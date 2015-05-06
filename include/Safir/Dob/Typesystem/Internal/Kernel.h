@@ -670,7 +670,21 @@ extern "C"
      * @param member [in] - The member.
      * @param valueIndex [in] - The value index.
      */
-    DOTS_KERNEL_API void DotsC_ReadMemberStatus(DotsC_Handle readerHandle, bool& isNull, bool& isChanged, DotsC_MemberIndex member, DotsC_Int32 valueIndex);
+    DOTS_KERNEL_API void DotsC_ReadMemberStatus(DotsC_Handle readerHandle,
+                                                bool& isNull,
+                                                bool& isChanged,
+                                                DotsC_MemberIndex member,
+                                                DotsC_Int32 valueIndex);
+
+    /**
+     * Read the top level change flag on a sequence or dictionary member.
+     *
+     * @param readerHandle [in] - Handle to blob reader.
+     * @param member [in] - The member.
+     * @return Value of the change flag.
+     */
+    DOTS_KERNEL_API bool DotsC_ReadTopLevelChangeFlag(DotsC_Handle readerHandle,
+                                                      DotsC_MemberIndex member);
 
     /**
      * Read a value from the blob managed by the specified blob reader.
@@ -764,13 +778,15 @@ extern "C"
                                                bool changed);
 
     /**
-     * Creates a BlobWriter and initiates it with current. Then all differences between current and original are
-     * marked as changed. The original and current blobs are not changed at all, instead a completely new BlobWriter
-     * is created and the caller is responsible for deleting it by calling DotsC_DeleteBlobWriter.
-     * @param original [in] - The original blob.
-     * @param current [in] - Current version of blob that will be diffed towards original.
-     * @return Handle to a new blob writer instance containing a copy of current but with updated change flags.
+     * Set the top level change flag on a sequence or dictionary member.
+     *
+     * @param writerHandle [in,out] - Handle to a blob writer.
+     * @param member [in] - id of the member.
+     * @param changed [in] - The value to set change flag to.
      */
+    DOTS_KERNEL_API void DotsC_WriteTopLevelChangeFlag(DotsC_Handle writerHandle,
+                                                       DotsC_MemberIndex member,
+                                                       bool isChanged);
 
     /**
       * Diff content of currentWriter and originalReader and mark all changes in currentWriter;

@@ -573,22 +573,29 @@ namespace @_NAMESPACEV_@
         }
 @@ --- Sequence member ---
 @@ELSIF@@ @_EXIST:MEMBERISSEQUENCE_@
-        for (int valueIndex=0; valueIndex<DotsC_GetNumberOfMemberValues(handle, g_@_LOWER:MEMBER_@MemberIndex); ++valueIndex)
         {
-            bool isNull, isChanged;
+            const auto size = DotsC_GetNumberOfMemberValues(handle, g_@_LOWER:MEMBER_@MemberIndex);
+            for (int valueIndex=0; valueIndex<size; ++valueIndex)
+            {
+                bool isNull, isChanged;
 @@IF@@ (@_UNIFORM_MEMBERTYPE_@ = Enumeration)
-            Safir::Dob::Typesystem::Int32 ordinal;
-            Safir::Dob::Typesystem::Internal::BlobOperations::Get(ordinal, isNull, isChanged, handle, g_@_LOWER:MEMBER_@MemberIndex, valueIndex, Safir::Dob::Typesystem::Internal::BlobOperations::ValueMode);
-            m_@_MEMBER_@Member.push_back(static_cast<@_MEMBERTYPE_@::Enumeration>(ordinal));
+                Safir::Dob::Typesystem::Int32 ordinal;
+                Safir::Dob::Typesystem::Internal::BlobOperations::Get(ordinal, isNull, isChanged, handle, g_@_LOWER:MEMBER_@MemberIndex, valueIndex, Safir::Dob::Typesystem::Internal::BlobOperations::ValueMode);
+                m_@_MEMBER_@Member.push_back(static_cast<@_MEMBERTYPE_@::Enumeration>(ordinal));
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
-            Safir::Dob::Typesystem::ObjectPtr seqVal;
-            Safir::Dob::Typesystem::Internal::BlobOperations::Get(seqVal, isNull, isChanged, handle, g_@_LOWER:MEMBER_@MemberIndex, valueIndex, Safir::Dob::Typesystem::Internal::BlobOperations::ValueMode);
-            m_@_MEMBER_@Member.push_back(boost::static_pointer_cast<@_MEMBERTYPE_@>(seqVal));
+                Safir::Dob::Typesystem::ObjectPtr seqVal;
+                Safir::Dob::Typesystem::Internal::BlobOperations::Get(seqVal, isNull, isChanged, handle, g_@_LOWER:MEMBER_@MemberIndex, valueIndex, Safir::Dob::Typesystem::Internal::BlobOperations::ValueMode);
+                m_@_MEMBER_@Member.push_back(boost::static_pointer_cast<@_MEMBERTYPE_@>(seqVal));
 @@ELSE@@
-            @_MEMBERTYPE_@ seqVal;
-            Safir::Dob::Typesystem::Internal::BlobOperations::Get(seqVal, isNull, isChanged, handle, g_@_LOWER:MEMBER_@MemberIndex, valueIndex, Safir::Dob::Typesystem::Internal::BlobOperations::ValueMode);
-            m_@_MEMBER_@Member.push_back(seqVal);
+                @_MEMBERTYPE_@ seqVal;
+                Safir::Dob::Typesystem::Internal::BlobOperations::Get(seqVal, isNull, isChanged, handle, g_@_LOWER:MEMBER_@MemberIndex, valueIndex, Safir::Dob::Typesystem::Internal::BlobOperations::ValueMode);
+                m_@_MEMBER_@Member.push_back(seqVal);
 @@END_IF@@
+            }
+            if (DotsC_ReadTopLevelChangeFlag(handle, g_@_LOWER:MEMBER_@MemberIndex))
+            {
+                m_@_MEMBER_@Member.SetChanged(true);
+            }
         }
 @@ --- Dictionary member ---
 @@ELSIF@@ @_EXIST:MEMBERISDICTIONARY_@

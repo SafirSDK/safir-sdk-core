@@ -90,16 +90,47 @@ namespace Safir.Dob.Typesystem.Internal
         }
 
         /// <summary>
-        /// Get the number of values contrained in a member.
+        /// Get the number of values contained in a member.
         /// </summary>
         /// <returns>The number of member values.</returns>
         /// <param name="handle">Handle.</param>
         /// <param name="member">Member.</param>
-        public static Int32 NumerOfMemberValues(System.Int64 handle, System.Int32 member)
+        public static Int32 NumberOfMemberValues(System.Int64 handle, System.Int32 member)
         {
             return Kernel.DotsC_GetNumberOfMemberValues (handle, member);
         }
 
+        /// <summary>
+        /// Get the "top level change flag" for a sequence or dictionary.
+        /// </summary>
+        /// <remarks>
+        ///   <para>
+        /// This operation is only valid for sequences or dictionaries.
+        ///   </para>
+        /// </remarks>
+        /// <returns>True if change flag is set.</returns>
+        /// <param name="handle">Handle.</param>
+        /// <param name="member">Member.</param>
+        public static bool ReadTopLevelChangeFlag(System.Int64 handle, System.Int32 member)
+        {
+            return InternalOperations.BoolOf(Kernel.DotsC_ReadTopLevelChangeFlag(handle,member));
+        }
+
+        /// <summary>
+        /// Set the "top level change flag" for a sequence or dictionary.
+        /// </summary>
+        /// <remarks>
+        ///   <para>
+        /// This operation is only valid for sequences or dictionaries.
+        ///   </para>
+        /// </remarks>
+        /// <param name="handle">Handle.</param>
+        /// <param name="member">Member.</param>
+        /// <param name="isChanged">The value to set the change flag to.</param>
+        public static void WriteTopLevelChangeFlag(System.Int64 handle, System.Int32 member, bool isChanged)
+        {
+            Kernel.DotsC_WriteTopLevelChangeFlag(handle,member,InternalOperations.ByteOf(isChanged));
+        }
 
         #region Container operations on Blobs
 

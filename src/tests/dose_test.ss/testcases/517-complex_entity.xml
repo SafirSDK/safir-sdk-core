@@ -863,19 +863,17 @@
           <TypeId>DoseTest.TestEnum</TypeId>
         </TypeIdSequenceMember>
         <InstanceIdSequenceMember>
-          <InstanceId>0</InstanceId>
-          <InstanceId>SomeInstance</InstanceId>
+          <InstanceId>1</InstanceId>
+          <InstanceId>SomeOtherInstance</InstanceId>
         </InstanceIdSequenceMember>
         <ChannelIdSequenceMember>
-          <ChannelId>0</ChannelId>
-          <ChannelId>SomeChannel</ChannelId>
+          <ChannelId>20</ChannelId>
         </ChannelIdSequenceMember>
         <HandlerIdSequenceMember>
           <HandlerId>0</HandlerId>
           <HandlerId>SomeHandler</HandlerId>
         </HandlerIdSequenceMember>
         <ObjectSequenceMember>
-          <Object/>
           <Object/>
         </ObjectSequenceMember>
         <BinarySequenceMember>
@@ -904,7 +902,6 @@
         </Hertz32SequenceMember>
         <Kelvin32SequenceMember>
           <Kelvin32>320005</Kelvin32>
-          <Kelvin32>-320005</Kelvin32>
         </Kelvin32SequenceMember>
         <Kilogram32SequenceMember>
           <Kilogram32>320006</Kilogram32>

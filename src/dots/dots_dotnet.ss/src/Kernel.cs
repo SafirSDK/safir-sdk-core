@@ -462,6 +462,10 @@ namespace Safir.Dob.Typesystem.Internal
 		                                                   System.Int32 member,
 		                                                   System.Int32 valueIndex);
 
+        [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
+		internal static extern byte DotsC_ReadTopLevelChangeFlag(System.Int64 readerHandle,
+                                                                 System.Int32 member);
+
 		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
 		internal static extern void DotsC_ReadInt32Member(System.Int64 readerHandle,
 		                                                  out System.Int32 val,
@@ -582,9 +586,14 @@ namespace Safir.Dob.Typesystem.Internal
 
 		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
 		internal static extern void DotsC_WriteChangeFlag(System.Int64 writerHandle,
-		                                           			System.Int32 member,
-		                                                  	System.Int32 index,
-		                                           			byte changed);
+                                                          System.Int32 member,
+                                                          System.Int32 index,
+                                                          byte changed);
+
+        [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
+		internal static extern void DotsC_WriteTopLevelChangeFlag(System.Int64 writerHandle,
+                                                                  System.Int32 member,
+                                                                  byte changed);
 
 		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
 		internal static extern byte DotsC_MarkChanges(System.Int64 originalReader,

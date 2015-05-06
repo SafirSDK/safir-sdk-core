@@ -128,7 +128,7 @@ namespace ToolSupport
          */
         void SetChangedTopLevel(DotsC_MemberIndex member, bool isChanged)
         {
-            const MemberDescriptionType* md=m_classDescription->GetMembner(member);
+            const MemberDescriptionType* md=m_classDescription->GetMember(member);
             DotsC_CollectionType collectionType=md->GetCollectionType();
             if (collectionType==SequenceCollectionType || collectionType==DictionaryCollectionType)
             {

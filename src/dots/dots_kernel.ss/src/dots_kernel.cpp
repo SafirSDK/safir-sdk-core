@@ -1078,6 +1078,13 @@ void DotsC_ReadMemberStatus(DotsC_Handle readerHandle, bool& isNull, bool& isCha
     reader->ReadStatus(member, arrayIndex, isNull, isChanged);
 }
 
+bool DotsC_ReadTopLevelChangeFlag(DotsC_Handle readerHandle, DotsC_MemberIndex member)
+{
+   Init();
+   Reader* reader=ReaderFromHandle(readerHandle);
+   return reader->IsChangedTopLevel(member);
+}
+
 void DotsC_ReadInt32Member(DotsC_Handle readerHandle, DotsC_Int32& val, bool& isNull, bool& isChanged, DotsC_MemberIndex member, DotsC_Int32 arrayIndex, DotsC_KeyValMode keyValMode)
 {
     Init();
@@ -1268,6 +1275,13 @@ void DotsC_WriteChangeFlag(DotsC_Handle writerHandle,
     Init();
     Writer* writer=WriterFromHandle(writerHandle);
     writer->SetChanged(member, index, changed);
+}
+
+void DotsC_WriteTopLevelChangeFlag(DotsC_Handle writerHandle, DotsC_MemberIndex member, bool isChanged)
+{
+   Init();
+   Writer* writer=WriterFromHandle(writerHandle);
+   writer->SetChangedTopLevel(member, isChanged);
 }
 
 bool DotsC_MarkChanges(DotsC_Handle originalReader, DotsC_Handle currentWriter)

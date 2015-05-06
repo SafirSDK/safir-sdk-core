@@ -1124,26 +1124,33 @@ namespace @_NAMESPACE_@
             }
 @@ --- Sequence member ---
 @@ELSIF@@ @_EXIST:MEMBERISSEQUENCE_@
-            for (int valueIndex=0; valueIndex<Safir.Dob.Typesystem.Internal.BlobOperations.NumerOfMemberValues(handle, m_@_LOWER:MEMBER_@MemberIndex); valueIndex++)
             {
-                bool isNull, isChanged;
+                int size = Safir.Dob.Typesystem.Internal.BlobOperations.NumberOfMemberValues(handle, m_@_LOWER:MEMBER_@MemberIndex);
+                for (int valueIndex=0; valueIndex<size; valueIndex++)
+                {
+                    bool isNull, isChanged;
 @@IF@@ (@_UNIFORM_MEMBERTYPE_@ = Enumeration)
-                Int32 ordinal;
-                Safir.Dob.Typesystem.Internal.BlobOperations.Get(out ordinal, out isNull, out isChanged, handle, m_@_LOWER:MEMBER_@MemberIndex, valueIndex, Safir.Dob.Typesystem.KeyValMode.ValueMode);
-                m_@_MEMBER_@Member.Add((@_MEMBERTYPE_@.Enumeration)ordinal);
+                    Int32 ordinal;
+                    Safir.Dob.Typesystem.Internal.BlobOperations.Get(out ordinal, out isNull, out isChanged, handle, m_@_LOWER:MEMBER_@MemberIndex, valueIndex, Safir.Dob.Typesystem.KeyValMode.ValueMode);
+                    m_@_MEMBER_@Member.Add((@_MEMBERTYPE_@.Enumeration)ordinal);
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
-                Safir.Dob.Typesystem.Object seqVal;
-                Safir.Dob.Typesystem.Internal.BlobOperations.Get(out seqVal, out isNull, out isChanged, handle, m_@_LOWER:MEMBER_@MemberIndex, valueIndex, Safir.Dob.Typesystem.KeyValMode.ValueMode);
-                m_@_MEMBER_@Member.Add((@_MEMBERTYPE_@)seqVal);
+                    Safir.Dob.Typesystem.Object seqVal;
+                    Safir.Dob.Typesystem.Internal.BlobOperations.Get(out seqVal, out isNull, out isChanged, handle, m_@_LOWER:MEMBER_@MemberIndex, valueIndex, Safir.Dob.Typesystem.KeyValMode.ValueMode);
+                    m_@_MEMBER_@Member.Add((@_MEMBERTYPE_@)seqVal);
 @@ELSE@@
-                @_MEMBERTYPE_@ seqVal;
-                Safir.Dob.Typesystem.Internal.BlobOperations.Get(out seqVal, out isNull, out isChanged, handle, m_@_LOWER:MEMBER_@MemberIndex, valueIndex, Safir.Dob.Typesystem.KeyValMode.ValueMode);
-                m_@_MEMBER_@Member.Add(seqVal);
+                    @_MEMBERTYPE_@ seqVal;
+                    Safir.Dob.Typesystem.Internal.BlobOperations.Get(out seqVal, out isNull, out isChanged, handle, m_@_LOWER:MEMBER_@MemberIndex, valueIndex, Safir.Dob.Typesystem.KeyValMode.ValueMode);
+                    m_@_MEMBER_@Member.Add(seqVal);
 @@END_IF@@
+                }
+                if (Safir.Dob.Typesystem.Internal.BlobOperations.ReadTopLevelChangeFlag(handle,m_@_LOWER:MEMBER_@MemberIndex))
+                {
+                    m_@_MEMBER_@Member.SetChanged(true);
+                }
             }
 @@----------dictionary member ---------------
 @@ELSIF@@ @_EXIST:MEMBERISDICTIONARY_@
-            for (int valueIndex=0; valueIndex<Safir.Dob.Typesystem.Internal.BlobOperations.NumerOfMemberValues(handle, m_@_LOWER:MEMBER_@MemberIndex); valueIndex++)
+            for (int valueIndex=0; valueIndex<Safir.Dob.Typesystem.Internal.BlobOperations.NumberOfMemberValues(handle, m_@_LOWER:MEMBER_@MemberIndex); valueIndex++)
             {
                 bool isNull, isChanged;
 @@--              -- KEY ---
@@ -1226,6 +1233,10 @@ namespace @_NAMESPACE_@
 @@ELSE@@
                 Safir.Dob.Typesystem.Internal.BlobOperations.Set(m_@_MEMBER_@Member[i], false, false, handle, m_@_LOWER:MEMBER_@MemberIndex, i, Safir.Dob.Typesystem.KeyValMode.ValueMode);
 @@END_IF@@
+            }
+            if (m_@_MEMBER_@Member.IsChanged())
+            {
+                Safir.Dob.Typesystem.Internal.BlobOperations.WriteTopLevelChangeFlag(handle, m_@_LOWER:MEMBER_@MemberIndex, true);
             }
 @@ --- Dictionary member ---
 @@ELSIF@@ @_EXIST:MEMBERISDICTIONARY_@
