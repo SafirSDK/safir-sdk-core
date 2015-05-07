@@ -1379,7 +1379,7 @@ void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_WriteChangeFlag
 JNIEXPORT void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_WriteTopLevelChangeFlag
   (JNIEnv *, jclass, jlong _writerHandle, jint _member, jboolean _changed)
 {
-    DotsC_WriteTopLevelChangeFlag(_writerHandle,_member,_changed);
+    DotsC_WriteTopLevelChangeFlag(_writerHandle,_member,_changed == JNI_TRUE);
 }
 /*
  * Class:     com_saabgroup_safir_dob_typesystem_Kernel
