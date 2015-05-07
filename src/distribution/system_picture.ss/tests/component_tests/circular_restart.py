@@ -185,7 +185,7 @@ os.environ["LLL_LOGDIR"] = os.path.join(os.getcwd(),"lll")
 
 subprocess.call(("safir_show_config","--logging"))
 if sys.platform == "win32":
-    subprocess.call(("env"),shell=True)
+    subprocess.call(("set"),shell=True)
 
 seeder = launch_seeder(args) if args.start == 0 else None
 
