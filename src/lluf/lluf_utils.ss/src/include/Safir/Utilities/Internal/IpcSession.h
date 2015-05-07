@@ -84,6 +84,10 @@ namespace Internal
         {
             bool writeInProgress = !m_msgQueue.empty();
             m_msgQueue.push_back({msg, msgSize});
+            if (m_msgQueue.size() > 1000)
+            {
+                throw std::logic_error("IpcSession send message queue overflow.");
+            }
             if (!writeInProgress)
             {
               Write();
