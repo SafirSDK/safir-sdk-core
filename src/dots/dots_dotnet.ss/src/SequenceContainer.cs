@@ -41,28 +41,14 @@ namespace Safir.Dob.Typesystem
     /// This container is intended for the simple types of the DOB typesystem.
     /// </summary>
     /// <typeparam name="T">The type to contain.</typeparam>
-    public abstract class SequenceContainer<T> : ContainerBase, IList<T>, ICloneable
+    public abstract class SequenceContainer<T> : ContainerBase, IList<T>
     {
-        /// <summary>
-        /// The internal list holding the values.
-        /// </summary>
-        protected internal List<T> values = new List<T> ();
-
         /// <summary>
         /// Default constructor
         /// <para/>
         /// Creates a null and not changed container.
         /// </summary>
         public SequenceContainer(): base()
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the class.
-        /// </summary>
-        /// <param name="other">Other.</param>
-        protected SequenceContainer(SequenceContainer<T> other):
-            base(other)
         {
         }
 
@@ -77,7 +63,7 @@ namespace Safir.Dob.Typesystem
         /// <param name="item">Item.</param>
         public int IndexOf (T item)
         {
-            return values.IndexOf (item);
+            return m_values.IndexOf (item);
         }
 
         /// <summary>
@@ -88,7 +74,7 @@ namespace Safir.Dob.Typesystem
         public void Insert (int index, T item)
         {
             m_bIsChanged = true;
-            values.Insert (index, item);
+            m_values.Insert (index, item);
         }
 
         /// <summary>
@@ -98,7 +84,7 @@ namespace Safir.Dob.Typesystem
         public void RemoveAt (int index)
         {
             m_bIsChanged = true;
-            values.RemoveAt (index);
+            m_values.RemoveAt (index);
         }
 
         /// <summary>
@@ -107,11 +93,11 @@ namespace Safir.Dob.Typesystem
         /// <param name="index">Index.</param>
         public T this [int index] {
             get {
-                return values [index];
+                return m_values [index];
             }
             set {
                 m_bIsChanged = true;
-                values [index] = value;
+                m_values [index] = value;
             }
         }
 
@@ -130,7 +116,7 @@ namespace Safir.Dob.Typesystem
         public void Add (T item)
         {
             m_bIsChanged = true;
-            values.Add (item);
+            m_values.Add (item);
         }
 
         /// <summary>
@@ -139,7 +125,7 @@ namespace Safir.Dob.Typesystem
         public void Clear ()
         {
             m_bIsChanged = true;
-            values.Clear ();
+            m_values.Clear ();
         }
 
         /// <Docs>The object to locate in the current collection.</Docs>
@@ -150,7 +136,7 @@ namespace Safir.Dob.Typesystem
         /// <param name="item">Item.</param>
         public bool Contains (T item)
         {
-            return values.Contains (item);
+            return m_values.Contains (item);
         }
 
         /// <summary>
@@ -161,7 +147,7 @@ namespace Safir.Dob.Typesystem
         public void CopyTo (T[] array, int arrayIndex)
         {
             m_bIsChanged = true;
-            values.CopyTo (array, arrayIndex);
+            m_values.CopyTo (array, arrayIndex);
         }
 
         /// <Docs>The item to remove from the current collection.</Docs>
@@ -172,7 +158,7 @@ namespace Safir.Dob.Typesystem
         /// <param name="item">Item.</param>
         public bool Remove (T item)
         {
-            bool removed=values.Remove (item);
+            bool removed=m_values.Remove (item);
             if (removed)
                 m_bIsChanged = true;
             return removed;
@@ -184,7 +170,7 @@ namespace Safir.Dob.Typesystem
         /// <value>The count.</value>
         public int Count {
             get {
-                return values.Count;
+                return m_values.Count;
             }
         }
 
@@ -208,7 +194,7 @@ namespace Safir.Dob.Typesystem
         /// <returns>The enumerator.</returns>
         public IEnumerator<T> GetEnumerator ()
         {
-            return values.GetEnumerator ();
+            return m_values.GetEnumerator ();
         }
 
         #endregion
@@ -221,7 +207,7 @@ namespace Safir.Dob.Typesystem
         /// <returns>The enumerator.</returns>
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator ()
         {
-            return (values as IEnumerable<T>).GetEnumerator ();
+            return (m_values as IEnumerable<T>).GetEnumerator ();
         }
 
         #endregion
@@ -264,1515 +250,188 @@ namespace Safir.Dob.Typesystem
         }
 
         #endregion
-    }
 
-    /// <summary>
-    /// Generic SequenceContainer for Objects.
-    /// </summary>
-    public class GenericObjectSequenceContainer<T> : SequenceContainer<T>, ICloneable where T : Safir.Dob.Typesystem.Object
-    {
-        /// <summary>
-        /// Initializes a new instance.
-        /// </summary>
-        public GenericObjectSequenceContainer(): base()
+
+        internal override void ShallowCopy(ContainerBase other)
         {
+            base.ShallowCopy(other);
+            SequenceContainer<T> that = (SequenceContainer<T>)other;
+            m_values = that.m_values;
         }
 
         /// <summary>
-        /// Override ContainerBase.
+        /// The internal list holding the values.
         /// </summary>
-        /// <param name="other"></param>
-        public override void Copy(ContainerBase other)
-        {
-            base.Copy(other);
-            this.values.Clear ();
-            GenericObjectSequenceContainer<T> that = other as GenericObjectSequenceContainer<T>;
-            foreach (var val in that.values)
-            {
-                this.values.Add(val.Clone() as T);
-            }
-        }
-
-        #region Cloning
-
-        /// <summary>
-        /// Clone this instance.
-        /// </summary>
-        object ICloneable.Clone()
-        {
-            return new GenericObjectSequenceContainer<T>(this);
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        /// <returns></returns>
-        public new GenericObjectSequenceContainer<T> Clone()
-        {
-            return new GenericObjectSequenceContainer<T>(this);
-        }
-
-        /// <summary>
-        /// Copy constructor for use by Clone
-        /// </summary>
-        /// <param name="other"></param>
-        protected GenericObjectSequenceContainer(GenericObjectSequenceContainer<T> other):
-            base(other)
-        {
-            foreach (var val in other.values) {
-                this.values.Add(val.Clone() as T);
-            }
-        }
-
-        #endregion
+        private List<T> m_values = new List<T> ();
     }
 
-    /// <summary>
-    /// Generic SequenceContainer for non-Object members.
-    /// </summary>
-    public class ValueSequenceContainer<T> : SequenceContainer<T>, ICloneable
-    {
-        /// <summary>
-        /// Constructor.
-        /// </summary>
-        public ValueSequenceContainer(): base()
-        {
-        }
+    /// <summary>Generic SequenceContainer for Objects.</summary>
+    public class GenericObjectSequenceContainer<T> : SequenceContainer<T> where T : Safir.Dob.Typesystem.Object { }
 
-        /// <summary>
-        /// Override ContainerBase.
-        /// </summary>
-        /// <param name="other"></param>
-        public override void Copy(ContainerBase other)
-        {
-            base.Copy(other);
-            this.values.Clear ();
-            ValueSequenceContainer<T> that = other as ValueSequenceContainer<T>;
-            foreach (var val in that.values) {
-                this.values.Add(val);
-            }
-        }
+    /// <summary>Generic SequenceContainer for non-Object members.</summary>
+    public class ValueSequenceContainer<T> : SequenceContainer<T> { }
 
-        #region Cloning
+    /// <summary>String sequence container.</summary>
+    public class StringSequenceContainer : ValueSequenceContainer<string> {}
 
-        /// <summary>
-        /// Clone this instance.
-        /// </summary>
-        object ICloneable.Clone()
-        {
-            return new ValueSequenceContainer<T>(this);
-        }
+    /// <summary>Boolean sequence container.</summary>
+    public class BooleanSequenceContainer : ValueSequenceContainer<bool> {}
 
-        /// <summary>
-        ///
-        /// </summary>
-        /// <returns></returns>
-        public new ValueSequenceContainer<T> Clone()
-        {
-            return new ValueSequenceContainer<T>(this);
-        }
+    /// <summary>Int32 sequence container.</summary>
+    public class Int32SequenceContainer : ValueSequenceContainer<Int32> {}
 
-        /// <summary>
-        /// Copy constructor for use by Clone
-        /// </summary>
-        /// <param name="other"></param>
-        protected ValueSequenceContainer(ValueSequenceContainer<T> other):
-            base(other)
-        {
-            foreach (var val in other.values) {
-                this.values.Add(val);
-            }
-        }
+    /// <summary>Int64 sequence container.</summary>
+    public class Int64SequenceContainer : ValueSequenceContainer<Int64> {}
 
-        #endregion
-    }
+    /// <summary>Float32 sequence container.</summary>
+    public class Float32SequenceContainer : ValueSequenceContainer<float> {}
 
-    /// <summary>
-    /// String sequence container.
-    /// </summary>
-    public class StringSequenceContainer : ValueSequenceContainer<string>, ICloneable
-    {
-        /// <summary>
-        /// Initializes a new instance.
-        /// </summary>
-        public StringSequenceContainer() : base() { }
+    /// <summary>Float64 sequence container.</summary>
+    public class Float64SequenceContainer : ValueSequenceContainer<double> {}
 
-        /// <summary>
-        /// Clone this instance.
-        /// </summary>
-        object ICloneable.Clone() {return new StringSequenceContainer(this);}
+    /// <summary>TypeId sequence container.</summary>
+    public class TypeIdSequenceContainer : ValueSequenceContainer<Int64> {}
 
-        /// <summary>
-        /// Clone this instance.
-        /// </summary>
-        public new StringSequenceContainer Clone() {return new StringSequenceContainer(this);}
+    /// <summary>InstanceId sequence container.</summary>
+    public class InstanceIdSequenceContainer : ValueSequenceContainer<InstanceId> {}
 
-        /// <summary>
-        /// Initializes a new copy.
-        /// </summary>
-        /// <param name="other">Other.</param>
-        protected StringSequenceContainer(StringSequenceContainer other) : base(other) { }
-    }
+    /// <summary>ChannelId sequence container.</summary>
+    public class ChannelIdSequenceContainer : ValueSequenceContainer<ChannelId> {}
 
-    /// <summary>
-    /// Boolean sequence container.
-    /// </summary>
-    public class BooleanSequenceContainer : ValueSequenceContainer<bool>, ICloneable
-    {
-        /// <summary>
-        /// Initializes a new instance.
-        /// </summary>
-        public BooleanSequenceContainer() : base() { }
+    /// <summary>HandlerId sequence container.</summary>
+    public class HandlerIdSequenceContainer : ValueSequenceContainer<HandlerId> {}
 
-        /// <summary>
-        /// Clone this instance.
-        /// </summary>
-        object ICloneable.Clone() {return new BooleanSequenceContainer(this);}
+    /// <summary>EntityId sequence container.</summary>
+    public class EntityIdSequenceContainer : ValueSequenceContainer<EntityId> {}
 
-        /// <summary>
-        /// Clone this instance.
-        /// </summary>
-        public new BooleanSequenceContainer Clone() {return new BooleanSequenceContainer(this);}
-
-        /// <summary>
-        /// Initializes a new copy.
-        /// </summary>
-        /// <param name="other">Other.</param>
-        protected BooleanSequenceContainer(BooleanSequenceContainer other) : base(other) { }
-    }
-
-    /// <summary>
-    /// Int32 sequence container.
-    /// </summary>
-    public class Int32SequenceContainer : ValueSequenceContainer<Int32>, ICloneable
-    {
-        /// <summary>
-        /// Initializes a new instance.
-        /// </summary>
-        public Int32SequenceContainer() : base() { }
-
-        /// <summary>
-        /// Clone this instance.
-        /// </summary>
-        object ICloneable.Clone() {return new Int32SequenceContainer(this);}
-
-        /// <summary>
-        /// Clone this instance.
-        /// </summary>
-        public new Int32SequenceContainer Clone() {return new Int32SequenceContainer(this);}
-
-        /// <summary>
-        /// Initializes a new copy.
-        /// </summary>
-        /// <param name="other">Other.</param>
-        protected Int32SequenceContainer(Int32SequenceContainer other) : base(other) { }
-    }
+    /// <summary>Binary sequence container.</summary>
+    public class BinarySequenceContainer : ValueSequenceContainer<byte[]> {}
 
 
-    /// <summary>
-    /// Int64 sequence container.
-    /// </summary>
-    public class Int64SequenceContainer : ValueSequenceContainer<Int64>, ICloneable
-    {
-        /// <summary>
-        /// Initializes a new instance.
-        /// </summary>
-        public Int64SequenceContainer() : base() { }
-
-        /// <summary>
-        /// Clone this instance.
-        /// </summary>
-        object ICloneable.Clone() {return new Int64SequenceContainer(this);}
-
-        /// <summary>
-        /// Clone this instance.
-        /// </summary>
-        public new Int64SequenceContainer Clone() {return new Int64SequenceContainer(this);}
-
-        /// <summary>
-        /// Initializes a new copy.
-        /// </summary>
-        /// <param name="other">Other.</param>
-        protected Int64SequenceContainer(Int64SequenceContainer other) : base(other) { }
-    }
-
-    /// <summary>
-    /// Float32 sequence container.
-    /// </summary>
-    public class Float32SequenceContainer : ValueSequenceContainer<float>, ICloneable
-    {
-        /// <summary>
-        /// Initializes a new instance.
-        /// </summary>
-        public Float32SequenceContainer() : base() { }
-
-        /// <summary>
-        /// Clone this instance.
-        /// </summary>
-        object ICloneable.Clone() {return new Float32SequenceContainer(this);}
-
-        /// <summary>
-        /// Clone this instance.
-        /// </summary>
-        public new Float32SequenceContainer Clone() {return new Float32SequenceContainer(this);}
-
-        /// <summary>
-        /// Initializes a new copy.
-        /// </summary>
-        /// <param name="other">Other.</param>
-        protected Float32SequenceContainer(Float32SequenceContainer other) : base(other) { }
-    }
-
-    /// <summary>
-    /// Float64 sequence container.
-    /// </summary>
-    public class Float64SequenceContainer : ValueSequenceContainer<double>, ICloneable
-    {
-        /// <summary>
-        /// Initializes a new instance.
-        /// </summary>
-        public Float64SequenceContainer() : base() { }
-
-        /// <summary>
-        /// Clone this instance.
-        /// </summary>
-        object ICloneable.Clone() {return new Float64SequenceContainer(this);}
-
-        /// <summary>
-        /// Clone this instance.
-        /// </summary>
-        public new Float64SequenceContainer Clone() {return new Float64SequenceContainer(this);}
-
-        /// <summary>
-        /// Initializes a new copy.
-        /// </summary>
-        /// <param name="other">Other.</param>
-        protected Float64SequenceContainer(Float64SequenceContainer other) : base(other) { }
-    }
-
-    /// <summary>
-    /// TypeId sequence container.
-    /// </summary>
-    public class TypeIdSequenceContainer : ValueSequenceContainer<Int64>, ICloneable
-    {
-        /// <summary>
-        /// Initializes a new instance.
-        /// </summary>
-        public TypeIdSequenceContainer() : base() { }
-
-        /// <summary>
-        /// Clone this instance.
-        /// </summary>
-        object ICloneable.Clone() {return new TypeIdSequenceContainer(this);}
-
-        /// <summary>
-        /// Clone this instance.
-        /// </summary>
-        public new TypeIdSequenceContainer Clone() {return new TypeIdSequenceContainer(this);}
-
-        /// <summary>
-        /// Initializes a new copy.
-        /// </summary>
-        /// <param name="other">Other.</param>
-        protected TypeIdSequenceContainer(TypeIdSequenceContainer other) : base(other) { }
-    }
-
-    /// <summary>
-    /// InstanceId sequence container.
-    /// </summary>
-    public class InstanceIdSequenceContainer : ValueSequenceContainer<InstanceId>, ICloneable
-    {
-        /// <summary>
-        /// Initializes a new instance.
-        /// </summary>
-        public InstanceIdSequenceContainer() : base() { }
-
-        /// <summary>
-        /// Clone this instance.
-        /// </summary>
-        object ICloneable.Clone() {return new InstanceIdSequenceContainer(this);}
-
-        /// <summary>
-        /// Clone this instance.
-        /// </summary>
-        public new InstanceIdSequenceContainer Clone() {return new InstanceIdSequenceContainer(this);}
-
-        /// <summary>
-        /// Initializes a new copy.
-        /// </summary>
-        /// <param name="other">Other.</param>
-        protected InstanceIdSequenceContainer(InstanceIdSequenceContainer other) : base(other) { }
-    }
-
-    /// <summary>
-    /// ChannelId sequence container.
-    /// </summary>
-    public class ChannelIdSequenceContainer : ValueSequenceContainer<ChannelId>, ICloneable
-    {
-        /// <summary>
-        /// Initializes a new instance.
-        /// </summary>
-        public ChannelIdSequenceContainer() : base() { }
-
-        /// <summary>
-        /// Clone this instance.
-        /// </summary>
-        object ICloneable.Clone() {return new ChannelIdSequenceContainer(this);}
-
-        /// <summary>
-        /// Clone this instance.
-        /// </summary>
-        public new ChannelIdSequenceContainer Clone() {return new ChannelIdSequenceContainer(this);}
-
-        /// <summary>
-        /// Initializes a new copy.
-        /// </summary>
-        /// <param name="other">Other.</param>
-        protected ChannelIdSequenceContainer(ChannelIdSequenceContainer other) : base(other) { }
-    }
-
-    /// <summary>
-    /// HandlerId sequence container.
-    /// </summary>
-    public class HandlerIdSequenceContainer : ValueSequenceContainer<HandlerId>, ICloneable
-    {
-        /// <summary>
-        /// Initializes a new instance.
-        /// </summary>
-        public HandlerIdSequenceContainer() : base() { }
-
-        /// <summary>
-        /// Clone this instance.
-        /// </summary>
-        object ICloneable.Clone() {return new HandlerIdSequenceContainer(this);}
-
-        /// <summary>
-        /// Clone this instance.
-        /// </summary>
-        public new HandlerIdSequenceContainer Clone() {return new HandlerIdSequenceContainer(this);}
-
-        /// <summary>
-        /// Initializes a new copy.
-        /// </summary>
-        /// <param name="other">Other.</param>
-        protected HandlerIdSequenceContainer(HandlerIdSequenceContainer other) : base(other) { }
-    }
-
-    /// <summary>
-    /// EntityId sequence container.
-    /// </summary>
-    public class EntityIdSequenceContainer : ValueSequenceContainer<EntityId>, ICloneable
-    {
-        /// <summary>
-        /// Initializes a new instance.
-        /// </summary>
-        public EntityIdSequenceContainer() : base() { }
-
-        /// <summary>
-        /// Clone this instance.
-        /// </summary>
-        object ICloneable.Clone() {return new EntityIdSequenceContainer(this);}
-
-        /// <summary>
-        /// Clone this instance.
-        /// </summary>
-        public new EntityIdSequenceContainer Clone() {return new EntityIdSequenceContainer(this);}
-
-        /// <summary>
-        /// Initializes a new copy.
-        /// </summary>
-        /// <param name="other">Other.</param>
-        protected EntityIdSequenceContainer(EntityIdSequenceContainer other) : base(other) { }
-    }
-
-    /// <summary>
-    /// Binary sequence container.
-    /// </summary>
-    public class BinarySequenceContainer : ValueSequenceContainer<byte[]>, ICloneable
-    {
-        /// <summary>
-        /// Initializes a new instance.
-        /// </summary>
-        public BinarySequenceContainer() : base() { }
-
-        /// <summary>
-        /// Clone this instance.
-        /// </summary>
-        object ICloneable.Clone() {return new BinarySequenceContainer(this);}
-
-        /// <summary>
-        /// Clone this instance.
-        /// </summary>
-        public new BinarySequenceContainer Clone() {return new BinarySequenceContainer(this);}
-
-        /// <summary>
-        /// Initializes a new copy.
-        /// </summary>
-        /// <param name="other">Other.</param>
-        protected BinarySequenceContainer(BinarySequenceContainer other) : base(other) { }
-    }
-
-
-    /// <summary>
-    /// Object sequence container.
-    /// </summary>
-    public class ObjectSequenceContainer : GenericObjectSequenceContainer<Safir.Dob.Typesystem.Object>, ICloneable
-    {
-        /// <summary>
-        /// Initializes a new instance.
-        /// </summary>
-        public ObjectSequenceContainer() : base() { }
-
-        /// <summary>
-        /// Clone this instance.
-        /// </summary>
-        object ICloneable.Clone() {return new ObjectSequenceContainer(this);}
-
-        /// <summary>
-        /// Clone this instance.
-        /// </summary>
-        public new ObjectSequenceContainer Clone() {return new ObjectSequenceContainer(this);}
-
-        /// <summary>
-        /// Initializes a new copy.
-        /// </summary>
-        /// <param name="other">Other.</param>
-        protected ObjectSequenceContainer(ObjectSequenceContainer other) : base(other) { }
-    }
+    /// <summary>Object sequence container.</summary>
+    public class ObjectSequenceContainer : GenericObjectSequenceContainer<Safir.Dob.Typesystem.Object> {}
 
     //SI32
     namespace Si32
     {
 
-        /// <summary>
-        /// Ampere sequence container.
-        /// </summary>
-        public class AmpereSequenceContainer : Float32SequenceContainer, ICloneable
-        {
-            /// <summary>
-            /// Initializes a new instance.
-            /// </summary>
-            public AmpereSequenceContainer() : base() { }
+        /// <summary>Ampere sequence container.</summary>
+        public class AmpereSequenceContainer : Float32SequenceContainer {}
 
-            /// <summary>
-            /// Clone this instance.
-            /// </summary>
-            object ICloneable.Clone() {return new AmpereSequenceContainer(this);}
+        /// <summary>CubicMeter sequence container.</summary>
+        public class CubicMeterSequenceContainer : Float32SequenceContainer {}
 
-            /// <summary>
-            /// Clone this instance.
-            /// </summary>
-            public new AmpereSequenceContainer Clone() {return new AmpereSequenceContainer(this);}
+        /// <summary>Hertz sequence container.</summary>
+        public class HertzSequenceContainer : Float32SequenceContainer {}
 
-            /// <summary>
-            /// Initializes a new copy.
-            /// </summary>
-            /// <param name="other">Other.</param>
-            protected AmpereSequenceContainer(AmpereSequenceContainer other) : base(other) { }
-        }
+        /// <summary>Joule sequence container.</summary>
+        public class JouleSequenceContainer : Float32SequenceContainer {}
 
-        /// <summary>
-        /// CubicMeter sequence container.
-        /// </summary>
-        public class CubicMeterSequenceContainer : Float32SequenceContainer, ICloneable
-        {
-            /// <summary>
-            /// Initializes a new instance.
-            /// </summary>
-            public CubicMeterSequenceContainer() : base() { }
+        /// <summary>Kelvin sequence container.</summary>
+        public class KelvinSequenceContainer : Float32SequenceContainer {}
 
-            /// <summary>
-            /// Clone this instance.
-            /// </summary>
-            object ICloneable.Clone() {return new CubicMeterSequenceContainer(this);}
+        /// <summary>Kilogram sequence container.</summary>
+        public class KilogramSequenceContainer : Float32SequenceContainer {}
 
-            /// <summary>
-            /// Clone this instance.
-            /// </summary>
-            public new CubicMeterSequenceContainer Clone() {return new CubicMeterSequenceContainer(this);}
+        /// <summary>Meter sequence container.</summary>
+        public class MeterSequenceContainer : Float32SequenceContainer {}
 
-            /// <summary>
-            /// Initializes a new copy.
-            /// </summary>
-            /// <param name="other">Other.</param>
-            protected CubicMeterSequenceContainer(CubicMeterSequenceContainer other) : base(other) { }
-        }
+        /// <summary>MeterPerSecond sequence container.</summary>
+        public class MeterPerSecondSequenceContainer : Float32SequenceContainer {}
 
-        /// <summary>
-        /// Hertz sequence container.
-        /// </summary>
-        public class HertzSequenceContainer : Float32SequenceContainer, ICloneable
-        {
-            /// <summary>
-            /// Initializes a new instance.
-            /// </summary>
-            public HertzSequenceContainer() : base() { }
+        /// <summary>MeterPerSecondSquared sequence container.</summary>
+        public class MeterPerSecondSquaredSequenceContainer : Float32SequenceContainer {}
 
-            /// <summary>
-            /// Clone this instance.
-            /// </summary>
-            object ICloneable.Clone() {return new HertzSequenceContainer(this);}
+        /// <summary>Newton sequence container.</summary>
+        public class NewtonSequenceContainer : Float32SequenceContainer {}
 
-            /// <summary>
-            /// Clone this instance.
-            /// </summary>
-            public new HertzSequenceContainer Clone() {return new HertzSequenceContainer(this);}
+        /// <summary>Pascal sequence container.</summary>
+        public class PascalSequenceContainer : Float32SequenceContainer {}
 
-            /// <summary>
-            /// Initializes a new copy.
-            /// </summary>
-            /// <param name="other">Other.</param>
-            protected HertzSequenceContainer(HertzSequenceContainer other) : base(other) { }
-        }
+        /// <summary>Radian sequence container.</summary>
+        public class RadianSequenceContainer : Float32SequenceContainer {}
 
-        /// <summary>
-        /// Joule sequence container.
-        /// </summary>
-        public class JouleSequenceContainer : Float32SequenceContainer, ICloneable
-        {
-            /// <summary>
-            /// Initializes a new instance.
-            /// </summary>
-            public JouleSequenceContainer() : base() { }
+        /// <summary>RadianPerSecond sequence container.</summary>
+        public class RadianPerSecondSequenceContainer : Float32SequenceContainer {}
 
-            /// <summary>
-            /// Clone this instance.
-            /// </summary>
-            object ICloneable.Clone() {return new JouleSequenceContainer(this);}
+        /// <summary>RadianPerSecondSquared sequence container.</summary>
+        public class RadianPerSecondSquaredSequenceContainer : Float32SequenceContainer {}
 
-            /// <summary>
-            /// Clone this instance.
-            /// </summary>
-            public new JouleSequenceContainer Clone() {return new JouleSequenceContainer(this);}
+        /// <summary>Second sequence container.</summary>
+        public class SecondSequenceContainer : Float32SequenceContainer {}
 
-            /// <summary>
-            /// Initializes a new copy.
-            /// </summary>
-            /// <param name="other">Other.</param>
-            protected JouleSequenceContainer(JouleSequenceContainer other) : base(other) { }
-        }
+        /// <summary>SquareMeter sequence container.</summary>
+        public class SquareMeterSequenceContainer : Float32SequenceContainer {}
 
-        /// <summary>
-        /// Kelvin sequence container.
-        /// </summary>
-        public class KelvinSequenceContainer : Float32SequenceContainer, ICloneable
-        {
-            /// <summary>
-            /// Initializes a new instance.
-            /// </summary>
-            public KelvinSequenceContainer() : base() { }
+        /// <summary>Steradian sequence container.</summary>
+        public class SteradianSequenceContainer : Float32SequenceContainer {}
 
-            /// <summary>
-            /// Clone this instance.
-            /// </summary>
-            object ICloneable.Clone() {return new KelvinSequenceContainer(this);}
+        /// <summary>Volt sequence container.</summary>
+        public class VoltSequenceContainer : Float32SequenceContainer {}
 
-            /// <summary>
-            /// Clone this instance.
-            /// </summary>
-            public new KelvinSequenceContainer Clone() {return new KelvinSequenceContainer(this);}
-
-            /// <summary>
-            /// Initializes a new copy.
-            /// </summary>
-            /// <param name="other">Other.</param>
-            protected KelvinSequenceContainer(KelvinSequenceContainer other) : base(other) { }
-        }
-
-        /// <summary>
-        /// Kilogram sequence container.
-        /// </summary>
-        public class KilogramSequenceContainer : Float32SequenceContainer, ICloneable
-        {
-            /// <summary>
-            /// Initializes a new instance.
-            /// </summary>
-            public KilogramSequenceContainer() : base() { }
-
-            /// <summary>
-            /// Clone this instance.
-            /// </summary>
-            object ICloneable.Clone() {return new KilogramSequenceContainer(this);}
-
-            /// <summary>
-            /// Clone this instance.
-            /// </summary>
-            public new KilogramSequenceContainer Clone() {return new KilogramSequenceContainer(this);}
-
-            /// <summary>
-            /// Initializes a new copy.
-            /// </summary>
-            /// <param name="other">Other.</param>
-            protected KilogramSequenceContainer(KilogramSequenceContainer other) : base(other) { }
-        }
-
-        /// <summary>
-        /// Meter sequence container.
-        /// </summary>
-        public class MeterSequenceContainer : Float32SequenceContainer, ICloneable
-        {
-            /// <summary>
-            /// Initializes a new instance.
-            /// </summary>
-            public MeterSequenceContainer() : base() { }
-
-            /// <summary>
-            /// Clone this instance.
-            /// </summary>
-            object ICloneable.Clone() {return new MeterSequenceContainer(this);}
-
-            /// <summary>
-            /// Clone this instance.
-            /// </summary>
-            public new MeterSequenceContainer Clone() {return new MeterSequenceContainer(this);}
-
-            /// <summary>
-            /// Initializes a new copy.
-            /// </summary>
-            /// <param name="other">Other.</param>
-            protected MeterSequenceContainer(MeterSequenceContainer other) : base(other) { }
-        }
-
-        /// <summary>
-        /// MeterPerSecond sequence container.
-        /// </summary>
-        public class MeterPerSecondSequenceContainer : Float32SequenceContainer, ICloneable
-        {
-            /// <summary>
-            /// Initializes a new instance.
-            /// </summary>
-            public MeterPerSecondSequenceContainer() : base() { }
-
-            /// <summary>
-            /// Clone this instance.
-            /// </summary>
-            object ICloneable.Clone() {return new MeterPerSecondSequenceContainer(this);}
-
-            /// <summary>
-            /// Clone this instance.
-            /// </summary>
-            public new MeterPerSecondSequenceContainer Clone() {return new MeterPerSecondSequenceContainer(this);}
-
-            /// <summary>
-            /// Initializes a new copy.
-            /// </summary>
-            /// <param name="other">Other.</param>
-            protected MeterPerSecondSequenceContainer(MeterPerSecondSequenceContainer other) : base(other) { }
-        }
-
-        /// <summary>
-        /// MeterPerSecondSquared sequence container.
-        /// </summary>
-        public class MeterPerSecondSquaredSequenceContainer : Float32SequenceContainer, ICloneable
-        {
-            /// <summary>
-            /// Initializes a new instance.
-            /// </summary>
-            public MeterPerSecondSquaredSequenceContainer() : base() { }
-
-            /// <summary>
-            /// Clone this instance.
-            /// </summary>
-            object ICloneable.Clone() {return new MeterPerSecondSquaredSequenceContainer(this);}
-
-            /// <summary>
-            /// Clone this instance.
-            /// </summary>
-            public new MeterPerSecondSquaredSequenceContainer Clone() {return new MeterPerSecondSquaredSequenceContainer(this);}
-
-            /// <summary>
-            /// Initializes a new copy.
-            /// </summary>
-            /// <param name="other">Other.</param>
-            protected MeterPerSecondSquaredSequenceContainer(MeterPerSecondSquaredSequenceContainer other) : base(other) { }
-        }
-
-        /// <summary>
-        /// Newton sequence container.
-        /// </summary>
-        public class NewtonSequenceContainer : Float32SequenceContainer, ICloneable
-        {
-            /// <summary>
-            /// Initializes a new instance.
-            /// </summary>
-            public NewtonSequenceContainer() : base() { }
-
-            /// <summary>
-            /// Clone this instance.
-            /// </summary>
-            object ICloneable.Clone() {return new NewtonSequenceContainer(this);}
-
-            /// <summary>
-            /// Clone this instance.
-            /// </summary>
-            public new NewtonSequenceContainer Clone() {return new NewtonSequenceContainer(this);}
-
-            /// <summary>
-            /// Initializes a new copy.
-            /// </summary>
-            /// <param name="other">Other.</param>
-            protected NewtonSequenceContainer(NewtonSequenceContainer other) : base(other) { }
-        }
-
-        /// <summary>
-        /// Pascal sequence container.
-        /// </summary>
-        public class PascalSequenceContainer : Float32SequenceContainer, ICloneable
-        {
-            /// <summary>
-            /// Initializes a new instance.
-            /// </summary>
-            public PascalSequenceContainer() : base() { }
-
-            /// <summary>
-            /// Clone this instance.
-            /// </summary>
-            object ICloneable.Clone() {return new PascalSequenceContainer(this);}
-
-            /// <summary>
-            /// Clone this instance.
-            /// </summary>
-            public new PascalSequenceContainer Clone() {return new PascalSequenceContainer(this);}
-
-            /// <summary>
-            /// Initializes a new copy.
-            /// </summary>
-            /// <param name="other">Other.</param>
-            protected PascalSequenceContainer(PascalSequenceContainer other) : base(other) { }
-        }
-
-        /// <summary>
-        /// Radian sequence container.
-        /// </summary>
-        public class RadianSequenceContainer : Float32SequenceContainer, ICloneable
-        {
-            /// <summary>
-            /// Initializes a new instance.
-            /// </summary>
-            public RadianSequenceContainer() : base() { }
-
-            /// <summary>
-            /// Clone this instance.
-            /// </summary>
-            object ICloneable.Clone() {return new RadianSequenceContainer(this);}
-
-            /// <summary>
-            /// Clone this instance.
-            /// </summary>
-            public new RadianSequenceContainer Clone() {return new RadianSequenceContainer(this);}
-
-            /// <summary>
-            /// Initializes a new copy.
-            /// </summary>
-            /// <param name="other">Other.</param>
-            protected RadianSequenceContainer(RadianSequenceContainer other) : base(other) { }
-        }
-
-        /// <summary>
-        /// RadianPerSecond sequence container.
-        /// </summary>
-        public class RadianPerSecondSequenceContainer : Float32SequenceContainer, ICloneable
-        {
-            /// <summary>
-            /// Initializes a new instance.
-            /// </summary>
-            public RadianPerSecondSequenceContainer() : base() { }
-
-            /// <summary>
-            /// Clone this instance.
-            /// </summary>
-            object ICloneable.Clone() {return new RadianPerSecondSequenceContainer(this);}
-
-            /// <summary>
-            /// Clone this instance.
-            /// </summary>
-            public new RadianPerSecondSequenceContainer Clone() {return new RadianPerSecondSequenceContainer(this);}
-
-            /// <summary>
-            /// Initializes a new copy.
-            /// </summary>
-            /// <param name="other">Other.</param>
-            protected RadianPerSecondSequenceContainer(RadianPerSecondSequenceContainer other) : base(other) { }
-        }
-
-        /// <summary>
-        /// RadianPerSecondSquared sequence container.
-        /// </summary>
-        public class RadianPerSecondSquaredSequenceContainer : Float32SequenceContainer, ICloneable
-        {
-            /// <summary>
-            /// Initializes a new instance.
-            /// </summary>
-            public RadianPerSecondSquaredSequenceContainer() : base() { }
-
-            /// <summary>
-            /// Clone this instance.
-            /// </summary>
-            object ICloneable.Clone() {return new RadianPerSecondSquaredSequenceContainer(this);}
-
-            /// <summary>
-            /// Clone this instance.
-            /// </summary>
-            public new RadianPerSecondSquaredSequenceContainer Clone() {return new RadianPerSecondSquaredSequenceContainer(this);}
-
-            /// <summary>
-            /// Initializes a new copy.
-            /// </summary>
-            /// <param name="other">Other.</param>
-            protected RadianPerSecondSquaredSequenceContainer(RadianPerSecondSquaredSequenceContainer other) : base(other) { }
-        }
-
-        /// <summary>
-        /// Second sequence container.
-        /// </summary>
-        public class SecondSequenceContainer : Float32SequenceContainer, ICloneable
-        {
-            /// <summary>
-            /// Initializes a new instance.
-            /// </summary>
-            public SecondSequenceContainer() : base() { }
-
-            /// <summary>
-            /// Clone this instance.
-            /// </summary>
-            object ICloneable.Clone() {return new SecondSequenceContainer(this);}
-
-            /// <summary>
-            /// Clone this instance.
-            /// </summary>
-            public new SecondSequenceContainer Clone() {return new SecondSequenceContainer(this);}
-
-            /// <summary>
-            /// Initializes a new copy.
-            /// </summary>
-            /// <param name="other">Other.</param>
-            protected SecondSequenceContainer(SecondSequenceContainer other) : base(other) { }
-        }
-
-        /// <summary>
-        /// SquareMeter sequence container.
-        /// </summary>
-        public class SquareMeterSequenceContainer : Float32SequenceContainer, ICloneable
-        {
-            /// <summary>
-            /// Initializes a new instance.
-            /// </summary>
-            public SquareMeterSequenceContainer() : base() { }
-
-            /// <summary>
-            /// Clone this instance.
-            /// </summary>
-            object ICloneable.Clone() {return new SquareMeterSequenceContainer(this);}
-
-            /// <summary>
-            /// Clone this instance.
-            /// </summary>
-            public new SquareMeterSequenceContainer Clone() {return new SquareMeterSequenceContainer(this);}
-
-            /// <summary>
-            /// Initializes a new copy.
-            /// </summary>
-            /// <param name="other">Other.</param>
-            protected SquareMeterSequenceContainer(SquareMeterSequenceContainer other) : base(other) { }
-        }
-
-        /// <summary>
-        /// Steradian sequence container.
-        /// </summary>
-        public class SteradianSequenceContainer : Float32SequenceContainer, ICloneable
-        {
-            /// <summary>
-            /// Initializes a new instance.
-            /// </summary>
-            public SteradianSequenceContainer() : base() { }
-
-            /// <summary>
-            /// Clone this instance.
-            /// </summary>
-            object ICloneable.Clone() {return new SteradianSequenceContainer(this);}
-
-            /// <summary>
-            /// Clone this instance.
-            /// </summary>
-            public new SteradianSequenceContainer Clone() {return new SteradianSequenceContainer(this);}
-
-            /// <summary>
-            /// Initializes a new copy.
-            /// </summary>
-            /// <param name="other">Other.</param>
-            protected SteradianSequenceContainer(SteradianSequenceContainer other) : base(other) { }
-        }
-
-        /// <summary>
-        /// Volt sequence container.
-        /// </summary>
-        public class VoltSequenceContainer : Float32SequenceContainer, ICloneable
-        {
-            /// <summary>
-            /// Initializes a new instance.
-            /// </summary>
-            public VoltSequenceContainer() : base() { }
-
-            /// <summary>
-            /// Clone this instance.
-            /// </summary>
-            object ICloneable.Clone() {return new VoltSequenceContainer(this);}
-
-            /// <summary>
-            /// Clone this instance.
-            /// </summary>
-            public new VoltSequenceContainer Clone() {return new VoltSequenceContainer(this);}
-
-            /// <summary>
-            /// Initializes a new copy.
-            /// </summary>
-            /// <param name="other">Other.</param>
-            protected VoltSequenceContainer(VoltSequenceContainer other) : base(other) { }
-        }
-
-        /// <summary>
-        /// Watt sequence container.
-        /// </summary>
-        public class WattSequenceContainer : Float32SequenceContainer, ICloneable
-        {
-            /// <summary>
-            /// Initializes a new instance.
-            /// </summary>
-            public WattSequenceContainer() : base() { }
-
-            /// <summary>
-            /// Clone this instance.
-            /// </summary>
-            object ICloneable.Clone() {return new WattSequenceContainer(this);}
-
-            /// <summary>
-            /// Clone this instance.
-            /// </summary>
-            public new WattSequenceContainer Clone() {return new WattSequenceContainer(this);}
-
-            /// <summary>
-            /// Initializes a new copy.
-            /// </summary>
-            /// <param name="other">Other.</param>
-            protected WattSequenceContainer(WattSequenceContainer other) : base(other) { }
-        }
+        /// <summary>Watt sequence container.</summary>
+        public class WattSequenceContainer : Float32SequenceContainer {}
     }
 
     //SI64
     namespace Si64
     {
 
-        /// <summary>
-        /// Ampere sequence container.
-        /// </summary>
-        public class AmpereSequenceContainer : Float64SequenceContainer, ICloneable
-        {
-            /// <summary>
-            /// Initializes a new instance.
-            /// </summary>
-            public AmpereSequenceContainer() : base() { }
+        /// <summary>Ampere sequence container.</summary>
+        public class AmpereSequenceContainer : Float64SequenceContainer {}
 
-            /// <summary>
-            /// Clone this instance.
-            /// </summary>
-            object ICloneable.Clone() {return new AmpereSequenceContainer(this);}
+        /// <summary>CubicMeter sequence container.</summary>
+        public class CubicMeterSequenceContainer : Float64SequenceContainer {}
 
-            /// <summary>
-            /// Clone this instance.
-            /// </summary>
-            public new AmpereSequenceContainer Clone() {return new AmpereSequenceContainer(this);}
+        /// <summary>Hertz sequence container.</summary>
+        public class HertzSequenceContainer : Float64SequenceContainer {}
 
-            /// <summary>
-            /// Initializes a new copy.
-            /// </summary>
-            /// <param name="other">Other.</param>
-            protected AmpereSequenceContainer(AmpereSequenceContainer other) : base(other) { }
-        }
+        /// <summary>Joule sequence container.</summary>
+        public class JouleSequenceContainer : Float64SequenceContainer {}
 
-        /// <summary>
-        /// CubicMeter sequence container.
-        /// </summary>
-        public class CubicMeterSequenceContainer : Float64SequenceContainer, ICloneable
-        {
-            /// <summary>
-            /// Initializes a new instance.
-            /// </summary>
-            public CubicMeterSequenceContainer() : base() { }
+        /// <summary>Kelvin sequence container.</summary>
+        public class KelvinSequenceContainer : Float64SequenceContainer {}
 
-            /// <summary>
-            /// Clone this instance.
-            /// </summary>
-            object ICloneable.Clone() {return new CubicMeterSequenceContainer(this);}
+        /// <summary>Kilogram sequence container.</summary>
+        public class KilogramSequenceContainer : Float64SequenceContainer {}
 
-            /// <summary>
-            /// Clone this instance.
-            /// </summary>
-            public new CubicMeterSequenceContainer Clone() {return new CubicMeterSequenceContainer(this);}
+        /// <summary>Meter sequence container.</summary>
+        public class MeterSequenceContainer : Float64SequenceContainer {}
 
-            /// <summary>
-            /// Initializes a new copy.
-            /// </summary>
-            /// <param name="other">Other.</param>
-            protected CubicMeterSequenceContainer(CubicMeterSequenceContainer other) : base(other) { }
-        }
+        /// <summary>MeterPerSecond sequence container.</summary>
+        public class MeterPerSecondSequenceContainer : Float64SequenceContainer {}
 
-        /// <summary>
-        /// Hertz sequence container.
-        /// </summary>
-        public class HertzSequenceContainer : Float64SequenceContainer, ICloneable
-        {
-            /// <summary>
-            /// Initializes a new instance.
-            /// </summary>
-            public HertzSequenceContainer() : base() { }
+        /// <summary>MeterPerSecondSquared sequence container.</summary>
+        public class MeterPerSecondSquaredSequenceContainer : Float64SequenceContainer {}
 
-            /// <summary>
-            /// Clone this instance.
-            /// </summary>
-            object ICloneable.Clone() {return new HertzSequenceContainer(this);}
+        /// <summary>Newton sequence container.</summary>
+        public class NewtonSequenceContainer : Float64SequenceContainer {}
 
-            /// <summary>
-            /// Clone this instance.
-            /// </summary>
-            public new HertzSequenceContainer Clone() {return new HertzSequenceContainer(this);}
+        /// <summary>Pascal sequence container.</summary>
+        public class PascalSequenceContainer : Float64SequenceContainer {}
 
-            /// <summary>
-            /// Initializes a new copy.
-            /// </summary>
-            /// <param name="other">Other.</param>
-            protected HertzSequenceContainer(HertzSequenceContainer other) : base(other) { }
-        }
+        /// <summary>Radian sequence container.</summary>
+        public class RadianSequenceContainer : Float64SequenceContainer {}
 
-        /// <summary>
-        /// Joule sequence container.
-        /// </summary>
-        public class JouleSequenceContainer : Float64SequenceContainer, ICloneable
-        {
-            /// <summary>
-            /// Initializes a new instance.
-            /// </summary>
-            public JouleSequenceContainer() : base() { }
+        /// <summary>RadianPerSecond sequence container.</summary>
+        public class RadianPerSecondSequenceContainer : Float64SequenceContainer {}
 
-            /// <summary>
-            /// Clone this instance.
-            /// </summary>
-            object ICloneable.Clone() {return new JouleSequenceContainer(this);}
+        /// <summary>RadianPerSecondSquared sequence container.</summary>
+        public class RadianPerSecondSquaredSequenceContainer : Float64SequenceContainer {}
 
-            /// <summary>
-            /// Clone this instance.
-            /// </summary>
-            public new JouleSequenceContainer Clone() {return new JouleSequenceContainer(this);}
+        /// <summary>Second sequence container.</summary>
+        public class SecondSequenceContainer : Float64SequenceContainer {}
 
-            /// <summary>
-            /// Initializes a new copy.
-            /// </summary>
-            /// <param name="other">Other.</param>
-            protected JouleSequenceContainer(JouleSequenceContainer other) : base(other) { }
-        }
+        /// <summary>SquareMeter sequence container.</summary>
+        public class SquareMeterSequenceContainer : Float64SequenceContainer {}
 
-        /// <summary>
-        /// Kelvin sequence container.
-        /// </summary>
-        public class KelvinSequenceContainer : Float64SequenceContainer, ICloneable
-        {
-            /// <summary>
-            /// Initializes a new instance.
-            /// </summary>
-            public KelvinSequenceContainer() : base() { }
+        /// <summary>Steradian sequence container.</summary>
+        public class SteradianSequenceContainer : Float64SequenceContainer {}
 
-            /// <summary>
-            /// Clone this instance.
-            /// </summary>
-            object ICloneable.Clone() {return new KelvinSequenceContainer(this);}
+        /// <summary>Volt sequence container.</summary>
+        public class VoltSequenceContainer : Float64SequenceContainer {}
 
-            /// <summary>
-            /// Clone this instance.
-            /// </summary>
-            public new KelvinSequenceContainer Clone() {return new KelvinSequenceContainer(this);}
-
-            /// <summary>
-            /// Initializes a new copy.
-            /// </summary>
-            /// <param name="other">Other.</param>
-            protected KelvinSequenceContainer(KelvinSequenceContainer other) : base(other) { }
-        }
-
-        /// <summary>
-        /// Kilogram sequence container.
-        /// </summary>
-        public class KilogramSequenceContainer : Float64SequenceContainer, ICloneable
-        {
-            /// <summary>
-            /// Initializes a new instance.
-            /// </summary>
-            public KilogramSequenceContainer() : base() { }
-
-            /// <summary>
-            /// Clone this instance.
-            /// </summary>
-            object ICloneable.Clone() {return new KilogramSequenceContainer(this);}
-
-            /// <summary>
-            /// Clone this instance.
-            /// </summary>
-            public new KilogramSequenceContainer Clone() {return new KilogramSequenceContainer(this);}
-
-            /// <summary>
-            /// Initializes a new copy.
-            /// </summary>
-            /// <param name="other">Other.</param>
-            protected KilogramSequenceContainer(KilogramSequenceContainer other) : base(other) { }
-        }
-
-        /// <summary>
-        /// Meter sequence container.
-        /// </summary>
-        public class MeterSequenceContainer : Float64SequenceContainer, ICloneable
-        {
-            /// <summary>
-            /// Initializes a new instance.
-            /// </summary>
-            public MeterSequenceContainer() : base() { }
-
-            /// <summary>
-            /// Clone this instance.
-            /// </summary>
-            object ICloneable.Clone() {return new MeterSequenceContainer(this);}
-
-            /// <summary>
-            /// Clone this instance.
-            /// </summary>
-            public new MeterSequenceContainer Clone() {return new MeterSequenceContainer(this);}
-
-            /// <summary>
-            /// Initializes a new copy.
-            /// </summary>
-            /// <param name="other">Other.</param>
-            protected MeterSequenceContainer(MeterSequenceContainer other) : base(other) { }
-        }
-
-        /// <summary>
-        /// MeterPerSecond sequence container.
-        /// </summary>
-        public class MeterPerSecondSequenceContainer : Float64SequenceContainer, ICloneable
-        {
-            /// <summary>
-            /// Initializes a new instance.
-            /// </summary>
-            public MeterPerSecondSequenceContainer() : base() { }
-
-            /// <summary>
-            /// Clone this instance.
-            /// </summary>
-            object ICloneable.Clone() {return new MeterPerSecondSequenceContainer(this);}
-
-            /// <summary>
-            /// Clone this instance.
-            /// </summary>
-            public new MeterPerSecondSequenceContainer Clone() {return new MeterPerSecondSequenceContainer(this);}
-
-            /// <summary>
-            /// Initializes a new copy.
-            /// </summary>
-            /// <param name="other">Other.</param>
-            protected MeterPerSecondSequenceContainer(MeterPerSecondSequenceContainer other) : base(other) { }
-        }
-
-        /// <summary>
-        /// MeterPerSecondSquared sequence container.
-        /// </summary>
-        public class MeterPerSecondSquaredSequenceContainer : Float64SequenceContainer, ICloneable
-        {
-            /// <summary>
-            /// Initializes a new instance.
-            /// </summary>
-            public MeterPerSecondSquaredSequenceContainer() : base() { }
-
-            /// <summary>
-            /// Clone this instance.
-            /// </summary>
-            object ICloneable.Clone() {return new MeterPerSecondSquaredSequenceContainer(this);}
-
-            /// <summary>
-            /// Clone this instance.
-            /// </summary>
-            public new MeterPerSecondSquaredSequenceContainer Clone() {return new MeterPerSecondSquaredSequenceContainer(this);}
-
-            /// <summary>
-            /// Initializes a new copy.
-            /// </summary>
-            /// <param name="other">Other.</param>
-            protected MeterPerSecondSquaredSequenceContainer(MeterPerSecondSquaredSequenceContainer other) : base(other) { }
-        }
-
-        /// <summary>
-        /// Newton sequence container.
-        /// </summary>
-        public class NewtonSequenceContainer : Float64SequenceContainer, ICloneable
-        {
-            /// <summary>
-            /// Initializes a new instance.
-            /// </summary>
-            public NewtonSequenceContainer() : base() { }
-
-            /// <summary>
-            /// Clone this instance.
-            /// </summary>
-            object ICloneable.Clone() {return new NewtonSequenceContainer(this);}
-
-            /// <summary>
-            /// Clone this instance.
-            /// </summary>
-            public new NewtonSequenceContainer Clone() {return new NewtonSequenceContainer(this);}
-
-            /// <summary>
-            /// Initializes a new copy.
-            /// </summary>
-            /// <param name="other">Other.</param>
-            protected NewtonSequenceContainer(NewtonSequenceContainer other) : base(other) { }
-        }
-
-        /// <summary>
-        /// Pascal sequence container.
-        /// </summary>
-        public class PascalSequenceContainer : Float64SequenceContainer, ICloneable
-        {
-            /// <summary>
-            /// Initializes a new instance.
-            /// </summary>
-            public PascalSequenceContainer() : base() { }
-
-            /// <summary>
-            /// Clone this instance.
-            /// </summary>
-            object ICloneable.Clone() {return new PascalSequenceContainer(this);}
-
-            /// <summary>
-            /// Clone this instance.
-            /// </summary>
-            public new PascalSequenceContainer Clone() {return new PascalSequenceContainer(this);}
-
-            /// <summary>
-            /// Initializes a new copy.
-            /// </summary>
-            /// <param name="other">Other.</param>
-            protected PascalSequenceContainer(PascalSequenceContainer other) : base(other) { }
-        }
-
-        /// <summary>
-        /// Radian sequence container.
-        /// </summary>
-        public class RadianSequenceContainer : Float64SequenceContainer, ICloneable
-        {
-            /// <summary>
-            /// Initializes a new instance.
-            /// </summary>
-            public RadianSequenceContainer() : base() { }
-
-            /// <summary>
-            /// Clone this instance.
-            /// </summary>
-            object ICloneable.Clone() {return new RadianSequenceContainer(this);}
-
-            /// <summary>
-            /// Clone this instance.
-            /// </summary>
-            public new RadianSequenceContainer Clone() {return new RadianSequenceContainer(this);}
-
-            /// <summary>
-            /// Initializes a new copy.
-            /// </summary>
-            /// <param name="other">Other.</param>
-            protected RadianSequenceContainer(RadianSequenceContainer other) : base(other) { }
-        }
-
-        /// <summary>
-        /// RadianPerSecond sequence container.
-        /// </summary>
-        public class RadianPerSecondSequenceContainer : Float64SequenceContainer, ICloneable
-        {
-            /// <summary>
-            /// Initializes a new instance.
-            /// </summary>
-            public RadianPerSecondSequenceContainer() : base() { }
-
-            /// <summary>
-            /// Clone this instance.
-            /// </summary>
-            object ICloneable.Clone() {return new RadianPerSecondSequenceContainer(this);}
-
-            /// <summary>
-            /// Clone this instance.
-            /// </summary>
-            public new RadianPerSecondSequenceContainer Clone() {return new RadianPerSecondSequenceContainer(this);}
-
-            /// <summary>
-            /// Initializes a new copy.
-            /// </summary>
-            /// <param name="other">Other.</param>
-            protected RadianPerSecondSequenceContainer(RadianPerSecondSequenceContainer other) : base(other) { }
-        }
-
-        /// <summary>
-        /// RadianPerSecondSquared sequence container.
-        /// </summary>
-        public class RadianPerSecondSquaredSequenceContainer : Float64SequenceContainer, ICloneable
-        {
-            /// <summary>
-            /// Initializes a new instance.
-            /// </summary>
-            public RadianPerSecondSquaredSequenceContainer() : base() { }
-
-            /// <summary>
-            /// Clone this instance.
-            /// </summary>
-            object ICloneable.Clone() {return new RadianPerSecondSquaredSequenceContainer(this);}
-
-            /// <summary>
-            /// Clone this instance.
-            /// </summary>
-            public new RadianPerSecondSquaredSequenceContainer Clone() {return new RadianPerSecondSquaredSequenceContainer(this);}
-
-            /// <summary>
-            /// Initializes a new copy.
-            /// </summary>
-            /// <param name="other">Other.</param>
-            protected RadianPerSecondSquaredSequenceContainer(RadianPerSecondSquaredSequenceContainer other) : base(other) { }
-        }
-
-        /// <summary>
-        /// Second sequence container.
-        /// </summary>
-        public class SecondSequenceContainer : Float64SequenceContainer, ICloneable
-        {
-            /// <summary>
-            /// Initializes a new instance.
-            /// </summary>
-            public SecondSequenceContainer() : base() { }
-
-            /// <summary>
-            /// Clone this instance.
-            /// </summary>
-            object ICloneable.Clone() {return new SecondSequenceContainer(this);}
-
-            /// <summary>
-            /// Clone this instance.
-            /// </summary>
-            public new SecondSequenceContainer Clone() {return new SecondSequenceContainer(this);}
-
-            /// <summary>
-            /// Initializes a new copy.
-            /// </summary>
-            /// <param name="other">Other.</param>
-            protected SecondSequenceContainer(SecondSequenceContainer other) : base(other) { }
-        }
-
-        /// <summary>
-        /// SquareMeter sequence container.
-        /// </summary>
-        public class SquareMeterSequenceContainer : Float64SequenceContainer, ICloneable
-        {
-            /// <summary>
-            /// Initializes a new instance.
-            /// </summary>
-            public SquareMeterSequenceContainer() : base() { }
-
-            /// <summary>
-            /// Clone this instance.
-            /// </summary>
-            object ICloneable.Clone() {return new SquareMeterSequenceContainer(this);}
-
-            /// <summary>
-            /// Clone this instance.
-            /// </summary>
-            public new SquareMeterSequenceContainer Clone() {return new SquareMeterSequenceContainer(this);}
-
-            /// <summary>
-            /// Initializes a new copy.
-            /// </summary>
-            /// <param name="other">Other.</param>
-            protected SquareMeterSequenceContainer(SquareMeterSequenceContainer other) : base(other) { }
-        }
-
-        /// <summary>
-        /// Steradian sequence container.
-        /// </summary>
-        public class SteradianSequenceContainer : Float64SequenceContainer, ICloneable
-        {
-            /// <summary>
-            /// Initializes a new instance.
-            /// </summary>
-            public SteradianSequenceContainer() : base() { }
-
-            /// <summary>
-            /// Clone this instance.
-            /// </summary>
-            object ICloneable.Clone() {return new SteradianSequenceContainer(this);}
-
-            /// <summary>
-            /// Clone this instance.
-            /// </summary>
-            public new SteradianSequenceContainer Clone() {return new SteradianSequenceContainer(this);}
-
-            /// <summary>
-            /// Initializes a new copy.
-            /// </summary>
-            /// <param name="other">Other.</param>
-            protected SteradianSequenceContainer(SteradianSequenceContainer other) : base(other) { }
-        }
-
-        /// <summary>
-        /// Volt sequence container.
-        /// </summary>
-        public class VoltSequenceContainer : Float64SequenceContainer, ICloneable
-        {
-            /// <summary>
-            /// Initializes a new instance.
-            /// </summary>
-            public VoltSequenceContainer() : base() { }
-
-            /// <summary>
-            /// Clone this instance.
-            /// </summary>
-            object ICloneable.Clone() {return new VoltSequenceContainer(this);}
-
-            /// <summary>
-            /// Clone this instance.
-            /// </summary>
-            public new VoltSequenceContainer Clone() {return new VoltSequenceContainer(this);}
-
-            /// <summary>
-            /// Initializes a new copy.
-            /// </summary>
-            /// <param name="other">Other.</param>
-            protected VoltSequenceContainer(VoltSequenceContainer other) : base(other) { }
-        }
-
-        /// <summary>
-        /// Watt sequence container.
-        /// </summary>
-        public class WattSequenceContainer : Float64SequenceContainer, ICloneable
-        {
-            /// <summary>
-            /// Initializes a new instance.
-            /// </summary>
-            public WattSequenceContainer() : base() { }
-
-            /// <summary>
-            /// Clone this instance.
-            /// </summary>
-            object ICloneable.Clone() {return new WattSequenceContainer(this);}
-
-            /// <summary>
-            /// Clone this instance.
-            /// </summary>
-            public new WattSequenceContainer Clone() {return new WattSequenceContainer(this);}
-
-            /// <summary>
-            /// Initializes a new copy.
-            /// </summary>
-            /// <param name="other">Other.</param>
-            protected WattSequenceContainer(WattSequenceContainer other) : base(other) { }
-        }
+        /// <summary>Watt sequence container.</summary>
+        public class WattSequenceContainer : Float64SequenceContainer {}
     }
 }

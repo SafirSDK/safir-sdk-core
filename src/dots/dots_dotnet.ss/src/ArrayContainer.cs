@@ -36,7 +36,7 @@ namespace Safir.Dob.Typesystem
     /// Apart from that they behave like a normal C# collection.
     ///
     /// </summary>
-    public class ArrayContainer<T> : IList<T>, ICloneable where T : ContainerBase, new()
+    public class ArrayContainer<T> : IList<T> where T : ContainerBase, new()
     {
         #region Constructors
         /// <summary>
@@ -219,36 +219,7 @@ namespace Safir.Dob.Typesystem
 
         #endregion
 
-        #region Cloning
-
-        object ICloneable.Clone()
-        {
-            return new ArrayContainer<T>(this);
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        /// <returns></returns>
-        public ArrayContainer<T> Clone()
-        {
-            return (ArrayContainer<T>)(((ICloneable)this).Clone());
-        }
-
-        /// <summary>
-        /// Copy constructor for use by Clone
-        /// </summary>
-        /// <param name="other"></param>
-        protected ArrayContainer(ArrayContainer<T> other)
-            : this(other.m_Array.Count)
-        {
-            for (System.Int32 i = 0; i < other.m_Array.Count; ++i)
-            {
-                m_Array[i] = (T)(other.m_Array[i].Clone());
-            }
-        }
-
-        #endregion
+        
 
         #region Private data
 

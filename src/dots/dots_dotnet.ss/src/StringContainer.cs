@@ -1,7 +1,7 @@
 /* ****************************************************************************
 *
 * Copyright Saab AB, 2005-2013 (http://safir.sourceforge.net)
-* 
+*
 * Created by: Lars Hagström / stlrha
 *
 *******************************************************************************
@@ -30,13 +30,13 @@ namespace Safir.Dob.Typesystem
 {
     /// <summary>
     /// Container for strings.
-    /// 
+    ///
     /// <para/>
     /// This is a container for strings. It differs from the ordinary ValueContainer
     /// in that it has methods for converting to UTF8 strings. These
     /// are really only meant for blob serialization to use.
     /// </summary>
-    public class StringContainer : ContainerBase, ICloneable
+    public class StringContainer : ContainerBase
     {
         /// <summary>
         /// Constructor.
@@ -46,47 +46,7 @@ namespace Safir.Dob.Typesystem
             m_bIsNull = true;
         }
 
-        #region Cloning
 
-        object ICloneable.Clone()
-        {
-            return new StringContainer(this);
-        }
-
-        /// <summary>
-        /// Clone.
-        /// </summary>
-        /// <returns>StringContainer.</returns>
-        public new StringContainer Clone()
-        {
-            return (StringContainer)((ICloneable)this).Clone(); 
-        }
-
-        /// <summary>
-        /// Copy constructor for use by Clone
-        /// </summary>
-        /// <param name="other"></param>
-        protected StringContainer(StringContainer other)
-            : base(other)
-        {
-            m_bIsNull = other.m_bIsNull;
-            m_Value = other.m_Value;
-        }
-
-        /// <summary>
-        /// Override method from Containerbase
-        /// </summary>
-        /// <param name="other">Other container.</param>
-        public override void Copy(ContainerBase other)
-        {
-            base.Copy(other);
-            StringContainer that = other as StringContainer;
-            m_bIsNull = that.m_bIsNull;
-            m_Value = that.m_Value;
-            m_CachedUtf8String = that.m_CachedUtf8String;
-        }
-
-        #endregion
 
         /// <summary>
         /// Val.
@@ -133,17 +93,17 @@ namespace Safir.Dob.Typesystem
             {
                 return 0;
             }
-            
+
             if (m_Value.Length == 0)
             {
                 return 1;
             }
-            
+
             if (m_CachedUtf8String == null)
             {
                 m_CachedUtf8String = System.Text.Encoding.UTF8.GetBytes(m_Value);
             }
-            
+
             return m_CachedUtf8String.Length + 1;
         }
 
@@ -223,7 +183,7 @@ namespace Safir.Dob.Typesystem
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <returns></returns>
         public override int GetHashCode()
@@ -232,7 +192,7 @@ namespace Safir.Dob.Typesystem
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="obj"></param>
         /// <returns></returns>
@@ -240,13 +200,22 @@ namespace Safir.Dob.Typesystem
         {
             throw new System.Exception("The method or operation is not implemented.");
         }
-        
-        
+
+
+        internal override void ShallowCopy(ContainerBase other)
+        {
+            base.ShallowCopy(other);
+            StringContainer that = (StringContainer)other;
+            m_bIsNull = that.m_bIsNull;
+            m_Value = that.m_Value;
+            m_CachedUtf8String = that.m_CachedUtf8String;
+        }
+
         internal bool m_bIsNull;
         internal string m_Value;
-        byte[] m_CachedUtf8String;
+        private byte[] m_CachedUtf8String;
     }
 
-    
+
 
 }

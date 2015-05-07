@@ -486,7 +486,7 @@ namespace @_NAMESPACE_@
     /// No description given in dou file.
 @@END_IF@@
     /// </summary>
-    public class @_CLASS_@ : @_BASECLASS_@, ICloneable
+    public class @_CLASS_@ : @_BASECLASS_@
     {
         #region Constructors
 
@@ -599,86 +599,6 @@ namespace @_NAMESPACE_@
         }
 
 @@END_TABLE@@
-        #endregion
-
-        #region Cloning
-
-        object ICloneable.Clone()
-        {
-            return new @_CLASS_@(this);
-        }
-
-        /// <summary>
-        /// <see cref="Safir.Dob.Typesystem.Object.Clone()"/>
-        /// </summary>
-        public new @_CLASS_@ Clone()
-        {
-            return (@_CLASS_@)(((ICloneable)this).Clone());
-        }
-
-        /// <summary>
-        /// Copy constructor.
-        /// </summary>
-        protected @_CLASS_@(@_CLASS_@ other)
-            : base(other)
-        {
-@@TABLE@@
-@@IF@@ @_EXIST:MEMBER_@
-@@----- Array --------
-@@IF@@ @_EXIST:MEMBERISARRAY_@
-@@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
-            m_@_MEMBER_@Member = (@_MEMBERTYPE_@.EnumerationContainerArray)other.m_@_MEMBER_@Member.Clone();
-@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
-            m_@_MEMBER_@Member = (@_MEMBERTYPE_@ContainerArray)other.m_@_MEMBER_@Member.Clone();
-@@ELSE@@
-            m_@_MEMBER_@Member = (Safir.Dob.Typesystem.@_UNIFORM_MEMBERTYPE_@ContainerArray)other.m_@_MEMBER_@Member.Clone();
-@@END_IF@@
-@@----- Sequence --------
-@@ELSIF@@ @_EXIST:MEMBERISSEQUENCE_@
-@@IF@@ (@_UNIFORM_MEMBERTYPE_@ = Enumeration)
-            m_@_MEMBER_@Member = (@_MEMBERTYPE_@.EnumerationSequenceContainer)other.m_@_MEMBER_@Member.Clone();
-@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
-            m_@_MEMBER_@Member = (@_MEMBERTYPE_@SequenceContainer)other.m_@_MEMBER_@Member.Clone();
-@@ELSE@@
-            m_@_MEMBER_@Member = (Safir.Dob.Typesystem.@_UNIFORM_MEMBERTYPE_@SequenceContainer)other.m_@_MEMBER_@Member.Clone();
-@@END_IF@@
-@@----- Dictionary --------
-@@ELSIF@@ @_EXIST:MEMBERISDICTIONARY_@
-@@IF@@ @_UNIFORM_MEMBERDICTIONARYTYPE_@=Enumeration
-@@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
-            m_@_MEMBER_@Member =  (Safir.Dob.Typesystem.EnumDictionaryContainer<@_MEMBERDICTIONARYTYPE_@.Enumeration, @_MEMBERTYPE_@.EnumerationContainer, @_MEMBERTYPE_@.Enumeration>)other.m_@_MEMBER_@Member.Clone();
-@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
-            m_@_MEMBER_@Member =  (Safir.Dob.Typesystem.ObjectDictionaryContainer<@_MEMBERDICTIONARYTYPE_@.Enumeration, @_MEMBERTYPE_@Container, @_MEMBERTYPE_@>)other.m_@_MEMBER_@Member.Clone();
-@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=String
-            m_@_MEMBER_@Member =  (Safir.Dob.Typesystem.StringDictionaryContainer<@_MEMBERDICTIONARYTYPE_@.Enumeration>)other.m_@_MEMBER_@Member.Clone();
-@@ELSE@@
-            m_@_MEMBER_@Member =  (Safir.Dob.Typesystem.ValueDictionaryContainer<@_MEMBERDICTIONARYTYPE_@.Enumeration, Safir.Dob.Typesystem.@_UNIFORM_MEMBERTYPE_@Container, @_MEMBERTYPE_@>)other.m_@_MEMBER_@Member.Clone();
-@@END_IF@@
-@@ELSE@@
-@@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
-            m_@_MEMBER_@Member =  (Safir.Dob.Typesystem.EnumDictionaryContainer<@_MEMBERDICTIONARYTYPE_@, @_MEMBERTYPE_@.EnumerationContainer, @_MEMBERTYPE_@.Enumeration>)other.m_@_MEMBER_@Member.Clone();
-@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
-            m_@_MEMBER_@Member =  (Safir.Dob.Typesystem.ObjectDictionaryContainer<@_MEMBERDICTIONARYTYPE_@, @_MEMBERTYPE_@Container, @_MEMBERTYPE_@>)other.m_@_MEMBER_@Member.Clone();
-@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=String
-            m_@_MEMBER_@Member =  (Safir.Dob.Typesystem.StringDictionaryContainer<@_MEMBERDICTIONARYTYPE_@>)other.m_@_MEMBER_@Member.Clone();
-@@ELSE@@
-            m_@_MEMBER_@Member =  (Safir.Dob.Typesystem.ValueDictionaryContainer<@_MEMBERDICTIONARYTYPE_@, Safir.Dob.Typesystem.@_UNIFORM_MEMBERTYPE_@Container, @_MEMBERTYPE_@>)other.m_@_MEMBER_@Member.Clone();
-@@END_IF@@
-@@END_IF@@
-@@----- Single --------
-@@ELSE@@
-@@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
-            m_@_MEMBER_@Member = (@_MEMBERTYPE_@.EnumerationContainer)other.m_@_MEMBER_@Member.Clone();
-@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
-            m_@_MEMBER_@Member = (@_MEMBERTYPE_@Container)other.m_@_MEMBER_@Member.Clone();
-@@ELSE@@
-            m_@_MEMBER_@Member = (Safir.Dob.Typesystem.@_UNIFORM_MEMBERTYPE_@Container)other.m_@_MEMBER_@Member.Clone();
-@@END_IF@@
-@@END_IF@@
-@@END_IF@@
-@@END_TABLE@@
-        }
-
         #endregion
 
         #region Members
@@ -1422,101 +1342,23 @@ namespace @_NAMESPACE_@
     /// <summary>
     /// Container for members of type @_CLASS_@
     /// </summary>
-    public class @_CLASS_@Container : Safir.Dob.Typesystem.ObjectContainerImpl<@_CLASS_@>, ICloneable
-    {
-        /// <summary>
-        /// Constructor.
-        /// </summary>
-        public @_CLASS_@Container() : base() { }
-
-        #region Cloning
-
-        object ICloneable.Clone()
-        {
-            return new @_CLASS_@Container(this);
-        }
-
-        /// <summary>
-        /// <see cref="Safir.Dob.Typesystem.ContainerBase.Clone()"/>
-        /// </summary>
-        public new @_CLASS_@Container Clone()
-        {
-            return (@_CLASS_@Container)((ICloneable)this).Clone();
-        }
-
-        /// <summary>
-        /// Copy constructor for use by Clone
-        /// </summary>
-        protected @_CLASS_@Container(@_CLASS_@Container other) : base(other) { }
-
-        #endregion
-    }
+    public class @_CLASS_@Container : Safir.Dob.Typesystem.ObjectContainerImpl<@_CLASS_@> {}
 
     /// <summary>
     /// Container for array members of type @_CLASS_@
     /// </summary>
-    public class @_CLASS_@ContainerArray : Safir.Dob.Typesystem.ArrayContainer<@_CLASS_@Container>, ICloneable
+    public class @_CLASS_@ContainerArray : Safir.Dob.Typesystem.ArrayContainer<@_CLASS_@Container>
     {
         /// <summary>
         /// Constructor.
         /// </summary>
         public @_CLASS_@ContainerArray(System.Int32 size) : base(size) { }
-
-        #region Cloning
-
-        object ICloneable.Clone()
-        {
-            return new @_CLASS_@ContainerArray(this);
-        }
-
-        /// <summary>
-        /// <see cref="Safir.Dob.Typesystem.ContainerBase.Clone()"/>
-        /// </summary>
-        public new @_CLASS_@ContainerArray Clone()
-        {
-            return (@_CLASS_@ContainerArray)(((ICloneable)this).Clone());
-        }
-
-        /// <summary>
-        /// Copy constructor for use by Clone
-        /// </summary>
-        protected @_CLASS_@ContainerArray(@_CLASS_@ContainerArray other) : base(other) { }
-
-        #endregion
     }
 
     /// <summary>
     /// Container for sequence members of type @_CLASS_@
     /// </summary>
-    public class @_CLASS_@SequenceContainer : Safir.Dob.Typesystem.GenericObjectSequenceContainer<@_CLASS_@>, ICloneable
-    {
-        /// <summary>
-        /// Constructor.
-        /// </summary>
-        public @_CLASS_@SequenceContainer() : base() { }
-
-        #region Cloning
-
-        object ICloneable.Clone()
-        {
-            return new @_CLASS_@SequenceContainer(this);
-        }
-
-        /// <summary>
-        /// <see cref="Safir.Dob.Typesystem.ContainerBase.Clone()"/>
-        /// </summary>
-        public new @_CLASS_@SequenceContainer Clone()
-        {
-            return new @_CLASS_@SequenceContainer(this);
-        }
-
-        /// <summary>
-        /// Copy constructor for use by Clone
-        /// </summary>
-        protected @_CLASS_@SequenceContainer(@_CLASS_@SequenceContainer other) : base(other) { }
-
-        #endregion
-    }
+    public class @_CLASS_@SequenceContainer : Safir.Dob.Typesystem.GenericObjectSequenceContainer<@_CLASS_@> {}
 
 @@ELSIF@@ @_UNITTYPE_@=enumeration
 @@--
@@ -1597,35 +1439,8 @@ namespace @_NAMESPACE_@
         /// <summary>
         /// Container for members of type @_CLASS_@
         /// </summary>
-        public class EnumerationContainer : Safir.Dob.Typesystem.EnumerationContainerImpl<Enumeration>, ICloneable
+        public class EnumerationContainer : Safir.Dob.Typesystem.EnumerationContainerImpl<Enumeration>
         {
-            /// <summary>
-            /// Constructor.
-            /// </summary>
-            public EnumerationContainer() : base() { }
-
-            #region Cloning
-
-            object ICloneable.Clone()
-            {
-                return new EnumerationContainer(this);
-            }
-
-            /// <summary>
-            /// <see cref="Safir.Dob.Typesystem.ContainerBase.Clone()"/>
-            /// </summary>
-            public new EnumerationContainer Clone()
-            {
-                return (EnumerationContainer)((ICloneable)this).Clone();
-            }
-
-            /// <summary>
-            /// Copy constructor for use by Clone.
-            /// </summary>
-            protected EnumerationContainer(EnumerationContainer other) : base(other) { }
-
-            #endregion
-
             /// <summary>
             /// Get or set the enumeration value by ordinal integer value.
             /// </summary>
@@ -1704,68 +1519,19 @@ namespace @_NAMESPACE_@
         /// <summary>
         /// Container for array members of type @_CLASS_@
         /// </summary>
-        public class EnumerationContainerArray : Safir.Dob.Typesystem.ArrayContainer<EnumerationContainer>, ICloneable
+        public class EnumerationContainerArray : Safir.Dob.Typesystem.ArrayContainer<EnumerationContainer>
         {
             /// <summary>
             /// Constructor for array container.
             /// </summary>
             public EnumerationContainerArray(System.Int32 size) : base(size) { }
 
-            #region Cloning
-
-            object ICloneable.Clone()
-            {
-                return new EnumerationContainerArray(this);
-            }
-
-            /// <summary>
-            /// <see cref="Safir.Dob.Typesystem.ContainerBase.Clone()"/>
-            /// </summary>
-            public new EnumerationContainerArray Clone()
-            {
-                return (EnumerationContainerArray)(((ICloneable)this).Clone());
-            }
-
-            /// <summary>
-            /// Copy constructor for use by Clone.
-            /// </summary>
-            protected EnumerationContainerArray(EnumerationContainerArray other) : base(other) { }
-
-            #endregion
         }
 
         /// <summary>
         /// Container for sequence members of type @_CLASS_@
         /// </summary>
-        public class EnumerationSequenceContainer : Safir.Dob.Typesystem.ValueSequenceContainer<Enumeration>, ICloneable
-        {
-            /// <summary>
-            /// Constructor.
-            /// </summary>
-            public EnumerationSequenceContainer() : base() { }
-
-            #region Cloning
-
-            object ICloneable.Clone()
-            {
-                return new EnumerationSequenceContainer(this);
-            }
-
-            /// <summary>
-            /// <see cref="Safir.Dob.Typesystem.ContainerBase.Clone()"/>
-            /// </summary>
-            public new EnumerationSequenceContainer Clone()
-            {
-                return new EnumerationSequenceContainer(this);
-            }
-
-            /// <summary>
-            /// Copy constructor for use by Clone.
-            /// </summary>
-            protected EnumerationSequenceContainer(EnumerationSequenceContainer other) : base(other) { }
-
-            #endregion
-        }
+        public class EnumerationSequenceContainer : Safir.Dob.Typesystem.ValueSequenceContainer<Enumeration> {}
     }
 
 @@ELSIF@@ @_UNITTYPE_@=exception

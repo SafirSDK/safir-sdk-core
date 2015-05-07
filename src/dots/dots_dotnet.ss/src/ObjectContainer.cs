@@ -1,7 +1,7 @@
 /* ****************************************************************************
 *
 * Copyright Saab AB, 2005-2015 (http://safir.sourceforge.net)
-* 
+*
 * Created by: Lars Hagström / stlrha
 *
 *******************************************************************************
@@ -42,12 +42,6 @@ namespace Safir.Dob.Typesystem
         public ObjectContainerBase() : base() { }
 
         /// <summary>
-        /// Copy constructor.
-        /// </summary>
-        /// <param name="other">ObjectContainerBase.</param>
-        protected ObjectContainerBase(ObjectContainerBase other) : base(other) { }
-
-        /// <summary>
         /// Is the change flag in the container set?
         /// <para/>
         /// This method is like IsChanged without the recursion (on object containers IsChanged is recursive).
@@ -65,7 +59,7 @@ namespace Safir.Dob.Typesystem
 
         /**
          * Get or set the pointer to the contained object.
-         * 
+         *
          * Directly access the pointer that the container contains, but in the form
          * of a DOB Object base class.
          *
@@ -105,7 +99,7 @@ namespace Safir.Dob.Typesystem
     /// to get information from it and modify it.
     /// </summary>
     /// <typeparam name="T">The type to contain. Must inherit from Dob.Typesystem.Object</typeparam>
-    public class ObjectContainerImpl <T> : ObjectContainerBase, ICloneable where T : Object
+    public class ObjectContainerImpl <T> : ObjectContainerBase where T : Object
     {
         /// <summary>
         /// Default constructor.
@@ -114,70 +108,19 @@ namespace Safir.Dob.Typesystem
         /// </summary>
         public ObjectContainerImpl() : base() { }
 
-        #region Cloning
 
-        object ICloneable.Clone()
-        {
-            return new ObjectContainerImpl<T>(this);
-        }
-
-        /// <summary>
-        /// Clone.
-        /// </summary>
-        /// <returns>ObjectContainerImpl</returns>
-        public new ObjectContainerImpl<T> Clone()
-        {
-            return (ObjectContainerImpl<T>)((ICloneable)this).Clone(); 
-        }
-
-        /// <summary>
-        /// Copy constructor.
-        /// </summary>
-        /// <param name="other"></param>
-        protected ObjectContainerImpl(ObjectContainerImpl<T> other)
-            : base(other)
-        {
-            if (other.IsNull())
-            {
-                m_Object = null;
-            }
-            else
-            {
-                m_Object = (T)(other.m_Object.Clone());
-            }
-        }
-
-        /// <summary>
-        /// Implementation of abstract in ContainerBase.
-        /// </summary>
-        /// <param name="other">ContainerBase</param>
-        public override void Copy(ContainerBase other)
-        {
-            base.Copy(other);
-            ObjectContainerImpl<T> that = other as ObjectContainerImpl<T>;
-            if (that.IsNull())
-            {
-                m_Object = null;
-            }
-            else
-            {
-                InternalObj = that.m_Object.Clone();
-            }
-        }
-
-        #endregion
 
         /// <summary>
         /// Obj property.
         /// </summary>
         public T Obj
         {
-            set 
-            { 
-                m_Object = value; 
-                m_bIsChanged = true; 
+            set
+            {
+                m_Object = value;
+                m_bIsChanged = true;
             }
-            get 
+            get
             {
                 if (IsNull())
                 {
@@ -227,7 +170,7 @@ namespace Safir.Dob.Typesystem
             m_Object = null;
             m_bIsChanged = true;
         }
-        
+
         /// <summary>
         /// Access the contained object directly, without any checks.
         /// No checks are made of the isNull flag, and the isChanged flag is not updated
@@ -271,6 +214,14 @@ namespace Safir.Dob.Typesystem
             }
             return m_Object.GetMember(member,index);
         }
+
+        internal override void ShallowCopy(ContainerBase other)
+        {
+            base.ShallowCopy(other);
+            ObjectContainerImpl<T> that = (ObjectContainerImpl<T>)other;
+            m_Object = that.m_Object;
+        }
+
 
         private T m_Object;
     }

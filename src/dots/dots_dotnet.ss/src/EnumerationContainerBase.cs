@@ -41,7 +41,7 @@ namespace Safir.Dob.Typesystem
     ///  use the Val property defined in the derived classes.
     ///  </para>
     /// </summary>
-    abstract public class EnumerationContainerBase : ContainerBase, ICloneable
+    abstract public class EnumerationContainerBase : ContainerBase
     {
         /// <summary>
         /// Default constructor.
@@ -53,46 +53,6 @@ namespace Safir.Dob.Typesystem
         {
             m_bIsNull = true;
         }
-
-        #region Cloning
-
-        object ICloneable.Clone()
-        {
-            throw new SoftwareViolationException("Cannot clone EnumerationContainerBase");
-        }
-
-        /// <summary>
-        /// Clone.
-        /// </summary>
-        /// <returns></returns>
-        public new EnumerationContainerBase Clone()
-        {
-            return (EnumerationContainerBase)((ICloneable)this).Clone();
-        }
-
-        /// <summary>
-        /// Copy constructor for use by Clone.
-        /// </summary>
-        /// <param name="other">Other enumeration container.</param>
-        protected EnumerationContainerBase(EnumerationContainerBase other)
-            : base(other)
-        {
-            m_bIsNull = other.m_bIsNull;
-            m_Value = other.m_Value;
-        }
-
-        /// <summary>
-        /// </summary>
-        /// <param name="other"></param>
-        public override void Copy(ContainerBase other)
-        {
-            base.Copy(other);
-            EnumerationContainerBase that = other as EnumerationContainerBase;
-            m_bIsNull = that.m_bIsNull;
-            m_Value = that.m_Value;
-        }
-
-        #endregion
 
         /// <summary>
         /// Ordinal value of the enumeration container.
@@ -117,6 +77,13 @@ namespace Safir.Dob.Typesystem
             m_bIsChanged = true;
         }
 
+        internal override void ShallowCopy(ContainerBase other)
+        {
+            base.ShallowCopy(other);
+            EnumerationContainerBase that = (EnumerationContainerBase)other;
+            m_Value = that.m_Value;
+            m_bIsNull = that.m_bIsNull;
+        }
 
         /// <summary>The stored value</summary>
         protected internal int m_Value;
@@ -135,13 +102,6 @@ namespace Safir.Dob.Typesystem
         /// Constructor.
         /// </summary>
         public EnumerationContainerImpl() : base()
-        {
-        }
-
-        /// <summary>
-        /// Copy constructor.
-        /// </summary>
-        protected EnumerationContainerImpl(EnumerationContainerImpl<EnumT> other) :base(other)
         {
         }
 

@@ -1,7 +1,7 @@
 /* ****************************************************************************
 *
 * Copyright Saab AB, 2005-2013 (http://safir.sourceforge.net)
-* 
+*
 * Created by: Lars Hagström / stlrha
 *
 *******************************************************************************
@@ -35,7 +35,7 @@ namespace Safir.Dob.Typesystem
     /// Basically this amounts to the interface for nullability and
     /// the change flag.
     /// </summary>
-    abstract public class ContainerBase : ICloneable
+    abstract public class ContainerBase
     {
         /// <summary>
         /// Default Constructor.
@@ -51,7 +51,7 @@ namespace Safir.Dob.Typesystem
         /// Is the container set to null?
         /// </summary>
         /// <returns>True if the container is set to null.</returns>
-        abstract public bool IsNull(); 
+        abstract public bool IsNull();
 
         /// <summary>
         /// Set the container to null.
@@ -91,50 +91,15 @@ namespace Safir.Dob.Typesystem
             m_bIsChanged = changed;
         }
 
-        #region Cloning
-
-        object ICloneable.Clone()
-        {
-            throw new SoftwareViolationException("Cannot clone ContainerBase");
-        }
-
-        /// <summary>
-        /// Clone.
-        /// </summary>
-        /// <returns>ContainerBase</returns>
-        public virtual ContainerBase Clone()
-        {
-            return (ContainerBase)((ICloneable)this).Clone();
-        }
-
-        /// <summary>
-        /// Copy constructor for use by Clone
-        /// </summary>
-        /// <param name="other">Other ContainerBase.</param>
-        protected ContainerBase(ContainerBase other)
-        {
-            m_bIsChanged = other.m_bIsChanged;
-        }
-
-        /// <summary>
-        /// Copy.
-        /// </summary>
-        /// <param name="other">Other ContainerBase.</param>
-        virtual public void Copy(ContainerBase other)
-        {
-            if (this.GetType() != other.GetType())
-            {
-                throw new SoftwareViolationException("Invalid call to Copy, containers are not of same type");
-            }
-            m_bIsChanged = other.m_bIsChanged;
-        }
-
-        #endregion
-
         /// <summary>
         /// Flag accessible from subclasses.
         /// </summary>
         protected internal bool m_bIsChanged;
+
+        virtual internal void ShallowCopy(ContainerBase other)
+        {
+            m_bIsChanged = other.m_bIsChanged;
+        }
 
     }
 }

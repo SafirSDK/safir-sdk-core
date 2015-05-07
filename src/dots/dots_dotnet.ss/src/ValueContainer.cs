@@ -1,7 +1,7 @@
 /* ****************************************************************************
 *
 * Copyright Saab AB, 2005-2013 (http://safir.sourceforge.net)
-* 
+*
 * Created by: Lars Hagström / stlrha
 *
 *******************************************************************************
@@ -30,17 +30,17 @@ namespace Safir.Dob.Typesystem
 {
     /// <summary>
     /// Container for base types.
-    /// 
+    ///
     /// <para/>
     /// This class holds a value of the template argument type and a null flag.
     /// The operations that modify the value update the null flag and the change flag
     /// (which is inherited from ContainerBase).
-    /// 
+    ///
     /// <para/>
     /// This container is intended for the simple types of the DOB typesystem.
     /// </summary>
     /// <typeparam name="T">The type to contain.</typeparam>
-    public class ValueContainer<T> : ContainerBase, ICloneable
+    public class ValueContainer<T> : ContainerBase
     {
         /// <summary>
         /// Default constructor
@@ -52,49 +52,10 @@ namespace Safir.Dob.Typesystem
             m_bIsNull = true;
         }
 
-        #region Cloning
 
-        object ICloneable.Clone()
-        {
-            return new ValueContainer<T>(this);
-        }
 
         /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
-        public new ValueContainer<T> Clone()
-        {
-            return (ValueContainer<T>)((ICloneable)this).Clone(); 
-        }
-
-        /// <summary>
-        /// Copy constructor for use by Clone
-        /// </summary>
-        /// <param name="other"></param>
-        protected ValueContainer(ValueContainer<T> other):
-            base(other)
-        {
-            m_bIsNull = other.m_bIsNull;
-            m_Value = other.m_Value;
-        }
-
-        /// <summary>
-        /// Override ContainerBase.
-        /// </summary>
-        /// <param name="other"></param>
-        public override void Copy(ContainerBase other)
-        {
-            base.Copy(other);
-            ValueContainer<T> that = other as ValueContainer<T>;
-            m_bIsNull = that.m_bIsNull;
-            m_Value = that.m_Value;
-        }
-
-        #endregion
-
-        /// <summary>
-        /// The value of the container. 
+        /// The value of the container.
         /// Null and change flags are updated accordingly.
         /// </summary>
         public T Val
@@ -122,7 +83,7 @@ namespace Safir.Dob.Typesystem
 
         /// <summary>
         /// Equality operator for ValueContainer and value.
-        /// 
+        ///
         /// <para/>
         /// This operator lets you compare the container with a value of the contained type.
         /// It will return false if the container is null or the values are not equal.
@@ -201,11 +162,17 @@ namespace Safir.Dob.Typesystem
             throw new System.Exception("The method or operation is not implemented.");
         }
 
-        
-        
+        internal override void ShallowCopy(ContainerBase other)
+        {
+            base.ShallowCopy(other);
+            ValueContainer<T> that = (ValueContainer<T>)other;
+            m_bIsNull = that.m_bIsNull;
+            m_Value = that.m_Value;
+        }
+
         internal bool m_bIsNull;
         internal T m_Value;
     }
 
-    
+
 }

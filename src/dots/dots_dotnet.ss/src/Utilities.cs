@@ -1,7 +1,7 @@
 /* ****************************************************************************
 *
 * Copyright Consoden AB, 2005-2015 (http://safir.sourceforge.net)
-* 
+*
 * Created by: Lars Hagström / stlrha
 *
 *******************************************************************************
@@ -35,12 +35,18 @@ public class Utilities
 {
     /// <summary>
     /// Merge the changed members (recursively) from one object into another.
-    /// 
+    ///
     /// <para/>
     /// This function will recurse through the members of the "from" object and
     /// take all the members that have a change flag set and copy them into the "into"
     /// object.
     /// </summary>
+    /// <remarks>
+    ///   <para>
+    ///  Note that this uses shallow copying, so the two objects may end up
+    ///  using the same objects internally.
+    ///   </para>
+    /// </remarks>
     /// <param name="into">Object to merge into.</param>
     /// <param name="from">Object whose changes shall be merged into "into".</param>
     public static void MergeChanges(Object into, Object from)
@@ -74,15 +80,7 @@ public class Utilities
 
                         if (fromContainerOB.IsChangedHere()) //this specific member has changed
                         {
-                            if (fromContainerOB.IsNull())
-                            {
-                                intoContainerOB.SetNull();
-                            }
-                            else
-                            {
-                                intoContainerOB.InternalObj = fromContainerOB.InternalObj.Clone();
-                                intoContainerOB.SetChangedHere(true);
-                            }
+                            intoContainerOB.ShallowCopy(fromContainerOB);
                         }
                         else if (fromContainerOB.IsChanged()) //some child has changed we need to recurse
                         {
@@ -92,14 +90,14 @@ public class Utilities
                                 //If the type is changing we write a warning
                                 if (!intoContainerOB.IsNull())
                                 {
+                                    //TODO syslog
                                     System.Console.WriteLine("Warning (Contact a DOB developer if you do not understand it):");
                                     System.Console.WriteLine("The type of a member has changed without the change flag being set in 'from'.");
                                 }
 
                                 //if it was null we don't warn (even if it is a little bit suspicious to do that...)
 
-                                intoContainerOB.InternalObj = fromContainerOB.InternalObj.Clone();
-                                intoContainerOB.SetChangedHere(true);
+                                intoContainerOB.ShallowCopy(fromContainerOB);
                             }
                             else
                             {
@@ -112,7 +110,7 @@ public class Utilities
                     {
                         if (fromContainerB.IsChanged())
                         {
-                            intoContainerB.Copy(fromContainerB);
+                            intoContainerB.ShallowCopy(fromContainerB);
                         }
                     }
                 }
@@ -120,8 +118,8 @@ public class Utilities
         }
         catch (System.InvalidCastException exc)
         {
-            throw new SoftwareViolationException("Cast failed inside MergeChanges" + exc.Message);            
+            throw new SoftwareViolationException("Cast failed inside MergeChanges" + exc.Message);
         }
     }
-    }
+}
 }

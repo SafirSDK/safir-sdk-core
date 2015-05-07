@@ -30,7 +30,7 @@ namespace Safir.Dob.Typesystem
     /// <summary>
     /// Dictionary container.
     /// </summary>
-    public class DictionaryContainer<KeyT, ValT> : ContainerBase, ICloneable, IDictionary<KeyT, ValT>
+    public class DictionaryContainer<KeyT, ValT> : ContainerBase, IDictionary<KeyT, ValT>
         where ValT : ContainerBase, new()
     {
         private SortedDictionary<KeyT, ValT> values = new SortedDictionary<KeyT, ValT> ();
@@ -315,58 +315,13 @@ namespace Safir.Dob.Typesystem
 
         #endregion
 
-        #region Cloning
 
-        /// <summary>
-        /// Clone this instance.
-        /// </summary>
-        object ICloneable.Clone()
-        {
-            return new DictionaryContainer<KeyT, ValT> (this);
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        /// <returns></returns>
-        public new DictionaryContainer<KeyT, ValT> Clone()
-        {
-            return (DictionaryContainer<KeyT, ValT>)((ICloneable)this).Clone();
-        }
-
-        /// <summary>
-        /// Copy the container.
-        /// </summary>
-        public override void Copy(ContainerBase other)
-        {
-            base.Copy(other);
-            this.values.Clear ();
-            DictionaryContainer<KeyT, ValT> that = other as DictionaryContainer<KeyT, ValT>;
-            foreach (var kv in that.values)
-            {
-                Add (kv.Key, (ValT)kv.Value.Clone ());
-            }
-        }
-
-        /// <summary>
-        /// Copy constructor for use by Clone
-        /// </summary>
-        /// <param name="other"></param>
-        protected DictionaryContainer(DictionaryContainer<KeyT, ValT> other):
-            base(other)
-        {
-            foreach (var kv in other.values) {
-                values.Add (kv.Key, (ValT)kv.Value.Clone ());
-            }
-        }
-
-        #endregion
     }
 
     /// <summary>
     /// Value dictionary container.
     /// </summary>
-    public class ValueDictionaryContainer<KeyT, ContainerT, ValueT> : DictionaryContainer<KeyT, ContainerT>, ICloneable
+    public class ValueDictionaryContainer<KeyT, ContainerT, ValueT> : DictionaryContainer<KeyT, ContainerT>
         where ContainerT : ValueContainer<ValueT>, new()
     {
         /// <summary>
@@ -374,30 +329,6 @@ namespace Safir.Dob.Typesystem
         /// </summary>
         public ValueDictionaryContainer() :base()
         {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the class.
-        /// </summary>
-        /// <param name="other">Other.</param>
-        protected ValueDictionaryContainer(ValueDictionaryContainer<KeyT, ContainerT, ValueT> other) : base(other)
-        {
-        }
-
-        /// <summary>
-        /// Clone this instance.
-        /// </summary>
-        public new ValueDictionaryContainer<KeyT, ContainerT, ValueT> Clone()
-        {
-            return new ValueDictionaryContainer<KeyT, ContainerT, ValueT> (this);
-        }
-
-        /// <summary>
-        /// Clone this instance.
-        /// </summary>
-        object ICloneable.Clone()
-        {
-            return new ValueDictionaryContainer<KeyT, ContainerT, ValueT> (this);
         }
 
         /// <summary>
@@ -416,7 +347,7 @@ namespace Safir.Dob.Typesystem
     /// <summary>
     /// Object dictionary container.
     /// </summary>
-    public class ObjectDictionaryContainer<KeyT, ContainerT, ValueT> : DictionaryContainer<KeyT, ContainerT>, ICloneable
+    public class ObjectDictionaryContainer<KeyT, ContainerT, ValueT> : DictionaryContainer<KeyT, ContainerT>
             where ValueT : Object
             where ContainerT : ObjectContainerImpl<ValueT>, new()
     {
@@ -425,30 +356,6 @@ namespace Safir.Dob.Typesystem
         /// </summary>
         public ObjectDictionaryContainer() :base()
         {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the class.
-        /// </summary>
-        /// <param name="other">Other.</param>
-        protected ObjectDictionaryContainer(ObjectDictionaryContainer<KeyT, ContainerT, ValueT> other) : base(other)
-        {
-        }
-
-        /// <summary>
-        /// Clone this instance.
-        /// </summary>
-        public new ObjectDictionaryContainer<KeyT, ContainerT, ValueT> Clone()
-        {
-            return new ObjectDictionaryContainer<KeyT, ContainerT, ValueT> (this);
-        }
-
-        /// <summary>
-        /// Clone this instance.
-        /// </summary>
-        object ICloneable.Clone()
-        {
-            return new ObjectDictionaryContainer<KeyT, ContainerT, ValueT> (this);
         }
 
         /// <summary>
@@ -467,7 +374,7 @@ namespace Safir.Dob.Typesystem
     /// <summary>
     /// Enum dictionary container.
     /// </summary>
-    public class EnumDictionaryContainer<KeyT, ContainerT, ValueT> : DictionaryContainer<KeyT, ContainerT>, ICloneable
+    public class EnumDictionaryContainer<KeyT, ContainerT, ValueT> : DictionaryContainer<KeyT, ContainerT>
         where ValueT : struct
         where ContainerT : EnumerationContainerImpl<ValueT>, new()
     {
@@ -476,30 +383,6 @@ namespace Safir.Dob.Typesystem
         /// </summary>
         public EnumDictionaryContainer() :base()
         {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the class.
-        /// </summary>
-        /// <param name="other">Other.</param>
-        protected EnumDictionaryContainer(EnumDictionaryContainer<KeyT, ContainerT, ValueT> other) : base(other)
-        {
-        }
-
-        /// <summary>
-        /// Clone this instance.
-        /// </summary>
-        public new EnumDictionaryContainer<KeyT, ContainerT, ValueT> Clone()
-        {
-            return new EnumDictionaryContainer<KeyT, ContainerT, ValueT> (this);
-        }
-
-        /// <summary>
-        /// Clone this instance.
-        /// </summary>
-        object ICloneable.Clone()
-        {
-            return new EnumDictionaryContainer<KeyT, ContainerT, ValueT> (this);
         }
 
         /// <summary>
@@ -518,37 +401,13 @@ namespace Safir.Dob.Typesystem
     /// <summary>
     /// Enum dictionary container.
     /// </summary>
-    public class StringDictionaryContainer<KeyT> : DictionaryContainer<KeyT, StringContainer>, ICloneable
+    public class StringDictionaryContainer<KeyT> : DictionaryContainer<KeyT, StringContainer>
     {
         /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
         public StringDictionaryContainer() :base()
         {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the class.
-        /// </summary>
-        /// <param name="other">Other.</param>
-        protected StringDictionaryContainer(StringDictionaryContainer<KeyT> other) : base(other)
-        {
-        }
-
-        /// <summary>
-        /// Clone this instance.
-        /// </summary>
-        public new StringDictionaryContainer<KeyT> Clone()
-        {
-            return new StringDictionaryContainer<KeyT> (this);
-        }
-
-        /// <summary>
-        /// Clone this instance.
-        /// </summary>
-        object ICloneable.Clone()
-        {
-            return new StringDictionaryContainer<KeyT> (this);
         }
 
         /// <summary>

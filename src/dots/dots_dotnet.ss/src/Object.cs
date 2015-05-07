@@ -1,7 +1,7 @@
 /* ****************************************************************************
 *
 * Copyright Saab AB, 2005-2013 (http://safir.sourceforge.net)
-* 
+*
 * Created by: Lars Hagström / stlrha
 *
 *******************************************************************************
@@ -31,7 +31,7 @@ namespace Safir.Dob.Typesystem
     /// <para/>
     /// This class is the base class for all automatically generated DOB classes.
     /// </summary>
-    public class Object : ICloneable
+    public class Object
     {
         #region Constructors
 
@@ -40,7 +40,7 @@ namespace Safir.Dob.Typesystem
         /// </summary>
         public Object()
         {
-           
+
         }
 
         #endregion
@@ -91,35 +91,7 @@ namespace Safir.Dob.Typesystem
 
         #endregion
 
-        #region Cloning
 
-        object ICloneable.Clone()
-        {
-            return new Object(this);
-        }
-
-        /// <summary>
-        /// Create a copy of the object.
-        /// <para>
-        /// Cast it to the type of object that you're after.
-        /// </para>
-        /// </summary>
-        /// <returns>A copy of the object</returns>
-        public virtual Object Clone()
-        {
-            return (Object)((ICloneable)this).Clone();
-        }
-
-        /// <summary>
-        /// Copy constructor for use by Clone.
-        /// </summary>
-        /// <param name="other">Other object.</param>
-        protected Object(Object other)
-        {
-
-        }
-
-        #endregion
 
         #region Blob serialization and deserialization
 
@@ -168,5 +140,5 @@ namespace Safir.Dob.Typesystem
         #endregion
 
     }
-    
+
 }

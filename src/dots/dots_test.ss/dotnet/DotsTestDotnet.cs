@@ -8020,10 +8020,5 @@ class DotsTestDotnet
         Console.WriteLine("------ From Json -----");
         var fromJson = Safir.Dob.Typesystem.Serialization.ToObjectFromJson (json) as DotsTest.MemberDictionaries;
         PrintDictionaries(fromJson);
-
-        //Console.WriteLine("------ Clone -----");
-        //DotsTest.MemberDictionaries clone = md.Clone() as DotsTest.MemberDictionaries;
-        //PrintDictionaries(clone);
-        //TODO: test clone somehow
     }
 }
