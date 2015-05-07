@@ -39,11 +39,11 @@ def log(*args, **kwargs):
 
 def check_tabs(filename):
     try:
-        #log("checking file", filename)
+        log("checking file", filename)
         with open(filename,"r") as f:
             for line in f:
                 if "\t" in line:
-                    log (filename, "contains a tab!")
+                    log (" !!!", filename, "contains a tab!!!")
                     return False
     except UnicodeDecodeError:
         log("Failed to check file", filename)
