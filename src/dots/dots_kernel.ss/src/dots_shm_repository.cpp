@@ -181,123 +181,123 @@ namespace Internal
         switch(m_memberType)
         {
         case BooleanMemberType:
-        {
-            for (int i=0; i<pd->GetNumberOfValues(); ++i)
             {
-                ValueDefinitionShm vd(shm);
-                vd.val.boolean=pd->GetBoolValue(i);
-                m_values.push_back(vd);
+                for (int i=0; i<pd->GetNumberOfValues(); ++i)
+                {
+                    ValueDefinitionShm vd(shm);
+                    vd.val.boolean=pd->GetBoolValue(i);
+                    m_values.push_back(vd);
+                }
             }
-        }
             break;
 
         case Int32MemberType:
-        {
-            for (int i=0; i<pd->GetNumberOfValues(); ++i)
             {
-                ValueDefinitionShm vd(shm);
-                vd.val.int32=pd->GetInt32Value(i);
-                m_values.push_back(vd);
+                for (int i=0; i<pd->GetNumberOfValues(); ++i)
+                {
+                    ValueDefinitionShm vd(shm);
+                    vd.val.int32=pd->GetInt32Value(i);
+                    m_values.push_back(vd);
+                }
             }
-        }
             break;
         case Int64MemberType:
-        {
-            for (int i=0; i<pd->GetNumberOfValues(); ++i)
             {
-                ValueDefinitionShm vd(shm);
-                vd.val.int64=pd->GetInt64Value(i);
-                m_values.push_back(vd);
+                for (int i=0; i<pd->GetNumberOfValues(); ++i)
+                {
+                    ValueDefinitionShm vd(shm);
+                    vd.val.int64=pd->GetInt64Value(i);
+                    m_values.push_back(vd);
+                }
             }
-        }
             break;
 
         case EntityIdMemberType:
-        {
-            for (int i=0; i<pd->GetNumberOfValues(); ++i)
             {
-                std::pair<boost::int64_t, const char*> hashed=pd->GetHashedValue(i);
-                if (hashed.second==NULL)
+                for (int i=0; i<pd->GetNumberOfValues(); ++i)
                 {
-                    hashed.second="";
+                    std::pair<boost::int64_t, const char*> hashed=pd->GetHashedValue(i);
+                    if (hashed.second==NULL)
+                    {
+                        hashed.second="";
+                    }
+                    ValueDefinitionShm vd(hashed.second, shm);
+                    vd.val.hash=hashed.first;
+                    vd.val.int64=pd->GetInt64Value(i);
+                    m_values.push_back(vd);
                 }
-                ValueDefinitionShm vd(hashed.second, shm);
-                vd.val.hash=hashed.first;
-                vd.val.int64=pd->GetInt64Value(i);
-                m_values.push_back(vd);
             }
-        }
             break;
         case TypeIdMemberType:
-        {
-            for (int i=0; i<pd->GetNumberOfValues(); ++i)
             {
-                ValueDefinitionShm vd(shm);
-                vd.val.int64=pd->GetInt64Value(i);
-                m_values.push_back(vd);
+                for (int i=0; i<pd->GetNumberOfValues(); ++i)
+                {
+                    ValueDefinitionShm vd(shm);
+                    vd.val.int64=pd->GetInt64Value(i);
+                    m_values.push_back(vd);
+                }
             }
-        }
             break;
         case InstanceIdMemberType:
         case ChannelIdMemberType:
         case HandlerIdMemberType:
-        {
-            for (int i=0; i<pd->GetNumberOfValues(); ++i)
             {
-                std::pair<boost::int64_t, const char*> hashed=pd->GetHashedValue(i);
-                if (hashed.second==NULL)
+                for (int i=0; i<pd->GetNumberOfValues(); ++i)
                 {
-                    hashed.second="";
+                    std::pair<boost::int64_t, const char*> hashed=pd->GetHashedValue(i);
+                    if (hashed.second==NULL)
+                    {
+                        hashed.second="";
+                    }
+                    ValueDefinitionShm vd(hashed.second, shm);
+                    vd.val.hash=hashed.first;
+                    m_values.push_back(vd);
                 }
-                ValueDefinitionShm vd(hashed.second, shm);
-                vd.val.hash=hashed.first;
-                m_values.push_back(vd);
             }
-        }
             break;
 
         case StringMemberType:
-        {
-            for (int i=0; i<pd->GetNumberOfValues(); ++i)
             {
-                const char* str=pd->GetStringValue(i);
-                ValueDefinitionShm vd(str, shm);
-                m_values.push_back(vd);
+                for (int i=0; i<pd->GetNumberOfValues(); ++i)
+                {
+                    const char* str=pd->GetStringValue(i);
+                    ValueDefinitionShm vd(str, shm);
+                    m_values.push_back(vd);
+                }
             }
-        }
             break;
 
         case ObjectMemberType:
-        {
-            for (int i=0; i<pd->GetNumberOfValues(); ++i)
             {
-                std::pair<const char*, size_t> bin=pd->GetObjectValue(i);
-                ValueDefinitionShm vd(bin.first, bin.second, shm);
-                m_values.push_back(vd);
+                for (int i=0; i<pd->GetNumberOfValues(); ++i)
+                {
+                    std::pair<const char*, size_t> bin=pd->GetObjectValue(i);
+                    ValueDefinitionShm vd(bin.first, bin.second, shm);
+                    m_values.push_back(vd);
+                }
             }
-        }
             break;
 
         case EnumerationMemberType:
-        {
-            for (int i=0; i<pd->GetNumberOfValues(); ++i)
             {
-                ValueDefinitionShm vd(shm);
-                vd.val.int32=pd->GetInt32Value(i);
-                m_values.push_back(vd);
+                for (int i=0; i<pd->GetNumberOfValues(); ++i)
+                {
+                    ValueDefinitionShm vd(shm);
+                    vd.val.int32=pd->GetInt32Value(i);
+                    m_values.push_back(vd);
+                }
             }
-        }
             break;
 
         case BinaryMemberType:
-        {
-            for (int i=0; i<pd->GetNumberOfValues(); ++i)
             {
-                std::pair<const char*, size_t> bin=pd->GetBinaryValue(i);
-                ValueDefinitionShm vd(bin.first, bin.second, shm);
-                m_values.push_back(vd);
+                for (int i=0; i<pd->GetNumberOfValues(); ++i)
+                {
+                    std::pair<const char*, size_t> bin=pd->GetBinaryValue(i);
+                    ValueDefinitionShm vd(bin.first, bin.second, shm);
+                    m_values.push_back(vd);
+                }
             }
-        }
             break;
 
         case Float32MemberType:
@@ -320,14 +320,14 @@ namespace Internal
         case Steradian32MemberType:
         case Volt32MemberType:
         case Watt32MemberType:
-        {
-            for (int i=0; i<pd->GetNumberOfValues(); ++i)
             {
-                ValueDefinitionShm vd(shm);
-                vd.val.float32=pd->GetFloat32Value(i);
-                m_values.push_back(vd);
+                for (int i=0; i<pd->GetNumberOfValues(); ++i)
+                {
+                    ValueDefinitionShm vd(shm);
+                    vd.val.float32=pd->GetFloat32Value(i);
+                    m_values.push_back(vd);
+                }
             }
-        }
             break;
 
         case Float64MemberType:
@@ -350,14 +350,14 @@ namespace Internal
         case Steradian64MemberType:
         case Volt64MemberType:
         case Watt64MemberType:
-        {
-            for (int i=0; i<pd->GetNumberOfValues(); ++i)
             {
-                ValueDefinitionShm vd(shm);
-                vd.val.float64=pd->GetFloat64Value(i);
-                m_values.push_back(vd);
+                for (int i=0; i<pd->GetNumberOfValues(); ++i)
+                {
+                    ValueDefinitionShm vd(shm);
+                    vd.val.float64=pd->GetFloat64Value(i);
+                    m_values.push_back(vd);
+                }
             }
-        }
             break;
         }
 
@@ -366,86 +366,86 @@ namespace Internal
             switch (m_keyType)
             {
             case Int32MemberType:
-            {
-                for (int i=0; i<pd->GetNumberOfValues(); ++i)
                 {
-                    ValueDefinitionShm& vd=m_values[static_cast<size_t>(i)];
-                    vd.key.int32=pd->GetInt32Key(i);
+                    for (int i=0; i<pd->GetNumberOfValues(); ++i)
+                    {
+                        ValueDefinitionShm& vd=m_values[static_cast<size_t>(i)];
+                        vd.key.int32=pd->GetInt32Key(i);
+                    }
                 }
-            }
                 break;
             case Int64MemberType:
-            {
-                for (int i=0; i<pd->GetNumberOfValues(); ++i)
                 {
-                    ValueDefinitionShm& vd=m_values[static_cast<size_t>(i)];
-                    vd.key.int64=pd->GetInt64Key(i);
+                    for (int i=0; i<pd->GetNumberOfValues(); ++i)
+                    {
+                        ValueDefinitionShm& vd=m_values[static_cast<size_t>(i)];
+                        vd.key.int64=pd->GetInt64Key(i);
+                    }
                 }
-            }
                 break;
 
             case EnumerationMemberType:
-            {
-                for (int i=0; i<pd->GetNumberOfValues(); ++i)
                 {
-                    ValueDefinitionShm& vd=m_values[static_cast<size_t>(i)];
-                    vd.key.int32=pd->GetInt32Key(i);
+                    for (int i=0; i<pd->GetNumberOfValues(); ++i)
+                    {
+                        ValueDefinitionShm& vd=m_values[static_cast<size_t>(i)];
+                        vd.key.int32=pd->GetInt32Key(i);
+                    }
                 }
-            }
                 break;
 
             case EntityIdMemberType:
-            {
-                for (int i=0; i<pd->GetNumberOfValues(); ++i)
                 {
-                    std::pair<boost::int64_t, const char*> hashed=pd->GetHashedKey(i);
-                    if (hashed.second==NULL)
+                    for (int i=0; i<pd->GetNumberOfValues(); ++i)
                     {
-                        hashed.second="";
+                        std::pair<boost::int64_t, const char*> hashed=pd->GetHashedKey(i);
+                        if (hashed.second==NULL)
+                        {
+                            hashed.second="";
+                        }
+                        ValueDefinitionShm& vd=m_values[static_cast<size_t>(i)];
+                        vd.stringKey=StringShm(hashed.second, shm->get_segment_manager());
+                        vd.key.hash=hashed.first;
+                        vd.key.int64=pd->GetInt64Key(i);
                     }
-                    ValueDefinitionShm& vd=m_values[static_cast<size_t>(i)];
-                    vd.stringKey=StringShm(hashed.second, shm->get_segment_manager());
-                    vd.key.hash=hashed.first;
-                    vd.key.int64=pd->GetInt64Key(i);
                 }
-            }
                 break;
             case TypeIdMemberType:
-            {
-                for (int i=0; i<pd->GetNumberOfValues(); ++i)
                 {
-                    ValueDefinitionShm& vd=m_values[static_cast<size_t>(i)];
-                    vd.key.int64=pd->GetInt64Key(i);
+                    for (int i=0; i<pd->GetNumberOfValues(); ++i)
+                    {
+                        ValueDefinitionShm& vd=m_values[static_cast<size_t>(i)];
+                        vd.key.int64=pd->GetInt64Key(i);
+                    }
                 }
-            }
                 break;
             case InstanceIdMemberType:
             case ChannelIdMemberType:
             case HandlerIdMemberType:
-            {
-                for (int i=0; i<pd->GetNumberOfValues(); ++i)
                 {
-                    std::pair<boost::int64_t, const char*> hashed=pd->GetHashedKey(i);
-                    if (hashed.second==NULL)
+                    for (int i=0; i<pd->GetNumberOfValues(); ++i)
                     {
-                        hashed.second="";
+                        std::pair<boost::int64_t, const char*> hashed=pd->GetHashedKey(i);
+                        if (hashed.second==NULL)
+                        {
+                            hashed.second="";
+                        }
+                        ValueDefinitionShm& vd=m_values[static_cast<size_t>(i)];
+                        vd.stringKey=StringShm(hashed.second, shm->get_segment_manager());
+                        vd.key.hash=hashed.first;
                     }
-                    ValueDefinitionShm& vd=m_values[static_cast<size_t>(i)];
-                    vd.stringKey=StringShm(hashed.second, shm->get_segment_manager());
-                    vd.key.hash=hashed.first;
                 }
-            }
                 break;
 
             case StringMemberType:
-            {
-                for (int i=0; i<pd->GetNumberOfValues(); ++i)
                 {
-                    const char* str=pd->GetStringKey(i);
-                    ValueDefinitionShm& vd=m_values[static_cast<size_t>(i)];
-                    vd.stringKey=StringShm(str, shm->get_segment_manager());
+                    for (int i=0; i<pd->GetNumberOfValues(); ++i)
+                    {
+                        const char* str=pd->GetStringKey(i);
+                        ValueDefinitionShm& vd=m_values[static_cast<size_t>(i)];
+                        vd.stringKey=StringShm(str, shm->get_segment_manager());
+                    }
                 }
-            }
                 break;
 
             default:

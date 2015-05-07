@@ -377,10 +377,10 @@ public class Properties {
             {
                 int[] paramIndex=new int[1];
                 int[] valueIndex=new int[1];
-            	Kernel.GetPropertyParameterReference(obj.getTypeId(), propertyId, member, index, paramIndex, valueIndex);
-            	
-            	boolean val [] = new boolean [1];
-            	Kernel.GetBooleanParameter(obj.getTypeId(), paramIndex[0], valueIndex[0], val);
+                Kernel.GetPropertyParameterReference(obj.getTypeId(), propertyId, member, index, paramIndex, valueIndex);
+                
+                boolean val [] = new boolean [1];
+                Kernel.GetBooleanParameter(obj.getTypeId(), paramIndex[0], valueIndex[0], val);
                                                 
                 return val[0];
             }
@@ -496,12 +496,12 @@ public class Properties {
 
         case MappedToParameter:
             {
-            	int[] paramIndex=new int[1];
+                int[] paramIndex=new int[1];
                 int[] valueIndex=new int[1];
-            	Kernel.GetPropertyParameterReference(obj.getTypeId(), propertyId, member, index, paramIndex, valueIndex);
-            	
-            	int val [] = new int [1];
-            	Kernel.GetInt32Parameter(obj.getTypeId(), paramIndex[0], valueIndex[0], BlobOperations.VALUE_MODE, val);
+                Kernel.GetPropertyParameterReference(obj.getTypeId(), propertyId, member, index, paramIndex, valueIndex);
+                
+                int val [] = new int [1];
+                Kernel.GetInt32Parameter(obj.getTypeId(), paramIndex[0], valueIndex[0], BlobOperations.VALUE_MODE, val);
                                                 
                 return val[0];
             }
@@ -621,12 +621,12 @@ public class Properties {
 
         case MappedToParameter:
             {
-            	int[] paramIndex=new int[1];
+                int[] paramIndex=new int[1];
                 int[] valueIndex=new int[1];
-            	Kernel.GetPropertyParameterReference(obj.getTypeId(), propertyId, member, index, paramIndex, valueIndex);
-            	
-            	int val [] = new int [1];
-            	Kernel.GetInt32Parameter(obj.getTypeId(), paramIndex[0], valueIndex[0], BlobOperations.VALUE_MODE, val);
+                Kernel.GetPropertyParameterReference(obj.getTypeId(), propertyId, member, index, paramIndex, valueIndex);
+                
+                int val [] = new int [1];
+                Kernel.GetInt32Parameter(obj.getTypeId(), paramIndex[0], valueIndex[0], BlobOperations.VALUE_MODE, val);
                                                 
                 return val[0];
             }
@@ -745,13 +745,13 @@ public class Properties {
 
         case MappedToParameter:
             {
-            	int[] paramIndex=new int[1];
+                int[] paramIndex=new int[1];
                 int[] valueIndex=new int[1];
-            	Kernel.GetPropertyParameterReference(obj.getTypeId(), propertyId, member, index, paramIndex, valueIndex);
-            	
-            	long val [] = new long [1];
-            	Kernel.GetInt64Parameter(obj.getTypeId(), paramIndex[0], valueIndex[0], BlobOperations.VALUE_MODE, val);
-            	return val[0];
+                Kernel.GetPropertyParameterReference(obj.getTypeId(), propertyId, member, index, paramIndex, valueIndex);
+                
+                long val [] = new long [1];
+                Kernel.GetInt64Parameter(obj.getTypeId(), paramIndex[0], valueIndex[0], BlobOperations.VALUE_MODE, val);
+                return val[0];
             }
 
         case MappedToMember:
@@ -868,13 +868,13 @@ public class Properties {
 
         case MappedToParameter:
             {
-            	int[] paramIndex=new int[1];
+                int[] paramIndex=new int[1];
                 int[] valueIndex=new int[1];
-            	Kernel.GetPropertyParameterReference(obj.getTypeId(), propertyId, member, index, paramIndex, valueIndex);
-            	
-            	float val [] = new float [1];
-            	Kernel.GetFloat32Parameter(obj.getTypeId(), paramIndex[0], valueIndex[0], val);
-            	
+                Kernel.GetPropertyParameterReference(obj.getTypeId(), propertyId, member, index, paramIndex, valueIndex);
+                
+                float val [] = new float [1];
+                Kernel.GetFloat32Parameter(obj.getTypeId(), paramIndex[0], valueIndex[0], val);
+                
                 return val[0];
             }
 
@@ -992,13 +992,13 @@ public class Properties {
 
         case MappedToParameter:
             {
-            	int[] paramIndex=new int[1];
+                int[] paramIndex=new int[1];
                 int[] valueIndex=new int[1];
-            	Kernel.GetPropertyParameterReference(obj.getTypeId(), propertyId, member, index, paramIndex, valueIndex);
-            	
-            	double val [] = new double [1];
-            	Kernel.GetFloat64Parameter(obj.getTypeId(), paramIndex[0], valueIndex[0], val);
-            	
+                Kernel.GetPropertyParameterReference(obj.getTypeId(), propertyId, member, index, paramIndex, valueIndex);
+                
+                double val [] = new double [1];
+                Kernel.GetFloat64Parameter(obj.getTypeId(), paramIndex[0], valueIndex[0], val);
+                
                 return val[0];
             }
 
@@ -1116,18 +1116,18 @@ public class Properties {
 
         case MappedToParameter:
             {
-            	int[] paramIndex=new int[1];
+                int[] paramIndex=new int[1];
                 int[] valueIndex=new int[1];
-            	Kernel.GetPropertyParameterReference(obj.getTypeId(), propertyId, member, index, paramIndex, valueIndex);
-            	
-            	long val [] = new long [1];
-            	String str[]=new String[1];
-            	Kernel.GetHashedIdParameter(obj.getTypeId(), paramIndex[0], valueIndex[0], BlobOperations.VALUE_MODE, val, str);
-            	
-            	if (str[0]!=null)
-            		return new InstanceId(val[0], str[0]);
-            	else
-            		return new InstanceId(val[0]);
+                Kernel.GetPropertyParameterReference(obj.getTypeId(), propertyId, member, index, paramIndex, valueIndex);
+                
+                long val [] = new long [1];
+                String str[]=new String[1];
+                Kernel.GetHashedIdParameter(obj.getTypeId(), paramIndex[0], valueIndex[0], BlobOperations.VALUE_MODE, val, str);
+                
+                if (str[0]!=null)
+                    return new InstanceId(val[0], str[0]);
+                else
+                    return new InstanceId(val[0]);
             }
 
         case MappedToMember:
@@ -1267,19 +1267,19 @@ public class Properties {
 
         case MappedToParameter:
             {
-            	int[] paramIndex=new int[1];
+                int[] paramIndex=new int[1];
                 int[] valueIndex=new int[1];
-            	Kernel.GetPropertyParameterReference(obj.getTypeId(), propertyId, member, index, paramIndex, valueIndex);
-            	
-            	long typeId[] = new long[1];
-            	long inst [] = new long [1];
-            	String str[]=new String[1];
-            	Kernel.GetEntityIdParameter(obj.getTypeId(), paramIndex[0], valueIndex[0], BlobOperations.VALUE_MODE, typeId, inst, str);
-            	
-            	if (str[0]!=null)
-            		return new EntityId(typeId[0], new InstanceId(inst[0], str[0]));
-            	else
-            		return new EntityId(typeId[0], new InstanceId(inst[0]));
+                Kernel.GetPropertyParameterReference(obj.getTypeId(), propertyId, member, index, paramIndex, valueIndex);
+                
+                long typeId[] = new long[1];
+                long inst [] = new long [1];
+                String str[]=new String[1];
+                Kernel.GetEntityIdParameter(obj.getTypeId(), paramIndex[0], valueIndex[0], BlobOperations.VALUE_MODE, typeId, inst, str);
+                
+                if (str[0]!=null)
+                    return new EntityId(typeId[0], new InstanceId(inst[0], str[0]));
+                else
+                    return new EntityId(typeId[0], new InstanceId(inst[0]));
             }
 
         case MappedToMember:
@@ -1396,18 +1396,18 @@ public class Properties {
 
         case MappedToParameter:
             {
-            	int[] paramIndex=new int[1];
+                int[] paramIndex=new int[1];
                 int[] valueIndex=new int[1];
-            	Kernel.GetPropertyParameterReference(obj.getTypeId(), propertyId, member, index, paramIndex, valueIndex);
-            	
-            	long val [] = new long [1];
-            	String str[]=new String[1];
-            	Kernel.GetHashedIdParameter(obj.getTypeId(), paramIndex[0], valueIndex[0], BlobOperations.VALUE_MODE, val, str);
-            	
-            	if (str[0]!=null)
-            		return new ChannelId(val[0], str[0]);
-            	else
-            		return new ChannelId(val[0]);
+                Kernel.GetPropertyParameterReference(obj.getTypeId(), propertyId, member, index, paramIndex, valueIndex);
+                
+                long val [] = new long [1];
+                String str[]=new String[1];
+                Kernel.GetHashedIdParameter(obj.getTypeId(), paramIndex[0], valueIndex[0], BlobOperations.VALUE_MODE, val, str);
+                
+                if (str[0]!=null)
+                    return new ChannelId(val[0], str[0]);
+                else
+                    return new ChannelId(val[0]);
             }
 
         case MappedToMember:
@@ -1524,18 +1524,18 @@ public class Properties {
 
         case MappedToParameter:
             {
-            	int[] paramIndex=new int[1];
+                int[] paramIndex=new int[1];
                 int[] valueIndex=new int[1];
-            	Kernel.GetPropertyParameterReference(obj.getTypeId(), propertyId, member, index, paramIndex, valueIndex);
-            	
-            	long val [] = new long [1];
-            	String str[]=new String[1];
-            	Kernel.GetHashedIdParameter(obj.getTypeId(), paramIndex[0], valueIndex[0], BlobOperations.VALUE_MODE, val, str);
-            	
-            	if (str[0]!=null)
-            		return new HandlerId(val[0], str[0]);
-            	else
-            		return new HandlerId(val[0]);
+                Kernel.GetPropertyParameterReference(obj.getTypeId(), propertyId, member, index, paramIndex, valueIndex);
+                
+                long val [] = new long [1];
+                String str[]=new String[1];
+                Kernel.GetHashedIdParameter(obj.getTypeId(), paramIndex[0], valueIndex[0], BlobOperations.VALUE_MODE, val, str);
+                
+                if (str[0]!=null)
+                    return new HandlerId(val[0], str[0]);
+                else
+                    return new HandlerId(val[0]);
             }
 
         case MappedToMember:
@@ -1655,11 +1655,11 @@ public class Properties {
             {
                 int[] paramIndex=new int[1];
                 int[] valueIndex=new int[1];
-            	Kernel.GetPropertyParameterReference(obj.getTypeId(), propertyId, member, index, paramIndex, valueIndex);
-            	
-            	String val [] = new String [1];
-            	Kernel.GetStringParameter(obj.getTypeId(), paramIndex[0], valueIndex[0], BlobOperations.VALUE_MODE, val);
-            	return val[0];
+                Kernel.GetPropertyParameterReference(obj.getTypeId(), propertyId, member, index, paramIndex, valueIndex);
+                
+                String val [] = new String [1];
+                Kernel.GetStringParameter(obj.getTypeId(), paramIndex[0], valueIndex[0], BlobOperations.VALUE_MODE, val);
+                return val[0];
             }
 
         case MappedToMember:
@@ -1777,15 +1777,15 @@ public class Properties {
 
         case MappedToParameter:
             {
-            	int[] paramIndex=new int[1];
+                int[] paramIndex=new int[1];
                 int[] valueIndex=new int[1];
-            	Kernel.GetPropertyParameterReference(obj.getTypeId(), propertyId, member, index, paramIndex, valueIndex);
-            	
-            	java.nio.ByteBuffer val [] = new java.nio.ByteBuffer [1];
-            	Kernel.GetObjectParameter(obj.getTypeId(), paramIndex[0], valueIndex[0], val);
-            	
-            	Object result = ObjectFactory.getInstance().createObject(val[0]);
-            	result.setChanged(false);
+                Kernel.GetPropertyParameterReference(obj.getTypeId(), propertyId, member, index, paramIndex, valueIndex);
+                
+                java.nio.ByteBuffer val [] = new java.nio.ByteBuffer [1];
+                Kernel.GetObjectParameter(obj.getTypeId(), paramIndex[0], valueIndex[0], val);
+                
+                Object result = ObjectFactory.getInstance().createObject(val[0]);
+                result.setChanged(false);
                 return result;
             }
 
@@ -1909,16 +1909,16 @@ public class Properties {
 
         case MappedToParameter:
             {
-            	int[] paramIndex=new int[1];
+                int[] paramIndex=new int[1];
                 int[] valueIndex=new int[1];
-            	Kernel.GetPropertyParameterReference(obj.getTypeId(), propertyId, member, index, paramIndex, valueIndex);
-            	
-            	java.nio.ByteBuffer val [] = new java.nio.ByteBuffer [1];
-            	Kernel.GetBinaryParameter(obj.getTypeId(), paramIndex[0], valueIndex[0], val);
-            	
-            	byte[] result = new byte [val[0].capacity()];
-            	val[0].clear(); //reset position
-            	val[0].get(result);
+                Kernel.GetPropertyParameterReference(obj.getTypeId(), propertyId, member, index, paramIndex, valueIndex);
+                
+                java.nio.ByteBuffer val [] = new java.nio.ByteBuffer [1];
+                Kernel.GetBinaryParameter(obj.getTypeId(), paramIndex[0], valueIndex[0], val);
+                
+                byte[] result = new byte [val[0].capacity()];
+                val[0].clear(); //reset position
+                val[0].get(result);
                 return result;
             }
 
@@ -1982,7 +1982,7 @@ public class Properties {
                                       member);
         
         if (kind<0){
-        	throw new IllegalValueException("That obj is not mapped to that property!");
+            throw new IllegalValueException("That obj is not mapped to that property!");
         }
         
         return Kernel.DotsC_PropertyMappingKind.values()[kind];

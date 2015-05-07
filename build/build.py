@@ -631,7 +631,7 @@ class VisualStudioBuilder(BuilderBase):
         command = ("makensis",
                    "/DARCH=" + self.target_architecture,
                    "/DSTUDIO=" + self.used_studio,
-				   "/DVERSION=" + version_string)
+                   "/DVERSION=" + version_string)
 
         if self.debug_only:
             command += ("/DDEBUGONLY",)

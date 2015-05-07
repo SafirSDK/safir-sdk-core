@@ -178,150 +178,150 @@ namespace SerializationUtils
         switch(md->GetMemberType())
         {
         case BooleanMemberType:
-        {
-            Trim(memberContent.data());
-            const std::string& val=memberContent.data();
-            bool boolVal=false;
-            try
             {
-                boolVal=StringToBoolean(val);
-            }
-            catch (const std::exception& err)
-            {
-                throw ParseError("Serialization error", err.what(), "", 208);
-            }
+                Trim(memberContent.data());
+                const std::string& val=memberContent.data();
+                bool boolVal=false;
+                try
+                {
+                    boolVal=StringToBoolean(val);
+                }
+                catch (const std::exception& err)
+                {
+                    throw ParseError("Serialization error", err.what(), "", 208);
+                }
 
-            writer.WriteValue(memIx, arrIx, boolVal, false, true);
-        }
+                writer.WriteValue(memIx, arrIx, boolVal, false, true);
+            }
             break;
 
         case EnumerationMemberType:
-        {
-            Trim(memberContent.data());
-            const typename WriterT::EnumDescriptionType* ed=repository->GetEnum(md->GetTypeId());
-            DotsC_Int32 enumOrdinal=ed->GetIndexOfValue(memberContent.data());
-            if (enumOrdinal<0)
             {
-                std::ostringstream os;
-                os<<"Enumeration member '"<<md->GetName()<<"' contains an invalid value. Value="<<memberContent.data()<<" is not a value of enum type "<<ed->GetName();
-                throw ParseError("Serialization error", os.str(), "", 114);
-            }
+                Trim(memberContent.data());
+                const typename WriterT::EnumDescriptionType* ed=repository->GetEnum(md->GetTypeId());
+                DotsC_Int32 enumOrdinal=ed->GetIndexOfValue(memberContent.data());
+                if (enumOrdinal<0)
+                {
+                    std::ostringstream os;
+                    os<<"Enumeration member '"<<md->GetName()<<"' contains an invalid value. Value="<<memberContent.data()<<" is not a value of enum type "<<ed->GetName();
+                    throw ParseError("Serialization error", os.str(), "", 114);
+                }
 
-            writer.WriteValue(memIx, arrIx, enumOrdinal, false, true);
-        }
+                writer.WriteValue(memIx, arrIx, enumOrdinal, false, true);
+            }
             break;
 
         case Int32MemberType:
-        {
-            Trim(memberContent.data());
-            DotsC_Int32 val=memberContent.get_value<DotsC_Int32>();
-            writer.WriteValue(memIx, arrIx, val, false, true);
-        }
+            {
+                Trim(memberContent.data());
+                DotsC_Int32 val=memberContent.get_value<DotsC_Int32>();
+                writer.WriteValue(memIx, arrIx, val, false, true);
+            }
             break;
 
         case Int64MemberType:
-        {
-            Trim(memberContent.data());
-            DotsC_Int64 val=memberContent.get_value<DotsC_Int64>();
-            writer.WriteValue(memIx, arrIx, val, false, true);
-        }
+            {
+                Trim(memberContent.data());
+                DotsC_Int64 val=memberContent.get_value<DotsC_Int64>();
+                writer.WriteValue(memIx, arrIx, val, false, true);
+            }
             break;
 
         case TypeIdMemberType:
-        {
-            Trim(memberContent.data());
-            DotsC_TypeId tid=SerializationUtils::StringToTypeId(memberContent.data());
-
-            if (!BasicTypeOperations::TypeIdToTypeName(repository, tid))
             {
-                std::ostringstream os;
-                os<<"TypeId member "<<md->GetName()<<" does not refer to an existing type. Specified type name: "<<memberContent.data();
-                throw ParseError("Serialization error", os.str(), "", 174);
-            }
+                Trim(memberContent.data());
+                DotsC_TypeId tid=SerializationUtils::StringToTypeId(memberContent.data());
 
-            writer.WriteValue(memIx, arrIx, tid, false, true);
-        }
+                if (!BasicTypeOperations::TypeIdToTypeName(repository, tid))
+                {
+                    std::ostringstream os;
+                    os<<"TypeId member "<<md->GetName()<<" does not refer to an existing type. Specified type name: "<<memberContent.data();
+                    throw ParseError("Serialization error", os.str(), "", 174);
+                }
+
+                writer.WriteValue(memIx, arrIx, tid, false, true);
+            }
             break;
 
         case InstanceIdMemberType:
         case ChannelIdMemberType:
         case HandlerIdMemberType:
-        {
-            Trim(memberContent.data());
-            std::pair<DotsC_Int64, const char*> hash=SerializationUtils::StringToHash(memberContent.data());
-            writer.WriteValue(memIx, arrIx, hash, false, true);
-        }
+            {
+                Trim(memberContent.data());
+                std::pair<DotsC_Int64, const char*> hash=SerializationUtils::StringToHash(memberContent.data());
+                writer.WriteValue(memIx, arrIx, hash, false, true);
+            }
             break;
 
         case EntityIdMemberType:
-        {
-            static const DotsC_TypeId EntityTypeId=LlufId_Generate64("Safir.Dob.Entity");
-
-            boost::optional<std::string> typeIdString=memberContent.get_optional<std::string>("name");
-            boost::optional<std::string> instanceIdString=memberContent.get_optional<std::string>("instanceId");
-            if (!typeIdString)
             {
-                std::ostringstream os;
-                os<<"EntityId member '"<<md->GetName()<<"' is missing the name-element that specifies the type.";
-                throw ParseError("Serialization error", os.str(), "", 115);
-            }
-            if (!instanceIdString)
-            {
-                std::ostringstream os;
-                os<<"EntityId member '"<<md->GetName()<<"' is missing the instanceId-element that specifies the instance.";
-                throw ParseError("Serialization error", os.str(), "", 116);
-            }
+                static const DotsC_TypeId EntityTypeId=LlufId_Generate64("Safir.Dob.Entity");
 
-            Trim(*typeIdString);
-            Trim(*instanceIdString);
-            std::pair<DotsC_EntityId, const char*> entityId=StringToEntityId(*typeIdString, *instanceIdString);
-
-            if (!BasicTypeOperations::IsOfType(repository, ObjectMemberType, entityId.first.typeId, ObjectMemberType, EntityTypeId))
-            {
-                std::ostringstream os;
-                os<<"EntityId member "<<md->GetName()<<" contains a typeId that does not refer to a subtype of Safir.Dob.Entity. Specified type name: "<<*typeIdString;
-                if (!BasicTypeOperations::TypeIdToTypeName(repository, entityId.first.typeId))
+                boost::optional<std::string> typeIdString=memberContent.get_optional<std::string>("name");
+                boost::optional<std::string> instanceIdString=memberContent.get_optional<std::string>("instanceId");
+                if (!typeIdString)
                 {
-                    os<<". By the way, the type '"<<*typeIdString<<"'' does not exist at all!";
+                    std::ostringstream os;
+                    os<<"EntityId member '"<<md->GetName()<<"' is missing the name-element that specifies the type.";
+                    throw ParseError("Serialization error", os.str(), "", 115);
                 }
-                throw ParseError("Serialization error", os.str(), "", 173);
-            }
+                if (!instanceIdString)
+                {
+                    std::ostringstream os;
+                    os<<"EntityId member '"<<md->GetName()<<"' is missing the instanceId-element that specifies the instance.";
+                    throw ParseError("Serialization error", os.str(), "", 116);
+                }
 
-            writer.WriteValue(memIx, arrIx, entityId, false, true);
-        }
+                Trim(*typeIdString);
+                Trim(*instanceIdString);
+                std::pair<DotsC_EntityId, const char*> entityId=StringToEntityId(*typeIdString, *instanceIdString);
+
+                if (!BasicTypeOperations::IsOfType(repository, ObjectMemberType, entityId.first.typeId, ObjectMemberType, EntityTypeId))
+                {
+                    std::ostringstream os;
+                    os<<"EntityId member "<<md->GetName()<<" contains a typeId that does not refer to a subtype of Safir.Dob.Entity. Specified type name: "<<*typeIdString;
+                    if (!BasicTypeOperations::TypeIdToTypeName(repository, entityId.first.typeId))
+                    {
+                        os<<". By the way, the type '"<<*typeIdString<<"'' does not exist at all!";
+                    }
+                    throw ParseError("Serialization error", os.str(), "", 173);
+                }
+
+                writer.WriteValue(memIx, arrIx, entityId, false, true);
+            }
             break;
 
         case StringMemberType:
-        {
-            boost::optional<std::string> preserve=memberContent.get_optional<std::string>("<xmlattr>.xml:space");
-            if (!preserve || *preserve!="preserve")
             {
-                Trim(memberContent.data());
+                boost::optional<std::string> preserve=memberContent.get_optional<std::string>("<xmlattr>.xml:space");
+                if (!preserve || *preserve!="preserve")
+                {
+                    Trim(memberContent.data());
+                }
+                //The only time we dont trim content
+                writer.WriteValue(memIx, arrIx, memberContent.data().c_str(), false, true);
             }
-            //The only time we dont trim content
-            writer.WriteValue(memIx, arrIx, memberContent.data().c_str(), false, true);
-        }
             break;
 
         case ObjectMemberType:
-        {
-            //handled separately
-        }
+            {
+                //handled separately
+            }
             break;
 
         case BinaryMemberType:
-        {
-            Trim(memberContent.data());
-            std::string bin;
-            if (!FromBase64(memberContent.data(), bin))
             {
-                std::ostringstream os;
-                os<<"Member "<<md->GetName()<<" of type binary containes invalid base64 data";
-                throw ParseError("Serialization error", os.str(), "",  117);
-            }
+                Trim(memberContent.data());
+                std::string bin;
+                if (!FromBase64(memberContent.data(), bin))
+                {
+                    std::ostringstream os;
+                    os<<"Member "<<md->GetName()<<" of type binary containes invalid base64 data";
+                    throw ParseError("Serialization error", os.str(), "",  117);
+                }
 
-            writer.WriteValue(memIx, arrIx, std::make_pair(static_cast<const char*>(&bin[0]), static_cast<DotsC_Int32>(bin.size())), false, true);
-        }
+                writer.WriteValue(memIx, arrIx, std::make_pair(static_cast<const char*>(&bin[0]), static_cast<DotsC_Int32>(bin.size())), false, true);
+            }
             break;
 
             //  32 bit floats
@@ -345,20 +345,20 @@ namespace SerializationUtils
         case Steradian32MemberType:
         case Volt32MemberType:
         case Watt32MemberType:
-        {
-            Trim(memberContent.data());
-            try
             {
-                DotsC_Float32 val=classic_string_cast<DotsC_Float32>(memberContent.data());
-                writer.WriteValue(memIx, arrIx, val, false, true);
+                Trim(memberContent.data());
+                try
+                {
+                    DotsC_Float32 val=classic_string_cast<DotsC_Float32>(memberContent.data());
+                    writer.WriteValue(memIx, arrIx, val, false, true);
+                }
+                catch (const boost::bad_lexical_cast&)
+                {
+                    std::ostringstream os;
+                    os<<"Member "<<md->GetName()<<" of type Float32 contains invalid value. Value="<<memberContent.data();
+                    throw ParseError("Serialization error", os.str(), "",  118);
+                }
             }
-            catch (const boost::bad_lexical_cast&)
-            {
-                std::ostringstream os;
-                os<<"Member "<<md->GetName()<<" of type Float32 contains invalid value. Value="<<memberContent.data();
-                throw ParseError("Serialization error", os.str(), "",  118);
-            }
-        }
             break;
 
             //  64 bit floats
@@ -382,20 +382,20 @@ namespace SerializationUtils
         case Steradian64MemberType:
         case Volt64MemberType:
         case Watt64MemberType:
-        {
-            Trim(memberContent.data());
-            try
             {
-                DotsC_Float64 val=classic_string_cast<DotsC_Float64>(memberContent.data());
-                writer.WriteValue(memIx, arrIx, val, false, true);
+                Trim(memberContent.data());
+                try
+                {
+                    DotsC_Float64 val=classic_string_cast<DotsC_Float64>(memberContent.data());
+                    writer.WriteValue(memIx, arrIx, val, false, true);
+                }
+                catch (const boost::bad_lexical_cast&)
+                {
+                    std::ostringstream os;
+                    os<<"Member "<<md->GetName()<<" of type Float64 contains invalid value. Value="<<memberContent.data();
+                    throw ParseError("Serialization error", os.str(), "",  119);
+                }
             }
-            catch (const boost::bad_lexical_cast&)
-            {
-                std::ostringstream os;
-                os<<"Member "<<md->GetName()<<" of type Float64 contains invalid value. Value="<<memberContent.data();
-                throw ParseError("Serialization error", os.str(), "",  119);
-            }
-        }
             break;
         }
     }
@@ -458,69 +458,69 @@ namespace SerializationUtils
         switch(md->GetMemberType())
         {
         case BooleanMemberType:
-        {
-            writer.WriteValue(memIx, arrIx, param->GetBoolValue(parameterIndex), false, true);
-        }
+            {
+                writer.WriteValue(memIx, arrIx, param->GetBoolValue(parameterIndex), false, true);
+            }
             break;
 
         case EnumerationMemberType:
-        {
-            writer.WriteValue(memIx, arrIx, param->GetInt32Value(parameterIndex), false, true);
-        }
+            {
+                writer.WriteValue(memIx, arrIx, param->GetInt32Value(parameterIndex), false, true);
+            }
             break;
 
         case Int32MemberType:
-        {
-            writer.WriteValue(memIx, arrIx, param->GetInt32Value(parameterIndex), false, true);
-        }
+            {
+                writer.WriteValue(memIx, arrIx, param->GetInt32Value(parameterIndex), false, true);
+            }
             break;
 
         case Int64MemberType:
-        {
-            writer.WriteValue(memIx, arrIx, param->GetInt64Value(parameterIndex), false, true);
-        }
+            {
+                writer.WriteValue(memIx, arrIx, param->GetInt64Value(parameterIndex), false, true);
+            }
             break;
 
         case TypeIdMemberType:
-        {
-            writer.WriteValue(memIx, arrIx, param->GetInt64Value(parameterIndex), false, true);
-        }
+            {
+                writer.WriteValue(memIx, arrIx, param->GetInt64Value(parameterIndex), false, true);
+            }
             break;
 
         case InstanceIdMemberType:
         case ChannelIdMemberType:
         case HandlerIdMemberType:
-        {            
-            writer.WriteValue(memIx, arrIx, param->GetHashedValue(parameterIndex), false, true);
-        }
+            {            
+                writer.WriteValue(memIx, arrIx, param->GetHashedValue(parameterIndex), false, true);
+            }
             break;
 
         case EntityIdMemberType:
-        {
-            DotsC_EntityId entId;
-            entId.typeId=param->GetInt64Value(parameterIndex);
-            std::pair<DotsC_TypeId, const char*> instanceId=param->GetHashedValue(parameterIndex);
-            entId.instanceId=instanceId.first;
-            writer.WriteValue(memIx, arrIx, std::make_pair(entId, instanceId.second), false, true);
-        }
+            {
+                DotsC_EntityId entId;
+                entId.typeId=param->GetInt64Value(parameterIndex);
+                std::pair<DotsC_TypeId, const char*> instanceId=param->GetHashedValue(parameterIndex);
+                entId.instanceId=instanceId.first;
+                writer.WriteValue(memIx, arrIx, std::make_pair(entId, instanceId.second), false, true);
+            }
             break;
 
         case StringMemberType:
-        {
-            writer.WriteValue(memIx, arrIx, param->GetStringValue(parameterIndex), false, true);
-        }
+            {
+                writer.WriteValue(memIx, arrIx, param->GetStringValue(parameterIndex), false, true);
+            }
             break;
 
         case ObjectMemberType:
-        {
-            //not supported
-        }
+            {
+                //not supported
+            }
             break;
 
         case BinaryMemberType:
-        {
-            writer.WriteValue(memIx, arrIx, param->GetBinaryValue(parameterIndex), false, true);
-        }
+            {
+                writer.WriteValue(memIx, arrIx, param->GetBinaryValue(parameterIndex), false, true);
+            }
             break;
 
             //  32 bit floats
@@ -544,9 +544,9 @@ namespace SerializationUtils
         case Steradian32MemberType:
         case Volt32MemberType:
         case Watt32MemberType:
-        {
-            writer.WriteValue(memIx, arrIx, param->GetFloat32Value(parameterIndex), false, true);
-        }
+            {
+                writer.WriteValue(memIx, arrIx, param->GetFloat32Value(parameterIndex), false, true);
+            }
             break;
 
             //  64 bit floats
@@ -570,9 +570,9 @@ namespace SerializationUtils
         case Steradian64MemberType:
         case Volt64MemberType:
         case Watt64MemberType:
-        {
-            writer.WriteValue(memIx, arrIx, param->GetFloat64Value(parameterIndex), false, true);
-        }
+            {
+                writer.WriteValue(memIx, arrIx, param->GetFloat64Value(parameterIndex), false, true);
+            }
             break;
         }
     }

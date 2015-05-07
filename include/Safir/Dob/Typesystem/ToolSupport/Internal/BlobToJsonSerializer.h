@@ -102,112 +102,112 @@ namespace Internal
                 switch (md->GetCollectionType())
                 {
                 case SingleValueCollectionType:
-                {
-                    bool isNull=true, isChanged=true;
-                    reader.ReadStatus(memberIx, 0, isNull, isChanged);
-                    if (!isNull)
-                    {
-                        os<<", ";
-                        WriteMemberName(md->GetName(), os);
-                        SerializeMember(reader, md, memberIx, 0, os);
-                    }
-                }
-                    break;
-                case ArrayCollectionType:
-                {
-                    std::ostringstream arrayValues;
-                    arrayValues<<", ";
-                    WriteMemberName(md->GetName(), arrayValues);
-                    arrayValues<<"[";
-                    bool nonNullValueInserted=false;
-                    int accumulatedNulls=0;
-                    bool hasInsertedValues=false;
-                    for (DotsC_Int32 arrIx=0; arrIx<md->GetArraySize(); ++arrIx)
                     {
                         bool isNull=true, isChanged=true;
-                        reader.ReadStatus(memberIx, arrIx, isNull, isChanged);
-                        if (isNull)
+                        reader.ReadStatus(memberIx, 0, isNull, isChanged);
+                        if (!isNull)
                         {
-                            //we wait to insert null until we know we have to because an value exists after.
-                            //This way we avoid lots of null at the end of an array
-                            ++accumulatedNulls;
-                        }
-                        else
-                        {
-                            if (hasInsertedValues)
-                            {
-                                arrayValues<<", ";
-                            }
-
-                            for (int nullCount=0; nullCount<accumulatedNulls; ++nullCount)
-                            {
-                                arrayValues<<"null, ";
-                            }
-                            accumulatedNulls=0;
-                            nonNullValueInserted=true;
-
-                            SerializeMember(reader, md, memberIx, arrIx, arrayValues);
-                            hasInsertedValues=true;
+                            os<<", ";
+                            WriteMemberName(md->GetName(), os);
+                            SerializeMember(reader, md, memberIx, 0, os);
                         }
                     }
-                    arrayValues<<"]";
-
-                    if (nonNullValueInserted) //only add array element if there are non-null values
+                    break;
+                case ArrayCollectionType:
                     {
-                        os<<arrayValues.str();
+                        std::ostringstream arrayValues;
+                        arrayValues<<", ";
+                        WriteMemberName(md->GetName(), arrayValues);
+                        arrayValues<<"[";
+                        bool nonNullValueInserted=false;
+                        int accumulatedNulls=0;
+                        bool hasInsertedValues=false;
+                        for (DotsC_Int32 arrIx=0; arrIx<md->GetArraySize(); ++arrIx)
+                        {
+                            bool isNull=true, isChanged=true;
+                            reader.ReadStatus(memberIx, arrIx, isNull, isChanged);
+                            if (isNull)
+                            {
+                                //we wait to insert null until we know we have to because an value exists after.
+                                //This way we avoid lots of null at the end of an array
+                                ++accumulatedNulls;
+                            }
+                            else
+                            {
+                                if (hasInsertedValues)
+                                {
+                                    arrayValues<<", ";
+                                }
+
+                                for (int nullCount=0; nullCount<accumulatedNulls; ++nullCount)
+                                {
+                                    arrayValues<<"null, ";
+                                }
+                                accumulatedNulls=0;
+                                nonNullValueInserted=true;
+
+                                SerializeMember(reader, md, memberIx, arrIx, arrayValues);
+                                hasInsertedValues=true;
+                            }
+                        }
+                        arrayValues<<"]";
+
+                        if (nonNullValueInserted) //only add array element if there are non-null values
+                        {
+                            os<<arrayValues.str();
+                        }
                     }
-                }
                     break;
                 case SequenceCollectionType:
-                {
-                    int numberOfValues=reader.NumberOfValues(memberIx);
-                    if (numberOfValues>0)
                     {
-                        os<<", ";
-                        WriteMemberName(md->GetName(), os);
-                        os<<"[";
-
-                        for (DotsC_Int32 valueIndex=0; valueIndex<numberOfValues; ++valueIndex)
+                        int numberOfValues=reader.NumberOfValues(memberIx);
+                        if (numberOfValues>0)
                         {
-                            if (valueIndex>0)
-                            {
-                                os<<", ";
-                            }
-                            SerializeMember(reader, md, memberIx, valueIndex, os);
-                        }
+                            os<<", ";
+                            WriteMemberName(md->GetName(), os);
+                            os<<"[";
 
-                        os<<"]";
+                            for (DotsC_Int32 valueIndex=0; valueIndex<numberOfValues; ++valueIndex)
+                            {
+                                if (valueIndex>0)
+                                {
+                                    os<<", ";
+                                }
+                                SerializeMember(reader, md, memberIx, valueIndex, os);
+                            }
+
+                            os<<"]";
+                        }
                     }
-                }
                     break;
                 case DictionaryCollectionType:
-                {
-                    int numberOfValues=reader.NumberOfValues(memberIx);
-                    if (numberOfValues>0)
                     {
-                        os<<", ";
-                        WriteMemberName(md->GetName(), os);
-                        os<<"[";
-
-                        for (DotsC_Int32 valueIndex=0; valueIndex<numberOfValues; ++valueIndex)
+                        int numberOfValues=reader.NumberOfValues(memberIx);
+                        if (numberOfValues>0)
                         {
-                            if (valueIndex>0)
-                            {
-                                os<<", ";
-                            }
-                            os<<"{";
-                            WriteMemberName("key", os);
-                            SerializeKey(reader, md, memberIx, valueIndex, os);
                             os<<", ";
-                            WriteMemberName("value", os);
-                            if (!SerializeMember(reader, md, memberIx, valueIndex, os))
-                                os<<"null";
-                            os<<"}";
-                        }
+                            WriteMemberName(md->GetName(), os);
+                            os<<"[";
 
-                        os<<"]";
+                            for (DotsC_Int32 valueIndex=0; valueIndex<numberOfValues; ++valueIndex)
+                            {
+                                if (valueIndex>0)
+                                {
+                                    os<<", ";
+                                }
+                                os<<"{";
+                                WriteMemberName("key", os);
+                                SerializeKey(reader, md, memberIx, valueIndex, os);
+                                os<<", ";
+                                WriteMemberName("value", os);
+                                if (!SerializeMember(reader, md, memberIx, valueIndex, os))
+                                    os<<"null";
+                                os<<"}";
+                            }
+
+                            os<<"]";
+                        }
                     }
-                }
                     break;
                 }
             }
@@ -263,45 +263,45 @@ namespace Internal
             switch(md->GetKeyType())
             {
             case Int32MemberType:
-            {
-                os<<reader.template ReadKey<DotsC_Int32>(memberIndex, valueIndex);
-            }
+                {
+                    os<<reader.template ReadKey<DotsC_Int32>(memberIndex, valueIndex);
+                }
                 break;
             case Int64MemberType:
-            {
-                os<<reader.template ReadKey<DotsC_Int64>(memberIndex, valueIndex);
-            }
+                {
+                    os<<reader.template ReadKey<DotsC_Int64>(memberIndex, valueIndex);
+                }
                 break;
             case EnumerationMemberType:
-            {
-                const char* enumVal=m_repository->GetEnum(md->GetKeyTypeId())->GetValueName(reader.template ReadKey<DotsC_EnumerationValue>(memberIndex, valueIndex));
-                os<<SAFIR_JSON_QUOTE(enumVal);
-            }
+                {
+                    const char* enumVal=m_repository->GetEnum(md->GetKeyTypeId())->GetValueName(reader.template ReadKey<DotsC_EnumerationValue>(memberIndex, valueIndex));
+                    os<<SAFIR_JSON_QUOTE(enumVal);
+                }
                 break;
             case EntityIdMemberType:
-            {
-                std::pair<DotsC_EntityId, const char*> eid=reader.template ReadKey< std::pair<DotsC_EntityId, const char*> >(memberIndex, valueIndex);
-                WriteEntityId(eid, os);
-            }
+                {
+                    std::pair<DotsC_EntityId, const char*> eid=reader.template ReadKey< std::pair<DotsC_EntityId, const char*> >(memberIndex, valueIndex);
+                    WriteEntityId(eid, os);
+                }
                 break;
             case TypeIdMemberType:
-            {
-                os<<SAFIR_JSON_QUOTE(TypeUtilities::GetTypeName(m_repository, reader.template ReadKey<DotsC_TypeId>(memberIndex, valueIndex)));
-            }
+                {
+                    os<<SAFIR_JSON_QUOTE(TypeUtilities::GetTypeName(m_repository, reader.template ReadKey<DotsC_TypeId>(memberIndex, valueIndex)));
+                }
                 break;
             case InstanceIdMemberType:
             case ChannelIdMemberType:
             case HandlerIdMemberType:
-            {
-                std::pair<DotsC_Int64, const char*> hash=reader.template ReadKey< std::pair<DotsC_Int64, const char*> >(memberIndex, valueIndex);
-                WriteHash(hash, os);
-            }
+                {
+                    std::pair<DotsC_Int64, const char*> hash=reader.template ReadKey< std::pair<DotsC_Int64, const char*> >(memberIndex, valueIndex);
+                    WriteHash(hash, os);
+                }
                 break;
 
             case StringMemberType:
-            {
-                WriteString(reader.template ReadKey<const char*>(memberIndex, valueIndex), os);
-            }
+                {
+                    WriteString(reader.template ReadKey<const char*>(memberIndex, valueIndex), os);
+                }
                 break;
 
             default:
@@ -322,127 +322,127 @@ namespace Internal
             switch(md->GetMemberType())
             {
             case BooleanMemberType:
-            {
-                bool val=true;
-                reader.ReadValue(memberIndex, arrayIndex, val, isNull, isChanged);
-                if (!isNull)
                 {
-                    os<<(val ? "true" : "false");
-                    return true;
+                    bool val=true;
+                    reader.ReadValue(memberIndex, arrayIndex, val, isNull, isChanged);
+                    if (!isNull)
+                    {
+                        os<<(val ? "true" : "false");
+                        return true;
+                    }
                 }
-            }
                 break;
 
             case EnumerationMemberType:
-            {
-                DotsC_EnumerationValue val=0;
-                reader.ReadValue(memberIndex, arrayIndex, val, isNull, isChanged);
-                if (!isNull)
                 {
-                    const char* enumVal=m_repository->GetEnum(md->GetTypeId())->GetValueName(val);
-                    os<<SAFIR_JSON_QUOTE(enumVal);
-                    return true;
+                    DotsC_EnumerationValue val=0;
+                    reader.ReadValue(memberIndex, arrayIndex, val, isNull, isChanged);
+                    if (!isNull)
+                    {
+                        const char* enumVal=m_repository->GetEnum(md->GetTypeId())->GetValueName(val);
+                        os<<SAFIR_JSON_QUOTE(enumVal);
+                        return true;
+                    }
                 }
-            }
                 break;
 
             case Int32MemberType:
-            {
-                DotsC_Int32 val=0;
-                reader.ReadValue(memberIndex, arrayIndex, val, isNull, isChanged);
-                if (!isNull)
                 {
-                    os<<val;
-                    return true;
+                    DotsC_Int32 val=0;
+                    reader.ReadValue(memberIndex, arrayIndex, val, isNull, isChanged);
+                    if (!isNull)
+                    {
+                        os<<val;
+                        return true;
+                    }
                 }
-            }
                 break;
 
             case Int64MemberType:
-            {
-                DotsC_Int64 val=0;
-                reader.ReadValue(memberIndex, arrayIndex, val, isNull, isChanged);
-                if (!isNull)
                 {
-                    os<<val;
-                    return true;
+                    DotsC_Int64 val=0;
+                    reader.ReadValue(memberIndex, arrayIndex, val, isNull, isChanged);
+                    if (!isNull)
+                    {
+                        os<<val;
+                        return true;
+                    }
                 }
-            }
                 break;
 
             case TypeIdMemberType:
-            {
-                DotsC_Int64 val=0;
-                reader.ReadValue(memberIndex, arrayIndex, val, isNull, isChanged);
-                if (!isNull)
                 {
-                    os<<SAFIR_JSON_QUOTE(TypeUtilities::GetTypeName(m_repository, val));
-                    return true;
+                    DotsC_Int64 val=0;
+                    reader.ReadValue(memberIndex, arrayIndex, val, isNull, isChanged);
+                    if (!isNull)
+                    {
+                        os<<SAFIR_JSON_QUOTE(TypeUtilities::GetTypeName(m_repository, val));
+                        return true;
+                    }
                 }
-            }
                 break;
 
             case InstanceIdMemberType:
             case ChannelIdMemberType:
             case HandlerIdMemberType:
-            {
-                std::pair<DotsC_Int64, const char*> val;
-                reader.ReadValue(memberIndex, arrayIndex, val, isNull, isChanged);
-                if (!isNull)
                 {
-                    WriteHash(val, os);
-                    return true;
+                    std::pair<DotsC_Int64, const char*> val;
+                    reader.ReadValue(memberIndex, arrayIndex, val, isNull, isChanged);
+                    if (!isNull)
+                    {
+                        WriteHash(val, os);
+                        return true;
+                    }
                 }
-            }
                 break;
 
             case EntityIdMemberType:
-            {
-                std::pair<DotsC_EntityId, const char*> val;
-                reader.ReadValue(memberIndex, arrayIndex, val, isNull, isChanged);
-                if (!isNull)
                 {
-                    WriteEntityId(val, os);
-                    return true;
+                    std::pair<DotsC_EntityId, const char*> val;
+                    reader.ReadValue(memberIndex, arrayIndex, val, isNull, isChanged);
+                    if (!isNull)
+                    {
+                        WriteEntityId(val, os);
+                        return true;
+                    }
                 }
-            }
                 break;
 
             case StringMemberType:
-            {
-                const char* val=NULL;
-                reader.ReadValue(memberIndex, arrayIndex, val, isNull, isChanged);
-                if (!isNull)
                 {
-                    WriteString(val, os);
-                    return true;
+                    const char* val=NULL;
+                    reader.ReadValue(memberIndex, arrayIndex, val, isNull, isChanged);
+                    if (!isNull)
+                    {
+                        WriteString(val, os);
+                        return true;
+                    }
                 }
-            }
                 break;
 
             case ObjectMemberType:
-            {
-                std::pair<const char*, DotsC_Int32> val; //blob and size
-                reader.ReadValue(memberIndex, arrayIndex, val, isNull, isChanged);
-                if (!isNull)
                 {
-                    SerializeMembers(val.first, os);
-                    return true;
+                    std::pair<const char*, DotsC_Int32> val; //blob and size
+                    reader.ReadValue(memberIndex, arrayIndex, val, isNull, isChanged);
+                    if (!isNull)
+                    {
+                        SerializeMembers(val.first, os);
+                        return true;
+                    }
                 }
-            }
                 break;
 
             case BinaryMemberType:
-            {
-                std::pair<const char*, DotsC_Int32> val; //blob and size
-                reader.ReadValue(memberIndex, arrayIndex, val, isNull, isChanged);
-                if (!isNull)
                 {
-                    std::string bin(val.first, static_cast<size_t>(val.second));
-                    os<<SAFIR_JSON_QUOTE(SerializationUtils::ToBase64(bin));
-                    return true;
+                    std::pair<const char*, DotsC_Int32> val; //blob and size
+                    reader.ReadValue(memberIndex, arrayIndex, val, isNull, isChanged);
+                    if (!isNull)
+                    {
+                        std::string bin(val.first, static_cast<size_t>(val.second));
+                        os<<SAFIR_JSON_QUOTE(SerializationUtils::ToBase64(bin));
+                        return true;
+                    }
                 }
-            }
                 break;
 
                 //  32 bit floats
@@ -466,15 +466,15 @@ namespace Internal
             case Steradian32MemberType:
             case Volt32MemberType:
             case Watt32MemberType:
-            {
-                DotsC_Float32 val=0;
-                reader.ReadValue(memberIndex, arrayIndex, val, isNull, isChanged);
-                if (!isNull)
                 {
-                    os<<classic_string_cast<std::string>(val);
-                    return true;
+                    DotsC_Float32 val=0;
+                    reader.ReadValue(memberIndex, arrayIndex, val, isNull, isChanged);
+                    if (!isNull)
+                    {
+                        os<<classic_string_cast<std::string>(val);
+                        return true;
+                    }
                 }
-            }
                 break;
 
                 //  64 bit floats
@@ -498,15 +498,15 @@ namespace Internal
             case Steradian64MemberType:
             case Volt64MemberType:
             case Watt64MemberType:
-            {
-                DotsC_Float64 val=0;
-                reader.ReadValue(memberIndex, arrayIndex, val, isNull, isChanged);
-                if (!isNull)
                 {
-                    os<<classic_string_cast<std::string>(val);
-                    return true;
+                    DotsC_Float64 val=0;
+                    reader.ReadValue(memberIndex, arrayIndex, val, isNull, isChanged);
+                    if (!isNull)
+                    {
+                        os<<classic_string_cast<std::string>(val);
+                        return true;
+                    }
                 }
-            }
                 break;
             }
 

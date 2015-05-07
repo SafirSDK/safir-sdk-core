@@ -29,7 +29,7 @@ import com.saabgroup.safir.dob.typesystem.Float64SequenceContainer;
 public class MeterPerSecondSquaredSequenceContainer
     extends Float64SequenceContainer {
 
-	public MeterPerSecondSquaredSequenceContainer() {
-		super();
-	}
+    public MeterPerSecondSquaredSequenceContainer() {
+        super();
+    }
 }

@@ -1,7 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2006-2013 (http://safir.sourceforge.net)
-* 
+*
 * Created by: Lars Hagström / stlrha
 *
 *******************************************************************************
@@ -1347,7 +1347,7 @@ namespace Typesystem
         case MappedToParameter:
             {
                 DotsC_EntityId eid;
-                const char * instanceIdStr;                
+                const char * instanceIdStr;
                 DotsC_ParameterIndex paramIndex;
                 DotsC_Int32 valueIndex;
                 DotsC_GetPropertyParameterReference(object->GetTypeId(), propertyId, member, index, paramIndex, valueIndex);

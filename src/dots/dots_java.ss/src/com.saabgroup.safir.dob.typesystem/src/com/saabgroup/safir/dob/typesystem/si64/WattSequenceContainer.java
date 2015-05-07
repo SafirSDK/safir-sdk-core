@@ -29,15 +29,15 @@ import com.saabgroup.safir.dob.typesystem.Float64SequenceContainer;
 public class WattSequenceContainer
 extends Float64SequenceContainer {
 
-	public WattSequenceContainer() {
-		super();
-	}
-	
-	public WattSequenceContainer(WattSequenceContainer other) {
-		super(other);
-	}
-	
-	/**
+    public WattSequenceContainer() {
+        super();
+    }
+    
+    public WattSequenceContainer(WattSequenceContainer other) {
+        super(other);
+    }
+    
+    /**
      * @see com.saabgroup.safir.dob.typesystem.ValueContainer#clone()
      */
     @Override

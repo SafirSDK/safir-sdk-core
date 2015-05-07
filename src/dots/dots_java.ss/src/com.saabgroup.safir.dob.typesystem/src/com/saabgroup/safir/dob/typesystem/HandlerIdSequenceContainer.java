@@ -28,15 +28,15 @@ package com.saabgroup.safir.dob.typesystem;
 public class HandlerIdSequenceContainer
 extends ValueSequenceContainer<HandlerId>  {
 
-	public HandlerIdSequenceContainer() {
-		super();
-	}
-	
-	public HandlerIdSequenceContainer(HandlerIdSequenceContainer other) {
-		super(other);
-	}
-	
-	/**
+    public HandlerIdSequenceContainer() {
+        super();
+    }
+    
+    public HandlerIdSequenceContainer(HandlerIdSequenceContainer other) {
+        super(other);
+    }
+    
+    /**
      * @see com.saabgroup.safir.dob.typesystem.ValueContainer#clone()
      */
     @Override

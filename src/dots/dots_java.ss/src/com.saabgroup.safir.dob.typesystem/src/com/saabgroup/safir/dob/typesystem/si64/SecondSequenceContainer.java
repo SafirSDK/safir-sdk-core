@@ -29,15 +29,15 @@ import com.saabgroup.safir.dob.typesystem.Float64SequenceContainer;
 public class SecondSequenceContainer
 extends Float64SequenceContainer {
 
-	public SecondSequenceContainer() {
-		super();
-	}
-	
-	public SecondSequenceContainer(SecondSequenceContainer other) {
-		super(other);
-	}
-	
-	/**
+    public SecondSequenceContainer() {
+        super();
+    }
+    
+    public SecondSequenceContainer(SecondSequenceContainer other) {
+        super(other);
+    }
+    
+    /**
      * @see com.saabgroup.safir.dob.typesystem.ValueContainer#clone()
      */
     @Override

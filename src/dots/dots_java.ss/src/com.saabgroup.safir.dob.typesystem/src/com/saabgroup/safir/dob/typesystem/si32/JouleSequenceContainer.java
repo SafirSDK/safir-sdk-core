@@ -29,15 +29,15 @@ import com.saabgroup.safir.dob.typesystem.Float32SequenceContainer;
 public class JouleSequenceContainer
 extends Float32SequenceContainer {
 
-	public JouleSequenceContainer() {
-		super();
-	}
-	
-	public JouleSequenceContainer(JouleSequenceContainer other) {
-		super(other);
-	}
-	
-	/**
+    public JouleSequenceContainer() {
+        super();
+    }
+    
+    public JouleSequenceContainer(JouleSequenceContainer other) {
+        super(other);
+    }
+    
+    /**
      * @see com.saabgroup.safir.dob.typesystem.ValueContainer#clone()
      */
     @Override

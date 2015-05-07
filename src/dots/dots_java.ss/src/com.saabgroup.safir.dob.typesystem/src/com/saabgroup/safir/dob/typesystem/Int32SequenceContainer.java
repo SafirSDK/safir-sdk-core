@@ -29,6 +29,6 @@ public class Int32SequenceContainer
 extends ValueSequenceContainer<Integer> {
 
     public Int32SequenceContainer() {
-		super();
-	}
+        super();
+    }
 }

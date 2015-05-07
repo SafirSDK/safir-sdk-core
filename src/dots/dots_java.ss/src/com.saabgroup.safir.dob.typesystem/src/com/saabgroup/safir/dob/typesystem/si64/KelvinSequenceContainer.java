@@ -29,15 +29,15 @@ import com.saabgroup.safir.dob.typesystem.Float64SequenceContainer;
 public class KelvinSequenceContainer
 extends Float64SequenceContainer {
 
-	public KelvinSequenceContainer() {
-		super();
-	}
-	
-	public KelvinSequenceContainer(KelvinSequenceContainer other) {
-		super(other);
-	}
-	
-	/**
+    public KelvinSequenceContainer() {
+        super();
+    }
+    
+    public KelvinSequenceContainer(KelvinSequenceContainer other) {
+        super(other);
+    }
+    
+    /**
      * @see com.saabgroup.safir.dob.typesystem.ValueContainer#clone()
      */
     @Override

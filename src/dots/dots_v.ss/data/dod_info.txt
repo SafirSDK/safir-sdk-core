@@ -3,12 +3,12 @@ SECTION: One of "Parameters", "Parent" and "Code"
 Parameters
 ==========
 The parameter section contains information for Dots_V. There are some fix parameters:
-	File_Extension:"cs"
-	Filename_Separator:"."
-	Output_Directory:"dotnet\"
-	Namespace_Separator:"."
-	Object_Type:"object"
-	Index_Type:"int32"
+    File_Extension:"cs"
+    Filename_Separator:"."
+    Output_Directory:"dotnet\"
+    Namespace_Separator:"."
+    Object_Type:"object"
+    Index_Type:"int32"
 
 Types are defined like this:
     Type:<dou>:<set/get>:"<generated>"

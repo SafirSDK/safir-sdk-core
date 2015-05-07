@@ -28,7 +28,7 @@ package com.saabgroup.safir.dob.typesystem;
 public class GenericObjectSequenceContainer<T extends com.saabgroup.safir.dob.typesystem.Object>
     extends SequenceContainer<T>  {
 
-	public GenericObjectSequenceContainer() {
-		super();
-	}
+    public GenericObjectSequenceContainer() {
+        super();
+    }
 }

@@ -194,27 +194,27 @@ namespace Internal
             switch (pdInfo)
             {
             case PoolDistributionInfo::PdRequest:
-            {
-                lllog(5)<<"PoolHandler: got PdRequest from "<<fromNodeId<<std::endl;
-                //start new pool distribution to node
-                m_poolDistributor.AddPoolDistribution(fromNodeId, fromNodeType);
-            }
+                {
+                    lllog(5)<<"PoolHandler: got PdRequest from "<<fromNodeId<<std::endl;
+                    //start new pool distribution to node
+                    m_poolDistributor.AddPoolDistribution(fromNodeId, fromNodeType);
+                }
                 break;
 
             case PoolDistributionInfo::PdComplete:
-            {
-                lllog(5)<<"PoolHandler: got PdComplete from "<<fromNodeId<<std::endl;
-                ++m_numReceivedPdComplete;
-                m_persistHandler.SetPersistentDataReady(); //persistens is ready as soon as we have received one pdComplete
-                m_poolDistributionRequests.PoolDistributionFinished(fromNodeId);
-            }
+                {
+                    lllog(5)<<"PoolHandler: got PdComplete from "<<fromNodeId<<std::endl;
+                    ++m_numReceivedPdComplete;
+                    m_persistHandler.SetPersistentDataReady(); //persistens is ready as soon as we have received one pdComplete
+                    m_poolDistributionRequests.PoolDistributionFinished(fromNodeId);
+                }
                 break;
 
             case PoolDistributionInfo::PdHaveNothing:
-            {
-                lllog(5)<<"PoolHandler: got PdHaveNothing from "<<fromNodeId<<std::endl;
-                m_poolDistributionRequests.PoolDistributionFinished(fromNodeId);
-            }
+                {
+                    lllog(5)<<"PoolHandler: got PdHaveNothing from "<<fromNodeId<<std::endl;
+                    m_poolDistributionRequests.PoolDistributionFinished(fromNodeId);
+                }
                 break;
 
             default:
@@ -301,51 +301,51 @@ namespace Internal
             switch (state.GetEntityStateKind())
             {
             case DistributionData::Ghost:
-            {
-                ENSURE(state.GetSenderId().m_id == -1, << "Ghost states are expected to have ConnectionId == -1! Ghost for "
-                       << state.GetEntityId());
-
-                EntityTypes::Instance().RemoteSetRealEntityState(ConnectionPtr(), // Null connection for ghosts
-                                                                 state);
-            }
-                break;
-            case DistributionData::Injection:
-            {
-                ENSURE(state.GetSenderId().m_id == -1, << "Injection states are expected to have ConnectionId == -1! Injection for "
-                       << state.GetEntityId());
-                EntityTypes::Instance().RemoteSetInjectionEntityState(state);
-            }
-                break;
-            case DistributionData::Real:
-            {
-                lllog(1)<<"OnEntityState - "<<state.GetEntityId().ToString()<<", handler "<<state.GetHandlerId()<<std::endl;
-                if (state.IsCreated()) //handle created and delete states differently
                 {
-                    const ConnectionId senderId=state.GetSenderId();
-
-                    ENSURE(senderId.m_id != -1, << "Entity states are expected to have ConnectionId != -1! State for "
+                    ENSURE(state.GetSenderId().m_id == -1, << "Ghost states are expected to have ConnectionId == -1! Ghost for "
                            << state.GetEntityId());
 
-                    const ConnectionPtr connection = Connections::Instance().GetConnection(senderId, std::nothrow);
-                    if (connection!=nullptr)
+                    EntityTypes::Instance().RemoteSetRealEntityState(ConnectionPtr(), // Null connection for ghosts
+                                                                     state);
+                }
+                break;
+            case DistributionData::Injection:
+                {
+                    ENSURE(state.GetSenderId().m_id == -1, << "Injection states are expected to have ConnectionId == -1! Injection for "
+                           << state.GetEntityId());
+                    EntityTypes::Instance().RemoteSetInjectionEntityState(state);
+                }
+                break;
+            case DistributionData::Real:
+                {
+                    lllog(1)<<"OnEntityState - "<<state.GetEntityId().ToString()<<", handler "<<state.GetHandlerId()<<std::endl;
+                    if (state.IsCreated()) //handle created and delete states differently
                     {
-                        EntityTypes::Instance().RemoteSetRealEntityState(connection, state);
+                        const ConnectionId senderId=state.GetSenderId();
+
+                        ENSURE(senderId.m_id != -1, << "Entity states are expected to have ConnectionId != -1! State for "
+                               << state.GetEntityId());
+
+                        const ConnectionPtr connection = Connections::Instance().GetConnection(senderId, std::nothrow);
+                        if (connection!=nullptr)
+                        {
+                            EntityTypes::Instance().RemoteSetRealEntityState(connection, state);
+                        }
+                        else
+                        {
+                            //auto name=Safir::Dob::Typesystem::Operations::GetName(state.GetTypeId());
+                            //throw std::logic_error(Safir::Dob::Typesystem::Utilities::ToUtf8(name)+", unknown con");
+                            //throw std::logic_error("Received acked entity with an unknown connection ");
+                        }
                     }
                     else
                     {
-                        //auto name=Safir::Dob::Typesystem::Operations::GetName(state.GetTypeId());
-                        //throw std::logic_error(Safir::Dob::Typesystem::Utilities::ToUtf8(name)+", unknown con");
-                        //throw std::logic_error("Received acked entity with an unknown connection ");
+                        ENSURE(state.GetSenderId().m_id == -1, << "Delete states are expected to have ConnectionId == -1! Delete for "
+                               << state.GetEntityId());
+
+                        EntityTypes::Instance().RemoteSetDeleteEntityState(state);
                     }
                 }
-                else
-                {
-                    ENSURE(state.GetSenderId().m_id == -1, << "Delete states are expected to have ConnectionId == -1! Delete for "
-                           << state.GetEntityId());
-
-                    EntityTypes::Instance().RemoteSetDeleteEntityState(state);
-                }
-            }
                 break;
             }
         });

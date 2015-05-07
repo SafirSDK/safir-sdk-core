@@ -27,20 +27,20 @@ package com.saabgroup.safir.dob.typesystem;
 
 public class ValueSequenceContainer<T>
 extends SequenceContainer<T>  {
-	
-	public ValueSequenceContainer() {
-		super();
-	}
-	
-	public ValueSequenceContainer(ValueSequenceContainer<T> other) {
-		super();
-		m_isChanged=other.m_isChanged;
-		for (T v : other.m_values) {
-			m_values.add(v);
-		}
-	}
-	
-	/**
+    
+    public ValueSequenceContainer() {
+        super();
+    }
+    
+    public ValueSequenceContainer(ValueSequenceContainer<T> other) {
+        super();
+        m_isChanged=other.m_isChanged;
+        for (T v : other.m_values) {
+            m_values.add(v);
+        }
+    }
+    
+    /**
      * @see com.saabgroup.safir.dob.typesystem.ValueContainer#clone()
      */
     @Override

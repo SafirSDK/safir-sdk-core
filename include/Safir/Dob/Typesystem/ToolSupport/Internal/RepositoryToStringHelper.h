@@ -143,46 +143,46 @@ namespace Internal
         switch(c->GetKeyType())
         {
         case Int32MemberType:
-        {
-            os<<c->GetInt32Key(index);
-        }
+            {
+                os<<c->GetInt32Key(index);
+            }
             break;
         case Int64MemberType:
-        {
-            os<<c->GetInt64Key(index);
-        }
+            {
+                os<<c->GetInt64Key(index);
+            }
             break;
 
         case EntityIdMemberType:
-        {
-            TypeIdToString(c->GetInt64Key(index), os);
-            os<<" : ";
-            HashedValToString(c->GetHashedKey(index), os);
-        }
+            {
+                TypeIdToString(c->GetInt64Key(index), os);
+                os<<" : ";
+                HashedValToString(c->GetHashedKey(index), os);
+            }
             break;
         case TypeIdMemberType:
-        {
-            TypeIdToString(c->GetInt64Key(index), os);
-        }
+            {
+                TypeIdToString(c->GetInt64Key(index), os);
+            }
             break;
         case InstanceIdMemberType:
         case ChannelIdMemberType:
         case HandlerIdMemberType:
-        {
-            HashedValToString(c->GetHashedKey(index), os);
-        }
+            {
+                HashedValToString(c->GetHashedKey(index), os);
+            }
             break;
 
         case StringMemberType:
-        {
-            os<<c->GetStringKey(index);
-        }
+            {
+                os<<c->GetStringKey(index);
+            }
             break;
 
         case EnumerationMemberType:
-        {
-            os<<m_rep->GetEnum(c->GetKeyTypeId())->GetValueName(c->GetInt32Key(index));
-        }
+            {
+                os<<m_rep->GetEnum(c->GetKeyTypeId())->GetValueName(c->GetInt32Key(index));
+            }
             break;
 
         default:
@@ -196,73 +196,73 @@ namespace Internal
         switch(c->GetMemberType())
         {
         case BooleanMemberType:
-        {
-            os<<std::boolalpha<<c->GetBoolValue(i)<<std::dec;
+            {
+                os<<std::boolalpha<<c->GetBoolValue(i)<<std::dec;
 
-        }
+            }
             break;
 
         case Int32MemberType:
-        {
-            os<<c->GetInt32Value(i);
-        }
+            {
+                os<<c->GetInt32Value(i);
+            }
             break;
         case Int64MemberType:
-        {
-            os<<c->GetInt64Value(i);
-        }
+            {
+                os<<c->GetInt64Value(i);
+            }
             break;
 
         case EntityIdMemberType:
-        {
-            TypeIdToString(c->GetInt64Value(i), os);
-            os<<" : ";
-            HashedValToString(c->GetHashedValue(i), os);
-        }
+            {
+                TypeIdToString(c->GetInt64Value(i), os);
+                os<<" : ";
+                HashedValToString(c->GetHashedValue(i), os);
+            }
             break;
         case TypeIdMemberType:
-        {
-            TypeIdToString(c->GetInt64Value(i), os);
-        }
+            {
+                TypeIdToString(c->GetInt64Value(i), os);
+            }
             break;
         case InstanceIdMemberType:
         case ChannelIdMemberType:
         case HandlerIdMemberType:
-        {
-            HashedValToString(c->GetHashedValue(i), os);
-        }
+            {
+                HashedValToString(c->GetHashedValue(i), os);
+            }
             break;
 
         case StringMemberType:
-        {
-            os<<c->GetStringValue(i)<<std::endl;
-        }
+            {
+                os<<c->GetStringValue(i)<<std::endl;
+            }
             break;
 
         case ObjectMemberType:
-        {
-            const char* objParam=c->GetObjectValue(i).first;
-            std::ostringstream json;
-            (BlobToJsonSerializer<RepositoryType>(m_rep))(objParam, json);
-            os<<std::endl<<json.str();
-        }
+            {
+                const char* objParam=c->GetObjectValue(i).first;
+                std::ostringstream json;
+                (BlobToJsonSerializer<RepositoryType>(m_rep))(objParam, json);
+                os<<std::endl<<json.str();
+            }
             break;
 
         case EnumerationMemberType:
-        {
-            os<<m_rep->GetEnum(c->GetTypeId())->GetValueName(c->GetInt32Value(i));
-        }
+            {
+                os<<m_rep->GetEnum(c->GetTypeId())->GetValueName(c->GetInt32Value(i));
+            }
             break;
 
         case BinaryMemberType:
-        {
-            std::pair<const char*, size_t> bin=c->GetBinaryValue(i);
-            if (bin.second>0)
             {
-                std::string tmp(bin.first, bin.first+bin.second);
-                os<<Safir::Dob::Typesystem::ToolSupport::Internal::SerializationUtils::ToBase64(tmp);
+                std::pair<const char*, size_t> bin=c->GetBinaryValue(i);
+                if (bin.second>0)
+                {
+                    std::string tmp(bin.first, bin.first+bin.second);
+                    os<<Safir::Dob::Typesystem::ToolSupport::Internal::SerializationUtils::ToBase64(tmp);
+                }
             }
-        }
             break;
 
         case Float32MemberType:
@@ -285,9 +285,9 @@ namespace Internal
         case Steradian32MemberType:
         case Volt32MemberType:
         case Watt32MemberType:
-        {
-            os<<c->GetFloat32Value(i);
-        }
+            {
+                os<<c->GetFloat32Value(i);
+            }
             break;
 
         case Float64MemberType:
@@ -310,9 +310,9 @@ namespace Internal
         case Steradian64MemberType:
         case Volt64MemberType:
         case Watt64MemberType:
-        {
-            os<<c->GetFloat64Value(i);
-        }
+            {
+                os<<c->GetFloat64Value(i);
+            }
             break;
         }
 
@@ -491,50 +491,50 @@ namespace Internal
         switch (c->GetCollectionType())
         {
         case SingleValueCollectionType:
-        {
-            os<<std::endl;
-            for (int i=0; i<c->GetNumberOfValues(); ++i)
             {
-                os<<"      value=";
-                ParameterValueToString(c, i, os);
                 os<<std::endl;
+                for (int i=0; i<c->GetNumberOfValues(); ++i)
+                {
+                    os<<"      value=";
+                    ParameterValueToString(c, i, os);
+                    os<<std::endl;
+                }
             }
-        }
             break;
         case ArrayCollectionType:
-        {
-            os<<", Array, size="<<c->GetNumberOfValues()<<std::endl;
-            for (int i=0; i<c->GetNumberOfValues(); ++i)
             {
-                os<<"      value["<<i<<"]=";
-                ParameterValueToString(c, i, os);
-                os<<std::endl;
+                os<<", Array, size="<<c->GetNumberOfValues()<<std::endl;
+                for (int i=0; i<c->GetNumberOfValues(); ++i)
+                {
+                    os<<"      value["<<i<<"]=";
+                    ParameterValueToString(c, i, os);
+                    os<<std::endl;
+                }
             }
-        }
             break;
         case SequenceCollectionType:
-        {
-            os<<", Sequence, size="<<c->GetNumberOfValues()<<std::endl;
-            for (int i=0; i<c->GetNumberOfValues(); ++i)
             {
-                os<<"      value["<<i<<"]=";
-                ParameterValueToString(c, i, os);
-                os<<std::endl;
+                os<<", Sequence, size="<<c->GetNumberOfValues()<<std::endl;
+                for (int i=0; i<c->GetNumberOfValues(); ++i)
+                {
+                    os<<"      value["<<i<<"]=";
+                    ParameterValueToString(c, i, os);
+                    os<<std::endl;
+                }
             }
-        }
             break;
         case DictionaryCollectionType:
-        {
-            os<<", Dictionary<"<<(c->GetKeyType()==EnumerationMemberType ? m_rep->GetEnum(c->GetKeyTypeId())->GetName() : BasicTypeOperations::MemberTypeToString(c->GetKeyType()))<<">, size="<<c->GetNumberOfValues()<<std::endl;
-            for (int i=0; i<c->GetNumberOfValues(); ++i)
             {
-                os<<"      value[";
-                ParameterKeyToString(c, i, os);
-                os<<"]=";
-                ParameterValueToString(c, i, os);
-                os<<std::endl;
+                os<<", Dictionary<"<<(c->GetKeyType()==EnumerationMemberType ? m_rep->GetEnum(c->GetKeyTypeId())->GetName() : BasicTypeOperations::MemberTypeToString(c->GetKeyType()))<<">, size="<<c->GetNumberOfValues()<<std::endl;
+                for (int i=0; i<c->GetNumberOfValues(); ++i)
+                {
+                    os<<"      value[";
+                    ParameterKeyToString(c, i, os);
+                    os<<"]=";
+                    ParameterValueToString(c, i, os);
+                    os<<std::endl;
+                }
             }
-        }
             break;
         }
     }
@@ -556,54 +556,54 @@ namespace Internal
             switch(md->GetMappingKind())
             {
             case MappedToParameter:
-            {
-                std::pair<const ParameterDescriptionType*, int> par=md->GetParameter();
-                os<<"        MappingKind:     ValueMapping"<<std::endl;
-                os<<"        MappedParam:       "<<par.first->GetName();
-                if (propertyMember->GetCollectionType()==SingleValueCollectionType)
                 {
-                    if (par.first->GetCollectionType()==ArrayCollectionType)
+                    std::pair<const ParameterDescriptionType*, int> par=md->GetParameter();
+                    os<<"        MappingKind:     ValueMapping"<<std::endl;
+                    os<<"        MappedParam:       "<<par.first->GetName();
+                    if (propertyMember->GetCollectionType()==SingleValueCollectionType)
                     {
-                        os<<"["<<par.second<<"]";
+                        if (par.first->GetCollectionType()==ArrayCollectionType)
+                        {
+                            os<<"["<<par.second<<"]";
+                        }
+                        else if (par.first->GetCollectionType()==DictionaryCollectionType)
+                        {
+                            os<<"[";
+                            ParameterKeyToString(par.first, par.second, os);
+                            os<<"]";
+                        }
                     }
-                    else if (par.first->GetCollectionType()==DictionaryCollectionType)
-                    {
-                        os<<"[";
-                        ParameterKeyToString(par.first, par.second, os);
-                        os<<"]";
-                    }
+                    os<<std::endl;
                 }
-                os<<std::endl;
-            }
                 break;
             case MappedToMember:
-            {
-                os<<"        MappingKind:     MemberMapping"<<std::endl;
-                os<<"        MemberRef:       ";
-                const ClassDescriptionType* currentClass=c;
-                for (int memRef=0; memRef<md->MemberReferenceDepth(); ++memRef)
                 {
-                    std::pair<DotsC_MemberIndex, DotsC_Int32> ref=md->GetMemberReference(memRef);
-                    const MemberDescriptionType* member=currentClass->GetMember(ref.first);
-                    os<<"->"<<member->GetName();
-                    if (member->GetCollectionType()==ArrayCollectionType && propertyMember->GetCollectionType()!=ArrayCollectionType)
+                    os<<"        MappingKind:     MemberMapping"<<std::endl;
+                    os<<"        MemberRef:       ";
+                    const ClassDescriptionType* currentClass=c;
+                    for (int memRef=0; memRef<md->MemberReferenceDepth(); ++memRef)
                     {
-                        os<<"["<<ref.second<<"]";
-                    }
+                        std::pair<DotsC_MemberIndex, DotsC_Int32> ref=md->GetMemberReference(memRef);
+                        const MemberDescriptionType* member=currentClass->GetMember(ref.first);
+                        os<<"->"<<member->GetName();
+                        if (member->GetCollectionType()==ArrayCollectionType && propertyMember->GetCollectionType()!=ArrayCollectionType)
+                        {
+                            os<<"["<<ref.second<<"]";
+                        }
 
-                    if (member->GetMemberType()==ObjectMemberType)
-                    {
-                        currentClass=m_rep->GetClass(member->GetTypeId());
+                        if (member->GetMemberType()==ObjectMemberType)
+                        {
+                            currentClass=m_rep->GetClass(member->GetTypeId());
+                        }
                     }
+                    os<<std::endl;
                 }
-                os<<std::endl;
-            }
                 break;
 
             case MappedToNull:
-            {
-                os<<"        MappingKind:     NullMapping"<<std::endl;
-            }
+                {
+                    os<<"        MappingKind:     NullMapping"<<std::endl;
+                }
                 break;
             }
         }

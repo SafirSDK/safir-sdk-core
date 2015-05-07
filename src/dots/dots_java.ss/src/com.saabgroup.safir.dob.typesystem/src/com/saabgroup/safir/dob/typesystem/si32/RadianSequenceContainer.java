@@ -29,15 +29,15 @@ import com.saabgroup.safir.dob.typesystem.Float32SequenceContainer;
 public class RadianSequenceContainer
 extends Float32SequenceContainer {
 
-	public RadianSequenceContainer() {
-		super();
-	}
-	
-	public RadianSequenceContainer(RadianSequenceContainer other) {
-		super(other);
-	}
-	
-	/**
+    public RadianSequenceContainer() {
+        super();
+    }
+    
+    public RadianSequenceContainer(RadianSequenceContainer other) {
+        super(other);
+    }
+    
+    /**
      * @see com.saabgroup.safir.dob.typesystem.ValueContainer#clone()
      */
     @Override

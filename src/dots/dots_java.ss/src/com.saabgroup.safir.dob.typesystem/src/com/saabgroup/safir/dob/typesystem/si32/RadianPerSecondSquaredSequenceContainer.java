@@ -29,15 +29,15 @@ import com.saabgroup.safir.dob.typesystem.Float32SequenceContainer;
 public class RadianPerSecondSquaredSequenceContainer
 extends Float32SequenceContainer {
 
-	public RadianPerSecondSquaredSequenceContainer() {
-		super();
-	}
-	
-	public RadianPerSecondSquaredSequenceContainer(RadianPerSecondSquaredSequenceContainer other) {
-		super(other);
-	}
-	
-	/**
+    public RadianPerSecondSquaredSequenceContainer() {
+        super();
+    }
+    
+    public RadianPerSecondSquaredSequenceContainer(RadianPerSecondSquaredSequenceContainer other) {
+        super(other);
+    }
+    
+    /**
      * @see com.saabgroup.safir.dob.typesystem.ValueContainer#clone()
      */
     @Override

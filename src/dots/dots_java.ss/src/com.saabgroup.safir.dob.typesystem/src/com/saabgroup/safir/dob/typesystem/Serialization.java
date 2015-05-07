@@ -39,8 +39,8 @@ public class Serialization {
      */
     public static String toXml(com.saabgroup.safir.dob.typesystem.Object obj)
     {
-    	byte[] bin=toBinary(obj);
-    	return toXml(bin);
+        byte[] bin=toBinary(obj);
+        return toXml(bin);
     }
     
     /**
@@ -110,8 +110,8 @@ public class Serialization {
      */
     public static String toJson(com.saabgroup.safir.dob.typesystem.Object obj)
     {
-    	byte[] bin=toBinary(obj);
-    	return toJson(bin);
+        byte[] bin=toBinary(obj);
+        return toJson(bin);
     }
     
     /**
@@ -183,7 +183,7 @@ public class Serialization {
      */
     public static byte[] toBinary(com.saabgroup.safir.dob.typesystem.Object obj){
         
-    	long handle = Kernel.CreateBlobWriter(obj.getTypeId());
+        long handle = Kernel.CreateBlobWriter(obj.getTypeId());
         obj.writeToBlob (handle);
         int size = Kernel.CalculateBlobSize (handle);
         java.nio.ByteBuffer blob=java.nio.ByteBuffer.allocateDirect(size);

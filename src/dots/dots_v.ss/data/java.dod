@@ -1568,8 +1568,8 @@ public enum @_CLASS_@
 
 
         public SequenceContainer() {
-		    super();
-	    }
+            super();
+        }
     }
 }
 @@ELSIF@@ @_UNITTYPE_@=exception

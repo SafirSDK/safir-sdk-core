@@ -175,116 +175,116 @@ namespace ToolSupport
         switch (pd->GetCollectionType())
         {
         case DictionaryCollectionType:
-        {
-            ValueDefinition vd;
-            if (pd->GetKeyType()==EnumerationMemberType)
             {
-                const EnumDescription* ed=rep->GetEnum(pd->GetKeyTypeId());
-                vd.key.int32=TypeUtilities::GetIndexOfEnumValue(ed, key);
-                int index=TypeUtilities::GetDictionaryIndexFromKey(pd, vd.key.int32);
-                if (index<0)
+                ValueDefinition vd;
+                if (pd->GetKeyType()==EnumerationMemberType)
+                {
+                    const EnumDescription* ed=rep->GetEnum(pd->GetKeyTypeId());
+                    vd.key.int32=TypeUtilities::GetIndexOfEnumValue(ed, key);
+                    int index=TypeUtilities::GetDictionaryIndexFromKey(pd, vd.key.int32);
+                    if (index<0)
+                    {
+                        std::ostringstream os;
+                        os<<"Failed to parse '"<<key<<"' as a dictionary key of enum type '"<<ed->GetName()<<"'";
+                        throw std::invalid_argument(os.str());
+                    }
+                    return index;
+                }
+                else if (ParseKey(pd->GetKeyType(), key, vd))
+                {
+                    int index=-1;
+                    switch(pd->GetKeyType())
+                    {
+                    case Int32MemberType:
+                        index=TypeUtilities::GetDictionaryIndexFromKey(pd, vd.key.int32);
+                        break;
+
+                    case Int64MemberType:
+                    case TypeIdMemberType:
+                        index=TypeUtilities::GetDictionaryIndexFromKey(pd, vd.key.int64);
+                        break;
+
+                    case StringMemberType:
+                        index=TypeUtilities::GetDictionaryIndexFromKey(pd, vd.key.str);
+                        break;
+
+                    case EntityIdMemberType:
+                        {
+                            DotsC_EntityId eidKey={vd.key.int64, vd.key.hash};
+                            index=TypeUtilities::GetDictionaryIndexFromKey(pd, eidKey);
+                        }
+                        break;
+
+                    case InstanceIdMemberType:
+                    case HandlerIdMemberType:
+                    case ChannelIdMemberType:
+                        index=TypeUtilities::GetDictionaryIndexFromKey(pd, vd.key.hash);
+                        break;
+
+                    default:
+                        break;
+                    }
+
+                    if (index<0)
+                    {
+                        std::ostringstream os;
+                        os<<"The dictionary key '"<<key<<"' is not found in the referenced parameter "<<pd->qualifiedName;
+                        throw std::invalid_argument(os.str());
+                    }
+
+                    return index;
+                }
+                else
                 {
                     std::ostringstream os;
-                    os<<"Failed to parse '"<<key<<"' as a dictionary key of enum type '"<<ed->GetName()<<"'";
+                    os<<"Failed to parse '"<<key<<"' as a dictionary key of type "<<BasicTypeOperations::MemberTypeToString(pd->GetKeyType());
                     throw std::invalid_argument(os.str());
                 }
-                return index;
             }
-            else if (ParseKey(pd->GetKeyType(), key, vd))
-            {
-                int index=-1;
-                switch(pd->GetKeyType())
-                {
-                case Int32MemberType:
-                    index=TypeUtilities::GetDictionaryIndexFromKey(pd, vd.key.int32);
-                    break;
-
-                case Int64MemberType:
-                case TypeIdMemberType:
-                    index=TypeUtilities::GetDictionaryIndexFromKey(pd, vd.key.int64);
-                    break;
-
-                case StringMemberType:
-                    index=TypeUtilities::GetDictionaryIndexFromKey(pd, vd.key.str);
-                    break;
-
-                case EntityIdMemberType:
-                {
-                    DotsC_EntityId eidKey={vd.key.int64, vd.key.hash};
-                    index=TypeUtilities::GetDictionaryIndexFromKey(pd, eidKey);
-                }
-                    break;
-
-                case InstanceIdMemberType:
-                case HandlerIdMemberType:
-                case ChannelIdMemberType:
-                    index=TypeUtilities::GetDictionaryIndexFromKey(pd, vd.key.hash);
-                    break;
-
-                default:
-                    break;
-                }
-
-                if (index<0)
-                {
-                    std::ostringstream os;
-                    os<<"The dictionary key '"<<key<<"' is not found in the referenced parameter "<<pd->qualifiedName;
-                    throw std::invalid_argument(os.str());
-                }
-
-                return index;
-            }
-            else
-            {
-                std::ostringstream os;
-                os<<"Failed to parse '"<<key<<"' as a dictionary key of type "<<BasicTypeOperations::MemberTypeToString(pd->GetKeyType());
-                throw std::invalid_argument(os.str());
-            }
-        }
             break;
 
         case ArrayCollectionType:
         case SequenceCollectionType:
-        {
-            if (key.empty())
             {
-                std::ostringstream os;
-                os<<"Referenced parameter '"<<pd->qualifiedName<<"' has collectionType="<<BasicTypeOperations::CollectionTypeToString(pd->GetCollectionType())<<". An index element is required in the reference";
-                throw std::invalid_argument(os.str());
-            }
-
-            try
-            {
-                int index=boost::lexical_cast<int>(key);
-                if (index<0 || index>=pd->GetNumberOfValues())
+                if (key.empty())
                 {
                     std::ostringstream os;
-                    os<<"Parameter reference out of range. Index="<<index<<"' but the parameter '"<<pd->qualifiedName<<"' only has "<<pd->GetNumberOfValues()<<" values.";
+                    os<<"Referenced parameter '"<<pd->qualifiedName<<"' has collectionType="<<BasicTypeOperations::CollectionTypeToString(pd->GetCollectionType())<<". An index element is required in the reference";
                     throw std::invalid_argument(os.str());
                 }
-                return index;
+
+                try
+                {
+                    int index=boost::lexical_cast<int>(key);
+                    if (index<0 || index>=pd->GetNumberOfValues())
+                    {
+                        std::ostringstream os;
+                        os<<"Parameter reference out of range. Index="<<index<<"' but the parameter '"<<pd->qualifiedName<<"' only has "<<pd->GetNumberOfValues()<<" values.";
+                        throw std::invalid_argument(os.str());
+                    }
+                    return index;
+                }
+                catch (const boost::bad_lexical_cast&)
+                {
+                    std::ostringstream os;
+                    os<<"Specified index '"<<key<<"' can't be interpreted as an array index of type Int32. Referenced parameter is '"<<pd->qualifiedName<<"'";
+                    throw std::invalid_argument(os.str());
+                }
             }
-            catch (const boost::bad_lexical_cast&)
-            {
-                std::ostringstream os;
-                os<<"Specified index '"<<key<<"' can't be interpreted as an array index of type Int32. Referenced parameter is '"<<pd->qualifiedName<<"'";
-                throw std::invalid_argument(os.str());
-            }
-        }
             break;
 
         case SingleValueCollectionType:
-        {
-            if (!key.empty())
             {
-                std::ostringstream os;
-                os<<"The parameter '"<<pd->qualifiedName<<"' has collectionType="<<BasicTypeOperations::CollectionTypeToString(pd->GetCollectionType())<<"' and hence key/index is not allowed in reference.";
-                throw std::invalid_argument(os.str());
+                if (!key.empty())
+                {
+                    std::ostringstream os;
+                    os<<"The parameter '"<<pd->qualifiedName<<"' has collectionType="<<BasicTypeOperations::CollectionTypeToString(pd->GetCollectionType())<<"' and hence key/index is not allowed in reference.";
+                    throw std::invalid_argument(os.str());
+                }
+
+                return 0;
+
             }
-
-            return 0;
-
-        }
             break;
 
         }
@@ -313,80 +313,80 @@ namespace ToolSupport
             switch(memberType)
             {
             case BooleanMemberType:
-            {
-                if (val=="True" || val=="true")
-                    result.val.boolean=true;
-                else if (val=="False" || val=="false")
-                    result.val.boolean=false;
-                else
-                    return false;
-            }
+                {
+                    if (val=="True" || val=="true")
+                        result.val.boolean=true;
+                    else if (val=="False" || val=="false")
+                        result.val.boolean=false;
+                    else
+                        return false;
+                }
                 break;
 
             case Int32MemberType:
-            {
-                result.val.int32=boost::lexical_cast<DotsC_Int32>(val);
-            }
+                {
+                    result.val.int32=boost::lexical_cast<DotsC_Int32>(val);
+                }
                 break;
             case Int64MemberType:
-            {
-                result.val.int64=boost::lexical_cast<DotsC_Int64>(val);
-            }
+                {
+                    result.val.int64=boost::lexical_cast<DotsC_Int64>(val);
+                }
                 break;
             case Float32MemberType:
-            {
-                result.val.float32=classic_string_cast<DotsC_Float32>(val);
-            }
+                {
+                    result.val.float32=classic_string_cast<DotsC_Float32>(val);
+                }
                 break;
             case Float64MemberType:
-            {
-                result.val.float64=classic_string_cast<DotsC_Float64>(val);
-            }
+                {
+                    result.val.float64=classic_string_cast<DotsC_Float64>(val);
+                }
                 break;
             case EntityIdMemberType:
-            {
-                result.val.str=val;
-                size_t sep=val.find(", ");
-                result.val.int64=LlufId_Generate64(val.substr(0, sep).c_str());
-                result.val.str=val.substr(sep+2);
-                try
                 {
-                    result.val.hash=boost::lexical_cast<boost::int64_t>(result.val.str);
-                    result.val.str.clear();
+                    result.val.str=val;
+                    size_t sep=val.find(", ");
+                    result.val.int64=LlufId_Generate64(val.substr(0, sep).c_str());
+                    result.val.str=val.substr(sep+2);
+                    try
+                    {
+                        result.val.hash=boost::lexical_cast<boost::int64_t>(result.val.str);
+                        result.val.str.clear();
+                    }
+                    catch(const boost::bad_lexical_cast&)
+                    {
+                        result.val.hash=LlufId_Generate64(result.val.str.c_str());
+                    }
                 }
-                catch(const boost::bad_lexical_cast&)
-                {
-                    result.val.hash=LlufId_Generate64(result.val.str.c_str());
-                }
-            }
                 break;
             case TypeIdMemberType:
-            {
-                result.val.int64=LlufId_Generate64(val.c_str());
-                result.val.str=val;
-            }
+                {
+                    result.val.int64=LlufId_Generate64(val.c_str());
+                    result.val.str=val;
+                }
                 break;
             case InstanceIdMemberType:
             case ChannelIdMemberType:
             case HandlerIdMemberType:
-            {
-                try
                 {
-                    result.val.hash=boost::lexical_cast<boost::int64_t>(val);
-                    result.val.str.clear();
+                    try
+                    {
+                        result.val.hash=boost::lexical_cast<boost::int64_t>(val);
+                        result.val.str.clear();
+                    }
+                    catch(const boost::bad_lexical_cast&)
+                    {
+                        result.val.hash=LlufId_Generate64(val.c_str());
+                        result.val.str=val;
+                    }
                 }
-                catch(const boost::bad_lexical_cast&)
-                {
-                    result.val.hash=LlufId_Generate64(val.c_str());
-                    result.val.str=val;
-                }
-            }
                 break;
 
             case StringMemberType:
-            {
-                result.val.str=val;
-            }
+                {
+                    result.val.str=val;
+                }
                 break;
 
             case ObjectMemberType:
@@ -394,12 +394,12 @@ namespace ToolSupport
             case EnumerationMemberType:
                 return false; //dont know about enum types here
             case BinaryMemberType:
-            {
-                if (!SerializationUtils::FromBase64(val, result.val.str))
                 {
-                    return false;
+                    if (!SerializationUtils::FromBase64(val, result.val.str))
+                    {
+                        return false;
+                    }
                 }
-            }
                 break;
 
             case Ampere32MemberType:
@@ -421,9 +421,9 @@ namespace ToolSupport
             case Steradian32MemberType:
             case Volt32MemberType:
             case Watt32MemberType:
-            {
-                result.val.float32=classic_string_cast<DotsC_Float32>(val);
-            }
+                {
+                    result.val.float32=classic_string_cast<DotsC_Float32>(val);
+                }
                 break;
 
             case Ampere64MemberType:
@@ -445,9 +445,9 @@ namespace ToolSupport
             case Steradian64MemberType:
             case Volt64MemberType:
             case Watt64MemberType:
-            {
-                result.val.float64=classic_string_cast<DotsC_Float64>(val);
-            }
+                {
+                    result.val.float64=classic_string_cast<DotsC_Float64>(val);
+                }
                 break;
             }
         }
@@ -466,52 +466,52 @@ namespace ToolSupport
             switch(memberType)
             {
             case Int32MemberType:
-            {
-                result.key.int32=boost::lexical_cast<DotsC_Int32>(val);
-            }
+                {
+                    result.key.int32=boost::lexical_cast<DotsC_Int32>(val);
+                }
                 break;
             case Int64MemberType:
-            {
-                result.key.int64=boost::lexical_cast<DotsC_Int64>(val);
-            }
+                {
+                    result.key.int64=boost::lexical_cast<DotsC_Int64>(val);
+                }
                 break;
             case EntityIdMemberType:
-            {
-                size_t sep=val.find(", ");
-                result.key.int64=LlufId_Generate64(val.substr(0, sep).c_str());
-                result.key.str=val.substr(sep+2);
+                {
+                    size_t sep=val.find(", ");
+                    result.key.int64=LlufId_Generate64(val.substr(0, sep).c_str());
+                    result.key.str=val.substr(sep+2);
 
-                std::pair<DotsC_EntityId, const char*> entId=SerializationUtils::StringToEntityId(val.substr(0, sep), val.substr(sep+2));
-                result.key.int64=entId.first.typeId;
-                result.key.hash=entId.first.instanceId;
-                if (entId.second)
-                    result.key.str=entId.second;
-                else
-                    result.key.str.clear();
-            }
+                    std::pair<DotsC_EntityId, const char*> entId=SerializationUtils::StringToEntityId(val.substr(0, sep), val.substr(sep+2));
+                    result.key.int64=entId.first.typeId;
+                    result.key.hash=entId.first.instanceId;
+                    if (entId.second)
+                        result.key.str=entId.second;
+                    else
+                        result.key.str.clear();
+                }
                 break;
             case TypeIdMemberType:
-            {
-                result.key.int64=SerializationUtils::StringToTypeId(val);
-            }
+                {
+                    result.key.int64=SerializationUtils::StringToTypeId(val);
+                }
                 break;
             case InstanceIdMemberType:
             case ChannelIdMemberType:
             case HandlerIdMemberType:
-            {
-                std::pair<DotsC_Int64, const char*> hash=SerializationUtils::StringToHash(val);
-                result.key.hash=hash.first;
-                if (hash.second)
-                    result.key.str=hash.second;
-                else
-                    result.key.str.clear();
-            }
+                {
+                    std::pair<DotsC_Int64, const char*> hash=SerializationUtils::StringToHash(val);
+                    result.key.hash=hash.first;
+                    if (hash.second)
+                        result.key.str=hash.second;
+                    else
+                        result.key.str.clear();
+                }
                 break;
 
             case StringMemberType:
-            {
-                result.key.str=val;
-            }
+                {
+                    result.key.str=val;
+                }
                 break;
 
             default: //not valid key type
@@ -723,141 +723,141 @@ namespace ToolSupport
         switch(pd->GetKeyType())
         {
         case Int32MemberType:
-        {
-            for (int index=0; index<pd->GetNumberOfValues(); ++index)
             {
-                const ValueDefinition& v=pd->Value(static_cast<size_t>(index));
-                if (!pd->unifiedKeyToIndex.insert(std::pair<DotsC_Int64, int>(TypeUtilities::ToUnifiedDictionaryKey(v.key.int32), index)).second)
+                for (int index=0; index<pd->GetNumberOfValues(); ++index)
                 {
-                    ThrowDictionaryKeyDuplicates(state, pd, index);
+                    const ValueDefinition& v=pd->Value(static_cast<size_t>(index));
+                    if (!pd->unifiedKeyToIndex.insert(std::pair<DotsC_Int64, int>(TypeUtilities::ToUnifiedDictionaryKey(v.key.int32), index)).second)
+                    {
+                        ThrowDictionaryKeyDuplicates(state, pd, index);
 
+                    }
                 }
             }
-        }
             break;
 
         case Int64MemberType:
-        {
-            for (int index=0; index<pd->GetNumberOfValues(); ++index)
             {
-                const ValueDefinition& v=pd->Value(static_cast<size_t>(index));
-                if (!pd->unifiedKeyToIndex.insert(std::pair<DotsC_Int64, int>(TypeUtilities::ToUnifiedDictionaryKey(v.key.int64), index)).second)
+                for (int index=0; index<pd->GetNumberOfValues(); ++index)
                 {
-                    ThrowDictionaryKeyDuplicates(state, pd, index);
+                    const ValueDefinition& v=pd->Value(static_cast<size_t>(index));
+                    if (!pd->unifiedKeyToIndex.insert(std::pair<DotsC_Int64, int>(TypeUtilities::ToUnifiedDictionaryKey(v.key.int64), index)).second)
+                    {
+                        ThrowDictionaryKeyDuplicates(state, pd, index);
+                    }
                 }
             }
-        }
             break;
 
         case InstanceIdMemberType:
         case ChannelIdMemberType:
         case HandlerIdMemberType:
-        {
-            for (int index=0; index<pd->GetNumberOfValues(); ++index)
             {
-                const ValueDefinition& v=pd->Value(static_cast<size_t>(index));
-                if (!pd->unifiedKeyToIndex.insert(std::pair<DotsC_Int64, int>(TypeUtilities::ToUnifiedDictionaryKey(v.key.hash), index)).second)
+                for (int index=0; index<pd->GetNumberOfValues(); ++index)
                 {
-                    ThrowDictionaryKeyDuplicates(state, pd, index);
+                    const ValueDefinition& v=pd->Value(static_cast<size_t>(index));
+                    if (!pd->unifiedKeyToIndex.insert(std::pair<DotsC_Int64, int>(TypeUtilities::ToUnifiedDictionaryKey(v.key.hash), index)).second)
+                    {
+                        ThrowDictionaryKeyDuplicates(state, pd, index);
+                    }
                 }
             }
-        }
             break;
 
         case StringMemberType:
-        {
-            for (int index=0; index<pd->GetNumberOfValues(); ++index)
             {
-                const ValueDefinition& v=pd->Value(static_cast<size_t>(index));
-                if (!pd->unifiedKeyToIndex.insert(std::pair<DotsC_Int64, int>(TypeUtilities::ToUnifiedDictionaryKey(v.key.str), index)).second)
+                for (int index=0; index<pd->GetNumberOfValues(); ++index)
                 {
-                    ThrowDictionaryKeyDuplicates(state, pd, index);
+                    const ValueDefinition& v=pd->Value(static_cast<size_t>(index));
+                    if (!pd->unifiedKeyToIndex.insert(std::pair<DotsC_Int64, int>(TypeUtilities::ToUnifiedDictionaryKey(v.key.str), index)).second)
+                    {
+                        ThrowDictionaryKeyDuplicates(state, pd, index);
+                    }
                 }
             }
-        }
             break;
 
         case EntityIdMemberType:
-        {
-            //Verify that EntityId parameters contains values that are existing class type.
-            for (int index=0; index<pd->GetNumberOfValues(); ++index)
             {
-                const ValueDefinition& v=pd->Value(static_cast<size_t>(index));
-                const ClassDescription* tmpCd=state.repository->GetClass(v.key.int64);
-                if (!tmpCd)
+                //Verify that EntityId parameters contains values that are existing class type.
+                for (int index=0; index<pd->GetNumberOfValues(); ++index)
                 {
-                    std::ostringstream os;
-                    os<<"The parameter "<<pd->GetName()<<" has an invalid typeId in its key. The typeId does not exist or is not a class type. (Hint it's the "<<index+1<<":th dictionary entry in the parameter)";
-                    throw ParseError("Invalid EntityId key", os.str(), state.currentPath, 51);
-                }
+                    const ValueDefinition& v=pd->Value(static_cast<size_t>(index));
+                    const ClassDescription* tmpCd=state.repository->GetClass(v.key.int64);
+                    if (!tmpCd)
+                    {
+                        std::ostringstream os;
+                        os<<"The parameter "<<pd->GetName()<<" has an invalid typeId in its key. The typeId does not exist or is not a class type. (Hint it's the "<<index+1<<":th dictionary entry in the parameter)";
+                        throw ParseError("Invalid EntityId key", os.str(), state.currentPath, 51);
+                    }
 
-                if (!BasicTypeOperations::IsOfType<TypeRepository>(state.repository.get(), ObjectMemberType, v.key.int64, ObjectMemberType, EntityTypeId))
-                {
-                    std::ostringstream os;
-                    os<<"The parameter "<<pd->GetName()<<" has an invalid key. The class '"<<tmpCd->GetName()<<"' is not a subtype of Safir.Dob.Entity";
-                    throw ParseError("Invalid EntityId key", os.str(), state.currentPath, 53);
-                }
+                    if (!BasicTypeOperations::IsOfType<TypeRepository>(state.repository.get(), ObjectMemberType, v.key.int64, ObjectMemberType, EntityTypeId))
+                    {
+                        std::ostringstream os;
+                        os<<"The parameter "<<pd->GetName()<<" has an invalid key. The class '"<<tmpCd->GetName()<<"' is not a subtype of Safir.Dob.Entity";
+                        throw ParseError("Invalid EntityId key", os.str(), state.currentPath, 53);
+                    }
 
-                DotsC_EntityId eidKey={v.key.int64, v.key.hash};
-                if (!pd->unifiedKeyToIndex.insert(std::pair<DotsC_Int64, int>(TypeUtilities::ToUnifiedDictionaryKey(eidKey), index)).second)
-                {
-                    ThrowDictionaryKeyDuplicates(state, pd, index);
+                    DotsC_EntityId eidKey={v.key.int64, v.key.hash};
+                    if (!pd->unifiedKeyToIndex.insert(std::pair<DotsC_Int64, int>(TypeUtilities::ToUnifiedDictionaryKey(eidKey), index)).second)
+                    {
+                        ThrowDictionaryKeyDuplicates(state, pd, index);
+                    }
                 }
             }
-        }
             break;
 
         case TypeIdMemberType:
-        {
-            //Verify that typeId parameters contains values that are existing typeIds.
-            for (int index=0; index<pd->GetNumberOfValues(); ++index)
             {
-                const ValueDefinition& v=pd->Value(static_cast<size_t>(index));
-                if (!BasicTypeOperations::ValidTypeId(state.repository.get(), v.key.int64))
+                //Verify that typeId parameters contains values that are existing typeIds.
+                for (int index=0; index<pd->GetNumberOfValues(); ++index)
                 {
-                    std::ostringstream os;
-                    os<<"The parameter "<<pd->GetName()<<" has an invalid key. The specified typeId is not a type. (Hint its the "<<index+1<<":th dictionary entry in the parameter)";
-                    throw ParseError("Invalid TypeId key", os.str(), state.currentPath, 202);
-                }
+                    const ValueDefinition& v=pd->Value(static_cast<size_t>(index));
+                    if (!BasicTypeOperations::ValidTypeId(state.repository.get(), v.key.int64))
+                    {
+                        std::ostringstream os;
+                        os<<"The parameter "<<pd->GetName()<<" has an invalid key. The specified typeId is not a type. (Hint its the "<<index+1<<":th dictionary entry in the parameter)";
+                        throw ParseError("Invalid TypeId key", os.str(), state.currentPath, 202);
+                    }
 
-                if (!pd->unifiedKeyToIndex.insert(std::pair<DotsC_Int64, int>(TypeUtilities::ToUnifiedDictionaryKey(v.key.int64), index)).second)
-                {
-                    ThrowDictionaryKeyDuplicates(state, pd, index);
+                    if (!pd->unifiedKeyToIndex.insert(std::pair<DotsC_Int64, int>(TypeUtilities::ToUnifiedDictionaryKey(v.key.int64), index)).second)
+                    {
+                        ThrowDictionaryKeyDuplicates(state, pd, index);
+                    }
                 }
             }
-        }
             break;
 
         case EnumerationMemberType:
-        {
-            //Verify that enum parameter key is valid according to the specified enum type.
-            const EnumDescription* ed=state.repository->GetEnum(pd->GetKeyTypeId());
-            if (!ed)
             {
-                //Enum type does not exist
-                std::ostringstream os;
-                os<<"The keyType specified for the dictionary paramaeter '"<<pd->typeName<<"' does not exist";
-                throw ParseError("Key type does not exist", os.str(), state.currentPath, 194);
-            }
-
-            //Check value
-            for (int index=0; index<pd->GetNumberOfValues(); ++index)
-            {
-                ValueDefinition& v=pd->MutableValue(static_cast<size_t>(index));
-                v.key.int32=ed->GetIndexOfValue(v.key.str);
-                if (v.key.int32<0)
+                //Verify that enum parameter key is valid according to the specified enum type.
+                const EnumDescription* ed=state.repository->GetEnum(pd->GetKeyTypeId());
+                if (!ed)
                 {
+                    //Enum type does not exist
                     std::ostringstream os;
-                    os<<"The parameter "<<pd->GetName()<<" has an invalid key '"<<v.key.str<<"'. Expected to be an enum value of type "<<ed->GetName();
-                    throw ParseError("Invalid key", os.str(), state.currentPath, 196);
+                    os<<"The keyType specified for the dictionary paramaeter '"<<pd->typeName<<"' does not exist";
+                    throw ParseError("Key type does not exist", os.str(), state.currentPath, 194);
                 }
 
-                if (!pd->unifiedKeyToIndex.insert(std::pair<DotsC_Int64, int>(TypeUtilities::ToUnifiedDictionaryKey(v.key.int32), index)).second)
+                //Check value
+                for (int index=0; index<pd->GetNumberOfValues(); ++index)
                 {
-                    ThrowDictionaryKeyDuplicates(state, pd, index);
+                    ValueDefinition& v=pd->MutableValue(static_cast<size_t>(index));
+                    v.key.int32=ed->GetIndexOfValue(v.key.str);
+                    if (v.key.int32<0)
+                    {
+                        std::ostringstream os;
+                        os<<"The parameter "<<pd->GetName()<<" has an invalid key '"<<v.key.str<<"'. Expected to be an enum value of type "<<ed->GetName();
+                        throw ParseError("Invalid key", os.str(), state.currentPath, 196);
+                    }
+
+                    if (!pd->unifiedKeyToIndex.insert(std::pair<DotsC_Int64, int>(TypeUtilities::ToUnifiedDictionaryKey(v.key.int32), index)).second)
+                    {
+                        ThrowDictionaryKeyDuplicates(state, pd, index);
+                    }
                 }
             }
-        }
             break;
 
         default:

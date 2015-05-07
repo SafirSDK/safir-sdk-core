@@ -29,15 +29,15 @@ import com.saabgroup.safir.dob.typesystem.Float32SequenceContainer;
 public class AmpereSequenceContainer
 extends Float32SequenceContainer {
 
-	public AmpereSequenceContainer() {
-		super();
-	}
-	
-	public AmpereSequenceContainer(AmpereSequenceContainer other) {
-		super(other);
-	}
-	
-	/**
+    public AmpereSequenceContainer() {
+        super();
+    }
+    
+    public AmpereSequenceContainer(AmpereSequenceContainer other) {
+        super(other);
+    }
+    
+    /**
      * @see com.saabgroup.safir.dob.typesystem.ValueContainer#clone()
      */
     @Override

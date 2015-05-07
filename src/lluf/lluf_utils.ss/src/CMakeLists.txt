@@ -28,14 +28,14 @@ if (MSVC)
     $<BUILD_INTERFACE:lluf_config>
     ${Boost_FILESYSTEM_LIBRARY}
     ${Boost_THREAD_LIBRARY}
-	${Boost_SYSTEM_LIBRARY})
+    ${Boost_SYSTEM_LIBRARY})
 else()
   TARGET_LINK_LIBRARIES(lluf_utils PRIVATE
     PUBLIC
     $<BUILD_INTERFACE:lluf_config>
     "$<BUILD_INTERFACE:${Boost_FILESYSTEM_LIBRARY}>"
     "$<BUILD_INTERFACE:${Boost_THREAD_LIBRARY}>"
-	"$<BUILD_INTERFACE:${Boost_SYSTEM_LIBRARY}>")
+    "$<BUILD_INTERFACE:${Boost_SYSTEM_LIBRARY}>")
 endif()
 
 if (WIN32)

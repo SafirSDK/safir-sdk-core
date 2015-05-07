@@ -39,17 +39,17 @@ package com.saabgroup.safir.dob.typesystem;
  */
 public class BlobOperations {
 
-	public static final int KEY_MODE = 0;
-	public static final int VALUE_MODE = 1;
+    public static final int KEY_MODE = 0;
+    public static final int VALUE_MODE = 1;
 
-	/// <summary>
+    /// <summary>
     /// Writes to BLOB.
     /// </summary>
     /// <returns>The to BLOB.</returns>
     /// <param name="obj">Object.</param>
     public static java.nio.ByteBuffer writeToBlob(com.saabgroup.safir.dob.typesystem.Object obj)
     {
-    	long handle = Kernel.CreateBlobWriter(obj.getTypeId());
+        long handle = Kernel.CreateBlobWriter(obj.getTypeId());
         obj.writeToBlob (handle);
         int size = Kernel.CalculateBlobSize (handle);
         java.nio.ByteBuffer blob=java.nio.ByteBuffer.allocateDirect(size);
@@ -106,7 +106,7 @@ public class BlobOperations {
     //boolean
     public static void get(BooleanContainer container, long handle, int member, int index)
     {
-    	boolean value[] = new boolean[1];
+        boolean value[] = new boolean[1];
         boolean isNull[] = new boolean[1];
         boolean isChanged[] = new boolean[1];
 
@@ -117,7 +117,7 @@ public class BlobOperations {
     }
 
     public static boolean getBoolean(long handle, int member, int index, int keyValMode) {
-    	boolean value[] = new boolean[1];
+        boolean value[] = new boolean[1];
         boolean isNull[] = new boolean[1];
         boolean isChanged[] = new boolean[1];
 
@@ -127,24 +127,24 @@ public class BlobOperations {
 
     public static void set(BooleanContainer container, long handle, int member, int index)
     {
-    	Kernel.WriteBooleanMember(handle,
-    			container.m_value,
-    			container.m_isNull,
-    			container.m_isChanged,
-    			member,
-    			index,
-    			VALUE_MODE);
+        Kernel.WriteBooleanMember(handle,
+                container.m_value,
+                container.m_isNull,
+                container.m_isChanged,
+                member,
+                index,
+                VALUE_MODE);
     }
 
     public static void set(boolean value, long handle, int member, int index, int keyValMode)
     {
-    	Kernel.WriteBooleanMember(handle, value, false, false, member, index, keyValMode);
+        Kernel.WriteBooleanMember(handle, value, false, false, member, index, keyValMode);
     }
 
     //enum
     public static void get(EnumerationContainerBase<?> enumContainer, long handle, int member, int index)
     {
-    	int value[] = new int[1];
+        int value[] = new int[1];
         boolean isNull[] = new boolean[1];
         boolean isChanged[] = new boolean[1];
         Kernel.ReadInt32Member(handle, value, isNull, isChanged, member, index, VALUE_MODE);
@@ -155,19 +155,19 @@ public class BlobOperations {
 
     public static void set(EnumerationContainerBase<?> container, long handle, int member, int index)
     {
-    	Kernel.WriteInt32Member(handle,
-    			container.m_Value,
-    			container.m_bIsNull,
-    			container.m_isChanged,
-    			member,
-    			index,
-    			VALUE_MODE);
+        Kernel.WriteInt32Member(handle,
+                container.m_Value,
+                container.m_bIsNull,
+                container.m_isChanged,
+                member,
+                index,
+                VALUE_MODE);
     }
 
     //int32
     public static void get(Int32Container container, long handle, int member, int index)
     {
-    	int value[] = new int[1];
+        int value[] = new int[1];
         boolean isNull[] = new boolean[1];
         boolean isChanged[] = new boolean[1];
 
@@ -179,7 +179,7 @@ public class BlobOperations {
 
     public static int getInt32(long handle, int member, int index, int keyValMode)
     {
-    	int value[] = new int[1];
+        int value[] = new int[1];
         boolean isNull[] = new boolean[1];
         boolean isChanged[] = new boolean[1];
 
@@ -189,24 +189,24 @@ public class BlobOperations {
 
     public static void set(Int32Container container, long handle, int member, int index)
     {
-    	Kernel.WriteInt32Member(handle,
-    			container.m_value,
-    			container.m_isNull,
-    			container.m_isChanged,
-    			member,
-    			index,
-    			VALUE_MODE);
+        Kernel.WriteInt32Member(handle,
+                container.m_value,
+                container.m_isNull,
+                container.m_isChanged,
+                member,
+                index,
+                VALUE_MODE);
     }
 
     public static void set(int val, long handle, int member, int index, int keyValMode)
     {
-    	Kernel.WriteInt32Member(handle, val, false, false, member, index, keyValMode);
+        Kernel.WriteInt32Member(handle, val, false, false, member, index, keyValMode);
     }
 
     //int64
     public static void get(Int64Container container, long handle, int member, int index)
     {
-    	long value[] = new long[1];
+        long value[] = new long[1];
         boolean isNull[] = new boolean[1];
         boolean isChanged[] = new boolean[1];
 
@@ -218,7 +218,7 @@ public class BlobOperations {
 
     public static long getInt64(long handle, int member, int index, int keyValMode)
     {
-    	long value[] = new long[1];
+        long value[] = new long[1];
         boolean isNull[] = new boolean[1];
         boolean isChanged[] = new boolean[1];
 
@@ -228,24 +228,24 @@ public class BlobOperations {
 
     public static void set(Int64Container container, long handle, int member, int index)
     {
-    	Kernel.WriteInt64Member(handle,
-    			container.m_value,
-    			container.m_isNull,
-    			container.m_isChanged,
-    			member,
-    			index,
-    			VALUE_MODE);
+        Kernel.WriteInt64Member(handle,
+                container.m_value,
+                container.m_isNull,
+                container.m_isChanged,
+                member,
+                index,
+                VALUE_MODE);
     }
 
     public static void set(long val, long handle, int member, int index, int keyValMode)
     {
-    	Kernel.WriteInt64Member(handle, val, false, false, member, index, keyValMode);
+        Kernel.WriteInt64Member(handle, val, false, false, member, index, keyValMode);
     }
 
     //float32
     public static void get(Float32Container container, long handle, int member, int index)
     {
-    	float value[] = new float[1];
+        float value[] = new float[1];
         boolean isNull[] = new boolean[1];
         boolean isChanged[] = new boolean[1];
 
@@ -257,7 +257,7 @@ public class BlobOperations {
 
     public static float getFloat32(long handle, int member, int index, int keyValMode)
     {
-    	float value[] = new float[1];
+        float value[] = new float[1];
         boolean isNull[] = new boolean[1];
         boolean isChanged[] = new boolean[1];
 
@@ -267,24 +267,24 @@ public class BlobOperations {
 
     public static void set(Float32Container container, long handle, int member, int index)
     {
-    	Kernel.WriteFloat32Member(handle,
-    			container.m_value,
-    			container.m_isNull,
-    			container.m_isChanged,
-    			member,
-    			index,
-    			VALUE_MODE);
+        Kernel.WriteFloat32Member(handle,
+                container.m_value,
+                container.m_isNull,
+                container.m_isChanged,
+                member,
+                index,
+                VALUE_MODE);
     }
 
     public static void set(float value, long handle, int member, int index, int keyValMode)
     {
-    	Kernel.WriteFloat32Member(handle, value, false, false, member, index, keyValMode);
+        Kernel.WriteFloat32Member(handle, value, false, false, member, index, keyValMode);
     }
 
     //float64
     public static void get(Float64Container container, long handle, int member, int index)
     {
-    	double value[] = new double[1];
+        double value[] = new double[1];
         boolean isNull[] = new boolean[1];
         boolean isChanged[] = new boolean[1];
 
@@ -296,7 +296,7 @@ public class BlobOperations {
 
     public static double getFloat64(long handle, int member, int index, int keyValMode)
     {
-    	double value[] = new double[1];
+        double value[] = new double[1];
         boolean isNull[] = new boolean[1];
         boolean isChanged[] = new boolean[1];
 
@@ -306,24 +306,24 @@ public class BlobOperations {
 
     public static void set(Float64Container container, long handle, int member, int index)
     {
-    	Kernel.WriteFloat64Member(handle,
-    			container.m_value,
-    			container.m_isNull,
-    			container.m_isChanged,
-    			member,
-    			index,
-    			VALUE_MODE);
+        Kernel.WriteFloat64Member(handle,
+                container.m_value,
+                container.m_isNull,
+                container.m_isChanged,
+                member,
+                index,
+                VALUE_MODE);
     }
 
     public static void set(double val, long handle, int member, int index, int keyValMode)
     {
-    	Kernel.WriteFloat64Member(handle, val, false, false, member, index, keyValMode);
+        Kernel.WriteFloat64Member(handle, val, false, false, member, index, keyValMode);
     }
 
     //typeId
     public static void get(TypeIdContainer container, long handle, int member, int index)
     {
-    	long value[] = new long[1];
+        long value[] = new long[1];
         boolean isNull[] = new boolean[1];
         boolean isChanged[] = new boolean[1];
 
@@ -335,7 +335,7 @@ public class BlobOperations {
 
     public static long getTypeId(long handle, int member, int index, int keyValMode)
     {
-    	long value[] = new long[1];
+        long value[] = new long[1];
         boolean isNull[] = new boolean[1];
         boolean isChanged[] = new boolean[1];
 
@@ -345,20 +345,20 @@ public class BlobOperations {
 
     public static void set(TypeIdContainer container, long handle, int member, int index)
     {
-    	Kernel.WriteInt64Member(handle,
-    			container.m_value,
-    			container.m_isNull,
-    			container.m_isChanged,
-    			member,
-    			index,
-    			VALUE_MODE);
+        Kernel.WriteInt64Member(handle,
+                container.m_value,
+                container.m_isNull,
+                container.m_isChanged,
+                member,
+                index,
+                VALUE_MODE);
     }
 
     //instanceId
     public static void get(InstanceIdContainer container, long handle, int member, int index)
     {
-    	long hashVal[] = new long[1];
-    	String[] strVal=new String[1];
+        long hashVal[] = new long[1];
+        String[] strVal=new String[1];
         boolean isNull[] = new boolean[1];
         boolean isChanged[] = new boolean[1];
 
@@ -372,15 +372,15 @@ public class BlobOperations {
                 container.m_value=new InstanceId(hashVal[0],strVal[0]);
             }
             else {
-            	container.m_value=new InstanceId(hashVal[0]);
+                container.m_value=new InstanceId(hashVal[0]);
             }
         }
     }
 
     public static InstanceId getInstanceId(long handle, int member, int index, int keyValMode)
     {
-    	long hashVal[] = new long[1];
-    	String[] strVal=new String[1];
+        long hashVal[] = new long[1];
+        String[] strVal=new String[1];
         boolean isNull[] = new boolean[1];
         boolean isChanged[] = new boolean[1];
 
@@ -422,8 +422,8 @@ public class BlobOperations {
     //handlerId
     public static void get(HandlerIdContainer container, long handle, int member, int index)
     {
-    	long hashVal[] = new long[1];
-    	String[] strVal=new String[1];
+        long hashVal[] = new long[1];
+        String[] strVal=new String[1];
         boolean isNull[] = new boolean[1];
         boolean isChanged[] = new boolean[1];
 
@@ -437,15 +437,15 @@ public class BlobOperations {
                 container.m_value=new HandlerId(hashVal[0],strVal[0]);
             }
             else {
-            	container.m_value=new HandlerId(hashVal[0]);
+                container.m_value=new HandlerId(hashVal[0]);
             }
         }
     }
 
     public static HandlerId getHandlerId(long handle, int member, int index, int keyValMode)
     {
-    	long hashVal[] = new long[1];
-    	String[] strVal=new String[1];
+        long hashVal[] = new long[1];
+        String[] strVal=new String[1];
         boolean isNull[] = new boolean[1];
         boolean isChanged[] = new boolean[1];
 
@@ -487,8 +487,8 @@ public class BlobOperations {
     //channelId
     public static void get(ChannelIdContainer container, long handle, int member, int index)
     {
-    	long hashVal[] = new long[1];
-    	String[] strVal=new String[1];
+        long hashVal[] = new long[1];
+        String[] strVal=new String[1];
         boolean isNull[] = new boolean[1];
         boolean isChanged[] = new boolean[1];
 
@@ -502,15 +502,15 @@ public class BlobOperations {
                 container.m_value=new ChannelId(hashVal[0],strVal[0]);
             }
             else {
-            	container.m_value=new ChannelId(hashVal[0]);
+                container.m_value=new ChannelId(hashVal[0]);
             }
         }
     }
 
     public static ChannelId getChannelId(long handle, int member, int index, int keyValMode)
     {
-    	long hashVal[] = new long[1];
-    	String[] strVal=new String[1];
+        long hashVal[] = new long[1];
+        String[] strVal=new String[1];
         boolean isNull[] = new boolean[1];
         boolean isChanged[] = new boolean[1];
 
@@ -552,9 +552,9 @@ public class BlobOperations {
     //entityId
     public static void get(EntityIdContainer container, long handle, int member, int index)
     {
-    	long typeVal[] = new long[1];
-    	long hashVal[] = new long[1];
-    	String[] strVal=new String[1];
+        long typeVal[] = new long[1];
+        long hashVal[] = new long[1];
+        String[] strVal=new String[1];
         boolean isNull[] = new boolean[1];
         boolean isChanged[] = new boolean[1];
 
@@ -568,16 +568,16 @@ public class BlobOperations {
                 container.m_value=new EntityId(typeVal[0], new InstanceId(hashVal[0],strVal[0]));
             }
             else {
-            	container.m_value=new EntityId(typeVal[0], new InstanceId(hashVal[0]));
+                container.m_value=new EntityId(typeVal[0], new InstanceId(hashVal[0]));
             }
         }
     }
 
     public static EntityId getEntityId(long handle, int member, int index, int keyValMode)
     {
-    	long typeVal[] = new long[1];
-    	long hashVal[] = new long[1];
-    	String[] strVal=new String[1];
+        long typeVal[] = new long[1];
+        long hashVal[] = new long[1];
+        String[] strVal=new String[1];
         boolean isNull[] = new boolean[1];
         boolean isChanged[] = new boolean[1];
 
@@ -651,7 +651,7 @@ public class BlobOperations {
     //string
     public static void get(StringContainer container, long handle, int member, int index)
     {
-    	String value[] = new String[1];
+        String value[] = new String[1];
         boolean isNull[] = new boolean[1];
         boolean isChanged[] = new boolean[1];
 
@@ -666,7 +666,7 @@ public class BlobOperations {
 
     public static String getString(long handle, int member, int index, int keyValMode)
     {
-    	String value[] = new String[1];
+        String value[] = new String[1];
         boolean isNull[] = new boolean[1];
         boolean isChanged[] = new boolean[1];
 
@@ -676,24 +676,24 @@ public class BlobOperations {
 
     public static void set(StringContainer container, long handle, int member, int index)
     {
-    	Kernel.WriteStringMember(handle,
-    			container.m_value,
-    			container.m_isNull,
-    			container.m_isChanged,
-    			member,
-    			index,
-    			VALUE_MODE);
+        Kernel.WriteStringMember(handle,
+                container.m_value,
+                container.m_isNull,
+                container.m_isChanged,
+                member,
+                index,
+                VALUE_MODE);
     }
 
     public static void set(String val, long handle, int member, int index, int keyValMode)
     {
-    	Kernel.WriteStringMember(handle, val, false, false, member, index, keyValMode);
+        Kernel.WriteStringMember(handle, val, false, false, member, index, keyValMode);
     }
 
     //Object
     public static void get(ObjectContainerImpl<?> container, long handle, int member, int index)
     {
-    	java.nio.ByteBuffer value[] = new java.nio.ByteBuffer[1];
+        java.nio.ByteBuffer value[] = new java.nio.ByteBuffer[1];
         boolean isNull[] = new boolean[1];
         boolean isChanged[] = new boolean[1];
 
@@ -711,7 +711,7 @@ public class BlobOperations {
 
     public static Object getObject(long handle, int member, int index, int keyValMode)
     {
-    	java.nio.ByteBuffer value[] = new java.nio.ByteBuffer[1];
+        java.nio.ByteBuffer value[] = new java.nio.ByteBuffer[1];
         boolean isNull[] = new boolean[1];
         boolean isChanged[] = new boolean[1];
 
@@ -727,7 +727,7 @@ public class BlobOperations {
 
     public static void set(ObjectContainerImpl<?> container, long handle, int member, int index)
     {
-    	if (container.isNull()) {
+        if (container.isNull()) {
             Kernel.WriteObjectMember(handle,
                             null,
                             true,
@@ -735,8 +735,8 @@ public class BlobOperations {
                             member,
                             index,
                             VALUE_MODE);
-    	}
-    	else {
+        }
+        else {
             java.nio.ByteBuffer blob=writeToBlob(container.getObjInternal());
             Kernel.WriteObjectMember(handle,
                             blob,
@@ -745,16 +745,16 @@ public class BlobOperations {
                             member,
                             index,
                             VALUE_MODE);
-    	}
+        }
     }
 
     public static void set(Object obj, long handle, int member, int index, int keyValMode)
     {
-    	if (obj==null) {
-    		throw new SoftwareViolationException("Value not allowed to be null");
-    	}
+        if (obj==null) {
+            throw new SoftwareViolationException("Value not allowed to be null");
+        }
 
-    	java.nio.ByteBuffer blob=writeToBlob(obj);
+        java.nio.ByteBuffer blob=writeToBlob(obj);
         Kernel.WriteObjectMember(handle, blob, false, false, member, index, keyValMode);
     }
 
@@ -762,8 +762,8 @@ public class BlobOperations {
     //binary
     public static void get(BinaryContainer container, long handle, int member, int index)
     {
-    	java.nio.ByteBuffer value[] = new java.nio.ByteBuffer[1];
-    	boolean isNull[] = new boolean[1];
+        java.nio.ByteBuffer value[] = new java.nio.ByteBuffer[1];
+        boolean isNull[] = new boolean[1];
         boolean isChanged[] = new boolean[1];
 
         Kernel.ReadBinaryMember(handle, value, isNull, isChanged, member, index, VALUE_MODE);
@@ -784,8 +784,8 @@ public class BlobOperations {
 
     public static Byte[] getBinary(long handle, int member, int index, int keyValMode)
     {
-    	java.nio.ByteBuffer value[] = new java.nio.ByteBuffer[1];
-    	boolean isNull[] = new boolean[1];
+        java.nio.ByteBuffer value[] = new java.nio.ByteBuffer[1];
+        boolean isNull[] = new boolean[1];
         boolean isChanged[] = new boolean[1];
 
         Kernel.ReadBinaryMember(handle, value, isNull, isChanged, member, index, keyValMode);
@@ -812,8 +812,8 @@ public class BlobOperations {
                             member,
                             index,
                             VALUE_MODE);
-    	}
-    	else {
+        }
+        else {
             java.nio.ByteBuffer bin=java.nio.ByteBuffer.allocateDirect(container.m_value.length);
             bin.put(container.m_value);
             Kernel.WriteBinaryMember(handle,
@@ -829,20 +829,20 @@ public class BlobOperations {
 
     public static void set(byte[] val, long handle, int member, int index, int keyValMode)
     {
-    	if (val==null)
+        if (val==null)
             throw new SoftwareViolationException("Value not allowed to be null");
 
-    	java.nio.ByteBuffer bin=java.nio.ByteBuffer.allocateDirect(val.length);
+        java.nio.ByteBuffer bin=java.nio.ByteBuffer.allocateDirect(val.length);
             bin.put(val);
             Kernel.WriteBinaryMember(handle, bin, val.length, false, false, member, index, keyValMode);
     }
 
     public static void set(Byte[] val, long handle, int member, int index, int keyValMode)
     {
-    	if (val==null)
+        if (val==null)
             throw new SoftwareViolationException("Value not allowed to be null");
 
-    	java.nio.ByteBuffer bin=java.nio.ByteBuffer.allocateDirect(val.length);
+        java.nio.ByteBuffer bin=java.nio.ByteBuffer.allocateDirect(val.length);
         for (Byte b : val) {
             bin.put(b.byteValue());
         }

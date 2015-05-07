@@ -29,22 +29,22 @@ public class BinarySequenceContainer
 extends ValueSequenceContainer<Byte[]> {
 
     public BinarySequenceContainer() {
-		super();
-	}
-	
-	public BinarySequenceContainer(BinarySequenceContainer other) {
-		super(other);
-	}
-	
-	public boolean add(byte[] binary) {
-		return add(toByteArray(binary));
-	}
-	
-	public void add(int index, byte[] binary) {
-		add(index, toByteArray(binary));
-	}
-	
-	/**
+        super();
+    }
+    
+    public BinarySequenceContainer(BinarySequenceContainer other) {
+        super(other);
+    }
+    
+    public boolean add(byte[] binary) {
+        return add(toByteArray(binary));
+    }
+    
+    public void add(int index, byte[] binary) {
+        add(index, toByteArray(binary));
+    }
+    
+    /**
      * @see com.saabgroup.safir.dob.typesystem.ValueSequenceContainer#clone()
      */
     @Override

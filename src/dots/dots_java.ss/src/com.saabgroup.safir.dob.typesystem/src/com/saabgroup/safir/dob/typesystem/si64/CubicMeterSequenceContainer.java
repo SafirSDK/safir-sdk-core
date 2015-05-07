@@ -29,15 +29,15 @@ import com.saabgroup.safir.dob.typesystem.Float64SequenceContainer;
 public class CubicMeterSequenceContainer
 extends Float64SequenceContainer {
 
-	public CubicMeterSequenceContainer() {
-		super();
-	}
-	
-	public CubicMeterSequenceContainer(CubicMeterSequenceContainer other) {
-		super(other);
-	}
-	
-	/**
+    public CubicMeterSequenceContainer() {
+        super();
+    }
+    
+    public CubicMeterSequenceContainer(CubicMeterSequenceContainer other) {
+        super(other);
+    }
+    
+    /**
      * @see com.saabgroup.safir.dob.typesystem.ValueContainer#clone()
      */
     @Override

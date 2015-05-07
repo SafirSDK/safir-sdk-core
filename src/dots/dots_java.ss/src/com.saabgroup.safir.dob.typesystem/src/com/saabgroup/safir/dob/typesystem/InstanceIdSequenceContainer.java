@@ -28,15 +28,15 @@ package com.saabgroup.safir.dob.typesystem;
 public class InstanceIdSequenceContainer
 extends ValueSequenceContainer<InstanceId> {
 
-	public InstanceIdSequenceContainer() {
-		super();
-	}
-	
-	public InstanceIdSequenceContainer(InstanceIdSequenceContainer other) {
-		super(other);
-	}
-	
-	/**
+    public InstanceIdSequenceContainer() {
+        super();
+    }
+    
+    public InstanceIdSequenceContainer(InstanceIdSequenceContainer other) {
+        super(other);
+    }
+    
+    /**
      * @see com.saabgroup.safir.dob.typesystem.ValueSequenceContainer#clone()
      */
     @Override

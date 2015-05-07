@@ -29,15 +29,15 @@ import com.saabgroup.safir.dob.typesystem.Float64SequenceContainer;
 public class MeterPerSecondSequenceContainer
 extends Float64SequenceContainer {
 
-	public MeterPerSecondSequenceContainer() {
-		super();
-	}
-	
-	public MeterPerSecondSequenceContainer(MeterPerSecondSequenceContainer other) {
-		super(other);
-	}
-	
-	/**
+    public MeterPerSecondSequenceContainer() {
+        super();
+    }
+    
+    public MeterPerSecondSequenceContainer(MeterPerSecondSequenceContainer other) {
+        super(other);
+    }
+    
+    /**
      * @see com.saabgroup.safir.dob.typesystem.ValueContainer#clone()
      */
     @Override

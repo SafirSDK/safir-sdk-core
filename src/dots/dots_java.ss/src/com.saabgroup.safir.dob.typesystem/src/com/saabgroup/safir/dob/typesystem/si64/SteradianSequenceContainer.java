@@ -29,15 +29,15 @@ import com.saabgroup.safir.dob.typesystem.Float64SequenceContainer;
 public class SteradianSequenceContainer
 extends Float64SequenceContainer {
 
-	public SteradianSequenceContainer() {
-		super();
-	}
-	
-	public SteradianSequenceContainer(SteradianSequenceContainer other) {
-		super(other);
-	}
-	
-	/**
+    public SteradianSequenceContainer() {
+        super();
+    }
+    
+    public SteradianSequenceContainer(SteradianSequenceContainer other) {
+        super(other);
+    }
+    
+    /**
      * @see com.saabgroup.safir.dob.typesystem.ValueContainer#clone()
      */
     @Override

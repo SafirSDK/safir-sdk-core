@@ -29,15 +29,15 @@ import com.saabgroup.safir.dob.typesystem.Float64SequenceContainer;
 public class HertzSequenceContainer
 extends Float64SequenceContainer {
 
-	public HertzSequenceContainer() {
-		super();
-	}
-	
-	public HertzSequenceContainer(HertzSequenceContainer other) {
-		super(other);
-	}
-	
-	/**
+    public HertzSequenceContainer() {
+        super();
+    }
+    
+    public HertzSequenceContainer(HertzSequenceContainer other) {
+        super(other);
+    }
+    
+    /**
      * @see com.saabgroup.safir.dob.typesystem.ValueContainer#clone()
      */
     @Override

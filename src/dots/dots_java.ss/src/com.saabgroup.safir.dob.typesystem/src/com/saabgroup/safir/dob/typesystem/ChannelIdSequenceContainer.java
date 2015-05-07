@@ -28,15 +28,15 @@ package com.saabgroup.safir.dob.typesystem;
 public class ChannelIdSequenceContainer
 extends ValueSequenceContainer<ChannelId> {
 
-	public ChannelIdSequenceContainer() {
-		super();
-	}
-	
-	public ChannelIdSequenceContainer(ChannelIdSequenceContainer other) {
-		super(other);
-	}
-	
-	/**
+    public ChannelIdSequenceContainer() {
+        super();
+    }
+    
+    public ChannelIdSequenceContainer(ChannelIdSequenceContainer other) {
+        super(other);
+    }
+    
+    /**
      * @see com.saabgroup.safir.dob.typesystem.ValueSequenceContainer#clone()
      */
     @Override

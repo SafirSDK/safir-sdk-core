@@ -29,15 +29,15 @@ import com.saabgroup.safir.dob.typesystem.Float32SequenceContainer;
 public class SquareMeterSequenceContainer
 extends Float32SequenceContainer {
 
-	public SquareMeterSequenceContainer() {
-		super();
-	}
-	
-	public SquareMeterSequenceContainer(SquareMeterSequenceContainer other) {
-		super(other);
-	}
-	
-	/**
+    public SquareMeterSequenceContainer() {
+        super();
+    }
+    
+    public SquareMeterSequenceContainer(SquareMeterSequenceContainer other) {
+        super(other);
+    }
+    
+    /**
      * @see com.saabgroup.safir.dob.typesystem.ValueContainer#clone()
      */
     @Override

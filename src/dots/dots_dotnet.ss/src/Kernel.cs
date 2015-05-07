@@ -59,7 +59,7 @@ namespace Safir.Dob.Typesystem.Internal
     internal class Kernel
     {
         internal const string DOTS_KERNEL_NAME = "dots_kernel";
-		        
+                
         //********************************************************
         //* Static type information operations
         //********************************************************
@@ -79,8 +79,8 @@ namespace Safir.Dob.Typesystem.Internal
         [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
         internal static extern System.Int32 DotsC_NumberOfEnumerations();
 
-		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
-		internal static extern System.Int32 DotsC_NumberOfExceptions();
+        [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
+        internal static extern System.Int32 DotsC_NumberOfExceptions();
 
         //GetAllTypeId
         [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
@@ -116,8 +116,8 @@ namespace Safir.Dob.Typesystem.Internal
         [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
         internal static extern System.IntPtr DotsC_GetTypeName(System.Int64 id);
 
-		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
-		internal static extern System.IntPtr DotsC_MemberTypeName(MemberType memberType);
+        [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
+        internal static extern System.IntPtr DotsC_MemberTypeName(MemberType memberType);
 
         //GetNumberOfEnumerationValues
         [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
@@ -133,10 +133,10 @@ namespace Safir.Dob.Typesystem.Internal
         internal static extern System.Int32 DotsC_EnumerationValueFromName(System.Int64 enumId,
                                                                            System.IntPtr enumValueName);
 
-		//GetEnumerationChecksum
-		[DllImport(DOTS_KERNEL_NAME, CallingConvention = CallingConvention.Cdecl)]
-		internal static extern void DotsC_GetEnumerationChecksum(System.Int64 typeId,
-		                                                         out System.Int64 checksum);
+        //GetEnumerationChecksum
+        [DllImport(DOTS_KERNEL_NAME, CallingConvention = CallingConvention.Cdecl)]
+        internal static extern void DotsC_GetEnumerationChecksum(System.Int64 typeId,
+                                                                 out System.Int64 checksum);
 
         //********************************************************
         //* Functions for retrieving member info about object types
@@ -150,28 +150,28 @@ namespace Safir.Dob.Typesystem.Internal
         internal static extern System.Int32 DotsC_GetMemberId(System.Int64 id,
                                                               System.IntPtr str);
 
-		//GetMemberInfo
-		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
-		internal static extern void DotsC_GetMemberInfo(System.Int64 id,                //in
-		                                                System.Int32 member,            //in
-		                                                out MemberType mt,              //out
-		                                                out System.IntPtr memberName,   //out
-		                                                out System.Int64 complexType,   //out
-		                                                out System.Int32 stringLength,  //out
-		                                                out CollectionType collectionType, //out
-		                                                out System.Int32 arrLength );   //out
+        //GetMemberInfo
+        [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
+        internal static extern void DotsC_GetMemberInfo(System.Int64 id,                //in
+                                                        System.Int32 member,            //in
+                                                        out MemberType mt,              //out
+                                                        out System.IntPtr memberName,   //out
+                                                        out System.Int64 complexType,   //out
+                                                        out System.Int32 stringLength,  //out
+                                                        out CollectionType collectionType, //out
+                                                        out System.Int32 arrLength );   //out
 
-		//GetMemberArraySizeProperty
-		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
-		internal static extern System.Int32 DotsC_GetMemberArraySizeProperty(System.Int64 classId,
-		                                                                     System.Int64 propertyId,
-		                                                                     System.Int32 propertyMember);
+        //GetMemberArraySizeProperty
+        [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
+        internal static extern System.Int32 DotsC_GetMemberArraySizeProperty(System.Int64 classId,
+                                                                             System.Int64 propertyId,
+                                                                             System.Int32 propertyMember);
 
-		//GetStringMemberMaxLength
-		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
-		internal static extern System.Int32 DotsC_GetStringMemberMaxLengthProperty(System.Int64 classId,
-		                                                                           System.Int64 propertyId,
-		                                                                           System.Int32 propertyMember);
+        //GetStringMemberMaxLength
+        [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
+        internal static extern System.Int32 DotsC_GetStringMemberMaxLengthProperty(System.Int64 classId,
+                                                                                   System.Int64 propertyId,
+                                                                                   System.Int32 propertyMember);
 
         //********************************************************
         //* Functions handling parameters
@@ -186,13 +186,13 @@ namespace Safir.Dob.Typesystem.Internal
                                                                  System.IntPtr parameterName);
 
         [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
-		internal static extern void DotsC_GetParameterInfo(System.Int64 typeId,
-								                           System.Int32 parameter,
-								                           out MemberType memberType,
-								                           out System.IntPtr parameterName,
-		                                                   out System.Int64 complexType,
-		                                                   out CollectionType collectionType,
-		                                                   out System.Int32 numberOfValues);
+        internal static extern void DotsC_GetParameterInfo(System.Int64 typeId,
+                                                           System.Int32 parameter,
+                                                           out MemberType memberType,
+                                                           out System.IntPtr parameterName,
+                                                           out System.Int64 complexType,
+                                                           out CollectionType collectionType,
+                                                           out System.Int32 numberOfValues);
 
         //************************************************************************************
         //* Type compatibility
@@ -220,34 +220,34 @@ namespace Safir.Dob.Typesystem.Internal
                                                       out byte hasProperty,
                                                       out byte isInherited);
 
-		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
-		internal static extern byte DotsC_GetPropertyMappingKind(System.Int64 classTypeId,
-		                                                         System.Int64 propertyTypeId,
-		                                                         System.Int32 propertyMember,
-	                                                  			 out DotsC_PropertyMappingKind mappingKind);
+        [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
+        internal static extern byte DotsC_GetPropertyMappingKind(System.Int64 classTypeId,
+                                                                 System.Int64 propertyTypeId,
+                                                                 System.Int32 propertyMember,
+                                                                   out DotsC_PropertyMappingKind mappingKind);
 
-		//GetClassMemberReference
-		[DllImport(DOTS_KERNEL_NAME, CallingConvention = CallingConvention.Cdecl)]
-		internal static extern void DotsC_GetClassMemberReference(System.Int64 typeId,
-		                                                          System.Int64 propertyId,
-		                                                          System.Int32 propertyMember,
-		                                                          out System.IntPtr classMemberReference,
-		                                                          out System.Int32 classMemberReferenceSize); //out
+        //GetClassMemberReference
+        [DllImport(DOTS_KERNEL_NAME, CallingConvention = CallingConvention.Cdecl)]
+        internal static extern void DotsC_GetClassMemberReference(System.Int64 typeId,
+                                                                  System.Int64 propertyId,
+                                                                  System.Int32 propertyMember,
+                                                                  out System.IntPtr classMemberReference,
+                                                                  out System.Int32 classMemberReferenceSize); //out
 
-		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
-		internal static extern void DotsC_GetPropertyParameterReference(System.Int64 typeId,
-		                                                                System.Int64 propertyId,
-		                                                                System.Int32 propertyMember,
-		                                                         		System.Int32 index,
-		                                                         		out System.Int32 paramId, //out
-		                                                                out System.Int32 paramValueIndex); //out
+        [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
+        internal static extern void DotsC_GetPropertyParameterReference(System.Int64 typeId,
+                                                                        System.Int64 propertyId,
+                                                                        System.Int32 propertyMember,
+                                                                         System.Int32 index,
+                                                                         out System.Int32 paramId, //out
+                                                                        out System.Int32 paramValueIndex); //out
 
         //************************************************************************************
         //* Serialization
         //************************************************************************************
         //BetterBlobToXml
         [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
-		internal static extern void DotsC_BlobToXml(System.IntPtr xmlDest,
+        internal static extern void DotsC_BlobToXml(System.IntPtr xmlDest,
                                                           System.IntPtr blobSource,
                                                           System.Int32 bufSize,
                                                           out System.Int32 resultSize);
@@ -314,7 +314,7 @@ namespace Safir.Dob.Typesystem.Internal
         internal static extern void DotsC_GetEnumerationParameter(System.Int64 id,
                                                                   System.Int32 parameter,
                                                                   System.Int32 index,
-		                                                          KeyValMode keyValMode,
+                                                                  KeyValMode keyValMode,
                                                                   out System.Int32 val);
 
         //GetInt32Parameter
@@ -322,7 +322,7 @@ namespace Safir.Dob.Typesystem.Internal
         internal static extern void DotsC_GetInt32Parameter(System.Int64 id,
                                                             System.Int32 parameter,
                                                             System.Int32 index,
-		                                                    KeyValMode keyValMode,
+                                                            KeyValMode keyValMode,
                                                             out System.Int32 val);
 
         //GetInt64Parameter
@@ -330,7 +330,7 @@ namespace Safir.Dob.Typesystem.Internal
         internal static extern void DotsC_GetInt64Parameter(System.Int64 id,
                                                             System.Int32 parameter,
                                                             System.Int32 index,
-		                                                    KeyValMode keyValMode,
+                                                            KeyValMode keyValMode,
                                                             out System.Int64 val);
 
         //GetFloat32Parameter
@@ -352,23 +352,23 @@ namespace Safir.Dob.Typesystem.Internal
         internal static extern void DotsC_GetStringParameter(System.Int64 id,
                                                              System.Int32 parameter,
                                                              System.Int32 index,
-		                                                     KeyValMode keyValMode,
+                                                             KeyValMode keyValMode,
                                                              out System.IntPtr val);
 
-		//GetTypeIdParameter
-		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
-		internal static extern void DotsC_GetTypeIdParameter(System.Int64 id,
-		                                                     System.Int32 parameter,
-		                                                     System.Int32 index,
-		                                                     KeyValMode keyValMode,
-		                                                     out System.Int64 val);
+        //GetTypeIdParameter
+        [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
+        internal static extern void DotsC_GetTypeIdParameter(System.Int64 id,
+                                                             System.Int32 parameter,
+                                                             System.Int32 index,
+                                                             KeyValMode keyValMode,
+                                                             out System.Int64 val);
 
         //GetHashedIdParameter
         [DllImport(DOTS_KERNEL_NAME, CallingConvention = CallingConvention.Cdecl)]
         internal static extern void DotsC_GetHashedIdParameter(System.Int64 id,
                                                                System.Int32 parameter,
                                                                System.Int32 index,
-		                                                       KeyValMode keyValMode,
+                                                               KeyValMode keyValMode,
                                                                out System.Int64 hashVal,
                                                                out System.IntPtr strVal);
 
@@ -377,7 +377,7 @@ namespace Safir.Dob.Typesystem.Internal
         internal static extern void DotsC_GetEntityIdParameter(System.Int64 id,
                                                                System.Int32 parameter,
                                                                System.Int32 index,
-		                                                       KeyValMode keyValMode,
+                                                               KeyValMode keyValMode,
                                                                out Internal.DotsC_EntityId eid,
                                                                out System.IntPtr strVal);
 
@@ -396,259 +396,259 @@ namespace Safir.Dob.Typesystem.Internal
                                                              out System.IntPtr val,
                                                              out System.Int32 size);
 
-		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
-		internal static extern System.Int32 DotsC_DictionaryInt32KeyToIndex(System.Int64 typeId,
-		                                                                    System.Int32 parameter,
-		                                                                    System.Int32 key);
-
-		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
-		internal static extern System.Int32 DotsC_DictionaryInt64KeyToIndex(System.Int64 typeId,
-		                                                                   System.Int32 parameter,
-		                                                                   System.Int64 key);
-
-		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
-        internal static extern System.Int32 DotsC_DictionaryStringKeyToIndex(System.Int64 typeId,
-		                                                                    System.Int32 parameter,
-		                                                                    System.IntPtr key);
-
-		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
-        internal static extern System.Int32 DotsC_DictionaryEntityIdKeyToIndex(System.Int64 typeId,
-		                                                                      System.Int32 parameter,
-		                                                                      DotsC_EntityId key);
-
-		//********************************************************
-		//* Operations on blobs
-		//********************************************************
-
-		//GetTypeId
-		[DllImport(DOTS_KERNEL_NAME, CallingConvention = CallingConvention.Cdecl)]
-		internal static extern System.Int64 DotsC_GetTypeId(System.IntPtr blob);
-
-		//GetSize
-		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
-		internal static extern System.Int32 DotsC_GetSize(System.IntPtr blob);
-
-		//CreateBlob
-		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
-		internal static extern System.IntPtr DotsC_AllocateBlob(System.Int32 size);
-
-		//CreateAndCopyBlob
-		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
-		internal static extern void DotsC_CreateCopyOfBlob(out System.IntPtr to,
-		                                                   System.IntPtr from);
-
-		//DeleteBlob
-		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
-		internal static extern void DotsC_DeleteBlob(ref System.IntPtr blob);
-
-		//************************************************************************************
-		//* Read operations
-		//************************************************************************************
-		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
-		internal static extern System.Int64 DotsC_CreateBlobReader(System.IntPtr blob);
-
-		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
-		internal static extern void DotsC_DeleteBlobReader(System.Int64 handle);
-
-
-		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
-        internal static extern System.Int32 DotsC_GetNumberOfMemberValues(System.Int64 readerHandle,
-		                                                                 System.Int32 member);
-
-		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
-		internal static extern void DotsC_ReadMemberStatus(System.Int64 readerHandle,
-		                                                   out byte isNull,
-		                                                   out byte isChanged,
-		                                                   System.Int32 member,
-		                                                   System.Int32 valueIndex);
+        [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
+        internal static extern System.Int32 DotsC_DictionaryInt32KeyToIndex(System.Int64 typeId,
+                                                                            System.Int32 parameter,
+                                                                            System.Int32 key);
 
         [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
-		internal static extern byte DotsC_ReadTopLevelChangeFlag(System.Int64 readerHandle,
+        internal static extern System.Int32 DotsC_DictionaryInt64KeyToIndex(System.Int64 typeId,
+                                                                           System.Int32 parameter,
+                                                                           System.Int64 key);
+
+        [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
+        internal static extern System.Int32 DotsC_DictionaryStringKeyToIndex(System.Int64 typeId,
+                                                                            System.Int32 parameter,
+                                                                            System.IntPtr key);
+
+        [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
+        internal static extern System.Int32 DotsC_DictionaryEntityIdKeyToIndex(System.Int64 typeId,
+                                                                              System.Int32 parameter,
+                                                                              DotsC_EntityId key);
+
+        //********************************************************
+        //* Operations on blobs
+        //********************************************************
+
+        //GetTypeId
+        [DllImport(DOTS_KERNEL_NAME, CallingConvention = CallingConvention.Cdecl)]
+        internal static extern System.Int64 DotsC_GetTypeId(System.IntPtr blob);
+
+        //GetSize
+        [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
+        internal static extern System.Int32 DotsC_GetSize(System.IntPtr blob);
+
+        //CreateBlob
+        [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
+        internal static extern System.IntPtr DotsC_AllocateBlob(System.Int32 size);
+
+        //CreateAndCopyBlob
+        [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
+        internal static extern void DotsC_CreateCopyOfBlob(out System.IntPtr to,
+                                                           System.IntPtr from);
+
+        //DeleteBlob
+        [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
+        internal static extern void DotsC_DeleteBlob(ref System.IntPtr blob);
+
+        //************************************************************************************
+        //* Read operations
+        //************************************************************************************
+        [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
+        internal static extern System.Int64 DotsC_CreateBlobReader(System.IntPtr blob);
+
+        [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
+        internal static extern void DotsC_DeleteBlobReader(System.Int64 handle);
+
+
+        [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
+        internal static extern System.Int32 DotsC_GetNumberOfMemberValues(System.Int64 readerHandle,
+                                                                         System.Int32 member);
+
+        [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
+        internal static extern void DotsC_ReadMemberStatus(System.Int64 readerHandle,
+                                                           out byte isNull,
+                                                           out byte isChanged,
+                                                           System.Int32 member,
+                                                           System.Int32 valueIndex);
+
+        [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
+        internal static extern byte DotsC_ReadTopLevelChangeFlag(System.Int64 readerHandle,
                                                                  System.Int32 member);
 
-		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
-		internal static extern void DotsC_ReadInt32Member(System.Int64 readerHandle,
-		                                                  out System.Int32 val,
-		                                                  out byte isNull,
-		                                                  out byte isChanged,
-		                                                  System.Int32 member,
-		                                                  System.Int32 valueIndex,
-		                                                  KeyValMode keyValMode);
+        [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
+        internal static extern void DotsC_ReadInt32Member(System.Int64 readerHandle,
+                                                          out System.Int32 val,
+                                                          out byte isNull,
+                                                          out byte isChanged,
+                                                          System.Int32 member,
+                                                          System.Int32 valueIndex,
+                                                          KeyValMode keyValMode);
 
-		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
-		internal static extern void DotsC_ReadInt64Member(System.Int64 readerHandle,
-		                                                  out System.Int64 val,
-		                                                  out byte isNull,
-		                                                  out byte isChanged,
-		                                                  System.Int32 member,
-		                                                  System.Int32 valueIndex,
-		                                                  KeyValMode keyValMode);
+        [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
+        internal static extern void DotsC_ReadInt64Member(System.Int64 readerHandle,
+                                                          out System.Int64 val,
+                                                          out byte isNull,
+                                                          out byte isChanged,
+                                                          System.Int32 member,
+                                                          System.Int32 valueIndex,
+                                                          KeyValMode keyValMode);
 
-		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
-		internal static extern void DotsC_ReadFloat32Member(System.Int64 readerHandle,
-		                                                  out float val,
-		                                                  out byte isNull,
-		                                                  out byte isChanged,
-		                                                  System.Int32 member,
-		                                                  System.Int32 valueIndex,
-		                                                  KeyValMode keyValMode);
+        [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
+        internal static extern void DotsC_ReadFloat32Member(System.Int64 readerHandle,
+                                                          out float val,
+                                                          out byte isNull,
+                                                          out byte isChanged,
+                                                          System.Int32 member,
+                                                          System.Int32 valueIndex,
+                                                          KeyValMode keyValMode);
 
 
-		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
-		internal static extern void DotsC_ReadFloat64Member(System.Int64 readerHandle,
-		                                                    out double val,
-		                                                    out byte isNull,
-		                                                    out byte isChanged,
-		                                                    System.Int32 member,
-		                                                    System.Int32 valueIndex,
-		                                                    KeyValMode keyValMode);
+        [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
+        internal static extern void DotsC_ReadFloat64Member(System.Int64 readerHandle,
+                                                            out double val,
+                                                            out byte isNull,
+                                                            out byte isChanged,
+                                                            System.Int32 member,
+                                                            System.Int32 valueIndex,
+                                                            KeyValMode keyValMode);
 
-		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
-		internal static extern void DotsC_ReadBooleanMember(System.Int64 readerHandle,
-		                                                    out byte val,
-		                                                    out byte isNull,
-		                                                    out byte isChanged,
-		                                                    System.Int32 member,
-		                                                    System.Int32 valueIndex,
-		                                                    KeyValMode keyValMode);
+        [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
+        internal static extern void DotsC_ReadBooleanMember(System.Int64 readerHandle,
+                                                            out byte val,
+                                                            out byte isNull,
+                                                            out byte isChanged,
+                                                            System.Int32 member,
+                                                            System.Int32 valueIndex,
+                                                            KeyValMode keyValMode);
 
-		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
-		internal static extern void DotsC_ReadStringMember(System.Int64 readerHandle,
-		                                                    out System.IntPtr val,
-		                                                    out byte isNull,
-		                                                    out byte isChanged,
-		                                                    System.Int32 member,
-		                                                    System.Int32 valueIndex,
-		                                                    KeyValMode keyValMode);
+        [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
+        internal static extern void DotsC_ReadStringMember(System.Int64 readerHandle,
+                                                            out System.IntPtr val,
+                                                            out byte isNull,
+                                                            out byte isChanged,
+                                                            System.Int32 member,
+                                                            System.Int32 valueIndex,
+                                                            KeyValMode keyValMode);
 
-		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
-		internal static extern void DotsC_ReadHashedMember(System.Int64 readerHandle,
-		                                                   out System.Int64 val,
-		                                                   out System.IntPtr optionalStr,
-		                                                   out byte isNull,
-		                                                   out byte isChanged,
-		                                                   System.Int32 member,
-		                                                   System.Int32 valueIndex,
-		                                                   KeyValMode keyValMode);
+        [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
+        internal static extern void DotsC_ReadHashedMember(System.Int64 readerHandle,
+                                                           out System.Int64 val,
+                                                           out System.IntPtr optionalStr,
+                                                           out byte isNull,
+                                                           out byte isChanged,
+                                                           System.Int32 member,
+                                                           System.Int32 valueIndex,
+                                                           KeyValMode keyValMode);
 
-		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
-		internal static extern void DotsC_ReadEntityIdMember(System.Int64 readerHandle,
-		                                                     out DotsC_EntityId val,
-		                                                   	 out System.IntPtr optionalStr,
-			                                                 out byte isNull,
-			                                                 out byte isChanged,
-			                                                 System.Int32 member,
-			                                                 System.Int32 valueIndex,
-			                                                 KeyValMode keyValMode);
+        [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
+        internal static extern void DotsC_ReadEntityIdMember(System.Int64 readerHandle,
+                                                             out DotsC_EntityId val,
+                                                                out System.IntPtr optionalStr,
+                                                             out byte isNull,
+                                                             out byte isChanged,
+                                                             System.Int32 member,
+                                                             System.Int32 valueIndex,
+                                                             KeyValMode keyValMode);
 
-		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
-		internal static extern void DotsC_ReadBinaryMember(System.Int64 readerHandle,
-		                                                     out System.IntPtr val,
-		                                                   	 out System.Int32 size,
-		                                                     out byte isNull,
-		                                                     out byte isChanged,
-		                                                     System.Int32 member,
-		                                                     System.Int32 valueIndex,
-		                                                     KeyValMode keyValMode);
+        [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
+        internal static extern void DotsC_ReadBinaryMember(System.Int64 readerHandle,
+                                                             out System.IntPtr val,
+                                                                out System.Int32 size,
+                                                             out byte isNull,
+                                                             out byte isChanged,
+                                                             System.Int32 member,
+                                                             System.Int32 valueIndex,
+                                                             KeyValMode keyValMode);
 
-		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
-		internal static extern void DotsC_ReadObjectMember(System.Int64 readerHandle,
-		                                                   out System.IntPtr val,
-		                                                   out byte isNull,
-		                                                   out byte isChanged,
-		                                                   System.Int32 member,
-		                                                   System.Int32 valueIndex,
-		                                                   KeyValMode keyValMode);
+        [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
+        internal static extern void DotsC_ReadObjectMember(System.Int64 readerHandle,
+                                                           out System.IntPtr val,
+                                                           out byte isNull,
+                                                           out byte isChanged,
+                                                           System.Int32 member,
+                                                           System.Int32 valueIndex,
+                                                           KeyValMode keyValMode);
 
-		//************************************************************************************
-		//* Write operations
-		//************************************************************************************
-		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
-		internal static extern System.Int64 DotsC_CreateBlobWriter(System.Int64 typeId);
+        //************************************************************************************
+        //* Write operations
+        //************************************************************************************
+        [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
+        internal static extern System.Int64 DotsC_CreateBlobWriter(System.Int64 typeId);
 
-		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
-		internal static extern System.Int64 DotsC_CreateBlobWriterFromBlob(System.IntPtr blob);
+        [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
+        internal static extern System.Int64 DotsC_CreateBlobWriterFromBlob(System.IntPtr blob);
 
-		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
-		internal static extern System.Int64 DotsC_CreateBlobWriterFromReader(System.Int64 readerHandle);
+        [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
+        internal static extern System.Int64 DotsC_CreateBlobWriterFromReader(System.Int64 readerHandle);
 
-		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
-		internal static extern void DotsC_DeleteBlobWriter(System.Int64 writerHandle);
+        [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
+        internal static extern void DotsC_DeleteBlobWriter(System.Int64 writerHandle);
 
-		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
+        [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
         internal static extern System.Int32 DotsC_CalculateBlobSize(System.Int64 writerHandle);
 
-		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
-		internal static extern void DotsC_WriteBlob(System.Int64 writerHandle, System.IntPtr blob);
+        [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
+        internal static extern void DotsC_WriteBlob(System.Int64 writerHandle, System.IntPtr blob);
 
-		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
-		internal static extern void DotsC_WriteAllChangeFlags(System.Int64 writerHandle, byte changed);
+        [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
+        internal static extern void DotsC_WriteAllChangeFlags(System.Int64 writerHandle, byte changed);
 
-		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
-		internal static extern void DotsC_WriteChangeFlag(System.Int64 writerHandle,
+        [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
+        internal static extern void DotsC_WriteChangeFlag(System.Int64 writerHandle,
                                                           System.Int32 member,
                                                           System.Int32 index,
                                                           byte changed);
 
         [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
-		internal static extern void DotsC_WriteTopLevelChangeFlag(System.Int64 writerHandle,
+        internal static extern void DotsC_WriteTopLevelChangeFlag(System.Int64 writerHandle,
                                                                   System.Int32 member,
                                                                   byte changed);
 
-		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
-		internal static extern byte DotsC_MarkChanges(System.Int64 originalReader,
-		                                              System.Int64 currentWriter);
+        [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
+        internal static extern byte DotsC_MarkChanges(System.Int64 originalReader,
+                                                      System.Int64 currentWriter);
 
-		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
-		internal static extern void DotsC_WriteInt32Member(System.Int64 writerHandle, System.Int32 val, byte isNull, byte isChanged,
-		                                                   System.Int32 member, System.Int32 arrayIndex, KeyValMode keyValMode);
+        [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
+        internal static extern void DotsC_WriteInt32Member(System.Int64 writerHandle, System.Int32 val, byte isNull, byte isChanged,
+                                                           System.Int32 member, System.Int32 arrayIndex, KeyValMode keyValMode);
 
-		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
-		internal static extern void DotsC_WriteInt64Member(System.Int64 writerHandle, System.Int64 val, byte isNull, byte isChanged, 
-		                                                   System.Int32 member, System.Int32 arrayIndex, KeyValMode keyValMode);
+        [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
+        internal static extern void DotsC_WriteInt64Member(System.Int64 writerHandle, System.Int64 val, byte isNull, byte isChanged, 
+                                                           System.Int32 member, System.Int32 arrayIndex, KeyValMode keyValMode);
 
-		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
-		internal static extern void DotsC_WriteFloat32Member(System.Int64 writerHandle, float val, byte isNull, byte isChanged, 
-		                                                     System.Int32 member, System.Int32 arrayIndex, KeyValMode keyValMode);
+        [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
+        internal static extern void DotsC_WriteFloat32Member(System.Int64 writerHandle, float val, byte isNull, byte isChanged, 
+                                                             System.Int32 member, System.Int32 arrayIndex, KeyValMode keyValMode);
 
-		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
-		internal static extern void DotsC_WriteFloat64Member(System.Int64 writerHandle, double val, byte isNull, byte isChanged, 
-		                                                     System.Int32 member, System.Int32 arrayIndex, KeyValMode keyValMode);
+        [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
+        internal static extern void DotsC_WriteFloat64Member(System.Int64 writerHandle, double val, byte isNull, byte isChanged, 
+                                                             System.Int32 member, System.Int32 arrayIndex, KeyValMode keyValMode);
 
-		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
-		internal static extern void DotsC_WriteBooleanMember(System.Int64 writerHandle, byte val, byte isNull, byte isChanged, 
-		                                                     System.Int32 member, System.Int32 arrayIndex, KeyValMode keyValMode);
+        [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
+        internal static extern void DotsC_WriteBooleanMember(System.Int64 writerHandle, byte val, byte isNull, byte isChanged, 
+                                                             System.Int32 member, System.Int32 arrayIndex, KeyValMode keyValMode);
 
-		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
-		internal static extern void DotsC_WriteStringMember(System.Int64 writerHandle, System.IntPtr val, byte isNull, byte isChanged, 
-		                                                    System.Int32 member, System.Int32 arrayIndex, KeyValMode keyValMode);
+        [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
+        internal static extern void DotsC_WriteStringMember(System.Int64 writerHandle, System.IntPtr val, byte isNull, byte isChanged, 
+                                                            System.Int32 member, System.Int32 arrayIndex, KeyValMode keyValMode);
 
-		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
-		internal static extern void DotsC_WriteHashedMember(System.Int64 writerHandle, System.Int64 hash, System.IntPtr str, byte isNull, byte isChanged, 
-		                                                    System.Int32 member, System.Int32 arrayIndex, KeyValMode keyValMode);
+        [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
+        internal static extern void DotsC_WriteHashedMember(System.Int64 writerHandle, System.Int64 hash, System.IntPtr str, byte isNull, byte isChanged, 
+                                                            System.Int32 member, System.Int32 arrayIndex, KeyValMode keyValMode);
 
-		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
-		internal static extern void DotsC_WriteEntityIdMember(System.Int64 writerHandle, DotsC_EntityId val, System.IntPtr instanceString, byte isNull, byte isChanged, 
-		                                                      System.Int32 member, System.Int32 arrayIndex, KeyValMode keyValMode);
+        [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
+        internal static extern void DotsC_WriteEntityIdMember(System.Int64 writerHandle, DotsC_EntityId val, System.IntPtr instanceString, byte isNull, byte isChanged, 
+                                                              System.Int32 member, System.Int32 arrayIndex, KeyValMode keyValMode);
 
-		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
+        [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
         internal static extern void DotsC_WriteBinaryMember(System.Int64 writerHandle, System.IntPtr val, System.Int32 size, byte isNull, byte isChanged, 
-		                                                    System.Int32 member, System.Int32 arrayIndex, KeyValMode keyValMode);
+                                                            System.Int32 member, System.Int32 arrayIndex, KeyValMode keyValMode);
 
-		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
-		internal static extern void DotsC_WriteObjectMember(System.Int64 writerHandle, System.IntPtr blob, byte isNull, byte isChanged, 
-		                                                    System.Int32 member, System.Int32 arrayIndex, KeyValMode keyValMode);
+        [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
+        internal static extern void DotsC_WriteObjectMember(System.Int64 writerHandle, System.IntPtr blob, byte isNull, byte isChanged, 
+                                                            System.Int32 member, System.Int32 arrayIndex, KeyValMode keyValMode);
 
-		//************************************************************************************
-		//* Library exception handling
-		//************************************************************************************
+        //************************************************************************************
+        //* Library exception handling
+        //************************************************************************************
         //DotsC_SetException
         [DllImport(DOTS_KERNEL_NAME, CallingConvention = CallingConvention.Cdecl)]
         internal static extern void DotsC_SetException(System.Int64 exceptionId,
                                                        System.IntPtr description);
 
-		[DllImport(DOTS_KERNEL_NAME, CallingConvention = CallingConvention.Cdecl)]
-		internal static extern void DotsC_AppendExceptionDescription(System.IntPtr moreDescription);
+        [DllImport(DOTS_KERNEL_NAME, CallingConvention = CallingConvention.Cdecl)]
+        internal static extern void DotsC_AppendExceptionDescription(System.IntPtr moreDescription);
 
 
         //DotsC_GetAndClearException
@@ -662,21 +662,21 @@ namespace Safir.Dob.Typesystem.Internal
         [DllImport(DOTS_KERNEL_NAME, CallingConvention = CallingConvention.Cdecl)]
         internal static extern void DotsC_PeekAtException(out System.Int64 exceptionId);
 
-		//************************************************************************************
-		//* Functions mostly indended for debugging
-		//************************************************************************************
+        //************************************************************************************
+        //* Functions mostly indended for debugging
+        //************************************************************************************
         //DotsC_GetDouFilePathForType
         [DllImport(DOTS_KERNEL_NAME, CallingConvention = CallingConvention.Cdecl)]
-		internal static extern System.IntPtr DotsC_GetDouFilePath(System.Int64 typeId);
+        internal static extern System.IntPtr DotsC_GetDouFilePath(System.Int64 typeId);
 
-		[DllImport(DOTS_KERNEL_NAME, CallingConvention = CallingConvention.Cdecl)]
-		internal static extern byte DotsC_TypeRepositoryLoadedByThisProcess();
+        [DllImport(DOTS_KERNEL_NAME, CallingConvention = CallingConvention.Cdecl)]
+        internal static extern byte DotsC_TypeRepositoryLoadedByThisProcess();
 
-		[DllImport(DOTS_KERNEL_NAME, CallingConvention = CallingConvention.Cdecl)]
-		internal static extern void DotsC_GetTypeDescription(System.Int64 typeId,
-		                                              		 System.IntPtr buf,
-		                                              		 System.Int32 bufSize,
-		                                              		 out System.Int32 resultSize);
+        [DllImport(DOTS_KERNEL_NAME, CallingConvention = CallingConvention.Cdecl)]
+        internal static extern void DotsC_GetTypeDescription(System.Int64 typeId,
+                                                               System.IntPtr buf,
+                                                               System.Int32 bufSize,
+                                                               out System.Int32 resultSize);
 
 
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 4)]

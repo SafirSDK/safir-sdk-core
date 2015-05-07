@@ -173,14 +173,14 @@ public class EntityId implements Comparable<EntityId> {
      * @return -1 if this instance is less than other, 1 if this is bigger, else 0.
      */
     @Override
-	public int compareTo(EntityId other) {
-    	if (m_typeId<other.m_typeId)
-    		return -1;
-    	else if (m_typeId>other.m_typeId)
-    		return 1;
-    	else
-    		return m_instanceId.compareTo(other.m_instanceId);
-	}
+    public int compareTo(EntityId other) {
+        if (m_typeId<other.m_typeId)
+            return -1;
+        else if (m_typeId>other.m_typeId)
+            return 1;
+        else
+            return m_instanceId.compareTo(other.m_instanceId);
+    }
 
     private long m_typeId = 0;
     private InstanceId m_instanceId;

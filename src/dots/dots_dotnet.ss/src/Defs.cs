@@ -191,20 +191,20 @@ namespace Safir.Dob.Typesystem
     /// <summary>
     /// Types of collections that a member can be.
     /// </summary>
-	public enum CollectionType
-	{
+    public enum CollectionType
+    {
         /// <summary>Member is a single member, i.e not a collection at all.</summary>
-		SingleValueCollectionType = 0,
+        SingleValueCollectionType = 0,
 
         /// <summary>Member is an array.</summary>
-		ArrayCollectionType,
+        ArrayCollectionType,
 
         /// <summary>Member is a Sequence.</summary>
-		SequenceCollectionType,
+        SequenceCollectionType,
 
         /// <summary>Member is a Dictionary.</summary>
-		DictionaryCollectionType
-	}
+        DictionaryCollectionType
+    }
 
     /// <summary>
     /// Used to control whether an operation controls value or key elements.

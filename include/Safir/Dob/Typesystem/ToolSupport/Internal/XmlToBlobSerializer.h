@@ -136,152 +136,152 @@ namespace Internal
                 switch (md->GetCollectionType())
                 {
                 case SingleValueCollectionType:
-                {
-                    //non-array, then the inner propertyTree contains the content, i.e <myInt>123</myInt>
-                    try
                     {
-                        SetMember(md, memIx, 0, memIt->second, 0, writer);
+                        //non-array, then the inner propertyTree contains the content, i.e <myInt>123</myInt>
+                        try
+                        {
+                            SetMember(md, memIx, 0, memIt->second, 0, writer);
+                        }
+                        catch (boost::property_tree::ptree_error&)
+                        {
+                            std::ostringstream os;
+                            os<<"Failed to serialize member '"<<cd->GetName()<<"."<<md->GetName()<<"' from xml to binary. Type is incorrect.";
+                            throw ParseError("XmlToBinary serialization error", os.str(), "", 153);
+                        }
                     }
-                    catch (boost::property_tree::ptree_error&)
-                    {
-                        std::ostringstream os;
-                        os<<"Failed to serialize member '"<<cd->GetName()<<"."<<md->GetName()<<"' from xml to binary. Type is incorrect.";
-                        throw ParseError("XmlToBinary serialization error", os.str(), "", 153);
-                    }
-                }
                     break;
 
                 case ArrayCollectionType:
-                {
-                    //array, then the inner propertyTree contains array element and the array elements contains the content
-                    //i.e <myIntArray><Int32 index=0>1</Int32><Int32 index=5>2</Int32></myIntArray>
-                    int arrayIndex=0;
-                    bool usesIndexAttr=(!memIt->second.empty() && memIt->second.begin()->second.get_optional<int>("<xmlattr>.index")) ? true : false;
-
-                    for (boost::property_tree::ptree::iterator arrIt=memIt->second.begin(); arrIt!=memIt->second.end(); ++arrIt)
                     {
-                        boost::optional<int> index=arrIt->second.get_optional<int>("<xmlattr>.index");
-                        if (usesIndexAttr)
+                        //array, then the inner propertyTree contains array element and the array elements contains the content
+                        //i.e <myIntArray><Int32 index=0>1</Int32><Int32 index=5>2</Int32></myIntArray>
+                        int arrayIndex=0;
+                        bool usesIndexAttr=(!memIt->second.empty() && memIt->second.begin()->second.get_optional<int>("<xmlattr>.index")) ? true : false;
+
+                        for (boost::property_tree::ptree::iterator arrIt=memIt->second.begin(); arrIt!=memIt->second.end(); ++arrIt)
                         {
-                            //we expect an index attribute on every array element
-                            if (index)
+                            boost::optional<int> index=arrIt->second.get_optional<int>("<xmlattr>.index");
+                            if (usesIndexAttr)
                             {
-                                arrayIndex=*index;
+                                //we expect an index attribute on every array element
+                                if (index)
+                                {
+                                    arrayIndex=*index;
+                                }
+                                else
+                                {
+                                    std::ostringstream os;
+                                    os<<"Serialization from xml to binary failed because the xml of array member '"<<md->GetName()<<"' is missing index-attribute";
+                                    throw ParseError("XmlToBinary serialization error", os.str(), "", 156);
+                                }
                             }
-                            else
+                            else if (index) //not usesIndexAttr but got it anyway
+                            {
+                                //We got an index attribute but does not expect it since it has not been present for every previous array elements
+                                std::ostringstream os;
+                                os<<"Serialization from xml to binary failed because the xml of array member '"<<md->GetName()<<"' is contains an unexpected index-attribute. Index must be present on every array element or none. Not just some of them!";
+                                throw ParseError("XmlToBinary serialization error", os.str(), "", 176);
+                            }
+
+                            if (md->GetArraySize()<=arrayIndex)
                             {
                                 std::ostringstream os;
-                                os<<"Serialization from xml to binary failed because the xml of array member '"<<md->GetName()<<"' is missing index-attribute";
-                                throw ParseError("XmlToBinary serialization error", os.str(), "", 156);
+                                os<<"Failed to serialize array member '"<<cd->GetName()<<"."<<md->GetName()<<"' with index="<<arrayIndex<<" from xml to binary. Index out of range. ArraySize is "<<md->GetArraySize();
+                                throw ParseError("XmlToBinary serialization error", os.str(), "", 154);
                             }
-                        }
-                        else if (index) //not usesIndexAttr but got it anyway
-                        {
-                            //We got an index attribute but does not expect it since it has not been present for every previous array elements
-                            std::ostringstream os;
-                            os<<"Serialization from xml to binary failed because the xml of array member '"<<md->GetName()<<"' is contains an unexpected index-attribute. Index must be present on every array element or none. Not just some of them!";
-                            throw ParseError("XmlToBinary serialization error", os.str(), "", 176);
-                        }
 
-                        if (md->GetArraySize()<=arrayIndex)
-                        {
-                            std::ostringstream os;
-                            os<<"Failed to serialize array member '"<<cd->GetName()<<"."<<md->GetName()<<"' with index="<<arrayIndex<<" from xml to binary. Index out of range. ArraySize is "<<md->GetArraySize();
-                            throw ParseError("XmlToBinary serialization error", os.str(), "", 154);
-                        }
+                            try
+                            {
+                                SetMember(md, memIx, arrayIndex, arrIt->second, 0, writer);
+                            }
+                            catch (boost::property_tree::ptree_error&)
+                            {
+                                std::ostringstream os;
+                                os<<"Failed to serialize array member '"<<cd->GetName()<<"."<<md->GetName()<<"' with index="<<arrayIndex<<" from xml to binary. Type is incorrect.";
+                                throw ParseError("XmlToBinary serialization error", os.str(), "", 155);
+                            }
 
-                        try
-                        {
-                            SetMember(md, memIx, arrayIndex, arrIt->second, 0, writer);
+                            ++arrayIndex;
                         }
-                        catch (boost::property_tree::ptree_error&)
-                        {
-                            std::ostringstream os;
-                            os<<"Failed to serialize array member '"<<cd->GetName()<<"."<<md->GetName()<<"' with index="<<arrayIndex<<" from xml to binary. Type is incorrect.";
-                            throw ParseError("XmlToBinary serialization error", os.str(), "", 155);
-                        }
-
-                        ++arrayIndex;
                     }
-                }
                     break;
 
                 case SequenceCollectionType:
-                {
-                    int count=0;
-                    for (boost::property_tree::ptree::iterator seqIt=memIt->second.begin(); seqIt!=memIt->second.end(); ++seqIt)
                     {
-                        try
+                        int count=0;
+                        for (boost::property_tree::ptree::iterator seqIt=memIt->second.begin(); seqIt!=memIt->second.end(); ++seqIt)
                         {
-                            SetMember(md, memIx, 0, seqIt->second, 0, writer);
-                        }
-                        catch (const ParseError&)
-                        {
-                            throw;
-                        }
-                        catch (...)
-                        {
-                            std::ostringstream os;
-                            os<<"Failed to serialize sequence member '"<<cd->GetName()<<"."<<md->GetName()<<"' with index="<<count<<" from xml to binary. Type is incorrect.";
-                            throw ParseError("XmlToBinary serialization error", os.str(), "", 193);
-                        }
+                            try
+                            {
+                                SetMember(md, memIx, 0, seqIt->second, 0, writer);
+                            }
+                            catch (const ParseError&)
+                            {
+                                throw;
+                            }
+                            catch (...)
+                            {
+                                std::ostringstream os;
+                                os<<"Failed to serialize sequence member '"<<cd->GetName()<<"."<<md->GetName()<<"' with index="<<count<<" from xml to binary. Type is incorrect.";
+                                throw ParseError("XmlToBinary serialization error", os.str(), "", 193);
+                            }
 
-                        ++count;
+                            ++count;
+                        }
+                        writer.SetChangedTopLevel(memIx,true);
                     }
-                    writer.SetChangedTopLevel(memIx,true);
-                }
                     break;
 
                 case DictionaryCollectionType:
-                {
-                    int entryCount=0;
-                    for (boost::property_tree::ptree::iterator entryIt=memIt->second.begin(); entryIt!=memIt->second.end(); ++entryIt)
                     {
-                        ++entryCount;
+                        int entryCount=0;
+                        for (boost::property_tree::ptree::iterator entryIt=memIt->second.begin(); entryIt!=memIt->second.end(); ++entryIt)
+                        {
+                            ++entryCount;
 
-                        if (entryIt->second.size()>2) //there shall at most 2 subelements, key and value. If no value, key->NULL
-                        {
-                            throw "Wrong number of subelements";
-                        }
-                        boost::property_tree::ptree* keyTree=NULL;
-                        boost::property_tree::ptree* valTree=NULL;
+                            if (entryIt->second.size()>2) //there shall at most 2 subelements, key and value. If no value, key->NULL
+                            {
+                                throw "Wrong number of subelements";
+                            }
+                            boost::property_tree::ptree* keyTree=NULL;
+                            boost::property_tree::ptree* valTree=NULL;
 
-                        for (boost::property_tree::ptree::iterator entryContentIt=entryIt->second.begin(); entryContentIt!=entryIt->second.end(); ++entryContentIt)
-                        {
-                            if (entryContentIt->first=="key")
+                            for (boost::property_tree::ptree::iterator entryContentIt=entryIt->second.begin(); entryContentIt!=entryIt->second.end(); ++entryContentIt)
                             {
-                                keyTree=&(entryContentIt->second);
+                                if (entryContentIt->first=="key")
+                                {
+                                    keyTree=&(entryContentIt->second);
+                                }
+                                else
+                                {
+                                    valTree=&(entryContentIt->second);
+                                }
                             }
-                            else
-                            {
-                                valTree=&(entryContentIt->second);
-                            }
-                        }
 
-                        if (keyTree==NULL)
-                        {
-                            throw "No key element";
-                        }
+                            if (keyTree==NULL)
+                            {
+                                throw "No key element";
+                            }
 
-                        try
-                        {
-                            if (valTree!=NULL)
+                            try
                             {
-                                SetMember(md, memIx, 0, *valTree, *keyTree, writer);
+                                if (valTree!=NULL)
+                                {
+                                    SetMember(md, memIx, 0, *valTree, *keyTree, writer);
+                                }
+                                else
+                                {
+                                    SetKeyWithNullValue(md, memIx, *keyTree, writer);
+                                }
                             }
-                            else
+                            catch (boost::property_tree::ptree_error&)
                             {
-                                SetKeyWithNullValue(md, memIx, *keyTree, writer);
+                                std::ostringstream os;
+                                os<<"Failed to serialize dictionary member '"<<cd->GetName()<<"."<<md->GetName()<<"'. Key or value is incorrect. (Hint it's the "<<entryCount<<":th dictionary entry).";
+                                throw ParseError("XmlToBinary serialization error", os.str(), "", 207);
                             }
-                        }
-                        catch (boost::property_tree::ptree_error&)
-                        {
-                            std::ostringstream os;
-                            os<<"Failed to serialize dictionary member '"<<cd->GetName()<<"."<<md->GetName()<<"'. Key or value is incorrect. (Hint it's the "<<entryCount<<":th dictionary entry).";
-                            throw ParseError("XmlToBinary serialization error", os.str(), "", 207);
                         }
                     }
-                }
                     break;
                 }
             }
@@ -302,53 +302,53 @@ namespace Internal
             switch(md->GetKeyType())
             {
             case Int32MemberType:
-            {
-                SerializationUtils::SetKeyWithNullValue(memIx, boost::lexical_cast<DotsC_Int32>(keyContent.data()), writer);
-            }
+                {
+                    SerializationUtils::SetKeyWithNullValue(memIx, boost::lexical_cast<DotsC_Int32>(keyContent.data()), writer);
+                }
                 break;
 
             case Int64MemberType:
-            {
-                SerializationUtils::SetKeyWithNullValue(memIx, boost::lexical_cast<DotsC_Int64>(keyContent.data()), writer);
-            }
+                {
+                    SerializationUtils::SetKeyWithNullValue(memIx, boost::lexical_cast<DotsC_Int64>(keyContent.data()), writer);
+                }
                 break;
 
             case TypeIdMemberType:
-            {
-                DotsC_TypeId tid=SerializationUtils::StringToTypeId(keyContent.data());
-                SerializationUtils::SetKeyWithNullValue(memIx, tid, writer);
-            }
+                {
+                    DotsC_TypeId tid=SerializationUtils::StringToTypeId(keyContent.data());
+                    SerializationUtils::SetKeyWithNullValue(memIx, tid, writer);
+                }
                 break;
 
             case StringMemberType:
-            {
-                SerializationUtils::SetKeyWithNullValue(memIx, keyContent.data().c_str(), writer);
-            }
+                {
+                    SerializationUtils::SetKeyWithNullValue(memIx, keyContent.data().c_str(), writer);
+                }
                 break;
 
             case EntityIdMemberType:
-            {
-                const std::string inst = keyContent.get<std::string>("instanceId");
-                std::pair<DotsC_EntityId, const char*> eid=SerializationUtils::StringToEntityId(keyContent.get<std::string>("name"), inst);
-                SerializationUtils::SetKeyWithNullValue(memIx, eid, writer);
-            }
+                {
+                    const std::string inst = keyContent.get<std::string>("instanceId");
+                    std::pair<DotsC_EntityId, const char*> eid=SerializationUtils::StringToEntityId(keyContent.get<std::string>("name"), inst);
+                    SerializationUtils::SetKeyWithNullValue(memIx, eid, writer);
+                }
                 break;
 
             case InstanceIdMemberType:
             case HandlerIdMemberType:
             case ChannelIdMemberType:
-            {
-                std::pair<DotsC_Int64, const char*> hash=SerializationUtils::StringToHash(keyContent.data());
-                SerializationUtils::SetKeyWithNullValue(memIx, hash, writer);
-            }
+                {
+                    std::pair<DotsC_Int64, const char*> hash=SerializationUtils::StringToHash(keyContent.data());
+                    SerializationUtils::SetKeyWithNullValue(memIx, hash, writer);
+                }
                 break;
 
             case EnumerationMemberType:
-            {
-                const EnumDescriptionType* ed=m_repository->GetEnum(md->GetKeyTypeId());
-                DotsC_EnumerationValue enumVal=TypeUtilities::GetIndexOfEnumValue(ed, keyContent.data());
-                SerializationUtils::SetKeyWithNullValue(memIx, enumVal, writer);
-            }
+                {
+                    const EnumDescriptionType* ed=m_repository->GetEnum(md->GetKeyTypeId());
+                    DotsC_EnumerationValue enumVal=TypeUtilities::GetIndexOfEnumValue(ed, keyContent.data());
+                    SerializationUtils::SetKeyWithNullValue(memIx, enumVal, writer);
+                }
                 break;
 
             default:
@@ -366,53 +366,53 @@ namespace Internal
             switch(md->GetKeyType())
             {
             case Int32MemberType:
-            {
-                SetMember(md, memIx, arrIx, memberContent, boost::lexical_cast<DotsC_Int32>(keyContent.data()), writer);
-            }
+                {
+                    SetMember(md, memIx, arrIx, memberContent, boost::lexical_cast<DotsC_Int32>(keyContent.data()), writer);
+                }
                 break;
 
             case Int64MemberType:
-            {
-                SetMember(md, memIx, arrIx, memberContent, boost::lexical_cast<DotsC_Int64>(keyContent.data()), writer);
-            }
+                {
+                    SetMember(md, memIx, arrIx, memberContent, boost::lexical_cast<DotsC_Int64>(keyContent.data()), writer);
+                }
                 break;
 
             case TypeIdMemberType:
-            {
-                DotsC_TypeId tid=SerializationUtils::StringToTypeId(keyContent.data());
-                SetMember(md, memIx, arrIx, memberContent, tid, writer);
-            }
+                {
+                    DotsC_TypeId tid=SerializationUtils::StringToTypeId(keyContent.data());
+                    SetMember(md, memIx, arrIx, memberContent, tid, writer);
+                }
                 break;
 
             case StringMemberType:
-            {
-                SetMember(md, memIx, arrIx, memberContent, keyContent.data().c_str(), writer);
-            }
+                {
+                    SetMember(md, memIx, arrIx, memberContent, keyContent.data().c_str(), writer);
+                }
                 break;
 
             case EntityIdMemberType:
-            {
-                const std::string inst = keyContent.get<std::string>("instanceId");
-                std::pair<DotsC_EntityId, const char*> eid=SerializationUtils::StringToEntityId(keyContent.get<std::string>("name"), inst);
-                SetMember(md, memIx, arrIx, memberContent, eid, writer);
-            }
+                {
+                    const std::string inst = keyContent.get<std::string>("instanceId");
+                    std::pair<DotsC_EntityId, const char*> eid=SerializationUtils::StringToEntityId(keyContent.get<std::string>("name"), inst);
+                    SetMember(md, memIx, arrIx, memberContent, eid, writer);
+                }
                 break;
 
             case InstanceIdMemberType:
             case HandlerIdMemberType:
             case ChannelIdMemberType:
-            {
-                std::pair<DotsC_Int64, const char*> hash=SerializationUtils::StringToHash(keyContent.data());
-                SetMember(md, memIx, arrIx, memberContent, hash, writer);
-            }
+                {
+                    std::pair<DotsC_Int64, const char*> hash=SerializationUtils::StringToHash(keyContent.data());
+                    SetMember(md, memIx, arrIx, memberContent, hash, writer);
+                }
                 break;
 
             case EnumerationMemberType:
-            {
-                const EnumDescriptionType* ed=m_repository->GetEnum(md->GetKeyTypeId());
-                DotsC_EnumerationValue enumVal=TypeUtilities::GetIndexOfEnumValue(ed, keyContent.data());
-                SetMember(md, memIx, arrIx, memberContent, enumVal, writer);
-            }
+                {
+                    const EnumDescriptionType* ed=m_repository->GetEnum(md->GetKeyTypeId());
+                    DotsC_EnumerationValue enumVal=TypeUtilities::GetIndexOfEnumValue(ed, keyContent.data());
+                    SetMember(md, memIx, arrIx, memberContent, enumVal, writer);
+                }
                 break;
 
             default:

@@ -89,24 +89,24 @@ public class NamespaceMappings {
         return namespace.toLowerCase() + className;
     }
 
-    static private String readNamespacePrefix(String filename){    	
+    static private String readNamespacePrefix(String filename){        
         BufferedReader reader = null;
-    	try{
+        try{
             File mappingFile = new File(filename);
             reader = new BufferedReader(new FileReader(mappingFile));
 
             try {
-	            while(reader.ready()) {
-	                String line = reader.readLine();
-	                if (line.matches("^[a-zA-Z][a-zA-Z\\.]+")) {
-	                    return line.trim();
-	                }
-	            }
+                while(reader.ready()) {
+                    String line = reader.readLine();
+                    if (line.matches("^[a-zA-Z][a-zA-Z\\.]+")) {
+                        return line.trim();
+                    }
+                }
             }
             finally {
-        		if (reader!=null)
-        			reader.close();
-        	}
+                if (reader!=null)
+                    reader.close();
+            }
         }
         catch(java.io.FileNotFoundException exc) {
             exc.printStackTrace();
@@ -114,7 +114,7 @@ public class NamespaceMappings {
         catch(java.io.IOException exc) {
             exc.printStackTrace();
         }
-    	
+        
         throw new SoftwareViolationException("Failed to find a valid namespace in " + filename);
     }
 

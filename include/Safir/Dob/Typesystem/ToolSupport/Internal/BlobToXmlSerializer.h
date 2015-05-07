@@ -81,74 +81,74 @@ namespace Internal
                 switch (md->GetCollectionType())
                 {
                 case SingleValueCollectionType:
-                {
-                    SerializeMember(reader, md, memberIx, 0, md->GetName(), os);
-                }
+                    {
+                        SerializeMember(reader, md, memberIx, 0, md->GetName(), os);
+                    }
                     break;
 
                 case ArrayCollectionType:
-                {
-                    const char* typeName=Safir::Dob::Typesystem::ToolSupport::TypeUtilities::GetTypeName(m_repository, md);
-
-                    //find first non-null value in array
-                    DotsC_Int32 arrIx=0;
-                    bool isNull=true, isChanged=true;
-                    while (arrIx<md->GetArraySize())
                     {
-                        reader.ReadStatus(memberIx, arrIx, isNull, isChanged);
-                        if (!isNull)
-                        {
-                            break;
-                        }
-                        ++arrIx;
-                    }
+                        const char* typeName=Safir::Dob::Typesystem::ToolSupport::TypeUtilities::GetTypeName(m_repository, md);
 
-                    if (arrIx<md->GetArraySize()) //only add array if it contains non-null values
-                    {
-                        os<<"<"<<md->GetName()<<">";
-                        for (DotsC_Int32 arrIx=0; arrIx<md->GetArraySize(); ++arrIx)
+                        //find first non-null value in array
+                        DotsC_Int32 arrIx=0;
+                        bool isNull=true, isChanged=true;
+                        while (arrIx<md->GetArraySize())
                         {
-                            SerializeMember(reader, md, memberIx, arrIx, typeName, os);
+                            reader.ReadStatus(memberIx, arrIx, isNull, isChanged);
+                            if (!isNull)
+                            {
+                                break;
+                            }
+                            ++arrIx;
                         }
-                        os<<"</"<<md->GetName()<<">";
+
+                        if (arrIx<md->GetArraySize()) //only add array if it contains non-null values
+                        {
+                            os<<"<"<<md->GetName()<<">";
+                            for (DotsC_Int32 arrIx=0; arrIx<md->GetArraySize(); ++arrIx)
+                            {
+                                SerializeMember(reader, md, memberIx, arrIx, typeName, os);
+                            }
+                            os<<"</"<<md->GetName()<<">";
+                        }
                     }
-                }
                     break;
 
                 case SequenceCollectionType:
-                {
-                    const char* typeName=Safir::Dob::Typesystem::ToolSupport::TypeUtilities::GetTypeName(m_repository, md);
-                    int numberOfValues=reader.NumberOfValues(memberIx);
-                    if (numberOfValues>0)
                     {
-                        os<<"<"<<md->GetName()<<">";
-                        for (DotsC_Int32 valueIndex=0; valueIndex<numberOfValues; ++valueIndex)
+                        const char* typeName=Safir::Dob::Typesystem::ToolSupport::TypeUtilities::GetTypeName(m_repository, md);
+                        int numberOfValues=reader.NumberOfValues(memberIx);
+                        if (numberOfValues>0)
                         {
-                            SerializeMember(reader, md, memberIx, valueIndex, typeName, os);
+                            os<<"<"<<md->GetName()<<">";
+                            for (DotsC_Int32 valueIndex=0; valueIndex<numberOfValues; ++valueIndex)
+                            {
+                                SerializeMember(reader, md, memberIx, valueIndex, typeName, os);
+                            }
+                            os<<"</"<<md->GetName()<<">";
                         }
-                        os<<"</"<<md->GetName()<<">";
                     }
-                }
                     break;
 
                 case DictionaryCollectionType:
-                {
-                    const char* typeName=md->GetMemberType()!=ObjectMemberType ? "value" : Safir::Dob::Typesystem::ToolSupport::TypeUtilities::GetTypeName(m_repository, md);
-                    int numberOfValues=reader.NumberOfValues(memberIx);
-                    if (numberOfValues>0)
                     {
-                        os<<"<"<<md->GetName()<<">";
-                        for (DotsC_Int32 valueIndex=0; valueIndex<numberOfValues; ++valueIndex)
+                        const char* typeName=md->GetMemberType()!=ObjectMemberType ? "value" : Safir::Dob::Typesystem::ToolSupport::TypeUtilities::GetTypeName(m_repository, md);
+                        int numberOfValues=reader.NumberOfValues(memberIx);
+                        if (numberOfValues>0)
                         {
-                            os<<"<entry>";
-                            SerializeKey(reader, md, memberIx, valueIndex, os);
-                            SerializeMember(reader, md, memberIx, valueIndex, typeName, os);
-                            os<<"</entry>";
+                            os<<"<"<<md->GetName()<<">";
+                            for (DotsC_Int32 valueIndex=0; valueIndex<numberOfValues; ++valueIndex)
+                            {
+                                os<<"<entry>";
+                                SerializeKey(reader, md, memberIx, valueIndex, os);
+                                SerializeMember(reader, md, memberIx, valueIndex, typeName, os);
+                                os<<"</entry>";
+                            }
+                            os<<"</"<<md->GetName()<<">";
                         }
-                        os<<"</"<<md->GetName()<<">";
-                    }
 
-                }
+                    }
                     break;
                 }
             }
@@ -201,61 +201,61 @@ namespace Internal
         }
 
         void SerializeKey(const BlobReader<RepositoryType>& reader,
-                             const MemberDescriptionType* md,
-                             DotsC_MemberIndex memberIndex,
-                             DotsC_Int32 valueIndex,
-                             std::ostream& os) const
+                          const MemberDescriptionType* md,
+                          DotsC_MemberIndex memberIndex,
+                          DotsC_Int32 valueIndex,
+                          std::ostream& os) const
         {
             os<<"<key>";
 
             switch(md->GetKeyType())
             {
             case Int32MemberType:
-            {
-                os<<reader.template ReadKey<DotsC_Int32>(memberIndex, valueIndex);
-            }
+                {
+                    os<<reader.template ReadKey<DotsC_Int32>(memberIndex, valueIndex);
+                }
                 break;
             case Int64MemberType:
-            {
-                os<<reader.template ReadKey<DotsC_Int64>(memberIndex, valueIndex);
-            }
+                {
+                    os<<reader.template ReadKey<DotsC_Int64>(memberIndex, valueIndex);
+                }
                 break;
             case EnumerationMemberType:
-            {
-                os<<m_repository->GetEnum(md->GetKeyTypeId())->GetValueName(reader.template ReadKey<DotsC_EnumerationValue>(memberIndex, valueIndex));
-            }
+                {
+                    os<<m_repository->GetEnum(md->GetKeyTypeId())->GetValueName(reader.template ReadKey<DotsC_EnumerationValue>(memberIndex, valueIndex));
+                }
                 break;
             case EntityIdMemberType:
-            {
-                std::pair<DotsC_EntityId, const char*> eid=reader.template ReadKey< std::pair<DotsC_EntityId, const char*> >(memberIndex, valueIndex);
-                os<<"<name>"<<TypeUtilities::GetTypeName(m_repository, eid.first.typeId)<<"</name>";
-                if (eid.second)
-                    os<<"<instanceId>"<<eid.second<<"</instanceId>";
-                else
-                    os<<"<instanceId>"<<eid.first.instanceId<<"</instanceId>";
-            }
+                {
+                    std::pair<DotsC_EntityId, const char*> eid=reader.template ReadKey< std::pair<DotsC_EntityId, const char*> >(memberIndex, valueIndex);
+                    os<<"<name>"<<TypeUtilities::GetTypeName(m_repository, eid.first.typeId)<<"</name>";
+                    if (eid.second)
+                        os<<"<instanceId>"<<eid.second<<"</instanceId>";
+                    else
+                        os<<"<instanceId>"<<eid.first.instanceId<<"</instanceId>";
+                }
                 break;
             case TypeIdMemberType:
-            {
-                os<<TypeUtilities::GetTypeName(m_repository, reader.template ReadKey<DotsC_TypeId>(memberIndex, valueIndex));
-            }
+                {
+                    os<<TypeUtilities::GetTypeName(m_repository, reader.template ReadKey<DotsC_TypeId>(memberIndex, valueIndex));
+                }
                 break;
             case InstanceIdMemberType:
             case ChannelIdMemberType:
             case HandlerIdMemberType:
-            {
-                std::pair<DotsC_Int64, const char*> hash=reader.template ReadKey< std::pair<DotsC_Int64, const char*> >(memberIndex, valueIndex);
-                if (hash.second)
-                    os<<hash.second;
-                else
-                    os<<hash.first;
-            }
+                {
+                    std::pair<DotsC_Int64, const char*> hash=reader.template ReadKey< std::pair<DotsC_Int64, const char*> >(memberIndex, valueIndex);
+                    if (hash.second)
+                        os<<hash.second;
+                    else
+                        os<<hash.first;
+                }
                 break;
 
             case StringMemberType:
-            {
-                os<<reader.template ReadKey<const char*>(memberIndex, valueIndex);
-            }
+                {
+                    os<<reader.template ReadKey<const char*>(memberIndex, valueIndex);
+                }
                 break;
 
             default:
@@ -280,199 +280,199 @@ namespace Internal
             switch(md->GetMemberType())
             {
             case BooleanMemberType:
-            {
-                bool val=true;
-                reader.ReadValue(memberIndex, arrayIndex, val, isNull, isChanged);
-                if (!isNull)
                 {
-                    WriteStartElement(elementName, arrayIndex, md->GetCollectionType()==ArrayCollectionType, os);
-                    os<<(val ? "true" : "false");
-                    os<<"</"<<elementName<<">";
+                    bool val=true;
+                    reader.ReadValue(memberIndex, arrayIndex, val, isNull, isChanged);
+                    if (!isNull)
+                    {
+                        WriteStartElement(elementName, arrayIndex, md->GetCollectionType()==ArrayCollectionType, os);
+                        os<<(val ? "true" : "false");
+                        os<<"</"<<elementName<<">";
+                    }
                 }
-            }
                 break;
 
             case EnumerationMemberType:
-            {
-                DotsC_EnumerationValue val=0;
-                reader.ReadValue(memberIndex, arrayIndex, val, isNull, isChanged);
-                if (!isNull)
                 {
-                    const char* enumVal=m_repository->GetEnum(md->GetTypeId())->GetValueName(val);
-                    WriteStartElement(elementName, arrayIndex, md->GetCollectionType()==ArrayCollectionType, os);
-                    os<<enumVal;
-                    os<<"</"<<elementName<<">";
+                    DotsC_EnumerationValue val=0;
+                    reader.ReadValue(memberIndex, arrayIndex, val, isNull, isChanged);
+                    if (!isNull)
+                    {
+                        const char* enumVal=m_repository->GetEnum(md->GetTypeId())->GetValueName(val);
+                        WriteStartElement(elementName, arrayIndex, md->GetCollectionType()==ArrayCollectionType, os);
+                        os<<enumVal;
+                        os<<"</"<<elementName<<">";
+                    }
                 }
-            }
                 break;
 
             case Int32MemberType:
-            {
-                DotsC_Int32 val=0;
-                reader.ReadValue(memberIndex, arrayIndex, val, isNull, isChanged);
-                if (!isNull)
                 {
-                    WriteStartElement(elementName, arrayIndex, md->GetCollectionType()==ArrayCollectionType, os);
-                    os<<val;
-                    os<<"</"<<elementName<<">";
+                    DotsC_Int32 val=0;
+                    reader.ReadValue(memberIndex, arrayIndex, val, isNull, isChanged);
+                    if (!isNull)
+                    {
+                        WriteStartElement(elementName, arrayIndex, md->GetCollectionType()==ArrayCollectionType, os);
+                        os<<val;
+                        os<<"</"<<elementName<<">";
+                    }
                 }
-            }
                 break;
 
             case Int64MemberType:
-            {
-                DotsC_Int64 val=0;
-                reader.ReadValue(memberIndex, arrayIndex, val, isNull, isChanged);
-                if (!isNull)
                 {
-                    WriteStartElement(elementName, arrayIndex, md->GetCollectionType()==ArrayCollectionType, os);
-                    os<<val;
-                    os<<"</"<<elementName<<">";
+                    DotsC_Int64 val=0;
+                    reader.ReadValue(memberIndex, arrayIndex, val, isNull, isChanged);
+                    if (!isNull)
+                    {
+                        WriteStartElement(elementName, arrayIndex, md->GetCollectionType()==ArrayCollectionType, os);
+                        os<<val;
+                        os<<"</"<<elementName<<">";
+                    }
                 }
-            }
                 break;
 
             case TypeIdMemberType:
-            {
-                DotsC_Int64 val=0;
-                reader.ReadValue(memberIndex, arrayIndex, val, isNull, isChanged);
-                if (!isNull)
                 {
-                    WriteStartElement(elementName, arrayIndex, md->GetCollectionType()==ArrayCollectionType, os);
-
-                    const char* typeName=TypeUtilities::GetTypeName(m_repository, val);
-                    if (typeName)
+                    DotsC_Int64 val=0;
+                    reader.ReadValue(memberIndex, arrayIndex, val, isNull, isChanged);
+                    if (!isNull)
                     {
-                        os<<typeName;
-                    }
-                    else
-                    {
-                        os<<val;
-                    }
+                        WriteStartElement(elementName, arrayIndex, md->GetCollectionType()==ArrayCollectionType, os);
 
-                    os<<"</"<<elementName<<">";
+                        const char* typeName=TypeUtilities::GetTypeName(m_repository, val);
+                        if (typeName)
+                        {
+                            os<<typeName;
+                        }
+                        else
+                        {
+                            os<<val;
+                        }
+
+                        os<<"</"<<elementName<<">";
+                    }
                 }
-            }
                 break;
 
             case InstanceIdMemberType:
             case ChannelIdMemberType:
             case HandlerIdMemberType:
-            {
-                std::pair<DotsC_Int64, const char*> val;
-                reader.ReadValue(memberIndex, arrayIndex, val, isNull, isChanged);
-                if (!isNull)
                 {
-                    WriteStartElement(elementName, arrayIndex, md->GetCollectionType()==ArrayCollectionType, os);
-                    if (val.second)
+                    std::pair<DotsC_Int64, const char*> val;
+                    reader.ReadValue(memberIndex, arrayIndex, val, isNull, isChanged);
+                    if (!isNull)
                     {
-                        os<<val.second;
+                        WriteStartElement(elementName, arrayIndex, md->GetCollectionType()==ArrayCollectionType, os);
+                        if (val.second)
+                        {
+                            os<<val.second;
+                        }
+                        else
+                        {
+                            os<<val.first;
+                        }
+                        os<<"</"<<elementName<<">";
                     }
-                    else
-                    {
-                        os<<val.first;
-                    }
-                    os<<"</"<<elementName<<">";
                 }
-            }
                 break;
 
             case EntityIdMemberType:
-            {
-                std::pair<DotsC_EntityId, const char*> val;
-                reader.ReadValue(memberIndex, arrayIndex, val, isNull, isChanged);
-                if (!isNull)
                 {
-                    WriteStartElement(elementName, arrayIndex, md->GetCollectionType()==ArrayCollectionType, os);
+                    std::pair<DotsC_EntityId, const char*> val;
+                    reader.ReadValue(memberIndex, arrayIndex, val, isNull, isChanged);
+                    if (!isNull)
+                    {
+                        WriteStartElement(elementName, arrayIndex, md->GetCollectionType()==ArrayCollectionType, os);
 
-                    const char* typeName=TypeUtilities::GetTypeName(m_repository, val.first.typeId);
-                    if (typeName)
-                    {
-                        os<<"<name>"<<typeName<<"</name>";
-                    }
-                    else
-                    {
-                        os<<"<name>"<<val.first.typeId<<"</name>";
-                    }
+                        const char* typeName=TypeUtilities::GetTypeName(m_repository, val.first.typeId);
+                        if (typeName)
+                        {
+                            os<<"<name>"<<typeName<<"</name>";
+                        }
+                        else
+                        {
+                            os<<"<name>"<<val.first.typeId<<"</name>";
+                        }
 
-                    if (val.second)
-                    {
-                        os<<"<instanceId>"<<val.second<<"</instanceId>";
-                    }
-                    else
-                    {
-                        os<<"<instanceId>"<<val.first.instanceId<<"</instanceId>";
-                    }
+                        if (val.second)
+                        {
+                            os<<"<instanceId>"<<val.second<<"</instanceId>";
+                        }
+                        else
+                        {
+                            os<<"<instanceId>"<<val.first.instanceId<<"</instanceId>";
+                        }
 
-                    os<<"</"<<elementName<<">";
+                        os<<"</"<<elementName<<">";
+                    }
                 }
-            }
                 break;
 
             case StringMemberType:
-            {
-                const char* val=NULL;
-                reader.ReadValue(memberIndex, arrayIndex, val, isNull, isChanged);
-                if (!isNull)
                 {
-                    if (md->GetCollectionType()!=ArrayCollectionType)
+                    const char* val=NULL;
+                    reader.ReadValue(memberIndex, arrayIndex, val, isNull, isChanged);
+                    if (!isNull)
                     {
-                        os<<"<"<<elementName<<" xml:space=\"preserve\">";
+                        if (md->GetCollectionType()!=ArrayCollectionType)
+                        {
+                            os<<"<"<<elementName<<" xml:space=\"preserve\">";
+                        }
+                        else
+                        {
+                            os<<"<"<<elementName<<" index=\""<<arrayIndex<<"\" xml:space=\"preserve\">";
+                        }
+                        WriteString(val, os);
+                        os<<"</"<<elementName<<">";
                     }
-                    else
-                    {
-                        os<<"<"<<elementName<<" index=\""<<arrayIndex<<"\" xml:space=\"preserve\">";
-                    }
-                    WriteString(val, os);
-                    os<<"</"<<elementName<<">";
                 }
-            }
                 break;
 
             case ObjectMemberType:
-            {
-                std::pair<const char*, DotsC_Int32> val; //blob and size
-                reader.ReadValue(memberIndex, arrayIndex, val, isNull, isChanged);
-                if (!isNull)
                 {
-                    bool typesDiffer=BlobReader<RepositoryType>::GetTypeId(val.first)!=md->GetTypeId();
+                    std::pair<const char*, DotsC_Int32> val; //blob and size
+                    reader.ReadValue(memberIndex, arrayIndex, val, isNull, isChanged);
+                    if (!isNull)
+                    {
+                        bool typesDiffer=BlobReader<RepositoryType>::GetTypeId(val.first)!=md->GetTypeId();
 
-                    if (typesDiffer) //we only need to add typeAttribute if types are not same as declared in dou (differ by inheritance)
-                    {
-                        os<<"<"<<elementName<<" type=\""<<GetClass(val.first)->GetName()<<"\"";
-                    }
-                    else
-                    {
-                        os<<"<"<<elementName;
-                    }
+                        if (typesDiffer) //we only need to add typeAttribute if types are not same as declared in dou (differ by inheritance)
+                        {
+                            os<<"<"<<elementName<<" type=\""<<GetClass(val.first)->GetName()<<"\"";
+                        }
+                        else
+                        {
+                            os<<"<"<<elementName;
+                        }
 
-                    if (md->GetCollectionType()!=ArrayCollectionType)
-                    {
-                        os<<">";
-                    }
-                    else
-                    {
-                        os<<" index=\""<<arrayIndex<<"\">";
-                    }
+                        if (md->GetCollectionType()!=ArrayCollectionType)
+                        {
+                            os<<">";
+                        }
+                        else
+                        {
+                            os<<" index=\""<<arrayIndex<<"\">";
+                        }
 
-                    SerializeMembers(val.first, os);
-                    os<<"</"<<elementName<<">";
+                        SerializeMembers(val.first, os);
+                        os<<"</"<<elementName<<">";
+                    }
                 }
-            }
                 break;
 
             case BinaryMemberType:
-            {
-                std::pair<const char*, DotsC_Int32> val; //blob and size
-                reader.ReadValue(memberIndex, arrayIndex, val, isNull, isChanged);
-                if (!isNull)
                 {
-                    WriteStartElement(elementName, arrayIndex, md->GetCollectionType()==ArrayCollectionType, os);
-                    std::string bin(val.first, static_cast<size_t>(val.second));
-                    os<<SerializationUtils::ToBase64(bin);
-                    os<<"</"<<elementName<<">";
+                    std::pair<const char*, DotsC_Int32> val; //blob and size
+                    reader.ReadValue(memberIndex, arrayIndex, val, isNull, isChanged);
+                    if (!isNull)
+                    {
+                        WriteStartElement(elementName, arrayIndex, md->GetCollectionType()==ArrayCollectionType, os);
+                        std::string bin(val.first, static_cast<size_t>(val.second));
+                        os<<SerializationUtils::ToBase64(bin);
+                        os<<"</"<<elementName<<">";
+                    }
                 }
-            }
                 break;
 
                 //  32 bit floats
@@ -496,16 +496,16 @@ namespace Internal
             case Steradian32MemberType:
             case Volt32MemberType:
             case Watt32MemberType:
-            {
-                DotsC_Float32 val=0;
-                reader.ReadValue(memberIndex, arrayIndex, val, isNull, isChanged);
-                if (!isNull)
                 {
-                    WriteStartElement(elementName, arrayIndex, md->GetCollectionType()==ArrayCollectionType, os);
-                    os<<classic_string_cast<std::string>(val);
-                    os<<"</"<<elementName<<">";
+                    DotsC_Float32 val=0;
+                    reader.ReadValue(memberIndex, arrayIndex, val, isNull, isChanged);
+                    if (!isNull)
+                    {
+                        WriteStartElement(elementName, arrayIndex, md->GetCollectionType()==ArrayCollectionType, os);
+                        os<<classic_string_cast<std::string>(val);
+                        os<<"</"<<elementName<<">";
+                    }
                 }
-            }
                 break;
 
                 //  64 bit floats
@@ -529,16 +529,16 @@ namespace Internal
             case Steradian64MemberType:
             case Volt64MemberType:
             case Watt64MemberType:
-            {
-                DotsC_Float64 val=0;
-                reader.ReadValue(memberIndex, arrayIndex, val, isNull, isChanged);
-                if (!isNull)
                 {
-                    WriteStartElement(elementName, arrayIndex, md->GetCollectionType()==ArrayCollectionType, os);
-                    os<<classic_string_cast<std::string>(val);
-                    os<<"</"<<elementName<<">";
+                    DotsC_Float64 val=0;
+                    reader.ReadValue(memberIndex, arrayIndex, val, isNull, isChanged);
+                    if (!isNull)
+                    {
+                        WriteStartElement(elementName, arrayIndex, md->GetCollectionType()==ArrayCollectionType, os);
+                        os<<classic_string_cast<std::string>(val);
+                        os<<"</"<<elementName<<">";
+                    }
                 }
-            }
                 break;
             }
         }

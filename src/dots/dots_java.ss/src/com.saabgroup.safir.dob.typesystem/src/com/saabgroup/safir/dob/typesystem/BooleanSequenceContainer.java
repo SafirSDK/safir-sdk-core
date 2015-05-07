@@ -28,15 +28,15 @@ package com.saabgroup.safir.dob.typesystem;
 public class BooleanSequenceContainer
 extends ValueSequenceContainer<Boolean> {
 
-	public BooleanSequenceContainer() {
-		super();
-	}
-	
-	public BooleanSequenceContainer(BooleanSequenceContainer other) {
-		super(other);
-	}
-	
-	/**
+    public BooleanSequenceContainer() {
+        super();
+    }
+    
+    public BooleanSequenceContainer(BooleanSequenceContainer other) {
+        super(other);
+    }
+    
+    /**
      * @see com.saabgroup.safir.dob.typesystem.ValueSequenceContainer#clone()
      */
     @Override

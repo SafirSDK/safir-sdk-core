@@ -28,15 +28,15 @@ package com.saabgroup.safir.dob.typesystem;
 public class TypeIdSequenceContainer
 extends ValueSequenceContainer<Long> {
 
-	public TypeIdSequenceContainer() {
-		super();
-	}
-	
-	public TypeIdSequenceContainer(TypeIdSequenceContainer other) {
-		super(other);
-	}
-	
-	/**
+    public TypeIdSequenceContainer() {
+        super();
+    }
+    
+    public TypeIdSequenceContainer(TypeIdSequenceContainer other) {
+        super(other);
+    }
+    
+    /**
      * @see com.saabgroup.safir.dob.typesystem.ValueSequenceContainer#clone()
      */
     @Override

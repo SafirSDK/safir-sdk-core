@@ -709,7 +709,7 @@ namespace @_NAMESPACEV_@
              it!=m_@_MEMBER_@Member.end(); ++it)
 @@END_IF@@
 @@END_IF@@
-	    {
+        {
             Safir::Dob::Typesystem::Internal::BlobOperations::Set(it->first, false, false, handle, g_@_LOWER:MEMBER_@MemberIndex, 0, Safir::Dob::Typesystem::Internal::BlobOperations::KeyMode);
             Safir::Dob::Typesystem::Internal::BlobOperations::Set(it->second, handle, g_@_LOWER:MEMBER_@MemberIndex, 0);
          }

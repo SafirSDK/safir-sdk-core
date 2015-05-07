@@ -25,12 +25,12 @@ if (MSVC)
   TARGET_LINK_LIBRARIES(dose_internal PRIVATE
     PUBLIC
     ${Boost_THREAD_LIBRARY}
-	${Boost_SYSTEM_LIBRARY})
+    ${Boost_SYSTEM_LIBRARY})
 else()
   TARGET_LINK_LIBRARIES(dose_internal PRIVATE
     PUBLIC
     "$<BUILD_INTERFACE:${Boost_THREAD_LIBRARY}>"
-	"$<BUILD_INTERFACE:${Boost_SYSTEM_LIBRARY}>")
+    "$<BUILD_INTERFACE:${Boost_SYSTEM_LIBRARY}>")
 endif()
 
 if (UNIX)

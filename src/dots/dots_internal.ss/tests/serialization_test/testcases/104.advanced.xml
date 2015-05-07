@@ -9,12 +9,12 @@
     </MyStrings>
     <DictStringInt32>
       <entry>
-	<key>kalle</key>
-	<value>123</value>
+    <key>kalle</key>
+    <value>123</value>
       </entry>
       <entry>
-	<key>pelle</key>
-	<value>456</value>
+    <key>pelle</key>
+    <value>456</value>
       </entry>
     </DictStringInt32>
   </SingelItem>

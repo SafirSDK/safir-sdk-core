@@ -29,15 +29,15 @@ import com.saabgroup.safir.dob.typesystem.Float64SequenceContainer;
 public class PascalSequenceContainer
 extends Float64SequenceContainer {
 
-	public PascalSequenceContainer() {
-		super();
-	}
-	
-	public PascalSequenceContainer(PascalSequenceContainer other) {
-		super(other);
-	}
-	
-	/**
+    public PascalSequenceContainer() {
+        super();
+    }
+    
+    public PascalSequenceContainer(PascalSequenceContainer other) {
+        super(other);
+    }
+    
+    /**
      * @see com.saabgroup.safir.dob.typesystem.ValueContainer#clone()
      */
     @Override

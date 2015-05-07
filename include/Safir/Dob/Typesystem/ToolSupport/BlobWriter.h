@@ -192,26 +192,26 @@ namespace ToolSupport
             switch (m_memberDescription->GetCollectionType())
             {
             case SingleValueCollectionType:
-            {
-                m_valueIndex=0;
-                m_blob.SetChanged(m_memberIndex, m_valueIndex, isChanged);
-            }
+                {
+                    m_valueIndex=0;
+                    m_blob.SetChanged(m_memberIndex, m_valueIndex, isChanged);
+                }
                 break;
             case ArrayCollectionType:
-            {
-                m_valueIndex=index;
-                m_blob.SetChanged(m_memberIndex, m_valueIndex, isChanged);
-            }
+                {
+                    m_valueIndex=index;
+                    m_blob.SetChanged(m_memberIndex, m_valueIndex, isChanged);
+                }
                 break;
             case SequenceCollectionType:
-            {
-                m_valueIndex=m_blob.AddValue(m_memberIndex, isChanged);
-            }
+                {
+                    m_valueIndex=m_blob.AddValue(m_memberIndex, isChanged);
+                }
                 break;
             case DictionaryCollectionType:
-            {
-                m_blob.SetChanged(m_memberIndex, m_valueIndex, isChanged);
-            }
+                {
+                    m_blob.SetChanged(m_memberIndex, m_valueIndex, isChanged);
+                }
                 break;
             }
 
@@ -236,93 +236,93 @@ namespace ToolSupport
                 switch (md->GetCollectionType())
                 {
                 case SingleValueCollectionType:
-                {
-                    m_blob.SetChanged(memIx, 0, isChanged);
-                    if (md->GetMemberType()==ObjectMemberType)
                     {
-                        m_blob.ValueStatus(memIx, 0, isNull, dummy);
-                        if (!isNull)
+                        m_blob.SetChanged(memIx, 0, isChanged);
+                        if (md->GetMemberType()==ObjectMemberType)
                         {
-                            std::pair<const char*, DotsC_Int32> obj=m_blob.GetValueBinary(memIx, 0);
-                            BlobWriterType inner(BlobReaderType(m_repository, obj.first));
-                            inner.SetAllChangeFlags(isChanged);
-                            WriteValue(memIx, 0, inner, isNull, isChanged);
+                            m_blob.ValueStatus(memIx, 0, isNull, dummy);
+                            if (!isNull)
+                            {
+                                std::pair<const char*, DotsC_Int32> obj=m_blob.GetValueBinary(memIx, 0);
+                                BlobWriterType inner(BlobReaderType(m_repository, obj.first));
+                                inner.SetAllChangeFlags(isChanged);
+                                WriteValue(memIx, 0, inner, isNull, isChanged);
+                            }
                         }
                     }
-                }
                     break;
                 case ArrayCollectionType:
-                {
-                    if (md->GetMemberType()==ObjectMemberType)
                     {
-                        for (int valIx=0; valIx<m_blob.NumberOfValues(memIx); ++valIx)
+                        if (md->GetMemberType()==ObjectMemberType)
                         {
-                            m_blob.ValueStatus(memIx, valIx, isNull, dummy);
-                            if (isNull)
+                            for (int valIx=0; valIx<m_blob.NumberOfValues(memIx); ++valIx)
+                            {
+                                m_blob.ValueStatus(memIx, valIx, isNull, dummy);
+                                if (isNull)
+                                {
+                                    m_blob.SetChanged(memIx, valIx, isChanged);
+                                }
+                                else
+                                {
+                                    std::pair<const char*, DotsC_Int32> obj=m_blob.GetValueBinary(memIx, valIx);
+                                    BlobWriterType inner(BlobReaderType(m_repository, obj.first));
+                                    inner.SetAllChangeFlags(isChanged);
+                                    WriteValue(memIx, valIx, inner, isNull, isChanged);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            for (int valIx=0; valIx<m_blob.NumberOfValues(memIx); ++valIx)
                             {
                                 m_blob.SetChanged(memIx, valIx, isChanged);
                             }
-                            else
+                        }
+                    }
+                    break;
+                case SequenceCollectionType:
+                    {
+                        m_blob.SetChangedTopLevel(memIx, isChanged);
+                        if (md->GetMemberType()==ObjectMemberType)
+                        {
+                            MoveToMember(memIx);
+                            for (int valIx=0; valIx<m_blob.NumberOfValues(memIx); ++valIx)
                             {
-                                std::pair<const char*, DotsC_Int32> obj=m_blob.GetValueBinary(memIx, valIx);
-                                BlobWriterType inner(BlobReaderType(m_repository, obj.first));
-                                inner.SetAllChangeFlags(isChanged);
-                                WriteValue(memIx, valIx, inner, isNull, isChanged);
+                                m_blob.ValueStatus(memIx, valIx, isNull, dummy);
+                                if (!isNull)
+                                {
+                                    std::pair<const char*, DotsC_Int32> obj=m_blob.GetValueBinary(memIx, valIx);
+                                    BlobWriterType inner(BlobReaderType(m_repository, obj.first));
+                                    inner.SetAllChangeFlags(isChanged);
+                                    m_valueIndex=valIx;
+                                    WriteValue(inner);
+                                }
                             }
                         }
                     }
-                    else
+                    break;
+                case DictionaryCollectionType:
                     {
+                        m_blob.SetChangedTopLevel(memIx, isChanged);
+                        MoveToMember(memIx);
+
                         for (int valIx=0; valIx<m_blob.NumberOfValues(memIx); ++valIx)
                         {
                             m_blob.SetChanged(memIx, valIx, isChanged);
-                        }
-                    }
-                }
-                    break;
-                case SequenceCollectionType:
-                {
-                    m_blob.SetChangedTopLevel(memIx, isChanged);
-                    if (md->GetMemberType()==ObjectMemberType)
-                    {
-                        MoveToMember(memIx);
-                        for (int valIx=0; valIx<m_blob.NumberOfValues(memIx); ++valIx)
-                        {
-                            m_blob.ValueStatus(memIx, valIx, isNull, dummy);
-                            if (!isNull)
+                            if (md->GetMemberType()==ObjectMemberType)
                             {
-                                std::pair<const char*, DotsC_Int32> obj=m_blob.GetValueBinary(memIx, valIx);
-                                BlobWriterType inner(BlobReaderType(m_repository, obj.first));
-                                inner.SetAllChangeFlags(isChanged);
-                                m_valueIndex=valIx;
-                                WriteValue(inner);
+                                m_blob.ValueStatus(memIx, valIx, isNull, dummy);
+                                if (!isNull)
+                                {
+                                    std::pair<const char*, DotsC_Int32> obj=m_blob.GetValueBinary(memIx, valIx);
+                                    BlobWriterType inner(BlobReaderType(m_repository, obj.first));
+                                    inner.SetAllChangeFlags(isChanged);
+                                    m_valueIndex=valIx;
+                                    WriteValue(inner);
+                                }
                             }
                         }
                     }
-                }
-                    break;
-                case DictionaryCollectionType:
-                {
-                    m_blob.SetChangedTopLevel(memIx, isChanged);
-                    MoveToMember(memIx);
-
-                    for (int valIx=0; valIx<m_blob.NumberOfValues(memIx); ++valIx)
-                    {
-                        m_blob.SetChanged(memIx, valIx, isChanged);
-                        if (md->GetMemberType()==ObjectMemberType)
-                        {
-                            m_blob.ValueStatus(memIx, valIx, isNull, dummy);
-                            if (!isNull)
-                            {
-                                std::pair<const char*, DotsC_Int32> obj=m_blob.GetValueBinary(memIx, valIx);
-                                BlobWriterType inner(BlobReaderType(m_repository, obj.first));
-                                inner.SetAllChangeFlags(isChanged);
-                                m_valueIndex=valIx;
-                                WriteValue(inner);
-                            }
-                        }
-                    }
-                }
                     break;
                 }
             }
@@ -348,79 +348,79 @@ namespace ToolSupport
                 switch (md->GetCollectionType())
                 {
                 case SingleValueCollectionType:
-                {
-                    if (Diff(other, md, memIx, 0, 0))
                     {
-                        m_blob.SetChanged(memIx, 0, true);
-                        diff=true;
-                    }
-                }
-                    break;
-                case ArrayCollectionType:
-                {
-                    for (int valIx=0; valIx<md->GetArraySize(); ++valIx)
-                    {
-                        if (Diff(other, md, memIx, valIx, valIx))
+                        if (Diff(other, md, memIx, 0, 0))
                         {
-                            m_blob.SetChanged(memIx, valIx, true);
+                            m_blob.SetChanged(memIx, 0, true);
                             diff=true;
                         }
                     }
-                }
                     break;
-                case SequenceCollectionType:
-                {
-                    if (m_blob.NumberOfValues(memIx)!=other.NumberOfValues(memIx))
+                case ArrayCollectionType:
                     {
-                        diff=true;
-                        m_blob.SetChangedTopLevel(memIx, true);
-                    }
-                    else
-                    {
-                        for (int valIx=0; valIx<m_blob.NumberOfValues(memIx); ++valIx)
+                        for (int valIx=0; valIx<md->GetArraySize(); ++valIx)
                         {
                             if (Diff(other, md, memIx, valIx, valIx))
                             {
-                                m_blob.SetChangedTopLevel(memIx, true);
+                                m_blob.SetChanged(memIx, valIx, true);
                                 diff=true;
-                                break;
                             }
                         }
                     }
-                }
+                    break;
+                case SequenceCollectionType:
+                    {
+                        if (m_blob.NumberOfValues(memIx)!=other.NumberOfValues(memIx))
+                        {
+                            diff=true;
+                            m_blob.SetChangedTopLevel(memIx, true);
+                        }
+                        else
+                        {
+                            for (int valIx=0; valIx<m_blob.NumberOfValues(memIx); ++valIx)
+                            {
+                                if (Diff(other, md, memIx, valIx, valIx))
+                                {
+                                    m_blob.SetChangedTopLevel(memIx, true);
+                                    diff=true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
                     break;
                 case DictionaryCollectionType:
-                {
-                    //olika antal, eller någon i this som inte finns i other -> topLevel
-                    //different size, i.e top leve changed
-                    if (m_blob.NumberOfValues(memIx)!=other.NumberOfValues(memIx))
                     {
-                        m_blob.SetChangedTopLevel(memIx, true);
-                        diff=true;
-                    }
-
-                    typedef std::map<DotsC_Int64, int> Uki;
-                    Uki myUki, otherUki;
-                    UniversalKeyToIndex(m_blob, md, memIx, myUki);
-                    UniversalKeyToIndex(other, md, memIx, otherUki);
-
-                    for (Uki::const_iterator myIt=myUki.begin(); myIt!=myUki.end(); ++myIt)
-                    {
-                        Uki::const_iterator otherIt=otherUki.find(myIt->first);
-                        if (otherIt==otherUki.end())
+                        //olika antal, eller någon i this som inte finns i other -> topLevel
+                        //different size, i.e top leve changed
+                        if (m_blob.NumberOfValues(memIx)!=other.NumberOfValues(memIx))
                         {
-                            //not found, we have something that is new
                             m_blob.SetChangedTopLevel(memIx, true);
-                            m_blob.SetChanged(memIx, myIt->second, true);
                             diff=true;
                         }
-                        else if (Diff(other, md, memIx, myIt->second, otherIt->second))
+
+                        typedef std::map<DotsC_Int64, int> Uki;
+                        Uki myUki, otherUki;
+                        UniversalKeyToIndex(m_blob, md, memIx, myUki);
+                        UniversalKeyToIndex(other, md, memIx, otherUki);
+
+                        for (Uki::const_iterator myIt=myUki.begin(); myIt!=myUki.end(); ++myIt)
                         {
-                            m_blob.SetChanged(memIx, myIt->second, true);
-                            diff=true;
+                            Uki::const_iterator otherIt=otherUki.find(myIt->first);
+                            if (otherIt==otherUki.end())
+                            {
+                                //not found, we have something that is new
+                                m_blob.SetChangedTopLevel(memIx, true);
+                                m_blob.SetChanged(memIx, myIt->second, true);
+                                diff=true;
+                            }
+                            else if (Diff(other, md, memIx, myIt->second, otherIt->second))
+                            {
+                                m_blob.SetChanged(memIx, myIt->second, true);
+                                diff=true;
+                            }
                         }
                     }
-                }
                     break;
                 }
             }
@@ -446,18 +446,18 @@ namespace ToolSupport
                 switch (member->GetCollectionType())
                 {
                 case SingleValueCollectionType:
-                {
-                    m_blob.AddValue(memberIndex, false);
-                }
-                    break;
-
-                case ArrayCollectionType:
-                {
-                    for (int arrayIndex=0; arrayIndex<member->GetArraySize(); ++arrayIndex)
                     {
                         m_blob.AddValue(memberIndex, false);
                     }
-                }
+                    break;
+
+                case ArrayCollectionType:
+                    {
+                        for (int arrayIndex=0; arrayIndex<member->GetArraySize(); ++arrayIndex)
+                        {
+                            m_blob.AddValue(memberIndex, false);
+                        }
+                    }
                     break;
 
                 default:
@@ -558,7 +558,7 @@ namespace ToolSupport
         void WriteValue(const char* val)
         {
             assert(m_memberDescription->GetMemberType()==StringMemberType);
-             m_blob.SetValueString(m_memberIndex, m_valueIndex, val);
+            m_blob.SetValueString(m_memberIndex, m_valueIndex, val);
         }
 
         void WriteValue(const std::pair<DotsC_Int64, const char *>& val) //hashed val
@@ -645,39 +645,39 @@ namespace ToolSupport
 
                 case EntityIdMemberType:
                     return (m_blob.GetValueInt64(memberIndex, myValueIndex)!=other.GetValueInt64(memberIndex, otherValueIndex)) ||
-                            (m_blob.GetValueHash(memberIndex, myValueIndex)!=other.GetValueHash(memberIndex, otherValueIndex));
+                        (m_blob.GetValueHash(memberIndex, myValueIndex)!=other.GetValueHash(memberIndex, otherValueIndex));
 
                 case StringMemberType:
                     return strcmp(m_blob.GetValueString(memberIndex, myValueIndex), other.GetValueString(memberIndex, otherValueIndex))!=0;
 
                 case ObjectMemberType:
-                {
-                    std::pair<const char*, boost::int32_t> meInner=m_blob.GetValueBinary(memberIndex, myValueIndex);
-                    std::pair<const char*, boost::int32_t> otherInner=other.GetValueBinary(memberIndex, otherValueIndex);
-                    if (meInner.second!=otherInner.second || memcmp(meInner.first, otherInner.first, static_cast<size_t>(meInner.second))!=0)
                     {
-                        //not binary equal, something is probably different
-                        BlobWriterType inner(BlobReaderType(m_repository, meInner.first));
-                        BlobReaderType otherReader(m_repository, otherInner.first);
-                        bool diff=inner.MarkChanges(otherReader);
-                        if (diff)
+                        std::pair<const char*, boost::int32_t> meInner=m_blob.GetValueBinary(memberIndex, myValueIndex);
+                        std::pair<const char*, boost::int32_t> otherInner=other.GetValueBinary(memberIndex, otherValueIndex);
+                        if (meInner.second!=otherInner.second || memcmp(meInner.first, otherInner.first, static_cast<size_t>(meInner.second))!=0)
                         {
-                            MoveToMember(memberIndex);
-                            m_valueIndex=myValueIndex;
-                            WriteValue(inner);
-                            return true;
+                            //not binary equal, something is probably different
+                            BlobWriterType inner(BlobReaderType(m_repository, meInner.first));
+                            BlobReaderType otherReader(m_repository, otherInner.first);
+                            bool diff=inner.MarkChanges(otherReader);
+                            if (diff)
+                            {
+                                MoveToMember(memberIndex);
+                                m_valueIndex=myValueIndex;
+                                WriteValue(inner);
+                                return true;
+                            }
                         }
+                        return false;
                     }
-                    return false;
-                }
                     break;
 
                 case BinaryMemberType:
-                {
-                    std::pair<const char*, boost::int32_t> a=m_blob.GetValueBinary(memberIndex, myValueIndex);
-                    std::pair<const char*, boost::int32_t> b=other.GetValueBinary(memberIndex, otherValueIndex);
-                    return a.second!=b.second || memcmp(a.first, b.first, static_cast<size_t>(a.second))!=0;
-                }
+                    {
+                        std::pair<const char*, boost::int32_t> a=m_blob.GetValueBinary(memberIndex, myValueIndex);
+                        std::pair<const char*, boost::int32_t> b=other.GetValueBinary(memberIndex, otherValueIndex);
+                        return a.second!=b.second || memcmp(a.first, b.first, static_cast<size_t>(a.second))!=0;
+                    }
                     break;
 
                 case Float32MemberType:
@@ -739,52 +739,52 @@ namespace ToolSupport
             {
             case Int32MemberType:
             case EnumerationMemberType:
-            {
-                for (int i=0; i<blob.NumberOfValues(memberIndex); ++i)
                 {
-                     keyToIndex.insert(std::make_pair(TypeUtilities::ToUnifiedDictionaryKey(blob.GetKeyInt32(memberIndex, i)), i));
+                    for (int i=0; i<blob.NumberOfValues(memberIndex); ++i)
+                    {
+                        keyToIndex.insert(std::make_pair(TypeUtilities::ToUnifiedDictionaryKey(blob.GetKeyInt32(memberIndex, i)), i));
+                    }
                 }
-            }
                 break;
 
             case Int64MemberType:
             case TypeIdMemberType:
-            {
-                for (int i=0; i<blob.NumberOfValues(memberIndex); ++i)
                 {
-                     keyToIndex.insert(std::make_pair(TypeUtilities::ToUnifiedDictionaryKey(blob.GetKeyInt64(memberIndex, i)), i));
+                    for (int i=0; i<blob.NumberOfValues(memberIndex); ++i)
+                    {
+                        keyToIndex.insert(std::make_pair(TypeUtilities::ToUnifiedDictionaryKey(blob.GetKeyInt64(memberIndex, i)), i));
+                    }
                 }
-            }
                 break;
 
             case StringMemberType:
-            {
-                for (int i=0; i<blob.NumberOfValues(memberIndex); ++i)
                 {
-                     keyToIndex.insert(std::make_pair(TypeUtilities::ToUnifiedDictionaryKey(blob.GetKeyString(memberIndex, i)), i));
+                    for (int i=0; i<blob.NumberOfValues(memberIndex); ++i)
+                    {
+                        keyToIndex.insert(std::make_pair(TypeUtilities::ToUnifiedDictionaryKey(blob.GetKeyString(memberIndex, i)), i));
+                    }
                 }
-            }
                 break;
 
             case InstanceIdMemberType:
             case HandlerIdMemberType:
             case ChannelIdMemberType:
-            {
-                for (int i=0; i<blob.NumberOfValues(memberIndex); ++i)
                 {
-                     keyToIndex.insert(std::make_pair(TypeUtilities::ToUnifiedDictionaryKey(blob.GetKeyHash(memberIndex, i)), i));
+                    for (int i=0; i<blob.NumberOfValues(memberIndex); ++i)
+                    {
+                        keyToIndex.insert(std::make_pair(TypeUtilities::ToUnifiedDictionaryKey(blob.GetKeyHash(memberIndex, i)), i));
+                    }
                 }
-            }
                 break;
 
             case EntityIdMemberType:
-            {
-                for (int i=0; i<blob.NumberOfValues(memberIndex); ++i)
                 {
-                    DotsC_EntityId eid={blob.GetKeyInt64(memberIndex, i), blob.GetKeyHash(memberIndex, i)};
-                    keyToIndex.insert(std::make_pair(TypeUtilities::ToUnifiedDictionaryKey(eid), i));
+                    for (int i=0; i<blob.NumberOfValues(memberIndex); ++i)
+                    {
+                        DotsC_EntityId eid={blob.GetKeyInt64(memberIndex, i), blob.GetKeyHash(memberIndex, i)};
+                        keyToIndex.insert(std::make_pair(TypeUtilities::ToUnifiedDictionaryKey(eid), i));
+                    }
                 }
-            }
                 break;
 
             default:

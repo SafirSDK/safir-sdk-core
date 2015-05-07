@@ -88,13 +88,13 @@ public class Parameters {
      */
     public static String getName(long typeId, int parameter)
     {
-    	int[] memberType=new int[1];
-        String[] parameterName=new String[1];    	
-    	long[] complexType=new long[1];
-    	int[] collectionType=new int[1];
-    	int[] numberOfValues=new int[1];
-    	Kernel.GetParameterInfo(typeId, parameter, memberType, parameterName, complexType, collectionType, numberOfValues);
-    	
+        int[] memberType=new int[1];
+        String[] parameterName=new String[1];        
+        long[] complexType=new long[1];
+        int[] collectionType=new int[1];
+        int[] numberOfValues=new int[1];
+        Kernel.GetParameterInfo(typeId, parameter, memberType, parameterName, complexType, collectionType, numberOfValues);
+        
         return parameterName[0];
     }    
 
@@ -112,22 +112,22 @@ public class Parameters {
      */
     public static String getTypeName(long typeId, int parameter)
     {
-    	int[] memberType=new int[1];
-        String[] parameterName=new String[1];    	
-    	long[] complexType=new long[1];
-    	int[] collectionType=new int[1];
-    	int[] numberOfValues=new int[1];
-    	Kernel.GetParameterInfo(typeId, parameter, memberType, parameterName, complexType, collectionType, numberOfValues);
-    	
-    	MemberType mt=MemberType.values()[memberType[0]];
-    	if (mt==MemberType.OBJECT_MEMBER_TYPE || mt==MemberType.ENUMERATION_MEMBER_TYPE)
-    	{
+        int[] memberType=new int[1];
+        String[] parameterName=new String[1];        
+        long[] complexType=new long[1];
+        int[] collectionType=new int[1];
+        int[] numberOfValues=new int[1];
+        Kernel.GetParameterInfo(typeId, parameter, memberType, parameterName, complexType, collectionType, numberOfValues);
+        
+        MemberType mt=MemberType.values()[memberType[0]];
+        if (mt==MemberType.OBJECT_MEMBER_TYPE || mt==MemberType.ENUMERATION_MEMBER_TYPE)
+        {
             return Kernel.GetTypeName(complexType[0]);
-    	}
-    	else
-    	{
+        }
+        else
+        {
             return Kernel.MemberTypeName(memberType[0]);
-    	}
+        }
     }
     
     /**
@@ -142,14 +142,14 @@ public class Parameters {
      */
     public static MemberType getType(long typeId, int parameter)
     {
-    	int[] memberType=new int[1];
-        String[] parameterName=new String[1];    	
-    	long[] complexType=new long[1];
-    	int[] collectionType=new int[1];
-    	int[] numberOfValues=new int[1];
-    	Kernel.GetParameterInfo(typeId, parameter, memberType, parameterName, complexType, collectionType, numberOfValues);
-    	
-    	return MemberType.values()[memberType[0]];
+        int[] memberType=new int[1];
+        String[] parameterName=new String[1];        
+        long[] complexType=new long[1];
+        int[] collectionType=new int[1];
+        int[] numberOfValues=new int[1];
+        Kernel.GetParameterInfo(typeId, parameter, memberType, parameterName, complexType, collectionType, numberOfValues);
+        
+        return MemberType.values()[memberType[0]];
     }
 
     /**
@@ -164,14 +164,14 @@ public class Parameters {
      */
     public static int getArraySize(long typeId, int parameter)
     {
-    	int[] memberType=new int[1];
-        String[] parameterName=new String[1];    	
-    	long[] complexType=new long[1];
-    	int[] collectionType=new int[1];
-    	int[] numberOfValues=new int[1];
-    	Kernel.GetParameterInfo(typeId, parameter, memberType, parameterName, complexType, collectionType, numberOfValues);
-    	
-    	return numberOfValues[0];
+        int[] memberType=new int[1];
+        String[] parameterName=new String[1];        
+        long[] complexType=new long[1];
+        int[] collectionType=new int[1];
+        int[] numberOfValues=new int[1];
+        Kernel.GetParameterInfo(typeId, parameter, memberType, parameterName, complexType, collectionType, numberOfValues);
+        
+        return numberOfValues[0];
     }
 
 

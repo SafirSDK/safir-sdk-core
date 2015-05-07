@@ -28,15 +28,15 @@ package com.saabgroup.safir.dob.typesystem;
 public class Float64SequenceContainer
 extends ValueSequenceContainer<Double> {
 
-	public Float64SequenceContainer() {
-		super();
-	}
-	
-	public Float64SequenceContainer(Float64SequenceContainer other) {
-		super(other);
-	}
-	
-	/**
+    public Float64SequenceContainer() {
+        super();
+    }
+    
+    public Float64SequenceContainer(Float64SequenceContainer other) {
+        super(other);
+    }
+    
+    /**
      * @see com.saabgroup.safir.dob.typesystem.ValueSequenceContainer#clone()
      */
     @Override

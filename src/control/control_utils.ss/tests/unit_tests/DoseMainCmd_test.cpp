@@ -66,7 +66,7 @@ BOOST_AUTO_TEST_CASE( send_commands )
                                            {
                                                // cmd receiver has connected
 
-		                                       std::wcout << "The receiver has connected!" << std::endl;
+                                               std::wcout << "The receiver has connected!" << std::endl;
 
                                                cmdSender->StartDoseMain("Kalle",
                                                                         54321,
@@ -141,8 +141,8 @@ BOOST_AUTO_TEST_CASE( send_commands )
                                     }
 
                                     ));
-	cmdReceiver->Start();
-	cmdSender->Start();
+    cmdReceiver->Start();
+    cmdSender->Start();
 
     threads.join_all();
 

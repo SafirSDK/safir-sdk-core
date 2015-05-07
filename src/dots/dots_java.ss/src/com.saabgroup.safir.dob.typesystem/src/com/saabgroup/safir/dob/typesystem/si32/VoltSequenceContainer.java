@@ -29,15 +29,15 @@ import com.saabgroup.safir.dob.typesystem.Float32SequenceContainer;
 public class VoltSequenceContainer
 extends Float32SequenceContainer {
 
-	public VoltSequenceContainer() {
-		super();
-	}
-	
-	public VoltSequenceContainer(VoltSequenceContainer other) {
-		super(other);
-	}
-	
-	/**
+    public VoltSequenceContainer() {
+        super();
+    }
+    
+    public VoltSequenceContainer(VoltSequenceContainer other) {
+        super(other);
+    }
+    
+    /**
      * @see com.saabgroup.safir.dob.typesystem.ValueContainer#clone()
      */
     @Override

@@ -29,15 +29,15 @@ import com.saabgroup.safir.dob.typesystem.Float64SequenceContainer;
 public class NewtonSequenceContainer
 extends Float64SequenceContainer {
 
-	public NewtonSequenceContainer() {
-		super();
-	}
-	
-	public NewtonSequenceContainer(NewtonSequenceContainer other) {
-		super(other);
-	}
-	
-	/**
+    public NewtonSequenceContainer() {
+        super();
+    }
+    
+    public NewtonSequenceContainer(NewtonSequenceContainer other) {
+        super(other);
+    }
+    
+    /**
      * @see com.saabgroup.safir.dob.typesystem.ValueContainer#clone()
      */
     @Override

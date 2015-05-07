@@ -28,15 +28,15 @@ package com.saabgroup.safir.dob.typesystem;
 public class Int64SequenceContainer
 extends ValueSequenceContainer<Long> {
 
-	public Int64SequenceContainer() {
-		super();
-	}
-	
-	public Int64SequenceContainer(Int64SequenceContainer other) {
-		super(other);
-	}
-	
-	/**
+    public Int64SequenceContainer() {
+        super();
+    }
+    
+    public Int64SequenceContainer(Int64SequenceContainer other) {
+        super(other);
+    }
+    
+    /**
      * @see com.saabgroup.safir.dob.typesystem.ValueSequenceContainer#clone()
      */
     @Override

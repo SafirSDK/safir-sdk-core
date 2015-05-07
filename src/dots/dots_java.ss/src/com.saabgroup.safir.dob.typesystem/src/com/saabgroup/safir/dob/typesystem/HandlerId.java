@@ -210,14 +210,14 @@ public class HandlerId implements Comparable<HandlerId> {
      * @return -1 if this instance is less than other, 1 if this is bigger, else 0.
      */
     @Override
-	public int compareTo(HandlerId other) {
-		if (getRawValue()<other.getRawValue())
-			return -1;
-		else if (getRawValue()>other.getRawValue())
-			return 1;
-		else
-			return 0;
-	}
+    public int compareTo(HandlerId other) {
+        if (getRawValue()<other.getRawValue())
+            return -1;
+        else if (getRawValue()>other.getRawValue())
+            return 1;
+        else
+            return 0;
+    }
 
     private long m_handlerId = -1;
     private String m_handlerIdStr;

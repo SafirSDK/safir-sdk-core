@@ -29,15 +29,15 @@ import com.saabgroup.safir.dob.typesystem.Float64SequenceContainer;
 public class MeterSequenceContainer
 extends Float64SequenceContainer {
 
-	public MeterSequenceContainer() {
-		super();
-	}
-	
-	public MeterSequenceContainer(MeterSequenceContainer other) {
-		super(other);
-	}
-	
-	/**
+    public MeterSequenceContainer() {
+        super();
+    }
+    
+    public MeterSequenceContainer(MeterSequenceContainer other) {
+        super(other);
+    }
+    
+    /**
      * @see com.saabgroup.safir.dob.typesystem.ValueContainer#clone()
      */
     @Override

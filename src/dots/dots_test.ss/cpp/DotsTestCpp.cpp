@@ -8584,7 +8584,7 @@ void Test_IsProperty()
                 }
             }
             ++iter;
-        }   
+        }
 }
 void Test_IsEnumeration()
 {
@@ -8603,7 +8603,7 @@ void Test_IsEnumeration()
                 }
             }
             ++iter;
-        }   
+        }
 }
 void Test_IsException()
 {
@@ -8622,7 +8622,7 @@ void Test_IsException()
                 }
             }
             ++iter;
-        }   
+        }
 }
 
 void FileCheck(const std::wstring& path, const std::wstring& expectedName)
@@ -8652,7 +8652,7 @@ void Test_GetDouFilePath()
               L"DotsTest.MemberTypesProperty.dou");
 }
 
-/* This test attempts to deserialize a piece of xml that represents a class 
+/* This test attempts to deserialize a piece of xml that represents a class
  * that is part of a dou library that this executable has not been linked with.
  * The idea being that this test will succeed if dots_cpp has loaded all the
  * required libraries as specified by typesystem.ini
@@ -8661,7 +8661,7 @@ void Test_DeserializeUnlinkedObject()
 {
     Header(L"DeserializeUnlinkedObject");
     const std::wstring xml(L"<?xml version=\"1.0\" encoding=\"utf-8\"?><DotsTest.ExtraObject><Int32Member>-32</Int32Member></DotsTest.ExtraObject>");
-    
+
     const Safir::Dob::Typesystem::ObjectPtr obj = Safir::Dob::Typesystem::Serialization::ToObject(xml);
 
     std::wcout << "Class name: " << Safir::Dob::Typesystem::Operations::GetName(obj->GetTypeId()) << std::endl;
@@ -8775,7 +8775,7 @@ void ContainerTest()
         const Int32 i = t.Int32Member();
         Check(i == 10);
 
-        
+
 
         CheckNullExc(t.BooleanMember() == true);
         CheckNullExc(true == t.BooleanMember());
@@ -8834,9 +8834,9 @@ void ContainerTest()
         Check(t.InstanceIdMember() != InstanceId(11));
         t.InstanceIdMember().SetVal(InstanceId(L"Kalle"));
         Check(InstanceId(L"Kalle") == t.InstanceIdMember());
-        Check(t.InstanceIdMember() == InstanceId(L"Kalle")); 
+        Check(t.InstanceIdMember() == InstanceId(L"Kalle"));
         Check(InstanceId(L"Pelle") != t.InstanceIdMember());
-        Check(t.InstanceIdMember() != InstanceId(L"Pelle")); 
+        Check(t.InstanceIdMember() != InstanceId(L"Pelle"));
 
         Check(t.StringMember().IsNull());
         Check(!t.StringMember().IsChanged());
@@ -9504,4 +9504,3 @@ int main(int /*argc*/, char* /*argv*/[])
 
     return 0;
 }
-

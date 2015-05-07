@@ -46,11 +46,11 @@
     <BlobTest.MyItem type="BlobTest.MyItem">
       <MyNumber>666</MyNumber>
       <MyStrings>
-	    <String xml:space="default" index="0">  aaaa  </String>
-	  <String xml:space="preserve" index="1">  bbbb  </String>
-	  <String xml:space="preserve" index="2">cccc</String>
-	  <String xml:space="preserve" index="3">dddd</String>
-	  <String xml:space="preserve" index="4"> &lt;, &gt; &amp; </String>
+        <String xml:space="default" index="0">  aaaa  </String>
+      <String xml:space="preserve" index="1">  bbbb  </String>
+      <String xml:space="preserve" index="2">cccc</String>
+      <String xml:space="preserve" index="3">dddd</String>
+      <String xml:space="preserve" index="4"> &lt;, &gt; &amp; </String>
       </MyStrings>
     </BlobTest.MyItem>
 
@@ -70,19 +70,19 @@
     <BlobTest.MyItem type="BlobTest.MySpecialItem">
       <MyNumber>5</MyNumber>
       <MyStrings>
-	<value index="0">Svarre</value>
-	<value index="2">Hello</value>
-	<value index="3">Sheldon is cool</value>
+    <value index="0">Svarre</value>
+    <value index="2">Hello</value>
+    <value index="3">Sheldon is cool</value>
       </MyStrings>
       <DictStringInt32>
-	<entry>
-	  <key>kalle</key>
-	  <value>123</value>
-	</entry>
-	<entry>
-	  <key>pelle</key>
-	  <value>456</value>
-	</entry>
+    <entry>
+      <key>kalle</key>
+      <value>123</value>
+    </entry>
+    <entry>
+      <key>pelle</key>
+      <value>456</value>
+    </entry>
       </DictStringInt32>
     </BlobTest.MyItem>
   </SeqObject>
@@ -114,15 +114,15 @@
     <entry>
       <key>White</key>
       <value>
-	<name>BlobTest.MyEntity</name>
-	<instanceId>first</instanceId>
+    <name>BlobTest.MyEntity</name>
+    <instanceId>first</instanceId>
       </value>
     </entry>
     <entry>
       <key>Black</key>
       <value>
-	<name>Safir.Dob.Entity</name>
-	<instanceId>second</instanceId>
+    <name>Safir.Dob.Entity</name>
+    <instanceId>second</instanceId>
       </value>
     </entry>
   </DictEnumEntityId>
@@ -130,44 +130,44 @@
   <DictEntityIdObject>
     <entry>
       <key>
-	<name>BlobTest.MyEntity</name>
-	<instanceId>first</instanceId>
+    <name>BlobTest.MyEntity</name>
+    <instanceId>first</instanceId>
       </key>
       <BlobTest.MyItem type="BlobTest.MySpecialItem">
-	<MyNumber>5</MyNumber>
-	<MyStrings>
-	  <value index="0">Svarre</value>
-	  <value index="2">Hello</value>
-	  <value index="3">Sheldon is cool</value>
-	</MyStrings>
-	<DictStringInt32>
-	  <entry>
-	    <key>kalle</key>
-	    <value>123</value>
-	  </entry>
-	  <entry>
-	    <key>pelle</key>
-	    <value>456</value>
-	  </entry>
-	</DictStringInt32>
+    <MyNumber>5</MyNumber>
+    <MyStrings>
+      <value index="0">Svarre</value>
+      <value index="2">Hello</value>
+      <value index="3">Sheldon is cool</value>
+    </MyStrings>
+    <DictStringInt32>
+      <entry>
+        <key>kalle</key>
+        <value>123</value>
+      </entry>
+      <entry>
+        <key>pelle</key>
+        <value>456</value>
+      </entry>
+    </DictStringInt32>
       </BlobTest.MyItem>
     </entry>
     <entry>
       <key>
-	<name>Safir.Dob.Entity</name>
-	<instanceId>second</instanceId>
+    <name>Safir.Dob.Entity</name>
+    <instanceId>second</instanceId>
       </key>
       <BlobTest.MyItem type="BlobTest.MySpecialItem">
-	<MyNumber>76</MyNumber>
-	<MyStrings>
-	  <value index="1" xsi:space="preserve">  My name is Sven  </value>
-	  <value index="3" xsi:space="default">  Whats yours?  </value>
-	</MyStrings>
-	<Child type="BlobTest.MySpecialItem">
-	  <MyNumber>8</MyNumber>
-	  <ChildName>Bob Jr</ChildName>
-	</Child>
-	<ChildName>Senior Bob</ChildName>
+    <MyNumber>76</MyNumber>
+    <MyStrings>
+      <value index="1" xsi:space="preserve">  My name is Sven  </value>
+      <value index="3" xsi:space="default">  Whats yours?  </value>
+    </MyStrings>
+    <Child type="BlobTest.MySpecialItem">
+      <MyNumber>8</MyNumber>
+      <ChildName>Bob Jr</ChildName>
+    </Child>
+    <ChildName>Senior Bob</ChildName>
       </BlobTest.MyItem>
     </entry>
   </DictEntityIdObject>

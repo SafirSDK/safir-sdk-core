@@ -28,15 +28,15 @@ package com.saabgroup.safir.dob.typesystem;
 public class StringSequenceContainer
 extends ValueSequenceContainer<String> {
 
-	public StringSequenceContainer() {
-		super();
-	}
-	
-	public StringSequenceContainer(StringSequenceContainer other) {
-		super(other);
-	}
-	
-	/**
+    public StringSequenceContainer() {
+        super();
+    }
+    
+    public StringSequenceContainer(StringSequenceContainer other) {
+        super(other);
+    }
+    
+    /**
      * @see com.saabgroup.safir.dob.typesystem.ValueSequenceContainer#clone()
      */
     @Override
