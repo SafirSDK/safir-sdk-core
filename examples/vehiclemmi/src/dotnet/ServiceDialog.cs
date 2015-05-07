@@ -29,10 +29,10 @@ namespace VehicleMmiCsWinForms
 {
     /// <summary>
     /// Implements dialog to use service CalculateSpeedDifference.
-    /// The dialog sends a service request and receives the 
+    /// The dialog sends a service request and receives the
     /// service response.
     /// </summary>
-    public partial class ServiceDialog : 
+    public partial class ServiceDialog :
         Form,
         // Allows this class to receive response on sent requests
         Safir.Dob.Requestor
@@ -51,7 +51,7 @@ namespace VehicleMmiCsWinForms
         private Capabilities.Vehicles.Vehicle m_vehicle;
 
         /// <summary>
-        /// Cancel button pressed by operator, closes the dialog 
+        /// Cancel button pressed by operator, closes the dialog
         /// </summary>
         private void buttonClose_Click(object sender, EventArgs e)
         {
@@ -79,7 +79,7 @@ namespace VehicleMmiCsWinForms
             // Create service request
             Capabilities.CalculateSpeedDifference req = new Capabilities.CalculateSpeedDifference();
 
-            // Set service request values 
+            // Set service request values
             try
             {
                 req.Speed.Val = float.Parse(textboxNewSpeed.Text);
@@ -90,7 +90,9 @@ namespace VehicleMmiCsWinForms
                 return;
             }
 
-            req.ObjectWithSpeed.Obj = m_vehicle.Clone();
+            //this will cause the req object to point to m_vehicle, but that is okay since
+            //the req object is never modified and is short-lived.
+            req.ObjectWithSpeed.Obj = m_vehicle;
 
             try
             {
@@ -160,7 +162,7 @@ namespace VehicleMmiCsWinForms
 
             return true;
         }
-              
+
         /// <summary>
         /// Overrides Safir.Dob.Requestor. Response for sent request
         /// </summary>
@@ -183,7 +185,7 @@ namespace VehicleMmiCsWinForms
         /// </summary>
         public void OnNotRequestOverflow()
         {
-            // No automatic resending is made. 
+            // No automatic resending is made.
             // Inform operator that requests can be made now.
             statusStrip.Items["toolStripStatus"].Text = "Overflow situation solved. Make request again!";
         }
