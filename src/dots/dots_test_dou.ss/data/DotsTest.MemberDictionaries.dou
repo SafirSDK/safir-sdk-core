@@ -429,7 +429,7 @@
             <type>DotsTest.MemberDictionaries</type>
             <dictionary keyType="EntityId"/>
         </member>
-        
+
         <!-- Dictionaries keyType=InstanceId -->
         <member>
             <name>InstanceIdInt32Member</name>
@@ -500,7 +500,7 @@
             <name>InstanceIdItemMember</name>
             <type>DotsTest.MemberDictionaries</type>
             <dictionary keyType="InstanceId"/>
-        </member>        
-        
+        </member>
+
     </members>
 </class>
