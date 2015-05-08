@@ -174,14 +174,14 @@ os.chdir("circular_restart_output")
 
 
 #This relies on the fact that we're installed in the bin directory on both linux and windows.
-testdatadir = os.path.join(os.path.dirname(os.path.realpath(__file__)),"..","share", "safir-sdk-core", "test_data")
+testdatadir = os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),"..","share", "safir-sdk-core", "test_data"))
 
 #Set up to use our own test configuration
 os.environ["SAFIR_TEST_CONFIG_OVERRIDE"] = os.path.join(testdatadir,
                                                         "system_picture",
                                                         "config")
 
-os.environ["LLL_LOGDIR"] = os.path.join(os.getcwd(),"lll")
+os.environ["LLL_LOGDIR"] = os.path.normpath(os.path.join(os.getcwd(),"lll"))
 
 subprocess.call(("safir_show_config","--logging"))
 if sys.platform == "win32":
