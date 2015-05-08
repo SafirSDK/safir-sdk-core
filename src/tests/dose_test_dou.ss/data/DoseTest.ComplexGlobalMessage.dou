@@ -1278,7 +1278,7 @@
             <dictionary keyType="ChannelId"/>
         </member>
 
-        
+
         <!-- Dictionaries keyType=HandlerId -->
         <member>
             <name>HandlerIdInt32DictionaryMember</name>
