@@ -1134,7 +1134,7 @@ public class @_CLASS_@
 @@ELSIF@@ @_UNIFORM_MEMBERDICTIONARYTYPE_@="HandlerId"
         com.saabgroup.safir.dob.typesystem.HandlerId key=com.saabgroup.safir.dob.typesystem.BlobOperations.getHandlerId(handle, m_@_MEMBER_@MemberIndex, i, com.saabgroup.safir.dob.typesystem.BlobOperations.KEY_MODE);
 @@ELSIF@@ @_UNIFORM_MEMBERDICTIONARYTYPE_@="ChannelId"
-        com.saabgroup.safir.dob.typesystem.HandlerId key=com.saabgroup.safir.dob.typesystem.BlobOperations.getChannelId(handle, m_@_MEMBER_@MemberIndex, i, com.saabgroup.safir.dob.typesystem.BlobOperations.KEY_MODE);
+        com.saabgroup.safir.dob.typesystem.ChannelId key=com.saabgroup.safir.dob.typesystem.BlobOperations.getChannelId(handle, m_@_MEMBER_@MemberIndex, i, com.saabgroup.safir.dob.typesystem.BlobOperations.KEY_MODE);
 @@ELSIF@@ @_UNIFORM_MEMBERDICTIONARYTYPE_@="EntityId"
         com.saabgroup.safir.dob.typesystem.EntityId key=com.saabgroup.safir.dob.typesystem.BlobOperations.getEntityId(handle, m_@_MEMBER_@MemberIndex, i, com.saabgroup.safir.dob.typesystem.BlobOperations.KEY_MODE);
 @@ELSIF@@ @_UNIFORM_MEMBERDICTIONARYTYPE_@="String"
