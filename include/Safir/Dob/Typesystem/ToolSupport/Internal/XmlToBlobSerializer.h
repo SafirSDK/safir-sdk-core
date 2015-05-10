@@ -281,6 +281,7 @@ namespace Internal
                                 throw ParseError("XmlToBinary serialization error", os.str(), "", 207);
                             }
                         }
+                        writer.SetChangedTopLevel(memIx,true);
                     }
                     break;
                 }
