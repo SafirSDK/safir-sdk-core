@@ -138,27 +138,6 @@ namespace Typesystem
         }
 
         /**
-         * Is the change flag in the container set?
-         *
-         * This method is like IsChanged without the recursion (on dictionary containers IsChanged is recursive).
-         *
-         * @return True if the containers change flag is set.
-         */
-        bool IsChangedHere() const {return m_bIsChanged;}
-
-        /**
-         * Set the change flag in the container.
-         *
-         * This method is like SetChanged without the recursion (on dictionary containers SetChanged is recursive).
-         *
-         * @param changed [in] - The value to set the change flag to.
-         */
-        void SetChangedHere(const bool changed) {m_bIsChanged = changed;}
-
-        //TODO: is it possible to send a request that only adds one entry into the dictionary with SetChanges?
-        //TODO: in dose tests change the keys as well
-        //TODO Do we need changedhere?
-        /**
          * @brief clear - Clear the sequence, i.e remove all values. After a call to clear
          * the sequence will be empty but not automatically set to null.
          */

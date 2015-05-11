@@ -391,7 +391,7 @@ namespace ToolSupport
                     {
                         //Different count, or something in this that is not in other -> topLevel
 
-                        //different size, i.e top leve changed
+                        //different size, i.e top level changed
                         if (m_blob.NumberOfValues(memIx)!=other.NumberOfValues(memIx))
                         {
                             m_blob.SetChangedTopLevel(memIx, true);

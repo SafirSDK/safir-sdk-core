@@ -597,21 +597,28 @@ namespace @_NAMESPACEV_@
 @@ --- Dictionary member ---
 @@ELSIF@@ @_EXIST:MEMBERISDICTIONARY_@
         {
+            bool tlChanged = DotsC_ReadTopLevelChangeFlag(handle, g_@_LOWER:MEMBER_@MemberIndex);
+            m_@_MEMBER_@Member.SetChanged(tlChanged);
             const auto size = DotsC_GetNumberOfMemberValues(handle, g_@_LOWER:MEMBER_@MemberIndex);
             for (int valueIndex=0; valueIndex<size; ++valueIndex)
             {
-                bool isNull, isChanged;
+                bool dummy1, dummy2;
 @@IF@@ @_UNIFORM_MEMBERDICTIONARYTYPE_@=Enumeration
                 Safir::Dob::Typesystem::Int32 ordinal;
-                Safir::Dob::Typesystem::Internal::BlobOperations::Get(ordinal, isNull, isChanged, handle, g_@_LOWER:MEMBER_@MemberIndex, valueIndex, Safir::Dob::Typesystem::Internal::BlobOperations::KeyMode);
+                Safir::Dob::Typesystem::Internal::BlobOperations::Get(ordinal, dummy1, dummy2, handle, g_@_LOWER:MEMBER_@MemberIndex, valueIndex, Safir::Dob::Typesystem::Internal::BlobOperations::KeyMode);
                 @_MEMBERDICTIONARYTYPE_@::Enumeration key=static_cast<@_MEMBERDICTIONARYTYPE_@::Enumeration>(ordinal);
 @@ELSE@@
                 @_MEMBERDICTIONARYTYPE_@ key;
-                Safir::Dob::Typesystem::Internal::BlobOperations::Get(key, isNull, isChanged, handle, g_@_LOWER:MEMBER_@MemberIndex, valueIndex, Safir::Dob::Typesystem::Internal::BlobOperations::KeyMode);
+                Safir::Dob::Typesystem::Internal::BlobOperations::Get(key, dummy1, dummy2, handle, g_@_LOWER:MEMBER_@MemberIndex, valueIndex, Safir::Dob::Typesystem::Internal::BlobOperations::KeyMode);
 @@END_IF@@
                 Safir::Dob::Typesystem::Internal::BlobOperations::Get(m_@_MEMBER_@Member[key], handle, g_@_LOWER:MEMBER_@MemberIndex, valueIndex);
+                tlChanged = tlChanged || m_@_MEMBER_@Member[key].IsChanged();
+
             }
-            m_@_MEMBER_@Member.SetChangedHere(DotsC_ReadTopLevelChangeFlag(handle, g_@_LOWER:MEMBER_@MemberIndex));
+            if (!tlChanged)
+            {
+                m_@_MEMBER_@Member.SetChanged(false);
+            }
         }
 @@ --- Single member ---
 @@ELSE@@
@@ -704,7 +711,7 @@ namespace @_NAMESPACEV_@
                                                                   g_@_LOWER:MEMBER_@MemberIndex,
                                                                   0);
         }
-        DotsC_WriteTopLevelChangeFlag(handle, g_@_LOWER:MEMBER_@MemberIndex, m_@_MEMBER_@Member.IsChangedHere());
+        DotsC_WriteTopLevelChangeFlag(handle, g_@_LOWER:MEMBER_@MemberIndex, m_@_MEMBER_@Member.IsChanged());
 
 @@ --- Single member ---
 @@ELSE@@
