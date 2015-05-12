@@ -38,6 +38,7 @@ namespace Safir.Dob.Typesystem
         /// </summary>
         public DictionaryContainer() : base()
         {
+            //For string keys we need to specify the comparer, otherwise we get different order from C++.
             if (typeof(KeyT) == typeof(String))
             {
                 m_values = new SortedDictionary<KeyT, ValT> ((System.Collections.Generic.IComparer<KeyT>)StringComparer.Ordinal);

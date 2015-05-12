@@ -50,7 +50,7 @@ namespace Typesystem
         typedef KeyT KeyType;
         typedef ValT ValueContainerType;
         typedef typename ValueContainerType::ContainedType ContainedType;
-        typedef std::map<KeyType, ValueContainerType> StorageType;  //we use boost version instead of std because we want to be able to use vector<bool> without warnings and errors.
+        typedef std::map<KeyType, ValueContainerType> StorageType;
         typedef typename StorageType::const_iterator const_iterator;
         typedef typename StorageType::iterator iterator;
         typedef typename StorageType::value_type value_type;
