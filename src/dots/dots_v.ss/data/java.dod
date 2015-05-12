@@ -1122,40 +1122,51 @@ public class @_CLASS_@
         }
 @@----------dictionary member ---------------
 @@ELSIF@@ @_EXIST:MEMBERISDICTIONARY_@
-        //dictemember m_@_MEMBER_@Member
-    for (int i=0; i<com.saabgroup.safir.dob.typesystem.BlobOperations.numberOfMemberValues(handle, m_@_MEMBER_@MemberIndex); i++) {
+        //Dictionary member m_@_MEMBER_@Member
+        {
+            boolean tlChanged = com.saabgroup.safir.dob.typesystem.BlobOperations.readTopLevelChangeFlag(handle, m_@_MEMBER_@MemberIndex);
+            m_@_MEMBER_@Member.setChanged(tlChanged);
+
+            int size = com.saabgroup.safir.dob.typesystem.BlobOperations.numberOfMemberValues(handle, m_@_MEMBER_@MemberIndex);
+            for (int i=0; i<size; i++) {
 @@---- Get key
 @@IF@@ @_UNIFORM_MEMBERDICTIONARYTYPE_@="Int32"
-        int key=com.saabgroup.safir.dob.typesystem.BlobOperations.getInt32(handle, m_@_MEMBER_@MemberIndex, i, com.saabgroup.safir.dob.typesystem.BlobOperations.KEY_MODE);
+                int key=com.saabgroup.safir.dob.typesystem.BlobOperations.getInt32(handle, m_@_MEMBER_@MemberIndex, i, com.saabgroup.safir.dob.typesystem.BlobOperations.KEY_MODE);
 @@ELSIF@@ @_UNIFORM_MEMBERDICTIONARYTYPE_@="Int64" or @_UNIFORM_MEMBERDICTIONARYTYPE_@="TypeId"
-        long key=com.saabgroup.safir.dob.typesystem.BlobOperations.getInt64(handle, m_@_MEMBER_@MemberIndex, i, com.saabgroup.safir.dob.typesystem.BlobOperations.KEY_MODE);
+                long key=com.saabgroup.safir.dob.typesystem.BlobOperations.getInt64(handle, m_@_MEMBER_@MemberIndex, i, com.saabgroup.safir.dob.typesystem.BlobOperations.KEY_MODE);
 @@ELSIF@@ @_UNIFORM_MEMBERDICTIONARYTYPE_@="InstanceId"
-        com.saabgroup.safir.dob.typesystem.InstanceId key=com.saabgroup.safir.dob.typesystem.BlobOperations.getInstanceId(handle, m_@_MEMBER_@MemberIndex, i, com.saabgroup.safir.dob.typesystem.BlobOperations.KEY_MODE);
+                com.saabgroup.safir.dob.typesystem.InstanceId key=com.saabgroup.safir.dob.typesystem.BlobOperations.getInstanceId(handle, m_@_MEMBER_@MemberIndex, i, com.saabgroup.safir.dob.typesystem.BlobOperations.KEY_MODE);
 @@ELSIF@@ @_UNIFORM_MEMBERDICTIONARYTYPE_@="HandlerId"
-        com.saabgroup.safir.dob.typesystem.HandlerId key=com.saabgroup.safir.dob.typesystem.BlobOperations.getHandlerId(handle, m_@_MEMBER_@MemberIndex, i, com.saabgroup.safir.dob.typesystem.BlobOperations.KEY_MODE);
+                com.saabgroup.safir.dob.typesystem.HandlerId key=com.saabgroup.safir.dob.typesystem.BlobOperations.getHandlerId(handle, m_@_MEMBER_@MemberIndex, i, com.saabgroup.safir.dob.typesystem.BlobOperations.KEY_MODE);
 @@ELSIF@@ @_UNIFORM_MEMBERDICTIONARYTYPE_@="ChannelId"
-        com.saabgroup.safir.dob.typesystem.ChannelId key=com.saabgroup.safir.dob.typesystem.BlobOperations.getChannelId(handle, m_@_MEMBER_@MemberIndex, i, com.saabgroup.safir.dob.typesystem.BlobOperations.KEY_MODE);
+                com.saabgroup.safir.dob.typesystem.ChannelId key=com.saabgroup.safir.dob.typesystem.BlobOperations.getChannelId(handle, m_@_MEMBER_@MemberIndex, i, com.saabgroup.safir.dob.typesystem.BlobOperations.KEY_MODE);
 @@ELSIF@@ @_UNIFORM_MEMBERDICTIONARYTYPE_@="EntityId"
-        com.saabgroup.safir.dob.typesystem.EntityId key=com.saabgroup.safir.dob.typesystem.BlobOperations.getEntityId(handle, m_@_MEMBER_@MemberIndex, i, com.saabgroup.safir.dob.typesystem.BlobOperations.KEY_MODE);
+                com.saabgroup.safir.dob.typesystem.EntityId key=com.saabgroup.safir.dob.typesystem.BlobOperations.getEntityId(handle, m_@_MEMBER_@MemberIndex, i, com.saabgroup.safir.dob.typesystem.BlobOperations.KEY_MODE);
 @@ELSIF@@ @_UNIFORM_MEMBERDICTIONARYTYPE_@="String"
-        String key=com.saabgroup.safir.dob.typesystem.BlobOperations.getString(handle, m_@_MEMBER_@MemberIndex, i, com.saabgroup.safir.dob.typesystem.BlobOperations.KEY_MODE);
+                String key=com.saabgroup.safir.dob.typesystem.BlobOperations.getString(handle, m_@_MEMBER_@MemberIndex, i, com.saabgroup.safir.dob.typesystem.BlobOperations.KEY_MODE);
 @@ELSIF@@ @_UNIFORM_MEMBERDICTIONARYTYPE_@="Enumeration"
-        int ordinal=com.saabgroup.safir.dob.typesystem.BlobOperations.getInt32(handle, m_@_MEMBER_@MemberIndex, i, com.saabgroup.safir.dob.typesystem.BlobOperations.KEY_MODE);
-        @_MEMBERDICTIONARYTYPE_@ key=@_MEMBERDICTIONARYTYPE_@.values()[ordinal];
+                int ordinal=com.saabgroup.safir.dob.typesystem.BlobOperations.getInt32(handle, m_@_MEMBER_@MemberIndex, i, com.saabgroup.safir.dob.typesystem.BlobOperations.KEY_MODE);
+                @_MEMBERDICTIONARYTYPE_@ key=@_MEMBERDICTIONARYTYPE_@.values()[ordinal];
 @@ELSE@@
-        //not supported as key @_UNIFORM_MEMBERDICTIONARYTYPE_@
+                not supported as key @_UNIFORM_MEMBERDICTIONARYTYPE_@
 @@END_IF@@
 @@---- Get val
 @@IF@@ (@_UNIFORM_MEMBERTYPE_@ = Enumeration)
-        @_MEMBERTYPE_@.Container value = new @_MEMBERTYPE_@.Container();
+                @_MEMBERTYPE_@.Container value = new @_MEMBERTYPE_@.Container();
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
-        com.saabgroup.safir.dob.typesystem.ObjectContainerImpl<@_MEMBERTYPE_@> value = new com.saabgroup.safir.dob.typesystem.ObjectContainerImpl<@_MEMBERTYPE_@>();
+                com.saabgroup.safir.dob.typesystem.ObjectContainerImpl<@_MEMBERTYPE_@> value = new com.saabgroup.safir.dob.typesystem.ObjectContainerImpl<@_MEMBERTYPE_@>();
 @@ELSE@@
-        com.saabgroup.safir.dob.typesystem.@_UNIFORM_MEMBERTYPE_@Container value = new com.saabgroup.safir.dob.typesystem.@_UNIFORM_MEMBERTYPE_@Container();
+                com.saabgroup.safir.dob.typesystem.@_UNIFORM_MEMBERTYPE_@Container value = new com.saabgroup.safir.dob.typesystem.@_UNIFORM_MEMBERTYPE_@Container();
 @@END_IF@@
-        com.saabgroup.safir.dob.typesystem.BlobOperations.get(value, handle, m_@_MEMBER_@MemberIndex, i);
-        m_@_MEMBER_@Member.put(key, value);
-    } //end dictionary loop
+                com.saabgroup.safir.dob.typesystem.BlobOperations.get(value, handle, m_@_MEMBER_@MemberIndex, i);
+                tlChanged = tlChanged || value.isChanged();
+                m_@_MEMBER_@Member.put(key, value);
+            } //end dictionary loop
+
+            if (!tlChanged) {
+                m_@_MEMBER_@Member.setChanged(tlChanged);
+            }
+        }
 
 
 @@ --- Single member ---
@@ -1231,6 +1242,7 @@ public class @_CLASS_@
 @@----- set the value
             com.saabgroup.safir.dob.typesystem.BlobOperations.set(entry.getValue(), handle, m_@_MEMBER_@MemberIndex, 0);
         }
+        com.saabgroup.safir.dob.typesystem.BlobOperations.writeTopLevelChangeFlag(handle, m_@_MEMBER_@MemberIndex, m_@_MEMBER_@Member.isChanged());
 @@ --- Single member ---
 @@ELSE@@
         com.saabgroup.safir.dob.typesystem.BlobOperations.set(m_@_MEMBER_@Member, handle, m_@_MEMBER_@MemberIndex, 0);
