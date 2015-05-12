@@ -31,7 +31,7 @@ namespace Safir.Dob.Typesystem
     /// <summary>
     /// Class containing the identity of a channel.
     /// </summary>
-    public class ChannelId
+    public class ChannelId : IComparable
     {
         /// <summary>
         /// Constant representing all channels.
@@ -156,6 +156,28 @@ namespace Safir.Dob.Typesystem
         {
             return !(first == second);
         }
+
+        #region IComparable Members
+
+        /// <summary>
+        /// Compare to specified object.
+        /// </summary>
+        /// <param name="obj">Object to compare to.</param>
+        /// <returns>Relative order</returns>
+        public int CompareTo(object obj)
+        {
+            if (obj is ChannelId)
+            {
+                return m_channelId.CompareTo(((ChannelId)obj).m_channelId);
+            }
+            else
+            {
+                throw new ArgumentException("object is not an ChannelId.");
+            }
+        }
+
+        #endregion
+
 
         /// <summary>
         /// Return a string representation of the channel id.
