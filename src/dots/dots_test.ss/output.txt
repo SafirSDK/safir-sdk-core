@@ -33,9 +33,9 @@ EmptyObject          - DotsTest.EmptyObject
 =====================================================
 Testing: Get Number Of Members
 =====================================================
-MemberTypes          - 57
+MemberTypes          - 58
 MemberArrays         - 53
-MemberTypesProperty  - 57
+MemberTypesProperty  - 58
 MemberArraysProperty - 53
 MemberItems          - 2
 MemberItemsArray     - 2
@@ -48,12 +48,12 @@ ParameterArrays      - 0
 =====================================================
 Testing: Get Number Of Parameters
 =====================================================
-MemberTypes          - 0
+MemberTypes          - 1
 MemberArrays         - 0
-MemberItems          - 0
-MemberItemsArray     - 1
-EmptyObject          - 110
-ParameterTypes       - 58
+MemberItems          - 1
+MemberItemsArray     - 2
+EmptyObject          - 111
+ParameterTypes       - 59
 ParameterArrays      - 53
 
 

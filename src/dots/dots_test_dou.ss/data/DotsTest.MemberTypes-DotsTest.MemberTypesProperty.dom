@@ -345,5 +345,9 @@
                 <classMember>Watt64Member</classMember>
             </classMemberReference>
         </member>
+        <member>
+            <propertyMember>lowercase</propertyMember>
+            <value>10</value>
+        </member>
     </memberMapping>
 </propertyMapping>

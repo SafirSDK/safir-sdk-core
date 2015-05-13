@@ -296,6 +296,11 @@
       <type>Watt64</type>
       <value>64019.0</value>
     </parameter>
+    <parameter><!--this is only here to test all-lowercase parameter names -->
+      <name>lowercase</name>
+      <type>Int64</type>
+      <value>11</value>
+    </parameter>>
     <parameter>
       <name>TypesItemParameter</name>
       <type>DotsTest.TypesItem</type>
