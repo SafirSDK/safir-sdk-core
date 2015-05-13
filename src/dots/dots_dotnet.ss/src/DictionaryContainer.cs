@@ -168,8 +168,7 @@ namespace Safir.Dob.Typesystem
         /// <param name="item">Item.</param>
         public void Add (KeyValuePair<KeyT, ValT> item)
         {
-            m_bIsChanged = true;
-            m_values.Add (item.Key, item.Value);
+            Add(item.Key, item.Value);
         }
 
         /// <summary>

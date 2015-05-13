@@ -266,7 +266,7 @@ namespace
                              const Dob::Typesystem::MemberIndex member,
                              const Dob::Typesystem::ArrayIndex index)
     {
-        Set(value.GetObjectPointer(), value.IsNull(), value.IsChanged(), handle, member, index, ValueMode);
+        Set(value.GetObjectPointer(), value.IsNull(), value.m_bIsChanged, handle, member, index, ValueMode);
     }
 
     void BlobOperations::Get(ObjectContainerBase& object,

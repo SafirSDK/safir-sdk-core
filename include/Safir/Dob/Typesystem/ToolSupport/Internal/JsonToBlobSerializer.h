@@ -296,7 +296,7 @@ namespace Internal
             //first check if value is set to null in json, in that case just set status to null and return.
             if (memberContent.data()=="null")
             {
-                writer.WriteValue(memIx, arrIx, 0, true, false);
+                writer.WriteValue(memIx, arrIx, 0, true, true);
                 return;
             }
 
