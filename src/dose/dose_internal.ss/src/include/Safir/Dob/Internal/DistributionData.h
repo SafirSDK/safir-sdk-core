@@ -378,10 +378,7 @@ namespace Internal
         // - Request_EntityCreate,
         // - Request_EntityUpdate,
         // - Request_EntityDelete,
-        const Typesystem::EntityId GetEntityId() const
-        {return Typesystem::EntityId(GetTypeId(), GetInstanceId());}
-        //TODO: this can be more efficiently implemented by doing the work itself, rather
-        //than calling the selectors. The ENSUREs are probably doubled as it is now.
+        const Typesystem::EntityId GetEntityId() const;
 
         //Reads a blob from a data, only valid id the data type is:
         // - EntityState
