@@ -13,6 +13,8 @@ Lars Hagström, Anders Widén and Joel Ottosson
 == Preface
 The purpose of this document is to provide a comprehensive guide to using the services in Safir SDK Core. The reader should have general knowledge about object-oriented programming. Some knowledge of distributed real-time systems programming is also desirable, but not essential.
 
+This document is delivered as part of Safir SDK Core with version tag ``{SAFIR_VERSION}''.
+
 === How to read
 This document is intended to be used both as an introduction to new users of the Safir SDK Core, and as a reference for those who have used the SDK for a long time. Because of this the level of the different sections vary quite a lot. Some sections are marked as advanced (with an ^adv^ tag to them), to signal that they cover advanced topics that can be skipped by newcomers.
 

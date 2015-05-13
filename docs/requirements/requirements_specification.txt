@@ -6,6 +6,8 @@
 
 == Introduction
 
+This document is delivered as part of Safir SDK Core with version tag ``{SAFIR_VERSION}''.
+
 === License
 
     Copyright (C) 2004 - 2015 Saab AB.
