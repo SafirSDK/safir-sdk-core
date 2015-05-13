@@ -1158,9 +1158,9 @@ public class @_CLASS_@
 @@ELSE@@
                 com.saabgroup.safir.dob.typesystem.@_UNIFORM_MEMBERTYPE_@Container value = new com.saabgroup.safir.dob.typesystem.@_UNIFORM_MEMBERTYPE_@Container();
 @@END_IF@@
+                m_@_MEMBER_@Member.put(key, value);
                 com.saabgroup.safir.dob.typesystem.BlobOperations.get(value, handle, m_@_MEMBER_@MemberIndex, i);
                 tlChanged = tlChanged || value.isChanged();
-                m_@_MEMBER_@Member.put(key, value);
             } //end dictionary loop
 
             if (!tlChanged) {

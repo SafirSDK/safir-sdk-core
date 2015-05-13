@@ -1087,15 +1087,15 @@ namespace @_NAMESPACE_@
 
 @@--                  -- VAL ---
 @@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
-                    @_MEMBERTYPE_@.EnumerationContainer val = new @_MEMBERTYPE_@.EnumerationContainer();
+                    @_MEMBERTYPE_@.EnumerationContainer val;
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
-                    @_MEMBERTYPE_@Container val = new @_MEMBERTYPE_@Container();
+                    @_MEMBERTYPE_@Container val;
 @@ELSE@@
-                    Safir.Dob.Typesystem.@_UNIFORM_MEMBERTYPE_@Container val = new Safir.Dob.Typesystem.@_UNIFORM_MEMBERTYPE_@Container();
+                    Safir.Dob.Typesystem.@_UNIFORM_MEMBERTYPE_@Container val;
 @@END_IF@@
+                    val = m_@_MEMBER_@Member.Add(key);
                     Safir.Dob.Typesystem.Internal.BlobOperations.Get(val, handle, m_@_LOWER:MEMBER_@MemberIndex, valueIndex);
                     tlChanged = tlChanged || val.IsChanged();
-                    m_@_MEMBER_@Member.Add(key, val);
                 }
                 if (!tlChanged)
                 {
