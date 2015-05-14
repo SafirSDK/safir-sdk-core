@@ -24,6 +24,8 @@
 #ifndef Safir_Databases_Odbc_Defs_h
 #define Safir_Databases_Odbc_Defs_h
 
+#ifndef SAFIR_NO_DEPRECATED
+
 namespace Safir
 {
 namespace Databases
@@ -38,5 +40,7 @@ typedef char byte;
 }
 
 }
+
+#endif
 
 #endif // Safir_Databases_Odbc_Defs_h

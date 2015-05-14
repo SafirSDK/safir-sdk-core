@@ -24,6 +24,8 @@
 #ifndef __DOB_UTILITIES_ACE_DISPATCHER_H__
 #define __DOB_UTILITIES_ACE_DISPATCHER_H__
 
+#ifndef SAFIR_NO_DEPRECATED
+
 #include <boost/noncopyable.hpp>
 #include <Safir/Dob/Connection.h>
 #include <Safir/Utilities/Internal/Atomic.h>
@@ -46,6 +48,9 @@ namespace Utilities
 
     /**
      * The class makes a thread switch and perform a dispatch on Dob connection.
+     *
+     * @deprecated This class will be removed from Safir SDK Core eventually, make your 
+     *             own copy of it if you need it.
      */
     class AceDispatcher:
         public Safir::Dob::Dispatcher,
@@ -111,4 +116,5 @@ namespace Utilities
 } // namespace Utilities
 } // namespace Safir
 
+#endif
 #endif // __DOB_UTILITIES_ACE_DISPATCHER_H__

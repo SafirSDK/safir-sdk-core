@@ -24,9 +24,12 @@
 #ifndef Safir_Databases_Odbc_Exception_h
 #define Safir_Databases_Odbc_Exception_h
 
+#ifndef SAFIR_NO_DEPRECATED
+
 #include <Safir/Databases/Odbc/IntegrityConstraintException.h>
 #include <Safir/Databases/Odbc/ReconnectException.h>
 #include <Safir/Databases/Odbc/RetryException.h>
 #include <Safir/Databases/Odbc/TimeoutException.h>
+#endif
 
 #endif // Safir_Databases_Odbc_Exception_h

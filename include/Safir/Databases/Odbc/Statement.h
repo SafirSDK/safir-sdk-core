@@ -24,6 +24,8 @@
 #ifndef Safir_Databases_Statement_h
 #define Safir_Databases_Statement_h
 
+#ifndef SAFIR_NO_DEPRECATED
+
 #include "Safir/Databases/Odbc/Defs.h"
 #include "Safir/Databases/Odbc/Internal/InternalDefs.h"
 #include "Safir/Databases/Odbc/Internal/Parameter.h"
@@ -478,4 +480,5 @@ void Statement::PutData(Internal::Parameter<sCType, sSqlType, Type, sInputOutput
 
 } // End namespace Safir
 
+#endif
 #endif // Safir_Databases_Statement_h

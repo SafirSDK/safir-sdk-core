@@ -21,8 +21,10 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#if !defined(Safir_Databases_Odbc_Input_Output_Parameter_h)
+#ifndef Safir_Databases_Odbc_Input_Output_Parameter_h
 #define Safir_Databases_Odbc_Input_Output_Parameter_h
+
+#ifndef SAFIR_NO_DEPRECATED
 
 #include "Safir/Databases/Odbc/Defs.h"
 #include "Safir/Dob/Typesystem/Defs.h"
@@ -61,4 +63,5 @@ typedef Internal::TimeParameter<SQL_PARAM_INPUT_OUTPUT> TimeInputOutputParameter
 
 };  // Safir
 
+#endif
 #endif //Safir_Databases_Odbc_Input_Output_Parameter_h

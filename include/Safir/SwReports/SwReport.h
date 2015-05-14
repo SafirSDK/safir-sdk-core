@@ -27,6 +27,8 @@
 #include <Safir/Application/Internal/SwReportExportDefs.h>
 #include <string>
 
+#ifndef SAFIR_NO_DEPRECATED
+
 namespace Safir
 {
 
@@ -73,9 +75,9 @@ namespace SwReports
      *
      * @deprecated use Safir::Logging::SendSystemLog() instead.
      */
-    SWRE_INTERFACE_CPP_API void SendFatalErrorReport(const std::wstring&   errorCode,
-                                                     const std::wstring&   location,
-                                                     const std::wstring&   text);
+     SWRE_INTERFACE_CPP_API void SendFatalErrorReport(const std::wstring&   errorCode,
+                                                      const std::wstring&   location,
+                                                      const std::wstring&   text);
 
     /**
      * Sends an Error report.
@@ -142,5 +144,6 @@ namespace SwReports
 
 };
 };
+#endif
 
 #endif

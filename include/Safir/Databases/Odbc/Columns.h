@@ -21,8 +21,10 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#if !defined(Safir_Databases_Odbc_Columns_h)
+#ifndef Safir_Databases_Odbc_Columns_h
 #define Safir_Databases_Odbc_Columns_h
+
+#ifndef SAFIR_NO_DEPRECATED
 
 #include "Safir/Databases/Odbc/Defs.h"
 #include "Safir/Databases/Odbc/Internal/InternalDefs.h"
@@ -140,5 +142,7 @@ inline void TimeColumn::GetValue(Safir::Dob::Typesystem::Si64::Second & time) co
 };  // Databases
 
 };  // Safir
+
+#endif
 
 #endif // Safir_Databases_Odbc_Columns_h

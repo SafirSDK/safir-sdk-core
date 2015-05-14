@@ -24,6 +24,8 @@
 #ifndef Safir_Databases_Environment_h
 #define Safir_Databases_Environment_h
 
+#ifndef SAFIR_NO_DEPRECATED
+
 #include "Safir/Databases/Odbc/Defs.h"
 #include "Safir/Databases/Odbc/Internal/InternalDefs.h"
 #include <Safir/Dob/Typesystem/Defs.h>
@@ -177,4 +179,5 @@ SQLHENV Environment::Handle() const
 
 } // End namespace Safir
 
+#endif
 #endif // Safir_Databases_Environment_h

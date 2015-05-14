@@ -24,6 +24,8 @@
 #ifndef Safir_Databases_Connection_h
 #define Safir_Databases_Connection_h
 
+#ifndef SAFIR_NO_DEPRECATED
+
 #include "Safir/Databases/Odbc/Defs.h"
 #include "Safir/Databases/Odbc/Internal/InternalDefs.h"
 #include <Safir/Dob/Typesystem/Defs.h>
@@ -305,5 +307,5 @@ SQLHDBC Connection::Handle() const
 } // End namespace Databases
 
 } // End namespace Safir
-
+#endif
 #endif //Safir_Databases_Connection_h
