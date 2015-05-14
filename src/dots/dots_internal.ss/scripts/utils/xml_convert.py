@@ -9,6 +9,7 @@
 
 import os, sys, getopt
 import xml.etree.ElementTree as ET
+import xml.dom.minidom
 
 convert_mode=""
 recursive=False
@@ -295,9 +296,22 @@ def convert_parameter_arrays(tree):
         changed=True
     return changed
 
+def create_outfile(file_path, out_dir):
+    f = open(file_path, 'rb')
+    out_path=os.path.join(out_dir, os.path.basename(file_path))
+    of=open(out_path, "wb")
+    text = f.read()
+    f.close()
+    of.write(text.replace('\r', '').replace('\n', os.linesep))
+    of.close()
+    return out_path
+
 def convert_file(file_path, out_dir):
     """Converts a single file and store result in out_dir. Only modified files are saved"""
     output('Handle file '+file_path)
+
+    out_path=create_outfile(file_path, out_dir)
+        
     global current_file
     global number_of_converted
     global number_of_unchanged
@@ -305,11 +319,12 @@ def convert_file(file_path, out_dir):
     global error_files
     current_file=file_path
     try:
-        tree = ET.parse(file_path)
+        tree = ET.parse(out_path)
     except:
         output("*** Couldnt parse file: "+file_path+". Skipping file.")
         error_files.append(file_path)
         number_of_failed=number_of_failed+1
+        os.remove(out_path)
         return
     
     #Convert old format createRoutines
@@ -328,18 +343,22 @@ def convert_file(file_path, out_dir):
         if converted_objects: output('                - Converted objects')
         if converted_arrays: output('                - Converted arrays')
         if converted_create_routines: output('                - Converted create routines')
-        indent(root)
-        new_file=os.path.join(out_dir, os.path.basename(file_path))
+        indent(root)        
         
         #Since tree.write will add a unix lineending after <?xml version...?> we do this step manually instead.
         #tree.write(new_file, encoding='utf-8', xml_declaration=True, default_namespace=None, method='xml')
         xml_str='<?xml version="1.0" encoding="utf-8" ?>'+os.linesep+ET.tostring(root, encoding='utf-8', method='xml')
-        outfile=open(new_file, "w")
+        xml_str = xml_str.replace('\n\n', '\n')
+        
+        outfile=open(out_path, 'wb')
+        outfile.seek(0)                
         outfile.write(xml_str)
+        outfile.truncate()
         outfile.close()
         
         number_of_converted=number_of_converted+1
     else:
+        os.remove(out_path)
         number_of_unchanged=number_of_unchanged+1
         output('                - No changes')
  
