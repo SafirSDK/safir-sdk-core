@@ -657,7 +657,7 @@ namespace Safir.Dob.Typesystem.Internal
                                System.Int32 member,
                                System.Int32 index)
         {
-            Set (container.InternalObj, container.IsNull(), container.IsChanged(), handle, member, index, KeyValMode.ValueMode);
+            Set (container.InternalObj, container.IsNull(), container.IsChangedHere(), handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>

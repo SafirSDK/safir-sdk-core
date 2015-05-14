@@ -1067,29 +1067,40 @@ namespace @_NAMESPACE_@
             }
 @@----------dictionary member ---------------
 @@ELSIF@@ @_EXIST:MEMBERISDICTIONARY_@
-            for (int valueIndex=0; valueIndex<Safir.Dob.Typesystem.Internal.BlobOperations.NumberOfMemberValues(handle, m_@_LOWER:MEMBER_@MemberIndex); valueIndex++)
             {
-                bool isNull, isChanged;
-@@--              -- KEY ---
+                bool tlChanged = Safir.Dob.Typesystem.Internal.BlobOperations.ReadTopLevelChangeFlag(handle, m_@_LOWER:MEMBER_@MemberIndex);
+                m_@_MEMBER_@Member.SetChanged(tlChanged);
+
+                int size = Safir.Dob.Typesystem.Internal.BlobOperations.NumberOfMemberValues(handle, m_@_LOWER:MEMBER_@MemberIndex);
+                for (int valueIndex=0; valueIndex<size; valueIndex++)
+                {
+                    bool dummy1, dummy2;
+@@--                  -- KEY ---
 @@IF@@ @_UNIFORM_MEMBERDICTIONARYTYPE_@=Enumeration
-                Int32 ordinal;
-                Safir.Dob.Typesystem.Internal.BlobOperations.Get(out ordinal, out isNull, out isChanged, handle, m_@_LOWER:MEMBER_@MemberIndex, valueIndex, Safir.Dob.Typesystem.KeyValMode.KeyMode);
-                @_MEMBERDICTIONARYTYPE_@.Enumeration key = (@_MEMBERDICTIONARYTYPE_@.Enumeration)ordinal;
+                    Int32 ordinal;
+                    Safir.Dob.Typesystem.Internal.BlobOperations.Get(out ordinal, out dummy1, out dummy2, handle, m_@_LOWER:MEMBER_@MemberIndex, valueIndex, Safir.Dob.Typesystem.KeyValMode.KeyMode);
+                    @_MEMBERDICTIONARYTYPE_@.Enumeration key = (@_MEMBERDICTIONARYTYPE_@.Enumeration)ordinal;
 @@ELSE@@
-                @_MEMBERDICTIONARYTYPE_@ key;
-                Safir.Dob.Typesystem.Internal.BlobOperations.Get(out key, out isNull, out isChanged, handle, m_@_LOWER:MEMBER_@MemberIndex, valueIndex, Safir.Dob.Typesystem.KeyValMode.KeyMode);
+                    @_MEMBERDICTIONARYTYPE_@ key;
+                    Safir.Dob.Typesystem.Internal.BlobOperations.Get(out key, out dummy1, out dummy2, handle, m_@_LOWER:MEMBER_@MemberIndex, valueIndex, Safir.Dob.Typesystem.KeyValMode.KeyMode);
 @@END_IF@@
 
-@@--              -- VAL ---
+@@--                  -- VAL ---
 @@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
-                @_MEMBERTYPE_@.EnumerationContainer val = new @_MEMBERTYPE_@.EnumerationContainer();
+                    @_MEMBERTYPE_@.EnumerationContainer val;
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
-                @_MEMBERTYPE_@Container val = new @_MEMBERTYPE_@Container();
+                    @_MEMBERTYPE_@Container val;
 @@ELSE@@
-                Safir.Dob.Typesystem.@_UNIFORM_MEMBERTYPE_@Container val = new Safir.Dob.Typesystem.@_UNIFORM_MEMBERTYPE_@Container();
+                    Safir.Dob.Typesystem.@_UNIFORM_MEMBERTYPE_@Container val;
 @@END_IF@@
-                Safir.Dob.Typesystem.Internal.BlobOperations.Get(val, handle, m_@_LOWER:MEMBER_@MemberIndex, valueIndex);
-                m_@_MEMBER_@Member.Add(key, val);
+                    val = m_@_MEMBER_@Member.Add(key);
+                    Safir.Dob.Typesystem.Internal.BlobOperations.Get(val, handle, m_@_LOWER:MEMBER_@MemberIndex, valueIndex);
+                    tlChanged = tlChanged || val.IsChanged();
+                }
+                if (!tlChanged)
+                {
+                    m_@_MEMBER_@Member.SetChanged(false);
+                }
             }
 @@ --- Single member ---
 @@ELSE@@
@@ -1164,6 +1175,7 @@ namespace @_NAMESPACE_@
 @@END_IF@@
                 Safir.Dob.Typesystem.Internal.BlobOperations.Set(kv.Value, handle, m_@_LOWER:MEMBER_@MemberIndex, 0);
             }
+            Safir.Dob.Typesystem.Internal.BlobOperations.WriteTopLevelChangeFlag(handle, m_@_LOWER:MEMBER_@MemberIndex, m_@_MEMBER_@Member.IsChanged());
 @@ --- Single member ---
 @@ELSE@@
 @@IF@@ @_UNIFORM_MEMBERTYPE_@=String

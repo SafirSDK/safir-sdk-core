@@ -2,13 +2,15 @@
 :encoding: UTF-8
 
 = Requirements Specification for Safir SDK Core
-:date: 2014-03-27
+:date: 2015-05-13
 
 == Introduction
 
+This document is delivered as part of Safir SDK Core with version tag ``{SAFIR_VERSION}''.
+
 === License
 
-    Copyright (C) 2004 - 2014 Saab AB.
+    Copyright (C) 2004 - 2015 Saab AB.
     Permission is granted to copy, distribute and/or modify this document
     under the terms of the GNU Free Documentation License, Version 1.3
     or any later version published by the Free Software Foundation;
@@ -28,17 +30,19 @@ This document is based on Saab AB internal documents, ``System / Subsystem Speci
 Historically the requirements for Safir SDK Core and Safir SDK (the Saab AB proprietary product, built on top of Safir SDK Core) have been kept together in the documents mentioned above. This document separates the Safir SDK Core requirements into a separate document.
 
 .Revision History
-[width="90%",cols="8%,12%,15%,65%",options="header",frame="topbot",grid="none"]
+[width="90%",cols="10%,12%,15%,63%",options="header",frame="topbot",grid="none"]
 |=========================================================
-|Version     |Date      | Author(s)   | Comment
+|Version       |Date      | Author(s)   | Comment
 
-|1.0 *Draft* |2014-03-27| 
+|1.0 _Draft_   |2014-03-27|
 Anders Widén
 +
 Lars Hagström
 +
-Joel Ottosson| 
-First version
+Joel Ottosson|
+First draft.
+
+|1.0           |2015-05-13| Lars Hagström| Updated after review 2014-09-05.
 
 |=========================================================
 
@@ -82,11 +86,14 @@ Clients send no or very little data between each other, the majority of data is 
 
 Network topology:: The clients may be situated on the same LAN as the server, but clients may also be on a WAN or on the other side of VPN tunnels. Different clients may have different connectivity to the server, and clients may not be able to send or receive network packets from all other clients.
 
-==== Vehicle mounted Client/Server system
+==== Client/Server system mounted in harsh environment
 
 Same configuration as ``Client/Server system'' above, but with two vital differences: One or more clients may intermittently have very bad connectivity, e.g. due to a slip ring and the network may fail intermittently due to power failures in the networking equipment.
 
+Note that in a system that has only one server the result of the server loosing connectivity is the same as all clients loosing connectivity.
+
 Network topology:: Everything is situated on the same LAN, but some connections may intermittently be in a degraded state or fail completely.
+
 
 [[typical_redundant]]
 ==== Client/Server system with redundancy
@@ -97,7 +104,7 @@ A failed server will not be allowed to reconnect to the system until the softwar
 
 Network topology:: The servers are expected to have good connectivity between them, even if bandwidth may be low and latency may be high. But network failures between the servers are expected to be few. The servers may be located close to each other on the same LAN or far from each other on a WAN or a VPN.
 +
-If the connectivity between the servers is bad there will be many redundancy failovers which will cause a lot of network traffic and server reboots.
+*Note:* If the connectivity between the servers is bad there will be many redundancy failovers which will cause a lot of network traffic and server reboots.
 
 
 [[typical_complex]]
@@ -131,6 +138,7 @@ _Split_/_Join_ is a mechanism whereby one or several computers in a system are d
 
 The distribution mechanism in Safir SDK Core is not expected to provide Split/Join functionality. However, the distribution mechanism shall provide the fundamental tools needed to add Split/Join functionality when Safir SDK Core is used to build Systems of Systems.
 
+In Safir SDK Core disconnect/reconnect of a node will cause that node to be ignored by the rest of the system, hence it is artificially isolated. An isolated node can rejoin the system only if it is sure to contain no data that conflicts with the data in the system, either by restarting the node or through configuration.
 
 == Safir SDK Core Requirements
 
@@ -150,8 +158,9 @@ lic_req_4:: Third party libraries that are used by Safir SDK Core shall be avail
 === Documentation and examples
 
 doc_req_1:: Safir SDK Core shall be well documented in a User's Guide.
-doc_req_2:: Safir SDK Core shall contain source code for an example of a business logic application.
-doc_req_3:: Safir SDK Core shall contain source code for an example of a gui logic application.
+doc_req_2:: Safir SDK Core shall contain API documentation.
+doc_req_3:: Safir SDK Core shall contain source code for an example of a business logic application.
+doc_req_4:: Safir SDK Core shall contain source code for an example of a gui logic application.
 
 === Distribution
 The Dob provides three distribution mechanisms; Messages, Services and Entities. These three fulfill different needs in a distributed real time system, and have different characteristics and provide different guarantees.
@@ -169,13 +178,14 @@ mes_req_2:: Safir SDK Core shall provide a mechanism for applications to subscri
 mes_req_3:: Safir SDK Core shall guarantee that the message order for a certain message type is preserved between sender and receiver.
 mes_req_4:: Safir SDK Core shall issue an overflow to the message sender when a message can't be added to the outbound queue.
 mes_req_5:: In the case of an overflow Safir SDK Core shall notify the application when it’s possible to start sending messages again.
+mes_req_6:: Safir SDK Core shall provide a filtering mechanism - _channels_ - that makes it possible to subscribe to only a subset of messages for a certain message type.
 
 ===== Messages without guaranteed delivery
 Messages without guaranteed delivery are typically used for cyclic data where a few lost messages are acceptable. For example, messages can be lost due to network failures or if some application cannot keep up with the message rate. There is no way for the sender to know whether or not a message actually has been delivered.
 
 mesunack_req_1:: Safir SDK Core shall provide a mechanism for applications to send messages without guaranteed delivery.
 
-===== Messages with guaranteed delivery
+===== Messages with delivery notification
 Messages with guaranteed delivery are used when messages must be delivered to all current subscribers. The sender is informed about the outcome of the send operation, i.e. if the message was successfully delivered to all subscribers or if the delivery to one or more subscribers did fail.
 
 mesack_req_1:: Safir SDK Core shall provide a mechanism for applications to send messages with guaranteed delivery.
@@ -192,30 +202,29 @@ Any application can send a request to create, update or delete an entity instanc
 
 Any application can subscribe for entity instances, which means that it will receive updates whenever the instances are changed. Entity updates are guaranteed to reach all subscribers, with one important caveat; subscribers are not guaranteed to see all intermediate states of an entity.
 
-ent_req_1:: Safir SDK Core shall keep a local object cache with entity instances on each node.
-ent_req_2:: Safir SDK Core shall keep all local object caches synchronized.
-ent_req_3:: Safir SDK Core shall provide a mechanism for applications to register handlers for entity classes.
-ent_req_4:: Safir SDK Core shall provide a mechanism for applications that has a registered handler to create entity instances of the class.
-ent_req_5:: Safir SDK Core shall ensure that an entity instance has one, and only one, owner.
-ent_req_6:: Safir SDK Core shall provide a mechanism for entity owners to update entities.
-ent_req_7:: Safir SDK Core shall provide a mechanism for entity owners to delete entities.
-ent_req_8:: Safir SDK Core shall provide a mechanism for applications to send requests to handlers to create entities.
-ent_req_9:: Safir SDK Core shall provide a mechanism for applications to send update requests for existing entities. The update requests shall be delivered to the entity owner.
-ent_req_10:: Safir SDK Core shall provide a mechanism for applications to send delete requests for existing entities. The delete requests shall be delivered to the entity owner.
-ent_req_11:: Safir SDK Core shall provide a mechanism for entity handlers/owners to send responses to received requests.
-ent_req_12:: Safir SDK Core shall provide a mechanism for applications to subscribe to entity instance creations.
-ent_req_13:: Safir SDK Core shall provide a mechanism for applications to subscribe to entity instance updates.
-ent_req_14:: Safir SDK Core shall provide a mechanism for applications to subscribe to entity instance deletes.
-ent_req_15:: Safir SDK Core shall provide a mechanism for applications to read entity instance states.
-ent_req_16:: It shall be possible to configure whether entities shall be acknowledged or not. Unacknowledged entities is an optimization that can be used for entities that are cyclically (and frequently) updated
-ent_req_17:: When an application exits (i.e. either through a crash or controlled exit) Safir SDK Core shall automatically unregister the entity handlers registered by that application.
-ent_req_18:: When contact with a node is lost (e.g. either through a network failure or controlled shutdown) Safir SDK Core shall automatically unregister the entity handlers registered by applications on that node.
+ent_req_1:: Safir SDK Core shall provide a mechanism for applications to register handlers for entity classes.
+ent_req_2:: Safir SDK Core shall provide a mechanism for applications that has a registered handler to create entity instances of the class.
+ent_req_3:: Safir SDK Core shall ensure that an entity instance has one, and only one, owner.
+ent_req_4:: Safir SDK Core shall provide a mechanism for entity owners to update entities.
+ent_req_5:: Safir SDK Core shall provide a mechanism for entity owners to delete entities.
+ent_req_6:: Safir SDK Core shall provide a mechanism for applications to send requests to handlers to create entities.
+ent_req_7:: Safir SDK Core shall provide a mechanism for applications to send update requests for existing entities. The update requests shall be delivered to the entity owner.
+ent_req_8:: Safir SDK Core shall provide a mechanism for applications to send delete requests for existing entities. The delete requests shall be delivered to the entity owner.
+ent_req_9:: Safir SDK Core shall provide a mechanism for entity handlers/owners to send responses to received requests.
+ent_req_10:: Safir SDK Core shall provide a mechanism for applications to subscribe to entity instance creations.
+ent_req_11:: Safir SDK Core shall provide a mechanism for applications to subscribe to entity instance updates.
+ent_req_12:: Safir SDK Core shall provide a mechanism for applications to subscribe to entity instance deletes.
+ent_req_13:: Safir SDK Core shall provide a mechanism for applications to read entity instance states.
+ent_req_14:: Safir SDK Core shall provide a mechanism for applications to read all instance states for a certain type.
+ent_req_15:: It shall be possible to configure whether entities shall be acknowledged or not. Unacknowledged entities is an optimization that can be used for entities that are cyclically (and frequently) updated
+ent_req_16:: When an application exits (i.e. either through a crash or controlled exit) Safir SDK Core shall automatically unregister the entity handlers registered by that application.
+ent_req_17:: When contact with a node is lost (e.g. either through a network failure or controlled shutdown) Safir SDK Core shall automatically unregister the entity handlers registered by applications on that node.
 
 Although Safir SDK Core allows an application to have several outstanding requests at a time it is sometimes desirable to be able to send off a number of requests and receive a summary of how it all went.
 
-ent_req_19:: Safir SDK Core shall provide a mechanism to delete all instances of a given entity.
-ent_req_20:: Safir SDK Core shall provide a mechanism to delete a specified set of entities.
-ent_req_21:: Safir SDK Core shall provide a mechanism to update a specified set of entities according to a template object. 
+ent_req_18:: Safir SDK Core shall provide a mechanism to delete all instances of a given entity.
+ent_req_19:: Safir SDK Core shall provide a mechanism to delete a specified set of entities.
+ent_req_20:: Safir SDK Core shall provide a mechanism to update a specified set of entities according to a template object.
 
 ==== Services
 A Service has one or more handlers (known as service handlers) to which any application (known as a requestor) can send service requests. For each service request that is sent, a response is received. The response is sent by the service handler, and indicates the result of the operation.
@@ -230,9 +239,11 @@ ser_req_5:: When contact with a node is lost (e.g. either through a network fail
 The following requirements apply to entity create requests, entity update requests, entity delete requests, service requests and their corresponding responses.
 
 reqresp_req_1:: If a request can not be delivered because there is no registered handler, Safir SDK Core shall generate an error response to the requestor.
-reqresp_req_2:: If the receiver of the request does not send a response within a configurable amount of time, Safir SDK Core shall generate an error response (timeout) to the requestor.
+reqresp_req_2:: If a request cannot be delivered within a configurable amount of time or the receiver of the request does not send a response within that time, Safir SDK Core shall generate an error response (timeout) to the requestor.
 reqresp_req_3:: Safir SDK Core shall issue an overflow to the requestor when a request can't be added to the outbound queue.
 reqresp_req_4:: In the case of an overflow Safir SDK Core shall notify the application when its possible to start sending requests again.
+
+Note: A timeout response does not indicate whether the request was delivered or not.
 
 ==== Handler registration subscriptions
 It is possible for applications to subscribe to the registration/unregistration of entity and service handlers. This is useful to be able to monitor the status of other applications in the system.
@@ -244,7 +255,7 @@ hanreg_req_2:: Safir SDK Core shall guarantee that a subscriber gets at least on
 
 ==== Addressing
 The addressing mechanism used by Safir SDK Core is completely transparent. The sender of a service or entity request doesn't know if the receiving handler is located on the same node or on a remote node. In the same way the sender of a message is unaware of the location of the subscribers. When an entity owner updates an entity it has no knowledge of the numbers of subscribers and their location.
-  
+
 addr_req_1:: Safir SDK Core shall for addressing use logical addressing, i.e. an applications shall be unaware of the physical address of its counterparts.
 
 ==== Queues
@@ -266,7 +277,7 @@ Hot standby is used when there is a need for the standby application to be start
 
 When a cold or hot standby application is started it is given the persistent flagged entity instances that any failing application has left behind.
 
-red_req_1:: At successful registration of an entity handler the application shall be given any persistent flagged entity instances. This holds for cold standby as well as for hot standby applications.  
+red_req_1:: At successful registration of an entity handler the application shall be given any persistent flagged entity instances. This holds for cold standby as well as for hot standby applications.
 red_req_2:: Safir SDK Core shall provide a mechanism for several hot standby application instances to make pending handler registrations. Only one of the application instances shall have its handler registered.
 red_req_3:: In case of failure of the application instance with the registered handler, Safir SDK Core shall automatically register the handler of one of the hot standby application instances and notify that instance.
 
@@ -279,10 +290,11 @@ pers_req_1:: It shall be possible to configure entity types to be persistent.
 pers_req_2:: Types marked as persistent shall be automatically persisted.
 pers_req_3:: Persisted entity instances shall be automatically passed to the handler on startup.
 pers_req_4:: It shall be possible to configure persistency services to use a MySQL database for storage.
-pers_req_5:: It shall be possible to configure persistency services to use a MariaDB database for storage.
+pers_req_5:: It shall be possible to configure persistency services to use a Microsoft SQL Server database for storage.
 pers_req_6:: It shall be possible to configure persistency services to use a Mimer SQL database for storage.
 pers_req_7:: It shall be possible to configure persistency services to use a PostgreSQL database for storage.
 pers_req_8:: It shall be possible to configure persistency services to use files on disk for storage.
+pres_req_9:: It shall be possible to configure the persistency service to provide redundancy fallback.
 
 === Types
 Safir SDK Core shall provide a type system that can be used to construct complex types that can be exchanged between nodes and between applications written in various programming languages.
@@ -315,10 +327,10 @@ Safir SDK Core is designed and implemented to be platform and compiler independe
 
 plat_req_1:: Safir SDK Core shall support the latest Ubuntu Long Term Support release, on x86 and x86_64 platforms.
 plat_req_2:: Safir SDK Core shall support the latest RedHat Enterprise Linux release on x86_64 platforms.
-plat_req_3:: Safir SDK Core shall support the Windows 7 on x86 and x86_64 platforms.
-plat_req_4:: Safir SDK Core shall support Visual Studio 2010, 2012 and 2013.
-plat_req_5:: It shall be possible to install the Safir SDK Core software in accordance with the established standard for each supported plattform.
-plat_req_6:: Safir SDK Core nodes shall be able to communicate with other Safir SDK Core nodes, regardless of platform.
+plat_req_3:: Safir SDK Core shall support the Windows 7 on x86 and x86_64 platforms and Windows Server 2008 and 2012 on x86_64 platforms.
+plat_req_4:: It shall be possible to install the Safir SDK Core software in accordance with the established standard for each supported plattform.
+plat_req_5:: Safir SDK Core nodes shall be able to communicate with other Safir SDK Core nodes, regardless of platform.
+plat_req_6:: Safir SDK Core shall, for every released version, provide information about what versions of languages, compilers and operating systems have been used for compilation and testing.
 
 === Error and event logging
 Logging functionality is provided to allow applications to report errors, events and other information. Log timestamps are expected to conform to the format specified by the logging mechanism, e.g. syslog or windows event log, and the timestamp will be based on the local computer clock.
@@ -346,7 +358,7 @@ lang_req_5:: An application built on Safir SDK Core shall be able to communicate
 Node supervision along with redundancy is provided to detect and act on unexpected application or node losses. The system control mechanism starts and stops the entire system including the Dob and will also keep an unambiguous view of the system, i.e which nodes are part of the system and where individual applications are executing.
 
 sysctrl_req_1:: It shall be possible to supervise the existence of a node.
-sysctrl_req_2:: It shall be possible to automatically restart a node after an uncontrolled stop. 
+sysctrl_req_2:: It shall be possible to automatically restart a node after an uncontrolled stop.
 sysctrl_req_3:: It shall be possible to define a fallback system configuration as an addition to the basic system configuration. The fallback system configuration shall be automatically switched to when the basic configuration fails.
 sysctrl_req_4:: Safir SDK Core shall provide a start mechanism that starts the system.
 sysctrl_req_5:: Safir SDK Core shall provide a stop mechanism that stops the system.
@@ -354,15 +366,17 @@ sysctrl_req_6:: The start/stop mechanism shall be configurable to start external
 sysctrl_req_7:: The start/stop mechanism shall be able start and stop applications on any node in the system.
 sysctrl_req_8:: The control mechanism shall provide an unambiguous view of which nodes are part of the system.
 sysctrl_req_9:: The start/stop mechanism shall monitor the processes started through it.
+sysctrl_req_10:: Safir SDK Core shall allow processes to run as different operating system users within one node.
 
 === Context
-The concept of contexts in Safir SDK Core is a mechanism for separation of data into different realms that can exist simultanously but are strictly separated from each other. For example the same instance of an object may occur in more than one context at the same time, and the Dob will guarantee that they will never be mixed up. 
+The concept of contexts in Safir SDK Core is a mechanism for separation of data into different realms that can exist simultanously but are strictly separated from each other. For example the same instance of an object may occur in more than one context at the same time, and the Dob will guarantee that they will never be mixed up.
 
 An example of when the use of contexts is well suited, is when replaying recorded data. By defining a special replay context, there is no risk that replayed data are mixed up with real data.
 
 context_req_1:: Safir SDK Core shall support separation of information into different contexts.
 context_req_2:: An application that is connected to the Dob in one context shall not be able to access data from other contexts.
-context_req_3:: It shall be possible to configure the number of contexts.
+context_req_3:: Safir SDK Core shall support data that is shared between all contexts.
+context_req_4:: It shall be possible to configure the number of contexts.
 
 === Performance
 
@@ -382,7 +396,7 @@ Since computer hardware is developing at a rapid pace it is not sensible to spec
 
 These specifications apply to all computers in the load scenarios, except where otherwise noted.
 
-perf_req_3:: For all major and minor releases (e.g. 5.0 and 5.1, but not 5.1.1) results from running these scenarios shall be documented and made available to customers and potential customers.  
+perf_req_3:: For all major and minor releases (e.g. 5.0 and 5.1, but not 5.1.1) results from running these scenarios shall be documented and made available to customers and potential customers.
 
 perf_req_4:: The documented results shall contain at least the following:
 * Hardware specifications of test platform
@@ -429,7 +443,7 @@ This scenario is intended to be an approximate instantiation of the typical syst
 * 2 computers each running one ``Server'' node.
 * Server A own 10000 instances of +StaticEntity+, with 100 random instances being updated every second.
 * Server B subscribes to all entities.
-* 100 ``Client'' nodes that may be slower (either due to slower network connection or slower hardware) than the two servers. 
+* 100 ``Client'' nodes that may be slower (either due to slower network connection or slower hardware) than the two servers.
 * All client nodes subscribe to all entities
 * All client nodes each produce 1 update request per second on random +StaticEntity+ instances.
 * Every minute one random client node restarts.

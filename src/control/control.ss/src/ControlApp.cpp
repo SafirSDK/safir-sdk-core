@@ -53,7 +53,7 @@ ControlApp::ControlApp(boost::asio::io_service& ioService,
     , m_strand(ioService)
     , m_terminationTimer(ioService)
     , m_ctrlStopped(false)
-    , m_doseMainStarted(false)
+    , m_doseMainRunning(false)
 #if defined(linux) || defined(__linux) || defined(__linux__)
     , m_sigchldSet(ioService, SIGCHLD)
 #elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
@@ -123,7 +123,7 @@ ControlApp::ControlApp(boost::asio::io_service& ioService,
                                // This is what we do when dose_main is ready to receive commands
                                [this, id]()
     {
-        m_doseMainStarted = true;
+        m_doseMainRunning = true;
 
         m_doseMainCmdSender->StartDoseMain(m_conf.thisNodeParam.name,
                                            id,
@@ -169,7 +169,7 @@ ControlApp::ControlApp(boost::asio::io_service& ioService,
                             << "CTRL: Got a signals error: " << error);
         }
 
-        m_doseMainStarted = false;
+        m_doseMainRunning = false;
 
         // dose_main has exited, we can stop our timer that will slay dose_main
         m_terminationTimer.cancel();
@@ -230,9 +230,9 @@ ControlApp::ControlApp(boost::asio::io_service& ioService,
                                                 (boost::process::initializers::run_exe(path),
                                                  boost::process::initializers::set_on_error(ec),
                                                  boost::process::initializers::inherit_env()
-                                                 #if defined(linux) || defined(__linux) || defined(__linux__)
+#if defined(linux) || defined(__linux) || defined(__linux__)
                                                  ,boost::process::initializers::notify_io_service(ioService)
-                                                 #endif
+#endif
                                                )));
 
     if (ec)
@@ -253,7 +253,7 @@ ControlApp::ControlApp(boost::asio::io_service& ioService,
         DWORD statusCode;
         ::GetExitCodeProcess(m_handle.native(), &statusCode);
 
-        m_doseMainStarted = false;
+        m_doseMainRunning = false;
 
         // dose_main has exited, we can stop our timer that will slay dose_main
         m_terminationTimer.cancel();
@@ -296,7 +296,7 @@ ControlApp::ControlApp(boost::asio::io_service& ioService,
                             << "CTRL: Got a signals error: " << error);
         }
 
-        if (m_doseMainStarted)
+        if (m_doseMainRunning)
         {
             StopDoseMain();
         }
@@ -318,10 +318,7 @@ ControlApp::~ControlApp()
 
 void ControlApp::StopDoseMain()
 {
-    // Send stop order to dose_main
-    m_doseMainCmdSender->StopDoseMain();
-
-    // Give dose_main some time to stop in a controlled fashion
+    // Set up a timer that will kill dose_main the hard way if it doesn't stop within a reasonable time.
     m_terminationTimer.expires_from_now(boost::chrono::seconds(10));
 
     m_terminationTimer.async_wait([this]
@@ -337,8 +334,14 @@ void ControlApp::StopDoseMain()
                                                       << "... killing it!");
 
                                       // Kill dose_main the hard way
-                                      boost::process::terminate(*m_doseMain);
+                                      boost::system::error_code ec;
+                                      boost::process::terminate(*m_doseMain, ec);
+                                      // We don't care about the error code from terminate. dose_main might
+                                      // have exited by itself (which is good) and that will give an error.
                                   });
+
+    // Send stop order to dose_main
+    m_doseMainCmdSender->StopDoseMain();
 }
 
 void ControlApp::StopControl()

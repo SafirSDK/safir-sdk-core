@@ -85,9 +85,8 @@ public class Utilities {
                                 //If the type is changing we write a warning
                                 if (!intoContainerOB.isNull())
                                 {
-                                    //TODO write to syslog
-                                    System.out.println("Warning (Contact a DOB developer if you do not understand it):");
-                                    System.out.println("The type of a member has changed without the change flag being set in 'from'.");
+                                    com.saabgroup.safir.Logging.sendSystemLog(com.saabgroup.safir.Logging.Severity.WARNING,
+                                                                              "The type of a member has changed without the change flag being set in 'from'.");
                                 }
 
                                 //if it was null we don't warn (even if it is a little bit suspicious to do that...)

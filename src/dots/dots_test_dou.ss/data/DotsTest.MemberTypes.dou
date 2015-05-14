@@ -151,6 +151,10 @@
             <name>Watt64Member</name>
             <type>Watt64</type>
         </member>
+        <member><!--this is only here to test all-lowercase member names -->
+            <name>lowercase</name>
+            <type>Int64</type>
+        </member>
     </members>
     <createRoutines>
         <createRoutine>

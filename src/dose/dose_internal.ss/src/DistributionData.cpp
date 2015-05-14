@@ -951,6 +951,11 @@ namespace Internal
         throw Safir::Dob::Typesystem::SoftwareViolationException(L"Internal error, got to end of DistributionData::HasInstanceId()", __WFILE__,__LINE__);
     }
 
+    const Typesystem::EntityId DistributionData::GetEntityId() const
+    {
+        return Typesystem::EntityId(GetTypeId(), GetInstanceId());
+    }
+
     const char * const DistributionData::GetConnectionName() const
     {
         return GetData() + sizeof(ConnectHeader);

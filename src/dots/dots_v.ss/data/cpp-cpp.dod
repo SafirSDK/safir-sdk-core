@@ -596,19 +596,29 @@ namespace @_NAMESPACEV_@
         }
 @@ --- Dictionary member ---
 @@ELSIF@@ @_EXIST:MEMBERISDICTIONARY_@
-        for (int valueIndex=0; valueIndex<DotsC_GetNumberOfMemberValues(handle, g_@_LOWER:MEMBER_@MemberIndex); ++valueIndex)
         {
-            bool isNull, isChanged;
+            bool tlChanged = DotsC_ReadTopLevelChangeFlag(handle, g_@_LOWER:MEMBER_@MemberIndex);
+            m_@_MEMBER_@Member.SetChanged(tlChanged);
+            const auto size = DotsC_GetNumberOfMemberValues(handle, g_@_LOWER:MEMBER_@MemberIndex);
+            for (int valueIndex=0; valueIndex<size; ++valueIndex)
+            {
+                bool dummy1, dummy2;
 @@IF@@ @_UNIFORM_MEMBERDICTIONARYTYPE_@=Enumeration
-            Safir::Dob::Typesystem::Int32 ordinal;
-            Safir::Dob::Typesystem::Internal::BlobOperations::Get(ordinal, isNull, isChanged, handle, g_@_LOWER:MEMBER_@MemberIndex, valueIndex, Safir::Dob::Typesystem::Internal::BlobOperations::KeyMode);
-            @_MEMBERDICTIONARYTYPE_@::Enumeration key=static_cast<@_MEMBERDICTIONARYTYPE_@::Enumeration>(ordinal);
+                Safir::Dob::Typesystem::Int32 ordinal;
+                Safir::Dob::Typesystem::Internal::BlobOperations::Get(ordinal, dummy1, dummy2, handle, g_@_LOWER:MEMBER_@MemberIndex, valueIndex, Safir::Dob::Typesystem::Internal::BlobOperations::KeyMode);
+                @_MEMBERDICTIONARYTYPE_@::Enumeration key=static_cast<@_MEMBERDICTIONARYTYPE_@::Enumeration>(ordinal);
 @@ELSE@@
-            @_MEMBERDICTIONARYTYPE_@ key;
-            Safir::Dob::Typesystem::Internal::BlobOperations::Get(key, isNull, isChanged, handle, g_@_LOWER:MEMBER_@MemberIndex, valueIndex, Safir::Dob::Typesystem::Internal::BlobOperations::KeyMode);
+                @_MEMBERDICTIONARYTYPE_@ key;
+                Safir::Dob::Typesystem::Internal::BlobOperations::Get(key, dummy1, dummy2, handle, g_@_LOWER:MEMBER_@MemberIndex, valueIndex, Safir::Dob::Typesystem::Internal::BlobOperations::KeyMode);
 @@END_IF@@
-            Safir::Dob::Typesystem::Internal::BlobOperations::Get(m_@_MEMBER_@Member[key], handle, g_@_LOWER:MEMBER_@MemberIndex, valueIndex);
-            m_@_MEMBER_@Member[key].SetChanged(true);
+                Safir::Dob::Typesystem::Internal::BlobOperations::Get(m_@_MEMBER_@Member[key], handle, g_@_LOWER:MEMBER_@MemberIndex, valueIndex);
+                tlChanged = tlChanged || m_@_MEMBER_@Member[key].IsChanged();
+
+            }
+            if (!tlChanged)
+            {
+                m_@_MEMBER_@Member.SetChanged(false);
+            }
         }
 @@ --- Single member ---
 @@ELSE@@
@@ -686,33 +696,23 @@ namespace @_NAMESPACEV_@
         DotsC_WriteTopLevelChangeFlag(handle, g_@_LOWER:MEMBER_@MemberIndex, m_@_MEMBER_@Member.IsChanged());
 @@ --- Dictionary member ---
 @@ELSIF@@ @_EXIST:MEMBERISDICTIONARY_@
-@@IF@@ @_UNIFORM_MEMBERDICTIONARYTYPE_@=Enumeration
-@@IF@@ (@_UNIFORM_MEMBERTYPE_@ = String) or (@_UNIFORM_MEMBERTYPE_@ = Boolean)
-        for (Safir::Dob::Typesystem::DictionaryContainer<@_MEMBERDICTIONARYTYPE_@::Enumeration, Safir::Dob::Typesystem::@_UNIFORM_MEMBERTYPE_@Container>::const_iterator it=m_@_MEMBER_@Member.begin();
-             it!=m_@_MEMBER_@Member.end(); ++it)
-@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
-        for (Safir::Dob::Typesystem::DictionaryContainer<@_MEMBERDICTIONARYTYPE_@::Enumeration, @_MEMBERTYPE_@::EnumerationContainer>::const_iterator it=m_@_MEMBER_@Member.begin();
-             it!=m_@_MEMBER_@Member.end(); ++it)
-@@ELSE@@
-        for (Safir::Dob::Typesystem::DictionaryContainer<@_MEMBERDICTIONARYTYPE_@::Enumeration, @_MEMBERTYPE_@Container>::const_iterator it=m_@_MEMBER_@Member.begin();
-             it!=m_@_MEMBER_@Member.end(); ++it)
-@@END_IF@@
-@@ELSE@@
-@@IF@@ (@_UNIFORM_MEMBERTYPE_@ = String) or (@_UNIFORM_MEMBERTYPE_@ = Boolean)
-        for (Safir::Dob::Typesystem::DictionaryContainer<@_MEMBERDICTIONARYTYPE_@, Safir::Dob::Typesystem::@_UNIFORM_MEMBERTYPE_@Container>::const_iterator it=m_@_MEMBER_@Member.begin();
-             it!=m_@_MEMBER_@Member.end(); ++it)
-@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
-        for (Safir::Dob::Typesystem::DictionaryContainer<@_MEMBERDICTIONARYTYPE_@, @_MEMBERTYPE_@::EnumerationContainer>::const_iterator it=m_@_MEMBER_@Member.begin();
-             it!=m_@_MEMBER_@Member.end(); ++it)
-@@ELSE@@
-        for (Safir::Dob::Typesystem::DictionaryContainer<@_MEMBERDICTIONARYTYPE_@, @_MEMBERTYPE_@Container>::const_iterator it=m_@_MEMBER_@Member.begin();
-             it!=m_@_MEMBER_@Member.end(); ++it)
-@@END_IF@@
-@@END_IF@@
+        for (const auto& entry : m_@_MEMBER_@Member)
         {
-            Safir::Dob::Typesystem::Internal::BlobOperations::Set(it->first, false, false, handle, g_@_LOWER:MEMBER_@MemberIndex, 0, Safir::Dob::Typesystem::Internal::BlobOperations::KeyMode);
-            Safir::Dob::Typesystem::Internal::BlobOperations::Set(it->second, handle, g_@_LOWER:MEMBER_@MemberIndex, 0);
-         }
+            Safir::Dob::Typesystem::Internal::BlobOperations::Set(entry.first,
+                                                                  false,
+                                                                  false,
+                                                                  handle,
+                                                                  g_@_LOWER:MEMBER_@MemberIndex,
+                                                                  0,
+                                                                  Safir::Dob::Typesystem::Internal::BlobOperations::KeyMode);
+
+            Safir::Dob::Typesystem::Internal::BlobOperations::Set(entry.second,
+                                                                  handle,
+                                                                  g_@_LOWER:MEMBER_@MemberIndex,
+                                                                  0);
+        }
+        DotsC_WriteTopLevelChangeFlag(handle, g_@_LOWER:MEMBER_@MemberIndex, m_@_MEMBER_@Member.IsChanged());
+
 @@ --- Single member ---
 @@ELSE@@
 @@IF@@ (@_UNIFORM_MEMBERTYPE_@ = String)

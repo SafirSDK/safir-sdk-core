@@ -201,7 +201,7 @@ namespace Internal
                             }
                             ++valueIndex;
                         }
-
+                        writer.SetChangedTopLevel(memIx,true);
                     }
                     break;
                 }
@@ -287,10 +287,16 @@ namespace Internal
                        const KeyT& key,
                        BlobWriter<RepositoryType>& writer) const
         {
-            //if dictionary first write the key
+            //if dictionary first write the key, and if it is null we need to write the null and change flag correctly.
             if (md->GetCollectionType()==DictionaryCollectionType)
             {
                 writer.WriteKey(memIx, key);
+
+                if (memberContent.data()=="null")
+                {
+                    writer.WriteValue(memIx, arrIx, 0, true, true);
+                    return;
+                }
             }
 
             //first check if value is set to null in json, in that case just set status to null and return.

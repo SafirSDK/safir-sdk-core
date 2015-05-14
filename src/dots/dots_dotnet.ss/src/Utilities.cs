@@ -90,9 +90,8 @@ public class Utilities
                                 //If the type is changing we write a warning
                                 if (!intoContainerOB.IsNull())
                                 {
-                                    //TODO syslog
-                                    System.Console.WriteLine("Warning (Contact a DOB developer if you do not understand it):");
-                                    System.Console.WriteLine("The type of a member has changed without the change flag being set in 'from'.");
+                                    Safir.Logging.SendSystemLog(Safir.Logging.Severity.Warning,
+                                                                "The type of a member has changed without the change flag being set in 'from'.");
                                 }
 
                                 //if it was null we don't warn (even if it is a little bit suspicious to do that...)

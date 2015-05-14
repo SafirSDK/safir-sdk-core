@@ -705,5 +705,665 @@
             <sequence/>
             <type>Watt64</type>
         </member>
+
+        <!-- Dictionaries keyType=Int32 -->
+        <member>
+            <name>Int32Int32DictionaryMember</name>
+            <type>Int32</type>
+            <dictionary keyType="Int32"/>
+        </member>
+        <member>
+            <name>Int32Int32DictionaryMember2</name>
+            <type>Int32</type>
+            <dictionary keyType="Int32"/>
+        </member>
+        <member>
+            <name>Int32Int64DictionaryMember</name>
+            <type>Int64</type>
+            <dictionary keyType="Int32"/>
+        </member>
+        <member>
+            <name>Int32Int64DictionaryMember2</name>
+            <type>Int64</type>
+            <dictionary keyType="Int32"/>
+        </member>
+        <member>
+            <name>Int32StringDictionaryMember</name>
+            <type>String</type>
+            <dictionary keyType="Int32"/>
+        </member>
+        <member>
+            <name>Int32Float32DictionaryMember</name>
+            <type>Float32</type>
+            <dictionary keyType="Int32"/>
+        </member>
+        <member>
+            <name>Int32Float64DictionaryMember</name>
+            <type>Float64</type>
+            <dictionary keyType="Int32"/>
+        </member>
+        <member>
+            <name>Int32TypeIdDictionaryMember</name>
+            <type>TypeId</type>
+            <dictionary keyType="Int32"/>
+        </member>
+        <member>
+            <name>Int32InstanceIdDictionaryMember</name>
+            <type>InstanceId</type>
+            <dictionary keyType="Int32"/>
+        </member>
+        <member>
+            <name>Int32InstanceIdDictionaryMember2</name>
+            <type>InstanceId</type>
+            <dictionary keyType="Int32"/>
+        </member>
+        <member>
+            <name>Int32ChannelIdDictionaryMember</name>
+            <type>ChannelId</type>
+            <dictionary keyType="Int32"/>
+        </member>
+        <member>
+            <name>Int32HandlerIdDictionaryMember</name>
+            <type>HandlerId</type>
+            <dictionary keyType="Int32"/>
+        </member>
+        <member>
+            <name>Int32EntityIdDictionaryMember</name>
+            <type>EntityId</type>
+            <dictionary keyType="Int32"/>
+        </member>
+        <member>
+            <name>Int32BinaryDictionaryMember</name>
+            <type>Binary</type>
+            <dictionary keyType="Int32"/>
+        </member>
+        <member>
+            <name>Int32EnumDictionaryMember</name>
+            <type>DoseTest.TestEnum</type>
+            <dictionary keyType="Int32"/>
+        </member>
+        <member>
+            <name>Int32ObjectDictionaryMember</name>
+            <type>Object</type>
+            <dictionary keyType="Int32"/>
+        </member>
+        <member>
+            <name>Int32ItemDictionaryMember</name>
+            <type>DoseTest.TestItem</type>
+            <dictionary keyType="Int32"/>
+        </member>
+        <!-- Dictionaries keyType=Int64 -->
+        <member>
+            <name>Int64Int32DictionaryMember</name>
+            <type>Int32</type>
+            <dictionary keyType="Int64"/>
+        </member>
+        <member>
+            <name>Int64Int64DictionaryMember</name>
+            <type>Int64</type>
+            <dictionary keyType="Int64"/>
+        </member>
+        <member>
+            <name>Int64StringDictionaryMember</name>
+            <type>String</type>
+            <dictionary keyType="Int64"/>
+        </member>
+        <member>
+            <name>Int64Float32DictionaryMember</name>
+            <type>Float32</type>
+            <dictionary keyType="Int64"/>
+        </member>
+        <member>
+            <name>Int64Float64DictionaryMember</name>
+            <type>Float64</type>
+            <dictionary keyType="Int64"/>
+        </member>
+        <member>
+            <name>Int64TypeIdDictionaryMember</name>
+            <type>TypeId</type>
+            <dictionary keyType="Int64"/>
+        </member>
+        <member>
+            <name>Int64InstanceIdDictionaryMember</name>
+            <type>InstanceId</type>
+            <dictionary keyType="Int64"/>
+        </member>
+        <member>
+            <name>Int64ChannelIdDictionaryMember</name>
+            <type>ChannelId</type>
+            <dictionary keyType="Int64"/>
+        </member>
+        <member>
+            <name>Int64HandlerIdDictionaryMember</name>
+            <type>HandlerId</type>
+            <dictionary keyType="Int64"/>
+        </member>
+        <member>
+            <name>Int64EntityIdDictionaryMember</name>
+            <type>EntityId</type>
+            <dictionary keyType="Int64"/>
+        </member>
+        <member>
+            <name>Int64BinaryDictionaryMember</name>
+            <type>Binary</type>
+            <dictionary keyType="Int64"/>
+        </member>
+        <member>
+            <name>Int64EnumDictionaryMember</name>
+            <type>DoseTest.TestEnum</type>
+            <dictionary keyType="Int64"/>
+        </member>
+        <member>
+            <name>Int64ObjectDictionaryMember</name>
+            <type>Object</type>
+            <dictionary keyType="Int64"/>
+        </member>
+        <member>
+            <name>Int64ItemDictionaryMember</name>
+            <type>DoseTest.TestItem</type>
+            <dictionary keyType="Int64"/>
+        </member>
+        <!-- Dictionaries keyType=String -->
+        <member>
+            <name>StringInt32DictionaryMember</name>
+            <type>Int32</type>
+            <dictionary keyType="String"/>
+        </member>
+        <member>
+            <name>StringInt64DictionaryMember</name>
+            <type>Int64</type>
+            <dictionary keyType="String"/>
+        </member>
+        <member>
+            <name>StringStringDictionaryMember</name>
+            <type>String</type>
+            <dictionary keyType="String"/>
+        </member>
+        <member>
+            <name>StringFloat32DictionaryMember</name>
+            <type>Float32</type>
+            <dictionary keyType="String"/>
+        </member>
+        <member>
+            <name>StringFloat64DictionaryMember</name>
+            <type>Float64</type>
+            <dictionary keyType="String"/>
+        </member>
+        <member>
+            <name>StringTypeIdDictionaryMember</name>
+            <type>TypeId</type>
+            <dictionary keyType="String"/>
+        </member>
+        <member>
+            <name>StringInstanceIdDictionaryMember</name>
+            <type>InstanceId</type>
+            <dictionary keyType="String"/>
+        </member>
+        <member>
+            <name>StringChannelIdDictionaryMember</name>
+            <type>ChannelId</type>
+            <dictionary keyType="String"/>
+        </member>
+        <member>
+            <name>StringHandlerIdDictionaryMember</name>
+            <type>HandlerId</type>
+            <dictionary keyType="String"/>
+        </member>
+        <member>
+            <name>StringEntityIdDictionaryMember</name>
+            <type>EntityId</type>
+            <dictionary keyType="String"/>
+        </member>
+        <member>
+            <name>StringBinaryDictionaryMember</name>
+            <type>Binary</type>
+            <dictionary keyType="String"/>
+        </member>
+        <member>
+            <name>StringEnumDictionaryMember</name>
+            <type>DoseTest.TestEnum</type>
+            <dictionary keyType="String"/>
+        </member>
+        <member>
+            <name>StringObjectDictionaryMember</name>
+            <type>Object</type>
+            <dictionary keyType="String"/>
+        </member>
+        <member>
+            <name>StringItemDictionaryMember</name>
+            <type>DoseTest.TestItem</type>
+            <dictionary keyType="String"/>
+        </member>
+        <!-- Dictionaries keyType=TypeId -->
+        <member>
+            <name>TypeIdInt32DictionaryMember</name>
+            <type>Int32</type>
+            <dictionary keyType="TypeId"/>
+        </member>
+        <member>
+            <name>TypeIdInt64DictionaryMember</name>
+            <type>Int64</type>
+            <dictionary keyType="TypeId"/>
+        </member>
+        <member>
+            <name>TypeIdStringDictionaryMember</name>
+            <type>String</type>
+            <dictionary keyType="TypeId"/>
+        </member>
+        <member>
+            <name>TypeIdFloat32DictionaryMember</name>
+            <type>Float32</type>
+            <dictionary keyType="TypeId"/>
+        </member>
+        <member>
+            <name>TypeIdFloat64DictionaryMember</name>
+            <type>Float64</type>
+            <dictionary keyType="TypeId"/>
+        </member>
+        <member>
+            <name>TypeIdTypeIdDictionaryMember</name>
+            <type>TypeId</type>
+            <dictionary keyType="TypeId"/>
+        </member>
+        <member>
+            <name>TypeIdInstanceIdDictionaryMember</name>
+            <type>InstanceId</type>
+            <dictionary keyType="TypeId"/>
+        </member>
+        <member>
+            <name>TypeIdChannelIdDictionaryMember</name>
+            <type>ChannelId</type>
+            <dictionary keyType="TypeId"/>
+        </member>
+        <member>
+            <name>TypeIdHandlerIdDictionaryMember</name>
+            <type>HandlerId</type>
+            <dictionary keyType="TypeId"/>
+        </member>
+        <member>
+            <name>TypeIdEntityIdDictionaryMember</name>
+            <type>EntityId</type>
+            <dictionary keyType="TypeId"/>
+        </member>
+        <member>
+            <name>TypeIdBinaryDictionaryMember</name>
+            <type>Binary</type>
+            <dictionary keyType="TypeId"/>
+        </member>
+        <member>
+            <name>TypeIdEnumDictionaryMember</name>
+            <type>DoseTest.TestEnum</type>
+            <dictionary keyType="TypeId"/>
+        </member>
+        <member>
+            <name>TypeIdObjectDictionaryMember</name>
+            <type>Object</type>
+            <dictionary keyType="TypeId"/>
+        </member>
+        <member>
+            <name>TypeIdItemDictionaryMember</name>
+            <type>DoseTest.TestItem</type>
+            <dictionary keyType="TypeId"/>
+        </member>
+        <!-- Dictionaries keyType=TestEnum -->
+        <member>
+            <name>EnumInt32DictionaryMember</name>
+            <type>Int32</type>
+            <dictionary keyType="DoseTest.TestEnum"/>
+        </member>
+        <member>
+            <name>EnumInt64DictionaryMember</name>
+            <type>Int64</type>
+            <dictionary keyType="DoseTest.TestEnum"/>
+        </member>
+        <member>
+            <name>EnumStringDictionaryMember</name>
+            <type>String</type>
+            <dictionary keyType="DoseTest.TestEnum"/>
+        </member>
+        <member>
+            <name>EnumFloat32DictionaryMember</name>
+            <type>Float32</type>
+            <dictionary keyType="DoseTest.TestEnum"/>
+        </member>
+        <member>
+            <name>EnumFloat64DictionaryMember</name>
+            <type>Float64</type>
+            <dictionary keyType="DoseTest.TestEnum"/>
+        </member>
+        <member>
+            <name>EnumTypeIdDictionaryMember</name>
+            <type>TypeId</type>
+            <dictionary keyType="DoseTest.TestEnum"/>
+        </member>
+        <member>
+            <name>EnumInstanceIdDictionaryMember</name>
+            <type>InstanceId</type>
+            <dictionary keyType="DoseTest.TestEnum"/>
+        </member>
+        <member>
+            <name>EnumChannelIdDictionaryMember</name>
+            <type>ChannelId</type>
+            <dictionary keyType="DoseTest.TestEnum"/>
+        </member>
+        <member>
+            <name>EnumHandlerIdDictionaryMember</name>
+            <type>HandlerId</type>
+            <dictionary keyType="DoseTest.TestEnum"/>
+        </member>
+        <member>
+            <name>EnumEntityIdDictionaryMember</name>
+            <type>EntityId</type>
+            <dictionary keyType="DoseTest.TestEnum"/>
+        </member>
+        <member>
+            <name>EnumBinaryDictionaryMember</name>
+            <type>Binary</type>
+            <dictionary keyType="DoseTest.TestEnum"/>
+        </member>
+        <member>
+            <name>EnumEnumDictionaryMember</name>
+            <type>DoseTest.TestEnum</type>
+            <dictionary keyType="DoseTest.TestEnum"/>
+        </member>
+        <member>
+            <name>EnumObjectDictionaryMember</name>
+            <type>Object</type>
+            <dictionary keyType="DoseTest.TestEnum"/>
+        </member>
+        <member>
+            <name>EnumItemDictionaryMember</name>
+            <type>DoseTest.TestItem</type>
+            <dictionary keyType="DoseTest.TestEnum"/>
+        </member>
+        <!-- Dictionaries keyType=EntityId -->
+        <member>
+            <name>EntityIdInt32DictionaryMember</name>
+            <type>Int32</type>
+            <dictionary keyType="EntityId"/>
+        </member>
+        <member>
+            <name>EntityIdInt64DictionaryMember</name>
+            <type>Int64</type>
+            <dictionary keyType="EntityId"/>
+        </member>
+        <member>
+            <name>EntityIdStringDictionaryMember</name>
+            <type>String</type>
+            <dictionary keyType="EntityId"/>
+        </member>
+        <member>
+            <name>EntityIdFloat32DictionaryMember</name>
+            <type>Float32</type>
+            <dictionary keyType="EntityId"/>
+        </member>
+        <member>
+            <name>EntityIdFloat64DictionaryMember</name>
+            <type>Float64</type>
+            <dictionary keyType="EntityId"/>
+        </member>
+        <member>
+            <name>EntityIdTypeIdDictionaryMember</name>
+            <type>TypeId</type>
+            <dictionary keyType="EntityId"/>
+        </member>
+        <member>
+            <name>EntityIdInstanceIdDictionaryMember</name>
+            <type>InstanceId</type>
+            <dictionary keyType="EntityId"/>
+        </member>
+        <member>
+            <name>EntityIdChannelIdDictionaryMember</name>
+            <type>ChannelId</type>
+            <dictionary keyType="EntityId"/>
+        </member>
+        <member>
+            <name>EntityIdHandlerIdDictionaryMember</name>
+            <type>HandlerId</type>
+            <dictionary keyType="EntityId"/>
+        </member>
+        <member>
+            <name>EntityIdEntityIdDictionaryMember</name>
+            <type>EntityId</type>
+            <dictionary keyType="EntityId"/>
+        </member>
+        <member>
+            <name>EntityIdBinaryDictionaryMember</name>
+            <type>Binary</type>
+            <dictionary keyType="EntityId"/>
+        </member>
+        <member>
+            <name>EntityIdEnumDictionaryMember</name>
+            <type>DoseTest.TestEnum</type>
+            <dictionary keyType="EntityId"/>
+        </member>
+        <member>
+            <name>EntityIdObjectDictionaryMember</name>
+            <type>Object</type>
+            <dictionary keyType="EntityId"/>
+        </member>
+        <member>
+            <name>EntityIdItemDictionaryMember</name>
+            <type>DoseTest.TestItem</type>
+            <dictionary keyType="EntityId"/>
+        </member>
+
+        <!-- Dictionaries keyType=InstanceId -->
+        <member>
+            <name>InstanceIdInt32DictionaryMember</name>
+            <type>Int32</type>
+            <dictionary keyType="InstanceId"/>
+        </member>
+        <member>
+            <name>InstanceIdInt64DictionaryMember</name>
+            <type>Int64</type>
+            <dictionary keyType="InstanceId"/>
+        </member>
+        <member>
+            <name>InstanceIdStringDictionaryMember</name>
+            <type>String</type>
+            <dictionary keyType="InstanceId"/>
+        </member>
+        <member>
+            <name>InstanceIdFloat32DictionaryMember</name>
+            <type>Float32</type>
+            <dictionary keyType="InstanceId"/>
+        </member>
+        <member>
+            <name>InstanceIdFloat64DictionaryMember</name>
+            <type>Float64</type>
+            <dictionary keyType="InstanceId"/>
+        </member>
+        <member>
+            <name>InstanceIdTypeIdDictionaryMember</name>
+            <type>TypeId</type>
+            <dictionary keyType="InstanceId"/>
+        </member>
+        <member>
+            <name>InstanceIdInstanceIdDictionaryMember</name>
+            <type>InstanceId</type>
+            <dictionary keyType="InstanceId"/>
+        </member>
+        <member>
+            <name>InstanceIdChannelIdDictionaryMember</name>
+            <type>ChannelId</type>
+            <dictionary keyType="InstanceId"/>
+        </member>
+        <member>
+            <name>InstanceIdHandlerIdDictionaryMember</name>
+            <type>HandlerId</type>
+            <dictionary keyType="InstanceId"/>
+        </member>
+        <member>
+            <name>InstanceIdEntityIdDictionaryMember</name>
+            <type>EntityId</type>
+            <dictionary keyType="InstanceId"/>
+        </member>
+        <member>
+            <name>InstanceIdBinaryDictionaryMember</name>
+            <type>Binary</type>
+            <dictionary keyType="InstanceId"/>
+        </member>
+        <member>
+            <name>InstanceIdEnumDictionaryMember</name>
+            <type>DoseTest.TestEnum</type>
+            <dictionary keyType="InstanceId"/>
+        </member>
+        <member>
+            <name>InstanceIdObjectDictionaryMember</name>
+            <type>Object</type>
+            <dictionary keyType="InstanceId"/>
+        </member>
+        <member>
+            <name>InstanceIdItemDictionaryMember</name>
+            <type>DoseTest.TestItem</type>
+            <dictionary keyType="InstanceId"/>
+        </member>
+
+        <!-- Dictionaries keyType=ChannelId -->
+        <member>
+            <name>ChannelIdInt32DictionaryMember</name>
+            <type>Int32</type>
+            <dictionary keyType="ChannelId"/>
+        </member>
+        <member>
+            <name>ChannelIdInt64DictionaryMember</name>
+            <type>Int64</type>
+            <dictionary keyType="ChannelId"/>
+        </member>
+        <member>
+            <name>ChannelIdStringDictionaryMember</name>
+            <type>String</type>
+            <dictionary keyType="ChannelId"/>
+        </member>
+        <member>
+            <name>ChannelIdFloat32DictionaryMember</name>
+            <type>Float32</type>
+            <dictionary keyType="ChannelId"/>
+        </member>
+        <member>
+            <name>ChannelIdFloat64DictionaryMember</name>
+            <type>Float64</type>
+            <dictionary keyType="ChannelId"/>
+        </member>
+        <member>
+            <name>ChannelIdTypeIdDictionaryMember</name>
+            <type>TypeId</type>
+            <dictionary keyType="ChannelId"/>
+        </member>
+        <member>
+            <name>ChannelIdInstanceIdDictionaryMember</name>
+            <type>InstanceId</type>
+            <dictionary keyType="ChannelId"/>
+        </member>
+        <member>
+            <name>ChannelIdChannelIdDictionaryMember</name>
+            <type>ChannelId</type>
+            <dictionary keyType="ChannelId"/>
+        </member>
+        <member>
+            <name>ChannelIdHandlerIdDictionaryMember</name>
+            <type>HandlerId</type>
+            <dictionary keyType="ChannelId"/>
+        </member>
+        <member>
+            <name>ChannelIdEntityIdDictionaryMember</name>
+            <type>EntityId</type>
+            <dictionary keyType="ChannelId"/>
+        </member>
+        <member>
+            <name>ChannelIdBinaryDictionaryMember</name>
+            <type>Binary</type>
+            <dictionary keyType="ChannelId"/>
+        </member>
+        <member>
+            <name>ChannelIdEnumDictionaryMember</name>
+            <type>DoseTest.TestEnum</type>
+            <dictionary keyType="ChannelId"/>
+        </member>
+        <member>
+            <name>ChannelIdObjectDictionaryMember</name>
+            <type>Object</type>
+            <dictionary keyType="ChannelId"/>
+        </member>
+        <member>
+            <name>ChannelIdItemDictionaryMember</name>
+            <type>DoseTest.TestItem</type>
+            <dictionary keyType="ChannelId"/>
+        </member>
+
+
+        <!-- Dictionaries keyType=HandlerId -->
+        <member>
+            <name>HandlerIdInt32DictionaryMember</name>
+            <type>Int32</type>
+            <dictionary keyType="HandlerId"/>
+        </member>
+        <member>
+            <name>HandlerIdInt64DictionaryMember</name>
+            <type>Int64</type>
+            <dictionary keyType="HandlerId"/>
+        </member>
+        <member>
+            <name>HandlerIdStringDictionaryMember</name>
+            <type>String</type>
+            <dictionary keyType="HandlerId"/>
+        </member>
+        <member>
+            <name>HandlerIdFloat32DictionaryMember</name>
+            <type>Float32</type>
+            <dictionary keyType="HandlerId"/>
+        </member>
+        <member>
+            <name>HandlerIdFloat64DictionaryMember</name>
+            <type>Float64</type>
+            <dictionary keyType="HandlerId"/>
+        </member>
+        <member>
+            <name>HandlerIdTypeIdDictionaryMember</name>
+            <type>TypeId</type>
+            <dictionary keyType="HandlerId"/>
+        </member>
+        <member>
+            <name>HandlerIdInstanceIdDictionaryMember</name>
+            <type>InstanceId</type>
+            <dictionary keyType="HandlerId"/>
+        </member>
+        <member>
+            <name>HandlerIdChannelIdDictionaryMember</name>
+            <type>ChannelId</type>
+            <dictionary keyType="HandlerId"/>
+        </member>
+        <member>
+            <name>HandlerIdHandlerIdDictionaryMember</name>
+            <type>HandlerId</type>
+            <dictionary keyType="HandlerId"/>
+        </member>
+        <member>
+            <name>HandlerIdEntityIdDictionaryMember</name>
+            <type>EntityId</type>
+            <dictionary keyType="HandlerId"/>
+        </member>
+        <member>
+            <name>HandlerIdBinaryDictionaryMember</name>
+            <type>Binary</type>
+            <dictionary keyType="HandlerId"/>
+        </member>
+        <member>
+            <name>HandlerIdEnumDictionaryMember</name>
+            <type>DoseTest.TestEnum</type>
+            <dictionary keyType="HandlerId"/>
+        </member>
+        <member>
+            <name>HandlerIdObjectDictionaryMember</name>
+            <type>Object</type>
+            <dictionary keyType="HandlerId"/>
+        </member>
+        <member>
+            <name>HandlerIdItemDictionaryMember</name>
+            <type>DoseTest.TestItem</type>
+            <dictionary keyType="HandlerId"/>
+        </member>
+
       </members>
 </class>

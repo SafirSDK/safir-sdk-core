@@ -71,7 +71,7 @@ private:
     boost::asio::steady_timer       m_terminationTimer;
     Control::Config                 m_conf;
     bool                            m_ctrlStopped;
-    bool                            m_doseMainStarted;
+    bool                            m_doseMainRunning;
 
     std::unique_ptr<boost::asio::io_service::work>  m_work;
     std::unique_ptr<Com::Communication>             m_communication;

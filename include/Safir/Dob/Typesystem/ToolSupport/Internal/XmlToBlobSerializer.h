@@ -281,6 +281,7 @@ namespace Internal
                                 throw ParseError("XmlToBinary serialization error", os.str(), "", 207);
                             }
                         }
+                        writer.SetChangedTopLevel(memIx,true);
                     }
                     break;
                 }
@@ -466,7 +467,7 @@ namespace Internal
                     else if (!BasicTypeOperations::IsOfType(m_repository, ObjectMemberType, cd->GetTypeId(), ObjectMemberType, md->GetTypeId()))
                     {
                         std::ostringstream os;
-                        os<<"Attribute 'type' on member "<<md->GetName()<<" is specitying an invalid type. "<<cd->GetName()<<" is not a subtype of "<<m_repository->GetClass(md->GetTypeId())->GetName();
+                        os<<"Attribute 'type' on member "<<md->GetName()<<" is specifying an invalid type. "<<cd->GetName()<<" is not a subtype of "<<m_repository->GetClass(md->GetTypeId())->GetName();
                         throw ParseError("XmlToBinary serialization error", os.str(), "", 150);
                     }
                 }

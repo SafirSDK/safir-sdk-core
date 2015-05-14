@@ -239,5 +239,9 @@
       <propertyMember>Watt64Member</propertyMember>
       <value>10.01</value>
     </member>
+    <member>
+      <propertyMember>lowercase</propertyMember>
+      <value>10</value>
+    </member>
   </memberMapping>
 </propertyMapping>

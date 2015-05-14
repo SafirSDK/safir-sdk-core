@@ -33,14 +33,20 @@ namespace Safir.Dob.Typesystem
     public class DictionaryContainer<KeyT, ValT> : ContainerBase, IDictionary<KeyT, ValT>
         where ValT : ContainerBase, new()
     {
-        private SortedDictionary<KeyT, ValT> values = new SortedDictionary<KeyT, ValT> ();
-        //private Dictionary<KeyT, ValT> values;
-
         /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
         public DictionaryContainer() : base()
         {
+            //For string keys we need to specify the comparer, otherwise we get different order from C++.
+            if (typeof(KeyT) == typeof(String))
+            {
+                m_values = new SortedDictionary<KeyT, ValT> ((System.Collections.Generic.IComparer<KeyT>)StringComparer.Ordinal);
+            }
+            else
+            {
+                m_values = new SortedDictionary<KeyT, ValT> ();
+            }
         }
 
         #region IDictionary implementation
@@ -54,7 +60,7 @@ namespace Safir.Dob.Typesystem
         {
             m_bIsChanged = true;
             value.SetChanged (true);
-            values.Add (key, value);
+            m_values.Add (key, value);
         }
 
         /// <Docs>The item to add to the current collection.</Docs>
@@ -81,7 +87,7 @@ namespace Safir.Dob.Typesystem
         /// <param name="key">Key.</param>
         public bool ContainsKey (KeyT key)
         {
-            return values.ContainsKey (key);
+            return m_values.ContainsKey (key);
         }
 
         /// <Docs>The item to remove from the current collection.</Docs>
@@ -92,7 +98,7 @@ namespace Safir.Dob.Typesystem
         /// <param name="key">Key.</param>
         public bool Remove (KeyT key)
         {
-            bool removed = values.Remove (key);
+            bool removed = m_values.Remove (key);
             if (removed)
                 m_bIsChanged = true;
 
@@ -109,7 +115,7 @@ namespace Safir.Dob.Typesystem
         /// <param name="value">Value.</param>
         public bool TryGetValue (KeyT key, out ValT value)
         {
-            return values.TryGetValue (key, out value);
+            return m_values.TryGetValue (key, out value);
         }
 
         /// <summary>
@@ -117,12 +123,12 @@ namespace Safir.Dob.Typesystem
         /// </summary>
         public ValT this [KeyT index] {
             get {
-                return values [index];
+                return m_values [index];
             }
             set {
                 m_bIsChanged = true;
                 value.SetChanged (true);
-                values [index] = value;
+                m_values [index] = value;
             }
         }
 
@@ -132,7 +138,7 @@ namespace Safir.Dob.Typesystem
         /// <value>The keys.</value>
         public ICollection<KeyT> Keys {
             get {
-                return values.Keys;
+                return m_values.Keys;
             }
         }
 
@@ -142,7 +148,7 @@ namespace Safir.Dob.Typesystem
         /// <value>The values.</value>
         public ICollection<ValT> Values {
             get {
-                return values.Values;
+                return m_values.Values;
             }
         }
 
@@ -162,8 +168,7 @@ namespace Safir.Dob.Typesystem
         /// <param name="item">Item.</param>
         public void Add (KeyValuePair<KeyT, ValT> item)
         {
-            m_bIsChanged = true;
-            values.Add (item.Key, item.Value);
+            Add(item.Key, item.Value);
         }
 
         /// <summary>
@@ -172,7 +177,7 @@ namespace Safir.Dob.Typesystem
         public void Clear ()
         {
             m_bIsChanged = true;
-            values.Clear ();
+            m_values.Clear ();
         }
 
         /// <Docs>The object to locate in the current collection.</Docs>
@@ -214,7 +219,7 @@ namespace Safir.Dob.Typesystem
         /// <value>The count.</value>
         public int Count {
             get {
-                return values.Count;
+                return m_values.Count;
             }
         }
 
@@ -240,7 +245,7 @@ namespace Safir.Dob.Typesystem
         /// <returns>The enumerator.</returns>
         public IEnumerator<KeyValuePair<KeyT, ValT>> GetEnumerator ()
         {
-            return (values as IEnumerable<KeyValuePair<KeyT, ValT>>).GetEnumerator ();
+            return (m_values as IEnumerable<KeyValuePair<KeyT, ValT>>).GetEnumerator ();
         }
 
 
@@ -255,7 +260,7 @@ namespace Safir.Dob.Typesystem
         /// <returns>The enumerator.</returns>
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator ()
         {
-            return values.GetEnumerator ();
+            return m_values.GetEnumerator ();
         }
 
 
@@ -289,7 +294,7 @@ namespace Safir.Dob.Typesystem
             if (m_bIsChanged)
                 return m_bIsChanged;
 
-            foreach (var kv in values)
+            foreach (var kv in m_values)
             {
                 if (kv.Value.IsChanged())
                 {
@@ -307,7 +312,7 @@ namespace Safir.Dob.Typesystem
         public override void SetChanged (bool changed)
         {
             m_bIsChanged = changed;
-            foreach (var kv in values)
+            foreach (var kv in m_values)
             {
                 kv.Value.SetChanged (changed);
             }
@@ -315,7 +320,14 @@ namespace Safir.Dob.Typesystem
 
         #endregion
 
+        internal override void ShallowCopy(ContainerBase other)
+        {
+            base.ShallowCopy(other);
+            DictionaryContainer<KeyT,ValT> that = (DictionaryContainer<KeyT,ValT>)other;
+            m_values = that.m_values;
+        }
 
+        private SortedDictionary<KeyT, ValT> m_values;
     }
 
     /// <summary>
@@ -399,7 +411,7 @@ namespace Safir.Dob.Typesystem
     }
 
     /// <summary>
-    /// Enum dictionary container.
+    /// String dictionary container.
     /// </summary>
     public class StringDictionaryContainer<KeyT> : DictionaryContainer<KeyT, StringContainer>
     {
@@ -408,6 +420,7 @@ namespace Safir.Dob.Typesystem
         /// </summary>
         public StringDictionaryContainer() :base()
         {
+
         }
 
         /// <summary>

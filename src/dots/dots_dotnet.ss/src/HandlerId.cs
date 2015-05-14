@@ -31,7 +31,7 @@ namespace Safir.Dob.Typesystem
     /// <summary>
     /// Class containing the identity of a handler.
     /// </summary>
-    public class HandlerId
+    public class HandlerId : IComparable
     {
         /// <summary>
         /// Represents all handlers.
@@ -158,6 +158,27 @@ namespace Safir.Dob.Typesystem
             return !(first == second);
         }
 
+        #region IComparable Members
+
+        /// <summary>
+        /// Compare to specified object.
+        /// </summary>
+        /// <param name="obj">Object to compare to.</param>
+        /// <returns>Relative order</returns>
+        public int CompareTo(object obj)
+        {
+            if (obj is HandlerId)
+            {
+                return m_handlerId.CompareTo(((HandlerId)obj).m_handlerId);
+            }
+            else
+            {
+                throw new ArgumentException("object is not an HandlerId.");
+            }
+        }
+
+        #endregion
+
         /// <summary>
         /// Return a string representation of the handler id.
         /// </summary>
@@ -253,6 +274,6 @@ namespace Safir.Dob.Typesystem
         private Int64 m_handlerId = -1;
         private string m_handlerIdStr;
         private byte[] m_CachedUtf8String;
-#endregion
+        #endregion
     }
 }
