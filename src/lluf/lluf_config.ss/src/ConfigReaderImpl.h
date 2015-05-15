@@ -52,30 +52,35 @@ namespace Internal
         void Read()
         {
             const Path dir1 = PathFinder::SafirTestConfigOverrideDirectory();
-            if (TryLoad(dir1))
+            if (!dir1.empty())
             {
-                return;
+                if (TryLoad(dir1))
+                {
+                    return;
+                }
+                throw std::logic_error("Failed to load configuration. "
+                                       "Looked in '"
+                                       + dir1.str() + "'");
             }
-
-            const Path dir2 = PathFinder::SystemConfigDirectory();
-            if (TryLoad(dir2))
+            else
             {
-                return;
-            }
+                const Path dir2 = PathFinder::SystemConfigDirectory();
+                if (TryLoad(dir2))
+                {
+                    return;
+                }
 
-            const Path dir3 = PathFinder::UserConfigDirectory();
-            if (TryLoad(dir3))
-            {
-                return;
+                const Path dir3 = PathFinder::UserConfigDirectory();
+                if (TryLoad(dir3))
+                {
+                    return;
+                }
+                throw std::logic_error("Failed to load configuration. "
+                                       "Looked in '"
+                                       + dir2.str() + "' and '"
+                                       + dir3.str() + "'");
             }
-
-            throw std::logic_error("Failed to load configuration.\n"
-                                   "Looked in '"
-                                   + (dir1.empty() ? "" : (dir1.str() + "', '"))
-                                   + dir2.str() + "', '"
-                                   + dir3.str() + "'");
         }
-
         boost::property_tree::ptree m_locations;
         boost::property_tree::ptree m_logging;
         boost::property_tree::ptree m_typesystem;
