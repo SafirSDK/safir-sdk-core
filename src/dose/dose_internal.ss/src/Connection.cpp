@@ -170,7 +170,6 @@ namespace Internal
 
         ENSURE(m_messageOutQueue.empty(), << "MessageOutQ should have been cleaned up before call to Connection destructor of " << NameWithCounter());
 
-        //TODO: check that all other vectors/queues are empty as they should be!
         m_dirtySubscriptions.clear();
     }
 
