@@ -5,7 +5,10 @@ TARGET_LINK_LIBRARIES(olib_test PRIVATE
   safir_generated-OlibTest-cpp
   ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
-SAFIR_INSTALL(TARGETS olib_test TEST_SUITE)
+#Olib tests are not installed since the run_olib_tests.py is not updated.
+#since Olib is deprecated this is low priority work.
 
-SAFIR_INSTALL_PYTHON(SCRIPT run_olib_tests.py
-  COMPONENT Test)
+#SAFIR_INSTALL(TARGETS olib_test TEST_SUITE)
+
+#SAFIR_INSTALL_PYTHON(SCRIPT run_olib_tests.py
+#  COMPONENT Test)

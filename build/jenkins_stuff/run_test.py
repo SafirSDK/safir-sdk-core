@@ -311,14 +311,6 @@ def run_test_slave():
         raise SetupError("Test suite failed. Returncode = " + str(result))
 
 def run_database_tests():
-    #TODO
-    olib_result = 0
-    #log("Running Olib tests")
-    #if sys.platform == "win32":
-    #    olib_result = subprocess.call(["run_olib_tests.py",], shell = True)
-    #else:
-    #    olib_result = subprocess.call(["run_olib_tests",])
-
     log("Running Dope tests")
     args = ["--driver", os.environ["Driver"],
             "--hostname", "databases",
@@ -328,10 +320,9 @@ def run_database_tests():
     else:
         dope_result = subprocess.call(["run_dope_odbc_backend_test",] + args)
 
-    log("Olib tests result:", olib_result)
     log("Dope tests result:", dope_result)
 
-    if dope_result != 0 or olib_result != 0:
+    if dope_result != 0:
         raise Exception("Database tests failed")
 
 def build_examples():
