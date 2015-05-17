@@ -36,8 +36,7 @@ override_dh_auto_test:
 	cd obj-$(DEB_BUILD_GNU_TYPE) && /usr/bin/ctest -V -T Test --no-compress-output
 
 
-#TODO: remove this when cli-common-dev has fixed this bug
-#and remove the jenkins suppression of the cli:Depends warning
+#workaround for bug in cli-common-dev.
 override_dh_clideps:
 	pwd|grep -q " " && echo "Skipping dh_clideps since there is a space in pwd" || dh_clideps
 
