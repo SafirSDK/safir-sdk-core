@@ -338,18 +338,9 @@ def build_examples():
     olddir = os.getcwd()
     dirs = (("examples" , None),
             ("src/dots/dots_dobmake.ss/tests/tree" , None),
-            ("src/dots/dots_dobmake.ss/tests/separate_dirs/dous_1" , os.path.join(olddir, "inst")),
-            #TODO: ("src/dots/dots_dobmake.ss/tests/separate_dirs/dous_2" : os.path.join(olddir, "inst")),
-            #TODO: ("src/dots/dots_dobmake.ss/tests/separate_dirs/dous_3" : os.path.join(olddir, "inst"))
-            )
-    """
-    TODO: to get the above to work we need to have our own typesystem.ini, that contains both the
-    installed dou_search_path and our own "inst" dir from above.
-    One way of doing this would be to use safir_show_config to dump the installed ones to a new
-    set of ini files and then append what we need to them. The set the override env variable to
-    point to that directory.
-    Not really sure it is worth the effort. A lot of fiddling...
-    """
+            ("src/dots/dots_dobmake.ss/tests/separate_dirs/dous_1" , os.path.join(olddir, "inst")))
+    #We don't test the dous_2 and dous_3 builds, since it is just too fiddly to get automated.
+
     for (builddir, installdir) in dirs:
         os.chdir(builddir)
 
