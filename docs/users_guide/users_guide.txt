@@ -3303,10 +3303,6 @@ You also need to make sure that you build your application with debug informatio
 
 NOTE: In previous versions (older than 4.5) of Safir SDK Core the Crash Reporter was started with a call to +Safir::SwReports::SwReport::EnableCrashReporting()+ and stopped with a call to +Safir::SwReports::SwReport::Stop()+. This was changed due to the introduction of Safir Logging and the changes in the Tracer.
 
-////
-TODO: write about reporting sdk crashes
-////
-
 ==== Analyzing a crash dump
 
 When an application crashes in a way that is caught by the crash reporter a dump file will be placed in the crash dump directory (see <<locations_ini>>) with a rather cryptic name (a lot of digits followed by .dmp). Apart from generating this dump file the crash reporter will attempt to log an error to the Safir Log and to standard output that a crash has happened.
