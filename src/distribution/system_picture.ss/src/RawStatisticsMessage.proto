@@ -41,6 +41,4 @@ message RawStatisticsMessage
     //This list contains dead nodes that we have removed from the node_info list
     //and that we have been told about by other nodes.
     repeated sfixed64 more_dead_nodes = 9;
-
-    //TODO: Add some support for clearing the more_dead_nodes list
 }

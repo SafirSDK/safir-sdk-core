@@ -116,7 +116,7 @@ ControlApp::ControlApp(boost::asio::io_service& ioService,
                                      m_conf.thisNodeParam.nodeTypeId,
                                      std::move(spNodeTypes),
                                      [](const int64_t /*incarnationId*/)
-                                     {return true;})); //TODO: implement incarnation id validation
+                                     {return true;})); //this just says that all incarnation ids are valid.
 
     m_doseMainCmdSender.reset(new Control::DoseMainCmdSender
                               (ioService,
