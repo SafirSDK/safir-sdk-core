@@ -30,7 +30,7 @@
 #include <Safir/Dob/Internal/SharedMemoryObject.h>
 #include <Safir/Dob/Internal/Connection.h>
 #include <Safir/Dob/Internal/Semaphore.h>
-#include <boost/interprocess/sync/interprocess_upgradable_mutex.hpp>
+#include <boost/interprocess/sync/interprocess_mutex.hpp>
 #include <Safir/Dob/Internal/ConnectRequest.h>
 #include <Safir/Dob/Internal/LeveledLock.h>
 
@@ -65,7 +65,7 @@ namespace Internal
 
         /** Get the id of the current node */
         int64_t NodeId() const {return m_nodeId;}
-        
+
         /**
          * This is for applications waiting for "things" to happen to its connection.
          * This blocks forever until SignalIn for that connection has been called.
@@ -169,13 +169,7 @@ namespace Internal
          */
         void AllowConnect(const long context);
 
-        typedef boost::function<void(const ConnectionPtr &)> ConnectionOutEventHandler;
-
-        //Note that this does not lock internal structures, since it must only be called from dose_main
-        //we don't need to lock it (it is dose_main that modifies the structures)
-        //TODO: Added a lock since there appears to be some problems in this area... GetConnectionInfo is not working correctly
-        //and dose_main crashed with "could not find connection" when running multinode tests.
-        void HandleConnectionOutEvents(const ConnectionOutEventHandler & handler);
+        void HandleConnectionOutEvents(const boost::function<void(const ConnectionPtr&)> & handler);
 
         //look through all connections and see if there is a pending reg that is accepted
         bool IsPendingAccepted(const Typesystem::TypeId typeId, const Typesystem::HandlerId & handlerId, const ContextId contextId) const;
@@ -218,8 +212,6 @@ namespace Internal
         //They have a static size, and a connId of -1,-1 (default constructed ConnectionId) means that that "slot" is not occupied
         //THIS DATA STRUCTURE CAN NOT BE RESIZED!! EACH CONNECTION HOLDS A POINTER TO IT'S SIGNAL!
         //RESIZING/MOVING THE STRUCTURE WILL INVALIDATE THE POINTERS!
-        //the reason that this is an int is that assigns of 0 and 1 should be atomic, and
-        //that any compiler should have int be the wordsize for that processor.
 
         boost::interprocess::offset_ptr<Safir::Utilities::Internal::AtomicUint32> m_connectionOutSignals;
         Containers<ConnectionId>::vector m_connectionOutIds;
@@ -241,8 +233,7 @@ namespace Internal
         Semaphore m_connectResponseEvent;
 
         //lock for m_connections, m_connectionOutIds, and m_connectionOutSignals
-        //Note that this is an upgradable lock!!!! Not a normal mutex!
-        typedef Safir::Dob::Internal::LeveledLock<boost::interprocess::interprocess_upgradable_mutex,
+        typedef Safir::Dob::Internal::LeveledLock<boost::interprocess::interprocess_mutex,
                                                   CONNECTIONS_TABLE_LOCK_LEVEL,
                                                   NO_MASTER_LEVEL_REQUIRED> ConnectionsTableLock;
         mutable ConnectionsTableLock m_connectionTablesLock;

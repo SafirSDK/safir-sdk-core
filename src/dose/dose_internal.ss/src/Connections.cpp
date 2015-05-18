@@ -28,9 +28,6 @@
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/ProcessInfo.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
-#include <boost/interprocess/sync/upgradable_lock.hpp>
-#include <boost/interprocess/sync/sharable_lock.hpp>
-#include <boost/interprocess/detail/move.hpp>
 #include <boost/lexical_cast.hpp>
 #include "Signals.h"
 
@@ -155,6 +152,7 @@ namespace Internal
             m_connectSem.post();
         }
 
+        //this means that only one process can attempt to connect at a time.
         ScopedConnectLock lck(m_connectLock);
 
         const pid_t pid = Safir::Utilities::ProcessInfo::GetPid();
@@ -183,7 +181,7 @@ namespace Internal
 
         connection.reset();
         result = Success;
-        boost::interprocess::upgradable_lock<ConnectionsTableLock> rlock(m_connectionTablesLock);
+        boost::interprocess::scoped_lock<ConnectionsTableLock> lck(m_connectionTablesLock);
 
         bool foundName = false;
         for (ConnectionTable::const_iterator it = m_connections.begin();
@@ -207,8 +205,6 @@ namespace Internal
         {
             const pid_t pid = Safir::Utilities::ProcessInfo::GetPid();
 
-            //upgrade the mutex
-            boost::interprocess::scoped_lock<ConnectionsTableLock> wlock(boost::interprocess::move(rlock));
             connection = ConnectionPtr(GetSharedMemory().construct<Connection>
                                        (boost::interprocess::anonymous_instance)
                                        (connectionName, m_connectionCounter++, m_nodeId, contextId, pid, true));
@@ -243,7 +239,7 @@ namespace Internal
 
             m_connectMessage.GetAndClear(connect_tag, connectionName, context, pid);
 
-            boost::interprocess::upgradable_lock<ConnectionsTableLock> rlock(m_connectionTablesLock);
+            boost::interprocess::scoped_lock<ConnectionsTableLock> lck(m_connectionTablesLock);
 
             bool foundName = false;
             for (ConnectionTable::const_iterator it = m_connections.begin();
@@ -265,9 +261,6 @@ namespace Internal
             {
                 ConnectionPtr connection;
                 {
-                    //upgrade the mutex
-                    boost::interprocess::scoped_lock<ConnectionsTableLock> wlock(boost::interprocess::move(rlock));
-
                     connection = ConnectionPtr(GetSharedMemory().construct<Connection>
                                                (boost::interprocess::anonymous_instance)
                                                (connectionName, m_connectionCounter++, m_nodeId, context, pid, true));
@@ -278,6 +271,8 @@ namespace Internal
 
                     AddToSignalHandling(connection);
                 }
+
+                lck.unlock();
 
                 //call the connect handler
                 handleConnect(connection);
@@ -300,7 +295,7 @@ namespace Internal
                << "', context = " << context
                << ", id = " << id << std::endl;
 
-        boost::interprocess::upgradable_lock<ConnectionsTableLock> rlock(m_connectionTablesLock);
+        boost::interprocess::scoped_lock<ConnectionsTableLock> lck(m_connectionTablesLock);
 
         ConnectionTable::const_iterator findIt = m_connections.find(id);
 
@@ -313,10 +308,6 @@ namespace Internal
 
             return;
         }
-
-
-        //upgrade the mutex
-        boost::interprocess::scoped_lock<ConnectionsTableLock> wlock(boost::interprocess::move(rlock));
 
         //remote connections have pid = -1
         ConnectionPtr connection(GetSharedMemory().construct<Connection>
@@ -332,7 +323,7 @@ namespace Internal
     void Connections::RemoveConnection(const ConnectionPtr & connection)
     {
         {
-            boost::interprocess::scoped_lock<ConnectionsTableLock> wlock(m_connectionTablesLock);
+            boost::interprocess::scoped_lock<ConnectionsTableLock> lck(m_connectionTablesLock);
 
             if (connection->IsLocal())
             {
@@ -420,16 +411,14 @@ namespace Internal
 
 
 
-    void Connections::HandleConnectionOutEvents(const ConnectionOutEventHandler & handler)
+    void Connections::HandleConnectionOutEvents(const boost::function<void(const ConnectionPtr&)>& handler)
     {
-        typedef std::vector<ConnectionId> ConnectionIds;
-
-        ConnectionIds signalledConnections;
+        std::vector<ConnectionPtr> signalledConnections;
 
         //Take the lock while we loop through the signal vectors, but release it before we
         //call the handler for the signalled connections.
         {
-            boost::interprocess::sharable_lock<ConnectionsTableLock> lock(m_connectionTablesLock);
+            boost::interprocess::scoped_lock<ConnectionsTableLock> lck(m_connectionTablesLock);
             const Safir::Utilities::Internal::AtomicUint32 * end = m_connectionOutSignals.get() + m_lastUsedSlot + 1;
             for (Safir::Utilities::Internal::AtomicUint32 * it = m_connectionOutSignals.get();
                  it != end; ++it)
@@ -438,51 +427,34 @@ namespace Internal
                 {
                     *it = 0;
 
-                    const ConnectionId & connId = m_connectionOutIds[std::distance(m_connectionOutSignals.get(), it)];
+                    const ConnectionId& connId = m_connectionOutIds[std::distance(m_connectionOutSignals.get(), it)];
 
                     if (connId == ConnectionId()) //compare with dummy-connection
                     {
-                        lllout << "A signal was set for a slot that has no valid connection id! Resetting it!" << std::endl;
-                        std::wcout << "A signal was set for a slot that has no valid connection id! Resetting it!" << std::endl;
+                        SEND_SYSTEM_LOG(Warning, << "A signal was set for a slot that has no valid connection id! Resetting it!");
                     }
                     else
                     {
-                        signalledConnections.push_back(connId);
+                        const auto findIt = m_connections.find(connId);
+                        ENSURE(findIt != m_connections.end(), << "Connections::GetConnection: Failed to find connection! connectionId = " << connId);
+                        signalledConnections.push_back(findIt->second);
                     }
                 }
             }
         }
 
-        //The lock is released here, so at all points in the following loop where we're not holding the lock again,
-        // i.e. in the GetConnection call, a connection could theoretically have been removed.
-        // (we don't want to hold the lock while calling the callback, since it may want to take the lock itself at
-        // some stage).
-        //Note: This should probably not happen at the moment, since the only thread that removes connections
-        //is the dose_main main thread, which is also the only caller of this function. And it should
-        //not be doing removes inside the callback.
+        //The lock is released here, so at all points in the following loop where we're not holding the lock,
 
-        for (ConnectionIds::iterator it = signalledConnections.begin();
-             it != signalledConnections.end(); ++it)
+        for (const auto& conn: signalledConnections)
         {
-            //                std::wcout << "Handling event from connection " << *it << std::endl;
-            const ConnectionPtr conn = GetConnection(*it,std::nothrow);
-            if (conn == NULL)
-            {
-                SEND_SYSTEM_LOG(Critical,
-                                << "Looks like a connection disappeared while we were handling connection out events. "
-                                << "Ignoring disappeared connection with id "
-                                << boost::lexical_cast<std::wstring>(*it));
-                continue;
-            }
             handler(conn);
         }
-
     }
 
     bool
     Connections::IsPendingAccepted(const Typesystem::TypeId typeId, const Typesystem::HandlerId & handlerId, const ContextId contextId) const
     {
-        boost::interprocess::sharable_lock<ConnectionsTableLock> lock(m_connectionTablesLock);
+        boost::interprocess::scoped_lock<ConnectionsTableLock> lck(m_connectionTablesLock);
         for (ConnectionTable::const_iterator it = m_connections.begin();
              it != m_connections.end(); ++it)
         {
@@ -497,8 +469,8 @@ namespace Internal
     const ConnectionPtr
     Connections::GetConnection(const ConnectionId & connId) const
     {
-        boost::interprocess::sharable_lock<ConnectionsTableLock> lock(m_connectionTablesLock);
-        ConnectionTable::const_iterator findIt = m_connections.find(connId);
+        boost::interprocess::scoped_lock<ConnectionsTableLock> lck(m_connectionTablesLock);
+        const auto findIt = m_connections.find(connId);
         ENSURE(findIt != m_connections.end(), << "Connections::GetConnection: Failed to find connection! connectionId = " << connId);
         return findIt->second;
     }
@@ -506,8 +478,8 @@ namespace Internal
     const ConnectionPtr
     Connections::GetConnection(const ConnectionId & connId, std::nothrow_t) const
     {
-        boost::interprocess::sharable_lock<ConnectionsTableLock> lock(m_connectionTablesLock);
-        ConnectionTable::const_iterator findIt = m_connections.find(connId);
+        boost::interprocess::scoped_lock<ConnectionsTableLock> lck(m_connectionTablesLock);
+        const auto findIt = m_connections.find(connId);
         if (findIt != m_connections.end())
         {
             return findIt->second;
@@ -521,7 +493,7 @@ namespace Internal
     const ConnectionPtr
     Connections::GetConnectionByName(const std::string & connectionName) const
     {
-        boost::interprocess::sharable_lock<ConnectionsTableLock> lock(m_connectionTablesLock);
+        boost::interprocess::scoped_lock<ConnectionsTableLock> lock(m_connectionTablesLock);
         for (ConnectionTable::const_iterator it = m_connections.begin();
             it != m_connections.end(); ++it)
         {
@@ -537,7 +509,7 @@ namespace Internal
     void
     Connections::GetConnections(const pid_t pid, std::vector<ConnectionPtr>& connections) const
     {
-        boost::interprocess::sharable_lock<ConnectionsTableLock> lock(m_connectionTablesLock);
+        boost::interprocess::scoped_lock<ConnectionsTableLock> lck(m_connectionTablesLock);
 
         connections.clear();
 
@@ -554,7 +526,7 @@ namespace Internal
 
     const std::string Connections::GetConnectionName(const ConnectionId & connectionId) const
     {
-        boost::interprocess::sharable_lock<ConnectionsTableLock> lock(m_connectionTablesLock);
+        boost::interprocess::scoped_lock<ConnectionsTableLock> lck(m_connectionTablesLock);
         ConnectionTable::const_iterator findIt = m_connections.find(connectionId);
 
         if (findIt != m_connections.end())
@@ -573,7 +545,7 @@ namespace Internal
 
         // Remove from m_connections and store in removeConnections
         {
-            boost::interprocess::scoped_lock<ConnectionsTableLock> wlock(m_connectionTablesLock);
+            boost::interprocess::scoped_lock<ConnectionsTableLock> lck(m_connectionTablesLock);
 
             ConnectionTable::const_iterator it = m_connections.begin();
 
@@ -611,7 +583,7 @@ namespace Internal
 
     void Connections::ForEachConnection(const boost::function<void(const Connection & connection)> & connectionFunc) const
     {
-        boost::interprocess::sharable_lock<ConnectionsTableLock> lock(m_connectionTablesLock);
+        boost::interprocess::scoped_lock<ConnectionsTableLock> lck(m_connectionTablesLock);
         for (ConnectionTable::const_iterator it = m_connections.begin();
              it != m_connections.end(); ++it)
         {
@@ -621,7 +593,7 @@ namespace Internal
 
     void Connections::ForEachConnectionPtr(const boost::function<void(const ConnectionPtr & connection)> & connectionFunc) const
     {
-        boost::interprocess::sharable_lock<ConnectionsTableLock> lock(m_connectionTablesLock);
+        boost::interprocess::scoped_lock<ConnectionsTableLock> lck(m_connectionTablesLock);
         for (ConnectionTable::const_iterator it = m_connections.begin();
              it != m_connections.end(); ++it)
         {
@@ -632,7 +604,7 @@ namespace Internal
     void Connections::ForSpecificConnection(const ConnectionId& connectionId,
                                             const boost::function<void(const ConnectionPtr & connection)> & connectionFunc) const
     {
-        boost::interprocess::sharable_lock<ConnectionsTableLock> lock(m_connectionTablesLock);
+        boost::interprocess::scoped_lock<ConnectionsTableLock> lck(m_connectionTablesLock);
 
         ConnectionTable::const_iterator it = m_connections.find(connectionId);
 
