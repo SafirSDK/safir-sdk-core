@@ -37,7 +37,6 @@ namespace Dob
 namespace Internal
 {
 
-    //Returns false if queue is full
     void SubscriptionQueue::push(const SubscriptionPtr& subscription)
     {
         ScopedSubscriptionQueueLock lck(m_lock);
@@ -99,13 +98,12 @@ namespace Internal
         }
     }
 
-    void SubscriptionQueue::clear(void) 
-    { 
+    void SubscriptionQueue::clear(void)
+    {
         ScopedSubscriptionQueueLock lck(m_lock);
-        m_queue.clear(); 
+        m_queue.clear();
     }
 
 }
 }
 }
-
