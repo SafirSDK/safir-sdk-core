@@ -758,9 +758,9 @@ bool RunSingleTest(const TypeRepository* repository, const TestCase& test)
         {
             RunTestFromXml(repository, test.path.string());
         }
-        else if (test.path.extension()==".json")
+        else
         {
-            //TODO
+            throw std::logic_error("Dots Serializaton Test only handles xml files");
         }
 
         if (test.expectedResult!=TestCase::SuccessCode)

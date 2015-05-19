@@ -11471,7 +11471,7 @@ public class Test {
             if (kv.getValue().isNull ())
                 System.out.println (kv.getKey() + " = NULL, changed: " + kv.getValue().isChanged ());
             else
-                System.out.println (kv.getKey() + " = "+(new String(kv.getValue().getVal()))+", changed: " + kv.getValue().isChanged()); //TODO: binary to utf8String
+                System.out.println (kv.getKey() + " = "+(new String(kv.getValue().getVal()))+", changed: " + kv.getValue().isChanged());
         }
 
         System.out.println("--- TypeIdEnumMember ---");
@@ -11482,7 +11482,7 @@ public class Test {
             if (kv.getValue().isNull ())
                 System.out.println (Operations.getName(kv.getKey()) + " = NULL, changed: " + kv.getValue().isChanged ());
             else
-                System.out.println (Operations.getName(kv.getKey()) + " = "+TestEnumStr(kv.getValue().getVal())+", changed: " + kv.getValue().isChanged()); //TODO: binary to utf8String
+                System.out.println (Operations.getName(kv.getKey()) + " = "+TestEnumStr(kv.getValue().getVal())+", changed: " + kv.getValue().isChanged());
         }
 
         System.out.println("--- EnumInstanceIdMember ---");
@@ -11493,7 +11493,7 @@ public class Test {
             if (kv.getValue().isNull ())
                 System.out.println (TestEnumStr(kv.getKey()) + " = NULL, changed: " + kv.getValue().isChanged ());
             else
-                System.out.println (TestEnumStr(kv.getKey()) + " = "+kv.getValue().getVal().toString()+", changed: " + kv.getValue().isChanged()); //TODO: binary to utf8String
+                System.out.println (TestEnumStr(kv.getKey()) + " = "+kv.getValue().getVal().toString()+", changed: " + kv.getValue().isChanged());
         }
 
         System.out.println("--- InstanceIdEntityIdMember ---");
@@ -11504,7 +11504,7 @@ public class Test {
             if (kv.getValue().isNull ())
                 System.out.println (kv.getKey().toString() + " = NULL, changed: " + kv.getValue().isChanged ());
             else
-                System.out.println (kv.getKey().toString() + " = "+kv.getValue().getVal()+", changed: " + kv.getValue().isChanged()); //TODO: binary to utf8String
+                System.out.println (kv.getKey().toString() + " = "+kv.getValue().getVal()+", changed: " + kv.getValue().isChanged());
         }
 
         System.out.println("--- EntityIdHandlerIdMember ---");
@@ -11515,7 +11515,7 @@ public class Test {
             if (kv.getValue().isNull ())
                 System.out.println (kv.getKey() + " = NULL, changed: " + kv.getValue().isChanged ());
             else
-                System.out.println (kv.getKey() + " = "+kv.getValue().getVal()+", changed: " + kv.getValue().isChanged()); //TODO: binary to utf8String
+                System.out.println (kv.getKey() + " = "+kv.getValue().getVal()+", changed: " + kv.getValue().isChanged());
         }
 
         System.out.println("--- StringItemMember ---");
@@ -11526,7 +11526,7 @@ public class Test {
             if (kv.getValue().isNull ())
                 System.out.println (kv.getKey() + " = NULL, changed: " + kv.getValue().isChanged ());
             else
-                System.out.println (kv.getKey() + " = "+Serialization.toJson(kv.getValue().getObj())+", changed: " + kv.getValue().isChanged()); //TODO: binary to utf8String
+                System.out.println (kv.getKey() + " = "+Serialization.toJson(kv.getValue().getObj())+", changed: " + kv.getValue().isChanged());
         }
 
         System.out.println("--- StringObjectMember ---");
@@ -11537,7 +11537,7 @@ public class Test {
             if (kv.getValue().isNull ())
                 System.out.println (kv.getKey() + " = NULL, changed: " + kv.getValue().isChanged ());
             else
-                System.out.println (kv.getKey() + " = "+Serialization.toJson(kv.getValue().getObj())+", changed: " + kv.getValue().isChanged()); //TODO: binary to utf8String
+                System.out.println (kv.getKey() + " = "+Serialization.toJson(kv.getValue().getObj())+", changed: " + kv.getValue().isChanged());
         }
     }
 

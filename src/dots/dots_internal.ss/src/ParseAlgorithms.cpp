@@ -981,7 +981,7 @@ namespace ToolSupport
             }
         }
 
-        //TODO Test
+        //Check that all keys are valid and that there are no duplicates
         VerifyParameterKeys(state);
 
         //Resolve parameter to parameter references
