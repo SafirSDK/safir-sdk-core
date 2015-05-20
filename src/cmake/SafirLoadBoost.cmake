@@ -85,10 +85,6 @@ endif()
 
 
 #Set up our patched include files
-if(safir-sdk-core_SOURCE_DIR)
-  message(STATUS "Setting up Boost patches at ${safir-sdk-core_SOURCE_DIR}/build/patches/boost/${Boost_LIB_VERSION}")
-  include_directories(BEFORE SYSTEM ${safir-sdk-core_SOURCE_DIR}/build/patches/boost/${Boost_LIB_VERSION})
-  set(CMAKE_REQUIRED_INCLUDES BEFORE SYSTEM ${safir-sdk-core_SOURCE_DIR}/build/patches/boost/${Boost_LIB_VERSION})
-else()
-  message(FATAL_ERROR "adasdfasdf")
-endif()
+message(STATUS "Setting up Boost patches at ${safir-sdk-core_SOURCE_DIR}/boost_patches/${Boost_LIB_VERSION}")
+include_directories(BEFORE SYSTEM ${safir-sdk-core_SOURCE_DIR}/boost_patches/${Boost_LIB_VERSION})
+set(CMAKE_REQUIRED_INCLUDES BEFORE SYSTEM ${safir-sdk-core_SOURCE_DIR}/boost_patches/${Boost_LIB_VERSION})
