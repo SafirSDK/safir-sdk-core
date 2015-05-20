@@ -13,6 +13,6 @@ if (Boost_VERSION LESS 105700) #1.57
   if(NOT NUM_COMMENTS EQUAL 5)
     message (FATAL_ERROR
       "${atomic_path} does not appear to be patched.\n"
-      "Please follow the included instructions for patching your Boost headers.")
+      "Please use a supported Boost version!")
   endif()
 endif()
