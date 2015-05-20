@@ -63,33 +63,33 @@ struct classic_string_cast_impl;
 template<typename Target, typename Source>
 struct classic_string_cast_impl<Target, Source, TargetIsString>
 {
-    inline Target operator()(const Source& src) const
+    inline bool operator()(const Source& src, Target& tgt) const
     {
         typedef typename Target::traits_type::char_type CharType;
         typedef std::numeric_limits< Source > Limit;
         std::basic_stringstream<CharType> os;
         os.imbue(std::locale::classic());
         os<<std::setprecision(Limit::digits10)<<src;
-        return os.str();
+        tgt = os.str();
+        return true;
     }
 };
 
 template<typename Target, typename Source>
 struct classic_string_cast_impl<Target, Source, SourceIsString>
 {
-    inline Target operator()(const Source& src) const
+    inline bool operator()(const Source& src, Target& tgt) const
     {
         typedef typename Source::traits_type::char_type CharType;
         typedef std::numeric_limits< Source > Limit;
         std::basic_stringstream<CharType> is(src);
         is.imbue(std::locale::classic());
-        Target result;
-        is>>std::setprecision(Limit::digits10)>>result;
+        is>>std::setprecision(Limit::digits10)>>tgt;
         if (!is.eof()) //not all chars were read, means that some chars are not allowed
         {
-            throw boost::bad_lexical_cast();
+            return false;
         }
-        return result;
+        return true;
     }
 };
 
@@ -104,7 +104,12 @@ inline Target classic_string_cast(const Source& src)
     typedef typename boost::mpl::contains<  boost::mpl::vector< std::string, std::wstring >,
                                             Source >::type SourceIsString;
     typedef typename IsStringType< TargetIsString::value, SourceIsString::value >::type SelectedVersion;
-    return classic_string_cast_impl< Target, Source, SelectedVersion > ()(src);
+    Target tgt;
+    if (!classic_string_cast_impl< Target, Source, SelectedVersion > ()(src,tgt))
+    {
+        throw boost::bad_lexical_cast();
+    }
+    return tgt;
 }
 
 //specialization for raw pointer char*
@@ -117,6 +122,32 @@ template<typename Target> inline Target classic_string_cast(const char* src)
 template<typename Target> inline Target classic_string_cast(const wchar_t* src)
 {
     return classic_string_cast< Target, std::wstring>(src);
+}
+
+//---------------------------------------------------
+// The function classic_string_cast - nothrow version
+//---------------------------------------------------
+template<typename Target, typename Source>
+inline bool classic_string_cast(const Source& src, Target& tgt)
+{
+    typedef typename boost::mpl::contains<  boost::mpl::vector< std::string, std::wstring >,
+                                            Target >::type TargetIsString;
+    typedef typename boost::mpl::contains<  boost::mpl::vector< std::string, std::wstring >,
+                                            Source >::type SourceIsString;
+    typedef typename IsStringType< TargetIsString::value, SourceIsString::value >::type SelectedVersion;
+    return classic_string_cast_impl< Target, Source, SelectedVersion > ()(src,tgt);
+}
+
+//specialization for raw pointer char*
+template<typename Target> inline bool classic_string_cast(const char* src, Target& tgt)
+{
+    return classic_string_cast< Target, std::string>(src,tgt);
+}
+
+//specialization for raw pointer wchar_t*
+template<typename Target> inline bool classic_string_cast(const wchar_t* src, Target& tgt)
+{
+    return classic_string_cast< Target, std::wstring>(src,tgt);
 }
 
 }}}}} //Safir::Dob::Typesystem::ToolSupport::Internal

@@ -123,7 +123,7 @@ namespace ToolSupport
             try
             {
                 SerializationUtils::Trim(*index);
-                paramIndex=boost::lexical_cast<int>(*index);
+                paramIndex=classic_string_cast<int>(*index);
             }
             catch (const boost::bad_lexical_cast&)
             {
@@ -255,7 +255,7 @@ namespace ToolSupport
 
                 try
                 {
-                    int index=boost::lexical_cast<int>(key);
+                    int index=classic_string_cast<int>(key);
                     if (index<0 || index>=pd->GetNumberOfValues())
                     {
                         std::ostringstream os;
@@ -325,12 +325,12 @@ namespace ToolSupport
 
             case Int32MemberType:
                 {
-                    result.val.int32=boost::lexical_cast<DotsC_Int32>(val);
+                    result.val.int32=classic_string_cast<DotsC_Int32>(val);
                 }
                 break;
             case Int64MemberType:
                 {
-                    result.val.int64=boost::lexical_cast<DotsC_Int64>(val);
+                    result.val.int64=classic_string_cast<DotsC_Int64>(val);
                 }
                 break;
             case Float32MemberType:
@@ -349,12 +349,11 @@ namespace ToolSupport
                     size_t sep=val.find(", ");
                     result.val.int64=LlufId_Generate64(val.substr(0, sep).c_str());
                     result.val.str=val.substr(sep+2);
-                    try
+                    if (classic_string_cast<boost::int64_t>(result.val.str,result.val.hash))
                     {
-                        result.val.hash=boost::lexical_cast<boost::int64_t>(result.val.str);
                         result.val.str.clear();
                     }
-                    catch(const boost::bad_lexical_cast&)
+                    else
                     {
                         result.val.hash=LlufId_Generate64(result.val.str.c_str());
                     }
@@ -370,12 +369,11 @@ namespace ToolSupport
             case ChannelIdMemberType:
             case HandlerIdMemberType:
                 {
-                    try
+                    if (classic_string_cast<boost::int64_t>(val, result.val.hash))
                     {
-                        result.val.hash=boost::lexical_cast<boost::int64_t>(val);
                         result.val.str.clear();
                     }
-                    catch(const boost::bad_lexical_cast&)
+                    else
                     {
                         result.val.hash=LlufId_Generate64(val.c_str());
                         result.val.str=val;
@@ -467,12 +465,12 @@ namespace ToolSupport
             {
             case Int32MemberType:
                 {
-                    result.key.int32=boost::lexical_cast<DotsC_Int32>(val);
+                    result.key.int32=classic_string_cast<DotsC_Int32>(val);
                 }
                 break;
             case Int64MemberType:
                 {
-                    result.key.int64=boost::lexical_cast<DotsC_Int64>(val);
+                    result.key.int64=classic_string_cast<DotsC_Int64>(val);
                 }
                 break;
             case EntityIdMemberType:
