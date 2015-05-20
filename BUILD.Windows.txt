@@ -1,0 +1,123 @@
+Windows Build Instructions
+==========================
+
+If you're just looking to install Safir SDK Core, this document is not for you. Download
+one of the installers from http://safirsdkcore.com.
+
+This document describes how to set up a computer that can build a Safir SDK Core installer.
+
+Installing Prerequisites
+------------------------
+
+Visual Studio 2013 or later (express or paid versions work)
+Subversion
+Boost (>=1.58)
+Python (>= 2.7)
+CMake (>=3.0.0)
+Protobuf(>= 2.6.1)
+Jom *
+Qt (>=5.2) *
+Java Platform (JDK) *
+Doxygen *
+Graphviz *
+
+Items marked with an asterisk (*) are optional.
+
+Note for 64 bit builds: If you intend to build a 64-bit Safir SDK Core you need 64-bit version of the libraries!
+
+Protobuf
+~~~~~~~~
+TODO: I had to add an #include <algorithm> to zero_copy_stream_lite.cc to get it to build.
+Also lite-test and tests did not build correctly... This is for 2.5.0, which was latest version at the time of writing.
+Check newer releases!
+
+1. Download the protobuf source code from https://github.com/google/protobuf/releases
+2. Unzip the code to c:\protobuf (or somewhere else of your choice).
+3. Create an environment variable PROTOBUF_DIR that points to c:\protobuf (or
+   the place where you put it).
+4. Open c:\protobuf\vsprojects\protobuf.sln in Visual Studio and click through
+   the Conversion Wizard to update the solution to your studio version.
+5. If you're building a 64-bit system: Open Build --> Configuration Manager and
+   create an x64 configuration under the "Active solution platform" drop down.
+6  Build the solution in both Debug and Release configurations. You may have to
+   build a few times to get them to compile, since the project configuration is
+   incomplete, and the test projects may not build either. But we don't need them.
+7. Open a command prompt in the vsprojects directory, and run "extract_includes.bat".
+8. If you're building a 64 bit system: Move the Debug and Release directories
+   from vsprojects\x64\ to vsprojects\ .
+
+Subversion
+~~~~~~~~~~
+You need a subversion command line client. If you've got TortoiseSVN installed it is
+quite likely that you've already got one installed. Open a command prompt and type "svn
+help". If you get some help output you've got one installed.
+
+Otherwise install either TortoiseSVN (http://tortoisesvn.net/downloads.html), remembering
+to select installation of command line tools, or some command-line-only svn client,
+e.g. SlikSVN (http://www.sliksvn.com/en/download).
+
+Boost
+~~~~~
+You can either build boost from source yourself (follow the instructions on boost.org),
+or download a binary installer that installs everything for you, saving you the build
+time:
+
+1. Download the approriate binary from http://sourceforge.net/projects/boost/files/boost-binaries/
+2. Run the installer and install to C:\boost.
+3. Go c:\boost directory and rename the binary library directory to "lib" (e.g. rename lib64-msvc-12.0 to lib).
+4. Add the lib of the boost installation (e.g. c:\boost\lib) to your PATH.
+
+Jom
+~~~
+Jom is an nmake replacement with support for multi-core CPU, which will speed up
+compilation both of Qt below, and of the Safir SDK Core components. Installing it is
+optional.
+
+Download the latest version of jom from http://qt-project.org/wiki/jom, and put the jom
+executable in a folder that is in your PATH.
+
+Qt
+~~
+Qt can either be built/installed from source or using a Qt installer downloaded from qt-project.org.
+Here is how to install it using the installer:
+
+1. Download and run the appropriate the installer for your compiler from http://qt-project.org/downloads.
+2. Set up environment variable QTDIR to refer the to the directory in the installation
+   that contains the "include" and "bin" folders (e.g. QTDIR=c:\Qt\Qt5.2.0\5.2.0\msvc2012_64).
+3. add %QTDIR%\bin to PATH environment variable.
+
+CMake
+~~~~~
+Go to http://www.cmake.org/ and download and install the CMake installer.
+In the "Install Options" step, check the "Add CMake to the system PATH for all users", or "... current user" if you prefer.
+
+Java
+~~~~
+This step is optional, if you don't want Java interfaces you do not need to install
+Java.
+
+Go to http://java.sun.com/javase/downloads/index.jsp and download and install a JDK
+kit.
+
+NSIS
+~~~~
+TODO: write about installing
+
+Python
+~~~~~~
+Go to http://www.python.org/ and download and install the python installer. (Please use a version greater than or equal to 2.7)
+
+Add C:\Python27 (or equivalent) to your PATH.
+
+Doxygen and Graphviz
+~~~~~~~~~~~~~~~~~~~~
+These tools are used to build the interface documentation from the C++ source code. If you do not require this documentation you can skip this step.
+Go to http://www.doxygen.org/ and download and install the windows installer 
+Go to http://www.graphviz.org/ and download and install the windows installer
+
+Now you can continue to "Building Safir SDK Core"
+
+Building Safir SDK Core
+-----------------------
+Now you can build Safir SDK Core using the build script, or using CMake-generated projects.
+
