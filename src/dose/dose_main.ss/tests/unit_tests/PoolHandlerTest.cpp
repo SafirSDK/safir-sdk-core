@@ -24,7 +24,6 @@
 #include <set>
 #include <atomic>
 #include <boost/make_shared.hpp>
-#include <boost/thread.hpp>
 #include "../../src/PoolDistributionRequestSender.h"
 #include "../../src/PoolDistributionHandler.h"
 
@@ -35,6 +34,7 @@
 #endif
 
 #include <boost/asio.hpp>
+#include <boost/thread.hpp>
 
 #ifdef _MSC_VER
 #pragma warning (pop)

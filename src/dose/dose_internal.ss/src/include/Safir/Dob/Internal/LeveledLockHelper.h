@@ -28,7 +28,17 @@
 #include <Safir/Dob/Internal/SharedMemoryObject.h>
 #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
 #include <Safir/Utilities/ProcessInfo.h>
+
+#if defined _MSC_VER
+#  pragma warning (push)
+#  pragma warning (disable : 4100)
+#endif
+
 #include <boost/thread.hpp>
+
+#if defined _MSC_VER
+#  pragma warning (pop)
+#endif
 
 namespace Safir
 {

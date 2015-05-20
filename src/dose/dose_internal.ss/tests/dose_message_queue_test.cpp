@@ -29,10 +29,20 @@
 #include <Safir/Dob/Internal/StateDeleter.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <boost/lexical_cast.hpp>
-#include <boost/thread.hpp>
 #include <Safir/Dob/Message.h>
 #include <Safir/Dob/Typesystem/Serialization.h>
 #include <Safir/Utilities/CrashReporter.h>
+
+#if defined _MSC_VER
+#  pragma warning (push)
+#  pragma warning (disable : 4100)
+#endif
+
+#include <boost/thread.hpp>
+
+#if defined _MSC_VER
+#  pragma warning (pop)
+#endif
 
 void DumpFunc(const char* const dumpPath)
 {

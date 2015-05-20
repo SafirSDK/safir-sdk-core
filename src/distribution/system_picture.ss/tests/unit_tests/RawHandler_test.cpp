@@ -22,8 +22,18 @@
 *
 ******************************************************************************/
 #include "../../src/RawHandler.h"
-#include <boost/thread.hpp>
 #include <set>
+
+#if defined _MSC_VER
+#  pragma warning (push)
+#  pragma warning (disable : 4100)
+#endif
+
+#include <boost/thread.hpp>
+
+#if defined _MSC_VER
+#  pragma warning (pop)
+#endif
 
 #define BOOST_TEST_MODULE RawHandlerTest
 #include <boost/test/unit_test.hpp>

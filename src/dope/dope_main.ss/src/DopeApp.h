@@ -30,8 +30,18 @@
 #include "PersistenceHandler.h"
 #include <Safir/Application/Tracer.h>
 #include <boost/bind.hpp>
-#include <boost/thread.hpp>
 #include <Safir/Utilities/AsioDispatcher.h>
+
+#if defined _MSC_VER
+#  pragma warning (push)
+#  pragma warning (disable : 4100)
+#endif
+
+#include <boost/thread.hpp>
+
+#if defined _MSC_VER
+#  pragma warning (pop)
+#endif
 
 class DopeApp :
     public Safir::Dob::StopHandler,

@@ -31,8 +31,18 @@
 #include <queue>
 #include <boost/make_shared.hpp>
 #include <boost/optional.hpp>
-#include <boost/thread.hpp>
 #include <boost/lexical_cast.hpp>
+
+#if defined _MSC_VER
+#  pragma warning (push)
+#  pragma warning (disable : 4100)
+#endif
+
+#include <boost/thread.hpp>
+
+#if defined _MSC_VER
+#  pragma warning (pop)
+#endif
 
 #include "../../src/MessageQueue.h"
 #include "../../src/Node.h"
@@ -43,6 +53,7 @@
 #include "../../src/Discoverer.h"
 #include "../../src/DataSender.h"
 #include "../../src/Resolver.h"
+
 
 #ifdef _MSC_VER
 #pragma warning(disable:4127) //Get rid of warning that this if-expression is constant (comparing two constants)

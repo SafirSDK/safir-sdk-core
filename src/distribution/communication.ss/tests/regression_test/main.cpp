@@ -22,9 +22,19 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#include <boost/thread.hpp>
 #include "Sender.h"
 #include "Receiver.h"
+
+#if defined _MSC_VER
+#  pragma warning (push)
+#  pragma warning (disable : 4100)
+#endif
+
+#include <boost/thread.hpp>
+
+#if defined _MSC_VER
+#  pragma warning (pop)
+#endif
 
 void ControlChannelTest(int executionTime)
 {

@@ -26,7 +26,6 @@
 #include <limits>
 #include <chrono>
 #include <boost/function.hpp>
-#include <boost/thread.hpp>
 #include <boost/program_options.hpp>
 #include <boost/make_shared.hpp>
 #include <Safir/Utilities/Internal/Id.h>
@@ -42,6 +41,7 @@
 
 #include <boost/asio.hpp>
 #include <boost/crc.hpp>
+#include <boost/thread.hpp>
 
 #ifdef _MSC_VER
 #pragma warning (pop)

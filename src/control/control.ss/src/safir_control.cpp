@@ -34,7 +34,7 @@
 //disable warnings in boost
 #if defined _MSC_VER
 #  pragma warning (push)
-#  pragma warning (disable : 4100 4267 4251 4913 4100)
+#  pragma warning (disable : 4100 4267 4251 4913)
 #endif
 
 #include <boost/program_options.hpp>

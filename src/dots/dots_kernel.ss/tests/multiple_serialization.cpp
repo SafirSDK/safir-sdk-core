@@ -6,10 +6,20 @@
 *
 ******************************************************************************/
 #include <Safir/Dob/Typesystem/Internal/Kernel.h>
-#include <boost/thread.hpp>
 #include <boost/bind.hpp>
 #include <fstream>
 #include <iostream>
+
+#if defined _MSC_VER
+#  pragma warning (push)
+#  pragma warning (disable : 4100)
+#endif
+
+#include <boost/thread.hpp>
+
+#if defined _MSC_VER
+#  pragma warning (pop)
+#endif
 
 std::vector<char> xml;
 

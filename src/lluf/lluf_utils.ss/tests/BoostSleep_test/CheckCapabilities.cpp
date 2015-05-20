@@ -22,7 +22,17 @@
 *
 ******************************************************************************/
 #include <iostream>
+
+#if defined _MSC_VER
+#  pragma warning (push)
+#  pragma warning (disable : 4100)
+#endif
+
 #include <boost/thread.hpp>
+
+#if defined _MSC_VER
+#  pragma warning (pop)
+#endif
 
 //disable conditional expression is constant warning
 #ifdef _MSC_VER
