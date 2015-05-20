@@ -54,6 +54,9 @@ ADD_DEFINITIONS(-DBOOST_THREAD_DONT_USE_DATETIME)
 #Make Boost.Chrono header-only
 ADD_DEFINITIONS(-DBOOST_CHRONO_HEADER_ONLY)
 
+#use Boost.Chrono v2
+ADD_DEFINITIONS(-DBOOST_CHRONO_VERSION=2)
+
 #Make sure we only use the header-only part of Boost.DateTime
 ADD_DEFINITIONS(-DBOOST_DATE_TIME_NO_LIB)
 
