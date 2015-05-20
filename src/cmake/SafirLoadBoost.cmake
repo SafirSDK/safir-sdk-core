@@ -6,7 +6,6 @@ endif()
 
 set(Boost_NO_BOOST_CMAKE ON)
 set(Boost_USE_MULTITHREADED ON)
-set(Boost_FIND_QUIETLY True)
 
 find_package(Boost
   COMPONENTS
@@ -22,7 +21,6 @@ find_package(Boost
   REQUIRED)
 
 include_directories(${Boost_INCLUDE_DIRS})
-#link_directories(${Boost_LIBRARY_DIRS})
 
 if (Boost_VERSION LESS 105300)
   MESSAGE(FATAL_ERROR "Boost >= 1.53 required! Sorry!")
@@ -83,4 +81,14 @@ if(MSVC)
      STRING(REGEX REPLACE "/Ob1" "/Ob0" CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
      STRING(REGEX REPLACE "/O2" "/O1" CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
    endif()
+endif()
+
+
+#Set up our patched include files
+if(safir-sdk-core_SOURCE_DIR)
+  message(STATUS "Setting up Boost patches at ${safir-sdk-core_SOURCE_DIR}/build/patches/boost/${Boost_LIB_VERSION}")
+  include_directories(BEFORE SYSTEM ${safir-sdk-core_SOURCE_DIR}/build/patches/boost/${Boost_LIB_VERSION})
+  set(CMAKE_REQUIRED_INCLUDES BEFORE SYSTEM ${safir-sdk-core_SOURCE_DIR}/build/patches/boost/${Boost_LIB_VERSION})
+else()
+  message(FATAL_ERROR "adasdfasdf")
 endif()
