@@ -1679,6 +1679,8 @@ JNIEXPORT jobjectArray JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_Ge
         }
     }
 
+    deleter(generatedLibraries,size);
+
     jobjectArray stringArray = env->NewObjectArray(static_cast<jsize>(libraries.size()),
                                                    env->FindClass("java/lang/String"),
                                                    env->NewStringUTF(""));

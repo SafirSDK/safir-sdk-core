@@ -101,6 +101,8 @@ namespace Typesystem
                 }
             }
 
+            deleter(generatedLibraries,size);
+
             return true;
         }
 
