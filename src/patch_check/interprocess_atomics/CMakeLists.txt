@@ -1,7 +1,7 @@
 #This bug is fixed in 1.57
 if (Boost_VERSION LESS 105700) #1.57
-  set(atomic_path ${Boost_INCLUDE_DIRS}/boost/interprocess/detail/atomic.hpp)
-
+  find_path(atomic_path "boost/interprocess/detail/atomic.hpp")
+  message(STATUS "Checking ${atomic_path}/boost/interprocess/detail/atomic.hpp")
   file(STRINGS ${atomic_path} FOUND_COMMENTS
     REGEX "//Patched for Safir SDK Core")
 
