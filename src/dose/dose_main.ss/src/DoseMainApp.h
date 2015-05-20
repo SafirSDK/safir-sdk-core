@@ -41,7 +41,7 @@
 //disable warnings in boost
 #if defined _MSC_VER
   #pragma warning (push)
-  #pragma warning (disable : 4244 4267)
+  #pragma warning (disable : 4244 4267 4100)
 #endif
 
 #include <boost/thread.hpp>

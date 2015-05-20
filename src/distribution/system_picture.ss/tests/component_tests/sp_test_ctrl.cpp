@@ -34,7 +34,6 @@
 #include <atomic>
 #include <fstream>
 #include <map>
-#include <boost/thread.hpp>
 #include <boost/lexical_cast.hpp>
 
 //disable warnings in boost
@@ -45,6 +44,7 @@
 
 #include <boost/program_options.hpp>
 #include <boost/asio.hpp>
+#include <boost/thread.hpp>
 
 #if defined _MSC_VER
 #  pragma warning (pop)

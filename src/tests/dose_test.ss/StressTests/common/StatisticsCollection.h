@@ -33,6 +33,7 @@
   #pragma warning(push)
   #pragma warning(disable: 4267)
   #pragma warning(disable: 4244)
+  #pragma warning (disable: 4100)
 #endif
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>

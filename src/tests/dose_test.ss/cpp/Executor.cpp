@@ -28,7 +28,6 @@
 #include <Safir/Dob/Typesystem/ObjectFactory.h>
 #include <DoseTest/Partner.h>
 #include <boost/bind.hpp>
-#include <boost/thread.hpp>
 #include "Logger.h"
 #include <DoseTest/Dump.h>
 #include <DoseTest/DumpResult.h>
@@ -40,9 +39,11 @@
 #ifdef _MSC_VER
   #pragma warning(push)
   #pragma warning(disable: 4702)
+  #pragma warning(disable: 4100)
 #endif
 
 #include <boost/lexical_cast.hpp>
+#include <boost/thread.hpp>
 
 #ifdef _MSC_VER
   #pragma warning(pop)

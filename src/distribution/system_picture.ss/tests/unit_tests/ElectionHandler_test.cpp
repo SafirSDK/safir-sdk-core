@@ -24,7 +24,6 @@
 #include "../../src/ElectionHandler.h"
 #include "../../src/MessageWrapperCreators.h"
 #include <Safir/Utilities/Internal/MakeUnique.h>
-#include <boost/thread.hpp>
 #include <boost/thread/mutex.hpp>
 #include <memory>
 #include <time.h>
@@ -33,9 +32,11 @@
 #  pragma warning (push)
 #  pragma warning (disable: 4244)
 #  pragma warning (disable: 4127)
+#  pragma warning (disable: 4100)
 #endif
 
 #include "RawStatisticsMessage.pb.h"
+#include <boost/thread.hpp>
 
 #ifdef _MSC_VER
 #  pragma warning (pop)

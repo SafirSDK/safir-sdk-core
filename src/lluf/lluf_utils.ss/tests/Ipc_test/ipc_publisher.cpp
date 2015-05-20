@@ -31,7 +31,6 @@
 #include <Safir/Utilities/Internal/StringEncoding.h>
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
-#include <boost/thread.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/program_options.hpp>
 #include <stdlib.h>
@@ -41,9 +40,11 @@
 #ifdef _MSC_VER
 #pragma warning (push)
 #pragma warning (disable: 4267)
+#pragma warning (disable: 4100)
 #endif
 
 #include <boost/asio.hpp>
+#include <boost/thread.hpp>
 
 #ifdef _MSC_VER
 #pragma warning (pop)

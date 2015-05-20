@@ -21,43 +21,44 @@
  * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
- #include "Sequencer.h"
- #include <Safir/Dob/OverflowException.h>
- #include <Safir/Dob/NotOpenException.h>
- #include <Safir/Dob/AccessDeniedException.h>
- #include <Safir/Dob/NotFoundException.h>
- #include <Safir/Dob/NodeParameters.h>
- #include <DoseTest/Partner.h>
- #include <DoseTest/PartnerResponseMessage.h>
- #include <DoseTest/RootEntity.h>
- #include <DoseTest/RootMessage.h>
- #include <DoseTest/Dump.h>
- #include <DoseTest/DumpResult.h>
- #include <DoseTest/ComplexGlobalMessage.h>
- #include <DoseTest/ComplexGlobalEntity.h>
- #include <DoseTest/ComplexGlobalService.h>
- #include <iostream>
- #include <sstream>
- #include <time.h>
- #include <boost/bind.hpp>
- #include <Safir/Dob/Typesystem/Members.h>
- #include <Safir/Dob/Typesystem/Serialization.h>
- #include <boost/filesystem/path.hpp>
- #include <boost/filesystem/operations.hpp>
- #include <boost/filesystem/fstream.hpp>
- #include <boost/thread.hpp>
+#include "Sequencer.h"
+#include <Safir/Dob/OverflowException.h>
+#include <Safir/Dob/NotOpenException.h>
+#include <Safir/Dob/AccessDeniedException.h>
+#include <Safir/Dob/NotFoundException.h>
+#include <Safir/Dob/NodeParameters.h>
+#include <DoseTest/Partner.h>
+#include <DoseTest/PartnerResponseMessage.h>
+#include <DoseTest/RootEntity.h>
+#include <DoseTest/RootMessage.h>
+#include <DoseTest/Dump.h>
+#include <DoseTest/DumpResult.h>
+#include <DoseTest/ComplexGlobalMessage.h>
+#include <DoseTest/ComplexGlobalEntity.h>
+#include <DoseTest/ComplexGlobalService.h>
+#include <iostream>
+#include <sstream>
+#include <time.h>
+#include <boost/bind.hpp>
+#include <Safir/Dob/Typesystem/Members.h>
+#include <Safir/Dob/Typesystem/Serialization.h>
+#include <boost/filesystem/path.hpp>
+#include <boost/filesystem/operations.hpp>
+#include <boost/filesystem/fstream.hpp>
 
 
- #ifdef _MSC_VER
-   #pragma warning(push)
-   #pragma warning(disable: 4702)
- #endif
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4702)
+#pragma warning(disable: 4100)
+#endif
 
- #include <boost/lexical_cast.hpp>
+#include <boost/lexical_cast.hpp>
+#include <boost/thread.hpp>
 
- #ifdef _MSC_VER
-   #pragma warning(pop)
- #endif
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 namespace
 {

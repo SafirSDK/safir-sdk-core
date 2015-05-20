@@ -34,22 +34,23 @@
 #include <Safir/Dob/ConnectionAspectMisc.h>
 #include <Safir/Dob/ErrorResponse.h>
 #include <Safir/Dob/PersistentDataStatus.h>
-#include <boost/thread.hpp>
 
 #ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning (disable: 4702)
-#pragma warning(disable: 4267)
+#  pragma warning(push)
+#  pragma warning (disable: 4702)
+#  pragma warning (disable: 4267)
+#  pragma warning (disable: 4100)
 #endif
 
 #include <boost/lexical_cast.hpp>
+#include <boost/thread.hpp>
 
 #ifdef _MSC_VER
-#pragma warning(pop)
+#  pragma warning(pop)
 #endif
 
 #ifndef NO_DATABASE_SUPPORT
-#include "OdbcPersistor.h"
+#  include "OdbcPersistor.h"
 #endif
 
 

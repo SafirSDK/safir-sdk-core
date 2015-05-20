@@ -32,7 +32,6 @@
 #include <iostream>
 #include <map>
 #include <deque>
-#include <boost/thread.hpp>
 #include <atomic>
 
 //disable warnings in boost
@@ -45,6 +44,7 @@
 #include <boost/program_options.hpp>
 #include <boost/asio.hpp>
 #include <boost/asio/steady_timer.hpp>
+#include <boost/thread.hpp>
 
 #if defined _MSC_VER
 #  pragma warning (pop)

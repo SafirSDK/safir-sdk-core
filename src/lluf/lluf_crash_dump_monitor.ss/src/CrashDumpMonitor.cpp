@@ -25,7 +25,6 @@
 #include <Safir/Utilities/Internal/SystemLog.h>
 #include <Safir/Utilities/Internal/StringEncoding.h>
 #include <boost/bind.hpp>
-#include <boost/thread.hpp>
 #include <boost/chrono.hpp>
 #include <iostream>
 
@@ -37,6 +36,7 @@
 
 #include <boost/program_options.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/thread.hpp>
 
 #ifdef _MSC_VER
 #pragma warning (pop)

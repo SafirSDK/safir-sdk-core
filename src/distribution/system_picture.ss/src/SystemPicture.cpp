@@ -37,15 +37,16 @@
 #include <Safir/Utilities/Internal/MakeUnique.h>
 #include <Safir/Utilities/Internal/IpcSubscriber.h>
 #include <boost/lexical_cast.hpp>
-#include <boost/thread.hpp>
 #include <memory>
 
 #ifdef _MSC_VER
 #pragma warning (push)
 #pragma warning (disable: 4267)
+#pragma warning (disable: 4100)
 #endif
 
 #include <boost/asio.hpp>
+#include <boost/thread.hpp>
 
 #ifdef _MSC_VER
 #pragma warning (pop)
