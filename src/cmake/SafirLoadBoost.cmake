@@ -85,6 +85,7 @@ endif()
 
 
 #Set up our patched include files
-message(STATUS "Setting up Boost patches at ${safir-sdk-core_SOURCE_DIR}/boost_patches/${Boost_LIB_VERSION}")
-include_directories(BEFORE SYSTEM ${safir-sdk-core_SOURCE_DIR}/boost_patches/${Boost_LIB_VERSION})
-set(CMAKE_REQUIRED_INCLUDES BEFORE SYSTEM ${safir-sdk-core_SOURCE_DIR}/boost_patches/${Boost_LIB_VERSION} ${CMAKE_REQUIRED_INCLUDES})
+set (SAFIR_BOOST_PATCHES_PATH "${safir-sdk-core_SOURCE_DIR}/boost_patches/${Boost_LIB_VERSION}")
+message(STATUS "Setting up Boost patches at ${SAFIR_BOOST_PATCHES_PATH}")
+include_directories(BEFORE SYSTEM "${SAFIR_BOOST_PATCHES_PATH}")
+set(CMAKE_REQUIRED_INCLUDES BEFORE SYSTEM "${SAFIR_BOOST_PATCHES_PATH}" ${CMAKE_REQUIRED_INCLUDES})
