@@ -206,7 +206,15 @@ namespace Internal
                           DotsC_Int32 valueIndex,
                           std::ostream& os) const
         {
-            os<<"<key>";
+            os<<"<key";
+
+            //write attributes (currently only for strings)
+            if (md->GetKeyType() == StringMemberType)
+            {
+                os << " xml:space=\"preserve\"";
+            }
+            
+            os<<">";
 
             switch(md->GetKeyType())
             {
