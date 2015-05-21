@@ -29,6 +29,16 @@ if (UNIX)
 endif()
 ###########
 
+
+#
+# Load Qt5
+#
+# As moc files are generated in the binary dir, tell CMake
+# to always look for includes there:
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+find_package(Qt5Widgets)
+
+
 #
 # Install a target to the proper place. This function tries to put all parts
 # of the targets into the correct places.
