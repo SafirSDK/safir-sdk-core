@@ -68,3 +68,7 @@ internally and that is used in our interfaces:
   libraries are bundled.
 * Qt runtime (http://www.qt.io) - used by dobmake and dobexplorer.
 * Jom (http://qt-project.org/wiki/jom) - NMake clone that can run in parallel.
+
+License terms for these can be found at their respective web sites, but in short there
+are no surprises there, nothing that should affect your ability to use Safir SDK Core
+under either the GPLv3 license or the commercial license.
