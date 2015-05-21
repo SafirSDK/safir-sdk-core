@@ -16,7 +16,7 @@ Python (>= 2.7)
 CMake (>=3.0.0)
 Protobuf(>= 2.6.1)
 Jom *
-Qt (>=5.2) *
+Qt (>=5.4) *
 Java Platform (JDK) *
 Doxygen *
 Graphviz *
@@ -83,7 +83,7 @@ Here is how to install it using the installer:
 
 1. Download and run the appropriate the installer for your compiler from http://qt-project.org/downloads.
 2. Set up environment variable QTDIR to refer the to the directory in the installation
-   that contains the "include" and "bin" folders (e.g. QTDIR=c:\Qt\Qt5.2.0\5.2.0\msvc2012_64).
+   that contains the "include" and "bin" folders (e.g. QTDIR=c:\Qt\Qt5.4.0\5.4\msvc2013_64).
 3. add %QTDIR%\bin to PATH environment variable.
 
 CMake
