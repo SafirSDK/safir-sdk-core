@@ -58,6 +58,10 @@ ADD_DEFINITIONS(-DBOOST_CHRONO_VERSION=2)
 #Make sure we only use the header-only part of Boost.DateTime
 ADD_DEFINITIONS(-DBOOST_DATE_TIME_NO_LIB)
 
+#The xml parsing uses Boost.Spirit, which we may be using from
+#multiple threads at the same time
+ADD_DEFINITIONS(-DBOOST_SPIRIT_THREADSAFE)
+
 #Set up boost for any test code (i.e. CheckCXXSourceCompiles stuff)
 set(CMAKE_REQUIRED_INCLUDES ${Boost_INCLUDE_DIRS})
 set(CMAKE_REQUIRED_DEFINITIONS

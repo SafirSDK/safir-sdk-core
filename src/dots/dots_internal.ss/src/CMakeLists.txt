@@ -14,12 +14,14 @@ target_include_directories(dots_internal PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 TARGET_LINK_LIBRARIES(dots_internal PRIVATE
   lluf_utils
+  ${PROTOBUF_LITE_LIBRARIES}
 
   PUBLIC
   lluf_id
   lluf_config
   ${Boost_FILESYSTEM_LIBRARY}
-  ${PROTOBUF_LITE_LIBRARIES}
+  ${Boost_THREAD_LIBRARY}
+  ${Boost_SYSTEM_LIBRARY}
 )
 
 SAFIR_INSTALL(TARGETS dots_internal)
