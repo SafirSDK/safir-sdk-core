@@ -12,7 +12,7 @@
 #
 # Redistribution and use is allowed according to the terms of the GPL license.
 
-FIND_PROGRAM (CSHARP_COMPILER NAMES csc cli-csc gmcs gmcs2)
+FIND_PROGRAM (CSHARP_COMPILER NAMES csc cli-csc gmcs gmcs2 mcs)
 FIND_PROGRAM (CSHARP_LINKER NAMES cli-al al)
 FIND_PROGRAM (GACUTIL_EXECUTABLE gacutil)
 FIND_PROGRAM (RESGEN_EXECUTABLE NAMES cli-resgen resgen2 resgen PATH_SUFFIXES ..) #in vs2013 express x64 we need to look one step up!
@@ -32,22 +32,17 @@ if (version_output MATCHES "Mono")
 endif()
 SET(version_output "")
 
-IF (CSHARP_FOUND)
-    IF (NOT CSharp_FIND_QUIETLY)
-        MESSAGE(STATUS "Found CSharp compiler: ${CSHARP_COMPILER}")
-        MESSAGE(STATUS "Found CSharp linker: ${CSHARP_LINKER}")
-        MESSAGE(STATUS "Found gacutil: ${GACUTIL_EXECUTABLE}")
-        MESSAGE(STATUS "Found resgen: ${RESGEN_EXECUTABLE}")
-    ENDIF ()
-ELSE ()
-    IF (CSharp_FIND_REQUIRED)
-        MESSAGE(FATAL_ERROR "Could not find one or more of the C# development tools")
-        MESSAGE(STATUS "Found CSharp compiler: ${CSHARP_COMPILER}")
-        MESSAGE(STATUS "Found CSharp linker: ${CSHARP_LINKER}")
-        MESSAGE(STATUS "Found gacutil: ${GACUTIL_EXECUTABLE}")
-        MESSAGE(STATUS "Found resgen: ${RESGEN_EXECUTABLE}")
+IF (NOT CSharp_FIND_QUIETLY)
+  MESSAGE(STATUS "Found CSharp compiler: ${CSHARP_COMPILER}")
+  MESSAGE(STATUS "Found CSharp linker: ${CSHARP_LINKER}")
+  MESSAGE(STATUS "Found gacutil: ${GACUTIL_EXECUTABLE}")
+  MESSAGE(STATUS "Found resgen: ${RESGEN_EXECUTABLE}")
+ENDIF ()
 
-    ENDIF ()
+IF (NOT CSHARP_FOUND)
+  IF (CSharp_FIND_REQUIRED)
+    MESSAGE(FATAL_ERROR "Could not find one or more of the C# development tools")
+  ENDIF ()
 ENDIF ()
 
 MARK_AS_ADVANCED(CSHARP_COMPILER CSHARP_LINKER GACUTIL_EXECUTABLE RESGEN_EXECUTABLE)
