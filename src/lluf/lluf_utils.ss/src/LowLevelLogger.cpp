@@ -36,21 +36,14 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/convenience.hpp>
 #include <boost/filesystem/path.hpp>
-#include <boost/iostreams/device/file.hpp>
-#include <boost/iostreams/filtering_streambuf.hpp>
-#include <boost/iostreams/stream_buffer.hpp>
-#include <boost/iostreams/tee.hpp>
 #include <boost/lexical_cast.hpp>
-#include <boost/scoped_ptr.hpp>
-#include <boost/thread/mutex.hpp>
-#include <boost/thread/locks.hpp>
 
 #ifdef _MSC_VER
 #pragma warning (pop)
 #endif
 
 #include <iomanip>
-#include <iostream>
+#include <fstream>
 
 namespace //anonymous namespace for internal functions
 {
@@ -88,43 +81,44 @@ namespace //anonymous namespace for internal functions
         }
     }
 
-    class DateOutputFilter
+    class TimestampingStreambuf
+        : public std::basic_streambuf<wchar_t>
+        , private boost::noncopyable
     {
     public:
-        typedef wchar_t char_type;
-        struct category :
-            boost::iostreams::output_filter_tag,
-            boost::iostreams::multichar_tag,
-            boost::iostreams::flushable_tag {};
-
-        explicit DateOutputFilter(const LowLevelLoggerControl& control)
-            : m_datePending(true)
-            , m_fractionalDigits(boost::posix_time::time_duration::num_fractional_digits())
-            , m_ostr(new std::wostringstream())
-            , m_ostrLock(new boost::mutex())
-            , m_control(control)
+        TimestampingStreambuf(const LowLevelLoggerControl& control)
+            : m_control(control)
         {
 
         }
 
-        template <typename Sink>
-        std::streamsize write( Sink& dest, const wchar_t* s, const std::streamsize n)
+        std::wfilebuf* open(const std::string& filename, std::ios_base::openmode mode)
         {
+            return m_sink.open(filename,mode);
+        }
+    protected:
+        int_type overflow( int_type m = traits_type::eof() ) override
+        {
+            WriteTime();
+
+            m_datePending = traits_type::to_char_type( m ) == L'\n';
+            return m_sink.sputc(m);
+        }
+
+        std::streamsize xsputn(const char_type * s, std::streamsize n) override
+        {
+            std::wcout <<"xsputn called with '" << std::wstring(s,s+n) << "'" <<std::endl;
             const wchar_t* start = s;
             std::streamsize i = 0;
             const wchar_t* const end = s+n;
 
             while (start + i != end)
             {
-                if (start[i] == '\n')
+                if (start[i] == L'\n')
                 {
-                    if (m_datePending && m_control.UseTimestamps())
-                    {
-                        const std::wstring timestring = TimeString();
-                        boost::iostreams::write(dest,timestring.c_str(),timestring.size());
-                        m_datePending = false;
-                    }
-                    boost::iostreams::write(dest,start,i+1);
+                    WriteTime();
+
+                    m_sink.sputn(start,i+1);
                     start += i + 1;
                     i = 0;
                     m_datePending = true;
@@ -137,100 +131,15 @@ namespace //anonymous namespace for internal functions
 
             if (end - start > 0)
             {
-                if (m_datePending && m_control.UseTimestamps())
-                {
-                    const std::wstring timestring = TimeString();
-                    boost::iostreams::write(dest,timestring.c_str(),timestring.size());
-                    m_datePending = false;
-                }
-                boost::iostreams::write(dest,start,end-start);
+                WriteTime();
+                m_sink.sputn(start,end-start);
             }
 
 
             return n;
         }
 
-        template <typename Sink>
-        bool flush(Sink& s) const
-        {
-            return boost::iostreams::flush(s);
-        }
-
-        /** This copy constructor does actually not copy anything at all,
-         * All it does is create new internal structures to avoid
-         * allocation in TimeString.
-         */
-        DateOutputFilter(const DateOutputFilter& other)
-            : m_datePending(true)
-            , m_fractionalDigits(other.m_fractionalDigits)
-            , m_ostr(new std::wostringstream())
-            , m_ostrLock(new boost::mutex())
-            , m_control(other.m_control)
-        {
-
-        }
-
-    private:
-        const DateOutputFilter& operator=(const DateOutputFilter& other); //no assignment op.
-
-        /**
-         * This is an optimized version of to_simple_string(time_duration) from posix_time.
-         * It is here just to reduce the amount of time spent in serializing the time strings
-         * in the logger.
-         * The ch argument is appended to the string, so that the caller only has to do
-         * a call to write, rather than a write followed by a put.
-         * The wostringstream is a member with a lock rather than a local variable since
-         * that is actually faster (tested on linux with gcc).
-         */
-        const std::wstring TimeString()
-        {
-            using namespace boost::posix_time;
-            using namespace boost;
-            const time_duration td = microsec_clock::universal_time().time_of_day();
-
-            boost::lock_guard<boost::mutex> lck(*m_ostrLock);
-            m_ostr->str(L"");
-
-            *m_ostr << L"[" << std::setfill(fill_char) << std::setw(2)
-                    << date_time::absolute_value(td.hours()) << L":";
-            *m_ostr << std::setw(2)
-                    << date_time::absolute_value(td.minutes()) << L":";
-            *m_ostr << std::setw(2)
-                    << date_time::absolute_value(td.seconds());
-
-            const time_duration::fractional_seconds_type frac_sec =
-                date_time::absolute_value(td.fractional_seconds());
-
-            *m_ostr << L"." << std::setw(m_fractionalDigits)
-                  << frac_sec;
-            *m_ostr << L"] ";
-            return m_ostr->str();
-        }
-
-
-        bool m_datePending;
-
-        static const wchar_t fill_char = '0';
-        const unsigned short m_fractionalDigits;
-
-        boost::shared_ptr<std::wostringstream> m_ostr;
-        boost::shared_ptr<boost::mutex> m_ostrLock;
-
-        const LowLevelLoggerControl& m_control;
-    };
-
-    /**/
-    class FilteringStreambuf:
-        public boost::iostreams::filtering_wostreambuf
-    {
-    public:
-        explicit FilteringStreambuf(const LowLevelLoggerControl& control)
-            : m_control(control)
-        {
-
-        }
-
-        int sync()
+        int sync() override
         {
             if (m_control.IgnoreFlush())
             {
@@ -238,11 +147,51 @@ namespace //anonymous namespace for internal functions
             }
             else
             {
-                return boost::iostreams::filtering_wostreambuf::sync();
+                return m_sink.pubsync();
             }
         }
+
+        /**
+         * This is an optimized version of to_simple_string(time_duration) from posix_time.
+         * It is here just to reduce the amount of time spent in serializing the time strings
+         * in the logger.
+         * The wostringstream is a member rather than a local variable since that is
+         * actually faster (tested on linux with gcc).
+         *
+         * Note: This function is not thread safe!
+         */
+        inline void WriteTime()
+        {
+            if(m_datePending && m_control.UseTimestamps())
+            {
+                m_datePending = false;
+
+                using namespace boost::posix_time;
+                using namespace boost;
+                const time_duration td = microsec_clock::universal_time().time_of_day();
+
+                m_ostr << L"[" << std::setfill(L'0') << std::setw(2)
+                       << date_time::absolute_value(td.hours()) << L":";
+                m_ostr << std::setw(2)
+                       << date_time::absolute_value(td.minutes()) << L":";
+                m_ostr << std::setw(2)
+                       << date_time::absolute_value(td.seconds());
+
+                const time_duration::fractional_seconds_type frac_sec =
+                    date_time::absolute_value(td.fractional_seconds());
+
+                m_ostr << L"." << std::setw(m_fractionalDigits)
+                       << frac_sec;
+                m_ostr << L"] ";
+            }
+        }
+
     private:
         const LowLevelLoggerControl& m_control;
+        std::basic_filebuf<wchar_t> m_sink;
+        std::wostream m_ostr {&m_sink};
+        bool m_datePending {true};
+        const int m_fractionalDigits{boost::posix_time::time_duration::num_fractional_digits()};
     };
 }
 
@@ -263,16 +212,12 @@ namespace Internal
         {
             if (m_control.LogLevel() > 0)
             {
-                m_fileSink.reset(new boost::iostreams::wfile_sink(GetLogFilename(m_control.LogDirectory()).string()));
-                DateOutputFilter filter(m_control);
-                m_buffer.push(filter);
-                m_buffer.push(*m_fileSink);
+                m_buffer.open(GetLogFilename(m_control.LogDirectory()).string(),std::ios_base::out);
             }
         }
 
         const LowLevelLoggerControl m_control;
-        boost::shared_ptr<boost::iostreams::wfile_sink> m_fileSink;
-        FilteringStreambuf m_buffer;
+        TimestampingStreambuf m_buffer;
     };
 
     boost::once_flag LowLevelLogger::SingletonHelper::m_onceFlag = BOOST_ONCE_INIT;
