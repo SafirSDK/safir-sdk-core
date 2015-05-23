@@ -107,7 +107,6 @@ namespace //anonymous namespace for internal functions
 
         std::streamsize xsputn(const char_type * s, std::streamsize n) override
         {
-            std::wcout <<"xsputn called with '" << std::wstring(s,s+n) << "'" <<std::endl;
             const wchar_t* start = s;
             std::streamsize i = 0;
             const wchar_t* const end = s+n;
