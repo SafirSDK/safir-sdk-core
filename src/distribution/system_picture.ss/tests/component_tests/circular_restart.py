@@ -210,6 +210,7 @@ try:
             log(" found", count,"nodes")
             if count == args.total_nodes + 1:
                 break
+            time.sleep(10)
 
         log("Stopping node 0")
         stop_node(*nodes[0])
