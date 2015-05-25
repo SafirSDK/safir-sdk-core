@@ -2017,11 +2017,6 @@ namespace Internal
                                                bool& exitDispatch,
                                                bool& dontRemove)
     {
-        //TODO: this routine currently ignores the problem of getting postpones on an OnDeletedEntity
-        //when it is a WantsLastState case that gets dispatched.
-        //In this case the last state will be dispatched twice if the OnDeletedEntity gets postponed.
-        //This must be fixed, somehow...
-
         const DistributionData currState = subscription->GetCurrentRealState();
         const DistributionData lastState = subscription->GetLastRealState();
 
