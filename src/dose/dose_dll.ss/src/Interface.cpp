@@ -127,10 +127,6 @@ void DoseC_Connect(const DotsC_Int32 ctrl,
     success = false;
     try
     {
-        //AWI:todo Here we should check that a program doesn't call open with a common part and an instance part
-        //      that it has already used for another connection in any context (software violation). This means that a
-        //      secondary attach using common part and an instance part identifies a unique connection in a certain context.
-
         ControllerPtr controller = ControllerTable::Instance().GetController(ctrl);
 
         ControllerTable::Instance().SetThread(ctrl);
