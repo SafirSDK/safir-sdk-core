@@ -54,8 +54,7 @@ namespace Dob
 {
 namespace Internal
 {
-    const std::string ConnectOrOutSignalName("SAFIR_DOSE_CONN_OR_OUT" +
-                                             Safir::Utilities::Internal::Expansion::GetSafirInstanceSuffix());
+    const char * ConnectOrOutSignalName = "SAFIR_DOSE_CONN_OR_OUT";
 
 
     boost::once_flag Signals::SingletonHelper::m_onceFlag = BOOST_ONCE_INIT;
