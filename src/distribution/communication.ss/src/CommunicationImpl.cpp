@@ -184,8 +184,7 @@ namespace Com
         lllog(6)<<L"COM: IncludeNode "<<id<<std::endl;
         if (!m_isControlInstance)
         {
-            return; //TODO: remove and throw exception
-            //std::logic_error("COM: InclueNode was called on instance running in DataMode.");
+            std::logic_error("COM: InclueNode was called on instance running in DataMode.");
         }
 
         IncludeNodeInternal(id);
@@ -245,8 +244,7 @@ namespace Com
     {
         if (m_isControlInstance)
         {
-            return; //TODO: remove and throw exception
-            //std::logic_error("COM: InjectNode was called on instance running in ControlMode.");
+            throw std::logic_error("COM: InjectNode was called on instance running in ControlMode.");
         }
 
         lllog(6)<<L"COM: Inject node '"<<name.c_str()<<L"' ["<<id<<L"]"<<std::endl;
