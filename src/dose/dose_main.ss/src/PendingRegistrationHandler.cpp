@@ -102,7 +102,7 @@ namespace Internal
 
                                                               DistributionData::DropReference(data);
 
-                                                              HandleRequest(msg,fromNodeId,fromNodeType);
+                                                              m_strand.dispatch([this,msg,fromNodeId,fromNodeType]{HandleRequest(msg,fromNodeId,fromNodeType);});
                                                           },
                                                           m_dataTypeIdentifier,
                                                           DistributionData::NewData);
@@ -354,6 +354,7 @@ namespace Internal
         });
     }
 
+    //must be called in strand
     void PendingRegistrationHandler::HandleRequest(const DistributionData & msg,
                                                    const int64_t fromNodeId,
                                                    const int64_t fromNodeType)
