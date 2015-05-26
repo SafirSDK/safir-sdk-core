@@ -110,12 +110,18 @@ namespace Internal
     }
 
     int Blob::NumberOfValues(int member) const
-    {        
+    {
         return m_object->members(member).values_size();
     }
 
     void Blob::ValueStatus(int member, int index, bool &isNull, bool &isChanged) const
     {
+        if (index >= m_object->members(member).values_size())
+        {
+            isNull = false;
+            isChanged = false;
+        }
+
         const AnyObject_Value& val=m_object->members(member).values(index);
         bool hasValue=
                 val.value().has_int32_value() ||
