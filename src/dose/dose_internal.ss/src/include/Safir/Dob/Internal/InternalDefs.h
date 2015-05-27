@@ -74,6 +74,10 @@ namespace Internal
         NumberOfSubscriptionTypes
     };
 
+    enum RemoteSetResult {RemoteSetAccepted,
+                          RemoteSetDiscarded,
+                          RemoteSetNeedRegistration};
+
     enum StatePtrHandling {RestorePtr,
                            ReleasePtr,
                            KeepPtr};

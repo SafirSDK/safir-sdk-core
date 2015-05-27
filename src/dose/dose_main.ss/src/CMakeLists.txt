@@ -3,13 +3,13 @@ FILE(GLOB headers
   PendingRegistrationHandler.h PoolDistribution.h PoolDistributionRequestSender.h
   ProcessInfoHandler.h ResponseHandler.h ConnectionHandler.h Distribution.h LockMonitor.h
   MessageHandler.h NodeInfoHandler.h PersistHandler.h PoolDistributionHandler.h
-  PoolHandler.h RequestHandler.h StateDistributor.h)
+  PoolHandler.h RequestHandler.h StateDistributor.h WaitingStates.h)
 
 FILE(GLOB sources
   BlockingHandler.cpp ConnectionHandler.cpp ConnectionKiller.cpp DoseMainApp.cpp
   dose_main.cpp LockMonitor.cpp MessageHandler.cpp NodeInfoHandler.cpp
   PendingRegistrationHandler.cpp PersistHandler.cpp PoolHandler.cpp
-  ProcessInfoHandler.cpp RequestHandler.cpp ResponseHandler.cpp)
+  ProcessInfoHandler.cpp RequestHandler.cpp ResponseHandler.cpp WaitingStates.cpp)
 
 ADD_EXECUTABLE(dose_main ${sources} ${headers})
 

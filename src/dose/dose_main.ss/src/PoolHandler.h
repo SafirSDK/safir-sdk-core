@@ -23,6 +23,7 @@
 ******************************************************************************/
 #pragma once
 #include <unordered_map>
+#include "WaitingStates.h"
 #include "Distribution.h"
 #include "PoolDistributionRequestSender.h"
 #include "PoolDistributionHandler.h"
@@ -52,6 +53,11 @@ namespace Internal
         void Start();
         void Stop();
 
+        // The pool handler must be aware of connections/disconnections arriving from external nodes
+        // in order to properly handle the "waiting states".
+        void HandleConnect(const ConnectionId& connId);
+        void HandleDisconnect(const ConnectionId& connId);
+
     private:
         using PoolDistributionType=PoolDistribution<Distribution>;
         using PoolDistributionHandlerType=PoolDistributionHandler<Distribution, PoolDistributionType>;
@@ -65,6 +71,8 @@ namespace Internal
         PoolDistributionHandlerType m_poolDistributor;
         PoolDistributionRequestSenderType m_poolDistributionRequests;
         PersistHandler m_persistHandler;
+        WaitingStates m_waitingStates;
+
         std::unordered_map<int64_t, int64_t> m_nodes; //map<nodeId, nodeType>
         std::unordered_map<int64_t, std::unique_ptr<StateDistributorType> > m_stateDistributors; //map<nodeType, StateDistributor>
 
@@ -76,6 +84,13 @@ namespace Internal
 
         void SignalPdComplete();
         void RunEndStatesTimer();
+
+        //when a new registration arrives a list of waiting states need to be checked
+        //to see if there are any states that need to be "set".
+        void HandleStatesWaitingForRegistration(const DistributionData& registrationState);
+
+        void HandleRegistrationState(const DistributionData& state, int64_t fromNodeType);
+        void HandleEntityState(const DistributionData& state, int64_t fromNodeType);
 
         //PersistenceHandler reports Persistet data ready
         void OnPersistenceReady();

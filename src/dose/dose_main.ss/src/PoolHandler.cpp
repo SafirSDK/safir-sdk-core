@@ -71,13 +71,15 @@ namespace Internal
 
         auto excludeNode=[=](int64_t id, int64_t)
         {
-            m_strand.dispatch([=]
+            m_strand.post([=]
             {
                 if (m_nodes.erase(id)>0)
                 {
                     m_poolDistributionRequests.PoolDistributionFinished(id);
                     m_poolDistributor.RemovePoolDistribution(id);
                 }
+
+                m_waitingStates.NodeDown(id);
             });
         };
 
@@ -184,6 +186,39 @@ namespace Internal
         });
     }
 
+    void PoolHandler::HandleConnect(const ConnectionId& connId)
+    {
+        m_strand.post([this, connId]
+        {
+            m_waitingStates.PerformStatesWaitingForConnection(connId,
+                                                              [this](const DistributionData& state,
+                                                                     int64_t fromNodeType)
+            {
+                if (state.GetType() == DistributionData::RegistrationState)
+                {
+                    HandleRegistrationState(state, fromNodeType);
+                }
+                else if (state.GetType() == DistributionData::EntityState)
+                {
+                    HandleEntityState(state, fromNodeType);
+                }
+                else
+                {
+                    ENSURE (false, <<
+                            "PoolHandler::HandleConnect Expected a registration state or entity state!");
+                }
+            });
+        });
+    }
+
+    void PoolHandler::HandleDisconnect(const ConnectionId& connId)
+    {
+        m_strand.post([this, connId]
+        {
+             m_waitingStates.Disconnect(connId);
+        });
+    }
+
     void PoolHandler::OnPoolDistributionInfo(int64_t fromNodeId, int64_t fromNodeType, const char *data, size_t /*size*/)
     {
         const PoolDistributionInfo pdInfo=*reinterpret_cast<const PoolDistributionInfo*>(data);
@@ -237,54 +272,11 @@ namespace Internal
             ENSURE (state.GetType() == DistributionData::RegistrationState, <<
                     "PoolHandler::OnRegistrationState received DistributionData that is not a RegistrationState!");
 
-            if (state.IsRegistered()) //is a registration state
-            {
-                lllog(1)<<"OnRegistrationState - "<<Safir::Dob::Typesystem::Operations::GetName(state.GetTypeId())<<", handler "<<state.GetHandlerId()<<std::endl;
-                const ConnectionId senderId=state.GetSenderId();
-
-                ENSURE(senderId.m_id != -1, << "Registration states are expected to have ConnectionId != -1! Reg for type "
-                       << Safir::Dob::Typesystem::Operations::GetName(state.GetTypeId()));
-
-                const ConnectionPtr connection = Connections::Instance().GetConnection(senderId, std::nothrow);
-
-                if (connection!=nullptr)
-                {
-                    if (Typesystem::Operations::IsOfType(state.GetTypeId(),Safir::Dob::Service::ClassTypeId))
-                    {
-                        ServiceTypes::Instance().RemoteSetRegistrationState(connection,state);
-                    }
-                    else
-                    {
-                        EntityTypes::Instance().RemoteSetRegistrationState(connection,state);
-                    }
-                }
-            }
-            else //is an unregistration state
-            {
-                ENSURE(state.GetSenderId().m_id == -1, << "Unregistration states are expected to have ConnectionId == -1! Unreg for type "
-                       << Safir::Dob::Typesystem::Operations::GetName(state.GetTypeId()));
-
-                //unregistration states bypass all waitingstates handling and go straight
-                //into shared memory
-                if (Typesystem::Operations::IsOfType(state.GetTypeId(),Safir::Dob::Service::ClassTypeId))
-                {
-                    ServiceTypes::Instance().RemoteSetRegistrationState(ConnectionPtr(), state);
-                }
-                else
-                {
-                    EntityTypes::Instance().RemoteSetRegistrationState(ConnectionPtr(), state);
-                }
-
-                auto sdIt=m_stateDistributors.find(fromNodeType);
-                if (sdIt!=m_stateDistributors.end())
-                {
-                    sdIt->second->CheckForPending(state.GetTypeId());
-                }
-            }
+            HandleRegistrationState(state, fromNodeType);
         });
     }
 
-    void PoolHandler::OnEntityState(int64_t fromNodeId, int64_t /*fromNodeType*/, const char* data, size_t /*size*/)
+    void PoolHandler::OnEntityState(int64_t fromNodeId, int64_t fromNodeType, const char* data, size_t /*size*/)
     {
         m_strand.post([=]
         {
@@ -298,56 +290,7 @@ namespace Internal
                    << "Received Local EntityState of type " << state.GetTypeId()
                    << " from node " << fromNodeId << ", system configuration is bad!");
 
-            switch (state.GetEntityStateKind())
-            {
-            case DistributionData::Ghost:
-                {
-                    ENSURE(state.GetSenderId().m_id == -1, << "Ghost states are expected to have ConnectionId == -1! Ghost for "
-                           << state.GetEntityId());
-
-                    EntityTypes::Instance().RemoteSetRealEntityState(ConnectionPtr(), // Null connection for ghosts
-                                                                     state);
-                }
-                break;
-            case DistributionData::Injection:
-                {
-                    ENSURE(state.GetSenderId().m_id == -1, << "Injection states are expected to have ConnectionId == -1! Injection for "
-                           << state.GetEntityId());
-                    EntityTypes::Instance().RemoteSetInjectionEntityState(state);
-                }
-                break;
-            case DistributionData::Real:
-                {
-                    lllog(1)<<"OnEntityState - "<<state.GetEntityId().ToString()<<", handler "<<state.GetHandlerId()<<std::endl;
-                    if (state.IsCreated()) //handle created and delete states differently
-                    {
-                        const ConnectionId senderId=state.GetSenderId();
-
-                        ENSURE(senderId.m_id != -1, << "Entity states are expected to have ConnectionId != -1! State for "
-                               << state.GetEntityId());
-
-                        const ConnectionPtr connection = Connections::Instance().GetConnection(senderId, std::nothrow);
-                        if (connection!=nullptr)
-                        {
-                            EntityTypes::Instance().RemoteSetRealEntityState(connection, state);
-                        }
-                        else
-                        {
-                            //auto name=Safir::Dob::Typesystem::Operations::GetName(state.GetTypeId());
-                            //throw std::logic_error(Safir::Dob::Typesystem::Utilities::ToUtf8(name)+", unknown con");
-                            //throw std::logic_error("Received acked entity with an unknown connection ");
-                        }
-                    }
-                    else
-                    {
-                        ENSURE(state.GetSenderId().m_id == -1, << "Delete states are expected to have ConnectionId == -1! Delete for "
-                               << state.GetEntityId());
-
-                        EntityTypes::Instance().RemoteSetDeleteEntityState(state);
-                    }
-                }
-                break;
-            }
+            HandleEntityState(state, fromNodeType);
         });
     }
 
@@ -375,6 +318,145 @@ namespace Internal
                 RunEndStatesTimer();
             }
         }));
+    }
+
+    void PoolHandler::HandleStatesWaitingForRegistration(const DistributionData& registrationState)
+    {
+        m_waitingStates.PerformStatesWaitingForRegistration
+            (registrationState,
+             [this](const DistributionData& state, int64_t fromNodeType)
+             {
+                 ENSURE(state.GetType() == DistributionData::EntityState, <<
+                                "PoolHandler::HandleStatesWaitingForRegistration Expected an EntityState!");
+
+                 HandleEntityState(state, fromNodeType);
+             });
+    }
+
+    void PoolHandler::HandleRegistrationState(const DistributionData& state, int64_t fromNodeType)
+    {
+        if (state.IsRegistered()) //is a registration state
+        {
+            lllog(1)<<"OnRegistrationState - "<<Safir::Dob::Typesystem::Operations::GetName(state.GetTypeId())<<", handler "<<state.GetHandlerId()<<std::endl;
+            const ConnectionId senderId=state.GetSenderId();
+
+            ENSURE(senderId.m_id != -1, << "Registration states are expected to have ConnectionId != -1! Reg for type "
+                   << Safir::Dob::Typesystem::Operations::GetName(state.GetTypeId()));
+
+            const ConnectionPtr connection = Connections::Instance().GetConnection(senderId, std::nothrow);
+
+            if (connection != nullptr)
+            {
+                if (Typesystem::Operations::IsOfType(state.GetTypeId(),Safir::Dob::Service::ClassTypeId))
+                {
+                    ServiceTypes::Instance().RemoteSetRegistrationState(connection,state);
+                }
+                else
+                {
+                    EntityTypes::Instance().RemoteSetRegistrationState(connection,state);
+                }
+
+                HandleStatesWaitingForRegistration(state);
+            }
+            else
+            {
+
+                m_waitingStates.Add(state, fromNodeType);
+            }
+        }
+        else //is an unregistration state
+        {
+            ENSURE(state.GetSenderId().m_id == -1, << "Unregistration states are expected to have ConnectionId == -1! Unreg for type "
+                   << Safir::Dob::Typesystem::Operations::GetName(state.GetTypeId()));
+
+            //unregistration states bypass all waitingstates handling and go straight
+            //into shared memory
+            if (Typesystem::Operations::IsOfType(state.GetTypeId(),Safir::Dob::Service::ClassTypeId))
+            {
+                ServiceTypes::Instance().RemoteSetRegistrationState(ConnectionPtr(), state);
+            }
+            else
+            {
+                EntityTypes::Instance().RemoteSetRegistrationState(ConnectionPtr(), state);
+            }
+
+            auto sdIt=m_stateDistributors.find(fromNodeType);
+            if (sdIt!=m_stateDistributors.end())
+            {
+                sdIt->second->CheckForPending(state.GetTypeId());
+            }
+        }
+
+        m_waitingStates.CleanUp(state);
+    }
+
+    void PoolHandler::HandleEntityState(const DistributionData& state, int64_t fromNodeType)
+    {
+        switch (state.GetEntityStateKind())
+        {
+        case DistributionData::Ghost:
+            {
+                ENSURE(state.GetSenderId().m_id == -1, << "Ghost states are expected to have ConnectionId == -1! Ghost for "
+                       << state.GetEntityId());
+
+                const RemoteSetResult result =
+                        EntityTypes::Instance().RemoteSetRealEntityState(ConnectionPtr(), // Null connection for ghosts
+                                                                         state);
+                if (result == RemoteSetNeedRegistration)
+                {
+                    m_waitingStates.Add(state, fromNodeType);
+                }
+
+            }
+            break;
+        case DistributionData::Injection:
+            {
+                ENSURE(state.GetSenderId().m_id == -1, << "Injection states are expected to have ConnectionId == -1! Injection for "
+                       << state.GetEntityId());
+                EntityTypes::Instance().RemoteSetInjectionEntityState(state);
+            }
+            break;
+        case DistributionData::Real:
+            {
+                lllog(1)<<"OnEntityState - "<<state.GetEntityId().ToString()<<", handler "<<state.GetHandlerId()<<std::endl;
+                if (state.IsCreated()) //handle created and delete states differently
+                {
+                    const ConnectionId senderId=state.GetSenderId();
+
+                    ENSURE(senderId.m_id != -1, << "Entity states are expected to have ConnectionId != -1! State for "
+                           << state.GetEntityId());
+
+                    const ConnectionPtr connection = Connections::Instance().GetConnection(senderId, std::nothrow);
+                    if (connection!=nullptr)
+                    {
+                        const RemoteSetResult result =
+                                EntityTypes::Instance().RemoteSetRealEntityState(connection, state);
+
+                        if (result == RemoteSetNeedRegistration)
+                        {
+                            m_waitingStates.Add(state, fromNodeType);
+                        }
+                    }
+                    else
+                    {
+                        m_waitingStates.Add(state, fromNodeType);
+                    }
+                }
+                else
+                {
+                    ENSURE(state.GetSenderId().m_id == -1, << "Delete states are expected to have ConnectionId == -1! Delete for "
+                           << state.GetEntityId());
+
+                    RemoteSetResult result = EntityTypes::Instance().RemoteSetDeleteEntityState(state);
+
+                    if (result == RemoteSetNeedRegistration)
+                    {
+                        m_waitingStates.Add(state, fromNodeType);
+                    }
+                }
+            }
+            break;
+        }
     }
 }
 }

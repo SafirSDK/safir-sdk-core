@@ -331,17 +331,17 @@ namespace Internal
         GetType(entityState.GetTypeId()).RemoteSetInjectionEntityState(entityState);
     }
 
-    void EntityTypes::RemoteSetDeleteEntityState(const DistributionData&    entityState)
+    RemoteSetResult EntityTypes::RemoteSetDeleteEntityState(const DistributionData&    entityState)
     {
         m_registrationClock.UpdateCurrentTimestamp(entityState.GetRegistrationTime());
-        GetType(entityState.GetTypeId()).RemoteSetDeleteEntityState(entityState);
+        return GetType(entityState.GetTypeId()).RemoteSetDeleteEntityState(entityState);
     }
 
-    void EntityTypes::RemoteSetRealEntityState(const ConnectionPtr&      connection,
-                                          const DistributionData&   entityState)
+    RemoteSetResult EntityTypes::RemoteSetRealEntityState(const ConnectionPtr&      connection,
+                                                          const DistributionData&   entityState)
     {
         m_registrationClock.UpdateCurrentTimestamp(entityState.GetRegistrationTime());
-        GetType(entityState.GetTypeId()).RemoteSetRealEntityState(connection, entityState);
+        return GetType(entityState.GetTypeId()).RemoteSetRealEntityState(connection, entityState);
     }
 
     void EntityTypes::Subscribe(const SubscriptionId&                subscriptionId,
