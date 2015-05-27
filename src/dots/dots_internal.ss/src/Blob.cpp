@@ -118,8 +118,9 @@ namespace Internal
     {
         if (index >= m_object->members(member).values_size())
         {
-            isNull = false;
+            isNull = true;
             isChanged = false;
+            return;
         }
 
         const AnyObject_Value& val=m_object->members(member).values(index);

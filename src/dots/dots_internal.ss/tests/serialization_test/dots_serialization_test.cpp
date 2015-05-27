@@ -59,6 +59,63 @@ void CheckBlobSize(const std::vector<char>& blob)
 
 }
 
+void BlobArraySizeDiff(RepositoryPtr rep)
+{
+    const ClassDescription* cd=GetClassByName(rep, "BlobTest.SmallArray");
+    const DotsC_MemberIndex intArrayMemberIndex=cd->GetMemberIndex("IntArray");
+    const MemberDescription* md=cd->GetMember(intArrayMemberIndex);
+
+    if (cd->GetNumberOfMembers()!=1)
+    {
+        throw std::logic_error("BlobTest.SmallArray is expected to have just one member.");
+    }
+    if (md->GetArraySize()!=3)
+    {
+        throw std::logic_error("BlobTest.SmallArray.IntArray is expected to have arraySize=3.");
+    }
+
+    //Manually create a blob with too few array elements.
+    Internal::Blob blob(cd->GetTypeId(), cd->GetNumberOfMembers());
+    blob.AddValue(intArrayMemberIndex, false);
+    blob.AddValue(intArrayMemberIndex, false);
+    blob.SetValueInt32(intArrayMemberIndex, 0, 1); //intArray[0]=1
+    blob.SetValueInt32(intArrayMemberIndex, 1, 2); //intArray[1]=2
+
+    //serialize to binary
+    size_t size=static_cast<size_t>(blob.CalculateBlobSize());
+    std::vector<char> bin(size);
+    blob.Serialize(&bin[0]);
+
+    //Deserialize the blob that has only 2 array elements and is expected to have 3
+    int value=0;
+    bool isNull=false;
+    bool isChanged=false;
+
+    BlobReader<Safir::Dob::Typesystem::ToolSupport::TypeRepository> r(rep.get(), &bin[0]);
+
+    //read index 0
+    r.ReadValue(intArrayMemberIndex, 0, value, isNull, isChanged);
+    if (isNull || value!=1)
+    {
+        throw std::logic_error("BlobTest.SmallArray.IntArray[0] is expected to have value 1");
+    }
+
+    //read index 1
+    r.ReadValue(intArrayMemberIndex, 1, value, isNull, isChanged);
+    if (isNull || value!=2)
+    {
+        throw std::logic_error("BlobTest.SmallArray.IntArray[1] is expected to have value 2");
+    }
+
+    //read index 2, wich does not exist. Should return isNull=true and isChanged=false on ReadValue
+    r.ReadValue(intArrayMemberIndex, 2, value, isNull, isChanged);
+    //std::cout<<"BlobTest.SmallArray.IntArray[2]: isNull="<<std::boolalpha<<isNull<<", isChanged="<<isChanged<<", value="<<value<<std::endl;
+    if (!isNull || isChanged )
+    {
+        throw std::logic_error("BlobTest.SmallArray.IntArray[2] is expected to be null and not changed");
+    }
+}
+
 void BlobDiffTest(RepositoryPtr rep)
 {
     std::cout<<"========= Blob Diff Test ========"<<std::endl;
@@ -597,6 +654,7 @@ int main(int argc, char* argv[])
 
     BlobChangeTest(repository);
     BlobDiffTest(repository);
+    BlobArraySizeDiff(repository);
 
     std::cout<<"========= Repository ========"<<std::endl;
 
