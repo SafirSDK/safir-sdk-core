@@ -43,6 +43,10 @@
   #pragma warning (pop)
 #endif
 
+#ifndef BOOST_SPIRIT_THREADSAFE
+  #error "Please define BOOST_SPIRIT_THREADSAFE in your project settings!"
+#endif
+
 namespace Safir
 {
 namespace Dob
