@@ -37,6 +37,8 @@
 #pragma warning (pop)
 #endif
 
+#include "git_revision.h"
+
 class ProgramOptions
 {
 public:
@@ -49,6 +51,7 @@ public:
         options.add_options()
             ("help,h", "show help message")
             ("version", "show Safir SDK Core version")
+            ("revision", "show the git revision of the Safir SDK Core source code used to build this binary.")
             ("typesystem", "Show contents of typesystem.ini")
             ("locations", "Show contents of locations.ini")
             ("logging", "Show contents of logging.ini")
@@ -80,12 +83,14 @@ public:
         }
 
         version = vm.count("version") != 0;
+        revision = vm.count("revision") != 0;
         logging = vm.count("logging") != 0;
         typesystem = vm.count("typesystem") != 0;
         locations = vm.count("locations") != 0;
         dou_install_dirs = vm.count("dou-install-dirs") != 0;
 
         if (!version &&
+            !revision &&
             !logging &&
             !locations &&
             !typesystem &&
@@ -101,6 +106,7 @@ public:
     }
 
     bool version;
+    bool revision;
     bool logging;
     bool typesystem;
     bool locations;
@@ -157,6 +163,10 @@ int main(int argc, char * argv[])
         if (options.version)
         {
             std::cout << "Safir SDK Core " << SAFIR_SDK_CORE_VERSION << std::endl;
+        }
+        if (options.revision)
+        {
+            std::cout << "Safir SDK Core Git revision: " << SAFIR_SDK_CORE_GIT_REVISION << std::endl;
         }
         if (options.locations)
         {
