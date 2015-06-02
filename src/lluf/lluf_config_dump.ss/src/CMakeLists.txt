@@ -7,7 +7,7 @@ FILE(WRITE ${CMAKE_CURRENT_BINARY_DIR}/git_revision.h.in
 )
 FILE(WRITE ${CMAKE_CURRENT_BINARY_DIR}/git_revision.cmake
 "EXECUTE_PROCESS(
-     COMMAND ${GIT_EXECUTABLE} log --pretty=format:%h -n 1
+     COMMAND ${GIT_EXECUTABLE} log --pretty=format:\"%h\" -n 1
      OUTPUT_VARIABLE GIT_REVISION
      RESULT_VARIABLE RESULT
      ERROR_QUIET
