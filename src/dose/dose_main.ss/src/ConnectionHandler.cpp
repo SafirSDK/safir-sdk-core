@@ -82,12 +82,12 @@ namespace
                 DistributionData::DropReference(data);
                 if (state.GetType()==DistributionData::Action_Connect)
                 {
-                    lllog(1)<<"ConnectionHandler - AddConnection "<<state.GetConnectionName()<<std::endl;
+                    lllog(4)<<"ConnectionHandler - AddConnection "<<state.GetConnectionName()<<std::endl;
                     Connections::Instance().AddConnection(state.GetConnectionName(), state.GetCounter(), state.GetSenderId().m_contextId, state.GetSenderId());
                 }
                 else if (state.GetType()==DistributionData::Action_Disconnect)
                 {
-                    lllog(1)<<"ConnectionHandler - RemoveConnection "<<state.GetConnectionName()<<std::endl;
+                    lllog(4)<<"ConnectionHandler - RemoveConnection "<<state.GetConnectionName()<<std::endl;
                     const ConnectionPtr connection = Connections::Instance().GetConnection(state.GetSenderId(), std::nothrow);
                     m_onAppEvent(connection, true);
                     Connections::Instance().RemoveConnection(connection);
@@ -149,12 +149,12 @@ namespace
 
                 if (m_communication.Send(0, ntQ.first, msg.first, msg.second, ConnectionMessageDataTypeId, true))
                 {
-                    lllog(1)<<"ConnectionHandler - Send to to nodeType "<<ntQ.first<<std::endl;
+                    lllog(5)<<"ConnectionHandler - Send to to nodeType "<<ntQ.first<<std::endl;
                     ntQ.second.pop();
                 }
                 else
                 {
-                    lllog(1)<<"ConnectionHandler - Failed Send to to nodeType "<<ntQ.first<<std::endl;
+                    lllog(5)<<"ConnectionHandler - Failed Send to to nodeType "<<ntQ.first<<std::endl;
                     break;
                 }
             }
@@ -176,18 +176,18 @@ namespace
                 //have not been handled yet.
                 if (connect)
                 {
-                    lllog(1) << "ConnectionThread - CONNECT "<< std::endl;
+                    lllog(9) << "ConnectionThread - CONNECT "<< std::endl;
                     m_connectEvent=true;
                 }
                 if (connectionOut)
                 {
-                    lllog(1) << "ConnectionThread - CONNECT_OUT "<< std::endl;
+                    lllog(9) << "ConnectionThread - CONNECT_OUT "<< std::endl;
                     m_connectionOutEvent=true;
                 }
 
                 if (m_handleEventsNotified==false)
                 {
-                    lllog(1) << "ConnectionThread - NOTIFY "<< std::endl;
+                    lllog(9) << "ConnectionThread - NOTIFY "<< std::endl;
                     m_handleEventsNotified=true;
                     m_strand.post([this]{HandleEvents();});
                 }
@@ -201,7 +201,7 @@ namespace
 
     void ConnectionHandler::HandleEvents()
     {
-        lllog(1) << "ConnectionHandler::HandleEvents "<< std::endl;
+        lllog(9) << "ConnectionHandler::HandleEvents "<< std::endl;
 
 
         m_handleEventsNotified=false;
@@ -247,10 +247,7 @@ namespace
         {
             Connections::Instance().HandleConnect([this](const ConnectionPtr& connection)
             {
-                lllout << "ConnectionHandler::HandleConnect: New connection from "
-                       << connection->NameWithCounter() << " id = " << connection->Id() << std::endl;
-
-                lllog(1) << "ConnectionHandler::HandleConnect: New connection from "
+                lllog(4) << "ConnectionHandler::HandleConnect: Sending new connection "
                        << connection->NameWithCounter() << " id = " << connection->Id() << std::endl;
 
                 SendAll(ConnectDataPtr(connection->Id(), connection->NameWithoutCounter(), connection->Counter()));
@@ -271,24 +268,10 @@ namespace
 
         HandleConnectionOutEvent(connection,dummy);
 
-        //if message out queue is not empty we've failed to send the msgs
-        //because of dose_com overflow. We will have been added to the blocking handler
-        //and so we can just leave the connection in here for the time being
-        //and the blocking handler will make sure that we retry the disconnect
-        if (!connection->GetMessageOutQueue().empty())
-        {
-            return;
-        }
-
         //Distribute the disconnection to dose_com if Connection resides on this node
         if (connection->Id().m_node==m_communication.Id())
         {
-            if (std::string(connection->NameWithoutCounter()).find(";dose_main;") != std::string::npos)
-            {
-                return;
-            }
-
-            lllog(1) << "ConnectionHandler::HandleDisconnect: New connection from "
+            lllog(4) << "ConnectionHandler::HandleDisconnect: Sending disconnect for connection "
                    << connection->NameWithCounter() << " id = " << connection->Id() << std::endl;
 
             SendAll(DisconnectDataPtr(connection->Id()));
