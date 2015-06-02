@@ -3,11 +3,11 @@
 FIND_PACKAGE(Git QUIET)
 
 FILE(WRITE ${CMAKE_CURRENT_BINARY_DIR}/git_revision.h.in
-"\#define SAFIR_SDK_CORE_GIT_REVISION @GIT_REVISION@\n"
+"\#define SAFIR_SDK_CORE_GIT_REVISION \"@GIT_REVISION@\"\n"
 )
 FILE(WRITE ${CMAKE_CURRENT_BINARY_DIR}/git_revision.cmake
 "EXECUTE_PROCESS(
-     COMMAND ${GIT_EXECUTABLE} log --pretty=format:\"%h\" -n 1
+     COMMAND \"${GIT_EXECUTABLE}\" log --pretty=format:%h -n 1
      OUTPUT_VARIABLE GIT_REVISION
      RESULT_VARIABLE RESULT
      ERROR_QUIET
@@ -15,7 +15,7 @@ FILE(WRITE ${CMAKE_CURRENT_BINARY_DIR}/git_revision.cmake
 
  if (RESULT)
    message(WARNING \"Failed to obtain git revision! safir_show_config --revision will not be able to show correct information.\")
-   set(GIT_REVISION \"Unknown\")
+   set(GIT_REVISION Unknown)
  endif()
 
  CONFIGURE_FILE(\${SRC} \${DST} @ONLY)
