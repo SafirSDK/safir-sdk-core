@@ -263,12 +263,12 @@ namespace
         lllout << "ConnectionHandler::HandleDisconnect: Disconnected " << connection->NameWithCounter() << " id = " << connection->Id() << std::endl;
 
         //try to handle some outstanding stuff (this does not guarantee that all gets handled,
-        // e.g. dose_com overflow may stop something in here.).
+        // e.g. communication overflow may stop something in here.).
         std::vector<ConnectionPtr> dummy;
 
         HandleConnectionOutEvent(connection,dummy);
 
-        //Distribute the disconnection to dose_com if Connection resides on this node
+        //Distribute the disconnection to communication if Connection resides on this node
         if (connection->Id().m_node==m_communication.Id())
         {
             lllog(4) << "ConnectionHandler::HandleDisconnect: Sending disconnect for connection "

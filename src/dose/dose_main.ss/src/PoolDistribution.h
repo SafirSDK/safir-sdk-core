@@ -235,7 +235,7 @@ namespace Internal
                         dontRemove=!subscription->DirtyFlag().Process([this, &subscription]{return ProcessEntityState(subscription);});
                     }
                 }
-                //dontRemove is true if we got an overflow, and if we did we dont want to keep sending anything to dose_com.
+                //dontRemove is true if we got an overflow, and if we did we dont want to keep sending anything to communication.
                 exitDispatch = dontRemove;
                 overflow=exitDispatch;
             });
