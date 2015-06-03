@@ -371,8 +371,8 @@ int main(int argc, char * argv[])
 
     commNodeTypes.push_back({1,
                 "NodeTypeA",
-                "224.11.22.33:10000", //multicast
-                "224.11.22.44:11000", //multicast
+                "", //no multicast
+                "", //no multicast
                 1000,
                 20,
                 15});
