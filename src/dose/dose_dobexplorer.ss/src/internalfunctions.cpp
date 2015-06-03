@@ -98,9 +98,29 @@ void Safir::Dob::Internal::StatisticsCollector(Safir::Dob::Internal::State& stat
         arguments.kind.append("has Injection");
     }
 
+    if (arguments.getSubscibers)
+    {
+        std::wostringstream ostr;
+        ostr << "Subscribers for instance : " << arguments.instanceId << std::endl;
+        State::Subscriptions subscriptions = state.m_subscriptions;
+
+        for (State::Subscriptions::iterator iter = subscriptions.begin(); iter != subscriptions.end(); ++iter)
+        {
+           ostr << iter->first.connectionConsumer.connection->NameWithoutCounter() << std::endl;
+        }
+
+        arguments.info = ostr.str();
+    }
+
     if (arguments.getInfo)
     {
         std::wostringstream ostr;
+
+        if (!arguments.info.empty())
+        {
+            ostr << std::endl;
+        }
+
         ostr << "Instance: " << arguments.instanceId << std::endl;
 
         if (!realState.IsNoState())
@@ -112,7 +132,15 @@ void Safir::Dob::Internal::StatisticsCollector(Safir::Dob::Internal::State& stat
         {
             ostr << "Injection State: " << injectionState.Image();
         }
-        arguments.info = ostr.str();
+
+        if (arguments.info.empty())
+        {
+            arguments.info = ostr.str();
+        }
+        else
+        {
+            arguments.info.append(ostr.str());
+        }
     }
 
     if (!arguments.simple && state.m_connection != NULL)

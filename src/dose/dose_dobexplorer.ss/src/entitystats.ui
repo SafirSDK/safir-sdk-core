@@ -102,6 +102,11 @@
       </column>
       <column>
        <property name="text">
+        <string>Subsrcibers</string>
+       </property>
+      </column>      
+      <column>
+       <property name="text">
         <string>InstanceId</string>
        </property>
       </column>

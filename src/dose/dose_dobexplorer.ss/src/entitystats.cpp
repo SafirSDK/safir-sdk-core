@@ -36,12 +36,13 @@
 
 
 const int CHECK_COLUMN = 0;
-const int INSTANCE_ID_COLUMN = 1;
-const int CONTEXT_COLUMN = 2;
-const int CONNECTION_COLUMN = 3;
-const int ENTITY_STATE_KIND_COLUMN = 4;
-const int HANDLER_ID_COLUMN = 5;
-const int NUM_SUBS_COLUMN = 6;
+const int CHECK_SUBSCR_COLUMN = 1;
+const int INSTANCE_ID_COLUMN = 2;
+const int CONTEXT_COLUMN = 3;
+const int CONNECTION_COLUMN = 4;
+const int ENTITY_STATE_KIND_COLUMN = 5;
+const int HANDLER_ID_COLUMN = 6;
+const int NUM_SUBS_COLUMN = 7;
 
 const int CONTEXT_CHECK_COLUMN = 0;
 const int CONTEXT_CONTEXT_COLUMN = 1;
@@ -156,6 +157,7 @@ void EntityStats::RemoveInstances()
     {
         const int row = (*m_removeInstances.begin())->row();
         delete instances->item(row,CHECK_COLUMN);
+        delete instances->item(row,CHECK_SUBSCR_COLUMN);
         delete instances->item(row,CONTEXT_COLUMN);
         delete instances->item(row,INSTANCE_ID_COLUMN);
         delete instances->item(row,CONNECTION_COLUMN);
@@ -186,6 +188,7 @@ void EntityStats::ProcessState(const Safir::Dob::Typesystem::Int64 instance,
         // If this state belongs to a context that is not shown we just get some statics
         // and then return.
         arguments.getInfo = false;
+        arguments.getSubscibers = false;
         StatisticsCollector(*statePtr, &arguments);
         return;  // ***RETURN***
     }
@@ -209,6 +212,7 @@ void EntityStats::ProcessState(const Safir::Dob::Typesystem::Int64 instance,
     {
         row = findResult->row();
         arguments.getInfo = instances->item(row,CHECK_COLUMN)->checkState() == Qt::Checked;
+        arguments.getSubscibers = instances->item(row,CHECK_SUBSCR_COLUMN)->checkState() == Qt::Checked;
         m_removeInstances.erase(findResult);
     }
     else
@@ -218,6 +222,12 @@ void EntityStats::ProcessState(const Safir::Dob::Typesystem::Int64 instance,
         item->setFlags(Qt::ItemIsUserCheckable|Qt::ItemIsEnabled);
         item->setCheckState(Qt::Unchecked);
         instances->setItem(0,CHECK_COLUMN,item);
+
+        QTableWidgetItem * item2 = new QTableWidgetItem();
+        item2->setFlags(Qt::ItemIsUserCheckable|Qt::ItemIsEnabled);
+        item2->setCheckState(Qt::Unchecked);
+        instances->setItem(0,CHECK_SUBSCR_COLUMN,item2);
+
         instances->setItem(0,INSTANCE_ID_COLUMN,new QTableWidgetItem(instanceString));
         instances->setItem(0,CONTEXT_COLUMN,new QTableWidgetItem(contextString));
         instances->setItem(0,CONNECTION_COLUMN,new QTableWidgetItem());
@@ -226,6 +236,7 @@ void EntityStats::ProcessState(const Safir::Dob::Typesystem::Int64 instance,
         instances->setItem(0,NUM_SUBS_COLUMN,new QTableWidgetItem());
 
         arguments.getInfo = false;
+        arguments.getSubscibers = false;
     }
 
     arguments.info.clear();

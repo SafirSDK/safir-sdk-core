@@ -75,6 +75,7 @@ namespace Safir
             //TEMPORARIES
             Safir::Dob::Typesystem::Int64 instanceId;
             bool getInfo;
+            bool getSubscibers;
             std::wstring info;
             bool contextChecked;
 

@@ -62,6 +62,7 @@ void NumberOfEntities::Update()
     Safir::Dob::Internal::Arguments arguments;
     arguments.simple = true;
     arguments.getInfo = false;
+    arguments.getSubscibers = false;
     arguments.context = 0;
 
     for (int row=0; row<entityTable->rowCount(); row++)
