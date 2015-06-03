@@ -8,7 +8,7 @@ get_property(SAFIR_GENERATED_PATHS GLOBAL PROPERTY SAFIR_GENERATED_PATHS)
 ADD_TEST(NAME tracer_backdoor
   COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py
   --sender $<TARGET_FILE:tracer_backdoor_sender>
-  --backdoor $<TARGET_FILE:backdoor>
+  --backdoor $<TARGET_FILE:bd>
   --safir-control $<TARGET_FILE:safir_control>
   --dose-main $<TARGET_FILE:dose_main>
   --dope-main $<TARGET_FILE:signal_persistence_ready>
