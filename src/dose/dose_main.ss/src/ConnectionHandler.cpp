@@ -271,6 +271,12 @@ namespace
         //Distribute the disconnection to communication if Connection resides on this node
         if (connection->Id().m_node==m_communication.Id())
         {
+            //TODO: remove this when we send dose_mains connections to remote nodes.
+            if (std::string(connection->NameWithoutCounter()).find(";dose_main;") != std::string::npos)
+            {
+                return;
+            }
+
             lllog(4) << "ConnectionHandler::HandleDisconnect: Sending disconnect for connection "
                    << connection->NameWithCounter() << " id = " << connection->Id() << std::endl;
 
