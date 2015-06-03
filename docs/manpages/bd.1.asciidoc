@@ -1,25 +1,26 @@
-BACKDOOR(1)
-===========
+BD(1)
+=====
 :doctype: manpage
 
 
 NAME
 ----
-backdoor - Send backdoor commands to Safir applications
+bd - Send backdoor commands to Safir applications
 
 
 SYNOPSIS
 --------
-*backdoor* ['OPTIONS']
+*bd* ['OPTIONS']
 
 DESCRIPTION
 -----------
-Backdoor is a tool for testing Safir applications. It can be used to send backdoor
-commands to applications that have a properly implemented Backdoor and BackdoorKeeper
+bd is a tool for testing Safir applications. It can be used to send backdoor commands to
+applications that have a properly implemented Backdoor and BackdoorKeeper.
+
 
 OPTIONS
 -------
-Please check backdoor --help for information on options.
+Please check bd --help for information on options.
 
 
 RESOURCES
