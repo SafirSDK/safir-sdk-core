@@ -38,7 +38,6 @@
 #include <QMessageBox>
 #include <QDesktopServices>
 #include <QUrl>
-#include <iostream>
 
 #ifdef _MSC_VER
 #pragma warning(pop)
@@ -144,11 +143,22 @@ QString Dobmake::GetDobmakeBatchScript()
 
 void Dobmake::on_douDirectoryBrowse_clicked()
 {
-    const QFileInfo fi(QFileDialog::getOpenFileName(this,
-                                                    "Locate your dou-file directory",
-                                                    "",
-                                                    "CMakeLists.txt"));
-    ui->douDirectory->setText(QDir::toNativeSeparators(fi.dir().path()));
+    QString startDir;
+    const QFileInfo dir(ui->douDirectory->text());
+    if (dir.exists() && dir.isDir())
+    {
+        startDir = dir.path();
+    }
+
+    QString douDir = QFileDialog::getOpenFileName(this,
+                                                  "Locate your dou-file directory",
+                                                  startDir,
+                                                  "CMakeLists.txt");
+    if (!douDir.isNull())
+    {
+        const QFileInfo fi(douDir);
+        ui->douDirectory->setText(QDir::toNativeSeparators(fi.dir().path()));
+    }
 }
 
 void Dobmake::on_douDirectory_textChanged(const QString &path)
@@ -186,9 +196,20 @@ void Dobmake::on_installDirectory_textChanged(const QString &path)
 
 void Dobmake::on_installDirectoryBrowse_clicked()
 {
+    const QFileInfo dir(ui->installDirectory->text());
+
     QFileDialog dialog;
     dialog.setFileMode(QFileDialog::Directory);
     dialog.setOption(QFileDialog::ShowDirsOnly);
+
+    if (dir.exists() && dir.isDir())
+    {
+        dialog.setDirectory(dir.path());
+    }
+    else
+    {
+        dialog.setDirectory(QDir::home());
+    }
 
     if (dialog.exec())
     {
@@ -208,7 +229,6 @@ void Dobmake::on_absoluteInstall_clicked()
 
 void Dobmake::UpdateInstallButton()
 {
-    std::wcout << "UpdateInstallButton" << std::endl;
     const QFile buildDir(ui->douDirectory->text());
     const QFile cmakelists(ui->douDirectory->text() + QDir::separator() + "CMakeLists.txt");
     const QFile installDir(ui->installDirectory->text());
