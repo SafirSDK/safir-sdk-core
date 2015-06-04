@@ -204,7 +204,24 @@ ControlApp::ControlApp(boost::asio::io_service& ioService,
     // Locate and start dose_main
     namespace fs = boost::filesystem;
 
-    fs::path path(doseMainPath);
+    fs::path path;
+
+    if (doseMainPath.empty())
+    {
+        path = boost::process::search_path("dose_main");
+
+        if (path.empty())
+        {
+            std::ostringstream os;
+            os << "CTRL: Can't find dose_main in PATH" << std::endl;
+            std::wcout << os.str().c_str() << std::endl;
+            throw std::logic_error(os.str().c_str());
+        }
+    }
+    else
+    {
+        path =  doseMainPath;
+    }
 
     if (fs::exists(path))
     {
@@ -212,15 +229,15 @@ ControlApp::ControlApp(boost::asio::io_service& ioService,
         {
             std::ostringstream os;
             os << "CTRL: " << doseMainPath << " is a directory or a non regular file!" << std::endl;
-            SEND_SYSTEM_LOG(Error, << os.str().c_str());
+            std::wcout << os.str().c_str() << std::endl;
             throw std::logic_error(os.str().c_str());
         }
     }
     else
     {
         std::ostringstream os;
-        os << "CTRL: Can't find " << doseMainPath << std::endl;
-        SEND_SYSTEM_LOG(Error, << os.str().c_str());
+        os << "CTRL: Can't find " << path << std::endl;
+        std::wcout << os.str().c_str() << std::endl;
         throw std::logic_error(os.str().c_str());
     }
 

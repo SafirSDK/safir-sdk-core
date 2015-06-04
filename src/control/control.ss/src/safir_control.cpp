@@ -81,8 +81,8 @@ public:
         options.add_options()
                 ("help,h", "show help message")
                 ("dose-main-path",
-                 value<std::string>(&doseMainPath)->required(),
-                 "Absolute or relative path to dose_main executable.")
+                 value<std::string>(&doseMainPath)->default_value(""),
+                 "Absolute or relative path to dose_main executable. If not defined PATH will be used.")
                 ("force-id",
                  value<boost::int64_t>(&id)->default_value(LlufId_GenerateRandom64(), ""),
                  "Override the automatically generated node id. For debugging/testing purposes only.");
