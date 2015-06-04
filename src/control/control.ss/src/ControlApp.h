@@ -53,9 +53,9 @@ namespace Control = Safir::Dob::Internal::Control;
 class ControlApp : private boost::noncopyable
 {
 public:
-    ControlApp(boost::asio::io_service& ioService,
-               const std::string&       doseMainPath,
-               const boost::int64_t     id);
+    ControlApp(boost::asio::io_service&         ioService,
+               const boost::filesystem::path&   doseMainPath,
+               const boost::int64_t             id);
 
     ~ControlApp();
 

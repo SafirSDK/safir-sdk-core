@@ -145,6 +145,56 @@ int main(int argc, char * argv[])
             return 1;
         }
 
+        // Locate dose_main binary
+
+        namespace fs = boost::filesystem;
+
+#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
+        std::wstring doseMainName(L"dose_main");
+#elif defined(linux) || defined(__linux) || defined(__linux__)
+        std::string doseMainName("dose_main");
+#endif
+
+        fs::path doseMainPath;
+
+        if (options.doseMainPath.empty())
+        {
+            doseMainPath = boost::process::search_path(doseMainName);
+
+            if (doseMainPath.empty())
+            {
+                std::ostringstream os;
+                os << "CTRL: Can't find dose_main in PATH";
+                std::wcout << os.str().c_str() << std::endl;
+                SEND_SYSTEM_LOG(Critical, << os.str().c_str() << std::endl);
+                return 1;
+            }
+        }
+        else
+        {
+            doseMainPath =  options.doseMainPath;
+        }
+
+        if (fs::exists(doseMainPath))
+        {
+            if (fs::is_directory(doseMainPath) || !fs::is_regular_file(doseMainPath))
+            {
+                std::ostringstream os;
+                os << "CTRL: " << doseMainPath << " is a directory or a non regular file!";
+                std::wcout << os.str().c_str() << std::endl;
+                SEND_SYSTEM_LOG(Critical, << os.str().c_str() << std::endl);
+                return 1;
+            }
+        }
+        else
+        {
+            std::ostringstream os;
+            os << "CTRL: Can't find " << doseMainPath;
+            std::wcout << os.str().c_str() << std::endl;
+            SEND_SYSTEM_LOG(Critical, << os.str().c_str() << std::endl);
+            return 1;
+        }
+
         boost::asio::io_service ioService;
 
         Safir::Utilities::CrashReporter::RegisterCallback(DumpFunc);
@@ -175,7 +225,7 @@ int main(int argc, char * argv[])
             }
         };
 
-        ControlApp controlApp(ioService, options.doseMainPath, options.id);
+        ControlApp controlApp(ioService, doseMainPath, options.id);
 
         (void)controlApp;  // to keep compilers from warning about unused variable
 

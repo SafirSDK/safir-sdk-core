@@ -45,9 +45,9 @@
 #  pragma warning (pop)
 #endif
 
-ControlApp::ControlApp(boost::asio::io_service& ioService,
-                       const std::string&       doseMainPath,
-                       const boost::int64_t     id)
+ControlApp::ControlApp(boost::asio::io_service&         ioService,
+                       const boost::filesystem::path&   doseMainPath,
+                       const boost::int64_t             id)
     : m_ioService(ioService)
     , m_signalSet(ioService)
     , m_strand(ioService)
@@ -201,50 +201,11 @@ ControlApp::ControlApp(boost::asio::io_service& ioService,
     ));
 #endif
 
-    // Locate and start dose_main
-    namespace fs = boost::filesystem;
-
-    fs::path path;
-
-    if (doseMainPath.empty())
-    {
-        path = boost::process::search_path("dose_main");
-
-        if (path.empty())
-        {
-            std::ostringstream os;
-            os << "CTRL: Can't find dose_main in PATH" << std::endl;
-            std::wcout << os.str().c_str() << std::endl;
-            throw std::logic_error(os.str().c_str());
-        }
-    }
-    else
-    {
-        path =  doseMainPath;
-    }
-
-    if (fs::exists(path))
-    {
-        if (fs::is_directory(path) || !fs::is_regular_file(path))
-        {
-            std::ostringstream os;
-            os << "CTRL: " << doseMainPath << " is a directory or a non regular file!" << std::endl;
-            std::wcout << os.str().c_str() << std::endl;
-            throw std::logic_error(os.str().c_str());
-        }
-    }
-    else
-    {
-        std::ostringstream os;
-        os << "CTRL: Can't find " << path << std::endl;
-        std::wcout << os.str().c_str() << std::endl;
-        throw std::logic_error(os.str().c_str());
-    }
-
+    // Start dose_main
     boost::system::error_code ec;
 
     m_doseMain.reset(new boost::process::child(boost::process::execute
-                                                (boost::process::initializers::run_exe(path),
+                                                (boost::process::initializers::run_exe(doseMainPath),
                                                  boost::process::initializers::set_on_error(ec),
                                                  boost::process::initializers::inherit_env()
 #if defined(linux) || defined(__linux) || defined(__linux__)
