@@ -322,7 +322,10 @@ def parse_command_line():
 
     action.add_argument("--install",
                         metavar="PATH",
-                        help="Build the source in the current directory and install it to PATH")
+                        help="Build the source in the current directory and install it to "
+                             "PATH. If PATH is set to 'None' the install step will be run "
+                             "without setting CMAKE_INSTALL_PREFIX, useful if your "
+                             "CMakeLists.txt has absolute paths in the INSTALL directives.")
 
     parser.add_argument("--skip-tests",
                         action = "store_true",
@@ -378,7 +381,7 @@ class BuilderBase(object):
         self.stagedir = os.path.join(os.getcwd(),"stage") if self.arguments.package else None
 
         self.install_prefix = None #derived classes can override if arguments.package is true
-        if self.arguments.install:
+        if self.arguments.install and self.arguments.install != "None":
             self.install_prefix = self.arguments.install
 
     def build(self):

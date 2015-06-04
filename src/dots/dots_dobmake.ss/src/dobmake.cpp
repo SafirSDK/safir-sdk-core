@@ -38,6 +38,7 @@
 #include <QMessageBox>
 #include <QDesktopServices>
 #include <QUrl>
+#include <iostream>
 
 #ifdef _MSC_VER
 #pragma warning(pop)
@@ -195,15 +196,26 @@ void Dobmake::on_installDirectoryBrowse_clicked()
     }
 }
 
+void Dobmake::on_relativeInstall_clicked()
+{
+    UpdateInstallButton();
+}
+
+void Dobmake::on_absoluteInstall_clicked()
+{
+    UpdateInstallButton();
+}
+
 void Dobmake::UpdateInstallButton()
 {
+    std::wcout << "UpdateInstallButton" << std::endl;
     const QFile buildDir(ui->douDirectory->text());
     const QFile cmakelists(ui->douDirectory->text() + QDir::separator() + "CMakeLists.txt");
     const QFile installDir(ui->installDirectory->text());
     ui->buildAndInstall->setEnabled(!m_buildRunning &&
                                     buildDir.exists() &&
                                     cmakelists.exists() &&
-                                    installDir.exists());
+                                    (installDir.exists() || ui->absoluteInstall->isChecked()));
 }
 
 void Dobmake::UpdateBuildButton()
@@ -261,13 +273,23 @@ void Dobmake::on_build_clicked()
 
 void Dobmake::on_buildAndInstall_clicked()
 {
+    QString installDir;
+    if (ui->relativeInstall->isChecked())
+    {
+        installDir = ui->installDirectory->text();
+    }
+    else
+    {
+        installDir = "None";
+    }
+
     BuildThread* worker = new BuildThread(this,
                                           GetDobmakeBatchScript(),
                                           ui->douDirectory->text(),
                                           m_debug,
                                           m_release,
                                           Force32Bit(),
-                                          ui->installDirectory->text());
+                                          installDir);
 
     connect(worker, SIGNAL(BuildComplete(bool)), this, SLOT(BuildComplete(bool)));
     connect(worker, SIGNAL(finished()), worker, SLOT(deleteLater()));

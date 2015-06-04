@@ -61,6 +61,10 @@ private slots:
 
     void on_installDirectoryBrowse_clicked();
 
+    void on_absoluteInstall_clicked();
+
+    void on_relativeInstall_clicked();
+
     void on_build_clicked();
 
     void on_buildAndInstall_clicked();
