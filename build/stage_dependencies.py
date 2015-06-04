@@ -188,8 +188,11 @@ class __WindowsStager(object):
                  "LibGLESv2.dll",
                  "LibEGL.dll",
                  "icudt51.dll",
+                 "icudt53.dll",
                  "icuin51.dll",
+                 "icuin53.dll",
                  "icuuc51.dll",
+                 "icuuc53.dll",
                  "QtCore4.dll",  #for qt4
                  "QtGui4.dll")  #for qt4
 
