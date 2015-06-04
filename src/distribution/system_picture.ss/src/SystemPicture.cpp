@@ -224,6 +224,16 @@ namespace SP
 
         }
 
+        ~Impl()
+        {
+            if (!m_stopped)
+            {
+                SEND_SYSTEM_LOG(Error,
+                                << "You have to call SystemPicture::Stop before destroying object");
+                abort();
+            }
+        }
+
         void Stop()
         {
             const bool was_stopped = m_stopped.exchange(true);
