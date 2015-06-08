@@ -26,7 +26,7 @@
 #  GLOB: Use this to automatically find dou, dom and namespace.txt files in the current source directory.
 #        This option can not be used together with DOU_FILES, DOM_FILES and NAMESPACE_MAPPINGS.
 #  DEPENDENCIES: Dependencies to other safir_generated targets within the build tree.
-#
+# TODO: Update bin/lib documentation
 # INSTALL_SAFIR_GENERATED_LIBRARY(TARGETS <target1> .. <targetN>
 #                                 [CXX_BIN <c++ .dll destination dir>]
 #                                 [CXX_LIB <c++ .lib/.so destination dir>]

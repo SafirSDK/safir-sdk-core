@@ -7,8 +7,8 @@ ADD_SAFIR_GENERATED_LIBRARY(
 #Can be absolute paths or relative paths. If relative, they will be prefixed with CMAKE_INSTALL_PREFIX
 INSTALL_SAFIR_GENERATED_LIBRARY(
   TARGETS Test1
-  CXX_BIN bin
-  CXX_LIB lib
+  CXX_RUNTIME bin
+  CXX_LIBRARY lib
   CXX_INCLUDE include
   JAR java
   DOTNET dotnet

@@ -417,7 +417,7 @@ FUNCTION(INSTALL_SAFIR_GENERATED_LIBRARY)
   SAFIR_IS_EXTERNAL_BUILD()
 
   if (SAFIR_EXTERNAL_BUILD)
-    cmake_parse_arguments(_in "" "CXX_BIN;CXX_LIB;CXX_INCLUDE;JAR;DOTNET;DOU_BASE" "TARGETS" ${ARGN})
+    cmake_parse_arguments(_in "" "CXX_RUNTIME;CXX_LIBRARY;CXX_ARCHIVE;CXX_INCLUDE;JAR;DOTNET;DOU_BASE" "TARGETS" ${ARGN})
   else()
     cmake_parse_arguments(_in "TEST_SUITE" "" "TARGETS" ${ARGN})
   endif()
@@ -437,11 +437,14 @@ FUNCTION(INSTALL_SAFIR_GENERATED_LIBRARY)
     get_target_property(_in_DOTNET_BUILT ${_in_NAME}-dou DOTNET_BUILT)
 
     if (SAFIR_EXTERNAL_BUILD)
-      if (_in_CXX_BIN AND _in_CXX_LIB)
+      if (_in_CXX_RUNTIME AND _in_CXX_LIBRARY)
+        if (NOT _in_CXX_ARCHIVE)
+          set(_in_CXX_ARCHIVE ${_in_CXX_LIBRARY})
+        endif()
         INSTALL(TARGETS safir_generated-${_in_NAME}-cpp
-          RUNTIME DESTINATION ${_in_CXX_BIN}
-          LIBRARY DESTINATION ${_in_CXX_LIB}
-          ARCHIVE DESTINATION ${_in_CXX_LIB})
+          RUNTIME DESTINATION ${_in_CXX_RUNTIME}
+          LIBRARY DESTINATION ${_in_CXX_LIBRARY}
+          ARCHIVE DESTINATION ${_in_CXX_ARCHIVE})
       endif()
 
       if (_in_CXX_INCLUDE)
