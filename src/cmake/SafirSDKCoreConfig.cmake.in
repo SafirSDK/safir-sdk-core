@@ -26,10 +26,11 @@
 #  GLOB: Use this to automatically find dou, dom and namespace.txt files in the current source directory.
 #        This option can not be used together with DOU_FILES, DOM_FILES and NAMESPACE_MAPPINGS.
 #  DEPENDENCIES: Dependencies to other safir_generated targets within the build tree.
-# TODO: Update bin/lib documentation
+#
 # INSTALL_SAFIR_GENERATED_LIBRARY(TARGETS <target1> .. <targetN>
-#                                 [CXX_BIN <c++ .dll destination dir>]
-#                                 [CXX_LIB <c++ .lib/.so destination dir>]
+#                                 [CXX_RUNTIME <c++ windows .dll destination dir>]
+#                                 [CXX_LIBRARY <c++ linux .so destination dir>]
+#                                 [CXX_ARCHIVE <c++ windows .lib destination dir>]
 #                                 [CXX_INCLUDE <c++ include destination dir>]
 #                                 [JAR <java .jar destination dir>]
 #                                 [DOTNET <dotnet .dll destination dir>]
@@ -38,7 +39,10 @@
 # Notes:
 #  1. Dotnet assemblies are not installed into GAC.
 #  2. Dou files will be installed into <DOU_BASE>/<target name> directory.
-#  3. Both CXX_LIB and CXX_BIN have to be specified to install the C++ libraries..
+#  3. Both CXX_LIBRARY and CXX_RUNTIME have to be specified to install the C++ libraries..
+#  4. If CXX_ARCHIVE is not specified CXX_LIBRARY will be used as windows .lib destination
+#  5. The CXX_RUNTIME, CXX_LIBRARY and CXX_ARCHIVE parameters work the same way as in the
+#     CMake builtin INSTALL(TARGET ...).
 #
 # This file will actually define some other variables, some of which are used by the
 # example apps build scripts to make CMake build Java and .Net. If you're trying to do
