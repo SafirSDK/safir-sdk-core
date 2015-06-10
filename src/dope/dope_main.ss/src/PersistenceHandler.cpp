@@ -25,6 +25,8 @@
 #include <Safir/Dob/PersistenceParameters.h>
 #include <Safir/Dob/InjectionProperty.h>
 #include <Safir/Dob/InjectionOverrideProperty.h>
+#include <Safir/Dob/PersistenceThrottlingProperty.h>
+#include <Safir/Dob/PersistenceThrottlingOverrideProperty.h>
 #include <Safir/Dob/PersistentDataReady.h>
 #include <Safir/Dob/AccessDeniedException.h>
 #include <Safir/Dob/Typesystem/Exceptions.h>
@@ -36,6 +38,7 @@
 #include <Safir/Dob/ConnectionAspectInjector.h>
 #include <Safir/Dob/Typesystem/Internal/BlobOperations.h>
 #include <Safir/Dob/NotOpenException.h>
+#include <Safir/Dob/NotFoundException.h>
 
 //Dope uses context 0 to connect to the dob. The strange looking negative number
 //is a way to indicate that this is a connection with special privileges.
@@ -43,27 +46,74 @@ const Safir::Dob::Typesystem::Int32 PERSISTENCE_CONTEXT = -1000000;
 
 //-------------------------------------------------------
 PersistenceHandler::PersistenceHandler(boost::asio::io_service& ioService,
-                                       const bool ignorePersistenceProperties):
-    m_dispatcher(m_dobConnection,ioService),
-    m_debug(L"PersistenceHandler"),
-    m_started(false)
+                                       const bool ignorePersistenceProperties)
+    : m_writeTimer(ioService),
+      m_nextTimeout(boost::chrono::steady_clock::time_point::max()),
+      m_dispatcher(m_dobConnection, ioService),
+      m_debug(L"PersistenceHandler"),
+      m_started(false)
 {
     const Safir::Dob::Typesystem::TypeIdVector types =
         Safir::Dob::Typesystem::Operations::GetClassTree(Safir::Dob::Entity::ClassTypeId);
     m_debug << "-----These classes will be persisted--------" <<std::endl;
 
-    if (!ignorePersistenceProperties)
+
+    for (const auto& type : types)
     {
-        for (const auto & type : types)
+        const boost::chrono::milliseconds writePeriod = GetWritePeriod(type);
+
+        if (ShouldPersist(type))
         {
-            if (ShouldPersist(type))
+            if (ignorePersistenceProperties)
             {
-                m_debug << "  " << Safir::Dob::Typesystem::Operations::GetName(type) << std::endl;
-                m_persistentTypes.insert(type);
+                continue;
+            }
+
+            m_persistentTypes.insert(type);
+
+            std::wostringstream os;
+
+            if (m_debug.IsEnabled())
+            {
+                os << L"  " << Safir::Dob::Typesystem::Operations::GetName(type);
+            }
+
+            if (writePeriod > boost::chrono::milliseconds(0))
+            {
+                if (m_debug.IsEnabled())
+                {
+                    os << L" (will be stored no more frequently than every " << writePeriod << ")";
+                }
+
+                m_writePeriod[type] = writePeriod;
+            }
+            else
+            {
+                if (m_debug.IsEnabled())
+                {
+                    os << std::endl;
+                }
+            }
+
+            if (m_debug.IsEnabled())
+            {
+                m_debug << os.str() << std::endl;
+            }
+        }
+        else
+        {
+            // A non synchronous permanent type. Put out a warning if it happens to have
+            // a PersistenceThrottlingProperty
+            if (writePeriod > boost::chrono::milliseconds(0))
+            {
+                std::wostringstream os;
+                os << "Ignoring PersistenceThrottlingProperty since "
+                   << Safir::Dob::Typesystem::Operations::GetName(type) << " is not SynchronousPermanent";
+                Safir::Logging::SendSystemLog(Safir::Logging::Warning, os.str());
             }
         }
     }
-    m_debug << "---------------- End list ----------------" <<std::endl;
+    m_debug << "---------------- End list ----------------" << std::endl;
     m_debug << std::flush;
 }
 
@@ -118,14 +168,18 @@ void PersistenceHandler::Start(bool restore)
         StartSubscriptions();
     }
 
+    // Start timer
+    HandleTimeout();
+
     m_started = true;
-    m_debug << "PersistenceHandler::Allocate successful"<<std::endl;
+    m_debug << "Persistence handling successfully started"<<std::endl;
 }
 
 //-------------------------------------------------------
 void PersistenceHandler::Stop()
 {
     m_started = false;
+    m_writeTimer.cancel();
     m_dobConnection.Close();
 }
 
@@ -138,10 +192,14 @@ PersistenceHandler::ShouldPersist(const Safir::Dob::Typesystem::TypeId typeId)
     {
         // Check if override property
         bool hasProperty, isInherited;
-        Safir::Dob::Typesystem::Operations::HasProperty(typeId, Safir::Dob::InjectionOverrideProperty::ClassTypeId, hasProperty, isInherited);
+        Safir::Dob::Typesystem::Operations::HasProperty(typeId,
+                                                        Safir::Dob::InjectionOverrideProperty::ClassTypeId,
+                                                        hasProperty,
+                                                        isInherited);
         if ( hasProperty && !isInherited)
         { //has override property
-            Safir::Dob::Typesystem::ObjectPtr obj = Safir::Dob::Typesystem::ObjectFactory::Instance().CreateObject(typeId);
+            Safir::Dob::Typesystem::ObjectPtr obj =
+                    Safir::Dob::Typesystem::ObjectFactory::Instance().CreateObject(typeId);
             if (Safir::Dob::InjectionOverrideProperty::GetInjection(obj) == Safir::Dob::InjectionKind::SynchronousPermanent)
             {
                 return true;
@@ -156,7 +214,8 @@ PersistenceHandler::ShouldPersist(const Safir::Dob::Typesystem::TypeId typeId)
         // No override property check InjectionProperty
         if (Safir::Dob::Typesystem::Operations::HasProperty(typeId, Safir::Dob::InjectionProperty::ClassTypeId))
         { //normal persistence property
-            Safir::Dob::Typesystem::ObjectPtr obj = Safir::Dob::Typesystem::ObjectFactory::Instance().CreateObject(typeId);
+            Safir::Dob::Typesystem::ObjectPtr obj =
+                    Safir::Dob::Typesystem::ObjectFactory::Instance().CreateObject(typeId);
             if (Safir::Dob::InjectionProperty::GetInjection(obj) == Safir::Dob::InjectionKind::SynchronousPermanent)
             {
                 return true;
@@ -169,6 +228,48 @@ PersistenceHandler::ShouldPersist(const Safir::Dob::Typesystem::TypeId typeId)
     {
         throw Safir::Dob::Typesystem::SoftwareViolationException(std::wstring(L"Failed to get persistence status for object ") +
                                                                    Safir::Dob::Typesystem::Operations::GetName(typeId),
+                                                                 __WFILE__,__LINE__);
+    }
+}
+
+//-------------------------------------------------------
+boost::chrono::milliseconds
+PersistenceHandler::GetWritePeriod(const Safir::Dob::Typesystem::TypeId typeId)
+{
+    try
+    {
+        Safir::Dob::Typesystem::Si32::Second result = -1;
+
+        // Check if override property
+        bool hasProperty;
+        bool isInherited;
+        Safir::Dob::Typesystem::Operations::HasProperty(typeId,
+                                                        Safir::Dob::PersistenceThrottlingOverrideProperty::ClassTypeId,
+                                                        hasProperty,
+                                                        isInherited);
+        if (hasProperty && !isInherited)
+        {
+            //has override property
+            Safir::Dob::Typesystem::ObjectPtr obj =
+                    Safir::Dob::Typesystem::ObjectFactory::Instance().CreateObject(typeId);
+            result = Safir::Dob::PersistenceThrottlingOverrideProperty::GetWritePeriod(obj);
+        }
+        // No override property check PersistenceThrottlingProperty
+        else if (Safir::Dob::Typesystem::Operations::HasProperty(typeId,
+                                                                 Safir::Dob::PersistenceThrottlingProperty::ClassTypeId))
+        {
+            //normal persistence property
+            Safir::Dob::Typesystem::ObjectPtr obj =
+                    Safir::Dob::Typesystem::ObjectFactory::Instance().CreateObject(typeId);
+            result = Safir::Dob::PersistenceThrottlingProperty::GetWritePeriod(obj);
+        }
+
+        return boost::chrono::milliseconds(static_cast<int>(result * 1000));
+    }
+    catch (const Safir::Dob::Typesystem::NullException &)
+    {
+        throw Safir::Dob::Typesystem::SoftwareViolationException(L"Failed to get persistence throttling period for object " +
+                                                                 Safir::Dob::Typesystem::Operations::GetName(typeId),
                                                                  __WFILE__,__LINE__);
     }
 }
@@ -204,6 +305,20 @@ PersistenceHandler::StartSubscriptions()
 
 //-------------------------------------------------------
 void
+PersistenceHandler::Write(const Safir::Dob::EntityProxy& entityProxy, const bool update)
+{
+    m_debug << "Will try to persist entity " << entityProxy.GetEntityId() << std::endl;
+
+    const char* blob = entityProxy.GetBlob();
+
+    Safir::Dob::Typesystem::BinarySerialization bin =
+        std::vector<char>(blob,blob+Safir::Dob::Typesystem::Internal::BlobOperations::GetSize(blob));
+
+    Store(entityProxy.GetEntityId(), entityProxy.GetOwner(), bin, update);
+}
+
+//-------------------------------------------------------
+void
 PersistenceHandler::OnNewEntity(const Safir::Dob::EntityProxy entityProxy)
 {
     HandleEntity(entityProxy, false);
@@ -221,6 +336,9 @@ void
 PersistenceHandler::OnDeletedEntity(const Safir::Dob::EntityProxy entityProxy,
                                     const bool                    deletedByOwner)
 {
+    // Remove it from the throttling structure if it happens to be there
+    m_toBeWritten.erase(entityProxy.GetEntityId());
+
     // only remove if removed by owner... Otherwise it is probably because the system shut down or the application died
     if( !deletedByOwner )
     {
@@ -231,19 +349,109 @@ PersistenceHandler::OnDeletedEntity(const Safir::Dob::EntityProxy entityProxy,
     Remove(entityProxy);
 }
 
+//-------------------------------------------------------
+void
+PersistenceHandler::HandleTimeout()
+{
+    const auto now = boost::chrono::steady_clock::now();
+
+    // Don't iterate through all unless we are due for a write timeout.
+    if (now > m_nextTimeout)
+    {
+        m_nextTimeout = boost::chrono::steady_clock::time_point::max();
+
+        for (auto& entity : m_toBeWritten)
+        {
+            // Should we write this object?
+            if (entity.second.second && entity.second.first < now)
+            {
+                // The object is dirty and its time to write it
+                try
+                {
+                    const Safir::Dob::EntityProxy entityProxy = m_dobConnection.Read(entity.first);
+
+                    m_debug << "Periodic write time ended for entity " << entityProxy.GetEntityId() << std::endl;
+
+                    Write(entityProxy,true);
+
+                    // Set next write time ...
+                    entity.second.first = now + m_writePeriod[entity.first.GetTypeId()];
+
+                    // ...and reset dirty flag
+                    entity.second.second = false;
+                }
+                catch(const Safir::Dob::NotFoundException &)
+                {
+                    // This could happen if the instance has been deleted but we haven't been told yet
+                    // Just fall through and erase it from our internal structure. The delete callback will
+                    // take care of this.
+                }
+            }
+
+            if (entity.second.first < m_nextTimeout)
+            {
+                m_nextTimeout = entity.second.first;
+            }
+        }
+    }
+
+    m_writeTimer.expires_from_now(boost::chrono::seconds(1));
+    m_writeTimer.async_wait([this](const boost::system::error_code& error)
+    {
+        if (!error)
+        {
+            HandleTimeout();
+        }
+    });
+}
 
 
 //-------------------------------------------------------
 void
-PersistenceHandler::HandleEntity(const Safir::Dob::EntityProxy & entityProxy, const bool update)
+PersistenceHandler::HandleEntity(const Safir::Dob::EntityProxy& entityProxy, const bool update)
 {
-    m_debug << "Got entity " << entityProxy.GetEntityId() << ", will try to persist it" << std::endl;
-    const char * blob = entityProxy.GetBlob();
+    auto writePeriodIt = m_writePeriod.find(entityProxy.GetTypeId());
 
-    Safir::Dob::Typesystem::BinarySerialization bin =
-        std::vector<char>(blob,blob+Safir::Dob::Typesystem::Internal::BlobOperations::GetSize(blob));
+    if (writePeriodIt != m_writePeriod.cend())
+    {
+        // This entity type has a write period limit
 
-    Store(entityProxy.GetEntityId(), entityProxy.GetOwner(), bin, update);
+        const auto now = boost::chrono::steady_clock::now();
+
+        const auto writePeriod = writePeriodIt->second;
+
+        auto toBeWrittenIt = m_toBeWritten.find(entityProxy.GetEntityId());
+
+        if (toBeWrittenIt == m_toBeWritten.cend())
+        {
+            // If the entity instance doesn't exist in the map then this instance has never been written.
+            // Write it right away!
+            Write(entityProxy, update);
+
+            m_toBeWritten[entityProxy.GetEntityId()] = std::make_pair(now + writePeriod,
+                                                                      false);  // dirty flag
+            m_nextTimeout = now; // Force timeout and a recalculation of nextTimeout
+        }
+        else if (m_toBeWritten[entityProxy.GetEntityId()].first < now)
+        {
+            // This instance hasn't been written within its write period
+            // Write it right away!
+            Write(entityProxy, update);
+
+            toBeWrittenIt->second.first = now + writePeriod; // next timeout
+            toBeWrittenIt->second.second = false;            // dirty flag
+            m_nextTimeout = now; // Force timeout and a recalculation of nextTimeout
+        }
+        else
+        {
+            // Otherwise, mark the entity as dirty and wait until the timer strikes.
+            toBeWrittenIt->second.second = true;
+        }
+    }
+    else
+    {
+        Write(entityProxy, update);
+    }
 }
 
 

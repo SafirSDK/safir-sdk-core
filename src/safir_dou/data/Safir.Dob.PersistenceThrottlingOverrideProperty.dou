@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<property xmlns="urn:safir-dots-unit" xmlns:xsd="http://www.w3.org/2001/XMLSchema-instance">
+    <summary>
+        This property overrides the value of the PersistenceThrottlingProperty. This value overrides the
+        inherited value, and it is not inherited by child classes..
+    </summary>
+    <name>Safir.Dob.PersistenceThrottlingOverrideProperty</name>
+  <members>
+    <member>
+       <summary>
+           Zero or negative values will be treated as no throttling wanted.
+       </summary>
+       <name>WritePeriod</name>
+       <type>Second32</type>
+    </member>
+  </members>
+</property>

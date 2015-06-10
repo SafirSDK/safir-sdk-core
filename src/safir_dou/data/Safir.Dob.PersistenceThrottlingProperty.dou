@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<property xmlns="urn:safir-dots-unit" xmlns:xsd="http://www.w3.org/2001/XMLSchema-instance">
+    <summary>
+        This property is used to limit writes to external storage for frequently updated entities.
+        An entity will be be written no more often then WritePeriod.
+    </summary>
+    <name>Safir.Dob.PersistenceThrottlingProperty</name>
+  <members>
+    <member>
+       <summary>
+           Zero or negative values will be treated as no throttling wanted.
+       </summary>
+       <name>WritePeriod</name>
+       <type>Second32</type>
+    </member>
+  </members>
+</property>

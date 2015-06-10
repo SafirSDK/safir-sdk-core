@@ -54,6 +54,8 @@ ADD_SAFIR_GENERATED_LIBRARY(NAME Core
   data/Safir.Dob.OverflowException.dou
   data/Safir.Dob.Parametrization.dou
   data/Safir.Dob.PersistenceBackend.dou
+  data/Safir.Dob.PersistenceThrottlingOverrideProperty.dou
+  data/Safir.Dob.PersistenceThrottlingProperty.dou
   data/Safir.Dob.PersistentDataReady.dou
   data/Safir.Dob.PersistentDataState.dou
   data/Safir.Dob.PersistentDataStatus.dou
