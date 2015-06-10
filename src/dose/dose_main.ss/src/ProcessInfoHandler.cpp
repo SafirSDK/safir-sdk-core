@@ -183,7 +183,6 @@ namespace Internal
             const Typesystem::EntityId eid(ProcessInfo::ClassTypeId,Typesystem::InstanceId(connection->Pid()));
             try
             {
-                bool processHasConnection = false;
                 bool processInfoUpdated = false;
 
                 auto processInfo = boost::static_pointer_cast<ProcessInfo>(m_connection.Read(eid).GetEntity());
@@ -199,16 +198,10 @@ namespace Internal
                         processInfoUpdated = true;
                         break;
                     }
-                    else
-                    {
-                        processHasConnection = true;
-                        // No, it wasn't. Indicate that this process has other connections
-                        // and that the entity should not be deleted
-                    }
                 }
                 if (processInfoUpdated)
                 {
-                    if (!processHasConnection)
+                    if (processInfo->ConnectionNames().empty())
                     {
                         m_connection.Delete(eid,Typesystem::HandlerId());
                         m_processMonitor.StopMonitorPid(connection->Pid());
