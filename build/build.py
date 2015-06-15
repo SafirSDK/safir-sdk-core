@@ -194,9 +194,15 @@ class Logger(object):
         self.__last_tag = None
 
         self.__buildlog = codecs.open("buildlog.html", mode = "w", encoding = "utf-8")
-        self.__buildlog.write("<html><head><title>Safir SDK Core Build Log"
-                              + "</title><meta http-equiv=\"refresh\" content=\"10\" ></head>\n")
-        self.__buildlog.write("<body>\n")
+        self.__buildlog.write("<html><head>"
+                              "<script language=\"JavaScript\">"
+                              "function readCookie(name){"
+                              "  return(document.cookie.match('(^|; )'+name+'=([^;]*)')||0)[2]"
+                              "}"
+                              "</script>"
+                              "<title>Safir SDK Core Build Log</title>"
+                              "<meta http-equiv=\"refresh\" content=\"10\" ></head>\n")
+        self.__buildlog.write("<body onScroll=\"document.cookie='ypos=' + window.pageYOffset\" onLoad=\"window.scrollTo(0,readCookie('ypos'))\">\n")
         self.__buildlog.write("<h1>Safir SDK Core Build Log</h1>")
         self.__buildlog.write("<b>Command line:</b> " + " ".join(sys.argv) + "<br/>")
         self.__buildlog.write("<b>Working directory:</b> " + os.getcwd() + "<br/>")
