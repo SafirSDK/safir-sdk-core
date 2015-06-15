@@ -212,8 +212,8 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
   endif()
 
   FILE(GLOB dod_files ${dod_directory}*.dod)
-  SET(dots_v_command ${PYTHON_EXECUTABLE}
-    ${dots_v_path}
+  SET(dots_v_command ${PYTHON_EXECUTABLE} ${dots_v_path})
+  SET(dots_v_arguments
     --dod-files ${dod_files}
     --dou-files ${_gen_DOU_FILES}
     --namespace-mappings ${_gen_NAMESPACE_MAPPINGS}
@@ -221,10 +221,18 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
     --library-name ${_gen_NAME}
     --output-path=${CMAKE_CURRENT_BINARY_DIR}/generated_code)
 
+  #write the command to a response file, since there may be maaaannnyyy dou
+  #files and windows has problems with long command lines
+  SET (response_file "${CMAKE_CURRENT_BINARY_DIR}/command_line_dots_v_${_gen_NAME}.rsp")
+  file(REMOVE ${response_file})
+  foreach(arg IN LISTS dots_v_arguments)
+    file(APPEND ${response_file} "${arg}\n")
+  endforeach()
+
   ADD_CUSTOM_COMMAND(
     OUTPUT ${cpp_files} ${java_files} ${dotnet_files}
 
-    COMMAND ${dots_v_command}
+    COMMAND ${dots_v_command} "@${response_file}"
     DEPENDS ${dod_files} ${_gen_DOU_FILES} ${_gen_NAMESPACE_MAPPINGS}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMENT "Generating code for safir_generated-${_gen_NAME}")

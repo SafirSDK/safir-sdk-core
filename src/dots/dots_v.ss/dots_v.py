@@ -33,11 +33,6 @@ import codecs
 import argparse
 
 try:
-    import ConfigParser
-except ImportError:
-    import configparser as ConfigParser
-
-try:
     from StringIO import StringIO
 except ImportError:
     from io import StringIO
@@ -1682,7 +1677,12 @@ def main():
 
     arguments = None
 
-    parser = argparse.ArgumentParser(description='Source code generator tool for Safir SDK Core. Processes .dou files into source code for all supported languages. Files are generated in language specific subdirectories of root path of processed dou files.')
+    parser = argparse.ArgumentParser(fromfile_prefix_chars = "@",
+                                     description="Source code generator tool for Safir SDK Core. Processes "
+                                                 ".dou files into source code for all supported languages. "
+                                                 "Files are generated in language specific subdirectories "
+                                                 "of root path of processed dou files.\n"
+                                                 "Use @<file name> to read arguments from a file.")
 
     parser.add_argument('--dou-files',
                         metavar='DOU_FILE(S)',
