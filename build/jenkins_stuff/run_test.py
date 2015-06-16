@@ -329,6 +329,7 @@ def build_examples():
     olddir = os.getcwd()
     dirs = (("examples" , None),
             ("src/dots/dots_dobmake.ss/tests/tree" , None),
+            ("src/dots/dots_dobmake.ss/tests/many_dous" , None),
             ("src/dots/dots_dobmake.ss/tests/separate_dirs/dous_1" , os.path.join(olddir, "inst")))
     #We don't test the dous_2 and dous_3 builds, since it is just too fiddly to get automated.
 
