@@ -6,6 +6,12 @@
 # Also defines a function SAFIR_JAVAH which is described below.
 #
 
+#TODO: write about this in users guide
+if (NOT "$ENV{SAFIR_DONT_BUILD_JAVA}" STREQUAL "")
+  SET(Java_FOUND Java-NOTFOUND)
+  return()
+endif()
+
 set(Java_FIND_QUIETLY True)
 find_package(Java COMPONENTS Development Runtime)
 if (Java_Development_FOUND AND Java_Runtime_FOUND)
