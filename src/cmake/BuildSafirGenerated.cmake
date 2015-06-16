@@ -221,6 +221,11 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
     --library-name ${_gen_NAME}
     --output-path=${CMAKE_CURRENT_BINARY_DIR}/generated_code)
 
+  list(LENGTH _gen_DOU_FILES _gen_DOU_FILES_length)
+  if (_gen_DOU_FILES_length GREATER 100)
+    list(APPEND dots_v_arguments --multiprocess)
+  endif()
+
   #write the command to a response file, since there may be maaaannnyyy dou
   #files and windows has problems with long command lines
   SET (response_file "${CMAKE_CURRENT_BINARY_DIR}/command_line_dots_v_${_gen_NAME}.rsp")

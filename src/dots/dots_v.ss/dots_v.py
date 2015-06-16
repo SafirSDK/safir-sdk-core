@@ -1668,12 +1668,11 @@ def main():
 
     # version dependent features
     support_multicpu = True
-    if sys.version_info[0] == 3:
-        support_multicpu = False
 
-        # if ((sys.version_info[1] == 3 and sys.version_info[2] >= 2)) or (sys.version_info[1] > 3) or (sys.version_info[1] == 2 and sys.version_info[2] >= 5):
-        #    # This was introduced due to http://bugs.python.org/issue16076, which was resolved in 3.3.2
-        #    support_multicpu = True
+    #some versions of python do not work with multiprocess
+    #See http://bugs.python.org/issue16076, we play it safe and disallow versions between 3.0 and 3.4
+    if sys.version_info[0] == 3 and sys.version_info[1] < 4:
+        support_multicpu = False
 
     arguments = None
 
