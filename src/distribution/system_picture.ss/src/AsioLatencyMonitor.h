@@ -79,7 +79,7 @@ namespace Internal
                                    const auto latency = boost::chrono::duration_cast<boost::chrono::milliseconds>
                                        (boost::chrono::steady_clock::now() - m_timer.expires_at());
 
-                                   if (latency > boost::chrono::milliseconds(1000))
+                                   if (latency > m_tolerance)
                                    {
                                        SEND_SYSTEM_LOG(Warning, << "Boost.Asio latency for '"
                                                        << m_identifier.c_str() << "' is at " << latency
@@ -93,7 +93,11 @@ namespace Internal
         }
 
         const std::string m_identifier;
-
+#ifdef NDEBUG
+        const boost::chrono::milliseconds m_tolerance{1000};
+#else
+        const boost::chrono::milliseconds m_tolerance{5000};
+#endif
         boost::asio::io_service::strand& m_strand;
         boost::asio::steady_timer m_timer;
 
