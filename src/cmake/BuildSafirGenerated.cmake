@@ -159,8 +159,8 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
   foreach (dou ${_gen_DOU_FILES})
     get_filename_component(douname ${dou} NAME)
     string (REGEX REPLACE "([a-zA-Z\\.0-9]*)\\.dou" "\\1" base_name ${douname})
-    set (cpp_files ${cpp_files} generated_code/cpp/${base_name}.cpp)
-    set (dotnet_files ${dotnet_files} "${CMAKE_CURRENT_BINARY_DIR}/generated_code/dotnet/${base_name}.cs")
+    set (cpp_files ${cpp_files} gen/cpp/${base_name}.cpp)
+    set (dotnet_files ${dotnet_files} "${CMAKE_CURRENT_BINARY_DIR}/gen/dotnet/${base_name}.cs")
 
 
     string (REGEX REPLACE "^([a-zA-Z\\.0-9]*)\\.[a-zA-Z0-9]+$" "\\1" namespace ${base_name})
@@ -175,7 +175,7 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
     string (TOLOWER ${namespace} java_namespace)
     string (REPLACE "." "/" java_path ${java_namespace})
     set (java_files ${java_files}
-      "${CMAKE_CURRENT_BINARY_DIR}/generated_code/java/src/${java_path}/${java_base_name}.java")
+      "${CMAKE_CURRENT_BINARY_DIR}/gen/java/src/${java_path}/${java_base_name}.java")
   endforeach()
 
   ##############
@@ -219,7 +219,7 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
     --namespace-mappings ${_gen_NAMESPACE_MAPPINGS}
     --dependencies ${DOTS_V_DEPS}
     --library-name ${_gen_NAME}
-    --output-path=${CMAKE_CURRENT_BINARY_DIR}/generated_code)
+    --output-path=${CMAKE_CURRENT_BINARY_DIR}/gen)
 
   list(LENGTH _gen_DOU_FILES _gen_DOU_FILES_length)
   if (_gen_DOU_FILES_length GREATER 100)
@@ -242,8 +242,8 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMENT "Generating code for safir_generated-${_gen_NAME}")
 
-  #make clean target remove the generated_code directory
-  SET_DIRECTORY_PROPERTIES(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES generated_code)
+  #make clean target remove the gen directory
+  SET_DIRECTORY_PROPERTIES(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES gen)
 
   #We need a custom target that the library (java,cpp,dotnet) targets can depend on, since
   #having them all just depend on the output files will wreak havoc with cmake in parallel builds.
@@ -282,7 +282,7 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
   ADD_LIBRARY(safir_generated-${_gen_NAME}-cpp SHARED ${cpp_files})
 
   target_include_directories(safir_generated-${_gen_NAME}-cpp
-    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/generated_code/cpp/include>)
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/gen/cpp/include>)
 
   #add safir include dirs.
   if (SAFIR_EXTERNAL_BUILD)
@@ -323,7 +323,7 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
 
   #put the include files in a target property
   set_property(TARGET ${_gen_NAME}-dou PROPERTY
-    CXX_INCLUDE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/generated_code/cpp/include/)
+    CXX_INCLUDE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/gen/cpp/include/)
 
   ############
 

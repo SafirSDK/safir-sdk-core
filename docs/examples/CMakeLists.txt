@@ -33,4 +33,4 @@ INSTALL(
   PATTERN "Release" EXCLUDE
   PATTERN "RelWithDebInfo" EXCLUDE
   PATTERN "MinSizeRel" EXCLUDE
-  PATTERN "generated_code" EXCLUDE)
+  PATTERN "gen" EXCLUDE)
