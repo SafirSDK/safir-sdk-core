@@ -2,14 +2,14 @@ cmake_minimum_required(VERSION 2.8.12)
 
 find_package(SafirSDKCore REQUIRED)
 
-#This is a testcase that generates lots of dou files with very long file names, to ensure
+#This is a testcase that generates lots of dou files to check
 #that long command lines etc work.
 
 foreach (i RANGE 1000)
-  file (WRITE "ManyDous.With.LongNames.Object${i}.xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.dou"
+  file (WRITE "ManyDous.Object${i}.dou"
     "<?xml version=\"1.0\" encoding=\"utf-8\" ?>\n"
     "<class xmlns=\"urn:safir-dots-unit\">\n"
-    "  <name>ManyDous.With.LongNames.Object${i}.xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</name>\n"
+    "  <name>ManyDous.Object${i}</name>\n"
     "  <baseClass>Object</baseClass>\n"
     "  <members>\n"
     "    <member>\n"
