@@ -1,6 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2005-2013 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2015 (http://www.consoden.se)
 *
 * Created by: Henrik Sundberg / sthesu
 *
@@ -29,6 +30,7 @@ using System;
 /// </summary>
 class DotsTestDotnet
 {
+
     /// <summary>
     /// The main entry point for the application.
     /// </summary>
@@ -102,9 +104,10 @@ class DotsTestDotnet
         Test_IsEnumeration();
         Test_IsException();
         Test_GetDouFilePath();
-        TestSequences();
-        TestDictionaries();
+        Test_Sequences();
+        Test_Dictionaries();
         Test_DeserializeUnlinkedObject();
+        Test_DeepClone();
     }
 
     private static void Test_IsException()
@@ -7792,7 +7795,7 @@ class DotsTestDotnet
         Console.WriteLine("isChanged: "+ms.HandlerIdMember.IsChanged().ToString().ToLower());
     }
 
-    private static void TestSequences()
+    private static void Test_Sequences()
     {
         Header("Sequences");
 
@@ -7958,7 +7961,7 @@ class DotsTestDotnet
         }
     }
 
-    private static void TestDictionaries()
+    private static void Test_Dictionaries()
     {
         Header("Dictionaries");
 
@@ -8014,4 +8017,53 @@ class DotsTestDotnet
         var fromJson = Safir.Dob.Typesystem.Serialization.ToObjectFromJson (json) as DotsTest.MemberDictionaries;
         PrintDictionaries(fromJson);
     }
+
+    private static void Test_DeepClone()
+    {
+        {
+            DotsTest.MemberTypes mt = new DotsTest.MemberTypes();
+            DotsTest.MemberTypes mtc = mt.DeepClone();
+            mt.Int32Member.Val = 10;
+            mt.Kelvin64Member.Val = 10;
+            if (!mtc.Int32Member.IsNull() || !mtc.Kelvin64Member.IsNull())
+            {
+                System.Console.WriteLine("Clone Error");
+            }
+        }
+        
+        {
+            DotsTest.MemberArrays ma = new DotsTest.MemberArrays();
+            DotsTest.MemberArrays mac = ma.DeepClone();
+            ma.Int32Member[1].Val = 10;
+            ma.Kelvin64Member[0].Val = 10;
+            if (!mac.Int32Member[1].IsNull() || !mac.Kelvin64Member[0].IsNull())
+            {
+                System.Console.WriteLine("Clone Error");
+            }
+        }
+
+        {
+            DotsTest.MemberSequences ms = new DotsTest.MemberSequences ();
+            DotsTest.MemberSequences msc = ms.DeepClone();
+            ms.Int32Member.Add(20);
+            ms.Kelvin64Member.Add(20);
+            if (msc.Int32Member.Count != 0 || msc.Kelvin64Member.Count != 0)
+            {
+                System.Console.WriteLine("Clone Error");
+            }
+        }
+
+        {
+            DotsTest.MemberDictionaries md=new DotsTest.MemberDictionaries();
+            DotsTest.MemberDictionaries mdc = md.DeepClone();
+
+            md.Int32StringMember.Add (10, "Rude word");
+            if (mdc.Int32StringMember.Count != 0)
+            {
+                System.Console.WriteLine("Clone Error");
+            }
+        }
+
+    }
+
 }

@@ -1,6 +1,7 @@
 /* ****************************************************************************
 *
 * Copyright Saab AB, 2005-2013 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2015 (http://www.consoden.se)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -183,12 +184,24 @@ namespace Safir.Dob.Typesystem
         }
 
         /// <summary>
-        ///
+        /// Get a hash code for a StringContainer.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>a hash code</returns>
         public override int GetHashCode()
         {
-            throw new System.Exception("The method or operation is not implemented.");
+            unchecked // Overflow is fine, just wrap
+            {
+                int hash = 17;
+
+                hash = hash * 486187739 + m_bIsNull.GetHashCode();
+                hash = hash * 486187739 + m_bIsChanged.GetHashCode();
+                if (!m_bIsNull)
+                {
+                    hash = hash * 486187739 + m_Value.GetHashCode();
+                }
+
+                return hash;
+            }
         }
 
         /// <summary>
@@ -198,7 +211,28 @@ namespace Safir.Dob.Typesystem
         /// <returns></returns>
         public override bool Equals(object obj)
         {
-            throw new System.Exception("The method or operation is not implemented.");
+            StringContainer sc = obj as StringContainer;
+            if (sc == null)
+            {
+                return false;
+            }
+
+            if (IsChanged() != sc.IsChanged())
+            {
+                return false;
+            }
+
+            if (IsNull() && sc.IsNull())
+            {
+                return true;
+            }
+
+            if (IsNull() != sc.IsNull())
+            {
+                return false;
+            }
+
+            return m_Value.Equals(sc.m_Value);
         }
 
 

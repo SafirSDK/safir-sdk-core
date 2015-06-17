@@ -1,6 +1,7 @@
 @@-------------------------------------------------------------------------------
 @@--
 @@--  Copyright Saab AB, 2005-2013 (http://safir.sourceforge.net)
+@@--  Copyright Consoden AB, 2015 (http://www.consoden.se)
 @@--
 @@--  Created by: Henrik Sundberg / sthesu
 @@--
@@ -1512,19 +1513,19 @@ namespace @_NAMESPACE_@
             { return !(second == first); }
 
             /// <summary>
-            /// Has no useful implementation.
+            /// Get a hash code for the container.
             /// </summary>
             public override int GetHashCode()
             {
-                throw new System.Exception("The method or operation is not implemented.");
+                return base.GetHashCode();
             }
 
             /// <summary>
-            /// Has no useful implementation.
+            /// Compare container.
             /// </summary>
             public override bool Equals(object obj)
             {
-                throw new System.Exception("The method or operation is not implemented.");
+                return base.Equals(obj);
             }
         }
 

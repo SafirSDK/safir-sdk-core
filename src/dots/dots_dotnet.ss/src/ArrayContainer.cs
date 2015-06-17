@@ -219,8 +219,6 @@ namespace Safir.Dob.Typesystem
 
         #endregion
 
-        
-
         #region Private data
 
         private System.Collections.Generic.List<T> m_Array;

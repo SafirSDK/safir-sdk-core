@@ -1,6 +1,7 @@
 /* ****************************************************************************
 *
 * Copyright Saab AB, 2005-2013 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2015 (http://www.consoden.se)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -75,6 +76,59 @@ namespace Safir.Dob.Typesystem
         {
             m_bIsNull = true;
             m_bIsChanged = true;
+        }
+
+
+        /// <summary>
+        /// Not implementd!
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        public override bool Equals(object obj)
+        {
+            EnumerationContainerBase ecb = obj as EnumerationContainerBase;
+            if (ecb == null)
+            {
+                return false;
+            }
+
+            if (IsChanged() != ecb.IsChanged())
+            {
+                return false;
+            }
+
+            if (IsNull() && ecb.IsNull())
+            {
+                return true;
+            }
+
+            if (IsNull() != ecb.IsNull())
+            {
+                return false;
+            }
+
+            return m_Value.Equals(ecb.m_Value);
+        }
+
+        /// <summary>
+        /// Get a hash code for an EnumerationContainerBase.
+        /// </summary>
+        /// <returns>a hash code</returns>
+        public override int GetHashCode()
+        {
+            unchecked // Overflow is fine, just wrap
+            {
+                int hash = 17;
+
+                hash = hash * 486187739 + m_bIsNull.GetHashCode();
+                hash = hash * 486187739 + m_bIsChanged.GetHashCode();
+                if (!m_bIsNull)
+                {
+                    hash = hash * 486187739 + m_Value.GetHashCode();
+                }
+
+                return hash;
+            }
         }
 
         internal override void ShallowCopy(ContainerBase other)

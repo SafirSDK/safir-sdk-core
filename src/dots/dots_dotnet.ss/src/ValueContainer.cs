@@ -1,6 +1,7 @@
 /* ****************************************************************************
 *
 * Copyright Saab AB, 2005-2013 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2015 (http://www.consoden.se)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -92,7 +93,7 @@ namespace Safir.Dob.Typesystem
         /// <param name="first">First value to compare.</param>
         /// <param name="second">Second value to compare.</param>
         /// <returns>True if the container is non-null and the values are equal.</returns>
-        public static bool operator ==(ValueContainer<T> first, T second)
+        public static bool operator==(ValueContainer<T> first, T second)
         {
             // If both are null, or both are same instance, return true.
             if (System.Object.ReferenceEquals(first, second))
@@ -144,22 +145,55 @@ namespace Safir.Dob.Typesystem
         }
 
         /// <summary>
-        /// Not implementd!
-        /// </summary>
-        /// <returns></returns>
-        public override int GetHashCode()
-        {
-            throw new System.Exception("The method or operation is not implemented.");
-        }
-
-        /// <summary>
-        /// Not implementd!
+        /// Compare two ValueContainers for equality.
         /// </summary>
         /// <param name="obj"></param>
         /// <returns></returns>
         public override bool Equals(object obj)
         {
-            throw new System.Exception("The method or operation is not implemented.");
+            ValueContainer<T> vc = obj as ValueContainer<T>;
+            if (vc == null)
+            {
+                return false;
+            }
+
+            if (IsChanged() != vc.IsChanged())
+            {
+                return false;
+            }
+
+            if (IsNull() && vc.IsNull())
+            {
+                return true;
+            }
+
+            if (IsNull() != vc.IsNull())
+            {
+                return false;
+            }
+
+            return m_Value.Equals(vc.m_Value);
+        }
+
+        /// <summary>
+        /// Get a hash code for a ValueContainer.
+        /// </summary>
+        /// <returns>a hash code</returns>
+        public override int GetHashCode()
+        {
+            unchecked // Overflow is fine, just wrap
+            {
+                int hash = 17;
+
+                hash = hash * 486187739 + m_bIsNull.GetHashCode();
+                hash = hash * 486187739 + m_bIsChanged.GetHashCode();
+                if (!m_bIsNull)
+                {
+                    hash = hash * 486187739 + m_Value.GetHashCode();
+                }
+
+                return hash;
+            }
         }
 
         internal override void ShallowCopy(ContainerBase other)
