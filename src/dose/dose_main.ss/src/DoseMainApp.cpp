@@ -177,13 +177,16 @@ namespace Internal
         m_pendingRegistrationHandler.reset(new PendingRegistrationHandler(m_ioService,
                                                                           *m_distribution));
 
+        m_nodeInfoHandler.reset(new NodeInfoHandler(m_ioService, *m_distribution));
+
         m_connectionHandler.reset(new ConnectionHandler(m_ioService,
                                                         *m_distribution,
                                                         [this](const ConnectionPtr& connection, bool disconnecting){OnAppEvent(connection, disconnecting);},
                                                         [this](int64_t tid){m_pendingRegistrationHandler->CheckForPending(tid);},
+                                                        [this]{m_nodeInfoHandler->Start();},
                                                         [this](const std::string& str){LogStatus(str);}));
 
-        m_nodeInfoHandler.reset(new NodeInfoHandler(m_ioService, *m_distribution));
+
     }
 
     void DoseMainApp::InjectNode(const std::string& nodeName,

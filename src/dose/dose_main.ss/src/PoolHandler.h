@@ -48,6 +48,7 @@ namespace Internal
         PoolHandler(boost::asio::io_service::strand& strand,
                     Distribution& distribution,
                     const std::function<void(int64_t)>& checkPendingReg,
+                    const std::function<void()>& connectAllowedCb,  // Called when ok for normal connections to connect
                     const std::function<void(const std::string& str)>& logStatus);
 
         void Start();
@@ -67,6 +68,7 @@ namespace Internal
         boost::asio::io_service::strand& m_strand;
         boost::asio::steady_timer m_endStatesTimer;
         Distribution& m_distribution;
+        std::function<void()> m_connectAllowedCb;
         std::function<void(const std::string& str)> m_log;
         PoolDistributionHandlerType m_poolDistributor;
         PoolDistributionRequestSenderType m_poolDistributionRequests;

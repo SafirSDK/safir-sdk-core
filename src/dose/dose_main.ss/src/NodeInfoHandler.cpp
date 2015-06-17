@@ -38,43 +38,51 @@ namespace Internal
 {
     NodeInfoHandler::NodeInfoHandler(boost::asio::io_service& ioService,
                                      const Distribution& distribution)
-        : m_dispatcher(m_connection, ioService)
+        : m_dispatcher(m_connection, ioService),
+          m_distribution(distribution)
     {
-        m_connection.Open(L"dose_main",
-                          L"NodeInfoHandler",
-                          0,
-                          nullptr,
-                          &m_dispatcher);
+    }
 
-        m_connection.RegisterEntityHandler(Dob::NodeInfo::ClassTypeId,
-                                           Typesystem::HandlerId(distribution.GetNodeId()),
-                                           Safir::Dob::InstanceIdPolicy::HandlerDecidesInstanceId,
-                                           this);
+    void NodeInfoHandler::Start()
+    {
+        m_dispatcher.Strand().post([this]
+        {
+            m_connection.Open(L"DoseMain",  // Note the name. We want this to be handled as a normal connection.
+                              L"NodeInfoHandler",
+                              0,
+                              nullptr,
+                              &m_dispatcher);
 
-        Dob::NodeInfoPtr ni = Dob::NodeInfo::Create();
+            m_connection.RegisterEntityHandler(Dob::NodeInfo::ClassTypeId,
+                                               Typesystem::HandlerId(m_distribution.GetNodeId()),
+                                               Safir::Dob::InstanceIdPolicy::HandlerDecidesInstanceId,
+                                               this);
 
-        ni->NodeName().SetVal(ThisNodeParameters::Name());
+            Dob::NodeInfoPtr ni = Dob::NodeInfo::Create();
 
-        //extract the address from data we get from Communication.
-        //The value we get from DataAddress ends with :port, so
-        //we need to strip that.
-        const auto address = distribution.GetCommunication().DataAddress();
-        const auto ip = address.substr(0,address.find_last_of(":"));
-        ni->IpAddress().SetVal(Safir::Dob::Typesystem::Utilities::ToWstring(ip));
+            ni->NodeName().SetVal(ThisNodeParameters::Name());
 
-        ni->NodeType().SetVal(ThisNodeParameters::NodeType());
+            //extract the address from data we get from Communication.
+            //The value we get from DataAddress ends with :port, so
+            //we need to strip that.
+            const auto address = m_distribution.GetCommunication().DataAddress();
+            const auto ip = address.substr(0,address.find_last_of(":"));
+            ni->IpAddress().SetVal(Safir::Dob::Typesystem::Utilities::ToWstring(ip));
 
-        m_connection.SetAll(ni,
-                            Typesystem::InstanceId(distribution.GetNodeId()),
-                            Typesystem::HandlerId(distribution.GetNodeId()));
+            ni->NodeType().SetVal(ThisNodeParameters::NodeType());
+
+            m_connection.SetAll(ni,
+                                Typesystem::InstanceId(m_distribution.GetNodeId()),
+                                Typesystem::HandlerId(m_distribution.GetNodeId()));
+        });
     }
 
     void NodeInfoHandler::Stop()
     {
         m_dispatcher.Strand().dispatch([this]
-                                       {
-                                           m_connection.Close();
-                                       });
+        {
+            m_connection.Close();
+        });
     }
 
 

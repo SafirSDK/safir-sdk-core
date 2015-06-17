@@ -44,10 +44,12 @@ namespace Internal
     PoolHandler::PoolHandler(boost::asio::io_service::strand& strand,
                              Distribution& distribution,
                              const std::function<void(int64_t)>& checkPendingReg,
+                             const std::function<void()>& connectAllowedCb,
                              const std::function<void(const std::string& str)>& logStatus)
         :m_strand(strand)
         ,m_endStatesTimer(m_strand.get_io_service())
         ,m_distribution(distribution)
+        ,m_connectAllowedCb(connectAllowedCb)
         ,m_log(logStatus)
         ,m_poolDistributor(m_strand.get_io_service(), m_distribution)
         ,m_poolDistributionRequests(m_strand.get_io_service(), m_distribution.GetCommunication())
@@ -309,6 +311,7 @@ namespace Internal
             m_poolDistributor.Start();
             Connections::Instance().AllowConnect(-1);
             Connections::Instance().AllowConnect(0);
+            m_connectAllowedCb();
         }
     }
 

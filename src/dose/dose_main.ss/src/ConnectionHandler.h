@@ -66,6 +66,7 @@ namespace Internal
                           Distribution& distribution,
                           const std::function<void(const ConnectionPtr& connection, bool disconnecting)>& onAppEvent,
                           const std::function<void(int64_t)>& checkPendingReg,
+                          const std::function<void()>& connectAllowedCb,
                           const std::function<void(const std::string& str)>& logStatus);
 
         void Start();
