@@ -219,6 +219,7 @@ namespace Internal
         boost::shared_ptr<void> guard =
                 boost::shared_ptr<void>(static_cast<void*>(NULL),
                                         boost::bind(&WaitingStates::UnsetPerformingFlag,this,_1));
+
         m_isPerforming = true;
 
         const Key key(registrationState.GetTypeId(), registrationState.GetHandlerId(),registrationState.GetRegistrationTime());
@@ -234,6 +235,38 @@ namespace Internal
             }
 
             m_waitingStateTable.erase(findIt);
+        }
+    }
+
+    void WaitingStates::SanityCheck()
+    {
+        for (auto& element : m_waitingStateTable)
+        {
+            if (element.second.sanityCounter == 0)
+            {
+                // The sanity method hasn't seen this state before
+                ++element.second.sanityCounter;
+            }
+            else
+            {
+                // This state was here the last time this method was executed.
+                std::wostringstream ostr;
+                ostr << "One or more items seem to be stuck in WaitingStates! "
+                     << "If the system is artificially stopped when debugging or testing this "
+                     << "warning can be ignored.\n"
+                     << "ConnectionId=" << element.second.connectionId << "\n"
+                     << "registrationState=" << element.second.registrationState.state.Image() << "\n"
+                     << "entityStates=\n";
+                for (const auto& entityState : element.second.entityStates)
+                {
+                    ostr << entityState.state.Image() << "\n";
+                }
+                Safir::Utilities::Internal::Log::Send(Safir::Utilities::Internal::Log::Warning,
+                                                      ostr.str());
+
+                lllog(1) << ostr.str() << std::endl;
+            }
+
         }
     }
 }

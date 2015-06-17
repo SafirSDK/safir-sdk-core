@@ -53,6 +53,7 @@ namespace Internal
         ,m_poolDistributionRequests(m_strand.get_io_service(), m_distribution.GetCommunication())
         ,m_persistHandler(m_strand.get_io_service(), distribution, logStatus, [=]{OnPersistenceReady();}, // persistentDataReadyCb
                                                        [=]{Connections::Instance().AllowConnect(-1);}) // persistentDataAllowedCb
+        ,m_waitingStatesSanityTimer(m_strand.get_io_service())
     {
         auto injectNode=[=](const std::string&, int64_t id, int64_t nt, const std::string&)
         {
@@ -113,7 +114,10 @@ namespace Internal
         //create one StateDistributor per nodeType
         for (auto& nt : distribution.GetNodeTypeConfiguration().nodeTypesParam)
         {
-            auto sd=std::unique_ptr<StateDistributorType >(new StateDistributorType(nt.id, distribution, m_strand, checkPendingReg));
+            auto sd=std::unique_ptr<StateDistributorType>(new StateDistributorType(nt.id,
+                                                                                   distribution,
+                                                                                   m_strand,
+                                                                                   checkPendingReg));
             m_stateDistributors.emplace(nt.id, std::move(sd));
         }
     }
@@ -143,11 +147,12 @@ namespace Internal
 
     void PoolHandler::Start()
     {
-        m_strand.dispatch([=]
+        m_strand.post([=]
         {
             m_persistHandler.Start();
 
             RunEndStatesTimer();
+            RunWaitingStatesSanityCheckTimer();
 
             //request pool distributions
             m_poolDistributionRequests.Start(m_strand.wrap([=]
@@ -169,6 +174,7 @@ namespace Internal
         m_strand.post([=]
         {
             m_endStatesTimer.cancel();
+            m_waitingStatesSanityTimer.cancel();
 
             m_persistHandler.Stop();
 
@@ -215,7 +221,7 @@ namespace Internal
     {
         m_strand.post([this, connId]
         {
-             m_waitingStates.Disconnect(connId);
+            m_waitingStates.Disconnect(connId);
         });
     }
 
@@ -261,7 +267,7 @@ namespace Internal
     void PoolHandler::OnRegistrationState(int64_t fromNodeId, int64_t fromNodeType, const char* data, size_t /*size*/)
     {
         m_strand.post([=]
-        {
+        {            
             const auto state=DistributionData::ConstConstructor(new_data_tag, data);
             DistributionData::DropReference(data);
 
@@ -320,6 +326,20 @@ namespace Internal
         }));
     }
 
+    void PoolHandler::RunWaitingStatesSanityCheckTimer()
+    {
+        m_waitingStates.SanityCheck();
+
+        m_waitingStatesSanityTimer.expires_from_now(boost::chrono::seconds(30));
+        m_waitingStatesSanityTimer.async_wait(m_strand.wrap([=](const boost::system::error_code& error)
+        {
+            if (!error)
+            {
+                RunWaitingStatesSanityCheckTimer();
+            }
+        }));
+    }
+
     void PoolHandler::HandleStatesWaitingForRegistration(const DistributionData& registrationState)
     {
         m_waitingStates.PerformStatesWaitingForRegistration
@@ -337,7 +357,6 @@ namespace Internal
     {
         if (state.IsRegistered()) //is a registration state
         {
-            lllog(1)<<"OnRegistrationState - "<<Safir::Dob::Typesystem::Operations::GetName(state.GetTypeId())<<", handler "<<state.GetHandlerId()<<std::endl;
             const ConnectionId senderId=state.GetSenderId();
 
             ENSURE(senderId.m_id != -1, << "Registration states are expected to have ConnectionId != -1! Reg for type "
@@ -418,7 +437,6 @@ namespace Internal
             break;
         case DistributionData::Real:
             {
-                lllog(1)<<"OnEntityState - "<<state.GetEntityId().ToString()<<", handler "<<state.GetHandlerId()<<std::endl;
                 if (state.IsCreated()) //handle created and delete states differently
                 {
                     const ConnectionId senderId=state.GetSenderId();

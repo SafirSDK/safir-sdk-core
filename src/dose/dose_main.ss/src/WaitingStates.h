@@ -70,6 +70,9 @@ namespace Internal
         void PerformStatesWaitingForRegistration(const DistributionData & registrationState,
                                                  const ProcessStateFunc& processFunc);
 
+        /** Performs a sanity check that states are not left in the structure forever. */
+        void SanityCheck();
+
     private:
         struct State
         {
@@ -85,9 +88,12 @@ namespace Internal
 
         struct States
         {
+            States(): sanityCounter(0) {}
+
             ConnectionId connectionId;
             State registrationState;
             EntityStates entityStates;
+            unsigned int sanityCounter;
         };
 
         struct Key

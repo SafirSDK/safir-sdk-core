@@ -72,6 +72,7 @@ namespace Internal
         PoolDistributionRequestSenderType m_poolDistributionRequests;
         PersistHandler m_persistHandler;
         WaitingStates m_waitingStates;
+        boost::asio::steady_timer m_waitingStatesSanityTimer;
 
         std::unordered_map<int64_t, int64_t> m_nodes; //map<nodeId, nodeType>
         std::unordered_map<int64_t, std::unique_ptr<StateDistributorType> > m_stateDistributors; //map<nodeType, StateDistributor>
@@ -84,6 +85,7 @@ namespace Internal
 
         void SignalPdComplete();
         void RunEndStatesTimer();
+        void RunWaitingStatesSanityCheckTimer();
 
         //when a new registration arrives a list of waiting states need to be checked
         //to see if there are any states that need to be "set".

@@ -83,7 +83,11 @@ namespace
                 if (state.GetType()==DistributionData::Action_Connect)
                 {
                     lllog(4)<<"ConnectionHandler - AddConnection "<<state.GetConnectionName()<<std::endl;
-                    Connections::Instance().AddConnection(state.GetConnectionName(), state.GetCounter(), state.GetSenderId().m_contextId, state.GetSenderId());
+                    Connections::Instance().AddConnection(state.GetConnectionName(),
+                                                          state.GetCounter(),
+                                                          state.GetSenderId().m_contextId,
+                                                          state.GetSenderId());
+                    m_poolHandler.HandleConnect(state.GetSenderId());
                 }
                 else if (state.GetType()==DistributionData::Action_Disconnect)
                 {
@@ -91,6 +95,7 @@ namespace
                     const ConnectionPtr connection = Connections::Instance().GetConnection(state.GetSenderId(), std::nothrow);
                     m_onAppEvent(connection, true);
                     Connections::Instance().RemoveConnection(connection);
+                    m_poolHandler.HandleDisconnect(state.GetSenderId());
                 }
             });
         }, ConnectionMessageDataTypeId, [=](size_t s){return DistributionData::NewData(s);});
