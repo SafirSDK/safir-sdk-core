@@ -143,21 +143,6 @@ namespace Sate
             unsavedScenario = true;
         }
 
-        //private void pausbutton_Click(object sender, System.EventArgs e)
-        //{
-        //    MessageBox.Show("Not implemented");
-        //    status = Status.Paused;
-        //    this.statusBar.Text = "Paused";
-        //    if (status == Status.Recording)
-        //    {
-        //        OutputPanel.Instance.LogEvent("- Recording paused", true);
-        //    }
-        //    else if (status == Status.Playing)
-        //    {
-        //        OutputPanel.Instance.LogEvent("- Playback paused", true);
-        //    }
-        //}
-
         private void BuildScenario()
         {
             ArrayList scn = new ArrayList();

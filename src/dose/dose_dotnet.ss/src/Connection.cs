@@ -73,7 +73,7 @@ namespace Safir.Dob
         /// <param name="connectionNameCommonPart">Name that identifies the program but not any particular
         ///                                        program instance.</param>
         /// <param name="connectionNameInstancePart">Name that identifies a particular program instance.</param>
-        /// <param name="context">Context functionality not implemented yet!</param>
+        /// <param name="context">Context of the connection</param>
         /// <param name="stopHandler">Object that implements the StopHandler interface.</param>
         /// <param name="dispatcher">Object that implements the Dispatcher interface.</param>
         /// <exception cref="Safir.Dob.NotOpenException">The connection name is already used by someone else.
