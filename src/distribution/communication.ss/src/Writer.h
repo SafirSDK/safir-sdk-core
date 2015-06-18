@@ -254,7 +254,7 @@ namespace Com
             if (m_multicastEnabled)
             {
                 m_multicastEndpoint=Resolver::StringToEndpoint(multicastAddress);
-                m_socket.set_option(boost::asio::ip::multicast::outbound_interface(Resolver::StringToEndpoint(localIf).address().to_v4())); //TODO: Test this code with IP6 and figure out how to specify outbound_if for ip6
+                m_socket.set_option(boost::asio::ip::multicast::outbound_interface(Resolver::StringToEndpoint(localIf).address().to_v4()));
                 m_socket.set_option(boost::asio::ip::multicast::enable_loopback(true));
                 m_socket.set_option(boost::asio::ip::multicast::join_group(m_multicastEndpoint.address()));
             }

@@ -305,7 +305,6 @@ extern "C"
                                                        const DotsC_Int32 * & classMemberReference, //out
                                                        DotsC_Int32 & classMemberReferenceSize); //out
 
-    //Todo: Impelement and consider remove  PropertyParam-methods    
     DOTS_KERNEL_API void DotsC_GetPropertyParameterReference(const DotsC_TypeId typeId,
                                                              const DotsC_TypeId propertyId,
                                                              const DotsC_MemberIndex member,
