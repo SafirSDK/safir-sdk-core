@@ -35,6 +35,7 @@
 #include <Safir/Dob/ConnectionAspectMisc.h>
 #include <Safir/Dob/NodeInfo.h>
 #include <Safir/Dob/ThisNodeParameters.h>
+#include <Safir/Dob/NotFoundException.h>
 
 #ifdef _MSC_VER
   #pragma warning(push)
@@ -395,10 +396,23 @@ void Executor::HandleSequencerState(const DoseTest::SequencerPtr& sequencer)
             using namespace Safir::Dob;
             using namespace Safir::Dob::Typesystem;
             const auto nodeId = ConnectionAspectMisc(m_controlConnection).GetNodeId();
-            partner->Address() = boost::static_pointer_cast<NodeInfo>
-                (m_controlConnection.Read(EntityId(NodeInfo::ClassTypeId,
-                                                   InstanceId(nodeId))).
-                 GetEntity())->IpAddress();
+
+            // Wait for NodeInfo to be available
+            for(;;)
+            {
+                try
+                {
+                    partner->Address() = boost::static_pointer_cast<NodeInfo>
+                                         (m_controlConnection.Read(EntityId(NodeInfo::ClassTypeId,
+                                                                            InstanceId(nodeId))).
+                                          GetEntity())->IpAddress();
+                    break;
+                }
+                catch (const Safir::Dob::NotFoundException&)
+                {
+                    boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
+                }
+            }
         }
 
         m_controlConnection.SetAll(partner, m_partnerEntityId.GetInstanceId(),
