@@ -36,6 +36,12 @@ namespace Safir
 {
 namespace Databases
 {
+/**
+ * This namespace contains ODBC database support for Safir SDK Core. All functionality in
+ * this namespace is currently deprecated.
+ *
+ * @deprecated All functionality in the Safir::Databases::Odbc namespace is deprecated.
+ */
 namespace Odbc
 {
 class Environment;
@@ -47,10 +53,13 @@ class Statement;
 #pragma warning(disable: 4251)
 #endif
 
-/** The Connection class models a connection made to the database engine.
-    An application should have one connection object per connection and in
-    ODBC one connection can only process one statement at the time. All
-    Connections needs to be allocated and deallocated before use.
+/**
+ * The Connection class models a connection made to the database engine.
+ * An application should have one connection object per connection and in
+ * ODBC one connection can only process one statement at the time. All
+ * Connections needs to be allocated and deallocated before use.
+ *
+ * @deprecated All functionality in the Safir::Databases::Odbc namespace is deprecated.
 */
 class OLIB_API Connection : private boost::noncopyable
 {

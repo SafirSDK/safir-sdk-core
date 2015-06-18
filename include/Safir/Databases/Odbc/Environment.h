@@ -43,10 +43,13 @@ namespace Odbc
 #pragma warning(disable: 4275)
 #endif
 
-/** The Environment class models the necessary setup each application neeeds
-    in order to access the database. Only one Environment is necessary in a
-    application and all environments needs to be Allocated and Deallocated
-    before use.
+/**
+ * The Environment class models the necessary setup each application neeeds
+ * in order to access the database. Only one Environment is necessary in a
+ * application and all environments needs to be Allocated and Deallocated
+ * before use.
+ *
+ * @deprecated All functionality in the Safir::Databases::Odbc namespace is deprecated.
 */
 class OLIB_API Environment : private boost::noncopyable
 {

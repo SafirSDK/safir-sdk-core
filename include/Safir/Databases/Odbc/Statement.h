@@ -53,10 +53,13 @@ namespace Odbc
 #pragma warning(disable: 4275)
 #endif
 
-/** The Statement class models a statement made to the database engine
-    and one statement object should be made for each statement or query
-    to the database. All statements needs to be Allocated and Deallocated
-    at connect and disconnect.
+/**
+ * The Statement class models a statement made to the database engine
+ * and one statement object should be made for each statement or query
+ * to the database. All statements needs to be Allocated and Deallocated
+ * at connect and disconnect.
+ *
+ * @deprecated All functionality in the Safir::Databases::Odbc namespace is deprecated.
 */
 class OLIB_API Statement : private boost::noncopyable
 {
