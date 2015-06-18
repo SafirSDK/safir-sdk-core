@@ -1,8 +1,6 @@
 /******************************************************************************
 *
-* Copyright Alex Burtsev, 2012-2013
-*
-* License: "do whatever you want with code".
+* This code is in the Public Domain.
 *
 * https://stackoverflow.com/questions/129389/how-do-you-do-a-deep-copy-an-object-in-net-c-specifically/
 *
