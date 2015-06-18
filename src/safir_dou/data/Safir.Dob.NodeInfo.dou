@@ -8,7 +8,7 @@
             <summary>The name of the node.</summary>
             <name>NodeName</name>
             <type>String</type>
-            <maxLength>256</maxLength>
+            <maxLengthRef><name>Safir.Dob.NodeParameters.MaxNodeNameLength</name></maxLengthRef>
         </member>
         <member>
             <summary>The Ip address used by the node.</summary>
@@ -20,7 +20,7 @@
             <summary>The node type of the node.</summary>
             <name>NodeType</name>
             <type>String</type>
-            <maxLength>256</maxLength>
+            <maxLengthRef><name>Safir.Dob.NodeParameters.MaxNodeNameLength</name></maxLengthRef>
         </member>
     </members>
 </class>

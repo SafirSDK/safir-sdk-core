@@ -23,6 +23,12 @@
       <value>1000</value>
     </parameter>
     <parameter>
+      <summary>Maximum string length of a node name and node type name.</summary>
+      <name>MaxNodeNameLength</name>
+      <type>Int32</type>
+      <value>256</value>
+    </parameter>
+    <parameter>
       <summary>Determines if an unrecoverable error, typically an abondoned locked shared memory lock, causes a termination of dose_main. Consider setting this parameter to false when running dose_main under a debugger</summary>
       <name>TerminateDoseMainWhenUnrecoverableError</name>
       <type>Boolean</type>

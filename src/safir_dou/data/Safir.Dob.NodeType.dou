@@ -8,7 +8,7 @@
             <summary>Name of the node type.</summary>
             <name>Name</name>
             <type>String</type>
-            <maxLength>80</maxLength>
+            <maxLengthRef><name>Safir.Dob.NodeParameters.MaxNodeNameLength</name></maxLengthRef>
         </member>
         <member>
             <summary>Is the node type a 'light' node type?</summary>
