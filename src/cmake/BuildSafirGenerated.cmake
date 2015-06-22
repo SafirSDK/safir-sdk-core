@@ -269,7 +269,7 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
       OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/precompiled_header_for_cpp.cpp
       COMMAND ${CMAKE_COMMAND} -E echo "//This is an automatically generated file." > ${CMAKE_CURRENT_BINARY_DIR}/precompiled_header_for_cpp.cpp
       COMMAND ${CMAKE_COMMAND} -E echo "#include <precompiled_header_for_cpp.h>" >> ${CMAKE_CURRENT_BINARY_DIR}/precompiled_header_for_cpp.cpp
-      COMMENT "Creating precompiled_header_for_cpp.cpp for ${TARGET_NAME}"
+      COMMENT "Creating precompiled_header_for_cpp.cpp for ${_gen_NAME}"
       VERBATIM)
     list (APPEND cpp_files ${CMAKE_CURRENT_BINARY_DIR}/precompiled_header_for_cpp.cpp)
   endif()
