@@ -285,10 +285,11 @@ class Results:
 
         tcnos = list(set(expected_output[0].keys()))
         tcnos.sort()
-        self.write_test_result(len (set(tcnos) - set(output[0].keys())) == 0,
-                               "all_tests_performed",
-                               "The following tests appear to not have been run: "+
-                               str(sorted(list(set(tcnos) - set(output[0].keys())))))
+        if parameters.single_testcase is None:
+            self.write_test_result(len (set(tcnos) - set(output[0].keys())) == 0,
+                                   "all_tests_performed",
+                                   "The following tests appear to not have been run: "+
+                                   str(sorted(list(set(tcnos) - set(output[0].keys())))))
         self.write_test_result(len (set(output[0].keys())- set(tcnos)) == 0,
                                "all_tests_have_results",
                                "The following tests appear to not to be listed in expected outputs: "+
@@ -634,7 +635,7 @@ def main():
         else:
             log("!!",results.num_tc_failed, "testcases appear to have failed!")
 
-        if results.num_tc_performed<20:
+        if results.num_tc_performed<20 and parameters.single_testcase is None:
             log("!! Less than 20 testcases seem to have been performed, this is a sign of trouble!")
             return 1
 
