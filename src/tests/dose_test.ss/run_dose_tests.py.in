@@ -362,7 +362,7 @@ class Runner:
         log("** Starting safir_control and partners", str(partners))
         self.safir_control = self.__launchProcess("safir_control.0",
                                                   parameters.safir_control_cmd +
-                                                  ("--force-id", ("888888" if self.slave else "999999")))
+                                                  ("--force-id", ("888888" if parameters.slave else "999999")))
 
         self.__launchProcess("dope_main.0", parameters.dope_main_cmd)
         self.__launchProcess("foreach.0", parameters.foreach_cmd)
