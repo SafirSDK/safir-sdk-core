@@ -82,13 +82,15 @@ class Parameters:
         parser.add_option("--jenkins", action="store_true",dest="jenkins",default=False,
                           help="Set up the needed environment variables for a Jenkins automated build," +
                           "and respect the langX matrix variables")
-        parser.add_option("--autostart-slave", action="store_true", dest="autostart_slave",default=False,
-                          help="Automatically start a multinode slave (Server_1) through jenkins." +
-                          "This is only applicable when using --multinode, and is implied when using --jenkins")
         parser.add_option("--multinode", action="store_true",dest="multinode",default=False,
                           help="Run multinode tests instead of standalone tests. Both nodes are run on this computer.")
-        #parser.add_option("--slave", action="store_true",dest="slave",default=False,
-        #                  help="Be a multinode slave")
+        parser.add_option("--multicomputer", action="store_true",dest="multicomputer",default=False,
+                          help="Run multicomputer tests instead of standalone tests.")
+        parser.add_option("--autostart-slave", action="store_true", dest="autostart_slave",default=False,
+                          help="Automatically start a multicomputer slave (Server_1) through jenkins." +
+                          "This is only applicable when using --multicomputer, and is implied when using --jenkins")
+        parser.add_option("--slave", action="store_true",dest="slave",default=False,
+                          help="Be a multicomputer slave")
         parser.add_option("--no-syslog", action="store_false",dest="check_syslog",default=True,
                           help="Do not check syslog output")
         parser.add_option("--no-java", action="store_true",dest="no_java",default=False,
@@ -112,20 +114,21 @@ class Parameters:
         self.lang2 = options.lang2
 
         self.multinode = options.multinode
-        #self.slave = options.slave
+        self.multicomputer = options.multicomputer
+        self.slave = options.slave
         self.check_syslog = options.check_syslog
-        self.standalone = not options.multinode # and not options.slave
+        self.standalone = not options.multinode and not options.multicomputer and not options.slave
 
         self.no_java = options.no_java
 
-        #if options.autostart_slave and not self.multinode:
-        #    log("--autostart-slave can only be used together with --multinode")
-        #    sys.exit(1)
-        #if options.slave and options.multinode:
-        #    log("Don't specify both --slave and --multinode")
-        #    sys.exit(1)
+        if options.autostart_slave and not self.multicomputer:
+            log("--autostart-slave can only be used together with --multinode")
+            sys.exit(1)
+        if options.slave and options.multicomputer:
+            log("Don't specify both --slave and --multinode")
+            sys.exit(1)
 
-        #self.autostart_jenkins_slave = options.autostart_slave or (options.jenkins and self.multinode)
+        self.autostart_jenkins_slave = options.autostart_slave or (options.jenkins and self.multicomputer)
 
         if options.jenkins:
             #make stdout unbuffered for more direct output in jenkins log
@@ -153,24 +156,23 @@ class Parameters:
         self.test_data_directory = os.path.join(install_dir, "@SAFIR_INSTALL_DESTINATION_TEST_DATA@")
         log(self.test_data_directory)
 
+        if self.standalone:
+            config = "standalone"
+        elif self.multinode or self.slave:
+            config = "multinode"
+        elif self.multicomputer:
+            config = "multicomputer"
+
         #Set up to use our own test configuration
         os.environ["SAFIR_TEST_CONFIG_OVERRIDE"] = os.path.join(self.test_data_directory,
                                                                 "dose",
                                                                 "test_config",
-                                                                "standalone" if self.standalone else "multinode")
+                                                                config)
 
         jar_install_path = os.path.join(install_dir,
                                         "@SAFIR_INSTALL_DESTINATION_JAR@")
 
-        self.safir_control_cmd = ("safir_control",
-                                  "--dose-main-path",
-                                  os.path.join(install_dir,
-                                               "bin",
-                                               "dose_main" + (".exe" if sys.platform == "win32" else "")))
-        #if self.slave:
-        #    self.safir_control_cmd += ("--force-id", "888888")
-        #else:
-        #    self.safir_control_cmd += ("--force-id", "999999")
+        self.safir_control_cmd = ("safir_control",)
 
         self.dope_main_cmd = ("dope_main",)
         self.foreach_cmd = ("foreach",)
@@ -193,7 +195,7 @@ class Parameters:
             self.dose_test_sequencer_cmd += ("--first", options.single_testcase,
                                              "--last", options.single_testcase)
 
-        if self.multinode:
+        if self.multinode or self.multicomputer:
             self.dose_test_sequencer_cmd += ("--multinode",)
 
         self.expected_output_path = os.path.join(self.test_data_directory,
@@ -347,14 +349,15 @@ class Runner:
 
         if parameters.standalone:
             partners = (0,1,2)
-        elif parameters.multinode:
+        elif parameters.multinode or parameters.multicomputer:
             partners = (0,1)
-        #else: #slave
-        #    partners = (2,)
+        else: #slave
+            partners = (2,)
 
         log("** Starting safir_control and partners", str(partners))
         self.safir_control = self.__launchProcess("safir_control.0",
-                                                  parameters.safir_control_cmd + ("--force-id", "999999"))
+                                                  parameters.safir_control_cmd +
+                                                  ("--force-id", ("888888" if self.slave else "999999")))
 
         self.__launchProcess("dope_main.0", parameters.dope_main_cmd)
         self.__launchProcess("foreach.0", parameters.foreach_cmd)
@@ -604,9 +607,9 @@ def main():
 
     parameters = Parameters()
 
-    #if parameters.autostart_jenkins_slave:
-    #    jenkinsController = JenkinsController(parameters)
-    #    jenkinsController.start_slave()
+    if parameters.autostart_jenkins_slave:
+        jenkinsController = JenkinsController(parameters)
+        jenkinsController.start_slave()
 
     runner = Runner()
     results = Results()
@@ -614,18 +617,18 @@ def main():
     completed = False
     try:
         runner.initialize(parameters)
-        #if parameters.slave:
-        #    runner.wait_for_safir_control()
-        #else:
-        runner.run_sequencer(parameters)
+        if parameters.slave:
+            runner.wait_for_safir_control()
+        else:
+            runner.run_sequencer(parameters)
         completed = True
     except:
         log("exception occurred!")
         traceback.print_exc()
 
     runner.killprocs(results)
-    #if parameters.autostart_jenkins_slave:
-    #    jenkinsController.stop_slave()
+    if parameters.autostart_jenkins_slave:
+        jenkinsController.stop_slave()
 
     if completed:
         results.check_output(parameters)

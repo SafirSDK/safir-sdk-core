@@ -1,0 +1,90 @@
+<class xmlns="urn:safir-dots-unit">
+  <summary>Contains paramaters for all nodes in the system.</summary>
+  <name>Safir.Dob.NodeParameters</name>
+  <baseClass>Safir.Dob.Parametrization</baseClass>
+  <parameters>
+    <parameter>
+      <summary>Specifies the Id of the System/System installation.</summary>
+      <name>SystemId</name>
+      <type>InstanceId</type>
+      <value>StandAlone</value>
+    </parameter>
+    <parameter>
+      <summary>Specifies the amount of shared memory to allocate for the Dob distribution (in megabytes)</summary>
+      <name>SharedMemorySize</name>
+      <type>Int32</type>
+      <value>100</value>
+    </parameter>
+    <parameter>
+      <summary>This controls how many connections the local Dob instance can handle.</summary>
+      <name>MaxNumberOfConnections</name>
+      <type>Int32</type>
+      <value>1000</value>
+    </parameter>
+    <parameter>
+      <summary>Maximum string length of a node name and node type name.</summary>
+      <name>MaxNodeNameLength</name>
+      <type>Int32</type>
+      <value>256</value>
+    </parameter>
+    <parameter>
+      <summary>Determines if an unrecoverable error, typically an abondoned locked shared memory lock, causes a termination of dose_main. Consider setting this parameter to false when running dose_main under a debugger</summary>
+      <name>TerminateDoseMainWhenUnrecoverableError</name>
+      <type>Boolean</type>
+      <value>True</value>
+    </parameter>
+    <parameter>
+      <summary>Min time (seconds) before an apparently hanging dose_main thread causes a termination of the dose_main program.</summary>
+      <name>DoseMainThreadWatchdogTimeout</name>
+      <type>Int32</type>
+      <value>180</value>
+    </parameter>
+    <parameter>
+      <summary>The number of contexts in the system. (The context numbering starts from 0.)</summary>
+      <name>NumberOfContexts</name>
+      <type>Int32</type>
+      <value>2</value>
+    </parameter>
+    <parameter>
+      <summary>Specifies for every context wether or not it is a local context. The array length must correspond to the NumberOfContexts parameter above.</summary>
+      <name>LocalContexts</name>
+      <type>Boolean</type>
+      <arrayElements>
+        <arrayElement>
+          <value>False</value>
+        </arrayElement>
+        <arrayElement>
+          <value>False</value>
+        </arrayElement>
+      </arrayElements>
+    </parameter>
+
+    <parameter>
+      <summary>Defines the different node types in the system. Can be an empty array if standalone configuration.</summary>
+      <name>NodeTypes</name>
+      <type>Safir.Dob.NodeType</type>
+      <arrayElements>
+
+        <arrayElement>
+          <Safir.Dob.NodeType type="Safir.Dob.NodeType">
+            <Name>Server</Name>
+            <IsLight>False</IsLight>
+            <TalksTo></TalksTo>
+            <MulticastAddressControl>224.11.11.11:23000</MulticastAddressControl>
+            <MulticastAddressData>224.11.11.11:24000</MulticastAddressData>
+            <HeartbeatInterval>0.7</HeartbeatInterval>
+            <MaxLostHeartbeats>7</MaxLostHeartbeats>
+            <SlidingWindowsSize>10</SlidingWindowsSize>
+            <RetryTimeout>0.02</RetryTimeout>
+            <WantedTypes>
+              <String>.*</String> <!-- Must be all types for non IsLight node -->
+            </WantedTypes>
+            <UnwantedTypes></UnwantedTypes> <!-- Can't be specified for non IsLight node -->
+          </Safir.Dob.NodeType>
+        </arrayElement>
+
+      </arrayElements>
+    </parameter>
+
+  </parameters>
+</class>
