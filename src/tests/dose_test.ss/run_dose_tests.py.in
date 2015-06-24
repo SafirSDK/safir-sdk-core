@@ -200,7 +200,7 @@ class Parameters:
 
         self.expected_output_path = os.path.join(self.test_data_directory,
                                                  "dose",
-                                                 "output_multinode" if self.multinode else "output_standalone")
+                                                 "output_standalone" if self.standalone else "output_multinode")
 
         #this is needed for multicomputer tests
         self.tempdir = tempfile.mkdtemp(prefix="dose_test_backup")
