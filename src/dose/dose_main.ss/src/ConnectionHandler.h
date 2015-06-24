@@ -54,9 +54,6 @@ namespace Internal
     {
         class Communication;
     }
-    class RequestHandler;
-    class PendingRegistrationHandler;
-    class NodeHandler;
 
     class ConnectionHandler:
         private boost::noncopyable
@@ -66,7 +63,6 @@ namespace Internal
                           Distribution& distribution,
                           const std::function<void(const ConnectionPtr& connection, bool disconnecting)>& onAppEvent,
                           const std::function<void(int64_t)>& checkPendingReg,
-                          const std::function<void()>& connectAllowedCb,
                           const std::function<void(const std::string& str)>& logStatus);
 
         void Start();
@@ -84,7 +80,6 @@ namespace Internal
         std::atomic_bool m_connectionOutEvent;
         std::atomic_bool m_handleEventsNotified;
 
-        // Process info
         PoolHandler m_poolHandler;
         ProcessInfoHandler m_processInfoHandler;
 

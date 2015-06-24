@@ -49,8 +49,6 @@ namespace Internal
         NodeInfoHandler(boost::asio::io_service& ioService,
                         const Distribution& distribution);
 
-        void Start();
-
         void Stop();
     private:
         void OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId    typeId,

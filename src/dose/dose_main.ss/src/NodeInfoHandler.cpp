@@ -41,10 +41,6 @@ namespace Internal
         : m_dispatcher(m_connection, ioService),
           m_distribution(distribution)
     {
-    }
-
-    void NodeInfoHandler::Start()
-    {
         m_dispatcher.Strand().post([this]
         {
             m_connection.Open(L"DoseMain",  // Note the name. We want this to be handled as a normal connection.

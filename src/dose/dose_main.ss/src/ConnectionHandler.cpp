@@ -46,12 +46,11 @@ namespace
                                          Distribution& distribution,
                                          const std::function<void(const ConnectionPtr& connection, bool disconnecting)>& onAppEvent,
                                          const std::function<void(int64_t)>& checkPendingReg,
-                                         const std::function<void()>& connectAllowedCb,  // Called when ok for normal connections to connect
                                          const std::function<void(const std::string& str)>& logStatus)
         : m_strand(ioService),
           m_communication(distribution.GetCommunication()),
           m_onAppEvent(onAppEvent),
-          m_poolHandler(m_strand, distribution, checkPendingReg, connectAllowedCb, logStatus),
+          m_poolHandler(m_strand, distribution, checkPendingReg, logStatus),
           m_processInfoHandler(ioService, distribution)
     {
         distribution.SubscribeNodeEvents(

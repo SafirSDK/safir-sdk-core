@@ -66,21 +66,24 @@ namespace Internal
                            },
                            boost::chrono::seconds(1))
     {
-        m_connection.Open(L"dose_main",L"ProcessInfoHandler",0,nullptr,&m_dispatcher);
-
-        if (!distribution.IsLocal(Dob::ProcessInfo::ClassTypeId))
+        m_strand.dispatch([this,&distribution]
         {
-            throw Dob::Typesystem::ConfigurationErrorException
-                (L"Entity ProcessInfo must have DistributionChannelProperty (or Override) set to Local",__WFILE__,__LINE__);
-        }
+            m_connection.Open(L"dose_main",L"ProcessInfoHandler",0,nullptr,&m_dispatcher);
 
-        // Register ProcessInfo class
-        m_connection.RegisterEntityHandler(Dob::ProcessInfo::ClassTypeId,
-                                           Typesystem::HandlerId(),
-                                           Dob::InstanceIdPolicy::HandlerDecidesInstanceId,
-                                           this);
+            if (!distribution.IsLocal(Dob::ProcessInfo::ClassTypeId))
+            {
+                throw Dob::Typesystem::ConfigurationErrorException
+                    (L"Entity ProcessInfo must have DistributionChannelProperty (or Override) set to Local",__WFILE__,__LINE__);
+            }
 
-        AddOwnConnection();
+            // Register ProcessInfo class
+            m_connection.RegisterEntityHandler(Dob::ProcessInfo::ClassTypeId,
+                                               Typesystem::HandlerId(),
+                                               Dob::InstanceIdPolicy::HandlerDecidesInstanceId,
+                                               this);
+
+            AddOwnConnection();
+        });
     }
 
 

@@ -29,7 +29,6 @@
 #include "ConnectionHandler.h"
 #include "Distribution.h"
 #include "MessageHandler.h"
-#include "NodeInfoHandler.h"
 #include "MemoryMonitor.h"
 #include "PendingRegistrationHandler.h"
 #include "RequestHandler.h"
@@ -110,7 +109,6 @@ namespace Internal
         std::unique_ptr<MessageHandler>      m_messageHandler;
         std::unique_ptr<RequestHandler>      m_requestHandler;
         std::unique_ptr<ConnectionHandler>   m_connectionHandler;
-        std::unique_ptr<NodeInfoHandler>     m_nodeInfoHandler;
 
         //Pending Registrations
         std::unique_ptr<PendingRegistrationHandler> m_pendingRegistrationHandler;

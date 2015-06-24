@@ -30,6 +30,7 @@
 #include "PoolDistribution.h"
 #include "StateDistributor.h"
 #include "PersistHandler.h"
+#include "NodeInfoHandler.h"
 
 namespace Safir
 {
@@ -48,7 +49,6 @@ namespace Internal
         PoolHandler(boost::asio::io_service::strand& strand,
                     Distribution& distribution,
                     const std::function<void(int64_t)>& checkPendingReg,
-                    const std::function<void()>& connectAllowedCb,  // Called when ok for normal connections to connect
                     const std::function<void(const std::string& str)>& logStatus);
 
         void Start();
@@ -68,7 +68,6 @@ namespace Internal
         boost::asio::io_service::strand& m_strand;
         boost::asio::steady_timer m_endStatesTimer;
         Distribution& m_distribution;
-        std::function<void()> m_connectAllowedCb;
         std::function<void(const std::string& str)> m_log;
         PoolDistributionHandlerType m_poolDistributor;
         PoolDistributionRequestSenderType m_poolDistributionRequests;
@@ -84,6 +83,10 @@ namespace Internal
         bool m_poolDistributionComplete=false;
         bool m_pdCompleteSignaled=false;
         int m_numReceivedPdComplete=0;
+
+        //The NodeInfoHandler can not be started until we have pd complete
+        //so the PoolHandler has to own it.
+        std::unique_ptr<NodeInfoHandler> m_nodeInfoHandler;
 
         void SignalPdComplete();
         void RunEndStatesTimer();
