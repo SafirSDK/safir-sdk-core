@@ -158,9 +158,9 @@ class Parameters:
 
         if self.standalone:
             config = "standalone"
-        elif self.multinode or self.slave:
+        elif self.multinode:
             config = "multinode"
-        elif self.multicomputer:
+        elif self.multicomputer or self.slave:
             config = "multicomputer"
 
         #Set up to use our own test configuration
@@ -450,7 +450,7 @@ class Runner:
 
     def wait_for_safir_control(self):
         self.safir_control.wait()
-        if hasattr(self,safir_control_1):
+        if hasattr(self,"safir_control_1"):
             self.safir_control_1.wait()
 
 class JenkinsInterface:
