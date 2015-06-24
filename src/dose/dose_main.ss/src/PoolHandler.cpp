@@ -173,7 +173,10 @@ namespace Internal
     {
         m_strand.post([=]
         {
-            m_nodeInfoHandler->Stop();
+            if (m_nodeInfoHandler != nullptr)
+            {
+                m_nodeInfoHandler->Stop();
+            }
 
             m_endStatesTimer.cancel();
             m_waitingStatesSanityTimer.cancel();
