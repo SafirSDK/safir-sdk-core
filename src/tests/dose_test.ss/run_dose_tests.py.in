@@ -357,6 +357,7 @@ class Runner:
         elif parameters.multinode or parameters.multicomputer:
             partners = (0,1)
         else: #slave
+            os.environ["SAFIR_INSTANCE"] = "1"
             partners = (2,)
 
         log("** Starting safir_control and partners", str(partners))
