@@ -629,7 +629,7 @@ def main():
             runner.wait_for_safir_control()
         else:
             runner.run_sequencer(parameters)
-        completed = True
+            completed = True
     except:
         log("exception occurred!")
         traceback.print_exc()
