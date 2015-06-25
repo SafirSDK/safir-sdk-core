@@ -397,7 +397,7 @@ def main():
 
     try:
         if not args.skip_install:
-            development = True #TODO: args.test == "build-examples"
+            development = args.test == "build-examples"
             testsuite = args.test != "build-examples"
 
             installer.install(development,testsuite)
