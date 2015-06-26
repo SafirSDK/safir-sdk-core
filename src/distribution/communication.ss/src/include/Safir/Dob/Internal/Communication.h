@@ -47,6 +47,21 @@ namespace Com
      */
     struct NodeTypeDefinition
     {
+
+        NodeTypeDefinition() {}
+
+        NodeTypeDefinition( int64_t id_, std::string name_, std::string controlMulticastAddress_, std::string dataMulticastAddress_,
+                            int heartbeatInterval_, int retryTimeout_, int maxLostHeartbeats_) 
+                            : id(id_)
+                            , name(name_)
+                            , controlMulticastAddress(controlMulticastAddress_)
+                            , dataMulticastAddress(dataMulticastAddress_)
+                            , heartbeatInterval(heartbeatInterval_)
+                            , retryTimeout(retryTimeout_)
+                            , maxLostHeartbeats(maxLostHeartbeats_)
+                            {
+                            }
+
         int64_t id;                             //node type id
         std::string name;                       //unique readable name
         std::string controlMulticastAddress;    //multicast address including port number, 'address:port' empty string if not multicast enabled

@@ -303,7 +303,7 @@ namespace Internal
 
         private:
             friend class EntityTypes;
-            EntityIterator() = default;
+            EntityIterator() {};
 
             ContextId m_connectionContext;  // The context of the connection that initiated the iteration
             TypeIdVector m_remainingTypes;

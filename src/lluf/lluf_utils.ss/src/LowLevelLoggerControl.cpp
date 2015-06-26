@@ -35,7 +35,10 @@ namespace Utilities
 {
 namespace Internal
 {
-    LowLevelLoggerControl::LowLevelLoggerControl()
+    LowLevelLoggerControl::LowLevelLoggerControl() :
+		m_logLevel(0),
+        m_timestamps(true),
+        m_ignoreFlush(false)
     {
         const auto configReader = Safir::Utilities::Internal::ConfigReader();
         m_logLevel = configReader.Logging().get<int>("LowLevelLog.log_level");

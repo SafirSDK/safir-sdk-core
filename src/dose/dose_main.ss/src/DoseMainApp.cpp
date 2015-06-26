@@ -56,10 +56,12 @@ namespace Internal
     }
 
     DoseMainApp::DoseMainApp(boost::asio::io_service& ioService):
+        m_stopped(false),
         m_ioService(ioService),
         m_strand(ioService),
         m_wcoutStrand(ioService),
         m_work(new boost::asio::io_service::work(ioService)),
+        m_nodeId(0),
         m_distribution(),
         m_cmdReceiver(ioService,
                       m_strand.wrap([this](const std::string& nodeName,

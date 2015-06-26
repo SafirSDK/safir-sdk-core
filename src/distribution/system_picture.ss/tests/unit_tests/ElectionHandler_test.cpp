@@ -288,6 +288,10 @@ struct Node
                      incarnationId = incarnationId_;
                  }
              })
+        , electedNode(0)
+        , electionId(0)
+        , incarnationId(0)
+        , removed(false)
     {
         SAFE_BOOST_TEST_MESSAGE("Create node " << id);
     }
@@ -317,18 +321,19 @@ struct Node
     Communication comm;
     ElectionHandlerBasic<Communication> eh;
 
-    int64_t electedNode = 0;
-    int64_t electionId = 0;
+    int64_t electedNode;
+    int64_t electionId;
 
-    int64_t incarnationId = 0;
+    int64_t incarnationId;
 
-    bool removed = false;
+    bool removed;
 
 };
 
 struct Fixture
 {
-    Fixture()
+    Fixture() 
+        : nextNodeId(10)
     {
         SAFE_BOOST_TEST_MESSAGE("Set up fixture");
         const auto seed = static_cast<unsigned int>(time(nullptr));
@@ -447,7 +452,7 @@ struct Fixture
 
     boost::asio::io_service ioService;
 
-    int nextNodeId = 10;
+    int nextNodeId;
     std::vector<std::unique_ptr<Node>> nodes;
 };
 

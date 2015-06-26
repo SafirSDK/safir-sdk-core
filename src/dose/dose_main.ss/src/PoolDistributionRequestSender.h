@@ -62,7 +62,8 @@ namespace Internal
     public:
         PoolDistributionRequestSender(boost::asio::io_service& io,
                                   CommunicationT& communication)
-            :m_strand(io)
+            :m_running(false)
+            ,m_strand(io)
             ,m_communication(communication)
         {
         }
@@ -98,7 +99,7 @@ namespace Internal
         {
             m_strand.post([=]
             {
-                m_requests.push_back({nodeId, nodeTypeId, false});
+                m_requests.push_back(PdReq(nodeId, nodeTypeId, false));
                 SendPoolDistributionRequests();
             });
         }
@@ -133,12 +134,19 @@ namespace Internal
 #endif
         struct PdReq
         {
+            PdReq(int64_t nodeId_, int64_t nodeType_, bool sent_) 
+                : nodeId(nodeId_)
+                , nodeType(nodeType_)
+                , sent(sent_)
+            {
+            }
+
             int64_t nodeId;
             int64_t nodeType;
             bool sent;
         };
 
-        bool m_running=false;
+        bool m_running;
 
         boost::asio::io_service::strand m_strand;
         CommunicationT& m_communication;

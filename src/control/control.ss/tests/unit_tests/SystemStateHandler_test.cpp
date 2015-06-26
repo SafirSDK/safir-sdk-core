@@ -120,7 +120,7 @@ SystemState::Node ownNode("OwnNode",
                           "192.168.0.2",
                           false);
 
-using TestSystemStateHandler = SystemStateHandlerBasic<SystemState>;
+typedef SystemStateHandlerBasic<SystemState> TestSystemStateHandler;
 
 BOOST_AUTO_TEST_CASE( callback_order )
 {

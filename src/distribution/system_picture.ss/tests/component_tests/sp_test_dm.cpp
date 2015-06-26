@@ -138,10 +138,11 @@ public:
                        Safir::Dob::Internal::Com::Communication& communication,
                        const std::string& suicideTrigger)
         : m_strand(ioService)
-        , m_injectedNodes({id}) //consider ourselves already injected
+        , m_injectedNodes( [] (const int64_t id) { std::set<int64_t> s; s.insert(id); return s;}(id) ) //consider ourselves already injected
         , m_communication(communication)
         , m_trigger(suicideTrigger)
         , m_suicideTimer(ioService)
+        , m_suicideScheduled(false)
     {
 
     }
@@ -342,7 +343,7 @@ private:
     std::map<int64_t, bool> m_triggerHistory;
 
     boost::asio::steady_timer m_suicideTimer;
-    bool m_suicideScheduled = false;
+    bool m_suicideScheduled;
     std::function<void()> m_stopHandler;
 };
 
@@ -369,13 +370,13 @@ int main(int argc, char * argv[])
     std::vector<Safir::Dob::Internal::Com::NodeTypeDefinition> commNodeTypes;
     std::map<int64_t, Safir::Dob::Internal::SP::NodeType> spNodeTypes;
 
-    commNodeTypes.push_back({1,
-                "NodeTypeA",
-                "", //no multicast
-                "", //no multicast
-                1000,
-                20,
-                15});
+    commNodeTypes.push_back(Safir::Dob::Internal::Com::NodeTypeDefinition(1,
+                                                                          "NodeTypeA",
+                                                                          "", //no multicast
+                                                                          "", //no multicast
+                                                                          1000,
+                                                                          20,
+                                                                          15));
 
     spNodeTypes.insert(std::make_pair(1,
                                       Safir::Dob::Internal::SP::NodeType(1,
@@ -385,13 +386,13 @@ int main(int argc, char * argv[])
                                                                          15,
                                                                          boost::chrono::milliseconds(20))));
 
-    commNodeTypes.push_back({2,
-                "NodeTypeB",
-                "", //no multicast
-                "", //no multicast
-                2000,
-                50,
-                8});
+    commNodeTypes.push_back(Safir::Dob::Internal::Com::NodeTypeDefinition(2,
+                                                                          "NodeTypeB",
+                                                                          "", //no multicast
+                                                                          "", //no multicast
+                                                                          2000,
+                                                                          50,
+                                                                          8));
 
     spNodeTypes.insert(std::make_pair(2,
                                       Safir::Dob::Internal::SP::NodeType(2,
@@ -515,7 +516,7 @@ int main(int argc, char * argv[])
                                  return;
                              }
 
-                             if (error)
+                             if (!!error) //fix for ws2012 warning
                              {
                                  SEND_SYSTEM_LOG(Error,
                                                  << "Got a signals error: " << error);
@@ -529,7 +530,7 @@ int main(int argc, char * argv[])
 
     ssh.SetStopHandler(stopFcn);
 
-    std::atomic<bool> success {true};
+    std::atomic<bool> success = true;
 
     const auto run = [&ioService,&success]
         {

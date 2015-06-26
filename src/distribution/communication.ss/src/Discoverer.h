@@ -65,6 +65,12 @@ namespace Com
                         int sendInterval,
                         const std::function<void(const Node&)>& onNewNode)
             :WriterType(ioService, Resolver::Protocol(me.unicastAddress))
+            ,m_running(false)
+            ,m_seeds()
+            ,m_nodes()
+            ,m_reportedNodes()
+            ,m_incompletedNodes()
+            ,m_excludedNodes()
             ,m_strand(ioService)
             ,m_me(me)
             ,m_onNewNode(onNewNode)
@@ -228,7 +234,7 @@ namespace Com
     private:
 #endif
         static const int DiscovererLogLevel=2;
-        bool m_running {false};
+        bool m_running;
 
         //Constant defining how many nodes that can be sent in a singel NodeInfo message without risking that fragmentSize is exceeded.
         //The stuff in CommunicationMessage+NodeInfo is less than 30 bytes plus sent_from_node, and each individual Node (also sent_from_node) is less than 100 bytes.
@@ -237,11 +243,11 @@ namespace Com
         static const int NodeInfoFixedSize=30+NodeInfoPerNodeSize;
         static const int NumberOfNodesPerNodeInfoMsg=(Parameters::FragmentSize-NodeInfoFixedSize)/NodeInfoPerNodeSize;
 
-        NodeMap m_seeds{}; //id generated from ip:port
-        NodeMap m_nodes{}; //known nodes
-        NodeMap m_reportedNodes{}; //nodes only heard about from others, never talked to
-        std::map<int64_t, std::vector<bool> > m_incompletedNodes{}; //talked to but still haven't received all node info from this node
-        std::set<int64_t> m_excludedNodes{};
+        NodeMap m_seeds; //id generated from ip:port
+        NodeMap m_nodes; //known nodes
+        NodeMap m_reportedNodes; //nodes only heard about from others, never talked to
+        std::map<int64_t, std::vector<bool> > m_incompletedNodes; //talked to but still haven't received all node info from this node
+        std::set<int64_t> m_excludedNodes;
         boost::asio::io_service::strand m_strand;
         Node m_me;
         std::function<void(const Node&)> m_onNewNode;

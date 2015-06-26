@@ -50,6 +50,12 @@ namespace Internal
 
     struct Msg
     {
+        Msg( boost::shared_ptr<char[]> data_,  uint32_t size_ )
+            : data(data_)
+            , size(size_)
+        {
+        }
+
         boost::shared_ptr<char[]>   data;
         uint32_t                    size;
     };
@@ -83,7 +89,7 @@ namespace Internal
         void Send(boost::shared_ptr<char[]> msg, uint32_t msgSize)
         {
             bool writeInProgress = !m_msgQueue.empty();
-            m_msgQueue.push_back({msg, msgSize});
+            m_msgQueue.push_back(Msg(msg, msgSize));
             if (m_msgQueue.size() > 1000)
             {
                 throw std::logic_error("IpcSession send message queue overflow.");
@@ -109,8 +115,8 @@ namespace Internal
 
             const Msg& msg = m_msgQueue.front(); // make alias to increase readability
 
-            buffers.push_back({&msg.size, sizeof(msg.size)}); // header
-            buffers.push_back({msg.data.get(), msg.size});    // msg data
+            buffers.push_back(boost::asio::const_buffer(&msg.size, sizeof(msg.size))); // header
+            buffers.push_back(boost::asio::const_buffer(msg.data.get(), msg.size));    // msg data
 
             boost::asio::async_write(*m_streamPtr,
                                      buffers,

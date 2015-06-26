@@ -328,6 +328,14 @@ public:
 class RawHandlerStub
 {
 public:
+
+    RawHandlerStub()
+        : rawCb()
+        , electedId()
+        , electionId(0)
+        , deadNodes()
+    {}
+
     void SetElectionId(const int64_t nodeId_, const int64_t electionId_)
     {
         electedId = nodeId_;
@@ -352,8 +360,8 @@ public:
 
     StatisticsCallback rawCb;
 
-    int64_t electedId = 0;
-    int64_t electionId = 0;
+    int64_t electedId;
+    int64_t electionId;
 
     std::set<int64_t> deadNodes;
 };
@@ -371,6 +379,9 @@ public:
                                                  const int64_t electionId)>& electionCompleteCallback_,
                         const std::function<void(const int64_t incarnationId)>& /*setIncarnationIdCallback_*/)
         : id(id_)
+        , electedId(0)
+        , stopped(false)
+        , nodesChangedCalled(false)
         , electionCompleteCallback(electionCompleteCallback_)
     {
         lastInstance = this;
@@ -402,10 +413,10 @@ public:
     }
 
     const int64_t id;
-    int64_t electedId = 0;
+    int64_t electedId;
 
-    bool stopped = false;
-    bool nodesChangedCalled = false;
+    bool stopped;
+    bool nodesChangedCalled;
 
     const std::function<void(const int64_t nodeId,
                              const int64_t electionId)> electionCompleteCallback;

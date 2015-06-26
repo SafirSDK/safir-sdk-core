@@ -131,11 +131,11 @@ namespace Internal
         void RemovePendingRequest(const int64_t blockingConn, const InternalRequestId& requestId);
         bool ReceiverHasOtherPendingRequest(const int64_t receiver, const InternalRequestId& requestId) const;
 
-        using PendingRequest = std::pair<DistributionData, std::unique_ptr<boost::asio::steady_timer>>;
+        typedef std::pair<DistributionData, std::unique_ptr<boost::asio::steady_timer>> PendingRequest;
 
-        using PendingRequestsQueue = std::deque<PendingRequest>;
+        typedef std::deque<PendingRequest> PendingRequestsQueue;
 
-        using PendingRequestTable = boost::unordered_map<int64_t, PendingRequestsQueue>;
+        typedef boost::unordered_map<int64_t, PendingRequestsQueue> PendingRequestTable;
 
         boost::asio::io_service&            m_ioService;
         boost::asio::io_service::strand     m_strand;

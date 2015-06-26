@@ -72,7 +72,7 @@ namespace Internal
         boost::asio::io_service::strand m_strand;
         Com::Communication&             m_communication;
         std::function<void(const ConnectionPtr& connection, bool disconnecting)> m_onAppEvent;
-        using SendQueue=std::queue< std::pair< boost::shared_ptr<const char[]>, size_t> >;//vector of pair<data, size>
+        typedef std::queue< std::pair< boost::shared_ptr<const char[]>, size_t> > SendQueue;//vector of pair<data, size>
         std::unordered_map<int64_t, SendQueue> m_sendQueues; //<nodeType, SendQueue>
         boost::thread m_connectionThread;
 

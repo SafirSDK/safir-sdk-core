@@ -1,4 +1,4 @@
-/******************************************************************************
+/*************************************************************0*****************
 *
 * Copyright Saab AB, 2014 (http://safir.sourceforge.net)
 * Copyright Consoden AB, 2014 (http://www.consoden.se)
@@ -34,7 +34,13 @@ Receiver::Receiver(Com::ControlModeTag tag, boost::asio::io_service& ioService, 
            nodeType,
            std::string("127.0.0.1:1000")+boost::lexical_cast<std::string>(nodeId),
            std::string("127.0.0.1:1100")+boost::lexical_cast<std::string>(nodeId),
-           {{10, "nt10", "", "", 1000, 1000, 10}, {11, "nt11", "224.90.90.241:12000", "224.90.90.241:13000", 1000, 1000, 10}})
+           []{
+                std::vector<Com::NodeTypeDefinition> n;
+                n.push_back(Com::NodeTypeDefinition(10, "nt10", "", "", 1000, 1000, 10));
+                n.push_back(Com::NodeTypeDefinition(11, "nt11", "224.90.90.241:12000", "224.90.90.241:13000", 1000, 1000, 10));
+                return n;
+             }())
+   ,m_running(true)
 {
     m_timerInclude.expires_from_now(boost::chrono::milliseconds(1000));
     m_timerInclude.async_wait(m_strand.wrap([=](const boost::system::error_code& /*error*/){if (m_running) IncludeNode();}));
@@ -61,10 +67,14 @@ Receiver::Receiver(Com::DataModeTag tag, boost::asio::io_service& ioService, int
            nodeId,
            nodeType,
            std::string("127.0.0.1:1100")+boost::lexical_cast<std::string>(nodeId),
+           []() -> std::vector<Com::NodeTypeDefinition>
            {
-             {10, "nt10", "", "", 1000, 1000, 10}
-             ,{11, "nt11", "224.90.90.241:12000", "224.90.90.241:13000", 1000, 1000, 10}
-           })
+                std::vector<Com::NodeTypeDefinition> n;
+                n.push_back(Com::NodeTypeDefinition(10, "nt10", "", "", 1000, 1000, 10));
+                n.push_back(Com::NodeTypeDefinition(11, "nt11", "224.90.90.241:12000", "224.90.90.241:13000", 1000, 1000, 10));
+                return n;
+           }()
+           )
 {
     m_timerInclude.expires_from_now(boost::chrono::milliseconds(1000));
     m_timerInclude.async_wait(m_strand.wrap([=](const boost::system::error_code& error){if (!error) IncludeNode();}));
@@ -90,7 +100,10 @@ void Receiver::InjectNode(int64_t nodeId, int64_t nodeType)
 
 void Receiver::Seed(int64_t nodeId)
 {
-    m_com.InjectSeeds({std::string("127.0.0.1:1000")+boost::lexical_cast<std::string>(nodeId)});
+    std::vector<std::string> seeds;
+    seeds.push_back(std::string("127.0.0.1:1000")+boost::lexical_cast<std::string>(nodeId));
+
+    m_com.InjectSeeds(seeds);
 }
 
 void Receiver::Stop()

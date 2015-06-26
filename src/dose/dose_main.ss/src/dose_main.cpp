@@ -87,7 +87,7 @@ int main()
 
     boost::asio::io_service ioService;
 
-    std::atomic<bool> success {true};
+    std::atomic<bool> success = true;
 
     try
     {

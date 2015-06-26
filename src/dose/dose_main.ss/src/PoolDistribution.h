@@ -63,6 +63,7 @@ namespace Internal
             ,m_timer(strand.get_io_service())
             ,m_distribution(distribution)
             ,m_completionHandler(completionHandler)
+            ,m_running(false)
         {
         }
 
@@ -122,7 +123,7 @@ namespace Internal
         std::queue<DistributionData> m_connections;
         Safir::Dob::Connection m_dobConnection;
 
-        bool m_running=false;
+        bool m_running;
 
         void SendConnections()
         {

@@ -104,7 +104,7 @@ namespace Internal
         };
         typedef std::map<long,std::unique_ptr<PendingRegistrationInfo>> PendingRegistrations;
 
-        std::atomic<bool> m_stopped {false};
+        std::atomic<bool> m_stopped;
 
         boost::asio::strand m_strand;
 
@@ -113,7 +113,7 @@ namespace Internal
         std::map<int64_t,int64_t> m_liveNodes;
 
         PendingRegistrations m_pendingRegistrations;
-        long m_nextId {1};
+        long m_nextId;
 
         LamportClock m_pendingRegistrationClock;
     };

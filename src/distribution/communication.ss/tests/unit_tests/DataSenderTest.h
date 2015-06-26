@@ -48,7 +48,7 @@ public:
         //-------------------
         Sender sender(io, Com::Acked, 1, 1, 4, "127.0.0.1:10000", "224.90.90.241:10000", 500, Com::MessageHeaderSize+3); //ntId, nId, ipV, mc, waitForAck, fragmentSize
 
-        std::atomic_uint go{0};
+        std::atomic<unsigned int> go(0);
         auto WaitUntilReady=[&]
         {
             sender.m_strand.post([&]{go=1;});
@@ -344,7 +344,7 @@ public:
         //-------------------
         Sender sender(io, Com::Unacked, 1, 1, 4, "127.0.0.1:10000", "224.90.90.241:10000", 500, 10); //ntId, nId, ipV, mc, waitForAck, fragmentSize
 
-        std::atomic_uint go{0};
+        std::atomic<unsigned int> go(0);
         auto WaitUntilReady=[&]
         {
             sender.m_strand.post([&]{go=1;});

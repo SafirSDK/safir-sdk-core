@@ -57,13 +57,13 @@ namespace Dob
 {
 namespace Internal
 {
-    using OnInjectNode = std::function<void(const std::string&  nodeName,
-                                            int64_t             nodeId,
-                                            int64_t             nodeTypeId,
-                                            const std::string&  dataAddress)>;
+    typedef std::function<void(const std::string&  nodeName,
+                               int64_t             nodeId,
+                               int64_t             nodeTypeId,
+                               const std::string&  dataAddress)> OnInjectNode;
 
-    using OnExcludeNode = std::function<void(int64_t nodeId,
-                                             int64_t nodeTypeId)>;
+    typedef std::function<void(int64_t nodeId,
+                               int64_t nodeTypeId)> OnExcludeNode;
 
     // Class that encapsulates the Communication and System Picture instances
     //
@@ -92,13 +92,13 @@ namespace Internal
 
             for (const auto& nt: m_config.nodeTypesParam)
             {
-                commNodeTypes.push_back({nt.id,
+                commNodeTypes.push_back(Com::NodeTypeDefinition(nt.id,
                                          nt.name,
                                          nt.multicastAddressControl,
                                          nt.multicastAddressData,
                                          nt.heartbeatInterval,
                                          nt.retryTimeout,
-                                         nt.maxLostHeartbeats});
+                                         nt.maxLostHeartbeats));
 
                 spNodeTypes.insert(std::make_pair(nt.id,
                                                   SP::NodeType(nt.id,

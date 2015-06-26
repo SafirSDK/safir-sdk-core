@@ -28,7 +28,11 @@
 class Cmd
 {
 public:
-    Cmd(int argc, char * argv[])
+    Cmd(int argc, char * argv[]) :
+        help(false),
+        verbose(false),
+        local(false),
+        expr()
     {
         boost::program_options::options_description desc("Command line options");
         desc.add_options()
@@ -70,10 +74,10 @@ public:
         }
     }
 
-    bool help{false};
-    bool verbose{false};
-    bool local{false};
-    std::string expr{};
+    bool help;
+    bool verbose;
+    bool local;
+    std::string expr;
 };
 
 std::string RemovePort(const std::string& s)
