@@ -33,7 +33,7 @@ public:
     {
         std::cout<<"DeliveryHandler started"<<std::endl;
 
-        std::atomic_uint go{0};
+        std::atomic<unsigned int> go(0);
         auto SetReady=[&]{go=1;};
         auto WaitUntilReady=[&]
         {

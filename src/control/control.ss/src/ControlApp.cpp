@@ -69,13 +69,13 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
 
     for (const auto& nt: m_conf.nodeTypesParam)
     {
-        commNodeTypes.push_back({nt.id,
-                                 nt.name,
-                                 nt.multicastAddressControl,
-                                 nt.multicastAddressData,
-                                 nt.heartbeatInterval,
-                                 nt.retryTimeout,
-                                 nt.maxLostHeartbeats});
+        commNodeTypes.push_back(Com::NodeTypeDefinition(nt.id,
+                                                        nt.name,
+                                                        nt.multicastAddressControl,
+                                                        nt.multicastAddressData,
+                                                        nt.heartbeatInterval,
+                                                        nt.retryTimeout,
+                                                        nt.maxLostHeartbeats));
     }
 
     m_communication.reset(new Com::Communication(Com::controlModeTag,
@@ -268,7 +268,7 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
                                             const int signalNumber)
     {
         lllog(1) << "CTRL: Got signal " << signalNumber << " ... stop sequence initiated." << std::endl;
-        if (error)
+        if (!!error) //fix for vs2012 warning
         {
             SEND_SYSTEM_LOG(Error,
                             << "CTRL: Got a signals error: " << error);

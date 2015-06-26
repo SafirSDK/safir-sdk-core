@@ -94,6 +94,7 @@ namespace SP
                                                       const int64_t electionId)>& electionCompleteCallback,
                              const std::function<void(const int64_t incarnationId)>& setIncarnationIdCallback)
             : m_strand (ioService)
+            , m_stopped(false)
             , m_communication(communication)
             , m_receiverId(LlufId_Generate64(receiverId))
             , m_id(id)
@@ -114,6 +115,7 @@ namespace SP
             , m_electionTimeout(CalculateElectionTimeout(nodeTypes))
             , m_elected(std::numeric_limits<int64_t>::min())
             , m_electionTimer(ioService)
+            , m_electionInProgress(false)
             , m_currentElectionId(0)
             , m_generateIncarnationIdTimer(ioService)
             , m_sendMessageTimer(ioService)
@@ -555,7 +557,7 @@ namespace SP
 
 
         mutable boost::asio::strand m_strand;
-        bool m_stopped{false};
+        bool m_stopped;
         CommunicationT& m_communication;
         const uint64_t m_receiverId;
 
@@ -570,7 +572,7 @@ namespace SP
 
         std::atomic<int64_t> m_elected;
         boost::asio::steady_timer m_electionTimer;
-        bool m_electionInProgress{false};
+        bool m_electionInProgress;
         std::atomic<int64_t> m_currentElectionId;
 
         boost::asio::steady_timer m_generateIncarnationIdTimer;

@@ -56,6 +56,8 @@ namespace Internal
         PoolDistributionHandler(boost::asio::io_service& io, DistributionT& distribution)
             :m_strand(io)
             ,m_distribution(distribution)
+            ,m_running(false)
+            ,m_haveNothing(false)
         {
         }
 
@@ -160,10 +162,10 @@ namespace Internal
 #endif
         boost::asio::io_service::strand m_strand;
         DistributionT& m_distribution;
-        bool m_running=false;
-        bool m_haveNothing=false;
+        bool m_running;
+        bool m_haveNothing;
 
-        using PdPtr = std::unique_ptr< PoolDistributionT >;
+        typedef std::unique_ptr< PoolDistributionT > PdPtr;
         std::deque<PdPtr> m_pendingPoolDistributions;
 
         void StartNextPoolDistribution()

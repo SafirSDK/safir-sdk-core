@@ -80,7 +80,7 @@ namespace Internal
         boost::asio::io_service::strand m_strand;
         Safir::Dob::Connection m_connection;
         Utilities::AsioDispatcher m_dispatcher;
-        std::atomic<bool> m_stopped{false};
+        std::atomic<bool> m_stopped;
 
         Safir::Utilities::ProcessMonitor m_processMonitor;
     };

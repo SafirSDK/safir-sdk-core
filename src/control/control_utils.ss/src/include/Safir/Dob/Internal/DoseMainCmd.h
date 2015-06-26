@@ -58,15 +58,14 @@ namespace Control
     {
     public:
 
-        using IncludeNodeCmdCb = std::function<void(const std::string& nodeName,
+        typedef std::function<void(const std::string& nodeName,
                                                     int64_t nodeId,
                                                     int64_t nodeTypeId,
-                                                    const std::string& dataAddress)>;
+                                                    const std::string& dataAddress)> IncludeNodeCmdCb;
 
-        using ExcludeNodeCmdCb = std::function<void(int64_t nodeId,
-                                                    int64_t nodeTypeId)>;
+        typedef std::function<void(int64_t nodeId, int64_t nodeTypeId)> ExcludeNodeCmdCb;
 
-        using StopDoseMainCb = std::function<void()>;
+        typedef std::function<void()> StopDoseMainCb;
 
         DoseMainCmdReceiver(boost::asio::io_service&    ioService,
                             const IncludeNodeCmdCb&     startDoseMainCb,

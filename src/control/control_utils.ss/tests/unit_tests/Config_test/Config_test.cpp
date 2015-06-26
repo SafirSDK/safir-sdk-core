@@ -91,9 +91,9 @@ int main(int argc, char* argv[])
         CHECK(conf.nodeTypesParam[2].slidingWindowSize == 10);
         CHECK(conf.nodeTypesParam[2].retryTimeout == 5000);
         CHECK(conf.nodeTypesParam[2].wantedTypes.size() == 1);
-        CHECK(conf.nodeTypesParam[2].wantedTypes[0] == R"(Capabilities\.Vehicles\.)");
+        CHECK(conf.nodeTypesParam[2].wantedTypes[0] == "Capabilities\\.Vehicles\\.");
         CHECK(conf.nodeTypesParam[2].unwantedTypes.size() == 1);
-        CHECK(conf.nodeTypesParam[2].unwantedTypes[0] == R"(Capabilities\.Vehicles\.Ambulance.*)");
+        CHECK(conf.nodeTypesParam[2].unwantedTypes[0] == "Capabilities\\.Vehicles\\.Ambulance.*");
 
         // Check ThisNode parameters
         CHECK(conf.thisNodeParam.controlAddress == "0.0.0.0:30000");

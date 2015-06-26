@@ -106,13 +106,13 @@ int main(int /*argc*/, char * /*argv*/[])
 
     for (const auto& nt: config.nodeTypesParam)
     {
-        commNodeTypes.push_back({nt.id,
-                                 nt.name,
-                                 nt.multicastAddressControl,
-                                 nt.multicastAddressData,
-                                 nt.heartbeatInterval,
-                                 nt.retryTimeout,
-                                 nt.maxLostHeartbeats});
+        commNodeTypes.push_back( Com::NodeTypeDefinition(nt.id,
+                                                         nt.name,
+                                                         nt.multicastAddressControl,
+                                                         nt.multicastAddressData,
+                                                         nt.heartbeatInterval,
+                                                         nt.retryTimeout,
+                                                         nt.maxLostHeartbeats));
 
         spNodeTypes.insert(std::make_pair(nt.id,
                                           SP::NodeType(nt.id,
@@ -137,7 +137,7 @@ int main(int /*argc*/, char * /*argv*/[])
                    return;
                }
 
-               if (error)
+               if (!!error) //workaround for vs2012 warning
                {
                    lllog(3) << "DOSE_MAIN: OnTimeout error!" << std::endl;
                }
@@ -271,7 +271,7 @@ int main(int /*argc*/, char * /*argv*/[])
                          {
                              lllog(1) << "DOSE_MAIN: got signal " << signalNumber  << std::endl;
 
-                             if (error)
+                             if (!!error) //fix for vs2012 warning
                              {
                                  if (error == boost::asio::error::operation_aborted)
                                  {

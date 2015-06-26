@@ -66,6 +66,10 @@ namespace Internal
         {
             m_dispatcherNotified=false;
             m_distribution.GetCommunication().SetQueueNotFullCallback([=](int64_t){OnDoDispatch();}, m_nodeType);
+            for (auto it = m_connections.begin(); it != m_connections.end(); ++it)
+            {
+                it->reset(new SubcriptionConnection());
+            }
         }
 
         void Start()
@@ -79,7 +83,7 @@ namespace Internal
             {
                 for (auto context=0; context<Safir::Dob::NodeParameters::NumberOfContexts(); ++context)
                 {
-                    m_connections[static_cast<size_t>(context)].connection.Close();
+                    m_connections[static_cast<size_t>(context)]->connection.Close();
                 }
             });
         }
@@ -103,7 +107,7 @@ namespace Internal
         DistributionT& m_distribution;
         boost::asio::io_service::strand& m_strand;
         std::function<void(int64_t)> m_checkPendingReg;
-        std::vector<SubcriptionConnection> m_connections;
+        std::vector<std::unique_ptr<SubcriptionConnection>> m_connections;
         std::atomic_bool m_dispatcherNotified;
 
         static inline boost::shared_ptr<const char[]> ToPtr(const DistributionData& d)
@@ -124,7 +128,7 @@ namespace Internal
 
                     for (auto context = 0; context < Safir::Dob::NodeParameters::NumberOfContexts(); ++context)
                     {
-                        auto& queue=m_connections[static_cast<size_t>(context)].connectionPtr->GetDirtySubscriptionQueue();
+                        auto& queue=m_connections[static_cast<size_t>(context)]->connectionPtr->GetDirtySubscriptionQueue();
                         queue.Dispatch([=](const SubscriptionPtr& subscription, bool& exitDispatch, bool& dontRemove)
                         {
                             dontRemove=false;
@@ -168,21 +172,21 @@ namespace Internal
             for (auto context=0; context<Safir::Dob::NodeParameters::NumberOfContexts(); ++context)
             {
                 auto& subCon=m_connections[static_cast<size_t>(context)];
-                subCon.connection.Open(L"dose_main", L"states_"+boost::lexical_cast<std::wstring>(m_nodeType), context, this, this);
+                subCon->connection.Open(L"dose_main", L"states_"+boost::lexical_cast<std::wstring>(m_nodeType), context, this, this);
 
-                subCon.connection.SubscribeRegistration(Entity::ClassTypeId,
+                subCon->connection.SubscribeRegistration(Entity::ClassTypeId,
                                                         Typesystem::HandlerId::ALL_HANDLERS,
                                                         true, //includeSubclasses
                                                         false, //restartSubscription
                                                         this);
 
-                subCon.connection.SubscribeRegistration(Service::ClassTypeId,
+                subCon->connection.SubscribeRegistration(Service::ClassTypeId,
                                                         Typesystem::HandlerId::ALL_HANDLERS,
                                                         true, //includeSubclasses
                                                         false, //restartSubscription
                                                         this);
 
-                ConnectionAspectInjector(subCon.connection).SubscribeEntity(Entity::ClassTypeId,
+                ConnectionAspectInjector(subCon->connection).SubscribeEntity(Entity::ClassTypeId,
                                                                             true,  //includeUpdates,
                                                                             true,  //includeSubclasses
                                                                             false, //restartSubscription
@@ -194,8 +198,8 @@ namespace Internal
                                                                             this);
 
 
-                auto connectionName = ConnectionAspectMisc(subCon.connection).GetConnectionName();
-                subCon.connectionPtr=Connections::Instance().GetConnectionByName(Typesystem::Utilities::ToUtf8(connectionName));
+                auto connectionName = ConnectionAspectMisc(subCon->connection).GetConnectionName();
+                subCon->connectionPtr=Connections::Instance().GetConnectionByName(Typesystem::Utilities::ToUtf8(connectionName));
             }
         }
 

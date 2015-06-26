@@ -68,9 +68,11 @@ namespace Internal
 
     PendingRegistrationHandler::PendingRegistrationHandler(boost::asio::io_service& ioService,
                                                            Distribution& distribution)
-        : m_strand(ioService)
+        : m_stopped(false)
+        , m_strand(ioService)
         , m_distribution(distribution)
         , m_dataTypeIdentifier(LlufId_Generate64("PendingRegistrationHandler"))
+        , m_nextId(1)
         , m_pendingRegistrationClock(distribution.GetNodeId())
     {
         //ioService is started after our constructor, so we do not need to be reentrant.

@@ -56,9 +56,9 @@ namespace Internal
         bool UseTimestamps() const {return m_timestamps;}
         bool IgnoreFlush() const {return m_ignoreFlush;}
     private:
-        int m_logLevel {0};
-        bool m_timestamps {true};
-        bool m_ignoreFlush {false};
+        int m_logLevel;
+        bool m_timestamps;
+        bool m_ignoreFlush;
         std::string m_logDirectory;
     };
 

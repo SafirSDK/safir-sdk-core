@@ -50,6 +50,7 @@ namespace Internal
                                            const Distribution& distribution)
         : m_strand(ioService)
         , m_dispatcher(m_connection, m_strand)
+        , m_stopped(false)
         , m_processMonitor(ioService,
                            [] (const pid_t pid)
                            {

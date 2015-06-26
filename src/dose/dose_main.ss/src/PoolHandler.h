@@ -60,10 +60,10 @@ namespace Internal
         void HandleDisconnect(const ConnectionId& connId);
 
     private:
-        using PoolDistributionType=PoolDistribution<Distribution>;
-        using PoolDistributionHandlerType=PoolDistributionHandler<Distribution, PoolDistributionType>;
-        using PoolDistributionRequestSenderType=PoolDistributionRequestSender<Com::Communication>;
-        using StateDistributorType=StateDistributor<Distribution>;
+        typedef PoolDistribution<Distribution> PoolDistributionType;
+        typedef PoolDistributionHandler<Distribution, PoolDistributionType> PoolDistributionHandlerType;
+        typedef PoolDistributionRequestSender<Com::Communication> PoolDistributionRequestSenderType;
+        typedef StateDistributor<Distribution> StateDistributorType;
 
         boost::asio::io_service::strand& m_strand;
         boost::asio::steady_timer m_endStatesTimer;
@@ -79,10 +79,10 @@ namespace Internal
         std::unordered_map<int64_t, std::unique_ptr<StateDistributorType> > m_stateDistributors; //map<nodeType, StateDistributor>
 
         std::function<void()> m_poolDistributionCompleteCallback;
-        bool m_persistensReady=false;
-        bool m_poolDistributionComplete=false;
-        bool m_pdCompleteSignaled=false;
-        int m_numReceivedPdComplete=0;
+        bool m_persistensReady;
+        bool m_poolDistributionComplete;
+        bool m_pdCompleteSignaled;
+        int m_numReceivedPdComplete;
 
         //The NodeInfoHandler can not be started until we have pd complete
         //so the PoolHandler has to own it.

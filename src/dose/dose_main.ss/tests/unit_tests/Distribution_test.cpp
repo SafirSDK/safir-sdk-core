@@ -94,15 +94,17 @@ public:
 
 struct Fixture
 {
-    boost::asio::io_service ioService;
 
-    Safir::Dob::Internal::DistributionBasic<Communication, SP, Config>
-        distribution {ioService,
+    Fixture ()
+        : ioService()
+        , distribution(ioService,
                       "Pelle",
                       6565,
                       878787,
-                      "127.0.0.1:5555"};
+                      "127.0.0.1:5555") {};
 
+    boost::asio::io_service ioService;
+    Safir::Dob::Internal::DistributionBasic<Communication, SP, Config> distribution;
 };
 
 BOOST_FIXTURE_TEST_SUITE( s, Fixture )

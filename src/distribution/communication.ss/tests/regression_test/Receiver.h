@@ -49,7 +49,7 @@ protected:
     std::queue<int64_t> m_newNodes;
     std::map<int64_t, std::pair<uint64_t /*expected*/, uint64_t /*lastRecvVal*/> > m_recvCount;
 
-    bool m_running=true;
+    bool m_running;
 
     void NewNode(const std::string& name, int64_t nodeId, int64_t nodeTypeId, const std::string& controlAddress, const std::string& dataAddress);
     void GotReceiveFrom(int64_t fromNodeId);

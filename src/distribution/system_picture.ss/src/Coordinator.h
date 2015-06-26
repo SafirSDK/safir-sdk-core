@@ -106,6 +106,7 @@ namespace SP
                                 {
                                     m_rawHandler.SetIncarnationId(incarnationId);
                                 })
+            , m_lastStatisticsDirty(true)
             , m_name(name)
             , m_id(id)
             , m_nodeTypeId(nodeTypeId)
@@ -113,6 +114,7 @@ namespace SP
             , m_dataAddress(dataAddress)
             , m_ownElectionId(0)
             , m_rawHandler(rawHandler)
+            , m_failedStateUpdates(0)
         {
             m_stateMessage.set_elected_id(0); //our state message is not valid until we have a real id set.
 
@@ -337,7 +339,9 @@ namespace SP
         bool SystemStable() const
         {
             //get all node ids that we've heard about so far
-            std::set<int64_t> knownNodes({m_id}); //include ourselves...
+            std::set<int64_t> knownNodes; 
+            knownNodes.insert(m_id); //include ourselves...
+
             for (int i = 0; i < m_lastStatistics.Size(); ++i)
             {
                 knownNodes.insert(m_lastStatistics.Id(i));
@@ -812,7 +816,7 @@ namespace SP
         ElectionHandlerT m_electionHandler;
 
         RawStatistics m_lastStatistics;
-        bool m_lastStatisticsDirty = true;
+        bool m_lastStatisticsDirty;
 
         std::function<void(const SystemStateMessage& data)> m_stateChangedCallback;
 
@@ -826,7 +830,7 @@ namespace SP
         int64_t m_ownElectionId;
         RawHandlerT& m_rawHandler;
 
-        int m_failedStateUpdates = 0;
+        int m_failedStateUpdates;
     };
 
     //forward declarations

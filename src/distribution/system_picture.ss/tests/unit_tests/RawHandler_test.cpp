@@ -176,8 +176,12 @@ BOOST_AUTO_TEST_CASE( new_node )
     comm.gotReceiveFromCb(11);
     comm.gotReceiveFromCb(11);
     rh.Stop();
+
+    std::set<int64_t> correctNodes;
+    correctNodes.insert(11);
+
     BOOST_CHECK_NO_THROW(ioService.run());
-    BOOST_CHECK(comm.includedNodes == std::set<int64_t>{11});
+    BOOST_CHECK(comm.includedNodes == correctNodes);
     BOOST_CHECK(comm.excludedNodes.empty());
 }
 
@@ -197,8 +201,12 @@ BOOST_AUTO_TEST_CASE( new_node_twice )
 {
     comm.newNodeCb("asdf",11,10,"asdf","asdf");
     comm.newNodeCb("asdf",11,10,"asdf","asdf");
+
+    std::set<int64_t> correctNodes;
+    correctNodes.insert(11);
+
     BOOST_CHECK_THROW(ioService.run(), std::logic_error);
-    BOOST_CHECK(comm.includedNodes == std::set<int64_t>{11});
+    BOOST_CHECK(comm.includedNodes == correctNodes);
 
 }
 
@@ -211,9 +219,12 @@ BOOST_AUTO_TEST_CASE( exclude_node )
     comm.gotReceiveFromCb(11);
     comm.gotReceiveFromCb(11);
 
+    std::set<int64_t> correctNodes;
+    correctNodes.insert(11);
+
     BOOST_CHECK_NO_THROW(ioService.run());
-    BOOST_CHECK(comm.includedNodes == std::set<int64_t>{11});
-    BOOST_CHECK(comm.excludedNodes == std::set<int64_t>{11});
+    BOOST_CHECK(comm.includedNodes == correctNodes);
+    BOOST_CHECK(comm.excludedNodes == correctNodes);
 }
 
 void CheckStatisticsCommon(const RawStatistics& statistics)
@@ -645,7 +656,11 @@ BOOST_AUTO_TEST_CASE( recently_dead_nodes )
                                    }
                                });
     comm.newNodeCb("asdf",11,10,"asdffff","asdfqqqq");
-    rh.RecentlyDeadNodes({11,100,2900});
+    std::vector<int64_t> dead;
+    dead.push_back(11);
+    dead.push_back(100);
+    dead.push_back(2900);
+    rh.RecentlyDeadNodes(dead);
 
     //triggers another callback so that we get to check the SetDeadNode result.
     comm.newNodeCb("asdf",12,10,"asdffff","asdfqqqq");
@@ -665,7 +680,7 @@ BOOST_AUTO_TEST_CASE( perform_on_all )
     msg->SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(data.get()));
     rh.NewRemoteStatistics(11,data,size);
 
-    rh.PerformOnAllStatisticsMessage([&](std::unique_ptr<char[]> data,
+    rh.PerformOnAllStatisticsMessage([&](const std::unique_ptr<char[]>& data,
                                          const size_t size)
                                      {
                                          auto msg = Safir::make_unique<RawStatisticsMessage>();

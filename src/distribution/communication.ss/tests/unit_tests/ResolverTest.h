@@ -75,7 +75,14 @@ public:
         CHECK(resolver.DiffIndex("bcdefg", "abdcefg")==0);
         CHECK(resolver.DiffIndex("abcdefg", "abcdefg")==7);
 
-        std::vector<std::string> v={"192.168.0.100", "192.168.66.100", "192.0.0.0", "192.168.0.0", "192.255.255.255"};
+        std::vector<std::string> v;
+        
+        v.push_back("192.168.0.100");
+        v.push_back("192.168.66.100");
+        v.push_back("192.0.0.0");
+        v.push_back("192.168.0.0");
+        v.push_back("192.255.255.255");
+        
         CHECK(resolver.FindBestMatch("192.168.66.123", v)=="192.168.66.100");
         CHECK(resolver.FindBestMatch("192.0.66.123", v)=="192.0.0.0");
         CHECK(resolver.FindBestMatch("192.168.255.255", v)=="192.168.0.100");

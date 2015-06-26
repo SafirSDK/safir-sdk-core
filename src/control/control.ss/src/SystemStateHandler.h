@@ -83,9 +83,9 @@ namespace Control
     {
     public:
 
-        using NodeIncludedCb = boost::function<void(const Node& node)>;
+        typedef boost::function<void(const Node& node)> NodeIncludedCb;
 
-        using NodeDownCb = boost::function<void(const int64_t nodeId, const int64_t nodeTypeId)>;
+        typedef boost::function<void(const int64_t nodeId, const int64_t nodeTypeId)> NodeDownCb;
 
         SystemStateHandlerBasic(const int64_t                    ownNodeId,
                                 const NodeIncludedCb&            nodeIncludedCb,
@@ -144,7 +144,7 @@ namespace Control
                                  newState.ControlAddress(ix),
                                  newState.DataAddress(ix));
 
-                    m_systemState.insert({nodeId, newNode});
+                    m_systemState.insert( std::make_pair(nodeId, newNode) );
 
                     if (newNode.nodeId == m_ownNodeId)
                     {
@@ -203,7 +203,7 @@ namespace Control
 
     };
 
-    using SystemStateHandler = SystemStateHandlerBasic<Safir::Dob::Internal::SP::SystemState>;
+    typedef SystemStateHandlerBasic<Safir::Dob::Internal::SP::SystemState> SystemStateHandler;
 
 }
 }

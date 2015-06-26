@@ -54,6 +54,10 @@ namespace Internal
         ,m_persistHandler(m_strand.get_io_service(), distribution, logStatus, [=]{OnPersistenceReady();}, // persistentDataReadyCb
                                                        [=]{Connections::Instance().AllowConnect(-1);}) // persistentDataAllowedCb
         ,m_waitingStatesSanityTimer(m_strand.get_io_service())
+        ,m_persistensReady(false)
+        ,m_poolDistributionComplete(false)
+        ,m_pdCompleteSignaled(false)
+        ,m_numReceivedPdComplete(0)
     {
         auto injectNode=[=](const std::string&, int64_t id, int64_t nt, const std::string&)
         {

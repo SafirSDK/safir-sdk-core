@@ -51,7 +51,7 @@ namespace Internal
         std::string dataAddress;
     };
 
-    using NodeTypeIds = std::unordered_set<int64_t>;
+    typedef std::unordered_set<int64_t> NodeTypeIds;
 
 }
 }

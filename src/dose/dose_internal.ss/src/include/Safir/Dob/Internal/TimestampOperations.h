@@ -92,8 +92,8 @@ namespace Internal
                                              const Typesystem::ObjectPtr& intoObject,
                                              const Typesystem::ObjectConstPtr& fromObject);
         //Not instantiable
-        TimestampOperations() = delete;
-        ~TimestampOperations() = delete;
+        TimestampOperations();
+        ~TimestampOperations();
     };
 }
 }

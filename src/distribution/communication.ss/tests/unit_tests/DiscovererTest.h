@@ -54,7 +54,11 @@ public:
         Discoverer n2(io, CreateNode(2), 100, [&](const Com::Node&){});
 
         TRACELINE
-        std::vector<std::string> seeds{"127.0.0.1:10100", "127.0.0.1:10200"};
+        std::vector<std::string> seeds;
+        
+        seeds.push_back("127.0.0.1:10100");
+        seeds.push_back("127.0.0.1:10200");
+
         n0.AddSeeds(seeds);
         n1.AddSeeds(seeds);
         n2.AddSeeds(seeds);
@@ -108,7 +112,7 @@ public:
         n2.HandleReceivedNodeInfo(ni1);
 
         //Wait for HandleReceivedNodeInfo to be executed
-        std::atomic_int fence{0};
+        std::atomic<int> fence(0);
         n0.m_strand.post([&]{++fence;});
         n1.m_strand.post([&]{++fence;});
         n2.m_strand.post([&]{++fence;});
@@ -281,7 +285,9 @@ public:
 
         TRACELINE
 
-        std::vector<std::string> seeds{"127.0.0.1:10000"};
+        std::vector<std::string> seeds;
+        seeds.push_back("127.0.0.1:10000");
+        
         {
             boost::mutex::scoped_lock lock(mutex);
             discoverState[10001].discover->AddSeeds(seeds);

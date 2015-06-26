@@ -48,6 +48,11 @@ namespace Internal
         explicit AsioLatencyMonitor(const std::string& identifier,
                                     boost::asio::io_service::strand& strand)
             : m_identifier(identifier)
+#ifdef NDEBUG
+            , m_tolerance(1000)
+#else
+            , m_tolerance(5000)
+#endif
             , m_strand(strand)
             , m_timer(m_strand.get_io_service())
             , m_stop(false)
@@ -93,11 +98,7 @@ namespace Internal
         }
 
         const std::string m_identifier;
-#ifdef NDEBUG
-        const boost::chrono::milliseconds m_tolerance{1000};
-#else
-        const boost::chrono::milliseconds m_tolerance{5000};
-#endif
+        const boost::chrono::milliseconds m_tolerance;
         boost::asio::io_service::strand& m_strand;
         boost::asio::steady_timer m_timer;
 

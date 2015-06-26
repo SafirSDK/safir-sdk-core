@@ -87,7 +87,10 @@ namespace //anonymous namespace for internal functions
     {
     public:
         TimestampingStreambuf(const LowLevelLoggerControl& control)
-            : m_control(control)
+            : m_control(control),
+            m_ostr (&m_sink),
+            m_datePending (true),
+            m_fractionalDigits(boost::posix_time::time_duration::num_fractional_digits())
         {
 
         }
@@ -188,9 +191,9 @@ namespace //anonymous namespace for internal functions
     private:
         const LowLevelLoggerControl& m_control;
         std::basic_filebuf<wchar_t> m_sink;
-        std::wostream m_ostr {&m_sink};
-        bool m_datePending {true};
-        const int m_fractionalDigits{boost::posix_time::time_duration::num_fractional_digits()};
+        std::wostream m_ostr;
+        bool m_datePending;
+        const int m_fractionalDigits;
     };
 }
 

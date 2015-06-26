@@ -143,6 +143,8 @@ public:
     explicit IncarnationChecker(bool enabled)
         : m_enabled(enabled)
         , m_filename("last_incarnation" + Safir::Utilities::Internal::Expansion::GetSafirInstanceSuffix() + ".txt")
+        , m_calls(0)
+        , m_lastIncarnation(0)
     {
         std::ifstream f(m_filename);
         if (f.good())
@@ -189,8 +191,8 @@ public:
 private:
     bool m_enabled;
     std::string m_filename;
-    int m_calls{0};
-    int64_t m_lastIncarnation {0};
+    int m_calls;
+    int64_t m_lastIncarnation;
 };
 
 int main(int argc, char * argv[])
@@ -217,13 +219,14 @@ int main(int argc, char * argv[])
         std::vector<Safir::Dob::Internal::Com::NodeTypeDefinition> commNodeTypes;
         std::map<boost::int64_t, Safir::Dob::Internal::SP::NodeType> spNodeTypes;
 
-        commNodeTypes.push_back({1,
-                    "NodeTypeA",
-                    "", //no multicast
-                    "", //no multicast
-                    1000,
-                    20,
-                    15});
+        
+        commNodeTypes.push_back(Safir::Dob::Internal::Com::NodeTypeDefinition(1,
+                                                                              "NodeTypeA",
+                                                                              "", //no multicast
+                                                                              "", //no multicast
+                                                                              1000,
+                                                                              20,
+                                                                              15));   
 
         spNodeTypes.insert(std::make_pair(1,
                                           Safir::Dob::Internal::SP::NodeType(1,
@@ -233,13 +236,13 @@ int main(int argc, char * argv[])
                                                                              15,
                                                                              boost::chrono::milliseconds(20))));
 
-        commNodeTypes.push_back({2,
-                    "NodeTypeB",
-                    "", //no multicast
-                    "", //no multicast
-                    2000,
-                    50,
-                    8});
+        commNodeTypes.push_back(Safir::Dob::Internal::Com::NodeTypeDefinition(2,
+                                                                              "NodeTypeB",
+                                                                              "", //no multicast
+                                                                              "", //no multicast
+                                                                              2000,
+                                                                              50,
+                                                                              8));
 
         spNodeTypes.insert(std::make_pair(2,
                                           Safir::Dob::Internal::SP::NodeType(2,
@@ -305,7 +308,7 @@ int main(int argc, char * argv[])
                                                         const int signal_number)
                              {
                                  std::wcout << "Got signal " << signal_number << std::endl;
-                                 if (error)
+                                 if (!!error) //fix for ws2012 warning
                                  {
                                      SEND_SYSTEM_LOG(Error,
                                                      << "Got a signals error: " << error);
@@ -320,7 +323,7 @@ int main(int argc, char * argv[])
                              }
                              );
 
-        std::atomic<bool> success {true};
+        std::atomic<bool> success(true);
 
         const auto run = [&ioService,&success]
             {
