@@ -8,7 +8,7 @@ PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS
   ../../src/ControlCommands.proto)
 
 if (MSVC)
-  SET_SOURCE_FILES_PROPERTIES(${PROTO_SRCS} PROPERTIES COMPILE_FLAGS "/wd4127 /wd4244 /wd4267 /wd4018")
+  SET_SOURCE_FILES_PROPERTIES(${PROTO_SRCS} PROPERTIES COMPILE_FLAGS "/wd4127 /wd4244 /wd4267 /wd4018 /wd4512")
 endif()
 
 #Need to define this to not get inconsistent dll linkage on windows.

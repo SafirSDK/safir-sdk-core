@@ -4,7 +4,7 @@ PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS
   ../../src/ElectionMessage.proto)
 
 if (MSVC)
-  SET_SOURCE_FILES_PROPERTIES(${PROTO_SRCS} PROPERTIES COMPILE_FLAGS "/wd4127 /wd4244 /wd4267 /wd4018")
+  SET_SOURCE_FILES_PROPERTIES(${PROTO_SRCS} PROPERTIES COMPILE_FLAGS "/wd4127 /wd4244 /wd4267 /wd4018 /wd4512")
 endif()
 
 #Most of the tests in here need the generated protobuf headers
