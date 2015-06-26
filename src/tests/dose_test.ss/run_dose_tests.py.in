@@ -388,6 +388,8 @@ class Runner:
             self.__launchProcess("dose_test_dotnet.2", parameters.dose_test_dotnet_cmd + ("2",))
             if not parameters.no_java:
                 self.__launchProcess("dose_test_java.2", parameters.dose_test_java_cmd + ("2",))
+
+        if "SAFIR_INSTANCE" in os.environ:
             del os.environ["SAFIR_INSTANCE"] #unset the environment after we've launched the processes.
 
     #By default processes have 10 seconds to shut down nicely.
@@ -627,7 +629,7 @@ def main():
             runner.wait_for_safir_control()
         else:
             runner.run_sequencer(parameters)
-        completed = True
+            completed = True
     except:
         log("exception occurred!")
         traceback.print_exc()

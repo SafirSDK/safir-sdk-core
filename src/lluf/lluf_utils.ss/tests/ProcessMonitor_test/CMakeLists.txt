@@ -12,7 +12,7 @@ ADD_EXECUTABLE(ProcessMonitorSleeper Sleeper.cpp)
 
 if(MSVC)
     set_target_properties(ProcessMonitor_test3 PROPERTIES
-    COMPILE_DEFINITIONS " -D_lluf_utils_export_defs_h -Dlluf_utils_EXPORTS")
+    COMPILE_DEFINITIONS "_lluf_utils_export_defs_h;lluf_utils_EXPORTS")
 endif()
 
 
