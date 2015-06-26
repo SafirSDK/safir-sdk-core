@@ -530,7 +530,7 @@ int main(int argc, char * argv[])
 
     ssh.SetStopHandler(stopFcn);
 
-    std::atomic<bool> success = true;
+    std::atomic<bool> success(true);
 
     const auto run = [&ioService,&success]
         {

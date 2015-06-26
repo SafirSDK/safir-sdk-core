@@ -132,7 +132,7 @@ int main(int argc, char * argv[])
     boost::shared_ptr<void> crGuard(static_cast<void*>(0),
                                     [](void*){Safir::Utilities::CrashReporter::Stop();});
 
-    std::atomic<bool> success = true;
+    std::atomic<bool> success(true);
 
     try
     {

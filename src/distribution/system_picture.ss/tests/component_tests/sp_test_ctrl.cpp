@@ -323,7 +323,7 @@ int main(int argc, char * argv[])
                              }
                              );
 
-        std::atomic<bool> success = true;
+        std::atomic<bool> success(true);
 
         const auto run = [&ioService,&success]
             {
