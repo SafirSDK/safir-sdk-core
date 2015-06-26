@@ -299,7 +299,7 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
   target_include_directories(safir_generated-${_gen_NAME}-cpp
     PRIVATE ${precompiled_header_path})
 
-  target_link_libraries(safir_generated-${_gen_NAME}-cpp PRIVATE dots_kernel
+  target_link_libraries(safir_generated-${_gen_NAME}-cpp PRIVATE dots_kernel)
 
   #On Windows external builds autolinking for dots_cpp is used.
   if (NOT (MSVC AND SAFIR_EXTERNAL_BUILD))
