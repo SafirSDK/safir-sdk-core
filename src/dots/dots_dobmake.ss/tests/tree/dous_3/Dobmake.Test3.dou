@@ -6,6 +6,7 @@
         <member>
             <name>Mem2</name>
             <type>Dobmake.Test1</type>
+            <sequence/>
         </member>
     </members>
 </class>
