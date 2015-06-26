@@ -271,7 +271,7 @@ int main(int /*argc*/, char * /*argv*/[])
                          {
                              lllog(1) << "DOSE_MAIN: got signal " << signalNumber  << std::endl;
 
-                             if (error)
+                             if (!!error) //fix for vs2012 warning
                              {
                                  if (error == boost::asio::error::operation_aborted)
                                  {

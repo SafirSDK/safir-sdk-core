@@ -52,6 +52,7 @@ x64/
 Debug/
 Release/
 RelWithDebInfo/
+ipch/
 
 
 #CTest / Unit test stuff
