@@ -59,7 +59,7 @@ public:
     }
 private:
     boost::asio::io_service m_ioService;
-    std::unique_ptr<boost::asio::io_service::work> m_work;// {new boost::asio::io_service::work(m_ioService)};
+    std::unique_ptr<boost::asio::io_service::work> m_work;
     Safir::Dob::Connection m_connection;
     Safir::Utilities::AsioDispatcher m_dispatcher;
 };

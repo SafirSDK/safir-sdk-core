@@ -138,7 +138,7 @@ public:
                        Safir::Dob::Internal::Com::Communication& communication,
                        const std::string& suicideTrigger)
         : m_strand(ioService)
-        , m_injectedNodes( [] (const int64_t id) { std::set<int64_t> s; s.insert(id); return s;}(id) ) //consider ourselves already injected
+        , m_injectedNodes(1,id) //consider ourselves already injected
         , m_communication(communication)
         , m_trigger(suicideTrigger)
         , m_suicideTimer(ioService)

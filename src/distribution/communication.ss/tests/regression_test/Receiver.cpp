@@ -34,13 +34,14 @@ Receiver::Receiver(Com::ControlModeTag tag, boost::asio::io_service& ioService, 
            nodeType,
            std::string("127.0.0.1:1000")+boost::lexical_cast<std::string>(nodeId),
            std::string("127.0.0.1:1100")+boost::lexical_cast<std::string>(nodeId),
-           []{
-                std::vector<Com::NodeTypeDefinition> n;
-                n.push_back(Com::NodeTypeDefinition(10, "nt10", "", "", 1000, 1000, 10));
-                n.push_back(Com::NodeTypeDefinition(11, "nt11", "224.90.90.241:12000", "224.90.90.241:13000", 1000, 1000, 10));
-                return n;
-             }())
-   ,m_running(true)
+           [] //This lambda just generates a vector of nodetypes. It used to be an initializer list
+           {  //but VS2012 doesnt have initializer lists :-(
+               std::vector<Com::NodeTypeDefinition> n;
+               n.push_back(Com::NodeTypeDefinition(10, "nt10", "", "", 1000, 1000, 10));
+               n.push_back(Com::NodeTypeDefinition(11, "nt11", "224.90.90.241:12000", "224.90.90.241:13000", 1000, 1000, 10));
+               return n;
+           }())
+    ,m_running(true)
 {
     m_timerInclude.expires_from_now(boost::chrono::milliseconds(1000));
     m_timerInclude.async_wait(m_strand.wrap([=](const boost::system::error_code& /*error*/){if (m_running) IncludeNode();}));
@@ -67,14 +68,14 @@ Receiver::Receiver(Com::DataModeTag tag, boost::asio::io_service& ioService, int
            nodeId,
            nodeType,
            std::string("127.0.0.1:1100")+boost::lexical_cast<std::string>(nodeId),
-           []() -> std::vector<Com::NodeTypeDefinition>
-           {
+           [] //This lambda just generates a vector of nodetypes. It used to be an initializer list
+           {  //but VS2012 doesnt have initializer lists :-(
                 std::vector<Com::NodeTypeDefinition> n;
                 n.push_back(Com::NodeTypeDefinition(10, "nt10", "", "", 1000, 1000, 10));
                 n.push_back(Com::NodeTypeDefinition(11, "nt11", "224.90.90.241:12000", "224.90.90.241:13000", 1000, 1000, 10));
                 return n;
-           }()
-           )
+           }())
+    ,m_running(true)
 {
     m_timerInclude.expires_from_now(boost::chrono::milliseconds(1000));
     m_timerInclude.async_wait(m_strand.wrap([=](const boost::system::error_code& error){if (!error) IncludeNode();}));

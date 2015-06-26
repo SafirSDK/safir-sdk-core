@@ -656,7 +656,11 @@ BOOST_AUTO_TEST_CASE( recently_dead_nodes )
                                    }
                                });
     comm.newNodeCb("asdf",11,10,"asdffff","asdfqqqq");
-    rh.RecentlyDeadNodes([]() -> std::vector<int64_t> { std::vector<int64_t> n; n.push_back(11); n.push_back(100); n.push_back(2900); return n; }());
+    std::vector<int64_t> dead;
+    dead.push_back(11);
+    dead.push_back(100);
+    dead.push_back(2900);
+    rh.RecentlyDeadNodes(dead);
 
     //triggers another callback so that we get to check the SetDeadNode result.
     comm.newNodeCb("asdf",12,10,"asdffff","asdfqqqq");

@@ -36,7 +36,7 @@ namespace Utilities
 namespace Internal
 {
     LowLevelLoggerControl::LowLevelLoggerControl() :
-		m_logLevel(0),
+        m_logLevel(0),
         m_timestamps(true),
         m_ignoreFlush(false)
     {
