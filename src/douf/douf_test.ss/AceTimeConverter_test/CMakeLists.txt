@@ -8,7 +8,7 @@ if (ACE_FOUND)
   TARGET_LINK_LIBRARIES(AceTimeConverter_test PRIVATE
     douf_time_cpp
     ${ACE_LIBRARY}
-	${Boost_DATE_TIME_LIBRARY})
+    ${Boost_DATE_TIME_LIBRARY})
 
   ADD_TEST(NAME AceTimeConverter_test COMMAND AceTimeConverter_test)
 
