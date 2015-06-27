@@ -518,6 +518,7 @@ class VisualStudioBuilder(BuilderBase):
 
         # Use Jom (google for qt jom) to build if it is available
         try:
+            raise Exception("TODO: remove this exception when/if we get jom to work again...")
             subprocess.Popen(("jom", "/version"), stdout = subprocess.PIPE).communicate()
             self.cmake_generator = "NMake Makefiles JOM"
             self.have_jom = True
