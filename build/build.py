@@ -516,15 +516,14 @@ class VisualStudioBuilder(BuilderBase):
 
         self.install_target = "Install"
 
-        # Use Jom (google for qt jom) to build if it is available
+        # Use Ninja for building if available, it is much faster
         try:
-            raise Exception("TODO: remove this exception when/if we get jom to work again...")
-            subprocess.Popen(("jom", "/version"), stdout = subprocess.PIPE).communicate()
-            self.cmake_generator = "NMake Makefiles JOM"
-            self.have_jom = True
+            subprocess.Popen(("ninja", "--version"), stdout = subprocess.PIPE).communicate()
+            self.cmake_generator = "Ninja"
+            self.have_ninja = True
         except:
             self.cmake_generator = "NMake Makefiles"
-            self.have_jom = False
+            self.have_ninja = False
 
         self.__handle_command_line_arguments()
 
@@ -543,8 +542,8 @@ class VisualStudioBuilder(BuilderBase):
 
 
     def generator_specific_build_cmds(self):
-        if self.have_jom:
-            return ("/nologo", "/j", str(self.num_jobs))
+        if self.have_ninja:
+            return () #empty tuple
         else:
             return ("/nologo",)
 
