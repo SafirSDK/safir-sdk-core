@@ -132,14 +132,14 @@ class __WindowsStager(object):
         else:
             self.__copy_qt_dlls(qt_dir)
 
-    def __copy_jom(self):
-        self.logger.log("Copying jom.exe")
-        self.__copy_exe("jom.exe")
+    def __copy_ninja(self):
+        self.logger.log("Copying ninja.exe")
+        self.__copy_exe("ninja.exe")
 
     def run(self):
         self.__copy_boost()
         self.__copy_qt()
-        self.__copy_jom()
+        self.__copy_ninja()
     """
         ############
 

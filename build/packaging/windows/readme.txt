@@ -67,7 +67,8 @@ internally and that is used in our interfaces:
 * Boost C++ Libraries (http://www.boost.org) - All headers and a subset of the Boost
   libraries are bundled.
 * Qt runtime (http://www.qt.io) - used by dobmake and dobexplorer.
-* Jom (http://qt-project.org/wiki/jom) - NMake clone that can run in parallel.
+* Ninja (https://github.com/martine/ninja/releases) - Build system that can run in
+  parallel.
 
 License terms for these can be found at their respective web sites, but in short there
 are no surprises there, nothing that should affect your ability to use Safir SDK Core
