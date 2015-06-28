@@ -717,6 +717,11 @@ namespace Internal
                         KeyValueMode mode);
     };
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4275)
+#endif
+
     /**********************************************************************
      *
      *  Helper class for reading change flags
@@ -763,6 +768,11 @@ namespace Internal
     private:
         DotsC_Int64 m_handle;
     };
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
+
 }
 }
 }
