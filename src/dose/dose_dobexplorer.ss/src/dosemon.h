@@ -66,7 +66,7 @@ private:
 
     QTimer m_updateTimer;
     boost::thread m_doseInternalInitializer;
-    std::atomic<bool> m_doseInternalInitialized{false};
+    std::atomic<bool> m_doseInternalInitialized;
 };
 
 

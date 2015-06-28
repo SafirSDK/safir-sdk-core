@@ -58,6 +58,7 @@ namespace
 
 
 DoseMon::DoseMon(QWidget * /*parent*/)
+    : m_doseInternalInitialized(false)
 {
     setupUi(this); // this sets up GUI
 
