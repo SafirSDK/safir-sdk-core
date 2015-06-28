@@ -4,6 +4,10 @@ if (MSVC)
   set (BOOST_REQUIRED_ON_WINDOWS date_time)
 endif()
 
+#Turn on boost cmake debugging
+#TODO: remove this, only used for finding jenkins problem
+set(Boost_DEBUG ON)
+
 set(Boost_NO_BOOST_CMAKE ON)
 set(Boost_USE_MULTITHREADED ON)
 
