@@ -856,7 +856,7 @@ namespace SP
         const bool m_master; //true if running in SystemPicture master instance
         const std::function<bool (const int64_t incarnationId)> m_validateIncarnationIdCallback;
 
-        std::atomic<bool> m_stopped;
+        boost::atomic<bool> m_stopped;
     };
 
     typedef RawHandlerBasic<Com::Communication> RawHandler;

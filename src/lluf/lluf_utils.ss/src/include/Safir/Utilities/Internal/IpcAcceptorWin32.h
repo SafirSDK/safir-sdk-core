@@ -136,11 +136,14 @@ namespace Internal
                             // Save pointer to "current connect handle" so we can close it in case of a stop call
                             m_currentConnectHandle = boost::make_shared<boost::asio::windows::stream_handle>(m_strand.get_io_service(), pipe);
 
+
+                            //auto& selfHandleRedirect = selfHandle;
+                 
                             // Construct an overlapped_ptr object with a handler that is called when a subscriber has connected,
                             // that is, when the overlapped ConnectNamedPipe call has completed.
                             boost::asio::windows::overlapped_ptr overlappedPtr(m_strand.get_io_service(),
                                                                                m_strand.wrap(
-                                [this, selfHandle](const boost::system::error_code ec, std::size_t)
+                                [=](const boost::system::error_code ec, std::size_t)
                                 {
                                     if (!IsStarted())
                                     {

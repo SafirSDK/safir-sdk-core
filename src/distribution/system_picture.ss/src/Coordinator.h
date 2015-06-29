@@ -30,7 +30,7 @@
 #include <Safir/Utilities/Internal/SystemLog.h>
 #include <functional>
 #include <limits>
-#include <atomic>
+#include <boost/atomic.hpp>
 #include <map>
 #include <set>
 #include "ElectionHandler.h"

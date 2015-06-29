@@ -25,7 +25,7 @@
 #pragma once
 
 #include <map>
-#include <atomic>
+#include <boost/atomic.hpp>
 #include <boost/noncopyable.hpp>
 #include <boost/function.hpp>
 #include <boost/make_shared.hpp>
@@ -372,7 +372,7 @@ namespace Com
         RetransmitTo m_retransmitNotification;
         std::vector<QueueNotFull> m_queueNotFullNotification;
         size_t m_queueNotFullNotificationLimit; //below number of used slots. NOT percent.
-        std::atomic_bool m_notifyQueueNotFull;
+        boost::atomic<bool> m_notifyQueueNotFull;
         std::vector<size_t> m_sendAckRequestForMsgIndex;
         const std::string m_logPrefix;
 

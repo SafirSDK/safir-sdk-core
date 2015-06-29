@@ -28,7 +28,7 @@
 #include <Safir/Utilities/Internal/SystemLog.h>
 #include "SubscriberInterfaces.h"
 #include <functional>
-#include <atomic>
+#include <boost/atomic.hpp>
 
 #ifdef _MSC_VER
 #  pragma warning (push)

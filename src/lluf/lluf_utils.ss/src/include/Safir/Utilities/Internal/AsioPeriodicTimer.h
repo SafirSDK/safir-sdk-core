@@ -24,7 +24,7 @@
 #ifndef __LLUF_ASIO_PERIODIC_TIMER_H__
 #define __LLUF_ASIO_PERIODIC_TIMER_H__
 
-#include <atomic>
+#include <boost/atomic.hpp>
 #include <functional>
 #include <boost/noncopyable.hpp>
 
@@ -140,7 +140,7 @@ namespace Internal
         boost::asio::steady_timer m_timer;
         const boost::chrono::steady_clock::duration m_period;
         const std::function<void(const boost::system::error_code& error)> m_handler;
-        std::atomic<bool> m_started;
+        boost::atomic<bool> m_started;
     };
 }
 }

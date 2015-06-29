@@ -154,7 +154,7 @@ namespace SP
 
         boost::asio::strand m_strand;
         boost::asio::steady_timer m_timer;
-        std::atomic<bool> m_stopped;
+        boost::atomic<bool> m_stopped;
         CommunicationT& m_communication;
         const uint64_t m_senderId;
         const std::map<int64_t, NodeType> m_nodeTypes;

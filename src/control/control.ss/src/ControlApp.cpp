@@ -31,7 +31,7 @@
 #include <iostream>
 #include <map>
 #include <boost/regex.hpp>
-#include <atomic>
+#include <boost/atomic.hpp>
 
 //disable warnings in boost
 #if defined _MSC_VER

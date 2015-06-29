@@ -102,7 +102,7 @@ namespace Internal
         boost::asio::io_service::strand& m_strand;
         boost::asio::steady_timer m_timer;
 
-        std::atomic<bool> m_stop;
+        boost::atomic<bool> m_stop;
     };
 }
 }

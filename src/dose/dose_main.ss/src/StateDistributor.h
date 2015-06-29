@@ -22,7 +22,7 @@
 *
 ******************************************************************************/
 #pragma once
-#include <atomic>
+#include <boost/atomic.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/asio.hpp>
 #include <boost/function.hpp>
@@ -108,7 +108,7 @@ namespace Internal
         boost::asio::io_service::strand& m_strand;
         std::function<void(int64_t)> m_checkPendingReg;
         std::vector<std::unique_ptr<SubcriptionConnection>> m_connections;
-        std::atomic_bool m_dispatcherNotified;
+        boost::atomic<bool> m_dispatcherNotified;
 
         static inline boost::shared_ptr<const char[]> ToPtr(const DistributionData& d)
         {

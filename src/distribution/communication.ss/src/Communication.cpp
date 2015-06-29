@@ -77,27 +77,27 @@ namespace
 
         //create node type map
         NodeTypeMap nodeTypeMap;
-        for (const auto& nt : nodeTypes)
+        for ( auto nt = nodeTypes.cbegin(); nt != nodeTypes.cend(); ++nt)
         {
-            if (nt.id==0)
+            if (nt->id==0)
             {
                 throw std::invalid_argument("Safir.Communication: NodeType '"+nt.name+"' has id=0. NodeTypeId 0 is reserved and can't be assigned to an specific nodeType.");
             }
 
-            const std::string& mc=isControlInstance ? nt.controlMulticastAddress : nt.dataMulticastAddress;
+            const std::string& mc=isControlInstance ? nt->controlMulticastAddress : nt->dataMulticastAddress;
             bool useMulticast=(thisNodeIsMulticastEnabled && !mc.empty());
             auto ptr= boost::shared_ptr<Safir::Dob::Internal::Com::NodeType>(new Safir::Dob::Internal::Com::NodeType(ioService,
                                                                                                                      nodeId,
                                                                                                                      localIf,
                                                                                                                      useMulticast,
-                                                                                                                     nt.id,
-                                                                                                                     nt.name,
+                                                                                                                     nt->id,
+                                                                                                                     nt->name,
                                                                                                                      mc,
                                                                                                                      ipVersion,
-                                                                                                                     nt.heartbeatInterval,
-                                                                                                                     nt.maxLostHeartbeats,
-                                                                                                                     nt.retryTimeout));
-            nodeTypeMap.insert(NodeTypeMap::value_type(nt.id, ptr));
+                                                                                                                     nt->heartbeatInterval,
+                                                                                                                     nt->maxLostHeartbeats,
+                                                                                                                     nt->retryTimeout));
+            nodeTypeMap.insert(NodeTypeMap::value_type(nt->id, ptr));
         }
 
         //create impl object

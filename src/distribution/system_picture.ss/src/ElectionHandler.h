@@ -33,7 +33,7 @@
 #include <boost/make_shared.hpp>
 #include <functional>
 #include <limits>
-#include <atomic>
+#include <boost/atomic.hpp>
 #include <map>
 #include <set>
 #include <boost/static_assert.hpp>
@@ -57,10 +57,11 @@
 
 namespace
 {
-    //Check that std::atomic<[u]int64_t> and std::atomic<[u]int32_t> are lock free
-    BOOST_STATIC_ASSERT(ATOMIC_INT_LOCK_FREE == 2); //int and unsigned int are always lock free
-    BOOST_STATIC_ASSERT(ATOMIC_LONG_LOCK_FREE == 2); //long and unsigned long are always lock free
-    BOOST_STATIC_ASSERT(ATOMIC_LLONG_LOCK_FREE == 2); //long long and unsigned long long are always lock free
+
+   	//Check that boost::atomic<[u]int64_t> and boost::atomic<[u]int32_t> are lock free
+    BOOST_STATIC_ASSERT(BOOST_ATOMIC_INT_LOCK_FREE == 2); //int and unsigned int are always lock free
+    BOOST_STATIC_ASSERT(BOOST_ATOMIC_LONG_LOCK_FREE == 2); //long and unsigned long are always lock free
+	BOOST_STATIC_ASSERT(BOOST_ATOMIC_LLONG_LOCK_FREE == 2); //llong and unsigned llong are always lock free
 
     //now we need to check that int32_t, uint32_t, int64_t and uint64_t actually map to any of the above types
     BOOST_STATIC_ASSERT((boost::is_same<int32_t, int>::value || boost::is_same<int32_t, long>::value));
@@ -570,10 +571,10 @@ namespace SP
 
         RawStatistics m_lastStatistics;
 
-        std::atomic<int64_t> m_elected;
+        boost::atomic<int64_t> m_elected;
         boost::asio::steady_timer m_electionTimer;
         bool m_electionInProgress;
-        std::atomic<int64_t> m_currentElectionId;
+        boost::atomic<int64_t> m_currentElectionId;
 
         boost::asio::steady_timer m_generateIncarnationIdTimer;
 

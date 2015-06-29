@@ -32,7 +32,7 @@
 #include <iostream>
 #include <map>
 #include <deque>
-#include <atomic>
+#include <boost/atomic.hpp>
 
 //disable warnings in boost
 #if defined _MSC_VER
@@ -362,7 +362,7 @@ int main(int argc, char * argv[])
     }
 
     boost::asio::io_service ioService;
-    std::atomic<bool> m_stop(false);
+    boost::atomic<bool> m_stop(false);
 
     // Make some work to stop io_service from exiting.
     auto work = Safir::make_unique<boost::asio::io_service::work>(ioService);
@@ -530,7 +530,7 @@ int main(int argc, char * argv[])
 
     ssh.SetStopHandler(stopFcn);
 
-    std::atomic<bool> success(true);
+    boost::atomic<bool> success(true);
 
     const auto run = [&ioService,&success]
         {

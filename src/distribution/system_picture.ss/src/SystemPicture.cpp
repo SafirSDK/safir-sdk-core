@@ -329,7 +329,7 @@ namespace SP
         std::unique_ptr<StatePublisherRemote> m_statePublisherRemote;
         std::unique_ptr<RemoteSubscriber<Com::Communication, Coordinator>> m_stateSubscriberRemote;
 
-        std::atomic<bool> m_stopped;
+        boost::atomic<bool> m_stopped;
     };
 
     SystemPicture::SystemPicture(master_tag_t,

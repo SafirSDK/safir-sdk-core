@@ -445,10 +445,11 @@ namespace Internal
 
         //The lock is released here, so at all points in the following loop where we're not holding the lock,
 
-        for (const auto& conn: signalledConnections)
+        for (auto conn = signalledConnections.begin(); conn != signalledConnections.end(); ++conn)
         {
-            handler(conn);
+            handler(*conn);
         }
+
     }
 
     bool

@@ -26,7 +26,7 @@
 #define __LLUF_IPC_PUBLISHER_H__
 
 #include <set>
-#include <atomic>
+#include <boost/atomic.hpp>
 #include <boost/cstdint.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/shared_array.hpp>
@@ -78,10 +78,15 @@ namespace Internal
                          const std::function<void()>    subscriberDisconnectedCb)
             : m_running(false),
               m_strand(ioService),
-              m_acceptor(boost::make_shared<Acceptor>(
+              m_acceptor(),
+              m_sessions(),
+              m_subscriberConnectedCb(subscriberConnectedCb),
+              m_subscriberDisconnectedCb(subscriberDisconnectedCb)
+        {
+            m_acceptor = boost::make_shared<Acceptor>(
                              m_strand,
                              name,
-                             [this](typename Acceptor::StreamPtr streamPtr)
+                             [this] (typename Acceptor::StreamPtr streamPtr)
                              {
                                  m_sessions.insert(boost::make_shared<SessionType>
                                                    (streamPtr, m_strand, m_subscriberDisconnectedCb));
@@ -89,11 +94,7 @@ namespace Internal
                                  {
                                      m_subscriberConnectedCb();
                                  }
-                             })),
-              m_sessions(),
-              m_subscriberConnectedCb(subscriberConnectedCb),
-              m_subscriberDisconnectedCb(subscriberDisconnectedCb)
-        {
+                             });
         }
 
         void Start()
@@ -114,7 +115,7 @@ namespace Internal
                                 return;
                             }
 
-                            TestPolicy::StartListeningEvent();
+                            StartListeningEvent();
 
                             m_acceptor->Start();
                         });
@@ -136,7 +137,7 @@ namespace Internal
                              m_sessions.clear();
                              m_acceptor->Stop();
 
-                             TestPolicy::StopListeningEvent();
+                             StopListeningEvent();
                          });
         }
 
@@ -173,12 +174,23 @@ namespace Internal
 
     private:
 
+
+        void StartListeningEvent()
+        {
+             TestPolicy::StartListeningEvent();
+        }
+
+        void StopListeningEvent()
+        {
+            TestPolicy::StopListeningEvent();
+        }
+
         typedef Session<typename Acceptor::StreamPtr> SessionType;
 
         typedef boost::shared_ptr<SessionType> SessionPtr;
         typedef boost::shared_ptr<Acceptor> AcceptorPtr;
 
-        std::atomic<bool>                   m_running;
+        boost::atomic<bool>                 m_running;
         boost::asio::io_service::strand     m_strand;
         AcceptorPtr                         m_acceptor;
         std::set<SessionPtr>                m_sessions;

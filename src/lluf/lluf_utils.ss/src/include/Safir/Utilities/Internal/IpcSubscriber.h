@@ -63,6 +63,7 @@ namespace Internal
         : public boost::enable_shared_from_this<IpcSubscriberImpl<TestPolicy>>,
           private boost::noncopyable
     {
+
     public:
 
         IpcSubscriberImpl(boost::asio::io_service&  ioService,
@@ -112,11 +113,29 @@ namespace Internal
                                   }
                                   m_connectRetryTimer.cancel();
 
-                                  TestPolicy::DisconnectEvent();
+                                  DisconnectEvent();
                               });
         }
 
     private:
+
+        void DisconnectEvent()
+        {
+            //vs2010 does not support templates in lambdas
+            TestPolicy::DisconnectEvent();
+        }
+
+        void ConnectedToPublisherEvent()
+        {
+            //vs2010 does not support templates in lambdas
+            TestPolicy::ConnectedToPublisherEvent();
+        }
+
+        void DisconnectedFromPublisherEvent()
+        {
+            //vs2010 does not support templates in lambdas
+            TestPolicy::DisconnectedFromPublisherEvent();
+        }
 
         void ConnectInternal()
         {
@@ -171,7 +190,7 @@ namespace Internal
     #endif
                             if (!ec)
                             {
-                                TestPolicy::ConnectedToPublisherEvent();
+                                ConnectedToPublisherEvent();
 
                                 ReadHeader();
                             }
@@ -222,7 +241,7 @@ namespace Internal
                                             {
                                                 m_stream.close();
 
-                                                TestPolicy::DisconnectedFromPublisherEvent();
+                                                DisconnectedFromPublisherEvent();
 
                                                 Reconnect();
                                             }
@@ -267,7 +286,7 @@ namespace Internal
                                             {
                                                 m_stream.close();
 
-                                                TestPolicy::DisconnectedFromPublisherEvent();
+                                                DisconnectedFromPublisherEvent();
 
                                                 Reconnect();
                                             }
@@ -298,7 +317,7 @@ namespace Internal
         const std::string                                                   m_streamId;
         const RecvDataCallback                                              m_callback;
         boost::uint32_t                                                     m_msgSize;
-        std::atomic<bool>                                                   m_connected;
+        boost::atomic<bool>                                                 m_connected;
         std::vector<char>                                                   m_msgRecvBuffer;
     };
 
