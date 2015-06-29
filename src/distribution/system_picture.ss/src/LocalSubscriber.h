@@ -65,7 +65,6 @@ namespace SP
                            m_name,
                            [this](const char* const data, size_t size){DataReceived(data,size);})
         {
-
         }
 
 

@@ -81,7 +81,7 @@ namespace
         {
             if (nt->id==0)
             {
-                throw std::invalid_argument("Safir.Communication: NodeType '"+nt.name+"' has id=0. NodeTypeId 0 is reserved and can't be assigned to an specific nodeType.");
+                throw std::invalid_argument("Safir.Communication: NodeType '"+nt->name+"' has id=0. NodeTypeId 0 is reserved and can't be assigned to an specific nodeType.");
             }
 
             const std::string& mc=isControlInstance ? nt->controlMulticastAddress : nt->dataMulticastAddress;

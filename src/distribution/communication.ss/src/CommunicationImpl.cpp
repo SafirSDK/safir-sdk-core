@@ -61,10 +61,12 @@ namespace Com
         ,m_gotRecv()
         ,m_discoverer(m_ioService,
                       m_me,
-                     [&nodeTypes]{ //calculate the maximum delay for Discover
+                     [&nodeTypes]() -> int { //calculate the maximum delay for Discover
                          int ep=100;
-                         for (auto& vt : nodeTypes)
-                             ep=std::max(ep, vt.second->RetryTimeout()*vt.second->MaxLostHeartbeats());
+                         for (auto vt = nodeTypes.begin(); vt != nodeTypes.end(); ++vt)
+                         {
+                             ep=(std::max)(ep, vt->second->RetryTimeout()*vt->second->MaxLostHeartbeats());
+                         }
                          return ep;
                      }(),
                      [=](const Node& n){OnNewNode(n);})
@@ -117,9 +119,9 @@ namespace Com
 
     void CommunicationImpl::SetRetransmitToCallback(const RetransmitTo& callback)
     {
-        for (auto& vt : m_nodeTypes)
+        for (auto vt = m_nodeTypes.cbegin(); vt != m_nodeTypes.cend(); ++vt)
         {
-            vt.second->GetAckedDataSender().SetRetransmitCallback(callback);
+            vt->second->GetAckedDataSender().SetRetransmitCallback(callback);
         }
     }
 
@@ -142,9 +144,9 @@ namespace Com
         }
         else //set callback for all nodeTypes
         {
-            for (auto& nt : m_nodeTypes)
+            for (auto nt = m_nodeTypes.cbegin(); nt != m_nodeTypes.cend(); ++nt)
             {
-                nt.second->GetAckedDataSender().SetNotFullCallback(callback);
+                nt->second->GetAckedDataSender().SetNotFullCallback(callback);
             }
         }
     }
@@ -153,10 +155,10 @@ namespace Com
     {
         m_deliveryHandler.Start();
         m_reader.Start();
-        for (auto& vt : m_nodeTypes)
+        for (auto vt = m_nodeTypes.cbegin(); vt != m_nodeTypes.cend(); ++vt)
         {
-            vt.second->GetHeartbeatSender().Start();
-            vt.second->GetAckedDataSender().Start();
+            vt->second->GetHeartbeatSender().Start();
+            vt->second->GetAckedDataSender().Start();
         }
         if (m_isControlInstance)
         {
@@ -168,10 +170,10 @@ namespace Com
     {
         m_reader.Stop();
         m_deliveryHandler.Stop();
-        for (auto& vt : m_nodeTypes)
+        for (auto vt = m_nodeTypes.cbegin(); vt != m_nodeTypes.cend(); ++vt)
         {
-            vt.second->GetHeartbeatSender().Stop();
-            vt.second->GetAckedDataSender().Stop();
+            vt->second->GetHeartbeatSender().Stop();
+            vt->second->GetAckedDataSender().Stop();
         }
         if (m_isControlInstance)
         {
@@ -277,17 +279,17 @@ namespace Com
             return;
 
         std::vector<std::string> resolvedSeeds;
-        for (auto& seed : seeds)
+        for (auto seed = seeds.cbegin(); seed != seeds.cend(); ++seed)
         {
             try
             {
-                auto rs=Resolver(m_ioService).ResolveRemoteEndpoint(seed, m_protocol);
+                auto rs=Resolver(m_ioService).ResolveRemoteEndpoint(*seed, m_protocol);
                 resolvedSeeds.push_back(rs);
             }
             catch(const std::logic_error& badSeed)
             {
                 lllog(2)<<"COM: InjectSeeds injecting a seed that could not be resolved to a valid ip_address and port. Seed: "
-                          <<seed.c_str()<<". "<<badSeed.what()<<std::endl;
+                          <<seed->c_str()<<". "<<badSeed.what()<<std::endl;
 
             }
         }

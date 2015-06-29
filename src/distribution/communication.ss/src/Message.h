@@ -145,9 +145,10 @@ namespace Com
         {
             std::ostringstream os;
             os<<"AckContent: {"<<commonHeader.ToString()<<", sendMethod: "<<SendMethodToString(sendMethod)<<", seq: "<<sequenceNumber<<", gaps: [";
-            for (auto i : missing) 
+            
+            for (int i = 0; i < Parameters::SlidingWindowSize; ++i)
             {
-                    os<<static_cast<int>(i);
+                    os<<static_cast<int>(missing[i]);
             }
 
             os<<"]}";

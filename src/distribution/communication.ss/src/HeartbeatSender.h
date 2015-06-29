@@ -74,10 +74,9 @@ namespace Com
             ,m_interval(heartbeatInterval)
             ,m_nodes()
             ,m_running(false)
-            ,m_logPrefix([&]{std::ostringstream os;
-                             os<<"COM: (HeartbeatSender nodeType "<<nodeTypeId<<") - ";
-                             return os.str();}())
+            ,m_logPrefix(GenerateLogPrefix(nodeTypeId))
         {
+            
         }
 
         void Start()
@@ -131,6 +130,13 @@ namespace Com
         std::map<int64_t, boost::asio::ip::udp::endpoint> m_nodes;
         bool m_running;
         const std::string m_logPrefix;
+
+        static std::string GenerateLogPrefix( int64_t nodeTypeId)
+        {
+            std::ostringstream os;
+            os<<"COM: (HeartbeatSender nodeType "<<nodeTypeId<<") - ";
+            return os.str();
+        }
 
         void OnTimeout()
         {

@@ -310,7 +310,7 @@ namespace Com
         int64_t m_myId;
         boost::asio::strand& m_receiveStrand; //for sending acks, same strand as all public methods are supposed to be called from
         boost::asio::strand m_deliverStrand; //for delivering data to application
-        boost::atomic<uint> m_numberOfUndeliveredMessages;
+        boost::atomic<unsigned int> m_numberOfUndeliveredMessages;
 
         NodeInfoMap m_nodes;
         ReceiverMap m_receivers;

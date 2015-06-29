@@ -34,7 +34,7 @@ Receiver::Receiver(Com::ControlModeTag tag, boost::asio::io_service& ioService, 
            nodeType,
            std::string("127.0.0.1:1000")+boost::lexical_cast<std::string>(nodeId),
            std::string("127.0.0.1:1100")+boost::lexical_cast<std::string>(nodeId),
-           [] //This lambda just generates a vector of nodetypes. It used to be an initializer list
+           []() -> std::vector<Com::NodeTypeDefinition>  //This lambda just generates a vector of nodetypes. It used to be an initializer list
            {  //but VS2012 doesnt have initializer lists :-(
                std::vector<Com::NodeTypeDefinition> n;
                n.push_back(Com::NodeTypeDefinition(10, "nt10", "", "", 1000, 1000, 10));
@@ -68,7 +68,7 @@ Receiver::Receiver(Com::DataModeTag tag, boost::asio::io_service& ioService, int
            nodeId,
            nodeType,
            std::string("127.0.0.1:1100")+boost::lexical_cast<std::string>(nodeId),
-           [] //This lambda just generates a vector of nodetypes. It used to be an initializer list
+           []() ->  std::vector<Com::NodeTypeDefinition> //This lambda just generates a vector of nodetypes. It used to be an initializer list
            {  //but VS2012 doesnt have initializer lists :-(
                 std::vector<Com::NodeTypeDefinition> n;
                 n.push_back(Com::NodeTypeDefinition(10, "nt10", "", "", 1000, 1000, 10));
@@ -118,9 +118,9 @@ void Receiver::Print() const
 {
     std::cout<<"--- "<<m_com.Name()<<" ---"<<std::endl;
     std::cout<<"Recv:"<<std::endl;
-    for (auto& vt : m_recvCount)
+    for (auto vt = m_recvCount.cbegin(); vt != m_recvCount.cend(); ++vt)
     {
-        std::cout<<"  ["<<vt.first<<"] => recvCount: "<<vt.second.first<<", lastRecvData: "<<vt.second.second<<std::endl;
+        std::cout<<"  ["<<vt->first<<"] => recvCount: "<<vt->second.first<<", lastRecvData: "<<vt->second.second<<std::endl;
     }
 }
 

@@ -371,19 +371,30 @@ private:
     {
         boost::mutex::scoped_lock lock(mutex);
         std::cout<<"------ Info ------"<<std::endl;
-        for (auto&& vt : discoverState)
+        
+        for (auto vt = discoverState.cbegin(); vt != discoverState.cend(); ++vt)
         {
-            std::cout<<"Id: "<<vt.first<<std::endl;
+            std::cout<<"Id: "<<vt->first<<std::endl;
             std::cout<<"Nodes: ";
-            for (auto id : vt.second.newNodes) {std::cout<<id<<", ";}
+            
+            for (auto id = vt->second.newNodes.cbegin(); id != vt->second.newNodes.cend(); ++id)
+            {
+                std::cout<<*id<<", ";
+            }
             std::cout<<std::endl;
 
             std::cout<<"DiscoverTo: ";
-            for (auto id : vt.second.sentDiscoverTo) {std::cout<<id<<", ";}
+            for (auto id = vt->second.sentDiscoverTo.cbegin(); id != vt->second.sentDiscoverTo.cend(); ++id)
+            {
+                std::cout<<*id<<", ";
+            }
             std::cout<<std::endl;
 
             std::cout<<"NodeInfoTo: ";
-            for (auto id : vt.second.sentNodeInfoTo) {std::cout<<id<<", ";}
+            for (auto id = vt->second.sentNodeInfoTo.cbegin(); id != vt->second.sentNodeInfoTo.cend(); ++id)
+            {
+                std::cout<<*id<<", ";
+            }
             std::cout<<std::endl<<std::endl;
         }
         std::cout<<"------------------\n"<<std::endl;
@@ -445,10 +456,10 @@ private:
     static void Deliver()
     {
         boost::mutex::scoped_lock lock(mutex);
-        for (auto& vt : discoverState)
+        for (auto vt = discoverState.cbegin(); vt != discoverState.cend(); ++vt)
         {
-            auto& dp=vt.second.discover;
-            HandleDiscover::Deliver(*dp, vt.first);
+            auto& dp=vt->second.discover;
+            HandleDiscover::Deliver(*dp, vt->first);
         }
     }
 

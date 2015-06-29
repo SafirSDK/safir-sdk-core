@@ -100,11 +100,8 @@ namespace Com
             ,m_queueNotFullNotification()
             ,m_queueNotFullNotificationLimit(Parameters::SendQueueSize/2)
             ,m_sendAckRequestForMsgIndex()
-            ,m_logPrefix([&]{std::ostringstream os;
-                             os<<"COM: ("<<DeliveryGuaranteeToString(deliveryGuarantee)<<"DataSender nodeType "<<nodeTypeId<<") - ";
-                             return os.str();}())
+            ,m_logPrefix(GenerateLogPrefix(deliveryGuarantee,nodeTypeId))
         {
-
             m_sendQueueSize=0;
             m_notifyQueueNotFull=false;
         }
@@ -361,7 +358,7 @@ namespace Com
         int64_t m_nodeTypeId;
         int64_t m_nodeId;
         MessageQueue<UserDataPtr> m_sendQueue;
-        std::atomic_uint m_sendQueueSize;
+        boost::atomic<unsigned int> m_sendQueueSize;
         bool m_running;
         int m_waitForAckTimeout;
         size_t m_fragmentDataSize; //size of a fragments data part, excluding header size.
@@ -375,6 +372,13 @@ namespace Com
         boost::atomic<bool> m_notifyQueueNotFull;
         std::vector<size_t> m_sendAckRequestForMsgIndex;
         const std::string m_logPrefix;
+
+        static std::string GenerateLogPrefix(uint8_t deliveryGuarantee, int64_t nodeTypeId)
+        {
+           std::ostringstream os;
+           os<<"COM: ("<<DeliveryGuaranteeToString(deliveryGuarantee)<<"DataSender nodeType "<<nodeTypeId<<") - ";
+           return os.str();
+        }
 
         void PostWelcome(int64_t nodeId)
         {

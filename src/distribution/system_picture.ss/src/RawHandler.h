@@ -98,7 +98,12 @@ namespace SP
             , m_nodeTypes(nodeTypes)
             , m_strand(ioService)
             , m_latencyMonitor("SpRawHandler",m_strand)
-            , m_checkDeadNodesTimer(ioService,
+            , m_checkDeadNodesTimer()
+            , m_master(master)
+            , m_validateIncarnationIdCallback(validateIncarnationIdCallback)
+            , m_stopped(false)
+        {
+            m_checkDeadNodesTimer = ioService,
                                     CalculateDeadCheckPeriod(nodeTypes),
                                     m_strand.wrap([this](const boost::system::error_code& error)
                                     {
@@ -115,11 +120,9 @@ namespace SP
                                         }
 
                                         CheckDeadNodes();
-                                    }))
-            , m_master(master)
-            , m_validateIncarnationIdCallback(validateIncarnationIdCallback)
-            , m_stopped(false)
-        {
+                                    });
+
+
             //set up some info about ourselves in our message
             m_allStatisticsMessage.set_name(name);
             m_allStatisticsMessage.set_id(id);

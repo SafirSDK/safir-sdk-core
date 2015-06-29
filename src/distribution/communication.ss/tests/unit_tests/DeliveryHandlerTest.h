@@ -382,17 +382,17 @@ private:
 
     static void DumpReceived()
     {
-        for (auto& vt : received)
+        for (auto vt = received.cbegin(); vt != received.cend(); ++vt)
         {
-            std::cout<<"node_"<<vt.first<<": received="<<vt.second<<", acked="<<acked[vt.first]<<std::endl;
+            std::cout<<"node_"<<vt->first<<": received="<<vt->second<<", acked="<<acked[vt->first]<<std::endl;
         }
     }
 
     static void DumpNodeInfo(Com::DeliveryHandlerBasic<DeliveryHandlerTest::TestWriter>& dh)
     {
-        for (auto& vt : dh.m_nodes)
+        for (auto vt = dh.m_nodes.cbegin(); vt != dh.m_nodes.cend(); ++vt)
         {
-            Com::DeliveryHandlerBasic<DeliveryHandlerTest::TestWriter>::NodeInfo& ni=vt.second;
+            Com::DeliveryHandlerBasic<DeliveryHandlerTest::TestWriter>::NodeInfo& ni=vt->second;
             std::cout<<"Node: "<<ni.node.name<<std::endl;
             std::cout<<"    Channel: unacked_singel, lastInSeq: "<<ni.unackedSingleReceiverChannel.lastInSequence<<", biggestSeq: "<<ni.unackedSingleReceiverChannel.biggestSequence<<std::endl;
             std::cout<<"    Channel: unacked_multi, lastInSeq: "<<ni.unackedMultiReceiverChannel.lastInSequence<<", biggestSeq: "<<ni.unackedMultiReceiverChannel.biggestSequence<<std::endl;
