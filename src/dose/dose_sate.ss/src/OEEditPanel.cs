@@ -317,11 +317,21 @@ namespace Sate
         {
             ObjectDataFieldControl c = null;
             Safir.Dob.Typesystem.MemberType memberType;
+            Safir.Dob.Typesystem.MemberType keyType;
             long complexType;
+            long keyTypeId;
             int typeSize;
             Safir.Dob.Typesystem.CollectionType ct;
             int arrLength;
-            string memberName = Safir.Dob.Typesystem.Members.GetInfo(typeId, member, out memberType, out complexType, out typeSize, out ct, out arrLength);
+            string memberName = Safir.Dob.Typesystem.Members.GetInfo(typeId,
+                                                                     member,
+                                                                     out memberType,
+                                                                     out keyType,
+                                                                     out complexType,
+                                                                     out keyTypeId,
+                                                                     out typeSize,
+                                                                     out ct,
+                                                                     out arrLength);
 
             if (ct!=Safir.Dob.Typesystem.CollectionType.ArrayCollectionType)
             {
