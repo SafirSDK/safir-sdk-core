@@ -617,6 +617,8 @@ BOOST_AUTO_TEST_CASE( lots_of_nodes )
 {
 #if !defined(NDEBUG)
     const int numNodes = 50;
+#elif defined(_MSC_VER)
+    const int numNodes = 100;
 #else
     const int numNodes = 500;
 #endif
@@ -647,6 +649,8 @@ BOOST_AUTO_TEST_CASE( lots_of_nodes_remove_some )
 {
 #if !defined(NDEBUG)
     const int numNodes = 50;
+#elif defined(_MSC_VER)
+    const int numNodes = 100;
 #else
     const int numNodes = 500;
 #endif
