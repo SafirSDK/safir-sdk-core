@@ -9335,15 +9335,6 @@ void TestSequences()
 
 void PrintDictionaries(DotsTest::MemberDictionariesPtr md)
 {
-    Safir::Dob::Typesystem::MemberType  lMT;
-    Safir::Dob::Typesystem::MemberType  lKT;
-    const char*                         lMN;
-    Safir::Dob::Typesystem::TypeId      lMTId;
-    Safir::Dob::Typesystem::TypeId      lKTId;
-    Safir::Dob::Typesystem::Int32       lSL;
-    Safir::Dob::Typesystem::CollectionType lCT;
-    Safir::Dob::Typesystem::Int32       lAL;
-
     std::wcout<<L"--- Int32StringMember ---"<<std::endl;
     std::wcout<<L"size: "<<md->Int32StringMember().size()<<std::endl;
     std::wcout<<L"isChanged: "<<md->Int32StringMember().IsChanged()<<std::endl;
