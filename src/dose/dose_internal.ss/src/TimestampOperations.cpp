@@ -53,8 +53,10 @@ namespace Internal
         if (fromTimestamp > intoTimestamp)
         {
             Safir::Dob::Typesystem::MemberType memberType;
+            Safir::Dob::Typesystem::MemberType keyType;
             const char * memberName;
             Typesystem::TypeId memberTypeId;
+            Typesystem::TypeId keyTypeId;
             Typesystem::Int32 stringLength;
             Typesystem::CollectionType collectionType;
             Typesystem::Int32 arrayLength;
@@ -62,8 +64,10 @@ namespace Internal
             Safir::Dob::Typesystem::Members::GetInfo(typeId,
                                                      member,
                                                      memberType,
+                                                     keyType,
                                                      memberName,
                                                      memberTypeId,
+                                                     keyTypeId,
                                                      stringLength,
                                                      collectionType,
                                                      arrayLength);

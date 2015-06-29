@@ -83,13 +83,15 @@ public final class Kernel {
     public static native int GetMemberId(long id, String memberName);
 
     public static native void GetMemberInfo(  long id,                //in
-            int member,            //in
-            int[] memberType,      //out
-            String[] memberName,   //out
-            long[] complexType,   //out
-            int[] stringLength,  //out
-            int[] collectionType, //out
-            int[] arrLength );   //out
+                                              int member,            //in
+                                              int[] memberType,      //out
+                                              int[] keyType,      //out
+                                              String[] memberName,   //out
+                                              long[] complexType,   //out
+                                              long[] keyTypeId,   //out
+                                              int[] stringLength,  //out
+                                              int[] collectionType, //out
+                                              int[] arrLength );   //out
 
     public static native int GetMemberArraySizeProperty(long classId, long propertyId, int propertyMember);
 

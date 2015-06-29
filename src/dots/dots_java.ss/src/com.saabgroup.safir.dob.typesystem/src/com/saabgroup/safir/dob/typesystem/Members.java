@@ -90,16 +90,18 @@ public class Members {
     public static String getName(long typeId, int member)
     {
         int[] memberType=new int[1];
-        String[] memberName=new String[1];        
+        int[] keyType=new int[1];
+        String[] memberName=new String[1];
         long[] complexType=new long[1];
+        long[] keyTypeId=new long[1];
         int[] stringLength=new int[1];
         int[] collectionType=new int[1];
         int[] arrLength=new int[1];
-        
-        Kernel.GetMemberInfo(typeId, member, memberType, memberName, complexType, stringLength, collectionType, arrLength);
+
+        Kernel.GetMemberInfo(typeId, member, memberType, keyType, memberName, complexType, keyTypeId, stringLength, collectionType, arrLength);
         return memberName[0];
     }
-    
+
     /**
      * Get the name of the type as it was defined in the xml description.
      *
@@ -112,19 +114,21 @@ public class Members {
     public static String getTypeName(long typeId, int member)
     {
         int[] memberType=new int[1];
-        String[] memberName=new String[1];        
+        int[] keyType=new int[1];
+        String[] memberName=new String[1];
         long[] complexType=new long[1];
+        long[] keyTypeId=new long[1];
         int[] stringLength=new int[1];
         int[] collectionType=new int[1];
         int[] arrLength=new int[1];
-        
-        Kernel.GetMemberInfo(typeId, member, memberType, memberName, complexType, stringLength, collectionType, arrLength);
-        
+
+        Kernel.GetMemberInfo(typeId, member, memberType, keyType, memberName, complexType, keyTypeId, stringLength, collectionType, arrLength);
+
         if (memberName[0] == null)
         {
             throw new IllegalValueException("There is no such type or member defined");
         }
-        
+
         MemberType mt=MemberType.values()[memberType[0]];
         if (mt==MemberType.OBJECT_MEMBER_TYPE || mt==MemberType.ENUMERATION_MEMBER_TYPE)
         {
@@ -151,14 +155,16 @@ public class Members {
     public static long getTypeId(long typeId, int member)
     {
         int[] memberType=new int[1];
-        String[] memberName=new String[1];        
+        int[] keyType=new int[1];
+        String[] memberName=new String[1];
         long[] complexType=new long[1];
+        long[] keyTypeId=new long[1];
         int[] stringLength=new int[1];
         int[] collectionType=new int[1];
         int[] arrLength=new int[1];
-        
-        Kernel.GetMemberInfo(typeId, member, memberType, memberName, complexType, stringLength, collectionType, arrLength);
-        
+
+        Kernel.GetMemberInfo(typeId, member, memberType, keyType, memberName, complexType, keyTypeId, stringLength, collectionType, arrLength);
+
         if (complexType[0] == -1)
         {
             throw new IllegalValueException("There is no such type or member defined");
@@ -183,22 +189,26 @@ public class Members {
     public static MemberInfo getInfo(long typeId, int member)
     {
         int[] memberType=new int[1];
-        String[] memberName=new String[1];        
+        int[] keyType=new int[1];
+        String[] memberName=new String[1];
         long[] complexType=new long[1];
+        long[] keyTypeId=new long[1];
         int[] stringLength=new int[1];
         int[] collectionType=new int[1];
         int[] arrLength=new int[1];
-        
-        Kernel.GetMemberInfo(typeId, member, memberType, memberName, complexType, stringLength, collectionType, arrLength);
-        
+
+        Kernel.GetMemberInfo(typeId, member, memberType, keyType, memberName, complexType, keyTypeId, stringLength, collectionType, arrLength);
+
         if (memberName[0]==null)
         {
             throw new IllegalValueException("There is no such type or member defined");
         }
 
         return new MemberInfo(MemberType.values()[memberType[0]],
+                              MemberType.values()[keyType[0]],
                               memberName[0],
                               complexType[0],
+                              keyTypeId[0],
                               stringLength[0],
                               CollectionType.values()[collectionType[0]],
                               arrLength[0]);
@@ -216,14 +226,16 @@ public class Members {
     public static int getArraySize(long typeId, int member)
     {
         int[] memberType=new int[1];
-        String[] memberName=new String[1];        
+        int[] keyType=new int[1];
+        String[] memberName=new String[1];
         long[] complexType=new long[1];
+        long[] keyTypeId=new long[1];
         int[] stringLength=new int[1];
         int[] collectionType=new int[1];
         int[] arrLength=new int[1];
-        
-        Kernel.GetMemberInfo(typeId, member, memberType, memberName, complexType, stringLength, collectionType, arrLength);
-        
+
+        Kernel.GetMemberInfo(typeId, member, memberType, keyType, memberName, complexType, keyTypeId, stringLength, collectionType, arrLength);
+
         if (memberName[0] == null)
         {
             throw new IllegalValueException("No such type or array defined");
@@ -246,14 +258,16 @@ public class Members {
     public static int getMaxStringLength(long typeId, int member)
     {
         int[] memberType=new int[1];
-        String[] memberName=new String[1];        
+        int[] keyType=new int[1];
+        String[] memberName=new String[1];
         long[] complexType=new long[1];
+        long[] keyTypeId=new long[1];
         int[] stringLength=new int[1];
         int[] collectionType=new int[1];
         int[] arrLength=new int[1];
-        
-        Kernel.GetMemberInfo(typeId, member, memberType, memberName, complexType, stringLength, collectionType, arrLength);
-        
+
+        Kernel.GetMemberInfo(typeId, member, memberType, keyType, memberName, complexType, keyTypeId, stringLength, collectionType, arrLength);
+
         if (memberName[0] == null)
         {
             throw new IllegalValueException("No such type or array defined");

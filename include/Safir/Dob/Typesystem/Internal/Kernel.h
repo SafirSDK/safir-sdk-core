@@ -180,8 +180,10 @@ extern "C"
     // Parameters:  typeId       -   id of class or property
     //              member       -   id of member
     //              memberType   -   the type of the member, out parameter.
+    //              keyType      -   the type of the key, if member is dictionary, out parameter.
     //              memberName   -   the name of the member, out parameter.
     //              complexType  -   if memberType is object or enumeration, this is the typeId of that type. out parameter.
+    //              keyTypeId    -   if member is a dict and keyType is an enumeration, this is the typeId of that type. out parameter.
     //              stringLength -   if memberType is string and the type is a class then this is the length of the string. Out parameter
     //              isArray      -   true if member is an array and type id is a class. Not applicable if type id is a property. Out parameter.
     //              arrayLength  -   maximum capacity of array if the member is an array. Not applicable if type id is a property.
@@ -192,8 +194,10 @@ extern "C"
     DOTS_KERNEL_API void DotsC_GetMemberInfo(DotsC_TypeId typeId,  //in
                                              DotsC_MemberIndex member,  //in
                                              DotsC_MemberType& memberType,//out
+                                             DotsC_MemberType& keyType,//out
                                              const char*& memberName,           //out
                                              DotsC_TypeId& complexType,   //out
+                                             DotsC_TypeId& keyTypeId,   //out
                                              DotsC_Int32& stringLength,   //out
                                              DotsC_CollectionType& collectionType, //out
                                              DotsC_Int32& arraySize);   //out

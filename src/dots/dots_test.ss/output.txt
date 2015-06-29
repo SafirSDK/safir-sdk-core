@@ -1953,6 +1953,14 @@ isChanged: false
 =====================================================
 Testing: Dictionaries
 =====================================================
+GetInfo: STRINGMEMBERTYPE,INT32MEMBERTYPE,Int32StringMember,-1,-1,0,Dictionary,1
+GetInfo: BINARYMEMBERTYPE,INT64MEMBERTYPE,Int64BinaryMember,-1,-1,-1,Dictionary,1
+GetInfo: ENUMERATIONMEMBERTYPE,TYPEIDMEMBERTYPE,TypeIdEnumMember,7765043459684641017,-1,-1,Dictionary,1
+GetInfo: INSTANCEIDMEMBERTYPE,ENUMERATIONMEMBERTYPE,EnumInstanceIdMember,-1,7765043459684641017,-1,Dictionary,1
+GetInfo: ENTITYIDMEMBERTYPE,INSTANCEIDMEMBERTYPE,InstanceIdEntityIdMember,-1,-1,-1,Dictionary,1
+GetInfo: HANDLERIDMEMBERTYPE,ENTITYIDMEMBERTYPE,EntityIdHandlerIdMember,-1,-1,-1,Dictionary,1
+GetInfo: OBJECTMEMBERTYPE,STRINGMEMBERTYPE,StringItemMember,-2750667458010662290,-1,-1,Dictionary,1
+GetInfo: OBJECTMEMBERTYPE,STRINGMEMBERTYPE,StringObjectMember,5955188366590963785,-1,-1,Dictionary,1
 --- Int32StringMember ---
 size: 2
 isChanged: true

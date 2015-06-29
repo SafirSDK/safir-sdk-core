@@ -38,6 +38,12 @@ public class MemberInfo
     public MemberType getMemberType() {return m_memberType;};
 
     /**
+    * Get the type of the key if the member is a dictionary.
+    * @return The type of the key.
+    */
+    public MemberType getKeyType() {return m_keyType;};
+
+    /**
      * Get the name of the member.
      * @return The name of the member.
      */
@@ -50,6 +56,13 @@ public class MemberInfo
      * @return TypeId of member.
      */
     public long getMemberTypeId() {return m_memberTypeId;}
+
+    /**
+     * if member is a dictionary and keyType is enumeration, this is the typeId of that type.
+     *
+     * @return TypeId of key.
+     */
+    public long getKeyTypeId() {return m_keyTypeId;}
 
     /**
      * If memberType is string and the type is a class
@@ -74,23 +87,29 @@ public class MemberInfo
 
 
     MemberInfo(MemberType memberType,
+               MemberType keyType,
                String memberName,
                long memberTypeId,
+               long keyTypeId,
                int stringLength,
                CollectionType collectionType,
                int arrayLength)
     {
         m_memberType = memberType;
+        m_keyType = keyType;
         m_memberName = memberName;
         m_memberTypeId = memberTypeId;
+        m_keyTypeId = keyTypeId;
         m_stringLength = stringLength;
         m_collectionType = collectionType;
         m_arrayLength = arrayLength;
     }
 
     private MemberType m_memberType;
+    private MemberType m_keyType;
     private String m_memberName;
     private long m_memberTypeId;
+    private long m_keyTypeId;
     private int m_stringLength;
     private CollectionType m_collectionType;
     private int m_arrayLength;

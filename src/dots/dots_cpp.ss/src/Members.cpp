@@ -1,7 +1,7 @@
 /******************************************************************************
 *
 * Copyright Consoden AB, 2006-2013 (http://safir.sourceforge.net)
-* 
+*
 * Created by: Lars Hagström / stlrha
 *
 *******************************************************************************
@@ -52,7 +52,7 @@ namespace Members
         }
     }
 
-    MemberIndex 
+    MemberIndex
     GetIndex(const TypeId typeId, const std::wstring & memberName)
     {
         const MemberIndex result = DotsC_GetMemberId(typeId, Utilities::ToUtf8(memberName).c_str());
@@ -66,17 +66,28 @@ namespace Members
         }
     }
 
-    std::wstring 
-    GetName(const TypeId typeId, 
+    std::wstring
+    GetName(const TypeId typeId,
             const MemberIndex member)
     {
         DotsC_MemberType memberType;
+        DotsC_MemberType keyType;
         const char* memberName;
         DotsC_TypeId complexType;
+        DotsC_TypeId keyTypeId;
         DotsC_Int32 stringLength;
         DotsC_CollectionType collectionType;
         DotsC_Int32 arraySize;
-        DotsC_GetMemberInfo(typeId, member, memberType, memberName, complexType, stringLength, collectionType, arraySize);
+        DotsC_GetMemberInfo(typeId,
+                            member,
+                            memberType,
+                            keyType,
+                            memberName,
+                            complexType,
+                            keyTypeId,
+                            stringLength,
+                            collectionType,
+                            arraySize);
 
         if (memberName == NULL)
         {
@@ -91,12 +102,23 @@ namespace Members
     std::wstring GetTypeName(const Dob::Typesystem::TypeId typeId, const Dob::Typesystem::MemberIndex member)
     {
         DotsC_MemberType memberType;
+        DotsC_MemberType keyType;
         const char* memberName;
         DotsC_TypeId complexType;
+        DotsC_TypeId keyTypeId;
         DotsC_Int32 stringLength;
         DotsC_CollectionType collectionType;
         DotsC_Int32 arraySize;
-        DotsC_GetMemberInfo(typeId, member, memberType, memberName, complexType, stringLength, collectionType, arraySize);
+        DotsC_GetMemberInfo(typeId,
+                            member,
+                            memberType,
+                            keyType,
+                            memberName,
+                            complexType,
+                            keyTypeId,
+                            stringLength,
+                            collectionType,
+                            arraySize);
 
         if (memberName == NULL)
         {
@@ -113,17 +135,28 @@ namespace Members
         }
     }
 
-    TypeId  
-    GetTypeId(const TypeId typeId, 
+    TypeId
+    GetTypeId(const TypeId typeId,
                       const MemberIndex member)
     {
         DotsC_MemberType memberType;
+        DotsC_MemberType keyType;
         const char* memberName;
         DotsC_TypeId complexType;
+        DotsC_TypeId keyTypeId;
         DotsC_Int32 stringLength;
         DotsC_CollectionType collectionType;
         DotsC_Int32 arraySize;
-        DotsC_GetMemberInfo(typeId, member, memberType, memberName, complexType, stringLength, collectionType, arraySize);
+        DotsC_GetMemberInfo(typeId,
+                            member,
+                            memberType,
+                            keyType,
+                            memberName,
+                            complexType,
+                            keyTypeId,
+                            stringLength,
+                            collectionType,
+                            arraySize);
 
         if (complexType == -1)
         {
@@ -135,17 +168,28 @@ namespace Members
         }
     }
 
-    void 
-    GetInfo(const TypeId typeId,                //in 
+    void
+    GetInfo(const TypeId typeId,                //in
             const MemberIndex member,           //in
             MemberType& memberType,             //out
+            MemberType& keyType,                //out
             const char* & memberName,           //out
             TypeId& memberTypeId,               //out
+            TypeId& keyTypeId,                  //out
             Int32& stringLength,                //out
             CollectionType& collectionType,     //out
             Int32& arrayLength)                 //out
     {
-        DotsC_GetMemberInfo(typeId, member, memberType, memberName, memberTypeId, stringLength, collectionType, arrayLength);
+        DotsC_GetMemberInfo(typeId,
+                            member,
+                            memberType,
+                            keyType,
+                            memberName,
+                            memberTypeId,
+                            keyTypeId,
+                            stringLength,
+                            collectionType,
+                            arrayLength);
         if (memberName == NULL)
         {
             throw IllegalValueException(L"There is no such type or member defined", __WFILE__, __LINE__);
@@ -153,17 +197,28 @@ namespace Members
     }
 
 
-    Int32 
-    GetArraySize(const TypeId typeId, 
+    Int32
+    GetArraySize(const TypeId typeId,
                  const MemberIndex member)
     {
         DotsC_MemberType memberType;
+        DotsC_MemberType keyType;
         const char* memberName;
         DotsC_TypeId complexType;
+        DotsC_TypeId keyTypeId;
         DotsC_Int32 stringLength;
         DotsC_CollectionType collectionType;
         DotsC_Int32 arraySize;
-        DotsC_GetMemberInfo(typeId, member, memberType, memberName, complexType, stringLength, collectionType, arraySize);
+        DotsC_GetMemberInfo(typeId,
+                            member,
+                            memberType,
+                            keyType,
+                            memberName,
+                            complexType,
+                            keyTypeId,
+                            stringLength,
+                            collectionType,
+                            arraySize);
 
         if (arraySize == -1)
         {
@@ -175,17 +230,28 @@ namespace Members
         }
     }
 
-    Int32 
-    GetMaxStringLength(const TypeId typeId, 
+    Int32
+    GetMaxStringLength(const TypeId typeId,
                        const MemberIndex member)
     {
         DotsC_MemberType memberType;
+        DotsC_MemberType keyType;
         const char* memberName;
         DotsC_TypeId complexType;
+        DotsC_TypeId keyTypeId;
         DotsC_Int32 stringLength;
         DotsC_CollectionType collectionType;
         DotsC_Int32 arraySize;
-        DotsC_GetMemberInfo(typeId, member, memberType, memberName, complexType, stringLength, collectionType, arraySize);
+        DotsC_GetMemberInfo(typeId,
+                            member,
+                            memberType,
+                            keyType,
+                            memberName,
+                            complexType,
+                            keyTypeId,
+                            stringLength,
+                            collectionType,
+                            arraySize);
 
         if (stringLength == -1)
         {

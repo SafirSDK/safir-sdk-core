@@ -371,8 +371,10 @@ DotsC_MemberIndex DotsC_GetMemberId(const DotsC_TypeId typeId, const char* const
 void DotsC_GetMemberInfo(DotsC_TypeId typeId,  //in
                          DotsC_MemberIndex member,  //in
                          DotsC_MemberType& memberType,//out
+                         DotsC_MemberType& keyType,//out
                          const char*& memberName,           //out
                          DotsC_TypeId& complexType,   //out
+                         DotsC_TypeId& keyTypeId,   //out
                          DotsC_Int32& stringLength,   //out
                          DotsC_CollectionType& collectionType, //out
                          DotsC_Int32& arraySize)   //out
@@ -380,8 +382,11 @@ void DotsC_GetMemberInfo(DotsC_TypeId typeId,  //in
     Init();
     const MemberDescriptionShm* memberDesc;
     complexType=-1;
-    const ClassDescriptionShm* cd=RepositoryKeeper::GetRepository()->GetClass(typeId);
+    keyTypeId=-1;
     stringLength=-1;
+    keyType= static_cast<DotsC_MemberType>(0);
+
+    const ClassDescriptionShm* cd=RepositoryKeeper::GetRepository()->GetClass(typeId);
     if (cd!=NULL)
     {
         memberDesc=cd->GetMember(member);
@@ -389,7 +394,6 @@ void DotsC_GetMemberInfo(DotsC_TypeId typeId,  //in
         {
             // there is no error code, so set all out fields to invalid (-1 or null)
             memberName=NULL;
-            complexType=-1;
             arraySize=-1;
             return;
         }
@@ -401,17 +405,12 @@ void DotsC_GetMemberInfo(DotsC_TypeId typeId,  //in
         {
             // there is no error code, so set all out fields to invalid (-1 or null)
             memberName=NULL;
-            complexType=-1;
             arraySize=-1;
             return;
         }
         memberDesc=pd->GetMember(member);
     }
 
-    if (memberDesc->GetMemberType()==StringMemberType)
-    {
-        stringLength=memberDesc->GetMaxLength();
-    }
 
     memberType=memberDesc->GetMemberType();
     memberName=memberDesc->GetName();
@@ -420,6 +419,19 @@ void DotsC_GetMemberInfo(DotsC_TypeId typeId,  //in
     if (memberType==ObjectMemberType || memberType==EnumerationMemberType)
     {
         complexType=memberDesc->GetTypeId();
+    }
+    if (memberType==StringMemberType)
+    {
+        stringLength=memberDesc->GetMaxLength();
+    }
+
+    if (collectionType == DictionaryCollectionType)
+    {
+        keyType = memberDesc->GetKeyType();
+        if (keyType == EnumerationMemberType)
+        {
+            keyTypeId = memberDesc->GetKeyTypeId();
+        }
     }
 }
 
@@ -633,7 +645,7 @@ bool DotsC_GetPropertyMappingKind(const DotsC_TypeId typeId,
                                   const DotsC_MemberIndex member,
                                   DotsC_PropertyMappingKind & mappingKind)
 {
-    Init();   
+    Init();
 
     bool isInherited;
     const PropertyMappingDescriptionShm* pmd=RepositoryKeeper::GetRepository()->GetClass(typeId)->GetPropertyMapping(propertyId, isInherited);

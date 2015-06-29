@@ -1,7 +1,7 @@
 /******************************************************************************
 *
 * Copyright Consoden AB, 2006-2013 (http://safir.sourceforge.net)
-* 
+*
 * Created by: Lars Hagström / stlrha
 *
 *******************************************************************************
@@ -112,23 +112,31 @@ namespace Members
      * @param typeId [in] - TypeId of class or property.
      * @param member [in] - Index of member.
      * @param memberType [out] - The type of the member.
+     * @param keyType [out] - The type of the key if the member is a dictionary, otherwise undefined.
      * @param memberName [out] - The name of the member.
      * @param memberTypeId [out] - if memberType is object or enumeration, this is the typeId of that type.
      *                             If memberType is something else the value is -1.
-     * @param stringLength [out] - If memberType is string and the type is a class (not property) then this is the length of the string.
+     * @param keyTypeId [out] - if the member is a dictionary and the key type is an enumeration this is
+     *                          the type id of the enumeration. Otherwise undefined.
+     *                             If memberType is something else the value is -1.
+     * @param stringLength [out] - If memberType is string and the type is a class (not property) then
+     *                             this is the length of the string.
      * @param collectionType [out] - The member collection type, can be singel value, array, sequence or dictionary.
-     * @param arrayLength [out] - Maximum capacity of array if the member collection type is an array (1 if not an array). Not applicable if type id is a property.
+     * @param arrayLength [out] - Maximum capacity of array if the member collection type is an array
+     *                            (1 if not an array). Not applicable if type id is a property.
      * @throws IllegalValueException There is no such type defined or there is no such member
      *                               in the type.
      */
     DOTS_CPP_API void GetInfo(const Dob::Typesystem::TypeId typeId,
-                          const Dob::Typesystem::MemberIndex member,
-                          Dob::Typesystem::MemberType& memberType,
-                          const char * & memberName,
-                          Dob::Typesystem::TypeId & memberTypeId,
-                          Dob::Typesystem::Int32 & stringLength,
-                          CollectionType & collectionType,
-                          Dob::Typesystem::Int32 & arrayLength);
+                              const Dob::Typesystem::MemberIndex member,
+                              Dob::Typesystem::MemberType& memberType,
+                              Dob::Typesystem::MemberType& keyType,
+                              const char * & memberName,
+                              Dob::Typesystem::TypeId & memberTypeId,
+                              Dob::Typesystem::TypeId & keyTypeId,
+                              Dob::Typesystem::Int32 & stringLength,
+                              CollectionType & collectionType,
+                              Dob::Typesystem::Int32 & arrayLength);
 
     /**
      * Get the array size of a member.
@@ -159,4 +167,3 @@ namespace Members
 }
 
 #endif
-

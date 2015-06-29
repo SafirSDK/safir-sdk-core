@@ -93,13 +93,15 @@ namespace Safir.Dob.Typesystem
                                      int member)
         {
             MemberType memberType;
+            MemberType keyType;
             IntPtr memberName;
             Int64 complexType;
+            Int64 keyTypeId;
             Int32 stringLength;
             CollectionType collectionType;
             Int32 arraySize;
 
-            Kernel.DotsC_GetMemberInfo(typeId, member, out memberType, out memberName, out complexType, out stringLength, out collectionType, out arraySize);
+            Kernel.DotsC_GetMemberInfo(typeId, member, out memberType, out keyType, out memberName, out complexType, out keyTypeId, out stringLength, out collectionType, out arraySize);
 
             if (memberName == IntPtr.Zero)
             {
@@ -123,13 +125,15 @@ namespace Safir.Dob.Typesystem
                                          int member)
         {
             MemberType memberType;
+            MemberType keyType;
             IntPtr memberName;
             Int64 complexType;
+            Int64 keyTypeId;
             Int32 stringLength;
             CollectionType collectionType;
             Int32 arraySize;
 
-            Kernel.DotsC_GetMemberInfo(typeId, member, out memberType, out memberName, out complexType, out stringLength, out collectionType, out arraySize);
+            Kernel.DotsC_GetMemberInfo(typeId, member, out memberType, out keyType, out memberName, out complexType, out keyTypeId, out stringLength, out collectionType, out arraySize);
 
             if (memberName == IntPtr.Zero)
             {
@@ -164,13 +168,15 @@ namespace Safir.Dob.Typesystem
                                              int member)
         {
             MemberType memberType;
+            MemberType keyType;
             IntPtr memberName;
             Int64 complexType;
+            Int64 keyTypeId;
             Int32 stringLength;
             CollectionType collectionType;
             Int32 arraySize;
 
-            Kernel.DotsC_GetMemberInfo(typeId, member, out memberType, out memberName, out complexType, out stringLength, out collectionType, out arraySize);
+            Kernel.DotsC_GetMemberInfo(typeId, member, out memberType, out keyType, out memberName, out complexType, out keyTypeId, out stringLength, out collectionType, out arraySize);
 
             if (complexType == -1)
             {
@@ -187,9 +193,11 @@ namespace Safir.Dob.Typesystem
         /// </summary>
         /// <param name="typeId">TypeId of class or property.</param>
         /// <param name="member">Index of member.</param>
-        /// <param name="theMemberType">The type of the member.</param>
+        /// <param name="memberType">The type of the member.</param>
+        /// <param name="keyType">The type of the key if member is dictionary.</param>
         /// <param name="memberTypeId">If memberType is object or enumeration, this is the typeId of that type.
-        /// If memberType is something else the value is -1.</param>
+        ///                            If memberType is something else the value is -1.</param>
+        /// <param name="keyTypeId">If member is a dictionary and keyType is enumeration, this is the typeId of that type.</param>
         /// <param name="stringLength">Length of the string</param>
         /// <param name="collectionType">Member collection type.</param>
         /// <param name="arrayLength">Maximum capacity of array if the member is an array (1 if not an array). Not applicable if type id is a property.</param>
@@ -197,14 +205,16 @@ namespace Safir.Dob.Typesystem
         /// <exception cref="Safir.Dob.Typesystem.IllegalValueException">There is no such type defined or there is no such member in the type.</exception>
         public static string GetInfo(System.Int64 typeId,
                                      int member,
-                                     out MemberType theMemberType,
+                                     out MemberType memberType,
+                                     out MemberType keyType,
                                      out System.Int64 memberTypeId,
+                                     out System.Int64 keyTypeId,
                                      out int stringLength,
                                      out CollectionType collectionType,
                                      out int arrayLength)
         {
             IntPtr name;
-            Kernel.DotsC_GetMemberInfo(typeId, member, out theMemberType, out name, out memberTypeId, out stringLength, out collectionType, out arrayLength);
+            Kernel.DotsC_GetMemberInfo(typeId, member, out memberType, out keyType, out name, out memberTypeId, out keyTypeId, out stringLength, out collectionType, out arrayLength);
 
             if (name == IntPtr.Zero)
             {
@@ -227,13 +237,15 @@ namespace Safir.Dob.Typesystem
                                              int member)
         {
             MemberType memberType;
+            MemberType keyType;
             IntPtr memberName;
             Int64 complexType;
+            Int64 keyTypeId;
             Int32 stringLength;
             CollectionType collectionType;
             Int32 arraySize;
 
-            Kernel.DotsC_GetMemberInfo(typeId, member, out memberType, out memberName, out complexType, out stringLength, out collectionType, out arraySize);
+            Kernel.DotsC_GetMemberInfo(typeId, member, out memberType, out keyType, out memberName, out complexType, out keyTypeId, out stringLength, out collectionType, out arraySize);
 
             if (arraySize == -1)
             {
@@ -256,13 +268,15 @@ namespace Safir.Dob.Typesystem
                                              int member)
         {
             MemberType memberType;
+            MemberType keyType;
             IntPtr memberName;
             Int64 complexType;
+            Int64 keyTypeId;
             Int32 stringLength;
             CollectionType collectionType;
             Int32 arraySize;
 
-            Kernel.DotsC_GetMemberInfo(typeId, member, out memberType, out memberName, out complexType, out stringLength, out collectionType, out arraySize);
+            Kernel.DotsC_GetMemberInfo(typeId, member, out memberType, out keyType, out memberName, out complexType, out keyTypeId, out stringLength, out collectionType, out arraySize);
 
             if (stringLength == -1)
             {

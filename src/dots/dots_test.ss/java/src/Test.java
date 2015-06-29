@@ -11449,6 +11449,115 @@ public class Test {
         printSequences(fromJson);
     }
 
+    private static void printDictionaryMemberInfo()
+    {
+        MemberInfo mi;
+
+        mi = Members.getInfo(MemberDictionaries.ClassTypeId,
+                                                  MemberDictionaries.getInt32StringMemberMemberIndex());
+
+        System.out.println("GetInfo: "
+                           + toStringNoUnderscore(mi.getMemberType()) + ","
+                           + toStringNoUnderscore(mi.getKeyType()) + ","
+                           + mi.getMemberName() + "," + mi.getMemberTypeId() + ","
+                           + mi.getKeyTypeId() + ","
+                           + mi.getStringLength() + "," + ctStr(mi.getCollectionType()) + ","
+                           + mi.getArrayLength());
+
+
+        mi = Members.getInfo(MemberDictionaries.ClassTypeId,
+                             MemberDictionaries.getInt64BinaryMemberMemberIndex());
+
+        System.out.println("GetInfo: "
+                           + toStringNoUnderscore(mi.getMemberType()) + ","
+                           + toStringNoUnderscore(mi.getKeyType()) + ","
+                           + mi.getMemberName() + "," + mi.getMemberTypeId() + ","
+                           + mi.getKeyTypeId() + ","
+                           + mi.getStringLength() + "," + ctStr(mi.getCollectionType()) + ","
+                           + mi.getArrayLength());
+
+
+
+        mi = Members.getInfo(MemberDictionaries.ClassTypeId,
+                                                    MemberDictionaries.getTypeIdEnumMemberMemberIndex());
+
+        System.out.println("GetInfo: "
+                           + toStringNoUnderscore(mi.getMemberType()) + ","
+                           + toStringNoUnderscore(mi.getKeyType()) + ","
+                           + mi.getMemberName() + "," + mi.getMemberTypeId() + ","
+                           + mi.getKeyTypeId() + ","
+                           + mi.getStringLength() + "," + ctStr(mi.getCollectionType()) + ","
+                           + mi.getArrayLength());
+
+
+
+        mi = Members.getInfo(MemberDictionaries.ClassTypeId,
+                                                    MemberDictionaries.getEnumInstanceIdMemberMemberIndex());
+
+        System.out.println("GetInfo: "
+                           + toStringNoUnderscore(mi.getMemberType()) + ","
+                           + toStringNoUnderscore(mi.getKeyType()) + ","
+                           + mi.getMemberName() + "," + mi.getMemberTypeId() + ","
+                           + mi.getKeyTypeId() + ","
+                           + mi.getStringLength() + "," + ctStr(mi.getCollectionType()) + ","
+                           + mi.getArrayLength());
+
+
+
+        mi = Members.getInfo(MemberDictionaries.ClassTypeId,
+                                                    MemberDictionaries.getInstanceIdEntityIdMemberMemberIndex());
+
+        System.out.println("GetInfo: "
+                           + toStringNoUnderscore(mi.getMemberType()) + ","
+                           + toStringNoUnderscore(mi.getKeyType()) + ","
+                           + mi.getMemberName() + "," + mi.getMemberTypeId() + ","
+                           + mi.getKeyTypeId() + ","
+                           + mi.getStringLength() + "," + ctStr(mi.getCollectionType()) + ","
+                           + mi.getArrayLength());
+
+
+
+        mi = Members.getInfo(MemberDictionaries.ClassTypeId,
+                                                    MemberDictionaries.getEntityIdHandlerIdMemberMemberIndex());
+
+        System.out.println("GetInfo: "
+                           + toStringNoUnderscore(mi.getMemberType()) + ","
+                           + toStringNoUnderscore(mi.getKeyType()) + ","
+                           + mi.getMemberName() + "," + mi.getMemberTypeId() + ","
+                           + mi.getKeyTypeId() + ","
+                           + mi.getStringLength() + "," + ctStr(mi.getCollectionType()) + ","
+                           + mi.getArrayLength());
+
+
+
+        mi = Members.getInfo(MemberDictionaries.ClassTypeId,
+                                                    MemberDictionaries.getStringItemMemberMemberIndex());
+
+        System.out.println("GetInfo: "
+                           + toStringNoUnderscore(mi.getMemberType()) + ","
+                           + toStringNoUnderscore(mi.getKeyType()) + ","
+                           + mi.getMemberName() + "," + mi.getMemberTypeId() + ","
+                           + mi.getKeyTypeId() + ","
+                           + mi.getStringLength() + "," + ctStr(mi.getCollectionType()) + ","
+                           + mi.getArrayLength());
+
+
+
+        mi = Members.getInfo(MemberDictionaries.ClassTypeId,
+                                                    MemberDictionaries.getStringObjectMemberMemberIndex());
+
+        System.out.println("GetInfo: "
+                           + toStringNoUnderscore(mi.getMemberType()) + ","
+                           + toStringNoUnderscore(mi.getKeyType()) + ","
+                           + mi.getMemberName() + "," + mi.getMemberTypeId() + ","
+                           + mi.getKeyTypeId() + ","
+                           + mi.getStringLength() + "," + ctStr(mi.getCollectionType()) + ","
+                           + mi.getArrayLength());
+
+
+
+    }
+
     private static void printDictionaries(MemberDictionaries md)
     {
 
@@ -11544,6 +11653,8 @@ public class Test {
     private static void testDictionaries()
     {
         Header("Dictionaries");
+
+        printDictionaryMemberInfo();
 
         MemberDictionaries md=new MemberDictionaries();
 
