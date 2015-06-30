@@ -2,14 +2,14 @@ cmake_minimum_required(VERSION 2.8.12)
 
 find_package(SafirSDKCore REQUIRED)
 
-ADD_SAFIR_GENERATED_LIBRARY(
+add_safir_generated_library(
   NAME Test1
   DEPENDENCIES Core
   DOU_FILES Dobmake.Test1.dou)
 
 
 #Can be absolute paths or relative paths. If relative, they will be prefixed with CMAKE_INSTALL_PREFIX
-INSTALL_SAFIR_GENERATED_LIBRARY(
+install_safir_generated_library(
   TARGETS Test1
   CXX_RUNTIME bin
   CXX_LIBRARY lib
