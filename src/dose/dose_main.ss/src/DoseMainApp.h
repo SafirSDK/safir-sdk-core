@@ -100,7 +100,7 @@ namespace Internal
         int64_t m_nodeId;
         std::unique_ptr<Distribution> m_distribution;
 
-        Control::DoseMainCmdReceiver m_cmdReceiver;
+        std::unique_ptr<Control::DoseMainCmdReceiver> m_cmdReceiver;
 
         boost::asio::signal_set m_signalSet;
 

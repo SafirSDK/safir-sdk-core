@@ -100,18 +100,7 @@ namespace SP
             , m_receiverId(LlufId_Generate64(receiverId))
             , m_id(id)
             , m_nodeTypes(nodeTypes)
-            , m_nonLightNodeTypes([&nodeTypes]
-                                  {
-                                      std::set<int64_t> res;
-                                      for (const auto& it: nodeTypes)
-                                      {
-                                          if (!it.second.isLight)
-                                          {
-                                              res.insert(it.first);
-                                          }
-                                      }
-                                      return res;
-                                  }())
+            , m_nonLightNodeTypes(GetLightNodeTypes(nodeTypes))
             , m_aloneTimeout(CalculateAloneTimeout(nodeTypes))
             , m_electionTimeout(CalculateElectionTimeout(nodeTypes))
             , m_elected(std::numeric_limits<int64_t>::min())
@@ -185,6 +174,22 @@ namespace SP
                               });
         }
     private:
+
+        /** Finds Returns the subset of nodeTypes with the isLight flag  */
+        static std::set<int64_t> GetLightNodeTypes(const std::map<int64_t, NodeType>& nodeTypes)
+        {
+            std::set<int64_t> res;
+            for (const auto& it: nodeTypes)
+            {
+                if (!it.second.isLight)
+                {
+                    res.insert(it.first);
+                }
+            }
+            return res;
+        }
+
+
         /** Calculate the time to wait for other nodes to come up before assuming that
          * we're alone and proclaiming victory. */
         static boost::chrono::steady_clock::duration CalculateAloneTimeout(const std::map<int64_t, NodeType>& nodeTypes)

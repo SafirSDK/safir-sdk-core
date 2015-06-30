@@ -106,9 +106,9 @@ namespace Com
         {
             m_strand.dispatch([=]
             {
-                for (auto& seed : seeds)
+                for (auto seed = seeds.cbegin(); seed != seeds.cend(); ++seed)
                 {
-                    AddSeed(seed);
+                    AddSeed(*seed);
                 }
             });
         }

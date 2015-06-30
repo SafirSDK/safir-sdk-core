@@ -68,10 +68,11 @@ namespace
             }
         );
 
-        for (auto nt : distribution.GetNodeTypeIds())
+        for (auto nt = distribution.GetNodeTypeIds().cbegin(); nt != distribution.GetNodeTypeIds().cend(); ++nt)
+        
         {
-            m_sendQueues.insert(std::make_pair(nt, SendQueue()));
-            m_communication.SetQueueNotFullCallback([=](int64_t){HandleSendQueues();}, nt);
+            m_sendQueues.insert(std::make_pair(*nt, SendQueue()));
+            m_communication.SetQueueNotFullCallback([=](int64_t){HandleSendQueues();}, *nt);
         }
 
         m_communication.SetDataReceiver([=](int64_t /*fromNodeId*/, int64_t /*fromNodeType*/, const char *data, size_t /*size*/)

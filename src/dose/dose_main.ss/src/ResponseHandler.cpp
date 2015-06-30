@@ -74,7 +74,8 @@ namespace Internal
         }),
                                                           m_dataTypeIdentifier,
                                                           DistributionData::NewData);
-        for (const auto nodeTypeId : m_distribution.GetNodeTypeIds())
+
+        for (auto nodeTypeId = m_distribution.GetNodeTypeIds().cbegin(); nodeTypeId != m_distribution.GetNodeTypeIds().cend(); ++nodeTypeId)
         {
             m_distribution.GetCommunication().SetQueueNotFullCallback
                 (m_strand.wrap([this](const int64_t /*nodeTypeId*/)
@@ -90,7 +91,7 @@ namespace Internal
                                        }
                                    }
                                }),
-                 nodeTypeId);
+                 *nodeTypeId);
         }
     }
 

@@ -191,9 +191,9 @@ namespace Internal
                     processFunc(theStates.registrationState.state, theStates.registrationState.fromNodeType);
 
                     // ... and the instances.
-                    for (const auto& entityState: theStates.entityStates)
+                    for (auto entityState = theStates.entityStates.cbegin(); entityState != theStates.entityStates.cend(); ++entityState)
                     {
-                        processFunc(entityState.state, entityState.fromNodeType);
+                        processFunc(entityState->state, entityState->fromNodeType);
                     }
 
                     m_waitingStateTable.erase(it++);
@@ -229,9 +229,9 @@ namespace Internal
             //make a ref to the state struct to make the code below easier to read.
             States& theStates = findIt->second;
 
-            for (const auto& entityState: theStates.entityStates)
+            for (auto entityState = theStates.entityStates.cbegin(); entityState != theStates.entityStates.cend(); ++entityState)
             {
-                processFunc(entityState.state, entityState.fromNodeType);
+                processFunc(entityState->state, entityState->fromNodeType);
             }
 
             m_waitingStateTable.erase(findIt);
@@ -240,12 +240,12 @@ namespace Internal
 
     void WaitingStates::SanityCheck()
     {
-        for (auto& element : m_waitingStateTable)
+        for (auto element = m_waitingStateTable.begin(); element != m_waitingStateTable.end(); ++element)
         {
-            if (element.second.sanityCounter == 0)
+            if (element->second.sanityCounter == 0)
             {
                 // The sanity method hasn't seen this state before
-                ++element.second.sanityCounter;
+                ++element->second.sanityCounter;
             }
             else
             {
@@ -254,12 +254,12 @@ namespace Internal
                 ostr << "One or more items seem to be stuck in WaitingStates! "
                      << "If the system is artificially stopped when debugging or testing this "
                      << "warning can be ignored.\n"
-                     << "ConnectionId=" << element.second.connectionId << "\n"
-                     << "registrationState=" << element.second.registrationState.state.Image() << "\n"
+                     << "ConnectionId=" << element->second.connectionId << "\n"
+                     << "registrationState=" << element->second.registrationState.state.Image() << "\n"
                      << "entityStates=\n";
-                for (const auto& entityState : element.second.entityStates)
+                for (auto entityState = element->second.entityStates.cbegin(); entityState != element->second.entityStates.cend(); ++entityState)
                 {
-                    ostr << entityState.state.Image() << "\n";
+                    ostr << entityState->state.Image() << "\n";
                 }
                 Safir::Utilities::Internal::Log::Send(Safir::Utilities::Internal::Log::Warning,
                                                       ostr.str());

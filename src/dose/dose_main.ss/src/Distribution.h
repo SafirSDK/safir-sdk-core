@@ -90,23 +90,24 @@ namespace Internal
             std::vector<Com::NodeTypeDefinition> commNodeTypes;
             std::map<boost::int64_t, typename SP::NodeType> spNodeTypes;
 
-            for (const auto& nt: m_config.nodeTypesParam)
-            {
-                commNodeTypes.push_back(Com::NodeTypeDefinition(nt.id,
-                                         nt.name,
-                                         nt.multicastAddressControl,
-                                         nt.multicastAddressData,
-                                         nt.heartbeatInterval,
-                                         nt.retryTimeout,
-                                         nt.maxLostHeartbeats));
 
-                spNodeTypes.insert(std::make_pair(nt.id,
-                                                  SP::NodeType(nt.id,
-                                                               nt.name,
-                                                               nt.isLight,
-                                                               boost::chrono::milliseconds(nt.heartbeatInterval),
-                                                               nt.maxLostHeartbeats,
-                                                               boost::chrono::milliseconds(nt.retryTimeout))));
+            for (auto nt = m_config.nodeTypesParam.cbegin(); nt != m_config.nodeTypesParam.cend(); ++nt)
+            {
+                commNodeTypes.push_back(Com::NodeTypeDefinition(nt->id,
+                                         nt->name,
+                                         nt->multicastAddressControl,
+                                         nt->multicastAddressData,
+                                         nt->heartbeatInterval,
+                                         nt->retryTimeout,
+                                         nt->maxLostHeartbeats));
+
+                spNodeTypes.insert(std::make_pair(nt->id,
+                                                  SP::NodeType(nt->id,
+                                                               nt->name,
+                                                               nt->isLight,
+                                                               boost::chrono::milliseconds(nt->heartbeatInterval),
+                                                               nt->maxLostHeartbeats,
+                                                               boost::chrono::milliseconds(nt->retryTimeout))));
             }
 
             m_communication.reset(new CommunicationT(Com::dataModeTag,

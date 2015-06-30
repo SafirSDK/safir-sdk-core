@@ -67,15 +67,15 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
 
     std::vector<Com::NodeTypeDefinition> commNodeTypes;
 
-    for (const auto& nt: m_conf.nodeTypesParam)
+    for (auto nt = m_conf.nodeTypesParam.cbegin(); nt != m_conf.nodeTypesParam.cend(); ++nt)
     {
-        commNodeTypes.push_back(Com::NodeTypeDefinition(nt.id,
-                                                        nt.name,
-                                                        nt.multicastAddressControl,
-                                                        nt.multicastAddressData,
-                                                        nt.heartbeatInterval,
-                                                        nt.retryTimeout,
-                                                        nt.maxLostHeartbeats));
+        commNodeTypes.push_back(Com::NodeTypeDefinition(nt->id,
+                                                        nt->name,
+                                                        nt->multicastAddressControl,
+                                                        nt->multicastAddressData,
+                                                        nt->heartbeatInterval,
+                                                        nt->retryTimeout,
+                                                        nt->maxLostHeartbeats));
     }
 
     m_communication.reset(new Com::Communication(Com::controlModeTag,
@@ -96,15 +96,15 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
 
     std::map<boost::int64_t, SP::NodeType> spNodeTypes;
 
-    for (const auto& nt: m_conf.nodeTypesParam)
+    for (auto nt = m_conf.nodeTypesParam.cbegin(); nt != m_conf.nodeTypesParam.cend(); ++nt)
     {
-        spNodeTypes.insert(std::make_pair(nt.id,
-                                          SP::NodeType(nt.id,
-                                                       nt.name,
-                                                       nt.isLight,
-                                                       boost::chrono::milliseconds(nt.heartbeatInterval),
-                                                       nt.maxLostHeartbeats,
-                                                       boost::chrono::milliseconds(nt.retryTimeout))));
+        spNodeTypes.insert(std::make_pair(nt->id,
+                                          SP::NodeType(nt->id,
+                                                       nt->name,
+                                                       nt->isLight,
+                                                       boost::chrono::milliseconds(nt->heartbeatInterval),
+                                                       nt->maxLostHeartbeats,
+                                                       boost::chrono::milliseconds(nt->retryTimeout))));
     }
 
 

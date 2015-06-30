@@ -44,7 +44,7 @@ namespace Dob
 namespace Internal
 {
     static const int64_t PoolDistributionInfoDataTypeId=-3446507522969672286; //DoseMain.PoolDistributionInfo
-    enum class PoolDistributionInfo : uint8_t
+    enum PoolDistributionInfo : uint8_t
     {
         PdRequest = 1,      //Request a pool distribution from another node
         PdComplete = 2,     //Answer to PdRequest: my pool distribution is completed including persistent data

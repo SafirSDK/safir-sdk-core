@@ -140,10 +140,10 @@ namespace Internal
                                              });
 
         // Send message to all node types
-        for (const auto nodeType : m_distribution.GetNodeTypeIds())
+        for (auto nodeType = m_distribution.GetNodeTypeIds().cbegin(); nodeType != m_distribution.GetNodeTypeIds().cend(); ++nodeType)
         {
             m_distribution.GetCommunication().Send(0,  // All nodes of the type
-                                                   nodeType,
+                                                   *nodeType,
                                                    msgP,
                                                    msg.Size(),
                                                    m_dataTypeIdentifier,

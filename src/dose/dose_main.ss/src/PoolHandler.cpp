@@ -116,13 +116,13 @@ namespace Internal
                                                           [=](size_t s){return DistributionData::NewData(s);});
 
         //create one StateDistributor per nodeType
-        for (auto& nt : distribution.GetNodeTypeConfiguration().nodeTypesParam)
+        for (auto nt = distribution.GetNodeTypeConfiguration().nodeTypesParam.cbegin(); nt != distribution.GetNodeTypeConfiguration().nodeTypesParam.cend(); ++nt)
         {
-            auto sd=std::unique_ptr<StateDistributorType>(new StateDistributorType(nt.id,
+            auto sd=std::unique_ptr<StateDistributorType>(new StateDistributorType(nt->id,
                                                                                    distribution,
                                                                                    m_strand,
                                                                                    checkPendingReg));
-            m_stateDistributors.emplace(nt.id, std::move(sd));
+            m_stateDistributors.emplace(nt->id, std::move(sd));
         }
     }
 

@@ -110,7 +110,7 @@ namespace Com
                     throw std::logic_error(os.str());
                 }
 
-                m_nodes.emplace(id, Resolver::StringToEndpoint(address));
+                m_nodes.insert(std::make_pair(id, Resolver::StringToEndpoint(address)));
             });
         }
 
@@ -149,10 +149,10 @@ namespace Com
                 }
                 else
                 {
-                    for (auto& vt : m_nodes)
+                    for (auto vt = m_nodes.cbegin(); vt != m_nodes.cend(); ++vt)
                     {
-                        lllog(8)<<m_logPrefix.c_str()<<"Send Heartbeat to "<<vt.first<<std::endl;
-                        WriterType::SendTo(m_heartbeat, vt.second);
+                        lllog(8)<<m_logPrefix.c_str()<<"Send Heartbeat to "<<vt->first<<std::endl;
+                        WriterType::SendTo(m_heartbeat, vt->second);
                     }
                 }
 

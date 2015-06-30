@@ -264,12 +264,12 @@ namespace Internal
             ProcessInfoPtr procInfo = boost::static_pointer_cast<ProcessInfo>
                 (m_connection.Read(entityRequestProxy.GetEntityId()).GetEntity());
 
-            for (const auto& name : procInfo->ConnectionNames())
+            for (auto name = procInfo->ConnectionNames().begin(); name != procInfo->ConnectionNames().end(); ++name)
             {
                 const ConnectionId id(Connections::Instance().NodeId(),
                     -1,  // dummy context (context is part of the connection name)
                     (Connection::CalculateIdentifier
-                    (Typesystem::Utilities::ToUtf8(name))));
+                    (Typesystem::Utilities::ToUtf8(*name))));
                 ConnectionPtr connection = Connections::Instance().GetConnection(id);
 
                 connection->SendStopOrder();

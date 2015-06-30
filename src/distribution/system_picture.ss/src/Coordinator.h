@@ -84,28 +84,6 @@ namespace SP
                          RawHandlerT& rawHandler)
             : m_strand (ioService)
             , m_communication(communication)
-            , m_electionHandler(ioService,
-                                communication,
-                                id,
-                                nodeTypes,
-                                receiverId,
-                                [this](const int64_t nodeId, const int64_t electionId)
-                                {
-                                    if (nodeId == m_id)
-                                    {
-                                        m_ownElectionId = electionId;
-                                    }
-                                    else
-                                    {
-                                        m_ownElectionId = 0;
-                                    }
-
-                                    m_rawHandler.SetElectionId(nodeId, electionId);
-                                },
-                                [this](const int64_t incarnationId)
-                                {
-                                    m_rawHandler.SetIncarnationId(incarnationId);
-                                })
             , m_lastStatisticsDirty(true)
             , m_name(name)
             , m_id(id)
@@ -116,6 +94,29 @@ namespace SP
             , m_rawHandler(rawHandler)
             , m_failedStateUpdates(0)
         {
+
+            m_electionHandler.reset(new ElectionHandlerT(ioService,
+                                                         communication,
+                                                         id,
+                                                         nodeTypes,
+                                                         receiverId,
+                                                         [this](const int64_t nodeId, const int64_t electionId)
+                                                         {
+                                                             if (nodeId == m_id)
+                                                             {
+                                                                 m_ownElectionId = electionId;
+                                                             }
+                                                             else
+                                                             {
+                                                                 m_ownElectionId = 0;
+                                                             }
+
+                                                             m_rawHandler.SetElectionId(nodeId, electionId);
+                                                         },
+                                                         [this](const int64_t incarnationId)
+                                                         {
+                                                             m_rawHandler.SetIncarnationId(incarnationId);
+                                                         }))
             m_stateMessage.set_elected_id(0); //our state message is not valid until we have a real id set.
 
             rawHandler.AddRawChangedCallback(m_strand.wrap([this](const RawStatistics& statistics,
@@ -813,7 +814,7 @@ namespace SP
         mutable boost::asio::strand m_strand;
         CommunicationT& m_communication;
 
-        ElectionHandlerT m_electionHandler;
+        std::unique_ptr<ElectionHandlerT> m_electionHandler;
 
         RawStatistics m_lastStatistics;
         bool m_lastStatisticsDirty;

@@ -440,7 +440,7 @@ namespace Com
 
                     if (WriterType::IsMulticastEnabled()) //this node and all the receivers are capable of sending and receiving multicast
                     {
-                        for (const auto& val : m_nodes)
+                        for (auto val = m_nodes.cbegin(); val != m_nodes.cend(); ++val)
                         {
                             if (val.second.systemNode && val.second.welcome<=ud->header.sequenceNumber)
                             {
@@ -457,7 +457,7 @@ namespace Com
                     }
                     else //this node is not multicast enabled, only send unicast. However it's still a multiReceiver message and the multiReceiverSeqNo shall be used
                     {
-                        for (const auto& val : m_nodes)
+                        for (auto val = m_nodes.cbegin(); val != m_nodes.cend(); ++val)
                         {
                             if (val.second.systemNode && val.second.welcome<=ud->header.sequenceNumber)
                             {
