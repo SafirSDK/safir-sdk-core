@@ -486,9 +486,9 @@ namespace Com
 
         bool IsKnownSeedAddress(const std::string& seedAddress) const
         {
-            for (const auto& vt : m_nodes)
+            for (auto vt = m_nodes.cbegin(); vt != m_nodes.cend(); ++vt)
             {
-                if (vt.second.controlAddress==seedAddress)
+                if (vt->second.controlAddress==seedAddress)
                 {
                     return true;
                 }

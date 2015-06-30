@@ -116,7 +116,8 @@ namespace SP
                                                          [this](const int64_t incarnationId)
                                                          {
                                                              m_rawHandler.SetIncarnationId(incarnationId);
-                                                         }))
+                                                         }));
+
             m_stateMessage.set_elected_id(0); //our state message is not valid until we have a real id set.
 
             rawHandler.AddRawChangedCallback(m_strand.wrap([this](const RawStatistics& statistics,
@@ -128,14 +129,14 @@ namespace SP
                 m_lastStatistics = statistics;
                 m_lastStatisticsDirty = true;
 
-                if (m_electionHandler.IsElected())
+                if (m_electionHandler->IsElected())
                 {
                     UpdateMyState();
                 }
 
                 if (flags.NodesChanged())
                 {
-                    m_electionHandler.NodesChanged(statistics, completionSignaller);
+                    m_electionHandler->NodesChanged(statistics, completionSignaller);
                 }
             }));
         }
@@ -284,7 +285,7 @@ namespace SP
 
         void Stop()
         {
-            m_electionHandler.Stop();
+            m_electionHandler->Stop();
         }
 
     private:
@@ -468,7 +469,7 @@ namespace SP
             //This function attempts to not flush the logger until the end of the function
             lllog(9) << "SP: Entering UpdateMyState\n";
 
-            if (!m_electionHandler.IsElected())
+            if (!m_electionHandler->IsElected())
             {
                 lllog(9) << "SP: We're not elected, not updating my state." << std::endl;
                 m_failedStateUpdates = 0;
@@ -486,7 +487,7 @@ namespace SP
                 {
                     m_failedStateUpdates = 0;
                     lllog(1) << "SP: Have failed at 60 state updates, forcing reelection." << std::endl;
-                    m_electionHandler.ForceElection();
+                    m_electionHandler->ForceElection();
                 }
                 return false;
             }
@@ -599,7 +600,8 @@ namespace SP
             {
                 std::set<int64_t> died;
                 //handle nodes that have died since last state
-                for (const auto& lln : lastLiveNodes)
+                
+                for (auto lln = lastLiveNodes.cbegin(); lln != lastLiveNodes.cend(); ++lln)
                 {
                     const auto findIt = deadNodes.find(lln.first);
                     if (findIt != deadNodes.end())

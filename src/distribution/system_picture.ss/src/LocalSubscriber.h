@@ -61,10 +61,11 @@ namespace SP
                         const char* const name)
             : m_strand(ioService)
             , m_name (name)
-            , m_subscriber(ioService,
-                           m_name,
-                           [this](const char* const data, size_t size){DataReceived(data,size);})
         {
+
+            m_subscriber.reset(new IpcSubscriberT(ioService,
+                                                  m_name,
+                                                  [this](const char* const data, size_t size){DataReceived(data,size);}));
         }
 
 
@@ -85,7 +86,7 @@ namespace SP
                 if (needConnect)
                 {
                     lllog(9) << "SP: AddSubscriber calling Connect" << std::endl;
-                    m_subscriber.Connect();
+                    m_subscriber->Connect();
                 }
             });
         }
@@ -94,7 +95,7 @@ namespace SP
         {
             m_strand.dispatch([this]
                               {
-                                  m_subscriber.Disconnect();
+                                  m_subscriber->Disconnect();
                                   m_dataCallbacks.clear();
                               });
         }
@@ -130,7 +131,8 @@ namespace SP
         const std::string m_name;
 
         std::vector<DataCallback> m_dataCallbacks;
-        IpcSubscriberT m_subscriber;
+
+        std::unique_ptr<IpcSubscriberT> m_subscriber;
     };
 
 

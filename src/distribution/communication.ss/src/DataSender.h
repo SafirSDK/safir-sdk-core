@@ -442,11 +442,11 @@ namespace Com
                     {
                         for (auto val = m_nodes.cbegin(); val != m_nodes.cend(); ++val)
                         {
-                            if (val.second.systemNode && val.second.welcome<=ud->header.sequenceNumber)
+                            if (val->second.systemNode && val->second.welcome<=ud->header.sequenceNumber)
                             {
                                 //The node will get the message throuch the multicast message, we just add it to receiver list
                                 //to be able to track the ack
-                                ud->receivers.insert(val.first);
+                                ud->receivers.insert(val->first);
                             }
                         }
 
@@ -459,10 +459,10 @@ namespace Com
                     {
                         for (auto val = m_nodes.cbegin(); val != m_nodes.cend(); ++val)
                         {
-                            if (val.second.systemNode && val.second.welcome<=ud->header.sequenceNumber)
+                            if (val->second.systemNode && val->second.welcome<=ud->header.sequenceNumber)
                             {
-                                ud->receivers.insert(val.first);
-                                WriterType::SendTo(ud, val.second.endpoint);
+                                ud->receivers.insert(val->first);
+                                WriterType::SendTo(ud, val->second.endpoint);
                             }
                         }
                     }
@@ -555,9 +555,9 @@ namespace Com
             std::set<int64_t> singleReceiverSendMethod;
             std::set<int64_t> multiReceiverSendMethod;
 
-            for (auto index : m_sendAckRequestForMsgIndex)
+            for (auto index = m_sendAckRequestForMsgIndex.cbegin(); index != m_sendAckRequestForMsgIndex.cend(); ++index)
             {
-                const UserDataPtr& ud=m_sendQueue[index];
+                const UserDataPtr& ud=m_sendQueue[*index];
                 if (ud->header.sendMethod==SingleReceiverSendMethod)
                 {
                     singleReceiverSendMethod.insert(ud->receivers.begin(), ud->receivers.end());
@@ -573,26 +573,28 @@ namespace Com
 
             //Send ackRequests for SingleReceiver channel
             ud->header.sendMethod=SingleReceiverSendMethod;
-            for (auto recvId : singleReceiverSendMethod)
+
+            for (auto recvId = singleReceiverSendMethod.cbegin(); recvId != singleReceiverSendMethod.cend(); ++recvId)
             {
-                auto nodeIt=m_nodes.find(recvId);
+                auto nodeIt=m_nodes.find(*recvId);
                 if (nodeIt!=m_nodes.end() && nodeIt->second.systemNode)
                 {
-                    lllog(9)<<m_logPrefix.c_str()<<"Send AckRequest for SingleReceiverSendMethod to "<<recvId<<std::endl;
-                    ud->header.commonHeader.receiverId=recvId;
+                    lllog(9)<<m_logPrefix.c_str()<<"Send AckRequest for SingleReceiverSendMethod to "<<*recvId<<std::endl;
+                    ud->header.commonHeader.receiverId=*recvId;
                     WriterType::SendTo(ud, nodeIt->second.endpoint);
                 }
             }
 
             //Send ackRequests for MultiReceiver channel
             ud->header.sendMethod=MultiReceiverSendMethod;
-            for (auto recvId : multiReceiverSendMethod)
+           
+            for (auto recvId = multiReceiverSendMethod.cbegin(); recvId != multiReceiverSendMethod.cend(); ++recvId)
             {
-                auto nodeIt=m_nodes.find(recvId);
+                auto nodeIt=m_nodes.find(*recvId);
                 if (nodeIt!=m_nodes.end() && nodeIt->second.systemNode)
                 {
-                    lllog(9)<<m_logPrefix.c_str()<<"Send AckRequest for MultiReceiverSendMethod to "<<recvId<<std::endl;
-                    ud->header.commonHeader.receiverId=recvId;
+                    lllog(9)<<m_logPrefix.c_str()<<"Send AckRequest for MultiReceiverSendMethod to "<<*recvId<<std::endl;
+                    ud->header.commonHeader.receiverId=*recvId;
                     WriterType::SendTo(ud, nodeIt->second.endpoint);
                 }
             }
@@ -675,9 +677,9 @@ namespace Com
                     else
                     {
                         //message has not been acked by everyone
-                        for (auto r : ud->receivers)
+                        for (auto r = ud->receivers.cbegin(); r != ud->receivers.cend(); ++r)
                         {
-                            lllog(8)<<m_logPrefix.c_str()<<"Cant remove seq: "<<ud->header.sequenceNumber<<", left: "<<r<<std::endl;
+                            lllog(8)<<m_logPrefix.c_str()<<"Cant remove seq: "<<ud->header.sequenceNumber<<", left: "<<*r<<std::endl;
                         }
                         break;
                     }
@@ -737,9 +739,9 @@ namespace Com
                 {
                      m_strand.get_io_service().post([this]
                      {
-                         for (auto& callback : m_queueNotFullNotification)
+                         for (auto callback = m_queueNotFullNotification.cbegin(); callback != m_queueNotFullNotification.cend(); ++callback)
                          {
-                             callback(m_nodeTypeId);
+                             (*callback)(m_nodeTypeId);
                          }
                      });
                 }
@@ -769,9 +771,9 @@ namespace Com
                 }
                 else
                 {
-                    for (auto id : ud->receivers)
+                    for (auto id = ud->receivers.cbegin(); id != ud->receivers.cend(); ++id)
                     {
-                        os<<"    recvId="<<id<<std::endl;
+                        os<<"    recvId="<<*id<<std::endl;
                     }
                 }
             }

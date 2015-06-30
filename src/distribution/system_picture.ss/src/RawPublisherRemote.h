@@ -54,17 +54,10 @@ namespace SP
             , m_senderId(LlufId_Generate64(senderId))
             , m_nodeTypes(nodeTypes)
             , m_rawHandler(rawHandler)
-            , m_allNodeTypes([&nodeTypes]
-                             {
-                                 std::set<int64_t> res;
-                                 for (const auto& it: nodeTypes)
-                                 {
-                                     res.insert(it.first);
-                                 }
-                                 return res;
-                             }())
+            , m_allNodeTypes(ExtractKeys(nodeTypes))
             , m_period(period)
         {
+
             SchedulePublishTimer(period, m_allNodeTypes);
 
             rawHandler.AddRawChangedCallback(m_strand.wrap([this](const RawStatistics&,
@@ -91,6 +84,19 @@ namespace SP
         }
 
     private:
+
+        template <class T, class U>
+        static std::set<T> ExtractKeys(const std::map<T,U>& map)
+        {
+            std::set<T> set;
+            for (auto it = map.cbegin(); it != map.cend(); ++it)
+            {
+                set.insert(it->first);
+            }
+            return set;
+        }
+
+
         //must be called in strand
         void SchedulePublishTimer(const boost::chrono::steady_clock::duration& delay,
                                   const std::set<int64_t>& toNodeTypes)

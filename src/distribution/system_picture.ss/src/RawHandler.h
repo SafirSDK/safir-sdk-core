@@ -103,24 +103,25 @@ namespace SP
             , m_validateIncarnationIdCallback(validateIncarnationIdCallback)
             , m_stopped(false)
         {
-            m_checkDeadNodesTimer = ioService,
-                                    CalculateDeadCheckPeriod(nodeTypes),
-                                    m_strand.wrap([this](const boost::system::error_code& error)
-                                    {
-                                        if (m_stopped)
-                                        {
-                                            return;
-                                        }
 
-                                        if (!!error) //fix for vs2012 warning
-                                        {
-                                            SEND_SYSTEM_LOG(Alert,
-                                                            << "Unexpected error in CheckDeadNodes: " << error);
-                                            throw std::logic_error("Unexpected error in CheckDeadNodes");
-                                        }
+            m_checkDeadNodesTimer.reset(new Safir::Utilities::Internal::AsioPeriodicTimer(ioService,
+                                                                                          CalculateDeadCheckPeriod(nodeTypes),
+                                                                                          m_strand.wrap([this](const boost::system::error_code& error)
+                                                                                          {
+                                                                                              if (m_stopped)
+                                                                                              {
+                                                                                                  return;
+                                                                                              }
 
-                                        CheckDeadNodes();
-                                    });
+                                                                                              if (!!error) //fix for vs2012 warning
+                                                                                              {
+                                                                                                  SEND_SYSTEM_LOG(Alert,
+                                                                                                                  << "Unexpected error in CheckDeadNodes: " << error);
+                                                                                                  throw std::logic_error("Unexpected error in CheckDeadNodes");
+                                                                                              }
+
+                                                                                              CheckDeadNodes();
+                                                                                            })));
 
 
             //set up some info about ourselves in our message
@@ -130,29 +131,11 @@ namespace SP
             m_allStatisticsMessage.set_control_address(controlAddress);
             m_allStatisticsMessage.set_data_address(dataAddress);
 
-            communication.SetNewNodeCallback(m_strand.wrap([this](const std::string& name,
-                                                                  const int64_t id,
-                                                                  const int64_t nodeTypeId,
-                                                                  const std::string& controlAddress,
-                                                                  const std::string& dataAddress)
-                                                           {
-                                                               NewNode(name,
-                                                                       id,
-                                                                       nodeTypeId,
-                                                                       controlAddress,
-                                                                       dataAddress);
-                                                           }));
+            communication.SetNewNodeCallback(m_strand.wrap(boost::bind(&RawHandler::NewNode,this,_1, _2, _3, _4, _5)));
+            communication.SetGotReceiveFromCallback(m_strand.wrap(boost::bind(&RawHandler::GotReceive,this,_1)));
+            communication.SetRetransmitToCallback(m_strand.wrap(boost::bind(&RawHandler::Retransmit,this,_1)));
 
-            communication.SetGotReceiveFromCallback(m_strand.wrap([this](int64_t id)
-                                                                  {
-                                                                      GotReceive(id);
-                                                                  }));
-
-            communication.SetRetransmitToCallback(m_strand.wrap([this](int64_t id)
-                                                                {
-                                                                    Retransmit(id);
-                                                                }));
-            m_checkDeadNodesTimer.Start();
+            m_checkDeadNodesTimer->Start();
         }
 
 
@@ -165,7 +148,7 @@ namespace SP
 
                 m_strand.dispatch([this]
                                   {
-                                      m_checkDeadNodesTimer.Stop();
+                                      m_checkDeadNodesTimer->Stop();
                                   });
             }
         }
@@ -404,7 +387,7 @@ namespace SP
 
                 if (changes != 0)
                 {
-                    PostRawChangedCallback(changes);
+                    PostRawChangedCallback(changes, nullptr);
                 }
             });
         }
@@ -460,20 +443,21 @@ namespace SP
             m_strand.dispatch([this, nodeIds]
                               {
                                   bool changed = false;
-                                  for (auto id : nodeIds)
+                                  
+                                  for (auto id = nodeIds.cbegin(); id != nodeIds.cend(); ++id)
                                   {
-                                      auto findIt = m_nodeTable.find(id);
+                                      auto findIt = m_nodeTable.find(*id);
                                       if (findIt != m_nodeTable.end() && !findIt->second.nodeInfo->is_dead())
                                       {
                                           findIt->second.nodeInfo->set_is_dead(true);
-                                          m_communication.ExcludeNode(id);
+                                          m_communication.ExcludeNode(*id);
                                           changed = true;
                                       }
                                   }
 
                                   if (changed)
                                   {
-                                      PostRawChangedCallback(RawChanges::NODES_CHANGED);
+                                      PostRawChangedCallback(RawChanges::NODES_CHANGED, nullptr);
                                   }
                               });
         }
@@ -803,9 +787,9 @@ namespace SP
         /**
          * Post a copy of the data on the ioservice
          *
-         * must be called in strand
+         * must be called in strand, completionHandler can be nullptr
          */
-        void PostRawChangedCallback(const RawChanges& flags, const std::function<void()>& completionHandler = nullptr)
+        void PostRawChangedCallback(const RawChanges& flags, const std::function<void()>& completionHandler)
         {
             lllog(7) << "SP: PostRawChangedCallback " << flags << std::endl;
             const auto copy = RawStatisticsCreator::Create
@@ -821,10 +805,10 @@ namespace SP
                                                              completionHandler();
                                                          }
                                                      });
-
-            for (const auto& cb : m_rawChangedCallbacks)
+            
+            for (auto cb = m_rawChangedCallbacks.cbegin(); cb != m_rawChangedCallbacks.cend(); ++cb)
             {
-                m_strand.post([cb,copy,flags,completionCaller]{cb(copy,flags,completionCaller);});
+                m_strand.post([cb,copy,flags,completionCaller]{(*cb)(copy,flags,completionCaller);});
             }
         }
 
@@ -847,7 +831,7 @@ namespace SP
         mutable boost::asio::strand m_strand;
         AsioLatencyMonitor m_latencyMonitor;
 
-        Safir::Utilities::Internal::AsioPeriodicTimer m_checkDeadNodesTimer;
+        std::unique_ptr<Safir::Utilities::Internal::AsioPeriodicTimer> m_checkDeadNodesTimer;
 
         NodeTable m_nodeTable;
         mutable RawStatisticsMessage m_allStatisticsMessage;

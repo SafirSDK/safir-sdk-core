@@ -378,15 +378,15 @@ struct Fixture
         const auto electedNode = nodes[0]->electedNode;
         const auto electionId = nodes[0]->electionId;
 
-        for(auto&& node: nodes)
+        for (auto node = nodes.cbegin(); node != nodes.cend(); ++node)
         {
-            if (node->removed)
+            if ((*node)->removed)
             {
                 continue;
             }
 
-            SAFE_BOOST_CHECK_EQUAL(node->electedNode, electedNode)
-            SAFE_BOOST_CHECK_EQUAL(node->electionId, electionId)
+            SAFE_BOOST_CHECK_EQUAL((*node)->electedNode, electedNode)
+            SAFE_BOOST_CHECK_EQUAL((*node)->electionId, electionId)
         }
 
     }
@@ -425,14 +425,15 @@ struct Fixture
 
         boost::shared_ptr<void> dummy;
         const auto raw = RawStatisticsCreator::Create(std::move(msg));
-        for(auto&& node: nodes)
+        
+        for (auto node = nodes.cbegin(); node != nodes.cend(); ++node)
         {
-            if (node->removed)
+            if ((*node)->removed)
             {
                 continue;
             }
 
-            node->eh.NodesChanged(raw,dummy);
+            (*node)->eh.NodesChanged(raw,dummy);
         }
     }
 

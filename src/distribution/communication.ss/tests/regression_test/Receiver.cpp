@@ -23,6 +23,7 @@
 *
 ******************************************************************************/
 #include "Receiver.h"
+#include <boost/bind.hpp>
 
 Receiver::Receiver(Com::ControlModeTag tag, boost::asio::io_service& ioService, int64_t nodeId, int64_t nodeType)
     :m_timerInclude(ioService)
@@ -46,15 +47,11 @@ Receiver::Receiver(Com::ControlModeTag tag, boost::asio::io_service& ioService, 
     m_timerInclude.expires_from_now(boost::chrono::milliseconds(1000));
     m_timerInclude.async_wait(m_strand.wrap([=](const boost::system::error_code& /*error*/){if (m_running) IncludeNode();}));
 
-    m_com.SetDataReceiver(  [this](int64_t fromNodeId, int64_t fromNodeType, const char* data, size_t size)
-                            {ReceiveData(fromNodeId, fromNodeType, data, size);},
-                            0,
-                            [=](size_t s){return new char[s];});
-
-    m_com.SetGotReceiveFromCallback([this](int64_t id){GotReceiveFrom(id);});
-    m_com.SetNewNodeCallback([this](const std::string& n, int64_t id, int64_t nt, const std::string& ca, const std::string& da){NewNode(n, id, nt, ca, da);});
-    m_com.SetQueueNotFullCallback([this](int64_t id){QueueNotFull(id);}, 0);
-    m_com.SetRetransmitToCallback([this](int64_t id){RetransmitTo(id);});
+    m_com.SetDataReceiver(boost::bind(&Receiver::ReceiveData,this,_1,_2,_3,_4), 0, [=](size_t s){return new char[s];});
+    m_com.SetGotReceiveFromCallback(boost::bind(&Receiver::GotReceiveFrom,this,_1));
+    m_com.SetNewNodeCallback(boost::bind(&Receiver::NewNode,this,_1,_2,_3,_4,_5));
+    m_com.SetQueueNotFullCallback(boost::bind(&Receiver::QueueNotFull,this,_1), 0);
+    m_com.SetRetransmitToCallback(boost::bind(&Receiver::RetransmitTo,this,_1));
 
     m_com.Start();
 }
@@ -80,15 +77,11 @@ Receiver::Receiver(Com::DataModeTag tag, boost::asio::io_service& ioService, int
     m_timerInclude.expires_from_now(boost::chrono::milliseconds(1000));
     m_timerInclude.async_wait(m_strand.wrap([=](const boost::system::error_code& error){if (!error) IncludeNode();}));
 
-    m_com.SetDataReceiver(  [this](int64_t fromNodeId, int64_t fromNodeType, const char* data, size_t size)
-                            {ReceiveData(fromNodeId, fromNodeType, data, size);},
-                            0,
-                            [=](size_t s){return new char[s];});
-    m_com.SetGotReceiveFromCallback([this](int64_t id){GotReceiveFrom(id);});
-    m_com.SetNewNodeCallback([this](const std::string& n, int64_t id, int64_t nt, const std::string& ca, const std::string& da){NewNode(n, id, nt, ca, da);});
-    m_com.SetQueueNotFullCallback([this](int64_t id){QueueNotFull(id);}, 0);
-    m_com.SetRetransmitToCallback([this](int64_t id){RetransmitTo(id);});
-
+    m_com.SetDataReceiver(boost::bind(&Receiver::ReceiveData,this,_1,_2,_3,_4), 0, [=](size_t s){return new char[s];});
+    m_com.SetGotReceiveFromCallback(boost::bind(&Receiver::GotReceiveFrom,this,_1));
+    m_com.SetNewNodeCallback(boost::bind(&Receiver::NewNode,this,_1,_2,_3,_4,_5));
+    m_com.SetQueueNotFullCallback(boost::bind(&Receiver::QueueNotFull,this,_1), 0);
+    m_com.SetRetransmitToCallback(boost::bind(&Receiver::RetransmitTo,this,_1));
     m_com.Start();
 }
 
