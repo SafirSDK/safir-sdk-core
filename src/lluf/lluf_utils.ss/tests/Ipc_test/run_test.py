@@ -26,13 +26,17 @@
 ###############################################################################
 from __future__ import print_function
 from inspect import currentframe
-import subprocess, os, time, sys
+import subprocess, os, time, sys, datetime
 
 if sys.platform == "win32":
     config_type = os.environ.get("CMAKE_CONFIG_TYPE")
     exe_path = config_type if config_type else ""
 else:
     exe_path = "."
+
+def log(*args, **kwargs):
+    print(datetime.datetime.now().isoformat(), ":", *args, **kwargs)
+    sys.stdout.flush()
 
 def kill(proc):
     try:
@@ -44,8 +48,8 @@ def test_failed(error_str, sourceline=None):
     if sourceline is None:
         sourceline = currentframe().f_back.f_lineno
         
-    print("Test failed at line " + str(sourceline) + "!");
-    print(error_str);
+    log("Test failed at line " + str(sourceline) + "!");
+    log(error_str);
 
     kill(subscriber1)
     kill(subscriber2)
@@ -57,7 +61,7 @@ def wait_for_output(proc, output, n=1, exact_match=False):
     no_found = 0
     while True:
         line = proc.stdout.readline().decode("utf-8")
-        print (line)
+        log(line)
         if line.find(output) != -1:
             no_found = no_found + 1
             if no_found >= n:
@@ -85,7 +89,7 @@ IpcPublisher = os.path.join(exe_path,"IpcPublisher")
 IpcSubscriber = os.path.join(exe_path,"IpcSubscriber")
 
 #######
-print("Test that the publisher is notified of subscriber connect/disconnect")
+log("Test that the publisher is notified of subscriber connect/disconnect")
 #######
 # Start a publisher that sends no messages
 publisher = subprocess.Popen((IpcPublisher, "--cmd-from-stdin"), stdin = subprocess.PIPE, stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
@@ -134,7 +138,7 @@ terminate(subscriber1)
 terminate(subscriber2)
 
 #######
-print("Test that the publisher can be started before the subscribers")
+log("Test that the publisher can be started before the subscribers")
 #######
 # Start a publisher that sends messages
 publisher = subprocess.Popen((IpcPublisher, "--message-delay", "10"), stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
@@ -156,7 +160,7 @@ if sub2_result.decode("utf-8").count("Kalle") != 5:
 terminate(publisher)
 
 #######
-print("Test that subscribers can be started before publisher")
+log("Test that subscribers can be started before publisher")
 #######
 subscriber1 = subprocess.Popen((IpcSubscriber, "--number-of-messages", "5"), stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
 wait_for_output(subscriber1, "Trying to connect")
@@ -184,7 +188,7 @@ if sub2_result.decode("utf-8").count("Kalle") != 5:
 terminate(publisher)
 
 #######
-print("Test that subscribers can connect/disconnect several times")
+log("Test that subscribers can connect/disconnect several times")
 #######
 # Connect/disconnect witout an existing publisher
 subscriber = subprocess.Popen((IpcSubscriber, "--cmd-from-stdin"), stdin = subprocess.PIPE, stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
@@ -219,7 +223,7 @@ terminate(subscriber)
 
 
 #######
-print("Test that a publisher can do several start/stop")
+log("Test that a publisher can do several start/stop")
 #######
 subscriber1 = subprocess.Popen((IpcSubscriber), stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
 wait_for_output(subscriber1, "Trying to connect", exact_match=True)
@@ -250,7 +254,7 @@ terminate(subscriber1)
 
 
 #######
-print("Test with large messages")
+log("Test with large messages")
 #######
 subscriber1 = subprocess.Popen((IpcSubscriber, "--number-of-messages", "2", "-o"), stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
 wait_for_output(subscriber1, "Trying to connect")
@@ -274,7 +278,7 @@ if sub2_result.decode("utf-8").count("Received msg with size 100000000") != 2:
 terminate(publisher)
 
 #######
-print("Test that publisher and subscriber can be stopped properly")
+log("Test that publisher and subscriber can be stopped properly")
 #######
 publisher = subprocess.Popen((IpcPublisher, "--cmd-from-stdin"), stdin = subprocess.PIPE, stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
 send_cmd(publisher, "START\n")
@@ -290,6 +294,6 @@ exit_process(publisher)
 exit_process(subscriber)
 
 
-print("success")
+log("success")
 sys.exit(0)
 
