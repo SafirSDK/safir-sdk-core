@@ -191,22 +191,25 @@ namespace dose_test_dotnet
 
                 partner.Port.Val = m_actionReceiver.getPort();
 
-                try
+                // Wait for NodeInfo to be available
+                while (true)
                 {
-
-                    Safir.Dob.Typesystem.InstanceId instance = new Safir.Dob.Typesystem.InstanceId
-                        (new Safir.Dob.ConnectionAspectMisc(m_controlConnection).GetNodeId());
-                    Safir.Dob.Typesystem.EntityId eid = new Safir.Dob.Typesystem.EntityId(Safir.Dob.NodeInfo.ClassTypeId, instance);
-                    using (Safir.Dob.EntityProxy ep = m_controlConnection.Read(eid))
+                    try
                     {
-                        partner.Address.Val = ((Safir.Dob.NodeInfo)ep.Entity).IpAddress.Val;
+
+                        Safir.Dob.Typesystem.InstanceId instance = new Safir.Dob.Typesystem.InstanceId
+                            (new Safir.Dob.ConnectionAspectMisc(m_controlConnection).GetNodeId());
+                        Safir.Dob.Typesystem.EntityId eid = new Safir.Dob.Typesystem.EntityId(Safir.Dob.NodeInfo.ClassTypeId, instance);
+                        using (Safir.Dob.EntityProxy ep = m_controlConnection.Read(eid))
+                        {
+                            partner.Address.Val = ((Safir.Dob.NodeInfo)ep.Entity).IpAddress.Val;
+                        }
+                    }
+                    catch (Safir.Dob.NotFoundException e)
+                    {
+                        System.Threading.Thread.Sleep(100);
                     }
                 }
-                catch (Safir.Dob.NotFoundException e)
-                {
-                    System.Console.WriteLine("Not found exception: " + e);
-                }
-
                 m_controlConnection.SetAll(partner, m_partnerEntityId.InstanceId,
                                            new Safir.Dob.Typesystem.HandlerId(m_instance));
 

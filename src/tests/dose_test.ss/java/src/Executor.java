@@ -433,22 +433,25 @@ class Executor implements
             partner.identifier().setVal(m_identifier);
             partner.port().setVal((int) m_actionReceiver.getPort());
 
-            try {
-                InstanceId instance =
-                    new InstanceId(new com.saabgroup.safir.dob.ConnectionAspectMisc(m_controlConnection).getNodeId());
-
-                EntityId eid = new EntityId(com.saabgroup.safir.dob.NodeInfo.ClassTypeId,instance);
-                com.saabgroup.safir.dob.EntityProxy ep = m_controlConnection.read(eid);
+            // Wait for NodeInfo to be available
+            for (;;) {
                 try {
-                    partner.address().setVal(((com.saabgroup.safir.dob.NodeInfo)
-                                              ep.getEntity()).ipAddress().getVal());
-                }
-                finally {
-                    ep.dispose();
-                }
-            }
-            catch (com.saabgroup.safir.dob.NotFoundException e) {
+                    InstanceId instance =
+                        new InstanceId(new com.saabgroup.safir.dob.ConnectionAspectMisc(m_controlConnection).getNodeId());
 
+                    EntityId eid = new EntityId(com.saabgroup.safir.dob.NodeInfo.ClassTypeId,instance);
+                    com.saabgroup.safir.dob.EntityProxy ep = m_controlConnection.read(eid);
+                    try {
+                        partner.address().setVal(((com.saabgroup.safir.dob.NodeInfo)
+                                                  ep.getEntity()).ipAddress().getVal());
+                    }
+                    finally {
+                        ep.dispose();
+                    }
+                }
+                catch (com.saabgroup.safir.dob.NotFoundException e) {
+                    Thread.sleep(100);
+                }
             }
 
             m_controlConnection.setAll(partner, m_partnerEntityId.getInstanceId(),
