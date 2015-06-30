@@ -204,8 +204,10 @@ namespace dose_test_dotnet
                         {
                             partner.Address.Val = ((Safir.Dob.NodeInfo)ep.Entity).IpAddress.Val;
                         }
+
+                        break;
                     }
-                    catch (Safir.Dob.NotFoundException e)
+                    catch (Safir.Dob.NotFoundException)
                     {
                         System.Threading.Thread.Sleep(100);
                     }

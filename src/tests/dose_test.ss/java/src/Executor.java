@@ -444,13 +444,17 @@ class Executor implements
                     try {
                         partner.address().setVal(((com.saabgroup.safir.dob.NodeInfo)
                                                   ep.getEntity()).ipAddress().getVal());
+                        break;
                     }
                     finally {
                         ep.dispose();
                     }
                 }
                 catch (com.saabgroup.safir.dob.NotFoundException e) {
-                    Thread.sleep(100);
+                    try {
+                        Thread.sleep(100);
+                        } catch (InterruptedException ie) {
+                    }
                 }
             }
 
