@@ -70,8 +70,6 @@
             <Name>Server</Name>
             <IsLight>False</IsLight>
             <TalksTo></TalksTo>
-            <MulticastAddressControl>224.11.11.11:23000</MulticastAddressControl>
-            <MulticastAddressData>224.11.11.11:24000</MulticastAddressData>
             <HeartbeatInterval>0.7</HeartbeatInterval>
             <MaxLostHeartbeats>7</MaxLostHeartbeats>
             <SlidingWindowsSize>10</SlidingWindowsSize>
