@@ -54,7 +54,7 @@ namespace SP
                                const boost::chrono::steady_clock::duration& period,
                                const bool all)
             : m_rawHandler(rawHandler)
-            , m_publisher(ioService,name,nullptr,nullptr)
+            , m_publisher(ioService,name,NULL,NULL)
             , m_all(all)
         {
             m_publishTimer.reset(new Safir::Utilities::Internal::AsioPeriodicTimer(ioService,

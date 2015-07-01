@@ -50,7 +50,7 @@ namespace SP
                                  const char* const name,
                                  const boost::chrono::steady_clock::duration& period)
             : m_coordinator(coordinator)
-            , m_publisher(ioService,name,nullptr,nullptr)
+            , m_publisher(ioService, name, NULL, NULL)
         {
             m_publishTimer.reset(new Safir::Utilities::Internal::AsioPeriodicTimer(ioService,
                                                                                    period,

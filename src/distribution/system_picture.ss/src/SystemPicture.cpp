@@ -172,7 +172,7 @@ namespace SP
                                                           communication.DataAddress(),
                                                           nodeTypes,
                                                           false,
-                                                          NULL))
+                                                          boost::function<bool (const int64_t incarnationId)>())) //NULL function pointer to make vs2010 happy
             , m_rawPublisherLocal(Safir::make_unique<RawPublisherLocal>(ioService,
                                                                         *m_rawHandler,
                                                                         SLAVE_LOCAL_RAW_NAME,

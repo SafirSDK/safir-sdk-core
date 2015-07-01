@@ -139,9 +139,9 @@ int main(int argc, char * argv[])
 
     auto stopFcn = [&ioService, &sp, &wk, &signals]
     {
-        auto sp_ = sp;
+        auto& sp_ = sp;
         auto& wk_ = wk;
-        auto signals_ = signals;
+        auto& signals_ = signals;
         ioService.post([&sp_, &wk_, &signals_]
         {
             signals_.cancel();
