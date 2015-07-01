@@ -6,7 +6,6 @@
 # Also defines a function SAFIR_JAVAH which is described below.
 #
 
-#TODO: write about this in users guide
 if (NOT "$ENV{SAFIR_DONT_BUILD_JAVA}" STREQUAL "")
   SET(Java_FOUND Java-NOTFOUND)
   return()
