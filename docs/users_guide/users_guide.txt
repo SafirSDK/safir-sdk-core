@@ -903,7 +903,7 @@ specify a CMAKE_INSTALL_PREFIX, using the _Prefix_ field.
 
 .Note
 ************************************
-Dobmake will build binaries for C\++, C# and Java if it can find compilers for each of
+Dobmake will build binaries for C++, C# and Java if it can find compilers for each of
 these languages.
 
 It is possible to explicitly disable Java builds by setting an environment variable
@@ -912,7 +912,7 @@ It is possible to explicitly disable Java builds by setting an environment varia
 
 If you want to run dobmake from a script, use dobmake-batch (or dobmake-batch.py on
 Windows) to run without using the GUI. It expects to be run from the directory containing
-the CMakeLists.txt file, and CMAKE_INSTALL_PREFIX can be set using the --install
+the CMakeLists.txt file, and CMAKE_INSTALL_PREFIX can be set using the +--install+
 argument.
 
 === Using the generated types
