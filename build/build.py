@@ -292,6 +292,18 @@ class Logger(object):
         self.log("","output")
         return "\n".join(output)
 
+def suppress(help_string):
+    """
+    Use this function to wrap help strings for arguments that should not be visible
+    in the help when this script is run as dobmake-batch.
+    """
+    try:
+        if os.path.basename(__file__).startswith("dobmake-batch"):
+            return argparse.SUPPRESS
+    except:
+        pass
+    return help_string
+
 def add_win32_options(parser):
     parser.add_argument("--use-studio",
                         help="The visual studio to use for building, can be '2010', '2012' or '2013'")
@@ -324,7 +336,7 @@ def parse_command_line():
     action.add_argument("--package",
                         action="store_true",
                         default=False,
-                        help="Build everything and package the results for the current platform.")
+                        help=suppress("Build everything and package the results for the current platform."))
 
     action.add_argument("--install",
                         metavar="PATH",
@@ -335,12 +347,12 @@ def parse_command_line():
 
     parser.add_argument("--skip-tests",
                         action = "store_true",
-                        help="Skip running the unit tests")
+                        help=suppress("Skip running the unit tests"))
 
     parser.add_argument("--jenkins",
                         action="store_true",
                         default=False,
-                        help="Increase verbosity and obey build matrix variables.")
+                        help=suppress("Increase verbosity and obey build matrix variables."))
 
     parser.add_argument("--verbose", "-v",
                         action="count",
