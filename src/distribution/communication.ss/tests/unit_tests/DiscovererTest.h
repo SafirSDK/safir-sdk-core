@@ -447,8 +447,8 @@ private:
         Info() {}
 
         Info(int64_t id, boost::asio::io_service& io)
-            :discover(boost::make_shared<HandleDiscover::Discoverer>(io, HandleDiscover::CreateNode(id), 100, [=](const Com::Node& n){HandleDiscover::OnNewNode(id, n);}))
         {
+            discover.reset(new HandleDiscover::Discoverer(io, HandleDiscover::CreateNode(id), 100, [=](const Com::Node& n){HandleDiscover::OnNewNode(id, n);}));
         }
     };
     static std::map<int64_t, HandleDiscover::Info> discoverState;

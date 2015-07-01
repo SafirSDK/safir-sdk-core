@@ -67,8 +67,8 @@ namespace Com
         DataReceiverType(boost::asio::io_service::strand& receiveStrand,
                          const std::string& unicastAddress,
                          const std::string& multicastAddress,
-                         const std::function<bool(const char*, size_t)>& onRecv,
-                         const std::function<bool(void)>& isReceiverIsReady)
+                         const boost::function<bool(const char*, size_t)>& onRecv,
+                         const boost::function<bool(void)>& isReceiverIsReady)
             :m_strand(receiveStrand)
             ,m_timer(m_strand.get_io_service(), boost::chrono::milliseconds(10))
             ,m_onRecv(onRecv)
@@ -140,8 +140,8 @@ namespace Com
 #endif
         boost::asio::io_service::strand& m_strand;
         boost::asio::steady_timer m_timer;
-        std::function<bool(const char*, size_t)> m_onRecv;
-        std::function<bool(void)> m_isReceiverReady;
+        boost::function<bool(const char*, size_t)> m_onRecv;
+        boost::function<bool(void)> m_isReceiverReady;
         boost::shared_ptr<boost::asio::ip::udp::socket> m_socket;
         boost::shared_ptr<boost::asio::ip::udp::socket> m_multicastSocket;
         bool m_running;

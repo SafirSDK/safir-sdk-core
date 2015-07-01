@@ -63,7 +63,7 @@ namespace Com
         DiscovererBasic(boost::asio::io_service& ioService,
                         const Node& me,
                         int sendInterval,
-                        const std::function<void(const Node&)>& onNewNode)
+                        const boost::function<void(const Node&)>& onNewNode)
             :WriterType(ioService, Resolver::Protocol(me.unicastAddress))
             ,m_running(false)
             ,m_seeds()
@@ -250,7 +250,7 @@ namespace Com
         std::set<int64_t> m_excludedNodes;
         boost::asio::io_service::strand m_strand;
         Node m_me;
-        std::function<void(const Node&)> m_onNewNode;
+        boost::function<void(const Node&)> m_onNewNode;
         boost::asio::steady_timer m_timer;
         Utilities::Random m_random;
 

@@ -148,7 +148,7 @@ public:
     }
 
     //this must be called before io_services are started
-    void SetStopHandler(const std::function<void()>& fcn)
+    void SetStopHandler(const boost::function<void()>& fcn)
     {
         m_stopHandler = fcn;
     }
@@ -344,7 +344,7 @@ private:
 
     boost::asio::steady_timer m_suicideTimer;
     bool m_suicideScheduled;
-    std::function<void()> m_stopHandler;
+    boost::function<void()> m_stopHandler;
 };
 
 int main(int argc, char * argv[])
@@ -456,7 +456,7 @@ int main(int argc, char * argv[])
     boost::asio::steady_timer sendTimer(ioService);
     bool timerStopped = false;
 
-    const std::function<void(const boost::system::error_code& error)> send =
+    const boost::function<void(const boost::system::error_code& error)> send =
         [&communication, &sendTimer, &timerStopped, &send](const boost::system::error_code& error)
         {
             if (error || timerStopped)

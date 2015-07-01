@@ -87,7 +87,7 @@ namespace SP
              const int64_t id,
              const int64_t nodeTypeId,
              const std::map<int64_t, NodeType>& nodeTypes,
-             const std::function<bool (const int64_t incarnationId)>& validateIncarnationIdCallback)
+             const boost::function<bool (const int64_t incarnationId)>& validateIncarnationIdCallback)
             : m_rawHandler(Safir::make_unique<RawHandler>(ioService,
                                                           communication,
                                                           name,
@@ -172,7 +172,7 @@ namespace SP
                                                           communication.DataAddress(),
                                                           nodeTypes,
                                                           false,
-                                                          nullptr))
+                                                          NULL))
             , m_rawPublisherLocal(Safir::make_unique<RawPublisherLocal>(ioService,
                                                                         *m_rawHandler,
                                                                         SLAVE_LOCAL_RAW_NAME,
@@ -281,7 +281,7 @@ namespace SP
             }
         }
 
-        void StartRawSubscription(const std::function<void (const RawStatistics& data)>& dataCallback)
+        void StartRawSubscription(const boost::function<void (const RawStatistics& data)>& dataCallback)
         {
             if (m_stopped)
             {
@@ -296,7 +296,7 @@ namespace SP
             m_rawSubscriberLocal->Start(dataCallback);
         }
 
-        void StartStateSubscription(const std::function<void (const SystemState& data)>& dataCallback)
+        void StartStateSubscription(const boost::function<void (const SystemState& data)>& dataCallback)
         {
             if (m_stopped)
             {
@@ -339,7 +339,7 @@ namespace SP
                                  const int64_t id,
                                  const int64_t nodeTypeId,
                                  const std::map<int64_t, NodeType>& nodeTypes,
-                                 const std::function<bool (const int64_t incarnationId)>& validateIncarnationIdCallback)
+                                 const boost::function<bool (const int64_t incarnationId)>& validateIncarnationIdCallback)
         : m_impl(Safir::make_unique<Impl>(master_tag,
                                           ioService,
                                           communication,
@@ -388,12 +388,12 @@ namespace SP
         m_impl->Stop();
     }
 
-    void SystemPicture::StartRawSubscription(const std::function<void (const RawStatistics& data)>& dataCallback)
+    void SystemPicture::StartRawSubscription(const boost::function<void (const RawStatistics& data)>& dataCallback)
     {
         m_impl->StartRawSubscription(dataCallback);
     }
 
-    void SystemPicture::StartStateSubscription(const std::function<void (const SystemState& data)>& dataCallback)
+    void SystemPicture::StartStateSubscription(const boost::function<void (const SystemState& data)>& dataCallback)
     {
         m_impl->StartStateSubscription(dataCallback);
     }

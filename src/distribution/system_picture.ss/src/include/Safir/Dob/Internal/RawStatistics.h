@@ -24,7 +24,7 @@
 #pragma once
 
 #include <Safir/Dob/Internal/SystemPictureDefs.h>
-#include <functional>
+#include <boost/function.hpp>
 #include <memory>
 #include <ostream>
 #include <string>

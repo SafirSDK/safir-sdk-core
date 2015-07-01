@@ -57,9 +57,9 @@ namespace Internal
 {
 namespace Com
 {
-    typedef std::function<char*(size_t)> Allocator;
-    typedef std::function<void(int64_t fromNodeId, int64_t fromNodeType, const char* data, size_t size)> ReceiveData;
-    typedef std::function<void(int64_t fromNodeId)> GotReceiveFrom;
+    typedef boost::function<char*(size_t)> Allocator;
+    typedef boost::function<void(int64_t fromNodeId, int64_t fromNodeType, const char* data, size_t size)> ReceiveData;
+    typedef boost::function<void(int64_t fromNodeId)> GotReceiveFrom;
 
     template <class WriterType>
     class DeliveryHandlerBasic : private WriterType

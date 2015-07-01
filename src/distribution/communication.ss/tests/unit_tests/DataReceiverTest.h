@@ -61,7 +61,9 @@ public:
         // Setup
         //--------------------------
         TRACELINE
-        receiver.reset(new TestDataReceiver(strand, "127.0.0.1:10000", "239.192.1.1:11000", [=](const char* d, size_t s){return DataReceiverTest::Recv(d,s);}, [=]{return DataReceiverTest::IsReaderReady();}));
+
+        
+        receiver.reset(new TestDataReceiver(strand, "127.0.0.1:10000", "239.192.1.1:11000", boost::bind(&DataReceiverTest::Recv, _1, _2), boost::bind(&DataReceiverTest::IsReaderReady)));
         TRACELINE
         receiver->Start();
 

@@ -55,7 +55,7 @@ namespace SP
         : public SubscriberInterfaceT
     {
     public:
-        typedef std::function<void (const typename SubscriberInterfaceT::DataWrapper& data)> DataCallback;
+        typedef boost::function<void (const typename SubscriberInterfaceT::DataWrapper& data)> DataCallback;
 
         LocalSubscriber(boost::asio::io_service& ioService,
                         const char* const name)
@@ -118,9 +118,9 @@ namespace SP
             const auto wrapped = WrapperCreatorT::Create(std::move(msg));
             m_strand.dispatch([this,wrapped]
             {
-                for (const auto cb : m_dataCallbacks)
+                for (auto cb = m_dataCallbacks.cbegin(); cb != m_dataCallbacks.cend(); ++cb)
                 {
-                    cb(wrapped);
+                    (*cb)(wrapped);
                 }
             });
         }

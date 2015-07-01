@@ -85,13 +85,13 @@ namespace SP
             {
                 lllog(8) << "Publishing system state to other nodes" << std::endl;
 
-                for (const auto& it: m_nodeTypes)
+                for (auto it = m_nodeTypes.cbegin(); it != m_nodeTypes.cend(); ++it)
                 {
-                    const bool sent = m_communication.Send(0, it.second.id, std::move(data), size, m_senderId, true);
+                    const bool sent = m_communication.Send(0, it->second.id, std::move(data), size, m_senderId, true);
                     if (!sent)
                     {
                         lllog(8) << "StatePublisherRemote: Overflow when sending to node type "
-                                 << it.second.name.c_str() << std::endl;
+                                 << it->second.name.c_str() << std::endl;
                         //No retry handling, since we send cyclically
                     }
                 }

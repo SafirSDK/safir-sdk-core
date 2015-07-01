@@ -60,7 +60,7 @@ namespace Internal
     public:
         AsioPeriodicTimer(boost::asio::io_service& ioService,
                           const boost::chrono::steady_clock::duration& period,
-                          const std::function<void(const boost::system::error_code& error)>& handler)
+                          const boost::function<void(const boost::system::error_code& error)>& handler)
             : m_strand(ioService)
             , m_timer(ioService)
             , m_period(period)
@@ -139,7 +139,7 @@ namespace Internal
         boost::asio::strand m_strand;
         boost::asio::steady_timer m_timer;
         const boost::chrono::steady_clock::duration m_period;
-        const std::function<void(const boost::system::error_code& error)> m_handler;
+        const boost::function<void(const boost::system::error_code& error)> m_handler;
         boost::atomic<bool> m_started;
     };
 }

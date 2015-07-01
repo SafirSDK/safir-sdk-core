@@ -141,7 +141,7 @@ namespace SP
             }));
         }
 
-        void SetStateChangedCallback(const std::function<void(const SystemStateMessage& data)>& callback)
+        void SetStateChangedCallback(const boost::function<void(const SystemStateMessage& data)>& callback)
         {
             m_strand.dispatch([this,callback]
                               {
@@ -152,7 +152,7 @@ namespace SP
         //used to send state message
         //if onlyOwnState is true the callback will only be called if we're elected
         //and have a valid own system state that is ok to send.
-        void PerformOnStateMessage(const std::function<void(std::unique_ptr<char []> data,
+        void PerformOnStateMessage(const boost::function<void(std::unique_ptr<char []> data,
                                                             const size_t size)> & fn,
                                    const bool onlyOwnState)
         {
@@ -192,7 +192,7 @@ namespace SP
         {
             m_strand.dispatch([this,from,data,size]
             {
-                if (!m_electionHandler.IsElected(from))
+                if (!m_electionHandler->IsElected(from))
                 {
                     SEND_SYSTEM_LOG(Informational,
                                     << "SystemPicture (in node " << m_id
@@ -603,27 +603,27 @@ namespace SP
                 
                 for (auto lln = lastLiveNodes.cbegin(); lln != lastLiveNodes.cend(); ++lln)
                 {
-                    const auto findIt = deadNodes.find(lln.first);
+                    const auto findIt = deadNodes.find(lln->first);
                     if (findIt != deadNodes.end())
                     {
-                        lln.second->set_is_dead(true);
+                        lln->second->set_is_dead(true);
                         deadNodes.erase(findIt);
-                        died.insert(lln.first);
-                        lllog(9) << "SP: Node " << lln.first << " has died since last state\n";
+                        died.insert(lln->first);
+                        lllog(9) << "SP: Node " << lln->first << " has died since last state\n";
                     }
                 }
 
                 //remove the dead ones from lastLiveNodes
-                for (const auto d: died)
+                for (auto d = died.cbegin(); d != died.cend(); ++d)
                 {
-                    lastLiveNodes.erase(d);
+                    lastLiveNodes.erase(*d);
                 }
             }
 
             //handle nodes that were dead already
-            for (const auto ldn : lastDeadNodes)
+            for (auto ldn = lastDeadNodes.cbegin(); ldn != lastDeadNodes.cend(); ++ldn)
             {
-                deadNodes.erase(ldn);
+                deadNodes.erase(*ldn);
             }
 
             //Note that nodes that died since last are now in neither lastLiveNodes or
@@ -686,12 +686,12 @@ namespace SP
 
                 //any nodes left over in "seen" are nodes that remote cannot see.
                 //remove them from newNodes
-                for (const auto notSeen : seen)
+                for (auto notSeen = seen.cbegin(); notSeen != seen.cend(); ++notSeen)
                 {
                     lllog(9) << "SP:   Node " << m_lastStatistics.Id(i) << " cannot see node "
-                             << notSeen << ", so we cannot add it to system state yet\n";
+                             << *notSeen << ", so we cannot add it to system state yet\n";
 
-                    newNodes.erase(notSeen);
+                    newNodes.erase(*notSeen);
                 }
             }
 
@@ -718,12 +718,12 @@ namespace SP
 
                 //any nodes left over in "seen" are nodes that remote cannot see.
                 //remove them from newNodes
-                for (const auto notSeen : seen)
+                for (auto notSeen = seen.cbegin(); notSeen != seen.cend(); ++notSeen)
                 {
                     lllog(9) << "SP:   Node " << m_lastStatistics.Id(i) << " cannot see node "
-                             << notSeen << ", so we cannot add it to system state yet\n";
+                             << *notSeen << ", so we cannot add it to system state yet\n";
 
-                    newNodes.erase(notSeen);
+                    newNodes.erase(*notSeen);
                 }
             }
 
@@ -751,10 +751,10 @@ namespace SP
 
 
             //and we add all nodes that remain in deadNodes
-            for (const auto& dn : deadNodes)
+            for (auto dn = deadNodes.cbegin(); dn != deadNodes.cend(); ++dn)
             {
-                const auto& remote = dn.second.first;
-                const int index = dn.second.second;
+                const auto& remote = dn->second.first;
+                const int index = dn->second.second;
 
                 lllog(9) << "SP: Adding dead node " << remote.Name(index).c_str()
                          << " (" << remote.Id(index) << ")\n";
@@ -821,7 +821,7 @@ namespace SP
         RawStatistics m_lastStatistics;
         bool m_lastStatisticsDirty;
 
-        std::function<void(const SystemStateMessage& data)> m_stateChangedCallback;
+        boost::function<void(const SystemStateMessage& data)> m_stateChangedCallback;
 
         SystemStateMessage m_stateMessage;
 

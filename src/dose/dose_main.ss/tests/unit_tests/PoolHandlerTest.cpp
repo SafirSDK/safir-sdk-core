@@ -156,9 +156,10 @@ BOOST_AUTO_TEST_CASE( PoolDistributionHandlerTest )
     auto dump=[]
     {
         std::wcout<<L"--- outbound pool distributions ---"<<std::endl;
-        for (auto& vt : Pd::PoolDistributions)
+
+        for (auto vt = Pd::PoolDistributions.cbegin(); vt != Pd::PoolDistributions.cend(); ++vt)
         {
-            std::wcout<<L"Node "<<vt.first<<L" started: "<<std::boolalpha<<vt.second.first<<std::endl;
+            std::wcout<<L"Node "<<vt->first<<L" started: "<<std::boolalpha<<vt->second.first<<std::endl;
         }
     };
 

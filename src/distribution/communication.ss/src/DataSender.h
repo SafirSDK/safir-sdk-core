@@ -67,8 +67,8 @@ namespace Com
      * messages that have not been acked.
      */
 
-    typedef std::function<void(int64_t toNodeId)> RetransmitTo;
-    typedef std::function<void(int64_t nodeTypeId)> QueueNotFull;
+    typedef boost::function<void(int64_t toNodeId)> RetransmitTo;
+    typedef boost::function<void(int64_t nodeTypeId)> QueueNotFull;
 
     template <class WriterType>
     class DataSenderBasic : private WriterType

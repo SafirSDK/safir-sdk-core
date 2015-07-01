@@ -309,7 +309,7 @@ SystemStateMessage GetStateWithTwoNodes()
 }
 
 
-typedef std::function<void(const RawStatistics& statistics,
+typedef boost::function<void(const RawStatistics& statistics,
                            const RawChanges& flags,
                            boost::shared_ptr<void> completionSignaller)> StatisticsCallback;
 
@@ -375,9 +375,9 @@ public:
                         const int64_t id_,
                         const std::map<int64_t, NodeType>& /*nodeTypes*/,
                         const char* const /*receiverId*/,
-                        const std::function<void(const int64_t nodeId,
+                        const boost::function<void(const int64_t nodeId,
                                                  const int64_t electionId)>& electionCompleteCallback_,
-                        const std::function<void(const int64_t incarnationId)>& /*setIncarnationIdCallback_*/)
+                        const boost::function<void(const int64_t incarnationId)>& /*setIncarnationIdCallback_*/)
         : id(id_)
         , electedId(0)
         , stopped(false)
@@ -418,7 +418,7 @@ public:
     bool stopped;
     bool nodesChangedCalled;
 
-    const std::function<void(const int64_t nodeId,
+    const boost::function<void(const int64_t nodeId,
                              const int64_t electionId)> electionCompleteCallback;
 
 

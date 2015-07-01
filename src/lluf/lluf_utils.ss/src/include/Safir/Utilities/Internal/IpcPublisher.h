@@ -74,8 +74,8 @@ namespace Internal
 
         IpcPublisherImpl(boost::asio::io_service&       ioService,
                          const std::string&             name,
-                         const std::function<void()>    subscriberConnectedCb,
-                         const std::function<void()>    subscriberDisconnectedCb)
+                         const boost::function<void()>    subscriberConnectedCb,
+                         const boost::function<void()>    subscriberDisconnectedCb)
             : m_running(false),
               m_strand(ioService),
               m_acceptor(),
@@ -194,8 +194,8 @@ namespace Internal
         boost::asio::io_service::strand     m_strand;
         AcceptorPtr                         m_acceptor;
         std::set<SessionPtr>                m_sessions;
-        std::function<void()>               m_subscriberConnectedCb;
-        std::function<void()>               m_subscriberDisconnectedCb;
+        boost::function<void()>               m_subscriberConnectedCb;
+        boost::function<void()>               m_subscriberDisconnectedCb;
     };
 
     struct IpcPublisherNoTest
@@ -236,8 +236,8 @@ namespace Internal
          */
         IpcPublisher(boost::asio::io_service&       ioService,
                      const std::string&             name,
-                     const std::function<void()>    subscriberConnectedCb,
-                     const std::function<void()>    subscriberDisconnectedCb)
+                     const boost::function<void()>    subscriberConnectedCb,
+                     const boost::function<void()>    subscriberDisconnectedCb)
             : m_pimpl(boost::make_shared<IpcPubImpl>(ioService,
                                                      name,
                                                      subscriberConnectedCb,

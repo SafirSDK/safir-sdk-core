@@ -696,7 +696,7 @@ namespace @_NAMESPACEV_@
         DotsC_WriteTopLevelChangeFlag(handle, g_@_LOWER:MEMBER_@MemberIndex, m_@_MEMBER_@Member.IsChanged());
 @@ --- Dictionary member ---
 @@ELSIF@@ @_EXIST:MEMBERISDICTIONARY_@
-        for (auto it = m_@_MEMBER_@Member.cbegin(); it != m_@_MEMBER_@Member.cend(); ++it)
+        for (auto it = m_@_MEMBER_@Member.begin(); it != m_@_MEMBER_@Member.end(); ++it)
         {
             Safir::Dob::Typesystem::Internal::BlobOperations::Set(it->first,
                                                                   false,

@@ -54,8 +54,10 @@ public:
         boost::asio::io_service::strand strand(io);
 
         Com::DeliveryHandlerBasic<DeliveryHandlerTest::TestWriter> dh(strand, 1, 4);
-        dh.SetGotRecvCallback([=](int64_t id){DeliveryHandlerTest::GotReceiveFrom(id);});
-        dh.SetReceiver([=](int64_t n, int64_t nt, const char* d, size_t s){DeliveryHandlerTest::OnRecv(n, nt, d, s);}, 0, [=](size_t s){return new char[s];});
+        
+        dh.SetGotRecvCallback(boost::bind(&DeliveryHandlerTest::GotReceiveFrom, _1));
+
+        dh.SetReceiver(boost::bind(&DeliveryHandlerTest::OnRecv, _1, _2, _3, _4), 0, [=](size_t s){return new char[s];});
         dh.Start();
 
         TRACELINE
@@ -390,7 +392,7 @@ private:
 
     static void DumpNodeInfo(Com::DeliveryHandlerBasic<DeliveryHandlerTest::TestWriter>& dh)
     {
-        for (auto vt = dh.m_nodes.cbegin(); vt != dh.m_nodes.cend(); ++vt)
+        for (auto vt = dh.m_nodes.begin(); vt != dh.m_nodes.end(); ++vt)
         {
             Com::DeliveryHandlerBasic<DeliveryHandlerTest::TestWriter>::NodeInfo& ni=vt->second;
             std::cout<<"Node: "<<ni.node.name<<std::endl;

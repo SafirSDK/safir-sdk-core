@@ -140,14 +140,14 @@ namespace SP
                 boost::shared_ptr<char[]> data(std::move(d));
                 std::set<int64_t> overflowNodes;
 
-                for (auto id: toNodeTypes)
+                for (auto id = toNodeTypes.cbegin(); id != toNodeTypes.cend(); ++id)
                 {
-                    const bool sent = m_communication.Send(0, id, data, size, m_senderId, true);
+                    const bool sent = m_communication.Send(0, *id, data, size, m_senderId, true);
                     if (!sent)
                     {
                         lllog(7) << "RawPublisherRemote: Overflow when sending to node type "
-                                 << m_nodeTypes.find(id)->second.name.c_str() << std::endl;
-                        overflowNodes.insert(id);
+                                 << m_nodeTypes.find(*id)->second.name.c_str() << std::endl;
+                        overflowNodes.insert(*id);
                     }
                 }
 

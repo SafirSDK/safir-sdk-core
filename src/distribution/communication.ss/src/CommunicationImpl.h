@@ -56,7 +56,7 @@ namespace Internal
 {
 namespace Com
 {
-    typedef std::function<void(const std::string& name, int64_t nodeId, int64_t nodeTypeId, const std::string& controlAddress, const std::string& dataAddress)> NewNode;
+    typedef boost::function<void(const std::string& name, int64_t nodeId, int64_t nodeTypeId, const std::string& controlAddress, const std::string& dataAddress)> NewNode;
 
     class CommunicationImpl : private boost::noncopyable
     {

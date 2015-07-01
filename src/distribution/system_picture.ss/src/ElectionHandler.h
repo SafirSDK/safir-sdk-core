@@ -91,9 +91,9 @@ namespace SP
                              const int64_t id,
                              const std::map<int64_t, NodeType>& nodeTypes,
                              const char* const receiverId,
-                             const std::function<void(const int64_t nodeId,
+                             const boost::function<void(const int64_t nodeId,
                                                       const int64_t electionId)>& electionCompleteCallback,
-                             const std::function<void(const int64_t incarnationId)>& setIncarnationIdCallback)
+                             const boost::function<void(const int64_t incarnationId)>& setIncarnationIdCallback)
             : m_strand (ioService)
             , m_stopped(false)
             , m_communication(communication)
@@ -179,11 +179,12 @@ namespace SP
         static std::set<int64_t> GetLightNodeTypes(const std::map<int64_t, NodeType>& nodeTypes)
         {
             std::set<int64_t> res;
-            for (const auto& it: nodeTypes)
+
+            for (auto it = nodeTypes.cbegin(); it != nodeTypes.cend(); ++it)
             {
-                if (!it.second.isLight)
+                if (!it->second.isLight)
                 {
-                    res.insert(it.first);
+                    res.insert(it->first);
                 }
             }
             return res;
@@ -196,11 +197,12 @@ namespace SP
         {
             //use max of non-light node types heartbeatInterval * maxLostHeartbeats * 2
             boost::chrono::steady_clock::duration max = boost::chrono::milliseconds(100);
-            for (const auto& nt: nodeTypes)
+            
+            for (auto nt = nodeTypes.cbegin(); nt != nodeTypes.cend(); ++nt)
             {
-                if (!nt.second.isLight)
+                if (!nt->second.isLight)
                 {
-                    max = std::max(max,nt.second.heartbeatInterval * nt.second.maxLostHeartbeats * 2);
+                    max = std::max(max,nt->second.heartbeatInterval * nt->second.maxLostHeartbeats * 2);
                 }
             }
             return max;
@@ -211,11 +213,12 @@ namespace SP
         {
             //use max of non-light node types retryTimeout * maxLostHeartbeats
             boost::chrono::steady_clock::duration max = boost::chrono::milliseconds(100);
-            for (const auto& nt: nodeTypes)
+
+            for (auto nt = nodeTypes.cbegin(); nt != nodeTypes.cend(); ++nt)
             {
-                if (!nt.second.isLight)
+                if (!nt->second.isLight)
                 {
-                    max = std::max(max,nt.second.retryTimeout * nt.second.maxLostHeartbeats);
+                    max = std::max(max,nt->second.retryTimeout * nt->second.maxLostHeartbeats);
                 }
             }
             return max;
@@ -305,47 +308,46 @@ namespace SP
 
                 m_electionInProgress = true;
                 m_electionTimer.expires_from_now(m_electionTimeout);
-                m_electionTimer.async_wait(m_strand.wrap([this](const boost::system::error_code& error)
-                                                         {
-                                                             if (!error && !m_stopped && m_electionInProgress)
-                                                             {
-                                                                 m_electionInProgress = false;
-                                                                 ElectionTimeout();
-                                                             }
-                                                         }));
+
+                m_electionTimer.async_wait(m_strand.wrap(boost::bind(&ElectionHandlerBasic<CommunicationT>::ElectionTimeout, this, _1)));
             }));
         }
 
 
         //must be called in strand
-        void ElectionTimeout()
+        void ElectionTimeout(const boost::system::error_code& error)
         {
-            lllog(4) << "SP: There can be only one! Will send VICTORY ("
-                     << m_currentElectionId << ") to everyone!" << std::endl;
-
-            m_elected = m_id;
-
-            m_pendingVictories = m_nonLightNodeTypes;
-            SendPendingElectionMessages();
-
-            m_electionCompleteCallback(m_elected, m_currentElectionId);
-
-            if (m_lastStatistics.IncarnationId() == 0)
+            if (!error && !m_stopped && m_electionInProgress)
             {
-                m_generateIncarnationIdTimer.expires_from_now(m_aloneTimeout);
+                m_electionInProgress = false;
 
-                m_generateIncarnationIdTimer.async_wait
-                    (m_strand.wrap([this](const boost::system::error_code& error)
-                                   {
-                                       if (!!error || m_stopped)
-                                       {
-                                           return;
-                                       }
+                lllog(4) << "SP: There can be only one! Will send VICTORY ("
+                    << m_currentElectionId << ") to everyone!" << std::endl;
 
-                                       //note that we may not end up with this incarnationId, in case a RAW
-                                       //is received just after this call, but before it is executed
-                                       m_setIncarnationIdCallback(LlufId_GenerateRandom64());
-                                   }));
+                m_elected = m_id;
+
+                m_pendingVictories = m_nonLightNodeTypes;
+                SendPendingElectionMessages();
+
+                m_electionCompleteCallback(m_elected, m_currentElectionId);
+
+                if (m_lastStatistics.IncarnationId() == 0)
+                {
+                    m_generateIncarnationIdTimer.expires_from_now(m_aloneTimeout);
+
+                    m_generateIncarnationIdTimer.async_wait
+                        (m_strand.wrap([this](const boost::system::error_code& error)
+                    {
+                        if (!!error || m_stopped)
+                        {
+                            return;
+                        }
+
+                        //note that we may not end up with this incarnationId, in case a RAW
+                        //is received just after this call, but before it is executed
+                        m_setIncarnationIdCallback(LlufId_GenerateRandom64());
+                    }));
+                }
             }
         }
 
@@ -469,18 +471,19 @@ namespace SP
             { //ALIVE
                 const auto pending = m_pendingAlives;
                 m_pendingAlives.clear();
-                for (const auto& it : pending)
+
+                for (auto it = pending.cbegin(); it != pending.cend(); ++it)
                 {
                     ElectionMessage aliveMsg;
                     aliveMsg.set_action(ALIVE);
-                    aliveMsg.set_election_id(it.second.second);
+                    aliveMsg.set_election_id(it->second.second);
 
                     const auto size = aliveMsg.ByteSize();
                     boost::shared_ptr<char[]> data = boost::make_shared<char[]>(size);
                     aliveMsg.SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(data.get()));
 
-                    const bool sent = m_communication.Send(it.first,
-                                                           it.second.first,
+                    const bool sent = m_communication.Send(it->first,
+                                                           it->second.first,
                                                            std::move(data),
                                                            size,
                                                            m_receiverId,
@@ -489,8 +492,8 @@ namespace SP
                     if (!sent)
                     {
                         lllog(9) << "SP: ElectionHandler: Overflow when sending ALIVE to node "
-                                 << it.first << std::endl;
-                        m_pendingAlives.insert(it);
+                                 << it->first << std::endl;
+                        m_pendingAlives.insert(*it);
                     }
                 }
             }
@@ -498,7 +501,8 @@ namespace SP
             { //VICTORY
                 const auto pending = m_pendingVictories;
                 m_pendingVictories.clear();
-                for (const auto& it : pending)
+
+                for (auto it = pending.cbegin(); it != pending.cend(); ++it)
                 {
                     ElectionMessage victoryMsg;
                     victoryMsg.set_action(VICTORY);
@@ -508,13 +512,13 @@ namespace SP
                     boost::shared_ptr<char[]> data = boost::make_shared<char[]>(size);
                     victoryMsg.SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(data.get()));
 
-                    const bool sent = m_communication.Send(0, it, std::move(data), size, m_receiverId, true);
+                    const bool sent = m_communication.Send(0, *it, std::move(data), size, m_receiverId, true);
 
                     if (!sent)
                     {
                         lllog(9) << "SP: ElectionHandler: Overflow when sending VICTORY to node type "
-                                 << m_nodeTypes.find(it)->second.name.c_str() << std::endl;
-                        m_pendingVictories.insert(it);
+                                 << m_nodeTypes.find(*it)->second.name.c_str() << std::endl;
+                        m_pendingVictories.insert(*it);
                     }
                 }
             }
@@ -522,7 +526,8 @@ namespace SP
             { //INQUIRY
                 const auto pending = m_pendingInquiries;
                 m_pendingInquiries.clear();
-                for (const auto it : pending)
+
+                for (auto it = pending.cbegin(); it != pending.cend(); ++it)
                 {
                     ElectionMessage message;
                     message.set_action(INQUIRY);
@@ -532,17 +537,17 @@ namespace SP
                     boost::shared_ptr<char[]> data = boost::make_shared<char[]>(size);
                     message.SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(data.get()));
 
-                    const bool sent = m_communication.Send(0, it, std::move(data), size, m_receiverId, true);
+                    const bool sent = m_communication.Send(0, *it, std::move(data), size, m_receiverId, true);
                     if (!sent)
                     {
                         lllog(7) << "SP: ElectionHandler: Overflow when sending INQUIRY to node type "
-                                 << m_nodeTypes.find(it)->second.name.c_str() << std::endl;
-                        m_pendingInquiries.insert(it);
+                                 << m_nodeTypes.find(*it)->second.name.c_str() << std::endl;
+                        m_pendingInquiries.insert(*it);
                     }
                     else
                     {
                         lllog(9) << "SP: ElectionHandler: sent INQUIRY to node type "
-                                 << m_nodeTypes.find(it)->second.name.c_str() << std::endl;
+                                 << m_nodeTypes.find(*it)->second.name.c_str() << std::endl;
                     }
                 }
             }
@@ -597,11 +602,11 @@ namespace SP
         std::set<int64_t> m_pendingVictories;
 
         //callback to call on completed election
-        const std::function<void(const int64_t nodeId,
+        const boost::function<void(const int64_t nodeId,
                                  const int64_t electionId)> m_electionCompleteCallback;
 
         //callback to call when generating a new incarnation id
-        const std::function<void(const int64_t incarnationId)> m_setIncarnationIdCallback;
+        const boost::function<void(const int64_t incarnationId)> m_setIncarnationIdCallback;
 
 
     };

@@ -301,8 +301,8 @@ class Sp : private boost::noncopyable
 public:
 
     Sp(uint64_t numRecv, bool accumulated, bool acked,
-       const std::function< void(int64_t) >& includeNode,
-       const std::function< void(int64_t) >& reportNodeFinished)
+       const boost::function< void(int64_t) >& includeNode,
+       const boost::function< void(int64_t) >& reportNodeFinished)
         :m_nodeTypes()
         ,m_nodeNames()
         ,m_recvCount()
@@ -430,8 +430,8 @@ private:
     uint64_t m_numRecv;
     bool m_accumulated;
     bool m_acked;
-    std::function< void(int64_t) > m_includeNode;
-    std::function< void(int64_t) > m_reportNodeFinished;
+    boost::function< void(int64_t) > m_includeNode;
+    boost::function< void(int64_t) > m_reportNodeFinished;
 };
 
 char* Allocate(size_t size) {return new char[size];}
