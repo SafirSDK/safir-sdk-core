@@ -559,7 +559,7 @@ namespace Com
                 //All the code here just produce helpfull logs.
                 std::ostringstream os;
                 os<<"COM: Logic Error! Node "<<m_myId<<" received message from node "<<header->commonHeader.senderId<<
-                    L" that is too far ahead which means that we have lost a message. "<<
+                    " that is too far ahead which means that we have lost a message. "<<
                     SendMethodToString(header->sendMethod)<<", seq: "<<header->sequenceNumber<<"\n     RecvQueue - lastInSeq: "<<ch.lastInSequence<<
                     ", biggestSeq: "<<ch.biggestSequence<<", welcome: "<<ch.welcome<<
                     ", recvQueue: [";
