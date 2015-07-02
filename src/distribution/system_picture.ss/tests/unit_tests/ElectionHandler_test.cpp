@@ -466,7 +466,7 @@ BOOST_FIXTURE_TEST_SUITE( s, Fixture )
 
 BOOST_AUTO_TEST_CASE( start_stop )
 {
-    BOOST_CHECK(nodes[0]->comm.receiveDataCb != nullptr);
+    BOOST_CHECK(!nodes[0]->comm.receiveDataCb.empty());
     BOOST_CHECK(!nodes[0]->eh->IsElected());
 
     //this is kind of an implementation detail...

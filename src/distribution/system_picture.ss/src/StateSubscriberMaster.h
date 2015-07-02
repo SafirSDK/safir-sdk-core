@@ -64,7 +64,7 @@ namespace SP
 
                                                     m_strand.post([this_, dataCopy]
                                                                   {
-                                                                      if (this_->m_dataCallback != NULL)
+                                                                      if (!this_->m_dataCallback.empty())
                                                                       {
                                                                           this_->m_dataCallback(dataCopy);
                                                                       }
@@ -76,7 +76,7 @@ namespace SP
         {
             m_strand.dispatch([this, dataCallback]
                               {
-                                  if (m_dataCallback != NULL)
+                                  if (!m_dataCallback.empty())
                                   {
                                       throw std::logic_error("StateSubscriberMaster already started");
                                   }

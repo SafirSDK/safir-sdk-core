@@ -140,7 +140,7 @@ namespace Internal
 
                         m_streamPtr->close();
 
-                        if (m_sessionClosedCb != nullptr)
+                        if (!m_sessionClosedCb.empty())
                         {
                             m_sessionClosedCb();
                         }

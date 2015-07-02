@@ -77,7 +77,7 @@ public:
     void ExcludeNode(int64_t nodeId)
     {
         excludedNodes.insert(nodeId);
-        if (excludeCb != nullptr)
+        if (!excludeCb.empty())
         {
             excludeCb();
         }
@@ -146,9 +146,9 @@ BOOST_FIXTURE_TEST_SUITE( s, Fixture )
 
 BOOST_AUTO_TEST_CASE( start_stop )
 {
-    BOOST_CHECK(comm.newNodeCb != nullptr);
-    BOOST_CHECK(comm.gotReceiveFromCb != nullptr);
-    BOOST_CHECK(comm.retransmitToCb != nullptr);
+    BOOST_CHECK(!comm.newNodeCb.empty());
+    BOOST_CHECK(!comm.gotReceiveFromCb.empty());
+    BOOST_CHECK(!comm.retransmitToCb.empty());
     BOOST_CHECK(incarnations.empty());
 
     rh->Stop();
@@ -666,7 +666,8 @@ BOOST_AUTO_TEST_CASE( recently_dead_nodes )
     comm.newNodeCb("asdf",12,10,"asdffff","asdfqqqq");
 
     rh->Stop();
-    BOOST_CHECK_NO_THROW(ioService.run());
+    ioService.run();
+    //BOOST_CHECK_NO_THROW(ioService.run());
     BOOST_CHECK_EQUAL(cbCalls, 3);
 }
 

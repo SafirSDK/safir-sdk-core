@@ -109,7 +109,6 @@ SET_SAFIR_TEST_PROPERTIES(TEST StatePublisherLocal_test TIMEOUT 30)
 add_test(NAME StatePublisherRemote_test COMMAND StatePublisherRemote_test)
 SET_SAFIR_TEST_PROPERTIES(TEST StatePublisherRemote_test TIMEOUT 30)
 
-
 add_test(NAME LocalSubscriber_test COMMAND LocalSubscriber_test)
 SET_SAFIR_TEST_PROPERTIES(TEST LocalSubscriber_test TIMEOUT 30)
 

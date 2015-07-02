@@ -349,7 +349,7 @@ public:
 
     void AddRawChangedCallback(const StatisticsCallback& callback)
     {
-        BOOST_CHECK(rawCb == nullptr);
+        BOOST_CHECK(rawCb == NULL);
         rawCb = callback;
     }
 
@@ -483,7 +483,7 @@ BOOST_AUTO_TEST_CASE( start_stop )
     ioService.run();
     BOOST_REQUIRE(ElectionHandlerStub::lastInstance != nullptr);
     BOOST_CHECK(ElectionHandlerStub::lastInstance->stopped);
-    BOOST_CHECK(rh.rawCb != nullptr);
+    BOOST_CHECK(!rh.rawCb.empty());
 }
 
 BOOST_AUTO_TEST_CASE( perform_only_own_unelected )

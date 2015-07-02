@@ -488,7 +488,7 @@ namespace SP
                                   lllog(1) << "SP: Incarnation Id " << incarnationId
                                            << " set in RawHandler." << std::endl;
 
-                                  if (m_validateIncarnationIdCallback != nullptr)
+                                  if (!m_validateIncarnationIdCallback.empty())
                                   {
                                       if (!m_validateIncarnationIdCallback(incarnationId))
                                       {
@@ -803,15 +803,16 @@ namespace SP
             boost::shared_ptr<void> completionCaller(static_cast<void*>(nullptr),
                                                      [completionHandler](void*)
                                                      {
-                                                         if (completionHandler)
+                                                         if (!completionHandler.empty())
                                                          {
                                                              completionHandler();
                                                          }
                                                      });
             
-            for (auto cb = m_rawChangedCallbacks.cbegin(); cb != m_rawChangedCallbacks.cend(); ++cb)
+            for (auto it = m_rawChangedCallbacks.cbegin(); it != m_rawChangedCallbacks.cend(); ++it)
             {
-                m_strand.post([cb,copy,flags,completionCaller]{(*cb)(copy,flags,completionCaller);});
+                auto cb = *it;
+                m_strand.post([cb,copy,flags,completionCaller]{cb(copy,flags,completionCaller);});
             }
         }
 

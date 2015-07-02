@@ -275,7 +275,7 @@ namespace SP
                 }
 
 
-                if (m_stateChangedCallback != nullptr)
+                if (!m_stateChangedCallback.empty())
                 {
                     m_stateChangedCallback(m_stateMessage);
                 }
@@ -801,7 +801,7 @@ namespace SP
                 lllog(9) << "SP: New state:\n" << m_stateMessage << "\n";
             }
 
-            if (m_stateChangedCallback != nullptr)
+            if (!m_stateChangedCallback.empty())
             {
                 m_stateChangedCallback(m_stateMessage);
             }
