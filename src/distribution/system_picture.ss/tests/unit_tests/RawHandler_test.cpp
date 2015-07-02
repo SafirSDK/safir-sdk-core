@@ -53,19 +53,19 @@ public:
 
     void SetNewNodeCallback(const NewNode& callback)
     {
-        BOOST_CHECK(newNodeCb == nullptr);
+        BOOST_CHECK(newNodeCb == NULL);
         newNodeCb = callback;
     }
 
     void SetGotReceiveFromCallback(const GotReceiveFrom& callback)
     {
-        BOOST_CHECK(gotReceiveFromCb == nullptr);
+        BOOST_CHECK(gotReceiveFromCb == NULL);
         gotReceiveFromCb = callback;
     }
 
     void SetRetransmitToCallback(const RetransmitTo& callback)
     {
-        BOOST_CHECK(retransmitToCb == nullptr);
+        BOOST_CHECK(retransmitToCb == NULL);
         retransmitToCb = callback;
     }
 
