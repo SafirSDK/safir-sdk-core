@@ -25,7 +25,7 @@
 #define __LLUF_ASIO_PERIODIC_TIMER_H__
 
 #include <boost/atomic.hpp>
-#include <functional>
+#include <boost/function.hpp>
 #include <boost/noncopyable.hpp>
 
 #ifdef _MSC_VER
