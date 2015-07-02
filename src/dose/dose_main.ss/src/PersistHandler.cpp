@@ -69,7 +69,7 @@ namespace Internal
             {
                 logStatus("RUNNING IN PERSISTENCE TEST MODE! PLEASE CHANGE PARAMETER "
                           "Safir.Dob.PersistenceParameters.TestMode IF THIS IS NOT WHAT YOU EXPECTED!");
-                ENSURE(Dob::PersistenceParameters::Backend() == Dob::PersistenceBackend::Enumeration::None,
+                ENSURE(Dob::PersistenceParameters::Backend() == Dob::PersistenceBackend::None,
                        << "Safir.Dob.PersistenceBackend must be None when running in persistence test mode");
             }
 
@@ -89,30 +89,34 @@ namespace Internal
                                             int64_t                nodeTypeId,
                                            const std::string&     /*dataAddress*/)
         {
-            m_strand.post([this, nodeId, nodeTypeId]
+            auto this_ = this; //fix for vs2010 issues with lambdas
+
+            m_strand.post([this_, nodeId, nodeTypeId]
                           {
-                              if (m_systemFormed || m_persistentDataReady)
+                              if (this_->m_systemFormed || this_->m_persistentDataReady)
                               {
                                   return;
                               }
 
-                              m_nodes.insert(std::make_pair(nodeId, nodeTypeId));
+                              this_->m_nodes.insert(std::make_pair(nodeId, nodeTypeId));
                           });
         },
                                            [this]
                                            (int64_t   nodeId,
                                             int64_t   nodeTypeId)
         {
-            m_strand.post([this, nodeId, nodeTypeId]
+             auto this_ = this;
+
+            m_strand.post([this_, nodeId, nodeTypeId]
                           {
-                              if (m_persistentDataReady)
+                              if (this_->m_persistentDataReady)
                               {
                                   return;
                               }
 
-                              m_nodes.erase(std::make_pair(nodeId, nodeTypeId));
+                              this_->m_nodes.erase(std::make_pair(nodeId, nodeTypeId));
 
-                             CheckResponseStatus();
+                            this_->CheckResponseStatus();
                           });
 
 
@@ -187,18 +191,20 @@ namespace Internal
 
             SetPersistentDataAllowed();
 
-            for (auto& cb : m_persistentDataReadyCb)
+            for (auto cb = m_persistentDataReadyCb.cbegin(); cb != m_persistentDataReadyCb.cend(); ++cb)
             {
-                cb();
+                (*cb)();
             }
+
+            auto this_ = this; //fix for vs2010 issues with lambdas
 
             //We could be inside a Dob callback, so we need
             //to post the call to Close, or else we might be
             //killing the connection that is dispatching...
-            m_strand.post([this]
+            m_strand.post([this_]
                           {
                               // We don't need the connection now
-                              m_connection.Close();
+                              this_->m_connection.Close();
                           });
         });
 
@@ -214,9 +220,9 @@ namespace Internal
 
         m_persistentDataAllowed = true;
 
-        for (auto& cb : m_persistentDataAllowedCb)
+        for (auto cb = m_persistentDataAllowedCb.cbegin(); cb != m_persistentDataAllowedCb.cend(); ++cb)
         {
-            cb();
+            (*cb)();
         }
     }
 
@@ -248,21 +254,21 @@ namespace Internal
         auto request = CreateRequest();
 
         // Send the request to all known nodes
-        for (const auto& node : m_nodes)
+        for (auto node = m_nodes.cbegin(); node != m_nodes.cend(); ++node)
         {
-            auto ok = m_communication.Send(node.first, // nodeId
-                                           node.second, // nodetypeId
+            auto ok = m_communication.Send(node->first, // nodeId
+                                           node->second, // nodetypeId
                                            request.first,
                                            request.second, // size
                                            m_dataTypeIdentifier,
                                            true); // delivery guarantee
             if (ok)
             {
-                lllog(3) << "DOSE_MAIN: Sent HavePersistenceDataRequest to nodeId " << node.first << std::endl;
+                lllog(3) << "DOSE_MAIN: Sent HavePersistenceDataRequest to nodeId " << node->first << std::endl;
             }
             else
             {
-               m_unsentRequests.insert(node);
+               m_unsentRequests.insert(*node);
             }
         }
     }

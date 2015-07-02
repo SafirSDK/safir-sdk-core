@@ -104,7 +104,8 @@ namespace Internal
 
                                                               DistributionData::DropReference(data);
 
-                                                              m_strand.dispatch([this,msg,fromNodeId,fromNodeType]{HandleRequest(msg,fromNodeId,fromNodeType);});
+                                                              auto this_ = this; //fix for vs 2010 lamba issues
+                                                              m_strand.dispatch([this_,msg,fromNodeId,fromNodeType]{this_->HandleRequest(msg,fromNodeId,fromNodeType);});
                                                           },
                                                           m_dataTypeIdentifier,
                                                           DistributionData::NewData);
@@ -117,9 +118,9 @@ namespace Internal
         {
             m_strand.dispatch([this]
                               {
-                                  for (auto& reg : m_pendingRegistrations)
+                                  for (auto reg = m_pendingRegistrations.cbegin(); reg != m_pendingRegistrations.cend(); ++reg)
                                   {
-                                      reg.second->timer.cancel();
+                                      reg->second->timer.cancel();
                                   }
                               });
         }
@@ -157,7 +158,7 @@ namespace Internal
                 PendingRegistration reg;
                 while (connection->GetNextNewPendingRegistration(m_nextId, reg))
                 {
-                    std::pair<PendingRegistrations::iterator, bool> result =
+                    std::pair<PendingRegistrationHandler::PendingRegistrations::iterator, bool> result =
                         m_pendingRegistrations.emplace
                         (std::make_pair(reg.id,
                                         Safir::make_unique<PendingRegistrationInfo>(m_strand.get_io_service(),
@@ -193,7 +194,7 @@ namespace Internal
                     lllout << "Removing RegistrationRequest for " << Dob::Typesystem::Operations::GetName(it->typeId)
                            << " as request id " << it->id <<std::endl;
                     ENSURE(it->remove, << "The PR does not have the remove flag!");
-                    PendingRegistrations::iterator findIt = m_pendingRegistrations.find(it->id);
+                    PendingRegistrationHandler::PendingRegistrations::iterator findIt = m_pendingRegistrations.find(it->id);
 
                     if (findIt != m_pendingRegistrations.end())
                     { //it may have managed to get completed while we were doing other stuff...
@@ -217,16 +218,16 @@ namespace Internal
 
         if (!m_distribution.IsLocal(findIt->second->typeId))
         {
-            for (const auto node: m_liveNodes)
+            for (auto node = m_liveNodes.cbegin(); node != m_liveNodes.cend(); ++node)
             {
-                if (reg.acceptedNodes.find(node.first) == reg.acceptedNodes.end())
+                if (reg.acceptedNodes.find(node->first) == reg.acceptedNodes.end())
                 {
                     gotAll = false;
-                    lllout << "Request " << requestId << " needs accept from node " << node.first << std::endl;
+                    lllout << "Request " << requestId << " needs accept from node " << node->first << std::endl;
                 }
                 else
                 {
-                    lllout << "Request " << requestId << " has accept from node " << node.first << std::endl;
+                    lllout << "Request " << requestId << " has accept from node " << node->first << std::endl;
                 }
             }
         }
@@ -280,11 +281,11 @@ namespace Internal
 
         bool success = true;
         // Send message to all node types
-        for (const auto nodeType : m_distribution.GetNodeTypeIds())
+        for (auto nodeType = m_distribution.GetNodeTypeIds().cbegin(); nodeType != m_distribution.GetNodeTypeIds().cend(); ++nodeType)
         {
             success = success &&
                 m_distribution.GetCommunication().Send(0,  // All nodes of the type
-                                                       nodeType,
+                                                       *nodeType,
                                                        msgP,
                                                        msg.Size(),
                                                        m_dataTypeIdentifier,
@@ -324,17 +325,17 @@ namespace Internal
         {
             std::vector<long> affectedRequestIds;
 
-            for (auto & elem : m_pendingRegistrations)
+            for (auto elem = m_pendingRegistrations.cbegin(); elem != m_pendingRegistrations.cend(); ++elem)
             {
-                if (elem.second->typeId == typeId)
+                if (elem->second->typeId == typeId)
                 {
-                    affectedRequestIds.push_back(elem.first);
+                    affectedRequestIds.push_back(elem->first);
                 }
             }
 
-            for (auto & affectedRequestId : affectedRequestIds)
+            for (auto affectedRequestId = affectedRequestIds.cbegin(); affectedRequestId != affectedRequestIds.cend(); ++affectedRequestId)
             {
-                TryPendingRegistration(affectedRequestId);
+                TryPendingRegistration(*affectedRequestId);
             }
         });
     }
@@ -344,12 +345,12 @@ namespace Internal
     {
         m_strand.dispatch([this]
         {
-            for (PendingRegistrations::iterator it = m_pendingRegistrations.begin();
+            for (PendingRegistrationHandler::PendingRegistrations::iterator it = m_pendingRegistrations.begin();
                  it != m_pendingRegistrations.end();)  // iterator incrementation done below
             {
                 // Important to increment iterator before we call TryPendingRegistration since
                 // the pointed to object might get erased in that routine.
-                PendingRegistrations::iterator tmpIt = it;
+                PendingRegistrationHandler::PendingRegistrations::iterator tmpIt = it;
                 ++it;
                 TryPendingRegistration(tmpIt->first);
             }
@@ -390,13 +391,13 @@ namespace Internal
                 //check if we have a reason to say no!
 
                 //do we have an outstanding pending that is older!
-                for (auto & elem : m_pendingRegistrations)
+                for (auto elem = m_pendingRegistrations.cbegin(); elem != m_pendingRegistrations.cend(); ++elem)
                 {
-                    if (elem.second->typeId == typeId &&
-                        elem.second->handlerId == handlerId &&
-                        elem.second->connectionId.m_contextId == contextId)
+                    if (elem->second->typeId == typeId &&
+                        elem->second->handlerId == handlerId &&
+                        elem->second->connectionId.m_contextId == contextId)
                     {
-                        if (!elem.second->rejected && elem.second->lastRequestTimestamp < timestamp)
+                        if (!elem->second->rejected && elem->second->lastRequestTimestamp < timestamp)
                         {//no, mine is older!
                             lllout << "No, I believe I have an older pending request!" <<std::endl;
                             resp.SetPendingResponse(false);
@@ -513,7 +514,7 @@ namespace Internal
         m_strand.dispatch([this,id]
         {
             lllout << "RemovePendingRegistrations for " << id << std::endl;
-            for (PendingRegistrations::iterator it = m_pendingRegistrations.begin();
+            for (PendingRegistrationHandler::PendingRegistrations::iterator it = m_pendingRegistrations.begin();
                  it != m_pendingRegistrations.end();)
             {
                 if (it->second->connectionId == id)

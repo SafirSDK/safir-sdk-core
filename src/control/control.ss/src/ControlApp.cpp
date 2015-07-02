@@ -122,23 +122,23 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
                               (ioService,
                                // This is what we do when dose_main is ready to receive commands
                                [this, id]()
-    {
-        m_doseMainRunning = true;
+                               {
+                                   m_doseMainRunning = true;
+                                   
+                                   m_doseMainCmdSender->StartDoseMain(m_conf.thisNodeParam.name,
+                                                                      id,
+                                                                      m_conf.thisNodeParam.nodeTypeId,
+                                                                      m_conf.thisNodeParam.dataAddress);
 
-        m_doseMainCmdSender->StartDoseMain(m_conf.thisNodeParam.name,
-                                           id,
-                                           m_conf.thisNodeParam.nodeTypeId,
-                                           m_conf.thisNodeParam.dataAddress);
-
-        m_sp->StartStateSubscription
-                ([this](const SP::SystemState& newState)
-        {
-            m_stateHandler->SetNewState(newState);
-        });
-
-        m_communication->Start();
-    })
-                              );
+                                   auto this_ = this;
+                                   m_sp->StartStateSubscription
+                                           ([this_](const SP::SystemState& newState)
+                                   {
+                                       this_->m_stateHandler->SetNewState(newState);
+                                   });
+                                   
+                                   m_communication->Start();
+                                }));
 
     m_stateHandler.reset(new Control::SystemStateHandler
                          (id,

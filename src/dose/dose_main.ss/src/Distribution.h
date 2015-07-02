@@ -163,18 +163,17 @@ namespace Internal
                                         nodeTypeId,
                                         dataAddress);
 
-            for (auto& cb : m_injectCallbacks)
+            for (auto cb = m_injectCallbacks.cbegin(); cb != m_injectCallbacks.cend(); ++cb)
             {
-                cb(nodeName, nodeId, nodeTypeId, dataAddress);
+                (*cb)(nodeName, nodeId, nodeTypeId, dataAddress);
             }
         }
 
         void ExcludeNode(int64_t nodeId, int64_t nodeTypeId)
         {
-            for (auto& cb : m_excludeCallbacks)
-
+            for (auto cb = m_excludeCallbacks.cbegin(); cb != m_excludeCallbacks.cend(); ++cb)
             {
-                cb(nodeId, nodeTypeId);
+                (*cb)(nodeId, nodeTypeId);
             }
         }
 
@@ -228,7 +227,7 @@ namespace Internal
                     //though it is a constant
                     Dob::Typesystem::ObjectPtr obj = Typesystem::ObjectFactory::Instance().CreateObject(typeId);
                     return Dob::DistributionScopeOverrideProperty::GetDistributionScope(obj) ==
-                        Dob::DistributionScope::Enumeration::Local;
+                        Dob::DistributionScope::Local;
                 }
                 catch (const std::exception & exc)
                 {
@@ -247,7 +246,7 @@ namespace Internal
                 {
                     Dob::Typesystem::ObjectPtr obj = Typesystem::ObjectFactory::Instance().CreateObject(typeId);
                     return Dob::DistributionScopeProperty::GetDistributionScope(obj) ==
-                        Dob::DistributionScope::Enumeration::Local;
+                        Dob::DistributionScope::Local;
                 }
                 catch (const std::exception & exc)
                 {
@@ -270,12 +269,13 @@ namespace Internal
             std::vector<Safir::Dob::Typesystem::TypeId> localTypes;
 
             lllog(3) << "Reading DistributionScope properties to ascertain local types" << std::endl;
-            for (const auto typeId : Safir::Dob::Typesystem::Operations::GetAllTypeIds())
+
+            for (auto typeId = Safir::Dob::Typesystem::Operations::GetAllTypeIds().cbegin(); typeId != Safir::Dob::Typesystem::Operations::GetAllTypeIds().cend(); ++typeId)
             {
-                if (ReadDistributionScopeProperty(typeId))
+                if (ReadDistributionScopeProperty(*typeId))
                 {
-                    localTypes.push_back(typeId);
-                    lllog(3) << "Local type " << Dob::Typesystem::Operations::GetName(typeId) << std::endl;
+                    localTypes.push_back(*typeId);
+                    lllog(3) << "Local type " << Dob::Typesystem::Operations::GetName(*typeId) << std::endl;
                 }
             }
 
@@ -288,9 +288,9 @@ namespace Internal
         {
             std::vector<int64_t> nodeTypeIds;
 
-            for (const auto& nt: config.nodeTypesParam)
+            for (auto nt = config.nodeTypesParam.cbegin(); nt != config.nodeTypesParam.cend(); ++nt)
             {
-                nodeTypeIds.push_back(nt.id);
+                nodeTypeIds.push_back(nt->id);
             }
 
             std::sort(nodeTypeIds.begin(),nodeTypeIds.end());

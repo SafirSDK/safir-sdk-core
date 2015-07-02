@@ -111,7 +111,8 @@ namespace
     {
         m_strand.dispatch([=]
         {
-            m_connectionThread = boost::thread([this]() {ConnectionThread();});
+            auto this_ = this;
+            m_connectionThread = boost::thread([this_]() {this_->ConnectionThread();});
             m_poolHandler.Start();
         });
     }
@@ -138,29 +139,29 @@ namespace
 
     void ConnectionHandler::SendAll(const std::pair<boost::shared_ptr<const char[]>, size_t>& data)
     {
-        for (auto& vt : m_sendQueues)
+        for (auto vt = m_sendQueues.begin(); vt != m_sendQueues.end(); ++vt)
         {
-            vt.second.push(data);
+            vt->second.push(data);
         }
         HandleSendQueues();
     }
 
     void ConnectionHandler::HandleSendQueues()
     {
-        for (auto& ntQ : m_sendQueues) //ntQ = pair<nodeType, SendQueue>
+        for (auto ntQ = m_sendQueues.begin(); ntQ != m_sendQueues.end(); ++ntQ)
         {
-            while (!ntQ.second.empty())
+            while (!ntQ->second.empty())
             {
-                const auto& msg=ntQ.second.front();
+                const auto& msg=ntQ->second.front();
 
-                if (m_communication.Send(0, ntQ.first, msg.first, msg.second, ConnectionMessageDataTypeId, true))
+                if (m_communication.Send(0, ntQ->first, msg.first, msg.second, ConnectionMessageDataTypeId, true))
                 {
-                    lllog(5)<<"ConnectionHandler - Send to to nodeType "<<ntQ.first<<std::endl;
-                    ntQ.second.pop();
+                    lllog(5)<<"ConnectionHandler - Send to to nodeType "<<ntQ->first<<std::endl;
+                    ntQ->second.pop();
                 }
                 else
                 {
-                    lllog(5)<<"ConnectionHandler - Failed Send to to nodeType "<<ntQ.first<<std::endl;
+                    lllog(5)<<"ConnectionHandler - Failed Send to to nodeType "<<ntQ->first<<std::endl;
                     break;
                 }
             }

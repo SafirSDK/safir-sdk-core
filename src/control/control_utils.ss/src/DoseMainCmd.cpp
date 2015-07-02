@@ -162,7 +162,7 @@ namespace Control
 
         Impl(boost::asio::io_service&       ioService,
              const std::function<void()>    doseMainConnectedCb)
-            : m_ipcPublisher(ioService, doseMainCmdChannel, doseMainConnectedCb, nullptr)
+            : m_ipcPublisher(ioService, doseMainCmdChannel, doseMainConnectedCb, NULL)
         {
         }
 

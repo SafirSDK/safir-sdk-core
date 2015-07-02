@@ -191,8 +191,11 @@ int main(int /*argc*/, char * /*argv*/[])
                                                             nodeTypeId,
                                                             spNodeTypes));
 
+                             auto & nodeNameMap_ = nodeNameMap; //fix for vs2010 which cant capture a variable "through two lambdas"
+                             auto & spNodeTypes_ = spNodeTypes;
+
                              communication->SetDataReceiver
-                                 ([&nodeNameMap, &spNodeTypes]
+                                 ([&nodeNameMap_, &spNodeTypes_]
                                   (int64_t fromNodeId,
                                    int64_t fromNodeType,
                                    const char* const data_,
@@ -202,8 +205,8 @@ int main(int /*argc*/, char * /*argv*/[])
                                       std::string msg(data.get(), size);
                                       std::ostringstream os;
                                       os << "DOSE_MAIN: Received " << msg
-                                         << " from Node " << nodeNameMap[fromNodeId]
-                                         << " of Node Type " << spNodeTypes.find(fromNodeType)->second.name;
+                                         << " from Node " << nodeNameMap_[fromNodeId]
+                                         << " of Node Type " << spNodeTypes_.find(fromNodeType)->second.name;
                                       std::cout << os.str() << std::endl;
                                       lllog(3) << os.str() << std::endl;
                                   },

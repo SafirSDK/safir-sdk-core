@@ -221,6 +221,8 @@ namespace Internal
             bool overflow=false;
             conPtr->GetDirtySubscriptionQueue().Dispatch([this, conPtr, context, &overflow](const SubscriptionPtr& subscription, bool& exitDispatch, bool& dontRemove)
             {
+
+                auto this_ = this; //fix for vs 2010 lamba issues
                 dontRemove=false;
                 DistributionData realState = subscription->GetState()->GetRealState();
                 if (!realState.IsNoState() && !m_distribution.IsLocal(realState.GetTypeId()))
@@ -228,12 +230,12 @@ namespace Internal
                     if (realState.GetType()==DistributionData::RegistrationState)
                     {
                         // Registration state
-                        dontRemove=!subscription->DirtyFlag().Process([this, &subscription]{return ProcessRegistrationState(subscription);});
+                        dontRemove=!subscription->DirtyFlag().Process([this_, &subscription]{return this_->ProcessRegistrationState(subscription);});
                     }
                     else
                     {
                         // Entity state
-                        dontRemove=!subscription->DirtyFlag().Process([this, &subscription]{return ProcessEntityState(subscription);});
+                        dontRemove=!subscription->DirtyFlag().Process([this_, &subscription]{return this_->ProcessEntityState(subscription);});
                     }
                 }
                 //dontRemove is true if we got an overflow, and if we did we dont want to keep sending anything to communication.
@@ -261,7 +263,7 @@ namespace Internal
             m_dobConnection.Close();
 
             auto req=boost::make_shared<char[]>(sizeof(PoolDistributionInfo));
-            (*reinterpret_cast<PoolDistributionInfo*>(req.get()))=PoolDistributionInfo::PdComplete;
+            (*reinterpret_cast<PoolDistributionInfo*>(req.get()))=PdComplete;
 
             if (m_distribution.GetCommunication().Send(m_nodeId, m_nodeType, req, sizeof(PoolDistributionInfo), PoolDistributionInfoDataTypeId, true))
             {

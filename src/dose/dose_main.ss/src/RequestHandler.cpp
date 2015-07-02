@@ -94,17 +94,17 @@ namespace
           m_distribution(distribution),
           m_communication(distribution.GetCommunication()),
           m_dataTypeIdentifier(LlufId_Generate64("RequestHandler")),
-          m_communicationVirtualConnectionId(LlufId_Generate64("CommunicationVirtualConnectionId")),
-          m_responseHandler(m_strand,
+          m_communicationVirtualConnectionId(LlufId_Generate64("CommunicationVirtualConnectionId"))
+    {
+        m_responseHandler.reset(new ResponseHandler(m_strand,
                             distribution,
                             [this]
                             (const ConnectionId& connectionId,
                              const InternalRequestId requestId)
                             {
                                 m_outReqTimers.erase(std::make_pair(connectionId.m_id, requestId));
-                            })
+                            }));
 
-    {
         m_distribution.SubscribeNodeEvents(
                     // Executed when a 'node included' cb is received
                     m_strand.wrap([this](const std::string& /*nodeName*/,
@@ -153,7 +153,7 @@ namespace
         m_strand.dispatch([this, connection] ()
         {
             // First, try to distribute responses for this connection
-            m_responseHandler.DistributeResponses(connection);
+            m_responseHandler->DistributeResponses(connection);
 
             // Second, try to distribute out requests for this connection
             lllog(8) << "DOSE_MAIN: Distributing requests (out) for connection "
@@ -171,11 +171,14 @@ namespace
     {
         m_strand.dispatch([this, deletedConnection] ()
         {
+            auto this_ = this; //fixes for vs 2010 issues with lambda
+            auto& deletedConnection_ = deletedConnection;
+
             // All requests that have been dispatched should have their timeout shortened, so that if
             // the deleted connection (on a remote node) has not already sent a response
             // (which we have not yet received) the request will timeout shortly.
             Connections::Instance().ForEachConnectionPtr(
-                        [this, deletedConnection]
+                        [this_, deletedConnection_]
                         (const ConnectionPtr& fromConnection)
                         {
                             if (!fromConnection->IsLocal())
@@ -183,11 +186,14 @@ namespace
                                 return;
                             }
 
+                            auto this__ = this_; //fixes for vs 2010 issues with lambda
+                            auto& deletedConnection__ = deletedConnection_; 
+
                             fromConnection->GetRequestOutQueue().ForEachDispatchedRequest(
-                                        [this, deletedConnection, fromConnection]
+                                        [this__, deletedConnection__, fromConnection]
                                         (const DistributionData& request)
                                         {
-                                            SetShortTimeout(request, deletedConnection, fromConnection);
+                                            this__->SetShortTimeout(request, deletedConnection__, fromConnection);
                                         });
                         });
 
@@ -463,7 +469,7 @@ namespace
             sender->GetRequestOutQueue().RequestTimeout(reqId);
 
             //Post the response
-            m_responseHandler.SendLocalResponse(response);
+            m_responseHandler->SendLocalResponse(response);
 
             sender->SignalIn();
         }));
@@ -615,7 +621,7 @@ namespace
                                   reqId,
                                   &bin[0]);
         //Post the response
-        m_responseHandler.SendLocalResponse(response);
+        m_responseHandler->SendLocalResponse(response);
 
         //Remove timer
         m_outReqTimers.erase(std::make_pair(sender->Id().m_id, reqId));

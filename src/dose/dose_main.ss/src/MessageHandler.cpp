@@ -35,7 +35,6 @@
 #include <Safir/Dob/Internal/MessageTypes.h>
 #include <Safir/Dob/NodeParameters.h>
 
-
 namespace Safir
 {
 namespace Dob
@@ -116,7 +115,7 @@ namespace Internal
                                            bool& exitDispatch,
                                            bool& dontRemove)
              {
-                 DispatchMessage(noPopped,
+                 this->DispatchMessage(noPopped,
                                  connection,
                                  msg,
                                  exitDispatch,

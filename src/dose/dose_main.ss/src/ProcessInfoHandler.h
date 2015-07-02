@@ -82,7 +82,7 @@ namespace Internal
         Utilities::AsioDispatcher m_dispatcher;
         boost::atomic<bool> m_stopped;
 
-        Safir::Utilities::ProcessMonitor m_processMonitor;
+        std::unique_ptr<Safir::Utilities::ProcessMonitor> m_processMonitor;
     };
 }
 }
