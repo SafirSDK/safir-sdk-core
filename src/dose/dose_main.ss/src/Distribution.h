@@ -270,7 +270,9 @@ namespace Internal
 
             lllog(3) << "Reading DistributionScope properties to ascertain local types" << std::endl;
 
-            for (auto typeId = Safir::Dob::Typesystem::Operations::GetAllTypeIds().cbegin(); typeId != Safir::Dob::Typesystem::Operations::GetAllTypeIds().cend(); ++typeId)
+            auto allTypeId = Safir::Dob::Typesystem::Operations::GetAllTypeIds();
+
+            for (auto typeId = allTypeId.cbegin(); typeId != allTypeId.cend(); ++typeId)
             {
                 if (ReadDistributionScopeProperty(*typeId))
                 {
