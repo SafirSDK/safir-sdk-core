@@ -70,8 +70,8 @@
             <Name>Server</Name>
             <IsLight>False</IsLight>
             <TalksTo></TalksTo>
-            <HeartbeatInterval>0.7</HeartbeatInterval>
-            <MaxLostHeartbeats>7</MaxLostHeartbeats>
+            <HeartbeatInterval>1</HeartbeatInterval>
+            <MaxLostHeartbeats>30</MaxLostHeartbeats>
             <SlidingWindowsSize>10</SlidingWindowsSize>
             <RetryTimeout>0.02</RetryTimeout>
             <WantedTypes>
