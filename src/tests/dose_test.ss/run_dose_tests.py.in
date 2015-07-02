@@ -365,10 +365,7 @@ class Runner:
                                                   parameters.safir_control_cmd +
                                                   ("--force-id", ("888888" if parameters.slave else "999999")))
 
-        #we don't run dope on the multicomputer test slave, to ensure that it won't
-        #create a system of its own due to slow jenkins slave startup
-        if not parameters.slave:
-            self.__launchProcess("dope_main.0", parameters.dope_main_cmd)
+        self.__launchProcess("dope_main.0", parameters.dope_main_cmd)
         self.__launchProcess("foreach.0", parameters.foreach_cmd)
 
         for i in partners:
