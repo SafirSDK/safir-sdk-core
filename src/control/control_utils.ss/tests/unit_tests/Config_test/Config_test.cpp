@@ -28,6 +28,7 @@
 
 int failures = 0;
 #define CHECK(expr) {if (!(expr)) { std::wcout << "Test failed! Line: " <<__LINE__<< ", expr: " << #expr << std::endl; ++failures;}}
+#define LOGERROR(expr) { std::wcout << "Test failed! Line: " <<__LINE__<< ", expr: " << #expr << std::endl; ++failures;}
 
 namespace ctrl = Safir::Dob::Internal::Control;
 
@@ -110,7 +111,7 @@ int main(int argc, char* argv[])
         {           
             ctrl::Config conf;
 
-            CHECK(!"Expected an exception!");
+            LOGERROR("Expected an exception!");
         }
         catch (const std::exception& e)
         {
@@ -123,7 +124,7 @@ int main(int argc, char* argv[])
         {            
             ctrl::Config conf;
 
-            CHECK(!"Expected an exception!");
+            LOGERROR("Expected an exception!");
         }
         catch (const std::exception& e)
         {
@@ -136,7 +137,7 @@ int main(int argc, char* argv[])
         {
             ctrl::Config conf;
 
-            CHECK(!"Expected an exception!");
+            LOGERROR("Expected an exception!");
         }
         catch (const std::exception& e)
         {
