@@ -309,7 +309,7 @@ SystemStateMessage GetStateWithTwoNodes()
 }
 
 
-typedef std::function<void(const RawStatistics& statistics,
+typedef boost::function<void(const RawStatistics& statistics,
                            const RawChanges& flags,
                            boost::shared_ptr<void> completionSignaller)> StatisticsCallback;
 
@@ -349,7 +349,7 @@ public:
 
     void AddRawChangedCallback(const StatisticsCallback& callback)
     {
-        BOOST_CHECK(rawCb == nullptr);
+        BOOST_CHECK(rawCb == NULL);
         rawCb = callback;
     }
 
@@ -375,9 +375,9 @@ public:
                         const int64_t id_,
                         const std::map<int64_t, NodeType>& /*nodeTypes*/,
                         const char* const /*receiverId*/,
-                        const std::function<void(const int64_t nodeId,
+                        const boost::function<void(const int64_t nodeId,
                                                  const int64_t electionId)>& electionCompleteCallback_,
-                        const std::function<void(const int64_t incarnationId)>& /*setIncarnationIdCallback_*/)
+                        const boost::function<void(const int64_t incarnationId)>& /*setIncarnationIdCallback_*/)
         : id(id_)
         , electedId(0)
         , stopped(false)
@@ -418,7 +418,7 @@ public:
     bool stopped;
     bool nodesChangedCalled;
 
-    const std::function<void(const int64_t nodeId,
+    const boost::function<void(const int64_t nodeId,
                              const int64_t electionId)> electionCompleteCallback;
 
 
@@ -483,7 +483,7 @@ BOOST_AUTO_TEST_CASE( start_stop )
     ioService.run();
     BOOST_REQUIRE(ElectionHandlerStub::lastInstance != nullptr);
     BOOST_CHECK(ElectionHandlerStub::lastInstance->stopped);
-    BOOST_CHECK(rh.rawCb != nullptr);
+    BOOST_CHECK(!rh.rawCb.empty());
 }
 
 BOOST_AUTO_TEST_CASE( perform_only_own_unelected )

@@ -25,7 +25,7 @@
 #pragma once
 
 #include <map>
-#include <atomic>
+#include <boost/atomic.hpp>
 #include <boost/noncopyable.hpp>
 #include <boost/function.hpp>
 #include <boost/make_shared.hpp>
@@ -67,8 +67,8 @@ namespace Com
      * messages that have not been acked.
      */
 
-    typedef std::function<void(int64_t toNodeId)> RetransmitTo;
-    typedef std::function<void(int64_t nodeTypeId)> QueueNotFull;
+    typedef boost::function<void(int64_t toNodeId)> RetransmitTo;
+    typedef boost::function<void(int64_t nodeTypeId)> QueueNotFull;
 
     template <class WriterType>
     class DataSenderBasic : private WriterType
@@ -100,11 +100,8 @@ namespace Com
             ,m_queueNotFullNotification()
             ,m_queueNotFullNotificationLimit(Parameters::SendQueueSize/2)
             ,m_sendAckRequestForMsgIndex()
-            ,m_logPrefix([&]{std::ostringstream os;
-                             os<<"COM: ("<<DeliveryGuaranteeToString(deliveryGuarantee)<<"DataSender nodeType "<<nodeTypeId<<") - ";
-                             return os.str();}())
+            ,m_logPrefix(GenerateLogPrefix(deliveryGuarantee,nodeTypeId))
         {
-
             m_sendQueueSize=0;
             m_notifyQueueNotFull=false;
         }
@@ -361,7 +358,7 @@ namespace Com
         int64_t m_nodeTypeId;
         int64_t m_nodeId;
         MessageQueue<UserDataPtr> m_sendQueue;
-        std::atomic_uint m_sendQueueSize;
+        boost::atomic<unsigned int> m_sendQueueSize;
         bool m_running;
         int m_waitForAckTimeout;
         size_t m_fragmentDataSize; //size of a fragments data part, excluding header size.
@@ -372,9 +369,16 @@ namespace Com
         RetransmitTo m_retransmitNotification;
         std::vector<QueueNotFull> m_queueNotFullNotification;
         size_t m_queueNotFullNotificationLimit; //below number of used slots. NOT percent.
-        std::atomic_bool m_notifyQueueNotFull;
+        boost::atomic<bool> m_notifyQueueNotFull;
         std::vector<size_t> m_sendAckRequestForMsgIndex;
         const std::string m_logPrefix;
+
+        static std::string GenerateLogPrefix(uint8_t deliveryGuarantee, int64_t nodeTypeId)
+        {
+           std::ostringstream os;
+           os<<"COM: ("<<DeliveryGuaranteeToString(deliveryGuarantee)<<"DataSender nodeType "<<nodeTypeId<<") - ";
+           return os.str();
+        }
 
         void PostWelcome(int64_t nodeId)
         {
@@ -436,13 +440,13 @@ namespace Com
 
                     if (WriterType::IsMulticastEnabled()) //this node and all the receivers are capable of sending and receiving multicast
                     {
-                        for (const auto& val : m_nodes)
+                        for (auto val = m_nodes.cbegin(); val != m_nodes.cend(); ++val)
                         {
-                            if (val.second.systemNode && val.second.welcome<=ud->header.sequenceNumber)
+                            if (val->second.systemNode && val->second.welcome<=ud->header.sequenceNumber)
                             {
                                 //The node will get the message throuch the multicast message, we just add it to receiver list
                                 //to be able to track the ack
-                                ud->receivers.insert(val.first);
+                                ud->receivers.insert(val->first);
                             }
                         }
 
@@ -453,12 +457,12 @@ namespace Com
                     }
                     else //this node is not multicast enabled, only send unicast. However it's still a multiReceiver message and the multiReceiverSeqNo shall be used
                     {
-                        for (const auto& val : m_nodes)
+                        for (auto val = m_nodes.cbegin(); val != m_nodes.cend(); ++val)
                         {
-                            if (val.second.systemNode && val.second.welcome<=ud->header.sequenceNumber)
+                            if (val->second.systemNode && val->second.welcome<=ud->header.sequenceNumber)
                             {
-                                ud->receivers.insert(val.first);
-                                WriterType::SendTo(ud, val.second.endpoint);
+                                ud->receivers.insert(val->first);
+                                WriterType::SendTo(ud, val->second.endpoint);
                             }
                         }
                     }
@@ -551,9 +555,9 @@ namespace Com
             std::set<int64_t> singleReceiverSendMethod;
             std::set<int64_t> multiReceiverSendMethod;
 
-            for (auto index : m_sendAckRequestForMsgIndex)
+            for (auto index = m_sendAckRequestForMsgIndex.cbegin(); index != m_sendAckRequestForMsgIndex.cend(); ++index)
             {
-                const UserDataPtr& ud=m_sendQueue[index];
+                const UserDataPtr& ud=m_sendQueue[*index];
                 if (ud->header.sendMethod==SingleReceiverSendMethod)
                 {
                     singleReceiverSendMethod.insert(ud->receivers.begin(), ud->receivers.end());
@@ -569,26 +573,28 @@ namespace Com
 
             //Send ackRequests for SingleReceiver channel
             ud->header.sendMethod=SingleReceiverSendMethod;
-            for (auto recvId : singleReceiverSendMethod)
+
+            for (auto recvId = singleReceiverSendMethod.cbegin(); recvId != singleReceiverSendMethod.cend(); ++recvId)
             {
-                auto nodeIt=m_nodes.find(recvId);
+                auto nodeIt=m_nodes.find(*recvId);
                 if (nodeIt!=m_nodes.end() && nodeIt->second.systemNode)
                 {
-                    lllog(9)<<m_logPrefix.c_str()<<"Send AckRequest for SingleReceiverSendMethod to "<<recvId<<std::endl;
-                    ud->header.commonHeader.receiverId=recvId;
+                    lllog(9)<<m_logPrefix.c_str()<<"Send AckRequest for SingleReceiverSendMethod to "<<*recvId<<std::endl;
+                    ud->header.commonHeader.receiverId=*recvId;
                     WriterType::SendTo(ud, nodeIt->second.endpoint);
                 }
             }
 
             //Send ackRequests for MultiReceiver channel
             ud->header.sendMethod=MultiReceiverSendMethod;
-            for (auto recvId : multiReceiverSendMethod)
+           
+            for (auto recvId = multiReceiverSendMethod.cbegin(); recvId != multiReceiverSendMethod.cend(); ++recvId)
             {
-                auto nodeIt=m_nodes.find(recvId);
+                auto nodeIt=m_nodes.find(*recvId);
                 if (nodeIt!=m_nodes.end() && nodeIt->second.systemNode)
                 {
-                    lllog(9)<<m_logPrefix.c_str()<<"Send AckRequest for MultiReceiverSendMethod to "<<recvId<<std::endl;
-                    ud->header.commonHeader.receiverId=recvId;
+                    lllog(9)<<m_logPrefix.c_str()<<"Send AckRequest for MultiReceiverSendMethod to "<<*recvId<<std::endl;
+                    ud->header.commonHeader.receiverId=*recvId;
                     WriterType::SendTo(ud, nodeIt->second.endpoint);
                 }
             }
@@ -671,9 +677,9 @@ namespace Com
                     else
                     {
                         //message has not been acked by everyone
-                        for (auto r : ud->receivers)
+                        for (auto r = ud->receivers.cbegin(); r != ud->receivers.cend(); ++r)
                         {
-                            lllog(8)<<m_logPrefix.c_str()<<"Cant remove seq: "<<ud->header.sequenceNumber<<", left: "<<r<<std::endl;
+                            lllog(8)<<m_logPrefix.c_str()<<"Cant remove seq: "<<ud->header.sequenceNumber<<", left: "<<*r<<std::endl;
                         }
                         break;
                     }
@@ -733,9 +739,9 @@ namespace Com
                 {
                      m_strand.get_io_service().post([this]
                      {
-                         for (auto& callback : m_queueNotFullNotification)
+                         for (auto callback = m_queueNotFullNotification.cbegin(); callback != m_queueNotFullNotification.cend(); ++callback)
                          {
-                             callback(m_nodeTypeId);
+                             (*callback)(m_nodeTypeId);
                          }
                      });
                 }
@@ -765,9 +771,9 @@ namespace Com
                 }
                 else
                 {
-                    for (auto id : ud->receivers)
+                    for (auto id = ud->receivers.cbegin(); id != ud->receivers.cend(); ++id)
                     {
-                        os<<"    recvId="<<id<<std::endl;
+                        os<<"    recvId="<<*id<<std::endl;
                     }
                 }
             }

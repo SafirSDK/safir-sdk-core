@@ -24,7 +24,7 @@
 ******************************************************************************/
 #pragma once
 
-#include <atomic>
+#include <boost/atomic.hpp>
 #include <boost/unordered_map.hpp>
 #include <boost/function.hpp>
 #include <boost/shared_ptr.hpp>
@@ -57,9 +57,9 @@ namespace Internal
 {
 namespace Com
 {
-    typedef std::function<char*(size_t)> Allocator;
-    typedef std::function<void(int64_t fromNodeId, int64_t fromNodeType, const char* data, size_t size)> ReceiveData;
-    typedef std::function<void(int64_t fromNodeId)> GotReceiveFrom;
+    typedef boost::function<char*(size_t)> Allocator;
+    typedef boost::function<void(int64_t fromNodeId, int64_t fromNodeType, const char* data, size_t size)> ReceiveData;
+    typedef boost::function<void(int64_t fromNodeId)> GotReceiveFrom;
 
     template <class WriterType>
     class DeliveryHandlerBasic : private WriterType
@@ -310,7 +310,7 @@ namespace Com
         int64_t m_myId;
         boost::asio::strand& m_receiveStrand; //for sending acks, same strand as all public methods are supposed to be called from
         boost::asio::strand m_deliverStrand; //for delivering data to application
-        std::atomic_uint m_numberOfUndeliveredMessages;
+        boost::atomic<unsigned int> m_numberOfUndeliveredMessages;
 
         NodeInfoMap m_nodes;
         ReceiverMap m_receivers;

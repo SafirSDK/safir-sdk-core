@@ -31,7 +31,7 @@
 #include <iostream>
 #include <map>
 #include <boost/regex.hpp>
-#include <atomic>
+#include <boost/atomic.hpp>
 
 //disable warnings in boost
 #if defined _MSC_VER
@@ -67,15 +67,15 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
 
     std::vector<Com::NodeTypeDefinition> commNodeTypes;
 
-    for (const auto& nt: m_conf.nodeTypesParam)
+    for (auto nt = m_conf.nodeTypesParam.cbegin(); nt != m_conf.nodeTypesParam.cend(); ++nt)
     {
-        commNodeTypes.push_back(Com::NodeTypeDefinition(nt.id,
-                                                        nt.name,
-                                                        nt.multicastAddressControl,
-                                                        nt.multicastAddressData,
-                                                        nt.heartbeatInterval,
-                                                        nt.retryTimeout,
-                                                        nt.maxLostHeartbeats));
+        commNodeTypes.push_back(Com::NodeTypeDefinition(nt->id,
+                                                        nt->name,
+                                                        nt->multicastAddressControl,
+                                                        nt->multicastAddressData,
+                                                        nt->heartbeatInterval,
+                                                        nt->retryTimeout,
+                                                        nt->maxLostHeartbeats));
     }
 
     m_communication.reset(new Com::Communication(Com::controlModeTag,
@@ -96,15 +96,15 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
 
     std::map<boost::int64_t, SP::NodeType> spNodeTypes;
 
-    for (const auto& nt: m_conf.nodeTypesParam)
+    for (auto nt = m_conf.nodeTypesParam.cbegin(); nt != m_conf.nodeTypesParam.cend(); ++nt)
     {
-        spNodeTypes.insert(std::make_pair(nt.id,
-                                          SP::NodeType(nt.id,
-                                                       nt.name,
-                                                       nt.isLight,
-                                                       boost::chrono::milliseconds(nt.heartbeatInterval),
-                                                       nt.maxLostHeartbeats,
-                                                       boost::chrono::milliseconds(nt.retryTimeout))));
+        spNodeTypes.insert(std::make_pair(nt->id,
+                                          SP::NodeType(nt->id,
+                                                       nt->name,
+                                                       nt->isLight,
+                                                       boost::chrono::milliseconds(nt->heartbeatInterval),
+                                                       nt->maxLostHeartbeats,
+                                                       boost::chrono::milliseconds(nt->retryTimeout))));
     }
 
 
@@ -122,23 +122,23 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
                               (ioService,
                                // This is what we do when dose_main is ready to receive commands
                                [this, id]()
-    {
-        m_doseMainRunning = true;
+                               {
+                                   m_doseMainRunning = true;
+                                   
+                                   m_doseMainCmdSender->StartDoseMain(m_conf.thisNodeParam.name,
+                                                                      id,
+                                                                      m_conf.thisNodeParam.nodeTypeId,
+                                                                      m_conf.thisNodeParam.dataAddress);
 
-        m_doseMainCmdSender->StartDoseMain(m_conf.thisNodeParam.name,
-                                           id,
-                                           m_conf.thisNodeParam.nodeTypeId,
-                                           m_conf.thisNodeParam.dataAddress);
-
-        m_sp->StartStateSubscription
-                ([this](const SP::SystemState& newState)
-        {
-            m_stateHandler->SetNewState(newState);
-        });
-
-        m_communication->Start();
-    })
-                              );
+                                   auto this_ = this;
+                                   m_sp->StartStateSubscription
+                                           ([this_](const SP::SystemState& newState)
+                                   {
+                                       this_->m_stateHandler->SetNewState(newState);
+                                   });
+                                   
+                                   m_communication->Start();
+                                }));
 
     m_stateHandler.reset(new Control::SystemStateHandler
                          (id,

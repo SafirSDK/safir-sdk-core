@@ -61,7 +61,7 @@ std::unique_ptr<RawStatisticsMessage> GetProtobuf()
 }
 
 
-std::function<void(const char* const data, const size_t size)> dataCallback;
+boost::function<void(const char* const data, const size_t size)> dataCallback;
 
 int connect_calls = 0;
 int disconnect_calls = 0;
@@ -71,7 +71,7 @@ class Subscriber
 public:
     Subscriber(boost::asio::io_service&,
                const std::string& name,
-               const std::function<void(const char* const data, const size_t size)>& callback)
+               const boost::function<void(const char* const data, const size_t size)>& callback)
     {
         connect_calls = 0;
         disconnect_calls = 0;

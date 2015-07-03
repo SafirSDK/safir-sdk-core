@@ -155,7 +155,7 @@ namespace Internal
         mutable TimeoutTable m_timeoutTable;
 
         BlockingHandlers m_blockingHandler;
-        ResponseHandler m_responseHandler;
+        std::unique_ptr<ResponseHandler> m_responseHandler;
     };
 }
 }

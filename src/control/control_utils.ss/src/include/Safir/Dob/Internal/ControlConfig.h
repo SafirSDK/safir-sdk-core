@@ -187,13 +187,13 @@ namespace Control
                     }
 
                     // Check that the TalksTo nodes exists
-                    for (const auto& talksToName: talksTo)
+                    for (auto talksToName = talksTo.cbegin(); talksToName != talksTo.cend(); ++talksToName)
                     {
-                        if (allNodeTypes.find(talksToName) == allNodeTypes.end())
+                        if (allNodeTypes.find(*talksToName) == allNodeTypes.end())
                         {
                             throw std::logic_error("Parameter error: "
                                                    "Node type " + nodeTypeName + ": TalksTo node " +
-                                                   talksToName + "does not exist!");
+                                                   *talksToName + "does not exist!");
                         }
                     }
                 }
@@ -308,19 +308,20 @@ namespace Control
 
             // Check that there are no duplicated ip addresses
             std::set<std::string> ipAddr;
-            for (const auto& i : nodeTypesParam)
+
+            for (auto i = nodeTypesParam.cbegin(); i != nodeTypesParam.cend(); ++i)
             {
-                if (!i.multicastAddressControl.empty())
+                if (!i->multicastAddressControl.empty())
                 {
-                    if (!ipAddr.insert(i.multicastAddressControl).second)
+                    if (!ipAddr.insert(i->multicastAddressControl).second)
                     {
                         throw std::logic_error("Parameter error: Duplicated ip addresses!");
                     }
                 }
 
-                if (!i.multicastAddressData.empty())
+                if (!i->multicastAddressData.empty())
                 {
-                    if (!ipAddr.insert(i.multicastAddressData).second)
+                    if (!ipAddr.insert(i->multicastAddressData).second)
                     {
                         throw std::logic_error("Parameter error: Duplicated ip addresses!");
                     }
@@ -353,9 +354,10 @@ namespace Control
 
 
             bool nodeTypeValid = false;
-            for (const auto& nt: nodeTypesParam)
+
+            for (auto nt = nodeTypesParam.cbegin(); nt != nodeTypesParam.cend(); ++nt)
             {
-                if (nt.id == thisNodeParam.nodeTypeId)
+                if (nt->id == thisNodeParam.nodeTypeId)
                 {
                     nodeTypeValid = true;
                     break;

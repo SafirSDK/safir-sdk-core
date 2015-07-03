@@ -21,9 +21,10 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
+#include <boost/function.hpp>
 #include <Safir/Utilities/Internal/MakeUnique.h>
 #include "../../src/RemoteSubscriber.h"
-#include <Safir/Utilities/Internal/MakeUnique.h>
+
 
 
 #define BOOST_TEST_MODULE StateSubscriberRemoteTest
@@ -31,22 +32,22 @@
 
 using namespace Safir::Dob::Internal::SP;
 
-std::function<void(int64_t fromNodeId,
+boost::function<void(int64_t fromNodeId,
                    int64_t fromNodeType,
                    const char* const data,
                    size_t size)> dataCallback;
 
-std::function<char*(size_t)> allocator;
+boost::function<char*(size_t)> allocator;
 
 class Com
 {
 public:
-    void SetDataReceiver(const std::function<void(int64_t fromNodeId,
+    void SetDataReceiver(const boost::function<void(int64_t fromNodeId,
                                                   int64_t fromNodeType,
                                                   const char* const data,
                                                   size_t size)>& callback,
                          int64_t /*dataTypeIdentifier*/,
-                         const std::function<char*(size_t)>& alloc)
+                         const boost::function<char*(size_t)>& alloc)
     {
         dataCallback = callback;
         allocator = alloc;

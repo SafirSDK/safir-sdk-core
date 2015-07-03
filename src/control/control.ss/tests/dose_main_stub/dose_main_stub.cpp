@@ -104,23 +104,24 @@ int main(int /*argc*/, char * /*argv*/[])
     std::vector<Com::NodeTypeDefinition> commNodeTypes;
     std::map<boost::int64_t, SP::NodeType> spNodeTypes;
 
-    for (const auto& nt: config.nodeTypesParam)
-    {
-        commNodeTypes.push_back( Com::NodeTypeDefinition(nt.id,
-                                                         nt.name,
-                                                         nt.multicastAddressControl,
-                                                         nt.multicastAddressData,
-                                                         nt.heartbeatInterval,
-                                                         nt.retryTimeout,
-                                                         nt.maxLostHeartbeats));
 
-        spNodeTypes.insert(std::make_pair(nt.id,
-                                          SP::NodeType(nt.id,
-                                                       nt.name,
-                                                       nt.isLight,
-                                                       boost::chrono::milliseconds(nt.heartbeatInterval),
-                                                       nt.maxLostHeartbeats,
-                                                       boost::chrono::milliseconds(nt.retryTimeout))));
+    for (auto nt = config.nodeTypesParam.cbegin(); nt != config.nodeTypesParam.cend(); ++nt)
+    {
+        commNodeTypes.push_back( Com::NodeTypeDefinition(nt->id,
+                                                         nt->name,
+                                                         nt->multicastAddressControl,
+                                                         nt->multicastAddressData,
+                                                         nt->heartbeatInterval,
+                                                         nt->retryTimeout,
+                                                         nt->maxLostHeartbeats));
+
+        spNodeTypes.insert(std::make_pair(nt->id,
+                                          SP::NodeType(nt->id,
+                                                       nt->name,
+                                                       nt->isLight,
+                                                       boost::chrono::milliseconds(nt->heartbeatInterval),
+                                                       nt->maxLostHeartbeats,
+                                                       boost::chrono::milliseconds(nt->retryTimeout))));
     }
 
     std::unique_ptr<Com::Communication> communication;
@@ -147,10 +148,10 @@ int main(int /*argc*/, char * /*argv*/[])
                ++counter;
 
                // Send message to all node types
-               for (const auto& nt: config.nodeTypesParam)
+               for (auto nt = config.nodeTypesParam.cbegin(); nt != config.nodeTypesParam.cend(); ++nt)
                {
                    communication->Send(0, // Send to all nodes of this type
-                                       nt.id,
+                                       nt->id,
                                        StrToPtr(output.str()),
                                        output.str().length(),
                                        12345,
@@ -190,8 +191,11 @@ int main(int /*argc*/, char * /*argv*/[])
                                                             nodeTypeId,
                                                             spNodeTypes));
 
+                             auto & nodeNameMap_ = nodeNameMap; //fix for vs2010 which cant capture a variable "through two lambdas"
+                             auto & spNodeTypes_ = spNodeTypes;
+
                              communication->SetDataReceiver
-                                 ([&nodeNameMap, &spNodeTypes]
+                                 ([&nodeNameMap_, &spNodeTypes_]
                                   (int64_t fromNodeId,
                                    int64_t fromNodeType,
                                    const char* const data_,
@@ -201,8 +205,8 @@ int main(int /*argc*/, char * /*argv*/[])
                                       std::string msg(data.get(), size);
                                       std::ostringstream os;
                                       os << "DOSE_MAIN: Received " << msg
-                                         << " from Node " << nodeNameMap[fromNodeId]
-                                         << " of Node Type " << spNodeTypes.find(fromNodeType)->second.name;
+                                         << " from Node " << nodeNameMap_[fromNodeId]
+                                         << " of Node Type " << spNodeTypes_.find(fromNodeType)->second.name;
                                       std::cout << os.str() << std::endl;
                                       lllog(3) << os.str() << std::endl;
                                   },

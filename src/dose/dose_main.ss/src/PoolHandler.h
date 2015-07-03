@@ -71,7 +71,7 @@ namespace Internal
         std::function<void(const std::string& str)> m_log;
         PoolDistributionHandlerType m_poolDistributor;
         PoolDistributionRequestSenderType m_poolDistributionRequests;
-        PersistHandler m_persistHandler;
+        std::unique_ptr<PersistHandler> m_persistHandler;
         WaitingStates m_waitingStates;
         boost::asio::steady_timer m_waitingStatesSanityTimer;
 

@@ -114,7 +114,7 @@ namespace Internal
                     return;
                 }
 
-                auto pd=PdPtr(new PoolDistributionT(nodeId, nodeTypeId, m_strand, m_distribution, [=](int64_t nodeId)
+                auto pd=PoolDistributionHandler<DistributionT, PoolDistributionT>::PdPtr(new PoolDistributionT(nodeId, nodeTypeId, m_strand, m_distribution, [=](int64_t nodeId)
                 {
                     if (!m_pendingPoolDistributions.empty() && m_pendingPoolDistributions.front()->NodeId()==nodeId)
                     {
@@ -179,7 +179,7 @@ namespace Internal
         void SendHaveNothing(int64_t nodeId, int64_t nodeType)
         {
             auto msg=boost::make_shared<char[]>(sizeof(PoolDistributionInfo));
-            (*reinterpret_cast<PoolDistributionInfo*>(msg.get()))=PoolDistributionInfo::PdHaveNothing;
+            (*reinterpret_cast<PoolDistributionInfo*>(msg.get()))=PdHaveNothing;
 
             if (!m_distribution.GetCommunication().Send(nodeId, nodeType, msg, sizeof(PoolDistributionInfo), PoolDistributionInfoDataTypeId, true))
             {

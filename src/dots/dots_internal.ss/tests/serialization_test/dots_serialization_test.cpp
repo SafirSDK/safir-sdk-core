@@ -336,7 +336,7 @@ void BlobChangeTest(RepositoryPtr rep)
         wc.WriteValue(mySeqObject, 0, w2, false, false);
 
         DotsC_EntityId eid={tid, 1};
-        wc.WriteKey(myDictEntityIdObject, std::pair<DotsC_EntityId, const char*>(eid, NULL));
+        wc.WriteKey(myDictEntityIdObject, std::pair<DotsC_EntityId, const char*>(eid, (const char *) '\0'));
         wc.WriteValue(myDictEntityIdObject, 0, w2, false, false);
 
         w.WriteKey(myDictAdvanced, 0);

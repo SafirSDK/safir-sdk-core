@@ -51,22 +51,23 @@ namespace Internal
         : m_strand(ioService)
         , m_dispatcher(m_connection, m_strand)
         , m_stopped(false)
-        , m_processMonitor(ioService,
-                           [] (const pid_t pid)
-                           {
-                               //This marks all connections belonging to the process that died
-                               //as dead.
-                               Connections::Instance().ForEachConnectionPtr
-                                   ([pid](const ConnectionPtr& connection)
-                                    {
-                                        if (connection->Pid() == pid)
-                                        {
-                                            connection->Died();
-                                        }
-                                    });
-                           },
-                           boost::chrono::seconds(1))
     {
+        m_processMonitor.reset(new Safir::Utilities::ProcessMonitor(ioService,
+                                                                       [] (const pid_t pid)
+                                                                       {
+                                                                           //This marks all connections belonging to the process that died
+                                                                           //as dead.
+                                                                           Connections::Instance().ForEachConnectionPtr
+                                                                               ([pid](const Safir::Dob::Internal::ConnectionPtr& connection)
+                                                                                {
+                                                                                    if (connection->Pid() == pid)
+                                                                                    {
+                                                                                        connection->Died();
+                                                                                    }
+                                                                                });
+                                                                       },
+                                                                       boost::chrono::seconds(1)));
+
         m_strand.dispatch([this,&distribution]
         {
             m_connection.Open(L"dose_main",L"ProcessInfoHandler",0,nullptr,&m_dispatcher);
@@ -93,7 +94,7 @@ namespace Internal
         const bool was_stopped = m_stopped.exchange(true);
         if (!was_stopped)
         {
-            m_processMonitor.Stop();
+            m_processMonitor->Stop();
             m_strand.dispatch([this]
                               {
                                   m_connection.Close();
@@ -115,7 +116,7 @@ namespace Internal
             {
                 if (!m_connection.IsCreated(eid))
                 {
-                    m_processMonitor.StartMonitorPid(connection->Pid());
+                    m_processMonitor->StartMonitorPid(connection->Pid());
 
                     //pid does not exist, need a new instance
                     ProcessInfoPtr processInfo = ProcessInfo::Create();
@@ -208,7 +209,7 @@ namespace Internal
                     if (processInfo->ConnectionNames().empty())
                     {
                         m_connection.Delete(eid,Typesystem::HandlerId());
-                        m_processMonitor.StopMonitorPid(connection->Pid());
+                        m_processMonitor->StopMonitorPid(connection->Pid());
                     }
                     else
                     {
@@ -264,12 +265,12 @@ namespace Internal
             ProcessInfoPtr procInfo = boost::static_pointer_cast<ProcessInfo>
                 (m_connection.Read(entityRequestProxy.GetEntityId()).GetEntity());
 
-            for (const auto& name : procInfo->ConnectionNames())
+            for (auto name = procInfo->ConnectionNames().begin(); name != procInfo->ConnectionNames().end(); ++name)
             {
                 const ConnectionId id(Connections::Instance().NodeId(),
                     -1,  // dummy context (context is part of the connection name)
                     (Connection::CalculateIdentifier
-                    (Typesystem::Utilities::ToUtf8(name))));
+                    (Typesystem::Utilities::ToUtf8(*name))));
                 ConnectionPtr connection = Connections::Instance().GetConnection(id);
 
                 connection->SendStopOrder();

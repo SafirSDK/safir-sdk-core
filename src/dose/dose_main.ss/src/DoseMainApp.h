@@ -90,7 +90,7 @@ namespace Internal
 
         void HandleEvents();
 
-        std::atomic<bool> m_stopped;
+        boost::atomic<bool> m_stopped;
         boost::asio::io_service& m_ioService;
 
         boost::asio::io_service::strand m_strand;
@@ -100,7 +100,7 @@ namespace Internal
         int64_t m_nodeId;
         std::unique_ptr<Distribution> m_distribution;
 
-        Control::DoseMainCmdReceiver m_cmdReceiver;
+        std::unique_ptr<Control::DoseMainCmdReceiver> m_cmdReceiver;
 
         boost::asio::signal_set m_signalSet;
 

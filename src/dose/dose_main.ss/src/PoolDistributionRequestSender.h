@@ -44,7 +44,7 @@ namespace Dob
 namespace Internal
 {
     static const int64_t PoolDistributionInfoDataTypeId=-3446507522969672286; //DoseMain.PoolDistributionInfo
-    enum class PoolDistributionInfo : uint8_t
+    enum PoolDistributionInfo
     {
         PdRequest = 1,      //Request a pool distribution from another node
         PdComplete = 2,     //Answer to PdRequest: my pool distribution is completed including persistent data
@@ -99,7 +99,7 @@ namespace Internal
         {
             m_strand.post([=]
             {
-                m_requests.push_back(PdReq(nodeId, nodeTypeId, false));
+                m_requests.push_back(PoolDistributionRequestSender<CommunicationT>::PdReq(nodeId, nodeTypeId, false));
                 SendPoolDistributionRequests();
             });
         }
@@ -115,7 +115,8 @@ namespace Internal
                 }
                 else
                 {
-                    auto it=std::find_if(m_requests.begin(), m_requests.end(), [fromNodeId](const PdReq& r){return r.nodeId==fromNodeId;});
+                    auto& fromNodeId_ = fromNodeId;
+                    auto it=std::find_if(m_requests.begin(), m_requests.end(), [fromNodeId_](const PdReq& r){return r.nodeId==fromNodeId_;});
                     if (it!=m_requests.end())
                     {
                         m_requests.erase(it);
@@ -161,17 +162,17 @@ namespace Internal
             }
 
             auto req=boost::make_shared<char[]>(sizeof(PoolDistributionInfo));
-            (*reinterpret_cast<PoolDistributionInfo*>(req.get()))=PoolDistributionInfo::PdRequest;
+            (*reinterpret_cast<PoolDistributionInfo*>(req.get()))= PdRequest;
 
             bool unsentRequests=false;
 
-            for (auto& r : m_requests)
+            for (auto r = m_requests.begin(); r != m_requests.end(); ++r)
             {
-                if (!r.sent)
+                if (!r->sent)
                 {
-                    if (m_communication.Send(r.nodeId, r.nodeType, req, sizeof(PoolDistributionInfo), PoolDistributionInfoDataTypeId, true))
+                    if (m_communication.Send(r->nodeId, r->nodeType, req, sizeof(PoolDistributionInfo), PoolDistributionInfoDataTypeId, true))
                     {
-                        r.sent=true;
+                        r->sent=true;
                     }
                     else
                     {

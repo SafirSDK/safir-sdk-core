@@ -36,7 +36,11 @@ if (MSVC)
    ADD_DEFINITIONS(-DWIN32_LEAN_AND_MEAN)
    ADD_DEFINITIONS(/wd4503) #decorated name length exceeded
    ADD_DEFINITIONS(/wd4512) #assignment operator could not be generated
-
+   
+   if (MSVC_VERSION EQUAL 1600)
+     ADD_DEFINITIONS(/wd4481) #nonstandard extension used, removed due to vs2010 not having full c++11 support
+   endif()
+   
    # increase warning level
    # Use the highest warning level for visual studio.
    IF(CMAKE_CXX_FLAGS MATCHES "/W[0-4]")

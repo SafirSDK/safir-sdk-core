@@ -46,7 +46,7 @@ public:
         cb = callback;
     }
 
-    void PerformOnMyStatisticsMessage(const std::function<void(std::unique_ptr<char []> data,
+    void PerformOnMyStatisticsMessage(const boost::function<void(std::unique_ptr<char []> data,
                                                                const size_t size)> & fn) const
     {
         std::wcout << "Perform " << numPerform << std::endl;
@@ -63,7 +63,7 @@ public:
         }
     }
 
-    std::function<void()> stopCall;
+    boost::function<void()> stopCall;
 };
 
 class Communication

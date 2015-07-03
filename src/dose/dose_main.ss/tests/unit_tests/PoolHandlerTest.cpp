@@ -22,7 +22,7 @@
 *
 ******************************************************************************/
 #include <set>
-#include <atomic>
+#include <boost/atomic.hpp>
 #include <boost/make_shared.hpp>
 #include "../../src/PoolDistributionRequestSender.h"
 #include "../../src/PoolDistributionHandler.h"
@@ -156,9 +156,10 @@ BOOST_AUTO_TEST_CASE( PoolDistributionHandlerTest )
     auto dump=[]
     {
         std::wcout<<L"--- outbound pool distributions ---"<<std::endl;
-        for (auto& vt : Pd::PoolDistributions)
+
+        for (auto vt = Pd::PoolDistributions.cbegin(); vt != Pd::PoolDistributions.cend(); ++vt)
         {
-            std::wcout<<L"Node "<<vt.first<<L" started: "<<std::boolalpha<<vt.second.first<<std::endl;
+            std::wcout<<L"Node "<<vt->first<<L" started: "<<std::boolalpha<<vt->second.first<<std::endl;
         }
     };
 
@@ -184,7 +185,7 @@ BOOST_AUTO_TEST_CASE( PoolDistributionHandlerTest )
     pdh.AddPoolDistribution(1, 1);
     pdh.AddPoolDistribution(2, 1);
 
-    std::atomic_bool hasRun;
+    boost::atomic<bool> hasRun;
     hasRun=false;
     auto WaitUntilReady=[&]
     {

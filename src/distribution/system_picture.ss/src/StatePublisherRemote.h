@@ -53,19 +53,22 @@ namespace SP
             , m_senderId(LlufId_Generate64(senderId))
             , m_nodeTypes(nodeTypes)
             , m_coordinator(coordinator)
-            , m_publishTimer(ioService,
-                             period,
-                             [this](const boost::system::error_code& error)
-                             {
-                                 Publish(error);
-                             })
+            , m_publishTimer()
         {
-            m_publishTimer.Start();
+            m_publishTimer.reset(new Safir::Utilities::Internal::AsioPeriodicTimer(ioService,
+                                                                                   period,
+                                                                                   [this](const boost::system::error_code& error)
+                                                                                   {
+                                                                                        Publish(error);
+                                                                                   }));
+
+
+            m_publishTimer->Start();
         }
 
         void Stop()
         {
-            m_publishTimer.Stop();
+            m_publishTimer->Stop();
         }
 
     private:
@@ -82,13 +85,13 @@ namespace SP
             {
                 lllog(8) << "Publishing system state to other nodes" << std::endl;
 
-                for (const auto& it: m_nodeTypes)
+                for (auto it = m_nodeTypes.cbegin(); it != m_nodeTypes.cend(); ++it)
                 {
-                    const bool sent = m_communication.Send(0, it.second.id, std::move(data), size, m_senderId, true);
+                    const bool sent = m_communication.Send(0, it->second.id, std::move(data), size, m_senderId, true);
                     if (!sent)
                     {
                         lllog(8) << "StatePublisherRemote: Overflow when sending to node type "
-                                 << it.second.name.c_str() << std::endl;
+                                 << it->second.name.c_str() << std::endl;
                         //No retry handling, since we send cyclically
                     }
                 }
@@ -100,7 +103,7 @@ namespace SP
         const uint64_t m_senderId;
         const std::map<int64_t, NodeType> m_nodeTypes;
         CoordinatorT& m_coordinator;
-        Safir::Utilities::Internal::AsioPeriodicTimer m_publishTimer;
+        std::unique_ptr<Safir::Utilities::Internal::AsioPeriodicTimer> m_publishTimer;
     };
 
     typedef StatePublisherRemoteBasic<Coordinator, Com::Communication> StatePublisherRemote;

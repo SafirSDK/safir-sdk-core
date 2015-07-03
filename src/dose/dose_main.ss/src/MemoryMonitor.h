@@ -40,23 +40,25 @@ namespace Internal
     public:
         explicit MemoryMonitor(boost::asio::io_service& ioService):
             m_capacity(GetSharedMemory().get_size()),
-            m_warningPercent(20),
-            m_timer(ioService,
-                    boost::chrono::seconds(30),
-                    [this](const boost::system::error_code& error)
-                    {
-                        if (!error)
-                        {
-                            Check();
-                        }
-                    })
+            m_warningPercent(20)
         {
-            m_timer.Start();
+
+            m_timer.reset(new Safir::Utilities::Internal::AsioPeriodicTimer(ioService,
+                                                                            boost::chrono::seconds(30),
+                                                                            [this](const boost::system::error_code& error)
+                                                                            {
+                                                                                if (!error)
+                                                                                {
+                                                                                    Check();
+                                                                                }
+                                                                            }));
+
+            m_timer->Start();
         }
 
         void Stop()
         {
-            m_timer.Stop();
+            m_timer->Stop();
         }
     private:
         void Check()
@@ -97,7 +99,7 @@ namespace Internal
         const size_t m_capacity;
         const double m_warningPercent;
 
-        Safir::Utilities::Internal::AsioPeriodicTimer m_timer;
+        std::unique_ptr<Safir::Utilities::Internal::AsioPeriodicTimer> m_timer;
     };
 }
 }

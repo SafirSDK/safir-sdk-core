@@ -50,21 +50,22 @@ namespace SP
                                  const char* const name,
                                  const boost::chrono::steady_clock::duration& period)
             : m_coordinator(coordinator)
-            , m_publisher(ioService,name,nullptr,nullptr)
-            , m_publishTimer(ioService,
-                             period,
-                             [this](const boost::system::error_code& error)
-                             {
-                                 Publish(error);
-                             })
+            , m_publisher(ioService, name, NULL, NULL)
         {
-            m_publishTimer.Start();
+            m_publishTimer.reset(new Safir::Utilities::Internal::AsioPeriodicTimer(ioService,
+                                                                                   period,
+                                                                                   [this](const boost::system::error_code& error)
+                                                                                   {
+                                                                                       Publish(error);
+                                                                                   }));
+
+            m_publishTimer->Start();
             m_publisher.Start();
         }
 
         void Stop()
         {
-            m_publishTimer.Stop();
+            m_publishTimer->Stop();
             m_publisher.Stop();
         }
 
@@ -88,7 +89,7 @@ namespace SP
 
         CoordinatorT& m_coordinator;
         IpcPublisherT m_publisher;
-        Safir::Utilities::Internal::AsioPeriodicTimer m_publishTimer;
+        std::unique_ptr<Safir::Utilities::Internal::AsioPeriodicTimer> m_publishTimer;
     };
 
     typedef StatePublisherLocalBasic<Coordinator, Safir::Utilities::Internal::IpcPublisher> StatePublisherLocal;

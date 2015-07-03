@@ -30,7 +30,7 @@
 #include <Safir/Utilities/Internal/SystemLog.h>
 #include <functional>
 #include <limits>
-#include <atomic>
+#include <boost/atomic.hpp>
 #include <map>
 #include <set>
 #include "ElectionHandler.h"
@@ -84,28 +84,6 @@ namespace SP
                          RawHandlerT& rawHandler)
             : m_strand (ioService)
             , m_communication(communication)
-            , m_electionHandler(ioService,
-                                communication,
-                                id,
-                                nodeTypes,
-                                receiverId,
-                                [this](const int64_t nodeId, const int64_t electionId)
-                                {
-                                    if (nodeId == m_id)
-                                    {
-                                        m_ownElectionId = electionId;
-                                    }
-                                    else
-                                    {
-                                        m_ownElectionId = 0;
-                                    }
-
-                                    m_rawHandler.SetElectionId(nodeId, electionId);
-                                },
-                                [this](const int64_t incarnationId)
-                                {
-                                    m_rawHandler.SetIncarnationId(incarnationId);
-                                })
             , m_lastStatisticsDirty(true)
             , m_name(name)
             , m_id(id)
@@ -116,6 +94,30 @@ namespace SP
             , m_rawHandler(rawHandler)
             , m_failedStateUpdates(0)
         {
+
+            m_electionHandler.reset(new ElectionHandlerT(ioService,
+                                                         communication,
+                                                         id,
+                                                         nodeTypes,
+                                                         receiverId,
+                                                         [this](const int64_t nodeId, const int64_t electionId)
+                                                         {
+                                                             if (nodeId == m_id)
+                                                             {
+                                                                 m_ownElectionId = electionId;
+                                                             }
+                                                             else
+                                                             {
+                                                                 m_ownElectionId = 0;
+                                                             }
+
+                                                             m_rawHandler.SetElectionId(nodeId, electionId);
+                                                         },
+                                                         [this](const int64_t incarnationId)
+                                                         {
+                                                             m_rawHandler.SetIncarnationId(incarnationId);
+                                                         }));
+
             m_stateMessage.set_elected_id(0); //our state message is not valid until we have a real id set.
 
             rawHandler.AddRawChangedCallback(m_strand.wrap([this](const RawStatistics& statistics,
@@ -127,19 +129,19 @@ namespace SP
                 m_lastStatistics = statistics;
                 m_lastStatisticsDirty = true;
 
-                if (m_electionHandler.IsElected())
+                if (m_electionHandler->IsElected())
                 {
                     UpdateMyState();
                 }
 
                 if (flags.NodesChanged())
                 {
-                    m_electionHandler.NodesChanged(statistics, completionSignaller);
+                    m_electionHandler->NodesChanged(statistics, completionSignaller);
                 }
             }));
         }
 
-        void SetStateChangedCallback(const std::function<void(const SystemStateMessage& data)>& callback)
+        void SetStateChangedCallback(const boost::function<void(const SystemStateMessage& data)>& callback)
         {
             m_strand.dispatch([this,callback]
                               {
@@ -150,7 +152,7 @@ namespace SP
         //used to send state message
         //if onlyOwnState is true the callback will only be called if we're elected
         //and have a valid own system state that is ok to send.
-        void PerformOnStateMessage(const std::function<void(std::unique_ptr<char []> data,
+        void PerformOnStateMessage(const boost::function<void(std::unique_ptr<char []> data,
                                                             const size_t size)> & fn,
                                    const bool onlyOwnState)
         {
@@ -190,7 +192,7 @@ namespace SP
         {
             m_strand.dispatch([this,from,data,size]
             {
-                if (!m_electionHandler.IsElected(from))
+                if (!m_electionHandler->IsElected(from))
                 {
                     SEND_SYSTEM_LOG(Informational,
                                     << "SystemPicture (in node " << m_id
@@ -273,7 +275,7 @@ namespace SP
                 }
 
 
-                if (m_stateChangedCallback != nullptr)
+                if (!m_stateChangedCallback.empty())
                 {
                     m_stateChangedCallback(m_stateMessage);
                 }
@@ -283,7 +285,7 @@ namespace SP
 
         void Stop()
         {
-            m_electionHandler.Stop();
+            m_electionHandler->Stop();
         }
 
     private:
@@ -467,7 +469,7 @@ namespace SP
             //This function attempts to not flush the logger until the end of the function
             lllog(9) << "SP: Entering UpdateMyState\n";
 
-            if (!m_electionHandler.IsElected())
+            if (!m_electionHandler->IsElected())
             {
                 lllog(9) << "SP: We're not elected, not updating my state." << std::endl;
                 m_failedStateUpdates = 0;
@@ -485,7 +487,7 @@ namespace SP
                 {
                     m_failedStateUpdates = 0;
                     lllog(1) << "SP: Have failed at 60 state updates, forcing reelection." << std::endl;
-                    m_electionHandler.ForceElection();
+                    m_electionHandler->ForceElection();
                 }
                 return false;
             }
@@ -598,29 +600,30 @@ namespace SP
             {
                 std::set<int64_t> died;
                 //handle nodes that have died since last state
-                for (const auto& lln : lastLiveNodes)
+                
+                for (auto lln = lastLiveNodes.cbegin(); lln != lastLiveNodes.cend(); ++lln)
                 {
-                    const auto findIt = deadNodes.find(lln.first);
+                    const auto findIt = deadNodes.find(lln->first);
                     if (findIt != deadNodes.end())
                     {
-                        lln.second->set_is_dead(true);
+                        lln->second->set_is_dead(true);
                         deadNodes.erase(findIt);
-                        died.insert(lln.first);
-                        lllog(9) << "SP: Node " << lln.first << " has died since last state\n";
+                        died.insert(lln->first);
+                        lllog(9) << "SP: Node " << lln->first << " has died since last state\n";
                     }
                 }
 
                 //remove the dead ones from lastLiveNodes
-                for (const auto d: died)
+                for (auto d = died.cbegin(); d != died.cend(); ++d)
                 {
-                    lastLiveNodes.erase(d);
+                    lastLiveNodes.erase(*d);
                 }
             }
 
             //handle nodes that were dead already
-            for (const auto ldn : lastDeadNodes)
+            for (auto ldn = lastDeadNodes.cbegin(); ldn != lastDeadNodes.cend(); ++ldn)
             {
-                deadNodes.erase(ldn);
+                deadNodes.erase(*ldn);
             }
 
             //Note that nodes that died since last are now in neither lastLiveNodes or
@@ -683,12 +686,12 @@ namespace SP
 
                 //any nodes left over in "seen" are nodes that remote cannot see.
                 //remove them from newNodes
-                for (const auto notSeen : seen)
+                for (auto notSeen = seen.cbegin(); notSeen != seen.cend(); ++notSeen)
                 {
                     lllog(9) << "SP:   Node " << m_lastStatistics.Id(i) << " cannot see node "
-                             << notSeen << ", so we cannot add it to system state yet\n";
+                             << *notSeen << ", so we cannot add it to system state yet\n";
 
-                    newNodes.erase(notSeen);
+                    newNodes.erase(*notSeen);
                 }
             }
 
@@ -715,12 +718,12 @@ namespace SP
 
                 //any nodes left over in "seen" are nodes that remote cannot see.
                 //remove them from newNodes
-                for (const auto notSeen : seen)
+                for (auto notSeen = seen.cbegin(); notSeen != seen.cend(); ++notSeen)
                 {
                     lllog(9) << "SP:   Node " << m_lastStatistics.Id(i) << " cannot see node "
-                             << notSeen << ", so we cannot add it to system state yet\n";
+                             << *notSeen << ", so we cannot add it to system state yet\n";
 
-                    newNodes.erase(notSeen);
+                    newNodes.erase(*notSeen);
                 }
             }
 
@@ -748,10 +751,10 @@ namespace SP
 
 
             //and we add all nodes that remain in deadNodes
-            for (const auto& dn : deadNodes)
+            for (auto dn = deadNodes.cbegin(); dn != deadNodes.cend(); ++dn)
             {
-                const auto& remote = dn.second.first;
-                const int index = dn.second.second;
+                const auto& remote = dn->second.first;
+                const int index = dn->second.second;
 
                 lllog(9) << "SP: Adding dead node " << remote.Name(index).c_str()
                          << " (" << remote.Id(index) << ")\n";
@@ -798,7 +801,7 @@ namespace SP
                 lllog(9) << "SP: New state:\n" << m_stateMessage << "\n";
             }
 
-            if (m_stateChangedCallback != nullptr)
+            if (!m_stateChangedCallback.empty())
             {
                 m_stateChangedCallback(m_stateMessage);
             }
@@ -813,12 +816,12 @@ namespace SP
         mutable boost::asio::strand m_strand;
         CommunicationT& m_communication;
 
-        ElectionHandlerT m_electionHandler;
+        std::unique_ptr<ElectionHandlerT> m_electionHandler;
 
         RawStatistics m_lastStatistics;
         bool m_lastStatisticsDirty;
 
-        std::function<void(const SystemStateMessage& data)> m_stateChangedCallback;
+        boost::function<void(const SystemStateMessage& data)> m_stateChangedCallback;
 
         SystemStateMessage m_stateMessage;
 

@@ -31,7 +31,7 @@
 #include <Safir/Dob/Internal/SystemPicture.h>
 #include <Safir/Utilities/Internal/Id.h>
 #include <iostream>
-#include <atomic>
+#include <boost/atomic.hpp>
 #include <fstream>
 #include <map>
 #include <boost/lexical_cast.hpp>
@@ -323,7 +323,7 @@ int main(int argc, char * argv[])
                              }
                              );
 
-        std::atomic<bool> success(true);
+        boost::atomic<bool> success(true);
 
         const auto run = [&ioService,&success]
             {

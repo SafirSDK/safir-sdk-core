@@ -112,7 +112,7 @@ public:
         n2.HandleReceivedNodeInfo(ni1);
 
         //Wait for HandleReceivedNodeInfo to be executed
-        std::atomic<int> fence(0);
+        boost::atomic<int> fence(0);
         n0.m_strand.post([&]{++fence;});
         n1.m_strand.post([&]{++fence;});
         n2.m_strand.post([&]{++fence;});
@@ -371,19 +371,30 @@ private:
     {
         boost::mutex::scoped_lock lock(mutex);
         std::cout<<"------ Info ------"<<std::endl;
-        for (auto&& vt : discoverState)
+        
+        for (auto vt = discoverState.cbegin(); vt != discoverState.cend(); ++vt)
         {
-            std::cout<<"Id: "<<vt.first<<std::endl;
+            std::cout<<"Id: "<<vt->first<<std::endl;
             std::cout<<"Nodes: ";
-            for (auto id : vt.second.newNodes) {std::cout<<id<<", ";}
+            
+            for (auto id = vt->second.newNodes.cbegin(); id != vt->second.newNodes.cend(); ++id)
+            {
+                std::cout<<*id<<", ";
+            }
             std::cout<<std::endl;
 
             std::cout<<"DiscoverTo: ";
-            for (auto id : vt.second.sentDiscoverTo) {std::cout<<id<<", ";}
+            for (auto id = vt->second.sentDiscoverTo.cbegin(); id != vt->second.sentDiscoverTo.cend(); ++id)
+            {
+                std::cout<<*id<<", ";
+            }
             std::cout<<std::endl;
 
             std::cout<<"NodeInfoTo: ";
-            for (auto id : vt.second.sentNodeInfoTo) {std::cout<<id<<", ";}
+            for (auto id = vt->second.sentNodeInfoTo.cbegin(); id != vt->second.sentNodeInfoTo.cend(); ++id)
+            {
+                std::cout<<*id<<", ";
+            }
             std::cout<<std::endl<<std::endl;
         }
         std::cout<<"------------------\n"<<std::endl;
@@ -436,8 +447,8 @@ private:
         Info() {}
 
         Info(int64_t id, boost::asio::io_service& io)
-            :discover(boost::make_shared<HandleDiscover::Discoverer>(io, HandleDiscover::CreateNode(id), 100, [=](const Com::Node& n){HandleDiscover::OnNewNode(id, n);}))
         {
+            discover.reset(new HandleDiscover::Discoverer(io, HandleDiscover::CreateNode(id), 100, [=](const Com::Node& n){HandleDiscover::OnNewNode(id, n);}));
         }
     };
     static std::map<int64_t, HandleDiscover::Info> discoverState;
@@ -445,10 +456,10 @@ private:
     static void Deliver()
     {
         boost::mutex::scoped_lock lock(mutex);
-        for (auto& vt : discoverState)
+        for (auto vt = discoverState.cbegin(); vt != discoverState.cend(); ++vt)
         {
-            auto& dp=vt.second.discover;
-            HandleDiscover::Deliver(*dp, vt.first);
+            auto& dp=vt->second.discover;
+            HandleDiscover::Deliver(*dp, vt->first);
         }
     }
 

@@ -93,7 +93,7 @@ namespace SP
                       const int64_t id,
                       const int64_t nodeTypeId,
                       const std::map<int64_t, NodeType>& nodeTypes,
-                      const std::function<bool (const int64_t incarnationId)>& validateIncarnationIdCallback);
+                      const boost::function<bool (const int64_t incarnationId)>& validateIncarnationIdCallback);
 
         /**
          * Constructor for creating a slave instance of SystemPicture.
@@ -131,7 +131,7 @@ namespace SP
          * Call Stop to end all subscriptions.
          * Note that it is not possible to call Start again after a Stop call.
          */
-        void StartRawSubscription(const std::function<void (const RawStatistics& data)>& dataCallback);
+        void StartRawSubscription(const boost::function<void (const RawStatistics& data)>& dataCallback);
 
         /**
          * Start a subscription to system state information.
@@ -139,7 +139,7 @@ namespace SP
          * Call Stop to end all subscriptions.
          * Note that it is not possible to call Start again after a Stop call.
          */
-        void StartStateSubscription(const std::function<void (const SystemState& data)>& dataCallback);
+        void StartStateSubscription(const boost::function<void (const SystemState& data)>& dataCallback);
 
     private:
         class Impl;

@@ -24,7 +24,7 @@
 ******************************************************************************/
 #include <iostream>
 #include <limits>
-#include <chrono>
+#include <boost/chrono.hpp>
 #include <boost/function.hpp>
 #include <boost/program_options.hpp>
 #include <boost/make_shared.hpp>
@@ -218,9 +218,10 @@ public:
     std::vector<Safir::Dob::Internal::Com::NodeTypeDefinition> ToVector() const
     {
         std::vector<Safir::Dob::Internal::Com::NodeTypeDefinition> v;
-        for (auto& n : m_nodeTypes)
+
+        for (auto n = m_nodeTypes.cbegin(); n != m_nodeTypes.cend(); ++n)
         {
-            v.push_back(n.second);
+            v.push_back(n->second);
         }
         return v;
     }
@@ -300,8 +301,8 @@ class Sp : private boost::noncopyable
 public:
 
     Sp(uint64_t numRecv, bool accumulated, bool acked,
-       const std::function< void(int64_t) >& includeNode,
-       const std::function< void(int64_t) >& reportNodeFinished)
+       const boost::function< void(int64_t) >& includeNode,
+       const boost::function< void(int64_t) >& reportNodeFinished)
         :m_nodeTypes()
         ,m_nodeNames()
         ,m_recvCount()
@@ -412,10 +413,10 @@ public:
 
     int64_t GetNodeIdByName(const std::string& name) const
     {
-        for (auto& vt : m_nodeNames)
+        for (auto vt = m_nodeNames.cbegin(); vt != m_nodeNames.cend(); ++vt)
         {
-            if (vt.second==name)
-                return vt.first;
+            if (vt->second==name)
+                return vt->first;
         }
         return 0;
     }
@@ -429,8 +430,8 @@ private:
     uint64_t m_numRecv;
     bool m_accumulated;
     bool m_acked;
-    std::function< void(int64_t) > m_includeNode;
-    std::function< void(int64_t) > m_reportNodeFinished;
+    boost::function< void(int64_t) > m_includeNode;
+    boost::function< void(int64_t) > m_reportNodeFinished;
 };
 
 char* Allocate(size_t size) {return new char[size];}
@@ -501,9 +502,10 @@ int main(int argc, char * argv[])
     com->SetNewNodeCallback([=](const std::string& name, int64_t nodeId, int64_t nodeTypeId, const std::string& ca, const std::string& /*da*/)
                             {sp->NewNode(name, nodeId, nodeTypeId, ca);});
 
-    for (const auto& vt : nodeTypes.Map())
+
+    for (auto vt = nodeTypes.Map().cbegin(); vt != nodeTypes.Map().cend(); ++vt)
     {
-        com->SetQueueNotFullCallback([&](int64_t){queueFullSem.Notify();}, vt.first);
+        com->SetQueueNotFullCallback([&](int64_t){queueFullSem.Notify();}, vt->first);
     }
 
     boost::thread_group threads;
@@ -528,7 +530,7 @@ int main(int argc, char * argv[])
 
     std::cout<<"Start sending "<<cmd.nsend<<" messages!"<<std::endl;
 
-    auto startTime=std::chrono::high_resolution_clock::now();
+    auto startTime=boost::chrono::high_resolution_clock::now();
     uint64_t numberOfOverflows=0;
     uint64_t sendCounter=0;
     while (sendCounter<cmd.nsend)
@@ -537,11 +539,11 @@ int main(int argc, char * argv[])
 
         auto data=CreateMessage(sendCounter, cmd.messageSize);
 
-        for (auto& nt : nodeTypes.Map())
+        for (auto nt = nodeTypes.Map().cbegin(); nt != nodeTypes.Map().cend(); ++nt)
         {
             if (cmd.acked)
             {
-                while (!com->Send(0, nt.second.id, data, cmd.messageSize, 123, true))
+                while (!com->Send(0, nt->second.id, data, cmd.messageSize, 123, true))
                 {
                     ++numberOfOverflows;
                     queueFullSem.Wait();
@@ -549,7 +551,7 @@ int main(int argc, char * argv[])
             }
             else
             {
-                com->Send(0, nt.second.id, data, cmd.messageSize, 123, false);
+                com->Send(0, nt->second.id, data, cmd.messageSize, 123, false);
             }
         }
 
@@ -588,16 +590,16 @@ int main(int argc, char * argv[])
     {
         stopCondition.Wait();
 
-        for (auto& nt : nodeTypes.Map())
+        for (auto nt = nodeTypes.Map().cbegin(); nt != nodeTypes.Map().cend(); ++nt)
         {
-            while (com->NumberOfQueuedMessages(nt.second.id)>0)
+            while (com->NumberOfQueuedMessages(nt->second.id)>0)
             {
                 boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
             }
         }
     }
 
-    auto elapsed=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now()-startTime);
+    auto elapsed=boost::chrono::duration_cast<boost::chrono::milliseconds>(boost::chrono::high_resolution_clock::now()-startTime);
 
     std::cout<<"---------------------------------------------------------"<<std::endl;
     std::cout<<"Finished after "<<static_cast<double>(elapsed.count())/1000.0<<" sec"<<std::endl;

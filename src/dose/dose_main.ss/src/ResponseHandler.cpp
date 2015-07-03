@@ -74,23 +74,24 @@ namespace Internal
         }),
                                                           m_dataTypeIdentifier,
                                                           DistributionData::NewData);
-        for (const auto nodeTypeId : m_distribution.GetNodeTypeIds())
+
+        for (auto nodeTypeId = m_distribution.GetNodeTypeIds().cbegin(); nodeTypeId != m_distribution.GetNodeTypeIds().cend(); ++nodeTypeId)
         {
             m_distribution.GetCommunication().SetQueueNotFullCallback
                 (m_strand.wrap([this](const int64_t /*nodeTypeId*/)
                                {
                                    const auto pending = std::move(m_waitingConnections);
-                                   for (auto&& conn : pending)
+                                   for (auto conn = pending.cbegin(); conn != pending.cend(); ++conn)
                                    {
                                        const ConnectionPtr to = Connections::Instance().
-                                           GetConnection(conn,std::nothrow);
+                                           GetConnection(*conn,std::nothrow);
                                        if (to != NULL) //if receiver of the response is dead, theres nothing to do
                                        {
                                            DistributeResponses(to);
                                        }
                                    }
                                }),
-                 nodeTypeId);
+                 *nodeTypeId);
         }
     }
 
@@ -101,19 +102,24 @@ namespace Internal
         {
             const auto senderId = sender->Id();
 
+            auto this_ = this; //fix for vs2010 issue with lambdas
+
             //loop over all the RequestInQueues in the connection
-            sender->ForEachRequestInQueue([this,senderId](const ConsumerId& /*consumer*/, RequestInQueue& queue)
+            sender->ForEachRequestInQueue([this_, senderId](const ConsumerId& /*consumer*/, RequestInQueue& queue)
             {
+                auto this__ = this_;
+                auto & senderId_ = senderId;
+
                 //loop over all responses in the connection
-                queue.DispatchResponses([this,senderId](const DistributionData& response, bool& dontRemove)
+                queue.DispatchResponses([this__, senderId_](const DistributionData& response, bool& dontRemove)
                 {
                     //Try to send the response
-                    const bool success = SendResponseInternal(response);
+                    const bool success = this__->SendResponseInternal(response);
                     dontRemove = !success;
 
                     if (!success)
                     {
-                        m_waitingConnections.insert(senderId);
+                        this__->m_waitingConnections.insert(senderId_);
                     }
                 });
             });

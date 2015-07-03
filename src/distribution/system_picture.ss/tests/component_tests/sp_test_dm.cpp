@@ -32,7 +32,7 @@
 #include <iostream>
 #include <map>
 #include <deque>
-#include <atomic>
+#include <boost/atomic.hpp>
 
 //disable warnings in boost
 #if defined _MSC_VER
@@ -138,7 +138,7 @@ public:
                        Safir::Dob::Internal::Com::Communication& communication,
                        const std::string& suicideTrigger)
         : m_strand(ioService)
-        , m_injectedNodes( [id] { std::set<int64_t> s; s.insert(id); return s;}() ) //consider ourselves already injected
+        , m_injectedNodes( [id]() -> std::set<int64_t> { std::set<int64_t> s; s.insert(id); return s;}() ) //consider ourselves already injected
         , m_communication(communication)
         , m_trigger(suicideTrigger)
         , m_suicideTimer(ioService)
@@ -148,7 +148,7 @@ public:
     }
 
     //this must be called before io_services are started
-    void SetStopHandler(const std::function<void()>& fcn)
+    void SetStopHandler(const boost::function<void()>& fcn)
     {
         m_stopHandler = fcn;
     }
@@ -344,7 +344,7 @@ private:
 
     boost::asio::steady_timer m_suicideTimer;
     bool m_suicideScheduled;
-    std::function<void()> m_stopHandler;
+    boost::function<void()> m_stopHandler;
 };
 
 int main(int argc, char * argv[])
@@ -362,7 +362,7 @@ int main(int argc, char * argv[])
     }
 
     boost::asio::io_service ioService;
-    std::atomic<bool> m_stop(false);
+    boost::atomic<bool> m_stop(false);
 
     // Make some work to stop io_service from exiting.
     auto work = Safir::make_unique<boost::asio::io_service::work>(ioService);
@@ -456,7 +456,7 @@ int main(int argc, char * argv[])
     boost::asio::steady_timer sendTimer(ioService);
     bool timerStopped = false;
 
-    const std::function<void(const boost::system::error_code& error)> send =
+    const boost::function<void(const boost::system::error_code& error)> send =
         [&communication, &sendTimer, &timerStopped, &send](const boost::system::error_code& error)
         {
             if (error || timerStopped)
@@ -530,7 +530,7 @@ int main(int argc, char * argv[])
 
     ssh.SetStopHandler(stopFcn);
 
-    std::atomic<bool> success(true);
+    boost::atomic<bool> success(true);
 
     const auto run = [&ioService,&success]
         {

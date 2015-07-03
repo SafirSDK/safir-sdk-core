@@ -74,10 +74,9 @@ namespace Com
             ,m_interval(heartbeatInterval)
             ,m_nodes()
             ,m_running(false)
-            ,m_logPrefix([&]{std::ostringstream os;
-                             os<<"COM: (HeartbeatSender nodeType "<<nodeTypeId<<") - ";
-                             return os.str();}())
+            ,m_logPrefix(GenerateLogPrefix(nodeTypeId))
         {
+            
         }
 
         void Start()
@@ -111,7 +110,7 @@ namespace Com
                     throw std::logic_error(os.str());
                 }
 
-                m_nodes.emplace(id, Resolver::StringToEndpoint(address));
+                m_nodes.insert(std::make_pair(id, Resolver::StringToEndpoint(address)));
             });
         }
 
@@ -132,6 +131,13 @@ namespace Com
         bool m_running;
         const std::string m_logPrefix;
 
+        static std::string GenerateLogPrefix( int64_t nodeTypeId)
+        {
+            std::ostringstream os;
+            os<<"COM: (HeartbeatSender nodeType "<<nodeTypeId<<") - ";
+            return os.str();
+        }
+
         void OnTimeout()
         {
             if (m_running)
@@ -143,10 +149,10 @@ namespace Com
                 }
                 else
                 {
-                    for (auto& vt : m_nodes)
+                    for (auto vt = m_nodes.cbegin(); vt != m_nodes.cend(); ++vt)
                     {
-                        lllog(8)<<m_logPrefix.c_str()<<"Send Heartbeat to "<<vt.first<<std::endl;
-                        WriterType::SendTo(m_heartbeat, vt.second);
+                        lllog(8)<<m_logPrefix.c_str()<<"Send Heartbeat to "<<vt->first<<std::endl;
+                        WriterType::SendTo(m_heartbeat, vt->second);
                     }
                 }
 

@@ -22,7 +22,7 @@
 *
 ******************************************************************************/
 #pragma once
-#include <atomic>
+#include <boost/atomic.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/asio.hpp>
 #include <boost/function.hpp>
@@ -108,7 +108,7 @@ namespace Internal
         boost::asio::io_service::strand& m_strand;
         std::function<void(int64_t)> m_checkPendingReg;
         std::vector<std::unique_ptr<SubcriptionConnection>> m_connections;
-        std::atomic_bool m_dispatcherNotified;
+        boost::atomic<bool> m_dispatcherNotified;
 
         static inline boost::shared_ptr<const char[]> ToPtr(const DistributionData& d)
         {
@@ -126,27 +126,29 @@ namespace Internal
                 {
                     m_dispatcherNotified=false;
 
+                    auto this_ = this;
+
                     for (auto context = 0; context < Safir::Dob::NodeParameters::NumberOfContexts(); ++context)
                     {
                         auto& queue=m_connections[static_cast<size_t>(context)]->connectionPtr->GetDirtySubscriptionQueue();
                         queue.Dispatch([=](const SubscriptionPtr& subscription, bool& exitDispatch, bool& dontRemove)
                         {
+                            auto this__ = this_;
                             dontRemove=false;
                             DistributionData realState = subscription->GetState()->GetRealState();
                             if (!realState.IsNoState() && realState.GetType()==DistributionData::RegistrationState)
                             {
-                                // Registration state
-                                dontRemove=!subscription->DirtyFlag().Process([this, &subscription]
+                                dontRemove=!subscription->DirtyFlag().Process([this__, &subscription]
                                 {
-                                    return ProcessRegistrationState(subscription);
+                                    return this__->ProcessRegistrationState(subscription);
                                 });
                             }
                             else
                             {
                                 // Entity state
-                                dontRemove=!subscription->DirtyFlag().Process([this, &subscription]
+                                dontRemove=!subscription->DirtyFlag().Process([this__, &subscription]
                                 {
-                                    return ProcessEntityState(subscription);
+                                    return this__->ProcessEntityState(subscription);
                                 });
                             }
                             //dontRemove is true if we got an overflow, and if we did we

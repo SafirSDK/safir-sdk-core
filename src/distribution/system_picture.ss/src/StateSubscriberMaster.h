@@ -60,21 +60,23 @@ namespace SP
             coordinator.SetStateChangedCallback([this](const SystemStateMessage& data)
                                                 {
                                                     const auto dataCopy = SystemStateCreator::Create(Safir::make_unique<SystemStateMessage>(data));
-                                                    m_strand.post([this, dataCopy]
+                                                    auto this_ = this; //vs2010 workaround
+
+                                                    m_strand.post([this_, dataCopy]
                                                                   {
-                                                                      if (m_dataCallback != nullptr)
+                                                                      if (!this_->m_dataCallback.empty())
                                                                       {
-                                                                          m_dataCallback(dataCopy);
+                                                                          this_->m_dataCallback(dataCopy);
                                                                       }
                                                                   });
                                                 });
         }
 
-        void Start(const std::function<void (const SystemState& data)>& dataCallback) override
+        void Start(const boost::function<void (const SystemState& data)>& dataCallback) override
         {
             m_strand.dispatch([this, dataCallback]
                               {
-                                  if (m_dataCallback != nullptr)
+                                  if (!m_dataCallback.empty())
                                   {
                                       throw std::logic_error("StateSubscriberMaster already started");
                                   }
@@ -87,13 +89,13 @@ namespace SP
         {
             m_strand.dispatch([this]
                               {
-                                  m_dataCallback = nullptr;
+                                  m_dataCallback = NULL;
                               });
         }
 
     private:
 
-        std::function<void (const SystemState& data)> m_dataCallback;
+        boost::function<void (const SystemState& data)> m_dataCallback;
         boost::asio::strand m_strand;
     };
 

@@ -27,7 +27,7 @@
 #include <cstdint>
 #include <vector>
 #include <memory>
-#include <functional>
+#include <boost/function.hpp>
 #include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
 #include <Safir/Dob/Internal/CommunicationExportDefs.h>
@@ -72,12 +72,12 @@ namespace Com
     };
 
     //Callbacks functions used in Communications public interface.
-    typedef std::function<void(const std::string& name, int64_t nodeId, int64_t nodeTypeId, const std::string& controlAddress, const std::string& dataAddress)> NewNode;
-    typedef std::function<void(int64_t fromNodeId)> GotReceiveFrom;
-    typedef std::function<void(int64_t toNodeId)> RetransmitTo;
-    typedef std::function<void(int64_t fromNodeId, int64_t fromNodeType, const char* data, size_t size)> ReceiveData;
-    typedef std::function<void(int64_t nodeTypeId)> QueueNotFull;
-    typedef std::function<char*(size_t)> Allocator;
+    typedef boost::function<void(const std::string& name, int64_t nodeId, int64_t nodeTypeId, const std::string& controlAddress, const std::string& dataAddress)> NewNode;
+    typedef boost::function<void(int64_t fromNodeId)> GotReceiveFrom;
+    typedef boost::function<void(int64_t toNodeId)> RetransmitTo;
+    typedef boost::function<void(int64_t fromNodeId, int64_t fromNodeType, const char* data, size_t size)> ReceiveData;
+    typedef boost::function<void(int64_t nodeTypeId)> QueueNotFull;
+    typedef boost::function<char*(size_t)> Allocator;
 
     struct ControlModeTag {};
     const ControlModeTag controlModeTag = ControlModeTag();

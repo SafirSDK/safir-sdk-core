@@ -33,7 +33,7 @@ public:
     {
         std::cout<<"DeliveryHandler started"<<std::endl;
 
-        std::atomic<unsigned int> go(0);
+        boost::atomic<unsigned int> go(0);
         auto SetReady=[&]{go=1;};
         auto WaitUntilReady=[&]
         {
@@ -54,8 +54,10 @@ public:
         boost::asio::io_service::strand strand(io);
 
         Com::DeliveryHandlerBasic<DeliveryHandlerTest::TestWriter> dh(strand, 1, 4);
-        dh.SetGotRecvCallback([=](int64_t id){DeliveryHandlerTest::GotReceiveFrom(id);});
-        dh.SetReceiver([=](int64_t n, int64_t nt, const char* d, size_t s){DeliveryHandlerTest::OnRecv(n, nt, d, s);}, 0, [=](size_t s){return new char[s];});
+        
+        dh.SetGotRecvCallback(boost::bind(&DeliveryHandlerTest::GotReceiveFrom, _1));
+
+        dh.SetReceiver(boost::bind(&DeliveryHandlerTest::OnRecv, _1, _2, _3, _4), 0, [=](size_t s){return new char[s];});
         dh.Start();
 
         TRACELINE
@@ -382,17 +384,17 @@ private:
 
     static void DumpReceived()
     {
-        for (auto& vt : received)
+        for (auto vt = received.cbegin(); vt != received.cend(); ++vt)
         {
-            std::cout<<"node_"<<vt.first<<": received="<<vt.second<<", acked="<<acked[vt.first]<<std::endl;
+            std::cout<<"node_"<<vt->first<<": received="<<vt->second<<", acked="<<acked[vt->first]<<std::endl;
         }
     }
 
     static void DumpNodeInfo(Com::DeliveryHandlerBasic<DeliveryHandlerTest::TestWriter>& dh)
     {
-        for (auto& vt : dh.m_nodes)
+        for (auto vt = dh.m_nodes.begin(); vt != dh.m_nodes.end(); ++vt)
         {
-            Com::DeliveryHandlerBasic<DeliveryHandlerTest::TestWriter>::NodeInfo& ni=vt.second;
+            Com::DeliveryHandlerBasic<DeliveryHandlerTest::TestWriter>::NodeInfo& ni=vt->second;
             std::cout<<"Node: "<<ni.node.name<<std::endl;
             std::cout<<"    Channel: unacked_singel, lastInSeq: "<<ni.unackedSingleReceiverChannel.lastInSequence<<", biggestSeq: "<<ni.unackedSingleReceiverChannel.biggestSequence<<std::endl;
             std::cout<<"    Channel: unacked_multi, lastInSeq: "<<ni.unackedMultiReceiverChannel.lastInSequence<<", biggestSeq: "<<ni.unackedMultiReceiverChannel.biggestSequence<<std::endl;

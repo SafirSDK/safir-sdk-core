@@ -54,17 +54,10 @@ namespace SP
             , m_senderId(LlufId_Generate64(senderId))
             , m_nodeTypes(nodeTypes)
             , m_rawHandler(rawHandler)
-            , m_allNodeTypes([&nodeTypes]
-                             {
-                                 std::set<int64_t> res;
-                                 for (const auto& it: nodeTypes)
-                                 {
-                                     res.insert(it.first);
-                                 }
-                                 return res;
-                             }())
+            , m_allNodeTypes(ExtractKeys(nodeTypes))
             , m_period(period)
         {
+
             SchedulePublishTimer(period, m_allNodeTypes);
 
             rawHandler.AddRawChangedCallback(m_strand.wrap([this](const RawStatistics&,
@@ -91,6 +84,19 @@ namespace SP
         }
 
     private:
+
+        template <class T, class U>
+        static std::set<T> ExtractKeys(const std::map<T,U>& map)
+        {
+            std::set<T> set;
+            for (auto it = map.cbegin(); it != map.cend(); ++it)
+            {
+                set.insert(it->first);
+            }
+            return set;
+        }
+
+
         //must be called in strand
         void SchedulePublishTimer(const boost::chrono::steady_clock::duration& delay,
                                   const std::set<int64_t>& toNodeTypes)
@@ -134,14 +140,14 @@ namespace SP
                 boost::shared_ptr<char[]> data(std::move(d));
                 std::set<int64_t> overflowNodes;
 
-                for (auto id: toNodeTypes)
+                for (auto id = toNodeTypes.cbegin(); id != toNodeTypes.cend(); ++id)
                 {
-                    const bool sent = m_communication.Send(0, id, data, size, m_senderId, true);
+                    const bool sent = m_communication.Send(0, *id, data, size, m_senderId, true);
                     if (!sent)
                     {
                         lllog(7) << "RawPublisherRemote: Overflow when sending to node type "
-                                 << m_nodeTypes.find(id)->second.name.c_str() << std::endl;
-                        overflowNodes.insert(id);
+                                 << m_nodeTypes.find(*id)->second.name.c_str() << std::endl;
+                        overflowNodes.insert(*id);
                     }
                 }
 
@@ -154,7 +160,7 @@ namespace SP
 
         boost::asio::strand m_strand;
         boost::asio::steady_timer m_timer;
-        std::atomic<bool> m_stopped;
+        boost::atomic<bool> m_stopped;
         CommunicationT& m_communication;
         const uint64_t m_senderId;
         const std::map<int64_t, NodeType> m_nodeTypes;

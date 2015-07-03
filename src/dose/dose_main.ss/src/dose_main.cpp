@@ -29,7 +29,7 @@
 #include <boost/regex.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/asio.hpp>
-#include <atomic>
+#include <boost/atomic.hpp>
 #include <boost/filesystem/fstream.hpp>
 
 //This is a sanity check to make sure we've taken down all the threads in dose_main
@@ -87,7 +87,7 @@ int main()
 
     boost::asio::io_service ioService;
 
-    std::atomic<bool> success(true);
+    boost::atomic<bool> success(true);
 
     try
     {

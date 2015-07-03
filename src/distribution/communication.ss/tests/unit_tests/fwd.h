@@ -26,7 +26,7 @@
 
 #include <iostream>
 #include <string>
-#include <atomic>
+#include <boost/atomic.hpp>
 #include <map>
 #include <queue>
 #include <boost/make_shared.hpp>

@@ -63,39 +63,38 @@ namespace Internal
         m_work(new boost::asio::io_service::work(ioService)),
         m_nodeId(0),
         m_distribution(),
-        m_cmdReceiver(ioService,
-                      m_strand.wrap([this](const std::string& nodeName,
-                                           int64_t nodeId,
-                                           int64_t nodeTypeId,
-                                           const std::string& dataAddress)
-                                    {
-                                        Start(nodeName,
-                                              nodeId,
-                                              nodeTypeId,
-                                              dataAddress);
-                                    }),
-                      m_strand.wrap([this](const std::string& nodeName,
-                                           int64_t nodeId,
-                                           int64_t nodeTypeId,
-                                           const std::string& dataAddress)
-                                    {
-                                        InjectNode(nodeName,
-                                                   nodeId,
-                                                   nodeTypeId,
-                                                   dataAddress);
-                                    }),
-                      m_strand.wrap([this](int64_t nodeId, int64_t nodeTypeId)
-                                    {
-                                        ExcludeNode(nodeId, nodeTypeId);
-                                    }),
-                      m_strand.wrap([this]()
-                                    {
-                                        Stop();
-                                    })),
-
-
         m_signalSet(ioService)
     {
+        m_cmdReceiver.reset(new Control::DoseMainCmdReceiver( ioService,
+                                                              m_strand.wrap([this](const std::string& nodeName,
+                                                                                   int64_t nodeId,
+                                                                                   int64_t nodeTypeId,
+                                                                                   const std::string& dataAddress)
+                                                                            {
+                                                                                Start(nodeName,
+                                                                                      nodeId,
+                                                                                      nodeTypeId,
+                                                                                      dataAddress);
+                                                                            }),
+                                                              m_strand.wrap([this](const std::string& nodeName,
+                                                                                   int64_t nodeId,
+                                                                                   int64_t nodeTypeId,
+                                                                                   const std::string& dataAddress)
+                                                                            {
+                                                                                InjectNode(nodeName,
+                                                                                           nodeId,
+                                                                                           nodeTypeId,
+                                                                                           dataAddress);
+                                                                            }),
+                                                              m_strand.wrap([this](int64_t nodeId, int64_t nodeTypeId)
+                                                                            {
+                                                                                ExcludeNode(nodeId, nodeTypeId);
+                                                                            }),
+                                                              m_strand.wrap([this]()
+                                                                            {
+                                                                                Stop();
+                                                                            })) );
+
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
         m_signalSet.add(SIGABRT);
         m_signalSet.add(SIGBREAK);
@@ -117,7 +116,7 @@ namespace Internal
         Safir::Utilities::CrashReporter::Start();
 
         // Start reception of commands from Control
-        m_cmdReceiver.Start();
+        m_cmdReceiver->Start();
     }
 
     DoseMainApp::~DoseMainApp()
@@ -130,7 +129,7 @@ namespace Internal
         const bool wasStopped = m_stopped.exchange(true);
         if (!wasStopped)
         {
-            m_cmdReceiver.Stop();
+            m_cmdReceiver->Stop();
 
             m_lockMonitor->Stop();
 

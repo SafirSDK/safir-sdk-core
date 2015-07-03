@@ -28,7 +28,7 @@
 #include <Safir/Utilities/Internal/SystemLog.h>
 #include "SubscriberInterfaces.h"
 #include <functional>
-#include <atomic>
+#include <boost/atomic.hpp>
 
 #ifdef _MSC_VER
 #  pragma warning (push)
@@ -55,17 +55,17 @@ namespace SP
         : public SubscriberInterfaceT
     {
     public:
-        typedef std::function<void (const typename SubscriberInterfaceT::DataWrapper& data)> DataCallback;
+        typedef boost::function<void (const typename SubscriberInterfaceT::DataWrapper& data)> DataCallback;
 
         LocalSubscriber(boost::asio::io_service& ioService,
                         const char* const name)
             : m_strand(ioService)
             , m_name (name)
-            , m_subscriber(ioService,
-                           m_name,
-                           [this](const char* const data, size_t size){DataReceived(data,size);})
         {
 
+            m_subscriber.reset(new IpcSubscriberT(ioService,
+                                                  m_name,
+                                                  [this](const char* const data, size_t size){DataReceived(data,size);}));
         }
 
 
@@ -86,7 +86,7 @@ namespace SP
                 if (needConnect)
                 {
                     lllog(9) << "SP: AddSubscriber calling Connect" << std::endl;
-                    m_subscriber.Connect();
+                    m_subscriber->Connect();
                 }
             });
         }
@@ -95,7 +95,7 @@ namespace SP
         {
             m_strand.dispatch([this]
                               {
-                                  m_subscriber.Disconnect();
+                                  m_subscriber->Disconnect();
                                   m_dataCallbacks.clear();
                               });
         }
@@ -118,9 +118,9 @@ namespace SP
             const auto wrapped = WrapperCreatorT::Create(std::move(msg));
             m_strand.dispatch([this,wrapped]
             {
-                for (const auto cb : m_dataCallbacks)
+                for (auto cb = m_dataCallbacks.cbegin(); cb != m_dataCallbacks.cend(); ++cb)
                 {
-                    cb(wrapped);
+                    (*cb)(wrapped);
                 }
             });
         }
@@ -131,7 +131,8 @@ namespace SP
         const std::string m_name;
 
         std::vector<DataCallback> m_dataCallbacks;
-        IpcSubscriberT m_subscriber;
+
+        std::unique_ptr<IpcSubscriberT> m_subscriber;
     };
 
 

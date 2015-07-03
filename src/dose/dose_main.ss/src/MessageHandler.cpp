@@ -35,7 +35,6 @@
 #include <Safir/Dob/Internal/MessageTypes.h>
 #include <Safir/Dob/NodeParameters.h>
 
-
 namespace Safir
 {
 namespace Dob
@@ -116,7 +115,7 @@ namespace Internal
                                            bool& exitDispatch,
                                            bool& dontRemove)
              {
-                 DispatchMessage(noPopped,
+                 this->DispatchMessage(noPopped,
                                  connection,
                                  msg,
                                  exitDispatch,
@@ -140,10 +139,10 @@ namespace Internal
                                              });
 
         // Send message to all node types
-        for (const auto nodeType : m_distribution.GetNodeTypeIds())
+        for (auto nodeType = m_distribution.GetNodeTypeIds().cbegin(); nodeType != m_distribution.GetNodeTypeIds().cend(); ++nodeType)
         {
             m_distribution.GetCommunication().Send(0,  // All nodes of the type
-                                                   nodeType,
+                                                   *nodeType,
                                                    msgP,
                                                    msg.Size(),
                                                    m_dataTypeIdentifier,

@@ -24,7 +24,7 @@
 
 #include <Safir/Dob/Internal/LamportClocks.h>
 #include <iostream>
-#include <atomic>
+#include <boost/atomic.hpp>
 
 namespace Safir
 {

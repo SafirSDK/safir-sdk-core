@@ -26,7 +26,7 @@
 #define __LLUF_IPC_PUBLISHER_H__
 
 #include <set>
-#include <atomic>
+#include <boost/atomic.hpp>
 #include <boost/cstdint.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/shared_array.hpp>
@@ -74,26 +74,28 @@ namespace Internal
 
         IpcPublisherImpl(boost::asio::io_service&       ioService,
                          const std::string&             name,
-                         const std::function<void()>    subscriberConnectedCb,
-                         const std::function<void()>    subscriberDisconnectedCb)
+                         const boost::function<void()>    subscriberConnectedCb,
+                         const boost::function<void()>    subscriberDisconnectedCb)
             : m_running(false),
               m_strand(ioService),
-              m_acceptor(boost::make_shared<Acceptor>(
-                             m_strand,
-                             name,
-                             [this](typename Acceptor::StreamPtr streamPtr)
-                             {
-                                 m_sessions.insert(boost::make_shared<SessionType>
-                                                   (streamPtr, m_strand, m_subscriberDisconnectedCb));
-                                 if (m_subscriberConnectedCb != nullptr)
-                                 {
-                                     m_subscriberConnectedCb();
-                                 }
-                             })),
+              m_acceptor(),
               m_sessions(),
               m_subscriberConnectedCb(subscriberConnectedCb),
               m_subscriberDisconnectedCb(subscriberDisconnectedCb)
         {
+            m_acceptor = boost::make_shared<Acceptor>(
+                             m_strand,
+                             name,
+                             [this] (typename Acceptor::StreamPtr streamPtr)
+                             {
+                                 m_sessions.insert(boost::make_shared<SessionType>
+                                                   (streamPtr, m_strand, m_subscriberDisconnectedCb));
+
+                                 if (!m_subscriberConnectedCb.empty())
+                                 {
+                                    m_subscriberConnectedCb();
+                                 }
+                             });
         }
 
         void Start()
@@ -114,7 +116,7 @@ namespace Internal
                                 return;
                             }
 
-                            TestPolicy::StartListeningEvent();
+                            StartListeningEvent();
 
                             m_acceptor->Start();
                         });
@@ -136,7 +138,7 @@ namespace Internal
                              m_sessions.clear();
                              m_acceptor->Stop();
 
-                             TestPolicy::StopListeningEvent();
+                             StopListeningEvent();
                          });
         }
 
@@ -173,17 +175,28 @@ namespace Internal
 
     private:
 
+
+        void StartListeningEvent()
+        {
+             TestPolicy::StartListeningEvent();
+        }
+
+        void StopListeningEvent()
+        {
+            TestPolicy::StopListeningEvent();
+        }
+
         typedef Session<typename Acceptor::StreamPtr> SessionType;
 
         typedef boost::shared_ptr<SessionType> SessionPtr;
         typedef boost::shared_ptr<Acceptor> AcceptorPtr;
 
-        std::atomic<bool>                   m_running;
+        boost::atomic<bool>                 m_running;
         boost::asio::io_service::strand     m_strand;
         AcceptorPtr                         m_acceptor;
         std::set<SessionPtr>                m_sessions;
-        std::function<void()>               m_subscriberConnectedCb;
-        std::function<void()>               m_subscriberDisconnectedCb;
+        boost::function<void()>               m_subscriberConnectedCb;
+        boost::function<void()>               m_subscriberDisconnectedCb;
     };
 
     struct IpcPublisherNoTest
@@ -224,8 +237,8 @@ namespace Internal
          */
         IpcPublisher(boost::asio::io_service&       ioService,
                      const std::string&             name,
-                     const std::function<void()>    subscriberConnectedCb,
-                     const std::function<void()>    subscriberDisconnectedCb)
+                     const boost::function<void()>    subscriberConnectedCb,
+                     const boost::function<void()>    subscriberDisconnectedCb)
             : m_pimpl(boost::make_shared<IpcPubImpl>(ioService,
                                                      name,
                                                      subscriberConnectedCb,

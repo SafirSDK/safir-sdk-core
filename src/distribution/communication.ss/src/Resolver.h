@@ -123,9 +123,9 @@ namespace Com
             if (m_verbose)
             {
                 std::cout<<"Candidates after DNS lookup:"<<std::endl;
-                for (const auto& s : addresses)
+                for (auto s = addresses.cbegin(); s != addresses.cend(); ++s)
                 {
-                    std::cout<<"  "<<s<<std::endl;
+                    std::cout<<"  " << *s << std::endl;
                 }
             }
 
@@ -298,21 +298,21 @@ namespace Com
             if (m_verbose)
             {
                 std::cout<<"Own interface addresses available:"<<std::endl;
-                for (const auto& a : adapters)
+                for (auto a = adapters.cbegin(); a != adapters.cend(); ++a)
                 {
-                    std::cout<<"  "<<a.ipAddress<<std::endl;
+                    std::cout<<"  "<<a->ipAddress<<std::endl;
                 }
             }
 
             std::vector<std::string> addresses;
 
-            for (const auto& ai : adapters)
+            for (auto ai = adapters.cbegin(); ai != adapters.cend(); ++ai)
             {
-                if (ai.name == expr || ai.ipAddress==expr)
+                if (ai->name == expr || ai->ipAddress==expr)
                 {
-                    return ai.ipAddress;
+                    return ai->ipAddress;
                 }
-                addresses.push_back(ai.ipAddress);
+                addresses.push_back(ai->ipAddress);
             }
 
             auto bestMatchingIp=FindBestMatch(expr, addresses);
@@ -321,14 +321,16 @@ namespace Com
                 return bestMatchingIp;
             }
 
-            for (const auto& addr : DnsLookup(expr, 46))
+            std::vector<std::string> allSupportingAddresses = DnsLookup(expr, 46);
+
+            for (auto addr = allSupportingAddresses.cbegin(); addr != allSupportingAddresses.cend(); ++addr )
             {
                 if (m_verbose)
                 {
-                    std::cout<<" DNS lookup: "<<addr<<std::endl;
+                    std::cout<<" DNS lookup: "<< *addr <<std::endl;
                 }
 
-                auto found=std::find(addresses.begin(), addresses.end(), addr);
+                auto found=std::find(addresses.begin(), addresses.end(), *addr);
                 if (found!=addresses.end())
                 {
                     return *found;

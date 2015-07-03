@@ -157,11 +157,11 @@ namespace Internal
     {
         boost::lock_guard<boost::mutex> lck(m_lock);
 
-        for (const auto& pair: m_controllers)
+        for (auto pair = m_controllers.cbegin(); pair != m_controllers.cend(); ++pair)
         {
-            if (pair.second->NameIsEqual(connectionNameCommonPart,connectionNameInstancePart))
+            if (pair->second->NameIsEqual(connectionNameCommonPart,connectionNameInstancePart))
             {
-                return pair.first;
+                return pair->first;
             }
         }
 
