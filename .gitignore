@@ -42,6 +42,7 @@ stage
 *.exp
 *.resource.txt
 *.vcxproj
+*.vcxproj.user
 *.vcxproj.filters
 *.sln
 *.suo
