@@ -39,14 +39,14 @@ def log(*args, **kwargs):
 
 def check_tabs(filename):
     try:
-        log("checking file", filename)
+        #log("checking file", filename)
         with open(filename,"r") as f:
             for line in f:
                 if "\t" in line:
                     log (" !!!", filename, "contains a tab!!!")
                     return False
     except UnicodeDecodeError:
-        log("Failed to check file", filename)
+        log(" !!! UnicodeDecodeError while reading", filename)
         return False
     return True
 
@@ -64,8 +64,7 @@ def main():
                     check = False
                     break;
             if check:
-                ok = ok and check_tabs(os.path.join(dirName,fname))
-            #print('\t%s' % fname)
+                ok = check_tabs(os.path.join(dirName,fname)) and ok
     return 0 if ok else 1
 
 if __name__ == "__main__":
