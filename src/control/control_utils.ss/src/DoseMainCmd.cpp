@@ -50,33 +50,33 @@ namespace Control
              const IncludeNodeCmdCb&    injectNodeCb,
              const ExcludeNodeCmdCb&    excludeNodeCb,
              const StopDoseMainCb&      stopDoseMainCb)
-            : m_ipcSubscriber(ioService,
-                              doseMainCmdChannel,
-                              [this](const char* data, size_t size)
-                              {
-                                  RecvDataCb(data, size);
-                              }),
-              m_startDoseMainCb(startDoseMainCb),
+            : m_startDoseMainCb(startDoseMainCb),
               m_injectNodeCb(injectNodeCb),
               m_excludeNodeCb(excludeNodeCb),
               m_stopDoseMainCb(stopDoseMainCb)
         {
+            m_ipcSubscriber.reset( new Safir::Utilities::Internal::IpcSubscriber(ioService,
+                                                                                 doseMainCmdChannel,
+                                                                                 [this](const char* data, size_t size)
+                                                                                 {
+                                                                                     RecvDataCb(data, size);
+                                                                                 }));
         }
 
         void Start()
         {
-            m_ipcSubscriber.Connect();
+            m_ipcSubscriber->Connect();
         }
 
         void Stop()
         {
-            m_ipcSubscriber.Disconnect();
+            m_ipcSubscriber->Disconnect();
         }
 
 
     private:
 
-        Safir::Utilities::Internal::IpcSubscriber m_ipcSubscriber;
+        std::unique_ptr<Safir::Utilities::Internal::IpcSubscriber> m_ipcSubscriber;
 
         IncludeNodeCmdCb    m_startDoseMainCb;
         IncludeNodeCmdCb    m_injectNodeCb;

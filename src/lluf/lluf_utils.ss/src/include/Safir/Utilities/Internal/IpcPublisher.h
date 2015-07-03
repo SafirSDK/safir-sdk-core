@@ -90,9 +90,10 @@ namespace Internal
                              {
                                  m_sessions.insert(boost::make_shared<SessionType>
                                                    (streamPtr, m_strand, m_subscriberDisconnectedCb));
-                                 if (m_subscriberConnectedCb != nullptr)
+
+                                 if (!m_subscriberConnectedCb.empty())
                                  {
-                                     m_subscriberConnectedCb();
+                                    m_subscriberConnectedCb();
                                  }
                              });
         }
