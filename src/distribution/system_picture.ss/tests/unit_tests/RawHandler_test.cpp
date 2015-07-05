@@ -707,7 +707,7 @@ BOOST_AUTO_TEST_CASE( perform_on_my )
     msg->SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(data.get()));
     rh->NewRemoteStatistics(11,data,size);
 
-    rh->PerformOnMyStatisticsMessage([&](boost::shared_ptr<char[]> data,
+    rh->PerformOnMyStatisticsMessage([&](std::unique_ptr<char[]> data,
                                          const size_t size)
                                      {
                                          auto msg = Safir::make_unique<RawStatisticsMessage>();

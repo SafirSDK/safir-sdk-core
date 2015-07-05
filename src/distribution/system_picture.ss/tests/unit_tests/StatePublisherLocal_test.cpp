@@ -39,7 +39,7 @@ size_t gsize = 0;
 class Handler
 {
 public:
-    void PerformOnStateMessage(const boost::function<void(std::unique_ptr<char []> data,
+    void PerformOnStateMessage(const workaround::function<void(std::unique_ptr<char []> data,
                                                         const size_t size)> & fn,
                                const bool onlyOwnState) const
     {

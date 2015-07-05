@@ -32,12 +32,12 @@
 #include "MessageWrapperCreators.h"
 #include "RawChanges.h"
 #include "AsioLatencyMonitor.h"
+#include "Function.h"
 #include <boost/make_shared.hpp>
 #include <boost/chrono.hpp>
 #include <boost/noncopyable.hpp>
 #include <string>
 #include <unordered_map>
-#include <functional>
 #include <set>
 
 
@@ -154,7 +154,7 @@ namespace SP
         }
 
 
-        void PerformOnMyStatisticsMessage(const boost::function<void(std::unique_ptr<char[]> data,
+        void PerformOnMyStatisticsMessage(const workaround::function<void(std::unique_ptr<char[]> data,
                                                                    const size_t size)> & fn) const
         {
             m_strand.dispatch([this,fn]
@@ -199,7 +199,7 @@ namespace SP
         }
 
 
-        void PerformOnAllStatisticsMessage(const boost::function<void(std::unique_ptr<char []> data,
+        void PerformOnAllStatisticsMessage(const workaround::function<void(std::unique_ptr<char []> data,
                                                                     const size_t size)> & fn) const
         {
             m_strand.dispatch([this,fn]

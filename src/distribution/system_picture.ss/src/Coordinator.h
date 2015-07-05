@@ -28,7 +28,7 @@
 #include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
 #include <Safir/Utilities/Internal/SystemLog.h>
-#include <functional>
+#include "Function.h"
 #include <limits>
 #include <boost/atomic.hpp>
 #include <map>
@@ -152,7 +152,7 @@ namespace SP
         //used to send state message
         //if onlyOwnState is true the callback will only be called if we're elected
         //and have a valid own system state that is ok to send.
-        void PerformOnStateMessage(const boost::function<void(std::unique_ptr<char []> data,
+        void PerformOnStateMessage(const workaround::function<void(std::unique_ptr<char []> data,
                                                             const size_t size)> & fn,
                                    const bool onlyOwnState)
         {

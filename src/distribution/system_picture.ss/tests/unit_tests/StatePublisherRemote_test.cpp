@@ -40,7 +40,7 @@ size_t gsize = 0;
 class Handler
 {
 public:
-    void PerformOnStateMessage(const boost::function<void(std::unique_ptr<char []> data, 
+    void PerformOnStateMessage(const workaround::function<void(std::unique_ptr<char []> data,
                                                         const size_t size)> & fn,
                                const bool onlyOwnState) const
     {
@@ -66,9 +66,9 @@ class Communication
 {
 public:
     bool Send(int64_t nodeId,
-              int64_t nodeTypeId, 
-              const boost::shared_ptr<char[]>& data, 
-              size_t size, 
+              int64_t nodeTypeId,
+              const boost::shared_ptr<char[]>& data,
+              size_t size,
               int64_t /*dataTypeIdentifier*/,
               bool acked)
     {
@@ -100,17 +100,15 @@ BOOST_AUTO_TEST_CASE( send_ten )
     std::map<int64_t, NodeType> nodeTypes;
     nodeTypes.insert(std::make_pair(10, NodeType(10,"mupp",false,boost::chrono::seconds(1),10,boost::chrono::seconds(1))));
     nodeTypes.insert(std::make_pair(20, NodeType(20,"tupp",true,boost::chrono::seconds(1),22,boost::chrono::seconds(1))));
-    
+
     StatePublisherRemoteBasic<::Handler, ::Communication> publisher
         (ioService,communication,nodeTypes,"foo",h,boost::chrono::milliseconds(10));
-     
+
     h.stopCall = [&]{publisher.Stop();};
     ioService.run();
-    
+
 
     BOOST_CHECK(numPerform == 10);
     BOOST_CHECK(numSend10 == 10);
     BOOST_CHECK(numSend20 == 10);
 }
-
-

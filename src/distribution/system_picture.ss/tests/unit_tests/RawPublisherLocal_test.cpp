@@ -40,7 +40,7 @@ size_t gsize = 0;
 class Handler
 {
 public:
-    void PerformOnAllStatisticsMessage(const boost::function<void(std::unique_ptr<char []> data,
+    void PerformOnAllStatisticsMessage(const workaround::function<void(std::unique_ptr<char []> data,
                                                                 const size_t size)> & fn) const
     {
         std::wcout << "AllPerform" << std::endl;
@@ -56,8 +56,8 @@ public:
             stopCall();
         }
     }
-    
-    void PerformOnMyStatisticsMessage(const boost::function<void(std::unique_ptr<char []> data,
+
+    void PerformOnMyStatisticsMessage(const workaround::function<void(std::unique_ptr<char []> data,
                                                                 const size_t size)> & fn) const
     {
         std::wcout << "MyPerform" << std::endl;
@@ -73,7 +73,7 @@ public:
             stopCall();
         }
     }
-    
+
     boost::function<void()> stopCall;
 };
 
