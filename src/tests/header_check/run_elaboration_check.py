@@ -78,8 +78,13 @@ class LllProc:
             return logfile.read()
 
     def kill(self):
-        self.proc.kill()
-        self.proc.wait()
+        try:
+            self.proc.kill()
+            self.proc.wait()
+        except WindowsError:
+            # It seems that there is a bug which makes older python versions
+            # to throw an exception when performing a kill on Windows
+            pass
 
 if sys.platform == "win32":
     temp = os.environ.get("TEMP")
