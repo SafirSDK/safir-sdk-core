@@ -1,3 +1,4 @@
+ADD_SUBDIRECTORY(ConnectStresser)
 ADD_SUBDIRECTORY(EntityReceptionVerifier)
 ADD_SUBDIRECTORY(EntityStresser)
 
