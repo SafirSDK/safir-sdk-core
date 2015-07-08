@@ -95,6 +95,8 @@ class Parameters:
                           help="Do not check syslog output")
         parser.add_option("--no-java", action="store_true",dest="no_java",default=False,
                           help="Do not run java partners")
+        parser.add_option("--no-dotnet", action="store_true",dest="no_dotnet",default=False,
+                          help="Do not run dotnet partners")
         parser.add_option("--lang0", action="store",dest="lang0",default="cpp",
                           help="Which partner 0 to run. [default: %default]. "
                           "If --jenkins is specified the Languages environment variable will override this.")
@@ -120,6 +122,7 @@ class Parameters:
         self.standalone = not options.multinode and not options.multicomputer and not options.slave
 
         self.no_java = options.no_java
+        self.no_dotnet = options.no_dotnet
 
         if options.autostart_slave and not self.multicomputer:
             log("--autostart-slave can only be used together with --multinode")
@@ -370,7 +373,8 @@ class Runner:
 
         for i in partners:
             self.__launchProcess("dose_test_cpp." + str(i), parameters.dose_test_cpp_cmd + (str(i),))
-            self.__launchProcess("dose_test_dotnet." + str(i), parameters.dose_test_dotnet_cmd + (str(i),))
+            if not parameters.no_dotnet:
+                self.__launchProcess("dose_test_dotnet." + str(i), parameters.dose_test_dotnet_cmd + (str(i),))
             if not parameters.no_java:
                 self.__launchProcess("dose_test_java." + str(i), parameters.dose_test_java_cmd + (str(i),))
 
@@ -385,7 +389,8 @@ class Runner:
             self.__launchProcess("foreach.1", parameters.foreach_cmd)
 
             self.__launchProcess("dose_test_cpp.2", parameters.dose_test_cpp_cmd + ("2",))
-            self.__launchProcess("dose_test_dotnet.2", parameters.dose_test_dotnet_cmd + ("2",))
+            if not parameters.no_dotnet:
+                self.__launchProcess("dose_test_dotnet.2", parameters.dose_test_dotnet_cmd + ("2",))
             if not parameters.no_java:
                 self.__launchProcess("dose_test_java.2", parameters.dose_test_java_cmd + ("2",))
 
