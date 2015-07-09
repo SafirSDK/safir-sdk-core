@@ -43,6 +43,8 @@ namespace Typesystem
 {
     namespace
     {
+        struct Unused{template<class T> Unused(const T&){}};  // To keep compilers happy about unused variable
+
         void LoadGeneratedLibrary(const std::string& path, std::string name)
         {
 #if defined (_MSC_VER) && !defined (NDEBUG)
@@ -106,7 +108,7 @@ namespace Typesystem
             return true;
         }
 
-        const bool loadedLibraries = LoadGeneratedLibraries();
+        const Unused loadedLibraries = LoadGeneratedLibraries();
     }
 
     boost::once_flag ObjectFactory::SingletonHelper::m_onceFlag = BOOST_ONCE_INIT;

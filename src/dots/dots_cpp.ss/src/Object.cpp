@@ -40,6 +40,8 @@ namespace Typesystem
     const Safir::Dob::Typesystem::TypeId Object::ClassTypeId;
 #endif
 
+    struct Unused{template<class T> Unused(const T&){}};  // To keep compilers happy about unused variable
+
     namespace
     {
         ObjectPtr CreateObject(Safir::Dob::Typesystem::Int64 handle)
@@ -55,7 +57,7 @@ namespace Typesystem
         }
 
         //This ensures that Object is registered in the object factory 
-        const bool registered =
+        const Unused registered =
             ObjectFactory::Instance().RegisterClass(Safir::Dob::Typesystem::Object::ClassTypeId,CreateObject);
         
     }

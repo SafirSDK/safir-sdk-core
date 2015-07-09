@@ -451,6 +451,8 @@ namespace @_NAMESPACEV_@
     const Safir::Dob::Typesystem::TypeId @_CLASS_@::ClassTypeId;
 #endif
 
+    struct Unused{template<class T> Unused(const T&){}};  // To keep compilers happy about unused variable
+
     //An anonymous namespace for object factory registration
     //this can never be called directly by anyone (since it is anonymous)
     namespace
@@ -466,7 +468,7 @@ namespace @_NAMESPACEV_@
                 return Safir::Dob::Typesystem::ObjectPtr(new @_CLASS_@(handle));
             }
         }
-        const bool registered =
+        const Unused registered =
             Safir::Dob::Typesystem::ObjectFactory::Instance().RegisterClass(@_CLASS_@::ClassTypeId, CreateObject);
     }
 
@@ -1257,6 +1259,8 @@ namespace @_NAMESPACEV_@
     const Safir::Dob::Typesystem::TypeId @_CLASS_@::ExceptionTypeId;
 #endif
 
+    struct Unused{template<class T> Unused(const T&){}};  // To keep compilers happy about unused variable
+
     //An anonymous namespace for exception factory registration
     //this can never be called directly by anyone (since it is anonymous)
     namespace
@@ -1267,7 +1271,7 @@ namespace @_NAMESPACEV_@
         {
             throw @_CLASS_@(description,__WFILE__,__LINE__);
         }
-        const bool registered =
+        const Unused registered =
             Safir::Dob::Typesystem::LibraryExceptions::Instance().RegisterException
             (@_CLASS_@::ExceptionTypeId,
              ThrowException);

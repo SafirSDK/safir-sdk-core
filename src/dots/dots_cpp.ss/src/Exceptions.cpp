@@ -45,39 +45,40 @@ namespace Typesystem
     const Safir::Dob::Typesystem::TypeId ReadOnlyException::ExceptionTypeId;
 #endif
 
-
     //An anonymous namespace for exception factory registration
     //this can never be called directly by anyone (since it is anonymous)
     namespace
     {
-        //register IllegalValueException in exception factory
 
+        struct Unused{template<class T> Unused(const T&){}};  // To keep compilers happy about unused variable
+
+        //register IllegalValueException in exception factory
         void ThrowIllegalValueException(const std::wstring & description)
         {
             throw IllegalValueException(description,__WFILE__,__LINE__);
         }
-        const bool registeredIllegalValueException =
-            LibraryExceptions::Instance().RegisterException
-            (Safir::Dob::Typesystem::IllegalValueException::ExceptionTypeId,
-             ThrowIllegalValueException);
+        const Unused registeredIllegalValueException =
+                LibraryExceptions::Instance().RegisterException
+                (Safir::Dob::Typesystem::IllegalValueException::ExceptionTypeId,
+                 ThrowIllegalValueException);
 
         //register IncompatibleTypesException in exception factory
         void ThrowIncompatibleTypesException(const std::wstring & description)
         {
             throw IncompatibleTypesException(description,__WFILE__,__LINE__);
         }
-        const bool registeredIncompatibleTypesException =
+
+        const Unused registeredIncompatibleTypesException =
             LibraryExceptions::Instance().RegisterException
             (Safir::Dob::Typesystem::IncompatibleTypesException::ExceptionTypeId,
              ThrowIncompatibleTypesException);
-
 
         //register ConfigurationErrorException in exception factory
         void ThrowConfigurationErrorException(const std::wstring & description)
         {
             throw ConfigurationErrorException(description,__WFILE__,__LINE__);
         }
-        const bool registeredConfigurationErrorException =
+        const Unused registeredConfigurationErrorException =
             LibraryExceptions::Instance().RegisterException
             (Safir::Dob::Typesystem::ConfigurationErrorException::ExceptionTypeId,
              ThrowConfigurationErrorException);
@@ -88,7 +89,7 @@ namespace Typesystem
         {
             throw SoftwareViolationException(description,__WFILE__,__LINE__);
         }
-        const bool registeredSoftwareViolationException =
+        const Unused registeredSoftwareViolationException =
             LibraryExceptions::Instance().RegisterException
             (Safir::Dob::Typesystem::SoftwareViolationException::ExceptionTypeId,
              ThrowSoftwareViolationException);
@@ -98,7 +99,7 @@ namespace Typesystem
         {
             throw NullException(description,__WFILE__,__LINE__);
         }
-        const bool registeredNullException =
+        const Unused registeredNullException =
             LibraryExceptions::Instance().RegisterException
             (Safir::Dob::Typesystem::NullException::ExceptionTypeId,
              ThrowNullException);
@@ -108,7 +109,7 @@ namespace Typesystem
         {
             throw ReadOnlyException(description,__WFILE__,__LINE__);
         }
-        const bool registeredReadOnlyException =
+        const Unused registeredReadOnlyException =
             LibraryExceptions::Instance().RegisterException
             (Safir::Dob::Typesystem::ReadOnlyException::ExceptionTypeId,
              ThrowReadOnlyException);
@@ -120,7 +121,6 @@ namespace Typesystem
                                                const Int64 lineNumber):
         Internal::CommonExceptionBase(message,fileName,lineNumber)
     {
-
     }
 
     Exception::Exception(const std::wstring & message,

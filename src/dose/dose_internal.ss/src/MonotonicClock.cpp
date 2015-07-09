@@ -41,7 +41,6 @@ namespace Dob
 {
 namespace Internal
 {
-    static const double fraction_multiplicator = pow(10.0,-boost::posix_time::time_duration::num_fractional_digits());
     const boost::posix_time::ptime epoch(boost::gregorian::date(2008,1,1));
 
     Typesystem::Int64 MonotonicClock::Get(const Typesystem::Int64 oldTime)
