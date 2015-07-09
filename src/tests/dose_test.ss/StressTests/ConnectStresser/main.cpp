@@ -50,7 +50,6 @@ public:
         , m_noFailedAttempts(0)
 
     {
-
         std::wcout << "Starting Connectstresser with args Timeout: " << m_timeout << " ms., Connection attempts: " << m_attempts << " Instance: " << m_instance <<  std::endl;
 
         for (int attemptNo = 0; attemptNo < m_attempts; ++attemptNo)
@@ -68,14 +67,10 @@ public:
                                   &m_dispatcher);
 
                 std::wcout << "+";
-
                 m_connection.Close();
 
                 std::wcout << "- " << std::flush;
-
-
                 boost::this_thread::sleep_for(boost::chrono::milliseconds(m_timeout));
-
             }
             catch(const Safir::Dob::NotOpenException &ex)
             {
@@ -90,14 +85,12 @@ public:
 
         if (m_noFailedAttempts > 0)
         {
-
-
             std::wcout << "Press enter to see exceptions given: " << std::endl;
             std::cin.get();
-            for (auto ex : m_exceptions)
-            {
-                std::wcout << ex.what() << std::endl << "--" << std::endl;
 
+            for (auto ex = m_exceptions.cbegin(); ex != m_exceptions.cend(); ++ex)
+            {
+                std::wcout << ex->what() << std::endl << "--" << std::endl;
             }
         }
 
