@@ -590,7 +590,7 @@ extern "C"
     DOTS_KERNEL_API DotsC_Int32 DotsC_DictionaryInt32KeyToIndex(const DotsC_TypeId typeId, const DotsC_ParameterIndex parameter, const DotsC_Int32 key);
     DOTS_KERNEL_API DotsC_Int32 DotsC_DictionaryInt64KeyToIndex(const DotsC_TypeId typeId, const DotsC_ParameterIndex parameter, const DotsC_Int64 key);
     DOTS_KERNEL_API DotsC_Int32 DotsC_DictionaryStringKeyToIndex(const DotsC_TypeId typeId, const DotsC_ParameterIndex parameter, const char* key);
-    DOTS_KERNEL_API DotsC_Int32 DotsC_DictionaryEntityIdKeyToIndex(const DotsC_TypeId typeId, const DotsC_ParameterIndex parameter, const DotsC_EntityId key);
+    DOTS_KERNEL_API DotsC_Int32 DotsC_DictionaryEntityIdKeyToIndex(const DotsC_TypeId typeId, const DotsC_ParameterIndex parameter, const DotsC_EntityId& key);
 
     //********************************************************
     // Operations on blobs
@@ -818,7 +818,7 @@ extern "C"
     DOTS_KERNEL_API void DotsC_WriteBooleanMember(DotsC_Handle writerHandle, bool val, bool isNull, bool isChanged, DotsC_MemberIndex member, DotsC_Int32 arrayIndex, DotsC_KeyValMode keyValMode);
     DOTS_KERNEL_API void DotsC_WriteStringMember(DotsC_Handle writerHandle, const char* val, bool isNull, bool isChanged, DotsC_MemberIndex member, DotsC_Int32 arrayIndex, DotsC_KeyValMode keyValMode);
     DOTS_KERNEL_API void DotsC_WriteHashedMember(DotsC_Handle writerHandle, DotsC_Int64 hash, const char* str, bool isNull, bool isChanged, DotsC_MemberIndex member, DotsC_Int32 arrayIndex, DotsC_KeyValMode keyValMode);
-    DOTS_KERNEL_API void DotsC_WriteEntityIdMember(DotsC_Handle writerHandle, DotsC_EntityId val, const char* instanceString, bool isNull, bool isChanged, DotsC_MemberIndex member, DotsC_Int32 arrayIndex, DotsC_KeyValMode keyValMode);
+    DOTS_KERNEL_API void DotsC_WriteEntityIdMember(DotsC_Handle writerHandle, const DotsC_EntityId& val, const char* instanceString, bool isNull, bool isChanged, DotsC_MemberIndex member, DotsC_Int32 arrayIndex, DotsC_KeyValMode keyValMode);
     DOTS_KERNEL_API void DotsC_WriteBinaryMember(DotsC_Handle writerHandle, const char* val, DotsC_Int32 size, bool isNull, bool isChanged, DotsC_MemberIndex member, DotsC_Int32 arrayIndex, DotsC_KeyValMode keyValMode);
     DOTS_KERNEL_API void DotsC_WriteObjectMember(DotsC_Handle writerHandle, const char* blob, bool isNull, bool isChanged, DotsC_MemberIndex member, DotsC_Int32 arrayIndex, DotsC_KeyValMode keyValMode);
 

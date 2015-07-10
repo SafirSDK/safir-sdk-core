@@ -1011,7 +1011,7 @@ DotsC_Int32 DotsC_DictionaryStringKeyToIndex(const DotsC_TypeId typeId, const Do
     return ts::TypeUtilities::GetDictionaryIndexFromKey(pd, key);
 }
 
-DotsC_Int32 DotsC_DictionaryEntityIdKeyToIndex(const DotsC_TypeId typeId, const DotsC_ParameterIndex parameter, const DotsC_EntityId key)
+DotsC_Int32 DotsC_DictionaryEntityIdKeyToIndex(const DotsC_TypeId typeId, const DotsC_ParameterIndex parameter, const DotsC_EntityId& key)
 {
     Init();
     const ParameterDescriptionShm* const pd=RepositoryKeeper::GetRepository()->GetClass(typeId)->GetParameter(parameter);
@@ -1417,7 +1417,7 @@ void DotsC_WriteHashedMember(DotsC_Handle writerHandle, DotsC_Int64 hash, const 
     }
 }
 
-void DotsC_WriteEntityIdMember(DotsC_Handle writerHandle, DotsC_EntityId val, const char* instanceString,
+void DotsC_WriteEntityIdMember(DotsC_Handle writerHandle, const DotsC_EntityId& val, const char* instanceString,
                                bool isNull,
                                bool isChanged,
                                DotsC_MemberIndex member,

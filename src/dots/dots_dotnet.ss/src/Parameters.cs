@@ -503,7 +503,7 @@ namespace Safir.Dob.Typesystem
             Internal.DotsC_EntityId eid;
             eid.TypeId = key.TypeId;
             eid.InstanceId = key.InstanceId.RawValue;
-            return Kernel.DotsC_DictionaryEntityIdKeyToIndex (typeId, parameter, eid);
+            return Kernel.DotsC_DictionaryEntityIdKeyToIndex (typeId, parameter, ref eid);
         }
 
         /// <summary>

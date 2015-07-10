@@ -2975,7 +2975,7 @@ namespace Safir.Dob.Typesystem.Internal
                 DotsC_EntityId eid;
                 eid.TypeId = 0;
                 eid.InstanceId = 0;
-                Kernel.DotsC_WriteEntityIdMember (handle, eid, IntPtr.Zero,
+                Kernel.DotsC_WriteEntityIdMember (handle, ref eid, IntPtr.Zero,
                                                   InternalOperations.ByteOf(isNull),
                                                   InternalOperations.ByteOf(isChanged),
                                                   member, valueIndex, mode);
@@ -2992,7 +2992,7 @@ namespace Safir.Dob.Typesystem.Internal
                 eid.InstanceId = val.InstanceId.RawValue;
                 if (string.IsNullOrEmpty(val.InstanceId.RawString))
                 {
-                    Kernel.DotsC_WriteEntityIdMember (handle, eid, IntPtr.Zero,
+                    Kernel.DotsC_WriteEntityIdMember (handle, ref eid, IntPtr.Zero,
                                                     InternalOperations.ByteOf(isNull),
                                                     InternalOperations.ByteOf(isChanged),
                                                     member, valueIndex, mode);
@@ -3000,7 +3000,7 @@ namespace Safir.Dob.Typesystem.Internal
                 else
                 {
                     IntPtr cstring = InternalOperations.CStringOf (val.InstanceId.RawString);
-                    Kernel.DotsC_WriteEntityIdMember (handle, eid, cstring,
+                    Kernel.DotsC_WriteEntityIdMember (handle, ref eid, cstring,
                                                       InternalOperations.ByteOf(isNull),
                                                       InternalOperations.ByteOf(isChanged),
                                                       member, valueIndex, mode);

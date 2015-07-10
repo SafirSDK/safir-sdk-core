@@ -416,7 +416,7 @@ namespace Safir.Dob.Typesystem.Internal
         [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
         internal static extern System.Int32 DotsC_DictionaryEntityIdKeyToIndex(System.Int64 typeId,
                                                                               System.Int32 parameter,
-                                                                              DotsC_EntityId key);
+                                                                              ref DotsC_EntityId key);
 
         //********************************************************
         //* Operations on blobs
@@ -536,7 +536,7 @@ namespace Safir.Dob.Typesystem.Internal
         [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
         internal static extern void DotsC_ReadEntityIdMember(System.Int64 readerHandle,
                                                              out DotsC_EntityId val,
-                                                                out System.IntPtr optionalStr,
+                                                             out System.IntPtr optionalStr,
                                                              out byte isNull,
                                                              out byte isChanged,
                                                              System.Int32 member,
@@ -630,7 +630,7 @@ namespace Safir.Dob.Typesystem.Internal
                                                             System.Int32 member, System.Int32 arrayIndex, KeyValMode keyValMode);
 
         [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
-        internal static extern void DotsC_WriteEntityIdMember(System.Int64 writerHandle, DotsC_EntityId val, System.IntPtr instanceString, byte isNull, byte isChanged, 
+        internal static extern void DotsC_WriteEntityIdMember(System.Int64 writerHandle, ref DotsC_EntityId val, System.IntPtr instanceString, byte isNull, byte isChanged, 
                                                               System.Int32 member, System.Int32 arrayIndex, KeyValMode keyValMode);
 
         [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
