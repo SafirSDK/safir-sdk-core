@@ -31,7 +31,7 @@ TARGET_LINK_LIBRARIES (ProcessMonitorSleeper PRIVATE
   ${Boost_THREAD_LIBRARY}
   ${Boost_SYSTEM_LIBRARY})
 
-ADD_TEST(NAME ProcessMonitor_unittest COMMAND ProcessMonitor_test3)
+ADD_TEST(NAME ProcessMonitor_unittest COMMAND ProcessMonitor_test3 --catch_system_error=no)
 ADD_TEST(NAME ProcessMonitor_monitor COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py)
 ADD_TEST(NAME ProcessMonitor_stop COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test2.py)
 
