@@ -78,8 +78,8 @@ namespace Com
             }
             catch (const boost::system::system_error& sysErr)
             {
-                std::cout<<"Write<T> failed with systemError: "<<sysErr.what()<<std::endl;
-                SEND_SYSTEM_LOG(Error, <<"Write failed with systemError: "<<sysErr.what());
+                std::cout<<"Write<T> to " << to << " failed with systemError: "<<sysErr.what()<<std::endl;
+                SEND_SYSTEM_LOG(Error, <<"Write to " << to << " failed with systemError: "<<sysErr.what());
             }
         }
     };
@@ -114,8 +114,8 @@ namespace Com
             }
             catch (const boost::system::system_error& sysErr)
             {
-                std::cout<<"Write<UserData> failed with systemError: "<<sysErr.what()<<std::endl;
-                SEND_SYSTEM_LOG(Error, <<"Write failed with systemError: "<<sysErr.what());
+                std::cout<<"Write<UserData> to " << to << " failed with systemError: "<<sysErr.what()<<std::endl;
+                SEND_SYSTEM_LOG(Error, <<"Write to " << to << " failed with systemError: "<<sysErr.what());
             }
         }
     };
