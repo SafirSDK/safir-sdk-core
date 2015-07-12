@@ -23,8 +23,10 @@
             <name>Seeds</name>
             <type>String</type>
             <array>
+                <!-- Examples:
                 <value>192.168.1.11:40000</value>
                 <value>192.168.1.15:30000</value>
+                -->
             </array>
         </parameter>
 
