@@ -124,7 +124,7 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
                                [this, id]()
                                {
                                    m_doseMainRunning = true;
-                                   
+
                                    m_doseMainCmdSender->StartDoseMain(m_conf.thisNodeParam.name,
                                                                       id,
                                                                       m_conf.thisNodeParam.nodeTypeId,
@@ -136,7 +136,7 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
                                    {
                                        this_->m_stateHandler->SetNewState(newState);
                                    });
-                                   
+
                                    m_communication->Start();
                                 }));
 
@@ -175,8 +175,13 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
         m_terminationTimer.cancel();
 
         int statusCode;
-        ::wait(&statusCode);
-
+        const pid_t result = ::wait(&statusCode);
+        if (result == -1)
+        { //TODO handle error in some useful way
+            perror("wait");
+         }
+        //TODO: handle all signalling reasons (see man -S3 wait). (I added WIFSIGNALED)
+        //how to handle stopped and continue? Can they happen?
         if (WIFEXITED(statusCode))
         {
             auto status = WEXITSTATUS(statusCode);
@@ -186,6 +191,16 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
                 SEND_SYSTEM_LOG(Critical, << "CTRL: dose_main has exited with status code "  << status);
                 std::wcout << "CTRL: dose_main has exited with status code "  << status  << std::endl;
             }
+        }
+        else if (WIFSIGNALED(statusCode))
+        {
+            auto signal = WTERMSIG(statusCode);
+
+            SEND_SYSTEM_LOG(Critical,
+                            << "CTRL: dose_main has exited due to signal "
+                            << strsignal(signal) << " ("  << signal << ")");
+            std::wcout << "CTRL: dose_main has exited due to signal "
+                       << strsignal(signal) << " ("  << signal << ")" << std::endl;
         }
         else
         {
@@ -230,6 +245,8 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
 
         DWORD statusCode;
         ::GetExitCodeProcess(m_handle.native(), &statusCode);
+        //TODO: collect return code from GetExitCodeProcess and print any errors
+        //also check that statusCode is not STILL_ACTIVE
 
         m_doseMainRunning = false;
 
@@ -330,5 +347,3 @@ void ControlApp::StopControl()
     m_signalSet.cancel();
     m_work.reset();
 }
-
-
