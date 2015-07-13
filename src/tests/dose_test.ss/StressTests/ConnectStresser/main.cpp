@@ -23,6 +23,7 @@
 ******************************************************************************/
 
 #include "CommandLine.h"
+#include "Dispatcher.h"
 #include <Safir/Dob/Connection.h>
 #include <Safir/Dob/ConnectionAspectMisc.h>
 #include <Safir/Dob/Consumer.h>
@@ -38,39 +39,117 @@
 
 
 class App: 
-    public Safir::Dob::StopHandler,
-    private boost::noncopyable
+        public Safir::Dob::StopHandler,
+        private boost::noncopyable
 {
 public:
-    explicit App(std::wstring name, int attempts, int timeout, int instance)
-        : m_dispatcher(m_connection, m_ioService)
-        , m_instance(instance)
-        , m_attempts(attempts)
-        , m_timeout(timeout)
+    explicit App(std::wstring name, int attempts, int timeout, int instance, bool useMenu)
+        : m_firstDispatcher(boost::bind(&App::DispatchFirstConnection,this), m_ioService)
+        , m_secondDispatcher(boost::bind(&App::DispatchSecondConnection,this), m_ioService)
         , m_noFailedAttempts(0)
-
+        , m_exit(false)
     {
-        std::wcout << "Starting Connectstresser with args Timeout: " << m_timeout << " ms., Connection attempts: " << m_attempts << " Instance: " << m_instance <<  std::endl;
 
-        for (int attemptNo = 0; attemptNo < m_attempts; ++attemptNo)
+        while(!m_exit)
+        {
+
+            performConnectionAttempts(name, attempts, timeout, instance);
+
+            if (useMenu)
+            {
+                showMenu();
+            }
+            else
+            {
+                printExceptions();
+                m_exit = true;
+            }
+        }
+
+        m_ioService.stop();
+    }
+
+    void printExceptions()
+    {
+        for (auto ex = m_exceptions.cbegin(); ex != m_exceptions.cend(); ++ex)
+        {
+            std::wcout << ex->what() << std::endl << "--" << std::endl;
+        }
+    }
+
+    void showMenu()
+    {
+        bool done = false;
+
+        while (!done)
+        {
+            std::wcout << "Choose action:" << std::endl;
+            std::wcout << "1:\tSee exceptions" << std::endl;
+            std::wcout << "2:\tRe-run test" << std::endl;
+            std::wcout << "3:\tExit test" << std::endl;
+            std::wcout << "$:" << std::flush;
+
+            std::string input;
+            std::getline(std::cin,input);
+
+            switch (input[0])
+            {
+            case '1':
+                printExceptions();
+                break;
+            case '2':
+                done = true;
+                break;
+            case '3':
+                done = true;
+                m_exit = true;
+                break;
+            }
+        }
+    }
+
+    bool performConnectionAttempts(std::wstring name, int attempts, int timeout, int instance)
+    {
+
+        std::wstring firstName(name.append(L"_First"));
+        std::wstring secondName(name.append(L"_Second"));
+
+
+        m_exceptions.clear();
+
+        std::wcout << std::endl << std::endl << "Running tests instance: " << instance << ", timeout: " << timeout << "ms., attempts: " << attempts << std::endl;
+
+
+        for (int attemptNo = 0; attemptNo < attempts; ++attemptNo)
         {
             if ((attemptNo % 10) == 0)
                 std::wcout << std::endl;
 
             try
             {
-
-                m_connection.Open(name,
-                                  boost::lexical_cast<std::wstring>(m_instance),
+                m_firstConnection.Open(firstName,
+                                  boost::lexical_cast<std::wstring>(instance),
                                   0, // Context
                                   this,
-                                  &m_dispatcher);
+                                  &m_firstDispatcher);
 
                 std::wcout << "+";
-                m_connection.Close();
 
+                m_secondConnection.Open(secondName,
+                                  boost::lexical_cast<std::wstring>(instance),
+                                  0, // Context
+                                  this,
+                                  &m_secondDispatcher);
+
+                std::wcout << "+";
+
+                m_firstConnection.Close();
+                std::wcout << "-";
+
+                m_secondConnection.Close();
                 std::wcout << "- " << std::flush;
-                boost::this_thread::sleep_for(boost::chrono::milliseconds(m_timeout));
+
+                boost::this_thread::sleep_for(boost::chrono::milliseconds(timeout));
             }
             catch(const Safir::Dob::NotOpenException &ex)
             {
@@ -80,22 +159,9 @@ public:
             }
         }
 
-        std::wcout << std::endl << "Finished using instance: " << m_instance << ", timeout: " << m_timeout << "ms., attempts: " << m_attempts << std::endl;
-        std::wcout << "No failed attempts: " << m_noFailedAttempts << std::endl;
+        std::wcout << std::endl << "No failed attempts: " << m_noFailedAttempts << std::endl << std::endl;
 
-        if (m_noFailedAttempts > 0)
-        {
-            std::wcout << "Press enter to see exceptions given: " << std::endl;
-            std::cin.get();
-
-            for (auto ex = m_exceptions.cbegin(); ex != m_exceptions.cend(); ++ex)
-            {
-                std::wcout << ex->what() << std::endl << "--" << std::endl;
-            }
-        }
-
-
-        m_ioService.stop();
+        return (m_exceptions.size() == 0);
     }
 
     void Run()
@@ -105,20 +171,55 @@ public:
     }
 
 protected:
- 
+
     virtual void OnStopOrder()
     {
         m_ioService.stop();
     }
 
-    boost::asio::io_service             m_ioService;
-    Safir::Utilities::AsioDispatcher    m_dispatcher;
-    Safir::Dob::Connection              m_connection;
-    int                                 m_instance;
-    int                                 m_attempts;
-    int                                 m_timeout;
-    int                                 m_noFailedAttempts;
-    std::vector<Safir::Dob::NotOpenException> m_exceptions;
+
+private:
+
+    void DispatchFirstConnection()
+    {
+        try
+        {
+            m_firstConnection.Dispatch();
+        }
+        catch (const Safir::Dob::Typesystem::Exception & exc)
+        {
+            std::wcout << "Caught Exception when Dispatching FirstConnection: " << exc.GetName() << " - " << exc.GetExceptionInfo() << std::endl;
+        }
+        catch (const Safir::Dob::Typesystem::FundamentalException & exc)
+        {
+            std::wcout << "Caught Exception when Dispatching FirstConnection: " << exc.GetName() << " - " << exc.GetExceptionInfo() << std::endl;
+        }
+    }
+
+    void DispatchSecondConnection()
+    {
+        try
+        {
+            m_secondConnection.Dispatch();
+        }
+        catch (const Safir::Dob::Typesystem::Exception & exc)
+        {
+            std::wcout << "Caught Exception when Dispatching SecondConnection: " << exc.GetName() << " - " << exc.GetExceptionInfo() << std::endl;
+        }
+        catch (const Safir::Dob::Typesystem::FundamentalException & exc)
+        {
+            std::wcout << "Caught Exception when Dispatching SecondConnection: " << exc.GetName() << " - " << exc.GetExceptionInfo() << std::endl;
+        }
+    }
+
+    boost::asio::io_service                    m_ioService;
+    Dispatcher                                 m_firstDispatcher;
+    Dispatcher                                 m_secondDispatcher;
+    Safir::Dob::Connection                     m_firstConnection;
+    Safir::Dob::Connection                     m_secondConnection;
+    int                                        m_noFailedAttempts;
+    std::vector<Safir::Dob::NotOpenException>  m_exceptions;
+    bool                                       m_exit;
 };
 
 int main(int argc, char* argv[])
@@ -132,20 +233,22 @@ int main(int argc, char* argv[])
     {
         std::wstring name = L"ConnectStresser";
 
-        App app(name, CommandLine::Instance().Attempts(), CommandLine::Instance().Timeout(), CommandLine::Instance().ConnectionInstance());
+        std::wcout << "Starting Connectstresser with args Timeout: " << CommandLine::Instance().Timeout() << " ms., Connection attempts: " << CommandLine::Instance().Attempts() << " Instance: " << CommandLine::Instance().ConnectionInstance() <<  std::endl;
+
+        App app(name, CommandLine::Instance().Attempts(), CommandLine::Instance().Timeout(), CommandLine::Instance().ConnectionInstance(), CommandLine::Instance().ShowMenu());
         app.Run();
 
     }
     catch(const boost::interprocess::bad_alloc & e)
     {
         std::wcout << "Caught boost::interprocess::bad_alloc! Contents of exception is:" << std::endl
-            << e.what()<<std::endl;
+                   << e.what()<<std::endl;
         std::cin.get();
     }
     catch(const std::exception & e)
     {
         std::wcout << "Caught std::exception! Contents of exception is:" << std::endl
-            << e.what()<<std::endl;
+                   << e.what()<<std::endl;
         std::cin.get();
     }
     catch (...)
@@ -155,7 +258,10 @@ int main(int argc, char* argv[])
     }
 
     
- 
+
     return 0;
 }
+
+
+
 

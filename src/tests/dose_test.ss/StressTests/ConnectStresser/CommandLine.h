@@ -53,6 +53,7 @@ public:
                 ("attempts,a", po::value<int>(&m_attempts)->default_value(5),"total number of connection attempts that should be made")
                 ("timeout,t", po::value<int>(&m_timeout)->default_value(0),"milliseconds between connection attempts")
                 ("instance,i", po::value<int>(&m_instance)->default_value(0),"connection instance to use")
+                ("show menu,m", "shows the menu after the tests")
                 ;
 
             po::store(po::parse_command_line(argc,argv,all),m_variablesMap);
@@ -62,6 +63,12 @@ public:
             {
                 std::wcout << all << std::endl;
                 return false;
+            }
+
+            m_showMenu = false;
+            if (m_variablesMap.count("show menu"))
+            {
+                m_showMenu = true;
             }
 
         }
@@ -79,6 +86,7 @@ public:
     int Timeout() {return m_timeout;}
     int Attempts() {return m_attempts;}
     int ConnectionInstance() {return m_instance;}
+    bool ShowMenu()  {return m_showMenu;}
 
 
 
@@ -91,6 +99,7 @@ private:
     int m_timeout;
     int m_attempts;
     int m_instance;
+    bool m_showMenu;
 
 };
 #endif
