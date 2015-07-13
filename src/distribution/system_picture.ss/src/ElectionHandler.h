@@ -103,7 +103,8 @@ namespace SP
             , m_nonLightNodeTypes(GetLightNodeTypes(nodeTypes))
             , m_aloneTimeout(CalculateAloneTimeout(nodeTypes))
             , m_electionTimeout(CalculateElectionTimeout(nodeTypes))
-            , m_elected(std::numeric_limits<int64_t>::min())
+            , m_electedStorage(new AlignedStorage())
+            , m_elected(reinterpret_cast<boost::atomic<int64_t>&>(*m_electedStorage))
             , m_electionTimer(ioService)
             , m_electionInProgress(false)
             , m_currentElectionId(0)
@@ -112,6 +113,8 @@ namespace SP
             , m_electionCompleteCallback(electionCompleteCallback)
             , m_setIncarnationIdCallback(setIncarnationIdCallback)
         {
+            new (m_electedStorage.get()) boost::atomic<uint64_t>(std::numeric_limits<int64_t>::min());
+
             communication.SetDataReceiver([this](const int64_t from,
                                                  const int64_t nodeTypeId,
                                                  const char* const data,
@@ -197,7 +200,7 @@ namespace SP
         {
             //use max of non-light node types heartbeatInterval * maxLostHeartbeats * 2
             boost::chrono::steady_clock::duration max = boost::chrono::milliseconds(100);
-            
+
             for (auto nt = nodeTypes.cbegin(); nt != nodeTypes.cend(); ++nt)
             {
                 if (!nt->second.isLight)
@@ -581,7 +584,11 @@ namespace SP
 
         RawStatistics m_lastStatistics;
 
-        boost::atomic<int64_t> m_elected;
+        //64 bit atomic needs to be aligned on 64 bit boundary even on 32 bit systems,
+        //so we need to use alignment magic.
+        typedef boost::aligned_storage<sizeof(boost::atomic<int64_t>),sizeof(boost::atomic<int64_t>)>::type AlignedStorage;
+        std::unique_ptr<AlignedStorage> m_electedStorage;
+        boost::atomic<int64_t>& m_elected;
         boost::asio::steady_timer m_electionTimer;
         bool m_electionInProgress;
         boost::atomic<int64_t> m_currentElectionId;

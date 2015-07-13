@@ -40,10 +40,11 @@ namespace Internal
 
 
     LamportClock::LamportClock(const int64_t nodeId):
-        m_currentClock(0),
+        m_alignedStorage(GetSharedMemory().construct<AlignedStorage>(boost::interprocess::anonymous_instance)()),
+        m_currentClock(reinterpret_cast<boost::atomic<uint64_t>*>(m_alignedStorage.get().get())),
         m_nodeId(nodeId)
     {
-
+        new (m_alignedStorage.get().get()) boost::atomic<uint64_t>(0);
     }
 
     void LamportClock::UpdateCurrentTimestamp(const LamportTimestamp& timestamp)
@@ -55,10 +56,10 @@ namespace Internal
         //changes between the read and swap, and then we will try again.
         for(;;)
         {
-            auto currentClock = m_currentClock.load();
+            auto currentClock = m_currentClock->load();
             if (otherClock > currentClock)
             {
-                const bool res = m_currentClock.compare_exchange_strong(currentClock,otherClock);
+                const bool res = m_currentClock->compare_exchange_strong(currentClock,otherClock);
                 if (res)
                 {
                     return;
@@ -66,7 +67,7 @@ namespace Internal
             }
             else
             {
-                m_currentClock++;
+                (*m_currentClock)++;
                 return;
             }
         }
@@ -74,7 +75,7 @@ namespace Internal
 
     const LamportTimestamp LamportClock::GetNewTimestamp()
     {
-        return LamportTimestamp(++m_currentClock, m_nodeId);
+        return LamportTimestamp(++(*m_currentClock), m_nodeId);
     }
 
 

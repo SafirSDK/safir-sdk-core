@@ -47,6 +47,7 @@ void intrusive_ptr_release(const char * p);
 #include <boost/interprocess/containers/vector.hpp>
 #include <boost/interprocess/containers/list.hpp>
 #include <boost/interprocess/managed_shared_memory.hpp>
+#include <boost/interprocess/smart_ptr/unique_ptr.hpp>
 #include <boost/interprocess/smart_ptr/shared_ptr.hpp>
 #include <boost/interprocess/smart_ptr/enable_shared_from_this.hpp>
 #include <boost/interprocess/smart_ptr/intrusive_ptr.hpp>
@@ -279,6 +280,13 @@ namespace Internal
         template <class T>
         struct SmartPointers
         {
+            typedef typename boost::interprocess::unique_ptr
+            <
+                T,
+                my_deleter<T>
+            >
+            unique_ptr;
+
             typedef typename boost::interprocess::shared_ptr
             <
                 T,

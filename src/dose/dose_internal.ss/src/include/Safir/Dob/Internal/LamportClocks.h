@@ -26,7 +26,10 @@
 #include <boost/noncopyable.hpp>
 #include <iosfwd>
 #include <Safir/Dob/Internal/InternalExportDefs.h>
+#include <Safir/Dob/Internal/SharedMemoryObject.h>
 #include <boost/atomic.hpp>
+#include <boost/aligned_storage.hpp>
+#include <memory>
 
 namespace Safir
 {
@@ -76,8 +79,9 @@ namespace Internal
 
     DOSE_INTERNAL_API std::wostream& operator << (std::wostream& out, const LamportTimestamp& timestamp);
 
-    class DOSE_INTERNAL_API LamportClock:
-        private boost::noncopyable
+    class DOSE_INTERNAL_API LamportClock
+        : public SharedMemoryObject
+        , private boost::noncopyable
     {
     public:
         explicit LamportClock(const int64_t nodeId);
@@ -87,7 +91,11 @@ namespace Internal
         const LamportTimestamp GetNewTimestamp();
 
     private:
-        boost::atomic<uint64_t> m_currentClock;
+        //64 bit atomic needs to be aligned on 64 bit boundary even on 32 bit systems,
+        //so we need to use alignment magic.
+        typedef boost::aligned_storage<sizeof(boost::atomic<uint64_t>),sizeof(boost::atomic<uint64_t>)>::type AlignedStorage;
+        SmartPointers<AlignedStorage>::unique_ptr m_alignedStorage;
+        boost::interprocess::offset_ptr<boost::atomic<uint64_t>> m_currentClock;
         const int64_t m_nodeId;
     };
 
