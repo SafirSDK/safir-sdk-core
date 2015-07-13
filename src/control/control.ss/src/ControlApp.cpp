@@ -241,25 +241,46 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
     m_handle.async_wait(
                 [this](const boost::system::error_code&)
     {
-        lllog(1) << "CTRL: dose_main has exited" << std::endl;
 
-        DWORD statusCode;
-        ::GetExitCodeProcess(m_handle.native(), &statusCode);
-        //TODO: collect return code from GetExitCodeProcess and print any errors
-        //also check that statusCode is not STILL_ACTIVE
+        DWORD exitCode;
+        auto gotExitCode = ::GetExitCodeProcess(m_handle.native(), &exitCode);
+
+        if (!gotExitCode)
+        {
+            SEND_SYSTEM_LOG(Critical,
+                            << "CTRL: It seems that dose_main has exited but CTRL"
+                               " can't retrieve the exit code. GetExitCodeProcess failed"
+                               "with error code "  << ::GetLastError());
+            std::wcout << "CTRL: It seems that dose_main has exited but CTRL"
+                          " can't retrieve the exit code. GetExitCodeProcess failed"
+                          "with error code "  << ::GetLastError() << std::endl;
+
+        }
+        else if (exitCode == STILL_ACTIVE)
+        {
+            SEND_SYSTEM_LOG(Critical,
+                            << "CTRL: Got an indication that dose_main has exited, however the exit code"
+                               " indicates STILL_ALIVE!");
+            std::wcout << "CTRL: Got an indication that dose_main has exited, however the exit code"
+                          " indicates STILL_ALIVE!" << std::endl;
+        }
+        else
+        {
+            lllog(1) << "CTRL: dose_main has exited" << std::endl;
+
+            // dose_main has exited, we can stop our timer that will slay dose_main
+            m_terminationTimer.cancel();
+
+            if (exitCode != 0)
+            {
+                // dose_main has exited unexpectedly
+
+                SEND_SYSTEM_LOG(Critical, << "CTRL: dose_main has exited with exit code "  << exitCode);
+                std::wcout << "CTRL: dose_main has exited with exit code "  << exitCode  << std::endl;
+            }
+        }
 
         m_doseMainRunning = false;
-
-        // dose_main has exited, we can stop our timer that will slay dose_main
-        m_terminationTimer.cancel();
-
-        if (statusCode != 0)
-        {
-            // dose_main has exited unexpectedly
-
-            SEND_SYSTEM_LOG(Critical, << "CTRL: dose_main has exited with status code "  << statusCode);
-            std::wcout << "CTRL: dose_main has exited with status code "  << statusCode  << std::endl;
-        }
 
         if (!m_ctrlStopped)
         {
