@@ -111,6 +111,12 @@ class Parameters:
         parser.add_option("--single-testcase", action="store",
                           help="Run only a single testcase. Note that using this option will cause the script "
                           "to print some other errors, since not all tests are run")
+        parser.add_option("--first-testcase", action="store",
+                          help="Sets the first testcase to be run. Note that using this option will cause the script "
+                          "to print some other errors, since not all tests are run")
+        parser.add_option("--last-testcase", action="store",
+                          help="Sets the last testcase to be run. Note that using this option will cause the script "
+                          "to print some other errors, since not all tests are run")
         (options,args) = parser.parse_args()
 
         self.lang0 = options.lang0
@@ -132,6 +138,10 @@ class Parameters:
             sys.exit(1)
         if options.slave and options.multicomputer:
             log("Don't specify both --slave and --multinode")
+            sys.exit(1)
+
+        if (options.single_testcase is not None) and ((options.last_testcase is not None) or (options.first_testcase is not None)):
+            log("Don't specify both --single-testcase and either --first-testcase or --last-testcase")
             sys.exit(1)
 
         self.autostart_jenkins_slave = options.autostart_slave or (options.jenkins and self.multicomputer)
@@ -206,10 +216,20 @@ class Parameters:
                                         self.testcases_path,
                                         #"--context", "-1", #random context
                                         "-l", self.lang0, self.lang1, self.lang2)
+
         self.single_testcase = options.single_testcase
         if options.single_testcase is not None:
             self.dose_test_sequencer_cmd += ("--first", options.single_testcase,
                                              "--last", options.single_testcase)
+
+        self.first_testcase = options.first_testcase
+        self.last_testcase = options.last_testcase
+
+        if options.first_testcase is not None:
+            self.dose_test_sequencer_cmd += ("--first", options.first_testcase)
+
+        if options.last_testcase is not None:
+            self.dose_test_sequencer_cmd += ("--last", options.last_testcase)
 
         if self.multinode or self.multicomputer:
             self.dose_test_sequencer_cmd += ("--multinode",)
