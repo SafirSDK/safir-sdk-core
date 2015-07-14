@@ -215,7 +215,7 @@ class Parameters:
             self.dose_test_sequencer_cmd += ("--multinode",)
 
         if self.endlessMode:
-            self.dose_test_sequencer_cmd += ("--endlessMode")
+            self.dose_test_sequencer_cmd += ("--endlessMode",)
 
         self.expected_output_path = os.path.join(self.test_data_directory,
                                                  "dose",
