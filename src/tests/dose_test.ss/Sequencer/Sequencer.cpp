@@ -156,9 +156,6 @@ void Sequencer::FindNextTestcase()
 {
     while(m_currentCaseNo <= m_stopTc)
     {
-
-        std::wcout << "Loop: " << m_currentCaseNo << ", " << m_stopTc << std::endl;
-
         m_currentCase = TestCaseReader::Instance().GetTestCase(m_currentCaseNo);
 
         if (m_currentCase == NULL)
