@@ -145,7 +145,7 @@ namespace Com
         {
             std::ostringstream os;
             os<<"AckContent: {"<<commonHeader.ToString()<<", sendMethod: "<<SendMethodToString(sendMethod)<<", seq: "<<sequenceNumber<<", gaps: [";
-            
+
             for (unsigned int i = 0; i < Parameters::SlidingWindowSize; ++i)
             {
                     os<<static_cast<int>(missing[i]);
@@ -159,15 +159,17 @@ namespace Com
     struct MessageHeader
     {
         CommonHeader commonHeader;
+        uint64_t sequenceNumber;
         uint8_t sendMethod;
         uint8_t deliveryGuarantee;
-        uint64_t sequenceNumber;
-        size_t totalContentSize;
-        size_t fragmentContentSize;
+        uint8_t ackNow;
+        uint8_t padding;
+        uint32_t totalContentSize;
+        uint32_t fragmentContentSize;
         uint16_t numberOfFragments;
         uint16_t fragmentNumber;
-        size_t fragmentOffset;
-        uint8_t ackNow;
+        uint32_t fragmentOffset;
+        uint32_t padding2;
 
         MessageHeader(int64_t senderId_,
                       int64_t receiverId_,
@@ -181,15 +183,15 @@ namespace Com
                       uint16_t fragmentNumber_,
                       size_t fragmentOffset_)
             :commonHeader(senderId_, receiverId_, dataType_)
+            ,sequenceNumber(sequenceNumber_)
             ,sendMethod(sendMethod_)
             ,deliveryGuarantee(deliveryGuarantee_)
-            ,sequenceNumber(sequenceNumber_)
-            ,totalContentSize(totalContentSize_)
-            ,fragmentContentSize(fragmentContentSize_)
+            ,ackNow(0)
+            ,totalContentSize(static_cast<uint32_t>(totalContentSize_))
+            ,fragmentContentSize(static_cast<uint32_t>(fragmentContentSize_))
             ,numberOfFragments(numberOfFragments_)
             ,fragmentNumber(fragmentNumber_)
-            ,fragmentOffset(fragmentOffset_)
-            ,ackNow(0)
+            ,fragmentOffset(static_cast<uint32_t>(fragmentOffset_))
         {
         }
 
