@@ -115,6 +115,7 @@ Sequencer::Sequencer(const int startTc,
                      const Languages & languages,
                      const bool multinode,
                      const bool noTimeout,
+                     const bool endlessMode,
                      const int contextId,
                      boost::asio::io_service& ioService):
     m_ioService(ioService),
@@ -123,6 +124,8 @@ Sequencer::Sequencer(const int startTc,
     m_currentCaseNo(startTc),
     m_currentActionNo(0),
     m_stopTc(stopTc),
+    m_startTc(startTc),
+    m_endlessMode(endlessMode),
     m_state(SequencerStates::Created),
     m_lastCleanupTime(boost::chrono::steady_clock::now()),
     m_languages(languages),
@@ -149,12 +152,13 @@ Sequencer::Sequencer(const int startTc,
 
 
 
-bool Sequencer::PrepareTestcaseSetup()
+void Sequencer::FindNextTestcase()
 {
-    m_currentActionNo=-1;
-
     while(m_currentCaseNo <= m_stopTc)
     {
+
+        std::wcout << "Loop: " << m_currentCaseNo << ", " << m_stopTc << std::endl;
+
         m_currentCase = TestCaseReader::Instance().GetTestCase(m_currentCaseNo);
 
         if (m_currentCase == NULL)
@@ -168,15 +172,44 @@ bool Sequencer::PrepareTestcaseSetup()
                        << DoseTest::TestConfigEnum::ToString(m_testConfig) << " mode." << std::endl;
             ++m_currentCaseNo;
         }
+        else if (m_currentCaseNo > m_stopTc)
+        {
+            if (m_endlessMode)
+            {
+
+            }
+        }
         else
         {
             break;
         }
     }
+}
+
+bool Sequencer::PrepareTestcaseSetup()
+{
+    m_currentActionNo=-1;
+
+    FindNextTestcase();
 
     if (m_currentCaseNo > m_stopTc)
     {
-        return false;
+        if (!m_endlessMode)
+        {
+            return false;
+        }
+        else
+        {
+            m_currentCaseNo = m_startTc;
+            std::wcout << "Endlessmode: Finished the last testcase, restarting from testcase: " << m_currentCaseNo << std::endl;
+
+            FindNextTestcase();
+
+            if (m_currentCaseNo > m_stopTc)
+            {
+                return false;
+            }
+        }
     }
 
     std::wcout << "Running testcase: " << m_currentCaseNo << std::endl;

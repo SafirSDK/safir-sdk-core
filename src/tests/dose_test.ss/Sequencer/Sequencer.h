@@ -86,10 +86,12 @@ public:
               const Languages & languages,
               const bool multinode,
               const bool noTimeout,
+              const bool endlessMode,
               const int contextId,
               boost::asio::io_service& ioService);
 
 
+    void FindNextTestcase();
 private:
     virtual void OnResponse(const Safir::Dob::ResponseProxy responseProxy);
     virtual void OnNotRequestOverflow() {}
@@ -123,6 +125,9 @@ private:
 
 
     const int m_stopTc;
+    const int m_startTc;
+
+    const bool m_endlessMode;
 
     SequencerStates::State m_state;
     boost::chrono::steady_clock::time_point m_lastCleanupTime;
