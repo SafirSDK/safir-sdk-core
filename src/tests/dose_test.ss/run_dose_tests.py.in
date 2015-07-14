@@ -91,6 +91,8 @@ class Parameters:
                           "This is only applicable when using --multicomputer, and is implied when using --jenkins")
         parser.add_option("--slave", action="store_true",dest="slave",default=False,
                           help="Be a multicomputer slave")
+        parser.add_option("--endlessMode", action="store_true",dest="endlessMode",default=False,
+                          help="Loop the tests forever, works with or without the --single-testcase option")
         parser.add_option("--no-syslog", action="store_false",dest="check_syslog",default=True,
                           help="Do not check syslog output")
         parser.add_option("--no-java", action="store_true",dest="no_java",default=False,
@@ -123,6 +125,7 @@ class Parameters:
 
         self.no_java = options.no_java
         self.no_dotnet = options.no_dotnet
+        self.endlessMode = options.endlessMode
 
         if options.autostart_slave and not self.multicomputer:
             log("--autostart-slave can only be used together with --multinode")
@@ -166,6 +169,16 @@ class Parameters:
         elif self.multicomputer or self.slave:
             config = "multicomputer"
 
+        #set the SAFIR_TEST_TEMP variable, it's used in the test configuration to resolv the temp area
+        #were we store logs, crash dumps and IPC files. We want it to be inside the workspace when run on jenkins and
+        #in the location resolved by lluf via the @{TEMP} special variabel when run outside jenkins.
+        if options.jenkins:
+            os.environ["SAFIR_TEST_TEMP"] = os.path.join(os.environ["WORKSPACE"], "temp")
+        else:
+            os.environ["SAFIR_TEST_TEMP"] = "@{TEMP}"
+
+
+
         #Set up to use our own test configuration
         os.environ["SAFIR_TEST_CONFIG_OVERRIDE"] = os.path.join(self.test_data_directory,
                                                                 "dose",
@@ -200,6 +213,9 @@ class Parameters:
 
         if self.multinode or self.multicomputer:
             self.dose_test_sequencer_cmd += ("--multinode",)
+
+        if self.endlessMode:
+            self.dose_test_sequencer_cmd += ("--endlessMode")
 
         self.expected_output_path = os.path.join(self.test_data_directory,
                                                  "dose",
