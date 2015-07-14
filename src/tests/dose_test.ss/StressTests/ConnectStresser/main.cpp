@@ -43,6 +43,11 @@ class App:
         private boost::noncopyable
 {
 public:
+
+#ifdef _MSC_VER
+   #pragma warning(push)
+   #pragma warning(disable: 4355)
+#endif
     explicit App(std::wstring name, int attempts, int timeout, int instance, bool useMenu)
         : m_firstDispatcher(boost::bind(&App::DispatchFirstConnection,this), m_ioService)
         , m_secondDispatcher(boost::bind(&App::DispatchSecondConnection,this), m_ioService)
@@ -75,6 +80,9 @@ public:
 
         m_ioService.stop();
     }
+#ifdef _MSC_VER
+   #pragma warning(pop)
+#endif
 
     bool showMenu()
     {
