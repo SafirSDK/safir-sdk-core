@@ -24,7 +24,7 @@
 #
 ###############################################################################
 from __future__ import print_function
-import sys, subprocess, os, shutil, difflib, time, xml.dom.minidom, glob, re, traceback, stat, signal
+import sys, subprocess, os, shutil, difflib, time, xml.dom.minidom, glob, re, traceback, stat, signal, platform
 from xml.sax.saxutils import escape
 
 try:
@@ -181,11 +181,21 @@ class Parameters:
 
         #set the SAFIR_TEST_TEMP variable, it's used in the test configuration to resolv the temp area
         #were we store logs, crash dumps and IPC files. We want it to be inside the workspace when run on jenkins and
-        #in the location resolved by lluf via the @{TEMP} special variabel when run outside jenkins.
+        #in the location lluf resolvs @{TEMP} when not run in jenkins. (/tmp for linux and %TEMP% or %TMP% on windows)
         if options.jenkins:
             os.environ["SAFIR_TEST_TEMP"] = os.path.join(os.environ["WORKSPACE"], "temp")
         else:
-            os.environ["SAFIR_TEST_TEMP"] = "@{TEMP}"
+            if platform.system() == 'Linux':
+                os.environ["SAFIR_TEST_TEMP"] = "/tmp"
+            else:
+                if os.environ["TEMP"] is not None:
+                    os.environ["SAFIR_TEST_TEMP"] = os.environ["TEST"]
+                else:
+                    if os.environ["TMP"] is not None:
+                        os.environ["SAFIR_TEST_TEMP"] = os.environ["TMP"]
+                    else:
+                        log("Could not resolve %TEMP% or %TMP")
+                        sys.exit(1)
 
 
 
