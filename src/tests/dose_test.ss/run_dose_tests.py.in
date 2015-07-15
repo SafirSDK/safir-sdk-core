@@ -189,7 +189,7 @@ class Parameters:
                 os.environ["SAFIR_TEST_TEMP"] = "/tmp"
             else:
                 if os.environ["TEMP"] is not None:
-                    os.environ["SAFIR_TEST_TEMP"] = os.environ["TEST"]
+                    os.environ["SAFIR_TEST_TEMP"] = os.environ["TEMP"]
                 else:
                     if os.environ["TMP"] is not None:
                         os.environ["SAFIR_TEST_TEMP"] = os.environ["TMP"]
