@@ -169,13 +169,6 @@ void Sequencer::FindNextTestcase()
                        << DoseTest::TestConfigEnum::ToString(m_testConfig) << " mode." << std::endl;
             ++m_currentCaseNo;
         }
-        else if (m_currentCaseNo > m_stopTc)
-        {
-            if (m_endlessMode)
-            {
-
-            }
-        }
         else
         {
             break;
