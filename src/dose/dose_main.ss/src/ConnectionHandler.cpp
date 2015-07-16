@@ -72,7 +72,7 @@ namespace
         
         {
             m_sendQueues.insert(std::make_pair(*nt, SendQueue()));
-            m_communication.SetQueueNotFullCallback([=](int64_t){HandleSendQueues();}, *nt);
+            m_communication.SetQueueNotFullCallback([this](int64_t){m_strand.post([this]{HandleSendQueues();});}, *nt);
         }
 
         m_communication.SetDataReceiver([=](int64_t /*fromNodeId*/, int64_t /*fromNodeType*/, const char *data, size_t /*size*/)
