@@ -177,14 +177,13 @@ void SystemPicturePage::UpdateSystemTable(const Safir::Dob::Internal::SP::System
         }
         else
         {
-          
 
             UpdateRowState(systemTable,
                            row,
                            id == statistics.ElectedId(), //isElected
                            statistics.IsDead(findIt->second)); //isDead
 
-			ids.erase(id);
+            ids.erase(id);
         }
     }
 
