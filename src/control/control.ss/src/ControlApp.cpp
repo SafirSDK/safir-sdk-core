@@ -159,61 +159,7 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
     }));
 
 #if defined(linux) || defined(__linux) || defined(__linux__)
-    m_sigchldSet.async_wait(m_strand.wrap([this]
-                                          (const boost::system::error_code& error, int signalNumber)
-    {
-        lllog(1) << "CTRL: Got signal " << signalNumber << " ... dose_main has exited" << std::endl;
-        if (error)
-        {
-            SEND_SYSTEM_LOG(Error,
-                            << "CTRL: Got a signals error: " << error);
-        }
-
-        m_doseMainRunning = false;
-
-        // dose_main has exited, we can stop our timer that will slay dose_main
-        m_terminationTimer.cancel();
-
-        int statusCode;
-        const pid_t result = ::wait(&statusCode);
-        if (result == -1)
-        { //TODO handle error in some useful way
-            perror("wait");
-         }
-        //TODO: handle all signalling reasons (see man -S3 wait). (I added WIFSIGNALED)
-        //how to handle stopped and continue? Can they happen?
-        if (WIFEXITED(statusCode))
-        {
-            auto status = WEXITSTATUS(statusCode);
-
-            if (status != 0)
-            {
-                SEND_SYSTEM_LOG(Critical, << "CTRL: dose_main has exited with status code "  << status);
-                std::wcout << "CTRL: dose_main has exited with status code "  << status  << std::endl;
-            }
-        }
-        else if (WIFSIGNALED(statusCode))
-        {
-            auto signal = WTERMSIG(statusCode);
-
-            SEND_SYSTEM_LOG(Critical,
-                            << "CTRL: dose_main has exited due to signal "
-                            << strsignal(signal) << " ("  << signal << ")");
-            std::wcout << "CTRL: dose_main has exited due to signal "
-                       << strsignal(signal) << " ("  << signal << ")" << std::endl;
-        }
-        else
-        {
-            SEND_SYSTEM_LOG(Critical, << "CTRL: dose_main has exited, no exit status code provided");
-            std::wcout << "CTRL: dose_main has exited, no exit status code provided" << std::endl;
-        }
-
-        if (!m_ctrlStopped)
-        {
-            StopControl();
-        }
-    }
-    ));
+    SetSigchldHandler();
 #endif
 
     // Start dose_main
@@ -305,12 +251,22 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
                                            (const boost::system::error_code& error,
                                             const int signalNumber)
     {
-        lllog(1) << "CTRL: Got signal " << signalNumber << " ... stop sequence initiated." << std::endl;
         if (!!error) //fix for vs2012 warning
         {
-            SEND_SYSTEM_LOG(Error,
-                            << "CTRL: Got a signals error: " << error);
+            if (error == boost::asio::error::operation_aborted)
+            {
+                return;
+            }
+            else
+            {
+                std::ostringstream os;
+                os << "Got a signals error (m_signalSet): " << error;
+                throw std::logic_error(os.str());
+            }
         }
+
+        lllog(1) << "CTRL: Got signal " << signalNumber << " ... stop sequence initiated." << std::endl;
+        std::wcout << "CTRL: Got signal " << signalNumber << " ... stop sequence initiated." << std::endl;
 
         if (m_doseMainRunning)
         {
@@ -368,3 +324,82 @@ void ControlApp::StopControl()
     m_signalSet.cancel();
     m_work.reset();
 }
+
+#if defined(linux) || defined(__linux) || defined(__linux__)
+void ControlApp::SetSigchldHandler()
+{
+    m_sigchldSet.async_wait(m_strand.wrap([this](const boost::system::error_code& error, int signalNumber)
+    {
+        if (error)
+        {
+            if (error == boost::asio::error::operation_aborted)
+            {
+                return;
+            }
+            else
+            {
+                std::ostringstream os;
+                os << "Got a signals error (m_sigchldSet): " << error;
+                throw std::logic_error(os.str());
+            }
+        }
+
+        auto doseMainExited = false;
+
+        int statusCode;
+        const pid_t result = ::waitpid(0, &statusCode, WNOHANG | WUNTRACED | WCONTINUED);
+
+        if (result == -1)
+        {
+            throw std::logic_error("Call to waitpid failed!");
+        }
+
+        if (WIFEXITED(statusCode))
+        {
+            doseMainExited = true;
+
+            auto status = WEXITSTATUS(statusCode);
+
+            if (status != 0)
+            {
+                SEND_SYSTEM_LOG(Critical, << "CTRL: dose_main has exited with status code "  << status);
+                std::wcout << "CTRL: dose_main has exited with status code "  << status  << std::endl;
+            }
+        }
+        else if (WIFSTOPPED(statusCode) || WIFCONTINUED(statusCode))
+        {
+            // dose_main is stopped or continued, set up the handler to fetch subsequent signals
+            SetSigchldHandler();
+        }
+        else if (WIFSIGNALED(statusCode))
+        {
+            doseMainExited = true;
+
+            auto signal = WTERMSIG(statusCode);
+
+            SEND_SYSTEM_LOG(Critical,
+                            << "CTRL: dose_main has exited due to signal "
+                            << strsignal(signal) << " ("  << signal << ")");
+            std::wcout << "CTRL: dose_main has exited due to signal "
+                       << strsignal(signal) << " ("  << signal << ")" << std::endl;
+        }
+        else
+        {
+            throw std::logic_error("Unexpected status code returned from waitpid!");
+        }
+
+        if (doseMainExited)
+        {
+            lllog(1) << "CTRL: dose_main has exited" << std::endl;
+
+            m_doseMainRunning = false;
+            m_terminationTimer.cancel();
+
+            if (!m_ctrlStopped)
+            {
+                StopControl();
+            }
+        }
+    }));
+}
+#endif

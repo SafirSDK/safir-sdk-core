@@ -252,7 +252,9 @@ namespace Internal
             }
         }
 
-        lllog(1) << "DOSE_MAIN: Got signal " << signalNumber << ", shutting down." << std::endl;
+        std::ostringstream os;
+        os << "DOSE_MAIN: Got signal " << signalNumber << ", shutting down.";
+        LogStatus(os.str());
 
         Stop();
     }
