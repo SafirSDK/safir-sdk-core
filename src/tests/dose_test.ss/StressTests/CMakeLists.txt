@@ -2,6 +2,8 @@ ADD_SUBDIRECTORY(ConnectStresser)
 ADD_SUBDIRECTORY(EntityReceptionVerifier)
 ADD_SUBDIRECTORY(EntityStresser)
 
+ADD_SUBDIRECTORY(LargeMessageSender)
+
 ADD_SUBDIRECTORY(MessageLatencies)
 ADD_SUBDIRECTORY(MessageStresser)
 ADD_SUBDIRECTORY(MultiPingPong)
