@@ -122,3 +122,5 @@ dose_test_output
 version.cs
 *.1.asciidoc.copied
 tmp
+*.sublime-project
+*.sublime-workspace
