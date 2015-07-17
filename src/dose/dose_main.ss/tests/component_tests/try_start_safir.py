@@ -85,6 +85,7 @@ for i in range(len(lines)):
 expected_lines = set(["dose_main running...",
                       "dose_main is waiting for persistence data!",
                       "DOSE_MAIN: Exiting...",
+                      "CTRL: Got signal 15 ... stop sequence initiated.",
                       "CTRL: Exiting..."])
 
 if set(lines) - expected_lines:
