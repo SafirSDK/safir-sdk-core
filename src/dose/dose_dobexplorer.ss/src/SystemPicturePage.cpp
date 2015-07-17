@@ -165,7 +165,7 @@ void SystemPicturePage::UpdateSystemTable(const Safir::Dob::Internal::SP::System
     //but in the first loop we remove all that we already have in the table
     auto ids = GetAllIds(statistics);
 
-    //start by removing rows that are no longer in statistics
+    //start by removing rows that are no longer in statistics and updating rows that we already have
     for (int row = systemTable->rowCount() - 1; row >= 0; --row)
     {
         const qlonglong id = systemTable->item(row, COLUMN_ID)->text().toLongLong();
@@ -177,12 +177,14 @@ void SystemPicturePage::UpdateSystemTable(const Safir::Dob::Internal::SP::System
         }
         else
         {
-            ids.erase(id);
+          
 
             UpdateRowState(systemTable,
                            row,
                            id == statistics.ElectedId(), //isElected
                            statistics.IsDead(findIt->second)); //isDead
+
+			ids.erase(id);
         }
     }
 
