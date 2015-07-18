@@ -85,8 +85,14 @@ for i in range(len(lines)):
 expected_lines = set(["dose_main running...",
                       "dose_main is waiting for persistence data!",
                       "DOSE_MAIN: Exiting...",
-                      "CTRL: Got signal 15 ... stop sequence initiated.",
                       "CTRL: Exiting..."])
+
+if sys.platform == "win32":
+    expected_lines.add("DOSE_MAIN: Got signal 21, shutting down.")
+    expected_lines.add("CTRL: Got signal 21 ... stop sequence initiated.")
+else:
+    expected_lines.add("CTRL: Got signal 15 ... stop sequence initiated.")
+
 
 if set(lines) - expected_lines:
     log("Got unexpected output:")
