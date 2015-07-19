@@ -97,7 +97,7 @@ namespace SP
             , m_id(id)
             , m_nodeTypes(nodeTypes)
             , m_strand(ioService)
-            , m_latencyMonitor("SpRawHandler",m_strand)
+            , m_latencyMonitor("SpRawHandler",CalculateLatencyWarningThreshold(nodeTypes),m_strand)
             , m_checkDeadNodesTimer()
             , m_master(master)
             , m_validateIncarnationIdCallback(validateIncarnationIdCallback)
@@ -444,7 +444,7 @@ namespace SP
             m_strand.dispatch([this, nodeIds]
                               {
                                   bool changed = false;
-                                  
+
                                   for (auto id = nodeIds.cbegin(); id != nodeIds.cend(); ++id)
                                   {
                                       auto findIt = m_nodeTable.find(*id);
@@ -502,8 +502,8 @@ namespace SP
         }
 
     private:
-        static boost::chrono::steady_clock::duration CalculateDeadCheckPeriod(const std::map<int64_t,
-                                                                              NodeType>& nodeTypes)
+        static boost::chrono::steady_clock::duration
+        CalculateDeadCheckPeriod(const std::map<int64_t,NodeType>& nodeTypes)
         {
             boost::chrono::steady_clock::duration result = boost::chrono::seconds(1);
 
@@ -516,6 +516,22 @@ namespace SP
             }
 
             return result + result / 10;
+        }
+
+        static boost::chrono::steady_clock::duration
+        CalculateLatencyWarningThreshold(const std::map<int64_t,NodeType>& nodeTypes)
+        {
+            boost::chrono::steady_clock::duration result = boost::chrono::seconds(120);
+
+            for (auto node = nodeTypes.cbegin(); node != nodeTypes.cend(); ++node)
+            {
+                if (!node->second.isLight)
+                {
+                    result = std::min(result,node->second.deadTimeout);
+                }
+            }
+
+            return result / 2;
         }
 
         //must be called in strand
@@ -808,7 +824,7 @@ namespace SP
                                                              completionHandler();
                                                          }
                                                      });
-            
+
             for (auto it = m_rawChangedCallbacks.cbegin(); it != m_rawChangedCallbacks.cend(); ++it)
             {
                 auto cb = *it;
