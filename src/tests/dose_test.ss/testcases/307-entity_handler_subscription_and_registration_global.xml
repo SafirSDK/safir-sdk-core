@@ -38,6 +38,10 @@
       <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
     </DoseTest.Action>
     <DoseTest.Action index="3">
+      <ActionKind>Sleep</ActionKind>
+      <SleepDuration>1</SleepDuration>
+    </DoseTest.Action>
+    <DoseTest.Action index="4">
       <ActionKind>UnregisterHandler</ActionKind>
       <Partner>2</Partner>
       <Consumer>2</Consumer>
