@@ -72,7 +72,8 @@ namespace Internal
             SendLocalResponse(msg);
         }),
                                                           m_dataTypeIdentifier,
-                                                          DistributionData::NewData);
+                                                          DistributionData::NewData,
+                                                          DistributionData::DropReference);
 
         for (auto nodeTypeId = m_distribution.GetNodeTypeIds().cbegin(); nodeTypeId != m_distribution.GetNodeTypeIds().cend(); ++nodeTypeId)
         {

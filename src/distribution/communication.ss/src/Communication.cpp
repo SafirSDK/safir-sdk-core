@@ -153,9 +153,9 @@ namespace
        m_impl->SetQueueNotFullCallback(callback, nodeTypeId);
     }
 
-    void Communication::SetDataReceiver(const ReceiveData& callback, int64_t dataTypeIdentifier, const Allocator& allocator)
+    void Communication::SetDataReceiver(const ReceiveData& callback, int64_t dataTypeIdentifier, const Allocator& allocator, const DeAllocator& deallocator)
     {
-        m_impl->SetDataReceiver(callback, dataTypeIdentifier, allocator);
+        m_impl->SetDataReceiver(callback, dataTypeIdentifier, allocator, deallocator);
     }
 
     void Communication::Start()

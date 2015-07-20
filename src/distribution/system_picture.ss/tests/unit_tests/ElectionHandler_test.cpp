@@ -141,11 +141,13 @@ public:
                                size_t size)> ReceiveData;
 
     typedef boost::function<char*(size_t size)> Allocator;
+    typedef boost::function<void(const char *)> DeAllocator;
 
-    void SetDataReceiver(const ReceiveData& callback, const int64_t /*dataTypeIdentifier*/, const Allocator& alloc)
+    void SetDataReceiver(const ReceiveData& callback, const int64_t /*dataTypeIdentifier*/, const Allocator& alloc, const DeAllocator& dealloc)
     {
         receiveDataCb = callback;
         allocator = alloc;
+        deallocator = dealloc;
     }
 
 
@@ -184,6 +186,7 @@ public:
 
     ReceiveData receiveDataCb;
     Allocator allocator;
+    DeAllocator deallocator;
 
 };
 

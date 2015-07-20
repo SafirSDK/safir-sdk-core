@@ -144,7 +144,8 @@ namespace
                         HandleMessageFromRemoteNode(fromNodeId, fromNodeType, data);
                     }),
                     m_dataTypeIdentifier,
-                    DistributionData::NewData);
+                    DistributionData::NewData,
+                    DistributionData::DropReference);
     }
 
     void RequestHandler::HandleRequests(const ConnectionPtr& connection)

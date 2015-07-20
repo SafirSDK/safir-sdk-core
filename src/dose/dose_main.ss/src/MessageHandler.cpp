@@ -64,7 +64,8 @@ namespace Internal
                                                               MessageTypes::Instance().DistributeMsg(msg);
                                                           },
                                                           m_dataTypeIdentifier,
-                                                          DistributionData::NewData);
+                                                          DistributionData::NewData,
+                                                          DistributionData::DropReference);
     }
 
     void MessageHandler::DistributeMessages(const ConnectionPtr & connection)

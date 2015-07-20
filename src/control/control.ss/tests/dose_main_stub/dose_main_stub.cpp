@@ -210,7 +210,8 @@ int main(int /*argc*/, char * /*argv*/[])
                                       lllog(3) << os.str() << std::endl;
                                   },
                                   12345,
-                                  [](size_t size){return new char[size];});
+                                  [](size_t size){return new char[size];},
+                                  [](const char * data){delete[] data;});
 
                              communication->Start();
 

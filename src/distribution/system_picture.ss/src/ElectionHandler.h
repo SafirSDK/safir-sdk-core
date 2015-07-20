@@ -123,7 +123,8 @@ namespace SP
                                               GotData(from, nodeTypeId, boost::shared_ptr<const char[]>(data), size);
                                           },
                                           m_receiverId,
-                                          [](size_t size){return new char[size];});
+                                          [](size_t size){return new char[size];},
+                                          [](const char* data){delete[] data;});
 
             lllog(3) << "SP: AloneTimeout will be " << boost::chrono::duration_cast<boost::chrono::milliseconds>(m_aloneTimeout) << std::endl;
             lllog(3) << "SP: ElectionTimeout will be " << boost::chrono::duration_cast<boost::chrono::milliseconds>(m_electionTimeout) << std::endl;

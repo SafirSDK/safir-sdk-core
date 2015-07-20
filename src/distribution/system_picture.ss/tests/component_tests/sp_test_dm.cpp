@@ -448,7 +448,8 @@ int main(int argc, char * argv[])
 
                                   },
                                   1000100222,
-                                  [](size_t size){return new char[size];});
+                                  [](size_t size){return new char[size];},
+                                  [](const char * data){delete[] data;});
 
     communication.Start();
 

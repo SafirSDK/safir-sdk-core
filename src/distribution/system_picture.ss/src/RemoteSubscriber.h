@@ -52,7 +52,8 @@ namespace SP
                                               GotData(from,boost::shared_ptr<const char[]>(data),size);
                                           },
                                           LlufId_Generate64(receiverId),
-                                          [](size_t size){return new char[size];});
+                                          [](size_t size){return new char[size];},
+                                          [](const char * data){delete[] data;});
         }
 
     private:

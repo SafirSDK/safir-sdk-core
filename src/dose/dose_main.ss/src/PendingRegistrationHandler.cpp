@@ -108,7 +108,8 @@ namespace Internal
                                                               m_strand.dispatch([this_,msg,fromNodeId,fromNodeType]{this_->HandleRequest(msg,fromNodeId,fromNodeType);});
                                                           },
                                                           m_dataTypeIdentifier,
-                                                          DistributionData::NewData);
+                                                          DistributionData::NewData,
+                                                          DistributionData::DropReference);
     }
 
     void PendingRegistrationHandler::Stop()

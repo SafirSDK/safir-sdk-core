@@ -124,9 +124,9 @@ namespace Com
         }
     }
 
-    void CommunicationImpl::SetDataReceiver(const ReceiveData& callback, int64_t dataTypeIdentifier, const Allocator& allocator)
+    void CommunicationImpl::SetDataReceiver(const ReceiveData& callback, int64_t dataTypeIdentifier, const Allocator& allocator, const DeAllocator& deallocator)
     {
-        m_receiveStrand.post([=]{m_deliveryHandler.SetReceiver(callback, dataTypeIdentifier, allocator);});
+        m_receiveStrand.post([=]{m_deliveryHandler.SetReceiver(callback, dataTypeIdentifier, allocator, deallocator);});
     }
 
     void CommunicationImpl::SetQueueNotFullCallback(const QueueNotFull& callback, int64_t nodeTypeId)

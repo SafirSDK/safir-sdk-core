@@ -102,7 +102,8 @@ namespace Internal
                                                               OnPoolDistributionInfo(fromNodeId, fromNodeType, data, size);
                                                           },
                                                           PoolDistributionInfoDataTypeId,
-                                                          [=](size_t s){return new char[s];});
+                                                          [=](size_t s){return new char[s];},
+                                                          [](const char* data){ delete[] data;});
 
         //set data receiver for registration states
         m_distribution.GetCommunication().SetDataReceiver([=](int64_t fromNodeId, int64_t fromNodeType, const char *data, size_t size)
@@ -110,7 +111,8 @@ namespace Internal
                                                               OnRegistrationState(fromNodeId, fromNodeType, data, size);
                                                           },
                                                           RegistrationStateDataTypeId,
-                                                          [=](size_t s){return DistributionData::NewData(s);});
+                                                          [=](size_t s){return DistributionData::NewData(s);},
+                                                          [](const char* data){DistributionData::DropReference(data);});
 
         //set data receiver for entity states
         m_distribution.GetCommunication().SetDataReceiver([=](int64_t fromNodeId, int64_t fromNodeType, const char *data, size_t size)
@@ -118,7 +120,8 @@ namespace Internal
                                                               OnEntityState(fromNodeId, fromNodeType, data, size);
                                                           },
                                                           EntityStateDataTypeId,
-                                                          [=](size_t s){return DistributionData::NewData(s);});
+                                                          [=](size_t s){return DistributionData::NewData(s);},
+                                                          [](const char* data){DistributionData::DropReference(data);});
 
         //create one StateDistributor per nodeType
         for (auto nt = distribution.GetNodeTypeConfiguration().nodeTypesParam.cbegin(); nt != distribution.GetNodeTypeConfiguration().nodeTypesParam.cend(); ++nt)

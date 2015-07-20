@@ -77,6 +77,7 @@ namespace Com
     typedef boost::function<void(int64_t fromNodeId, int64_t fromNodeType, const char* data, size_t size)> ReceiveData;
     typedef boost::function<void(int64_t nodeTypeId)> QueueNotFull;
     typedef boost::function<char*(size_t)> Allocator;
+    typedef boost::function<void(const char *)> DeAllocator;
 
     struct ControlModeTag {};
     const ControlModeTag controlModeTag = ControlModeTag();
@@ -200,9 +201,11 @@ namespace Com
          * @param callback [in] - Callback function.
          * @param dataTypeIdentifier [in] - Only data sent with the same dataTypeIdentifier will be received by the callback.
          * @param allocator [in] - Will be used to allocate memory for the received data. The receiver is responsible for
-         *                         deleting the allocated memory after a message has been received.
+         *                         deleting the allocated memory after a message has been delivered.
+         * @param deAllocator [in] - Will be used to deAllocate memory for parts of the data if the message cannot be received in full. NOTE: The receiver is responsible for
+         *                         deleting the allocated memory after a message has been delivered.
          */
-        void SetDataReceiver(const ReceiveData& callback, int64_t dataTypeIdentifier, const Allocator& allocator);
+        void SetDataReceiver(const ReceiveData& callback, int64_t dataTypeIdentifier, const Allocator& allocator, const DeAllocator& deAllocator);
 
         /**
          * Start communication, no callbacks can be setup after started.

@@ -57,6 +57,7 @@ namespace Internal
 namespace Com
 {
     typedef boost::function<char*(size_t)> Allocator;
+    typedef boost::function<void(const char *)> DeAllocator;
     typedef boost::function<void(int64_t fromNodeId, int64_t fromNodeType, const char* data, size_t size)> ReceiveData;
     typedef boost::function<void(int64_t fromNodeId)> GotReceiveFrom;
 
@@ -78,6 +79,7 @@ namespace Com
 
             m_receivers.insert(std::make_pair(WelcomeDataType,
                                               DataReceiver([=](size_t size){return new char[size];},
+                                                           [=](const char* data) {delete[] data;},
                                                            [=](int64_t, int64_t, const char* data, size_t) {delete[] data;})
                                               )
                                );
@@ -106,9 +108,9 @@ namespace Com
             m_gotRecvFrom=callback;
         }
 
-        void SetReceiver(const ReceiveData& callback, int64_t dataTypeIdentifier, const Allocator& allocator)
+        void SetReceiver(const ReceiveData& callback, int64_t dataTypeIdentifier, const Allocator& allocator, const DeAllocator& deallocator)
         {
-            m_receivers.insert(std::make_pair(dataTypeIdentifier, DataReceiver(allocator, callback)));
+            m_receivers.insert(std::make_pair(dataTypeIdentifier, DataReceiver(allocator, deallocator, callback)));
         }
 
         //Handle received data and deliver to application if possible and sends ack back to sender.
@@ -213,10 +215,12 @@ namespace Com
         struct DataReceiver
         {
             Allocator alloc;
+            DeAllocator dealloc;
             ReceiveData onRecv;
 
-            DataReceiver(const Allocator& a, const ReceiveData& r)
+            DataReceiver(const Allocator& a, const DeAllocator& d, const ReceiveData& r)
                 :alloc(a)
+                ,dealloc(d)
                 ,onRecv(r)
             {
             }
@@ -233,6 +237,8 @@ namespace Com
             uint16_t numberOfFragments;
             char* data;
             size_t dataSize;
+            ;
+
 
             RecvData()
                 :free(true)
@@ -245,10 +251,16 @@ namespace Com
             {
             }
 
+            void Delete(DeAllocator dealloc)
+            {
+                dealloc(data); //if data has not been handed over to subscriber we delete the data
+                Clear();
+            }
+
             void Clear()
             {
                 free=true;
-                data=nullptr; //we are not responsible for deleting data
+                data=nullptr; //we are not responsible for deleting data if the data has been delivered to the subscriber
                 dataSize=0;
             }
         };
@@ -398,20 +410,6 @@ namespace Com
             memcpy(dest, payload, header->fragmentContentSize);
         }
 
-        void ForceInsert(const MessageHeader* header, const char* payload, NodeInfo& ni)
-        {
-            Channel& ch=ni.GetChannel(header);
-            ch.lastInSequence=header->sequenceNumber-1; //we pretend this was exactly what we expected to get
-            //Clear the queue, should not be necessary as long as we dont let excluded nodes come back.
-            for (size_t i=0; i<Parameters::SlidingWindowSize; ++i)
-            {
-                ch.queue[i].Clear();
-            }
-
-            //Call the normal insert
-            Insert(header, payload, ni);
-        }
-
         void HandleUnackedMessage(const MessageHeader* header, const char* payload, NodeInfo& ni)
         {
             lllog(8)<<L"COM: recvUnacked from: "<<ni.node.nodeId<<L", sendMethod: "<<
@@ -430,7 +428,18 @@ namespace Com
                 //reset receive queue, since theres nothing old we want to keep any longer
                 for (size_t i=0; i<ch.queue.Size(); ++i)
                 {
-                    ch.queue[i].Clear();
+
+                    auto recvIt=m_receivers.find(ch.queue[i].dataType); //m_receivers shall be safe to use inside m_deliverStrand since it is not supposed to be modified after start
+                    if (recvIt==m_receivers.end())
+                    {
+                        std::ostringstream os;
+                        os<<"COM: Received data from node "<<header->commonHeader.senderId<<" that has no registered receiver. DataTypeIdentifier: "<<ch.queue[i].dataType<<std::endl;
+                        SEND_SYSTEM_LOG(Error, <<os.str().c_str());
+                        throw std::logic_error(os.str());
+                    }
+
+                    //reset the que and delete the data in it since it has not been delivered to subscriber
+                    ch.queue[i].Delete(recvIt->second.dealloc);
                 }
 
                 if (header->fragmentNumber==0)

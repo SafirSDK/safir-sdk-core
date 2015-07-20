@@ -38,6 +38,7 @@ boost::function<void(int64_t fromNodeId,
                    size_t size)> dataCallback;
 
 boost::function<char*(size_t)> allocator;
+boost::function<void(const char* data)> deallocator;
 
 class Com
 {
@@ -47,10 +48,12 @@ public:
                                                   const char* const data,
                                                   size_t size)>& callback,
                          int64_t /*dataTypeIdentifier*/,
-                         const boost::function<char*(size_t)>& alloc)
+                         const boost::function<char*(size_t)>& alloc,
+                         const boost::function<void(const char* data)>& dealloc)
     {
         dataCallback = callback;
         allocator = alloc;
+        deallocator = dealloc;
     }
 };
 
