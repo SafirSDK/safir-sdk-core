@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
-; Copyright Saab AB, 2014 (http://safir.sourceforge.net)
-; Copyright Consoden AB, 2014-2015 (http://www.consoden.se)
+; Copyright Saab AB, 2014-2015 (http://safir.sourceforge.net)
 ;
 ; Created by: Lars Hagstrom / lars.hagstrom@consoden.se
 ;

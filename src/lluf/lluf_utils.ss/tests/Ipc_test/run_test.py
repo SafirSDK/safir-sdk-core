@@ -2,8 +2,7 @@
 # -*- coding: utf-8 -*-
 ###############################################################################
 #
-# Copyright Saab AB, 2013 (http://safir.sourceforge.net)
-# Copyright Consoden AB, 2014 (http://www.consoden.se)
+# Copyright Saab AB, 2013-2014 (http://safir.sourceforge.net)
 #
 # Created by: Anders Widén (anders.widen@consoden.se)
 #

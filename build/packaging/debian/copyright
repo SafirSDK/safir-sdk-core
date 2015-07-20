@@ -1,6 +1,5 @@
 Files: *
-Copyright: 2004-2014 Saab AB
-           2014-2015 Consoden AB
+Copyright: 2004-2015 Saab AB
 License: /usr/share/common-licenses/GPL-3
 
 Files: src/boost_patches/*

@@ -2,7 +2,7 @@
 //-*- coding: utf-8 -*-
 /******************************************************************************
  *
- * Copyright Consoden AB, 2009-2015 (http://safir.sourceforge.net)
+ * Copyright Saab AB, 2009-2015 (http://safir.sourceforge.net)
  *
  * Created by: Joel Ottosson / joot
  *
