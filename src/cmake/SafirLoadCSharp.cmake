@@ -17,10 +17,20 @@ else()
 endif()
 
 if (MSVC)
-  SET(CSHARP_COMPILER_FLAGS "-warn:4 -nowarn:1607")
+  if (CMAKE_CONFIGURATION_TYPES AND CMAKE_BUILD_TYPE)
+    MESSAGE(FATAL_ERROR "Both CMAKE_CONFIGURATION_TYPES and CMAKE_BUILD_TYPE are set! I can't work with this!")
+  endif()
 
-  #Get platform and convert it to lowercase (vs2010 has it as X64 and vs2013 express as x64!)
-  string(TOLOWER "$ENV{Platform}" PLATFORM)
+  SET(CSHARP_COMPILER_FLAGS "-warn:4 -nowarn:1607")
+  #if we're in an IDE we get the platform from the generator
+  if (CMAKE_CONFIGURATION_TYPES)
+    if (CMAKE_GENERATOR MATCHES "Win64")
+      set(PLATFORM "x64")
+	endif()
+  else()
+    #Get platform and convert it to lowercase (vs2010 has it as X64 and vs2013 express as x64!)
+    string(TOLOWER "$ENV{Platform}" PLATFORM)
+  endif()
 
   #make sure we set the arch of dotnet assemblies to be the same as the native code we build.
   if (PLATFORM STREQUAL "x64")
