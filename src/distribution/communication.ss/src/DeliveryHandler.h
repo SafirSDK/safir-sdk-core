@@ -251,10 +251,9 @@ namespace Com
             {
             }
 
-            void Delete(DeAllocator dealloc)
+            void Dealloc(DeAllocator dealloc)
             {
                 dealloc(data); //if data has not been handed over to subscriber we delete the data
-                Clear();
             }
 
             void Clear()
@@ -424,22 +423,32 @@ namespace Com
             }
             else if (header->sequenceNumber>ch.lastInSequence)
             {
+                lllog(8) << L"COM: Recv unacked message with seqNo gap (i.e messages have been lost), received seqNo " << header->sequenceNumber << std::endl;
+
                 //this is a message with bigger seq but we have missed something inbetween
                 //reset receive queue, since theres nothing old we want to keep any longer
+                //we need to deallocate the data since it has not been delivered to the subscriber
                 for (size_t i=0; i<ch.queue.Size(); ++i)
                 {
-
-                    auto recvIt=m_receivers.find(ch.queue[i].dataType); //m_receivers shall be safe to use inside m_deliverStrand since it is not supposed to be modified after start
-                    if (recvIt==m_receivers.end())
+                    //dealloc the buffer via the first entry in the queue
+                    if (i == 0)
                     {
-                        std::ostringstream os;
-                        os<<"COM: Received data from node "<<header->commonHeader.senderId<<" that has no registered receiver. DataTypeIdentifier: "<<ch.queue[i].dataType<<std::endl;
-                        SEND_SYSTEM_LOG(Error, <<os.str().c_str());
-                        throw std::logic_error(os.str());
-                    }
+                        auto recvIt = m_receivers.find(ch.queue[i].dataType);
+                        if (recvIt == m_receivers.end())
+                        {
+                            std::ostringstream os;
+                            os << "COM: Received data from node " << header->commonHeader.senderId << " that has no registered receiver. DataTypeIdentifier: " << ch.queue[i].dataType << std::endl;
+                            SEND_SYSTEM_LOG(Error, << os.str().c_str());
+                            throw std::logic_error(os.str());
+                        }
 
-                    //reset the que and delete the data in it since it has not been delivered to subscriber
-                    ch.queue[i].Delete(recvIt->second.dealloc);
+                        ch.queue[i].Dealloc(recvIt->second.dealloc);
+                        ch.queue[i].Clear();
+                    }
+                    else //clear the other entries
+                    {
+                        ch.queue[i].Clear();
+                    }
                 }
 
                 if (header->fragmentNumber==0)
@@ -453,8 +462,6 @@ namespace Com
                     //in the middle of a fragmented message, nothing we want to keep. Set lastInSeq to match with the beginning of next new message
                     ch.lastInSequence=header->sequenceNumber+header->numberOfFragments-header->fragmentNumber-1; //calculate nextStartOfNewMessage-1
                 }
-
-                lllog(8)<<L"COM: Recv unacked message with seqNo gap (i.e messages have been lost), received seqNo "<<header->sequenceNumber<<std::endl;
             }
             else
             {
