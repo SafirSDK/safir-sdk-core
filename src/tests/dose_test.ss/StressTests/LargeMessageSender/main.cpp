@@ -43,6 +43,10 @@ class App:
     private boost::noncopyable
 {
 public:
+#ifdef _MSC_VER
+   #pragma warning(push)
+   #pragma warning(disable: 4355)
+#endif
     explicit App(std::wstring name):
         m_dispatcher(connection,m_ioService),
         m_sender(CommandLine::Instance().Count(), CommandLine::Instance().Timeout(), boost::bind(&App::FinishedCallback,this))
@@ -71,6 +75,9 @@ public:
 
 
     }
+#ifdef _MSC_VER
+   #pragma warning(pop)
+#endif
 
     void Run()
     {
