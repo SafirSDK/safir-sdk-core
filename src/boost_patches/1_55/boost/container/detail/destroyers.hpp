@@ -72,9 +72,6 @@ struct scoped_deallocator
    void set(const pointer &p)
    {  m_ptr = p;  }
 
-   void set(const pointer &p)
-   {  m_ptr = p;  }
-
    void release()
    {  m_ptr = 0; }
 };
@@ -90,9 +87,6 @@ struct null_scoped_deallocator
    {}
 
    void release()
-   {}
-
-   void set(const pointer &)
    {}
 
    pointer get() const
@@ -264,11 +258,6 @@ class scoped_destructor
 
    void release()
    {  pv_ = 0; }
-
-
-   void set(value_type *ptr) { pv_ = ptr; }
-
-   value_type *get() const { return pv_; }
 
 
    void set(value_type *ptr) { pv_ = ptr; }
