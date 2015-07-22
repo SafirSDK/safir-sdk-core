@@ -92,7 +92,7 @@ print ("num_used:", num_used)
 print ("num_destroyed:", num_destroyed)
 
 
-if num_created == 1 and num_used == len(procs) * 100 and num_destroyed == 1:
+if num_created == 1 and num_used == len(procs) * 50 and num_destroyed == 1:
     print("success")
     sys.exit(0)
 else:
