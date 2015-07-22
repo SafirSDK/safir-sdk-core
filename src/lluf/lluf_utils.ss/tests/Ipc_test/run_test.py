@@ -46,7 +46,7 @@ def kill(proc):
 def test_failed(error_str, sourceline=None):
     if sourceline is None:
         sourceline = currentframe().f_back.f_lineno
-        
+
     log("Test failed at line " + str(sourceline) + "!");
     log(error_str);
 
@@ -57,6 +57,7 @@ def test_failed(error_str, sourceline=None):
     sys.exit(1)
 
 def wait_for_output(proc, output, n=1, exact_match=False):
+    log("Waiting for output: \'" + output + "\' from PID:", str(proc.pid))
     no_found = 0
     while True:
         line = proc.stdout.readline().decode("utf-8")
@@ -70,18 +71,26 @@ def wait_for_output(proc, output, n=1, exact_match=False):
                 # didn't receive the expected line
                 test_failed("Expected output: '" + output + "' Got: '" + line + "'", currentframe().f_back.f_lineno)
 
+def wait_for_outputs(proc, outputs):
+    unmatched_outputs = list(outputs)
+    log("Waiting for outputs: " + str(unmatched_outputs) + " from PID:", str(proc.pid))
+    while len(unmatched_outputs) > 0:
+        line = proc.stdout.readline().decode("utf-8")
+        log(line)
+        if line.strip() in unmatched_outputs:
+            unmatched_outputs.remove(line.strip())
 
 
 def send_cmd(proc, cmd):
     proc.stdin.write(cmd.encode("utf-8"))
     proc.stdin.flush()
-    
+
 def terminate(proc):
     proc.kill()
     proc.communicate()
 
 def exit_process(proc):
-    send_cmd(proc, "EXIT\n") 
+    send_cmd(proc, "EXIT\n")
     proc.communicate()
 
 IpcPublisher = os.path.join(exe_path,"IpcPublisher")
@@ -131,7 +140,6 @@ send_cmd(publisher, "SEND Kalle 1 0\n")
 wait_for_output(publisher, "A Subscriber disconnected", exact_match=True)
 wait_for_output(publisher, "A Subscriber disconnected", exact_match=True)
 
-
 terminate(publisher)
 terminate(subscriber1)
 terminate(subscriber2)
@@ -169,17 +177,13 @@ wait_for_output(subscriber2, "Trying to connect")
 # Start Publisher and wait for the subscribers to receive the messages
 publisher = subprocess.Popen((IpcPublisher, "--message-delay", "10"), stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
 
-wait_for_output(publisher, "A Subscriber connected")
-wait_for_output(publisher, "A Subscriber connected")
-wait_for_output(publisher, "A Subscriber disconnected")
-wait_for_output(publisher, "A Subscriber disconnected")
+wait_for_outputs(publisher, ["A Subscriber connected!", "A Subscriber connected!", "A Subscriber disconnected!", "A Subscriber disconnected!"])
 
 sub1_result = subscriber1.communicate()[0]
 sub2_result = subscriber2.communicate()[0]
 
 if sub1_result.decode("utf-8").count("Kalle") != 5:
     test_failed("Subscriber 1 didn't receive the expected 5 messages!")
-
 
 if sub2_result.decode("utf-8").count("Kalle") != 5:
     test_failed("Subscriber 2 didn't receive the expected 5 messages!")
@@ -220,7 +224,6 @@ wait_for_output(subscriber, "Disconnected from publisher")
 terminate(publisher)
 terminate(subscriber)
 
-
 #######
 log("Test that a publisher can do several start/stop")
 #######
@@ -251,7 +254,6 @@ wait_for_output(subscriber1, "Publisher disconnected", exact_match=True)
 terminate(publisher)
 terminate(subscriber1)
 
-
 #######
 log("Test with large messages")
 #######
@@ -273,7 +275,7 @@ if sub1_result.decode("utf-8").count("Received msg with size 100000000") != 2:
 
 if sub2_result.decode("utf-8").count("Received msg with size 100000000") != 2:
     test_failed("Subscriber 2 didn't receive the expected 2 large messages!")
-    
+
 terminate(publisher)
 
 #######
@@ -291,7 +293,6 @@ wait_for_output(publisher, "A Subscriber connected", exact_match=True)
 
 exit_process(publisher)
 exit_process(subscriber)
-
 
 log("success")
 sys.exit(0)
