@@ -36,7 +36,8 @@ the unpacked source code and run:
 
   build/build.py --package
 
-After a long wait you should have a set of installation packages in the TODO directory.
+After a long wait you should have a set of installation packages in the tmp directory
+that has been created in the source root.
 
 If the build script fails you can look in buildlog.html for information about what went
 wrong. Please get in touch with us if there is something unexpected in there.
