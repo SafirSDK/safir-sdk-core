@@ -86,7 +86,8 @@ Here is how to install it using the installer:
 CMake
 ~~~~~
 Go to http://www.cmake.org/ and download and install the CMake installer.
-In the "Install Options" step, check the "Add CMake to the system PATH for all users", or "... current user" if you prefer.
+In the "Install Options" step, check the "Add CMake to the system PATH for all users", or
+"... current user" if you prefer.
 
 Java
 ~~~~
@@ -103,19 +104,33 @@ http://nsis.sourceforge.net/Download and install.
 
 Python
 ~~~~~~
-Go to http://www.python.org/ and download and install the python installer. (Please use a version greater than or equal to 2.7)
+Go to http://www.python.org/ and download and install the python installer. (Please use a
+version greater than or equal to 2.7)
 
 Add C:\Python27 (or equivalent) to your PATH.
 
 Doxygen and Graphviz
 ~~~~~~~~~~~~~~~~~~~~
-These tools are used to build the interface documentation from the C++ source code. If you do not require this documentation you can skip this step.
-Go to http://www.doxygen.org/ and download and install the windows installer 
+These tools are used to build the interface documentation from the C++ source code. If
+you do not require this documentation you can skip this step.
+Go to http://www.doxygen.org/ and download and install the windows installer
 Go to http://www.graphviz.org/ and download and install the windows installer
 
 Now you can continue to "Building Safir SDK Core"
 
-Building Safir SDK Core
------------------------
-Now you can build Safir SDK Core using the build script, or using CMake-generated projects.
+Building Safir SDK Core Installer
+---------------------------------
+Now you can build Safir SDK Core using the build script. Open a command prompt in the
+root of the unpacked source code and run:
 
+  build\build.py --package
+
+After a long wait you should have an installation package in the build/packaging/windows
+directory.
+
+If the build script fails you can look in buildlog.html for information about what went
+wrong. Please get in touch with us if there is something unexpected in there.
+
+Contact Information
+-------------------
+Contact information can be found at http://safirsdkcore.com.

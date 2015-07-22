@@ -1,0 +1,70 @@
+Linux Build Instructions
+========================
+
+We provide pre-built packages for certain linux distributions:
+   Ubuntu 14.04 x86
+   Ubuntu 14.04 amd64
+   Raspbian Jessie (experimental)
+
+If you're using one of these platforms you should probably download the pre-built package
+from http://safirsdkcore.com.
+
+Safir SDK Core currently contains packaging instructions for Debian-based distributions,
+i.e. to build a deb package. In a future release we will add support for building RPMs.
+
+This document describes how to build a deb package for your Debian-based distribution.
+
+At the end of the document are some hints on how to build Safir SDK Core for other
+distributions. If you're still having problems you can contact us at
+http://safirsdkcore.com
+
+Installing Prerequisites
+------------------------
+To install all build dependencies "in one go" run the following from the command line:
+
+  sudo apt-get install devscripts debhelper cmake default-jdk asciidoc cli-common-dev \
+       libboost-all-dev unixodbc-dev subversion protobuf-compiler libprotobuf-dev doxygen \
+       graphviz qt5-default
+
+If you're building for another Debian-based distribution you may have to adjust some
+package names.
+
+Building Safir SDK Core Installation Packages
+---------------------------------------------
+Now you can build Safir SDK Core using the build script. Open a terminal in the root of
+the unpacked source code and run:
+
+  build/build.py --package
+
+After a long wait you should have a set of installation packages in the TODO directory.
+
+If the build script fails you can look in buildlog.html for information about what went
+wrong. Please get in touch with us if there is something unexpected in there.
+
+Building on other Linux distributions
+-------------------------------------
+Safir SDK Core uses CMake as its build system, so to build for any Linux system you
+should only need to do
+
+   cmake . -DCMAKE_BUILD_TYPE=Release
+   make
+   make install
+
+This will build Safir SDK Core with compiler optimizations enabled and then install to
+/usr/local. If you wish to control installation directory add -DCMAKE_INSTALL_PREFIX=...
+to the first command.
+
+If you do not have all prerequisites installed you will get warnings and errors from the
+cmake command. Some prerequisites are optional and some are required.
+
+When you have installed Safir SDK Core you will have to put some configuration files
+under /etc/safir-sdk-core/ or ~/.config/safir-sdk-core/. Find the example configuration
+under share/doc/safir-sdk-core, and copy the ini files into your preferred configuration
+directory. You may have to adjust the contents of locations.ini to give locations that
+are appropriate for your system.
+
+Please get in touch with us if you run into problems!
+
+Contact Information
+-------------------
+Contact information can be found at http://safirsdkcore.com.
