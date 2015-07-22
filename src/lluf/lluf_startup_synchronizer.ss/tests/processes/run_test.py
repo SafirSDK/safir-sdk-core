@@ -38,15 +38,16 @@ procs = list()
 try:
     #Start a bunch of processes
     for i in range(100):
-        proc = subprocess.Popen(ss_test, 
+        proc = subprocess.Popen(ss_test,
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.STDOUT,
                                 stdin=subprocess.PIPE,
                                 universal_newlines=True)
-        
+
         procs.append(proc)
 except OSError as e:
-    print ("Failed to launch processes. maybe you need to increase ulimit -u? I need at least 10000")
+    print ("Failed to launch processes. maybe you need to increase ulimit -u?")
+    print ("This test runs 100 processes.")
     print (e)
     for proc in procs:
         proc.kill()
@@ -80,7 +81,7 @@ for output in outputs:
     if output.find("Destroy") != -1:
         num_destroys += 1
 
-#check exit codes 
+#check exit codes
 #see bit field in ss_test.cpp
 if num_3 == 1 and num_2 == len(procs) - 1 and num_other == 0 and num_destroys == 1:
     print("success")

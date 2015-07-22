@@ -41,13 +41,13 @@
 #endif
 
 
-class Synchronized 
+class Synchronized
     : public Safir::Utilities::Synchronized
     , private boost::noncopyable
 {
 public:
     enum State { None = 0, Created = 1, Used = 2, Destroyed = 4};
-    
+
     explicit Synchronized(int & state)
       : m_state(state)
     {
@@ -71,7 +71,7 @@ private:
     }
 };
 
-int threadFun(boost::barrier& barrier1, boost::barrier& barrier2, boost::barrier& barrier3) 
+int threadFun(boost::barrier& barrier1, boost::barrier& barrier2, boost::barrier& barrier3)
 {
     int state = 0;
     Synchronized synched(state);
@@ -88,7 +88,7 @@ int threadFun(boost::barrier& barrier1, boost::barrier& barrier2, boost::barrier
 
 int main()
 {
-    const int num = 100;
+    const int num = 50;
     boost::barrier barrier1(num);
     boost::barrier barrier2(num + 1);
     boost::barrier barrier3(num + 1);
@@ -102,10 +102,10 @@ int main()
         threads.add_thread(new boost::thread(boost::move(pt)));
     }
 
-    barrier2.wait();    
+    barrier2.wait();
     std::wcout << "all threads started, collecting result" << std::endl;
     std::cin.get();
-    barrier3.wait();    
+    barrier3.wait();
 
     int num_created = 0;
     int num_used = 0;
@@ -135,5 +135,3 @@ int main()
 
     return 0;
 }
-
-

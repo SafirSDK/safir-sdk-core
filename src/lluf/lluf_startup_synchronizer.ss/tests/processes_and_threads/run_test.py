@@ -37,16 +37,17 @@ procs = list()
 
 try:
     #Start a bunch of processes
-    for i in range(100):
-        proc = subprocess.Popen(ss_test, 
+    for i in range(25):
+        proc = subprocess.Popen(ss_test,
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.STDOUT,
                                 stdin=subprocess.PIPE,
                                 universal_newlines=True)
-        
+
         procs.append(proc)
 except OSError as e:
-    print ("Failed to launch processes. maybe you need to increase ulimit -u or /proc/sys/kernel/threads-max? I need at least 10000")
+    print ("Failed to launch processes. maybe you need to increase ulimit -u or /proc/sys/kernel/threads-max?")
+    print ("This test runs 25 processes with 50 threads each")
     print ("Launched", i, "processes")
     print (e)
     for proc in procs:
@@ -85,7 +86,7 @@ for output in outputs:
     num_created += int(created_pattern.search(output).group(1))
     num_used += int(used_pattern.search(output).group(1))
     num_destroyed += int(destroyed_pattern.search(output).group(1))
-    
+
 print ("num_created:", num_created)
 print ("num_used:", num_used)
 print ("num_destroyed:", num_destroyed)
