@@ -77,15 +77,14 @@ namespace Internal
 
         void operator()(const boost::property_tree::ptree& json, std::vector<char>& blob) const
         {
-            const boost::property_tree::ptree& members=json.front().second;
-            boost::optional<std::string> typeName=members.get_optional<std::string>("_DouType");
+            boost::optional<std::string> typeName=json.get_optional<std::string>("_DouType");
 
             if (!typeName)
             {
                 throw ParseError("JsonToBinary serialization error", "Json object does not have the _DouType field", "", 143);
             }
 
-            SerializeObjectContent(*typeName, blob, members);
+            SerializeObjectContent(*typeName, blob, json);
         }
 
         void SerializeObjectContent(const std::string& typeName, std::vector<char>& blob, const boost::property_tree::ptree& members) const

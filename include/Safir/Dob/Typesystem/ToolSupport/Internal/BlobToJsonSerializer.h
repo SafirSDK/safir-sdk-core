@@ -68,11 +68,7 @@ namespace Internal
 
         void operator()(const char* blob, std::ostream& os) const
         {
-            const ClassDescriptionType* cd=GetClass(blob);
-            os<<"{";
-            WriteMemberName(cd->GetName(), os);
             SerializeMembers(blob, os);
-            os<<"}";
         }
 
     private:
