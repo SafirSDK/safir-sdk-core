@@ -4,12 +4,21 @@ else()
   set(DEFAULT_FILE_PERSISTENCE_DIRECTORY @{CSIDL_COMMON_APPDATA}/safir-sdk-core/persistence)
 endif()
 
+if (UNIX)
+  set(DEFAULT_INCARNATION_BLACKLIST /var/lib/safir-sdk-core/system-incarnation-blacklist.txt)
+else()
+  set(DEFAULT_INCARNATION_BLACKLIST @{CSIDL_COMMON_APPDATA}/safir-sdk-core/system-incarnation-blacklist.txt)
+endif()
 
 #We configure the file into the source dir, which may seem a bit strange
 #for out-of-source builds, but we need all the dou files in one directory
 #since our tests point there for dou file loading.
 configure_file(Safir.Dob.PersistenceParameters.dou.in
   "${CMAKE_CURRENT_SOURCE_DIR}/config/Safir.Dob.PersistenceParameters.dou" @ONLY)
+
+configure_file(Safir.Dob.NodeParameters.dou.in
+  "${CMAKE_CURRENT_SOURCE_DIR}/config/Safir.Dob.NodeParameters.dou" @ONLY)
+
 
 ADD_SAFIR_GENERATED_LIBRARY(NAME Core
 
