@@ -1,4 +1,36 @@
 -----------------------------------------------------------------------------------------------------------------------
+2015-07-23 version 6.0
+-----------------------------------------------------------------------------------------------------------------------
+
+This release introduces the following changes:
+
+* Complete redesign and rewrite of the low level communication mechanism. This has a number of advantages:
+  - Support for arbitrary number of nodes.
+  - Support for exclusion of misbehaving nodes.
+  - Support for more network topologies.
+  - Removal of error-prone general node join handling.
+  - Simpler configuration for systems with many nodes.
+  - Synchronized system picture
+
+* Enable completely read-only installations of Safir SDK Core:
+  - Create native installation packages for Windows and Linux (currently for Debian-based distributions).
+  - Allows separation of dou-file collections into separate modules.
+  - Remove the "tower" concept from Core.
+
+* Addition of dynamic types to the type system:
+  - Added support for "Sequence" - similar to std::vector in C++ or ArrayList in C#
+  - Added support for "Dictionary" - similar to std::map in C++ or Dictionary in C#
+  - Use Google Protobuf for internal data exchange instead of proprietary binary serialization.
+
+* A whole load of bug fixes (see ticket list at http://safirsdkcore.com for details).
+
+Notes:
+* The User's guide has not been updated with information about the new features. The
+  documentation for these will be part of a future 6.1 release.
+* The Ada interfaces are not included in this release since they have not been updated to
+  use the new internal interfaces.
+
+-----------------------------------------------------------------------------------------------------------------------
 2014-06-02 version 5.0.1
 -----------------------------------------------------------------------------------------------------------------------
 
