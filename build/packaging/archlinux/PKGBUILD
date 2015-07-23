@@ -1,7 +1,7 @@
 # Maintainer: DonOregano <lars@foldspace.nu>
 
 pkgname=safir-sdk-core-git
-pkgver=logan_r2603.0b51d8e
+pkgver=r4422.693c547
 pkgrel=1
 pkgdesc="Safir SDK Core is a middleware and platform for creation of distributed soft real-time systems. It is Scalable, Reliable, Portable, and last but not least, it is Open!"
 arch=('i686' 'x86_64' 'armv6h' 'armv7h')
@@ -11,7 +11,7 @@ groups=()
 depends=('boost' 'unixodbc' 'qt5-base' 'cmake' 'python' 'mono' 'java-environment>=6' 'google-breakpad-svn')
 makedepends=('git' 'subversion' 'doxygen' 'graphviz')
 install=install
-source=("$pkgname"::'git+https://github.com/anderswiden/safir_sdk_core.git'
+source=("$pkgname"::'git+https://github.com/SafirSDK/safir-sdk-core.git'
         'safir-sdk-core.tmpfiles')
 sha1sums=('SKIP'
           'b2ef06ef3614b2f7243556cb8a28e4856e0c9e7b')
@@ -19,7 +19,7 @@ backup=('etc/safir-sdk-core/typesystem.ini' 'etc/safir-sdk-core/logging.ini' 'et
 
 pkgver() {
   cd "$srcdir/$pkgname"
-  printf "logan_r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
+  printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
 }
 
 build() {
