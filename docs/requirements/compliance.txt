@@ -23,7 +23,7 @@ Version
 | Lars Hagström
 
 | 6.0
-| 2015-05-21
+| 2015-07-23
 | Lars Hagström
 
 |=========================================================
@@ -63,6 +63,11 @@ using +foreach+ and UpdateRequests.
 *plat_req_4* is not complied with since there is no packaging for RedHat Enterprise Linux (RHEL) 7.
 
 *plat_req_6* is not implemented.
+
+=== Languages
+
+*lang_req_4* is not implemented. The Ada interfaces have not been updated with the 6.0
+changes and are thus not usable.
 
 === System control and failover support
 
