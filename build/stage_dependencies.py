@@ -140,16 +140,7 @@ class __WindowsStager(object):
         self.__copy_boost()
         self.__copy_qt()
         self.__copy_ninja()
-    """
-        ############
 
-        log("Copying Ada stuff - GNAT runtime")
-        copy_dll("libgnat-2013.dll", Log_Error = False)
-        copy_dll("libgnarl-2013.dll", Log_Error = False)
-        copy_dll("libgcc_s_dw2-1.dll", Log_Error = False)
-
-        ###########
-    """
     def __copy_header_dir(self, dir):
         if not os.path.isdir(dir):
             raise StagingError(dir + " is not a directory")

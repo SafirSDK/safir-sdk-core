@@ -664,10 +664,6 @@ class UnixGccBuilder(BuilderBase):
     def __init__(self, arguments):
         super(UnixGccBuilder, self).__init__(arguments)
 
-        #ada builds (with gnatmake) will look at environment variable that is
-        #defined on windows to determine parallellism. Define it on linux too.
-        os.environ["NUMBER_OF_PROCESSORS"] = str(self.num_jobs)
-
         self.install_target = "install"
         self.cmake_generator = "Unix Makefiles"
 

@@ -7,9 +7,6 @@ INSTALL(FILES
 
 INSTALL(FILES
           data/precompiled_header_for_cpp.h
-#          data/dots_generated_ada.gpr_template
-#          data/dots_generated_ada_library.gpr_template
-#          data/dots_generated_main_ada.gpr_template
         DESTINATION ${SAFIR_INSTALL_DESTINATION_GENERATION}/cpp
         COMPONENT Development)
 

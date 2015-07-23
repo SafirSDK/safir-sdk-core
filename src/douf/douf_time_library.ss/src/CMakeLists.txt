@@ -15,5 +15,3 @@ TARGET_LINK_LIBRARIES(douf_time_library PRIVATE
 
 SAFIR_INSTALL(TARGETS douf_time_library)
 
-# INSTALL(FILES ../data/douf_time_library.gpr
-#         DESTINATION ${SAFIR_SDK}/ada)

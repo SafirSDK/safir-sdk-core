@@ -16,5 +16,3 @@ TARGET_LINK_LIBRARIES(dose_dll PRIVATE
 
 SAFIR_INSTALL(TARGETS dose_dll)
 
-# INSTALL(FILES ../data/dose_dll.gpr
-#         DESTINATION ${SAFIR_SDK}/ada)

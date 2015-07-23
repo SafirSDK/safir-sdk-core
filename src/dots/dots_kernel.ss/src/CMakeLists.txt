@@ -20,5 +20,3 @@ endif()
 
 SAFIR_INSTALL(TARGETS dots_kernel)
 
-# INSTALL(FILES ../data/dots_kernel.gpr
-#         DESTINATION ${SAFIR_SDK}/ada/)

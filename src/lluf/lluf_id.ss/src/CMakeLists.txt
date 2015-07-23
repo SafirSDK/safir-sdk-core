@@ -8,6 +8,3 @@ TARGET_LINK_LIBRARIES(lluf_id PRIVATE
   lluf_utils)
 
 SAFIR_INSTALL(TARGETS lluf_id)
-
-# INSTALL(FILES ../data/lluf_id.gpr
-#         DESTINATION ${SAFIR_SDK}/ada/)

@@ -62,11 +62,6 @@ DartConfiguration.tcl
 Testing
 *.junit.xml
 
-#Ada horrors
-ali
-obj
-interface
-
 #MSVC stuff
 *embed.manifest
 *embed.manifest.res

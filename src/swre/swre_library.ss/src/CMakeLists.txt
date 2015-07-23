@@ -21,5 +21,3 @@ TARGET_LINK_LIBRARIES(swre_library PRIVATE
 
 SAFIR_INSTALL(TARGETS swre_library)
 
-# INSTALL(FILES ../data/swre_library.gpr
-#         DESTINATION ${SAFIR_SDK}/ada)

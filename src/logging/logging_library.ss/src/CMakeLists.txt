@@ -13,6 +13,3 @@ TARGET_LINK_LIBRARIES(logging_library PRIVATE lluf_utils)
 
 SAFIR_INSTALL(TARGETS logging_library)
 
-# INSTALL(FILES ../data/logging_library.gpr
-#         DESTINATION ${SAFIR_SDK}/ada)
-
