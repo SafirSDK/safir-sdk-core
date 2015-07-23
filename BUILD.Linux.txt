@@ -22,9 +22,12 @@ Installing Prerequisites
 ------------------------
 To install all build dependencies "in one go" run the following from the command line:
 
-  sudo apt-get install devscripts debhelper cmake default-jdk asciidoc cli-common-dev \
+  sudo apt-get install build-essential g++ cmake default-jdk asciidoc cli-common-dev \
        libboost-all-dev unixodbc-dev subversion protobuf-compiler libprotobuf-dev doxygen \
-       graphviz qt5-default
+       graphviz qt5-default devscripts debhelper fakeroot
+
+The last three packages - devscripts, debhelper and fakeroot - are used for debian
+package creation.
 
 If you're building for another Debian-based distribution you may have to adjust some
 package names.
