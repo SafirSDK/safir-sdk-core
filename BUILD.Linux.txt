@@ -4,7 +4,6 @@ Linux Build Instructions
 We provide pre-built packages for certain linux distributions:
    Ubuntu 14.04 x86
    Ubuntu 14.04 amd64
-   Raspbian Jessie (experimental)
 
 If you're using one of these platforms you should probably download the pre-built package
 from http://safirsdkcore.com.
