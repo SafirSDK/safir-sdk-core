@@ -6,7 +6,7 @@ We provide pre-built packages for certain linux distributions:
    Ubuntu 14.04 amd64
 
 If you're using one of these platforms you should probably download the pre-built package
-from http://safirsdkcore.com.
+from http://safirsdkcore.com. If you're using Arch Linux there is a package in the AUR.
 
 Safir SDK Core currently contains packaging instructions for Debian-based distributions,
 i.e. to build a deb package. In a future release we will add support for building RPMs.
