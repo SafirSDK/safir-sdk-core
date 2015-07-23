@@ -28,14 +28,6 @@ debug << "Testing logging " << myFloat << ", " << myInt << std::endl;
 debug.WriteLine("Testing logging {0}, {1}",myFloat,myInt);
 ----------------------------
 
- - *Ada*
-+
-[source,ada]
-----------------------------
-debug.Put_Line("Testing logging " & Float'Wide_Image(myFloat) &
-               ", " & Float'Wide_Image(myInt));
-----------------------------
-
  - *Java*
 +
 [source,java]
@@ -77,8 +69,6 @@ debug.WriteLine("Hello {0}", 123.098);
 ----------------------------
 +
 since the string expansion will not be performed until the check has passed.
-
-- In Ada the check is made for every call to Put or Put_Line. As far as the author is aware there is no equivalent of the C# functionality in Ada, so it is not possible to avoid the check without encapsulating the debugging inside if-statements.
 
 - In Java the check is made for every +print+ or +println+ call that is made. The tracer supports the +printf(...)+ functions that will give the similar functionality as C# described above. Check out the documentation for javas +PrintWriter+ to find out how to use this syntax.
 
