@@ -276,7 +276,7 @@ namespace Com
                 ,biggestSequence(0)
                 ,queue(Parameters::SlidingWindowSize)
             {
-            }            
+            }
         };
 
         struct NodeInfo
@@ -378,7 +378,10 @@ namespace Com
                 if (recvIt==m_receivers.end())
                 {
                     std::ostringstream os;
-                    os<<"COM: Received data from node "<<header->commonHeader.senderId<<" that has no registered receiver. DataTypeIdentifier: "<<recvData.dataType<<std::endl;
+                    os << "COM: (Insert) Received data from node "
+                       << header->commonHeader.senderId
+                       << " that has no registered receiver. DataTypeIdentifier: "<<recvData.dataType
+                       << ", hdr = " << header->ToString();
                     SEND_SYSTEM_LOG(Error, <<os.str().c_str());
                     throw std::logic_error(os.str());
                 }
@@ -437,7 +440,10 @@ namespace Com
                         if (recvIt == m_receivers.end())
                         {
                             std::ostringstream os;
-                            os << "COM: Received data from node " << header->commonHeader.senderId << " that has no registered receiver. DataTypeIdentifier: " << ch.queue[i].dataType << std::endl;
+                            os << "COM: (HandleUnackedMessage) Received data from node "
+                               << header->commonHeader.senderId
+                               << " that has no registered receiver. DataTypeIdentifier: " << ch.queue[i].dataType
+                               << ", hdr = " << header->ToString();
                             SEND_SYSTEM_LOG(Error, << os.str().c_str());
                             throw std::logic_error(os.str());
                         }
@@ -651,7 +657,7 @@ namespace Com
                             else
                             {
                                 std::ostringstream os;
-                                os<<"COM: Trying to deliver data from node "<<fromId<<" that has no registered receiver. DataTypeIdentifier: "<<dataType<<std::endl;
+                                os<<"COM: Trying to deliver data from node "<<fromId<<" that has no registered receiver. DataTypeIdentifier: "<<dataType;
                                 SEND_SYSTEM_LOG(Error, <<os.str().c_str());
                                 throw std::logic_error(os.str());
                             }
