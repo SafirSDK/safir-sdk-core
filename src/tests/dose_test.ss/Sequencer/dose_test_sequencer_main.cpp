@@ -122,7 +122,7 @@ const CommandLineResults & HandleCommandLine(int argc, char* argv[])
             ("no-timeout", "Do not time out and exit if a partner does not respond for a long time")
             ("context", po::value<int>(&results.context)->default_value(0), "default context for partner test connection (-1 for random)")
             ("multinode", "Run in multinode mode")
-            ("endlessMode", "Run in endless mode");
+            ("endless-mode", "Run in endless mode");
 
         po::variables_map vm;
         po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -145,7 +145,7 @@ const CommandLineResults & HandleCommandLine(int argc, char* argv[])
 
         results.noTimeout = vm.count("no-timeout") != 0;
         results.multinode = vm.count("multinode") != 0;
-        results.endlessMode = vm.count("endlessMode") != 0;
+        results.endlessMode = vm.count("endless-mode") != 0;
 
         if (results.languages.size() != 3)
         {

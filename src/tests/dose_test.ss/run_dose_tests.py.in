@@ -91,7 +91,7 @@ class Parameters:
                           "This is only applicable when using --multicomputer, and is implied when using --jenkins")
         parser.add_option("--slave", action="store_true",dest="slave",default=False,
                           help="Be a multicomputer slave")
-        parser.add_option("--endlessMode", action="store_true",dest="endlessMode",default=False,
+        parser.add_option("--endless-mode", action="store_true",dest="endless_mode",default=False,
                           help="Loop the tests forever, works with or without the --single-testcase option")
         parser.add_option("--no-syslog", action="store_false",dest="check_syslog",default=True,
                           help="Do not check syslog output")
@@ -131,7 +131,7 @@ class Parameters:
 
         self.no_java = options.no_java
         self.no_dotnet = options.no_dotnet
-        self.endlessMode = options.endlessMode
+        self.endless_mode = options.endless_mode
 
         if options.autostart_slave and not self.multicomputer:
             log("--autostart-slave can only be used together with --multinode")
@@ -242,8 +242,8 @@ class Parameters:
         if self.multinode or self.multicomputer:
             self.dose_test_sequencer_cmd += ("--multinode",)
 
-        if self.endlessMode:
-            self.dose_test_sequencer_cmd += ("--endlessMode",)
+        if self.endless_mode:
+            self.dose_test_sequencer_cmd += ("--endless-mode",)
 
         self.expected_output_path = os.path.join(self.test_data_directory,
                                                  "dose",
