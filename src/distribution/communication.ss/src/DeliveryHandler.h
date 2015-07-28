@@ -237,8 +237,6 @@ namespace Com
             uint16_t numberOfFragments;
             char* data;
             size_t dataSize;
-            ;
-
 
             RecvData()
                 :free(true)
@@ -251,16 +249,24 @@ namespace Com
             {
             }
 
-            void Dealloc(DeAllocator dealloc)
-            {
-                dealloc(data); //if data has not been handed over to subscriber we delete the data
-            }
-
             void Clear()
             {
                 free=true;
                 data=nullptr; //we are not responsible for deleting data if the data has been delivered to the subscriber
                 dataSize=0;
+            }
+
+            std::string ToString() const
+            {
+                std::ostringstream os;
+                os<<"free: "<<std::boolalpha<<free<<std::dec<<"dataType: "<<dataType<<", seq: "<<sequenceNumber<<", frag: "<<fragmentNumber<<", #frags: "<<numberOfFragments<<
+                ", size: "<<dataSize<<", data: ";
+                if (data!=nullptr)
+                    os<<(uint64_t)data;
+                else
+                    os<<"null";
+
+                return os.str();
             }
         };
 
@@ -276,6 +282,17 @@ namespace Com
                 ,biggestSequence(0)
                 ,queue(Parameters::SlidingWindowSize)
             {
+            }
+
+            std::string ToString() const
+            {
+                std::ostringstream os;
+                os<<"welcome: "<<welcome<<", lastInSeq: "<<lastInSequence<<", biggestSeq: "<<biggestSequence<<std::endl;
+                for (int i=0; i<queue.Size(); ++i)
+                {
+                    os<<"q["<<i<<"]: "<<queue[i].ToString()<<std::endl;
+                }
+                return os.str();
             }
         };
 
@@ -395,6 +412,7 @@ namespace Com
                 {
                     ch.queue[i].data=recvData.data;
                     ch.queue[i].dataSize=recvData.dataSize;
+                    ch.queue[i].dataType=recvData.dataType;
                     ch.queue[i].numberOfFragments=recvData.numberOfFragments;
                     ch.queue[i].fragmentNumber=tmpFragNo++;
                 }
@@ -402,6 +420,7 @@ namespace Com
                 {
                     ch.queue[i].data=recvData.data;
                     ch.queue[i].dataSize=recvData.dataSize;
+                    ch.queue[i].dataType=recvData.dataType;
                     ch.queue[i].numberOfFragments=recvData.numberOfFragments;
                     ch.queue[i].fragmentNumber=++tmpFragNo;
                 }
@@ -426,35 +445,38 @@ namespace Com
             }
             else if (header->sequenceNumber>ch.lastInSequence)
             {
-                lllog(8) << L"COM: Recv unacked message with seqNo gap (i.e messages have been lost), received seqNo " << header->sequenceNumber << std::endl;
-
                 //this is a message with bigger seq but we have missed something inbetween
                 //reset receive queue, since theres nothing old we want to keep any longer
                 //we need to deallocate the data since it has not been delivered to the subscriber
+
+                lllog(8) << L"COM: Recv unacked message with seqNo gap (i.e messages have been lost), received seqNo " << header->sequenceNumber << std::endl;
+
+                //deallocate memory, use first slot to be sure to only do it once
+                if (ch.queue[0].data!=nullptr)
+                {
+                    auto recvIt = m_receivers.find(ch.queue[0].dataType);
+                    if (recvIt == m_receivers.end())
+                    {
+                        auto errMsg=std::string("COM: (HandleUnackedMessage) Could not find any registered receiver for dataType. Header = ")+header->ToString();
+                        SEND_SYSTEM_LOG(Error, << errMsg.c_str());
+                        throw std::logic_error(errMsg);
+
+                        std::ostringstream os;
+                        os << "COM: (HandleUnackedMessage) Cant find registered receiver for dataType "<<ch.queue[0].dataType<<" when trying to deallocate data."
+                           <<" This should be impossible since we have managed to allocate the data using the ame dataType."
+                           << " When it happened we got message = " << header->ToString();
+                        SEND_SYSTEM_LOG(Error, <<os.str().c_str());
+                        throw std::logic_error(os.str());
+                    }
+
+                    recvIt->second.dealloc(ch.queue[0].data);
+                    //ch.queue[0].Dealloc(recvIt->second.dealloc);
+                }
+
+                //clear the queue and be ready for a new message
                 for (size_t i=0; i<ch.queue.Size(); ++i)
                 {
-                    //dealloc the buffer via the first entry in the queue
-                    if (i == 0 && ch.queue[i].data != nullptr)
-                    {
-                        auto recvIt = m_receivers.find(ch.queue[i].dataType);
-                        if (recvIt == m_receivers.end())
-                        {
-                            std::ostringstream os;
-                            os << "COM: (HandleUnackedMessage) Received data from node "
-                               << header->commonHeader.senderId
-                               << " that has no registered receiver. DataTypeIdentifier: " << ch.queue[i].dataType
-                               << ", hdr = " << header->ToString();
-                            SEND_SYSTEM_LOG(Error, << os.str().c_str());
-                            throw std::logic_error(os.str());
-                        }
-
-                        ch.queue[i].Dealloc(recvIt->second.dealloc);
-                        ch.queue[i].Clear();
-                    }
-                    else //clear the other entries
-                    {
-                        ch.queue[i].Clear();
-                    }
+                    ch.queue[i].Clear();
                 }
 
                 if (header->fragmentNumber==0)
@@ -673,6 +695,7 @@ namespace Com
                         //remember if windowSize=1 then lastInQueue==rd, so we have to copy data before clearing rd
                         auto data=lastInQueue.data;
                         auto dataSize=lastInQueue.dataSize;
+                        auto dataType=lastInQueue.dataType;
                         auto numberOfFragments=lastInQueue.numberOfFragments;
                         uint16_t fragmentNumber=lastInQueue.fragmentNumber+1;
 
@@ -682,6 +705,7 @@ namespace Com
                         RecvData& nextFragment=ch.queue[ch.queue.Size()-1];
                         nextFragment.data=data;
                         nextFragment.dataSize=dataSize;
+                        nextFragment.dataType=dataType;
                         nextFragment.numberOfFragments=numberOfFragments;
                         nextFragment.fragmentNumber=fragmentNumber;
                     }
