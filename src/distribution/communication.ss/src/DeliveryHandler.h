@@ -457,10 +457,6 @@ namespace Com
                     auto recvIt = m_receivers.find(ch.queue[0].dataType);
                     if (recvIt == m_receivers.end())
                     {
-                        auto errMsg=std::string("COM: (HandleUnackedMessage) Could not find any registered receiver for dataType. Header = ")+header->ToString();
-                        SEND_SYSTEM_LOG(Error, << errMsg.c_str());
-                        throw std::logic_error(errMsg);
-
                         std::ostringstream os;
                         os << "COM: (HandleUnackedMessage) Cant find registered receiver for dataType "<<ch.queue[0].dataType<<" when trying to deallocate data."
                            <<" This should be impossible since we have managed to allocate the data using the ame dataType."
