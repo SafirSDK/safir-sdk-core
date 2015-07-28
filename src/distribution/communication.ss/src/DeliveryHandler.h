@@ -433,12 +433,8 @@ namespace Com
                 //we need to deallocate the data since it has not been delivered to the subscriber
                 for (size_t i=0; i<ch.queue.Size(); ++i)
                 {
-                    if (ch.queue[i].free)
-                    {
-                        continue;
-                    }
                     //dealloc the buffer via the first entry in the queue
-                    if (i == 0)
+                    if (i == 0 && ch.queue[i].data != nullptr)
                     {
                         auto recvIt = m_receivers.find(ch.queue[i].dataType);
                         if (recvIt == m_receivers.end())
