@@ -85,10 +85,12 @@ function(ADD_PRECOMPILED_HEADER _targetName _input)
     ENDFOREACH(item)
 
     GET_DIRECTORY_PROPERTY(_directory_flags COMPILE_DEFINITIONS)
-    STRING(REPLACE "\"" "\\\"" _directory_flags ${_directory_flags})
-    LIST(APPEND _compiler_FLAGS "${_directory_flags}")
-
     SEPARATE_ARGUMENTS(_compiler_FLAGS)
+    foreach(_flag ${_directory_flags})
+      STRING(REPLACE "\"" "\\\"" _flag ${_flag})
+      LIST(APPEND _compiler_FLAGS "-D${_flag}")
+    endforeach()
+
     #MESSAGE(STATUS "PCH command line: ${CMAKE_CXX_COMPILER} ${_compiler_FLAGS} -x c++-header ${_source} -o ${_output}")
     ADD_CUSTOM_COMMAND(
       OUTPUT ${_output}
