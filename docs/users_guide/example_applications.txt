@@ -16,7 +16,12 @@ The applications may execute on the same or different nodes, this is in fact one
 
 [[logic-separation]]
 .Separation of logic from GUI
-image::images/separation_tenet.png["Separation tenet", width="50%", link="images/separation_tenet.png"]
+ifdef::backend-docbook[]
+image::images/separation_tenet.png["Separation tenet", width="50%"]
+endif::backend-docbook[]
+ifndef::backend-docbook[]
+image::images/separation_tenet.png["Separation tenet", link="images/separation_tenet.png"]
+endif::backend-docbook[]
 
 === The (example) problem
 The fictive problem is that we need a system that can give us an overview of a number of manually created vehicles. We also want some services associated with the vehicles.
@@ -48,7 +53,12 @@ A deployment of the applications is shown in <<vehicle-deployment>> where the ap
 
 [[vehicle-deployment]]
 .Deployment of the Vehicle system
-image::images/vehicle_deployment.png["Vehicle system deployment", width="50%", link="images/vehicle_deployment.png"]
+ifdef::backend-docbook[]
+image::images/vehicle_deployment.png["Vehicle system deployment", width="50%"]
+endif::backend-docbook[]
+ifndef::backend-docbook[]
+image::images/vehicle_deployment.png["Vehicle system deployment", link="images/vehicle_deployment.png"]
+endif::backend-docbook[]
 
 === VehicleApp - Business Application
 This application exists in the languages C++ and C#.
@@ -100,7 +110,12 @@ Definition of vehicle parameters.
 
 [[vehicleapp-class-diagram]]
 .VehicleApp class diagram
-image::images/vehicleapp_class_diagram.png["Class Diagram", width="50%", link="images/vehicleapp_class_diagram.png"]
+ifdef::backend-docbook[]
+image::images/vehicleapp_class_diagram.png["Class Diagram", width="50%"]
+endif::backend-docbook[]
+ifndef::backend-docbook[]
+image::images/vehicleapp_class_diagram.png["Class Diagram", link="images/vehicleapp_class_diagram.png"]
+endif::backend-docbook[]
 
 App::
 Main class. Called by the Dob on application stop. Contains the main Dob connection.
@@ -134,31 +149,56 @@ The list view in <<vehiclemmi-list>> contains all published vehicle objects in t
 
 [[vehiclemmi-list]]
 .VehicleMmi list view.
-image::images/vehiclemmi_list.png["VehicleMmi List", width="50%", link="images/vehiclemmi_list.png"]
+ifdef::backend-docbook[]
+image::images/vehiclemmi_list.png["VehicleMmi List", width="50%"]
+endif::backend-docbook[]
+ifndef::backend-docbook[]
+image::images/vehiclemmi_list.png["VehicleMmi List", link="images/vehiclemmi_list.png"]
+endif::backend-docbook[]
 
 The dialog in <<vehiclemmi-create>> is opened from the list view and is used to send create requests for new vehicle objects. The requests are received by VehicleApp.
 
 [[vehiclemmi-create]]
 .VehicleMmi Create dialog
-image::images/vehiclemmi_create.png["VehicleMmi Create dialog", width="50%", link="images/vehiclemmi_create.png"]
+ifdef::backend-docbook[]
+image::images/vehiclemmi_create.png["VehicleMmi Create dialog", width="50%"]
+endif::backend-docbook[]
+ifndef::backend-docbook[]
+image::images/vehiclemmi_create.png["VehicleMmi Create dialog", link="images/vehiclemmi_create.png"]
+endif::backend-docbook[]
 
 The dialog in <<vehiclemmi-update>> is opened from the list view and is used to send update requests for existing vehicle objects. The requests are received by VehicleApp.
 
 [[vehiclemmi-update]]
 .VehicleMmi Update dialog
-image::images/vehiclemmi_update.png["VehicleMmi Update dialog", width="50%", link="images/vehiclemmi_update.png"]
+ifdef::backend-docbook[]
+image::images/vehiclemmi_update.png["VehicleMmi Update dialog", width="50%"]
+endif::backend-docbook[]
+ifndef::backend-docbook[]
+image::images/vehiclemmi_update.png["VehicleMmi Update dialog", link="images/vehiclemmi_update.png"]
+endif::backend-docbook[]
 
 The dialog in <<vehiclemmi-calculate-speed>> is opened from the list view and is used to send to calculate the difference between the speed for a selected vehicle object and an entered speed. The request is sent through a service to VehicleApp and the result is given in the sevice response.
 
 [[vehiclemmi-calculate-speed]]
 .VehicleMmi Speed calculation dialog
-image::images/vehiclemmi_calculate_speed.png["Speed calculation", width="50%", link="images/vehiclemmi_calculate_speed.png"]
+ifdef::backend-docbook[]
+image::images/vehiclemmi_calculate_speed.png["Speed calculation", width="50%"]
+endif::backend-docbook[]
+ifndef::backend-docbook[]
+image::images/vehiclemmi_calculate_speed.png["Speed calculation", link="images/vehiclemmi_calculate_speed.png"]
+endif::backend-docbook[]
 
 The dialog in <<vehiclemmi-category-info>> is opened from the list view and is used to obtain category information for the selected vehicle object. If there is no information the category code in the database, the information entered in the dialog is instead stored for the given category code.
 
 [[vehiclemmi-category-info]]
 .VehicleMmi Category information dialog
-image::images/vehiclemmi_category_info.png["Category info", width="50%", link="images/vehiclemmi_category_info.png"]
+ifdef::backend-docbook[]
+image::images/vehiclemmi_category_info.png["Category info", width="50%"]
+endif::backend-docbook[]
+ifndef::backend-docbook[]
+image::images/vehiclemmi_category_info.png["Category info", link="images/vehiclemmi_category_info.png"]
+endif::backend-docbook[]
 
 ==== Dou-files
 No dou files are provided by VehicleMmi.
@@ -168,7 +208,12 @@ No dou files are provided by VehicleMmi.
 
 [[vehiclemmi-class-diagram]]
 .VehicleMmi class diagram
-image::images/vehiclemmi_class_diagram.png["Class Diagram", width="50%", link="images/vehiclemmi_class_diagram.png"]
+ifdef::backend-docbook[]
+image::images/vehiclemmi_class_diagram.png["Class Diagram", width="50%"]
+endif::backend-docbook[]
+ifndef::backend-docbook[]
+image::images/vehiclemmi_class_diagram.png["Class Diagram", link="images/vehiclemmi_class_diagram.png"]
+endif::backend-docbook[]
 
 App::
 Main class. Called by the Dob on application stop.Contains the main Dob connection.
@@ -235,7 +280,12 @@ This service is used to create a new vehicle category info.
 
 [[vehicledb-class-diagram]]
 .VehicleDb class diagram
-image::images/vehicledb_class_diagram.png["Class Diagram", width="50%", link="images/vehicledb_class_diagram.png"]
+ifdef::backend-docbook[]
+image::images/vehicledb_class_diagram.png["Class Diagram", width="50%"]
+endif::backend-docbook[]
+ifndef::backend-docbook[]
+image::images/vehicledb_class_diagram.png["Class Diagram", link="images/vehicledb_class_diagram.png"]
+endif::backend-docbook[]
 
 App::
 Main class. Called by the Dob on application stop. Contains the main Dob connection.

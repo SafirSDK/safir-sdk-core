@@ -1477,18 +1477,17 @@ All objects of types defined by dou files can be serialized to and from XML and 
 [source,java]
 ----------------------------
 {
-    "Capabilities.TestObj" : {
-        "_douType" : "Capabilities.TestObj",
-        "MyStringArray" : ["hello", "world"],
-        "MyInt32Array" : [null, 123, null, 456], //array is padded with null values up to array size
-        "MyFirstBaseObject" : {
-            "_douType" : "Capabilities.Base",
-            ...
-        }
-        "MySecondBaseObject" : {
-            "_douType" : "Capabilities.Derived",
-            ...
-        }
+    "_douType" : "Capabilities.TestObj",
+    "MyStringArray" : ["hello", "world"],
+    "MyInt32Array" : [null, 123, null, 456],
+         //Note: array is padded with null values up to array size
+    "MyFirstBaseObject" : {
+        "_douType" : "Capabilities.Base",
+        ...
+    }
+    "MySecondBaseObject" : {
+        "_douType" : "Capabilities.Derived",
+        ...
     }
 }
 ----------------------------
@@ -1560,7 +1559,12 @@ The upshot is that all callbacks (except, of course, the +OnDoDispatch+ one) are
 
 [[dispatching_sequence_diagram]]
 .Dispatching sequence diagram
-image::images/dispatching_sequence_diagram.png["Dispatching Sequence Diagram", width="50%", link="images/dispatching_sequence_diagram.png"]
+ifdef::backend-docbook[]
+image::images/dispatching_sequence_diagram.png["Dispatching Sequence Diagram", width="50%"]
+endif::backend-docbook[]
+ifndef::backend-docbook[]
+image::images/dispatching_sequence_diagram.png["Dispatching Sequence Diagram", link="images/dispatching_sequence_diagram.png"]
+endif::backend-docbook[]
 
 If you're using C++ and Boost.Asio or ACE the SDK provides Dispatcher classes that do the thread switch and calls Dispatch, see <<dispatcher_classes>>.
 
@@ -1615,7 +1619,12 @@ Of course it is possible to pass proxies to other methods, as long as the proxy 
 
 [[messages_sequence_diagram]]
 .Sequence diagram for messages
-image::images/messages_sequence_diagram.png["Messages Sequence Diagram", width="50%", link="images/messages_sequence_diagram.png"]
+ifdef::backend-docbook[]
+image::images/messages_sequence_diagram.png["Messages Sequence Diagram", width="50%"]
+endif::backend-docbook[]
+ifndef::backend-docbook[]
+image::images/messages_sequence_diagram.png["Messages Sequence Diagram", link="images/messages_sequence_diagram.png"]
+endif::backend-docbook[]
 
 For messages there are two different roles involved. The Message Sender sends messages and the Message Subscriber receives messages. The subscriber needs to set up the subscription, and subsequently it will receive messages in its +OnMessage+ callback function whenever a Message Sender sends a message.
 
@@ -1725,7 +1734,12 @@ catch (const Safir::Dob::OverflowException &)
 
 [[services_sequence_diagram]]
 .Sequence diagram for services
-image::images/services_sequence_diagram.png["Services Sequence Diagram", width="50%", link="images/services_sequence_diagram.png"]
+ifdef::backend-docbook[]
+image::images/services_sequence_diagram.png["Services Sequence Diagram", width="50%"]
+endif::backend-docbook[]
+ifndef::backend-docbook[]
+image::images/services_sequence_diagram.png["Services Sequence Diagram", link="images/services_sequence_diagram.png"]
+endif::backend-docbook[]
 
 
 For services there are two different roles involved. The ServiceHandler is the component implementing the service and the Requestor is the component using the service. The Handler needs to register the service and then the Requestor can send requests to it.
@@ -1887,8 +1901,12 @@ When handling entities there are three roles involved. _Entity Handler_ is an ap
 
 [[entities_sequence_diagram]]
 .Sequence diagram for entities
-image::images/entities_sequence_diagram.png["Entities Sequence Diagram", width="50%", link="images/entities_sequence_diagram.png"]
-
+ifdef::backend-docbook[]
+image::images/entities_sequence_diagram.png["Entities Sequence Diagram", width="50%"]
+endif::backend-docbook[]
+ifndef::backend-docbook[]
+image::images/entities_sequence_diagram.png["Entities Sequence Diagram", link="images/entities_sequence_diagram.png"]
+endif::backend-docbook[]
 
 This section will first describe "simple" entity handling, such as is shown in <<entities_sequence_diagram>>, and later go on to describe more advanced concepts, such as _persistence_ and _injections_.
 
@@ -2504,8 +2522,12 @@ Now you need to create a dom file as described in <<simple_persistence>>, and th
 
 [[persistence_sequence_diagram]]
 .Sequence diagram for persistent entity
-image::images/persistence_sequence_diagram.png["Persistence Sequence Diagram", width="50%", link="images/persistence_sequence_diagram.png"]
-
+ifdef::backend-docbook[]
+image::images/persistence_sequence_diagram.png["Persistence Sequence Diagram", width="50%"]
+endif::backend-docbook[]
+ifndef::backend-docbook[]
+image::images/persistence_sequence_diagram.png["Persistence Sequence Diagram", link="images/persistence_sequence_diagram.png"]
+endif::backend-docbook[]
 
 [[handler_registration_subscription]]
 ==== Handler registration subscriptions
@@ -3193,6 +3215,10 @@ For applications written in C++ and using Boost.Asio or ACE the classes +Safir.U
 
 Just instantiate the +AsioDispatcher+ or +AceDispatcher+ passing it your io_service or ACE_Reactor, and pass a pointer to the instance to your connection when calling +Open+, and you're done. The dispatcher will now perform the thread switch through the io_service/reactor main loop using +post+/+notify+.
 
+The ACE dispatcher is deprecated as of Safir SDK Core 6.0 and will be removed in a future
+release. Since it is a header-only class you can make a copy of it to your own project if
+you need to keep it around after it has been removed.
+
 === Time
 Under the namespace +Safir.Time+ there are a few classes that provide functionality for obtaining the current time (both local and UTC) and converting it to and from various formats.
 
@@ -3381,7 +3407,12 @@ The first time the application instances start, one of the instances will be giv
 
 [[redundancy_sequence_diagram]]
 .Sequence diagram for redundant entity handlers
-image::images/redundancy_sequence_diagram.png["Redundancy Sequence Diagram", width="50%", link="images/redundancy_sequence_diagram.png"]
+ifdef::backend-docbook[]
+image::images/redundancy_sequence_diagram.png["Redundancy Sequence Diagram", width="50%"]
+endif::backend-docbook[]
+ifndef::backend-docbook[]
+image::images/redundancy_sequence_diagram.png["Redundancy Sequence Diagram", link="images/redundancy_sequence_diagram.png"]
+endif::backend-docbook[]
 
 Note that applications subscribing to the entities that are redundancy-handled _may_ see the entity instances as deleted for a short while, since in reality the handler was unregistered for a short while.
 
@@ -3448,8 +3479,12 @@ The +EntityHandlerInjection+ consumer interface has, as described in <<advanced_
 
 [[injection_sequence_diagram]]
 .Injection sequence diagram
-image::images/injection_sequence_diagram.png["Injection Sequence Diagram", width="50%", link="images/injection_sequence_diagram.png"]
-
+ifdef::backend-docbook[]
+image::images/injection_sequence_diagram.png["Injection Sequence Diagram", width="50%"]
+endif::backend-docbook[]
+ifndef::backend-docbook[]
+image::images/injection_sequence_diagram.png["Injection Sequence Diagram", link="images/injection_sequence_diagram.png"]
+endif::backend-docbook[]
 
 Note that it is not possible to tell the difference between the two kinds of calls to +OnInjectedNewEntity+, and in fact both new and old (i.e. persisted and injected) data can be mixed (i.e. timestamp merged) in a call to +OnInjectedNewEntity+.
 
@@ -3691,7 +3726,12 @@ For example, you can set up a subscription to an entity, register entity handler
 
 [[sate_overview]]
 .Sate screen shot
-image::images/sate_overview.png["Sate Screen shot", width="50%", link="images/sate_overview.png"]
+ifdef::backend-docbook[]
+image::images/sate_overview.png["Sate Screen shot", width="50%"]
+endif::backend-docbook[]
+ifndef::backend-docbook[]
+image::images/sate_overview.png["Sate Screen shot", link="images/sate_overview.png"]
+endif::backend-docbook[]
 
 The lower left part is an "inbox", containing the most recent entity updates and requests, service requests and messages received. The lower right hand part shows a history of what "has happened", e.g. showing if a request has been successfully sent, etc.
 
@@ -3703,13 +3743,23 @@ Dobexplorer is a tool that is primarily meant for the developers of the Dob, but
 
 [[dobexplorer_memory]]
 .Dobexplorer showing a graph of memory usage.
-image::images/dobexplorer_memory.png["Dobexplorer showing memory usage", width="50%", link="images/dobexplorer_memory.png"]
+ifdef::backend-docbook[]
+image::images/dobexplorer_memory.png["Dobexplorer showing memory usage", width="50%"]
+endif::backend-docbook[]
+ifndef::backend-docbook[]
+image::images/dobexplorer_memory.png["Dobexplorer showing memory usage", link="images/dobexplorer_memory.png"]
+endif::backend-docbook[]
 
 <<dobexplorer_nodes>> shows dobexplorer displaying a table of the node statuses of a multinode system.
 
 [[dobexplorer_nodes]]
 .Dobexplorer showing node statuses.
-image::images/dobexplorer_nodes.png["Dobexplorer showing node statuses", width="50%", link="images/dobexplorer_nodes.png"]
+ifdef::backend-docbook[]
+image::images/dobexplorer_nodes.png["Dobexplorer showing node statuses", width="50%"]
+endif::backend-docbook[]
+ifndef::backend-docbook[]
+image::images/dobexplorer_nodes.png["Dobexplorer showing node statuses", link="images/dobexplorer_nodes.png"]
+endif::backend-docbook[]
 
 === dots_configuration_check
 +dots_configuration_check+ is a command line tool that can be used to quickly validate
