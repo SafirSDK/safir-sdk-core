@@ -24,7 +24,7 @@ This document is a combination of several other documents, so some parts of the 
 More specifically the database section is written by Jörgen Johansson, the section on Safir.Utilities.Foreach was written by Stefan Lindström, and the appendix about the example applications was written by Petter Lönnstedt. Most of the text on the basic Dob services is based on the original Dob Software User's Guide written by Jörgen Johansson. Mikael Wennerberg wrote the section on redundant persistency.
 
 === Versions of this document
-To obtain the latest version, please visit http://safir.sourceforge.net/[].
+To obtain the latest version, please visit http://safirsdkcore.com/[].
 
 [[licenses]]
 === Licences and Copying
@@ -36,20 +36,23 @@ To obtain the latest version, please visit http://safir.sourceforge.net/[].
     A copy of the license is included in the source code distribution and it
     is also available from https://www.gnu.org/licenses.
 
-Safir SDK Core itself is available under the GPL v3 (GNU General Public License version 3) license from http://safir.sourceforge.net[] or a commercial license from Saab AB.
+Safir SDK Core itself is available under the GPL v3 (GNU General Public License version 3) license from http://safirsdkcore.com[] or a commercial license from Saab AB.
 
 The GPL license means that you are free to try out or modify the software to your hearts content and create your own applications on top of it. But you are not allowed to distribute the modified software or your applications (which will classify as derivative works) without releasing your code under the GPL license too. If you want to do this you need to obtain (and pay for...) a commercial license from Saab AB (contact information at http://www.saabgroup.com[]).
 
 For more information on the GPL v3 license, see http://gplv3.fsf.org/[].
 
+Portions of the source code has other licenses and other copyright holders. These are
+listed in the file source package file build/packaging/debian/copyright.
+
 :numbered:
 == What is Safir SDK Core?
 
-This section is meant to contain a high-level overview of what the Safir SDK Core is, what services it provides and what kind of systems it is suitable for, without going too much into the technical details.
+Safir SDK Core is a middleware and platform for creation of distributed soft real-time
+systems. It is Scalable, Reliable, Portable, and last but not least, it is Open!
 
-But, we're not there yet. We haven't been able to get that information in here in a form that we're satisfied with. If you want that kind of information please contact Saab AB (contact information at http://www.saabgroup.com[]).
-
-So for the time being this chapter just contains a collection of background information.
+Safir SDK Core is based on modern architectural principles and has a solid foundation in
+more than 20 years of experience of development of distributed systems at Saab AB.
 
 === Provided services
 Safir SDK Core is mainly aimed at providing data distribution for distributed real-time systems and information systems, but there are a few other services included in Safir SDK Core, mostly because they are needed internally. <<sdk_service_summary>> contains a summary of the services provided by Safir SDK Core.
@@ -58,19 +61,21 @@ Safir SDK Core consists of a number of _components_, some of which have cryptic 
 
 [[sdk_service_summary]]
 .Components and Services in Safir SDK Core
-[width="70%", cols="15%,25%,60%",options="header",frame="topbot",grid="none"]
+[width="80%", cols="15%,25%,60%",options="header",frame="topbot",grid="none"]
 |=========================================================================
 |Acronym |Full name                       |Provided Service(s)
 
-|Lluf    |Low Level Utility Functions     |Low level functions that are not provided by Boost.
-|Dots    |Distributed Objects Type system |The type system used for the distributed objects.
-|Dose    |Distributed Objects Service     |Inter-process and inter-computer distribution.
-|Douf    |Dob Utility Functions           |Utility functions for applications using the Dob.
-|Logging |N/A                             |Send log messages to the Safir Log mechanism.
-|Swre    |Software Reports                |Debug trace logging.
-|Olib    |ODBC Library                    |C++ wrapper classes for Odbc database access.
-|Dope    |Dob Persistence                 |Persistent storage of Dob entities.
-|Foreach |N/A                             |Functionality for operating on multiple entity instances.
+|Lluf         |Low Level Utility Functions     |Low level functions that are not provided by Boost.
+|Logging      |N/A                             |Send log messages to the Safir Log mechanism.
+|Distribution |N/A                             |Low level communication mechanism.
+|Dots         |Distributed Objects Type system |The type system used for the distributed objects.
+|Dose         |Distributed Objects Service     |Inter-process and inter-computer distribution.
+|Control      |N/A                             |Application launching and monitoring (currently limited implementation).
+|Douf         |Dob Utility Functions           |Utility functions for applications using the Dob.
+|Swre         |Software Reports                |Debug trace logging.
+|Olib         |ODBC Library                    |C++ wrapper classes for Odbc database access (deprecated).
+|Dope         |Dob Persistence                 |Persistent storage of Dob entities.
+|Foreach      |N/A                             |Functionality for operating on multiple entity instances.
 
 |=========================================================================
 
@@ -81,7 +86,7 @@ Component dependencies and the layered architecture of Safir SDK Core is illustr
 [[sdk_core_component_dependencies]]
 .Safir SDK Core component dependencies
 ifdef::backend-docbook[]
-image::images/block_diagram.eps["Component Dependencies", scaledwidth="60%"]
+image::images/block_diagram.eps["Component Dependencies", scaledwidth="50%"]
 endif::backend-docbook[]
 ifndef::backend-docbook[]
 image::images/block_diagram.png["Component Dependencies", link="images/block_diagram.png"]
@@ -99,7 +104,7 @@ Contact Saab AB for more information (contact information at http://www.saabgrou
 === Prerequisites / Dependencies
 Safir SDK Core uses the _Boost_ library to provide low level functionality and operating system independence wrappers. See http://www.boost.org/[] for more information.
 
-Safir SDK Core also uses some other open source libraries, such as Qt for C++ widgets and CMake for building. See the installation instructions for more information.
+Safir SDK Core also uses some other open source libraries, such as Qt for C++ widgets and CMake for building. See the build instructions for more information.
 
 === Supported Platforms
 Safir SDK Core supports both the Windows and Linux platforms on the x86 and x86_64 platforms. It also successufully builds and runs on ARM Linux, but we have not tested this extensively.
@@ -114,7 +119,8 @@ Studio (2010 SP1 or later) or Mono (version 2.4 or later). Any Java 6 compiler s
 able to compile the Java code (we've used Oracles's and OpenJDK). We strive to make all
 our code standards compliant, so other versions and compilers _should_ work.
 
-There is more information about platform support on the http://sourceforge.net/p/safir/wiki/[safir.sourceforge.net wiki].
+There is more information about platform support on the
+https://github.com/SafirSDK/safir-sdk-core/wiki/Platform-Support[Safir SDK Core wiki].
 
 == What is the Dob?
 This chapter describes what the Dob does and a little bit about why it does it the way it does.
@@ -133,11 +139,17 @@ The main ``selling points'' include:
 
 ==== A bit about the Dob architecture
 
-The Dob consists of two parts that together provide the object distribution mechanism. These two parts are the type system (Dots), which provides the language independent types and manages the definitions of the objects to distribute, and the distribution mechanism (Dose), which does the actual data distribution and synchronisation.
+From the user perspective the Dob itself consists of two parts that together provide the
+object distribution mechanism. These two parts are the type system (Dots), which provides
+the language independent types and manages the definitions of the objects to distribute,
+and the distribution mechanism (Dose), which does the actual data distribution and
+synchronisation.
 
 To use the Dob an application includes the language specific interface part of the Dob interface into the application. This language specific interface in turn uses language independent libraries (written in C++) to manage the objects and to communicate with other parts of the Dob.
 
-To run the Dob there is an executable, "dose_main", that must be running. This executable is responsible for managing the distribution of data between applications and nodes in the system.
+To run the Dob there is an executable, "safir_control", that must be running. This
+executable is responsible launching and monitoring the process that manages the
+distribution of data between applications and nodes in the system.
 
 Within a node all data distribution is done through shared memory, and between the nodes it is UDP/IP communication (with a reliable protocol on top, to guarantee delivery).
 
@@ -148,7 +160,7 @@ The Dob is appropriate for distribution of data between applications (in the sam
 - Has no infinite queues.
 - Is event driven (no polling).
 - Is asynchronous (no RPC, no blocking calls).
-- Has bounded latency.
+- Designed to provide bounded latency.
 
 The Dob implements a distributed object cache, making it possible to either read object information synchronously from shared memory, or to subscribe to object changes.
 
@@ -219,6 +231,8 @@ All Safir systems are based around types defined using the Dob type system.
 A Dob object is made up of _members_, that can be simple or complex types (and arrays of these).
 
 The type system also provides functionality for defining run-time parameters (values are loaded at start-up) and properties, that provide a common interface for accessing members of different classes.
+
+TODO: write about dictionaries and sequences!
 
 === The simple types
 These are the simple types that class members can have, either as single members or as arrays (it is also possible to put objects inside objects, which is described below).
@@ -882,14 +896,19 @@ and include files. In the example the installation paths are relative, and will 
 relative to CMAKE_INSTALL_PREFIX (which will be set by dobmake). If you specify absolute
 installation paths instead, those will be used.
 
-==== Running dobmake
+==== Running Dobmake GUI
 
 Dobmake is really only a gui for building and installing a CMake project. In fact, it can
 be used to build any CMakeLists.txt file. <<dobmake>> shows dobmake running under Windows 7.
 
 [[dobmake]]
 .Dobmake screen shot
-image::images/dobmake.png["Dobmake Screen shot", width="60%", link="images/dobmake.png"]
+ifdef::backend-docbook[]
+image::images/dobmake.png["Dobmake Screen shot", width="70%"]
+endif::backend-docbook[]
+ifndef::backend-docbook[]
+image::images/dobmake.png["Dobmake Screen shot", link="images/dobmake.png"]
+endif::backend-docbook[]
 
 To build a CMake project, enter the path to the CMakeLists.txt file in the _Dou
 directory_ field (or select the CMakeLists.txt file using the browse button).
@@ -910,10 +929,13 @@ It is possible to explicitly disable Java builds by setting an environment varia
 +SAFIR_DONT_BUILD_JAVA+ to +True+.
 ************************************
 
-If you want to run dobmake from a script, use dobmake-batch (or dobmake-batch.py on
-Windows) to run without using the GUI. It expects to be run from the directory containing
-the CMakeLists.txt file, and CMAKE_INSTALL_PREFIX can be set using the +--install+
-argument.
+==== Running Dobmake from script or command line
+
+If you want to run dobmake from a script or from the command line, use dobmake-batch (or
+dobmake-batch.py on Windows) to run without using the GUI.
+
+The dobmake-batch script expects to be run from the directory containing the
+CMakeLists.txt file, and CMAKE_INSTALL_PREFIX can be set using the +--install+ argument.
 
 === Using the generated types
 This section contains some pointers on how to use the generated types, and what the different operations and classes "mean".
@@ -925,7 +947,7 @@ So an A object (myA) could look like in <<example_object>>.
 [[example_object]]
 .Example object
 ifdef::backend-docbook[]
-image::images/example_object.eps["Example object", scaledwidth="30%"]
+image::images/example_object.eps["Example object", scaledwidth="25%"]
 endif::backend-docbook[]
 ifndef::backend-docbook[]
 image::images/example_object.png["Example object", link="images/example_object.png"]
@@ -1160,7 +1182,12 @@ For the discussion in this section the object hierarchy in <<example_object_hier
 
 [[example_object_hierarchy]]
 .Example object hierarchy
-image::images/object_hierarchy.png["Example object hierarchy", width="50%", link="images/object_hierarchy.png"]
+ifdef::backend-docbook[]
+image::images/object_hierarchy.eps["Example object hierarchy", scaledwidth="40%"]
+endif::backend-docbook[]
+ifndef::backend-docbook[]
+image::images/object_hierarchy.png["Example object hierarchy", link="images/object_hierarchy.png"]
+endif::backend-docbook[]
 
 [[cpp_type_casting]]
 ===== C++ type casting
@@ -2629,7 +2656,7 @@ The reason that we need two mechanisms is that the dou-parameters are not availa
 This chapter aims to describe the most important of all the things that can be configured in Safir SDK Core. There are many more things that can be configured, and you're encouraged to have a look in the parameter dou-files, which should contain descriptions of what the parameters do.
 
 === Basic system settings
-The basic system settings consist of three ini files: _locations.ini_, _logging.ini_, and _typesystem.ini_. Currently these contain very few settings, but we have plans to use them for more settings (go to http://safir.sourceforge.net for more information).
+The basic system settings consist of three ini files: _locations.ini_, _logging.ini_, and _typesystem.ini_. Currently these contain very few settings, but we have plans to use them for more settings (go to http://safirsdkcore.com for more information).
 
  * locations.ini - locations of stuff we need, e.g. lock file and crash dump directories.
  * logging.ini - logging settings.
@@ -2778,6 +2805,9 @@ Now you should be able to fire up +dose_main+ on the nodes of your system and st
 
 [[routed_networks]]
 ===== Routed networks
+
+TODO: update or remove
+
 In the default configuration the Dob assumes that it runs on a non-routed network. To run on a routed network there are some further considerations that need to be made.
 
 By default the _time-to-live_ (TTL) of the multicast packets of the Dob is set to 1. This means that packets will not cross routers and will stay within the current subnet. By changing the parameter +Safir.Dob.NodeParameters.RoutingHops+ you can modify this behaviour. For example, if it is set to 2 the packets will survive one routing hop.
@@ -3693,14 +3723,6 @@ typesystem and retrieve information like:
 
 By typing "+dots_configuration_check --help+" all available options are displayed.
 
-[[olib]]
-== C++ ODBC database wrapper
-////
-Olib text is located in a separate file, olib.txt
-////
-
-include::olib.txt[]
-
 == More help
 Apart from this document there are other sources for help.
 
@@ -3712,9 +3734,15 @@ The generated doxygen documentation is included in the downloads, and should be 
 _Use this documentation! It is the place where interface details are explained!_
 
 === Forum and Mailing list
+
+TODO update remove
+
 Questions can be posted in the Safir SDK Core forum or the safir-devel mailing list. More info at http://safir.sourceforge.net[].
 
 === Reporting bugs
+
+TODO update remove
+
 Bug reports can be filed under "Tickets" at at http://safir.sourceforge.net[].
 
 [[appendix_a]]

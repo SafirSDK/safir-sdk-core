@@ -1,7 +1,7 @@
 .SILENT:
 .PHONY: all clean default
 
-DEPS := users_guide.txt olib.txt tracer.txt example_applications.txt \
+DEPS := users_guide.txt tracer.txt example_applications.txt \
 		$(wildcard images/*.png) \
 		$(patsubst %.dia,%.eps,$(wildcard images/*.dia)) \
 		$(patsubst %.dia,%.png,$(wildcard images/*.dia)) \
@@ -34,7 +34,7 @@ vpath %.dia images
 users_guide.pdf: $(DEPS)
 	echo "Building pdf"
 	cp -f ../logo/renders/logotype1024.png .
-	a2x -L -f pdf -d book --xsltproc-opts="--stringparam section.autolabel 1 --stringparam section.label.includes.component.label 1 --stringparam toc.section.depth 3" --dblatex-opts "-P latex.output.revhistory=0 -s custom-coverpage-dblatex.sty" -a SAFIR_VERSION=$(SAFIR_VERSION) users_guide.txt 
+	a2x -L -f pdf -d book --xsltproc-opts="--stringparam section.autolabel 1 --stringparam section.label.includes.component.label 1 --stringparam toc.section.depth 3" --dblatex-opts "-P doc.publisher.show=0 -P latex.output.revhistory=0 -s custom-coverpage-dblatex.sty" -a SAFIR_VERSION=$(SAFIR_VERSION) users_guide.txt 
 	rm -f logotype1024.png
 
 users_guide.html: $(DEPS)
