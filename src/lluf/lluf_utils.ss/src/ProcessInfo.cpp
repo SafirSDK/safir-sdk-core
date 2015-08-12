@@ -23,7 +23,7 @@
 ******************************************************************************/
 #include <Safir/Utilities/ProcessInfo.h>
 #include <vector>
-
+#include <iostream>
 #include <boost/lexical_cast.hpp>
 #include <boost/filesystem/path.hpp>
 
@@ -32,7 +32,6 @@
 #include <boost/filesystem/fstream.hpp>
 #include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/predicate.hpp>
-#include <iostream>
 #include <iterator>
 
 #elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
