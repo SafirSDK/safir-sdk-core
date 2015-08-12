@@ -67,7 +67,7 @@ namespace
         }
 
         //Note: cmdline is null character separated. See man proc(5).
-        
+
         std::vector<std::string> result(1);
         for (std::istreambuf_iterator<char> it = std::istreambuf_iterator<char>(cmdline);
              it != std::istreambuf_iterator<char>(); ++it)
@@ -158,6 +158,9 @@ namespace Utilities
                                         m_pid);
         if (hProcess == NULL)
         {
+            //TODO: remove error stuff
+            std::wcerr << "OpenProcess failed with error code "
+                       << boost::lexical_cast<std::string>(::GetLastError()) << std::endl;
             return boost::lexical_cast<std::string>(m_pid);
         }
 
@@ -171,7 +174,19 @@ namespace Utilities
         if ( EnumProcessModules( hProcess, &hMod, sizeof(hMod),
             &cbNeededMBN) )
         {
-            GetModuleBaseNameA( hProcess, hMod, szProcessName, MAX_PATH );
+            const auto ret = GetModuleBaseNameA( hProcess, hMod, szProcessName, MAX_PATH );
+            if (ret == 0)
+            {
+                //TODO: remove error stuff
+                std::wcerr << "GetModuleBaseNameA failed with error code "
+                           << boost::lexical_cast<std::string>(::GetLastError()) << std::endl;
+            }
+        }
+        else
+        {
+            //TODO: remove error stuff
+            std::wcerr << "EnumProcessModules failed with error code "
+                       << boost::lexical_cast<std::string>(::GetLastError()) << std::endl;
         }
 
         CloseHandle(hProcess);
