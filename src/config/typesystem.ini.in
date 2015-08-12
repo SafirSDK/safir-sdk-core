@@ -4,7 +4,7 @@
 ;Number of megabytes of shared memory that will be allocated by dots kernel.
 dots_shared_memory_size=10
 
-;Default directory to look for dou files in. Can be overridden in each section.
+;Comma separated list of default directories to look for dou files in.
 dou_search_path=@DEFAULT_DOU_SEARCH_PATH@
 
 ;Comma separated search path for dots_generated-xxx-java.jar files.
@@ -14,3 +14,17 @@ java_search_path=@DEFAULT_JAVA_SEARCH_PATH@
 ;This section contains the information needed to load the safir_generated-Core-xxx libraries and its dou files.
 kind=library
 dependencies=
+
+;[OverrideExample]
+; This section provides an override that will only be used on a node with SAFIR_INSTANCE set to 1.
+; See User's Guide for more info on running multiple nodes on one computer.
+;kind=override                    ; this section only contains parameter overrides.
+;dou_directory=/path/to/files     ; specify a custom directory for the files
+;safir_instance=1
+;Overrides don't need to specify dependencies
+
+;[LibraryExample]
+;kind=library          ; this section describes a library built from dou files.
+;dependencies=Core     ; it has a dependency on one or more dou files in Core (above).
+;No dou_directory is specified, so the dou files will be looked for under dou_search_path/LibraryExample
+;No safir_instance is specified, so the section will apply to all nodes on the computer.
