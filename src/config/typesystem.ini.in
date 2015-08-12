@@ -7,7 +7,7 @@ dots_shared_memory_size=10
 ;Comma separated list of default directories to look for dou files in.
 dou_search_path=@DEFAULT_DOU_SEARCH_PATH@
 
-;Comma separated search path for dots_generated-xxx-java.jar files.
+;Comma separated search path for safir_generated-xxx-java.jar files.
 java_search_path=@DEFAULT_JAVA_SEARCH_PATH@
 
 [Core]
