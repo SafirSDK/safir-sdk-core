@@ -29,7 +29,7 @@
 #include <Safir/Dob/Typesystem/ContainerBase.h>
 #include <Safir/Dob/Typesystem/Exceptions.h>
 
-#include <map>
+#include <boost/shared_ptr.hpp>
 
 namespace Safir
 {
@@ -152,7 +152,7 @@ namespace Typesystem
         {
             m_bIsChanged=true;
             ValueContainerType container;
-            container.SetVal(val);
+            InsertHelper<ContainedType, ValueContainerType>::SetVal(val, container);
             container.SetChanged(true);
             m_values.insert(value_type(key, container));
         }
@@ -197,6 +197,16 @@ namespace Typesystem
 
     private:
         std::map<KeyT, ValT> m_values;
+
+        template <class V, class C> struct InsertHelper
+        {
+            static void SetVal(const V& v, C& c) {c.SetVal(v);}
+        };
+
+        template <class V, class C> struct InsertHelper< boost::shared_ptr<V>, C >
+        {
+            static void SetVal(const boost::shared_ptr<V>& v, C& c) {c.SetPtr(v);}
+        };
     };
 }
 }
