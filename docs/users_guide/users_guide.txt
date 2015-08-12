@@ -2678,10 +2678,10 @@ The reason that we need two mechanisms is that the dou-parameters are not availa
 This chapter aims to describe the most important of all the things that can be configured in Safir SDK Core. There are many more things that can be configured, and you're encouraged to have a look in the parameter dou-files, which should contain descriptions of what the parameters do.
 
 === Basic system settings
-The basic system settings consist of three ini files: _locations.ini_, _logging.ini_, and _typesystem.ini_. Currently these contain very few settings, but we have plans to use them for more settings (go to http://safirsdkcore.com for more information).
+The basic system settings consist of three ini files: _locations.ini_, _logging.ini_, and _typesystem.ini_:
 
- * locations.ini - locations of stuff we need, e.g. lock file and crash dump directories.
- * logging.ini - logging settings.
+ * locations.ini - locations of low level files and directories, e.g. lock file and crash dump directories.
+ * logging.ini - settings for system logging and debug logging.
  * typesystem.ini - typesystem configuration.
 
 The system will look for these configuration files in several places, which allows them to be kept separate or together with the rest of the Safir SDK Core files. The following locations are checked, and the first configuration found will be used:
@@ -2697,24 +2697,32 @@ The system will look for these configuration files in several places, which allo
   2. _CSIDL_LOCAL_APPDATA_\safir-sdk-core\config\ - user configuration
 
 +
-On Windows 7 _CSIDL_COMMON_APPDATA_ is +C:\ProgramData+ and _CSIDL_LOCAL_APPDATA_ is +%USERPROFILE%\AppData\Local+ by default. See http://msdn.microsoft.com/en-us/library/windows/desktop/bb762494%28v=vs.85%29.aspx[MSDN documentation] for more information about CSIDLs. (The reason that we use CSIDLs rather than Windows Known Folders is that it allows us to be backward compatible with Windows XP.)
+On Windows 7 _CSIDL_COMMON_APPDATA_ is +C:\ProgramData+ and _CSIDL_LOCAL_APPDATA_ is +%USERPROFILE%\AppData\Local+ by default. See http://msdn.microsoft.com/en-us/library/windows/desktop/bb762494%28v=vs.85%29.aspx[MSDN documentation] for more information about CSIDLs.
 
 [[locations_ini]]
 ==== locations.ini
-_locations.ini_ currently contains two parameters:
+_locations.ini_ contains three parameters:
 
 lock_file_directory::
-To ensure correct platform independent initialization of some system-wide resources (e.g. shared memory) Safir SDK Core uses lock files. This parameter lets us know where we should keep them.
+To ensure correct platform independent initialization of some system-wide resources
+(e.g. shared memory) Safir SDK Core uses lock files. This parameter lets us know where we
+should keep them.
 
 crash_dump_directory::
-Controls where the crash reporting library (see <<crash_reporting>>) should write the dump files.
+Controls where the crash reporting library (see <<crash_reporting>>) should write the
+dump files.
+
+ipc_endpoints_directory::
+Specifies where in the filesystem node internal ipc endpoints should be
+stored. Applicable for Linux only.
+
 
 [[logging_ini]]
 ==== logging.ini
 _logging.ini_ has two sections, _SystemLog_ and _LowLevelLog_. The LowLevelLog section contains parameters that control the logs for an internal logging and debugging facility, and you should never really need to touch these parameters, unless one of the Safir SDK Core developers have asked you to. The SystemLog section, however, contains parameters of greater interest, since they control the way Safir Logging works:
 
 native_logging::
-Controls whether or not logs are sent to the native, plattform specific, logging mechanism.
+Controls whether or not logs are sent to the native, platform specific, logging mechanism.
 
 send_to_syslog_server::
 Controls whether or not logs are formatted by the Safir Log mechanism and sent to a syslog server using UDP datagrams.
@@ -2728,6 +2736,11 @@ UDP Port for the syslog server.
 replace_newline_with_space::
 Controls whether or not a newline in the log message is replaced with a space.
 
+show_safir_instance::
+Show the current SAFIR_INSTANCE in syslog reports.
+
+TODO: reference a chapter on running multiple nodes on one computer.
+
 See <<safir_logging>> for more information on what "native" and "syslog" means, and how to use and configure the logging functionality.
 
 [[typesystem_ini]]
@@ -2738,6 +2751,19 @@ _typesystem.ini_ is a little bit more involved, so let's start with an example:
 ------------------------------------------
 ;Number of megabytes of shared memory that will be allocated by dots kernel.
 dots_shared_memory_size=10
+
+;Comma separated list of default directories to look for dou files in.
+dou_search_path=/home/lars/safir-logan/share/safir-sdk-core/dou
+
+;Comma separated search path for dots_generated-xxx-java.jar files.
+java_search_path=/home/lars/safir-logan/share/java/safir-sdk-core
+
+[Core]
+;This section contains the information needed to load the safir_generated-Core-xxx libraries and its dou files.
+kind=library
+dependencies=
+
+TODO: finish this example and section
 
 [Default]
 dou_directory=$(SAFIR_RUNTIME)/data/text/dots/classes
