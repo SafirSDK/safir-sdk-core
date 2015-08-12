@@ -9541,24 +9541,24 @@ void TestDictionaries()
     md->Int64BinaryMember()[100].SetVal(DotsTest::ParameterDictionaries::Int32BinaryParameter(10));
     md->Int64BinaryMember()[200].SetVal(DotsTest::ParameterDictionaries::Int32BinaryParameter(20));
 
-    md->TypeIdEnumMember()[DotsTest::MemberDictionaries::ClassTypeId].SetVal(DotsTest::ParameterDictionaries::StringEnumParameter(L"Billy"));
+    md->TypeIdEnumMember().Insert(DotsTest::MemberDictionaries::ClassTypeId,DotsTest::ParameterDictionaries::StringEnumParameter(L"Billy"));
     md->TypeIdEnumMember()[DotsTest::MemberSequences::ClassTypeId].SetVal(DotsTest::ParameterDictionaries::StringEnumParameter(L"Svarre"));
 
-    md->EnumInstanceIdMember()[DotsTest::TestEnum::MyFirst].SetVal(DotsTest::ParameterDictionaries::EnumInstanceIdParameter(DotsTest::TestEnum::MyFirst));
+    md->EnumInstanceIdMember().Insert(DotsTest::TestEnum::MyFirst,DotsTest::ParameterDictionaries::EnumInstanceIdParameter(DotsTest::TestEnum::MyFirst));
     md->EnumInstanceIdMember()[DotsTest::TestEnum::MySecond].SetVal(DotsTest::ParameterDictionaries::EnumInstanceIdParameter(DotsTest::TestEnum::MySecond));
 
-    md->InstanceIdEntityIdMember()[ts::InstanceId(L"FirstInstance")].SetVal(DotsTest::ParameterDictionaries::HandlerIdEntityIdParameter(ts::HandlerId(L"handlerOne")));
+    md->InstanceIdEntityIdMember().Insert(ts::InstanceId(L"FirstInstance"),DotsTest::ParameterDictionaries::HandlerIdEntityIdParameter(ts::HandlerId(L"handlerOne")));
     md->InstanceIdEntityIdMember()[ts::InstanceId(L"SecondInstance")].SetVal(DotsTest::ParameterDictionaries::HandlerIdEntityIdParameter(ts::HandlerId(2)));
 
     DotsTest::MemberDictionariesPtr item1=DotsTest::MemberDictionaries::Create();
-    item1->EntityIdHandlerIdMember()[ts::EntityId(Safir::Dob::Entity::ClassTypeId, ts::InstanceId(L"first"))].SetVal(DotsTest::ParameterDictionaries::EntityIdHandlerIdParameter(ts::EntityId(Safir::Dob::Entity::ClassTypeId, ts::InstanceId(L"first"))));
+    item1->EntityIdHandlerIdMember().Insert(ts::EntityId(Safir::Dob::Entity::ClassTypeId, ts::InstanceId(L"first")),DotsTest::ParameterDictionaries::EntityIdHandlerIdParameter(ts::EntityId(Safir::Dob::Entity::ClassTypeId, ts::InstanceId(L"first"))));
     item1->EntityIdHandlerIdMember()[ts::EntityId(Safir::Dob::Entity::ClassTypeId, ts::InstanceId(2))].SetVal(DotsTest::ParameterDictionaries::EntityIdHandlerIdParameter(ts::EntityId(Safir::Dob::Entity::ClassTypeId, ts::InstanceId(L"second"))));
 
-    md->StringItemMember()[L"Karl"].SetPtr(item1);
+    md->StringItemMember().Insert(L"Karl",item1);
     md->StringItemMember()[L"Philip"].SetNull();
     md->StringItemMember()[L"Gustav"].SetPtr(item1);
 
-    md->StringObjectMember()[L"Dilbert"].SetPtr(DotsTest::ParameterDictionaries::Int32ObjectParameter(10));
+    md->StringObjectMember().Insert(L"Dilbert",DotsTest::ParameterDictionaries::Int32ObjectParameter(10));
     md->StringObjectMember()[L"Wally"].SetPtr(DotsTest::ParameterDictionaries::Int32ObjectParameter(20));
 
     PrintDictionaries(md);
