@@ -159,7 +159,7 @@ namespace Utilities
         {
             //TODO: remove error stuff
             std::wcerr << "OpenProcess failed with error code "
-                       << boost::lexical_cast<std::string>(::GetLastError()) << std::endl;
+                       << ::GetLastError() << std::endl;
             return boost::lexical_cast<std::string>(m_pid);
         }
 
@@ -178,14 +178,14 @@ namespace Utilities
             {
                 //TODO: remove error stuff
                 std::wcerr << "GetModuleBaseNameA failed with error code "
-                           << boost::lexical_cast<std::string>(::GetLastError()) << std::endl;
+                           << ::GetLastError() << std::endl;
             }
         }
         else
         {
             //TODO: remove error stuff
             std::wcerr << "EnumProcessModules failed with error code "
-                       << boost::lexical_cast<std::string>(::GetLastError()) << std::endl;
+                       << ::GetLastError() << std::endl;
         }
 
         CloseHandle(hProcess);
