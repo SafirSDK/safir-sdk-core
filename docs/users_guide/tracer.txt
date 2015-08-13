@@ -37,7 +37,7 @@ debug.println("Testing logging " + myFloat + ", " + myInt);
 
 3. Call +Safir::Application::TracerBackdoor::Start(connection)+ just after your program has opened its main Dob connection.
 4. Call +Safir::Application::TracerBackdoor::Stop()+ when your application is shutting down.
-5. Enable and disable the logging by using the "backdoor" command. Send "<prefix> on" to turn on the logging of a prefix (also try "help" to see what prefixes are registered and what their current states are). To do this, type "backdoor -c myconnection myprefix on" in a command line window (if you skip the "-c myconnection" bit all applications in the system will receive the command, which may have undesired consequences).
+5. Enable and disable the logging by using the "bd" command. Send "<prefix> on" to turn on the logging of a prefix (also try "help" to see what prefixes are registered and what their current states are). To do this, type "bd -c myconnection myprefix on" in a command line window (if you skip the "-c myconnection" bit all applications in the system will receive the command, which may have undesired consequences).
  - It is possible to turn on/off all prefixes by sending "all on" to your application.
  - It is possible to turn on/off prefixes immediately from the start of an application by setting the environment variable FORCE_LOG to one or several "<prefix>" or "all". This is useful to be able to have logging on by default or for logging the startup behaviour of an application. See <<force_log>> for a few hints on how this feature can be used.
  - Trace log output will be sent to the Safir Log.
@@ -120,7 +120,7 @@ Starting the TracerBackdoor::
   Previously the TracerBackdoor was started automatically with a separate thread and connection, but now the TracerBackdoor has to be started explicitly, and on an existing connection. This means that you have to add Start and Stop calls in your applications.
 
 Setting Program Name::
-  Previously it has been necessary to tell the Tracer what the name of the program is for it to be able to use a sensible connection name. Since the Tracer no longer has a connection of its own this is no longer necessary. Hence the +SetProgramName(...)+ function has been removed. If your applications used this function you have to remove those calls. This also means that you now cannot address your application using "backdoor -c <executable name>", but instead have to use the connection name that the TracerBackdoor was started with.
+  Previously it has been necessary to tell the Tracer what the name of the program is for it to be able to use a sensible connection name. Since the Tracer no longer has a connection of its own this is no longer necessary. Hence the +SetProgramName(...)+ function has been removed. If your applications used this function you have to remove those calls. This also means that you now cannot address your application using "bd -c <executable name>", but instead have to use the connection name that the TracerBackdoor was started with.
 
 Buffering and flushing::
   Previously logged data was flushed to the old logging mechanism after 0.5 seconds. The new flushing behaviour is described above. You don't have to change your application in any way, just expect the new behaviour when using the Tracer.

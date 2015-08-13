@@ -3115,6 +3115,9 @@ WARNING: Before deciding to change the queue lengths you should have read and un
 
 [[memory_config]]
 === Shared Memory config
+
+TODO: update
+
 The Dob has two parameters that control the amount of shared memory used, +TypesystemSharedMemorySize+ and +SharedMemorySize+ (both can be found in Safir.Dob.NodeParameters.dou). The first parameter controls the amount of memory available for the typesystem (the internal tables for all types, and all parameters), and the second one controls the amount of memory available for the distribution mechanism.
 
 The amount of memory that the typesystem needs is completely static, i.e. it does not change at all during runtime, so if you have been able to start +dose_main+ you know that you have enough memory allocated for the typesystem.
@@ -3243,8 +3246,10 @@ The following table shows the recommended mapping between the report types used 
 == Debugging support
 Safir SDK Core provides support for applications to have a "back door" to make it possible to interactively enquire about the status of an application or to turn on and off debug logging. It also provides an interface that makes it easy to add debug trace logging to applications.
 
-=== The backdoor command
-The SDK defines a Dob message, Safir.Application.Backdoor to be used to send debugging commands to applications. Backdoor commands can either be sent using Sate (see <<sate>>), or by the command-line program "backdoor" (use "+backdoor -h+" to get info on usage).
+=== The bd (backdoor) command
+The SDK defines a Dob message, Safir.Application.Backdoor to be used to send debugging
+commands to applications. Backdoor commands can either be sent using Sate (see <<sate>>),
+or by the command-line program "bd" (use "+bd -h+" to get info on usage).
 
 There are some predefined backdoor commands that applications should handle:
 
@@ -3895,13 +3900,13 @@ _Use this documentation! It is the place where interface details are explained!_
 
 TODO update remove
 
-Questions can be posted in the Safir SDK Core forum or the safir-devel mailing list. More info at http://safir.sourceforge.net[].
+Questions can be posted in the Safir SDK Core forum or the safir-devel mailing list. More info at http://safirsdkcore.com[].
 
 === Reporting bugs
 
 TODO update remove
 
-Bug reports can be filed under "Tickets" at at http://safir.sourceforge.net[].
+Bug reports can be filed under "Tickets" at at http://safirsdkcore.com[].
 
 [[appendix_a]]
 == Appendix A: Example applications
@@ -3946,7 +3951,7 @@ Whatever happened to +deletedByOwner+?::
 The persistence service (_dope_), however, still uses this flag, since it has meaning when using the special _entity injector_ subscribe with +wantsLastState+ set to true. This will be changed in a future release, but you can safely ignore this bit of information unless you're writing your own persistence service or entity injector.
 
 == Appendix D: Building from source
-Since Safir SDK Core is released under an Open Source license (as described in <<licenses>>) you are able to download and build the source code from scratch. Instructions for building is included in the source distribution of Safir SDK Core obtained from http://safir.sourceforge.net/[].
+Since Safir SDK Core is released under an Open Source license (as described in <<licenses>>) you are able to download and build the source code from scratch. Instructions for building is included in the source distribution of Safir SDK Core obtained from http://safirsdkcore.com/[].
 
 [[glossary]]
 == Glossary
