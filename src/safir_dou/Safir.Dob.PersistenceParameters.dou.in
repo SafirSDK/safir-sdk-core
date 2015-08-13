@@ -46,7 +46,7 @@
         <value>236</value>
       </parameter>
       <parameter>
-        <summary>TestMode allow initial injections without persistence started. Only valid if SystemHasPersistence flag is set to false.</summary>
+        <summary>TestMode allow initial injections without persistence started.</summary>
         <name>TestMode</name>
         <type>Boolean</type>
         <value>False</value>
