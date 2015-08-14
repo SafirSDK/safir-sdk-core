@@ -496,6 +496,37 @@ In previous versions of Safir SDK Core the array parameter syntax was a bit more
 </class>
 ----------------------------
 
+==== Dictionary parameters
+A parameter can also be a dictionary of key/value pairs, as shown in the example below.
+
+.A dictionary parameter of Strings mapped to Float64
+[source,xml]
+----------------------------
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <summary>An example parameter file.</summary>
+    <name>Capabilities.MyParameters</name>
+    <baseClass>Safir.Dob.Parametrization</baseClass>
+    <parameters>
+        <parameter>
+            <name>StringsMappedToDoubles</name>
+            <type>String</type>
+            <dictionary keyType="Float64">
+                <entry>
+                    <key>Hot</key>
+                    <value>65.4321</value>
+                </entry>
+                <entry>
+                    <key>Cold</key>
+                    <value>-12.3456</value>
+                </entry>
+            </dictionary>
+        </parameter>
+    </parameters>
+</class>
+----------------------------
+
 ==== Objects in parameters
 Parameters can also contain whole Dou-defined objects, not just the basic types. Below is an example from +Safir.Dob.NodeParameters+, where there is in fact an array of items in a parameter.
 
