@@ -229,14 +229,14 @@ One "half" of the Dob consists of a type system that is used to describe and man
 
 All Safir systems are based around types defined using the Dob type system.
 
-A Dob object is made up of _members_, that can be simple or complex types (and arrays of these).
+A Dob object is made up of _members_, that can be simple or complex types (and collections of these).
 
 The type system also provides functionality for defining run-time parameters (values are loaded at start-up) and properties, that provide a common interface for accessing members of different classes.
 
-TODO: write about dictionaries and sequences!
-
 === The simple types
-These are the simple types that class members can have, either as single members or as arrays (it is also possible to put objects inside objects, which is described below).
+These are the simple types that class members can have, either as single members or in
+collections (it is also possible to put objects inside objects, which is described
+below).
 
 .The simple Dob type system types.
 [width="70%", cols="20%,80%",options="header",frame="topbot",grid="none"]
@@ -299,7 +299,9 @@ If a string is used to define hashed type, the string will be included in the ty
 
 [[binary_data]]
 ==== Binary type
-The type Binary is the type that shall be used for binary data of any size. When the Binary type is used in parameters and xml- or json- serialized objects, the data shall be standard base64 encoded, which is a common binary-to-text encoding format.
+_Binary_ is a simple type that can be used for binary data of any size. When the Binary
+type is used in parameters and xml or json serialized objects, the data is encoded to
+base64 format.
 
 [[member_flags]]
 === Flags on members
@@ -310,9 +312,30 @@ All members have methods to access these flags, +IsNull+ and +IsChanged+, and th
 
 The change flags are described in greater detail in <<change_flags>> and <<interpreting_change_flags>>.
 
+[[collections]]
+=== Collections
+The Dob type system supports three kinds of collections. _Arrays_, _Sequences_ and
+_Dictionaries_.
+
+An array is a fixed-length integer-indexed collection of simple members. Each index has
+its own IsNull and IsChanged flag.
+
+A sequence is a variable-length collection of simple members. There is only an IsChanged
+flag on the whole collection, i.e. not on individual elements. The change flag will be
+set whenever a value is added, removed or replaced. There is no IsNull flag on sequences,
+and the IsNull operation will always return false.
+
+A dictionary is a variable-length collection of key-value pairs. The keys can be any
+simple type (with some exceptions, i.e. Boolean and floating point types) and the values
+can be simple or complex members. Each value has its own IsNull and IsChanged flags, and
+the collection itself has an IsChanged flag that will be set whenever a value is added or
+removed.
+
 [[items_and_structs]]
 === Items and structs
-Apart from simple types, such as integers and strings, classes can also contain other classes. These "contained classes" are usually called _Items_ (due to the fact that they should inherit from Safir.Dob.Item).
+Apart from simple types such as integers and strings and collections of these, classes
+can also contain other classes. These "contained classes" are usually called _Items_ (due
+to the fact that they should inherit from Safir.Dob.Item).
 
 An Item works exactly the same way as any other Dob class apart from the fact that it is not possible to send it to another application without putting it inside an object that is distributable (i.e. a Message, Entity, Service or Response). An item has change flags and null flags just like any other member, and all of the item's members have change flags and null flags too.
 
@@ -628,7 +651,8 @@ One of the main purposes of Safir SDK is to promote reusable code. Due to this S
 Saab uses _Capabilities_ as the top-level namespace for reusable components built on Safir. Non-top-level namespaces should not be component or project specific names but rather service oriented names describing the functionality of the classes in that namespace. As an example the class +Capabilities.Vehicles.Vehicle+ is a class in a reusable component for handling vehicles.
 *****************************
 
-Arrays are declared by adding the field arraySize to an element or constant as shown in the example below.
+Arrays are declared by adding the field +arraySize+ to an element or constant as shown in
+the example below.
 
 .Array member declaration
 [source,xml]
@@ -640,7 +664,34 @@ Arrays are declared by adding the field arraySize to an element or constant as s
     </member>
 ----------------------------
 
-For strings the maximum length in number of Unicode characters must be defined using the maxLength tag.
+Sequences are declared by adding the field +sequence+ to an element or constant as shown
+in the example below.
+
+.Sequence member declaration
+[source,xml]
+----------------------------
+    <member>
+        <name>Type</name>
+        <type>Int32</type>
+        <sequence/>
+    </member>
+----------------------------
+
+Dictionaries are declared by adding the field +dictionary+ to an element or constant as
+shown in the example below. The key type is specified using the +keyType+ attribute.
+
+.Declaration of dictionary of strings mapped to 32 bit integers
+[source,xml]
+----------------------------
+    <member>
+        <name>Type</name>
+        <type>Int32</type>
+        <dictionary keyType="String"/>
+    </member>
+----------------------------
+
+For strings the maximum length in number of Unicode characters must be defined using the
++maxLength+ tag.
 
 .String member declaration
 [source,xml]
