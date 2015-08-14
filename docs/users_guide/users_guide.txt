@@ -8,7 +8,7 @@ Lars Hagström, Anders Widén and Joel Ottosson
 
 :cpp: {basebackend@docbook:c++:cpp}
 :csharp: {basebackend@docbook:c:csharp}
-:json: {basebackend@docbook:java:json}
+:json: {basebackend@docbook:java:java}
 
 :numbered!:
 == Preface
