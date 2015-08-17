@@ -2880,7 +2880,8 @@ sections in the rest of the file.
 dots_shared_memory_size::
 Specifies the size of shared memory allocated for the typesystem. The default value is
 big enough for most systems, but if the typesystem contains a very large number of types
-it may be necessary to increase this value.
+it may be necessary to increase this value. More info on shared memory can be found in
+<<memory_config>>
 
 dou_search_path::
 Comma separated list of default directories to look for dou files in. The typesystem will
@@ -3198,13 +3199,22 @@ WARNING: Before deciding to change the queue lengths you should have read and un
 [[memory_config]]
 === Shared Memory config
 
-TODO: update
+The Dob has two parameters that control the amount of shared memory used, one that
+controls the amount of memory available for the typesystem (the internal tables for all
+types, and all parameters), and one that controls the amount of memory available for the
+distribution mechanism.
 
-The Dob has two parameters that control the amount of shared memory used, +TypesystemSharedMemorySize+ and +SharedMemorySize+ (both can be found in Safir.Dob.NodeParameters.dou). The first parameter controls the amount of memory available for the typesystem (the internal tables for all types, and all parameters), and the second one controls the amount of memory available for the distribution mechanism.
+The parameter that controls the typesystem memory can be found in the file
++typesystem.ini+, as described in <<typesystem_ini>>. The amount of memory that the
+typesystem needs is completely static, i.e. it does not change at all during runtime, so
+if you have been able to start +safir_control+ you know that you have enough memory allocated
+for the typesystem.
 
-The amount of memory that the typesystem needs is completely static, i.e. it does not change at all during runtime, so if you have been able to start +dose_main+ you know that you have enough memory allocated for the typesystem.
-
-Knowing what value to set +SharedMemorySize+ to is trickier, but one approach is to run the system and monitor the memory usage, for example using _dobexplorer_, which is described in <<dobexplorer>>.
+The parameter that controls the shared memory used by the distribution mechanism is
+called +SharedMemorySize+ and can be found in Safir.Dob.NodeParameters.dou. Knowing what
+value to set +SharedMemorySize+ to is trickier since the memory usage varies over time,
+but one approach is to run the system and monitor the memory usage, for example using
+_dobexplorer_, which is described in <<dobexplorer>>.
 
 [[safir_logging]]
 == Safir Logging
