@@ -312,36 +312,37 @@ All members have methods to access these flags, +IsNull+ and +IsChanged+, and th
 
 The change flags are described in greater detail in <<change_flags>> and <<interpreting_change_flags>>.
 
-[[collections]]
-=== Collections
-The Dob type system supports three kinds of collections. _Arrays_, _Sequences_ and
-_Dictionaries_.
-
-An array is a fixed-length integer-indexed collection of simple members. Each index has
-its own IsNull and IsChanged flag.
-
-A sequence is a variable-length collection of simple members. There is only an IsChanged
-flag on the whole collection, i.e. not on individual elements. The change flag will be
-set whenever a value is added, removed or replaced. There is no IsNull flag on sequences,
-and the IsNull operation will always return false.
-
-A dictionary is a variable-length collection of key-value pairs. The keys can be any
-simple type (with some exceptions, i.e. Boolean and floating point types) and the values
-can be simple or complex members. Each value has its own IsNull and IsChanged flags, and
-the collection itself has an IsChanged flag that will be set whenever a value is added or
-removed.
 
 [[items_and_structs]]
 === Items and structs
 Apart from simple types such as integers and strings and collections of these, classes
-can also contain other classes. These "contained classes" are usually called _Items_ (due
-to the fact that they should inherit from Safir.Dob.Item).
+can also contain other classes. These complex types or "contained classes" are usually
+called _Items_ (due to the fact that they should inherit from Safir.Dob.Item).
 
 An Item works exactly the same way as any other Dob class apart from the fact that it is not possible to send it to another application without putting it inside an object that is distributable (i.e. a Message, Entity, Service or Response). An item has change flags and null flags just like any other member, and all of the item's members have change flags and null flags too.
 
 All these flags mean that there is a certain overhead to items, which in many cases is undesirable. And also, it doesn't always make sense to have null and change flags on all members of items. For example, in a Position type, there is no point in setting the Latitude member to null. Either the position as a whole is null or it is a valid position. For this purpose _Structs_ (inheriting from Safir.Dob.Struct) were introduced. Currently they behave exactly like an Item, but in a future Dob version they will be optimised so as to remove all the flags and overhead.
 
 This means that there are some limitations to what you should do to a Struct. Do not use IsChanged or IsNull on any members of a struct. Instead check IsNull and IsChanged on the whole struct. Do not inherit from a user-defined struct (structs will not support inheritance). In the current Dob this will of course work, but once the optimisation is introduced your code will break.
+
+[[collections]]
+=== Collections
+The Dob type system supports three kinds of collections. _Arrays_, _Sequences_ and
+_Dictionaries_.
+
+An array is a fixed-length integer-indexed collection of simple or complex members. Each
+index has its own IsNull and IsChanged flag.
+
+A sequence is a variable-length collection of simple or complex members. There is only an
+IsChanged flag on the whole collection, i.e. not on individual elements. The change flag
+will be set whenever a value is added, removed or replaced. There is no IsNull flag on
+sequences, and the IsNull operation will always return false.
+
+A dictionary is a variable-length collection of key-value pairs. The keys can be any
+simple type (with some exceptions, i.e. Boolean and floating point types) and the values
+can be simple or complex members. Each value has its own IsNull and IsChanged flags, and
+the collection itself has an IsChanged flag that will be set whenever a value is added or
+removed.
 
 [[parameters]]
 === Parameters
@@ -993,8 +994,8 @@ where to find other library modules that you depend on.  Dobmake uses informatio
 +typesystem.ini+ - as described in <<typesystem_ini>> - to find library module
 dependencies that it cannot find within the current CMake build tree.
 
-If you download the Safir SDK Core source code you can find an example of a dobmake build
-tree under src/dots/dots_dobmake.ss/tests/tree.
+If you download the Safir SDK Core source code you can find an example of a dobmake/CMake
+build tree under +src/dots/dots_dobmake.ss/tests/tree+.
 
 ==== Running Dobmake GUI
 
@@ -1261,7 +1262,9 @@ Smart pointers are objects which store pointers to dynamically allocated (heap) 
 Conceptually, smart pointers are seen as owning the object pointed to, and thus responsible for deletion of the object when it is no longer needed.
 *********************************************
 
-The boost::shared_ptr type is included in C++ since 2007 (ISO/IEC TR 19768:2007 aka C++TR1) under the name std::shared_ptr. Safir SDK Core will continue to use the boost version so as not to break backward compatibility.
+The boost::shared_ptr type is included in C\++ since 2007 (ISO/IEC TR 19768:2007 aka
+C++TR1) under the name std::shared_ptr. Safir SDK Core will continue to use the boost
+version so as not to break backward compatibility.
 
 See <<cpp_type_casting>> for more information on how to cast smart pointers in C++.
 
