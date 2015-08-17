@@ -981,6 +981,21 @@ generated from the Test1 module. In the example the installation paths are relat
 will be relative to CMAKE_INSTALL_PREFIX (which will be set by dobmake). If you specify
 absolute installation paths they will be used as specified.
 
+==== Dependencies between modules
+
+As hinted to above it is possible to have many safir_generated library modules, that have
+dependencies on each other. Naturally circular dependencies are not allowed.
+
+If you build all your safir_generated library modules in one CMake ``build tree'', you
+only have to specify the dependencies using the +DEPENDENCIES+ argument as described. But
+if you are building library modules separately, you will also have to tell the typesystem
+where to find other library modules that you depend on.  Dobmake uses information in
++typesystem.ini+ - as described in <<typesystem_ini>> - to find library module
+dependencies that it cannot find within the current CMake build tree.
+
+If you download the Safir SDK Core source code you can find an example of a dobmake build
+tree under src/dots/dots_dobmake.ss/tests/tree.
+
 ==== Running Dobmake GUI
 
 Dobmake is really only a gui for building and installing a CMake project. In fact, it can
