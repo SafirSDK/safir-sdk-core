@@ -157,13 +157,12 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
   #loop over all dou files
   foreach (dou ${_gen_DOU_FILES})
     get_filename_component(douname ${dou} NAME)
-    string (REGEX REPLACE "([a-zA-Z\\.0-9]*)\\.dou" "\\1" base_name ${douname})
+    string (REPLACE ".dou" "" base_name ${douname})
     set (cpp_files ${cpp_files} gen/cpp/${base_name}.cpp)
     set (dotnet_files ${dotnet_files} "${CMAKE_CURRENT_BINARY_DIR}/gen/dotnet/${base_name}.cs")
 
-
-    string (REGEX REPLACE "^([a-zA-Z\\.0-9]*)\\.[a-zA-Z0-9]+$" "\\1" namespace ${base_name})
-    string (REGEX REPLACE "^[a-zA-Z\\.0-9]*\\.([a-zA-Z0-9]+)$" "\\1" java_base_name ${base_name})
+    string (REGEX REPLACE "^([a-zA-Z\\.0-9]*)\\.[a-zA-Z0-9_]+$" "\\1" namespace ${base_name})
+    string (REGEX REPLACE "^[a-zA-Z\\.0-9]*\\.([a-zA-Z0-9_]+)$" "\\1" java_base_name ${base_name})
 
     #perform prefix insertion
     foreach(key ${java_namespace_keys})
