@@ -79,9 +79,6 @@ namespace Internal
 
         void LogStatus(const std::string& str);
 
-        void HandleSignal(const boost::system::error_code& error,
-                          const int signalNumber);
-
         void HandleIncomingData(const DistributionData & data, const bool isAckedData);
 
         void OnAppEvent(const ConnectionPtr & connection, bool disconnecting);

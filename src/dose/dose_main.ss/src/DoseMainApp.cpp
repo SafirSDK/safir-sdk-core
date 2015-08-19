@@ -106,9 +106,23 @@ namespace Internal
 #endif
 
         m_signalSet.async_wait(m_strand.wrap([this](const boost::system::error_code& error,
-                                                    const int signalNumber)
+                                                    const int /*signalNumber*/)
                                             {
-                                                HandleSignal(error, signalNumber);
+                                                if (error)
+                                                {
+                                                    if (error == boost::asio::error::operation_aborted)
+                                                    {
+                                                        // dose_main got stopped via a command from Control, do nothing
+                                                        return;
+                                                    }
+                                                    else
+                                                    {
+                                                       SEND_SYSTEM_LOG(Error,
+                                                                        << "DOSE_MAIN: Got a signals error: " << error);
+                                                    }
+                                                }
+                                                // dose_main expects to be stopped by safir_control and
+                                                // therefor ignores all "termination" signals
                                             }));
 
         Safir::Utilities::CrashReporter::RegisterCallback(DumpFunc);
@@ -231,31 +245,6 @@ namespace Internal
                     " NodeTypeId=" << nodeTypeId << std::endl;
 
         m_distribution->ExcludeNode(nodeId, nodeTypeId);
-    }
-
-
-    void DoseMainApp::HandleSignal(const boost::system::error_code& error,
-                                   const int signalNumber)
-    {
-        if (error)
-        {
-            if (error == boost::asio::error::operation_aborted)
-            {
-                // dose_main got stopped via a command from Control, do nothing
-                return;
-            }
-            else
-            {
-               SEND_SYSTEM_LOG(Error,
-                                << "DOSE_MAIN: Got a signals error: " << error);
-            }
-        }
-
-        std::ostringstream os;
-        os << "DOSE_MAIN: Got signal " << signalNumber << ", shutting down.";
-        LogStatus(os.str());
-
-        Stop();
     }
 
     void DoseMainApp::OnAppEvent(const ConnectionPtr & connection, bool disconnecting)
