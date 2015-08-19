@@ -42,5 +42,9 @@
       <TypeId>DoseTest.LocalService</TypeId>
       <Handler>DEFAULT_HANDLER</Handler>
     </DoseTest.Action>
+    <DoseTest.Action index="4">
+      <ActionKind>Sleep</ActionKind>
+      <SleepDuration>5</SleepDuration>
+    </DoseTest.Action> 
   </TestActions>
 </DoseTest.Items.TestCase>
