@@ -103,7 +103,6 @@ struct CommandLineResults
     int testcaseNo;
     int context;
     bool multinode;
-    bool endlessMode;
 };
 
 const CommandLineResults & HandleCommandLine(int argc, char* argv[])
@@ -121,8 +120,7 @@ const CommandLineResults & HandleCommandLine(int argc, char* argv[])
             ("last", po::value<int>(&results.last)->default_value(9999), "last testcase")
             ("no-timeout", "Do not time out and exit if a partner does not respond for a long time")
             ("context", po::value<int>(&results.context)->default_value(0), "default context for partner test connection (-1 for random)")
-            ("multinode", "Run in multinode mode")
-            ("endless-mode", "Run in endless mode");
+            ("multinode", "Run in multinode mode");
 
         po::variables_map vm;
         po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -145,7 +143,6 @@ const CommandLineResults & HandleCommandLine(int argc, char* argv[])
 
         results.noTimeout = vm.count("no-timeout") != 0;
         results.multinode = vm.count("multinode") != 0;
-        results.endlessMode = vm.count("endless-mode") != 0;
 
         if (results.languages.size() != 3)
         {
@@ -216,7 +213,6 @@ int main(int argc, char* argv[])
                             languages,
                             commandLine.multinode,
                             commandLine.noTimeout,
-                            commandLine.endlessMode,
                             context,
                             ioService);
 

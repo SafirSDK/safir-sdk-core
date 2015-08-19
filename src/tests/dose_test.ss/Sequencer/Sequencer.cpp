@@ -115,7 +115,6 @@ Sequencer::Sequencer(const int startTc,
                      const Languages & languages,
                      const bool multinode,
                      const bool noTimeout,
-                     const bool endlessMode,
                      const int contextId,
                      boost::asio::io_service& ioService):
     m_ioService(ioService),
@@ -125,7 +124,6 @@ Sequencer::Sequencer(const int startTc,
     m_currentActionNo(0),
     m_stopTc(stopTc),
     m_startTc(startTc),
-    m_endlessMode(endlessMode),
     m_state(SequencerStates::Created),
     m_lastCleanupTime(boost::chrono::steady_clock::now()),
     m_languages(languages),
@@ -184,22 +182,7 @@ bool Sequencer::PrepareTestcaseSetup()
 
     if (m_currentCaseNo > m_stopTc)
     {
-        if (!m_endlessMode)
-        {
             return false;
-        }
-        else
-        {
-            m_currentCaseNo = m_startTc;
-            std::wcout << "Endlessmode: Finished the last testcase, restarting from testcase: " << m_currentCaseNo << std::endl;
-
-            FindNextTestcase();
-
-            if (m_currentCaseNo > m_stopTc)
-            {
-                return false;
-            }
-        }
     }
 
     std::wcout << "Running testcase: " << m_currentCaseNo << std::endl;
@@ -387,7 +370,7 @@ void Sequencer::Tick()
         {
             if (!m_isDumpRequested)
             {
-                GetTestResults(0);
+                GetTestResults();
             }
             else if (m_dumpRequestIds.empty())
             {
@@ -408,11 +391,10 @@ void Sequencer::Tick()
 }
 
 void
-Sequencer::GetTestResults(const int fileNumber)
+Sequencer::GetTestResults()
 {
     assert(!m_isDumpRequested);
 
-    m_fileNumber = fileNumber;
     DoseTest::DumpPtr request = DoseTest::Dump::Create();
     for (int i = 0; i < 3; ++i)
     {
@@ -429,8 +411,8 @@ Sequencer::OnResponse(const Safir::Dob::ResponseProxy responseProxy)
 {
     const int partner = m_dumpRequestIds.find(responseProxy.GetRequestId())->second;
 
-    boost::filesystem::path directory = "run" + boost::lexical_cast<std::string>(m_fileNumber)
-        + "-" + m_languages.at(0) + "-" + m_languages.at(1) + "-" + m_languages.at(2);
+    boost::filesystem::path directory = "run-" +
+                                        m_languages.at(0) + "-" + m_languages.at(1) + "-" + m_languages.at(2);
     boost::filesystem::create_directory(directory);
 
     // Create context dir if not context 0

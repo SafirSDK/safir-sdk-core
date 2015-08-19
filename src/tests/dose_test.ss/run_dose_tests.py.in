@@ -91,8 +91,9 @@ class Parameters:
                           "This is only applicable when using --multicomputer, and is implied when using --jenkins")
         parser.add_option("--slave", action="store_true",dest="slave",default=False,
                           help="Be a multicomputer slave")
-        parser.add_option("--endless-mode", action="store_true",dest="endless_mode",default=False,
-                          help="Loop the tests forever, works with or without the --single-testcase option")
+        parser.add_option("--run-until-failure", action="store_true",dest="run_until_failure",default=False,
+                          help="Run the given test range until one or more tests fail. Only test output for the last "
+                          "(failed) run will be saved.")
         parser.add_option("--no-syslog", action="store_false",dest="check_syslog",default=True,
                           help="Do not check syslog output")
         parser.add_option("--no-java", action="store_true",dest="no_java",default=False,
@@ -109,14 +110,11 @@ class Parameters:
                           help="Which partner 2 to run. [default: %default]. "
                           "If --jenkins is specified the Languages environment variable will override this.")
         parser.add_option("--single-testcase", action="store",
-                          help="Run only a single testcase. Note that using this option will cause the script "
-                          "to print some other errors, since not all tests are run")
+                          help="Run only a single testcase.")
         parser.add_option("--first-testcase", action="store",
-                          help="Sets the first testcase to be run. Note that using this option will cause the script "
-                          "to print some other errors, since not all tests are run")
+                          help="Sets the first testcase to be run.")
         parser.add_option("--last-testcase", action="store",
-                          help="Sets the last testcase to be run. Note that using this option will cause the script "
-                          "to print some other errors, since not all tests are run")
+                          help="Sets the last testcase to be run.")
         (options,args) = parser.parse_args()
 
         self.lang0 = options.lang0
@@ -131,7 +129,7 @@ class Parameters:
 
         self.no_java = options.no_java
         self.no_dotnet = options.no_dotnet
-        self.endless_mode = options.endless_mode
+        self.run_until_failure = options.run_until_failure
 
         if options.autostart_slave and not self.multicomputer:
             log("--autostart-slave can only be used together with --multinode")
@@ -242,9 +240,6 @@ class Parameters:
         if self.multinode or self.multicomputer:
             self.dose_test_sequencer_cmd += ("--multinode",)
 
-        if self.endless_mode:
-            self.dose_test_sequencer_cmd += ("--endless-mode",)
-
         self.expected_output_path = os.path.join(self.test_data_directory,
                                                  "dose",
                                                  "output_standalone" if self.standalone else "output_multinode")
@@ -312,9 +307,19 @@ class Results:
         self.write_test_result(res, tcname, output)
         return res
 
+    def tc_included(self, tc, parameters):
+        if parameters.single_testcase is not None and tc != int(parameters.single_testcase):
+            return False
+        if parameters.first_testcase is not None and tc < int(parameters.first_testcase):
+            return False
+        if parameters.last_testcase is not None and tc > int(parameters.last_testcase):
+            return False
+        return True
+
+
     def check_output(self,parameters):
         log("** Parsing test output")
-        resdir = glob.glob("run0-*")
+        resdir = glob.glob("run-*")
         if len(resdir) == 0:
             log("No output directories found, cannot parse output!")
             return
@@ -338,6 +343,7 @@ class Results:
                 expected_output[partner] = self.split(file.read())
 
         tcnos = list(set(expected_output[0].keys()))
+        tcnos = [tc for tc in tcnos if self.tc_included(tc, parameters)]
         tcnos.sort()
         if parameters.single_testcase is None:
             self.write_test_result(len (set(tcnos) - set(output[0].keys())) == 0,
@@ -345,13 +351,11 @@ class Results:
                                    "The following tests appear to not have been run: "+
                                    str(sorted(list(set(tcnos) - set(output[0].keys())))))
         self.write_test_result(len (set(output[0].keys())- set(tcnos)) == 0,
-                               "all_tests_have_results",
+                               "all_tests_have_expected_results",
                                "The following tests appear to not to be listed in expected outputs: "+
                                str(sorted(list(set(output[0].keys())- set(tcnos)))))
 
         for tc in tcnos:
-            if parameters.single_testcase is not None and tc != int(parameters.single_testcase):
-                continue
             if tc not in output[0]:
                 self.write_test_result(False,
                                        tcnames[tc],
@@ -658,46 +662,57 @@ class JenkinsController:
 
 
 def main():
-    rmdir("dose_test_output")
-    mkdir("dose_test_output")
-    os.chdir("dose_test_output")
+    start_dir = os.getcwd()
 
-    parameters = Parameters()
+    while True:
+        parameters = Parameters()
 
-    if parameters.autostart_jenkins_slave:
-        jenkinsController = JenkinsController(parameters)
-        jenkinsController.start_slave()
+        os.chdir(start_dir)
+        rmdir("dose_test_output")
+        mkdir("dose_test_output")
+        os.chdir("dose_test_output")
 
-    runner = Runner()
-    results = Results()
+        if parameters.autostart_jenkins_slave:
+            jenkinsController = JenkinsController(parameters)
+            jenkinsController.start_slave()
 
-    completed = False
-    try:
-        runner.initialize(parameters)
-        if parameters.slave:
-            runner.wait_for_safir_control()
-        else:
-            runner.run_sequencer(parameters)
-            completed = True
-    except:
-        log("exception occurred!")
-        traceback.print_exc()
+        runner = Runner()
+        results = Results()
 
-    runner.killprocs(results)
-    if parameters.autostart_jenkins_slave:
-        jenkinsController.stop_slave()
+        completed = False
+        try:
+            runner.initialize(parameters)
+            if parameters.slave:
+                runner.wait_for_safir_control()
+            else:
+                runner.run_sequencer(parameters)
+                completed = True
+        except:
+            log("exception occurred!")
+            traceback.print_exc()
 
-    if completed:
-        results.check_output(parameters)
+        runner.killprocs(results)
+        if parameters.autostart_jenkins_slave:
+            jenkinsController.stop_slave()
 
-        if results.num_tc_failed == 0:
-            log("== All tests were successful!!")
-        else:
-            log("!!",results.num_tc_failed, "testcases appear to have failed!")
+        if completed:
+            results.check_output(parameters)
 
-        if results.num_tc_performed<20 and parameters.single_testcase is None:
-            log("!! Less than 20 testcases seem to have been performed, this is a sign of trouble!")
-            return 1
+            if results.num_tc_failed == 0:
+                log("== All tests were successful!!")
+            else:
+                log("!!",results.num_tc_failed, "testcases appear to have failed!")
+                break
+
+            if (results.num_tc_performed<20 and
+                parameters.single_testcase is None and
+                parameters.first_testcase is None and
+                parameters.last_testcase is None):
+                log("!! Less than 20 testcases seem to have been performed, this is a sign of trouble!")
+                return 1
+
+            if not parameters.run_until_failure:
+                break
 
     return 0
 

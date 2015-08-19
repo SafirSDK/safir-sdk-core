@@ -86,7 +86,6 @@ public:
               const Languages & languages,
               const bool multinode,
               const bool noTimeout,
-              const bool endlessMode,
               const int contextId,
               boost::asio::io_service& ioService);
 
@@ -107,7 +106,7 @@ private:
 
     void ExecuteCurrentAction();
 
-    void GetTestResults(const int fileNumber);
+    void GetTestResults();
 
 
     boost::asio::io_service& m_ioService;
@@ -127,8 +126,6 @@ private:
     const int m_stopTc;
     const int m_startTc;
 
-    const bool m_endlessMode;
-
     SequencerStates::State m_state;
     boost::chrono::steady_clock::time_point m_lastCleanupTime;
 
@@ -138,7 +135,6 @@ private:
     std::map<Safir::Dob::RequestId,int> m_dumpRequestIds;
 
     bool m_isDumpRequested;
-    int m_fileNumber;
 
     const int m_contextId;
     //no need to do anything with this. Constructor sets up everything.
