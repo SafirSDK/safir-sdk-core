@@ -352,7 +352,7 @@ starts and applications can ask for the values by a simple function call. This m
 all that is needed to change a parameter is to change its value in the dou file, or to
 add a copy of the dou file, with modifications, in an override directory, as described in
 <<typesystem_ini>>) and restarting the Dob and all the applications that use the Dob
-(note that running the code generation, as described in <<code-generation>>, will
+(note that running the code generation, as described in <<code_generation>>, will
 overwrite these changes).
 
 Parameters are defined by a name, a type and a value. Here is an example of a parameter
@@ -888,7 +888,7 @@ void DisplayName(const Safir::Dob::Typesystem::ObjectPtr & obj)
 
 Note that in the code above there is no reference at all to what kind of object +obj+ is. It could be any object that has the property mapped to it. It is possible to check if an object has a specific property mapped to it using the +HasProperty+ method on the property.
 
-[[code-generation]]
+[[code_generation]]
 === Generating code from Dou-files
 In order to use the classes defined by the Dou-files, interface code has to be generated
 for the different languages. First, source code has to be generated from the dou-files and
@@ -1018,7 +1018,7 @@ You should now be able to press the _Build_ button to generate code and build it
 
 If you're using absolute install paths in your CMakeLists.txt file you can select
 _Absolute_ and then press _Build & Install_ to also install the results to the
-directories you specified. If you're using relative install paths file you first need to
+directories you specified. If you're using relative install paths you first need to
 specify a CMAKE_INSTALL_PREFIX, using the _Prefix_ field.
 
 .Note
@@ -1684,7 +1684,7 @@ Whereas a primary connection is a real connection to the Dob, a secondary connec
 
 Each application needs one primary connection (at least, see <<multithreading>>). This connection is the one that the Dob knows about and through which data is dispatched. A secondary connection is used by other parts of the application to "attach" to the primary connection.
 
-The reason for providing this functionality is so that for example a C++ library used by a C# application can use the main programs connection. This would otherwise be impossible, since passing the connecton object over the C# to C++ interface is not possible. Instead modules can attach to the main program's connection using a secondary connection.
+The reason for providing this functionality is so that for example a C\++ library used by a C# application can use the main programs connection. This would otherwise be impossible, since passing the connecton object over the C# to C++ interface is not possible. Instead modules can attach to the main program's connection using a secondary connection.
 
 When creating a secondary connection you can either specify a connection name and instance to get a specific connection instance, or not specify anything at all, in which case you will be given the first connection that was created in the current thread.
 
@@ -2966,6 +2966,9 @@ safir_instance::
 Optional integer value. If specified the section will only be applied to the node with
 that +SAFIR_INSTANCE+ number. For more info on running multiple nodes on one computer, see todo.
 
+The name of parameter override sections are not used for anything in the system, so they
+only need to be unique.
+
 [[special_variables]]
 ==== Environment and special variable expansion
 Since the configuration files need to be able to refer to system directories they also support environment variable expansion. E.g. +$(HOME)+ expands to the value of the +HOME+ environment variable.
@@ -3000,9 +3003,75 @@ There is currently one special variable that is available on both Linux and Wind
 |TEMP              | /tmp on Linux and TEMP or TMP environment variable on Windows.
 |===========================
 
-
 === Network config
-A Safir SDK Core system can have two basic configurations, with respect to networking. _Standalone_ or _Multinode_. Standalone means that the system consists of only one node or computer. This is typically used for developer machines or systems that have only one node. Multinode is typically used when a system consists of several nodes, for example a couple of servers (where applications and databases run) and a few operator consoles (where only the HMI runs).
+A Safir SDK Core system can consist of one or more nodes running on one or more
+computers. This allows division of responsibility between multiple server nodes, or
+running HMI and business logic on different computers.
+
+To be able to configure a networked system properly a basic understanding of how
+Safir SDK Core nodes communicate is needed.
+
+==== Safir SDK Core networking
+
+Safir SDK Core nodes can communicate using either _UDP Multicast_ or _UDP Unicast_. Multicast
+communication means that a single packet sent from one node can be received by multiple
+nodes, whereas unicast packets are only sent to one node.
+
+For networks that support it, multicast is a lot more efficient if there are many
+nodes. For example an entity update can be performed using only one packet, whereas in a
+system using unicast one packet per node is needed. On the other hand, using multicast is
+not an option on all networks.
+
+A system can also mix nodes that are reached with multicast with nodes that are reached
+with unicast.
+
+The nodes communicate with each other over two channels, the _control channel_ and the
+_data channel_. Each of these channels is a separate stream of UDP packets over a
+separate set of ports.
+
+==== Node types
+
+Each node in a Safir SDK Core system belongs to one _Node Type_. Each node type has a
+number of properties that control how nodes belonging to it communicate with other
+nodes. The properties are listed in <<node-type-properties>>.
+
+[[node-type-properties]]
+.Node Type Properties
+[width="80%",cols="30%,70%",frame="topbot",options="header"]
+|======================
+| Property Name | Comment
+
+| Name
+| Name of the node type
+
+| MulticastAddressControl
+| Multicast address and port used for the control channel for nodes of this type. An
+empty string for this or MulticastAddressData indicates that nodes of this type can't
+be reached via multicast.
+
+| MulticastAddressData
+| Multicast address and port used for the data channel for nodes of this type. An empty
+string for this or MulticastAddressControl indicates that nodes of this type can't be
+reached via multicast.
+
+| HeartbeatInterval
+| How often shall heartbeats/keepalives be sent.
+
+| MaxLostHeartbeats
+| How many lost heartbeats before marking nodes of this type as dead.
+
+| SlidingWindowSize
+| Size of the sliding window when communicating with nodes of this type.
+
+| RetryTimeout
+| Time to wait for Ack before retrying transmission to nodes of this type.
+
+|======================
+
+
+==== Node discovery
+
+==== Multiple nodes on one computer
 
 [[standalone_config]]
 ==== Standalone
@@ -3014,7 +3083,7 @@ To configure a system to be Standalone (which is the default configuration anywa
 <array>
     <Safir.Dob.DistributionChannel>
         <Name>System</Name>
-        ... IncludedNodes parameter that doesn't fit here ...
+        ... IncludedNodes parameter that does not fit here ...
         <MulticastAddress>127.0.0.1</MulticastAddress>
 ----------------------------
 
@@ -3389,9 +3458,12 @@ Regardless of whether the database or file backend is used the entities are stor
 
 This means that it is possible to run dope_bin2xml, edit the xml data, and then start the system to get the edited data presented as persistent data.
 
-This also allows for a solution to a common problem: When a dou file is changed (a member is added or removed or an array length is changed) any old stored binary persistent data is unusable (this is because the binaries are interpreted directly using the dou-files, e.g. by jumping straight in and getting some specific bytes out for a certain member). But loading stored data in xml format is much more "compatible" with respect to dou-file changes, so if you run dope_bin2xml, then change the dou-files and recompile dots_generated, and then start the system you are much more likely to have usable data in the persistent entities.
-
-TODO: dots_generated!
+This also allows for a solution to a common problem: When a dou file is changed in
+certain ways (a member is added or removed, or members are reordered) any old stored
+binary persistent data becomes unusable. But loading stored data in xml format is much
+more "compatible" with respect to dou-file changes, so if you run dope_bin2xml, then
+change the dou-files and rerun dobmake, and then start the system you are much more
+likely to have usable data in the persistent entities.
 
 This works with adding members, or changing array lengths, but not with removing or renaming members (unless they are _null_ in the persisted data, in which case they are not present in the xml). Of course if your persistent data is valuable, you can always edit the xml "by hand" to keep it. Just remember to do dope_bin2xml _before_ you change your Dob object definitions.
 
@@ -3611,8 +3683,10 @@ The basic rule is that an application that handles persistent entity types shoul
 
 [[multithreading]]
 === Multithreading
-A connection should only be used from within one thread. The queues and other states associated with a connection are not thread safe, for simplicity and efficiency. One thread can handle many connections, though.
 
+A connection can only be used from within one thread at a time. The queues and other
+states associated with a connection are not thread safe, for simplicity and
+efficiency.
 
 [[hot_standby]]
 === Hot-standby / Redundancy
@@ -4006,17 +4080,13 @@ The generated doxygen documentation is included in the downloads, and should be 
 
 _Use this documentation! It is the place where interface details are explained!_
 
-=== Forum and Mailing list
 
-TODO update remove
+=== Reporting bugs and asking questions.
 
-Questions can be posted in the Safir SDK Core forum or the safir-devel mailing list. More info at http://safirsdkcore.com[].
+TODO: Bug reports can be filed under "Tickets" at at http://safirsdkcore.com[].
 
-=== Reporting bugs
-
-TODO update remove
-
-Bug reports can be filed under "Tickets" at at http://safirsdkcore.com[].
+Questions can be sent directly to us using the contact form or by asking a question in
+our Google+ Community. Links to both can be found at http://safirsdkcore.com[].
 
 [[appendix_a]]
 == Appendix A: Example applications
