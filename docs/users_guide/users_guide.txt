@@ -3029,7 +3029,10 @@ The nodes communicate with each other over two channels, the _control channel_ a
 _data channel_. Each of these channels is a separate stream of UDP packets over a
 separate set of ports.
 
-==== Node types
+All these things, the control and data channel ports and multicast/unicast communication,
+need to be configured.
+
+==== Node type configuration
 
 Each node in a Safir SDK Core system belongs to one _Node Type_. Each node type has a
 number of properties that control how nodes belonging to it communicate with other
