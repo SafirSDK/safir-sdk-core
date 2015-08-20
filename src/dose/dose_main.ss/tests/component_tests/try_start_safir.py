@@ -87,7 +87,6 @@ expected_lines = set(["dose_main running...",
                       "CTRL: Exiting..."])
 
 if sys.platform == "win32":
-    expected_lines.add("DOSE_MAIN: Got signal 21, shutting down.")
     expected_lines.add("CTRL: Got signal 21 ... stop sequence initiated.")
 else:
     expected_lines.add("CTRL: Got signal 15 ... stop sequence initiated.")
