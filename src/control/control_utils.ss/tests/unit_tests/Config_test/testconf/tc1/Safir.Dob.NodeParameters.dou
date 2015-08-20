@@ -75,7 +75,7 @@
         </arrayElement>
       </arrayElements>
     </parameter>
-    
+
     <parameter>
       <summary>Defines the different node types in the system.</summary>
       <name>NodeTypes</name>
@@ -107,14 +107,14 @@
               <String>Server</String>
             </TalksTo>
             <MulticastAddressControl></MulticastAddressControl>
-            <MulticastAddressData>192.0.0.15:9501</MulticastAddressData>
+            <MulticastAddressData></MulticastAddressData>
             <HeartbeatInterval>5.0</HeartbeatInterval>
             <MaxLostHeartbeats>5</MaxLostHeartbeats>
             <SlidingWindowsSize>10</SlidingWindowsSize>
             <RetryTimeout>2.0</RetryTimeout>
             <WantedTypes>
               <String>.*</String> <!-- This client  wants all types -->
-            </WantedTypes> 
+            </WantedTypes>
             <UnwantedTypes></UnwantedTypes>
           </Safir.Dob.NodeType>
         </arrayElement>
@@ -126,7 +126,6 @@
             <TalksTo>
               <String>Server</String>
             </TalksTo>
-            <MulticastAddressControl>192.0.0.16:9500</MulticastAddressControl>
             <HeartbeatInterval>30.00</HeartbeatInterval>
             <MaxLostHeartbeats>5</MaxLostHeartbeats>
             <SlidingWindowsSize>10</SlidingWindowsSize>

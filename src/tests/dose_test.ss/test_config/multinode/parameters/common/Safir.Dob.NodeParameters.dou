@@ -68,16 +68,10 @@
         <arrayElement>
           <Safir.Dob.NodeType type="Safir.Dob.NodeType">
             <Name>Server</Name>
-            <IsLight>False</IsLight>
-            <TalksTo></TalksTo>
             <HeartbeatInterval>0.7</HeartbeatInterval>
             <MaxLostHeartbeats>7</MaxLostHeartbeats>
             <SlidingWindowsSize>10</SlidingWindowsSize>
             <RetryTimeout>0.02</RetryTimeout>
-            <WantedTypes>
-              <String>.*</String> <!-- Must be all types for non IsLight node -->
-            </WantedTypes>
-            <UnwantedTypes></UnwantedTypes> <!-- Can't be specified for non IsLight node -->
           </Safir.Dob.NodeType>
         </arrayElement>
 

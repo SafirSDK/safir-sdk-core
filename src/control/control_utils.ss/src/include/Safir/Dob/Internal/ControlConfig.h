@@ -44,43 +44,31 @@ namespace Control
     struct NodeType
     {
         NodeType(const std::string& name_,
-                 const bool isLight_,
-                 const std::set<std::string>& talksTo_,
                  const std::string& multicastAddressControl_,
                  const std::string& multicastAddressData_,
                  const int heartbeatInterval_,
                  const int maxLostHeartbeats_,
                  const int slidingWindowSize_,
-                 const int retryTimeout_,
-                 const std::vector<std::string>& wantedTypes_,
-                 const std::vector<std::string>& unwantedTypes_)
+                 const int retryTimeout_)
 
             : name(name_),
               id(LlufId_Generate64(name_.c_str())),
-              isLight(isLight_),
-              talksTo(talksTo_),
               multicastAddressControl(multicastAddressControl_),
               multicastAddressData(multicastAddressData_),
               heartbeatInterval(heartbeatInterval_),
               maxLostHeartbeats(maxLostHeartbeats_),
               slidingWindowSize(slidingWindowSize_),
-              retryTimeout(retryTimeout_),
-              wantedTypes(wantedTypes_),
-              unwantedTypes(unwantedTypes_)
+              retryTimeout(retryTimeout_)
         {}
 
         std::string name;
         boost::int64_t id;
-        bool isLight;
-        std::set<std::string> talksTo;
         std::string multicastAddressControl;
         std::string multicastAddressData;
         int heartbeatInterval;
         int maxLostHeartbeats;
         int slidingWindowSize;
         int retryTimeout;
-        std::vector<std::string> wantedTypes;
-        std::vector<std::string> unwantedTypes;
     };
 
     struct ThisNode
@@ -157,52 +145,6 @@ namespace Control
                 const std::string nodeTypeName =
                         ToUtf8(nt->Name().GetVal());
 
-                // IsLight
-                if (nt->IsLight().IsNull())
-                {
-                    throw std::logic_error("Parameter error: "
-                                           "Node type " + nodeTypeName + ": IsLight is mandatory");
-                }
-                auto isLight = nt->IsLight();
-
-                // TalksTo
-                std::set<std::string> talksTo;
-                for (Safir::Dob::Typesystem::ArrayIndex i = 0;
-                     i < nt->TalksToArraySize();
-                     ++i)
-                {
-                    if (!nt->TalksTo()[i].IsNull())
-                    {
-                        talksTo.insert(ToUtf8(nt->TalksTo()[i].GetVal()));
-                    }
-                }
-
-                if (talksTo.size() > 0)
-                {
-                    if (!isLight)
-                    {
-                        throw std::logic_error("Parameter error: "
-                                               "Node type " + nodeTypeName +
-                                               ": TalksTo can only be specified for Light nodes!");
-                    }
-
-                    // Check that the TalksTo nodes exists
-                    for (auto talksToName = talksTo.cbegin(); talksToName != talksTo.cend(); ++talksToName)
-                    {
-                        if (allNodeTypes.find(*talksToName) == allNodeTypes.end())
-                        {
-                            throw std::logic_error("Parameter error: "
-                                                   "Node type " + nodeTypeName + ": TalksTo node " +
-                                                   *talksToName + "does not exist!");
-                        }
-                    }
-                }
-                else
-                {
-                    // Non Light nodes talks to all node types
-                    talksTo = allNodeTypes;
-                }
-
                 // MulticastAddressControl
                 std::string multicastAddressControl;
                 if (!nt->MulticastAddressControl().IsNull())
@@ -215,6 +157,12 @@ namespace Control
                 if (!nt->MulticastAddressData().IsNull())
                 {
                     multicastAddressData = ToUtf8(nt->MulticastAddressData());
+                }
+
+                if (nt->MulticastAddressControl().IsNull() != nt->MulticastAddressData().IsNull() ||
+                    multicastAddressControl.empty() != multicastAddressData.empty())
+                {
+                    throw std::logic_error("Parameter error: Data and control channels need to be configured in the same way");
                 }
 
                 // HeartbeatInterval
@@ -253,56 +201,13 @@ namespace Control
 
                 auto retryTimeout = nt->RetryTimeout();
 
-                // WantedTypes
-                std::vector<std::string> wantedTypes;
-                for (Safir::Dob::Typesystem::ArrayIndex i = 0;
-                     i < nt->WantedTypesArraySize();
-                     ++i)
-                {
-                    if (!nt->WantedTypes()[i].IsNull())
-                    {
-                        std::string wt = ToUtf8(nt->WantedTypes()[i].GetVal());
-
-                        if (!isLight && wt != ".*")
-                        {
-                            throw std::logic_error("Parameter error: "
-                                                   "Node type " + nodeTypeName +
-                                                   ": WantedTypes can only be .* for non Light nodes!");
-                        }
-                        wantedTypes.push_back(wt);
-                    }
-                }
-
-                // UnwantedTypes
-                std::vector<std::string> unwantedTypes;
-
-                for (Safir::Dob::Typesystem::ArrayIndex i = 0;
-                     i < nt->UnwantedTypesArraySize();
-                     ++i)
-                {
-                    if (!nt->UnwantedTypes()[i].IsNull())
-                    {
-                        if (!isLight)
-                        {
-                            throw std::logic_error("Parameter error: "
-                                                   "Node type " + nodeTypeName +
-                                                   ": UnwantedTypes can be specified only for non Light nodes!");
-                        }
-                        unwantedTypes.push_back(ToUtf8(nt->UnwantedTypes()[i].GetVal()));
-                    }
-                }
-
                 nodeTypesParam.push_back(NodeType(nodeTypeName,
-                                                  isLight,
-                                                  talksTo,
                                                   multicastAddressControl,
                                                   multicastAddressData,
                                                   static_cast<int>(heartbeatInterval * 1000), // seconds -> milliseconds
                                                   maxLostHeartbeats,
                                                   slidingWindowsSize,
-                                                  static_cast<int>(retryTimeout * 1000), // seconds -> milliseconds
-                                                  wantedTypes,
-                                                  unwantedTypes));
+                                                  static_cast<int>(retryTimeout * 1000))); // seconds -> milliseconds
 
             }
 

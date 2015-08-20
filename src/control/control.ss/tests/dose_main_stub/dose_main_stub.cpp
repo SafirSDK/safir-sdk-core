@@ -117,7 +117,7 @@ int main(int /*argc*/, char * /*argv*/[])
         spNodeTypes.insert(std::make_pair(nt->id,
                                           SP::NodeType(nt->id,
                                                        nt->name,
-                                                       nt->isLight,
+                                                       false,
                                                        boost::chrono::milliseconds(nt->heartbeatInterval),
                                                        nt->maxLostHeartbeats,
                                                        boost::chrono::milliseconds(nt->retryTimeout))));
