@@ -104,9 +104,18 @@ namespace Control
 
         Config()
         {
-            // NodeTypes
             using Safir::Dob::Typesystem::Utilities::ToUtf8;
 
+
+            //incarnation blacklist
+            if (Safir::Dob::NodeParameters::IncarnationBlacklistFilename().length() == 0)
+            {
+                throw std::logic_error("Parameter IncarnationBlacklistFilename is expected to be a string with length > 0");
+            }
+
+            incarnationBlacklistFileName = ToUtf8(Safir::Dob::NodeParameters::IncarnationBlacklistFilename());
+
+            // NodeTypes
             if (Safir::Dob::NodeParameters::NodeTypesArraySize() < 1)
             {
                 throw std::logic_error("Parameter NodeTypesArray is expected to be an array with length > 0");
@@ -279,6 +288,7 @@ namespace Control
 
         std::vector<NodeType> nodeTypesParam;
         ThisNode thisNodeParam;
+        std::string incarnationBlacklistFileName;
     };
 }
 }

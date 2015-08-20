@@ -52,6 +52,7 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
     , m_signalSet(ioService)
     , m_strand(ioService)
     , m_terminationTimer(ioService)
+    , m_incarnationBlackListHandler(m_conf.incarnationBlacklistFileName)
     , m_ctrlStopped(false)
     , m_doseMainRunning(false)
 #if defined(linux) || defined(__linux) || defined(__linux__)
