@@ -3901,19 +3901,23 @@ Here we will focus on Normal and Replay. Simulation should be possible to suppor
 
 The safety issue is very important when mixing real data sessions and Replay sessions and the intention of the design is that it should be as difficult as possible to do things like "shoot a real gun at a replayed target".
 
-Safir applications are usually classified as either Business applications (APP) or Presentation applications (PRSes). The first type handles all business logic while the latter takes care of all presentation of data in a GUI (see <<appendix_a>>). This section contains some recommendations for how APPs and PRSes should use contexts to support Replay sessions.
+Safir applications are usually classified as either Business applications or Presentation
+applications (for simplicity we will refer to these as _Apps_ and _GUIs_ in the rest of
+this chapter). The first type handles all business logic while the latter takes care of
+all presentation of data in a GUI (see <<appendix_a>>). This section contains some
+recommendations for how APPs and GUIs should use contexts to support Replay sessions.
 
 === Design principles
 A Dob connection is always related to one, and only one, context. The context is given as parameter in the Open call. The contexts are numbered from 0 and upwards where 0 is used to identify the Normal context. Any data (except the ContextShared types, see below), such as entities, services and messages, produced by a connection, can only be seen by connections that is opened in the same context.
 
-In a system that supports Replay there must be at least some data that is control data, i.e. some things that need to be displayed from the Normal context while we're replaying. Typically this is the entities that control the Replay, software error reports, and a few more things. Fort example, a PRS that is showing a Replay session must be able to pick up changes to the Replay control entities, so that it will know when to switch out of Replay and back to Normal.
+In a system that supports Replay there must be at least some data that is control data, i.e. some things that need to be displayed from the Normal context while we're replaying. Typically this is the entities that control the Replay, software error reports, and a few more things. Fort example, a GUI that is showing a Replay session must be able to pick up changes to the Replay control entities, so that it will know when to switch out of Replay and back to Normal.
 
 Forcing applications to have multiple Dob connections, one in context 0 for the control data, and one in the Replay context, and then dynamically working out which kind of data goes where, is considered a potential security risk. Therefore, Safir SDK Core has a concept of ContextShared types which eliminates the need to have parallel connections to different contexts.
 
 === ContextShared types
 A type could be marked as being visible in all contexts by mapping the ContextShared property to it. ContextShared types are typically control types, e.g. types used to control the system mode.
 
-For example, an APP or PRS that is connected to context 0 can "see" all that goes on in context 0 and the ContextShared types. An APP or PRS that is connected to context 1 can "see" all that goes on in context 1 and the ContextShared types.
+For example, an APP or GUI that is connected to context 0 can "see" all that goes on in context 0 and the ContextShared types. An APP or GUI that is connected to context 1 can "see" all that goes on in context 1 and the ContextShared types.
 
 The following rules applies to ContextShared types:
 
@@ -3928,68 +3932,68 @@ The following rules applies to ContextShared types:
 
 These rules prevent a Replay application from accidentally (due to misconfiguration) replaying data that is configured to be ContextShared. If ContextShared types could be produced from any context nothing would stop the Replay application from over-registering a ContextShared entity and producing entity updates that may produce an inconsistent system leading to a number of security issues.
 
-ContextShared types removes the need for PRSes to have connections to several contexts at once. Without ContextShared types PRSes would have to have one connection to context 0 that subscribes to the control entities, and one connection to the context that contains the data that it should currently be displaying. So the PRS would have two connections, and it would probably be easy to use the wrong connection, for example sending a "fire" request accidentally on the context 0 connection instead of on the Replay connection (where it would get ignored).
+ContextShared types removes the need for GUIs to have connections to several contexts at once. Without ContextShared types GUIs would have to have one connection to context 0 that subscribes to the control entities, and one connection to the context that contains the data that it should currently be displaying. So the GUI would have two connections, and it would probably be easy to use the wrong connection, for example sending a "fire" request accidentally on the context 0 connection instead of on the Replay connection (where it would get ignored).
 
-By introducing ContextShared types this same PRS will only have to have one connection to the Dob. It can subscribe to both the control entities and the data that it displays through the same connection. This makes it impossible for this PRS to send a request in the wrong context, since it only knows of one context at a time.
+By introducing ContextShared types this same GUI will only have to have one connection to the Dob. It can subscribe to both the control entities and the data that it displays through the same connection. This makes it impossible for this GUI to send a request in the wrong context, since it only knows of one context at a time.
 
 === Using the context mechanism
-This section contains some hints on how APPs and PRSes should be designed to support Replay in different kind of systems.
+This section contains some hints on how APPs and GUIs should be designed to support Replay in different kind of systems.
 
 ==== Terminology
 - Replay - the mode that a console is in while showing Replay data.
 - ReplayApp - the component that performs the Replay. Typically an application that reads from a database produced by a "recorder" application, and sets entities and sends messages as if they were owned/sent by the real applications.
 
 ==== Each operator console has one mode (Type 1)
-This is a multinode system with one or more server nodes (that is running the APPs) and one or (probably) more operator consoles (running the PRSes). Each console can display either the Normal data, or one Replay session. Different consoles can be in different modes, and several consoles can display the same Replay session.
+This is a multinode system with one or more server nodes (that is running the APPs) and one or (probably) more operator consoles (running the GUIs). Each console can display either the Normal data, or one Replay session. Different consoles can be in different modes, and several consoles can display the same Replay session.
 
 An elaborate example would be: Console 1 and 2 are in Normal mode, console 3 is replaying yesterdays recorded data at three times the speed, and console 4 and 5 is looking at the Replay of data from last week.
 
-ReplayApp runs in one of the server nodes, and there is a PRS in each of the operator consoles that allow the operator to start a Replay session, or to "attach" to a Replay session that another operator is running. This results in changes to some control entities (owned by the ReplayApp) that reflect the mode of each console.
+ReplayApp runs in one of the server nodes, and there is a GUI in each of the operator consoles that allow the operator to start a Replay session, or to "attach" to a Replay session that another operator is running. This results in changes to some control entities (owned by the ReplayApp) that reflect the mode of each console.
 
 The APPs whose responsibility it is to maintain the Normal context data are not aware of any of the mode changes (the server nodes don't switch modes), and they only connect to context 0.
 
-PRSes that are meant to show Replay data must subscribe to the ReplayApp control entities, and when a mode change occurs they must reconnect to the Dob in the desired Replay context.
+GUIs that are meant to show Replay data must subscribe to the ReplayApp control entities, and when a mode change occurs they must reconnect to the Dob in the desired Replay context.
 
-There might be some PRSes in the console that does not listen to the mode change, e.g. the PRS that shows alerts.
+There might be some GUIs in the console that does not listen to the mode change, e.g. the GUI that shows alerts.
 
 ==== StandAlone system supporting one mode (Type 2)
-Very similar to a Type 1 system. The only difference is that the APPs are running on the same node as the PRSes. A correct implemented APP or PRS will work without any modification in both a Type 1 and a Type 2 system.
+Very similar to a Type 1 system. The only difference is that the APPs are running on the same node as the GUIs. A correct implemented APP or GUI will work without any modification in both a Type 1 and a Type 2 system.
 
-==== Starting extra PRSes showing a Replay session (Type 3)
-In this kind of system Replay sessions are started in a new set of windows, enabling the user to look at both Normal and one or more Replay sessions at the same time. When a Replay session is started a new set of PRSes (either new instances of the ones that show Normal data, or special replay-PRSes) are started to show the Replay data.
+==== Starting extra GUIs showing a Replay session (Type 3)
+In this kind of system Replay sessions are started in a new set of windows, enabling the user to look at both Normal and one or more Replay sessions at the same time. When a Replay session is started a new set of GUIs (either new instances of the ones that show Normal data, or special replay-GUIs) are started to show the Replay data.
 
-In this case the PRSes don't listen to the ReplayApp control entities. The PRSes that were started in the Normal context stay in that context. When the operator wants to start a Replay session the system will launch a new set of PRSes (either new instances of the Normal PRSes, or special replay-PRSes), telling them which context to connect to.
+In this case the GUIs don't listen to the ReplayApp control entities. The GUIs that were started in the Normal context stay in that context. When the operator wants to start a Replay session the system will launch a new set of GUIs (either new instances of the Normal GUIs, or special replay-GUIs), telling them which context to connect to.
 
-PRSes in this type of system must have a way of being told which context to connect to, and this could be either a command line parameter, or by setting an environment variable (the latter is probably better, since it makes it easy for plugins and libraries to get at the value, without having to pass around and parse the command reliably).
+GUIs in this type of system must have a way of being told which context to connect to, and this could be either a command line parameter, or by setting an environment variable (the latter is probably better, since it makes it easy for plugins and libraries to get at the value, without having to pass around and parse the command reliably).
 
 ==== Several Replay sessions in one console (Type 4)
 In this kind of system the user interface shows replayed and real objects intermingled, allowing operations on all objects.
 
-The PRSes in this type of system must connect to all contexts that are used on the console. The PRSes have many Dob connections, and they must be explicitly be written to be fully aware of which objects belong to which contexts, and what operations are legal on which objects, e.g. knowing that a track from context 3 (Replay) cannot be sent to the Fire service in context 0.
+The GUIs in this type of system must connect to all contexts that are used on the console. The GUIs have many Dob connections, and they must be explicitly be written to be fully aware of which objects belong to which contexts, and what operations are legal on which objects, e.g. knowing that a track from context 3 (Replay) cannot be sent to the Fire service in context 0.
 
 Although supported, this kind of system is usually considered dangerous, since the possibility for mistaking the nature of an object is high.
 
 === APP design
 Almost all applications should only be aware of context 0. An obvious exception to this rule is the the ReplayApp itself.
 
-=== PRS design
-In a Type 1 or Type 2 system a well behaved PRS should be designed according to the following rules:
+=== GUI design
+In a Type 1 or Type 2 system a well behaved GUI should be designed according to the following rules:
 
-All PRSes (that want to be able to show Replay data) must subscribe to a ContextShared entity that shows which context the console should "display".
+All GUIs (that want to be able to show Replay data) must subscribe to a ContextShared entity that shows which context the console should "display".
 
-When the PRS gets notified that the console is switching context it:
+When the GUI gets notified that the console is switching context it:
 
 * Closes its current connection.
 * Opens the connection in the "new" context.
 * Tells all its "parts" to restart, i.e
 ** Clear all internal state information.
 ** Attach to the connection.
-** Set up subscriptions again (A PRS normally does not own entities, but if it does, registrations and creation of entities must be done again.)
+** Set up subscriptions again (A GUI normally does not own entities, but if it does, registrations and creation of entities must be done again.)
 ** Restart TracerBackdoor and any BackdoorKeepers (these use message subscriptions internally which are lost in connection Close).
 
-The attach and subscription are the same actions that the PRS must take when it starts up the first time. What is very important when changing context (but not when starting for the first time) is the clearing of internal state information. Leaving any internal state information is a serious safety risk!
+The attach and subscription are the same actions that the GUI must take when it starts up the first time. What is very important when changing context (but not when starting for the first time) is the clearing of internal state information. Leaving any internal state information is a serious safety risk!
 
-A ReplayApp will probably send error responses to all requests on entities it owns. Therefore, PRSes in Replay mode needs to disable buttons etc that would generate requests, or be able to ignore the error responses from the ReplayApp.
+A ReplayApp will probably send error responses to all requests on entities it owns. Therefore, GUIs in Replay mode needs to disable buttons etc that would generate requests, or be able to ignore the error responses from the ReplayApp.
 
 == Test support and Tools
 Safir SDK Core contains some tools that are useful for, among other things, application and system testing.
