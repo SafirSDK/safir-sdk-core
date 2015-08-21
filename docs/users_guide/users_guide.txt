@@ -4124,12 +4124,25 @@ getting output on all listeners for a certain sender you've got some routing pro
 How can I be sure that I'm not using deprecated features?::
 In C++ you can define a preprocessor symbol +SAFIR_NO_DEPRECATED+. When this symbol is
 defined any references to deprecated features will fail to compile.
-
++
 For Java we have tagged deprecated features with the +@Deprecated+ attribute, which should
 cause your compiler to issue warnings.
-
++
 For C# we have currently _not_ used the +Obsolete+ attribute, so no warnings are issued on
 use of deprecated features.
+
+What happened to the +Clone()+ function in C# and Java?::
+All types generated from dou-files used to have a +Clone()+ (+clone()+ in Java)
+method. During the implementation of the new collection types in Safir SDK Core 6.0 -
+sequence and dictionary - we realized that the Clone methods were actually not
+needed. Additionally, supporting Clone for the new collection types would be _a lot_ of
+work. So the decision was taken to remove support for Clone.
+
+If you've been using Clone in your code this might be a problem for you. Rather than
+leaving you high and dry we've created a workaround that can be used by those who need
+the Clone functionality in C#. In the source code tree of Safir SDK Core there is a file
+src/dots/dots_test.ss/dotnet/DeepClone.cs, that you can add to your project. You will
+then get a function called +DeepClone+ added to _all_ objects in your project.
 
 == Appendix D: Building from source
 Since Safir SDK Core is released under an Open Source license (as described in <<licenses>>) you are able to download and build the source code from scratch. Instructions for building is included in the source distribution of Safir SDK Core obtained from http://safirsdkcore.com/[].
