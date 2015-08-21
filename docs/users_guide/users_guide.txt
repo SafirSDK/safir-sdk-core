@@ -4,7 +4,7 @@
 Safir SDK Core User's Guide
 ==========================
 Lars Hagström, Anders Widén and Joel Ottosson
-2015-07-23
+2015-08-21
 
 :cpp: {basebackend@docbook:c++:cpp}
 :csharp: {basebackend@docbook:c:csharp}
@@ -2457,18 +2457,27 @@ The second one is (obviously, since it contains an InstanceId parameter) only po
 
 [[persistence]]
 ==== Entity Persistence
-The Dob has an area of functionality known as _injections_, that allows entities to be injected from an _external source_. A special case of this is _persistence_, i.e. making entities survive an application or system restart. Persistence injections are known as _synchronous_ injections, since they will always occur synchronously, at application startup (or rather, when registration occurs), whereas the other kind of injection can occur asynchronously throughout the lifetime of a system.
+The Dob has an area of functionality known as _injections_, that allows entities to be
+injected from an _external source_. The most common use for this is _persistence_, which
+is what this section describes.  The purpose of persistence is to make entity instances
+survive an application or system restart.
 
-Note that it is possible (indeed, it is easy) to use the persistence injections without having to use the other kind of injections.
-
-This functionality is configured using the properties Safir.Dob.InjectionProperty and Safir.Dob.InjectionOverrideProperty. The possible values are:
+This functionality is configured using the properties Safir.Dob.InjectionProperty and
+Safir.Dob.InjectionOverrideProperty. The possible values are:
 
 - +None+
 - +SynchronousVolatile+
 - +SynchronousPermanent+
 - +Injectable+
 
-+None+ is the default, where nothing is remembered since the previous registration. The other values deserve their own subsections (although +Injectable+ will not be described in this chapter, but in <<systems_of_systems>>).
++None+ is the default, where nothing is remembered since the previous registration. The
+other values deserve their own subsections (although +Injectable+ will not be described
+in this chapter, but in <<systems_of_systems>>).
+
+But first a word on why they're called _synchronous_; Persistence injections are known as
+synchronous injections since they will always occur synchronously, at application startup
+(or rather, when registration occurs), whereas the other kind of injection can occur
+asynchronously throughout the lifetime of an entity instance.
 
 ===== SynchronousVolatile
 +SynchronousVolatile+ persistence is useful to make entities survive when an application restarts, but when the whole system does not. For example if an application crashes and is restarted automatically, or, in a system with redundant nodes, a node is shut down and the applications restarted on another node.
@@ -4145,7 +4154,7 @@ method. During the implementation of the new collection types in Safir SDK Core 
 sequence and dictionary - we realized that the Clone methods were actually not
 needed. Additionally, supporting Clone for the new collection types would be _a lot_ of
 work. So the decision was taken to remove support for Clone.
-
++
 If you've been using Clone in your code this might be a problem for you. Rather than
 leaving you high and dry we've created a workaround that can be used by those who need
 the Clone functionality in C#. In the source code tree of Safir SDK Core there is a file
