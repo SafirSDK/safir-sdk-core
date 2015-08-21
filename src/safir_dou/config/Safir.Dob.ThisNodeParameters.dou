@@ -5,6 +5,20 @@
     <baseClass>Safir.Dob.Parametrization</baseClass>
     <parameters>
         <parameter>
+            <summary>A nice name for this node</summary>
+            <name>Name</name>
+            <type>String</type>
+            <value>MyNode</value>
+        </parameter>
+
+        <parameter>
+            <summary>Node type for this node</summary>
+            <name>NodeType</name>
+            <type>String</type>
+            <value>Server</value>
+        </parameter>
+
+        <parameter>
             <summary>Address and port of the control channel</summary>
             <name>ControlAddress</name>
             <type>String</type>
@@ -28,20 +42,6 @@
                 <value>192.168.1.15:30000</value>
                 -->
             </array>
-        </parameter>
-
-        <parameter>
-            <summary>A nice name for this node</summary>
-            <name>Name</name>
-            <type>String</type>
-            <value>MyNode</value>
-        </parameter>
-
-        <parameter>
-            <summary>Node type for this node</summary>
-            <name>NodeType</name>
-            <type>String</type>
-            <value>Server</value>
         </parameter>
 
     </parameters>
