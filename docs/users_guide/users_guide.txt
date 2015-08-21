@@ -62,21 +62,21 @@ Safir SDK Core consists of a number of _components_, some of which have cryptic 
 
 [[sdk_service_summary]]
 .Components and Services in Safir SDK Core
-[width="80%", cols="15%,25%,60%",options="header",frame="topbot",grid="none"]
+[width="80%", cols="25%,15%,60%",options="header",frame="topbot",grid="none"]
 |=========================================================================
-|Acronym |Full name                       |Provided Service(s)
+|Component/Service               |Name         |Provided Service(s)
 
-|Lluf         |Low Level Utility Functions     |Low level functions that are not provided by Boost.
-|Logging      |N/A                             |Send log messages to the Safir Log mechanism.
-|Distribution |N/A                             |Low level communication mechanism.
-|Dots         |Distributed Objects Type system |The type system used for the distributed objects.
-|Dose         |Distributed Objects Service     |Inter-process and inter-computer distribution.
-|Control      |N/A                             |Application launching and monitoring (currently limited implementation).
-|Douf         |Dob Utility Functions           |Utility functions for applications using the Dob.
-|Swre         |Software Reports                |Debug trace logging.
-|Olib         |ODBC Library                    |C++ wrapper classes for Odbc database access (deprecated).
-|Dope         |Dob Persistence                 |Persistent storage of Dob entities.
-|Foreach      |N/A                             |Functionality for operating on multiple entity instances.
+|Low Level Utility Functions     |Lluf         |Low level functions that are not provided by Boost.
+|N/A                             |Logging      |Send log messages to the Safir Log mechanism.
+|N/A                             |Distribution |Low level communication mechanism.
+|Distributed Objects Type system |Dots         |The type system used for the distributed objects.
+|Distributed Objects Service     |Dose         |Inter-process and inter-computer distribution.
+|N/A                             |Control      |Application launching and monitoring (currently limited implementation).
+|Dob Utility Functions           |Douf         |Utility functions for applications using the Dob.
+|Software Reports                |Swre         |Debug trace logging.
+|ODBC Library                    |Olib         |C++ wrapper classes for Odbc database access (deprecated).
+|Dob Persistence                 |Dope         |Persistent storage of Dob entities.
+|N/A                             |Foreach      |Functionality for operating on multiple entity instances.
 
 |=========================================================================
 
@@ -96,7 +96,9 @@ endif::backend-docbook[]
 Again, to be able to use Safir SDK Core you do not need to understand or like these acronyms, but knowing that they are there may make some things in the SDK easier to use.
 
 === Why ``Core''?
-Saab sells another product Safir SDK, which is not open-source, which consists of Safir SDK Core plus a number of services that are very useful when building systems for both the civil and military market.
+Saab sells another product Safir SDK, which is not open-source, which consists of Safir
+SDK Core plus a number of services that are very useful when building systems for both
+the civilian and military markets.
 
 The additional services that Safir SDK provides include Alert handling, Application and Node redundancy control, communication over low-bandwidth and low connectivity media (e.g. radios of different kinds), track handling and correlation etc.
 
@@ -4119,6 +4121,15 @@ run +iperf -u -c 224.20.20.20+ (send UDP multicast packets) in turn on each comp
 checking that you get output on all listeners for every run of the sender. If you're not
 getting output on all listeners for a certain sender you've got some routing problem.
 
+How can I be sure that I'm not using deprecated features?::
+In C++ you can define a preprocessor symbol +SAFIR_NO_DEPRECATED+. When this symbol is
+defined any references to deprecated features will fail to compile.
+
+For Java we have tagged deprecated features with the +@Deprecated+ attribute, which should
+cause your compiler to issue warnings.
+
+For C# we have currently _not_ used the +Obsolete+ attribute, so no warnings are issued on
+use of deprecated features.
 
 == Appendix D: Building from source
 Since Safir SDK Core is released under an Open Source license (as described in <<licenses>>) you are able to download and build the source code from scratch. Instructions for building is included in the source distribution of Safir SDK Core obtained from http://safirsdkcore.com/[].
