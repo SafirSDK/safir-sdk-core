@@ -47,7 +47,7 @@ VehicleMmi::
 A Safir presentation application that presents all vehicle information in a GUI. It is designed to execute on any number of presentation nodes.
 
 VehicleDb::
-A Safir database application that on request interacts with a database through the the Safir ODBC database interface (see <<olib>>). It is designed to execute on one server node that also runs the ODBC database.
+A Safir database application that on request interacts with a database through the (now deprecated) Safir ODBC database interface. It is designed to execute on one server node that also runs the ODBC database.
 
 A deployment of the applications is shown in <<vehicle-deployment>> where the applications execute on one standalone node, but they could just as well execute on different nodes.
 
@@ -241,7 +241,7 @@ VehicleDb is the database application in the system. It sets up a connection to 
 
 The database contains vehicle category information. I.e. for each category code there is additional information that is stored in a database.
 
-All database interaction is made through the Safir ODBC interface (see <<olib>>).
+All database interaction is made through the Safir ODBC interface (which is deprecated, as of Safir SDK Core 6.0).
 
 A condition for the database application to work properly is that there is an ODBC database setup. A script is provided to set up a Mimer database with the correct tables, columns, stored procedures and user information.
 

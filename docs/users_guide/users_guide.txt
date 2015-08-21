@@ -2840,11 +2840,11 @@ replace_newline_with_space::
 Controls whether or not a newline in the log message is replaced with a space.
 
 show_safir_instance::
-Show the current SAFIR_INSTANCE in syslog reports.
+Show the current SAFIR_INSTANCE in syslog reports. Useful when running multiple nodes on
+one computer (see <<multiple-nodes-on-one-computer>>)
 
-TODO: reference a chapter on running multiple nodes on one computer.
-
-See <<safir_logging>> for more information on what "native" and "syslog" means, and how to use and configure the logging functionality.
+See <<safir_logging>> for more information on what "native" and "syslog" means, and how
+to use and configure the logging functionality.
 
 [[typesystem_ini]]
 ==== typesystem.ini
@@ -2964,7 +2964,8 @@ Directory containing dou files to load for this parameter override.
 
 safir_instance::
 Optional integer value. If specified the section will only be applied to the node with
-that +SAFIR_INSTANCE+ number. For more info on running multiple nodes on one computer, see todo.
+that +SAFIR_INSTANCE+ number. For more info on running multiple nodes on one computer,
+see <<multiple-nodes-on-one-computer>>.
 
 The name of parameter override sections are not used for anything in the system, so they
 only need to be unique.
@@ -3030,19 +3031,22 @@ _data channel_. Each of these channels is a separate stream of UDP packets over 
 separate set of ports.
 
 All these things, the control and data channel ports and multicast/unicast communication,
-need to be configured.
+need to be configured. Some things are configured as part of the each node's _Node Type_,
+and some are configured for each individual node.
 
-==== Node type configuration
+==== Node configuration
 
-Each node in a Safir SDK Core system belongs to one _Node Type_. Each node type has a
-number of properties that control how nodes belonging to it communicate with other
-nodes. The properties are listed in <<node-type-properties>>.
+Each node in a Safir SDK Core system belongs to one and only one Node Type. Each node
+type has a number of parameters that control how nodes belonging to it communicate with
+other nodes. The node types are configured in the NodeTypes parameter in
+Safir.Dob.NodeParameters.dou. The parameters for each node type are listed in
+<<node-type-parameters>>.
 
-[[node-type-properties]]
-.Node Type Properties
+[[node-type-parameters]]
+.Node Type Parameters
 [width="80%",cols="30%,70%",frame="topbot",options="header"]
 |======================
-| Property Name | Comment
+| Parameter Name | Comment
 
 | Name
 | Name of the node type
@@ -3071,61 +3075,86 @@ reached via multicast.
 
 |======================
 
+Each node has to be configured individually, to know which node type it belongs to,
+etc. This is done in done in the +Safir.Dob.ThisNodeParameters.dou+ file, which therefore
+must be different on all nodes (or use environment variables in the parameters, as
+described in <<environment_parameters>>).
 
+[[this-node-parameters]]
+.Node Parameters
+[width="70%",cols="30%,70%",frame="topbot",options="header"]
+|======================
+| Parameter Name | Comment
+
+| Name
+| Name of the node. This is only used for presentation purposes, and is not used for any
+logic. No checks are made to ensure that the node name is unique, since in fact it
+doesn't need to be unique.
+
+| NodeType
+| Node type for this node.
+
+| ControlAddress
+| Address and port of the control channel.
+
+| DataAddress
+| Address and port of the data channel.
+
+| Seeds
+| List of addresses and ports of the control channel of the seed nodes. Seed nodes are explained in <<node-discovery>>.
+
+|======================
+
+The addresses are on the format +address:port+, where the address can be an IP address or
+a DNS-resolvable address. On Linux it is also possible to specify a network interface
+explicitly, for example "eth0:20000", meaning use port 20000 on whatever ip address eth0
+is using. There is a command line utility +communication_resolver+ that can be used to
+check what an address or interface name will resolv to. Use the +-l+ flag to resolve
+local addresses and interfaces.
+
+[[node-discovery]]
 ==== Node discovery
 
+Safir SDK Core has a _node discovery_ mechanism, that is used by individual nodes to find
+and connect to other nodes. Once a node finds one other node in a system it will find all
+other nodes in the system, and all the other nodes will find it.
+
+This process is initiated by setting up _seeds_. Each node can have a list of addresses
+that it will try to connect to. These addresses are known as seed addresses. A seed
+address is simply the address of another node's control channel, as configured in
+Safir.Dob.ThisNodeParameters.ControlAddress.
+
+A simple way to use this in a Client/Server system is to have all nodes list all the
+server nodes' addresses in their seed list. This way, when any node starts, it will
+attempt to connect to all servers, which will then tell it about all other clients.
+
+[[multiple-nodes-on-one-computer]]
 ==== Multiple nodes on one computer
 
-[[standalone_config]]
-==== Standalone
-To configure a system to be Standalone (which is the default configuration anyway) you need only change one parameter in Safir.Dob.DistributionChannelParameters.dou (and you can do that without recompilation, as described in <<parameters>>). Set the +MulticastAddress+ of the first DistributionChannel in the array (the one named _System_) to be "127.0.0.1" (i.e. localhost), and your system is now standalone, and _no data is sent over the network by the Dob_.
+As hinted at before it is in fact possible to run multiple Dob nodes on a single computer
+(this is a new feature in Safir SDK Core 6.0). The way that the nodes are distinguished
+from each other is by setting the environment variable +SAFIR_INSTANCE+. All processes
+that have the same value of SAFIR_INSTANCE will form one node.
 
-.Standalone configuration
-[source,xml]
-----------------------------
-<array>
-    <Safir.Dob.DistributionChannel>
-        <Name>System</Name>
-        ... IncludedNodes parameter that does not fit here ...
-        <MulticastAddress>127.0.0.1</MulticastAddress>
-----------------------------
+So, for example, you can start two instances of +safir_control+, one with SAFIR_INSTANCE
+set to 0, and one with it set to 1. When you then start an application, with
+SAFIR_INSTANCE set to 1 it will be part of the second safir_control instance.
 
-Once the MulticastAddress is set to 127.0.0.1 all the rest of the network configuration files are ignored.
-
-You should also set up the parameters +Safir.Dob.NodeParameters.NumberOfNodes+ and +Safir.Dob.NodeParameters.Nodes+ to only contain the one node. This is not mandatory, but it may cause confusion to have several nodes defined in a one-node system.
-
-==== Multinode
-This section could have a lot of examples, but I think it would become unwieldy with huge amounts of xml files, so I'm keeping it brief and descriptive instead.
-
-First of all you should specify the number of nodes that are part of your system. Do this using the two parameters +Safir.Dob.NodeParameters.NumberOfNodes+ and +Safir.Dob.NodeParameters.Nodes+. If you're not using persistence, set the parameter +Safir.Dob.PersistenceParameters.SystemHasPersistence+ to false, otherwise configure the persistence as described in <<persistence_config>>).
-
-Each node has to be configured to know which node number it is, which is done in the parameter +Safir.Dob.ThisNodeParameters.NodeNumber+. Change this to contain the node number of each node (yes, this means having different contents in that file on each node in the system, unless you use an environment variable in the parameter, as described in <<environment_parameters>>).
-
-If your nodes have multiple network cards the Dob needs to be told which network card it should use, and this is done by specifying a network address in +Safir.Dob.NodeParameters.NetworkAddress+ (you only have to specify enough to uniquely identify the subnet that the card has, so if all your nodes are on the 192.168.123.* network you only need to specify 192.168.123.0).
-
-The last step to get a working multinode configuration is to change the Safir.Dob.DistributionChannelParameters dou file. What this file actually does is described below, but for now you just need to know that it specifies which multicast addresses the Dob uses. You need two +DistributionChannels+ defined, the +System+ and +PoolDistribution+ ones, which must be the first two distribution channels in the array.
-Set the MulticastAddress members to be valid multicast addresses, that are not used for something else on your network (e.g. 224.10.10.127 and 224.10.10.128).
-
-Now you should be able to fire up +dose_main+ on the nodes of your system and start communicating. The easiest way to tell if it is working is to have a look at what +dose_main+ prints to its stdout. If there is stuff there about "NodeUp" you're on the right track. Then start up Sate (see <<sate>>) and send and subscribe to some stuff across the network.
-
-[[routed_networks]]
-===== Routed networks
-
-TODO: update or remove
-
-In the default configuration the Dob assumes that it runs on a non-routed network. To run on a routed network there are some further considerations that need to be made.
-
-By default the _time-to-live_ (TTL) of the multicast packets of the Dob is set to 1. This means that packets will not cross routers and will stay within the current subnet. By changing the parameter +Safir.Dob.NodeParameters.RoutingHops+ you can modify this behaviour. For example, if it is set to 2 the packets will survive one routing hop.
-
-When using routed networks it is important to be sure that bidirectional multicast routing is enabled on the router. To test this I can recommend _iperf_ (http://sourceforge.net/projects/iperf[]) and the gui frontend _jperf_ (http://sourceforge.net/projects/jperf[]). One test strategy could be to run +iperf -u -s -B 224.20.20.20+ (listen to UDP packets on a multicast group) on all computers, and then run +iperf -u -c 224.20.20.20+ (send UDP multicast packets) in turn on each computer, checking that you get output on all listeners for every run of the sender. If you're not getting output on all listeners for a certain sender you've got some routing problem.
+If you want the nodes to talk to each other you will need to set up seeding, as described
+above, but it is of course possible to run two completely separate and different systems.
 
 [[local_objects]]
 ===== Local objects
-One last thing before going into the deeper technicalities of network configuration: Objects that are not sent over the network, even in a multinode system.
+One last thing before going into the deeper technicalities of network configuration:
+_Local objects_ - objects that are not sent over the network.
 
-For some entities, services and messages it is not desirable to have them sent over the network at all. These are known as _Local_ objects. Things like settings for an operator on one operator console or other things that only apply to the current node like which object is selected in the map are typically Local objects.
+For some entities, services and messages it is not desirable to have them sent over the
+network at all. These are known as local objects. Things like settings for an operator
+on one operator console or other things that only apply to the current node like which
+object is selected in the map are typically Local objects.
 
-An object is specified as Local by mapping the +Safir.Dob.DistributionChannelProperty+ to it, with the value "Local" as DistributionChannel, using a dom file.
+An object is specified as Local by mapping the +Safir.Dob.DistributionScopeProperty+ to
+it, with the value "Local" as DistributionChannel, using a dom file.
 
 .Specifying that an object is local.
 [source,xml]
@@ -3133,69 +3162,16 @@ An object is specified as Local by mapping the +Safir.Dob.DistributionChannelPro
 <?xml version="1.0" encoding="utf-8" ?>
 <propertyMapping xmlns="urn:safir-dots-unit"
                  xmlns:xsd="http://www.w3.org/2001/XMLSchema-instance">
-    <property>Safir.Dob.DistributionChannelProperty</property>
-    <class>Capabilties.Selection</class>
+    <property>Safir.Dob.DistributionScopeProperty</property>
+    <class>Capabilities.Selection</class>
     <memberMapping>
         <member>
-            <propertyMember>DistributionChannel</propertyMember>
+            <propertyMember>DistributionScope</propertyMember>
             <value>Local</value>
         </member>
     </memberMapping>
 </propertyMapping>
 ----------------------------
-
-===== Distribution Channels
-In a system with many nodes with different tasks it is not always necessary or desirable (e.g. for shared memory usage reasons) to send all data to all nodes. For example say there is one server that handles database stuff, and one that handles real-time tracking of all vessel in a harbour (using a radar or transponders or something like that). The applications on the database server have no need of the vessel data, and having them there would only use memory and generate CPU load (the Dob would still have to process them).
-
-+DistributionChannels+ are the solution to this problem. They allow you to specify which data is sent to which nodes.
-
-For the above example you could set up a distribution channel called VesselData, which only contains the nodes that need the vessel data (i.e. the tracking server and the operator consoles). You have to specify a new MulticastAddress for this distribution channel (this allows the filtering of the data to occur on the network card, generating no load on the CPU).
-
-For each type that is associated with the vessels (e.g. the vessel entities, and maybe some messages) you then specify that they use that distribution channel, using properties.
-
-.A DistributionChannel for VesselEntity
-[source,xml]
-----------------------------
-<?xml version="1.0" encoding="utf-8" ?>
-<propertyMapping xmlns="urn:safir-dots-unit"
-                 xmlns:xsd="http://www.w3.org/2001/XMLSchema-instance">
-    <property>Safir.Dob.DistributionChannelProperty</property>
-    <class>Capabilties.Vessels.VesselEntity</class>
-    <memberMapping>
-        <member>
-            <propertyMember>DistributionChannel</propertyMember>
-            <value>VesselData</value>
-        </member>
-    </memberMapping>
-</propertyMapping>
-----------------------------
-
-There is no need to do any modifications to the applications involved.
-
-It is possible to have up to 32 distribution channels defined for a system. But having more than 8 (or maybe 16 depending on your hardware) causes the filtering may move from the network card into the CPU. If you have other uses of multicast (IGMP) in your system one or more of these 8 hardware accelerated "slots" may already be occupied.
-
-===== Priorities
-In a system with many Dob objects competing for the network bandwidth it is possible to specify different priorities for the different objects.
-
-The Dob supports up to six priority levels, which are defined in the +Safir.Dob.PriorityParameters+ parameter file.
-
-It is also possible to specify whether a certain priority level uses _acks_ (acknowledgements) on the LAN. For most stuff acks are needed, since otherwise it is not certain that an entity update or a message is received on the network or not, but for cyclic data (stuff that is updated regularly, and where it doesn't matter that one update is missed every now and then) it is useful to avoid the extra network load generated by the acks.
-
-An acked entity update, for example, will generate one packet for the entity update itself (sent by multicast to all nodes in the system), and then one ack packet from each of the receiving nodes. Disabling the acking will potentially reduce the collisions on the network quite drastically, allowing for higher throughput or lower LAN load (which might be wanted for other things).
-
-===== Ports used
-The Dob uses the following ports:
-[width="70%", cols="20%,80%",options="header",frame="topbot",grid="none"]
-|==================
-|Port(s)       |Use
-
-|6970          |KeepAlive messages, to know which nodes are running.
-|6971          |Acknowledgements
-|6972-6977     |Data (one port for every priority level)
-
-|==================
-
-If the system is configured to be StandAlone (as described in <<standalone_config>>) none of the ports will be opened or used.
 
 [[persistence_config]]
 === Persistence config
@@ -4132,6 +4108,17 @@ Whatever happened to +deletedByOwner+?::
   Once upon a time (well, 4.5 and earlier) the deprecated-flag in the +OnDeletedEntity+ callback was known as +deletedByOwner+. This was used to signal how an entity was deleted, whether it was due to an unregistration or an explicit delete. Unfortunately this information was useless, since after the introduction of _ghosts_ and persistence it was no longer possible for the Dob to guarantee that you got the right value in all circumstances. Unfortunately we did not realize this at the time, so we've had to deprecate this flag now.
 +
 The persistence service (_dope_), however, still uses this flag, since it has meaning when using the special _entity injector_ subscribe with +wantsLastState+ set to true. This will be changed in a future release, but you can safely ignore this bit of information unless you're writing your own persistence service or entity injector.
+
+Have you got any tips for troubleshooting multicast networking?::
+When using multicast, and especially over routed networks it is important to be sure that
+bidirectional multicast routing is enabled on the router. To test this we can recommend
+_iperf_ (http://sourceforge.net/projects/iperf[]) and the gui frontend _jperf_
+(http://sourceforge.net/projects/jperf[]). One test strategy could be to run +iperf -u -s
+-B 224.20.20.20+ (listen to UDP packets on a multicast group) on all computers, and then
+run +iperf -u -c 224.20.20.20+ (send UDP multicast packets) in turn on each computer,
+checking that you get output on all listeners for every run of the sender. If you're not
+getting output on all listeners for a certain sender you've got some routing problem.
+
 
 == Appendix D: Building from source
 Since Safir SDK Core is released under an Open Source license (as described in <<licenses>>) you are able to download and build the source code from scratch. Instructions for building is included in the source distribution of Safir SDK Core obtained from http://safirsdkcore.com/[].
