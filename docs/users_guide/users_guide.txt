@@ -4062,12 +4062,16 @@ The generated doxygen documentation is included in the downloads, and should be 
 _Use this documentation! It is the place where interface details are explained!_
 
 
-=== Reporting bugs and asking questions.
-
-TODO: Bug reports can be filed under "Tickets" at at http://safirsdkcore.com[].
+=== Asking questions and reporting bugs
 
 Questions can be sent directly to us using the contact form or by asking a question in
 our Google+ Community. Links to both can be found at http://safirsdkcore.com[].
+
+Bug reports can either be sent directly to us, or by creating an issue on our GitHub page
+https://github.com/SafirSDK/safir-sdk-core/issues[]. When you report a bug, please
+include as much information as possible, e.g. version information and platform
+information. If you experience a crash in any part of Safir SDK Core, please include any
+crash dumps that were created.
 
 [[appendix_a]]
 == Appendix A: Example applications
