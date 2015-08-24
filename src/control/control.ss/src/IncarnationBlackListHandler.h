@@ -23,6 +23,7 @@
 ******************************************************************************/
 #pragma once
 
+#include <Safir/Utilities/Internal/SystemLog.h>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
 #include <fstream>
@@ -44,19 +45,21 @@ namespace Control
     {
     public:
 
-        IncarnationBlacklistHandler(const std::string& fileName)
+        explicit IncarnationBlacklistHandler(const std::string& fileName)
             : m_path(fileName)
         {
             CheckConfigurationFile(m_path); //throws if errors detected
         }
 
         //returns true if the incarnationId is not blacklisted
-        bool validateIncarnationId(const int64_t incarnationId)
+        bool validateIncarnationId(const int64_t incarnationId) const
         {
             std::ifstream file(m_path.string().c_str(), std::ios::in);
 
             if (file.is_open() == false)
+            {
                 return true;
+            }
 
             while ( !file.eof() )
             {
@@ -65,8 +68,10 @@ namespace Control
                 file >> readValue;
 
                 if (readValue == incarnationId)
+                {
+                    file.close();
                     return false;
-
+                }
             }
 
             file.close();
@@ -78,17 +83,19 @@ namespace Control
         {
 
             if(validateIncarnationId(incarnationId) == false) //only add if it's not already added
+            {
                 return;
+            }
 
             std::ofstream file(m_path.string().c_str(), std::ios::out | std::ofstream::app);
 
             if (file.is_open() == false)
             {
-                throw std::runtime_error("Configuration error: Unable to write to incarnation black list file configured via the Safir::Dob::NodeParameters::IncarnationBlacklistFilename parameter");
+                SEND_SYSTEM_LOG(Error, << "Configuration error: Unable to write incarnation id to black list file configured via the Safir::Dob::NodeParameters::IncarnationBlacklistFilename parameter");
+                return;
             }
 
             file << incarnationId << std::endl;
-
             file.close();
         }
 
@@ -126,7 +133,7 @@ namespace Control
             }
         }
 
-        boost::filesystem::path m_path;
+        const boost::filesystem::path m_path;
     };
 
 

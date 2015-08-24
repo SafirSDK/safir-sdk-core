@@ -41,7 +41,9 @@ BOOST_AUTO_TEST_CASE( blacklisthandlertests )
     boost::filesystem::path file("test_incarnation_blacklistfile.txt");
 
     if(boost::filesystem::exists(file))
+    {
         boost::filesystem::remove(file);
+    }
 
     BOOST_CHECK_NO_THROW(IncarnationBlacklistHandler testHandler("test_incarnation_blacklistfile.txt"));
 

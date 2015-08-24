@@ -7,9 +7,10 @@ TARGET_LINK_LIBRARIES(SystemStateHandler_test PRIVATE
   ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 
 TARGET_LINK_LIBRARIES(IncarnationBlackListHandler_test PRIVATE
-  ${Boost_SYSTEM_LIBRARY}
-  ${Boost_FILESYSTEM_LIBRARY}
-  ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+    lluf_utils
+    ${Boost_SYSTEM_LIBRARY}
+    ${Boost_FILESYSTEM_LIBRARY}
+    ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 
 ADD_TEST(NAME SystemStateHandler_test COMMAND SystemStateHandler_test)
 SET_SAFIR_TEST_PROPERTIES(TEST SystemStateHandler_test TIMEOUT 600)
