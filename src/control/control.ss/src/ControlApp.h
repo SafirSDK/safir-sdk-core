@@ -24,7 +24,7 @@
 #pragma once
 
 #include "SystemStateHandler.h"
-#include "IncarnationBlacklistHandler.h"
+#include "IncarnationBlackListHandler.h"
 #include <Safir/Dob/Internal/SystemPicture.h>
 #include <Safir/Dob/Internal/Communication.h>
 #include <Safir/Dob/Internal/DoseMainCmd.h>
