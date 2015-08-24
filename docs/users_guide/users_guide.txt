@@ -1604,7 +1604,11 @@ Safir SDK Core versions prior to 5.0 used a different XML serialization format t
 
 For backward compatibility reasons and to make the transition to 5.0 as smooth as possible, Safir SDK Core can still read the old format, even though it is considered deprecated.
 
-However, it is quite easy to convert old XML to new XML, since Safir SDK Core provides a script, _xml_convert.py_, that does just that. For example +xml_convert.py -d <path_to_douFiles> -o <converted_result_path> -r+ will recursively convert all dou and dom files for you. The script can be found in +$SAFIR_SDK/data/utils+.
+However, it is quite easy to convert old XML to new XML, since Safir SDK Core provides a
+script, _xml_convert.py_, that does just that. For example +xml_convert.py -d
+<path_to_douFiles> -o <converted_result_path> -r+ will recursively convert all dou and
+dom files for you. The script is included in the installation packages, and can be found
+in the documentation directory.
 
 To convert serialized objects that reside in databases etc, it might be easier to write a small program that deserializes your objects and then serializes them back to XML again. Those two steps will generate equivalent XML but in the new format. Actually such tool already exists, please don't hesitate to contact any Safir SDK Core developers for help and information.
 
@@ -2568,7 +2572,7 @@ public:
          (const Safir::Dob::InjectedEntityProxy injectedEntityProxy);
 
     virtual void OnInitialInjectionsDone
-         (const Safir::Dob::Typesystem::TypeId typeId,
+         (const Safir::Dob::Typesystem::TypeId     typeId,
           const Safir::Dob::Typesystem::HandlerId& handlerId);
 };
 ----------------------------
@@ -4070,7 +4074,8 @@ Apart from this document there are other sources for help.
 === Doxygen help
 All the language interfaces have comments that can be used to generate documentation (doxygen for C++, javadoc for Java, etc).
 
-The generated doxygen documentation is included in the downloads, and should be located under $(SAFIR_SDK)/docs/.
+The generated doxygen documentation is included in the installation packages, and is located
+under /usr/share/doc/safir-sdk-core on Linux and under the Start Menu in Windows.
 
 _Use this documentation! It is the place where interface details are explained!_
 
