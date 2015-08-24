@@ -58,6 +58,12 @@
         </arrayElement>
       </arrayElements>
     </parameter>
+    <parameter>
+      <summary>Full filename where the system stores the incarnation blacklist. Use forward slashes as directory separator!</summary>
+      <name>IncarnationBlacklistFilename</name>
+      <type>String</type>
+      <value>@{TEMP}/safir-sdk-core/system-incarnation-blacklist.txt</value> <!-- This is filled out by cmake -->
+    </parameter>
 
     <parameter>
       <summary>Defines the different node types in the system. Can be an empty array if standalone configuration.</summary>
