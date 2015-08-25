@@ -2,12 +2,12 @@ FILE(GLOB headers
   StatusApp.h)
 
 FILE(GLOB sources
-  StatusApp.cpp status.cpp)
+  StatusApp.cpp safir_status.cpp)
 
-ADD_EXECUTABLE(status ${sources} ${headers})
+ADD_EXECUTABLE(safir_status ${sources} ${headers})
 
-TARGET_LINK_LIBRARIES(status PRIVATE
+TARGET_LINK_LIBRARIES(safir_status PRIVATE
   lluf_utils
   lluf_crash_reporter)
 
-SAFIR_INSTALL(TARGETS status)
+SAFIR_INSTALL(TARGETS safir_status)
