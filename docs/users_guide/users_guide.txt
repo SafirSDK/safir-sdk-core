@@ -2872,10 +2872,10 @@ _typesystem.ini_ is a little bit more involved, so let's start with an example:
 dots_shared_memory_size=10
 
 ; Comma separated list of default directories to look for dou files in.
-dou_search_path=/home/lars/safir-logan/share/safir-sdk-core/dou
+dou_search_path=/usr/share/safir-sdk-core/dou
 
 ; Comma separated search path for safir_generated-xxx-java.jar files.
-java_search_path=/home/lars/safir-logan/share/java/safir-sdk-core
+java_search_path=/usr/share/java/safir-sdk-core
 
 [Core]
 ; This section contains the information needed to load the safir_generated-Core-xxx
@@ -3029,7 +3029,7 @@ Safir SDK Core nodes communicate is needed.
 
 ==== Safir SDK Core networking
 
-Safir SDK Core nodes can communicate using either _UDP Multicast_ or _UDP Unicast_. Multicast
+Safir SDK Core nodes can communicate using  _UDP Unicast_ and _UDP Multicast_. Multicast
 communication means that a single packet sent from one node can be received by multiple
 nodes, whereas unicast packets are only sent to one node.
 
@@ -3038,7 +3038,9 @@ nodes. For example an entity update can be performed using only one packet, wher
 system using unicast one packet per node is needed. On the other hand, using multicast is
 not an option on all networks.
 
-A system can also mix nodes that are reached with multicast with nodes that are reached
+Regardless of whether multicast is used or not, all nodes must be reachable using
+unicast, since things that only need to be sent to one node is sent using unicast.  A
+system can also mix nodes that are reached with multicast with nodes that are reached
 with unicast.
 
 The nodes communicate with each other over two channels, the _control channel_ and the
@@ -3046,8 +3048,8 @@ _data channel_. Each of these channels is a separate stream of UDP packets over 
 separate set of ports.
 
 All these things, the control and data channel ports and multicast/unicast communication,
-need to be configured. Some things are configured as part of the each node's _Node Type_,
-and some are configured for each individual node.
+need to be configured. Some things are configured as part of each node's _Node Type_, and
+some are configured for each individual node.
 
 ==== Node configuration
 
@@ -3068,13 +3070,11 @@ Safir.Dob.NodeParameters.dou. The parameters for each node type are listed in
 
 | MulticastAddressControl
 | Multicast address and port used for the control channel for nodes of this type. An
-empty string for this or MulticastAddressData indicates that nodes of this type can't
-be reached via multicast.
+empty string indicates that nodes of this type can't be reached via multicast.
 
 | MulticastAddressData
 | Multicast address and port used for the data channel for nodes of this type. An empty
-string for this or MulticastAddressControl indicates that nodes of this type can't be
-reached via multicast.
+string indicates that nodes of this type can't be reached via multicast.
 
 | HeartbeatInterval
 | How often shall heartbeats/keepalives be sent.
@@ -3110,10 +3110,10 @@ doesn't need to be unique.
 | Node type for this node.
 
 | ControlAddress
-| Address and port of the control channel.
+| Unicast address and port of the control channel.
 
 | DataAddress
-| Address and port of the data channel.
+| Unicast address and port of the data channel.
 
 | Seeds
 | List of addresses and ports of the control channel of the seed nodes. Seed nodes are explained in <<node-discovery>>.
@@ -3123,9 +3123,11 @@ doesn't need to be unique.
 The addresses are on the format +address:port+, where the address can be an IP address or
 a DNS-resolvable address. On Linux it is also possible to specify a network interface
 explicitly, for example "eth0:20000", meaning use port 20000 on whatever ip address eth0
-is using. There is a command line utility +communication_resolver+ that can be used to
-check what an address or interface name will resolv to. Use the +-l+ flag to resolve
-local addresses and interfaces.
+is using. On Windows there is no such feature, currently.
+
+There is a command line utility +communication_resolver+ that can be used to check what
+an address or interface name will resolv to. Use the +-l+ flag to resolve local addresses
+and interfaces.
 
 [[node-discovery]]
 ==== Node discovery
@@ -3137,7 +3139,7 @@ other nodes in the system, and all the other nodes will find it.
 This process is initiated by setting up _seeds_. Each node can have a list of addresses
 that it will try to connect to. These addresses are known as seed addresses. A seed
 address is simply the address of another node's control channel, as configured in
-Safir.Dob.ThisNodeParameters.ControlAddress.
++Safir.Dob.ThisNodeParameters.ControlAddress+.
 
 A simple way to use this in a Client/Server system is to have all nodes list all the
 server nodes' addresses in their seed list. This way, when any node starts, it will
@@ -3153,15 +3155,16 @@ that have the same value of SAFIR_INSTANCE will form one node.
 
 So, for example, you can start two instances of +safir_control+, one with SAFIR_INSTANCE
 set to 0, and one with it set to 1. When you then start an application, with
-SAFIR_INSTANCE set to 1 it will be part of the second safir_control instance.
+SAFIR_INSTANCE set to 1 it will be part of the second safir_control instance. Remember
+that it is possible to specify parameter overrides that are only loaded for certain
+values of SAFIR_INSTANCE, as described in <<typesystem_ini>>.
 
 If you want the nodes to talk to each other you will need to set up seeding, as described
 above, but it is of course possible to run two completely separate and different systems.
 
 [[local_objects]]
 ===== Local objects
-One last thing before going into the deeper technicalities of network configuration:
-_Local objects_ - objects that are not sent over the network.
+One last thing, _Local objects_ - objects that are not sent over the network.
 
 For some entities, services and messages it is not desirable to have them sent over the
 network at all. These are known as local objects. Things like settings for an operator
