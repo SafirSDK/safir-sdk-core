@@ -58,7 +58,7 @@
       <summary>Full filename where the system stores the incarnation blacklist. Use forward slashes as directory separator!</summary>
       <name>IncarnationBlacklistFilename</name>
       <type>String</type>
-      <value>@DEFAULT_INCARNATION_BLACKLIST@</value> <!-- This is filled out by cmake -->
+      <value>@DEFAULT_INCARNATION_BLACKLIST@</value>
     </parameter>
 
     <parameter>
