@@ -8225,10 +8225,16 @@ class DotsTestDotnet
     {
         {
             DotsTest.MemberTypes mt = new DotsTest.MemberTypes();
-            DotsTest.MemberTypes mtc = mt.DeepClone();
+            DotsTest.MemberTypes mtc = mt.Clone();
             mt.Int32Member.Val = 10;
             mt.Kelvin64Member.Val = 10;
             if (!mtc.Int32Member.IsNull() || !mtc.Kelvin64Member.IsNull())
+            {
+                System.Console.WriteLine("Clone Error");
+            }
+
+            mtc = mt.Clone();
+            if (mtc.Int32Member.Val != 10 || mtc.Kelvin64Member.Val != 10)
             {
                 System.Console.WriteLine("Clone Error");
             }
@@ -8236,10 +8242,16 @@ class DotsTestDotnet
 
         {
             DotsTest.MemberArrays ma = new DotsTest.MemberArrays();
-            DotsTest.MemberArrays mac = ma.DeepClone();
+            DotsTest.MemberArrays mac = ma.Clone();
             ma.Int32Member[1].Val = 10;
             ma.Kelvin64Member[0].Val = 10;
             if (!mac.Int32Member[1].IsNull() || !mac.Kelvin64Member[0].IsNull())
+            {
+                System.Console.WriteLine("Clone Error");
+            }
+
+            mac = ma.Clone();
+            if (mac.Int32Member[1].Val != 10 || mac.Kelvin64Member[0].Val != 10)
             {
                 System.Console.WriteLine("Clone Error");
             }
@@ -8247,24 +8259,39 @@ class DotsTestDotnet
 
         {
             DotsTest.MemberSequences ms = new DotsTest.MemberSequences ();
-            DotsTest.MemberSequences msc = ms.DeepClone();
+            DotsTest.MemberSequences msc = ms.Clone();
             ms.Int32Member.Add(20);
             ms.Kelvin64Member.Add(20);
             if (msc.Int32Member.Count != 0 || msc.Kelvin64Member.Count != 0)
             {
                 System.Console.WriteLine("Clone Error");
             }
+
+            msc = ms.Clone();
+            if (msc.Int32Member.Count != 1 || msc.Kelvin64Member.Count != 1 ||
+                msc.Int32Member[0] != 20 || msc.Kelvin64Member[0] != 20)
+            {
+                System.Console.WriteLine("Clone Error");
+            }
         }
 
         {
-            DotsTest.MemberDictionaries md=new DotsTest.MemberDictionaries();
-            DotsTest.MemberDictionaries mdc = md.DeepClone();
+            DotsTest.MemberDictionaries md = new DotsTest.MemberDictionaries();
+            DotsTest.MemberDictionaries mdc = md.Clone();
 
             md.Int32StringMember.Add (10, "Rude word");
             if (mdc.Int32StringMember.Count != 0)
             {
                 System.Console.WriteLine("Clone Error");
             }
+
+            mdc = md.Clone();
+            if (mdc.Int32StringMember.Count != 1 ||
+                mdc.Int32StringMember[10].Val != "Rude word")
+            {
+                System.Console.WriteLine("Clone Error");
+            }
+
         }
 
     }

@@ -1,4 +1,4 @@
-/******************************************************************************
+/* ****************************************************************************
 *
 * This code is in the Public Domain.
 *
@@ -12,7 +12,7 @@ using System.ArrayExtensions;
 
 namespace System
 {
-    public static class ObjectExtensions
+    internal static class ObjectExtensions
     {
         private static readonly MethodInfo CloneMethod = typeof(Object).GetMethod("MemberwiseClone", BindingFlags.NonPublic | BindingFlags.Instance);
 
@@ -76,7 +76,7 @@ namespace System
         }
     }
 
-    public class ReferenceEqualityComparer : EqualityComparer<Object>
+    internal class ReferenceEqualityComparer : EqualityComparer<Object>
     {
         public override bool Equals(object x, object y)
         {
@@ -91,7 +91,7 @@ namespace System
 
     namespace ArrayExtensions
     {
-        public static class ArrayExtensions
+        internal static class ArrayExtensions
         {
             public static void ForEach(this Array array, Action<Array, int[]> action)
             {
