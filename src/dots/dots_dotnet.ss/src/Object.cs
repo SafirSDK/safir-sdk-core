@@ -31,7 +31,7 @@ namespace Safir.Dob.Typesystem
     /// <para/>
     /// This class is the base class for all automatically generated DOB classes.
     /// </summary>
-    public class Object
+    public class Object: ICloneable
     {
         #region Constructors
 
@@ -139,6 +139,19 @@ namespace Safir.Dob.Typesystem
 
         #endregion
 
-    }
+        #region Cloning
 
+        /// <summary>
+        /// Create a copy of the object.
+        /// <para>
+        /// This method is deprecated.
+        /// </para>
+        /// </summary>
+        public dynamic Clone()
+        {
+            return this.DeepClone();
+        }
+
+        #endregion
+    }
 }

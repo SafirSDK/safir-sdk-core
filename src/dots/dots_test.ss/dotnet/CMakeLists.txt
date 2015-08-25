@@ -3,6 +3,6 @@ if (NOT CSHARP_FOUND)
 endif()
 
 ADD_CSHARP_ASSEMBLY(dots_test_dotnet EXE
-  SOURCES AssemblyInfo.cs DotsTestDotnet.cs DeepClone.cs
+  SOURCES AssemblyInfo.cs DotsTestDotnet.cs
   REFERENCES Safir.Dob.Typesystem safir_generated-DotsTest-dotnet)
 
