@@ -189,6 +189,11 @@ int main(int argc, char* argv[])
         {
             std::wstring line;
             std::getline(std::wcin, line);
+            if (!std::wcin.good())
+            {
+               std::wcerr << "Error reading from std::wcin" << std::endl;
+               return 1;
+            }
 
             //std::wcout << "getline read: " << line << " Line length:" << line.length() << std::endl;
 

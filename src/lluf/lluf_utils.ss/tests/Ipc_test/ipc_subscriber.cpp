@@ -190,6 +190,11 @@ int main(int argc, char* argv[])
         {
             std::wstring line;
             std::getline(std::wcin, line);
+            if (!std::wcin.good())
+            {
+               std::wcerr << "Error reading from std::wcin" << std::endl;
+               return 1;
+            }
 
             std::vector<std::wstring> cmd;
 
