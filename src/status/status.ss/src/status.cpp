@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2015 (???? Github)
+* Copyright Saab AB, 2015 (http://safirsdkcore.com/)
 *
 * Created by: Anders Widén / anders.widen@consoden.se
 *
