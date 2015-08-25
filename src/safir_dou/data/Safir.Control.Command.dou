@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <summary>Command to stop, shutdown or reboot a specific node or a whole safir system.</summary>
+  <name>Safir.Control.Command</name>
+  <baseClass>Safir.Dob.Service</baseClass>
+  <members>
+    <member>
+      <summary>Operation to be performed on a whole safir system or a specific node.</summary>
+      <name>Operation</name>
+      <type>Safir.Control.Operation</type>
+    </member>
+    <member>
+      <summary>The node to apply the operation to. A null value indicates that the operation shall be applied to the whole system</summary>
+      <name>NodeId</name>
+      <type>Int64</type>
+    </member>
+  </members>
+</class>
