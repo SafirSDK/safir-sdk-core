@@ -91,7 +91,8 @@ namespace Control
 
             if (file.is_open() == false)
             {
-                SEND_SYSTEM_LOG(Error, << "Configuration error: Unable to write incarnation id to black list file configured via the Safir::Dob::NodeParameters::IncarnationBlacklistFilename parameter");
+                SEND_SYSTEM_LOG(Error, << "Configuration error: Unable to write incarnation id to black list file '" <<
+                                m_path << "' configured via the Safir::Dob::NodeParameters::IncarnationBlacklistFilename parameter");
                 return;
             }
 
@@ -107,7 +108,8 @@ namespace Control
 
             if (file.is_open() == false)
             {
-                throw std::runtime_error("Configuration error: Unable to write to incarnation black list file configured via the Safir::Dob::NodeParameters::IncarnationBlacklistFilename parameter");
+                throw std::runtime_error("Configuration error: Unable to write to incarnation black list file '"
+                                         + m_path.string() + "' configured via the Safir::Dob::NodeParameters::IncarnationBlacklistFilename parameter");
             }
 
             file.close();
