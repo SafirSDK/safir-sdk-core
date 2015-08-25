@@ -411,6 +411,7 @@ add_subdirectory(dots)
 add_subdirectory(safir_dou)
 add_subdirectory(control)
 add_subdirectory(dose)
+add_subdirectory(status)
 add_subdirectory(douf)
 add_subdirectory(swre)
 add_subdirectory(foreach)
@@ -422,6 +423,7 @@ add_subdirectory(tests)
 
 add_subdirectory(util)
 add_subdirectory(config)
+
 
 #non-msvc systems need the cmake export file.
 #msvc uses autolinking, so we don't need this file there.
