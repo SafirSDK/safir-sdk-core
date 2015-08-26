@@ -5,6 +5,6 @@
   <values>
     <value>Stop</value>
     <value>Shutdown</value>
-    <value>Restart</value>
+    <value>Reboot</value>
   </values>
 </enumeration>
