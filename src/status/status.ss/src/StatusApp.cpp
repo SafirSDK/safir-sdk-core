@@ -1,8 +1,8 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2007-2013,2015 (http://safir.sourceforge.net)
+* Copyright Saab AB, 2015 (http://safirsdkcore.com/)
 *
-* Created by: Lars Hagström / stlrha
+* Created by: Anders Widén / anders.widen@consoden.se
 *
 *******************************************************************************
 *
@@ -34,13 +34,6 @@
 //#include <boost/bind.hpp>
 //#include <iostream>
 
-//namespace Safir
-//{
-//namespace Dob
-//{
-//namespace Internal
-//{
-
 //    namespace //anonymous namespace
 //    {
 //        void DumpFunc(const char* const dumpPath)
@@ -54,113 +47,114 @@
 //        }
 //    }
 
-//    DoseMainApp::DoseMainApp(boost::asio::io_service& ioService):
-//        m_stopped(false),
-//        m_ioService(ioService),
-//        m_strand(ioService),
-//        m_wcoutStrand(ioService),
-//        m_work(new boost::asio::io_service::work(ioService)),
-//        m_nodeId(0),
-//        m_distribution(),
-//        m_signalSet(ioService)
-//    {
-//        m_cmdReceiver.reset(new Control::DoseMainCmdReceiver( ioService,
-//                                                              m_strand.wrap([this](const std::string& nodeName,
-//                                                                                   int64_t nodeId,
-//                                                                                   int64_t nodeTypeId,
-//                                                                                   const std::string& dataAddress)
-//                                                                            {
-//                                                                                Start(nodeName,
-//                                                                                      nodeId,
-//                                                                                      nodeTypeId,
-//                                                                                      dataAddress);
-//                                                                            }),
-//                                                              m_strand.wrap([this](const std::string& nodeName,
-//                                                                                   int64_t nodeId,
-//                                                                                   int64_t nodeTypeId,
-//                                                                                   const std::string& dataAddress)
-//                                                                            {
-//                                                                                InjectNode(nodeName,
-//                                                                                           nodeId,
-//                                                                                           nodeTypeId,
-//                                                                                           dataAddress);
-//                                                                            }),
-//                                                              m_strand.wrap([this](int64_t nodeId, int64_t nodeTypeId)
-//                                                                            {
-//                                                                                ExcludeNode(nodeId, nodeTypeId);
-//                                                                            }),
-//                                                              m_strand.wrap([this]()
-//                                                                            {
-//                                                                                Stop();
-//                                                                            })) );
+StatusApp::StatusApp(boost::asio::io_service& ioService)
+    :
+      //        m_stopped(false),
+      m_ioService(ioService)
+    //        m_strand(ioService),
+    //        m_wcoutStrand(ioService),
+    //        m_work(new boost::asio::io_service::work(ioService)),
+    //        m_nodeId(0),
+    //        m_distribution(),
+    //        m_signalSet(ioService)
+{
+    //        m_cmdReceiver.reset(new Control::DoseMainCmdReceiver( ioService,
+    //                                                              m_strand.wrap([this](const std::string& nodeName,
+    //                                                                                   int64_t nodeId,
+    //                                                                                   int64_t nodeTypeId,
+    //                                                                                   const std::string& dataAddress)
+    //                                                                            {
+    //                                                                                Start(nodeName,
+    //                                                                                      nodeId,
+    //                                                                                      nodeTypeId,
+    //                                                                                      dataAddress);
+    //                                                                            }),
+    //                                                              m_strand.wrap([this](const std::string& nodeName,
+    //                                                                                   int64_t nodeId,
+    //                                                                                   int64_t nodeTypeId,
+    //                                                                                   const std::string& dataAddress)
+    //                                                                            {
+    //                                                                                InjectNode(nodeName,
+    //                                                                                           nodeId,
+    //                                                                                           nodeTypeId,
+    //                                                                                           dataAddress);
+    //                                                                            }),
+    //                                                              m_strand.wrap([this](int64_t nodeId, int64_t nodeTypeId)
+    //                                                                            {
+    //                                                                                ExcludeNode(nodeId, nodeTypeId);
+    //                                                                            }),
+    //                                                              m_strand.wrap([this]()
+    //                                                                            {
+    //                                                                                Stop();
+    //                                                                            })) );
 
-//#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
-//        m_signalSet.add(SIGABRT);
-//        m_signalSet.add(SIGBREAK);
-//        m_signalSet.add(SIGINT);
-//        m_signalSet.add(SIGTERM);
-//#elif defined(linux) || defined(__linux) || defined(__linux__)
-//        m_signalSet.add(SIGQUIT);
-//        m_signalSet.add(SIGINT);
-//        m_signalSet.add(SIGTERM);
-//#endif
+    //#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
+    //        m_signalSet.add(SIGABRT);
+    //        m_signalSet.add(SIGBREAK);
+    //        m_signalSet.add(SIGINT);
+    //        m_signalSet.add(SIGTERM);
+    //#elif defined(linux) || defined(__linux) || defined(__linux__)
+    //        m_signalSet.add(SIGQUIT);
+    //        m_signalSet.add(SIGINT);
+    //        m_signalSet.add(SIGTERM);
+    //#endif
 
-//        m_signalSet.async_wait(m_strand.wrap([this](const boost::system::error_code& error,
-//                                                    const int /*signalNumber*/)
-//                                            {
-//                                                if (error)
-//                                                {
-//                                                    if (error == boost::asio::error::operation_aborted)
-//                                                    {
-//                                                        // dose_main got stopped via a command from Control, do nothing
-//                                                        return;
-//                                                    }
-//                                                    else
-//                                                    {
-//                                                       SEND_SYSTEM_LOG(Error,
-//                                                                        << "DOSE_MAIN: Got a signals error: " << error);
-//                                                    }
-//                                                }
-//                                                // dose_main expects to be stopped by safir_control and
-//                                                // therefor ignores all "termination" signals
-//                                            }));
+    //        m_signalSet.async_wait(m_strand.wrap([this](const boost::system::error_code& error,
+    //                                                    const int /*signalNumber*/)
+    //                                            {
+    //                                                if (error)
+    //                                                {
+    //                                                    if (error == boost::asio::error::operation_aborted)
+    //                                                    {
+    //                                                        // dose_main got stopped via a command from Control, do nothing
+    //                                                        return;
+    //                                                    }
+    //                                                    else
+    //                                                    {
+    //                                                       SEND_SYSTEM_LOG(Error,
+    //                                                                        << "DOSE_MAIN: Got a signals error: " << error);
+    //                                                    }
+    //                                                }
+    //                                                // dose_main expects to be stopped by safir_control and
+    //                                                // therefor ignores all "termination" signals
+    //                                            }));
 
-//        Safir::Utilities::CrashReporter::RegisterCallback(DumpFunc);
-//        Safir::Utilities::CrashReporter::Start();
+    //        Safir::Utilities::CrashReporter::RegisterCallback(DumpFunc);
+    //        Safir::Utilities::CrashReporter::Start();
 
-//        // Start reception of commands from Control
-//        m_cmdReceiver->Start();
-//    }
+    //        // Start reception of commands from Control
+    //        m_cmdReceiver->Start();
+}
 
-//    DoseMainApp::~DoseMainApp()
-//    {
-//        Stop();
-//    }
+StatusApp::~StatusApp()
+{
+//    Stop();
+}
 
-//    void DoseMainApp::Stop()
-//    {
-//        const bool wasStopped = m_stopped.exchange(true);
-//        if (!wasStopped)
-//        {
-//            m_cmdReceiver->Stop();
+void StatusApp::Stop()
+{
+    const bool wasStopped = m_stopped.exchange(true);
+    if (!wasStopped)
+    {
+//        m_cmdReceiver->Stop();
 
-//            m_lockMonitor->Stop();
+//        m_lockMonitor->Stop();
 
-//            m_connectionHandler->Stop();
+//        m_connectionHandler->Stop();
 
-//            m_distribution->Stop();
+//        m_distribution->Stop();
 
-//            m_requestHandler->Stop();
+//        m_requestHandler->Stop();
 
-//            m_pendingRegistrationHandler->Stop();
+//        m_pendingRegistrationHandler->Stop();
 
-//            m_signalSet.cancel();
+//        m_signalSet.cancel();
 
-//            m_memoryMonitor->Stop();
+//        m_memoryMonitor->Stop();
 
-//            m_work.reset();
-//        }
-//    }
+//        m_work.reset();
+    }
+}
 
 
 //    void DoseMainApp::Start(const std::string& nodeName,
@@ -281,6 +275,5 @@
 //                               });
 //    }
 
-//}
-//}
-//}
+
+

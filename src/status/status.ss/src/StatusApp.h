@@ -1,8 +1,8 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2007-2015 (http://safir.sourceforge.net)
+* Copyright Saab AB, 2015 (http://safirsdkcore.com/)
 *
-* Created by: Lars Hagström / stlrha
+* Created by: Anders Widén / anders.widen@consoden.se
 *
 *******************************************************************************
 *
@@ -36,91 +36,82 @@
 //#include "LockMonitor.h"
 //#include <Safir/Dob/Internal/DoseMainCmd.h>
 
-////disable warnings in boost
-//#if defined _MSC_VER
-//  #pragma warning (push)
-//  #pragma warning (disable : 4244 4267 4100)
-//#endif
+//disable warnings in boost
+#if defined _MSC_VER
+  #pragma warning (push)
+  #pragma warning (disable : 4244 4267 4100)
+#endif
 
-//#include <boost/thread.hpp>
-//#include <boost/asio.hpp>
+#include <boost/thread.hpp>
+#include <boost/asio.hpp>
 
-//#if defined _MSC_VER
-//  #pragma warning (pop)
-//#endif
+#if defined _MSC_VER
+  #pragma warning (pop)
+#endif
 
-//namespace Safir
-//{
-//namespace Dob
-//{
-//namespace Internal
-//{
-//    class DoseMainApp : private boost::noncopyable
-//    {
-//    public:
-//        explicit DoseMainApp(boost::asio::io_service& ioService);
+class StatusApp : private boost::noncopyable
+{
+public:
+    explicit StatusApp(boost::asio::io_service& ioService);
 
-//        ~DoseMainApp();
+    ~StatusApp();
 
-//        void Stop();
+    void Stop();
 
-//    private:
-//        void Start(const std::string& nodeName,
-//                   int64_t nodeId,
-//                   int64_t nodeTypeId,
-//                   const std::string& dataAddress);
 
-//        void InjectNode(const std::string& nodeName,
-//                        int64_t nodeId,
-//                        int64_t nodeTypeId,
-//                        const std::string& dataAddress);
+private:
+    //        void Start(const std::string& nodeName,
+    //                   int64_t nodeId,
+    //                   int64_t nodeTypeId,
+    //                   const std::string& dataAddress);
 
-//        void ExcludeNode(int64_t nodeId, int64_t nodeTypeId);
+    //        void InjectNode(const std::string& nodeName,
+    //                        int64_t nodeId,
+    //                        int64_t nodeTypeId,
+    //                        const std::string& dataAddress);
 
-//        void LogStatus(const std::string& str);
+    //        void ExcludeNode(int64_t nodeId, int64_t nodeTypeId);
 
-//        void HandleIncomingData(const DistributionData & data, const bool isAckedData);
+    //        void LogStatus(const std::string& str);
 
-//        void OnAppEvent(const ConnectionPtr & connection, bool disconnecting);
-//        void HandleAppEventHelper(const ConnectionPtr & connection);
+    //        void HandleIncomingData(const DistributionData & data, const bool isAckedData);
 
-//        void HandleEvents();
+    //        void OnAppEvent(const ConnectionPtr & connection, bool disconnecting);
+    //        void HandleAppEventHelper(const ConnectionPtr & connection);
 
-//        boost::atomic<bool> m_stopped;
-//        boost::asio::io_service& m_ioService;
+    //        void HandleEvents();
 
-//        boost::asio::io_service::strand m_strand;
-//        boost::asio::io_service::strand m_wcoutStrand;
-//        boost::shared_ptr<boost::asio::io_service::work> m_work;
+    boost::atomic<bool> m_stopped;
+    boost::asio::io_service& m_ioService;
 
-//        int64_t m_nodeId;
-//        std::unique_ptr<Distribution> m_distribution;
+    //        boost::asio::io_service::strand m_strand;
+    //        boost::asio::io_service::strand m_wcoutStrand;
+    //        boost::shared_ptr<boost::asio::io_service::work> m_work;
 
-//        std::unique_ptr<Control::DoseMainCmdReceiver> m_cmdReceiver;
+    //        int64_t m_nodeId;
+    //        std::unique_ptr<Distribution> m_distribution;
 
-//        boost::asio::signal_set m_signalSet;
+    //        std::unique_ptr<Control::DoseMainCmdReceiver> m_cmdReceiver;
 
-//        BlockingHandlers    m_blockingHandler;
+    //        boost::asio::signal_set m_signalSet;
 
-//        std::unique_ptr<MessageHandler>      m_messageHandler;
-//        std::unique_ptr<RequestHandler>      m_requestHandler;
-//        std::unique_ptr<ConnectionHandler>   m_connectionHandler;
+    //        BlockingHandlers    m_blockingHandler;
 
-//        //Pending Registrations
-//        std::unique_ptr<PendingRegistrationHandler> m_pendingRegistrationHandler;
+    //        std::unique_ptr<MessageHandler>      m_messageHandler;
+    //        std::unique_ptr<RequestHandler>      m_requestHandler;
+    //        std::unique_ptr<ConnectionHandler>   m_connectionHandler;
 
-//        // For monitoring abandoned shared memory locks
-//        std::unique_ptr<LockMonitor> m_lockMonitor;
+    //        //Pending Registrations
+    //        std::unique_ptr<PendingRegistrationHandler> m_pendingRegistrationHandler;
 
-//        // For monitoring memory usage
-//        std::unique_ptr<MemoryMonitor> m_memoryMonitor;
+    //        // For monitoring abandoned shared memory locks
+    //        std::unique_ptr<LockMonitor> m_lockMonitor;
 
-//        //this class should be declared last, so that when the app
-//        //is destroyed all connections will be marked as dead and stop
-//        //orders sent before any more destruction is done.
-//        ConnectionKiller m_connectionKiller;
-//    };
+    //        // For monitoring memory usage
+    //        std::unique_ptr<MemoryMonitor> m_memoryMonitor;
 
-//}
-//}
-//}
+    //        //this class should be declared last, so that when the app
+    //        //is destroyed all connections will be marked as dead and stop
+    //        //orders sent before any more destruction is done.
+    //        ConnectionKiller m_connectionKiller;
+};
