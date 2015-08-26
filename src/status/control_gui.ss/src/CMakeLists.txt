@@ -1,10 +1,10 @@
-set(ui mainwindow.ui)
+set(ui MainWindow.ui)
 
-set(sources main.cpp mainwindow.cpp )
+set(sources Main.cpp MainWindow.cpp NodeTableModel.cpp )
 
-set(widget_headers mainwindow.h)
+set(widget_headers MainWindow.h)
 
-set(headers )
+set(headers NodeTableModel.h)
 
 if (NOT Qt5Widgets_FOUND)
   message(STATUS "Could not find Qt5, will not build safir_control_gui")

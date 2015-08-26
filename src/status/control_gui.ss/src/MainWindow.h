@@ -28,7 +28,10 @@
 #include <QEvent>
 #include <QThread>
 #include <QTime>
+#include <QLabel>
 #include <Safir/Dob/Connection.h>
+#include "Safir/Control/Status.h"
+#include "Safir/Control/Command.h"
 
 //----------------------------------------
 class DobConnector : public QThread
@@ -94,8 +97,24 @@ private:
     QEvent::Type m_dispatchEvent;
     DobConnector m_conThread;
 
+    QLabel *m_dobConnectionLabel;
+
+
+    void HandleStatusEntity(const Safir::Control::StatusPtr status);
+    void SendRequestOnAllNodes(Safir::Control::Operation::Enumeration operation);
+    void SendRequestOnSpecificNode(Safir::Control::Operation::Enumeration operation, int64_t nodeId);
+    void SendRequest(Safir::Control::CommandPtr command);
+
+
 private slots:
     void OnConnected();
+    void on_actionExit_triggered();
+    void on_pushButton_StopNode_clicked();
+    void on_pushButton_RebootNode_clicked();
+    void on_pushButton_ShutdownNode_clicked();
+    void on_pushButton_StopAll_clicked();
+    void on_pushButton_RebootAll_clicked();
+    void on_pushButton_ShutdownAll_clicked();
 };
 
 
