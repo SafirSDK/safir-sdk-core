@@ -1,3 +1,13 @@
+-----------------------------------------------------------------------------------------------------------------------
+2015-08-26 version 6.0.2
+-----------------------------------------------------------------------------------------------------------------------
+
+This release fixes the following ticket (see http://safirsdkcore.com for details):
+
+#232 Customer wants removed Clone() re-added to C# dots objects.
+
+### NOTE: The tickets have been migrated from SourceForge to GitHub, but unfortunately the ticket numbering
+###       got messed up for some tickets. Double check the description to make sure you're on the right issue.
 
 -----------------------------------------------------------------------------------------------------------------------
 2015-08-04 version 6.0.1

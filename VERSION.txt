@@ -4,7 +4,7 @@
 
 MAJOR=6
 MINOR=0
-PATCH=1
+PATCH=2
 SUFFIX=
 
 #Set the SUFFIX to empty string for stable releases (but keep the equal sign).
