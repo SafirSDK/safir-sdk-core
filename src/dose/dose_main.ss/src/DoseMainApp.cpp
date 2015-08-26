@@ -108,7 +108,7 @@ namespace Internal
         m_signalSet.async_wait(m_strand.wrap([this](const boost::system::error_code& error,
                                                     const int /*signalNumber*/)
                                             {
-                                                if (error)
+                                                if (!!error)
                                                 {
                                                     if (error == boost::asio::error::operation_aborted)
                                                     {
