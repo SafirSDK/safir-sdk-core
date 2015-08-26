@@ -3,6 +3,9 @@ FILE(GLOB sources *.cpp)
 
 FILE(GLOB proto_files *.proto)
 
+#This makes the proto files show up in various IDEs
+ADD_CUSTOM_TARGET(dummy_proto_target SOURCES ${proto_files})
+
 PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${proto_files})
 
 if (MSVC)
