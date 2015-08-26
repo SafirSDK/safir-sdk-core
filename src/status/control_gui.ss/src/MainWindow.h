@@ -29,9 +29,13 @@
 #include <QThread>
 #include <QTime>
 #include <QLabel>
+
+#include <QItemSelectionModel>
 #include <Safir/Dob/Connection.h>
 #include "Safir/Control/Status.h"
 #include "Safir/Control/Command.h"
+
+#include "NodeTableModel.h"
 
 //----------------------------------------
 class DobConnector : public QThread
@@ -96,7 +100,7 @@ private:
     Safir::Dob::Connection m_dobConnection;
     QEvent::Type m_dispatchEvent;
     DobConnector m_conThread;
-
+    NodeTableModel* m_nodeTableModel;
     QLabel *m_dobConnectionLabel;
 
 
@@ -104,6 +108,8 @@ private:
     void SendRequestOnAllNodes(Safir::Control::Operation::Enumeration operation);
     void SendRequestOnSpecificNode(Safir::Control::Operation::Enumeration operation, int64_t nodeId);
     void SendRequest(Safir::Control::CommandPtr command);
+    bool DisplayConfirmationDialog(QString index, Safir::Control::Operation::Enumeration operation);
+    bool DisplayConfirmationDialog(Safir::Control::Operation::Enumeration operation);
 
 
 private slots:
@@ -115,6 +121,7 @@ private slots:
     void on_pushButton_StopAll_clicked();
     void on_pushButton_RebootAll_clicked();
     void on_pushButton_ShutdownAll_clicked();
+    void nodeListSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected);
 };
 
 

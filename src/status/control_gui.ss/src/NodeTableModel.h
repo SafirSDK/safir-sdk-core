@@ -29,6 +29,11 @@
 #include <Safir/Dob/NodeInfo.h>
 #include <list>
 
+#define NO_COLUMNS 4
+#define NAME_COLUMN 0
+#define IP_COLUMN 1
+#define TYPE_COLUMN 2
+#define NODE_ID_COLUMN 3
 
 class NodeTableModel : public QAbstractTableModel,
                       public Safir::Dob::EntitySubscriber

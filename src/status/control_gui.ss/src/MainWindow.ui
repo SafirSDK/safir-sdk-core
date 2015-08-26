@@ -6,12 +6,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>495</width>
+    <width>600</width>
     <height>446</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Safir control GUI</string>
+   <string>Node control</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -147,7 +147,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>495</width>
+     <width>600</width>
      <height>23</height>
     </rect>
    </property>

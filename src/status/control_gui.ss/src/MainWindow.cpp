@@ -25,7 +25,6 @@
 #include <boost/filesystem.hpp>
 #include <QMessageBox>
 #include "MainWindow.h"
-#include "NodeTableModel.h"
 #include "ui_MainWindow.h"
 
 #include "Safir/Control/Operation.h"
@@ -37,13 +36,16 @@ MainWindow::MainWindow(QWidget *parent)
     ,m_dispatchEvent(static_cast<QEvent::Type>(QEvent::User+666))
     ,m_conThread(&m_dobConnection, this, this, 0)
 {
-
-
     installEventFilter(this);
     ui->setupUi(this);
 
+    ui->pushButton_RebootNode->setEnabled(false);
+    ui->pushButton_ShutdownNode->setEnabled(false);
+    ui->pushButton_StopNode->setEnabled(false);
+
     m_dobConnectionLabel = new QLabel("Not connected");
-    statusBar()->addWidget(m_dobConnectionLabel);
+    statusBar()->setStyleSheet("QStatusBar::item { border: 0px solid black }; ");
+    statusBar()->addPermanentWidget(m_dobConnectionLabel);
 
     QObject::connect(&m_conThread, SIGNAL(ConnectedToDob()), this, SLOT(OnConnected()));
     m_conThread.start();
@@ -57,14 +59,20 @@ MainWindow::~MainWindow()
 void MainWindow::OnConnected()
 {
     m_dobConnection.Open(L"safir_control_gui", QTime::currentTime().toString("hh:mm:ss.zzz").toStdWString(), 0, this, this);
-    statusBar()->showMessage("Connected - System Incarnation Id: UNKNOWN");
+    m_dobConnectionLabel->setText("Connected | System Incarnation Id: UNKNOWN");
 
-
-    m_dobConnection.SubscribeEntity(
+   m_dobConnection.SubscribeEntity(
                 Safir::Dob::Typesystem::EntityId(Safir::Control::Status::ClassTypeId, Safir::Dob::Typesystem::InstanceId(0)), true, true, this );
 
+    m_nodeTableModel = new NodeTableModel(this);
+    ui->nodeTableView->setModel(m_nodeTableModel);
 
-    ui->nodeTableView->setModel(new NodeTableModel(this));
+    ui->nodeTableView->setColumnHidden(NODE_ID_COLUMN, false);
+
+    connect(ui->nodeTableView->selectionModel(),
+            SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
+            this,
+            SLOT(nodeListSelectionChanged(const QItemSelection &, const QItemSelection &)));
 }
 
 bool MainWindow::eventFilter(QObject*, QEvent* e)
@@ -164,11 +172,11 @@ void MainWindow::HandleStatusEntity(const Safir::Control::StatusPtr status)
 {
     if (status->SystemIncarnation().IsNull())
     {
-        m_dobConnectionLabel->setText("Connected - System Incarnation Id: UNKNOWN");
+        m_dobConnectionLabel->setText("Connected | System Incarnation Id: UNKNOWN");
     }
     else
     {
-        QString message = QString("Connected - System Incarnation Id: %1").arg(status->SystemIncarnation().GetVal());
+        QString message = QString("Connected | System Incarnation Id: %1").arg(status->SystemIncarnation().GetVal());
         m_dobConnectionLabel->setText(message);
     }
 }
@@ -206,38 +214,117 @@ void MainWindow::SendRequest(Safir::Control::CommandPtr command)
 //------------------------------------------------------------
 // GUI stuff
 //------------------------------------------------------------
-void MainWindow::on_actionExit_triggered()
+
+bool MainWindow::DisplayConfirmationDialog(QString name, Safir::Control::Operation::Enumeration operation)
 {
-      this->close();
+    QString op;
+
+    switch (operation) {
+    case Safir::Control::Operation::Enumeration::Reboot:
+        op = "rebooted";
+        break;
+    case Safir::Control::Operation::Enumeration::Shutdown:
+        op = "shutdown";
+        break;
+    case Safir::Control::Operation::Enumeration::Stop:
+        op = "stopped";
+        break;
+
+    default:
+        break;
+    }
+
+    QString message = QString("The node <b>%1</b> will be %2.\nAre you sure?").arg( name ).arg( op );
+    return QMessageBox::warning(this, "Node control", message, QMessageBox::No | QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes;
 }
 
+bool MainWindow::DisplayConfirmationDialog(Safir::Control::Operation::Enumeration operation)
+{
+    QString op;
+
+    switch (operation) {
+    case Safir::Control::Operation::Enumeration::Reboot:
+        op = "rebooted";
+        break;
+    case Safir::Control::Operation::Enumeration::Shutdown:
+        op = "shutdown";
+        break;
+    case Safir::Control::Operation::Enumeration::Stop:
+        op = "stopped";
+        break;
+
+    default:
+        break;
+    }
+
+    QString message = QString("All nodes will be %2.\nAre you sure?").arg( op );
+    return QMessageBox::warning(this, "Node control", message, QMessageBox::No | QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes;
+}
 
 void MainWindow::on_pushButton_StopNode_clicked()
 {
-    SendRequestOnSpecificNode(Safir::Control::Operation::Stop,0);
+    QModelIndexList selected = ui->nodeTableView->selectionModel()->selectedIndexes();
+
+    if (DisplayConfirmationDialog(m_nodeTableModel->data(m_nodeTableModel->index(selected[0].row(), NAME_COLUMN)).toString(), Safir::Control::Operation::Stop))
+    {
+        SendRequestOnSpecificNode(Safir::Control::Operation::Stop, m_nodeTableModel->data(m_nodeTableModel->index(selected[0].row(), NODE_ID_COLUMN)).toLongLong());
+    }
 }
 
 void MainWindow::on_pushButton_RebootNode_clicked()
 {
-    SendRequestOnSpecificNode(Safir::Control::Operation::Restart,0);
+    QModelIndexList selected = ui->nodeTableView->selectionModel()->selectedIndexes();
+
+    if (DisplayConfirmationDialog(m_nodeTableModel->data(m_nodeTableModel->index(selected[0].row(), NAME_COLUMN)).toString(), Safir::Control::Operation::Reboot))
+    {
+        SendRequestOnSpecificNode(Safir::Control::Operation::Reboot, m_nodeTableModel->data(m_nodeTableModel->index(selected[0].row(), NODE_ID_COLUMN)).toLongLong());
+    }
 }
 
 void MainWindow::on_pushButton_ShutdownNode_clicked()
 {
-    SendRequestOnSpecificNode(Safir::Control::Operation::Shutdown,0);
+    QModelIndexList selected = ui->nodeTableView->selectionModel()->selectedIndexes();
+
+    if (DisplayConfirmationDialog(m_nodeTableModel->data(m_nodeTableModel->index(selected[0].row(), NAME_COLUMN)).toString(), Safir::Control::Operation::Shutdown))
+    {
+        SendRequestOnSpecificNode(Safir::Control::Operation::Shutdown, m_nodeTableModel->data(m_nodeTableModel->index(selected[0].row(), NODE_ID_COLUMN)).toLongLong());
+    }
 }
 
 void MainWindow::on_pushButton_StopAll_clicked()
 {
-    SendRequestOnAllNodes(Safir::Control::Operation::Stop);
+    if (DisplayConfirmationDialog(Safir::Control::Operation::Stop))
+    {
+        SendRequestOnAllNodes(Safir::Control::Operation::Stop);
+    }
 }
 
 void MainWindow::on_pushButton_RebootAll_clicked()
 {
-    SendRequestOnAllNodes(Safir::Control::Operation::Restart);
+    if (DisplayConfirmationDialog(Safir::Control::Operation::Reboot))
+    {
+        SendRequestOnAllNodes(Safir::Control::Operation::Reboot);
+    }
 }
 
 void MainWindow::on_pushButton_ShutdownAll_clicked()
 {
-    SendRequestOnAllNodes(Safir::Control::Operation::Shutdown);
+    if (DisplayConfirmationDialog(Safir::Control::Operation::Shutdown))
+    {
+        SendRequestOnAllNodes(Safir::Control::Operation::Shutdown);
+    }
+}
+
+void MainWindow::nodeListSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected)
+{
+    bool enabled = (selected.size() != 0);
+
+    ui->pushButton_RebootNode->setEnabled(enabled);
+    ui->pushButton_ShutdownNode->setEnabled(enabled);
+    ui->pushButton_StopNode->setEnabled(enabled);
+}
+
+void MainWindow::on_actionExit_triggered()
+{
+      this->close();
 }

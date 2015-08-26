@@ -23,12 +23,8 @@
 ******************************************************************************/
 #include "NodeTableModel.h"
 
-#define NO_COLUMNS 3
-#define NAME_COLUMN 0
-#define IP_COLUMN 1
-#define TYPE_COLUMN 2
 
-#define GET_INSTANCE_ID_ROLE Qt::UserRole + 230
+
 
 NodeTableModel::NodeTableModel(QObject *parent)
     : QAbstractTableModel(parent)
@@ -71,6 +67,9 @@ QVariant NodeTableModel::headerData(int section,
     case TYPE_COLUMN:
         return QString("Node type");
         break;
+    case NODE_ID_COLUMN:
+        return QString("Node id");
+        break;
     default:
         break;
     }
@@ -99,16 +98,14 @@ QVariant NodeTableModel::data(const QModelIndex &index, int role) const
         case TYPE_COLUMN:
             return QString::fromStdWString(nodeInfo->NodeType().GetVal());
             break;
+        case NODE_ID_COLUMN:
+            return (qint64) m_nodeInfos.at(index.row()).GetInstanceId().GetRawValue();
+            break;
         default:
             break;
         }
 
         return QVariant();
-    }
-
-    if (role == GET_INSTANCE_ID_ROLE)
-    {
-        return (qint64) m_nodeInfos.at(index.row()).GetInstanceId().GetRawValue();
     }
 
     return QVariant();
