@@ -39,7 +39,7 @@ namespace Internal
      */
 
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
-    std::string GetIpcStreamId(const std::string& name)
+    static std::string GetIpcStreamId(const std::string& name)
     {
         return std::string("\\\\.\\pipe\\") + name +
                 Safir::Utilities::Internal::Expansion::GetSafirInstanceSuffix();
@@ -47,7 +47,7 @@ namespace Internal
 
 #elif defined(linux) || defined(__linux) || defined(__linux__)
 
-    const boost::filesystem::path GetIpcDirectory()
+    static const boost::filesystem::path GetIpcDirectory()
     {
         using namespace boost::filesystem;
 
@@ -76,7 +76,7 @@ namespace Internal
         return dir;
     }
 
-    const std::string GetIpcStreamId(const std::string& name)
+    static const std::string GetIpcStreamId(const std::string& name)
     {
         std::string s = (GetIpcDirectory() /
                         (name + Safir::Utilities::Internal::Expansion::GetSafirInstanceSuffix())).string();

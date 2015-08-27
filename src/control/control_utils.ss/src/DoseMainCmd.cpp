@@ -123,7 +123,7 @@ namespace Control
 
                 default:
                 {
-                    throw std::logic_error("Received unknown control command!");
+                    throw std::logic_error("Received unknown doseMain command!");
                 }
 
             }
