@@ -1,0 +1,29 @@
+SAFIR_CONTROL_GUI(1)
+====================
+:doctype: manpage
+
+
+NAME
+----
+safir_control_gui - Safir Application Tester
+
+
+SYNOPSIS
+--------
+*safir_control_gui*
+
+DESCRIPTION
+-----------
+Safir_control_gui is a graphical front end to the safir_control component. The GUI can be used to inspect and control (stop, restart, reboot) the invidual nodes that are running in Safir system.
+
+
+RESOURCES
+---------
+Web site: <http://www.safirsdkcore.com/>
+
+
+COPYING
+-------
+Copyright \(C) 2004-2015 Saab AB. Free use of this software is granted under
+the terms of the GNU General Public License Version 3 (GPL-3).
+
