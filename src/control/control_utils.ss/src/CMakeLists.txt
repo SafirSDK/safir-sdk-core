@@ -1,7 +1,7 @@
-FILE(GLOB_RECURSE headers *.h)
-FILE(GLOB sources *.cpp)
+FILE(GLOB_RECURSE headers ControlConfig.h ControlUtilsExportDefs.h DoseMainCmd.h)
+FILE(GLOB sources DoseMainCmd.cpp)
 
-FILE(GLOB proto_files *.proto)
+FILE(GLOB proto_files DoseMainCommands.proto)
 
 #This makes the proto files show up in various IDEs
 ADD_CUSTOM_TARGET(dummy_proto_target SOURCES ${proto_files})

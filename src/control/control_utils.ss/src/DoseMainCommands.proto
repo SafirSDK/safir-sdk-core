@@ -25,7 +25,7 @@ option optimize_for = LITE_RUNTIME;
 
 package Safir.Dob.Internal.Control;
 
-message ControlCmd {
+message DoseMainCmd {
 
     enum CmdType
     {

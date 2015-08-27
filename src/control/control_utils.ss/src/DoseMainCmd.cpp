@@ -25,7 +25,7 @@
 #include <Safir/Utilities/Internal/IpcPublisher.h>
 #include <Safir/Utilities/Internal/IpcSubscriber.h>
 #include <Safir/Utilities/Internal/MakeUnique.h>
-#include "ControlCommands.pb.h"
+#include "DoseMainCommands.pb.h"
 #include <set>
 
 namespace Safir
@@ -84,38 +84,38 @@ namespace Control
 
         void RecvDataCb(const char* data, size_t size)
         {
-            ControlCmd controlCmd;
+            DoseMainCmd doseMainCmd;
 
-            controlCmd.ParseFromArray(data, static_cast<int>(size));
+            doseMainCmd.ParseFromArray(data, static_cast<int>(size));
 
-            switch (controlCmd.cmd_type())
+            switch (doseMainCmd.cmd_type())
             {
-                case controlCmd.START:
+                case doseMainCmd.START:
                 {
-                    m_startDoseMainCb(controlCmd.node_name(),
-                                      controlCmd.node_id(),
-                                      controlCmd.node_type_id(),
-                                      controlCmd.data_address());
+                    m_startDoseMainCb(doseMainCmd.node_name(),
+                                      doseMainCmd.node_id(),
+                                      doseMainCmd.node_type_id(),
+                                      doseMainCmd.data_address());
                 }
                 break;
 
-                case controlCmd.INJECT_NODE:
+                case doseMainCmd.INJECT_NODE:
                 {
-                    m_injectNodeCb(controlCmd.node_name(),
-                                   controlCmd.node_id(),
-                                   controlCmd.node_type_id(),
-                                   controlCmd.data_address());
+                    m_injectNodeCb(doseMainCmd.node_name(),
+                                   doseMainCmd.node_id(),
+                                   doseMainCmd.node_type_id(),
+                                   doseMainCmd.data_address());
                 }
                 break;
 
-                case controlCmd.EXCLUDE_NODE:
+                case doseMainCmd.EXCLUDE_NODE:
                 {
-                    m_excludeNodeCb(controlCmd.node_id(),
-                                    controlCmd.node_type_id());
+                    m_excludeNodeCb(doseMainCmd.node_id(),
+                                    doseMainCmd.node_type_id());
                 }
                 break;
 
-                case controlCmd.STOP:
+                case doseMainCmd.STOP:
                 {
                     m_stopDoseMainCb();
                 }
@@ -180,15 +180,15 @@ namespace Control
                            int64_t              nodeTypeId,
                            const std::string&   dataAddress)
         {
-            ControlCmd controlCmd;
+            DoseMainCmd doseMainCmd;
 
-            controlCmd.set_cmd_type(ControlCmd::START);
-            controlCmd.set_node_name(nodeName);
-            controlCmd.set_node_id(nodeId);
-            controlCmd.set_node_type_id(nodeTypeId);
-            controlCmd.set_data_address(dataAddress);
+            doseMainCmd.set_cmd_type(DoseMainCmd::START);
+            doseMainCmd.set_node_name(nodeName);
+            doseMainCmd.set_node_id(nodeId);
+            doseMainCmd.set_node_type_id(nodeTypeId);
+            doseMainCmd.set_data_address(dataAddress);
 
-            Send(controlCmd);
+            Send(doseMainCmd);
         }
 
         void InjectNode(const std::string&  nodeName,
@@ -196,43 +196,43 @@ namespace Control
                         int64_t             nodeTypeId,
                         const std::string&  dataAddress)
         {
-            ControlCmd controlCmd;
+            DoseMainCmd doseMainCmd;
 
-            controlCmd.set_cmd_type(ControlCmd::INJECT_NODE);
-            controlCmd.set_node_name(nodeName);
-            controlCmd.set_node_id(nodeId);
-            controlCmd.set_node_type_id(nodeTypeId);
-            controlCmd.set_data_address(dataAddress);
+            doseMainCmd.set_cmd_type(DoseMainCmd::INJECT_NODE);
+            doseMainCmd.set_node_name(nodeName);
+            doseMainCmd.set_node_id(nodeId);
+            doseMainCmd.set_node_type_id(nodeTypeId);
+            doseMainCmd.set_data_address(dataAddress);
 
-            Send(controlCmd);
+            Send(doseMainCmd);
         }
 
         void ExcludeNode(int64_t nodeId,
                          int64_t nodeTypeId)
         {
-            ControlCmd controlCmd;
+            DoseMainCmd doseMainCmd;
 
-            controlCmd.set_cmd_type(ControlCmd::EXCLUDE_NODE);
-            controlCmd.set_node_id(nodeId);
-            controlCmd.set_node_type_id(nodeTypeId);
+            doseMainCmd.set_cmd_type(DoseMainCmd::EXCLUDE_NODE);
+            doseMainCmd.set_node_id(nodeId);
+            doseMainCmd.set_node_type_id(nodeTypeId);
 
-            Send(controlCmd);
+            Send(doseMainCmd);
         }
 
         void StopDoseMain()
         {
-            ControlCmd controlCmd;
+            DoseMainCmd doseMainCmd;
 
-            controlCmd.set_cmd_type(ControlCmd::STOP);
+            doseMainCmd.set_cmd_type(DoseMainCmd::STOP);
 
-            Send(controlCmd);
+            Send(doseMainCmd);
         }
 
     private:
 
         Safir::Utilities::Internal::IpcPublisher m_ipcPublisher;
 
-        void Send(const ControlCmd& cmd)
+        void Send(const DoseMainCmd& cmd)
         {
             const auto size = cmd.ByteSize();
             auto data = std::unique_ptr<char[]>(new char[size]);

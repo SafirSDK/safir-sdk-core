@@ -5,7 +5,7 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR} ../../src/include)
 ADD_SUBDIRECTORY(Config_test)
 
 PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS
-  ../../src/ControlCommands.proto)
+  ../../src/DoseMainCommands.proto)
 
 if (MSVC)
   SET_SOURCE_FILES_PROPERTIES(${PROTO_SRCS} PROPERTIES COMPILE_FLAGS "/wd4127 /wd4244 /wd4267 /wd4018 /wd4512")
