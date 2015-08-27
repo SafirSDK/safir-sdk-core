@@ -61,11 +61,11 @@ void MainWindow::OnConnected()
     m_dobConnection.Open(L"safir_control_gui", QTime::currentTime().toString("hh:mm:ss.zzz").toStdWString(), 0, this, this);
     m_dobConnectionLabel->setText("Connected | System Incarnation Id: UNKNOWN");
 
-   m_dobConnection.SubscribeEntity(
-                Safir::Dob::Typesystem::EntityId(Safir::Control::Status::ClassTypeId, Safir::Dob::Typesystem::InstanceId(0)), true, true, this );
-
+    QSortFilterProxyModel *proxyModel = new QSortFilterProxyModel(this);
     m_nodeTableModel = new NodeTableModel(this);
-    ui->nodeTableView->setModel(m_nodeTableModel);
+
+    proxyModel->setSourceModel(m_nodeTableModel);
+    ui->nodeTableView->setModel(proxyModel);
 
     ui->nodeTableView->setColumnHidden(NODE_ID_COLUMN, false);
 
@@ -73,6 +73,10 @@ void MainWindow::OnConnected()
             SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
             this,
             SLOT(nodeListSelectionChanged(const QItemSelection &, const QItemSelection &)));
+
+    m_dobConnection.SubscribeEntity(
+                 Safir::Dob::Typesystem::EntityId(Safir::Control::Status::ClassTypeId, Safir::Dob::Typesystem::InstanceId(0)), true, true, this );
+
 }
 
 bool MainWindow::eventFilter(QObject*, QEvent* e)
@@ -178,6 +182,11 @@ void MainWindow::HandleStatusEntity(const Safir::Control::StatusPtr status)
     {
         QString message = QString("Connected | System Incarnation Id: %1").arg(status->SystemIncarnation().GetVal());
         m_dobConnectionLabel->setText(message);
+    }
+
+    if (!status->NodeId().IsNull())
+    {
+        m_nodeTableModel->setOwnNodeId(status->NodeId());
     }
 }
 

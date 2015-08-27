@@ -52,14 +52,17 @@ public:
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const Q_DECL_OVERRIDE;
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const Q_DECL_OVERRIDE;
 
+    void setOwnNodeId(int64_t ownNodeId) { beginResetModel(); m_ownNodeId = ownNodeId;  endResetModel(); }
+
 signals:
 
 public slots:
 
-public:
+private:
 
     Safir::Dob::SecondaryConnection m_dobConnection;
     std::vector<Safir::Dob::Typesystem::EntityId> m_nodeInfos;
+    int64_t m_ownNodeId;
 };
 
 #endif // NODETABLEMODEL_H

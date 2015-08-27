@@ -29,7 +29,7 @@
 #include <QThread>
 #include <QTime>
 #include <QLabel>
-
+#include <QSortFilterProxyModel>
 #include <QItemSelectionModel>
 #include <Safir/Dob/Connection.h>
 #include "Safir/Control/Status.h"

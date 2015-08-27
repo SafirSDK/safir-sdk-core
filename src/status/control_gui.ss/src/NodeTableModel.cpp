@@ -21,6 +21,7 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
+#include <QColor>
 #include "NodeTableModel.h"
 
 
@@ -103,6 +104,19 @@ QVariant NodeTableModel::data(const QModelIndex &index, int role) const
             break;
         default:
             break;
+        }
+
+        return QVariant();
+    }
+    else if (role == Qt::BackgroundColorRole)
+    {
+        Safir::Dob::NodeInfoPtr nodeInfo
+                = boost::dynamic_pointer_cast<Safir::Dob::NodeInfo>(m_dobConnection.Read(m_nodeInfos.at(index.row())).GetEntity());
+
+        //give the local node a slight tint
+        if (m_nodeInfos.at(index.row()).GetInstanceId().GetRawValue() == m_ownNodeId)
+        {
+            return  QColor(255, 0, 0, 127);
         }
 
         return QVariant();
