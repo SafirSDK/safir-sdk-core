@@ -4156,18 +4156,18 @@ cause your compiler to issue warnings.
 For C# we have currently _not_ used the +Obsolete+ attribute, so no warnings are issued on
 use of deprecated features.
 
-What happened to the +Clone()+ function in C# and Java?::
-All types generated from dou-files used to have a +Clone()+ (+clone()+ in Java)
-method. During the implementation of the new collection types in Safir SDK Core 6.0 -
-sequence and dictionary - we realized that the Clone methods were actually not
-needed. Additionally, supporting Clone for the new collection types would be _a lot_ of
-work. So the decision was taken to remove support for Clone.
+What happened to the +clone()+ function in Java and why is +Clone()+ deprecated in C#?::
+In Safir SDK Core 5 and earlier all types generated from dou-files used to have a method
+for cloning in C# and Java. During the implementation of the new collection types in
+Safir SDK Core 6.0 - sequence and dictionary - we realized that the Clone methods were
+actually not needed. Additionally, supporting Clone for the new collection types would be
+_a lot_ of work. So the decision was taken to remove support for Clone.
 +
-If you've been using Clone in your code this might be a problem for you. Rather than
-leaving you high and dry we've created a workaround that can be used by those who need
-the Clone functionality in C#. In the source code tree of Safir SDK Core there is a file
-src/dots/dots_test.ss/dotnet/DeepClone.cs, that you can add to your project. You will
-then get a function called +DeepClone+ added to _all_ objects in your project.
+We asked our customers about this, and they were ok with removing +clone()+ in Java,
+since it wasn't being used, but in C# there is apparently quite a lot of user code that
+calls Clone(), so in C# we decided to deprecate the API instead. However, the underlying
+implementation now uses C# reflection, which means that we don't need to write and
+maintain all the Clone code for the new collection types.
 
 == Appendix D: Building from source
 Since Safir SDK Core is released under an Open Source license (as described in <<licenses>>) you are able to download and build the source code from scratch. Instructions for building is included in the source distribution of Safir SDK Core obtained from http://safirsdkcore.com/[].
