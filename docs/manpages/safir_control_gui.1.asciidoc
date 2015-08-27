@@ -14,7 +14,7 @@ SYNOPSIS
 
 DESCRIPTION
 -----------
-Safir_control_gui is a graphical front end to the safir_control component. The GUI can be used to inspect and control (stop, restart, reboot) the invidual nodes that are running in Safir system.
+Safir_control_gui is a graphical front end to the safir_control component. The GUI can be used to inspect and control (stop, restart, reboot) the invidual nodes that are running in a Safir system.
 
 
 RESOURCES

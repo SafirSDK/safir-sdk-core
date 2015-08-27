@@ -47,44 +47,28 @@ int main()
 
     try
     {
-        StatusApp theApp(ioService);
+        Safir::Control::StatusApp theApp(ioService);
 
-        //Set number of threads to at least 2, or the number of cpu kernels
-        auto nbrOfThreads = std::max<size_t>(10, boost::thread::hardware_concurrency());
 
-        const auto run = [&ioService,&theApp,&success]
+        try
         {
-            try
-            {
-                ioService.run();
-                return;
-            }
-            catch (const std::exception & exc)
-            {
-                SEND_SYSTEM_LOG(Alert,
-                                << "SAFIR_STATUS: Caught 'std::exception' exception from io_service.run(): "
-                                << "  '" << exc.what() << "'.");
-                success.exchange(false);
-            }
-            catch (...)
-            {
-                SEND_SYSTEM_LOG(Alert,
-                                << "SAFIR_STATUS: Caught '...' exception from io_service.run().");
-                success.exchange(false);
-            }
-
-            theApp.Stop();
-        };
-
-        boost::thread_group threads;
-        for (unsigned int i = 0; i < nbrOfThreads-1; ++i)
+            ioService.run();
+        }
+        catch (const std::exception & exc)
         {
-            threads.create_thread(run);
+            SEND_SYSTEM_LOG(Alert,
+                            << "SAFIR_STATUS: Caught 'std::exception' exception from io_service.run(): "
+                            << "  '" << exc.what() << "'.");
+            success.exchange(false);
+        }
+        catch (...)
+        {
+            SEND_SYSTEM_LOG(Alert,
+                            << "SAFIR_STATUS: Caught '...' exception from io_service.run().");
+            success.exchange(false);
         }
 
-        run();
-
-        threads.join_all();
+        theApp.Stop();
 
         crGuard.reset();
     }

@@ -23,31 +23,16 @@
 ******************************************************************************/
 #pragma once
 
-//#include <memory>
+#include <Safir/Dob/Connection.h>
+#include <Safir/Utilities/AsioDispatcher.h>
+#include "StatusEntityHandler.h"
 
-//#include "ConnectionHandler.h"
-//#include "Distribution.h"
-//#include "MessageHandler.h"
-//#include "MemoryMonitor.h"
-//#include "PendingRegistrationHandler.h"
-//#include "RequestHandler.h"
-//#include "BlockingHandler.h"
-//#include "ConnectionKiller.h"
-//#include "LockMonitor.h"
-//#include <Safir/Dob/Internal/DoseMainCmd.h>
-
-//disable warnings in boost
-#if defined _MSC_VER
-  #pragma warning (push)
-  #pragma warning (disable : 4244 4267 4100)
-#endif
-
-#include <boost/thread.hpp>
 #include <boost/asio.hpp>
 
-#if defined _MSC_VER
-  #pragma warning (pop)
-#endif
+namespace Safir
+{
+namespace Control
+{
 
 class StatusApp : private boost::noncopyable
 {
@@ -60,58 +45,14 @@ public:
 
 
 private:
-    //        void Start(const std::string& nodeName,
-    //                   int64_t nodeId,
-    //                   int64_t nodeTypeId,
-    //                   const std::string& dataAddress);
 
-    //        void InjectNode(const std::string& nodeName,
-    //                        int64_t nodeId,
-    //                        int64_t nodeTypeId,
-    //                        const std::string& dataAddress);
+    boost::asio::io_service&    m_ioService;
 
-    //        void ExcludeNode(int64_t nodeId, int64_t nodeTypeId);
+    Safir::Utilities::AsioDispatcher   m_dispatcher;
+    Safir::Dob::Connection      m_connection;
+    Safir::Control::StatusEntityHandler m_statusEntityHandler;
 
-    //        void LogStatus(const std::string& str);
-
-    //        void HandleIncomingData(const DistributionData & data, const bool isAckedData);
-
-    //        void OnAppEvent(const ConnectionPtr & connection, bool disconnecting);
-    //        void HandleAppEventHelper(const ConnectionPtr & connection);
-
-    //        void HandleEvents();
-
-    boost::atomic<bool> m_stopped;
-    boost::asio::io_service& m_ioService;
-
-    //        boost::asio::io_service::strand m_strand;
-    //        boost::asio::io_service::strand m_wcoutStrand;
-    //        boost::shared_ptr<boost::asio::io_service::work> m_work;
-
-    //        int64_t m_nodeId;
-    //        std::unique_ptr<Distribution> m_distribution;
-
-    //        std::unique_ptr<Control::DoseMainCmdReceiver> m_cmdReceiver;
-
-    //        boost::asio::signal_set m_signalSet;
-
-    //        BlockingHandlers    m_blockingHandler;
-
-    //        std::unique_ptr<MessageHandler>      m_messageHandler;
-    //        std::unique_ptr<RequestHandler>      m_requestHandler;
-    //        std::unique_ptr<ConnectionHandler>   m_connectionHandler;
-
-    //        //Pending Registrations
-    //        std::unique_ptr<PendingRegistrationHandler> m_pendingRegistrationHandler;
-
-    //        // For monitoring abandoned shared memory locks
-    //        std::unique_ptr<LockMonitor> m_lockMonitor;
-
-    //        // For monitoring memory usage
-    //        std::unique_ptr<MemoryMonitor> m_memoryMonitor;
-
-    //        //this class should be declared last, so that when the app
-    //        //is destroyed all connections will be marked as dead and stop
-    //        //orders sent before any more destruction is done.
-    //        ConnectionKiller m_connectionKiller;
 };
+}
+}
+
