@@ -37,7 +37,10 @@ BOOST_AUTO_TEST_CASE(simple_comparison)
         {
             const LamportTimestamp next = clock.GetNewTimestamp();
             BOOST_CHECK(last < next);
+            BOOST_CHECK(!(next < last));
             BOOST_CHECK(last != next);
+            BOOST_CHECK(next != last);
+            BOOST_CHECK(!(next != next));
         }
     }
 }
@@ -51,11 +54,19 @@ BOOST_AUTO_TEST_CASE(different_nodes)
     const LamportTimestamp t1 = clock1.GetNewTimestamp();
     const LamportTimestamp t2 = clock2.GetNewTimestamp();
     BOOST_CHECK(t1 < t2);
+    BOOST_CHECK(!(t2 < t1));
     BOOST_CHECK(t1 != t2);
+    BOOST_CHECK(t2 != t1);
 
     const LamportTimestamp t3 = clock1.GetNewTimestamp();
     BOOST_CHECK(t2 < t3);
+    BOOST_CHECK(!(t3 < t2));
     BOOST_CHECK(t2 != t3);
+    BOOST_CHECK(t3 != t2);
+
+    BOOST_CHECK(!(t1 != t1));
+    BOOST_CHECK(!(t2 != t2));
+    BOOST_CHECK(!(t3 != t3));
 }
 
 
@@ -73,4 +84,41 @@ BOOST_AUTO_TEST_CASE(update_current)
     const auto t3 = clock2.GetNewTimestamp();
     BOOST_CHECK(t2 < t3);
     BOOST_CHECK(t1 < t3);
+}
+
+BOOST_AUTO_TEST_CASE(wrap_around)
+{
+    LamportClock clock(1000);
+    const LamportTimestamp first = clock.GetNewTimestamp();
+
+    //run clock a bit into the first half of the timestamps
+    for (unsigned long i = 0; i <0x0fffffff;++i)
+    {
+        clock.GetNewTimestamp();
+    }
+
+    const LamportTimestamp beginningOfFirstHalf = clock.GetNewTimestamp();
+
+    //run clock into beginning of second half
+    for (unsigned long i = 0; i <0x7ffffff0;++i)
+    {
+        clock.GetNewTimestamp();
+    }
+
+    const LamportTimestamp beginningOfSecondHalf = clock.GetNewTimestamp();
+
+    //run clock until it has wrapped.
+    for (unsigned long i = 0; i <0x7fffff00;++i)
+    {
+        clock.GetNewTimestamp();
+    }
+
+    const LamportTimestamp wrapped = clock.GetNewTimestamp();
+
+    BOOST_CHECK(first < beginningOfFirstHalf);
+    BOOST_CHECK(beginningOfFirstHalf < beginningOfSecondHalf);
+    BOOST_CHECK(beginningOfSecondHalf < first);
+    BOOST_CHECK(first < wrapped);
+    BOOST_CHECK(beginningOfSecondHalf < wrapped);
+    BOOST_CHECK(wrapped < beginningOfFirstHalf);
 }
