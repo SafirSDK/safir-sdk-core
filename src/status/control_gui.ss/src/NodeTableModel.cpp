@@ -38,7 +38,7 @@ NodeTableModel::NodeTableModel(QObject *parent)
 
 int NodeTableModel::rowCount(const QModelIndex & /* parent */) const
 {
-    return m_nodeInfos.size();
+    return static_cast<int>(m_nodeInfos.size());
 }
 
 int NodeTableModel::columnCount(const QModelIndex & /* parent */) const
@@ -129,7 +129,7 @@ QVariant NodeTableModel::data(const QModelIndex &index, int role) const
 //DOB Stuff
 void NodeTableModel::OnNewEntity(const Safir::Dob::EntityProxy entityProxy)
 {
-    beginInsertRows(QModelIndex(), m_nodeInfos.size(), m_nodeInfos.size());
+    beginInsertRows(QModelIndex(), static_cast<int>(m_nodeInfos.size()), static_cast<int>(m_nodeInfos.size()));
     m_nodeInfos.push_back(entityProxy.GetEntityId());
     endInsertRows();
 }
