@@ -229,13 +229,13 @@ bool MainWindow::DisplayConfirmationDialog(QString name, Safir::Control::Operati
     QString op;
 
     switch (operation) {
-    case Safir::Control::Operation::Enumeration::Reboot:
+    case Safir::Control::Operation::Reboot:
         op = "rebooted";
         break;
-    case Safir::Control::Operation::Enumeration::Shutdown:
+    case Safir::Control::Operation::Shutdown:
         op = "shutdown";
         break;
-    case Safir::Control::Operation::Enumeration::Stop:
+    case Safir::Control::Operation::Stop:
         op = "stopped";
         break;
 
@@ -252,13 +252,13 @@ bool MainWindow::DisplayConfirmationDialog(Safir::Control::Operation::Enumeratio
     QString op;
 
     switch (operation) {
-    case Safir::Control::Operation::Enumeration::Reboot:
+    case Safir::Control::Operation::Reboot:
         op = "rebooted";
         break;
-    case Safir::Control::Operation::Enumeration::Shutdown:
+    case Safir::Control::Operation::Shutdown:
         op = "shutdown";
         break;
-    case Safir::Control::Operation::Enumeration::Stop:
+    case Safir::Control::Operation::Stop:
         op = "stopped";
         break;
 
@@ -324,7 +324,7 @@ void MainWindow::on_pushButton_ShutdownAll_clicked()
     }
 }
 
-void MainWindow::nodeListSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected)
+void MainWindow::nodeListSelectionChanged(const QItemSelection & selected, const QItemSelection & /*deselected*/)
 {
     bool enabled = (selected.size() != 0);
 
