@@ -47,7 +47,7 @@ int NodeTableModel::columnCount(const QModelIndex & /* parent */) const
 }
 
 QVariant NodeTableModel::headerData(int section,
-                                   Qt::Orientation orientation,
+                                   Qt::Orientation /*orientation*/,
                                    int role) const
 {
     if (role != Qt::DisplayRole && role != Qt::TextAlignmentRole)
