@@ -34,6 +34,7 @@
 #include <functional>
 #include <limits>
 #include <boost/atomic.hpp>
+#include <boost/aligned_storage.hpp>
 #include <map>
 #include <set>
 
