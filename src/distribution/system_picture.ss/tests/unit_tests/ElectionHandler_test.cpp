@@ -624,7 +624,7 @@ BOOST_AUTO_TEST_CASE( three_nodes_remove_elected )
 
 BOOST_AUTO_TEST_CASE( lots_of_nodes )
 {
-#if !defined(NDEBUG)
+#if !defined(NDEBUG) or defined(__arm__)
     const int numNodes = 50;
 #elif defined(_MSC_VER)
     const int numNodes = 100;
