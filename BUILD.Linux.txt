@@ -23,7 +23,7 @@ To install all build dependencies "in one go" run the following from the command
 
   sudo apt-get install build-essential g++ cmake default-jdk asciidoc cli-common-dev \
        libboost-all-dev unixodbc-dev subversion protobuf-compiler libprotobuf-dev doxygen \
-       graphviz qt5-default devscripts debhelper fakeroot
+       graphviz qt5-default devscripts debhelper fakeroot libxml2-utils
 
 The last three packages - devscripts, debhelper and fakeroot - are used for debian
 package creation.
