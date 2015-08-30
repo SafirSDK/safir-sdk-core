@@ -1,3 +1,4 @@
 html
 Doxyfile
 documentation_generated
+doxygen_sqlite3.db
