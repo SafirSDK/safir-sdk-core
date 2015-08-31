@@ -31,11 +31,8 @@ int main(int argc, char* argv[])
 {
 
     //ensure call to CrashReporter::Stop at application exit
-    //Start is called in StatusApp
     boost::shared_ptr<void> crGuard(static_cast<void*>(0),
                                     [](void*){Safir::Utilities::CrashReporter::Stop();});
-
-    std::wcout << "Starting" << std::endl;
 
     boost::atomic<bool> success(true);
     try
@@ -45,15 +42,13 @@ int main(int argc, char* argv[])
         Safir::Control::StatusApp app;
         app.Run();
 
+        crGuard.reset();
     }
     catch(std::exception & e)
     {
         SEND_SYSTEM_LOG(Alert,
                         << "SCaught std::exception! Contents of exception is: "
                         << "  '" << e.what() << "'.");
-
-        std::wcout << "Caught std::exception! Contents of exception is:" << std::endl
-             << e.what()<<std::endl;
 
         success.exchange(false);
     }
@@ -63,15 +58,6 @@ int main(int argc, char* argv[])
                         << "Caught ... exception!");
 
         success.exchange(false);
-    }
-
-    if (success)
-    {
-        std::wcout << "SAFIR_STATUS: Exiting..." << std::endl;
-    }
-    else
-    {
-        std::wcout << "SAFIR_STATUS: Exiting due to error..." << std::endl;
     }
 
     return success ? 0 : 1;

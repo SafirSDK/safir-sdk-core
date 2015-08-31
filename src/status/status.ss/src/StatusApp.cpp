@@ -38,7 +38,7 @@ StatusApp::StatusApp()
     m_connection.Open(L"safir_control_status",  // Note the name. We want this to be handled as a normal connection.
                           L"main",
                           0,
-                          nullptr,
+                          this,
                           &m_dispatcher);
 
 
