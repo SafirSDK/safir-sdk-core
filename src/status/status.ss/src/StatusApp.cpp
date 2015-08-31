@@ -22,27 +22,18 @@
 *
 ******************************************************************************/
 #include "StatusApp.h"
-//#include <Safir/Dob/Internal/ControlConfig.h>
-//#include <Safir/Dob/Internal/Connections.h>
-//#include <Safir/Dob/Internal/InternalDefs.h>
-//#include <Safir/Dob/Internal/Initialize.h>
-//#include <Safir/Dob/OverflowException.h>
-//#include <Safir/Dob/ThisNodeParameters.h>
-//#include <Safir/Utilities/Internal/LowLevelLogger.h>
-//#include <Safir/Utilities/Internal/SystemLog.h>
-//#include <Safir/Utilities/CrashReporter.h>
-//#include <boost/bind.hpp>
-//#include <iostream>
+
 
 namespace Safir
 {
 namespace Control
 {
 
-StatusApp::StatusApp(boost::asio::io_service& ioService)
-    : m_ioService(ioService)
-    , m_dispatcher(m_connection, ioService)
-    , m_statusEntityHandler()
+StatusApp::StatusApp()
+    : m_ioService()
+    , m_dispatcher(m_connection, m_ioService)
+    , m_statusEntityHandler(m_ioService)
+    , m_commandRequestHandler(m_ioService)
 {
     m_connection.Open(L"safir_control_status",  // Note the name. We want this to be handled as a normal connection.
                           L"main",
@@ -52,59 +43,36 @@ StatusApp::StatusApp(boost::asio::io_service& ioService)
 
 
     m_statusEntityHandler.Start();
+    m_commandRequestHandler.Start();
+}
+
+void StatusApp::OnStopOrder()
+{
+    Stop();
+    m_ioService.stop();
+}
+
+
+void StatusApp::Run()
+{
+    boost::asio::io_service::work keepRunning(m_ioService);
+    m_ioService.run();
+
+    m_connection.Close();
 }
 
 StatusApp::~StatusApp()
 {
-//    Stop();
+
 }
 
 void StatusApp::Stop()
 {
+    m_commandRequestHandler.Stop();
+    m_statusEntityHandler.Stop();
 
 }
 
-//    void DoseMainApp::ExcludeNode(int64_t nodeId, int64_t nodeTypeId)
-//    {
-//        lllog(1) << "DOSE_MAIN: ExcludeNode cmd received."<<
-//                    " NodeId=" <<  nodeId <<
-//                    " NodeTypeId=" << nodeTypeId << std::endl;
 
-//        m_distribution->ExcludeNode(nodeId, nodeTypeId);
-//    }
-
-//    void DoseMainApp::OnAppEvent(const ConnectionPtr & connection, bool disconnecting)
-//    {
-//        HandleAppEventHelper(connection);
-//        if (disconnecting)
-//        {
-//            m_pendingRegistrationHandler->RemovePendingRegistrations(connection->Id());
-//            m_requestHandler->HandleDisconnect(connection);
-//        }
-//    }
-
-//    void DoseMainApp::HandleAppEventHelper(const ConnectionPtr & connection)
-//    {
-//        lllout << "HandleAppEventHelper for connection " << connection->NameWithCounter()
-//               << ", id = " << connection->Id() << std::endl;
-
-//        //Handle queued requests
-//        m_requestHandler->HandleRequests(connection);
-
-//        //Send messages
-//        m_messageHandler->DistributeMessages(connection);
-
-//        //Handle pending registrations
-//        m_pendingRegistrationHandler->CheckForNewOrRemovedPendingRegistration(connection);
-//    }
-
-//    void DoseMainApp::LogStatus(const std::string& str)
-//    {
-//        lllog(1) << str.c_str() << std::endl;
-//        m_wcoutStrand.dispatch([str]
-//                               {
-//                                   std::wcout << str.c_str() << std::endl;
-//                               });
-//    }
 }
 }

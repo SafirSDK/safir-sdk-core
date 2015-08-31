@@ -26,14 +26,8 @@
 #include <Safir/Utilities/Internal/SystemLog.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/CrashReporter.h>
-//#include <boost/regex.hpp>
-//#include <boost/lexical_cast.hpp>
-#include <boost/asio.hpp>
-#include <boost/atomic.hpp>
-//#include <boost/filesystem/fstream.hpp>
 
-
-int main()
+int main(int argc, char* argv[])
 {
 
     //ensure call to CrashReporter::Stop at application exit
@@ -41,50 +35,36 @@ int main()
     boost::shared_ptr<void> crGuard(static_cast<void*>(0),
                                     [](void*){Safir::Utilities::CrashReporter::Stop();});
 
-    boost::asio::io_service ioService;
+    std::wcout << "Starting" << std::endl;
 
     boost::atomic<bool> success(true);
-
     try
     {
-        Safir::Control::StatusApp theApp(ioService);
+        Safir::Utilities::CrashReporter::Start();
 
+        Safir::Control::StatusApp app;
+        app.Run();
 
-        try
-        {
-            ioService.run();
-        }
-        catch (const std::exception & exc)
-        {
-            SEND_SYSTEM_LOG(Alert,
-                            << "SAFIR_STATUS: Caught 'std::exception' exception from io_service.run(): "
-                            << "  '" << exc.what() << "'.");
-            success.exchange(false);
-        }
-        catch (...)
-        {
-            SEND_SYSTEM_LOG(Alert,
-                            << "SAFIR_STATUS: Caught '...' exception from io_service.run().");
-            success.exchange(false);
-        }
-
-        theApp.Stop();
-
-        crGuard.reset();
     }
-    catch (const std::exception & exc)
+    catch(std::exception & e)
     {
         SEND_SYSTEM_LOG(Alert,
-                        << "SAFIR_STATUS: Caught 'std::exception' exception: "
-                        << "  '" << exc.what() << "'.");
+                        << "SCaught std::exception! Contents of exception is: "
+                        << "  '" << e.what() << "'.");
+
+        std::wcout << "Caught std::exception! Contents of exception is:" << std::endl
+             << e.what()<<std::endl;
+
         success.exchange(false);
     }
     catch (...)
     {
         SEND_SYSTEM_LOG(Alert,
-                        << "SAFIR_STATUS: Caught '...' exception.");
+                        << "Caught ... exception!");
+
         success.exchange(false);
     }
+
     if (success)
     {
         std::wcout << "SAFIR_STATUS: Exiting..." << std::endl;
@@ -93,5 +73,6 @@ int main()
     {
         std::wcout << "SAFIR_STATUS: Exiting due to error..." << std::endl;
     }
+
     return success ? 0 : 1;
 }

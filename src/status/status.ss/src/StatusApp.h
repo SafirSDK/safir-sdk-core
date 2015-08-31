@@ -26,6 +26,7 @@
 #include <Safir/Dob/Connection.h>
 #include <Safir/Utilities/AsioDispatcher.h>
 #include "StatusEntityHandler.h"
+#include "CommandRequestHandler.h"
 
 #include <boost/asio.hpp>
 
@@ -34,23 +35,27 @@ namespace Safir
 namespace Control
 {
 
-class StatusApp : private boost::noncopyable
+class StatusApp : private boost::noncopyable,
+                  public Safir::Dob::StopHandler
 {
 public:
-    explicit StatusApp(boost::asio::io_service& ioService);
+    explicit StatusApp();
 
     ~StatusApp();
 
+    void Run();
     void Stop();
-
 
 private:
 
-    boost::asio::io_service&    m_ioService;
+    virtual void OnStopOrder();
 
-    Safir::Utilities::AsioDispatcher   m_dispatcher;
-    Safir::Dob::Connection      m_connection;
-    Safir::Control::StatusEntityHandler m_statusEntityHandler;
+    boost::asio::io_service    m_ioService;
+
+    Safir::Utilities::AsioDispatcher        m_dispatcher;
+    Safir::Dob::Connection                  m_connection;
+    Safir::Control::StatusEntityHandler     m_statusEntityHandler;
+    Safir::Control::CommandRequestHandler   m_commandRequestHandler;
 
 };
 }

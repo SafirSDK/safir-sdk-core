@@ -23,49 +23,44 @@
 ******************************************************************************/
 #pragma once
 
+#include <Safir/Control/Command.h>
 #include <Safir/Dob/SecondaryConnection.h>
-#include <Safir/Dob/Internal/ControlInfo.h>
+#include <Safir/Dob/Internal/ControlCmd.h>
 #include <boost/noncopyable.hpp>
-
+#include <boost/asio.hpp>
 
 namespace Safir
 {
 namespace Control
 {
     /**
-     * This class handles the Safir.Control.Status entity.
+     * This class handles the Safir.Control.Command service.
      *
-     * The application own one local instance of this entity. No requests are allowed.
+     * When a request is received the command is passed on via IPC to Safir_control
      */
-    class StatusEntityHandler:
-        public Safir::Dob::EntityHandler,
+    class CommandRequestHandler:
+        public Safir::Dob::ServiceHandler,
         private boost::noncopyable
     {
     public:
-        StatusEntityHandler(boost::asio::io_service &ioService);
+        CommandRequestHandler(boost::asio::io_service& ioService);
 
         void Start();
         void Stop();
-        void SetValues(int64_t incarnationId, int64_t nodeId);
 
     private:
         void OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId    typeId,
                                    const Safir::Dob::Typesystem::HandlerId& handlerId) override;
 
-        void OnCreateRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy,
-                             Safir::Dob::ResponseSenderPtr    responseSender) override;
+        void OnServiceRequest(const Safir::Dob::ServiceRequestProxy serviceRequestProxy,
+                                       Safir::Dob::ResponseSenderPtr       responseSender) override;
 
-        void OnUpdateRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy,
-                                     Safir::Dob::ResponseSenderPtr    responseSender) override;
+        Safir::Dob::Internal::Control::CommandAction GetCommandActionFromRequest(
+                Safir::Control::Operation::Enumeration operation);
 
-        void OnDeleteRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy,
-                             Safir::Dob::ResponseSenderPtr    responseSender) override;
-
-
-
+        bool m_connectedToIPC;
         Safir::Dob::SecondaryConnection m_dobConnection;
-
-        std::unique_ptr<Safir::Dob::Internal::Control::ControlInfoReceiver> m_controlInfoReceiver;
+        std::unique_ptr<Safir::Dob::Internal::Control::ControlCmdSender> m_controlCommandSender;
     };
 }
 }

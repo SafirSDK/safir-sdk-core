@@ -26,31 +26,16 @@
 #include <Safir/Control/Status.h>
 #include <Safir/Dob/ResponseGeneralErrorCodes.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
-#include <boost/asio.hpp>
+
 
 namespace Safir
 {
 namespace Control
 {
-    StatusEntityHandler::StatusEntityHandler()
+    StatusEntityHandler::StatusEntityHandler(boost::asio::io_service& ioService)
     {
-
-
-
-
-//            Dob::NodeInfoPtr ni = Dob::NodeInfo::Create();
-
-//            ni->NodeName().SetVal(ThisNodeParameters::Name());
-
-//            //extract the address from data we get from Communication.
-//            //The value we get from DataAddress ends with :port, so
-//            //we need to strip that.
-//            const auto address = m_distribution.GetCommunication().DataAddress();
-//            const auto ip = address.substr(0,address.find_last_of(":"));
-//            ni->IpAddress().SetVal(Safir::Dob::Typesystem::Utilities::ToWstring(ip));
-
-//            ni->NodeType().SetVal(ThisNodeParameters::NodeType());
-
+        m_controlInfoReceiver.reset(new Safir::Dob::Internal::Control::ControlInfoReceiver(ioService,
+                                                                                           [this](int64_t incarnationId, int64_t nodeId){SetValues(incarnationId,nodeId);} ));
 
     }
 
@@ -62,16 +47,18 @@ namespace Control
                                                        Safir::Dob::Typesystem::HandlerId(),
                                                        Safir::Dob::InstanceIdPolicy::HandlerDecidesInstanceId,
                                                        this);
+
+        m_controlInfoReceiver->Start();
     }
 
     void StatusEntityHandler::Stop()
     {
-        m_dobConnection.Detach();
+        m_controlInfoReceiver->Stop();
     }
 
-    void StatusEntityHandler::SetValues(int64_t nodeId, int64_t incarnationId)
+    void StatusEntityHandler::SetValues(int64_t incarnationId, int64_t nodeId)
     {
-        StatusPtr status;
+        StatusPtr status = Status::Create();
 
         status->NodeId().SetVal(nodeId);
         status->SystemIncarnation().SetVal(incarnationId);
