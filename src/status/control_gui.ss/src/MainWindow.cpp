@@ -25,7 +25,21 @@
 #include <boost/filesystem.hpp>
 
 #include "MainWindow.h"
+
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4127)
+#pragma warning (disable: 4244)
+#pragma warning (disable: 4251)
+#pragma warning (disable: 4800)
+#endif
+
 #include "ui_MainWindow.h"
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
+
 
 #include "Safir/Control/Operation.h"
 #include "Safir/Dob/OverflowException.h"
