@@ -55,7 +55,7 @@ namespace Control
         void OnServiceRequest(const Safir::Dob::ServiceRequestProxy serviceRequestProxy,
                                        Safir::Dob::ResponseSenderPtr       responseSender) override;
 
-        Safir::Dob::Internal::Control::CommandAction GetCommandActionFromRequest(
+        Safir::Dob::Internal::Control::CommandAction GetCommandActionFromOperation(
                 Safir::Control::Operation::Enumeration operation);
 
         bool m_connectedToIPC;

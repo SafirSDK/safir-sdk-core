@@ -35,7 +35,8 @@ namespace Control
     /**
      * This class handles the Safir.Control.Status entity.
      *
-     * The application own one local instance of this entity. No requests are allowed.
+     * The application own one local instance of this entity. When a IPC call is received from Safir_contorl the entity
+     * is created or updated. No requests are allowed.
      */
     class StatusEntityHandler:
         public Safir::Dob::EntityHandler,
@@ -64,8 +65,8 @@ namespace Control
 
 
         Safir::Dob::SecondaryConnection m_dobConnection;
-
         std::unique_ptr<Safir::Dob::Internal::Control::ControlInfoReceiver> m_controlInfoReceiver;
+
     };
 }
 }

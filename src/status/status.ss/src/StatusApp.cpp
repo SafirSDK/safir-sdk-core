@@ -48,7 +48,9 @@ StatusApp::StatusApp()
 
 void StatusApp::OnStopOrder()
 {
-    Stop();
+    m_commandRequestHandler.Stop();
+    m_statusEntityHandler.Stop();
+
     m_ioService.stop();
 }
 
@@ -65,14 +67,6 @@ StatusApp::~StatusApp()
 {
 
 }
-
-void StatusApp::Stop()
-{
-    m_commandRequestHandler.Stop();
-    m_statusEntityHandler.Stop();
-
-}
-
 
 }
 }

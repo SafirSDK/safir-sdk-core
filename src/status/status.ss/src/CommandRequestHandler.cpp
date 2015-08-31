@@ -27,9 +27,6 @@
 #include <Safir/Dob/ResponseGeneralErrorCodes.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
 
-
-
-
 namespace Safir
 {
 namespace Control
@@ -82,13 +79,15 @@ namespace Control
         }
         else if (command->NodeId().IsNull())
         {
+            //NodeId is null, send "system wide" command
             response = Safir::Dob::SuccessResponse::Create();
-            m_controlCommandSender->SystemCmd(GetCommandActionFromRequest(command->Operation().GetVal()));
+            m_controlCommandSender->SystemCmd(GetCommandActionFromOperation(command->Operation().GetVal()));
         }
         else
         {
+            //Send node command
             response = Safir::Dob::SuccessResponse::Create();
-            m_controlCommandSender->NodeCmd(GetCommandActionFromRequest(command->Operation().GetVal())
+            m_controlCommandSender->NodeCmd(GetCommandActionFromOperation(command->Operation().GetVal())
                                                                         ,command->NodeId().GetVal());
         }
 
@@ -103,19 +102,25 @@ namespace Control
                         << "going to be able to handle this service any longer!");
     }
 
-    Safir::Dob::Internal::Control::CommandAction CommandRequestHandler::GetCommandActionFromRequest(
-                                                                        Safir::Control::Operation::Enumeration operation)
+    Safir::Dob::Internal::Control::CommandAction
+    CommandRequestHandler::GetCommandActionFromOperation(Safir::Control::Operation::Enumeration operation)
     {
         switch (operation) {
         case Safir::Control::Operation::Enumeration::Reboot:
-                return Safir::Dob::Internal::Control::REBOOT;
+        {
+            return Safir::Dob::Internal::Control::REBOOT;
             break;
+        }
         case Safir::Control::Operation::Enumeration::Shutdown:
-                return Safir::Dob::Internal::Control::SHUTDOWN;
+        {
+            return Safir::Dob::Internal::Control::SHUTDOWN;
             break;
+        }
         case Safir::Control::Operation::Enumeration::Stop:
-                return Safir::Dob::Internal::Control::STOP;
+        {
+            return Safir::Dob::Internal::Control::STOP;
             break;
+        }
         default:
             break;
         }

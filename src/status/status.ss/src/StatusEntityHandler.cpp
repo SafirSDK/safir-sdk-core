@@ -34,8 +34,9 @@ namespace Control
 {
     StatusEntityHandler::StatusEntityHandler(boost::asio::io_service& ioService)
     {
-        m_controlInfoReceiver.reset(new Safir::Dob::Internal::Control::ControlInfoReceiver(ioService,
-                                                                                           [this](int64_t incarnationId, int64_t nodeId){SetValues(incarnationId,nodeId);} ));
+        m_controlInfoReceiver.reset(
+                    new Safir::Dob::Internal::Control::ControlInfoReceiver(ioService,
+                                     [this](int64_t incarnationId, int64_t nodeId){SetValues(incarnationId,nodeId);} ));
 
     }
 
@@ -80,7 +81,7 @@ namespace Control
     {
         responseSender->Send(Safir::Dob::ErrorResponse::CreateErrorResponse
                              (Safir::Dob::ResponseGeneralErrorCodes::SafirReqErr(),
-             L"It is not possible to send create requests on Safir::Control::Status"));
+                              L"It is not possible to send create requests on Safir::Control::Status"));
     }
 
     void StatusEntityHandler::OnUpdateRequest(const Safir::Dob::EntityRequestProxy /*entityRequestProxy*/,
