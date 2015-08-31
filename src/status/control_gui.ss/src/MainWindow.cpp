@@ -44,7 +44,11 @@
 #include "Safir/Control/Operation.h"
 #include "Safir/Dob/OverflowException.h"
 
-
+#ifdef _MSC_VER
+#pragma warning (push)
+//fix for vs2010 which complains about the usage of this in the member initializer list
+#pragma warning (disable: 4355) 
+#endif
 MainWindow::MainWindow(QWidget *parent)
     :QMainWindow(parent)
     ,ui(new Ui::MainWindow)
@@ -65,6 +69,9 @@ MainWindow::MainWindow(QWidget *parent)
     QObject::connect(&m_conThread, SIGNAL(ConnectedToDob()), this, SLOT(OnConnected()));
     m_conThread.start();
 }
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
 
 MainWindow::~MainWindow()
 {
