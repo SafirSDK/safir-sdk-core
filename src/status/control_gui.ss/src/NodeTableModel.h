@@ -24,10 +24,22 @@
 #ifndef NODETABLEMODEL_H
 #define NODETABLEMODEL_H
 
-#include <QAbstractTableModel>
+
 #include <Safir/Dob/SecondaryConnection.h>
 #include <Safir/Dob/NodeInfo.h>
 #include <list>
+
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4127)
+#endif
+
+#include <QAbstractTableModel>
+#include <QColor>
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
 
 #define NO_COLUMNS 4
 #define NAME_COLUMN 0

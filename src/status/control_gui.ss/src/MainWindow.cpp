@@ -23,12 +23,13 @@
 ******************************************************************************/
 #include <string>
 #include <boost/filesystem.hpp>
-#include <QMessageBox>
+
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
 
 #include "Safir/Control/Operation.h"
 #include "Safir/Dob/OverflowException.h"
+
 
 MainWindow::MainWindow(QWidget *parent)
     :QMainWindow(parent)

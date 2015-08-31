@@ -24,6 +24,18 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+
+#include <Safir/Dob/Connection.h>
+#include "Safir/Control/Status.h"
+#include "Safir/Control/Command.h"
+
+#include "NodeTableModel.h"
+
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4127)
+#endif
+#include <QMessageBox>
 #include <QMainWindow>
 #include <QEvent>
 #include <QThread>
@@ -31,11 +43,9 @@
 #include <QLabel>
 #include <QSortFilterProxyModel>
 #include <QItemSelectionModel>
-#include <Safir/Dob/Connection.h>
-#include "Safir/Control/Status.h"
-#include "Safir/Control/Command.h"
-
-#include "NodeTableModel.h"
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
 
 //----------------------------------------
 class DobConnector : public QThread
