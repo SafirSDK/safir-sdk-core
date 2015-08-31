@@ -252,7 +252,8 @@ bool MainWindow::DisplayConfirmationDialog(Safir::Control::Operation::Enumeratio
 {
     QString op;
 
-    switch (operation) {
+    switch (operation)
+    {
     case Safir::Control::Operation::Reboot:
         op = "rebooted";
         break;
