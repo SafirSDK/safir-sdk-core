@@ -156,6 +156,14 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
                                    std::wcout << "CTRL: Received system cmd. Action: " << cmdAction << std::endl;
                                }));
 
+    m_controlInfoSender.reset(new Control::ControlInfoSender
+                              (ioService,
+                               // This is what we do when a receiver is ready
+                               [this]()
+                               {
+                                   m_controlInfoSender->SendInfo(123456, 654321);
+                               }));
+
     m_stateHandler.reset(new Control::SystemStateHandler
                          (id,
 
@@ -298,6 +306,7 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
 
     m_doseMainCmdSender->Start();
     m_controlCmdReceiver->Start();
+    m_controlInfoSender->Start();
 }
 
 ControlApp::~ControlApp()
@@ -337,6 +346,7 @@ void ControlApp::StopControl()
 {
     m_sp->Stop();
     m_communication->Stop();
+    m_controlInfoSender->Stop();
     m_controlCmdReceiver->Stop();
     m_doseMainCmdSender->Stop();
     m_signalSet.cancel();

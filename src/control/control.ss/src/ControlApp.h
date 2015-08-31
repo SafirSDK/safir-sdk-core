@@ -28,6 +28,7 @@
 #include <Safir/Dob/Internal/SystemPicture.h>
 #include <Safir/Dob/Internal/Communication.h>
 #include <Safir/Dob/Internal/ControlCmd.h>
+#include <Safir/Dob/Internal/ControlInfo.h>
 #include <Safir/Dob/Internal/DoseMainCmd.h>
 #include <Safir/Dob/Internal/ControlConfig.h>
 
@@ -80,6 +81,7 @@ private:
     std::unique_ptr<Com::Communication>             m_communication;
     std::unique_ptr<SP::SystemPicture>              m_sp;
     std::unique_ptr<Control::ControlCmdReceiver>    m_controlCmdReceiver;
+    std::unique_ptr<Control::ControlInfoSender>     m_controlInfoSender;
     std::unique_ptr<Control::DoseMainCmdSender>     m_doseMainCmdSender;
     std::unique_ptr<Control::SystemStateHandler>    m_stateHandler;
     std::unique_ptr<boost::process::child>          m_doseMain;
