@@ -141,6 +141,21 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
                                    m_communication->Start();
                                 }));
 
+    // Initiate reception of control commands via IPC
+    m_controlCmdReceiver.reset(new Control::ControlCmdReceiver
+                              (ioService,
+                               // This is what we do when a node command is received
+                               [](Control::CommandAction cmdAction, int64_t nodeId)
+                               {
+                                   std::wcout << "CTRL: Received node cmd. Action: " << cmdAction
+                                   << " NodeId: " << nodeId << std::endl;
+                               },
+                               // This is what we do when a system command is received
+                               [](Control::CommandAction cmdAction)
+                               {
+                                   std::wcout << "CTRL: Received system cmd. Action: " << cmdAction << std::endl;
+                               }));
+
     m_stateHandler.reset(new Control::SystemStateHandler
                          (id,
 
@@ -282,6 +297,7 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
     ));
 
     m_doseMainCmdSender->Start();
+    m_controlCmdReceiver->Start();
 }
 
 ControlApp::~ControlApp()
@@ -321,6 +337,7 @@ void ControlApp::StopControl()
 {
     m_sp->Stop();
     m_communication->Stop();
+    m_controlCmdReceiver->Stop();
     m_doseMainCmdSender->Stop();
     m_signalSet.cancel();
     m_work.reset();
