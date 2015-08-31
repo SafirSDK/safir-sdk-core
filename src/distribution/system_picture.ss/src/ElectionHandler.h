@@ -34,10 +34,9 @@
 #include <functional>
 #include <limits>
 #include <boost/atomic.hpp>
+#include <boost/aligned_storage.hpp>
 #include <map>
 #include <set>
-#include <boost/static_assert.hpp>
-#include <boost/type_traits.hpp>
 
 #ifdef _MSC_VER
 #  pragma warning (push)
@@ -53,24 +52,6 @@
 #ifdef _MSC_VER
 #  pragma warning (pop)
 #endif
-
-
-namespace
-{
-
-    //Check that boost::atomic<[u]int64_t> and boost::atomic<[u]int32_t> are lock free
-    BOOST_STATIC_ASSERT(BOOST_ATOMIC_INT_LOCK_FREE == 2); //int and unsigned int are always lock free
-    BOOST_STATIC_ASSERT(BOOST_ATOMIC_LONG_LOCK_FREE == 2); //long and unsigned long are always lock free
-    BOOST_STATIC_ASSERT(BOOST_ATOMIC_LLONG_LOCK_FREE == 2); //llong and unsigned llong are always lock free
-
-    //now we need to check that int32_t, uint32_t, int64_t and uint64_t actually map to any of the above types
-    BOOST_STATIC_ASSERT((boost::is_same<int32_t, int>::value || boost::is_same<int32_t, long>::value));
-    BOOST_STATIC_ASSERT((boost::is_same<uint32_t, unsigned int>::value || boost::is_same<uint32_t, unsigned long>::value));
-    BOOST_STATIC_ASSERT((boost::is_same<int64_t, long>::value || boost::is_same<int64_t, long long>::value));
-    BOOST_STATIC_ASSERT((boost::is_same<uint64_t, unsigned long>::value || boost::is_same<uint64_t, unsigned long long>::value));
-
-    //these checks may have to be adjusted when/if we port to a platform with different sizes.
-}
 
 namespace Safir
 {

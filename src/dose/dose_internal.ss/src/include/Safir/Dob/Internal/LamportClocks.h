@@ -28,7 +28,6 @@
 #include <Safir/Dob/Internal/InternalExportDefs.h>
 #include <Safir/Dob/Internal/SharedMemoryObject.h>
 #include <boost/atomic.hpp>
-#include <boost/aligned_storage.hpp>
 #include <memory>
 
 namespace Safir
@@ -37,6 +36,9 @@ namespace Dob
 {
 namespace Internal
 {
+#pragma pack (push)
+#pragma pack (4)
+
     class DOSE_INTERNAL_API LamportTimestamp
     {
     public:
@@ -52,7 +54,14 @@ namespace Internal
             }
             else
             {
-                return m_clock < other.m_clock;
+                if (m_clock < other.m_clock)
+                {
+                    return (other.m_clock - m_clock) <= 0x7fffffff;
+                }
+                else
+                {
+                    return (m_clock - other.m_clock) > 0x7fffffff;
+                }
             }
         }
 
@@ -60,28 +69,31 @@ namespace Internal
         {return m_clock != other.m_clock || m_nodeId != other.m_nodeId;}
 
     private:
-        LamportTimestamp(const uint64_t clock, const int64_t nodeId)
+        LamportTimestamp(const uint32_t clock, const int64_t nodeId)
             : m_clock(clock)
             , m_nodeId(nodeId)
         {
 
         }
 
-        uint64_t GetClock() const { return m_clock;}
+        uint32_t GetClock() const { return m_clock;}
 
         friend class LamportClock;
 
         friend DOSE_INTERNAL_API std::wostream& operator << (std::wostream& out, const LamportTimestamp& timestamp);
 
-        uint64_t m_clock;
+        uint32_t m_clock;
+        uint32_t m_padding;
         int64_t m_nodeId;
+        //Note: size is checked in DistributionData.cpp
     };
+
+#pragma pack (pop)
 
     DOSE_INTERNAL_API std::wostream& operator << (std::wostream& out, const LamportTimestamp& timestamp);
 
     class DOSE_INTERNAL_API LamportClock
-        : public SharedMemoryObject
-        , private boost::noncopyable
+        : private boost::noncopyable
     {
     public:
         explicit LamportClock(const int64_t nodeId);
@@ -91,11 +103,7 @@ namespace Internal
         const LamportTimestamp GetNewTimestamp();
 
     private:
-        //64 bit atomic needs to be aligned on 64 bit boundary even on 32 bit systems,
-        //so we need to use alignment magic.
-        typedef boost::aligned_storage<sizeof(boost::atomic<uint64_t>),sizeof(boost::atomic<uint64_t>)>::type AlignedStorage;
-        SmartPointers<AlignedStorage>::unique_ptr m_alignedStorage;
-        boost::interprocess::offset_ptr<boost::atomic<uint64_t>> m_currentClock;
+        boost::atomic<uint32_t> m_currentClock;
         const int64_t m_nodeId;
     };
 
