@@ -121,6 +121,8 @@ void MainWindow::OnDoDispatch()
 
 void MainWindow::OnStopOrder()
 {
+    m_dobConnection.Close();
+    this->close();
 
 }
 
@@ -358,5 +360,5 @@ void MainWindow::nodeListSelectionChanged(const QItemSelection & selected, const
 
 void MainWindow::on_actionExit_triggered()
 {
-      this->close();
+      OnStopOrder();
 }

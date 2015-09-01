@@ -23,7 +23,7 @@
 ******************************************************************************/
 
 #include "NodeTableModel.h"
-
+#include "Safir/Dob/NotFoundException.h"
 
 
 
@@ -86,8 +86,16 @@ QVariant NodeTableModel::data(const QModelIndex &index, int role) const
 
     if (role == Qt::DisplayRole)
     {
-        Safir::Dob::NodeInfoPtr nodeInfo
-                = boost::dynamic_pointer_cast<Safir::Dob::NodeInfo>(m_dobConnection.Read(m_nodeInfos.at(index.row())).GetEntity());
+        Safir::Dob::NodeInfoPtr nodeInfo;
+
+        try
+        {
+            nodeInfo = boost::dynamic_pointer_cast<Safir::Dob::NodeInfo>(m_dobConnection.Read(m_nodeInfos.at(index.row())).GetEntity());
+        }
+        catch (Safir::Dob::NotFoundException /*ex*/)
+        {
+            return QVariant(); //do nothing, we end up here sometimes when the system is going down
+        }
 
         switch (index.column()) {
         case NAME_COLUMN:
@@ -110,8 +118,16 @@ QVariant NodeTableModel::data(const QModelIndex &index, int role) const
     }
     else if (role == Qt::BackgroundColorRole)
     {
-        Safir::Dob::NodeInfoPtr nodeInfo
-                = boost::dynamic_pointer_cast<Safir::Dob::NodeInfo>(m_dobConnection.Read(m_nodeInfos.at(index.row())).GetEntity());
+        Safir::Dob::NodeInfoPtr nodeInfo;
+
+        try
+        {
+            nodeInfo = boost::dynamic_pointer_cast<Safir::Dob::NodeInfo>(m_dobConnection.Read(m_nodeInfos.at(index.row())).GetEntity());
+        }
+        catch (Safir::Dob::NotFoundException /*ex*/)
+        {
+            return QVariant(); //do nothing, we end up here sometimes when the system is going down
+        }
 
         //give the local node a slight tint
         if (m_nodeInfos.at(index.row()).GetInstanceId().GetRawValue() == m_ownNodeId)
