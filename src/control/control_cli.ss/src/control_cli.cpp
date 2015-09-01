@@ -131,25 +131,27 @@ int main(int argc, char * argv[])
     // the timer. Thus the timer will always expire, so in the callback for the timer we stop our worker and thus lets
     // the ioService finish. If the timer is not canceled we take it as a failure since we have then timedout.
 
-    Safir::Dob::Internal::Control::ControlCmdSender sender(ioService,
-                                                           [&cmd, &sender, &timeOutTimer]()
+    std::unique_ptr<Safir::Dob::Internal::Control::ControlCmdSender> senderPtr;
+
+    senderPtr.reset(new Safir::Dob::Internal::Control::ControlCmdSender(ioService,
+                                                           [&cmd, &senderPtr, &timeOutTimer]()
                                                            {
                                                                 if (cmd.nodeCmd)
                                                                 {
-                                                                    sender.NodeCmd(cmd.cmdAction,
+                                                                    senderPtr->NodeCmd(cmd.cmdAction,
                                                                                    cmd.nodeId);
                                                                 }
                                                                 else
                                                                 {
-                                                                    sender.SystemCmd(cmd.cmdAction);
+                                                                    senderPtr->SystemCmd(cmd.cmdAction);
                                                                 }
 
                                                                 timeOutTimer.cancel();
-                                                            });
+                                                            }));
 
 
     bool success = false;
-    timeOutTimer.async_wait([&sender, &work, &success]
+    timeOutTimer.async_wait([&senderPtr, &work, &success]
                                   (const boost::system::error_code& error)
                                   {
                                       if (error == boost::asio::error::operation_aborted)
@@ -157,11 +159,11 @@ int main(int argc, char * argv[])
                                             success = true; //timer was canceled meaning we sent our command
                                       }
 
-                                      sender.Stop();
+                                      senderPtr->Stop();
                                       work.reset();
                                   });
 
-    sender.Start();
+    senderPtr->Start();
     ioService.run();
 
     return success ? 0 : 1;
