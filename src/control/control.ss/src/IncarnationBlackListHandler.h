@@ -27,6 +27,7 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
 #include <fstream>
+#include <iostream>
 
 
 namespace Safir
@@ -69,6 +70,8 @@ namespace Control
 
                 if (readValue == incarnationId)
                 {
+                    //TODO: remove debug output
+                    std::wcout << "Found incarnationId " << incarnationId << " in blacklist " << m_path.string().c_str() << std::endl;
                     file.close();
                     return false;
                 }

@@ -492,6 +492,8 @@ namespace SP
                                   {
                                       if (!m_validateIncarnationIdCallback(incarnationId))
                                       {
+                                          //TODO: remove debug output
+                                          std::wcout << "Control said no to incarnation id " << incarnationId << std::endl;
                                           throw std::logic_error("Nooooo! You can't say no to this incarnation id!");
                                       }
                                   }
