@@ -106,17 +106,17 @@ namespace Control
     CommandRequestHandler::GetCommandActionFromOperation(Safir::Control::Operation::Enumeration operation)
     {
         switch (operation) {
-        case Safir::Control::Operation::Enumeration::Reboot:
+        case Safir::Control::Operation::Reboot:
         {
             return Safir::Dob::Internal::Control::REBOOT;
             break;
         }
-        case Safir::Control::Operation::Enumeration::Shutdown:
+        case Safir::Control::Operation::Shutdown:
         {
             return Safir::Dob::Internal::Control::SHUTDOWN;
             break;
         }
-        case Safir::Control::Operation::Enumeration::Stop:
+        case Safir::Control::Operation::Stop:
         {
             return Safir::Dob::Internal::Control::STOP;
             break;
