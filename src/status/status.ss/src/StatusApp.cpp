@@ -51,13 +51,14 @@ void StatusApp::OnStopOrder()
     m_commandRequestHandler.Stop();
     m_statusEntityHandler.Stop();
 
-    m_ioService.stop();
+    m_work.reset();
 }
 
 
 void StatusApp::Run()
 {
-    boost::asio::io_service::work keepRunning(m_ioService);
+    m_work.reset(new boost::asio::io_service::work(m_ioService));
+
     m_ioService.run();
 
     m_connection.Close();

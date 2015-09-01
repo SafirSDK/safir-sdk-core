@@ -51,6 +51,7 @@ private:
 
     boost::asio::io_service    m_ioService;
 
+    boost::shared_ptr<boost::asio::io_service::work> m_work;
     Safir::Utilities::AsioDispatcher        m_dispatcher;
     Safir::Dob::Connection                  m_connection;
     Safir::Control::StatusEntityHandler     m_statusEntityHandler;
