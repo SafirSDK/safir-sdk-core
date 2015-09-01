@@ -33,6 +33,7 @@
 #endif
 
 #include <boost/asio.hpp>
+#include <boost/asio/steady_timer.hpp>
 
 #ifdef _MSC_VER
 #pragma warning (pop)
@@ -49,14 +50,17 @@ public:
         boost::program_options::options_description desc("Command line options");
         desc.add_options()
                 ("help,h", "This help message")
-                ("action",  boost::program_options::value<std::string>(),
+                ("action,a",  boost::program_options::value<std::string>(),
                  "Action (STOP|SHUTDOWN|REBOOT)")
-                ("node-id", boost::program_options::value<int64_t>(&nodeId),
-                 "Node id to send action to. If not given action will be sent to all nodes.");
+                ("node-id,n", boost::program_options::value<int64_t>(&nodeId),
+                 "Node id to send action to. If not given action will be sent to all nodes.")
+                ("timeout,t", boost::program_options::value<uint64_t>(&timeOut)->default_value(5),
+                 "The time in seconds to wait for a IPC connection to safir_control.");
 
         boost::program_options::positional_options_description pd;
         pd.add("action", 1);
         pd.add("node-id", 2);
+        pd.add("timeout", 3);
 
         boost::program_options::variables_map vm;
         boost::program_options::store(boost::program_options::command_line_parser(argc, argv).options(desc).positional(pd).run(), vm);
@@ -109,6 +113,7 @@ public:
     Safir::Dob::Internal::Control::CommandAction cmdAction;
     bool nodeCmd;
     int64_t nodeId;
+    uint64_t timeOut;
 };
 
 int main(int argc, char * argv[])
@@ -117,10 +122,17 @@ int main(int argc, char * argv[])
     if (cmd.help) return 0; //only show help
 
     boost::asio::io_service ioService;
-    boost::shared_ptr<boost::asio::io_service::work> work (new boost::asio::io_service::work(ioService));
+    boost::shared_ptr<boost::asio::io_service::work> work(new boost::asio::io_service::work(ioService));
+
+    boost::asio::steady_timer timeOutTimer(ioService);
+    timeOutTimer.expires_from_now(boost::chrono::seconds(cmd.timeOut));
+
+    // We start the sender and a timeout timer. If the sender is connected to the subscriber we send our action and cancel
+    // the timer. Thus the timer will always expire, so in the callback for the timer we stop our worker and thus lets
+    // the ioService finish. If the timer is not canceled we take it as a failure since we have then timedout.
 
     Safir::Dob::Internal::Control::ControlCmdSender sender(ioService,
-                                                           [&cmd, &sender, &work]()
+                                                           [&cmd, &sender, &timeOutTimer]()
                                                            {
                                                                 if (cmd.nodeCmd)
                                                                 {
@@ -132,16 +144,26 @@ int main(int argc, char * argv[])
                                                                     sender.SystemCmd(cmd.cmdAction);
                                                                 }
 
-                                                                sender.Stop();
-                                                                work.reset();
+                                                                timeOutTimer.cancel();
                                                             });
 
 
+    bool success = false;
+    timeOutTimer.async_wait([&sender, &work, &success]
+                                  (const boost::system::error_code& error)
+                                  {
+                                      if (error == boost::asio::error::operation_aborted)
+                                      {
+                                            success = true; //timer was canceled meaning we sent our command
+                                      }
+
+                                      sender.Stop();
+                                      work.reset();
+                                  });
 
     sender.Start();
-
     ioService.run();
 
-    return 0;
+    return success ? 0 : 1;
 }
 

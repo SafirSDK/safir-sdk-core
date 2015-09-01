@@ -1,0 +1,29 @@
+SAFIR_CONTROL_CLI(1)
+====================
+:doctype: manpage
+
+
+NAME
+----
+safir_control_cli - Safir Control Command Line Interface
+
+
+SYNOPSIS
+--------
+*safir_control_cli*
+
+DESCRIPTION
+-----------
+Safir_control_cli is a command line front end to the safir_control component. It can be used to control (stop, restart, reboot) the invidual nodes that are running in a Safir system.
+
+
+RESOURCES
+---------
+Web site: <http://www.safirsdkcore.com/>
+
+
+COPYING
+-------
+Copyright \(C) 2004-2015 Saab AB. Free use of this software is granted under
+the terms of the GNU General Public License Version 3 (GPL-3).
+
