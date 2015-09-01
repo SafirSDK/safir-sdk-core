@@ -27,7 +27,7 @@
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/CrashReporter.h>
 
-int main(int argc, char* argv[])
+int main(int /*argc*/, char* [] /*argv*/)
 {
 
     //ensure call to CrashReporter::Stop at application exit
