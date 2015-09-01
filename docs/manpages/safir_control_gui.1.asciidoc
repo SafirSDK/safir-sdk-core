@@ -5,7 +5,7 @@ SAFIR_CONTROL_GUI(1)
 
 NAME
 ----
-safir_control_gui - Safir Application Tester
+safir_control_gui - Safir Control Gui
 
 
 SYNOPSIS
