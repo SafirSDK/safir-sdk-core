@@ -58,7 +58,8 @@ class ControlApp : private boost::noncopyable
 public:
     ControlApp(boost::asio::io_service&         ioService,
                const boost::filesystem::path&   doseMainPath,
-               const boost::int64_t             id);
+               const boost::int64_t             id,
+               const bool                       ignoreControlCmd);
 
     ~ControlApp();
 
@@ -68,9 +69,15 @@ private:
 
     void StopControl();
 
+    void StopThisNode();
+
+    void HandleControlCmd(Control::CommandAction cmdAction);
+
     boost::asio::io_service&                    m_ioService;
     boost::asio::signal_set                     m_signalSet;
     boost::asio::io_service::strand             m_strand;
+    const boost::int64_t                        m_nodeId;
+    const bool                                  m_ignoreControlCmd;
     boost::asio::steady_timer                   m_terminationTimer;
     Control::Config                             m_conf;
     Control::IncarnationBlacklistHandler        m_incarnationBlackListHandler;

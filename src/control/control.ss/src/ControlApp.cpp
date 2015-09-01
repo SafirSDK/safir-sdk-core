@@ -45,12 +45,20 @@
 #  pragma warning (pop)
 #endif
 
+#if defined(linux) || defined(__linux) || defined(__linux__)
+#include <unistd.h>
+#include <sys/reboot.h>
+#endif
+
 ControlApp::ControlApp(boost::asio::io_service&         ioService,
                        const boost::filesystem::path&   doseMainPath,
-                       const boost::int64_t             id)
+                       const boost::int64_t             id,
+                       const bool                       ignoreControlCmd)
     : m_ioService(ioService)
     , m_signalSet(ioService)
     , m_strand(ioService)
+    , m_nodeId(id)
+    , m_ignoreControlCmd(ignoreControlCmd)
     , m_terminationTimer(ioService)
     , m_incarnationBlackListHandler(m_conf.incarnationBlacklistFileName)
     , m_ctrlStopped(false)
@@ -145,15 +153,34 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
     m_controlCmdReceiver.reset(new Control::ControlCmdReceiver
                               (ioService,
                                // This is what we do when a node command is received
-                               [](Control::CommandAction cmdAction, int64_t nodeId)
+                               [this](Control::CommandAction cmdAction, int64_t nodeId)
                                {
                                    std::wcout << "CTRL: Received node cmd. Action: " << cmdAction
                                    << " NodeId: " << nodeId << std::endl;
+
+                                   if (nodeId != m_nodeId || m_ignoreControlCmd)
+                                   {
+                                       return;
+                                   }
+
+                                   HandleControlCmd(cmdAction);
+
                                },
                                // This is what we do when a system command is received
-                               [](Control::CommandAction cmdAction)
+                               [this](Control::CommandAction cmdAction)
                                {
                                    std::wcout << "CTRL: Received system cmd. Action: " << cmdAction << std::endl;
+
+                                   if (m_ignoreControlCmd)
+                                   {
+                                       return;
+                                   }
+
+                                   // TODO: Check if we are the node where the command is generated. If so,
+                                   //       send the cmd via Communication.
+
+                                   HandleControlCmd(cmdAction);
+
                                }));
 
     m_controlInfoSender.reset(new Control::ControlInfoSender
@@ -292,15 +319,7 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
         lllog(1) << "CTRL: Got signal " << signalNumber << " ... stop sequence initiated." << std::endl;
         std::wcout << "CTRL: Got signal " << signalNumber << " ... stop sequence initiated." << std::endl;
 
-        if (m_doseMainRunning)
-        {
-            StopDoseMain();
-        }
-
-        if (!m_ctrlStopped)
-        {
-            StopControl();
-        }
+        StopThisNode();
     }
     ));
 
@@ -351,6 +370,44 @@ void ControlApp::StopControl()
     m_doseMainCmdSender->Stop();
     m_signalSet.cancel();
     m_work.reset();
+}
+
+void ControlApp::StopThisNode()
+{
+    if (m_doseMainRunning)
+    {
+        StopDoseMain();
+    }
+
+    if (!m_ctrlStopped)
+    {
+        StopControl();
+    }
+}
+
+void ControlApp::HandleControlCmd(Control::CommandAction cmdAction)
+{
+    switch (cmdAction)
+    {
+        case Control::STOP:
+        {
+            lllog(1) << "CTRL: Got STOP command ... stop sequence initiated." << std::endl;
+            std::wcout << "CTRL: Got STOP command ... stop sequence initiated." << std::endl;
+
+            StopThisNode();
+        }
+        break;
+
+        case Control::SHUTDOWN:
+        {
+        }
+        break;
+
+        case Control::REBOOT:
+        {
+        }
+        break;
+    }
 }
 
 #if defined(linux) || defined(__linux) || defined(__linux__)
