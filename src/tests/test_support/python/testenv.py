@@ -96,7 +96,7 @@ class TestEnv:
                 print(" dose_main seems to be ready")
                 break
             if self.safir_control.poll() is not None:
-                raise Exception(" safir_control appears to have failed to start dose_main!\n" +
+                raise Exception(" safir_control terminated!\n" +
                                 "----- Output so far ----\n" +
                                 self.Output("safir_control") +
                                 "\n---------------------")
