@@ -64,9 +64,9 @@ public:
         options_description options("Options");
         options.add_options()
             ("help,h", "show help message")
-            ("raw",
+            ("raw,r",
              "Subscribe to the Raw data instead of the SystemState data.")
-            ("one",
+            ("one,o",
              "Exit after one subscription response.");
 
         variables_map vm;
