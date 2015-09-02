@@ -321,6 +321,13 @@ try:
         print("could not find the right number of updated BigEntity in output")
         sys.exit(1)
 
+except:
+    syslog_output = env.Syslog()
+    if len(syslog_output) != 0:
+        print("Unexpected exception! syslog output:\n" + syslog_output)
+    else:
+        print("Unexpected exception! No syslog output available")
+    raise
 
 finally:
     print("== Clear the db")

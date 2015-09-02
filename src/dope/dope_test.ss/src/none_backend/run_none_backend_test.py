@@ -32,80 +32,88 @@ def log(data):
     sys.stdout.flush()
 
 
-parser = argparse.ArgumentParser("test script")
-parser.add_argument("--safir-show-config", required=True)
-parser.add_argument("--safir-control", required=True)
-parser.add_argument("--dose-main", required=True)
-parser.add_argument("--dope-main", required=True)
-parser.add_argument("--entity-owner", required=True)
-parser.add_argument("--safir-generated-paths", required=True)
+try:
+    parser = argparse.ArgumentParser("test script")
+    parser.add_argument("--safir-show-config", required=True)
+    parser.add_argument("--safir-control", required=True)
+    parser.add_argument("--dose-main", required=True)
+    parser.add_argument("--dope-main", required=True)
+    parser.add_argument("--entity-owner", required=True)
+    parser.add_argument("--safir-generated-paths", required=True)
 
-arguments = parser.parse_args()
-
-
-#add all the environment variables. passed on format A=10;B=20
-for pair in arguments.safir_generated_paths.split(";"):
-    (name,value) = pair.split("=")
-    print("Setting environment variable", name, "to", value)
-    os.environ[name] = value
+    arguments = parser.parse_args()
 
 
-"""
-log("Find out how many entities entity_owner will set")
-num_str = subprocess.check_output((arguments.entity_owner,"num"), universal_newlines=True)
-NUM_SMALL = int(re.search(r"NUM_SMALL = ([0-9]+)",num_str).group(1))
-NUM_BIG = int(re.search(r"NUM_BIG = ([0-9]+)",num_str).group(1))
-log("NUM_SMALL = " + str(NUM_SMALL) + " and NUM_BIG = " + str(NUM_BIG))
-"""
+    #add all the environment variables. passed on format A=10;B=20
+    for pair in arguments.safir_generated_paths.split(";"):
+        (name,value) = pair.split("=")
+        print("Setting environment variable", name, "to", value)
+        os.environ[name] = value
 
-log("Set a bunch of entities")
-env = TestEnv(arguments.safir_control,
-              arguments.dose_main,
-              arguments.dope_main,
-              arguments.safir_show_config)
-with TestEnvStopper(env):
-    env.launchProcess("entity_owner", (arguments.entity_owner,"set")).wait()
-    env.WaitForOutput("entity_owner", "Exiting")
 
-syslog_output = env.Syslog()
-if len(syslog_output) != 0:
-    log("Unexpected syslog output:\n" + syslog_output)
-    sys.exit(1)
-    
-if not env.ReturnCodesOk():
-    log("Some process exited with an unexpected value")
-    sys.exit(1)
+    """
+    log("Find out how many entities entity_owner will set")
+    num_str = subprocess.check_output((arguments.entity_owner,"num"), universal_newlines=True)
+    NUM_SMALL = int(re.search(r"NUM_SMALL = ([0-9]+)",num_str).group(1))
+    NUM_BIG = int(re.search(r"NUM_BIG = ([0-9]+)",num_str).group(1))
+    log("NUM_SMALL = " + str(NUM_SMALL) + " and NUM_BIG = " + str(NUM_BIG))
+    """
 
-log("See if dope loads them at startup")
-env = TestEnv(arguments.safir_control,
-              arguments.dose_main,
-              arguments.dope_main,
-              arguments.safir_show_config)
-with TestEnvStopper(env):
-    env.launchProcess("entity_owner", (arguments.entity_owner,"accept")).wait()
+    log("Set a bunch of entities")
+    env = TestEnv(arguments.safir_control,
+                  arguments.dose_main,
+                  arguments.dope_main,
+                  arguments.safir_show_config)
+    with TestEnvStopper(env):
+        env.launchProcess("entity_owner", (arguments.entity_owner,"set")).wait()
+        env.WaitForOutput("entity_owner", "Exiting")
 
-syslog_output = env.Syslog()
-if len(syslog_output) != 0:
-    log("Unexpected syslog output:\n" + syslog_output)
-    sys.exit(1)
-    
-if not env.ReturnCodesOk():
-    log("Some process exited with an unexpected value")
-    sys.exit(1)
-    
-output = env.Output("entity_owner")
-if output.count("OnInjectedNewEntity") != 0:
-    log("could not find the right number of 'OnInjectedNewEntity' in output")
-    sys.exit(1)
+    syslog_output = env.Syslog()
+    if len(syslog_output) != 0:
+        log("Unexpected syslog output:\n" + syslog_output)
+        sys.exit(1)
 
-if output.count("<DopeTest.SmallEntity>") != 0:
-    log("could not find the right number of 'DopeTest.SmallEntity' in output")
-    sys.exit(1)
+    if not env.ReturnCodesOk():
+        log("Some process exited with an unexpected value")
+        sys.exit(1)
 
-if output.count("<DopeTest.BigEntity>") != 0:
-    log("could not find the right number of 'DopeTest.BigEntity' in output")
-    sys.exit(1)
+    log("See if dope loads them at startup")
+    env = TestEnv(arguments.safir_control,
+                  arguments.dose_main,
+                  arguments.dope_main,
+                  arguments.safir_show_config)
+    with TestEnvStopper(env):
+        env.launchProcess("entity_owner", (arguments.entity_owner,"accept")).wait()
 
+    syslog_output = env.Syslog()
+    if len(syslog_output) != 0:
+        log("Unexpected syslog output:\n" + syslog_output)
+        sys.exit(1)
+
+    if not env.ReturnCodesOk():
+        log("Some process exited with an unexpected value")
+        sys.exit(1)
+
+    output = env.Output("entity_owner")
+    if output.count("OnInjectedNewEntity") != 0:
+        log("could not find the right number of 'OnInjectedNewEntity' in output")
+        sys.exit(1)
+
+    if output.count("<DopeTest.SmallEntity>") != 0:
+        log("could not find the right number of 'DopeTest.SmallEntity' in output")
+        sys.exit(1)
+
+    if output.count("<DopeTest.BigEntity>") != 0:
+        log("could not find the right number of 'DopeTest.BigEntity' in output")
+        sys.exit(1)
+
+except:
+    syslog_output = env.Syslog()
+    if len(syslog_output) != 0:
+        print("Unexpected exception! syslog output:\n" + syslog_output)
+    else:
+        print("Unexpected exception! No syslog output available")
+    raise
 
 log("Success")
 sys.exit(0)
