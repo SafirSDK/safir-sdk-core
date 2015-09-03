@@ -58,6 +58,8 @@ def rmdir(directory):
             time.sleep(0.2)
             shutil.rmtree(directory)
 
+env = None
+
 try:
     parser = argparse.ArgumentParser("test script")
     parser.add_argument("--safir-show-config", required=True)
@@ -94,10 +96,10 @@ try:
     log("NUM_SMALL = " + str(NUM_SMALL) + " and NUM_BIG = " + str(NUM_BIG))
 
     log("Set a bunch of entities")
-    env = TestEnv(arguments.safir_control,
-                  arguments.dose_main,
-                  arguments.dope_main,
-                  arguments.safir_show_config)
+    global env = TestEnv(arguments.safir_control,
+                         arguments.dose_main,
+                         arguments.dope_main,
+                         arguments.safir_show_config)
     with TestEnvStopper(env):
         env.launchProcess("entity_owner", (arguments.entity_owner,"set")).wait()
         while(len(glob.glob(os.path.join(file_storage_path,"DopeTest.*.bin"))) != NUM_SMALL + NUM_BIG):
@@ -116,10 +118,10 @@ try:
         sys.exit(1)
 
     log("See if dope loads them at startup")
-    env = TestEnv(arguments.safir_control,
-                  arguments.dose_main,
-                  arguments.dope_main,
-                  arguments.safir_show_config)
+    global env = TestEnv(arguments.safir_control,
+                         arguments.dose_main,
+                         arguments.dope_main,
+                         arguments.safir_show_config)
     with TestEnvStopper(env):
         env.launchProcess("entity_owner", (arguments.entity_owner,"accept")).wait()
 
@@ -164,10 +166,10 @@ try:
 
     log("Check that dope can load xml")
 
-    env = TestEnv(arguments.safir_control,
-                  arguments.dose_main,
-                  arguments.dope_main,
-                  arguments.safir_show_config)
+    global env = TestEnv(arguments.safir_control,
+                         arguments.dose_main,
+                         arguments.dope_main,
+                         arguments.safir_show_config)
     with TestEnvStopper(env):
         env.launchProcess("entity_owner", (arguments.entity_owner,"accept")).wait()
 
@@ -203,10 +205,10 @@ try:
 
     log("update the entities")
 
-    env = TestEnv(arguments.safir_control,
-                  arguments.dose_main,
-                  arguments.dope_main,
-                  arguments.safir_show_config)
+    global env = TestEnv(arguments.safir_control,
+                         arguments.dose_main,
+                         arguments.dope_main,
+                         arguments.safir_show_config)
     with TestEnvStopper(env):
         #remove all bin files (that have been loaded by dope by now), so
         #that we can wait for all entities to be written again
@@ -228,10 +230,10 @@ try:
         sys.exit(1)
 
     log("Load them again and check output")
-    env = TestEnv(arguments.safir_control,
-                  arguments.dose_main,
-                  arguments.dope_main,
-                  arguments.safir_show_config)
+    global env = TestEnv(arguments.safir_control,
+                         arguments.dose_main,
+                         arguments.dope_main,
+                         arguments.safir_show_config)
     with TestEnvStopper(env):
         env.launchProcess("entity_owner", (arguments.entity_owner,"accept")).wait()
 
@@ -257,11 +259,11 @@ try:
     rmdir(file_storage_path)
 
 except:
-        syslog_output = env.Syslog()
-        if len(syslog_output) != 0:
-            print("Unexpected exception! syslog output:\n" + syslog_output)
-        else:
-            print("Unexpected exception! No syslog output available")
+        print("Unexpected exception!")
+        if env is not None:
+            syslog_output = env.Syslog()
+            if len(syslog_output) != 0:
+                print("syslog output:\n" + syslog_output)
         raise
 
 log("Success")

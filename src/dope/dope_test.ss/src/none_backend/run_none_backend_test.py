@@ -31,6 +31,7 @@ def log(data):
     print(data)
     sys.stdout.flush()
 
+env = None
 
 try:
     parser = argparse.ArgumentParser("test script")
@@ -60,10 +61,10 @@ try:
     """
 
     log("Set a bunch of entities")
-    env = TestEnv(arguments.safir_control,
-                  arguments.dose_main,
-                  arguments.dope_main,
-                  arguments.safir_show_config)
+    global env = TestEnv(arguments.safir_control,
+                         arguments.dose_main,
+                         arguments.dope_main,
+                         arguments.safir_show_config)
     with TestEnvStopper(env):
         env.launchProcess("entity_owner", (arguments.entity_owner,"set")).wait()
         env.WaitForOutput("entity_owner", "Exiting")
@@ -78,10 +79,10 @@ try:
         sys.exit(1)
 
     log("See if dope loads them at startup")
-    env = TestEnv(arguments.safir_control,
-                  arguments.dose_main,
-                  arguments.dope_main,
-                  arguments.safir_show_config)
+    global env = TestEnv(arguments.safir_control,
+                         arguments.dose_main,
+                         arguments.dope_main,
+                         arguments.safir_show_config)
     with TestEnvStopper(env):
         env.launchProcess("entity_owner", (arguments.entity_owner,"accept")).wait()
 
@@ -108,11 +109,11 @@ try:
         sys.exit(1)
 
 except:
-    syslog_output = env.Syslog()
-    if len(syslog_output) != 0:
-        print("Unexpected exception! syslog output:\n" + syslog_output)
-    else:
-        print("Unexpected exception! No syslog output available")
+    print("Unexpected exception!")
+    if env is not None:
+        syslog_output = env.Syslog()
+        if len(syslog_output) != 0:
+            print("syslog output:\n" + syslog_output)
     raise
 
 log("Success")
