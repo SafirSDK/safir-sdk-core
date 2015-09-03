@@ -1,7 +1,8 @@
 add_executable(tracer_backdoor_sender sender.cpp)
 
 target_link_libraries(tracer_backdoor_sender PRIVATE
-  swre_interface_cpp)
+  swre_interface_cpp
+  ${Boost_ATOMIC_LIBRARY})
 
 get_property(SAFIR_GENERATED_PATHS GLOBAL PROPERTY SAFIR_GENERATED_PATHS)
 
