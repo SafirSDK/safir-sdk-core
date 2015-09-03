@@ -28,11 +28,10 @@
       <TypeId>DoseTest.LocalService</TypeId>
       <Handler>DEFAULT_HANDLER</Handler>
     </DoseTest.Action>
-     <DoseTest.Action index="2">
+    <DoseTest.Action index="2">
       <ActionKind>Sleep</ActionKind>
       <SleepDuration>5</SleepDuration>
     </DoseTest.Action> 
-  </TestActions>   
     <DoseTest.Action index="3">
       <ActionKind>RegisterServiceHandler</ActionKind>
       <Partner>1</Partner>
