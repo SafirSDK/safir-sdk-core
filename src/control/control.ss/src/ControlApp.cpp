@@ -125,7 +125,7 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
                                      m_conf.thisNodeParam.nodeTypeId,
                                      std::move(spNodeTypes),
                                      [this](const int64_t incarnationId)
-                                     {return m_incarnationBlackListHandler.validateIncarnationId(incarnationId);}));
+                                     {return m_incarnationBlackListHandler.ValidateIncarnationId(incarnationId);}));
 
     m_doseMainCmdSender.reset(new Control::DoseMainCmdSender
                               (ioService,

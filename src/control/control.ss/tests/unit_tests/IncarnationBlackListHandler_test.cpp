@@ -53,22 +53,22 @@ BOOST_AUTO_TEST_CASE( blacklisthandlertests )
     IncarnationBlacklistHandler testHandler("test_incarnation_blacklistfile.txt");
 
     //make sure we don't have troubles with an empty file
-    BOOST_CHECK(testHandler.validateIncarnationId(2) == true);
+    BOOST_CHECK(testHandler.ValidateIncarnationId(2) == true);
 
     //add a incarnation ids to the blacklist
-    BOOST_CHECK_NO_THROW(testHandler.addIncarnationId(1));
-    BOOST_CHECK_NO_THROW(testHandler.addIncarnationId(3));
+    BOOST_CHECK_NO_THROW(testHandler.AddIncarnationId(1));
+    BOOST_CHECK_NO_THROW(testHandler.AddIncarnationId(3));
 
     //check that it's blacklisted and that others are not
-    BOOST_CHECK(testHandler.validateIncarnationId(1) == false);
-    BOOST_CHECK(testHandler.validateIncarnationId(3) == false);
-    BOOST_CHECK(testHandler.validateIncarnationId(2) == true);
+    BOOST_CHECK(testHandler.ValidateIncarnationId(1) == false);
+    BOOST_CHECK(testHandler.ValidateIncarnationId(3) == false);
+    BOOST_CHECK(testHandler.ValidateIncarnationId(2) == true);
 
     //check that we can add the same id again
-    BOOST_CHECK_NO_THROW(testHandler.addIncarnationId(1));
+    BOOST_CHECK_NO_THROW(testHandler.AddIncarnationId(1));
 
     //check that they are still blacklisted
-    BOOST_CHECK(testHandler.validateIncarnationId(1) == false);
-    BOOST_CHECK(testHandler.validateIncarnationId(3) == false);
+    BOOST_CHECK(testHandler.ValidateIncarnationId(1) == false);
+    BOOST_CHECK(testHandler.ValidateIncarnationId(3) == false);
 }
 

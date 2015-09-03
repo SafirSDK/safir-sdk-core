@@ -53,7 +53,7 @@ namespace Control
         }
 
         //returns true if the incarnationId is not blacklisted
-        bool validateIncarnationId(const int64_t incarnationId) const
+        bool ValidateIncarnationId(const int64_t incarnationId) const
         {
             std::ifstream file(m_path.string().c_str(), std::ios::in);
 
@@ -82,10 +82,10 @@ namespace Control
             return true;
         }
 
-        void addIncarnationId(const int64_t incarnationId)
+        void AddIncarnationId(const int64_t incarnationId)
         {
 
-            if(validateIncarnationId(incarnationId) == false) //only add if it's not already added
+            if(ValidateIncarnationId(incarnationId) == false) //only add if it's not already added
             {
                 return;
             }
