@@ -75,14 +75,17 @@ class TestEnv:
 
     If the exes are in the PATH, its okay to just use exe names.
     """
-    def __init__(self, safir_control, dose_main, dope_main, safir_show_config):
+    def __init__(self, safir_control, dose_main, dope_main, safir_show_config, start_syslog_server = True):
         self.__procs = dict()
         self.__creationflags = 0
         if sys.platform == "win32":
             self.__creationflags= subprocess.CREATE_NEW_PROCESS_GROUP
         self.safir_control = self.launchProcess("safir_control", (safir_control, "--dose-main-path", dose_main))
         self.launchProcess("dope_main", (dope_main,))
-        self.syslog = syslog_server.SyslogServer(safir_show_config)
+
+        self.start_syslog_server = start_syslog_server
+        if self.start_syslog_server == True:
+            self.syslog = syslog_server.SyslogServer(safir_show_config)
         self.syslog_output = list()
 
         start_time = time.time()
@@ -108,7 +111,8 @@ class TestEnv:
                 print("----- dope_main output -----")
                 print(self.Output("dope_main"))
                 print("---- syslog output ----")
-                print(self.syslog.get_data(0))
+                if self.start_syslog_server == True:
+                    print(self.syslog.get_data(0))
                 print("----------------------------")
                 print("Will keep waiting")
 
@@ -166,10 +170,12 @@ class TestEnv:
                 print(self.Output(name))
                 print("----------------------------------")
 
-        self.syslog.stop()
+        if self.start_syslog_server == True:
+            self.syslog.stop()
 
     def Syslog(self):
-        data = self.syslog.get_data(0)
+        if self.start_syslog_server == True:
+            data = self.syslog.get_data(0)
         self.syslog_output.append(data)
         return "".join(self.syslog_output)
 
