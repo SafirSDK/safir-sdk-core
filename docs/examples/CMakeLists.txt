@@ -24,6 +24,7 @@ INSTALL(
   PATTERN "*.ico"
   PATTERN "*.bmp"
   PATTERN "*.csproj"
+  PATTERN "*.namespace.txt"
   PATTERN "CMakeLists.txt"
   PATTERN "ui_*.h" EXCLUDE
   PATTERN ".svn" EXCLUDE
