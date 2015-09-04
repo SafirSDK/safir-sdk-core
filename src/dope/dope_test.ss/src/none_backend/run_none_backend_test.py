@@ -61,7 +61,7 @@ try:
     """
 
     log("Set a bunch of entities")
-    global env = TestEnv(arguments.safir_control,
+    env = TestEnv(arguments.safir_control,
                          arguments.dose_main,
                          arguments.dope_main,
                          arguments.safir_show_config)
@@ -79,10 +79,10 @@ try:
         sys.exit(1)
 
     log("See if dope loads them at startup")
-    global env = TestEnv(arguments.safir_control,
-                         arguments.dose_main,
-                         arguments.dope_main,
-                         arguments.safir_show_config)
+    env = TestEnv(arguments.safir_control,
+                  arguments.dose_main,
+                  arguments.dope_main,
+                  arguments.safir_show_config)
     with TestEnvStopper(env):
         env.launchProcess("entity_owner", (arguments.entity_owner,"accept")).wait()
 
