@@ -92,7 +92,7 @@ def readconnectedNodeId(safir_instance, nodeName):
     output = subprocess.check_output([arguments.system_picture_listener, "-o"],
                                     universal_newlines = True)
   except CalledProcessError:
-    print("Failed read nodeId for " + nodeName + " from instance" + safir_instance)
+    print("*-* Failed read nodeId for " + nodeName + " from instance" + safir_instance)
     killNodeProcesses()
     sys.exit(1)
 
@@ -104,8 +104,6 @@ def readconnectedNodeId(safir_instance, nodeName):
 #stops the node given nodeId via the safir_control_cli ran at node given by safir_instance
 def stopNode(safir_instance, nodeId):
 
-  print("Asked to stop nodeid " + str(nodeId))
-
   os.environ["SAFIR_INSTANCE"] = safir_instance
 
   #launch the safir_control_cli and wait until it exists
@@ -113,7 +111,7 @@ def stopNode(safir_instance, nodeId):
     subprocess.check_call([arguments.safir_control_cli, "-a", "STOP", "-n", nodeId],
                                     universal_newlines = True)
   except CalledProcessError:
-    print("Failed to stop node with id:" + str(nodeId) + " from instance " + safir_instance)
+    print("*-* Failed to stop node with id:" + str(nodeId) + " from instance " + safir_instance)
     killNodeProcesses()
     sys.exit(1)
 
@@ -145,13 +143,13 @@ arguments = parser.parse_args()
 #add all the environment variables. passed on format A=10;B=20
 for pair in arguments.safir_generated_paths.split(";"):
     (name,value) = pair.split("=")
-    print("Setting environment variable", name, "to", value)
+    print("*-* Setting environment variable", name, "to", value)
     os.environ[name] = value
 
 envs = dict()
 
 #start all nodes
-print("Starting nodes 0,1,2")
+print("*-* Starting nodes 0,1,2")
 envs['0'] = startNode("0");
 envs['1'] = startNode("1")
 envs['2'] = startNode("2")
@@ -160,6 +158,7 @@ envs['2'] = startNode("2")
 checkConnectionToNodes("0", ['Server_0', 'Server_1', 'Server_2'])
 
 #stop node two
+print("*-* Stopping node 2")
 stopNode("2", readconnectedNodeIds("0")[2])
 
 time.sleep(5)
@@ -168,11 +167,13 @@ time.sleep(5)
 checkConnectionToNodes("0", ['Server_0', 'Server_1'])
 
 #restart node 2
+print("*-* Starting node 2")
 envs['2'] = startNode("2")
 
 #make Server_0 has connection to the other two
 checkConnectionToNodes("0", ['Server_0', 'Server_1', 'Server_2'])
 
+print("*-* Stopping all nodes")
 killNodeProcesses()
 
 for env in envs:
