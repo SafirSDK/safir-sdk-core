@@ -58,7 +58,6 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
     , m_signalSet(ioService)
     , m_strand(ioService)
     , m_nodeId(id)
-    , m_ignoreControlCmd(ignoreControlCmd)
     , m_terminationTimer(ioService)
     , m_incarnationBlackListHandler(m_conf.incarnationBlacklistFileName)
     , m_ctrlStopped(false)
@@ -149,39 +148,12 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
                                    m_communication->Start();
                                 }));
 
-    // Initiate reception of control commands via IPC
-    m_controlCmdReceiver.reset(new Control::ControlCmdReceiver
-                              (ioService,
-                               // This is what we do when a node command is received
-                               [this](Control::CommandAction cmdAction, int64_t nodeId)
-                               {
-                                   std::wcout << "CTRL: Received node cmd. Action: " << cmdAction
-                                   << " NodeId: " << nodeId << std::endl;
+    m_stopHandler.reset(new Control::StopHandler(ioService,
+                                                 *m_communication,
+                                                 *m_sp,
+                                                 [this]() {StopThisNode();},
+                                                 ignoreControlCmd));
 
-                                   if (nodeId != m_nodeId || m_ignoreControlCmd)
-                                   {
-                                       return;
-                                   }
-
-                                   HandleControlCmd(cmdAction);
-
-                               },
-                               // This is what we do when a system command is received
-                               [this](Control::CommandAction cmdAction)
-                               {
-                                   std::wcout << "CTRL: Received system cmd. Action: " << cmdAction << std::endl;
-
-                                   if (m_ignoreControlCmd)
-                                   {
-                                       return;
-                                   }
-
-                                   // TODO: Check if we are the node where the command is generated. If so,
-                                   //       send the cmd via Communication.
-
-                                   HandleControlCmd(cmdAction);
-
-                               }));
 
     m_controlInfoSender.reset(new Control::ControlInfoSender
                               (ioService,
@@ -324,7 +296,7 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
     ));
 
     m_doseMainCmdSender->Start();
-    m_controlCmdReceiver->Start();
+    m_stopHandler->Start();
     m_controlInfoSender->Start();
 }
 
@@ -366,7 +338,7 @@ void ControlApp::StopControl()
     m_sp->Stop();
     m_communication->Stop();
     m_controlInfoSender->Stop();
-    m_controlCmdReceiver->Stop();
+    m_stopHandler->Stop();
     m_doseMainCmdSender->Stop();
     m_signalSet.cancel();
     m_work.reset();
@@ -382,31 +354,6 @@ void ControlApp::StopThisNode()
     if (!m_ctrlStopped)
     {
         StopControl();
-    }
-}
-
-void ControlApp::HandleControlCmd(Control::CommandAction cmdAction)
-{
-    switch (cmdAction)
-    {
-        case Control::STOP:
-        {
-            lllog(1) << "CTRL: Got STOP command ... stop sequence initiated." << std::endl;
-            std::wcout << "CTRL: Got STOP command ... stop sequence initiated." << std::endl;
-
-            StopThisNode();
-        }
-        break;
-
-        case Control::SHUTDOWN:
-        {
-        }
-        break;
-
-        case Control::REBOOT:
-        {
-        }
-        break;
     }
 }
 

@@ -114,6 +114,9 @@ namespace Control
         boost::shared_ptr<Impl> m_impl;
     };
 
+    CONTROL_UTILS_API std::pair<std::unique_ptr<char[]>, size_t> SerializeCmd(CommandAction  cmdAction);
+
+
 #ifdef _MSC_VER
 #pragma warning (pop)
 #endif

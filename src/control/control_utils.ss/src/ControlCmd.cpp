@@ -199,36 +199,30 @@ namespace
         void NodeCmd(CommandAction  cmdAction,
                      int64_t        nodeId)
         {
-            ControlCmd controlCmd;
+            ControlCmd cmd;
 
-            controlCmd.set_cmd_type(getCmdType(cmdAction));
-            controlCmd.set_node_id(nodeId);
+            cmd.set_cmd_type(getCmdType(cmdAction));
+            cmd.set_node_id(nodeId);
 
-            Send(controlCmd);
+            const auto size = cmd.ByteSize();
+            auto data = std::unique_ptr<char[]>(new char[size]);
+            cmd.SerializeWithCachedSizesToArray
+                (reinterpret_cast<google::protobuf::uint8*>(data.get()));
+
+            m_ipcPublisher.Send(std::move(data), size);
+
         }
 
         void SystemCmd(CommandAction  cmdAction)
         {
-            ControlCmd controlCmd;
+            auto sc = SerializeCmd(cmdAction);
 
-            controlCmd.set_cmd_type(getCmdType(cmdAction));
-
-            Send(controlCmd);
+            m_ipcPublisher.Send(std::move(sc.first), sc.second);
         }
 
     private:
 
         Safir::Utilities::Internal::IpcPublisher m_ipcPublisher;
-
-        void Send(const ControlCmd& cmd)
-        {
-            const auto size = cmd.ByteSize();
-            auto data = std::unique_ptr<char[]>(new char[size]);
-            cmd.SerializeWithCachedSizesToArray
-                (reinterpret_cast<google::protobuf::uint8*>(data.get()));
-            m_ipcPublisher.Send(std::move(data), size);
-        }
-
     };
 
     ControlCmdSender::ControlCmdSender(boost::asio::io_service&       ioService,
@@ -259,6 +253,19 @@ namespace
         m_impl->SystemCmd(cmdAction);
     }
 
+    std::pair<std::unique_ptr<char[]>, size_t> SerializeCmd(CommandAction cmdAction)
+    {
+        ControlCmd cmd;
+
+        cmd.set_cmd_type(getCmdType(cmdAction));
+
+        const auto size = cmd.ByteSize();
+        auto data = std::unique_ptr<char[]>(new char[size]);
+        cmd.SerializeWithCachedSizesToArray
+            (reinterpret_cast<google::protobuf::uint8*>(data.get()));
+
+        return std::make_pair(std::move(data), size);
+    }
 }
 }
 }
