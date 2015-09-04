@@ -194,14 +194,22 @@ class Logger(object):
 
         self.__buildlog = codecs.open("buildlog.html", mode = "w", encoding = "utf-8")
         self.__buildlog.write("<html><head>"
-                              "<script language=\"JavaScript\">"
-                              "function readCookie(name){"
-                              "  return(document.cookie.match('(^|; )'+name+'=([^;]*)')||0)[2]"
+                              "<script type=\"text/javascript\">"
+                              "function refreshPage () {"
+                              "var page_y = document.getElementsByTagName(\"body\")[0].scrollTop;"
+                              "window.location.href = window.location.href.split('?')[0] + '?page_y=' + page_y;"
+                              "}"
+                              "window.onload = function () {"
+                              "setTimeout(refreshPage, 10000);"
+                              "if ( window.location.href.indexOf('page_y') != -1 ) {"
+                              "var match = window.location.href.split('?')[1].split(\"&\")[0].split(\"=\");"
+                              "document.getElementsByTagName(\"body\")[0].scrollTop = match[1];"
+                              "}"
                               "}"
                               "</script>"
                               "<title>Safir SDK Core Build Log</title>"
-                              "<meta http-equiv=\"refresh\" content=\"10\" ></head>\n")
-        self.__buildlog.write("<body onScroll=\"document.cookie='ypos=' + window.pageYOffset\" onLoad=\"window.scrollTo(0,readCookie('ypos'))\">\n")
+                              )
+        self.__buildlog.write("<body>\n")
         self.__buildlog.write("<h1>Safir SDK Core Build Log</h1>")
         self.__buildlog.write("<b>Command line:</b> " + " ".join(sys.argv) + "<br/>")
         self.__buildlog.write("<b>Working directory:</b> " + os.getcwd() + "<br/>")
