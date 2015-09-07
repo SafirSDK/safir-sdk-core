@@ -266,6 +266,16 @@ namespace
 
         return std::make_pair(std::move(data), size);
     }
+
+    CommandAction DeserializeCmd(const char* data, size_t size)
+    {
+        ControlCmd controlCmd;
+
+        controlCmd.ParseFromArray(data, static_cast<int>(size));
+
+        return getCommandAction(controlCmd.cmd_type());
+    }
+
 }
 }
 }

@@ -34,6 +34,7 @@
 #endif
 
 #include <boost/asio.hpp>
+#include <boost/asio/steady_timer.hpp>
 
 #ifdef _MSC_VER
 #pragma warning (pop)
@@ -41,6 +42,7 @@
 
 #include <string>
 #include <unordered_map>
+#include <utility>
 
 namespace Safir
 {
@@ -71,15 +73,18 @@ namespace Control
               m_sp(sp),
               m_stopSafirCb(stopSafirCb),
               m_ignoreCmd(ignoreCmd),
-              m_controlCmdMsgTypeId(LlufId_Generate64("Safir.Dob.Control.CmdMsgType"))
+              m_controlCmdMsgTypeId(LlufId_Generate64("Safir.Dob.Control.CmdMsgType")),
+              m_resendTimer(ioService),
+              resendTimerRunning(false)
 
         {
+            // Set up callbacks to receive stop commands locally via IPC
             m_controlCmdReceiver.reset(new ControlCmdReceiver(ioService,
                                                               [this](Control::CommandAction cmdAction, int64_t nodeId)
                                                               {
                                                                   if (nodeId == m_communication.Id())
                                                                   {
-                                                                      HandleNodeCmd(cmdAction, nodeId);
+                                                                      HandleNodeCmd(cmdAction);
                                                                   }
                                                                   else
                                                                   {
@@ -91,6 +96,19 @@ namespace Control
                                                               {
                                                                   HandleSystemCmd(cmdAction);
                                                               }));
+
+            // Set up callback to receive stop commands via control channel from an external node.
+            communication.SetDataReceiver([this](const int64_t from,
+                                                 const int64_t /*nodeTypeId*/,
+                                                 const char* const data,
+                                                 const size_t size)
+                                          {
+                                              ReceiveFromExternalNode(from,
+                                                                      boost::shared_ptr<const char[]>(data),size);
+                                          },
+                                          m_controlCmdMsgTypeId,
+                                          [](size_t size){return new char[size];},
+                                          [](const char * data){delete[] data;});
         }
 
         void Start()
@@ -105,16 +123,15 @@ namespace Control
 
         void AddNode(const int64_t nodeId, const int64_t nodeTypeId)
         {
-
+            m_nodeTable.insert(std::make_pair(nodeId, Node(nodeTypeId)));
         }
 
         void RemoveNode(const int64_t nodeId)
         {
-
+            m_nodeTable.erase(nodeId);
         }
 
-        void HandleNodeCmd(CommandAction  /*cmdAction*/,
-                           int64_t        /*nodeId*/)
+        void HandleNodeCmd(CommandAction  /*cmdAction*/)
         {
             if (m_ignoreCmd)
             {
@@ -153,6 +170,9 @@ namespace Control
 
         const int64_t   m_controlCmdMsgTypeId;
 
+        boost::asio::steady_timer m_resendTimer;
+        bool resendTimerRunning;
+
         struct Node
         {
             Node(int64_t _nodeTypeId)
@@ -170,11 +190,13 @@ namespace Control
 
         std::unordered_map<int64_t, Node> m_nodeTable;
 
-        void ResendOutstandingCommands()
+        void Resend()
         {
+            resendTimerRunning = false;
+
             for (auto it = m_nodeTable.begin(); it != m_nodeTable.end(); ++it)
             {
-                if (it->second.outstandingCmd)
+                if (it->second.communicationOverflow)
                 {
                     SendToExternalNode(it->second.cmdAction, it->first);
                 }
@@ -200,14 +222,42 @@ namespace Control
                                            cmd.second, // size
                                            m_controlCmdMsgTypeId,
                                            true); // delivery guarantee
+
             if (!ok)
             {
                 nodeIt->second.communicationOverflow = true;
+                if (!resendTimerRunning)
+                {
+                    m_resendTimer.async_wait([this](const boost::system::error_code& error)
+                                            {
+                                                if (!!error && error == boost::asio::error::operation_aborted)
+                                                {
+                                                    // We are stopped, just return
+                                                    return;
+                                                }
+
+                                                Resend();
+
+                                            });
+                    resendTimerRunning = true;
+
+                }
             }
             else
             {
+                nodeIt->second.outstandingCmd = true;
                 nodeIt->second.communicationOverflow = false;
             }
+
+        }
+
+        void ReceiveFromExternalNode(const int64_t from,
+                                     const boost::shared_ptr<const char[]>& data,
+                                     const size_t size)
+        {
+            auto cmdAction = DeserializeCmd(data.get(),  size);
+
+            HandleNodeCmd(cmdAction);
 
         }
 

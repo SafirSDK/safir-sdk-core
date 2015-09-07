@@ -116,6 +116,7 @@ namespace Control
 
     CONTROL_UTILS_API std::pair<std::unique_ptr<char[]>, size_t> SerializeCmd(CommandAction  cmdAction);
 
+    CONTROL_UTILS_API CommandAction DeserializeCmd(const char* data, size_t size);
 
 #ifdef _MSC_VER
 #pragma warning (pop)

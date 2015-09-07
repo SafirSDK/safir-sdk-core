@@ -173,12 +173,16 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
                                         node.nodeId,
                                         node.nodeTypeId,
                                         node.dataAddress);
+
+        m_stopHandler->AddNode(node.nodeId, node.nodeTypeId);
     },
 
     // Node down callback
     [this](const int64_t nodeId, const int64_t nodeTypeId)
     {
         m_doseMainCmdSender->ExcludeNode(nodeId, nodeTypeId);
+
+        m_stopHandler->RemoveNode(nodeId);
     }));
 
 #if defined(linux) || defined(__linux) || defined(__linux__)
