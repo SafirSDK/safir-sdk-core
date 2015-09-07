@@ -36,7 +36,7 @@ def startNode(safir_instance):
                dose_main = arguments.dose_main,
                dope_main = arguments.dope_main,
                safir_show_config = arguments.safir_show_config,
-               start_syslog_server = True if safir_instance == "1" else False)
+               start_syslog_server = True if safir_instance == "0" else False)
 
   del os.environ["SAFIR_INSTANCE"]
 
@@ -45,6 +45,11 @@ def startNode(safir_instance):
 
 #kills all nodes by terminating their processes
 def killNodeProcesses():
+  if envs['0'] is not None:
+    syslog_output = envs['0'].Syslog()
+    if len(syslog_output) != 0:
+      print("SYSLOG OUPUT:\n" + syslog_output)
+
   for env in envs:
     envs[env].killprocs()
 
@@ -60,6 +65,8 @@ def readConnectedNodes(safir_instance):
                                     universal_newlines = True)
 
   del os.environ["SAFIR_INSTANCE"]
+
+  #print("*-* Found connected nodenames: " + str(re.findall('(\S+)@', output)) + " from node with instance " + safir_instance)
 
   return re.findall('(\S+)@', output)
 
@@ -81,6 +88,8 @@ def readconnectedNodeIds(safir_instance):
 
   del os.environ["SAFIR_INSTANCE"]
 
+  #print("*-* Found connected nodeIds: " + str(re.findall('id = (\S+),', output)) + " from node with instance " + safir_instance)
+
   return re.findall('id = (\S+),', output)
 
 def readconnectedNodeId(safir_instance, nodeName):
@@ -97,6 +106,8 @@ def readconnectedNodeId(safir_instance, nodeName):
     sys.exit(1)
 
   del os.environ["SAFIR_INSTANCE"]
+
+  #print("*-* Found NodeID: " + str(re.findall(nodeName + ".+id = (\S+)", output)) + " for node with name " + nodeName)
 
   return re.findall(nodeName + ".+id = (\S+)", output)
 
@@ -122,10 +133,14 @@ def checkConnectionToNodes(safir_instance, nodes):
 
   os.environ["SAFIR_INSTANCE"] = safir_instance
 
-  if readConnectedNodes(safir_instance).sort() == nodes.sort():
-    print("Server_" + safir_instance + " has connection to " + str(nodes))
+  connectedNodes = readConnectedNodes(safir_instance)
+  connectedNodes.sort()
+  nodes.sort()
+
+  if connectedNodes == nodes:
+    print("*-* Server_" + safir_instance + " has connection to (only) " + str(nodes))
   else:
-    print("Server_" + safir_instance + " does not have contact with the " + str(nodes))
+    print("*-* Server_" + safir_instance + " does not have contact with (only) " + str(nodes) + " we have connection to: " + str(connectedNodes))
     killNodeProcesses()
     sys.exit(1)
 
@@ -150,30 +165,44 @@ envs = dict()
 
 #start all nodes
 print("*-* Starting nodes 0,1,2")
-envs['0'] = startNode("0");
-envs['1'] = startNode("1")
-envs['2'] = startNode("2")
+
+try:
+  envs['0'] = startNode("0");
+  envs['1'] = startNode("1")
+  envs['2'] = startNode("2")
+except:
+  print("*-* Failed to start nodes 0,1,2")
+  killNodeProcesses()
+  sys.exit(1)
 
 #make Server_0 has connection to the other two
+print("*-* Checking that Server_0 has connection to ['Server_0', 'Server_1', 'Server_2']")
 checkConnectionToNodes("0", ['Server_0', 'Server_1', 'Server_2'])
 
 #stop node two
 print("*-* Stopping node 2")
 stopNode("2", readconnectedNodeIds("0")[2])
 
-time.sleep(5)
+time.sleep(15)
 
 #make sure Server_0 has connection to Server_1 only
 checkConnectionToNodes("0", ['Server_0', 'Server_1'])
 
 #restart node 2
-print("*-* Starting node 2")
-envs['2'] = startNode("2")
+try:
+  print("*-* Starting node 2")
+  envs['2'] = startNode("2")
+except:
+  print("*-* Failed to start node 2")
+  killNodeProcesses()
+  sys.exit(1)
+
 
 #make Server_0 has connection to the other two
 checkConnectionToNodes("0", ['Server_0', 'Server_1', 'Server_2'])
 
 print("*-* Stopping all nodes")
+
 killNodeProcesses()
 
 for env in envs:
