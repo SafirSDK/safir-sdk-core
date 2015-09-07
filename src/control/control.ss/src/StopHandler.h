@@ -70,37 +70,36 @@ namespace Control
             : m_communication(communication),
               m_sp(sp),
               m_ignoreCmd(ignoreCmd),
-              m_controlCmdReceiver(ioService,
-                                   [this](Control::CommandAction cmdAction, int64_t nodeId)
-                                   {
-                                       if (nodeId == m_communication.Id())
-                                       {
-                                           HandleNodeCmd(cmdAction, nodeId);
-                                       }
-                                       else
-                                       {
-                                           SendToExternalNode(cmdAction, nodeId);
-                                       }
-
-                                   },
-                                   [this](Control::CommandAction cmdAction)
-                                   {
-                                       HandleSystemCmd(cmdAction);
-                                   }),
-
               m_controlCmdMsgTypeId(LlufId_Generate64("Safir.Dob.Control.CmdMsgType"))
 
         {
+            m_controlCmdReceiver.reset(new ControlCmdReceiver(ioService,
+                                                              [this](Control::CommandAction cmdAction, int64_t nodeId)
+                                                              {
+                                                                  if (nodeId == m_communication.Id())
+                                                                  {
+                                                                      HandleNodeCmd(cmdAction, nodeId);
+                                                                  }
+                                                                  else
+                                                                  {
+                                                                      SendToExternalNode(cmdAction, nodeId);
+                                                                  }
+
+                                                              },
+                                                              [this](Control::CommandAction cmdAction)
+                                                              {
+                                                                  HandleSystemCmd(cmdAction);
+                                                              }));
         }
 
         void Start()
         {
-            m_controlCmdReceiver.Start();
+            m_controlCmdReceiver->Start();
         }
 
         void Stop()
         {
-            m_controlCmdReceiver.Stop();
+            m_controlCmdReceiver->Stop();
         }
 
         void AddNode(const int64_t nodeId, const int64_t nodeTypeId)
@@ -113,8 +112,8 @@ namespace Control
 
         }
 
-        void HandleNodeCmd(CommandAction  cmdAction,
-                           int64_t        nodeId)
+        void HandleNodeCmd(CommandAction  /*cmdAction*/,
+                           int64_t        /*nodeId*/)
         {
             if (m_ignoreCmd)
             {
@@ -149,7 +148,7 @@ namespace Control
 
         const bool  m_ignoreCmd;
 
-        ControlCmdReceiver m_controlCmdReceiver;
+        std::unique_ptr<ControlCmdReceiver> m_controlCmdReceiver;
 
         const int64_t   m_controlCmdMsgTypeId;
 
