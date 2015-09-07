@@ -36,7 +36,8 @@ def startNode(safir_instance):
                dose_main = arguments.dose_main,
                dope_main = arguments.dope_main,
                safir_show_config = arguments.safir_show_config,
-               start_syslog_server = True if safir_instance == "0" else False)
+               start_syslog_server = True if safir_instance == "0" else False,
+               ignore_control_cmd = True if safir_instance == "0" else False)
 
   del os.environ["SAFIR_INSTANCE"]
 
@@ -121,7 +122,7 @@ def stopNode(safir_instance, nodeId):
   os.environ["SAFIR_INSTANCE"] = safir_instance
 
 
-  print("Trying to stop process " + nodeId + " from instance " + safir_instance)
+  print("Trying to stop node " + nodeId + " from instance " + safir_instance)
 
   #launch the safir_control_cli and wait until it exists
   try:

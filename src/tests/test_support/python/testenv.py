@@ -75,12 +75,12 @@ class TestEnv:
 
     If the exes are in the PATH, its okay to just use exe names.
     """
-    def __init__(self, safir_control, dose_main, dope_main, safir_show_config, start_syslog_server = True):
+    def __init__(self, safir_control, dose_main, dope_main, safir_show_config, start_syslog_server = True, ignore_control_cmd = False ):
         self.__procs = dict()
         self.__creationflags = 0
         if sys.platform == "win32":
             self.__creationflags= subprocess.CREATE_NEW_PROCESS_GROUP
-        self.safir_control = self.launchProcess("safir_control", (safir_control, "--dose-main-path", dose_main))
+        self.safir_control = self.launchProcess("safir_control", (safir_control, "--dose-main-path", dose_main, "--ignore-control-cmd", str(ignore_control_cmd)))
         self.launchProcess("dope_main", (dope_main,))
 
         self.start_syslog_server = start_syslog_server
