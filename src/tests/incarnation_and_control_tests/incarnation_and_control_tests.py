@@ -66,9 +66,7 @@ def readConnectedNodes(safir_instance):
 
   del os.environ["SAFIR_INSTANCE"]
 
-  #print("*-* Found connected nodenames: " + str(re.findall('(\S+)@', output)) + " from node with instance " + safir_instance)
-
-  return re.findall('(\S+)@', output)
+  return re.findall('(?:\sE\s|\s\s\s)(\S+)@', output)
 
 
 #returns a list of nodeIds to which the given node (safir_instance) is connected
@@ -81,16 +79,14 @@ def readconnectedNodeIds(safir_instance):
   try:
     output = subprocess.check_output([arguments.system_picture_listener, "-o"],
                                     universal_newlines = True)
-  except CalledProcessError:
+  except subprocess.CalledProcessError:
     print("Failed to read connected nodeIds " + safir_instance)
     killNodeProcesses()
     sys.exit(1)
 
   del os.environ["SAFIR_INSTANCE"]
 
-  #print("*-* Found connected nodeIds: " + str(re.findall('id = (\S+),', output)) + " from node with instance " + safir_instance)
-
-  return re.findall('id = (\S+),', output)
+  return re.findall('(?:\sE\s|\s\s\s)S.+\(id = (\S+),', output)
 
 def readconnectedNodeId(safir_instance, nodeName):
 
@@ -100,28 +96,38 @@ def readconnectedNodeId(safir_instance, nodeName):
   try:
     output = subprocess.check_output([arguments.system_picture_listener, "-o"],
                                     universal_newlines = True)
-  except CalledProcessError:
+  except subprocess.CalledProcessError:
     print("*-* Failed read nodeId for " + nodeName + " from instance" + safir_instance)
     killNodeProcesses()
     sys.exit(1)
 
   del os.environ["SAFIR_INSTANCE"]
 
-  #print("*-* Found NodeID: " + str(re.findall(nodeName + ".+id = (\S+)", output)) + " for node with name " + nodeName)
+  matchList = re.findall("(?:\sE\s|\s\s\s)" + nodeName + ".+id = (\S+),", output)
 
-  return re.findall(nodeName + ".+id = (\S+)", output)
+  if len(matchList) is 0:
+    print("*-* Did not find NodeID: for node with name " + nodeName)
+  else:
+    print("*-* Found NodeID: " + str(matchList[0]) + " for node with name " + nodeName)
 
+  if len(matchList) is 0:
+    return ""
+  else:
+    return str(matchList[0])
 
 #stops the node given nodeId via the safir_control_cli ran at node given by safir_instance
 def stopNode(safir_instance, nodeId):
 
   os.environ["SAFIR_INSTANCE"] = safir_instance
 
+
+  print("Trying to stop process " + nodeId + " from instance " + safir_instance)
+
   #launch the safir_control_cli and wait until it exists
   try:
     subprocess.check_call([arguments.safir_control_cli, "-a", "STOP", "-n", nodeId],
                                     universal_newlines = True)
-  except CalledProcessError:
+  except subprocess.CalledProcessError:
     print("*-* Failed to stop node with id:" + str(nodeId) + " from instance " + safir_instance)
     killNodeProcesses()
     sys.exit(1)
@@ -167,7 +173,7 @@ envs = dict()
 print("*-* Starting nodes 0,1,2")
 
 try:
-  envs['0'] = startNode("0");
+  envs['0'] = startNode("0")
   envs['1'] = startNode("1")
   envs['2'] = startNode("2")
 except:
@@ -181,11 +187,12 @@ checkConnectionToNodes("0", ['Server_0', 'Server_1', 'Server_2'])
 
 #stop node two
 print("*-* Stopping node 2")
-stopNode("2", readconnectedNodeIds("0")[2])
+stopNode("2", readconnectedNodeId('0', "Server_2"))
 
 time.sleep(15)
 
 #make sure Server_0 has connection to Server_1 only
+print("*-* Checking that Server_0 has connection to ['Server_0', 'Server_1']")
 checkConnectionToNodes("0", ['Server_0', 'Server_1'])
 
 #restart node 2
