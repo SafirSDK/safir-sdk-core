@@ -69,6 +69,7 @@ namespace Control
                          bool                       ignoreCmd)
             : m_communication(communication),
               m_sp(sp),
+              m_stopSafirCb(stopSafirCb),
               m_ignoreCmd(ignoreCmd),
               m_controlCmdMsgTypeId(LlufId_Generate64("Safir.Dob.Control.CmdMsgType"))
 
