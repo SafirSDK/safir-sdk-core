@@ -251,7 +251,7 @@ namespace Control
 
         }
 
-        void ReceiveFromExternalNode(const int64_t from,
+        void ReceiveFromExternalNode(const int64_t /*from*/,
                                      const boost::shared_ptr<const char[]>& data,
                                      const size_t size)
         {
