@@ -217,7 +217,7 @@ namespace
         {
             auto sc = SerializeCmd(cmdAction);
 
-            m_ipcPublisher.Send(std::move(sc.first), sc.second);
+            m_ipcPublisher.Send(std::move(sc.first), static_cast<uint32_t>(sc.second));
         }
 
     private:
