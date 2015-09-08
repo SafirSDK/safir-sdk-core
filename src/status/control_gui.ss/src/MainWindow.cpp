@@ -96,20 +96,47 @@ void MainWindow::OnConnected()
             this,
             SLOT(nodeListSelectionChanged(const QItemSelection &, const QItemSelection &)));
 
+
+    SetupContextMenu();
+
+
     m_dobConnection.SubscribeEntity(
                  Safir::Dob::Typesystem::EntityId(Safir::Control::Status::ClassTypeId, Safir::Dob::Typesystem::InstanceId(0)), true, true, this );
 
 }
 
-bool MainWindow::eventFilter(QObject*, QEvent* e)
+void MainWindow::SetupContextMenu()
 {
-    if (e->type()==m_dispatchEvent)
-    {
-        m_dobConnection.Dispatch();
-        return true;
-    }
-    return false;
+    ui->nodeTableView->setContextMenuPolicy(Qt::CustomContextMenu);
+
+    connect(ui->nodeTableView, SIGNAL(customContextMenuRequested(QPoint)),
+            this,
+            SLOT(customMenuRequested(QPoint)));
+
+    m_NodeContextmenu = new QMenu(this);
+
+    QAction* reboot = new QAction("Reboot", this);
+    connect(reboot, SIGNAL(triggered()),
+            this,
+            SLOT(on_pushButton_RebootNode_clicked()));
+
+    QAction* shutdown = new QAction("Shutdown", this);
+    connect(shutdown, SIGNAL(triggered()),
+            this,
+            SLOT(on_pushButton_ShutdownNode_clicked()));
+
+    QAction* stop = new QAction("Stop", this);
+    connect(stop, SIGNAL(triggered()),
+            this,
+            SLOT(on_pushButton_StopNode_clicked()));
+
+    m_NodeContextmenu->addAction(stop);
+    m_NodeContextmenu->addAction(reboot);
+    m_NodeContextmenu->addAction(shutdown);
+
 }
+
+
 
 //------------------------------------------------------------
 // DOB stuff
@@ -295,6 +322,14 @@ bool MainWindow::DisplayConfirmationDialog(Safir::Control::Operation::Enumeratio
     return QMessageBox::warning(this, "Node control", message, QMessageBox::No | QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes;
 }
 
+void MainWindow::customMenuRequested(QPoint pos)
+{
+    QModelIndex index= ui->nodeTableView->indexAt(pos);
+
+    if (index != QModelIndex())
+        m_NodeContextmenu->popup(ui->nodeTableView->viewport()->mapToGlobal(pos));
+}
+
 void MainWindow::on_pushButton_StopNode_clicked()
 {
     QModelIndexList selected = ui->nodeTableView->selectionModel()->selectedIndexes();
@@ -361,4 +396,14 @@ void MainWindow::nodeListSelectionChanged(const QItemSelection & selected, const
 void MainWindow::on_actionExit_triggered()
 {
       OnStopOrder();
+}
+
+bool MainWindow::eventFilter(QObject*, QEvent* e)
+{
+    if (e->type()==m_dispatchEvent)
+    {
+        m_dobConnection.Dispatch();
+        return true;
+    }
+    return false;
 }

@@ -94,6 +94,9 @@ class MainWindow : public QMainWindow,
 {
     Q_OBJECT
 
+
+
+
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
@@ -110,6 +113,10 @@ public:
     virtual void OnResponse(const Safir::Dob::ResponseProxy responseProxy);
     virtual void OnNotRequestOverflow();
 
+public slots:
+    void customMenuRequested(QPoint pos);
+
+
 private:
     Ui::MainWindow *ui;
     Safir::Dob::Connection m_dobConnection;
@@ -118,7 +125,9 @@ private:
     NodeTableModel* m_nodeTableModel;
     QLabel *m_dobConnectionLabel;
 
+    QMenu *m_NodeContextmenu;
 
+    void SetupContextMenu();
     void HandleStatusEntity(const Safir::Control::StatusPtr status);
     void SendRequestOnAllNodes(Safir::Control::Operation::Enumeration operation);
     void SendRequestOnSpecificNode(Safir::Control::Operation::Enumeration operation, int64_t nodeId);

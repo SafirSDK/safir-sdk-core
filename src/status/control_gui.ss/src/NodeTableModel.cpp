@@ -132,7 +132,7 @@ QVariant NodeTableModel::data(const QModelIndex &index, int role) const
         //give the local node a slight tint
         if (m_nodeInfos.at(index.row()).GetInstanceId().GetRawValue() == m_ownNodeId)
         {
-            return  QColor(255, 0, 0, 127);
+            return  QColor(164, 237, 166, 127);
         }
 
         return QVariant();
