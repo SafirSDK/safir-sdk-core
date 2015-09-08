@@ -128,7 +128,7 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
                                      id,
                                      m_conf.thisNodeParam.nodeTypeId,
                                      std::move(spNodeTypes),
-                                     [this](const int64_t incarnationId)
+                                     [this](const int64_t incarnationId) -> bool
                                      {
                                          if (m_incarnationBlackListHandler.ValidateIncarnationId(incarnationId))
                                          {
