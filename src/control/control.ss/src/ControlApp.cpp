@@ -60,14 +60,19 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
     , m_nodeId(id)
     , m_terminationTimer(ioService)
     , m_incarnationBlackListHandler(m_conf.incarnationBlacklistFileName)
+    , m_controlInfoReceiverReady(false)
     , m_ctrlStopped(false)
     , m_doseMainRunning(false)
+    , m_incarnationIdStorage(new AlignedStorage())
+    , m_incarnationId(reinterpret_cast<boost::atomic<int64_t>&>(*m_incarnationIdStorage))
 #if defined(linux) || defined(__linux) || defined(__linux__)
     , m_sigchldSet(ioService, SIGCHLD)
 #elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
     , m_handle(ioService)
 #endif
 {
+    new (m_incarnationIdStorage.get()) boost::atomic<uint64_t>(0);
+
     // Make some work to stop io_service from exiting.
     m_work = Safir::make_unique<boost::asio::io_service::work>(ioService);
 
@@ -124,7 +129,22 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
                                      m_conf.thisNodeParam.nodeTypeId,
                                      std::move(spNodeTypes),
                                      [this](const int64_t incarnationId)
-                                     {return m_incarnationBlackListHandler.ValidateIncarnationId(incarnationId);}));
+                                     {
+                                         if (m_incarnationBlackListHandler.ValidateIncarnationId(incarnationId))
+                                         {
+                                             m_incarnationId = incarnationId;
+
+                                             auto this_ = this;
+
+                                             m_strand.post([this_]{this_->SendControlInfo();});
+
+                                             return true;
+                                         }
+                                         else
+                                         {
+                                             return false;
+                                         }
+                                     }));
 
     m_doseMainCmdSender.reset(new Control::DoseMainCmdSender
                               (ioService,
@@ -158,10 +178,11 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
     m_controlInfoSender.reset(new Control::ControlInfoSender
                               (ioService,
                                // This is what we do when a receiver is ready
-                               [this]()
-                               {
-                                   m_controlInfoSender->SendInfo(123456, 654321);
-                               }));
+                               m_strand.wrap([this]()
+                                             {
+                                                 m_controlInfoReceiverReady = true;
+                                                 SendControlInfo();
+                                             })));
 
     m_stateHandler.reset(new Control::SystemStateHandler
                          (id,
@@ -358,6 +379,14 @@ void ControlApp::StopThisNode()
     if (!m_ctrlStopped)
     {
         StopControl();
+    }
+}
+
+void ControlApp::SendControlInfo()
+{
+    if (m_incarnationId != 0 && m_controlInfoReceiverReady)
+    {
+        m_controlInfoSender->SendInfo(m_incarnationId, m_nodeId);
     }
 }
 

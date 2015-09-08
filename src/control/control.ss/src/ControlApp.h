@@ -31,6 +31,8 @@
 #include <Safir/Dob/Internal/ControlInfo.h>
 #include <Safir/Dob/Internal/DoseMainCmd.h>
 #include <Safir/Dob/Internal/ControlConfig.h>
+#include <boost/atomic.hpp>
+#include <boost/aligned_storage.hpp>
 
 //disable warnings in boost
 #if defined _MSC_VER
@@ -71,6 +73,8 @@ private:
 
     void StopThisNode();
 
+    void SendControlInfo();
+
     boost::asio::io_service&                    m_ioService;
     boost::asio::signal_set                     m_signalSet;
     boost::asio::io_service::strand             m_strand;
@@ -78,6 +82,7 @@ private:
     boost::asio::steady_timer                   m_terminationTimer;
     Control::Config                             m_conf;
     Control::IncarnationBlacklistHandler        m_incarnationBlackListHandler;
+    bool                                        m_controlInfoReceiverReady;
     bool                                        m_ctrlStopped;
     bool                                        m_doseMainRunning;
 
@@ -89,6 +94,13 @@ private:
     std::unique_ptr<Control::DoseMainCmdSender>     m_doseMainCmdSender;
     std::unique_ptr<Control::SystemStateHandler>    m_stateHandler;
     std::unique_ptr<boost::process::child>          m_doseMain;
+
+    // 64 bit atomic needs to be aligned on 64 bit boundary even on 32 bit systems,
+    // so we need to use alignment magic.
+    typedef boost::aligned_storage<sizeof(boost::atomic<int64_t>),
+                                   sizeof(boost::atomic<int64_t>)>::type AlignedStorage;
+    std::unique_ptr<AlignedStorage>     m_incarnationIdStorage;
+    boost::atomic<int64_t>&             m_incarnationId;
 
 #if defined(linux) || defined(__linux) || defined(__linux__)
     boost::asio::signal_set m_sigchldSet;
