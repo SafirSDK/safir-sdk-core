@@ -64,13 +64,10 @@ namespace Control
     {
     public:
 
-        typedef std::function<void(CommandAction cmdAction, int64_t nodeId)> NodeCmdCb;
-
-        typedef std::function<void(CommandAction cmdAction)> SystemCmdCb;
+        typedef std::function<void(CommandAction cmdAction, int64_t nodeId)> CmdCb;
 
         ControlCmdReceiver(boost::asio::io_service& ioService,
-                           const NodeCmdCb&         nodeCmdCb,
-                           const SystemCmdCb&       systemCmdCb);
+                           const CmdCb&             cmdCb);
 
         // Start command reception
         void Start();
@@ -102,11 +99,8 @@ namespace Control
         // Stop sender
         void Stop();
 
-        // commands
-        void NodeCmd(CommandAction  cmdAction,
+        void SendCmd(CommandAction  cmdAction,
                      int64_t        nodeId);
-
-        void SystemCmd(CommandAction cmdAction);
 
     private:
         class Impl;
@@ -114,9 +108,10 @@ namespace Control
         boost::shared_ptr<Impl> m_impl;
     };
 
-    CONTROL_UTILS_API std::pair<std::unique_ptr<char[]>, size_t> SerializeCmd(CommandAction  cmdAction);
+    CONTROL_UTILS_API std::pair<std::unique_ptr<char[]>, size_t> SerializeCmd(CommandAction  cmdAction,
+                                                                              int64_t        nodeId);
 
-    CONTROL_UTILS_API CommandAction DeserializeCmd(const char* data, size_t size);
+    CONTROL_UTILS_API std::pair<CommandAction, int64_t> DeserializeCmd(const char* data, size_t size);
 
 #ifdef _MSC_VER
 #pragma warning (pop)

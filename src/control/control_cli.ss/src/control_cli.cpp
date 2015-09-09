@@ -138,12 +138,12 @@ int main(int argc, char * argv[])
                                                            {
                                                                 if (cmd.nodeCmd)
                                                                 {
-                                                                    senderPtr->NodeCmd(cmd.cmdAction,
-                                                                                   cmd.nodeId);
+                                                                    senderPtr->SendCmd(cmd.cmdAction,
+                                                                                       cmd.nodeId);
                                                                 }
                                                                 else
                                                                 {
-                                                                    senderPtr->SystemCmd(cmd.cmdAction);
+                                                                    senderPtr->SendCmd(cmd.cmdAction,0);
                                                                 }
 
                                                                 timeOutTimer.cancel();

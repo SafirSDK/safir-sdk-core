@@ -27,6 +27,7 @@
 #include <Safir/Dob/Internal/Communication.h>
 #include <Safir/Dob/Internal/ControlCmd.h>
 #include <Safir/Utilities/Internal/Id.h>
+#include <boost/chrono.hpp>
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -62,39 +63,49 @@ namespace Control
     {
     public:
 
-        typedef std::function<void()> StopSafirCb;
+        typedef std::function<void()> StopSafirNodeCb;
+        typedef std::function<void()> StopSystemCb;
 
         StopHandlerBasic(boost::asio::io_service&   ioService,
                          Communication&             communication,
                          SP&                        sp,
-                         const StopSafirCb          stopSafirCb,
+                         const StopSafirNodeCb      stopSafirNodeCb,
+                         const StopSystemCb         stopSystemCb,
                          bool                       ignoreCmd)
             : m_communication(communication),
               m_sp(sp),
-              m_stopSafirCb(stopSafirCb),
+              m_stopSafirNodeCb(stopSafirNodeCb),
+              m_stopSystemCb(stopSystemCb),
               m_ignoreCmd(ignoreCmd),
               m_controlCmdMsgTypeId(LlufId_Generate64("Safir.Dob.Control.CmdMsgType")),
-              m_resendTimer(ioService),
-              resendTimerRunning(false)
+              m_sendTimer(ioService),
+              m_localNodeStopInProgress(false),
+              m_systemStop(false)
 
         {
             // Set up callbacks to receive stop commands locally via IPC
             m_controlCmdReceiver.reset(new ControlCmdReceiver(ioService,
                                                               [this](Control::CommandAction cmdAction, int64_t nodeId)
                                                               {
-                                                                  if (nodeId == m_communication.Id())
+                                                                  if (nodeId != 0)
                                                                   {
-                                                                      HandleNodeCmd(cmdAction);
+                                                                      // An local order to stop a specific node
+
+                                                                      if (nodeId == m_communication.Id())
+                                                                      {
+                                                                          HandleLocalNodeStop(cmdAction);
+                                                                      }
+                                                                      else
+                                                                      {
+                                                                          StopExternalNode(cmdAction, nodeId, nodeId);
+                                                                      }
                                                                   }
                                                                   else
                                                                   {
-                                                                      SendToExternalNode(cmdAction, nodeId);
+                                                                      // A local order to stop the system
+                                                                      HandleSystemStop(cmdAction);
                                                                   }
 
-                                                              },
-                                                              [this](Control::CommandAction cmdAction)
-                                                              {
-                                                                  HandleSystemCmd(cmdAction);
                                                               }));
 
             // Set up callback to receive stop commands via control channel from an external node.
@@ -119,10 +130,28 @@ namespace Control
         void Stop()
         {
             m_controlCmdReceiver->Stop();
+            m_sendTimer.cancel();
         }
 
         void AddNode(const int64_t nodeId, const int64_t nodeTypeId)
         {
+            if (nodeId == m_communication.Id())
+            {
+                // We don't save own node
+                return;
+            }
+
+            Node node(nodeTypeId);
+
+            if (m_systemStop)
+            {
+                // A node is added while we are about to stop the system
+
+                node.stopInProgress = true;
+                node.cmdAction = m_localNodeStopCmdAction;
+                node.cmdNodeId = 0;
+            }
+
             m_nodeTable.insert(std::make_pair(nodeId, Node(nodeTypeId)));
         }
 
@@ -131,7 +160,44 @@ namespace Control
             m_nodeTable.erase(nodeId);
         }
 
-        void HandleNodeCmd(CommandAction  /*cmdAction*/)
+    private:
+
+        Communication&  m_communication;
+        SP&             m_sp;
+
+        const StopSafirNodeCb m_stopSafirNodeCb;
+        const StopSystemCb m_stopSystemCb;
+
+        const bool  m_ignoreCmd;
+
+        std::unique_ptr<ControlCmdReceiver> m_controlCmdReceiver;
+
+        const int64_t   m_controlCmdMsgTypeId;
+
+        boost::asio::steady_timer m_sendTimer;
+
+        bool                    m_localNodeStopInProgress;
+        Control::CommandAction  m_localNodeStopCmdAction;
+
+        bool m_systemStop;
+
+        struct Node
+        {
+            Node(int64_t _nodeTypeId)
+                : nodeTypeId(_nodeTypeId),
+                  stopInProgress(false)
+            {
+            }
+
+            int64_t                 nodeTypeId;
+            Control::CommandAction  cmdAction;
+            int64_t                 cmdNodeId;
+            bool                    stopInProgress;
+        };
+
+        std::unordered_map<int64_t, Node> m_nodeTable;
+
+        void StopThisNode(CommandAction  /*cmdAction*/)
         {
             if (m_ignoreCmd)
             {
@@ -142,148 +208,154 @@ namespace Control
 
             // Systemlog?
 
-            m_stopSafirCb();
+            m_stopSafirNodeCb();
         }
 
-        void HandleSystemCmd(CommandAction  cmdAction)
+        void HandleLocalNodeStop(CommandAction cmdAction)
         {
-            std::wcout << "CTRL: Received system cmd. Action: " << cmdAction << std::endl;
+            m_localNodeStopInProgress = true;
+            m_localNodeStopCmdAction = cmdAction;
 
-            if (m_ignoreCmd)
+            bool externalNodeStopInProgress = false;
+
+            for (auto nodeIt = m_nodeTable.begin(); nodeIt != m_nodeTable.end(); ++nodeIt)
             {
+                if (nodeIt->second.stopInProgress)
+                {
+                    externalNodeStopInProgress = true;
+                    break;
+                }
+            }
+
+            if (externalNodeStopInProgress)
+            {
+                // There is an outstanding stop request to one or more external nodes. Don't
+                // execute stop of this node now. (It will be stopped when all outstanding stop requests
+                // have been handled.
                 return;
             }
 
-//            HandleControlCmd(cmdAction);
+            StopThisNode(cmdAction);
         }
 
-    private:
-
-        Communication&  m_communication;
-        SP&             m_sp;
-
-        const StopSafirCb m_stopSafirCb;
-
-        const bool  m_ignoreCmd;
-
-        std::unique_ptr<ControlCmdReceiver> m_controlCmdReceiver;
-
-        const int64_t   m_controlCmdMsgTypeId;
-
-        boost::asio::steady_timer m_resendTimer;
-        bool resendTimerRunning;
-
-        struct Node
+        void HandleSystemStop(CommandAction cmdAction)
         {
-            Node(int64_t _nodeTypeId)
-                : nodeTypeId(_nodeTypeId),
-                  outstandingCmd(false),
-                  communicationOverflow(false)
+            std::wcout << "CTRL: Received system cmd. Action: " << cmdAction << std::endl;
+
+            m_systemStop = true;
+
+            m_localNodeStopInProgress = true;
+            m_localNodeStopCmdAction = cmdAction;
+
+            m_stopSystemCb();  // Notify other parts that we got a system stop order
+
+            // Initiate stop of all known nodes
+            for (auto nodeIt = m_nodeTable.begin(); nodeIt != m_nodeTable.end(); ++nodeIt)
             {
+                nodeIt->second.cmdAction = cmdAction;
+                nodeIt->second.cmdNodeId = 0;
+                nodeIt->second.stopInProgress = true;
             }
 
-            int64_t nodeTypeId;
-            Control::CommandAction cmdAction;
-            bool    outstandingCmd;
-            bool    communicationOverflow;
-        };
+            m_sendTimer.expires_from_now(boost::chrono::seconds(0));
+            m_sendTimer.async_wait([this](const boost::system::error_code& error)
+                                   {
+                                       if (error == boost::asio::error::operation_aborted)
+                                       {
+                                           return;
+                                       }
+                                       SendAllOutstanding();
+                                   });
 
-        std::unordered_map<int64_t, Node> m_nodeTable;
-
-        void Resend()
-        {
-            resendTimerRunning = false;
-
-            for (auto it = m_nodeTable.begin(); it != m_nodeTable.end(); ++it)
-            {
-                if (it->second.communicationOverflow)
-                {
-                    SendToExternalNode(it->second.cmdAction, it->first);
-                }
-            }
         }
 
-        void SendToExternalNode(Control::CommandAction cmdAction, int64_t nodeId)
+        void StopExternalNode(Control::CommandAction cmdAction, int64_t cmdNodeId, int64_t toNodeId)
         {
-            auto nodeIt = m_nodeTable.find(nodeId);
+            auto nodeIt = m_nodeTable.find(toNodeId);
             if (nodeIt == m_nodeTable.end())
             {
                 // External node is already down
                 return;
             }
 
-            nodeIt->second.cmdAction = cmdAction;
-
-            auto cmd = SerializeCmd(cmdAction);
-
-            auto ok = m_communication.Send(nodeId,
-                                           nodeIt->second.nodeTypeId,
-                                           boost::shared_ptr<char[]>(std::move(cmd.first)),
-                                           cmd.second, // size
-                                           m_controlCmdMsgTypeId,
-                                           true); // delivery guarantee
-
-            if (!ok)
+            if (nodeIt->second.stopInProgress)
             {
-                nodeIt->second.communicationOverflow = true;
-                if (!resendTimerRunning)
+                // There is a pending stop order to the external node
+                return;
+            }
+
+            nodeIt->second.cmdAction = cmdAction;
+            nodeIt->second.cmdNodeId = cmdNodeId;
+            nodeIt->second.stopInProgress = true;
+
+            m_sendTimer.expires_from_now(boost::chrono::seconds(0));
+            m_sendTimer.async_wait([this](const boost::system::error_code& error)
+                                   {
+                                       if (error == boost::asio::error::operation_aborted)
+                                       {
+                                           return;
+                                       }
+                                       SendAllOutstanding();
+                                   });
+
+        }
+
+        void SendAllOutstanding()
+        {
+            bool externalNodeStopInProgress = false;
+
+            for (auto nodeIt = m_nodeTable.begin(); nodeIt != m_nodeTable.end(); ++nodeIt)
+            {
+                if (nodeIt->second.stopInProgress)
                 {
-                    m_resendTimer.async_wait([this](const boost::system::error_code& error)
-                                            {
-                                                if (!!error && error == boost::asio::error::operation_aborted)
-                                                {
-                                                    // We are stopped, just return
-                                                    return;
-                                                }
+                    auto cmd = SerializeCmd(nodeIt->second.cmdAction, nodeIt->second.cmdNodeId);
 
-                                                Resend();
+                    m_communication.Send(nodeIt->first,
+                                         nodeIt->second.nodeTypeId,
+                                         boost::shared_ptr<char[]>(std::move(cmd.first)),
+                                         cmd.second, // size
+                                         m_controlCmdMsgTypeId,
+                                         true); // delivery guarantee
 
-                                            });
-                    resendTimerRunning = true;
-
+                    // We don't care about overflow towards Communication since we will resend
+                    // outstanding stop commmands until the node disapears.
+                    externalNodeStopInProgress = true;
                 }
             }
-            else
-            {
-                nodeIt->second.outstandingCmd = true;
-                nodeIt->second.communicationOverflow = false;
-            }
 
+            if (externalNodeStopInProgress)
+            {
+                m_sendTimer.expires_from_now(boost::chrono::seconds(2));
+                m_sendTimer.async_wait([this](const boost::system::error_code& error)
+                                       {
+                                           if (error == boost::asio::error::operation_aborted)
+                                           {
+                                               return;
+                                           }
+                                           SendAllOutstanding();
+                                       });
+            }
+            else if (m_localNodeStopInProgress)
+            {
+                // All external nodes are gone and this node is also on death row ... time to die.
+                StopThisNode(m_localNodeStopCmdAction);
+            }
         }
 
         void ReceiveFromExternalNode(const int64_t /*from*/,
                                      const boost::shared_ptr<const char[]>& data,
                                      const size_t size)
         {
-            auto cmdAction = DeserializeCmd(data.get(),  size);
+            auto cmd = DeserializeCmd(data.get(), size);
 
-            HandleNodeCmd(cmdAction);
+            if (cmd.second == 0)
+            {
+                // Receivied a system stop command
+                m_stopSystemCb();
+            }
 
+            StopThisNode(cmd.first);
         }
-
-        //void ControlApp::SendControlCmd(std::pair<std::unique_ptr<char[]>, size_t> cmd)
-        //{
-        //    // Send the request to all known nodes
-        //    for (auto nt = m_conf.nodeTypesParam.cbegin(); nt != m_conf.nodeTypesParam.cend(); ++nt)
-        //    {
-        //        auto ok = m_communication->Send(0, // all nodes...
-        //                                        nt->id, // ... of this node type
-        //                                        boost::shared_ptr<char[]>(std::move(cmd.first)),
-        //                                        cmd.second, // size
-        //                                        m_controlCmdMsgTypeId,
-        //                                        true); // delivery guarantee
-        //        if (ok)
-        //        {
-        //            lllog(3) << "DOSE_MAIN: Sent HavePersistenceDataRequest to nodeId " << node->first << std::endl;
-        //        }
-        //        else
-        //        {
-        //           m_unsentRequests.insert(*node);
-        //        }
-        //    }
-
-
-        //}
 
     };
 

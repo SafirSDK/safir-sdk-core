@@ -107,16 +107,17 @@ namespace
     public:
 
         Impl(boost::asio::io_service&    ioService,
-             const NodeCmdCb&            nodeCmdCb,
-             const SystemCmdCb&          systemCmdCb)
-            : m_nodeCmdCb(nodeCmdCb),
-              m_systemCmdCb(systemCmdCb)
+             const CmdCb&                cmdCb)
+            : m_cmdCb(cmdCb)
+
         {
-            m_ipcSubscriber.reset( new Safir::Utilities::Internal::IpcSubscriber(ioService,
-                                                                                 controlCmdChannel,
-                                                                                 [this](const char* data, size_t size)
-                                                                                 {
-                                                                                     RecvDataCb(data, size);
+            m_ipcSubscriber.reset(new Safir::Utilities::Internal::IpcSubscriber(ioService,
+                                                                                controlCmdChannel,
+                                                                                [this](const char* data, size_t size)
+                                                                                {
+                                                                                    auto cmd = DeserializeCmd(data, size);
+
+                                                                                    m_cmdCb(cmd.first, cmd.second);
                                                                                  }));
         }
 
@@ -135,32 +136,21 @@ namespace
 
         std::unique_ptr<Safir::Utilities::Internal::IpcSubscriber> m_ipcSubscriber;
 
-        NodeCmdCb   m_nodeCmdCb;
-        SystemCmdCb m_systemCmdCb;
+        CmdCb   m_cmdCb;
 
         void RecvDataCb(const char* data, size_t size)
         {
-            ControlCmd controlCmd;
+            auto cmd = DeserializeCmd(data, size);
 
-            controlCmd.ParseFromArray(data, static_cast<int>(size));
+            m_cmdCb(cmd.first, cmd.second);
 
-            if (controlCmd.has_node_id())
-            {
-                m_nodeCmdCb(getCommandAction(controlCmd.cmd_type()), controlCmd.node_id());
-            }
-            else
-            {
-                m_systemCmdCb(getCommandAction(controlCmd.cmd_type()));
-            }
         }
     };
 
     ControlCmdReceiver::ControlCmdReceiver(boost::asio::io_service&     ioService,
-                                           const NodeCmdCb&             nodeCmdCb,
-                                           const SystemCmdCb&           systemCmdCb)
+                                           const CmdCb&                 cmdCb)
         : m_impl(Safir::make_unique<Impl>(ioService,
-                                          nodeCmdCb,
-                                          systemCmdCb))
+                                          cmdCb))
     {
     }
 
@@ -196,28 +186,13 @@ namespace
            m_ipcPublisher.Stop();
         }
 
-        void NodeCmd(CommandAction  cmdAction,
+        void SendCmd(CommandAction  cmdAction,
                      int64_t        nodeId)
         {
-            ControlCmd cmd;
+            auto data = SerializeCmd(cmdAction, nodeId);
 
-            cmd.set_cmd_type(getCmdType(cmdAction));
-            cmd.set_node_id(nodeId);
+            m_ipcPublisher.Send(std::move(data.first), data.second);
 
-            const auto size = cmd.ByteSize();
-            auto data = std::unique_ptr<char[]>(new char[size]);
-            cmd.SerializeWithCachedSizesToArray
-                (reinterpret_cast<google::protobuf::uint8*>(data.get()));
-
-            m_ipcPublisher.Send(std::move(data), size);
-
-        }
-
-        void SystemCmd(CommandAction  cmdAction)
-        {
-            auto sc = SerializeCmd(cmdAction);
-
-            m_ipcPublisher.Send(std::move(sc.first), static_cast<uint32_t>(sc.second));
         }
 
     private:
@@ -241,23 +216,24 @@ namespace
         m_impl->Stop();
     }
 
-    void ControlCmdSender::NodeCmd(CommandAction  cmdAction,
+    void ControlCmdSender::SendCmd(CommandAction  cmdAction,
                                    int64_t        nodeId)
     {
-        m_impl->NodeCmd(cmdAction,
+        m_impl->SendCmd(cmdAction,
                         nodeId);
     }
 
-    void ControlCmdSender::SystemCmd(CommandAction  cmdAction)
-    {
-        m_impl->SystemCmd(cmdAction);
-    }
-
-    std::pair<std::unique_ptr<char[]>, size_t> SerializeCmd(CommandAction cmdAction)
+    std::pair<std::unique_ptr<char[]>, size_t> SerializeCmd(CommandAction cmdAction,
+                                                            int64_t       nodeId)
     {
         ControlCmd cmd;
 
         cmd.set_cmd_type(getCmdType(cmdAction));
+
+        if (nodeId != 0)
+        {
+            cmd.set_node_id(nodeId);
+        }
 
         const auto size = cmd.ByteSize();
         auto data = std::unique_ptr<char[]>(new char[size]);
@@ -267,13 +243,26 @@ namespace
         return std::make_pair(std::move(data), size);
     }
 
-    CommandAction DeserializeCmd(const char* data, size_t size)
+    std::pair<CommandAction, int64_t> DeserializeCmd(const char* data, size_t size)
     {
         ControlCmd controlCmd;
 
         controlCmd.ParseFromArray(data, static_cast<int>(size));
 
-        return getCommandAction(controlCmd.cmd_type());
+        std::pair<CommandAction, int64_t> res;
+
+        res.first = getCommandAction(controlCmd.cmd_type());
+
+        if (controlCmd.has_node_id())
+        {
+            res.second = controlCmd.node_id();
+        }
+        else
+        {
+            res.second = 0;
+        }
+
+        return res;
     }
 
 }

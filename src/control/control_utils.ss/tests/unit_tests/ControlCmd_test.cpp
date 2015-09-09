@@ -55,7 +55,6 @@ BOOST_AUTO_TEST_CASE( send_commands )
     threads.create_thread([&subIoService](){subIoService.run();});
 
     bool nodeCmdReceived = false;
-    bool systemCmdReceived = false;
 
     std::unique_ptr<ControlCmdSender> cmdSender;
 
@@ -67,9 +66,9 @@ BOOST_AUTO_TEST_CASE( send_commands )
 
                                                std::wcout << "The receiver has connected!" << std::endl;
 
-                                               cmdSender->NodeCmd(REBOOT, 1234567);
+                                               cmdSender->SendCmd(REBOOT, 1234567);
 
-                                               cmdSender->SystemCmd(SHUTDOWN);
+                                               cmdSender->SendCmd(SHUTDOWN,0);
 
                                            }));
 
@@ -77,28 +76,25 @@ BOOST_AUTO_TEST_CASE( send_commands )
 
     cmdReceiver.reset(new ControlCmdReceiver(subIoService,
 
-                                    // nodeCmd callback
-                                    [&nodeCmdReceived](CommandAction cmdAction, int64_t nodeId)
+                                    // cmd callback
+                                    [&cmdSender, &cmdReceiver, &pubWork, &subWork, &nodeCmdReceived]
+                                    (CommandAction cmdAction, int64_t nodeId)
                                     {
-                                        nodeCmdReceived = true;
+                                        if (nodeId != 0)
+                                        {
+                                            nodeCmdReceived =true;
+                                            BOOST_CHECK(cmdAction == REBOOT);
+                                            BOOST_CHECK(nodeId == 1234567);
+                                        }
+                                        else
+                                        {
+                                            BOOST_CHECK(cmdAction == SHUTDOWN);
 
-                                        BOOST_CHECK(cmdAction == REBOOT);
-                                        BOOST_CHECK(nodeId == 1234567);
-                                    },
-
-                                    // systemCmd callback
-                                    [&cmdSender, &cmdReceiver, &pubWork, &subWork, &systemCmdReceived]
-                                    (CommandAction cmdAction)
-                                    {
-                                        systemCmdReceived = true;
-
-                                        BOOST_CHECK(cmdAction == SHUTDOWN);
-
-                                        cmdSender->Stop();
-                                        cmdReceiver->Stop();
-                                        pubWork.reset();
-                                        subWork.reset();
-
+                                            cmdSender->Stop();
+                                            cmdReceiver->Stop();
+                                            pubWork.reset();
+                                            subWork.reset();
+                                        }
                                     }));
     cmdReceiver->Start();
     cmdSender->Start();

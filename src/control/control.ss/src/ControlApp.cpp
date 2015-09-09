@@ -130,7 +130,8 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
                                      std::move(spNodeTypes),
                                      [this](const int64_t incarnationId) -> bool
                                      {
-                                         if (m_incarnationBlackListHandler.ValidateIncarnationId(incarnationId))
+                                         if (m_incarnationId == 0 &&
+                                             m_incarnationBlackListHandler.ValidateIncarnationId(incarnationId))
                                          {
                                              m_incarnationId = incarnationId;
 
@@ -171,7 +172,17 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
     m_stopHandler.reset(new Control::StopHandler(ioService,
                                                  *m_communication,
                                                  *m_sp,
-                                                 [this]() {StopThisNode();},
+                                                 [this]()
+                                                 {
+                                                     StopThisNode();
+                                                 },
+                                                 [this]()
+                                                 {
+                                                     if (m_incarnationId != 0)
+                                                     {
+                                                         m_incarnationBlackListHandler.AddIncarnationId(m_incarnationId);
+                                                     }
+                                                 },
                                                  ignoreControlCmd));
 
 

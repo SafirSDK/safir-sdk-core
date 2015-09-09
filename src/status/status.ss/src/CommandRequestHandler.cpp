@@ -81,14 +81,15 @@ namespace Control
         {
             //NodeId is null, send "system wide" command
             response = Safir::Dob::SuccessResponse::Create();
-            m_controlCommandSender->SystemCmd(GetCommandActionFromOperation(command->Operation().GetVal()));
+            m_controlCommandSender->SendCmd(GetCommandActionFromOperation(command->Operation().GetVal()),
+                                                                          0);
         }
         else
         {
             //Send node command
             response = Safir::Dob::SuccessResponse::Create();
-            m_controlCommandSender->NodeCmd(GetCommandActionFromOperation(command->Operation().GetVal())
-                                                                        ,command->NodeId().GetVal());
+            m_controlCommandSender->SendCmd(GetCommandActionFromOperation(command->Operation().GetVal())
+                                                                         ,command->NodeId().GetVal());
         }
 
         responseSender->Send(response);
