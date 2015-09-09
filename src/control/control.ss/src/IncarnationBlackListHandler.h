@@ -57,12 +57,12 @@ namespace Control
         {
             std::ifstream file(m_path.string().c_str(), std::ios::in);
 
-            if (file.is_open() == false)
+            if (!file.is_open())
             {
                 return true;
             }
 
-            while ( !file.eof() )
+            while (!file.eof())
             {
                 int64_t readValue;
 
@@ -90,9 +90,9 @@ namespace Control
                 return;
             }
 
-            std::ofstream file(m_path.string().c_str(), std::ios::out | std::ofstream::app);
+            std::ofstream file(m_path.string().c_str(), std::ofstream::out | std::ofstream::app);
 
-            if (file.is_open() == false)
+            if (!file.is_open())
             {
                 SEND_SYSTEM_LOG(Error, << "Configuration error: Unable to write incarnation id to black list file '" <<
                                 m_path << "' configured via the Safir::Dob::NodeParameters::IncarnationBlacklistFilename parameter");
@@ -107,9 +107,9 @@ namespace Control
 
         void TryOpenCreateFile(const boost::filesystem::path& path)
         {
-            std::ofstream file(path.string().c_str(),std::ios::out);
+            std::ofstream file(path.string().c_str(), std::ofstream::out | std::ofstream::app);
 
-            if (file.is_open() == false)
+            if (!file.is_open())
             {
                 throw std::runtime_error("Configuration error: Unable to write to incarnation black list file '"
                                          + m_path.string() + "' configured via the Safir::Dob::NodeParameters::IncarnationBlacklistFilename parameter");
@@ -123,7 +123,7 @@ namespace Control
             if (boost::filesystem::exists(path))
             {
                 //path exists
-                if ( boost::filesystem::is_regular_file(path) == false)
+                if (!boost::filesystem::is_regular_file(path))
                 {
                     //path is directory not file
                     throw std::runtime_error("Configuration error: Safir::Dob::NodeParameters::IncarnationBlacklistFilename parameter should point to a file, not a directory!");
