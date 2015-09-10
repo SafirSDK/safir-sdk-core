@@ -191,7 +191,7 @@ namespace
         {
             auto data = SerializeCmd(cmdAction, nodeId);
 
-            m_ipcPublisher.Send(std::move(data.first), data.second);
+            m_ipcPublisher.Send(std::move(data.first), static_cast<uint32_t>(data.second));
 
         }
 
