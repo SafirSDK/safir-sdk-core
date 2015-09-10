@@ -174,6 +174,21 @@ int main()
                 return 1;
             }
             
+            std::wcout << "expand SAFIR_INSTANCE" << std::endl;
+
+            SetEnv("SAFIR_INSTANCE", "");
+
+            if (ExpandSpecial("widde@{SAFIR_INSTANCE}eddiw") != "widde0eddiw")
+            {
+                return 1;
+            }
+
+            SetEnv("SAFIR_INSTANCE", "5");
+
+            if (ExpandSpecial("widde@{SAFIR_INSTANCE}eddiw") != "widde5eddiw")
+            {
+                return 1;
+            }
 
         }
 
@@ -209,6 +224,7 @@ int main()
 
         std::wcout << "test GetSafirInstanceSuffix" << std::endl;
         {
+            SetEnv("SAFIR_INSTANCE", "");
             if (GetSafirInstanceSuffix() != "_0")
             {
                 return 1;

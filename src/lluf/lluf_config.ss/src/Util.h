@@ -76,95 +76,6 @@ namespace Internal
     }
 #endif
 
-
-
-    std::string ExpandSpecial(const std::string& str)
-    {
-        const size_t start=str.rfind("@{");
-        const size_t stop=str.find('}', start);
-
-        if (start==std::string::npos || stop==std::string::npos)
-            return str;
-
-        const std::string var=str.substr(start+2, stop-start-2);
-
-        Path value;
-        if (var == "TEMP")
-        {
-#ifdef LLUF_CONFIG_READER_USE_WINDOWS
-            std::string env = GetEnv("TEMP", std::nothrow);
-            if (env.empty())
-            {
-                env = GetEnv("TMP", std::nothrow);
-            }
-            if (env.empty())
-            {
-                throw std::logic_error("Special variable TEMP could not be expanded, since neither TEMP or TMP environment variables could be found.");
-            }
-            value = Path(env);
-#else
-            value = Path("/tmp");
-#endif
-        }
-#ifdef LLUF_CONFIG_READER_USE_WINDOWS
-        else if (var == "CSIDL_APPDATA" || var == "FOLDERID_RoamingAppData")
-        {
-            value = GetFolderPathFromCSIDL(CSIDL_APPDATA);
-        }
-        else if (var == "CSIDL_LOCAL_APPDATA" || var == "FOLDERID_LocalAppData")
-        {
-            value = GetFolderPathFromCSIDL(CSIDL_LOCAL_APPDATA);
-        }
-        else if (var == "CSIDL_COMMON_APPDATA" || var == "FOLDERID_ProgramData")
-        {
-            value = GetFolderPathFromCSIDL(CSIDL_COMMON_APPDATA);
-        }
-        else if (var == "CSIDL_MYDOCUMENTS" || var == "FOLDERID_Documents")
-        {
-            value = GetFolderPathFromCSIDL(CSIDL_MYDOCUMENTS);
-        }
-        else if (var == "CSIDL_COMMON_DOCUMENTS" || var == "FOLDERID_PublicDocuments")
-        {
-            value = GetFolderPathFromCSIDL(CSIDL_COMMON_DOCUMENTS);
-        }
-        else if (var == "CSIDL_PROGRAM_FILES" || var == "FOLDERID_ProgramFiles")
-        {
-            value = GetFolderPathFromCSIDL(CSIDL_PROGRAM_FILES);
-        }
-        else if (var == "CSIDL_PROGRAM_FILESX86" || var == "FOLDERID_ProgramFilesX86")
-        {
-            value = GetFolderPathFromCSIDL(CSIDL_PROGRAM_FILESX86);
-        }
-#endif
-        else
-        {
-            throw std::logic_error("Special variable " + var + " could not be found");
-        }
-
-        const std::string res=str.substr(0, start) + value.str() + str.substr(stop+1, str.size()-stop-1);
-        //search for next special variable 
-        return ExpandSpecial(res); 
-    }
-
-
-
-    std::string ExpandEnvironment(const std::string& str)
-    {
-        const size_t start=str.rfind("$(");
-        const size_t stop=str.find(')', start);
-
-        if (start==std::string::npos || stop==std::string::npos)
-            return str;
-
-        const std::string var=str.substr(start+2, stop-start-2);
-        const std::string env = GetEnv(var);
-
-        const std::string res=str.substr(0, start) + env + str.substr(stop+1, str.size()-stop-1);
-        //search for next environment variable or
-        //recursively expand nested variable, e.g. $(NAME_$(NUMBER))
-        return ExpandEnvironment(res); 
-    }
-
     unsigned int GetSafirInstance()
     {
         try
@@ -191,6 +102,97 @@ namespace Internal
         return std::string("_") + boost::lexical_cast<std::string>(GetSafirInstance());
     }
 
+
+    std::string ExpandSpecial(const std::string& str)
+    {
+        const size_t start=str.rfind("@{");
+        const size_t stop=str.find('}', start);
+
+        if (start==std::string::npos || stop==std::string::npos)
+            return str;
+
+        const std::string var=str.substr(start+2, stop-start-2);
+
+        std::string value;
+        if (var == "TEMP")
+        {
+#ifdef LLUF_CONFIG_READER_USE_WINDOWS
+            std::string env = GetEnv("TEMP", std::nothrow);
+            if (env.empty())
+            {
+                env = GetEnv("TMP", std::nothrow);
+            }
+            if (env.empty())
+            {
+                throw std::logic_error("Special variable TEMP could not be expanded, since neither TEMP or TMP environment variables could be found.");
+            }
+            value = Path(env).str();
+#else
+            value = Path("/tmp").str();
+#endif
+        }
+#ifdef LLUF_CONFIG_READER_USE_WINDOWS
+        else if (var == "CSIDL_APPDATA" || var == "FOLDERID_RoamingAppData")
+        {
+            value = Path(GetFolderPathFromCSIDL(CSIDL_APPDATA)).str();
+        }
+        else if (var == "CSIDL_LOCAL_APPDATA" || var == "FOLDERID_LocalAppData")
+        {
+            value = Path(GetFolderPathFromCSIDL(CSIDL_LOCAL_APPDATA)).str();
+        }
+        else if (var == "CSIDL_COMMON_APPDATA" || var == "FOLDERID_ProgramData")
+        {
+            value = Path(GetFolderPathFromCSIDL(CSIDL_COMMON_APPDATA)).str();
+        }
+        else if (var == "CSIDL_MYDOCUMENTS" || var == "FOLDERID_Documents")
+        {
+            value = Path(GetFolderPathFromCSIDL(CSIDL_MYDOCUMENTS)).str();
+        }
+        else if (var == "CSIDL_COMMON_DOCUMENTS" || var == "FOLDERID_PublicDocuments")
+        {
+            value = Path(GetFolderPathFromCSIDL(CSIDL_COMMON_DOCUMENTS)).str();
+        }
+        else if (var == "CSIDL_PROGRAM_FILES" || var == "FOLDERID_ProgramFiles")
+        {
+            value = Path(GetFolderPathFromCSIDL(CSIDL_PROGRAM_FILES)).str();
+        }
+        else if (var == "CSIDL_PROGRAM_FILESX86" || var == "FOLDERID_ProgramFilesX86")
+        {
+            value = Path(GetFolderPathFromCSIDL(CSIDL_PROGRAM_FILESX86)).str();
+        }
+#endif
+        else if (var == "SAFIR_INSTANCE")
+        {
+            value = boost::lexical_cast<std::string>(GetSafirInstance());
+        }
+        else
+        {
+            throw std::logic_error("Special variable " + var + " could not be found");
+        }
+
+        const std::string res=str.substr(0, start) + value + str.substr(stop+1, str.size()-stop-1);
+        //search for next special variable 
+        return ExpandSpecial(res); 
+    }
+
+
+
+    std::string ExpandEnvironment(const std::string& str)
+    {
+        const size_t start=str.rfind("$(");
+        const size_t stop=str.find(')', start);
+
+        if (start==std::string::npos || stop==std::string::npos)
+            return str;
+
+        const std::string var=str.substr(start+2, stop-start-2);
+        const std::string env = GetEnv(var);
+
+        const std::string res=str.substr(0, start) + env + str.substr(stop+1, str.size()-stop-1);
+        //search for next environment variable or
+        //recursively expand nested variable, e.g. $(NAME_$(NUMBER))
+        return ExpandEnvironment(res); 
+    }
 
 }
 }
