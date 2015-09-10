@@ -97,6 +97,7 @@ ADD_SAFIR_GENERATED_LIBRARY(NAME Core
   config/Safir.Utilities.ForEach.UpdateRequest-Safir.Dob.RequestTimeoutProperty.dom
   data/Safir.Application.BackdoorCommand-Safir.Dob.ContextSharedProperty.dom
   data/Safir.Control.Command-Safir.Dob.DistributionScopeProperty.dom
+  data/Safir.Control.Status-Safir.Dob.DistributionScopeProperty.dom
   data/Safir.Dob.PersistentDataReady-Safir.Dob.DistributionScopeProperty.dom
   data/Safir.Dob.ProcessInfo-Safir.Dob.DistributionScopeProperty.dom
   data/Safir.Utilities.ForEach.DeleteAllRequest-Safir.Dob.DistributionScopeProperty.dom
