@@ -37,7 +37,7 @@ def startNode(safir_instance):
                dope_main = arguments.dope_main,
                safir_show_config = arguments.safir_show_config,
                start_syslog_server = True if safir_instance == "0" else False,
-               ignore_control_cmd = True if safir_instance == "1" else False)
+               ignore_control_cmd = True if safir_instance == "0" else False)
 
   del os.environ["SAFIR_INSTANCE"]
 
@@ -45,10 +45,14 @@ def startNode(safir_instance):
 
 #kills all nodes by terminating their processes
 def killNodeProcesses():
-  if envs['0'] is not None:
-    syslog_output = envs['0'].Syslog()
-    if len(syslog_output) != 0:
-      print("SYSLOG OUPUT:\n" + syslog_output)
+
+  try:
+    if envs['0'] is not None:
+      syslog_output = envs['0'].Syslog()
+      if len(syslog_output) != 0:
+        print("SYSLOG OUPUT:\n" + syslog_output)
+  except KeyError:
+    pass
 
   for env in envs:
     envs[env].killprocs()
@@ -107,8 +111,6 @@ def readconnectedNodeId(safir_instance, nodeName):
 
   if len(matchList) is 0:
     print("*-* Did not find NodeID: for node with name " + nodeName)
-  else:
-    print("*-* Found NodeID: " + str(matchList[0]) + " for node with name " + nodeName)
 
   if len(matchList) is 0:
     return ""
@@ -204,7 +206,7 @@ print("*-* Checking that Server_0 has connection to ['Server_0', 'Server_1', 'Se
 checkConnectionToNodes("0", ['Server_0', 'Server_1', 'Server_2'])
 
 #stop node two
-print("*-* Stopping node 2")
+print("*-* Stopping node 2 from System_0")
 stopNode("0", readconnectedNodeId('0', "Server_2"))
 
 time.sleep(15)
@@ -223,51 +225,60 @@ except:
   sys.exit(1)
 
 #make sure Server_0 has connection to the other two
+print("*-* Checking that Server_0 has connection to ['Server_0', 'Server_1', 'Server_2']")
 checkConnectionToNodes("0", ['Server_0', 'Server_1', 'Server_2'])
 
 
 #stop the whole system via safir_control_cli from node 0, note that System_1 is started with the "ignore-control-cmd" flag
 #which will make it not stop. The other nodes will add the current incarnation id to the blacklist and stop
 #when we start the other two again they shall not join System_1
+print("*-* Stopping the system from Server_0, Server_0 should not go down due to being started with --ignore-control-cmd")
 stopSystem('0')
 
-time.sleep(15)
+time.sleep(25)
 
-#make sure Server_1 has connection only to itself
-checkConnectionToNodes("1", ['Server_1'])
+print("*-* Checking that Server_0 has only to itself")
+checkConnectionToNodes("0", ['Server_0'])
 
 #start Server_0 and Server_2 again
 try:
-  print("*-* Starting Server_0 and Server_2")
-  envs['0'] = startNode("0")
+  print("*-* Starting Server_1 and Server_2")
+  envs['1'] = startNode("1")
   envs['2'] = startNode("2")
 except:
-  print("*-* Failed to start Server_0 and Server_2")
+  print("*-* Failed to start Server_1 and Server_2")
   killNodeProcesses()
   sys.exit(1)
 
-#make sure Server_1 has connection only to itself
-checkConnectionToNodes("1", ['Server_1'])
+print("*-* Checking that Server_0 has only to itself")
+checkConnectionToNodes("0", ['Server_0'])
 
-#make sure Server_0 has connection only to itself and Server_2
-checkConnectionToNodes("0", ['Server_0', 'Server_2'])
+print("*-* Checking that Server_1 has connection to ['Server_1', 'Server_2']")
+checkConnectionToNodes("1", ['Server_1', 'Server_2'])
 
-#hard kill Server_1 and restart it, see that it joins Server_1 and Server_2 again
-print("*-* Hardkill Server_1")
-envs['1'].killprocs()
+#hard kill Server_0 and restart it, see that it joins Server_1 and Server_2 again
+print("*-* Hardkill Server_0")
+envs['0'].killprocs()
 
 try:
-  print("*-* Starting Server_1")
-  envs['1'] = startNode("1")
+  print("*-* Starting Server_0")
+  envs['0'] = startNode("0")
 except:
-  print("*-* Failed to start Server_1")
+  print("*-* Failed to start Server_0")
   killNodeProcesses()
   sys.exit(1)
 
 #make sure Server_0 has connection to the other two
 checkConnectionToNodes("0", ['Server_0', 'Server_1', 'Server_2'])
 
-time.sleep(5)
+print("*-* Stopping node 1 from System_1")
+stopNode("1", readconnectedNodeId('0', "Server_1"))
+
+time.sleep(15)
+
+#make sure Server_0 has connection to Server_2 only
+print("*-* Checking that Server_0 has connection to ['Server_0', 'Server_2']")
+checkConnectionToNodes("0", ['Server_0', 'Server_2'])
 
 #end the test
 print("*-* Ending test, stopping all nodes")
