@@ -5,9 +5,9 @@ else()
 endif()
 
 if (UNIX)
-  set(DEFAULT_INCARNATION_BLACKLIST /var/lib/safir-sdk-core/system-incarnation-blacklist.txt)
+  set(DEFAULT_INCARNATION_BLACKLIST /var/lib/safir-sdk-core/system-incarnation-blacklist@{SAFIR_INSTANCE}.txt)
 else()
-  set(DEFAULT_INCARNATION_BLACKLIST @{CSIDL_COMMON_APPDATA}/safir-sdk-core/system-incarnation-blacklist.txt)
+  set(DEFAULT_INCARNATION_BLACKLIST @{CSIDL_COMMON_APPDATA}/safir-sdk-core/system-incarnation-blacklist@{SAFIR_INSTANCE}.txt)
 endif()
 
 #We configure the file into the source dir, which may seem a bit strange
