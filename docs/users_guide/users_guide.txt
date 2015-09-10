@@ -589,8 +589,7 @@ starts', so any environment variables set after that time will not be seen by th
 system environment variable expansion.
 
 There is also support for _special variable_ expansion using the same syntax as is
-described in <<special_variables>>. This can be used to specify operating system paths in
-parameters.
+described in <<special_variables>>. Special variables have built in magic in order to make them easy to use, for example when specifying operating system paths in parameters.
 
 === Create routines
 Create routines allow the designer of a Dob class to define custom routines for creating
@@ -3009,7 +3008,7 @@ The supported special variables are listed in <<windows_special_variables>>. We 
 
 Here are two more links that contain useful information about Windows paths, CSIDLs, and Windows Known Folders.: "http://blogs.msdn.com/b/cjacks/archive/2008/02/05/where-should-i-write-program-data-instead-of-program-files.aspx[Where Should I Write Program Data...?]" and "http://blogs.msdn.com/b/patricka/archive/2010/03/18/where-should-i-store-my-data-and-configuration-files-if-i-target-multiple-os-versions.aspx[Where Should I Store my Data and Config...?]".
 
-There is currently one special variable that is available on both Linux and Windows. It is described in <<common_special_variables>>, below.
+There is currently two special variables that are available on both Linux and Windows. They are described in <<common_special_variables>>, below.
 
 [[common_special_variables]]
 .Common Special Variables
@@ -3017,6 +3016,7 @@ There is currently one special variable that is available on both Linux and Wind
 |===========================
 |Special Variable  |Meaning
 |TEMP              | /tmp on Linux and TEMP or TMP environment variable on Windows.
+|SAFIR_INSTANCE    | The value of the environment variable SAFIR_INSTANCE, or "0" if that variable is not defined.
 |===========================
 
 === Network config
