@@ -172,6 +172,7 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
     m_stopHandler.reset(new Control::StopHandler(ioService,
                                                  *m_communication,
                                                  *m_sp,
+                                                 m_conf,
                                                  [this]()
                                                  {
                                                      StopThisNode();

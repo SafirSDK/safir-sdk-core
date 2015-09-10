@@ -26,7 +26,9 @@
 #include <Safir/Dob/Internal/SystemPicture.h>
 #include <Safir/Dob/Internal/Communication.h>
 #include <Safir/Dob/Internal/ControlCmd.h>
+#include <Safir/Dob/Internal/ControlConfig.h>
 #include <Safir/Utilities/Internal/Id.h>
+#include <Safir/Utilities/Internal/SystemLog.h>
 #include <boost/chrono.hpp>
 
 #ifdef _MSC_VER
@@ -58,7 +60,10 @@ namespace Control
      * @brief The StopHandler class handles the logic for Stop, Shutdown or Reboot of single nodes as well as
      *        a complete system.
      */
-    template<typename Communication, typename SP, typename ControlCmdReceiver>
+    template<typename Communication,
+             typename SP,
+             typename ControlCmdReceiver,
+             typename ControlConfig>
     class StopHandlerBasic
     {
     public:
@@ -69,11 +74,13 @@ namespace Control
         StopHandlerBasic(boost::asio::io_service&   ioService,
                          Communication&             communication,
                          SP&                        sp,
+                         Config&                    config,
                          const StopSafirNodeCb      stopSafirNodeCb,
                          const StopSystemCb         stopSystemCb,
                          bool                       ignoreCmd)
             : m_communication(communication),
               m_sp(sp),
+              m_config(config),
               m_stopSafirNodeCb(stopSafirNodeCb),
               m_stopSystemCb(stopSystemCb),
               m_ignoreCmd(ignoreCmd),
@@ -141,7 +148,29 @@ namespace Control
                 return;
             }
 
-            Node node(nodeTypeId);
+            // Calculate max time to wait for this node to stop
+            unsigned int idx = 0;
+            bool found = false;
+            for (; idx < m_config.nodeTypesParam.size(); ++idx)
+            {
+                if (m_config.nodeTypesParam[idx].id == nodeTypeId)
+                {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found)
+            {
+                std::ostringstream os;
+                os << "Node type " << nodeTypeId << " not found in configuration!";
+                throw std::logic_error(os.str());
+            }
+
+            auto maxStop = (boost::chrono::seconds(m_config.nodeTypesParam[idx].heartbeatInterval/1000) *
+                                                   m_config.nodeTypesParam[idx].maxLostHeartbeats) * 2;
+
+            Node node(nodeTypeId,
+                      maxStop);
 
             if (m_systemStop)
             {
@@ -152,7 +181,7 @@ namespace Control
                 node.cmdNodeId = 0;
             }
 
-            m_nodeTable.insert(std::make_pair(nodeId, Node(nodeTypeId)));
+            m_nodeTable.insert(std::make_pair(nodeId, node));
         }
 
         void RemoveNode(const int64_t nodeId)
@@ -164,6 +193,7 @@ namespace Control
 
         Communication&  m_communication;
         SP&             m_sp;
+        ControlConfig&  m_config;
 
         const StopSafirNodeCb m_stopSafirNodeCb;
         const StopSystemCb m_stopSystemCb;
@@ -183,16 +213,21 @@ namespace Control
 
         struct Node
         {
-            Node(int64_t _nodeTypeId)
+            Node(int64_t _nodeTypeId,
+                 boost::chrono::seconds _maxStopDuration)
                 : nodeTypeId(_nodeTypeId),
+                  maxStopDuration(_maxStopDuration),
                   stopInProgress(false)
             {
             }
 
-            int64_t                 nodeTypeId;
-            Control::CommandAction  cmdAction;
-            int64_t                 cmdNodeId;
-            bool                    stopInProgress;
+            const int64_t                   nodeTypeId;
+            const boost::chrono::seconds    maxStopDuration;
+
+            boost::chrono::steady_clock::time_point maxStopTime;
+            Control::CommandAction                  cmdAction;
+            int64_t                                 cmdNodeId;
+            bool                                    stopInProgress;
         };
 
         std::unordered_map<int64_t, Node> m_nodeTable;
@@ -232,16 +267,15 @@ namespace Control
                 // There is an outstanding stop request to one or more external nodes. Don't
                 // execute stop of this node now. (It will be stopped when all outstanding stop requests
                 // have been handled.
-                return;
             }
-
-            StopThisNode(cmdAction);
+            else
+            {
+                StopThisNode(cmdAction);
+            }
         }
 
         void HandleSystemStop(CommandAction cmdAction)
         {
-            std::wcout << "CTRL: Received system cmd. Action: " << cmdAction << std::endl;
-
             m_systemStop = true;
 
             m_localNodeStopInProgress = true;
@@ -250,11 +284,13 @@ namespace Control
             m_stopSystemCb();  // Notify other parts that we got a system stop order
 
             // Initiate stop of all known nodes
+            auto now = boost::chrono::steady_clock::now();
             for (auto nodeIt = m_nodeTable.begin(); nodeIt != m_nodeTable.end(); ++nodeIt)
             {
                 nodeIt->second.cmdAction = cmdAction;
                 nodeIt->second.cmdNodeId = 0;
                 nodeIt->second.stopInProgress = true;
+                nodeIt->second.maxStopTime = now + nodeIt->second.maxStopDuration;
             }
 
             m_sendTimer.expires_from_now(boost::chrono::seconds(0));
@@ -287,6 +323,7 @@ namespace Control
             nodeIt->second.cmdAction = cmdAction;
             nodeIt->second.cmdNodeId = cmdNodeId;
             nodeIt->second.stopInProgress = true;
+            nodeIt->second.maxStopTime = boost::chrono::steady_clock::now() + nodeIt->second.maxStopDuration;
 
             m_sendTimer.expires_from_now(boost::chrono::seconds(0));
             m_sendTimer.async_wait([this](const boost::system::error_code& error)
@@ -304,28 +341,40 @@ namespace Control
         {
             bool externalNodeStopInProgress = false;
 
+            auto now = boost::chrono::steady_clock::now();
+
             for (auto nodeIt = m_nodeTable.begin(); nodeIt != m_nodeTable.end(); ++nodeIt)
             {
                 if (nodeIt->second.stopInProgress)
                 {
-                    auto cmd = SerializeCmd(nodeIt->second.cmdAction, nodeIt->second.cmdNodeId);
+                    if (now < nodeIt->second.maxStopTime)
+                    {
+                        auto cmd = SerializeCmd(nodeIt->second.cmdAction, nodeIt->second.cmdNodeId);
 
-                    m_communication.Send(nodeIt->first,
-                                         nodeIt->second.nodeTypeId,
-                                         boost::shared_ptr<char[]>(std::move(cmd.first)),
-                                         cmd.second, // size
-                                         m_controlCmdMsgTypeId,
-                                         true); // delivery guarantee
+                        m_communication.Send(nodeIt->first,
+                                             nodeIt->second.nodeTypeId,
+                                             boost::shared_ptr<char[]>(std::move(cmd.first)),
+                                             cmd.second, // size
+                                             m_controlCmdMsgTypeId,
+                                             true); // delivery guarantee
 
-                    // We don't care about overflow towards Communication since we will resend
-                    // outstanding stop commmands until the node disapears.
-                    externalNodeStopInProgress = true;
+                        // We don't care about overflow towards Communication since we will resend
+                        // outstanding stop commmands until the node disapears.
+                        externalNodeStopInProgress = true;
+                    }
+                    else
+                    {
+                        SEND_SYSTEM_LOG(Informational,
+                                        << "Node " << nodeIt->first << " doesn't receive or doesn't act on a stop order");
+
+                        nodeIt->second.stopInProgress = false;
+                    }
                 }
             }
 
             if (externalNodeStopInProgress)
             {
-                m_sendTimer.expires_from_now(boost::chrono::seconds(2));
+                m_sendTimer.expires_from_now(boost::chrono::seconds(1));
                 m_sendTimer.async_wait([this](const boost::system::error_code& error)
                                        {
                                            if (error == boost::asio::error::operation_aborted)
@@ -337,7 +386,8 @@ namespace Control
             }
             else if (m_localNodeStopInProgress)
             {
-                // All external nodes are gone and this node is also on death row ... time to die.
+                // All external nodes are gone (or doesn't act on the stop order) and this node is
+                // also on death row ... time to die.
                 StopThisNode(m_localNodeStopCmdAction);
             }
         }
@@ -346,6 +396,11 @@ namespace Control
                                      const boost::shared_ptr<const char[]>& data,
                                      const size_t size)
         {
+            if (m_ignoreCmd)
+            {
+                return;
+            }
+
             auto cmd = DeserializeCmd(data.get(), size);
 
             if (cmd.second == 0)
@@ -361,7 +416,8 @@ namespace Control
 
     typedef StopHandlerBasic<Safir::Dob::Internal::Com::Communication,
                              Safir::Dob::Internal::SP::SystemPicture,
-                             ControlCmdReceiver> StopHandler;
+                             ControlCmdReceiver,
+                             Config> StopHandler;
 
 }
 }

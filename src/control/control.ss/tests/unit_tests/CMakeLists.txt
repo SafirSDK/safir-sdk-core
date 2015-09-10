@@ -10,6 +10,7 @@ TARGET_LINK_LIBRARIES(SystemStateHandler_test PRIVATE
 TARGET_LINK_LIBRARIES(StopHandler_test PRIVATE
   system_picture
   control_utils
+  lluf_utils
   ${Boost_SYSTEM_LIBRARY}
   ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})  
 
