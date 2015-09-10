@@ -70,5 +70,14 @@ BOOST_AUTO_TEST_CASE( blacklisthandlertests )
     //check that they are still blacklisted
     BOOST_CHECK(testHandler.ValidateIncarnationId(1) == false);
     BOOST_CHECK(testHandler.ValidateIncarnationId(3) == false);
+
+    //Create a new testHandler and make sure the old ids are still banned
+    IncarnationBlacklistHandler secondTestHandler("test_incarnation_blacklistfile.txt");
+
+    //check that we get the same results as last time
+    BOOST_CHECK(secondTestHandler.ValidateIncarnationId(1) == false);
+    BOOST_CHECK(secondTestHandler.ValidateIncarnationId(3) == false);
+    BOOST_CHECK(secondTestHandler.ValidateIncarnationId(2) == true);
+
 }
 
