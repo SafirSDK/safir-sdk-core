@@ -37,12 +37,11 @@ def startNode(safir_instance):
                dope_main = arguments.dope_main,
                safir_show_config = arguments.safir_show_config,
                start_syslog_server = True if safir_instance == "0" else False,
-               ignore_control_cmd = True if safir_instance == "0" else False)
+               ignore_control_cmd = True if safir_instance == "1" else False)
 
   del os.environ["SAFIR_INSTANCE"]
 
   return env;
-
 
 #kills all nodes by terminating their processes
 def killNodeProcesses():
@@ -121,7 +120,7 @@ def stopSystem(safir_instance):
 
   os.environ["SAFIR_INSTANCE"] = safir_instance
 
-  print("Trying to the system from instance " + safir_instance)
+  print("Trying to stop the system from instance " + safir_instance)
 
   #launch the safir_control_cli and wait until it exists
   try:
@@ -227,41 +226,41 @@ except:
 checkConnectionToNodes("0", ['Server_0', 'Server_1', 'Server_2'])
 
 
-#stop the whole system via safir_control_cli, note that System_0 is started with the "ignore-control-cmd" flag
-#wich will make it not stop. The other nodes will add the current incarnation id to the blacklist and stop
-#when we start the other two again they shall not join System_0
+#stop the whole system via safir_control_cli from node 0, note that System_1 is started with the "ignore-control-cmd" flag
+#which will make it not stop. The other nodes will add the current incarnation id to the blacklist and stop
+#when we start the other two again they shall not join System_1
 stopSystem('0')
 
 time.sleep(15)
 
-#make sure Server_0 has connection only to itself
-checkConnectionToNodes("0", ['Server_0'])
+#make sure Server_1 has connection only to itself
+checkConnectionToNodes("1", ['Server_1'])
 
-#start Server_1 and Server_2 again
+#start Server_0 and Server_2 again
 try:
-  print("*-* Starting Server_1 and Server_2")
-  envs['1'] = startNode("1")
+  print("*-* Starting Server_0 and Server_2")
+  envs['0'] = startNode("0")
   envs['2'] = startNode("2")
 except:
-  print("*-* Failed to start Server_1 and Server_2")
+  print("*-* Failed to start Server_0 and Server_2")
   killNodeProcesses()
   sys.exit(1)
 
-#make sure Server_0 has connection only to itself
-checkConnectionToNodes("0", ['Server_0'])
+#make sure Server_1 has connection only to itself
+checkConnectionToNodes("1", ['Server_1'])
 
-#make sure Server_1 has connection only to itself and Server_2
-checkConnectionToNodes("1", ['Server_1', 'Server_2'])
+#make sure Server_0 has connection only to itself and Server_2
+checkConnectionToNodes("0", ['Server_0', 'Server_2'])
 
-#hard kill Server_0 and restart it, see that it joins Server_1 and Server_2 again
-print("*-* Hardkill Server_0")
-envs['0'].killprocs()
+#hard kill Server_1 and restart it, see that it joins Server_1 and Server_2 again
+print("*-* Hardkill Server_1")
+envs['1'].killprocs()
 
 try:
-  print("*-* Starting Server_0")
-  envs['0'] = startNode("0")
+  print("*-* Starting Server_1")
+  envs['1'] = startNode("1")
 except:
-  print("*-* Failed to start Server_0")
+  print("*-* Failed to start Server_1")
   killNodeProcesses()
   sys.exit(1)
 

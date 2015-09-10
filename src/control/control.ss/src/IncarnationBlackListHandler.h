@@ -55,7 +55,7 @@ namespace Control
         //returns true if the incarnationId is not blacklisted
         bool ValidateIncarnationId(const int64_t incarnationId) const
         {
-            std::ifstream file(m_path.string().c_str(), std::ios::in);
+            std::ifstream file(m_path.string().c_str(), std::iostream::in);
 
             if (!file.is_open())
             {
