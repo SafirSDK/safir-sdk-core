@@ -166,8 +166,8 @@ namespace Control
                 throw std::logic_error(os.str());
             }
 
-            auto maxStop = (boost::chrono::seconds(m_config.nodeTypesParam[idx].heartbeatInterval/1000) *
-                                                   m_config.nodeTypesParam[idx].maxLostHeartbeats) * 2;
+            auto maxStop = (boost::chrono::milliseconds(m_config.nodeTypesParam[idx].heartbeatInterval) *
+                                                        m_config.nodeTypesParam[idx].maxLostHeartbeats) * 2;
 
             Node node(nodeTypeId,
                       maxStop);
@@ -214,15 +214,15 @@ namespace Control
         struct Node
         {
             Node(int64_t _nodeTypeId,
-                 boost::chrono::seconds _maxStopDuration)
+                 boost::chrono::milliseconds _maxStopDuration)
                 : nodeTypeId(_nodeTypeId),
                   maxStopDuration(_maxStopDuration),
                   stopInProgress(false)
             {
             }
 
-            const int64_t                   nodeTypeId;
-            const boost::chrono::seconds    maxStopDuration;
+            const int64_t                       nodeTypeId;
+            const boost::chrono::milliseconds   maxStopDuration;
 
             boost::chrono::steady_clock::time_point maxStopTime;
             Control::CommandAction                  cmdAction;
