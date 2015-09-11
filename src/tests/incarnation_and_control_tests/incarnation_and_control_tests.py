@@ -260,11 +260,13 @@ checkConnectionToNodes("1", ['Server_1', 'Server_2'])
 print("*-* Hardkill Server_0")
 envs['0'].killprocs()
 
+time.sleep(15)
+
 try:
   print("*-* Starting Server_0")
   envs['0'] = startNode("0")
-except:
-  print("*-* Failed to start Server_0")
+except Exception as e:
+  print("*-* Failed to start Server_0. Exception " + str(e))
   killNodeProcesses()
   sys.exit(1)
 
