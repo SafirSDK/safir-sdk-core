@@ -392,10 +392,11 @@ namespace Control
             }
         }
 
-        void ReceiveFromExternalNode(const int64_t /*from*/,
+        void ReceiveFromExternalNode(const int64_t from,
                                      const boost::shared_ptr<const char[]>& data,
                                      const size_t size)
         {
+            // Test/debug flag
             if (m_ignoreCmd)
             {
                 return;
@@ -406,6 +407,14 @@ namespace Control
             if (cmd.second == 0)
             {
                 // Receivied a system stop command
+
+                if (m_systemStop && from < m_communication.Id())
+                {
+                    // Ignore the stop command if this node is in system stop mode itsef
+                    // and the sender has a lower nodeId.
+                    return;
+                }
+
                 m_stopSystemCb();
             }
 
