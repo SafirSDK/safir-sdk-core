@@ -43,6 +43,7 @@
 #pragma warning (pop)
 #endif
 
+#include <set>
 #include <string>
 #include <unordered_map>
 #include <utility>
@@ -84,12 +85,23 @@ namespace Control
               m_stopSafirNodeCb(stopSafirNodeCb),
               m_stopSystemCb(stopSystemCb),
               m_ignoreCmd(ignoreCmd),
-              m_controlCmdMsgTypeId(LlufId_Generate64("Safir.Dob.Control.CmdMsgType")),
+              m_stopOrderMsgTypeId(LlufId_Generate64("Safir.Dob.Control.StopOrderMsgTypeId")),
+              m_stopNotificationMsgTypeId(LlufId_Generate64("Safir.Dob.Control.StopNotificationMsgTypeId")),
               m_sendTimer(ioService),
               m_localNodeStopInProgress(false),
               m_systemStop(false)
 
         {
+            for (unsigned int idx = 0; idx < m_config.nodeTypesParam.size(); ++idx)
+            {
+                auto nodeTypeId = m_config.nodeTypesParam[idx].id;
+                auto maxStopDuration = (boost::chrono::milliseconds(m_config.nodeTypesParam[idx].heartbeatInterval) *
+                                        m_config.nodeTypesParam[idx].maxLostHeartbeats) * 2;
+
+                m_nodeTypeTable.insert(std::make_pair(nodeTypeId, maxStopDuration));
+
+            }
+
             // Set up callbacks to receive stop commands locally via IPC
             m_controlCmdReceiver.reset(new ControlCmdReceiver(ioService,
                                                               [this](Control::CommandAction cmdAction, int64_t nodeId)
@@ -121,10 +133,22 @@ namespace Control
                                                  const char* const data,
                                                  const size_t size)
                                           {
-                                              ReceiveFromExternalNode(from,
-                                                                      boost::shared_ptr<const char[]>(data),size);
+                                              HandleStopOrderFromExternalNode(from,
+                                                                              boost::shared_ptr<const char[]>(data),size);
                                           },
-                                          m_controlCmdMsgTypeId,
+                                          m_stopOrderMsgTypeId,
+                                          [](size_t size){return new char[size];},
+                                          [](const char * data){delete[] data;});
+
+            // Set up callback to receive stop notifications via control channel from an external node.
+            communication.SetDataReceiver([this](const int64_t from,
+                                                 const int64_t /*nodeTypeId*/,
+                                                 const char* const /*data*/,
+                                                 const size_t /*size*/)
+                                          {
+                                              HandleStopNotificationFromExternalNode(from);
+                                          },
+                                          m_stopNotificationMsgTypeId,
                                           [](size_t size){return new char[size];},
                                           [](const char * data){delete[] data;});
         }
@@ -148,29 +172,7 @@ namespace Control
                 return;
             }
 
-            // Calculate max time to wait for this node to stop
-            unsigned int idx = 0;
-            bool found = false;
-            for (; idx < m_config.nodeTypesParam.size(); ++idx)
-            {
-                if (m_config.nodeTypesParam[idx].id == nodeTypeId)
-                {
-                    found = true;
-                    break;
-                }
-            }
-            if (!found)
-            {
-                std::ostringstream os;
-                os << "Node type " << nodeTypeId << " not found in configuration!";
-                throw std::logic_error(os.str());
-            }
-
-            auto maxStop = (boost::chrono::milliseconds(m_config.nodeTypesParam[idx].heartbeatInterval) *
-                                                        m_config.nodeTypesParam[idx].maxLostHeartbeats) * 2;
-
-            Node node(nodeTypeId,
-                      maxStop);
+            Node node(nodeTypeId);
 
             if (m_systemStop)
             {
@@ -202,7 +204,8 @@ namespace Control
 
         std::unique_ptr<ControlCmdReceiver> m_controlCmdReceiver;
 
-        const int64_t   m_controlCmdMsgTypeId;
+        const int64_t   m_stopOrderMsgTypeId;
+        const int64_t   m_stopNotificationMsgTypeId;
 
         boost::asio::steady_timer m_sendTimer;
 
@@ -211,18 +214,17 @@ namespace Control
 
         bool m_systemStop;
 
+        std::unordered_map<int64_t, boost::chrono::milliseconds> m_nodeTypeTable;
+
         struct Node
         {
-            Node(int64_t _nodeTypeId,
-                 boost::chrono::milliseconds _maxStopDuration)
+            Node(int64_t _nodeTypeId)
                 : nodeTypeId(_nodeTypeId),
-                  maxStopDuration(_maxStopDuration),
                   stopInProgress(false)
             {
             }
 
             const int64_t                       nodeTypeId;
-            const boost::chrono::milliseconds   maxStopDuration;
 
             boost::chrono::steady_clock::time_point maxStopTime;
             Control::CommandAction                  cmdAction;
@@ -239,9 +241,14 @@ namespace Control
                 return;
             }
 
-            // Skicka "Jag kommer gå ned" här
+            // Tell other nodes that this node is about to stop.
+            SendStopNotification();
 
-            // Systemlog?
+            // Wait a short while and then send the notification again, just in case.
+
+            //TODO short thread sleep here?
+
+            SendStopNotification();
 
             m_stopSafirNodeCb();
         }
@@ -290,7 +297,7 @@ namespace Control
                 nodeIt->second.cmdAction = cmdAction;
                 nodeIt->second.cmdNodeId = 0;
                 nodeIt->second.stopInProgress = true;
-                nodeIt->second.maxStopTime = now + nodeIt->second.maxStopDuration;
+                nodeIt->second.maxStopTime = now + m_nodeTypeTable[nodeIt->second.nodeTypeId];
             }
 
             m_sendTimer.expires_from_now(boost::chrono::seconds(0));
@@ -323,7 +330,8 @@ namespace Control
             nodeIt->second.cmdAction = cmdAction;
             nodeIt->second.cmdNodeId = cmdNodeId;
             nodeIt->second.stopInProgress = true;
-            nodeIt->second.maxStopTime = boost::chrono::steady_clock::now() + nodeIt->second.maxStopDuration;
+            nodeIt->second.maxStopTime = boost::chrono::steady_clock::now() +
+                                         m_nodeTypeTable[nodeIt->second.nodeTypeId];
 
             m_sendTimer.expires_from_now(boost::chrono::seconds(0));
             m_sendTimer.async_wait([this](const boost::system::error_code& error)
@@ -343,29 +351,43 @@ namespace Control
 
             auto now = boost::chrono::steady_clock::now();
 
+            std::set<int64_t> pendingNodeTypeIds;
+
             for (auto nodeIt = m_nodeTable.begin(); nodeIt != m_nodeTable.end(); ++nodeIt)
             {
                 if (nodeIt->second.stopInProgress)
                 {
                     if (now < nodeIt->second.maxStopTime)
                     {
-                        auto cmd = SerializeCmd(nodeIt->second.cmdAction, nodeIt->second.cmdNodeId);
-
-                        m_communication.Send(nodeIt->first,
-                                             nodeIt->second.nodeTypeId,
-                                             boost::shared_ptr<char[]>(std::move(cmd.first)),
-                                             cmd.second, // size
-                                             m_controlCmdMsgTypeId,
-                                             true); // delivery guarantee
-
-                        // We don't care about overflow towards Communication since we will resend
-                        // outstanding stop commmands until the node disapears.
                         externalNodeStopInProgress = true;
+
+                        if (m_systemStop)
+                        {
+                            // We are in system stop mode. Here we collect only the nodeTypeId:s so that
+                            // just one message for each nodeTypeId will be sent to Communication.
+                            pendingNodeTypeIds.insert(nodeIt->second.nodeTypeId);
+                        }
+                        else
+                        {
+                            // Send stop order to a single node
+                            auto cmd = SerializeCmd(nodeIt->second.cmdAction, nodeIt->second.cmdNodeId);
+
+                            m_communication.Send(nodeIt->first,
+                                                 nodeIt->second.nodeTypeId,
+                                                 boost::shared_ptr<char[]>(std::move(cmd.first)),
+                                                 cmd.second, // size
+                                                 m_stopOrderMsgTypeId,
+                                                 true); // delivery guarantee
+
+                            // We don't care about overflow towards Communication since we will resend
+                            // outstanding stop commmands until the node disappears or we get
+                        }
                     }
                     else
                     {
                         SEND_SYSTEM_LOG(Informational,
-                                        << "Node " << nodeIt->first << " doesn't receive or doesn't act on a stop order");
+                                        << "Node " << nodeIt->first
+                                        << " doesn't receive or doesn't act on a stop order");
 
                         nodeIt->second.stopInProgress = false;
                     }
@@ -374,6 +396,20 @@ namespace Control
 
             if (externalNodeStopInProgress)
             {
+                for (auto nodeTypeIdIt = pendingNodeTypeIds.begin();
+                     nodeTypeIdIt != pendingNodeTypeIds.end();
+                     ++nodeTypeIdIt)
+                {
+                    auto cmd = SerializeCmd(m_localNodeStopCmdAction, 0);
+
+                    m_communication.Send(0, // all nodes ...
+                                         *nodeTypeIdIt, // ... of this type
+                                         boost::shared_ptr<char[]>(std::move(cmd.first)),
+                                         cmd.second, // size
+                                         m_stopOrderMsgTypeId,
+                                         true); // delivery guarantee
+                }
+
                 m_sendTimer.expires_from_now(boost::chrono::seconds(1));
                 m_sendTimer.async_wait([this](const boost::system::error_code& error)
                                        {
@@ -392,9 +428,9 @@ namespace Control
             }
         }
 
-        void ReceiveFromExternalNode(const int64_t from,
-                                     const boost::shared_ptr<const char[]>& data,
-                                     const size_t size)
+        void HandleStopOrderFromExternalNode(const int64_t from,
+                                             const boost::shared_ptr<const char[]>& data,
+                                             const size_t size)
         {
             // Test/debug flag
             if (m_ignoreCmd)
@@ -419,6 +455,38 @@ namespace Control
             }
 
             StopThisNode(cmd.first);
+        }
+
+        void HandleStopNotificationFromExternalNode(const int64_t from)
+        {
+            // TODO Anropa ny fin metod i SP
+            std::wcout << "Received stop notification from node " << from;
+        }
+
+        void SendStopNotification()
+        {
+            // Send stop notifications to all nodes
+
+            // First, collect all node types that we know about ...
+            std::set<int64_t> nodeTypeIds;
+
+            for (auto nodeIt = m_nodeTable.begin(); nodeIt != m_nodeTable.end(); ++nodeIt)
+            {
+                nodeTypeIds.insert(nodeIt->second.nodeTypeId);
+            }
+
+            // ... and send a stop notification to all nodes of each node type
+            for (auto nodeTypeIdIt = nodeTypeIds.begin();
+                 nodeTypeIdIt != nodeTypeIds.end();
+                 ++nodeTypeIdIt)
+            {
+                m_communication.Send(0, // all nodes
+                                     *nodeTypeIdIt,
+                                     boost::shared_ptr<char[]>(new char[1]),  // dummy
+                                     1, // size
+                                     m_stopNotificationMsgTypeId,
+                                     false); // no delivery guarantee
+            }
         }
 
     };
