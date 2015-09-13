@@ -40,4 +40,27 @@ if (MSVC)
   endif()
 else()
   SET(CSHARP_COMPILER_FLAGS "-warn:4")
+
+  #If we're compiling with Mono on ARM we need a newish version, since
+  #older versions of mono do not work well on ARM. Here we test for 4.0
+  #or later, but it is quite likely we would work with 3.4 or later.
+  #We know we don't work with 3.2.8 and earlier.
+  if (CSHARP_IS_MONO)
+    FIND_PROGRAM (MONO_RUNTIME NAMES mono)
+    if (NOT MONO_RUNTIME)
+      MESSAGE(FATAL_ERROR "Could not find mono executable")
+    endif()
+    EXECUTE_PROCESS(COMMAND ${MONO_RUNTIME} --version
+      OUTPUT_VARIABLE version_output)
+    STRING(REGEX MATCH "Mono JIT compiler version [0-9]+\\.[0-9]+\\.[0-9]+ \\(" version ${version_output})
+    STRING(REPLACE "Mono JIT compiler version " "" version ${version})
+    STRING(REPLACE " (" "" version ${version})
+    if (version VERSION_LESS "4.0" AND ${version_output} MATCHES "Architecture:.*armel")
+      SET(CSHARP_FOUND FALSE)
+      message(STATUS "The installed version of Mono is too old, need at least 4.0 on ARM. Will not build .NET interfaces!")
+    endif()
+    UNSET(version_output)
+    UNSET(version)
+    UNSET(MONO_RUNTIME)
+  endif()
 endif()
