@@ -88,6 +88,7 @@ namespace Control
               m_stopOrderMsgTypeId(LlufId_Generate64("Safir.Dob.Control.StopOrderMsgTypeId")),
               m_stopNotificationMsgTypeId(LlufId_Generate64("Safir.Dob.Control.StopNotificationMsgTypeId")),
               m_sendTimer(ioService),
+              m_stopTimer(ioService),
               m_localNodeStopInProgress(false),
               m_systemStop(false)
 
@@ -162,6 +163,7 @@ namespace Control
         {
             m_controlCmdReceiver->Stop();
             m_sendTimer.cancel();
+            m_stopTimer.cancel();
         }
 
         void AddNode(const int64_t nodeId, const int64_t nodeTypeId)
@@ -208,6 +210,8 @@ namespace Control
         const int64_t   m_stopNotificationMsgTypeId;
 
         boost::asio::steady_timer m_sendTimer;
+        boost::asio::steady_timer m_stopTimer;
+
 
         bool                    m_localNodeStopInProgress;
         Control::CommandAction  m_localNodeStopCmdAction;
@@ -246,11 +250,18 @@ namespace Control
 
             // Wait a short while and then send the notification again, just in case.
 
-            //TODO short thread sleep here?
+            m_stopTimer.expires_from_now(boost::chrono::milliseconds(300));
+            m_stopTimer.async_wait([this](const boost::system::error_code& error)
+                                   {
+                                       if (error == boost::asio::error::operation_aborted)
+                                       {
+                                           return;
+                                       }
+                                       SendStopNotification();
 
-            SendStopNotification();
-
-            m_stopSafirNodeCb();
+                                       // The notification has been sent a second time, now we stop this node
+                                       m_stopSafirNodeCb();
+                                   });
         }
 
         void HandleLocalNodeStop(CommandAction cmdAction)
@@ -460,7 +471,7 @@ namespace Control
         void HandleStopNotificationFromExternalNode(const int64_t from)
         {
             // TODO Anropa ny fin metod i SP
-            std::wcout << "Received stop notification from node " << from;
+            std::wcout << "Received stop notification from node " << from << std::endl;
         }
 
         void SendStopNotification()
