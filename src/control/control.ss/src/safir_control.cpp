@@ -204,8 +204,9 @@ int main(int argc, char * argv[])
         Safir::Utilities::CrashReporter::RegisterCallback(DumpFunc);
         Safir::Utilities::CrashReporter::Start();
 
-        //Set number of threads to at least 2, or the number of cpu kernels
-        auto nbrOfThreads = std::max<size_t>(2, boost::thread::hardware_concurrency());
+        // Set number of threads to 2. Control has an event driven design where parallell execution is of
+        // little use.
+        const auto nbrOfThreads = 2;
 
         const auto run = [&ioService, &success]
         {
