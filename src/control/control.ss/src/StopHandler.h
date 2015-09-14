@@ -408,7 +408,7 @@ namespace Control
                                                  true); // delivery guarantee
 
                             // We don't care about overflow towards Communication since we will resend
-                            // outstanding stop commmands until the node disappears or we get
+                            // outstanding stop commmands until the node disappears.
                         }
                     }
                     else
