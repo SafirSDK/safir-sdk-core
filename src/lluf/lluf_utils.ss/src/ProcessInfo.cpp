@@ -157,9 +157,6 @@ namespace Utilities
                                         m_pid);
         if (hProcess == NULL)
         {
-            //TODO: remove error stuff
-            std::wcerr << "OpenProcess failed with error code "
-                       << ::GetLastError() << std::endl;
             return boost::lexical_cast<std::string>(m_pid);
         }
 
@@ -167,25 +164,55 @@ namespace Utilities
         char szProcessName[MAX_PATH];
         strncpy(szProcessName,boost::lexical_cast<std::string>(m_pid).c_str(), MAX_PATH);
 
-        HMODULE hMod;
+        std::unique_ptr<HMODULE[]> hMod = new HMODULE[1];
         DWORD cbNeededMBN;
 
-        if ( EnumProcessModules( hProcess, &hMod, sizeof(hMod),
-            &cbNeededMBN) )
+        const BOOL ret = EnumProcessModules(hProcess,
+                                            hMod.get(),
+                                            sizeof(HMODULE),
+                                            &cbNeededMBN);
+        if (!ret)
         {
-            const auto ret = GetModuleBaseNameA( hProcess, hMod, szProcessName, MAX_PATH );
-            if (ret == 0)
-            {
-                //TODO: remove error stuff
-                std::wcerr << "GetModuleBaseNameA failed with error code "
-                           << ::GetLastError() << std::endl;
-            }
-        }
-        else
-        {
-            //TODO: remove error stuff
             std::wcerr << "EnumProcessModules failed with error code "
-                       << ::GetLastError() << std::endl;
+                       << ::GetLastError() << " cbNeededMBN = " << cbNeededMBN
+                       << std::endl;
+
+            hMod.reset(new HMODULE[cbNeededMBN/sizeof(HMODULE)]);
+            const BOOL ret2 = EnumProcessModules(hProcess,
+                                                 hMod.get(),
+                                                 cbNeededMBN,
+                                                 &cbNeededMBN);
+            if (!ret2)
+            {
+                std::wcerr << "Retry EnumProcessModules failed: "
+                           << ::GetLastError() << " cbNeededMBN = " << cbNeededMBN
+                           << std::endl;
+            }
+            else
+            {
+                std::wcerr << "Retry EnumProcessModules succeeded: "
+                           << " cbNeededMBN = " << cbNeededMBN
+                           << std::endl;
+
+                for (int i = 0; i < cbNeededMBN/sizeof(HMODULE); ++i)
+                {
+                    char pn[MAX_PATH];
+                    BOOL ret3 = GetModuleBaseNameA( hProcess, hMod[i], pn, MAX_PATH );
+                    if (!ret3)
+                    {
+                        std::wcout << "GetModuleBaseNameA failed " << i << " " << GetLastError() << std::endl;
+                    }
+                    else
+                    {
+                        std::wcout << "GetModuleBaseNameA " << i << ": " << pn << std::endl;
+                    }
+                }
+            }
+
+        }
+        else //TODO: remove else and brackets (not statement)
+        {
+            GetModuleBaseNameA( hProcess, hMod[0], szProcessName, MAX_PATH );
         }
 
         CloseHandle(hProcess);
