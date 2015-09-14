@@ -164,7 +164,7 @@ namespace Utilities
         char szProcessName[MAX_PATH];
         strncpy(szProcessName,boost::lexical_cast<std::string>(m_pid).c_str(), MAX_PATH);
 
-        std::unique_ptr<HMODULE[]> hMod = new HMODULE[1];
+        std::unique_ptr<HMODULE[]> hMod(new HMODULE[1]);
         DWORD cbNeededMBN;
 
         const BOOL ret = EnumProcessModules(hProcess,
