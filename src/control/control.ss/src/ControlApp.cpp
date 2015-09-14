@@ -179,6 +179,14 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
                                                  },
                                                  [this]()
                                                  {
+                                                     Shutdown();
+                                                 },
+                                                 [this]()
+                                                 {
+                                                     Reboot();
+                                                 },
+                                                 [this]()
+                                                 {
                                                      if (m_incarnationId != 0)
                                                      {
                                                          m_incarnationBlackListHandler.AddIncarnationId(m_incarnationId);
@@ -392,6 +400,16 @@ void ControlApp::StopThisNode()
     {
         StopControl();
     }
+}
+
+void ControlApp::Shutdown()
+{
+    //TODO Implement shutdown for Linux and Windows here
+}
+
+void ControlApp::Reboot()
+{
+    //TODO Implement reboot for Linux and Windows here
 }
 
 void ControlApp::SendControlInfo()

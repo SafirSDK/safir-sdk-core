@@ -70,6 +70,8 @@ namespace Control
     public:
 
         typedef std::function<void()> StopSafirNodeCb;
+        typedef std::function<void()> ShutdownCb;
+        typedef std::function<void()> RebootCb;
         typedef std::function<void()> StopSystemCb;
 
         StopHandlerBasic(boost::asio::io_service&   ioService,
@@ -77,6 +79,8 @@ namespace Control
                          SP&                        sp,
                          Config&                    config,
                          const StopSafirNodeCb      stopSafirNodeCb,
+                         const ShutdownCb           shutdownCb,
+                         const RebootCb             rebootCb,
                          const StopSystemCb         stopSystemCb,
                          bool                       ignoreCmd)
             : m_strand(ioService),
@@ -84,6 +88,8 @@ namespace Control
               m_sp(sp),
               m_config(config),
               m_stopSafirNodeCb(stopSafirNodeCb),
+              m_shutdownCb(shutdownCb),
+              m_rebootCb(rebootCb),
               m_stopSystemCb(stopSystemCb),
               m_ignoreCmd(ignoreCmd),
               m_stopOrderMsgTypeId(LlufId_Generate64("Safir.Dob.Control.StopOrderMsgTypeId")),
@@ -158,6 +164,33 @@ namespace Control
                                           [](const char * data){delete[] data;});
         }
 
+        ~StopHandlerBasic()
+        {
+            // This is about the last thing that happens when a node is stopped. When this destructor is
+            // executed we know that the ioService is empty and therefor this is a good place to make
+            // a shutdown or reboot.
+            switch (m_localNodeStopCmdAction)
+            {
+                case STOP:
+                {
+                    // Do nothing
+                }
+                break;
+
+                case SHUTDOWN:
+                {
+                    m_shutdownCb();
+                }
+                break;
+
+                case REBOOT:
+                {
+                    m_rebootCb();
+                }
+                break;
+            }
+        }
+
         void Start()
         {
             m_controlCmdReceiver->Start();
@@ -216,8 +249,10 @@ namespace Control
         SP&             m_sp;
         ControlConfig&  m_config;
 
-        const StopSafirNodeCb m_stopSafirNodeCb;
-        const StopSystemCb m_stopSystemCb;
+        const StopSafirNodeCb   m_stopSafirNodeCb;
+        const ShutdownCb        m_shutdownCb;
+        const RebootCb          m_rebootCb;
+        const StopSystemCb      m_stopSystemCb;
 
         const bool  m_ignoreCmd;
 

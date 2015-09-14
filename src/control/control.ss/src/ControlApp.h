@@ -73,6 +73,10 @@ private:
 
     void StopThisNode();
 
+    void Shutdown();
+
+    void Reboot();
+
     void SendControlInfo();
 
     boost::asio::io_service&                    m_ioService;
