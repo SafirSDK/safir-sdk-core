@@ -290,7 +290,7 @@ namespace Control
 
         std::unordered_map<int64_t, Node> m_nodeTable;
 
-        void StopThisNode(CommandAction  /*cmdAction*/)
+        void StopThisNode()
         {
             if (m_ignoreCmd)
             {
@@ -340,7 +340,7 @@ namespace Control
             }
             else
             {
-                StopThisNode(cmdAction);
+                StopThisNode();
             }
         }
 
@@ -487,7 +487,7 @@ namespace Control
             {
                 // All external nodes are gone (or doesn't act on the stop order) and this node is
                 // also on death row ... time to die.
-                StopThisNode(m_localNodeStopCmdAction);
+                StopThisNode();
             }
         }
 
@@ -503,6 +503,8 @@ namespace Control
 
             auto cmd = DeserializeCmd(data.get(), size);
 
+            m_localNodeStopCmdAction = cmd.first;
+
             if (cmd.second == 0)
             {
                 // Receivied a system stop command
@@ -517,7 +519,7 @@ namespace Control
                 m_stopSystemCb();
             }
 
-            StopThisNode(cmd.first);
+            StopThisNode();
         }
 
         void HandleStopNotificationFromExternalNode(const int64_t from)
