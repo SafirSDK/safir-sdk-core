@@ -79,7 +79,8 @@ namespace Control
                          const StopSafirNodeCb      stopSafirNodeCb,
                          const StopSystemCb         stopSystemCb,
                          bool                       ignoreCmd)
-            : m_communication(communication),
+            : m_strand(ioService),
+              m_communication(communication),
               m_sp(sp),
               m_config(config),
               m_stopSafirNodeCb(stopSafirNodeCb),
@@ -105,6 +106,7 @@ namespace Control
 
             // Set up callbacks to receive stop commands locally via IPC
             m_controlCmdReceiver.reset(new ControlCmdReceiver(ioService,
+                                                              m_strand.wrap(
                                                               [this](Control::CommandAction cmdAction, int64_t nodeId)
                                                               {
                                                                   if (nodeId != 0)
@@ -126,29 +128,31 @@ namespace Control
                                                                       HandleSystemStop(cmdAction);
                                                                   }
 
-                                                              }));
+                                                              })));
 
             // Set up callback to receive stop commands via control channel from an external node.
-            communication.SetDataReceiver([this](const int64_t from,
-                                                 const int64_t /*nodeTypeId*/,
-                                                 const char* const data,
-                                                 const size_t size)
-                                          {
-                                              HandleStopOrderFromExternalNode(from,
+            communication.SetDataReceiver(m_strand.wrap(
+                                         [this](const int64_t from,
+                                                const int64_t /*nodeTypeId*/,
+                                                const char* const data,
+                                                const size_t size)
+                                         {
+                                             HandleStopOrderFromExternalNode(from,
                                                                               boost::shared_ptr<const char[]>(data),size);
-                                          },
-                                          m_stopOrderMsgTypeId,
-                                          [](size_t size){return new char[size];},
-                                          [](const char * data){delete[] data;});
+                                         }),
+                                         m_stopOrderMsgTypeId,
+                                         [](size_t size){return new char[size];},
+                                         [](const char * data){delete[] data;});
 
             // Set up callback to receive stop notifications via control channel from an external node.
-            communication.SetDataReceiver([this](const int64_t from,
+            communication.SetDataReceiver(m_strand.wrap(
+                                          [this](const int64_t from,
                                                  const int64_t /*nodeTypeId*/,
                                                  const char* const /*data*/,
                                                  const size_t /*size*/)
                                           {
                                               HandleStopNotificationFromExternalNode(from);
-                                          },
+                                          }),
                                           m_stopNotificationMsgTypeId,
                                           [](size_t size){return new char[size];},
                                           [](const char * data){delete[] data;});
@@ -161,39 +165,52 @@ namespace Control
 
         void Stop()
         {
-            m_controlCmdReceiver->Stop();
-            m_sendTimer.cancel();
-            m_stopTimer.cancel();
+            m_strand.post([this]()
+                          {
+                              m_controlCmdReceiver->Stop();
+                              m_sendTimer.cancel();
+                              m_stopTimer.cancel();
+                          });
+
+
         }
 
         void AddNode(const int64_t nodeId, const int64_t nodeTypeId)
         {
-            if (nodeId == m_communication.Id())
-            {
-                // We don't save own node
-                return;
-            }
+            m_strand.post([this, nodeId, nodeTypeId]()
+                          {
+                              if (nodeId == m_communication.Id())
+                              {
+                                  // We don't save own node
+                                  return;
+                              }
 
-            Node node(nodeTypeId);
+                              Node node(nodeTypeId);
 
-            if (m_systemStop)
-            {
-                // A node is added while we are about to stop the system
+                              if (m_systemStop)
+                              {
+                                  // A node is added while we are about to stop the system
 
-                node.stopInProgress = true;
-                node.cmdAction = m_localNodeStopCmdAction;
-                node.cmdNodeId = 0;
-            }
+                                  node.stopInProgress = true;
+                                  node.cmdAction = m_localNodeStopCmdAction;
+                                  node.cmdNodeId = 0;
+                              }
 
-            m_nodeTable.insert(std::make_pair(nodeId, node));
+                              m_nodeTable.insert(std::make_pair(nodeId, node));
+                          });
         }
 
         void RemoveNode(const int64_t nodeId)
         {
-            m_nodeTable.erase(nodeId);
+            m_strand.post([this, nodeId]()
+                          {
+                              m_nodeTable.erase(nodeId);
+                          });
         }
 
     private:
+
+        boost::asio::io_service::strand m_strand;
 
         Communication&  m_communication;
         SP&             m_sp;
