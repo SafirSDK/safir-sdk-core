@@ -84,7 +84,7 @@ def readconnectedNodeIds(safir_instance):
     output = subprocess.check_output([arguments.system_picture_listener, "-o"],
                                     universal_newlines = True)
   except subprocess.CalledProcessError:
-    print("Failed to read connected nodeIds " + safir_instance)
+    print("Error: Failed to read connected nodeIds " + safir_instance)
     killNodeProcesses()
     sys.exit(1)
 
@@ -101,7 +101,7 @@ def readconnectedNodeId(safir_instance, nodeName):
     output = subprocess.check_output([arguments.system_picture_listener, "-o"],
                                     universal_newlines = True)
   except subprocess.CalledProcessError:
-    print("*-* Failed read nodeId for " + nodeName + " from instance" + safir_instance)
+    print("Error: Failed read nodeId for " + nodeName + " from instance" + safir_instance)
     killNodeProcesses()
     sys.exit(1)
 
@@ -110,7 +110,7 @@ def readconnectedNodeId(safir_instance, nodeName):
   matchList = re.findall("(?:\sE\s|\s\s\s)" + nodeName + ".+id = (\S+),", output)
 
   if len(matchList) is 0:
-    print("*-* Did not find NodeID: for node with name " + nodeName)
+    print("Did not find NodeID: for node with name " + nodeName)
 
   if len(matchList) is 0:
     return ""
@@ -129,7 +129,7 @@ def stopSystem(safir_instance):
     subprocess.check_call([arguments.safir_control_cli, "-a", "STOP"],
                                     universal_newlines = True)
   except subprocess.CalledProcessError:
-    print("*-* Failed to stop the system from instance " + safir_instance)
+    print("Error: Failed to stop the system from instance " + safir_instance)
     killNodeProcesses()
     sys.exit(1)
 
@@ -148,7 +148,7 @@ def stopNode(safir_instance, nodeId):
     subprocess.check_call([arguments.safir_control_cli, "-a", "STOP", "-n", nodeId],
                                     universal_newlines = True)
   except subprocess.CalledProcessError:
-    print("*-* Failed to stop node with id:" + str(nodeId) + " from instance " + safir_instance)
+    print("Error: Failed to stop node with id:" + str(nodeId) + " from instance " + safir_instance)
     killNodeProcesses()
     sys.exit(1)
 
@@ -156,19 +156,22 @@ def stopNode(safir_instance, nodeId):
 
 #checks if the node given by the safir_instance has a connection to the given nodes
 def checkConnectionToNodes(safir_instance, nodes):
-
   os.environ["SAFIR_INSTANCE"] = safir_instance
 
-  connectedNodes = readConnectedNodes(safir_instance)
-  connectedNodes.sort()
-  nodes.sort()
+  #try for one minute
+  for i in range(60):
+      connectedNodes = readConnectedNodes(safir_instance)
+      connectedNodes.sort()
+      nodes.sort()
 
-  if connectedNodes == nodes:
-    print("*-* Server_" + safir_instance + " has connection to (only) " + str(nodes))
-  else:
-    print("*-* Server_" + safir_instance + " does not have contact with (only) " + str(nodes) + " we have connection to: " + str(connectedNodes))
-    killNodeProcesses()
-    sys.exit(1)
+      if connectedNodes == nodes:
+          print("Server_" + safir_instance + " has connection to (only) " + str(nodes))
+          return
+      time.sleep(1.0)
+
+  print("Error: Server_" + safir_instance + " does not have contact with (only) " + str(nodes) + " we have connection to: " + str(connectedNodes))
+  killNodeProcesses()
+  sys.exit(1)
 
 parser = argparse.ArgumentParser("test script")
 parser.add_argument("--safir-control", required=True)
@@ -184,112 +187,104 @@ arguments = parser.parse_args()
 #add all the environment variables. passed on format A=10;B=20
 for pair in arguments.safir_generated_paths.split(";"):
     (name,value) = pair.split("=")
-    print("*-* Setting environment variable", name, "to", value)
+    print("Setting environment variable", name, "to", value)
     os.environ[name] = value
 
 envs = dict()
 
 #start all nodes
-print("*-* Starting nodes 0,1,2")
+print("Starting nodes 0,1,2")
 
 try:
   envs['0'] = startNode("0")
   envs['1'] = startNode("1")
   envs['2'] = startNode("2")
 except:
-  print("*-* Failed to start nodes 0,1,2")
+  print("Error: Failed to start nodes 0,1,2")
   killNodeProcesses()
   sys.exit(1)
 
 #make Server_0 has connection to the other two
-print("*-* Checking that Server_0 has connection to ['Server_0', 'Server_1', 'Server_2']")
+print("Checking that Server_0 has connection to ['Server_0', 'Server_1', 'Server_2']")
 checkConnectionToNodes("0", ['Server_0', 'Server_1', 'Server_2'])
 
 #stop node two
-print("*-* Stopping node 2 from System_0")
+print("Stopping node 2 from System_0")
 stopNode("0", readconnectedNodeId('0', "Server_2"))
 
-time.sleep(15)
-
 #make sure Server_0 has connection to Server_1 only
-print("*-* Checking that Server_0 has connection to ['Server_0', 'Server_1']")
+print("Checking that Server_0 has connection to ['Server_0', 'Server_1']")
 checkConnectionToNodes("0", ['Server_0', 'Server_1'])
 
 #restart node 2
 try:
-  print("*-* Starting node 2")
+  print("Starting node 2")
   envs['2'] = startNode("2")
 except:
-  print("*-* Failed to start node 2")
+  print("Error: Failed to start node 2")
   killNodeProcesses()
   sys.exit(1)
 
 #make sure Server_0 has connection to the other two
-print("*-* Checking that Server_0 has connection to ['Server_0', 'Server_1', 'Server_2']")
+print("Checking that Server_0 has connection to ['Server_0', 'Server_1', 'Server_2']")
 checkConnectionToNodes("0", ['Server_0', 'Server_1', 'Server_2'])
 
 
 #stop the whole system via safir_control_cli from node 0, note that System_1 is started with the "ignore-control-cmd" flag
 #which will make it not stop. The other nodes will add the current incarnation id to the blacklist and stop
 #when we start the other two again they shall not join System_1
-print("*-* Stopping the system from Server_0, Server_0 should not go down due to being started with --ignore-control-cmd")
+print("Stopping the system from Server_0, Server_0 should not go down due to being started with --ignore-control-cmd")
 stopSystem('0')
 
-time.sleep(25)
-
-print("*-* Checking that Server_0 has only to itself")
+print("Checking that Server_0 has only to itself")
 checkConnectionToNodes("0", ['Server_0'])
 
 #start Server_0 and Server_2 again
 try:
-  print("*-* Starting Server_1 and Server_2")
+  print("Starting Server_1 and Server_2")
   envs['1'] = startNode("1")
   envs['2'] = startNode("2")
 except:
-  print("*-* Failed to start Server_1 and Server_2")
+  print("Error: Failed to start Server_1 and Server_2")
   killNodeProcesses()
   sys.exit(1)
 
-print("*-* Checking that Server_0 has only to itself")
+print("Checking that Server_0 has only to itself")
 checkConnectionToNodes("0", ['Server_0'])
 
-print("*-* Checking that Server_1 has connection to ['Server_1', 'Server_2']")
+print("Checking that Server_1 has connection to ['Server_1', 'Server_2']")
 checkConnectionToNodes("1", ['Server_1', 'Server_2'])
 
 #hard kill Server_0 and restart it, see that it joins Server_1 and Server_2 again
-print("*-* Hardkill Server_0")
+print("Hardkill Server_0")
 envs['0'].killprocs()
 
-time.sleep(15)
-
 try:
-  print("*-* Starting Server_0")
+  print("Starting Server_0")
   envs['0'] = startNode("0")
 except Exception as e:
-  print("*-* Failed to start Server_0. Exception " + str(e))
+  print("Error: Failed to start Server_0. Exception " + str(e))
   killNodeProcesses()
   sys.exit(1)
 
 #make sure Server_0 has connection to the other two
 checkConnectionToNodes("0", ['Server_0', 'Server_1', 'Server_2'])
 
-print("*-* Stopping node 1 from System_1")
+print("Stopping node 1 from System_1")
 stopNode("1", readconnectedNodeId('0', "Server_1"))
 
-time.sleep(15)
-
 #make sure Server_0 has connection to Server_2 only
-print("*-* Checking that Server_0 has connection to ['Server_0', 'Server_2']")
+print("Checking that Server_0 has connection to ['Server_0', 'Server_2']")
 checkConnectionToNodes("0", ['Server_0', 'Server_2'])
 
 #end the test
-print("*-* Ending test, stopping all nodes")
+print("Ending test, stopping all nodes")
 
 killNodeProcesses()
 
 for env in envs:
     if not envs[env].ReturnCodesOk():
-        print("Some process exited with an unexpected value")
+        print("Error: Some process exited with an unexpected value")
         sys.exit(1)
 
 sys.exit(0)
