@@ -106,7 +106,8 @@ class DotsTestDotnet
         Test_Sequences();
         Test_Dictionaries();
         Test_DeserializeUnlinkedObject();
-        Test_DeepClone();
+        Test_ObjectClone();
+        Test_ContainerClone();
     }
 
     private static void Test_IsException()
@@ -8221,7 +8222,7 @@ class DotsTestDotnet
         PrintDictionaries(fromJson);
     }
 
-    private static void Test_DeepClone()
+    private static void Test_ObjectClone()
     {
         {
             DotsTest.MemberTypes mt = new DotsTest.MemberTypes();
@@ -8294,6 +8295,70 @@ class DotsTestDotnet
 
         }
 
+    }
+
+    private static void Test_ContainerClone()
+    {
+        {
+            DotsTest.MemberTypes mt = new DotsTest.MemberTypes();
+            Safir.Dob.Typesystem.Int32Container intClone = mt.Int32Member.Clone();
+            Safir.Dob.Typesystem.Si64.KelvinContainer kelvinClone = mt.Kelvin64Member.Clone();
+            mt.Int32Member.Val = 10;
+            mt.Kelvin64Member.Val = 10;
+            if (!intClone.IsNull() || !kelvinClone.IsNull())
+            {
+                System.Console.WriteLine("Clone Error");
+            }
+
+            intClone = mt.Int32Member.Clone();
+            kelvinClone = mt.Kelvin64Member.Clone();
+            if (intClone.Val != 10 || kelvinClone.Val != 10)
+            {
+                System.Console.WriteLine("Clone Error");
+            }
+        }
+
+
+        {
+            DotsTest.MemberSequences ms = new DotsTest.MemberSequences ();
+            Safir.Dob.Typesystem.Int32SequenceContainer intClone = ms.Int32Member.Clone();
+            Safir.Dob.Typesystem.Si64.KelvinSequenceContainer kelvinClone = ms.Kelvin64Member.Clone();
+
+            ms.Int32Member.Add(20);
+            ms.Kelvin64Member.Add(20);
+
+            if (intClone.Count != 0 || kelvinClone.Count != 0)
+            {
+                System.Console.WriteLine("Clone Error");
+            }
+
+            intClone = ms.Int32Member.Clone();
+            kelvinClone = ms.Kelvin64Member.Clone();
+            if (intClone.Count != 1 || kelvinClone.Count != 1 ||
+                intClone[0] != 20 || kelvinClone[0] != 20)
+            {
+                System.Console.WriteLine("Clone Error");
+            }
+        }
+
+        {
+            DotsTest.MemberDictionaries md = new DotsTest.MemberDictionaries();
+            Safir.Dob.Typesystem.StringDictionaryContainer<Int32> intClone = md.Int32StringMember.Clone();
+
+            md.Int32StringMember.Add (10, "Rude word");
+            if (intClone.Count != 0)
+            {
+                System.Console.WriteLine("Clone Error");
+            }
+
+            intClone = md.Int32StringMember.Clone();
+            if (intClone.Count != 1 ||
+                intClone[10].Val != "Rude word")
+            {
+                System.Console.WriteLine("Clone Error");
+            }
+
+        }
     }
 
 }

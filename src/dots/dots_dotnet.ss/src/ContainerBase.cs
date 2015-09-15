@@ -90,6 +90,21 @@ namespace Safir.Dob.Typesystem
         {
             m_bIsChanged = changed;
         }
+        #region Cloning
+
+        /// <summary>
+        /// Create a copy of the object.
+        /// <para>
+        /// This method is deprecated.
+        /// </para>
+        /// </summary>
+        public dynamic Clone()
+        {
+            return this.DeepClone();
+        }
+
+        #endregion
+
 
         /// <summary>
         /// Flag accessible from subclasses.
