@@ -108,6 +108,7 @@ class DotsTestDotnet
         Test_DeserializeUnlinkedObject();
         Test_ObjectClone();
         Test_ContainerClone();
+        Test_ContainerCopy();
     }
 
     private static void Test_IsException()
@@ -8318,6 +8319,24 @@ class DotsTestDotnet
             }
         }
 
+        {
+            DotsTest.MemberArrays ma = new DotsTest.MemberArrays();
+            Safir.Dob.Typesystem.Int32ContainerArray intClone = ma.Int32Member.Clone();
+            Safir.Dob.Typesystem.Si64.KelvinContainerArray kelvinClone = ma.Kelvin64Member.Clone();
+            ma.Int32Member[1].Val = 10;
+            ma.Kelvin64Member[0].Val = 10;
+            if (!intClone[1].IsNull() || !kelvinClone[0].IsNull())
+            {
+                System.Console.WriteLine("Clone Error");
+            }
+
+            intClone = ma.Int32Member.Clone();
+            kelvinClone = ma.Kelvin64Member.Clone();
+            if (intClone[1].Val != 10 || kelvinClone[0].Val != 10)
+            {
+                System.Console.WriteLine("Clone Error");
+            }
+        }
 
         {
             DotsTest.MemberSequences ms = new DotsTest.MemberSequences ();
@@ -8358,6 +8377,74 @@ class DotsTestDotnet
                 System.Console.WriteLine("Clone Error");
             }
 
+        }
+    }
+
+    private static void Test_ContainerCopy()
+    {
+        {
+            DotsTest.MemberTypes mt = new DotsTest.MemberTypes();
+            DotsTest.MemberTypes mtc = new DotsTest.MemberTypes();
+            mt.Int32Member.Val = 10;
+            mt.Kelvin64Member.Val = 10;
+
+            mtc.Int32Member.Copy(mt.Int32Member);
+            mtc.Kelvin64Member.Copy(mt.Kelvin64Member);
+            if (mtc.Int32Member.Val != 10 || mtc.Kelvin64Member.Val != 10)
+            {
+                System.Console.WriteLine("Clone Error");
+            }
+
+            mt.Int32Member.Val = 20;
+            mt.Kelvin64Member.Val = 20;
+            if (mtc.Int32Member.Val != 10 || mtc.Kelvin64Member.Val != 10)
+            {
+                System.Console.WriteLine("Clone Error");
+            }
+        }
+
+        {
+            DotsTest.MemberSequences ms = new DotsTest.MemberSequences ();
+            DotsTest.MemberSequences msc = new DotsTest.MemberSequences ();
+            ms.Int32Member.Add(20);
+            ms.Kelvin64Member.Add(20);
+
+            msc.Int32Member.Copy(ms.Int32Member);
+            msc.Kelvin64Member.Copy(ms.Kelvin64Member);
+            if (msc.Int32Member.Count != 1 || msc.Kelvin64Member.Count != 1 ||
+                msc.Int32Member[0] != 20 || msc.Kelvin64Member[0] != 20)
+            {
+                System.Console.WriteLine("Clone Error");
+            }
+
+            ms.Int32Member.Add(40);
+            ms.Kelvin64Member.Add(40);
+            if (msc.Int32Member.Count != 1 || msc.Kelvin64Member.Count != 1 ||
+                msc.Int32Member[0] != 20 || msc.Kelvin64Member[0] != 20)
+            {
+                System.Console.WriteLine("Clone Error");
+            }
+        }
+
+        {
+            DotsTest.MemberDictionaries md = new DotsTest.MemberDictionaries();
+            DotsTest.MemberDictionaries mdc = new DotsTest.MemberDictionaries();
+
+            md.Int32StringMember.Add (10, "Rude word");
+
+            mdc.Int32StringMember.Copy(md.Int32StringMember);
+            if (mdc.Int32StringMember.Count != 1 ||
+                mdc.Int32StringMember[10].Val != "Rude word")
+            {
+                System.Console.WriteLine("Clone Error");
+            }
+
+            md.Int32StringMember.Add (20, "Polite word");
+            if (mdc.Int32StringMember.Count != 1 ||
+                mdc.Int32StringMember[10].Val != "Rude word")
+            {
+                System.Console.WriteLine("Clone Error");
+            }
         }
     }
 

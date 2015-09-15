@@ -93,7 +93,7 @@ namespace Safir.Dob.Typesystem
         #region Cloning
 
         /// <summary>
-        /// Create a copy of the object.
+        /// Create a copy of the Container.
         /// <para>
         /// This method is deprecated.
         /// </para>
@@ -101,6 +101,15 @@ namespace Safir.Dob.Typesystem
         public dynamic Clone()
         {
             return this.DeepClone();
+        }
+
+        /// <summary>
+        /// Copy.
+        /// </summary>
+        /// <param name="other">Other ContainerBase.</param>
+        virtual public void Copy(ContainerBase other)
+        {
+            ShallowCopy(other);
         }
 
         #endregion
@@ -113,6 +122,10 @@ namespace Safir.Dob.Typesystem
 
         virtual internal void ShallowCopy(ContainerBase other)
         {
+            if (this.GetType() != other.GetType())
+            {
+                throw new SoftwareViolationException("Invalid call to Copy, containers are not of same type");
+            }
             m_bIsChanged = other.m_bIsChanged;
         }
 

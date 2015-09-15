@@ -320,6 +320,17 @@ namespace Safir.Dob.Typesystem
 
         #endregion
 
+        /// <summary>
+        /// Copy.
+        /// </summary>
+        /// <param name="other">ContainerBase</param>
+        public override void Copy(ContainerBase other)
+        {
+            ShallowCopy(other);
+            DictionaryContainer<KeyT,ValT> that = (DictionaryContainer<KeyT,ValT>)other;
+            m_values =  that.m_values.DeepClone();
+        }
+
         internal override void ShallowCopy(ContainerBase other)
         {
             base.ShallowCopy(other);

@@ -133,7 +133,7 @@ namespace Safir.Dob.Typesystem
         internal override void ShallowCopy(ContainerBase other)
         {
             base.ShallowCopy(other);
-            EnumerationContainerBase that = (EnumerationContainerBase)other;
+            EnumerationContainerBase that = other as EnumerationContainerBase;
             m_Value = that.m_Value;
             m_bIsNull = that.m_bIsNull;
         }

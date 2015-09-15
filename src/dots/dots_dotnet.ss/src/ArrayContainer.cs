@@ -219,6 +219,21 @@ namespace Safir.Dob.Typesystem
 
         #endregion
 
+        #region Cloning
+
+        /// <summary>
+        /// Create a copy of the ArrayContainer
+        /// <para>
+        /// This method is deprecated.
+        /// </para>
+        /// </summary>
+        public dynamic Clone()
+        {
+            return this.DeepClone();
+        }
+
+        #endregion
+
         #region Private data
 
         private System.Collections.Generic.List<T> m_Array;
