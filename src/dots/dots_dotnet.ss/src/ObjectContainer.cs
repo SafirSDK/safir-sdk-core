@@ -215,6 +215,20 @@ namespace Safir.Dob.Typesystem
             return m_Object.GetMember(member,index);
         }
 
+
+        /// <summary>
+        /// Copy.
+        /// </summary>
+        /// <param name="other">ContainerBase</param>
+        public override void Copy(ContainerBase other)
+        {
+            ShallowCopy(other);
+            if (!IsNull())
+            {
+                m_Object = m_Object.Clone();
+            }
+        }
+
         internal override void ShallowCopy(ContainerBase other)
         {
             base.ShallowCopy(other);

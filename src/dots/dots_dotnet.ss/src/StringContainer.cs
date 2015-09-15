@@ -238,7 +238,7 @@ namespace Safir.Dob.Typesystem
         internal override void ShallowCopy(ContainerBase other)
         {
             base.ShallowCopy(other);
-            StringContainer that = (StringContainer)other;
+            StringContainer that = other as StringContainer;
             m_bIsNull = that.m_bIsNull;
             m_Value = that.m_Value;
             m_CachedUtf8String = that.m_CachedUtf8String;
