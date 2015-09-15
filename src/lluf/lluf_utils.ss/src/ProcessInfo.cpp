@@ -194,7 +194,7 @@ namespace Utilities
                            << " cbNeededMBN = " << cbNeededMBN
                            << std::endl;
 
-                for (int i = 0; i < cbNeededMBN/sizeof(HMODULE); ++i)
+                for (unsigned int i = 0; i < cbNeededMBN/sizeof(HMODULE); ++i)
                 {
                     char pn[MAX_PATH];
                     BOOL ret3 = GetModuleBaseNameA( hProcess, hMod[i], pn, MAX_PATH );
