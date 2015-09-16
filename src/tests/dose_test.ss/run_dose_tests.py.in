@@ -702,7 +702,6 @@ def main():
                 log("== All tests were successful!!")
             else:
                 log("!!",results.num_tc_failed, "testcases appear to have failed!")
-                break
 
             if (results.num_tc_performed<20 and
                 parameters.single_testcase is None and
@@ -711,7 +710,7 @@ def main():
                 log("!! Less than 20 testcases seem to have been performed, this is a sign of trouble!")
                 return 1
 
-            if not parameters.run_until_failure:
+            if not parameters.run_until_failure or results.num_tc_failed > 0:
                 break
 
     return 0
