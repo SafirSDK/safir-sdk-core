@@ -1,4 +1,16 @@
 -----------------------------------------------------------------------------------------------------------------------
+2015-09-16 version 6.0.3
+-----------------------------------------------------------------------------------------------------------------------
+
+This release fixes the following ticket (see http://safirsdkcore.com for details):
+
+#233 Dobmake buildlog behaves badly in Internet Explorer
+#234 Dobmake hangs forever when typesystem.ini is incorrect rejected
+#236 Customer wants removed Clone() and Copy() re-added to C# dots containers
+#237 Safir.Dob.NodeDefinition.dou is not used
+#238 Dobmake fails to open log
+
+-----------------------------------------------------------------------------------------------------------------------
 2015-08-26 version 6.0.2
 -----------------------------------------------------------------------------------------------------------------------
 
