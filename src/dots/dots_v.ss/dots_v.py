@@ -46,6 +46,9 @@ else:
     def u(x):
         return x
 
+class VException(Exception):
+    pass
+
 dod_parameter_names = [\
         "File_Suffix", "Filename_Separator", "Output_Directory", "Namespace_Separator", \
         "Namespace_Prefix_File_Suffix", "Parent_Filename", "Namespace_Underscore_Style", "Filename_Underscore_Style", \
@@ -149,7 +152,7 @@ def dou_uniform_lookup_add(dou_uniform_lookup_cache,
             #we've already got this dou file
             return
         print ("Duplicate dou file", os.path.join(path,file), file=sys.stderr)
-        sys.exit(1)
+        sys.exit(1) #ok to use exit, not called inside multiprocess
 
     dou_xml = ET.parse(os.path.join(path, file))
     xml_root = dou_xml.getroot()
@@ -186,7 +189,7 @@ def dou_uniform_lookup_init(dou_uniform_lookup_cache,
 def dou_uniform_lookup(gSession, typename):
     if typename in gSession.dou_uniform_lookup_cache: return gSession.dou_uniform_lookup_cache[typename]
     print("** ERROR - Cannot match dou type", typename, file=sys.stderr)
-    sys.exit(1)
+    raise VException("Cannot match dou type")
 
 def parse_namespace_file(namespace_prefixes, path, file, file_suffix):
     prefix_file = codecs.open(os.path.join(path, file), "r", encoding="utf-8")
@@ -200,7 +203,7 @@ def parse_namespace_file(namespace_prefixes, path, file, file_suffix):
                 namespace_prefixes[namespace] = line.rstrip()
             elif namespace_prefixes[namespace] != line.rstrip():
                 print("Conflicting namespace prefix definition found.", namespace_prefixes[namespace], "is different from", line.rstrip(), file=sys.stderr)
-                sys.exit(1)
+                raise VException("Conflicting namespace prefix definition found")
         line = prefix_file.readline()
 
 # We only need to call this once per dod file (if Namespace prefixes are used)
@@ -435,8 +438,8 @@ def parse_dou(gSession, dou_xmlfile):
 
 
                     else:
-                        print("** ERROR unknown CreateRoutineParameter subtag", parameter_tag, file=sys.stderr)
-                        sys.exit(1)
+                        print("** ERROR Unknown CreateRoutineParameter subtag", parameter_tag, file=sys.stderr)
+                        raise VException("Unknown CreateRoutineParameter subtag")
 
             values = []
             vs = cr.find("{urn:safir-dots-unit}values")
@@ -644,7 +647,7 @@ def underscore_formatter(name, style):
         return s4
     else:
         print("** ERROR, unsupported underscore format", style, file=sys.stderr)
-        sys.exit(1)
+        raise VException("Unsupported underscore format")
 
 def case_formatter(name, style):
     # *_Case_Style is one of: "Upper", "Lower", "Camel", "Keep"
@@ -653,7 +656,7 @@ def case_formatter(name, style):
     elif style == "Lower": return name.lower()
     else:
         print("** ERROR, unsupported case format", style, file=sys.stderr)
-        sys.exit(1)
+        raise VException("Unsupported case format")
 
 def separator_formatter(gSession, name, style):
     if style != gSession.dod_parameters["Namespace_Separator"]:
@@ -881,7 +884,7 @@ def process_at_variable_lookup(gSession, var, dou, table_line, parent_table_line
             return enum_formatter(gSession, dou.values[index])
     elif var == "ENUMVALUE'LENGTH": return get_iterator_length("ENUMVALUE", dou, 0, 0)
     print("** ERROR - invalid var lookup,", var, file=sys.stderr)
-    sys.exit(1)
+    raise VException("Invalid var lookup")
 
 def get_iterator_length(var, dou, table_line, parent_table_line):
     # if the variable is no iterator return -1
@@ -908,7 +911,7 @@ def get_iterator_length(var, dou, table_line, parent_table_line):
     elif var == "ENUMVALUE" : return len(dou.values)
 
     print("** ERROR ** - bad iterator: ", var, file=sys.stderr)
-    sys.exit(1)
+    raise VException("Bad iterator")
 
 def create_parameter_is_array(dou, table_line, parent_table_line):
     if len(dou.createRoutines) == 0: return trim_false(False)
@@ -1109,7 +1112,7 @@ def process_at_str(gSession, at_string, dou, table_line, parent_table_line, stri
 
             else:
                 print("** ERROR - Unknown @ command", command, file=sys.stderr)
-                sys.exit(1)
+                raise VException("Unknown @ command")
 
     if isinstance(result, (bool, int)): result = str(result)
     elif strings_with_quotes and not result.isdigit(): result = '"' + result + '"'
@@ -1274,7 +1277,7 @@ def parse_parameters(gSession, line):
 
     if not valid_parameter:
         print("** ERROR - Cannot parse parameter line:", line, file=sys.stderr)
-        sys.exit(1)
+        raise VException("Cannot parse parameter line")
 
 
 def parse_if_clause(gSession, current_line, file, dou, process_if_content, table_line, parent_table_line):
@@ -1349,7 +1352,7 @@ def write_to_file(gSession, s):
         gSession.current_generated_file = codecs.open(gSession.current_generated_filename, "w", encoding="utf-8")
         if gSession.current_generated_file is None:
             print("** ERROR - could not open output file!", gSession.current_generated_filename, file=sys.stderr)
-            sys.exit(1)
+            raise VException("Could not open output file")
 
     # wierd way that the original parses the .dod:
     if s != "\n" and s.strip() == "": return
@@ -1423,10 +1426,10 @@ def get_dou_directories():
     output = proc.communicate()
     if proc.returncode != 0:
         print ("Failed to run safir_show_config. \nStdout:\n",output[0],"\nStderr:\n",output[1],sep='')
-        sys.exit(1)
+        sys.exit(1) #ok to use exit, not called inside multiprocess
     if len(output[1]) != 0:
         print ("Spurious output from safir_show_config. \nStdout:\n",output[0],"\nStderr:\n",output[1],sep='')
-        sys.exit(1)
+        sys.exit(1)  #ok to use exit, not called inside multiprocess
     dou_directories = list()
     for line in output[0].splitlines():
         (module,path) = line.split("=")
@@ -1469,7 +1472,7 @@ def resolve_typesystem_dependencies(unresolved_dependencies):
             result.append(pair[1])
         else:
             print("Syntax error for dependencies argument!", dependency, file=sys.stderr)
-            sys.exit(1)
+            sys.exit(1)  #ok to use exit, not called inside multiprocess
     return result
 
 # Faster file reader, buffers all in memory (good since we loop through same file multiple times)
@@ -1492,7 +1495,7 @@ class FileReader(object):
                     elif self.lines[0].endswith("\r"): eol_string = "\r"
                     else:
                         print("** ERROR, file", filename, "has unknown EOL characters", file=sys.stderr)
-                        sys.exit(1)
+                        raise VException("Unknown EOL characters")
 
                 if eol_string != "\n":
                     self.lines[i] = self.lines[i].replace(eol_string, "\n")
@@ -1540,7 +1543,7 @@ def dod_init(gSession, dod_filename):
     parse_dod(gSession, dod_file, None)
     if not are_dod_parameters_complete(gSession.dod_parameters, dod_parameter_names):
         print("** ERROR - missing mandatory parameters, check ", dod_file, file=sys.stderr)
-        sys.exit(1)
+        raise VException("Missing mandatory parameters")
 
     dod_file.seek(0)
     return dod_file
@@ -1742,12 +1745,12 @@ def main():
             mkdir(None, gen_src_output_path)
             if not os.path.isdir(gen_src_output_path):
                 print("Invalid argument for output path.", file=sys.stderr)
-                sys.exit(1)
+                sys.exit(1)  #ok to use exit, not called inside multiprocess
     gen_src_output_path = os.path.abspath(gen_src_output_path) + os.sep
 
     if len(dou_files) == 0:
         print("No valid dou files to process.", file=sys.stderr)
-        sys.exit(1)
+        sys.exit(1)  #ok to use exit, not called inside multiprocess
 
     if arguments.verbose: loglevel = 4
 
@@ -1763,12 +1766,26 @@ def main():
 
         pool = multiprocessing.Pool() # Defaults number of worker processes to number of CPUs
 
+        results = list()
         for dod_filename in dod_files:
-            pool.apply_async(dod_thread_main, args = (dod_filename, dou_files, gen_src_output_path, arguments.show_files, dou_uniform_lookup_cache, dou_file_lookup_cache, dou_xml_lookup_cache, dependency_paths, namespace_prefix_files, arguments.library_name))
+            results.append(pool.apply_async(dod_thread_main,
+                                            args = (dod_filename,
+                                                    dou_files,
+                                                    gen_src_output_path,
+                                                    arguments.show_files,
+                                                    dou_uniform_lookup_cache,
+                                                    dou_file_lookup_cache,
+                                                    dou_xml_lookup_cache,
+                                                    dependency_paths,
+                                                    namespace_prefix_files,
+                                                    arguments.library_name)))
 
         pool.close()
         pool.join()
 
+        for res in results:
+            if not res.successful():
+                return 1
     else:
         # Prepare dou lookup tables
         # We don't need to clear this between the dou or dod files, since the result is the same for all
@@ -1777,9 +1794,11 @@ def main():
         dou_xml_lookup_cache = {}
         dou_uniform_lookup_init(dou_uniform_lookup_cache, dou_file_lookup_cache, dou_xml_lookup_cache, dependency_paths, dou_files)
 
-        for dod_filename in dod_files:
-            dod_thread_main(dod_filename, dou_files, gen_src_output_path, arguments.show_files, dou_uniform_lookup_cache, dou_file_lookup_cache, dou_xml_lookup_cache, dependency_paths, namespace_prefix_files, arguments.library_name)
-
+        try:
+            for dod_filename in dod_files:
+                dod_thread_main(dod_filename, dou_files, gen_src_output_path, arguments.show_files, dou_uniform_lookup_cache, dou_file_lookup_cache, dou_xml_lookup_cache, dependency_paths, namespace_prefix_files, arguments.library_name)
+        except VException:
+            return 1
     return 0
 
 if __name__ == "__main__":
