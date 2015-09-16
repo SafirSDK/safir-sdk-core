@@ -58,26 +58,6 @@
     </parameter>
 
     <parameter>
-      <summary>The number of nodes in the system. Must correspond to the Nodes parameter below.</summary>
-      <name>NumberOfNodes</name>
-      <type>Int32</type>
-      <value>1</value>
-    </parameter>
-    
-    <parameter>
-      <summary>The name of all nodes in the system. Must correspond to the NumberOfNodes parameter above.</summary>
-      <name>Nodes</name>
-      <type>Safir.Dob.NodeDefinition</type>
-      <arrayElements>
-        <arrayElement>
-          <Safir.Dob.NodeDefinition type="Safir.Dob.NodeDefinition">
-            <NodeName>StandAlone</NodeName>
-          </Safir.Dob.NodeDefinition>
-        </arrayElement>
-      </arrayElements>
-    </parameter>
-    
-    <parameter>
       <summary>Defines the different node types in the system.</summary>
       <name>NodeTypes</name>
       <type>Safir.Dob.NodeType</type>
