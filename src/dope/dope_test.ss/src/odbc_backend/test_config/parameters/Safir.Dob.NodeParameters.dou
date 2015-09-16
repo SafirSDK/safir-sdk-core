@@ -58,7 +58,7 @@
       <summary>Full filename where the system stores the incarnation blacklist. Use forward slashes as directory separator!</summary>
       <name>IncarnationBlacklistFilename</name>
       <type>String</type>
-      <value>@{TEMP}/safir-sdk-core/system-incarnation-blacklist.txt</value>
+      <value>@{TEMP}/system-incarnation-blacklist.txt</value>
     </parameter>
 
     <parameter>
