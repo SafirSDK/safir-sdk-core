@@ -254,8 +254,8 @@ void Dobmake::OpenLog(const bool ignoreCheckbox)
     {
         const QUrl url = QUrl::fromLocalFile(ui->douDirectory->text() + QDir::separator() + "buildlog.html");
 
-        //try to open for ten seconds, once every 0.1s
-        for (int i = 0; i < 100; ++i)
+        //try to open for thirty seconds, once every 0.1s
+        for (int i = 0; i < 300; ++i)
         {
             const bool result = QDesktopServices::openUrl(url);
             if (result)
@@ -287,8 +287,8 @@ void Dobmake::on_build_clicked()
     QApplication::setOverrideCursor(Qt::BusyCursor);
     UpdateBuildButton();
     UpdateInstallButton();
-    OpenLog();
     worker->start();
+    OpenLog();
 }
 
 void Dobmake::on_buildAndInstall_clicked()
@@ -317,8 +317,8 @@ void Dobmake::on_buildAndInstall_clicked()
     QApplication::setOverrideCursor(Qt::BusyCursor);
     UpdateBuildButton();
     UpdateInstallButton();
-    OpenLog();
     worker->start();
+    OpenLog();
 }
 
 void Dobmake::BuildComplete(const bool result)
