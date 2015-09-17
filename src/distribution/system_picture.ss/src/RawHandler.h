@@ -409,19 +409,18 @@ namespace SP
 
 
         /**
-         * Mark a node as dead in the raw data.
-         *
-         * Use this to mark a node that has just been excluded as dead.
+         * Exclude a node and mark it as dead in the raw data.
          **/
-        void SetDeadNode(const int64_t id)
+        void ExcludeNode(const int64_t id)
         {
+            m_communication.ExcludeNode(id);
             m_strand.dispatch([this, id]
                               {
                                   auto findIt = m_nodeTable.find(id);
 
                                   if (findIt == m_nodeTable.end())
                                   {
-                                      throw std::logic_error("SetDeadNode on unknown node");
+                                      throw std::logic_error("ExcludeNode on unknown node");
                                   }
 
                                   if (!findIt->second.nodeInfo->is_dead())

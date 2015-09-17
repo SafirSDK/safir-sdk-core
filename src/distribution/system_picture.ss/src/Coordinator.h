@@ -269,8 +269,7 @@ namespace SP
                                   << " with id " << m_lastStatistics.Id(i)
                                   << " is dead, so I'll mark him as dead." << std::endl;
 
-                        m_communication.ExcludeNode(m_lastStatistics.Id(i));
-                        m_rawHandler.SetDeadNode(m_lastStatistics.Id(i));
+                        m_rawHandler.ExcludeNode(m_lastStatistics.Id(i));
                     }
                 }
 
@@ -442,7 +441,7 @@ namespace SP
         bool ExcludeNodes(const std::map<int64_t, std::pair<RawStatistics,int>>& deadNodes) const
         {
             //Exclude nodes that we think are alive but someone else thinks are dead
-            //(the SetDeadNode will cause RawHandler to post another RawChangedEvent)
+            //(the ExcludeNode will cause RawHandler to post another RawChangedEvent)
             bool changes = false;
             for (int i = 0; i < m_lastStatistics.Size(); ++i)
             {
@@ -453,8 +452,7 @@ namespace SP
                               << " with id " << m_lastStatistics.Id(i)
                               << " is dead, so I'll exclude him."
                               << std::endl;
-                    m_communication.ExcludeNode(m_lastStatistics.Id(i));
-                    m_rawHandler.SetDeadNode(m_lastStatistics.Id(i));
+                    m_rawHandler.ExcludeNode(m_lastStatistics.Id(i));
                     changes = true;
                 }
             }

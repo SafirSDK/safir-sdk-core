@@ -317,12 +317,7 @@ typedef boost::function<void(const RawStatistics& statistics,
 class CommunicationStub
 {
 public:
-    void ExcludeNode(int64_t nodeId)
-    {
-        excludedNodes.insert(nodeId);
-    }
 
-    std::set<int64_t> excludedNodes;
 };
 
 class RawHandlerStub
@@ -353,7 +348,7 @@ public:
         rawCb = callback;
     }
 
-    void SetDeadNode(int64_t nodeId)
+    void ExcludeNode(int64_t nodeId)
     {
         deadNodes.insert(nodeId);
     }
@@ -581,7 +576,6 @@ BOOST_AUTO_TEST_CASE( simple_state_production )
     BOOST_CHECK_EQUAL(stateMessage.node_info(1).data_address(),"remote1:data");
     BOOST_CHECK(!stateMessage.node_info(1).is_dead());
 
-    BOOST_CHECK(comm.excludedNodes.empty());
     BOOST_CHECK(rh.deadNodes.empty());
 }
 
@@ -641,7 +635,6 @@ BOOST_AUTO_TEST_CASE( propagate_state_from_other )
     BOOST_CHECK_EQUAL(stateMessage.node_info(1).data_address(),"flupp");
     BOOST_CHECK(!stateMessage.node_info(1).is_dead());
 
-    BOOST_CHECK(comm.excludedNodes.empty());
     BOOST_CHECK(rh.deadNodes.empty());
 }
 
@@ -664,10 +657,6 @@ BOOST_AUTO_TEST_CASE( remote_from_other_with_dead )
 
     BOOST_CHECK(rh.deadNodes.size() == 1);
     BOOST_CHECK(rh.deadNodes.find(1002) != rh.deadNodes.end());
-
-    BOOST_CHECK(comm.excludedNodes.size() == 1);
-    BOOST_CHECK(comm.excludedNodes.find(1002) != comm.excludedNodes.end());
-
 
     bool callbackCalled = false;
 
@@ -740,7 +729,6 @@ BOOST_AUTO_TEST_CASE( remote_reports_dead )
     BOOST_CHECK_EQUAL(stateMessage.node_info(2).name(),"remote2");
     BOOST_CHECK(!stateMessage.node_info(2).is_dead());
 
-    BOOST_CHECK(comm.excludedNodes.empty());
     BOOST_CHECK(rh.deadNodes.empty());
 
 
@@ -772,9 +760,6 @@ BOOST_AUTO_TEST_CASE( remote_reports_dead )
     BOOST_CHECK(rh.deadNodes.size() == 1);
     BOOST_CHECK(rh.deadNodes.find(1001) != rh.deadNodes.end());
 
-    BOOST_CHECK(comm.excludedNodes.size() == 1);
-    BOOST_CHECK(comm.excludedNodes.find(1001) != comm.excludedNodes.end());
-
     rh.rawCb(GetRawWithTwoNodesAndRemoteRaw(true,true),RawChanges(RawChanges::NEW_REMOTE_STATISTICS),cs);
 
     callbackCalled = false;
@@ -804,9 +789,6 @@ BOOST_AUTO_TEST_CASE( remote_reports_dead )
 
     BOOST_CHECK(rh.deadNodes.size() == 1);
     BOOST_CHECK(rh.deadNodes.find(1001) != rh.deadNodes.end());
-
-    BOOST_CHECK(comm.excludedNodes.size() == 1);
-    BOOST_CHECK(comm.excludedNodes.find(1001) != comm.excludedNodes.end());
 }
 
 /* Not sure what this test tests at the moment.
@@ -848,7 +830,6 @@ BOOST_AUTO_TEST_CASE( ignore_long_gone_flag )
     BOOST_CHECK(stateMessage.node_info(2).is_dead());
 
     BOOST_CHECK(rh.deadNodes.empty());
-    BOOST_CHECK(comm.excludedNodes.empty());
 }
 
 /* This tc checks that a new remote node cannot make the coordinator produce a state
@@ -898,7 +879,6 @@ BOOST_AUTO_TEST_CASE( state_sequence_consistent )
     BOOST_CHECK_EQUAL(stateMessage.node_info(1).id(),1001);
     BOOST_CHECK(!stateMessage.node_info(1).is_dead());
 
-    BOOST_CHECK(comm.excludedNodes.empty());
     BOOST_CHECK(rh.deadNodes.empty());
 }
 

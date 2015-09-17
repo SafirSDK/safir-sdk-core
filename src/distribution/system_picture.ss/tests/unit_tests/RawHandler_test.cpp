@@ -615,9 +615,9 @@ BOOST_AUTO_TEST_CASE( set_dead_node )
                                    }
                                });
     comm.newNodeCb("asdf",11,10,"asdffff","asdfqqqq");
-    rh->SetDeadNode(11);
+    rh->ExcludeNode(11);
 
-    //triggers another callback so that we get to check the SetDeadNode result.
+    //triggers another callback so that we get to check the ExcludeNode result.
     comm.newNodeCb("asdf",12,10,"asdffff","asdfqqqq");
 
     rh->Stop();
@@ -662,7 +662,7 @@ BOOST_AUTO_TEST_CASE( recently_dead_nodes )
     dead.push_back(2900);
     rh->RecentlyDeadNodes(dead);
 
-    //triggers another callback so that we get to check the SetDeadNode result.
+    //triggers another callback so that we get to check the ExcludeNode result.
     comm.newNodeCb("asdf",12,10,"asdffff","asdfqqqq");
 
     rh->Stop();

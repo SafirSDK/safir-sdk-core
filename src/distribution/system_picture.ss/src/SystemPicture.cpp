@@ -313,9 +313,12 @@ namespace SP
 
         void ExcludeNode(const int64_t id)
         {
-            //TODO: fix and check pointers
-            //m_communication->ExcludeNode(id);
-            //m_rawHandler->SetDeadNode(id);
+            if (m_rawHandler == nullptr)
+            {
+                throw std::logic_error("ExcludeNode is not available in this SystemPicture instance");
+            }
+
+            m_rawHandler->ExcludeNode(id);
         }
 
 
