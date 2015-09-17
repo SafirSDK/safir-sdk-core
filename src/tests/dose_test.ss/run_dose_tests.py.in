@@ -145,9 +145,6 @@ class Parameters:
         self.autostart_jenkins_slave = options.autostart_slave or (options.jenkins and self.multicomputer)
 
         if options.jenkins:
-            #make stdout unbuffered for more direct output in jenkins log
-            sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
-
             #Get env variables if they're set
             langs= os.environ.get("Languages")
             if langs is not None:
