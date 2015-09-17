@@ -311,6 +311,13 @@ namespace SP
             m_stateSubscriberLocal->Start(dataCallback);
         }
 
+        void ExcludeNode(const int64_t id)
+        {
+            //TODO: fix and check pointers
+            //m_communication->ExcludeNode(id);
+            //m_rawHandler->SetDeadNode(id);
+        }
+
 
     private:
         std::unique_ptr<RawHandler> m_rawHandler;
@@ -398,7 +405,10 @@ namespace SP
         m_impl->StartStateSubscription(dataCallback);
     }
 
-
+    void SystemPicture::ExcludeNode(const int64_t id)
+    {
+        m_impl->ExcludeNode(id);
+    }
 }
 }
 }

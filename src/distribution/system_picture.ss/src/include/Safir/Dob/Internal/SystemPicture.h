@@ -141,6 +141,14 @@ namespace SP
          */
         void StartStateSubscription(const boost::function<void (const SystemState& data)>& dataCallback);
 
+
+        /**
+         * Exclude a node from the system.
+         *
+         * Calling this function will immediately exclude a node from the system.
+         * This function will also call Communications ExcludeNode function.
+         */
+        void ExcludeNode(const int64_t id);
     private:
         class Impl;
 
