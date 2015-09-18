@@ -23,6 +23,7 @@
 ******************************************************************************/
 #pragma once
 
+#include <Safir/Utilities/Internal/StringEncoding.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
 
 #include <boost/tokenizer.hpp>
@@ -108,9 +109,28 @@ namespace Control
         return std::make_pair(argv, true);
     }
 
+    std::pair<std::vector<std::wstring>, bool> GetArgvW(const std::string& cmdLineStr,
+                                                        const std::string& parameter)
+    {
+        std::pair<std::vector<std::string>, bool> argv = GetArgv(cmdLineStr, parameter);
+
+        std::vector<std::wstring> wideArgv;
+        for (auto it = argv.first.begin(); it != argv.first.end(); ++it)
+        {
+            wideArgv.push_back(Safir::Utilities::Internal::ToUtf16(*it));
+        }
+
+        return std::make_pair(wideArgv, argv.second);
+    }
+
     void ExecuteCmd(const std::string& cmdLineStr, const std::string& parameter)
     {
+#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
+        auto argv = GetArgvW(cmdLineStr, parameter);
+#elif defined(linux) || defined(__linux) || defined(__linux__)
         auto argv = GetArgv(cmdLineStr, parameter);
+#endif
+
 
         if (argv.second == false)
         {

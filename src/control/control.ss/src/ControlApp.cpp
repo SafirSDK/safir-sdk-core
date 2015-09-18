@@ -25,6 +25,7 @@
 #include "ControlApp.h"
 #include "CommandExecutor.h"
 #include <Safir/Control/Parameters.h>
+#include <Safir/Utilities/Internal/StringEncoding.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
 #include <Safir/Utilities/Internal/MakeUnique.h>
@@ -407,7 +408,7 @@ void ControlApp::StopThisNode()
 void ControlApp::Shutdown()
 {
     std::string shutdownCmd =
-            Safir::Dob::Typesystem::Utilities::ToUtf8(Safir::Control::Parameters::ShutdownCommand());
+            Safir::Utilities::Internal::ToUtf8(Safir::Control::Parameters::ShutdownCommand());
 
     if (shutdownCmd.empty())
     {
@@ -424,7 +425,7 @@ void ControlApp::Shutdown()
 void ControlApp::Reboot()
 {
     std::string rebootCmd =
-            Safir::Dob::Typesystem::Utilities::ToUtf8(Safir::Control::Parameters::RebootCommand());
+            Safir::Utilities::Internal::ToUtf8(Safir::Control::Parameters::RebootCommand());
 
     if (rebootCmd.empty())
     {
