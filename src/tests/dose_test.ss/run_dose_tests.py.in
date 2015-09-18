@@ -660,10 +660,9 @@ class JenkinsController:
 
 def main():
     start_dir = os.getcwd()
+    parameters = Parameters()
 
     while True:
-        parameters = Parameters()
-
         os.chdir(start_dir)
         rmdir("dose_test_output")
         mkdir("dose_test_output")
