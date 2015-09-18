@@ -584,13 +584,13 @@ BOOST_AUTO_TEST_CASE( incarnation_id_forbid)
     BOOST_CHECK_EQUAL(*incarnations.begin(), 12345);
 }
 
-BOOST_AUTO_TEST_CASE( set_dead_node )
+BOOST_AUTO_TEST_CASE( explicit_exclude_node )
 {
     int cbCalls = 0;
     rh->AddRawChangedCallback([&](const RawStatistics& statistics,
-                                 const RawChanges& flags,
-                                 boost::shared_ptr<void> completionSignaller)
-                               {
+                                  const RawChanges& flags,
+                                  boost::shared_ptr<void> completionSignaller)
+                              {
                                    ++cbCalls;
 
                                    BOOST_CHECK(flags.NodesChanged());
@@ -623,6 +623,8 @@ BOOST_AUTO_TEST_CASE( set_dead_node )
     rh->Stop();
     BOOST_CHECK_NO_THROW(ioService.run());
     BOOST_CHECK_EQUAL(cbCalls, 3);
+    BOOST_REQUIRE_EQUAL(comm.excludedNodes.size(),1);
+    BOOST_CHECK_EQUAL(*comm.excludedNodes.begin(),11);
 }
 
 BOOST_AUTO_TEST_CASE( recently_dead_nodes )
