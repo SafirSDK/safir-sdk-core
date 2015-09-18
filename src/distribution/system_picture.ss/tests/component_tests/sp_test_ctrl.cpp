@@ -88,11 +88,14 @@ public:
              value<std::string>(&name)->default_value("<not set>", ""),
              "A nice name for the node, for presentation purposes only")
             ("force-id",
-             value<boost::int64_t>(&id)->default_value(LlufId_GenerateRandom64(), ""),
+             value<int64_t>(&id)->default_value(LlufId_GenerateRandom64(), ""),
              "Override the automatically generated node id. For debugging/testing purposes only.")
             ("check-incarnation",
              bool_switch(&checkIncarnation)->default_value(false),
-             "Perform checking on incarnation ids");
+             "Perform checking on incarnation ids")
+            ("node-type",
+             value<int64_t>(&nodeType)->default_value(1),
+             "Node type to use. 1 or 2 are valid values. 1 is without multicast and 2 is with multicast.");
 
         variables_map vm;
 
@@ -123,9 +126,10 @@ public:
     std::string controlAddress;
     std::string dataAddress;
     std::vector<std::string> seeds;
-    boost::int64_t id;
+    int64_t id;
     std::string name;
     bool checkIncarnation;
+    int64_t nodeType;
 private:
     static void ShowHelp(const boost::program_options::options_description& desc)
     {
@@ -217,16 +221,16 @@ int main(int argc, char * argv[])
         auto work = Safir::make_unique<boost::asio::io_service::work>(ioService);
 
         std::vector<Safir::Dob::Internal::Com::NodeTypeDefinition> commNodeTypes;
-        std::map<boost::int64_t, Safir::Dob::Internal::SP::NodeType> spNodeTypes;
+        std::map<int64_t, Safir::Dob::Internal::SP::NodeType> spNodeTypes;
 
-        
+
         commNodeTypes.push_back(Safir::Dob::Internal::Com::NodeTypeDefinition(1,
                                                                               "NodeTypeA",
                                                                               "", //no multicast
                                                                               "", //no multicast
                                                                               1000,
                                                                               20,
-                                                                              15));   
+                                                                              15));
 
         spNodeTypes.insert(std::make_pair(1,
                                           Safir::Dob::Internal::SP::NodeType(1,
@@ -238,8 +242,8 @@ int main(int argc, char * argv[])
 
         commNodeTypes.push_back(Safir::Dob::Internal::Com::NodeTypeDefinition(2,
                                                                               "NodeTypeB",
-                                                                              "", //no multicast
-                                                                              "", //no multicast
+                                                                              "224.123.45.67:10000",
+                                                                              "224.123.45.67:10001",
                                                                               2000,
                                                                               50,
                                                                               8));
@@ -258,7 +262,7 @@ int main(int argc, char * argv[])
                                                                ioService,
                                                                options.name,
                                                                options.id,
-                                                               1,
+                                                               options.nodeType,
                                                                options.controlAddress,
                                                                options.dataAddress,
                                                                commNodeTypes);
@@ -274,7 +278,7 @@ int main(int argc, char * argv[])
                                                    communication,
                                                    options.name,
                                                    options.id,
-                                                   1,
+                                                   options.nodeType,
                                                    std::move(spNodeTypes),
                                                    [&incarnationChecker](const int64_t id){return incarnationChecker.Check(id);});
 

@@ -84,8 +84,10 @@ public:
              "Override the automatically generated node id. For debugging/testing purposes only.")
             ("suicide-trigger",
              value<std::string>(&suicideTrigger),
-             "This node should exit gracefully a time after the node specified in suicideTrigger has exited");
-
+             "This node should exit gracefully a time after the node specified in suicideTrigger has exited")
+            ("node-type",
+             value<int64_t>(&nodeType)->default_value(1),
+             "Node type to use. 1 or 2 are valid values. 1 is without multicast and 2 is with multicast.");
 
         variables_map vm;
 
@@ -119,6 +121,7 @@ public:
     int64_t id;
     std::string name;
     std::string suicideTrigger;
+    int64_t nodeType;
 private:
     static void ShowHelp(const boost::program_options::options_description& desc)
     {
@@ -270,7 +273,7 @@ private:
             return;
         }
 
-        //std::wcout << "Considering suicide" << std::endl;
+        std::wcout << "Considering suicide" << std::endl;
 
         bool triggered = false;
 
@@ -294,13 +297,13 @@ private:
                 continue;
             }
 
-            //std::wcout << "Found dead trigger node " << data.Id(i) << std::endl;
+            std::wcout << "Found dead trigger node " << data.Id(i) << std::endl;
 
             //check if it was not known about
             const auto findIt = m_triggerHistory.find(data.Id(i));
             if (findIt == m_triggerHistory.end())
             {
-                //std::wcout << " most probably from a previous cycle, ignore it." << std::endl;
+                std::wcout << " most probably from a previous cycle, ignore it." << std::endl;
                 m_triggerHistory.insert(std::make_pair(data.Id(i),true));
                 continue;
             }
@@ -308,7 +311,7 @@ private:
             //if it wasnt previously dead
             if (!findIt->second)
             {
-                //std::wcout << " was not previously dead, triggering" << std::endl;
+                std::wcout << " was not previously dead, triggering" << std::endl;
                 findIt->second = true; //now known to be dead
                 triggered = true;
                 break;
@@ -388,8 +391,8 @@ int main(int argc, char * argv[])
 
     commNodeTypes.push_back(Safir::Dob::Internal::Com::NodeTypeDefinition(2,
                                                                           "NodeTypeB",
-                                                                          "", //no multicast
-                                                                          "", //no multicast
+                                                                          "224.123.45.67:10000",
+                                                                          "224.123.45.67:10001",
                                                                           2000,
                                                                           50,
                                                                           8));
@@ -408,7 +411,7 @@ int main(int argc, char * argv[])
                                                            ioService,
                                                            options.name,
                                                            options.id,
-                                                           1,
+                                                           options.nodeType,
                                                            options.dataAddress,
                                                            commNodeTypes);
 
@@ -420,7 +423,7 @@ int main(int argc, char * argv[])
                                                communication,
                                                options.name,
                                                options.id,
-                                               1,
+                                               options.nodeType,
                                                std::move(spNodeTypes));
 
     SystemStateHandler ssh(ioService, options.id, communication, options.suicideTrigger);

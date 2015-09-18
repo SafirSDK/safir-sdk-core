@@ -24,7 +24,7 @@
 #
 ###############################################################################
 from __future__ import print_function
-import subprocess, os, time, sys, shutil, random, argparse, traceback, platform, datetime, signal
+import subprocess, os, time, sys, shutil, random, argparse, traceback, platform, datetime, signal, random
 
 class Failure(Exception):
     pass
@@ -60,12 +60,13 @@ def mkdir(newdir):
         if tail:
             os.mkdir(newdir)
 
-def launch_control(number, previous, id, env, ownip, seedip):
+def launch_control(number, previous, id, env, ownip, seedip, nodetype):
     command = ("sp_test_ctrl",) + ("--name",    "Node_{0:03d}".format(number),
                                    "--control-address", ownip + ":33{0:03d}".format(number),
                                    "--data-address", ownip + ":43{0:03d}".format(number),
                                    "--force-id", str(id),
-                                   "--check-incarnation")
+                                   "--check-incarnation",
+                                   "--node-type", str(nodetype))
     if previous is not None:
         command += ("--seed", seedip + ":33999")
 
@@ -77,10 +78,11 @@ def launch_control(number, previous, id, env, ownip, seedip):
                             creationflags = subprocess.CREATE_NEW_PROCESS_GROUP if sys.platform == "win32" else 0)
     return proc
 
-def launch_dose_main(number, previous, id, env, ownip):
+def launch_dose_main(number, previous, id, env, ownip, nodetype):
     command = ("sp_test_dm",) + ("--name", "Node_{0:03d}".format(number),
                                  "--data-address", ownip + ":43{0:03d}".format(number),
-                                 "--force-id", str(id))
+                                 "--force-id", str(id),
+                                 "--node-type", str(nodetype))
     if previous is not None:
         command += ("--suicide-trigger", "Node_{0:03d}".format(previous))
 
@@ -95,15 +97,16 @@ def launch_dose_main(number, previous, id, env, ownip):
 
 def launch_node(number, args):
     id = random.getrandbits(63)
+    nt = random.randint(1,2)
 
     previous = (number - 1) % args.total_nodes
     seed = args.seed_ip
-    log("Launching node", number, "with previous set to", previous)
+    log("Launching node", number, "of node type", nt, "with previous set to", previous)
     env = os.environ.copy()
     env["SAFIR_INSTANCE"] = str(number+1000)
 
-    control = launch_control(number, previous, id, env, args.own_ip, seed)
-    main = launch_dose_main(number, previous, id, env, args.own_ip)
+    control = launch_control(number, previous, id, env, args.own_ip, seed, nt)
+    main = launch_dose_main(number, previous, id, env, args.own_ip, nt)
     return (number,control,main)
 
 def launch_seeder(args):
@@ -111,8 +114,8 @@ def launch_seeder(args):
 
     log("Launching seeder node")
 
-    control = launch_control(999, previous = None, id = id, env = None, ownip = args.own_ip, seedip = None)
-    main = launch_dose_main(999, previous = None, id = id, env = None, ownip = args.own_ip)
+    control = launch_control(999, previous = None, id = id, env = None, ownip = args.own_ip, seedip = None, nodetype=1)
+    main = launch_dose_main(999, previous = None, id = id, env = None, ownip = args.own_ip, nodetype=1)
     return (control,main)
 
 
