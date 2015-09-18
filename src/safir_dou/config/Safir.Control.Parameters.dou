@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <name>Safir.Control.Parameters</name>
+  <baseClass>Safir.Dob.Parametrization</baseClass>
+  <parameters>
+    <parameter>
+      <summary>Command to be executed for a computer shutdown initiated by Safir. The command must be given as an absolute path. Most commonly this is a operating system specific command, for example '/usr/bin/shutdown --poweroff now' for Linux or 'C:\\WINDOWS\\System32\\shutdown /s /t 0' for Windows. Note that it might be necessary to make additional configurations outside Safir to be able to run the command.</summary>
+      <name>ShutdownCommand</name>
+      <type>String</type>
+      <value></value>
+    </parameter>
+    <parameter>
+      <summary>Command to be executed for a computer reboot initiated by Safir. The command must be given as an absolute path. Most commonly this is a operating system specific command, for example '/usr/bin/shutdown --reboot now' for Linux or 'C:\\WINDOWS\\System32\\shutdown /r /t 0' for Windows. Note that it might be necessary to make additional configurations outside Safir to be able to run the command.</summary>
+      <name>RebootCommand</name>
+      <type>String</type>
+      <value></value>
+    </parameter>
+  </parameters>
+</class>

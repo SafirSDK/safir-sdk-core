@@ -23,6 +23,8 @@
 ******************************************************************************/
 
 #include "ControlApp.h"
+#include "CommandExecutor.h"
+#include <Safir/Control/Parameters.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
 #include <Safir/Utilities/Internal/MakeUnique.h>
@@ -47,8 +49,8 @@
 
 #if defined(linux) || defined(__linux) || defined(__linux__)
 #include <unistd.h>
-#include <sys/reboot.h>
 #endif
+
 
 ControlApp::ControlApp(boost::asio::io_service&         ioService,
                        const boost::filesystem::path&   doseMainPath,
@@ -404,12 +406,35 @@ void ControlApp::StopThisNode()
 
 void ControlApp::Shutdown()
 {
-    //TODO Implement shutdown for Linux and Windows here
+    std::string shutdownCmd =
+            Safir::Dob::Typesystem::Utilities::ToUtf8(Safir::Control::Parameters::ShutdownCommand());
+
+    if (shutdownCmd.empty())
+    {
+        SEND_SYSTEM_LOG(Informational,
+                        << "CTRL: Can't execute a shutdown, Safir.Control.Parameters.ShutdownCommand is empty");
+        std::wcout << "CTRL: Can't execute a shutdown, Safir.Control.Parameters.ShutdownCommand is empty" << std::endl;
+        return;
+    }
+
+    Control::ExecuteCmd(shutdownCmd, "Safir.Control.Parameters.ShutdownCommand");
+
 }
 
 void ControlApp::Reboot()
 {
-    //TODO Implement reboot for Linux and Windows here
+    std::string rebootCmd =
+            Safir::Dob::Typesystem::Utilities::ToUtf8(Safir::Control::Parameters::RebootCommand());
+
+    if (rebootCmd.empty())
+    {
+        SEND_SYSTEM_LOG(Informational,
+                        << "CTRL: Can't execute a reboot, Safir.Control.Parameters.RebootCommand is empty");
+        std::wcout << "CTRL: Can't execute a reboot, Safir.Control.Parameters.rebootCommand is empty" << std::endl;
+        return;
+    }
+
+    Control::ExecuteCmd(rebootCmd, "Safir.Control.Parameters.RebootCommand");
 }
 
 void ControlApp::SendControlInfo()
@@ -423,7 +448,7 @@ void ControlApp::SendControlInfo()
 #if defined(linux) || defined(__linux) || defined(__linux__)
 void ControlApp::SetSigchldHandler()
 {
-    m_sigchldSet.async_wait(m_strand.wrap([this](const boost::system::error_code& error, int signalNumber)
+    m_sigchldSet.async_wait(m_strand.wrap([this](const boost::system::error_code& error, int /*signalNumber*/)
     {
         if (error)
         {

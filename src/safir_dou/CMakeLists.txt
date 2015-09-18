@@ -28,6 +28,7 @@ ADD_SAFIR_GENERATED_LIBRARY(NAME Core
   config/Safir.Dob.NodeParameters.dou
   config/Safir.Dob.QueueParameters.dou
   config/Safir.Dob.ThisNodeParameters.dou
+  config/Safir.Control.Parameters.dou
   config/Safir.Time.LibraryParameters.dou
   data/Safir.Application.BackdoorCommand.dou
   data/Safir.Control.Command.dou
