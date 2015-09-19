@@ -623,7 +623,7 @@ BOOST_AUTO_TEST_CASE( explicit_exclude_node )
     rh->Stop();
     BOOST_CHECK_NO_THROW(ioService.run());
     BOOST_CHECK_EQUAL(cbCalls, 3);
-    BOOST_REQUIRE_EQUAL(comm.excludedNodes.size(),1);
+    BOOST_REQUIRE_EQUAL(comm.excludedNodes.size(),1U);
     BOOST_CHECK_EQUAL(*comm.excludedNodes.begin(),11);
 }
 
