@@ -706,8 +706,8 @@ def main():
                 log("!! Less than 20 testcases seem to have been performed, this is a sign of trouble!")
                 return 1
 
-            if not parameters.run_until_failure or results.num_tc_failed > 0:
-                break
+        if not parameters.run_until_failure or results.num_tc_failed > 0:
+            break
 
     return 0
 
