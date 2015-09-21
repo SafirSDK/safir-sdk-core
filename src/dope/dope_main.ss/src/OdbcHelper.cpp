@@ -38,14 +38,14 @@ void OdbcHelper::ThrowException(SQLSMALLINT handleType,
     SQLCHAR     messageText[512];
     SQLRETURN   ret;
 
-    ret = ::SQLGetDiagRec(handleType,
-                          handle,
-                          1,
-                          sqlState,
-                          &lpNativeErrorPtr,
-                          messageText,
-                          256,
-                          0);
+    ret = ::SQLGetDiagRecA(handleType,
+                           handle,
+                           1,
+                           sqlState,
+                           &lpNativeErrorPtr,
+                           messageText,
+                           256,
+                           0);
     if (SQL_SUCCEEDED(ret))
     {
         std::string string = std::string(reinterpret_cast<char*>(sqlState))
@@ -153,14 +153,14 @@ void OdbcHelper::BindParamString(SQLHSTMT statement,
 
 void OdbcHelper::Connect(SQLHDBC connection, const std::string& connectionString)
 {
-    SQLRETURN ret = ::SQLDriverConnect(connection,
-                                       NULL,
-                                       reinterpret_cast<SQLCHAR*>(const_cast<char*>(connectionString.c_str())),
-                                       SQL_NTS,
-                                       NULL,
-                                       0,
-                                       NULL,
-                                       SQL_DRIVER_NOPROMPT);
+    SQLRETURN ret = ::SQLDriverConnectA(connection,
+                                        NULL,
+                                        reinterpret_cast<SQLCHAR*>(const_cast<char*>(connectionString.c_str())),
+                                        SQL_NTS,
+                                        NULL,
+                                        0,
+                                        NULL,
+                                        SQL_DRIVER_NOPROMPT);
     if (!SQL_SUCCEEDED(ret))
     {
         ThrowException(SQL_HANDLE_DBC, connection);
@@ -208,9 +208,9 @@ void OdbcHelper::Prepare(SQLHSTMT statement,
 {
     // const_cast is used because StatementText is declared as input in the ODBC
     // specification and should be a const wchar_t*.
-    SQLRETURN ret = ::SQLPrepare(statement,
-                                 reinterpret_cast<SQLCHAR*>(const_cast<char*>(sql.c_str())),
-                                 SQL_NTS);
+    SQLRETURN ret = ::SQLPrepareA(statement,
+                                  reinterpret_cast<SQLCHAR*>(const_cast<char*>(sql.c_str())),
+                                  SQL_NTS);
     if (!SQL_SUCCEEDED(ret))
     {
         ThrowException(SQL_HANDLE_STMT, statement);

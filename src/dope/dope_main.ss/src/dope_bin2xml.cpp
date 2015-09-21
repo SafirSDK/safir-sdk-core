@@ -230,7 +230,7 @@ void ConvertDb()
             updateTypeIdParam = entityId.GetTypeId();
             updateInstanceParam = entityId.GetInstanceId().GetRawValue();
 
-            const int size = (xml.size() + 1)* sizeof (wchar_t);
+            const size_t size = (xml.size() + 1)* sizeof (wchar_t);
             memcpy(updateXmlDataParam.get(), xml.c_str(), size);
             updateXmlDataParamSize = SQL_NTS;
 

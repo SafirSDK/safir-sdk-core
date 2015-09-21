@@ -843,7 +843,7 @@ OdbcPersistor::ConnectIfNeeded(SQLHDBC connection,
         const auto connectionString = Safir::Dob::Typesystem::Utilities::ToUtf8
         (Safir::Dob::PersistenceParameters::OdbcStorageConnectString());
 
-        SQLRETURN ret = ::SQLDriverConnect
+        SQLRETURN ret = ::SQLDriverConnectA
             (connection,
              NULL,
              reinterpret_cast<SQLCHAR*>(const_cast<char *>(connectionString.c_str())),
