@@ -25,7 +25,7 @@
         <summary>The string to use for connection to the physical storage.</summary>
         <name>OdbcStorageConnectString</name>
         <type>String</type>
-        <value>Driver={MIMER};Database=SafirDb;Uid=dopeuser;Pwd=dopeuser</value>
+        <value>Driver={SQL Server Native Client 11.0};Server=localhost\SOMEDATABASE;Database=dope_db;Trusted_Connection=yes</value>
      </parameter>
       <parameter>
         <summary>The size of the XmlData column in the database.</summary>

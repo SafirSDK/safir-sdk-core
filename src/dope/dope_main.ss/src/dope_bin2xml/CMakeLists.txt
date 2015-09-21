@@ -2,8 +2,10 @@ ADD_EXECUTABLE(dope_bin2xml dope_bin2xml.cpp)
 
 FIND_PACKAGE(Boost COMPONENTS program_options filesystem system)
 
-if (NOT MSVC)
-    TARGET_LINK_LIBRARIES(dope_bin2xml dots_cpp dots_generated-Safir-cpp dots_generated-cpp olib ${Boost_LIBRARIES} ${ODBC_LIBRARIES})
+if (MSVC)
+    TARGET_LINK_LIBRARIES(dope_bin2xml odbc32)
+else()
+    TARGET_LINK_LIBRARIES(dope_bin2xml dots_cpp dots_generated-Safir-cpp dots_generated-cpp ${Boost_LIBRARIES} ${ODBC_LIBRARIES})
 endif()
 
 INSTALL(TARGETS dope_bin2xml

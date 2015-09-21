@@ -24,15 +24,16 @@
 #ifndef __DOPE_ODBC_PERSITOR_H__
 #define __DOPE_ODBC_PERSITOR_H__
 
-
-#include <Safir/Databases/Odbc/Connection.h>
-#include <Safir/Databases/Odbc/Environment.h>
-#include <Safir/Databases/Odbc/InputParameter.h>
-#include <Safir/Databases/Odbc/Statement.h>
-
 #include <Safir/Application/Tracer.h>
 
 #include "PersistenceHandler.h"
+
+#include <boost/scoped_array.hpp>
+
+#include <sqltypes.h>
+#include <sql.h>
+#include <sqlext.h>
+
 
 /**
  * Storage backend for ODBC databases
@@ -70,56 +71,146 @@ private:
     void Insert(const Safir::Dob::Typesystem::EntityId & entityId);
 
     //Delete a row into the db
-    void Delete(Safir::Databases::Odbc::Connection & connectionToUse,
+    void Delete(SQLHDBC connectionToUse,
+                bool & connectionIsValid,
                 const Safir::Dob::Typesystem::EntityId & entityId);
 
     //Delete all rows from the db
-    void DeleteAll(Safir::Databases::Odbc::Connection & connectionToUse);
+    void DeleteAll();
+
+    // Bind one Int64 parameter to a statement. The Int64 is not nullable.
+    void BindParamInt64(SQLHSTMT hStmt,
+                        const SQLUSMALLINT paramNumber,
+                        Safir::Dob::Typesystem::Int64 * value);
+
+    // Bind one binary parameter to a statement. The binary are nullable.
+    void BindParamBinary(SQLHSTMT hStmt,
+                         const SQLUSMALLINT paramNumber,
+                         const SQLUINTEGER maxSize,
+                         unsigned char * buffer,
+                         SQLINTEGER * sizePtr);
+
+    // Bind one string to a statement. The string is nullable.
+    void BindParamString(SQLHSTMT hStmt,
+                         const SQLUSMALLINT paramNumber,
+                         const SQLUINTEGER maxSize,
+                         wchar_t * string,
+                         SQLINTEGER * sizePtr);
+
+    // Bind one Int64 column to a statement. The Int64 cannot be null.
+    void BindColumnInt64( SQLHSTMT hStmt,
+                          unsigned short usColumnNumber,
+                          Safir::Dob::Typesystem::Int64 * value );
+
+    // Bind one binary column to a statement. The binary can be null.
+    void BindColumnBinary( SQLHSTMT hStmt,
+                           unsigned short usColumnNumber,
+                           const int maxSize,
+                           unsigned char * buffer,
+                           SQLINTEGER * sizePtr );
+
+    // Bind one string column to a statement. The string can be null.
+    void BindColumnString( SQLHSTMT hStmt,
+                           unsigned short usColumnNumber,
+                           const int maxSize,
+                           wchar_t * string,
+                           SQLINTEGER * sizePtr );
+
+    // Connect to the database if necessary.
+    void ConnectIfNeeded(SQLHDBC hConnection, bool & isConnected, int & connectionAttempts);
+
+    // Prepare a sql query.
+    void Prepare(SQLHSTMT hStmt, const std::wstring & sql);
+
+    // Sets the timeout for a sql statement.
+    void SetStmtTimeout(SQLHSTMT hStmt);
+
+    // Execute a sql statement
+    void Execute(SQLHSTMT hStmt);
+
+    // Allocates a handle for a sql statement.
+    void AllocStatement(SQLHSTMT * hStmt, SQLHDBC hConnection);
+
+    // Fetches data from an executed statement into the columns bound to the statement.
+    bool Fetch( SQLHSTMT hStmt );
+
+    // Free an previously allocated connection
+    void Free( SQLHDBC hConnection );
+
+    // Disconnects a connection.
+    void Disconnect( SQLHDBC hConnection );
+
+    // Reads the error message and throws an std::exception
+    void ThrowException(SQLSMALLINT   HandleType,
+                        SQLHANDLE     Handle);
+
+    // Disconnects the ODBC connection with all boolean correctly reset.
+    void DisconnectOdbcConnection();
+
+    // Closes a cursor previously opened with Fetch().
+    void CloseCursor(SQLHSTMT hStmt);
+
 
     /**
      * The main database connection.
      */
-    Safir::Databases::Odbc::Connection  m_odbcConnection;
+    SQLHDBC                             m_hOdbcConnection;
 
     /**
      * The database environment.
      */
-    Safir::Databases::Odbc::Environment m_environment;
+    SQLHENV                             m_hEnvironment;
 
+    /**
+     * The database connection used during RestoreAll
+     */
+    SQLHDBC                             m_hRestoreAllConnection;
 
     /**
      * Statement used for to update a row in db.
      */
-    Safir::Databases::Odbc::Statement      m_storeStatement;
-    Safir::Databases::Odbc::Int64Parameter m_storeTypeIdParam;
-    Safir::Databases::Odbc::Int64Parameter m_storeInstanceParam;
-    Safir::Databases::Odbc::Int64Parameter m_storeHandlerParam;
-    Safir::Databases::Odbc::LongBinaryParameter m_storeBinaryDataParam; //10M
-    Safir::Databases::Odbc::BinaryParameter m_storeBinarySmallDataParam; //5k
+    SQLHSTMT                                    m_hStoreStatement;
+    SQLHSTMT                                    m_hInsertStatement;
+    SQLHSTMT                                    m_hRowExistsStatement;
+    boost::scoped_array<unsigned char>          m_storeBinarySmallData;
+    SQLINTEGER                                  m_currentSmallDataSize;
+    boost::scoped_array<unsigned char>          m_storeBinaryLargeData;
+    SQLINTEGER                                  m_currentLargeDataSize;
+    Safir::Dob::Typesystem::Int64               m_handler;
+    SQLINTEGER                                  m_currentInt64Size;
+    Safir::Dob::Typesystem::Int64               m_type;
+    Safir::Dob::Typesystem::Int64               m_instance;
+    boost::scoped_array<wchar_t>                m_typeName;
+    SQLINTEGER                                  m_typeNameSize;
+    Safir::Dob::Typesystem::Int64               m_rowCount;
 
-    /**
-     * Statement used to insert a null row in db
-     */
-    Safir::Databases::Odbc::Statement      m_insertStatement;
-    Safir::Databases::Odbc::Int64Parameter m_insertTypeIdInsertParam;
-    Safir::Databases::Odbc::Int64Parameter m_insertInstanceInsertParam;
-    Safir::Databases::Odbc::WideStringParameter m_insertTypeNameParam; //236
 
     /**
      * Statement used to delete all rows in db
      */
-    Safir::Databases::Odbc::Statement      m_deleteAllStatement;
+    SQLHSTMT                                    m_hDeleteAllStatement;
 
     /**
      * Statement used to delete a row in db
      */
-    Safir::Databases::Odbc::Statement      m_deleteStatement;
-    Safir::Databases::Odbc::Int64Parameter m_deleteTypeIdParam;
-    Safir::Databases::Odbc::Int64Parameter m_deleteInstanceParam;
-    //delete has its own connection since it can be done
-    // during a fetch
-    Safir::Databases::Odbc::Connection     m_deleteConnection;
+    SQLHSTMT                                    m_hDeleteStatement;
+    SQLHSTMT                                    m_hDeleteODBCStatement;
 
+    // delete has its own connection since it can be done
+    // during a fetch
+    SQLHDBC                                     m_hDeleteConnection;
+
+    /**
+     * Keeps track of various Odbc actions.
+     */
+    bool                                        m_bIsOdbcConnected;
+    bool                                        m_bIsRestoreAllConnected;
+    bool                                        m_bStoreStatementIsValid;
+    bool                                        m_bDeleteAllIsValid;
+    bool                                        m_bDeleteIsConnected;
+    bool                                        m_bInsertIsValid;
+    bool                                        m_bDeleteIsValid;
+    bool                                        m_bDeleteODBCIsValid;
 
     Safir::Application::Tracer m_debug;
 };
