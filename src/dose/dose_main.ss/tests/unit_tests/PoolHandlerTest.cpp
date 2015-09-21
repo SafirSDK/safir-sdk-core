@@ -228,6 +228,8 @@ BOOST_AUTO_TEST_CASE( PoolDistributionHandlerTest )
         hasRun=true;
     });
 
+    WaitUntilReady();
+
     pdh.m_strand.post([&]
     {
         dump();
