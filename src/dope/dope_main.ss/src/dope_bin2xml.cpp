@@ -35,6 +35,8 @@
 #pragma warning(pop)
 #endif
 
+#include <boost/scoped_array.hpp>
+
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/convenience.hpp>
 #include <boost/filesystem/exception.hpp>
@@ -42,19 +44,49 @@
 
 #include <Safir/Dob/Typesystem/Serialization.h>
 #include <Safir/Dob/Typesystem/ObjectFactory.h>
-#include <Safir/Databases/Odbc/Connection.h>
-#include <Safir/Databases/Odbc/Environment.h>
-#include <Safir/Databases/Odbc/InputParameter.h>
-#include <Safir/Databases/Odbc/Statement.h>
-#include <Safir/Databases/Odbc/Columns.h>
-#include <Safir/Databases/Odbc/Exception.h>
 
 #include <Safir/Dob/PersistenceParameters.h>
+
+
+#include <Safir/Logging/Log.h>
+
+
+// Somehow we need this included inorder to compile the ODBC header files below.
+// I don't know why but it probably includes windows.h somehow...
+#include <Safir/Utilities/AsioDispatcher.h>
+
+#include <sqltypes.h>
+#include <sql.h>
+#include <sqlext.h>
 
 #include <iostream>
 enum WhatToConvert {db, files};
 
 WhatToConvert g_whatToConvert;
+
+// Odbc helper functions. See below
+void AllocStatement(SQLHSTMT * hStmt, SQLHDBC hConnection);
+void BindColumnInt64( SQLHSTMT hStmt,
+                      unsigned short usColumnNumber,
+                      Safir::Dob::Typesystem::Int64 * value,
+                      SQLINTEGER * size);
+void BindColumnBinary( SQLHSTMT hStmt,
+                       unsigned short usColumnNumber,
+                       const int maxSize,
+                       unsigned char * buffer,
+                       SQLINTEGER * sizePtr );
+void BindParamInt64(SQLHSTMT hStmt, const SQLUSMALLINT paramNumber, Safir::Dob::Typesystem::Int64 * value, SQLINTEGER * size);
+void BindParamString(SQLHSTMT hStmt,
+                     const SQLUSMALLINT paramNumber,
+                     const SQLUINTEGER maxSize,
+                     wchar_t * string,
+                     SQLINTEGER * sizePtr);
+void Connect(SQLHDBC hConnection, const std::wstring & connectionString);
+void Execute(SQLHSTMT hStmt);
+bool Fetch( SQLHSTMT hStmt );
+void Prepare(SQLHSTMT hStmt, const std::wstring & sql);
+void ThrowException(SQLSMALLINT   HandleType,
+                    SQLHANDLE     Handle);
 
 void ParseCommandLine(int argc, char * argv[])
 {
@@ -98,7 +130,7 @@ void ParseCommandLine(int argc, char * argv[])
     else
     {
         // No command line parameter given. We read the persistence
-        // configuration parameter instead. 
+        // configuration parameter instead.
         switch (Safir::Dob::PersistenceParameters::Backend())
         {
             case Safir::Dob::PersistenceBackend::File:
@@ -122,92 +154,109 @@ void ParseCommandLine(int argc, char * argv[])
 
 void ConvertDb()
 {
-    Safir::Databases::Odbc::Connection  readConnection;
-    Safir::Databases::Odbc::Connection  updateConnection;
-    Safir::Databases::Odbc::Environment environment;
-    environment.Alloc();
-    readConnection.Alloc(environment);
-    updateConnection.Alloc(environment);
+    SQLHENV                             hEnvironment;
+    SQLHDBC                             hReadConnection;
+    SQLHDBC                             hUpdateConnection;
 
-    Safir::Databases::Odbc::Statement getAllStatement;
-    Safir::Databases::Odbc::Int64Column typeIdColumn;
-    Safir::Databases::Odbc::Int64Column instanceColumn;
-    Safir::Databases::Odbc::Int64Column handlerColumn;
-    Safir::Databases::Odbc::WideStringColumn xmlDataColumn(Safir::Dob::PersistenceParameters::XmlDataColumnSize());
-    Safir::Databases::Odbc::BinaryColumn binaryDataColumn(Safir::Dob::PersistenceParameters::BinaryDataColumnSize());
-    Safir::Databases::Odbc::BinaryColumn binarySmallDataColumn(Safir::Dob::PersistenceParameters::BinarySmallDataColumnSize());
+    SQLINTEGER                          currentInt64Size(sizeof(Safir::Dob::Typesystem::Int64));
 
-    Safir::Databases::Odbc::Statement updateStatement;
-    Safir::Databases::Odbc::Int64Parameter updateTypeIdParam;
-    Safir::Databases::Odbc::Int64Parameter updateInstanceParam;
-    Safir::Databases::Odbc::LongWideStringParameter updateXmlDataParam(Safir::Dob::PersistenceParameters::XmlDataColumnSize());
+    SQLHSTMT                            hGetAllStatement;
+    Safir::Dob::Typesystem::Int64       typeIdColumn;
+    Safir::Dob::Typesystem::Int64       instanceColumn;
+    boost::scoped_array<unsigned char>  largeBinaryDataColumn(new unsigned char[Safir::Dob::PersistenceParameters::BinaryDataColumnSize()]);
+    SQLINTEGER                          largeBinaryDataColumnSize(0);
+    boost::scoped_array<unsigned char>  smallBinaryDataColumn(new unsigned char[Safir::Dob::PersistenceParameters::BinarySmallDataColumnSize()]);
+    SQLINTEGER                          smallBinaryDataColumnSize(0);
 
-    readConnection.Connect(Safir::Dob::PersistenceParameters::OdbcStorageConnectString());
-    updateConnection.Connect(Safir::Dob::PersistenceParameters::OdbcStorageConnectString());
+    SQLHSTMT                            hUpdateStatement;
+    Safir::Dob::Typesystem::Int64       updateTypeIdParam;
+    Safir::Dob::Typesystem::Int64       updateInstanceParam;
+    boost::scoped_array<wchar_t>        updateXmlDataParam(new wchar_t[Safir::Dob::PersistenceParameters::XmlDataColumnSize()]);
+    SQLINTEGER                          updateXmlDataParamSize(0);
 
-    updateStatement.Alloc(updateConnection);
-    updateStatement.Prepare(L"UPDATE PersistentEntity SET xmlData=?, binarySmallData=NULL, binaryData=NULL WHERE typeId=? AND instance=?");
-    updateStatement.BindLongParameter( 1, updateXmlDataParam );
-    updateStatement.BindParameter( 2, updateTypeIdParam );
-    updateStatement.BindParameter( 3, updateInstanceParam );
-
-    getAllStatement.Alloc(readConnection);
-    getAllStatement.Prepare( L"SELECT typeId, instance, binarySmallData, binaryData from PersistentEntity where binaryData is not null or binarySmallData is not null");
-    getAllStatement.BindColumn( 1, typeIdColumn );
-    getAllStatement.BindColumn( 2, instanceColumn);
-    getAllStatement.BindColumn( 3, binarySmallDataColumn);
-    getAllStatement.Execute();
-    for (;;)
+    SQLRETURN ret = ::SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &hEnvironment);
+    if (!SQL_SUCCEEDED(ret))
     {
-        if (!getAllStatement.Fetch())
-        {//we've got all rows!
-            break;
-        }
+        ThrowException(SQL_HANDLE_ENV, SQL_NULL_HANDLE);
+    }
 
-        Safir::Dob::Typesystem::EntityId entityId
-            (typeIdColumn.GetValue(), Safir::Dob::Typesystem::InstanceId(instanceColumn.GetValue()));
+    ret = ::SQLSetEnvAttr(  hEnvironment,
+                            SQL_ATTR_ODBC_VERSION,
+                            reinterpret_cast<SQLPOINTER>(SQL_OV_ODBC3),
+                            SQL_IS_UINTEGER );
+    if (!SQL_SUCCEEDED(ret))
+    {
+        ThrowException(SQL_HANDLE_ENV, hEnvironment);
+    }
+
+    ret = ::SQLAllocHandle(SQL_HANDLE_DBC, hEnvironment, &hReadConnection);
+    if (!SQL_SUCCEEDED(ret))
+    {
+        ThrowException(SQL_HANDLE_ENV, hEnvironment);
+    }
+
+    ret = ::SQLAllocHandle(SQL_HANDLE_DBC, hEnvironment, &hUpdateConnection);
+    if (!SQL_SUCCEEDED(ret))
+    {
+        ThrowException(SQL_HANDLE_ENV, hEnvironment);
+    }
+
+    Connect( hReadConnection, Safir::Dob::PersistenceParameters::OdbcStorageConnectString() );
+    Connect( hUpdateConnection, Safir::Dob::PersistenceParameters::OdbcStorageConnectString() );
+
+    AllocStatement( &hUpdateStatement, hUpdateConnection );
+    Prepare( hUpdateStatement, L"UPDATE PersistentEntity SET xmlData=?, binarySmallData=NULL, binaryData=NULL WHERE typeId=? AND instance=?");
+
+    BindParamString( hUpdateStatement, 1, Safir::Dob::PersistenceParameters::XmlDataColumnSize(), updateXmlDataParam.get(), &updateXmlDataParamSize );
+    BindParamInt64( hUpdateStatement, 2, &updateTypeIdParam, &currentInt64Size );
+    BindParamInt64( hUpdateStatement, 3, &updateInstanceParam, &currentInt64Size );
+
+    AllocStatement( &hGetAllStatement, hReadConnection );
+    Prepare( hGetAllStatement, L"SELECT typeId, instance, binarySmallData, binaryData from PersistentEntity where binaryData is not null or binarySmallData is not null");
+
+    BindColumnInt64( hGetAllStatement, 1, &typeIdColumn, &currentInt64Size );
+    BindColumnInt64( hGetAllStatement, 2, &instanceColumn, &currentInt64Size );
+    BindColumnBinary( hGetAllStatement, 3, Safir::Dob::PersistenceParameters::BinarySmallDataColumnSize(), smallBinaryDataColumn.get(), &smallBinaryDataColumnSize );
+    BindColumnBinary( hGetAllStatement, 4, Safir::Dob::PersistenceParameters::BinaryDataColumnSize(), largeBinaryDataColumn.get(), &largeBinaryDataColumnSize );
+
+    Execute( hGetAllStatement );
+
+    while (Fetch(hGetAllStatement))
+    {
+        const Safir::Dob::Typesystem::EntityId entityId
+            (typeIdColumn, Safir::Dob::Typesystem::InstanceId(instanceColumn));
 
         Safir::Dob::Typesystem::ObjectPtr object;
 
-        if (!binarySmallDataColumn.IsNull())
+        if (smallBinaryDataColumnSize != SQL_NULL_DATA)
         {
-            const char * const data = reinterpret_cast<const char * const>(binarySmallDataColumn.GetValue());
+            const char * const data = reinterpret_cast<const char * const>(smallBinaryDataColumn.get());
             object = Safir::Dob::Typesystem::ObjectFactory::Instance().CreateObject(data);
         }
         else
         {
-            getAllStatement.GetData(4, binaryDataColumn);
-            if (!binaryDataColumn.IsNull())
-            { //some binarypersistent data set
-                const char * const data = reinterpret_cast<const char * const>(binaryDataColumn.GetValue());
+            if (largeBinaryDataColumnSize != SQL_NULL_DATA)
+            {   //some binarypersistent data set
+                const char * const data = reinterpret_cast<const char * const>(largeBinaryDataColumn.get());
                 object = Safir::Dob::Typesystem::ObjectFactory::Instance().CreateObject(data);
             }
         }
         if (object != nullptr)
         {
             std::wstring xml = Safir::Dob::Typesystem::Serialization::ToXml(object);
-            
-            updateTypeIdParam.SetValue(entityId.GetTypeId());
-            updateInstanceParam.SetValue(entityId.GetInstanceId().GetRawValue());
-            updateXmlDataParam.SetValueAtExecution(static_cast<int>(xml.size() * sizeof (wchar_t)));
-            
-            updateStatement.Execute();
-            unsigned short param = 0;
-            if (!updateStatement.ParamData(param))
-            {
-                throw Safir::Dob::Typesystem::SoftwareViolationException(L"There should be one call to ParamData!",__WFILE__,__LINE__);
-            }
-            updateXmlDataParam.SetValue(&xml);
-            updateStatement.PutData(updateXmlDataParam);
-            if (updateStatement.ParamData(param))
-            {
-                throw Safir::Dob::Typesystem::SoftwareViolationException(L"There should only be one call to ParamData!",__WFILE__,__LINE__);
-            }
-            updateConnection.Commit();
+
+            updateTypeIdParam = entityId.GetTypeId();
+            updateInstanceParam = entityId.GetInstanceId().GetRawValue();
+
+            const int size = (xml.size() + 1)* sizeof (wchar_t);
+            memcpy(updateXmlDataParam.get(), xml.c_str(), size );
+            updateXmlDataParamSize = SQL_NTS;
+
+            Execute( hUpdateStatement );
         }
         else
         {
-            //                          m_debug << "No data set for " << objectId <<std::endl;
+            //  m_debug << "No data set for " << objectId <<std::endl;
         }
     }
 }
@@ -344,6 +393,197 @@ void ConvertFiles()
     }
 }
 
+void AllocStatement(SQLHSTMT * hStmt, SQLHDBC hConnection)
+{
+    SQLRETURN ret = ::SQLAllocHandle(SQL_HANDLE_STMT, hConnection, hStmt);
+    if (!SQL_SUCCEEDED(ret))
+    {
+        ThrowException(SQL_HANDLE_STMT,hStmt);
+    }
+}
+
+void BindColumnInt64( SQLHSTMT hStmt,
+                      unsigned short usColumnNumber,
+                      Safir::Dob::Typesystem::Int64 * value,
+                      SQLINTEGER * size)
+{
+    SQLRETURN ret;
+
+    ret = ::SQLBindCol( hStmt,                                  // StatementHandle
+                        usColumnNumber,                         // ColumnNumber,
+                        SQL_C_SBIGINT,                          // TargetType,
+                        value,                                  // TargetValuePtr,
+                        sizeof(Safir::Dob::Typesystem::Int64),  // BufferLength,
+                        size);                                  // StrLen_or_Ind
+    if (!SQL_SUCCEEDED(ret))
+    {
+        ThrowException(SQL_HANDLE_STMT,hStmt);
+    }
+}
+
+void BindColumnBinary( SQLHSTMT hStmt,
+                       unsigned short usColumnNumber,
+                       const int maxSize,
+                       unsigned char * buffer,
+                       SQLINTEGER * sizePtr )
+{
+    SQLRETURN ret;
+
+    ret = ::SQLBindCol( hStmt,                      // StatementHandle
+                        usColumnNumber,             // ColumnNumber,
+                        SQL_C_BINARY,               // TargetType,
+                        buffer,                     // TargetValuePtr,
+                        maxSize,                    // BufferLength,
+                        sizePtr);                   // StrLen_or_Ind
+    if (!SQL_SUCCEEDED(ret))
+    {
+        ThrowException(SQL_HANDLE_STMT,hStmt);
+    }
+}
+
+void BindParamInt64(SQLHSTMT hStmt, const SQLUSMALLINT paramNumber, Safir::Dob::Typesystem::Int64 * value, SQLINTEGER * size)
+{
+    SQLRETURN ret = ::SQLBindParameter(
+        hStmt,                                  // StatementHandle
+        paramNumber,                            // ParameterNumber,
+        SQL_PARAM_INPUT,                        // InputOutputType
+        SQL_C_SBIGINT,                          // ValueType
+        SQL_BIGINT,                             // ParameterType
+        20,                                     // ColumnSize
+        0,                                      // DecimalDigits
+        value,                                  // ParameterValuePtr
+        sizeof(Safir::Dob::Typesystem::Int64),  // BufferLength
+        size );                                 // StrLen_or_Ind
+    if (!SQL_SUCCEEDED(ret))
+    {
+        ThrowException(SQL_HANDLE_STMT,hStmt);
+    }
+}
+
+void BindParamString(SQLHSTMT hStmt,
+                     const SQLUSMALLINT paramNumber,
+                     const SQLUINTEGER maxSize,
+                     wchar_t * string,
+                     SQLINTEGER * sizePtr)
+{
+    const SQLUINTEGER number_of_chars = static_cast<SQLUINTEGER>( maxSize ) + 1;
+    const SQLUINTEGER size_of_char = static_cast<SQLUINTEGER>(sizeof(wchar_t));
+    const SQLUINTEGER columnSize = number_of_chars * size_of_char;
+
+    SQLRETURN ret = ::SQLBindParameter(
+        hStmt,                          // StatementHandle
+        paramNumber,                    // ParameterNumber,
+        SQL_PARAM_INPUT,                // InputOutputType
+        SQL_C_WCHAR,                    // ValueType
+        SQL_WLONGVARCHAR,               // ParameterType
+        //SQL_WVARCHAR,                   // ParameterType
+        columnSize,                     // ColumnSize
+        0,                              // DecimalDigits
+        string,                         // ParameterValuePtr
+        maxSize,                        // BufferLength
+        sizePtr );                      // StrLen_or_Ind
+    if (!SQL_SUCCEEDED(ret))
+    {
+        ThrowException(SQL_HANDLE_STMT,hStmt);
+    }
+}
+
+
+void Connect(SQLHDBC hConnection, const std::wstring & connectionString)
+{
+    //m_debug << L"Connecting to database"    << std::endl;
+
+    SQLRETURN ret = ::SQLDriverConnectW(
+        hConnection,
+        NULL,
+        const_cast<wchar_t *>(connectionString.c_str()),
+        SQL_NTS,
+        NULL,
+        0,
+        NULL,
+        SQL_DRIVER_NOPROMPT );
+    if (!SQL_SUCCEEDED(ret))
+    {
+        ThrowException(SQL_HANDLE_DBC, hConnection );
+    }
+
+    // SQLSetConnectAttr(SQL_ATTR_AUTOCOMMIT, SQL_AUTOCOMMIT_ON);
+    ret = ::SQLSetConnectAttr(  hConnection,
+                                SQL_ATTR_AUTOCOMMIT,
+                                reinterpret_cast<SQLPOINTER>(SQL_AUTOCOMMIT_ON),
+                                SQL_IS_UINTEGER );
+    if (!SQL_SUCCEEDED(ret))
+    {
+        ThrowException(SQL_HANDLE_DBC, hConnection );
+    }
+}
+
+void Execute(SQLHSTMT hStmt)
+{
+    SQLRETURN ret = ::SQLExecute( hStmt );
+    if (!SQL_SUCCEEDED(ret))
+    {
+        ThrowException(SQL_HANDLE_STMT,hStmt);
+    }
+}
+
+bool Fetch( SQLHSTMT hStmt )
+{
+    SQLRETURN ret;
+    bool bDataFound = true;
+
+    ret = ::SQLFetch( hStmt );
+    if (ret==SQL_NO_DATA_FOUND)
+    {
+        bDataFound = false;
+    }
+    else if (!SQL_SUCCEEDED(ret))
+    {
+        ThrowException(SQL_HANDLE_STMT,hStmt);
+    }
+    return bDataFound;
+}
+
+void Prepare(SQLHSTMT hStmt, const std::wstring & sql)
+{
+    // const_cast is used because StatementText is declared as input in the ODBC
+    // specification and should be a const wchar_t *.
+    SQLRETURN ret = ::SQLPrepareW(
+        hStmt,
+        const_cast<wchar_t *>(sql.c_str()),
+        SQL_NTS );
+    if (!SQL_SUCCEEDED(ret))
+    {
+        ThrowException(SQL_HANDLE_STMT,hStmt);
+    }
+}
+
+void ThrowException(SQLSMALLINT   HandleType,
+                    SQLHANDLE     Handle)
+{
+    wchar_t     wszSqlState[6];
+    SQLINTEGER  lpNativeErrorPtr;
+    wchar_t     wszMessageText[512];
+    SQLRETURN   ret;
+
+    ret = ::SQLGetDiagRecW( HandleType,
+                            Handle,
+                            1,
+                            wszSqlState,
+                            &lpNativeErrorPtr,
+                            wszMessageText,
+                            256,
+                            0 );
+    if (SQL_SUCCEEDED(ret))
+    {
+        std::wstring string = wszSqlState;
+        string += L":";
+        string += wszMessageText;
+
+        throw std::exception(Safir::Dob::Typesystem::Utilities::ToUtf8(string).c_str());
+    }
+}
+
 int main(int argc, char * argv[])
 {
     try
@@ -365,4 +605,3 @@ int main(int argc, char * argv[])
     }
     return 0;
 }
-

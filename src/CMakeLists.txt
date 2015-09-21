@@ -26,6 +26,8 @@ if (UNIX)
       SET(SAFIR_ODBC_LIBRARIES ${UnixODBC_LIBRARIES})
       ADD_DEFINITIONS(-DSAFIR_ODBC_IS_UNIXODBC)
     endif()
+elseif(MSVC)
+  SET(SAFIR_ODBC_LIBRARIES odbc32)
 endif()
 ###########
 

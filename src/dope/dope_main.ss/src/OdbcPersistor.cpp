@@ -27,10 +27,8 @@
 
 #include <Safir/Dob/Typesystem/Serialization.h>
 #include <Safir/Dob/Typesystem/ObjectFactory.h>
-#include <Safir/Databases/Odbc/Columns.h>
 #include <Safir/Dob/PersistenceParameters.h>
 #include <Safir/Logging/Log.h>
-#include <Safir/Databases/Odbc/Exception.h>
 #include <Safir/Dob/ConnectionAspectInjector.h>
 
 #ifdef _MSC_VER
@@ -52,122 +50,118 @@ const boost::chrono::steady_clock::duration RETRY_EXCEPTION_DELAY = boost::chron
 const int REPORT_AFTER_RECONNECTS = 100;
 
 //-------------------------------------------------------
-template <class T>
-void Free(T & thing)
-{
-    if (thing.IsValid())
-    {
-        thing.Free();
-    }
-}
-
-//-------------------------------------------------------
-template <class T>
-void Disconnect(T & thing)
-{
-    if (thing.IsConnected())
-    {
-        thing.Disconnect();
-    }
-}
-
-//-------------------------------------------------------
-template <class T>
-void Alloc(T & thing)
-{
-    int retries = 0;
-    bool errorReported = false;
-    while (!thing.IsValid())
-    {
-        try
-        {
-            thing.Alloc();
-            if (errorReported)
-            {
-                Safir::Logging::SendSystemLog(Safir::Logging::Informational,
-                                              L"Successfully allocated the something that failed before...");
-                errorReported = false;
-                retries = 0;
-            }
-        }
-        catch (const Safir::Databases::Odbc::ReconnectException& e)
-        {
-            Free(thing);
-            ++retries;
-            if (retries > REPORT_AFTER_RECONNECTS && !errorReported)
-            {
-                Safir::Logging::SendSystemLog(Safir::Logging::Error,
-                                              L"Dope failed to Alloc something. Will retry. Exception info: " + e.GetExceptionInfo());
-                errorReported = true;
-            }
-            boost::this_thread::sleep_for(RECONNECT_EXCEPTION_DELAY);
-        }
-    }
-}
-
-//-------------------------------------------------------
-template <class T, class U>
-void Alloc(T & thing, U & arg)
-{
-    int retries = 0;
-    bool errorReported = false;
-    while (!thing.IsValid())
-    {
-        try
-        {
-            thing.Alloc(arg);
-            if (errorReported)
-            {
-                Safir::Logging::SendSystemLog(Safir::Logging::Informational,
-                                              L"Successfully allocated the something that failed before...");
-                errorReported = false;
-                retries = 0;
-            }
-        }
-        catch (const Safir::Databases::Odbc::ReconnectException& e)
-        {
-            Free(thing);
-            ++retries;
-            if (retries > REPORT_AFTER_RECONNECTS && !errorReported)
-            {
-                Safir::Logging::SendSystemLog(Safir::Logging::Error,
-                                              L"Dope failed to Alloc something. Will retry. Exception info: " + e.GetExceptionInfo());
-                errorReported = true;
-            }
-            boost::this_thread::sleep_for(RECONNECT_EXCEPTION_DELAY);
-        }
-    }
-}
-
-
-
-//-------------------------------------------------------
 OdbcPersistor::OdbcPersistor(boost::asio::io_service& ioService) :
     PersistenceHandler(ioService, false),
-    m_odbcConnection(),
-    m_environment(),
-    m_storeBinaryDataParam(Safir::Dob::PersistenceParameters::XmlDataColumnSize()),
-    m_storeBinarySmallDataParam(Safir::Dob::PersistenceParameters::BinarySmallDataColumnSize()),
-    m_insertTypeNameParam(Safir::Dob::PersistenceParameters::TypeNameColumnSize()),
-    m_deleteConnection(),
+    m_hOdbcConnection(SQL_NULL_HANDLE),
+    m_hEnvironment(SQL_NULL_HANDLE),
+    m_hRestoreAllConnection(SQL_NULL_HANDLE),
+    m_hStoreStatement(SQL_NULL_HANDLE),
+    m_hInsertStatement(SQL_NULL_HANDLE),
+    m_hRowExistsStatement(SQL_NULL_HANDLE),
+    m_storeBinarySmallData(new unsigned char[Safir::Dob::PersistenceParameters::BinarySmallDataColumnSize()]),
+    m_currentSmallDataSize(0),
+    m_storeBinaryLargeData(new unsigned char[Safir::Dob::PersistenceParameters::BinaryDataColumnSize()]),
+    m_currentLargeDataSize(0),
+    m_currentInt64Size(sizeof(Safir::Dob::Typesystem::Int64)),
+    m_typeName( new wchar_t[Safir::Dob::PersistenceParameters::TypeNameColumnSize()]),
+    m_hDeleteAllStatement(SQL_NULL_HANDLE),
+    m_hDeleteStatement(SQL_NULL_HANDLE),
+    m_hDeleteODBCStatement(SQL_NULL_HANDLE),
+    m_hDeleteConnection(SQL_NULL_HANDLE),
+    m_bIsOdbcConnected(false),
+    m_bIsRestoreAllConnected(false),
+    m_bStoreStatementIsValid(false),
+    m_bDeleteAllIsValid(false),
+    m_bDeleteIsConnected(false),
+    m_bInsertIsValid(false),
+    m_bDeleteIsValid(false),
+    m_bDeleteODBCIsValid(false),
     m_debug(L"OdbcPersistor")
 {
     m_debug << "Using ODBC connect string " << Safir::Dob::PersistenceParameters::OdbcStorageConnectString() <<std::endl;
-    Alloc(m_environment);
-    Alloc(m_odbcConnection, m_environment);
-    Alloc(m_deleteConnection, m_environment);
+
+    try
+    {
+        SQLRETURN ret = ::SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &m_hEnvironment);
+        if (!SQL_SUCCEEDED(ret))
+        {
+            ThrowException(SQL_HANDLE_ENV, SQL_NULL_HANDLE);
+        }
+
+        // SetEnvAttr(SQL_ATTR_ODBC_VERSION, SQL_OV_ODBC3);
+        ret = ::SQLSetEnvAttr(  m_hEnvironment,
+                                SQL_ATTR_ODBC_VERSION,
+                                reinterpret_cast<SQLPOINTER>(SQL_OV_ODBC3),
+                                SQL_IS_UINTEGER );
+        if (!SQL_SUCCEEDED(ret))
+        {
+            ThrowException(SQL_HANDLE_ENV, m_hEnvironment);
+        }
+
+        ret = ::SQLAllocHandle(SQL_HANDLE_DBC, m_hEnvironment, &m_hOdbcConnection);
+        if (!SQL_SUCCEEDED(ret))
+        {
+            ThrowException(SQL_HANDLE_ENV, m_hEnvironment);
+        }
+
+        ret = ::SQLAllocHandle(SQL_HANDLE_DBC, m_hEnvironment, &m_hRestoreAllConnection);
+        if (!SQL_SUCCEEDED(ret))
+        {
+            ThrowException(SQL_HANDLE_ENV, m_hEnvironment);
+        }
+
+        ret = ::SQLAllocHandle(SQL_HANDLE_DBC, m_hEnvironment, &m_hDeleteConnection);
+        if (!SQL_SUCCEEDED(ret))
+        {
+            ThrowException(SQL_HANDLE_ENV, m_hEnvironment);
+        }
+    }
+    catch(const std::exception & ex)
+    {
+        Safir::Logging::SendSystemLog(
+            Safir::Logging::Error,
+            Safir::Dob::Typesystem::Utilities::ToWstring(ex.what()) );
+
+    }
 }
 
 
 //-------------------------------------------------------
 OdbcPersistor::~OdbcPersistor()
 {
-    Disconnect(m_deleteConnection);
-    Disconnect(m_odbcConnection);
+    try
+    {
+        SQLRETURN ret;
 
-    Free(m_deleteConnection);
-    Free(m_odbcConnection);
-    Free(m_environment);
+        if (m_bDeleteIsConnected)
+        {
+            Disconnect(m_hDeleteConnection);
+            m_bDeleteIsConnected = false;
+        }
+
+        if (m_bIsOdbcConnected)
+        {
+            Disconnect(m_hOdbcConnection);
+            m_bIsOdbcConnected = false;
+        }
+
+        Free(m_hDeleteConnection);
+        Free(m_hRestoreAllConnection);
+        Free(m_hOdbcConnection);
+
+        ret = ::SQLFreeHandle(SQL_HANDLE_ENV, m_hEnvironment);
+        if (!SQL_SUCCEEDED(ret))
+        {
+            ThrowException(SQL_HANDLE_ENV, m_hEnvironment);
+        }
+    }
+    catch(const std::exception & ex)
+    {
+        Safir::Logging::SendSystemLog(
+            Safir::Logging::Error,
+            Safir::Dob::Typesystem::Utilities::ToWstring(ex.what()) );
+
+    }
 }
 
 
@@ -177,7 +171,6 @@ void OdbcPersistor::Store(const Safir::Dob::Typesystem::EntityId& entityId,
                           Safir::Dob::Typesystem::BinarySerialization & bin,
                           const bool update)
 {
-
     const bool small = static_cast<int>(bin.size()) < Safir::Dob::PersistenceParameters::BinarySmallDataColumnSize();
 
     int retries = 0;
@@ -189,24 +182,26 @@ void OdbcPersistor::Store(const Safir::Dob::Typesystem::EntityId& entityId,
     {
         try
         {
-            if( !m_odbcConnection.IsConnected() )
-            {
-                ++retries;
-                m_debug << "Store: Connecting to database, attempt " << retries << std::endl;
-                m_odbcConnection.Connect(Safir::Dob::PersistenceParameters::OdbcStorageConnectString());
-            }
+            ConnectIfNeeded(m_hOdbcConnection, m_bIsOdbcConnected, retries);
 
-            if (!m_storeStatement.IsValid())
+            if (!m_bStoreStatementIsValid)
             {
-                m_storeStatement.Alloc(m_odbcConnection);
-                m_storeStatement.Prepare(
-                    L"UPDATE PersistentEntity SET xmlData=NULL, binarySmallData=?, binaryData=?, handlerid=? WHERE typeId=? AND instance=?");
-                m_storeStatement.BindParameter( 1, m_storeBinarySmallDataParam );
-                m_storeStatement.BindLongParameter( 2, m_storeBinaryDataParam );
-                m_storeStatement.BindParameter( 3, m_storeHandlerParam );
-                m_storeStatement.BindParameter( 4, m_storeTypeIdParam );
-                m_storeStatement.BindParameter( 5, m_storeInstanceParam );
-                m_storeStatement.SetStmtAttr( SQL_ATTR_QUERY_TIMEOUT, 15 );
+                AllocStatement(&m_hStoreStatement, m_hOdbcConnection);
+                m_bStoreStatementIsValid = true;
+
+                Prepare(
+                    m_hStoreStatement,
+                    L"UPDATE PersistentEntity SET xmlData=NULL, binarySmallData=?, binaryData=?, handlerid=? "
+                    L"WHERE typeId=? AND instance=?" );
+
+                BindParamBinary(m_hStoreStatement, 1, Safir::Dob::PersistenceParameters::BinarySmallDataColumnSize(), m_storeBinarySmallData.get(), &m_currentSmallDataSize );
+                BindParamBinary(m_hStoreStatement, 2, Safir::Dob::PersistenceParameters::BinaryDataColumnSize(), m_storeBinaryLargeData.get(), &m_currentLargeDataSize );
+                BindParamInt64(m_hStoreStatement, 3, &m_handler);
+                BindParamInt64(m_hStoreStatement, 4, &m_type);
+                BindParamInt64(m_hStoreStatement, 5, &m_instance);
+
+                SetStmtTimeout(m_hStoreStatement);
+
                 paramSet = false;
             }
 
@@ -214,80 +209,57 @@ void OdbcPersistor::Store(const Safir::Dob::Typesystem::EntityId& entityId,
             {
                 if (small)
                 {
-                    m_storeBinarySmallDataParam.SetValue(&bin[0],static_cast<unsigned int>(bin.size()));
-                    m_storeBinaryDataParam.SetNull();
+                    memcpy(m_storeBinarySmallData.get(),&bin[0], bin.size());
+                    m_currentSmallDataSize = bin.size();
+                    m_currentLargeDataSize = SQL_NULL_DATA;
                 }
                 else
                 {
-                    m_storeBinarySmallDataParam.SetNull();
+                    memcpy(m_storeBinaryLargeData.get(),&bin[0], bin.size());
+                    m_currentLargeDataSize = bin.size();
+                    m_currentSmallDataSize = SQL_NULL_DATA;
                 }
 
-                m_storeTypeIdParam.SetValue(entityId.GetTypeId());
-                m_storeInstanceParam.SetValue(entityId.GetInstanceId().GetRawValue());
-                m_storeHandlerParam.SetValue(handlerId.GetRawValue() );
+                m_type = entityId.GetTypeId();
+                m_instance = entityId.GetInstanceId().GetRawValue();
+                m_handler = handlerId.GetRawValue();
                 paramSet = true;
             }
 
-            try
+            if (!update)
             {
-                if (!update)
-                {
-                    // After global instanceid's we can no longer assume that all instanceid's are written to the
-                    // the database at startup. So try to insert them here if the entity already exist
-                    Insert( entityId );
-                }
-
-                if (!small)
-                {
-                    m_storeBinaryDataParam.SetValueAtExecution(static_cast<int>(bin.size() * sizeof (char)));
-                }
-
-                m_storeStatement.Execute();
-
-                if (!small)
-                {
-                    unsigned short param = 0;
-                    if (!m_storeStatement.ParamData(param))
-                    {
-                        throw Safir::Dob::Typesystem::SoftwareViolationException(L"There should be one call to ParamData!",__WFILE__,__LINE__);
-                    }
-                    m_storeBinaryDataParam.SetValue(&bin[0],
-                                                    static_cast<int>(bin.size() * sizeof (char)));
-                    m_storeStatement.PutData(m_storeBinaryDataParam);
-                    if (m_storeStatement.ParamData(param))
-                    {
-                        throw Safir::Dob::Typesystem::SoftwareViolationException(L"There should only be one call to ParamData!",__WFILE__,__LINE__);
-                    }
-                }
-                m_debug << "Successfully stored binary entity in database. Size = "<<bin.size() << std::endl;
-                done = true;
-
-                if (errorReported)
-                {
-                    Safir::Logging::SendSystemLog(Safir::Logging::Informational,
-                                                  L"Successfully connected to the database");
-                    errorReported = false;
-                    retries = 0;
-                }
+                // After global instanceid's we can no longer assume that all instanceid's are written to the
+                // the database at startup. So try to insert them here if the entity already exist
+                Insert( entityId );
             }
-            catch(const Safir::Databases::Odbc::RetryException& e)
+
+            Execute( m_hStoreStatement );
+
+            m_debug << "Successfully stored binary entity in database. Size = "<<bin.size() << std::endl;
+            done = true;
+
+            if (errorReported)
             {
-                m_debug << "Caught a RetryException in Store:\n" << e.GetExceptionInfo() << std::endl;
-                boost::this_thread::sleep_for(RETRY_EXCEPTION_DELAY);
+                Safir::Logging::SendSystemLog(Safir::Logging::Informational,
+                                                L"Successfully connected to the database");
+                errorReported = false;
+                retries = 0;
             }
         }
-        catch(const Safir::Databases::Odbc::ReconnectException& e)
+        catch(const std::exception & e)
         {
-            m_debug << "Caught a ReconnectException in Store:\n" << e.GetExceptionInfo() << std::endl;
+            const std::wstring err = Safir::Dob::Typesystem::Utilities::ToWstring( e.what() );
+            m_debug << "Caught a ReconnectException in Store:\n" << err << std::endl;
             if (retries > REPORT_AFTER_RECONNECTS && !errorReported)
             {
                 Safir::Logging::SendSystemLog(Safir::Logging::Error,
                                               L"Failed to connect to the database, will keep trying. Exception info: " +
-                                              e.GetExceptionInfo());
+                                              err);
                 errorReported = true;
             }
-            Disconnect(m_odbcConnection);
-            Free(m_storeStatement);
+
+            DisconnectOdbcConnection();
+
             boost::this_thread::sleep_for(RECONNECT_EXCEPTION_DELAY);
         }
     }
@@ -298,17 +270,72 @@ void OdbcPersistor::Store(const Safir::Dob::Typesystem::EntityId& entityId,
 //-------------------------------------------------------
 void OdbcPersistor::Remove(const Safir::Dob::EntityProxy & entityProxy)
 {
-    Delete(m_odbcConnection, entityProxy.GetEntityId());
+    m_debug << "Deleting " << entityProxy.GetEntityId() <<std::endl;
+    int retries = 0;
+    bool errorReported = false;
+    bool paramSet = false;
+    bool done = false;
+
+    while (!done)
+    {
+        try
+        {
+            ConnectIfNeeded(m_hOdbcConnection, m_bIsOdbcConnected, retries);
+
+            if (!m_bDeleteODBCIsValid)
+            {
+                AllocStatement(&m_hDeleteODBCStatement, m_hOdbcConnection);
+                Prepare(m_hDeleteODBCStatement, L"DELETE FROM PersistentEntity WHERE typeId=? AND instance=?");
+                BindParamInt64(m_hDeleteODBCStatement, 1, &m_type);
+                BindParamInt64(m_hDeleteODBCStatement, 2, &m_instance);
+                SetStmtTimeout(m_hDeleteODBCStatement);
+                m_bDeleteODBCIsValid = true;
+                paramSet = false;
+            }
+
+            if (!paramSet)
+            {
+                m_type = entityProxy.GetEntityId().GetTypeId();
+                m_instance = entityProxy.GetEntityId().GetInstanceId().GetRawValue();
+                paramSet = true;
+            }
+
+            Execute(m_hDeleteODBCStatement);
+            done = true;
+            if (errorReported)
+            {
+                Safir::Logging::SendSystemLog(Safir::Logging::Informational,
+                                                L"Successfully connected to the database");
+                errorReported = false;
+                retries = 0;
+            }
+        }
+        catch(const std::exception & e)
+        {
+            const std::wstring err = Safir::Dob::Typesystem::Utilities::ToWstring( e.what() );
+            m_debug << "Caught a ReconnectException in Delete:\n" << err << std::endl;
+            if (retries > REPORT_AFTER_RECONNECTS && !errorReported)
+            {
+                Safir::Logging::SendSystemLog(Safir::Logging::Error,
+                                              L"Failed to connect to the database, will keep trying. Exception info: " +
+                                              err );
+                errorReported = true;
+            }
+            DisconnectOdbcConnection();
+            boost::this_thread::sleep_for(RECONNECT_EXCEPTION_DELAY);
+        }
+    }
 }
+
 
 //-------------------------------------------------------
 void OdbcPersistor::RemoveAll()
 {
-    DeleteAll(m_odbcConnection);
+    DeleteAll();
 }
 
 //-------------------------------------------------------
-void OdbcPersistor::DeleteAll(Safir::Databases::Odbc::Connection & connectionToUse)
+void OdbcPersistor::DeleteAll()
 {
     m_debug << "Deleting all" <<std::endl;
     int retries = 0;
@@ -319,49 +346,46 @@ void OdbcPersistor::DeleteAll(Safir::Databases::Odbc::Connection & connectionToU
     {
         try
         {
-            if( !connectionToUse.IsConnected() )
+            ConnectIfNeeded(m_hDeleteConnection, m_bDeleteIsConnected, retries);
+
+            if (!m_bDeleteAllIsValid)
             {
-                ++retries;
-                connectionToUse.Connect(Safir::Dob::PersistenceParameters::OdbcStorageConnectString());
+                AllocStatement( &m_hDeleteAllStatement, m_hOdbcConnection );
+                m_bDeleteAllIsValid = true;
+
+                Prepare(m_hDeleteAllStatement, L"DELETE FROM PersistentEntity");
+
+                SetStmtTimeout(m_hDeleteAllStatement);
             }
 
-            if (!m_deleteAllStatement.IsValid())
-            {
-                m_deleteAllStatement.Alloc(connectionToUse);
-                m_deleteAllStatement.Prepare(L"DELETE FROM PersistentEntity");
-                m_deleteAllStatement.SetStmtAttr( SQL_ATTR_QUERY_TIMEOUT, 15 );
-            }
+            Execute( m_hDeleteAllStatement );
 
-            try
+            done = true;
+            if (errorReported)
             {
-                m_deleteAllStatement.Execute();
-                done = true;
-                if (errorReported)
-                {
-                    Safir::Logging::SendSystemLog(Safir::Logging::Informational,
-                                                  L"Successfully connected to the database");
-                    errorReported = false;
-                    retries = 0;
-                }
-            }
-            catch(const Safir::Databases::Odbc::RetryException& e)
-            {
-                m_debug << "Caught a RetryException in RemoveAll:\n" << e.GetExceptionInfo() << std::endl;
-                boost::this_thread::sleep_for(RETRY_EXCEPTION_DELAY);
+                Safir::Logging::SendSystemLog(Safir::Logging::Informational,
+                                                L"Successfully connected to the database");
+                errorReported = false;
+                retries = 0;
             }
         }
-        catch(const Safir::Databases::Odbc::ReconnectException& e)
+        catch(const std::exception & e)
         {
-            m_debug << "Caught a ReconnectException in RemoveAll:\n" << e.GetExceptionInfo() << std::endl;
+            const std::wstring err = Safir::Dob::Typesystem::Utilities::ToWstring( e.what() );
+            m_debug << "Caught a ReconnectException in RemoveAll:\n" << err << std::endl;
             if (retries > REPORT_AFTER_RECONNECTS && !errorReported)
             {
                 Safir::Logging::SendSystemLog(Safir::Logging::Error,
                                               L"Failed to connect to the database, will keep trying. Exception info: " +
-                                              e.GetExceptionInfo());
+                                              err);
                 errorReported = true;
             }
-            Disconnect(connectionToUse);
-            Free(m_deleteAllStatement);
+            if (m_bDeleteIsConnected)
+            {
+                Disconnect(m_hDeleteConnection);
+                m_bDeleteIsConnected = false;
+            }
+            Free(m_hDeleteAllStatement);
             boost::this_thread::sleep_for(RECONNECT_EXCEPTION_DELAY);
         }
     }
@@ -374,13 +398,21 @@ void OdbcPersistor::RestoreAll()
     bool errorReported = false;
     EntityIdSet restoredObjects;
 
-    Safir::Databases::Odbc::Statement getAllStatement;
-    Safir::Databases::Odbc::Int64Column typeIdColumn;
-    Safir::Databases::Odbc::Int64Column instanceColumn;
-    Safir::Databases::Odbc::Int64Column handlerColumn;
-    Safir::Databases::Odbc::WideStringColumn xmlDataColumn(Safir::Dob::PersistenceParameters::XmlDataColumnSize());
-    Safir::Databases::Odbc::BinaryColumn binaryDataColumn(Safir::Dob::PersistenceParameters::BinaryDataColumnSize());
-    Safir::Databases::Odbc::BinaryColumn binarySmallDataColumn(Safir::Dob::PersistenceParameters::BinarySmallDataColumnSize());
+    const int binaryLargeSize = Safir::Dob::PersistenceParameters::BinaryDataColumnSize();
+    const int binarySmallSize = Safir::Dob::PersistenceParameters::BinarySmallDataColumnSize();
+    const int xmlSize = Safir::Dob::PersistenceParameters::XmlDataColumnSize();
+
+    bool                                        bGetAllIsValid = false;
+    SQLHSTMT                                    hGetAllStatement = SQL_NULL_HANDLE;
+    Safir::Dob::Typesystem::Int64               typeId = 0;
+    Safir::Dob::Typesystem::Int64               instance = 0;
+    Safir::Dob::Typesystem::Int64               handler = 0;
+    boost::scoped_array<unsigned char>          storeBinarySmallData(new unsigned char[binarySmallSize]);
+    SQLINTEGER                                  currentSmallDataSize = 0;
+    boost::scoped_array<unsigned char>          storeBinaryLargeData(new unsigned char[binaryLargeSize]);
+    SQLINTEGER                                  currentLargeDataSize = 0;
+    boost::scoped_array<wchar_t>                xmlBuffer(new wchar_t[xmlSize]);
+    SQLINTEGER                                  currentXmlSize = 0;
 
     const boost::chrono::steady_clock::time_point startTime = boost::chrono::steady_clock::now();
 
@@ -389,94 +421,111 @@ void OdbcPersistor::RestoreAll()
     {
         try
         {
-            if (!m_odbcConnection.IsConnected())
-            {
-                ++connectionAttempts;
-                m_debug << "RestoreAll: Connecting to database, attempt " << connectionAttempts << std::endl;
-                m_odbcConnection.Connect(Safir::Dob::PersistenceParameters::OdbcStorageConnectString());
-            }
+            ConnectIfNeeded(m_hRestoreAllConnection, m_bIsRestoreAllConnected, connectionAttempts);
 
             for (;;)
             {
                 //getAll statement execution (will loop here until we successfully execute)
-                if (!getAllStatement.IsValid())
+                if (!bGetAllIsValid)
                 {
-                    getAllStatement.Alloc(m_odbcConnection);
-                    getAllStatement.Prepare( L"SELECT typeId, instance, handlerid, xmlData, binaryData, binarySmallData from PersistentEntity" );
-                    getAllStatement.BindColumn( 1, typeIdColumn );
-                    getAllStatement.BindColumn( 2, instanceColumn);
-                    getAllStatement.BindColumn( 3, handlerColumn);
-                    //getAllStatement.BindColumn( 4, xmlDataColumn );
-                    //getAllStatement.BindColumn( 5, binaryDataColumn );
-                    getAllStatement.BindColumn( 6, binarySmallDataColumn );
+                    AllocStatement(&hGetAllStatement, m_hRestoreAllConnection);
+                    Prepare(
+                        hGetAllStatement,
+                        L"SELECT typeId, instance, handlerid, xmlData, binaryData, binarySmallData from PersistentEntity" );
+                    BindColumnInt64(hGetAllStatement, 1, &typeId);
+                    BindColumnInt64(hGetAllStatement, 2, &instance);
+                    BindColumnInt64(hGetAllStatement, 3, &handler);
+
+                    BindColumnString(hGetAllStatement, 4, xmlSize, xmlBuffer.get(), &currentXmlSize);
+
+                    BindColumnBinary(hGetAllStatement, 5, binaryLargeSize, storeBinaryLargeData.get(), &currentLargeDataSize);
+                    BindColumnBinary(hGetAllStatement, 6, binarySmallSize, storeBinarySmallData.get(), &currentSmallDataSize);
                 }
 
                 try
                 {
-                    getAllStatement.Execute();
+                    Execute( hGetAllStatement );
                     break;
                 }
-                catch(const Safir::Databases::Odbc::RetryException& e)
+                catch(const std::exception & e)
                 {
-                    m_debug << "Caught a RetryException in GetAll:\n" << e.GetExceptionInfo() << std::endl;
+                    const std::wstring err = Safir::Dob::Typesystem::Utilities::ToWstring( e.what() );
+                    m_debug << "Caught a RetryException in GetAll:\n" << err << std::endl;
                     boost::this_thread::sleep_for(RETRY_EXCEPTION_DELAY);
                 }
             }
 
             for (;;)
             {
+                if (!Fetch(hGetAllStatement))
+                {//we've got all rows!
+                    done = true;
+                    break;
+                }
+
+                const Safir::Dob::Typesystem::EntityId entityId(
+                        typeId,
+                        Safir::Dob::Typesystem::InstanceId(instance));
+
+                const Safir::Dob::Typesystem::HandlerId handler(handler);
+
+                auto findIt = GetPersistentTypes().find(entityId.GetTypeId());
+                if (findIt == GetPersistentTypes().end())
+                { //not to be persisted!
+                    Delete(m_hDeleteConnection,m_bDeleteIsConnected, entityId);
+                    continue;
+                }
+
+                if (restoredObjects.find(entityId) != restoredObjects.end())
+                { //already restored this object
+                    continue;
+                }
+
                 try
                 {
-                    if (!getAllStatement.Fetch())
-                    {//we've got all rows!
-                        done = true;
-                        break;
+                    Safir::Dob::ConnectionAspectInjector injector(m_dobConnection);
+
+                    if (currentXmlSize != SQL_NULL_DATA)
+                    { //some xml persistent data set
+                        std::wstring xml = xmlBuffer.get();
+                        m_debug
+                            << "Restoring from xml"                 << entityId
+                            << ", size = "                          << xml.size()
+                            << ". First 100 chars of the data: "    << xml.substr(0,100)
+                            << std::endl;
+
+                        Safir::Dob::Typesystem::ObjectPtr object =
+                            Safir::Dob::Typesystem::Serialization::ToObject(xml);
+                        Safir::Dob::EntityPtr entity =
+                            boost::dynamic_pointer_cast<Safir::Dob::Entity>(object);
+                        m_debug << "Successfully deserialized" <<std::endl;
+
+                        injector.InitialSet(entity, entityId.GetInstanceId(), handler );
+                        m_debug << "InitialSet successful"<<std::endl;
+
+                        Safir::Dob::Typesystem::BinarySerialization bin;
+                        Safir::Dob::Typesystem::Serialization::ToBinary( entity, bin);
+                        Store(entityId, handler, bin, true);
+                        m_debug << "Stored it as binary" << std::endl;
                     }
-
-                    const Safir::Dob::Typesystem::EntityId entityId
-                        (typeIdColumn.GetValue(),
-                         Safir::Dob::Typesystem::InstanceId(instanceColumn.GetValue()));
-
-                    const Safir::Dob::Typesystem::HandlerId handler(handlerColumn.GetValue());
-
-                    auto findIt = GetPersistentTypes().find(entityId.GetTypeId());
-                    if (findIt == GetPersistentTypes().end())
-                    { //not to be persisted!
-                        Delete(m_deleteConnection,entityId);
-                        continue;
-                    }
-
-                    if (restoredObjects.find(entityId) != restoredObjects.end())
-                    { //already restored this object
-                        continue;
-                    }
-
-                    try
+                    else if (currentSmallDataSize != SQL_NULL_DATA)
                     {
-                        Safir::Dob::ConnectionAspectInjector injector(m_dobConnection);
-                        getAllStatement.GetData(4, xmlDataColumn);
+                        const char * const data = reinterpret_cast<const char * const>(storeBinarySmallData.get());
+                        m_debug << "Restoring " << entityId << " from binary " <<std::endl;
 
+                        Safir::Dob::EntityPtr entity =
+                            boost::dynamic_pointer_cast<Safir::Dob::Entity>
+                            (Safir::Dob::Typesystem::ObjectFactory::Instance().CreateObject(data));
+                        m_debug << "Successfully deserialized" <<std::endl;
 
-                        if (!xmlDataColumn.IsNull())
-                        { //some xml persistent data set
-                            std::wstring xml = xmlDataColumn.GetValue();
-                            m_debug << "Restoring from xml" << entityId << ", size = " << xml.size() << ". First 100 chars of the data: " << xml.substr(0,100) <<std::endl;
-
-                            Safir::Dob::EntityPtr entity =
-                                boost::dynamic_pointer_cast<Safir::Dob::Entity>(Safir::Dob::Typesystem::Serialization::ToObject(xml));
-                            m_debug << "Successfully deserialized" <<std::endl;
-
-                            injector.InitialSet(entity, entityId.GetInstanceId(), handler );
-                            m_debug << "InitialSet successful"<<std::endl;
-
-                            Safir::Dob::Typesystem::BinarySerialization bin;
-                            Safir::Dob::Typesystem::Serialization::ToBinary( entity, bin);
-                            Store(entityId, handler, bin, true);
-                            m_debug << "Stored it as binary" << std::endl;
-                        }
-                        else if (!binarySmallDataColumn.IsNull())
-                        {
-                            const char * const data = reinterpret_cast<const char * const>(binarySmallDataColumn.GetValue());
+                        injector.InitialSet(entity, entityId.GetInstanceId(), handler );
+                        m_debug << "InitialSet successful"<<std::endl;
+                    }
+                    else
+                    {
+                        if (currentLargeDataSize != SQL_NULL_DATA)
+                        { //some binarypersistent data set
+                            const char * const data = reinterpret_cast<const char * const>(storeBinaryLargeData.get());
                             m_debug << "Restoring " << entityId << " from binary " <<std::endl;
 
                             Safir::Dob::EntityPtr entity =
@@ -489,67 +538,51 @@ void OdbcPersistor::RestoreAll()
                         }
                         else
                         {
-                            getAllStatement.GetData(5, binaryDataColumn);
-                            if (!binaryDataColumn.IsNull())
-                            { //some binarypersistent data set
-                                const char * const data = reinterpret_cast<const char * const>(binaryDataColumn.GetValue());
-                                m_debug << "Restoring " << entityId << " from binary " <<std::endl;
-
-                                Safir::Dob::EntityPtr entity =
-                                    boost::dynamic_pointer_cast<Safir::Dob::Entity>
-                                    (Safir::Dob::Typesystem::ObjectFactory::Instance().CreateObject(data));
-                                m_debug << "Successfully deserialized" <<std::endl;
-
-                                injector.InitialSet(entity, entityId.GetInstanceId(), handler );
-                                m_debug << "InitialSet successful"<<std::endl;
-                            }
-                            else
-                            {
-                                m_debug << "No data set for " << entityId <<std::endl;
-                            }
+                            m_debug << "No data set for " << entityId <<std::endl;
                         }
-                        //add the objectid to the list of objectids that we've done, so that we can resume from where
-                        //we were in case the db goes down during restore
-                        restoredObjects.insert(entityId);
                     }
-                    catch(const Safir::Dob::Typesystem::IllegalValueException &)
-                    {
-                        m_debug << "Could not restore "
-                                << entityId.ToString()
-                                << ", removing it" << std::endl;
-
-                        Safir::Logging::SendSystemLog(Safir::Logging::Error,
-                                                      L"Failed to restore entity" +
-                                                      entityId.ToString() +
-                                                      L", will remove persisted data.");
-
-                        //we don't want to try it again if the connection fails later.
-                        restoredObjects.insert(entityId);
-                        //remove the row from the db
-                        Delete(m_deleteConnection,entityId);
-                        //since we did not remove the objectid from persistentObjects an empty row will be inserted below.
-                    }
+                    //add the objectid to the list of objectids that we've done, so that we can resume from where
+                    //we were in case the db goes down during restore
+                    restoredObjects.insert(entityId);
                 }
-                catch(const Safir::Databases::Odbc::RetryException& e)
+                catch(const Safir::Dob::Typesystem::IllegalValueException &)
                 {
-                    m_debug << "Caught a RetryException in Fetch:\n" << e.GetExceptionInfo() << std::endl;
-                    boost::this_thread::sleep_for(RETRY_EXCEPTION_DELAY);
+                    m_debug << "Could not restore "
+                            << entityId.ToString()
+                            << ", removing it" << std::endl;
+
+                    Safir::Logging::SendSystemLog(Safir::Logging::Error,
+                                                    L"Failed to restore entity" +
+                                                    entityId.ToString() +
+                                                    L", will remove persisted data.");
+
+                    //we don't want to try it again if the connection fails later.
+                    restoredObjects.insert(entityId);
+                    //remove the row from the db
+                    Delete(m_hDeleteConnection,m_bDeleteIsConnected, entityId);
+                    //since we did not remove the objectid from persistentObjects an empty row will be inserted below.
                 }
             }
         }
-        catch(const Safir::Databases::Odbc::ReconnectException& e)
+        catch(const std::exception & e)
         {
-            m_debug << "Caught a ReconnectException in RestoreAll:\n" << e.GetExceptionInfo() << std::endl;
+            const std::wstring err = Safir::Dob::Typesystem::Utilities::ToWstring( e.what() );
+            m_debug << "Caught a ReconnectException in RestoreAll:\n" << err << std::endl;
             if (connectionAttempts > REPORT_AFTER_RECONNECTS && !errorReported)
             {
                 Safir::Logging::SendSystemLog(Safir::Logging::Error,
                                               L"Failed to connect to the database, will keep trying. Exception info: " +
-                                              e.GetExceptionInfo());
+                                              err );
                 errorReported = true;
             }
 
-            Disconnect(m_odbcConnection);
-            Free(getAllStatement);
+            if (m_bIsRestoreAllConnected)
+            {
+                Disconnect(m_hRestoreAllConnection);
+                m_bIsRestoreAllConnected= false;
+            }
+            Free(hGetAllStatement);
+            bGetAllIsValid = false;
 
             boost::this_thread::sleep_for(RECONNECT_EXCEPTION_DELAY);
         }
@@ -563,19 +596,39 @@ void OdbcPersistor::RestoreAll()
         connectionAttempts = 0;
     }
 
-    Free(getAllStatement);
+    Free(hGetAllStatement);
 
-    Free(m_insertStatement);
+    Free(m_hInsertStatement);
 
     //we don't need the deleteconnection any more, so close it.
-    Disconnect(m_deleteConnection);
-    Free(m_deleteConnection);
-    m_debug << "RestoreAll completed" <<std::endl;
-    m_debug << restoredObjects.size() << " objects restored in time "
+    try
+    {
+        if (m_bIsRestoreAllConnected)
+        {
+            Disconnect(m_hRestoreAllConnection);
+            m_bIsRestoreAllConnected= false;
+        }
+
+        if (m_bDeleteIsConnected)
+        {
+            Disconnect(m_hDeleteConnection);
+            m_bDeleteIsConnected = false;
+        }
+        Free(m_hDeleteConnection);
+
+        m_debug << "RestoreAll completed" <<std::endl;
+        m_debug
+            << restoredObjects.size()                                           << " objects restored in time "
             << boost::chrono::steady_clock::now() - startTime << std::endl;
+    }
+    catch(const std::exception & e)
+    {
+        const std::wstring err = Safir::Dob::Typesystem::Utilities::ToWstring( e.what() );
+        Safir::Logging::SendSystemLog(Safir::Logging::Error,
+                                        L"Whoops. Error while disconnecting from the DeleteConnection. Ignoring this and moving on. Exception info: " +
+                                        err );
+    }
 }
-
-
 
 //-------------------------------------------------------
 void
@@ -591,75 +644,124 @@ OdbcPersistor::Insert(const Safir::Dob::Typesystem::EntityId & entityId)
     {
         try
         {
-            if( !m_odbcConnection.IsConnected() )
-            {
-                ++retries;
-                m_debug << "Insert: Connecting to database, attempt " << retries << std::endl;
-                m_odbcConnection.Connect(Safir::Dob::PersistenceParameters::OdbcStorageConnectString());
-            }
+            ConnectIfNeeded(m_hOdbcConnection, m_bIsOdbcConnected, retries);
 
-            if (!m_insertStatement.IsValid())
+            if (!m_bInsertIsValid)
             {
-                m_insertStatement.Alloc(m_odbcConnection);
-                m_insertStatement.Prepare(
-                    L"call spInsertEntity(?, ?, ?);");
-                m_insertStatement.BindParameter( 1, m_insertTypeIdInsertParam );
-                m_insertStatement.BindParameter( 2, m_insertInstanceInsertParam );
-                m_insertStatement.BindParameter( 3, m_insertTypeNameParam );
-                m_insertStatement.SetStmtAttr( SQL_ATTR_QUERY_TIMEOUT, 15 );
+                AllocStatement(&m_hRowExistsStatement, m_hOdbcConnection);
+
+                AllocStatement(&m_hInsertStatement, m_hOdbcConnection);
+                m_bInsertIsValid = true;
+
+                Prepare(
+                    m_hRowExistsStatement,
+                    L"SELECT count(*) as antal from PersistentEntity where typeId=? AND instance=? " );
+
+                Prepare(
+                    m_hInsertStatement,
+                    L"INSERT INTO PersistentEntity (typeid, instance, typename) "
+                    L"values (?, ?, ?); " );
+
+                const int typeNameMaxSize = Safir::Dob::PersistenceParameters::TypeNameColumnSize();
+
+                BindParamInt64(m_hRowExistsStatement, 1, &m_type);
+                BindParamInt64(m_hRowExistsStatement, 2, &m_instance);
+                BindColumnInt64(m_hRowExistsStatement,1, &m_rowCount);
+
+                BindParamInt64(m_hInsertStatement, 1, &m_type);
+                BindParamInt64(m_hInsertStatement, 2, &m_instance);
+                BindParamString(m_hInsertStatement, 3, typeNameMaxSize, m_typeName.get(), &m_typeNameSize);
+
+                SetStmtTimeout(m_hInsertStatement);
+                SetStmtTimeout(m_hRowExistsStatement);
+
                 paramSet = false;
             }
 
             if (!paramSet)
             {
-                m_insertTypeIdInsertParam.SetValue(entityId.GetTypeId());
-                m_insertInstanceInsertParam.SetValue(entityId.GetInstanceId().GetRawValue() );
-                m_insertTypeNameParam.SetValue(Safir::Dob::Typesystem::Operations::GetName(entityId.GetTypeId()).c_str());
+                m_type = entityId.GetTypeId();
+                m_instance = entityId.GetInstanceId().GetRawValue();
+
+                std::wstring name = Safir::Dob::Typesystem::Operations::GetName(entityId.GetTypeId());
+                const size_t length = (name.size() + 1) * sizeof(wchar_t);
+                memcpy(m_typeName.get(),name.c_str(), length);
+                m_typeNameSize = SQL_NTS;
+
                 paramSet = true;
             }
 
-            try
+            Execute(m_hRowExistsStatement);
+
+            bool bExecuteInsert = false;
+            if (Fetch(m_hRowExistsStatement))
             {
-                m_insertStatement.Execute();
-                done = true;
-                if (errorReported)
+                // Insert if no row exist
+                if (m_rowCount <= 0)
                 {
-                    Safir::Logging::SendSystemLog(Safir::Logging::Informational,
-                                                  L"Successfully connected to the database");
-                    errorReported = false;
-                    retries = 0;
+                    bExecuteInsert = true;
                 }
             }
-            catch(const Safir::Databases::Odbc::RetryException& e)
+
+            CloseCursor(m_hRowExistsStatement);
+
+            if (bExecuteInsert)
+                Execute(m_hInsertStatement);
+
+            done = true;
+            if (errorReported)
             {
-                m_debug << "Caught a RetryException in Insert:\n" << e.GetExceptionInfo() << std::endl;
-                boost::this_thread::sleep_for(RETRY_EXCEPTION_DELAY);
+                Safir::Logging::SendSystemLog(Safir::Logging::Informational,
+                                                L"Successfully connected to the database");
+                errorReported = false;
+                retries = 0;
             }
 
         }
-        catch(const Safir::Databases::Odbc::ReconnectException& e)
+        catch(const std::exception & e)
         {
-            m_debug << "Caught a ReconnectException in Insert:\n" << e.GetExceptionInfo() << std::endl;
+            const std::wstring err = Safir::Dob::Typesystem::Utilities::ToWstring( e.what() );
+            m_debug << "Caught a ReconnectException in Insert:\n" << err << std::endl;
             if (retries > REPORT_AFTER_RECONNECTS && !errorReported)
             {
                 Safir::Logging::SendSystemLog(Safir::Logging::Error,
                                               L"Failed to connect to the database, will keep trying. Exception info: " +
-                                              e.GetExceptionInfo());
+                                              err);
                 errorReported = true;
             }
-            Disconnect(m_odbcConnection);
-            Free(m_insertStatement);
+
+            DisconnectOdbcConnection();
+
             boost::this_thread::sleep_for(RECONNECT_EXCEPTION_DELAY);
         }
 
     }
 }
 
+//-------------------------------------------------------
+void
+OdbcPersistor::DisconnectOdbcConnection()
+{
+    if (m_bIsOdbcConnected)
+    {
+        Disconnect(m_hOdbcConnection);
+        m_bIsOdbcConnected = false;
+    }
+    Free(m_hInsertStatement);
+    m_bInsertIsValid = false;
+
+    Free(m_hStoreStatement);
+    m_bStoreStatementIsValid = false;
+
+    Free(m_hDeleteODBCStatement);
+    m_bDeleteODBCIsValid = false;
+}
 
 
 //-------------------------------------------------------
 void
-OdbcPersistor::Delete(Safir::Databases::Odbc::Connection & connectionToUse,
+OdbcPersistor::Delete(SQLHDBC connectionToUse,
+                      bool & connectionIsValid,
                       const Safir::Dob::Typesystem::EntityId& entityId)
 {
     m_debug << "Deleting " << entityId <<std::endl;
@@ -672,61 +774,359 @@ OdbcPersistor::Delete(Safir::Databases::Odbc::Connection & connectionToUse,
     {
         try
         {
-            if( !connectionToUse.IsConnected() )
-            {
-                ++retries;
-                connectionToUse.Connect(Safir::Dob::PersistenceParameters::OdbcStorageConnectString());
-            }
+            ConnectIfNeeded(connectionToUse, connectionIsValid, retries);
 
-            if (!m_deleteStatement.IsValid())
+            if (!connectionIsValid)
             {
-                m_deleteStatement.Alloc(connectionToUse);
-                m_deleteStatement.Prepare(L"DELETE FROM PersistentEntity WHERE typeId=? AND instance=?");
-                m_deleteStatement.BindParameter( 1, m_deleteTypeIdParam );
-                m_deleteStatement.BindParameter( 2, m_deleteInstanceParam );
-                m_deleteStatement.SetStmtAttr( SQL_ATTR_QUERY_TIMEOUT, 15 );
+                AllocStatement(&m_hDeleteStatement, connectionToUse);
+                Prepare(m_hDeleteStatement, L"DELETE FROM PersistentEntity WHERE typeId=? AND instance=?");
+                BindParamInt64(m_hDeleteStatement, 1, &m_type);
+                BindParamInt64(m_hDeleteStatement, 2, &m_instance);
+                SetStmtTimeout(m_hDeleteStatement);
+                m_bDeleteIsValid = true;
                 paramSet = false;
             }
 
             if (!paramSet)
             {
-                m_deleteTypeIdParam.SetValue(entityId.GetTypeId());
-                m_deleteInstanceParam.SetValue(entityId.GetInstanceId().GetRawValue() );
+                m_type = entityId.GetTypeId();
+                m_instance = entityId.GetInstanceId().GetRawValue();
                 paramSet = true;
             }
 
-            try
+            Execute(m_hDeleteStatement);
+            done = true;
+            if (errorReported)
             {
-                m_deleteStatement.Execute();
-                done = true;
-                if (errorReported)
-                {
-                    Safir::Logging::SendSystemLog(Safir::Logging::Informational,
-                                                  L"Successfully connected to the database");
-                    errorReported = false;
-                    retries = 0;
-                }
-            }
-            catch(const Safir::Databases::Odbc::RetryException& e)
-            {
-                m_debug << "Caught a RetryException in Delete:\n" << e.GetExceptionInfo() << std::endl;
-                boost::this_thread::sleep_for(RETRY_EXCEPTION_DELAY);
+                Safir::Logging::SendSystemLog(Safir::Logging::Informational,
+                                                L"Successfully connected to the database");
+                errorReported = false;
+                retries = 0;
             }
         }
-        catch(const Safir::Databases::Odbc::ReconnectException& e)
+        catch(const std::exception & e)
         {
-            m_debug << "Caught a ReconnectException in Delete:\n" << e.GetExceptionInfo() << std::endl;
+            const std::wstring err = Safir::Dob::Typesystem::Utilities::ToWstring( e.what() );
+            m_debug << "Caught a ReconnectException in Delete:\n" << err << std::endl;
             if (retries > REPORT_AFTER_RECONNECTS && !errorReported)
             {
                 Safir::Logging::SendSystemLog(Safir::Logging::Error,
                                               L"Failed to connect to the database, will keep trying. Exception info: " +
-                                              e.GetExceptionInfo());
+                                              err );
                 errorReported = true;
             }
-            Disconnect(connectionToUse);
-            Free(m_deleteStatement);
+            if (connectionIsValid)
+            {
+                Disconnect(connectionToUse);
+                connectionIsValid = false;
+            }
+            Free(m_hDeleteStatement);
+            m_bDeleteIsValid = false;
             boost::this_thread::sleep_for(RECONNECT_EXCEPTION_DELAY);
         }
     }
 }
+
+//-------------------------------------------------------
+void
+OdbcPersistor::BindParamInt64(SQLHSTMT hStmt, const SQLUSMALLINT paramNumber, Safir::Dob::Typesystem::Int64 * value)
+{
+    SQLRETURN ret = ::SQLBindParameter(
+        hStmt,                                  // StatementHandle
+        paramNumber,                            // ParameterNumber,
+        SQL_PARAM_INPUT,                        // InputOutputType
+        SQL_C_SBIGINT,                          // ValueType
+        SQL_BIGINT,                             // ParameterType
+        20,                                     // ColumnSize
+        0,                                      // DecimalDigits
+        value,                                  // ParameterValuePtr
+        sizeof(Safir::Dob::Typesystem::Int64),  // BufferLength
+        &m_currentInt64Size );                  // StrLen_or_Ind
+    if (!SQL_SUCCEEDED(ret))
+    {
+        ThrowException(SQL_HANDLE_STMT,hStmt);
+    }
+}
+
+void
+OdbcPersistor::ThrowException(SQLSMALLINT   HandleType,
+                              SQLHANDLE     Handle)
+{
+    wchar_t     wszSqlState[6];
+    SQLINTEGER  lpNativeErrorPtr;
+    wchar_t     wszMessageText[512];
+    SQLRETURN   ret;
+
+    ret = ::SQLGetDiagRecW( HandleType,
+                            Handle,
+                            1,
+                            wszSqlState,
+                            &lpNativeErrorPtr,
+                            wszMessageText,
+                            256,
+                            0 );
+    if (SQL_SUCCEEDED(ret))
+    {
+        std::wstring string = wszSqlState;
+        string += L":";
+        string += wszMessageText;
+
+        throw std::exception(Safir::Dob::Typesystem::Utilities::ToUtf8(string).c_str());
+    }
+}
+
+void
+OdbcPersistor::BindParamBinary(SQLHSTMT hStmt,
+                               const SQLUSMALLINT paramNumber,
+                               const SQLUINTEGER maxSize,
+                               unsigned char * buffer,
+                               SQLINTEGER * sizePtr)
+{
+
+    SQLRETURN ret = ::SQLBindParameter(
+        hStmt,                          // StatementHandle
+        paramNumber,                    // ParameterNumber,
+        SQL_PARAM_INPUT,                // InputOutputType
+        SQL_C_BINARY,                   // ValueType
+        SQL_LONGVARBINARY,              // ParameterType
+        //SQL_VARBINARY,                  // ParameterType
+        maxSize,                        // ColumnSize
+        0,                              // DecimalDigits
+        buffer,                         // ParameterValuePtr
+        maxSize,                        // BufferLength
+        sizePtr );                      // StrLen_or_Ind
+    if (!SQL_SUCCEEDED(ret))
+    {
+        ThrowException(SQL_HANDLE_STMT,hStmt);
+    }
+}
+
+
+void
+OdbcPersistor::BindParamString(SQLHSTMT hStmt,
+                               const SQLUSMALLINT paramNumber,
+                               const SQLUINTEGER maxSize,
+                               wchar_t * string,
+                               SQLINTEGER * sizePtr)
+{
+    const SQLUINTEGER number_of_chars = static_cast<SQLUINTEGER>( maxSize ) + 1;
+    const SQLUINTEGER size_of_char = static_cast<SQLUINTEGER>(sizeof(wchar_t));
+    const SQLUINTEGER columnSize = number_of_chars * size_of_char;
+
+    SQLRETURN ret = ::SQLBindParameter(
+        hStmt,                          // StatementHandle
+        paramNumber,                    // ParameterNumber,
+        SQL_PARAM_INPUT,                // InputOutputType
+        SQL_C_WCHAR,                    // ValueType
+        SQL_WLONGVARCHAR,               // ParameterType
+        //SQL_WVARCHAR,                   // ParameterType
+        columnSize,                     // ColumnSize
+        0,                              // DecimalDigits
+        string,                         // ParameterValuePtr
+        maxSize,                        // BufferLength
+        sizePtr );                      // StrLen_or_Ind
+    if (!SQL_SUCCEEDED(ret))
+    {
+        ThrowException(SQL_HANDLE_STMT,hStmt);
+    }
+}
+
+void
+OdbcPersistor::ConnectIfNeeded(SQLHDBC hConnection, bool & isConnected, int & connectionAttempts)
+{
+    if(!isConnected)
+    {
+        ++connectionAttempts;
+        m_debug << L"Connecting to database, attempt " << connectionAttempts << std::endl;
+
+        SQLRETURN ret = ::SQLDriverConnectW(
+            hConnection,
+            NULL,
+            const_cast<wchar_t *>(Safir::Dob::PersistenceParameters::OdbcStorageConnectString().c_str()),
+            SQL_NTS,
+            NULL,
+            0,
+            NULL,
+            SQL_DRIVER_NOPROMPT );
+        if (SQL_SUCCEEDED(ret))
+        {
+            isConnected = true;
+        }
+        else
+        {
+            ThrowException(SQL_HANDLE_DBC, hConnection );
+        }
+
+        // SQLSetConnectAttr(SQL_ATTR_AUTOCOMMIT, SQL_AUTOCOMMIT_ON);
+        ret = ::SQLSetConnectAttr(  hConnection,
+                                    SQL_ATTR_AUTOCOMMIT,
+                                    reinterpret_cast<SQLPOINTER>(SQL_AUTOCOMMIT_ON),
+                                    SQL_IS_UINTEGER );
+        if (!SQL_SUCCEEDED(ret))
+        {
+            ThrowException(SQL_HANDLE_DBC, hConnection );
+        }
+
+    }
+}
+
+void
+OdbcPersistor::Prepare(SQLHSTMT hStmt, const std::wstring & sql)
+{
+    // const_cast is used because StatementText is declared as input in the ODBC
+    // specification and should be a const wchar_t *.
+    SQLRETURN ret = ::SQLPrepareW(
+        hStmt,
+        const_cast<wchar_t *>(sql.c_str()),
+        SQL_NTS );
+    if (!SQL_SUCCEEDED(ret))
+    {
+        ThrowException(SQL_HANDLE_STMT,hStmt);
+    }
+}
+
+void
+OdbcPersistor::SetStmtTimeout(SQLHSTMT hStmt)
+{
+    SQLRETURN ret = ::SQLSetStmtAttr(
+        hStmt,
+        SQL_ATTR_QUERY_TIMEOUT,
+        reinterpret_cast<SQLPOINTER>(15),
+        SQL_IS_UINTEGER );
+    if (!SQL_SUCCEEDED(ret))
+    {
+        ThrowException(SQL_HANDLE_STMT,hStmt);
+    }
+}
+
+void
+OdbcPersistor::CloseCursor(SQLHSTMT hStmt)
+{
+    SQLRETURN ret = ::SQLCloseCursor(hStmt);
+    if (!SQL_SUCCEEDED(ret))
+    {
+        ThrowException(SQL_HANDLE_STMT,hStmt);
+    }
+}
+
+
+void
+OdbcPersistor::Execute(SQLHSTMT hStmt)
+{
+    SQLRETURN ret = ::SQLExecute( hStmt );
+    if (!SQL_SUCCEEDED(ret))
+    {
+        ThrowException(SQL_HANDLE_STMT,hStmt);
+    }
+}
+
+void
+OdbcPersistor::AllocStatement(SQLHSTMT * hStmt, SQLHDBC hConnection)
+{
+    SQLRETURN ret = ::SQLAllocHandle(SQL_HANDLE_STMT, hConnection, hStmt);
+    if (!SQL_SUCCEEDED(ret))
+    {
+        ThrowException(SQL_HANDLE_STMT,hStmt);
+    }
+}
+
+void
+OdbcPersistor::BindColumnInt64( SQLHSTMT hStmt,
+                                unsigned short usColumnNumber,
+                                Safir::Dob::Typesystem::Int64 * value )
+{
+    SQLRETURN ret;
+
+    ret = ::SQLBindCol( hStmt,                                  // StatementHandle
+                        usColumnNumber,                         // ColumnNumber,
+                        SQL_C_SBIGINT,                          // TargetType,
+                        value,                                  // TargetValuePtr,
+                        sizeof(Safir::Dob::Typesystem::Int64),  // BufferLength,
+                        &m_currentInt64Size);                   // StrLen_or_Ind
+    if (!SQL_SUCCEEDED(ret))
+    {
+        ThrowException(SQL_HANDLE_STMT,hStmt);
+    }
+}
+
+void
+OdbcPersistor::BindColumnBinary( SQLHSTMT hStmt,
+                                 unsigned short usColumnNumber,
+                                 const int maxSize,
+                                 unsigned char * buffer,
+                                 SQLINTEGER * sizePtr )
+{
+    SQLRETURN ret;
+
+    ret = ::SQLBindCol( hStmt,                      // StatementHandle
+                        usColumnNumber,             // ColumnNumber,
+                        SQL_C_BINARY,               // TargetType,
+                        buffer,                     // TargetValuePtr,
+                        maxSize,                    // BufferLength,
+                        sizePtr);                   // StrLen_or_Ind
+    if (!SQL_SUCCEEDED(ret))
+    {
+        ThrowException(SQL_HANDLE_STMT,hStmt);
+    }
+}
+
+void
+OdbcPersistor::BindColumnString( SQLHSTMT hStmt,
+                                 unsigned short usColumnNumber,
+                                 const int maxSize,
+                                 wchar_t * string,
+                                 SQLINTEGER * sizePtr )
+{
+    SQLRETURN ret;
+
+    ret = ::SQLBindCol( hStmt,                      // StatementHandle
+                        usColumnNumber,             // ColumnNumber,
+                        SQL_C_WCHAR,                // TargetType,
+                        string,                     // TargetValuePtr,
+                        maxSize,                    // BufferLength,
+                        sizePtr);                   // StrLen_or_Ind
+    if (!SQL_SUCCEEDED(ret))
+    {
+        ThrowException(SQL_HANDLE_STMT,hStmt);
+    }
+}
+
+bool
+OdbcPersistor::Fetch( SQLHSTMT hStmt )
+{
+    SQLRETURN ret;
+    bool bDataFound = true;
+
+    ret = ::SQLFetch( hStmt );
+    if (ret==SQL_NO_DATA_FOUND)
+    {
+        bDataFound = false;
+    }
+    else if (!SQL_SUCCEEDED(ret))
+    {
+        ThrowException(SQL_HANDLE_STMT,hStmt);
+    }
+    return bDataFound;
+}
+
+void
+OdbcPersistor::Free( SQLHDBC hConnection )
+{
+    SQLRETURN ret = ::SQLFreeHandle(SQL_HANDLE_DBC, hConnection);
+    if (!SQL_SUCCEEDED(ret))
+    {
+        ThrowException(SQL_HANDLE_DBC, hConnection );
+    }
+}
+
+void
+OdbcPersistor::Disconnect( SQLHDBC hConnection )
+{
+    SQLRETURN ret = ::SQLDisconnect( hConnection );
+    if (!SQL_SUCCEEDED(ret))
+    {
+        ThrowException(SQL_HANDLE_DBC, hConnection );
+    }
+}
+
 #endif
