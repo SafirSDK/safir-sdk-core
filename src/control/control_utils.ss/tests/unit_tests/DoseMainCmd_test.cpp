@@ -57,6 +57,7 @@ BOOST_AUTO_TEST_CASE( send_commands )
     bool setOwnNodeCmdReceived = false;
     bool injectNodeCmdReceived = false;
     bool excludeNodeCmdReceived = false;
+    bool stoppedNodeIndicationReceived = false;
 
     std::unique_ptr<DoseMainCmdSender> cmdSender;
 
@@ -79,6 +80,8 @@ BOOST_AUTO_TEST_CASE( send_commands )
                                                                      "192.168.213.55");
 
                                                cmdSender->ExcludeNode(620109, 3737);
+
+                                               cmdSender->StoppedNodeIndication(77777);
 
                                                cmdSender->StopDoseMain();
 
@@ -126,13 +129,24 @@ BOOST_AUTO_TEST_CASE( send_commands )
                                         BOOST_CHECK(nodeTypeId == 3737);
                                     },
 
+                                    // Stopped node indication callback
+                                    [&stoppedNodeIndicationReceived](int64_t nodeId)
+                                    {
+                                        stoppedNodeIndicationReceived = true;
+
+                                        BOOST_CHECK(nodeId == 77777);
+
+                                    },
+
                                     // Stop dose_main
                                     [&cmdSender, &cmdReceiver, &pubWork, &subWork,
-                                     &setOwnNodeCmdReceived, &injectNodeCmdReceived, &excludeNodeCmdReceived]()
+                                     &setOwnNodeCmdReceived, &injectNodeCmdReceived, &excludeNodeCmdReceived,
+                                     &stoppedNodeIndicationReceived]()
                                     {
                                         BOOST_CHECK(setOwnNodeCmdReceived);
                                         BOOST_CHECK(injectNodeCmdReceived);
                                         BOOST_CHECK(excludeNodeCmdReceived);
+                                        BOOST_CHECK(stoppedNodeIndicationReceived);
 
                                         cmdSender->Stop();
                                         cmdReceiver->Stop();

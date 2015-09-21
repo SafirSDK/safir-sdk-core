@@ -177,6 +177,11 @@ namespace Internal
             }
         }
 
+        void StoppedNodeIndication(int64_t nodeId)
+        {
+            m_sp->ExcludeNode(nodeId);
+        }
+
 
         CommunicationT& GetCommunication()
         {

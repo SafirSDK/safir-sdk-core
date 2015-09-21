@@ -44,14 +44,16 @@ namespace Control
     {
     public:
 
-        Impl(boost::asio::io_service&   ioService,
-             const IncludeNodeCmdCb&    startDoseMainCb,
-             const IncludeNodeCmdCb&    injectNodeCb,
-             const ExcludeNodeCmdCb&    excludeNodeCb,
-             const StopDoseMainCb&      stopDoseMainCb)
+        Impl(boost::asio::io_service&       ioService,
+             const IncludeNodeCmdCb&        startDoseMainCb,
+             const IncludeNodeCmdCb&        injectNodeCb,
+             const ExcludeNodeCmdCb&        excludeNodeCb,
+             const StoppedNodeIndicationCb& stoppedNodeIndicationCb,
+             const StopDoseMainCb&          stopDoseMainCb)
             : m_startDoseMainCb(startDoseMainCb),
               m_injectNodeCb(injectNodeCb),
               m_excludeNodeCb(excludeNodeCb),
+              m_stoppedNodeIndicationCb(stoppedNodeIndicationCb),
               m_stopDoseMainCb(stopDoseMainCb)
         {
             m_ipcSubscriber.reset( new Safir::Utilities::Internal::IpcSubscriber(ioService,
@@ -77,10 +79,11 @@ namespace Control
 
         std::unique_ptr<Safir::Utilities::Internal::IpcSubscriber> m_ipcSubscriber;
 
-        IncludeNodeCmdCb    m_startDoseMainCb;
-        IncludeNodeCmdCb    m_injectNodeCb;
-        ExcludeNodeCmdCb    m_excludeNodeCb;
-        StopDoseMainCb      m_stopDoseMainCb;
+        IncludeNodeCmdCb        m_startDoseMainCb;
+        IncludeNodeCmdCb        m_injectNodeCb;
+        ExcludeNodeCmdCb        m_excludeNodeCb;
+        StoppedNodeIndicationCb m_stoppedNodeIndicationCb;
+        StopDoseMainCb          m_stopDoseMainCb;
 
         void RecvDataCb(const char* data, size_t size)
         {
@@ -115,7 +118,13 @@ namespace Control
                 }
                 break;
 
-                case doseMainCmd.STOP:
+                case doseMainCmd.STOPPED_NODE_INDICATION:
+                {
+                    m_stoppedNodeIndicationCb(doseMainCmd.node_id());
+                }
+                break;
+
+                case doseMainCmd.STOP_DOSE_MAIN:
                 {
                     m_stopDoseMainCb();
                 }
@@ -130,15 +139,17 @@ namespace Control
         }
     };
 
-    DoseMainCmdReceiver::DoseMainCmdReceiver(boost::asio::io_service&   ioService,
-                                             const IncludeNodeCmdCb&    startDoseMainCb,
-                                             const IncludeNodeCmdCb&    injectNodeCb,
-                                             const ExcludeNodeCmdCb&    excludeNodeCb,
-                                             const StopDoseMainCb&      stopDoseMainCb)
+    DoseMainCmdReceiver::DoseMainCmdReceiver(boost::asio::io_service&       ioService,
+                                             const IncludeNodeCmdCb&        startDoseMainCb,
+                                             const IncludeNodeCmdCb&        injectNodeCb,
+                                             const ExcludeNodeCmdCb&        excludeNodeCb,
+                                             const StoppedNodeIndicationCb& stoppedNodeIndicationCb,
+                                             const StopDoseMainCb&          stopDoseMainCb)
         : m_impl(Safir::make_unique<Impl>(ioService,
                                           startDoseMainCb,
                                           injectNodeCb,
                                           excludeNodeCb,
+                                          stoppedNodeIndicationCb,
                                           stopDoseMainCb))
     {
     }
@@ -219,11 +230,21 @@ namespace Control
             Send(doseMainCmd);
         }
 
+        void StoppedNodeIndication(int64_t nodeId)
+        {
+            DoseMainCmd doseMainCmd;
+
+            doseMainCmd.set_cmd_type(DoseMainCmd::STOPPED_NODE_INDICATION);
+            doseMainCmd.set_node_id(nodeId);
+
+            Send(doseMainCmd);
+        }
+
         void StopDoseMain()
         {
             DoseMainCmd doseMainCmd;
 
-            doseMainCmd.set_cmd_type(DoseMainCmd::STOP);
+            doseMainCmd.set_cmd_type(DoseMainCmd::STOP_DOSE_MAIN);
 
             Send(doseMainCmd);
         }
@@ -284,6 +305,11 @@ namespace Control
     void DoseMainCmdSender::ExcludeNode(int64_t nodeId, int64_t nodeTypeId)
     {
         m_impl->ExcludeNode(nodeId, nodeTypeId);
+    }
+
+    void DoseMainCmdSender::StoppedNodeIndication(int64_t nodeId)
+    {
+        m_impl->StoppedNodeIndication(nodeId);
     }
 
     void DoseMainCmdSender::StopDoseMain()

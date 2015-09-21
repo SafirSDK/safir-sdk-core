@@ -241,6 +241,12 @@ int main(int /*argc*/, char * /*argv*/[])
                         {
                         },
 
+                        // Action when StoppedNodeIndication command is received
+                        []
+                        (int64_t /*nodeId*/)
+                        {
+                        },
+
                         // Action when StopDoseMain command is received
                         [&sp, &work, &communication, &running, &doseMainCmdReceiver, &signalSet]
                         ()

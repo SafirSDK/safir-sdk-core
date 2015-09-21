@@ -77,6 +77,8 @@ namespace Internal
 
         void ExcludeNode(int64_t nodeId, int64_t nodeTypeId);
 
+        void StoppedNodeIndication(int64_t nodeId);
+
         void LogStatus(const std::string& str);
 
         void HandleIncomingData(const DistributionData & data, const bool isAckedData);

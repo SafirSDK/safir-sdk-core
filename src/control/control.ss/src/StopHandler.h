@@ -26,6 +26,7 @@
 #include <Safir/Dob/Internal/SystemPicture.h>
 #include <Safir/Dob/Internal/Communication.h>
 #include <Safir/Dob/Internal/ControlCmd.h>
+#include <Safir/Dob/Internal/DoseMainCmd.h>
 #include <Safir/Dob/Internal/ControlConfig.h>
 #include <Safir/Utilities/Internal/Id.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
@@ -64,6 +65,7 @@ namespace Control
     template<typename Communication,
              typename SP,
              typename ControlCmdReceiver,
+             typename DoseMainCmdSender,
              typename ControlConfig>
     class StopHandlerBasic
     {
@@ -77,6 +79,7 @@ namespace Control
         StopHandlerBasic(boost::asio::io_service&   ioService,
                          Communication&             communication,
                          SP&                        sp,
+                         DoseMainCmdSender&         doseMainCmdSender,
                          Config&                    config,
                          const StopSafirNodeCb      stopSafirNodeCb,
                          const ShutdownCb           shutdownCb,
@@ -86,6 +89,7 @@ namespace Control
             : m_strand(ioService),
               m_communication(communication),
               m_sp(sp),
+              m_doseMainCmdSender(doseMainCmdSender),
               m_config(config),
               m_stopSafirNodeCb(stopSafirNodeCb),
               m_shutdownCb(shutdownCb),
@@ -245,9 +249,10 @@ namespace Control
 
         boost::asio::io_service::strand m_strand;
 
-        Communication&  m_communication;
-        SP&             m_sp;
-        ControlConfig&  m_config;
+        Communication&      m_communication;
+        SP&                 m_sp;
+        DoseMainCmdSender&  m_doseMainCmdSender;
+        ControlConfig&      m_config;
 
         const StopSafirNodeCb   m_stopSafirNodeCb;
         const ShutdownCb        m_shutdownCb;
@@ -524,8 +529,13 @@ namespace Control
 
         void HandleStopNotificationFromExternalNode(const int64_t from)
         {
-            // TODO Anropa ny fin metod i SP
-            std::wcout << "Received stop notification from node " << from << std::endl;
+            // We got an indication that a node is about to stop. To get a nice, responsive system we
+            // tell both the master instance and the slave instance of System Picture about this.
+
+            m_sp.ExcludeNode(from);  // Master is the SP we have here
+
+            // Send a message to dose_main so the slave SP can be told .
+            m_doseMainCmdSender.StoppedNodeIndication(from);
         }
 
         void SendStopNotification()
@@ -559,6 +569,7 @@ namespace Control
     typedef StopHandlerBasic<Safir::Dob::Internal::Com::Communication,
                              Safir::Dob::Internal::SP::SystemPicture,
                              ControlCmdReceiver,
+                             DoseMainCmdSender,
                              Config> StopHandler;
 
 }

@@ -32,7 +32,8 @@ message DoseMainCmd {
       START = 0;
       INJECT_NODE = 1;
       EXCLUDE_NODE = 2;
-      STOP = 3;
+      STOPPED_NODE_INDICATION = 3;
+      STOP_DOSE_MAIN = 4;
     }
         
    // Fields

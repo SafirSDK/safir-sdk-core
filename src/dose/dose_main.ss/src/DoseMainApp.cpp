@@ -89,6 +89,10 @@ namespace Internal
                                                                             {
                                                                                 ExcludeNode(nodeId, nodeTypeId);
                                                                             }),
+                                                              m_strand.wrap([this](int64_t nodeId)
+                                                                            {
+                                                                                StoppedNodeIndication(nodeId);
+                                                                            }),
                                                               m_strand.wrap([this]()
                                                                             {
                                                                                 Stop();
@@ -245,6 +249,14 @@ namespace Internal
                     " NodeTypeId=" << nodeTypeId << std::endl;
 
         m_distribution->ExcludeNode(nodeId, nodeTypeId);
+    }
+
+    void DoseMainApp::StoppedNodeIndication(int64_t nodeId)
+    {
+        lllog(1) << "DOSE_MAIN: ExcludeNode cmd received."<<
+                    " NodeId=" <<  nodeId << std::endl;
+
+        m_distribution->StoppedNodeIndication(nodeId);
     }
 
     void DoseMainApp::OnAppEvent(const ConnectionPtr & connection, bool disconnecting)

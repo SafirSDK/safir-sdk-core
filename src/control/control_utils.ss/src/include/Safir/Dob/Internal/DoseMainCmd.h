@@ -64,13 +64,16 @@ namespace Control
 
         typedef std::function<void(int64_t nodeId, int64_t nodeTypeId)> ExcludeNodeCmdCb;
 
+        typedef std::function<void(int64_t nodeId)> StoppedNodeIndicationCb;
+
         typedef std::function<void()> StopDoseMainCb;
 
-        DoseMainCmdReceiver(boost::asio::io_service&    ioService,
-                            const IncludeNodeCmdCb&     startDoseMainCb,
-                            const IncludeNodeCmdCb&     injectNodeCb,
-                            const ExcludeNodeCmdCb&     excludeNodeCb,
-                            const StopDoseMainCb&       stopDoseMainCb);
+        DoseMainCmdReceiver(boost::asio::io_service&        ioService,
+                            const IncludeNodeCmdCb&         startDoseMainCb,
+                            const IncludeNodeCmdCb&         injectNodeCb,
+                            const ExcludeNodeCmdCb&         excludeNodeCb,
+                            const StoppedNodeIndicationCb&  stoppedNodeIndicationCb,
+                            const StopDoseMainCb&           stopDoseMainCb);
 
         // Start command reception
         void Start();
@@ -115,6 +118,8 @@ namespace Control
 
         void ExcludeNode(int64_t nodeId,
                          int64_t nodeTypeId);
+
+        void StoppedNodeIndication(int64_t nodeId);
 
         void StopDoseMain();
 
