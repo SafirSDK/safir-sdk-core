@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2006-2013 (http://safir.sourceforge.net)
+* Copyright Saab AB, 2006-2015 (http://safir.sourceforge.net)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -23,15 +23,10 @@
 ******************************************************************************/
 #pragma once
 
-#include <Safir/Application/Tracer.h>
-
+#include "OdbcHelper.h"
 #include "PersistenceHandler.h"
-
+#include <Safir/Application/Tracer.h>
 #include <boost/scoped_array.hpp>
-
-#include <sqltypes.h>
-#include <sql.h>
-#include <sqlext.h>
 
 
 /**
@@ -53,95 +48,58 @@ public:
 private:
     void Store(const Safir::Dob::Typesystem::EntityId& entityId,
                const Safir::Dob::Typesystem::HandlerId& handlerId,
-               Safir::Dob::Typesystem::BinarySerialization & bin,
+               Safir::Dob::Typesystem::BinarySerialization& bin,
                const bool update) override;
 
     void RestoreAll() override;
-    void Remove(const Safir::Dob::EntityProxy & entityProxy) override;
+    void Remove(const Safir::Dob::EntityProxy& entityProxy) override;
     void RemoveAll() override;
 
     //Insert an empty row into the db
-    void Insert(const Safir::Dob::Typesystem::EntityId & entityId);
+    void Insert(const Safir::Dob::Typesystem::EntityId& entityId);
 
     //Delete a row into the db
     void Delete(SQLHDBC connectionToUse,
-                bool & connectionIsValid,
-                const Safir::Dob::Typesystem::EntityId & entityId);
+                bool& connectionIsValid,
+                const Safir::Dob::Typesystem::EntityId& entityId);
 
     //Delete all rows from the db
     void DeleteAll();
 
-    // Bind one Int64 parameter to a statement. The Int64 is not nullable.
-    void BindParamInt64(SQLHSTMT hStmt,
-                        const SQLUSMALLINT paramNumber,
-                        Safir::Dob::Typesystem::Int64 * value);
-
-    // Bind one binary parameter to a statement. The binary are nullable.
-    void BindParamBinary(SQLHSTMT hStmt,
-                         const SQLUSMALLINT paramNumber,
-                         const SQLUINTEGER maxSize,
-                         unsigned char * buffer,
-                         SQLINTEGER * sizePtr);
-
-    // Bind one string to a statement. The string is nullable.
-    void BindParamString(SQLHSTMT hStmt,
-                         const SQLUSMALLINT paramNumber,
-                         const SQLUINTEGER maxSize,
-                         wchar_t * string,
-                         SQLINTEGER * sizePtr);
-
-    // Bind one Int64 column to a statement. The Int64 cannot be null.
-    void BindColumnInt64( SQLHSTMT hStmt,
-                          unsigned short usColumnNumber,
-                          Safir::Dob::Typesystem::Int64 * value );
-
-    // Bind one binary column to a statement. The binary can be null.
-    void BindColumnBinary( SQLHSTMT hStmt,
-                           unsigned short usColumnNumber,
-                           const int maxSize,
-                           unsigned char * buffer,
-                           SQLINTEGER * sizePtr );
-
-    // Bind one string column to a statement. The string can be null.
-    void BindColumnString( SQLHSTMT hStmt,
-                           unsigned short usColumnNumber,
-                           const int maxSize,
-                           wchar_t * string,
-                           SQLINTEGER * sizePtr );
-
     // Connect to the database if necessary.
-    void ConnectIfNeeded(SQLHDBC hConnection, bool & isConnected, int & connectionAttempts);
-
-    // Prepare a sql query.
-    void Prepare(SQLHSTMT hStmt, const std::wstring & sql);
+    void ConnectIfNeeded(SQLHDBC connection,
+                         bool& isConnected,
+                         int&connectionAttempts);
 
     // Sets the timeout for a sql statement.
-    void SetStmtTimeout(SQLHSTMT hStmt);
+    static void SetStmtTimeout(SQLHSTMT statement);
 
-    // Execute a sql statement
-    void Execute(SQLHSTMT hStmt);
+    // Bind one binary parameter to a statement. The binary are nullable.
+    static void BindParamBinary(SQLHSTMT statement,
+                                const SQLUSMALLINT paramNumber,
+                                const SQLUINTEGER maxSize,
+                                unsigned char* buffer,
+                                SQLLEN* sizePtr);
 
-    // Allocates a handle for a sql statement.
-    void AllocStatement(SQLHSTMT * hStmt, SQLHDBC hConnection);
-
-    // Fetches data from an executed statement into the columns bound to the statement.
-    bool Fetch( SQLHSTMT hStmt );
+    // Bind one string column to a statement. The string can be null.
+    static void BindColumnString(SQLHSTMT statement,
+                                 unsigned short usColumnNumber,
+                                 const int maxSize,
+                                 wchar_t* string,
+                                 SQLLEN* sizePtr);
 
     // Free an previously allocated connection
-    void Free( SQLHDBC hConnection );
+    static void Free(SQLHDBC connection);
 
     // Disconnects a connection.
-    void Disconnect( SQLHDBC hConnection );
+    static void Disconnect(SQLHDBC connection);
 
-    // Reads the error message and throws an std::exception
-    void ThrowException(SQLSMALLINT   HandleType,
-                        SQLHANDLE     Handle);
 
     // Disconnects the ODBC connection with all boolean correctly reset.
     void DisconnectOdbcConnection();
 
     // Closes a cursor previously opened with Fetch().
-    void CloseCursor(SQLHSTMT hStmt);
+    static void CloseCursor(SQLHSTMT statement);
 
 
     /**
@@ -159,6 +117,8 @@ private:
      */
     SQLHDBC                             m_hRestoreAllConnection;
 
+    OdbcHelper                          m_helper;
+
     /**
      * Statement used for to update a row in db.
      */
@@ -166,15 +126,14 @@ private:
     SQLHSTMT                                    m_hInsertStatement;
     SQLHSTMT                                    m_hRowExistsStatement;
     boost::scoped_array<unsigned char>          m_storeBinarySmallData;
-    SQLINTEGER                                  m_currentSmallDataSize;
+    SQLLEN                                      m_currentSmallDataSize;
     boost::scoped_array<unsigned char>          m_storeBinaryLargeData;
-    SQLINTEGER                                  m_currentLargeDataSize;
+    SQLLEN                                      m_currentLargeDataSize;
     Safir::Dob::Typesystem::Int64               m_handler;
-    SQLINTEGER                                  m_currentInt64Size;
     Safir::Dob::Typesystem::Int64               m_type;
     Safir::Dob::Typesystem::Int64               m_instance;
     boost::scoped_array<wchar_t>                m_typeName;
-    SQLINTEGER                                  m_typeNameSize;
+    SQLLEN                                      m_typeNameSize;
     Safir::Dob::Typesystem::Int64               m_rowCount;
 
 

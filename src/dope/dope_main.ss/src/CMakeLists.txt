@@ -9,10 +9,10 @@ ADD_EXECUTABLE(dope_main
   DopeApp.cpp
   FilePersistor.h
   PersistenceHandler.cpp
-)
+  OdbcHelper.h
+  OdbcHelper.cpp)
 
-ADD_EXECUTABLE(dope_bin2xml dope_bin2xml.cpp)
-
+ADD_EXECUTABLE(dope_bin2xml dope_bin2xml.cpp OdbcHelper.h OdbcHelper.cpp)
 
 TARGET_LINK_LIBRARIES(dope_main PRIVATE
   swre_interface_cpp
