@@ -31,7 +31,7 @@
 #include <DopeTest/BigEntity.h>
 #include <boost/lexical_cast.hpp>
 
-#ifndef NDEBUG
+#ifdef NDEBUG
 const int NUM_SMALL=100;
 const int NUM_BIG=10;
 #else

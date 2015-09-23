@@ -163,12 +163,18 @@ try:
     print("== Clear the db")
     delete_all_rows(parameters)
 
+    print ("== Find out how many entities entity_owner will set")
+    num_str = subprocess.check_output(("entity_owner","num"), universal_newlines=True)
+    NUM_SMALL = int(re.search(r"NUM_SMALL = ([0-9]+)",num_str).group(1))
+    NUM_BIG = int(re.search(r"NUM_BIG = ([0-9]+)",num_str).group(1))
+    print ("NUM_SMALL = " + str(NUM_SMALL) + " and NUM_BIG = " + str(NUM_BIG))
+
     print("== Set a bunch of entities")
     env = TestEnv("safir_control", dose_main_path, "dope_main", "safir_show_config")
     with TestEnvStopper(env):
         env.launchProcess("entity_owner", ("entity_owner","set")).wait()
-        print("waiting for 110 entities in db")
-        while count_rows(parameters) != 110:
+        print("waiting for", NUM_BIG + NUM_SMALL, "entities in db")
+        while count_rows(parameters) != NUM_BIG + NUM_SMALL:
             time.sleep(1)
 
     syslog_output = env.Syslog()
@@ -195,23 +201,23 @@ try:
         sys.exit(1)
 
     output = env.Output("entity_owner")
-    if output.count("OnInjectedNewEntity") != 110:
+    if output.count("OnInjectedNewEntity") != NUM_BIG + NUM_SMALL:
         print("could not find the right number of 'OnInjectedNewEntity' in output")
         sys.exit(1)
 
-    if output.count("<DopeTest.SmallEntity>") != 100:
+    if output.count("<DopeTest.SmallEntity>") != NUM_SMALL:
         print("could not find the right number of 'DopeTest.SmallEntity' in output")
         sys.exit(1)
 
-    if count_small(parameters) != 100:
+    if count_small(parameters) != NUM_SMALL:
         print("could not find the right number of entries in the small column in the database")
         sys.exit(1)
 
-    if output.count("<DopeTest.BigEntity>") != 10:
+    if output.count("<DopeTest.BigEntity>") != NUM_BIG:
         print("could not find the right number of 'DopeTest.BigEntity' in output")
         sys.exit(1)
 
-    if count_big(parameters) != 10:
+    if count_big(parameters) != NUM_BIG:
         print("could not find the right number of entries in the big column in the database")
         sys.exit(1)
 
@@ -225,7 +231,7 @@ try:
     #db is automatically chosen by parameter setting
     subprocess.call("dope_bin2xml")
 
-    if count_xml(parameters) != 110 or count_rows(parameters) != 110:
+    if count_xml(parameters) != NUM_BIG + NUM_SMALL or count_rows(parameters) != NUM_BIG + NUM_SMALL:
         print("dope_bin2xml appears to have failed")
         sys.exit(1)
 
@@ -251,19 +257,19 @@ try:
         sys.exit(1)
 
     output = env.Output("entity_owner")
-    if output.count("OnInjectedNewEntity") != 110:
+    if output.count("OnInjectedNewEntity") != NUM_BIG + NUM_SMALL:
         print("could not find the right number of 'OnInjectedNewEntity' in output")
         sys.exit(1)
 
-    if output.count("<DopeTest.SmallEntity>") != 100:
+    if output.count("<DopeTest.SmallEntity>") != NUM_SMALL:
         print("could not find the right number of 'DopeTest.SmallEntity' in output")
         sys.exit(1)
 
-    if output.count("<DopeTest.BigEntity>") != 10:
+    if output.count("<DopeTest.BigEntity>") != NUM_BIG:
         print("could not find the right number of 'DopeTest.BigEntity' in output")
         sys.exit(1)
 
-    if count_big(parameters) != 10 or count_small(parameters) != 100:
+    if count_big(parameters) != NUM_BIG or count_small(parameters) != NUM_SMALL:
         print("xml does not appear to have been translated into binaries")
         sys.exit(1)
 
@@ -286,8 +292,8 @@ try:
 
         env.launchProcess("entity_owner", ("entity_owner","update")).wait()
 
-        print("waiting for 110 entities in db")
-        while count_binares(parameters) != 110:
+        print("waiting for", NUM_BIG + NUM_SMALL,  "entities in db")
+        while count_binares(parameters) != NUM_BIG + NUM_SMALL:
             time.sleep(1)
 
     syslog_output = env.Syslog()
@@ -314,11 +320,11 @@ try:
         sys.exit(1)
 
     output = env.Output("entity_owner")
-    if output.count("name is changed") != 100:
+    if output.count("name is changed") != NUM_SMALL:
         print("could not find the right number of updated SmallEntity in output")
         sys.exit(1)
 
-    if output.count("99999999") != 10:
+    if output.count("99999999") != NUM_BIG:
         print("could not find the right number of updated BigEntity in output")
         sys.exit(1)
 
@@ -332,8 +338,8 @@ except:
 
 finally:
     pass
-    #print("== Clear the db")
-    #delete_all_rows(parameters)
+    print("== Clear the db")
+    delete_all_rows(parameters)
 
 print("Success")
 sys.exit(0)
