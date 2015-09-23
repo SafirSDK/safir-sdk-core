@@ -84,7 +84,7 @@ CREATE table PersistentEntity
 (
     TYPEID bigint  NOT NULL,
     INSTANCE bigint NOT NULL,
-    HANDLERID bigint NULL,            -- This is set for existing entities. It doesn't uniquely identify the entity so its not part of the primarykey.
+    HANDLERID bigint NULL,
     XMLDATA NCLOB(10M) NULL,
     BINARYDATA BLOB(10M) NULL,
     BINARYSMALLDATA BINARY(5000) NULL,
