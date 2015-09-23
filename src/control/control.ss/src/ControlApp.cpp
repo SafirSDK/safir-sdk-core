@@ -241,7 +241,9 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
                                                 (boost::process::initializers::run_exe(doseMainPath),
                                                  boost::process::initializers::set_on_error(ec),
                                                  boost::process::initializers::inherit_env()
-#if defined(linux) || defined(__linux) || defined(__linux__)
+#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
+                                                 ,boost::process::initializers::show_window(SW_HIDE)
+#elif defined(linux) || defined(__linux) || defined(__linux__)
                                                  ,boost::process::initializers::notify_io_service(ioService)
 #endif
                                                )));
