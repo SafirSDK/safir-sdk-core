@@ -52,58 +52,58 @@ const int REPORT_AFTER_RECONNECTS = 100;
 //-------------------------------------------------------
 OdbcPersistor::OdbcPersistor(boost::asio::io_service& ioService) :
     PersistenceHandler(ioService, false),
-    m_hOdbcConnection(SQL_NULL_HANDLE),
-    m_hEnvironment(SQL_NULL_HANDLE),
-    m_hStoreStatement(SQL_NULL_HANDLE),
-    m_hInsertStatement(SQL_NULL_HANDLE),
-    m_hRowExistsStatement(SQL_NULL_HANDLE),
+    m_odbcConnection(SQL_NULL_HANDLE),
+    m_environment(SQL_NULL_HANDLE),
+    m_storeStatement(SQL_NULL_HANDLE),
+    m_insertStatement(SQL_NULL_HANDLE),
+    m_rowExistsStatement(SQL_NULL_HANDLE),
     m_storeBinarySmallData(new unsigned char[Safir::Dob::PersistenceParameters::BinarySmallDataColumnSize()]),
     m_currentSmallDataSize(0),
     m_storeBinaryLargeData(new unsigned char[Safir::Dob::PersistenceParameters::BinaryDataColumnSize()]),
     m_currentLargeDataSize(0),
-    m_hDeleteAllStatement(SQL_NULL_HANDLE),
-    m_hDeleteStatement(SQL_NULL_HANDLE),
-    m_hDeleteODBCStatement(SQL_NULL_HANDLE),
-    m_hDeleteConnection(SQL_NULL_HANDLE),
-    m_bIsOdbcConnected(false),
-    m_bStoreStatementIsValid(false),
-    m_bDeleteAllIsValid(false),
-    m_bDeleteIsConnected(false),
-    m_bInsertIsValid(false),
-    m_bDeleteIsValid(false),
-    m_bDeleteODBCIsValid(false),
+    m_deleteAllStatement(SQL_NULL_HANDLE),
+    m_deleteStatement(SQL_NULL_HANDLE),
+    m_deleteODBCStatement(SQL_NULL_HANDLE),
+    m_deleteConnection(SQL_NULL_HANDLE),
+    m_isOdbcConnected(false),
+    m_storeStatementIsValid(false),
+    m_deleteAllIsValid(false),
+    m_deleteIsConnected(false),
+    m_insertIsValid(false),
+    m_deleteIsValid(false),
+    m_deleteODBCIsValid(false),
     m_debug(L"OdbcPersistor")
 {
     m_debug << "Using ODBC connect string " << Safir::Dob::PersistenceParameters::OdbcStorageConnectString() <<std::endl;
 
     try
     {
-        SQLRETURN ret = ::SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &m_hEnvironment);
+        SQLRETURN ret = ::SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &m_environment);
         if (!SQL_SUCCEEDED(ret))
         {
             OdbcHelper::ThrowException(SQL_HANDLE_ENV, SQL_NULL_HANDLE);
         }
 
         // SetEnvAttr(SQL_ATTR_ODBC_VERSION, SQL_OV_ODBC3);
-        ret = ::SQLSetEnvAttr(m_hEnvironment,
+        ret = ::SQLSetEnvAttr(m_environment,
                               SQL_ATTR_ODBC_VERSION,
                               reinterpret_cast<SQLPOINTER>(SQL_OV_ODBC3),
                               SQL_IS_UINTEGER);
         if (!SQL_SUCCEEDED(ret))
         {
-            OdbcHelper::ThrowException(SQL_HANDLE_ENV, m_hEnvironment);
+            OdbcHelper::ThrowException(SQL_HANDLE_ENV, m_environment);
         }
 
-        ret = ::SQLAllocHandle(SQL_HANDLE_DBC, m_hEnvironment, &m_hOdbcConnection);
+        ret = ::SQLAllocHandle(SQL_HANDLE_DBC, m_environment, &m_odbcConnection);
         if (!SQL_SUCCEEDED(ret))
         {
-            OdbcHelper::ThrowException(SQL_HANDLE_ENV, m_hEnvironment);
+            OdbcHelper::ThrowException(SQL_HANDLE_ENV, m_environment);
         }
 
-        ret = ::SQLAllocHandle(SQL_HANDLE_DBC, m_hEnvironment, &m_hDeleteConnection);
+        ret = ::SQLAllocHandle(SQL_HANDLE_DBC, m_environment, &m_deleteConnection);
         if (!SQL_SUCCEEDED(ret))
         {
-            OdbcHelper::ThrowException(SQL_HANDLE_ENV, m_hEnvironment);
+            OdbcHelper::ThrowException(SQL_HANDLE_ENV, m_environment);
         }
     }
     catch(const OdbcException& ex)
@@ -123,25 +123,25 @@ OdbcPersistor::~OdbcPersistor()
     {
         SQLRETURN ret;
 
-        if (m_bDeleteIsConnected)
+        if (m_deleteIsConnected)
         {
-            Disconnect(m_hDeleteConnection);
-            m_bDeleteIsConnected = false;
+            Disconnect(m_deleteConnection);
+            m_deleteIsConnected = false;
         }
 
-        if (m_bIsOdbcConnected)
+        if (m_isOdbcConnected)
         {
-            Disconnect(m_hOdbcConnection);
-            m_bIsOdbcConnected = false;
+            Disconnect(m_odbcConnection);
+            m_isOdbcConnected = false;
         }
 
-        Free(m_hDeleteConnection);
-        Free(m_hOdbcConnection);
+        Free(m_deleteConnection);
+        Free(m_odbcConnection);
 
-        ret = ::SQLFreeHandle(SQL_HANDLE_ENV, m_hEnvironment);
+        ret = ::SQLFreeHandle(SQL_HANDLE_ENV, m_environment);
         if (!SQL_SUCCEEDED(ret))
         {
-            OdbcHelper::ThrowException(SQL_HANDLE_ENV, m_hEnvironment);
+            OdbcHelper::ThrowException(SQL_HANDLE_ENV, m_environment);
         }
     }
     catch(const OdbcException& ex)
@@ -171,25 +171,25 @@ void OdbcPersistor::Store(const Safir::Dob::Typesystem::EntityId& entityId,
     {
         try
         {
-            ConnectIfNeeded(m_hOdbcConnection, m_bIsOdbcConnected, retries);
+            ConnectIfNeeded(m_odbcConnection, m_isOdbcConnected, retries);
 
-            if (!m_bStoreStatementIsValid)
+            if (!m_storeStatementIsValid)
             {
-                m_helper.AllocStatement(&m_hStoreStatement, m_hOdbcConnection);
-                m_bStoreStatementIsValid = true;
+                m_helper.AllocStatement(&m_storeStatement, m_odbcConnection);
+                m_storeStatementIsValid = true;
 
-                m_helper.Prepare(m_hStoreStatement,
+                m_helper.Prepare(m_storeStatement,
                                  "UPDATE PersistentEntity "
                                  "SET xmlData=NULL, binarySmallData=?, binaryData=?, handlerid=? "
                                  "WHERE typeId=? AND instance=?");
 
-                BindParamBinary(m_hStoreStatement, 1, Safir::Dob::PersistenceParameters::BinarySmallDataColumnSize(), m_storeBinarySmallData.get(), &m_currentSmallDataSize);
-                BindParamBinary(m_hStoreStatement, 2, Safir::Dob::PersistenceParameters::BinaryDataColumnSize(), m_storeBinaryLargeData.get(), &m_currentLargeDataSize);
-                m_helper.BindParamInt64(m_hStoreStatement, 3, &m_handler);
-                m_helper.BindParamInt64(m_hStoreStatement, 4, &m_type);
-                m_helper.BindParamInt64(m_hStoreStatement, 5, &m_instance);
+                BindParamBinary(m_storeStatement, 1, Safir::Dob::PersistenceParameters::BinarySmallDataColumnSize(), m_storeBinarySmallData.get(), &m_currentSmallDataSize);
+                BindParamBinary(m_storeStatement, 2, Safir::Dob::PersistenceParameters::BinaryDataColumnSize(), m_storeBinaryLargeData.get(), &m_currentLargeDataSize);
+                m_helper.BindParamInt64(m_storeStatement, 3, &m_handler);
+                m_helper.BindParamInt64(m_storeStatement, 4, &m_type);
+                m_helper.BindParamInt64(m_storeStatement, 5, &m_instance);
 
-                SetStmtTimeout(m_hStoreStatement);
+                SetStmtTimeout(m_storeStatement);
 
                 paramSet = false;
             }
@@ -222,7 +222,7 @@ void OdbcPersistor::Store(const Safir::Dob::Typesystem::EntityId& entityId,
                 Insert(entityId);
             }
 
-            m_helper.Execute(m_hStoreStatement);
+            m_helper.Execute(m_storeStatement);
 
             m_debug << "Successfully stored binary entity in database. Size = "<<bin.size() << std::endl;
             done = true;
@@ -269,16 +269,16 @@ void OdbcPersistor::Remove(const Safir::Dob::EntityProxy& entityProxy)
     {
         try
         {
-            ConnectIfNeeded(m_hOdbcConnection, m_bIsOdbcConnected, retries);
+            ConnectIfNeeded(m_odbcConnection, m_isOdbcConnected, retries);
 
-            if (!m_bDeleteODBCIsValid)
+            if (!m_deleteODBCIsValid)
             {
-                m_helper.AllocStatement(&m_hDeleteODBCStatement, m_hOdbcConnection);
-                m_helper.Prepare(m_hDeleteODBCStatement, "DELETE FROM PersistentEntity WHERE typeId=? AND instance=?");
-                m_helper.BindParamInt64(m_hDeleteODBCStatement, 1, &m_type);
-                m_helper.BindParamInt64(m_hDeleteODBCStatement, 2, &m_instance);
-                SetStmtTimeout(m_hDeleteODBCStatement);
-                m_bDeleteODBCIsValid = true;
+                m_helper.AllocStatement(&m_deleteODBCStatement, m_odbcConnection);
+                m_helper.Prepare(m_deleteODBCStatement, "DELETE FROM PersistentEntity WHERE typeId=? AND instance=?");
+                m_helper.BindParamInt64(m_deleteODBCStatement, 1, &m_type);
+                m_helper.BindParamInt64(m_deleteODBCStatement, 2, &m_instance);
+                SetStmtTimeout(m_deleteODBCStatement);
+                m_deleteODBCIsValid = true;
                 paramSet = false;
             }
 
@@ -289,7 +289,7 @@ void OdbcPersistor::Remove(const Safir::Dob::EntityProxy& entityProxy)
                 paramSet = true;
             }
 
-            m_helper.Execute(m_hDeleteODBCStatement);
+            m_helper.Execute(m_deleteODBCStatement);
             done = true;
             if (errorReported)
             {
@@ -335,19 +335,19 @@ void OdbcPersistor::DeleteAll()
     {
         try
         {
-            ConnectIfNeeded(m_hDeleteConnection, m_bDeleteIsConnected, retries);
+            ConnectIfNeeded(m_deleteConnection, m_deleteIsConnected, retries);
 
-            if (!m_bDeleteAllIsValid)
+            if (!m_deleteAllIsValid)
             {
-                m_helper.AllocStatement(&m_hDeleteAllStatement, m_hOdbcConnection);
-                m_bDeleteAllIsValid = true;
+                m_helper.AllocStatement(&m_deleteAllStatement, m_odbcConnection);
+                m_deleteAllIsValid = true;
 
-                m_helper.Prepare(m_hDeleteAllStatement, "DELETE FROM PersistentEntity");
+                m_helper.Prepare(m_deleteAllStatement, "DELETE FROM PersistentEntity");
 
-                SetStmtTimeout(m_hDeleteAllStatement);
+                SetStmtTimeout(m_deleteAllStatement);
             }
 
-            m_helper.Execute(m_hDeleteAllStatement);
+            m_helper.Execute(m_deleteAllStatement);
 
             done = true;
             if (errorReported)
@@ -369,12 +369,12 @@ void OdbcPersistor::DeleteAll()
                                               err);
                 errorReported = true;
             }
-            if (m_bDeleteIsConnected)
+            if (m_deleteIsConnected)
             {
-                Disconnect(m_hDeleteConnection);
-                m_bDeleteIsConnected = false;
+                Disconnect(m_deleteConnection);
+                m_deleteIsConnected = false;
             }
-            Free(m_hDeleteAllStatement);
+            Free(m_deleteAllStatement);
             boost::this_thread::sleep_for(RECONNECT_EXCEPTION_DELAY);
         }
     }
@@ -391,8 +391,8 @@ void OdbcPersistor::RestoreAll()
     const int binarySmallSize = Safir::Dob::PersistenceParameters::BinarySmallDataColumnSize();
     const int xmlSize = Safir::Dob::PersistenceParameters::XmlDataColumnSize();
 
-    bool                                        bGetAllIsValid = false;
-    SQLHSTMT                                    hGetAllStatement = SQL_NULL_HANDLE;
+    bool                                        getAllIsValid = false;
+    SQLHSTMT                                    getAllStatement = SQL_NULL_HANDLE;
     Safir::Dob::Typesystem::Int64               typeId = 0;
     Safir::Dob::Typesystem::Int64               instance = 0;
     Safir::Dob::Typesystem::Int64               handlerId = 0;
@@ -410,31 +410,31 @@ void OdbcPersistor::RestoreAll()
     {
         try
         {
-            ConnectIfNeeded(m_hOdbcConnection, m_bIsOdbcConnected, connectionAttempts);
+            ConnectIfNeeded(m_odbcConnection, m_isOdbcConnected, connectionAttempts);
 
             for (;;)
             {
                 //getAll statement execution (will loop here until we successfully execute)
-                if (!bGetAllIsValid)
+                if (!getAllIsValid)
                 {
-                    m_helper.AllocStatement(&hGetAllStatement, m_hOdbcConnection);
+                    m_helper.AllocStatement(&getAllStatement, m_odbcConnection);
                     m_helper.Prepare(
-                        hGetAllStatement,
+                        getAllStatement,
                         "SELECT typeId, instance, handlerid, xmlData, binaryData, binarySmallData "
                         "FROM PersistentEntity");
-                    m_helper.BindColumnInt64(hGetAllStatement, 1, &typeId);
-                    m_helper.BindColumnInt64(hGetAllStatement, 2, &instance);
-                    m_helper.BindColumnInt64(hGetAllStatement, 3, &handlerId);
+                    m_helper.BindColumnInt64(getAllStatement, 1, &typeId);
+                    m_helper.BindColumnInt64(getAllStatement, 2, &instance);
+                    m_helper.BindColumnInt64(getAllStatement, 3, &handlerId);
 
-                    BindColumnString(hGetAllStatement, 4, xmlSize, xmlBuffer.get(), &currentXmlSize);
+                    BindColumnString(getAllStatement, 4, xmlSize, xmlBuffer.get(), &currentXmlSize);
 
-                    m_helper.BindColumnBinary(hGetAllStatement, 5, binaryLargeSize, storeBinaryLargeData.get(), &currentLargeDataSize);
-                    m_helper.BindColumnBinary(hGetAllStatement, 6, binarySmallSize, storeBinarySmallData.get(), &currentSmallDataSize);
+                    m_helper.BindColumnBinary(getAllStatement, 5, binaryLargeSize, storeBinaryLargeData.get(), &currentLargeDataSize);
+                    m_helper.BindColumnBinary(getAllStatement, 6, binarySmallSize, storeBinarySmallData.get(), &currentSmallDataSize);
                 }
 
                 try
                 {
-                    m_helper.Execute(hGetAllStatement);
+                    m_helper.Execute(getAllStatement);
                     break;
                 }
                 catch(const OdbcException& e)
@@ -447,7 +447,7 @@ void OdbcPersistor::RestoreAll()
 
             for (;;)
             {
-                if (!m_helper.Fetch(hGetAllStatement))
+                if (!m_helper.Fetch(getAllStatement))
                 {//we've got all rows!
                     done = true;
                     break;
@@ -462,7 +462,7 @@ void OdbcPersistor::RestoreAll()
                 auto findIt = GetPersistentTypes().find(entityId.GetTypeId());
                 if (findIt == GetPersistentTypes().end())
                 { //not to be persisted!
-                    Delete(m_hDeleteConnection,m_bDeleteIsConnected, entityId);
+                    Delete(m_deleteConnection,m_deleteIsConnected, entityId);
                     continue;
                 }
 
@@ -549,7 +549,7 @@ void OdbcPersistor::RestoreAll()
                     //we don't want to try it again if the connection fails later.
                     restoredObjects.insert(entityId);
                     //remove the row from the db
-                    Delete(m_hDeleteConnection,m_bDeleteIsConnected, entityId);
+                    Delete(m_deleteConnection,m_deleteIsConnected, entityId);
                     //since we did not remove the objectid from persistentObjects an empty row will be inserted below.
                 }
             }
@@ -566,13 +566,13 @@ void OdbcPersistor::RestoreAll()
                 errorReported = true;
             }
 
-            if (m_bIsOdbcConnected)
+            if (m_isOdbcConnected)
             {
-                Disconnect(m_hOdbcConnection);
-                m_bIsOdbcConnected = false;
+                Disconnect(m_odbcConnection);
+                m_isOdbcConnected = false;
             }
-            Free(hGetAllStatement);
-            bGetAllIsValid = false;
+            Free(getAllStatement);
+            getAllIsValid = false;
 
             boost::this_thread::sleep_for(RECONNECT_EXCEPTION_DELAY);
         }
@@ -586,19 +586,19 @@ void OdbcPersistor::RestoreAll()
         connectionAttempts = 0;
     }
 
-    Free(hGetAllStatement);
+    Free(getAllStatement);
 
-    Free(m_hInsertStatement);
+    Free(m_insertStatement);
 
     //we don't need the deleteconnection any more, so close it.
     try
     {
-        if (m_bDeleteIsConnected)
+        if (m_deleteIsConnected)
         {
-            Disconnect(m_hDeleteConnection);
-            m_bDeleteIsConnected = false;
+            Disconnect(m_deleteConnection);
+            m_deleteIsConnected = false;
         }
-        Free(m_hDeleteConnection);
+        Free(m_deleteConnection);
     }
     catch(const OdbcException& e)
     {
@@ -628,33 +628,33 @@ OdbcPersistor::Insert(const Safir::Dob::Typesystem::EntityId& entityId)
     {
         try
         {
-            ConnectIfNeeded(m_hOdbcConnection, m_bIsOdbcConnected, retries);
+            ConnectIfNeeded(m_odbcConnection, m_isOdbcConnected, retries);
 
-            if (!m_bInsertIsValid)
+            if (!m_insertIsValid)
             {
-                m_helper.AllocStatement(&m_hRowExistsStatement, m_hOdbcConnection);
+                m_helper.AllocStatement(&m_rowExistsStatement, m_odbcConnection);
 
-                m_helper.AllocStatement(&m_hInsertStatement, m_hOdbcConnection);
-                m_bInsertIsValid = true;
+                m_helper.AllocStatement(&m_insertStatement, m_odbcConnection);
+                m_insertIsValid = true;
 
                 m_helper.Prepare
-                    (m_hRowExistsStatement,
+                    (m_rowExistsStatement,
                      "SELECT count(*) as antal from PersistentEntity where typeId=? AND instance=? ");
 
                 m_helper.Prepare
-                    (m_hInsertStatement,
+                    (m_insertStatement,
                      "INSERT INTO PersistentEntity (typeid, instance) "
                      "values (?, ?); ");
 
-                m_helper.BindParamInt64(m_hRowExistsStatement, 1, &m_type);
-                m_helper.BindParamInt64(m_hRowExistsStatement, 2, &m_instance);
-                m_helper.BindColumnInt64(m_hRowExistsStatement,1, &m_rowCount);
+                m_helper.BindParamInt64(m_rowExistsStatement, 1, &m_type);
+                m_helper.BindParamInt64(m_rowExistsStatement, 2, &m_instance);
+                m_helper.BindColumnInt64(m_rowExistsStatement,1, &m_rowCount);
 
-                m_helper.BindParamInt64(m_hInsertStatement, 1, &m_type);
-                m_helper.BindParamInt64(m_hInsertStatement, 2, &m_instance);
+                m_helper.BindParamInt64(m_insertStatement, 1, &m_type);
+                m_helper.BindParamInt64(m_insertStatement, 2, &m_instance);
 
-                SetStmtTimeout(m_hInsertStatement);
-                SetStmtTimeout(m_hRowExistsStatement);
+                SetStmtTimeout(m_insertStatement);
+                SetStmtTimeout(m_rowExistsStatement);
 
                 paramSet = false;
             }
@@ -667,10 +667,10 @@ OdbcPersistor::Insert(const Safir::Dob::Typesystem::EntityId& entityId)
                 paramSet = true;
             }
 
-            m_helper.Execute(m_hRowExistsStatement);
+            m_helper.Execute(m_rowExistsStatement);
 
             bool bExecuteInsert = false;
-            if (m_helper.Fetch(m_hRowExistsStatement))
+            if (m_helper.Fetch(m_rowExistsStatement))
             {
                 // Insert if no row exist
                 if (m_rowCount <= 0)
@@ -679,11 +679,11 @@ OdbcPersistor::Insert(const Safir::Dob::Typesystem::EntityId& entityId)
                 }
             }
 
-            CloseCursor(m_hRowExistsStatement);
+            CloseCursor(m_rowExistsStatement);
 
             if (bExecuteInsert)
             {
-                m_helper.Execute(m_hInsertStatement);
+                m_helper.Execute(m_insertStatement);
             }
 
             done = true;
@@ -720,19 +720,19 @@ OdbcPersistor::Insert(const Safir::Dob::Typesystem::EntityId& entityId)
 void
 OdbcPersistor::DisconnectOdbcConnection()
 {
-    if (m_bIsOdbcConnected)
+    if (m_isOdbcConnected)
     {
-        Disconnect(m_hOdbcConnection);
-        m_bIsOdbcConnected = false;
+        Disconnect(m_odbcConnection);
+        m_isOdbcConnected = false;
     }
-    Free(m_hInsertStatement);
-    m_bInsertIsValid = false;
+    Free(m_insertStatement);
+    m_insertIsValid = false;
 
-    Free(m_hStoreStatement);
-    m_bStoreStatementIsValid = false;
+    Free(m_storeStatement);
+    m_storeStatementIsValid = false;
 
-    Free(m_hDeleteODBCStatement);
-    m_bDeleteODBCIsValid = false;
+    Free(m_deleteODBCStatement);
+    m_deleteODBCIsValid = false;
 }
 
 
@@ -756,12 +756,12 @@ OdbcPersistor::Delete(SQLHDBC connectionToUse,
 
             if (!connectionIsValid)
             {
-                m_helper.AllocStatement(&m_hDeleteStatement, connectionToUse);
-                m_helper.Prepare(m_hDeleteStatement, "DELETE FROM PersistentEntity WHERE typeId=? AND instance=?");
-                m_helper.BindParamInt64(m_hDeleteStatement, 1, &m_type);
-                m_helper.BindParamInt64(m_hDeleteStatement, 2, &m_instance);
-                SetStmtTimeout(m_hDeleteStatement);
-                m_bDeleteIsValid = true;
+                m_helper.AllocStatement(&m_deleteStatement, connectionToUse);
+                m_helper.Prepare(m_deleteStatement, "DELETE FROM PersistentEntity WHERE typeId=? AND instance=?");
+                m_helper.BindParamInt64(m_deleteStatement, 1, &m_type);
+                m_helper.BindParamInt64(m_deleteStatement, 2, &m_instance);
+                SetStmtTimeout(m_deleteStatement);
+                m_deleteIsValid = true;
                 paramSet = false;
             }
 
@@ -772,7 +772,7 @@ OdbcPersistor::Delete(SQLHDBC connectionToUse,
                 paramSet = true;
             }
 
-            m_helper.Execute(m_hDeleteStatement);
+            m_helper.Execute(m_deleteStatement);
             done = true;
             if (errorReported)
             {
@@ -798,8 +798,8 @@ OdbcPersistor::Delete(SQLHDBC connectionToUse,
                 Disconnect(connectionToUse);
                 connectionIsValid = false;
             }
-            Free(m_hDeleteStatement);
-            m_bDeleteIsValid = false;
+            Free(m_deleteStatement);
+            m_deleteIsValid = false;
             boost::this_thread::sleep_for(RECONNECT_EXCEPTION_DELAY);
         }
     }
@@ -854,11 +854,10 @@ OdbcPersistor::ConnectIfNeeded(SQLHDBC connection,
 void
 OdbcPersistor::SetStmtTimeout(SQLHSTMT statement)
 {
-    SQLRETURN ret = ::SQLSetStmtAttr(
-        statement,
-        SQL_ATTR_QUERY_TIMEOUT,
-        reinterpret_cast<SQLPOINTER>(15),
-        SQL_IS_UINTEGER);
+    const SQLRETURN ret = ::SQLSetStmtAttr(statement,
+                                           SQL_ATTR_QUERY_TIMEOUT,
+                                           reinterpret_cast<SQLPOINTER>(15),
+                                           SQL_IS_UINTEGER);
     if (!SQL_SUCCEEDED(ret))
     {
         OdbcHelper::ThrowException(SQL_HANDLE_STMT,statement);
@@ -868,7 +867,7 @@ OdbcPersistor::SetStmtTimeout(SQLHSTMT statement)
 void
 OdbcPersistor::CloseCursor(SQLHSTMT statement)
 {
-    SQLRETURN ret = ::SQLCloseCursor(statement);
+    const SQLRETURN ret = ::SQLCloseCursor(statement);
     if (!SQL_SUCCEEDED(ret))
     {
         OdbcHelper::ThrowException(SQL_HANDLE_STMT,statement);
@@ -883,19 +882,16 @@ OdbcPersistor::BindParamBinary(SQLHSTMT statement,
                                unsigned char* buffer,
                                SQLLEN* sizePtr)
 {
-
-    SQLRETURN ret = ::SQLBindParameter(
-        statement,                          // StatementHandle
-        paramNumber,                    // ParameterNumber,
-        SQL_PARAM_INPUT,                // InputOutputType
-        SQL_C_BINARY,                   // ValueType
-        SQL_LONGVARBINARY,              // ParameterType
-        //SQL_VARBINARY,                  // ParameterType
-        maxSize,                        // ColumnSize
-        0,                              // DecimalDigits
-        buffer,                         // ParameterValuePtr
-        maxSize,                        // BufferLength
-        sizePtr );                      // StrLen_or_Ind
+    const SQLRETURN ret = ::SQLBindParameter(statement,
+                                             paramNumber,
+                                             SQL_PARAM_INPUT,
+                                             SQL_C_BINARY,
+                                             SQL_LONGVARBINARY,
+                                             maxSize,
+                                             0,
+                                             buffer,
+                                             maxSize,
+                                             sizePtr );
     if (!SQL_SUCCEEDED(ret))
     {
         OdbcHelper::ThrowException(SQL_HANDLE_STMT,statement);
@@ -909,14 +905,12 @@ OdbcPersistor::BindColumnString(SQLHSTMT statement,
                                 char* string,
                                 SQLLEN* sizePtr)
 {
-    SQLRETURN ret;
-
-    ret = ::SQLBindCol(statement,                  // StatementHandle
-                       columnNumber,               // ColumnNumber,
-                       SQL_C_CHAR,                 // TargetType,
-                       string,                     // TargetValuePtr,
-                       maxSize,                    // BufferLength,
-                       sizePtr);                   // StrLen_or_Ind
+    const SQLRETURN ret = ::SQLBindCol(statement,
+                                       columnNumber,
+                                       SQL_C_CHAR,
+                                       string,
+                                       maxSize,
+                                       sizePtr);
     if (!SQL_SUCCEEDED(ret))
     {
         OdbcHelper::ThrowException(SQL_HANDLE_STMT, statement);
@@ -926,7 +920,7 @@ OdbcPersistor::BindColumnString(SQLHSTMT statement,
 void
 OdbcPersistor::Free(SQLHDBC connection)
 {
-    SQLRETURN ret = ::SQLFreeHandle(SQL_HANDLE_DBC, connection);
+    const SQLRETURN ret = ::SQLFreeHandle(SQL_HANDLE_DBC, connection);
     if (!SQL_SUCCEEDED(ret))
     {
         OdbcHelper::ThrowException(SQL_HANDLE_DBC, connection);
@@ -936,7 +930,7 @@ OdbcPersistor::Free(SQLHDBC connection)
 void
 OdbcPersistor::Disconnect(SQLHDBC connection)
 {
-    SQLRETURN ret = ::SQLDisconnect(connection);
+    const SQLRETURN ret = ::SQLDisconnect(connection);
     if (!SQL_SUCCEEDED(ret))
     {
         OdbcHelper::ThrowException(SQL_HANDLE_DBC, connection);

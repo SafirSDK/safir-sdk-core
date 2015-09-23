@@ -105,21 +105,21 @@ private:
     /**
      * The main database connection.
      */
-    SQLHDBC                             m_hOdbcConnection;
+    SQLHDBC                             m_odbcConnection;
 
     /**
      * The database environment.
      */
-    SQLHENV                             m_hEnvironment;
+    SQLHENV                             m_environment;
 
     OdbcHelper                          m_helper;
 
     /**
      * Statement used for to update a row in db.
      */
-    SQLHSTMT                                    m_hStoreStatement;
-    SQLHSTMT                                    m_hInsertStatement;
-    SQLHSTMT                                    m_hRowExistsStatement;
+    SQLHSTMT                                    m_storeStatement;
+    SQLHSTMT                                    m_insertStatement;
+    SQLHSTMT                                    m_rowExistsStatement;
     boost::scoped_array<unsigned char>          m_storeBinarySmallData;
     SQLLEN                                      m_currentSmallDataSize;
     boost::scoped_array<unsigned char>          m_storeBinaryLargeData;
@@ -133,28 +133,28 @@ private:
     /**
      * Statement used to delete all rows in db
      */
-    SQLHSTMT                                    m_hDeleteAllStatement;
+    SQLHSTMT                                    m_deleteAllStatement;
 
     /**
      * Statement used to delete a row in db
      */
-    SQLHSTMT                                    m_hDeleteStatement;
-    SQLHSTMT                                    m_hDeleteODBCStatement;
+    SQLHSTMT                                    m_deleteStatement;
+    SQLHSTMT                                    m_deleteODBCStatement;
 
     // delete has its own connection since it can be done
     // during a fetch
-    SQLHDBC                                     m_hDeleteConnection;
+    SQLHDBC                                     m_deleteConnection;
 
     /**
      * Keeps track of various Odbc actions.
      */
-    bool                                        m_bIsOdbcConnected;
-    bool                                        m_bStoreStatementIsValid;
-    bool                                        m_bDeleteAllIsValid;
-    bool                                        m_bDeleteIsConnected;
-    bool                                        m_bInsertIsValid;
-    bool                                        m_bDeleteIsValid;
-    bool                                        m_bDeleteODBCIsValid;
+    bool                                        m_isOdbcConnected;
+    bool                                        m_storeStatementIsValid;
+    bool                                        m_deleteAllIsValid;
+    bool                                        m_deleteIsConnected;
+    bool                                        m_insertIsValid;
+    bool                                        m_deleteIsValid;
+    bool                                        m_deleteODBCIsValid;
 
     Safir::Application::Tracer m_debug;
 };
