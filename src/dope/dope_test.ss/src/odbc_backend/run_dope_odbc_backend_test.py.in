@@ -175,7 +175,7 @@ try:
     if len(syslog_output) != 0:
         print("Unexpected syslog output:\n" + syslog_output)
         sys.exit(1)
-        
+
     if not env.ReturnCodesOk():
         print("Some process exited with an unexpected value")
         sys.exit(1)
@@ -189,7 +189,7 @@ try:
     if len(syslog_output) != 0:
         print("Unexpected syslog output:\n" + syslog_output)
         sys.exit(1)
-        
+
     if not env.ReturnCodesOk():
         print("Some process exited with an unexpected value")
         sys.exit(1)
@@ -245,7 +245,7 @@ try:
     if len(syslog_output) != 0:
         print("Unexpected syslog output:\n" + syslog_output)
         sys.exit(1)
-        
+
     if not env.ReturnCodesOk():
         print("Some process exited with an unexpected value")
         sys.exit(1)
@@ -294,7 +294,7 @@ try:
     if len(syslog_output) != 0:
         print("Unexpected syslog output:\n" + syslog_output)
         sys.exit(1)
-        
+
     if not env.ReturnCodesOk():
         print("Some process exited with an unexpected value")
         sys.exit(1)
@@ -308,7 +308,7 @@ try:
     if len(syslog_output) != 0:
         print("Unexpected syslog output:\n" + syslog_output)
         sys.exit(1)
-        
+
     if not env.ReturnCodesOk():
         print("Some process exited with an unexpected value")
         sys.exit(1)
@@ -331,10 +331,9 @@ except:
     raise
 
 finally:
-    print("== Clear the db")
-    delete_all_rows(parameters)
-
-    #RestoreConfig(parameters)
+    pass
+    #print("== Clear the db")
+    #delete_all_rows(parameters)
 
 print("Success")
 sys.exit(0)

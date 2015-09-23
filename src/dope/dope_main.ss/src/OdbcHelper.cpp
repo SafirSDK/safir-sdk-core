@@ -22,7 +22,6 @@
 *
 ******************************************************************************/
 #include "OdbcHelper.h"
-#include <stdexcept>
 
 OdbcHelper::OdbcHelper()
     : m_int64Size(sizeof(int64_t))
@@ -48,11 +47,11 @@ void OdbcHelper::ThrowException(SQLSMALLINT handleType,
                            0);
     if (SQL_SUCCEEDED(ret))
     {
-        std::string string = std::string(reinterpret_cast<char*>(sqlState))
+        const std::string string = std::string(reinterpret_cast<char*>(sqlState))
             + ":"
             + reinterpret_cast<char*>(messageText);
 
-        throw std::runtime_error(string.c_str());
+        throw OdbcException(string);
     }
 }
 
@@ -126,24 +125,23 @@ void OdbcHelper::BindParamInt64(SQLHSTMT statement,
 void OdbcHelper::BindParamString(SQLHSTMT statement,
                                  const SQLUSMALLINT paramNumber,
                                  const SQLUINTEGER maxSize,
-                                 wchar_t* string,
+                                 char* string,
                                  SQLLEN* sizePtr)
 {
     const SQLUINTEGER number_of_chars = static_cast<SQLUINTEGER>(maxSize) + 1;
-    const SQLUINTEGER size_of_char = static_cast<SQLUINTEGER>(sizeof(wchar_t));
+    const SQLUINTEGER size_of_char = static_cast<SQLUINTEGER>(sizeof(char));
     const SQLUINTEGER columnSize = number_of_chars* size_of_char;
 
-    SQLRETURN ret = ::SQLBindParameter(statement,                          // StatementHandle
+    SQLRETURN ret = ::SQLBindParameter(statement,                      // StatementHandle
                                        paramNumber,                    // ParameterNumber,
                                        SQL_PARAM_INPUT,                // InputOutputType
-                                       SQL_C_WCHAR,                    // ValueType
-                                       SQL_WLONGVARCHAR,               // ParameterType
-                                       //SQL_WVARCHAR,                   // ParameterType
+                                       SQL_C_CHAR,                     // ValueType
+                                       SQL_VARCHAR,                    // ParameterType
                                        columnSize,                     // ColumnSize
                                        0,                              // DecimalDigits
                                        string,                         // ParameterValuePtr
                                        maxSize,                        // BufferLength
-                                       sizePtr);                      // StrLen_or_Ind
+                                       sizePtr);                       // StrLen_or_Ind
     if (!SQL_SUCCEEDED(ret))
     {
         ThrowException(SQL_HANDLE_STMT,statement);

@@ -25,11 +25,10 @@ CREATE TABLE [dbo].[PersistentEntity](
     [TYPEID] [bigint] NOT NULL,
     [INSTANCE] [bigint] NOT NULL,
     [HANDLERID] [bigint] NULL,
-    [TYPENAME] [nvarchar](236) NULL,
     [XMLDATA] [nvarchar](max) NULL,
     [BINARYDATA] [varbinary](max) NULL,
     [BINARYSMALLDATA] [varbinary](5000) NULL,
-PRIMARY KEY CLUSTERED 
+PRIMARY KEY CLUSTERED
 (
     [TYPEID] ASC,
     [INSTANCE] ASC
@@ -44,5 +43,5 @@ GO
 USE [master]
 GO
 
-ALTER DATABASE [dope_db] SET  READ_WRITE 
+ALTER DATABASE [dope_db] SET  READ_WRITE
 GO

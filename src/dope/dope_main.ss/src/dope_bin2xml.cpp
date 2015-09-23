@@ -134,7 +134,7 @@ void ConvertDb()
     SQLHSTMT                            hUpdateStatement;
     Safir::Dob::Typesystem::Int64       updateTypeIdParam;
     Safir::Dob::Typesystem::Int64       updateInstanceParam;
-    boost::scoped_array<wchar_t>        updateXmlDataParam(new wchar_t[Safir::Dob::PersistenceParameters::XmlDataColumnSize()]);
+    boost::scoped_array<char>           updateXmlDataParam(new char[Safir::Dob::PersistenceParameters::XmlDataColumnSize()]); //TODO: multiply by 4?!
     SQLLEN                              updateXmlDataParamSize(0);
 
     SQLRETURN ret = ::SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &hEnvironment);
@@ -225,12 +225,17 @@ void ConvertDb()
         }
         if (object != nullptr)
         {
-            std::wstring xml = Safir::Dob::Typesystem::Serialization::ToXml(object);
+            std::string xml = Safir::Dob::Typesystem::Utilities::ToUtf8
+                (Safir::Dob::Typesystem::Serialization::ToXml(object));
 
             updateTypeIdParam = entityId.GetTypeId();
             updateInstanceParam = entityId.GetInstanceId().GetRawValue();
 
-            const size_t size = (xml.size() + 1)* sizeof (wchar_t);
+            const size_t size = (xml.size() + 1)* sizeof (char);
+            if (size > static_cast<size_t>(Safir::Dob::PersistenceParameters::XmlDataColumnSize())) //TODO: multiply by 4
+            {
+                throw std::runtime_error("waah"); //TODO
+            }
             memcpy(updateXmlDataParam.get(), xml.c_str(), size);
             updateXmlDataParamSize = SQL_NTS;
 

@@ -28,13 +28,23 @@
 #endif
 
 #include <boost/noncopyable.hpp>
-
-#include <sqltypes.h>
+#include <cstdint>
 #include <sql.h>
 #include <sqlext.h>
-
-#include <cstdint>
+#include <sqltypes.h>
+#include <stdexcept>
 #include <string>
+
+class OdbcException
+    : public std::runtime_error
+{
+public:
+    explicit OdbcException(const std::string& what)
+        : std::runtime_error(what.c_str())
+    {
+
+    }
+};
 
 class OdbcHelper:
     private boost::noncopyable
@@ -62,7 +72,7 @@ public:
     static void BindParamString(SQLHSTMT statement,
                                 const SQLUSMALLINT paramNumber,
                                 const SQLUINTEGER maxSize,
-                                wchar_t* string,
+                                char* string,
                                 SQLLEN* sizePtr);
 
     static void Connect(SQLHDBC connection,

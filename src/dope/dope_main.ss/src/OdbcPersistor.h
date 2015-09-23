@@ -85,7 +85,7 @@ private:
     static void BindColumnString(SQLHSTMT statement,
                                  unsigned short usColumnNumber,
                                  const int maxSize,
-                                 wchar_t* string,
+                                 char* string,
                                  SQLLEN* sizePtr);
 
     // Free an previously allocated connection
@@ -132,8 +132,6 @@ private:
     Safir::Dob::Typesystem::Int64               m_handler;
     Safir::Dob::Typesystem::Int64               m_type;
     Safir::Dob::Typesystem::Int64               m_instance;
-    boost::scoped_array<wchar_t>                m_typeName;
-    SQLLEN                                      m_typeNameSize;
     Safir::Dob::Typesystem::Int64               m_rowCount;
 
 
