@@ -121,8 +121,6 @@ OdbcPersistor::~OdbcPersistor()
 {
     try
     {
-        SQLRETURN ret;
-
         if (m_deleteIsConnected)
         {
             Disconnect(m_deleteConnection);
@@ -138,7 +136,7 @@ OdbcPersistor::~OdbcPersistor()
         Free(m_deleteConnection);
         Free(m_odbcConnection);
 
-        ret = ::SQLFreeHandle(SQL_HANDLE_ENV, m_environment);
+        const SQLRETURN ret = ::SQLFreeHandle(SQL_HANDLE_ENV, m_environment);
         if (!SQL_SUCCEEDED(ret))
         {
             OdbcHelper::ThrowException(SQL_HANDLE_ENV, m_environment);
@@ -598,7 +596,6 @@ void OdbcPersistor::RestoreAll()
             Disconnect(m_deleteConnection);
             m_deleteIsConnected = false;
         }
-        Free(m_deleteConnection);
     }
     catch(const OdbcException& e)
     {
