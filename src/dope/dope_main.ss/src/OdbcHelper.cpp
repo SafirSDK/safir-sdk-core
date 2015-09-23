@@ -35,16 +35,15 @@ void OdbcHelper::ThrowException(SQLSMALLINT handleType,
     SQLCHAR     sqlState[6];
     SQLINTEGER  lpNativeErrorPtr;
     SQLCHAR     messageText[512];
-    SQLRETURN   ret;
 
-    ret = ::SQLGetDiagRecA(handleType,
-                           handle,
-                           1,
-                           sqlState,
-                           &lpNativeErrorPtr,
-                           messageText,
-                           256,
-                           0);
+    const SQLRETURN ret = ::SQLGetDiagRecA(handleType,
+                                           handle,
+                                           1,
+                                           sqlState,
+                                           &lpNativeErrorPtr,
+                                           messageText,
+                                           256,
+                                           0);
     if (SQL_SUCCEEDED(ret))
     {
         const std::string string = std::string(reinterpret_cast<char*>(sqlState))
@@ -57,7 +56,7 @@ void OdbcHelper::ThrowException(SQLSMALLINT handleType,
 
 void OdbcHelper::AllocStatement(SQLHSTMT* statement, SQLHDBC connection)
 {
-    SQLRETURN ret = ::SQLAllocHandle(SQL_HANDLE_STMT, connection, statement);
+    const SQLRETURN ret = ::SQLAllocHandle(SQL_HANDLE_STMT, connection, statement);
     if (!SQL_SUCCEEDED(ret))
     {
         ThrowException(SQL_HANDLE_STMT,statement);
@@ -68,14 +67,12 @@ void OdbcHelper::BindColumnInt64(SQLHSTMT statement,
                                  unsigned short columnNumber,
                                  int64_t* value)
 {
-    SQLRETURN ret;
-
-    ret = ::SQLBindCol(statement,                                  // StatementHandle
-                       columnNumber,                         // ColumnNumber,
-                       SQL_C_SBIGINT,                          // TargetType,
-                       value,                                  // TargetValuePtr,
-                       sizeof(int64_t),  // BufferLength,
-                       &m_int64Size);                                  // StrLen_or_Ind
+    const SQLRETURN ret = ::SQLBindCol(statement,
+                                       columnNumber,
+                                       SQL_C_SBIGINT,
+                                       value,
+                                       sizeof(int64_t),
+                                       &m_int64Size);
     if (!SQL_SUCCEEDED(ret))
     {
         ThrowException(SQL_HANDLE_STMT,statement);
@@ -88,14 +85,12 @@ void OdbcHelper::BindColumnBinary(SQLHSTMT statement,
                                   unsigned char* buffer,
                                   SQLLEN* sizePtr)
 {
-    SQLRETURN ret;
-
-    ret = ::SQLBindCol(statement,                      // StatementHandle
-                       columnNumber,             // ColumnNumber,
-                       SQL_C_BINARY,               // TargetType,
-                       buffer,                     // TargetValuePtr,
-                       maxSize,                    // BufferLength,
-                       sizePtr);                   // StrLen_or_Ind
+    const SQLRETURN ret = ::SQLBindCol(statement,
+                                       columnNumber,
+                                       SQL_C_BINARY,
+                                       buffer,
+                                       maxSize,
+                                       sizePtr);
     if (!SQL_SUCCEEDED(ret))
     {
         ThrowException(SQL_HANDLE_STMT,statement);
@@ -106,16 +101,16 @@ void OdbcHelper::BindParamInt64(SQLHSTMT statement,
                                 const SQLUSMALLINT paramNumber,
                                 int64_t* value)
 {
-    SQLRETURN ret = ::SQLBindParameter(statement,                                  // StatementHandle
-                                       paramNumber,                            // ParameterNumber,
-                                       SQL_PARAM_INPUT,                        // InputOutputType
-                                       SQL_C_SBIGINT,                          // ValueType
-                                       SQL_BIGINT,                             // ParameterType
-                                       20,                                     // ColumnSize
-                                       0,                                      // DecimalDigits
-                                       value,                                  // ParameterValuePtr
-                                       sizeof(int64_t),  // BufferLength
-                                       &m_int64Size);                                 // StrLen_or_Ind
+    const SQLRETURN ret = ::SQLBindParameter(statement,
+                                             paramNumber,
+                                             SQL_PARAM_INPUT,
+                                             SQL_C_SBIGINT,
+                                             SQL_BIGINT,
+                                             20,
+                                             0,
+                                             value,
+                                             sizeof(int64_t),
+                                             &m_int64Size);
     if (!SQL_SUCCEEDED(ret))
     {
         ThrowException(SQL_HANDLE_STMT,statement);
@@ -132,16 +127,16 @@ void OdbcHelper::BindParamString(SQLHSTMT statement,
     const SQLUINTEGER size_of_char = static_cast<SQLUINTEGER>(sizeof(char));
     const SQLUINTEGER columnSize = number_of_chars* size_of_char;
 
-    SQLRETURN ret = ::SQLBindParameter(statement,                      // StatementHandle
-                                       paramNumber,                    // ParameterNumber,
-                                       SQL_PARAM_INPUT,                // InputOutputType
-                                       SQL_C_CHAR,                     // ValueType
-                                       SQL_VARCHAR,                    // ParameterType
-                                       columnSize,                     // ColumnSize
-                                       0,                              // DecimalDigits
-                                       string,                         // ParameterValuePtr
-                                       maxSize,                        // BufferLength
-                                       sizePtr);                       // StrLen_or_Ind
+    const SQLRETURN ret = ::SQLBindParameter(statement,
+                                             paramNumber,
+                                             SQL_PARAM_INPUT,
+                                             SQL_C_CHAR,
+                                             SQL_VARCHAR,
+                                             columnSize,
+                                             0,
+                                             string,
+                                             maxSize,
+                                             sizePtr);
     if (!SQL_SUCCEEDED(ret))
     {
         ThrowException(SQL_HANDLE_STMT,statement);
@@ -151,25 +146,24 @@ void OdbcHelper::BindParamString(SQLHSTMT statement,
 
 void OdbcHelper::Connect(SQLHDBC connection, const std::string& connectionString)
 {
-    SQLRETURN ret = ::SQLDriverConnectA(connection,
-                                        NULL,
-                                        reinterpret_cast<SQLCHAR*>(const_cast<char*>(connectionString.c_str())),
-                                        SQL_NTS,
-                                        NULL,
-                                        0,
-                                        NULL,
-                                        SQL_DRIVER_NOPROMPT);
+    const SQLRETURN ret = ::SQLDriverConnectA(connection,
+                                              NULL,
+                                              reinterpret_cast<SQLCHAR*>(const_cast<char*>(connectionString.c_str())),
+                                              SQL_NTS,
+                                              NULL,
+                                              0,
+                                              NULL,
+                                              SQL_DRIVER_NOPROMPT);
     if (!SQL_SUCCEEDED(ret))
     {
         ThrowException(SQL_HANDLE_DBC, connection);
     }
 
-    // SQLSetConnectAttr(SQL_ATTR_AUTOCOMMIT, SQL_AUTOCOMMIT_ON);
-    ret = ::SQLSetConnectAttr(connection,
-                              SQL_ATTR_AUTOCOMMIT,
-                              reinterpret_cast<SQLPOINTER>(SQL_AUTOCOMMIT_ON),
-                              SQL_IS_UINTEGER);
-    if (!SQL_SUCCEEDED(ret))
+    const SQLRETURN ret2 = ::SQLSetConnectAttr(connection,
+                                               SQL_ATTR_AUTOCOMMIT,
+                                               reinterpret_cast<SQLPOINTER>(SQL_AUTOCOMMIT_ON),
+                                               SQL_IS_UINTEGER);
+    if (!SQL_SUCCEEDED(ret2))
     {
         ThrowException(SQL_HANDLE_DBC, connection);
     }
@@ -177,7 +171,7 @@ void OdbcHelper::Connect(SQLHDBC connection, const std::string& connectionString
 
 void OdbcHelper::Execute(SQLHSTMT statement)
 {
-    SQLRETURN ret = ::SQLExecute(statement);
+    const SQLRETURN ret = ::SQLExecute(statement);
     if (!SQL_SUCCEEDED(ret))
     {
         ThrowException(SQL_HANDLE_STMT,statement);
@@ -186,19 +180,16 @@ void OdbcHelper::Execute(SQLHSTMT statement)
 
 bool OdbcHelper::Fetch(SQLHSTMT statement)
 {
-    SQLRETURN ret;
-    bool bDataFound = true;
-
-    ret = ::SQLFetch(statement);
+    const SQLRETURN ret = ::SQLFetch(statement);
     if (ret==SQL_NO_DATA_FOUND)
     {
-        bDataFound = false;
+        return false; //No data to process
     }
     else if (!SQL_SUCCEEDED(ret))
     {
         ThrowException(SQL_HANDLE_STMT,statement);
     }
-    return bDataFound;
+    return true;
 }
 
 void OdbcHelper::Prepare(SQLHSTMT statement,
@@ -206,9 +197,9 @@ void OdbcHelper::Prepare(SQLHSTMT statement,
 {
     // const_cast is used because StatementText is declared as input in the ODBC
     // specification and should be a const wchar_t*.
-    SQLRETURN ret = ::SQLPrepareA(statement,
-                                  reinterpret_cast<SQLCHAR*>(const_cast<char*>(sql.c_str())),
-                                  SQL_NTS);
+    const SQLRETURN ret = ::SQLPrepareA(statement,
+                                        reinterpret_cast<SQLCHAR*>(const_cast<char*>(sql.c_str())),
+                                        SQL_NTS);
     if (!SQL_SUCCEEDED(ret))
     {
         ThrowException(SQL_HANDLE_STMT, statement);
