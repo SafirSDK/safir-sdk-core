@@ -54,7 +54,6 @@ OdbcPersistor::OdbcPersistor(boost::asio::io_service& ioService) :
     PersistenceHandler(ioService, false),
     m_hOdbcConnection(SQL_NULL_HANDLE),
     m_hEnvironment(SQL_NULL_HANDLE),
-    m_hRestoreAllConnection(SQL_NULL_HANDLE),
     m_hStoreStatement(SQL_NULL_HANDLE),
     m_hInsertStatement(SQL_NULL_HANDLE),
     m_hRowExistsStatement(SQL_NULL_HANDLE),
@@ -67,7 +66,6 @@ OdbcPersistor::OdbcPersistor(boost::asio::io_service& ioService) :
     m_hDeleteODBCStatement(SQL_NULL_HANDLE),
     m_hDeleteConnection(SQL_NULL_HANDLE),
     m_bIsOdbcConnected(false),
-    m_bIsRestoreAllConnected(false),
     m_bStoreStatementIsValid(false),
     m_bDeleteAllIsValid(false),
     m_bDeleteIsConnected(false),
@@ -88,21 +86,15 @@ OdbcPersistor::OdbcPersistor(boost::asio::io_service& ioService) :
 
         // SetEnvAttr(SQL_ATTR_ODBC_VERSION, SQL_OV_ODBC3);
         ret = ::SQLSetEnvAttr(m_hEnvironment,
-                                SQL_ATTR_ODBC_VERSION,
-                                reinterpret_cast<SQLPOINTER>(SQL_OV_ODBC3),
-                                SQL_IS_UINTEGER);
+                              SQL_ATTR_ODBC_VERSION,
+                              reinterpret_cast<SQLPOINTER>(SQL_OV_ODBC3),
+                              SQL_IS_UINTEGER);
         if (!SQL_SUCCEEDED(ret))
         {
             OdbcHelper::ThrowException(SQL_HANDLE_ENV, m_hEnvironment);
         }
 
         ret = ::SQLAllocHandle(SQL_HANDLE_DBC, m_hEnvironment, &m_hOdbcConnection);
-        if (!SQL_SUCCEEDED(ret))
-        {
-            OdbcHelper::ThrowException(SQL_HANDLE_ENV, m_hEnvironment);
-        }
-
-        ret = ::SQLAllocHandle(SQL_HANDLE_DBC, m_hEnvironment, &m_hRestoreAllConnection);
         if (!SQL_SUCCEEDED(ret))
         {
             OdbcHelper::ThrowException(SQL_HANDLE_ENV, m_hEnvironment);
@@ -144,7 +136,6 @@ OdbcPersistor::~OdbcPersistor()
         }
 
         Free(m_hDeleteConnection);
-        Free(m_hRestoreAllConnection);
         Free(m_hOdbcConnection);
 
         ret = ::SQLFreeHandle(SQL_HANDLE_ENV, m_hEnvironment);
@@ -419,14 +410,14 @@ void OdbcPersistor::RestoreAll()
     {
         try
         {
-            ConnectIfNeeded(m_hRestoreAllConnection, m_bIsRestoreAllConnected, connectionAttempts);
+            ConnectIfNeeded(m_hOdbcConnection, m_bIsOdbcConnected, connectionAttempts);
 
             for (;;)
             {
                 //getAll statement execution (will loop here until we successfully execute)
                 if (!bGetAllIsValid)
                 {
-                    m_helper.AllocStatement(&hGetAllStatement, m_hRestoreAllConnection);
+                    m_helper.AllocStatement(&hGetAllStatement, m_hOdbcConnection);
                     m_helper.Prepare(
                         hGetAllStatement,
                         "SELECT typeId, instance, handlerid, xmlData, binaryData, binarySmallData "
@@ -575,10 +566,10 @@ void OdbcPersistor::RestoreAll()
                 errorReported = true;
             }
 
-            if (m_bIsRestoreAllConnected)
+            if (m_bIsOdbcConnected)
             {
-                Disconnect(m_hRestoreAllConnection);
-                m_bIsRestoreAllConnected= false;
+                Disconnect(m_hOdbcConnection);
+                m_bIsOdbcConnected = false;
             }
             Free(hGetAllStatement);
             bGetAllIsValid = false;
@@ -602,23 +593,12 @@ void OdbcPersistor::RestoreAll()
     //we don't need the deleteconnection any more, so close it.
     try
     {
-        if (m_bIsRestoreAllConnected)
-        {
-            Disconnect(m_hRestoreAllConnection);
-            m_bIsRestoreAllConnected= false;
-        }
-
         if (m_bDeleteIsConnected)
         {
             Disconnect(m_hDeleteConnection);
             m_bDeleteIsConnected = false;
         }
         Free(m_hDeleteConnection);
-
-        m_debug << "RestoreAll completed" <<std::endl;
-        m_debug
-            << restoredObjects.size()                                           << " objects restored in time "
-            << boost::chrono::steady_clock::now() - startTime << std::endl;
     }
     catch(const OdbcException& e)
     {
@@ -627,6 +607,11 @@ void OdbcPersistor::RestoreAll()
                                         L"Whoops. Error while disconnecting from the DeleteConnection. Ignoring this and moving on. Exception info: " +
                                         err);
     }
+
+    m_debug << "RestoreAll completed: "
+            << restoredObjects.size()
+            << " objects restored in time "
+            << boost::chrono::steady_clock::now() - startTime << std::endl;
 }
 
 //-------------------------------------------------------

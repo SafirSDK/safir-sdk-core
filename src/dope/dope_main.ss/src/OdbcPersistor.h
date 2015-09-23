@@ -112,11 +112,6 @@ private:
      */
     SQLHENV                             m_hEnvironment;
 
-    /**
-     * The database connection used during RestoreAll
-     */
-    SQLHDBC                             m_hRestoreAllConnection;
-
     OdbcHelper                          m_helper;
 
     /**
@@ -154,7 +149,6 @@ private:
      * Keeps track of various Odbc actions.
      */
     bool                                        m_bIsOdbcConnected;
-    bool                                        m_bIsRestoreAllConnected;
     bool                                        m_bStoreStatementIsValid;
     bool                                        m_bDeleteAllIsValid;
     bool                                        m_bDeleteIsConnected;
