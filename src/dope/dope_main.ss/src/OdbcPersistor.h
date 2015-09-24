@@ -53,18 +53,11 @@ private:
 
     void RestoreAll() override;
     void Remove(const Safir::Dob::EntityProxy& entityProxy) override;
+    void Remove(const Safir::Dob::Typesystem::EntityId& entityId);
     void RemoveAll() override;
 
     //Insert an empty row into the db
     void Insert(const Safir::Dob::Typesystem::EntityId& entityId);
-
-    //Delete a row into the db
-    void Delete(SQLHDBC connectionToUse,
-                bool& connectionIsValid,
-                const Safir::Dob::Typesystem::EntityId& entityId);
-
-    //Delete all rows from the db
-    void DeleteAll();
 
     // Connect to the database if necessary.
     void ConnectIfNeeded(SQLHDBC connection,
@@ -89,7 +82,10 @@ private:
                                  SQLLEN* sizePtr);
 
     // Free an previously allocated connection
-    static void Free(SQLHDBC connection);
+    static void FreeStatement(SQLHSTMT statement);
+
+    // Free an previously allocated connection
+    static void FreeConnection(SQLHDBC connection);
 
     // Disconnects a connection.
     static void Disconnect(SQLHDBC connection);
@@ -103,14 +99,15 @@ private:
 
 
     /**
-     * The main database connection.
-     */
-    SQLHDBC                             m_odbcConnection;
-
-    /**
      * The database environment.
      */
     SQLHENV                             m_environment;
+
+    /**
+     * The main database connection.
+     */
+    SQLHDBC                             m_odbcConnection;
+    bool                                m_isOdbcConnected;
 
     OdbcHelper                          m_helper;
 
@@ -118,7 +115,9 @@ private:
      * Statement used for to update a row in db.
      */
     SQLHSTMT                                    m_storeStatement;
+    bool                                        m_storeIsValid;
     SQLHSTMT                                    m_insertStatement;
+    bool                                        m_insertIsValid;
     SQLHSTMT                                    m_rowExistsStatement;
     boost::scoped_array<unsigned char>          m_storeBinarySmallData;
     SQLLEN                                      m_currentSmallDataSize;
@@ -134,27 +133,13 @@ private:
      * Statement used to delete all rows in db
      */
     SQLHSTMT                                    m_deleteAllStatement;
+    bool                                        m_deleteAllIsValid;
 
     /**
      * Statement used to delete a row in db
      */
     SQLHSTMT                                    m_deleteStatement;
-    SQLHSTMT                                    m_deleteODBCStatement;
-
-    // delete has its own connection since it can be done
-    // during a fetch
-    SQLHDBC                                     m_deleteConnection;
-
-    /**
-     * Keeps track of various Odbc actions.
-     */
-    bool                                        m_isOdbcConnected;
-    bool                                        m_storeStatementIsValid;
-    bool                                        m_deleteAllIsValid;
-    bool                                        m_deleteIsConnected;
-    bool                                        m_insertIsValid;
     bool                                        m_deleteIsValid;
-    bool                                        m_deleteODBCIsValid;
 
     Safir::Application::Tracer m_debug;
 };
