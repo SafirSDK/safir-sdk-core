@@ -432,9 +432,9 @@ void OdbcPersistor::RestoreAll()
                     break;
                 }
 
-                const Safir::Dob::Typesystem::EntityId entityId(
-                        typeId,
-                        Safir::Dob::Typesystem::InstanceId(instance));
+                const Safir::Dob::Typesystem::EntityId entityId
+                    (typeId,
+                     Safir::Dob::Typesystem::InstanceId(instance));
 
                 const Safir::Dob::Typesystem::HandlerId handler(handlerId);
 

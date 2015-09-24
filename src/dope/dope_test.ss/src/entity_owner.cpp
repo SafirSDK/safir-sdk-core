@@ -94,7 +94,7 @@ public:
              it != EntityIterator(); ++it)
         {
             DopeTest::SmallEntityPtr ent = boost::static_pointer_cast<DopeTest::SmallEntity>(it->GetEntity());
-            ent->Name() = L"name is changed";
+            ent->Name() = L"name is changed\n\u00e4\u203d."; //newline, ä, interrobang
             m_connection.SetChanges(ent,
                                     it->GetInstanceId(),
                                     Safir::Dob::Typesystem::HandlerId());

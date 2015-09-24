@@ -320,7 +320,7 @@ try:
         sys.exit(1)
 
     output = env.Output("entity_owner")
-    if output.count("name is changed") != NUM_SMALL:
+    if output.count("name is changed\nä\u203d.") != NUM_SMALL:
         print("could not find the right number of updated SmallEntity in output")
         sys.exit(1)
 
@@ -337,7 +337,6 @@ except:
     raise
 
 finally:
-    pass
     print("== Clear the db")
     delete_all_rows(parameters)
 

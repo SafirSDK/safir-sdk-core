@@ -46,12 +46,6 @@
         <value>5000</value>
       </parameter>
       <parameter>
-        <summary>The size of the TypeName column in the database. Unit is likely in unicode characters.</summary>
-        <name>TypeNameColumnSize</name>
-        <type>Int32</type>
-        <value>236</value>
-      </parameter>
-      <parameter>
         <summary>StandaloneMode means that each dope that is started is saving its own persistent data.
                  Only valid if when several dope_main runs on different nodes in a redundant system.
                  Use with caution. If active dope_main(the one that is started first) has no persistent data saved, all
