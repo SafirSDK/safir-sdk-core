@@ -1,17 +1,11 @@
 --==============================================================
 --
--- Copyright:      Saab AB 2007
+-- Copyright:      Saab AB 2007-2015
 -- Author:         Jonas Thor
 --
 -- Purpose:        Mimer SQL DOPE database DDL script.
 --                 Inspiration for this installscript is taken
 --                 from Mimers example database.
--- 
--- Improvements:   None.
---
--- History:        2007-01-09      /stjth/   First version.
---                 2007-03-07      /stlrha/  Adapted to DOPE from the ALRT variant
---                 2010-01-19      /staeh/   Connect has to specify database, SafirDb.
 --
 --==============================================================
 
@@ -90,30 +84,12 @@ CREATE table PersistentEntity
 (
     TYPEID bigint  NOT NULL,
     INSTANCE bigint NOT NULL,
-    HANDLERID bigint NULL,            -- This is set for existing entities. It doesn't uniquely identify the entity so its not part of the primarykey.
-    TYPENAME nvarchar(236) NULL,
-    XMLDATA NCLOB(10485760) NULL,
-    BINARYDATA BLOB(10485760) NULL,
+    HANDLERID bigint NULL,
+    XMLDATA NCLOB(10M) NULL,
+    BINARYDATA BLOB(10M) NULL,
     BINARYSMALLDATA BINARY(5000) NULL,
     PRIMARY KEY(TYPEID, INSTANCE)
 );
-
---==============================================================
--- Create procedures.
---==============================================================
-
-@
-create procedure spInsertEntity(in TypeIdIn bigint,
-                                in InstanceIdIn bigint,
-                                in TypeNameIn nvarchar(236) )
-modifies SQL data
-begin
-    If not exists(SELECT * from PersistentEntity where typeId=TypeIdIn AND instance=InstanceIdIn) then
-        INSERT INTO PersistentEntity (typeid, instance, typename) 
-            values (TypeIdIn, InstanceIdIn, TypeNameIn);
-    end if;
-end
-@
 
 --==============================================================
 -- Done. Close log.
@@ -126,5 +102,5 @@ CLOSE LOG;
 
 SET MESSAGE ON;
 
--- EXIT;
+EXIT;
 

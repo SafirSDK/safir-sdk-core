@@ -40,12 +40,6 @@
         <value>5000</value>
       </parameter>
       <parameter>
-        <summary>The size of the TypeName column in the database. Unit is likely in unicode characters.</summary>
-        <name>TypeNameColumnSize</name>
-        <type>Int32</type>
-        <value>236</value>
-      </parameter>
-      <parameter>
         <summary>TestMode allow initial injections without persistence started.</summary>
         <name>TestMode</name>
         <type>Boolean</type>

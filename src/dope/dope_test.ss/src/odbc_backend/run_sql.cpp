@@ -45,7 +45,7 @@
 #include <Safir/Databases/Odbc/Exception.h>
 
 #include <iostream>
-
+#include <locale>
 
 
 std::wostream& operator<<(std::wostream& out, const boost::program_options::options_description& opt)
@@ -67,7 +67,7 @@ public:
             ("help,h", "show help message")
             ("statement", value<std::string>(&statement), "Statement to execute")
             ("connection-string", value<std::string>(&connectionString), "Connection string to use for db connection");
-        
+
         variables_map vm;
 
         try
@@ -140,10 +140,15 @@ void RunStatement(const ProgramOptions& options)
 
 int main(int argc, char * argv[])
 {
+    //Mimer requires locale to be set like this for character conversions
+    //to work properly. Hopefully this does not adversely affect other
+    //databases.
+    std::setlocale(LC_CTYPE, "");
+
     try
     {
         const ProgramOptions options(argc,argv);
-        
+
         if (!options.parseOk)
         {
             return 1;
@@ -157,4 +162,3 @@ int main(int argc, char * argv[])
     }
     return 0;
 }
-

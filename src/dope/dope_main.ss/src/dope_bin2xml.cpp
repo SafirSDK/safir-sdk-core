@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2006-2013 (http://safir.sourceforge.net)
+* Copyright Saab AB, 2006-2015 (http://safir.sourceforge.net)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -35,28 +35,24 @@
 #pragma warning(pop)
 #endif
 
-#include <boost/filesystem/operations.hpp>
+#include <Safir/Dob/PersistenceParameters.h>
+#include <Safir/Dob/Typesystem/ObjectFactory.h>
+#include <Safir/Dob/Typesystem/Serialization.h>
+#include <Safir/Logging/Log.h>
 #include <boost/filesystem/convenience.hpp>
 #include <boost/filesystem/exception.hpp>
 #include <boost/filesystem/fstream.hpp>
-
-#include <Safir/Dob/Typesystem/Serialization.h>
-#include <Safir/Dob/Typesystem/ObjectFactory.h>
-#include <Safir/Databases/Odbc/Connection.h>
-#include <Safir/Databases/Odbc/Environment.h>
-#include <Safir/Databases/Odbc/InputParameter.h>
-#include <Safir/Databases/Odbc/Statement.h>
-#include <Safir/Databases/Odbc/Columns.h>
-#include <Safir/Databases/Odbc/Exception.h>
-
-#include <Safir/Dob/PersistenceParameters.h>
-
+#include <boost/filesystem/operations.hpp>
+#include <boost/scoped_array.hpp>
 #include <iostream>
+#include <locale>
+#include "OdbcHelper.h"
+
 enum WhatToConvert {db, files};
 
 WhatToConvert g_whatToConvert;
 
-void ParseCommandLine(int argc, char * argv[])
+void ParseCommandLine(int argc, char* argv[])
 {
     namespace po = boost::program_options;
     // Declare the supported options.
@@ -98,7 +94,7 @@ void ParseCommandLine(int argc, char * argv[])
     else
     {
         // No command line parameter given. We read the persistence
-        // configuration parameter instead. 
+        // configuration parameter instead.
         switch (Safir::Dob::PersistenceParameters::Backend())
         {
             case Safir::Dob::PersistenceBackend::File:
@@ -122,92 +118,129 @@ void ParseCommandLine(int argc, char * argv[])
 
 void ConvertDb()
 {
-    Safir::Databases::Odbc::Connection  readConnection;
-    Safir::Databases::Odbc::Connection  updateConnection;
-    Safir::Databases::Odbc::Environment environment;
-    environment.Alloc();
-    readConnection.Alloc(environment);
-    updateConnection.Alloc(environment);
+    SQLHENV                             hEnvironment;
+    SQLHDBC                             hReadConnection;
+    SQLHDBC                             hUpdateConnection;
 
-    Safir::Databases::Odbc::Statement getAllStatement;
-    Safir::Databases::Odbc::Int64Column typeIdColumn;
-    Safir::Databases::Odbc::Int64Column instanceColumn;
-    Safir::Databases::Odbc::Int64Column handlerColumn;
-    Safir::Databases::Odbc::WideStringColumn xmlDataColumn(Safir::Dob::PersistenceParameters::XmlDataColumnSize());
-    Safir::Databases::Odbc::BinaryColumn binaryDataColumn(Safir::Dob::PersistenceParameters::BinaryDataColumnSize());
-    Safir::Databases::Odbc::BinaryColumn binarySmallDataColumn(Safir::Dob::PersistenceParameters::BinarySmallDataColumnSize());
+    OdbcHelper                          helper;
 
-    Safir::Databases::Odbc::Statement updateStatement;
-    Safir::Databases::Odbc::Int64Parameter updateTypeIdParam;
-    Safir::Databases::Odbc::Int64Parameter updateInstanceParam;
-    Safir::Databases::Odbc::LongWideStringParameter updateXmlDataParam(Safir::Dob::PersistenceParameters::XmlDataColumnSize());
+    SQLHSTMT                            hGetAllStatement;
+    Safir::Dob::Typesystem::Int64       typeIdColumn;
+    Safir::Dob::Typesystem::Int64       instanceColumn;
+    boost::scoped_array<unsigned char>  largeBinaryDataColumn(new unsigned char[Safir::Dob::PersistenceParameters::BinaryDataColumnSize()]);
+    SQLLEN                              largeBinaryDataColumnSize(0);
+    boost::scoped_array<unsigned char>  smallBinaryDataColumn(new unsigned char[Safir::Dob::PersistenceParameters::BinarySmallDataColumnSize()]);
+    SQLLEN                              smallBinaryDataColumnSize(0);
 
-    readConnection.Connect(Safir::Dob::PersistenceParameters::OdbcStorageConnectString());
-    updateConnection.Connect(Safir::Dob::PersistenceParameters::OdbcStorageConnectString());
+    SQLHSTMT                            hUpdateStatement;
+    Safir::Dob::Typesystem::Int64       updateTypeIdParam;
+    Safir::Dob::Typesystem::Int64       updateInstanceParam;
+    boost::scoped_array<char>           updateXmlDataParam(new char[Safir::Dob::PersistenceParameters::XmlDataColumnSize()]); //TODO: multiply by 4?!
+    SQLLEN                              updateXmlDataParamSize(0);
 
-    updateStatement.Alloc(updateConnection);
-    updateStatement.Prepare(L"UPDATE PersistentEntity SET xmlData=?, binarySmallData=NULL, binaryData=NULL WHERE typeId=? AND instance=?");
-    updateStatement.BindLongParameter( 1, updateXmlDataParam );
-    updateStatement.BindParameter( 2, updateTypeIdParam );
-    updateStatement.BindParameter( 3, updateInstanceParam );
-
-    getAllStatement.Alloc(readConnection);
-    getAllStatement.Prepare( L"SELECT typeId, instance, binarySmallData, binaryData from PersistentEntity where binaryData is not null or binarySmallData is not null");
-    getAllStatement.BindColumn( 1, typeIdColumn );
-    getAllStatement.BindColumn( 2, instanceColumn);
-    getAllStatement.BindColumn( 3, binarySmallDataColumn);
-    getAllStatement.Execute();
-    for (;;)
+    SQLRETURN ret = ::SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &hEnvironment);
+    if (!SQL_SUCCEEDED(ret))
     {
-        if (!getAllStatement.Fetch())
-        {//we've got all rows!
-            break;
-        }
+        helper.ThrowException(SQL_HANDLE_ENV, SQL_NULL_HANDLE);
+    }
 
-        Safir::Dob::Typesystem::EntityId entityId
-            (typeIdColumn.GetValue(), Safir::Dob::Typesystem::InstanceId(instanceColumn.GetValue()));
+    ret = ::SQLSetEnvAttr(hEnvironment,
+                            SQL_ATTR_ODBC_VERSION,
+                            reinterpret_cast<SQLPOINTER>(SQL_OV_ODBC3),
+                            SQL_IS_UINTEGER);
+    if (!SQL_SUCCEEDED(ret))
+    {
+        helper.ThrowException(SQL_HANDLE_ENV, hEnvironment);
+    }
+
+    ret = ::SQLAllocHandle(SQL_HANDLE_DBC, hEnvironment, &hReadConnection);
+    if (!SQL_SUCCEEDED(ret))
+    {
+        helper.ThrowException(SQL_HANDLE_ENV, hEnvironment);
+    }
+
+    ret = ::SQLAllocHandle(SQL_HANDLE_DBC, hEnvironment, &hUpdateConnection);
+    if (!SQL_SUCCEEDED(ret))
+    {
+        helper.ThrowException(SQL_HANDLE_ENV, hEnvironment);
+    }
+
+    const auto connectionString = Safir::Dob::Typesystem::Utilities::ToUtf8
+        (Safir::Dob::PersistenceParameters::OdbcStorageConnectString());
+    helper.Connect(hReadConnection, connectionString);
+    helper.Connect(hUpdateConnection, connectionString);
+
+    helper.AllocStatement(&hUpdateStatement, hUpdateConnection);
+    helper.Prepare(hUpdateStatement,
+                   "UPDATE PersistentEntity "
+                   "SET xmlData=?, binarySmallData=NULL, binaryData=NULL "
+                   "WHERE typeId=? AND instance=?");
+
+    helper.BindParamString(hUpdateStatement,
+                           1,
+                           Safir::Dob::PersistenceParameters::XmlDataColumnSize(),
+                           updateXmlDataParam.get(),
+                           &updateXmlDataParamSize);
+    helper.BindParamInt64(hUpdateStatement, 2, &updateTypeIdParam);
+    helper.BindParamInt64(hUpdateStatement, 3, &updateInstanceParam);
+
+    helper.AllocStatement(&hGetAllStatement, hReadConnection);
+    helper.Prepare(hGetAllStatement,
+                   "SELECT typeId, instance, binarySmallData, binaryData "
+                   "FROM PersistentEntity "
+                   "WHERE binaryData is not null or binarySmallData is not null");
+
+    helper.BindColumnInt64(hGetAllStatement, 1, &typeIdColumn);
+    helper.BindColumnInt64(hGetAllStatement, 2, &instanceColumn);
+    helper.BindColumnBinary(hGetAllStatement,
+                            3,
+                            Safir::Dob::PersistenceParameters::BinarySmallDataColumnSize(),
+                            smallBinaryDataColumn.get(),
+                            &smallBinaryDataColumnSize);
+    helper.BindColumnBinary(hGetAllStatement,
+                            4,
+                            Safir::Dob::PersistenceParameters::BinaryDataColumnSize(),
+                            largeBinaryDataColumn.get(), &largeBinaryDataColumnSize);
+
+    helper.Execute(hGetAllStatement);
+
+    while (helper.Fetch(hGetAllStatement))
+    {
+        const Safir::Dob::Typesystem::EntityId entityId
+            (typeIdColumn, Safir::Dob::Typesystem::InstanceId(instanceColumn));
 
         Safir::Dob::Typesystem::ObjectPtr object;
 
-        if (!binarySmallDataColumn.IsNull())
+        if (smallBinaryDataColumnSize != SQL_NULL_DATA)
         {
-            const char * const data = reinterpret_cast<const char * const>(binarySmallDataColumn.GetValue());
+            const char* const data = reinterpret_cast<const char* const>(smallBinaryDataColumn.get());
             object = Safir::Dob::Typesystem::ObjectFactory::Instance().CreateObject(data);
         }
         else
         {
-            getAllStatement.GetData(4, binaryDataColumn);
-            if (!binaryDataColumn.IsNull())
-            { //some binarypersistent data set
-                const char * const data = reinterpret_cast<const char * const>(binaryDataColumn.GetValue());
+            if (largeBinaryDataColumnSize != SQL_NULL_DATA)
+            {   //some binarypersistent data set
+                const char* const data = reinterpret_cast<const char* const>(largeBinaryDataColumn.get());
                 object = Safir::Dob::Typesystem::ObjectFactory::Instance().CreateObject(data);
             }
         }
         if (object != nullptr)
         {
-            std::wstring xml = Safir::Dob::Typesystem::Serialization::ToXml(object);
-            
-            updateTypeIdParam.SetValue(entityId.GetTypeId());
-            updateInstanceParam.SetValue(entityId.GetInstanceId().GetRawValue());
-            updateXmlDataParam.SetValueAtExecution(static_cast<int>(xml.size() * sizeof (wchar_t)));
-            
-            updateStatement.Execute();
-            unsigned short param = 0;
-            if (!updateStatement.ParamData(param))
+            std::string xml = Safir::Dob::Typesystem::Utilities::ToUtf8
+                (Safir::Dob::Typesystem::Serialization::ToXml(object));
+
+            updateTypeIdParam = entityId.GetTypeId();
+            updateInstanceParam = entityId.GetInstanceId().GetRawValue();
+
+            const size_t size = (xml.size() + 1)* sizeof (char);
+            if (size > static_cast<size_t>(Safir::Dob::PersistenceParameters::XmlDataColumnSize())) //TODO: multiply by 4
             {
-                throw Safir::Dob::Typesystem::SoftwareViolationException(L"There should be one call to ParamData!",__WFILE__,__LINE__);
+                throw std::runtime_error("waah"); //TODO
             }
-            updateXmlDataParam.SetValue(&xml);
-            updateStatement.PutData(updateXmlDataParam);
-            if (updateStatement.ParamData(param))
-            {
-                throw Safir::Dob::Typesystem::SoftwareViolationException(L"There should only be one call to ParamData!",__WFILE__,__LINE__);
-            }
-            updateConnection.Commit();
-        }
-        else
-        {
-            //                          m_debug << "No data set for " << objectId <<std::endl;
+            memcpy(updateXmlDataParam.get(), xml.c_str(), size);
+            updateXmlDataParamSize = SQL_NTS;
+
+            helper.Execute(hUpdateStatement);
         }
     }
 }
@@ -235,7 +268,7 @@ boost::filesystem::path GetStorageDirectory()
 
         return path;
     }
-    catch (const boost::filesystem::filesystem_error & e)
+    catch (const boost::filesystem::filesystem_error& e)
     {
         throw Safir::Dob::Typesystem::SoftwareViolationException
             (L"Failed to get hold of the directory for file persistence. Got this info from boost::filesystem::filesystem_error" +
@@ -247,7 +280,7 @@ typedef std::pair<Safir::Dob::Typesystem::EntityId, Safir::Dob::Typesystem::Hand
 
 //-------------------------------------------------------
 const EntityIdAndHandlerId
-Filename2EntityIdAndHandlerId(const boost::filesystem::path & filename)
+Filename2EntityIdAndHandlerId(const boost::filesystem::path& filename)
 {
     if (!filename.has_filename())
     {
@@ -290,14 +323,14 @@ Filename2EntityIdAndHandlerId(const boost::filesystem::path & filename)
 
     return std::make_pair(Safir::Dob::Typesystem::EntityId
         (Safir::Dob::Typesystem::Operations::GetTypeId(Safir::Dob::Typesystem::Utilities::ToWstring(typeName)),
-        Safir::Dob::Typesystem::InstanceId( boost::lexical_cast<Safir::Dob::Typesystem::Int64>(instance))),
+        Safir::Dob::Typesystem::InstanceId(boost::lexical_cast<Safir::Dob::Typesystem::Int64>(instance))),
         Safir::Dob::Typesystem::HandlerId(boost::lexical_cast<Safir::Dob::Typesystem::Int64>(handler)));
 }
 
 //-------------------------------------------------------
 boost::filesystem::path
 EntityId2Filename(const EntityIdAndHandlerId& entityAndHandler,
-                  const std::string & extension)
+                  const std::string& extension)
 {
     std::ostringstream out;
     out << Safir::Dob::Typesystem::Utilities::ToUtf8(Safir::Dob::Typesystem::Operations::GetName(entityAndHandler.first.GetTypeId()))
@@ -344,8 +377,14 @@ void ConvertFiles()
     }
 }
 
-int main(int argc, char * argv[])
+
+int main(int argc, char* argv[])
 {
+    //Mimer requires locale to be set like this for character conversions
+    //to work properly. Hopefully this does not adversely affect other
+    //databases.
+    std::setlocale(LC_CTYPE, "");
+
     try
     {
         ParseCommandLine(argc,argv);
@@ -358,11 +397,10 @@ int main(int argc, char * argv[])
             ConvertFiles();
         }
     }
-    catch (const std::exception & exc)
+    catch (const std::exception& exc)
     {
         std::wcout << "Caught exception: " << exc.what() << std::endl;
         return 1;
     }
     return 0;
 }
-

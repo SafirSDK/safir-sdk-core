@@ -1,0 +1,47 @@
+USE [master]
+GO
+
+CREATE DATABASE [dope_db]
+ CONTAINMENT = NONE
+GO
+
+USE [dope_db]
+GO
+
+CREATE SCHEMA [DOPEUSER]
+GO
+
+/****** Object:  Table [dbo].[PersistentEntity]    Script Date: 2015-07-09 09:32:20 ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+SET ANSI_PADDING ON
+GO
+
+CREATE TABLE [dbo].[PersistentEntity](
+    [TYPEID] [bigint] NOT NULL,
+    [INSTANCE] [bigint] NOT NULL,
+    [HANDLERID] [bigint] NULL,
+    [XMLDATA] [nvarchar](max) NULL,
+    [BINARYDATA] [varbinary](max) NULL,
+    [BINARYSMALLDATA] [varbinary](5000) NULL,
+PRIMARY KEY CLUSTERED
+(
+    [TYPEID] ASC,
+    [INSTANCE] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+
+GO
+
+SET ANSI_PADDING OFF
+GO
+
+USE [master]
+GO
+
+ALTER DATABASE [dope_db] SET  READ_WRITE
+GO

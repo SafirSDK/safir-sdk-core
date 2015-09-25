@@ -43,16 +43,10 @@ def enqueue_output(out, queue):
         queue.put(line.rstrip("\n\r"))
     out.close()
 
-class Unbuffered(object):
-   def __init__(self, stream):
-       self.stream = stream
-   def write(self, data):
-       self.stream.write(data)
-       self.stream.flush()
-   def __getattr__(self, attr):
-       return getattr(self.stream, attr)
 
-sys.stdout = Unbuffered(sys.stdout)
+def log(*args, **kwargs):
+    print(*args, **kwargs)
+    sys.stdout.flush()
 
 class TestEnvStopper:
     def __init__(self, env):
@@ -89,14 +83,14 @@ class TestEnv:
         self.syslog_output = list()
 
         start_time = time.time()
-        print("Waiting for safir_control to be ready")
+        log("Waiting for safir_control to be ready")
 
         phrase="persistence data is ready"
 
         while True:
             time.sleep(0.2)
             if self.Output("safir_control").find(phrase) != -1:
-                print(" dose_main seems to be ready")
+                log(" dose_main seems to be ready")
                 break
             if self.safir_control.poll() is not None:
                 raise Exception(" safir_control terminated!\n" +
@@ -105,19 +99,19 @@ class TestEnv:
                                 "\n---------------------")
             if time.time() - start_time > 90:
                 start_time = time.time()
-                print("safir_control and/or dose_main seems slow to start. Here is some output:")
-                print("----- safir_control output -----")
-                print(self.Output("safir_control"))
-                print("----- dope_main output -----")
-                print(self.Output("dope_main"))
-                print("---- syslog output ----")
+                log("safir_control and/or dose_main seems slow to start. Here is some output:")
+                log("----- safir_control output -----")
+                log(self.Output("safir_control"))
+                log("----- dope_main output -----")
+                log(self.Output("dope_main"))
+                log("---- syslog output ----")
                 if self.start_syslog_server == True:
-                    print(self.syslog.get_data(0))
-                print("----------------------------")
-                print("Will keep waiting")
+                    log(self.syslog.get_data(0))
+                log("----------------------------")
+                log("Will keep waiting")
 
     def launchProcess(self, name, cmd):
-        print("Launching", name)
+        log("Launching", name)
         proc = subprocess.Popen(cmd,
                                 stdout = subprocess.PIPE,
                                 stderr = subprocess.STDOUT,
@@ -133,7 +127,7 @@ class TestEnv:
 
     def __kill(self, name, proc, timeout):
         try:
-            print(" Terminating", name)
+            log(" Terminating", name)
             if sys.platform == "win32":
                 #can't send CTRL_C_EVENT to processes started with subprocess, unfortunately
                 proc.send_signal(signal.CTRL_BREAK_EVENT)
@@ -142,18 +136,18 @@ class TestEnv:
             #let it have a minute to die...
             for i in range (timeout * 10):
                 if proc.poll() is not None:
-                    print("   Terminate successful")
+                    log("   Terminate successful")
                     return
                 time.sleep(0.1)
             if proc.poll() is None:
-                print(" Killing", name)
+                log(" Killing", name)
                 proc.kill()
                 proc.wait()
         except OSError:
             pass
 
     def killprocs(self):
-        print("Terminating all processes")
+        log("Terminating all processes")
         self.__kill("safir_control", self.safir_control, timeout = 120)
 
         polls = 0
@@ -166,9 +160,9 @@ class TestEnv:
                 self.__kill(name,proc, timeout = 30)
 
             if proc.returncode != 0:
-                print("--", name, "returncode is", proc.returncode, " -----")
-                print(self.Output(name))
-                print("----------------------------------")
+                log("--", name, "returncode is", proc.returncode, " -----")
+                log(self.Output(name))
+                log("----------------------------------")
 
         if self.start_syslog_server == True:
             self.syslog.stop()
@@ -191,7 +185,7 @@ class TestEnv:
     def WaitForOutput(self, name, expected_output):
         while True:
             output = self.Output(name)
-            #print(output)
+            #log(output)
             if output.find(expected_output) != -1:
                 return output
             if not self.ProcessDied(): #reversed return value
@@ -207,8 +201,8 @@ class TestEnv:
         ok = True
         for name, (proc,queue,output) in self.__procs.items():
             if proc.returncode != 0:
-                print (" - Process", name, "exited with code", proc.returncode)
-                print (" - Output:\n", self.Output(name))
+                log (" - Process", name, "exited with code", proc.returncode)
+                log (" - Output:\n", self.Output(name))
                 ok = False
         return ok;
 
@@ -217,7 +211,7 @@ class TestEnv:
         for name, (proc,queue,output) in self.__procs.items():
             ret = proc.poll()
             if ret is not None and ret != 0:
-                print (" - Process", name, "exited with code", proc.returncode)
-                print (" - Output:\n", self.Output(name))
+                log (" - Process", name, "exited with code", proc.returncode)
+                log (" - Output:\n", self.Output(name))
                 ok = False
         return ok;

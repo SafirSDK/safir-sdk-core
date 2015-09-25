@@ -24,10 +24,16 @@
 #include "DopeApp.h"
 #include <Safir/Logging/Log.h>
 #include <Safir/Application/CrashReporter.h>
+#include <locale>
 
 int main()
 {
     Safir::Application::ScopedCrashReporter scopedStartStop;
+
+    //Mimer requires locale to be set like this for character conversions
+    //to work properly. Hopefully this does not adversely affect other
+    //databases.
+    std::setlocale(LC_CTYPE, "");
 
     try
     {

@@ -6,7 +6,7 @@
         <member>
             <name>Name</name>
             <type>String</type>
-            <maxLength>16</maxLength>
+            <maxLength>19</maxLength>
         </member>
         <member>
             <name>Kind</name>

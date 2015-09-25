@@ -36,6 +36,7 @@
 #include <boost/make_shared.hpp>
 #include <boost/chrono.hpp>
 #include <boost/noncopyable.hpp>
+#include <boost/bind.hpp>
 #include <string>
 #include <unordered_map>
 #include <set>
