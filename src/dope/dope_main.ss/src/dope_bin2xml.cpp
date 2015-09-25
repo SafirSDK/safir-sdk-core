@@ -45,6 +45,7 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/scoped_array.hpp>
 #include <iostream>
+#include <locale>
 #include "OdbcHelper.h"
 
 enum WhatToConvert {db, files};
@@ -379,6 +380,11 @@ void ConvertFiles()
 
 int main(int argc, char* argv[])
 {
+    //Mimer requires locale to be set like this for character conversions
+    //to work properly. Hopefully this does not adversely affect other
+    //databases.
+    std::setlocale(LC_CTYPE, "");
+
     try
     {
         ParseCommandLine(argc,argv);
