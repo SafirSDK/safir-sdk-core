@@ -80,7 +80,7 @@ namespace Control
                          Communication&             communication,
                          SP&                        sp,
                          DoseMainCmdSender&         doseMainCmdSender,
-                         Config&                    config,
+                         ControlConfig&             config,
                          const StopSafirNodeCb      stopSafirNodeCb,
                          const ShutdownCb           shutdownCb,
                          const RebootCb             rebootCb,
@@ -410,7 +410,6 @@ namespace Control
                                        }
                                        SendAllOutstanding();
                                    });
-
         }
 
         void SendAllOutstanding()
