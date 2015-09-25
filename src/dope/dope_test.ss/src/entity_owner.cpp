@@ -77,7 +77,7 @@ public:
         for (int i = 0; i < NUM_SMALL; ++i)
         {
             DopeTest::SmallEntityPtr ent = DopeTest::SmallEntity::Create();
-            ent->Name() = L"testelitest";
+            ent->Name() = L"testelitest\n\u00e4\u203d."; //newline, ä, interrobang"
             ent->Kind() = i;
             ent->Blahonga() = 123.4f;
             ent->Show() = true;
@@ -150,6 +150,19 @@ private:
                    << injectedEntityProxy.GetEntityId() << ": "
                    << Safir::Dob::Typesystem::Serialization::ToXml(injectedEntityProxy.GetInjectionBlob()).substr(0,200)
                    << std::endl;
+
+        const auto small = boost::dynamic_pointer_cast<DopeTest::SmallEntity>(injectedEntityProxy.GetInjection());
+        if (small != nullptr)
+        {
+            if (small->Name() == L"testelitest\n\u00e4\u203d." || small->Name() == L"name is changed\n\u00e4\u203d.")
+            {
+                std::wcout << "Correct string!" << std::endl;
+            }
+            else
+            {
+                std::wcout << "Incorrect string!" << std::endl;
+            }
+        }
     }
 
     virtual void OnInitialInjectionsDone(const Safir::Dob::Typesystem::TypeId typeId,
