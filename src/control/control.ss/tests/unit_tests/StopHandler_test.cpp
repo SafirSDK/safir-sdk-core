@@ -252,7 +252,7 @@ BOOST_AUTO_TEST_CASE( stop_external_node )
                                       const boost::shared_ptr<const char[]>& data,
                                       size_t size,
                                       int64_t dataTypeIdentifier,
-                                      bool deliveryGuarantee)
+                                      bool deliveryGuarantee) -> bool
     {
         BOOST_CHECK(nodeId == 1234);
         BOOST_CHECK(nodeTypeId == 1111);
@@ -288,7 +288,7 @@ BOOST_AUTO_TEST_CASE( shutdown_external_node_resending )
                                                   const boost::shared_ptr<const char[]>& data,
                                                   size_t size,
                                                   int64_t dataTypeIdentifier,
-                                                  bool deliveryGuarantee)
+                                                  bool deliveryGuarantee) -> bool
     {
         BOOST_CHECK(nodeId == 5678);
         BOOST_CHECK(nodeTypeId == 2222);
@@ -329,7 +329,7 @@ BOOST_AUTO_TEST_CASE( stop_own_node )
                                                   const boost::shared_ptr<const char[]>& data,
                                                   size_t size,
                                                   int64_t dataTypeIdentifier,
-                                                  bool deliveryGuarantee)
+                                                  bool deliveryGuarantee) -> bool
     {
         BOOST_CHECK(nodeId == 0);
         BOOST_CHECK(nodeTypeId == 1111 || nodeTypeId == 2222);
