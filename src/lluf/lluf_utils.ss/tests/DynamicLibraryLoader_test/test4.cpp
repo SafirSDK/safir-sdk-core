@@ -32,20 +32,20 @@ int main()
     {
         Safir::Utilities::DynamicLibraryLoader lib;
 #if defined(linux) || defined(__linux) || defined(__linux__)
-        lib.Load("m",true); //math library
-        double result = lib.GetFunction<double(double)>("cos")(0.0);
-            
-        if (result != 1.0)
+        lib.Load("rt",true); //librt library
+        const pthread_t result = lib.GetFunction<pthread_t()>("pthread_self")();
+
+        if (result == 0)
         {
             std::wcout << "The loaded function seems to work incorrectly" << std::endl;
             return 1;
         }
 #elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
         lib.Load("Ws2_32",true); //winsock library
-       
-        const unsigned short result = 
+
+        const unsigned short result =
             lib.GetFunction<unsigned short __stdcall (unsigned short)>("htons")(0xff00);
-            
+
         if (result != 0xff)
         {
             std::wcout << "The loaded function seems to work incorrectly" << std::endl;
@@ -55,7 +55,7 @@ int main()
 #  error You need to implement a DynamicLibraryLoader_test for this platform!
 #endif
 
-        
+
     }
     catch(const std::exception& e)
     {
@@ -64,4 +64,3 @@ int main()
     }
     return 0;
 }
-
