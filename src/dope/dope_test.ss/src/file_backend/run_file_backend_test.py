@@ -143,6 +143,10 @@ try:
         log("could not find the right number of 'DopeTest.SmallEntity' in output")
         sys.exit(1)
 
+    if output.count("Correct string!") != NUM_SMALL or output.count("Incorrect string!") != 0:
+        log("Unicode string check failed")
+        sys.exit(1)
+
     if output.count("<DopeTest.BigEntity>") != NUM_BIG:
         log("could not find the right number of 'DopeTest.BigEntity' in output")
         sys.exit(1)
@@ -185,10 +189,15 @@ try:
     output = env.Output("entity_owner")
     if output.count("OnInjectedNewEntity") != NUM_SMALL + NUM_BIG:
         log("could not find the right number of 'OnInjectedNewEntity' in output")
+        log(output)
         sys.exit(1)
 
     if output.count("<DopeTest.SmallEntity>") != NUM_SMALL:
         log("could not find the right number of 'DopeTest.SmallEntity' in output")
+        sys.exit(1)
+
+    if output.count("Correct string!") != NUM_SMALL or output.count("Incorrect string!") != 0:
+        log("Unicode string check failed")
         sys.exit(1)
 
     if output.count("<DopeTest.BigEntity>") != NUM_BIG:

@@ -365,13 +365,13 @@ void ConvertFiles()
 
             boost::filesystem::ifstream file(path, std::ios::in | std::ios::binary);
             file.read(&bin[0],fileSize);
-
             const Safir::Dob::Typesystem::ObjectPtr object = Safir::Dob::Typesystem::Serialization::ToObject(bin);
 
-            const std::wstring xml = Safir::Dob::Typesystem::Serialization::ToXml(object);
+            const std::string xml = Safir::Dob::Typesystem::Utilities::ToUtf8
+                (Safir::Dob::Typesystem::Serialization::ToXml(object));
             boost::filesystem::path xmlFileName(path);
             xmlFileName.replace_extension(".xml");
-            boost::filesystem::wofstream xmlFile(xmlFileName);
+            boost::filesystem::ofstream xmlFile(xmlFileName);
             xmlFile << xml;
         }
     }
@@ -380,16 +380,16 @@ void ConvertFiles()
 
 int main(int argc, char* argv[])
 {
-    //Mimer requires locale to be set like this for character conversions
-    //to work properly. Hopefully this does not adversely affect other
-    //databases.
-    std::setlocale(LC_CTYPE, "");
-
     try
     {
         ParseCommandLine(argc,argv);
         if (g_whatToConvert == db)
         {
+            //Mimer requires locale to be set like this for character conversions
+            //to work properly. Hopefully this does not adversely affect other
+            //databases.
+            std::setlocale(LC_CTYPE, "");
+
             ConvertDb();
         }
         else if (g_whatToConvert == files)

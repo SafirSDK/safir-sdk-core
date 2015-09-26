@@ -297,9 +297,11 @@ FilePersistor::RestoreXml(const boost::filesystem::path & path) const
         return Safir::Dob::EntityPtr(); //NULL
     }
 
-    boost::filesystem::wifstream file (path, std::ios::in);
-    std::wstring xml((std::istreambuf_iterator<wchar_t>(file)),
-                     std::istreambuf_iterator<wchar_t>());
+    boost::filesystem::ifstream file (path, std::ios::in);
+    std::string utf8((std::istreambuf_iterator<char>(file)),
+                     std::istreambuf_iterator<char>());
+
+    const std::wstring xml = Safir::Dob::Typesystem::Utilities::ToWstring(utf8);
 
     file.close();
 
@@ -309,7 +311,8 @@ FilePersistor::RestoreXml(const boost::filesystem::path & path) const
     Safir::Dob::EntityPtr entityPtr;
     try
     {
-        entityPtr = boost::dynamic_pointer_cast<Safir::Dob::Entity>(Safir::Dob::Typesystem::Serialization::ToObject(xml));
+        entityPtr = boost::dynamic_pointer_cast<Safir::Dob::Entity>
+            (Safir::Dob::Typesystem::Serialization::ToObject(xml));
     }
     catch(const Safir::Dob::Typesystem::IllegalValueException &)
     {

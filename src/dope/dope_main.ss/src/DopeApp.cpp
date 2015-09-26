@@ -34,6 +34,7 @@
 #include <Safir/Dob/ConnectionAspectMisc.h>
 #include <Safir/Dob/ErrorResponse.h>
 #include <Safir/Dob/PersistentDataStatus.h>
+#include <locale>
 
 #ifdef _MSC_VER
 #  pragma warning(push)
@@ -198,6 +199,12 @@ void DopeApp::Start(bool restore)
         case Safir::Dob::PersistenceBackend::Odbc:
             {
                 m_debug << "Using database persistence" << std::endl;
+
+                //Mimer requires locale to be set like this for character conversions
+                //to work properly. Hopefully this does not adversely affect other
+                //databases.
+                std::setlocale(LC_CTYPE, "");
+
 #ifndef NO_DATABASE_SUPPORT
                 m_persistenceHandler.reset(new OdbcPersistor(m_ioService));
 #endif
