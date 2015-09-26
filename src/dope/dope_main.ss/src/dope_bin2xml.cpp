@@ -45,7 +45,7 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/scoped_array.hpp>
 #include <iostream>
-#include <locale>
+#include <clocale>
 #include "OdbcHelper.h"
 
 enum WhatToConvert {db, files};

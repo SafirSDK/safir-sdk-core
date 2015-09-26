@@ -45,7 +45,7 @@
 #include <Safir/Databases/Odbc/Exception.h>
 
 #include <iostream>
-#include <locale>
+#include <clocale>
 
 
 std::wostream& operator<<(std::wostream& out, const boost::program_options::options_description& opt)

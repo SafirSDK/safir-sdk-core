@@ -34,7 +34,7 @@
 #include <Safir/Dob/ConnectionAspectMisc.h>
 #include <Safir/Dob/ErrorResponse.h>
 #include <Safir/Dob/PersistentDataStatus.h>
-#include <locale>
+#include <clocale>
 
 #ifdef _MSC_VER
 #  pragma warning(push)
