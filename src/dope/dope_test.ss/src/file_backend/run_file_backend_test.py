@@ -137,6 +137,7 @@ try:
     output = env.Output("entity_owner")
     if output.count("OnInjectedNewEntity") != NUM_SMALL + NUM_BIG:
         log("could not find the right number of 'OnInjectedNewEntity' in output")
+        log(output)
         sys.exit(1)
 
     if output.count("<DopeTest.SmallEntity>") != NUM_SMALL:
