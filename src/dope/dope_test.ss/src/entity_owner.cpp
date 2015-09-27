@@ -39,6 +39,10 @@ const int NUM_SMALL=10;
 const int NUM_BIG=2;
 #endif
 
+//disable stupid incorrect microsoft warning.
+#ifdef _MSC_VER
+#pragma warning (disable : 4428)
+#endif
 
 class StopHandler :
     public Safir::Dob::StopHandler
