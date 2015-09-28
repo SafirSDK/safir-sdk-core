@@ -173,6 +173,19 @@ def checkConnectionToNodes(safir_instance, nodes):
   killNodeProcesses()
   sys.exit(1)
 
+def waitForProcessExit(node):
+    #try for one minute
+    for i in range(120):
+        if envs[node].ProcessDied():
+            return
+        time.sleep(0.5)
+
+    print("Error: Node " + str(node) + " isn't stopping as expected")
+    killNodeProcesses()
+    sys.exit(1)
+
+
+
 parser = argparse.ArgumentParser("test script")
 parser.add_argument("--safir-control", required=True)
 parser.add_argument("--dose_main", required=True)
@@ -196,9 +209,9 @@ envs = dict()
 print("Starting nodes 0,1,2")
 
 try:
-  envs['0'] = startNode("0")
-  envs['1'] = startNode("1")
-  envs['2'] = startNode("2")
+  envs[0] = startNode("0")
+  envs[1] = startNode("1")
+  envs[2] = startNode("2")
 except:
   print("Error: Failed to start nodes 0,1,2")
   killNodeProcesses()
@@ -216,10 +229,12 @@ stopNode("0", readconnectedNodeId('0', "Server_2"))
 print("Checking that Server_0 has connection to ['Server_0', 'Server_1']")
 checkConnectionToNodes("0", ['Server_0', 'Server_1'])
 
+waitForProcessExit(2)
+
 #restart node 2
 try:
   print("Starting node 2")
-  envs['2'] = startNode("2")
+  envs[2] = startNode("2")
 except:
   print("Error: Failed to start node 2")
   killNodeProcesses()
@@ -239,11 +254,14 @@ stopSystem('0')
 print("Checking that Server_0 has only to itself")
 checkConnectionToNodes("0", ['Server_0'])
 
-#start Server_0 and Server_2 again
+waitForProcessExit(1)
+waitForProcessExit(2)
+
+#start Server_1 and Server_2 again
 try:
   print("Starting Server_1 and Server_2")
-  envs['1'] = startNode("1")
-  envs['2'] = startNode("2")
+  envs[1] = startNode("1")
+  envs[2] = startNode("2")
 except:
   print("Error: Failed to start Server_1 and Server_2")
   killNodeProcesses()
@@ -257,11 +275,11 @@ checkConnectionToNodes("1", ['Server_1', 'Server_2'])
 
 #hard kill Server_0 and restart it, see that it joins Server_1 and Server_2 again
 print("Hardkill Server_0")
-envs['0'].killprocs()
+envs[0].killprocs()
 
 try:
   print("Starting Server_0")
-  envs['0'] = startNode("0")
+  envs[0] = startNode("0")
 except Exception as e:
   print("Error: Failed to start Server_0. Exception " + str(e))
   killNodeProcesses()
