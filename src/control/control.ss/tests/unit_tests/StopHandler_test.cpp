@@ -326,8 +326,8 @@ BOOST_AUTO_TEST_CASE( stop_own_node )
     auto nbrOfSend = 0;
     communication.sendAction = [this, &nbrOfSend](int64_t nodeId,
                                                   int64_t nodeTypeId,
-                                                  const boost::shared_ptr<const char[]>& data,
-                                                  size_t size,
+                                                  const boost::shared_ptr<const char[]>& /*data*/,
+                                                  size_t /*size*/,
                                                   int64_t dataTypeIdentifier,
                                                   bool deliveryGuarantee) -> bool
     {
