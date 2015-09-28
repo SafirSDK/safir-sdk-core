@@ -149,10 +149,13 @@ private:
 
     virtual void OnInjectedNewEntity(const Safir::Dob::InjectedEntityProxy injectedEntityProxy)
     {
-        //output only the first 200 chars of the xml
+        //output only the first 200 chars of the xml and replace funny chars
+        std::wstring xml = Safir::Dob::Typesystem::Serialization::ToXml(injectedEntityProxy.GetInjectionBlob()).substr(0,200);
+        std::replace(xml.begin(), xml.end(),L'\u00e4',L'%');
+        std::replace(xml.begin(), xml.end(),L'\u203d',L'&');
         std::wcout << "OnInjectedNewEntity "
                    << injectedEntityProxy.GetEntityId() << ": "
-                   << Safir::Dob::Typesystem::Serialization::ToXml(injectedEntityProxy.GetInjectionBlob()).substr(0,200)
+                   << xml
                    << std::endl;
 
         const auto small = boost::dynamic_pointer_cast<DopeTest::SmallEntity>(injectedEntityProxy.GetInjection());
@@ -196,7 +199,6 @@ private:
 
 int main(int argc, char* argv[])
 {
-
     std::vector<std::string> args(argv+1, argv+argc);
     if (args.size() != 1 || (args[0] != "set" && args[0] != "accept" && args[0] != "update" && args[0] != "num"))
     {
