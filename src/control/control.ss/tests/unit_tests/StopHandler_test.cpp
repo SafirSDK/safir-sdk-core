@@ -370,7 +370,7 @@ BOOST_AUTO_TEST_CASE( stop_system )
                                 const boost::shared_ptr<const char[]>& data,
                                 size_t size,
                                 int64_t dataTypeIdentifier,
-                                bool deliveryGuarantee)
+                                bool deliveryGuarantee) -> bool
     {
         if (dataTypeIdentifier == stopOrderMsgTypeId)
         {
@@ -429,7 +429,7 @@ BOOST_AUTO_TEST_CASE( stop_system_external_nodes_unresponsive )
                                 const boost::shared_ptr<const char[]>& data,
                                 size_t size,
                                 int64_t dataTypeIdentifier,
-                                bool deliveryGuarantee)
+                                bool deliveryGuarantee) -> bool
     {
         if (dataTypeIdentifier == stopOrderMsgTypeId)
         {
@@ -476,15 +476,21 @@ BOOST_AUTO_TEST_CASE( stop_system_external_nodes_unresponsive )
 //                   {
 //                       BOOST_CHECK(communication.setDataReceiverCalls.size() == 2);
 
+//                       //auto stopOrder = Control::SerializeCmd(Control::STOP, communication.Id());
 //                       auto stopOrder = Control::SerializeCmd(Control::STOP, communication.Id());
+//                       std::wcout << "StopOrder length: " << stopOrder.second << std::endl;
 
 //                       communication.setDataReceiverCalls[0].first(1234, 1111, stopOrder.first.get(), stopOrder.second);
 //                   });
 
 //    RunIoService();
 
-//    BOOST_CHECK(sp.excludedNodes.size() == 1);
-//    //BOOST_CHECK(sp.excludedNodes[0] == 1234);
+//    BOOST_CHECK(sp.excludedNodes.size() == 0);
+//    BOOST_CHECK(stopSafirNodeCb == 1);
+//    BOOST_CHECK(shutdownCb == 0);
+//    BOOST_CHECK(rebootCb == 0);
+//    BOOST_CHECK(stopSystemCb == 0);
+
 //}
 
 BOOST_AUTO_TEST_SUITE_END()
