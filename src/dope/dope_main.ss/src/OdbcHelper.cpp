@@ -143,6 +143,31 @@ void OdbcHelper::BindParamString(SQLHSTMT statement,
     }
 }
 
+void OdbcHelper::BindParamStringW(SQLHSTMT statement,
+                                 const SQLUSMALLINT paramNumber,
+                                 const SQLUINTEGER maxSize,
+                                 wchar_t* string,
+                                 SQLLEN* sizePtr)
+{
+    const SQLUINTEGER number_of_chars = static_cast<SQLUINTEGER>(maxSize) + 1;
+    const SQLUINTEGER size_of_char = static_cast<SQLUINTEGER>(sizeof(wchar_t));
+    const SQLUINTEGER columnSize = number_of_chars* size_of_char;
+
+    const SQLRETURN ret = ::SQLBindParameter(statement,
+                                             paramNumber,
+                                             SQL_PARAM_INPUT,
+                                             SQL_C_WCHAR,
+                                             SQL_WLONGVARCHAR,
+                                             columnSize,
+                                             0,
+                                             string,
+                                             maxSize,
+                                             sizePtr);
+    if (!SQL_SUCCEEDED(ret))
+    {
+        ThrowException(SQL_HANDLE_STMT,statement);
+    }
+}
 
 void OdbcHelper::Connect(SQLHDBC connection, const std::string& connectionString)
 {

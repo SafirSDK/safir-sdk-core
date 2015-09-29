@@ -34,6 +34,12 @@
         <value>10485760</value>
       </parameter>
       <parameter>
+        <summary>If this is true the XmlData column is manipulated using char operations instead of wchar_t operations. Needs to be False on MS SQL Server.</summary>
+        <name>XmlDataColumnIsUtf8</name>
+        <type>Boolean</type>
+        <value>$(DOPE_TEST_XML_DATA_COLUMN_IS_UTF8)</value>
+      </parameter>
+      <parameter>
         <summary>The size of the BinaryData column in the database. Unit is bytes.</summary>
         <name>BinaryDataColumnSize</name>
         <type>Int32</type>
@@ -44,15 +50,6 @@
         <name>BinarySmallDataColumnSize</name>
         <type>Int32</type>
         <value>5000</value>
-      </parameter>
-      <parameter>
-        <summary>StandaloneMode means that each dope that is started is saving its own persistent data.
-                 Only valid if when several dope_main runs on different nodes in a redundant system.
-                 Use with caution. If active dope_main(the one that is started first) has no persistent data saved, all
-                 other nodes persistent data will be cleared. </summary>
-        <name>StandaloneMode</name>
-        <type>Boolean</type>
-        <value>False</value>
       </parameter>
       <parameter>
         <summary>TestMode allow initial injections without persistence started. Only valid if SystemHasPersistence flag is set to false.</summary>

@@ -81,8 +81,12 @@ private:
                                  char* string,
                                  SQLLEN* sizePtr);
 
-    // Free an previously allocated connection
-    static void FreeStatement(SQLHSTMT statement);
+    // Bind one wide string column to a statement. The string can be null.
+    static void BindColumnStringW(SQLHSTMT statement,
+                                 unsigned short usColumnNumber,
+                                 const int maxSize,
+                                 wchar_t* string,
+                                 SQLLEN* sizePtr);
 
     // Free an previously allocated connection
     static void FreeConnection(SQLHDBC connection);

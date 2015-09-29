@@ -374,6 +374,7 @@ void OdbcPersistor::RestoreAll()
     boost::scoped_array<unsigned char>          storeBinaryLargeData(new unsigned char[binaryLargeSize]);
     SQLLEN                                      currentLargeDataSize = 0;
     boost::scoped_array<char>                   xmlBuffer(new char[xmlSize]); //TODO:multiply by 4?
+    boost::scoped_array<wchar_t>                xmlBufferW(new wchar_t[xmlSize]); //TODO:multiply by 4?
     SQLLEN                                      currentXmlSize = 0;
 
     const boost::chrono::steady_clock::time_point startTime = boost::chrono::steady_clock::now();
@@ -405,7 +406,14 @@ void OdbcPersistor::RestoreAll()
                     m_helper.BindColumnInt64(getAllStatement, 2, &instance);
                     m_helper.BindColumnInt64(getAllStatement, 3, &handlerId);
 
-                    BindColumnString(getAllStatement, 4, xmlSize, xmlBuffer.get(), &currentXmlSize);
+                    if (Safir::Dob::PersistenceParameters::XmlDataColumnIsUtf8())
+                    {
+                        BindColumnString(getAllStatement, 4, xmlSize, xmlBuffer.get(), &currentXmlSize);
+                    }
+                    else
+                    {
+                        BindColumnStringW(getAllStatement, 4, xmlSize, xmlBufferW.get(), &currentXmlSize);
+                    }
 
                     m_helper.BindColumnBinary(getAllStatement, 5, binaryLargeSize, storeBinaryLargeData.get(), &currentLargeDataSize);
                     m_helper.BindColumnBinary(getAllStatement, 6, binarySmallSize, storeBinarySmallData.get(), &currentSmallDataSize);
@@ -456,7 +464,16 @@ void OdbcPersistor::RestoreAll()
 
                     if (currentXmlSize != SQL_NULL_DATA)
                     { //some xml persistent data set
-                        const std::wstring xml = Safir::Dob::Typesystem::Utilities::ToWstring(xmlBuffer.get());
+                        std::wstring xml;
+
+                        if (Safir::Dob::PersistenceParameters::XmlDataColumnIsUtf8())
+                        {
+                           xml = Safir::Dob::Typesystem::Utilities::ToWstring(xmlBuffer.get());
+                        }
+                        else
+                        {
+                            xml = xmlBufferW.get();
+                        }
                         m_debug
                             << "Restoring from xml"                 << entityId
                             << ", size = "                          << xml.size()
@@ -551,7 +568,6 @@ void OdbcPersistor::RestoreAll()
                 isConnected = false;
             }
 
-            FreeStatement(getAllStatement);
             getAllIsValid = false;
 
             boost::this_thread::sleep_for(RECONNECT_EXCEPTION_DELAY);
@@ -565,8 +581,6 @@ void OdbcPersistor::RestoreAll()
         errorReported = false;
         connectionAttempts = 0;
     }
-
-    FreeStatement(getAllStatement);
 
     try
     {
@@ -701,17 +715,6 @@ OdbcPersistor::DisconnectOdbcConnection()
         Disconnect(m_odbcConnection);
         m_isOdbcConnected = false;
     }
-    FreeStatement(m_insertStatement);
-    m_insertIsValid = false;
-
-    FreeStatement(m_storeStatement);
-    m_storeIsValid = false;
-
-    FreeStatement(m_deleteStatement);
-    m_deleteIsValid = false;
-
-    FreeStatement(m_deleteAllStatement);
-    m_deleteAllIsValid = false;
 }
 
 
@@ -826,6 +829,26 @@ OdbcPersistor::BindColumnString(SQLHSTMT statement,
     }
 }
 
+
+void
+OdbcPersistor::BindColumnStringW(SQLHSTMT statement,
+                                unsigned short columnNumber,
+                                const int maxSize,
+                                wchar_t* string,
+                                SQLLEN* sizePtr)
+{
+    const SQLRETURN ret = ::SQLBindCol(statement,
+                                       columnNumber,
+                                       SQL_C_WCHAR,
+                                       string,
+                                       maxSize,
+                                       sizePtr);
+    if (!SQL_SUCCEEDED(ret))
+    {
+        OdbcHelper::ThrowException(SQL_HANDLE_STMT, statement);
+    }
+}
+
 void
 OdbcPersistor::FreeConnection(SQLHDBC connection)
 {
@@ -836,15 +859,6 @@ OdbcPersistor::FreeConnection(SQLHDBC connection)
     }
 }
 
-void
-OdbcPersistor::FreeStatement(SQLHSTMT statement)
-{
-    const SQLRETURN ret = ::SQLFreeHandle(SQL_HANDLE_STMT, statement);
-    if (!SQL_SUCCEEDED(ret))
-    {
-        OdbcHelper::ThrowException(SQL_HANDLE_STMT, statement);
-    }
-}
 
 void
 OdbcPersistor::Disconnect(SQLHDBC connection)

@@ -136,6 +136,7 @@ void ConvertDb()
     Safir::Dob::Typesystem::Int64       updateTypeIdParam;
     Safir::Dob::Typesystem::Int64       updateInstanceParam;
     boost::scoped_array<char>           updateXmlDataParam(new char[Safir::Dob::PersistenceParameters::XmlDataColumnSize()]); //TODO: multiply by 4?!
+    boost::scoped_array<wchar_t>        updateXmlDataParamW(new wchar_t[Safir::Dob::PersistenceParameters::XmlDataColumnSize()]); //TODO: multiply by 4?!
     SQLLEN                              updateXmlDataParamSize(0);
 
     SQLRETURN ret = ::SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &hEnvironment);
@@ -176,11 +177,22 @@ void ConvertDb()
                    "SET xmlData=?, binarySmallData=NULL, binaryData=NULL "
                    "WHERE typeId=? AND instance=?");
 
-    helper.BindParamString(hUpdateStatement,
-                           1,
-                           Safir::Dob::PersistenceParameters::XmlDataColumnSize(),
-                           updateXmlDataParam.get(),
-                           &updateXmlDataParamSize);
+    if (Safir::Dob::PersistenceParameters::XmlDataColumnIsUtf8())
+    {
+        helper.BindParamString(hUpdateStatement,
+                               1,
+                               Safir::Dob::PersistenceParameters::XmlDataColumnSize(),
+                               updateXmlDataParam.get(),
+                               &updateXmlDataParamSize);
+    }
+    else
+    {
+        helper.BindParamStringW(hUpdateStatement,
+                               1,
+                               Safir::Dob::PersistenceParameters::XmlDataColumnSize(),
+                               updateXmlDataParamW.get(),
+                               &updateXmlDataParamSize);
+    }
     helper.BindParamInt64(hUpdateStatement, 2, &updateTypeIdParam);
     helper.BindParamInt64(hUpdateStatement, 3, &updateInstanceParam);
 
@@ -226,18 +238,31 @@ void ConvertDb()
         }
         if (object != nullptr)
         {
-            std::string xml = Safir::Dob::Typesystem::Utilities::ToUtf8
-                (Safir::Dob::Typesystem::Serialization::ToXml(object));
-
             updateTypeIdParam = entityId.GetTypeId();
             updateInstanceParam = entityId.GetInstanceId().GetRawValue();
 
-            const size_t size = (xml.size() + 1)* sizeof (char);
-            if (size > static_cast<size_t>(Safir::Dob::PersistenceParameters::XmlDataColumnSize())) //TODO: multiply by 4
+            if (Safir::Dob::PersistenceParameters::XmlDataColumnIsUtf8())
             {
-                throw std::runtime_error("waah"); //TODO
+                const std::string xml = Safir::Dob::Typesystem::Utilities::ToUtf8
+                    (Safir::Dob::Typesystem::Serialization::ToXml(object));
+
+                const size_t size = (xml.size() + 1)* sizeof (char);
+                if (size > static_cast<size_t>(Safir::Dob::PersistenceParameters::XmlDataColumnSize())) //TODO: multiply by 4
+                {
+                    throw std::runtime_error("waah"); //TODO
+                }
+                memcpy(updateXmlDataParam.get(), xml.c_str(), size);
             }
-            memcpy(updateXmlDataParam.get(), xml.c_str(), size);
+            else
+            {
+                const std::wstring xml = Safir::Dob::Typesystem::Serialization::ToXml(object);
+                const size_t size = (xml.size() + 1)* sizeof (wchar_t);
+                if (size > static_cast<size_t>(Safir::Dob::PersistenceParameters::XmlDataColumnSize())) //TODO: multiply by 4
+                {
+                    throw std::runtime_error("waah"); //TODO
+                }
+                memcpy(updateXmlDataParamW.get(), xml.c_str(), size);
+            }
             updateXmlDataParamSize = SQL_NTS;
 
             helper.Execute(hUpdateStatement);

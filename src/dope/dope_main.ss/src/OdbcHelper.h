@@ -75,6 +75,13 @@ public:
                                 char* string,
                                 SQLLEN* sizePtr);
 
+
+    static void BindParamStringW(SQLHSTMT statement,
+                                const SQLUSMALLINT paramNumber,
+                                const SQLUINTEGER maxSize,
+                                wchar_t* string,
+                                SQLLEN* sizePtr);
+
     static void Connect(SQLHDBC connection,
                         const std::string& connectionString);
 

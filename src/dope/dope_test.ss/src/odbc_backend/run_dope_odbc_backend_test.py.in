@@ -36,7 +36,7 @@ class Parameters:
         import tempfile
 
         parser = OptionParser()
-        parser.add_option("--driver", action="store",type="choice",choices=("mimer","mysql","postgres"),dest="driver",default=False,
+        parser.add_option("--driver", action="store",type="choice",choices=("mimer","mysql","postgres","ms-sql"),dest="driver",default=False,
                           help="Database engine to test against")
         parser.add_option("--hostname", action="store",dest="hostname",default="localhost",
                           help="Hostname of the database server")
@@ -63,14 +63,19 @@ class Parameters:
             driver = os.environ.get("MYSQL_ODBC_DRIVER_NAME")
             if driver is None:
                 driver = "MySQL"
+        elif self.driver == "ms-sql":
+            driver = os.environ.get("MSSQL_ODBC_DRIVER_NAME")
+            if driver is None:
+                driver = "SQL Server"
 
         #set up the connection string, starting with the driver specific parts
         if self.driver == "mimer":
-            self.connection_string = "Driver={{{driver}}};Protocol=tcp;Node={hostname};"
+            self.connection_string = "Driver={{{driver}}};Protocol=tcp;Node={hostname};Database={database};Uid=dopeuser;Pwd=dopeuse"
         elif self.driver == "mysql":
-            self.connection_string = "DRIVER={{{driver}}};Server={hostname};charset=utf8;"
-        #add common bits
-        self.connection_string += "Database={database};Uid=dopeuser;Pwd=dopeuser"
+            self.connection_string = "DRIVER={{{driver}}};Server={hostname};charset=utf8;Database={database};Uid=dopeuser;Pwd=dopeuse"
+        elif self.driver == "ms-sql":
+            self.connection_string = "Driver={{{driver}}};Server={hostname};Database={database};Trusted_Connection=Yes;"
+
 
         self.connection_string = self.connection_string.format(driver = driver,
                                                                hostname = options.hostname,
@@ -78,6 +83,8 @@ class Parameters:
 
         log("Using connection string", self.connection_string)
         os.environ["DOPE_TEST_ODBC_CONNECT_STRING"] = self.connection_string
+
+        os.environ["DOPE_TEST_XML_DATA_COLUMN_IS_UTF8"] = str(self.driver != "ms-sql")
 
 run_sql_pattern = re.compile(r"Got ([0-9]+) rows.")
 
