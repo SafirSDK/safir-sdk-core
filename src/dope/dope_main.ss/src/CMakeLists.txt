@@ -14,6 +14,8 @@ ADD_EXECUTABLE(dope_main
 
 ADD_EXECUTABLE(dope_bin2xml dope_bin2xml.cpp OdbcHelper.h OdbcHelper.cpp)
 
+ADD_EXECUTABLE(run_sql run_sql.cpp OdbcHelper.h OdbcHelper.cpp)
+
 TARGET_LINK_LIBRARIES(dope_main PRIVATE
   swre_interface_cpp
   dose_cpp
@@ -28,4 +30,11 @@ TARGET_LINK_LIBRARIES(dope_bin2xml PRIVATE
   ${Boost_PROGRAM_OPTIONS_LIBRARY}
   ${SAFIR_ODBC_LIBRARIES})
 
+TARGET_LINK_LIBRARIES(run_sql PRIVATE
+  ${Boost_PROGRAM_OPTIONS_LIBRARY}
+  ${SAFIR_ODBC_LIBRARIES})
+
 SAFIR_INSTALL(TARGETS dope_main dope_bin2xml)
+
+SAFIR_INSTALL(TARGETS run_sql TEST_SUITE)
+

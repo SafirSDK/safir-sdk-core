@@ -36,16 +36,10 @@
 #endif
 
 
+#include "OdbcHelper.h"
 #include <Safir/Dob/Typesystem/Utilities.h>
-#include <Safir/Databases/Odbc/Connection.h>
-#include <Safir/Databases/Odbc/Environment.h>
-#include <Safir/Databases/Odbc/InputParameter.h>
-#include <Safir/Databases/Odbc/Statement.h>
-#include <Safir/Databases/Odbc/Columns.h>
-#include <Safir/Databases/Odbc/Exception.h>
-
-#include <iostream>
 #include <clocale>
+#include <iostream>
 
 
 std::wostream& operator<<(std::wostream& out, const boost::program_options::options_description& opt)
@@ -113,23 +107,51 @@ private:
 
 void RunStatement(const ProgramOptions& options)
 {
-    Safir::Databases::Odbc::Connection  connection;
-    Safir::Databases::Odbc::Environment environment;
-    environment.Alloc();
-    connection.Alloc(environment);
-    connection.Connect(Safir::Dob::Typesystem::Utilities::ToWstring(options.connectionString));
+    SQLHENV environment;
+    SQLHDBC connection;
+    OdbcHelper helper;
 
-
-    Safir::Databases::Odbc::Statement statement;
-
-    statement.Alloc(connection);
-    statement.Prepare(Safir::Dob::Typesystem::Utilities::ToWstring(options.statement));
-
-    statement.Execute();
-    int rows = 0;
-    if (statement.GetNumberOfColumns() != 0)
+    SQLRETURN ret = ::SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &environment);
+    if (!SQL_SUCCEEDED(ret))
     {
-        while(statement.Fetch())
+        helper.ThrowException(SQL_HANDLE_ENV, SQL_NULL_HANDLE);
+    }
+
+    ret = ::SQLSetEnvAttr(environment,
+                            SQL_ATTR_ODBC_VERSION,
+                            reinterpret_cast<SQLPOINTER>(SQL_OV_ODBC3),
+                            SQL_IS_UINTEGER);
+    if (!SQL_SUCCEEDED(ret))
+    {
+        helper.ThrowException(SQL_HANDLE_ENV, environment);
+    }
+
+    ret = ::SQLAllocHandle(SQL_HANDLE_DBC, environment, &connection);
+    if (!SQL_SUCCEEDED(ret))
+    {
+        helper.ThrowException(SQL_HANDLE_ENV, environment);
+    }
+
+    helper.Connect(connection, options.connectionString);
+
+    SQLHSTMT statement;
+    helper.AllocStatement(&statement, connection);
+
+    helper.Prepare(statement, options.statement);
+    helper.Execute(statement);
+
+    int rows = 0;
+    SQLSMALLINT columns = 0;
+
+    ret = ::SQLNumResultCols(statement, &columns);
+    if (!SQL_SUCCEEDED(ret))
+    {
+        helper.ThrowException(SQL_HANDLE_STMT,statement);
+    }
+
+    if (columns != 0)
+    {
+        while(helper.Fetch(statement))
         {
             ++rows;
         }
