@@ -47,8 +47,8 @@ def startNode(safir_instance):
 def killNodeProcesses():
 
   try:
-    if envs['0'] is not None:
-      syslog_output = envs['0'].Syslog()
+    if envs[0] is not None:
+      syslog_output = envs[0].Syslog()
       if len(syslog_output) != 0:
         print("SYSLOG OUPUT:\n" + syslog_output)
   except KeyError:
@@ -176,7 +176,7 @@ def checkConnectionToNodes(safir_instance, nodes):
 def waitForProcessExit(node):
     #try for one minute
     for i in range(120):
-        if envs[node].ProcessDied():
+        if not envs[node].SafirControlRunning():
             return
         time.sleep(0.5)
 
@@ -276,6 +276,8 @@ checkConnectionToNodes("1", ['Server_1', 'Server_2'])
 #hard kill Server_0 and restart it, see that it joins Server_1 and Server_2 again
 print("Hardkill Server_0")
 envs[0].killprocs()
+
+waitForProcessExit(0)
 
 try:
   print("Starting Server_0")

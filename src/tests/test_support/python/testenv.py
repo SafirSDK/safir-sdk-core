@@ -215,3 +215,11 @@ class TestEnv:
                 log (" - Output:\n", self.Output(name))
                 ok = False
         return ok;
+
+    def SafirControlRunning(self):
+        proc = self.__procs.get("safir_control")
+
+        if proc is None:
+            return False
+
+        return proc[0].poll() is None
