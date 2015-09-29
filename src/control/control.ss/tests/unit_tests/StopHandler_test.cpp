@@ -36,6 +36,7 @@
 #endif
 
 #include <boost/thread.hpp>
+#include <boost/function.hpp>
 
 #ifdef _MSC_VER
 #  pragma warning (pop)
@@ -65,13 +66,13 @@ public:
                          const Com::Allocator& /*allocator*/,
                          const Com::DeAllocator& /*deAllocator*/)
     {
-        setDataReceiverCalls.push_back(boost::make_tuple(callback, dataTypeIdentifier));
+        setDataReceiverCalls.push_back(std::make_pair(callback, dataTypeIdentifier));
     }
-    typedef std::vector<boost::tuple<Com::ReceiveData, int64_t>> SetDataReceiverCalls;
+    typedef std::vector<std::pair<Com::ReceiveData, int64_t>> SetDataReceiverCalls;
 
     SetDataReceiverCalls setDataReceiverCalls;
 
-    std::function<bool(int64_t, int64_t, const boost::shared_ptr<const char[]>&, size_t, int64_t, bool)> sendAction;
+    boost::function<bool(int64_t, int64_t, const boost::shared_ptr<const char[]>&, size_t, int64_t, bool)> sendAction;
 
     bool Send(int64_t nodeId,
               int64_t nodeTypeId,
@@ -351,50 +352,139 @@ BOOST_AUTO_TEST_CASE( stop_own_node )
     BOOST_CHECK(stopSystemCb == 0);
 }
 
-//BOOST_AUTO_TEST_CASE( stop_system )
+BOOST_AUTO_TEST_CASE( stop_system )
+{
+    stopHandler->Start();
+    stopHandler->AddNode(1234, 1111);
+    stopHandler->AddNode(5678, 2222);
+    ioService.post([this](){controlCmdCallback(Control::STOP, 0);});
+
+    auto nbrOfSentStopNotifications = 0;
+    auto nbrOfSentStopOrders = 0;
+
+    communication.sendAction = [this,
+                               &nbrOfSentStopNotifications,
+                               &nbrOfSentStopOrders]
+                               (int64_t nodeId,
+                                int64_t nodeTypeId,
+                                const boost::shared_ptr<const char[]>& data,
+                                size_t size,
+                                int64_t dataTypeIdentifier,
+                                bool deliveryGuarantee)
+    {
+        if (dataTypeIdentifier == stopOrderMsgTypeId)
+        {
+            BOOST_CHECK(nodeId == 0);
+            BOOST_CHECK(nodeTypeId == 1111 || nodeTypeId == 2222);
+
+            auto cmd = Control::DeserializeCmd(data.get(), size);
+            BOOST_CHECK(cmd.first == Control::STOP);
+            BOOST_CHECK(cmd.second == 0);
+
+            BOOST_CHECK(deliveryGuarantee == true);
+            ++nbrOfSentStopOrders;
+
+            if (nbrOfSentStopOrders == 2)
+            {
+                stopHandler->RemoveNode(5678);
+                stopHandler->RemoveNode(1234);
+            }
+        }
+        else if (dataTypeIdentifier == stopNotificationMsgTypeId)
+        {
+            ++nbrOfSentStopNotifications;
+        }
+        else
+        {
+            BOOST_FAIL("Unexpected dataTypeIdentifier");
+        }
+        return true;
+    };
+
+    RunIoService();
+
+    BOOST_CHECK(nbrOfSentStopOrders == 2);
+    BOOST_CHECK(nbrOfSentStopNotifications == 0); // all other nodes are gone before this node dies
+    BOOST_CHECK(stopSafirNodeCb == 1);
+    BOOST_CHECK(shutdownCb == 0);
+    BOOST_CHECK(rebootCb == 0);
+    BOOST_CHECK(stopSystemCb == 1);
+}
+
+BOOST_AUTO_TEST_CASE( stop_system_external_nodes_unresponsive )
+{
+    stopHandler->Start();
+    stopHandler->AddNode(1234, 1111);
+    stopHandler->AddNode(5678, 2222);
+    ioService.post([this](){controlCmdCallback(Control::STOP, 0);});
+
+    auto nbrOfSentStopNotifications = 0;
+    auto nbrOfSentStopOrders = 0;
+
+    communication.sendAction = [this,
+                               &nbrOfSentStopNotifications,
+                               &nbrOfSentStopOrders]
+                               (int64_t nodeId,
+                                int64_t nodeTypeId,
+                                const boost::shared_ptr<const char[]>& data,
+                                size_t size,
+                                int64_t dataTypeIdentifier,
+                                bool deliveryGuarantee)
+    {
+        if (dataTypeIdentifier == stopOrderMsgTypeId)
+        {
+            BOOST_CHECK(nodeId == 0);
+            BOOST_CHECK(nodeTypeId == 1111 || nodeTypeId == 2222);
+
+            auto cmd = Control::DeserializeCmd(data.get(), size);
+            BOOST_CHECK(cmd.first == Control::STOP);
+            BOOST_CHECK(cmd.second == 0);
+
+            BOOST_CHECK(deliveryGuarantee == true);
+            ++nbrOfSentStopOrders;
+        }
+        else if (dataTypeIdentifier == stopNotificationMsgTypeId)
+        {
+            BOOST_CHECK(nodeId == 0);
+            BOOST_CHECK(nodeTypeId == 1111 || nodeTypeId == 2222);
+            BOOST_CHECK(deliveryGuarantee == false);
+
+            ++nbrOfSentStopNotifications;
+        }
+        else
+        {
+            BOOST_FAIL("Unexpected dataTypeIdentifier");
+        }
+        return true;
+    };
+
+    RunIoService();
+
+    BOOST_CHECK(nbrOfSentStopOrders > 2);
+    BOOST_CHECK(nbrOfSentStopNotifications == 4); // 2 node types, 2 messages each
+    BOOST_CHECK(stopSafirNodeCb == 1);
+    BOOST_CHECK(shutdownCb == 0);
+    BOOST_CHECK(rebootCb == 0);
+    BOOST_CHECK(stopSystemCb == 1);
+}
+
+//BOOST_AUTO_TEST_CASE( receive_node_stop_cmd )
 //{
 //    stopHandler->Start();
-//    stopHandler->AddNode(1234, 1111);
-//    stopHandler->AddNode(5678, 2222);
-//    ioService.post([this](){controlCmdCallback(Control::STOP, 0);});
 
-//    auto nbrOfSentStopNotifications = 0;
-//    auto nbrOfSentStopOrders = 0;
+//    ioService.post([this]()
+//                   {
+//                       BOOST_CHECK(communication.setDataReceiverCalls.size() == 2);
 
-//    communication.sendAction = [this, &nbrOfSend](int64_t nodeId,
-//                                                  int64_t nodeTypeId,
-//                                                  const boost::shared_ptr<const char[]>& data,
-//                                                  size_t size,
-//                                                  int64_t dataTypeIdentifier,
-//                                                  bool deliveryGuarantee)
-//    {
-//        BOOST_CHECK(nodeId == 0);
-//        BOOST_CHECK(nodeTypeId == 1111 || nodeTypeId == 2222);
+//                       auto stopOrder = Control::SerializeCmd(Control::STOP, communication.Id());
 
-//        BOOST_CHECK(dataTypeIdentifier == stopNotificationMsgTypeId);
-//        BOOST_CHECK(deliveryGuarantee == false);
-
-//        ++nbrOfSend;
-
-//        if (nbrOfSend == 4)
-//        {
-//            stopHandler->RemoveNode(5678);
-//            stopHandler->RemoveNode(1234);
-//        }
-
-//        BOOST_CHECK(stopSystemCb == 0);
-//        BOOST_CHECK(stopSafirNodeCb == 0);
-
-//        return true;
-//    };
+//                       communication.setDataReceiverCalls[0].first(1234, 1111, stopOrder.first.get(), stopOrder.second);
+//                   });
 
 //    RunIoService();
 
-//    BOOST_CHECK(nbrOfSend == 4); // 2 node types, 2 messages each
-//    BOOST_CHECK(stopSafirNodeCb == 1);
-//    BOOST_CHECK(shutdownCb == 0);
-//    BOOST_CHECK(rebootCb == 0);
-//    BOOST_CHECK(stopSystemCb == 1);
+//    BOOST_CHECK(sp.excludedNodes.size() == 1);
+//    //BOOST_CHECK(sp.excludedNodes[0] == 1234);
 //}
 
 BOOST_AUTO_TEST_SUITE_END()
