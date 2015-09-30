@@ -302,23 +302,26 @@ namespace Control
                 return;
             }
 
+            // We are about to die, stop any sending of stop commands to other nodes
+            m_sendTimer.cancel();
+
             // Tell other nodes that this node is about to stop.
             SendStopNotification();
 
             // Wait a short while and then send the notification again, just in case.
 
             m_stopTimer.expires_from_now(boost::chrono::milliseconds(300));
-            m_stopTimer.async_wait([this](const boost::system::error_code& error)
-                                   {
-                                       if (error == boost::asio::error::operation_aborted)
-                                       {
-                                           return;
-                                       }
-                                       SendStopNotification();
+            m_stopTimer.async_wait(m_strand.wrap([this](const boost::system::error_code& error)
+                                                 {
+                                                     if (error == boost::asio::error::operation_aborted)
+                                                     {
+                                                         return;
+                                                     }
+                                                     SendStopNotification();
 
-                                       // The notification has been sent a second time, now we stop this node
-                                       m_stopSafirNodeCb();
-                                   });
+                                                     // The notification has been sent a second time, now we stop this node
+                                                     m_stopSafirNodeCb();
+                                                 }));
         }
 
         void HandleLocalNodeStop(CommandAction cmdAction)
@@ -369,15 +372,14 @@ namespace Control
             }
 
             m_sendTimer.expires_from_now(boost::chrono::seconds(0));
-            m_sendTimer.async_wait([this](const boost::system::error_code& error)
-                                   {
-                                       if (error == boost::asio::error::operation_aborted)
-                                       {
-                                           return;
-                                       }
-                                       SendAllOutstanding();
-                                   });
-
+            m_sendTimer.async_wait(m_strand.wrap([this](const boost::system::error_code& error)
+                                                 {
+                                                     if (error == boost::asio::error::operation_aborted)
+                                                     {
+                                                         return;
+                                                     }
+                                                     SendAllOutstanding();
+                                                 }));
         }
 
         void StopExternalNode(Control::CommandAction cmdAction, int64_t cmdNodeId, int64_t toNodeId)
@@ -402,14 +404,14 @@ namespace Control
                                          m_nodeTypeTable[nodeIt->second.nodeTypeId];
 
             m_sendTimer.expires_from_now(boost::chrono::seconds(0));
-            m_sendTimer.async_wait([this](const boost::system::error_code& error)
-                                   {
-                                       if (error == boost::asio::error::operation_aborted)
-                                       {
-                                           return;
-                                       }
-                                       SendAllOutstanding();
-                                   });
+            m_sendTimer.async_wait(m_strand.wrap([this](const boost::system::error_code& error)
+                                                 {
+                                                     if (error == boost::asio::error::operation_aborted)
+                                                     {
+                                                         return;
+                                                     }
+                                                     SendAllOutstanding();
+                                                 }));
         }
 
         void SendAllOutstanding()
@@ -478,14 +480,14 @@ namespace Control
                 }
 
                 m_sendTimer.expires_from_now(boost::chrono::seconds(1));
-                m_sendTimer.async_wait([this](const boost::system::error_code& error)
-                                       {
-                                           if (error == boost::asio::error::operation_aborted)
-                                           {
-                                               return;
-                                           }
-                                           SendAllOutstanding();
-                                       });
+                m_sendTimer.async_wait(m_strand.wrap([this](const boost::system::error_code& error)
+                                                     {
+                                                         if (error == boost::asio::error::operation_aborted)
+                                                         {
+                                                             return;
+                                                         }
+                                                         SendAllOutstanding();
+                                                     }));
             }
             else if (m_localNodeStopInProgress)
             {
@@ -513,14 +515,21 @@ namespace Control
             {
                 // Receivied a system stop command
 
-                if (m_systemStop && from < m_communication.Id())
+                if (m_systemStop)
                 {
-                    // Ignore the stop command if this node is in system stop mode itsef
-                    // and the sender has a lower nodeId.
-                    return;
-                }
+                    // We are already in "system stop mode"
 
-                m_stopSystemCb();
+                    if (from < m_communication.Id())
+                    {
+                        // Ignore the stop command if this node is in system stop mode itself
+                        // and the sender has a lower nodeId.
+                        return;
+                    }
+                }
+                else
+                {
+                    m_stopSystemCb();
+                }
             }
 
             StopThisNode();
