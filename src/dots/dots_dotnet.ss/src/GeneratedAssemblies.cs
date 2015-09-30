@@ -96,7 +96,7 @@ namespace Safir.Dob.Typesystem
                 }
                 else
                 {
-                    m_assemblies.Add(System.Reflection.Assembly.LoadFile
+                    m_assemblies.Add(System.Reflection.Assembly.LoadFrom
                                      (lib.dotnetAssemblyLocation + "/" + lib.dotnetAssemblyName + ".dll"));
                 }
             }
