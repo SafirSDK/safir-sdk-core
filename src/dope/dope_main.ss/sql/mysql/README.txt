@@ -13,5 +13,3 @@ IMPORTANT
 MySQL/MariaDB needs one setting changed in my.cnf, otherwise Dope cannot work with
 large objects in the database.
 Set max_allowed_packet in the [mysqld] section to something large, e.g. 10M or 100M.
-
-Also make sure that your database is configured to use utf-8.
