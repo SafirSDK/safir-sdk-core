@@ -3163,7 +3163,7 @@ If you want the nodes to talk to each other you will need to set up seeding, as 
 above, but it is of course possible to run two completely separate and different systems.
 
 [[local_objects]]
-===== Local objects
+==== Local objects
 One last thing, _Local objects_ - objects that are not sent over the network.
 
 For some entities, services and messages it is not desirable to have them sent over the
