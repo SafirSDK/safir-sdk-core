@@ -313,8 +313,12 @@ def run_test_slave():
 
 def run_database_tests():
     log("Running Dope tests")
+    if os.environ["Driver"] == "ms-sql":
+        hostname = "ms-sql-server\\SQLEXPRESS"
+    else:
+        hostname = "databases"
     args = ["--driver", os.environ["Driver"],
-            "--hostname", "databases",
+            "--hostname", hostname,
             "--database", os.environ.get("label").replace("-","")]
     if sys.platform == "win32":
         dope_result = subprocess.call(["run_dope_odbc_backend_test.py",] + args, shell = True)
