@@ -3145,6 +3145,21 @@ A simple way to use this in a Client/Server system is to have all nodes list all
 server nodes' addresses in their seed list. This way, when any node starts, it will
 attempt to connect to all servers, which will then tell it about all other clients.
 
+===== Node discovery and startup times
+When a node starts it will wait for a certain amount of time to see if there is an
+existing system to join on the network. If no existing system is discovered during this
+time the node will start a new system of its own, possibly together with other newly
+started nodes.
+
+This ``AloneTimeout'' is calculated to be the maximum value of 2 * MaxLostHeartbeats *
+HeartbeatInterval for all node types.
+
+The practical upshot of this is that if you configure one node type to have very large
+values for these then nodes will appear slow to start. But this is all to be expected,
+since the reason for setting large values is that a node type has bad connectivity, and
+then we may need a long time to discover it.
+
+
 [[multiple-nodes-on-one-computer]]
 ==== Multiple nodes on one computer
 
