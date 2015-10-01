@@ -12,3 +12,6 @@ IMPORTANT
 ---------
 The sizes of the XMLDATA, BINARYDATA and BINARYSMALLDATA columns must correspond to the
 size values in Safir.Dob.PersistenceParameters.
+
+On Windows you may have to set XmlDataColumnIsUtf8 in Safir.Dob.PersistenceParameters to
+False.
