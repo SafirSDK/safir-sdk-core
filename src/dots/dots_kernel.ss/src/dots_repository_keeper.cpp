@@ -161,7 +161,7 @@ namespace Internal
         catch (const boost::interprocess::interprocess_exception&)
         {
             SEND_SYSTEM_LOG(Error, << "Ran out of shared memory while loading types and parameters." <<std::endl
-                            << "Please increase the sharemd memory size specified in typesystem.ini");
+                            << "Please increase the shared memory size specified in typesystem.ini");
             localRepository.reset();
             m_repository=NULL;
             return;
