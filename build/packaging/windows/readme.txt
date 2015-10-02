@@ -36,15 +36,16 @@ that you need to have installed on your machine.
 
 For developing Safir SDK Core applications you need:
 
-* Python 2.7 or later (https://www.python.org/downloads/)
-* CMake 3.0 or later (http://www.cmake.org/download/)
-* Microsoft Visual Studio
+ * Python 2.7 or later (https://www.python.org/downloads/)
+ * CMake 3.0 or later (http://www.cmake.org/download/)
+ * Microsoft Visual Studio
+ * Microsoft .NET Framework 4.5 or later
 
 For the Safir SDK Core Runtime (i.e. just running applications that are built on Safir
 SDK Core) you need:
 
  * Microsoft Visual C++ Redistributable (http://support.microsoft.com/kb/2019667).
- * Microsoft .NET Framework 4 or later
+ * Microsoft .NET Framework 4.5 or later
 
 Note that the version of Visual Studio has to match the build of Safir SDK Core that you
 install. So, if you're using Visual Studio 2013, make sure you're using the VS2013 build
@@ -64,11 +65,11 @@ Bundled Software
 The Safir SDK Core windows installer comes with some bundled software, that is used
 internally and that is used in our interfaces:
 
-* Boost C++ Libraries (http://www.boost.org) - All headers and a subset of the Boost
-  libraries are bundled.
-* Qt runtime (http://www.qt.io) - used by dobmake and dobexplorer.
-* Ninja (https://github.com/martine/ninja/releases) - Build system that can run in
-  parallel.
+ * Boost C++ Libraries (http://www.boost.org) - All headers and a subset of the Boost
+   libraries are bundled.
+ * Qt runtime (http://www.qt.io) - used by dobmake and dobexplorer.
+ * Ninja (https://github.com/martine/ninja/releases) - Build system that can run in
+   parallel.
 
 License terms for these can be found at their respective web sites, but in short there
 are no surprises there, nothing that should affect your ability to use Safir SDK Core
