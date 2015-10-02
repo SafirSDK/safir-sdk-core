@@ -59,25 +59,7 @@ namespace System
             }
         }
 
-        private static void CopyFields(object originalObject,
-                                       IDictionary<object, object> visited,
-                                       object cloneObject,
-                                       Type typeToReflect)
-        {
-            CopyFields(originalObject,
-                       visited,
-                       cloneObject,
-                       typeToReflect,
-                       BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.FlattenHierarchy,
-                       null);
-        }
-
-        private static void CopyFields(object originalObject,
-                                       IDictionary<object, object> visited,
-                                       object cloneObject,
-                                       Type typeToReflect,
-                                       BindingFlags bindingFlags,
-                                       Func<FieldInfo, bool> filter)
+        private static void CopyFields(object originalObject, IDictionary<object, object> visited, object cloneObject, Type typeToReflect, BindingFlags bindingFlags = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.FlattenHierarchy, Func<FieldInfo, bool> filter = null)
         {
             foreach (FieldInfo fieldInfo in typeToReflect.GetFields(bindingFlags))
             {
