@@ -288,12 +288,12 @@ BOOST_AUTO_TEST_CASE( stop_non_existing_external_node )
     ioService.post([this](){controlCmdCallback(Control::STOP, 5678);});
 
     auto nbrOfSend = 0;
-    communication.sendAction = [this, &nbrOfSend](int64_t nodeId,
-                                                  int64_t nodeTypeId,
-                                                  const boost::shared_ptr<const char[]>& data,
-                                                  size_t size,
-                                                  int64_t dataTypeIdentifier,
-                                                  bool deliveryGuarantee) -> bool
+    communication.sendAction = [this, &nbrOfSend](int64_t /*nodeId*/,
+                                                  int64_t /*nodeTypeId*/,
+                                                  const boost::shared_ptr<const char[]>& /*data*/,
+                                                  size_t /*size*/,
+                                                  int64_t /*dataTypeIdentifier*/,
+                                                  bool /*deliveryGuarantee*/) -> bool
     {
         ++nbrOfSend;
         return true;
@@ -619,12 +619,12 @@ BOOST_AUTO_TEST_CASE( system_stop_cmd_while_in_system_stop_mode )
     communication.sendAction = [this,
                                &nbrOfSentStopNotifications,
                                &nbrOfSentStopOrders]
-                               (int64_t nodeId,
-                                int64_t nodeTypeId,
-                                const boost::shared_ptr<const char[]>& data,
-                                size_t size,
+                               (int64_t /*nodeId*/,
+                                int64_t /*nodeTypeId*/,
+                                const boost::shared_ptr<const char[]>& /*data*/,
+                                size_t /*size*/,
                                 int64_t dataTypeIdentifier,
-                                bool deliveryGuarantee) -> bool
+                                bool /*deliveryGuarantee*/) -> bool
     {
         if (dataTypeIdentifier == stopOrderMsgTypeId)
         {
@@ -679,12 +679,12 @@ BOOST_AUTO_TEST_CASE( ignored_system_stop_cmd_while_in_system_stop_mode )
     communication.sendAction = [this,
                                &nbrOfSentStopNotifications,
                                &nbrOfSentStopOrders]
-                               (int64_t nodeId,
-                                int64_t nodeTypeId,
-                                const boost::shared_ptr<const char[]>& data,
-                                size_t size,
+                               (int64_t /*nodeId*/,
+                                int64_t /*nodeTypeId*/,
+                                const boost::shared_ptr<const char[]>& /*data*/,
+                                size_t /*size*/,
                                 int64_t dataTypeIdentifier,
-                                bool deliveryGuarantee) -> bool
+                                bool /*deliveryGuarantee*/) -> bool
     {
         if (dataTypeIdentifier == stopOrderMsgTypeId)
         {
