@@ -70,12 +70,13 @@ class Parameters:
 
         #set up the connection string, starting with the driver specific parts
         if self.driver == "mimer":
-            self.connection_string = "Driver={{{driver}}};Protocol=tcp;Node={hostname};Database={database};Uid=dopeuser;Pwd=dopeuser"
+            self.connection_string = "Driver={{{driver}}};Protocol=tcp;Node={hostname};"
         elif self.driver == "mysql":
-            self.connection_string = "DRIVER={{{driver}}};Server={hostname};charset=utf8;Database={database};Uid=dopeuser;Pwd=dopeuser"
+            self.connection_string = "DRIVER={{{driver}}};Server={hostname};charset=utf8;"
         elif self.driver == "ms-sql":
-            self.connection_string = "Driver={{{driver}}};Server={hostname};Database={database};Trusted_Connection=Yes;"
+            self.connection_string = "Driver={{{driver}}};Server={hostname};"
 
+        self.connection_string += "Database={database};Uid=dopeuser;Pwd=dopeuser"
 
         self.connection_string = self.connection_string.format(driver = driver,
                                                                hostname = options.hostname,
