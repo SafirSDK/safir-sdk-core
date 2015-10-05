@@ -31,7 +31,7 @@
         <summary>If this is true the XmlData column is manipulated using char operations instead of wchar_t operations. Needs to be False on MS SQL Server.</summary>
         <name>XmlDataColumnIsUtf8</name>
         <type>Boolean</type>
-        <value>True</value>
+        <value>@DEFAULT_XML_DATA_COLUMN_IS_UTF_8@</value>
       </parameter>
       <parameter>
         <summary>The size of the BinaryData column in the database. Unit is bytes.</summary>

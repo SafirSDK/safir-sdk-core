@@ -1,12 +1,10 @@
 if (UNIX)
   set(DEFAULT_FILE_PERSISTENCE_DIRECTORY /var/lib/safir-sdk-core/persistence/)
-else()
-  set(DEFAULT_FILE_PERSISTENCE_DIRECTORY @{CSIDL_COMMON_APPDATA}/safir-sdk-core/persistence)
-endif()
-
-if (UNIX)
+  set(DEFAULT_XML_DATA_COLUMN_IS_UTF_8 True)
   set(DEFAULT_INCARNATION_BLACKLIST /var/lib/safir-sdk-core/system-incarnation-blacklist@{SAFIR_INSTANCE}.txt)
 else()
+  set(DEFAULT_FILE_PERSISTENCE_DIRECTORY @{CSIDL_COMMON_APPDATA}/safir-sdk-core/persistence)
+  set(DEFAULT_XML_DATA_COLUMN_IS_UTF_8 False)
   set(DEFAULT_INCARNATION_BLACKLIST @{CSIDL_COMMON_APPDATA}/safir-sdk-core/system-incarnation-blacklist@{SAFIR_INSTANCE}.txt)
 endif()
 
