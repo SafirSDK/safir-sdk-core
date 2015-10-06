@@ -154,7 +154,14 @@ def dou_uniform_lookup_add(dou_uniform_lookup_cache,
         print ("Duplicate dou file", os.path.join(path,file), file=sys.stderr)
         sys.exit(1) #ok to use exit, not called inside multiprocess
 
-    dou_xml = ET.parse(os.path.join(path, file))
+    try:
+        dou_xml = ET.parse(os.path.join(path, file))
+    except ET.ParseError as e:
+        print (os.path.abspath(os.path.join(path, file)) +
+               ":" + str(e.position[0]) + ":" + str(e.position[1]) +
+               ": error: " + str(e))
+        sys.exit(1) #ok to use exit, not called inside multiprocess
+
     xml_root = dou_xml.getroot()
     dou_type = xml_root.tag.split("}")[1]
     # Make first char uppercase
