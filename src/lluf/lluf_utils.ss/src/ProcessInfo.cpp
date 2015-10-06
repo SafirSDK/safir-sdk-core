@@ -166,7 +166,6 @@ namespace Utilities
 
         std::unique_ptr<HMODULE[]> hMod;
         DWORD cbNeededMBN = sizeof(HMODULE);
-        BOOL result = FALSE;
 
         for (int retry = 0; retry < 20; ++retry)
         {
