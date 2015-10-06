@@ -514,8 +514,8 @@ A parameter can also be a dictionary of key/value pairs, as shown in the example
     <parameters>
         <parameter>
             <name>StringsMappedToDoubles</name>
-            <type>String</type>
-            <dictionary keyType="Float64">
+            <type>Float64</type>
+            <dictionary keyType="String">
                 <entry>
                     <key>Hot</key>
                     <value>65.4321</value>
