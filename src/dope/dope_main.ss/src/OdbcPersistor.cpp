@@ -715,6 +715,11 @@ OdbcPersistor::DisconnectOdbcConnection()
         Disconnect(m_odbcConnection);
         m_isOdbcConnected = false;
     }
+
+    m_storeIsValid = false;
+    m_insertIsValid = false;
+    m_deleteAllIsValid = false;
+    m_deleteIsValid = false;
 }
 
 
