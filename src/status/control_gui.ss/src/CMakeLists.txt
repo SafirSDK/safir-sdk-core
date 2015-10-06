@@ -30,4 +30,4 @@ TARGET_LINK_LIBRARIES(safir_control_gui PRIVATE
     lluf_crash_reporter
     )
 
-SAFIR_INSTALL(TARGETS safir_control_gui DEVELOPMENT)
+SAFIR_INSTALL(TARGETS safir_control_gui)
