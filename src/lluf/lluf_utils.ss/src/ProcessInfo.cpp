@@ -164,55 +164,51 @@ namespace Utilities
         char szProcessName[MAX_PATH];
         strncpy(szProcessName,boost::lexical_cast<std::string>(m_pid).c_str(), MAX_PATH);
 
-        std::unique_ptr<HMODULE[]> hMod(new HMODULE[1]);
-        DWORD cbNeededMBN;
+        std::unique_ptr<HMODULE[]> hMod;
+        DWORD cbNeededMBN = sizeof(HMODULE);
+        BOOL result = FALSE;
 
-        const BOOL ret = EnumProcessModules(hProcess,
-                                            hMod.get(),
-                                            sizeof(HMODULE),
-                                            &cbNeededMBN);
-        if (!ret)
+        for (int retry = 0; retry < 20; ++retry)
         {
-            std::wcerr << "EnumProcessModules failed with error code "
-                       << ::GetLastError() << " cbNeededMBN = " << cbNeededMBN
-                       << std::endl;
-
             hMod.reset(new HMODULE[cbNeededMBN/sizeof(HMODULE)]);
-            const BOOL ret2 = EnumProcessModules(hProcess,
-                                                 hMod.get(),
-                                                 cbNeededMBN,
-                                                 &cbNeededMBN);
-            if (!ret2)
+            const BOOL result = EnumProcessModules(hProcess,
+                                                   hMod.get(),
+                                                   cbNeededMBN,
+                                                   &cbNeededMBN);
+            if (!result)
             {
-                std::wcerr << "Retry EnumProcessModules failed: "
+                std::wcerr << "EnumProcessModules attempt " << retry << " failed: "
                            << ::GetLastError() << " cbNeededMBN = " << cbNeededMBN
                            << std::endl;
             }
             else
             {
-                std::wcerr << "Retry EnumProcessModules succeeded: "
-                           << " cbNeededMBN = " << cbNeededMBN
-                           << std::endl;
-
-                for (unsigned int i = 0; i < cbNeededMBN/sizeof(HMODULE); ++i)
+                if (retry > 0) //TODO clean up all this debug output!
                 {
-                    char pn[MAX_PATH];
-                    BOOL ret3 = GetModuleBaseNameA( hProcess, hMod[i], pn, MAX_PATH );
-                    if (!ret3)
-                    {
-                        std::wcout << "GetModuleBaseNameA failed " << i << " " << GetLastError() << std::endl;
-                    }
-                    else
-                    {
-                        std::wcout << "GetModuleBaseNameA " << i << ": " << pn << std::endl;
-                    }
-                }
-            }
+                    std::wcerr << "EnumProcessModules attempt " << retry << " succeeded!" << std::endl;
 
-        }
-        else //TODO: remove else and brackets (not statement)
-        {
-            GetModuleBaseNameA( hProcess, hMod[0], szProcessName, MAX_PATH );
+                    if (cbNeededMBN/sizeof(HMODULE) > 1)
+                    {
+                        for (unsigned int i = 0; i < cbNeededMBN/sizeof(HMODULE); ++i)
+                        {
+                            char pn[MAX_PATH];
+                            BOOL ret3 = GetModuleBaseNameA( hProcess, hMod[i], pn, MAX_PATH );
+                            if (!ret3)
+                            {
+                                std::wcout << "GetModuleBaseNameA failed " << i << " " << GetLastError() << std::endl;
+                            }
+                            else
+                            {
+                                std::wcout << "GetModuleBaseNameA " << i << ": " << pn << std::endl;
+                            }
+                        }
+                    }
+                    break; //we break out here so that we return an incorrect process name to make the test case fail.
+                }
+
+                GetModuleBaseNameA( hProcess, hMod[0], szProcessName, MAX_PATH );
+                break;
+            }
         }
 
         CloseHandle(hProcess);
