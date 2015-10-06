@@ -85,7 +85,7 @@
        <string>Control Address</string>
       </property>
       <property name="toolTip">
-       <string>Address of node</string>
+       <string>Address of node's Control channel.</string>
       </property>
      </column>
      <column>
@@ -93,7 +93,7 @@
        <string>Data Address</string>
       </property>
       <property name="toolTip">
-       <string>Is this node multicast enabled.</string>
+       <string>Address of node's Data channel.</string>
       </property>
      </column>
     </widget>
