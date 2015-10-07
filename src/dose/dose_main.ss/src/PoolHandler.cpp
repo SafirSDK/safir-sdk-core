@@ -57,8 +57,17 @@ namespace Internal
         ,m_pdCompleteSignaled(false)
         ,m_numReceivedPdComplete(0)
     {
-        m_persistHandler.reset(new PersistHandler(m_strand.get_io_service(), distribution, logStatus, [=]{OnPersistenceReady();}, // persistentDataReadyCb
-                                                       [=]{Connections::Instance().AllowConnect(-1);})); // persistentDataAllowedCb
+        m_persistHandler.reset(new PersistHandler(m_strand.get_io_service(),
+                                                  distribution,
+                                                  logStatus,
+                                                  [=] // persistentDataReadyCb
+                                                  {
+                                                      OnPersistenceReady();
+                                                  },
+                                                  [=] // persistentDataAllowedCb
+                                                  {
+                                                      Connections::Instance().AllowConnect(-1);
+                                                  }));
 
         auto injectNode=[=](const std::string&, int64_t id, int64_t nt, const std::string&)
         {
@@ -124,7 +133,8 @@ namespace Internal
                                                           [](const char* data){DistributionData::DropReference(data);});
 
         //create one StateDistributor per nodeType
-        for (auto nt = distribution.GetNodeTypeConfiguration().nodeTypesParam.cbegin(); nt != distribution.GetNodeTypeConfiguration().nodeTypesParam.cend(); ++nt)
+        for (auto nt = distribution.GetNodeTypeConfiguration().nodeTypesParam.cbegin();
+             nt != distribution.GetNodeTypeConfiguration().nodeTypesParam.cend(); ++nt)
         {
             auto sd=std::unique_ptr<StateDistributorType>(new StateDistributorType(nt->id,
                                                                                    distribution,
@@ -145,11 +155,13 @@ namespace Internal
 
             if (m_numReceivedPdComplete==0) //got persistence from Dope
             {
-                m_poolDistributionRequests.PoolDistributionFinished(0); //clear all, we dont care anymore for other nodes pools
+                //clear all, we dont care anymore for other nodes pools
+                m_poolDistributionRequests.PoolDistributionFinished(0);
             }
             else //got persistence from other node
             {
-                m_poolDistributor.SetHaveNothing(); //tell poolDistributor that until we are started, we have no pool or persistence to provide
+                //tell poolDistributor that until we are started, we have no pool or persistence to provide
+                m_poolDistributor.SetHaveNothing();
             }
             m_persistensReady=true;
             SignalPdComplete();
@@ -454,7 +466,8 @@ namespace Internal
             break;
         case DistributionData::Injection:
             {
-                ENSURE(state.GetSenderId().m_id == -1, << "Injection states are expected to have ConnectionId == -1! Injection for "
+                ENSURE(state.GetSenderId().m_id == -1,
+                       << "Injection states are expected to have ConnectionId == -1! Injection for "
                        << state.GetEntityId());
                 EntityTypes::Instance().RemoteSetInjectionEntityState(state);
             }
