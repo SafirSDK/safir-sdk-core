@@ -69,7 +69,7 @@ namespace
         );
 
         for (auto nt = distribution.GetNodeTypeIds().cbegin(); nt != distribution.GetNodeTypeIds().cend(); ++nt)
-        
+
         {
             m_sendQueues.insert(std::make_pair(*nt, SendQueue()));
             m_communication.SetQueueNotFullCallback([=](int64_t)
@@ -100,6 +100,12 @@ namespace
                 {
                     lllog(4)<<"ConnectionHandler - RemoveConnection "<<state.GetConnectionName()<<std::endl;
                     const ConnectionPtr connection = Connections::Instance().GetConnection(state.GetSenderId(), std::nothrow);
+                    if (connection == nullptr)
+                    {
+                        lllog(4) << "We don't have that connection, discarding Disconnect" << std::endl;
+                        return;
+                    }
+
                     m_onAppEvent(connection, true);
                     Connections::Instance().RemoveConnection(connection);
                     m_poolHandler.HandleDisconnect(state.GetSenderId());
