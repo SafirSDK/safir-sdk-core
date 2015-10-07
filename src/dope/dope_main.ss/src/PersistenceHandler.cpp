@@ -31,7 +31,8 @@
 #include <Safir/Dob/AccessDeniedException.h>
 #include <Safir/Dob/Typesystem/Exceptions.h>
 #include <Safir/Dob/Typesystem/Serialization.h>
-#include <Safir/Dob/SuccessResponse.h>
+#include <Safir/Dob/ErrorResponse.h>
+#include <Safir/Dob/ResponseGeneralErrorCodes.h>
 #include <Safir/Dob/Typesystem/Operations.h>
 #include <Safir/Dob/Typesystem/ObjectFactory.h>
 #include <Safir/Logging/Log.h>
@@ -473,12 +474,23 @@ PersistenceHandler::OnResponse(const Safir::Dob::ResponseProxy responseProxy)
     m_debug << "Got this response to the PersistenceDataReady request:" << std::endl
             << Safir::Dob::Typesystem::Serialization::ToXml(responseProxy.GetBlob()) << std::endl;
 
-    if (!responseProxy.IsSuccess())
+    if (responseProxy.IsSuccess())
     {
-        Safir::Logging::SendSystemLog(Safir::Logging::Error,
-                                      L"Did not get a SuccessResponse to the PersistentDataReady request to Dose. Response: "
-                                      + Safir::Dob::Typesystem::Serialization::ToXml(responseProxy.GetBlob()));
+        return;
     }
+
+    const auto error = boost::dynamic_pointer_cast<Safir::Dob::ErrorResponse>(responseProxy.GetResponse());
+    if (error != nullptr && error->Code() == Safir::Dob::ResponseGeneralErrorCodes::SafirNotRegistered())
+    {
+        //This is probably due to the dose_main having got persistence from somewhere else, and
+        //has closed the connection.
+        return;
+    }
+
+    Safir::Logging::SendSystemLog(Safir::Logging::Error,
+                                  L"Did not get a SuccessResponse to the PersistentDataReady request to Dose. Response: "
+                                  + Safir::Dob::Typesystem::Serialization::ToXml(responseProxy.GetBlob()));
+
 }
 
 //-------------------------------------------------------
