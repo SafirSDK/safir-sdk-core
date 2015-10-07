@@ -421,6 +421,8 @@ namespace Internal
                 EntityTypes::Instance().RemoteSetRegistrationState(ConnectionPtr(), state);
             }
 
+            HandleStatesWaitingForRegistration(state);
+
             auto sdIt=m_stateDistributors.find(fromNodeType);
             if (sdIt!=m_stateDistributors.end())
             {

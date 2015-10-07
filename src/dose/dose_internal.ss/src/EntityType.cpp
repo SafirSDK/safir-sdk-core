@@ -1670,6 +1670,15 @@ namespace Internal
                 result = RemoteSetDiscarded;
                 return;
             }
+
+            if (!regStatePtr->GetRealState().IsRegistered() &&
+                remoteEntity.GetEntityStateKind() == DistributionData::Real)
+            {
+                // There is an unregistration state, then we should not set a real entity state
+                lllog(3) << "Skipping remote entity state since it is a real state and there is a corresponding unregistration" << std::endl;
+                result = RemoteSetDiscarded;
+                return;
+            }
         }
 
         //Check if we have an injection state that can be cleared
