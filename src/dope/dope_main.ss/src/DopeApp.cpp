@@ -113,12 +113,25 @@ void DopeApp::OnStopOrder()
 }
 
 //-------------------------------------------------------
-void DopeApp::OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId /*typeId*/,
-                                    const Safir::Dob::Typesystem::HandlerId& /*handlerId*/)
+void DopeApp::OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId typeId,
+                                    const Safir::Dob::Typesystem::HandlerId& handlerId)
 {
-    throw Safir::Dob::Typesystem::SoftwareViolationException
-        (L"Dope got an OnRevokedRegistration! Something is wrong with your configuration!",
-         __WFILE__,__LINE__);
+    if (handlerId != m_handlerId)
+        return;   // DOPE_ENTITY_HANDLER, not used for this purpose. Handle only the "pending" registration.
+
+    //The DEFAULT_HANDLER can be revoked if we're unlucky at startup, since we're starting before
+    //the lamport clocks are correctly synchronised. So we set up a pending registration to
+    //ensure that we can correct any spurious overregistrations.
+
+    m_debug << L"OnRevokedRegistration() " <<  Safir::Dob::Typesystem::Operations::GetName(typeId) +  L":" + handlerId.GetRawString() << std::endl;
+
+    std::wcout << L"Dope is now standby persistence." << std::endl;
+
+    // Start pending registration and wait to be the active dope.
+    m_dobConnection.RegisterEntityHandlerPending(Safir::Dob::PersistentDataStatus::ClassTypeId,
+                                                 m_handlerId,
+                                                 Safir::Dob::InstanceIdPolicy::HandlerDecidesInstanceId,
+                                                 this);
 }
 
 void DopeApp::OnCompletedRegistration(const Safir::Dob::Typesystem::TypeId     typeId,
@@ -226,7 +239,7 @@ void DopeApp::StartUp(bool restore)
 {
     Start(restore);
 
-    if (m_thread.get_id() != boost::thread::id())
+    if (m_thread.get_id() == boost::thread::id())
     {
         // wait for ok to connect on context 0
         m_thread = boost::thread(boost::bind(&DopeApp::ConnectionThread, this));
@@ -287,6 +300,7 @@ void DopeApp::ConnectionThread()
                          {
                              SignalOkToConnect(true);
                          });
+        return;
     }
     catch (Safir::Dob::NotOpenException e)
     {
@@ -304,11 +318,16 @@ void DopeApp::ConnectionThread()
         Safir::Logging::SendSystemLog(Safir::Logging::Critical,
                                       L"Unhandled '...' exception in ConnectionThread");
     }
-    m_ioService.post(boost::bind(&DopeApp::SignalOkToConnect,this, false));
+
+    m_ioService.post([this]
+                     {
+                         SignalOkToConnect(false);
+                     });
 }
 
 void DopeApp::SignalOkToConnect(bool ok)
 {
+    m_debug << "Entering SignalOkToConnect. ok = " << std::boolalpha << ok << std::endl;
     if (ok)
     {
         // use a different handler to register PersistentDataStatus to get the correct registration time.
