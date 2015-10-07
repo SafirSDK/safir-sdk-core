@@ -67,6 +67,7 @@ private:
     QTimer m_updateTimer;
     boost::thread m_doseInternalInitializer;
     boost::atomic<bool> m_doseInternalInitialized;
+    bool m_entitiesAdded;
 };
 
 

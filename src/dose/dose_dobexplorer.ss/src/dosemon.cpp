@@ -59,6 +59,7 @@ namespace
 
 DoseMon::DoseMon(QWidget * /*parent*/)
     : m_doseInternalInitialized(false)
+    , m_entitiesAdded(false)
 {
     setupUi(this); // this sets up GUI
 
@@ -88,10 +89,8 @@ DoseMon::DoseMon(QWidget * /*parent*/)
             SLOT(TreeItemActivated(QTreeWidgetItem*, int)));
 
     connect(&m_updateTimer,SIGNAL(timeout()), this, SLOT(UpdateTreeWidget()));
-    m_updateTimer.start(3000);
+    m_updateTimer.start(1000);
     UpdateTreeWidget();
-
-    AddEntitesToTreeWidget();
 }
 
 
@@ -218,10 +217,12 @@ void DoseMon::CloseTab(int index)
 
 void DoseMon::AddEntitesToTreeWidget()
 {
-    if (!m_doseInternalInitialized)
+    if (!m_doseInternalInitialized || m_entitiesAdded)
     {
         return;
     }
+
+    m_entitiesAdded = true;
 
     using namespace Safir::Dob::Typesystem;
     using namespace Safir::Dob::Typesystem::Operations;
@@ -306,6 +307,9 @@ void DoseMon::UpdateTreeWidget()
     {
         return;
     }
+
+
+    AddEntitesToTreeWidget();
 
     using namespace Safir::Dob::Internal;
 
