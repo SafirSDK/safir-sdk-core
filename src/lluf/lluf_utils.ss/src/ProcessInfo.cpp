@@ -43,6 +43,7 @@
 #include <psapi.h>
 #include <process.h>
 #include <boost/algorithm/string.hpp>
+#include <boost/thread.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <Safir/Utilities/Internal/StringEncoding.h>
 #endif
@@ -179,6 +180,7 @@ namespace Utilities
                 std::wcerr << "EnumProcessModules attempt " << retry << " failed: "
                            << ::GetLastError() << " cbNeededMBN = " << cbNeededMBN
                            << std::endl;
+                boost::this_thread::yield();
             }
             else
             {
