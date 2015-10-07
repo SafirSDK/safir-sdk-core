@@ -29,23 +29,30 @@
 
 #if defined(linux) || defined(__linux) || defined(__linux__)
 
-#include <boost/filesystem/fstream.hpp>
-#include <boost/algorithm/string/join.hpp>
-#include <boost/algorithm/string/predicate.hpp>
-#include <iterator>
+#  include <boost/filesystem/fstream.hpp>
+#  include <boost/algorithm/string/join.hpp>
+#  include <boost/algorithm/string/predicate.hpp>
+#  include <iterator>
 
 #elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
-#ifndef _WIN32_WINNT
-  #define _WIN32_WINNT 0x0501
-#endif
-#include <windows.h>
-#include <shellapi.h>
-#include <psapi.h>
-#include <process.h>
-#include <boost/algorithm/string.hpp>
-#include <boost/thread.hpp>
-#include <boost/algorithm/string/split.hpp>
-#include <Safir/Utilities/Internal/StringEncoding.h>
+
+#  ifndef _WIN32_WINNT
+#    define _WIN32_WINNT 0x0501
+#  endif
+
+#  include <windows.h>
+#  include <shellapi.h>
+#  include <psapi.h>
+#  include <process.h>
+#  include <boost/algorithm/string.hpp>
+#  include <boost/algorithm/string/split.hpp>
+#  include <Safir/Utilities/Internal/StringEncoding.h>
+
+#  pragma warning (push)
+#  pragma warning (disable: 4100)
+#  include <boost/thread.hpp>
+#  pragma warning (pop)
+
 #endif
 
 namespace bfs = boost::filesystem;
