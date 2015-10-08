@@ -117,8 +117,9 @@ namespace Internal
         // Always update the lamport clock
         m_registrationClock.UpdateCurrentTimestamp(registrationState.GetRegistrationTime());
 
-        if (connection == nullptr)
+        if (registrationState.IsRegistered() && connection == nullptr)
         {
+            // Registration states without a connection should not be set
             return false;
         }
 
@@ -351,8 +352,9 @@ namespace Internal
         // Always update the lamport clock
         m_registrationClock.UpdateCurrentTimestamp(entityState.GetRegistrationTime());
 
-        if (connection == nullptr)
+        if (entityState.IsCreated() && connection == nullptr)
         {
+            // Created (non-ghost) entity states without a connection should not be set
             return RemoteSetNeedConnection;
         }
 

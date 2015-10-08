@@ -110,8 +110,9 @@ namespace Internal
         // Always update the lamport clock
         m_registrationClock.UpdateCurrentTimestamp(registrationState.GetRegistrationTime());
 
-        if (connection == nullptr)
+        if (registrationState.IsRegistered() && connection == nullptr)
         {
+            // Registration states without a connection should not be set
             return false;
         }
 
