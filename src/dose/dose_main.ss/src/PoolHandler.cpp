@@ -398,22 +398,23 @@ namespace Internal
 
             const ConnectionPtr connection = Connections::Instance().GetConnection(senderId, std::nothrow);
 
-            if (connection != nullptr)
-            {
-                if (Typesystem::Operations::IsOfType(state.GetTypeId(),Safir::Dob::Service::ClassTypeId))
-                {
-                    ServiceTypes::Instance().RemoteSetRegistrationState(connection,state);
-                }
-                else
-                {
-                    EntityTypes::Instance().RemoteSetRegistrationState(connection,state);
-                }
+            bool remoteSetOk = false;
 
+            if (Typesystem::Operations::IsOfType(state.GetTypeId(),Safir::Dob::Service::ClassTypeId))
+            {
+                remoteSetOk = ServiceTypes::Instance().RemoteSetRegistrationState(connection,state);
+            }
+            else
+            {
+                remoteSetOk = EntityTypes::Instance().RemoteSetRegistrationState(connection,state);
+            }
+
+            if (remoteSetOk)
+            {
                 HandleStatesWaitingForRegistration(state);
             }
             else
             {
-
                 m_waitingStates.Add(state, fromNodeType);
             }
         }
@@ -482,17 +483,11 @@ namespace Internal
                            << state.GetEntityId());
 
                     const ConnectionPtr connection = Connections::Instance().GetConnection(senderId, std::nothrow);
-                    if (connection!=nullptr)
-                    {
-                        const RemoteSetResult result =
-                                EntityTypes::Instance().RemoteSetRealEntityState(connection, state);
 
-                        if (result == RemoteSetNeedRegistration)
-                        {
-                            m_waitingStates.Add(state, fromNodeType);
-                        }
-                    }
-                    else
+                    const RemoteSetResult result =
+                            EntityTypes::Instance().RemoteSetRealEntityState(connection, state);
+
+                    if (result == RemoteSetNeedRegistration || result == RemoteSetNeedConnection)
                     {
                         m_waitingStates.Add(state, fromNodeType);
                     }

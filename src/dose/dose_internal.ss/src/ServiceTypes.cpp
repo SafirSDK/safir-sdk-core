@@ -104,13 +104,20 @@ namespace Internal
         GetType(typeId).UnregisterAll(connection, explicitUnregister);
     }
 
-    void ServiceTypes::RemoteSetRegistrationState(const ConnectionPtr& connection,
+    bool ServiceTypes::RemoteSetRegistrationState(const ConnectionPtr& connection,
                                                   const DistributionData& registrationState)
     {
+        // Always update the lamport clock
         m_registrationClock.UpdateCurrentTimestamp(registrationState.GetRegistrationTime());
+
+        if (connection == nullptr)
+        {
+            return false;
+        }
 
         GetType(registrationState.GetTypeId()).RemoteSetRegistrationState(connection,
                                                                           registrationState);
+        return true;
     }
 
     bool ServiceTypes::IsRegistered(const Dob::Typesystem::TypeId typeId,

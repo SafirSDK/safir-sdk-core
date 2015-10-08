@@ -111,12 +111,20 @@ namespace Internal
         GetType(typeId).UnregisterAll(connection, explicitUnregister);
     }
 
-    void EntityTypes::RemoteSetRegistrationState(const ConnectionPtr& connection,
+    bool EntityTypes::RemoteSetRegistrationState(const ConnectionPtr& connection,
                                                  const DistributionData& registrationState)
     {
+        // Always update the lamport clock
         m_registrationClock.UpdateCurrentTimestamp(registrationState.GetRegistrationTime());
 
+        if (connection == nullptr)
+        {
+            return false;
+        }
+
         GetType(registrationState.GetTypeId()).RemoteSetRegistrationState(connection, registrationState);
+
+        return true;
     }
 
     bool EntityTypes::IsRegistered(const Dob::Typesystem::TypeId        typeId,
@@ -340,7 +348,14 @@ namespace Internal
     RemoteSetResult EntityTypes::RemoteSetRealEntityState(const ConnectionPtr&      connection,
                                                           const DistributionData&   entityState)
     {
+        // Always update the lamport clock
         m_registrationClock.UpdateCurrentTimestamp(entityState.GetRegistrationTime());
+
+        if (connection == nullptr)
+        {
+            return RemoteSetNeedConnection;
+        }
+
         return GetType(entityState.GetTypeId()).RemoteSetRealEntityState(connection, entityState);
     }
 

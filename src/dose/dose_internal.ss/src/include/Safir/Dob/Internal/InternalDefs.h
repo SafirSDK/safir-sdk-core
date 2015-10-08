@@ -76,7 +76,8 @@ namespace Internal
 
     enum RemoteSetResult {RemoteSetAccepted,
                           RemoteSetDiscarded,
-                          RemoteSetNeedRegistration};
+                          RemoteSetNeedRegistration,
+                          RemoteSetNeedConnection};
 
     enum StatePtrHandling {RestorePtr,
                            ReleasePtr,

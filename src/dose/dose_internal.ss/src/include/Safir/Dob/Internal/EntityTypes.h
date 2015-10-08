@@ -88,8 +88,12 @@ namespace Internal
                            const Dob::Typesystem::TypeId  typeId,
                            const bool                     explicitUnregister);
 
-        /** New registration state from external node */
-        void RemoteSetRegistrationState(const ConnectionPtr& connection,
+        // New registration state from external node
+        //
+        // If false is returned the registration state hasn't been set due to a non existing connection.
+        // Note that becasue of lamport clock updates this method must be called even though it is possible
+        // to check the connection before the call.
+        bool RemoteSetRegistrationState(const ConnectionPtr& connection,
                                         const DistributionData& registrationState);
 
         bool IsRegistered(const Dob::Typesystem::TypeId     typeId,
