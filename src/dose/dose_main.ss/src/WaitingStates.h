@@ -135,6 +135,13 @@ namespace Internal
                     return false;
                 }
             }
+
+            std::wstring ToString() const
+            {
+                std::wstringstream os;
+                os << "TypeId=" << typeId << " HandlerId=" << handlerId << "RegTime=" << registrationTime;
+                return os.str();
+            }
         };
 
         typedef std::map<Key,States> WaitingStateTable;
