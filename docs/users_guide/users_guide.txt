@@ -4,7 +4,7 @@
 Safir SDK Core User's Guide
 ==========================
 Lars Hagström, Anders Widén and Joel Ottosson
-2015-08-21
+2015-10-09
 
 :cpp: {basebackend@docbook:c++:cpp}
 :csharp: {basebackend@docbook:c:csharp}
@@ -3438,14 +3438,14 @@ The following table shows the recommended mapping between the report types used 
 Safir SDK Core provides support for stopping one or all of the nodes which constitute a Safir system. In addition, the stop mechanism can also be used to execute a computer shutdown or reboot.
 
 === Start
-The Dob is started by running the executable _safir_control_. This program will in turn start the executable that is the real framework workhorse , dose_main.
+The Dob is started by running the executable +safir_control+. This program will in turn start the executable that is the real framework workhorse , +dose_main+.
 
-How and when safir_control is started is outside the control of Safir SDK Core. For example, the program can be started by a script at computer start-up or manually in a terminal window. 
+How and when +safir_control+ is started is outside the control of Safir SDK Core. For example, the program can be started by a script at computer start-up or manually in a terminal window. 
 
 ==== Why isn't there any support for start of applications?
 You may wonder why there isn't any support for starting applications. The answer is that there are plans for this but as of today this is unimplemented.
 
-This mechanism would provide functionality along these lines:
+The application start mechanism would provide functionality along these lines:
 
 - Let you configure which applications to start on different nodes.
 - Monitor applications.
@@ -3453,40 +3453,63 @@ This mechanism would provide functionality along these lines:
 - Start of applications on fallback nodes in case of application failure. 
 
 === Stop
-A Safir node can be stopped in three different ways
+A Safir node can be stopped in three different ways:
+
 - Safir node stop
 - Computer shutdown
 - Computer reboot
 
-'Stop' is used in this description as a generic term for any of these stop mechanisms.
+`Stop' is used in this description as a generic term for any of these stop mechanisms.
 
 ==== Safir Node Stop
-A Safir node stop will stop all safir-related processes in a controlled fashion. At stop, dose_main will send stop orders to all applications that have a dob connection (see <<stop_orders>>) which means that all application programs will be stopped as well. Note that an application might for some reason (by design or because of a bug) ignore a stop order so there is no absolute guarantee that all applications are stopped.
+A Safir node stop will stop all safir-related processes in a controlled fashion. At stop, +dose_main+ will send stop orders to all applications that have a dob connection (see <<stop_orders>>) which means that all application programs will be stopped as well. Note that an application might for some reason (by design or because of a bug) ignore a stop order so there is no absolute guarantee that all applications are stopped.
 
 ==== Shutdown
-Safir SDK Core provides a mechanism to shutdown the computer where a safir node is running.
+Safir SDK Core provides a mechanism to shutdown the computer where a Safir node is running.
 
 Since the command to execute a computer shutdown is tightly coupled to the operating system and also in many cases involves setting specific arguments, the actual shutdown command is specified by the parameter ShutdownCommand found in Safir.Dob.NodeParameters.
 
-For example, '/usr/bin/shutdown --poweroff now' for Linux or 'C:\\WINDOWS\\System32\\shutdown /s /t 0' for Windows, could be used as shutdown command. The command must be given as an absulute path. Note that it might be necessary to make additional configurations, like setting permissions, outside Safir to be able to run the command.
+For example, +/usr/bin/shutdown --poweroff now+ for Linux or +C:\\WINDOWS\\System32\\shutdown /s /t 0+ for Windows, could be used as shutdown command. The command must be given as an absolute path. Note that it might be necessary to make additional configurations outside Safir, like setting permissions, to be able to run the command.
 
-A computer shutdown initiated by this mechanism will implicitly execute a Safir node stop before the shutdown command, so that the Safir programs are stopped in a controlled fashion.
+A shutdown initiated by this mechanism will implicitly execute a Safir node stop before the shutdown command, which means that the Safir programs will be stopped in a controlled fashion before the computer is shutdown.
 
 ==== Reboot
 Much like the shutdown command Safir SDK Core also provides a mechanism to reboot the computer where a safir node is running.
 
 The reboot command is specified by the parameter RebootCommand found in Safir.Dob.NodeParameters.
 
-Example of a reboot command for Linux: '/usr/bin/shutdown --reboot now', or for Windows: 'C:\\WINDOWS\\System32\\shutdown /r /t 0'.
+Example of a reboot command for Linux: +/usr/bin/shutdown --reboot now+, or for Windows: +C:\\WINDOWS\\System32\\shutdown /r /t 0+.
 
 ==== Stop all nodes
-A stop order can be targeted to a specific node or to all nodes that constitute a Safir system. Stopping all nodes triggers a mechanism that deserves a little more explanation.
+A Safir system stop, that is, an order to stop all nodes that constitute a Safir system, triggers a mechanism that deserves a little more explanation.
 
-All nodes forming a system shares a unique incarnation number. The incarnation number is used to guarantee that an "old" node isn't by mistake included in a newly formed system. The typical scenario is when restarting a system consisting of several nodes. Without the incarnation mechanism a nod that happens to survive a system restart could be included in the restarted system, resulting in a mix of old and new data. 
+All nodes forming a system shares a unique incarnation id. Before a node joins a system it checks the the system incarnation id is not found in a locally kept ``blacklist'' of old incarnation ids. A node adds its current incarnation id to this blacklist when it receives a Safir system stop order.
 
-=== Application interface
+The incarnation mechanism is used to guarantee that an ``old'' node isn't by mistake included in a newly formed system. The typical scenario is when restarting a system consisting of several nodes. Without this mechanism a nod that happens to survive the system restart could be included in the restarted system, resulting in a mix of old and new data.
 
-Beskriv status-program och gui
+== System status and control
+Safir SDK Core provides a GUI application, Node Control, that presents information about the nodes that constitute the system. The GUI can also be used to execute Safir node stop and computer shutdown/reboot of individual nodes or the complete system. 
+
+There is also a simple command line tool that can be used to execute different stop orders.
+
+=== Node Control
+To start the Node Control GUI run +safir_control_gui+.
+
+In order to get system information the GUI needs another program, +safir_status+. This program act as a gateway to the lower parts and exposes a Dob interface that is used by the GUI to control the nodes.
+
+<<node_control_overview>> shows a system with 3 nodes. In this case all three Safir nodes run on the local computer using the loopback address. 
+
+[[node_control_overview]]
+.Node Control screen shot
+ifdef::backend-docbook[]
+image::images/node_control.png["Node Control Screen shot", width="50%"]
+endif::backend-docbook[]
+ifndef::backend-docbook[]
+image::images/node_control.png["Node Control Screen shot", link="images/node_control.png"]
+endif::backend-docbook[]
+
+=== Command Line Tool
++safir_control_cli+ is a simple command line tool that can be used to execute different stop orders. This tool doesn't require the +safir_status+ program to be started. Type +safir_control_cli --help+ for the available command line options.
 
 [[debugging_support]]
 == Debugging support
