@@ -3443,14 +3443,15 @@ The Dob is started by running the executable +safir_control+. This program will 
 How and when +safir_control+ is started is outside the control of Safir SDK Core. For example, the program can be started by a script at computer start-up or manually in a terminal window. 
 
 ==== Why isn't there any support for start of applications?
-You may wonder why there isn't any support for starting applications. The answer is that there are plans for this but as of today this is unimplemented.
+You may wonder why there isn't any support for starting applications. The answer is that there are plans for this but as of today this is not implemented.
 
-The application start mechanism would provide functionality along these lines:
+The application start mechanism will - when it has been implemented - provide
+functionality along these lines:
 
 - Let you configure which applications to start on different nodes.
 - Monitor applications.
 - Show application status (fully functional, degraded etc.)
-- Start of applications on fallback nodes in case of application failure. 
+- Start of applications on fallback nodes in case of application failure.
 
 === Stop
 A Safir node can be stopped in three different ways:
@@ -3485,7 +3486,7 @@ A Safir system stop, that is, an order to stop all nodes that constitute a Safir
 
 All nodes forming a system shares a unique incarnation id. Before a node joins a system it checks the the system incarnation id is not found in a locally kept ``blacklist'' of old incarnation ids. A node adds its current incarnation id to this blacklist when it receives a Safir system stop order.
 
-The incarnation mechanism is used to guarantee that an ``old'' node isn't by mistake included in a newly formed system. The typical scenario is when restarting a system consisting of several nodes. Without this mechanism a nod that happens to survive the system restart could be included in the restarted system, resulting in a mix of old and new data.
+The incarnation mechanism is used to guarantee that an ``old'' node cannot join a newly formed system. The typical scenario is when restarting a system consisting of several nodes. Without this mechanism a node that happens to survive the system restart could be included in the restarted system, resulting in a mix of old and new data.
 
 == System status and control
 Safir SDK Core provides a GUI application, Node Control, that presents information about the nodes that constitute the system. The GUI can also be used to execute Safir node stop and computer shutdown/reboot of individual nodes or the complete system. 
