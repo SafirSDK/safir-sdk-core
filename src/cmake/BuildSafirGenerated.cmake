@@ -55,6 +55,7 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
     set(Boost_FIND_QUIETLY True)
     find_package(Boost COMPONENTS system thread REQUIRED)
     include_directories(${Boost_INCLUDE_DIRS})
+    link_directories(${Boost_LIBRARY_DIRS})
 
     #use dynamic linking with boost
     ADD_DEFINITIONS(-DBOOST_ALL_DYN_LINK)
