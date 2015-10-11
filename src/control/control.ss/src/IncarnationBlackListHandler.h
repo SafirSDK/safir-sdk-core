@@ -70,8 +70,7 @@ namespace Control
 
                 if (readValue == incarnationId)
                 {
-                    //TODO: remove debug output
-                    std::wcout << "Found incarnationId " << incarnationId << " in blacklist " << m_path.string().c_str() << std::endl;
+                    lllog(3) << "Found incarnationId " << incarnationId << " in blacklist " << m_path.string().c_str() << std::endl;
                     file.close();
                     return false;
                 }
