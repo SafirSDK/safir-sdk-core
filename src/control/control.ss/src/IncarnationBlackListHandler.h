@@ -24,6 +24,7 @@
 #pragma once
 
 #include <Safir/Utilities/Internal/SystemLog.h>
+#include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
 #include <fstream>
