@@ -373,8 +373,8 @@ void OdbcPersistor::RestoreAll()
     SQLLEN                                      currentSmallDataSize = 0;
     boost::scoped_array<unsigned char>          storeBinaryLargeData(new unsigned char[binaryLargeSize]);
     SQLLEN                                      currentLargeDataSize = 0;
-    boost::scoped_array<char>                   xmlBuffer(new char[xmlSize]); //TODO:multiply by 4?
-    boost::scoped_array<wchar_t>                xmlBufferW(new wchar_t[xmlSize]); //TODO:multiply by 4?
+    boost::scoped_array<char>                   xmlBuffer(new char[xmlSize]);
+    boost::scoped_array<wchar_t>                xmlBufferW(new wchar_t[xmlSize / sizeof(wchar_t)]);
     SQLLEN                                      currentXmlSize = 0;
 
     const boost::chrono::steady_clock::time_point startTime = boost::chrono::steady_clock::now();
@@ -412,7 +412,11 @@ void OdbcPersistor::RestoreAll()
                     }
                     else
                     {
-                        BindColumnStringW(getAllStatement, 4, xmlSize, xmlBufferW.get(), &currentXmlSize);
+                        BindColumnStringW(getAllStatement,
+                                          4,
+                                          xmlSize / sizeof(wchar_t),
+                                          xmlBufferW.get(),
+                                          &currentXmlSize);
                     }
 
                     m_helper.BindColumnBinary(getAllStatement, 5, binaryLargeSize, storeBinaryLargeData.get(), &currentLargeDataSize);

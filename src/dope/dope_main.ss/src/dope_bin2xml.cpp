@@ -97,20 +97,22 @@ void ParseCommandLine(int argc, char* argv[])
         // configuration parameter instead.
         switch (Safir::Dob::PersistenceParameters::Backend())
         {
-            case Safir::Dob::PersistenceBackend::File:
+        case Safir::Dob::PersistenceBackend::File:
             {
                 g_whatToConvert = files;
             }
             break;
 
-            case Safir::Dob::PersistenceBackend::Odbc:
+        case Safir::Dob::PersistenceBackend::Odbc:
             {
                 g_whatToConvert = db;
             }
             break;
 
-            default:
+        default:
+            {
                 throw Safir::Dob::Typesystem::SoftwareViolationException(L"Unknown backend!",__WFILE__,__LINE__);
+            }
         }
     }
 }
@@ -135,8 +137,8 @@ void ConvertDb()
     SQLHSTMT                            hUpdateStatement;
     Safir::Dob::Typesystem::Int64       updateTypeIdParam;
     Safir::Dob::Typesystem::Int64       updateInstanceParam;
-    boost::scoped_array<char>           updateXmlDataParam(new char[Safir::Dob::PersistenceParameters::XmlDataColumnSize()]); //TODO: multiply by 4?!
-    boost::scoped_array<wchar_t>        updateXmlDataParamW(new wchar_t[Safir::Dob::PersistenceParameters::XmlDataColumnSize()]); //TODO: multiply by 4?!
+    boost::scoped_array<char>           updateXmlDataParam(new char[Safir::Dob::PersistenceParameters::XmlDataColumnSize()]);
+    boost::scoped_array<wchar_t>        updateXmlDataParamW(new wchar_t[Safir::Dob::PersistenceParameters::XmlDataColumnSize() / sizeof(wchar_t)]);
     SQLLEN                              updateXmlDataParamSize(0);
 
     SQLRETURN ret = ::SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &hEnvironment);
@@ -188,10 +190,10 @@ void ConvertDb()
     else
     {
         helper.BindParamStringW(hUpdateStatement,
-                               1,
-                               Safir::Dob::PersistenceParameters::XmlDataColumnSize(),
-                               updateXmlDataParamW.get(),
-                               &updateXmlDataParamSize);
+                                1,
+                                Safir::Dob::PersistenceParameters::XmlDataColumnSize() / sizeof(wchar_t),
+                                updateXmlDataParamW.get(),
+                                &updateXmlDataParamSize);
     }
     helper.BindParamInt64(hUpdateStatement, 2, &updateTypeIdParam);
     helper.BindParamInt64(hUpdateStatement, 3, &updateInstanceParam);
@@ -247,9 +249,12 @@ void ConvertDb()
                     (Safir::Dob::Typesystem::Serialization::ToXml(object));
 
                 const size_t size = (xml.size() + 1)* sizeof (char);
-                if (size > static_cast<size_t>(Safir::Dob::PersistenceParameters::XmlDataColumnSize())) //TODO: multiply by 4
+                if (size > static_cast<size_t>(Safir::Dob::PersistenceParameters::XmlDataColumnSize()))
                 {
-                    throw std::runtime_error("waah"); //TODO
+                    throw Safir::Dob::Typesystem::SoftwareViolationException
+                        (L"The size in bytes of the xml serialization for " + entityId.ToString() +
+                         L" exceeds Safir.Dob.PersistenceParameters.XmlDataColumnSize",
+                         __WFILE__, __LINE__);
                 }
                 memcpy(updateXmlDataParam.get(), xml.c_str(), size);
             }
@@ -257,9 +262,12 @@ void ConvertDb()
             {
                 const std::wstring xml = Safir::Dob::Typesystem::Serialization::ToXml(object);
                 const size_t size = (xml.size() + 1)* sizeof (wchar_t);
-                if (size > static_cast<size_t>(Safir::Dob::PersistenceParameters::XmlDataColumnSize())) //TODO: multiply by 4
+                if (size > static_cast<size_t>(Safir::Dob::PersistenceParameters::XmlDataColumnSize()))
                 {
-                    throw std::runtime_error("waah"); //TODO
+                    throw Safir::Dob::Typesystem::SoftwareViolationException
+                        (L"The size in bytes of the xml serialization for " + entityId.ToString() +
+                         L" exceeds Safir.Dob.PersistenceParameters.XmlDataColumnSize",
+                         __WFILE__, __LINE__);
                 }
                 memcpy(updateXmlDataParamW.get(), xml.c_str(), size);
             }
