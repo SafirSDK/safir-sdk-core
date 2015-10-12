@@ -307,7 +307,11 @@ namespace Internal
                         }
                     }
                 }
-                subscription->SetLastRealState(currentState);
+
+                if (success)
+                {
+                    subscription->SetLastRealState(currentState);
+                }
             }
 
             //injection state
@@ -321,7 +325,10 @@ namespace Internal
                     {
                         success=false;
                     }
-                    subscription->SetLastInjectionState(currentState);
+                    else
+                    {
+                        subscription->SetLastInjectionState(currentState);
+                    }
                 }
             }
 
@@ -350,7 +357,11 @@ namespace Internal
                         }
                     }
                 }
-                subscription->SetLastRealState(state); //update this so we only dispatch this state once (see "if" above)
+
+                if (success)
+                {
+                    subscription->SetLastRealState(state);
+                }
             }
             return success;
         }
