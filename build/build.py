@@ -321,7 +321,7 @@ def add_win32_options(parser):
                             default=False,
                             help="Build a 32 bit system even though this machine is 64 bit.")
     parser.add_argument("--configs",
-                        default=("RelWithDebInfo",), #TODO: readd Debug, before RelWithDebInfo
+                        default=("Debug", "RelWithDebInfo"),
                         nargs='*',
                         choices=known_configs,
                         help="The configurations to build. Debug and RelWithDebInfo is the default.")
