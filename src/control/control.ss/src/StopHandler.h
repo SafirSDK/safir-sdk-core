@@ -101,6 +101,7 @@ namespace Control
               m_sendTimer(ioService),
               m_stopTimer(ioService),
               m_localNodeStopInProgress(false),
+              m_localNodeStopCmdAction(STOP),
               m_systemStop(false)
 
         {
