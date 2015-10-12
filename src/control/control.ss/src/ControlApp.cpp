@@ -315,6 +315,16 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
     m_signalSet.add(SIGBREAK);
     m_signalSet.add(SIGINT);
     m_signalSet.add(SIGTERM);
+
+    //Disable the close button in the console window. Could not get handling
+    //windows close events to work properly, so this is a workaround.
+    //Just use Ctrl-C instead...
+    GUITHREADINFO info = {0};
+    info.cbSize=sizeof(info);
+    GetGUIThreadInfo(NULL, &info);
+    HMENU hSysMenu = GetSystemMenu(info.hwndActive, FALSE);
+    EnableMenuItem(hSysMenu, SC_CLOSE, MF_GRAYED);
+
 #elif defined(linux) || defined(__linux) || defined(__linux__)
     m_signalSet.add(SIGQUIT);
     m_signalSet.add(SIGINT);
