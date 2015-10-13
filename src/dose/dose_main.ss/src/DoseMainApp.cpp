@@ -55,7 +55,7 @@ namespace Internal
 
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
         std::function<void()> ConsoleCtrlHandlerFcn;
-        BOOL ConsoleCtrlHandler(DWORD event)
+        BOOL WINAPI ConsoleCtrlHandler(DWORD event)
         {
             switch (event)
             {
