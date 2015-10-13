@@ -271,10 +271,28 @@ namespace Internal
 
         statePtr->SetRealState(newRegState);
 
-        statePtr->SetReleased(true);
+        switch (InjectionKindTable::Instance().GetInjectionKind(m_typeId))
+        {
+            case InjectionKind::None:
+            {
+                // Set the state to released which will cause a drop of the reference from
+                // the state container to this state.
+                statePtr->SetReleased(true);
 
-        // The released end state must be saved "a while".
-        EndStates::Instance().Add(statePtr);
+                // The released end state must be saved "a while".
+                EndStates::Instance().Add(statePtr);
+            }
+            break;
+
+            case InjectionKind::SynchronousVolatile:
+            case InjectionKind::SynchronousPermanent:
+            case InjectionKind::Injectable:
+            {
+                //Unregistration states for types that potentially have ghosts must be kept
+                statePtr->SetReleased(false);
+            }
+            break;
+        }
     }
 
     void HandlerRegistrations::RemoteRegistrationStateInternal(const ConnectionPtr&    connection,
@@ -320,10 +338,29 @@ namespace Internal
             // Remote unregistration
             statePtr->SetConnection(ConnectionPtr());
             const_cast<DistributionData&>(remoteRegistrationState).ResetSenderIdConnectionPart();
-            statePtr->SetReleased(true);
 
-            // This is an end state so it must be saved "a while".
-            EndStates::Instance().Add(statePtr);
+            switch (InjectionKindTable::Instance().GetInjectionKind(m_typeId))
+            {
+                case InjectionKind::None:
+                {
+                    // Set the state to released which will cause a drop of the reference from
+                    // the state container to this state.
+                    statePtr->SetReleased(true);
+
+                    // The released end state must be saved "a while".
+                    EndStates::Instance().Add(statePtr);
+                }
+                break;
+
+                case InjectionKind::SynchronousVolatile:
+                case InjectionKind::SynchronousPermanent:
+                case InjectionKind::Injectable:
+                {
+                    //Unregistration states for types that potentially have ghosts must be kept
+                    statePtr->SetReleased(false);
+                }
+                break;
+            }
         }
 
         statePtr->SetRealState(remoteRegistrationState);
