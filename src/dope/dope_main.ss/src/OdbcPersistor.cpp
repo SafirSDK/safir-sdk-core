@@ -841,16 +841,16 @@ OdbcPersistor::BindColumnString(SQLHSTMT statement,
 
 void
 OdbcPersistor::BindColumnStringW(SQLHSTMT statement,
-                                unsigned short columnNumber,
-                                const int maxSize,
-                                wchar_t* string,
-                                SQLLEN* sizePtr)
+                                 unsigned short columnNumber,
+                                 const int maxSize,
+                                 wchar_t* string,
+                                 SQLLEN* sizePtr)
 {
     const SQLRETURN ret = ::SQLBindCol(statement,
                                        columnNumber,
                                        SQL_C_WCHAR,
                                        string,
-                                       maxSize,
+                                       maxSize * sizeof(wchar_t),
                                        sizePtr);
     if (!SQL_SUCCEEDED(ret))
     {
