@@ -25,6 +25,7 @@ CREATE TABLE [dbo].[PersistentEntity](
     [TYPEID] [bigint] NOT NULL,
     [INSTANCE] [bigint] NOT NULL,
     [HANDLERID] [bigint] NULL,
+    [TYPENAME] [nvarchar](236) NULL,
     [XMLDATA] [nvarchar](max) NULL,
     [BINARYDATA] [varbinary](max) NULL,
     [BINARYSMALLDATA] [varbinary](5000) NULL,
