@@ -114,8 +114,8 @@ namespace Internal
         static const int64_t RegistrationStateDataTypeId=6915466164769792349; //DoseMain.RegistrationState
         static const int64_t EntityStateDataTypeId=5802524208372516084; //DoseMain.EntityState
 
-        int64_t m_nodeId;
-        int64_t m_nodeType;
+        const int64_t m_nodeId;
+        const int64_t m_nodeType;
         boost::asio::io_service::strand& m_strand;
         boost::asio::steady_timer m_timer;
         DistributionT& m_distribution;
@@ -294,12 +294,12 @@ namespace Internal
 
                 if (!currentState.IsNoState())
                 {
-                    //Send all local states
+                    //Send all states owned by someone on this node
                     //send all ghosts (the owner node is probably down...)
                     //send all delete states (so that new nodes get the correct timestamps)
                     if (currentState.GetSenderId().m_node==m_distribution.GetCommunication().Id() ||
-                            currentState.GetEntityStateKind() == DistributionData::Ghost ||
-                            !currentState.HasBlob())
+                        currentState.GetEntityStateKind() == DistributionData::Ghost ||
+                        !currentState.HasBlob())
                     {
                         if (!CanSend() || !m_distribution.GetCommunication().Send(m_nodeId, m_nodeType, ToPtr(currentState), currentState.Size(), EntityStateDataTypeId, true))
                         {
@@ -343,15 +343,15 @@ namespace Internal
             {
                 const DistributionData state = subscription->GetCurrentRealState();
 
-
                 if (!state.IsNoState())
                 {
-                    //Local states are to be sent to other nodes.
-                    //Unregistration states (regardless of whether they are local or not) are always sent.
+                    //States owned by someone on this node are to be sent to other nodes.
+                    //Unregistration states are always sent, since ghosts may be in WaitingStates
+                    //waiting for the unreg.
                     if (state.GetSenderId().m_node==m_distribution.GetCommunication().Id() ||
-                            !state.IsRegistered())
+                        !state.IsRegistered())
                     {
-                        if (!CanSend() || !m_distribution.GetCommunication().Send(0, m_nodeType, ToPtr(state), state.Size(), RegistrationStateDataTypeId, true))
+                        if (!CanSend() || !m_distribution.GetCommunication().Send(m_nodeId, m_nodeType, ToPtr(state), state.Size(), RegistrationStateDataTypeId, true))
                         {
                             success=false;
                         }
