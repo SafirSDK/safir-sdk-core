@@ -52,8 +52,38 @@ namespace Internal
                             << "Please send this file to your nearest Dob developer, along with\n"
                             << "relevant information about what version of Safir SDK you are using");
         }
-    }
 
+#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
+        std::function<void()> ConsoleCtrlHandlerFcn;
+        BOOL ConsoleCtrlHandler(DWORD event)
+        {
+            switch (event)
+            {
+            case CTRL_CLOSE_EVENT:
+            case CTRL_LOGOFF_EVENT:
+            case CTRL_SHUTDOWN_EVENT:
+                {
+                    SEND_SYSTEM_LOG(Informational,
+                                    << "DOSE_MAIN: Got a ConsoleCtrlHandler call with event " << event << ", will close down." );
+                    ConsoleCtrlHandlerFcn();
+
+                    //We could sleep forever here, since the function will be terminated when
+                    //our main function returns. Anyway, we only have something like
+                    //five seconds before the process gets killed anyway.
+                    //So the below code is just to ensure we sleep for a while and
+                    //dont generate any compiler errors...
+                    for(int i = 0; i < 10; ++i)
+                    {
+                        boost::this_thread::sleep_for(boost::chrono::seconds(1));
+                    }
+                }
+                return TRUE;
+            default:
+                return FALSE;
+            }
+        }
+#endif
+    }
     DoseMainApp::DoseMainApp(boost::asio::io_service& ioService):
         m_stopped(false),
         m_ioService(ioService),
@@ -103,6 +133,14 @@ namespace Internal
         m_signalSet.add(SIGBREAK);
         m_signalSet.add(SIGINT);
         m_signalSet.add(SIGTERM);
+
+        //We install a ConsoleCtrlHandler to handle presses of the Close button
+        //on the console window
+        ConsoleCtrlHandlerFcn = m_strand.wrap([this]()
+        {
+            Stop();
+        });
+        ::SetConsoleCtrlHandler(ConsoleCtrlHandler,TRUE);
 #elif defined(linux) || defined(__linux) || defined(__linux__)
         m_signalSet.add(SIGQUIT);
         m_signalSet.add(SIGINT);

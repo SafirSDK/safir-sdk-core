@@ -43,6 +43,7 @@
 #endif
 
 #include <boost/filesystem.hpp>
+#include <boost/thread.hpp>
 
 #if defined _MSC_VER
 #  pragma warning (pop)
@@ -52,6 +53,39 @@
 #include <unistd.h>
 #endif
 
+namespace
+{
+#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
+        std::function<void()> ConsoleCtrlHandlerFcn;
+        BOOL ConsoleCtrlHandler(DWORD event)
+        {
+            switch (event)
+            {
+            case CTRL_CLOSE_EVENT:
+            case CTRL_LOGOFF_EVENT:
+            case CTRL_SHUTDOWN_EVENT:
+                {
+                    SEND_SYSTEM_LOG(Informational,
+                                    << "DOSE_MAIN: Got a ConsoleCtrlHandler call with event " << event << ", will close down." );
+                    ConsoleCtrlHandlerFcn();
+
+                    //We could sleep forever here, since the function will be terminated when
+                    //our main function returns. Anyway, we only have something like
+                    //five seconds before the process gets killed anyway.
+                    //So the below code is just to ensure we sleep for a while and
+                    //dont generate any compiler errors...
+                    for(int i = 0; i < 10; ++i)
+                    {
+                        boost::this_thread::sleep_for(boost::chrono::seconds(1));
+                    }
+                }
+                return TRUE;
+            default:
+                return FALSE;
+            }
+        }
+#endif
+}
 
 ControlApp::ControlApp(boost::asio::io_service&         ioService,
                        const boost::filesystem::path&   doseMainPath,
@@ -258,10 +292,8 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
     m_handle.assign(m_doseMain->process_handle());
 
-    m_handle.async_wait(
-                [this](const boost::system::error_code&)
+    m_handle.async_wait([this](const boost::system::error_code&)
     {
-
         DWORD exitCode;
         auto gotExitCode = ::GetExitCodeProcess(m_handle.native(), &exitCode);
 
@@ -316,15 +348,13 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
     m_signalSet.add(SIGINT);
     m_signalSet.add(SIGTERM);
 
-    //Disable the close button in the console window. Could not get handling
-    //windows close events to work properly, so this is a workaround.
-    //Just use Ctrl-C instead...
-    GUITHREADINFO info = {0};
-    info.cbSize=sizeof(info);
-    GetGUIThreadInfo(NULL, &info);
-    HMENU hSysMenu = GetSystemMenu(info.hwndActive, FALSE);
-    EnableMenuItem(hSysMenu, SC_CLOSE, MF_GRAYED);
-
+    //We install a ConsoleCtrlHandler to handle presses of the Close button
+    //on the console window
+    ConsoleCtrlHandlerFcn = m_strand.wrap([this]()
+    {
+        //TODO Stop();
+    });
+    ::SetConsoleCtrlHandler(ConsoleCtrlHandler,TRUE);
 #elif defined(linux) || defined(__linux) || defined(__linux__)
     m_signalSet.add(SIGQUIT);
     m_signalSet.add(SIGINT);
