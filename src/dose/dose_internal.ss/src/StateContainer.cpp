@@ -480,7 +480,7 @@ namespace Internal
         }
         else if (subscriptionId.subscriptionType == EntitySubscription)
         {
-            if (strstr(subscriptionId.connectionConsumer.connection->NameWithoutCounter(), ";dose_main_pd;") != NULL)
+            if (strstr(subscriptionId.connectionConsumer.connection->NameWithoutCounter(), "dose_pool_distribution") != NULL)
             {
                 //include released states for entity subscriptions when doing pool distribution to
                 // sync lamport clock on newly started node.
