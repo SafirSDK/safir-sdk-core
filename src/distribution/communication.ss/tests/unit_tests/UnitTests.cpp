@@ -28,6 +28,7 @@
 #include "DataSenderTest.h"
 #include "DiscovererTest.h"
 #include "ResolverTest.h"
+#include "CommunicationAllocatorTest.h"
 
 //**********************************
 // Main - run all tests
@@ -67,6 +68,10 @@ int main(int argc, char* argv[])
         {
             ResolverTest::Run();
         }
+        else if (testcase=="AllocatorTest")
+        {
+            AllocatorTest::Run();
+        }
     }
     else //run all tests
     {
@@ -77,6 +82,7 @@ int main(int argc, char* argv[])
         DeliveryHandlerTest::Run();
         DiscovererTest::Run();
         ResolverTest::Run();
+        AllocatorTest::Run();
     }
 
     std::cout<<"================================="<<std::endl;

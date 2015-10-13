@@ -38,3 +38,6 @@ SET_SAFIR_TEST_PROPERTIES(TEST DeliveryHandlerTest TIMEOUT 360)
 
 ADD_TEST(NAME DiscovererTest COMMAND unit_tests DiscovererTest)
 SET_SAFIR_TEST_PROPERTIES(TEST DiscovererTest TIMEOUT 360)
+
+ADD_TEST(NAME CommunicationAllocatorTest COMMAND unit_tests CommunicationAllocatorTest)
+SET_SAFIR_TEST_PROPERTIES(TEST CommunicationAllocatorTest TIMEOUT 360)

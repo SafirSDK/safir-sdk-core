@@ -189,6 +189,17 @@ namespace Com
         //Make node included or excluded. If excluded it is also removed.
         void RemoveNode(int64_t id)
         {
+            auto it=m_nodes.find(id);
+
+            if (it!=m_nodes.end())
+            {
+                lllog(8) << L"COM: DeliveryHandler got RemoveNode, will now deallocate used memory then remove the node " <<it->second.node.name.c_str()<< std::endl;
+                ClearChannel(it->second.ackedMultiReceiverChannel);
+                ClearChannel(it->second.ackedSingleReceiverChannel);
+                ClearChannel(it->second.unackedMultiReceiverChannel);
+                ClearChannel(it->second.unackedSingleReceiverChannel);
+            }
+            
             m_nodes.erase(id);
         }
 
@@ -342,6 +353,36 @@ namespace Com
         NodeInfoMap m_nodes;
         ReceiverMap m_receivers;
         GotReceiveFrom m_gotRecvFrom;
+
+        //loop through all RecvData in a channel and deallocate any allocated memory. Reset each RecvData in the channel.
+        void ClearChannel(Channel& ch)
+        {
+            bool firstFound=false;
+            for (size_t i=0; i<ch.queue.Size(); ++i)
+            {
+                if (ch.queue[i].data!=nullptr && (!firstFound || ch.queue[i].fragmentNumber==0))
+                {
+                    //the first message in queue with data, or the first fragment of a message
+                    firstFound=true;
+
+                    auto recvIt=m_receivers.find(ch.queue[i].dataType);
+                    if (recvIt!=m_receivers.end())
+                    {
+                        recvIt->second.dealloc(ch.queue[i].data);
+                    }
+                    else
+                    {
+                        std::ostringstream os;
+                        os << "COM: ClearChannel, cant find registered receiver for dataType "<<ch.queue[i].dataType<<" when trying to deallocate data."
+                           <<" This should be impossible since we have managed to allocate the data using the same dataType.";
+                        SEND_SYSTEM_LOG(Error, <<os.str().c_str());
+                        throw std::logic_error(os.str());
+                    }
+                }
+
+                ch.queue[i].Clear();
+            }
+        }
 
         void Insert(const MessageHeader* header, const char* payload, NodeInfo& ni)
         {
