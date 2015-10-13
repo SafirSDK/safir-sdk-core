@@ -56,7 +56,7 @@ public:
         dh.SetGotRecvCallback(boost::bind(&AllocatorTest::GotReceiveFrom, _1));
 
         dh.SetReceiver(boost::bind(&AllocatorTest::OnRecv, _1, _2, _3, _4), 0,
-                       [&](size_t s)
+                       [&](size_t s) -> char*
                         {
                             ++numAllocs;
                             std::cout<<"Alloc: "<<numAllocs<<std::endl;
