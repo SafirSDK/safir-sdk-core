@@ -62,7 +62,6 @@ if arguments.language == "cpp":
     command = (arguments.binary,)
 elif arguments.language == "java":
     command = ("java",
-               "-Xcheck:jni",
                "-Xfuture",
                "-jar", arguments.jar)
 elif arguments.language == "dotnet":
@@ -70,7 +69,7 @@ elif arguments.language == "dotnet":
 else:
     print("Not implemented")
     sys.exit(1)
-    
+
 print("Test suite command is '" + " ".join(command) + "'")
 
 proc = subprocess.Popen(command, stdout = subprocess.PIPE, stderr = subprocess.STDOUT, universal_newlines=True)
@@ -89,6 +88,6 @@ logs = syslog.get_data(0.5) #we wait for a very short while for any logs to prop
 if len(logs) > 0:
     print("Unexpected logs in system log!")
     print(logs)
-    
+
 print("Expected output achieved")
 sys.exit(0)

@@ -42,7 +42,6 @@ for dep in dependencies:
                  ".")
 
 sender_cmd = ("java",
-              "-Xcheck:jni",
               "-Xfuture",
               "-jar", arguments.jar)
 

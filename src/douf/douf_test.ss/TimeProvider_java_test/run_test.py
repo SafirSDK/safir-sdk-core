@@ -39,7 +39,6 @@ for dep in dependencies:
                  ".")
 
 result = subprocess.call(("java",
-                          "-Xcheck:jni",
                           "-Xfuture",
                           "-jar", arguments.jar))
 
