@@ -175,47 +175,23 @@ namespace Utilities
         std::unique_ptr<HMODULE[]> hMod;
         DWORD cbNeededMBN = sizeof(HMODULE);
 
+        //It seems that sometimes EnumProcessModules fails spuriously, if called
+        //while a process is "half-loaded", which is why we have this retry loop.
         for (int retry = 0; retry < 20; ++retry)
         {
             hMod.reset(new HMODULE[cbNeededMBN/sizeof(HMODULE)]);
-            const BOOL result = EnumProcessModules(hProcess,
-                                                   hMod.get(),
-                                                   cbNeededMBN,
-                                                   &cbNeededMBN);
-            if (!result)
+            const BOOL success = EnumProcessModules(hProcess,
+                                                    hMod.get(),
+                                                    cbNeededMBN,
+                                                    &cbNeededMBN);
+            if (success)
             {
-                std::wcerr << "EnumProcessModules attempt " << retry << " failed: "
-                           << ::GetLastError() << " cbNeededMBN = " << cbNeededMBN
-                           << std::endl;
-                boost::this_thread::yield();
+                GetModuleBaseNameA(hProcess, hMod[0], szProcessName, MAX_PATH);
+                break;
             }
             else
             {
-                if (retry > 0) //TODO clean up all this debug output!
-                {
-                    std::wcerr << "EnumProcessModules attempt " << retry << " succeeded!" << std::endl;
-
-                    if (cbNeededMBN/sizeof(HMODULE) > 1)
-                    {
-                        for (unsigned int i = 0; i < cbNeededMBN/sizeof(HMODULE); ++i)
-                        {
-                            char pn[MAX_PATH];
-                            BOOL ret3 = GetModuleBaseNameA( hProcess, hMod[i], pn, MAX_PATH );
-                            if (!ret3)
-                            {
-                                std::wcout << "GetModuleBaseNameA failed " << i << " " << GetLastError() << std::endl;
-                            }
-                            else
-                            {
-                                std::wcout << "GetModuleBaseNameA " << i << ": " << pn << std::endl;
-                            }
-                        }
-                    }
-                    break; //we break out here so that we return an incorrect process name to make the test case fail.
-                }
-
-                GetModuleBaseNameA( hProcess, hMod[0], szProcessName, MAX_PATH );
-                break;
+                boost::this_thread::yield();
             }
         }
 
