@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <exception xmlns="urn:safir-dots-unit">
         <summary>The odbc operation caused a violation of a constraint in the database</summary>
   <name>Safir.Databases.Odbc.IntegrityConstraintException</name>

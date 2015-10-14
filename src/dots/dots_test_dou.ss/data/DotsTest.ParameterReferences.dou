@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <class xmlns="urn:safir-dots-unit">
     <name>DotsTest.ParameterReferences</name>
     <baseClass>Object</baseClass>
