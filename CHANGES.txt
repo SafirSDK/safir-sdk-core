@@ -2,7 +2,29 @@
 2015-09-30 version 6.1
 -----------------------------------------------------------------------------------------------------------------------
 
-TODO
+This release introduces the following changes:
+
+* Add full support for system incarnations, i.e. the mechanism to ensure that "old" nodes
+  cannot join a restarted system.
+* Add support for stopping safir_control on specific nodes or the whole system.
+* Add support for rebooting or shutting down nodes after they have been stopped.
+* Add documentation for the new features from 6.0 and 6.1
+* Rewrite of the persistence service which introduces support for MS SQL Server.
+
+* Bug fixes, among which the most notable ones are (see http://safirsdkcore.com for details):
+
+#241 Unable to hide dose_main console window
+#244 Stop Orders are not sent if safir_control is stopped using the close button on Windows
+#243 Sate crashes with assembly paths in typesystem.ini
+#248 Dope_main crashes with OnRevokedRegistration at startup in multinode system
+#249 dose_main crashes on stop of other node
+#252 Ghosts get stuck in WaitingState
+#253 Entities get stuck in WaitingStates
+#265 No sending of released entity states in pool distribution
+#263 Ghosts get stuck in WaitingStates on node restart
+#256 Node might start sending data without properly synced lamport clocks
+#254 Debugging C# applications fail due to same assembly being loaded from several places
+#261 Memory leak in Communication on ExcludeNode
 
 -----------------------------------------------------------------------------------------------------------------------
 2015-09-16 version 6.0.3
