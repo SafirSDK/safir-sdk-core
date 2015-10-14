@@ -46,6 +46,7 @@
 #  include <process.h>
 #  include <boost/algorithm/string.hpp>
 #  include <boost/algorithm/string/split.hpp>
+#  include <boost/chrono.hpp>
 #  include <Safir/Utilities/Internal/StringEncoding.h>
 
 #  pragma warning (push)
@@ -191,7 +192,7 @@ namespace Utilities
             }
             else
             {
-                boost::this_thread::yield();
+                boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
             }
         }
 
