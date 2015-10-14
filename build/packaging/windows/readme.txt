@@ -56,8 +56,8 @@ Documentation
 
 Documentation for Safir SDK Core can be found at http://www.safirsdkcore.com/docs.
 
-Go to http://www.safirsdkcore.com to find out about our Google+ Community, our GitHub and
-SourceForge pages and to get in touch with us!
+Go to http://www.safirsdkcore.com to find out about our Google+ Community and our GitHub
+pages and to get in touch with us! We're eager to hear from you!
 
 Bundled Software
 ----------------

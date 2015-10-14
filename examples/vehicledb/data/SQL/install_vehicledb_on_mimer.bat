@@ -1,6 +1,6 @@
 REM============================================================================
 REM
-REM Copyright Saab AB, 2008-2013 (http://safir.sourceforge.net)
+REM Copyright Saab AB, 2008-2013 (http://safirsdkcore.com)
 REM 
 REM Created by: Saab AB
 REM

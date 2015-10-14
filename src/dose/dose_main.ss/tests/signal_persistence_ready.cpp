@@ -1,7 +1,7 @@
 
 /******************************************************************************
 *
-* Copyright Saab AB, 2015 (http://safir.sourceforge.net)
+* Copyright Saab AB, 2015 (http://safirsdkcore.com)
 *
 * Created by: Lars Hagström <lars@foldspace.nu>
 *

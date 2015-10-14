@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2014 (http://safir.sourceforge.net)
+* Copyright Saab AB, 2014 (http://safirsdkcore.com)
 *
 * Created by: Anders Widén / ander.widen@consoden.se
 *

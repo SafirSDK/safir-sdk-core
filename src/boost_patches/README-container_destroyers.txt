@@ -7,7 +7,7 @@ Affected platforms:
 All
 
 References:
-http://sourceforge.net/p/safir/tickets/197/
+https://github.com/SafirSDK/safir-sdk-core/issues/196
 http://lists.boost.org/Archives/boost/2014/09/216727.php
 
 Fixed in:

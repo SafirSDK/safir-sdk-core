@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 ###############################################################################
 #
-# Copyright Saab AB, 2005-2014 (http://safir.sourceforge.net)
+# Copyright Saab AB, 2005-2014 (http://safirsdkcore.com)
 #
 # Created by: Björn Weström
 #
