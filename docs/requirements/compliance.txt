@@ -26,6 +26,10 @@ Version
 | 2015-07-23
 | Lars Hagström
 
+| 6.1
+| 2015-10-14
+| Lars Hagström
+
 |=========================================================
 
 === Typical Systems
@@ -36,13 +40,13 @@ with.
 All nodes in a system must currently be able to send network packets to each other.
 
 All nodes in a system must have good connectivity. Power failures in the network
-equipment is an example of bad connectivity.
-
-All nodes will wait for the slowest node.
+equipment is an example of bad connectivity. Currently there is no way to configure
+a node to recover from lost connectivity, it can only be excluded from the system.
 
 === Distribution
 
-*dist_req_2* has not been tested.
+*dist_req_2* has not been tested, and there is currently no way to specify outbound
+interface when using IPv6.
 
 === Messages with guaranteed delivery
 
@@ -56,13 +60,11 @@ using +foreach+ and UpdateRequests.
 
 === Persistence
 
-*pers_req_4* is partially implemented. *pers_req_5* and *pers_req_7* are not implemented.
+*pers_req_7* is not implemented.
 
 === OS, Platform and Compiler support
 
 *plat_req_4* is not complied with since there is no packaging for RedHat Enterprise Linux (RHEL) 7.
-
-*plat_req_6* is not implemented.
 
 === Languages
 
