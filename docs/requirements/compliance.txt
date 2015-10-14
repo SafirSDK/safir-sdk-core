@@ -53,7 +53,7 @@ interface when using IPv6.
 Requirements *mesack_req_1*, *mesack_req_2*, *mesack_req_3*, and *mesack_req_4*, are
 currently not implemented in the preferred fashion in Safir SDK Core. The preferred
 implementation is described in the ``Messages'' whitepaper that can be found on the Safir
-SDK Core Jenkins server at http://safir.sourceforge.net.
+SDK Core Jenkins server at http://safirsdkcore.com.
 
 However, as is described in that whitepaper it is actually possible to send ``messages''
 using +foreach+ and UpdateRequests.
