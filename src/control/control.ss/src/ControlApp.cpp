@@ -292,7 +292,7 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
     m_handle.assign(m_doseMain->process_handle());
 
-    m_handle.async_wait([this](const boost::system::error_code&)
+    m_handle.async_wait(m_strand.wrap([this](const boost::system::error_code&)
     {
         DWORD exitCode;
         auto gotExitCode = ::GetExitCodeProcess(m_handle.native(), &exitCode);
@@ -339,7 +339,7 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
             StopControl();
         }
     }
-    );
+    ));
 #endif
 
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
@@ -352,7 +352,7 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
     //on the console window
     ConsoleCtrlHandlerFcn = m_strand.wrap([this]()
     {
-        //TODO Stop();
+        StopControl();
     });
     ::SetConsoleCtrlHandler(ConsoleCtrlHandler,TRUE);
 #elif defined(linux) || defined(__linux) || defined(__linux__)
