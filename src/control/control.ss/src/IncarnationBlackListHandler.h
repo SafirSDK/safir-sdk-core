@@ -71,7 +71,8 @@ namespace Control
 
                 if (readValue == incarnationId)
                 {
-                    lllog(3) << "Found incarnationId " << incarnationId << " in blacklist " << m_path.string().c_str() << std::endl;
+                    lllog(3) << "Found incarnationId " << incarnationId
+                             << " in blacklist " << m_path.string().c_str() << std::endl;
                     file.close();
                     return false;
                 }
@@ -94,8 +95,11 @@ namespace Control
 
             if (!file.is_open())
             {
-                SEND_SYSTEM_LOG(Error, << "Configuration error: Unable to write incarnation id to black list file '" <<
-                                m_path << "' configured via the Safir::Dob::NodeParameters::IncarnationBlacklistFilename parameter");
+                SEND_SYSTEM_LOG(Error,
+                                << "Configuration error: Unable to write incarnation id to black list file '" <<
+                                m_path
+                                << "' configured via the Safir::Dob::NodeParameters::IncarnationBlacklistFilename "
+                                << "parameter. Please check configuration and permissions.");
                 return;
             }
 
@@ -112,10 +116,19 @@ namespace Control
             if (!file.is_open())
             {
                 throw std::runtime_error("Configuration error: Unable to write to incarnation black list file '"
-                                         + m_path.string() + "' configured via the Safir::Dob::NodeParameters::IncarnationBlacklistFilename parameter");
+                                         + m_path.string()
+                                         + "' configured via the Safir::Dob::NodeParameters::IncarnationBlacklistFilename "
+                                         + " parameter. Please check configuration and permissions.");
             }
 
             file.close();
+
+            //make the file world read-writeable
+            using namespace boost::filesystem;
+            permissions(path,
+                        owner_read  | owner_write  |
+                        group_read  | group_write  |
+                        others_read | others_write );
         }
 
         void CheckConfigurationFile(const boost::filesystem::path& path)
@@ -126,7 +139,9 @@ namespace Control
                 if (!boost::filesystem::is_regular_file(path))
                 {
                     //path is directory not file
-                    throw std::runtime_error("Configuration error: Safir::Dob::NodeParameters::IncarnationBlacklistFilename parameter should point to a file, not a directory!");
+                    throw std::runtime_error("Configuration error: Safir::Dob::NodeParameters::"
+                                             "IncarnationBlacklistFilename parameter should point to a "
+                                             "file, not a directory!");
                 }
 
                 //file exists, try open it
