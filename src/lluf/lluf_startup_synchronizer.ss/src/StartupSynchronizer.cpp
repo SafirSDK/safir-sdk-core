@@ -180,8 +180,11 @@ namespace Utilities
                     //invoke the user callback
                     synchronized->Create();
 
+                    boost::interprocess::permissions perms;
+                    perms.set_unrestricted();
+
                     //Create a new semaphore so that users know if we succeeded or not.
-                    boost::interprocess::named_semaphore sem(boost::interprocess::create_only,m_name.c_str(),1);
+                    boost::interprocess::named_semaphore sem(boost::interprocess::create_only,m_name.c_str(),1,perms);
                 }
 
                 m_firstExclusiveLock.unlock();

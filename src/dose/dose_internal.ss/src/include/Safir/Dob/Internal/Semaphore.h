@@ -79,12 +79,18 @@ namespace Internal
 #else
         boost::interprocess::named_semaphore m_semaphore;
 #endif
+        static boost::interprocess::permissions UnrestrictedPermissions()
+        {
+            boost::interprocess::permissions perms;
+            perms.set_unrestricted();
+            return perms;
+        }
     };
 
 
 #ifdef DOSE_SEMAPHORE_WIN32
 
-    namespace Win32 
+    namespace Win32
     {
         extern "C" __declspec(dllimport) void * __stdcall CreateSemaphoreA(void*, long, long, const char *);
         extern "C" __declspec(dllimport) int __stdcall ReleaseSemaphore(void *, long, long *);
@@ -105,7 +111,7 @@ namespace Internal
                                         0,
                                         0x7fffffff,
                                         (name + Safir::Utilities::Internal::Expansion::GetSafirInstanceSuffix()).c_str());
-        if (m_semaphoreHandle == NULL) 
+        if (m_semaphoreHandle == NULL)
         {
             throw boost::interprocess::interprocess_exception(Win32::GetLastError());
         }
@@ -113,7 +119,7 @@ namespace Internal
 
     inline NamedSemaphore::~NamedSemaphore()
     {
-        if (m_semaphoreHandle != NULL) 
+        if (m_semaphoreHandle != NULL)
         {
             Win32::CloseHandle(m_semaphoreHandle);
             m_semaphoreHandle = NULL;
@@ -154,7 +160,7 @@ namespace Internal
     inline void NamedSemaphore::post()
     {
         const int res = Win32::ReleaseSemaphore(m_semaphoreHandle,1,NULL);
-        if (!res) 
+        if (!res)
         {
             throw boost::interprocess::interprocess_exception(Win32::GetLastError());
         }
@@ -164,7 +170,8 @@ namespace Internal
     inline NamedSemaphore::NamedSemaphore(const std::string& name):
         m_semaphore(boost::interprocess::open_or_create,
                     (name + Safir::Utilities::Internal::Expansion::GetSafirInstanceSuffix()).c_str(),
-                    0)
+                    0,
+                    UnrestrictedPermissions())
     {
 
     }
@@ -201,7 +208,7 @@ namespace Internal
                 }
 
             }
-        }  
+        }
     }
 
     inline bool NamedSemaphore::try_wait()
@@ -255,7 +262,7 @@ namespace Internal
                 }
 
             }
-        }  
+        }
 #else
         m_semaphore.wait();
 #endif
@@ -265,4 +272,3 @@ namespace Internal
 }
 
 #endif
-

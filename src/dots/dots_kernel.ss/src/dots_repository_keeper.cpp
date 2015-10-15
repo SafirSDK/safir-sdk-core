@@ -150,13 +150,18 @@ namespace Internal
         try
         {
             //-------------------------------------------------
-            //Copy localRepository into shared memory
+            //Create shared memory with appropriate permissions
             //-------------------------------------------------
+            boost::interprocess::permissions perms;
+            perms.set_unrestricted();
+
             boost::interprocess::shared_memory_object::remove(DOTS_SHM_NAME);
             m_sharedMemory.reset(new boost::interprocess::managed_shared_memory
                                  (boost::interprocess::create_only,
                                   DOTS_SHM_NAME,
-                                  m_sharedMemorySize));
+                                  m_sharedMemorySize,
+                                  0,
+                                  perms));
         }
         catch (const boost::interprocess::interprocess_exception&)
         {
@@ -174,6 +179,9 @@ namespace Internal
             return;
         }
 
+        //-------------------------------------------------
+        //Copy localRepository into shared memory
+        //-------------------------------------------------
         RepositoryShm::CreateShmCopyOfRepository(*localRepository, DOTS_REPOSITORY_NAME, *m_sharedMemory);
     }
 }
