@@ -2805,16 +2805,26 @@ The system will look for these configuration files in several places, which allo
 
 *Linux*::
 
-  1. /etc/safir-sdk-core/ - system wide configuration
+  1. /etc/safir-sdk-core/ - system-wide configuration
   2. ~/.config/safir-sdk-core/ - user configuration
 
 *Windows*::
 
-  1. _CSIDL_COMMON_APPDATA_\safir-sdk-core\config\ - system wide configuration
+  1. _CSIDL_COMMON_APPDATA_\safir-sdk-core\config\ - system-wide configuration
   2. _CSIDL_LOCAL_APPDATA_\safir-sdk-core\config\ - user configuration
 
 +
 On Windows 7 _CSIDL_COMMON_APPDATA_ is +C:\ProgramData+ and _CSIDL_LOCAL_APPDATA_ is +%USERPROFILE%\AppData\Local+ by default. See http://msdn.microsoft.com/en-us/library/windows/desktop/bb762494%28v=vs.85%29.aspx[MSDN documentation] for more information about CSIDLs.
+
+The reason for checking for the system-wide configuration before checking for a user
+configuration is a security measure. It will ensure that an unpriviliged user cannot
+insert their own configuration files, thereby modifying an installed system. If the load
+order was reversed an unpriviliged user could just put ini-files in his configuration
+directory and thereby completely change the behaviour of the system.
+
+The Safir SDK Core installation packages will only provide system-wide configuration
+files. If you wish to load the configuration from the user configuration instead you will
+have to remove the system-wide configuration manually after installing Safir SDK Core.
 
 [[locations_ini]]
 ==== locations.ini
