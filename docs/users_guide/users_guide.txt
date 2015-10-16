@@ -3233,6 +3233,10 @@ variables here, as described in <<environment_parameters>>.
 _Safir.Dob.PersistenceParameters.OdbcStorageConnectString_::
 The connection string to use to connect to the database.
 
+The default behaviour is that an entity is written to external storage as soon as it is updated, which, for frequently updated entities, might generate a lot of writes to external storage.
+
+The ´´Persistence Throttling'' mechanism can be used to limit the number of writes for instances of a certain entity type. The throttling mechanism is applied by mapping the property +Safir.Dob.PersistenceThrottlingProperty+ to it. An entity instance will be written no more often than given by the property value +WritePeriod+.
+
 There is more information about the persistence service in <<persistence_service>>.
 
 [[request_timeout_config]]
