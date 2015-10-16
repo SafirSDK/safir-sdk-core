@@ -43,8 +43,6 @@ namespace Internal
     {
         if (m_isPerforming)
         {
-            lllog(1) << "WaitingStates::Add: Ignoring state (m_isPerforming == true) State:" << state.Image() << std::endl;
-
             // Ignore Adds while we're performing a state.
             return;
         }
@@ -57,14 +55,8 @@ namespace Internal
         if (regIt == m_waitingStateTable.end())
         { //haven't seen this combo before, add it.
             regIt = m_waitingStateTable.insert(std::make_pair(key,States())).first;
-            lllog(1) << "WaitingStates::Add: A new item with Key: " << key.ToString()
-                     << " has been added to WaitingStates, due to state " << state.Image() << std::endl;
+            lllout << "WaitingStates::Add: A new registration has been added to WaitingStates, due to state " << state.Image() << std::endl;
         }
-        else
-        {
-             lllog(1) << "WaitingStates::Add: Found existing Key: " << key.ToString() << std::endl;
-        }
-
 
         //make a ref to the state struct to make the code below easier to read.
         States& theStates = regIt->second;
@@ -78,8 +70,6 @@ namespace Internal
             {
                 //if we didn't have a connection id before
                 theStates.connectionId = senderId;
-
-                lllog(1) << "WaitingStates::Add: Setting connectionId " << senderId << " for Key: " << key.ToString() << std::endl;
             }
             else if (theStates.connectionId.m_id != -1 && senderId.m_id != -1)
             {
@@ -94,16 +84,12 @@ namespace Internal
             {
                 ENSURE(state.IsRegistered(), << "WaitingStates::Add can not handle unregistration states! Got state " << state.Image());
                 theStates.registrationState = State(state, fromNodeType);
-                lllog(1) << "WaitingStates::Add: Adding registration state to Key: " << key.ToString()
-                         << " RegState: " << state.Image() << std::endl;
             }
             break;
 
         case DistributionData::EntityState:
             {
                 theStates.entityStates.push_back(State(state, fromNodeType));
-                lllog(1) << "WaitingStates::Add: Adding entity state to Key: " << key.ToString()
-                         << " EntityState: " << state.Image() << std::endl;
             }
             break;
 
@@ -114,12 +100,8 @@ namespace Internal
 
     void WaitingStates::CleanUp(const DistributionData & registrationState)
     {
-        lllog(1) << "WaitingStates::CleanUp: RegState: " << registrationState.Image() << std::endl;
-
         if (m_isPerforming || m_waitingStateTable.empty())
         {
-            lllog(1) << "WaitingStates::Cleanup: RETURN (m_isPerforming is " << m_isPerforming
-                     << ") State:" << registrationState.Image() << std::endl;
             return;
         }
 
@@ -133,8 +115,6 @@ namespace Internal
             const Key& key = it->first;
             if (key.typeId == typeId && key.handlerId == handlerId && key.registrationTime < regTime)
             {
-                lllog(1) << "WaitingStates::Cleanup: Erasing Key: " << key.ToString()
-                         << " State:" << registrationState.Image() << std::endl;
                 m_waitingStateTable.erase(it++);
             }
             else
@@ -147,14 +127,11 @@ namespace Internal
 
     void WaitingStates::Disconnect(const ConnectionId& connId)
     {
-        lllog(1) << "WaitingStates::Disconnect: connId: " << connId << std::endl;
-
         for (WaitingStateTable::iterator it = m_waitingStateTable.begin();
              it != m_waitingStateTable.end();) //increment below
         {
             if (it->second.connectionId == connId)
             {
-                lllog(1) << "WaitingStates::Disconnect: Erasing Key: " << it->first.ToString() << std::endl;
                 m_waitingStateTable.erase(it++);
             }
             else
@@ -167,14 +144,11 @@ namespace Internal
 
     void WaitingStates::NodeDown(const int64_t node)
     {
-        lllog(1) << "WaitingStates::NodeDown: node: " << node << std::endl;
-
         for (WaitingStateTable::iterator it = m_waitingStateTable.begin();
              it != m_waitingStateTable.end();) //increment below
         {
             if (it->second.connectionId.m_node == node)
             {
-                lllog(1) << "WaitingStates::NodeDown: Erasing Key: " << it->first.ToString() << std::endl;
                 m_waitingStateTable.erase(it++);
             }
             else
@@ -188,13 +162,8 @@ namespace Internal
     void WaitingStates::PerformStatesWaitingForConnection(const ConnectionId & connId,
                                                           const ProcessStateFunc& processFunc)
     {
-        lllog(1) << "WaitingStates::PerformStatesWaitingForConnection: ConnectionId: " << connId << std::endl;
-
         if (m_isPerforming || m_waitingStateTable.empty())
         {
-            lllog(1) << "WaitingStates::PerformStatesWaitingForConnection: RETURN (m_isPerforming is "
-                     << m_isPerforming << ")" << std::endl;
-
             return;
         }
         //use a shared ptr to guarantee that the performing flag is unset when we exit method.
@@ -207,37 +176,25 @@ namespace Internal
              it != m_waitingStateTable.end();) //increment below
         {
             if (it->second.connectionId == connId)
-            {                
+            {
                 //make a ref to the state struct to make the code below easier to read.
                 States& theStates = it->second;
 
                 if (theStates.registrationState.state.IsNoState())
                 {
-                    lllog(1) << "WaitingStates::PerformStatesWaitingForConnection: We don't have the registration yet, so we wait for that instead."
-                             << "Key:" << it->first.ToString() << std::endl;
-
                     //we don't have the registration yet, so we wait for that instead.
                     ++it;
                 }
                 else
                 {
-                    lllog(1) << "WaitingStates::PerformStatesWaitingForConnection: Process registrationState:"
-                             << theStates.registrationState.state.Image() << std::endl;
-
                     //process the registration state ...
                     processFunc(theStates.registrationState.state, theStates.registrationState.fromNodeType);
 
                     // ... and the instances.
                     for (auto entityState = theStates.entityStates.cbegin(); entityState != theStates.entityStates.cend(); ++entityState)
                     {
-                        lllog(1) << "WaitingStates::PerformStatesWaitingForConnection: Process Entity instance:"
-                                 << entityState->state.Image() << std::endl;
-
                         processFunc(entityState->state, entityState->fromNodeType);
                     }
-
-                    lllog(1) << "WaitingStates::PerformStatesWaitingForConnection: Erasing Key: "
-                             << it->first.ToString() << std::endl;
 
                     m_waitingStateTable.erase(it++);
                 }
@@ -253,12 +210,8 @@ namespace Internal
     void WaitingStates::PerformStatesWaitingForRegistration(const DistributionData & registrationState,
                                                             const ProcessStateFunc& processFunc)
     {
-        lllog(1) << "WaitingStates::PerformStatesWaitingForRegistration: RegState: " << registrationState.Image() << std::endl;
-
         if (m_isPerforming || m_waitingStateTable.empty())
         {
-            lllog(1) << "WaitingStates::PerformStatesWaitingForRegistration: RETURN (m_isPerforming is "
-                     << m_isPerforming << ")" << std::endl;
             return;
         }
 
@@ -273,21 +226,13 @@ namespace Internal
         const WaitingStateTable::iterator findIt = m_waitingStateTable.find(key);
         if (findIt != m_waitingStateTable.end())
         {
-            lllog(1) << "WaitingStates::PerformStatesWaitingForRegistration: Found Key: " << findIt->first.ToString() << std::endl;
-
             //make a ref to the state struct to make the code below easier to read.
             States& theStates = findIt->second;
 
             for (auto entityState = theStates.entityStates.cbegin(); entityState != theStates.entityStates.cend(); ++entityState)
             {
-                lllog(1) << "WaitingStates::PerformStatesWaitingForRegistration: Process EntityState:"
-                         << entityState->state.Image() << std::endl;
-
                 processFunc(entityState->state, entityState->fromNodeType);
             }
-
-            lllog(1) << "WaitingStates::PerformStatesWaitingForRegistration: Erasing Key: "
-                     << findIt->first.ToString() << std::endl;
 
             m_waitingStateTable.erase(findIt);
         }
