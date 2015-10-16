@@ -406,6 +406,14 @@ void ConvertFiles()
             xmlFileName.replace_extension(".xml");
             boost::filesystem::ofstream xmlFile(xmlFileName);
             xmlFile << xml;
+            xmlFile.close();
+
+            //make the file world read-writeable
+            using namespace boost::filesystem;
+            permissions(path,
+                        owner_read  | owner_write  |
+                        group_read  | group_write  |
+                        others_read | others_write );
         }
     }
 }

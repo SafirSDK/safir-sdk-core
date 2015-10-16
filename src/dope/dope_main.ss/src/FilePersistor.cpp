@@ -225,6 +225,15 @@ FilePersistor::Store(const Safir::Dob::Typesystem::EntityId& entityId,
                                       + L" for writing, cannot persist entity "
                                       + entityId.ToString());
     }
+
+    file.close();
+
+    //make the file world read-writeable
+    using namespace boost::filesystem;
+    permissions(path,
+                owner_read  | owner_write  |
+                group_read  | group_write  |
+                others_read | others_write );
 }
 
 //-------------------------------------------------------
