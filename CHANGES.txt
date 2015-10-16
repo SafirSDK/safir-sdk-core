@@ -25,6 +25,7 @@ This release introduces the following changes:
 #256 Node might start sending data without properly synced lamport clocks
 #254 Debugging C# applications fail due to same assembly being loaded from several places
 #261 Memory leak in Communication on ExcludeNode
+#271 Starting safir_control as different users on Windows fails
 
 -----------------------------------------------------------------------------------------------------------------------
 2015-09-16 version 6.0.3
