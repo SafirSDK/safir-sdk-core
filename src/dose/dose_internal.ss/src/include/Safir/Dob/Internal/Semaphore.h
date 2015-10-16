@@ -33,6 +33,8 @@
 //nastyness
 // So there are a bunch of definitions below.
 
+#  include <boost/interprocess/permissions.hpp>
+
 #elif defined(linux) || defined(__linux) || defined(__linux__)
 
 #  include <boost/interprocess/sync/named_semaphore.hpp>
@@ -107,7 +109,7 @@ namespace Internal
         m_semaphoreHandle(NULL)
     {
         m_semaphoreHandle =
-                Win32::CreateSemaphoreA(NULL,
+                Win32::CreateSemaphoreA(UnrestrictedPermissions().get_permissions(),
                                         0,
                                         0x7fffffff,
                                         (name + Safir::Utilities::Internal::Expansion::GetSafirInstanceSuffix()).c_str());
