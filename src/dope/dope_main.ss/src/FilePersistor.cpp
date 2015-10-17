@@ -228,12 +228,23 @@ FilePersistor::Store(const Safir::Dob::Typesystem::EntityId& entityId,
 
     file.close();
 
-    //make the file world read-writeable
-    using namespace boost::filesystem;
-    permissions(path,
-                owner_read  | owner_write  |
-                group_read  | group_write  |
-                others_read | others_write );
+    try
+    {
+        //make the file world read-writeable
+        using namespace boost::filesystem;
+        permissions(path,
+                    owner_read  | owner_write  |
+                    group_read  | group_write  |
+                    others_read | others_write );
+    }
+    catch(const boost::filesystem::filesystem_error& error)
+    {
+        Safir::Logging::SendSystemLog(Safir::Logging::Error,
+                                      L"Failed to set permissions on "
+                                      + Safir::Dob::Typesystem::Utilities::ToWstring(path.string())
+                                      + L". Got exception:"
+                                      + Safir::Dob::Typesystem::Utilities::ToWstring(error.what()));
+    }
 }
 
 //-------------------------------------------------------
