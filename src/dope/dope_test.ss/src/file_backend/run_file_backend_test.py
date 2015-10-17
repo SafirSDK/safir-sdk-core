@@ -220,10 +220,15 @@ try:
                   arguments.dope_main,
                   arguments.safir_show_config)
     with TestEnvStopper(env):
-        #remove all bin files (that have been loaded by dope by now), so
-        #that we can wait for all entities to be written again
-        for f in glob.glob(os.path.join(file_storage_path,"DopeTest.*.bin")):
-            remove(f)
+        #Remove all bin files (that have been loaded by dope by now), so
+        #that we can wait for all entities to be written again.
+        #Since dope will be writing the files a while after everything has
+        #started (it will get them from dose) we need to stay here
+        #for a while and check for files reappearing. Hacky, but good enough.
+        while(len(glob.glob(os.path.join(file_storage_path,"DopeTest.*.bin"))) != 0):
+            for f in glob.glob(os.path.join(file_storage_path,"DopeTest.*.bin")):\t
+                remove(f)
+            time.sleep(10)
 
         env.launchProcess("entity_owner", (arguments.entity_owner,"update")).wait()
 
