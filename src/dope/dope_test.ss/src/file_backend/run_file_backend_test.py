@@ -226,7 +226,7 @@ try:
         #started (it will get them from dose) we need to stay here
         #for a while and check for files reappearing. Hacky, but good enough.
         while(len(glob.glob(os.path.join(file_storage_path,"DopeTest.*.bin"))) != 0):
-            for f in glob.glob(os.path.join(file_storage_path,"DopeTest.*.bin")):\t
+            for f in glob.glob(os.path.join(file_storage_path,"DopeTest.*.bin")):
                 remove(f)
             time.sleep(10)
 
@@ -235,9 +235,16 @@ try:
         while(len(glob.glob(os.path.join(file_storage_path,"DopeTest.*.bin"))) != NUM_SMALL + NUM_BIG):
             time.sleep(0.1)
 
+    #The above removing of files while dope is writing them may cause
+    #some logs to be generated, which is expected. We try to get rid
+    #of them to not generate false negatives.
     syslog_output = env.Syslog()
-    if len(syslog_output) != 0:
-        log("Unexpected syslog output:\n" + syslog_output)
+    syslog_output_filtered = ""
+    for line in syslog_output.splitlines():
+        if line.find("boost::filesystem::permissions") == -1:
+            syslog_output_filtered += line
+    if len(syslog_output_filtered) != 0:
+        log("Unexpected syslog output:\n" + syslog_output_filtered)
         sys.exit(1)
 
     if not env.ReturnCodesOk():
