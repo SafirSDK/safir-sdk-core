@@ -63,11 +63,16 @@ namespace Control
                 return true;
             }
 
-            while (!file.eof())
+            while (file.good())
             {
-                int64_t readValue;
+                int64_t readValue = 0;
 
                 file >> readValue;
+
+                if (!file.good())
+                {
+                    break;
+                }
 
                 if (readValue == incarnationId)
                 {
