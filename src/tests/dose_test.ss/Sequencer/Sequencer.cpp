@@ -432,10 +432,11 @@ Sequencer::OnResponse(const Safir::Dob::ResponseProxy responseProxy)
 
     if (result == NULL)
     {
-        std::wcout << "GOT BAD RESPONSE FROM PARTNER " << partner << std::endl;
+        std::wcout << "GOT BAD RESPONSE FROM PARTNER " << partner << std::endl
+                   << Safir::Dob::Typesystem::Serialization::ToXml(responseProxy.GetBlob());
 
         file << "GOT BAD RESPONSE FROM PARTNER " << partner << std::endl
-            << Safir::Dob::Typesystem::Serialization::ToXml(responseProxy.GetBlob());
+             << Safir::Dob::Typesystem::Serialization::ToXml(responseProxy.GetBlob());
     }
     else
     {
