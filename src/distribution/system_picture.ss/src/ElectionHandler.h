@@ -82,7 +82,7 @@ namespace SP
             , m_receiverId(LlufId_Generate64(receiverId))
             , m_id(id)
             , m_nodeTypes(nodeTypes)
-            , m_nonLightNodeTypes(GetLightNodeTypes(nodeTypes))
+            , m_nonLightNodeTypes(GetNonLightNodeTypes(nodeTypes))
             , m_aloneTimeout(CalculateAloneTimeout(nodeTypes))
             , m_electionTimeout(CalculateElectionTimeout(nodeTypes))
             , m_electedStorage(new AlignedStorage())
@@ -161,8 +161,8 @@ namespace SP
         }
     private:
 
-        /** Finds Returns the subset of nodeTypes with the isLight flag  */
-        static std::set<int64_t> GetLightNodeTypes(const std::map<int64_t, NodeType>& nodeTypes)
+        /** Returns the subset of nodeTypes that doesn't have the LightNode flag  */
+        static std::set<int64_t> GetNonLightNodeTypes(const std::map<int64_t, NodeType>& nodeTypes)
         {
             std::set<int64_t> res;
 
