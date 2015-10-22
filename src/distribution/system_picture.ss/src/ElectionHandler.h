@@ -227,6 +227,11 @@ namespace SP
         //must be called in strand
         void StartElection()
         {
+            if (m_stopped)
+            {
+                return;
+            }
+
             //cancel any other pending elections
             m_electionTimer.cancel();
 
