@@ -1,0 +1,2 @@
+#We use the same control file for many debian-based distros.
+safir-sdk-core: newer-standards-version
