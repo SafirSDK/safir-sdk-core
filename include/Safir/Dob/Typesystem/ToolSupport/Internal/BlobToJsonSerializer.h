@@ -216,6 +216,7 @@ namespace Internal
             std::string str=val;
             std::string repl=std::string("\\")+std::string("\"");
             boost::replace_all(str, "\"", repl);
+            boost::replace_all(str, "\n", "\\n");
             os<<SAFIR_JSON_QUOTE(str);
         }
 

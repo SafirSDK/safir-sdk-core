@@ -914,6 +914,7 @@ bool RunTestFromXml(const TypeRepository* repository, const std::string& fileNam
     std::vector<char> bin4;
     JsonToBinary(repository, json1.str().c_str(), bin4);
     CheckBlobSize(bin4);
+
     if (bin1.size()!=bin4.size() || memcmp(&bin1[0], &bin4[0], bin1.size())!=0)
     {
         std::ostringstream dummyJson;

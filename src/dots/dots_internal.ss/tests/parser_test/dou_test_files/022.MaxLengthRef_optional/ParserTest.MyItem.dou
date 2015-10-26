@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <summary>Test item.</summary>
+    <name>ParserTest.MyItem</name>
+    <baseClass>Object</baseClass>
+    <members>
+        <member>
+            <name>Val</name>
+            <type>String</type>
+        </member>
+        <member>
+            <name>ArrVal</name>
+            <type>String</type>
+            <arraySize>4</arraySize>
+        </member>
+        <member>
+            <name>SeqVal</name>
+            <type>String</type>
+            <sequence/>
+        </member>
+        <member>
+            <name>DictInt32Str</name>
+            <type>String</type>
+            <dictionary keyType="Int32" />
+        </member>
+        <member>
+            <name>DictStrObject</name>
+            <type>Object</type>
+            <dictionary keyType="String" />
+        </member>
+        <member>
+            <name>DictStringString</name>
+            <type>String</type>
+            <dictionary keyType="String" />
+        </member>
+    </members>
+</class>

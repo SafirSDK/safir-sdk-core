@@ -102,7 +102,7 @@ namespace ToolSupport
         MemberDescriptionLocal()
             :collectionType(SingleValueCollectionType)
             ,arraySize(1)
-            ,maxLength(0)
+            ,maxLength(INT32_MAX)
         {
         }
 

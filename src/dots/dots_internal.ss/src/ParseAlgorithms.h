@@ -734,7 +734,7 @@ namespace ToolSupport
 
     template<> struct ParseAlgorithm<Elements::Parametersummary>
     {
-        void operator()(boost::property_tree::ptree& pt, ParseState& state) const {state.lastInsertedClass->ownParameters.back()->summary=pt.data();}
+        void operator()(boost::property_tree::ptree& pt, ParseState& state) const {state.lastInsertedClass->ownParameters.back()->summary=boost::trim_copy(pt.data());}
     };
 
     template<> struct ParseAlgorithm<Elements::ParameterArrayElements>
@@ -976,22 +976,22 @@ namespace ToolSupport
 
     template<> struct ParseAlgorithm<Elements::Classsummary>
     {
-        void operator()(boost::property_tree::ptree& pt, ParseState& state) const {state.lastInsertedClass->summary=pt.data();}
+        void operator()(boost::property_tree::ptree& pt, ParseState& state) const {state.lastInsertedClass->summary=boost::trim_copy(pt.data());}
     };
 
     template<> struct ParseAlgorithm<Elements::Exceptionsummary>
     {
-        void operator()(boost::property_tree::ptree& pt, ParseState& state) const {state.lastInsertedException->summary=pt.data();}
+        void operator()(boost::property_tree::ptree& pt, ParseState& state) const {state.lastInsertedException->summary=boost::trim_copy(pt.data());}
     };
 
     template<> struct ParseAlgorithm<Elements::Enumerationsummary>
     {
-        void operator()(boost::property_tree::ptree& pt, ParseState& state) const {state.lastInsertedEnum->summary=pt.data();}
+        void operator()(boost::property_tree::ptree& pt, ParseState& state) const {state.lastInsertedEnum->summary=boost::trim_copy(pt.data());}
     };
 
     template<> struct ParseAlgorithm<Elements::Propertysummary>
     {
-        void operator()(boost::property_tree::ptree& pt, ParseState& state) const {state.lastInsertedProperty->summary=pt.data();}
+        void operator()(boost::property_tree::ptree& pt, ParseState& state) const {state.lastInsertedProperty->summary=boost::trim_copy(pt.data());}
     };
 
     template<> struct ParseAlgorithm<Elements::PropertyMember>
@@ -1045,7 +1045,7 @@ namespace ToolSupport
 
     template<> struct ParseAlgorithm<Elements::PropertyMembersummary>
     {
-        void operator()(boost::property_tree::ptree& pt, ParseState& state) const {state.lastInsertedProperty->members.back()->summary=pt.data();}
+        void operator()(boost::property_tree::ptree& pt, ParseState& state) const {state.lastInsertedProperty->members.back()->summary=boost::trim_copy(pt.data());}
     };
 
     template<> struct ParseAlgorithm<Elements::PropertyMemberisArray>
@@ -1097,12 +1097,12 @@ namespace ToolSupport
 
     template<> struct ParseAlgorithm<Elements::Membersummary>
     {
-        void operator()(boost::property_tree::ptree& pt, ParseState& state) const {state.lastInsertedClass->members.back()->summary=pt.data();}
+        void operator()(boost::property_tree::ptree& pt, ParseState& state) const {state.lastInsertedClass->members.back()->summary=boost::trim_copy(pt.data());}
     };
 
     template<> struct ParseAlgorithm<Elements::CreateRoutinesummary>
     {
-        void operator()(boost::property_tree::ptree& pt, ParseState& state) const {state.lastInsertedClass->createRoutines.back()->summary=pt.data();}
+        void operator()(boost::property_tree::ptree& pt, ParseState& state) const {state.lastInsertedClass->createRoutines.back()->summary=boost::trim_copy(pt.data());}
     };
 
     template<> struct ParseAlgorithm<Elements::MaxLength>
@@ -1830,7 +1830,7 @@ namespace ToolSupport
 
     template<> struct ParseAlgorithm<Elements::PropertyMappingsummary>
     {
-        void operator()(boost::property_tree::ptree& pt, ParseState& state) const {state.lastInsertedPropertyMapping->summary=pt.data();}
+        void operator()(boost::property_tree::ptree& pt, ParseState& state) const {state.lastInsertedPropertyMapping->summary=boost::trim_copy(pt.data());}
     };
 
     template<> struct ParseAlgorithm<Elements::MemberMapping>

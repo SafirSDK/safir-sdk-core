@@ -457,7 +457,7 @@ namespace Internal
             os<<", Sequence"<<std::endl;
             break;
         case DictionaryCollectionType:
-            os<<", Dictionary"<<std::endl;
+            os<<", Dictionary<"<<(c->GetKeyType()==EnumerationMemberType ? m_rep->GetEnum(c->GetKeyTypeId())->GetName() : BasicTypeOperations::MemberTypeToString(c->GetKeyType()))<<">"<<std::endl;
             break;
         default:
             os<<std::endl;
