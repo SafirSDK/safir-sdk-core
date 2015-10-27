@@ -163,7 +163,7 @@ public:
         ++m_calls;
         if (m_calls > 1)
         {
-            throw std::logic_error("Expect only one call to IncarnationChecker::Check");
+            throw std::logic_error("Expect only one call to IncarnationChecker::CheckJoinSystem");
         }
 
         std::wcout << "Checking incarnation id " << id << std::endl;
@@ -195,7 +195,7 @@ public:
 
     bool CheckFormSystem(const int64_t /*incarnationId*/, const Safir::Dob::Internal::SP::RawStatistics& /*rawData*/)
     {
-        //AWI:TODO
+        // This could be elaborated when the SP Salt tests are up and running again.
         return true;
     }
 
