@@ -75,7 +75,7 @@ namespace SP
                              const char* const receiverId,
                              const boost::function<void(const int64_t nodeId,
                                                       const int64_t electionId)>& electionCompleteCallback,
-                             const boost::function<void(const int64_t incarnationId)>& setIncarnationIdCallback)
+                             const boost::function<void(const int64_t incarnationId)>& formSystemCallback)
             : m_strand (ioService)
             , m_stopped(false)
             , m_communication(communication)
@@ -93,7 +93,7 @@ namespace SP
             , m_generateIncarnationIdTimer(ioService)
             , m_sendMessageTimer(ioService)
             , m_electionCompleteCallback(electionCompleteCallback)
-            , m_setIncarnationIdCallback(setIncarnationIdCallback)
+            , m_formSystemCallback(formSystemCallback)
         {
             new (m_electedStorage.get()) boost::atomic<uint64_t>(std::numeric_limits<int64_t>::min());
 
@@ -257,9 +257,9 @@ namespace SP
                     m_currentElectionId = LlufId_GenerateRandom64();
                     m_electionCompleteCallback(m_elected, m_currentElectionId);
 
-                    //note that we may not end up with this incarnationId, in case a RAW
-                    //is received just after this call, but before it is executed
-                    m_setIncarnationIdCallback(LlufId_GenerateRandom64());
+                    //Note that we may not end up with this incarnationId, we might join an existing system
+                    //in case a RAW is received before we have formed a system.
+                    m_formSystemCallback(LlufId_GenerateRandom64());
                     return;
                 }
                 else
@@ -334,9 +334,9 @@ namespace SP
                             return;
                         }
 
-                        //note that we may not end up with this incarnationId, in case a RAW
-                        //is received just after this call, but before it is executed
-                        m_setIncarnationIdCallback(LlufId_GenerateRandom64());
+                        //Note that we may not end up with this incarnationId, we might join an existing system
+                        //in case a RAW is received before we have formed a system.
+                        m_formSystemCallback(LlufId_GenerateRandom64());
                     }));
                 }
             }
@@ -601,7 +601,7 @@ namespace SP
                                  const int64_t electionId)> m_electionCompleteCallback;
 
         //callback to call when generating a new incarnation id
-        const boost::function<void(const int64_t incarnationId)> m_setIncarnationIdCallback;
+        const boost::function<void(const int64_t incarnationId)> m_formSystemCallback;
 
 
     };

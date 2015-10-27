@@ -92,16 +92,19 @@ namespace SP
                         const std::string& dataAddress,
                         const std::map<int64_t, NodeType>& nodeTypes,
                         const bool master,
-                        const boost::function<bool (const int64_t incarnationId)>& validateIncarnationIdCallback)
+                        const boost::function<bool (const int64_t incarnationId)>& validateJoinSystemCallback,
+                        const boost::function<bool (const int64_t incarnationId, const RawStatistics& rawData)>& validateFormSystemCallback)
             : m_ioService(ioService)
             , m_communication(communication)
             , m_id(id)
             , m_nodeTypes(nodeTypes)
             , m_strand(ioService)
             , m_latencyMonitor("SpRawHandler",CalculateLatencyWarningThreshold(nodeTypes),m_strand)
-            , m_checkDeadNodesTimer()
+            , m_formSystemTimer(ioService)
+            , m_checkDeadNodesTimer()            
             , m_master(master)
-            , m_validateIncarnationIdCallback(validateIncarnationIdCallback)
+            , m_validateJoinSystemCallback(validateJoinSystemCallback)
+            , m_validateFormSystemCallback(validateFormSystemCallback)
             , m_stopped(false)
         {
 
@@ -149,6 +152,7 @@ namespace SP
 
                 m_strand.dispatch([this]
                                   {
+                                      m_formSystemTimer.cancel();
                                       m_checkDeadNodesTimer->Stop();
                                   });
             }
@@ -253,8 +257,8 @@ namespace SP
                     lllog(6) << "SP: This node does not have an incarnation id" << std::endl;
                     if (node.nodeInfo->remote_statistics().has_incarnation_id())
                     {
-                        const bool join = m_validateIncarnationIdCallback == nullptr ||
-                            m_validateIncarnationIdCallback(node.nodeInfo->remote_statistics().incarnation_id());
+                        const bool join = m_validateJoinSystemCallback == nullptr ||
+                            m_validateJoinSystemCallback(node.nodeInfo->remote_statistics().incarnation_id());
 
                         if (join)
                         {
@@ -264,6 +268,9 @@ namespace SP
                             m_allStatisticsMessage.set_incarnation_id(node.nodeInfo->remote_statistics().incarnation_id());
 
                             changes |= RawChanges::METADATA_CHANGED;
+
+                            // Since we have now joined a system we can skip any attempt to form a new system
+                            m_formSystemTimer.cancel();
                         }
                         else
                         {
@@ -476,7 +483,7 @@ namespace SP
                               });
         }
 
-        void SetIncarnationId(const int64_t incarnationId)
+        void FormSystem(const int64_t incarnationId)
         {
             m_strand.dispatch([this, incarnationId]
                               {
@@ -485,20 +492,38 @@ namespace SP
                                       return;
                                   }
 
-                                  lllog(1) << "SP: Incarnation Id " << incarnationId
-                                           << " set in RawHandler." << std::endl;
+                                  const auto rawData = RawStatisticsCreator::Create
+                                      (Safir::make_unique<RawStatisticsMessage>(m_allStatisticsMessage));
 
-                                  if (!m_validateIncarnationIdCallback.empty())
+                                  const auto formSystem = m_validateFormSystemCallback == nullptr ||
+                                                    m_validateFormSystemCallback(incarnationId, rawData);
+
+                                  if (formSystem)
                                   {
-                                      if (!m_validateIncarnationIdCallback(incarnationId))
-                                      {
-                                          lllog(1) << "Control said no to incarnation id " << incarnationId << std::endl;
-                                          throw std::logic_error("Nooooo! You can't say no to this incarnation id!");
-                                      }
-                                  }
-                                  m_allStatisticsMessage.set_incarnation_id(incarnationId);
+                                      m_allStatisticsMessage.set_incarnation_id(incarnationId);
 
-                                  PostRawChangedCallback(RawChanges(RawChanges::METADATA_CHANGED), NULL);
+                                      PostRawChangedCallback(RawChanges(RawChanges::METADATA_CHANGED), NULL);
+
+                                      lllog(1) << "SP: Incarnation Id " << incarnationId
+                                               << " set in RawHandler." << std::endl;
+                                  }
+                                  else
+                                  {
+                                      lllog(8) << "SP: Not allowed to form new system now, wait a while and try again." << std::endl;
+
+                                      auto this_ = this; // To keep older Windows compilers happy
+
+                                      m_formSystemTimer.expires_from_now(boost::chrono::seconds(5));
+                                      m_formSystemTimer.async_wait(m_strand.wrap([this_, incarnationId]
+                                                                                 (const boost::system::error_code& error)
+                                                                                 {
+                                                                                     if (error == boost::asio::error::operation_aborted)
+                                                                                     {
+                                                                                         return;
+                                                                                     }
+                                                                                     this_->FormSystem(incarnationId);
+                                                                                   }));
+                                  }
                               });
         }
 
@@ -852,6 +877,7 @@ namespace SP
         mutable boost::asio::strand m_strand;
         AsioLatencyMonitor m_latencyMonitor;
 
+        boost::asio::steady_timer m_formSystemTimer;
         std::unique_ptr<Safir::Utilities::Internal::AsioPeriodicTimer> m_checkDeadNodesTimer;
 
         NodeTable m_nodeTable;
@@ -862,7 +888,8 @@ namespace SP
         std::vector<StatisticsCallback> m_rawChangedCallbacks;
 
         const bool m_master; //true if running in SystemPicture master instance
-        const boost::function<bool (const int64_t incarnationId)> m_validateIncarnationIdCallback;
+        const boost::function<bool (const int64_t incarnationId)> m_validateJoinSystemCallback;
+        const boost::function<bool (const int64_t incarnationId, const RawStatistics& rawData)> m_validateFormSystemCallback;
 
         boost::atomic<bool> m_stopped;
     };

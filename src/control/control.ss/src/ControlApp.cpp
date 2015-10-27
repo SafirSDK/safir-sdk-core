@@ -165,6 +165,7 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
                                      id,
                                      m_conf.thisNodeParam.nodeTypeId,
                                      std::move(spNodeTypes),
+                                     // Join system callback
                                      [this](const int64_t incarnationId) -> bool
                                      {
                                          if (m_incarnationId == 0 &&
@@ -182,6 +183,12 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
                                          {
                                              return false;
                                          }
+                                     },
+                                     // Form system callback
+                                     [this](const int64_t /*incarnationId*/, const SP::RawStatistics& /*rawData*/) -> bool
+                                     {
+                                         //AWI:TODO
+                                         return true;
                                      }));
 
     m_doseMainCmdSender.reset(new Control::DoseMainCmdSender
