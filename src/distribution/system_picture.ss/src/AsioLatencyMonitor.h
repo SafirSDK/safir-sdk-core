@@ -60,6 +60,10 @@ namespace Internal
         void Stop()
         {
             m_stop = true;
+            m_strand.post([this]()
+                          {
+                              m_timer.cancel();
+                          });
         }
 
     private:
