@@ -91,6 +91,7 @@ namespace SP
                         const std::string& controlAddress,
                         const std::string& dataAddress,
                         const std::map<int64_t, NodeType>& nodeTypes,
+                        const boost::chrono::milliseconds& formSystemRetryTimeout,
                         const bool master,
                         const boost::function<bool (const int64_t incarnationId)>& validateJoinSystemCallback,
                         const boost::function<bool (const int64_t incarnationId, const RawStatistics& rawData)>& validateFormSystemCallback)
@@ -101,6 +102,7 @@ namespace SP
             , m_strand(ioService)
             , m_latencyMonitor("SpRawHandler",CalculateLatencyWarningThreshold(nodeTypes),m_strand)
             , m_formSystemTimer(ioService)
+            , m_formSystemRetryTimeout(formSystemRetryTimeout)
             , m_checkDeadNodesTimer()            
             , m_master(master)
             , m_validateJoinSystemCallback(validateJoinSystemCallback)
@@ -513,7 +515,7 @@ namespace SP
 
                                       auto this_ = this; // To keep older Windows compilers happy
 
-                                      m_formSystemTimer.expires_from_now(boost::chrono::seconds(5));
+                                      m_formSystemTimer.expires_from_now(m_formSystemRetryTimeout);
                                       m_formSystemTimer.async_wait(m_strand.wrap([this_, incarnationId]
                                                                                  (const boost::system::error_code& error)
                                                                                  {
@@ -878,6 +880,7 @@ namespace SP
         AsioLatencyMonitor m_latencyMonitor;
 
         boost::asio::steady_timer m_formSystemTimer;
+        const boost::chrono::milliseconds m_formSystemRetryTimeout;
         std::unique_ptr<Safir::Utilities::Internal::AsioPeriodicTimer> m_checkDeadNodesTimer;
 
         NodeTable m_nodeTable;

@@ -133,7 +133,8 @@ struct Fixture
         : formSystemDeniesBeforeOk(0),
           formSystemCallsBeforeJoin(10000)
     {
-        rh.reset(new RawHandlerBasic<::Communication>(ioService,comm,"plopp",10,100,"asdfasdf","qwerty",GetNodeTypes(),true,
+        rh.reset(new RawHandlerBasic<::Communication>(ioService,comm,"plopp",10,100,"asdfasdf","qwerty",
+                                                      GetNodeTypes(),boost::chrono::milliseconds(10), true,
                                                       [this](const int64_t id)
                                                       {return ValidateJoinSystem(id);},
                                                       [this](const int64_t id, const RawStatistics& rawData)
