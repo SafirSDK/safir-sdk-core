@@ -723,7 +723,7 @@ shown in the example below. The key type is specified using the +keyType+ attrib
     </member>
 ----------------------------
 
-For strings the maximum length in number of Unicode characters must be defined using the
+For strings the maximum length in number of Unicode characters can be defined using the
 +maxLength+ tag.
 
 .String member declaration
@@ -732,10 +732,16 @@ For strings the maximum length in number of Unicode characters must be defined u
     <member>
         <name>Callsign</name>
         <type>String</type>
-        <maxLength>10</maxLength>
+        <maxLength>10</maxLength> <!-- Optional -->
     </member>
 ----------------------------
-The string lengths and array sizes can be specified with parameters as well. The tags used for this is arraySizeRef and maxLenghtRef, and the parameter name must be fully qualified (full namespace and class name).
+Exceeding the maxiumum string length (i.e. setting a string that is too long) will cause
+an exception to be thrown _when the object is serialized_, e.g. when a Message is
+transmitted. If no maximum length is specified the strings can be Very Long^TM^.
+
+The string lengths and array sizes can also be specified with parameters. The tags
+used for this is arraySizeRef and maxLenghtRef, and the parameter name must be fully
+qualified (full namespace and class name).
 
 .Parameters and members
 [source,xml]
