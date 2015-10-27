@@ -95,12 +95,49 @@ public:
 
 using namespace Safir::Dob::Internal::SP;
 
+std::unique_ptr<RawStatisticsMessage> GetProtobuf(bool setIncarnation)
+{
+    auto msg = Safir::make_unique<RawStatisticsMessage>();
+
+    msg->set_name("foo");
+    msg->set_id(110);
+    msg->set_node_type_id(190);
+    msg->set_control_address("asdfasdfdd");
+    msg->set_data_address("foobar");
+    msg->set_election_id(91);
+
+    if (setIncarnation)
+    {
+        msg->set_incarnation_id(12345);
+    }
+
+    auto node = msg->add_node_info();
+
+    node->set_name("1");
+    node->set_id(1);
+    node->set_node_type_id(101);
+    node->set_control_address(":fobar!");
+    node->set_data_address(":flopp");
+    node->set_is_dead(false);
+    node->set_control_receive_count(1000);
+    node->set_control_retransmit_count(100);
+    node->set_data_receive_count(5000);
+    node->set_data_retransmit_count(500);
+
+    return std::move(msg);
+}
+
 struct Fixture
 {
     Fixture()
+        : formSystemDeniesBeforeOk(0),
+          formSystemCallsBeforeJoin(10000)
     {
         rh.reset(new RawHandlerBasic<::Communication>(ioService,comm,"plopp",10,100,"asdfasdf","qwerty",GetNodeTypes(),true,
-                                                      [this](const int64_t id){return ValidateIncarnation(id);}));
+                                                      [this](const int64_t id)
+                                                      {return ValidateJoinSystem(id);},
+                                                      [this](const int64_t id, const RawStatistics& rawData)
+                                                      {return ValidateFormSystem(id, rawData);}));
         BOOST_TEST_MESSAGE( "setup fixture" );
     }
 
@@ -127,10 +164,40 @@ struct Fixture
         return nodeTypes;
     }
 
-    bool ValidateIncarnation(const int64_t id)
+    bool ValidateJoinSystem(const int64_t id)
     {
-        incarnations.insert(id);
-        return forbiddenIncarnations.find(id) == forbiddenIncarnations.end();
+        joinSystemIncarnations.insert(id);
+        return forbiddenJoinIncarnations.find(id) == forbiddenJoinIncarnations.end();
+    }
+
+    bool ValidateFormSystem(const int64_t id, const RawStatistics& /*rawData*/)
+    {
+        formSystemIncarnations.insert(id);
+
+        if (formSystemCallsBeforeJoin == 0)
+        {
+            comm.newNodeCb("asdf",11,10,"asdffff","asdfqqqq");
+
+            auto msg = GetProtobuf(true);
+            const size_t size = msg->ByteSize();
+            auto data = boost::make_shared<char[]>(size);
+            msg->SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(data.get()));
+            rh->NewRemoteStatistics(11,data,size);
+        }
+        else
+        {
+            --formSystemCallsBeforeJoin;
+        }
+
+        if (formSystemDeniesBeforeOk == 0)
+        {
+            return true;
+        }
+        else
+        {
+            --formSystemDeniesBeforeOk;
+            return false;
+        }
     }
 
     Communication comm;
@@ -138,8 +205,11 @@ struct Fixture
 
     std::unique_ptr<RawHandlerBasic<::Communication>> rh;
 
-    std::set<int64_t> forbiddenIncarnations;
-    std::set<int64_t> incarnations;
+    std::set<int64_t> forbiddenJoinIncarnations;
+    std::set<int64_t> joinSystemIncarnations;
+    std::set<int64_t> formSystemIncarnations;
+    unsigned int formSystemDeniesBeforeOk;
+    unsigned int formSystemCallsBeforeJoin;
 };
 
 BOOST_FIXTURE_TEST_SUITE( s, Fixture )
@@ -149,7 +219,8 @@ BOOST_AUTO_TEST_CASE( start_stop )
     BOOST_CHECK(!comm.newNodeCb.empty());
     BOOST_CHECK(!comm.gotReceiveFromCb.empty());
     BOOST_CHECK(!comm.retransmitToCb.empty());
-    BOOST_CHECK(incarnations.empty());
+    BOOST_CHECK(joinSystemIncarnations.empty());
+    BOOST_CHECK(formSystemIncarnations.empty());
 
     rh->Stop();
     ioService.run();
@@ -227,7 +298,7 @@ BOOST_AUTO_TEST_CASE( exclude_node )
     BOOST_CHECK(comm.excludedNodes == correctNodes);
 }
 
-void CheckStatisticsCommon(const RawStatistics& statistics)
+void CheckStatisticsCommon(const RawStatistics& statistics, unsigned int externalNodes)
 {
     BOOST_CHECK_EQUAL(statistics.Name(), "plopp");
     BOOST_CHECK_EQUAL(statistics.Id(), 10);
@@ -235,13 +306,19 @@ void CheckStatisticsCommon(const RawStatistics& statistics)
     BOOST_CHECK_EQUAL(statistics.ControlAddress(), "asdfasdf");
     BOOST_CHECK_EQUAL(statistics.DataAddress(), "qwerty");
     BOOST_CHECK_EQUAL(statistics.ElectionId(), 0);
-    BOOST_CHECK_EQUAL(statistics.Size(), 1);
-    BOOST_CHECK_EQUAL(statistics.Name(0), "asdf");
-    BOOST_CHECK_EQUAL(statistics.Id(0), 11);
-    BOOST_CHECK_EQUAL(statistics.NodeTypeId(0), 10);
-    BOOST_CHECK_EQUAL(statistics.ControlAddress(0), "asdffff");
-    BOOST_CHECK_EQUAL(statistics.DataAddress(0), "asdfqqqq");
+    BOOST_CHECK_EQUAL(statistics.Size(), externalNodes);
+
+    for (unsigned int i = 0; i < externalNodes; ++i)
+    {
+
+        BOOST_CHECK_EQUAL(statistics.Name(i), "asdf");
+        BOOST_CHECK_EQUAL(statistics.Id(i), 11);
+        BOOST_CHECK_EQUAL(statistics.NodeTypeId(i), 10);
+        BOOST_CHECK_EQUAL(statistics.ControlAddress(i), "asdffff");
+        BOOST_CHECK_EQUAL(statistics.DataAddress(i), "asdfqqqq");
+    }
 }
+
 
 BOOST_AUTO_TEST_CASE( nodes_changed_add_callback )
 {
@@ -251,7 +328,7 @@ BOOST_AUTO_TEST_CASE( nodes_changed_add_callback )
                                  boost::shared_ptr<void> completionSignaller)
                                {
                                    ++cbCalls;
-                                   CheckStatisticsCommon(statistics);
+                                   CheckStatisticsCommon(statistics, 1);
 
                                    BOOST_CHECK(flags.NodesChanged());
                                    BOOST_CHECK(!flags.NewRemoteStatistics());
@@ -285,7 +362,7 @@ BOOST_AUTO_TEST_CASE( nodes_changed_removed_callback )
                                  boost::shared_ptr<void> completionSignaller)
                                {
                                    ++cbCalls;
-                                   CheckStatisticsCommon(statistics);
+                                   CheckStatisticsCommon(statistics, 1);
 
                                    BOOST_CHECK(flags.NodesChanged());
                                    BOOST_CHECK(!flags.NewRemoteStatistics());
@@ -317,38 +394,6 @@ BOOST_AUTO_TEST_CASE( nodes_changed_removed_callback )
     BOOST_CHECK_EQUAL(cbCalls, 2);
 }
 
-std::unique_ptr<RawStatisticsMessage> GetProtobuf(bool setIncarnation)
-{
-    auto msg = Safir::make_unique<RawStatisticsMessage>();
-
-    msg->set_name("foo");
-    msg->set_id(110);
-    msg->set_node_type_id(190);
-    msg->set_control_address("asdfasdfdd");
-    msg->set_data_address("foobar");
-    msg->set_election_id(91);
-
-    if (setIncarnation)
-    {
-        msg->set_incarnation_id(12345);
-    }
-
-    auto node = msg->add_node_info();
-
-    node->set_name("1");
-    node->set_id(1);
-    node->set_node_type_id(101);
-    node->set_control_address(":fobar!");
-    node->set_data_address(":flopp");
-    node->set_is_dead(false);
-    node->set_control_receive_count(1000);
-    node->set_control_retransmit_count(100);
-    node->set_data_receive_count(5000);
-    node->set_data_retransmit_count(500);
-
-    return std::move(msg);
-}
-
 void CheckRemotesCommon(const RawStatistics& remote)
 {
     BOOST_CHECK_EQUAL(remote.Name(), "foo");
@@ -375,11 +420,11 @@ BOOST_AUTO_TEST_CASE( raw_changed_callback )
     comm.excludeCb=[&]{rh->Stop();};
     int cbCalls = 0;
     rh->AddRawChangedCallback([&](const RawStatistics& statistics,
-                                 const RawChanges& flags,
-                                 boost::shared_ptr<void> completionSignaller)
+                                  const RawChanges& flags,
+                                  boost::shared_ptr<void> completionSignaller)
                                {
                                    ++cbCalls;
-                                   CheckStatisticsCommon(statistics);
+                                   CheckStatisticsCommon(statistics, 1);
 
                                    if (cbCalls == 1)
                                    {
@@ -420,8 +465,9 @@ BOOST_AUTO_TEST_CASE( raw_changed_callback )
 
     BOOST_CHECK_NO_THROW(ioService.run());
     BOOST_CHECK_EQUAL(cbCalls, 3);
-    BOOST_REQUIRE_EQUAL(incarnations.size(), 1U);
-    BOOST_CHECK_EQUAL(*incarnations.begin(), 12345);
+    BOOST_REQUIRE_EQUAL(joinSystemIncarnations.size(), 1U);
+    BOOST_CHECK_EQUAL(*joinSystemIncarnations.begin(), 12345);
+    BOOST_REQUIRE_EQUAL(formSystemIncarnations.size(), 0U);
 }
 
 
@@ -431,11 +477,11 @@ BOOST_AUTO_TEST_CASE( no_incarnations_discard )
     comm.excludeCb=[&]{rh->Stop();};
     int cbCalls = 0;
     rh->AddRawChangedCallback([&](const RawStatistics& statistics,
-                                 const RawChanges& flags,
-                                 boost::shared_ptr<void> completionSignaller)
+                                  const RawChanges& flags,
+                                  boost::shared_ptr<void> completionSignaller)
                                {
                                    ++cbCalls;
-                                   CheckStatisticsCommon(statistics);
+                                   CheckStatisticsCommon(statistics, 1);
 
                                    BOOST_CHECK(!flags.MetadataChanged());
                                    BOOST_CHECK(flags.NodesChanged());
@@ -463,7 +509,8 @@ BOOST_AUTO_TEST_CASE( no_incarnations_discard )
 
     BOOST_CHECK_NO_THROW(ioService.run());
     BOOST_CHECK_EQUAL(cbCalls, 2);
-    BOOST_REQUIRE_EQUAL(incarnations.size(), 0U);
+    BOOST_REQUIRE_EQUAL(joinSystemIncarnations.size(), 0U);
+    BOOST_REQUIRE_EQUAL(formSystemIncarnations.size(), 0U);
 }
 
 
@@ -472,8 +519,8 @@ BOOST_AUTO_TEST_CASE( election_id_changed_callback)
     comm.excludeCb=[&]{rh->Stop();};
     int cbCalls = 0;
     rh->AddRawChangedCallback([&](const RawStatistics& statistics,
-                                 const RawChanges& flags,
-                                 boost::shared_ptr<void> completionSignaller)
+                                  const RawChanges& flags,
+                                  boost::shared_ptr<void> completionSignaller)
                              {
                                  ++cbCalls;
 
@@ -503,16 +550,16 @@ BOOST_AUTO_TEST_CASE( election_id_changed_callback)
     BOOST_CHECK_EQUAL(cbCalls, 3);
 }
 
-BOOST_AUTO_TEST_CASE( incarnation_id_set_callback)
+BOOST_AUTO_TEST_CASE( join_system_callback)
 {
     comm.excludeCb=[&]{rh->Stop();};
     int cbCalls = 0;
     rh->AddRawChangedCallback([&](const RawStatistics& statistics,
-                                 const RawChanges& flags,
-                                 boost::shared_ptr<void> completionSignaller)
+                                  const RawChanges& flags,
+                                  boost::shared_ptr<void> completionSignaller)
                                {
                                    ++cbCalls;
-                                   CheckStatisticsCommon(statistics);
+                                   CheckStatisticsCommon(statistics, 1);
 
                                    if (cbCalls == 1)
                                    {
@@ -541,22 +588,23 @@ BOOST_AUTO_TEST_CASE( incarnation_id_set_callback)
 
     BOOST_CHECK_NO_THROW(ioService.run());
     BOOST_CHECK_EQUAL(cbCalls, 3);
-    BOOST_REQUIRE_EQUAL(incarnations.size(), 1U);
-    BOOST_CHECK_EQUAL(*incarnations.begin(), 12345);
+    BOOST_REQUIRE_EQUAL(joinSystemIncarnations.size(), 1U);
+    BOOST_CHECK_EQUAL(*joinSystemIncarnations.begin(), 12345);
+    BOOST_REQUIRE_EQUAL(formSystemIncarnations.size(), 0U);
 }
 
-BOOST_AUTO_TEST_CASE( incarnation_id_forbid)
+BOOST_AUTO_TEST_CASE( join_system_forbid)
 {
-    forbiddenIncarnations.insert(12345);
+    forbiddenJoinIncarnations.insert(12345);
 
     comm.excludeCb=[&]{rh->Stop();};
     int cbCalls = 0;
     rh->AddRawChangedCallback([&](const RawStatistics& statistics,
-                                 const RawChanges& flags,
-                                 boost::shared_ptr<void> completionSignaller)
+                                  const RawChanges& flags,
+                                  boost::shared_ptr<void> completionSignaller)
                                {
                                    ++cbCalls;
-                                   CheckStatisticsCommon(statistics);
+                                   CheckStatisticsCommon(statistics, 1);
 
                                    BOOST_CHECK(!flags.MetadataChanged());
                                    BOOST_CHECK_EQUAL(statistics.IncarnationId(),0);
@@ -580,8 +628,108 @@ BOOST_AUTO_TEST_CASE( incarnation_id_forbid)
 
     BOOST_CHECK_NO_THROW(ioService.run());
     BOOST_CHECK_EQUAL(cbCalls, 2);
-    BOOST_REQUIRE_EQUAL(incarnations.size(), 1U);
-    BOOST_CHECK_EQUAL(*incarnations.begin(), 12345);
+    BOOST_REQUIRE_EQUAL(joinSystemIncarnations.size(), 1U);
+    BOOST_CHECK_EQUAL(*joinSystemIncarnations.begin(), 12345);
+    BOOST_REQUIRE_EQUAL(formSystemIncarnations.size(), 0U);
+}
+
+BOOST_AUTO_TEST_CASE( form_system )
+{
+    formSystemDeniesBeforeOk = 0;
+
+    int cbCalls = 0;
+    rh->AddRawChangedCallback([&](const RawStatistics& statistics,
+                                  const RawChanges& flags,
+                                  boost::shared_ptr<void> completionSignaller)
+                               {
+                                   ++cbCalls;
+                                   CheckStatisticsCommon(statistics, 0);
+
+                                   BOOST_CHECK(flags.MetadataChanged());
+                                   BOOST_CHECK_EQUAL(statistics.IncarnationId(),54321);
+
+                                   rh->Stop();
+
+                               });
+
+    rh->FormSystem(54321);
+
+    BOOST_CHECK_NO_THROW(ioService.run());
+    BOOST_CHECK_EQUAL(cbCalls, 1);
+    BOOST_CHECK_EQUAL(joinSystemIncarnations.size(), 0U);
+    BOOST_REQUIRE_EQUAL(formSystemIncarnations.size(), 1U);
+    BOOST_CHECK_EQUAL(*formSystemIncarnations.begin(), 54321);
+}
+
+BOOST_AUTO_TEST_CASE( form_system_delay )
+{
+    formSystemDeniesBeforeOk = 2;
+
+    int cbCalls = 0;
+    rh->AddRawChangedCallback([&](const RawStatistics& statistics,
+                                  const RawChanges& flags,
+                                  boost::shared_ptr<void> completionSignaller)
+                               {
+                                   ++cbCalls;
+                                   CheckStatisticsCommon(statistics, 0);
+
+                                   BOOST_CHECK(flags.MetadataChanged());
+                                   BOOST_CHECK_EQUAL(statistics.IncarnationId(),54321);
+
+                                   rh->Stop();
+                               });
+
+    rh->FormSystem(54321);
+
+    BOOST_CHECK_NO_THROW(ioService.run());
+    BOOST_CHECK_EQUAL(cbCalls, 1);
+    BOOST_CHECK_EQUAL(joinSystemIncarnations.size(), 0U);
+    BOOST_CHECK_EQUAL(formSystemDeniesBeforeOk, 0);
+    BOOST_REQUIRE_EQUAL(formSystemIncarnations.size(), 1U);
+    BOOST_CHECK_EQUAL(*formSystemIncarnations.begin(), 54321);
+
+}
+
+BOOST_AUTO_TEST_CASE( form_system_delay_then_join )
+{
+    formSystemDeniesBeforeOk = 9999999; //never say ok in form system callback
+    formSystemCallsBeforeJoin = 2;
+
+    comm.excludeCb=[&]{rh->Stop();};
+
+    int cbCalls = 0;
+    rh->AddRawChangedCallback([&](const RawStatistics& statistics,
+                                  const RawChanges& flags,
+                                  boost::shared_ptr<void> completionSignaller)
+                               {
+                                   ++cbCalls;
+                                   CheckStatisticsCommon(statistics, 1);
+
+                                   if (cbCalls == 1)
+                                   {
+                                       BOOST_CHECK(!flags.MetadataChanged());
+                                       BOOST_CHECK_EQUAL(statistics.IncarnationId(),0);
+                                   }
+                                   else if (cbCalls == 2)
+                                   {
+                                       BOOST_CHECK(flags.MetadataChanged());
+                                       BOOST_CHECK_EQUAL(statistics.IncarnationId(),12345);
+                                   }
+                                   else
+                                   {
+                                       BOOST_CHECK(!flags.MetadataChanged());
+                                       BOOST_CHECK_EQUAL(statistics.IncarnationId(),12345);
+                                   }
+                               });
+    rh->FormSystem(54321);
+
+    BOOST_CHECK_NO_THROW(ioService.run());
+    BOOST_CHECK_EQUAL(cbCalls, 3);
+    BOOST_CHECK_EQUAL(joinSystemIncarnations.size(), 1U);
+    BOOST_CHECK_EQUAL(*joinSystemIncarnations.begin(), 12345);
+    BOOST_REQUIRE_EQUAL(formSystemIncarnations.size(), 1U);
+    BOOST_CHECK_EQUAL(*formSystemIncarnations.begin(), 54321);
+
 }
 
 BOOST_AUTO_TEST_CASE( explicit_exclude_node )
@@ -631,8 +779,8 @@ BOOST_AUTO_TEST_CASE( recently_dead_nodes )
 {
     int cbCalls = 0;
     rh->AddRawChangedCallback([&](const RawStatistics& statistics,
-                                 const RawChanges& flags,
-                                 boost::shared_ptr<void> completionSignaller)
+                                  const RawChanges& flags,
+                                  boost::shared_ptr<void> completionSignaller)
                                {
                                    ++cbCalls;
 
@@ -684,12 +832,12 @@ BOOST_AUTO_TEST_CASE( perform_on_all )
     rh->NewRemoteStatistics(11,data,size);
 
     rh->PerformOnAllStatisticsMessage([&](const std::unique_ptr<char[]>& data,
-                                         const size_t size)
+                                          const size_t size)
                                      {
                                          auto msg = Safir::make_unique<RawStatisticsMessage>();
                                          msg->ParseFromArray(data.get(),static_cast<int>(size));
                                          auto statistics = RawStatisticsCreator::Create(std::move(msg));
-                                         CheckStatisticsCommon(statistics);
+                                         CheckStatisticsCommon(statistics, 1);
 
                                          BOOST_CHECK(!statistics.IsDead(0));
                                          BOOST_CHECK(statistics.HasRemoteStatistics(0));
@@ -715,7 +863,7 @@ BOOST_AUTO_TEST_CASE( perform_on_my )
                                          auto msg = Safir::make_unique<RawStatisticsMessage>();
                                          msg->ParseFromArray(data.get(),static_cast<int>(size));
                                          auto statistics = RawStatisticsCreator::Create(std::move(msg));
-                                         CheckStatisticsCommon(statistics);
+                                         CheckStatisticsCommon(statistics, 1);
 
                                          BOOST_CHECK(!statistics.IsDead(0));
                                          BOOST_CHECK(!statistics.HasRemoteStatistics(0));
