@@ -513,17 +513,19 @@ namespace SP
                                   {
                                       lllog(8) << "SP: Not allowed to form new system now, wait a while and try again." << std::endl;
 
-                                      auto this_ = this; // To keep older Windows compilers happy
+                                      // To keep older Windows compilers happy
+                                      auto this_ = this;
+                                      auto incarnationId_ = incarnationId;
 
                                       m_formSystemTimer.expires_from_now(m_formSystemRetryTimeout);
-                                      m_formSystemTimer.async_wait(m_strand.wrap([this_, incarnationId]
+                                      m_formSystemTimer.async_wait(m_strand.wrap([this_, incarnationId_]
                                                                                  (const boost::system::error_code& error)
                                                                                  {
                                                                                      if (error == boost::asio::error::operation_aborted)
                                                                                      {
                                                                                          return;
                                                                                      }
-                                                                                     this_->FormSystem(incarnationId);
+                                                                                     this_->FormSystem(incarnationId_);
                                                                                    }));
                                   }
                               });
