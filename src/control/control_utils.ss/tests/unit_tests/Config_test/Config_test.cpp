@@ -104,6 +104,11 @@ int main(int argc, char* argv[])
         CHECK(conf.thisNodeParam.name == "MyNode");
         CHECK(conf.thisNodeParam.nodeType == "Server");
         CHECK(conf.thisNodeParam.nodeTypeId == LlufId_Generate64("Server"));
+
+        // Check WaitForNodeTypes
+        CHECK(conf.waitForNodeTypes.size() == 1);
+        CHECK(*conf.waitForNodeTypes.cbegin() == "Server");
+
     }
     else if (test == "tc2")
     {

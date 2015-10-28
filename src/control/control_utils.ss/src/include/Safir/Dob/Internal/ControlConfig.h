@@ -242,6 +242,43 @@ namespace Control
                 }
             }
 
+            // WaitForNodeTypes
+            for (Safir::Dob::Typesystem::ArrayIndex i = 0;
+                 i < Safir::Dob::NodeParameters::WaitForNodeTypesArraySize();
+                 ++i)
+            {
+                auto nt = ToUtf8(Safir::Dob::NodeParameters::WaitForNodeTypes(i));
+
+                if (nt.empty())
+                {
+                    throw  std::logic_error("Parameter error: WaitForNodeTypes: Empty value not allowed!");
+                }
+
+                if (!waitForNodeTypes.insert(nt).second)
+                {
+                    throw  std::logic_error("Parameter error: WaitForNodeTypes: Duplicated node types!");
+                }
+            }
+
+            for (auto waitIt = waitForNodeTypes.cbegin(); waitIt != waitForNodeTypes.cend(); ++waitIt)
+            {
+                for (auto ntIt = nodeTypesParam.cbegin(); ntIt != nodeTypesParam.cend(); ++ntIt)
+                {
+                    if (ntIt->name == *waitIt)
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        continue;
+                    }
+
+                    throw std::logic_error("Parameter error: WaitForNodeTypes: " + *waitIt +
+                                           " is not a valid node type");
+                }
+            }
+
+
             // ThisNode
             std::string controlAddress = ToUtf8(Safir::Dob::ThisNodeParameters::ControlAddress());
 
@@ -289,6 +326,7 @@ namespace Control
         std::vector<NodeType> nodeTypesParam;
         ThisNode thisNodeParam;
         std::string incarnationBlacklistFileName;
+        std::set<std::string> waitForNodeTypes;
     };
 }
 }
