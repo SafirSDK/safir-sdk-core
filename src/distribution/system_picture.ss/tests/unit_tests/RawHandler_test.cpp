@@ -299,7 +299,7 @@ BOOST_AUTO_TEST_CASE( exclude_node )
     BOOST_CHECK(comm.excludedNodes == correctNodes);
 }
 
-void CheckStatisticsCommon(const RawStatistics& statistics, unsigned int externalNodes)
+void CheckStatisticsCommon(const RawStatistics& statistics, int externalNodes)
 {
     BOOST_CHECK_EQUAL(statistics.Name(), "plopp");
     BOOST_CHECK_EQUAL(statistics.Id(), 10);
@@ -309,7 +309,7 @@ void CheckStatisticsCommon(const RawStatistics& statistics, unsigned int externa
     BOOST_CHECK_EQUAL(statistics.ElectionId(), 0);
     BOOST_CHECK_EQUAL(statistics.Size(), externalNodes);
 
-    for (unsigned int i = 0; i < externalNodes; ++i)
+    for (int i = 0; i < externalNodes; ++i)
     {
 
         BOOST_CHECK_EQUAL(statistics.Name(i), "asdf");
