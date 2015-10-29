@@ -262,17 +262,18 @@ namespace Control
 
             for (auto waitIt = waitForNodeTypes.cbegin(); waitIt != waitForNodeTypes.cend(); ++waitIt)
             {
+                bool found = false;
                 for (auto ntIt = nodeTypesParam.cbegin(); ntIt != nodeTypesParam.cend(); ++ntIt)
                 {
                     if (ntIt->name == *waitIt)
                     {
+                        found = true;
                         break;
                     }
-                    else
-                    {
-                        continue;
-                    }
+                }
 
+                if (!found)
+                {
                     throw std::logic_error("Parameter error: WaitForNodeTypes: " + *waitIt +
                                            " is not a valid node type");
                 }
