@@ -151,6 +151,21 @@ int main(int argc, char* argv[])
            CHECK(std::string(e.what()).find("Duplicated ip addresses") != std::string::npos)
         }
     }
+    else if (test == "tc5")
+    {
+        try
+        {
+            ctrl::Config conf;
+
+            LOGERROR("Expected an exception!");
+        }
+        catch (const std::exception& e)
+        {
+            std::cout << e.what() << std::endl;
+
+           CHECK(std::string(e.what()).find("APP1 is not a valid node type") != std::string::npos)
+        }
+    }
     else
     {
         std::cout << "Valid test case args are: Normal" << std::endl;
