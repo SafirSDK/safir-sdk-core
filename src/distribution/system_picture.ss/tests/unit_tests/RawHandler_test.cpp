@@ -685,7 +685,7 @@ BOOST_AUTO_TEST_CASE( form_system_delay )
     BOOST_CHECK_NO_THROW(ioService.run());
     BOOST_CHECK_EQUAL(cbCalls, 1);
     BOOST_CHECK_EQUAL(joinSystemIncarnations.size(), 0U);
-    BOOST_CHECK_EQUAL(formSystemDeniesBeforeOk, 0);
+    BOOST_CHECK_EQUAL(formSystemDeniesBeforeOk, 0U);
     BOOST_REQUIRE_EQUAL(formSystemIncarnations.size(), 1U);
     BOOST_CHECK_EQUAL(*formSystemIncarnations.begin(), 54321);
 
