@@ -104,11 +104,6 @@ int main(int argc, char* argv[])
         CHECK(conf.thisNodeParam.name == "MyNode");
         CHECK(conf.thisNodeParam.nodeType == "Server");
         CHECK(conf.thisNodeParam.nodeTypeId == LlufId_Generate64("Server"));
-
-        // Check WaitForNodeTypes
-        CHECK(conf.waitForNodeTypes.size() == 1);
-        CHECK(*conf.waitForNodeTypes.cbegin() == LlufId_Generate64("Server"));
-
     }
     else if (test == "tc2")
     {
@@ -149,21 +144,6 @@ int main(int argc, char* argv[])
             std::cout << e.what() << std::endl;
 
            CHECK(std::string(e.what()).find("Duplicated ip addresses") != std::string::npos)
-        }
-    }
-    else if (test == "tc5")
-    {
-        try
-        {
-            ctrl::Config conf;
-
-            LOGERROR("Expected an exception!");
-        }
-        catch (const std::exception& e)
-        {
-            std::cout << e.what() << std::endl;
-
-           CHECK(std::string(e.what()).find("APP1 is not a valid node type") != std::string::npos)
         }
     }
     else

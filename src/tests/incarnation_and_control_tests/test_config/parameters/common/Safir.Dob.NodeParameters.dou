@@ -64,17 +64,9 @@
       <type>String</type>
       <value>@{TEMP}/safir-sdk-core/system-incarnation-blacklist_$(SAFIR_INSTANCE).txt</value>
     </parameter>
-    <parameter>
-      <summary>At least one node of each given node type must be connected in order for the system to start.
-               If array is empty the system can be started without the existence of a node with a particular node type.</summary>
-      <name>WaitForNodeTypes</name>
-      <type>String</type>
-      <array>
-      </array>
-    </parameter>
 
     <parameter>
-      <summary>Defines the different node types in the system.</summary>
+      <summary>Defines the different node types in the system. Can be an empty array if standalone configuration.</summary>
       <name>NodeTypes</name>
       <type>Safir.Dob.NodeType</type>
       <arrayElements>

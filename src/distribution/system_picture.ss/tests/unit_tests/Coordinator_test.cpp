@@ -337,7 +337,7 @@ public:
         electionId = electionId_;
     }
 
-    void FormSystem(const int64_t /*incarnationId_*/)
+    void SetIncarnationId(const int64_t /*incarnationId_*/)
     {
 
     }

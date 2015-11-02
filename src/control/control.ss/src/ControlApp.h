@@ -87,7 +87,6 @@ private:
     Control::Config                             m_conf;
     Control::IncarnationBlacklistHandler        m_incarnationBlackListHandler;
     bool                                        m_controlInfoReceiverReady;
-    bool                                        m_startPending;
     bool                                        m_ctrlStopped;
     bool                                        m_doseMainRunning;
 

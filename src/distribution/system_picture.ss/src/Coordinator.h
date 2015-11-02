@@ -115,7 +115,7 @@ namespace SP
                                                          },
                                                          [this](const int64_t incarnationId)
                                                          {
-                                                             m_rawHandler.FormSystem(incarnationId);
+                                                             m_rawHandler.SetIncarnationId(incarnationId);
                                                          }));
 
             m_stateMessage.set_elected_id(0); //our state message is not valid until we have a real id set.

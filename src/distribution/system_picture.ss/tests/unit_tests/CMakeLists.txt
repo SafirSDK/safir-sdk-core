@@ -116,7 +116,7 @@ add_test(NAME RemoteSubscriber_test COMMAND RemoteSubscriber_test)
 SET_SAFIR_TEST_PROPERTIES(TEST RemoteSubscriber_test TIMEOUT 30)
 
 add_test(NAME RawHandler_test COMMAND RawHandler_test)
-SET_SAFIR_TEST_PROPERTIES(TEST RawHandler_test TIMEOUT 60)
+SET_SAFIR_TEST_PROPERTIES(TEST RawHandler_test TIMEOUT 30)
 
 add_test(NAME RawChanges_test COMMAND RawChanges_test)
 SET_SAFIR_TEST_PROPERTIES(TEST RawChanges_test TIMEOUT 30)

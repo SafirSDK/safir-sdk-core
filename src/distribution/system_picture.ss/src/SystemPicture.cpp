@@ -87,8 +87,7 @@ namespace SP
              const int64_t id,
              const int64_t nodeTypeId,
              const std::map<int64_t, NodeType>& nodeTypes,
-             const boost::function<bool (const int64_t incarnationId)>& validateJoinSystemCallback,
-             const boost::function<bool (const int64_t incarnationId, const RawStatistics& rawData)>& validateFormSystemCallback)
+             const boost::function<bool (const int64_t incarnationId)>& validateIncarnationIdCallback)
             : m_rawHandler(Safir::make_unique<RawHandler>(ioService,
                                                           communication,
                                                           name,
@@ -97,9 +96,8 @@ namespace SP
                                                           communication.ControlAddress(),
                                                           communication.DataAddress(),
                                                           nodeTypes,
-                                                          true,                                                          
-                                                          validateJoinSystemCallback,
-                                                          validateFormSystemCallback))
+                                                          true,
+                                                          validateIncarnationIdCallback))
             , m_rawPublisherLocal(Safir::make_unique<RawPublisherLocal>(ioService,
                                                                         *m_rawHandler,
                                                                         MASTER_LOCAL_RAW_NAME,
@@ -174,9 +172,7 @@ namespace SP
                                                           communication.DataAddress(),
                                                           nodeTypes,
                                                           false,
-                                                          boost::function<bool (const int64_t)>(),
-                                                          boost::function<bool (const int64_t,
-                                                                                const RawStatistics&)>())) //NULL function pointers to make vs2010 happy
+                                                          boost::function<bool (const int64_t incarnationId)>())) //NULL function pointer to make vs2010 happy
             , m_rawPublisherLocal(Safir::make_unique<RawPublisherLocal>(ioService,
                                                                         *m_rawHandler,
                                                                         SLAVE_LOCAL_RAW_NAME,
@@ -353,8 +349,7 @@ namespace SP
                                  const int64_t id,
                                  const int64_t nodeTypeId,
                                  const std::map<int64_t, NodeType>& nodeTypes,
-                                 const boost::function<bool (const int64_t incarnationId)>& validateJoinSystemCallback,
-                                 const boost::function<bool (const int64_t incarnationId, const RawStatistics& rawData)>& validateFormSystemCallback)
+                                 const boost::function<bool (const int64_t incarnationId)>& validateIncarnationIdCallback)
         : m_impl(Safir::make_unique<Impl>(master_tag,
                                           ioService,
                                           communication,
@@ -362,8 +357,7 @@ namespace SP
                                           id,
                                           nodeTypeId,
                                           nodeTypes,
-                                          validateJoinSystemCallback,
-                                          validateFormSystemCallback))
+                                          validateIncarnationIdCallback))
     {
 
     }

@@ -158,12 +158,12 @@ public:
         }
     }
 
-    bool CheckJoinSystem(const int64_t id)
+    bool Check(const int64_t id)
     {
         ++m_calls;
         if (m_calls > 1)
         {
-            throw std::logic_error("Expect only one call to IncarnationChecker::CheckJoinSystem");
+            throw std::logic_error("Expect only one call to IncarnationChecker::Check");
         }
 
         std::wcout << "Checking incarnation id " << id << std::endl;
@@ -192,13 +192,6 @@ public:
                                    + boost::lexical_cast<std::string>(id));
         }
     }
-
-    bool CheckFormSystem(const int64_t /*incarnationId*/, const Safir::Dob::Internal::SP::RawStatistics& /*rawData*/)
-    {
-        // This could be elaborated when the SP Salt tests are up and running again.
-        return true;
-    }
-
 private:
     bool m_enabled;
     std::string m_filename;
@@ -287,10 +280,7 @@ int main(int argc, char * argv[])
                                                    options.id,
                                                    options.nodeType,
                                                    std::move(spNodeTypes),
-                                                   [&incarnationChecker](const int64_t id)
-                                                   {return incarnationChecker.CheckJoinSystem(id);},
-                                                   [&incarnationChecker](const int64_t id, const Safir::Dob::Internal::SP::RawStatistics& rawData)
-                                                   {return incarnationChecker.CheckFormSystem(id, rawData);});
+                                                   [&incarnationChecker](const int64_t id){return incarnationChecker.Check(id);});
 
         std::wcout << "Starting SystemState subscription" << std::endl;
 
