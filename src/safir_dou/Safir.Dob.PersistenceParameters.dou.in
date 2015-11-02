@@ -15,21 +15,35 @@
         <type>String</type>
         <value>@DEFAULT_FILE_PERSISTENCE_DIRECTORY@</value>
       </parameter>
-     <parameter>
+      <parameter>
         <summary>The string to use for connection to the physical storage.</summary>
         <name>OdbcStorageConnectString</name>
         <type>String</type>
-        <value>Driver={MIMER};Database=SafirDb;Uid=dopeuser;Pwd=dopeuser</value>
-     </parameter>
+        <value></value>
+      </parameter>
       <parameter>
-        <summary>The number of bytes that can be written for each entry to the XmlData column in the database. Note that this is not in characters, but in bytes, so depending on the value of XmlDataColumnIsUtf8 and your platform a character can be from 1 to 4 bytes.</summary>
+        <summary>The number of bytes that can be written for each entry to the XmlData
+                 column in the database. Note that this is not in characters, but in
+                 bytes, so depending on the value of TextColumnsAreUtf8 and your platform
+                 a character can be from 1 to 4 bytes.</summary>
         <name>XmlDataColumnSize</name>
         <type>Int32</type>
         <value>10485760</value>
       </parameter>
       <parameter>
-        <summary>If this is true the XmlData column is manipulated using char operations instead of wchar_t operations. Needs to be False on MS SQL Server.</summary>
-        <name>XmlDataColumnIsUtf8</name>
+        <summary>The number of bytes that can be written for each entry to the TypeName
+                 column in the database. Note that this is not in characters, but in
+                 bytes, so depending on the value of TextColumnsAreUtf8 and your platform
+                 a character can be from 1 to 4 bytes.</summary>
+        <name>TypeNameColumnSize</name>
+        <type>Int32</type>
+        <value>944</value>
+      </parameter>
+      <parameter>
+        <summary>If this is true the XmlData and the TypeName column is manipulated using
+                 char operations instead of wchar_t operations. Needs to be False on MS
+                 SQL Server.</summary>
+        <name>TextColumnsAreUtf8</name>
         <type>Boolean</type>
         <value>@DEFAULT_XML_DATA_COLUMN_IS_UTF_8@</value>
       </parameter>

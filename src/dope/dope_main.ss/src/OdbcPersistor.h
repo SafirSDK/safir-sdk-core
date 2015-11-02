@@ -132,6 +132,10 @@ private:
     Safir::Dob::Typesystem::Int64               m_instance;
     Safir::Dob::Typesystem::Int64               m_rowCount;
 
+    boost::scoped_array<char>                   m_typename;
+    boost::scoped_array<wchar_t>                m_typenameW;
+    SQLLEN                                      m_currentTypenameSize;
+
 
     /**
      * Statement used to delete all rows in db

@@ -179,7 +179,7 @@ void ConvertDb()
                    "SET xmlData=?, binarySmallData=NULL, binaryData=NULL "
                    "WHERE typeId=? AND instance=?");
 
-    if (Safir::Dob::PersistenceParameters::XmlDataColumnIsUtf8())
+    if (Safir::Dob::PersistenceParameters::TextColumnsAreUtf8())
     {
         helper.BindParamString(hUpdateStatement,
                                1,
@@ -243,7 +243,7 @@ void ConvertDb()
             updateTypeIdParam = entityId.GetTypeId();
             updateInstanceParam = entityId.GetInstanceId().GetRawValue();
 
-            if (Safir::Dob::PersistenceParameters::XmlDataColumnIsUtf8())
+            if (Safir::Dob::PersistenceParameters::TextColumnsAreUtf8())
             {
                 const std::string xml = Safir::Dob::Typesystem::Utilities::ToUtf8
                     (Safir::Dob::Typesystem::Serialization::ToXml(object));

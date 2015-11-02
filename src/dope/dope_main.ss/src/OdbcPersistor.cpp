@@ -64,6 +64,9 @@ OdbcPersistor::OdbcPersistor(boost::asio::io_service& ioService) :
     m_currentSmallDataSize(0),
     m_storeBinaryLargeData(new unsigned char[Safir::Dob::PersistenceParameters::BinaryDataColumnSize()]),
     m_currentLargeDataSize(0),
+    m_typename(new char[Safir::Dob::PersistenceParameters::TypeNameColumnSize()]),
+    m_typenameW(new wchar_t[Safir::Dob::PersistenceParameters::TypeNameColumnSize()]),
+    m_currentTypenameSize(0),
     m_deleteAllStatement(SQL_NULL_HANDLE),
     m_deleteAllIsValid(false),
     m_deleteStatement(SQL_NULL_HANDLE),
@@ -406,7 +409,7 @@ void OdbcPersistor::RestoreAll()
                     m_helper.BindColumnInt64(getAllStatement, 2, &instance);
                     m_helper.BindColumnInt64(getAllStatement, 3, &handlerId);
 
-                    if (Safir::Dob::PersistenceParameters::XmlDataColumnIsUtf8())
+                    if (Safir::Dob::PersistenceParameters::TextColumnsAreUtf8())
                     {
                         BindColumnString(getAllStatement, 4, xmlSize, xmlBuffer.get(), &currentXmlSize);
                     }
@@ -470,7 +473,7 @@ void OdbcPersistor::RestoreAll()
                     { //some xml persistent data set
                         std::wstring xml;
 
-                        if (Safir::Dob::PersistenceParameters::XmlDataColumnIsUtf8())
+                        if (Safir::Dob::PersistenceParameters::TextColumnsAreUtf8())
                         {
                            xml = Safir::Dob::Typesystem::Utilities::ToWstring(xmlBuffer.get());
                         }
@@ -637,15 +640,33 @@ OdbcPersistor::Insert(const Safir::Dob::Typesystem::EntityId& entityId)
 
                 m_helper.Prepare
                     (m_insertStatement,
-                     "INSERT INTO PersistentEntity (typeid, instance) "
-                     "values (?, ?); ");
+                     "INSERT INTO PersistentEntity (typeid, instance, typename) "
+                     "values (?, ?, ?); ");
 
                 m_helper.BindParamInt64(m_rowExistsStatement, 1, &m_type);
                 m_helper.BindParamInt64(m_rowExistsStatement, 2, &m_instance);
+
                 m_helper.BindColumnInt64(m_rowExistsStatement,1, &m_rowCount);
 
                 m_helper.BindParamInt64(m_insertStatement, 1, &m_type);
                 m_helper.BindParamInt64(m_insertStatement, 2, &m_instance);
+
+                if (Safir::Dob::PersistenceParameters::TextColumnsAreUtf8())
+                {
+                    m_helper.BindParamString(m_insertStatement,
+                                             3,
+                                             Safir::Dob::PersistenceParameters::TypeNameColumnSize(),
+                                             m_typename.get(),
+                                             &m_currentTypenameSize);
+                }
+                else
+                {
+                    m_helper.BindParamStringW(m_insertStatement,
+                                              3,
+                                              Safir::Dob::PersistenceParameters::TypeNameColumnSize() / sizeof(wchar_t),
+                                              m_typenameW.get(),
+                                              &m_currentTypenameSize);
+                }
 
                 SetStmtTimeout(m_insertStatement);
                 SetStmtTimeout(m_rowExistsStatement);
@@ -657,6 +678,35 @@ OdbcPersistor::Insert(const Safir::Dob::Typesystem::EntityId& entityId)
             {
                 m_type = entityId.GetTypeId();
                 m_instance = entityId.GetInstanceId().GetRawValue();
+
+                const std::wstring typeName = Safir::Dob::Typesystem::Operations::GetName(m_type);
+                if (Safir::Dob::PersistenceParameters::TextColumnsAreUtf8())
+                {
+                    const std::string typeNameUtf8 = Safir::Dob::Typesystem::Utilities::ToUtf8(typeName);
+
+                    const size_t size = (typeNameUtf8.size() + 1)* sizeof (char);
+                    if (size > static_cast<size_t>(Safir::Dob::PersistenceParameters::TypeNameColumnSize()))
+                    {
+                        throw Safir::Dob::Typesystem::SoftwareViolationException
+                            (L"The size in bytes of '" + typeName +
+                             L"' exceeds Safir.Dob.PersistenceParameters.TypeNameColumnSize",
+                             __WFILE__, __LINE__);
+                    }
+                    memcpy(m_typename.get(), typeNameUtf8.c_str(), size);
+                }
+                else
+                {
+                    const size_t size = (typeName.size() + 1)* sizeof (wchar_t);
+                    if (size > static_cast<size_t>(Safir::Dob::PersistenceParameters::TypeNameColumnSize()))
+                    {
+                        throw Safir::Dob::Typesystem::SoftwareViolationException
+                            (L"The size in bytes of '" + typeName +
+                             L"' exceeds Safir.Dob.PersistenceParameters.TypeNameColumnSize",
+                             __WFILE__, __LINE__);
+                    }
+                    memcpy(m_typenameW.get(), typeName.c_str(), size);
+                }
+                m_currentTypenameSize = SQL_NTS;
 
                 paramSet = true;
             }
