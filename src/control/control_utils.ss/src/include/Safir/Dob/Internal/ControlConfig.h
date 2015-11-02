@@ -26,6 +26,7 @@
 #include <string>
 #include <vector>
 #include <set>
+#include <sstream>
 #include <Safir/Utilities/Internal/Id.h>
 #include <Safir/Dob/NodeParameters.h>
 #include <Safir/Dob/ThisNodeParameters.h>
@@ -247,38 +248,32 @@ namespace Control
                  i < Safir::Dob::NodeParameters::WaitForNodeTypesArraySize();
                  ++i)
             {
-                auto nt = ToUtf8(Safir::Dob::NodeParameters::WaitForNodeTypes(i));
+                auto nodeTypeName = ToUtf8(Safir::Dob::NodeParameters::WaitForNodeTypes(i));
 
-                if (nt.empty())
+                if (nodeTypeName.empty())
                 {
                     throw  std::logic_error("Parameter error: WaitForNodeTypes: Empty value not allowed!");
                 }
 
-                if (!waitForNodeTypes.insert(nt).second)
-                {
-                    throw  std::logic_error("Parameter error: WaitForNodeTypes: Duplicated node types!");
-                }
-            }
-
-            for (auto waitIt = waitForNodeTypes.cbegin(); waitIt != waitForNodeTypes.cend(); ++waitIt)
-            {
                 bool found = false;
                 for (auto ntIt = nodeTypesParam.cbegin(); ntIt != nodeTypesParam.cend(); ++ntIt)
                 {
-                    if (ntIt->name == *waitIt)
+                    if (ntIt->name == nodeTypeName)
                     {
+                        if (!waitForNodeTypes.insert(ntIt->id).second)
+                        {
+                            throw  std::logic_error("Parameter error: WaitForNodeTypes: Duplicated node types!");
+                        }
                         found = true;
                         break;
                     }
                 }
-
                 if (!found)
                 {
-                    throw std::logic_error("Parameter error: WaitForNodeTypes: " + *waitIt +
+                    throw std::logic_error("Parameter error: WaitForNodeTypes: " + nodeTypeName +
                                            " is not a valid node type");
                 }
             }
-
 
             // ThisNode
             std::string controlAddress = ToUtf8(Safir::Dob::ThisNodeParameters::ControlAddress());
@@ -324,10 +319,26 @@ namespace Control
 
         }
 
+        std::string GetName(boost::int64_t nodeTypeId)
+        {
+            for (auto it = nodeTypesParam.cbegin(); it != nodeTypesParam.cend(); ++it)
+            {
+                if (nodeTypeId == it->id)
+                {
+                    return it->name;
+                }
+            }
+
+            // Not found, return id as a string
+            std::ostringstream os;
+            os << nodeTypeId;
+            return os.str();
+        }
+
         std::vector<NodeType> nodeTypesParam;
         ThisNode thisNodeParam;
         std::string incarnationBlacklistFileName;
-        std::set<std::string> waitForNodeTypes;
+        std::set<boost::int64_t> waitForNodeTypes;
     };
 }
 }

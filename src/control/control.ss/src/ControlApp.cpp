@@ -98,6 +98,7 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
     , m_terminationTimer(ioService)
     , m_incarnationBlackListHandler(m_conf.incarnationBlacklistFileName)
     , m_controlInfoReceiverReady(false)
+    , m_startPending(false)
     , m_ctrlStopped(false)
     , m_doseMainRunning(false)
     , m_incarnationIdStorage(new AlignedStorage())
@@ -158,6 +159,10 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
     }
 
 
+    // Note that the two callbacks that are called by SP are synchronous and return a value. This means
+    // that the operations can't be protected by the strand and therefor you need to be cautious when
+    // modifying the callback code. In the future, if more elaborated things have to be done in the callback
+    // code, it might be necessary to turn this into ordinary asynchronous calls.
     m_sp.reset(new SP::SystemPicture(SP::master_tag,
                                      ioService,
                                      *m_communication,
@@ -177,18 +182,109 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
 
                                              m_strand.post([this_]{this_->SendControlInfo();});
 
+                                             if (m_startPending)
+                                             {
+                                                SEND_SYSTEM_LOG(Informational,
+                                                                 << "CTRL: Joined system with incarnation id "
+                                                                 << incarnationId);
+                                             }
+                                             std::wcout << "CTRL: Joined system with incarnation id "
+                                                        << incarnationId  << std::endl;
+
+                                             m_startPending = false;
+
+                                             lllog(6) << "CTRL: Ok to join incarnation " << incarnationId << std::endl;
+
                                              return true;
                                          }
                                          else
                                          {
+                                             lllog(6) << "CTRL: Not ok to join incarnation " << incarnationId << std::endl;
+
                                              return false;
                                          }
                                      },
                                      // Form system callback
-                                     [this](const int64_t /*incarnationId*/, const SP::RawStatistics& /*rawData*/) -> bool
+                                     [this](const int64_t incarnationId, const SP::RawStatistics& rawData) -> bool
                                      {
-                                         //AWI:TODO
-                                         return true;
+                                         // Check that there is at least one node of each node type that is
+                                         // specifed to be required for the system to be formed
+                                         bool allRequiredNodeTypesFound = true;
+                                         for (auto it = m_conf.waitForNodeTypes.cbegin(); it != m_conf.waitForNodeTypes.cend(); ++it)
+                                         {
+                                             bool found = false;
+
+                                             if (*it == m_conf.thisNodeParam.nodeTypeId)
+                                             {
+                                                // My own node type is required
+                                                 found = true;
+                                             }
+                                             else
+                                             {
+                                                 for (int i = 0; i < rawData.Size(); ++i)
+                                                 {
+                                                     if (rawData.NodeTypeId(i) == *it)
+                                                     {
+                                                         found = true;
+                                                         break;
+                                                     }
+                                                 }
+                                             }
+
+                                             if (!found)
+                                             {
+                                                 lllog(6) << "CTRL: Could not find required type "
+                                                          << Safir::Utilities::Internal::ToUtf16(m_conf.GetName(*it))
+                                                          << " in raw data" << std::endl;
+
+                                                 if (!m_startPending)
+                                                 {
+                                                     std::wostringstream os;
+                                                     os << "CTRL: Will not start, waiting for a node of type "
+                                                        << Safir::Utilities::Internal::ToUtf16(m_conf.GetName(*it));
+
+                                                     SEND_SYSTEM_LOG(Informational, << os.str());
+                                                     std::wcout << os.str() << std::endl;
+                                                 }
+                                                 m_startPending = true;
+                                                 allRequiredNodeTypesFound = false;
+                                             }
+                                             else
+                                             {
+                                                 lllog(6) << "CTRL: Found required type "
+                                                          << Safir::Utilities::Internal::ToUtf16(m_conf.GetName(*it))
+                                                          << " in raw data" << std::endl;
+                                             }
+                                         }
+
+                                         if (allRequiredNodeTypesFound)
+                                         {
+                                             m_incarnationId = incarnationId;
+
+                                             auto this_ = this;
+
+                                             m_strand.post([this_]{this_->SendControlInfo();});
+
+                                             std::wostringstream os;
+                                             os << "CTRL: All required node types are connected ... starting system with incarnation id "
+                                                << incarnationId;
+                                             if (m_startPending)
+                                             {
+                                                SEND_SYSTEM_LOG(Informational, << os.str());
+                                             }
+                                             std::wcout << os.str() << std::endl;
+                                             m_startPending = false;
+
+                                             lllog(6) << "CTRL: Ok to form system incarnation " << incarnationId << std::endl;
+
+                                             return true;
+                                         }
+                                         else
+                                         {
+                                             lllog(6) << "CTRL: Not ok to form system incarnation " << incarnationId << std::endl;
+
+                                             return false;
+                                         }
                                      }));
 
     m_doseMainCmdSender.reset(new Control::DoseMainCmdSender

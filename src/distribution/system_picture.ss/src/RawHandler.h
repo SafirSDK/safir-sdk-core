@@ -91,7 +91,6 @@ namespace SP
                         const std::string& controlAddress,
                         const std::string& dataAddress,
                         const std::map<int64_t, NodeType>& nodeTypes,
-                        const boost::chrono::milliseconds& formSystemRetryTimeout,
                         const bool master,
                         const boost::function<bool (const int64_t incarnationId)>& validateJoinSystemCallback,
                         const boost::function<bool (const int64_t incarnationId, const RawStatistics& rawData)>& validateFormSystemCallback)
@@ -101,8 +100,6 @@ namespace SP
             , m_nodeTypes(nodeTypes)
             , m_strand(ioService)
             , m_latencyMonitor("SpRawHandler",CalculateLatencyWarningThreshold(nodeTypes),m_strand)
-            , m_formSystemTimer(ioService)
-            , m_formSystemRetryTimeout(formSystemRetryTimeout)
             , m_checkDeadNodesTimer()            
             , m_master(master)
             , m_validateJoinSystemCallback(validateJoinSystemCallback)
@@ -154,7 +151,6 @@ namespace SP
 
                 m_strand.dispatch([this]
                                   {
-                                      m_formSystemTimer.cancel();
                                       m_checkDeadNodesTimer->Stop();
                                   });
             }
@@ -270,9 +266,6 @@ namespace SP
                             m_allStatisticsMessage.set_incarnation_id(node.nodeInfo->remote_statistics().incarnation_id());
 
                             changes |= RawChanges::METADATA_CHANGED;
-
-                            // Since we have now joined a system we can skip any attempt to form a new system
-                            m_formSystemTimer.cancel();
                         }
                         else
                         {
@@ -511,22 +504,7 @@ namespace SP
                                   }
                                   else
                                   {
-                                      lllog(8) << "SP: Not allowed to form new system now, wait a while and try again." << std::endl;
-
-                                      // To keep older Windows compilers happy
-                                      auto this_ = this;
-                                      auto incarnationId_ = incarnationId;
-
-                                      m_formSystemTimer.expires_from_now(m_formSystemRetryTimeout);
-                                      m_formSystemTimer.async_wait(m_strand.wrap([this_, incarnationId_]
-                                                                                 (const boost::system::error_code& error)
-                                                                                 {
-                                                                                     if (error == boost::asio::error::operation_aborted)
-                                                                                     {
-                                                                                         return;
-                                                                                     }
-                                                                                     this_->FormSystem(incarnationId_);
-                                                                                   }));
+                                      lllog(8) << "SP: Not allowed to form new system now" << std::endl;
                                   }
                               });
         }
@@ -881,8 +859,6 @@ namespace SP
         mutable boost::asio::strand m_strand;
         AsioLatencyMonitor m_latencyMonitor;
 
-        boost::asio::steady_timer m_formSystemTimer;
-        const boost::chrono::milliseconds m_formSystemRetryTimeout;
         std::unique_ptr<Safir::Utilities::Internal::AsioPeriodicTimer> m_checkDeadNodesTimer;
 
         NodeTable m_nodeTable;

@@ -107,7 +107,7 @@ int main(int argc, char* argv[])
 
         // Check WaitForNodeTypes
         CHECK(conf.waitForNodeTypes.size() == 1);
-        CHECK(*conf.waitForNodeTypes.cbegin() == "Server");
+        CHECK(*conf.waitForNodeTypes.cbegin() == LlufId_Generate64("Server"));
 
     }
     else if (test == "tc2")

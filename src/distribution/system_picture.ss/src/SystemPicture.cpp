@@ -97,7 +97,6 @@ namespace SP
                                                           communication.ControlAddress(),
                                                           communication.DataAddress(),
                                                           nodeTypes,
-                                                          boost::chrono::milliseconds(5000), // form system retry timeout
                                                           true,                                                          
                                                           validateJoinSystemCallback,
                                                           validateFormSystemCallback))
@@ -174,7 +173,6 @@ namespace SP
                                                           "",
                                                           communication.DataAddress(),
                                                           nodeTypes,
-                                                          boost::chrono::milliseconds(0), // dummy for slave
                                                           false,
                                                           boost::function<bool (const int64_t)>(),
                                                           boost::function<bool (const int64_t,

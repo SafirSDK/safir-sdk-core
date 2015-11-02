@@ -134,7 +134,7 @@ struct Fixture
           formSystemCallsBeforeJoin(10000)
     {
         rh.reset(new RawHandlerBasic<::Communication>(ioService,comm,"plopp",10,100,"asdfasdf","qwerty",
-                                                      GetNodeTypes(),boost::chrono::milliseconds(10), true,
+                                                      GetNodeTypes(), true,
                                                       [this](const int64_t id)
                                                       {return ValidateJoinSystem(id);},
                                                       [this](const int64_t id, const RawStatistics& rawData)
@@ -662,9 +662,9 @@ BOOST_AUTO_TEST_CASE( form_system )
     BOOST_CHECK_EQUAL(*formSystemIncarnations.begin(), 54321);
 }
 
-BOOST_AUTO_TEST_CASE( form_system_delay )
+BOOST_AUTO_TEST_CASE( form_system_denies )
 {
-    formSystemDeniesBeforeOk = 2;
+    formSystemDeniesBeforeOk = 1;
 
     int cbCalls = 0;
     rh->AddRawChangedCallback([&](const RawStatistics& statistics,
@@ -681,6 +681,7 @@ BOOST_AUTO_TEST_CASE( form_system_delay )
                                });
 
     rh->FormSystem(54321);
+    rh->FormSystem(54321);
 
     BOOST_CHECK_NO_THROW(ioService.run());
     BOOST_CHECK_EQUAL(cbCalls, 1);
@@ -688,13 +689,12 @@ BOOST_AUTO_TEST_CASE( form_system_delay )
     BOOST_CHECK_EQUAL(formSystemDeniesBeforeOk, 0U);
     BOOST_REQUIRE_EQUAL(formSystemIncarnations.size(), 1U);
     BOOST_CHECK_EQUAL(*formSystemIncarnations.begin(), 54321);
-
 }
 
 BOOST_AUTO_TEST_CASE( form_system_delay_then_join )
 {
     formSystemDeniesBeforeOk = 9999999; //never say ok in form system callback
-    formSystemCallsBeforeJoin = 2;
+    formSystemCallsBeforeJoin = 1;
 
     comm.excludeCb=[&]{rh->Stop();};
 
@@ -722,6 +722,7 @@ BOOST_AUTO_TEST_CASE( form_system_delay_then_join )
                                        BOOST_CHECK_EQUAL(statistics.IncarnationId(),12345);
                                    }
                                });
+    rh->FormSystem(54321);
     rh->FormSystem(54321);
 
     BOOST_CHECK_NO_THROW(ioService.run());
