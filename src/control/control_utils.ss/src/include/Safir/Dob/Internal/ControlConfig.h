@@ -49,7 +49,8 @@ namespace Control
                  const int heartbeatInterval_,
                  const int maxLostHeartbeats_,
                  const int slidingWindowSize_,
-                 const int retryTimeout_)
+                 const int retryTimeout_,
+                 const bool requiredForStart_)
 
             : name(name_),
               id(LlufId_Generate64(name_.c_str())),
@@ -58,7 +59,8 @@ namespace Control
               heartbeatInterval(heartbeatInterval_),
               maxLostHeartbeats(maxLostHeartbeats_),
               slidingWindowSize(slidingWindowSize_),
-              retryTimeout(retryTimeout_)
+              retryTimeout(retryTimeout_),
+              requiredForStart(requiredForStart_)
         {}
 
         std::string name;
@@ -69,6 +71,7 @@ namespace Control
         int maxLostHeartbeats;
         int slidingWindowSize;
         int retryTimeout;
+        bool requiredForStart;
     };
 
     struct ThisNode
@@ -210,13 +213,23 @@ namespace Control
 
                 auto retryTimeout = nt->RetryTimeout();
 
+                // RequiredForStart
+                if (nt->RequiredForStart().IsNull())
+                {
+                    throw std::logic_error("Parameter error: "
+                                           "Node type " + nodeTypeName + ": RequiredForStart is mandatory");
+                }
+
+                auto requiredForStart = nt->RequiredForStart();
+
                 nodeTypesParam.push_back(NodeType(nodeTypeName,
                                                   multicastAddressControl,
                                                   multicastAddressData,
                                                   static_cast<int>(heartbeatInterval * 1000), // seconds -> milliseconds
                                                   maxLostHeartbeats,
                                                   slidingWindowsSize,
-                                                  static_cast<int>(retryTimeout * 1000))); // seconds -> milliseconds
+                                                  static_cast<int>(retryTimeout * 1000), // seconds -> milliseconds
+                                                  requiredForStart));
 
             }
 

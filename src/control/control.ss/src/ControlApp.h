@@ -82,13 +82,14 @@ private:
     boost::asio::io_service&                    m_ioService;
     boost::asio::signal_set                     m_signalSet;
     boost::asio::io_service::strand             m_strand;
-    const int64_t                               m_nodeId;
+    int64_t                                     m_nodeId;
     boost::asio::steady_timer                   m_terminationTimer;
     Control::Config                             m_conf;
     Control::IncarnationBlacklistHandler        m_incarnationBlackListHandler;
     bool                                        m_controlInfoReceiverReady;
     bool                                        m_ctrlStopped;
     bool                                        m_doseMainRunning;
+    bool                                        m_requiredForStart;
 
     std::unique_ptr<boost::asio::io_service::work>  m_work;
     std::unique_ptr<Com::Communication>             m_communication;

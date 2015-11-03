@@ -81,10 +81,13 @@ namespace SP
          *
          * This is meant to be used in the Control executable.
          *
-         * @param validateIncarnationIdCallback This function will be called when the node wants
-         * to join an existing system, or when it is forming a new system. Return false if
-         * the incarnation id belongs to a system that we should not join.
-         * If true is returned the node will use the given incarnation id.
+         * @param validateJoinSystem Called when the node wants to join an existing system. Return false if
+         *                           the incarnation id belongs to a system that we should not join.
+         *                           If true is returned the node will use the given incarnation id.
+         *
+         * @param validateFormSystem Called when the node wants to form a new system. Return false if
+         *                           a we are not allowed to form a system. If true is returned the node will
+         *                           use the given incarnation id.
          */
         SystemPicture(master_tag_t,
                       boost::asio::io_service& ioService,
@@ -93,7 +96,9 @@ namespace SP
                       const int64_t id,
                       const int64_t nodeTypeId,
                       const std::map<int64_t, NodeType>& nodeTypes,
-                      const boost::function<bool (const int64_t incarnationId)>& validateIncarnationIdCallback);
+                      const boost::function<bool (const int64_t incarnationId)>& validateJoinSystemCallback,
+                      const boost::function<bool (const int64_t incarnationId)>& validateFormSystemCallback);
+
 
         /**
          * Constructor for creating a slave instance of SystemPicture.

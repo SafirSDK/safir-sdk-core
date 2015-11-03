@@ -99,8 +99,12 @@ struct Fixture
 {
     Fixture()
     {
-        rh.reset(new RawHandlerBasic<::Communication>(ioService,comm,"plopp",10,100,"asdfasdf","qwerty",GetNodeTypes(),true,
-                                                      [this](const int64_t id){return ValidateIncarnation(id);}));
+        rh.reset(new RawHandlerBasic<::Communication>(ioService,comm,"plopp",10,100,"asdfasdf","qwerty",
+                                                      GetNodeTypes(), true,
+                                                      [this](const int64_t id)
+                                                      {return ValidateJoinSystem(id);},
+                                                      [this](const int64_t id)
+                                                      {return ValidateFormSystem(id);}));
         BOOST_TEST_MESSAGE( "setup fixture" );
     }
 
@@ -127,10 +131,42 @@ struct Fixture
         return nodeTypes;
     }
 
-    bool ValidateIncarnation(const int64_t id)
+    bool ValidateJoinSystem(const int64_t id)
     {
-        incarnations.insert(id);
-        return forbiddenIncarnations.find(id) == forbiddenIncarnations.end();
+        joinSystemIncarnations.insert(id);
+        return forbiddenJoinIncarnations.find(id) == forbiddenJoinIncarnations.end();
+    }
+
+    bool ValidateFormSystem(const int64_t id)
+    {
+        //TODO
+//        formSystemIncarnations.insert(id);
+
+//        if (formSystemCallsBeforeJoin == 0)
+//        {
+//            comm.newNodeCb("asdf",11,10,"asdffff","asdfqqqq");
+
+//            auto msg = GetProtobuf(true);
+//            const size_t size = msg->ByteSize();
+//            auto data = boost::make_shared<char[]>(size);
+//            msg->SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(data.get()));
+//            rh->NewRemoteStatistics(11,data,size);
+//        }
+//        else
+//        {
+//            --formSystemCallsBeforeJoin;
+//        }
+
+//        if (formSystemDeniesBeforeOk == 0)
+//        {
+//            return true;
+//        }
+//        else
+//        {
+//            --formSystemDeniesBeforeOk;
+//            return false;
+//        }
+        return true;
     }
 
     Communication comm;
@@ -138,8 +174,8 @@ struct Fixture
 
     std::unique_ptr<RawHandlerBasic<::Communication>> rh;
 
-    std::set<int64_t> forbiddenIncarnations;
-    std::set<int64_t> incarnations;
+    std::set<int64_t> forbiddenJoinIncarnations;
+    std::set<int64_t> joinSystemIncarnations;
 };
 
 BOOST_FIXTURE_TEST_SUITE( s, Fixture )
@@ -149,7 +185,7 @@ BOOST_AUTO_TEST_CASE( start_stop )
     BOOST_CHECK(!comm.newNodeCb.empty());
     BOOST_CHECK(!comm.gotReceiveFromCb.empty());
     BOOST_CHECK(!comm.retransmitToCb.empty());
-    BOOST_CHECK(incarnations.empty());
+    BOOST_CHECK(joinSystemIncarnations.empty());
 
     rh->Stop();
     ioService.run();
@@ -420,8 +456,8 @@ BOOST_AUTO_TEST_CASE( raw_changed_callback )
 
     BOOST_CHECK_NO_THROW(ioService.run());
     BOOST_CHECK_EQUAL(cbCalls, 3);
-    BOOST_REQUIRE_EQUAL(incarnations.size(), 1U);
-    BOOST_CHECK_EQUAL(*incarnations.begin(), 12345);
+    BOOST_REQUIRE_EQUAL(joinSystemIncarnations.size(), 1U);
+    BOOST_CHECK_EQUAL(*joinSystemIncarnations.begin(), 12345);
 }
 
 
@@ -463,7 +499,7 @@ BOOST_AUTO_TEST_CASE( no_incarnations_discard )
 
     BOOST_CHECK_NO_THROW(ioService.run());
     BOOST_CHECK_EQUAL(cbCalls, 2);
-    BOOST_REQUIRE_EQUAL(incarnations.size(), 0U);
+    BOOST_REQUIRE_EQUAL(joinSystemIncarnations.size(), 0U);
 }
 
 
@@ -541,13 +577,13 @@ BOOST_AUTO_TEST_CASE( incarnation_id_set_callback)
 
     BOOST_CHECK_NO_THROW(ioService.run());
     BOOST_CHECK_EQUAL(cbCalls, 3);
-    BOOST_REQUIRE_EQUAL(incarnations.size(), 1U);
-    BOOST_CHECK_EQUAL(*incarnations.begin(), 12345);
+    BOOST_REQUIRE_EQUAL(joinSystemIncarnations.size(), 1U);
+    BOOST_CHECK_EQUAL(*joinSystemIncarnations.begin(), 12345);
 }
 
 BOOST_AUTO_TEST_CASE( incarnation_id_forbid)
 {
-    forbiddenIncarnations.insert(12345);
+    forbiddenJoinIncarnations.insert(12345);
 
     comm.excludeCb=[&]{rh->Stop();};
     int cbCalls = 0;
@@ -580,8 +616,8 @@ BOOST_AUTO_TEST_CASE( incarnation_id_forbid)
 
     BOOST_CHECK_NO_THROW(ioService.run());
     BOOST_CHECK_EQUAL(cbCalls, 2);
-    BOOST_REQUIRE_EQUAL(incarnations.size(), 1U);
-    BOOST_CHECK_EQUAL(*incarnations.begin(), 12345);
+    BOOST_REQUIRE_EQUAL(joinSystemIncarnations.size(), 1U);
+    BOOST_CHECK_EQUAL(*joinSystemIncarnations.begin(), 12345);
 }
 
 BOOST_AUTO_TEST_CASE( explicit_exclude_node )

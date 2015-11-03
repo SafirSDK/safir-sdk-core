@@ -84,11 +84,12 @@ public:
                  value<std::string>(&doseMainPath)->default_value(""),
                  "Absolute or relative path to dose_main executable. If not defined PATH will be used.")
                 ("force-id",
-                 value<boost::int64_t>(&id)->default_value(LlufId_GenerateRandom64(), ""),
-                 "Override the automatically generated node id. For debugging/testing purposes only.")
+                 value<boost::int64_t>(&id)->default_value(0, ""),
+                 "Override the automatically generated node id. WARNING This parameter is for debugging/testing"
+                 "purposes only.")
                 ("ignore-control-cmd",
                  value<bool>(&ignoreControlCmd)->default_value(false),
-                 "Ignore all commands sent to Control via Ipc. For debugging/testing purposes only.");
+                 "Ignore all commands sent to Control via Ipc. WARNING For debugging/testing purposes only.");
 
         variables_map vm;
 

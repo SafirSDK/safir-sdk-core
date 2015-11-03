@@ -158,12 +158,12 @@ public:
         }
     }
 
-    bool Check(const int64_t id)
+    bool CheckJoinSystem(const int64_t id)
     {
         ++m_calls;
         if (m_calls > 1)
         {
-            throw std::logic_error("Expect only one call to IncarnationChecker::Check");
+            throw std::logic_error("Expect only one call to IncarnationChecker::CheckJoinSystem");
         }
 
         std::wcout << "Checking incarnation id " << id << std::endl;
@@ -192,6 +192,13 @@ public:
                                    + boost::lexical_cast<std::string>(id));
         }
     }
+
+    bool CheckFormSystem(const int64_t /*incarnationId*/)
+    {
+        // This could be elaborated when the SP Salt tests are up and running again.
+        return true;
+    }
+
 private:
     bool m_enabled;
     std::string m_filename;
@@ -280,7 +287,10 @@ int main(int argc, char * argv[])
                                                    options.id,
                                                    options.nodeType,
                                                    std::move(spNodeTypes),
-                                                   [&incarnationChecker](const int64_t id){return incarnationChecker.Check(id);});
+                                                   [&incarnationChecker](const int64_t id)
+                                                   {return incarnationChecker.CheckJoinSystem(id);},
+                                                   [&incarnationChecker](const int64_t id)
+                                                   {return incarnationChecker.CheckFormSystem(id);});
 
         std::wcout << "Starting SystemState subscription" << std::endl;
 
@@ -373,3 +383,4 @@ int main(int argc, char * argv[])
         return 1;
     }
 }
+

@@ -42,5 +42,11 @@
             <name>RetryTimeout</name>
             <type>Second64</type>
         </member>
+        <member>
+            <summary>If True, at least one node of this type is required for the system to start. Nodes with a node
+                     type where this parameter is set to False will wait until a required node is started.</summary>
+            <name>RequiredForStart</name>
+            <type>Boolean</type>
+        </member>
     </members>
 </class>

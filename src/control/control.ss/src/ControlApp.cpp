@@ -94,12 +94,12 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
     : m_ioService(ioService)
     , m_signalSet(ioService)
     , m_strand(ioService)
-    , m_nodeId(id)
     , m_terminationTimer(ioService)
     , m_incarnationBlackListHandler(m_conf.incarnationBlacklistFileName)
     , m_controlInfoReceiverReady(false)
     , m_ctrlStopped(false)
     , m_doseMainRunning(false)
+    , m_requiredForStart(false)
     , m_incarnationIdStorage(new AlignedStorage())
     , m_incarnationId(reinterpret_cast<boost::atomic<int64_t>&>(*m_incarnationIdStorage))
 #if defined(linux) || defined(__linux) || defined(__linux__)
@@ -108,6 +108,36 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
     , m_handle(ioService)
 #endif
 {
+    if (id == 0)
+    {
+        for (auto it = m_conf.nodeTypesParam.cbegin(); it < m_conf.nodeTypesParam.cend(); ++it)
+        {
+            if (m_conf.thisNodeParam.nodeTypeId == it->id)
+            {
+                m_requiredForStart = it->requiredForStart;
+                break;
+            }
+        }
+
+        while (true)
+        {
+            // Generate a positive node id if the node is of a type that is allowed to form as system, or
+            // a negative node id if the node is of a type that is NOT allowd to form a system.
+            boost::int64_t nodeId = LlufId_GenerateRandom64();
+
+            if ((m_requiredForStart && nodeId > 0) || (!m_requiredForStart && nodeId < 0))
+            {
+                m_nodeId = nodeId;
+                break;
+            }
+        }
+    }
+    else
+    {
+
+        m_nodeId = id;
+    }
+
     new (m_incarnationIdStorage.get()) boost::atomic<uint64_t>(0);
 
     // Make some work to stop io_service from exiting.
@@ -131,7 +161,7 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
     m_communication.reset(new Com::Communication(Com::controlModeTag,
                                                  m_ioService,
                                                  m_conf.thisNodeParam.name,
-                                                 id,
+                                                 m_nodeId,
                                                  m_conf.thisNodeParam.nodeTypeId,
                                                  m_conf.thisNodeParam.controlAddress,
                                                  m_conf.thisNodeParam.dataAddress,
@@ -158,13 +188,18 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
     }
 
 
+    // Note that the two callbacks that are called by SP are synchronous and return a value. This means
+    // that the operations can't be protected by the strand and therefor you need to be cautious when
+    // modifying the callback code. In the future, if more elaborated things have to be done in the callback
+    // code, it might be necessary to turn this into ordinary asynchronous calls.
     m_sp.reset(new SP::SystemPicture(SP::master_tag,
                                      ioService,
                                      *m_communication,
                                      m_conf.thisNodeParam.name,
-                                     id,
+                                     m_nodeId,
                                      m_conf.thisNodeParam.nodeTypeId,
                                      std::move(spNodeTypes),
+                                     // Join system callback
                                      [this](const int64_t incarnationId) -> bool
                                      {
                                          if (m_incarnationId == 0 &&
@@ -176,10 +211,45 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
 
                                              m_strand.post([this_]{this_->SendControlInfo();});
 
+                                             std::wostringstream os;
+                                             os << "CTRL: Joined system with incarnation id " << incarnationId;
+                                             lllog(1) << os.str() << std::endl;
+                                             std::wcout << os.str() << std::endl;
+
                                              return true;
                                          }
                                          else
                                          {
+                                             lllog(1) << "CTRL: Not ok to join incarnation " << incarnationId << std::endl;
+
+                                             return false;
+                                         }
+                                     },
+                                     // Form system callback
+                                     [this](const int64_t incarnationId) -> bool
+                                     {
+                                         // Check if this node is of a type that is allowed to form systems
+                                         if (m_requiredForStart)
+                                         {
+                                             m_incarnationId = incarnationId;
+
+                                             auto this_ = this;
+
+                                             m_strand.post([this_]{this_->SendControlInfo();});
+
+                                             std::wostringstream os;
+                                             os << "CTRL: Starting system with incarnation id " << incarnationId;
+                                             std::wcout << os.str() << std::endl;
+
+                                             return true;
+                                         }
+                                         else
+                                         {
+                                             std::wostringstream os;
+                                             os << "CTRL: Waiting for system start";
+                                             lllog(1) << os.str() << std::endl;
+                                             std::wcout << os.str() << std::endl;
+
                                              return false;
                                          }
                                      }));
@@ -187,12 +257,12 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
     m_doseMainCmdSender.reset(new Control::DoseMainCmdSender
                               (ioService,
                                // This is what we do when dose_main is ready to receive commands
-                               [this, id]()
+                               [this]()
                                {
                                    m_doseMainRunning = true;
 
                                    m_doseMainCmdSender->StartDoseMain(m_conf.thisNodeParam.name,
-                                                                      id,
+                                                                      m_nodeId,
                                                                       m_conf.thisNodeParam.nodeTypeId,
                                                                       m_conf.thisNodeParam.dataAddress);
 
@@ -243,7 +313,7 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
                                              })));
 
     m_stateHandler.reset(new Control::SystemStateHandler
-                         (id,
+                         (m_nodeId,
 
     // Node included callback
     [this](const Control::Node& node)
@@ -567,3 +637,4 @@ void ControlApp::SetSigchldHandler()
     }));
 }
 #endif
+
