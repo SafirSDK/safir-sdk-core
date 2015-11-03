@@ -62,7 +62,7 @@
     </parameter>
 
     <parameter>
-      <summary>Defines the different node types in the system. Can be an empty array if standalone configuration.</summary>
+      <summary>Defines the different node types in the system.</summary>
       <name>NodeTypes</name>
       <type>Safir.Dob.NodeType</type>
       <arrayElements>
@@ -76,6 +76,7 @@
             <MaxLostHeartbeats>5</MaxLostHeartbeats>
             <SlidingWindowsSize>10</SlidingWindowsSize>
             <RetryTimeout>0.02</RetryTimeout>
+            <RequiredForStart>True</RequiredForStart>
           </Safir.Dob.NodeType>
         </arrayElement>
       </arrayElements>

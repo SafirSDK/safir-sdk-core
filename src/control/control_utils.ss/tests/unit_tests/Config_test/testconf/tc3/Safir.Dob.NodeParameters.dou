@@ -72,18 +72,13 @@
         <arrayElement>
           <Safir.Dob.NodeType type="Safir.Dob.NodeType">
             <Name>Server</Name>
-            <IsLight>False</IsLight>
-            <TalksTo></TalksTo>
             <MulticastAddressControl>192.0.0.1:9500</MulticastAddressControl>
             <MulticastAddressData>192.0.0.1:9501</MulticastAddressData>
             <HeartbeatInterval>1.0</HeartbeatInterval>
             <MaxLostHeartbeats>5</MaxLostHeartbeats>
             <SlidingWindowsSize>10</SlidingWindowsSize>
             <RetryTimeout>0.2</RetryTimeout>
-            <WantedTypes>
-              <String>abc.*</String> <!-- Must be all types for non IsLight node -->
-            </WantedTypes>
-            <UnwantedTypes></UnwantedTypes>
+            <RequiredForStart>True</RequiredForStart>
           </Safir.Dob.NodeType>
         </arrayElement>
 

@@ -8,19 +8,7 @@
             <summary>Name of the node type.</summary>
             <name>Name</name>
             <type>String</type>
-            <maxLength>80</maxLength>
-        </member>
-        <member>
-            <summary>Is the node type a 'light' node type?</summary>
-            <name>IsLight</name>
-            <type>Boolean</type>
-        </member>
-        <member>
-            <summary>List of node types that nodes of this type can talk to.</summary>
-            <name>TalksTo</name>
-            <arraySize>100</arraySize>
-            <type>String</type>
-            <maxLength>80</maxLength>
+            <maxLengthRef><name>Safir.Dob.NodeParameters.MaxNodeNameLength</name></maxLengthRef>
         </member>
         <member>
             <summary>Multicast address and port used for the control channel for nodes of this type. An empty string or null for this or MulticastAddressData indicates that nodes of this type can't be reached via multicast.</summary>
@@ -55,19 +43,10 @@
             <type>Second64</type>
         </member>
         <member>
-            <summary>A list of regular expressions. All types that match will be sent to this node type (unless they also match an UnwantedTypes, below).
-                     Only for nodes where IsLight is true can this be anything other than '.*'.</summary>
-            <name>WantedTypes</name>
-            <arraySize>50</arraySize>
-            <type>String</type>
-            <maxLength>80</maxLength>
-        </member>
-        <member>
-            <summary>Types that match will not be sent to this node type. Must be empty if IsLight is false.</summary>
-            <name>UnwantedTypes</name>
-            <arraySize>50</arraySize>
-            <type>String</type>
-            <maxLength>80</maxLength>
+            <summary>If True, at least one node of this type is required for the system to start. Nodes with a node
+                     type where this parameter is set to False will wait until a required node is started.</summary>
+            <name>RequiredForStart</name>
+            <type>Boolean</type>
         </member>
     </members>
 </class>

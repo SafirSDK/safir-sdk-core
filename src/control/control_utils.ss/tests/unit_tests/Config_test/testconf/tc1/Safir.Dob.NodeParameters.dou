@@ -71,58 +71,37 @@
         <arrayElement>
           <Safir.Dob.NodeType>
             <Name>Server</Name>
-            <IsLight>False</IsLight>
-            <TalksTo></TalksTo>
             <MulticastAddressControl>192.0.0.1:9500</MulticastAddressControl>
             <MulticastAddressData>192.0.0.1:9501</MulticastAddressData>
             <HeartbeatInterval>1.0</HeartbeatInterval>
             <MaxLostHeartbeats>5</MaxLostHeartbeats>
             <SlidingWindowsSize>10</SlidingWindowsSize>
             <RetryTimeout>0.2</RetryTimeout>
-            <WantedTypes>
-              <String>.*</String> <!-- Must be all types for non IsLight node -->
-            </WantedTypes>
-            <UnwantedTypes></UnwantedTypes>
+            <RequiredForStart>True</RequiredForStart>
           </Safir.Dob.NodeType>
         </arrayElement>
 
         <arrayElement>
           <Safir.Dob.NodeType>
             <Name>Client</Name>
-            <IsLight>True</IsLight>
-            <TalksTo>
-              <String>Server</String>
-            </TalksTo>
             <MulticastAddressControl></MulticastAddressControl>
             <MulticastAddressData></MulticastAddressData>
             <HeartbeatInterval>5.0</HeartbeatInterval>
             <MaxLostHeartbeats>5</MaxLostHeartbeats>
             <SlidingWindowsSize>10</SlidingWindowsSize>
             <RetryTimeout>2.0</RetryTimeout>
-            <WantedTypes>
-              <String>.*</String> <!-- This client  wants all types -->
-            </WantedTypes>
-            <UnwantedTypes></UnwantedTypes>
+            <RequiredForStart>False</RequiredForStart>
           </Safir.Dob.NodeType>
         </arrayElement>
 
         <arrayElement>
           <Safir.Dob.NodeType>
             <Name>RemoteClient</Name>
-            <IsLight>True</IsLight>
-            <TalksTo>
-              <String>Server</String>
-            </TalksTo>
             <HeartbeatInterval>30.00</HeartbeatInterval>
             <MaxLostHeartbeats>5</MaxLostHeartbeats>
             <SlidingWindowsSize>10</SlidingWindowsSize>
             <RetryTimeout>5.0</RetryTimeout>
-            <WantedTypes>
-              <String>Capabilities\.Vehicles\.</String>
-            </WantedTypes>
-            <UnwantedTypes>
-              <String>Capabilities\.Vehicles\.Ambulance.*</String>
-            </UnwantedTypes>
+            <RequiredForStart>False</RequiredForStart>
           </Safir.Dob.NodeType>
         </arrayElement>
 

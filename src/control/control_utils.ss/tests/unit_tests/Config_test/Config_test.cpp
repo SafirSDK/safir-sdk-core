@@ -61,6 +61,7 @@ int main(int argc, char* argv[])
         CHECK(conf.nodeTypesParam[0].maxLostHeartbeats == 5);
         CHECK(conf.nodeTypesParam[0].slidingWindowSize == 10);
         CHECK(conf.nodeTypesParam[0].retryTimeout == 200);
+        CHECK(conf.nodeTypesParam[0].requiredForStart == true);
         // CHECK(conf.nodeTypesParam[0].wantedTypes.size() == 1);
         // CHECK(conf.nodeTypesParam[0].wantedTypes[0] == ".*");
         // CHECK(conf.nodeTypesParam[0].unwantedTypes.size() == 0);
@@ -76,6 +77,7 @@ int main(int argc, char* argv[])
         CHECK(conf.nodeTypesParam[1].maxLostHeartbeats == 5);
         CHECK(conf.nodeTypesParam[1].slidingWindowSize == 10);
         CHECK(conf.nodeTypesParam[1].retryTimeout == 2000);
+        CHECK(conf.nodeTypesParam[1].requiredForStart == false);
         // CHECK(conf.nodeTypesParam[1].wantedTypes.size() == 1);
         // CHECK(conf.nodeTypesParam[1].wantedTypes[0] == ".*");
         // CHECK(conf.nodeTypesParam[1].unwantedTypes.size() == 0);
@@ -91,6 +93,7 @@ int main(int argc, char* argv[])
         CHECK(conf.nodeTypesParam[2].maxLostHeartbeats == 5);
         CHECK(conf.nodeTypesParam[2].slidingWindowSize == 10);
         CHECK(conf.nodeTypesParam[2].retryTimeout == 5000);
+        CHECK(conf.nodeTypesParam[2].requiredForStart == false);
         // CHECK(conf.nodeTypesParam[2].wantedTypes.size() == 1);
         // CHECK(conf.nodeTypesParam[2].wantedTypes[0] == "Capabilities\\.Vehicles\\.");
         // CHECK(conf.nodeTypesParam[2].unwantedTypes.size() == 1);
