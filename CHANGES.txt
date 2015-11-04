@@ -26,6 +26,9 @@ This release introduces the following changes:
 #254 Debugging C# applications fail due to same assembly being loaded from several places
 #261 Memory leak in Communication on ExcludeNode
 #271 Starting safir_control as different users on Windows fails
+#273 Client nodes should not be able to form systems without a Server node
+#278 Optional maxLength element in dou-files incorrectly implemented
+#281 TYPENAME column is needed
 
 -----------------------------------------------------------------------------------------------------------------------
 2015-09-16 version 6.0.3
