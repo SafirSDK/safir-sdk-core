@@ -3104,6 +3104,11 @@ string indicates that nodes of this type can't be reached via multicast.
 | RetryTimeout
 | Time to wait for Ack before retrying transmission to nodes of this type.
 
+| RequiredForStart
+| If true, a node of this type can start a system of its own. A node with a node
+type where this parameter is set to false will never start a system of its own, it
+just waits for a system to join.
+
 |======================
 
 Each node has to be configured individually, to know which node type it belongs to,
@@ -3161,18 +3166,22 @@ A simple way to use this in a Client/Server system is to have all nodes list all
 server nodes' addresses in their seed list. This way, when any node starts, it will
 attempt to connect to all servers, which will then tell it about all other clients.
 
-===== Node discovery and startup times
+===== Node discovery and startup
 When a node starts it will wait for a certain amount of time to see if there is an
-existing system to join on the network. If no existing system is discovered during this
-time the node will start a new system of its own, possibly together with other newly
-started nodes.
+existing system to join on the network. 
 
-This ``AloneTimeout'' is calculated to be the maximum value of 2 * MaxLostHeartbeats *
-HeartbeatInterval for all node types.
+If no existing system is discovered during this time the node will act differently
+depending on the specified value for RequiredForStart. If RequiredForStartStart is true
+the node will start a system of its own, possibly together with other newly
+started nodes. If RequiredForStartStart is false the node will _not_ start a system of its
+own, it just waits for a system to join.
 
-The practical upshot of this is that if you configure one node type to have very large
-values for these parameters then nodes will appear slow to start. But this is all to be expected,
-since the reason for setting large values is that a node type has bad connectivity, and
+The ``AloneTimeout'' is calculated to be the maximum value of 2 * MaxLostHeartbeats *
+HeartbeatInterval for all node types where RequiredForStart is true.
+
+The practical upshot of this is that if you, for some reason, configure one node type where
+RequiredForStart is true, to have very large values for these parameters then the system will appear slow to start.
+But this is all to be expected, since the reason for setting large values is that a node type has bad connectivity, and
 then we may need a long time to discover it.
 
 
