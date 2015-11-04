@@ -4,7 +4,7 @@
 Safir SDK Core User's Guide
 ==========================
 Lars Hagström, Anders Widén and Joel Ottosson
-2015-10-20
+2015-11-04
 
 :cpp: {basebackend@docbook:c++:cpp}
 :csharp: {basebackend@docbook:c:csharp}
@@ -3166,7 +3166,7 @@ A simple way to use this in a Client/Server system is to have all nodes list all
 server nodes' addresses in their seed list. This way, when any node starts, it will
 attempt to connect to all servers, which will then tell it about all other clients.
 
-===== Node discovery and startup
+===== Node discovery and startup times
 When a node starts it will wait for a certain amount of time to see if there is an
 existing system to join on the network. 
 
@@ -3177,12 +3177,11 @@ started nodes. If RequiredForStartStart is false the node will _not_ start a sys
 own, it just waits for a system to join.
 
 The ``AloneTimeout'' is calculated to be the maximum value of 2 * MaxLostHeartbeats *
-HeartbeatInterval for all node types where RequiredForStart is true.
+HeartbeatInterval for all node types.
 
-The practical upshot of this is that if you, for some reason, configure one node type where
-RequiredForStart is true, to have very large values for these parameters then the system will appear slow to start.
-But this is all to be expected, since the reason for setting large values is that a node type has bad connectivity, and
-then we may need a long time to discover it.
+The practical upshot of this is that if you configure one node type to have very large values for these
+parameters then the system will appear slow to start. But this is all to be expected, since the reason for
+setting large values is that a node type has bad connectivity, and then we may need a long time to discover it.
 
 
 [[multiple-nodes-on-one-computer]]
