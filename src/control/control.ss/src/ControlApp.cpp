@@ -119,7 +119,7 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
             }
         }
 
-        while (true)
+        for (;;)
         {
             // Generate a positive node id if the node is of a type that is allowed to form as system, or
             // a negative node id if the node is of a type that is NOT allowd to form a system.
