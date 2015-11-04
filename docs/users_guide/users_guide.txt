@@ -3151,11 +3151,16 @@ an address or interface name will resolv to. Use the +-l+ flag to resolve local 
 and interfaces.
 
 [[node-discovery]]
-==== Node discovery
+==== Node discovery and system start
+At start of a system a node will as a first step try to find and establish connections to other nodes. The mechanism
+used to achieve this is called _node discovery_.
 
-Safir SDK Core has a _node discovery_ mechanism, that is used by individual nodes to find
-and connect to other nodes. Once a node finds one other node in a system it will find all
-other nodes in the system, and all the other nodes will find it.
+The second step is to either start a new system or, in case the node is in contact with nodes from an already started system,
+to join this existing system.
+
+===== Node discovery
+The node discovery mechanism is used by individual nodes to find and establish connections to other nodes.
+Once a node finds one other node in a system it will find all other nodes in the system, and all the other nodes will find it.
 
 This process is initiated by setting up _seeds_. Each node can have a list of addresses
 that it will try to connect to. These addresses are known as seed addresses. A seed
@@ -3166,9 +3171,19 @@ A simple way to use this in a Client/Server system is to have all nodes list all
 server nodes' addresses in their seed list. This way, when any node starts, it will
 attempt to connect to all servers, which will then tell it about all other clients.
 
-===== Node discovery and startup times
+[[system-start]]
+===== System start
+A system, or more precisely, all nodes that are part of a specific system start, are identified by a unique
+incarnation id.
+
+The main purpose of the incarnation mechanism is to guarantee that an ``old'' node cannot join a newly started system.
+Before a node joins a system it checks the the system incarnation id is not found in a locally kept ``blacklist''
+of old incarnation ids.The typical scenario is when restarting a system consisting of several nodes.
+Without this mechanism a node that happens to survive the system restart could be included in the restarted system,
+resulting in a mix of old and new data.
+
 When a node starts it will wait for a certain amount of time to see if there is an
-existing system to join on the network. 
+existing system (incarnation id) to join on the network.
 
 If no existing system is discovered during this time the node will act differently
 depending on the specified value for RequiredForStart. If RequiredForStartStart is true
@@ -3176,13 +3191,17 @@ the node will start a system of its own, possibly together with other newly
 started nodes. If RequiredForStartStart is false the node will _not_ start a system of its
 own, it just waits for a system to join.
 
-The ``AloneTimeout'' is calculated to be the maximum value of 2 * MaxLostHeartbeats *
+For example, in a client/server configuration, setting RequiredForStart to false for nodes of type Client, and to true
+for nodes of type Server, will prevent clients to start and form a system on their own without a server. Note that this
+applies only to the start phase, if clients loses contact with the server in an already started system you can end up
+with a system that consists only of client nodes.
+
+Note that the ``AloneTimeout'' is calculated to be the maximum value of 2 * MaxLostHeartbeats *
 HeartbeatInterval for all node types.
 
 The practical upshot of this is that if you configure one node type to have very large values for these
 parameters then the system will appear slow to start. But this is all to be expected, since the reason for
 setting large values is that a node type has bad connectivity, and then we may need a long time to discover it.
-
 
 [[multiple-nodes-on-one-computer]]
 ==== Multiple nodes on one computer
@@ -3518,11 +3537,8 @@ After a Safir node is stopped there is an option to perform a computer shutdown 
 Stop of a specific Safir node will stop all safir-related processes in a controlled fashion. At stop, +dose_main+ will send stop orders to all applications that have a dob connection (see <<stop_orders>>) which means that all application programs will be stopped as well. Note that an application might for some reason (by design or because of a bug) ignore a stop order so there is no absolute guarantee that all applications are stopped.
 
 ==== Safir system stop
-A Safir system stop, that is, an order to stop all nodes that constitute a Safir system, triggers a mechanism that deserves a little more explanation.
-
-All nodes forming a system shares a unique incarnation id. Before a node joins a system it checks the the system incarnation id is not found in a locally kept ``blacklist'' of old incarnation ids. A node adds its current incarnation id to this blacklist when it receives a Safir system stop order.
-
-The incarnation mechanism is used to guarantee that an ``old'' node cannot join a newly formed system. The typical scenario is when restarting a system consisting of several nodes. Without this mechanism a node that happens to survive the system restart could be included in the restarted system, resulting in a mix of old and new data.
+A Safir system stop, that is, an order to stop all nodes that constitute a Safir system, triggers a write to
+the ``incarnation blacklist''mechanism, see <<system-start>>.
 
 ==== Shutdown
 Safir SDK Core provides a mechanism to execute an optional computer shutdown after the Safir node is stopped.
