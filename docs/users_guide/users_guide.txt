@@ -2511,7 +2511,7 @@ As you've probably understood +SynchronousPermanent+ persistence is really _just
 ===== Waiting for persistence data
 When starting a system with persistence the Dob does not allow connections to be opened until the persistent instances have been distributed to all nodes. So when your application is allowed to start you are guaranteed to have persistent data available.
 
-[[simple_persistence]]
+[[using_persistence]]
 ===== Using persistence
 If you just want entities to survive a system restart it is very easy to do. This section describes how to do this in the easiest possible way, but if you want more control and understanding over what is going on you probably want to read <<advanced_persistence>>.
 
@@ -2601,7 +2601,7 @@ A not so common case is when the application accepts the injected instance but t
 
 Once all persisted instances have been accepted or rejected by the application the +OnInitialInjectionsDone+ will be called. This signals that all persistent objects for a certain handler have been injected. Again, you don't have to do anything in the callback.
 
-(The ``you don't have to do anything'' bit is the reason why the strategy described in <<simple_persistence>> works so well.)
+(The ``you don't have to do anything'' bit is the reason why the strategy described in <<using_persistence>> works so well.)
 
 *Note:* In most cases it shouldn't be necessary to check the data coming in through persistence injections. After all, it is data that has already been checked by an earlier incarnation of your application! If it was good then it should be good now.
 
@@ -2638,7 +2638,7 @@ void VehicleSubscriber::OnInitialInjectionsDone
 }
 ----------------------------
 
-Now you need to create a dom file as described in <<simple_persistence>>, and then you are ready to go.
+Now you need to create a dom file as described in <<using_persistence>>, and then you are ready to go.
 
 
 <<persistence_sequence_diagram>> shows this mechanism as a sequence diagram (note that the +Open+ call from +MyEntityHandlerInjection+ blocks until the PersistenceService has signalled that the persistence data is ready, as described in <<waiting_for_persistence>>).
@@ -3256,7 +3256,7 @@ it, with the value "Local" as DistributionChannel, using a dom file.
 === Persistence config
 The persistence service, provided by the +dope_main+ executable has a few different features that might be good to know about. It has two _backends_, one that persists entities to files, and one that persists them to a database.
 
-A few relevant parameters for the persistence service, apart from the ones described in <<simple_persistence>>.
+A few relevant parameters for the persistence service, apart from the ones described in <<using_persistence>>.
 
 _Safir.Dob.PersistenceParameters.Backend_::
 Which backend should be used, _None_, _Odbc_ database or _File_.
@@ -3268,6 +3268,9 @@ variables here, as described in <<environment_parameters>>.
 
 _Safir.Dob.PersistenceParameters.OdbcStorageConnectString_::
 The connection string to use to connect to the database.
+
+_Safir.Dob.PersistenceParameters.StandaloneMode_::
+This parameter allows enabling deprecated functionality. Please don't do it!
 
 The default behaviour is that an entity is written to external storage as soon as it is updated, which, for frequently updated entities, might generate a lot of writes to external storage.
 

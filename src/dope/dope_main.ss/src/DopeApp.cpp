@@ -96,6 +96,11 @@ DopeApp::DopeApp():
     m_dobConnection.SubscribeEntity(Safir::Dob::PersistentDataStatus::ClassTypeId, false, false, false, this);
 
 
+    if (Safir::Dob::PersistenceParameters::StandaloneMode())
+    {
+        Safir::Logging::SendSystemLog(Safir::Logging::Warning,
+                                      L"Dope is running in DEPRECATED Standalone Mode!");
+    }
 }
 
 //-------------------------------------------------------
@@ -184,6 +189,12 @@ void DopeApp::OnNewEntity(const Safir::Dob::EntityProxy entityProxy)
             std::wcout << L"Dope is started as standby persistence. Active persistence is running on node ";
             std::wcout << entityProxy.GetInstanceId().GetRawValue() << "." << std::endl;
             m_persistenceStarted = true;
+
+            if (Safir::Dob::PersistenceParameters::StandaloneMode())
+            {
+                // Start saving persistent data
+                Start(false);
+            }
         }
     }
 }

@@ -165,6 +165,14 @@ void PersistenceHandler::Start(bool restore)
     }
     else
     {
+        // Failover startup, don't restore anything.
+
+        if (Safir::Dob::PersistenceParameters::StandaloneMode())
+        {
+            // If standalone mode then clear all before starting subscriptions
+            RemoveAll();
+        }
+
         StartSubscriptions();
     }
 

@@ -60,6 +60,15 @@
         <value>5000</value>
       </parameter>
       <parameter>
+        <summary>StandaloneMode means that each dope that is started is saving its own persistent data.
+                 Only valid if when several dope_main runs on different nodes in a redundant system.
+                 Use with extreme caution. You are responsible for starting the nodes in the correct
+                 order!</summary>
+        <name>StandaloneMode</name>
+        <type>Boolean</type>
+        <value>False</value>
+      </parameter>
+      <parameter>
         <summary>TestMode allow initial injections without persistence started. Only valid if SystemHasPersistence flag is set to false.</summary>
         <name>TestMode</name>
         <type>Boolean</type>
