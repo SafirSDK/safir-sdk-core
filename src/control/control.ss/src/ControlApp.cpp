@@ -108,17 +108,17 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
     , m_handle(ioService)
 #endif
 {
+    for (auto it = m_conf.nodeTypesParam.cbegin(); it < m_conf.nodeTypesParam.cend(); ++it)
+    {
+        if (m_conf.thisNodeParam.nodeTypeId == it->id)
+        {
+            m_requiredForStart = it->requiredForStart;
+            break;
+        }
+    }
+
     if (id == 0)
     {
-        for (auto it = m_conf.nodeTypesParam.cbegin(); it < m_conf.nodeTypesParam.cend(); ++it)
-        {
-            if (m_conf.thisNodeParam.nodeTypeId == it->id)
-            {
-                m_requiredForStart = it->requiredForStart;
-                break;
-            }
-        }
-
         for (;;)
         {
             // Generate a positive node id if the node is of a type that is allowed to form as system, or
