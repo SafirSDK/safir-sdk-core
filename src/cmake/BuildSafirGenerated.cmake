@@ -280,7 +280,7 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
 
   ADD_LIBRARY(safir_generated-${_gen_NAME}-cpp SHARED ${cpp_files})
 
-  target_include_directories(safir_generated-${_gen_NAME}-cpp
+  target_include_directories(safir_generated-${_gen_NAME}-cpp BEFORE
     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/gen/cpp/include>)
 
   #add safir include dirs.
