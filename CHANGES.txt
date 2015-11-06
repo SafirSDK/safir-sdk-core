@@ -1,5 +1,5 @@
 -----------------------------------------------------------------------------------------------------------------------
-2015-09-30 version 6.1
+2015-11-09 version 6.1
 -----------------------------------------------------------------------------------------------------------------------
 
 This release introduces the following changes:
@@ -28,7 +28,10 @@ This release introduces the following changes:
 #271 Starting safir_control as different users on Windows fails
 #273 Client nodes should not be able to form systems without a Server node
 #278 Optional maxLength element in dou-files incorrectly implemented
+#279 Re-add removed dope redundancy
+#280 Timestamp change flags are incorrect.
 #281 TYPENAME column is needed
+#282 Dobmake fails to build when adding a parameter to file that has already been built and installed
 
 -----------------------------------------------------------------------------------------------------------------------
 2015-09-16 version 6.0.3
