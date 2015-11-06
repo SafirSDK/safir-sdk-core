@@ -382,6 +382,7 @@ namespace Internal
                                          const DistributionData& localState) const;
 
         void SetTimestamps(DistributionData&       newState,
+                           const char* const       changeFlagsBlobTemplate,
                            const DistributionData& timeBase,
                            const bool              considerChangeFlags) const;
 

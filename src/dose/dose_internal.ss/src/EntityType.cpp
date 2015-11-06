@@ -1761,7 +1761,8 @@ namespace Internal
             // Update an existing state
 
             // Create a copy that includes the new blob
-            newRealState = realState.GetEntityStateCopy(blob, true);
+            newRealState = realState.GetEntityStateCopy(blob,
+                                                        true); // reset change flags
 
             newRealState.IncrementVersion();
             newRealState.SetExplicitlyDeleted(false);
@@ -1785,6 +1786,7 @@ namespace Internal
             }
 
             SetTimestamps(newRealState,
+                          blob, // Use the blob as a change flag template
                           timeBase,
                           considerChangeFlags);
         }
@@ -1865,6 +1867,7 @@ namespace Internal
             }
 
             SetTimestamps(newRealState,
+                          nullptr, // no change flag template needed
                           timeBase,
                           false);   // false => No changeflags to consider when the new state is a 'deleted' state
         }
@@ -2115,6 +2118,7 @@ namespace Internal
     }
 
     void EntityType::SetTimestamps(DistributionData&       newState,
+                                   const char* const       changeFlagsBlobTemplate,
                                    const DistributionData& timeBase,
                                    const bool              considerChangeFlags) const
     {
@@ -2133,6 +2137,7 @@ namespace Internal
         if (considerChangeFlags)
         {
             TimestampOperations::SetTimestampForChangedMembers(newState,
+                                                               changeFlagsBlobTemplate,
                                                                now,
                                                                resetUnchangedMembers);
         }

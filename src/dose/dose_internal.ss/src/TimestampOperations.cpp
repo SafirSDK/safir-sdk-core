@@ -239,7 +239,16 @@ namespace Internal
     }
 
     void
-    TimestampOperations::SetTimestampForChangedMembers(DistributionData &       entityState,
+    TimestampOperations::SetTimestampForChangedMembers(DistributionData&        entityState,
+                                                       const Typesystem::Int64  timestamp,
+                                                       const bool               resetUnchangedMembers)
+    {
+        SetTimestampForChangedMembers(entityState, nullptr, timestamp, resetUnchangedMembers);
+    }
+
+    void
+    TimestampOperations::SetTimestampForChangedMembers(DistributionData&        entityState,
+                                                       const char* const        changeFlagsBlobTemplate,
                                                        const Typesystem::Int64  timestamp,
                                                        const bool               resetUnchangedMembers)
     {
@@ -248,14 +257,25 @@ namespace Internal
         ENSURE(InjectionKindTable::Instance().IsInjectable(typeId),
             << "TimestampOperations::SetTimestampForChangedMembers: It is only possible to call this method if type is Injectable");
 
-        entityState.SetTopTimestamp(timestamp);
-
         if (!entityState.HasBlob())
         {
             return;
         }
 
-        Typesystem::Internal::BlobReadHelper reader(entityState.GetBlob());
+        std::unique_ptr<Typesystem::Internal::BlobReadHelper> reader;
+
+        if (changeFlagsBlobTemplate == nullptr)
+        {
+            // Change flags shall be read from the target entity
+            reader.reset(new Typesystem::Internal::BlobReadHelper(entityState.GetBlob()));
+        }
+        else
+        {
+            // Change flags shall be read from template blob
+            reader.reset(new Typesystem::Internal::BlobReadHelper(changeFlagsBlobTemplate));
+        }
+
+        entityState.SetTopTimestamp(timestamp);
 
         const Typesystem::MemberIndex numberOfMembers =
             Safir::Dob::Typesystem::Members::GetNumberOfMembers(typeId);
@@ -266,7 +286,7 @@ namespace Internal
             bool isChanged = false;
             for (Typesystem::ArrayIndex index = 0; index < arraySize; ++index)
             {
-                if (reader.IsChanged(member, index))
+                if (reader->IsChanged(member, index))
                 {
                     isChanged = true;
                     break;
@@ -283,7 +303,6 @@ namespace Internal
             }
         }
     }
-
 
     void
     TimestampOperations::SetTimestampForAllMembers(DistributionData&        entityState,

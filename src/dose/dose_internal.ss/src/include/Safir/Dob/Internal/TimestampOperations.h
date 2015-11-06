@@ -67,6 +67,20 @@ namespace Internal
                                                   const Typesystem::Int64  timestamp,
                                                   const bool               resetUnchangedMembers);
 
+        /** Set the timestamp on members that have their change flag set.
+         * The top level timestamp is also set.
+         * If no members have their changeflags set only the top timestamp will be set.
+         *
+         * The change flags are read from a "template" blob.
+         *
+         * resetUnchangedMembers: True => The timestamp for members that don't have their change flag set will be set to 0.
+         *                        False => The timestamp for members that don't have their change flag set will not be touched.
+         */
+        static void SetTimestampForChangedMembers(DistributionData&        entityState,
+                                                  const char* const        changeFlagsBlobTemplate,
+                                                  const Typesystem::Int64  timestamp,
+                                                  const bool               resetUnchangedMembers);
+
         /** Set the timestamp for all members
          * The top level timestamp is also set.
          */
