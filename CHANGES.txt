@@ -8,8 +8,9 @@ This release introduces the following changes:
   cannot join a restarted system.
 * Add support for stopping safir_control on specific nodes or the whole system.
 * Add support for rebooting or shutting down nodes after they have been stopped.
-* Add documentation for the new features from 6.0 and 6.1
+* Add documentation for the new features from 6.0 and 6.1.
 * Rewrite of the persistence service which introduces support for MS SQL Server.
+* maxLength in dou-files is now optional.
 
 * Bug fixes, among which the most notable ones are (see http://safirsdkcore.com for details):
 
@@ -27,7 +28,6 @@ This release introduces the following changes:
 #261 Memory leak in Communication on ExcludeNode
 #271 Starting safir_control as different users on Windows fails
 #273 Client nodes should not be able to form systems without a Server node
-#278 Optional maxLength element in dou-files incorrectly implemented
 #279 Re-add removed dope redundancy
 #280 Timestamp change flags are incorrect.
 #281 TYPENAME column is needed
