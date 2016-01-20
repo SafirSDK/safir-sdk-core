@@ -2951,7 +2951,7 @@ kind::
 Mandatory. Use value _library_ to make a library module section.
 
 dependencies::
-Mandatory, but can be empty. A space-separated list of modules that dou files in this
+Mandatory, but can be empty. A comma-separated list of modules that dou files in this
 module depend on. This information is needed by dobmake to resolve references inside dou
 files.
 
