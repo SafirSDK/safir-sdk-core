@@ -124,7 +124,7 @@ SET_SAFIR_TEST_PROPERTIES(TEST RawChanges_test TIMEOUT 30)
 add_test(NAME ElectionHandler_test COMMAND ElectionHandler_test)
 SET_SAFIR_TEST_PROPERTIES(TEST ElectionHandler_test TIMEOUT 2400)
 
-add_test(NAME ElectionHandler_test_with_overflows COMMAND ElectionHandler_test --overflows)
+add_test(NAME ElectionHandler_test_with_overflows COMMAND ElectionHandler_test -- --overflows)
 SET_SAFIR_TEST_PROPERTIES(TEST ElectionHandler_test_with_overflows TIMEOUT 2400)
 
 add_test(NAME Coordinator_test COMMAND Coordinator_test)
