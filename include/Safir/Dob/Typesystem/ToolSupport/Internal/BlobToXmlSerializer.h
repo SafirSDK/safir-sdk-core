@@ -477,7 +477,7 @@ namespace Internal
                     {
                         WriteStartElement(elementName, arrayIndex, md->GetCollectionType()==ArrayCollectionType, os);
                         std::string bin(val.first, static_cast<size_t>(val.second));
-                        os<<SerializationUtils::ToBase64(bin);
+                        os<<SerializationUtils::ToBase64(bin,true);
                         os<<"</"<<elementName<<">";
                     }
                 }

@@ -260,7 +260,7 @@ namespace Internal
                 if (bin.second>0)
                 {
                     std::string tmp(bin.first, bin.first+bin.second);
-                    os<<Safir::Dob::Typesystem::ToolSupport::Internal::SerializationUtils::ToBase64(tmp);
+                    os<<Safir::Dob::Typesystem::ToolSupport::Internal::SerializationUtils::ToBase64(tmp, true);
                 }
             }
             break;
