@@ -47,6 +47,7 @@ else()
   #We know we don't work with 3.2.8 and earlier.
   if (CSHARP_IS_MONO)
     FIND_PROGRAM (MONO_RUNTIME NAMES mono)
+    mark_as_advanced(MONO_RUNTIME)
     if (NOT MONO_RUNTIME)
       MESSAGE(FATAL_ERROR "Could not find mono executable")
     endif()
