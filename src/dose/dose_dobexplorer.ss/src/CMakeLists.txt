@@ -22,16 +22,11 @@ mark_as_advanced(Qt5Core_DIR Qt5Gui_DIR Qt5Widgets_DIR)
 
 ADD_EXECUTABLE(dobexplorer WIN32 ${sources} ${ui_headers} ${moc_sources} ${headers} ${widget_headers} dobexplorer.rc)
 
-if (Qt5Widgets_FOUND)
-  TARGET_LINK_LIBRARIES(dobexplorer PRIVATE Qt5::Widgets)
-else()
-  TARGET_LINK_LIBRARIES(dobexplorer PRIVATE ${QT_LIBRARIES})
-endif()
-
 TARGET_LINK_LIBRARIES(dobexplorer PRIVATE
   dose_internal
   system_picture
   lluf_utils
-  lluf_crash_reporter)
+  lluf_crash_reporter
+  Qt5::Widgets)
 
 SAFIR_INSTALL(TARGETS dobexplorer DEVELOPMENT)
