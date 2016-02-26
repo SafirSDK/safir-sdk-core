@@ -24,18 +24,10 @@
 #
 ###############################################################################
 from __future__ import print_function
-import sys, subprocess, os, shutil, difflib, time, xml.dom.minidom, glob, re, traceback, stat, signal, platform
-from xml.sax.saxutils import escape
+import sys, subprocess, os, shutil, difflib, time, glob, re, traceback, signal, platform
+from xml.sax.saxutils import escape, quoteattr
 
-try:
-    import ConfigParser
-except ImportError:
-    import configparser as ConfigParser
-
-try:
-    from StringIO import StringIO
-except ImportError:
-    from io import StringIO
+from optparse import OptionParser
 
 try:
     import urllib.request as urllib
@@ -75,7 +67,6 @@ def mkdir(newdir):
 
 class Parameters:
     def __init__(self):
-        from optparse import OptionParser
         import tempfile
 
         parser = OptionParser()
@@ -289,7 +280,7 @@ class Results:
         return testcases
 
 
-    def write_diff(self,tcname, tcno, diff0, diff1, diff2):
+    def write_diff(self,tcname, diff0, diff1, diff2):
         res = len(diff0) == 0 and len(diff1) == 0 and len(diff2) == 0
         output = ""
         if not res:
@@ -330,7 +321,6 @@ class Results:
 
         output = list((None,None,None))
         expected_output = list((None,None,None))
-        alltc = list((None,None,None))
 
         for partner in range(3):
             filename = "partner" + str(partner) + ".txt"
@@ -361,7 +351,7 @@ class Results:
             diff0 = list(difflib.unified_diff(expected_output[0][tc],output[0][tc]))
             diff1 = list(difflib.unified_diff(expected_output[1][tc],output[1][tc]))
             diff2 = list(difflib.unified_diff(expected_output[2][tc],output[2][tc]))
-            self.write_diff(tcnames[tc], tc, diff0, diff1, diff2)
+            self.write_diff(tcnames[tc], diff0, diff1, diff2)
             self.num_tc_performed += 1
 
 
@@ -378,7 +368,7 @@ class Runner:
             output = open(name + ".output.txt","w")
         else:
             output = None
-        cf = 0
+
         if sys.platform == "win32":
             proc = subprocess.Popen(cmd,
                                     stdout = output,
@@ -396,9 +386,9 @@ class Runner:
     def initialize(self,parameters):
         sys.path.append(os.path.join(parameters.test_data_directory,"python"))
         if parameters.check_syslog:
-           #load and start syslog server
-           from syslog_server import SyslogServer
-           self.syslog = SyslogServer("safir_show_config") #This should be in the PATH here, so no need to give full path
+            #load and start syslog server
+            from syslog_server import SyslogServer
+            self.syslog = SyslogServer("safir_show_config") #This should be in the PATH here, so no need to give full path
 
         if parameters.standalone:
             partners = (0,1,2)
@@ -471,7 +461,7 @@ class Runner:
         for name, (proc,output) in self.procs.items():
             while time.time() < future:
                 if proc.poll() is not None:
-                    break;
+                    break
                 time.sleep(0.1)
             if proc.poll() is None:
                 self.__kill(name,proc)
@@ -490,7 +480,7 @@ class Runner:
             syslog_data = self.syslog.get_data(10) # wait for 10 seconds to collect any output
             results.write_test_result(len(syslog_data) == 0,
                                       "syslog_output",
-                                      "syslog is not empty:\n" + xml.sax.saxutils.quoteattr(syslog_data))
+                                      "syslog is not empty:\n" + quoteattr(syslog_data))
 
     def run_sequencer(self,parameters):
         log("** Running test sequencer with languages set to", parameters.lang0, parameters.lang1, parameters.lang2)
@@ -521,7 +511,7 @@ class JenkinsInterface:
         self.clijar = os.path.join(parameters.tempdir,"jenkins-cli.jar")
         urllib.urlretrieve(cliurl,self.clijar)
 
-    def __run_command(self,cmd,input = None):
+    def __run_command(self,cmd,inp = None):
         args = list()
         args += ("java","-jar",self.clijar,"-s",self.server)
 
@@ -533,8 +523,8 @@ class JenkinsInterface:
         proc = subprocess.Popen(args,
                                 stdout = subprocess.PIPE,
                                 stderr = subprocess.STDOUT,
-                                stdin = None if input is None else subprocess.PIPE)
-        res = proc.communicate(input)
+                                stdin = None if inp is None else subprocess.PIPE)
+        res = proc.communicate(inp)
         if proc.returncode == 0:
             return res[0]
         else:
@@ -558,7 +548,8 @@ class JenkinsInterface:
 
     def __to_bool(self,output):
         output = output.strip()
-        if output not in ("true","false"):
+        if output not in ("true", "false"):
+            log ("'{0}' was not found in {1}".format(output, ("true","false")))
             raise Exception("Unexpected boolean value:" + output)
         return output == "true"
 
