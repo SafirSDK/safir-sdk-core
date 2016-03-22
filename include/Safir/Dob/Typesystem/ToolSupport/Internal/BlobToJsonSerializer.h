@@ -436,7 +436,7 @@ namespace Internal
                     if (!isNull)
                     {
                         std::string bin(val.first, static_cast<size_t>(val.second));
-                        os<<SAFIR_JSON_QUOTE(SerializationUtils::ToBase64(bin));
+                        os<<SAFIR_JSON_QUOTE(SerializationUtils::ToBase64(bin,false));
                         return true;
                     }
                 }
