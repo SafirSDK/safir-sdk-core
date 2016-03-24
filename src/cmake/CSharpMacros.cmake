@@ -24,6 +24,7 @@ function(ADD_CSHARP_ASSEMBLY TARGET_NAME)
     #we always generated debug info and enable optimizations, regardless of build type
     #and we always want to choose our standard libraries ourselves
     SET(_cs_flags "${CSHARP_COMPILER_FLAGS} -debug -optimize -fullpaths -nostdlib
+                                            -lib:\"${libpath}\"
                                             -reference:\"${libpath}mscorlib.dll\"
                                             -reference:\"${libpath}System.dll\"
                                             -reference:\"${libpath}Microsoft.CSharp.dll\"
