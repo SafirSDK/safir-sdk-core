@@ -37,6 +37,7 @@ public class Test {
      * @param args
      */
     public static void main(String[] args) throws java.lang.Exception {
+        Locale.setDefault(new Locale("en", "US"));
 
         test_Has_Property();
         test_GetName();
