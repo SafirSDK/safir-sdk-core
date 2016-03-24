@@ -150,6 +150,12 @@ namespace ToolSupport
         virtual const char* GetName() const=0; //get the parameter name, no namespace and class name: MyParameter
 
         /**
+         * @brief Get the TypeId of the class that the parameter belongs to.
+         * @return TypeId of owner class.
+         */
+        virtual DotsC_TypeId GetClassTypeId() const=0;
+
+        /**
          * @brief Get fully qualified parameter name. Example: MyNamespace.MyClass.MyParameter
          * @return Qualified parameter name.
          */

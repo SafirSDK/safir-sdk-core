@@ -529,6 +529,7 @@ namespace ToolSupport
             ParameterDescriptionLocalPtr par=boost::make_shared<ParameterDescriptionLocal>();
             par->qualifiedName=paramName.str();
             par->name=par->qualifiedName;
+            par->classTypeId=state.lastInsertedClass->GetTypeId();
             par->hidden=true;
             par->collectionType=SingleValueCollectionType;
             par->memberType=Int32MemberType; //just to indicate that type is not object or entityId, it is a basicType or enum
@@ -587,6 +588,7 @@ namespace ToolSupport
             ParameterDescriptionLocalPtr par=boost::make_shared<ParameterDescriptionLocal>();
             par->qualifiedName=paramName.str();
             par->name=par->qualifiedName;
+            par->classTypeId=state.lastInsertedClass->GetTypeId();
             par->hidden=true;
             par->collectionType=SingleValueCollectionType;
             par->memberType=EntityIdMemberType;
@@ -613,6 +615,7 @@ namespace ToolSupport
             ParameterDescriptionLocalPtr par=boost::make_shared<ParameterDescriptionLocal>();
             par->qualifiedName=paramName.str();
             par->name=par->qualifiedName;
+            par->classTypeId=state.lastInsertedClass->GetTypeId();
             par->hidden=true;
             par->collectionType=SingleValueCollectionType;
             par->memberType=ObjectMemberType;
@@ -652,6 +655,7 @@ namespace ToolSupport
             ParameterDescriptionLocalPtr par=boost::make_shared<ParameterDescriptionLocal>();
             par->qualifiedName=paramName.str();
             par->name=par->qualifiedName;
+            par->classTypeId=state.lastInsertedClass->GetTypeId();
             par->hidden=true;
             par->collectionType=SingleValueCollectionType;
             par->memberType=ObjectMemberType;
@@ -708,6 +712,7 @@ namespace ToolSupport
             }
 
             def->qualifiedName=state.lastInsertedClass->name+"."+def->name;
+            def->classTypeId=state.lastInsertedClass->GetTypeId();
 
             //Check parameter type
             try
@@ -1211,6 +1216,7 @@ namespace ToolSupport
         paramName<<pd->GetName()<<"."<<propMem->GetName()<<"@"<<state.lastInsertedPropertyMapping->class_->GetName();
         param->qualifiedName=paramName.str();
         param->name=param->qualifiedName;
+        param->classTypeId=state.lastInsertedPropertyMapping->class_->GetTypeId();
         param->hidden=true;
         param->collectionType=collectionType;
         param->memberType=propMem->memberType;

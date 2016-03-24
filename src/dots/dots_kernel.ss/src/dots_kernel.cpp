@@ -692,6 +692,7 @@ void DotsC_GetPropertyParameterReference(const DotsC_TypeId classTypeId,
                                          const DotsC_TypeId propertyTypeId,
                                          const DotsC_MemberIndex propertyMember,
                                          const DotsC_Int32 index,
+                                         DotsC_TypeId& paramClassTypeId, //out
                                          DotsC_ParameterIndex& paramId, //out
                                          DotsC_Int32& paramValueIndex) //out
 {
@@ -700,7 +701,11 @@ void DotsC_GetPropertyParameterReference(const DotsC_TypeId classTypeId,
     const PropertyMappingDescriptionShm* pmd=cd->GetPropertyMapping(propertyTypeId, isInherited);
     const MemberMappingDescriptionShm* mm=pmd->GetMemberMapping(propertyMember);
     std::pair<const ParameterDescriptionShm*, int> param=mm->GetParameter();
-
+    paramClassTypeId = param.first->GetClassTypeId();
+    if (paramClassTypeId != classTypeId)
+    {
+        cd = RepositoryKeeper::GetRepository()->GetClass(paramClassTypeId);
+    }
     for (DotsC_ParameterIndex pix=0; pix<cd->GetNumberOfParameters(); ++pix)
     {
         if (cd->GetParameter(pix)==param.first)
@@ -708,6 +713,7 @@ void DotsC_GetPropertyParameterReference(const DotsC_TypeId classTypeId,
             DotsC_CollectionType collectionType=pmd->GetProperty()->GetMember(propertyMember)->GetCollectionType();
             paramId=pix;
             paramValueIndex=collectionType==SingleValueCollectionType ? param.second : index;
+            break;
         }
     }
 }

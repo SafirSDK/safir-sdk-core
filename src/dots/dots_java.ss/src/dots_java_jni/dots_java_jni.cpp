@@ -621,13 +621,15 @@ void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetClassMemberRefere
  * Signature: (JJII[I[I)V
  */
 void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetPropertyParameterReference
-  (JNIEnv * env, jclass, jlong _typeId, jlong _propertyId, jint _member, jint _index, jintArray _paramId, jintArray _paramValueIndex)
+  (JNIEnv * env, jclass, jlong _typeId, jlong _propertyId, jint _member, jint _index, jlongArray _paramClassTypeId, jintArray _paramId, jintArray _paramValueIndex)
 {
+    DotsC_TypeId paramClassTypeId;
     DotsC_ParameterIndex paramId;
     DotsC_Int32 paramValueIndex;
 
-    DotsC_GetPropertyParameterReference(_typeId, _propertyId, _member, _index, paramId, paramValueIndex);
+    DotsC_GetPropertyParameterReference(_typeId, _propertyId, _member, _index, paramClassTypeId, paramId, paramValueIndex);
 
+    SetJArray(env,_paramClassTypeId, paramClassTypeId);
     SetJArray(env,_paramId, paramId);
     SetJArray(env,_paramValueIndex, paramValueIndex);
 }

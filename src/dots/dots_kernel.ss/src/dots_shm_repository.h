@@ -323,6 +323,7 @@ namespace Internal
 
         const char* Summary() const {return NULL;}
         const char* GetName() const {return m_name.c_str();}
+        DotsC_TypeId GetClassTypeId() const {return m_classTypeId;}
         const char* GetQualifiedName() const {return m_qualifiedName.c_str();}
         DotsC_MemberType GetMemberType() const {return m_memberType;}
         DotsC_TypeId GetTypeId() const {return m_typeId;}
@@ -388,6 +389,7 @@ namespace Internal
     private:
         StringShm m_name;
         StringShm m_qualifiedName;
+        DotsC_TypeId m_classTypeId; //typeid of class the parameter belongs to
         DotsC_MemberType m_memberType;
         DotsC_CollectionType m_collectionType;
         DotsC_MemberType m_keyType;

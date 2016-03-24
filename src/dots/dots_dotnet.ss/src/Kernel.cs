@@ -240,8 +240,9 @@ namespace Safir.Dob.Typesystem.Internal
         internal static extern void DotsC_GetPropertyParameterReference(System.Int64 typeId,
                                                                         System.Int64 propertyId,
                                                                         System.Int32 propertyMember,
-                                                                         System.Int32 index,
-                                                                         out System.Int32 paramId, //out
+                                                                        System.Int32 index,
+                                                                        out System.Int64 paramClassTypeId, //out
+                                                                        out System.Int32 paramId, //out
                                                                         out System.Int32 paramValueIndex); //out
 
         //************************************************************************************

@@ -134,6 +134,7 @@ public final class Kernel {
             long propertyId,
             int propertyMember,
             int index,
+            long[] paramClassTypeId, //out
             int[] paramId, //out
             int[] paramValueIndex); //out
 

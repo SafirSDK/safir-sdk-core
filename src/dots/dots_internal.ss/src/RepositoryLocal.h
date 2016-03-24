@@ -194,6 +194,7 @@ namespace ToolSupport
         //Visible interface
         virtual const char* Summary() const {return summary.c_str();}
         virtual const char* GetName() const {return name.c_str();}
+        virtual DotsC_TypeId GetClassTypeId() const {return classTypeId;}
         virtual const char* GetQualifiedName() const {return qualifiedName.c_str();}
         virtual DotsC_MemberType GetMemberType() const {return memberType;}
         virtual DotsC_TypeId GetTypeId() const {return typeId;} //only valid if MemberType is object or enum
@@ -291,6 +292,7 @@ namespace ToolSupport
         //Fields
         std::string summary;
         std::string name;
+        DotsC_TypeId classTypeId;
         std::string qualifiedName;
         std::string typeName;
         DotsC_MemberType memberType;

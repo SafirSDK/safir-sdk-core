@@ -313,6 +313,7 @@ extern "C"
                                                              const DotsC_TypeId propertyId,
                                                              const DotsC_MemberIndex member,
                                                              const DotsC_Int32 index,
+                                                             DotsC_TypeId& paramClassTypeId, //out
                                                              DotsC_ParameterIndex& paramId, //out
                                                              DotsC_Int32& paramValueIndex); //out
 

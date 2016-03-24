@@ -169,6 +169,7 @@ namespace Internal
     ParameterDescriptionShm::ParameterDescriptionShm(const ParameterDescription* pd, boost::interprocess::managed_shared_memory* shm)
         :m_name(pd->GetName(), shm->get_segment_manager())
         ,m_qualifiedName(pd->GetQualifiedName(), shm->get_segment_manager())
+        ,m_classTypeId(pd->GetClassTypeId())
         ,m_memberType(pd->GetMemberType())
         ,m_collectionType(pd->GetCollectionType())
         ,m_keyType(pd->GetKeyType())

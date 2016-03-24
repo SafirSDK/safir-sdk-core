@@ -1,7 +1,7 @@
 /* ****************************************************************************
 *
 * Copyright Saab AB, 2005-2013 (http://safirsdkcore.com)
-* 
+*
 * Created by: Lars Hagström / stlrha
 *
 *******************************************************************************
@@ -71,7 +71,7 @@ namespace Safir.Dob.Typesystem
         /// <exception cref="ReadOnlyException">The property member is read-only.</exception>
         public static void SetNull(Object obj,
                                    System.Int64 propertyId,
-                                   System.Int32 member, 
+                                   System.Int32 member,
                                    System.Int32 index)
         {
             switch(GetPropertyMappingKind(obj.GetTypeId(),propertyId,member))
@@ -94,7 +94,7 @@ namespace Safir.Dob.Typesystem
 
                 ContainerBase container;
                 bool parentIsChanged = false;
-                DereferenceClassMemberReference(obj, 
+                DereferenceClassMemberReference(obj,
                                                 classMemberRef,
                                                 0,
                                                 index,
@@ -112,7 +112,7 @@ namespace Safir.Dob.Typesystem
             break;
             }
         }
-        
+
         /// <summary>
         /// Is the property member null.
         /// </summary>
@@ -123,7 +123,7 @@ namespace Safir.Dob.Typesystem
         /// <returns>True if the property member (or a parent item of it) was null.</returns>
         public static bool IsNull(Object obj,
                                   System.Int64 propertyId,
-                                  System.Int32 member, 
+                                  System.Int32 member,
                                   System.Int32 index)
         {
             switch (GetPropertyMappingKind(obj.GetTypeId(), propertyId, member))
@@ -164,7 +164,7 @@ namespace Safir.Dob.Typesystem
             }
             throw new SoftwareViolationException("Coding error in Properties.IsNull");
         }
-        
+
         /// <summary>
         /// Is the property member changed.
         /// </summary>
@@ -175,7 +175,7 @@ namespace Safir.Dob.Typesystem
         /// <returns>True if the property member (or a parent item of it) was changed.</returns>
         public static bool IsChanged(Object obj,
                                      System.Int64 propertyId,
-                                     System.Int32 member, 
+                                     System.Int32 member,
                                      System.Int32 index)
         {
             switch (GetPropertyMappingKind(obj.GetTypeId(), propertyId, member))
@@ -221,7 +221,7 @@ namespace Safir.Dob.Typesystem
             }
             throw new SoftwareViolationException("Coding error in Properties.IsChanged");
         }
-        
+
         /// <summary>
         /// Is the property member read-only.
         /// <para/>
@@ -235,7 +235,7 @@ namespace Safir.Dob.Typesystem
         /// <returns>True if the property member is read only.</returns>
         public static bool IsReadOnly(Object obj,
                                       System.Int64 propertyId,
-                                      System.Int32 member, 
+                                      System.Int32 member,
                                       System.Int32 index)
         {
             switch (GetPropertyMappingKind(obj.GetTypeId(), propertyId, member))
@@ -295,7 +295,7 @@ namespace Safir.Dob.Typesystem
         public static void Set(Object obj,
                         System.Int64 propertyId,
                         bool val,
-                        System.Int32 member, 
+                        System.Int32 member,
                         System.Int32 index)
         {
             switch(GetPropertyMappingKind(obj.GetTypeId(),propertyId,member))
@@ -318,7 +318,7 @@ namespace Safir.Dob.Typesystem
 
                 ContainerBase container;
                 bool parentIsChanged = false;
-                DereferenceClassMemberReference(obj, 
+                DereferenceClassMemberReference(obj,
                                                 classMemberRef,
                                                 0,
                                                 index,
@@ -348,7 +348,7 @@ namespace Safir.Dob.Typesystem
         public static void Get(Object obj,
                         System.Int64 propertyId,
                         out bool val,
-                        System.Int32 member, 
+                        System.Int32 member,
                         System.Int32 index)
         {
             val = true;
@@ -359,16 +359,17 @@ namespace Safir.Dob.Typesystem
 
             case Internal.DotsC_PropertyMappingKind.MappedToParameter:
                 {
+                    Int64 paramClassTypeId;
                     Int32 paramIndex;
                     Int32 valueIndex;
-                    Internal.Kernel.DotsC_GetPropertyParameterReference (obj.GetTypeId (), propertyId, member, index, out paramIndex, out valueIndex);
-                    
+                    Internal.Kernel.DotsC_GetPropertyParameterReference (obj.GetTypeId(), propertyId, member, index, out paramClassTypeId, out paramIndex, out valueIndex);
+
                     byte tmpVal;
-                    Internal.Kernel.DotsC_GetBooleanParameter (obj.GetTypeId (), paramIndex, valueIndex, out tmpVal);
+                    Internal.Kernel.DotsC_GetBooleanParameter(paramClassTypeId, paramIndex, valueIndex, out tmpVal);
                     val = Internal.InternalOperations.BoolOf(tmpVal);
                 }
                 break;
-                
+
             case Internal.DotsC_PropertyMappingKind.MappedToMember:
                 System.Int32[] classMemberRef = GetClassMemberReference(obj.GetTypeId(),
                                                                         propertyId,
@@ -380,7 +381,7 @@ namespace Safir.Dob.Typesystem
 
                 ContainerBase container;
                 bool parentIsChanged = false;
-                DereferenceClassMemberReference(obj, 
+                DereferenceClassMemberReference(obj,
                                                 classMemberRef,
                                                 0,
                                                 index,
@@ -410,7 +411,7 @@ namespace Safir.Dob.Typesystem
         public static void SetEnum(Object obj,
                             System.Int64 propertyId,
                             System.Int32 val,
-                            System.Int32 member, 
+                            System.Int32 member,
                             System.Int32 index)
         {
             switch(GetPropertyMappingKind(obj.GetTypeId(),propertyId,member))
@@ -433,7 +434,7 @@ namespace Safir.Dob.Typesystem
 
                 ContainerBase container;
                 bool parentIsChanged = false;
-                DereferenceClassMemberReference(obj, 
+                DereferenceClassMemberReference(obj,
                                                 classMemberRef,
                                                 0,
                                                 index,
@@ -465,7 +466,7 @@ namespace Safir.Dob.Typesystem
         public static void GetEnum(Object obj,
                             System.Int64 propertyId,
                             out System.Int32 val,
-                            System.Int32 member, 
+                            System.Int32 member,
                             System.Int32 index)
         {
             val = 0;
@@ -476,10 +477,11 @@ namespace Safir.Dob.Typesystem
 
             case Internal.DotsC_PropertyMappingKind.MappedToParameter:
             {
+                Int64 paramClassTypeId;
                 Int32 paramIndex;
                 Int32 valueIndex;
-                Internal.Kernel.DotsC_GetPropertyParameterReference (obj.GetTypeId (), propertyId, member, index, out paramIndex, out valueIndex);
-                Internal.Kernel.DotsC_GetInt32Parameter(obj.GetTypeId (), paramIndex, valueIndex, KeyValMode.ValueMode, out val);
+                Internal.Kernel.DotsC_GetPropertyParameterReference (obj.GetTypeId(), propertyId, member, index, out paramClassTypeId, out paramIndex, out valueIndex);
+                Internal.Kernel.DotsC_GetInt32Parameter(paramClassTypeId, paramIndex, valueIndex, KeyValMode.ValueMode, out val);
             }
             break;
 
@@ -495,7 +497,7 @@ namespace Safir.Dob.Typesystem
 
                 ContainerBase container;
                 bool parentIsChanged = false;
-                DereferenceClassMemberReference(obj, 
+                DereferenceClassMemberReference(obj,
                                                 classMemberRef,
                                                 0,
                                                 index,
@@ -526,7 +528,7 @@ namespace Safir.Dob.Typesystem
         public static void Set(Object obj,
                         System.Int64 propertyId,
                         System.Int32 val,
-                        System.Int32 member, 
+                        System.Int32 member,
                         System.Int32 index)
         {
             switch(GetPropertyMappingKind(obj.GetTypeId(),propertyId,member))
@@ -549,7 +551,7 @@ namespace Safir.Dob.Typesystem
 
                 ContainerBase container;
                 bool parentIsChanged = false;
-                DereferenceClassMemberReference(obj, 
+                DereferenceClassMemberReference(obj,
                                                 classMemberRef,
                                                 0,
                                                 index,
@@ -581,7 +583,7 @@ namespace Safir.Dob.Typesystem
         public static void Get(Object obj,
                  System.Int64 propertyId,
                  out System.Int32 val,
-                 System.Int32 member, 
+                 System.Int32 member,
                  System.Int32 index)
         {
             val = 0;
@@ -592,10 +594,11 @@ namespace Safir.Dob.Typesystem
 
             case Internal.DotsC_PropertyMappingKind.MappedToParameter:
             {
+                Int64 paramClassTypeId;
                 Int32 paramIndex;
                 Int32 valueIndex;
-                Internal.Kernel.DotsC_GetPropertyParameterReference (obj.GetTypeId (), propertyId, member, index, out paramIndex, out valueIndex);
-                Internal.Kernel.DotsC_GetInt32Parameter(obj.GetTypeId (), paramIndex, valueIndex, KeyValMode.ValueMode, out val);
+                Internal.Kernel.DotsC_GetPropertyParameterReference (obj.GetTypeId(), propertyId, member, index, out paramClassTypeId, out paramIndex, out valueIndex);
+                Internal.Kernel.DotsC_GetInt32Parameter(paramClassTypeId, paramIndex, valueIndex, KeyValMode.ValueMode, out val);
             }
             break;
 
@@ -611,7 +614,7 @@ namespace Safir.Dob.Typesystem
 
                 ContainerBase container;
                 bool parentIsChanged = false;
-                DereferenceClassMemberReference(obj, 
+                DereferenceClassMemberReference(obj,
                                                 classMemberRef,
                                                 0,
                                                 index,
@@ -642,7 +645,7 @@ namespace Safir.Dob.Typesystem
         public static void Set(Object obj,
                        System.Int64 propertyId,
                        System.Int64 val,
-                       System.Int32 member, 
+                       System.Int32 member,
                        System.Int32 index)
         {
             switch(GetPropertyMappingKind(obj.GetTypeId(),propertyId,member))
@@ -665,7 +668,7 @@ namespace Safir.Dob.Typesystem
 
                 ContainerBase container;
                 bool parentIsChanged = false;
-                DereferenceClassMemberReference(obj, 
+                DereferenceClassMemberReference(obj,
                                                 classMemberRef,
                                                 0,
                                                 index,
@@ -697,7 +700,7 @@ namespace Safir.Dob.Typesystem
         public static void Get(Object obj,
                  System.Int64 propertyId,
                  out System.Int64 val,
-                 System.Int32 member, 
+                 System.Int32 member,
                  System.Int32 index)
         {
             val = 0;
@@ -708,10 +711,11 @@ namespace Safir.Dob.Typesystem
 
             case Internal.DotsC_PropertyMappingKind.MappedToParameter:
             {
+                Int64 paramClassTypeId;
                 Int32 paramIndex;
                 Int32 valueIndex;
-                Internal.Kernel.DotsC_GetPropertyParameterReference (obj.GetTypeId (), propertyId, member, index, out paramIndex, out valueIndex);
-                Internal.Kernel.DotsC_GetInt64Parameter(obj.GetTypeId (), paramIndex, valueIndex, KeyValMode.ValueMode, out val);
+                Internal.Kernel.DotsC_GetPropertyParameterReference (obj.GetTypeId(), propertyId, member, index, out paramClassTypeId, out paramIndex, out valueIndex);
+                Internal.Kernel.DotsC_GetInt64Parameter(paramClassTypeId, paramIndex, valueIndex, KeyValMode.ValueMode, out val);
             }
             break;
 
@@ -727,7 +731,7 @@ namespace Safir.Dob.Typesystem
 
                 ContainerBase container;
                 bool parentIsChanged = false;
-                DereferenceClassMemberReference(obj, 
+                DereferenceClassMemberReference(obj,
                                                 classMemberRef,
                                                 0,
                                                 index,
@@ -758,7 +762,7 @@ namespace Safir.Dob.Typesystem
         public static void Set(Object obj,
                                System.Int64 propertyId,
                                float val,
-                               System.Int32 member, 
+                               System.Int32 member,
                                System.Int32 index)
         {
             switch(GetPropertyMappingKind(obj.GetTypeId(),propertyId,member))
@@ -781,7 +785,7 @@ namespace Safir.Dob.Typesystem
 
                 ContainerBase container;
                 bool parentIsChanged = false;
-                DereferenceClassMemberReference(obj, 
+                DereferenceClassMemberReference(obj,
                                                 classMemberRef,
                                                 0,
                                                 index,
@@ -813,7 +817,7 @@ namespace Safir.Dob.Typesystem
         public static void Get(Object obj,
                        System.Int64 propertyId,
                        out float val,
-                       System.Int32 member, 
+                       System.Int32 member,
                        System.Int32 index)
         {
             val = 0;
@@ -824,10 +828,11 @@ namespace Safir.Dob.Typesystem
 
             case Internal.DotsC_PropertyMappingKind.MappedToParameter:
             {
+                Int64 paramClassTypeId;
                 Int32 paramIndex;
                 Int32 valueIndex;
-                Internal.Kernel.DotsC_GetPropertyParameterReference (obj.GetTypeId (), propertyId, member, index, out paramIndex, out valueIndex);
-                Internal.Kernel.DotsC_GetFloat32Parameter(obj.GetTypeId (), paramIndex, valueIndex, out val);
+                Internal.Kernel.DotsC_GetPropertyParameterReference (obj.GetTypeId(), propertyId, member, index, out paramClassTypeId, out paramIndex, out valueIndex);
+                Internal.Kernel.DotsC_GetFloat32Parameter(paramClassTypeId, paramIndex, valueIndex, out val);
             }
             break;
 
@@ -843,7 +848,7 @@ namespace Safir.Dob.Typesystem
 
                 ContainerBase container;
                 bool parentIsChanged = false;
-                DereferenceClassMemberReference(obj, 
+                DereferenceClassMemberReference(obj,
                                                 classMemberRef,
                                                 0,
                                                 index,
@@ -874,7 +879,7 @@ namespace Safir.Dob.Typesystem
         public static void Set(Object obj,
                                System.Int64 propertyId,
                                double val,
-                               System.Int32 member, 
+                               System.Int32 member,
                                System.Int32 index)
         {
             switch(GetPropertyMappingKind(obj.GetTypeId(),propertyId,member))
@@ -897,7 +902,7 @@ namespace Safir.Dob.Typesystem
 
                 ContainerBase container;
                 bool parentIsChanged = false;
-                DereferenceClassMemberReference(obj, 
+                DereferenceClassMemberReference(obj,
                                                 classMemberRef,
                                                 0,
                                                 index,
@@ -929,7 +934,7 @@ namespace Safir.Dob.Typesystem
         public static void Get(Object obj,
                                System.Int64 propertyId,
                                out double val,
-                               System.Int32 member, 
+                               System.Int32 member,
                                System.Int32 index)
         {
             val = 0;
@@ -940,10 +945,11 @@ namespace Safir.Dob.Typesystem
 
             case Internal.DotsC_PropertyMappingKind.MappedToParameter:
             {
+                Int64 paramClassTypeId;
                 Int32 paramIndex;
                 Int32 valueIndex;
-                Internal.Kernel.DotsC_GetPropertyParameterReference (obj.GetTypeId (), propertyId, member, index, out paramIndex, out valueIndex);
-                Internal.Kernel.DotsC_GetFloat64Parameter(obj.GetTypeId (), paramIndex, valueIndex, out val);
+                Internal.Kernel.DotsC_GetPropertyParameterReference (obj.GetTypeId(), propertyId, member, index, out paramClassTypeId, out paramIndex, out valueIndex);
+                Internal.Kernel.DotsC_GetFloat64Parameter(paramClassTypeId, paramIndex, valueIndex, out val);
             }
             break;
 
@@ -959,7 +965,7 @@ namespace Safir.Dob.Typesystem
 
                 ContainerBase container;
                 bool parentIsChanged = false;
-                DereferenceClassMemberReference(obj, 
+                DereferenceClassMemberReference(obj,
                                                 classMemberRef,
                                                 0,
                                                 index,
@@ -990,7 +996,7 @@ namespace Safir.Dob.Typesystem
         public static void Set(Object obj,
                                System.Int64 propertyId,
                                InstanceId val,
-                               System.Int32 member, 
+                               System.Int32 member,
                                System.Int32 index)
         {
             switch(GetPropertyMappingKind(obj.GetTypeId(),propertyId,member))
@@ -1013,7 +1019,7 @@ namespace Safir.Dob.Typesystem
 
                 ContainerBase container;
                 bool parentIsChanged = false;
-                DereferenceClassMemberReference(obj, 
+                DereferenceClassMemberReference(obj,
                                                 classMemberRef,
                                                 0,
                                                 index,
@@ -1045,7 +1051,7 @@ namespace Safir.Dob.Typesystem
         public static void Get(Object obj,
                                System.Int64 propertyId,
                                out InstanceId val,
-                               System.Int32 member, 
+                               System.Int32 member,
                                System.Int32 index)
         {
             val = null;
@@ -1059,11 +1065,12 @@ namespace Safir.Dob.Typesystem
                 Int64 hashVal;
                 System.IntPtr strVal;
 
+                Int64 paramClassTypeId;
                 Int32 paramIndex;
                 Int32 valueIndex;
-                Internal.Kernel.DotsC_GetPropertyParameterReference (obj.GetTypeId (), propertyId, member, index, out paramIndex, out valueIndex);
-                Internal.Kernel.DotsC_GetHashedIdParameter(obj.GetTypeId (), paramIndex, valueIndex, KeyValMode.ValueMode, out hashVal, out strVal);
-             
+                Internal.Kernel.DotsC_GetPropertyParameterReference (obj.GetTypeId(), propertyId, member, index, out paramClassTypeId, out paramIndex, out valueIndex);
+                Internal.Kernel.DotsC_GetHashedIdParameter(paramClassTypeId, paramIndex, valueIndex, KeyValMode.ValueMode, out hashVal, out strVal);
+
                 val = new InstanceId
                        (hashVal,
                         strVal != System.IntPtr.Zero ? Internal.InternalOperations.StringOf(strVal) : "");
@@ -1082,7 +1089,7 @@ namespace Safir.Dob.Typesystem
 
                 ContainerBase container;
                 bool parentIsChanged = false;
-                DereferenceClassMemberReference(obj, 
+                DereferenceClassMemberReference(obj,
                                                 classMemberRef,
                                                 0,
                                                 index,
@@ -1113,7 +1120,7 @@ namespace Safir.Dob.Typesystem
         public static void Set(Object obj,
                                System.Int64 propertyId,
                                EntityId val,
-                               System.Int32 member, 
+                               System.Int32 member,
                                System.Int32 index)
         {
             switch(GetPropertyMappingKind(obj.GetTypeId(),propertyId,member))
@@ -1136,7 +1143,7 @@ namespace Safir.Dob.Typesystem
 
                 ContainerBase container;
                 bool parentIsChanged = false;
-                DereferenceClassMemberReference(obj, 
+                DereferenceClassMemberReference(obj,
                                                 classMemberRef,
                                                 0,
                                                 index,
@@ -1168,7 +1175,7 @@ namespace Safir.Dob.Typesystem
         public static void Get(Object obj,
                                System.Int64 propertyId,
                                out EntityId val,
-                               System.Int32 member, 
+                               System.Int32 member,
                                System.Int32 index)
         {
             val = null;
@@ -1181,10 +1188,11 @@ namespace Safir.Dob.Typesystem
             {
                 Internal.DotsC_EntityId eid;
                 System.IntPtr instanceIdStr;
+                Int64 paramClassTypeId;
                 Int32 paramIndex;
                 Int32 valueIndex;
-                Internal.Kernel.DotsC_GetPropertyParameterReference (obj.GetTypeId (), propertyId, member, index, out paramIndex, out valueIndex);
-                Internal.Kernel.DotsC_GetEntityIdParameter(obj.GetTypeId (), paramIndex, valueIndex, KeyValMode.ValueMode, out eid, out instanceIdStr);
+                Internal.Kernel.DotsC_GetPropertyParameterReference (obj.GetTypeId(), propertyId, member, index, out paramClassTypeId, out paramIndex, out valueIndex);
+                Internal.Kernel.DotsC_GetEntityIdParameter(paramClassTypeId, paramIndex, valueIndex, KeyValMode.ValueMode, out eid, out instanceIdStr);
 
                 val = new EntityId
                     (eid.TypeId,
@@ -1206,7 +1214,7 @@ namespace Safir.Dob.Typesystem
 
                 ContainerBase container;
                 bool parentIsChanged = false;
-                DereferenceClassMemberReference(obj, 
+                DereferenceClassMemberReference(obj,
                                                 classMemberRef,
                                                 0,
                                                 index,
@@ -1306,11 +1314,12 @@ namespace Safir.Dob.Typesystem
                     {
                         Int64 hashVal;
                         System.IntPtr strVal;
+                        Int64 paramClassTypeId;
                         Int32 paramIndex;
                         Int32 valueIndex;
-                        Internal.Kernel.DotsC_GetPropertyParameterReference (obj.GetTypeId (), propertyId, member, index, out paramIndex, out valueIndex);
-                        Internal.Kernel.DotsC_GetHashedIdParameter(obj.GetTypeId (), paramIndex, valueIndex, KeyValMode.ValueMode, out hashVal, out strVal);
-                                
+                        Internal.Kernel.DotsC_GetPropertyParameterReference (obj.GetTypeId(), propertyId, member, index, out paramClassTypeId, out paramIndex, out valueIndex);
+                        Internal.Kernel.DotsC_GetHashedIdParameter(paramClassTypeId, paramIndex, valueIndex, KeyValMode.ValueMode, out hashVal, out strVal);
+
                         val = new ChannelId(hashVal,
                                         strVal != System.IntPtr.Zero ? Internal.InternalOperations.StringOf(strVal) : "");
                     }
@@ -1427,11 +1436,12 @@ namespace Safir.Dob.Typesystem
                     {
                         Int64 hashVal;
                         System.IntPtr strVal;
+                        Int64 paramClassTypeId;
                         Int32 paramIndex;
                         Int32 valueIndex;
-                        Internal.Kernel.DotsC_GetPropertyParameterReference (obj.GetTypeId (), propertyId, member, index, out paramIndex, out valueIndex);
-                        Internal.Kernel.DotsC_GetHashedIdParameter(obj.GetTypeId (), paramIndex, valueIndex, KeyValMode.ValueMode, out hashVal, out strVal);
-                        
+                        Internal.Kernel.DotsC_GetPropertyParameterReference (obj.GetTypeId(), propertyId, member, index, out paramClassTypeId, out paramIndex, out valueIndex);
+                        Internal.Kernel.DotsC_GetHashedIdParameter(paramClassTypeId, paramIndex, valueIndex, KeyValMode.ValueMode, out hashVal, out strVal);
+
                         val = new HandlerId
                                (hashVal,
                                 strVal != System.IntPtr.Zero ? Internal.InternalOperations.StringOf(strVal) : "");
@@ -1481,7 +1491,7 @@ namespace Safir.Dob.Typesystem
         public static void Set(Object obj,
                        System.Int64 propertyId,
                        string val,
-                       System.Int32 member, 
+                       System.Int32 member,
                        System.Int32 index)
         {
             switch(GetPropertyMappingKind(obj.GetTypeId(),propertyId,member))
@@ -1504,7 +1514,7 @@ namespace Safir.Dob.Typesystem
 
                 ContainerBase container;
                 bool parentIsChanged = false;
-                DereferenceClassMemberReference(obj, 
+                DereferenceClassMemberReference(obj,
                                                 classMemberRef,
                                                 0,
                                                 index,
@@ -1536,7 +1546,7 @@ namespace Safir.Dob.Typesystem
         public static void Get(Object obj,
                        System.Int64 propertyId,
                        out string val,
-                       System.Int32 member, 
+                       System.Int32 member,
                        System.Int32 index)
         {
             val = null;
@@ -1549,11 +1559,12 @@ namespace Safir.Dob.Typesystem
             {
                 System.IntPtr str;
 
+                Int64 paramClassTypeId;
                 Int32 paramIndex;
                 Int32 valueIndex;
-                Internal.Kernel.DotsC_GetPropertyParameterReference (obj.GetTypeId (), propertyId, member, index, out paramIndex, out valueIndex);
-                Internal.Kernel.DotsC_GetStringParameter(obj.GetTypeId (), paramIndex, valueIndex, KeyValMode.ValueMode, out str);
-               
+                Internal.Kernel.DotsC_GetPropertyParameterReference (obj.GetTypeId(), propertyId, member, index, out paramClassTypeId, out paramIndex, out valueIndex);
+                Internal.Kernel.DotsC_GetStringParameter(paramClassTypeId, paramIndex, valueIndex, KeyValMode.ValueMode, out str);
+
                 val = Internal.InternalOperations.StringOf(str);
             }
             break;
@@ -1570,7 +1581,7 @@ namespace Safir.Dob.Typesystem
 
                 ContainerBase container;
                 bool parentIsChanged = false;
-                DereferenceClassMemberReference(obj, 
+                DereferenceClassMemberReference(obj,
                                                 classMemberRef,
                                                 0,
                                                 index,
@@ -1602,7 +1613,7 @@ namespace Safir.Dob.Typesystem
         public static void Set(Object obj,
                        System.Int64 propertyId,
                        Object val,
-                       System.Int32 member, 
+                       System.Int32 member,
                        System.Int32 index)
         {
             switch(GetPropertyMappingKind(obj.GetTypeId(),propertyId,member))
@@ -1625,7 +1636,7 @@ namespace Safir.Dob.Typesystem
 
                 ContainerBase container;
                 bool parentIsChanged = false;
-                DereferenceClassMemberReference(obj, 
+                DereferenceClassMemberReference(obj,
                                                 classMemberRef,
                                                 0,
                                                 index,
@@ -1658,7 +1669,7 @@ namespace Safir.Dob.Typesystem
         public static void Get(Object obj,
                        System.Int64 propertyId,
                        out Object val, //out
-                       System.Int32 member, 
+                       System.Int32 member,
                        System.Int32 index)
         {
             val = null;
@@ -1671,10 +1682,11 @@ namespace Safir.Dob.Typesystem
             {
                 System.IntPtr blob;
 
+                Int64 paramClassTypeId;
                 Int32 paramIndex;
                 Int32 valueIndex;
-                Internal.Kernel.DotsC_GetPropertyParameterReference (obj.GetTypeId (), propertyId, member, index, out paramIndex, out valueIndex);
-                Internal.Kernel.DotsC_GetObjectParameter(obj.GetTypeId (), paramIndex, valueIndex, out blob);
+                Internal.Kernel.DotsC_GetPropertyParameterReference (obj.GetTypeId(), propertyId, member, index, out paramClassTypeId, out paramIndex, out valueIndex);
+                Internal.Kernel.DotsC_GetObjectParameter(paramClassTypeId, paramIndex, valueIndex, out blob);
 
                 val = ObjectFactory.Instance.CreateObject(blob);
                 val.SetChanged(false);
@@ -1693,7 +1705,7 @@ namespace Safir.Dob.Typesystem
 
                 ContainerBase container;
                 bool parentIsChanged = false;
-                DereferenceClassMemberReference(obj, 
+                DereferenceClassMemberReference(obj,
                                                 classMemberRef,
                                                 0,
                                                 index,
@@ -1799,13 +1811,14 @@ namespace Safir.Dob.Typesystem
                     {
                         System.IntPtr bin;
                         int size;
+                        Int64 paramClassTypeId;
                         Int32 paramIndex;
                         Int32 valueIndex;
-                        Internal.Kernel.DotsC_GetPropertyParameterReference (obj.GetTypeId (), propertyId, member, index, out paramIndex, out valueIndex);
-                        Internal.Kernel.DotsC_GetBinaryParameter(obj.GetTypeId (), paramIndex, valueIndex, out bin, out size);
+                        Internal.Kernel.DotsC_GetPropertyParameterReference (obj.GetTypeId(), propertyId, member, index, out paramClassTypeId, out paramIndex, out valueIndex);
+                        Internal.Kernel.DotsC_GetBinaryParameter(paramClassTypeId, paramIndex, valueIndex, out bin, out size);
 
                         val = new byte[size];
-                        Marshal.Copy(bin, val, 0, size);                        
+                        Marshal.Copy(bin, val, 0, size);
                     }
                     break;
 
@@ -1877,14 +1890,14 @@ namespace Safir.Dob.Typesystem
             throw new IllegalValueException("That obj is not mapped to that property!");
         }
 
-        
+
         //if container == null then a parent was null
         private static void DereferenceClassMemberReference(Object obj,
-                                                            System.Int32 [] classmemberref, 
+                                                            System.Int32 [] classmemberref,
                                                             System.Int32 pos,
                                                             System.Int32 index,
-                                                            out ContainerBase container, 
-                                                            ref bool parentIsChanged)        
+                                                            out ContainerBase container,
+                                                            ref bool parentIsChanged)
         {
             if (classmemberref.Length - pos > 2) //we need to recurse into child objects
             {
@@ -1897,12 +1910,12 @@ namespace Safir.Dob.Typesystem
 
                 if (member.IsNull())
                 {
-                    container = null; 
+                    container = null;
                 }
                 else
                 {
                     DereferenceClassMemberReference(((ObjectContainerBase)member).InternalObj,
-                                                    classmemberref, 
+                                                    classmemberref,
                                                     pos + 2,
                                                     index,
                                                     out container,

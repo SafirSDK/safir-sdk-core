@@ -483,10 +483,11 @@ namespace Typesystem
 
         case MappedToParameter:
             {
+                DotsC_TypeId paramClassTypeId;
                 DotsC_ParameterIndex paramIndex;
                 DotsC_Int32 valueIndex;
-                DotsC_GetPropertyParameterReference(object->GetTypeId(), propertyId, member, index, paramIndex, valueIndex);
-                DotsC_GetBooleanParameter(object->GetTypeId(), paramIndex, valueIndex, value);
+                DotsC_GetPropertyParameterReference(object->GetTypeId(), propertyId, member, index, paramClassTypeId, paramIndex, valueIndex);
+                DotsC_GetBooleanParameter(paramClassTypeId, paramIndex, valueIndex, value);
             }
             break;
 
@@ -604,10 +605,11 @@ namespace Typesystem
 
         case MappedToParameter:
             {
+                DotsC_TypeId paramClassTypeId;
                 DotsC_ParameterIndex paramIndex;
                 DotsC_Int32 valueIndex;
-                DotsC_GetPropertyParameterReference(object->GetTypeId(), propertyId, member, index, paramIndex, valueIndex);
-                DotsC_GetEnumerationParameter(object->GetTypeId(), paramIndex, valueIndex, DotsC_ValueMode, value);
+                DotsC_GetPropertyParameterReference(object->GetTypeId(), propertyId, member, index, paramClassTypeId, paramIndex, valueIndex);
+                DotsC_GetEnumerationParameter(paramClassTypeId, paramIndex, valueIndex, DotsC_ValueMode, value);
             }
             break;
 
@@ -725,10 +727,11 @@ namespace Typesystem
 
         case MappedToParameter:
             {
+                DotsC_TypeId paramClassTypeId;
                 DotsC_ParameterIndex paramIndex;
                 DotsC_Int32 valueIndex;
-                DotsC_GetPropertyParameterReference(object->GetTypeId(), propertyId, member, index, paramIndex, valueIndex);
-                DotsC_GetInt32Parameter(object->GetTypeId(), paramIndex, valueIndex, DotsC_ValueMode, value);
+                DotsC_GetPropertyParameterReference(object->GetTypeId(), propertyId, member, index, paramClassTypeId, paramIndex, valueIndex);
+                DotsC_GetInt32Parameter(paramClassTypeId, paramIndex, valueIndex, DotsC_ValueMode, value);
             }
             break;
 
@@ -846,10 +849,11 @@ namespace Typesystem
 
         case MappedToParameter:
             {
+                DotsC_TypeId paramClassTypeId;
                 DotsC_ParameterIndex paramIndex;
                 DotsC_Int32 valueIndex;
-                DotsC_GetPropertyParameterReference(object->GetTypeId(), propertyId, member, index, paramIndex, valueIndex);
-                DotsC_GetInt64Parameter(object->GetTypeId(), paramIndex, valueIndex, DotsC_ValueMode, value);
+                DotsC_GetPropertyParameterReference(object->GetTypeId(), propertyId, member, index, paramClassTypeId, paramIndex, valueIndex);
+                DotsC_GetInt64Parameter(paramClassTypeId, paramIndex, valueIndex, DotsC_ValueMode, value);
             }
             break;
 
@@ -969,10 +973,11 @@ namespace Typesystem
 
         case MappedToParameter:
             {
+                DotsC_TypeId paramClassTypeId;
                 DotsC_ParameterIndex paramIndex;
                 DotsC_Int32 valueIndex;
-                DotsC_GetPropertyParameterReference(object->GetTypeId(), propertyId, member, index, paramIndex, valueIndex);
-                DotsC_GetFloat32Parameter(object->GetTypeId(), paramIndex, valueIndex, value);
+                DotsC_GetPropertyParameterReference(object->GetTypeId(), propertyId, member, index, paramClassTypeId, paramIndex, valueIndex);
+                DotsC_GetFloat32Parameter(paramClassTypeId, paramIndex, valueIndex, value);
             }
             break;
 
@@ -1090,10 +1095,11 @@ namespace Typesystem
 
         case MappedToParameter:
             {
+                DotsC_TypeId paramClassTypeId;
                 DotsC_ParameterIndex paramIndex;
                 DotsC_Int32 valueIndex;
-                DotsC_GetPropertyParameterReference(object->GetTypeId(), propertyId, member, index, paramIndex, valueIndex);
-                DotsC_GetFloat64Parameter(object->GetTypeId(), paramIndex, valueIndex, value);
+                DotsC_GetPropertyParameterReference(object->GetTypeId(), propertyId, member, index, paramClassTypeId, paramIndex, valueIndex);
+                DotsC_GetFloat64Parameter(paramClassTypeId, paramIndex, valueIndex, value);
             }
             break;
 
@@ -1214,10 +1220,11 @@ namespace Typesystem
             {
                 Int64 hashVal;
                 const char * instanceIdStr = NULL;
+                DotsC_TypeId paramClassTypeId;
                 DotsC_ParameterIndex paramIndex;
                 DotsC_Int32 valueIndex;
-                DotsC_GetPropertyParameterReference(object->GetTypeId(), propertyId, member, index, paramIndex, valueIndex);
-                DotsC_GetHashedIdParameter(object->GetTypeId(), paramIndex, valueIndex, DotsC_ValueMode, hashVal, instanceIdStr);
+                DotsC_GetPropertyParameterReference(object->GetTypeId(), propertyId, member, index, paramClassTypeId, paramIndex, valueIndex);
+                DotsC_GetHashedIdParameter(paramClassTypeId, paramIndex, valueIndex, DotsC_ValueMode, hashVal, instanceIdStr);
 
                 if (instanceIdStr == NULL)
                 {
@@ -1348,10 +1355,11 @@ namespace Typesystem
             {
                 DotsC_EntityId eid;
                 const char * instanceIdStr;
+                DotsC_TypeId paramClassTypeId;
                 DotsC_ParameterIndex paramIndex;
                 DotsC_Int32 valueIndex;
-                DotsC_GetPropertyParameterReference(object->GetTypeId(), propertyId, member, index, paramIndex, valueIndex);
-                DotsC_GetEntityIdParameter(object->GetTypeId(), paramIndex, valueIndex, DotsC_ValueMode, eid, instanceIdStr);
+                DotsC_GetPropertyParameterReference(object->GetTypeId(), propertyId, member, index, paramClassTypeId, paramIndex, valueIndex);
+                DotsC_GetEntityIdParameter(paramClassTypeId, paramIndex, valueIndex, DotsC_ValueMode, eid, instanceIdStr);
 
                 if (instanceIdStr == NULL)
                 {
@@ -1481,10 +1489,11 @@ namespace Typesystem
             {
                 Int64 hashVal;
                 const char * channelIdStr = NULL;
+                DotsC_TypeId paramClassTypeId;
                 DotsC_ParameterIndex paramIndex;
                 DotsC_Int32 valueIndex;
-                DotsC_GetPropertyParameterReference(object->GetTypeId(), propertyId, member, index, paramIndex, valueIndex);
-                DotsC_GetHashedIdParameter(object->GetTypeId(), paramIndex, valueIndex, DotsC_ValueMode, hashVal, channelIdStr);
+                DotsC_GetPropertyParameterReference(object->GetTypeId(), propertyId, member, index, paramClassTypeId, paramIndex, valueIndex);
+                DotsC_GetHashedIdParameter(paramClassTypeId, paramIndex, valueIndex, DotsC_ValueMode, hashVal, channelIdStr);
 
                 if (channelIdStr == NULL)
                 {
@@ -1615,10 +1624,11 @@ namespace Typesystem
             {
                 Int64 hashVal;
                 const char * handlerIdStr = NULL;
+                DotsC_TypeId paramClassTypeId;
                 DotsC_ParameterIndex paramIndex;
                 DotsC_Int32 valueIndex;
-                DotsC_GetPropertyParameterReference(object->GetTypeId(), propertyId, member, index, paramIndex, valueIndex);
-                DotsC_GetHashedIdParameter(object->GetTypeId(), paramIndex, valueIndex, DotsC_ValueMode, hashVal, handlerIdStr);
+                DotsC_GetPropertyParameterReference(object->GetTypeId(), propertyId, member, index, paramClassTypeId, paramIndex, valueIndex);
+                DotsC_GetHashedIdParameter(paramClassTypeId, paramIndex, valueIndex, DotsC_ValueMode, hashVal, handlerIdStr);
 
                 if (handlerIdStr == NULL)
                 {
@@ -1749,10 +1759,11 @@ namespace Typesystem
         case MappedToParameter:
             {
                 const char* str;
+                DotsC_TypeId paramClassTypeId;
                 DotsC_ParameterIndex paramIndex;
                 DotsC_Int32 valueIndex;
-                DotsC_GetPropertyParameterReference(object->GetTypeId(), propertyId, member, index, paramIndex, valueIndex);
-                DotsC_GetStringParameter(object->GetTypeId(), paramIndex, valueIndex, DotsC_ValueMode, str);
+                DotsC_GetPropertyParameterReference(object->GetTypeId(), propertyId, member, index, paramClassTypeId, paramIndex, valueIndex);
+                DotsC_GetStringParameter(paramClassTypeId, paramIndex, valueIndex, DotsC_ValueMode, str);
                 value = Utilities::ToWstring(str);
             }
             break;
@@ -1874,10 +1885,11 @@ namespace Typesystem
         case MappedToParameter:
             {
                 const char* blob;
+                DotsC_TypeId paramClassTypeId;
                 DotsC_ParameterIndex paramIndex;
                 DotsC_Int32 valueIndex;
-                DotsC_GetPropertyParameterReference(object->GetTypeId(), propertyId, member, index, paramIndex, valueIndex);
-                DotsC_GetObjectParameter(object->GetTypeId(), paramIndex, valueIndex, blob);
+                DotsC_GetPropertyParameterReference(object->GetTypeId(), propertyId, member, index, paramClassTypeId, paramIndex, valueIndex);
+                DotsC_GetObjectParameter(paramClassTypeId, paramIndex, valueIndex, blob);
 
                 ptr = ObjectFactory::Instance().CreateObject(blob);
                 ptr->SetChanged(false);
@@ -2007,10 +2019,11 @@ namespace Typesystem
             {
                 char const * bin;
                 DotsC_Int32 size;
+                DotsC_TypeId paramClassTypeId;
                 DotsC_ParameterIndex paramIndex;
                 DotsC_Int32 valueIndex;
-                DotsC_GetPropertyParameterReference(object->GetTypeId(), propertyId, member, index, paramIndex, valueIndex);
-                DotsC_GetBinaryParameter(object->GetTypeId(), paramIndex, valueIndex, bin, size);
+                DotsC_GetPropertyParameterReference(object->GetTypeId(), propertyId, member, index, paramClassTypeId, paramIndex, valueIndex);
+                DotsC_GetBinaryParameter(paramClassTypeId, paramIndex, valueIndex, bin, size);
 
                 binary.clear();
                 binary.reserve(size);
