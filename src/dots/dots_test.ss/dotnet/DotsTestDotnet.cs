@@ -177,6 +177,7 @@ class DotsTestDotnet
     private static DotsTest.MemberArrays MA1 = new DotsTest.MemberArrays();
     private static DotsTest.MemberArrays MA2 = new DotsTest.MemberArrays();
     private static DotsTest.EmptyObject EO = new DotsTest.EmptyObject();
+    private static DotsTest.AnotherEmptyObject AEO = new DotsTest.AnotherEmptyObject();
     private static DotsTest.MemberItemsArray MIA = new DotsTest.MemberItemsArray();
     private static DotsTest.MemberItems MI = new DotsTest.MemberItems();
 
@@ -195,6 +196,8 @@ class DotsTestDotnet
         Console.WriteLine("MemberItemsArray - MemberArraysProperty: " + DotsTest.MemberArraysProperty.HasProperty(MIA).ToString().ToLower());
         Console.WriteLine("EmptyObject - MemberTypesProperty: " + DotsTest.MemberTypesProperty.HasProperty(EO).ToString().ToLower());
         Console.WriteLine("EmptyObject - MemberArraysProperty: " + DotsTest.MemberArraysProperty.HasProperty(EO).ToString().ToLower());
+        Console.WriteLine("AnotherEmptyObject - MemberTypesProperty: " + DotsTest.MemberTypesProperty.HasProperty(AEO).ToString().ToLower());
+        Console.WriteLine("AnotherEmptyObject - MemberArraysProperty: " + DotsTest.MemberArraysProperty.HasProperty(AEO).ToString().ToLower());
     }
     private static void Test_GetName()
     {
@@ -331,6 +334,13 @@ class DotsTestDotnet
         Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullInt32Member(EO);
         In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedInt32Member(EO);
 
+        // AnotherEmptyObject
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullInt32Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedInt32Member(AEO);
+        Console.WriteLine("Property Parameter Val: " + DotsTest.MemberTypesProperty.GetInt32Member(AEO));
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullInt32Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedInt32Member(AEO);
+
         //Array test
         for (int ix = 0; ix < DotsTest.ParameterArrays.Int32ParameterArraySize; ix++)
         {
@@ -372,6 +382,13 @@ class DotsTestDotnet
             Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetInt32Member(EO, ix));
             Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullInt32Member(EO, ix);
             In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedInt32Member(EO, ix);
+
+            // AnotherEmptyObject
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullInt32Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedInt32Member(AEO, ix);
+            Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetInt32Member(AEO, ix));
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullInt32Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedInt32Member(AEO, ix);
         }
 
         // SetNull test
@@ -472,6 +489,13 @@ class DotsTestDotnet
         Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullInt64Member(EO);
         In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedInt64Member(EO);
 
+        // AnotherEmptyObject
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullInt64Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedInt64Member(AEO);
+        Console.WriteLine("Property Parameter Val: " + DotsTest.MemberTypesProperty.GetInt64Member(AEO));
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullInt64Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedInt64Member(AEO);
+
         //Array test
         for (int ix = 0; ix < DotsTest.ParameterArrays.Int64ParameterArraySize; ix++)
         {
@@ -511,6 +535,13 @@ class DotsTestDotnet
             Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetInt64Member(EO, ix));
             Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullInt64Member(EO, ix);
             In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedInt64Member(EO, ix);
+
+            // AnotherEmptyObject
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullInt64Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedInt64Member(AEO, ix);
+            Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetInt64Member(AEO, ix));
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullInt64Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedInt64Member(AEO, ix);
         }
 
         // SetNull test
@@ -611,6 +642,13 @@ class DotsTestDotnet
         Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullFloat32Member(EO);
         In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedFloat32Member(EO);
 
+        // AnotherEmptyObject
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullFloat32Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedFloat32Member(AEO);
+        Console.WriteLine("Property Parameter Val: " + DotsTest.MemberTypesProperty.GetFloat32Member(AEO));
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullFloat32Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedFloat32Member(AEO);
+
         //Array test
         for (int ix = 0; ix < DotsTest.ParameterArrays.Float32ParameterArraySize; ix++)
         {
@@ -650,6 +688,13 @@ class DotsTestDotnet
             Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetFloat32Member(EO, ix));
             Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullFloat32Member(EO, ix);
             In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedFloat32Member(EO, ix);
+
+            // AnotherEmptyObject
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullFloat32Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedFloat32Member(AEO, ix);
+            Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetFloat32Member(AEO, ix));
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullFloat32Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedFloat32Member(AEO, ix);
         }
 
         // SetNull test
@@ -752,6 +797,13 @@ class DotsTestDotnet
         Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullFloat64Member(EO);
         In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedFloat64Member(EO);
 
+        // AnotherEmptyObject
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullFloat64Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedFloat64Member(AEO);
+        Console.WriteLine("Property Parameter Val: " + DotsTest.MemberTypesProperty.GetFloat64Member(AEO));
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullFloat64Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedFloat64Member(AEO);
+
         //Array test
         for (int ix = 0; ix < DotsTest.ParameterArrays.Float64ParameterArraySize; ix++)
         {
@@ -791,6 +843,13 @@ class DotsTestDotnet
             Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetFloat64Member(EO, ix));
             Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullFloat64Member(EO, ix);
             In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedFloat64Member(EO, ix);
+
+            // AnotherEmptyObject
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullFloat64Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedFloat64Member(AEO, ix);
+            Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetFloat64Member(AEO, ix));
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullFloat64Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedFloat64Member(AEO, ix);
         }
 
         // SetNull test
@@ -893,6 +952,13 @@ class DotsTestDotnet
         Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullBooleanMember(EO);
         In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedBooleanMember(EO);
 
+        // AnotherEmptyObject
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullBooleanMember(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedBooleanMember(AEO);
+        Console.WriteLine("Property Parameter Val: " + DotsTest.MemberTypesProperty.GetBooleanMember(AEO).ToString().ToLower());
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullBooleanMember(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedBooleanMember(AEO);
+
         //Array test
         for (int ix = 0; ix < DotsTest.ParameterArrays.BooleanParameterArraySize; ix++)
         {
@@ -932,6 +998,13 @@ class DotsTestDotnet
             Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetBooleanMember(EO, ix).ToString().ToLower());
             Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullBooleanMember(EO, ix);
             In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedBooleanMember(EO, ix);
+
+            // AnotherEmptyObject
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullBooleanMember(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedBooleanMember(AEO, ix);
+            Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetBooleanMember(AEO, ix).ToString().ToLower());
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullBooleanMember(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedBooleanMember(AEO, ix);
         }
 
         // SetNull test
@@ -1040,6 +1113,13 @@ class DotsTestDotnet
         Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullEnumerationMember(EO);
         In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedEnumerationMember(EO);
 
+        // AnotherEmptyObject
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullEnumerationMember(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedEnumerationMember(AEO);
+        Console.WriteLine("Property Parameter Val: " + DotsTest.MemberTypesProperty.GetEnumerationMember(AEO));
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullEnumerationMember(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedEnumerationMember(AEO);
+
         //Array test
         for (int ix = 0; ix < DotsTest.ParameterArrays.EnumerationParameterArraySize; ix++)
         {
@@ -1079,6 +1159,13 @@ class DotsTestDotnet
             Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetEnumerationMember(EO, ix));
             Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullEnumerationMember(EO, ix);
             In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedEnumerationMember(EO, ix);
+
+            // AnotherEmptyObject
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullEnumerationMember(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedEnumerationMember(AEO, ix);
+            Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetEnumerationMember(AEO, ix));
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullEnumerationMember(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedEnumerationMember(AEO, ix);
         }
 
         // SetNull test
@@ -1209,6 +1296,13 @@ class DotsTestDotnet
         Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullStringMember(EO);
         In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedStringMember(EO);
 
+        // AnotherEmptyObject
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullStringMember(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedStringMember(AEO);
+        Console.WriteLine("Property Parameter Val: " + CheckString(DotsTest.MemberTypesProperty.GetStringMember(AEO)));
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullStringMember(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedStringMember(AEO);
+
         //Array test
         for (int ix = 0; ix < DotsTest.ParameterArrays.StringParameterArraySize; ix++)
         {
@@ -1248,6 +1342,13 @@ class DotsTestDotnet
             Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetStringMember(EO, ix));
             Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullStringMember(EO, ix);
             In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedStringMember(EO, ix);
+
+            // AnotherEmptyObject
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullStringMember(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedStringMember(AEO, ix);
+            Console.WriteLine("Parameter Array Val " + ix + ": " + CheckString(DotsTest.MemberArraysProperty.GetStringMember(AEO, ix),ix));
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullStringMember(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedStringMember(AEO, ix);
         }
 
         // SetNull test
@@ -1348,6 +1449,13 @@ class DotsTestDotnet
         Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullEntityIdMember(EO);
         In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedEntityIdMember(EO);
 
+        // AnotherEmptyObject
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullEntityIdMember(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedEntityIdMember(AEO);
+        Console.WriteLine("Property Parameter Val: " + DotsTest.MemberTypesProperty.GetEntityIdMember(AEO));
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullEntityIdMember(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedEntityIdMember(AEO);
+
         //Array test
         for (int ix = 0; ix < DotsTest.ParameterArrays.EntityIdParameterArraySize; ix++)
         {
@@ -1386,6 +1494,13 @@ class DotsTestDotnet
             Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetEntityIdMember(EO, ix));
             Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullEntityIdMember(EO, ix);
             In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedEntityIdMember(EO, ix);
+
+            // AnotherEmptyObject
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullEntityIdMember(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedEntityIdMember(AEO, ix);
+            Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetEntityIdMember(AEO, ix));
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullEntityIdMember(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedEntityIdMember(AEO, ix);
         }
 
         // SetNull test
@@ -1488,6 +1603,14 @@ class DotsTestDotnet
         Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullTypeIdMember(EO);
         In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedTypeIdMember(EO);
 
+        // AnotherEmptyObject
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullTypeIdMember(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedTypeIdMember(AEO);
+        Console.WriteLine("Property Parameter Val: " + Safir.Dob.Typesystem.Operations.GetName(
+                                                                                               DotsTest.MemberTypesProperty.GetTypeIdMember(AEO)));
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullTypeIdMember(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedTypeIdMember(AEO);
+
         //Array test
         for (int ix = 0; ix < DotsTest.ParameterArrays.TypeIdParameterArraySize; ix++)
         {
@@ -1529,6 +1652,14 @@ class DotsTestDotnet
                                                                                                            DotsTest.MemberArraysProperty.GetTypeIdMember(EO, ix)));
             Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullTypeIdMember(EO, ix);
             In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedTypeIdMember(EO, ix);
+
+            // AnotherEmptyObject
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullTypeIdMember(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedTypeIdMember(AEO, ix);
+            Console.WriteLine("Parameter Array Val " + ix + ": " + Safir.Dob.Typesystem.Operations.GetName(
+                                                                                                           DotsTest.MemberArraysProperty.GetTypeIdMember(AEO, ix)));
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullTypeIdMember(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedTypeIdMember(AEO, ix);
         }
 
         // SetNull test
@@ -1630,6 +1761,13 @@ class DotsTestDotnet
         Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullInstanceIdMember(EO);
         In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedInstanceIdMember(EO);
 
+        // AnotherEmptyObject
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullInstanceIdMember(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedInstanceIdMember(AEO);
+        Console.WriteLine("Property Parameter Val: " + DotsTest.MemberTypesProperty.GetInstanceIdMember(AEO));
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullInstanceIdMember(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedInstanceIdMember(AEO);
+
         //Array test
         for (int ix = 0; ix < DotsTest.ParameterArrays.InstanceIdParameterArraySize; ix++)
         {
@@ -1668,6 +1806,13 @@ class DotsTestDotnet
             Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetInstanceIdMember(EO, ix));
             Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullInstanceIdMember(EO, ix);
             In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedInstanceIdMember(EO, ix);
+
+            // AnotherEmptyObject
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullInstanceIdMember(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedInstanceIdMember(AEO, ix);
+            Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetInstanceIdMember(AEO, ix));
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullInstanceIdMember(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedInstanceIdMember(AEO, ix);
         }
 
         // SetNull test
@@ -1769,6 +1914,13 @@ class DotsTestDotnet
         Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullChannelIdMember(EO);
         In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedChannelIdMember(EO);
 
+        // AnotherEmptyObject
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullChannelIdMember(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedChannelIdMember(AEO);
+        Console.WriteLine("Property Parameter Val: " + DotsTest.MemberTypesProperty.GetChannelIdMember(AEO));
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullChannelIdMember(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedChannelIdMember(AEO);
+
         //Array test
         for (int ix = 0; ix < DotsTest.ParameterArrays.ChannelIdParameterArraySize; ix++)
         {
@@ -1807,6 +1959,13 @@ class DotsTestDotnet
             Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetChannelIdMember(EO, ix));
             Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullChannelIdMember(EO, ix);
             In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedChannelIdMember(EO, ix);
+
+            // AnotherEmptyObject
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullChannelIdMember(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedChannelIdMember(AEO, ix);
+            Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetChannelIdMember(AEO, ix));
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullChannelIdMember(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedChannelIdMember(AEO, ix);
         }
 
         // SetNull test
@@ -1909,6 +2068,13 @@ class DotsTestDotnet
         Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullHandlerIdMember(EO);
         In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedHandlerIdMember(EO);
 
+        // AnotherEmptyObject
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullHandlerIdMember(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedHandlerIdMember(AEO);
+        Console.WriteLine("Property Parameter Val: " + DotsTest.MemberTypesProperty.GetHandlerIdMember(AEO));
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullHandlerIdMember(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedHandlerIdMember(AEO);
+
         //Array test
         for (int ix = 0; ix < DotsTest.ParameterArrays.HandlerIdParameterArraySize; ix++)
         {
@@ -1947,6 +2113,13 @@ class DotsTestDotnet
             Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetHandlerIdMember(EO, ix));
             Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullHandlerIdMember(EO, ix);
             In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedHandlerIdMember(EO, ix);
+
+            // AnotherEmptyObject
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullHandlerIdMember(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedHandlerIdMember(AEO, ix);
+            Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetHandlerIdMember(AEO, ix));
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullHandlerIdMember(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedHandlerIdMember(AEO, ix);
         }
 
         // SetNull test
@@ -2049,6 +2222,13 @@ class DotsTestDotnet
         Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullObjectMember(EO);
         In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedObjectMember(EO);
 
+        // AnotherEmptyObject
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullObjectMember(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedObjectMember(AEO);
+        Console.WriteLine("Property Parameter Val: " + Safir.Dob.Typesystem.Serialization.ToXml(DotsTest.MemberTypesProperty.GetObjectMember(AEO)));
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullObjectMember(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedObjectMember(AEO);
+
         //Array test
         for (int ix = 0; ix < DotsTest.ParameterArrays.ObjectParameterArraySize; ix++)
         {
@@ -2089,6 +2269,13 @@ class DotsTestDotnet
             Console.WriteLine("Parameter Array Val " + ix + ": " + Safir.Dob.Typesystem.Serialization.ToXml(DotsTest.MemberArraysProperty.GetObjectMember(EO, ix)));
             Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullObjectMember(EO, ix);
             In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedObjectMember(EO, ix);
+
+            // AnotherEmptyObject
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullObjectMember(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedObjectMember(AEO, ix);
+            Console.WriteLine("Parameter Array Val " + ix + ": " + Safir.Dob.Typesystem.Serialization.ToXml(DotsTest.MemberArraysProperty.GetObjectMember(AEO, ix)));
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullObjectMember(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedObjectMember(AEO, ix);
         }
 
         // SetNull test
@@ -2190,6 +2377,13 @@ class DotsTestDotnet
         Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullBinaryMember(EO);
         In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedBinaryMember(EO);
 
+        // AnotherEmptyObject
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullBinaryMember(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedBinaryMember(AEO);
+        Console.WriteLine("Property Parameter Val: " + Convert.ToBase64String(DotsTest.MemberTypesProperty.GetBinaryMember(AEO)));
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullBinaryMember(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedBinaryMember(AEO);
+
         //Array test
         for (int ix = 0; ix < DotsTest.ParameterArrays.BinaryParameterArraySize; ix++)
         {
@@ -2229,6 +2423,13 @@ class DotsTestDotnet
             Console.WriteLine("Parameter Array Val " + ix + ": " + Convert.ToBase64String(DotsTest.MemberArraysProperty.GetBinaryMember(EO, ix)));
             Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullBinaryMember(EO, ix);
             In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedBinaryMember(EO, ix);
+
+            // AnotherEmptyObject
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullBinaryMember(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedBinaryMember(AEO, ix);
+            Console.WriteLine("Parameter Array Val " + ix + ": " + Convert.ToBase64String(DotsTest.MemberArraysProperty.GetBinaryMember(AEO, ix)));
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullBinaryMember(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedBinaryMember(AEO, ix);
         }
 
         // SetNull test
@@ -2331,6 +2532,13 @@ class DotsTestDotnet
         Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullTestClassMember(EO);
         In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedTestClassMember(EO);
 
+        // AnotherEmptyObject
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullTestClassMember(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedTestClassMember(AEO);
+        Console.WriteLine("Property Parameter Val: " + Safir.Dob.Typesystem.Serialization.ToXml(DotsTest.MemberTypesProperty.GetTestClassMember(AEO)));
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullTestClassMember(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedTestClassMember(AEO);
+
         //Array test
         for (int ix = 0; ix < DotsTest.ParameterArrays.TestClassParameterArraySize; ix++)
         {
@@ -2371,6 +2579,13 @@ class DotsTestDotnet
             Console.WriteLine("Parameter Array Val " + ix + ": " + Safir.Dob.Typesystem.Serialization.ToXml(DotsTest.MemberArraysProperty.GetTestClassMember(EO, ix)));
             Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullTestClassMember(EO, ix);
             In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedTestClassMember(EO, ix);
+
+            // AnothreEmptyObject
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullTestClassMember(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedTestClassMember(AEO, ix);
+            Console.WriteLine("Parameter Array Val " + ix + ": " + Safir.Dob.Typesystem.Serialization.ToXml(DotsTest.MemberArraysProperty.GetTestClassMember(AEO, ix)));
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullTestClassMember(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedTestClassMember(AEO, ix);
         }
 
         // SetNull test
@@ -2484,6 +2699,13 @@ class DotsTestDotnet
         Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullAmpere32Member(EO);
         In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedAmpere32Member(EO);
 
+        // AnotherEmptyObject
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullAmpere32Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedAmpere32Member(AEO);
+        Console.WriteLine("Property Parameter Val: " + DotsTest.MemberTypesProperty.GetAmpere32Member(AEO));
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullAmpere32Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedAmpere32Member(AEO);
+
         //Array test
         for (int ix = 0; ix < DotsTest.ParameterArrays.Ampere32ParameterArraySize; ix++)
         {
@@ -2523,6 +2745,13 @@ class DotsTestDotnet
             Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetAmpere32Member(EO, ix));
             Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullAmpere32Member(EO, ix);
             In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedAmpere32Member(EO, ix);
+
+            // AnotherEmptyObject
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullAmpere32Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedAmpere32Member(AEO, ix);
+            Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetAmpere32Member(AEO, ix));
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullAmpere32Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedAmpere32Member(AEO, ix);
         }
 
         // SetNull test
@@ -2625,6 +2854,13 @@ class DotsTestDotnet
         Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullCubicMeter32Member(EO);
         In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedCubicMeter32Member(EO);
 
+        // AnotherEmptyObject
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullCubicMeter32Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedCubicMeter32Member(AEO);
+        Console.WriteLine("Property Parameter Val: " + DotsTest.MemberTypesProperty.GetCubicMeter32Member(AEO));
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullCubicMeter32Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedCubicMeter32Member(AEO);
+
         //Array test
         for (int ix = 0; ix < DotsTest.ParameterArrays.CubicMeter32ParameterArraySize; ix++)
         {
@@ -2664,6 +2900,13 @@ class DotsTestDotnet
             Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetCubicMeter32Member(EO, ix));
             Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullCubicMeter32Member(EO, ix);
             In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedCubicMeter32Member(EO, ix);
+
+            // AnotherEmptyObject
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullCubicMeter32Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedCubicMeter32Member(AEO, ix);
+            Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetCubicMeter32Member(AEO, ix));
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullCubicMeter32Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedCubicMeter32Member(AEO, ix);
         }
 
         // SetNull test
@@ -2766,6 +3009,13 @@ class DotsTestDotnet
         Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullHertz32Member(EO);
         In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedHertz32Member(EO);
 
+        // AnotherEmptyObject
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullHertz32Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedHertz32Member(AEO);
+        Console.WriteLine("Property Parameter Val: " + DotsTest.MemberTypesProperty.GetHertz32Member(AEO));
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullHertz32Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedHertz32Member(AEO);
+
         //Array test
         for (int ix = 0; ix < DotsTest.ParameterArrays.Hertz32ParameterArraySize; ix++)
         {
@@ -2805,6 +3055,13 @@ class DotsTestDotnet
             Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetHertz32Member(EO, ix));
             Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullHertz32Member(EO, ix);
             In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedHertz32Member(EO, ix);
+
+            // AnotherEmptyObject
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullHertz32Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedHertz32Member(AEO, ix);
+            Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetHertz32Member(AEO, ix));
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullHertz32Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedHertz32Member(AEO, ix);
         }
 
         // SetNull test
@@ -2906,6 +3163,13 @@ class DotsTestDotnet
         Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullJoule32Member(EO);
         In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedJoule32Member(EO);
 
+        // AnotherEmptyObject
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullJoule32Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedJoule32Member(AEO);
+        Console.WriteLine("Property Parameter Val: " + DotsTest.MemberTypesProperty.GetJoule32Member(AEO));
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullJoule32Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedJoule32Member(AEO);
+
         //Array test
         for (int ix = 0; ix < DotsTest.ParameterArrays.Joule32ParameterArraySize; ix++)
         {
@@ -2945,6 +3209,13 @@ class DotsTestDotnet
             Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetJoule32Member(EO, ix));
             Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullJoule32Member(EO, ix);
             In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedJoule32Member(EO, ix);
+
+            // AnotherEmptyObject
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullJoule32Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedJoule32Member(AEO, ix);
+            Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetJoule32Member(AEO, ix));
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullJoule32Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedJoule32Member(AEO, ix);
         }
 
         // SetNull test
@@ -3046,6 +3317,13 @@ class DotsTestDotnet
         Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullKelvin32Member(EO);
         In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedKelvin32Member(EO);
 
+        // AnotherEmptyObject
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullKelvin32Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedKelvin32Member(AEO);
+        Console.WriteLine("Property Parameter Val: " + DotsTest.MemberTypesProperty.GetKelvin32Member(AEO));
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullKelvin32Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedKelvin32Member(AEO);
+
         //Array test
         for (int ix = 0; ix < DotsTest.ParameterArrays.Kelvin32ParameterArraySize; ix++)
         {
@@ -3085,6 +3363,13 @@ class DotsTestDotnet
             Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetKelvin32Member(EO, ix));
             Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullKelvin32Member(EO, ix);
             In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedKelvin32Member(EO, ix);
+
+            // AnotherEmptyObject
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullKelvin32Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedKelvin32Member(AEO, ix);
+            Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetKelvin32Member(AEO, ix));
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullKelvin32Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedKelvin32Member(AEO, ix);
         }
 
         // SetNull test
@@ -3187,6 +3472,13 @@ class DotsTestDotnet
         Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullKilogram32Member(EO);
         In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedKilogram32Member(EO);
 
+        // AnotherEmptyObject
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullKilogram32Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedKilogram32Member(AEO);
+        Console.WriteLine("Property Parameter Val: " + DotsTest.MemberTypesProperty.GetKilogram32Member(AEO));
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullKilogram32Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedKilogram32Member(AEO);
+
         //Array test
         for (int ix = 0; ix < DotsTest.ParameterArrays.Kilogram32ParameterArraySize; ix++)
         {
@@ -3226,6 +3518,13 @@ class DotsTestDotnet
             Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetKilogram32Member(EO, ix));
             Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullKilogram32Member(EO, ix);
             In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedKilogram32Member(EO, ix);
+
+            // AnotherEmptyObject
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullKilogram32Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedKilogram32Member(AEO, ix);
+            Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetKilogram32Member(AEO, ix));
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullKilogram32Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedKilogram32Member(AEO, ix);
         }
 
         // SetNull test
@@ -3328,6 +3627,13 @@ class DotsTestDotnet
         Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullMeter32Member(EO);
         In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedMeter32Member(EO);
 
+        // AnotherEmptyObject
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullMeter32Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedMeter32Member(AEO);
+        Console.WriteLine("Property Parameter Val: " + DotsTest.MemberTypesProperty.GetMeter32Member(AEO));
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullMeter32Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedMeter32Member(AEO);
+
         //Array test
         for (int ix = 0; ix < DotsTest.ParameterArrays.Meter32ParameterArraySize; ix++)
         {
@@ -3367,6 +3673,13 @@ class DotsTestDotnet
             Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetMeter32Member(EO, ix));
             Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullMeter32Member(EO, ix);
             In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedMeter32Member(EO, ix);
+
+            // AnotherEmptyObject
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullMeter32Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedMeter32Member(AEO, ix);
+            Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetMeter32Member(AEO, ix));
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullMeter32Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedMeter32Member(AEO, ix);
         }
 
         // SetNull test
@@ -3469,6 +3782,13 @@ class DotsTestDotnet
         Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullMeterPerSecond32Member(EO);
         In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedMeterPerSecond32Member(EO);
 
+        // AnotherEmptyObject
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullMeterPerSecond32Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedMeterPerSecond32Member(AEO);
+        Console.WriteLine("Property Parameter Val: " + DotsTest.MemberTypesProperty.GetMeterPerSecond32Member(AEO));
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullMeterPerSecond32Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedMeterPerSecond32Member(AEO);
+
         //Array test
         for (int ix = 0; ix < DotsTest.ParameterArrays.MeterPerSecond32ParameterArraySize; ix++)
         {
@@ -3508,6 +3828,13 @@ class DotsTestDotnet
             Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetMeterPerSecond32Member(EO, ix));
             Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullMeterPerSecond32Member(EO, ix);
             In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedMeterPerSecond32Member(EO, ix);
+
+            // AnotherEmptyObject
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullMeterPerSecond32Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedMeterPerSecond32Member(AEO, ix);
+            Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetMeterPerSecond32Member(AEO, ix));
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullMeterPerSecond32Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedMeterPerSecond32Member(AEO, ix);
         }
 
         // SetNull test
@@ -3610,6 +3937,13 @@ class DotsTestDotnet
         Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullMeterPerSecondSquared32Member(EO);
         In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedMeterPerSecondSquared32Member(EO);
 
+        // AnotherEmptyObject
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullMeterPerSecondSquared32Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedMeterPerSecondSquared32Member(AEO);
+        Console.WriteLine("Property Parameter Val: " + DotsTest.MemberTypesProperty.GetMeterPerSecondSquared32Member(AEO));
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullMeterPerSecondSquared32Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedMeterPerSecondSquared32Member(AEO);
+
         //Array test
         for (int ix = 0; ix < DotsTest.ParameterArrays.MeterPerSecondSquared32ParameterArraySize; ix++)
         {
@@ -3649,6 +3983,13 @@ class DotsTestDotnet
             Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetMeterPerSecondSquared32Member(EO, ix));
             Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullMeterPerSecondSquared32Member(EO, ix);
             In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedMeterPerSecondSquared32Member(EO, ix);
+
+            // AnotherEmptyObject
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullMeterPerSecondSquared32Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedMeterPerSecondSquared32Member(AEO, ix);
+            Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetMeterPerSecondSquared32Member(AEO, ix));
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullMeterPerSecondSquared32Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedMeterPerSecondSquared32Member(AEO, ix);
         }
 
         // SetNull test
@@ -3750,6 +4091,13 @@ class DotsTestDotnet
         Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullNewton32Member(EO);
         In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedNewton32Member(EO);
 
+        // AnotherEmptyObject
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullNewton32Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedNewton32Member(AEO);
+        Console.WriteLine("Property Parameter Val: " + DotsTest.MemberTypesProperty.GetNewton32Member(AEO));
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullNewton32Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedNewton32Member(AEO);
+
         //Array test
         for (int ix = 0; ix < DotsTest.ParameterArrays.Newton32ParameterArraySize; ix++)
         {
@@ -3789,6 +4137,13 @@ class DotsTestDotnet
             Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetNewton32Member(EO, ix));
             Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullNewton32Member(EO, ix);
             In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedNewton32Member(EO, ix);
+
+            // AnotherEmptyObject
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullNewton32Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedNewton32Member(AEO, ix);
+            Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetNewton32Member(AEO, ix));
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullNewton32Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedNewton32Member(AEO, ix);
         }
 
         // SetNull test
@@ -3891,6 +4246,13 @@ class DotsTestDotnet
         Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullPascal32Member(EO);
         In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedPascal32Member(EO);
 
+        // AnotherEmptyObject
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullPascal32Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedPascal32Member(AEO);
+        Console.WriteLine("Property Parameter Val: " + DotsTest.MemberTypesProperty.GetPascal32Member(AEO));
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullPascal32Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedPascal32Member(AEO);
+
         //Array test
         for (int ix = 0; ix < DotsTest.ParameterArrays.Pascal32ParameterArraySize; ix++)
         {
@@ -3930,6 +4292,13 @@ class DotsTestDotnet
             Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetPascal32Member(EO, ix));
             Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullPascal32Member(EO, ix);
             In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedPascal32Member(EO, ix);
+
+            // AnotherEmptyObject
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullPascal32Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedPascal32Member(AEO, ix);
+            Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetPascal32Member(AEO, ix));
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullPascal32Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedPascal32Member(AEO, ix);
         }
 
         // SetNull test
@@ -4032,6 +4401,13 @@ class DotsTestDotnet
         Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullRadian32Member(EO);
         In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedRadian32Member(EO);
 
+        // AnotherEmptyObject
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullRadian32Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedRadian32Member(AEO);
+        Console.WriteLine("Property Parameter Val: " + DotsTest.MemberTypesProperty.GetRadian32Member(AEO));
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullRadian32Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedRadian32Member(AEO);
+
         //Array test
         for (int ix = 0; ix < DotsTest.ParameterArrays.Radian32ParameterArraySize; ix++)
         {
@@ -4071,6 +4447,13 @@ class DotsTestDotnet
             Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetRadian32Member(EO, ix));
             Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullRadian32Member(EO, ix);
             In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedRadian32Member(EO, ix);
+
+            // AnotherEmptyObject
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullRadian32Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedRadian32Member(AEO, ix);
+            Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetRadian32Member(AEO, ix));
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullRadian32Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedRadian32Member(AEO, ix);
         }
 
         // SetNull test
@@ -4173,6 +4556,13 @@ class DotsTestDotnet
         Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullRadianPerSecond32Member(EO);
         In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedRadianPerSecond32Member(EO);
 
+        // AnotherEmptyObject
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullRadianPerSecond32Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedRadianPerSecond32Member(AEO);
+        Console.WriteLine("Property Parameter Val: " + DotsTest.MemberTypesProperty.GetRadianPerSecond32Member(AEO));
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullRadianPerSecond32Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedRadianPerSecond32Member(AEO);
+
         //Array test
         for (int ix = 0; ix < DotsTest.ParameterArrays.RadianPerSecond32ParameterArraySize; ix++)
         {
@@ -4212,6 +4602,13 @@ class DotsTestDotnet
             Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetRadianPerSecond32Member(EO, ix));
             Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullRadianPerSecond32Member(EO, ix);
             In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedRadianPerSecond32Member(EO, ix);
+
+            // AnotherEmptyObject
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullRadianPerSecond32Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedRadianPerSecond32Member(AEO, ix);
+            Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetRadianPerSecond32Member(AEO, ix));
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullRadianPerSecond32Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedRadianPerSecond32Member(AEO, ix);
         }
 
         // SetNull test
@@ -4313,6 +4710,13 @@ class DotsTestDotnet
         Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullRadianPerSecondSquared32Member(EO);
         In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedRadianPerSecondSquared32Member(EO);
 
+        // AnotherEmptyObject
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullRadianPerSecondSquared32Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedRadianPerSecondSquared32Member(AEO);
+        Console.WriteLine("Property Parameter Val: " + DotsTest.MemberTypesProperty.GetRadianPerSecondSquared32Member(AEO));
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullRadianPerSecondSquared32Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedRadianPerSecondSquared32Member(AEO);
+
         //Array test
         for (int ix = 0; ix < DotsTest.ParameterArrays.RadianPerSecondSquared32ParameterArraySize; ix++)
         {
@@ -4352,6 +4756,13 @@ class DotsTestDotnet
             Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetRadianPerSecondSquared32Member(EO, ix));
             Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullRadianPerSecondSquared32Member(EO, ix);
             In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedRadianPerSecondSquared32Member(EO, ix);
+
+            // AnotherEmptyObject
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullRadianPerSecondSquared32Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedRadianPerSecondSquared32Member(AEO, ix);
+            Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetRadianPerSecondSquared32Member(AEO, ix));
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullRadianPerSecondSquared32Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedRadianPerSecondSquared32Member(AEO, ix);
         }
 
         // SetNull test
@@ -4454,6 +4865,13 @@ class DotsTestDotnet
         Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullSecond32Member(EO);
         In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedSecond32Member(EO);
 
+        // AnotherEmptyObject
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullSecond32Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedSecond32Member(AEO);
+        Console.WriteLine("Property Parameter Val: " + DotsTest.MemberTypesProperty.GetSecond32Member(AEO));
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullSecond32Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedSecond32Member(AEO);
+
         //Array test
         for (int ix = 0; ix < DotsTest.ParameterArrays.Second32ParameterArraySize; ix++)
         {
@@ -4493,6 +4911,13 @@ class DotsTestDotnet
             Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetSecond32Member(EO, ix));
             Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullSecond32Member(EO, ix);
             In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedSecond32Member(EO, ix);
+
+            // AnotherEmptyObject
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullSecond32Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedSecond32Member(AEO, ix);
+            Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetSecond32Member(AEO, ix));
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullSecond32Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedSecond32Member(AEO, ix);
         }
 
         // SetNull test
@@ -4595,6 +5020,13 @@ class DotsTestDotnet
         Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullSquareMeter32Member(EO);
         In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedSquareMeter32Member(EO);
 
+        // AnotherEmptyObject
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullSquareMeter32Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedSquareMeter32Member(AEO);
+        Console.WriteLine("Property Parameter Val: " + DotsTest.MemberTypesProperty.GetSquareMeter32Member(AEO));
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullSquareMeter32Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedSquareMeter32Member(AEO);
+
         //Array test
         for (int ix = 0; ix < DotsTest.ParameterArrays.SquareMeter32ParameterArraySize; ix++)
         {
@@ -4634,6 +5066,13 @@ class DotsTestDotnet
             Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetSquareMeter32Member(EO, ix));
             Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullSquareMeter32Member(EO, ix);
             In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedSquareMeter32Member(EO, ix);
+
+            // AnotherEmptyObject
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullSquareMeter32Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedSquareMeter32Member(AEO, ix);
+            Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetSquareMeter32Member(AEO, ix));
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullSquareMeter32Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedSquareMeter32Member(AEO, ix);
         }
 
         // SetNull test
@@ -4736,6 +5175,13 @@ class DotsTestDotnet
         Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullSteradian32Member(EO);
         In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedSteradian32Member(EO);
 
+        // AnotherEmptyObject
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullSteradian32Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedSteradian32Member(AEO);
+        Console.WriteLine("Property Parameter Val: " + DotsTest.MemberTypesProperty.GetSteradian32Member(AEO));
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullSteradian32Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedSteradian32Member(AEO);
+
         //Array test
         for (int ix = 0; ix < DotsTest.ParameterArrays.Steradian32ParameterArraySize; ix++)
         {
@@ -4775,6 +5221,13 @@ class DotsTestDotnet
             Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetSteradian32Member(EO, ix));
             Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullSteradian32Member(EO, ix);
             In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedSteradian32Member(EO, ix);
+
+            // AnotherEmptyObject
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullSteradian32Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedSteradian32Member(AEO, ix);
+            Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetSteradian32Member(AEO, ix));
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullSteradian32Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedSteradian32Member(AEO, ix);
         }
 
         // SetNull test
@@ -4877,6 +5330,13 @@ class DotsTestDotnet
         Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullVolt32Member(EO);
         In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedVolt32Member(EO);
 
+        // AnotherEmptyObject
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullVolt32Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedVolt32Member(AEO);
+        Console.WriteLine("Property Parameter Val: " + DotsTest.MemberTypesProperty.GetVolt32Member(AEO));
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullVolt32Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedVolt32Member(AEO);
+
         //Array test
         for (int ix = 0; ix < DotsTest.ParameterArrays.Volt32ParameterArraySize; ix++)
         {
@@ -4916,6 +5376,13 @@ class DotsTestDotnet
             Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetVolt32Member(EO, ix));
             Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullVolt32Member(EO, ix);
             In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedVolt32Member(EO, ix);
+
+            // AnotherEmptyObject
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullVolt32Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedVolt32Member(AEO, ix);
+            Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetVolt32Member(AEO, ix));
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullVolt32Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedVolt32Member(AEO, ix);
         }
 
         // SetNull test
@@ -5018,6 +5485,13 @@ class DotsTestDotnet
         Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullWatt32Member(EO);
         In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedWatt32Member(EO);
 
+        // AnotherEmptyObject
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullWatt32Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedWatt32Member(AEO);
+        Console.WriteLine("Property Parameter Val: " + DotsTest.MemberTypesProperty.GetWatt32Member(AEO));
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullWatt32Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedWatt32Member(AEO);
+
         //Array test
         for (int ix = 0; ix < DotsTest.ParameterArrays.Watt32ParameterArraySize; ix++)
         {
@@ -5057,6 +5531,13 @@ class DotsTestDotnet
             Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetWatt32Member(EO, ix));
             Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullWatt32Member(EO, ix);
             In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedWatt32Member(EO, ix);
+
+            // AnotherEmptyObject
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullWatt32Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedWatt32Member(AEO, ix);
+            Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetWatt32Member(AEO, ix));
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullWatt32Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedWatt32Member(AEO, ix);
         }
 
         // SetNull test
@@ -5159,6 +5640,13 @@ class DotsTestDotnet
         Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullAmpere64Member(EO);
         In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedAmpere64Member(EO);
 
+        // AnotherEmptyObject
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullAmpere64Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedAmpere64Member(AEO);
+        Console.WriteLine("Property Parameter Val: " + DotsTest.MemberTypesProperty.GetAmpere64Member(AEO));
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullAmpere64Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedAmpere64Member(AEO);
+
         //Array test
         for (int ix = 0; ix < DotsTest.ParameterArrays.Ampere64ParameterArraySize; ix++)
         {
@@ -5198,6 +5686,13 @@ class DotsTestDotnet
             Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetAmpere64Member(EO, ix));
             Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullAmpere64Member(EO, ix);
             In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedAmpere64Member(EO, ix);
+
+            // AnotherEmptyObject
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullAmpere64Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedAmpere64Member(AEO, ix);
+            Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetAmpere64Member(AEO, ix));
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullAmpere64Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedAmpere64Member(AEO, ix);
         }
 
         // SetNull test
@@ -5300,6 +5795,13 @@ class DotsTestDotnet
         Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullCubicMeter64Member(EO);
         In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedCubicMeter64Member(EO);
 
+        // AnotherEmptyObject
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullCubicMeter64Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedCubicMeter64Member(AEO);
+        Console.WriteLine("Property Parameter Val: " + DotsTest.MemberTypesProperty.GetCubicMeter64Member(AEO));
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullCubicMeter64Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedCubicMeter64Member(AEO);
+
         //Array test
         for (int ix = 0; ix < DotsTest.ParameterArrays.CubicMeter64ParameterArraySize; ix++)
         {
@@ -5339,6 +5841,13 @@ class DotsTestDotnet
             Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetCubicMeter64Member(EO, ix));
             Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullCubicMeter64Member(EO, ix);
             In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedCubicMeter64Member(EO, ix);
+
+            // AnotherEmptyObject
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullCubicMeter64Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedCubicMeter64Member(AEO, ix);
+            Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetCubicMeter64Member(AEO, ix));
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullCubicMeter64Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedCubicMeter64Member(AEO, ix);
         }
 
         // SetNull test
@@ -5441,6 +5950,13 @@ class DotsTestDotnet
         Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullHertz64Member(EO);
         In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedHertz64Member(EO);
 
+        // AnotherEmptyObject
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullHertz64Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedHertz64Member(AEO);
+        Console.WriteLine("Property Parameter Val: " + DotsTest.MemberTypesProperty.GetHertz64Member(AEO));
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullHertz64Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedHertz64Member(AEO);
+
         //Array test
         for (int ix = 0; ix < DotsTest.ParameterArrays.Hertz64ParameterArraySize; ix++)
         {
@@ -5480,6 +5996,13 @@ class DotsTestDotnet
             Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetHertz64Member(EO, ix));
             Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullHertz64Member(EO, ix);
             In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedHertz64Member(EO, ix);
+
+            // AnotherEmptyObject
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullHertz64Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedHertz64Member(AEO, ix);
+            Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetHertz64Member(AEO, ix));
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullHertz64Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedHertz64Member(AEO, ix);
         }
 
         // SetNull test
@@ -5581,6 +6104,13 @@ class DotsTestDotnet
         Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullJoule64Member(EO);
         In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedJoule64Member(EO);
 
+        // AnotherEmptyObject
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullJoule64Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedJoule64Member(AEO);
+        Console.WriteLine("Property Parameter Val: " + DotsTest.MemberTypesProperty.GetJoule64Member(AEO));
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullJoule64Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedJoule64Member(AEO);
+
         //Array test
         for (int ix = 0; ix < DotsTest.ParameterArrays.Joule64ParameterArraySize; ix++)
         {
@@ -5620,6 +6150,13 @@ class DotsTestDotnet
             Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetJoule64Member(EO, ix));
             Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullJoule64Member(EO, ix);
             In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedJoule64Member(EO, ix);
+
+            // AnotherEmptyObject
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullJoule64Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedJoule64Member(AEO, ix);
+            Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetJoule64Member(AEO, ix));
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullJoule64Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedJoule64Member(AEO, ix);
         }
 
         // SetNull test
@@ -5722,6 +6259,13 @@ class DotsTestDotnet
         Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullKelvin64Member(EO);
         In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedKelvin64Member(EO);
 
+        // AnotherEmptyObject
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullKelvin64Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedKelvin64Member(AEO);
+        Console.WriteLine("Property Parameter Val: " + DotsTest.MemberTypesProperty.GetKelvin64Member(AEO));
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullKelvin64Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedKelvin64Member(AEO);
+
         //Array test
         for (int ix = 0; ix < DotsTest.ParameterArrays.Kelvin64ParameterArraySize; ix++)
         {
@@ -5761,6 +6305,13 @@ class DotsTestDotnet
             Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetKelvin64Member(EO, ix));
             Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullKelvin64Member(EO, ix);
             In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedKelvin64Member(EO, ix);
+
+            // AnotherEmptyObject
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullKelvin64Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedKelvin64Member(AEO, ix);
+            Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetKelvin64Member(AEO, ix));
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullKelvin64Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedKelvin64Member(AEO, ix);
         }
 
         // SetNull test
@@ -5863,6 +6414,13 @@ class DotsTestDotnet
         Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullKilogram64Member(EO);
         In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedKilogram64Member(EO);
 
+        // AnotherEmptyObject
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullKilogram64Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedKilogram64Member(AEO);
+        Console.WriteLine("Property Parameter Val: " + DotsTest.MemberTypesProperty.GetKilogram64Member(AEO));
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullKilogram64Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedKilogram64Member(AEO);
+
         //Array test
         for (int ix = 0; ix < DotsTest.ParameterArrays.Kilogram64ParameterArraySize; ix++)
         {
@@ -5902,6 +6460,13 @@ class DotsTestDotnet
             Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetKilogram64Member(EO, ix));
             Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullKilogram64Member(EO, ix);
             In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedKilogram64Member(EO, ix);
+
+            // AnotherEmptyObject
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullKilogram64Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedKilogram64Member(AEO, ix);
+            Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetKilogram64Member(AEO, ix));
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullKilogram64Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedKilogram64Member(AEO, ix);
         }
 
         // SetNull test
@@ -6004,6 +6569,13 @@ class DotsTestDotnet
         Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullMeter64Member(EO);
         In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedMeter64Member(EO);
 
+        // AnotherEmptyObject
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullMeter64Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedMeter64Member(AEO);
+        Console.WriteLine("Property Parameter Val: " + DotsTest.MemberTypesProperty.GetMeter64Member(AEO));
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullMeter64Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedMeter64Member(AEO);
+
         //Array test
         for (int ix = 0; ix < DotsTest.ParameterArrays.Meter64ParameterArraySize; ix++)
         {
@@ -6043,6 +6615,13 @@ class DotsTestDotnet
             Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetMeter64Member(EO, ix));
             Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullMeter64Member(EO, ix);
             In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedMeter64Member(EO, ix);
+
+            // AnotherEmptyObject
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullMeter64Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedMeter64Member(AEO, ix);
+            Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetMeter64Member(AEO, ix));
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullMeter64Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedMeter64Member(AEO, ix);
         }
 
         // SetNull test
@@ -6145,6 +6724,13 @@ class DotsTestDotnet
         Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullMeterPerSecond64Member(EO);
         In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedMeterPerSecond64Member(EO);
 
+        // AnotherEmptyObject
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullMeterPerSecond64Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedMeterPerSecond64Member(AEO);
+        Console.WriteLine("Property Parameter Val: " + DotsTest.MemberTypesProperty.GetMeterPerSecond64Member(AEO));
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullMeterPerSecond64Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedMeterPerSecond64Member(AEO);
+
         //Array test
         for (int ix = 0; ix < DotsTest.ParameterArrays.MeterPerSecond64ParameterArraySize; ix++)
         {
@@ -6184,6 +6770,13 @@ class DotsTestDotnet
             Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetMeterPerSecond64Member(EO, ix));
             Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullMeterPerSecond64Member(EO, ix);
             In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedMeterPerSecond64Member(EO, ix);
+
+            // AnotherEmptyObject
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullMeterPerSecond64Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedMeterPerSecond64Member(AEO, ix);
+            Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetMeterPerSecond64Member(AEO, ix));
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullMeterPerSecond64Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedMeterPerSecond64Member(AEO, ix);
         }
 
         // SetNull test
@@ -6286,6 +6879,13 @@ class DotsTestDotnet
         Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullMeterPerSecondSquared64Member(EO);
         In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedMeterPerSecondSquared64Member(EO);
 
+        // AnotherEmptyObject
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullMeterPerSecondSquared64Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedMeterPerSecondSquared64Member(AEO);
+        Console.WriteLine("Property Parameter Val: " + DotsTest.MemberTypesProperty.GetMeterPerSecondSquared64Member(AEO));
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullMeterPerSecondSquared64Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedMeterPerSecondSquared64Member(AEO);
+
         //Array test
         for (int ix = 0; ix < DotsTest.ParameterArrays.MeterPerSecondSquared64ParameterArraySize; ix++)
         {
@@ -6325,6 +6925,13 @@ class DotsTestDotnet
             Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetMeterPerSecondSquared64Member(EO, ix));
             Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullMeterPerSecondSquared64Member(EO, ix);
             In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedMeterPerSecondSquared64Member(EO, ix);
+
+            // AnotherEmptyObject
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullMeterPerSecondSquared64Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedMeterPerSecondSquared64Member(AEO, ix);
+            Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetMeterPerSecondSquared64Member(AEO, ix));
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullMeterPerSecondSquared64Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedMeterPerSecondSquared64Member(AEO, ix);
         }
 
         // SetNull test
@@ -6427,6 +7034,13 @@ class DotsTestDotnet
         Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullNewton64Member(EO);
         In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedNewton64Member(EO);
 
+        // AnotherEmptyObject
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullNewton64Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedNewton64Member(AEO);
+        Console.WriteLine("Property Parameter Val: " + DotsTest.MemberTypesProperty.GetNewton64Member(AEO));
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullNewton64Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedNewton64Member(AEO);
+
         //Array test
         for (int ix = 0; ix < DotsTest.ParameterArrays.Newton64ParameterArraySize; ix++)
         {
@@ -6466,6 +7080,13 @@ class DotsTestDotnet
             Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetNewton64Member(EO, ix));
             Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullNewton64Member(EO, ix);
             In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedNewton64Member(EO, ix);
+
+            // AnotherEmptyObject
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullNewton64Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedNewton64Member(AEO, ix);
+            Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetNewton64Member(AEO, ix));
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullNewton64Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedNewton64Member(AEO, ix);
         }
 
         // SetNull test
@@ -6568,6 +7189,13 @@ class DotsTestDotnet
         Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullPascal64Member(EO);
         In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedPascal64Member(EO);
 
+        // AnotherEmptyObject
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullPascal64Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedPascal64Member(AEO);
+        Console.WriteLine("Property Parameter Val: " + DotsTest.MemberTypesProperty.GetPascal64Member(AEO));
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullPascal64Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedPascal64Member(AEO);
+
         //Array test
         for (int ix = 0; ix < DotsTest.ParameterArrays.Pascal64ParameterArraySize; ix++)
         {
@@ -6607,6 +7235,13 @@ class DotsTestDotnet
             Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetPascal64Member(EO, ix));
             Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullPascal64Member(EO, ix);
             In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedPascal64Member(EO, ix);
+
+            // AnotherEmptyObject
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullPascal64Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedPascal64Member(AEO, ix);
+            Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetPascal64Member(AEO, ix));
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullPascal64Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedPascal64Member(AEO, ix);
         }
 
         // SetNull test
@@ -6708,6 +7343,13 @@ class DotsTestDotnet
         Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullRadian64Member(EO);
         In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedRadian64Member(EO);
 
+        // AnotherEmptyObject
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullRadian64Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedRadian64Member(AEO);
+        Console.WriteLine("Property Parameter Val: " + DotsTest.MemberTypesProperty.GetRadian64Member(AEO));
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullRadian64Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedRadian64Member(AEO);
+
         //Array test
         for (int ix = 0; ix < DotsTest.ParameterArrays.Radian64ParameterArraySize; ix++)
         {
@@ -6747,6 +7389,13 @@ class DotsTestDotnet
             Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetRadian64Member(EO, ix));
             Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullRadian64Member(EO, ix);
             In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedRadian64Member(EO, ix);
+
+            // AnotherEmptyObject
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullRadian64Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedRadian64Member(AEO, ix);
+            Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetRadian64Member(AEO, ix));
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullRadian64Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedRadian64Member(AEO, ix);
         }
 
         // SetNull test
@@ -6849,6 +7498,13 @@ class DotsTestDotnet
         Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullRadianPerSecond64Member(EO);
         In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedRadianPerSecond64Member(EO);
 
+        // AnotherEmptyObject
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullRadianPerSecond64Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedRadianPerSecond64Member(AEO);
+        Console.WriteLine("Property Parameter Val: " + DotsTest.MemberTypesProperty.GetRadianPerSecond64Member(AEO));
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullRadianPerSecond64Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedRadianPerSecond64Member(AEO);
+
         //Array test
         for (int ix = 0; ix < DotsTest.ParameterArrays.RadianPerSecond64ParameterArraySize; ix++)
         {
@@ -6888,6 +7544,13 @@ class DotsTestDotnet
             Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetRadianPerSecond64Member(EO, ix));
             Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullRadianPerSecond64Member(EO, ix);
             In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedRadianPerSecond64Member(EO, ix);
+
+            // AnotherEmptyObject
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullRadianPerSecond64Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedRadianPerSecond64Member(AEO, ix);
+            Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetRadianPerSecond64Member(AEO, ix));
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullRadianPerSecond64Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedRadianPerSecond64Member(AEO, ix);
         }
 
         // SetNull test
@@ -6990,6 +7653,13 @@ class DotsTestDotnet
         Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullRadianPerSecondSquared64Member(EO);
         In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedRadianPerSecondSquared64Member(EO);
 
+        // AnotherEmptyObject
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullRadianPerSecondSquared64Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedRadianPerSecondSquared64Member(AEO);
+        Console.WriteLine("Property Parameter Val: " + DotsTest.MemberTypesProperty.GetRadianPerSecondSquared64Member(AEO));
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullRadianPerSecondSquared64Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedRadianPerSecondSquared64Member(AEO);
+
         //Array test
         for (int ix = 0; ix < DotsTest.ParameterArrays.RadianPerSecondSquared64ParameterArraySize; ix++)
         {
@@ -7029,6 +7699,13 @@ class DotsTestDotnet
             Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetRadianPerSecondSquared64Member(EO, ix));
             Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullRadianPerSecondSquared64Member(EO, ix);
             In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedRadianPerSecondSquared64Member(EO, ix);
+
+            // AnotherEmptyObject
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullRadianPerSecondSquared64Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedRadianPerSecondSquared64Member(AEO, ix);
+            Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetRadianPerSecondSquared64Member(AEO, ix));
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullRadianPerSecondSquared64Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedRadianPerSecondSquared64Member(AEO, ix);
         }
 
         // SetNull test
@@ -7131,6 +7808,13 @@ class DotsTestDotnet
         Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullSecond64Member(EO);
         In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedSecond64Member(EO);
 
+        // AnotherEmptyObject
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullSecond64Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedSecond64Member(AEO);
+        Console.WriteLine("Property Parameter Val: " + DotsTest.MemberTypesProperty.GetSecond64Member(AEO));
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullSecond64Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedSecond64Member(AEO);
+
         //Array test
         for (int ix = 0; ix < DotsTest.ParameterArrays.Second64ParameterArraySize; ix++)
         {
@@ -7170,6 +7854,13 @@ class DotsTestDotnet
             Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetSecond64Member(EO, ix));
             Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullSecond64Member(EO, ix);
             In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedSecond64Member(EO, ix);
+
+            // AnotherEmptyObject
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullSecond64Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedSecond64Member(AEO, ix);
+            Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetSecond64Member(AEO, ix));
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullSecond64Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedSecond64Member(AEO, ix);
         }
 
         // SetNull test
@@ -7272,6 +7963,13 @@ class DotsTestDotnet
         Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullSquareMeter64Member(EO);
         In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedSquareMeter64Member(EO);
 
+        // AnotherEmptyObject
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullSquareMeter64Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedSquareMeter64Member(AEO);
+        Console.WriteLine("Property Parameter Val: " + DotsTest.MemberTypesProperty.GetSquareMeter64Member(AEO));
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullSquareMeter64Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedSquareMeter64Member(AEO);
+
         //Array test
         for (int ix = 0; ix < DotsTest.ParameterArrays.SquareMeter64ParameterArraySize; ix++)
         {
@@ -7311,6 +8009,13 @@ class DotsTestDotnet
             Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetSquareMeter64Member(EO, ix));
             Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullSquareMeter64Member(EO, ix);
             In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedSquareMeter64Member(EO, ix);
+
+            // AnotherEmptyObject
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullSquareMeter64Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedSquareMeter64Member(AEO, ix);
+            Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetSquareMeter64Member(AEO, ix));
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullSquareMeter64Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedSquareMeter64Member(AEO, ix);
         }
 
         // SetNull test
@@ -7413,6 +8118,13 @@ class DotsTestDotnet
         Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullSteradian64Member(EO);
         In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedSteradian64Member(EO);
 
+        // AnotherEmptyObject
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullSteradian64Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedSteradian64Member(AEO);
+        Console.WriteLine("Property Parameter Val: " + DotsTest.MemberTypesProperty.GetSteradian64Member(AEO));
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullSteradian64Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedSteradian64Member(AEO);
+
         //Array test
         for (int ix = 0; ix < DotsTest.ParameterArrays.Steradian64ParameterArraySize; ix++)
         {
@@ -7452,6 +8164,13 @@ class DotsTestDotnet
             Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetSteradian64Member(EO, ix));
             Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullSteradian64Member(EO, ix);
             In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedSteradian64Member(EO, ix);
+
+            // AnotherEmptyObject
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullSteradian64Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedSteradian64Member(AEO, ix);
+            Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetSteradian64Member(AEO, ix));
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullSteradian64Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedSteradian64Member(AEO, ix);
         }
 
         // SetNull test
@@ -7553,6 +8272,13 @@ class DotsTestDotnet
         Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullVolt64Member(EO);
         In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedVolt64Member(EO);
 
+        // AnotherEmptyObject
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullVolt64Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedVolt64Member(AEO);
+        Console.WriteLine("Property Parameter Val: " + DotsTest.MemberTypesProperty.GetVolt64Member(AEO));
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullVolt64Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedVolt64Member(AEO);
+
         //Array test
         for (int ix = 0; ix < DotsTest.ParameterArrays.Volt64ParameterArraySize; ix++)
         {
@@ -7592,6 +8318,13 @@ class DotsTestDotnet
             Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetVolt64Member(EO, ix));
             Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullVolt64Member(EO, ix);
             In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedVolt64Member(EO, ix);
+
+            // AnotherEmptyObject
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullVolt64Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedVolt64Member(AEO, ix);
+            Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetVolt64Member(AEO, ix));
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullVolt64Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedVolt64Member(AEO, ix);
         }
 
         // SetNull test
@@ -7694,6 +8427,13 @@ class DotsTestDotnet
         Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullWatt64Member(EO);
         In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedWatt64Member(EO);
 
+        // AnotherEmptyObject
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullWatt64Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedWatt64Member(AEO);
+        Console.WriteLine("Property Parameter Val: " + DotsTest.MemberTypesProperty.GetWatt64Member(AEO));
+        Null_Ok = Null_Ok && !DotsTest.MemberTypesProperty.IsNullWatt64Member(AEO);
+        In_Req_Ok = In_Req_Ok && !DotsTest.MemberTypesProperty.IsChangedWatt64Member(AEO);
+
         //Array test
         for (int ix = 0; ix < DotsTest.ParameterArrays.Watt64ParameterArraySize; ix++)
         {
@@ -7733,6 +8473,13 @@ class DotsTestDotnet
             Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetWatt64Member(EO, ix));
             Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullWatt64Member(EO, ix);
             In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedWatt64Member(EO, ix);
+
+            // AnotherEmptyObject
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullWatt64Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedWatt64Member(AEO, ix);
+            Console.WriteLine("Parameter Array Val " + ix + ": " + DotsTest.MemberArraysProperty.GetWatt64Member(AEO, ix));
+            Null_Ok = Null_Ok && !DotsTest.MemberArraysProperty.IsNullWatt64Member(AEO, ix);
+            In_Req_Ok = In_Req_Ok && !DotsTest.MemberArraysProperty.IsChangedWatt64Member(AEO, ix);
         }
 
         // SetNull test

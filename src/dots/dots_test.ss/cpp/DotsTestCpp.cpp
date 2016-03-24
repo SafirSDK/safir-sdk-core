@@ -36,6 +36,7 @@
 #include <DotsTest/ParameterArrays.h>
 #include <DotsTest/ParameterDictionaries.h>
 #include <DotsTest/EmptyObject.h>
+#include <DotsTest/AnotherEmptyObject.h>
 #include <DotsTest/MemberTypes.h>
 #include <DotsTest/MemberArrays.h>
 #include <DotsTest/MemberSequences.h>
@@ -201,6 +202,7 @@ static DotsTest::MemberSequencesPtr MS1;
 static DotsTest::MemberItemsPtr MI;
 static DotsTest::MemberItemsArrayPtr MIA;
 static DotsTest::EmptyObjectPtr EO;
+static DotsTest::AnotherEmptyObjectPtr AEO;
 
 void Test_Has_Property()
 {
@@ -215,6 +217,8 @@ void Test_Has_Property()
     std::wcout<<"MemberItemsArray - MemberArraysProperty: "<<DotsTest::MemberArraysProperty::HasProperty(MIA)<<std::endl;
     std::wcout<<"EmptyObject - MemberTypesProperty: "<<DotsTest::MemberTypesProperty::HasProperty(EO)<<std::endl;
     std::wcout<<"EmptyObject - MemberArraysProperty: "<<DotsTest::MemberArraysProperty::HasProperty(EO)<<std::endl;
+    std::wcout<<"AnotherEmptyObject - MemberTypesProperty: "<<DotsTest::MemberTypesProperty::HasProperty(AEO)<<std::endl;
+    std::wcout<<"AnotherEmptyObject - MemberArraysProperty: "<<DotsTest::MemberArraysProperty::HasProperty(AEO)<<std::endl;
 }
 
 void Test_GetName()
@@ -314,11 +318,11 @@ void Test_Int32()
     //  1. Member Parameter -> Member Class MT1 -> Member Property MT2 -> Output
     //  2. Member Property MT2 -> Member Item MI -> Output
     //  3. Member Property MT2 -> Member Item Array MIA -> Member Type Property MIA -> Output
-    //  4. Member Property EO -> Output
+    //  4. Member Property EO & AEO -> Output
     //  5. Member Parameter -> Member Array MA1 -> Member Array MA2 -> Member Array Property MA2 -> Output
     //  6. Member Array MA1 -> Member Item MI -> Member Array Property MI -> Output
     //  7. Member Array MA1 -> Member Item Array MIA -> Member Array Property MIA -> Output
-    //  8. Member Array Property EO -> Output
+    //  8. Member Array Property EO & AEO -> Output
     Header(L"Int32");
     std::wcout<<"MemberId: "<<DotsTest::MemberTypes::Int32MemberMemberIndex()<<std::endl;
     std::wcout<<"MemberId (arr): "<<DotsTest::MemberArrays::Int32MemberMemberIndex()<<std::endl;
@@ -399,6 +403,13 @@ void Test_Int32()
     Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullInt32Member(EO);
     In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedInt32Member(EO);
 
+    // AnotherEmptyObject
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullInt32Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedInt32Member(AEO);
+    std::wcout<<"Property Parameter Val: " << DotsTest::MemberTypesProperty::GetInt32Member(AEO)<<std::endl;
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullInt32Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedInt32Member(AEO);
+
     //Array test
     for (int ix = 0; ix < DotsTest::ParameterArrays::Int32ParameterArraySize(); ix++)
     {
@@ -450,6 +461,13 @@ void Test_Int32()
         std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetInt32Member(EO,ix)<<std::endl;
         Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullInt32Member (EO,ix);
         In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedInt32Member (EO,ix);
+
+        // AnotherEmptyObject
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullInt32Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedInt32Member (AEO,ix);
+        std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetInt32Member(AEO,ix)<<std::endl;
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullInt32Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedInt32Member (AEO,ix);
     }
 
     // SetNull test
@@ -476,11 +494,11 @@ void Test_Int64()
     //  1. Member Parameter -> Member Class MT1 -> Member Property MT2 -> Output
     //  2. Member Property MT2 -> Member Item MI -> Output
     //  3. Member Property MT2 -> Member Item Array MIA -> Member Type Property MIA -> Output
-    //  4. Member Property EO -> Output
+    //  4. Member Property EO & AEO -> Output
     //  5. Member Parameter -> Member Array MA1 -> Member Array MA2 -> Member Array Property MA2 -> Output
     //  6. Member Array MA1 -> Member Item MI -> Member Array Property MI -> Output
     //  7. Member Array MA1 -> Member Item Array MIA -> Member Array Property MIA -> Output
-    //  8. Member Array Property EO -> Output
+    //  8. Member Array Property EO & AEO -> Output
     Header(L"Int64");
     std::wcout<<"MemberId: "<<DotsTest::MemberTypes::Int64MemberMemberIndex()<<std::endl;
     std::wcout<<"MemberId (arr): "<<DotsTest::MemberArrays::Int64MemberMemberIndex()<<std::endl;
@@ -559,6 +577,13 @@ void Test_Int64()
     Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullInt64Member(EO);
     In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedInt64Member(EO);
 
+    // AnotherEmptyObject
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullInt64Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedInt64Member(AEO);
+    std::wcout<<"Property Parameter Val: " << DotsTest::MemberTypesProperty::GetInt64Member(AEO)<<std::endl;
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullInt64Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedInt64Member(AEO);
+
     //Array test
     for (int ix = 0; ix < DotsTest::ParameterArrays::Int64ParameterArraySize(); ix++)
     {
@@ -603,6 +628,13 @@ void Test_Int64()
         std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetInt64Member(EO,ix)<<std::endl;
         Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullInt64Member (EO,ix);
         In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedInt64Member (EO,ix);
+
+        // AnotherEmptyObject
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullInt64Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedInt64Member (AEO,ix);
+        std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetInt64Member(AEO,ix)<<std::endl;
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullInt64Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedInt64Member (AEO,ix);
     }
 
     // SetNull test
@@ -629,11 +661,11 @@ void Test_Float32()
     //  1. Member Parameter -> Member Class MT1 -> Member Property MT2 -> Output
     //  2. Member Property MT2 -> Member Item MI -> Output
     //  3. Member Property MT2 -> Member Item Array MIA -> Member Type Property MIA -> Output
-    //  4. Member Property EO -> Output
+    //  4. Member Property EO & AEO -> Output
     //  5. Member Parameter -> Member Array MA1 -> Member Array MA2 -> Member Array Property MA2 -> Output
     //  6. Member Array MA1 -> Member Item MI -> Member Array Property MI -> Output
     //  7. Member Array MA1 -> Member Item Array MIA -> Member Array Property MIA -> Output
-    //  8. Member Array Property EO -> Output
+    //  8. Member Array Property EO & AEO -> Output
     Header(L"Float32");
     std::wcout<<"MemberId: "<<DotsTest::MemberTypes::Float32MemberMemberIndex()<<std::endl;
     std::wcout<<"MemberId (arr): "<<DotsTest::MemberArrays::Float32MemberMemberIndex()<<std::endl;
@@ -713,6 +745,13 @@ void Test_Float32()
     Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullFloat32Member(EO);
     In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedFloat32Member(EO);
 
+    // AnotherEmptyObject
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullFloat32Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedFloat32Member(AEO);
+    std::wcout<<"Property Parameter Val: " << DotsTest::MemberTypesProperty::GetFloat32Member(AEO)<<std::endl;
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullFloat32Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedFloat32Member(AEO);
+
     //Array test
     for (int ix = 0; ix < DotsTest::ParameterArrays::Float32ParameterArraySize(); ix++)
     {
@@ -757,6 +796,13 @@ void Test_Float32()
         std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetFloat32Member(EO,ix)<<std::endl;
         Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullFloat32Member (EO,ix);
         In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedFloat32Member (EO,ix);
+
+        // AnotherEmptyObject
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullFloat32Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedFloat32Member (AEO,ix);
+        std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetFloat32Member(AEO,ix)<<std::endl;
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullFloat32Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedFloat32Member (AEO,ix);
     }
 
     // SetNull test
@@ -785,11 +831,11 @@ void Test_Float64()
     //  1. Member Parameter -> Member Class MT1 -> Member Property MT2 -> Output
     //  2. Member Property MT2 -> Member Item MI -> Output
     //  3. Member Property MT2 -> Member Item Array MIA -> Member Type Property MIA -> Output
-    //  4. Member Property EO -> Output
+    //  4. Member Property EO & AEO -> Output
     //  5. Member Parameter -> Member Array MA1 -> Member Array MA2 -> Member Array Property MA2 -> Output
     //  6. Member Array MA1 -> Member Item MI -> Member Array Property MI -> Output
     //  7. Member Array MA1 -> Member Item Array MIA -> Member Array Property MIA -> Output
-    //  8. Member Array Property EO -> Output
+    //  8. Member Array Property EO & AEO -> Output
     Header(L"Float64");
     std::wcout<<"MemberId: "<<DotsTest::MemberTypes::Float64MemberMemberIndex()<<std::endl;
     std::wcout<<"MemberId (arr): "<<DotsTest::MemberArrays::Float64MemberMemberIndex()<<std::endl;
@@ -870,6 +916,13 @@ std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Parameters::GetName(DotsTest::
     Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullFloat64Member(EO);
     In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedFloat64Member(EO);
 
+    // AnotherEmptyObject
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullFloat64Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedFloat64Member(AEO);
+    std::wcout<<"Property Parameter Val: " << DotsTest::MemberTypesProperty::GetFloat64Member(AEO)<<std::endl;
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullFloat64Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedFloat64Member(AEO);
+
     //Array test
     for (int ix = 0; ix < DotsTest::ParameterArrays::Float64ParameterArraySize(); ix++)
     {
@@ -914,6 +967,13 @@ std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Parameters::GetName(DotsTest::
         std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetFloat64Member(EO,ix)<<std::endl;
         Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullFloat64Member (EO,ix);
         In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedFloat64Member (EO,ix);
+
+        // AnotherEmptyObject
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullFloat64Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedFloat64Member (AEO,ix);
+        std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetFloat64Member(AEO,ix)<<std::endl;
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullFloat64Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedFloat64Member (AEO,ix);
     }
 
     // SetNull test
@@ -940,11 +1000,11 @@ void Test_Boolean()
     //  1. Member Parameter -> Member Class MT1 -> Member Property MT2 -> Output
     //  2. Member Property MT2 -> Member Item MI -> Output
     //  3. Member Property MT2 -> Member Item Array MIA -> Member Type Property MIA -> Output
-    //  4. Member Property EO -> Output
+    //  4. Member Property EO & AEO -> Output
     //  5. Member Parameter -> Member Array MA1 -> Member Array MA2 -> Member Array Property MA2 -> Output
     //  6. Member Array MA1 -> Member Item MI -> Member Array Property MI -> Output
     //  7. Member Array MA1 -> Member Item Array MIA -> Member Array Property MIA -> Output
-    //  8. Member Array Property EO -> Output
+    //  8. Member Array Property EO & AEO -> Output
     Header(L"Boolean");
     std::wcout<<"MemberId: "<<DotsTest::MemberTypes::BooleanMemberMemberIndex()<<std::endl;
     std::wcout<<"MemberId (arr): "<<DotsTest::MemberArrays::BooleanMemberMemberIndex()<<std::endl;
@@ -1025,6 +1085,13 @@ void Test_Boolean()
     Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullBooleanMember(EO);
     In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedBooleanMember(EO);
 
+    // AnotherEmptyObject
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullBooleanMember(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedBooleanMember(AEO);
+    std::wcout<<"Property Parameter Val: "  << DotsTest::MemberTypesProperty::GetBooleanMember(AEO) <<std::endl;
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullBooleanMember(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedBooleanMember(AEO);
+
     //Array test
     for (int ix = 0; ix < DotsTest::ParameterArrays::BooleanParameterArraySize(); ix++)
     {
@@ -1071,6 +1138,14 @@ void Test_Boolean()
             DotsTest::MemberArraysProperty::GetBooleanMember(EO,ix) <<std::endl;
         Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullBooleanMember (EO,ix);
         In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedBooleanMember (EO,ix);
+
+        // AnotherEmptyObject
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullBooleanMember (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedBooleanMember (AEO,ix);
+        std::wcout<<"Parameter Array Val "<<ix <<": "  <<
+            DotsTest::MemberArraysProperty::GetBooleanMember(AEO,ix) <<std::endl;
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullBooleanMember (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedBooleanMember (AEO,ix);
     }
 
     // SetNull test
@@ -1098,11 +1173,11 @@ void Test_Enumeration()
     //  1. Member Parameter -> Member Class MT1 -> Member Property MT2 -> Output
     //  2. Member Property MT2 -> Member Item MI -> Output
     //  3. Member Property MT2 -> Member Item Array MIA -> Member Type Property MIA -> Output
-    //  4. Member Property EO -> Output
+    //  4. Member Property EO & AEO -> Output
     //  5. Member Parameter -> Member Array MA1 -> Member Array MA2 -> Member Array Property MA2 -> Output
     //  6. Member Array MA1 -> Member Item MI -> Member Array Property MI -> Output
     //  7. Member Array MA1 -> Member Item Array MIA -> Member Array Property MIA -> Output
-    //  8. Member Array Property EO -> Output
+    //  8. Member Array Property EO & AEO -> Output
     Header(L"Enumeration");
     std::wcout<<"MemberId: "<<DotsTest::MemberTypes::EnumerationMemberMemberIndex()<<std::endl;
     std::wcout<<"MemberId (arr): "<<DotsTest::MemberArrays::EnumerationMemberMemberIndex()<<std::endl;
@@ -1200,6 +1275,15 @@ void Test_Enumeration()
     Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullEnumerationMember(EO);
     In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedEnumerationMember(EO);
 
+    // AnotherEmptyObject
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullEnumerationMember(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedEnumerationMember(AEO);
+    std::wcout<<"Property Parameter Val: " << Safir::Dob::Typesystem::Operations::GetEnumerationValueName
+                                                 (DotsTest::TestEnum::EnumerationTypeId,
+                                                  DotsTest::MemberTypesProperty::GetEnumerationMember(AEO))<<std::endl;
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullEnumerationMember(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedEnumerationMember(AEO);
+
     //Array test
     for (int ix = 0; ix < DotsTest::ParameterArrays::EnumerationParameterArraySize(); ix++)
     {
@@ -1251,6 +1335,15 @@ void Test_Enumeration()
                                                                       DotsTest::MemberArraysProperty::GetEnumerationMember(EO,ix))<<std::endl;
         Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullEnumerationMember (EO,ix);
         In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedEnumerationMember (EO,ix);
+
+        // AnotherEmptyObject
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullEnumerationMember (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedEnumerationMember (AEO,ix);
+        std::wcout<<"Parameter Array Val "<<ix <<": " << Safir::Dob::Typesystem::Operations::GetEnumerationValueName
+                                                                     (DotsTest::TestEnum::EnumerationTypeId,
+                                                                      DotsTest::MemberArraysProperty::GetEnumerationMember(AEO,ix))<<std::endl;
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullEnumerationMember (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedEnumerationMember (AEO,ix);
     }
 
     // SetNull test
@@ -1308,11 +1401,11 @@ void Test_String()
     //  1. Member Parameter -> Member Class MT1 -> Member Property MT2 -> Output
     //  2. Member Property MT2 -> Member Item MI -> Output
     //  3. Member Property MT2 -> Member Item Array MIA -> Member Type Property MIA -> Output
-    //  4. Member Property EO -> Output
+    //  4. Member Property EO & AEO -> Output
     //  5. Member Parameter -> Member Array MA1 -> Member Array MA2 -> Member Array Property MA2 -> Output
     //  6. Member Array MA1 -> Member Item MI -> Member Array Property MI -> Output
     //  7. Member Array MA1 -> Member Item Array MIA -> Member Array Property MIA -> Output
-    //  8. Member Array Property EO -> Output
+    //  8. Member Array Property EO & AEO -> Output
     Header(L"String");
     std::wcout<<"MemberId: "<<DotsTest::MemberTypes::StringMemberMemberIndex()<<std::endl;
     std::wcout<<"MemberId (arr): "<<DotsTest::MemberArrays::StringMemberMemberIndex()<<std::endl;
@@ -1397,6 +1490,13 @@ void Test_String()
     Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullStringMember(EO);
     In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedStringMember(EO);
 
+    // AnotherEmptyObject
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullStringMember(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedStringMember(AEO);
+    std::wcout<<"Property Parameter Val: " << CheckStr(DotsTest::MemberTypesProperty::GetStringMember(AEO))<<std::endl;
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullStringMember(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedStringMember(AEO);
+
     //Array test
     for (int ix = 0; ix < DotsTest::ParameterArrays::StringParameterArraySize(); ix++)
     {
@@ -1452,6 +1552,16 @@ void Test_String()
         std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetStringMember(EO,ix)<<std::endl;
         Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullStringMember (EO,ix);
         In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedStringMember (EO,ix);
+
+        // AnotherEmptyObject
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullStringMember (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedStringMember (AEO,ix);
+        val = ix == 0?
+            CheckStr(DotsTest::MemberArraysProperty::GetStringMember(AEO,ix)) :
+            CheckStrReverse(DotsTest::MemberArraysProperty::GetStringMember(AEO,ix));
+        std::wcout<<"Parameter Array Val "<<ix <<": " << val<<std::endl;
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullStringMember (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedStringMember (AEO,ix);
     }
 
     // SetNull test
@@ -1479,11 +1589,11 @@ void Test_EntityId()
     //  1. Member Parameter -> Member Class MT1 -> Member Property MT2 -> Output
     //  2. Member Property MT2 -> Member Item MI -> Output
     //  3. Member Property MT2 -> Member Item Array MIA -> Member Type Property MIA -> Output
-    //  4. Member Property EO -> Output
+    //  4. Member Property EO & AEO -> Output
     //  5. Member Parameter -> Member Array MA1 -> Member Array MA2 -> Member Array Property MA2 -> Output
     //  6. Member Array MA1 -> Member Item MI -> Member Array Property MI -> Output
     //  7. Member Array MA1 -> Member Item Array MIA -> Member Array Property MIA -> Output
-    //  8. Member Array Property EO -> Output
+    //  8. Member Array Property EO & AEO -> Output
     Header(L"EntityId");
     std::wcout<<"MemberId: "<<DotsTest::MemberTypes::EntityIdMemberMemberIndex()<<std::endl;
     std::wcout<<"MemberId (arr): "<<DotsTest::MemberArrays::EntityIdMemberMemberIndex()<<std::endl;
@@ -1565,6 +1675,13 @@ void Test_EntityId()
     Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullEntityIdMember(EO);
     In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedEntityIdMember(EO);
 
+    // AnotherEmptyObject
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullEntityIdMember(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedEntityIdMember(AEO);
+    std::wcout<<"Property Parameter Val: "<<DotsTest::MemberTypesProperty::GetEntityIdMember(AEO)<<std::endl;
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullEntityIdMember(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedEntityIdMember(AEO);
+
     //Array test
     for (int ix = 0; ix < DotsTest::ParameterArrays::EntityIdParameterArraySize(); ix++)
     {
@@ -1606,9 +1723,16 @@ void Test_EntityId()
         // EmptyObject
         Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullEntityIdMember (EO,ix);
         In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedEntityIdMember (EO,ix);
-        std::wcout<<"Parameter Array Val "<<ix<<": "<<DotsTest::MemberArraysProperty::GetEntityIdMember (EO, ix)<<std::endl;
+        std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetEntityIdMember(EO,ix)<<std::endl;
         Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullEntityIdMember (EO,ix);
         In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedEntityIdMember (EO,ix);
+
+        // AnotherEmptyObject
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullEntityIdMember (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedEntityIdMember (AEO,ix);
+        std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetEntityIdMember(AEO,ix)<<std::endl;
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullEntityIdMember (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedEntityIdMember (AEO,ix);
     }
 
     // SetNull test
@@ -1635,11 +1759,11 @@ void Test_TypeId()
     //  1. Member Parameter -> Member Class MT1 -> Member Property MT2 -> Output
     //  2. Member Property MT2 -> Member Item MI -> Output
     //  3. Member Property MT2 -> Member Item Array MIA -> Member Type Property MIA -> Output
-    //  4. Member Property EO -> Output
+    //  4. Member Property EO & AEO -> Output
     //  5. Member Parameter -> Member Array MA1 -> Member Array MA2 -> Member Array Property MA2 -> Output
     //  6. Member Array MA1 -> Member Item MI -> Member Array Property MI -> Output
     //  7. Member Array MA1 -> Member Item Array MIA -> Member Array Property MIA -> Output
-    //  8. Member Array Property EO -> Output
+    //  8. Member Array Property EO & AEO -> Output
     Header(L"TypeId");
     std::wcout<<"MemberId: "<<DotsTest::MemberTypes::TypeIdMemberMemberIndex()<<std::endl;
     std::wcout<<"MemberId (arr): "<<DotsTest::MemberArrays::TypeIdMemberMemberIndex()<<std::endl;
@@ -1724,6 +1848,14 @@ void Test_TypeId()
     Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullTypeIdMember(EO);
     In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedTypeIdMember(EO);
 
+    // AnotherEmptyObject
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullTypeIdMember(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedTypeIdMember(AEO);
+    std::wcout<<"Property Parameter Val: " << Safir::Dob::Typesystem::Operations::GetName(
+                                                                                             DotsTest::MemberTypesProperty::GetTypeIdMember(AEO))<<std::endl;
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullTypeIdMember(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedTypeIdMember(AEO);
+
     //Array test
     for (int ix = 0; ix < DotsTest::ParameterArrays::TypeIdParameterArraySize(); ix++)
     {
@@ -1772,6 +1904,14 @@ void Test_TypeId()
                                                                                                               DotsTest::MemberArraysProperty::GetTypeIdMember (EO, ix))<<std::endl;
         Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullTypeIdMember (EO,ix);
         In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedTypeIdMember (EO,ix);
+
+        // AnotherEmptyObject
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullTypeIdMember (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedTypeIdMember (AEO,ix);
+        std::wcout<<"Parameter Array Val "<<ix<<": "<<Safir::Dob::Typesystem::Operations::GetName(
+                                                                                                              DotsTest::MemberArraysProperty::GetTypeIdMember (AEO, ix))<<std::endl;
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullTypeIdMember (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedTypeIdMember (AEO,ix);
     }
 
     // SetNull test
@@ -1800,11 +1940,11 @@ void Test_InstanceId()
     //  1. Member Parameter -> Member Class MT1 -> Member Property MT2 -> Output
     //  2. Member Property MT2 -> Member Item MI -> Output
     //  3. Member Property MT2 -> Member Item Array MIA -> Member Type Property MIA -> Output
-    //  4. Member Property EO -> Output
+    //  4. Member Property EO & AEO -> Output
     //  5. Member Parameter -> Member Array MA1 -> Member Array MA2 -> Member Array Property MA2 -> Output
     //  6. Member Array MA1 -> Member Item MI -> Member Array Property MI -> Output
     //  7. Member Array MA1 -> Member Item Array MIA -> Member Array Property MIA -> Output
-    //  8. Member Array Property EO -> Output
+    //  8. Member Array Property EO & AEO -> Output
     Header(L"InstanceId");
     std::wcout<<"MemberId: "<<DotsTest::MemberTypes::InstanceIdMemberMemberIndex()<<std::endl;
     std::wcout<<"MemberId (arr): "<<DotsTest::MemberArrays::InstanceIdMemberMemberIndex()<<std::endl;
@@ -1886,6 +2026,13 @@ void Test_InstanceId()
     Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullInstanceIdMember(EO);
     In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedInstanceIdMember(EO);
 
+    // AnotherEmptyObject
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullInstanceIdMember(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedInstanceIdMember(AEO);
+    std::wcout<<"Property Parameter Val: "<<DotsTest::MemberTypesProperty::GetInstanceIdMember(AEO)<<std::endl;
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullInstanceIdMember(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedInstanceIdMember(AEO);
+
     //Array test
     for (int ix = 0; ix < DotsTest::ParameterArrays::InstanceIdParameterArraySize(); ix++)
     {
@@ -1927,9 +2074,16 @@ void Test_InstanceId()
         // EmptyObject
         Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullInstanceIdMember (EO,ix);
         In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedInstanceIdMember (EO,ix);
-        std::wcout<<"Parameter Array Val "<<ix<<": "<<DotsTest::MemberArraysProperty::GetInstanceIdMember (EO, ix)<<std::endl;
+        std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetInstanceIdMember(EO,ix)<<std::endl;
         Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullInstanceIdMember (EO,ix);
         In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedInstanceIdMember (EO,ix);
+
+        // AnotherEmptyObject
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullInstanceIdMember (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedInstanceIdMember (AEO,ix);
+        std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetInstanceIdMember(AEO,ix)<<std::endl;
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullInstanceIdMember (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedInstanceIdMember (AEO,ix);
     }
 
     // SetNull test
@@ -1954,11 +2108,11 @@ void Test_ChannelId()
     //  1. Member Parameter -> Member Class MT1 -> Member Property MT2 -> Output
     //  2. Member Property MT2 -> Member Item MI -> Output
     //  3. Member Property MT2 -> Member Item Array MIA -> Member Type Property MIA -> Output
-    //  4. Member Property EO -> Output
+    //  4. Member Property EO & AEO -> Output
     //  5. Member Parameter -> Member Array MA1 -> Member Array MA2 -> Member Array Property MA2 -> Output
     //  6. Member Array MA1 -> Member Item MI -> Member Array Property MI -> Output
     //  7. Member Array MA1 -> Member Item Array MIA -> Member Array Property MIA -> Output
-    //  8. Member Array Property EO -> Output
+    //  8. Member Array Property EO & AEO -> Output
     Header(L"ChannelId");
     std::wcout<<"MemberId: "<<DotsTest::MemberTypes::ChannelIdMemberMemberIndex()<<std::endl;
     std::wcout<<"MemberId (arr): "<<DotsTest::MemberArrays::ChannelIdMemberMemberIndex()<<std::endl;
@@ -2040,6 +2194,13 @@ void Test_ChannelId()
     Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullChannelIdMember(EO);
     In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedChannelIdMember(EO);
 
+    // AnotherEmptyObject
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullChannelIdMember(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedChannelIdMember(AEO);
+    std::wcout<<"Property Parameter Val: "<<DotsTest::MemberTypesProperty::GetChannelIdMember(AEO)<<std::endl;
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullChannelIdMember(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedChannelIdMember(AEO);
+
     //Array test
     for (int ix = 0; ix < DotsTest::ParameterArrays::ChannelIdParameterArraySize(); ix++)
     {
@@ -2081,9 +2242,16 @@ void Test_ChannelId()
         // EmptyObject
         Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullChannelIdMember (EO,ix);
         In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedChannelIdMember (EO,ix);
-        std::wcout<<"Parameter Array Val "<<ix<<": "<<DotsTest::MemberArraysProperty::GetChannelIdMember (EO, ix)<<std::endl;
+        std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetChannelIdMember(EO,ix)<<std::endl;
         Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullChannelIdMember (EO,ix);
         In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedChannelIdMember (EO,ix);
+
+        // AnotherEmptyObject
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullChannelIdMember (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedChannelIdMember (AEO,ix);
+        std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetChannelIdMember(AEO,ix)<<std::endl;
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullChannelIdMember (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedChannelIdMember (AEO,ix);
     }
 
     // SetNull test
@@ -2110,11 +2278,11 @@ void Test_HandlerId()
     //  1. Member Parameter -> Member Class MT1 -> Member Property MT2 -> Output
     //  2. Member Property MT2 -> Member Item MI -> Output
     //  3. Member Property MT2 -> Member Item Array MIA -> Member Type Property MIA -> Output
-    //  4. Member Property EO -> Output
+    //  4. Member Property EO & AEO -> Output
     //  5. Member Parameter -> Member Array MA1 -> Member Array MA2 -> Member Array Property MA2 -> Output
     //  6. Member Array MA1 -> Member Item MI -> Member Array Property MI -> Output
     //  7. Member Array MA1 -> Member Item Array MIA -> Member Array Property MIA -> Output
-    //  8. Member Array Property EO -> Output
+    //  8. Member Array Property EO & AEO -> Output
     Header(L"HandlerId");
     std::wcout<<"MemberId: "<<DotsTest::MemberTypes::HandlerIdMemberMemberIndex()<<std::endl;
     std::wcout<<"MemberId (arr): "<<DotsTest::MemberArrays::HandlerIdMemberMemberIndex()<<std::endl;
@@ -2196,6 +2364,13 @@ void Test_HandlerId()
     Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullHandlerIdMember(EO);
     In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedHandlerIdMember(EO);
 
+    // AnotherEmptyObject
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullHandlerIdMember(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedHandlerIdMember(AEO);
+    std::wcout<<"Property Parameter Val: "<<DotsTest::MemberTypesProperty::GetHandlerIdMember(AEO)<<std::endl;
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullHandlerIdMember(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedHandlerIdMember(AEO);
+
     //Array test
     for (int ix = 0; ix < DotsTest::ParameterArrays::HandlerIdParameterArraySize(); ix++)
     {
@@ -2237,9 +2412,16 @@ void Test_HandlerId()
         // EmptyObject
         Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullHandlerIdMember (EO,ix);
         In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedHandlerIdMember (EO,ix);
-        std::wcout<<"Parameter Array Val "<<ix<<": "<<DotsTest::MemberArraysProperty::GetHandlerIdMember (EO, ix)<<std::endl;
+        std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetHandlerIdMember(EO,ix)<<std::endl;
         Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullHandlerIdMember (EO,ix);
         In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedHandlerIdMember (EO,ix);
+
+        // AnotherEmptyObject
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullHandlerIdMember (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedHandlerIdMember (AEO,ix);
+        std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetHandlerIdMember(AEO,ix)<<std::endl;
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullHandlerIdMember (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedHandlerIdMember (AEO,ix);
     }
 
     // SetNull test
@@ -2265,11 +2447,11 @@ void Test_Object()
     //  1. Member Parameter -> Member Class MT1 -> Member Property MT2 -> Output
     //  2. Member Property MT2 -> Member Item MI -> Output
     //  3. Member Property MT2 -> Member Item Array MIA -> Member Type Property MIA -> Output
-    //  4. Member Property EO -> Output
+    //  4. Member Property EO & AEO -> Output
     //  5. Member Parameter -> Member Array MA1 -> Member Array MA2 -> Member Array Property MA2 -> Output
     //  6. Member Array MA1 -> Member Item MI -> Member Array Property MI -> Output
     //  7. Member Array MA1 -> Member Item Array MIA -> Member Array Property MIA -> Output
-    //  8. Member Array Property EO -> Output
+    //  8. Member Array Property EO & AEO -> Output
     Header(L"Object");
     std::wcout<<"MemberId: "<<DotsTest::MemberTypes::ObjectMemberMemberIndex()<<std::endl;
     std::wcout<<"MemberId (arr): "<<DotsTest::MemberArrays::ObjectMemberMemberIndex()<<std::endl;
@@ -2357,6 +2539,14 @@ void Test_Object()
     Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullObjectMember(EO);
     In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedObjectMember(EO);
 
+    // AnotherEmptyObject
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullObjectMember(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedObjectMember(AEO);
+    std::wcout<<"Property Parameter Val: "<<Safir::Dob::Typesystem::Serialization::ToXml
+                                               (DotsTest::MemberTypesProperty::GetObjectMember(AEO))<<std::endl;
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullObjectMember(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedObjectMember(AEO);
+
     //Array test
     for (int ix = 0; ix < DotsTest::ParameterArrays::ObjectParameterArraySize(); ix++)
     {
@@ -2406,6 +2596,14 @@ void Test_Object()
                                                                                                                DotsTest::MemberArraysProperty::GetObjectMember (EO, ix))<<std::endl;
         Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullObjectMember (EO,ix);
         In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedObjectMember (EO,ix);
+
+        // AnotherEmptyObject
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullObjectMember (EO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedObjectMember (EO,ix);
+        std::wcout<<"Parameter Array Val "<<ix<<": "<<Safir::Dob::Typesystem::Serialization::ToXml(
+                                                                                                               DotsTest::MemberArraysProperty::GetObjectMember (EO, ix))<<std::endl;
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullObjectMember (EO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedObjectMember (EO,ix);
     }
 
     // SetNull test
@@ -2432,11 +2630,11 @@ void Test_Binary()
     //  1. Member Parameter -> Member Class MT1 -> Member Property MT2 -> Output
     //  2. Member Property MT2 -> Member Item MI -> Output
     //  3. Member Property MT2 -> Member Item Array MIA -> Member Type Property MIA -> Output
-    //  4. Member Property EO -> Output
+    //  4. Member Property EO & AEO -> Output
     //  5. Member Parameter -> Member Array MA1 -> Member Array MA2 -> Member Array Property MA2 -> Output
     //  6. Member Array MA1 -> Member Item MI -> Member Array Property MI -> Output
     //  7. Member Array MA1 -> Member Item Array MIA -> Member Array Property MIA -> Output
-    //  8. Member Array Property EO -> Output
+    //  8. Member Array Property EO & AEO -> Output
     Header(L"Binary");
     std::wcout<<"MemberId: "<<DotsTest::MemberTypes::BinaryMemberMemberIndex()<<std::endl;
     std::wcout<<"MemberId (arr): "<<DotsTest::MemberArrays::BinaryMemberMemberIndex()<<std::endl;
@@ -2518,6 +2716,13 @@ void Test_Binary()
     Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullBinaryMember(EO);
     In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedBinaryMember(EO);
 
+    // AnotherEmptyObject
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullBinaryMember(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedBinaryMember(AEO);
+    std::wcout<<"Property Parameter Val: " << Safir::Dob::Typesystem::Utilities::BinaryToBase64(DotsTest::MemberTypesProperty::GetBinaryMember(AEO)).c_str()<<std::endl;
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullBinaryMember(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedBinaryMember(AEO);
+
     //Array test
     for (int ix = 0; ix < DotsTest::ParameterArrays::BinaryParameterArraySize(); ix++)
     {
@@ -2560,6 +2765,13 @@ void Test_Binary()
         std::wcout<<"Parameter Array Val "<<ix <<": " << Safir::Dob::Typesystem::Utilities::BinaryToBase64(DotsTest::MemberArraysProperty::GetBinaryMember(EO,ix)).c_str()<<std::endl;
         Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullBinaryMember (EO,ix);
         In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedBinaryMember (EO,ix);
+
+        // AnotherEmptyObject
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullBinaryMember (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedBinaryMember (AEO,ix);
+        std::wcout<<"Parameter Array Val "<<ix <<": " << Safir::Dob::Typesystem::Utilities::BinaryToBase64(DotsTest::MemberArraysProperty::GetBinaryMember(AEO,ix)).c_str()<<std::endl;
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullBinaryMember (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedBinaryMember (AEO,ix);
     }
 
     // SetNull test
@@ -2584,11 +2796,11 @@ void Test_TestClass()
     //  1. Member Parameter -> Member Class MT1 -> Member Property MT2 -> Output
     //  2. Member Property MT2 -> Member Item MI -> Output
     //  3. Member Property MT2 -> Member Item Array MIA -> Member Type Property MIA -> Output
-    //  4. Member Property EO -> Output
+    //  4. Member Property EO & AEO -> Output
     //  5. Member Parameter -> Member Array MA1 -> Member Array MA2 -> Member Array Property MA2 -> Output
     //  6. Member Array MA1 -> Member Item MI -> Member Array Property MI -> Output
     //  7. Member Array MA1 -> Member Item Array MIA -> Member Array Property MIA -> Output
-    //  8. Member Array Property EO -> Output
+    //  8. Member Array Property EO & AEO -> Output
     Header(L"TestClass");
     std::wcout<<"MemberId: "<<DotsTest::MemberTypes::TestClassMemberMemberIndex()<<std::endl;
     std::wcout<<"MemberId (arr): "<<DotsTest::MemberArrays::TestClassMemberMemberIndex()<<std::endl;
@@ -2671,6 +2883,13 @@ void Test_TestClass()
     Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullTestClassMember(EO);
     In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedTestClassMember(EO);
 
+    // AnotherEmptyObject
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullTestClassMember(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedTestClassMember(AEO);
+    std::wcout<<"Property Parameter Val: "<<Safir::Dob::Typesystem::Serialization::ToXml(DotsTest::MemberTypesProperty::GetTestClassMember(AEO))<<std::endl;
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullTestClassMember(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedTestClassMember(AEO);
+
     //Array test
     for (int ix = 0; ix < DotsTest::ParameterArrays::TestClassParameterArraySize(); ix++)
     {
@@ -2719,6 +2938,14 @@ void Test_TestClass()
                                                                                                      DotsTest::MemberArraysProperty::GetTestClassMember (EO, ix))<<std::endl;
         Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullTestClassMember (EO,ix);
         In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedTestClassMember (EO,ix);
+
+        // AnotherEmptyObject
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullTestClassMember (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedTestClassMember (AEO,ix);
+        std::wcout<<"Parameter Array Val "<<ix<<": "<<Safir::Dob::Typesystem::Serialization::ToXml(
+                                                                                                     DotsTest::MemberArraysProperty::GetTestClassMember (AEO, ix))<<std::endl;
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullTestClassMember (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedTestClassMember (AEO,ix);
     }
 
     // SetNull test
@@ -2755,11 +2982,11 @@ void Test_Ampere32()
     //  1. Member Parameter -> Member Class MT1 -> Member Property MT2 -> Output
     //  2. Member Property MT2 -> Member Item MI -> Output
     //  3. Member Property MT2 -> Member Item Array MIA -> Member Type Property MIA -> Output
-    //  4. Member Property EO -> Output
+    //  4. Member Property EO & AEO -> Output
     //  5. Member Parameter -> Member Array MA1 -> Member Array MA2 -> Member Array Property MA2 -> Output
     //  6. Member Array MA1 -> Member Item MI -> Member Array Property MI -> Output
     //  7. Member Array MA1 -> Member Item Array MIA -> Member Array Property MIA -> Output
-    //  8. Member Array Property EO -> Output
+    //  8. Member Array Property EO & AEO -> Output
     Header(L"Ampere32");
     std::wcout<<"MemberId: "<<DotsTest::MemberTypes::Ampere32MemberMemberIndex()<<std::endl;
     std::wcout<<"MemberId (arr): "<<DotsTest::MemberArrays::Ampere32MemberMemberIndex()<<std::endl;
@@ -2840,6 +3067,13 @@ void Test_Ampere32()
     Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullAmpere32Member(EO);
     In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedAmpere32Member(EO);
 
+    // AnotherEmptyObject
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullAmpere32Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedAmpere32Member(AEO);
+    std::wcout<<"Property Parameter Val: " << DotsTest::MemberTypesProperty::GetAmpere32Member(AEO)<<std::endl;
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullAmpere32Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedAmpere32Member(AEO);
+
     //Array test
     for (int ix = 0; ix < DotsTest::ParameterArrays::Ampere32ParameterArraySize(); ix++)
     {
@@ -2884,6 +3118,13 @@ void Test_Ampere32()
         std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetAmpere32Member(EO,ix)<<std::endl;
         Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullAmpere32Member (EO,ix);
         In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedAmpere32Member (EO,ix);
+
+        // AnotherEmptyObject
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullAmpere32Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedAmpere32Member (AEO,ix);
+        std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetAmpere32Member(AEO,ix)<<std::endl;
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullAmpere32Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedAmpere32Member (AEO,ix);
     }
 
     // SetNull test
@@ -2910,11 +3151,11 @@ void Test_CubicMeter32()
     //  1. Member Parameter -> Member Class MT1 -> Member Property MT2 -> Output
     //  2. Member Property MT2 -> Member Item MI -> Output
     //  3. Member Property MT2 -> Member Item Array MIA -> Member Type Property MIA -> Output
-    //  4. Member Property EO -> Output
+    //  4. Member Property EO & AEO -> Output
     //  5. Member Parameter -> Member Array MA1 -> Member Array MA2 -> Member Array Property MA2 -> Output
     //  6. Member Array MA1 -> Member Item MI -> Member Array Property MI -> Output
     //  7. Member Array MA1 -> Member Item Array MIA -> Member Array Property MIA -> Output
-    //  8. Member Array Property EO -> Output
+    //  8. Member Array Property EO & AEO -> Output
     Header(L"CubicMeter32");
     std::wcout<<"MemberId: "<<DotsTest::MemberTypes::CubicMeter32MemberMemberIndex()<<std::endl;
     std::wcout<<"MemberId (arr): "<<DotsTest::MemberArrays::CubicMeter32MemberMemberIndex()<<std::endl;
@@ -2995,6 +3236,13 @@ void Test_CubicMeter32()
     Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullCubicMeter32Member(EO);
     In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedCubicMeter32Member(EO);
 
+    // AnotherEmptyObject
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullCubicMeter32Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedCubicMeter32Member(AEO);
+    std::wcout<<"Property Parameter Val: " << DotsTest::MemberTypesProperty::GetCubicMeter32Member(AEO)<<std::endl;
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullCubicMeter32Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedCubicMeter32Member(AEO);
+
     //Array test
     for (int ix = 0; ix < DotsTest::ParameterArrays::CubicMeter32ParameterArraySize(); ix++)
     {
@@ -3039,6 +3287,13 @@ void Test_CubicMeter32()
         std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetCubicMeter32Member(EO,ix)<<std::endl;
         Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullCubicMeter32Member (EO,ix);
         In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedCubicMeter32Member (EO,ix);
+
+        // AnotherEmptyObject
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullCubicMeter32Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedCubicMeter32Member (AEO,ix);
+        std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetCubicMeter32Member(AEO,ix)<<std::endl;
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullCubicMeter32Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedCubicMeter32Member (AEO,ix);
     }
 
     // SetNull test
@@ -3066,11 +3321,11 @@ void Test_Hertz32()
     //  1. Member Parameter -> Member Class MT1 -> Member Property MT2 -> Output
     //  2. Member Property MT2 -> Member Item MI -> Output
     //  3. Member Property MT2 -> Member Item Array MIA -> Member Type Property MIA -> Output
-    //  4. Member Property EO -> Output
+    //  4. Member Property EO & AEO -> Output
     //  5. Member Parameter -> Member Array MA1 -> Member Array MA2 -> Member Array Property MA2 -> Output
     //  6. Member Array MA1 -> Member Item MI -> Member Array Property MI -> Output
     //  7. Member Array MA1 -> Member Item Array MIA -> Member Array Property MIA -> Output
-    //  8. Member Array Property EO -> Output
+    //  8. Member Array Property EO & AEO -> Output
     Header(L"Hertz32");
     std::wcout<<"MemberId: "<<DotsTest::MemberTypes::Hertz32MemberMemberIndex()<<std::endl;
     std::wcout<<"MemberId (arr): "<<DotsTest::MemberArrays::Hertz32MemberMemberIndex()<<std::endl;
@@ -3151,6 +3406,13 @@ void Test_Hertz32()
     Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullHertz32Member(EO);
     In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedHertz32Member(EO);
 
+    // AnotherEmptyObject
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullHertz32Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedHertz32Member(AEO);
+    std::wcout<<"Property Parameter Val: " << DotsTest::MemberTypesProperty::GetHertz32Member(AEO)<<std::endl;
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullHertz32Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedHertz32Member(AEO);
+
     //Array test
     for (int ix = 0; ix < DotsTest::ParameterArrays::Hertz32ParameterArraySize(); ix++)
     {
@@ -3195,6 +3457,13 @@ void Test_Hertz32()
         std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetHertz32Member(EO,ix)<<std::endl;
         Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullHertz32Member (EO,ix);
         In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedHertz32Member (EO,ix);
+
+        // AnotherEmptyObject
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullHertz32Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedHertz32Member (AEO,ix);
+        std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetHertz32Member(AEO,ix)<<std::endl;
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullHertz32Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedHertz32Member (AEO,ix);
     }
 
     // SetNull test
@@ -3221,11 +3490,11 @@ void Test_Joule32()
     //  1. Member Parameter -> Member Class MT1 -> Member Property MT2 -> Output
     //  2. Member Property MT2 -> Member Item MI -> Output
     //  3. Member Property MT2 -> Member Item Array MIA -> Member Type Property MIA -> Output
-    //  4. Member Property EO -> Output
+    //  4. Member Property EO & AEO -> Output
     //  5. Member Parameter -> Member Array MA1 -> Member Array MA2 -> Member Array Property MA2 -> Output
     //  6. Member Array MA1 -> Member Item MI -> Member Array Property MI -> Output
     //  7. Member Array MA1 -> Member Item Array MIA -> Member Array Property MIA -> Output
-    //  8. Member Array Property EO -> Output
+    //  8. Member Array Property EO & AEO -> Output
     Header(L"Joule32");
     std::wcout<<"MemberId: "<<DotsTest::MemberTypes::Joule32MemberMemberIndex()<<std::endl;
     std::wcout<<"MemberId (arr): "<<DotsTest::MemberArrays::Joule32MemberMemberIndex()<<std::endl;
@@ -3306,6 +3575,13 @@ void Test_Joule32()
     Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullJoule32Member(EO);
     In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedJoule32Member(EO);
 
+    // AnotherEmptyObject
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullJoule32Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedJoule32Member(AEO);
+    std::wcout<<"Property Parameter Val: " << DotsTest::MemberTypesProperty::GetJoule32Member(AEO)<<std::endl;
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullJoule32Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedJoule32Member(AEO);
+
     //Array test
     for (int ix = 0; ix < DotsTest::ParameterArrays::Joule32ParameterArraySize(); ix++)
     {
@@ -3350,6 +3626,13 @@ void Test_Joule32()
         std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetJoule32Member(EO,ix)<<std::endl;
         Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullJoule32Member (EO,ix);
         In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedJoule32Member (EO,ix);
+
+        // AnotherEmptyObject
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullJoule32Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedJoule32Member (AEO,ix);
+        std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetJoule32Member(AEO,ix)<<std::endl;
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullJoule32Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedJoule32Member (AEO,ix);
     }
 
     // SetNull test
@@ -3376,11 +3659,11 @@ void Test_Kelvin32()
     //  1. Member Parameter -> Member Class MT1 -> Member Property MT2 -> Output
     //  2. Member Property MT2 -> Member Item MI -> Output
     //  3. Member Property MT2 -> Member Item Array MIA -> Member Type Property MIA -> Output
-    //  4. Member Property EO -> Output
+    //  4. Member Property EO & AEO -> Output
     //  5. Member Parameter -> Member Array MA1 -> Member Array MA2 -> Member Array Property MA2 -> Output
     //  6. Member Array MA1 -> Member Item MI -> Member Array Property MI -> Output
     //  7. Member Array MA1 -> Member Item Array MIA -> Member Array Property MIA -> Output
-    //  8. Member Array Property EO -> Output
+    //  8. Member Array Property EO & AEO -> Output
     Header(L"Kelvin32");
     std::wcout<<"MemberId: "<<DotsTest::MemberTypes::Kelvin32MemberMemberIndex()<<std::endl;
     std::wcout<<"MemberId (arr): "<<DotsTest::MemberArrays::Kelvin32MemberMemberIndex()<<std::endl;
@@ -3461,6 +3744,13 @@ void Test_Kelvin32()
     Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullKelvin32Member(EO);
     In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedKelvin32Member(EO);
 
+    // AnotherEmptyObject
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullKelvin32Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedKelvin32Member(AEO);
+    std::wcout<<"Property Parameter Val: " << DotsTest::MemberTypesProperty::GetKelvin32Member(AEO)<<std::endl;
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullKelvin32Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedKelvin32Member(AEO);
+
     //Array test
     for (int ix = 0; ix < DotsTest::ParameterArrays::Kelvin32ParameterArraySize(); ix++)
     {
@@ -3505,6 +3795,13 @@ void Test_Kelvin32()
         std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetKelvin32Member(EO,ix)<<std::endl;
         Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullKelvin32Member (EO,ix);
         In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedKelvin32Member (EO,ix);
+
+        // AnotherEmptyObject
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullKelvin32Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedKelvin32Member (AEO,ix);
+        std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetKelvin32Member(AEO,ix)<<std::endl;
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullKelvin32Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedKelvin32Member (AEO,ix);
     }
 
     // SetNull test
@@ -3531,11 +3828,11 @@ void Test_Kilogram32()
     //  1. Member Parameter -> Member Class MT1 -> Member Property MT2 -> Output
     //  2. Member Property MT2 -> Member Item MI -> Output
     //  3. Member Property MT2 -> Member Item Array MIA -> Member Type Property MIA -> Output
-    //  4. Member Property EO -> Output
+    //  4. Member Property EO & AEO -> Output
     //  5. Member Parameter -> Member Array MA1 -> Member Array MA2 -> Member Array Property MA2 -> Output
     //  6. Member Array MA1 -> Member Item MI -> Member Array Property MI -> Output
     //  7. Member Array MA1 -> Member Item Array MIA -> Member Array Property MIA -> Output
-    //  8. Member Array Property EO -> Output
+    //  8. Member Array Property EO & AEO -> Output
     Header(L"Kilogram32");
     std::wcout<<"MemberId: "<<DotsTest::MemberTypes::Kilogram32MemberMemberIndex()<<std::endl;
     std::wcout<<"MemberId (arr): "<<DotsTest::MemberArrays::Kilogram32MemberMemberIndex()<<std::endl;
@@ -3616,6 +3913,13 @@ void Test_Kilogram32()
     Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullKilogram32Member(EO);
     In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedKilogram32Member(EO);
 
+    // AnotherEmptyObject
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullKilogram32Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedKilogram32Member(AEO);
+    std::wcout<<"Property Parameter Val: " << DotsTest::MemberTypesProperty::GetKilogram32Member(AEO)<<std::endl;
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullKilogram32Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedKilogram32Member(AEO);
+
     //Array test
     for (int ix = 0; ix < DotsTest::ParameterArrays::Kilogram32ParameterArraySize(); ix++)
     {
@@ -3660,6 +3964,13 @@ void Test_Kilogram32()
         std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetKilogram32Member(EO,ix)<<std::endl;
         Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullKilogram32Member (EO,ix);
         In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedKilogram32Member (EO,ix);
+
+        // AnotherEmptyObject
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullKilogram32Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedKilogram32Member (AEO,ix);
+        std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetKilogram32Member(AEO,ix)<<std::endl;
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullKilogram32Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedKilogram32Member (AEO,ix);
     }
 
     // SetNull test
@@ -3686,11 +3997,11 @@ void Test_Meter32()
     //  1. Member Parameter -> Member Class MT1 -> Member Property MT2 -> Output
     //  2. Member Property MT2 -> Member Item MI -> Output
     //  3. Member Property MT2 -> Member Item Array MIA -> Member Type Property MIA -> Output
-    //  4. Member Property EO -> Output
+    //  4. Member Property EO & AEO -> Output
     //  5. Member Parameter -> Member Array MA1 -> Member Array MA2 -> Member Array Property MA2 -> Output
     //  6. Member Array MA1 -> Member Item MI -> Member Array Property MI -> Output
     //  7. Member Array MA1 -> Member Item Array MIA -> Member Array Property MIA -> Output
-    //  8. Member Array Property EO -> Output
+    //  8. Member Array Property EO & AEO -> Output
     Header(L"Meter32");
     std::wcout<<"MemberId: "<<DotsTest::MemberTypes::Meter32MemberMemberIndex()<<std::endl;
     std::wcout<<"MemberId (arr): "<<DotsTest::MemberArrays::Meter32MemberMemberIndex()<<std::endl;
@@ -3771,6 +4082,13 @@ void Test_Meter32()
     Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullMeter32Member(EO);
     In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedMeter32Member(EO);
 
+    // AnotherEmptyObject
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullMeter32Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedMeter32Member(AEO);
+    std::wcout<<"Property Parameter Val: " << DotsTest::MemberTypesProperty::GetMeter32Member(AEO)<<std::endl;
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullMeter32Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedMeter32Member(AEO);
+
     //Array test
     for (int ix = 0; ix < DotsTest::ParameterArrays::Meter32ParameterArraySize(); ix++)
     {
@@ -3815,6 +4133,13 @@ void Test_Meter32()
         std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetMeter32Member(EO,ix)<<std::endl;
         Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullMeter32Member (EO,ix);
         In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedMeter32Member (EO,ix);
+
+        // AnotherEmptyObject
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullMeter32Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedMeter32Member (AEO,ix);
+        std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetMeter32Member(AEO,ix)<<std::endl;
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullMeter32Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedMeter32Member (AEO,ix);
     }
 
     // SetNull test
@@ -3841,11 +4166,11 @@ void Test_MeterPerSecond32()
     //  1. Member Parameter -> Member Class MT1 -> Member Property MT2 -> Output
     //  2. Member Property MT2 -> Member Item MI -> Output
     //  3. Member Property MT2 -> Member Item Array MIA -> Member Type Property MIA -> Output
-    //  4. Member Property EO -> Output
+    //  4. Member Property EO & AEO -> Output
     //  5. Member Parameter -> Member Array MA1 -> Member Array MA2 -> Member Array Property MA2 -> Output
     //  6. Member Array MA1 -> Member Item MI -> Member Array Property MI -> Output
     //  7. Member Array MA1 -> Member Item Array MIA -> Member Array Property MIA -> Output
-    //  8. Member Array Property EO -> Output
+    //  8. Member Array Property EO & AEO -> Output
     Header(L"MeterPerSecond32");
     std::wcout<<"MemberId: "<<DotsTest::MemberTypes::MeterPerSecond32MemberMemberIndex()<<std::endl;
     std::wcout<<"MemberId (arr): "<<DotsTest::MemberArrays::MeterPerSecond32MemberMemberIndex()<<std::endl;
@@ -3926,6 +4251,13 @@ void Test_MeterPerSecond32()
     Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullMeterPerSecond32Member(EO);
     In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedMeterPerSecond32Member(EO);
 
+    // AnotherEmptyObject
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullMeterPerSecond32Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedMeterPerSecond32Member(AEO);
+    std::wcout<<"Property Parameter Val: " << DotsTest::MemberTypesProperty::GetMeterPerSecond32Member(AEO)<<std::endl;
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullMeterPerSecond32Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedMeterPerSecond32Member(AEO);
+
     //Array test
     for (int ix = 0; ix < DotsTest::ParameterArrays::MeterPerSecond32ParameterArraySize(); ix++)
     {
@@ -3970,6 +4302,13 @@ void Test_MeterPerSecond32()
         std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetMeterPerSecond32Member(EO,ix)<<std::endl;
         Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullMeterPerSecond32Member (EO,ix);
         In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedMeterPerSecond32Member (EO,ix);
+
+        // AnotherEmptyObject
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullMeterPerSecond32Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedMeterPerSecond32Member (AEO,ix);
+        std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetMeterPerSecond32Member(AEO,ix)<<std::endl;
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullMeterPerSecond32Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedMeterPerSecond32Member (AEO,ix);
     }
 
     // SetNull test
@@ -3996,11 +4335,11 @@ void Test_MeterPerSecondSquared32()
     //  1. Member Parameter -> Member Class MT1 -> Member Property MT2 -> Output
     //  2. Member Property MT2 -> Member Item MI -> Output
     //  3. Member Property MT2 -> Member Item Array MIA -> Member Type Property MIA -> Output
-    //  4. Member Property EO -> Output
+    //  4. Member Property EO & AEO -> Output
     //  5. Member Parameter -> Member Array MA1 -> Member Array MA2 -> Member Array Property MA2 -> Output
     //  6. Member Array MA1 -> Member Item MI -> Member Array Property MI -> Output
     //  7. Member Array MA1 -> Member Item Array MIA -> Member Array Property MIA -> Output
-    //  8. Member Array Property EO -> Output
+    //  8. Member Array Property EO & AEO -> Output
     Header(L"MeterPerSecondSquared32");
     std::wcout<<"MemberId: "<<DotsTest::MemberTypes::MeterPerSecondSquared32MemberMemberIndex()<<std::endl;
     std::wcout<<"MemberId (arr): "<<DotsTest::MemberArrays::MeterPerSecondSquared32MemberMemberIndex()<<std::endl;
@@ -4081,6 +4420,13 @@ void Test_MeterPerSecondSquared32()
     Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullMeterPerSecondSquared32Member(EO);
     In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedMeterPerSecondSquared32Member(EO);
 
+    // AnotherEmptyObject
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullMeterPerSecondSquared32Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedMeterPerSecondSquared32Member(AEO);
+    std::wcout<<"Property Parameter Val: " << DotsTest::MemberTypesProperty::GetMeterPerSecondSquared32Member(AEO)<<std::endl;
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullMeterPerSecondSquared32Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedMeterPerSecondSquared32Member(AEO);
+
     //Array test
     for (int ix = 0; ix < DotsTest::ParameterArrays::MeterPerSecondSquared32ParameterArraySize(); ix++)
     {
@@ -4125,6 +4471,13 @@ void Test_MeterPerSecondSquared32()
         std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetMeterPerSecondSquared32Member(EO,ix)<<std::endl;
         Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullMeterPerSecondSquared32Member (EO,ix);
         In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedMeterPerSecondSquared32Member (EO,ix);
+
+        // AnotherEmptyObject
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullMeterPerSecondSquared32Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedMeterPerSecondSquared32Member (AEO,ix);
+        std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetMeterPerSecondSquared32Member(AEO,ix)<<std::endl;
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullMeterPerSecondSquared32Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedMeterPerSecondSquared32Member (AEO,ix);
     }
 
     // SetNull test
@@ -4151,11 +4504,11 @@ void Test_Newton32()
     //  1. Member Parameter -> Member Class MT1 -> Member Property MT2 -> Output
     //  2. Member Property MT2 -> Member Item MI -> Output
     //  3. Member Property MT2 -> Member Item Array MIA -> Member Type Property MIA -> Output
-    //  4. Member Property EO -> Output
+    //  4. Member Property EO & AEO -> Output
     //  5. Member Parameter -> Member Array MA1 -> Member Array MA2 -> Member Array Property MA2 -> Output
     //  6. Member Array MA1 -> Member Item MI -> Member Array Property MI -> Output
     //  7. Member Array MA1 -> Member Item Array MIA -> Member Array Property MIA -> Output
-    //  8. Member Array Property EO -> Output
+    //  8. Member Array Property EO & AEO -> Output
     Header(L"Newton32");
     std::wcout<<"MemberId: "<<DotsTest::MemberTypes::Newton32MemberMemberIndex()<<std::endl;
     std::wcout<<"MemberId (arr): "<<DotsTest::MemberArrays::Newton32MemberMemberIndex()<<std::endl;
@@ -4236,6 +4589,13 @@ void Test_Newton32()
     Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullNewton32Member(EO);
     In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedNewton32Member(EO);
 
+    // AnotherEmptyObject
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullNewton32Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedNewton32Member(AEO);
+    std::wcout<<"Property Parameter Val: " << DotsTest::MemberTypesProperty::GetNewton32Member(AEO)<<std::endl;
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullNewton32Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedNewton32Member(AEO);
+
     //Array test
     for (int ix = 0; ix < DotsTest::ParameterArrays::Newton32ParameterArraySize(); ix++)
     {
@@ -4280,6 +4640,13 @@ void Test_Newton32()
         std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetNewton32Member(EO,ix)<<std::endl;
         Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullNewton32Member (EO,ix);
         In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedNewton32Member (EO,ix);
+
+        // AnotherEmptyObject
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullNewton32Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedNewton32Member (AEO,ix);
+        std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetNewton32Member(AEO,ix)<<std::endl;
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullNewton32Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedNewton32Member (AEO,ix);
     }
 
     // SetNull test
@@ -4306,11 +4673,11 @@ void Test_Pascal32()
     //  1. Member Parameter -> Member Class MT1 -> Member Property MT2 -> Output
     //  2. Member Property MT2 -> Member Item MI -> Output
     //  3. Member Property MT2 -> Member Item Array MIA -> Member Type Property MIA -> Output
-    //  4. Member Property EO -> Output
+    //  4. Member Property EO & AEO -> Output
     //  5. Member Parameter -> Member Array MA1 -> Member Array MA2 -> Member Array Property MA2 -> Output
     //  6. Member Array MA1 -> Member Item MI -> Member Array Property MI -> Output
     //  7. Member Array MA1 -> Member Item Array MIA -> Member Array Property MIA -> Output
-    //  8. Member Array Property EO -> Output
+    //  8. Member Array Property EO & AEO -> Output
     Header(L"Pascal32");
     std::wcout<<"MemberId: "<<DotsTest::MemberTypes::Pascal32MemberMemberIndex()<<std::endl;
     std::wcout<<"MemberId (arr): "<<DotsTest::MemberArrays::Pascal32MemberMemberIndex()<<std::endl;
@@ -4391,6 +4758,13 @@ void Test_Pascal32()
     Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullPascal32Member(EO);
     In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedPascal32Member(EO);
 
+    // AnotherEmptyObject
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullPascal32Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedPascal32Member(AEO);
+    std::wcout<<"Property Parameter Val: " << DotsTest::MemberTypesProperty::GetPascal32Member(AEO)<<std::endl;
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullPascal32Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedPascal32Member(AEO);
+
     //Array test
     for (int ix = 0; ix < DotsTest::ParameterArrays::Pascal32ParameterArraySize(); ix++)
     {
@@ -4435,6 +4809,13 @@ void Test_Pascal32()
         std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetPascal32Member(EO,ix)<<std::endl;
         Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullPascal32Member (EO,ix);
         In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedPascal32Member (EO,ix);
+
+        // AnotherEmptyObject
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullPascal32Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedPascal32Member (AEO,ix);
+        std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetPascal32Member(AEO,ix)<<std::endl;
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullPascal32Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedPascal32Member (AEO,ix);
     }
 
     // SetNull test
@@ -4461,11 +4842,11 @@ void Test_Radian32()
     //  1. Member Parameter -> Member Class MT1 -> Member Property MT2 -> Output
     //  2. Member Property MT2 -> Member Item MI -> Output
     //  3. Member Property MT2 -> Member Item Array MIA -> Member Type Property MIA -> Output
-    //  4. Member Property EO -> Output
+    //  4. Member Property EO & AEO -> Output
     //  5. Member Parameter -> Member Array MA1 -> Member Array MA2 -> Member Array Property MA2 -> Output
     //  6. Member Array MA1 -> Member Item MI -> Member Array Property MI -> Output
     //  7. Member Array MA1 -> Member Item Array MIA -> Member Array Property MIA -> Output
-    //  8. Member Array Property EO -> Output
+    //  8. Member Array Property EO & AEO -> Output
     Header(L"Radian32");
     std::wcout<<"MemberId: "<<DotsTest::MemberTypes::Radian32MemberMemberIndex()<<std::endl;
     std::wcout<<"MemberId (arr): "<<DotsTest::MemberArrays::Radian32MemberMemberIndex()<<std::endl;
@@ -4546,6 +4927,13 @@ void Test_Radian32()
     Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullRadian32Member(EO);
     In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedRadian32Member(EO);
 
+    // AnotherEmptyObject
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullRadian32Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedRadian32Member(AEO);
+    std::wcout<<"Property Parameter Val: " << DotsTest::MemberTypesProperty::GetRadian32Member(AEO)<<std::endl;
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullRadian32Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedRadian32Member(AEO);
+
     //Array test
     for (int ix = 0; ix < DotsTest::ParameterArrays::Radian32ParameterArraySize(); ix++)
     {
@@ -4590,6 +4978,13 @@ void Test_Radian32()
         std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetRadian32Member(EO,ix)<<std::endl;
         Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullRadian32Member (EO,ix);
         In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedRadian32Member (EO,ix);
+
+        // AnotherEmptyObject
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullRadian32Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedRadian32Member (AEO,ix);
+        std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetRadian32Member(AEO,ix)<<std::endl;
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullRadian32Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedRadian32Member (AEO,ix);
     }
 
     // SetNull test
@@ -4616,11 +5011,11 @@ void Test_RadianPerSecond32()
     //  1. Member Parameter -> Member Class MT1 -> Member Property MT2 -> Output
     //  2. Member Property MT2 -> Member Item MI -> Output
     //  3. Member Property MT2 -> Member Item Array MIA -> Member Type Property MIA -> Output
-    //  4. Member Property EO -> Output
+    //  4. Member Property EO & AEO -> Output
     //  5. Member Parameter -> Member Array MA1 -> Member Array MA2 -> Member Array Property MA2 -> Output
     //  6. Member Array MA1 -> Member Item MI -> Member Array Property MI -> Output
     //  7. Member Array MA1 -> Member Item Array MIA -> Member Array Property MIA -> Output
-    //  8. Member Array Property EO -> Output
+    //  8. Member Array Property EO & AEO -> Output
     Header(L"RadianPerSecond32");
     std::wcout<<"MemberId: "<<DotsTest::MemberTypes::RadianPerSecond32MemberMemberIndex()<<std::endl;
     std::wcout<<"MemberId (arr): "<<DotsTest::MemberArrays::RadianPerSecond32MemberMemberIndex()<<std::endl;
@@ -4701,6 +5096,13 @@ void Test_RadianPerSecond32()
     Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullRadianPerSecond32Member(EO);
     In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedRadianPerSecond32Member(EO);
 
+    // AnotherEmptyObject
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullRadianPerSecond32Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedRadianPerSecond32Member(AEO);
+    std::wcout<<"Property Parameter Val: " << DotsTest::MemberTypesProperty::GetRadianPerSecond32Member(AEO)<<std::endl;
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullRadianPerSecond32Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedRadianPerSecond32Member(AEO);
+
     //Array test
     for (int ix = 0; ix < DotsTest::ParameterArrays::RadianPerSecond32ParameterArraySize(); ix++)
     {
@@ -4745,6 +5147,13 @@ void Test_RadianPerSecond32()
         std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetRadianPerSecond32Member(EO,ix)<<std::endl;
         Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullRadianPerSecond32Member (EO,ix);
         In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedRadianPerSecond32Member (EO,ix);
+
+        // AnotherEmptyObject
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullRadianPerSecond32Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedRadianPerSecond32Member (AEO,ix);
+        std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetRadianPerSecond32Member(AEO,ix)<<std::endl;
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullRadianPerSecond32Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedRadianPerSecond32Member (AEO,ix);
     }
 
     // SetNull test
@@ -4771,11 +5180,11 @@ void Test_RadianPerSecondSquared32()
     //  1. Member Parameter -> Member Class MT1 -> Member Property MT2 -> Output
     //  2. Member Property MT2 -> Member Item MI -> Output
     //  3. Member Property MT2 -> Member Item Array MIA -> Member Type Property MIA -> Output
-    //  4. Member Property EO -> Output
+    //  4. Member Property EO & AEO -> Output
     //  5. Member Parameter -> Member Array MA1 -> Member Array MA2 -> Member Array Property MA2 -> Output
     //  6. Member Array MA1 -> Member Item MI -> Member Array Property MI -> Output
     //  7. Member Array MA1 -> Member Item Array MIA -> Member Array Property MIA -> Output
-    //  8. Member Array Property EO -> Output
+    //  8. Member Array Property EO & AEO -> Output
     Header(L"RadianPerSecondSquared32");
     std::wcout<<"MemberId: "<<DotsTest::MemberTypes::RadianPerSecondSquared32MemberMemberIndex()<<std::endl;
     std::wcout<<"MemberId (arr): "<<DotsTest::MemberArrays::RadianPerSecondSquared32MemberMemberIndex()<<std::endl;
@@ -4856,6 +5265,13 @@ void Test_RadianPerSecondSquared32()
     Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullRadianPerSecondSquared32Member(EO);
     In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedRadianPerSecondSquared32Member(EO);
 
+    // AnotherEmptyObject
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullRadianPerSecondSquared32Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedRadianPerSecondSquared32Member(AEO);
+    std::wcout<<"Property Parameter Val: " << DotsTest::MemberTypesProperty::GetRadianPerSecondSquared32Member(AEO)<<std::endl;
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullRadianPerSecondSquared32Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedRadianPerSecondSquared32Member(AEO);
+
     //Array test
     for (int ix = 0; ix < DotsTest::ParameterArrays::RadianPerSecondSquared32ParameterArraySize(); ix++)
     {
@@ -4900,6 +5316,13 @@ void Test_RadianPerSecondSquared32()
         std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetRadianPerSecondSquared32Member(EO,ix)<<std::endl;
         Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullRadianPerSecondSquared32Member (EO,ix);
         In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedRadianPerSecondSquared32Member (EO,ix);
+
+        // AnotherEmptyObject
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullRadianPerSecondSquared32Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedRadianPerSecondSquared32Member (AEO,ix);
+        std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetRadianPerSecondSquared32Member(AEO,ix)<<std::endl;
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullRadianPerSecondSquared32Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedRadianPerSecondSquared32Member (AEO,ix);
     }
 
     // SetNull test
@@ -4926,11 +5349,11 @@ void Test_Second32()
     //  1. Member Parameter -> Member Class MT1 -> Member Property MT2 -> Output
     //  2. Member Property MT2 -> Member Item MI -> Output
     //  3. Member Property MT2 -> Member Item Array MIA -> Member Type Property MIA -> Output
-    //  4. Member Property EO -> Output
+    //  4. Member Property EO & AEO -> Output
     //  5. Member Parameter -> Member Array MA1 -> Member Array MA2 -> Member Array Property MA2 -> Output
     //  6. Member Array MA1 -> Member Item MI -> Member Array Property MI -> Output
     //  7. Member Array MA1 -> Member Item Array MIA -> Member Array Property MIA -> Output
-    //  8. Member Array Property EO -> Output
+    //  8. Member Array Property EO & AEO -> Output
     Header(L"Second32");
     std::wcout<<"MemberId: "<<DotsTest::MemberTypes::Second32MemberMemberIndex()<<std::endl;
     std::wcout<<"MemberId (arr): "<<DotsTest::MemberArrays::Second32MemberMemberIndex()<<std::endl;
@@ -5011,6 +5434,13 @@ void Test_Second32()
     Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullSecond32Member(EO);
     In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedSecond32Member(EO);
 
+    // AnotherEmptyObject
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullSecond32Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedSecond32Member(AEO);
+    std::wcout<<"Property Parameter Val: " << DotsTest::MemberTypesProperty::GetSecond32Member(AEO)<<std::endl;
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullSecond32Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedSecond32Member(AEO);
+
     //Array test
     for (int ix = 0; ix < DotsTest::ParameterArrays::Second32ParameterArraySize(); ix++)
     {
@@ -5055,6 +5485,13 @@ void Test_Second32()
         std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetSecond32Member(EO,ix)<<std::endl;
         Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullSecond32Member (EO,ix);
         In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedSecond32Member (EO,ix);
+
+        // AnotherEmptyObject
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullSecond32Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedSecond32Member (AEO,ix);
+        std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetSecond32Member(AEO,ix)<<std::endl;
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullSecond32Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedSecond32Member (AEO,ix);
     }
 
     // SetNull test
@@ -5081,11 +5518,11 @@ void Test_SquareMeter32()
     //  1. Member Parameter -> Member Class MT1 -> Member Property MT2 -> Output
     //  2. Member Property MT2 -> Member Item MI -> Output
     //  3. Member Property MT2 -> Member Item Array MIA -> Member Type Property MIA -> Output
-    //  4. Member Property EO -> Output
+    //  4. Member Property EO & AEO -> Output
     //  5. Member Parameter -> Member Array MA1 -> Member Array MA2 -> Member Array Property MA2 -> Output
     //  6. Member Array MA1 -> Member Item MI -> Member Array Property MI -> Output
     //  7. Member Array MA1 -> Member Item Array MIA -> Member Array Property MIA -> Output
-    //  8. Member Array Property EO -> Output
+    //  8. Member Array Property EO & AEO -> Output
     Header(L"SquareMeter32");
     std::wcout<<"MemberId: "<<DotsTest::MemberTypes::SquareMeter32MemberMemberIndex()<<std::endl;
     std::wcout<<"MemberId (arr): "<<DotsTest::MemberArrays::SquareMeter32MemberMemberIndex()<<std::endl;
@@ -5166,6 +5603,13 @@ void Test_SquareMeter32()
     Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullSquareMeter32Member(EO);
     In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedSquareMeter32Member(EO);
 
+    // AnotherEmptyObject
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullSquareMeter32Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedSquareMeter32Member(AEO);
+    std::wcout<<"Property Parameter Val: " << DotsTest::MemberTypesProperty::GetSquareMeter32Member(AEO)<<std::endl;
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullSquareMeter32Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedSquareMeter32Member(AEO);
+
     //Array test
     for (int ix = 0; ix < DotsTest::ParameterArrays::SquareMeter32ParameterArraySize(); ix++)
     {
@@ -5210,6 +5654,13 @@ void Test_SquareMeter32()
         std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetSquareMeter32Member(EO,ix)<<std::endl;
         Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullSquareMeter32Member (EO,ix);
         In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedSquareMeter32Member (EO,ix);
+
+        // AnotherEmptyObject
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullSquareMeter32Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedSquareMeter32Member (AEO,ix);
+        std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetSquareMeter32Member(AEO,ix)<<std::endl;
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullSquareMeter32Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedSquareMeter32Member (AEO,ix);
     }
 
     // SetNull test
@@ -5236,11 +5687,11 @@ void Test_Steradian32()
     //  1. Member Parameter -> Member Class MT1 -> Member Property MT2 -> Output
     //  2. Member Property MT2 -> Member Item MI -> Output
     //  3. Member Property MT2 -> Member Item Array MIA -> Member Type Property MIA -> Output
-    //  4. Member Property EO -> Output
+    //  4. Member Property EO & AEO -> Output
     //  5. Member Parameter -> Member Array MA1 -> Member Array MA2 -> Member Array Property MA2 -> Output
     //  6. Member Array MA1 -> Member Item MI -> Member Array Property MI -> Output
     //  7. Member Array MA1 -> Member Item Array MIA -> Member Array Property MIA -> Output
-    //  8. Member Array Property EO -> Output
+    //  8. Member Array Property EO & AEO -> Output
     Header(L"Steradian32");
     std::wcout<<"MemberId: "<<DotsTest::MemberTypes::Steradian32MemberMemberIndex()<<std::endl;
     std::wcout<<"MemberId (arr): "<<DotsTest::MemberArrays::Steradian32MemberMemberIndex()<<std::endl;
@@ -5321,6 +5772,13 @@ void Test_Steradian32()
     Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullSteradian32Member(EO);
     In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedSteradian32Member(EO);
 
+    // AnotherEmptyObject
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullSteradian32Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedSteradian32Member(AEO);
+    std::wcout<<"Property Parameter Val: " << DotsTest::MemberTypesProperty::GetSteradian32Member(AEO)<<std::endl;
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullSteradian32Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedSteradian32Member(AEO);
+
     //Array test
     for (int ix = 0; ix < DotsTest::ParameterArrays::Steradian32ParameterArraySize(); ix++)
     {
@@ -5365,6 +5823,13 @@ void Test_Steradian32()
         std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetSteradian32Member(EO,ix)<<std::endl;
         Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullSteradian32Member (EO,ix);
         In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedSteradian32Member (EO,ix);
+
+        // AnotherEmptyObject
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullSteradian32Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedSteradian32Member (AEO,ix);
+        std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetSteradian32Member(AEO,ix)<<std::endl;
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullSteradian32Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedSteradian32Member (AEO,ix);
     }
 
     // SetNull test
@@ -5391,11 +5856,11 @@ void Test_Volt32()
     //  1. Member Parameter -> Member Class MT1 -> Member Property MT2 -> Output
     //  2. Member Property MT2 -> Member Item MI -> Output
     //  3. Member Property MT2 -> Member Item Array MIA -> Member Type Property MIA -> Output
-    //  4. Member Property EO -> Output
+    //  4. Member Property EO & AEO -> Output
     //  5. Member Parameter -> Member Array MA1 -> Member Array MA2 -> Member Array Property MA2 -> Output
     //  6. Member Array MA1 -> Member Item MI -> Member Array Property MI -> Output
     //  7. Member Array MA1 -> Member Item Array MIA -> Member Array Property MIA -> Output
-    //  8. Member Array Property EO -> Output
+    //  8. Member Array Property EO & AEO -> Output
     Header(L"Volt32");
     std::wcout<<"MemberId: "<<DotsTest::MemberTypes::Volt32MemberMemberIndex()<<std::endl;
     std::wcout<<"MemberId (arr): "<<DotsTest::MemberArrays::Volt32MemberMemberIndex()<<std::endl;
@@ -5475,6 +5940,13 @@ void Test_Volt32()
     Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullVolt32Member(EO);
     In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedVolt32Member(EO);
 
+    // AnotherEmptyObject
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullVolt32Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedVolt32Member(AEO);
+    std::wcout<<"Property Parameter Val: " << DotsTest::MemberTypesProperty::GetVolt32Member(AEO)<<std::endl;
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullVolt32Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedVolt32Member(AEO);
+
     //Array test
     for (int ix = 0; ix < DotsTest::ParameterArrays::Volt32ParameterArraySize(); ix++)
     {
@@ -5519,6 +5991,13 @@ void Test_Volt32()
         std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetVolt32Member(EO,ix)<<std::endl;
         Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullVolt32Member (EO,ix);
         In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedVolt32Member (EO,ix);
+
+        // AnotherEmptyObject
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullVolt32Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedVolt32Member (AEO,ix);
+        std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetVolt32Member(AEO,ix)<<std::endl;
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullVolt32Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedVolt32Member (AEO,ix);
     }
 
     // SetNull test
@@ -5545,11 +6024,11 @@ void Test_Watt32()
     //  1. Member Parameter -> Member Class MT1 -> Member Property MT2 -> Output
     //  2. Member Property MT2 -> Member Item MI -> Output
     //  3. Member Property MT2 -> Member Item Array MIA -> Member Type Property MIA -> Output
-    //  4. Member Property EO -> Output
+    //  4. Member Property EO & AEO -> Output
     //  5. Member Parameter -> Member Array MA1 -> Member Array MA2 -> Member Array Property MA2 -> Output
     //  6. Member Array MA1 -> Member Item MI -> Member Array Property MI -> Output
     //  7. Member Array MA1 -> Member Item Array MIA -> Member Array Property MIA -> Output
-    //  8. Member Array Property EO -> Output
+    //  8. Member Array Property EO & AEO -> Output
     Header(L"Watt32");
     std::wcout<<"MemberId: "<<DotsTest::MemberTypes::Watt32MemberMemberIndex()<<std::endl;
     std::wcout<<"MemberId (arr): "<<DotsTest::MemberArrays::Watt32MemberMemberIndex()<<std::endl;
@@ -5630,6 +6109,13 @@ void Test_Watt32()
     Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullWatt32Member(EO);
     In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedWatt32Member(EO);
 
+    // AnotherEmptyObject
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullWatt32Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedWatt32Member(AEO);
+    std::wcout<<"Property Parameter Val: " << DotsTest::MemberTypesProperty::GetWatt32Member(AEO)<<std::endl;
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullWatt32Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedWatt32Member(AEO);
+
     //Array test
     for (int ix = 0; ix < DotsTest::ParameterArrays::Watt32ParameterArraySize(); ix++)
     {
@@ -5674,6 +6160,13 @@ void Test_Watt32()
         std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetWatt32Member(EO,ix)<<std::endl;
         Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullWatt32Member (EO,ix);
         In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedWatt32Member (EO,ix);
+
+        // AnotherEmptyObject
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullWatt32Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedWatt32Member (AEO,ix);
+        std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetWatt32Member(AEO,ix)<<std::endl;
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullWatt32Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedWatt32Member (AEO,ix);
     }
 
     // SetNull test
@@ -5700,11 +6193,11 @@ void Test_Ampere64()
     //  1. Member Parameter -> Member Class MT1 -> Member Property MT2 -> Output
     //  2. Member Property MT2 -> Member Item MI -> Output
     //  3. Member Property MT2 -> Member Item Array MIA -> Member Type Property MIA -> Output
-    //  4. Member Property EO -> Output
+    //  4. Member Property EO & AEO -> Output
     //  5. Member Parameter -> Member Array MA1 -> Member Array MA2 -> Member Array Property MA2 -> Output
     //  6. Member Array MA1 -> Member Item MI -> Member Array Property MI -> Output
     //  7. Member Array MA1 -> Member Item Array MIA -> Member Array Property MIA -> Output
-    //  8. Member Array Property EO -> Output
+    //  8. Member Array Property EO & AEO -> Output
     Header(L"Ampere64");
     std::wcout<<"MemberId: "<<DotsTest::MemberTypes::Ampere64MemberMemberIndex()<<std::endl;
     std::wcout<<"MemberId (arr): "<<DotsTest::MemberArrays::Ampere64MemberMemberIndex()<<std::endl;
@@ -5785,6 +6278,13 @@ void Test_Ampere64()
     Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullAmpere64Member(EO);
     In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedAmpere64Member(EO);
 
+    // AnotherEmptyObject
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullAmpere64Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedAmpere64Member(AEO);
+    std::wcout<<"Property Parameter Val: " << DotsTest::MemberTypesProperty::GetAmpere64Member(AEO)<<std::endl;
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullAmpere64Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedAmpere64Member(AEO);
+
     //Array test
     for (int ix = 0; ix < DotsTest::ParameterArrays::Ampere64ParameterArraySize(); ix++)
     {
@@ -5829,6 +6329,13 @@ void Test_Ampere64()
         std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetAmpere64Member(EO,ix)<<std::endl;
         Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullAmpere64Member (EO,ix);
         In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedAmpere64Member (EO,ix);
+
+        // AnotherEmptyObject
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullAmpere64Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedAmpere64Member (AEO,ix);
+        std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetAmpere64Member(AEO,ix)<<std::endl;
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullAmpere64Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedAmpere64Member (AEO,ix);
     }
 
     // SetNull test
@@ -5855,11 +6362,11 @@ void Test_CubicMeter64()
     //  1. Member Parameter -> Member Class MT1 -> Member Property MT2 -> Output
     //  2. Member Property MT2 -> Member Item MI -> Output
     //  3. Member Property MT2 -> Member Item Array MIA -> Member Type Property MIA -> Output
-    //  4. Member Property EO -> Output
+    //  4. Member Property EO & AEO -> Output
     //  5. Member Parameter -> Member Array MA1 -> Member Array MA2 -> Member Array Property MA2 -> Output
     //  6. Member Array MA1 -> Member Item MI -> Member Array Property MI -> Output
     //  7. Member Array MA1 -> Member Item Array MIA -> Member Array Property MIA -> Output
-    //  8. Member Array Property EO -> Output
+    //  8. Member Array Property EO & AEO -> Output
     Header(L"CubicMeter64");
     std::wcout<<"MemberId: "<<DotsTest::MemberTypes::CubicMeter64MemberMemberIndex()<<std::endl;
     std::wcout<<"MemberId (arr): "<<DotsTest::MemberArrays::CubicMeter64MemberMemberIndex()<<std::endl;
@@ -5940,6 +6447,13 @@ void Test_CubicMeter64()
     Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullCubicMeter64Member(EO);
     In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedCubicMeter64Member(EO);
 
+    // AnotherEmptyObject
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullCubicMeter64Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedCubicMeter64Member(AEO);
+    std::wcout<<"Property Parameter Val: " << DotsTest::MemberTypesProperty::GetCubicMeter64Member(AEO)<<std::endl;
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullCubicMeter64Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedCubicMeter64Member(AEO);
+
     //Array test
     for (int ix = 0; ix < DotsTest::ParameterArrays::CubicMeter64ParameterArraySize(); ix++)
     {
@@ -5984,6 +6498,13 @@ void Test_CubicMeter64()
         std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetCubicMeter64Member(EO,ix)<<std::endl;
         Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullCubicMeter64Member (EO,ix);
         In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedCubicMeter64Member (EO,ix);
+
+        // AnotherEmptyObject
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullCubicMeter64Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedCubicMeter64Member (AEO,ix);
+        std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetCubicMeter64Member(AEO,ix)<<std::endl;
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullCubicMeter64Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedCubicMeter64Member (AEO,ix);
     }
 
     // SetNull test
@@ -6010,11 +6531,11 @@ void Test_Hertz64()
     //  1. Member Parameter -> Member Class MT1 -> Member Property MT2 -> Output
     //  2. Member Property MT2 -> Member Item MI -> Output
     //  3. Member Property MT2 -> Member Item Array MIA -> Member Type Property MIA -> Output
-    //  4. Member Property EO -> Output
+    //  4. Member Property EO & AEO -> Output
     //  5. Member Parameter -> Member Array MA1 -> Member Array MA2 -> Member Array Property MA2 -> Output
     //  6. Member Array MA1 -> Member Item MI -> Member Array Property MI -> Output
     //  7. Member Array MA1 -> Member Item Array MIA -> Member Array Property MIA -> Output
-    //  8. Member Array Property EO -> Output
+    //  8. Member Array Property EO & AEO -> Output
     Header(L"Hertz64");
     std::wcout<<"MemberId: "<<DotsTest::MemberTypes::Hertz64MemberMemberIndex()<<std::endl;
     std::wcout<<"MemberId (arr): "<<DotsTest::MemberArrays::Hertz64MemberMemberIndex()<<std::endl;
@@ -6095,6 +6616,13 @@ void Test_Hertz64()
     Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullHertz64Member(EO);
     In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedHertz64Member(EO);
 
+    // AnotherEmptyObject
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullHertz64Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedHertz64Member(AEO);
+    std::wcout<<"Property Parameter Val: " << DotsTest::MemberTypesProperty::GetHertz64Member(AEO)<<std::endl;
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullHertz64Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedHertz64Member(AEO);
+
     //Array test
     for (int ix = 0; ix < DotsTest::ParameterArrays::Hertz64ParameterArraySize(); ix++)
     {
@@ -6139,6 +6667,13 @@ void Test_Hertz64()
         std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetHertz64Member(EO,ix)<<std::endl;
         Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullHertz64Member (EO,ix);
         In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedHertz64Member (EO,ix);
+
+        // AnotherEmptyObject
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullHertz64Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedHertz64Member (AEO,ix);
+        std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetHertz64Member(AEO,ix)<<std::endl;
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullHertz64Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedHertz64Member (AEO,ix);
     }
 
     // SetNull test
@@ -6165,11 +6700,11 @@ void Test_Joule64()
     //  1. Member Parameter -> Member Class MT1 -> Member Property MT2 -> Output
     //  2. Member Property MT2 -> Member Item MI -> Output
     //  3. Member Property MT2 -> Member Item Array MIA -> Member Type Property MIA -> Output
-    //  4. Member Property EO -> Output
+    //  4. Member Property EO & AEO -> Output
     //  5. Member Parameter -> Member Array MA1 -> Member Array MA2 -> Member Array Property MA2 -> Output
     //  6. Member Array MA1 -> Member Item MI -> Member Array Property MI -> Output
     //  7. Member Array MA1 -> Member Item Array MIA -> Member Array Property MIA -> Output
-    //  8. Member Array Property EO -> Output
+    //  8. Member Array Property EO & AEO -> Output
     Header(L"Joule64");
     std::wcout<<"MemberId: "<<DotsTest::MemberTypes::Joule64MemberMemberIndex()<<std::endl;
     std::wcout<<"MemberId (arr): "<<DotsTest::MemberArrays::Joule64MemberMemberIndex()<<std::endl;
@@ -6250,6 +6785,13 @@ void Test_Joule64()
     Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullJoule64Member(EO);
     In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedJoule64Member(EO);
 
+    // AnotherEmptyObject
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullJoule64Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedJoule64Member(AEO);
+    std::wcout<<"Property Parameter Val: " << DotsTest::MemberTypesProperty::GetJoule64Member(AEO)<<std::endl;
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullJoule64Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedJoule64Member(AEO);
+
     //Array test
     for (int ix = 0; ix < DotsTest::ParameterArrays::Joule64ParameterArraySize(); ix++)
     {
@@ -6294,6 +6836,13 @@ void Test_Joule64()
         std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetJoule64Member(EO,ix)<<std::endl;
         Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullJoule64Member (EO,ix);
         In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedJoule64Member (EO,ix);
+
+        // AnotherEmptyObject
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullJoule64Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedJoule64Member (AEO,ix);
+        std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetJoule64Member(AEO,ix)<<std::endl;
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullJoule64Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedJoule64Member (AEO,ix);
     }
 
     // SetNull test
@@ -6320,11 +6869,11 @@ void Test_Kelvin64()
     //  1. Member Parameter -> Member Class MT1 -> Member Property MT2 -> Output
     //  2. Member Property MT2 -> Member Item MI -> Output
     //  3. Member Property MT2 -> Member Item Array MIA -> Member Type Property MIA -> Output
-    //  4. Member Property EO -> Output
+    //  4. Member Property EO & AEO -> Output
     //  5. Member Parameter -> Member Array MA1 -> Member Array MA2 -> Member Array Property MA2 -> Output
     //  6. Member Array MA1 -> Member Item MI -> Member Array Property MI -> Output
     //  7. Member Array MA1 -> Member Item Array MIA -> Member Array Property MIA -> Output
-    //  8. Member Array Property EO -> Output
+    //  8. Member Array Property EO & AEO -> Output
     Header(L"Kelvin64");
     std::wcout<<"MemberId: "<<DotsTest::MemberTypes::Kelvin64MemberMemberIndex()<<std::endl;
     std::wcout<<"MemberId (arr): "<<DotsTest::MemberArrays::Kelvin64MemberMemberIndex()<<std::endl;
@@ -6405,6 +6954,13 @@ void Test_Kelvin64()
     Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullKelvin64Member(EO);
     In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedKelvin64Member(EO);
 
+    // AnotherEmptyObject
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullKelvin64Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedKelvin64Member(AEO);
+    std::wcout<<"Property Parameter Val: " << DotsTest::MemberTypesProperty::GetKelvin64Member(AEO)<<std::endl;
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullKelvin64Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedKelvin64Member(AEO);
+
     //Array test
     for (int ix = 0; ix < DotsTest::ParameterArrays::Kelvin64ParameterArraySize(); ix++)
     {
@@ -6449,6 +7005,13 @@ void Test_Kelvin64()
         std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetKelvin64Member(EO,ix)<<std::endl;
         Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullKelvin64Member (EO,ix);
         In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedKelvin64Member (EO,ix);
+
+        // AnotherEmptyObject
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullKelvin64Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedKelvin64Member (AEO,ix);
+        std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetKelvin64Member(AEO,ix)<<std::endl;
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullKelvin64Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedKelvin64Member (AEO,ix);
     }
 
     // SetNull test
@@ -6475,11 +7038,11 @@ void Test_Kilogram64()
     //  1. Member Parameter -> Member Class MT1 -> Member Property MT2 -> Output
     //  2. Member Property MT2 -> Member Item MI -> Output
     //  3. Member Property MT2 -> Member Item Array MIA -> Member Type Property MIA -> Output
-    //  4. Member Property EO -> Output
+    //  4. Member Property EO & AEO -> Output
     //  5. Member Parameter -> Member Array MA1 -> Member Array MA2 -> Member Array Property MA2 -> Output
     //  6. Member Array MA1 -> Member Item MI -> Member Array Property MI -> Output
     //  7. Member Array MA1 -> Member Item Array MIA -> Member Array Property MIA -> Output
-    //  8. Member Array Property EO -> Output
+    //  8. Member Array Property EO & AEO -> Output
     Header(L"Kilogram64");
     std::wcout<<"MemberId: "<<DotsTest::MemberTypes::Kilogram64MemberMemberIndex()<<std::endl;
     std::wcout<<"MemberId (arr): "<<DotsTest::MemberArrays::Kilogram64MemberMemberIndex()<<std::endl;
@@ -6560,6 +7123,13 @@ void Test_Kilogram64()
     Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullKilogram64Member(EO);
     In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedKilogram64Member(EO);
 
+    // AnotherEmptyObject
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullKilogram64Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedKilogram64Member(AEO);
+    std::wcout<<"Property Parameter Val: " << DotsTest::MemberTypesProperty::GetKilogram64Member(AEO)<<std::endl;
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullKilogram64Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedKilogram64Member(AEO);
+
     //Array test
     for (int ix = 0; ix < DotsTest::ParameterArrays::Kilogram64ParameterArraySize(); ix++)
     {
@@ -6604,6 +7174,13 @@ void Test_Kilogram64()
         std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetKilogram64Member(EO,ix)<<std::endl;
         Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullKilogram64Member (EO,ix);
         In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedKilogram64Member (EO,ix);
+
+        // AnotherEmptyObject
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullKilogram64Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedKilogram64Member (AEO,ix);
+        std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetKilogram64Member(AEO,ix)<<std::endl;
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullKilogram64Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedKilogram64Member (AEO,ix);
     }
 
     // SetNull test
@@ -6630,11 +7207,11 @@ void Test_Meter64()
     //  1. Member Parameter -> Member Class MT1 -> Member Property MT2 -> Output
     //  2. Member Property MT2 -> Member Item MI -> Output
     //  3. Member Property MT2 -> Member Item Array MIA -> Member Type Property MIA -> Output
-    //  4. Member Property EO -> Output
+    //  4. Member Property EO & AEO -> Output
     //  5. Member Parameter -> Member Array MA1 -> Member Array MA2 -> Member Array Property MA2 -> Output
     //  6. Member Array MA1 -> Member Item MI -> Member Array Property MI -> Output
     //  7. Member Array MA1 -> Member Item Array MIA -> Member Array Property MIA -> Output
-    //  8. Member Array Property EO -> Output
+    //  8. Member Array Property EO & AEO -> Output
     Header(L"Meter64");
     std::wcout<<"MemberId: "<<DotsTest::MemberTypes::Meter64MemberMemberIndex()<<std::endl;
     std::wcout<<"MemberId (arr): "<<DotsTest::MemberArrays::Meter64MemberMemberIndex()<<std::endl;
@@ -6715,6 +7292,13 @@ void Test_Meter64()
     Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullMeter64Member(EO);
     In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedMeter64Member(EO);
 
+    // AnotherEmptyObject
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullMeter64Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedMeter64Member(AEO);
+    std::wcout<<"Property Parameter Val: " << DotsTest::MemberTypesProperty::GetMeter64Member(AEO)<<std::endl;
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullMeter64Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedMeter64Member(AEO);
+
     //Array test
     for (int ix = 0; ix < DotsTest::ParameterArrays::Meter64ParameterArraySize(); ix++)
     {
@@ -6759,6 +7343,13 @@ void Test_Meter64()
         std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetMeter64Member(EO,ix)<<std::endl;
         Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullMeter64Member (EO,ix);
         In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedMeter64Member (EO,ix);
+
+        // AnotherEmptyObject
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullMeter64Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedMeter64Member (AEO,ix);
+        std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetMeter64Member(AEO,ix)<<std::endl;
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullMeter64Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedMeter64Member (AEO,ix);
     }
 
     // SetNull test
@@ -6785,11 +7376,11 @@ void Test_MeterPerSecond64()
     //  1. Member Parameter -> Member Class MT1 -> Member Property MT2 -> Output
     //  2. Member Property MT2 -> Member Item MI -> Output
     //  3. Member Property MT2 -> Member Item Array MIA -> Member Type Property MIA -> Output
-    //  4. Member Property EO -> Output
+    //  4. Member Property EO & AEO -> Output
     //  5. Member Parameter -> Member Array MA1 -> Member Array MA2 -> Member Array Property MA2 -> Output
     //  6. Member Array MA1 -> Member Item MI -> Member Array Property MI -> Output
     //  7. Member Array MA1 -> Member Item Array MIA -> Member Array Property MIA -> Output
-    //  8. Member Array Property EO -> Output
+    //  8. Member Array Property EO & AEO -> Output
     Header(L"MeterPerSecond64");
     std::wcout<<"MemberId: "<<DotsTest::MemberTypes::MeterPerSecond64MemberMemberIndex()<<std::endl;
     std::wcout<<"MemberId (arr): "<<DotsTest::MemberArrays::MeterPerSecond64MemberMemberIndex()<<std::endl;
@@ -6870,6 +7461,13 @@ void Test_MeterPerSecond64()
     Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullMeterPerSecond64Member(EO);
     In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedMeterPerSecond64Member(EO);
 
+    // AnotherEmptyObject
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullMeterPerSecond64Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedMeterPerSecond64Member(AEO);
+    std::wcout<<"Property Parameter Val: " << DotsTest::MemberTypesProperty::GetMeterPerSecond64Member(AEO)<<std::endl;
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullMeterPerSecond64Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedMeterPerSecond64Member(AEO);
+
     //Array test
     for (int ix = 0; ix < DotsTest::ParameterArrays::MeterPerSecond64ParameterArraySize(); ix++)
     {
@@ -6914,6 +7512,13 @@ void Test_MeterPerSecond64()
         std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetMeterPerSecond64Member(EO,ix)<<std::endl;
         Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullMeterPerSecond64Member (EO,ix);
         In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedMeterPerSecond64Member (EO,ix);
+
+        // AnotherEmptyObject
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullMeterPerSecond64Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedMeterPerSecond64Member (AEO,ix);
+        std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetMeterPerSecond64Member(AEO,ix)<<std::endl;
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullMeterPerSecond64Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedMeterPerSecond64Member (AEO,ix);
     }
 
     // SetNull test
@@ -6940,11 +7545,11 @@ void Test_MeterPerSecondSquared64()
     //  1. Member Parameter -> Member Class MT1 -> Member Property MT2 -> Output
     //  2. Member Property MT2 -> Member Item MI -> Output
     //  3. Member Property MT2 -> Member Item Array MIA -> Member Type Property MIA -> Output
-    //  4. Member Property EO -> Output
+    //  4. Member Property EO & AEO -> Output
     //  5. Member Parameter -> Member Array MA1 -> Member Array MA2 -> Member Array Property MA2 -> Output
     //  6. Member Array MA1 -> Member Item MI -> Member Array Property MI -> Output
     //  7. Member Array MA1 -> Member Item Array MIA -> Member Array Property MIA -> Output
-    //  8. Member Array Property EO -> Output
+    //  8. Member Array Property EO & AEO -> Output
     Header(L"MeterPerSecondSquared64");
     std::wcout<<"MemberId: "<<DotsTest::MemberTypes::MeterPerSecondSquared64MemberMemberIndex()<<std::endl;
     std::wcout<<"MemberId (arr): "<<DotsTest::MemberArrays::MeterPerSecondSquared64MemberMemberIndex()<<std::endl;
@@ -7025,6 +7630,13 @@ void Test_MeterPerSecondSquared64()
     Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullMeterPerSecondSquared64Member(EO);
     In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedMeterPerSecondSquared64Member(EO);
 
+    // AnotherEmptyObject
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullMeterPerSecondSquared64Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedMeterPerSecondSquared64Member(AEO);
+    std::wcout<<"Property Parameter Val: " << DotsTest::MemberTypesProperty::GetMeterPerSecondSquared64Member(AEO)<<std::endl;
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullMeterPerSecondSquared64Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedMeterPerSecondSquared64Member(AEO);
+
     //Array test
     for (int ix = 0; ix < DotsTest::ParameterArrays::MeterPerSecondSquared64ParameterArraySize(); ix++)
     {
@@ -7069,6 +7681,13 @@ void Test_MeterPerSecondSquared64()
         std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetMeterPerSecondSquared64Member(EO,ix)<<std::endl;
         Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullMeterPerSecondSquared64Member (EO,ix);
         In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedMeterPerSecondSquared64Member (EO,ix);
+
+        // AnotherEmptyObject
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullMeterPerSecondSquared64Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedMeterPerSecondSquared64Member (AEO,ix);
+        std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetMeterPerSecondSquared64Member(AEO,ix)<<std::endl;
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullMeterPerSecondSquared64Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedMeterPerSecondSquared64Member (AEO,ix);
     }
 
     // SetNull test
@@ -7095,11 +7714,11 @@ void Test_Newton64()
     //  1. Member Parameter -> Member Class MT1 -> Member Property MT2 -> Output
     //  2. Member Property MT2 -> Member Item MI -> Output
     //  3. Member Property MT2 -> Member Item Array MIA -> Member Type Property MIA -> Output
-    //  4. Member Property EO -> Output
+    //  4. Member Property EO & AEO -> Output
     //  5. Member Parameter -> Member Array MA1 -> Member Array MA2 -> Member Array Property MA2 -> Output
     //  6. Member Array MA1 -> Member Item MI -> Member Array Property MI -> Output
     //  7. Member Array MA1 -> Member Item Array MIA -> Member Array Property MIA -> Output
-    //  8. Member Array Property EO -> Output
+    //  8. Member Array Property EO & AEO -> Output
     Header(L"Newton64");
     std::wcout<<"MemberId: "<<DotsTest::MemberTypes::Newton64MemberMemberIndex()<<std::endl;
     std::wcout<<"MemberId (arr): "<<DotsTest::MemberArrays::Newton64MemberMemberIndex()<<std::endl;
@@ -7180,6 +7799,13 @@ void Test_Newton64()
     Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullNewton64Member(EO);
     In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedNewton64Member(EO);
 
+    // AnotherEmptyObject
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullNewton64Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedNewton64Member(AEO);
+    std::wcout<<"Property Parameter Val: " << DotsTest::MemberTypesProperty::GetNewton64Member(AEO)<<std::endl;
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullNewton64Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedNewton64Member(AEO);
+
     //Array test
     for (int ix = 0; ix < DotsTest::ParameterArrays::Newton64ParameterArraySize(); ix++)
     {
@@ -7224,6 +7850,13 @@ void Test_Newton64()
         std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetNewton64Member(EO,ix)<<std::endl;
         Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullNewton64Member (EO,ix);
         In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedNewton64Member (EO,ix);
+
+        // AnotherEmptyObject
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullNewton64Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedNewton64Member (AEO,ix);
+        std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetNewton64Member(AEO,ix)<<std::endl;
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullNewton64Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedNewton64Member (AEO,ix);
     }
 
     // SetNull test
@@ -7250,11 +7883,11 @@ void Test_Pascal64()
     //  1. Member Parameter -> Member Class MT1 -> Member Property MT2 -> Output
     //  2. Member Property MT2 -> Member Item MI -> Output
     //  3. Member Property MT2 -> Member Item Array MIA -> Member Type Property MIA -> Output
-    //  4. Member Property EO -> Output
+    //  4. Member Property EO & AEO -> Output
     //  5. Member Parameter -> Member Array MA1 -> Member Array MA2 -> Member Array Property MA2 -> Output
     //  6. Member Array MA1 -> Member Item MI -> Member Array Property MI -> Output
     //  7. Member Array MA1 -> Member Item Array MIA -> Member Array Property MIA -> Output
-    //  8. Member Array Property EO -> Output
+    //  8. Member Array Property EO & AEO -> Output
     Header(L"Pascal64");
     std::wcout<<"MemberId: "<<DotsTest::MemberTypes::Pascal64MemberMemberIndex()<<std::endl;
     std::wcout<<"MemberId (arr): "<<DotsTest::MemberArrays::Pascal64MemberMemberIndex()<<std::endl;
@@ -7335,6 +7968,13 @@ void Test_Pascal64()
     Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullPascal64Member(EO);
     In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedPascal64Member(EO);
 
+    // AnotherEmptyObject
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullPascal64Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedPascal64Member(AEO);
+    std::wcout<<"Property Parameter Val: " << DotsTest::MemberTypesProperty::GetPascal64Member(AEO)<<std::endl;
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullPascal64Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedPascal64Member(AEO);
+
     //Array test
     for (int ix = 0; ix < DotsTest::ParameterArrays::Pascal64ParameterArraySize(); ix++)
     {
@@ -7379,6 +8019,13 @@ void Test_Pascal64()
         std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetPascal64Member(EO,ix)<<std::endl;
         Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullPascal64Member (EO,ix);
         In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedPascal64Member (EO,ix);
+
+        // AnotherEmptyObject
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullPascal64Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedPascal64Member (AEO,ix);
+        std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetPascal64Member(AEO,ix)<<std::endl;
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullPascal64Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedPascal64Member (AEO,ix);
     }
 
     // SetNull test
@@ -7405,11 +8052,11 @@ void Test_Radian64()
     //  1. Member Parameter -> Member Class MT1 -> Member Property MT2 -> Output
     //  2. Member Property MT2 -> Member Item MI -> Output
     //  3. Member Property MT2 -> Member Item Array MIA -> Member Type Property MIA -> Output
-    //  4. Member Property EO -> Output
+    //  4. Member Property EO & AEO -> Output
     //  5. Member Parameter -> Member Array MA1 -> Member Array MA2 -> Member Array Property MA2 -> Output
     //  6. Member Array MA1 -> Member Item MI -> Member Array Property MI -> Output
     //  7. Member Array MA1 -> Member Item Array MIA -> Member Array Property MIA -> Output
-    //  8. Member Array Property EO -> Output
+    //  8. Member Array Property EO & AEO -> Output
     Header(L"Radian64");
     std::wcout<<"MemberId: "<<DotsTest::MemberTypes::Radian64MemberMemberIndex()<<std::endl;
     std::wcout<<"MemberId (arr): "<<DotsTest::MemberArrays::Radian64MemberMemberIndex()<<std::endl;
@@ -7490,6 +8137,13 @@ void Test_Radian64()
     Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullRadian64Member(EO);
     In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedRadian64Member(EO);
 
+    // AnotherEmptyObject
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullRadian64Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedRadian64Member(AEO);
+    std::wcout<<"Property Parameter Val: " << DotsTest::MemberTypesProperty::GetRadian64Member(AEO)<<std::endl;
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullRadian64Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedRadian64Member(AEO);
+
     //Array test
     for (int ix = 0; ix < DotsTest::ParameterArrays::Radian64ParameterArraySize(); ix++)
     {
@@ -7534,6 +8188,13 @@ void Test_Radian64()
         std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetRadian64Member(EO,ix)<<std::endl;
         Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullRadian64Member (EO,ix);
         In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedRadian64Member (EO,ix);
+
+        // AnotherEmptyObject
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullRadian64Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedRadian64Member (AEO,ix);
+        std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetRadian64Member(AEO,ix)<<std::endl;
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullRadian64Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedRadian64Member (AEO,ix);
     }
 
     // SetNull test
@@ -7560,11 +8221,11 @@ void Test_RadianPerSecond64()
     //  1. Member Parameter -> Member Class MT1 -> Member Property MT2 -> Output
     //  2. Member Property MT2 -> Member Item MI -> Output
     //  3. Member Property MT2 -> Member Item Array MIA -> Member Type Property MIA -> Output
-    //  4. Member Property EO -> Output
+    //  4. Member Property EO & AEO -> Output
     //  5. Member Parameter -> Member Array MA1 -> Member Array MA2 -> Member Array Property MA2 -> Output
     //  6. Member Array MA1 -> Member Item MI -> Member Array Property MI -> Output
     //  7. Member Array MA1 -> Member Item Array MIA -> Member Array Property MIA -> Output
-    //  8. Member Array Property EO -> Output
+    //  8. Member Array Property EO & AEO -> Output
     Header(L"RadianPerSecond64");
     std::wcout<<"MemberId: "<<DotsTest::MemberTypes::RadianPerSecond64MemberMemberIndex()<<std::endl;
     std::wcout<<"MemberId (arr): "<<DotsTest::MemberArrays::RadianPerSecond64MemberMemberIndex()<<std::endl;
@@ -7645,6 +8306,13 @@ void Test_RadianPerSecond64()
     Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullRadianPerSecond64Member(EO);
     In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedRadianPerSecond64Member(EO);
 
+    // AnotherEmptyObject
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullRadianPerSecond64Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedRadianPerSecond64Member(AEO);
+    std::wcout<<"Property Parameter Val: " << DotsTest::MemberTypesProperty::GetRadianPerSecond64Member(AEO)<<std::endl;
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullRadianPerSecond64Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedRadianPerSecond64Member(AEO);
+
     //Array test
     for (int ix = 0; ix < DotsTest::ParameterArrays::RadianPerSecond64ParameterArraySize(); ix++)
     {
@@ -7689,6 +8357,13 @@ void Test_RadianPerSecond64()
         std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetRadianPerSecond64Member(EO,ix)<<std::endl;
         Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullRadianPerSecond64Member (EO,ix);
         In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedRadianPerSecond64Member (EO,ix);
+
+        // AnotherEmptyObject
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullRadianPerSecond64Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedRadianPerSecond64Member (AEO,ix);
+        std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetRadianPerSecond64Member(AEO,ix)<<std::endl;
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullRadianPerSecond64Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedRadianPerSecond64Member (AEO,ix);
     }
 
     // SetNull test
@@ -7715,11 +8390,11 @@ void Test_RadianPerSecondSquared64()
     //  1. Member Parameter -> Member Class MT1 -> Member Property MT2 -> Output
     //  2. Member Property MT2 -> Member Item MI -> Output
     //  3. Member Property MT2 -> Member Item Array MIA -> Member Type Property MIA -> Output
-    //  4. Member Property EO -> Output
+    //  4. Member Property EO & AEO -> Output
     //  5. Member Parameter -> Member Array MA1 -> Member Array MA2 -> Member Array Property MA2 -> Output
     //  6. Member Array MA1 -> Member Item MI -> Member Array Property MI -> Output
     //  7. Member Array MA1 -> Member Item Array MIA -> Member Array Property MIA -> Output
-    //  8. Member Array Property EO -> Output
+    //  8. Member Array Property EO & AEO -> Output
     Header(L"RadianPerSecondSquared64");
     std::wcout<<"MemberId: "<<DotsTest::MemberTypes::RadianPerSecondSquared64MemberMemberIndex()<<std::endl;
     std::wcout<<"MemberId (arr): "<<DotsTest::MemberArrays::RadianPerSecondSquared64MemberMemberIndex()<<std::endl;
@@ -7800,6 +8475,13 @@ void Test_RadianPerSecondSquared64()
     Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullRadianPerSecondSquared64Member(EO);
     In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedRadianPerSecondSquared64Member(EO);
 
+    // AnotherEmptyObject
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullRadianPerSecondSquared64Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedRadianPerSecondSquared64Member(AEO);
+    std::wcout<<"Property Parameter Val: " << DotsTest::MemberTypesProperty::GetRadianPerSecondSquared64Member(AEO)<<std::endl;
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullRadianPerSecondSquared64Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedRadianPerSecondSquared64Member(AEO);
+
     //Array test
     for (int ix = 0; ix < DotsTest::ParameterArrays::RadianPerSecondSquared64ParameterArraySize(); ix++)
     {
@@ -7844,6 +8526,13 @@ void Test_RadianPerSecondSquared64()
         std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetRadianPerSecondSquared64Member(EO,ix)<<std::endl;
         Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullRadianPerSecondSquared64Member (EO,ix);
         In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedRadianPerSecondSquared64Member (EO,ix);
+
+        // AnotherEmptyObject
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullRadianPerSecondSquared64Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedRadianPerSecondSquared64Member (AEO,ix);
+        std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetRadianPerSecondSquared64Member(AEO,ix)<<std::endl;
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullRadianPerSecondSquared64Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedRadianPerSecondSquared64Member (AEO,ix);
     }
 
     // SetNull test
@@ -7870,11 +8559,11 @@ void Test_Second64()
     //  1. Member Parameter -> Member Class MT1 -> Member Property MT2 -> Output
     //  2. Member Property MT2 -> Member Item MI -> Output
     //  3. Member Property MT2 -> Member Item Array MIA -> Member Type Property MIA -> Output
-    //  4. Member Property EO -> Output
+    //  4. Member Property EO & AEO -> Output
     //  5. Member Parameter -> Member Array MA1 -> Member Array MA2 -> Member Array Property MA2 -> Output
     //  6. Member Array MA1 -> Member Item MI -> Member Array Property MI -> Output
     //  7. Member Array MA1 -> Member Item Array MIA -> Member Array Property MIA -> Output
-    //  8. Member Array Property EO -> Output
+    //  8. Member Array Property EO & AEO -> Output
     Header(L"Second64");
     std::wcout<<"MemberId: "<<DotsTest::MemberTypes::Second64MemberMemberIndex()<<std::endl;
     std::wcout<<"MemberId (arr): "<<DotsTest::MemberArrays::Second64MemberMemberIndex()<<std::endl;
@@ -7955,6 +8644,13 @@ void Test_Second64()
     Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullSecond64Member(EO);
     In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedSecond64Member(EO);
 
+    // AnotherEmptyObject
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullSecond64Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedSecond64Member(AEO);
+    std::wcout<<"Property Parameter Val: " << DotsTest::MemberTypesProperty::GetSecond64Member(AEO)<<std::endl;
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullSecond64Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedSecond64Member(AEO);
+
     //Array test
     for (int ix = 0; ix < DotsTest::ParameterArrays::Second64ParameterArraySize(); ix++)
     {
@@ -7999,6 +8695,13 @@ void Test_Second64()
         std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetSecond64Member(EO,ix)<<std::endl;
         Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullSecond64Member (EO,ix);
         In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedSecond64Member (EO,ix);
+
+        // AnotherEmptyObject
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullSecond64Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedSecond64Member (AEO,ix);
+        std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetSecond64Member(AEO,ix)<<std::endl;
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullSecond64Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedSecond64Member (AEO,ix);
     }
 
     // SetNull test
@@ -8025,11 +8728,11 @@ void Test_SquareMeter64()
     //  1. Member Parameter -> Member Class MT1 -> Member Property MT2 -> Output
     //  2. Member Property MT2 -> Member Item MI -> Output
     //  3. Member Property MT2 -> Member Item Array MIA -> Member Type Property MIA -> Output
-    //  4. Member Property EO -> Output
+    //  4. Member Property EO & AEO -> Output
     //  5. Member Parameter -> Member Array MA1 -> Member Array MA2 -> Member Array Property MA2 -> Output
     //  6. Member Array MA1 -> Member Item MI -> Member Array Property MI -> Output
     //  7. Member Array MA1 -> Member Item Array MIA -> Member Array Property MIA -> Output
-    //  8. Member Array Property EO -> Output
+    //  8. Member Array Property EO & AEO -> Output
     Header(L"SquareMeter64");
     std::wcout<<"MemberId: "<<DotsTest::MemberTypes::SquareMeter64MemberMemberIndex()<<std::endl;
     std::wcout<<"MemberId (arr): "<<DotsTest::MemberArrays::SquareMeter64MemberMemberIndex()<<std::endl;
@@ -8110,6 +8813,13 @@ void Test_SquareMeter64()
     Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullSquareMeter64Member(EO);
     In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedSquareMeter64Member(EO);
 
+    // AnotherEmptyObject
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullSquareMeter64Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedSquareMeter64Member(AEO);
+    std::wcout<<"Property Parameter Val: " << DotsTest::MemberTypesProperty::GetSquareMeter64Member(AEO)<<std::endl;
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullSquareMeter64Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedSquareMeter64Member(AEO);
+
     //Array test
     for (int ix = 0; ix < DotsTest::ParameterArrays::SquareMeter64ParameterArraySize(); ix++)
     {
@@ -8154,6 +8864,13 @@ void Test_SquareMeter64()
         std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetSquareMeter64Member(EO,ix)<<std::endl;
         Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullSquareMeter64Member (EO,ix);
         In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedSquareMeter64Member (EO,ix);
+
+        // AnotherEmptyObject
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullSquareMeter64Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedSquareMeter64Member (AEO,ix);
+        std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetSquareMeter64Member(AEO,ix)<<std::endl;
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullSquareMeter64Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedSquareMeter64Member (AEO,ix);
     }
 
     // SetNull test
@@ -8180,11 +8897,11 @@ void Test_Steradian64()
     //  1. Member Parameter -> Member Class MT1 -> Member Property MT2 -> Output
     //  2. Member Property MT2 -> Member Item MI -> Output
     //  3. Member Property MT2 -> Member Item Array MIA -> Member Type Property MIA -> Output
-    //  4. Member Property EO -> Output
+    //  4. Member Property EO & AEO -> Output
     //  5. Member Parameter -> Member Array MA1 -> Member Array MA2 -> Member Array Property MA2 -> Output
     //  6. Member Array MA1 -> Member Item MI -> Member Array Property MI -> Output
     //  7. Member Array MA1 -> Member Item Array MIA -> Member Array Property MIA -> Output
-    //  8. Member Array Property EO -> Output
+    //  8. Member Array Property EO & AEO -> Output
     Header(L"Steradian64");
     std::wcout<<"MemberId: "<<DotsTest::MemberTypes::Steradian64MemberMemberIndex()<<std::endl;
     std::wcout<<"MemberId (arr): "<<DotsTest::MemberArrays::Steradian64MemberMemberIndex()<<std::endl;
@@ -8265,6 +8982,13 @@ void Test_Steradian64()
     Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullSteradian64Member(EO);
     In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedSteradian64Member(EO);
 
+    // AnotherEmptyObject
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullSteradian64Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedSteradian64Member(AEO);
+    std::wcout<<"Property Parameter Val: " << DotsTest::MemberTypesProperty::GetSteradian64Member(AEO)<<std::endl;
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullSteradian64Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedSteradian64Member(AEO);
+
     //Array test
     for (int ix = 0; ix < DotsTest::ParameterArrays::Steradian64ParameterArraySize(); ix++)
     {
@@ -8309,6 +9033,13 @@ void Test_Steradian64()
         std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetSteradian64Member(EO,ix)<<std::endl;
         Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullSteradian64Member (EO,ix);
         In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedSteradian64Member (EO,ix);
+
+        // AnotherEmptyObject
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullSteradian64Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedSteradian64Member (AEO,ix);
+        std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetSteradian64Member(AEO,ix)<<std::endl;
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullSteradian64Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedSteradian64Member (AEO,ix);
     }
 
     // SetNull test
@@ -8335,11 +9066,11 @@ void Test_Volt64()
     //  1. Member Parameter -> Member Class MT1 -> Member Property MT2 -> Output
     //  2. Member Property MT2 -> Member Item MI -> Output
     //  3. Member Property MT2 -> Member Item Array MIA -> Member Type Property MIA -> Output
-    //  4. Member Property EO -> Output
+    //  4. Member Property EO & AEO -> Output
     //  5. Member Parameter -> Member Array MA1 -> Member Array MA2 -> Member Array Property MA2 -> Output
     //  6. Member Array MA1 -> Member Item MI -> Member Array Property MI -> Output
     //  7. Member Array MA1 -> Member Item Array MIA -> Member Array Property MIA -> Output
-    //  8. Member Array Property EO -> Output
+    //  8. Member Array Property EO & AEO -> Output
     Header(L"Volt64");
     std::wcout<<"MemberId: "<<DotsTest::MemberTypes::Volt64MemberMemberIndex()<<std::endl;
     std::wcout<<"MemberId (arr): "<<DotsTest::MemberArrays::Volt64MemberMemberIndex()<<std::endl;
@@ -8420,6 +9151,13 @@ void Test_Volt64()
     Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullVolt64Member(EO);
     In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedVolt64Member(EO);
 
+    // AnotherEmptyObject
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullVolt64Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedVolt64Member(AEO);
+    std::wcout<<"Property Parameter Val: " << DotsTest::MemberTypesProperty::GetVolt64Member(AEO)<<std::endl;
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullVolt64Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedVolt64Member(AEO);
+
     //Array test
     for (int ix = 0; ix < DotsTest::ParameterArrays::Volt64ParameterArraySize(); ix++)
     {
@@ -8464,6 +9202,13 @@ void Test_Volt64()
         std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetVolt64Member(EO,ix)<<std::endl;
         Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullVolt64Member (EO,ix);
         In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedVolt64Member (EO,ix);
+
+        // AnotherEmptyObject
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullVolt64Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedVolt64Member (AEO,ix);
+        std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetVolt64Member(AEO,ix)<<std::endl;
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullVolt64Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedVolt64Member (AEO,ix);
     }
 
     // SetNull test
@@ -8490,11 +9235,11 @@ void Test_Watt64()
     //  1. Member Parameter -> Member Class MT1 -> Member Property MT2 -> Output
     //  2. Member Property MT2 -> Member Item MI -> Output
     //  3. Member Property MT2 -> Member Item Array MIA -> Member Type Property MIA -> Output
-    //  4. Member Property EO -> Output
+    //  4. Member Property EO & AEO -> Output
     //  5. Member Parameter -> Member Array MA1 -> Member Array MA2 -> Member Array Property MA2 -> Output
     //  6. Member Array MA1 -> Member Item MI -> Member Array Property MI -> Output
     //  7. Member Array MA1 -> Member Item Array MIA -> Member Array Property MIA -> Output
-    //  8. Member Array Property EO -> Output
+    //  8. Member Array Property EO & AEO -> Output
     Header(L"Watt64");
     std::wcout<<"MemberId: "<<DotsTest::MemberTypes::Watt64MemberMemberIndex()<<std::endl;
     std::wcout<<"MemberId (arr): "<<DotsTest::MemberArrays::Watt64MemberMemberIndex()<<std::endl;
@@ -8575,6 +9320,13 @@ void Test_Watt64()
     Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullWatt64Member(EO);
     In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedWatt64Member(EO);
 
+    // AnotherEmptyObject
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullWatt64Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedWatt64Member(AEO);
+    std::wcout<<"Property Parameter Val: " << DotsTest::MemberTypesProperty::GetWatt64Member(AEO)<<std::endl;
+    Null_Ok  = Null_Ok && !DotsTest::MemberTypesProperty::IsNullWatt64Member(AEO);
+    In_Req_Ok  = In_Req_Ok && !DotsTest::MemberTypesProperty::IsChangedWatt64Member(AEO);
+
     //Array test
     for (int ix = 0; ix < DotsTest::ParameterArrays::Watt64ParameterArraySize(); ix++)
     {
@@ -8619,6 +9371,13 @@ void Test_Watt64()
         std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetWatt64Member(EO,ix)<<std::endl;
         Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullWatt64Member (EO,ix);
         In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedWatt64Member (EO,ix);
+
+        // AnotherEmptyObject
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullWatt64Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedWatt64Member (AEO,ix);
+        std::wcout<<"Parameter Array Val "<<ix <<": " << DotsTest::MemberArraysProperty::GetWatt64Member(AEO,ix)<<std::endl;
+        Null_Ok  = Null_Ok && !DotsTest::MemberArraysProperty::IsNullWatt64Member (AEO,ix);
+        In_Req_Ok  = In_Req_Ok && !DotsTest::MemberArraysProperty::IsChangedWatt64Member (AEO,ix);
     }
 
     // SetNull test
@@ -9593,6 +10352,7 @@ int main(int /*argc*/, char* /*argv*/[])
     MI = DotsTest::MemberItems::Create();
     MIA = DotsTest::MemberItemsArray::Create();
     EO = DotsTest::EmptyObject::Create();
+    AEO = DotsTest::AnotherEmptyObject::Create();
 
     try
     {

@@ -14,6 +14,8 @@ MemberItemsArray - MemberTypesProperty: true
 MemberItemsArray - MemberArraysProperty: true
 EmptyObject - MemberTypesProperty: true
 EmptyObject - MemberArraysProperty: true
+AnotherEmptyObject - MemberTypesProperty: true
+AnotherEmptyObject - MemberArraysProperty: true
 
 
 
@@ -86,14 +88,17 @@ Val: 32
 Item Val: 32
 Item Array Val: 32
 Property Parameter Val: 10
+Property Parameter Val: 32
 Val 0: 32
 Array Item Val 0: 32
 Array Item Array Val 0: 32
 Parameter Array Val 0: 10
+Parameter Array Val 0: 32
 Val 1: -32
 Array Item Val 1: -32
 Array Item Array Val 1: -32
 Parameter Array Val 1: 20
+Parameter Array Val 1: -32
 Is_Null OK: true
 Is_Changed OK: true
 
@@ -118,14 +123,17 @@ Val: 64
 Item Val: 64
 Item Array Val: 64
 Property Parameter Val: 10
+Property Parameter Val: 64
 Val 0: 64
 Array Item Val 0: 64
 Array Item Array Val 0: 64
 Parameter Array Val 0: 10
+Parameter Array Val 0: 64
 Val 1: -64
 Array Item Val 1: -64
 Array Item Array Val 1: -64
 Parameter Array Val 1: 20
+Parameter Array Val 1: -64
 Is_Null OK: true
 Is_Changed OK: true
 
@@ -150,14 +158,17 @@ Val: 32
 Item Val: 32
 Item Array Val: 32
 Property Parameter Val: 10
+Property Parameter Val: 32
 Val 0: 32
 Array Item Val 0: 32
 Array Item Array Val 0: 32
 Parameter Array Val 0: 10
+Parameter Array Val 0: 32
 Val 1: -32
 Array Item Val 1: -32
 Array Item Array Val 1: -32
 Parameter Array Val 1: 20
+Parameter Array Val 1: -32
 Is_Null OK: true
 Is_Changed OK: true
 
@@ -182,14 +193,17 @@ Val: 64
 Item Val: 64
 Item Array Val: 64
 Property Parameter Val: 10
+Property Parameter Val: 64
 Val 0: 64
 Array Item Val 0: 64
 Array Item Array Val 0: 64
 Parameter Array Val 0: 10
+Parameter Array Val 0: 64
 Val 1: -64
 Array Item Val 1: -64
 Array Item Array Val 1: -64
 Parameter Array Val 1: 20
+Parameter Array Val 1: -64
 Is_Null OK: true
 Is_Changed OK: true
 
@@ -214,14 +228,17 @@ Val: true
 Item Val: true
 Item Array Val: true
 Property Parameter Val: false
+Property Parameter Val: true
 Val 0: true
 Array Item Val 0: true
 Array Item Array Val 0: true
 Parameter Array Val 0: false
+Parameter Array Val 0: true
 Val 1: false
 Array Item Val 1: false
 Array Item Array Val 1: false
 Parameter Array Val 1: true
+Parameter Array Val 1: false
 Is_Null OK: true
 Is_Changed OK: true
 
@@ -252,13 +269,16 @@ Val: MyFirst
 Item Val: MyFirst
 Item Array Val: MyFirst
 Property Parameter Val: MyFirst
+Property Parameter Val: MyFirst
 Val 0: MyFirst
 Array Item Val 0: MyFirst
 Array Item Array Val 0: MyFirst
 Parameter Array Val 0: MyFirst
+Parameter Array Val 0: MyFirst
 Val 1: MySecond
 Array Item Val 1: MySecond
 Array Item Array Val 1: MySecond
+Parameter Array Val 1: MySecond
 Parameter Array Val 1: MySecond
 Is_Null OK: true
 Is_Changed OK: true
@@ -285,14 +305,17 @@ Val: <correct>
 Item Val: <correct>
 Item Array Val: <correct>
 Property Parameter Val: abcdABCD
+Property Parameter Val: <correct>
 Val 0: <correct>
 Array Item Val 0: <correct>
 Array Item Array Val 0: <correct>
 Parameter Array Val 0: abcdABCD
+Parameter Array Val 0: <correct>
 Val 1: <correct>
 Array Item Val 1: <correct>
 Array Item Array Val 1: <correct>
 Parameter Array Val 1: abcdABCDasdf
+Parameter Array Val 1: <correct>
 Is_Null OK: true
 Is_Changed OK: true
 
@@ -317,13 +340,16 @@ Val: (DotsTest.TestItem, 0)
 Item Val: (DotsTest.TestItem, 0)
 Item Array Val:(DotsTest.TestItem, 0)
 Property Parameter Val: (DotsTest.TestItem, SomeInstance)
+Property Parameter Val: (DotsTest.TestItem, 0)
 Val 0: (DotsTest.TestItem, 0)
 Array Item Val 0: (DotsTest.TestItem, 0)
 Array Item Array Val 0: (DotsTest.TestItem, 0)
 Parameter Array Val 0: (DotsTest.TestItem, 1)
+Parameter Array Val 0: (DotsTest.TestItem, 0)
 Val 1: (DotsTest.TestItem, SomeInstance)
 Array Item Val 1: (DotsTest.TestItem, SomeInstance)
 Array Item Array Val 1: (DotsTest.TestItem, SomeInstance)
+Parameter Array Val 1: (DotsTest.TestItem, SomeInstance)
 Parameter Array Val 1: (DotsTest.TestItem, SomeInstance)
 Is_Null OK: true
 Is_Changed OK: true
@@ -349,13 +375,16 @@ Val: SomeInstance
 Item Val: SomeInstance
 Item Array Val:SomeInstance
 Property Parameter Val: SomeInstance
+Property Parameter Val: SomeInstance
 Val 0: 0
 Array Item Val 0: 0
 Array Item Array Val 0: 0
 Parameter Array Val 0: 0
+Parameter Array Val 0: 0
 Val 1: SomeInstance
 Array Item Val 1: SomeInstance
 Array Item Array Val 1: SomeInstance
+Parameter Array Val 1: SomeInstance
 Parameter Array Val 1: SomeInstance
 Is_Null OK: true
 Is_Changed OK: true
@@ -381,14 +410,17 @@ Val: DotsTest.TestItem
 Item Val: DotsTest.TestItem
 Item Array Val: DotsTest.TestItem
 Property Parameter Val: DotsTest.TestItem
+Property Parameter Val: DotsTest.TestItem
 Val 0: DotsTest.TestItem
 Array Item Val 0: DotsTest.TestItem
 Array Item Array Val 0: DotsTest.TestItem
+Parameter Array Val 0: DotsTest.TestItem
 Parameter Array Val 0: DotsTest.TestItem
 Val 1: DotsTest.TestEnum
 Array Item Val 1: DotsTest.TestEnum
 Array Item Array Val 1: DotsTest.TestEnum
 Parameter Array Val 1: DotsTest.EmptyObject
+Parameter Array Val 1: DotsTest.TestEnum
 Is_Null OK: true
 Is_Changed OK: true
 
@@ -413,13 +445,16 @@ Val: SomeChannel
 Item Val: SomeChannel
 Item Array Val:SomeChannel
 Property Parameter Val: SomeChannel
+Property Parameter Val: SomeChannel
 Val 0: 0
 Array Item Val 0: 0
 Array Item Array Val 0: 0
 Parameter Array Val 0: 0
+Parameter Array Val 0: 0
 Val 1: SomeChannel
 Array Item Val 1: SomeChannel
 Array Item Array Val 1: SomeChannel
+Parameter Array Val 1: SomeChannel
 Parameter Array Val 1: SomeChannel
 Is_Null OK: true
 Is_Changed OK: true
@@ -445,13 +480,16 @@ Val: SomeHandler
 Item Val: SomeHandler
 Item Array Val:SomeHandler
 Property Parameter Val: SomeHandler
+Property Parameter Val: SomeHandler
 Val 0: 0
 Array Item Val 0: 0
 Array Item Array Val 0: 0
 Parameter Array Val 0: 0
+Parameter Array Val 0: 0
 Val 1: SomeHandler
 Array Item Val 1: SomeHandler
 Array Item Array Val 1: SomeHandler
+Parameter Array Val 1: SomeHandler
 Parameter Array Val 1: SomeHandler
 Is_Null OK: true
 Is_Changed OK: true
@@ -478,13 +516,16 @@ Val: <?xml version="1.0" encoding="utf-8"?><Object></Object>
 Item Val: <?xml version="1.0" encoding="utf-8"?><Object></Object>
 Item Array Val: <?xml version="1.0" encoding="utf-8"?><Object></Object>
 Property Parameter Val: <?xml version="1.0" encoding="utf-8"?><Object></Object>
+Property Parameter Val: <?xml version="1.0" encoding="utf-8"?><Object></Object>
 Val 0: <?xml version="1.0" encoding="utf-8"?><Object></Object>
 Array Item Val 0: <?xml version="1.0" encoding="utf-8"?><Object></Object>
 Array Item Array Val 0: <?xml version="1.0" encoding="utf-8"?><Object></Object>
 Parameter Array Val 0: <?xml version="1.0" encoding="utf-8"?><Object></Object>
+Parameter Array Val 0: <?xml version="1.0" encoding="utf-8"?><Object></Object>
 Val 1: <?xml version="1.0" encoding="utf-8"?><Object></Object>
 Array Item Val 1: <?xml version="1.0" encoding="utf-8"?><Object></Object>
 Array Item Array Val 1: <?xml version="1.0" encoding="utf-8"?><Object></Object>
+Parameter Array Val 1: <?xml version="1.0" encoding="utf-8"?><Object></Object>
 Parameter Array Val 1: <?xml version="1.0" encoding="utf-8"?><Object></Object>
 Is_Null OK: true
 Is_Changed OK: true
@@ -510,13 +551,16 @@ Val: VGVzdGluZyBiaW5hcnkgdHlwZQ==
 Item Val: VGVzdGluZyBiaW5hcnkgdHlwZQ==
 Item Array Val: VGVzdGluZyBiaW5hcnkgdHlwZQ==
 Property Parameter Val: VGVzdGluZyBiaW5hcnkgdHlwZQ==
+Property Parameter Val: VGVzdGluZyBiaW5hcnkgdHlwZQ==
 Val 0: VGVzdGluZyBiaW5hcnkgdHlwZQ==
 Array Item Val 0: VGVzdGluZyBiaW5hcnkgdHlwZQ==
 Array Item Array Val 0: VGVzdGluZyBiaW5hcnkgdHlwZQ==
 Parameter Array Val 0: VGVzdGluZyBiaW5hcnkgdHlwZQ==
+Parameter Array Val 0: VGVzdGluZyBiaW5hcnkgdHlwZQ==
 Val 1: b25jZSBtb3JlLi4u
 Array Item Val 1: b25jZSBtb3JlLi4u
 Array Item Array Val 1: b25jZSBtb3JlLi4u
+Parameter Array Val 1: b25jZSBtb3JlLi4u
 Parameter Array Val 1: b25jZSBtb3JlLi4u
 Is_Null OK: true
 Is_Changed OK: true
@@ -543,14 +587,17 @@ Val: <?xml version="1.0" encoding="utf-8"?><DotsTest.TestItem><MyInt>-32</MyInt>
 Item Val: <?xml version="1.0" encoding="utf-8"?><DotsTest.TestItem><MyInt>-32</MyInt></DotsTest.TestItem>
 Item Array Val: <?xml version="1.0" encoding="utf-8"?><DotsTest.TestItem><MyInt>-32</MyInt></DotsTest.TestItem>
 Property Parameter Val: <?xml version="1.0" encoding="utf-8"?><DotsTest.TestItem><MyInt>20</MyInt></DotsTest.TestItem>
+Property Parameter Val: <?xml version="1.0" encoding="utf-8"?><DotsTest.TestItem><MyInt>-32</MyInt></DotsTest.TestItem>
 Val 0: <?xml version="1.0" encoding="utf-8"?><DotsTest.TestItem><MyInt>3200</MyInt></DotsTest.TestItem>
 Array Item Val 0: <?xml version="1.0" encoding="utf-8"?><DotsTest.TestItem><MyInt>3200</MyInt></DotsTest.TestItem>
 Array Item Array Val 0: <?xml version="1.0" encoding="utf-8"?><DotsTest.TestItem><MyInt>3200</MyInt></DotsTest.TestItem>
 Parameter Array Val 0: <?xml version="1.0" encoding="utf-8"?><DotsTest.TestItem><MyInt>20</MyInt></DotsTest.TestItem>
+Parameter Array Val 0: <?xml version="1.0" encoding="utf-8"?><DotsTest.TestItem><MyInt>3200</MyInt></DotsTest.TestItem>
 Val 1: <?xml version="1.0" encoding="utf-8"?><DotsTest.TestItem><MyInt>-3200</MyInt></DotsTest.TestItem>
 Array Item Val 1: <?xml version="1.0" encoding="utf-8"?><DotsTest.TestItem><MyInt>-3200</MyInt></DotsTest.TestItem>
 Array Item Array Val 1: <?xml version="1.0" encoding="utf-8"?><DotsTest.TestItem><MyInt>-3200</MyInt></DotsTest.TestItem>
 Parameter Array Val 1: <?xml version="1.0" encoding="utf-8"?><DotsTest.TestItem><MyInt>20</MyInt></DotsTest.TestItem>
+Parameter Array Val 1: <?xml version="1.0" encoding="utf-8"?><DotsTest.TestItem><MyInt>-3200</MyInt></DotsTest.TestItem>
 Is_Null OK: true
 Is_Changed OK: true
 
@@ -575,14 +622,17 @@ Val: 32001
 Item Val: 32001
 Item Array Val: 32001
 Property Parameter Val: 10.01
+Property Parameter Val: 32001
 Val 0: 32001
 Array Item Val 0: 32001
 Array Item Array Val 0: 32001
 Parameter Array Val 0: 10.01
+Parameter Array Val 0: 32001
 Val 1: -32001
 Array Item Val 1: -32001
 Array Item Array Val 1: -32001
 Parameter Array Val 1: 20.02
+Parameter Array Val 1: -32001
 Is_Null OK: true
 Is_Changed OK: true
 
@@ -607,14 +657,17 @@ Val: 32002
 Item Val: 32002
 Item Array Val: 32002
 Property Parameter Val: 10.01
+Property Parameter Val: 32002
 Val 0: 32002
 Array Item Val 0: 32002
 Array Item Array Val 0: 32002
 Parameter Array Val 0: 10.01
+Parameter Array Val 0: 32002
 Val 1: -32002
 Array Item Val 1: -32002
 Array Item Array Val 1: -32002
 Parameter Array Val 1: 20.02
+Parameter Array Val 1: -32002
 Is_Null OK: true
 Is_Changed OK: true
 
@@ -639,14 +692,17 @@ Val: 32003
 Item Val: 32003
 Item Array Val: 32003
 Property Parameter Val: 10.01
+Property Parameter Val: 32003
 Val 0: 32003
 Array Item Val 0: 32003
 Array Item Array Val 0: 32003
 Parameter Array Val 0: 10.01
+Parameter Array Val 0: 32003
 Val 1: -32003
 Array Item Val 1: -32003
 Array Item Array Val 1: -32003
 Parameter Array Val 1: 20.02
+Parameter Array Val 1: -32003
 Is_Null OK: true
 Is_Changed OK: true
 
@@ -671,14 +727,17 @@ Val: 32004
 Item Val: 32004
 Item Array Val: 32004
 Property Parameter Val: 10.01
+Property Parameter Val: 32004
 Val 0: 32004
 Array Item Val 0: 32004
 Array Item Array Val 0: 32004
 Parameter Array Val 0: 10.01
+Parameter Array Val 0: 32004
 Val 1: -32004
 Array Item Val 1: -32004
 Array Item Array Val 1: -32004
 Parameter Array Val 1: 20.02
+Parameter Array Val 1: -32004
 Is_Null OK: true
 Is_Changed OK: true
 
@@ -703,14 +762,17 @@ Val: 32005
 Item Val: 32005
 Item Array Val: 32005
 Property Parameter Val: 10.01
+Property Parameter Val: 32005
 Val 0: 32005
 Array Item Val 0: 32005
 Array Item Array Val 0: 32005
 Parameter Array Val 0: 10.01
+Parameter Array Val 0: 32005
 Val 1: -32005
 Array Item Val 1: -32005
 Array Item Array Val 1: -32005
 Parameter Array Val 1: 20.02
+Parameter Array Val 1: -32005
 Is_Null OK: true
 Is_Changed OK: true
 
@@ -735,14 +797,17 @@ Val: 32006
 Item Val: 32006
 Item Array Val: 32006
 Property Parameter Val: 10.01
+Property Parameter Val: 32006
 Val 0: 32006
 Array Item Val 0: 32006
 Array Item Array Val 0: 32006
 Parameter Array Val 0: 10.01
+Parameter Array Val 0: 32006
 Val 1: -32006
 Array Item Val 1: -32006
 Array Item Array Val 1: -32006
 Parameter Array Val 1: 20.02
+Parameter Array Val 1: -32006
 Is_Null OK: true
 Is_Changed OK: true
 
@@ -767,14 +832,17 @@ Val: 32007
 Item Val: 32007
 Item Array Val: 32007
 Property Parameter Val: 10.01
+Property Parameter Val: 32007
 Val 0: 32007
 Array Item Val 0: 32007
 Array Item Array Val 0: 32007
 Parameter Array Val 0: 10.01
+Parameter Array Val 0: 32007
 Val 1: -32007
 Array Item Val 1: -32007
 Array Item Array Val 1: -32007
 Parameter Array Val 1: 20.02
+Parameter Array Val 1: -32007
 Is_Null OK: true
 Is_Changed OK: true
 
@@ -799,14 +867,17 @@ Val: 32008
 Item Val: 32008
 Item Array Val: 32008
 Property Parameter Val: 10.01
+Property Parameter Val: 32008
 Val 0: 32008
 Array Item Val 0: 32008
 Array Item Array Val 0: 32008
 Parameter Array Val 0: 10.01
+Parameter Array Val 0: 32008
 Val 1: -32008
 Array Item Val 1: -32008
 Array Item Array Val 1: -32008
 Parameter Array Val 1: 20.02
+Parameter Array Val 1: -32008
 Is_Null OK: true
 Is_Changed OK: true
 
@@ -831,14 +902,17 @@ Val: 32009
 Item Val: 32009
 Item Array Val: 32009
 Property Parameter Val: 10.01
+Property Parameter Val: 32009
 Val 0: 32009
 Array Item Val 0: 32009
 Array Item Array Val 0: 32009
 Parameter Array Val 0: 10.01
+Parameter Array Val 0: 32009
 Val 1: -32009
 Array Item Val 1: -32009
 Array Item Array Val 1: -32009
 Parameter Array Val 1: 20.02
+Parameter Array Val 1: -32009
 Is_Null OK: true
 Is_Changed OK: true
 
@@ -863,14 +937,17 @@ Val: 32010
 Item Val: 32010
 Item Array Val: 32010
 Property Parameter Val: 10.01
+Property Parameter Val: 32010
 Val 0: 32010
 Array Item Val 0: 32010
 Array Item Array Val 0: 32010
 Parameter Array Val 0: 10.01
+Parameter Array Val 0: 32010
 Val 1: -32010
 Array Item Val 1: -32010
 Array Item Array Val 1: -32010
 Parameter Array Val 1: 20.02
+Parameter Array Val 1: -32010
 Is_Null OK: true
 Is_Changed OK: true
 
@@ -895,14 +972,17 @@ Val: 32011
 Item Val: 32011
 Item Array Val: 32011
 Property Parameter Val: 10.01
+Property Parameter Val: 32011
 Val 0: 32011
 Array Item Val 0: 32011
 Array Item Array Val 0: 32011
 Parameter Array Val 0: 10.01
+Parameter Array Val 0: 32011
 Val 1: -32011
 Array Item Val 1: -32011
 Array Item Array Val 1: -32011
 Parameter Array Val 1: 20.02
+Parameter Array Val 1: -32011
 Is_Null OK: true
 Is_Changed OK: true
 
@@ -927,14 +1007,17 @@ Val: 32012
 Item Val: 32012
 Item Array Val: 32012
 Property Parameter Val: 10.01
+Property Parameter Val: 32012
 Val 0: 32012
 Array Item Val 0: 32012
 Array Item Array Val 0: 32012
 Parameter Array Val 0: 10.01
+Parameter Array Val 0: 32012
 Val 1: -32012
 Array Item Val 1: -32012
 Array Item Array Val 1: -32012
 Parameter Array Val 1: 20.02
+Parameter Array Val 1: -32012
 Is_Null OK: true
 Is_Changed OK: true
 
@@ -959,14 +1042,17 @@ Val: 32013
 Item Val: 32013
 Item Array Val: 32013
 Property Parameter Val: 10.01
+Property Parameter Val: 32013
 Val 0: 32013
 Array Item Val 0: 32013
 Array Item Array Val 0: 32013
 Parameter Array Val 0: 10.01
+Parameter Array Val 0: 32013
 Val 1: -32013
 Array Item Val 1: -32013
 Array Item Array Val 1: -32013
 Parameter Array Val 1: 20.02
+Parameter Array Val 1: -32013
 Is_Null OK: true
 Is_Changed OK: true
 
@@ -991,14 +1077,17 @@ Val: 32014
 Item Val: 32014
 Item Array Val: 32014
 Property Parameter Val: 10.01
+Property Parameter Val: 32014
 Val 0: 32014
 Array Item Val 0: 32014
 Array Item Array Val 0: 32014
 Parameter Array Val 0: 10.01
+Parameter Array Val 0: 32014
 Val 1: -32014
 Array Item Val 1: -32014
 Array Item Array Val 1: -32014
 Parameter Array Val 1: 20.02
+Parameter Array Val 1: -32014
 Is_Null OK: true
 Is_Changed OK: true
 
@@ -1023,14 +1112,17 @@ Val: 32015
 Item Val: 32015
 Item Array Val: 32015
 Property Parameter Val: 10.01
+Property Parameter Val: 32015
 Val 0: 32015
 Array Item Val 0: 32015
 Array Item Array Val 0: 32015
 Parameter Array Val 0: 10.01
+Parameter Array Val 0: 32015
 Val 1: -32015
 Array Item Val 1: -32015
 Array Item Array Val 1: -32015
 Parameter Array Val 1: 20.02
+Parameter Array Val 1: -32015
 Is_Null OK: true
 Is_Changed OK: true
 
@@ -1055,14 +1147,17 @@ Val: 32016
 Item Val: 32016
 Item Array Val: 32016
 Property Parameter Val: 10.01
+Property Parameter Val: 32016
 Val 0: 32016
 Array Item Val 0: 32016
 Array Item Array Val 0: 32016
 Parameter Array Val 0: 10.01
+Parameter Array Val 0: 32016
 Val 1: -32016
 Array Item Val 1: -32016
 Array Item Array Val 1: -32016
 Parameter Array Val 1: 20.02
+Parameter Array Val 1: -32016
 Is_Null OK: true
 Is_Changed OK: true
 
@@ -1087,14 +1182,17 @@ Val: 32017
 Item Val: 32017
 Item Array Val: 32017
 Property Parameter Val: 10.01
+Property Parameter Val: 32017
 Val 0: 32017
 Array Item Val 0: 32017
 Array Item Array Val 0: 32017
 Parameter Array Val 0: 10.01
+Parameter Array Val 0: 32017
 Val 1: -32017
 Array Item Val 1: -32017
 Array Item Array Val 1: -32017
 Parameter Array Val 1: 20.02
+Parameter Array Val 1: -32017
 Is_Null OK: true
 Is_Changed OK: true
 
@@ -1119,14 +1217,17 @@ Val: 32018
 Item Val: 32018
 Item Array Val: 32018
 Property Parameter Val: 10.01
+Property Parameter Val: 32018
 Val 0: 32018
 Array Item Val 0: 32018
 Array Item Array Val 0: 32018
 Parameter Array Val 0: 10.01
+Parameter Array Val 0: 32018
 Val 1: -32018
 Array Item Val 1: -32018
 Array Item Array Val 1: -32018
 Parameter Array Val 1: 20.02
+Parameter Array Val 1: -32018
 Is_Null OK: true
 Is_Changed OK: true
 
@@ -1151,14 +1252,17 @@ Val: 32019
 Item Val: 32019
 Item Array Val: 32019
 Property Parameter Val: 10.01
+Property Parameter Val: 32019
 Val 0: 32019
 Array Item Val 0: 32019
 Array Item Array Val 0: 32019
 Parameter Array Val 0: 10.01
+Parameter Array Val 0: 32019
 Val 1: -32019
 Array Item Val 1: -32019
 Array Item Array Val 1: -32019
 Parameter Array Val 1: 20.02
+Parameter Array Val 1: -32019
 Is_Null OK: true
 Is_Changed OK: true
 
@@ -1183,14 +1287,17 @@ Val: 64001
 Item Val: 64001
 Item Array Val: 64001
 Property Parameter Val: 10.01
+Property Parameter Val: 64001
 Val 0: 64001
 Array Item Val 0: 64001
 Array Item Array Val 0: 64001
 Parameter Array Val 0: 10.01
+Parameter Array Val 0: 64001
 Val 1: -64001
 Array Item Val 1: -64001
 Array Item Array Val 1: -64001
 Parameter Array Val 1: 20.02
+Parameter Array Val 1: -64001
 Is_Null OK: true
 Is_Changed OK: true
 
@@ -1215,14 +1322,17 @@ Val: 64002
 Item Val: 64002
 Item Array Val: 64002
 Property Parameter Val: 10.01
+Property Parameter Val: 64002
 Val 0: 64002
 Array Item Val 0: 64002
 Array Item Array Val 0: 64002
 Parameter Array Val 0: 10.01
+Parameter Array Val 0: 64002
 Val 1: -64002
 Array Item Val 1: -64002
 Array Item Array Val 1: -64002
 Parameter Array Val 1: 20.02
+Parameter Array Val 1: -64002
 Is_Null OK: true
 Is_Changed OK: true
 
@@ -1247,14 +1357,17 @@ Val: 64003
 Item Val: 64003
 Item Array Val: 64003
 Property Parameter Val: 10.01
+Property Parameter Val: 64003
 Val 0: 64003
 Array Item Val 0: 64003
 Array Item Array Val 0: 64003
 Parameter Array Val 0: 10.01
+Parameter Array Val 0: 64003
 Val 1: -64003
 Array Item Val 1: -64003
 Array Item Array Val 1: -64003
 Parameter Array Val 1: 20.02
+Parameter Array Val 1: -64003
 Is_Null OK: true
 Is_Changed OK: true
 
@@ -1279,14 +1392,17 @@ Val: 64004
 Item Val: 64004
 Item Array Val: 64004
 Property Parameter Val: 10.01
+Property Parameter Val: 64004
 Val 0: 64004
 Array Item Val 0: 64004
 Array Item Array Val 0: 64004
 Parameter Array Val 0: 10.01
+Parameter Array Val 0: 64004
 Val 1: -64004
 Array Item Val 1: -64004
 Array Item Array Val 1: -64004
 Parameter Array Val 1: 20.02
+Parameter Array Val 1: -64004
 Is_Null OK: true
 Is_Changed OK: true
 
@@ -1311,14 +1427,17 @@ Val: 64005
 Item Val: 64005
 Item Array Val: 64005
 Property Parameter Val: 10.01
+Property Parameter Val: 64005
 Val 0: 64005
 Array Item Val 0: 64005
 Array Item Array Val 0: 64005
 Parameter Array Val 0: 10.01
+Parameter Array Val 0: 64005
 Val 1: -64005
 Array Item Val 1: -64005
 Array Item Array Val 1: -64005
 Parameter Array Val 1: 20.02
+Parameter Array Val 1: -64005
 Is_Null OK: true
 Is_Changed OK: true
 
@@ -1343,14 +1462,17 @@ Val: 64006
 Item Val: 64006
 Item Array Val: 64006
 Property Parameter Val: 10.01
+Property Parameter Val: 64006
 Val 0: 64006
 Array Item Val 0: 64006
 Array Item Array Val 0: 64006
 Parameter Array Val 0: 10.01
+Parameter Array Val 0: 64006
 Val 1: -64006
 Array Item Val 1: -64006
 Array Item Array Val 1: -64006
 Parameter Array Val 1: 20.02
+Parameter Array Val 1: -64006
 Is_Null OK: true
 Is_Changed OK: true
 
@@ -1375,14 +1497,17 @@ Val: 64007
 Item Val: 64007
 Item Array Val: 64007
 Property Parameter Val: 10.01
+Property Parameter Val: 64007
 Val 0: 64007
 Array Item Val 0: 64007
 Array Item Array Val 0: 64007
 Parameter Array Val 0: 10.01
+Parameter Array Val 0: 64007
 Val 1: -64007
 Array Item Val 1: -64007
 Array Item Array Val 1: -64007
 Parameter Array Val 1: 20.02
+Parameter Array Val 1: -64007
 Is_Null OK: true
 Is_Changed OK: true
 
@@ -1407,14 +1532,17 @@ Val: 64008
 Item Val: 64008
 Item Array Val: 64008
 Property Parameter Val: 10.01
+Property Parameter Val: 64008
 Val 0: 64008
 Array Item Val 0: 64008
 Array Item Array Val 0: 64008
 Parameter Array Val 0: 10.01
+Parameter Array Val 0: 64008
 Val 1: -64008
 Array Item Val 1: -64008
 Array Item Array Val 1: -64008
 Parameter Array Val 1: 20.02
+Parameter Array Val 1: -64008
 Is_Null OK: true
 Is_Changed OK: true
 
@@ -1439,14 +1567,17 @@ Val: 64009
 Item Val: 64009
 Item Array Val: 64009
 Property Parameter Val: 10.01
+Property Parameter Val: 64009
 Val 0: 64009
 Array Item Val 0: 64009
 Array Item Array Val 0: 64009
 Parameter Array Val 0: 10.01
+Parameter Array Val 0: 64009
 Val 1: -64009
 Array Item Val 1: -64009
 Array Item Array Val 1: -64009
 Parameter Array Val 1: 20.02
+Parameter Array Val 1: -64009
 Is_Null OK: true
 Is_Changed OK: true
 
@@ -1471,14 +1602,17 @@ Val: 64010
 Item Val: 64010
 Item Array Val: 64010
 Property Parameter Val: 10.01
+Property Parameter Val: 64010
 Val 0: 64010
 Array Item Val 0: 64010
 Array Item Array Val 0: 64010
 Parameter Array Val 0: 10.01
+Parameter Array Val 0: 64010
 Val 1: -64010
 Array Item Val 1: -64010
 Array Item Array Val 1: -64010
 Parameter Array Val 1: 20.02
+Parameter Array Val 1: -64010
 Is_Null OK: true
 Is_Changed OK: true
 
@@ -1503,14 +1637,17 @@ Val: 64011
 Item Val: 64011
 Item Array Val: 64011
 Property Parameter Val: 10.01
+Property Parameter Val: 64011
 Val 0: 64011
 Array Item Val 0: 64011
 Array Item Array Val 0: 64011
 Parameter Array Val 0: 10.01
+Parameter Array Val 0: 64011
 Val 1: -64011
 Array Item Val 1: -64011
 Array Item Array Val 1: -64011
 Parameter Array Val 1: 20.02
+Parameter Array Val 1: -64011
 Is_Null OK: true
 Is_Changed OK: true
 
@@ -1535,14 +1672,17 @@ Val: 64012
 Item Val: 64012
 Item Array Val: 64012
 Property Parameter Val: 10.01
+Property Parameter Val: 64012
 Val 0: 64012
 Array Item Val 0: 64012
 Array Item Array Val 0: 64012
 Parameter Array Val 0: 10.01
+Parameter Array Val 0: 64012
 Val 1: -64012
 Array Item Val 1: -64012
 Array Item Array Val 1: -64012
 Parameter Array Val 1: 20.02
+Parameter Array Val 1: -64012
 Is_Null OK: true
 Is_Changed OK: true
 
@@ -1567,14 +1707,17 @@ Val: 64013
 Item Val: 64013
 Item Array Val: 64013
 Property Parameter Val: 10.01
+Property Parameter Val: 64013
 Val 0: 64013
 Array Item Val 0: 64013
 Array Item Array Val 0: 64013
 Parameter Array Val 0: 10.01
+Parameter Array Val 0: 64013
 Val 1: -64013
 Array Item Val 1: -64013
 Array Item Array Val 1: -64013
 Parameter Array Val 1: 20.02
+Parameter Array Val 1: -64013
 Is_Null OK: true
 Is_Changed OK: true
 
@@ -1599,14 +1742,17 @@ Val: 64014
 Item Val: 64014
 Item Array Val: 64014
 Property Parameter Val: 10.01
+Property Parameter Val: 64014
 Val 0: 64014
 Array Item Val 0: 64014
 Array Item Array Val 0: 64014
 Parameter Array Val 0: 10.01
+Parameter Array Val 0: 64014
 Val 1: -64014
 Array Item Val 1: -64014
 Array Item Array Val 1: -64014
 Parameter Array Val 1: 20.02
+Parameter Array Val 1: -64014
 Is_Null OK: true
 Is_Changed OK: true
 
@@ -1631,14 +1777,17 @@ Val: 64015
 Item Val: 64015
 Item Array Val: 64015
 Property Parameter Val: 10.01
+Property Parameter Val: 64015
 Val 0: 64015
 Array Item Val 0: 64015
 Array Item Array Val 0: 64015
 Parameter Array Val 0: 10.01
+Parameter Array Val 0: 64015
 Val 1: -64015
 Array Item Val 1: -64015
 Array Item Array Val 1: -64015
 Parameter Array Val 1: 20.02
+Parameter Array Val 1: -64015
 Is_Null OK: true
 Is_Changed OK: true
 
@@ -1663,14 +1812,17 @@ Val: 64016
 Item Val: 64016
 Item Array Val: 64016
 Property Parameter Val: 10.01
+Property Parameter Val: 64016
 Val 0: 64016
 Array Item Val 0: 64016
 Array Item Array Val 0: 64016
 Parameter Array Val 0: 10.01
+Parameter Array Val 0: 64016
 Val 1: -64016
 Array Item Val 1: -64016
 Array Item Array Val 1: -64016
 Parameter Array Val 1: 20.02
+Parameter Array Val 1: -64016
 Is_Null OK: true
 Is_Changed OK: true
 
@@ -1695,14 +1847,17 @@ Val: 64017
 Item Val: 64017
 Item Array Val: 64017
 Property Parameter Val: 10.01
+Property Parameter Val: 64017
 Val 0: 64017
 Array Item Val 0: 64017
 Array Item Array Val 0: 64017
 Parameter Array Val 0: 10.01
+Parameter Array Val 0: 64017
 Val 1: -64017
 Array Item Val 1: -64017
 Array Item Array Val 1: -64017
 Parameter Array Val 1: 20.02
+Parameter Array Val 1: -64017
 Is_Null OK: true
 Is_Changed OK: true
 
@@ -1727,14 +1882,17 @@ Val: 64018
 Item Val: 64018
 Item Array Val: 64018
 Property Parameter Val: 10.01
+Property Parameter Val: 64018
 Val 0: 64018
 Array Item Val 0: 64018
 Array Item Array Val 0: 64018
 Parameter Array Val 0: 10.01
+Parameter Array Val 0: 64018
 Val 1: -64018
 Array Item Val 1: -64018
 Array Item Array Val 1: -64018
 Parameter Array Val 1: 20.02
+Parameter Array Val 1: -64018
 Is_Null OK: true
 Is_Changed OK: true
 
@@ -1759,14 +1917,17 @@ Val: 64019
 Item Val: 64019
 Item Array Val: 64019
 Property Parameter Val: 10.01
+Property Parameter Val: 64019
 Val 0: 64019
 Array Item Val 0: 64019
 Array Item Array Val 0: 64019
 Parameter Array Val 0: 10.01
+Parameter Array Val 0: 64019
 Val 1: -64019
 Array Item Val 1: -64019
 Array Item Array Val 1: -64019
 Parameter Array Val 1: 20.02
+Parameter Array Val 1: -64019
 Is_Null OK: true
 Is_Changed OK: true
 
