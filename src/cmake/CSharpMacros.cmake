@@ -9,31 +9,44 @@ function(ADD_CSHARP_ASSEMBLY TARGET_NAME)
     if (NOT "${_cs_UNPARSED_ARGUMENTS}" STREQUAL "")
       message(FATAL_ERROR "Unknown argument to ADD_CSHARP_ASSEMBLY '${_cs_UNPARSED_ARGUMENTS}'")
     endif()
-    
-    set (libpath "C:/Program Files (x86)/Reference Assemblies/Microsoft/Framework/.NETFramework/v4.0/")
-    if (NOT IS_DIRECTORY "${libpath}")
-        set (libpath "C:/Program Files/Reference Assemblies/Microsoft/Framework/.NETFramework/v4.0/")
-    endif()
-    if (NOT IS_DIRECTORY "${libpath}")
-        set (libpath "/usr/lib/mono/4.0/")
-    endif()
-    if (NOT IS_DIRECTORY "${libpath}")
-        message(FATAL_ERROR "Could not find the .NET 4.0 libraries")
-    endif()
 
     #we always generated debug info and enable optimizations, regardless of build type
-    #and we always want to choose our standard libraries ourselves
-    SET(_cs_flags "${CSHARP_COMPILER_FLAGS} -debug -optimize -fullpaths -nostdlib
-                                            -lib:\"${libpath}\"
-                                            -reference:\"${libpath}mscorlib.dll\"
-                                            -reference:\"${libpath}System.dll\"
-                                            -reference:\"${libpath}Microsoft.CSharp.dll\"
-                                            -reference:\"${libpath}System.Configuration.dll\"
-                                            -reference:\"${libpath}System.Core.dll\"
-                                            -reference:\"${libpath}System.Xml.dll\"
-                                            -reference:\"${libpath}System.EnterpriseServices.dll\""
-    )
+    SET(_cs_flags "${CSHARP_COMPILER_FLAGS} -debug -optimize -fullpaths")
 
+    #On Windows we want to ensure that we target version 4.0 of the .NET framework, so we
+    #point it out specifically. On Linux it doesnt matter so much, since we target whatever
+    #is in the distro repos.
+    if (WIN32)
+      set (libpath "C:/Program Files (x86)/Reference Assemblies/Microsoft/Framework/.NETFramework/v4.0/")
+      if (NOT IS_DIRECTORY "${libpath}")
+        set (libpath "C:/Program Files/Reference Assemblies/Microsoft/Framework/.NETFramework/v4.0/")
+      endif()
+      if (NOT IS_DIRECTORY "${libpath}")
+        set (libpath "/usr/lib/mono/4.0/")
+      endif()
+      if (NOT IS_DIRECTORY "${libpath}")
+        message(FATAL_ERROR "Could not find the .NET 4.0 libraries")
+      endif()
+
+      #This, together with -noconfig (below), will cause only 4.0 assemblies to be used
+      #regardless of what is installed on the computer.
+      #This protects us from Windows Update sabotaging our build machines by installing
+      #a new .Net Framework version overnight...
+      SET(_cs_flags "${_cs_flags} -nostdlib
+                                  -lib:\"${libpath}\"
+                                  -reference:\"${libpath}mscorlib.dll\"
+                                  -reference:\"${libpath}System.dll\"
+                                  -reference:\"${libpath}Microsoft.CSharp.dll\"
+                                  -reference:\"${libpath}System.Configuration.dll\"
+                                  -reference:\"${libpath}System.Core.dll\"
+                                  -reference:\"${libpath}System.Xml.dll\"
+                                  -reference:\"${libpath}System.EnterpriseServices.dll\""
+        )
+
+      #This has to appear on the command line, not in the response file, hence we keep
+      #it separate
+      SET(_cs_noconfig -noconfig)
+    endif()
 
 
     if (_cs_SIGN)
@@ -178,7 +191,7 @@ function(ADD_CSHARP_ASSEMBLY TARGET_NAME)
 
     add_custom_command (
       OUTPUT ${_cs_target} ${_cs_doc_file} ${_cs_debug_file}
-      COMMAND ${CSHARP_COMPILER} -noconfig @${response_file}
+      COMMAND ${CSHARP_COMPILER} ${_cs_noconfig} @${response_file}
       DEPENDS ${_cs_SOURCES} ${_cs_target_dependencies} ${_cs_resources_files}
       COMMENT "Building ${_cs_target_kind} assembly ${TARGET_NAME}"
       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
