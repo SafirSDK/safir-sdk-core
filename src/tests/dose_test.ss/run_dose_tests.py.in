@@ -244,6 +244,7 @@ class Results:
 
     def write_test_result(self, expr, name, output):
         with open(name + ".junit.xml","w") as junitfile:
+            log("Test", name, " success:", expr)
             junitfile.write("<?xml version=\"1.0\"?>\n<testsuite>\n  <testcase name=\"" + name + "\" classname=\"dose_test\"")
             if expr:
                 """success"""
