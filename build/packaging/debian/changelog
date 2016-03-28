@@ -1,3 +1,10 @@
+safir-sdk-core (6.2.0-1~alpha-1) UNRELEASED; urgency=medium
+
+  [ Lars Hagström ]
+  * Update of source package.
+
+ -- Lars Hagström <lars@foldspace.nu>  Mon, 28 Mar 2016 13:30:00 +0100
+
 safir-sdk-core (6.1.1-1) UNRELEASED; urgency=medium
 
   [ Lars Hagström ]
