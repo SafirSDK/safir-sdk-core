@@ -1,4 +1,14 @@
 -----------------------------------------------------------------------------------------------------------------------
+2016-03-28 version 6.1.1
+-----------------------------------------------------------------------------------------------------------------------
+
+This release fixes the following tickets (see http://safirsdkcore.com for details):
+
+#291 dose_main crashes when reading parameterized member in Safir.Dob.InjectionProperty
+#292 Json serialization is not compatible with new boost
+#245 .Net code should build against Framework 4.0, not whatever is installed on computer
+
+-----------------------------------------------------------------------------------------------------------------------
 2015-11-09 version 6.1
 -----------------------------------------------------------------------------------------------------------------------
 
