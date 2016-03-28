@@ -388,6 +388,7 @@ class Runner:
         sys.path.append(os.path.join(parameters.test_data_directory,"python"))
         if parameters.check_syslog:
             #load and start syslog server
+            log("Starting syslog server")
             from syslog_server import SyslogServer
             self.syslog = SyslogServer("safir_show_config") #This should be in the PATH here, so no need to give full path
 
@@ -478,6 +479,7 @@ class Runner:
 
         if self.syslog is not None:
             #check that syslog output is empty
+            log("Checking syslog contents")
             syslog_data = self.syslog.get_data(10) # wait for 10 seconds to collect any output
             results.write_test_result(len(syslog_data) == 0,
                                       "syslog_output",
