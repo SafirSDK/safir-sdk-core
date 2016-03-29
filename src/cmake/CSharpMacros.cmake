@@ -16,7 +16,7 @@ function(ADD_CSHARP_ASSEMBLY TARGET_NAME)
     #On Windows we want to ensure that we target version 4.0 of the .NET framework, so we
     #point it out specifically. On Linux it doesnt matter so much, since we target whatever
     #is in the distro repos.
-    if (WIN32)
+    if (WIN32 AND NOT SAFIR_EXTERNAL_BUILD)
       set (libpath "C:/Program Files (x86)/Reference Assemblies/Microsoft/Framework/.NETFramework/v4.0/")
       if (NOT IS_DIRECTORY "${libpath}")
         set (libpath "C:/Program Files/Reference Assemblies/Microsoft/Framework/.NETFramework/v4.0/")
