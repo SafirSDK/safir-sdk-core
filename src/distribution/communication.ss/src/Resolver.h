@@ -23,18 +23,19 @@
 ******************************************************************************/
 #pragma once
 
+#include <boost/regex.hpp>
+#include <boost/lexical_cast.hpp>
+    #include <boost/asio.hpp>
+    #include <boost/asio/ip/udp.hpp>
+
 #ifdef _MSC_VER
     #pragma warning (push)
     #pragma warning (disable: 4996)
-    #pragma warning (disable: 4267)    
+    #pragma warning (disable: 4267)
 
     //Windows implementation
     #include <winsock2.h>
     #include <ws2tcpip.h>
-    #include <boost/asio.hpp>
-    #include <boost/asio/ip/udp.hpp>    
-    #include <boost/lexical_cast.hpp>
-
 #else
     //Linux implementation
     #include <sys/ioctl.h>
@@ -42,9 +43,6 @@
     #include <netinet/in.h>
     #include <sys/types.h>
     #include <ifaddrs.h>
-    #include <boost/asio.hpp>
-    #include <boost/asio/ip/udp.hpp>
-    #include <boost/lexical_cast.hpp>
 #endif
 
 namespace Safir
@@ -92,7 +90,7 @@ namespace Com
                 throw std::logic_error(std::string("COM: Resolver.ResolveLocalEndpoint could not separate ip and port: "+expr));
             }
 
-            auto ip=GetIPAddressBestMatch(ipExpr);
+            const auto ip=GetIPAddressBestMatch(ipExpr);
             if (ip.empty())
             {
                 throw std::logic_error(std::string("COM: Resolver.ResolveLocalEndpoint failed to resolve address: "+ipExpr));
@@ -122,10 +120,10 @@ namespace Com
 
             if (m_verbose)
             {
-                std::cout<<"Candidates after DNS lookup:"<<std::endl;
+                std::wcout<<"Candidates after DNS lookup:"<<std::endl;
                 for (auto s = addresses.cbegin(); s != addresses.cend(); ++s)
                 {
-                    std::cout<<"  " << *s << std::endl;
+                    std::wcout<<"  " << s->c_str() << std::endl;
                 }
             }
 
@@ -265,28 +263,33 @@ namespace Com
             return true;
         }
 
-        //Match all addresses against pattern and return best match.
+        //Match all addresses against pattern and return first match
         std::string FindBestMatch(const std::string& pattern, const std::vector<std::string>& addresses) const
         {
-            size_t highScore=0;
-            int bestIndex=-1;
-
-            for (size_t i=0; i<addresses.size(); ++i)
+            //addresses may only have numbers and stars in them
+            if(!boost::regex_match(pattern,boost::regex("[0-9\\*]+\\.[0-9\\*]+\\.[0-9\\*]+\\.[0-9\\*]+")))
             {
-                auto tmp=DiffIndex(pattern, addresses[i]);
-                if (tmp>highScore)
+                if (m_verbose)
                 {
-                    highScore=tmp;
-                    bestIndex=static_cast<int>(i);
+                    std::wcout << "Ip addresses may only consist of numbers and stars..." << std::endl;
+                }
+                return "";
+            }
+            const auto dotsReplaced = boost::regex_replace(pattern,boost::regex("\\."),"\\\\.");
+            const auto regex = boost::regex_replace(dotsReplaced,boost::regex("\\*"),".*");
+            if (m_verbose)
+            {
+                std::wcout << "Converted pattern '" << pattern.c_str() << "' to regex '" << regex.c_str() << "'" << std::endl;
+            }
+
+            for (auto it = addresses.cbegin(); it != addresses.end(); ++it)
+            {
+                if (boost::regex_match(*it,boost::regex(regex)))
+                {
+                    return *it;
                 }
             }
-
-            if (bestIndex<0)
-            {
-                return ""; //no match at all
-            }
-
-            return addresses[static_cast<size_t>(bestIndex)];
+            return ""; //no match at all
         }
 
         //Get the ip address of local machine that best matches expr.
@@ -297,15 +300,16 @@ namespace Com
 
             if (m_verbose)
             {
-                std::cout<<"Own interface addresses available:"<<std::endl;
+                std::wcout<<"Own interface addresses available:"<<std::endl;
                 for (auto a = adapters.cbegin(); a != adapters.cend(); ++a)
                 {
-                    std::cout<<"  "<<a->ipAddress<<std::endl;
+                    std::wcout<<"  "<<a->ipAddress.c_str()<<std::endl;
                 }
             }
 
             std::vector<std::string> addresses;
 
+            //if we have an exact match on interface name or ip address we use that
             for (auto ai = adapters.cbegin(); ai != adapters.cend(); ++ai)
             {
                 if (ai->name == expr || ai->ipAddress==expr)
@@ -315,32 +319,10 @@ namespace Com
                 addresses.push_back(ai->ipAddress);
             }
 
-            auto bestMatchingIp=FindBestMatch(expr, addresses);
-            if (!bestMatchingIp.empty())
-            {
-                return bestMatchingIp;
-            }
-
-            std::vector<std::string> allSupportingAddresses = DnsLookup(expr, 46);
-
-            for (auto addr = allSupportingAddresses.cbegin(); addr != allSupportingAddresses.cend(); ++addr )
-            {
-                if (m_verbose)
-                {
-                    std::cout<<" DNS lookup: "<< *addr <<std::endl;
-                }
-
-                auto found=std::find(addresses.begin(), addresses.end(), *addr);
-                if (found!=addresses.end())
-                {
-                    return *found;
-                }
-            }
-
-            return ""; //could not find any ip address to matching the expression
+            return FindBestMatch(expr,addresses);
         }
 
-        //Make dns lookup and retun list of all ip addresses that support specified protocol
+        //Make dns lookup and return list of all ip addresses that support specified protocol
         //protocol=46 means both 4 and 6
         std::vector<std::string> DnsLookup(const std::string& hostName, int protocol) const
         {

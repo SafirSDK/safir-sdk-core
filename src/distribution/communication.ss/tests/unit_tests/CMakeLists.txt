@@ -19,7 +19,8 @@ add_executable(unit_tests ${sources} ${headers} ${PROTO_SRCS} ${PROTO_HDRS} ../.
 target_link_libraries(unit_tests PRIVATE
   lluf_utils
   lluf_id
-  ${PROTOBUF_LITE_LIBRARIES})
+  ${PROTOBUF_LITE_LIBRARIES}
+  ${Boost_REGEX_LIBRARY})
 
 ADD_TEST(NAME MessageQueueTest COMMAND unit_tests MessageQueueTest)
 SET_SAFIR_TEST_PROPERTIES(TEST MessageQueueTest TIMEOUT 360)
@@ -39,5 +40,8 @@ SET_SAFIR_TEST_PROPERTIES(TEST DeliveryHandlerTest TIMEOUT 360)
 ADD_TEST(NAME DiscovererTest COMMAND unit_tests DiscovererTest)
 SET_SAFIR_TEST_PROPERTIES(TEST DiscovererTest TIMEOUT 360)
 
-ADD_TEST(NAME CommunicationAllocatorTest COMMAND unit_tests CommunicationAllocatorTest)
+ADD_TEST(NAME CommunicationAllocatorTest COMMAND unit_tests AllocatorTest)
+SET_SAFIR_TEST_PROPERTIES(TEST CommunicationAllocatorTest TIMEOUT 360)
+
+ADD_TEST(NAME CommunicationResolverTest COMMAND unit_tests ResolverTest)
 SET_SAFIR_TEST_PROPERTIES(TEST CommunicationAllocatorTest TIMEOUT 360)

@@ -25,6 +25,13 @@
 #include <boost/program_options.hpp>
 #include "../../src/Resolver.h"
 
+std::wostream& operator<<(std::wostream& out, const boost::program_options::options_description& opt)
+{
+    std::ostringstream ostr;
+    ostr << opt;
+    return out << ostr.str().c_str();
+}
+
 class Cmd
 {
 public:
@@ -51,7 +58,7 @@ public:
         if (vm.count("help"))
         {
             help=true;
-            std::cout<<desc<<std::endl;
+            std::wcout<<desc<<std::endl;
             return;
         }
 
@@ -69,7 +76,7 @@ public:
         }
         else
         {
-            std::cout<<"Must specify exactly one argument to resolve."<<std::endl;
+            std::wcout<<"Must specify exactly one argument to resolve."<<std::endl;
             help=true;
         }
     }
@@ -99,16 +106,16 @@ int main(int argc, char * argv[])
     boost::function<void()> fun;
     if (cmd.local)
     {
-        fun=[&]{std::cout<<"Resolved to local address: "<<
+        fun=[&]{std::wcout<<"Resolved to local address: "<<
                            RemovePort(resolver.ResolveLocalEndpoint(cmd.expr+":10000"))<<std::endl;};
     }
     else
     {
-        fun=[&]{std::cout<<"Resolved "<<cmd.expr<<" to: "<<
+        fun=[&]{std::wcout<<"Resolved "<<cmd.expr<<" to: "<<
                            RemovePort(resolver.ResolveRemoteEndpoint(cmd.expr+":10000", 4))<<std::endl;};
     }
 
-    ioService.post([&]{try{fun();}catch (const std::logic_error& e) {std::cout<<e.what()<<std::endl;}});
+    ioService.post([&]{try{fun();}catch (const std::logic_error& e) {std::wcout<<e.what()<<std::endl;}});
     ioService.run();
     return 0;
 }

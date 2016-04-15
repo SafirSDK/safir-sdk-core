@@ -75,23 +75,41 @@ public:
         CHECK(resolver.DiffIndex("abcdefg", "abcdefg")==7);
 
         std::vector<std::string> v;
-        
+
         v.push_back("192.168.0.100");
         v.push_back("192.168.66.100");
         v.push_back("192.0.0.0");
         v.push_back("192.168.0.0");
         v.push_back("192.255.255.255");
-        
-        CHECK(resolver.FindBestMatch("192.168.66.123", v)=="192.168.66.100");
-        CHECK(resolver.FindBestMatch("192.0.66.123", v)=="192.0.0.0");
-        CHECK(resolver.FindBestMatch("192.168.255.255", v)=="192.168.0.100");
 
+        CHECK(resolver.FindBestMatch("192.168.66.*", v)=="192.168.66.100");
+        CHECK(resolver.FindBestMatch("192.0.*.*", v)=="192.0.0.0");
+        CHECK(resolver.FindBestMatch("192.168.*.*", v)=="192.168.0.100");
+        CHECK(resolver.FindBestMatch("*.*.*.*", v)=="192.168.0.100");
+        CHECK(resolver.FindBestMatch("192.168.0.101", v)=="");
+        CHECK(resolver.FindBestMatch("asdfasdf", v)=="");
+        CHECK(resolver.FindBestMatch("", v)=="");
+
+        CHECK(resolver.ResolveLocalEndpoint("127.0.0.1:11111") == "127.0.0.1:11111");
+        CHECK(resolver.ResolveLocalEndpoint("127.0.0.*:11111") == "127.0.0.1:11111");
+        CHECK(resolver.ResolveLocalEndpoint("127.0.*.*:11111") == "127.0.0.1:11111");
+        try
+        {
+            resolver.ResolveLocalEndpoint("whut:11111");
+            CHECK(false);
+        }
+        catch(...)
+        {
+            CHECK(true);
+        }
+#ifndef _MSC_VER
+        CHECK(resolver.ResolveLocalEndpoint("lo:123") == "127.0.0.1:123");
+
+#endif
         std::cout<<"Testing resolve local endpoint"<<std::endl;
-        resolveLocal("localhost:10000");
         resolveLocal("192.168.*.*:12345");
         resolveLocal("eth0:10000");
         resolveLocal("lo:12000");
-        resolveLocal("ping.sunet.se:10000");
 
         std::cout<<"Testing resolve remote endpoint"<<std::endl;
         resolveRemote("safir-salt-router:10000", 4);

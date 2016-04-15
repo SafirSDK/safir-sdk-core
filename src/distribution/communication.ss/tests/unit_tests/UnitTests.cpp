@@ -72,6 +72,11 @@ int main(int argc, char* argv[])
         {
             AllocatorTest::Run();
         }
+        else
+        {
+            std::cout << "Unknown test" << std::endl;
+            return 1;
+        }
     }
     else //run all tests
     {

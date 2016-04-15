@@ -18,7 +18,8 @@ target_include_directories(communication PUBLIC $<BUILD_INTERFACE:${CMAKE_CURREN
 TARGET_LINK_LIBRARIES(communication PRIVATE
   lluf_id
   lluf_utils
-  ${PROTOBUF_LITE_LIBRARIES})
+  ${PROTOBUF_LITE_LIBRARIES}
+  ${Boost_REGEX_LIBRARY})
 
 SAFIR_INSTALL(TARGETS communication)
 
