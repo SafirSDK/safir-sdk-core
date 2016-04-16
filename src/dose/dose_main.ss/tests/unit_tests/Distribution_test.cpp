@@ -48,7 +48,7 @@ public:
                   const std::string& /*nodeName*/,
                   int64_t /*nodeId*/, //0 is not a valid id.
                   int64_t /*nodeTypeId*/,
-                  const std::string& /*dataAddress*/,
+                  const Safir::Dob::Internal::Com::ResolvedAddress& /*dataAddress*/,
                   const std::vector<Safir::Dob::Internal::Com::NodeTypeDefinition>& /*nodeTypes*/)
     {}
 

@@ -41,12 +41,11 @@ public:
         }
 
         bool success=true;
-        Com::Resolver resolver(io);
         auto resolveLocal=[&](const std::string& expr)
         {
             try
             {
-                auto ep=resolver.ResolveLocalEndpoint(expr);
+                auto ep=Com::Resolver::ResolveLocalEndpoint(expr);
                 std::cout<<"ResolvedLocal "<<expr<<" to '"<<ep<<"'"<<std::endl;
             }
             catch(const std::exception& e)
@@ -56,6 +55,7 @@ public:
             }
         };
 
+        Com::Resolver resolver(io);
         auto resolveRemote=[&](const std::string& expr, int protocol)
         {
             try
@@ -70,10 +70,6 @@ public:
             }
         };
 
-        CHECK(resolver.DiffIndex("abcdefg", "abdcefg")==2);
-        CHECK(resolver.DiffIndex("bcdefg", "abdcefg")==0);
-        CHECK(resolver.DiffIndex("abcdefg", "abcdefg")==7);
-
         std::vector<std::string> v;
 
         v.push_back("192.168.0.100");
@@ -82,20 +78,20 @@ public:
         v.push_back("192.168.0.0");
         v.push_back("192.255.255.255");
 
-        CHECK(resolver.FindBestMatch("192.168.66.*", v)=="192.168.66.100");
-        CHECK(resolver.FindBestMatch("192.0.*.*", v)=="192.0.0.0");
-        CHECK(resolver.FindBestMatch("192.168.*.*", v)=="192.168.0.100");
-        CHECK(resolver.FindBestMatch("*.*.*.*", v)=="192.168.0.100");
-        CHECK(resolver.FindBestMatch("192.168.0.101", v)=="");
-        CHECK(resolver.FindBestMatch("asdfasdf", v)=="");
-        CHECK(resolver.FindBestMatch("", v)=="");
+        CHECK(Com::Resolver::FindBestMatch("192.168.66.*", v, false)=="192.168.66.100");
+        CHECK(Com::Resolver::FindBestMatch("192.0.*.*", v, false)=="192.0.0.0");
+        CHECK(Com::Resolver::FindBestMatch("192.168.*.*", v, false)=="192.168.0.100");
+        CHECK(Com::Resolver::FindBestMatch("*.*.*.*", v, false)=="192.168.0.100");
+        CHECK(Com::Resolver::FindBestMatch("192.168.0.101", v, false)=="");
+        CHECK(Com::Resolver::FindBestMatch("asdfasdf", v, false)=="");
+        CHECK(Com::Resolver::FindBestMatch("", v, false)=="");
 
-        CHECK(resolver.ResolveLocalEndpoint("127.0.0.1:11111") == "127.0.0.1:11111");
-        CHECK(resolver.ResolveLocalEndpoint("127.0.0.*:11111") == "127.0.0.1:11111");
-        CHECK(resolver.ResolveLocalEndpoint("127.0.*.*:11111") == "127.0.0.1:11111");
+        CHECK(Com::Resolver::ResolveLocalEndpoint("127.0.0.1:11111") == "127.0.0.1:11111");
+        CHECK(Com::Resolver::ResolveLocalEndpoint("127.0.0.*:11111") == "127.0.0.1:11111");
+        CHECK(Com::Resolver::ResolveLocalEndpoint("127.0.*.*:11111") == "127.0.0.1:11111");
         try
         {
-            resolver.ResolveLocalEndpoint("whut:11111");
+            Com::Resolver::ResolveLocalEndpoint("whut:11111");
             CHECK(false);
         }
         catch(...)
@@ -103,15 +99,17 @@ public:
             CHECK(true);
         }
 #ifndef _MSC_VER
-        CHECK(resolver.ResolveLocalEndpoint("lo:123") == "127.0.0.1:123");
-
+        CHECK(Com::Resolver::ResolveLocalEndpoint("lo:123") == "127.0.0.1:123");
 #endif
+
         std::cout<<"Testing resolve local endpoint"<<std::endl;
         resolveLocal("192.168.*.*:12345");
         resolveLocal("eth0:10000");
         resolveLocal("lo:12000");
 
         std::cout<<"Testing resolve remote endpoint"<<std::endl;
+
+        CHECK(resolver.ResolveRemoteEndpoint("localhost:100",4) == "127.0.0.1:100");
         resolveRemote("safir-salt-router:10000", 4);
         resolveRemote("192.168.211.157:10000", 4);
         resolveRemote("google.com:10000", 4);

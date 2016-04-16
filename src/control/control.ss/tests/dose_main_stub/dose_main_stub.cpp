@@ -179,7 +179,7 @@ int main(int /*argc*/, char * /*argv*/[])
                                                                         nodeName,
                                                                         nodeId,
                                                                         nodeTypeId,
-                                                                        dataAddress,
+                                                                        Safir::Dob::Internal::Com::ResolvedAddress(dataAddress),
                                                                         commNodeTypes));
                              // ... and the System Picture instance
                              sp.reset(new SP::SystemPicture(SP::slave_tag,

@@ -100,23 +100,38 @@ int main(int argc, char * argv[])
     Cmd cmd(argc, argv);
     if (cmd.help) return 0; //only show help
 
-    boost::asio::io_service ioService;
-    Safir::Dob::Internal::Com::Resolver resolver(ioService, cmd.verbose);
-
     boost::function<void()> fun;
     if (cmd.local)
     {
-        fun=[&]{std::wcout<<"Resolved to local address: "<<
-                           RemovePort(resolver.ResolveLocalEndpoint(cmd.expr+":10000"))<<std::endl;};
+        try
+        {
+            std::wcout<<"Resolved to local address: "<<
+                RemovePort(Safir::Dob::Internal::Com::Resolver::ResolveLocalEndpoint(cmd.expr+":10000"))<<std::endl;
+        }
+        catch (const std::logic_error& e)
+        {
+            std::wcout<<e.what()<<std::endl;
+        }
     }
     else
     {
-        fun=[&]{std::wcout<<"Resolved "<<cmd.expr<<" to: "<<
-                           RemovePort(resolver.ResolveRemoteEndpoint(cmd.expr+":10000", 4))<<std::endl;};
+        boost::asio::io_service ioService;
+        Safir::Dob::Internal::Com::Resolver resolver(ioService, cmd.verbose);
+
+        ioService.post([&]
+        {
+            try
+            {
+                std::wcout<<"Resolved "<<cmd.expr<<" to: "<<
+                    RemovePort(resolver.ResolveRemoteEndpoint(cmd.expr+":10000", 4))<<std::endl;
+            }
+            catch (const std::logic_error& e)
+            {
+                std::wcout<<e.what()<<std::endl;
+            }});
+        ioService.run();
     }
 
-    ioService.post([&]{try{fun();}catch (const std::logic_error& e) {std::wcout<<e.what()<<std::endl;}});
-    ioService.run();
     return 0;
 }
 

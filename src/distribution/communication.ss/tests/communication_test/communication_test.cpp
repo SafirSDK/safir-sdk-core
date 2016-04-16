@@ -484,8 +484,8 @@ int main(int argc, char * argv[])
                                                            name.str(),
                                                            myId,
                                                            myNodeTypeId,
-                                                           cmd.unicastAddress,
-                                                           cmd.unicastAddress,
+                                                           Safir::Dob::Internal::Com::ResolvedAddress(cmd.unicastAddress),
+                                                           Safir::Dob::Internal::Com::ResolvedAddress(cmd.unicastAddress),
                                                            nodeTypes.ToVector()));
 
     std::cout<<"----------------------------------------------------------------------------"<<std::endl;

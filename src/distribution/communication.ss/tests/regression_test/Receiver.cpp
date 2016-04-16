@@ -32,8 +32,8 @@ Receiver::Receiver(Com::ControlModeTag tag, boost::asio::io_service& ioService, 
            std::string("Node_")+boost::lexical_cast<std::string>(nodeId),
            nodeId,
            nodeType,
-           std::string("127.0.0.1:1000")+boost::lexical_cast<std::string>(nodeId),
-           std::string("127.0.0.1:1100")+boost::lexical_cast<std::string>(nodeId),
+           Com::ResolvedAddress(std::string("127.0.0.1:1000")+boost::lexical_cast<std::string>(nodeId)),
+           Com::ResolvedAddress(std::string("127.0.0.1:1100")+boost::lexical_cast<std::string>(nodeId)),
            []() -> std::vector<Com::NodeTypeDefinition>  //This lambda just generates a vector of nodetypes. It used to be an initializer list
            {  //but VS2012 doesnt have initializer lists :-(
                std::vector<Com::NodeTypeDefinition> n;
@@ -63,7 +63,7 @@ Receiver::Receiver(Com::DataModeTag tag, boost::asio::io_service& ioService, int
            std::string("Node_")+boost::lexical_cast<std::string>(nodeId),
            nodeId,
            nodeType,
-           std::string("127.0.0.1:1100")+boost::lexical_cast<std::string>(nodeId),
+           Com::ResolvedAddress(std::string("127.0.0.1:1100")+boost::lexical_cast<std::string>(nodeId)),
            []() ->  std::vector<Com::NodeTypeDefinition> //This lambda just generates a vector of nodetypes. It used to be an initializer list
            {  //but VS2012 doesnt have initializer lists :-(
                 std::vector<Com::NodeTypeDefinition> n;

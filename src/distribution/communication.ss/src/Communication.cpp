@@ -48,20 +48,18 @@ namespace Com
 namespace
 {
     std::unique_ptr<CommunicationImpl> Init(bool isControlInstance,
-                                              boost::asio::io_service& ioService,
-                                              const std::string& nodeName,
-                                              int64_t nodeId, //0 is not a valid id.
-                                              int64_t nodeTypeId,
-                                              const std::string& controlAddress,
-                                              const std::string& dataAddress,
-                                              const std::vector<NodeTypeDefinition>& nodeTypes)
+                                            boost::asio::io_service& ioService,
+                                            const std::string& nodeName,
+                                            int64_t nodeId, //0 is not a valid id.
+                                            int64_t nodeTypeId,
+                                            const std::string& controlAddress,
+                                            const std::string& dataAddress,
+                                            const std::vector<NodeTypeDefinition>& nodeTypes)
     {
         //find address of local interface to use
         Resolver resolver(ioService);
 
-        const auto controlAddressResolved=(isControlInstance ? resolver.ResolveLocalEndpoint(controlAddress) : "");
-        const auto dataAddressResolved=resolver.ResolveLocalEndpoint(dataAddress);
-        const auto localIf=(isControlInstance ? controlAddressResolved : dataAddressResolved);
+        const auto localIf=(isControlInstance ? controlAddress : dataAddress);
 
         //find out if we are using ip4 or ip6
         const int ipVersion=Resolver::Protocol(localIf);
@@ -100,19 +98,33 @@ namespace
         }
 
         //create impl object
-        return std::unique_ptr<CommunicationImpl>(new CommunicationImpl(ioService, nodeName, nodeId, nodeTypeId, controlAddressResolved, dataAddressResolved, isControlInstance, nodeTypeMap));
+        return std::unique_ptr<CommunicationImpl>(new CommunicationImpl(ioService, nodeName, nodeId, nodeTypeId, controlAddress, dataAddress, isControlInstance, nodeTypeMap));
     }
 }
 
+    ResolvedAddress::ResolvedAddress(const std::string& pattern)
+        : m_address(Resolver::ResolveLocalEndpoint(pattern))
+    {
+    }
+
+    const std::string& ResolvedAddress::Address() const
+    {
+        if(!Ok())
+        {
+            throw std::logic_error("Address resolution has failed! Not ok to call Address!");
+        }
+        return m_address;
+    }
+
     Communication::Communication(ControlModeTag,
-                  boost::asio::io_service& ioService,
-                  const std::string& nodeName,
-                  int64_t nodeId, //0 is not a valid id.
-                  int64_t nodeTypeId,
-                  const std::string& controlAddress,
-                  const std::string& dataAddress,
-                  const std::vector<NodeTypeDefinition>& nodeTypes)
-        :m_impl(Init(true, ioService, nodeName, nodeId, nodeTypeId, controlAddress, dataAddress, nodeTypes))
+                                 boost::asio::io_service& ioService,
+                                 const std::string& nodeName,
+                                 int64_t nodeId, //0 is not a valid id.
+                                 int64_t nodeTypeId,
+                                 const ResolvedAddress& controlAddress,
+                                 const ResolvedAddress& dataAddress,
+                                 const std::vector<NodeTypeDefinition>& nodeTypes)
+        :m_impl(Init(true, ioService, nodeName, nodeId, nodeTypeId, controlAddress.Address(), dataAddress.Address(), nodeTypes))
     {
     }
 
@@ -122,9 +134,9 @@ namespace
                                  const std::string& nodeName,
                                  int64_t nodeId, //0 is not a valid id.
                                  int64_t nodeTypeId,
-                                 const std::string& dataAddress,
+                                 const ResolvedAddress& dataAddress,
                                  const std::vector<NodeTypeDefinition>& nodeTypes)
-        :m_impl(Init(false, ioService, nodeName, nodeId, nodeTypeId, "", dataAddress, nodeTypes))
+        :m_impl(Init(false, ioService, nodeName, nodeId, nodeTypeId, "", dataAddress.Address(), nodeTypes))
     {
     }
 

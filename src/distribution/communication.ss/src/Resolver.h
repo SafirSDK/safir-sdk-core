@@ -81,7 +81,7 @@ namespace Com
          * @throw Throws logic_error of expr could not be resolved.
          * @return Resolved address as a string on form <ip_address>:<port>
          */
-        std::string ResolveLocalEndpoint(const std::string& expr) const
+        static std::string ResolveLocalEndpoint(const std::string& expr, const bool verbose = false)
         {
             std::string ipExpr;
             unsigned short port;
@@ -90,7 +90,7 @@ namespace Com
                 throw std::logic_error(std::string("COM: Resolver.ResolveLocalEndpoint could not separate ip and port: "+expr));
             }
 
-            const auto ip=GetIPAddressBestMatch(ipExpr);
+            const auto ip=GetIPAddressBestMatch(ipExpr,verbose);
             if (ip.empty())
             {
                 throw std::logic_error(std::string("COM: Resolver.ResolveLocalEndpoint failed to resolve address: "+ipExpr));
@@ -218,21 +218,6 @@ namespace Com
         mutable boost::asio::ip::udp::resolver m_resolver;
         const bool m_verbose;
 
-        //Get first index at which val differs from original
-        static size_t DiffIndex(const std::string& original, const std::string& val)
-        {
-            size_t index=0;
-            while (index<std::min(original.size(), val.size()))
-            {
-                if (original[index]!=val[index])
-                {
-                    return index;
-                }
-
-                ++index;
-            }
-           return index;
-        }
 
         //Splig addrss into ip and port. Indata on form "addr:port"
         static bool SplitAddress(const std::string& address, std::string& ip, unsigned short& port)
@@ -264,12 +249,12 @@ namespace Com
         }
 
         //Match all addresses against pattern and return first match
-        std::string FindBestMatch(const std::string& pattern, const std::vector<std::string>& addresses) const
+        static std::string FindBestMatch(const std::string& pattern, const std::vector<std::string>& addresses, const bool verbose)
         {
             //addresses may only have numbers and stars in them
             if(!boost::regex_match(pattern,boost::regex("[0-9\\*]+\\.[0-9\\*]+\\.[0-9\\*]+\\.[0-9\\*]+")))
             {
-                if (m_verbose)
+                if (verbose)
                 {
                     std::wcout << "Ip addresses may only consist of numbers and stars..." << std::endl;
                 }
@@ -277,7 +262,7 @@ namespace Com
             }
             const auto dotsReplaced = boost::regex_replace(pattern,boost::regex("\\."),"\\\\.");
             const auto regex = boost::regex_replace(dotsReplaced,boost::regex("\\*"),".*");
-            if (m_verbose)
+            if (verbose)
             {
                 std::wcout << "Converted pattern '" << pattern.c_str() << "' to regex '" << regex.c_str() << "'" << std::endl;
             }
@@ -293,12 +278,12 @@ namespace Com
         }
 
         //Get the ip address of local machine that best matches expr.
-        std::string GetIPAddressBestMatch(const std::string& expr) const
+        static std::string GetIPAddressBestMatch(const std::string& expr, const bool verbose)
         {
             //check if a adapter name has been specified
             auto adapters = GetAdapters();
 
-            if (m_verbose)
+            if (verbose)
             {
                 std::wcout<<"Own interface addresses available:"<<std::endl;
                 for (auto a = adapters.cbegin(); a != adapters.cend(); ++a)
@@ -319,7 +304,7 @@ namespace Com
                 addresses.push_back(ai->ipAddress);
             }
 
-            return FindBestMatch(expr,addresses);
+            return FindBestMatch(expr,addresses,verbose);
         }
 
         //Make dns lookup and return list of all ip addresses that support specified protocol
@@ -381,7 +366,7 @@ namespace Com
 #ifdef _MSC_VER
 
         //Windows implementation
-        std::vector<AdapterInfo> GetAdapters() const
+        static std::vector<AdapterInfo> GetAdapters()
         {
             std::vector<AdapterInfo> result;
             WSADATA WinsockData;
@@ -420,7 +405,7 @@ namespace Com
         }
 
 #else
-        std::vector<AdapterInfo> GetAdapters() const
+        static std::vector<AdapterInfo> GetAdapters()
         {
             std::vector<AdapterInfo> result;
 
@@ -450,24 +435,11 @@ namespace Com
                 }
             }
 
-            for (int ipVersion=4; ipVersion<=6; ipVersion+=2)
-            {
-                auto dns=DnsLookup(boost::asio::ip::host_name(), ipVersion);
-                if (!dns.empty())
-                {
-                    AdapterInfo ai;
-                    ai.name=boost::asio::ip::host_name();
-                    ai.ipAddress=dns[0];
-                    ai.ipVersion=ipVersion;
-                    result.push_back(ai);
-                }
-            }
-
             return result;
         }
 
         //Linux implementation
-        std::vector<std::string> GetInterfaceNames() const
+        static std::vector<std::string> GetInterfaceNames()
         {
             std::vector<std::string> result;
             struct ifaddrs *addrs,*tmp;
@@ -486,7 +458,7 @@ namespace Com
             return result;
         }
 
-        std::string GetInterfaceIpAddress(const std::string& interfaceName, int protocol) const
+        static std::string GetInterfaceIpAddress(const std::string& interfaceName, int protocol)
         {
             try
             {

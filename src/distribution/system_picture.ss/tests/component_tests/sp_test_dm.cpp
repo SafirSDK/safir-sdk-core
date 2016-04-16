@@ -412,7 +412,7 @@ int main(int argc, char * argv[])
                                                            options.name,
                                                            options.id,
                                                            options.nodeType,
-                                                           options.dataAddress,
+                                                           Safir::Dob::Internal::Com::ResolvedAddress(options.dataAddress),
                                                            commNodeTypes);
 
 

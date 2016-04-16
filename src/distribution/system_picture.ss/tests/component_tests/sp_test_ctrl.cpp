@@ -270,8 +270,8 @@ int main(int argc, char * argv[])
                                                                options.name,
                                                                options.id,
                                                                options.nodeType,
-                                                               options.controlAddress,
-                                                               options.dataAddress,
+                                                               Safir::Dob::Internal::Com::ResolvedAddress(options.controlAddress),
+                                                               Safir::Dob::Internal::Com::ResolvedAddress(options.dataAddress),
                                                                commNodeTypes);
 
         std::wcout << "Injecting seeds" << std::endl;

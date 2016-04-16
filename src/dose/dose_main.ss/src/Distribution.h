@@ -115,7 +115,7 @@ namespace Internal
                                                      ownNodeName,
                                                      ownNodeId,
                                                      ownNodeTypeId,
-                                                     ownDataAddress,
+                                                     Com::ResolvedAddress(ownDataAddress),
                                                      commNodeTypes));
 
             m_sp.reset(new SystemPictureT(SP::slave_tag,

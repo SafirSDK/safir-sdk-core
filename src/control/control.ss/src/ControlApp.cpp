@@ -163,8 +163,8 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
                                                  m_conf.thisNodeParam.name,
                                                  m_nodeId,
                                                  m_conf.thisNodeParam.nodeTypeId,
-                                                 m_conf.thisNodeParam.controlAddress,
-                                                 m_conf.thisNodeParam.dataAddress,
+                                                 Com::ResolvedAddress(m_conf.thisNodeParam.controlAddress),
+                                                 Com::ResolvedAddress(m_conf.thisNodeParam.dataAddress),
                                                  commNodeTypes));
 
     if (!m_conf.thisNodeParam.seeds.empty())

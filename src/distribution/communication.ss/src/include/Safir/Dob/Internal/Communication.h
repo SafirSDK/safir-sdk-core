@@ -41,12 +41,12 @@ namespace Internal
 {
 namespace Com
 {
+
     /**
      * Definition of a NodeType.
      */
     struct NodeTypeDefinition
     {
-
         NodeTypeDefinition() {}
 
         NodeTypeDefinition( int64_t id_, std::string name_, std::string controlMulticastAddress_, std::string dataMulticastAddress_,
@@ -92,6 +92,19 @@ namespace Com
 #pragma warning (disable: 4275)
 #pragma warning (disable: 4251)
 #endif
+
+    class DISTRIBUTION_COMMUNICATION_API ResolvedAddress
+    {
+    public:
+        explicit ResolvedAddress(const std::string& pattern);
+        const std::string& Address() const;
+        bool Ok() const {return m_address != "";}
+
+    private:
+        const std::string m_address;
+    };
+
+
     /**
      * @brief The Communication class handles low level socket communication between nodes including discovering nodes,
      * message fragmentation and retranmits of lost packets and ordering of incoming data.
@@ -124,8 +137,8 @@ namespace Com
                       const std::string& nodeName,
                       int64_t nodeId, //0 is not a valid id.
                       int64_t nodeTypeId,
-                      const std::string& controlAddress,
-                      const std::string& dataAddress,
+                      const ResolvedAddress& controlAddress,
+                      const ResolvedAddress& dataAddress,
                       const std::vector<NodeTypeDefinition>& nodeTypes);
 
         /**
@@ -143,7 +156,7 @@ namespace Com
                       const std::string& nodeName,
                       int64_t nodeId, //0 is not a valid id.
                       int64_t nodeTypeId,
-                      const std::string& dataAddress,
+                      const ResolvedAddress& dataAddress,
                       const std::vector<NodeTypeDefinition>& nodeTypes);
 
         /**
