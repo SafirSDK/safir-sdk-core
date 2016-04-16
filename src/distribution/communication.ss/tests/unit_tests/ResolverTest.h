@@ -55,7 +55,7 @@ public:
             }
         };
 
-        Com::Resolver resolver(io);
+        Com::Resolver resolver(io,true);
         auto resolveRemote=[&](const std::string& expr, int protocol)
         {
             try
@@ -78,20 +78,20 @@ public:
         v.push_back("192.168.0.0");
         v.push_back("192.255.255.255");
 
-        CHECK(Com::Resolver::FindBestMatch("192.168.66.*", v, false)=="192.168.66.100");
-        CHECK(Com::Resolver::FindBestMatch("192.0.*.*", v, false)=="192.0.0.0");
-        CHECK(Com::Resolver::FindBestMatch("192.168.*.*", v, false)=="192.168.0.100");
-        CHECK(Com::Resolver::FindBestMatch("*.*.*.*", v, false)=="192.168.0.100");
-        CHECK(Com::Resolver::FindBestMatch("192.168.0.101", v, false)=="");
-        CHECK(Com::Resolver::FindBestMatch("asdfasdf", v, false)=="");
-        CHECK(Com::Resolver::FindBestMatch("", v, false)=="");
+        CHECK(Com::Resolver::FindBestMatch("192.168.66.*", v, true)=="192.168.66.100");
+        CHECK(Com::Resolver::FindBestMatch("192.0.*.*", v, true)=="192.0.0.0");
+        CHECK(Com::Resolver::FindBestMatch("192.168.*.*", v, true)=="192.168.0.100");
+        CHECK(Com::Resolver::FindBestMatch("*.*.*.*", v, true)=="192.168.0.100");
+        CHECK(Com::Resolver::FindBestMatch("192.168.0.101", v, true)=="");
+        CHECK(Com::Resolver::FindBestMatch("asdfasdf", v, true)=="");
+        CHECK(Com::Resolver::FindBestMatch("", v, true)=="");
 
-        CHECK(Com::Resolver::ResolveLocalEndpoint("127.0.0.1:11111") == "127.0.0.1:11111");
-        CHECK(Com::Resolver::ResolveLocalEndpoint("127.0.0.*:11111") == "127.0.0.1:11111");
-        CHECK(Com::Resolver::ResolveLocalEndpoint("127.0.*.*:11111") == "127.0.0.1:11111");
+        CHECK(Com::Resolver::ResolveLocalEndpoint("127.0.0.1:11111", true) == "127.0.0.1:11111");
+        CHECK(Com::Resolver::ResolveLocalEndpoint("127.0.0.*:11111", true) == "127.0.0.1:11111");
+        CHECK(Com::Resolver::ResolveLocalEndpoint("127.0.*.*:11111", true) == "127.0.0.1:11111");
         try
         {
-            Com::Resolver::ResolveLocalEndpoint("whut:11111");
+            Com::Resolver::ResolveLocalEndpoint("whut:11111", true);
             CHECK(false);
         }
         catch(...)
@@ -99,7 +99,7 @@ public:
             CHECK(true);
         }
 #ifndef _MSC_VER
-        CHECK(Com::Resolver::ResolveLocalEndpoint("lo:123") == "127.0.0.1:123");
+        CHECK(Com::Resolver::ResolveLocalEndpoint("lo:123",true) == "127.0.0.1:123");
 #endif
 
         std::cout<<"Testing resolve local endpoint"<<std::endl;
