@@ -30,7 +30,7 @@ class ResolverTest
 public:
     static void Run()
     {
-        std::cout<<"ResolverTest started"<<std::endl;
+        std::wcout<<"ResolverTest started"<<std::endl;
         boost::asio::io_service io;
         auto work=boost::make_shared<boost::asio::io_service::work>(io);
 
@@ -46,12 +46,12 @@ public:
             try
             {
                 auto ep=Com::Resolver::ResolveLocalEndpoint(expr);
-                std::cout<<"ResolvedLocal "<<expr<<" to '"<<ep<<"'"<<std::endl;
+                std::wcout<<"ResolvedLocal "<<expr.c_str()<<" to '"<<ep.c_str()<<"'"<<std::endl;
             }
             catch(const std::exception& e)
             {
                 success=false;
-                std::cout<<"Got Exception in ResolvedLocal: "<<e.what()<<std::endl;
+                std::wcout<<"Got Exception in ResolvedLocal: "<<e.what()<<std::endl;
             }
         };
 
@@ -61,12 +61,12 @@ public:
             try
             {
                 auto ep=resolver.ResolveRemoteEndpoint(expr, protocol);
-                std::cout<<"ResolvedRemote "<<expr<<" to '"<<ep<<"'"<<std::endl;
+                std::wcout<<"ResolvedRemote "<<expr.c_str()<<" to '"<<ep.c_str()<<"'"<<std::endl;
             }
             catch(const std::exception& e)
             {
                 success=false;
-                std::cout<<"Got Exception in ResolvedRemote: "<<e.what()<<std::endl;
+                std::wcout<<"Got Exception in ResolvedRemote: "<<e.what()<<std::endl;
             }
         };
 
@@ -102,12 +102,12 @@ public:
         CHECK(Com::Resolver::ResolveLocalEndpoint("lo:123",true) == "127.0.0.1:123");
 #endif
 
-        std::cout<<"Testing resolve local endpoint"<<std::endl;
+        std::wcout<<"Testing resolve local endpoint"<<std::endl;
         resolveLocal("192.168.*.*:12345");
         resolveLocal("eth0:10000");
         resolveLocal("lo:12000");
 
-        std::cout<<"Testing resolve remote endpoint"<<std::endl;
+        std::wcout<<"Testing resolve remote endpoint"<<std::endl;
 
         CHECK(resolver.ResolveRemoteEndpoint("localhost:100",4) == "127.0.0.1:100");
         resolveRemote("safir-salt-router:10000", 4);
@@ -117,7 +117,7 @@ public:
 
         work.reset();
         threads.join_all();
-        std::cout<<"Resolver tests passed"<<std::endl;
+        std::wcout<<"Resolver tests passed"<<std::endl;
     }
 
 private:

@@ -44,4 +44,4 @@ ADD_TEST(NAME CommunicationAllocatorTest COMMAND unit_tests AllocatorTest)
 SET_SAFIR_TEST_PROPERTIES(TEST CommunicationAllocatorTest TIMEOUT 360)
 
 ADD_TEST(NAME CommunicationResolverTest COMMAND unit_tests ResolverTest)
-SET_SAFIR_TEST_PROPERTIES(TEST CommunicationAllocatorTest TIMEOUT 360)
+SET_SAFIR_TEST_PROPERTIES(TEST CommunicationResolverTest TIMEOUT 360)

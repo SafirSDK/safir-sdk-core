@@ -36,63 +36,76 @@
 int main(int argc, char* argv[])
 {
     boost::chrono::steady_clock::now();
-
-    if (argc>1)
+    try
     {
-        std::string testcase(argv[1]);
-        if (testcase=="MessageQueueTest")
+        if (argc>1)
+        {
+            std::string testcase(argv[1]);
+            std::wcout << "Will run test case " << testcase.c_str() << std::endl;
+            if (testcase=="MessageQueueTest")
+            {
+                MessageQueueTest::Run();
+            }
+            else if (testcase=="DeliveryHandlerTest")
+            {
+                DeliveryHandlerTest::Run();
+            }
+            else if (testcase=="DataReceiverTest")
+            {
+                DataReceiverTest::Run();
+            }
+            else if (testcase=="HeartbeatSenderTest")
+            {
+                HeartbeatSenderTest::Run();
+            }
+            else if (testcase=="DataSenderTest")
+            {
+                DataSenderTest::Run();
+            }
+            else if (testcase=="DiscovererTest")
+            {
+                DiscovererTest::Run();
+            }
+            else if (testcase=="ResolverTest")
+            {
+                ResolverTest::Run();
+            }
+            else if (testcase=="AllocatorTest")
+            {
+                AllocatorTest::Run();
+            }
+            else
+            {
+                std::wcout << "Unknown test" << std::endl;
+                return 1;
+            }
+        }
+        else //run all tests
         {
             MessageQueueTest::Run();
-        }
-        else if (testcase=="DeliveryHandlerTest")
-        {
-            DeliveryHandlerTest::Run();
-        }
-        else if (testcase=="DataReceiverTest")
-        {
-            DataReceiverTest::Run();
-        }
-        else if (testcase=="HeartbeatSenderTest")
-        {
             HeartbeatSenderTest::Run();
-        }
-        else if (testcase=="DataSenderTest")
-        {
+            DataReceiverTest::Run();
             DataSenderTest::Run();
-        }
-        else if (testcase=="DiscovererTest")
-        {
+            DeliveryHandlerTest::Run();
             DiscovererTest::Run();
-        }
-        else if (testcase=="ResolverTest")
-        {
             ResolverTest::Run();
-        }
-        else if (testcase=="AllocatorTest")
-        {
             AllocatorTest::Run();
         }
-        else
-        {
-            std::cout << "Unknown test" << std::endl;
-            return 1;
-        }
-    }
-    else //run all tests
-    {
-        MessageQueueTest::Run();
-        HeartbeatSenderTest::Run();
-        DataReceiverTest::Run();
-        DataSenderTest::Run();
-        DeliveryHandlerTest::Run();
-        DiscovererTest::Run();
-        ResolverTest::Run();
-        AllocatorTest::Run();
-    }
 
-    std::cout<<"================================="<<std::endl;
-    std::cout<<"All tests passed!"<<std::endl;
-    std::cout<<"================================="<<std::endl;
-    return 0;
+        std::wcout<<"================================="<<std::endl;
+        std::wcout<<"All tests passed!"<<std::endl;
+        std::wcout<<"================================="<<std::endl;
+        return 0;
+    }
+    catch (const std::exception& e)
+    {
+        std::wcout << "Caught exception during tests: " << e.what() << std::endl;
+        return 1;
+    }
+    catch (...)
+    {
+        std::wcout << "Caught ... exception during tests" << std::endl;
+        return 1;
+    }
 }
 
