@@ -18,8 +18,8 @@ else()
   set(BOOST_PROCESS_INCLUDE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/boost-process/src)
 endif()
 
-set(headers ControlApp.h SystemStateHandler.h IncarnationBlackListHandler.h StopHandler.h CommandExecutor.h)
-set(sources safir_control.cpp ControlApp.cpp)
+set(headers ControlApp.h SystemStateHandler.h IncarnationBlackListHandler.h StopHandler.h CommandExecutor.h TerminateHandler.h)
+set(sources safir_control.cpp ControlApp.cpp TerminateHandler.cpp)
 
 ADD_EXECUTABLE(safir_control ${sources} ${headers})
 

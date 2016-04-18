@@ -23,7 +23,20 @@
 ******************************************************************************/
 #pragma once
 
+#include <Safir/Utilities/Internal/SystemLog.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
+
+#if defined _MSC_VER
+#  pragma warning (push)
+#  pragma warning (disable : 4100 4267 4251)
+#endif
+
+#include <boost/asio.hpp>
+#include <boost/thread.hpp>
+
+#if defined _MSC_VER
+#  pragma warning (pop)
+#endif
 
 /**
  * This class handles signals to make safir_control stop.
@@ -46,7 +59,7 @@ public:
 
         //We install a ConsoleCtrlHandler to handle presses of the Close button
         //on the console window
-        ConsoleCtrlHandlerFcn = m_stopCallback;
+        ConsoleCtrlHandlerFcn = stopCallback;
         ::SetConsoleCtrlHandler(ConsoleCtrlHandler,TRUE);
 #elif defined(linux) || defined(__linux) || defined(__linux__)
         m_signalSet.add(SIGQUIT);
@@ -105,7 +118,8 @@ private:
         case CTRL_SHUTDOWN_EVENT:
             {
                 SEND_SYSTEM_LOG(Informational,
-                                << "DOSE_MAIN: Got a ConsoleCtrlHandler call with event " << event << ", will close down." );
+                                << "DOSE_MAIN: Got a ConsoleCtrlHandler call with event "
+                                << event << ", will close down." );
                 ConsoleCtrlHandlerFcn();
 
                 //We could sleep forever here, since the function will be terminated when
