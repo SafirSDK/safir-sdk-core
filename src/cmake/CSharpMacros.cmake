@@ -13,34 +13,13 @@ function(ADD_CSHARP_ASSEMBLY TARGET_NAME)
     #we always generated debug info and enable optimizations, regardless of build type
     SET(_cs_flags "${CSHARP_COMPILER_FLAGS} -debug -optimize -fullpaths")
 
-    #On Windows we want to ensure that we target version 4.0 of the .NET framework, so we
+    #On Windows we want to ensure that we target a specific version of the .NET framework, so we
     #point it out specifically. On Linux it doesnt matter so much, since we target whatever
     #is in the distro repos.
+    #This protects us from Windows Update sabotaging our build machines by installing
+    #a new .Net Framework version overnight...
     if (WIN32 AND NOT SAFIR_EXTERNAL_BUILD)
-      set (libpath "C:/Program Files (x86)/Reference Assemblies/Microsoft/Framework/.NETFramework/v4.0/")
-      if (NOT IS_DIRECTORY "${libpath}")
-        set (libpath "C:/Program Files/Reference Assemblies/Microsoft/Framework/.NETFramework/v4.0/")
-      endif()
-      if (IS_DIRECTORY "${libpath}")
-        message(STATUS "Using .NET Framework assemblies in ${libpath}")
-      else()
-        message(FATAL_ERROR "Could not find the .NET 4.0 assemblies")
-      endif()
-
-      #This, together with -noconfig (below), will cause only 4.0 assemblies to be used
-      #regardless of what is installed on the computer.
-      #This protects us from Windows Update sabotaging our build machines by installing
-      #a new .Net Framework version overnight...
-      SET(_cs_flags "${_cs_flags} -nostdlib
-                                  -lib:\"${libpath}\"
-                                  -reference:\"${libpath}mscorlib.dll\"
-                                  -reference:\"${libpath}System.dll\"
-                                  -reference:\"${libpath}Microsoft.CSharp.dll\"
-                                  -reference:\"${libpath}System.Configuration.dll\"
-                                  -reference:\"${libpath}System.Core.dll\"
-                                  -reference:\"${libpath}System.Xml.dll\"
-                                  -reference:\"${libpath}System.EnterpriseServices.dll\""
-        )
+      SET(_cs_flags "${_cs_flags} ${CSHARP_COMPILER_FRAMEWORK_ARGUMENTS}")
 
       #This has to appear on the command line, not in the response file, hence we keep
       #it separate
