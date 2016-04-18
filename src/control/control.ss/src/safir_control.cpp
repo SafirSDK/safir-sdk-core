@@ -54,7 +54,61 @@ namespace //anonymous namespace
                         << "safir_control has generated a dump to:\n"
                         << dumpPath << "\n"
                         << "Please send this file to your nearest Dob developer, along with\n"
-                        << "relevant information about what version of Safir SDK you are using");
+                        << "relevant information about what version of Safir SDK Core you are using");
+    }
+
+    boost::filesystem::path FindDoseMain(const std::string& doseMainPathOption)
+    {
+        using namespace boost::filesystem;
+
+        //Boost.Process sucks, so we need this define.
+#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
+        std::wstring doseMainName(L"dose_main");
+#elif defined(linux) || defined(__linux) || defined(__linux__)
+        std::string doseMainName("dose_main");
+#endif
+
+        path doseMainPath;
+
+        if (doseMainPathOption.empty())
+        {
+            doseMainPath = boost::process::search_path(doseMainName);
+
+            if (doseMainPath.empty())
+            {
+                std::ostringstream os;
+                os << "CTRL: Can't find dose_main in PATH";
+                std::wcout << os.str().c_str() << std::endl;
+                SEND_SYSTEM_LOG(Critical, << os.str().c_str() << std::endl);
+                return "";
+            }
+        }
+        else
+        {
+            doseMainPath = doseMainPathOption;
+        }
+
+        if (exists(doseMainPath))
+        {
+            if (is_directory(doseMainPath) || !is_regular_file(doseMainPath))
+            {
+                std::ostringstream os;
+                os << "CTRL: " << doseMainPath << " is a directory or a non regular file!";
+                std::wcout << os.str().c_str() << std::endl;
+                SEND_SYSTEM_LOG(Critical, << os.str().c_str() << std::endl);
+                return "";
+            }
+        }
+        else
+        {
+            std::ostringstream os;
+            os << "CTRL: Can't find " << doseMainPath;
+            std::wcout << os.str().c_str() << std::endl;
+            SEND_SYSTEM_LOG(Critical, << os.str().c_str() << std::endl);
+            return "";
+        }
+
+        return doseMainPath;
     }
 }
 
@@ -151,54 +205,7 @@ int main(int argc, char * argv[])
         }
 
         // Locate dose_main binary
-
-        namespace fs = boost::filesystem;
-
-#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
-        std::wstring doseMainName(L"dose_main");
-#elif defined(linux) || defined(__linux) || defined(__linux__)
-        std::string doseMainName("dose_main");
-#endif
-
-        fs::path doseMainPath;
-
-        if (options.doseMainPath.empty())
-        {
-            doseMainPath = boost::process::search_path(doseMainName);
-
-            if (doseMainPath.empty())
-            {
-                std::ostringstream os;
-                os << "CTRL: Can't find dose_main in PATH";
-                std::wcout << os.str().c_str() << std::endl;
-                SEND_SYSTEM_LOG(Critical, << os.str().c_str() << std::endl);
-                return 1;
-            }
-        }
-        else
-        {
-            doseMainPath =  options.doseMainPath;
-        }
-
-        if (fs::exists(doseMainPath))
-        {
-            if (fs::is_directory(doseMainPath) || !fs::is_regular_file(doseMainPath))
-            {
-                std::ostringstream os;
-                os << "CTRL: " << doseMainPath << " is a directory or a non regular file!";
-                std::wcout << os.str().c_str() << std::endl;
-                SEND_SYSTEM_LOG(Critical, << os.str().c_str() << std::endl);
-                return 1;
-            }
-        }
-        else
-        {
-            std::ostringstream os;
-            os << "CTRL: Can't find " << doseMainPath;
-            std::wcout << os.str().c_str() << std::endl;
-            SEND_SYSTEM_LOG(Critical, << os.str().c_str() << std::endl);
-            return 1;
-        }
+        const boost::filesystem::path doseMainPath = FindDoseMain(options.doseMainPath);
 
         boost::asio::io_service ioService;
 

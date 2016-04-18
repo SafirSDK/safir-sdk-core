@@ -25,6 +25,7 @@
 
 #include "SystemStateHandler.h"
 #include "StopHandler.h"
+#include "TerminateHandler.h"
 #include "IncarnationBlackListHandler.h"
 #include <Safir/Dob/Internal/SystemPicture.h>
 #include <Safir/Dob/Internal/Communication.h>
@@ -63,9 +64,11 @@ public:
                const int64_t                    id,
                const bool                       ignoreControlCmd);
 
-    ~ControlApp();
-
 private:
+    void Start();
+
+    //first is controlAddress, second is dataAddress
+    std::pair<Com::ResolvedAddress,Com::ResolvedAddress> ResolveAddresses();
 
     void StopDoseMain();
 
@@ -80,14 +83,19 @@ private:
     void SendControlInfo();
 
     boost::asio::io_service&                    m_ioService;
-    boost::asio::signal_set                     m_signalSet;
+    bool                                        m_stopped;
+    const boost::chrono::steady_clock::time_point m_resolutionStartTime;
     boost::asio::io_service::strand             m_strand;
+    TerminateHandler                            m_terminateHandler;
     int64_t                                     m_nodeId;
+    const boost::filesystem::path               m_doseMainPath;
+    const bool                                  m_ignoreControlCmd;
+    boost::asio::steady_timer                   m_startTimer;
     boost::asio::steady_timer                   m_terminationTimer;
-    Control::Config                             m_conf;
+    const Control::Config                       m_conf;
     Control::IncarnationBlacklistHandler        m_incarnationBlackListHandler;
     bool                                        m_controlInfoReceiverReady;
-    bool                                        m_ctrlStopped;
+    bool                                        m_controlStopped;
     bool                                        m_doseMainRunning;
     bool                                        m_requiredForStart;
 

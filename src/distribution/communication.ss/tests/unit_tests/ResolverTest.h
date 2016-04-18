@@ -89,15 +89,9 @@ public:
         CHECK(Com::Resolver::ResolveLocalEndpoint("127.0.0.1:11111", true) == "127.0.0.1:11111");
         CHECK(Com::Resolver::ResolveLocalEndpoint("127.0.0.*:11111", true) == "127.0.0.1:11111");
         CHECK(Com::Resolver::ResolveLocalEndpoint("127.0.*.*:11111", true) == "127.0.0.1:11111");
-        try
-        {
-            Com::Resolver::ResolveLocalEndpoint("whut:11111", true);
-            CHECK(false);
-        }
-        catch(...)
-        {
-            CHECK(true);
-        }
+        CHECK(Com::Resolver::ResolveLocalEndpoint("whut:11111", true) == "");
+        CHECK(Com::Resolver::ResolveLocalEndpoint("0.0.0.0:11111", true) == "0.0.0.0:11111");
+
 #ifndef _MSC_VER
         CHECK(Com::Resolver::ResolveLocalEndpoint("lo:123",true) == "127.0.0.1:123");
 #endif
@@ -105,7 +99,6 @@ public:
         std::wcout<<"Testing resolve local endpoint"<<std::endl;
         resolveLocal("192.168.*.*:12345");
         resolveLocal("eth0:10000");
-        resolveLocal("lo:12000");
 
         std::wcout<<"Testing resolve remote endpoint"<<std::endl;
 

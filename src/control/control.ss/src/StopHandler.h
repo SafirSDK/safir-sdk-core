@@ -80,7 +80,7 @@ namespace Control
                          Communication&             communication,
                          SP&                        sp,
                          DoseMainCmdSender&         doseMainCmdSender,
-                         ControlConfig&             config,
+                         const ControlConfig&       config,
                          const StopSafirNodeCb      stopSafirNodeCb,
                          const ShutdownCb           shutdownCb,
                          const RebootCb             rebootCb,
@@ -250,10 +250,10 @@ namespace Control
 
         boost::asio::io_service::strand m_strand;
 
-        Communication&      m_communication;
-        SP&                 m_sp;
-        DoseMainCmdSender&  m_doseMainCmdSender;
-        ControlConfig&      m_config;
+        Communication&       m_communication;
+        SP&                  m_sp;
+        DoseMainCmdSender&   m_doseMainCmdSender;
+        const ControlConfig& m_config;
 
         const StopSafirNodeCb   m_stopSafirNodeCb;
         const ShutdownCb        m_shutdownCb;

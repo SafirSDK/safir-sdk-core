@@ -64,6 +64,18 @@
       <type>String</type>
       <value>@{TEMP}/system-incarnation-blacklist.txt</value>
     </parameter>
+    <parameter>
+      <summary>
+        How long to wait for the local interfaces becoming available before
+        giving up. I.e. if ControlAddress or DataAddress (as specified above)
+        have not become available before this timeout expires safir_control will
+        exit with an error.
+      </summary>
+      <name>LocalInterfaceTimeout</name>
+      <type>Second64</type>
+      <value>60.0</value>
+    </parameter>
+
 
     <parameter>
       <summary>Defines the different node types in the system.</summary>

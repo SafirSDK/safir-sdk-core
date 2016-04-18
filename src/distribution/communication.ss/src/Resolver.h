@@ -78,8 +78,7 @@ namespace Com
          *                              addresses {127.0.0.1, 192.168.100.100}, the adapter with address "192.168.100.100" will be chosen.
          * @param expr [in] - Expression that can be a hostname, localhost, adapter name (ex: eth0), ip-address. Must end with port number,
          *                    For example ip:port, adapter_name:port, host_name:port.
-         * @throw Throws logic_error of expr could not be resolved.
-         * @return Resolved address as a string on form <ip_address>:<port>
+         * @return Resolved address as a string on form <ip_address>:<port> or empty string if resolution failed.
          */
         static std::string ResolveLocalEndpoint(const std::string& expr, const bool verbose = false)
         {
@@ -93,7 +92,7 @@ namespace Com
             const auto ip=GetIPAddressBestMatch(ipExpr,verbose);
             if (ip.empty())
             {
-                throw std::logic_error(std::string("COM: Resolver.ResolveLocalEndpoint failed to resolve address: "+ipExpr));
+                return "";
             }
 
             return ip+std::string(":")+boost::lexical_cast<std::string>(port);
@@ -251,6 +250,11 @@ namespace Com
         //Match all addresses against pattern and return first match
         static std::string FindBestMatch(const std::string& pattern, const std::vector<std::string>& addresses, const bool verbose)
         {
+            if (pattern == "0.0.0.0")
+            {
+                return pattern;
+            }
+
             //addresses may only have numbers and stars in them
             if(!boost::regex_match(pattern,boost::regex("[0-9\\*]+\\.[0-9\\*]+\\.[0-9\\*]+\\.[0-9\\*]+")))
             {

@@ -30,7 +30,7 @@
 #include <Safir/Dob/NodeParameters.h>
 #include <Safir/Dob/ThisNodeParameters.h>
 #include <Safir/Dob/Typesystem/Utilities.h>
-
+#include <boost/chrono.hpp>
 
 namespace Safir
 {
@@ -63,15 +63,15 @@ namespace Control
               requiredForStart(requiredForStart_)
         {}
 
-        std::string name;
-        boost::int64_t id;
-        std::string multicastAddressControl;
-        std::string multicastAddressData;
-        int heartbeatInterval;
-        int maxLostHeartbeats;
-        int slidingWindowSize;
-        int retryTimeout;
-        bool requiredForStart;
+        const std::string name;
+        const boost::int64_t id;
+        const std::string multicastAddressControl;
+        const std::string multicastAddressData;
+        const int heartbeatInterval;
+        const int maxLostHeartbeats;
+        const int slidingWindowSize;
+        const int retryTimeout;
+        const bool requiredForStart;
     };
 
     struct ThisNode
@@ -297,11 +297,13 @@ namespace Control
                                        thisNodeParam.name + " is not a valid node type!");
             }
 
+            localInterfaceTimeout = boost::chrono::milliseconds(static_cast<int64_t>(Safir::Dob::NodeParameters::LocalInterfaceTimeout() * 1000));
         }
 
         std::vector<NodeType> nodeTypesParam;
         ThisNode thisNodeParam;
         std::string incarnationBlacklistFileName;
+        boost::chrono::steady_clock::duration localInterfaceTimeout;
     };
 }
 }

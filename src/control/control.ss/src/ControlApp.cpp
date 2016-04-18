@@ -53,51 +53,22 @@
 #include <unistd.h>
 #endif
 
-namespace
-{
-#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
-        std::function<void()> ConsoleCtrlHandlerFcn;
-        BOOL WINAPI ConsoleCtrlHandler(DWORD event)
-        {
-            switch (event)
-            {
-            case CTRL_CLOSE_EVENT:
-            case CTRL_LOGOFF_EVENT:
-            case CTRL_SHUTDOWN_EVENT:
-                {
-                    SEND_SYSTEM_LOG(Informational,
-                                    << "DOSE_MAIN: Got a ConsoleCtrlHandler call with event " << event << ", will close down." );
-                    ConsoleCtrlHandlerFcn();
-
-                    //We could sleep forever here, since the function will be terminated when
-                    //our main function returns. Anyway, we only have something like
-                    //five seconds before the process gets killed anyway.
-                    //So the below code is just to ensure we sleep for a while and
-                    //dont generate any compiler errors...
-                    for(int i = 0; i < 10; ++i)
-                    {
-                        boost::this_thread::sleep_for(boost::chrono::seconds(1));
-                    }
-                }
-                return TRUE;
-            default:
-                return FALSE;
-            }
-        }
-#endif
-}
 
 ControlApp::ControlApp(boost::asio::io_service&         ioService,
                        const boost::filesystem::path&   doseMainPath,
                        const boost::int64_t             id,
                        const bool                       ignoreControlCmd)
     : m_ioService(ioService)
-    , m_signalSet(ioService)
+    , m_resolutionStartTime(boost::chrono::steady_clock::now())
     , m_strand(ioService)
+    , m_terminateHandler(ioService,m_strand.wrap([this]{StopThisNode();}))
+    , m_doseMainPath(doseMainPath)
+    , m_ignoreControlCmd(ignoreControlCmd)
+    , m_startTimer(ioService)
     , m_terminationTimer(ioService)
     , m_incarnationBlackListHandler(m_conf.incarnationBlacklistFileName)
     , m_controlInfoReceiverReady(false)
-    , m_ctrlStopped(false)
+    , m_controlStopped(false)
     , m_doseMainRunning(false)
     , m_requiredForStart(false)
     , m_incarnationIdStorage(new AlignedStorage())
@@ -143,8 +114,24 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
     // Make some work to stop io_service from exiting.
     m_work = Safir::make_unique<boost::asio::io_service::work>(ioService);
 
-    // Initiate Communication
+    //Call the Start method, which will retry itself if need be (e.g. the local interface
+    //addresses cannot be resolved).
+    m_strand.post([this]{Start();});
+}
 
+//must be called from within strand
+void ControlApp::Start()
+{
+    const auto addresses = ResolveAddresses();
+
+    //if addresses can not be resolved we can't go on. ResolveAddresses is responsible
+    //for making retries which will cause Start to be called again.
+    if (!(addresses.first.Ok() && addresses.second.Ok()))
+    {
+        return;
+    }
+
+    // Initiate Communication
     std::vector<Com::NodeTypeDefinition> commNodeTypes;
 
     for (auto nt = m_conf.nodeTypesParam.cbegin(); nt != m_conf.nodeTypesParam.cend(); ++nt)
@@ -157,14 +144,13 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
                                                         nt->retryTimeout,
                                                         nt->maxLostHeartbeats));
     }
-
     m_communication.reset(new Com::Communication(Com::controlModeTag,
                                                  m_ioService,
                                                  m_conf.thisNodeParam.name,
                                                  m_nodeId,
                                                  m_conf.thisNodeParam.nodeTypeId,
-                                                 Com::ResolvedAddress(m_conf.thisNodeParam.controlAddress),
-                                                 Com::ResolvedAddress(m_conf.thisNodeParam.dataAddress),
+                                                 addresses.first,
+                                                 addresses.second,
                                                  commNodeTypes));
 
     if (!m_conf.thisNodeParam.seeds.empty())
@@ -188,12 +174,13 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
     }
 
 
-    // Note that the two callbacks that are called by SP are synchronous and return a value. This means
-    // that the operations can't be protected by the strand and therefor you need to be cautious when
-    // modifying the callback code. In the future, if more elaborated things have to be done in the callback
-    // code, it might be necessary to turn this into ordinary asynchronous calls.
+    // Note that the two callbacks that are called by SP are synchronous and return a
+    // value. This means that the operations can't be protected by the strand and
+    // therefore you need to be cautious when modifying the callback code. In the future,
+    // if more elaborated things have to be done in the callback code, it might be
+    // necessary to turn this into ordinary asynchronous calls.
     m_sp.reset(new SP::SystemPicture(SP::master_tag,
-                                     ioService,
+                                     m_ioService,
                                      *m_communication,
                                      m_conf.thisNodeParam.name,
                                      m_nodeId,
@@ -255,7 +242,7 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
                                      }));
 
     m_doseMainCmdSender.reset(new Control::DoseMainCmdSender
-                              (ioService,
+                              (m_ioService,
                                // This is what we do when dose_main is ready to receive commands
                                [this]()
                                {
@@ -276,7 +263,7 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
                                    m_communication->Start();
                                 }));
 
-    m_stopHandler.reset(new Control::StopHandler(ioService,
+    m_stopHandler.reset(new Control::StopHandler(m_ioService,
                                                  *m_communication,
                                                  *m_sp,
                                                  *m_doseMainCmdSender,
@@ -300,11 +287,11 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
                                                          m_incarnationBlackListHandler.AddIncarnationId(m_incarnationId);
                                                      }
                                                  },
-                                                 ignoreControlCmd));
+                                                 m_ignoreControlCmd));
 
 
     m_controlInfoSender.reset(new Control::ControlInfoSender
-                              (ioService,
+                              (m_ioService,
                                // This is what we do when a receiver is ready
                                m_strand.wrap([this]()
                                              {
@@ -342,13 +329,13 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
     boost::system::error_code ec;
 
     m_doseMain.reset(new boost::process::child(boost::process::execute
-                                                (boost::process::initializers::run_exe(doseMainPath),
+                                                (boost::process::initializers::run_exe(m_doseMainPath),
                                                  boost::process::initializers::set_on_error(ec),
                                                  boost::process::initializers::inherit_env()
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
                                                  ,boost::process::initializers::show_window(SW_HIDE)
 #elif defined(linux) || defined(__linux) || defined(__linux__)
-                                                 ,boost::process::initializers::notify_io_service(ioService)
+                                                 ,boost::process::initializers::notify_io_service(m_ioService)
 #endif
                                                )));
 
@@ -370,10 +357,10 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
         if (!gotExitCode)
         {
             SEND_SYSTEM_LOG(Critical,
-                            << "CTRL: It seems that dose_main has exited but CTRL"
+                            << "CTRL: It seems that dose_main has exited but Control"
                                " can't retrieve the exit code. GetExitCodeProcess failed"
                                "with error code "  << ::GetLastError());
-            std::wcout << "CTRL: It seems that dose_main has exited but CTRL"
+            std::wcout << "CTRL: It seems that dose_main has exited but Control"
                           " can't retrieve the exit code. GetExitCodeProcess failed"
                           "with error code "  << ::GetLastError() << std::endl;
 
@@ -404,66 +391,90 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
 
         m_doseMainRunning = false;
 
-        if (!m_ctrlStopped)
-        {
-            StopControl();
-        }
-    }
-    ));
-#endif
-
-#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
-    m_signalSet.add(SIGABRT);
-    m_signalSet.add(SIGBREAK);
-    m_signalSet.add(SIGINT);
-    m_signalSet.add(SIGTERM);
-
-    //We install a ConsoleCtrlHandler to handle presses of the Close button
-    //on the console window
-    ConsoleCtrlHandlerFcn = m_strand.wrap([this]()
-    {
         StopControl();
-    });
-    ::SetConsoleCtrlHandler(ConsoleCtrlHandler,TRUE);
-#elif defined(linux) || defined(__linux) || defined(__linux__)
-    m_signalSet.add(SIGQUIT);
-    m_signalSet.add(SIGINT);
-    m_signalSet.add(SIGTERM);
-#endif
-
-    m_signalSet.async_wait(m_strand.wrap([this]
-                                           (const boost::system::error_code& error,
-                                            const int signalNumber)
-    {
-        if (!!error) //fix for vs2012 warning
-        {
-            if (error == boost::asio::error::operation_aborted)
-            {
-                return;
-            }
-            else
-            {
-                std::ostringstream os;
-                os << "Got a signals error (m_signalSet): " << error;
-                throw std::logic_error(os.str());
-            }
-        }
-
-        lllog(1) << "CTRL: Got signal " << signalNumber << " ... stop sequence initiated." << std::endl;
-        std::wcout << "CTRL: Got signal " << signalNumber << " ... stop sequence initiated." << std::endl;
-
-        StopThisNode();
     }
     ));
+#endif
 
     m_doseMainCmdSender->Start();
     m_stopHandler->Start();
     m_controlInfoSender->Start();
 }
 
-ControlApp::~ControlApp()
-{
 
+std::pair<Com::ResolvedAddress,Com::ResolvedAddress> ControlApp::ResolveAddresses()
+{
+    //resolve local interfaces.
+    const Com::ResolvedAddress controlAddress(m_conf.thisNodeParam.controlAddress);
+    const Com::ResolvedAddress dataAddress(m_conf.thisNodeParam.dataAddress);
+
+    //if both addresses are not resolved ok we need to retry
+    if (!(controlAddress.Ok() && dataAddress.Ok()))
+    {
+        //well, unless we've been trying to start for long enough
+        if (m_resolutionStartTime + m_conf.localInterfaceTimeout < boost::chrono::steady_clock::now())
+        {
+            std::wostringstream os;
+            os << "CTRL: Failed to resolve local address/interface ";
+            if (!controlAddress.Ok())
+            {
+                os << m_conf.thisNodeParam.controlAddress.c_str() << " (ControlAddress)";
+            }
+            if (!dataAddress.Ok())
+            {
+                if (!controlAddress.Ok())
+                {
+                    os << " and ";
+                }
+                os << m_conf.thisNodeParam.dataAddress.c_str() << " (DataAddress)";
+            }
+            os << ". Have retried for the period configured in Safir.Dob.NodeParameters.LocalInterfaceTimeout.";
+
+            SEND_SYSTEM_LOG(Critical, << os.str().c_str());
+            std::wcout << os.str() << std::endl;
+
+            StopControl();
+        }
+        else
+        {
+            //log a warning
+            static bool warned = false;
+            if (!warned)
+            {
+                warned = true;
+                std::wostringstream os;
+                os << "CTRL: Failed to resolve local address/interface ";
+                if (!controlAddress.Ok())
+                {
+                    os << m_conf.thisNodeParam.controlAddress.c_str() << " (ControlAddress)";
+                }
+                if (!dataAddress.Ok())
+                {
+                    if (!controlAddress.Ok())
+                    {
+                        os << " and ";
+                    }
+                    os << m_conf.thisNodeParam.dataAddress.c_str() << " (DataAddress)";
+                }
+                os << ". Will retry.";
+
+                SEND_SYSTEM_LOG(Warning, << os.str().c_str());
+                std::wcout << os.str() << std::endl;
+            }
+
+            //ok, set up the retry timer
+            m_startTimer.expires_from_now(boost::chrono::seconds(1));
+            m_startTimer.async_wait(m_strand.wrap([this](const boost::system::error_code& error)
+                                                  {
+                                                      if (!error && !m_stopped)
+                                                      {
+                                                          Start();
+                                                      }
+                                                  }));
+        }
+    }
+
+    return std::make_pair(controlAddress,dataAddress);
 }
 
 void ControlApp::StopDoseMain()
@@ -496,12 +507,40 @@ void ControlApp::StopDoseMain()
 
 void ControlApp::StopControl()
 {
-    m_sp->Stop();
-    m_communication->Stop();
-    m_controlInfoSender->Stop();
-    m_stopHandler->Stop();
-    m_doseMainCmdSender->Stop();
-    m_signalSet.cancel();
+    if (m_controlStopped)
+    {
+        return;
+    }
+    m_controlStopped = true;
+
+    m_startTimer.cancel();
+
+    if (m_sp != nullptr)
+    {
+        m_sp->Stop();
+    }
+
+    if (m_communication != nullptr)
+    {
+        m_communication->Stop();
+    }
+
+    if (m_controlInfoSender != nullptr)
+    {
+        m_controlInfoSender->Stop();
+    }
+
+    if (m_stopHandler != nullptr)
+    {
+        m_stopHandler->Stop();
+    }
+
+    if (m_doseMainCmdSender != nullptr)
+    {
+        m_doseMainCmdSender->Stop();
+    }
+
+    m_terminateHandler.Stop();
     m_work.reset();
 }
 
@@ -512,10 +551,7 @@ void ControlApp::StopThisNode()
         StopDoseMain();
     }
 
-    if (!m_ctrlStopped)
-    {
-        StopControl();
-    }
+    StopControl();
 }
 
 void ControlApp::Shutdown()
@@ -629,12 +665,8 @@ void ControlApp::SetSigchldHandler()
             m_doseMainRunning = false;
             m_terminationTimer.cancel();
 
-            if (!m_ctrlStopped)
-            {
-                StopControl();
-            }
+            StopControl();
         }
     }));
 }
 #endif
-
