@@ -61,7 +61,6 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
     : m_ioService(ioService)
     , m_resolutionStartTime(boost::chrono::steady_clock::now())
     , m_strand(ioService)
-    , m_terminateHandler(ioService,m_strand.wrap([this]{StopThisNode();}))
     , m_doseMainPath(doseMainPath)
     , m_ignoreControlCmd(ignoreControlCmd)
     , m_startTimer(ioService)
@@ -79,6 +78,9 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
     , m_handle(ioService)
 #endif
 {
+    m_terminateHandler = Safir::make_unique<TerminateHandler>(ioService,m_strand.wrap([this]{StopThisNode();}));
+
+
     for (auto it = m_conf.nodeTypesParam.cbegin(); it < m_conf.nodeTypesParam.cend(); ++it)
     {
         if (m_conf.thisNodeParam.nodeTypeId == it->id)
@@ -540,7 +542,7 @@ void ControlApp::StopControl()
         m_doseMainCmdSender->Stop();
     }
 
-    m_terminateHandler.Stop();
+    m_terminateHandler->Stop();
     m_work.reset();
 }
 

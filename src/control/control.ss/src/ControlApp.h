@@ -86,7 +86,7 @@ private:
     bool                                        m_stopped;
     const boost::chrono::steady_clock::time_point m_resolutionStartTime;
     boost::asio::io_service::strand             m_strand;
-    TerminateHandler                            m_terminateHandler;
+    std::unique_ptr<TerminateHandler>           m_terminateHandler;
     int64_t                                     m_nodeId;
     const boost::filesystem::path               m_doseMainPath;
     const bool                                  m_ignoreControlCmd;
