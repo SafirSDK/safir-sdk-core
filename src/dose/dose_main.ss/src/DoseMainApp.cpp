@@ -63,8 +63,6 @@ namespace Internal
             case CTRL_LOGOFF_EVENT:
             case CTRL_SHUTDOWN_EVENT:
                 {
-                    SEND_SYSTEM_LOG(Informational,
-                                    << "DOSE_MAIN: Got a ConsoleCtrlHandler call with event " << event << ", will close down." );
                     ConsoleCtrlHandlerFcn();
 
                     //We could sleep forever here, since the function will be terminated when
@@ -135,7 +133,8 @@ namespace Internal
         m_signalSet.add(SIGTERM);
 
         //We install a ConsoleCtrlHandler to handle presses of the Close button
-        //on the console window
+        //on the console window. This is a little different from handling signals
+        //since there is no way to ignore it...
         ConsoleCtrlHandlerFcn = m_strand.wrap([this]()
         {
             Stop();

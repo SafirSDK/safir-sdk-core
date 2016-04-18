@@ -117,9 +117,9 @@ private:
         case CTRL_LOGOFF_EVENT:
         case CTRL_SHUTDOWN_EVENT:
             {
-                SEND_SYSTEM_LOG(Informational,
-                                << "DOSE_MAIN: Got a ConsoleCtrlHandler call with event "
-                                << event << ", will close down." );
+                lllog(1) << "CTRL: Got Windows Console Event " << event << " ... stop sequence initiated." << std::endl;
+                std::wcout << "CTRL: Got Windows Console Event " << event << " ... stop sequence initiated." << std::endl;
+
                 ConsoleCtrlHandlerFcn();
 
                 //We could sleep forever here, since the function will be terminated when
