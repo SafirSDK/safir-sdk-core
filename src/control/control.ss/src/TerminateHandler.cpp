@@ -21,8 +21,6 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#pragma once
-
 #include "TerminateHandler.h"
 
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
