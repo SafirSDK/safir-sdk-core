@@ -12,6 +12,3 @@ safir-sdk-core: extra-license-file
 
 #I believe this warning comes only on ubuntu, since they're using a different default java than lintian expects.
 safir-sdk-core: incompatible-java-bytecode-format
-
-#we use the same packaging files for many debian versions.
-safir-sdk-core: out-of-date-standards-version
