@@ -3117,7 +3117,7 @@ must be different on all nodes (or use environment variables in the parameters, 
 described in <<environment_parameters>>).
 
 [[this-node-parameters]]
-.Node Parameters
+.This Node Parameters
 [width="70%",cols="30%,70%",frame="topbot",options="header"]
 |======================
 | Parameter Name | Comment
@@ -3142,12 +3142,20 @@ doesn't need to be unique.
 |======================
 
 The addresses are on the format +address:port+, where the address can be an IP address or
-a DNS-resolvable address. On Linux it is also possible to specify a network interface
-explicitly, for example "eth0:20000", meaning use port 20000 on whatever ip address eth0
-is using. On Windows there is no such feature, currently.
+a DNS-resolvable address.
+
++ControlAddress+ and +DataAddress+ are used to identify which local network interface
+that we should bind to. Wildcards can be used to match parts of an address,
+e.g. "192.168.1.*" will make Safir SDK Core use the first network interface on that
+subnet that it can find on the local machine. On Linux it is also possible to specify a
+network interface explicitly, for example "eth0:20000", meaning use port 20000 on
+whatever ip address eth0 is using. On Windows there is no such feature, currently.
+
+If no matching interface can be found retries will be made for the interval specified in
+Safir.Dob.NodeParameters.LocalInterfaceTimeout.
 
 There is a command line utility +communication_resolver+ that can be used to check what
-an address or interface name will resolv to. Use the +-l+ flag to resolve local addresses
+an address or interface name will resolve to. Use the +-l+ flag to resolve local addresses
 and interfaces.
 
 [[node-discovery]]
