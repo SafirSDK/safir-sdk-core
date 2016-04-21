@@ -650,7 +650,7 @@ void ControlApp::SetSigchldHandler()
                 std::ostringstream ostr;
                 ostr << "CTRL: dose_main has exited with status code "  << status;
 
-                SEND_SYSTEM_LOG(Critical, << ostr.str());
+                SEND_SYSTEM_LOG(Critical, << ostr.str().c_str());
                 LogStatus(ostr.str());
             }
         }
@@ -669,7 +669,7 @@ void ControlApp::SetSigchldHandler()
             ostr << "CTRL: dose_main has exited due to signal "
                  << strsignal(signal) << " ("  << signal << ")";
 
-            SEND_SYSTEM_LOG(Critical, << ostr.str());
+            SEND_SYSTEM_LOG(Critical, << ostr.str().c_str());
             LogStatus(ostr.str());
         }
         else
