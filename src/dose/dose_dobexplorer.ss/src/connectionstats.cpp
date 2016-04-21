@@ -237,7 +237,7 @@ void ConnectionStats::UpdateStatistics(const bool ignoreVisible)
                 case 0:
                     {
                         std::ostringstream ostr;
-                        ostr << std::showbase << std::hex << (unsigned long)(stat.reqInQStat[row].consumerId.consumer);
+                        ostr << std::showbase << std::hex << stat.reqInQStat[row].consumerId.consumer;
                         newItem->setText(ostr.str().c_str());
                     }
                     break;
@@ -310,7 +310,7 @@ void ConnectionStats::UpdateStatistics(const bool ignoreVisible)
                 case 0:
                     {
                         std::ostringstream ostr;
-                        ostr << std::showbase << std::hex << (unsigned long)(stat.msgInQStat[row].consumerId.consumer);
+                        ostr << std::showbase << std::hex << stat.msgInQStat[row].consumerId.consumer;
                         newItem->setText(ostr.str().c_str());
                     }
                     break;

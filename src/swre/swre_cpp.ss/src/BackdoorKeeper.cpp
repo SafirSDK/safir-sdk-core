@@ -39,8 +39,6 @@ namespace Safir
 {
 namespace Application
 {
-
-const wchar_t* delimiters = L" \t\n\r";
 const wchar_t* pingCmd = L"ping";
 const wchar_t* helpCmd = L"help";
 
@@ -134,6 +132,7 @@ void BackdoorKeeper::OnMessage(const Safir::Dob::MessageProxy messageProxy)
 
         std::vector<std::wstring> cmdTokens;
 
+        const wchar_t* delimiters = L" \t\n\r";
         Tokenize(cmd->Command().GetVal(), cmdTokens, delimiters);
 
         if (!cmdTokens.empty())

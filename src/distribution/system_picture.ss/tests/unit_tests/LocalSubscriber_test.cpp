@@ -61,7 +61,7 @@ std::unique_ptr<RawStatisticsMessage> GetProtobuf()
 }
 
 
-boost::function<void(const char* const data, const size_t size)> dataCallback;
+boost::function<void(const char* const data, const size_t size)> gDataCallback;
 
 int connect_calls = 0;
 int disconnect_calls = 0;
@@ -76,7 +76,7 @@ public:
         connect_calls = 0;
         disconnect_calls = 0;
 
-        dataCallback = callback;
+        gDataCallback = callback;
         BOOST_CHECK(name == "foo");
     }
 
@@ -111,7 +111,7 @@ BOOST_AUTO_TEST_CASE( send_one )
     auto data = std::unique_ptr<char[]>(new char[size]);
     pbuf->SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(data.get()));
 
-    dataCallback(data.get(),size);
+    gDataCallback(data.get(),size);
 
     subscriber.Stop();
     ioService.run();
@@ -162,7 +162,7 @@ BOOST_AUTO_TEST_CASE( two_subscribers )
     auto data = std::unique_ptr<char[]>(new char[size]);
     pbuf->SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(data.get()));
 
-    dataCallback(data.get(),size);
+    gDataCallback(data.get(),size);
 
     subscriber.Stop();
     ioService.run();
@@ -211,7 +211,7 @@ BOOST_AUTO_TEST_CASE( add_before_start )
     auto data = std::unique_ptr<char[]>(new char[size]);
     pbuf->SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(data.get()));
 
-    dataCallback(data.get(),size);
+    gDataCallback(data.get(),size);
 
     subscriber.Stop();
     ioService.run();

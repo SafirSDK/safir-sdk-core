@@ -135,10 +135,7 @@ namespace Utilities
 
         ~StartupSynchronizerImpl()
         {
-            if (!m_synchronized.empty())
-            {
-                throw std::logic_error("Unexpectedly found some stuff in m_synchronized");
-            }
+            assert(m_synchronized.empty());
         }
     public:
         const std::string& Name() const {return m_name;}

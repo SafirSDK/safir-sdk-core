@@ -30,7 +30,10 @@
 #include <Safir/Logging/Log.h>
 #include "StringConversion.h"
 #include "Diagnostics.h"
-    
+
+#ifdef _MSC_VER
+#pragma warning (disable: 4312)
+#endif
 
 namespace Safir
 {

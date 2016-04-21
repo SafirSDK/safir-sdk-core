@@ -13,7 +13,7 @@ Visual Studio 2013 or later (express or paid versions work)
 Subversion
 Boost (>=1.58)
 Python (>= 2.7)
-CMake (>=3.0.0)
+CMake (>=3.5.0)
 Protobuf(>= 2.6.1)
 Ninja *
 Qt (>=5.4) *
@@ -36,12 +36,13 @@ Protobuf
    the Conversion Wizard to update the solution to your studio version.
 5. If you're building a 64-bit system: Open Build --> Configuration Manager and
    create an x64 configuration under the "Active solution platform" drop down.
-6  Build the solution in both Debug and Release configurations. You may have to
+6. If you're using VS2015 and Protobuf 2.6.1 you will have to add #define
+   _SILENCE_STDEXT_HASH_DEPRECATION_WARNINGS inside the hash.h file (inside the include
+   guard). When 3.0 is released this will no longer be a problem.
+7  Build the solution in both Debug and Release configurations. You may have to
    build a few times to get them to compile, since the project configuration is
    incomplete, and the test projects may not build either. But we don't need them.
-7. Open a command prompt in the vsprojects directory, and run "extract_includes.bat".
-8. If you're building a 64 bit system: Move the Debug and Release directories
-   from vsprojects\x64\ to vsprojects\ .
+8. Open a command prompt in the vsprojects directory, and run "extract_includes.bat".
 
 Subversion
 ~~~~~~~~~~

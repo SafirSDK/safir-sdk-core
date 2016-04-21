@@ -454,10 +454,10 @@ void BlobChangeTest(RepositoryPtr rep)
                 std::cout<<"    - MyCollections.DictEntityIdObject, topChanged="<<wc.IsChangedTopLevel(myDictEntityIdObject)<<std::endl;
                 for (int j=0; j<wc.NumberOfValues(myDictEntityIdObject); ++j)
                 {
-                    std::pair<DotsC_EntityId, const char*> key=wc.ReadKey< std::pair<DotsC_EntityId, const char*> >(myDictEntityIdObject, j);
+                    std::pair<DotsC_EntityId, const char*> key2=wc.ReadKey< std::pair<DotsC_EntityId, const char*> >(myDictEntityIdObject, j);
                     std::pair<const char*, DotsC_Int32> val;
                     wc.ReadValue(myDictEntityIdObject, j, val, isNull, isChanged);
-                    std::cout<<"        key: {"<<rep->GetClass(key.first.typeId)->GetName()<<", "<<key.first.instanceId<<
+                    std::cout<<"        key: {"<<rep->GetClass(key2.first.typeId)->GetName()<<", "<<key2.first.instanceId<<
                                "}, isNull="<<isNull<<", isChanged="<<isChanged<<std::endl;
 
                     BlobReader<Safir::Dob::Typesystem::ToolSupport::TypeRepository> wcInnerObj(rep.get(), val.first);
@@ -591,11 +591,11 @@ void BlobChangeTest(RepositoryPtr rep)
                 std::cout<<"    - MyCollections.DictEntityIdObject, topChanged="<<wc.IsChangedTopLevel(myDictEntityIdObject)<<std::endl;
                 for (int j=0; j<wc.NumberOfValues(myDictEntityIdObject); ++j)
                 {
-                    std::pair<DotsC_EntityId, const char*> key=wc.ReadKey< std::pair<DotsC_EntityId, const char*> >(myDictEntityIdObject, j);
+                    std::pair<DotsC_EntityId, const char*> key2=wc.ReadKey< std::pair<DotsC_EntityId, const char*> >(myDictEntityIdObject, j);
                     std::pair<const char*, DotsC_Int32> val;
                     wc.ReadValue(myDictEntityIdObject, j, val, isNull, isChanged);
                     if (!isChanged) throw std::logic_error(std::string("Change flag error, line: ")+boost::lexical_cast<std::string>(__LINE__));
-                    std::cout<<"        key: {"<<rep->GetClass(key.first.typeId)->GetName()<<", "<<key.first.instanceId<<
+                    std::cout<<"        key: {"<<rep->GetClass(key2.first.typeId)->GetName()<<", "<<key2.first.instanceId<<
                                "}, isNull="<<isNull<<", isChanged="<<isChanged<<std::endl;
 
                     BlobReader<Safir::Dob::Typesystem::ToolSupport::TypeRepository> wcInnerObj(rep.get(), val.first);
@@ -753,19 +753,21 @@ void RunTests(const TypeRepository* repository, const boost::filesystem::path& t
 
     TestSet testCases;
 
-    //Order test cases after test number
-    boost::filesystem::directory_iterator it(testRoot), end;
-    for (; it!=end; ++it)
-    {
-        if (!boost::filesystem::is_directory(it->path()))
+    { //scope for "it"
+        //Order test cases after test number
+        boost::filesystem::directory_iterator it(testRoot), end;
+        for (; it!=end; ++it)
         {
-            std::string file=it->path().string();
-            TestCase tc;
-            if (TestInfoFromPath(it->path(), tc))
+            if (!boost::filesystem::is_directory(it->path()))
             {
-                if (tc.testNumber>=firstTest && tc.testNumber<=lastTest)
+                std::string file=it->path().string();
+                TestCase tc;
+                if (TestInfoFromPath(it->path(), tc))
                 {
-                    testCases.insert(tc);
+                    if (tc.testNumber>=firstTest && tc.testNumber<=lastTest)
+                    {
+                        testCases.insert(tc);
+                    }
                 }
             }
         }

@@ -24,23 +24,29 @@
 #ifndef __DOTS_INTERNAL_JSON_TO_BLOB_H__
 #define __DOTS_INTERNAL_JSON_TO_BLOB_H__
 
-#ifdef _MSC_VER
-#pragma warning( push )
-#pragma warning( disable : 4100 )
-#endif
-
 #include <string>
 #include <vector>
 #include <sstream>
+#include <Safir/Utilities/Internal/Id.h>
+#include <Safir/Dob/Typesystem/ToolSupport/TypeRepository.h>
+#include <Safir/Dob/Typesystem/ToolSupport/BlobWriter.h>
+#include <Safir/Dob/Typesystem/ToolSupport/Internal/SerializationUtils.h>
+
+#ifdef _MSC_VER
+#pragma warning( push )
+#pragma warning( disable : 4100 )
+#pragma warning( disable : 4715 )
+#endif
+
 #include <boost/noncopyable.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/iostreams/stream.hpp>
 #include <boost/iostreams/device/array.hpp>
-#include <Safir/Utilities/Internal/Id.h>
-#include <Safir/Dob/Typesystem/ToolSupport/TypeRepository.h>
-#include <Safir/Dob/Typesystem/ToolSupport/BlobWriter.h>
-#include <Safir/Dob/Typesystem/ToolSupport/Internal/SerializationUtils.h>
+
+#ifdef _MSC_VER
+#pragma warning( pop )
+#endif
 
 namespace Safir
 {
@@ -512,9 +518,5 @@ namespace Internal
 }
 }
 } //end namespace Safir::Dob::Typesystem::ToolSupport::Internal
-
-#ifdef _MSC_VER
-#pragma warning( pop )
-#endif
 
 #endif

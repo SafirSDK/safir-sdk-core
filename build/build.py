@@ -24,8 +24,7 @@
 #
 ###############################################################################
 from __future__ import print_function
-import os, glob, sys, subprocess, platform, xml.dom.minidom, re, time, shutil, argparse
-import locale, codecs
+import os, glob, sys, subprocess, platform, xml.dom.minidom, re, time, shutil, argparse, codecs
 from xml.sax.saxutils import escape
 
 #a few constants
@@ -57,7 +56,7 @@ def cmake():
         try:
             subprocess.Popen(("cmake28", "--version"), stdout = subprocess.PIPE).communicate()
             cmake.cmake_executable = "cmake28"
-        except:
+        except Exception:
             cmake.cmake_executable = "cmake"
     return cmake.cmake_executable
 
@@ -68,7 +67,7 @@ def ctest():
         try:
             subprocess.Popen(("ctest28", "--version"), stdout = subprocess.PIPE).communicate()
             ctest.ctest_executable = "ctest28"
-        except:
+        except Exception:
             ctest.ctest_executable = "ctest"
     return ctest.ctest_executable
 
@@ -125,8 +124,6 @@ def num_cpus():
             ncpus = os.sysconf("SC_NPROCESSORS_ONLN")
             if isinstance(ncpus, int) and ncpus > 0:
                 return ncpus
-        else: # OSX:
-            return int(os.popen2("sysctl -n hw.ncpu")[1].read())
     # Windows:
     if "NUMBER_OF_PROCESSORS" in os.environ:
         ncpus = int(os.environ["NUMBER_OF_PROCESSORS"])
@@ -148,15 +145,15 @@ def num_jobs():
     #many parallel jobs we perform. Each job may use
     #up to 400Mb of memory.
     try:
-        num_jobs = num_cpus() + 1
+        num = num_cpus() + 1
 
         mem_per_job = 400
         memory = physical_memory()
-        if memory is not None and memory / num_jobs < mem_per_job:
-            num_jobs = max(1, int(memory / mem_per_job))
-    except:
-        num_jobs = 2
-    return num_jobs
+        if memory is not None and memory / num < mem_per_job:
+            num = max(1, int(memory / mem_per_job))
+    except Exception:
+        num = 2
+    return num
 
 def read_version():
     parts = {}
@@ -313,7 +310,7 @@ def suppress(help_string):
 
 def add_win32_options(parser):
     parser.add_argument("--use-studio",
-                        help="The visual studio to use for building, can be '2010', '2012' or '2013'")
+                        help="The visual studio to use for building, can be '2010', '2012', '2013' or '2015'")
     if is_64_bit():
         parser.add_argument("--32-bit",
                             action="store_true",
@@ -386,6 +383,7 @@ def parse_command_line():
 class BuilderBase(object):
     def __init__(self, arguments):
         self.num_jobs = num_jobs()
+        self.cmake_generator = "undefined"
 
         self.total_tests = 0
         self.failed_tests = 0
@@ -486,6 +484,9 @@ class BuilderBase(object):
     def stage_package(self):
         logger.log(" ! Packaging not implemented in this builder !","brief")
 
+    def generator_specific_build_cmds(self):
+        raise FatalError("generator_specific_build_cmds is not implemented")
+
     def test(self):
         """run ctest in current directory"""
         if not os.path.isfile("DartConfiguration.tcl"):
@@ -518,29 +519,28 @@ class BuilderBase(object):
         return output
 
     def interpret_test_output(self,output):
-        logger.log("Checking test output")
+        logger.log("Checking test output", "detail")
         match = re.search(r"tests passed, ([0-9]+) tests failed out of ([0-9]+)",output)
         if not match:
             if output.find("No tests were found") == -1:
                 logger.log("Failed to parse test output!")
             return
-        failed = int(match.group(1))
-        tests = int(match.group(2))
-        self.total_tests += tests
-        self.failed_tests += failed
+        self.total_tests += int(match.group(2))
+        self.failed_tests += int(match.group(1))
 
 class VisualStudioBuilder(BuilderBase):
     def __init__(self, arguments):
         super(VisualStudioBuilder, self).__init__(arguments)
 
         self.install_target = "Install"
+        self.used_studio = None
 
         # Use Ninja for building if available, it is much faster
         try:
             subprocess.Popen(("ninja", "--version"), stdout = subprocess.PIPE).communicate()
             self.cmake_generator = "Ninja"
             self.have_ninja = True
-        except:
+        except Exception:
             self.cmake_generator = "NMake Makefiles"
             self.have_ninja = False
 
@@ -567,16 +567,17 @@ class VisualStudioBuilder(BuilderBase):
             return ("/nologo",)
 
     def __find_vcvarsall(self):
-        install_dirs = {"VS120COMNTOOLS" : "2013",
+        install_dirs = {"VS140COMNTOOLS" : "2015",
+                        "VS120COMNTOOLS" : "2013",
                         "VS110COMNTOOLS" : "2012",
                         "VS100COMNTOOLS" : "2010"}
 
         # If use_studio is specified we change the list to only contain that vs.
         if self.use_studio is not None:
             found = False
-            for dir, ver in install_dirs.items():
+            for d, ver in install_dirs.items():
                 if self.use_studio == ver:
-                    install_dirs = {dir : ver}
+                    install_dirs = {d : ver}
                     found = True
                     break
             if not found:
@@ -593,10 +594,10 @@ class VisualStudioBuilder(BuilderBase):
         if env is None:
             die ("Failed to find Visual Studio install dir, "
                  + "checked the following environment variables: " + str(install_dirs))
-        result = os.path.join(env,os.pardir,os.pardir,"VC","vcvarsall.bat")
-        if not os.path.isfile(result):
-            die("No such file: " + result)
-        return result
+        res = os.path.join(env,os.pardir,os.pardir,"VC","vcvarsall.bat")
+        if not os.path.isfile(res):
+            die("No such file: " + res)
+        return res
 
     def __run_vcvarsall(self, vcvarsall, arch):
         cmd = '"%s" %s & set' % (vcvarsall, arch)
@@ -710,7 +711,7 @@ class DebianPackager(object):
         return output
 
     def build(self):
-        version_tuple, version_string = read_version()
+        version_string = read_version()[1]
         remove("tmp")
         mkdir("tmp")
         self.__run(("/usr/bin/git", "archive", "HEAD",
@@ -767,12 +768,12 @@ def translate_results_to_junit(suite_name):
                                     suite_name + "\" time=\"" + str(executionTime) + "\">\n")
                     output = escape(getText(meas.getElementsByTagName("Value")[0].childNodes))
                     if testStatus == "passed":
-                        """success"""
+                        #success
                         junitfile.write("<system-out>" +
                                         output +
                                         "\n</system-out>\n")
                     else:
-                        """failure"""
+                        #failure
 
                         junitfile.write("<error message=\"" + exitCode + "(" + exitValue +  ")\">" +
                                         output +

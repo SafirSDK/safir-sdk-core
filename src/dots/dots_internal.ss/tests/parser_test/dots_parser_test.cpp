@@ -108,18 +108,20 @@ void RunTests(const boost::filesystem::path& testRoot, int firstTest, int lastTe
 
     TestSet testCases;
 
-    //Order test cases after test number
-    boost::filesystem::directory_iterator it(testRoot), end;
-    for (; it!=end; ++it)
-    {
-        if (boost::filesystem::is_directory(it->path()))
+    {//(new scope for "it")
+        //Order test cases after test number
+        boost::filesystem::directory_iterator it(testRoot), end;
+        for (; it!=end; ++it)
         {
-            TestCase tc;
-            if (TestInfoFromPath(it->path(), tc))
+            if (boost::filesystem::is_directory(it->path()))
             {
-                if (tc.testNumber>=firstTest && tc.testNumber<=lastTest)
+                TestCase tc;
+                if (TestInfoFromPath(it->path(), tc))
                 {
-                    testCases.insert(tc);
+                    if (tc.testNumber>=firstTest && tc.testNumber<=lastTest)
+                    {
+                        testCases.insert(tc);
+                    }
                 }
             }
         }

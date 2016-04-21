@@ -240,9 +240,9 @@ BOOST_AUTO_TEST_CASE(monitor_0)
         boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
     }
     monitor.Stop();
-    std::vector<pid_t> terminatedPids = TerminatedPids();
-    BOOST_CHECK_EQUAL(terminatedPids.size(), 1U);
-    BOOST_CHECK_EQUAL(terminatedPids.at(0), 0);
+    std::vector<pid_t> terminated = TerminatedPids();
+    BOOST_CHECK_EQUAL(terminated.size(), 1U);
+    BOOST_CHECK_EQUAL(terminated.at(0), 0);
 }
 
 BOOST_AUTO_TEST_CASE(monitor_0_twice)
@@ -256,12 +256,12 @@ BOOST_AUTO_TEST_CASE(monitor_0_twice)
     }
     monitor.Stop();
 
-    std::vector<pid_t> terminatedPids = TerminatedPids();
-    BOOST_CHECK_LE(terminatedPids.size(), 2U);
-    BOOST_CHECK_EQUAL(terminatedPids.at(0), 0);
-    if (terminatedPids.size() == 2)
+    std::vector<pid_t> terminated = TerminatedPids();
+    BOOST_CHECK_LE(terminated.size(), 2U);
+    BOOST_CHECK_EQUAL(terminated.at(0), 0);
+    if (terminated.size() == 2)
     {
-        BOOST_CHECK_EQUAL(terminatedPids.at(0), 0);
+        BOOST_CHECK_EQUAL(terminated.at(0), 0);
     }
 }
 
@@ -273,8 +273,8 @@ BOOST_AUTO_TEST_CASE(monitor_self)
 
     Stop();
 
-    std::vector<pid_t> terminatedPids = TerminatedPids();
-    BOOST_CHECK(terminatedPids.empty());
+    std::vector<pid_t> terminated = TerminatedPids();
+    BOOST_CHECK(terminated.empty());
 }
 
 BOOST_AUTO_TEST_CASE(monitor_self_twice)
@@ -287,8 +287,8 @@ BOOST_AUTO_TEST_CASE(monitor_self_twice)
 
     Stop();
 
-    std::vector<pid_t> terminatedPids = TerminatedPids();
-    BOOST_CHECK(terminatedPids.empty());
+    std::vector<pid_t> terminated = TerminatedPids();
+    BOOST_CHECK(terminated.empty());
 }
 
 BOOST_AUTO_TEST_CASE(monitor_self_and_0)
@@ -303,9 +303,9 @@ BOOST_AUTO_TEST_CASE(monitor_self_and_0)
     }
     Stop();
 
-    std::vector<pid_t> terminatedPids = TerminatedPids();
-    BOOST_CHECK_EQUAL(terminatedPids.size(), 1U);
-    BOOST_CHECK_EQUAL(terminatedPids.at(0), 0);
+    std::vector<pid_t> terminated = TerminatedPids();
+    BOOST_CHECK_EQUAL(terminated.size(), 1U);
+    BOOST_CHECK_EQUAL(terminated.at(0), 0);
 }
 
 BOOST_AUTO_TEST_CASE(monitor_sleeper)
@@ -322,9 +322,9 @@ BOOST_AUTO_TEST_CASE(monitor_sleeper)
 
     Stop();
 
-    std::vector<pid_t> terminatedPids = TerminatedPids();
-    BOOST_CHECK_EQUAL(terminatedPids.size(), 1U);
-    BOOST_CHECK_EQUAL(terminatedPids.at(0), pid);
+    std::vector<pid_t> terminated = TerminatedPids();
+    BOOST_CHECK_EQUAL(terminated.size(), 1U);
+    BOOST_CHECK_EQUAL(terminated.at(0), pid);
 }
 
 BOOST_AUTO_TEST_CASE(stop_monitor)
@@ -339,8 +339,8 @@ BOOST_AUTO_TEST_CASE(stop_monitor)
 
     Stop();
 
-    std::vector<pid_t> terminatedPids = TerminatedPids();
-    BOOST_CHECK_EQUAL(terminatedPids.size(), 0U);
+    std::vector<pid_t> terminated = TerminatedPids();
+    BOOST_CHECK_EQUAL(terminated.size(), 0U);
 }
 
 BOOST_AUTO_TEST_CASE(many_sleepers)
@@ -372,10 +372,10 @@ BOOST_AUTO_TEST_CASE(many_sleepers)
     Stop();
 
     BOOST_TEST_MESSAGE("Checking result");
-    const std::vector<pid_t> terminatedPids = TerminatedPids();
-    BOOST_CHECK_EQUAL(terminatedPids.size(), 100U);
-    for (std::vector<pid_t>::const_iterator it = terminatedPids.begin();
-         it != terminatedPids.end(); ++it)
+    const std::vector<pid_t> terminated = TerminatedPids();
+    BOOST_CHECK_EQUAL(terminated.size(), 100U);
+    for (std::vector<pid_t>::const_iterator it = terminated.begin();
+         it != terminated.end(); ++it)
     {
         pids.erase(*it);
     }

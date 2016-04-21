@@ -106,9 +106,9 @@ namespace Internal
                         if (arrIx<md->GetArraySize()) //only add array if it contains non-null values
                         {
                             os<<"<"<<md->GetName()<<">";
-                            for (DotsC_Int32 arrIx=0; arrIx<md->GetArraySize(); ++arrIx)
+                            for (DotsC_Int32 ix=0; ix<md->GetArraySize(); ++ix)
                             {
-                                SerializeMember(reader, md, memberIx, arrIx, typeName, os);
+                                SerializeMember(reader, md, memberIx, ix, typeName, os);
                             }
                             os<<"</"<<md->GetName()<<">";
                         }

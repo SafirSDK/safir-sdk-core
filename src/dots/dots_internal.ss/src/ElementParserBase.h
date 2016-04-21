@@ -298,6 +298,12 @@ namespace ToolSupport
             m_occurrences.Reset();
         }
 
+//VS2015 will warn that everything below "m_parseAlgorithm(pt, state);" below is unreachable
+//for some unstantiation.
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable:4702)
+#endif
         virtual void Parse(boost::property_tree::ptree& pt, ParseState& state)
         {
             if (m_used)
@@ -333,7 +339,11 @@ namespace ToolSupport
                 }
             }
         }
-       
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
+
     private:
         bool m_used;
         ElementParserBaseVector m_subElements;

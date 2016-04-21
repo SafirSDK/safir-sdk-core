@@ -45,14 +45,13 @@
 #define BOOST_TEST_MODULE ElectionHandlerTest
 #include <boost/test/unit_test.hpp>
 
-
 //We need thread safe variants for some of the tests that use multiple threads in the ioService.
 boost::mutex testMtx;
-#define SAFE_BOOST_CHECK(p) {boost::lock_guard<boost::mutex> lck(testMtx); BOOST_CHECK(p);}
-#define SAFE_BOOST_FAIL(s) {boost::lock_guard<boost::mutex> lck(testMtx); BOOST_FAIL(s);}
-#define SAFE_BOOST_CHECK_NE(L, R) {boost::lock_guard<boost::mutex> lck(testMtx); BOOST_CHECK_NE(L, R);}
-#define SAFE_BOOST_CHECK_EQUAL(L, R) {boost::lock_guard<boost::mutex> lck(testMtx); BOOST_CHECK_EQUAL(L, R);}
-#define SAFE_BOOST_TEST_MESSAGE(m) {boost::lock_guard<boost::mutex> lck(testMtx); BOOST_TEST_MESSAGE(m);}
+#define SAFE_BOOST_CHECK(p) {boost::lock_guard<boost::mutex> lck123(testMtx); BOOST_CHECK(p);}
+#define SAFE_BOOST_FAIL(s) {boost::lock_guard<boost::mutex> lck123(testMtx); BOOST_FAIL(s);}
+#define SAFE_BOOST_CHECK_NE(L, R) {boost::lock_guard<boost::mutex> lck123(testMtx); BOOST_CHECK_NE(L, R);}
+#define SAFE_BOOST_CHECK_EQUAL(L, R) {boost::lock_guard<boost::mutex> lck123(testMtx); BOOST_CHECK_EQUAL(L, R);}
+#define SAFE_BOOST_TEST_MESSAGE(m) {boost::lock_guard<boost::mutex> lck123(testMtx); BOOST_TEST_MESSAGE(m);}
 
 class Communication;
 

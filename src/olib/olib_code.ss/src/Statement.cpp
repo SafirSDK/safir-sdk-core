@@ -31,6 +31,11 @@
 #include "StringConversion.h"
 #include "Diagnostics.h"
 
+#ifdef _MSC_VER
+#pragma warning (disable: 4312)
+#pragma warning (disable: 4311)
+#pragma warning (disable: 4302)
+#endif
 
 namespace Safir
 {

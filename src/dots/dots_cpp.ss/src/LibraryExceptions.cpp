@@ -114,6 +114,11 @@ namespace Typesystem
     static const char * err1 = "Failed to copy the exception string in UnknownException constructor";
     static const char * err2 = "Failed to extract the c_str from the std::string in what()";
 
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4275) //unreachable code
+#endif
+
     class DOTS_CPP_API UnknownException:
         public std::exception
     {
@@ -171,6 +176,9 @@ namespace Typesystem
 #endif
     };
 
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
     // -----------------------------------------------------------
     void LibraryExceptions::Throw()
     {

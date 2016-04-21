@@ -116,12 +116,12 @@ void SystemPicturePage::closeEvent(QCloseEvent* event)
     event->accept();
 }
 
-void SystemPicturePage::UpdatedState(const Safir::Dob::Internal::SP::SystemState& data)
+void SystemPicturePage::UpdatedState(const Safir::Dob::Internal::SP::SystemState& d)
 {
-    SetText(electedId,data.ElectedId());
+    SetText(electedId,d.ElectedId());
 
     systemTable->setSortingEnabled(false);
-    UpdateSystemTable(data);
+    UpdateSystemTable(d);
     systemTable->setSortingEnabled(true);
 }
 

@@ -110,8 +110,8 @@ RawStatisticsPage::RawStatisticsPage(QWidget* /*parent*/)
     : m_systemPicture(Safir::Dob::Internal::SP::subscriber_tag,
                       m_ioService)
 {
-    m_systemPicture.StartRawSubscription([this](const Safir::Dob::Internal::SP::RawStatistics& data)
-                                         {UpdatedStatistics(data);});
+    m_systemPicture.StartRawSubscription([this](const Safir::Dob::Internal::SP::RawStatistics& d)
+                                         {UpdatedStatistics(d);});
 
     setupUi(this);
     connect(localTable, SIGNAL(itemSelectionChanged()), this, SLOT(LocalTableSelectionChanged()));
@@ -145,16 +145,16 @@ void RawStatisticsPage::closeEvent(QCloseEvent* event)
 }
 
 
-void RawStatisticsPage::UpdatedStatistics(const Safir::Dob::Internal::SP::RawStatistics& data)
+void RawStatisticsPage::UpdatedStatistics(const Safir::Dob::Internal::SP::RawStatistics& d)
 {
-    m_statistics = data;
+    m_statistics = d;
 
-    SetText(name,data.Name());
-    SetText(address,data.ControlAddress());
-    SetText(id,data.Id());
+    SetText(name,d.Name());
+    SetText(address,d.ControlAddress());
+    SetText(id,d.Id());
 
-    SetText(incarnationId, data.IncarnationId());
-    SetText(electionId, data.ElectionId());
+    SetText(incarnationId, d.IncarnationId());
+    SetText(electionId, d.ElectionId());
 
     localTable->setSortingEnabled(false);
     UpdateLocalTable();
@@ -176,9 +176,9 @@ void RawStatisticsPage::UpdateLocalTable()
     //and updating existing rows
     for (int row = localTable->rowCount() - 1; row >= 0; --row)
     {
-        const qlonglong id = localTable->item(row, COLUMN_ID)->text().toLongLong();
+        const qlonglong id_ = localTable->item(row, COLUMN_ID)->text().toLongLong();
 
-        const auto findIt = ids.find(id);
+        const auto findIt = ids.find(id_);
         if (findIt == ids.end())
         {
             localTable->removeRow(row);
@@ -207,7 +207,7 @@ void RawStatisticsPage::UpdateLocalTable()
                 SetText(localTable->item(row,COLUMN_INCARNATION_ID), "");
             }
 
-            ids.erase(id);
+            ids.erase(id_);
 
             if (m_statistics.IsDead(findIt->second))
             {
@@ -294,13 +294,13 @@ void RawStatisticsPage::UpdateRemoteTable()
     }
     else
     {
-        const int row = selection[0]->row();
-        const qlonglong id = localTable->item(row, COLUMN_ID)->text().toLongLong();
+        const int selectedRow = selection[0]->row();
+        const qlonglong selectedId = localTable->item(selectedRow, COLUMN_ID)->text().toLongLong();
 
         const int size = m_statistics.Size();
         for (int i = 0; i < size; ++i)
         {
-            if (id == m_statistics.Id(i))
+            if (selectedId == m_statistics.Id(i))
             {
                 if(!m_statistics.HasRemoteStatistics(i))
                 {
@@ -322,9 +322,9 @@ void RawStatisticsPage::UpdateRemoteTable()
                 //and updating existing rows
                 for (int row = remoteTable->rowCount() - 1; row >= 0; --row)
                 {
-                    const qlonglong id = remoteTable->item(row, COLUMN_ID)->text().toLongLong();
+                    const qlonglong id_ = remoteTable->item(row, COLUMN_ID)->text().toLongLong();
 
-                    const auto findIt = ids.find(id);
+                    const auto findIt = ids.find(id_);
                     if (findIt == ids.end())
                     {
                         remoteTable->removeRow(row);
@@ -343,7 +343,7 @@ void RawStatisticsPage::UpdateRemoteTable()
                         SetText(remoteTable->item(row,COLUMN_DATA_RETRANSMIT_COUNT),
                                 statistics.DataRetransmitCount(findIt->second));
 
-                        ids.erase(id);
+                        ids.erase(id_);
 
                         if (statistics.IsDead(findIt->second))
                         {

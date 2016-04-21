@@ -35,7 +35,7 @@ using namespace Safir::Dob::Internal::SP;
 boost::function<void(int64_t fromNodeId,
                    int64_t fromNodeType,
                    const char* const data,
-                   size_t size)> dataCallback;
+                   size_t size)> gDataCallback;
 
 boost::function<char*(size_t)> allocator;
 boost::function<void(const char* data)> deallocator;
@@ -51,7 +51,7 @@ public:
                          const boost::function<char*(size_t)>& alloc,
                          const boost::function<void(const char* data)>& dealloc)
     {
-        dataCallback = callback;
+        gDataCallback = callback;
         allocator = alloc;
         deallocator = dealloc;
     }
@@ -86,7 +86,7 @@ BOOST_AUTO_TEST_CASE( send_one )
     char* dataCopy = allocator(size);
     memcpy(dataCopy,data.get(),size);
 
-    dataCallback(1,2002,dataCopy,size);
+    gDataCallback(1,2002,dataCopy,size);
 
     BOOST_CHECK(updates == 1);
 }

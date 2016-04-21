@@ -17,4 +17,4 @@ add_library(breakpad_client STATIC  ${headers} ${sources})
 
 add_definitions(-DBREAKPAD_NO_TERMINATE_THREAD) 
 add_definitions(-DUNICODE -D_UNICODE)
-add_definitions(/wd4127 /wd4245)
+add_definitions(/wd4127 /wd4245 /wd4091)

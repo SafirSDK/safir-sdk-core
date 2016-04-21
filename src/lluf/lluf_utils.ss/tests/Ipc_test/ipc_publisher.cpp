@@ -245,7 +245,7 @@ int main(int argc, char* argv[])
         {
             pubPtr->Start();
 
-            for (unsigned int i = 0; i < po.nbrOfMessages; ++i)
+            for (unsigned int j = 0; j < po.nbrOfMessages; ++j)
             {
                 if (po.largeMessageSize > 0)
                 {

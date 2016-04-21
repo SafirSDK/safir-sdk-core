@@ -49,7 +49,6 @@ namespace //anonymous namespace
 {
     void DumpFunc(const char* const dumpPath)
     {
-        std::wostringstream ostr;
         SEND_SYSTEM_LOG(Alert,
                         << "safir_control has generated a dump to:\n"
                         << dumpPath << "\n"

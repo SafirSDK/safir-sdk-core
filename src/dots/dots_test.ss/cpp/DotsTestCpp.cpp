@@ -53,6 +53,11 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/filesystem/operations.hpp>
 
+#ifdef _MSC_VER
+//disable warning about hiding previous declaration.
+#pragma warning (disable:4456)
+#endif
+
 namespace ts = Safir::Dob::Typesystem;
 
 std::wstring CollectionTypeStr(Safir::Dob::Typesystem::CollectionType ct)

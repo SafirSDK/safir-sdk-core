@@ -46,7 +46,7 @@ try:
 
         procs.append(proc)
 except OSError as e:
-    print ("Failed to launch processes. maybe you need to increase ulimit -u or /proc/sys/kernel/threads-max?")
+    print ("Failed to launch processes. maybe you need to increase ulimit -u, /proc/sys/kernel/threads-max or systemd DefaultTasksMax?")
     print ("This test runs 25 processes with 50 threads each")
     print ("Launched", i, "processes")
     print (e)

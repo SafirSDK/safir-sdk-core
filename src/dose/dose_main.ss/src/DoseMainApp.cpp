@@ -45,7 +45,6 @@ namespace Internal
     {
         void DumpFunc(const char* const dumpPath)
         {
-            std::wostringstream ostr;
             SEND_SYSTEM_LOG(Alert,
                             << "dose_main has generated a dump to:\n"
                             << dumpPath << "\n"

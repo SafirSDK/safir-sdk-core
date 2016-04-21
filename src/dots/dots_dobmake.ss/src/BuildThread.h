@@ -102,6 +102,8 @@ private:
         params << "--use-studio" << "2012";
 #elif _MSC_VER == 1800
         params << "--use-studio" << "2013";
+#elif _MSC_VER == 1900
+        params << "--use-studio" << "2015";
 #elif defined(_MSC_VER)
 #  error "Unknown version of Visual Studio. Dobmake won't stand for it!"
 #endif

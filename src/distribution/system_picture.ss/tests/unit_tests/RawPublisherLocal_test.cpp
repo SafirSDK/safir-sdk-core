@@ -30,7 +30,7 @@
 
 using namespace Safir::Dob::Internal::SP;
 
-boost::asio::io_service ioService;
+boost::asio::io_service gIoService;
 
 
 int numAllPerform = 0;
@@ -100,10 +100,10 @@ BOOST_AUTO_TEST_CASE( send_ten_all )
 {
     Handler h;
 
-    RawPublisherLocalBasic<::Handler, ::Publisher> publisher(ioService,h,"foo",boost::chrono::milliseconds(10),true);
+    RawPublisherLocalBasic<::Handler, ::Publisher> publisher(gIoService,h,"foo",boost::chrono::milliseconds(10),true);
 
     h.stopCall = [&]{publisher.Stop();};
-    ioService.run();
+    gIoService.run();
 
 
     BOOST_CHECK(numAllPerform == 10);
@@ -115,11 +115,11 @@ BOOST_AUTO_TEST_CASE( send_ten_my )
 {
     Handler h;
 
-    RawPublisherLocalBasic<::Handler, ::Publisher> publisher(ioService,h,"foo",boost::chrono::milliseconds(10),false);
+    RawPublisherLocalBasic<::Handler, ::Publisher> publisher(gIoService,h,"foo",boost::chrono::milliseconds(10),false);
 
     h.stopCall = [&]{publisher.Stop();};
-    ioService.reset();
-    ioService.run();
+    gIoService.reset();
+    gIoService.run();
 
 
     BOOST_CHECK_EQUAL(numAllPerform, 10);

@@ -676,9 +676,6 @@ namespace ForEach
             {
                 m_debug << "We got all " << data->NumberOfResponses() << " and are now ready to send a response back!" << std::endl;
 
-                /* get map's key to retrieve replySender */
-                Safir::Dob::ResponseSenderPtr replySender = iter->first;
-
                 if (data->ResponseType() == Safir::Utilities::ForEach::ResponseType::Brief)
                 {
                     Safir::Utilities::ForEach::BriefResponsePtr response = Safir::Utilities::ForEach::BriefResponse::Create();
