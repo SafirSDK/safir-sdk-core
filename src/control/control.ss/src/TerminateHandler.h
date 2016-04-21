@@ -47,7 +47,8 @@ class TerminateHandler
 {
 public:
     TerminateHandler(boost::asio::io_service& ioService,
-                     std::function<void()> stopCallback)
+                     std::function<void()> stopCallback,
+                     const std::function<void(const std::string& str)>& logStatus)
         : m_strand(ioService)
         , m_signalSet(ioService)
     {
@@ -59,7 +60,14 @@ public:
 
         //We install a ConsoleCtrlHandler to handle presses of the Close button
         //on the console window
-        ConsoleCtrlHandlerFcn = stopCallback;
+        ConsoleCtrlHandlerFcn = [logStatus,stopCallback](DWORD event)
+            {
+                std::ostringstream ostr;
+                ostr << "CTRL: Got Windows Console Event " << event << " ... stop sequence initiated.";
+                logStatus(ostr.str());
+
+                stopCallback;
+            };
         ::SetConsoleCtrlHandler(ConsoleCtrlHandler,TRUE);
 #elif defined(linux) || defined(__linux) || defined(__linux__)
         m_signalSet.add(SIGQUIT);
@@ -67,7 +75,7 @@ public:
         m_signalSet.add(SIGTERM);
 #endif
 
-        m_signalSet.async_wait(m_strand.wrap([this, stopCallback]
+        m_signalSet.async_wait(m_strand.wrap([this, stopCallback, logStatus]
                                              (const boost::system::error_code& error,
                                               const int signalNumber)
         {
@@ -84,9 +92,9 @@ public:
                     throw std::logic_error(os.str());
                 }
             }
-
-            lllog(1) << "CTRL: Got signal " << signalNumber << " ... stop sequence initiated." << std::endl;
-            std::wcout << "CTRL: Got signal " << signalNumber << " ... stop sequence initiated." << std::endl;
+            std::ostringstream os;
+            os << "CTRL: Got signal " << signalNumber << " ... stop sequence initiated.";
+            logStatus(os.str());
 
             stopCallback();
         }));
@@ -101,7 +109,7 @@ private:
 
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
     /** Function pointer to our real event handler code.*/
-    static std::function<void()> ConsoleCtrlHandlerFcn;
+    static std::function<void(DWORD event)> ConsoleCtrlHandlerFcn;
 
     /**
      * This is the handler that Windows will call on events occurring.
@@ -117,10 +125,7 @@ private:
         case CTRL_LOGOFF_EVENT:
         case CTRL_SHUTDOWN_EVENT:
             {
-                lllog(1) << "CTRL: Got Windows Console Event " << event << " ... stop sequence initiated." << std::endl;
-                std::wcout << "CTRL: Got Windows Console Event " << event << " ... stop sequence initiated." << std::endl;
-
-                ConsoleCtrlHandlerFcn();
+                ConsoleCtrlHandlerFcn(event);
 
                 //We could sleep forever here, since the function will be terminated when
                 //our main function returns. Anyway, we only have something like

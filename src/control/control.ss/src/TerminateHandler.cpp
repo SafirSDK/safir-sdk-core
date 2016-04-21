@@ -24,5 +24,5 @@
 #include "TerminateHandler.h"
 
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
-    std::function<void()> TerminateHandler::ConsoleCtrlHandlerFcn = nullptr;
+    std::function<void(DWORD)> TerminateHandler::ConsoleCtrlHandlerFcn = nullptr;
 #endif

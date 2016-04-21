@@ -61,6 +61,7 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
     : m_ioService(ioService)
     , m_resolutionStartTime(boost::chrono::steady_clock::now())
     , m_strand(ioService)
+    , m_wcoutStrand(ioService)
     , m_doseMainPath(doseMainPath)
     , m_ignoreControlCmd(ignoreControlCmd)
     , m_startTimer(ioService)
@@ -78,8 +79,9 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
     , m_handle(ioService)
 #endif
 {
-    m_terminateHandler = Safir::make_unique<TerminateHandler>(ioService,m_strand.wrap([this]{StopThisNode();}));
-
+    m_terminateHandler = Safir::make_unique<TerminateHandler>(ioService,
+                                                              m_strand.wrap([this]{StopThisNode();}),
+                                                              [this](const std::string& str){LogStatus(str);});
 
     for (auto it = m_conf.nodeTypesParam.cbegin(); it < m_conf.nodeTypesParam.cend(); ++it)
     {
@@ -120,6 +122,16 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
     //addresses cannot be resolved).
     m_strand.post([this]{Start();});
 }
+
+void ControlApp::LogStatus(const std::string& str)
+{
+    lllog(1) << str.c_str() << std::endl;
+    m_wcoutStrand.dispatch([str]
+                           {
+                               std::wcout << str.c_str() << std::endl;
+                           });
+}
+
 
 //must be called from within strand
 void ControlApp::Start()
@@ -200,10 +212,9 @@ void ControlApp::Start()
 
                                              m_strand.post([this_]{this_->SendControlInfo();});
 
-                                             std::wostringstream os;
+                                             std::ostringstream os;
                                              os << "CTRL: Joined system with incarnation id " << incarnationId;
-                                             lllog(1) << os.str() << std::endl;
-                                             std::wcout << os.str() << std::endl;
+                                             LogStatus(os.str());
 
                                              return true;
                                          }
@@ -226,18 +237,17 @@ void ControlApp::Start()
 
                                              m_strand.post([this_]{this_->SendControlInfo();});
 
-                                             std::wostringstream os;
+                                             std::ostringstream os;
                                              os << "CTRL: Starting system with incarnation id " << incarnationId;
-                                             std::wcout << os.str() << std::endl;
+                                             LogStatus(os.str());
 
                                              return true;
                                          }
                                          else
                                          {
-                                             std::wostringstream os;
+                                             std::ostringstream os;
                                              os << "CTRL: Waiting for system start";
-                                             lllog(1) << os.str() << std::endl;
-                                             std::wcout << os.str() << std::endl;
+                                             LogStatus(os.str());
 
                                              return false;
                                          }
@@ -358,22 +368,21 @@ void ControlApp::Start()
 
         if (!gotExitCode)
         {
-            SEND_SYSTEM_LOG(Critical,
-                            << "CTRL: It seems that dose_main has exited but Control"
-                               " can't retrieve the exit code. GetExitCodeProcess failed"
-                               "with error code "  << ::GetLastError());
-            std::wcout << "CTRL: It seems that dose_main has exited but Control"
-                          " can't retrieve the exit code. GetExitCodeProcess failed"
-                          "with error code "  << ::GetLastError() << std::endl;
+            std::ostringstream ostr;
+            ostr << "CTRL: It seems that dose_main has exited but Control"
+                " can't retrieve the exit code. GetExitCodeProcess failed"
+                "with error code "  << ::GetLastError();
+            SEND_SYSTEM_LOG(Critical, << ostr.str().c_str());
+            LogStatus(ostr.str());
 
         }
         else if (exitCode == STILL_ACTIVE)
         {
-            SEND_SYSTEM_LOG(Critical,
-                            << "CTRL: Got an indication that dose_main has exited, however the exit code"
-                               " indicates STILL_ALIVE!");
-            std::wcout << "CTRL: Got an indication that dose_main has exited, however the exit code"
-                          " indicates STILL_ALIVE!" << std::endl;
+            std::ostringstream ostr;
+            ostr << "CTRL: Got an indication that dose_main has exited, however the exit code"
+                " indicates STILL_ALIVE!";
+            SEND_SYSTEM_LOG(Critical, << ostr.str().c_str());
+            LogStatus(ostr.str());
         }
         else
         {
@@ -385,9 +394,10 @@ void ControlApp::Start()
             if (exitCode != 0)
             {
                 // dose_main has exited unexpectedly
-
-                SEND_SYSTEM_LOG(Critical, << "CTRL: dose_main has exited with exit code "  << exitCode);
-                std::wcout << "CTRL: dose_main has exited with exit code "  << exitCode  << std::endl;
+                std::ostringstream ostr;
+                ostr << "CTRL: dose_main has exited with exit code "  << exitCode;
+                SEND_SYSTEM_LOG(Critical, << ostr.str().c_str());
+                LogStatus(ostr.str());
             }
         }
 
@@ -416,7 +426,7 @@ std::pair<Com::ResolvedAddress,Com::ResolvedAddress> ControlApp::ResolveAddresse
         //well, unless we've been trying to start for long enough
         if (m_resolutionStartTime + m_conf.localInterfaceTimeout < boost::chrono::steady_clock::now())
         {
-            std::wostringstream os;
+            std::ostringstream os;
             os << "CTRL: Failed to resolve local address/interface ";
             if (!controlAddress.Ok())
             {
@@ -433,7 +443,7 @@ std::pair<Com::ResolvedAddress,Com::ResolvedAddress> ControlApp::ResolveAddresse
             os << ". Have retried for the period configured in Safir.Dob.NodeParameters.LocalInterfaceTimeout.";
 
             SEND_SYSTEM_LOG(Critical, << os.str().c_str());
-            std::wcout << os.str() << std::endl;
+            LogStatus(os.str());
 
             StopControl();
         }
@@ -444,7 +454,7 @@ std::pair<Com::ResolvedAddress,Com::ResolvedAddress> ControlApp::ResolveAddresse
             if (!warned)
             {
                 warned = true;
-                std::wostringstream os;
+                std::ostringstream os;
                 os << "CTRL: Failed to resolve local address/interface ";
                 if (!controlAddress.Ok())
                 {
@@ -461,7 +471,7 @@ std::pair<Com::ResolvedAddress,Com::ResolvedAddress> ControlApp::ResolveAddresse
                 os << ". Will retry.";
 
                 SEND_SYSTEM_LOG(Warning, << os.str().c_str());
-                std::wcout << os.str() << std::endl;
+                LogStatus(os.str());
             }
 
             //ok, set up the retry timer
@@ -563,13 +573,14 @@ void ControlApp::Shutdown()
 
     if (shutdownCmd.empty())
     {
-        SEND_SYSTEM_LOG(Informational,
-                        << "CTRL: Can't execute a shutdown, Safir.Control.Parameters.ShutdownCommand is empty");
-        std::wcout << "CTRL: Can't execute a shutdown, Safir.Control.Parameters.ShutdownCommand is empty" << std::endl;
+        std::ostringstream ostr;
+        ostr << "CTRL: Can't execute a shutdown, Safir.Control.Parameters.ShutdownCommand is empty";
+        SEND_SYSTEM_LOG(Informational, << ostr.str().c_str());
+        LogStatus(ostr.str());
         return;
     }
 
-    Control::ExecuteCmd(shutdownCmd, "Safir.Control.Parameters.ShutdownCommand");
+    Control::ExecuteCmd(shutdownCmd, "Safir.Control.Parameters.ShutdownCommand",[this](const std::string& str){LogStatus(str);});
 
 }
 
@@ -580,13 +591,15 @@ void ControlApp::Reboot()
 
     if (rebootCmd.empty())
     {
-        SEND_SYSTEM_LOG(Informational,
-                        << "CTRL: Can't execute a reboot, Safir.Control.Parameters.RebootCommand is empty");
-        std::wcout << "CTRL: Can't execute a reboot, Safir.Control.Parameters.rebootCommand is empty" << std::endl;
+        std::ostringstream ostr;
+        ostr << "CTRL: Can't execute a reboot, Safir.Control.Parameters.RebootCommand is empty";
+
+        SEND_SYSTEM_LOG(Informational, << ostr.str().c_str());
+        LogStatus(ostr.str());
         return;
     }
 
-    Control::ExecuteCmd(rebootCmd, "Safir.Control.Parameters.RebootCommand");
+    Control::ExecuteCmd(rebootCmd, "Safir.Control.Parameters.RebootCommand",[this](const std::string& str){LogStatus(str);});
 }
 
 void ControlApp::SendControlInfo()
@@ -634,8 +647,11 @@ void ControlApp::SetSigchldHandler()
 
             if (status != 0)
             {
-                SEND_SYSTEM_LOG(Critical, << "CTRL: dose_main has exited with status code "  << status);
-                std::wcout << "CTRL: dose_main has exited with status code "  << status  << std::endl;
+                std::ostringstream ostr;
+                ostr << "CTRL: dose_main has exited with status code "  << status;
+
+                SEND_SYSTEM_LOG(Critical, << ostr.str());
+                LogStatus(ostr.str());
             }
         }
         else if (WIFSTOPPED(statusCode) || WIFCONTINUED(statusCode))
@@ -649,11 +665,12 @@ void ControlApp::SetSigchldHandler()
 
             auto signal = WTERMSIG(statusCode);
 
-            SEND_SYSTEM_LOG(Critical,
-                            << "CTRL: dose_main has exited due to signal "
-                            << strsignal(signal) << " ("  << signal << ")");
-            std::wcout << "CTRL: dose_main has exited due to signal "
-                       << strsignal(signal) << " ("  << signal << ")" << std::endl;
+            std::ostringstream ostr;
+            ostr << "CTRL: dose_main has exited due to signal "
+                 << strsignal(signal) << " ("  << signal << ")";
+
+            SEND_SYSTEM_LOG(Critical, << ostr.str());
+            LogStatus(ostr.str());
         }
         else
         {

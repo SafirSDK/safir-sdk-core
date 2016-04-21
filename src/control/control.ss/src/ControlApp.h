@@ -65,6 +65,8 @@ public:
                const bool                       ignoreControlCmd);
 
 private:
+    void LogStatus(const std::string& str);
+
     void Start();
 
     //first is controlAddress, second is dataAddress
@@ -86,6 +88,7 @@ private:
     bool                                        m_stopped;
     const boost::chrono::steady_clock::time_point m_resolutionStartTime;
     boost::asio::io_service::strand             m_strand;
+    boost::asio::io_service::strand             m_wcoutStrand;
     std::unique_ptr<TerminateHandler>           m_terminateHandler;
     int64_t                                     m_nodeId;
     const boost::filesystem::path               m_doseMainPath;

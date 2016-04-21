@@ -31,7 +31,7 @@
 
 
 #define SEND_SYSTEM_LOG(severity, comment) \
-    {std::wostringstream ostr; ostr comment; Safir::Utilities::Internal::Log::Send(Safir::Utilities::Internal::Log::severity, ostr.str());}
+    {std::wostringstream ostr_123; ostr_123 comment; Safir::Utilities::Internal::Log::Send(Safir::Utilities::Internal::Log::severity, ostr_123.str());}
 
 namespace Safir
 {

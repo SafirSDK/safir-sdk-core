@@ -53,10 +53,10 @@ namespace Internal
 {
 namespace Control
 {
-    void Log(const std::string& msg)
+    void Log(const std::string& msg, const std::function<void(const std::string& str)>& logStatus)
     {
         SEND_SYSTEM_LOG(Error, << msg.c_str());
-        std::wcout << msg.c_str() << std::endl;
+        logStatus(msg);
     }
 
     std::vector<std::string> Split(const std::string& cmdLineStr)
@@ -74,7 +74,8 @@ namespace Control
     }
 
     std::pair<std::vector<std::string>, bool> GetArgv(const std::string& cmdLineStr,
-                                                      const std::string& parameter)
+                                                      const std::string& parameter,
+                                                      const std::function<void(const std::string& str)>& logStatus)
     {
         auto argv = Split(cmdLineStr);
 
@@ -83,7 +84,7 @@ namespace Control
             std::stringstream os;
             os << "CTRL: Invalid command line string '" << cmdLineStr << "' Check parameter "
                << parameter;
-            Log(os.str());
+            Log(os.str(),logStatus);
             return std::make_pair(argv, false);
         }
 
@@ -94,7 +95,7 @@ namespace Control
             std::stringstream os;
             os << "CTRL: Command '" << argv[0] << "' is not given as an absolute path. Check parameter "
                << parameter;
-            Log(os.str());
+            Log(os.str(),logStatus);
             return std::make_pair(argv, false);
         }
 
@@ -102,7 +103,7 @@ namespace Control
         {
             std::stringstream os;
             os << "CTRL: Command '" << argv[0] << "' does not exist. Check parameter " << parameter;
-            Log(os.str());
+            Log(os.str(),logStatus);
             return std::make_pair(argv, false);
         }
 
@@ -110,9 +111,10 @@ namespace Control
     }
 
     std::pair<std::vector<std::wstring>, bool> GetArgvW(const std::string& cmdLineStr,
-                                                        const std::string& parameter)
+                                                        const std::string& parameter,
+                                                        const std::function<void(const std::string& str)>& logStatus)
     {
-        std::pair<std::vector<std::string>, bool> argv = GetArgv(cmdLineStr, parameter);
+        std::pair<std::vector<std::string>, bool> argv = GetArgv(cmdLineStr, parameter, logStatus);
 
         std::vector<std::wstring> wideArgv;
         for (auto it = argv.first.begin(); it != argv.first.end(); ++it)
@@ -123,12 +125,14 @@ namespace Control
         return std::make_pair(wideArgv, argv.second);
     }
 
-    void ExecuteCmd(const std::string& cmdLineStr, const std::string& parameter)
+    void ExecuteCmd(const std::string& cmdLineStr,
+                    const std::string& parameter,
+                    const std::function<void(const std::string& str)>& logStatus)
     {
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
-        auto argv = GetArgvW(cmdLineStr, parameter);
+        auto argv = GetArgvW(cmdLineStr, parameter, logStatus);
 #elif defined(linux) || defined(__linux) || defined(__linux__)
-        auto argv = GetArgv(cmdLineStr, parameter);
+        auto argv = GetArgv(cmdLineStr, parameter, logStatus);
 #endif
 
 
@@ -148,7 +152,7 @@ namespace Control
             std::stringstream os;
             os << "CTRL: Can't execute command '" << cmdLineStr << "' Error: " << ec.message()
                << " Check parameter " << parameter << " and/or OS configuration";
-            Log(os.str());
+            Log(os.str(),logStatus);
         }
         else
         {
@@ -159,7 +163,7 @@ namespace Control
                 std::stringstream os;
                 os << "CTRL: Command '" << cmdLineStr << "' has exited with status code "  << exitCode
                    << " Check parameter " << parameter << " and/or OS configuration";
-                Log(os.str());
+                Log(os.str(),logStatus);
             }
 
 #elif defined(linux) || defined(__linux) || defined(__linux__)
@@ -172,7 +176,7 @@ namespace Control
                     std::stringstream os;
                     os << "CTRL: Command '" << cmdLineStr << "' has exited with status code " << status
                        << " Check parameter " << parameter << " and/or OS configuration";
-                    Log(os.str());
+                    Log(os.str(),logStatus);
                 }
             }
             else if (WIFSIGNALED(exitCode))
@@ -183,14 +187,14 @@ namespace Control
                 os << "CTRL: Command '" << cmdLineStr << "' has exited due to signal "
                    << strsignal(signal) << " ("  << signal << ") Check parameter " << parameter
                    << " and/or OS configuration";
-                Log(os.str());
+                Log(os.str(),logStatus);
             }
             else
             {
                 std::stringstream os;
                 os << "CTRL: Command '" << cmdLineStr << "' has exited with unexpected status code"
                                         << " Check parameter " << parameter << " and/or OS configuration";
-                Log(os.str());
+                Log(os.str(),logStatus);
             }
 #endif
         }
