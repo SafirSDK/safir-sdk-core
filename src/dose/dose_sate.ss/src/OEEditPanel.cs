@@ -333,6 +333,7 @@ namespace Sate
                                                                      out ct,
                                                                      out arrLength);
 
+
             if (ct!=Safir.Dob.Typesystem.CollectionType.ArrayCollectionType)
             {
                 arrLength = 1;
@@ -342,62 +343,62 @@ namespace Sate
             {
                 case Safir.Dob.Typesystem.MemberType.EnumerationMemberType:
                     {
-                        c = new EnumField(objInfo, member, complexType, memberName, arrLength);
+                        c = new EnumField(objInfo, member, complexType, memberName, ct, arrLength);
                         break;
                     }
                 case Safir.Dob.Typesystem.MemberType.BooleanMemberType:
                     {
-                        c = new BoolField(objInfo, member, memberName, arrLength);
+                        c = new BoolField(objInfo, member, memberName, ct, arrLength);
                         break;
                     }
                 case Safir.Dob.Typesystem.MemberType.Int32MemberType:
                     {
-                        c = new Int32Field(objInfo, member, memberName, arrLength);
+                        c = new Int32Field(objInfo, member, memberName, ct, arrLength);
                         break;
                     }
                 case Safir.Dob.Typesystem.MemberType.Int64MemberType:
                     {
-                        c = new Int64Field(objInfo, member, memberName, arrLength);
+                        c = new Int64Field(objInfo, member, memberName, ct, arrLength);
                         break;
                     }
                 case Safir.Dob.Typesystem.MemberType.ChannelIdMemberType:
                     {
-                        c = new ChannelIdField(objInfo, member, memberName, arrLength);
+                        c = new ChannelIdField(objInfo, member, memberName, ct, arrLength);
                         break;
                     }
                 case Safir.Dob.Typesystem.MemberType.HandlerIdMemberType:
                     {
-                        c = new HandlerIdField(objInfo, member, memberName, arrLength);
+                        c = new HandlerIdField(objInfo, member, memberName, ct, arrLength);
                         break;
                     }
                 case Safir.Dob.Typesystem.MemberType.EntityIdMemberType:
                     {
-                        c = new EntityIdField(objInfo, member, memberName, arrLength);
+                        c = new EntityIdField(objInfo, member, memberName, ct, arrLength);
                         break;
                     }
                 case Safir.Dob.Typesystem.MemberType.InstanceIdMemberType:
                     {
-                        c = new InstanceIdField(objInfo, member, memberName, arrLength);
+                        c = new InstanceIdField(objInfo, member, memberName, ct, arrLength);
                         break;
                     }
                 case Safir.Dob.Typesystem.MemberType.StringMemberType:
                     {
-                        c = new StringField(objInfo, member, memberName, arrLength, typeSize);
+                        c = new StringField(objInfo, member, memberName, ct, arrLength, typeSize);
                         break;
                     }
                 case Safir.Dob.Typesystem.MemberType.TypeIdMemberType:
                     {
-                        c = new TypeIdField(objInfo, member, memberName, arrLength);
+                        c = new TypeIdField(objInfo, member, memberName, ct, arrLength);
                         break;
                     }
                 case Safir.Dob.Typesystem.MemberType.ObjectMemberType:
                     {
-                        c = new ObjectField(objInfo, member, complexType, memberName, arrLength);
+                        c = new ObjectField(objInfo, member, complexType, memberName, ct, arrLength);
                         break;
                     }
                 case Safir.Dob.Typesystem.MemberType.BinaryMemberType:
                     {
-                        c = new BinaryField(objInfo, member, memberName, arrLength);
+                        c = new BinaryField(objInfo, member, memberName, ct, arrLength);
                         break;
                     }
                 case Safir.Dob.Typesystem.MemberType.Float32MemberType:
@@ -421,7 +422,7 @@ namespace Sate
                 case Safir.Dob.Typesystem.MemberType.Volt32MemberType:
                 case Safir.Dob.Typesystem.MemberType.Watt32MemberType:
                     {
-                        c = new Float32Field(objInfo, member, memberName, arrLength,
+                        c = new Float32Field(objInfo, member, memberName, ct, arrLength,
                             Safir.Dob.Typesystem.Members.GetTypeName(typeId, member));
                         break;
                     }
@@ -446,7 +447,7 @@ namespace Sate
                 case Safir.Dob.Typesystem.MemberType.Volt64MemberType:
                 case Safir.Dob.Typesystem.MemberType.Watt64MemberType:
                     {
-                        c = new Float64Field(objInfo, member, memberName, arrLength,
+                        c = new Float64Field(objInfo, member, memberName, ct, arrLength,
                             Safir.Dob.Typesystem.Members.GetTypeName(typeId, member));
                         break;
                     }

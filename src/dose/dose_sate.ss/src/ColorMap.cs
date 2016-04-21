@@ -36,5 +36,8 @@ namespace Sate
         public static readonly Color CHANGED = Color.LightSkyBlue;
         public static readonly Color ENABLED = Color.White;
         public static readonly Color DISABLED = Color.LightGray;
+
+        public static readonly Color ADD_LINK_CHANGED = Color.Blue;
+        public static readonly Color ADD_LINK_DEFAULT = Color.Black;
     }
 }

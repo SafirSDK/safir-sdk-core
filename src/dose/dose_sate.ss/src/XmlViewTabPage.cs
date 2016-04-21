@@ -39,10 +39,8 @@ namespace Sate
         {
             string name=Safir.Dob.Typesystem.Operations.GetName(objInfo.Obj.GetTypeId());
             name=name.Substring(name.LastIndexOf('.')+1);
-            //this.Text=name+" : "+obj.InstanceNumber;
             this.Text = name;
 
-            //fileName=name+"_"+obj.InstanceNumber.ToString()+".xml";
             fileName = name + ".xml";
             xmlRichEdit = new XmlRichEdit();
             xmlRichEdit.Dock=DockStyle.Fill;
@@ -79,6 +77,58 @@ namespace Sate
         public XmlRichEdit RichEdit
         {
             get { return xmlRichEdit; }
+        }
+    }
+
+
+    //Json
+    public class JsonTabPage : System.Windows.Forms.TabPage
+    {
+        private RichTextBox jsonEdit;
+        private string fileName;
+
+        public JsonTabPage(ObjectInfo objInfo)
+        {
+            string name = Safir.Dob.Typesystem.Operations.GetName(objInfo.Obj.GetTypeId());
+            name = name.Substring(name.LastIndexOf('.') + 1);
+            this.Text = name;
+
+            fileName = name + ".json";
+            jsonEdit = new XmlRichEdit();
+            jsonEdit.Dock = DockStyle.Fill;
+            this.Controls.Add(jsonEdit);
+            jsonEdit.Text = Safir.Dob.Typesystem.Serialization.ToJson(objInfo.Obj);
+        }
+
+        public JsonTabPage(string jsonContent, string fileName)
+        {
+            this.fileName = fileName;
+            this.Text = fileName;
+            jsonEdit = new XmlRichEdit();
+            jsonEdit.Dock = DockStyle.Fill;
+            this.Controls.Add(jsonEdit);
+            jsonEdit.Text = jsonContent;
+            jsonEdit.ReadOnly = false;
+        }
+
+        public void Save(string path)
+        {
+            using (System.IO.TextWriter writer = new System.IO.StreamWriter(path))
+            {
+                writer.Write(jsonEdit.Text);
+                writer.Flush();
+                writer.Close();
+            }
+        }
+
+        public string FileName
+        {
+            get { return fileName; }
+        }
+
+        public RichTextBox RichEdit
+        {
+            get { return jsonEdit; }
         }
     }
 }
