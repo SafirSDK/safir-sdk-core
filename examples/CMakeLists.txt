@@ -23,6 +23,12 @@ if (MSVC)
   ADD_DEFINITIONS(-DWIN32_LEAN_AND_MEAN)
 endif()
 
+if (UNIX)
+   #set up use of threads and turn on more warnings
+   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -Wall")
+endif ()
+
+
 #load macros for building dotnet stuff with cmake
 include(${SAFIR_SDK_CORE_DOTNET_SETTINGS})
 include(${SAFIR_SDK_CORE_JAVA_SETTINGS})
