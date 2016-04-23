@@ -69,7 +69,6 @@ namespace Sate
         /// Required designer variable.
         /// </summary>
         private System.ComponentModel.Container components = null;
-        private ToolTip m_toolTip = new ToolTip();
 
 
         protected abstract bool ValidInput(int index, bool setVal);
@@ -80,18 +79,15 @@ namespace Sate
         {
         }
 
-        protected ObjectDataFieldControl(ObjectInfo objInfo, int member, string typeName, string fieldName, Safir.Dob.Typesystem.CollectionType collectionType, int arraySize)
+        protected ObjectDataFieldControl(ObjectInfo objInfo, int member, string typeName, string memberName, Safir.Dob.Typesystem.CollectionType collectionType, int arraySize)
         {
-            Init(objInfo, member, typeName, fieldName, collectionType, arraySize);
-            m_toolTip.InitialDelay = 10;
-            m_toolTip.AutoPopDelay = 5000;
-            m_toolTip.ReshowDelay = 10;
+            Init(objInfo, member, typeName, memberName, collectionType, arraySize);
         }
 
-        protected void Init(ObjectInfo objInfo, int member, string typeName, string fieldName, Safir.Dob.Typesystem.CollectionType collectionType, int arraySize)
+        protected void Init(ObjectInfo objInfo, int member, string typeName, string memberName, Safir.Dob.Typesystem.CollectionType collectionType, int arraySize)
         {
             this.typeName = typeName;
-            this.memberName = fieldName;
+            this.memberName = memberName;
             this.collectionType = collectionType;
 
             Controls.Clear();
@@ -116,28 +112,39 @@ namespace Sate
             {
                 case Safir.Dob.Typesystem.CollectionType.SingleValueCollectionType:
                     {                        
-                        InitSingleOrArray(objInfo, member, typeName, fieldName, arraySize, ref location);
+                        InitSingleOrArray(objInfo, member, typeName, arraySize, ref location);
                     }
                     break;
 
                 case Safir.Dob.Typesystem.CollectionType.ArrayCollectionType:
                     {                        
-                        InitSingleOrArray(objInfo, member, typeName, fieldName, arraySize, ref location);
+                        InitSingleOrArray(objInfo, member, typeName, arraySize, ref location);
                     }
                     break;
 
                 case Safir.Dob.Typesystem.CollectionType.DictionaryCollectionType:
                     {
-                        InitDictionary(objInfo, member, typeName, fieldName, ref location);
+                        InitDictionary(objInfo, member, typeName, ref location);
                     }
                     break;
 
                 case Safir.Dob.Typesystem.CollectionType.SequenceCollectionType:
                     {
-                        InitSequence(objInfo, member, typeName, fieldName, ref location);
+                        InitSequence(objInfo, member, typeName, ref location);
                     }
                     break;
             }
+
+            
+
+            Controls.AddRange(fieldNameLabel.ToArray());
+            Controls.AddRange(fieldValueControl.ToArray());
+            Controls.AddRange(isNullCheckBox.ToArray());
+
+            if (typeLabel != null)
+                Controls.Add(typeLabel);
+            if (typeLabelAddItem != null)
+                Controls.Add(typeLabelAddItem);
 
             this.Height = location.Y;
 
@@ -146,7 +153,7 @@ namespace Sate
             this.ResumeLayout(false);
         }
 
-        protected void InitDictionary(ObjectInfo objInfo, int member, string typeName, string fieldName, ref Point location)
+        protected void InitDictionary(ObjectInfo objInfo, int member, string typeName, ref Point location)
         {
             Safir.Dob.Typesystem.MemberType memberType;
             long complexType;
@@ -181,11 +188,37 @@ namespace Sate
             tsi.Click += new EventHandler(OnIsChangedMenuItem);
             typeLabelAddItem.ContextMenuStrip = new ContextMenuStrip();
             typeLabelAddItem.ContextMenuStrip.Items.Add(tsi);
-            Controls.Add(typeLabelAddItem);
 
-            fieldNameLabel.Add(CreateNameLabel(fieldName));
+            //set values
+            ObjectInfo tmp = (ObjectInfo)Tag;
+            var container = tmp.Obj.GetMember(member, 0);
+            var containerType = container.GetType();
+            var keys = (System.Collections.IEnumerable)containerType.GetProperty("Keys").GetValue(container, null);
 
-            PositionControls(0, ref location);
+            int index = 0;
+            foreach (var k in keys)
+            {
+                //key
+                var keyString = ObjectDataFieldDictionaryKey.KeyToString(keyType, k);
+                var nameLabel = index == 0 ? CreateNameLabel(memberName + Environment.NewLine + string.Format("[{0}]", keyString)) : CreateNameLabel(string.Format("[{0}]", keyString));
+                nameLabel.Tag = k;
+                fieldNameLabel.Add(nameLabel);
+
+                //value
+                fieldValueControl.Add(CreateDictionaryItemValueControl());
+                changed.Add(false);
+                isNotChanged.Add(false);
+                isNullCheckBox.Add(CreateIsNullCheckbox());
+
+                PositionControls(index, ref location);
+                index++;
+            }
+
+            if (index == 0)
+            {
+                fieldNameLabel.Add(CreateNameLabel(memberName));
+                PositionControls(0, ref location);
+            }
         }
 
         private void AddDictionaryItem_Click(object sender, EventArgs e)
@@ -224,12 +257,17 @@ namespace Sate
                 fieldValueControl.Add(control);
                 changed.Add(true);
                 isNotChanged.Add(false);
+                var cb = CreateIsNullCheckbox();
+                cb.Checked = true;
+                Controls.Add(cb);
+                isNullCheckBox.Add(cb);
 
                 InsertDictionaryItem(key);
 
                 SetDictionaryChanged(true, fieldValueControl.Count - 1);
 
                 RePositioning();
+                control.Focus();
                 parentObjectEditPanel.ExpandCollapse(member);
             }
         }
@@ -245,7 +283,7 @@ namespace Sate
             return -1;
         }
 
-        protected void InitSequence(ObjectInfo objInfo, int member, string typeName, string fieldName, ref Point location)
+        protected void InitSequence(ObjectInfo objInfo, int member, string typeName, ref Point location)
         {
             //Type label and AddItem link
             typeLabelAddItem = new LinkLabel();
@@ -261,7 +299,6 @@ namespace Sate
             tsi.Click += new EventHandler(OnIsChangedMenuItem);
             typeLabelAddItem.ContextMenuStrip = new ContextMenuStrip();
             typeLabelAddItem.ContextMenuStrip.Items.Add(tsi);            
-            Controls.Add(typeLabelAddItem);
 
             ObjectInfo tmp = (ObjectInfo)Tag;
             var container = tmp.Obj.GetMember(member, 0);
@@ -277,7 +314,7 @@ namespace Sate
 
             if (numberOfValues == 0)
             {
-                fieldNameLabel.Add(CreateNameLabel(fieldName));
+                fieldNameLabel.Add(CreateNameLabel(memberName));
                 PositionControls(0, ref location);
             }
         }
@@ -339,12 +376,20 @@ namespace Sate
             }
 
             //insert member name with index
-            var nameLabel = CreateNameLabel(string.Format("{0}[{1}]", memberName, fieldNameLabel.Count));
-            fieldNameLabel.Add(nameLabel);
-            fieldNameLabel[0].Text = memberName + "[0]";
-
+            if (fieldValueControl.Count==0)
+            {
+                fieldNameLabel[0].Text = memberName + "[0]";
+            }
+            else
+            {
+                var nameLabel = CreateNameLabel(string.Format("{0}[{1}]", memberName, fieldNameLabel.Count));
+                fieldNameLabel.Add(nameLabel);
+                Controls.Add(nameLabel);
+            }
+            
             //insert controls
             var control = CreateSequenceItemValueControl();
+            Controls.Add(control);
             if (insertAt < 0)
             {
                 fieldValueControl.Add(control);
@@ -384,6 +429,9 @@ namespace Sate
 
                 Controls.Remove(fieldValueControl[removeAt]);
                 fieldValueControl.RemoveAt(removeAt);
+
+                Controls.Remove(isNullCheckBox[removeAt]);
+                isNullCheckBox.RemoveAt(removeAt);
 
                 changed.RemoveAt(removeAt);
                 isNotChanged.RemoveAt(removeAt);
@@ -500,7 +548,7 @@ namespace Sate
             ((ToolStripMenuItem)typeLabelAddItem.ContextMenuStrip.Items[0]).Checked = isChanged;            
         }        
         
-        protected void InitSingleOrArray(ObjectInfo objInfo, int member, string typeName, string fieldName, int numberOfValues, ref Point location)
+        protected void InitSingleOrArray(ObjectInfo objInfo, int member, string typeName, int numberOfValues, ref Point location)
         {
             typeLabel = new Label();
             typeLabel.Width = X_NAME_START - X_TYPE_START - 2 * X_STEP;
@@ -508,15 +556,14 @@ namespace Sate
             typeLabel.AutoSize = true;
             typeLabel.Location = location;
             typeLabel.Font = font;
-            location.X = X_NAME_START;
-            this.Controls.Add(typeLabel);
+            location.X = X_NAME_START;            
 
             for (int i = 0; i < numberOfValues; i++)
             {
                 fieldValueControl.Add(CreateValueControl());
                 changed.Add(false);
                 isNotChanged.Add(false);
-                fieldNameLabel.Add(CreateNameLabel(numberOfValues > 1 ? fieldName + "[" + i + "]" : fieldName));
+                fieldNameLabel.Add(CreateNameLabel(numberOfValues > 1 ? memberName + "[" + i + "]" : memberName));
                 isNullCheckBox.Add(CreateIsNullCheckbox());
                 PositionControls(i, ref location);
             }
@@ -563,8 +610,10 @@ namespace Sate
             //other collectionType than sequence
             for (int index = 0; index < this.fieldValueControl.Count; index++)
             {
-                ObjectInfo tmp = (ObjectInfo)Tag;
-                Safir.Dob.Typesystem.ContainerBase cont = tmp.Obj.GetMember(member, index);
+                //Safir.Dob.Typesystem.ContainerBase cont = tmp.Obj.GetMember(member, index);
+
+                var cont = collectionType == Safir.Dob.Typesystem.CollectionType.DictionaryCollectionType ?
+                    GetDictionaryValue(fieldNameLabel[index].Tag) : ((ObjectInfo)Tag).Obj.GetMember(member, index);
 
                 // set isChanged flag to false if this should be done
                 if (isNotChanged[index])
@@ -665,20 +714,7 @@ namespace Sate
                 ignoreEvent=false;
             }
         }
-
-        protected void ObjectDataFieldControl_MouseHover(object sender, EventArgs e)
-        {
-            int index = 0;
-            foreach (Control c in fieldValueControl)
-            {
-                if (c == sender)
-                {
-                    m_toolTip.SetToolTip(c, c.Text);
-                }
-                index++;
-            }
-        }
-
+        
         protected void ObjectDataFieldControl_TextChanged(object sender, EventArgs e)
         {
             if (!ignoreEvent)
@@ -697,7 +733,6 @@ namespace Sate
                     if (tb != null)
                     {
                         //If it's a textbox then we do some extra stuff
-                        m_toolTip.Show(tb.Text, tb, tb.Left, tb.Top, 5000);
                         TextBoxHandler(tb);
                     }
 
@@ -733,7 +768,6 @@ namespace Sate
             textBox.Multiline = true;
             textBox.Font = dataFont;
             textBox.TextChanged += new EventHandler(ObjectDataFieldControl_TextChanged);
-            textBox.MouseHover += new EventHandler(ObjectDataFieldControl_MouseHover);
 
             ToolStripMenuItem tsi = new ToolStripMenuItem();
             tsi.Text = "Is changed";
@@ -838,21 +872,18 @@ namespace Sate
             {
                 location.X = X_NAME_START;
                 fieldNameLabel[index].Location = location;
-                Controls.Add(fieldNameLabel[index]);
             }
             
             if (isNullCheckBox.Count > index)
             {
                 location.X = X_NULL_START;
                 isNullCheckBox[index].Location = location;
-                Controls.Add(isNullCheckBox[index]);
             }
 
             if (fieldValueControl.Count > index)
             {
                 location.X = X_VALUE_START;
                 fieldValueControl[index].Location = location;
-                Controls.Add(fieldValueControl[index]);
 
                 location.X = X_NAME_START;
                 location.Y += fieldValueControl[index].Height + Y_STEP;
@@ -897,6 +928,15 @@ namespace Sate
             var containerType = container.GetType();
             var method = containerType.GetMethod("Add", new Type[] { key.GetType() });
             method.Invoke(container, new object[] { key });
+        }
+
+        protected Safir.Dob.Typesystem.ContainerBase GetDictionaryValue(object key)
+        {
+            ObjectInfo tmp = (ObjectInfo)Tag;
+            var container = tmp.Obj.GetMember(member, 0);
+            var containerType = container.GetType();
+            var value = containerType.GetProperty("Item").GetValue(container, new object[] { key });
+            return value as Safir.Dob.Typesystem.ContainerBase;
         }
 
         //protected void InsertDictionaryItem(object key)
@@ -1008,6 +1048,12 @@ namespace Sate
                 Safir.Dob.Typesystem.BooleanContainer cont = (Safir.Dob.Typesystem.BooleanContainer)tmp.Obj.GetMember(member, index);
                 cont.Val = val;
             }
+            else if (collectionType == Safir.Dob.Typesystem.CollectionType.DictionaryCollectionType)
+            {
+                changed[index] = false;
+                var cont = (Safir.Dob.Typesystem.BooleanContainer)GetDictionaryValue(fieldNameLabel[index].Tag);
+                cont.Val = val;
+            }
             else if (collectionType==Safir.Dob.Typesystem.CollectionType.SequenceCollectionType)
             {
                 var cont = (Safir.Dob.Typesystem.BooleanSequenceContainer)tmp.Obj.GetMember(member, 0);
@@ -1052,6 +1098,33 @@ namespace Sate
                         (c.ContextMenuStrip.Items[0] as ToolStripMenuItem).Checked = true;
                         c.BackColor = ColorMap.CHANGED;
                         changed[index] = true;
+                    }
+
+                    index++;
+                }
+            }
+            else if (collectionType == Safir.Dob.Typesystem.CollectionType.DictionaryCollectionType)
+            {
+                int index = 0;
+                foreach (ComboBox c in fieldValueControl)
+                {
+                    var cont = (Safir.Dob.Typesystem.BooleanContainer)GetDictionaryValue(fieldNameLabel[index].Tag);
+
+                    if (cont.IsNull())
+                    {
+                        if (isNullCheckBox.Count > index)
+                        {
+                            isNullCheckBox[index].Checked = true;
+                        }
+                    }
+                    else
+                    {
+                        c.Text = cont.Val.ToString();
+                        c.BackColor = ColorMap.ENABLED;
+                    }
+                    if (cont.IsChanged())
+                    {
+                        SetDictionaryChanged(cont.IsChanged(), index);
                     }
 
                     index++;
@@ -1111,7 +1184,6 @@ namespace Sate
             ComboBox combo = new ComboBox();
             combo.Font = dataFont;
             combo.SelectedIndexChanged += new EventHandler(ObjectDataFieldControl_TextChanged);
-            combo.MouseHover += new EventHandler(ObjectDataFieldControl_MouseHover);
             combo.Items.AddRange(enumValueNames);
             combo.SelectedIndex = 0;
             combo.DropDownStyle = ComboBoxStyle.DropDownList;
@@ -1145,6 +1217,12 @@ namespace Sate
             {
                 changed[index] = false;
                 Safir.Dob.Typesystem.EnumerationContainerBase cont = (Safir.Dob.Typesystem.EnumerationContainerBase)tmp.Obj.GetMember(member, index);
+                cont.Ordinal = c.SelectedIndex;
+            }
+            else if (collectionType == Safir.Dob.Typesystem.CollectionType.DictionaryCollectionType)
+            {
+                changed[index] = false;
+                var cont = (Safir.Dob.Typesystem.EnumerationContainerBase)GetDictionaryValue(fieldNameLabel[index].Tag);
                 cont.Ordinal = c.SelectedIndex;
             }
             else if (collectionType == Safir.Dob.Typesystem.CollectionType.SequenceCollectionType)
@@ -1195,6 +1273,31 @@ namespace Sate
                         (c.ContextMenuStrip.Items[0] as ToolStripMenuItem).Checked = true;
                         c.BackColor = ColorMap.CHANGED;
                         changed[index] = true;
+                    }
+
+                    index++;
+                }
+            }
+            else if (collectionType == Safir.Dob.Typesystem.CollectionType.DictionaryCollectionType)
+            {
+                int index = 0;
+                foreach (ComboBox c in fieldValueControl)
+                {
+                    var cont = (Safir.Dob.Typesystem.EnumerationContainerBase)GetDictionaryValue(fieldNameLabel[index].Tag);
+
+                    if (cont.IsNull())
+                    {
+                        if (isNullCheckBox.Count > index)
+                            this.isNullCheckBox[index].Checked = true;
+                    }
+                    else
+                    {
+                        c.SelectedIndex = cont.Ordinal;
+                        c.BackColor = ColorMap.ENABLED;
+                    }
+                    if (cont.IsChanged())
+                    {
+                        SetDictionaryChanged(cont.IsChanged(), index);
                     }
 
                     index++;
@@ -1263,6 +1366,12 @@ namespace Sate
                     var cont = (Safir.Dob.Typesystem.Int32Container)tmp.Obj.GetMember(member, index);
                     cont.Val = val; ;
                 }
+                else if (collectionType == Safir.Dob.Typesystem.CollectionType.DictionaryCollectionType)
+                {
+                    changed[index] = false;
+                    var cont = (Safir.Dob.Typesystem.Int32Container)GetDictionaryValue(fieldNameLabel[index].Tag);
+                    cont.Val = val;
+                }
                 else if (collectionType == Safir.Dob.Typesystem.CollectionType.SequenceCollectionType)
                 {
                     var cont = (Safir.Dob.Typesystem.Int32SequenceContainer)tmp.Obj.GetMember(member, 0);
@@ -1311,6 +1420,32 @@ namespace Sate
                         (t.ContextMenuStrip.Items[0] as ToolStripMenuItem).Checked = true;
                         t.BackColor = ColorMap.CHANGED;
                         changed[index] = true;
+                    }
+
+                    index++;
+                }
+            }
+            else if (collectionType == Safir.Dob.Typesystem.CollectionType.DictionaryCollectionType)
+            {
+                int index = 0;
+                foreach (TextBox t in fieldValueControl)
+                {
+                    var cont = (Safir.Dob.Typesystem.Int32Container)GetDictionaryValue(fieldNameLabel[index].Tag);
+
+                    if (cont.IsNull())
+                    {
+                        if (isNullCheckBox.Count > index)
+                            this.isNullCheckBox[index].Checked = true;
+                    }
+                    else
+                    {
+                        t.Text = cont.Val.ToString();
+                        t.BackColor = ColorMap.ENABLED;
+                    }
+
+                    if (cont.IsChanged())
+                    {
+                        SetDictionaryChanged(cont.IsChanged(), index);
                     }
 
                     index++;
@@ -1374,6 +1509,12 @@ namespace Sate
                     var cont = (Safir.Dob.Typesystem.Int64Container)tmp.Obj.GetMember(member, index);
                     cont.Val = val; ;
                 }
+                else if (collectionType == Safir.Dob.Typesystem.CollectionType.DictionaryCollectionType)
+                {
+                    changed[index] = false;
+                    var cont = (Safir.Dob.Typesystem.Int64Container)GetDictionaryValue(fieldNameLabel[index].Tag);
+                    cont.Val = val;
+                }
                 else if (collectionType == Safir.Dob.Typesystem.CollectionType.SequenceCollectionType)
                 {
                     var cont = (Safir.Dob.Typesystem.Int64SequenceContainer)tmp.Obj.GetMember(member, 0);
@@ -1422,6 +1563,32 @@ namespace Sate
                         (t.ContextMenuStrip.Items[0] as ToolStripMenuItem).Checked = true;
                         t.BackColor = ColorMap.CHANGED;
                         changed[index] = true;
+                    }
+
+                    index++;
+                }
+            }
+            else if (collectionType == Safir.Dob.Typesystem.CollectionType.DictionaryCollectionType)
+            {
+                int index = 0;
+                foreach (TextBox t in fieldValueControl)
+                {
+                    var cont = (Safir.Dob.Typesystem.Int64Container)GetDictionaryValue(fieldNameLabel[index].Tag);
+
+                    if (cont.IsNull())
+                    {
+                        if (isNullCheckBox.Count > index)
+                            this.isNullCheckBox[index].Checked = true;
+                    }
+                    else
+                    {
+                        t.Text = cont.Val.ToString();
+                        t.BackColor = ColorMap.ENABLED;
+                    }
+
+                    if (cont.IsChanged())
+                    {
+                        SetDictionaryChanged(cont.IsChanged(), index);
                     }
 
                     index++;
@@ -1483,7 +1650,13 @@ namespace Sate
                 {
                     changed[index] = false;
                     var cont = (Safir.Dob.Typesystem.Float32Container)tmp.Obj.GetMember(member, index);
-                    cont.Val = val; ;
+                    cont.Val = val;
+                }
+                else if (collectionType == Safir.Dob.Typesystem.CollectionType.DictionaryCollectionType)
+                {
+                    changed[index] = false;
+                    var cont = (Safir.Dob.Typesystem.Float32Container)GetDictionaryValue(fieldNameLabel[index].Tag);
+                    cont.Val = val;
                 }
                 else if (collectionType == Safir.Dob.Typesystem.CollectionType.SequenceCollectionType)
                 {
@@ -1533,6 +1706,32 @@ namespace Sate
                         (t.ContextMenuStrip.Items[0] as ToolStripMenuItem).Checked = true;
                         t.BackColor = ColorMap.CHANGED;
                         changed[index] = true;
+                    }
+
+                    index++;
+                }
+            }
+            else if (collectionType == Safir.Dob.Typesystem.CollectionType.DictionaryCollectionType)
+            {
+                int index = 0;
+                foreach (TextBox t in fieldValueControl)
+                {
+                    var cont = (Safir.Dob.Typesystem.Float32Container)GetDictionaryValue(fieldNameLabel[index].Tag);
+
+                    if (cont.IsNull())
+                    {
+                        if (isNullCheckBox.Count > index)
+                            this.isNullCheckBox[index].Checked = true;
+                    }
+                    else
+                    {
+                        t.Text = cont.Val.ToString();
+                        t.BackColor = ColorMap.ENABLED;
+                    }
+
+                    if (cont.IsChanged())
+                    {
+                        SetDictionaryChanged(cont.IsChanged(), index);
                     }
 
                     index++;
@@ -1597,6 +1796,12 @@ namespace Sate
                     var cont = (Safir.Dob.Typesystem.Float64Container)tmp.Obj.GetMember(member, index);
                     cont.Val = val; ;
                 }
+                else if (collectionType == Safir.Dob.Typesystem.CollectionType.DictionaryCollectionType)
+                {
+                    changed[index] = false;
+                    var cont = (Safir.Dob.Typesystem.Float64Container)GetDictionaryValue(fieldNameLabel[index].Tag);
+                    cont.Val = val;
+                }
                 else if (collectionType == Safir.Dob.Typesystem.CollectionType.SequenceCollectionType)
                 {
                     var cont = (Safir.Dob.Typesystem.Float64SequenceContainer)tmp.Obj.GetMember(member, 0);
@@ -1645,6 +1850,32 @@ namespace Sate
                         (t.ContextMenuStrip.Items[0] as ToolStripMenuItem).Checked = true;
                         t.BackColor = ColorMap.CHANGED;
                         changed[index] = true;
+                    }
+
+                    index++;
+                }
+            }
+            else if (collectionType == Safir.Dob.Typesystem.CollectionType.DictionaryCollectionType)
+            {
+                int index = 0;
+                foreach (TextBox t in fieldValueControl)
+                {
+                    var cont = (Safir.Dob.Typesystem.Float64Container)GetDictionaryValue(fieldNameLabel[index].Tag);
+
+                    if (cont.IsNull())
+                    {
+                        if (isNullCheckBox.Count > index)
+                            this.isNullCheckBox[index].Checked = true;
+                    }
+                    else
+                    {
+                        t.Text = cont.Val.ToString();
+                        t.BackColor = ColorMap.ENABLED;
+                    }
+
+                    if (cont.IsChanged())
+                    {
+                        SetDictionaryChanged(cont.IsChanged(), index);
                     }
 
                     index++;
@@ -1719,6 +1950,12 @@ namespace Sate
                 Safir.Dob.Typesystem.StringContainer cont = (Safir.Dob.Typesystem.StringContainer)tmp.Obj.GetMember(member, index);
                 cont.Val = c.Text;
             }
+            else if (collectionType == Safir.Dob.Typesystem.CollectionType.DictionaryCollectionType)
+            {
+                changed[index] = false;
+                var cont = (Safir.Dob.Typesystem.StringContainer)GetDictionaryValue(fieldNameLabel[index].Tag);
+                cont.Val = c.Text;
+            }
             else if (collectionType == Safir.Dob.Typesystem.CollectionType.SequenceCollectionType)
             {
                 var cont = (Safir.Dob.Typesystem.StringSequenceContainer)tmp.Obj.GetMember(member, 0);
@@ -1765,6 +2002,32 @@ namespace Sate
                         (t.ContextMenuStrip.Items[0] as ToolStripMenuItem).Checked = true;
                         t.BackColor = ColorMap.CHANGED;
                         changed[index] = true;
+                    }
+
+                    index++;
+                }
+            }
+            else if (collectionType == Safir.Dob.Typesystem.CollectionType.DictionaryCollectionType)
+            {
+                int index = 0;
+                foreach (TextBox t in fieldValueControl)
+                {
+                    var cont = (Safir.Dob.Typesystem.StringContainer)GetDictionaryValue(fieldNameLabel[index].Tag);
+
+                    if (cont.IsNull())
+                    {
+                        if (isNullCheckBox.Count > index)
+                            this.isNullCheckBox[index].Checked = true;
+                    }
+                    else
+                    {
+                        t.Text = cont.Val.Trim();
+                        t.BackColor = ColorMap.ENABLED;
+                    }
+
+                    if (cont.IsChanged())
+                    {
+                        SetDictionaryChanged(cont.IsChanged(), index);
                     }
 
                     index++;
@@ -1834,6 +2097,12 @@ namespace Sate
                 Safir.Dob.Typesystem.TypeIdContainer cont = (Safir.Dob.Typesystem.TypeIdContainer)tmp.Obj.GetMember(member, index);
                 cont.Val = val;
             }
+            else if (collectionType == Safir.Dob.Typesystem.CollectionType.DictionaryCollectionType)
+            {
+                changed[index] = false;
+                var cont = (Safir.Dob.Typesystem.TypeIdContainer)GetDictionaryValue(fieldNameLabel[index].Tag);
+                cont.Val = val;
+            }
             else if (collectionType == Safir.Dob.Typesystem.CollectionType.SequenceCollectionType)
             {
                 var cont = (Safir.Dob.Typesystem.TypeIdSequenceContainer)tmp.Obj.GetMember(member, 0);
@@ -1877,6 +2146,32 @@ namespace Sate
                         t.BackColor = ColorMap.CHANGED;
                         changed[index] = true;
                     }
+                    index++;
+                }
+            }
+            else if (collectionType == Safir.Dob.Typesystem.CollectionType.DictionaryCollectionType)
+            {
+                int index = 0;
+                foreach (TextBox t in fieldValueControl)
+                {
+                    var cont = (Safir.Dob.Typesystem.TypeIdContainer)GetDictionaryValue(fieldNameLabel[index].Tag);
+
+                    if (cont.IsNull())
+                    {
+                        if (isNullCheckBox.Count > index)
+                            this.isNullCheckBox[index].Checked = true;
+                    }
+                    else
+                    {
+                        t.Text = Safir.Dob.Typesystem.Operations.Exists(cont.Val) ? Safir.Dob.Typesystem.Operations.GetName(cont.Val) : cont.Val.ToString();
+                        t.BackColor = ColorMap.ENABLED;
+                    }
+
+                    if (cont.IsChanged())
+                    {
+                        SetDictionaryChanged(cont.IsChanged(), index);
+                    }
+
                     index++;
                 }
             }
@@ -1951,6 +2246,12 @@ namespace Sate
                 Safir.Dob.Typesystem.ChannelIdContainer cont = (Safir.Dob.Typesystem.ChannelIdContainer)tmp.Obj.GetMember(member, index);
                 cont.Val = id;
             }
+            else if (collectionType == Safir.Dob.Typesystem.CollectionType.DictionaryCollectionType)
+            {
+                changed[index] = false;
+                var cont = (Safir.Dob.Typesystem.ChannelIdContainer)GetDictionaryValue(fieldNameLabel[index].Tag);
+                cont.Val = id;
+            }
             else if (collectionType == Safir.Dob.Typesystem.CollectionType.SequenceCollectionType)
             {
                 var cont = (Safir.Dob.Typesystem.ChannelIdSequenceContainer)tmp.Obj.GetMember(member, 0);
@@ -1993,6 +2294,32 @@ namespace Sate
                         (t.ContextMenuStrip.Items[0] as ToolStripMenuItem).Checked = true;
                         t.BackColor = ColorMap.CHANGED;
                         changed[index] = true;
+                    }
+
+                    index++;
+                }
+            }
+            else if (collectionType == Safir.Dob.Typesystem.CollectionType.DictionaryCollectionType)
+            {
+                int index = 0;
+                foreach (TextBox t in fieldValueControl)
+                {
+                    var cont = (Safir.Dob.Typesystem.ChannelIdContainer)GetDictionaryValue(fieldNameLabel[index].Tag);
+
+                    if (cont.IsNull())
+                    {
+                        if (isNullCheckBox.Count > index)
+                            this.isNullCheckBox[index].Checked = true;
+                    }
+                    else
+                    {
+                        t.Text = cont.Val.ToString();
+                        t.BackColor = ColorMap.ENABLED;
+                    }
+
+                    if (cont.IsChanged())
+                    {
+                        SetDictionaryChanged(cont.IsChanged(), index);
                     }
 
                     index++;
@@ -2067,6 +2394,12 @@ namespace Sate
                 Safir.Dob.Typesystem.HandlerIdContainer cont = (Safir.Dob.Typesystem.HandlerIdContainer)tmp.Obj.GetMember(member, index);
                 cont.Val = id;
             }
+            else if (collectionType == Safir.Dob.Typesystem.CollectionType.DictionaryCollectionType)
+            {
+                changed[index] = false;
+                var cont = (Safir.Dob.Typesystem.HandlerIdContainer)GetDictionaryValue(fieldNameLabel[index].Tag);
+                cont.Val = id;
+            }
             else if (collectionType == Safir.Dob.Typesystem.CollectionType.SequenceCollectionType)
             {
                 var cont = (Safir.Dob.Typesystem.HandlerIdSequenceContainer)tmp.Obj.GetMember(member, 0);
@@ -2110,6 +2443,32 @@ namespace Sate
                         (t.ContextMenuStrip.Items[0] as ToolStripMenuItem).Checked = true;
                         t.BackColor = ColorMap.CHANGED;
                         changed[index] = true;
+                    }
+
+                    index++;
+                }
+            }
+            else if (collectionType == Safir.Dob.Typesystem.CollectionType.DictionaryCollectionType)
+            {
+                int index = 0;
+                foreach (TextBox t in fieldValueControl)
+                {
+                    var cont = (Safir.Dob.Typesystem.HandlerIdContainer)GetDictionaryValue(fieldNameLabel[index].Tag);
+
+                    if (cont.IsNull())
+                    {
+                        if (isNullCheckBox.Count > index)
+                            this.isNullCheckBox[index].Checked = true;
+                    }
+                    else
+                    {
+                        t.Text = cont.Val.ToString();
+                        t.BackColor = ColorMap.ENABLED;
+                    }
+
+                    if (cont.IsChanged())
+                    {
+                        SetDictionaryChanged(cont.IsChanged(), index);
                     }
 
                     index++;
@@ -2218,6 +2577,12 @@ namespace Sate
                 Safir.Dob.Typesystem.EntityIdContainer cont = (Safir.Dob.Typesystem.EntityIdContainer)tmp.Obj.GetMember(member, index);
                 cont.Val = entityId;
             }
+            else if (collectionType == Safir.Dob.Typesystem.CollectionType.DictionaryCollectionType)
+            {
+                changed[index] = false;
+                var cont = (Safir.Dob.Typesystem.EntityIdContainer)GetDictionaryValue(fieldNameLabel[index].Tag);
+                cont.Val = entityId;
+            }
             else if (collectionType == Safir.Dob.Typesystem.CollectionType.SequenceCollectionType)
             {
                 var cont = (Safir.Dob.Typesystem.EntityIdSequenceContainer)tmp.Obj.GetMember(member, 0);
@@ -2272,6 +2637,43 @@ namespace Sate
                         (t.ContextMenuStrip.Items[0] as ToolStripMenuItem).Checked = true;
                         t.BackColor = ColorMap.CHANGED;
                         changed[index] = true;
+                    }
+
+                    index++;
+                }
+            }
+            else if (collectionType == Safir.Dob.Typesystem.CollectionType.DictionaryCollectionType)
+            {
+                int index = 0;
+                foreach (TextBox t in fieldValueControl)
+                {
+                    var cont = (Safir.Dob.Typesystem.EntityIdContainer)GetDictionaryValue(fieldNameLabel[index].Tag);
+
+                    if (cont.IsNull())
+                    {
+                        if (isNullCheckBox.Count > index)
+                            this.isNullCheckBox[index].Checked = true;
+                    }
+                    else
+                    {
+                        Safir.Dob.Typesystem.EntityId val = cont.Val;
+                        string typename = "";
+                        try
+                        {
+                            typename = Safir.Dob.Typesystem.Operations.GetName(val.TypeId);
+                        }
+                        catch
+                        {
+                            typename = val.TypeId.ToString();
+                        }
+
+                        t.Text = typename + " : " + val.InstanceId.ToString();
+                        t.BackColor = ColorMap.ENABLED;
+                    }
+
+                    if (cont.IsChanged())
+                    {
+                        SetDictionaryChanged(cont.IsChanged(), index);
                     }
 
                     index++;
@@ -2348,6 +2750,12 @@ namespace Sate
                 Safir.Dob.Typesystem.InstanceIdContainer cont = (Safir.Dob.Typesystem.InstanceIdContainer)tmp.Obj.GetMember(member, index);
                 cont.Val = id;
             }
+            else if (collectionType == Safir.Dob.Typesystem.CollectionType.DictionaryCollectionType)
+            {
+                changed[index] = false;
+                var cont = (Safir.Dob.Typesystem.InstanceIdContainer)GetDictionaryValue(fieldNameLabel[index].Tag);
+                cont.Val = id;
+            }
             else if (collectionType == Safir.Dob.Typesystem.CollectionType.SequenceCollectionType)
             {
                 var cont = (Safir.Dob.Typesystem.InstanceIdSequenceContainer)tmp.Obj.GetMember(member, 0);
@@ -2390,6 +2798,32 @@ namespace Sate
                         (t.ContextMenuStrip.Items[0] as ToolStripMenuItem).Checked = true;
                         t.BackColor = ColorMap.CHANGED;
                         changed[index] = true;
+                    }
+
+                    index++;
+                }
+            }
+            else if (collectionType == Safir.Dob.Typesystem.CollectionType.DictionaryCollectionType)
+            {
+                int index = 0;
+                foreach (TextBox t in fieldValueControl)
+                {
+                    var cont = (Safir.Dob.Typesystem.InstanceIdContainer)GetDictionaryValue(fieldNameLabel[index].Tag);
+
+                    if (cont.IsNull())
+                    {
+                        if (isNullCheckBox.Count > index)
+                            this.isNullCheckBox[index].Checked = true;
+                    }
+                    else
+                    {
+                        t.Text = cont.Val.ToString();
+                        t.BackColor = ColorMap.ENABLED;
+                    }
+
+                    if (cont.IsChanged())
+                    {
+                        SetDictionaryChanged(cont.IsChanged(), index);
                     }
 
                     index++;
@@ -2604,6 +3038,12 @@ namespace Sate
                 Safir.Dob.Typesystem.ObjectContainerBase cont = (Safir.Dob.Typesystem.ObjectContainerBase)tmp.Obj.GetMember(member, index);
                 cont.InternalObj = (Safir.Dob.Typesystem.Object)((ObjectInfo)(objButton.ObjPanel.Tag)).Obj;
             }
+            else if (collectionType == Safir.Dob.Typesystem.CollectionType.DictionaryCollectionType)
+            {
+                changed[index] = false;
+                var cont = (Safir.Dob.Typesystem.ObjectContainerBase)GetDictionaryValue(fieldNameLabel[index].Tag);
+                cont.InternalObj = (Safir.Dob.Typesystem.Object)((ObjectInfo)(objButton.ObjPanel.Tag)).Obj;
+            }
             else if (collectionType == Safir.Dob.Typesystem.CollectionType.SequenceCollectionType)
             {
                 var obj = ((ObjectInfo)objButton.Tag).Obj;
@@ -2627,14 +3067,17 @@ namespace Sate
         public override void SetFieldValues()
         {
             if (collectionType == Safir.Dob.Typesystem.CollectionType.SingleValueCollectionType ||
-                collectionType == Safir.Dob.Typesystem.CollectionType.ArrayCollectionType)
+                collectionType == Safir.Dob.Typesystem.CollectionType.ArrayCollectionType ||
+                collectionType==Safir.Dob.Typesystem.CollectionType.DictionaryCollectionType)
             {
                 bool forceResize = false;
                 ObjectInfo tmp = (ObjectInfo)Tag;
                 int index = 0;
                 foreach (ObjectExpandCollapseButton b in fieldValueControl)
                 {
-                    Safir.Dob.Typesystem.ObjectContainerBase cont = (Safir.Dob.Typesystem.ObjectContainerBase)tmp.Obj.GetMember(member, index);
+                    var cont = collectionType != Safir.Dob.Typesystem.CollectionType.DictionaryCollectionType ?
+                        (Safir.Dob.Typesystem.ObjectContainerBase)tmp.Obj.GetMember(member, index) : 
+                        (Safir.Dob.Typesystem.ObjectContainerBase)GetDictionaryValue(fieldNameLabel[index].Tag);
 
                     if (cont.IsNull())
                     {
@@ -2689,9 +3132,16 @@ namespace Sate
 
                     if (cont.IsChanged())
                     {
-                        (b.ContextMenuStrip.Items[0] as ToolStripMenuItem).Checked = true;
-                        b.BackColor = ColorMap.CHANGED;
-                        changed[index] = true;
+                        if (collectionType == Safir.Dob.Typesystem.CollectionType.DictionaryCollectionType)
+                        {
+                            SetDictionaryChanged(cont.IsChanged(), index);
+                        }
+                        else
+                        {
+                            (b.ContextMenuStrip.Items[0] as ToolStripMenuItem).Checked = true;
+                            b.BackColor = ColorMap.CHANGED;
+                            changed[index] = true;
+                        }
                     }
 
                     index++;
@@ -2804,10 +3254,19 @@ namespace Sate
                         changed[index]=true;
                 }
 
-                if (collectionType != Safir.Dob.Typesystem.CollectionType.SequenceCollectionType)
+                if (collectionType==Safir.Dob.Typesystem.CollectionType.SingleValueCollectionType || collectionType==Safir.Dob.Typesystem.CollectionType.ArrayCollectionType)
                 {
-                    Safir.Dob.Typesystem.ObjectContainerBase cont = (Safir.Dob.Typesystem.ObjectContainerBase)((Safir.Dob.Typesystem.Object)((ObjectInfo)Tag).Obj).GetMember(member, index);
+                    var cont = (Safir.Dob.Typesystem.ObjectContainerBase)((ObjectInfo)Tag).Obj.GetMember(member, index);
                     cont.InternalObj = (Safir.Dob.Typesystem.Object)((ObjectInfo)b.Tag).Obj;
+
+                    //Safir.Dob.Typesystem.ObjectContainerBase cont = (Safir.Dob.Typesystem.ObjectContainerBase)((Safir.Dob.Typesystem.Object)((ObjectInfo)Tag).Obj).GetMember(member, index);
+                    //cont.InternalObj = (Safir.Dob.Typesystem.Object)((ObjectInfo)b.Tag).Obj;
+                }
+                else if (collectionType==Safir.Dob.Typesystem.CollectionType.DictionaryCollectionType)
+                {
+                    var cont = (Safir.Dob.Typesystem.ObjectContainerBase)GetDictionaryValue(fieldNameLabel[index].Tag);
+                    cont.InternalObj = (Safir.Dob.Typesystem.Object)((ObjectInfo)b.Tag).Obj;
+
                 }
                 //else
                 //{
@@ -2966,6 +3425,12 @@ namespace Sate
                     Safir.Dob.Typesystem.BinaryContainer cont = (Safir.Dob.Typesystem.BinaryContainer)tmp.Obj.GetMember(member, index);
                     cont.Val = val;
                 }
+                else if (collectionType == Safir.Dob.Typesystem.CollectionType.DictionaryCollectionType)
+                {
+                    changed[index] = false;
+                    var cont = (Safir.Dob.Typesystem.BinaryContainer)GetDictionaryValue(fieldNameLabel[index].Tag);
+                    cont.Val = val;
+                }
                 else if (collectionType == Safir.Dob.Typesystem.CollectionType.SequenceCollectionType)
                 {
                     var cont = (Safir.Dob.Typesystem.BinarySequenceContainer)tmp.Obj.GetMember(member, 0);
@@ -3013,6 +3478,32 @@ namespace Sate
                         (t.ContextMenuStrip.Items[0] as ToolStripMenuItem).Checked = true;
                         t.BackColor = ColorMap.CHANGED;
                         changed[index] = true;
+                    }
+
+                    index++;
+                }
+            }
+            else if (collectionType == Safir.Dob.Typesystem.CollectionType.DictionaryCollectionType)
+            {
+                int index = 0;
+                foreach (TextBox t in fieldValueControl)
+                {
+                    var cont = (Safir.Dob.Typesystem.BinaryContainer)GetDictionaryValue(fieldNameLabel[index].Tag);
+
+                    if (cont.IsNull())
+                    {
+                        if (isNullCheckBox.Count > index)
+                            this.isNullCheckBox[index].Checked = true;
+                    }
+                    else
+                    {
+                        t.Text = cont.Val.ToString();
+                        t.BackColor = ColorMap.ENABLED;
+                    }
+
+                    if (cont.IsChanged())
+                    {
+                        SetDictionaryChanged(cont.IsChanged(), index);
                     }
 
                     index++;

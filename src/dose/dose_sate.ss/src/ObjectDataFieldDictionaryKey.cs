@@ -346,11 +346,29 @@ namespace Sate
             }
         }
 
-        private string TypeIdToString(long typeId)
+        private static string TypeIdToString(long typeId)
         {
             if (Safir.Dob.Typesystem.Operations.Exists(typeId))
                 return Safir.Dob.Typesystem.Operations.GetName(typeId);
             return typeId.ToString();
+        }
+
+        public static string KeyToString(Safir.Dob.Typesystem.MemberType keyType, object key)
+        {
+            switch (keyType)
+            {
+                case Safir.Dob.Typesystem.MemberType.TypeIdMemberType:
+                    {
+                        return TypeIdToString((long)key);
+                    }
+                case Safir.Dob.Typesystem.MemberType.EntityIdMemberType:
+                    {
+                        var eid = (Safir.Dob.Typesystem.EntityId)key;
+                        return string.Format("{0} : {1}", TypeIdToString(eid.TypeId), eid.InstanceId.ToString());
+                    }
+                default:
+                    return key.ToString();
+            }
         }
 
         public string KeyString
