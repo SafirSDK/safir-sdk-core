@@ -427,6 +427,11 @@ namespace Sate
             {
                 var key = fieldNameLabel[removeAt].Tag;
 
+                if (this is ObjectField)
+                {
+                    ((ObjectField)this).DeleteObjPanel(removeAt);
+                }
+
                 Controls.Remove(fieldValueControl[removeAt]);
                 fieldValueControl.RemoveAt(removeAt);
 
@@ -475,6 +480,11 @@ namespace Sate
 
             if (removeAt >= 0)
             {
+                if (this is ObjectField)
+                {
+                    ((ObjectField)this).DeleteObjPanel(removeAt);
+                }
+
                 Controls.Remove(fieldValueControl[removeAt]);
                 fieldValueControl.RemoveAt(removeAt);
 
@@ -610,8 +620,6 @@ namespace Sate
             //other collectionType than sequence
             for (int index = 0; index < this.fieldValueControl.Count; index++)
             {
-                //Safir.Dob.Typesystem.ContainerBase cont = tmp.Obj.GetMember(member, index);
-
                 var cont = collectionType == Safir.Dob.Typesystem.CollectionType.DictionaryCollectionType ?
                     GetDictionaryValue(fieldNameLabel[index].Tag) : ((ObjectInfo)Tag).Obj.GetMember(member, index);
 
@@ -2935,9 +2943,19 @@ namespace Sate
             button.Width = 100;
             button.CheckedChanged += new EventHandler(button_CheckedChanged);
             button.ContextMenuStrip = new ContextMenuStrip();
-            button.ContextMenuStrip.Items.AddRange(
-            new ToolStripItem[]{new ToolStripMenuItem("Is changed", null, new EventHandler(OnIsChangedMenuItem)),
-                                    new ToolStripMenuItem("Is changed here", null, new EventHandler(OnIsChangedHereMenuItem))});
+            if (collectionType == Safir.Dob.Typesystem.CollectionType.SequenceCollectionType)
+            {
+                button.ContextMenuStrip.Items.Add(new ToolStripMenuItem("Is changed", null, new EventHandler(OnIsChangedMenuItem)));
+            }
+            else
+            {
+                button.ContextMenuStrip.Items.AddRange(
+                                    new ToolStripItem[]{
+                                        new ToolStripMenuItem("Is changed", null, new EventHandler(OnIsChangedMenuItem)),
+                                        new ToolStripMenuItem("Is changed here", null, new EventHandler(OnIsChangedHereMenuItem))
+                                    });
+            }
+            
 
 
             MenuItem expandAllMenuItem = new MenuItem("Expand all", new EventHandler(OnExpandAll_ContextMenu));
@@ -2973,24 +2991,53 @@ namespace Sate
 
         private void OnExpandAll_ContextMenu(object o, EventArgs e)
         {
-            for (int i=0; i<isNullCheckBox.Count; i++)
+            if (collectionType == Safir.Dob.Typesystem.CollectionType.SequenceCollectionType)
             {
-                if (!isNullCheckBox[i].Checked)
+                foreach (ObjectExpandCollapseButton b in fieldValueControl)
                 {
-                    ((ObjectExpandCollapseButton)fieldValueControl[i]).Checked = true;
+                    b.Checked = true;
+                }
+            }
+            else
+            {
+                for (int i = 0; i < isNullCheckBox.Count; i++)
+                {
+                    if (!isNullCheckBox[i].Checked)
+                    {
+                        ((ObjectExpandCollapseButton)fieldValueControl[i]).Checked = true;
+                    }
                 }
             }
         }
 
         private void OnCollapseAll_ContextMenu(object o, EventArgs e)
         {
-            for (int i = 0; i < isNullCheckBox.Count; i++)
+            if (collectionType == Safir.Dob.Typesystem.CollectionType.SequenceCollectionType)
             {
-                ObjectExpandCollapseButton cb = fieldValueControl[i] as ObjectExpandCollapseButton;
-                if (cb.Checked)
+                foreach (ObjectExpandCollapseButton b in fieldValueControl)
                 {
-                    cb.Checked = false;
+                    b.Checked = false;
                 }
+            }
+            else
+            {
+                for (int i = 0; i < isNullCheckBox.Count; i++)
+                {
+                    ObjectExpandCollapseButton cb = fieldValueControl[i] as ObjectExpandCollapseButton;
+                    if (cb.Checked)
+                    {
+                        cb.Checked = false;
+                    }
+                }
+            }
+        }
+
+        public void DeleteObjPanel(int index)
+        {
+            var b = fieldValueControl[index] as ObjectExpandCollapseButton;
+            if (b != null && b.ObjPanel != null)
+            {
+                Controls.Remove(b.ObjPanel);
             }
         }
 
@@ -3268,13 +3315,6 @@ namespace Sate
                     cont.InternalObj = (Safir.Dob.Typesystem.Object)((ObjectInfo)b.Tag).Obj;
 
                 }
-                //else
-                //{
-                //    var obj = ((ObjectInfo)b.Tag).Obj;
-                //    var container = ((ObjectInfo)Tag).Obj.GetMember(member, 0);
-                //    var containerType = container.GetType();
-                //    containerType.GetMethod("Insert").Invoke(container, new object[] { index, obj });
-                //}
             }
             else
             {
