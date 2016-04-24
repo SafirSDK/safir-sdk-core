@@ -501,7 +501,6 @@ namespace Sate
                 ObjectInfo tmp = (ObjectInfo)Tag;
                 var container = tmp.Obj.GetMember(member, 0);
                 var containerType = container.GetType();
-                int numValues = (int)containerType.GetProperty("Count").GetValue(container, null);
                 containerType.GetMethod("RemoveAt").Invoke(container, new object[] { removeAt });
 
                 SetSequenceChanged(true);
@@ -1169,13 +1168,10 @@ namespace Sate
     //---------------------------------------------------
     public class EnumField : ObjectDataFieldControl
     {
-        private long enumTypeId;
         private string[] enumValueNames;
 
         public EnumField(ObjectInfo objInfo, int member, long enumTypeId, string name, Safir.Dob.Typesystem.CollectionType ct, int arraySize) : base()
         {
-            this.enumTypeId=enumTypeId;
-
             int noEnumValues = Safir.Dob.Typesystem.Operations.GetNumberOfEnumerationValues(enumTypeId);
             enumValueNames = new string[noEnumValues];
             for (int ev = 0; ev < noEnumValues; ev++)
@@ -1318,8 +1314,7 @@ namespace Sate
                 ObjectInfo tmp = (ObjectInfo)Tag;
                 var container = tmp.Obj.GetMember(member, 0);
                 var containerType = container.GetType();
-                var enumType = containerType.Assembly.GetType(containerType.ReflectedType.FullName).GetNestedType("Enumeration");
-                
+
                 if ((int)containerType.GetProperty("Count").GetValue(container, null) != fieldValueControl.Count)
                 {
                     Init(tmp, member, typeName, memberName, collectionType, 1);
