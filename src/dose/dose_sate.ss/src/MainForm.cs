@@ -508,7 +508,6 @@ namespace Sate
             // 
             // menuStrip1
             // 
-            this.menuStrip1.BackColor = System.Drawing.SystemColors.Menu;
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.connectionToolStripMenuItem,
             this.viewToolStripMenuItem,
@@ -774,7 +773,6 @@ namespace Sate
             // 
             // MainForm
             // 
-            this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
             this.BackColor = System.Drawing.SystemColors.ControlDark;
             this.ClientSize = new System.Drawing.Size(1160, 766);
             this.Controls.Add(this.fillPanel);
@@ -800,12 +798,24 @@ namespace Sate
         }
         #endregion
 
+        public static bool IsMono ()
+        {
+            return Type.GetType ("Mono.Runtime") != null;
+        }
+
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
         [STAThread]
         static void Main()
         {
+            if (IsMono())
+            {
+                System.Console.WriteLine("Disabling Mono Gtk+ Color detection. Please ignore the following line.");
+                System.Environment.SetEnvironmentVariable("DESKTOP_SESSION","KDE");
+                System.Threading.Thread.Sleep(1000);
+            }
+
             Application.Run(MainForm.Instance);
         }
 

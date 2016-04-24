@@ -122,7 +122,6 @@ namespace Sate
             //
             // DelayForm
             //
-            this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
             this.ClientSize = new System.Drawing.Size(240, 78);
             this.Controls.Add(this.cancelbutton);
             this.Controls.Add(this.okbutton);

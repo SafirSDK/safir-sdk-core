@@ -153,7 +153,6 @@ namespace Sate
             // 
             // TypeIdCalculatorForm
             // 
-            this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
             this.ClientSize = new System.Drawing.Size(450, 176);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.closebutton);
