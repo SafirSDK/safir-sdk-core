@@ -233,10 +233,13 @@ namespace Sate
         // Selects the tab to the right of the closing tab (if possible)
         void fillPanelLabel_CloseEvent(object sender, EventArgs e)
         {
+
             // save value
             int selectedIndex = tabControl.SelectedIndex;
             if (selectedIndex >= 0)
             {
+                menuStrip1.Focus (); //Mono bug workaround. Mono crashes if a control on the tabPage has focus when the tab is deleted.
+
                 TabPage tp = tabControl.TabPages[selectedIndex];
                 tabControl.TabPages.RemoveAt(selectedIndex);
                 tp.Dispose();
