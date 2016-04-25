@@ -142,7 +142,6 @@ namespace Sate
             //
             // RepeatForm
             //
-            this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
             this.ClientSize = new System.Drawing.Size(218, 104);
             this.Controls.Add(this.okbutton);
             this.Controls.Add(this.cancelbutton);

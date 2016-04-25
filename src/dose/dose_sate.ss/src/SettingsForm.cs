@@ -679,7 +679,6 @@ namespace Sate
             // 
             // SettingsForm
             // 
-            this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
             this.ClientSize = new System.Drawing.Size(504, 530);
             this.Controls.Add(this.tabControl);
             this.Controls.Add(this.bottompanel);

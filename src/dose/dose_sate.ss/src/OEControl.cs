@@ -52,6 +52,7 @@ namespace Sate
         private System.Windows.Forms.LinkLabel sendMessageLink;
         private System.Windows.Forms.LinkLabel sendServiceReqLink;
         private System.Windows.Forms.LinkLabel toXmlLink;
+        private System.Windows.Forms.LinkLabel toJsonLink;
         private System.Windows.Forms.LinkLabel useReplyLink;
         
         private System.Windows.Forms.Label handlerIdInputLabel;
@@ -98,50 +99,181 @@ namespace Sate
             toXmlLink.Click += new EventHandler(toXmlLink_Click);
             operations.Controls.Add(toXmlLink);
 
+            toJsonLink = new LinkLabel();
+            toJsonLink.AutoSize = true;
+            toJsonLink.Text = "Serialize to JSON";
+            toJsonLink.Location = new Point(10, 60);
+            toJsonLink.Click += new EventHandler(toJsonLink_Click);
+            operations.Controls.Add(toJsonLink);
+
 
             if (Safir.Dob.Typesystem.Operations.IsOfType(objInfo.Obj.GetTypeId(), Safir.Dob.Entity.ClassTypeId))
             {
                 setChangesEntityLink = new LinkLabel();
                 setChangesEntityLink.AutoSize = true;
                 setChangesEntityLink.Text = "SetChanges";
-                setChangesEntityLink.Location = new Point(10, 60);
+                setChangesEntityLink.Location = new Point(10, 80);
                 setChangesEntityLink.Click += new EventHandler(setChangesEntityLink_Click);
 
                 setAllEntityLink = new LinkLabel();
                 setAllEntityLink.AutoSize = true;
                 setAllEntityLink.Text = "SetAll";
-                setAllEntityLink.Location = new Point(10, 80);
+                setAllEntityLink.Location = new Point(10, 100);
                 setAllEntityLink.Click += new EventHandler(setAllEntityLink_Click);
 
                 deleteEntityLink = new LinkLabel();
                 deleteEntityLink.AutoSize = true;
                 deleteEntityLink.Text = "Delete";
-                deleteEntityLink.Location = new Point(10, 100);
+                deleteEntityLink.Location = new Point(10, 120);
                 deleteEntityLink.Click += new EventHandler(deleteEntityLink_Click);
 
                 createEntityReqLink = new LinkLabel();
                 createEntityReqLink.AutoSize = true;
                 createEntityReqLink.Text = "Create Request (requestor dec.)";
-                createEntityReqLink.Location = new Point(10, 120);
+                createEntityReqLink.Location = new Point(10, 140);
                 createEntityReqLink.Click += new EventHandler(createEntityReqLink_Click);
 
                 createEntityHandlerDecidesReqLink = new LinkLabel();
                 createEntityHandlerDecidesReqLink.AutoSize = true;
                 createEntityHandlerDecidesReqLink.Text = "Create Request (handler dec.)";
-                createEntityHandlerDecidesReqLink.Location = new Point(10, 140);
+                createEntityHandlerDecidesReqLink.Location = new Point(10, 160);
                 createEntityHandlerDecidesReqLink.Click += new EventHandler(createEntityHandlerDecidesReqLink_Click);
 
                 updateEntityReqLink = new LinkLabel();
                 updateEntityReqLink.AutoSize = true;
                 updateEntityReqLink.Text = "Update Request";
-                updateEntityReqLink.Location = new Point(10, 160);
+                updateEntityReqLink.Location = new Point(10, 180);
                 updateEntityReqLink.Click += new EventHandler(updateEntityReqLink_Click);
 
                 deleteEntityReqLink = new LinkLabel();
                 deleteEntityReqLink.AutoSize = true;
                 deleteEntityReqLink.Text = "Delete Request";
-                deleteEntityReqLink.Location = new Point(10, 180);
+                deleteEntityReqLink.Location = new Point(10, 200);
                 deleteEntityReqLink.Click += new EventHandler(deleteEntityReqLink_Click);
+
+                handlerIdInputLabel = new Label();
+                handlerIdInputLabel.AutoSize = true;
+                handlerIdInputLabel.Text = "HandlerId:";
+                handlerIdInputLabel.Location = new Point(10, 220);
+                operations.Controls.Add(handlerIdInputLabel);
+
+                handlerIdInputTextBox = new TextBox();
+                bool gotValue = false;
+                if (objInfo is EntityInfo)
+                {
+                    EntityInfo entityInfo = (EntityInfo)objInfo;
+                    if (entityInfo.getHandlerId() != null)
+                    {
+                        handlerIdInputTextBox.Text = ((EntityInfo)objInfo).getHandlerId().ToString();
+                        gotValue = true;
+                    }
+                }
+                if (!gotValue)
+                {
+                    handlerIdInputTextBox.Text = "DEFAULT_HANDLER";
+                }
+                handlerIdInputTextBox.Location = new Point(10, 240); //new Point(idInputLabel.Location.X + idInputLabel.Width, 10);
+                handlerIdInputTextBox.Width = 120;
+                handlerIdInputTextBox.TextChanged += new EventHandler(handlerIdInputTextBox_TextChanged);
+                operations.Controls.Add(handlerIdInputTextBox);
+
+                operations.Controls.AddRange(new Control[] {   setChangesEntityLink,
+                                                               setAllEntityLink,
+                                                               deleteEntityLink,
+                                                               createEntityReqLink,
+                                                               createEntityHandlerDecidesReqLink,
+                                                               updateEntityReqLink,
+                                                               deleteEntityReqLink});
+
+                 
+                if (Safir.Dob.InjectionProperty.HasProperty(objInfo.Obj) && 
+                    Safir.Dob.InjectionProperty.GetInjection(objInfo.Obj) == Safir.Dob.InjectionKind.Enumeration.Injectable)
+                {
+                    injectTimestampLabel = new Label();
+                    injectTimestampLabel.AutoSize = true;
+                    injectTimestampLabel.Text = "Timestamp:";
+                    injectTimestampLabel.Location = new Point(10, 340);
+                    operations.Controls.Add(injectTimestampLabel);
+
+                    injectTimestampTextBox = new TextBox();
+                    injectTimestampTextBox.Text = "0";
+                    injectTimestampTextBox.Location = new Point(10, 360); //new Point(idInputLabel.Location.X + idInputLabel.Width, 10);
+                    injectTimestampTextBox.Width = 120;
+                    injectTimestampTextBox.TextChanged += new EventHandler(injectTimestampTextBox_TextChanged);
+                    operations.Controls.Add(injectTimestampTextBox);
+
+                    injectChangesLink = new LinkLabel();
+                    injectChangesLink.AutoSize = true;
+                    injectChangesLink.Text = "InjectChanges";
+                    injectChangesLink.Location = new Point(10, 280);
+                    injectChangesLink.Click += new EventHandler(injectChangesLink_Click);
+
+                    injectInitialSetLink = new LinkLabel();
+                    injectInitialSetLink.AutoSize = true;
+                    injectInitialSetLink.Text = "Inject InitialSet";
+                    injectInitialSetLink.Location = new Point(10, 300);
+                    injectInitialSetLink.Click += new EventHandler(injectInitialSetLink_Click);
+
+                    injectDeleteLink = new LinkLabel();
+                    injectDeleteLink.AutoSize = true;
+                    injectDeleteLink.Text = "InjectDelete";
+                    injectDeleteLink.Location = new Point(10, 320);
+                    injectDeleteLink.Click += new EventHandler(injectDeleteLink_Click);
+
+
+                    operations.Controls.AddRange(new Control[] {injectInitialSetLink, 
+                                                               injectChangesLink,
+                                                               injectDeleteLink});
+                }
+                
+
+            }
+
+            if (Safir.Dob.Typesystem.Operations.IsOfType(objInfo.Obj.GetTypeId(), Safir.Dob.Message.ClassTypeId))
+            {
+                sendMessageLink = new LinkLabel();
+                sendMessageLink.AutoSize = true;
+                sendMessageLink.Text = "Send Message";
+                sendMessageLink.Location = new Point(10, 80);
+                sendMessageLink.Click += new EventHandler(sendMessageLink_Click);
+                operations.Controls.Add(sendMessageLink);
+
+                channelIdInputLabel = new Label();
+                channelIdInputLabel.AutoSize = true;
+                channelIdInputLabel.Text = "ChannelId:";
+                channelIdInputLabel.Location = new Point(10, 200);
+                operations.Controls.Add(channelIdInputLabel);
+
+                channelIdInputTextBox = new TextBox();
+                bool gotValue = false;
+                if (objInfo is MessageInfo)
+                {
+                    MessageInfo messageInfo = (MessageInfo)objInfo;
+                    if (messageInfo.getChannelId() != null)
+                    {
+                        channelIdInputTextBox.Text = ((MessageInfo)objInfo).getChannelId().ToString();
+                        gotValue = true;
+                    }
+                }
+                if (!gotValue)
+                {
+                    channelIdInputTextBox.Text = "DEFAULT_CHANNEL";
+                }
+                channelIdInputTextBox.Location = new Point(10, 220); //new Point(idInputLabel.Location.X + idInputLabel.Width, 10);
+                channelIdInputTextBox.Width = 120;
+                channelIdInputTextBox.TextChanged += new EventHandler(channelIdInputTextBox_TextChanged);
+                operations.Controls.Add(channelIdInputTextBox);
+
+            }
+
+            else if (Safir.Dob.Typesystem.Operations.IsOfType(objInfo.Obj.GetTypeId(), Safir.Dob.Service.ClassTypeId))
+            {
+                sendServiceReqLink = new LinkLabel();
+                sendServiceReqLink.AutoSize = true;
+                sendServiceReqLink.Text = "Send Service Request";
+                sendServiceReqLink.Location = new Point(10, 80);
+                sendServiceReqLink.Click += new EventHandler(sendServiceReqLink_Click);
+                operations.Controls.Add(sendServiceReqLink);
 
                 handlerIdInputLabel = new Label();
                 handlerIdInputLabel.AutoSize = true;
@@ -169,130 +301,6 @@ namespace Sate
                 handlerIdInputTextBox.TextChanged += new EventHandler(handlerIdInputTextBox_TextChanged);
                 operations.Controls.Add(handlerIdInputTextBox);
 
-                operations.Controls.AddRange(new Control[] {   setChangesEntityLink,
-                                                               setAllEntityLink,
-                                                               deleteEntityLink,
-                                                               createEntityReqLink,
-                                                               createEntityHandlerDecidesReqLink,
-                                                               updateEntityReqLink,
-                                                               deleteEntityReqLink});
-
-                 
-                if (Safir.Dob.InjectionProperty.HasProperty(objInfo.Obj) && 
-                    Safir.Dob.InjectionProperty.GetInjection(objInfo.Obj) == Safir.Dob.InjectionKind.Enumeration.Injectable)
-                {
-                    injectTimestampLabel = new Label();
-                    injectTimestampLabel.AutoSize = true;
-                    injectTimestampLabel.Text = "Timestamp:";
-                    injectTimestampLabel.Location = new Point(10, 320);
-                    operations.Controls.Add(injectTimestampLabel);
-
-                    injectTimestampTextBox = new TextBox();
-                    injectTimestampTextBox.Text = "0";
-                    injectTimestampTextBox.Location = new Point(10, 340); //new Point(idInputLabel.Location.X + idInputLabel.Width, 10);
-                    injectTimestampTextBox.Width = 120;
-                    injectTimestampTextBox.TextChanged += new EventHandler(injectTimestampTextBox_TextChanged);
-                    operations.Controls.Add(injectTimestampTextBox);
-
-                    injectChangesLink = new LinkLabel();
-                    injectChangesLink.AutoSize = true;
-                    injectChangesLink.Text = "InjectChanges";
-                    injectChangesLink.Location = new Point(10, 260);
-                    injectChangesLink.Click += new EventHandler(injectChangesLink_Click);
-
-                    injectInitialSetLink = new LinkLabel();
-                    injectInitialSetLink.AutoSize = true;
-                    injectInitialSetLink.Text = "Inject InitialSet";
-                    injectInitialSetLink.Location = new Point(10, 280);
-                    injectInitialSetLink.Click += new EventHandler(injectInitialSetLink_Click);
-
-                    injectDeleteLink = new LinkLabel();
-                    injectDeleteLink.AutoSize = true;
-                    injectDeleteLink.Text = "InjectDelete";
-                    injectDeleteLink.Location = new Point(10, 300);
-                    injectDeleteLink.Click += new EventHandler(injectDeleteLink_Click);
-
-
-                    operations.Controls.AddRange(new Control[] {injectInitialSetLink, 
-                                                               injectChangesLink,
-                                                               injectDeleteLink});
-                }
-                
-
-            }
-
-            if (Safir.Dob.Typesystem.Operations.IsOfType(objInfo.Obj.GetTypeId(), Safir.Dob.Message.ClassTypeId))
-            {
-                sendMessageLink = new LinkLabel();
-                sendMessageLink.AutoSize = true;
-                sendMessageLink.Text = "Send Message";
-                sendMessageLink.Location = new Point(10, 60);
-                sendMessageLink.Click += new EventHandler(sendMessageLink_Click);
-                operations.Controls.Add(sendMessageLink);
-
-                channelIdInputLabel = new Label();
-                channelIdInputLabel.AutoSize = true;
-                channelIdInputLabel.Text = "ChannelId:";
-                channelIdInputLabel.Location = new Point(10, 180);
-                operations.Controls.Add(channelIdInputLabel);
-
-                channelIdInputTextBox = new TextBox();
-                bool gotValue = false;
-                if (objInfo is MessageInfo)
-                {
-                    MessageInfo messageInfo = (MessageInfo)objInfo;
-                    if (messageInfo.getChannelId() != null)
-                    {
-                        channelIdInputTextBox.Text = ((MessageInfo)objInfo).getChannelId().ToString();
-                        gotValue = true;
-                    }
-                }
-                if (!gotValue)
-                {
-                    channelIdInputTextBox.Text = "DEFAULT_CHANNEL";
-                }
-                channelIdInputTextBox.Location = new Point(10, 200); //new Point(idInputLabel.Location.X + idInputLabel.Width, 10);
-                channelIdInputTextBox.Width = 120;
-                channelIdInputTextBox.TextChanged += new EventHandler(channelIdInputTextBox_TextChanged);
-                operations.Controls.Add(channelIdInputTextBox);
-
-            }
-
-            else if (Safir.Dob.Typesystem.Operations.IsOfType(objInfo.Obj.GetTypeId(), Safir.Dob.Service.ClassTypeId))
-            {
-                sendServiceReqLink = new LinkLabel();
-                sendServiceReqLink.AutoSize = true;
-                sendServiceReqLink.Text = "Send Service Request";
-                sendServiceReqLink.Location = new Point(10, 60);
-                sendServiceReqLink.Click += new EventHandler(sendServiceReqLink_Click);
-                operations.Controls.Add(sendServiceReqLink);
-
-                handlerIdInputLabel = new Label();
-                handlerIdInputLabel.AutoSize = true;
-                handlerIdInputLabel.Text = "HandlerId:";
-                handlerIdInputLabel.Location = new Point(10, 180);
-                operations.Controls.Add(handlerIdInputLabel);
-
-                handlerIdInputTextBox = new TextBox();
-                bool gotValue = false;
-                if (objInfo is EntityInfo)
-                {
-                    EntityInfo entityInfo = (EntityInfo)objInfo;
-                    if (entityInfo.getHandlerId() != null)
-                    {
-                        handlerIdInputTextBox.Text = ((EntityInfo)objInfo).getHandlerId().ToString();
-                        gotValue = true;
-                    }
-                }
-                if (!gotValue)
-                {
-                    handlerIdInputTextBox.Text = "DEFAULT_HANDLER";
-                }
-                handlerIdInputTextBox.Location = new Point(10, 200); //new Point(idInputLabel.Location.X + idInputLabel.Width, 10);
-                handlerIdInputTextBox.Width = 120;
-                handlerIdInputTextBox.TextChanged += new EventHandler(handlerIdInputTextBox_TextChanged);
-                operations.Controls.Add(handlerIdInputTextBox);
-
             }
 
             else if (Safir.Dob.Typesystem.Operations.IsOfType(objInfo.Obj.GetTypeId(), Safir.Dob.Response.ClassTypeId))
@@ -300,17 +308,17 @@ namespace Sate
                 useReplyLink = new LinkLabel();
                 useReplyLink.AutoSize = true;
                 useReplyLink.Text = "Use as default response";
-                useReplyLink.Location = new Point(10, 60);
+                useReplyLink.Location = new Point(10, 80);
                 useReplyLink.Click += new EventHandler(useReplyLink_Click);
                 operations.Controls.Add(useReplyLink);
             }
 
             //live data check box
-            liveDataCheckBox.Location = new Point(10, 360);
+            liveDataCheckBox.Location = new Point(10, 400);
             liveDataCheckBox.Text = "Live data";
             operations.Controls.Add(liveDataCheckBox);
 
-            operations.Size = new Size(170, 380);
+            operations.Size = new Size(170, 420);
             operations.Location = new Point(20, 40);
 
             rightPanel.Controls.Add(operations);
@@ -577,8 +585,15 @@ namespace Sate
         {
             if (objectPanel.SetObjectMembers())
             {
-                //MainForm.Instance.AddTabPage(new XmlTabPage((Safir.Dob.Typesystem.Object)Tag));
                 MainForm.Instance.AddTabPage(new XmlTabPage((ObjectInfo)Tag));
+            }
+        }
+
+        private void toJsonLink_Click(object sender, EventArgs e)
+        {
+            if (objectPanel.SetObjectMembers())
+            {
+                MainForm.Instance.AddTabPage(new JsonTabPage((ObjectInfo)Tag));
             }
         }
 
