@@ -23,35 +23,16 @@
 ******************************************************************************/
 
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
+using Safir.Dob.Typesystem;
 
 namespace Sate
 {
-
     public partial class SubscribeForm : Form
     {
         public SubscribeForm(long typeId)
         {
             InitializeComponent();
-        }
-
-        public void InitEntitySubForm()
-        {
-            includeUpdatesCheckBox.Enabled = true;
-            includeUpdatesCheckBox.Checked = true;
-            includeSubClassesCheckBox.Enabled = true;
-            includeSubClassesCheckBox.Checked = true;
-            restartSubscriptionCheckBox.Enabled = true;
-            restartSubscriptionCheckBox.Checked = true;
-            permanentSubcheckBox.Enabled = true;
-            permanentSubcheckBox.Checked = false;
-            allInstancesCheckBox.Enabled = true;
-            allInstancesCheckBox.Checked = true;
         }
 
         public bool DataUpdSub
@@ -74,18 +55,19 @@ namespace Sate
             get { return allInstancesCheckBox.Checked; }
         }
 
-        public Safir.Dob.Typesystem.InstanceId Instance
+        public InstanceId Instance
         {
             get
             {
                 try
                 {
-                    return new Safir.Dob.Typesystem.InstanceId(Int64.Parse(instanceTextBox.Text));
+                    return new InstanceId(long.Parse(instanceTextBox.Text));
                 }
                 catch
                 {
                     string idString;
-                    if (instanceTextBox.Text.StartsWith("\"") && (instanceTextBox.Text.EndsWith("\"")) && instanceTextBox.Text.Length > 2)
+                    if (instanceTextBox.Text.StartsWith("\"") && instanceTextBox.Text.EndsWith("\"") &&
+                        instanceTextBox.Text.Length > 2)
                     {
                         // remove quotation
                         idString = instanceTextBox.Text.Substring(1, instanceTextBox.Text.Length - 2);
@@ -99,7 +81,7 @@ namespace Sate
                     {
                         return null;
                     }
-                    return new Safir.Dob.Typesystem.InstanceId(idString);
+                    return new InstanceId(idString);
                 }
             }
         }
@@ -107,6 +89,20 @@ namespace Sate
         public bool PermanentSub
         {
             get { return permanentSubcheckBox.Checked; }
+        }
+
+        public void InitEntitySubForm()
+        {
+            includeUpdatesCheckBox.Enabled = true;
+            includeUpdatesCheckBox.Checked = true;
+            includeSubClassesCheckBox.Enabled = true;
+            includeSubClassesCheckBox.Checked = true;
+            restartSubscriptionCheckBox.Enabled = true;
+            restartSubscriptionCheckBox.Checked = true;
+            permanentSubcheckBox.Enabled = true;
+            permanentSubcheckBox.Checked = false;
+            allInstancesCheckBox.Enabled = true;
+            allInstancesCheckBox.Checked = true;
         }
 
         private void okbutton_Click(object sender, EventArgs e)

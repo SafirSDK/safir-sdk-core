@@ -23,24 +23,24 @@
 ******************************************************************************/
 
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
+using Safir.Dob.Typesystem;
 
 namespace Sate
 {
-   
     public partial class CustomImageForm : Form
     {
-        public enum ImageKindType { ClassImage, NamespaceImage };
+        public enum ImageKindType
+        {
+            ClassImage,
+            NamespaceImage
+        }
+
 #if REMOVED_CODE
         private TreeViewImageHandler treeViewImageHandler;
 #endif
-        private bool isDirty = false;
-        private string mappingName;
+        private readonly string mappingName;
 
         public CustomImageForm(TreeViewImageHandler imageHandler, string mappingName)
         {
@@ -54,12 +54,12 @@ namespace Sate
             imageOpenFileDialog.DefaultExt = "bmp";
             imageOpenFileDialog.ValidateNames = false;
 
-            System.Int64 typeId;
-            if (System.Int64.TryParse(mappingName, out typeId))
+            long typeId;
+            if (long.TryParse(mappingName, out typeId))
             {
                 applyToChildclassescheckBox.Text = "Apply to child classes";
                 cusomtImgaeForLabel.Text = "Custom image for class";
-                classlabel.Text = Safir.Dob.Typesystem.Operations.GetName(typeId);
+                classlabel.Text = Operations.GetName(typeId);
             }
             else
             {
@@ -74,16 +74,13 @@ namespace Sate
 
         private void LoadImages()
         {
-            foreach (ImageMapping im in Settings.Sate.ImageMappings)
+            foreach (var im in Settings.Sate.ImageMappings)
             {
                 AddImage(im.ImagePath);
             }
         }
 
-        public bool IsDirty
-        {
-            get { return isDirty; }
-        }
+        public bool IsDirty { get; private set; }
 
         private void addimagebutton_Click(object sender, EventArgs e)
         {
@@ -98,7 +95,7 @@ namespace Sate
             //Avoid duplicates
             foreach (ListViewItem item in imagelistView.Items)
             {
-                if ((string)item.Tag == path)
+                if ((string) item.Tag == path)
                 {
                     item.Selected = true;
                     imagelistView.Focus();
@@ -107,12 +104,12 @@ namespace Sate
             }
 
             //A unique image, add it
-            Image image = System.Drawing.Image.FromFile(path);
+            var image = Image.FromFile(path);
             image.Tag = path;
-            this.imageList.Images.Add(image);
-            ListViewItem li = new ListViewItem("", imageList.Images.Count - 1);
+            imageList.Images.Add(image);
+            var li = new ListViewItem("", imageList.Images.Count - 1);
             li.Tag = path;
-            this.imagelistView.Items.Add(li);
+            imagelistView.Items.Add(li);
             li.Selected = true;
             imagelistView.Focus();
         }
@@ -125,16 +122,17 @@ namespace Sate
                 return;
             }
 
-            if (MessageBox.Show("This operation will remove all existing mappings to the selected image. Do you want to proceed?",
-                                "Remove Image",
-                                MessageBoxButtons.OKCancel,
-                                MessageBoxIcon.Question) == DialogResult.OK)
+            if (MessageBox.Show(
+                "This operation will remove all existing mappings to the selected image. Do you want to proceed?",
+                "Remove Image",
+                MessageBoxButtons.OKCancel,
+                MessageBoxIcon.Question) == DialogResult.OK)
             {
                 //remove image and all mappings
                 Settings.Sate.RemoveImageAndMappings(imagelistView.SelectedItems[0].Tag as string);
                 Settings.Save();
                 imagelistView.Items.Remove(imagelistView.SelectedItems[0]);
-                isDirty = true;
+                IsDirty = true;
             }
         }
 
@@ -142,7 +140,8 @@ namespace Sate
         {
             if (!defaultimagecheckBox.Checked && imagelistView.SelectedIndices.Count == 0)
             {
-                MessageBox.Show("You must select an image in the list view, or use the cancel button.", "No image selected", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                MessageBox.Show("You must select an image in the list view, or use the cancel button.",
+                    "No image selected", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 return;
             }
 
@@ -153,17 +152,17 @@ namespace Sate
             }
             else
             {
-                ImageMapping im = new ImageMapping(mappingName,
-                                                    imagelistView.SelectedItems[0].Tag as string,
-                                                    applyToChildclassescheckBox.Checked);
+                var im = new ImageMapping(mappingName,
+                    imagelistView.SelectedItems[0].Tag as string,
+                    applyToChildclassescheckBox.Checked);
                 Settings.Sate.AddImageMapping(im);
                 Settings.Save();
             }
 
-            isDirty = true;
+            IsDirty = true;
             DialogResult = DialogResult.OK;
-
         }
+
         private void cancelbutton_Click(object sender, EventArgs e)
         {
             DialogResult = DialogResult.Cancel;

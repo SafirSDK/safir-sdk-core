@@ -23,63 +23,66 @@
 ******************************************************************************/
 
 using System;
-using System.Drawing;
-using System.Collections;
 using System.ComponentModel;
 using System.Windows.Forms;
+using Safir.Dob.Typesystem;
 
 namespace Sate
 {
     /// <summary>
-    /// Summary description for SettingsForm.
+    ///     Summary description for SettingsForm.
     /// </summary>
-    public class SettingsForm : System.Windows.Forms.Form
+    public class SettingsForm : Form
     {
         private class MyListViewItem : ListViewItem
         {
-            public Int64 typeId;
-            public Safir.Dob.Typesystem.HandlerId handlerId;
-            public Safir.Dob.Typesystem.EntityId entityId;
-            public Safir.Dob.Typesystem.ChannelId channelId;
-            public bool pending, upd, injection, requestorDecides;
-            public bool includeSubClasses, restartSubscription;
+            public readonly ChannelId channelId;
+            public readonly EntityId entityId;
+            public readonly HandlerId handlerId;
+            public readonly bool includeSubClasses;
+            public readonly bool injection;
+            public readonly bool pending;
+            public readonly bool requestorDecides;
+            public readonly bool restartSubscription;
+            public readonly long typeId;
+            public readonly bool upd;
 
             //For register
-            public MyListViewItem(Int64 typeId, Safir.Dob.Typesystem.HandlerId handlerId, bool pending, bool injection, bool requestorDecides)
+            public MyListViewItem(long typeId, HandlerId handlerId, bool pending, bool injection, bool requestorDecides)
             {
-                this.Text = Safir.Dob.Typesystem.Operations.GetName(typeId);
+                Text = Operations.GetName(typeId);
                 this.typeId = typeId;
                 this.handlerId = handlerId;
                 this.pending = pending;
                 this.injection = injection;
                 this.requestorDecides = requestorDecides;
 
-                this.SubItems.Add(handlerId.ToString());
+                SubItems.Add(handlerId.ToString());
                 if (pending)
-                    this.SubItems.Add("yes");
+                    SubItems.Add("yes");
                 else
-                    this.SubItems.Add("no");
+                    SubItems.Add("no");
                 if (injection)
-                    this.SubItems.Add("yes" );
+                    SubItems.Add("yes");
                 else
-                    this.SubItems.Add("no");
+                    SubItems.Add("no");
                 if (requestorDecides)
-                    this.SubItems.Add("Requestor");
+                    SubItems.Add("Requestor");
                 else
-                    this.SubItems.Add("Handler");
+                    SubItems.Add("Handler");
             }
 
             //For subscribe
-            public MyListViewItem(Int64 typeId, Safir.Dob.Typesystem.EntityId entityId, Safir.Dob.Typesystem.ChannelId channelId, bool upd, bool restart)
+            public MyListViewItem(long typeId, EntityId entityId, ChannelId channelId, bool upd, bool restart)
             {
-                this.Text = Safir.Dob.Typesystem.Operations.GetName(typeId);
+                Text = Operations.GetName(typeId);
 
                 this.typeId = typeId;
                 this.entityId = entityId;
                 this.channelId = channelId;
                 this.upd = upd;
-                this.restartSubscription = restart;
-                
+                restartSubscription = restart;
+
                 string infoStr;
                 if (channelId == null)
                 {
@@ -95,10 +98,10 @@ namespace Sate
                 else
                     infoStr = channelId.ToString();
 
-                this.SubItems.Add(infoStr);
+                SubItems.Add(infoStr);
 
-                string subscrStr = "";
-                bool slash = false;
+                var subscrStr = "";
+                var slash = false;
                 if (upd)
                 {
                     if (slash) subscrStr += " / ";
@@ -111,23 +114,23 @@ namespace Sate
                     subscrStr += "restart";
                     slash = true;
                 }
-                this.SubItems.Add(subscrStr);
+                SubItems.Add(subscrStr);
             }
 
             //For subscribe registrations
-            public MyListViewItem(Int64 typeId, Safir.Dob.Typesystem.HandlerId handlerId, bool includeSubClasses, bool restartSubscription)
+            public MyListViewItem(long typeId, HandlerId handlerId, bool includeSubClasses, bool restartSubscription)
             {
-                this.Text = Safir.Dob.Typesystem.Operations.GetName(typeId);
+                Text = Operations.GetName(typeId);
 
                 this.typeId = typeId;
                 this.handlerId = handlerId;
                 this.includeSubClasses = includeSubClasses;
                 this.restartSubscription = restartSubscription;
-                
-                this.SubItems.Add(handlerId.ToString());
-                
-                string subscrStr = "";
-                bool slash = false;
+
+                SubItems.Add(handlerId.ToString());
+
+                var subscrStr = "";
+                var slash = false;
                 if (includeSubClasses)
                 {
                     if (slash) subscrStr += " / ";
@@ -140,30 +143,29 @@ namespace Sate
                     subscrStr += "restart";
                     slash = true;
                 }
-                this.SubItems.Add(subscrStr);
+                SubItems.Add(subscrStr);
             }
-
         }
 
-        private System.Windows.Forms.TabControl tabControl;
-        private System.Windows.Forms.TabPage generalTabPage;
-        private System.Windows.Forms.TabPage handlersTabPage;
-        private System.Windows.Forms.TabPage subscriptionTabPage;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.TextBox inboxQueueLengthtextBox;
-        private System.Windows.Forms.CheckBox autoConnectCheckBox;
-        private System.Windows.Forms.Panel bottompanel;
-        private System.Windows.Forms.Button okbutton;
-        private System.Windows.Forms.Button cancelbutton;
-        private System.Windows.Forms.Button applybutton;
+        private TabControl tabControl;
+        private TabPage generalTabPage;
+        private TabPage handlersTabPage;
+        private TabPage subscriptionTabPage;
+        private Label label1;
+        private TextBox inboxQueueLengthtextBox;
+        private CheckBox autoConnectCheckBox;
+        private Panel bottompanel;
+        private Button okbutton;
+        private Button cancelbutton;
+        private Button applybutton;
 
-        private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.Label label7;
-        private System.Windows.Forms.Label label8;
-        private System.Windows.Forms.TextBox connectionNameTextBox;
-        private System.Windows.Forms.GroupBox groupBox1;
-        private System.Windows.Forms.RadioButton inheritanceradioButton;
-        private System.Windows.Forms.RadioButton namespacesradioButton;
+        private Label label2;
+        private Label label7;
+        private Label label8;
+        private TextBox connectionNameTextBox;
+        private GroupBox groupBox1;
+        private RadioButton inheritanceradioButton;
+        private RadioButton namespacesradioButton;
         private GroupBox groupBox2;
         private CheckBox deleteReqcheckBox;
         private CheckBox updateReqcheckBox;
@@ -188,10 +190,11 @@ namespace Sate
         private Label label3;
         private ColumnHeader columnHeader7;
         private ColumnHeader columnHeader8;
+
         /// <summary>
-        /// Required designer variable.
+        ///     Required designer variable.
         /// </summary>
-        private System.ComponentModel.Container components = null;
+        private readonly Container components = null;
 
         public SettingsForm()
         {
@@ -200,35 +203,35 @@ namespace Sate
             //
             InitializeComponent();
 
-            sublistView.ContextMenu = new ContextMenu(new MenuItem[] { new MenuItem("Remove", new EventHandler(OnRemoveSub_click)) });
-            subRegListView.ContextMenu = new ContextMenu(new MenuItem[] { new MenuItem("Remove", new EventHandler(OnRemoveSubReg_click)) });
-            reglistView.ContextMenu = new ContextMenu(new MenuItem[] { new MenuItem("Remove", new EventHandler(OnRemoveReg_click)) });
-
+            sublistView.ContextMenu = new ContextMenu(new[] {new MenuItem("Remove", OnRemoveSub_click)});
+            subRegListView.ContextMenu = new ContextMenu(new[] {new MenuItem("Remove", OnRemoveSubReg_click)});
+            reglistView.ContextMenu = new ContextMenu(new[] {new MenuItem("Remove", OnRemoveReg_click)});
         }
 
         /// <summary>
-        /// Clean up any resources being used.
+        ///     Clean up any resources being used.
         /// </summary>
-        protected override void Dispose( bool disposing )
+        protected override void Dispose(bool disposing)
         {
-            if( disposing )
+            if (disposing)
             {
-                if(components != null)
+                if (components != null)
                 {
                     components.Dispose();
                 }
             }
-            base.Dispose( disposing );
+            base.Dispose(disposing);
         }
 
         #region Windows Form Designer generated code
+
         /// <summary>
-        /// Required method for Designer support - do not modify
-        /// the contents of this method with the code editor.
+        ///     Required method for Designer support - do not modify
+        ///     the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SettingsForm));
+            var resources = new System.ComponentModel.ComponentResourceManager(typeof(SettingsForm));
             this.tabControl = new System.Windows.Forms.TabControl();
             this.generalTabPage = new System.Windows.Forms.TabPage();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
@@ -488,12 +491,14 @@ namespace Sate
             // 
             // reglistView
             // 
-            this.reglistView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.columnHeader1,
-            this.columnHeader2,
-            this.columnHeader3,
-            this.columnHeader4,
-            this.columnHeader8});
+            this.reglistView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[]
+            {
+                this.columnHeader1,
+                this.columnHeader2,
+                this.columnHeader3,
+                this.columnHeader4,
+                this.columnHeader8
+            });
             this.reglistView.Dock = System.Windows.Forms.DockStyle.Fill;
             this.reglistView.FullRowSelect = true;
             this.reglistView.Location = new System.Drawing.Point(0, 32);
@@ -536,7 +541,7 @@ namespace Sate
             this.label2.Size = new System.Drawing.Size(496, 32);
             this.label2.TabIndex = 0;
             this.label2.Text = "Listed typeIds and services are handled by SATE when connection to DOSE is perfor" +
-                "med.";
+                               "med.";
             // 
             // subscriptionTabPage
             // 
@@ -551,10 +556,12 @@ namespace Sate
             // 
             // sublistView
             // 
-            this.sublistView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.classcolumnHeader,
-            this.channelIdColumnHeader,
-            this.subtypecolumnHeader});
+            this.sublistView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[]
+            {
+                this.classcolumnHeader,
+                this.channelIdColumnHeader,
+                this.subtypecolumnHeader
+            });
             this.sublistView.Dock = System.Windows.Forms.DockStyle.Fill;
             this.sublistView.FullRowSelect = true;
             this.sublistView.Location = new System.Drawing.Point(5, 37);
@@ -602,10 +609,12 @@ namespace Sate
             // 
             // subRegListView
             // 
-            this.subRegListView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.columnHeader5,
-            this.columnHeader6,
-            this.columnHeader7});
+            this.subRegListView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[]
+            {
+                this.columnHeader5,
+                this.columnHeader6,
+                this.columnHeader7
+            });
             this.subRegListView.Dock = System.Windows.Forms.DockStyle.Fill;
             this.subRegListView.FullRowSelect = true;
             this.subRegListView.Location = new System.Drawing.Point(3, 35);
@@ -682,7 +691,7 @@ namespace Sate
             this.ClientSize = new System.Drawing.Size(504, 530);
             this.Controls.Add(this.tabControl);
             this.Controls.Add(this.bottompanel);
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.Icon = ((System.Drawing.Icon) (resources.GetObject("$this.Icon")));
             this.Name = "SettingsForm";
             this.Text = "Settings";
             this.tabControl.ResumeLayout(false);
@@ -698,19 +707,19 @@ namespace Sate
             this.tabPage1.ResumeLayout(false);
             this.bottompanel.ResumeLayout(false);
             this.ResumeLayout(false);
-
         }
+
         #endregion
 
-        private void cancelbutton_Click(object sender, System.EventArgs e)
+        private void cancelbutton_Click(object sender, EventArgs e)
         {
-            this.DialogResult=DialogResult.Cancel;
+            DialogResult = DialogResult.Cancel;
         }
 
-        private void okbutton_Click(object sender, System.EventArgs e)
+        private void okbutton_Click(object sender, EventArgs e)
         {
             if (SaveSettings())
-                this.DialogResult=DialogResult.OK;
+                DialogResult = DialogResult.OK;
         }
 
         public new void ShowDialog()
@@ -718,13 +727,13 @@ namespace Sate
             //---------------------------
             //Connection
             //---------------------------
-            this.connectionNameTextBox.Text=Settings.Sate.ConnectionName;
-            this.autoConnectCheckBox.Checked=Settings.Sate.ConnectAtStartUp;
+            connectionNameTextBox.Text = Settings.Sate.ConnectionName;
+            autoConnectCheckBox.Checked = Settings.Sate.ConnectAtStartUp;
 
             //---------------------------
             //Inbox
             //---------------------------
-            this.inboxQueueLengthtextBox.Text=Settings.Sate.InboxQueueuLength.ToString();
+            inboxQueueLengthtextBox.Text = Settings.Sate.InboxQueueuLength.ToString();
 
             //---------------------------
             //Explorer view
@@ -732,13 +741,13 @@ namespace Sate
 
             if (Settings.Sate.DefaultExplorerView)
             {
-                this.inheritanceradioButton.Checked=true;
-                this.namespacesradioButton.Checked=false;
+                inheritanceradioButton.Checked = true;
+                namespacesradioButton.Checked = false;
             }
             else
             {
-                this.inheritanceradioButton.Checked=false;
-                this.namespacesradioButton.Checked=true;
+                inheritanceradioButton.Checked = false;
+                namespacesradioButton.Checked = true;
             }
 
             //---------------------------
@@ -746,9 +755,9 @@ namespace Sate
             //---------------------------
             noDispatchCheckBox.Checked = Settings.Sate.NoDispatch;
             noResponseCheckBox.Checked = Settings.Sate.NoResponse;
-            this.createReqcheckBox.Checked = Settings.Sate.AutoCreate;
-            this.updateReqcheckBox.Checked = Settings.Sate.AutoUpdate;
-            this.deleteReqcheckBox.Checked = Settings.Sate.AutoDelete;
+            createReqcheckBox.Checked = Settings.Sate.AutoCreate;
+            updateReqcheckBox.Checked = Settings.Sate.AutoUpdate;
+            deleteReqcheckBox.Checked = Settings.Sate.AutoDelete;
 
             //---------------------------
             //Auto Reg/Sub
@@ -758,40 +767,40 @@ namespace Sate
         }
 
 
-        private void applybutton_Click(object sender, System.EventArgs e)
+        private void applybutton_Click(object sender, EventArgs e)
         {
             SaveSettings();
         }
 
         private bool SaveSettings()
         {
-            Cursor=Cursors.WaitCursor;
+            Cursor = Cursors.WaitCursor;
 
             //Connection name
-            Settings.Sate.ConnectionName=this.connectionNameTextBox.Text;
+            Settings.Sate.ConnectionName = connectionNameTextBox.Text;
 
             //Auto connect
-            Settings.Sate.ConnectAtStartUp=this.autoConnectCheckBox.Checked;
+            Settings.Sate.ConnectAtStartUp = autoConnectCheckBox.Checked;
 
             //DefaultExplorerView
-            Settings.Sate.DefaultExplorerView=inheritanceradioButton.Checked;
+            Settings.Sate.DefaultExplorerView = inheritanceradioButton.Checked;
 
             //InboxQueueuLength
             try
             {
-                Settings.Sate.InboxQueueuLength=int.Parse(this.inboxQueueLengthtextBox.Text);
+                Settings.Sate.InboxQueueuLength = int.Parse(inboxQueueLengthtextBox.Text);
             }
             catch
             {
                 MessageBox.Show("Inbox queue length is invalid!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Cursor=Cursors.Default;
+                Cursor = Cursors.Default;
                 return false;
             }
 
             //Save everything
             Settings.Save();
 
-            Cursor=Cursors.Default;
+            Cursor = Cursors.Default;
             return true;
         }
 
@@ -804,38 +813,41 @@ namespace Sate
             }
         }
 #endif
+
         private void LoadObjectIds()
         {
-            foreach (RegInfo ri in Settings.Sate.Register)
+            foreach (var ri in Settings.Sate.Register)
             {
                 try
                 {
-                    MyListViewItem ml = new MyListViewItem(ri.typeId, ri.handlerIdSer.HandlerId(), ri.pending, ri.injection);
+                    var ml = new MyListViewItem(ri.typeId, ri.handlerIdSer.HandlerId(), ri.pending, ri.injection);
                     reglistView.Items.Add(ml);
                 }
-                catch (Safir.Dob.Typesystem.IllegalValueException)
+                catch (IllegalValueException)
                 {
                 }
             }
-            foreach (SubInfo si in Settings.Sate.Subscribe)
+            foreach (var si in Settings.Sate.Subscribe)
             {
                 try
                 {
-                    MyListViewItem ml = new MyListViewItem(si.typeId, si.entityIdSer != null ? si.entityIdSer.EntityId() : null, si.channelIdSer.ChannelId(), si.upd, si.restartSubscription);
+                    var ml = new MyListViewItem(si.typeId, si.entityIdSer != null ? si.entityIdSer.EntityId() : null,
+                        si.channelIdSer.ChannelId(), si.upd, si.restartSubscription);
                     sublistView.Items.Add(ml);
                 }
-                catch (Safir.Dob.Typesystem.IllegalValueException)
+                catch (IllegalValueException)
                 {
                 }
             }
-            foreach (SubRegInfo sri in Settings.Sate.SubscribeReg)
+            foreach (var sri in Settings.Sate.SubscribeReg)
             {
                 try
                 {
-                    MyListViewItem ml = new MyListViewItem(sri.typeId, sri.handlerIdSer.HandlerId(), sri.includeSubClasses, sri.restartSubscription, false);
+                    var ml = new MyListViewItem(sri.typeId, sri.handlerIdSer.HandlerId(), sri.includeSubClasses,
+                        sri.restartSubscription, false);
                     subRegListView.Items.Add(ml);
                 }
-                catch (Safir.Dob.Typesystem.IllegalValueException)
+                catch (IllegalValueException)
                 {
                 }
             }
@@ -843,27 +855,27 @@ namespace Sate
 
         private void createReqcheckBox_CheckedChanged(object sender, EventArgs e)
         {
-            Settings.Sate.AutoCreate = this.createReqcheckBox.Checked;
+            Settings.Sate.AutoCreate = createReqcheckBox.Checked;
             Settings.Save();
         }
 
         private void updateReqcheckBox_CheckedChanged(object sender, EventArgs e)
         {
-            Settings.Sate.AutoUpdate = this.updateReqcheckBox.Checked;
+            Settings.Sate.AutoUpdate = updateReqcheckBox.Checked;
             Settings.Save();
         }
 
         private void deleteReqcheckBox_CheckedChanged(object sender, EventArgs e)
         {
-            Settings.Sate.AutoDelete = this.deleteReqcheckBox.Checked;
+            Settings.Sate.AutoDelete = deleteReqcheckBox.Checked;
             Settings.Save();
         }
 
         private void openReplybutton_Click(object sender, EventArgs e)
         {
-            ObjectInfo objInfo = new ObjectInfo();
+            var objInfo = new ObjectInfo();
             objInfo.Obj = Settings.Sate.AutoResponse;
-           MainForm.Instance.AddTabPage(new ObjectEditTabPage(objInfo));
+            MainForm.Instance.AddTabPage(new ObjectEditTabPage(objInfo));
         }
 
         private void noResponseCheckBox_CheckedChanged(object sender, EventArgs e)
@@ -883,53 +895,56 @@ namespace Sate
             }
         }
 
-        void OnRemoveSub_click(object sender, EventArgs e)
+        private void OnRemoveSub_click(object sender, EventArgs e)
         {
             foreach (ListViewItem li in sublistView.SelectedItems)
             {
-                this.sublistView.Items.Remove(li);
+                sublistView.Items.Remove(li);
             }
 
-            SubInfo[] tmp = new SubInfo[sublistView.Items.Count];
-            int i = 0;
+            var tmp = new SubInfo[sublistView.Items.Count];
+            var i = 0;
             foreach (MyListViewItem l in sublistView.Items)
             {
-                tmp[i++] = new SubInfo(l.typeId, new EntityIdSerializeable(l.entityId), new ChannelIdSerializable(l.channelId), l.upd, l.includeSubClasses, l.restartSubscription);
+                tmp[i++] = new SubInfo(l.typeId, new EntityIdSerializeable(l.entityId),
+                    new ChannelIdSerializable(l.channelId), l.upd, l.includeSubClasses, l.restartSubscription);
             }
             Settings.Sate.Subscribe = tmp;
             Settings.Save();
-            }
+        }
 
-        void OnRemoveSubReg_click(object sender, EventArgs e)
+        private void OnRemoveSubReg_click(object sender, EventArgs e)
         {
             foreach (ListViewItem li in subRegListView.SelectedItems)
             {
-                this.subRegListView.Items.Remove(li);
+                subRegListView.Items.Remove(li);
             }
 
-            SubRegInfo[] tmp = new SubRegInfo[subRegListView.Items.Count];
-            int i = 0;
+            var tmp = new SubRegInfo[subRegListView.Items.Count];
+            var i = 0;
             foreach (MyListViewItem l in subRegListView.Items)
             {
-                tmp[i++] = new SubRegInfo(l.typeId, new HandlerIdSerializeable(l.handlerId), l.includeSubClasses, l.restartSubscription);
+                tmp[i++] = new SubRegInfo(l.typeId, new HandlerIdSerializeable(l.handlerId), l.includeSubClasses,
+                    l.restartSubscription);
             }
             Settings.Sate.SubscribeReg = tmp;
             Settings.Save();
         }
 
 
-        void OnRemoveReg_click(object sender, EventArgs e)
+        private void OnRemoveReg_click(object sender, EventArgs e)
         {
             foreach (ListViewItem li in reglistView.SelectedItems)
             {
-                this.reglistView.Items.Remove(li);
+                reglistView.Items.Remove(li);
             }
 
-            RegInfo[] tmp = new RegInfo[reglistView.Items.Count];
-            int i = 0;
+            var tmp = new RegInfo[reglistView.Items.Count];
+            var i = 0;
             foreach (MyListViewItem l in reglistView.Items)
             {
-                tmp[i++] = new RegInfo(l.typeId, new HandlerIdSerializeable(l.handlerId), l.pending, l.injection, l.requestorDecides);
+                tmp[i++] = new RegInfo(l.typeId, new HandlerIdSerializeable(l.handlerId), l.pending, l.injection,
+                    l.requestorDecides);
             }
             Settings.Sate.Register = tmp;
             Settings.Save();

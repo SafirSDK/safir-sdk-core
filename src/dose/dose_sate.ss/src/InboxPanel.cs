@@ -23,26 +23,25 @@
 ******************************************************************************/
 
 using System;
-using System.Drawing;
-using System.Collections;
 using System.ComponentModel;
 using System.Windows.Forms;
+using Safir.Dob.Typesystem;
+using Object = Safir.Dob.Typesystem.Object;
 
 namespace Sate
 {
     /// <summary>
-    /// Summary description for SubscriptionResponses.
+    ///     Summary description for SubscriptionResponses.
     /// </summary>
-    public class InboxPanel : System.Windows.Forms.Panel
+    public class InboxPanel : Panel
     {
-        private System.Windows.Forms.ListView listView;
-        private System.Windows.Forms.ColumnHeader subColumnHeader;
-        private System.ComponentModel.IContainer components;
-        private System.Windows.Forms.ColumnHeader typeColumnHeader;
-        private System.Windows.Forms.ColumnHeader iconColumnHeader;
-        private System.Windows.Forms.ImageList smallImageList;
-
-        private static InboxPanel instance = null;
+        private static InboxPanel instance;
+        private IContainer components;
+        private ColumnHeader iconColumnHeader;
+        private ListView listView;
+        private ImageList smallImageList;
+        private ColumnHeader subColumnHeader;
+        private ColumnHeader typeColumnHeader;
 
         private InboxPanel()
         {
@@ -51,77 +50,83 @@ namespace Sate
             //
             InitializeComponent();
 
-            this.SuspendLayout();
+            SuspendLayout();
 
             //TitleBar
-            PanelLabelControl titleLabel = new PanelLabelControl("Inbox");
-            titleLabel.CloseEvent += new PanelLabelControl.OnCloseEventHandler(titleLabel_CloseEvent);
-            this.Controls.Add(titleLabel);
+            var titleLabel = new PanelLabelControl("Inbox");
+            titleLabel.CloseEvent += titleLabel_CloseEvent;
+            Controls.Add(titleLabel);
 
-            listView.ContextMenu = new ContextMenu(new MenuItem[] { new MenuItem("Clear", new EventHandler(OnClearInbox_click)),
-                                                                    new MenuItem("Serialize to xml", new EventHandler(OnToXml_click))});
-
-            this.listView.DoubleClick+=new EventHandler(listView_DoubleClick);
-
-            this.listView.Scrollable=true;
-
-            this.ResumeLayout(false);
-        }
-
-        void OnClearInbox_click(object sender, EventArgs e)
-        {
-            listView.Items.Clear();
-        }
-
-        void OnToXml_click(object sender, EventArgs e)
-        {
-            try
+            listView.ContextMenu = new ContextMenu(new[]
             {
-                ObjectInfo objInfo = (ObjectInfo)listView.SelectedItems[0].Tag;
-                MainForm.Instance.AddTabPage(new XmlTabPage(objInfo));
-            }
-            catch { }
-        }
+                new MenuItem("Clear", OnClearInbox_click),
+                new MenuItem("Serialize to xml", OnToXml_click)
+            });
 
-        void titleLabel_CloseEvent(object sender, EventArgs e)
-        {
-            MainForm.Instance.ShowHideInbox(false);
+            listView.DoubleClick += listView_DoubleClick;
+
+            listView.Scrollable = true;
+
+            ResumeLayout(false);
         }
 
         public static InboxPanel Instance
         {
             get
             {
-                if (instance==null)
-                    instance=new InboxPanel();
+                if (instance == null)
+                    instance = new InboxPanel();
                 return instance;
             }
         }
 
-        /// <summary>
-        /// Clean up any resources being used.
-        /// </summary>
-        protected override void Dispose( bool disposing )
+        private void OnClearInbox_click(object sender, EventArgs e)
         {
-            if( disposing )
+            listView.Items.Clear();
+        }
+
+        private void OnToXml_click(object sender, EventArgs e)
+        {
+            try
             {
-                if(components != null)
+                var objInfo = (ObjectInfo) listView.SelectedItems[0].Tag;
+                MainForm.Instance.AddTabPage(new XmlTabPage(objInfo));
+            }
+            catch
+            {
+            }
+        }
+
+        private void titleLabel_CloseEvent(object sender, EventArgs e)
+        {
+            MainForm.Instance.ShowHideInbox(false);
+        }
+
+        /// <summary>
+        ///     Clean up any resources being used.
+        /// </summary>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (components != null)
                 {
                     components.Dispose();
                 }
             }
-            base.Dispose( disposing );
+            base.Dispose(disposing);
         }
 
         #region Windows Form Designer generated code
+
         /// <summary>
-        /// Required method for Designer support - do not modify
-        /// the contents of this method with the code editor.
+        ///     Required method for Designer support - do not modify
+        ///     the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(InboxPanel));
+            var resources = new System.ComponentModel.ComponentResourceManager(typeof(InboxPanel));
             this.listView = new System.Windows.Forms.ListView();
             this.iconColumnHeader = new System.Windows.Forms.ColumnHeader();
             this.subColumnHeader = new System.Windows.Forms.ColumnHeader();
@@ -131,10 +136,12 @@ namespace Sate
             //
             // listView
             //
-            this.listView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.iconColumnHeader,
-            this.subColumnHeader,
-            this.typeColumnHeader});
+            this.listView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[]
+            {
+                this.iconColumnHeader,
+                this.subColumnHeader,
+                this.typeColumnHeader
+            });
             this.listView.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listView.FullRowSelect = true;
             this.listView.GridLines = true;
@@ -164,7 +171,8 @@ namespace Sate
             //
             // smallImageList
             //
-            this.smallImageList.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("smallImageList.ImageStream")));
+            this.smallImageList.ImageStream =
+                ((System.Windows.Forms.ImageListStreamer) (resources.GetObject("smallImageList.ImageStream")));
             this.smallImageList.TransparentColor = System.Drawing.Color.Transparent;
             this.smallImageList.Images.SetKeyName(0, "");
             this.smallImageList.Images.SetKeyName(1, "");
@@ -179,72 +187,73 @@ namespace Sate
             this.Size = new System.Drawing.Size(10, 10);
             this.Text = "Inbox";
             this.ResumeLayout(false);
-
         }
+
         #endregion
 
         public void AddResponse(ObjectInfo objInfo, string description)
         {
             string type;
 
-            type = Safir.Dob.Typesystem.Operations.GetName(objInfo.Obj.GetTypeId());
-         
-            ListViewItem item = new ListViewItem(new string[] { "", description, type }, 0);
+            type = Operations.GetName(objInfo.Obj.GetTypeId());
+
+            var item = new ListViewItem(new[] {"", description, type}, 0);
 
             item.Tag = objInfo;
-         
+
             if (listView.Items.Count >= Settings.Sate.InboxQueueuLength)
-                this.listView.Items.RemoveAt(0);
-            
-            this.listView.Items.Add(item);
-            this.Invalidate();
+                listView.Items.RemoveAt(0);
+
+            listView.Items.Add(item);
+            Invalidate();
         }
 
         /* used for response that don't have an object to display */
-        public void AddNonDisplayableResponse(Int64 typeId, string description)
+
+        public void AddNonDisplayableResponse(long typeId, string description)
         {
             string type;
 
-            type = Safir.Dob.Typesystem.Operations.GetName(typeId);
+            type = Operations.GetName(typeId);
 
-            ListViewItem item = new ListViewItem(new string[] { "", description, type }, 0);
+            var item = new ListViewItem(new[] {"", description, type}, 0);
 
             item.Tag = null;
 
             if (listView.Items.Count >= Settings.Sate.InboxQueueuLength)
-                this.listView.Items.RemoveAt(0);
+                listView.Items.RemoveAt(0);
 
-            this.listView.Items.Add(item);
-            this.Invalidate();
+            listView.Items.Add(item);
+            Invalidate();
         }
 
         private void listView_DoubleClick(object sender, EventArgs e)
         {
-            this.listView.SelectedItems[0].ImageIndex=1;
-            
+            listView.SelectedItems[0].ImageIndex = 1;
+
             if (listView.SelectedItems[0].Tag is MessageInfo)
             {
-                MessageInfo msgInfo = (MessageInfo)listView.SelectedItems[0].Tag;
+                var msgInfo = (MessageInfo) listView.SelectedItems[0].Tag;
                 MainForm.Instance.AddTabPage(new ObjectEditTabPage(msgInfo));
             }
             else if (listView.SelectedItems[0].Tag is ServiceHandlerInfo)
             {
-                ServiceHandlerInfo srvInfo = (ServiceHandlerInfo)listView.SelectedItems[0].Tag;
+                var srvInfo = (ServiceHandlerInfo) listView.SelectedItems[0].Tag;
                 MainForm.Instance.AddTabPage(new ObjectEditTabPage(srvInfo));
             }
             else if (listView.SelectedItems[0].Tag is ResponseInfo)
             {
-                ResponseInfo replyInfo = (ResponseInfo)listView.SelectedItems[0].Tag;
+                var replyInfo = (ResponseInfo) listView.SelectedItems[0].Tag;
                 MainForm.Instance.AddTabPage(new ObjectEditTabPage(replyInfo));
             }
             else if (listView.SelectedItems[0].Tag is EntityInfo)
             {
-                EntityInfo entityInfo = (EntityInfo)listView.SelectedItems[0].Tag;
+                var entityInfo = (EntityInfo) listView.SelectedItems[0].Tag;
                 MainForm.Instance.AddTabPage(new ObjectEditTabPage(entityInfo));
             }
-            else if (listView.SelectedItems[0].Tag is Safir.Dob.Typesystem.Object)
+            else if (listView.SelectedItems[0].Tag is Object)
             {
-                ObjectInfo objInfo = (ObjectInfo)listView.SelectedItems[0].Tag;
+                var objInfo = (ObjectInfo) listView.SelectedItems[0].Tag;
                 MainForm.Instance.AddTabPage(new ObjectEditTabPage(objInfo));
             }
 #if STSYLI
@@ -261,5 +270,4 @@ namespace Sate
             Invalidate(true);
         }
     }
-
 }

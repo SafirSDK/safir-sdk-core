@@ -23,66 +23,60 @@
 ******************************************************************************/
 
 using System;
-using System.Collections.Generic;
-using System.Text;
+using System.Windows.Forms;
 
 namespace Sate
 {
-    class OutputPanel : System.Windows.Forms.Panel
+    internal class OutputPanel : Panel
     {
-        private System.Windows.Forms.Panel fillpanel;
-        private System.Windows.Forms.Panel toppanel;
-        private System.Windows.Forms.RichTextBox richTextBox;
-        private PanelLabelControl titleLabel;
+        private readonly Panel fillpanel;
+        private readonly RichTextBox richTextBox;
+        private readonly PanelLabelControl titleLabel;
+        private readonly Panel toppanel;
 
-        private static OutputPanel instance = new OutputPanel();
-
-        public static OutputPanel Instance
+        private OutputPanel()
         {
-            get { return instance; }
+            toppanel = new Panel();
+            fillpanel = new Panel();
+            richTextBox = new RichTextBox();
+            titleLabel = new PanelLabelControl("Output");
+            SuspendLayout();
+            // 
+            // toppanel
+            // 
+            toppanel.Dock = DockStyle.Top;
+            toppanel.Height = 15;
+            // 
+            // fillpanel
+            // 
+            fillpanel.Dock = DockStyle.Fill;
+            toppanel.Controls.Add(titleLabel);
+            richTextBox.Dock = DockStyle.Fill;
+            fillpanel.Controls.Add(richTextBox);
+            Controls.AddRange(new Control[] {toppanel, fillpanel});
+            ResumeLayout(false);
+
+            titleLabel.CloseEvent += titleLabel_CloseEvent;
         }
+
+        public static OutputPanel Instance { get; } = new OutputPanel();
 
         public void LogEvent(string text, bool newLine)
         {
             text = DateTime.Now.ToLongTimeString() + " " + text;
             if (newLine) text += "\n";
             //this.richTextBox.Focus();
-            this.richTextBox.AppendText(text);
-            if (richTextBox.Text.Length > 80 * 1000)
+            richTextBox.AppendText(text);
+            if (richTextBox.Text.Length > 80*1000)
             {
-                richTextBox.Text.Remove(0, 80 * 500);
+                richTextBox.Text.Remove(0, 80*500);
             }
             // replaced Focus() with this one. To not steal focus.
-            this.richTextBox.ScrollToCaret();
-            this.Invalidate();
+            richTextBox.ScrollToCaret();
+            Invalidate();
         }
 
-        private OutputPanel()
-        {
-            this.toppanel = new System.Windows.Forms.Panel();
-            this.fillpanel = new System.Windows.Forms.Panel();
-            this.richTextBox = new System.Windows.Forms.RichTextBox();
-            this.titleLabel = new PanelLabelControl("Output");
-            this.SuspendLayout();
-            // 
-            // toppanel
-            // 
-            this.toppanel.Dock = System.Windows.Forms.DockStyle.Top;
-            toppanel.Height = 15;
-            // 
-            // fillpanel
-            // 
-            this.fillpanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            toppanel.Controls.Add(titleLabel);
-            richTextBox.Dock = System.Windows.Forms.DockStyle.Fill;
-            fillpanel.Controls.Add(richTextBox);
-            this.Controls.AddRange(new System.Windows.Forms.Control[] { toppanel, fillpanel });
-            this.ResumeLayout(false);
-
-            titleLabel.CloseEvent += new PanelLabelControl.OnCloseEventHandler(titleLabel_CloseEvent);
-        }
-
-        void titleLabel_CloseEvent(object sender, EventArgs e)
+        private void titleLabel_CloseEvent(object sender, EventArgs e)
         {
             MainForm.Instance.ShowHideOutput(false);
         }

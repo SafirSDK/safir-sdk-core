@@ -22,25 +22,21 @@
 *
 ******************************************************************************/
 
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
+using Safir.Dob.Typesystem;
 
 namespace Sate
 {
     public partial class DobUnitDetailsForm : Form
     {
-        Int64 typeId;
-        public DobUnitDetailsForm(Int64 typeId)//, Safir.Dob.Typesystem.InstanceId instanceId)
+        private readonly long typeId;
+
+        public DobUnitDetailsForm(long typeId) //, Safir.Dob.Typesystem.InstanceId instanceId)
         {
             InitializeComponent();
             //objId = oid;
-                 this.typeId = typeId;
-                  //this.instanceId = instanceId;
+            this.typeId = typeId;
+            //this.instanceId = instanceId;
             //if (oid.Instance==Safir.Dob.Typesystem.Constants.WHOLE_CLASS)
             {
                 ClassDetails();
@@ -72,14 +68,13 @@ namespace Sate
         private void ClassDetails()
         {
             //window text
-            Text = "Details [class " + Safir.Dob.Typesystem.Operations.GetName(typeId) + "]";
+            Text = "Details [class " + Operations.GetName(typeId) + "]";
 
             //number of instances
 
             //owner
 
             //subscribers
-
         }
     }
 }

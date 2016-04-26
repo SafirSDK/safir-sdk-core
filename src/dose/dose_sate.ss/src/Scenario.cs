@@ -22,12 +22,13 @@
 *
 ******************************************************************************/
 
-using System;
-using System.Xml;
-using System.Xml.Serialization;
+using System.Collections;
+using System.Collections.Generic;
 using System.IO;
+using System.Xml.Serialization;
+using Safir.Dob.Typesystem;
 
-namespace Sate.Scenarios
+namespace Sate
 {
     public enum DobAction
     {
@@ -59,33 +60,37 @@ namespace Sate.Scenarios
     // Class that defines a scenario and can be serialized to XML
     //****************************************************************
 
-    [XmlRootAttribute("Action", Namespace="", IsNullable = false)]
+    [XmlRoot("Action", Namespace = "", IsNullable = false)]
     public class Action
     {
         public DobAction action;
-        public int delay = 0;
-        public bool instStepUp = false;
-        public string xmlObject = null;
-        public ScenarioInfo scenarioInfo;
+        public int delay;
+        public bool instStepUp;
+
+        //Deserialize object here before replay, better performance
+        //[XmlIgnore]
+        public ObjectInfo objInfo;
         public int repetitions = 1;
-        public Action[] sequence = null;
+        public ScenarioInfo scenarioInfo;
+        public Action[] sequence;
+        public string xmlObject;
 
         public Action()
         {
         } //needed by xml-serializer
 
-    
+
         public Action(DobAction action, int delay, ObjectInfo objInfo)
         {
-            this.action=action;
-            this.delay=delay;
+            this.action = action;
+            this.delay = delay;
             if (objInfo != null)
             {
                 this.objInfo = objInfo;
-                xmlObject = Safir.Dob.Typesystem.Serialization.ToXml(objInfo.Obj);
+                xmlObject = Serialization.ToXml(objInfo.Obj);
             }
         }
-     
+
 
         public Action(DobAction action, int delay, ScenarioInfo scenarioInfo)
         {
@@ -94,30 +99,30 @@ namespace Sate.Scenarios
             this.scenarioInfo = scenarioInfo;
         }
 
-        public Action(System.Collections.ArrayList a, int reps)
+        public Action(ArrayList a, int reps)
         {
-            this.action=DobAction.Sequence;
-            repetitions=reps;
-            sequence=new Action[a.Count];
-            for (int i=0; i<a.Count; i++)
-                sequence[i]=(Action)a[i];
+            action = DobAction.Sequence;
+            repetitions = reps;
+            sequence = new Action[a.Count];
+            for (var i = 0; i < a.Count; i++)
+                sequence[i] = (Action) a[i];
         }
 
         public bool HasInstanceNumber()
         {
-            return  action==DobAction.Register ||
-                    action==DobAction.Unregister ||
-                    action==DobAction.Subscribe ||
-                    action==DobAction.Unsubscribe ||
-                    action==DobAction.SetChangesEntity ||
-                    action==DobAction.SetAllEntity ||
-                    action==DobAction.InjectionDelete ||
-                    action==DobAction.InjectionInitialSet ||
-                    action==DobAction.InjectionSetChanges ||
-                    action==DobAction.DeleteEntity ||
-                    action==DobAction.CreateRequest ||
-                    action==DobAction.UpdateRequest ||
-                    action==DobAction.DeleteRequest;
+            return action == DobAction.Register ||
+                   action == DobAction.Unregister ||
+                   action == DobAction.Subscribe ||
+                   action == DobAction.Unsubscribe ||
+                   action == DobAction.SetChangesEntity ||
+                   action == DobAction.SetAllEntity ||
+                   action == DobAction.InjectionDelete ||
+                   action == DobAction.InjectionInitialSet ||
+                   action == DobAction.InjectionSetChanges ||
+                   action == DobAction.DeleteEntity ||
+                   action == DobAction.CreateRequest ||
+                   action == DobAction.UpdateRequest ||
+                   action == DobAction.DeleteRequest;
         }
 
         public void StepUpInstance()
@@ -153,49 +158,39 @@ namespace Sate.Scenarios
         public override string ToString()
         {
             if (instStepUp)
-                return ScenarioTools.DobActionToString(action)+"++\tdelay "+delay;
-            else
-                return ScenarioTools.DobActionToString(action)+"\tdelay "+delay;
+                return ScenarioTools.DobActionToString(action) + "++\tdelay " + delay;
+            return ScenarioTools.DobActionToString(action) + "\tdelay " + delay;
         }
 
-        //Deserialize object here before replay, better performance
-        //[XmlIgnore]
-        public ObjectInfo objInfo = null;
         //public Safir.Dob.Typesystem.Object obj = null;
-        //[XmlIgnore]
+
         //public int numberOfInstances = 0;
     }
 
     //****************************************************************
-    // Help classes used during record/replay of scenarios.
     // Not serialized to XML-files.
     //****************************************************************
     public class RepeatStartMarker
     {
-        public int repetitions;
+        public int Repetitions;
 
         public RepeatStartMarker(int reps)
         {
-            repetitions=reps;
+            Repetitions = reps;
         }
 
         public override string ToString()
         {
-            if (repetitions<0)
+            if (Repetitions < 0)
             {
                 return "-------- Repeat forever --------";
             }
-            else
-            {
-                return "-------- Repeat "+repetitions+" times --------";
-            }
+            return "-------- Repeat " + Repetitions + " times --------";
         }
     }
 
     public class RepeatStopMarker
     {
-        public RepeatStopMarker() {}
-
         public override string ToString()
         {
             return "-------- End repeat --------";
@@ -252,15 +247,15 @@ namespace Sate.Scenarios
             return "UnknownType";
         }
 
-        public static Scenarios.Action ReadFile(string file)
+        public static Action ReadFile(string file)
         {
             try
             {
-                Scenarios.Action action;
-                XmlSerializer serializer = new XmlSerializer(typeof(Scenarios.Action));
-                using (FileStream fs = new FileStream(file, FileMode.Open))
+                Action action;
+                var serializer = new XmlSerializer(typeof(Action));
+                using (var fs = new FileStream(file, FileMode.Open))
                 {
-                    action = (Scenarios.Action) serializer.Deserialize(fs);
+                    action = (Action) serializer.Deserialize(fs);
                     fs.Close();
                 }
                 return action;
@@ -269,12 +264,11 @@ namespace Sate.Scenarios
             {
                 return null;
             }
-
         }
 
-        public static void WriteFile(string file, Scenarios.Action scn)
+        public static void WriteFile(string file, Action scn)
         {
-            XmlSerializer serializer = new XmlSerializer(typeof(Scenarios.Action));
+            var serializer = new XmlSerializer(typeof(Action));
             using (TextWriter writer = new StreamWriter(file))
             {
                 serializer.Serialize(writer, scn);
@@ -284,40 +278,29 @@ namespace Sate.Scenarios
 
         public class ScenarioIterator
         {
-            private class ItHelp
-            {
-                public Action action = null;
-                public int seqIx = 0;
-                public int rep = 0;
-                public ItHelp(Action a)
-                {
-                    action = a;
-                }
-            }
-
-            private System.Collections.Generic.Stack<ItHelp> it = new System.Collections.Generic.Stack<ItHelp>();
+            private readonly Stack<ItHelp> _it = new Stack<ItHelp>();
 
             public ScenarioIterator(Action scenario)
             {
-                it.Push(new ItHelp(scenario));
+                _it.Push(new ItHelp(scenario));
             }
 
             public bool HasNext()
             {
-                return it.Count > 0;
+                return _it.Count > 0;
             }
 
             public Action Next()
             {
-                ItHelp ih=it.Peek();
-                Action next = ih.action.sequence[ih.seqIx];
-                ih.seqIx++;
-                if (ih.seqIx>=ih.action.sequence.Length && ih.action.repetitions>0)
-                    ih.rep++;
+                var ih = _it.Peek();
+                var next = ih.Action.sequence[ih.SeqIx];
+                ih.SeqIx++;
+                if (ih.SeqIx >= ih.Action.sequence.Length && ih.Action.repetitions > 0)
+                    ih.Rep++;
 
                 if (next.action == DobAction.Sequence)
                 {
-                    it.Push(new ItHelp(next));
+                    _it.Push(new ItHelp(next));
                     return Next();
                 }
 
@@ -329,28 +312,39 @@ namespace Sate.Scenarios
             {
                 if (HasNext())
                 {
-                    bool lastRepeat = true;
-                    ItHelp ih=it.Peek();
-                    if (ih.rep!=ih.action.repetitions) //more iterations in loop
+                    var lastRepeat = true;
+                    var ih = _it.Peek();
+                    if (ih.Rep != ih.Action.repetitions) //more iterations in loop
                     {
                         lastRepeat = false;
                     }
 
-                    if (ih.seqIx >= ih.action.sequence.Length)
+                    if (ih.SeqIx >= ih.Action.sequence.Length)
                     {
                         if (lastRepeat)
                         {
-                            it.Pop();
+                            _it.Pop();
                             CleanUp();
                         }
                         else
                         {
-                            ih.seqIx = 0;
+                            ih.SeqIx = 0;
                         }
                     }
+                }
+            }
+
+            private class ItHelp
+            {
+                public readonly Action Action;
+                public int Rep;
+                public int SeqIx;
+
+                public ItHelp(Action a)
+                {
+                    Action = a;
                 }
             }
         }
     }
 }
-

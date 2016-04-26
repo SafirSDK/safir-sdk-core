@@ -1,4 +1,4 @@
-/******************************************************************************
+﻿/******************************************************************************
 *
 * Copyright Saab AB, 2007-2013 (http://safirsdkcore.com)
 * 
@@ -23,29 +23,30 @@
 ******************************************************************************/
 
 using System;
-using System.Drawing;
-using System.Collections;
 using System.ComponentModel;
 using System.Windows.Forms;
+using Safir.Dob.Typesystem;
 
 namespace Sate
 {
     /// <summary>
-    /// Summary description for TypeIdCalculatorForm.
+    ///     Summary description for TypeIdCalculatorForm.
     /// </summary>
-    public class TypeIdCalculatorForm : System.Windows.Forms.Form
+    public class TypeIdCalculatorForm : Form
     {
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.TextBox inputtextBox;
-        private System.Windows.Forms.Button calckbutton;
-        private System.Windows.Forms.TextBox resulttextBox;
-        private System.Windows.Forms.Button closebutton;
-        private System.Windows.Forms.GroupBox groupBox1;
-        private System.Windows.Forms.Label resultlabel;
         /// <summary>
-        /// Required designer variable.
+        ///     Required designer variable.
         /// </summary>
-        private System.ComponentModel.Container components = null;
+        private readonly Container components = null;
+
+        private Button calckbutton;
+        private Button closebutton;
+
+        private GroupBox groupBox1;
+        private TextBox inputtextBox;
+        private Label label1;
+        private Label resultlabel;
+        private TextBox resulttextBox;
 
         public TypeIdCalculatorForm()
         {
@@ -56,28 +57,29 @@ namespace Sate
         }
 
         /// <summary>
-        /// Clean up any resources being used.
+        ///     Clean up any resources being used.
         /// </summary>
-        protected override void Dispose( bool disposing )
+        protected override void Dispose(bool disposing)
         {
-            if( disposing )
+            if (disposing)
             {
-                if(components != null)
+                if (components != null)
                 {
                     components.Dispose();
                 }
             }
-            base.Dispose( disposing );
+            base.Dispose(disposing);
         }
 
         #region Windows Form Designer generated code
+
         /// <summary>
-        /// Required method for Designer support - do not modify
-        /// the contents of this method with the code editor.
+        ///     Required method for Designer support - do not modify
+        ///     the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(TypeIdCalculatorForm));
+            var resources = new System.ComponentModel.ComponentResourceManager(typeof(TypeIdCalculatorForm));
             this.label1 = new System.Windows.Forms.Label();
             this.inputtextBox = new System.Windows.Forms.TextBox();
             this.calckbutton = new System.Windows.Forms.Button();
@@ -157,45 +159,47 @@ namespace Sate
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.closebutton);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.Icon = ((System.Drawing.Icon) (resources.GetObject("$this.Icon")));
             this.Name = "TypeIdCalculatorForm";
             this.Text = "TypeId Calculator";
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             this.ResumeLayout(false);
-
         }
+
         #endregion
 
-        private void calckbutton_Click(object sender, System.EventArgs e)
+        private void calckbutton_Click(object sender, EventArgs e)
         {
             long typeId;
             try
             {
-                typeId=long.Parse(inputtextBox.Text);
-                this.resultlabel.Text="Result (type name):";
-                if (Safir.Dob.Typesystem.Operations.Exists(typeId))
+                typeId = long.Parse(inputtextBox.Text);
+                resultlabel.Text = "Result (type name):";
+                if (Operations.Exists(typeId))
                 {
-                    string name=Safir.Dob.Typesystem.Operations.GetName(typeId);
-                    this.resulttextBox.Text=name;
+                    var name = Operations.GetName(typeId);
+                    resulttextBox.Text = name;
                 }
                 else
                 {
-                    this.resultlabel.Text="Result (error):";
-                    this.resulttextBox.Text="No type exists with the specified typeId!";
+                    resultlabel.Text = "Result (error):";
+                    resulttextBox.Text = "No type exists with the specified typeId!";
                 }
                 return;
             }
-            catch {}
+            catch
+            {
+            }
 
-            this.resultlabel.Text="Result (typeId):";
-            typeId=Safir.Dob.Typesystem.Operations.GetTypeId(this.inputtextBox.Text);
-            this.resulttextBox.Text=typeId.ToString();
+            resultlabel.Text = "Result (typeId):";
+            typeId = Operations.GetTypeId(inputtextBox.Text);
+            resulttextBox.Text = typeId.ToString();
         }
 
-        private void closebutton_Click(object sender, System.EventArgs e)
+        private void closebutton_Click(object sender, EventArgs e)
         {
-            DialogResult=DialogResult.OK;
+            DialogResult = DialogResult.OK;
         }
     }
 }

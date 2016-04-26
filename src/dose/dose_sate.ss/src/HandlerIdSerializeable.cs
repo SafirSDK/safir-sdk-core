@@ -22,24 +22,22 @@
 *
 ******************************************************************************/
 
-using System;
-using System.Collections.Generic;
-using System.Text;
+using Safir.Dob.Typesystem;
 
 namespace Sate
 {
     public class HandlerIdSerializeable
     {
-        public Int64 m_handlerId = -1;
+        public long m_handlerId = -1;
         public string m_handlerIdStr;
-    
-        public HandlerIdSerializeable(Int64 handlerId, string handlerIdStr)
+
+        public HandlerIdSerializeable(long handlerId, string handlerIdStr)
         {
             m_handlerId = handlerId;
             m_handlerIdStr = handlerIdStr;
         }
 
-        public HandlerIdSerializeable(Int64 handlerId)
+        public HandlerIdSerializeable(long handlerId)
         {
             m_handlerId = handlerId;
             m_handlerIdStr = "";
@@ -50,7 +48,8 @@ namespace Sate
             m_handlerId = -1;
             m_handlerIdStr = handlerIdStr;
         }
-        public HandlerIdSerializeable(Safir.Dob.Typesystem.HandlerId handlerId)
+
+        public HandlerIdSerializeable(HandlerId handlerId)
         {
             m_handlerId = handlerId.RawValue;
             m_handlerIdStr = handlerId.RawString;
@@ -62,22 +61,22 @@ namespace Sate
             m_handlerIdStr = "";
         }
 
-        public Safir.Dob.Typesystem.HandlerId HandlerId()
+        public HandlerId HandlerId()
         {
             if (m_handlerId == -1 && m_handlerIdStr == "")
             {
-                return new Safir.Dob.Typesystem.HandlerId();
+                return new HandlerId();
             }
             if (m_handlerIdStr == "")
             {
-                return new Safir.Dob.Typesystem.HandlerId(m_handlerId);
+                return new HandlerId(m_handlerId);
             }
             if (m_handlerId == -1)
             {
-                return new Safir.Dob.Typesystem.HandlerId(m_handlerIdStr);
+                return new HandlerId(m_handlerIdStr);
             }
-            
-            return new Safir.Dob.Typesystem.HandlerId(m_handlerId, m_handlerIdStr);
+
+            return new HandlerId(m_handlerId, m_handlerIdStr);
         }
     }
 }

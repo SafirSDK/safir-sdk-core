@@ -23,99 +23,99 @@
 ******************************************************************************/
 
 using System;
-using System.Drawing;
-using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Windows.Forms;
-using System.Data;
+using System.Drawing;
 using System.IO;
+using System.Threading;
+using System.Windows.Forms;
+using Safir.Dob;
+using Safir.Dob.Typesystem;
+using Safir.Dob.Typesystem.Internal;
+using Exception = System.Exception;
+using Message = Safir.Dob.Message;
+using OverflowException = Safir.Dob.OverflowException;
 
 namespace Sate
 {
-    delegate void CallDispatchDelegate();
+    internal delegate void CallDispatchDelegate();
 
     /// <summary>
-    /// This is the main window in SATE.
+    ///     This is the main window in SATE.
     /// </summary>
-    public class MainForm : System.Windows.Forms.Form,
-                            Safir.Dob.Dispatcher,
-                            Safir.Dob.StopHandler,
-                            Safir.Dob.MessageSender,
-                            Safir.Dob.MessageSubscriber,
-                            Safir.Dob.Requestor,
-                            Safir.Dob.ServiceHandler,
-                            Safir.Dob.ServiceHandlerPending,
-                            Safir.Dob.RegistrationSubscriber,
-                            Safir.Dob.EntitySubscriber,
-                            Safir.Dob.EntityHandler,
-                            Safir.Dob.EntityHandlerInjection,
-                            Safir.Dob.EntityHandlerPending
+    public class MainForm : Form,
+        Dispatcher,
+        StopHandler,
+        MessageSender,
+        MessageSubscriber,
+        Requestor,
+        ServiceHandler,
+        ServiceHandlerPending,
+        RegistrationSubscriber,
+        EntitySubscriber,
+        EntityHandler,
+        EntityHandlerInjection,
+        EntityHandlerPending
     {
-        private delegate void OnConnectedDelegate();
-        private event OnConnectedDelegate ConnectedEvent;
-
-        //Must prevent the callback delegate from garbage collection. Thats why its declared here
-        private CallDispatchDelegate callDispatch;
+        private static MainForm instance;
 
         //DOB
-        private Safir.Dob.Connection dose = new Safir.Dob.Connection();
 
-        private AboutForm aboutForm = new AboutForm();
-        private System.Windows.Forms.StatusBar statusBar;
-        private System.Windows.Forms.Panel leftPanel;
-        private System.Windows.Forms.Splitter leftSplitter;
-        private System.Windows.Forms.Panel bottomPanel;
-        private System.Windows.Forms.Splitter bottomSplitter;
-        private System.ComponentModel.IContainer components;
-        private System.Windows.Forms.ImageList imageList;
-        private bool isConnected = false;
-        private Panel fillPanel;
-        private TabControl tabControl;
-        private MenuStrip menuStrip1;
-        private ToolStripMenuItem connectionToolStripMenuItem;
-        private ToolStripMenuItem connectToolStripMenuItem;
-        private ToolStripMenuItem disconnectToolStripMenuItem;
-        private ToolStripMenuItem viewToolStripMenuItem;
-        private ToolStripMenuItem classExplorerToolStripMenuItem;
-        private ToolStripMenuItem inboxToolStripMenuItem;
-        private ToolStripMenuItem outputToolStripMenuItem;
-        private ToolStripMenuItem toolsToolStripMenuItem;
-        private ToolStripMenuItem settingsToolStripMenuItem;
-        private ToolStripMenuItem scenarioPlayrecordToolStripMenuItem;
-        private ToolStripMenuItem helpToolStripMenuItem;
+        private readonly AboutForm aboutForm = new AboutForm();
+
+        //Must prevent the callback delegate from garbage collection. Thats why its declared here
+        private readonly CallDispatchDelegate callDispatch;
+        private readonly PanelLabelControl fillPanelLabel = new PanelLabelControl("");
         private ToolStripMenuItem aboutSATEToolStripMenuItem;
         private Panel bottomFillPanel;
-        private Splitter bottomRightSplitter;
+        private Panel bottomPanel;
         private Panel bottomRightPanel;
-        private PanelLabelControl fillPanelLabel = new PanelLabelControl("");
+        private Splitter bottomRightSplitter;
+        private Splitter bottomSplitter;
+        private ToolStripMenuItem calculatorsToolStripMenuItem;
+        private ToolStripMenuItem classExplorerToolStripMenuItem;
+        private IContainer components;
+
+        private int connectContext;
+        private ToolStripMenuItem connectionToolStripMenuItem;
+        private ToolStripMenuItem connectToolStripMenuItem;
+        private ToolStripMenuItem connectWithContextToolStripMenuItem;
+        private ToolStripMenuItem disconnectToolStripMenuItem;
+        private ToolStripMenuItem exitToolStripMenuItem;
         private Panel fillfillpanel;
-        private ToolStripSeparator toolStripMenuItem1;
-        private ToolStripMenuItem openToolStripMenuItem;
-        private ToolStripMenuItem saveToolStripMenuItem;
-        private ToolStripMenuItem helpToolStripMenuItem1;
-        private ToolStripSeparator toolStripMenuItem2;
+        private Panel fillPanel;
         private ToolStripMenuItem findToolStripMenuItem;
+
+        public List<long> handlerDecidesTypeIdList = new List<long>();
+        private ToolStripMenuItem helpToolStripMenuItem;
+        private ToolStripMenuItem helpToolStripMenuItem1;
+        private ImageList imageList;
+        private ToolStripMenuItem inboxToolStripMenuItem;
+        private Panel leftPanel;
+        private Splitter leftSplitter;
+        private MenuStrip menuStrip1;
         private ToolStripMenuItem opendoufileToolStripMenuItem;
         private ToolStripMenuItem openscenarioToolStripMenuItem;
         private ToolStripMenuItem openserializedObjectToolStripMenuItem;
-        private ToolStripSeparator toolStripMenuItem3;
-        private ToolStripMenuItem connectWithContextToolStripMenuItem;
-
-        private static MainForm instance;
-        private ToolStripSeparator toolStripMenuItem4;
-        private ToolStripMenuItem exitToolStripMenuItem;
+        private ToolStripMenuItem openToolStripMenuItem;
+        private ToolStripMenuItem outputToolStripMenuItem;
+        public List<long> requestorDecidesTypeIdList = new List<long>();
         private ToolStripMenuItem rescentFilesToolStripMenuItem;
-        private ToolStripMenuItem calculatorsToolStripMenuItem;
-        private ToolStripMenuItem typeIdToolStripMenuItem;
-        private ToolStripMenuItem timestampToolStripMenuItem;
-
-        private Int32 connectContext = 0;
-        private ToolStripSeparator toolStripSeparator1;
         private ToolStripMenuItem runGarbageCollectorToolStripMenuItem;
-
-        public List<Int64> handlerDecidesTypeIdList = new List<long>();
-        public List<Int64> requestorDecidesTypeIdList = new List<long>();
+        private ToolStripMenuItem saveToolStripMenuItem;
+        private ToolStripMenuItem scenarioPlayrecordToolStripMenuItem;
+        private ToolStripMenuItem settingsToolStripMenuItem;
+        private StatusBar statusBar;
+        private TabControl tabControl;
+        private ToolStripMenuItem timestampToolStripMenuItem;
+        private ToolStripMenuItem toolsToolStripMenuItem;
+        private ToolStripSeparator toolStripMenuItem1;
+        private ToolStripSeparator toolStripMenuItem2;
+        private ToolStripSeparator toolStripMenuItem3;
+        private ToolStripSeparator toolStripMenuItem4;
+        private ToolStripSeparator toolStripSeparator1;
+        private ToolStripMenuItem typeIdToolStripMenuItem;
+        private ToolStripMenuItem viewToolStripMenuItem;
 
 
         private MainForm()
@@ -125,21 +125,21 @@ namespace Sate
             //
             InitializeComponent();
 
-            fillPanelLabel.BackColor = System.Drawing.SystemColors.Control;
+            fillPanelLabel.BackColor = SystemColors.Control;
             fillPanelLabel.ForeColor = Color.Black;
-            fillPanelLabel.CloseEvent += new PanelLabelControl.OnCloseEventHandler(fillPanelLabel_CloseEvent);
-            fillPanelLabel.ContextMenu = new ContextMenu(new MenuItem[] { new MenuItem("Close all tabs", new EventHandler(OnCloseAllTabs)) });
-            this.fillfillpanel.Controls.Add(fillPanelLabel);
-            this.fillPanel.Visible = false;
+            fillPanelLabel.CloseEvent += fillPanelLabel_CloseEvent;
+            fillPanelLabel.ContextMenu = new ContextMenu(new[] {new MenuItem("Close all tabs", OnCloseAllTabs)});
+            fillfillpanel.Controls.Add(fillPanelLabel);
+            fillPanel.Visible = false;
 
-            ConnectedEvent+=new OnConnectedDelegate(OnConnected);
+            ConnectedEvent += OnConnected;
 
-            callDispatch = new CallDispatchDelegate(dose.Dispatch);
+            callDispatch = Dose.Dispatch;
 
 
             AllowDrop = true;
-            DragEnter += new DragEventHandler(OnDragEnter);
-            DragDrop += new DragEventHandler(OnDragDrop);
+            DragEnter += OnDragEnter;
+            DragDrop += OnDragDrop;
 
 
             //-------------------------------------------------------------
@@ -150,44 +150,189 @@ namespace Sate
             //Create Auto Reply
             if (Settings.Sate.XmlReplyObject != null) //try to load saved response
             {
-                Settings.Sate.AutoResponse = new Safir.Dob.Response();
-                bool loadedOk=true;
+                Settings.Sate.AutoResponse = new Response();
+                var loadedOk = true;
                 try
                 {
-                    Settings.Sate.AutoResponse = (Safir.Dob.Response)Safir.Dob.Typesystem.Serialization.ToObject(Settings.Sate.XmlReplyObject);
+                    Settings.Sate.AutoResponse = (Response) Serialization.ToObject(Settings.Sate.XmlReplyObject);
                 }
-                catch { loadedOk = false; }
+                catch
+                {
+                    loadedOk = false;
+                }
 
                 if (!loadedOk)
                 {
-                    Settings.Sate.AutoResponse = new Safir.Dob.SuccessResponse();
+                    Settings.Sate.AutoResponse = new SuccessResponse();
                     Settings.Sate.XmlReplyObject = null;
                     Settings.Save();
                 }
             }
             else //no stored response, use a simple success-reply
             {
-                Settings.Sate.AutoResponse = new Safir.Dob.SuccessResponse();
+                Settings.Sate.AutoResponse = new SuccessResponse();
             }
             //------------ End Read Parameters -------------
 
 
-            leftPanel.Dock=DockStyle.Left;
+            leftPanel.Dock = DockStyle.Left;
 
-            ExplorerPanel.Instance.Dock=DockStyle.Fill;
+            ExplorerPanel.Instance.Dock = DockStyle.Fill;
             leftPanel.Controls.Add(ExplorerPanel.Instance);
 
             InboxPanel.Instance.Dock = DockStyle.Fill;
 
-            this.bottomFillPanel.Controls.Add(InboxPanel.Instance);
+            bottomFillPanel.Controls.Add(InboxPanel.Instance);
 
-            OutputPanel.Instance.Dock=DockStyle.Fill;
-            this.bottomRightPanel.Controls.Add(OutputPanel.Instance);
-
+            OutputPanel.Instance.Dock = DockStyle.Fill;
+            bottomRightPanel.Controls.Add(OutputPanel.Instance);
         }
 
+        //Get the only instance of MainForm (singleton)
+        public static MainForm Instance
+        {
+            get
+            {
+                if (instance == null)
+                    instance = new MainForm();
+                return instance;
+            }
+        }
+
+        //Get the connection to the DOB
+        public Connection Dose { get; } = new Connection();
+
+
+        public bool IsConnected { get; private set; }
+
+        //-----------------------------------------------------
+        // Implemented Consumers and interfaces
+        //-----------------------------------------------------
+
+        #region Dispatcher Members
+
+        public void OnDoDispatch()
+        {
+            try
+            {
+                if (!Settings.Sate.NoDispatch && !IsDisposed)
+                {
+                    // Invoke will force a thread switch!
+                    Invoke(callDispatch);
+                }
+            }
+            catch (ObjectDisposedException e)
+            {
+                Console.WriteLine("Caught exception in Dispatch: " + e);
+            }
+        }
+
+        #endregion
+
+        #region MessageSender Members
+
+        public void OnNotMessageOverflow()
+        {
+            OutputPanel.Instance.LogEvent("- Notification: Not overflow in message queue", true);
+        }
+
+        #endregion
+
+        #region MessageSubscriber Members
+
+        public void OnMessage(MessageProxy messageProxy)
+        {
+            var name = Operations.GetName(messageProxy.TypeId);
+            OutputPanel.Instance.LogEvent("- Received message '" + name + "' on channel " + messageProxy.ChannelId, true);
+
+            var msgInfo = new MessageInfo();
+            msgInfo.setChannelId(messageProxy.ChannelId);
+            msgInfo.Obj = messageProxy.Message;
+
+            //int blobsize = Safir.Dob.Typesystem.BlobOperations.GetSize(messageProxy.Blob);
+
+            InboxPanel.Instance.AddResponse(msgInfo, "Message received on channel " + messageProxy.ChannelId);
+
+            UpdateLiveData(msgInfo);
+        }
+
+        #endregion
+
+        #region ServiceProvider Members
+
+        public void OnServiceRequest(ServiceRequestProxy serviceRequestProxy, ResponseSender rs)
+        {
+            var name = Operations.GetName(serviceRequestProxy.TypeId);
+            OutputPanel.Instance.LogEvent(
+                "- Received service request '" + name + "' for handler " + serviceRequestProxy.ReceivingHandlerId, true);
+
+            var serviceHandlerInfo = new ServiceHandlerInfo();
+            serviceHandlerInfo.setHandlerId(serviceRequestProxy.ReceivingHandlerId);
+            serviceHandlerInfo.Obj = serviceRequestProxy.Request;
+            serviceHandlerInfo.Blobsize = BlobOperations.GetSize(serviceRequestProxy.Blob);
+
+            UpdateLiveData(serviceHandlerInfo);
+
+            InboxPanel.Instance.AddResponse(serviceHandlerInfo,
+                "Service request for handler " + serviceRequestProxy.ReceivingHandlerId);
+
+            if (!Settings.Sate.NoResponse)
+            {
+                OutputPanel.Instance.LogEvent("- Response sent", true);
+                rs.Send(Settings.Sate.AutoResponse);
+            }
+            else
+            {
+                OutputPanel.Instance.LogEvent("- ResponseSender discarded", true);
+                rs.Discard();
+            }
+        }
+
+        #endregion
+
+        #region RevokedRegistrationBase Members
+
+        public void OnRevokedRegistration(long typeId, HandlerId handlerId)
+        {
+            var regInfo = new RegInfo();
+            regInfo.typeId = typeId;
+            regInfo.handlerIdSer = new HandlerIdSerializeable(handlerId);
+            ExplorerPanel.Instance.RevokedRegistration(regInfo);
+
+            // remove typeids
+            requestorDecidesTypeIdList.Remove(typeId);
+            handlerDecidesTypeIdList.Remove(typeId);
+        }
+
+        #endregion
+
+        #region CompletedRegistrationBase Members
+
+        public void OnCompletedRegistration(long typeId, HandlerId handlerId)
+        {
+            var name = Operations.GetName(typeId);
+            ExplorerPanel.Instance.SetRegistered(typeId);
+            OutputPanel.Instance.LogEvent(
+                "- Registration completed for typeId: " + name + " with handlerid '" + handlerId + "'", true);
+        }
+
+        #endregion
+
+        #region ConnectionOwner Members
+
+        public void OnStopOrder()
+        {
+            Environment.Exit(0);
+            OutputPanel.Instance.LogEvent("- Received stop order, disconnecting...", true);
+            Disconnect();
+        }
+
+        #endregion
+
+        private event OnConnectedDelegate ConnectedEvent;
+
         //Event handler for close all tabs context menu
-        void OnCloseAllTabs(object sender, EventArgs e)
+        private void OnCloseAllTabs(object sender, EventArgs e)
         {
             foreach (TabPage tp in tabControl.TabPages)
             {
@@ -199,12 +344,12 @@ namespace Sate
         }
 
         //Event handler for drag and drop of files on SATE.
-        void OnDragDrop(object sender, DragEventArgs e)
+        private void OnDragDrop(object sender, DragEventArgs e)
         {
-            string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
-            foreach (string f in files)
+            var files = (string[]) e.Data.GetData(DataFormats.FileDrop);
+            foreach (var f in files)
             {
-                string str=f.ToLower();
+                var str = f.ToLower();
                 if (str.EndsWith(".dou"))
                 {
                     OpenDouFile(str);
@@ -220,8 +365,9 @@ namespace Sate
                 }
             }
         }
+
         //Needed to get drag and drop working
-        void OnDragEnter(object sender, DragEventArgs e)
+        private void OnDragEnter(object sender, DragEventArgs e)
         {
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
             {
@@ -231,22 +377,25 @@ namespace Sate
 
         //Event handler for closing a tab
         // Selects the tab to the right of the closing tab (if possible)
-        void fillPanelLabel_CloseEvent(object sender, EventArgs e)
+        private void fillPanelLabel_CloseEvent(object sender, EventArgs e)
         {
-
             // save value
-            int selectedIndex = tabControl.SelectedIndex;
+            var selectedIndex = tabControl.SelectedIndex;
             if (selectedIndex >= 0)
             {
-                menuStrip1.Focus (); //Mono bug workaround. Mono crashes if a control on the tabPage has focus when the tab is deleted.
+                if (IsMono())
+                {
+                    menuStrip1.Focus();
+                    //Mono bug workaround. Mono crashes if a control on the tabPage has focus when the tab is deleted.
+                }
 
-                TabPage tp = tabControl.TabPages[selectedIndex];
+                var tp = tabControl.TabPages[selectedIndex];
+
                 tabControl.TabPages.RemoveAt(selectedIndex);
                 tp.Dispose();
 
                 if ((tabControl.TabCount > 1) && (selectedIndex != 0))
                 {
-
                     if (selectedIndex < tabControl.TabCount)
                     {
                         tabControl.SelectTab(selectedIndex);
@@ -259,88 +408,63 @@ namespace Sate
             }
             if (tabControl.TabPages.Count == 0)
             {
-                this.fillPanel.Visible = false;
-            }
-        }
-
-        //Get the only instance of MainForm (singleton)
-        public static MainForm Instance
-        {
-            get
-            {
-                if (instance==null)
-                    instance=new MainForm();
-                return instance;
-            }
-        }
-
-        //Get the connection to the DOB
-        public Safir.Dob.Connection Dose
-        {
-            get
-            {
-                return dose;
+                fillPanel.Visible = false;
             }
         }
 
         //Shows a new tab
         public void AddTabPage(TabPage tp)
         {
-            this.fillPanel.Visible = true;
-#if STSYLI
-            if (!(tp is ObjectEditTabPage && UpdateLiveData(((ObjectEditTabPage)tp).ObjEditCtrl.GetObject())))
-#else
-                  //if (tp is ObjectEditTabPage)
-#endif
-            {
-                try
-                {
-                    tabControl.TabPages.Add(tp);
-                    tabControl.SelectedIndex = tabControl.TabPages.Count - 1;
-                }
-                catch (System.ComponentModel.Win32Exception e)
-                {
-                    string msg = "Unable to display more windows in SATE! Try closing other tabs first! - Exception: " + e.Message;
-                    OutputPanel.Instance.LogEvent(msg, true);
-                    tp.Dispose();
-                    MessageBox.Show("A new page can not be created until you close one first!\nSATE has run out of resources.");
-                    //throw;
-                }
-            }
+            fillPanel.Visible = true;
 
+            try
+            {
+                tabControl.TabPages.Add(tp);
+                tabControl.SelectedIndex = tabControl.TabPages.Count - 1;
+            }
+            catch (Win32Exception e)
+            {
+                var msg = "Unable to display more windows in SATE! Try closing other tabs first! - Exception: " +
+                          e.Message;
+                OutputPanel.Instance.LogEvent(msg, true);
+                tp.Dispose();
+                MessageBox.Show(
+                    "A new page can not be created until you close one first!\nSATE has run out of resources.");
+            }
         }
 
         public void KickDispatch()
         {
-            System.GC.Collect();
+            GC.Collect();
             // Invoke will force a thread switch!
-            this.Invoke(callDispatch);
+            Invoke(callDispatch);
         }
 
         /// <summary>
-        /// Clean up any resources being used.
+        ///     Clean up any resources being used.
         /// </summary>
-        protected override void Dispose( bool disposing )
+        protected override void Dispose(bool disposing)
         {
-            if( disposing )
+            if (disposing)
             {
                 if (components != null)
                 {
                     components.Dispose();
                 }
             }
-            base.Dispose( disposing );
+            base.Dispose(disposing);
         }
 
         #region Windows Form Designer generated code
+
         /// <summary>
-        /// Required method for Designer support - do not modify
-        /// the contents of this method with the code editor.
+        ///     Required method for Designer support - do not modify
+        ///     the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
+            var resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.imageList = new System.Windows.Forms.ImageList(this.components);
             this.statusBar = new System.Windows.Forms.StatusBar();
             this.bottomSplitter = new System.Windows.Forms.Splitter();
@@ -393,7 +517,8 @@ namespace Sate
             // 
             // imageList
             // 
-            this.imageList.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imageList.ImageStream")));
+            this.imageList.ImageStream =
+                ((System.Windows.Forms.ImageListStreamer) (resources.GetObject("imageList.ImageStream")));
             this.imageList.TransparentColor = System.Drawing.Color.Transparent;
             this.imageList.Images.SetKeyName(0, "");
             this.imageList.Images.SetKeyName(1, "");
@@ -500,7 +625,8 @@ namespace Sate
             // 
             this.tabControl.Appearance = System.Windows.Forms.TabAppearance.FlatButtons;
             this.tabControl.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tabControl.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.tabControl.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F,
+                System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (0)));
             this.tabControl.ImageList = this.imageList;
             this.tabControl.Location = new System.Drawing.Point(0, 0);
             this.tabControl.Name = "tabControl";
@@ -511,11 +637,13 @@ namespace Sate
             // 
             // menuStrip1
             // 
-            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.connectionToolStripMenuItem,
-            this.viewToolStripMenuItem,
-            this.toolsToolStripMenuItem,
-            this.helpToolStripMenuItem});
+            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[]
+            {
+                this.connectionToolStripMenuItem,
+                this.viewToolStripMenuItem,
+                this.toolsToolStripMenuItem,
+                this.helpToolStripMenuItem
+            });
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(1160, 24);
@@ -524,24 +652,27 @@ namespace Sate
             // 
             // connectionToolStripMenuItem
             // 
-            this.connectionToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.connectToolStripMenuItem,
-            this.connectWithContextToolStripMenuItem,
-            this.disconnectToolStripMenuItem,
-            this.toolStripMenuItem1,
-            this.openToolStripMenuItem,
-            this.saveToolStripMenuItem,
-            this.findToolStripMenuItem,
-            this.rescentFilesToolStripMenuItem,
-            this.toolStripMenuItem4,
-            this.exitToolStripMenuItem});
+            this.connectionToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[]
+            {
+                this.connectToolStripMenuItem,
+                this.connectWithContextToolStripMenuItem,
+                this.disconnectToolStripMenuItem,
+                this.toolStripMenuItem1,
+                this.openToolStripMenuItem,
+                this.saveToolStripMenuItem,
+                this.findToolStripMenuItem,
+                this.rescentFilesToolStripMenuItem,
+                this.toolStripMenuItem4,
+                this.exitToolStripMenuItem
+            });
             this.connectionToolStripMenuItem.Name = "connectionToolStripMenuItem";
             this.connectionToolStripMenuItem.Size = new System.Drawing.Size(81, 20);
             this.connectionToolStripMenuItem.Text = "Connection";
             // 
             // connectToolStripMenuItem
             // 
-            this.connectToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("connectToolStripMenuItem.Image")));
+            this.connectToolStripMenuItem.Image =
+                ((System.Drawing.Image) (resources.GetObject("connectToolStripMenuItem.Image")));
             this.connectToolStripMenuItem.Name = "connectToolStripMenuItem";
             this.connectToolStripMenuItem.Size = new System.Drawing.Size(196, 22);
             this.connectToolStripMenuItem.Text = "Connect";
@@ -549,16 +680,19 @@ namespace Sate
             // 
             // connectWithContextToolStripMenuItem
             // 
-            this.connectWithContextToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("connectWithContextToolStripMenuItem.Image")));
+            this.connectWithContextToolStripMenuItem.Image =
+                ((System.Drawing.Image) (resources.GetObject("connectWithContextToolStripMenuItem.Image")));
             this.connectWithContextToolStripMenuItem.Name = "connectWithContextToolStripMenuItem";
             this.connectWithContextToolStripMenuItem.Size = new System.Drawing.Size(196, 22);
             this.connectWithContextToolStripMenuItem.Text = "Connect with context...";
-            this.connectWithContextToolStripMenuItem.Click += new System.EventHandler(this.connectWithContextToolStripMenuItem_Click);
+            this.connectWithContextToolStripMenuItem.Click +=
+                new System.EventHandler(this.connectWithContextToolStripMenuItem_Click);
             // 
             // disconnectToolStripMenuItem
             // 
             this.disconnectToolStripMenuItem.Enabled = false;
-            this.disconnectToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("disconnectToolStripMenuItem.Image")));
+            this.disconnectToolStripMenuItem.Image =
+                ((System.Drawing.Image) (resources.GetObject("disconnectToolStripMenuItem.Image")));
             this.disconnectToolStripMenuItem.Name = "disconnectToolStripMenuItem";
             this.disconnectToolStripMenuItem.Size = new System.Drawing.Size(196, 22);
             this.disconnectToolStripMenuItem.Text = "Disconnect";
@@ -571,11 +705,14 @@ namespace Sate
             // 
             // openToolStripMenuItem
             // 
-            this.openToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.opendoufileToolStripMenuItem,
-            this.openscenarioToolStripMenuItem,
-            this.openserializedObjectToolStripMenuItem});
-            this.openToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("openToolStripMenuItem.Image")));
+            this.openToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[]
+            {
+                this.opendoufileToolStripMenuItem,
+                this.openscenarioToolStripMenuItem,
+                this.openserializedObjectToolStripMenuItem
+            });
+            this.openToolStripMenuItem.Image =
+                ((System.Drawing.Image) (resources.GetObject("openToolStripMenuItem.Image")));
             this.openToolStripMenuItem.Name = "openToolStripMenuItem";
             this.openToolStripMenuItem.Size = new System.Drawing.Size(196, 22);
             this.openToolStripMenuItem.Text = "Open";
@@ -599,12 +736,14 @@ namespace Sate
             this.openserializedObjectToolStripMenuItem.Name = "openserializedObjectToolStripMenuItem";
             this.openserializedObjectToolStripMenuItem.Size = new System.Drawing.Size(168, 22);
             this.openserializedObjectToolStripMenuItem.Text = "Serialized object...";
-            this.openserializedObjectToolStripMenuItem.Click += new System.EventHandler(this.openserializedObjectToolStripMenuItem_Click);
+            this.openserializedObjectToolStripMenuItem.Click +=
+                new System.EventHandler(this.openserializedObjectToolStripMenuItem_Click);
             // 
             // saveToolStripMenuItem
             // 
             this.saveToolStripMenuItem.Enabled = false;
-            this.saveToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("saveToolStripMenuItem.Image")));
+            this.saveToolStripMenuItem.Image =
+                ((System.Drawing.Image) (resources.GetObject("saveToolStripMenuItem.Image")));
             this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
             this.saveToolStripMenuItem.Size = new System.Drawing.Size(196, 22);
             this.saveToolStripMenuItem.Text = "Save...";
@@ -613,7 +752,8 @@ namespace Sate
             // findToolStripMenuItem
             // 
             this.findToolStripMenuItem.Enabled = false;
-            this.findToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("findToolStripMenuItem.Image")));
+            this.findToolStripMenuItem.Image =
+                ((System.Drawing.Image) (resources.GetObject("findToolStripMenuItem.Image")));
             this.findToolStripMenuItem.Name = "findToolStripMenuItem";
             this.findToolStripMenuItem.Size = new System.Drawing.Size(196, 22);
             this.findToolStripMenuItem.Text = "Find...";
@@ -639,10 +779,12 @@ namespace Sate
             // 
             // viewToolStripMenuItem
             // 
-            this.viewToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.classExplorerToolStripMenuItem,
-            this.inboxToolStripMenuItem,
-            this.outputToolStripMenuItem});
+            this.viewToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[]
+            {
+                this.classExplorerToolStripMenuItem,
+                this.inboxToolStripMenuItem,
+                this.outputToolStripMenuItem
+            });
             this.viewToolStripMenuItem.Name = "viewToolStripMenuItem";
             this.viewToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
             this.viewToolStripMenuItem.Text = "View";
@@ -676,22 +818,26 @@ namespace Sate
             // 
             // toolsToolStripMenuItem
             // 
-            this.toolsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.calculatorsToolStripMenuItem,
-            this.scenarioPlayrecordToolStripMenuItem,
-            this.toolStripSeparator1,
-            this.runGarbageCollectorToolStripMenuItem,
-            this.toolStripMenuItem3,
-            this.settingsToolStripMenuItem});
+            this.toolsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[]
+            {
+                this.calculatorsToolStripMenuItem,
+                this.scenarioPlayrecordToolStripMenuItem,
+                this.toolStripSeparator1,
+                this.runGarbageCollectorToolStripMenuItem,
+                this.toolStripMenuItem3,
+                this.settingsToolStripMenuItem
+            });
             this.toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
             this.toolsToolStripMenuItem.Size = new System.Drawing.Size(47, 20);
             this.toolsToolStripMenuItem.Text = "Tools";
             // 
             // calculatorsToolStripMenuItem
             // 
-            this.calculatorsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.typeIdToolStripMenuItem,
-            this.timestampToolStripMenuItem});
+            this.calculatorsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[]
+            {
+                this.typeIdToolStripMenuItem,
+                this.timestampToolStripMenuItem
+            });
             this.calculatorsToolStripMenuItem.Image = global::Sate.Resources.TYPEIDCALC;
             this.calculatorsToolStripMenuItem.Name = "calculatorsToolStripMenuItem";
             this.calculatorsToolStripMenuItem.Size = new System.Drawing.Size(193, 22);
@@ -713,7 +859,8 @@ namespace Sate
             // 
             // scenarioPlayrecordToolStripMenuItem
             // 
-            this.scenarioPlayrecordToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("scenarioPlayrecordToolStripMenuItem.Image")));
+            this.scenarioPlayrecordToolStripMenuItem.Image =
+                ((System.Drawing.Image) (resources.GetObject("scenarioPlayrecordToolStripMenuItem.Image")));
             this.scenarioPlayrecordToolStripMenuItem.Name = "scenarioPlayrecordToolStripMenuItem";
             this.scenarioPlayrecordToolStripMenuItem.Size = new System.Drawing.Size(193, 22);
             this.scenarioPlayrecordToolStripMenuItem.Text = "Scenario play/record...";
@@ -729,7 +876,8 @@ namespace Sate
             this.runGarbageCollectorToolStripMenuItem.Name = "runGarbageCollectorToolStripMenuItem";
             this.runGarbageCollectorToolStripMenuItem.Size = new System.Drawing.Size(193, 22);
             this.runGarbageCollectorToolStripMenuItem.Text = "Run Garbage Collector";
-            this.runGarbageCollectorToolStripMenuItem.Click += new System.EventHandler(this.runGarbageCollectorToolStripMenuItem_Click);
+            this.runGarbageCollectorToolStripMenuItem.Click +=
+                new System.EventHandler(this.runGarbageCollectorToolStripMenuItem_Click);
             // 
             // toolStripMenuItem3
             // 
@@ -738,7 +886,8 @@ namespace Sate
             // 
             // settingsToolStripMenuItem
             // 
-            this.settingsToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("settingsToolStripMenuItem.Image")));
+            this.settingsToolStripMenuItem.Image =
+                ((System.Drawing.Image) (resources.GetObject("settingsToolStripMenuItem.Image")));
             this.settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
             this.settingsToolStripMenuItem.Size = new System.Drawing.Size(193, 22);
             this.settingsToolStripMenuItem.Text = "Settings...";
@@ -746,17 +895,20 @@ namespace Sate
             // 
             // helpToolStripMenuItem
             // 
-            this.helpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.helpToolStripMenuItem1,
-            this.toolStripMenuItem2,
-            this.aboutSATEToolStripMenuItem});
+            this.helpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[]
+            {
+                this.helpToolStripMenuItem1,
+                this.toolStripMenuItem2,
+                this.aboutSATEToolStripMenuItem
+            });
             this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
             this.helpToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
             this.helpToolStripMenuItem.Text = "Help";
             // 
             // helpToolStripMenuItem1
             // 
-            this.helpToolStripMenuItem1.Image = ((System.Drawing.Image)(resources.GetObject("helpToolStripMenuItem1.Image")));
+            this.helpToolStripMenuItem1.Image =
+                ((System.Drawing.Image) (resources.GetObject("helpToolStripMenuItem1.Image")));
             this.helpToolStripMenuItem1.Name = "helpToolStripMenuItem1";
             this.helpToolStripMenuItem1.Size = new System.Drawing.Size(145, 22);
             this.helpToolStripMenuItem1.Text = "Help...";
@@ -785,7 +937,7 @@ namespace Sate
             this.Controls.Add(this.leftPanel);
             this.Controls.Add(this.statusBar);
             this.Controls.Add(this.menuStrip1);
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.Icon = ((System.Drawing.Icon) (resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "MainForm";
             this.Text = "SATE";
@@ -797,33 +949,33 @@ namespace Sate
             this.menuStrip1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
-
         }
+
         #endregion
 
-        public static bool IsMono ()
+        public static bool IsMono()
         {
-            return Type.GetType ("Mono.Runtime") != null;
+            return Type.GetType("Mono.Runtime") != null;
         }
 
         /// <summary>
-        /// The main entry point for the application.
+        ///     The main entry point for the application.
         /// </summary>
         [STAThread]
-        static void Main()
+        private static void Main()
         {
             if (IsMono())
             {
-                System.Console.WriteLine("Disabling Mono Gtk+ Color detection. Please ignore the following line.");
-                System.Environment.SetEnvironmentVariable("DESKTOP_SESSION","KDE");
-                System.Threading.Thread.Sleep(1000);
+                Console.WriteLine("Disabling Mono Gtk+ Color detection. Please ignore the following line.");
+                Environment.SetEnvironmentVariable("DESKTOP_SESSION", "KDE");
+                Thread.Sleep(1000);
             }
 
-            Application.Run(MainForm.Instance);
+            Application.Run(Instance);
         }
 
         //This is executed when the MainForm is first loaded
-        private void MainForm_Load(object sender, System.EventArgs e)
+        private void MainForm_Load(object sender, EventArgs e)
         {
             OutputPanel.Instance.LogEvent("- SATE started.", true);
 
@@ -838,10 +990,10 @@ namespace Sate
             //------------------------------------------
             if (Settings.Sate.ConnectAtStartUp)
             {
-                Connect(true,0);
+                Connect(true, 0);
             }
 
-            this.AutoOrganize(); //organizes the windows (panels) in the main form
+            AutoOrganize(); //organizes the windows (panels) in the main form
         }
 
         //------------------------------------------
@@ -849,35 +1001,34 @@ namespace Sate
         //------------------------------------------
         private void ConnectToDose() //A new thread is calling the dose.Open
         {
-            int instance = 0;
-            string cn=Settings.Sate.ConnectionName;
+            var instance = 0;
+            var cn = Settings.Sate.ConnectionName;
 
-            bool connected = false;
+            var connected = false;
 
             while (!connected)
             {
                 try
                 {
-                    dose.Open(cn,
-                              instance.ToString(),
-                              connectContext,
-                              this,  // ConnectionOwner
-                              this); // Dispatcher
+                    Dose.Open(cn,
+                        instance.ToString(),
+                        connectContext,
+                        this, // ConnectionOwner
+                        this); // Dispatcher
 
                     connected = true;
                 }
-                catch (Safir.Dob.NotOpenException)
+                catch (NotOpenException)
                 {
                     // Instance already used, try another!
                     instance++;
                 }
             }
 
-            dose.Close();
+            Dose.Close();
             ConnectedEvent();
         }
 
-        private delegate void HandleConnectionDoneDelegate();
         private void OnConnected() //Event signaling that connection can be done
         {
             Invoke(new HandleConnectionDoneDelegate(HandleConnectionDone)); //change thread back to the main thread.
@@ -886,38 +1037,38 @@ namespace Sate
         //Called when connection to dose is established
         private void HandleConnectionDone()
         {
-            int instance = 0;
+            var instance = 0;
 
-            bool connected = false;
+            var connected = false;
 
             while (!connected)
             {
                 try
                 {
                     //connect to dob
-                    dose.Open(Settings.Sate.ConnectionName,
-                              instance.ToString(),
-                              connectContext,
-                              this,  // ConnectionOwner
-                              this); // Dispatcher
+                    Dose.Open(Settings.Sate.ConnectionName,
+                        instance.ToString(),
+                        connectContext,
+                        this, // ConnectionOwner
+                        this); // Dispatcher
                     connected = true;
                 }
-                catch (Safir.Dob.NotOpenException)
+                catch (NotOpenException)
                 {
                     // Instance already used, try another!
                     instance++;
                 }
             }
 
-            isConnected = true;
+            IsConnected = true;
 
-            this.connectToolStripMenuItem.Enabled = false;
-            this.connectWithContextToolStripMenuItem.Enabled = false;
-            this.disconnectToolStripMenuItem.Enabled=true;
+            connectToolStripMenuItem.Enabled = false;
+            connectWithContextToolStripMenuItem.Enabled = false;
+            disconnectToolStripMenuItem.Enabled = true;
 
             // get connection name
-            Safir.Dob.ConnectionAspectMisc doseAspectMisc = new Safir.Dob.ConnectionAspectMisc(dose);
-            this.statusBar.Text = "Connected as " + doseAspectMisc.GetConnectionName();
+            var doseAspectMisc = new ConnectionAspectMisc(Dose);
+            statusBar.Text = "Connected as " + doseAspectMisc.GetConnectionName();
 
             OutputPanel.Instance.LogEvent("success!", true);
 
@@ -925,9 +1076,9 @@ namespace Sate
             //If connection is ok, set up permanent ownerships stored in settings
             //--------------------------------------------------------------------
             OutputPanel.Instance.LogEvent("- Register entities and services", true);
-            foreach (RegInfo id in Settings.Sate.Register)
+            foreach (var id in Settings.Sate.Register)
             {
-                if (Safir.Dob.Typesystem.Operations.IsOfType(id.typeId, Safir.Dob.Entity.ClassTypeId))
+                if (Operations.IsOfType(id.typeId, Entity.ClassTypeId))
                 {
                     ExplorerPanel.Instance.RegisterEntity(id);
                 }
@@ -941,13 +1092,13 @@ namespace Sate
             //...and then set up permanent subscriptions
             //----------------------------------------------------
             OutputPanel.Instance.LogEvent("- Setting up subscriptions", true);
-            foreach (SubInfo id in Settings.Sate.Subscribe)
+            foreach (var id in Settings.Sate.Subscribe)
             {
-                if (Safir.Dob.Typesystem.Operations.IsOfType(id.typeId, Safir.Dob.Entity.ClassTypeId))
+                if (Operations.IsOfType(id.typeId, Entity.ClassTypeId))
                 {
                     ExplorerPanel.Instance.SubscribeEntity(id);
                 }
-                else if (Safir.Dob.Typesystem.Operations.IsOfType(id.typeId, Safir.Dob.Message.ClassTypeId))
+                else if (Operations.IsOfType(id.typeId, Message.ClassTypeId))
                 {
                     ExplorerPanel.Instance.SubscribeMessage(id);
                 }
@@ -957,12 +1108,10 @@ namespace Sate
             //...and then set up permanent subscriptions of registrations
             //----------------------------------------------------
             OutputPanel.Instance.LogEvent("- Setting up subscriptions of registrations", true);
-            foreach (SubRegInfo id in Settings.Sate.SubscribeReg)
+            foreach (var id in Settings.Sate.SubscribeReg)
             {
-
                 ExplorerPanel.Instance.SubscribeRegistration(id);
             }
-
         }
 
         //-------------------------------------------------
@@ -973,42 +1122,42 @@ namespace Sate
             //-----------------------------------------
             // Left Panel
             //-----------------------------------------
-            if (this.classExplorerToolStripMenuItem.Checked)
+            if (classExplorerToolStripMenuItem.Checked)
             {
-                this.leftPanel.Visible = true;
-                this.leftSplitter.Visible = true;
+                leftPanel.Visible = true;
+                leftSplitter.Visible = true;
             }
             else
             {
-                this.leftPanel.Visible = false;
-                this.leftSplitter.Visible = false;
+                leftPanel.Visible = false;
+                leftSplitter.Visible = false;
             }
 
             //-----------------------------------------
             // Bottom Panel
             //-----------------------------------------
-            if (this.inboxToolStripMenuItem.Checked || this.outputToolStripMenuItem.Checked)
+            if (inboxToolStripMenuItem.Checked || outputToolStripMenuItem.Checked)
             {
-                this.bottomPanel.Visible = true;
-                this.bottomSplitter.Visible = true;
+                bottomPanel.Visible = true;
+                bottomSplitter.Visible = true;
             }
             else
             {
-                this.bottomPanel.Visible = false;
-                this.bottomSplitter.Visible = false;
+                bottomPanel.Visible = false;
+                bottomSplitter.Visible = false;
             }
 
             // Inbox
             if (inboxToolStripMenuItem.Checked)
             {
-                this.bottomFillPanel.Visible = true;
-                this.bottomRightPanel.Dock = DockStyle.Right;
+                bottomFillPanel.Visible = true;
+                bottomRightPanel.Dock = DockStyle.Right;
             }
             else
             {
-                this.bottomFillPanel.Visible = false;
+                bottomFillPanel.Visible = false;
                 if (outputToolStripMenuItem.Checked)
-                    this.bottomRightPanel.Dock = DockStyle.Fill;
+                    bottomRightPanel.Dock = DockStyle.Fill;
             }
             // Output
             if (outputToolStripMenuItem.Checked)
@@ -1028,499 +1177,76 @@ namespace Sate
         }
 
         //Event handler for menu: View -> Class Explorer
-        private void classExplorermenuItem_Click(object sender, System.EventArgs e)
+        private void classExplorermenuItem_Click(object sender, EventArgs e)
         {
             ShowHideExplorer(!classExplorerToolStripMenuItem.Checked);
         }
 
         public void ShowHideExplorer(bool show)
         {
-            this.classExplorerToolStripMenuItem.Checked = show;
+            classExplorerToolStripMenuItem.Checked = show;
             AutoOrganize();
         }
 
         //Event handler for menu: View -> Output
-        private void eventlogmenuItem_Click(object sender, System.EventArgs e)
+        private void eventlogmenuItem_Click(object sender, EventArgs e)
         {
             ShowHideOutput(!outputToolStripMenuItem.Checked);
         }
 
         public void ShowHideOutput(bool show)
         {
-            this.outputToolStripMenuItem.Checked = show;
+            outputToolStripMenuItem.Checked = show;
             AutoOrganize();
         }
 
         //Event handler for menu: View -> Inbox
-        private void subrespmenuItem_Click(object sender, System.EventArgs e)
+        private void subrespmenuItem_Click(object sender, EventArgs e)
         {
             ShowHideInbox(!inboxToolStripMenuItem.Checked);
         }
 
         public void ShowHideInbox(bool show)
         {
-            this.inboxToolStripMenuItem.Checked = show;
+            inboxToolStripMenuItem.Checked = show;
             AutoOrganize();
         }
 
-        //-----------------------------------------------------
-        // Implemented Consumers and interfaces
-        //-----------------------------------------------------
-
-        #region Dispatcher Members
-
-        public void OnDoDispatch()
-        {
-            try
-            {
-                if (!Settings.Sate.NoDispatch && !this.IsDisposed)
-                {
-                    // Invoke will force a thread switch!
-                    this.Invoke(callDispatch);
-                }
-            }
-            catch (System.ObjectDisposedException e)
-            {
-                Console.WriteLine("Caught exception in Dispatch: " + e);
-            }
-        }
-
-        #endregion
-
-        #region ConnectionOwner Members
-
-        public void OnStopOrder()
-        {
-            Environment.Exit(0);
-            OutputPanel.Instance.LogEvent("- Received stop order, disconnecting...", true);
-            Disconnect();
-        }
-
-        #endregion
-
-        #region EntitySubscriber Members
-
-        #endregion
-
-        #region EntityOwner Members
-
-#if STSYLI
-        public void OnRegistrationStatus(Safir.Dob.Typesystem.ObjectId objectId,
-                                         Safir.Dob.RegistrationStatus.Enumeration registrationStatus)
-        {
-            string text = Safir.Dob.Typesystem.Operations.GetName(objectId.TypeId);
-            long inst = objectId.Instance;
-            if (inst == -1)
-            {
-                text = "- Registration of class '" + text + "' is ";
-            }
-            else
-            {
-                text = "- Registration of  instance '" + text + " : " + inst + "' is ";
-            }
-
-            switch (registrationStatus)
-            {
-                case Safir.Dob.RegistrationStatus.Enumeration.Completed:
-                {
-                    text += "Completed";
-                    ExplorerPanel.Instance.SetOwned(objectId);
-                }
-                break;
-
-                case Safir.Dob.RegistrationStatus.Enumeration.Pending:
-                {
-                    text += "Pending";
-                    ExplorerPanel.Instance.SetPending(objectId);
-                }
-                break;
-
-                case Safir.Dob.RegistrationStatus.Enumeration.Revoked:
-                {
-                    text += "Revoked";
-                    ExplorerPanel.Instance.SetUnregistered(objectId);
-                }
-                break;
-            }
-
-            OutputPanel.Instance.LogEvent(text, true);
-        }
-
-        public void OnRegisterAnyInstanceStatus(Safir.Dob.Typesystem.ObjectId objectId,
-                                                bool registrationCompleted)
-        {
-            //Register any instance is not supported by SATE in the current version
-            /*
-            string name = Safir.Dob.Typesystem.Operations.GetName(objectId.TypeId);
-            long inst = objectId.Instance;
-            if (registrationCompleted)
-            {
-                OutputPanel.Instance.LogEvent
-                    ("- Registration (any instance) of class '" + name + " : " + inst + "' is completed", true);
-            }
-            else
-            {
-                OutputPanel.Instance.LogEvent
-                    ("- Registration (any instance) of class '" + name + "' failed", true);
-            }
-             */
-        }
-
-        public void OnPersistentData(Safir.Dob.Entity entity)
-        {
-            string name = Safir.Dob.Typesystem.Operations.GetName(entity.GetTypeId());
-            long inst = entity.InstanceNumber;
-
-            if (Settings.Sate.AutoCreatePersistent)
-            {
-                OutputPanel.Instance.LogEvent("- Persistent object accepted, '" + name + " : " + inst + "'", true);
-                SetEntity(entity);
-            }
-            else
-            {
-                OutputPanel.Instance.LogEvent("- Persistent object refused, '" + name + " : " + inst + "'", true);
-            }
-        }
-#endif
-        #region EntityRequestBase Members
-
-        public void OnCreateRequest(Safir.Dob.EntityRequestProxy entityRequestProxy, Safir.Dob.ResponseSender responseSender)
-        {
-            string name=Safir.Dob.Typesystem.Operations.GetName(entityRequestProxy.TypeId);
-            bool handlerDecides = false;
-            foreach (Int64 typeId in handlerDecidesTypeIdList)
-            {
-                if (entityRequestProxy.TypeId == typeId)
-                {
-                    handlerDecides = true;
-                    break;
-                }
-            }
-
-            Safir.Dob.Typesystem.EntityId entityId;
-            Safir.Dob.Typesystem.InstanceId instanceId;
-
-            if (handlerDecides)
-            {
-                entityId = new Safir.Dob.Typesystem.EntityId(entityRequestProxy.TypeId, Safir.Dob.Typesystem.InstanceId.GenerateRandom());
-                instanceId = entityId.InstanceId;
-            }
-            else
-            {
-                entityId = entityRequestProxy.EntityId;
-                instanceId = entityRequestProxy.InstanceId;
-            }
-
-            OutputPanel.Instance.LogEvent("- Received create request on instance '"+ name +" : "+ instanceId.ToString() +"'", true);
-            Safir.Dob.Entity entity = entityRequestProxy.Request;
-
-            EntityInfo entityInfo = new EntityInfo();
-            entityInfo.Obj = entityRequestProxy.Request;
-            entityInfo.setInstanceId(instanceId);
-            entityInfo.setHandlerId(entityRequestProxy.ReceivingHandlerId);
-            entityInfo.Blobsize = Safir.Dob.Typesystem.Internal.BlobOperations.GetSize(entityRequestProxy.Blob);
-
-            InboxPanel.Instance.AddResponse(entityInfo, "Create request");
-            if (Settings.Sate.AutoCreate)
-            {
-                dose.SetAll(entity, instanceId, entityInfo.getHandlerId());
-            }
-
-            if (!Settings.Sate.NoResponse)
-            {
-                if (handlerDecides)
-                {
-                    OutputPanel.Instance.LogEvent("- Response sent", true);
-                    responseSender.Send(Safir.Dob.EntityIdResponse.CreateResponse(entityId));
-                }
-                else
-                {
-                    OutputPanel.Instance.LogEvent("- Response sent", true);
-                    responseSender.Send(Settings.Sate.AutoResponse);
-                }
-            }
-            else
-            {
-                OutputPanel.Instance.LogEvent("- ResponseSender discarded", true);
-                responseSender.Discard();
-            }
-        }
-
-        public void OnDeleteRequest(Safir.Dob.EntityRequestProxy entityRequestProxy, Safir.Dob.ResponseSender responseSender)
-        {
-            string name = Safir.Dob.Typesystem.Operations.GetName(entityRequestProxy.TypeId);
-            Safir.Dob.Typesystem.EntityId entityId = entityRequestProxy.EntityId;
-            Safir.Dob.Typesystem.InstanceId instanceId = entityRequestProxy.InstanceId;
-
-            OutputPanel.Instance.LogEvent("- Received delete request on instance '" + name + " : " + instanceId + "'", true);
-
-            EntityInfo entityInfo = new EntityInfo();
-            entityInfo.setInstanceId(entityRequestProxy.InstanceId);
-            entityInfo.setHandlerId(entityRequestProxy.ReceivingHandlerId);
-
-            InboxPanel.Instance.AddNonDisplayableResponse(entityId.TypeId, "Delete request");
-            if (Settings.Sate.AutoUpdate)
-            {
-                dose.Delete(entityId, entityInfo.getHandlerId());
-            }
-
-            if (!Settings.Sate.NoResponse)
-            {
-                OutputPanel.Instance.LogEvent("- Response sent", true);
-                responseSender.Send(Settings.Sate.AutoResponse);
-            }
-            else
-            {
-                OutputPanel.Instance.LogEvent("- ResponseSender discarded", true);
-                responseSender.Discard();
-            }
-        }
-
-        public void OnUpdateRequest(Safir.Dob.EntityRequestProxy entityRequestProxy, Safir.Dob.ResponseSender responseSender)
-        {
-            string name = Safir.Dob.Typesystem.Operations.GetName(entityRequestProxy.TypeId);
-            Safir.Dob.Typesystem.InstanceId instanceId = entityRequestProxy.InstanceId;
-
-            OutputPanel.Instance.LogEvent("- Received update request on instance '" + name + " : " + instanceId + "'", true);
-            Safir.Dob.Entity entity = entityRequestProxy.Request;
-
-            EntityInfo entityInfo = new EntityInfo();
-            entityInfo.Obj = entityRequestProxy.Request;
-            entityInfo.setInstanceId(entityRequestProxy.InstanceId);
-            entityInfo.setHandlerId(entityRequestProxy.ReceivingHandlerId);
-            entityInfo.Blobsize = Safir.Dob.Typesystem.Internal.BlobOperations.GetSize(entityRequestProxy.Blob);
-            InboxPanel.Instance.AddResponse(entityInfo, "Update request");
-
-            if (Settings.Sate.AutoUpdate)
-            {
-                dose.SetChanges(entity, instanceId, entityInfo.getHandlerId());
-               
-            }
-
-            if (!Settings.Sate.NoResponse)
-            {
-                OutputPanel.Instance.LogEvent("- Response sent", true);
-                responseSender.Send(Settings.Sate.AutoResponse);
-            }
-            else
-            {
-                OutputPanel.Instance.LogEvent("- ResponseSender discarded", true);
-                responseSender.Discard();
-            }
-
-        }
-
-        #endregion
-
-        #endregion
-
-        #region MessageSender Members
-
-        public void OnNotMessageOverflow()
-        {
-            OutputPanel.Instance.LogEvent("- Notification: Not overflow in message queue", true);
-        }
-
-        #endregion
-
-        #region RegistrationSubscriber Members
-
-
-        public void OnUnregistered(System.Int64 typeId, Safir.Dob.Typesystem.HandlerId handlerId)
-        {
-            string name=Safir.Dob.Typesystem.Operations.GetName(typeId);
-            OutputPanel.Instance.LogEvent("- Class '" + name + ": " + handlerId + "' is unregistered", true);
-            ExplorerPanel.Instance.SetUnregistered(typeId);
-        }
-
-        public void OnRegistered(System.Int64 typeId, Safir.Dob.Typesystem.HandlerId handlerId)
-        {
-            string name=Safir.Dob.Typesystem.Operations.GetName(typeId);
-            OutputPanel.Instance.LogEvent("- Class '" + name + ": " + handlerId + "' is registered", true);
-            ExplorerPanel.Instance.SetRegistered(typeId);
-        }
-
-        #endregion
-
-        #region ServiceProvider Members
-
-        public void OnServiceRequest(Safir.Dob.ServiceRequestProxy serviceRequestProxy, Safir.Dob.ResponseSender rs)
-        {
-            string name = Safir.Dob.Typesystem.Operations.GetName(serviceRequestProxy.TypeId);
-            OutputPanel.Instance.LogEvent("- Received service request '" + name + "' for handler " +  serviceRequestProxy.ReceivingHandlerId, true);
-
-            ServiceHandlerInfo serviceHandlerInfo = new ServiceHandlerInfo();
-            serviceHandlerInfo.setHandlerId(serviceRequestProxy.ReceivingHandlerId);
-            serviceHandlerInfo.Obj = serviceRequestProxy.Request;
-            serviceHandlerInfo.Blobsize = Safir.Dob.Typesystem.Internal.BlobOperations.GetSize(serviceRequestProxy.Blob);
-
-            UpdateLiveData(serviceHandlerInfo);
-
-            InboxPanel.Instance.AddResponse(serviceHandlerInfo, "Service request for handler " +  serviceRequestProxy.ReceivingHandlerId);
-
-            if (!Settings.Sate.NoResponse)
-            {
-                OutputPanel.Instance.LogEvent("- Response sent", true);
-                rs.Send(Settings.Sate.AutoResponse);
-            }
-            else
-            {
-                OutputPanel.Instance.LogEvent("- ResponseSender discarded", true);
-                rs.Discard();
-            }
-        }
-
-
-        #endregion
-
-        #region RevokedRegistrationBase Members
-
-        public void OnRevokedRegistration(long typeId, Safir.Dob.Typesystem.HandlerId handlerId)
-        {
-            RegInfo regInfo = new RegInfo();
-            regInfo.typeId = typeId;
-            regInfo.handlerIdSer = new HandlerIdSerializeable(handlerId);
-            ExplorerPanel.Instance.RevokedRegistration(regInfo);
-
-            // remove typeids
-            requestorDecidesTypeIdList.Remove(typeId);
-            handlerDecidesTypeIdList.Remove(typeId);
-        }
-
-        #endregion
-
-
-        #region Requestor Members
-
-        public void OnNotRequestOverflow()
-        {
-            OutputPanel.Instance.LogEvent("- Notification: Not overflow in request queue", true);
-        }
-
-        public void OnResponse(Safir.Dob.ResponseProxy responseProxy)
-        {
-            Safir.Dob.Response response = responseProxy.Response;
-            Safir.Dob.Typesystem.HandlerId handlerId = responseProxy.RequestHandlerId;
-            int requestId = responseProxy.RequestId;
-
-            ResponseInfo responseInfo = new ResponseInfo();
-            responseInfo.Response = responseProxy.Response;
-            responseInfo.Obj = responseProxy.Response;
-
-            if (response != null)
-            {
-                string name=Safir.Dob.Typesystem.Operations.GetName(response.GetTypeId());
-                OutputPanel.Instance.LogEvent("- Received response '"+name+" : "+ handlerId + "' on requestId "+requestId, true);
-            }
-            else
-            {
-                OutputPanel.Instance.LogEvent("- Received response 'null' on handlerId " + handlerId, true);
-            }
-
-            InboxPanel.Instance.AddResponse(responseInfo, "Reply on request "+requestId);
-            UpdateLiveData(responseInfo);
-
-        }
-
-        #endregion
-
-        #region MessageSubscriber Members
-
-        public void OnMessage(Safir.Dob.MessageProxy messageProxy)
-        {
-
-            string name=Safir.Dob.Typesystem.Operations.GetName(messageProxy.TypeId);
-            OutputPanel.Instance.LogEvent("- Received message '"+name+"' on channel " + messageProxy.ChannelId.ToString(), true);
-
-            MessageInfo msgInfo = new MessageInfo();
-            msgInfo.setChannelId(messageProxy.ChannelId);
-            msgInfo.Obj = messageProxy.Message;
-
-            //int blobsize = Safir.Dob.Typesystem.BlobOperations.GetSize(messageProxy.Blob);
-
-            InboxPanel.Instance.AddResponse(msgInfo, "Message received on channel " + messageProxy.ChannelId.ToString());
-
-            UpdateLiveData(msgInfo);
-        }
-
-        #endregion
-
         //Event handler for menu: Tools -> Settings
-        private void settingsmenuItem_Click(object sender, System.EventArgs e)
+        private void settingsmenuItem_Click(object sender, EventArgs e)
         {
-            SettingsForm sf=new SettingsForm();
+            var sf = new SettingsForm();
             sf.ShowDialog();
         }
 
         //Event handler for menu: Help -> About SATE...
-        private void aboutmenuItem_Click(object sender, System.EventArgs e)
+        private void aboutmenuItem_Click(object sender, EventArgs e)
         {
-            aboutForm.Location=new Point(this.Width/2, this.Height/2);
+            aboutForm.Location = new Point(Width/2, Height/2);
             aboutForm.ShowDialog();
         }
 
-#if REMOVED_CODE
-        //Event handler for menu: Connection -> Open
-        private void loadmenuItem_Click(object sender, System.EventArgs e)
-        {
-            OpenFileDialog of=new OpenFileDialog();
-            of.AddExtension=true;
-            of.Filter = "XML files (*.xml)|*.xml|All files (*.*)|*.*" ;
-
-            if (of.ShowDialog()==DialogResult.OK)
-            {
-                System.IO.TextReader reader = new System.IO.StreamReader(of.FileName);
-                string xmlObj=reader.ReadToEnd();
-                reader.Close();
-
-                try
-                {
-                    Safir.Dob.Typesystem.Object obj = Safir.Dob.Typesystem.Serialization.ToObject(xmlObj);
-                    AddTabPage(new ObjectEditTabPage(obj));
-                }
-                catch (Safir.Dob.Typesystem.IllegalValueException)
-                {
-                    MessageBox.Show("Failed to deserialize the object. Object is supposed to be in XML-format.",
-                        "Deserialization Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            }
-        }
-#endif
-
-#if REMOVED_CODE
-        //Event handler for menu: Tools -> TypeIdCalculator
-        private void typeIdCalcmenuItem_Click(object sender, System.EventArgs e)
-        {
-            new TypeIdCalculatorForm().ShowDialog();
-        }
-#endif
         //Event handler for menu: Connection -> Connect
-        private void connectmenuItem_Click(object sender, System.EventArgs e)
+        private void connectmenuItem_Click(object sender, EventArgs e)
         {
-            if (!isConnected)
+            if (!IsConnected)
             {
-                ScenarioTabPage.Instance.Player.Record(Scenarios.DobAction.Connect, (ScenarioInfo) null);
-                Connect(true,0);
+                ScenarioTabPage.Instance.Player.Record(DobAction.Connect, (ScenarioInfo) null);
+                Connect(true, 0);
             }
         }
 
         //Event handler for menu: Connection -> Disconnect
-        private void disconnectmenuItem_Click(object sender, System.EventArgs e)
+        private void disconnectmenuItem_Click(object sender, EventArgs e)
         {
-            ScenarioTabPage.Instance.Player.Record(Scenarios.DobAction.Disconnect, (ScenarioInfo)null);
+            ScenarioTabPage.Instance.Player.Record(DobAction.Disconnect, (ScenarioInfo) null);
             Disconnect();
         }
 
-
-        public bool IsConnected
-        {
-            get {return isConnected;}
-        }
-
         //Event handler for menu: Tools -> Scenario
-        private void scenariomenuItem_Click(object sender, System.EventArgs e)
+        private void scenariomenuItem_Click(object sender, EventArgs e)
         {
-            int ix=tabControl.TabPages.IndexOf(ScenarioTabPage.Instance);
+            var ix = tabControl.TabPages.IndexOf(ScenarioTabPage.Instance);
             if (ix < 0)
             {
                 AddTabPage(ScenarioTabPage.Instance);
@@ -1535,9 +1261,10 @@ namespace Sate
 
         public bool CheckConnection()
         {
-            if (!isConnected)
+            if (!IsConnected)
             {
-                MessageBox.Show("You are not connected to the DOB!", "Not Connected", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("You are not connected to the DOB!", "Not Connected", MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
                 return false;
             }
             return true;
@@ -1546,16 +1273,16 @@ namespace Sate
         //-----------------------------------------------------------------------
         // DOSE operations
         //-----------------------------------------------------------------------
-        public void Connect(bool startThread, Int32 context)
+        public void Connect(bool startThread, int context)
         {
             //Start thread that hangs on connect
-            this.statusBar.Text="Trying to connect...";
+            statusBar.Text = "Trying to connect...";
             OutputPanel.Instance.LogEvent("- Connecting to DOSE using context " + context + "...", false);
             connectContext = context;
             if (startThread)
             {
-                System.Threading.Thread connThread=new System.Threading.Thread(new System.Threading.ThreadStart(this.ConnectToDose));
-                connThread.IsBackground=true;
+                var connThread = new Thread(ConnectToDose);
+                connThread.IsBackground = true;
                 connThread.Start();
             }
             else
@@ -1566,82 +1293,42 @@ namespace Sate
 
         public void Disconnect()
         {
-            this.Cursor=Cursors.WaitCursor;
+            Cursor = Cursors.WaitCursor;
 
-            if (isConnected)
+            if (IsConnected)
             {
-                ScenarioTabPage.Instance.Player.Record(Scenarios.DobAction.Disconnect, (ScenarioInfo)null);
-                dose.Close();
+                ScenarioTabPage.Instance.Player.Record(DobAction.Disconnect, (ScenarioInfo) null);
+                Dose.Close();
             }
-            isConnected=false;
+            IsConnected = false;
 
             ExplorerPanel.Instance.LoadClassHierarchy(); //reset explorer
 
-            this.disconnectToolStripMenuItem.Enabled=false;
-            this.connectToolStripMenuItem.Enabled=true;
-            this.connectWithContextToolStripMenuItem.Enabled = true;
+            disconnectToolStripMenuItem.Enabled = false;
+            connectToolStripMenuItem.Enabled = true;
+            connectWithContextToolStripMenuItem.Enabled = true;
             OutputPanel.Instance.LogEvent("- Disconnected from DOSE.", true);
-            this.statusBar.Text="Disconnected!";
-            this.Cursor=Cursors.Default;
-        }
-#if STSYLI
-        public void RegisterEntity(Safir.Dob.Typesystem.ObjectId id, bool pending)
-        {
-            ExplorerPanel.Instance.RegisterEntity(id, pending);
+            statusBar.Text = "Disconnected!";
+            Cursor = Cursors.Default;
         }
 
-        public void RegisterService(Safir.Dob.Typesystem.ObjectId id, bool pending)
-        {
-            ExplorerPanel.Instance.RegisterService(id, pending);
-        }
-
-        public void Unregister(Safir.Dob.Typesystem.ObjectId id)
-        {
-            ExplorerPanel.Instance.Unregister(id);
-        }
-
-        public void SubscribeRegistration(Safir.Dob.Typesystem.ObjectId id)
-        {
-            ExplorerPanel.Instance.SubscribeRegistration(id);
-        }
-
-        public void SubscribeEntity(Safir.Dob.Typesystem.ObjectId id, bool changeInfo, bool upd)
-        {
-            ExplorerPanel.Instance.SubscribeEntity(id, changeInfo, upd);
-        }
-#endif
-        /*
-        public void SubscribeMessage(Int64 typeId, Safir.Dob.Typesystem.ChannelId channelId)
-        {
-            SubInfo subInfo = new SubInfo();
-            subInfo.typeId = typeId;
-            subInfo.channelId = channelId;
-            ExplorerPanel.Instance.SubscribeMessage(subInfo);
-        //    ExplorerPanel.Instance.SubscribeMessage(typeId, channelId);
-        }
-        */
-#if STSYLI
-        public void Unsubscribe(Safir.Dob.Typesystem.ObjectId id)
-        {
-            ExplorerPanel.Instance.Unsubscribe(id);
-        }
-#endif
 
         public void SetChangesEntity(EntityInfo entityInfo)
         {
             if (!CheckConnection())
                 return;
 
-            ScenarioTabPage.Instance.Player.Record(Scenarios.DobAction.SetChangesEntity, entityInfo);
+            ScenarioTabPage.Instance.Player.Record(DobAction.SetChangesEntity, entityInfo);
 
             try
             {
-                dose.SetChanges((Safir.Dob.Entity)entityInfo.Obj, entityInfo.getInstanceId(), entityInfo.getHandlerId());
-                OutputPanel.Instance.LogEvent("- Entity set changes, '" + entityInfo.Obj.ToString() + "'", true);
+                Dose.SetChanges((Entity) entityInfo.Obj, entityInfo.GetInstanceId(), entityInfo.getHandlerId());
+                OutputPanel.Instance.LogEvent("- Entity set changes, '" + entityInfo.Obj + "'", true);
             }
-            catch (Safir.Dob.Typesystem.SoftwareViolationException e)
+            catch (SoftwareViolationException e)
             {
-                MessageBox.Show(e.Message, "SoftwareViolationException", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show(e.Message, "SoftwareViolationException", MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
             }
             catch (Exception e)
             {
@@ -1654,16 +1341,17 @@ namespace Sate
             if (!CheckConnection())
                 return;
 
-            ScenarioTabPage.Instance.Player.Record(Scenarios.DobAction.SetAllEntity, entityInfo);
+            ScenarioTabPage.Instance.Player.Record(DobAction.SetAllEntity, entityInfo);
 
             try
             {
-                dose.SetAll((Safir.Dob.Entity)entityInfo.Obj, entityInfo.getInstanceId(), entityInfo.getHandlerId());
-                OutputPanel.Instance.LogEvent("- Entity set all, '" + entityInfo.Obj.ToString() + "'", true);
+                Dose.SetAll((Entity) entityInfo.Obj, entityInfo.GetInstanceId(), entityInfo.getHandlerId());
+                OutputPanel.Instance.LogEvent("- Entity set all, '" + entityInfo.Obj + "'", true);
             }
-            catch (Safir.Dob.Typesystem.SoftwareViolationException e)
+            catch (SoftwareViolationException e)
             {
-                MessageBox.Show(e.Message, "SoftwareViolationException", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show(e.Message, "SoftwareViolationException", MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
             }
             catch (Exception e)
             {
@@ -1677,21 +1365,22 @@ namespace Sate
             if (!CheckConnection())
                 return;
 
-            ScenarioTabPage.Instance.Player.Record(Scenarios.DobAction.DeleteEntity, entityInfo);
+            ScenarioTabPage.Instance.Player.Record(DobAction.DeleteEntity, entityInfo);
 
             try
             {
-                Safir.Dob.Typesystem.EntityId entityId = new Safir.Dob.Typesystem.EntityId(entityInfo.Obj.GetTypeId(), entityInfo.getInstanceId());
-                dose.Delete(entityId, entityInfo.getHandlerId());
-                OutputPanel.Instance.LogEvent("- Entity deleted, '" + entityInfo.Obj.ToString() + "'", true);
+                var entityId = new EntityId(entityInfo.Obj.GetTypeId(), entityInfo.GetInstanceId());
+                Dose.Delete(entityId, entityInfo.getHandlerId());
+                OutputPanel.Instance.LogEvent("- Entity deleted, '" + entityInfo.Obj + "'", true);
             }
-            catch (Safir.Dob.AccessDeniedException e)
+            catch (AccessDeniedException e)
             {
                 OutputPanel.Instance.LogEvent("- Entity delete failed, error message: " + e.Message, true);
             }
-            catch (Safir.Dob.Typesystem.SoftwareViolationException e)
+            catch (SoftwareViolationException e)
             {
-                MessageBox.Show(e.Message, "SoftwareViolationException", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show(e.Message, "SoftwareViolationException", MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
             }
         }
 
@@ -1700,17 +1389,19 @@ namespace Sate
             if (!CheckConnection())
                 return;
 
-            ScenarioTabPage.Instance.Player.Record(Scenarios.DobAction.InjectionSetChanges, entityInfo);
+            ScenarioTabPage.Instance.Player.Record(DobAction.InjectionSetChanges, entityInfo);
 
             try
             {
-                Safir.Dob.ConnectionAspectInjector injector = new Safir.Dob.ConnectionAspectInjector(dose);
-                injector.InjectChanges((Safir.Dob.Entity)entityInfo.Obj, entityInfo.getInstanceId(), entityInfo.Timestamp, entityInfo.getHandlerId());
-                OutputPanel.Instance.LogEvent("- Entity injection set changes, '" + entityInfo.Obj.ToString() + "'", true);
+                var injector = new ConnectionAspectInjector(Dose);
+                injector.InjectChanges((Entity) entityInfo.Obj, entityInfo.GetInstanceId(), entityInfo.Timestamp,
+                    entityInfo.getHandlerId());
+                OutputPanel.Instance.LogEvent("- Entity injection set changes, '" + entityInfo.Obj + "'", true);
             }
-            catch (Safir.Dob.Typesystem.SoftwareViolationException e)
+            catch (SoftwareViolationException e)
             {
-                MessageBox.Show(e.Message, "SoftwareViolationException", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show(e.Message, "SoftwareViolationException", MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
             }
             catch (Exception e)
             {
@@ -1724,17 +1415,18 @@ namespace Sate
             if (!CheckConnection())
                 return;
 
-            ScenarioTabPage.Instance.Player.Record(Scenarios.DobAction.InjectionInitialSet, entityInfo);
+            ScenarioTabPage.Instance.Player.Record(DobAction.InjectionInitialSet, entityInfo);
 
             try
             {
-                Safir.Dob.ConnectionAspectInjector injector = new Safir.Dob.ConnectionAspectInjector(dose);
-                injector.InitialSet((Safir.Dob.Entity)entityInfo.Obj, entityInfo.getInstanceId(), entityInfo.getHandlerId());
-                OutputPanel.Instance.LogEvent("- Entity injection initial set, '" + entityInfo.Obj.ToString() + "'", true);
+                var injector = new ConnectionAspectInjector(Dose);
+                injector.InitialSet((Entity) entityInfo.Obj, entityInfo.GetInstanceId(), entityInfo.getHandlerId());
+                OutputPanel.Instance.LogEvent("- Entity injection initial set, '" + entityInfo.Obj + "'", true);
             }
-            catch (Safir.Dob.Typesystem.SoftwareViolationException e)
+            catch (SoftwareViolationException e)
             {
-                MessageBox.Show(e.Message, "SoftwareViolationException", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show(e.Message, "SoftwareViolationException", MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
             }
             catch (Exception e)
             {
@@ -1748,18 +1440,19 @@ namespace Sate
             if (!CheckConnection())
                 return;
 
-            ScenarioTabPage.Instance.Player.Record(Scenarios.DobAction.InjectionDelete, entityInfo);
+            ScenarioTabPage.Instance.Player.Record(DobAction.InjectionDelete, entityInfo);
 
             try
             {
-                Safir.Dob.ConnectionAspectInjector injector = new Safir.Dob.ConnectionAspectInjector(dose);
-                Safir.Dob.Typesystem.EntityId entityId = new Safir.Dob.Typesystem.EntityId(entityInfo.Obj.GetTypeId(), entityInfo.getInstanceId());
+                var injector = new ConnectionAspectInjector(Dose);
+                var entityId = new EntityId(entityInfo.Obj.GetTypeId(), entityInfo.GetInstanceId());
                 injector.InjectDelete(entityId, entityInfo.Timestamp, entityInfo.getHandlerId());
-                OutputPanel.Instance.LogEvent("- Entity injection delete, '" + entityInfo.Obj.ToString() + "'", true);
+                OutputPanel.Instance.LogEvent("- Entity injection delete, '" + entityInfo.Obj + "'", true);
             }
-            catch (Safir.Dob.Typesystem.SoftwareViolationException e)
+            catch (SoftwareViolationException e)
             {
-                MessageBox.Show(e.Message, "SoftwareViolationException", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show(e.Message, "SoftwareViolationException", MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
             }
             catch (Exception e)
             {
@@ -1773,32 +1466,38 @@ namespace Sate
             if (!CheckConnection())
                 return;
 
-            ScenarioTabPage.Instance.Player.Record(Scenarios.DobAction.CreateRequest, entityInfo);
+            ScenarioTabPage.Instance.Player.Record(DobAction.CreateRequest, entityInfo);
 
             try
             {
                 if (entityInfo.RequestorDecides)
                 {
-                    int reqId = dose.CreateRequest((Safir.Dob.Entity)entityInfo.Obj, entityInfo.getInstanceId(), entityInfo.getHandlerId(), this);
-                    OutputPanel.Instance.LogEvent("- Create request (requestor decides) sent for entity '" + entityInfo.Obj.ToString() + "', requestId " + reqId, true);
+                    var reqId = Dose.CreateRequest((Entity) entityInfo.Obj, entityInfo.GetInstanceId(),
+                        entityInfo.getHandlerId(), this);
+                    OutputPanel.Instance.LogEvent(
+                        "- Create request (requestor decides) sent for entity '" + entityInfo.Obj + "', requestId " +
+                        reqId, true);
                 }
                 else
                 {
-                    int reqId = dose.CreateRequest((Safir.Dob.Entity)entityInfo.Obj, entityInfo.getHandlerId(), this);
-                    OutputPanel.Instance.LogEvent("- Create request (handler decides) sent for entity '" + entityInfo.Obj.ToString() + "', requestId " + reqId, true);
+                    var reqId = Dose.CreateRequest((Entity) entityInfo.Obj, entityInfo.getHandlerId(), this);
+                    OutputPanel.Instance.LogEvent(
+                        "- Create request (handler decides) sent for entity '" + entityInfo.Obj + "', requestId " +
+                        reqId, true);
                 }
             }
-            catch (Safir.Dob.OverflowException)
+            catch (OverflowException)
             {
-                OutputPanel.Instance.LogEvent("- Overflow when sending create request '" + entityInfo.Obj.ToString() + "'", true);
+                OutputPanel.Instance.LogEvent("- Overflow when sending create request '" + entityInfo.Obj + "'", true);
             }
-            catch (Safir.Dob.NotOpenException)
+            catch (NotOpenException)
             {
                 OutputPanel.Instance.LogEvent("- SATE is not connected to the DOB.", true);
             }
-            catch (Safir.Dob.Typesystem.SoftwareViolationException e)
+            catch (SoftwareViolationException e)
             {
-                MessageBox.Show(e.Message, "SoftwareViolationException", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show(e.Message, "SoftwareViolationException", MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
             }
         }
 
@@ -1807,24 +1506,26 @@ namespace Sate
             if (!CheckConnection())
                 return;
 
-            ScenarioTabPage.Instance.Player.Record(Scenarios.DobAction.UpdateRequest, entityInfo);
+            ScenarioTabPage.Instance.Player.Record(DobAction.UpdateRequest, entityInfo);
 
             try
             {
-                int reqId = dose.UpdateRequest((Safir.Dob.Entity)entityInfo.Obj, entityInfo.getInstanceId(), this);
-                OutputPanel.Instance.LogEvent("- Update request sent for entity '" + entityInfo.Obj.ToString() + "', requestId " + reqId, true);
+                var reqId = Dose.UpdateRequest((Entity) entityInfo.Obj, entityInfo.GetInstanceId(), this);
+                OutputPanel.Instance.LogEvent(
+                    "- Update request sent for entity '" + entityInfo.Obj + "', requestId " + reqId, true);
             }
-            catch (Safir.Dob.OverflowException)
+            catch (OverflowException)
             {
-                OutputPanel.Instance.LogEvent("- Overflow when sending update request '" + entityInfo.Obj.ToString() + "'", true);
+                OutputPanel.Instance.LogEvent("- Overflow when sending update request '" + entityInfo.Obj + "'", true);
             }
-            catch (Safir.Dob.NotOpenException)
+            catch (NotOpenException)
             {
                 OutputPanel.Instance.LogEvent("- SATE is not connected to the DOB.", true);
             }
-            catch (Safir.Dob.Typesystem.SoftwareViolationException e)
+            catch (SoftwareViolationException e)
             {
-                MessageBox.Show(e.Message, "SoftwareViolationException", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show(e.Message, "SoftwareViolationException", MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
             }
         }
 
@@ -1833,55 +1534,59 @@ namespace Sate
             if (!CheckConnection())
                 return;
 
-            ScenarioTabPage.Instance.Player.Record(Scenarios.DobAction.DeleteRequest, entityInfo);
+            ScenarioTabPage.Instance.Player.Record(DobAction.DeleteRequest, entityInfo);
 
             try
             {
-                Safir.Dob.Typesystem.EntityId entityId = new Safir.Dob.Typesystem.EntityId(entityInfo.Obj.GetTypeId(), entityInfo.getInstanceId());
-                int reqId = dose.DeleteRequest(entityId, this);
-                OutputPanel.Instance.LogEvent("- Delete request sent for entity '" + entityInfo.Obj.ToString() + "', requestId " + reqId, true);
+                var entityId = new EntityId(entityInfo.Obj.GetTypeId(), entityInfo.GetInstanceId());
+                var reqId = Dose.DeleteRequest(entityId, this);
+                OutputPanel.Instance.LogEvent(
+                    "- Delete request sent for entity '" + entityInfo.Obj + "', requestId " + reqId, true);
             }
-            catch (Safir.Dob.OverflowException)
+            catch (OverflowException)
             {
-                OutputPanel.Instance.LogEvent("- Overflow when sending delete request '" + entityInfo.Obj.ToString() + "'", true);
+                OutputPanel.Instance.LogEvent("- Overflow when sending delete request '" + entityInfo.Obj + "'", true);
             }
-            catch (Safir.Dob.NotOpenException)
+            catch (NotOpenException)
             {
                 OutputPanel.Instance.LogEvent("- SATE is not connected to the DOB.", true);
             }
-            catch (Safir.Dob.Typesystem.SoftwareViolationException e)
+            catch (SoftwareViolationException e)
             {
-                MessageBox.Show(e.Message, "SoftwareViolationException", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show(e.Message, "SoftwareViolationException", MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
             }
-
         }
 
-       // public void DeleteRequest(Safir.Dob.Typesystem.EntityId entityId)
+        // public void DeleteRequest(Safir.Dob.Typesystem.EntityId entityId)
         public void DeleteRequest(EntityIdInfo entityIdInfo)
         {
             if (!CheckConnection())
                 return;
 
-            ScenarioTabPage.Instance.Player.Record(Scenarios.DobAction.DeleteRequest, entityIdInfo);
+            ScenarioTabPage.Instance.Player.Record(DobAction.DeleteRequest, entityIdInfo);
 
             try
             {
-                int reqId = dose.DeleteRequest(entityIdInfo.entityIdSer.EntityId(), this);
-                OutputPanel.Instance.LogEvent("- Delete request sent for entityId '" + entityIdInfo.entityIdSer.EntityId().ToString() + "', requestId " + reqId, true);
+                var reqId = Dose.DeleteRequest(entityIdInfo.entityIdSer.EntityId(), this);
+                OutputPanel.Instance.LogEvent(
+                    "- Delete request sent for entityId '" + entityIdInfo.entityIdSer.EntityId() + "', requestId " +
+                    reqId, true);
             }
-            catch (Safir.Dob.OverflowException)
+            catch (OverflowException)
             {
-                OutputPanel.Instance.LogEvent("- Overflow when sending delete request '" + entityIdInfo.entityIdSer.EntityId().ToString() + "'", true);
+                OutputPanel.Instance.LogEvent(
+                    "- Overflow when sending delete request '" + entityIdInfo.entityIdSer.EntityId() + "'", true);
             }
-            catch (Safir.Dob.NotOpenException)
+            catch (NotOpenException)
             {
                 OutputPanel.Instance.LogEvent("- SATE is not connected to the DOB.", true);
             }
-            catch (Safir.Dob.Typesystem.SoftwareViolationException e)
+            catch (SoftwareViolationException e)
             {
-                MessageBox.Show(e.Message, "SoftwareViolationException", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show(e.Message, "SoftwareViolationException", MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
             }
-
         }
 
         public void ServiceRequest(ServiceHandlerInfo srvInfo)
@@ -1889,24 +1594,30 @@ namespace Sate
             if (!CheckConnection())
                 return;
 
-            ScenarioTabPage.Instance.Player.Record(Scenarios.DobAction.ServiceRequest, srvInfo);
+            ScenarioTabPage.Instance.Player.Record(DobAction.ServiceRequest, srvInfo);
 
             try
             {
-                dose.ServiceRequest((Safir.Dob.Service)srvInfo.Obj, srvInfo.getHandlerId(), this);
-                OutputPanel.Instance.LogEvent("- Service request sent, '" + Safir.Dob.Typesystem.Operations.GetName(((Safir.Dob.Service)srvInfo.Obj).GetTypeId()) + "' to handler: " + srvInfo.getHandlerId().ToString(), true);
+                Dose.ServiceRequest((Service) srvInfo.Obj, srvInfo.getHandlerId(), this);
+                OutputPanel.Instance.LogEvent(
+                    "- Service request sent, '" + Operations.GetName(((Service) srvInfo.Obj).GetTypeId()) +
+                    "' to handler: " + srvInfo.getHandlerId(), true);
             }
-            catch (Safir.Dob.OverflowException)
+            catch (OverflowException)
             {
-                OutputPanel.Instance.LogEvent("- Overflow when sending service request '" + Safir.Dob.Typesystem.Operations.GetName(((Safir.Dob.Service)srvInfo.Obj).GetTypeId()) + "' to handler: " + srvInfo.getHandlerId().ToString(), true);
+                OutputPanel.Instance.LogEvent(
+                    "- Overflow when sending service request '" +
+                    Operations.GetName(((Service) srvInfo.Obj).GetTypeId()) + "' to handler: " + srvInfo.getHandlerId(),
+                    true);
             }
-            catch (Safir.Dob.NotOpenException)
+            catch (NotOpenException)
             {
                 OutputPanel.Instance.LogEvent("- SATE is not connected to the DOB.", true);
             }
-            catch (Safir.Dob.Typesystem.SoftwareViolationException e)
+            catch (SoftwareViolationException e)
             {
-                MessageBox.Show(e.Message, "SoftwareViolationException", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show(e.Message, "SoftwareViolationException", MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
             }
         }
 
@@ -1915,24 +1626,29 @@ namespace Sate
             if (!CheckConnection())
                 return;
 
-            ScenarioTabPage.Instance.Player.Record(Scenarios.DobAction.SendMessage, msgInfo);
+            ScenarioTabPage.Instance.Player.Record(DobAction.SendMessage, msgInfo);
 
             try
             {
-                dose.Send((Safir.Dob.Message)msgInfo.Obj, msgInfo.getChannelId(), this);
-                OutputPanel.Instance.LogEvent("- Message sent, '" + Safir.Dob.Typesystem.Operations.GetName(((Safir.Dob.Message)msgInfo.Obj).GetTypeId()) + "' on channel " + msgInfo.getChannelId().ToString(), true);
+                Dose.Send((Message) msgInfo.Obj, msgInfo.getChannelId(), this);
+                OutputPanel.Instance.LogEvent(
+                    "- Message sent, '" + Operations.GetName(((Message) msgInfo.Obj).GetTypeId()) + "' on channel " +
+                    msgInfo.getChannelId(), true);
             }
-            catch (Safir.Dob.OverflowException)
+            catch (OverflowException)
             {
-                OutputPanel.Instance.LogEvent("- Overflow when sending message '" + Safir.Dob.Typesystem.Operations.GetName(((Safir.Dob.Message)msgInfo.Obj).GetTypeId()) + "'", true);
+                OutputPanel.Instance.LogEvent(
+                    "- Overflow when sending message '" + Operations.GetName(((Message) msgInfo.Obj).GetTypeId()) + "'",
+                    true);
             }
-            catch (Safir.Dob.NotOpenException)
+            catch (NotOpenException)
             {
                 OutputPanel.Instance.LogEvent("- SATE is not connected to the DOB.", true);
             }
-            catch (Safir.Dob.Typesystem.SoftwareViolationException e)
+            catch (SoftwareViolationException e)
             {
-                MessageBox.Show(e.Message, "SoftwareViolationException", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show(e.Message, "SoftwareViolationException", MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
             }
         }
 
@@ -1946,18 +1662,18 @@ namespace Sate
         {
             if (tabControl.SelectedTab is XmlTabPage)
             {
-                this.saveToolStripMenuItem.Enabled = true;
-                this.findToolStripMenuItem.Enabled = true;
+                saveToolStripMenuItem.Enabled = true;
+                findToolStripMenuItem.Enabled = true;
             }
             else if (tabControl.SelectedTab is ObjectEditTabPage)
             {
-                this.saveToolStripMenuItem.Enabled = true;
-                this.findToolStripMenuItem.Enabled = false;
+                saveToolStripMenuItem.Enabled = true;
+                findToolStripMenuItem.Enabled = false;
             }
             else if (tabControl.SelectedTab is ScenarioTabPage)
             {
-                this.saveToolStripMenuItem.Enabled = true;
-                this.findToolStripMenuItem.Enabled = false;
+                saveToolStripMenuItem.Enabled = true;
+                findToolStripMenuItem.Enabled = false;
             }
         }
 
@@ -1965,7 +1681,7 @@ namespace Sate
         {
             if (tabControl.SelectedTab is XmlTabPage)
             {
-                XmlTabPage p=(XmlTabPage)tabControl.SelectedTab;
+                var p = (XmlTabPage) tabControl.SelectedTab;
                 new FindForm(p.RichEdit).Show();
             }
             else
@@ -1977,11 +1693,13 @@ namespace Sate
 
         private void opendoufileToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            OpenFileDialog of = new OpenFileDialog();
-            of.AddExtension = true;
-            of.Filter = "DOU files (*.dou)|*.dou|All files (*.*)|*.*";
-            of.InitialDirectory = Path.GetDirectoryName(Path.GetDirectoryName
-                (Safir.Dob.Typesystem.Internal.InternalOperations.GetDouFilePath(Safir.Dob.Entity.ClassTypeId)));
+            var of = new OpenFileDialog
+            {
+                AddExtension = true,
+                Filter = "DOU files (*.dou)|*.dou|All files (*.*)|*.*",
+                InitialDirectory = Path.GetDirectoryName(Path.GetDirectoryName
+                    (InternalOperations.GetDouFilePath(Entity.ClassTypeId)))
+            };
 
             if (of.ShowDialog() == DialogResult.OK)
             {
@@ -1991,9 +1709,9 @@ namespace Sate
 
         private void OpenDouFile(string fileName)
         {
-            using (System.IO.TextReader reader = new System.IO.StreamReader(fileName))
+            using (TextReader reader = new StreamReader(fileName))
             {
-                string content = reader.ReadToEnd();
+                var content = reader.ReadToEnd();
                 reader.Close();
                 AddTabPage(new XmlTabPage(content, fileName));
             }
@@ -2001,9 +1719,11 @@ namespace Sate
 
         private void openscenarioToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            OpenFileDialog of = new OpenFileDialog();
-            of.AddExtension = true;
-            of.Filter = "Scenario files (*.dos)|*.dos|All files (*.*)|*.*";
+            var of = new OpenFileDialog
+            {
+                AddExtension = true,
+                Filter = "Scenario files (*.dos)|*.dos|All files (*.*)|*.*"
+            };
             if (of.ShowDialog() == DialogResult.OK)
             {
                 ScenarioTabPage.Instance.Player.LoadScenario(of.FileName);
@@ -2013,9 +1733,11 @@ namespace Sate
 
         private void openserializedObjectToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            OpenFileDialog of = new OpenFileDialog();
-            of.AddExtension = true;
-            of.Filter = "XML files (*.xml)|*.xml|All files (*.*)|*.*";
+            var of = new OpenFileDialog
+            {
+                AddExtension = true,
+                Filter = "XML files (*.xml)|*.xml|All files (*.*)|*.*"
+            };
 
             if (of.ShowDialog() == DialogResult.OK)
             {
@@ -2025,43 +1747,42 @@ namespace Sate
 
         private void OpenSerializedObject(string fileName)
         {
-            using (System.IO.TextReader reader = new System.IO.StreamReader(fileName))
+            using (TextReader reader = new StreamReader(fileName))
             {
-                string xml = reader.ReadToEnd();
+                var xml = reader.ReadToEnd();
                 reader.Close();
 
                 //First try to open as serialized object
                 try
                 {
-
-                    Safir.Dob.Typesystem.Object o = Safir.Dob.Typesystem.Serialization.ToObject(xml);
-                    if (o is Safir.Dob.Service)
+                    var o = Serialization.ToObject(xml);
+                    if (o is Service)
                     {
-                        ServiceHandlerInfo srvInfo = new ServiceHandlerInfo();
+                        var srvInfo = new ServiceHandlerInfo();
                         srvInfo.Obj = o;
                         AddTabPage(new ObjectEditTabPage(srvInfo));
                     }
-                    else if (o is Safir.Dob.Entity)
+                    else if (o is Entity)
                     {
-                        EntityInfo entityInfo = new EntityInfo();
+                        var entityInfo = new EntityInfo();
                         entityInfo.Obj = o;
                         AddTabPage(new ObjectEditTabPage(entityInfo));
                     }
-                    else if (o is Safir.Dob.Message)
+                    else if (o is Message)
                     {
-                        MessageInfo msgInfo = new MessageInfo();
+                        var msgInfo = new MessageInfo();
                         msgInfo.Obj = o;
                         AddTabPage(new ObjectEditTabPage(msgInfo));
                     }
-                    else if (o is Safir.Dob.Response)
+                    else if (o is Response)
                     {
-                        ResponseInfo responseInfo = new ResponseInfo();
+                        var responseInfo = new ResponseInfo();
                         responseInfo.Obj = o;
                         AddTabPage(new ObjectEditTabPage(responseInfo));
                     }
                     else
                     {
-                        ObjectInfo objInfo = new ObjectInfo();
+                        var objInfo = new ObjectInfo();
                         objInfo.Obj = o;
                         AddTabPage(new ObjectEditTabPage(objInfo));
                     }
@@ -2082,8 +1803,8 @@ namespace Sate
                 {
                 }
 
-                MessageBox.Show("Failed to open file '"+fileName+"'.",
-                        "Invalid xml", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Failed to open file '" + fileName + "'.",
+                    "Invalid xml", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -2091,11 +1812,11 @@ namespace Sate
         {
             if (tabControl.SelectedTab is XmlTabPage)
             {
-                XmlTabPage p = (XmlTabPage)tabControl.SelectedTab;
-                SaveFileDialog sf=new SaveFileDialog();
-                sf.AddExtension=false;
-                sf.Filter = "XML files (*.xml;*.dou)|*.xml;*.dou|All files (*.*)|*.*" ;
-                sf.FileName=p.FileName;
+                var p = (XmlTabPage) tabControl.SelectedTab;
+                var sf = new SaveFileDialog();
+                sf.AddExtension = false;
+                sf.Filter = "XML files (*.xml;*.dou)|*.xml;*.dou|All files (*.*)|*.*";
+                sf.FileName = p.FileName;
                 if (sf.ShowDialog() == DialogResult.OK)
                 {
                     p.Save(sf.FileName);
@@ -2103,25 +1824,25 @@ namespace Sate
             }
             else if (tabControl.SelectedTab is ObjectEditTabPage)
             {
-                ObjectEditTabPage p = (ObjectEditTabPage)tabControl.SelectedTab;
+                var p = (ObjectEditTabPage) tabControl.SelectedTab;
 
-                Safir.Dob.Typesystem.Object obj = p.ObjEditCtrl.GetObject();
+                var obj = p.ObjEditCtrl.GetObject();
                 if (obj == null)
                     return;
 
-                string name = Safir.Dob.Typesystem.Operations.GetName(obj.GetTypeId());
+                var name = Operations.GetName(obj.GetTypeId());
                 name = name.Substring(name.LastIndexOf('.') + 1);
                 //name += "_" + obj.InstanceNumber.ToString() + ".xml";
                 name += ".xml";
 
-                SaveFileDialog sf = new SaveFileDialog();
+                var sf = new SaveFileDialog();
                 sf.AddExtension = true;
                 sf.Filter = "XML files (*.xml)|*.xml|All files (*.*)|*.*";
                 sf.FileName = name;
                 if (sf.ShowDialog() == DialogResult.OK)
                 {
-                    string xml = Safir.Dob.Typesystem.Serialization.ToXml(obj);
-                    using (System.IO.TextWriter writer = new System.IO.StreamWriter(sf.FileName))
+                    var xml = Serialization.ToXml(obj);
+                    using (TextWriter writer = new StreamWriter(sf.FileName))
                     {
                         writer.Write(xml);
                         writer.Flush();
@@ -2131,7 +1852,7 @@ namespace Sate
             }
             else if (tabControl.SelectedTab is ScenarioTabPage)
             {
-                SaveFileDialog sf = new SaveFileDialog();
+                var sf = new SaveFileDialog();
                 sf.AddExtension = true;
                 sf.Filter = "Scenario files (*.dos)|*.dos|All files (*.*)|*.*";
                 if (sf.ShowDialog() == DialogResult.OK)
@@ -2144,7 +1865,7 @@ namespace Sate
 
         private void connectWithContextToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            ConnectWithContextForm form = new ConnectWithContextForm();
+            var form = new ConnectWithContextForm();
             form.ShowDialog();
         }
 
@@ -2162,15 +1883,18 @@ namespace Sate
                 {
                     if (tp is ObjectEditTabPage)
                     {
-                        ObjectEditTabPage otp = (ObjectEditTabPage)tp;
-                        if (otp.ObjEditCtrl.LiveData && otp.ObjEditCtrl.GetObject().GetTypeId() == objInfo.Obj.GetTypeId())
+                        var otp = (ObjectEditTabPage) tp;
+                        if (otp.ObjEditCtrl.LiveData &&
+                            otp.ObjEditCtrl.GetObject().GetTypeId() == objInfo.Obj.GetTypeId())
                         {
-                            if ((objInfo is EntityInfo) && (otp.ObjEditCtrl.GetObjectInfo() is EntityInfo))
+                            if (objInfo is EntityInfo && otp.ObjEditCtrl.GetObjectInfo() is EntityInfo)
                             {
-                                EntityInfo paramEntityInfo = (EntityInfo)objInfo;
-                                EntityInfo otpEntityInfo = (EntityInfo)otp.ObjEditCtrl.GetObjectInfo();
+                                var paramEntityInfo = (EntityInfo) objInfo;
+                                var otpEntityInfo = (EntityInfo) otp.ObjEditCtrl.GetObjectInfo();
                                 // only update if instanceid is the same
-                                if (paramEntityInfo.InstanceIdSer.InstanceId().Equals(otpEntityInfo.InstanceIdSer.InstanceId()))
+                                if (
+                                    paramEntityInfo.InstanceIdSer.InstanceId()
+                                        .Equals(otpEntityInfo.InstanceIdSer.InstanceId()))
                                 {
                                     otp.ObjEditCtrl.UpdateData(objInfo);
                                     return true;
@@ -2179,128 +1903,18 @@ namespace Sate
                         }
                     }
                 }
-                catch{}
+                catch
+                {
+                }
             }
             return false;
         }
 
-#if REMOVED_CODE
-        private bool UpdateLiveData(ObjectInfo objectInfo, bool deleted)
-        {
-            foreach (TabPage tp in tabControl.TabPages)
-            {
-                try
-                {
-                    if (tp is ObjectEditTabPage)
-                    {
-                        ObjectEditTabPage otp = (ObjectEditTabPage)tp;
-                        if (otp.ObjEditCtrl.LiveData && otp.ObjEditCtrl.GetObject().GetTypeId() == objectInfo.Obj.GetTypeId()) //&& otp.ObjEditCtrl.ObjId.Instance == oid.Instance)
-                        {
-                            otp.ObjEditCtrl.DeletedData(deleted);
-                            return true;
-                        }
-                    }
-                }
-                catch { }
-            }
-            return false;
-        }
-#endif
+
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            System.Windows.Forms.Application.Exit();
+            Application.Exit();
         }
-
-
-        #region EntitySubscriber Members
-
-        public void OnDeletedEntity(Safir.Dob.EntityProxy entityProxy, bool deletedByOwner)
-        {
-            EntityInfo entityInfo = new EntityInfo();
-            entityInfo.setInstanceId(entityProxy.InstanceId);
-            entityInfo.setHandlerId(entityProxy.OwnerWithStringRepresentation);
-
-            OutputPanel.Instance.LogEvent("- Received deleted entity: '" + entityProxy.EntityId.ToString()
-               + "' for handler '" + entityProxy.OwnerWithStringRepresentation.ToString() + "' deletedByOwner=" + deletedByOwner, true);
-            ExplorerPanel.Instance.DeleteObject(entityProxy.EntityId);
-            //InboxPanel.Instance.AddResponse(entityInfo, "Deleted entity");
-            InboxPanel.Instance.AddNonDisplayableResponse(entityProxy.EntityId.TypeId, "Deleted entity");
-
-            UpdateLiveData(entityInfo);
-        }
-
-        public void OnNewEntity(Safir.Dob.EntityProxy entityProxy)
-        {
-            EntityInfo entityInfo = new EntityInfo();
-            entityInfo.setInstanceId(entityProxy.InstanceId);
-            entityInfo.setHandlerId(entityProxy.OwnerWithStringRepresentation);
-            entityInfo.Obj = entityProxy.Entity;
-
-            entityInfo.Blobsize = Safir.Dob.Typesystem.Internal.BlobOperations.GetSize(entityProxy.Blob);
-
-            OutputPanel.Instance.LogEvent("- Received new entity: '" + entityProxy.EntityId.ToString()
-                + "' for handler '" + entityProxy.OwnerWithStringRepresentation.ToString() + "'"
-                + " owner '" + entityProxy.OwnerConnectionInfo.ConnectionName.Val + "'", true);
-            ExplorerPanel.Instance.AddObject(entityProxy.EntityId);
-            InboxPanel.Instance.AddResponse(entityInfo, "New entity");
-
-            UpdateLiveData(entityInfo);
-        }
-
-        public void OnUpdatedEntity(Safir.Dob.EntityProxy entityProxy)
-        {
-            EntityInfo entityInfo = new EntityInfo();
-            entityInfo.setInstanceId(entityProxy.InstanceId);
-            entityInfo.setHandlerId(entityProxy.OwnerWithStringRepresentation);
-            entityInfo.Obj = entityProxy.Entity;
-
-            entityInfo.Blobsize = Safir.Dob.Typesystem.Internal.BlobOperations.GetSize(entityProxy.Blob);
-
-            OutputPanel.Instance.LogEvent("- Received updated entity: '" + entityProxy.EntityId.ToString()
-               + "' for handler '" + entityProxy.OwnerWithStringRepresentation.ToString() + "'"
-               + " owner '" + entityProxy.OwnerConnectionInfo.ConnectionName.Val + "'", true);
-            InboxPanel.Instance.AddResponse(entityInfo, "Updated entity");
-
-            UpdateLiveData(entityInfo);
-        }
-
-        #endregion
-
-        #region CompletedRegistrationBase Members
-
-        public void OnCompletedRegistration(long typeId, Safir.Dob.Typesystem.HandlerId handlerId)
-        {
-            string name = Safir.Dob.Typesystem.Operations.GetName(typeId);
-            ExplorerPanel.Instance.SetRegistered(typeId);
-            OutputPanel.Instance.LogEvent("- Registration completed for typeId: " + name + " with handlerid '" + handlerId.ToString() + "'", true);
-        }
-
-        #endregion
-
-        #region EntityInjectionBase Members
-
-        public void OnInitialInjectionsDone(long typeId, Safir.Dob.Typesystem.HandlerId handlerId)
-        {
-            string name = Safir.Dob.Typesystem.Operations.GetName(typeId);
-            OutputPanel.Instance.LogEvent("- Initial injections done for typeId: " + name + " with handlerid '" + handlerId.ToString() + "'", true);
-        }
-
-        public void OnInjectedDeletedEntity(Safir.Dob.InjectedEntityProxy injectedEntityProxy)
-        {
-            OutputPanel.Instance.LogEvent("- Injected deleted entity. Entity id: '" +  injectedEntityProxy.EntityId.ToString() + "'", true);
-        }
-
-        public void OnInjectedNewEntity(Safir.Dob.InjectedEntityProxy injectedEntityProxy)
-        {
-            OutputPanel.Instance.LogEvent("- Injected new entity. Entity id: '" + injectedEntityProxy.EntityId.ToString() + "'", true);
-        }
-
-        public void OnInjectedUpdatedEntity(Safir.Dob.InjectedEntityProxy injectedEntityProxy)
-        {
-            OutputPanel.Instance.LogEvent("- Injected updated entity. Entity id: '" + injectedEntityProxy.EntityId.ToString() + "'", true);
-        }
-
-        #endregion
 
         private void timestampToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -2314,12 +1928,291 @@ namespace Sate
 
         private void runGarbageCollectorToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            System.GC.Collect();
+            GC.Collect();
         }
 
-        public System.Type GetType(System.Int64 typeId)
+        public Type GetType(long typeId)
         {
-            return Safir.Dob.Typesystem.ObjectFactory.Instance.CreateObject(typeId).GetType();
+            return ObjectFactory.Instance.CreateObject(typeId).GetType();
         }
+
+        private delegate void OnConnectedDelegate();
+
+        private delegate void HandleConnectionDoneDelegate();
+
+        #region EntitySubscriber Members
+
+        #endregion
+
+        #region EntityOwner Members
+
+        #region EntityRequestBase Members
+
+        public void OnCreateRequest(EntityRequestProxy entityRequestProxy, ResponseSender responseSender)
+        {
+            var name = Operations.GetName(entityRequestProxy.TypeId);
+            var handlerDecides = false;
+            foreach (var typeId in handlerDecidesTypeIdList)
+            {
+                if (entityRequestProxy.TypeId == typeId)
+                {
+                    handlerDecides = true;
+                    break;
+                }
+            }
+
+            EntityId entityId;
+            InstanceId instanceId;
+
+            if (handlerDecides)
+            {
+                entityId = new EntityId(entityRequestProxy.TypeId, InstanceId.GenerateRandom());
+                instanceId = entityId.InstanceId;
+            }
+            else
+            {
+                entityId = entityRequestProxy.EntityId;
+                instanceId = entityRequestProxy.InstanceId;
+            }
+
+            OutputPanel.Instance.LogEvent("- Received create request on instance '" + name + " : " + instanceId + "'",
+                true);
+            var entity = entityRequestProxy.Request;
+
+            var entityInfo = new EntityInfo();
+            entityInfo.Obj = entityRequestProxy.Request;
+            entityInfo.SetInstanceId(instanceId);
+            entityInfo.setHandlerId(entityRequestProxy.ReceivingHandlerId);
+            entityInfo.Blobsize = BlobOperations.GetSize(entityRequestProxy.Blob);
+
+            InboxPanel.Instance.AddResponse(entityInfo, "Create request");
+            if (Settings.Sate.AutoCreate)
+            {
+                Dose.SetAll(entity, instanceId, entityInfo.getHandlerId());
+            }
+
+            if (!Settings.Sate.NoResponse)
+            {
+                if (handlerDecides)
+                {
+                    OutputPanel.Instance.LogEvent("- Response sent", true);
+                    responseSender.Send(EntityIdResponse.CreateResponse(entityId));
+                }
+                else
+                {
+                    OutputPanel.Instance.LogEvent("- Response sent", true);
+                    responseSender.Send(Settings.Sate.AutoResponse);
+                }
+            }
+            else
+            {
+                OutputPanel.Instance.LogEvent("- ResponseSender discarded", true);
+                responseSender.Discard();
+            }
+        }
+
+        public void OnDeleteRequest(EntityRequestProxy entityRequestProxy, ResponseSender responseSender)
+        {
+            var name = Operations.GetName(entityRequestProxy.TypeId);
+            var entityId = entityRequestProxy.EntityId;
+            var instanceId = entityRequestProxy.InstanceId;
+
+            OutputPanel.Instance.LogEvent("- Received delete request on instance '" + name + " : " + instanceId + "'",
+                true);
+
+            var entityInfo = new EntityInfo();
+            entityInfo.SetInstanceId(entityRequestProxy.InstanceId);
+            entityInfo.setHandlerId(entityRequestProxy.ReceivingHandlerId);
+
+            InboxPanel.Instance.AddNonDisplayableResponse(entityId.TypeId, "Delete request");
+            if (Settings.Sate.AutoUpdate)
+            {
+                Dose.Delete(entityId, entityInfo.getHandlerId());
+            }
+
+            if (!Settings.Sate.NoResponse)
+            {
+                OutputPanel.Instance.LogEvent("- Response sent", true);
+                responseSender.Send(Settings.Sate.AutoResponse);
+            }
+            else
+            {
+                OutputPanel.Instance.LogEvent("- ResponseSender discarded", true);
+                responseSender.Discard();
+            }
+        }
+
+        public void OnUpdateRequest(EntityRequestProxy entityRequestProxy, ResponseSender responseSender)
+        {
+            var name = Operations.GetName(entityRequestProxy.TypeId);
+            var instanceId = entityRequestProxy.InstanceId;
+
+            OutputPanel.Instance.LogEvent("- Received update request on instance '" + name + " : " + instanceId + "'",
+                true);
+            var entity = entityRequestProxy.Request;
+
+            var entityInfo = new EntityInfo();
+            entityInfo.Obj = entityRequestProxy.Request;
+            entityInfo.SetInstanceId(entityRequestProxy.InstanceId);
+            entityInfo.setHandlerId(entityRequestProxy.ReceivingHandlerId);
+            entityInfo.Blobsize = BlobOperations.GetSize(entityRequestProxy.Blob);
+            InboxPanel.Instance.AddResponse(entityInfo, "Update request");
+
+            if (Settings.Sate.AutoUpdate)
+            {
+                Dose.SetChanges(entity, instanceId, entityInfo.getHandlerId());
+            }
+
+            if (!Settings.Sate.NoResponse)
+            {
+                OutputPanel.Instance.LogEvent("- Response sent", true);
+                responseSender.Send(Settings.Sate.AutoResponse);
+            }
+            else
+            {
+                OutputPanel.Instance.LogEvent("- ResponseSender discarded", true);
+                responseSender.Discard();
+            }
+        }
+
+        #endregion
+
+        #endregion
+
+        #region RegistrationSubscriber Members
+
+        public void OnUnregistered(long typeId, HandlerId handlerId)
+        {
+            var name = Operations.GetName(typeId);
+            OutputPanel.Instance.LogEvent("- Class '" + name + ": " + handlerId + "' is unregistered", true);
+            ExplorerPanel.Instance.SetUnregistered(typeId);
+        }
+
+        public void OnRegistered(long typeId, HandlerId handlerId)
+        {
+            var name = Operations.GetName(typeId);
+            OutputPanel.Instance.LogEvent("- Class '" + name + ": " + handlerId + "' is registered", true);
+            ExplorerPanel.Instance.SetRegistered(typeId);
+        }
+
+        #endregion
+
+        #region Requestor Members
+
+        public void OnNotRequestOverflow()
+        {
+            OutputPanel.Instance.LogEvent("- Notification: Not overflow in request queue", true);
+        }
+
+        public void OnResponse(ResponseProxy responseProxy)
+        {
+            var response = responseProxy.Response;
+            var handlerId = responseProxy.RequestHandlerId;
+            var requestId = responseProxy.RequestId;
+
+            var responseInfo = new ResponseInfo();
+            responseInfo.Response = responseProxy.Response;
+            responseInfo.Obj = responseProxy.Response;
+
+            if (response != null)
+            {
+                var name = Operations.GetName(response.GetTypeId());
+                OutputPanel.Instance.LogEvent(
+                    "- Received response '" + name + " : " + handlerId + "' on requestId " + requestId, true);
+            }
+            else
+            {
+                OutputPanel.Instance.LogEvent("- Received response 'null' on handlerId " + handlerId, true);
+            }
+
+            InboxPanel.Instance.AddResponse(responseInfo, "Reply on request " + requestId);
+            UpdateLiveData(responseInfo);
+        }
+
+        #endregion
+
+        #region EntitySubscriber Members
+
+        public void OnDeletedEntity(EntityProxy entityProxy, bool deletedByOwner)
+        {
+            var entityInfo = new EntityInfo();
+            entityInfo.SetInstanceId(entityProxy.InstanceId);
+            entityInfo.setHandlerId(entityProxy.OwnerWithStringRepresentation);
+
+            OutputPanel.Instance.LogEvent("- Received deleted entity: '" + entityProxy.EntityId
+                                          + "' for handler '" + entityProxy.OwnerWithStringRepresentation +
+                                          "' deletedByOwner=" + deletedByOwner, true);
+            ExplorerPanel.Instance.DeleteObject(entityProxy.EntityId);
+            //InboxPanel.Instance.AddResponse(entityInfo, "Deleted entity");
+            InboxPanel.Instance.AddNonDisplayableResponse(entityProxy.EntityId.TypeId, "Deleted entity");
+
+            UpdateLiveData(entityInfo);
+        }
+
+        public void OnNewEntity(EntityProxy entityProxy)
+        {
+            var entityInfo = new EntityInfo();
+            entityInfo.SetInstanceId(entityProxy.InstanceId);
+            entityInfo.setHandlerId(entityProxy.OwnerWithStringRepresentation);
+            entityInfo.Obj = entityProxy.Entity;
+
+            entityInfo.Blobsize = BlobOperations.GetSize(entityProxy.Blob);
+
+            OutputPanel.Instance.LogEvent("- Received new entity: '" + entityProxy.EntityId
+                                          + "' for handler '" + entityProxy.OwnerWithStringRepresentation + "'"
+                                          + " owner '" + entityProxy.OwnerConnectionInfo.ConnectionName.Val + "'", true);
+            ExplorerPanel.Instance.AddObject(entityProxy.EntityId);
+            InboxPanel.Instance.AddResponse(entityInfo, "New entity");
+
+            UpdateLiveData(entityInfo);
+        }
+
+        public void OnUpdatedEntity(EntityProxy entityProxy)
+        {
+            var entityInfo = new EntityInfo();
+            entityInfo.SetInstanceId(entityProxy.InstanceId);
+            entityInfo.setHandlerId(entityProxy.OwnerWithStringRepresentation);
+            entityInfo.Obj = entityProxy.Entity;
+
+            entityInfo.Blobsize = BlobOperations.GetSize(entityProxy.Blob);
+
+            OutputPanel.Instance.LogEvent("- Received updated entity: '" + entityProxy.EntityId
+                                          + "' for handler '" + entityProxy.OwnerWithStringRepresentation + "'"
+                                          + " owner '" + entityProxy.OwnerConnectionInfo.ConnectionName.Val + "'", true);
+            InboxPanel.Instance.AddResponse(entityInfo, "Updated entity");
+
+            UpdateLiveData(entityInfo);
+        }
+
+        #endregion
+
+        #region EntityInjectionBase Members
+
+        public void OnInitialInjectionsDone(long typeId, HandlerId handlerId)
+        {
+            var name = Operations.GetName(typeId);
+            OutputPanel.Instance.LogEvent(
+                "- Initial injections done for typeId: " + name + " with handlerid '" + handlerId + "'", true);
+        }
+
+        public void OnInjectedDeletedEntity(InjectedEntityProxy injectedEntityProxy)
+        {
+            OutputPanel.Instance.LogEvent(
+                "- Injected deleted entity. Entity id: '" + injectedEntityProxy.EntityId + "'", true);
+        }
+
+        public void OnInjectedNewEntity(InjectedEntityProxy injectedEntityProxy)
+        {
+            OutputPanel.Instance.LogEvent("- Injected new entity. Entity id: '" + injectedEntityProxy.EntityId + "'",
+                true);
+        }
+
+        public void OnInjectedUpdatedEntity(InjectedEntityProxy injectedEntityProxy)
+        {
+            OutputPanel.Instance.LogEvent(
+                "- Injected updated entity. Entity id: '" + injectedEntityProxy.EntityId + "'", true);
+        }
+
+        #endregion
     }
 }

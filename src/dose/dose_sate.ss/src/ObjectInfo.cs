@@ -23,33 +23,20 @@
 ******************************************************************************/
 
 using System.Xml.Serialization;
+using Safir.Dob.Typesystem;
 
 namespace Sate
 {
     /* Base class for containing an Object */
+
     [XmlInclude(typeof(EntityInfo))]
     [XmlInclude(typeof(MessageInfo))]
     [XmlInclude(typeof(ServiceHandlerInfo))]
     public class ObjectInfo
     {
-        public ObjectInfo()
-        {
-        }
-
-        private Safir.Dob.Typesystem.Object obj;
         [XmlIgnore]
-        public Safir.Dob.Typesystem.Object Obj
-        {
-            get { return obj; }
-            set { obj = value; }
-        }
+        public Object Obj { get; set; }
 
-        private int blobsize;
-        
-        public int Blobsize
-        {
-            get { return blobsize; }
-            set { blobsize = value; }
-        }
+        public int Blobsize { get; set; }
     }
 }

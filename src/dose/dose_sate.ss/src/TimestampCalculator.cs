@@ -1,4 +1,4 @@
-/******************************************************************************
+﻿/******************************************************************************
 *
 * Copyright Saab AB, 2007-2013 (http://safirsdkcore.com)
 * 
@@ -23,11 +23,6 @@
 ******************************************************************************/
 
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
 
 namespace Sate
@@ -41,17 +36,16 @@ namespace Sate
 
         private void convertToMsButton_Click(object sender, EventArgs e)
         {
-            
             if (humanTextBox.Text != "")
             {
                 if (int64RadioButton.Checked)
                 {
                     try
                     {
-                        DateTime dateTime = DateTime.Parse(humanTextBox.Text);
-                        DateTime ticks2008 = new DateTime(2008, 01, 01);
+                        var dateTime = DateTime.Parse(humanTextBox.Text);
+                        var ticks2008 = new DateTime(2008, 01, 01);
                         dateTime = dateTime.Subtract(new TimeSpan(ticks2008.Ticks));
-                        numberTextBox.Text = ((Int64)dateTime.Ticks / 10).ToString();
+                        numberTextBox.Text = (dateTime.Ticks/10).ToString();
                     }
                     catch
                     {
@@ -62,16 +56,15 @@ namespace Sate
                 {
                     try
                     {
-                        DateTime dateTime = DateTime.Parse(humanTextBox.Text);
-                        DateTime ticks1970 = new DateTime(1970, 01, 01);
+                        var dateTime = DateTime.Parse(humanTextBox.Text);
+                        var ticks1970 = new DateTime(1970, 01, 01);
                         dateTime = dateTime.Subtract(new TimeSpan(ticks1970.Ticks));
-                        numberTextBox.Text = ((Int64)dateTime.Ticks / 10000000).ToString();
+                        numberTextBox.Text = (dateTime.Ticks/10000000).ToString();
                     }
                     catch
                     {
                         numberTextBox.Text = "Enter date and time above.";
                     }
-
                 }
             }
             else
@@ -86,19 +79,20 @@ namespace Sate
             {
                 if (int64RadioButton.Checked)
                 {
-                    Int64 us = Int64.Parse(numberTextBox.Text);
+                    var us = long.Parse(numberTextBox.Text);
                     // Timestamp used in Int64 is number of micro seconds since 2008-01-01
-                    DateTime humanTime = (new DateTime(2008, 1, 1, 0, 0, 0)).AddSeconds(us / 1000000);
+                    var humanTime = new DateTime(2008, 1, 1, 0, 0, 0).AddSeconds(us/1000000);
                     humanTextBox.Text = humanTime.ToString();
                 }
                 else /* Second64 */
                 {
-                    Int64 s = Int64.Parse(numberTextBox.Text);
-                    DateTime humanTime = (new DateTime(1970, 1, 1, 0, 0, 0)).AddSeconds(s);
+                    var s = long.Parse(numberTextBox.Text);
+                    var humanTime = new DateTime(1970, 1, 1, 0, 0, 0).AddSeconds(s);
                     humanTextBox.Text = humanTime.ToString();
                 }
             }
-            catch {
+            catch
+            {
                 humanTextBox.Text = "Invalid format in textbox.";
             }
         }

@@ -1,4 +1,4 @@
-/******************************************************************************
+﻿/******************************************************************************
 *
 * Copyright Saab AB, 2007-2013 (http://safirsdkcore.com)
 * 
@@ -22,39 +22,41 @@
 *
 ******************************************************************************/
 
-using System;
-using System.IO;
-using System.Xml;
 using System.Drawing;
+using System.IO;
+using System.Text;
+using System.Windows.Forms;
+using System.Xml;
 
 namespace Sate
 {
     /// <summary>
-    /// Summary description for XmlPanel.
+    ///     Summary description for XmlPanel.
     /// </summary>
-    public class XmlRichEdit : System.Windows.Forms.RichTextBox
+    public class XmlRichEdit : RichTextBox
     {
         public XmlRichEdit()
         {
-            this.BackColor = Color.White;
-            this.ReadOnly=true;
+            BackColor = Color.White;
+            ReadOnly = true;
         }
 
         public void WriteXml(string xml)
         {
-            this.Clear();
-            
-            System.Xml.XmlTextReader reader=new System.Xml.XmlTextReader(new System.IO.StringReader(xml));
-            System.Xml.XmlDocument doc=new System.Xml.XmlDocument();
+            Clear();
+
+            var reader = new XmlTextReader(new StringReader(xml));
+            var doc = new XmlDocument();
             doc.Load(reader);
-            
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
-            XmlWriterSettings settings = new XmlWriterSettings();
+
+            var sb = new StringBuilder();
+            var settings = new XmlWriterSettings();
             settings.Indent = true;
             settings.IndentChars = "  ";
             settings.NewLineChars = "\r\n";
             settings.NewLineHandling = NewLineHandling.Replace;
-            using (XmlWriter writer = XmlWriter.Create(sb, settings)) {
+            using (var writer = XmlWriter.Create(sb, settings))
+            {
                 doc.Save(writer);
             }
             AppendText(sb.ToString());

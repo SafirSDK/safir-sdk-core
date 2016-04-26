@@ -23,11 +23,7 @@
 ******************************************************************************/
 
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Drawing;
-using System.Data;
-using System.Text;
 using System.Windows.Forms;
 
 namespace Sate
@@ -35,13 +31,12 @@ namespace Sate
     public partial class PanelLabelControl : UserControl
     {
         public delegate void OnCloseEventHandler(object sender, EventArgs e);
-        public event OnCloseEventHandler CloseEvent;
 
         public PanelLabelControl(string labelText)
         {
             InitializeComponent();
-            this.Dock = DockStyle.Top;
-            this.textlabel.Text = labelText;
+            Dock = DockStyle.Top;
+            textlabel.Text = labelText;
         }
 
         public string LabelText
@@ -52,31 +47,27 @@ namespace Sate
 
         public override Color BackColor
         {
-            get
-            {
-                return base.BackColor;
-            }
+            get { return base.BackColor; }
             set
             {
                 base.BackColor = value;
-                this.textlabel.BackColor = value;
-                this.closelabel.BackColor = value;
+                textlabel.BackColor = value;
+                closelabel.BackColor = value;
             }
         }
 
         public override Color ForeColor
         {
-            get
-            {
-                return base.ForeColor;
-            }
+            get { return base.ForeColor; }
             set
             {
                 base.ForeColor = value;
-                this.textlabel.ForeColor = value;
-                this.closelabel.ForeColor = value;
+                textlabel.ForeColor = value;
+                closelabel.ForeColor = value;
             }
         }
+
+        public event OnCloseEventHandler CloseEvent;
 
         private void closelabel_Click(object sender, EventArgs e)
         {

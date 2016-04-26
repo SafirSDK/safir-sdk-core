@@ -22,39 +22,29 @@
 *
 ******************************************************************************/
 
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
-using System.Data;
-using System.Text;
 using System.Windows.Forms;
+using Safir.Dob.Typesystem;
 
 namespace Sate
 {
     //*****************************************************************************************************
     // Object Edit Tab Page
     //*****************************************************************************************************
-    public class ObjectEditTabPage : System.Windows.Forms.TabPage
+    public class ObjectEditTabPage : TabPage
     {
-        private ObjectEditControl oec;
-
         public ObjectEditTabPage(ObjectInfo objInfo)
         {
-            string name = Safir.Dob.Typesystem.Operations.GetName(objInfo.Obj.GetTypeId());
+            var name = Operations.GetName(objInfo.Obj.GetTypeId());
             name = name.Substring(name.LastIndexOf('.') + 1);
-            this.Text = name;
-            this.Tag = objInfo;
-            this.ImageIndex = 4;
+            Text = name;
+            Tag = objInfo;
+            ImageIndex = 4;
 
-            oec = new ObjectEditControl(objInfo);
-            oec.Dock = DockStyle.Fill;
-            this.Controls.Add(oec);
+            ObjEditCtrl = new ObjectEditControl(objInfo);
+            ObjEditCtrl.Dock = DockStyle.Fill;
+            Controls.Add(ObjEditCtrl);
         }
 
-        public ObjectEditControl ObjEditCtrl
-        {
-            get { return oec; }
-        }
+        public ObjectEditControl ObjEditCtrl { get; }
     }
 }

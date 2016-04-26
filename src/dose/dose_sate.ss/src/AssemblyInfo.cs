@@ -1,4 +1,4 @@
-/******************************************************************************
+﻿/******************************************************************************
 *
 * Copyright Saab AB, 2007-2013 (http://safirsdkcore.com)
 * 
@@ -23,19 +23,19 @@
 ******************************************************************************/
 
 using System.Reflection;
-using System.Runtime.CompilerServices;
 
 //
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 //
+
 [assembly: AssemblyTitle("sate.exe")]
 [assembly: AssemblyDescription("Safir Application Tester")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Saab AB")]
 [assembly: AssemblyProduct("Safir SDK Core")]
-[assembly: AssemblyCopyright("Copyright Saab AB, 2006-2014")]
+[assembly: AssemblyCopyright("Copyright Saab AB, 2006-2016")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

@@ -23,21 +23,40 @@
 ******************************************************************************/
 
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
 
 namespace Sate
 {
-
     public partial class RegisterForm : Form
     {
         public RegisterForm(long typeId)
         {
             InitializeComponent();
+        }
+
+        public bool PendingReg
+        {
+            get { return pendingcheckBox.Checked; }
+        }
+
+        public bool InjectionReg
+        {
+            get { return injectionCheckBox.Checked; }
+        }
+
+        public bool PermanentReg
+        {
+            get { return permanentregcheckBox.Checked; }
+        }
+
+        public string HandlerId
+        {
+            get { return handlerIdTextBox.Text; }
+        }
+
+        public bool RequestorDecides
+        {
+            get { return requestorDecidesRadioButton.Checked; }
         }
 
         public void InitEntitySubForm()
@@ -66,31 +85,6 @@ namespace Sate
             DialogResult = DialogResult.Cancel;
         }
 
-        public bool PendingReg
-        {
-            get { return this.pendingcheckBox.Checked; }
-        }
-
-        public bool InjectionReg
-        {
-            get { return this.injectionCheckBox.Checked; }
-        }
-
-        public bool PermanentReg
-        {
-            get { return permanentregcheckBox.Checked; }
-        }
-
-        public string HandlerId
-        {
-            get { return handlerIdTextBox.Text; }
-        }
-
-        public bool RequestorDecides
-        {
-            get { return requestorDecidesRadioButton.Checked; }
-        }
-
         // handlerid is read from the HandlerId property. I.e. do not set any values in this method.
         private void handlerIdTextBox_TextChanged(object sender, EventArgs e)
         {
@@ -106,6 +100,7 @@ namespace Sate
         }
 
         /* only injection or pending can be checked in at the same time */
+
         private void injectionCheckBox_CheckedChanged(object sender, EventArgs e)
         {
             if (InjectionReg)

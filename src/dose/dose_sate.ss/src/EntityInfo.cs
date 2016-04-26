@@ -1,4 +1,4 @@
-/******************************************************************************
+﻿/******************************************************************************
 *
 * Copyright Saab AB, 2007-2013 (http://safirsdkcore.com)
 * 
@@ -22,61 +22,38 @@
 *
 ******************************************************************************/
 
-using System;
+using Safir.Dob.Typesystem;
 
 namespace Sate
 {
     public class EntityInfo : ObjectInfo
     {
-        private HandlerIdSerializeable handlerIdSer;
-        public HandlerIdSerializeable HandlerIdSer
+        public HandlerIdSerializeable HandlerIdSer { get; set; }
+
+        public InstanceIdSerializeable InstanceIdSer { get; set; }
+
+        public bool RequestorDecides { get; set; }
+
+        public long Timestamp { get; set; }
+
+        public HandlerId getHandlerId()
         {
-            get { return handlerIdSer; }
-            set { handlerIdSer = value; }
-        }
-        public Safir.Dob.Typesystem.HandlerId getHandlerId()
-        {
-            if (handlerIdSer != null)
-            {
-                return handlerIdSer.HandlerId();
-            }
-            return null;
-        }
-        public void setHandlerId(Safir.Dob.Typesystem.HandlerId handlerId)
-        {
-            handlerIdSer = new HandlerIdSerializeable(handlerId);
+            return HandlerIdSer?.HandlerId();
         }
 
-        private InstanceIdSerializeable instanceIdSer;
-        public InstanceIdSerializeable InstanceIdSer
+        public void setHandlerId(HandlerId handlerId)
         {
-            get { return instanceIdSer; }
-            set { instanceIdSer = value; }
-        }
-        public Safir.Dob.Typesystem.InstanceId getInstanceId()
-        {
-            if (instanceIdSer != null)
-            {
-                return instanceIdSer.InstanceId();
-            }
-            return null;
-        }
-        public void setInstanceId(Safir.Dob.Typesystem.InstanceId instanceId)
-        {
-            instanceIdSer = new InstanceIdSerializeable(instanceId);
+            HandlerIdSer = new HandlerIdSerializeable(handlerId);
         }
 
-        private bool requestorDecides;
-        public bool RequestorDecides
+        public InstanceId GetInstanceId()
         {
-            get { return requestorDecides; }
-            set { requestorDecides = value; }
+            return InstanceIdSer?.InstanceId();
         }
-        private Int64 timestamp;
-        public Int64 Timestamp
+
+        public void SetInstanceId(InstanceId instanceId)
         {
-            get { return timestamp; }
-            set { timestamp = value; }
+            InstanceIdSer = new InstanceIdSerializeable(instanceId);
         }
     }
 }

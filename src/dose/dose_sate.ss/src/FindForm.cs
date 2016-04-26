@@ -23,64 +23,64 @@
 ******************************************************************************/
 
 using System;
-using System.Drawing;
-using System.Collections;
 using System.ComponentModel;
 using System.Windows.Forms;
 
 namespace Sate
 {
     /// <summary>
-    /// Summary description for FindForm.
+    ///     Summary description for FindForm.
     /// </summary>
-    public class FindForm : System.Windows.Forms.Form
+    public class FindForm : Form
     {
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Button findbutton;
-        private System.Windows.Forms.Button closebutton;
         /// <summary>
-        /// Required designer variable.
+        ///     Required designer variable.
         /// </summary>
-        private System.ComponentModel.Container components = null;
-        private System.Windows.Forms.TextBox findtextBox;
+        private readonly Container components = null;
 
-        private System.Windows.Forms.RichTextBox richEdit  = null;
-        private System.Windows.Forms.CheckBox matchCasecheckBox;
+        private readonly RichTextBox richEdit;
+        private Button closebutton;
+
         private int currentIndex = -1;
+        private Button findbutton;
+        private TextBox findtextBox;
+        private Label label1;
+        private CheckBox matchCasecheckBox;
 
-        public FindForm(System.Windows.Forms.RichTextBox richEdit)
+        public FindForm(RichTextBox richEdit)
         {
             //
             // Required for Windows Form Designer support
             //
             InitializeComponent();
 
-            this.richEdit=richEdit;
+            this.richEdit = richEdit;
         }
 
         /// <summary>
-        /// Clean up any resources being used.
+        ///     Clean up any resources being used.
         /// </summary>
-        protected override void Dispose( bool disposing )
+        protected override void Dispose(bool disposing)
         {
-            if( disposing )
+            if (disposing)
             {
-                if(components != null)
+                if (components != null)
                 {
                     components.Dispose();
                 }
             }
-            base.Dispose( disposing );
+            base.Dispose(disposing);
         }
 
         #region Windows Form Designer generated code
+
         /// <summary>
-        /// Required method for Designer support - do not modify
-        /// the contents of this method with the code editor.
+        ///     Required method for Designer support - do not modify
+        ///     the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FindForm));
+            var resources = new System.ComponentModel.ComponentResourceManager(typeof(FindForm));
             this.findtextBox = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.matchCasecheckBox = new System.Windows.Forms.CheckBox();
@@ -138,40 +138,40 @@ namespace Sate
             this.Controls.Add(this.label1);
             this.Controls.Add(this.findtextBox);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.Icon = ((System.Drawing.Icon) (resources.GetObject("$this.Icon")));
             this.Name = "FindForm";
             this.Text = "Find";
             this.TopMost = true;
             this.ResumeLayout(false);
             this.PerformLayout();
-
         }
+
         #endregion
 
-        private void findbutton_Click(object sender, System.EventArgs e)
+        private void findbutton_Click(object sender, EventArgs e)
         {
             FindNext();
         }
 
         private void FindNext()
         {
-            richEdit.HideSelection=false;
-            string find=this.findtextBox.Text;
-            RichTextBoxFinds finds=RichTextBoxFinds.None;
-            if (this.matchCasecheckBox.Checked)
-                finds=RichTextBoxFinds.MatchCase;
-            currentIndex=this.richEdit.Find(find, currentIndex+1, richEdit.Text.Length, finds);
-            if (currentIndex<0)
+            richEdit.HideSelection = false;
+            var find = findtextBox.Text;
+            var finds = RichTextBoxFinds.None;
+            if (matchCasecheckBox.Checked)
+                finds = RichTextBoxFinds.MatchCase;
+            currentIndex = richEdit.Find(find, currentIndex + 1, richEdit.Text.Length, finds);
+            if (currentIndex < 0)
             {
-                MessageBox.Show("The text '"+find+"' was not found!");
+                MessageBox.Show("The text '" + find + "' was not found!");
                 return;
             }
-            richEdit.SelectionStart=currentIndex;
+            richEdit.SelectionStart = currentIndex;
         }
 
         private void closebutton_Click(object sender, EventArgs e)
         {
-            this.Hide();
+            Hide();
         }
     }
 }

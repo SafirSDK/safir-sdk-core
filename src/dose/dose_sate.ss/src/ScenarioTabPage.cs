@@ -22,40 +22,22 @@
 *
 ******************************************************************************/
 
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
-using System.Data;
-using System.Text;
 using System.Windows.Forms;
-using System.Collections;
 
 namespace Sate
 {
     public class ScenarioTabPage : TabPage
     {
-        private ScenarioControl sc = new ScenarioControl();
-        private static ScenarioTabPage instance = new ScenarioTabPage();
-
         private ScenarioTabPage()
         {
-            sc.Dock = DockStyle.Fill;
-            this.Controls.Add(sc);
-            this.Text = "Play/Record";
-            this.ImageIndex = 2;
+            Player.Dock = DockStyle.Fill;
+            Controls.Add(Player);
+            Text = "Play/Record";
+            ImageIndex = 2;
         }
 
-        public static ScenarioTabPage Instance
-        {
-            get { return instance; }
-        }
+        public static ScenarioTabPage Instance { get; } = new ScenarioTabPage();
 
-        public ScenarioControl Player
-        {
-            get { return sc; }
-        }
-
-
+        public ScenarioControl Player { get; } = new ScenarioControl();
     }
 }

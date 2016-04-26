@@ -1,4 +1,4 @@
-/******************************************************************************
+﻿/******************************************************************************
 *
 * Copyright Saab AB, 2007-2013 (http://safirsdkcore.com)
 * 
@@ -22,32 +22,26 @@
 *
 ******************************************************************************/
 
+using Safir.Dob.Typesystem;
+
 namespace Sate
 {
     public class MessageInfo : ObjectInfo
     {
-        public MessageInfo()
-        {
-        }
+        public ChannelIdSerializable ChannelIdSer { get; set; }
 
-        private ChannelIdSerializable channelIdSer;
-        public ChannelIdSerializable ChannelIdSer
+        public ChannelId getChannelId()
         {
-            get { return channelIdSer; }
-            set { channelIdSer = value; }
-        }
-        public Safir.Dob.Typesystem.ChannelId getChannelId()
-        {
-            if (channelIdSer != null)
+            if (ChannelIdSer != null)
             {
-                return channelIdSer.ChannelId();
+                return ChannelIdSer.ChannelId();
             }
             return null;
-        
         }
-        public void setChannelId(Safir.Dob.Typesystem.ChannelId channelId)
+
+        public void setChannelId(ChannelId channelId)
         {
-            channelIdSer = new ChannelIdSerializable(channelId);
+            ChannelIdSer = new ChannelIdSerializable(channelId);
         }
     }
 }

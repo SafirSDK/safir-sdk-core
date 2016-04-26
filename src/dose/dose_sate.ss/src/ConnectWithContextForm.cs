@@ -23,11 +23,6 @@
 ******************************************************************************/
 
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
 
 namespace Sate
@@ -41,7 +36,7 @@ namespace Sate
 
         private void okbutton_Click(object sender, EventArgs e)
         {
-            MainForm.Instance.Connect(true, (Int32)context.Value);
+            MainForm.Instance.Connect(true, (int) context.Value);
             Close();
         }
 
@@ -49,9 +44,5 @@ namespace Sate
         {
             Close();
         }
-
-     
-
-
     }
 }

@@ -23,34 +23,33 @@
 ******************************************************************************/
 
 using System;
-using System.Drawing;
-using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Windows.Forms;
+using Safir.Dob.Typesystem;
 
 namespace Sate
 {
-
     /// <summary>
-    /// Summary description for IterateClassForm.
+    ///     Summary description for IterateClassForm.
     /// </summary>
-    public class IterateClassForm : System.Windows.Forms.Form
+    public class IterateClassForm : Form
     {
         /// <summary>
-        /// Required designer variable.
+        ///     Required designer variable.
         /// </summary>
-        private System.ComponentModel.Container components = null;
-        private System.Windows.Forms.ListBox listBox1;
-        private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.Label label5;
-        private System.Windows.Forms.Label resultlabel;
-        private System.Windows.Forms.Panel topPanel;
-        private System.Windows.Forms.Button okbutton;
-        private System.Windows.Forms.Panel bottompanel;
-        private Button deleteAllInstancesButton;
+        private readonly Container components = null;
 
-        private long typeId;
+        private readonly long typeId;
+        private Panel bottompanel;
+
+        private Button deleteAllInstancesButton;
+        private Label label3;
+        private Label label5;
+        private ListBox listBox1;
+        private Button okbutton;
+        private Label resultlabel;
+        private Panel topPanel;
 
         public IterateClassForm(long typeId)
         {
@@ -59,51 +58,52 @@ namespace Sate
             //
             InitializeComponent();
 
-            this.typeId=typeId;
-            this.listBox1.DoubleClick+=new EventHandler(listBox1_DoubleClick);
+            this.typeId = typeId;
+            listBox1.DoubleClick += listBox1_DoubleClick;
 
-            this.Text="Iterate class: "+Safir.Dob.Typesystem.Operations.GetName(typeId);
+            Text = "Iterate class: " + Operations.GetName(typeId);
 
             UpdateListBox();
         }
 
         private void UpdateListBox()
         {
-            int noFound = 0;
-            this.listBox1.Items.Clear();
+            var noFound = 0;
+            listBox1.Items.Clear();
 
-            foreach (Safir.Dob.EntityProxy entityProxy in MainForm.Instance.Dose.GetEntityEnumerator(typeId, true))
+            foreach (var entityProxy in MainForm.Instance.Dose.GetEntityEnumerator(typeId, true))
             {
                 ++noFound;
-                this.listBox1.Items.Add(entityProxy.InstanceId.ToString());
+                listBox1.Items.Add(entityProxy.InstanceId.ToString());
             }
 
-            this.resultlabel.Text = noFound.ToString() + " existing instances";
+            resultlabel.Text = noFound + " existing instances";
         }
 
         /// <summary>
-        /// Clean up any resources being used.
+        ///     Clean up any resources being used.
         /// </summary>
-        protected override void Dispose( bool disposing )
+        protected override void Dispose(bool disposing)
         {
-            if( disposing )
+            if (disposing)
             {
-                if(components != null)
+                if (components != null)
                 {
                     components.Dispose();
                 }
             }
-            base.Dispose( disposing );
+            base.Dispose(disposing);
         }
 
         #region Windows Form Designer generated code
+
         /// <summary>
-        /// Required method for Designer support - do not modify
-        /// the contents of this method with the code editor.
+        ///     Required method for Designer support - do not modify
+        ///     the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(IterateClassForm));
+            var resources = new System.ComponentModel.ComponentResourceManager(typeof(IterateClassForm));
             this.listBox1 = new System.Windows.Forms.ListBox();
             this.label3 = new System.Windows.Forms.Label();
             this.resultlabel = new System.Windows.Forms.Label();
@@ -126,7 +126,9 @@ namespace Sate
             // 
             // label3
             // 
-            this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Underline))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F,
+                ((System.Drawing.FontStyle) ((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Underline))),
+                System.Drawing.GraphicsUnit.Point, ((byte) (0)));
             this.label3.Location = new System.Drawing.Point(8, 8);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(56, 23);
@@ -144,7 +146,8 @@ namespace Sate
             // 
             // label5
             // 
-            this.label5.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label5.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold,
+                System.Drawing.GraphicsUnit.Point, ((byte) (0)));
             this.label5.Location = new System.Drawing.Point(8, 40);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(272, 23);
@@ -199,85 +202,85 @@ namespace Sate
             this.Controls.Add(this.listBox1);
             this.Controls.Add(this.topPanel);
             this.Controls.Add(this.bottompanel);
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.Icon = ((System.Drawing.Icon) (resources.GetObject("$this.Icon")));
             this.Name = "IterateClassForm";
             this.Padding = new System.Windows.Forms.Padding(2);
             this.Text = "Iterate class";
             this.topPanel.ResumeLayout(false);
             this.bottompanel.ResumeLayout(false);
             this.ResumeLayout(false);
-
         }
+
         #endregion
 
-        private void okbutton_Click(object sender, System.EventArgs e)
+        private void okbutton_Click(object sender, EventArgs e)
         {
-            DialogResult=DialogResult.OK;
+            DialogResult = DialogResult.OK;
         }
 
         private void listBox1_DoubleClick(object sender, EventArgs e)
         {
             // Instance <string>
             // Instance <number>
-            string s = (string)this.listBox1.SelectedItem;
-            Safir.Dob.Typesystem.EntityId entityId;
+            var s = (string) listBox1.SelectedItem;
+            EntityId entityId;
 
             try
             {
-                Int64 instance = Int64.Parse(s);
-                entityId = new Safir.Dob.Typesystem.EntityId(typeId, new Safir.Dob.Typesystem.InstanceId(instance));
+                var instance = long.Parse(s);
+                entityId = new EntityId(typeId, new InstanceId(instance));
             }
             catch
             {
-                string instanceStr = s;
-                entityId = new Safir.Dob.Typesystem.EntityId(typeId, new Safir.Dob.Typesystem.InstanceId(instanceStr));
+                var instanceStr = s;
+                entityId = new EntityId(typeId, new InstanceId(instanceStr));
             }
 
             try
             {
-                using (Safir.Dob.EntityProxy entityProxy = MainForm.Instance.Dose.Read(entityId))
+                using (var entityProxy = MainForm.Instance.Dose.Read(entityId))
                 {
-                    EntityInfo entityInfo = new EntityInfo();
+                    var entityInfo = new EntityInfo();
                     entityInfo.Obj = entityProxy.Entity;
                     entityInfo.setHandlerId(entityProxy.OwnerWithStringRepresentation);
-                    entityInfo.setInstanceId(entityProxy.InstanceId);
+                    entityInfo.SetInstanceId(entityProxy.InstanceId);
                     MainForm.Instance.AddTabPage(new ObjectEditTabPage(entityInfo));
                 }
             }
             catch
             {
-                MessageBox.Show(entityId.InstanceId.ToString() + " does no longer exist.");
+                MessageBox.Show(entityId.InstanceId + " does no longer exist.");
             }
         }
 
         private void deleteAllInstancesButton_Click(object sender, EventArgs e)
         {
-            bool isHandler = false;
+            var isHandler = false;
 
-            foreach (Int64 loop_typeId in MainForm.Instance.requestorDecidesTypeIdList)
+            foreach (var loop_typeId in MainForm.Instance.requestorDecidesTypeIdList)
             {
                 if (loop_typeId == typeId)
                     isHandler = true;
             }
-            foreach (Int64 loop_typeId in MainForm.Instance.handlerDecidesTypeIdList)
+            foreach (var loop_typeId in MainForm.Instance.handlerDecidesTypeIdList)
             {
                 if (loop_typeId == typeId)
                     isHandler = true;
             }
 
 
-            List<EntityInfo> entityInfoList = new List<EntityInfo>();
+            var entityInfoList = new List<EntityInfo>();
 
-            foreach (Safir.Dob.EntityProxy entityProxy in MainForm.Instance.Dose.GetEntityEnumerator(typeId, true))
+            foreach (var entityProxy in MainForm.Instance.Dose.GetEntityEnumerator(typeId, true))
             {
-                EntityInfo entityInfo = new EntityInfo();
+                var entityInfo = new EntityInfo();
                 entityInfo.Obj = entityProxy.Entity;
-                entityInfo.setInstanceId(entityProxy.InstanceId);
+                entityInfo.SetInstanceId(entityProxy.InstanceId);
                 entityInfo.setHandlerId(entityProxy.OwnerWithStringRepresentation);
                 entityInfoList.Add(entityInfo);
             }
 
-            foreach (EntityInfo entityInfo in entityInfoList)
+            foreach (var entityInfo in entityInfoList)
             {
                 if (isHandler)
                 {
@@ -299,4 +302,3 @@ namespace Sate
         }
     }
 }
-

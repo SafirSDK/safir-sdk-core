@@ -23,12 +23,12 @@
 ******************************************************************************/
 
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Drawing;
-using System.Data;
-using System.Text;
 using System.Windows.Forms;
+using Safir.Dob;
+using Safir.Dob.Typesystem;
+using Message = Safir.Dob.Message;
+using Object = Safir.Dob.Typesystem.Object;
 
 namespace Sate
 {
@@ -37,55 +37,54 @@ namespace Sate
     //*****************************************************************************************************
     public class ObjectEditControl : UserControl
     {
-        private System.Windows.Forms.CheckBox liveDataCheckBox = new CheckBox();
+        private readonly Label channelIdInputLabel;
+        private readonly TextBox channelIdInputTextBox;
+        private readonly LinkLabel createEntityHandlerDecidesReqLink;
+        private readonly LinkLabel createEntityReqLink;
+        private readonly LinkLabel deleteEntityLink;
+        private readonly LinkLabel deleteEntityReqLink;
 
-        private Panel rightPanel = new Panel();
-        private ObjectEditPanel objectPanel = null;
+        private readonly Label handlerIdInputLabel;
+        private readonly TextBox handlerIdInputTextBox;
 
-        private System.Windows.Forms.LinkLabel setChangesEntityLink;
-        private System.Windows.Forms.LinkLabel setAllEntityLink;
-        private System.Windows.Forms.LinkLabel deleteEntityLink;
-        private System.Windows.Forms.LinkLabel createEntityReqLink;
-        private System.Windows.Forms.LinkLabel createEntityHandlerDecidesReqLink;
-        private System.Windows.Forms.LinkLabel updateEntityReqLink;
-        private System.Windows.Forms.LinkLabel deleteEntityReqLink;
-        private System.Windows.Forms.LinkLabel sendMessageLink;
-        private System.Windows.Forms.LinkLabel sendServiceReqLink;
-        private System.Windows.Forms.LinkLabel toXmlLink;
-        private System.Windows.Forms.LinkLabel toJsonLink;
-        private System.Windows.Forms.LinkLabel useReplyLink;
-        
-        private System.Windows.Forms.Label handlerIdInputLabel;
-        private System.Windows.Forms.TextBox handlerIdInputTextBox;
-        private System.Windows.Forms.Label channelIdInputLabel;
-        private System.Windows.Forms.TextBox channelIdInputTextBox;
+        private readonly LinkLabel injectChangesLink;
+        private readonly LinkLabel injectDeleteLink;
+        private readonly LinkLabel injectInitialSetLink;
+        private readonly Label injectTimestampLabel;
+        private readonly TextBox injectTimestampTextBox;
+        private readonly CheckBox liveDataCheckBox = new CheckBox();
+        private readonly ObjectEditPanel objectPanel;
 
-        private System.Windows.Forms.LinkLabel injectChangesLink;
-        private System.Windows.Forms.LinkLabel injectInitialSetLink;
-        private System.Windows.Forms.LinkLabel injectDeleteLink;
-        private System.Windows.Forms.Label injectTimestampLabel;
-        private System.Windows.Forms.TextBox injectTimestampTextBox;
+        private readonly LinkLabel sendMessageLink;
+        private readonly LinkLabel sendServiceReqLink;
+        private readonly LinkLabel setAllEntityLink;
+
+        private readonly LinkLabel setChangesEntityLink;
+        private readonly LinkLabel toJsonLink;
+        private readonly LinkLabel toXmlLink;
+        private readonly LinkLabel updateEntityReqLink;
+        private readonly LinkLabel useReplyLink;
 
         public ObjectEditControl(ObjectInfo objInfo)
         {
             if (objInfo == null)
                 return;
-            
+
             objectPanel = new ObjectEditPanel(objInfo, false);
             objectPanel.AutoScroll = true;
             objectPanel.Dock = DockStyle.Fill;
-            rightPanel.Dock = DockStyle.Right;
+            RightPanel.Dock = DockStyle.Right;
 
-            this.Controls.AddRange(new Control[] { objectPanel, rightPanel });
+            Controls.AddRange(new Control[] {objectPanel, RightPanel});
 
-            this.AutoScroll = true;
-            this.BackColor = Color.White;
+            AutoScroll = true;
+            BackColor = Color.White;
 
             //--- Create operations panel ---
 
-            Panel operations = new Panel();
+            var operations = new Panel();
             operations.BackColor = Color.LightYellow;
-            Label operationLabel = new Label();
+            var operationLabel = new Label();
             operationLabel.Font = new Font(FontFamily.GenericSansSerif, 10, FontStyle.Bold | FontStyle.Underline);
             operationLabel.Text = "Operations";
             operationLabel.ForeColor = Color.Black;
@@ -96,60 +95,60 @@ namespace Sate
             toXmlLink.AutoSize = true;
             toXmlLink.Text = "Serialize to XML";
             toXmlLink.Location = new Point(10, 40);
-            toXmlLink.Click += new EventHandler(toXmlLink_Click);
+            toXmlLink.Click += toXmlLink_Click;
             operations.Controls.Add(toXmlLink);
 
             toJsonLink = new LinkLabel();
             toJsonLink.AutoSize = true;
             toJsonLink.Text = "Serialize to JSON";
             toJsonLink.Location = new Point(10, 60);
-            toJsonLink.Click += new EventHandler(toJsonLink_Click);
+            toJsonLink.Click += toJsonLink_Click;
             operations.Controls.Add(toJsonLink);
 
 
-            if (Safir.Dob.Typesystem.Operations.IsOfType(objInfo.Obj.GetTypeId(), Safir.Dob.Entity.ClassTypeId))
+            if (Operations.IsOfType(objInfo.Obj.GetTypeId(), Entity.ClassTypeId))
             {
                 setChangesEntityLink = new LinkLabel();
                 setChangesEntityLink.AutoSize = true;
                 setChangesEntityLink.Text = "SetChanges";
                 setChangesEntityLink.Location = new Point(10, 80);
-                setChangesEntityLink.Click += new EventHandler(setChangesEntityLink_Click);
+                setChangesEntityLink.Click += setChangesEntityLink_Click;
 
                 setAllEntityLink = new LinkLabel();
                 setAllEntityLink.AutoSize = true;
                 setAllEntityLink.Text = "SetAll";
                 setAllEntityLink.Location = new Point(10, 100);
-                setAllEntityLink.Click += new EventHandler(setAllEntityLink_Click);
+                setAllEntityLink.Click += setAllEntityLink_Click;
 
                 deleteEntityLink = new LinkLabel();
                 deleteEntityLink.AutoSize = true;
                 deleteEntityLink.Text = "Delete";
                 deleteEntityLink.Location = new Point(10, 120);
-                deleteEntityLink.Click += new EventHandler(deleteEntityLink_Click);
+                deleteEntityLink.Click += deleteEntityLink_Click;
 
                 createEntityReqLink = new LinkLabel();
                 createEntityReqLink.AutoSize = true;
                 createEntityReqLink.Text = "Create Request (requestor dec.)";
                 createEntityReqLink.Location = new Point(10, 140);
-                createEntityReqLink.Click += new EventHandler(createEntityReqLink_Click);
+                createEntityReqLink.Click += createEntityReqLink_Click;
 
                 createEntityHandlerDecidesReqLink = new LinkLabel();
                 createEntityHandlerDecidesReqLink.AutoSize = true;
                 createEntityHandlerDecidesReqLink.Text = "Create Request (handler dec.)";
                 createEntityHandlerDecidesReqLink.Location = new Point(10, 160);
-                createEntityHandlerDecidesReqLink.Click += new EventHandler(createEntityHandlerDecidesReqLink_Click);
+                createEntityHandlerDecidesReqLink.Click += createEntityHandlerDecidesReqLink_Click;
 
                 updateEntityReqLink = new LinkLabel();
                 updateEntityReqLink.AutoSize = true;
                 updateEntityReqLink.Text = "Update Request";
                 updateEntityReqLink.Location = new Point(10, 180);
-                updateEntityReqLink.Click += new EventHandler(updateEntityReqLink_Click);
+                updateEntityReqLink.Click += updateEntityReqLink_Click;
 
                 deleteEntityReqLink = new LinkLabel();
                 deleteEntityReqLink.AutoSize = true;
                 deleteEntityReqLink.Text = "Delete Request";
                 deleteEntityReqLink.Location = new Point(10, 200);
-                deleteEntityReqLink.Click += new EventHandler(deleteEntityReqLink_Click);
+                deleteEntityReqLink.Click += deleteEntityReqLink_Click;
 
                 handlerIdInputLabel = new Label();
                 handlerIdInputLabel.AutoSize = true;
@@ -158,13 +157,13 @@ namespace Sate
                 operations.Controls.Add(handlerIdInputLabel);
 
                 handlerIdInputTextBox = new TextBox();
-                bool gotValue = false;
+                var gotValue = false;
                 if (objInfo is EntityInfo)
                 {
-                    EntityInfo entityInfo = (EntityInfo)objInfo;
+                    var entityInfo = (EntityInfo) objInfo;
                     if (entityInfo.getHandlerId() != null)
                     {
-                        handlerIdInputTextBox.Text = ((EntityInfo)objInfo).getHandlerId().ToString();
+                        handlerIdInputTextBox.Text = ((EntityInfo) objInfo).getHandlerId().ToString();
                         gotValue = true;
                     }
                 }
@@ -172,22 +171,26 @@ namespace Sate
                 {
                     handlerIdInputTextBox.Text = "DEFAULT_HANDLER";
                 }
-                handlerIdInputTextBox.Location = new Point(10, 240); //new Point(idInputLabel.Location.X + idInputLabel.Width, 10);
+                handlerIdInputTextBox.Location = new Point(10, 240);
+                //new Point(idInputLabel.Location.X + idInputLabel.Width, 10);
                 handlerIdInputTextBox.Width = 120;
-                handlerIdInputTextBox.TextChanged += new EventHandler(handlerIdInputTextBox_TextChanged);
+                handlerIdInputTextBox.TextChanged += handlerIdInputTextBox_TextChanged;
                 operations.Controls.Add(handlerIdInputTextBox);
 
-                operations.Controls.AddRange(new Control[] {   setChangesEntityLink,
-                                                               setAllEntityLink,
-                                                               deleteEntityLink,
-                                                               createEntityReqLink,
-                                                               createEntityHandlerDecidesReqLink,
-                                                               updateEntityReqLink,
-                                                               deleteEntityReqLink});
+                operations.Controls.AddRange(new Control[]
+                {
+                    setChangesEntityLink,
+                    setAllEntityLink,
+                    deleteEntityLink,
+                    createEntityReqLink,
+                    createEntityHandlerDecidesReqLink,
+                    updateEntityReqLink,
+                    deleteEntityReqLink
+                });
 
-                 
-                if (Safir.Dob.InjectionProperty.HasProperty(objInfo.Obj) && 
-                    Safir.Dob.InjectionProperty.GetInjection(objInfo.Obj) == Safir.Dob.InjectionKind.Enumeration.Injectable)
+
+                if (InjectionProperty.HasProperty(objInfo.Obj) &&
+                    InjectionProperty.GetInjection(objInfo.Obj) == InjectionKind.Enumeration.Injectable)
                 {
                     injectTimestampLabel = new Label();
                     injectTimestampLabel.AutoSize = true;
@@ -197,45 +200,47 @@ namespace Sate
 
                     injectTimestampTextBox = new TextBox();
                     injectTimestampTextBox.Text = "0";
-                    injectTimestampTextBox.Location = new Point(10, 360); //new Point(idInputLabel.Location.X + idInputLabel.Width, 10);
+                    injectTimestampTextBox.Location = new Point(10, 360);
+                    //new Point(idInputLabel.Location.X + idInputLabel.Width, 10);
                     injectTimestampTextBox.Width = 120;
-                    injectTimestampTextBox.TextChanged += new EventHandler(injectTimestampTextBox_TextChanged);
+                    injectTimestampTextBox.TextChanged += injectTimestampTextBox_TextChanged;
                     operations.Controls.Add(injectTimestampTextBox);
 
                     injectChangesLink = new LinkLabel();
                     injectChangesLink.AutoSize = true;
                     injectChangesLink.Text = "InjectChanges";
                     injectChangesLink.Location = new Point(10, 280);
-                    injectChangesLink.Click += new EventHandler(injectChangesLink_Click);
+                    injectChangesLink.Click += injectChangesLink_Click;
 
                     injectInitialSetLink = new LinkLabel();
                     injectInitialSetLink.AutoSize = true;
                     injectInitialSetLink.Text = "Inject InitialSet";
                     injectInitialSetLink.Location = new Point(10, 300);
-                    injectInitialSetLink.Click += new EventHandler(injectInitialSetLink_Click);
+                    injectInitialSetLink.Click += injectInitialSetLink_Click;
 
                     injectDeleteLink = new LinkLabel();
                     injectDeleteLink.AutoSize = true;
                     injectDeleteLink.Text = "InjectDelete";
                     injectDeleteLink.Location = new Point(10, 320);
-                    injectDeleteLink.Click += new EventHandler(injectDeleteLink_Click);
+                    injectDeleteLink.Click += injectDeleteLink_Click;
 
 
-                    operations.Controls.AddRange(new Control[] {injectInitialSetLink, 
-                                                               injectChangesLink,
-                                                               injectDeleteLink});
+                    operations.Controls.AddRange(new Control[]
+                    {
+                        injectInitialSetLink,
+                        injectChangesLink,
+                        injectDeleteLink
+                    });
                 }
-                
-
             }
 
-            if (Safir.Dob.Typesystem.Operations.IsOfType(objInfo.Obj.GetTypeId(), Safir.Dob.Message.ClassTypeId))
+            if (Operations.IsOfType(objInfo.Obj.GetTypeId(), Message.ClassTypeId))
             {
                 sendMessageLink = new LinkLabel();
                 sendMessageLink.AutoSize = true;
                 sendMessageLink.Text = "Send Message";
                 sendMessageLink.Location = new Point(10, 80);
-                sendMessageLink.Click += new EventHandler(sendMessageLink_Click);
+                sendMessageLink.Click += sendMessageLink_Click;
                 operations.Controls.Add(sendMessageLink);
 
                 channelIdInputLabel = new Label();
@@ -245,13 +250,13 @@ namespace Sate
                 operations.Controls.Add(channelIdInputLabel);
 
                 channelIdInputTextBox = new TextBox();
-                bool gotValue = false;
+                var gotValue = false;
                 if (objInfo is MessageInfo)
                 {
-                    MessageInfo messageInfo = (MessageInfo)objInfo;
+                    var messageInfo = (MessageInfo) objInfo;
                     if (messageInfo.getChannelId() != null)
                     {
-                        channelIdInputTextBox.Text = ((MessageInfo)objInfo).getChannelId().ToString();
+                        channelIdInputTextBox.Text = ((MessageInfo) objInfo).getChannelId().ToString();
                         gotValue = true;
                     }
                 }
@@ -259,20 +264,20 @@ namespace Sate
                 {
                     channelIdInputTextBox.Text = "DEFAULT_CHANNEL";
                 }
-                channelIdInputTextBox.Location = new Point(10, 220); //new Point(idInputLabel.Location.X + idInputLabel.Width, 10);
+                channelIdInputTextBox.Location = new Point(10, 220);
+                //new Point(idInputLabel.Location.X + idInputLabel.Width, 10);
                 channelIdInputTextBox.Width = 120;
-                channelIdInputTextBox.TextChanged += new EventHandler(channelIdInputTextBox_TextChanged);
+                channelIdInputTextBox.TextChanged += channelIdInputTextBox_TextChanged;
                 operations.Controls.Add(channelIdInputTextBox);
-
             }
 
-            else if (Safir.Dob.Typesystem.Operations.IsOfType(objInfo.Obj.GetTypeId(), Safir.Dob.Service.ClassTypeId))
+            else if (Operations.IsOfType(objInfo.Obj.GetTypeId(), Service.ClassTypeId))
             {
                 sendServiceReqLink = new LinkLabel();
                 sendServiceReqLink.AutoSize = true;
                 sendServiceReqLink.Text = "Send Service Request";
                 sendServiceReqLink.Location = new Point(10, 80);
-                sendServiceReqLink.Click += new EventHandler(sendServiceReqLink_Click);
+                sendServiceReqLink.Click += sendServiceReqLink_Click;
                 operations.Controls.Add(sendServiceReqLink);
 
                 handlerIdInputLabel = new Label();
@@ -282,13 +287,13 @@ namespace Sate
                 operations.Controls.Add(handlerIdInputLabel);
 
                 handlerIdInputTextBox = new TextBox();
-                bool gotValue = false;
+                var gotValue = false;
                 if (objInfo is EntityInfo)
                 {
-                    EntityInfo entityInfo = (EntityInfo)objInfo;
+                    var entityInfo = (EntityInfo) objInfo;
                     if (entityInfo.getHandlerId() != null)
                     {
-                        handlerIdInputTextBox.Text = ((EntityInfo)objInfo).getHandlerId().ToString();
+                        handlerIdInputTextBox.Text = ((EntityInfo) objInfo).getHandlerId().ToString();
                         gotValue = true;
                     }
                 }
@@ -296,20 +301,20 @@ namespace Sate
                 {
                     handlerIdInputTextBox.Text = "DEFAULT_HANDLER";
                 }
-                handlerIdInputTextBox.Location = new Point(10, 220); //new Point(idInputLabel.Location.X + idInputLabel.Width, 10);
+                handlerIdInputTextBox.Location = new Point(10, 220);
+                //new Point(idInputLabel.Location.X + idInputLabel.Width, 10);
                 handlerIdInputTextBox.Width = 120;
-                handlerIdInputTextBox.TextChanged += new EventHandler(handlerIdInputTextBox_TextChanged);
+                handlerIdInputTextBox.TextChanged += handlerIdInputTextBox_TextChanged;
                 operations.Controls.Add(handlerIdInputTextBox);
-
             }
 
-            else if (Safir.Dob.Typesystem.Operations.IsOfType(objInfo.Obj.GetTypeId(), Safir.Dob.Response.ClassTypeId))
+            else if (Operations.IsOfType(objInfo.Obj.GetTypeId(), Response.ClassTypeId))
             {
                 useReplyLink = new LinkLabel();
                 useReplyLink.AutoSize = true;
                 useReplyLink.Text = "Use as default response";
                 useReplyLink.Location = new Point(10, 80);
-                useReplyLink.Click += new EventHandler(useReplyLink_Click);
+                useReplyLink.Click += useReplyLink_Click;
                 operations.Controls.Add(useReplyLink);
             }
 
@@ -321,25 +326,31 @@ namespace Sate
             operations.Size = new Size(170, 420);
             operations.Location = new Point(20, 40);
 
-            rightPanel.Controls.Add(operations);
+            RightPanel.Controls.Add(operations);
 
-            this.Tag = objInfo;
+            Tag = objInfo;
         }
 
-        void useReplyLink_Click(object sender, EventArgs e)
+        public Panel RightPanel { get; } = new Panel();
+
+        public bool LiveData
+        {
+            get { return liveDataCheckBox.Checked; }
+        }
+
+        private void useReplyLink_Click(object sender, EventArgs e)
         {
             if (objectPanel.SetObjectMembers())
             {
-                ResponseInfo responseInfo = (ResponseInfo)Tag;
-                Settings.Sate.AutoResponse = (Safir.Dob.Response)responseInfo.Obj;
-                Settings.Sate.XmlReplyObject = Safir.Dob.Typesystem.Serialization.ToXml(Settings.Sate.AutoResponse);
+                var responseInfo = (ResponseInfo) Tag;
+                Settings.Sate.AutoResponse = (Response) responseInfo.Obj;
+                Settings.Sate.XmlReplyObject = Serialization.ToXml(Settings.Sate.AutoResponse);
                 Settings.Save();
             }
             else
             {
                 MessageBox.Show("Failed to serialize the response to xml.");
             }
-
         }
 
         private void setChangesEntityLink_Click(object sender, EventArgs e)
@@ -349,18 +360,17 @@ namespace Sate
 
             if (objectPanel.SetObjectMembers())
             {
-                EntityInfo entityInfo = (EntityInfo)Tag;
-                if (entityInfo.getInstanceId() == null)
+                var entityInfo = (EntityInfo) Tag;
+                if (entityInfo.GetInstanceId() == null)
                 {
-                    entityInfo.setInstanceId(new Safir.Dob.Typesystem.InstanceId());
+                    entityInfo.SetInstanceId(new InstanceId());
                 }
                 if (entityInfo.getHandlerId() == null)
                 {
-                    entityInfo.setHandlerId(new Safir.Dob.Typesystem.HandlerId());
+                    entityInfo.setHandlerId(new HandlerId());
                 }
 
                 MainForm.Instance.SetChangesEntity(entityInfo);
-
             }
         }
 
@@ -371,18 +381,17 @@ namespace Sate
 
             if (objectPanel.SetObjectMembers())
             {
-                EntityInfo entityInfo = (EntityInfo)Tag;
-                if (entityInfo.getInstanceId() == null)
+                var entityInfo = (EntityInfo) Tag;
+                if (entityInfo.GetInstanceId() == null)
                 {
-                    entityInfo.setInstanceId(Safir.Dob.Typesystem.InstanceId.GenerateRandom());
+                    entityInfo.SetInstanceId(InstanceId.GenerateRandom());
                 }
                 if (entityInfo.getHandlerId() == null)
                 {
-                    entityInfo.setHandlerId(new Safir.Dob.Typesystem.HandlerId());
+                    entityInfo.setHandlerId(new HandlerId());
                 }
 
                 MainForm.Instance.SetAllEntity(entityInfo);
-
             }
         }
 
@@ -393,14 +402,14 @@ namespace Sate
 
             if (objectPanel.SetObjectMembers())
             {
-                EntityInfo entityInfo = (EntityInfo)Tag;
-                if (entityInfo.getInstanceId() == null)
+                var entityInfo = (EntityInfo) Tag;
+                if (entityInfo.GetInstanceId() == null)
                 {
-                    entityInfo.setInstanceId(new Safir.Dob.Typesystem.InstanceId());
+                    entityInfo.SetInstanceId(new InstanceId());
                 }
                 if (entityInfo.getHandlerId() == null)
                 {
-                    entityInfo.setHandlerId(new Safir.Dob.Typesystem.HandlerId());
+                    entityInfo.setHandlerId(new HandlerId());
                 }
 
                 MainForm.Instance.DeleteEntity(entityInfo);
@@ -414,15 +423,15 @@ namespace Sate
 
             if (objectPanel.SetObjectMembers())
             {
-                EntityInfo entityInfo = (EntityInfo)Tag;
+                var entityInfo = (EntityInfo) Tag;
                 entityInfo.RequestorDecides = true;
-                if (entityInfo.getInstanceId() == null)
+                if (entityInfo.GetInstanceId() == null)
                 {
-                    entityInfo.setInstanceId(new Safir.Dob.Typesystem.InstanceId());
+                    entityInfo.SetInstanceId(new InstanceId());
                 }
                 if (entityInfo.getHandlerId() == null)
                 {
-                    entityInfo.setHandlerId(new Safir.Dob.Typesystem.HandlerId());
+                    entityInfo.setHandlerId(new HandlerId());
                 }
 
                 MainForm.Instance.CreateRequest(entityInfo);
@@ -436,11 +445,11 @@ namespace Sate
 
             if (objectPanel.SetObjectMembers())
             {
-                EntityInfo entityInfo = (EntityInfo)Tag;
+                var entityInfo = (EntityInfo) Tag;
                 entityInfo.RequestorDecides = false;
                 if (entityInfo.getHandlerId() == null)
                 {
-                    entityInfo.setHandlerId(new Safir.Dob.Typesystem.HandlerId());
+                    entityInfo.setHandlerId(new HandlerId());
                 }
 
                 MainForm.Instance.CreateRequest(entityInfo);
@@ -454,10 +463,10 @@ namespace Sate
 
             if (objectPanel.SetObjectMembers())
             {
-                EntityInfo entityInfo = (EntityInfo)Tag;
-                if (entityInfo.getInstanceId() == null)
+                var entityInfo = (EntityInfo) Tag;
+                if (entityInfo.GetInstanceId() == null)
                 {
-                    entityInfo.setInstanceId(Safir.Dob.Typesystem.InstanceId.GenerateRandom());
+                    entityInfo.SetInstanceId(InstanceId.GenerateRandom());
                 }
 
                 MainForm.Instance.UpdateRequest(entityInfo);
@@ -471,10 +480,10 @@ namespace Sate
 
             if (objectPanel.SetObjectMembers())
             {
-                EntityInfo entityInfo = (EntityInfo)Tag;
-                if (entityInfo.getInstanceId() == null)
+                var entityInfo = (EntityInfo) Tag;
+                if (entityInfo.GetInstanceId() == null)
                 {
-                    throw new Safir.Dob.Typesystem.SoftwareViolationException("Error doing delete. No InstanceId set in entityInfo!");
+                    throw new SoftwareViolationException("Error doing delete. No InstanceId set in entityInfo!");
                 }
                 MainForm.Instance.DeleteRequest(entityInfo);
             }
@@ -487,18 +496,17 @@ namespace Sate
 
             if (objectPanel.SetObjectMembers())
             {
-                EntityInfo entityInfo = (EntityInfo)Tag;
-                if (entityInfo.getInstanceId() == null)
+                var entityInfo = (EntityInfo) Tag;
+                if (entityInfo.GetInstanceId() == null)
                 {
-                    entityInfo.setInstanceId(new Safir.Dob.Typesystem.InstanceId());
+                    entityInfo.SetInstanceId(new InstanceId());
                 }
                 if (entityInfo.getHandlerId() == null)
                 {
-                    entityInfo.setHandlerId(new Safir.Dob.Typesystem.HandlerId());
+                    entityInfo.setHandlerId(new HandlerId());
                 }
-                
-                MainForm.Instance.InjectionSetChanges(entityInfo);
 
+                MainForm.Instance.InjectionSetChanges(entityInfo);
             }
         }
 
@@ -509,18 +517,17 @@ namespace Sate
 
             if (objectPanel.SetObjectMembers())
             {
-                EntityInfo entityInfo = (EntityInfo)Tag;
-                if (entityInfo.getInstanceId() == null)
+                var entityInfo = (EntityInfo) Tag;
+                if (entityInfo.GetInstanceId() == null)
                 {
-                    entityInfo.setInstanceId(new Safir.Dob.Typesystem.InstanceId());
+                    entityInfo.SetInstanceId(new InstanceId());
                 }
                 if (entityInfo.getHandlerId() == null)
                 {
-                    entityInfo.setHandlerId(new Safir.Dob.Typesystem.HandlerId());
+                    entityInfo.setHandlerId(new HandlerId());
                 }
 
                 MainForm.Instance.InjectionInitialSet(entityInfo);
-
             }
         }
 
@@ -531,18 +538,17 @@ namespace Sate
 
             if (objectPanel.SetObjectMembers())
             {
-                EntityInfo entityInfo = (EntityInfo)Tag;
-                if (entityInfo.getInstanceId() == null)
+                var entityInfo = (EntityInfo) Tag;
+                if (entityInfo.GetInstanceId() == null)
                 {
-                    entityInfo.setInstanceId(new Safir.Dob.Typesystem.InstanceId());
+                    entityInfo.SetInstanceId(new InstanceId());
                 }
                 if (entityInfo.getHandlerId() == null)
                 {
-                    entityInfo.setHandlerId(new Safir.Dob.Typesystem.HandlerId());
+                    entityInfo.setHandlerId(new HandlerId());
                 }
 
                 MainForm.Instance.InjectionDelete(entityInfo);
-
             }
         }
 
@@ -553,11 +559,11 @@ namespace Sate
 
             if (objectPanel.SetObjectMembers())
             {
-                MessageInfo msgInfo = (MessageInfo)Tag;
+                var msgInfo = (MessageInfo) Tag;
                 // if no channelid set, set to default
                 if (msgInfo.getChannelId() == null)
                 {
-                    msgInfo.setChannelId(new Safir.Dob.Typesystem.ChannelId());
+                    msgInfo.setChannelId(new ChannelId());
                 }
                 MainForm.Instance.SendMessage(msgInfo);
             }
@@ -571,10 +577,10 @@ namespace Sate
 
             if (objectPanel.SetObjectMembers())
             {
-                ServiceHandlerInfo srvInfo = (ServiceHandlerInfo)Tag;
+                var srvInfo = (ServiceHandlerInfo) Tag;
                 if (srvInfo.getHandlerId() == null)
                 {
-                    srvInfo.setHandlerId(new Safir.Dob.Typesystem.HandlerId());
+                    srvInfo.setHandlerId(new HandlerId());
                 }
                 MainForm.Instance.ServiceRequest(srvInfo);
             }
@@ -585,7 +591,7 @@ namespace Sate
         {
             if (objectPanel.SetObjectMembers())
             {
-                MainForm.Instance.AddTabPage(new XmlTabPage((ObjectInfo)Tag));
+                MainForm.Instance.AddTabPage(new XmlTabPage((ObjectInfo) Tag));
             }
         }
 
@@ -593,31 +599,21 @@ namespace Sate
         {
             if (objectPanel.SetObjectMembers())
             {
-                MainForm.Instance.AddTabPage(new JsonTabPage((ObjectInfo)Tag));
+                MainForm.Instance.AddTabPage(new JsonTabPage((ObjectInfo) Tag));
             }
         }
 
-        public Panel RightPanel
-        {
-            get { return rightPanel; }
-        }
 
-        public bool LiveData
-        {
-            get { return liveDataCheckBox.Checked; }
-        }
-
-
-        public Safir.Dob.Typesystem.Object GetObject()
+        public Object GetObject()
         {
             objectPanel.SetObjectMembers();
-            return ((ObjectInfo)objectPanel.Tag).Obj;
+            return ((ObjectInfo) objectPanel.Tag).Obj;
         }
-        
+
         public ObjectInfo GetObjectInfo()
         {
             objectPanel.SetObjectMembers();
-            return (ObjectInfo)objectPanel.Tag;
+            return (ObjectInfo) objectPanel.Tag;
         }
 
         public void UpdateData(ObjectInfo objInfo)
@@ -626,12 +622,10 @@ namespace Sate
             objectPanel.UpdateData(objInfo);
         }
 
-        public void DeletedData(bool deleted)//if deleted=false, then removed
+        public void DeletedData(bool deleted) //if deleted=false, then removed
         {
             objectPanel.SetDeleted(deleted);
         }
-
-        private enum resulttype { longvalue, stringvalue, novalue }
 
         private void handlerIdInputTextBox_TextChanged(object sender, EventArgs e)
         {
@@ -661,13 +655,13 @@ namespace Sate
                 switch (result)
                 {
                     case resulttype.longvalue:
-                        ((EntityInfo)Tag).setHandlerId(new Safir.Dob.Typesystem.HandlerId(val));
+                        ((EntityInfo) Tag).setHandlerId(new HandlerId(val));
                         break;
                     case resulttype.stringvalue:
-                        ((EntityInfo)Tag).setHandlerId(new Safir.Dob.Typesystem.HandlerId(handlerIdInputTextBox.Text));
+                        ((EntityInfo) Tag).setHandlerId(new HandlerId(handlerIdInputTextBox.Text));
                         break;
                     default:
-                        ((EntityInfo)Tag).setHandlerId(new Safir.Dob.Typesystem.HandlerId());
+                        ((EntityInfo) Tag).setHandlerId(new HandlerId());
                         break;
                 }
             }
@@ -676,13 +670,13 @@ namespace Sate
                 switch (result)
                 {
                     case resulttype.longvalue:
-                        ((ServiceHandlerInfo)Tag).setHandlerId(new Safir.Dob.Typesystem.HandlerId(val));
+                        ((ServiceHandlerInfo) Tag).setHandlerId(new HandlerId(val));
                         break;
                     case resulttype.stringvalue:
-                        ((ServiceHandlerInfo)Tag).setHandlerId(new Safir.Dob.Typesystem.HandlerId(handlerIdInputTextBox.Text));
+                        ((ServiceHandlerInfo) Tag).setHandlerId(new HandlerId(handlerIdInputTextBox.Text));
                         break;
                     default:
-                        ((ServiceHandlerInfo)Tag).setHandlerId(new Safir.Dob.Typesystem.HandlerId());
+                        ((ServiceHandlerInfo) Tag).setHandlerId(new HandlerId());
                         break;
                 }
             }
@@ -699,12 +693,12 @@ namespace Sate
 
             try
             {
-                ((MessageInfo)Tag).setChannelId(new Safir.Dob.Typesystem.ChannelId(Int64.Parse(channelIdInputTextBox.Text)));
+                ((MessageInfo) Tag).setChannelId(new ChannelId(long.Parse(channelIdInputTextBox.Text)));
             }
             catch
             {
                 string idString;
-                if (channelIdInputTextBox.Text.StartsWith("\"") && (channelIdInputTextBox.Text.EndsWith("\"")) &&
+                if (channelIdInputTextBox.Text.StartsWith("\"") && channelIdInputTextBox.Text.EndsWith("\"") &&
                     channelIdInputTextBox.Text.Length > 2)
                 {
                     // remove quotation
@@ -714,16 +708,15 @@ namespace Sate
                 {
                     idString = channelIdInputTextBox.Text;
                 }
-        
+
                 if (idString == "")
                 {
                     channelIdInputTextBox.BackColor = ColorMap.ERROR;
                     return;
                 }
-                ((MessageInfo)Tag).setChannelId(new Safir.Dob.Typesystem.ChannelId(idString));
-            
+                ((MessageInfo) Tag).setChannelId(new ChannelId(idString));
             }
-          
+
             channelIdInputTextBox.BackColor = ColorMap.ENABLED;
         }
 
@@ -734,7 +727,6 @@ namespace Sate
             try
             {
                 val = long.Parse(injectTimestampTextBox.Text);
-                
             }
             catch
             {
@@ -744,12 +736,17 @@ namespace Sate
 
             if (Tag is EntityInfo)
             {
-                ((EntityInfo)Tag).Timestamp = val;
-                        
+                ((EntityInfo) Tag).Timestamp = val;
             }
-           
+
             injectTimestampTextBox.BackColor = ColorMap.ENABLED;
         }
 
+        private enum resulttype
+        {
+            longvalue,
+            stringvalue,
+            novalue
+        }
     }
 }

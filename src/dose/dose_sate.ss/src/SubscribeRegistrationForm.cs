@@ -1,4 +1,4 @@
-/******************************************************************************
+﻿/******************************************************************************
 *
 * Copyright Saab AB, 2007-2013 (http://safirsdkcore.com)
 * 
@@ -23,11 +23,6 @@
 ******************************************************************************/
 
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
 
 namespace Sate
@@ -37,19 +32,6 @@ namespace Sate
         public SubscribeRegistrationForm(long typeId)
         {
             InitializeComponent();
-        }
-
-        public void InitSubForm()
-        {
-            permanentSubcheckBox.Enabled = true;
-            permanentSubcheckBox.Checked = false;
-            allHandlersCheckBox1.Enabled = true;
-            allHandlersCheckBox1.Checked = true;
-            handlerIdTextBox.Enabled = false;
-            includeSubClassesCheckBox.Enabled = true;
-            includeSubClassesCheckBox.Checked = true;
-            restartCheckBox.Enabled = true;
-            restartCheckBox.Checked = true;
         }
 
         public bool PermanentSub
@@ -67,6 +49,24 @@ namespace Sate
             get { return restartCheckBox.Checked; }
         }
 
+        public string HandlerIdTextBox
+        {
+            get { return handlerIdTextBox.Text; }
+        }
+
+        public void InitSubForm()
+        {
+            permanentSubcheckBox.Enabled = true;
+            permanentSubcheckBox.Checked = false;
+            allHandlersCheckBox1.Enabled = true;
+            allHandlersCheckBox1.Checked = true;
+            handlerIdTextBox.Enabled = false;
+            includeSubClassesCheckBox.Enabled = true;
+            includeSubClassesCheckBox.Checked = true;
+            restartCheckBox.Enabled = true;
+            restartCheckBox.Checked = true;
+        }
+
         private void okbutton_Click(object sender, EventArgs e)
         {
             DialogResult = DialogResult.OK;
@@ -77,14 +77,9 @@ namespace Sate
             DialogResult = DialogResult.Cancel;
         }
 
-        public string HandlerIdTextBox
-        {
-            get { return handlerIdTextBox.Text; }
-        }
-
         private void handlerIdTextBox_TextChanged(object sender, EventArgs e)
         {
-           handlerIdTextBox.BackColor = ColorMap.ENABLED;
+            handlerIdTextBox.BackColor = ColorMap.ENABLED;
         }
 
         private void allHandlersCheckBox1_CheckedChanged(object sender, EventArgs e)

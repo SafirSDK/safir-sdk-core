@@ -22,13 +22,12 @@
 *
 ******************************************************************************/
 
-using System;
 using System.Drawing;
 
 namespace Sate
 {
     /// <summary>
-    /// Summary description for ColorMap.
+    ///     Summary description for ColorMap.
     /// </summary>
     public class ColorMap
     {

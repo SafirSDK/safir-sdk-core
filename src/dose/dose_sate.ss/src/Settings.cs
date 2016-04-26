@@ -23,46 +23,47 @@
 ******************************************************************************/
 
 using System;
-using System.Xml;
-using System.Xml.Serialization;
+using System.Collections.Generic;
 using System.IO;
+using System.Windows.Forms;
+using System.Xml.Serialization;
+using Safir.Dob;
 
 namespace Sate
 {
     /// <summary>
-    /// Summary description for Settings.
+    ///     Summary description for Settings.
     /// </summary>
-    ///
 
     // Common base class for SubInfo, SubRegInfo, RegInfo to make scenarios easier
     [XmlInclude(typeof(EntityIdInfo))]
     [XmlInclude(typeof(SubInfo))]
-    [XmlInclude(typeof(SubRegInfo))]   
+    [XmlInclude(typeof(SubRegInfo))]
     [XmlInclude(typeof(RegInfo))]
-    abstract public class ScenarioInfo
+    public abstract class ScenarioInfo
     {
-        public ScenarioInfo()
-        {
-        }
     }
-   
+
     public class EntityIdInfo : ScenarioInfo
     {
-        public EntityIdInfo()
-        {
-        }
-    
         //public Safir.Dob.Typesystem.EntityId entityId;
         public EntityIdSerializeable entityIdSer;
     }
 
     public class SubInfo : ScenarioInfo
     {
+        public ChannelIdSerializable channelIdSer;
+        public EntityIdSerializeable entityIdSer;
+
+        public long typeId;
+        public bool upd, includeSubClasses, restartSubscription;
+
         public SubInfo()
         {
         }
-        
-        public SubInfo(Int64 typeId, EntityIdSerializeable entityIdSer, ChannelIdSerializable channelIdSer, bool upd, bool includeSubClasses, bool restartSubscription)
+
+        public SubInfo(long typeId, EntityIdSerializeable entityIdSer, ChannelIdSerializable channelIdSer, bool upd,
+            bool includeSubClasses, bool restartSubscription)
         {
             this.typeId = typeId;
             this.entityIdSer = entityIdSer;
@@ -71,40 +72,45 @@ namespace Sate
             this.includeSubClasses = includeSubClasses;
             this.restartSubscription = restartSubscription;
         }
-        
-        public Int64 typeId;
-        public EntityIdSerializeable entityIdSer;
-        public ChannelIdSerializable channelIdSer;
-        public bool upd, includeSubClasses, restartSubscription;
     }
 
     public class SubRegInfo : ScenarioInfo
     {
+        public HandlerIdSerializeable handlerIdSer;
+        public bool includeSubClasses;
+        public bool restartSubscription;
+
+        public long typeId;
+
         public SubRegInfo()
         {
         }
-        
-        public SubRegInfo(Int64 typeId, HandlerIdSerializeable handlerIdSer, bool includeSubClasses, bool restartSubscription)
+
+        public SubRegInfo(long typeId, HandlerIdSerializeable handlerIdSer, bool includeSubClasses,
+            bool restartSubscription)
         {
             this.typeId = typeId;
             this.handlerIdSer = handlerIdSer;
             this.includeSubClasses = includeSubClasses;
             this.restartSubscription = restartSubscription;
         }
-        
-        public Int64 typeId;
-        public HandlerIdSerializeable handlerIdSer;
-        public bool includeSubClasses;
-        public bool restartSubscription;
     }
 
     public class RegInfo : ScenarioInfo
     {
+        public HandlerIdSerializeable handlerIdSer;
+        public bool injection;
+        public bool pending;
+        public bool requestorDecides;
+
+        public long typeId;
+
         public RegInfo()
         {
         }
-        
-        public RegInfo(Int64 typeId, HandlerIdSerializeable handlerIdSer, bool pending, bool injection, bool requestorDecides)
+
+        public RegInfo(long typeId, HandlerIdSerializeable handlerIdSer, bool pending, bool injection,
+            bool requestorDecides)
         {
             this.typeId = typeId;
             this.handlerIdSer = handlerIdSer;
@@ -112,20 +118,14 @@ namespace Sate
             this.injection = injection;
             this.requestorDecides = requestorDecides;
         }
-
-        public Int64 typeId;
-        public HandlerIdSerializeable handlerIdSer;
-        public bool pending;
-        public bool injection;
-        public bool requestorDecides;
     }
 
 
     public class ImageMapping
     {
-        public string MapObject;
         public string ImagePath;
         public bool Inherit;
+        public string MapObject;
 
         public ImageMapping()
         {
@@ -139,42 +139,42 @@ namespace Sate
         }
     }
 
-    [XmlRootAttribute("SateSettings", Namespace="", IsNullable = false)]
+    [XmlRoot("SateSettings", Namespace = "", IsNullable = false)]
     public class SateSettings
     {
-        public string ConnectionName;
+        public bool AutoCreate;
+        public bool AutoCreatePersistent;
+        public bool AutoDelete;
+
+        [XmlIgnore] public Response AutoResponse;
+
+        public bool AutoUpdate;
         public bool ConnectAtStartUp;
+        public string ConnectionName;
+        public bool DefaultExplorerView; //true=inheritance false=namespaces
+        public ImageMapping[] ImageMappings;
         public int InboxQueueuLength;
         public bool NoDispatch;
         public bool NoResponse;
-        public bool AutoCreate;
-        public bool AutoUpdate;
-        public bool AutoDelete;
-        public bool AutoCreatePersistent;
-        public string XmlReplyObject;
-        public bool DefaultExplorerView; //true=inheritance false=namespaces
         public RegInfo[] Register;
         public SubInfo[] Subscribe;
         public SubRegInfo[] SubscribeReg;
-        public ImageMapping[] ImageMappings;
-       
-        [XmlIgnore]
-        public Safir.Dob.Response AutoResponse;
+        public string XmlReplyObject;
 
         public SateSettings()
         {
-            ConnectionName="SATE";
-            ConnectAtStartUp=true;
-            InboxQueueuLength=10;
+            ConnectionName = "SATE";
+            ConnectAtStartUp = true;
+            InboxQueueuLength = 10;
             NoDispatch = false;
             NoResponse = false;
-            AutoCreate=true;
-            AutoUpdate=true;
-            AutoDelete=true;
+            AutoCreate = true;
+            AutoUpdate = true;
+            AutoDelete = true;
             AutoCreatePersistent = true;
             XmlReplyObject = null;
-            DefaultExplorerView=true;
-            Register=new RegInfo[0];
+            DefaultExplorerView = true;
+            Register = new RegInfo[0];
             Subscribe = new SubInfo[0];
             SubscribeReg = new SubRegInfo[0];
             ImageMappings = new ImageMapping[0];
@@ -183,10 +183,11 @@ namespace Sate
 
         public void AddSubscription(SubInfo si)
         {
-            SubInfo[] tmp = new SubInfo[Subscribe.Length + 1];
-            for (int i = 0; i < Subscribe.Length; i++)
+            var tmp = new SubInfo[Subscribe.Length + 1];
+            for (var i = 0; i < Subscribe.Length; i++)
             {
-                if (Subscribe[i].typeId == si.typeId && Subscribe[i].channelIdSer.ChannelId() == si.channelIdSer.ChannelId())
+                if (Subscribe[i].typeId == si.typeId &&
+                    Subscribe[i].channelIdSer.ChannelId() == si.channelIdSer.ChannelId())
                 {
                     if (si.upd) Subscribe[i].upd = true;
                     return;
@@ -199,10 +200,11 @@ namespace Sate
 
         public void AddSubscriptionReg(SubRegInfo sri)
         {
-            SubRegInfo[] tmp = new SubRegInfo[Subscribe.Length + 1];
-            for (int i = 0; i < SubscribeReg.Length; i++)
+            var tmp = new SubRegInfo[Subscribe.Length + 1];
+            for (var i = 0; i < SubscribeReg.Length; i++)
             {
-                if (SubscribeReg[i].typeId == sri.typeId && SubscribeReg[i].handlerIdSer.HandlerId() == sri.handlerIdSer.HandlerId())
+                if (SubscribeReg[i].typeId == sri.typeId &&
+                    SubscribeReg[i].handlerIdSer.HandlerId() == sri.handlerIdSer.HandlerId())
                 {
                     return;
                 }
@@ -214,10 +216,11 @@ namespace Sate
 
         public void AddRegistration(RegInfo ri)
         {
-            RegInfo[] tmp = new RegInfo[Register.Length + 1];
-            for (int i = 0; i < Register.Length; i++)
+            var tmp = new RegInfo[Register.Length + 1];
+            for (var i = 0; i < Register.Length; i++)
             {
-                if (Register[i].typeId == ri.typeId && Register[i].handlerIdSer.HandlerId() == ri.handlerIdSer.HandlerId())
+                if (Register[i].typeId == ri.typeId &&
+                    Register[i].handlerIdSer.HandlerId() == ri.handlerIdSer.HandlerId())
                 {
                     if (ri.pending) Register[i].pending = true;
                     if (ri.injection) Register[i].injection = true;
@@ -232,7 +235,7 @@ namespace Sate
         public void AddImageMapping(ImageMapping imageMapping)
         {
             //find if mapping already exists
-            for (int i = 0; i < ImageMappings.Length; i++)
+            for (var i = 0; i < ImageMappings.Length; i++)
             {
                 if (ImageMappings[i].MapObject == imageMapping.MapObject)
                 {
@@ -242,8 +245,8 @@ namespace Sate
             }
 
             //no previous mapping existed, append new mapping
-            ImageMapping[] im = new ImageMapping[ImageMappings.Length + 1];
-            for (int i = 0; i < ImageMappings.Length; i++)
+            var im = new ImageMapping[ImageMappings.Length + 1];
+            for (var i = 0; i < ImageMappings.Length; i++)
             {
                 im[i] = ImageMappings[i];
             }
@@ -253,10 +256,10 @@ namespace Sate
 
         public void RemoveImageMapping(string mapObject)
         {
-            System.Collections.Generic.List<ImageMapping> list = new System.Collections.Generic.List<ImageMapping>();
+            var list = new List<ImageMapping>();
 
             //collect remaining mappings
-            for (int i = 0; i < ImageMappings.Length; i++)
+            for (var i = 0; i < ImageMappings.Length; i++)
             {
                 if (ImageMappings[i].MapObject != mapObject)
                 {
@@ -265,21 +268,21 @@ namespace Sate
             }
 
             //convert to plain array
-            ImageMapping[] tmp = new ImageMapping[list.Count];
-            for (int i = 0; i < tmp.Length; i++)
+            var tmp = new ImageMapping[list.Count];
+            for (var i = 0; i < tmp.Length; i++)
             {
-                tmp[i]=list[i];
+                tmp[i] = list[i];
             }
 
-            ImageMappings=tmp;
+            ImageMappings = tmp;
         }
 
         public void RemoveImageAndMappings(string imagePath)
         {
-            System.Collections.Generic.List<ImageMapping> list = new System.Collections.Generic.List<ImageMapping>();
+            var list = new List<ImageMapping>();
 
             //collect remaining mappings
-            for (int i = 0; i < ImageMappings.Length; i++)
+            for (var i = 0; i < ImageMappings.Length; i++)
             {
                 if (ImageMappings[i].ImagePath != imagePath)
                 {
@@ -288,8 +291,8 @@ namespace Sate
             }
 
             //convert to plain array
-            ImageMapping[] tmp = new ImageMapping[list.Count];
-            for (int i = 0; i < tmp.Length; i++)
+            var tmp = new ImageMapping[list.Count];
+            for (var i = 0; i < tmp.Length; i++)
             {
                 tmp[i] = list[i];
             }
@@ -301,51 +304,49 @@ namespace Sate
 
     public class Settings
     {
-        private static string FILE = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                                                            "SateSettings.xml");
-        private static SateSettings settings = null;
+        private static readonly string FILE =
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "SateSettings.xml");
+
+        public static SateSettings Sate { get; set; }
 
         public static void Load()
         {
-            XmlSerializer serializer = new XmlSerializer(typeof(SateSettings));
-          //  XmlSerializer serializer = new XmlSerializer(typeof(ChannelIdSerializable));
-         
+            var serializer = new XmlSerializer(typeof(SateSettings));
+            //  XmlSerializer serializer = new XmlSerializer(typeof(ChannelIdSerializable));
+
             try
             {
                 if (File.Exists(FILE))
                 {
-                    using (FileStream fs = new FileStream(FILE, FileMode.Open))
+                    using (var fs = new FileStream(FILE, FileMode.Open))
                     {
-                        settings = (SateSettings)serializer.Deserialize(fs);
+                        Sate = (SateSettings) serializer.Deserialize(fs);
                         fs.Close();
                     }
                 }
                 else
                 {
-                    settings = new SateSettings();
+                    Sate = new SateSettings();
                 }
             }
             catch
             {
-                System.Windows.Forms.MessageBox.Show("The file SateSettings.xml is corrupt or obsolete. It will be replaced with a new file containing default settings.", "Invalid Settings");
-                settings = new SateSettings();
+                MessageBox.Show(
+                    "The file SateSettings.xml is corrupt or obsolete. It will be replaced with a new file containing default settings.",
+                    "Invalid Settings");
+                Sate = new SateSettings();
                 Save();
             }
         }
 
         public static void Save()
         {
-            XmlSerializer serializer = new XmlSerializer(typeof(SateSettings));
+            var serializer = new XmlSerializer(typeof(SateSettings));
             using (TextWriter writer = new StreamWriter(FILE))
             {
-                serializer.Serialize(writer, settings);
+                serializer.Serialize(writer, Sate);
             }
-        }
-
-        public static SateSettings Sate
-        {
-            get { return settings; }
-            set { settings=value; }
         }
     }
 }

@@ -23,28 +23,27 @@
 ******************************************************************************/
 
 using System;
-using System.Drawing;
-using System.Collections;
 using System.ComponentModel;
 using System.Windows.Forms;
 
 namespace Sate
 {
     /// <summary>
-    /// Summary description for DelayForm.
+    ///     Summary description for DelayForm.
     /// </summary>
-    public class DelayForm : System.Windows.Forms.Form
+    public class DelayForm : Form
     {
-        private int delay = 100;
-
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.TextBox delaytextBox;
-        private System.Windows.Forms.Button okbutton;
-        private System.Windows.Forms.Button cancelbutton;
         /// <summary>
-        /// Required designer variable.
+        ///     Required designer variable.
         /// </summary>
-        private System.ComponentModel.Container components = null;
+        private readonly Container components = null;
+
+        private Button cancelbutton;
+
+        private TextBox delaytextBox;
+
+        private Label label1;
+        private Button okbutton;
 
         public DelayForm()
         {
@@ -52,37 +51,34 @@ namespace Sate
             // Required for Windows Form Designer support
             //
             InitializeComponent();
-
         }
 
-        public int Delay
-        {
-            get {return delay;}
-        }
+        public int Delay { get; private set; } = 100;
 
         /// <summary>
-        /// Clean up any resources being used.
+        ///     Clean up any resources being used.
         /// </summary>
-        protected override void Dispose( bool disposing )
+        protected override void Dispose(bool disposing)
         {
-            if( disposing )
+            if (disposing)
             {
-                if(components != null)
+                if (components != null)
                 {
                     components.Dispose();
                 }
             }
-            base.Dispose( disposing );
+            base.Dispose(disposing);
         }
 
         #region Windows Form Designer generated code
+
         /// <summary>
-        /// Required method for Designer support - do not modify
-        /// the contents of this method with the code editor.
+        ///     Required method for Designer support - do not modify
+        ///     the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent()
         {
-            System.Resources.ResourceManager resources = new System.Resources.ResourceManager(typeof(DelayForm));
+            var resources = new System.Resources.ResourceManager(typeof(DelayForm));
             this.label1 = new System.Windows.Forms.Label();
             this.delaytextBox = new System.Windows.Forms.TextBox();
             this.okbutton = new System.Windows.Forms.Button();
@@ -128,31 +124,30 @@ namespace Sate
             this.Controls.Add(this.delaytextBox);
             this.Controls.Add(this.label1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.Icon = ((System.Drawing.Icon) (resources.GetObject("$this.Icon")));
             this.Name = "DelayForm";
             this.Text = "Set delay";
             this.ResumeLayout(false);
-
         }
+
         #endregion
 
-        private void okbutton_Click(object sender, System.EventArgs e)
+        private void okbutton_Click(object sender, EventArgs e)
         {
             try
             {
-                delay=int.Parse(this.delaytextBox.Text);
-                this.DialogResult=DialogResult.OK;
+                Delay = int.Parse(delaytextBox.Text);
+                DialogResult = DialogResult.OK;
             }
             catch
             {
                 MessageBox.Show("Illegal delay value");
             }
-
         }
 
-        private void cancelbutton_Click(object sender, System.EventArgs e)
+        private void cancelbutton_Click(object sender, EventArgs e)
         {
-            this.DialogResult=DialogResult.Cancel;
+            DialogResult = DialogResult.Cancel;
         }
     }
 }

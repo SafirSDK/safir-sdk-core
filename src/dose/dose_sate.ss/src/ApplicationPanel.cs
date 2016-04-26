@@ -22,28 +22,28 @@
 *
 ******************************************************************************/
 
-using System;
-using System.Drawing;
-using System.Collections;
 using System.ComponentModel;
+using System.Drawing;
 using System.Windows.Forms;
 
 namespace Sate
 {
     /// <summary>
-    /// Summary description for ApplicationPanel.
+    ///     Summary description for ApplicationPanel.
     /// </summary>
-    public class ApplicationPanel : System.Windows.Forms.Panel
+    public class ApplicationPanel : Panel
     {
-        private System.Windows.Forms.ListView listView;
-        private System.Windows.Forms.ColumnHeader appColHeader;
-        private System.Windows.Forms.ColumnHeader columnHeader1;
-        /// <summary>
-        /// Required designer variable.
-        /// </summary>
-        private System.ComponentModel.Container components = null;
+        private static ApplicationPanel instance;
 
-        private static ApplicationPanel instance = null;
+        /// <summary>
+        ///     Required designer variable.
+        /// </summary>
+        private readonly Container components = null;
+
+        private ColumnHeader appColHeader;
+        private ColumnHeader columnHeader1;
+
+        private ListView listView;
 
         private ApplicationPanel()
         {
@@ -53,44 +53,45 @@ namespace Sate
             InitializeComponent();
 
             //TitleBar
-            Label titleLabel=new Label();
-            titleLabel.Text="Applications";
-            titleLabel.BackColor = System.Drawing.SystemColors.ActiveCaption;
-            titleLabel.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
-            titleLabel.Height=15;
-            titleLabel.Dock=DockStyle.Top;
-            this.Controls.Add(titleLabel);
+            var titleLabel = new Label();
+            titleLabel.Text = "Applications";
+            titleLabel.BackColor = SystemColors.ActiveCaption;
+            titleLabel.ForeColor = SystemColors.ActiveCaptionText;
+            titleLabel.Height = 15;
+            titleLabel.Dock = DockStyle.Top;
+            Controls.Add(titleLabel);
         }
 
         public static ApplicationPanel Instance
         {
             get
             {
-                if (instance==null)
-                    instance=new ApplicationPanel();
+                if (instance == null)
+                    instance = new ApplicationPanel();
                 return instance;
             }
         }
 
         /// <summary>
-        /// Clean up any resources being used.
+        ///     Clean up any resources being used.
         /// </summary>
-        protected override void Dispose( bool disposing )
+        protected override void Dispose(bool disposing)
         {
-            if( disposing )
+            if (disposing)
             {
-                if(components != null)
+                if (components != null)
                 {
                     components.Dispose();
                 }
             }
-            base.Dispose( disposing );
+            base.Dispose(disposing);
         }
 
         #region Windows Form Designer generated code
+
         /// <summary>
-        /// Required method for Designer support - do not modify
-        /// the contents of this method with the code editor.
+        ///     Required method for Designer support - do not modify
+        ///     the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent()
         {
@@ -101,9 +102,11 @@ namespace Sate
             //
             // listView
             //
-            this.listView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-                                                                                       this.columnHeader1,
-                                                                                       this.appColHeader});
+            this.listView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[]
+            {
+                this.columnHeader1,
+                this.appColHeader
+            });
             this.listView.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listView.GridLines = true;
             this.listView.Location = new System.Drawing.Point(0, 0);
@@ -129,8 +132,8 @@ namespace Sate
             this.Name = "ApplicationPanel";
             this.Text = "Applications";
             this.ResumeLayout(false);
-
         }
+
         #endregion
     }
 }

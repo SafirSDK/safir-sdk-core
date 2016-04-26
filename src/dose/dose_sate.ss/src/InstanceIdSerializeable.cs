@@ -1,4 +1,4 @@
-/******************************************************************************
+﻿/******************************************************************************
 *
 * Copyright Saab AB, 2007-2013 (http://safirsdkcore.com)
 * 
@@ -22,24 +22,22 @@
 *
 ******************************************************************************/
 
-using System;
-using System.Collections.Generic;
-using System.Text;
+using Safir.Dob.Typesystem;
 
 namespace Sate
 {
     public class InstanceIdSerializeable
     {
-        public Int64 m_instanceId = -1;
+        public long m_instanceId = -1;
         public string m_instanceIdStr;
- 
-        public InstanceIdSerializeable(Int64 instanceId, string instanceIdStr)
+
+        public InstanceIdSerializeable(long instanceId, string instanceIdStr)
         {
             m_instanceId = instanceId;
             m_instanceIdStr = instanceIdStr;
         }
 
-        public InstanceIdSerializeable(Int64 instanceId)
+        public InstanceIdSerializeable(long instanceId)
         {
             m_instanceId = instanceId;
         }
@@ -51,34 +49,34 @@ namespace Sate
 
         public InstanceIdSerializeable()
         {
-         /*   m_instanceId = -1;
+            /*   m_instanceId = -1;
             m_instanceIdStr = ""; */
-            Safir.Dob.Typesystem.InstanceId instanceId = new Safir.Dob.Typesystem.InstanceId();
+            var instanceId = new InstanceId();
             m_instanceId = instanceId.RawValue;
             m_instanceIdStr = instanceId.RawString;
         }
 
-        public InstanceIdSerializeable(Safir.Dob.Typesystem.InstanceId instanceId)
+        public InstanceIdSerializeable(InstanceId instanceId)
         {
             m_instanceId = instanceId.RawValue;
             m_instanceIdStr = instanceId.RawString;
         }
 
-        public Safir.Dob.Typesystem.InstanceId InstanceId()
+        public InstanceId InstanceId()
         {
             if (m_instanceIdStr == "")
             {
-                return new Safir.Dob.Typesystem.InstanceId(m_instanceId);
+                return new InstanceId(m_instanceId);
             }
             if (m_instanceId == -1)
             {
-                return new Safir.Dob.Typesystem.InstanceId(m_instanceIdStr);
+                return new InstanceId(m_instanceIdStr);
             }
             if (m_instanceId == -1 && m_instanceIdStr == "")
             {
-                return new Safir.Dob.Typesystem.InstanceId();
+                return new InstanceId();
             }
-            return new Safir.Dob.Typesystem.InstanceId(m_instanceId, m_instanceIdStr);
+            return new InstanceId(m_instanceId, m_instanceIdStr);
         }
     }
 }

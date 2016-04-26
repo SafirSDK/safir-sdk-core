@@ -1,4 +1,4 @@
-/******************************************************************************
+﻿/******************************************************************************
 *
 * Copyright Saab AB, 2007-2013 (http://safirsdkcore.com)
 * 
@@ -23,63 +23,58 @@
 ******************************************************************************/
 
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
 
 namespace Sate
 {
-        public partial class SubscribeMessageForm : Form
+    public partial class SubscribeMessageForm : Form
+    {
+        public SubscribeMessageForm(long typeId)
         {
-            public SubscribeMessageForm(long typeId)
-            {
-                InitializeComponent();
-            }
+            InitializeComponent();
+        }
 
-            public void InitMessageSubForm()
-            {
-                permanentSubcheckBox.Enabled = true;
-                permanentSubcheckBox.Checked = false;
-                allChannelsCheckBox.Enabled = true;
-                allChannelsCheckBox.Checked = true;
-            }
+        public bool PermanentSub
+        {
+            get { return permanentSubcheckBox.Checked; }
+        }
 
-            public bool PermanentSub
-            {
-                get { return permanentSubcheckBox.Checked; }
-            }
+        public bool AllChannels
+        {
+            get { return allChannelsCheckBox.Checked; }
+        }
 
-            public bool AllChannels
-            {
-                get { return allChannelsCheckBox.Checked; }
-            }
+        public string ChannelTextBox
+        {
+            get { return channelTextBox.Text; }
+        }
 
-            private void okbutton_Click(object sender, EventArgs e)
-            {
-                DialogResult = DialogResult.OK;
-            }
+        public void InitMessageSubForm()
+        {
+            permanentSubcheckBox.Enabled = true;
+            permanentSubcheckBox.Checked = false;
+            allChannelsCheckBox.Enabled = true;
+            allChannelsCheckBox.Checked = true;
+        }
 
-            private void cancelbutton_Click(object sender, EventArgs e)
-            {
-                DialogResult = DialogResult.Cancel;
-            }
+        private void okbutton_Click(object sender, EventArgs e)
+        {
+            DialogResult = DialogResult.OK;
+        }
 
-            public string ChannelTextBox
-            {
-                get { return channelTextBox.Text; }
-            }
+        private void cancelbutton_Click(object sender, EventArgs e)
+        {
+            DialogResult = DialogResult.Cancel;
+        }
 
-            private void channelTextBox_TextChanged(object sender, EventArgs e)
-            {
-                channelTextBox.BackColor = ColorMap.ENABLED;
-            }
+        private void channelTextBox_TextChanged(object sender, EventArgs e)
+        {
+            channelTextBox.BackColor = ColorMap.ENABLED;
+        }
 
-            private void allChannelsCheckBox_CheckedChanged(object sender, EventArgs e)
-            {
-                channelTextBox.Enabled = !channelTextBox.Enabled;
-            }
+        private void allChannelsCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            channelTextBox.Enabled = !channelTextBox.Enabled;
         }
     }
+}

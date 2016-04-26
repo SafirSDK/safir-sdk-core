@@ -1,4 +1,4 @@
-/******************************************************************************
+﻿/******************************************************************************
 *
 * Copyright Saab AB, 2007-2013 (http://safirsdkcore.com)
 * 
@@ -22,45 +22,26 @@
 *
 ******************************************************************************/
 
-using System;
+using Safir.Dob.Typesystem;
 
 namespace Sate
 {
     public class ServiceHandlerInfo : ObjectInfo
     {
-        public ServiceHandlerInfo()
+        public HandlerIdSerializeable HandlerIdSer { get; set; }
+
+        public bool Pending { get; set; }
+
+        public long TypeId { get; set; }
+
+        public HandlerId getHandlerId()
         {
+            return HandlerIdSer?.HandlerId();
         }
 
-        private HandlerIdSerializeable handlerIdSer;
-        public HandlerIdSerializeable HandlerIdSer
+        public void setHandlerId(HandlerId handlerId)
         {
-            get { return handlerIdSer; }
-            set { handlerIdSer = value; }
-        }
-        public Safir.Dob.Typesystem.HandlerId getHandlerId()
-        {
-            if (handlerIdSer != null)
-            {
-                return handlerIdSer.HandlerId();
-            }
-            return null;
-        }
-        public void setHandlerId(Safir.Dob.Typesystem.HandlerId handlerId)
-        {
-            handlerIdSer = new HandlerIdSerializeable(handlerId);
-        }
-        private bool pending;
-        public bool Pending
-        {
-            get { return pending; }
-            set { pending = value; }
-        }
-        private Int64 typeId;
-        public Int64 TypeId
-        {
-            get { return typeId; }
-            set { typeId = value; }
+            HandlerIdSer = new HandlerIdSerializeable(handlerId);
         }
     }
 }

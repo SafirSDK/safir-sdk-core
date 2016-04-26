@@ -1,4 +1,4 @@
-/******************************************************************************
+﻿/******************************************************************************
 *
 * Copyright Saab AB, 2007-2013 (http://safirsdkcore.com)
 * 
@@ -22,39 +22,17 @@
 *
 ******************************************************************************/
 
-using System;
-using System.Collections.Generic;
-using System.Text;
+using System.Collections;
 using System.Drawing;
+using System.Windows.Forms;
+using Safir.Dob;
+using Safir.Dob.Typesystem;
+using Message = Safir.Dob.Message;
 
 namespace Sate
 {
     public class TreeViewImageHandler
-    {  
-        //***********************************************************
-        // Image Index consts
-        //***********************************************************
-        private const int NS                            = 0;                
-        private const int EntityDefault                 = 1;                       
-        private const int ServiceDefault                = 9;                
-        private const int ObjectDefault                 = 17;               
-        private const int MessageDefault                = 25;               
-        private const int Response                      = 27;
-        private const int Item                          = 28;
-        private const int Struct                        = 29;
-        private const int Parameters                    = 30;
-        private const int ClassDefault                  = 31;
-        private const int FirstCustomBitmap             = ClassDefault +1;
-
-        //Offsets
-        private const int SubscribedOffset              = 1;
-        private const int RegisteredOffset              = 2;
-        private const int PendingOffset                 = 3;
-        private const int OwnedOffset                   = 4;
-        private const int RegisteredSubscribedOffset    = 5;
-        private const int PendingSubscribedOffset       = 6;
-        private const int OwnedSubscribedOffset         = 7;
-        private const int NextBitmapOffset              = OwnedSubscribedOffset + 1;                
+    {
         //***********************************************************        
 
         public enum ImageType
@@ -68,18 +46,48 @@ namespace Sate
             Subscribed,
             RegisteredSubscribed,
             PendingSubscribed,
-            OwnedSubscribed   
-        }       
-        
-        private System.Windows.Forms.ImageList imageList = new System.Windows.Forms.ImageList();
-        private System.Windows.Forms.ImageList defaultImagesList = new System.Windows.Forms.ImageList();
+            OwnedSubscribed
+        }
 
-        private System.Collections.Hashtable PathIndexHt = new System.Collections.Hashtable();        
+        //***********************************************************
+        // Image Index consts
+        //***********************************************************
+        private const int NS = 0;
+        private const int EntityDefault = 1;
+        private const int ServiceDefault = 9;
+        private const int ObjectDefault = 17;
+        private const int MessageDefault = 25;
+        private const int Response = 27;
+        private const int Item = 28;
+        private const int Struct = 29;
+        private const int Parameters = 30;
+        private const int ClassDefault = 31;
+        private const int FirstCustomBitmap = ClassDefault + 1;
 
-        public TreeViewImageHandler(System.Windows.Forms.ImageList imageList, System.Windows.Forms.ImageList defaults)
+        //Offsets
+        private const int SubscribedOffset = 1;
+        private const int RegisteredOffset = 2;
+        private const int PendingOffset = 3;
+        private const int OwnedOffset = 4;
+        private const int RegisteredSubscribedOffset = 5;
+        private const int PendingSubscribedOffset = 6;
+        private const int OwnedSubscribedOffset = 7;
+        private const int NextBitmapOffset = OwnedSubscribedOffset + 1;
+        private readonly ImageList defaultImagesList = new ImageList();
+
+        private readonly ImageList imageList = new ImageList();
+
+        private readonly Hashtable PathIndexHt = new Hashtable();
+
+        public TreeViewImageHandler(ImageList imageList, ImageList defaults)
         {
             this.imageList = imageList;
-            this.defaultImagesList = defaults;                                                      
+            defaultImagesList = defaults;
+        }
+
+        public int NamespaceImageIndex
+        {
+            get { return NS; }
         }
 
         public void RefreshImageCollection()
@@ -91,40 +99,40 @@ namespace Sate
             //Create needed images from default image list   
             //
             Bitmap subBitmap = null;
-            imageList.Images.Add(defaultImagesList.Images[0]);                           //pacakge(namespace)
+            imageList.Images.Add(defaultImagesList.Images[0]); //pacakge(namespace)
 
-            imageList.Images.Add(defaultImagesList.Images[1]);                           //entity default
-            subBitmap = Create_S_Bitmap((Bitmap)defaultImagesList.Images[1]);
-            imageList.Images.Add(subBitmap);                                    //entity subscribe
-            imageList.Images.Add(Create_R_Bitmap((Bitmap)defaultImagesList.Images[1]));  //entity regsiter
-            imageList.Images.Add(Create_P_Bitmap((Bitmap)defaultImagesList.Images[1]));  //entity pending
-            imageList.Images.Add(Create_O_Bitmap((Bitmap)defaultImagesList.Images[1]));  //entity own
-            imageList.Images.Add(Create_R_Bitmap(subBitmap));                   //entity reg+sub
-            imageList.Images.Add(Create_P_Bitmap(subBitmap));                   //entity pend+sub
-            imageList.Images.Add(Create_O_Bitmap(subBitmap));                   //entity own+sub
+            imageList.Images.Add(defaultImagesList.Images[1]); //entity default
+            subBitmap = Create_S_Bitmap((Bitmap) defaultImagesList.Images[1]);
+            imageList.Images.Add(subBitmap); //entity subscribe
+            imageList.Images.Add(Create_R_Bitmap((Bitmap) defaultImagesList.Images[1])); //entity regsiter
+            imageList.Images.Add(Create_P_Bitmap((Bitmap) defaultImagesList.Images[1])); //entity pending
+            imageList.Images.Add(Create_O_Bitmap((Bitmap) defaultImagesList.Images[1])); //entity own
+            imageList.Images.Add(Create_R_Bitmap(subBitmap)); //entity reg+sub
+            imageList.Images.Add(Create_P_Bitmap(subBitmap)); //entity pend+sub
+            imageList.Images.Add(Create_O_Bitmap(subBitmap)); //entity own+sub
 
-            imageList.Images.Add(defaultImagesList.Images[2]);                           //service default
-            subBitmap = Create_S_Bitmap((Bitmap)defaultImagesList.Images[2]);
-            imageList.Images.Add(subBitmap);                                    //service subscribe
-            imageList.Images.Add(Create_R_Bitmap((Bitmap)defaultImagesList.Images[2]));  //service regsiter
-            imageList.Images.Add(Create_P_Bitmap((Bitmap)defaultImagesList.Images[2]));  //service pending
-            imageList.Images.Add(Create_O_Bitmap((Bitmap)defaultImagesList.Images[2]));  //service own
-            imageList.Images.Add(Create_R_Bitmap(subBitmap));                   //service reg+sub
-            imageList.Images.Add(Create_P_Bitmap(subBitmap));                   //service pend+sub
-            imageList.Images.Add(Create_O_Bitmap(subBitmap));                   //service own+sub
+            imageList.Images.Add(defaultImagesList.Images[2]); //service default
+            subBitmap = Create_S_Bitmap((Bitmap) defaultImagesList.Images[2]);
+            imageList.Images.Add(subBitmap); //service subscribe
+            imageList.Images.Add(Create_R_Bitmap((Bitmap) defaultImagesList.Images[2])); //service regsiter
+            imageList.Images.Add(Create_P_Bitmap((Bitmap) defaultImagesList.Images[2])); //service pending
+            imageList.Images.Add(Create_O_Bitmap((Bitmap) defaultImagesList.Images[2])); //service own
+            imageList.Images.Add(Create_R_Bitmap(subBitmap)); //service reg+sub
+            imageList.Images.Add(Create_P_Bitmap(subBitmap)); //service pend+sub
+            imageList.Images.Add(Create_O_Bitmap(subBitmap)); //service own+sub
 
-            imageList.Images.Add(defaultImagesList.Images[3]);                           //object default
-            subBitmap = Create_S_Bitmap((Bitmap)defaultImagesList.Images[3]);
-            imageList.Images.Add(subBitmap);                                    //object subscribe
-            imageList.Images.Add(Create_R_Bitmap((Bitmap)defaultImagesList.Images[3]));  //object regsiter
-            imageList.Images.Add(Create_P_Bitmap((Bitmap)defaultImagesList.Images[3]));  //object pending
-            imageList.Images.Add(Create_O_Bitmap((Bitmap)defaultImagesList.Images[3]));  //object own
-            imageList.Images.Add(Create_R_Bitmap(subBitmap));                   //object reg+sub
-            imageList.Images.Add(Create_P_Bitmap(subBitmap));                   //object pend+sub
-            imageList.Images.Add(Create_O_Bitmap(subBitmap));                   //object own+sub
+            imageList.Images.Add(defaultImagesList.Images[3]); //object default
+            subBitmap = Create_S_Bitmap((Bitmap) defaultImagesList.Images[3]);
+            imageList.Images.Add(subBitmap); //object subscribe
+            imageList.Images.Add(Create_R_Bitmap((Bitmap) defaultImagesList.Images[3])); //object regsiter
+            imageList.Images.Add(Create_P_Bitmap((Bitmap) defaultImagesList.Images[3])); //object pending
+            imageList.Images.Add(Create_O_Bitmap((Bitmap) defaultImagesList.Images[3])); //object own
+            imageList.Images.Add(Create_R_Bitmap(subBitmap)); //object reg+sub
+            imageList.Images.Add(Create_P_Bitmap(subBitmap)); //object pend+sub
+            imageList.Images.Add(Create_O_Bitmap(subBitmap)); //object own+sub
 
             imageList.Images.Add(defaultImagesList.Images[4]); //message default
-            imageList.Images.Add(Create_S_Bitmap((Bitmap)defaultImagesList.Images[4])); //message subscribe
+            imageList.Images.Add(Create_S_Bitmap((Bitmap) defaultImagesList.Images[4])); //message subscribe
 
             imageList.Images.Add(defaultImagesList.Images[5]); //response
             imageList.Images.Add(defaultImagesList.Images[6]); //item
@@ -136,47 +144,42 @@ namespace Sate
             //
             //Create custom images
             //                     
-            foreach (ImageMapping mapping in Settings.Sate.ImageMappings)
+            foreach (var mapping in Settings.Sate.ImageMappings)
             {
                 if (PathIndexHt[mapping.ImagePath] == null)
                 {
-                    int imageListIndex=LoadCustomImage(mapping.ImagePath);
+                    var imageListIndex = LoadCustomImage(mapping.ImagePath);
                     if (imageListIndex > -1)
                     {
                         PathIndexHt[mapping.ImagePath] = imageListIndex;
                     }
                 }
-            }         
-        }
-
-        public int NamespaceImageIndex
-        {
-            get {return NS;}
+            }
         }
 
         public int GetImageIndex(long typeId, ImageType imageType)
         {
-            int defaultIndex = -1;                    
+            var defaultIndex = -1;
 
             try
             {
                 if (Settings.Sate.ImageMappings.Length > 0)
                 {
-                    ImageMapping found = null;                    
-                                        
-                    foreach (ImageMapping mapping in Settings.Sate.ImageMappings)
+                    ImageMapping found = null;
+
+                    foreach (var mapping in Settings.Sate.ImageMappings)
                     {
                         long mapTypeId;
-                        bool isClass = System.Int64.TryParse(mapping.MapObject, out mapTypeId);
+                        var isClass = long.TryParse(mapping.MapObject, out mapTypeId);
 
                         if (isClass)
                         {
                             if (mapTypeId == typeId)
                             {
-                                found = mapping;                                
+                                found = mapping;
                                 break;
                             }
-                            else if (mapping.Inherit && Safir.Dob.Typesystem.Operations.IsOfType(typeId, mapTypeId))
+                            if (mapping.Inherit && Operations.IsOfType(typeId, mapTypeId))
                             {
                                 if (found == null)
                                 {
@@ -184,29 +187,29 @@ namespace Sate
                                 }
                                 else
                                 {
-                                    System.Int64 foundTypeId;
-                                    if (System.Int64.TryParse(found.MapObject, out foundTypeId))
+                                    long foundTypeId;
+                                    if (long.TryParse(found.MapObject, out foundTypeId))
                                     {
-                                        if (Safir.Dob.Typesystem.Operations.IsOfType(foundTypeId, mapTypeId))
+                                        if (Operations.IsOfType(foundTypeId, mapTypeId))
                                         {
                                             //closer ancestor to our type
                                             found = mapping;
                                         }
-                                    }           
+                                    }
                                     //note: namespace custom images always overrides class custom images
-                                }                               
+                                }
                             }
                         }
                         else //namespace
                         {
-                            string typeName=Safir.Dob.Typesystem.Operations.GetName(typeId);
-                            string typeNamespace=typeName.Substring(0, typeName.LastIndexOf('.'));
+                            var typeName = Operations.GetName(typeId);
+                            var typeNamespace = typeName.Substring(0, typeName.LastIndexOf('.'));
                             if (typeNamespace == mapping.MapObject)
                             {
                                 found = mapping;
                                 break;
                             }
-                            else if (mapping.Inherit && typeNamespace.StartsWith(mapping.MapObject))
+                            if (mapping.Inherit && typeNamespace.StartsWith(mapping.MapObject))
                             {
                                 if (found == null)
                                 {
@@ -214,8 +217,8 @@ namespace Sate
                                 }
                                 else
                                 {
-                                    System.Int64 foundTypeId;
-                                    if (!System.Int64.TryParse(found.MapObject, out foundTypeId))
+                                    long foundTypeId;
+                                    if (!long.TryParse(found.MapObject, out foundTypeId))
                                     {
                                         if (mapping.MapObject.StartsWith(found.MapObject))
                                         {
@@ -228,20 +231,20 @@ namespace Sate
                                         //note: namespace custom images always overrides class custom images
                                         found = mapping;
                                     }
-                                }                                
+                                }
                             }
                         }
-                        
-                        
                     }
 
-                    if (found!=null && PathIndexHt[found.ImagePath] != null)
+                    if (found != null && PathIndexHt[found.ImagePath] != null)
                     {
-                        defaultIndex = (int)PathIndexHt[found.ImagePath];
-                    }    
+                        defaultIndex = (int) PathIndexHt[found.ImagePath];
+                    }
                 }
             }
-            catch { }                                
+            catch
+            {
+            }
 
             //If no custom bitmap, use standard bitmaps
             if (defaultIndex < 0)
@@ -252,7 +255,7 @@ namespace Sate
             return ApplyImageType(defaultIndex, imageType);
         }
 
-        public int GetImageIndex(Safir.Dob.Typesystem.EntityId entityId, ImageType imageType)
+        public int GetImageIndex(EntityId entityId, ImageType imageType)
         {
             return ApplyImageType(ObjectDefault, imageType);
             /*
@@ -269,82 +272,81 @@ namespace Sate
 
         //creates all custom images from a file, returns index in imagelist, -1=fileNotFound
         private int LoadCustomImage(string path)
-        {                                  
+        {
             try
             {
-                int index = imageList.Images.Count;                
-                System.Drawing.Bitmap bmDefault = new System.Drawing.Bitmap(path);
+                var index = imageList.Images.Count;
+                var bmDefault = new Bitmap(path);
 
                 if (bmDefault.Width != 16 || bmDefault.Height != 16)
                 {
-                    bmDefault = new Bitmap(bmDefault, new System.Drawing.Size(16, 16));
+                    bmDefault = new Bitmap(bmDefault, new Size(16, 16));
                 }
 
-                System.Drawing.Bitmap bmSubscribed = Create_S_Bitmap(bmDefault);
-                System.Drawing.Bitmap bmRegistered = Create_R_Bitmap(bmDefault);
-                System.Drawing.Bitmap bmPending = Create_P_Bitmap(bmDefault);
-                System.Drawing.Bitmap bmOwned = Create_O_Bitmap(bmDefault);
-                System.Drawing.Bitmap bmRegSub = Create_R_Bitmap(bmSubscribed);
-                System.Drawing.Bitmap bmPendSub = Create_P_Bitmap(bmSubscribed);
-                System.Drawing.Bitmap bmOwnedSub = Create_O_Bitmap(bmSubscribed);                              
+                var bmSubscribed = Create_S_Bitmap(bmDefault);
+                var bmRegistered = Create_R_Bitmap(bmDefault);
+                var bmPending = Create_P_Bitmap(bmDefault);
+                var bmOwned = Create_O_Bitmap(bmDefault);
+                var bmRegSub = Create_R_Bitmap(bmSubscribed);
+                var bmPendSub = Create_P_Bitmap(bmSubscribed);
+                var bmOwnedSub = Create_O_Bitmap(bmSubscribed);
 
-                imageList.Images.AddRange(new Image[]{ bmDefault, 
-                                                    bmSubscribed,
-                                                    bmRegistered,
-                                                    bmPending,
-                                                    bmOwned,
-                                                    bmRegSub,
-                                                    bmPendSub,
-                                                    bmOwnedSub});                   
+                imageList.Images.AddRange(new Image[]
+                {
+                    bmDefault,
+                    bmSubscribed,
+                    bmRegistered,
+                    bmPending,
+                    bmOwned,
+                    bmRegSub,
+                    bmPendSub,
+                    bmOwnedSub
+                });
                 return index;
             }
             catch
-            {              
+            {
                 return -1;
-            }            
+            }
         }
 
-        
 
         private int GetStandardDefaultIndex(long typeId)
         {
-            if (Safir.Dob.Typesystem.Operations.IsOfType(typeId, Safir.Dob.Entity.ClassTypeId))
+            if (Operations.IsOfType(typeId, Entity.ClassTypeId))
             {
                 return EntityDefault;
             }
-            else if (Safir.Dob.Typesystem.Operations.IsOfType(typeId, Safir.Dob.Message.ClassTypeId))
+            if (Operations.IsOfType(typeId, Message.ClassTypeId))
             {
                 return MessageDefault;
             }
-            else if (Safir.Dob.Typesystem.Operations.IsOfType(typeId, Safir.Dob.Service.ClassTypeId))
+            if (Operations.IsOfType(typeId, Service.ClassTypeId))
             {
                 return ServiceDefault;
             }
-            else if (Safir.Dob.Typesystem.Operations.IsOfType(typeId, Safir.Dob.Response.ClassTypeId))
+            if (Operations.IsOfType(typeId, Safir.Dob.Response.ClassTypeId))
             {
                 return Response;
             }
-            else if (Safir.Dob.Typesystem.Operations.IsOfType(typeId, Safir.Dob.Item.ClassTypeId))
+            if (Operations.IsOfType(typeId, Safir.Dob.Item.ClassTypeId))
             {
                 return Item;
             }
-            else if (Safir.Dob.Typesystem.Operations.IsOfType(typeId, Safir.Dob.Struct.ClassTypeId))
+            if (Operations.IsOfType(typeId, Safir.Dob.Struct.ClassTypeId))
             {
                 return Struct;
             }
-            else if (Safir.Dob.Typesystem.Operations.IsOfType(typeId, Safir.Dob.Parametrization.ClassTypeId))
+            if (Operations.IsOfType(typeId, Parametrization.ClassTypeId))
             {
                 return Parameters;
             }
-            else
-            {
-                return ClassDefault;
-            }
+            return ClassDefault;
         }
 
         private int ApplyImageType(int defaultIndex, ImageType imageType)
         {
-            int index = defaultIndex;
+            var index = defaultIndex;
             switch (imageType)
             {
                 case ImageType.Registered:
@@ -372,9 +374,8 @@ namespace Sate
 
             if (index < 0 || index >= imageList.Images.Count)
                 return ClassDefault;
-            else
-                return index;            
-        }        
+            return index;
+        }
 
         //----------------------------------------------------------------
         // Create image methods, adds S, R, O, and P to an image. 
@@ -387,7 +388,7 @@ namespace Sate
             //  |    S|
             //  |     |
             //  +-----+
-            Bitmap bitmap = new Bitmap(b);
+            var bitmap = new Bitmap(b);
             bitmap.SetPixel(12, 2, Color.Black);
             bitmap.SetPixel(12, 5, Color.Black);
             bitmap.SetPixel(13, 1, Color.Black);
@@ -407,7 +408,7 @@ namespace Sate
             //  |     |
             //  |    R|
             //  +-----+
-            Bitmap bitmap = new Bitmap(b);
+            var bitmap = new Bitmap(b);
             bitmap.SetPixel(12, 11, Color.Black);
             bitmap.SetPixel(12, 12, Color.Black);
             bitmap.SetPixel(12, 13, Color.Black);
@@ -429,7 +430,7 @@ namespace Sate
             //  |     |
             //  |    O|
             //  +-----+
-            Bitmap bitmap = new Bitmap(b);
+            var bitmap = new Bitmap(b);
             bitmap.SetPixel(12, 12, Color.Black);
             bitmap.SetPixel(12, 13, Color.Black);
             bitmap.SetPixel(12, 14, Color.Black);
@@ -449,7 +450,7 @@ namespace Sate
             //  |     |
             //  |    P|
             //  +-----+
-            Bitmap bitmap = new Bitmap(b);
+            var bitmap = new Bitmap(b);
             bitmap.SetPixel(12, 11, Color.Black);
             bitmap.SetPixel(12, 12, Color.Black);
             bitmap.SetPixel(12, 13, Color.Black);
@@ -461,6 +462,6 @@ namespace Sate
             bitmap.SetPixel(14, 13, Color.Black);
             bitmap.SetPixel(15, 12, Color.Black);
             return bitmap;
-        }                  
+        }
     }
 }

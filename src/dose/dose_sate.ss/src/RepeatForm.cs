@@ -23,29 +23,28 @@
 ******************************************************************************/
 
 using System;
-using System.Drawing;
-using System.Collections;
 using System.ComponentModel;
 using System.Windows.Forms;
 
 namespace Sate
 {
     /// <summary>
-    /// Summary description for RepeatForm.
+    ///     Summary description for RepeatForm.
     /// </summary>
-    public class RepeatForm : System.Windows.Forms.Form
+    public class RepeatForm : Form
     {
-        private int reps = 10;
-
-        private System.Windows.Forms.RadioButton manualradioButton;
-        private System.Windows.Forms.RadioButton infiniteradioButton;
-        private System.Windows.Forms.Button cancelbutton;
-        private System.Windows.Forms.Button okbutton;
-        private System.Windows.Forms.TextBox repstextBox;
         /// <summary>
-        /// Required designer variable.
+        ///     Required designer variable.
         /// </summary>
-        private System.ComponentModel.Container components = null;
+        private readonly Container components = null;
+
+        private Button cancelbutton;
+
+        private RadioButton infiniteradioButton;
+
+        private RadioButton manualradioButton;
+        private Button okbutton;
+        private TextBox repstextBox;
 
         public RepeatForm(int defaultReps)
         {
@@ -54,41 +53,39 @@ namespace Sate
             //
             InitializeComponent();
 
-            reps=defaultReps;
-            if (reps<0)
+            Repetitions = defaultReps;
+            if (Repetitions < 0)
             {
-                this.infiniteradioButton.Checked=true;
+                infiniteradioButton.Checked = true;
             }
             else
             {
-                this.repstextBox.Text=reps.ToString();
+                repstextBox.Text = Repetitions.ToString();
             }
         }
 
-        public int Repetitions
-        {
-            get {return reps;}
-        }
+        public int Repetitions { get; private set; } = 10;
 
         /// <summary>
-        /// Clean up any resources being used.
+        ///     Clean up any resources being used.
         /// </summary>
-        protected override void Dispose( bool disposing )
+        protected override void Dispose(bool disposing)
         {
-            if( disposing )
+            if (disposing)
             {
-                if(components != null)
+                if (components != null)
                 {
                     components.Dispose();
                 }
             }
-            base.Dispose( disposing );
+            base.Dispose(disposing);
         }
 
         #region Windows Form Designer generated code
+
         /// <summary>
-        /// Required method for Designer support - do not modify
-        /// the contents of this method with the code editor.
+        ///     Required method for Designer support - do not modify
+        ///     the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent()
         {
@@ -152,23 +149,23 @@ namespace Sate
             this.Name = "RepeatForm";
             this.Text = "Repeat action sequence";
             this.ResumeLayout(false);
-
         }
+
         #endregion
 
-        private void okbutton_Click(object sender, System.EventArgs e)
+        private void okbutton_Click(object sender, EventArgs e)
         {
             try
             {
-                if (this.manualradioButton.Checked)
+                if (manualradioButton.Checked)
                 {
-                    reps=int.Parse(this.repstextBox.Text);
-                    DialogResult=DialogResult.OK;
+                    Repetitions = int.Parse(repstextBox.Text);
+                    DialogResult = DialogResult.OK;
                 }
                 else
                 {
-                    reps=-1;
-                    DialogResult=DialogResult.OK;
+                    Repetitions = -1;
+                    DialogResult = DialogResult.OK;
                 }
             }
             catch
@@ -177,9 +174,9 @@ namespace Sate
             }
         }
 
-        private void cancelbutton_Click(object sender, System.EventArgs e)
+        private void cancelbutton_Click(object sender, EventArgs e)
         {
-            DialogResult=DialogResult.Cancel;
+            DialogResult = DialogResult.Cancel;
         }
     }
 }

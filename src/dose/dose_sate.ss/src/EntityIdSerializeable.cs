@@ -1,4 +1,4 @@
-/******************************************************************************
+﻿/******************************************************************************
 *
 * Copyright Saab AB, 2008-2013 (http://safirsdkcore.com)
 *
@@ -21,18 +21,17 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-using System;
-using System.Collections.Generic;
-using System.Text;
+
+using Safir.Dob.Typesystem;
 
 namespace Sate
 {
     public class EntityIdSerializeable
     {
-        public System.Int64 m_typeId = -1;
         public InstanceIdSerializeable m_instanceIdSerializeable;
+        public long m_typeId = -1;
 
-        public EntityIdSerializeable(Int64 typeId, InstanceIdSerializeable instanceIdSerializeable)
+        public EntityIdSerializeable(long typeId, InstanceIdSerializeable instanceIdSerializeable)
         {
             m_typeId = typeId;
             m_instanceIdSerializeable = instanceIdSerializeable;
@@ -44,15 +43,15 @@ namespace Sate
             m_instanceIdSerializeable = new InstanceIdSerializeable();
         }
 
-        public EntityIdSerializeable(Safir.Dob.Typesystem.EntityId entityId)
+        public EntityIdSerializeable(EntityId entityId)
         {
             m_typeId = entityId.TypeId;
             m_instanceIdSerializeable = new InstanceIdSerializeable(entityId.InstanceId);
         }
 
-        public Safir.Dob.Typesystem.EntityId EntityId()
+        public EntityId EntityId()
         {
-            return new Safir.Dob.Typesystem.EntityId(m_typeId, m_instanceIdSerializeable.InstanceId());
+            return new EntityId(m_typeId, m_instanceIdSerializeable.InstanceId());
         }
     }
 }

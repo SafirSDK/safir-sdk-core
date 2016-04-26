@@ -23,68 +23,100 @@
 ******************************************************************************/
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
+using System.IO;
 using System.Windows.Forms;
+using Safir.Dob.Typesystem;
+using Object = Safir.Dob.Typesystem.Object;
 
 namespace Sate
 {
     /// <summary>
-    /// Summary description for ObjectDataFieldControl.
+    ///     Summary description for ObjectDataFieldControl.
     /// </summary>
-    public abstract class ObjectDataFieldControl : System.Windows.Forms.UserControl
+    public abstract class ObjectDataFieldControl : UserControl
     {
-        protected ObjectEditPanel parentObjectEditPanel = null;
-
-        protected static System.Drawing.Font font=new Font("Courier New", 8, System.Drawing.FontStyle.Bold);
-        protected static System.Drawing.Font dataFont=new Font("Courier New", 8, System.Drawing.FontStyle.Regular);
-
-        protected System.Windows.Forms.Label typeLabel;
-        protected LinkLabel typeLabelAddItem;
-        protected List<System.Windows.Forms.Label> fieldNameLabel = new List<Label>();
-        protected List<System.Windows.Forms.CheckBox> isNullCheckBox = new List<CheckBox>();
-        protected List<System.Windows.Forms.Control> fieldValueControl = new List<Control>();
-        protected List<bool> changed = new List<bool>();
-        protected List<bool> isNotChanged = new List<bool>();
-        protected int member;
-        protected Safir.Dob.Typesystem.CollectionType collectionType;
-        protected Safir.Dob.Typesystem.MemberType keyType;
-        protected long keyTypeId;
-        protected string memberName = "";
-        protected string typeName = "";
-        protected bool isSequenceChanged = false;
-
         //Constants for positioning of controls
         protected const int Y_START = 5;
         protected const int Y_DEFAULT_HEIGHT = 23;
         protected const int Y_STEP = 5;
         protected const int X_STEP = 10;
         protected const int X_TYPE_START = 5;
-        protected const int X_NAME_START = 200;//150;
-        protected const int X_VALUE_START = 360;//280;
-        protected const int X_NULL_START = 470;//390;
-        protected const int X_DEFAULT_WIDTH = 600;//550;
+        protected const int X_NAME_START = 200; //150;
+        protected const int X_VALUE_START = 360; //280;
+        protected const int X_NULL_START = 470; //390;
+        protected const int X_DEFAULT_WIDTH = 600; //550;
+
+        protected static Font font = new Font("Courier New", 8, FontStyle.Bold);
+        protected static Font dataFont = new Font("Courier New", 8, FontStyle.Regular);
 
         /// <summary>
-        /// Required designer variable.
+        ///     Required designer variable.
         /// </summary>
-        private System.ComponentModel.Container components = null;
+        private readonly Container components = null;
+
+        protected List<bool> changed = new List<bool>();
+        protected CollectionType collectionType;
+
+        protected List<Label> fieldNameLabel = new List<Label>();
+        protected List<Control> fieldValueControl = new List<Control>();
+
+        private bool ignoreEvent;
+        protected List<bool> isNotChanged = new List<bool>();
+        protected List<CheckBox> isNullCheckBox = new List<CheckBox>();
+        protected bool isSequenceChanged;
+        protected MemberType keyType;
+        protected long keyTypeId;
+        protected int member;
+        protected string memberName = "";
+        protected ObjectEditPanel parentObjectEditPanel;
+
+        protected Label typeLabel;
+        protected LinkLabel typeLabelAddItem;
+        protected string typeName = "";
+
+        protected ObjectDataFieldControl()
+        {
+        }
+
+        protected ObjectDataFieldControl(ObjectInfo objInfo, int member, string typeName, string memberName,
+            CollectionType collectionType, int arraySize)
+        {
+            Init(objInfo, member, typeName, memberName, collectionType, arraySize);
+        }
+
+        public ObjectEditPanel ParentObjectEditPanel
+        {
+            get { return parentObjectEditPanel; }
+            set { parentObjectEditPanel = value; }
+        }
+
+        private int TypeLabelWidth
+        {
+            get
+            {
+                if (collectionType == CollectionType.SequenceCollectionType ||
+                    collectionType == CollectionType.DictionaryCollectionType)
+                    return typeLabelAddItem.Width;
+                return typeLabel.Width;
+            }
+        }
+
+        public static Font DataFont
+        {
+            get { return dataFont; }
+        }
 
 
         protected abstract bool ValidInput(int index, bool setVal);
         public abstract void SetFieldValues();
         protected abstract void InsertSequenceItem(int index);
 
-        protected ObjectDataFieldControl()
-        {
-        }
-
-        protected ObjectDataFieldControl(ObjectInfo objInfo, int member, string typeName, string memberName, Safir.Dob.Typesystem.CollectionType collectionType, int arraySize)
-        {
-            Init(objInfo, member, typeName, memberName, collectionType, arraySize);
-        }
-
-        protected void Init(ObjectInfo objInfo, int member, string typeName, string memberName, Safir.Dob.Typesystem.CollectionType collectionType, int arraySize)
+        protected void Init(ObjectInfo objInfo, int member, string typeName, string memberName,
+            CollectionType collectionType, int arraySize)
         {
             this.typeName = typeName;
             this.memberName = memberName;
@@ -98,44 +130,43 @@ namespace Sate
             isNotChanged.Clear();
 
             ignoreEvent = true;
-            this.Tag = objInfo;
+            Tag = objInfo;
             this.member = member;
-            this.SuspendLayout();
+            SuspendLayout();
 
-            this.Name = "ObjectDataFieldControl";
-            this.BackColor = System.Drawing.Color.LightGray;
-            this.Width = X_DEFAULT_WIDTH;
+            Name = "ObjectDataFieldControl";
+            BackColor = Color.LightGray;
+            Width = X_DEFAULT_WIDTH;
 
-            System.Drawing.Point location = new Point(X_TYPE_START, Y_START);            
+            var location = new Point(X_TYPE_START, Y_START);
 
             switch (collectionType)
             {
-                case Safir.Dob.Typesystem.CollectionType.SingleValueCollectionType:
-                    {                        
-                        InitSingleOrArray(objInfo, member, typeName, arraySize, ref location);
-                    }
+                case CollectionType.SingleValueCollectionType:
+                {
+                    InitSingleOrArray(objInfo, member, typeName, arraySize, ref location);
+                }
                     break;
 
-                case Safir.Dob.Typesystem.CollectionType.ArrayCollectionType:
-                    {                        
-                        InitSingleOrArray(objInfo, member, typeName, arraySize, ref location);
-                    }
+                case CollectionType.ArrayCollectionType:
+                {
+                    InitSingleOrArray(objInfo, member, typeName, arraySize, ref location);
+                }
                     break;
 
-                case Safir.Dob.Typesystem.CollectionType.DictionaryCollectionType:
-                    {
-                        InitDictionary(objInfo, member, typeName, ref location);
-                    }
+                case CollectionType.DictionaryCollectionType:
+                {
+                    InitDictionary(objInfo, member, typeName, ref location);
+                }
                     break;
 
-                case Safir.Dob.Typesystem.CollectionType.SequenceCollectionType:
-                    {
-                        InitSequence(objInfo, member, typeName, ref location);
-                    }
+                case CollectionType.SequenceCollectionType:
+                {
+                    InitSequence(objInfo, member, typeName, ref location);
+                }
                     break;
             }
 
-            
 
             Controls.AddRange(fieldNameLabel.ToArray());
             Controls.AddRange(fieldValueControl.ToArray());
@@ -146,36 +177,36 @@ namespace Sate
             if (typeLabelAddItem != null)
                 Controls.Add(typeLabelAddItem);
 
-            this.Height = location.Y;
+            Height = location.Y;
 
             SetFieldValues();
             ignoreEvent = false;
-            this.ResumeLayout(false);
+            ResumeLayout(false);
         }
 
         protected void InitDictionary(ObjectInfo objInfo, int member, string typeName, ref Point location)
         {
-            Safir.Dob.Typesystem.MemberType memberType;
+            MemberType memberType;
             long complexType;
             int typeSize;
-            Safir.Dob.Typesystem.CollectionType ct;
+            CollectionType ct;
             int arrLength;
-            string memberName = Safir.Dob.Typesystem.Members.GetInfo(objInfo.Obj.GetTypeId(),
-                                                                     member,
-                                                                     out memberType,
-                                                                     out keyType,
-                                                                     out complexType,
-                                                                     out keyTypeId,
-                                                                     out typeSize,
-                                                                     out ct,
-                                                                     out arrLength);
+            var memberName = Members.GetInfo(objInfo.Obj.GetTypeId(),
+                member,
+                out memberType,
+                out keyType,
+                out complexType,
+                out keyTypeId,
+                out typeSize,
+                out ct,
+                out arrLength);
 
-            string keyTypeName = ObjectDataFieldDictionaryKey.GetTypeName(keyType, keyTypeId);
+            var keyTypeName = ObjectDataFieldDictionaryKey.GetTypeName(keyType, keyTypeId);
 
 
             //Type label and AddItem link
             typeLabelAddItem = new LinkLabel();
-            typeLabelAddItem.Width = X_NAME_START-X_TYPE_START-2*X_STEP;
+            typeLabelAddItem.Width = X_NAME_START - X_TYPE_START - 2*X_STEP;
             typeLabelAddItem.AutoSize = false;
             typeLabelAddItem.Location = location;
             typeLabelAddItem.Font = font;
@@ -183,24 +214,26 @@ namespace Sate
             typeLabelAddItem.Text = string.Format("Dict<{0}, {1}>", keyTypeName, typeName);
             location.X += typeLabelAddItem.Width + X_STEP;
             typeLabelAddItem.Click += AddDictionaryItem_Click;
-            ToolStripMenuItem tsi = new ToolStripMenuItem();
+            var tsi = new ToolStripMenuItem();
             tsi.Text = "Is changed";
-            tsi.Click += new EventHandler(OnIsChangedMenuItem);
+            tsi.Click += OnIsChangedMenuItem;
             typeLabelAddItem.ContextMenuStrip = new ContextMenuStrip();
             typeLabelAddItem.ContextMenuStrip.Items.Add(tsi);
 
             //set values
-            ObjectInfo tmp = (ObjectInfo)Tag;
+            var tmp = (ObjectInfo) Tag;
             var container = tmp.Obj.GetMember(member, 0);
             var containerType = container.GetType();
-            var keys = (System.Collections.IEnumerable)containerType.GetProperty("Keys").GetValue(container, null);
+            var keys = (IEnumerable) containerType.GetProperty("Keys").GetValue(container, null);
 
-            int index = 0;
+            var index = 0;
             foreach (var k in keys)
             {
                 //key
                 var keyString = ObjectDataFieldDictionaryKey.KeyToString(keyType, k);
-                var nameLabel = index == 0 ? CreateNameLabel(memberName + Environment.NewLine + string.Format("[{0}]", keyString)) : CreateNameLabel(string.Format("[{0}]", keyString));
+                var nameLabel = index == 0
+                    ? CreateNameLabel(memberName + Environment.NewLine + string.Format("[{0}]", keyString))
+                    : CreateNameLabel(string.Format("[{0}]", keyString));
                 nameLabel.Tag = k;
                 fieldNameLabel.Add(nameLabel);
 
@@ -225,13 +258,13 @@ namespace Sate
         {
             var addDlg = new ObjectDataFieldDictionaryKey(keyType, keyTypeId);
             addDlg.StartPosition = FormStartPosition.Manual;
-            addDlg.Location = PointToScreen(new Point(0, Y_DEFAULT_HEIGHT + 2 * Y_STEP));
+            addDlg.Location = PointToScreen(new Point(0, Y_DEFAULT_HEIGHT + 2*Y_STEP));
             if (addDlg.ShowDialog() == DialogResult.OK)
             {
                 var key = addDlg.GetKey();
-                if (fieldValueControl.Count==0)
+                if (fieldValueControl.Count == 0)
                 {
-                    fieldNameLabel[0].Text += string.Format(Environment.NewLine+"[{0}]", addDlg.KeyString);
+                    fieldNameLabel[0].Text += string.Format(Environment.NewLine + "[{0}]", addDlg.KeyString);
                     fieldNameLabel[0].Tag = key;
                 }
                 else
@@ -274,7 +307,7 @@ namespace Sate
 
         protected int FindDictionaryKeyIndex(object key)
         {
-            for (int i=0; i<fieldNameLabel.Count; i++)
+            for (var i = 0; i < fieldNameLabel.Count; i++)
             {
                 if (key.Equals(fieldNameLabel[i].Tag))
                     return i;
@@ -287,25 +320,25 @@ namespace Sate
         {
             //Type label and AddItem link
             typeLabelAddItem = new LinkLabel();
-            typeLabelAddItem.Width = X_NAME_START - X_TYPE_START - 2 * X_STEP;
+            typeLabelAddItem.Width = X_NAME_START - X_TYPE_START - 2*X_STEP;
             typeLabelAddItem.Text = string.Format("Seq<{0}>", typeName);
             typeLabelAddItem.AutoSize = false;
             typeLabelAddItem.Location = location;
             typeLabelAddItem.Font = font;
             location.X = X_NAME_START;
             typeLabelAddItem.Click += AddSequenceItem_Click;
-            ToolStripMenuItem tsi = new ToolStripMenuItem();
+            var tsi = new ToolStripMenuItem();
             tsi.Text = "Is changed";
-            tsi.Click += new EventHandler(OnIsChangedMenuItem);
+            tsi.Click += OnIsChangedMenuItem;
             typeLabelAddItem.ContextMenuStrip = new ContextMenuStrip();
-            typeLabelAddItem.ContextMenuStrip.Items.Add(tsi);            
+            typeLabelAddItem.ContextMenuStrip.Items.Add(tsi);
 
-            ObjectInfo tmp = (ObjectInfo)Tag;
+            var tmp = (ObjectInfo) Tag;
             var container = tmp.Obj.GetMember(member, 0);
             var containerType = container.GetType();
-            int numberOfValues = (int)containerType.GetProperty("Count").GetValue(container, null);
+            var numberOfValues = (int) containerType.GetProperty("Count").GetValue(container, null);
 
-            for (int i = 0; i < numberOfValues; i++)
+            for (var i = 0; i < numberOfValues; i++)
             {
                 fieldNameLabel.Add(CreateNameLabel(string.Format("{0}[{1}]", memberName, i)));
                 fieldValueControl.Add(CreateSequenceItemValueControl());
@@ -323,35 +356,35 @@ namespace Sate
         {
             var control = CreateValueControl();
 
-            ToolStripMenuItem deleteItem = new ToolStripMenuItem();
+            var deleteItem = new ToolStripMenuItem();
             deleteItem.Tag = control;
             deleteItem.Text = "Delete item";
-            deleteItem.Click += new EventHandler(DeleteDictionaryItem_Click);
-            control.ContextMenuStrip.Items.Add(deleteItem);            
+            deleteItem.Click += DeleteDictionaryItem_Click;
+            control.ContextMenuStrip.Items.Add(deleteItem);
 
             return control;
         }
-        
+
         private Control CreateSequenceItemValueControl()
         {
             var control = CreateValueControl();
-           
-            ToolStripMenuItem addAbove = new ToolStripMenuItem();
+
+            var addAbove = new ToolStripMenuItem();
             addAbove.Tag = control;
             addAbove.Text = "Insert before";
-            addAbove.Click += new EventHandler(AddSequenceItem_Click);
+            addAbove.Click += AddSequenceItem_Click;
             control.ContextMenuStrip.Items.Add(addAbove);
 
-            ToolStripMenuItem addBelow = new ToolStripMenuItem();
+            var addBelow = new ToolStripMenuItem();
             addBelow.Tag = control;
             addBelow.Text = "Insert after";
-            addBelow.Click += new EventHandler(AddSequenceItem_Click);
+            addBelow.Click += AddSequenceItem_Click;
             control.ContextMenuStrip.Items.Add(addBelow);
 
-            ToolStripMenuItem deleteItem = new ToolStripMenuItem();
+            var deleteItem = new ToolStripMenuItem();
             deleteItem.Tag = control;
             deleteItem.Text = "Delete item";
-            deleteItem.Click += new EventHandler(DeleteSequenceItem_Click);
+            deleteItem.Click += DeleteSequenceItem_Click;
             control.ContextMenuStrip.Items.Add(deleteItem);
 
             return control;
@@ -359,16 +392,16 @@ namespace Sate
 
         private void AddSequenceItem_Click(object sender, EventArgs e)
         {
-            int insertAt = -1;
+            var insertAt = -1;
 
             var menuItem = sender as ToolStripMenuItem;
             if (menuItem != null) //if null then Add Item button has been clicked
             {
-                for (int i = 0; i < fieldValueControl.Count; i++)
+                for (var i = 0; i < fieldValueControl.Count; i++)
                 {
                     if (fieldValueControl[i] == menuItem.Tag)
                     {
-                        bool insertAfter = menuItem.Text != "Insert before";
+                        var insertAfter = menuItem.Text != "Insert before";
                         insertAt = insertAfter ? i + 1 : i;
                         break;
                     }
@@ -376,7 +409,7 @@ namespace Sate
             }
 
             //insert member name with index
-            if (fieldValueControl.Count==0)
+            if (fieldValueControl.Count == 0)
             {
                 fieldNameLabel[0].Text = memberName + "[0]";
             }
@@ -386,20 +419,20 @@ namespace Sate
                 fieldNameLabel.Add(nameLabel);
                 Controls.Add(nameLabel);
             }
-            
+
             //insert controls
             var control = CreateSequenceItemValueControl();
             Controls.Add(control);
             if (insertAt < 0)
             {
                 fieldValueControl.Add(control);
-                InsertSequenceItem(fieldValueControl.Count-1);
+                InsertSequenceItem(fieldValueControl.Count - 1);
             }
             else
             {
                 fieldValueControl.Insert(insertAt, control);
                 InsertSequenceItem(insertAt);
-            }           
+            }
 
             SetSequenceChanged(true);
 
@@ -409,11 +442,11 @@ namespace Sate
             control.Focus(); //set input focus on the newly added control
         }
 
-        
+
         private void DeleteDictionaryItem_Click(object sender, EventArgs e)
         {
-            int removeAt = -1;
-            for (int i = 0; i < fieldValueControl.Count; i++)
+            var removeAt = -1;
+            for (var i = 0; i < fieldValueControl.Count; i++)
             {
                 var menuItem = sender as ToolStripMenuItem;
                 if (menuItem != null && fieldValueControl[i] == menuItem.Tag)
@@ -429,7 +462,7 @@ namespace Sate
 
                 if (this is ObjectField)
                 {
-                    ((ObjectField)this).DeleteObjPanel(removeAt);
+                    ((ObjectField) this).DeleteObjPanel(removeAt);
                 }
 
                 Controls.Remove(fieldValueControl[removeAt]);
@@ -452,10 +485,10 @@ namespace Sate
                 }
 
 
-                ObjectInfo tmp = (ObjectInfo)Tag;
+                var tmp = (ObjectInfo) Tag;
                 var container = tmp.Obj.GetMember(member, 0);
                 var containerType = container.GetType();
-                containerType.GetMethod("Remove", new Type[] { key.GetType() }).Invoke(container, new object[] { key });
+                containerType.GetMethod("Remove", new[] {key.GetType()}).Invoke(container, new[] {key});
 
                 SetDictionaryChanged(true, -1);
 
@@ -467,8 +500,8 @@ namespace Sate
 
         private void DeleteSequenceItem_Click(object sender, EventArgs e)
         {
-            int removeAt = -1;
-            for (int i = 0; i < fieldValueControl.Count; i++)
+            var removeAt = -1;
+            for (var i = 0; i < fieldValueControl.Count; i++)
             {
                 var menuItem = sender as ToolStripMenuItem;
                 if (menuItem != null && fieldValueControl[i] == menuItem.Tag)
@@ -482,7 +515,7 @@ namespace Sate
             {
                 if (this is ObjectField)
                 {
-                    ((ObjectField)this).DeleteObjPanel(removeAt);
+                    ((ObjectField) this).DeleteObjPanel(removeAt);
                 }
 
                 Controls.Remove(fieldValueControl[removeAt]);
@@ -497,11 +530,11 @@ namespace Sate
                 {
                     fieldNameLabel[0].Text = memberName;
                 }
-                
-                ObjectInfo tmp = (ObjectInfo)Tag;
+
+                var tmp = (ObjectInfo) Tag;
                 var container = tmp.Obj.GetMember(member, 0);
                 var containerType = container.GetType();
-                containerType.GetMethod("RemoveAt").Invoke(container, new object[] { removeAt });
+                containerType.GetMethod("RemoveAt").Invoke(container, new object[] {removeAt});
 
                 SetSequenceChanged(true);
 
@@ -513,23 +546,24 @@ namespace Sate
 
         protected void SetDictionaryChanged(bool isChanged, int index)
         {
-            ObjectInfo tmp = (ObjectInfo)Tag;
-            Safir.Dob.Typesystem.ContainerBase container = tmp.Obj.GetMember(member, 0);
+            var tmp = (ObjectInfo) Tag;
+            var container = tmp.Obj.GetMember(member, 0);
             container.SetChanged(isChanged);
 
             typeLabelAddItem.LinkColor = isChanged ? ColorMap.ADD_LINK_CHANGED : ColorMap.ADD_LINK_DEFAULT;
-            ((ToolStripMenuItem)typeLabelAddItem.ContextMenuStrip.Items[0]).Checked = isChanged;
-            
-            if (index>=0)
+            ((ToolStripMenuItem) typeLabelAddItem.ContextMenuStrip.Items[0]).Checked = isChanged;
+
+            if (index >= 0)
             {
                 changed[index] = isChanged;
                 isNotChanged[index] = !isChanged;
-                ((ToolStripMenuItem)fieldValueControl[index].ContextMenuStrip.Items[0]).Checked = isChanged;
+                ((ToolStripMenuItem) fieldValueControl[index].ContextMenuStrip.Items[0]).Checked = isChanged;
                 fieldValueControl[index].BackColor = isChanged ? ColorMap.CHANGED : ColorMap.ENABLED;
 
                 var keyValue = fieldNameLabel[index].Tag;
                 var containerType = container.GetType();
-                var itemContainer = (Safir.Dob.Typesystem.ContainerBase)containerType.GetProperty("Item").GetValue(container, new object[] { keyValue });
+                var itemContainer =
+                    (ContainerBase) containerType.GetProperty("Item").GetValue(container, new[] {keyValue});
                 itemContainer.SetChanged(isChanged);
             }
         }
@@ -539,9 +573,9 @@ namespace Sate
             //if (fieldValueControl.Count==1 && fieldValueControl[0])
             isSequenceChanged = isChanged;
             var color = isChanged ? ColorMap.CHANGED : ColorMap.ENABLED;
-            for (int i=0; i<fieldValueControl.Count; i++)
+            for (var i = 0; i < fieldValueControl.Count; i++)
             {
-                ((ToolStripMenuItem)fieldValueControl[i].ContextMenuStrip.Items[0]).Checked = isChanged;
+                ((ToolStripMenuItem) fieldValueControl[i].ContextMenuStrip.Items[0]).Checked = isChanged;
 
                 if (ValidInput(i, false))
                     fieldValueControl[i].BackColor = color;
@@ -549,25 +583,26 @@ namespace Sate
                     fieldValueControl[i].BackColor = ColorMap.ERROR;
             }
 
-            ObjectInfo tmp = (ObjectInfo)Tag;
-            Safir.Dob.Typesystem.ContainerBase cont = tmp.Obj.GetMember(member, 0);
+            var tmp = (ObjectInfo) Tag;
+            var cont = tmp.Obj.GetMember(member, 0);
             cont.SetChanged(isChanged);
 
             typeLabelAddItem.LinkColor = isChanged ? ColorMap.ADD_LINK_CHANGED : ColorMap.ADD_LINK_DEFAULT;
-            ((ToolStripMenuItem)typeLabelAddItem.ContextMenuStrip.Items[0]).Checked = isChanged;            
-        }        
-        
-        protected void InitSingleOrArray(ObjectInfo objInfo, int member, string typeName, int numberOfValues, ref Point location)
+            ((ToolStripMenuItem) typeLabelAddItem.ContextMenuStrip.Items[0]).Checked = isChanged;
+        }
+
+        protected void InitSingleOrArray(ObjectInfo objInfo, int member, string typeName, int numberOfValues,
+            ref Point location)
         {
             typeLabel = new Label();
-            typeLabel.Width = X_NAME_START - X_TYPE_START - 2 * X_STEP;
+            typeLabel.Width = X_NAME_START - X_TYPE_START - 2*X_STEP;
             typeLabel.Text = typeName;
             typeLabel.AutoSize = true;
             typeLabel.Location = location;
             typeLabel.Font = font;
-            location.X = X_NAME_START;            
+            location.X = X_NAME_START;
 
-            for (int i = 0; i < numberOfValues; i++)
+            for (var i = 0; i < numberOfValues; i++)
             {
                 fieldValueControl.Add(CreateValueControl());
                 changed.Add(false);
@@ -584,7 +619,7 @@ namespace Sate
             cb.Font = font;
             cb.Checked = false;
             cb.Text = "Is Null";
-            cb.CheckedChanged += new EventHandler(ObjectDataFieldControl_CheckedChanged);
+            cb.CheckedChanged += ObjectDataFieldControl_CheckedChanged;
             return cb;
         }
 
@@ -600,12 +635,12 @@ namespace Sate
 
         public bool ValidateMember()
         {
-            bool ok = true;
+            var ok = true;
 
             //special sequence hanling
-            if (collectionType == Safir.Dob.Typesystem.CollectionType.SequenceCollectionType)
+            if (collectionType == CollectionType.SequenceCollectionType)
             {
-                for (int index = 0; index < this.fieldValueControl.Count; index++)
+                for (var index = 0; index < fieldValueControl.Count; index++)
                 {
                     if (!ValidInput(index, true))
                     {
@@ -617,17 +652,18 @@ namespace Sate
             }
 
             //other collectionType than sequence
-            for (int index = 0; index < this.fieldValueControl.Count; index++)
+            for (var index = 0; index < fieldValueControl.Count; index++)
             {
-                var cont = collectionType == Safir.Dob.Typesystem.CollectionType.DictionaryCollectionType ?
-                    GetDictionaryValue(fieldNameLabel[index].Tag) : ((ObjectInfo)Tag).Obj.GetMember(member, index);
+                var cont = collectionType == CollectionType.DictionaryCollectionType
+                    ? GetDictionaryValue(fieldNameLabel[index].Tag)
+                    : ((ObjectInfo) Tag).Obj.GetMember(member, index);
 
                 // set isChanged flag to false if this should be done
                 if (isNotChanged[index])
                 {
                     // before setting SetChanged(), check if null should be set.
                     // this should be set before as it changes the isChanged flag.
-                    if (isNullCheckBox.Count>index && isNullCheckBox[index].Checked)
+                    if (isNullCheckBox.Count > index && isNullCheckBox[index].Checked)
                     {
                         cont.SetNull();
                         // will set isChanged to true implicit
@@ -661,21 +697,21 @@ namespace Sate
 
         protected int ChangedValue<T>(IEnumerable<T> controls, object sender) where T : Control
         {
-            int index = 0;
+            var index = 0;
             foreach (Control c in controls)
             {
                 if (c == sender)
                 {
-                    if (collectionType == Safir.Dob.Typesystem.CollectionType.SequenceCollectionType)
+                    if (collectionType == CollectionType.SequenceCollectionType)
                     {
                         SetSequenceChanged(true);
                     }
                     else
                     {
-                        ((ToolStripMenuItem)fieldValueControl[index].ContextMenuStrip.Items[0]).Checked = true;
+                        ((ToolStripMenuItem) fieldValueControl[index].ContextMenuStrip.Items[0]).Checked = true;
                         fieldValueControl[index].BackColor = ColorMap.CHANGED;
                         changed[index] = true;
-                        isNotChanged[index] = false;                        
+                        isNotChanged[index] = false;
                     }
 
                     return index;
@@ -688,8 +724,8 @@ namespace Sate
 
         protected int FindMenuItemOwnerControl(object sender)
         {
-            int index = 0;
-            foreach (Control t in fieldValueControl)
+            var index = 0;
+            foreach (var t in fieldValueControl)
             {
                 foreach (ToolStripItem mi in t.ContextMenuStrip.Items)
                 {
@@ -704,30 +740,29 @@ namespace Sate
             return -1;
         }
 
-        private bool ignoreEvent = false;
         private void ObjectDataFieldControl_CheckedChanged(object sender, EventArgs e)
         {
             if (!ignoreEvent)
             {
-                ignoreEvent=true;
-                int i=ChangedValue(isNullCheckBox, sender);
-                if (i>=0)
+                ignoreEvent = true;
+                var i = ChangedValue(isNullCheckBox, sender);
+                if (i >= 0)
                 {
                     if (fieldValueControl[i] is TextBox)
-                        fieldValueControl[i].Text="";
+                        fieldValueControl[i].Text = "";
 
                     parentObjectEditPanel.ChangedDataField();
                 }
-                ignoreEvent=false;
+                ignoreEvent = false;
             }
         }
-        
+
         protected void ObjectDataFieldControl_TextChanged(object sender, EventArgs e)
         {
             if (!ignoreEvent)
             {
                 ignoreEvent = true;
-                int i = ChangedValue(fieldValueControl, sender);
+                var i = ChangedValue(fieldValueControl, sender);
 
                 if (i >= 0)
                 {
@@ -735,8 +770,8 @@ namespace Sate
                     {
                         isNullCheckBox[i].Checked = false;
                     }
-                    TextBox tb = this.fieldValueControl[i] as TextBox;
-                    
+                    var tb = fieldValueControl[i] as TextBox;
+
                     if (tb != null)
                     {
                         //If it's a textbox then we do some extra stuff
@@ -745,7 +780,7 @@ namespace Sate
 
                     if (!ValidInput(i, true))
                     {
-                        this.fieldValueControl[i].BackColor = ColorMap.ERROR;
+                        fieldValueControl[i].BackColor = ColorMap.ERROR;
                     }
                 }
 
@@ -771,18 +806,19 @@ namespace Sate
 
         protected virtual Control CreateValueControl()
         {
-            TextBox textBox = new TextBox();
+            var textBox = new TextBox();
             textBox.Multiline = true;
             textBox.Font = dataFont;
-            textBox.TextChanged += new EventHandler(ObjectDataFieldControl_TextChanged);
+            textBox.TextChanged += ObjectDataFieldControl_TextChanged;
 
-            ToolStripMenuItem tsi = new ToolStripMenuItem();
+            var tsi = new ToolStripMenuItem();
             tsi.Text = "Is changed";
-            if (collectionType==Safir.Dob.Typesystem.CollectionType.SequenceCollectionType || collectionType==Safir.Dob.Typesystem.CollectionType.DictionaryCollectionType)
+            if (collectionType == CollectionType.SequenceCollectionType ||
+                collectionType == CollectionType.DictionaryCollectionType)
             {
                 tsi.Checked = true; //always changed when new items are added
             }
-            tsi.Click += new EventHandler(OnIsChangedMenuItem);
+            tsi.Click += OnIsChangedMenuItem;
             textBox.ContextMenuStrip = new ContextMenuStrip();
             textBox.ContextMenuStrip.Items.Add(tsi);
             return textBox;
@@ -790,11 +826,12 @@ namespace Sate
 
         protected void OnIsChangedMenuItem(object sender, EventArgs e)
         {
-            ToolStripMenuItem mi = sender as ToolStripMenuItem;
+            var mi = sender as ToolStripMenuItem;
             mi.Checked = !mi.Checked;
-            if (collectionType == Safir.Dob.Typesystem.CollectionType.SingleValueCollectionType || collectionType == Safir.Dob.Typesystem.CollectionType.ArrayCollectionType)
+            if (collectionType == CollectionType.SingleValueCollectionType ||
+                collectionType == CollectionType.ArrayCollectionType)
             {
-                int i = FindMenuItemOwnerControl(sender);
+                var i = FindMenuItemOwnerControl(sender);
                 // STSYLI 20080821 #265
                 // Set flag if this checkbox is checked or not
                 isNotChanged[i] = !mi.Checked;
@@ -809,15 +846,15 @@ namespace Sate
                     ValidateMember();
                 }
             }
-            else if (collectionType==Safir.Dob.Typesystem.CollectionType.SequenceCollectionType)
+            else if (collectionType == CollectionType.SequenceCollectionType)
             {
                 SetSequenceChanged(mi.Checked);
                 if (mi.Checked)
                     ValidateMember();
             }
-            else if (collectionType == Safir.Dob.Typesystem.CollectionType.DictionaryCollectionType)
+            else if (collectionType == CollectionType.DictionaryCollectionType)
             {
-                int i = FindMenuItemOwnerControl(sender);
+                var i = FindMenuItemOwnerControl(sender);
                 SetDictionaryChanged(mi.Checked, i);
                 if (mi.Checked)
                     ValidateMember();
@@ -832,7 +869,7 @@ namespace Sate
 
         public void ResetChanged()
         {
-            for (int i = 0; i<fieldValueControl.Count; i++)
+            for (var i = 0; i < fieldValueControl.Count; i++)
             {
                 ResetIndex(i);
             }
@@ -840,37 +877,21 @@ namespace Sate
             ValidateMember();
         }
 
-        public ObjectEditPanel ParentObjectEditPanel
-        {
-            get { return parentObjectEditPanel; }
-            set { parentObjectEditPanel = value; }
-        }
-        
         public void RePositioning()
         {
-            this.SuspendLayout();
-            this.Width = X_DEFAULT_WIDTH;
-            System.Drawing.Point location = new Point(X_TYPE_START, Y_START);
-            int numControls = fieldValueControl.Count;
-            
-            int index = 0;
+            SuspendLayout();
+            Width = X_DEFAULT_WIDTH;
+            var location = new Point(X_TYPE_START, Y_START);
+            var numControls = fieldValueControl.Count;
+
+            var index = 0;
             do
             {
                 PositionControls(index, ref location);
             } while (++index < numControls);
 
-            this.Height = location.Y;
-            this.ResumeLayout(false);
-        }
-
-        private int TypeLabelWidth
-        {
-            get
-            {
-                if (collectionType == Safir.Dob.Typesystem.CollectionType.SequenceCollectionType || collectionType == Safir.Dob.Typesystem.CollectionType.DictionaryCollectionType)
-                    return typeLabelAddItem.Width;
-                return typeLabel.Width;
-            }
+            Height = location.Y;
+            ResumeLayout(false);
         }
 
         protected virtual void PositionControls(int index, ref Point location)
@@ -880,7 +901,7 @@ namespace Sate
                 location.X = X_NAME_START;
                 fieldNameLabel[index].Location = location;
             }
-            
+
             if (isNullCheckBox.Count > index)
             {
                 location.X = X_NULL_START;
@@ -900,50 +921,44 @@ namespace Sate
                 location.X = X_NAME_START;
                 location.Y += Y_DEFAULT_HEIGHT + Y_STEP;
             }
-
         }
 
         /// <summary>
-        /// Clean up any resources being used.
+        ///     Clean up any resources being used.
         /// </summary>
-        protected override void Dispose( bool disposing )
+        protected override void Dispose(bool disposing)
         {
-            if( disposing )
+            if (disposing)
             {
-                foreach (Control c in fieldValueControl)
+                foreach (var c in fieldValueControl)
                 {
                     c.Dispose();
                 }
-                
-                if(components != null)
+
+                if (components != null)
                 {
                     components.Dispose();
                 }
             }
-            base.Dispose( disposing );
-        }
-
-        public static Font DataFont
-        {
-            get {return dataFont;}
+            base.Dispose(disposing);
         }
 
         protected virtual void InsertDictionaryItem(object key)
         {
-            ObjectInfo tmp = (ObjectInfo)Tag;
+            var tmp = (ObjectInfo) Tag;
             var container = tmp.Obj.GetMember(member, 0);
             var containerType = container.GetType();
-            var method = containerType.GetMethod("Add", new Type[] { key.GetType() });
-            method.Invoke(container, new object[] { key });
+            var method = containerType.GetMethod("Add", new[] {key.GetType()});
+            method.Invoke(container, new[] {key});
         }
 
-        protected Safir.Dob.Typesystem.ContainerBase GetDictionaryValue(object key)
+        protected ContainerBase GetDictionaryValue(object key)
         {
-            ObjectInfo tmp = (ObjectInfo)Tag;
+            var tmp = (ObjectInfo) Tag;
             var container = tmp.Obj.GetMember(member, 0);
             var containerType = container.GetType();
-            var value = containerType.GetProperty("Item").GetValue(container, new object[] { key });
-            return value as Safir.Dob.Typesystem.ContainerBase;
+            var value = containerType.GetProperty("Item").GetValue(container, new[] {key});
+            return value as ContainerBase;
         }
 
         //protected void InsertDictionaryItem(object key)
@@ -1005,66 +1020,67 @@ namespace Sate
         //    }
 
         //    containerType.GetProperty("Item").SetValue(container, value, new object[] { key });
+
         //}
     }
-    
+
     //---------------------------------------------------
     // Bool control
     //---------------------------------------------------
     public class BoolField : ObjectDataFieldControl
     {
-        public BoolField(ObjectInfo objInfo, int member, string name, Safir.Dob.Typesystem.CollectionType ct, int arraySize) : base(objInfo, member, "Boolean", name, ct, arraySize)
+        public BoolField(ObjectInfo objInfo, int member, string name, CollectionType ct, int arraySize)
+            : base(objInfo, member, "Boolean", name, ct, arraySize)
         {
         }
 
         protected override Control CreateValueControl()
         {
-
-            ComboBox combo = new ComboBox();
+            var combo = new ComboBox();
             combo.Font = dataFont;
-            combo.SelectedIndexChanged += new EventHandler(ObjectDataFieldControl_TextChanged);
-            combo.Items.AddRange(new string[] { "True", "False" });
+            combo.SelectedIndexChanged += ObjectDataFieldControl_TextChanged;
+            combo.Items.AddRange(new[] {"True", "False"});
             combo.SelectedIndex = 0;
             combo.DropDownStyle = ComboBoxStyle.DropDownList;
             combo.Width = 100;
             combo.ContextMenuStrip = new ContextMenuStrip();
-            combo.ContextMenuStrip.Items.Add(new ToolStripMenuItem("Is changed", null, new EventHandler(OnIsChangedMenuItem)));
+            combo.ContextMenuStrip.Items.Add(new ToolStripMenuItem("Is changed", null, OnIsChangedMenuItem));
 
             return combo;
-
         }
 
         protected override void InsertSequenceItem(int index)
         {
-            ObjectInfo tmp = (ObjectInfo)Tag;
-            var cont = (Safir.Dob.Typesystem.BooleanSequenceContainer)tmp.Obj.GetMember(member, 0);
+            var tmp = (ObjectInfo) Tag;
+            var cont = (BooleanSequenceContainer) tmp.Obj.GetMember(member, 0);
             cont.Insert(index, true);
         }
-        
+
         protected override bool ValidInput(int index, bool setVal)
         {
             if (!setVal)
                 return true;
 
-            ComboBox c=(ComboBox)fieldValueControl[index];
-            ObjectInfo tmp = (ObjectInfo)Tag;
-            var val = (c.Text == "True");
-            if (collectionType==Safir.Dob.Typesystem.CollectionType.SingleValueCollectionType || collectionType==Safir.Dob.Typesystem.CollectionType.ArrayCollectionType)
+            var c = (ComboBox) fieldValueControl[index];
+            var tmp = (ObjectInfo) Tag;
+            var val = c.Text == "True";
+            if (collectionType == CollectionType.SingleValueCollectionType ||
+                collectionType == CollectionType.ArrayCollectionType)
             {
                 changed[index] = false;
-                Safir.Dob.Typesystem.BooleanContainer cont = (Safir.Dob.Typesystem.BooleanContainer)tmp.Obj.GetMember(member, index);
+                var cont = (BooleanContainer) tmp.Obj.GetMember(member, index);
                 cont.Val = val;
             }
-            else if (collectionType == Safir.Dob.Typesystem.CollectionType.DictionaryCollectionType)
+            else if (collectionType == CollectionType.DictionaryCollectionType)
             {
                 changed[index] = false;
-                var cont = (Safir.Dob.Typesystem.BooleanContainer)GetDictionaryValue(fieldNameLabel[index].Tag);
+                var cont = (BooleanContainer) GetDictionaryValue(fieldNameLabel[index].Tag);
                 cont.Val = val;
             }
-            else if (collectionType==Safir.Dob.Typesystem.CollectionType.SequenceCollectionType)
+            else if (collectionType == CollectionType.SequenceCollectionType)
             {
-                var cont = (Safir.Dob.Typesystem.BooleanSequenceContainer)tmp.Obj.GetMember(member, 0);
-                if (cont.Count>index)
+                var cont = (BooleanSequenceContainer) tmp.Obj.GetMember(member, 0);
+                if (cont.Count > index)
                 {
                     cont[index] = val;
                 }
@@ -1073,20 +1089,20 @@ namespace Sate
                     cont.Add(val);
                 }
             }
-            
+
             return true;
         }
 
         public override void SetFieldValues()
         {
-            if (collectionType == Safir.Dob.Typesystem.CollectionType.SingleValueCollectionType ||
-                collectionType == Safir.Dob.Typesystem.CollectionType.ArrayCollectionType)
+            if (collectionType == CollectionType.SingleValueCollectionType ||
+                collectionType == CollectionType.ArrayCollectionType)
             {
-                int index = 0;
+                var index = 0;
                 foreach (ComboBox c in fieldValueControl)
                 {
-                    ObjectInfo tmp = (ObjectInfo)Tag;
-                    Safir.Dob.Typesystem.BooleanContainer cont = (Safir.Dob.Typesystem.BooleanContainer)tmp.Obj.GetMember(member, index);
+                    var tmp = (ObjectInfo) Tag;
+                    var cont = (BooleanContainer) tmp.Obj.GetMember(member, index);
 
                     if (cont.IsNull())
                     {
@@ -1110,12 +1126,12 @@ namespace Sate
                     index++;
                 }
             }
-            else if (collectionType == Safir.Dob.Typesystem.CollectionType.DictionaryCollectionType)
+            else if (collectionType == CollectionType.DictionaryCollectionType)
             {
-                int index = 0;
+                var index = 0;
                 foreach (ComboBox c in fieldValueControl)
                 {
-                    var cont = (Safir.Dob.Typesystem.BooleanContainer)GetDictionaryValue(fieldNameLabel[index].Tag);
+                    var cont = (BooleanContainer) GetDictionaryValue(fieldNameLabel[index].Tag);
 
                     if (cont.IsNull())
                     {
@@ -1137,11 +1153,11 @@ namespace Sate
                     index++;
                 }
             }
-            else if (collectionType == Safir.Dob.Typesystem.CollectionType.SequenceCollectionType)
+            else if (collectionType == CollectionType.SequenceCollectionType)
             {
                 SetSequenceChanged(false);
-                ObjectInfo tmp = (ObjectInfo)Tag;
-                var cont = (Safir.Dob.Typesystem.BooleanSequenceContainer)tmp.Obj.GetMember(member, 0);
+                var tmp = (ObjectInfo) Tag;
+                var cont = (BooleanSequenceContainer) tmp.Obj.GetMember(member, 0);
 
                 if (cont.Count != fieldValueControl.Count)
                 {
@@ -1151,7 +1167,7 @@ namespace Sate
                     return;
                 }
 
-                int index = 0;
+                var index = 0;
                 foreach (ComboBox t in fieldValueControl)
                 {
                     t.Text = cont[index].ToString();
@@ -1168,103 +1184,105 @@ namespace Sate
     //---------------------------------------------------
     public class EnumField : ObjectDataFieldControl
     {
-        private string[] enumValueNames;
+        private readonly string[] enumValueNames;
 
-        public EnumField(ObjectInfo objInfo, int member, long enumTypeId, string name, Safir.Dob.Typesystem.CollectionType ct, int arraySize) : base()
+        public EnumField(ObjectInfo objInfo, int member, long enumTypeId, string name, CollectionType ct, int arraySize)
         {
-            int noEnumValues = Safir.Dob.Typesystem.Operations.GetNumberOfEnumerationValues(enumTypeId);
+            var noEnumValues = Operations.GetNumberOfEnumerationValues(enumTypeId);
             enumValueNames = new string[noEnumValues];
-            for (int ev = 0; ev < noEnumValues; ev++)
+            for (var ev = 0; ev < noEnumValues; ev++)
             {
-                enumValueNames[ev] = Safir.Dob.Typesystem.Operations.GetEnumerationValueName(enumTypeId, ev);
+                enumValueNames[ev] = Operations.GetEnumerationValueName(enumTypeId, ev);
             }
 
-            string enumName=Safir.Dob.Typesystem.Operations.GetName(enumTypeId);
-            base.Init(objInfo, member, enumName, name, ct, arraySize);
+            var enumName = Operations.GetName(enumTypeId);
+            Init(objInfo, member, enumName, name, ct, arraySize);
         }
 
         protected override Control CreateValueControl()
         {
-            ComboBox combo = new ComboBox();
+            var combo = new ComboBox();
             combo.Font = dataFont;
-            combo.SelectedIndexChanged += new EventHandler(ObjectDataFieldControl_TextChanged);
+            combo.SelectedIndexChanged += ObjectDataFieldControl_TextChanged;
             combo.Items.AddRange(enumValueNames);
             combo.SelectedIndex = 0;
             combo.DropDownStyle = ComboBoxStyle.DropDownList;
             combo.DropDownWidth = 400;
             combo.Width = 100;
             combo.ContextMenuStrip = new ContextMenuStrip();
-            combo.ContextMenuStrip.Items.Add(new ToolStripMenuItem("Is changed", null, new EventHandler(OnIsChangedMenuItem)));
+            combo.ContextMenuStrip.Items.Add(new ToolStripMenuItem("Is changed", null, OnIsChangedMenuItem));
             return combo;
-
         }
 
         protected override void InsertSequenceItem(int index)
         {
-            ObjectInfo tmp = (ObjectInfo)Tag;
+            var tmp = (ObjectInfo) Tag;
             var container = tmp.Obj.GetMember(member, 0);
             var containerType = container.GetType();
-            var enumType = containerType.Assembly.GetType(containerType.ReflectedType.FullName).GetNestedType("Enumeration");
+            var enumType =
+                containerType.Assembly.GetType(containerType.ReflectedType.FullName).GetNestedType("Enumeration");
             var enumVal = Enum.GetValues(enumType).GetValue(0);
-            containerType.GetMethod("Insert").Invoke(container, new object[] { index, enumVal });
+            containerType.GetMethod("Insert").Invoke(container, new[] {index, enumVal});
         }
-        
+
         protected override bool ValidInput(int index, bool setVal)
         {
             if (!setVal)
                 return true;
 
-            ComboBox c = (ComboBox)fieldValueControl[index];
-            ObjectInfo tmp = (ObjectInfo)Tag;
+            var c = (ComboBox) fieldValueControl[index];
+            var tmp = (ObjectInfo) Tag;
 
-            if (collectionType == Safir.Dob.Typesystem.CollectionType.SingleValueCollectionType || collectionType == Safir.Dob.Typesystem.CollectionType.ArrayCollectionType)
+            if (collectionType == CollectionType.SingleValueCollectionType ||
+                collectionType == CollectionType.ArrayCollectionType)
             {
                 changed[index] = false;
-                Safir.Dob.Typesystem.EnumerationContainerBase cont = (Safir.Dob.Typesystem.EnumerationContainerBase)tmp.Obj.GetMember(member, index);
+                var cont = (EnumerationContainerBase) tmp.Obj.GetMember(member, index);
                 cont.Ordinal = c.SelectedIndex;
             }
-            else if (collectionType == Safir.Dob.Typesystem.CollectionType.DictionaryCollectionType)
+            else if (collectionType == CollectionType.DictionaryCollectionType)
             {
                 changed[index] = false;
-                var cont = (Safir.Dob.Typesystem.EnumerationContainerBase)GetDictionaryValue(fieldNameLabel[index].Tag);
+                var cont = (EnumerationContainerBase) GetDictionaryValue(fieldNameLabel[index].Tag);
                 cont.Ordinal = c.SelectedIndex;
             }
-            else if (collectionType == Safir.Dob.Typesystem.CollectionType.SequenceCollectionType)
+            else if (collectionType == CollectionType.SequenceCollectionType)
             {
                 var container = tmp.Obj.GetMember(member, 0);
                 var containerType = container.GetType();
-                var enumType = containerType.Assembly.GetType(containerType.ReflectedType.FullName).GetNestedType("Enumeration");
+                var enumType =
+                    containerType.Assembly.GetType(containerType.ReflectedType.FullName).GetNestedType("Enumeration");
                 var enumVal = Enum.GetValues(enumType).GetValue(c.SelectedIndex);
 
-                int numValues = (int)containerType.GetProperty("Count").GetValue(container, null);
+                var numValues = (int) containerType.GetProperty("Count").GetValue(container, null);
                 if (numValues > index)
                 {
-                    containerType.GetProperty("Item").SetValue(container, enumVal, new object[] { index });
+                    containerType.GetProperty("Item").SetValue(container, enumVal, new object[] {index});
                 }
                 else
                 {
-                    containerType.GetMethod("Add").Invoke(container, new object[] { enumVal });
+                    containerType.GetMethod("Add").Invoke(container, new[] {enumVal});
                 }
             }
-            
+
             return true;
         }
 
         public override void SetFieldValues()
         {
-            if (collectionType == Safir.Dob.Typesystem.CollectionType.SingleValueCollectionType ||
-                collectionType == Safir.Dob.Typesystem.CollectionType.ArrayCollectionType)
+            if (collectionType == CollectionType.SingleValueCollectionType ||
+                collectionType == CollectionType.ArrayCollectionType)
             {
-                int index = 0;
+                var index = 0;
                 foreach (ComboBox c in fieldValueControl)
                 {
-                    ObjectInfo tmp = (ObjectInfo)Tag;
-                    Safir.Dob.Typesystem.EnumerationContainerBase cont = (Safir.Dob.Typesystem.EnumerationContainerBase)tmp.Obj.GetMember(member, index);
+                    var tmp = (ObjectInfo) Tag;
+                    var cont = (EnumerationContainerBase) tmp.Obj.GetMember(member, index);
 
                     if (cont.IsNull())
                     {
                         if (isNullCheckBox.Count > index)
-                            this.isNullCheckBox[index].Checked = true;
+                            isNullCheckBox[index].Checked = true;
                     }
                     else
                     {
@@ -1282,17 +1300,17 @@ namespace Sate
                     index++;
                 }
             }
-            else if (collectionType == Safir.Dob.Typesystem.CollectionType.DictionaryCollectionType)
+            else if (collectionType == CollectionType.DictionaryCollectionType)
             {
-                int index = 0;
+                var index = 0;
                 foreach (ComboBox c in fieldValueControl)
                 {
-                    var cont = (Safir.Dob.Typesystem.EnumerationContainerBase)GetDictionaryValue(fieldNameLabel[index].Tag);
+                    var cont = (EnumerationContainerBase) GetDictionaryValue(fieldNameLabel[index].Tag);
 
                     if (cont.IsNull())
                     {
                         if (isNullCheckBox.Count > index)
-                            this.isNullCheckBox[index].Checked = true;
+                            isNullCheckBox[index].Checked = true;
                     }
                     else
                     {
@@ -1307,15 +1325,15 @@ namespace Sate
                     index++;
                 }
             }
-            else if (collectionType == Safir.Dob.Typesystem.CollectionType.SequenceCollectionType)
+            else if (collectionType == CollectionType.SequenceCollectionType)
             {
                 SetSequenceChanged(false);
 
-                ObjectInfo tmp = (ObjectInfo)Tag;
+                var tmp = (ObjectInfo) Tag;
                 var container = tmp.Obj.GetMember(member, 0);
                 var containerType = container.GetType();
 
-                if ((int)containerType.GetProperty("Count").GetValue(container, null) != fieldValueControl.Count)
+                if ((int) containerType.GetProperty("Count").GetValue(container, null) != fieldValueControl.Count)
                 {
                     Init(tmp, member, typeName, memberName, collectionType, 1);
                     parentObjectEditPanel.ExpandCollapse(member);
@@ -1323,12 +1341,12 @@ namespace Sate
                     return;
                 }
 
-                int index = 0;
-                var ix = new object[1] { index };
+                var index = 0;
+                var ix = new object[1] {index};
                 foreach (ComboBox t in fieldValueControl)
                 {
                     ix[0] = index++;
-                    var value = (int)containerType.GetProperty("Item").GetValue(container, ix);
+                    var value = (int) containerType.GetProperty("Item").GetValue(container, ix);
                     t.SelectedIndex = value;
                     t.BackColor = ColorMap.ENABLED;
                 }
@@ -1341,14 +1359,15 @@ namespace Sate
     //---------------------------------------------------
     public class Int32Field : ObjectDataFieldControl
     {
-        public Int32Field(ObjectInfo objInfo, int member, string name, Safir.Dob.Typesystem.CollectionType ct, int arraySize) : base(objInfo, member, "Int32", name, ct, arraySize)
+        public Int32Field(ObjectInfo objInfo, int member, string name, CollectionType ct, int arraySize)
+            : base(objInfo, member, "Int32", name, ct, arraySize)
         {
         }
 
         protected override void InsertSequenceItem(int index)
         {
-            ObjectInfo tmp = (ObjectInfo)Tag;
-            var cont = (Safir.Dob.Typesystem.Int32SequenceContainer)tmp.Obj.GetMember(member, 0);
+            var tmp = (ObjectInfo) Tag;
+            var cont = (Int32SequenceContainer) tmp.Obj.GetMember(member, 0);
             cont.Insert(index, 0);
         }
 
@@ -1356,28 +1375,30 @@ namespace Sate
         {
             try
             {
-                TextBox c = (TextBox)fieldValueControl[index];
-                int val = int.Parse(c.Text);
+                var c = (TextBox) fieldValueControl[index];
+                var val = int.Parse(c.Text);
 
                 if (!setVal)
                     return true;
 
-                ObjectInfo tmp = (ObjectInfo)Tag;
-                if (collectionType == Safir.Dob.Typesystem.CollectionType.SingleValueCollectionType || collectionType == Safir.Dob.Typesystem.CollectionType.ArrayCollectionType)
+                var tmp = (ObjectInfo) Tag;
+                if (collectionType == CollectionType.SingleValueCollectionType ||
+                    collectionType == CollectionType.ArrayCollectionType)
                 {
                     changed[index] = false;
-                    var cont = (Safir.Dob.Typesystem.Int32Container)tmp.Obj.GetMember(member, index);
-                    cont.Val = val; ;
+                    var cont = (Int32Container) tmp.Obj.GetMember(member, index);
+                    cont.Val = val;
+                    ;
                 }
-                else if (collectionType == Safir.Dob.Typesystem.CollectionType.DictionaryCollectionType)
+                else if (collectionType == CollectionType.DictionaryCollectionType)
                 {
                     changed[index] = false;
-                    var cont = (Safir.Dob.Typesystem.Int32Container)GetDictionaryValue(fieldNameLabel[index].Tag);
+                    var cont = (Int32Container) GetDictionaryValue(fieldNameLabel[index].Tag);
                     cont.Val = val;
                 }
-                else if (collectionType == Safir.Dob.Typesystem.CollectionType.SequenceCollectionType)
+                else if (collectionType == CollectionType.SequenceCollectionType)
                 {
-                    var cont = (Safir.Dob.Typesystem.Int32SequenceContainer)tmp.Obj.GetMember(member, 0);
+                    var cont = (Int32SequenceContainer) tmp.Obj.GetMember(member, 0);
                     if (cont.Count > index)
                     {
                         cont[index] = val;
@@ -1387,7 +1408,7 @@ namespace Sate
                         cont.Add(val);
                     }
                 }
-               
+
                 return true;
             }
             catch
@@ -1398,19 +1419,19 @@ namespace Sate
 
         public override void SetFieldValues()
         {
-            if (collectionType == Safir.Dob.Typesystem.CollectionType.SingleValueCollectionType ||
-                collectionType == Safir.Dob.Typesystem.CollectionType.ArrayCollectionType)
+            if (collectionType == CollectionType.SingleValueCollectionType ||
+                collectionType == CollectionType.ArrayCollectionType)
             {
-                int index = 0;
+                var index = 0;
                 foreach (TextBox t in fieldValueControl)
                 {
-                    ObjectInfo tmp = (ObjectInfo)Tag;
-                    Safir.Dob.Typesystem.Int32Container cont = (Safir.Dob.Typesystem.Int32Container)tmp.Obj.GetMember(member, index);
+                    var tmp = (ObjectInfo) Tag;
+                    var cont = (Int32Container) tmp.Obj.GetMember(member, index);
 
                     if (cont.IsNull())
                     {
                         if (isNullCheckBox.Count > index)
-                            this.isNullCheckBox[index].Checked = true;
+                            isNullCheckBox[index].Checked = true;
                     }
                     else
                     {
@@ -1428,17 +1449,17 @@ namespace Sate
                     index++;
                 }
             }
-            else if (collectionType == Safir.Dob.Typesystem.CollectionType.DictionaryCollectionType)
+            else if (collectionType == CollectionType.DictionaryCollectionType)
             {
-                int index = 0;
+                var index = 0;
                 foreach (TextBox t in fieldValueControl)
                 {
-                    var cont = (Safir.Dob.Typesystem.Int32Container)GetDictionaryValue(fieldNameLabel[index].Tag);
+                    var cont = (Int32Container) GetDictionaryValue(fieldNameLabel[index].Tag);
 
                     if (cont.IsNull())
                     {
                         if (isNullCheckBox.Count > index)
-                            this.isNullCheckBox[index].Checked = true;
+                            isNullCheckBox[index].Checked = true;
                     }
                     else
                     {
@@ -1454,11 +1475,11 @@ namespace Sate
                     index++;
                 }
             }
-            else if (collectionType == Safir.Dob.Typesystem.CollectionType.SequenceCollectionType)
+            else if (collectionType == CollectionType.SequenceCollectionType)
             {
                 SetSequenceChanged(false);
-                ObjectInfo tmp = (ObjectInfo)Tag;
-                var cont = (Safir.Dob.Typesystem.Int32SequenceContainer)tmp.Obj.GetMember(member, 0);
+                var tmp = (ObjectInfo) Tag;
+                var cont = (Int32SequenceContainer) tmp.Obj.GetMember(member, 0);
 
                 if (cont.Count != fieldValueControl.Count)
                 {
@@ -1468,13 +1489,13 @@ namespace Sate
                     return;
                 }
 
-                int index = 0;
+                var index = 0;
                 foreach (TextBox t in fieldValueControl)
                 {
                     t.Text = cont[index].ToString();
                     t.BackColor = ColorMap.ENABLED;
                     index++;
-                }                
+                }
             }
         }
     }
@@ -1484,43 +1505,46 @@ namespace Sate
     //---------------------------------------------------
     public class Int64Field : ObjectDataFieldControl
     {
-        public Int64Field(ObjectInfo objInfo, int member, string name, Safir.Dob.Typesystem.CollectionType ct, int arraySize) : base(objInfo, member, "Int64", name, ct, arraySize)
+        public Int64Field(ObjectInfo objInfo, int member, string name, CollectionType ct, int arraySize)
+            : base(objInfo, member, "Int64", name, ct, arraySize)
         {
         }
 
         protected override void InsertSequenceItem(int index)
         {
-            ObjectInfo tmp = (ObjectInfo)Tag;
-            var cont = (Safir.Dob.Typesystem.Int64SequenceContainer)tmp.Obj.GetMember(member, 0);
+            var tmp = (ObjectInfo) Tag;
+            var cont = (Int64SequenceContainer) tmp.Obj.GetMember(member, 0);
             cont.Insert(index, 0);
         }
-        
+
         protected override bool ValidInput(int index, bool setVal)
         {
             try
             {
-                TextBox c = (TextBox)fieldValueControl[index];
+                var c = (TextBox) fieldValueControl[index];
                 var val = long.Parse(c.Text);
 
                 if (!setVal)
                     return true;
 
-                ObjectInfo tmp = (ObjectInfo)Tag;
-                if (collectionType == Safir.Dob.Typesystem.CollectionType.SingleValueCollectionType || collectionType == Safir.Dob.Typesystem.CollectionType.ArrayCollectionType)
+                var tmp = (ObjectInfo) Tag;
+                if (collectionType == CollectionType.SingleValueCollectionType ||
+                    collectionType == CollectionType.ArrayCollectionType)
                 {
                     changed[index] = false;
-                    var cont = (Safir.Dob.Typesystem.Int64Container)tmp.Obj.GetMember(member, index);
-                    cont.Val = val; ;
+                    var cont = (Int64Container) tmp.Obj.GetMember(member, index);
+                    cont.Val = val;
+                    ;
                 }
-                else if (collectionType == Safir.Dob.Typesystem.CollectionType.DictionaryCollectionType)
+                else if (collectionType == CollectionType.DictionaryCollectionType)
                 {
                     changed[index] = false;
-                    var cont = (Safir.Dob.Typesystem.Int64Container)GetDictionaryValue(fieldNameLabel[index].Tag);
+                    var cont = (Int64Container) GetDictionaryValue(fieldNameLabel[index].Tag);
                     cont.Val = val;
                 }
-                else if (collectionType == Safir.Dob.Typesystem.CollectionType.SequenceCollectionType)
+                else if (collectionType == CollectionType.SequenceCollectionType)
                 {
-                    var cont = (Safir.Dob.Typesystem.Int64SequenceContainer)tmp.Obj.GetMember(member, 0);
+                    var cont = (Int64SequenceContainer) tmp.Obj.GetMember(member, 0);
                     if (cont.Count > index)
                     {
                         cont[index] = val;
@@ -1541,19 +1565,19 @@ namespace Sate
 
         public override void SetFieldValues()
         {
-            if (collectionType == Safir.Dob.Typesystem.CollectionType.SingleValueCollectionType ||
-                collectionType == Safir.Dob.Typesystem.CollectionType.ArrayCollectionType)
+            if (collectionType == CollectionType.SingleValueCollectionType ||
+                collectionType == CollectionType.ArrayCollectionType)
             {
-                int index = 0;
+                var index = 0;
                 foreach (TextBox t in fieldValueControl)
                 {
-                    ObjectInfo tmp = (ObjectInfo)Tag;
-                    Safir.Dob.Typesystem.Int64Container cont = (Safir.Dob.Typesystem.Int64Container)tmp.Obj.GetMember(member, index);
+                    var tmp = (ObjectInfo) Tag;
+                    var cont = (Int64Container) tmp.Obj.GetMember(member, index);
 
                     if (cont.IsNull())
                     {
                         if (isNullCheckBox.Count > index)
-                            this.isNullCheckBox[index].Checked = true;
+                            isNullCheckBox[index].Checked = true;
                     }
                     else
                     {
@@ -1571,17 +1595,17 @@ namespace Sate
                     index++;
                 }
             }
-            else if (collectionType == Safir.Dob.Typesystem.CollectionType.DictionaryCollectionType)
+            else if (collectionType == CollectionType.DictionaryCollectionType)
             {
-                int index = 0;
+                var index = 0;
                 foreach (TextBox t in fieldValueControl)
                 {
-                    var cont = (Safir.Dob.Typesystem.Int64Container)GetDictionaryValue(fieldNameLabel[index].Tag);
+                    var cont = (Int64Container) GetDictionaryValue(fieldNameLabel[index].Tag);
 
                     if (cont.IsNull())
                     {
                         if (isNullCheckBox.Count > index)
-                            this.isNullCheckBox[index].Checked = true;
+                            isNullCheckBox[index].Checked = true;
                     }
                     else
                     {
@@ -1597,11 +1621,11 @@ namespace Sate
                     index++;
                 }
             }
-            else if (collectionType == Safir.Dob.Typesystem.CollectionType.SequenceCollectionType)
+            else if (collectionType == CollectionType.SequenceCollectionType)
             {
                 SetSequenceChanged(false);
-                ObjectInfo tmp = (ObjectInfo)Tag;
-                var cont = (Safir.Dob.Typesystem.Int64SequenceContainer)tmp.Obj.GetMember(member, 0);
+                var tmp = (ObjectInfo) Tag;
+                var cont = (Int64SequenceContainer) tmp.Obj.GetMember(member, 0);
 
                 if (cont.Count != fieldValueControl.Count)
                 {
@@ -1611,7 +1635,7 @@ namespace Sate
                     return;
                 }
 
-                int index = 0;
+                var index = 0;
                 foreach (TextBox t in fieldValueControl)
                 {
                     t.Text = cont[index].ToString();
@@ -1627,14 +1651,15 @@ namespace Sate
     //---------------------------------------------------
     public class Float32Field : ObjectDataFieldControl
     {
-        public Float32Field(ObjectInfo objInfo, int member, string name, Safir.Dob.Typesystem.CollectionType ct, int arraySize, string typeName) : base(objInfo, member, typeName, name, ct, arraySize)
+        public Float32Field(ObjectInfo objInfo, int member, string name, CollectionType ct, int arraySize,
+            string typeName) : base(objInfo, member, typeName, name, ct, arraySize)
         {
         }
 
         protected override void InsertSequenceItem(int index)
         {
-            ObjectInfo tmp = (ObjectInfo)Tag;
-            var cont = (Safir.Dob.Typesystem.Float32SequenceContainer)tmp.Obj.GetMember(member, 0);
+            var tmp = (ObjectInfo) Tag;
+            var cont = (Float32SequenceContainer) tmp.Obj.GetMember(member, 0);
             cont.Insert(index, 0);
         }
 
@@ -1642,28 +1667,29 @@ namespace Sate
         {
             try
             {
-                TextBox c = (TextBox)fieldValueControl[index];
+                var c = (TextBox) fieldValueControl[index];
                 var val = float.Parse(c.Text);
 
                 if (!setVal)
                     return true;
 
-                ObjectInfo tmp = (ObjectInfo)Tag;
-                if (collectionType == Safir.Dob.Typesystem.CollectionType.SingleValueCollectionType || collectionType == Safir.Dob.Typesystem.CollectionType.ArrayCollectionType)
+                var tmp = (ObjectInfo) Tag;
+                if (collectionType == CollectionType.SingleValueCollectionType ||
+                    collectionType == CollectionType.ArrayCollectionType)
                 {
                     changed[index] = false;
-                    var cont = (Safir.Dob.Typesystem.Float32Container)tmp.Obj.GetMember(member, index);
+                    var cont = (Float32Container) tmp.Obj.GetMember(member, index);
                     cont.Val = val;
                 }
-                else if (collectionType == Safir.Dob.Typesystem.CollectionType.DictionaryCollectionType)
+                else if (collectionType == CollectionType.DictionaryCollectionType)
                 {
                     changed[index] = false;
-                    var cont = (Safir.Dob.Typesystem.Float32Container)GetDictionaryValue(fieldNameLabel[index].Tag);
+                    var cont = (Float32Container) GetDictionaryValue(fieldNameLabel[index].Tag);
                     cont.Val = val;
                 }
-                else if (collectionType == Safir.Dob.Typesystem.CollectionType.SequenceCollectionType)
+                else if (collectionType == CollectionType.SequenceCollectionType)
                 {
-                    var cont = (Safir.Dob.Typesystem.Float32SequenceContainer)tmp.Obj.GetMember(member, 0);
+                    var cont = (Float32SequenceContainer) tmp.Obj.GetMember(member, 0);
                     if (cont.Count > index)
                     {
                         cont[index] = val;
@@ -1684,19 +1710,19 @@ namespace Sate
 
         public override void SetFieldValues()
         {
-            if (collectionType == Safir.Dob.Typesystem.CollectionType.SingleValueCollectionType ||
-                collectionType == Safir.Dob.Typesystem.CollectionType.ArrayCollectionType)
+            if (collectionType == CollectionType.SingleValueCollectionType ||
+                collectionType == CollectionType.ArrayCollectionType)
             {
-                int index = 0;
+                var index = 0;
                 foreach (TextBox t in fieldValueControl)
                 {
-                    ObjectInfo tmp = (ObjectInfo)Tag;
-                    Safir.Dob.Typesystem.Float32Container cont = (Safir.Dob.Typesystem.Float32Container)tmp.Obj.GetMember(member, index);
+                    var tmp = (ObjectInfo) Tag;
+                    var cont = (Float32Container) tmp.Obj.GetMember(member, index);
 
                     if (cont.IsNull())
                     {
                         if (isNullCheckBox.Count > index)
-                            this.isNullCheckBox[index].Checked = true;
+                            isNullCheckBox[index].Checked = true;
                     }
                     else
                     {
@@ -1714,17 +1740,17 @@ namespace Sate
                     index++;
                 }
             }
-            else if (collectionType == Safir.Dob.Typesystem.CollectionType.DictionaryCollectionType)
+            else if (collectionType == CollectionType.DictionaryCollectionType)
             {
-                int index = 0;
+                var index = 0;
                 foreach (TextBox t in fieldValueControl)
                 {
-                    var cont = (Safir.Dob.Typesystem.Float32Container)GetDictionaryValue(fieldNameLabel[index].Tag);
+                    var cont = (Float32Container) GetDictionaryValue(fieldNameLabel[index].Tag);
 
                     if (cont.IsNull())
                     {
                         if (isNullCheckBox.Count > index)
-                            this.isNullCheckBox[index].Checked = true;
+                            isNullCheckBox[index].Checked = true;
                     }
                     else
                     {
@@ -1740,11 +1766,11 @@ namespace Sate
                     index++;
                 }
             }
-            else if (collectionType == Safir.Dob.Typesystem.CollectionType.SequenceCollectionType)
+            else if (collectionType == CollectionType.SequenceCollectionType)
             {
                 SetSequenceChanged(false);
-                ObjectInfo tmp = (ObjectInfo)Tag;
-                var cont = (Safir.Dob.Typesystem.Float32SequenceContainer)tmp.Obj.GetMember(member, 0);
+                var tmp = (ObjectInfo) Tag;
+                var cont = (Float32SequenceContainer) tmp.Obj.GetMember(member, 0);
 
                 if (cont.Count != fieldValueControl.Count)
                 {
@@ -1754,7 +1780,7 @@ namespace Sate
                     return;
                 }
 
-                int index = 0;
+                var index = 0;
                 foreach (TextBox t in fieldValueControl)
                 {
                     t.Text = cont[index].ToString();
@@ -1770,15 +1796,16 @@ namespace Sate
     //---------------------------------------------------
     public class Float64Field : ObjectDataFieldControl
     {
-        public Float64Field(ObjectInfo objInfo, int member, string name, Safir.Dob.Typesystem.CollectionType ct, int arraySize, string typeName)
+        public Float64Field(ObjectInfo objInfo, int member, string name, CollectionType ct, int arraySize,
+            string typeName)
             : base(objInfo, member, typeName, name, ct, arraySize)
         {
         }
 
         protected override void InsertSequenceItem(int index)
         {
-            ObjectInfo tmp = (ObjectInfo)Tag;
-            var cont = (Safir.Dob.Typesystem.Float64SequenceContainer)tmp.Obj.GetMember(member, 0);
+            var tmp = (ObjectInfo) Tag;
+            var cont = (Float64SequenceContainer) tmp.Obj.GetMember(member, 0);
             cont.Insert(index, 0);
         }
 
@@ -1786,28 +1813,30 @@ namespace Sate
         {
             try
             {
-                TextBox c = (TextBox)fieldValueControl[index];
+                var c = (TextBox) fieldValueControl[index];
                 var val = double.Parse(c.Text);
 
                 if (!setVal)
                     return true;
 
-                ObjectInfo tmp = (ObjectInfo)Tag;
-                if (collectionType == Safir.Dob.Typesystem.CollectionType.SingleValueCollectionType || collectionType == Safir.Dob.Typesystem.CollectionType.ArrayCollectionType)
+                var tmp = (ObjectInfo) Tag;
+                if (collectionType == CollectionType.SingleValueCollectionType ||
+                    collectionType == CollectionType.ArrayCollectionType)
                 {
                     changed[index] = false;
-                    var cont = (Safir.Dob.Typesystem.Float64Container)tmp.Obj.GetMember(member, index);
-                    cont.Val = val; ;
+                    var cont = (Float64Container) tmp.Obj.GetMember(member, index);
+                    cont.Val = val;
+                    ;
                 }
-                else if (collectionType == Safir.Dob.Typesystem.CollectionType.DictionaryCollectionType)
+                else if (collectionType == CollectionType.DictionaryCollectionType)
                 {
                     changed[index] = false;
-                    var cont = (Safir.Dob.Typesystem.Float64Container)GetDictionaryValue(fieldNameLabel[index].Tag);
+                    var cont = (Float64Container) GetDictionaryValue(fieldNameLabel[index].Tag);
                     cont.Val = val;
                 }
-                else if (collectionType == Safir.Dob.Typesystem.CollectionType.SequenceCollectionType)
+                else if (collectionType == CollectionType.SequenceCollectionType)
                 {
-                    var cont = (Safir.Dob.Typesystem.Float64SequenceContainer)tmp.Obj.GetMember(member, 0);
+                    var cont = (Float64SequenceContainer) tmp.Obj.GetMember(member, 0);
                     if (cont.Count > index)
                     {
                         cont[index] = val;
@@ -1828,19 +1857,19 @@ namespace Sate
 
         public override void SetFieldValues()
         {
-            if (collectionType == Safir.Dob.Typesystem.CollectionType.SingleValueCollectionType ||
-                collectionType == Safir.Dob.Typesystem.CollectionType.ArrayCollectionType)
+            if (collectionType == CollectionType.SingleValueCollectionType ||
+                collectionType == CollectionType.ArrayCollectionType)
             {
-                int index = 0;
+                var index = 0;
                 foreach (TextBox t in fieldValueControl)
                 {
-                    ObjectInfo tmp = (ObjectInfo)Tag;
-                    Safir.Dob.Typesystem.Float64Container cont = (Safir.Dob.Typesystem.Float64Container)tmp.Obj.GetMember(member, index);
+                    var tmp = (ObjectInfo) Tag;
+                    var cont = (Float64Container) tmp.Obj.GetMember(member, index);
 
                     if (cont.IsNull())
                     {
                         if (isNullCheckBox.Count > index)
-                            this.isNullCheckBox[index].Checked = true;
+                            isNullCheckBox[index].Checked = true;
                     }
                     else
                     {
@@ -1858,17 +1887,17 @@ namespace Sate
                     index++;
                 }
             }
-            else if (collectionType == Safir.Dob.Typesystem.CollectionType.DictionaryCollectionType)
+            else if (collectionType == CollectionType.DictionaryCollectionType)
             {
-                int index = 0;
+                var index = 0;
                 foreach (TextBox t in fieldValueControl)
                 {
-                    var cont = (Safir.Dob.Typesystem.Float64Container)GetDictionaryValue(fieldNameLabel[index].Tag);
+                    var cont = (Float64Container) GetDictionaryValue(fieldNameLabel[index].Tag);
 
                     if (cont.IsNull())
                     {
                         if (isNullCheckBox.Count > index)
-                            this.isNullCheckBox[index].Checked = true;
+                            isNullCheckBox[index].Checked = true;
                     }
                     else
                     {
@@ -1884,11 +1913,11 @@ namespace Sate
                     index++;
                 }
             }
-            else if (collectionType == Safir.Dob.Typesystem.CollectionType.SequenceCollectionType)
+            else if (collectionType == CollectionType.SequenceCollectionType)
             {
                 SetSequenceChanged(false);
-                ObjectInfo tmp = (ObjectInfo)Tag;
-                var cont = (Safir.Dob.Typesystem.Float64SequenceContainer)tmp.Obj.GetMember(member, 0);
+                var tmp = (ObjectInfo) Tag;
+                var cont = (Float64SequenceContainer) tmp.Obj.GetMember(member, 0);
 
                 if (cont.Count != fieldValueControl.Count)
                 {
@@ -1898,7 +1927,7 @@ namespace Sate
                     return;
                 }
 
-                int index = 0;
+                var index = 0;
                 foreach (TextBox t in fieldValueControl)
                 {
                     t.Text = cont[index].ToString();
@@ -1914,11 +1943,12 @@ namespace Sate
     //---------------------------------------------------
     public class StringField : ObjectDataFieldControl
     {
-        private int maxLength;
-        public StringField(ObjectInfo objInfo, int member, string name, Safir.Dob.Typesystem.CollectionType ct, int arraySize, int maxLength)
+        private readonly int maxLength;
+
+        public StringField(ObjectInfo objInfo, int member, string name, CollectionType ct, int arraySize, int maxLength)
         {
             this.maxLength = maxLength;
-            base.Init(objInfo, member, "String", name, ct, arraySize);
+            Init(objInfo, member, "String", name, ct, arraySize);
         }
 
         protected override Control CreateValueControl()
@@ -1927,41 +1957,41 @@ namespace Sate
             if (control != null)
             {
                 control.MaxLength = maxLength;
-
             }
             return control;
         }
 
         protected override void InsertSequenceItem(int index)
         {
-            ObjectInfo tmp = (ObjectInfo)Tag;
-            var cont = (Safir.Dob.Typesystem.StringSequenceContainer)tmp.Obj.GetMember(member, 0);
+            var tmp = (ObjectInfo) Tag;
+            var cont = (StringSequenceContainer) tmp.Obj.GetMember(member, 0);
             cont.Insert(index, "");
         }
-        
+
         protected override bool ValidInput(int index, bool setVal)
         {
             if (!setVal)
                 return true;
 
-            TextBox c = (TextBox)fieldValueControl[index];
-            ObjectInfo tmp = (ObjectInfo)Tag;
+            var c = (TextBox) fieldValueControl[index];
+            var tmp = (ObjectInfo) Tag;
 
-            if (collectionType == Safir.Dob.Typesystem.CollectionType.SingleValueCollectionType || collectionType == Safir.Dob.Typesystem.CollectionType.ArrayCollectionType)
+            if (collectionType == CollectionType.SingleValueCollectionType ||
+                collectionType == CollectionType.ArrayCollectionType)
             {
                 changed[index] = false;
-                Safir.Dob.Typesystem.StringContainer cont = (Safir.Dob.Typesystem.StringContainer)tmp.Obj.GetMember(member, index);
+                var cont = (StringContainer) tmp.Obj.GetMember(member, index);
                 cont.Val = c.Text;
             }
-            else if (collectionType == Safir.Dob.Typesystem.CollectionType.DictionaryCollectionType)
+            else if (collectionType == CollectionType.DictionaryCollectionType)
             {
                 changed[index] = false;
-                var cont = (Safir.Dob.Typesystem.StringContainer)GetDictionaryValue(fieldNameLabel[index].Tag);
+                var cont = (StringContainer) GetDictionaryValue(fieldNameLabel[index].Tag);
                 cont.Val = c.Text;
             }
-            else if (collectionType == Safir.Dob.Typesystem.CollectionType.SequenceCollectionType)
+            else if (collectionType == CollectionType.SequenceCollectionType)
             {
-                var cont = (Safir.Dob.Typesystem.StringSequenceContainer)tmp.Obj.GetMember(member, 0);
+                var cont = (StringSequenceContainer) tmp.Obj.GetMember(member, 0);
                 if (cont.Count > index)
                 {
                     cont[index] = c.Text;
@@ -1971,25 +2001,25 @@ namespace Sate
                     cont.Add(c.Text);
                 }
             }
-            
+
             return true;
         }
 
         public override void SetFieldValues()
         {
-            if (collectionType == Safir.Dob.Typesystem.CollectionType.SingleValueCollectionType ||
-                collectionType == Safir.Dob.Typesystem.CollectionType.ArrayCollectionType)
+            if (collectionType == CollectionType.SingleValueCollectionType ||
+                collectionType == CollectionType.ArrayCollectionType)
             {
-                int index = 0;
+                var index = 0;
                 foreach (TextBox t in fieldValueControl)
                 {
-                    ObjectInfo tmp = (ObjectInfo)Tag;
-                    Safir.Dob.Typesystem.StringContainer cont = (Safir.Dob.Typesystem.StringContainer)tmp.Obj.GetMember(member, index);
+                    var tmp = (ObjectInfo) Tag;
+                    var cont = (StringContainer) tmp.Obj.GetMember(member, index);
 
                     if (cont.IsNull())
                     {
                         if (isNullCheckBox.Count > index)
-                            this.isNullCheckBox[index].Checked = true;
+                            isNullCheckBox[index].Checked = true;
                     }
                     else
                     {
@@ -2010,17 +2040,17 @@ namespace Sate
                     index++;
                 }
             }
-            else if (collectionType == Safir.Dob.Typesystem.CollectionType.DictionaryCollectionType)
+            else if (collectionType == CollectionType.DictionaryCollectionType)
             {
-                int index = 0;
+                var index = 0;
                 foreach (TextBox t in fieldValueControl)
                 {
-                    var cont = (Safir.Dob.Typesystem.StringContainer)GetDictionaryValue(fieldNameLabel[index].Tag);
+                    var cont = (StringContainer) GetDictionaryValue(fieldNameLabel[index].Tag);
 
                     if (cont.IsNull())
                     {
                         if (isNullCheckBox.Count > index)
-                            this.isNullCheckBox[index].Checked = true;
+                            isNullCheckBox[index].Checked = true;
                     }
                     else
                     {
@@ -2036,11 +2066,11 @@ namespace Sate
                     index++;
                 }
             }
-            else if (collectionType==Safir.Dob.Typesystem.CollectionType.SequenceCollectionType)
+            else if (collectionType == CollectionType.SequenceCollectionType)
             {
                 SetSequenceChanged(false);
-                ObjectInfo tmp = (ObjectInfo)Tag;
-                var cont = (Safir.Dob.Typesystem.StringSequenceContainer)tmp.Obj.GetMember(member, 0);
+                var tmp = (ObjectInfo) Tag;
+                var cont = (StringSequenceContainer) tmp.Obj.GetMember(member, 0);
 
                 if (cont.Count != fieldValueControl.Count)
                 {
@@ -2050,7 +2080,7 @@ namespace Sate
                     return;
                 }
 
-                int index = 0;
+                var index = 0;
                 foreach (TextBox t in fieldValueControl)
                 {
                     t.Text = cont[index].Trim();
@@ -2066,49 +2096,51 @@ namespace Sate
     //---------------------------------------------------
     public class TypeIdField : ObjectDataFieldControl
     {
-        public TypeIdField(ObjectInfo objInfo, int member, string name, Safir.Dob.Typesystem.CollectionType ct, int arraySize) : base(objInfo, member, "TypeId", name, ct, arraySize)
+        public TypeIdField(ObjectInfo objInfo, int member, string name, CollectionType ct, int arraySize)
+            : base(objInfo, member, "TypeId", name, ct, arraySize)
         {
         }
 
         protected override void InsertSequenceItem(int index)
         {
-            ObjectInfo tmp = (ObjectInfo)Tag;
-            var cont = (Safir.Dob.Typesystem.TypeIdSequenceContainer)tmp.Obj.GetMember(member, 0);
+            var tmp = (ObjectInfo) Tag;
+            var cont = (TypeIdSequenceContainer) tmp.Obj.GetMember(member, 0);
             cont.Insert(index, 0);
         }
-        
+
         protected override bool ValidInput(int index, bool setVal)
         {
             long val;
-            TextBox c=(TextBox)fieldValueControl[index];
+            var c = (TextBox) fieldValueControl[index];
             try
             {
-                val=long.Parse(c.Text);
+                val = long.Parse(c.Text);
             }
             catch
             {
-                val=Safir.Dob.Typesystem.Operations.GetTypeId(c.Text);
+                val = Operations.GetTypeId(c.Text);
             }
 
             if (!setVal)
                 return true;
-          
-            ObjectInfo tmp = (ObjectInfo)Tag;
-            if (collectionType == Safir.Dob.Typesystem.CollectionType.SingleValueCollectionType || collectionType == Safir.Dob.Typesystem.CollectionType.ArrayCollectionType)
+
+            var tmp = (ObjectInfo) Tag;
+            if (collectionType == CollectionType.SingleValueCollectionType ||
+                collectionType == CollectionType.ArrayCollectionType)
             {
                 changed[index] = false;
-                Safir.Dob.Typesystem.TypeIdContainer cont = (Safir.Dob.Typesystem.TypeIdContainer)tmp.Obj.GetMember(member, index);
+                var cont = (TypeIdContainer) tmp.Obj.GetMember(member, index);
                 cont.Val = val;
             }
-            else if (collectionType == Safir.Dob.Typesystem.CollectionType.DictionaryCollectionType)
+            else if (collectionType == CollectionType.DictionaryCollectionType)
             {
                 changed[index] = false;
-                var cont = (Safir.Dob.Typesystem.TypeIdContainer)GetDictionaryValue(fieldNameLabel[index].Tag);
+                var cont = (TypeIdContainer) GetDictionaryValue(fieldNameLabel[index].Tag);
                 cont.Val = val;
             }
-            else if (collectionType == Safir.Dob.Typesystem.CollectionType.SequenceCollectionType)
+            else if (collectionType == CollectionType.SequenceCollectionType)
             {
-                var cont = (Safir.Dob.Typesystem.TypeIdSequenceContainer)tmp.Obj.GetMember(member, 0);
+                var cont = (TypeIdSequenceContainer) tmp.Obj.GetMember(member, 0);
                 if (cont.Count > index)
                 {
                     cont[index] = val;
@@ -2123,23 +2155,23 @@ namespace Sate
 
         public override void SetFieldValues()
         {
-            if (collectionType == Safir.Dob.Typesystem.CollectionType.SingleValueCollectionType ||
-                collectionType == Safir.Dob.Typesystem.CollectionType.ArrayCollectionType)
+            if (collectionType == CollectionType.SingleValueCollectionType ||
+                collectionType == CollectionType.ArrayCollectionType)
             {
-                int index = 0;
+                var index = 0;
                 foreach (TextBox t in fieldValueControl)
                 {
-                    ObjectInfo tmp = (ObjectInfo)Tag;
-                    Safir.Dob.Typesystem.TypeIdContainer cont = (Safir.Dob.Typesystem.TypeIdContainer)tmp.Obj.GetMember(member, index);
+                    var tmp = (ObjectInfo) Tag;
+                    var cont = (TypeIdContainer) tmp.Obj.GetMember(member, index);
 
                     if (cont.IsNull())
                     {
                         if (isNullCheckBox.Count > index)
-                            this.isNullCheckBox[index].Checked = true;
+                            isNullCheckBox[index].Checked = true;
                     }
                     else
                     {
-                        t.Text = Safir.Dob.Typesystem.Operations.Exists(cont.Val) ? Safir.Dob.Typesystem.Operations.GetName(cont.Val) : cont.Val.ToString();
+                        t.Text = Operations.Exists(cont.Val) ? Operations.GetName(cont.Val) : cont.Val.ToString();
                         t.BackColor = ColorMap.ENABLED;
                     }
 
@@ -2152,21 +2184,21 @@ namespace Sate
                     index++;
                 }
             }
-            else if (collectionType == Safir.Dob.Typesystem.CollectionType.DictionaryCollectionType)
+            else if (collectionType == CollectionType.DictionaryCollectionType)
             {
-                int index = 0;
+                var index = 0;
                 foreach (TextBox t in fieldValueControl)
                 {
-                    var cont = (Safir.Dob.Typesystem.TypeIdContainer)GetDictionaryValue(fieldNameLabel[index].Tag);
+                    var cont = (TypeIdContainer) GetDictionaryValue(fieldNameLabel[index].Tag);
 
                     if (cont.IsNull())
                     {
                         if (isNullCheckBox.Count > index)
-                            this.isNullCheckBox[index].Checked = true;
+                            isNullCheckBox[index].Checked = true;
                     }
                     else
                     {
-                        t.Text = Safir.Dob.Typesystem.Operations.Exists(cont.Val) ? Safir.Dob.Typesystem.Operations.GetName(cont.Val) : cont.Val.ToString();
+                        t.Text = Operations.Exists(cont.Val) ? Operations.GetName(cont.Val) : cont.Val.ToString();
                         t.BackColor = ColorMap.ENABLED;
                     }
 
@@ -2178,11 +2210,11 @@ namespace Sate
                     index++;
                 }
             }
-            else if (collectionType == Safir.Dob.Typesystem.CollectionType.SequenceCollectionType)
+            else if (collectionType == CollectionType.SequenceCollectionType)
             {
                 SetSequenceChanged(false);
-                ObjectInfo tmp = (ObjectInfo)Tag;
-                var cont = (Safir.Dob.Typesystem.TypeIdSequenceContainer)tmp.Obj.GetMember(member, 0);
+                var tmp = (ObjectInfo) Tag;
+                var cont = (TypeIdSequenceContainer) tmp.Obj.GetMember(member, 0);
 
                 if (cont.Count != fieldValueControl.Count)
                 {
@@ -2192,15 +2224,14 @@ namespace Sate
                     return;
                 }
 
-                int index = 0;
+                var index = 0;
                 foreach (TextBox t in fieldValueControl)
                 {
-                    t.Text = Safir.Dob.Typesystem.Operations.Exists(cont[index]) ? Safir.Dob.Typesystem.Operations.GetName(cont[index]) : cont[index].ToString();
+                    t.Text = Operations.Exists(cont[index]) ? Operations.GetName(cont[index]) : cont[index].ToString();
                     t.BackColor = ColorMap.ENABLED;
                     index++;
                 }
             }
-
         }
     }
 
@@ -2210,21 +2241,21 @@ namespace Sate
     //---------------------------------------------------
     public class ChannelIdField : ObjectDataFieldControl
     {
-        public ChannelIdField(ObjectInfo objInfo, int member, string name, Safir.Dob.Typesystem.CollectionType ct, int arraySize)
+        public ChannelIdField(ObjectInfo objInfo, int member, string name, CollectionType ct, int arraySize)
             : base(objInfo, member, "ChannelId", name, ct, arraySize)
         {
         }
 
         protected override void InsertSequenceItem(int index)
         {
-            ObjectInfo tmp = (ObjectInfo)Tag;
-            var cont = (Safir.Dob.Typesystem.ChannelIdSequenceContainer)tmp.Obj.GetMember(member, 0);
-            cont.Insert(index, new Safir.Dob.Typesystem.ChannelId());
+            var tmp = (ObjectInfo) Tag;
+            var cont = (ChannelIdSequenceContainer) tmp.Obj.GetMember(member, 0);
+            cont.Insert(index, new ChannelId());
         }
-        
+
         protected override bool ValidInput(int index, bool setVal)
         {
-            TextBox c=(TextBox)fieldValueControl[index];
+            var c = (TextBox) fieldValueControl[index];
             long val;
             string idString = null;
 
@@ -2240,24 +2271,25 @@ namespace Sate
             if (!setVal)
                 return true;
 
-            Safir.Dob.Typesystem.ChannelId id = string.IsNullOrEmpty(idString) ? new Safir.Dob.Typesystem.ChannelId(val) : new Safir.Dob.Typesystem.ChannelId(idString);
+            var id = string.IsNullOrEmpty(idString) ? new ChannelId(val) : new ChannelId(idString);
 
-            ObjectInfo tmp = (ObjectInfo)Tag;
-            if (collectionType == Safir.Dob.Typesystem.CollectionType.SingleValueCollectionType || collectionType == Safir.Dob.Typesystem.CollectionType.ArrayCollectionType)
+            var tmp = (ObjectInfo) Tag;
+            if (collectionType == CollectionType.SingleValueCollectionType ||
+                collectionType == CollectionType.ArrayCollectionType)
             {
                 changed[index] = false;
-                Safir.Dob.Typesystem.ChannelIdContainer cont = (Safir.Dob.Typesystem.ChannelIdContainer)tmp.Obj.GetMember(member, index);
+                var cont = (ChannelIdContainer) tmp.Obj.GetMember(member, index);
                 cont.Val = id;
             }
-            else if (collectionType == Safir.Dob.Typesystem.CollectionType.DictionaryCollectionType)
+            else if (collectionType == CollectionType.DictionaryCollectionType)
             {
                 changed[index] = false;
-                var cont = (Safir.Dob.Typesystem.ChannelIdContainer)GetDictionaryValue(fieldNameLabel[index].Tag);
+                var cont = (ChannelIdContainer) GetDictionaryValue(fieldNameLabel[index].Tag);
                 cont.Val = id;
             }
-            else if (collectionType == Safir.Dob.Typesystem.CollectionType.SequenceCollectionType)
+            else if (collectionType == CollectionType.SequenceCollectionType)
             {
-                var cont = (Safir.Dob.Typesystem.ChannelIdSequenceContainer)tmp.Obj.GetMember(member, 0);
+                var cont = (ChannelIdSequenceContainer) tmp.Obj.GetMember(member, 0);
                 if (cont.Count > index)
                 {
                     cont[index] = id;
@@ -2272,19 +2304,19 @@ namespace Sate
 
         public override void SetFieldValues()
         {
-            if (collectionType == Safir.Dob.Typesystem.CollectionType.SingleValueCollectionType ||
-                collectionType == Safir.Dob.Typesystem.CollectionType.ArrayCollectionType)
+            if (collectionType == CollectionType.SingleValueCollectionType ||
+                collectionType == CollectionType.ArrayCollectionType)
             {
-                int index = 0;
+                var index = 0;
                 foreach (TextBox t in fieldValueControl)
                 {
-                    ObjectInfo tmp = (ObjectInfo)Tag;
-                    Safir.Dob.Typesystem.ChannelIdContainer cont = (Safir.Dob.Typesystem.ChannelIdContainer)tmp.Obj.GetMember(member, index);
+                    var tmp = (ObjectInfo) Tag;
+                    var cont = (ChannelIdContainer) tmp.Obj.GetMember(member, index);
 
                     if (cont.IsNull())
                     {
                         if (isNullCheckBox.Count > index)
-                            this.isNullCheckBox[index].Checked = true;
+                            isNullCheckBox[index].Checked = true;
                     }
                     else
                     {
@@ -2302,17 +2334,17 @@ namespace Sate
                     index++;
                 }
             }
-            else if (collectionType == Safir.Dob.Typesystem.CollectionType.DictionaryCollectionType)
+            else if (collectionType == CollectionType.DictionaryCollectionType)
             {
-                int index = 0;
+                var index = 0;
                 foreach (TextBox t in fieldValueControl)
                 {
-                    var cont = (Safir.Dob.Typesystem.ChannelIdContainer)GetDictionaryValue(fieldNameLabel[index].Tag);
+                    var cont = (ChannelIdContainer) GetDictionaryValue(fieldNameLabel[index].Tag);
 
                     if (cont.IsNull())
                     {
                         if (isNullCheckBox.Count > index)
-                            this.isNullCheckBox[index].Checked = true;
+                            isNullCheckBox[index].Checked = true;
                     }
                     else
                     {
@@ -2328,11 +2360,11 @@ namespace Sate
                     index++;
                 }
             }
-            else if (collectionType == Safir.Dob.Typesystem.CollectionType.SequenceCollectionType)
+            else if (collectionType == CollectionType.SequenceCollectionType)
             {
                 SetSequenceChanged(false);
-                ObjectInfo tmp = (ObjectInfo)Tag;
-                var cont = (Safir.Dob.Typesystem.ChannelIdSequenceContainer)tmp.Obj.GetMember(member, 0);
+                var tmp = (ObjectInfo) Tag;
+                var cont = (ChannelIdSequenceContainer) tmp.Obj.GetMember(member, 0);
 
                 if (cont.Count != fieldValueControl.Count)
                 {
@@ -2342,13 +2374,13 @@ namespace Sate
                     return;
                 }
 
-                int index = 0;
+                var index = 0;
                 foreach (TextBox t in fieldValueControl)
                 {
                     t.Text = cont[index].ToString();
                     t.BackColor = ColorMap.ENABLED;
                     index++;
-                }               
+                }
             }
         }
     }
@@ -2358,21 +2390,21 @@ namespace Sate
     //---------------------------------------------------
     public class HandlerIdField : ObjectDataFieldControl
     {
-        public HandlerIdField(ObjectInfo objInfo, int member, string name, Safir.Dob.Typesystem.CollectionType ct, int arraySize)
+        public HandlerIdField(ObjectInfo objInfo, int member, string name, CollectionType ct, int arraySize)
             : base(objInfo, member, "HandlerId", name, ct, arraySize)
         {
         }
 
         protected override void InsertSequenceItem(int index)
         {
-            ObjectInfo tmp = (ObjectInfo)Tag;
-            var cont = (Safir.Dob.Typesystem.HandlerIdSequenceContainer)tmp.Obj.GetMember(member, 0);
-            cont.Insert(index, new Safir.Dob.Typesystem.HandlerId());
+            var tmp = (ObjectInfo) Tag;
+            var cont = (HandlerIdSequenceContainer) tmp.Obj.GetMember(member, 0);
+            cont.Insert(index, new HandlerId());
         }
-        
+
         protected override bool ValidInput(int index, bool setVal)
         {
-            TextBox c = (TextBox)fieldValueControl[index];
+            var c = (TextBox) fieldValueControl[index];
             long val;
             string idString = null;
 
@@ -2388,24 +2420,25 @@ namespace Sate
             if (!setVal)
                 return true;
 
-            Safir.Dob.Typesystem.HandlerId id = string.IsNullOrEmpty(idString) ? new Safir.Dob.Typesystem.HandlerId(val) : new Safir.Dob.Typesystem.HandlerId(idString);
+            var id = string.IsNullOrEmpty(idString) ? new HandlerId(val) : new HandlerId(idString);
 
-            ObjectInfo tmp = (ObjectInfo)Tag;
-            if (collectionType == Safir.Dob.Typesystem.CollectionType.SingleValueCollectionType || collectionType == Safir.Dob.Typesystem.CollectionType.ArrayCollectionType)
+            var tmp = (ObjectInfo) Tag;
+            if (collectionType == CollectionType.SingleValueCollectionType ||
+                collectionType == CollectionType.ArrayCollectionType)
             {
                 changed[index] = false;
-                Safir.Dob.Typesystem.HandlerIdContainer cont = (Safir.Dob.Typesystem.HandlerIdContainer)tmp.Obj.GetMember(member, index);
+                var cont = (HandlerIdContainer) tmp.Obj.GetMember(member, index);
                 cont.Val = id;
             }
-            else if (collectionType == Safir.Dob.Typesystem.CollectionType.DictionaryCollectionType)
+            else if (collectionType == CollectionType.DictionaryCollectionType)
             {
                 changed[index] = false;
-                var cont = (Safir.Dob.Typesystem.HandlerIdContainer)GetDictionaryValue(fieldNameLabel[index].Tag);
+                var cont = (HandlerIdContainer) GetDictionaryValue(fieldNameLabel[index].Tag);
                 cont.Val = id;
             }
-            else if (collectionType == Safir.Dob.Typesystem.CollectionType.SequenceCollectionType)
+            else if (collectionType == CollectionType.SequenceCollectionType)
             {
-                var cont = (Safir.Dob.Typesystem.HandlerIdSequenceContainer)tmp.Obj.GetMember(member, 0);
+                var cont = (HandlerIdSequenceContainer) tmp.Obj.GetMember(member, 0);
                 if (cont.Count > index)
                 {
                     cont[index] = id;
@@ -2421,19 +2454,19 @@ namespace Sate
 
         public override void SetFieldValues()
         {
-            if (collectionType == Safir.Dob.Typesystem.CollectionType.SingleValueCollectionType ||
-                collectionType == Safir.Dob.Typesystem.CollectionType.ArrayCollectionType)
+            if (collectionType == CollectionType.SingleValueCollectionType ||
+                collectionType == CollectionType.ArrayCollectionType)
             {
-                int index = 0;
+                var index = 0;
                 foreach (TextBox t in fieldValueControl)
                 {
-                    ObjectInfo tmp = (ObjectInfo)Tag;
-                    Safir.Dob.Typesystem.HandlerIdContainer cont = (Safir.Dob.Typesystem.HandlerIdContainer)tmp.Obj.GetMember(member, index);
+                    var tmp = (ObjectInfo) Tag;
+                    var cont = (HandlerIdContainer) tmp.Obj.GetMember(member, index);
 
                     if (cont.IsNull())
                     {
                         if (isNullCheckBox.Count > index)
-                            this.isNullCheckBox[index].Checked = true;
+                            isNullCheckBox[index].Checked = true;
                     }
                     else
                     {
@@ -2451,17 +2484,17 @@ namespace Sate
                     index++;
                 }
             }
-            else if (collectionType == Safir.Dob.Typesystem.CollectionType.DictionaryCollectionType)
+            else if (collectionType == CollectionType.DictionaryCollectionType)
             {
-                int index = 0;
+                var index = 0;
                 foreach (TextBox t in fieldValueControl)
                 {
-                    var cont = (Safir.Dob.Typesystem.HandlerIdContainer)GetDictionaryValue(fieldNameLabel[index].Tag);
+                    var cont = (HandlerIdContainer) GetDictionaryValue(fieldNameLabel[index].Tag);
 
                     if (cont.IsNull())
                     {
                         if (isNullCheckBox.Count > index)
-                            this.isNullCheckBox[index].Checked = true;
+                            isNullCheckBox[index].Checked = true;
                     }
                     else
                     {
@@ -2477,11 +2510,11 @@ namespace Sate
                     index++;
                 }
             }
-            else if (collectionType == Safir.Dob.Typesystem.CollectionType.SequenceCollectionType)
+            else if (collectionType == CollectionType.SequenceCollectionType)
             {
                 SetSequenceChanged(false);
-                ObjectInfo tmp = (ObjectInfo)Tag;
-                var cont = (Safir.Dob.Typesystem.HandlerIdSequenceContainer)tmp.Obj.GetMember(member, 0);
+                var tmp = (ObjectInfo) Tag;
+                var cont = (HandlerIdSequenceContainer) tmp.Obj.GetMember(member, 0);
 
                 if (cont.Count != fieldValueControl.Count)
                 {
@@ -2491,7 +2524,7 @@ namespace Sate
                     return;
                 }
 
-                int index = 0;
+                var index = 0;
                 foreach (TextBox t in fieldValueControl)
                 {
                     t.Text = cont[index].ToString();
@@ -2507,30 +2540,30 @@ namespace Sate
     //---------------------------------------------------
     public class EntityIdField : ObjectDataFieldControl
     {
-        public EntityIdField(ObjectInfo objInfo, int member, string name, Safir.Dob.Typesystem.CollectionType ct, int arraySize)
+        public EntityIdField(ObjectInfo objInfo, int member, string name, CollectionType ct, int arraySize)
             : base(objInfo, member, "EntityId", name, ct, arraySize)
         {
         }
 
         protected override void InsertSequenceItem(int index)
         {
-            ObjectInfo tmp = (ObjectInfo)Tag;
-            var cont = (Safir.Dob.Typesystem.EntityIdSequenceContainer)tmp.Obj.GetMember(member, 0);
-            cont.Insert(index, new Safir.Dob.Typesystem.EntityId());
+            var tmp = (ObjectInfo) Tag;
+            var cont = (EntityIdSequenceContainer) tmp.Obj.GetMember(member, 0);
+            cont.Insert(index, new EntityId());
         }
-        
+
         protected override bool ValidInput(int index, bool setVal)
         {
-            Safir.Dob.Typesystem.EntityId entityId = new Safir.Dob.Typesystem.EntityId();
-            TextBox c = (TextBox)fieldValueControl[index];
-            string[] s = c.Text.Trim().Replace(':', ' ').Split(' ');
+            var entityId = new EntityId();
+            var c = (TextBox) fieldValueControl[index];
+            var s = c.Text.Trim().Replace(':', ' ').Split(' ');
             if (s.Length < 2)
             {
                 return false;
             }
-            else if (s.Length > 2)
+            if (s.Length > 2)
             {
-                for (int i = 1; i < s.Length - 1; i++)
+                for (var i = 1; i < s.Length - 1; i++)
                 {
                     if (s[i] != "")
                         return false;
@@ -2543,17 +2576,17 @@ namespace Sate
             }
             catch
             {
-                entityId.TypeId = Safir.Dob.Typesystem.Operations.GetTypeId(s[0]);
+                entityId.TypeId = Operations.GetTypeId(s[0]);
             }
 
             try
             {
-                entityId.InstanceId = new Safir.Dob.Typesystem.InstanceId(Int64.Parse(s[s.Length - 1]));
+                entityId.InstanceId = new InstanceId(long.Parse(s[s.Length - 1]));
             }
             catch
             {
                 string idString;
-                if (s[s.Length - 1].StartsWith("\"") && (s[s.Length - 1].EndsWith("\"")) && s[s.Length - 1].Length > 2)
+                if (s[s.Length - 1].StartsWith("\"") && s[s.Length - 1].EndsWith("\"") && s[s.Length - 1].Length > 2)
                 {
                     // remove quotation
                     idString = s[s.Length - 1].Substring(1, s[s.Length - 1].Length - 2);
@@ -2567,28 +2600,29 @@ namespace Sate
                 {
                     return false;
                 }
-                entityId.InstanceId = new Safir.Dob.Typesystem.InstanceId(idString);
+                entityId.InstanceId = new InstanceId(idString);
             }
 
             if (!setVal)
                 return true;
-            
-            ObjectInfo tmp = (ObjectInfo)Tag;
-            if (collectionType == Safir.Dob.Typesystem.CollectionType.SingleValueCollectionType || collectionType == Safir.Dob.Typesystem.CollectionType.ArrayCollectionType)
+
+            var tmp = (ObjectInfo) Tag;
+            if (collectionType == CollectionType.SingleValueCollectionType ||
+                collectionType == CollectionType.ArrayCollectionType)
             {
                 changed[index] = false;
-                Safir.Dob.Typesystem.EntityIdContainer cont = (Safir.Dob.Typesystem.EntityIdContainer)tmp.Obj.GetMember(member, index);
+                var cont = (EntityIdContainer) tmp.Obj.GetMember(member, index);
                 cont.Val = entityId;
             }
-            else if (collectionType == Safir.Dob.Typesystem.CollectionType.DictionaryCollectionType)
+            else if (collectionType == CollectionType.DictionaryCollectionType)
             {
                 changed[index] = false;
-                var cont = (Safir.Dob.Typesystem.EntityIdContainer)GetDictionaryValue(fieldNameLabel[index].Tag);
+                var cont = (EntityIdContainer) GetDictionaryValue(fieldNameLabel[index].Tag);
                 cont.Val = entityId;
             }
-            else if (collectionType == Safir.Dob.Typesystem.CollectionType.SequenceCollectionType)
+            else if (collectionType == CollectionType.SequenceCollectionType)
             {
-                var cont = (Safir.Dob.Typesystem.EntityIdSequenceContainer)tmp.Obj.GetMember(member, 0);
+                var cont = (EntityIdSequenceContainer) tmp.Obj.GetMember(member, 0);
                 if (cont.Count > index)
                 {
                     cont[index] = entityId;
@@ -2604,34 +2638,34 @@ namespace Sate
 
         public override void SetFieldValues()
         {
-            if (collectionType == Safir.Dob.Typesystem.CollectionType.SingleValueCollectionType ||
-                collectionType == Safir.Dob.Typesystem.CollectionType.ArrayCollectionType)
+            if (collectionType == CollectionType.SingleValueCollectionType ||
+                collectionType == CollectionType.ArrayCollectionType)
             {
-                int index = 0;
+                var index = 0;
                 foreach (TextBox t in fieldValueControl)
                 {
-                    ObjectInfo tmp = (ObjectInfo)Tag;
-                    Safir.Dob.Typesystem.EntityIdContainer cont = (Safir.Dob.Typesystem.EntityIdContainer)tmp.Obj.GetMember(member, index);
+                    var tmp = (ObjectInfo) Tag;
+                    var cont = (EntityIdContainer) tmp.Obj.GetMember(member, index);
 
                     if (cont.IsNull())
                     {
                         if (isNullCheckBox.Count > index)
-                            this.isNullCheckBox[index].Checked = true;
+                            isNullCheckBox[index].Checked = true;
                     }
                     else
                     {
-                        Safir.Dob.Typesystem.EntityId val = cont.Val;
-                        string typename = "";
+                        var val = cont.Val;
+                        var typename = "";
                         try
                         {
-                            typename = Safir.Dob.Typesystem.Operations.GetName(val.TypeId);
+                            typename = Operations.GetName(val.TypeId);
                         }
                         catch
                         {
                             typename = val.TypeId.ToString();
                         }
 
-                        t.Text = typename + " : " + val.InstanceId.ToString();
+                        t.Text = typename + " : " + val.InstanceId;
                         t.BackColor = ColorMap.ENABLED;
                     }
 
@@ -2645,32 +2679,32 @@ namespace Sate
                     index++;
                 }
             }
-            else if (collectionType == Safir.Dob.Typesystem.CollectionType.DictionaryCollectionType)
+            else if (collectionType == CollectionType.DictionaryCollectionType)
             {
-                int index = 0;
+                var index = 0;
                 foreach (TextBox t in fieldValueControl)
                 {
-                    var cont = (Safir.Dob.Typesystem.EntityIdContainer)GetDictionaryValue(fieldNameLabel[index].Tag);
+                    var cont = (EntityIdContainer) GetDictionaryValue(fieldNameLabel[index].Tag);
 
                     if (cont.IsNull())
                     {
                         if (isNullCheckBox.Count > index)
-                            this.isNullCheckBox[index].Checked = true;
+                            isNullCheckBox[index].Checked = true;
                     }
                     else
                     {
-                        Safir.Dob.Typesystem.EntityId val = cont.Val;
-                        string typename = "";
+                        var val = cont.Val;
+                        var typename = "";
                         try
                         {
-                            typename = Safir.Dob.Typesystem.Operations.GetName(val.TypeId);
+                            typename = Operations.GetName(val.TypeId);
                         }
                         catch
                         {
                             typename = val.TypeId.ToString();
                         }
 
-                        t.Text = typename + " : " + val.InstanceId.ToString();
+                        t.Text = typename + " : " + val.InstanceId;
                         t.BackColor = ColorMap.ENABLED;
                     }
 
@@ -2682,11 +2716,11 @@ namespace Sate
                     index++;
                 }
             }
-            else if (collectionType == Safir.Dob.Typesystem.CollectionType.SequenceCollectionType)
+            else if (collectionType == CollectionType.SequenceCollectionType)
             {
                 SetSequenceChanged(false);
-                ObjectInfo tmp = (ObjectInfo)Tag;
-                var cont = (Safir.Dob.Typesystem.EntityIdSequenceContainer)tmp.Obj.GetMember(member, 0);
+                var tmp = (ObjectInfo) Tag;
+                var cont = (EntityIdSequenceContainer) tmp.Obj.GetMember(member, 0);
 
                 if (cont.Count != fieldValueControl.Count)
                 {
@@ -2696,15 +2730,17 @@ namespace Sate
                     return;
                 }
 
-                int index = 0;
+                var index = 0;
                 foreach (TextBox t in fieldValueControl)
                 {
                     var eid = cont[index];
-                    var typename = Safir.Dob.Typesystem.Operations.Exists(eid.TypeId) ? Safir.Dob.Typesystem.Operations.GetName(eid.TypeId) : eid.TypeId.ToString();
-                    t.Text = typename + " : " + eid.InstanceId.ToString();
+                    var typename = Operations.Exists(eid.TypeId)
+                        ? Operations.GetName(eid.TypeId)
+                        : eid.TypeId.ToString();
+                    t.Text = typename + " : " + eid.InstanceId;
                     t.BackColor = ColorMap.ENABLED;
                     index++;
-                }              
+                }
             }
         }
     }
@@ -2714,21 +2750,21 @@ namespace Sate
     //---------------------------------------------------
     public class InstanceIdField : ObjectDataFieldControl
     {
-        public InstanceIdField(ObjectInfo objInfo, int member, string name, Safir.Dob.Typesystem.CollectionType ct, int arraySize)
+        public InstanceIdField(ObjectInfo objInfo, int member, string name, CollectionType ct, int arraySize)
             : base(objInfo, member, "InstanceId", name, ct, arraySize)
         {
         }
 
         protected override void InsertSequenceItem(int index)
         {
-            ObjectInfo tmp = (ObjectInfo)Tag;
-            var cont = (Safir.Dob.Typesystem.InstanceIdSequenceContainer)tmp.Obj.GetMember(member, 0);
-            cont.Insert(index, new Safir.Dob.Typesystem.InstanceId());
+            var tmp = (ObjectInfo) Tag;
+            var cont = (InstanceIdSequenceContainer) tmp.Obj.GetMember(member, 0);
+            cont.Insert(index, new InstanceId());
         }
-        
+
         protected override bool ValidInput(int index, bool setVal)
         {
-            TextBox c = (TextBox)fieldValueControl[index];
+            var c = (TextBox) fieldValueControl[index];
             long val;
             string idString = null;
 
@@ -2744,24 +2780,25 @@ namespace Sate
             if (!setVal)
                 return true;
 
-            Safir.Dob.Typesystem.InstanceId id = string.IsNullOrEmpty(idString) ? new Safir.Dob.Typesystem.InstanceId(val) : new Safir.Dob.Typesystem.InstanceId(idString);
+            var id = string.IsNullOrEmpty(idString) ? new InstanceId(val) : new InstanceId(idString);
 
-            ObjectInfo tmp = (ObjectInfo)Tag;
-            if (collectionType == Safir.Dob.Typesystem.CollectionType.SingleValueCollectionType || collectionType == Safir.Dob.Typesystem.CollectionType.ArrayCollectionType)
+            var tmp = (ObjectInfo) Tag;
+            if (collectionType == CollectionType.SingleValueCollectionType ||
+                collectionType == CollectionType.ArrayCollectionType)
             {
                 changed[index] = false;
-                Safir.Dob.Typesystem.InstanceIdContainer cont = (Safir.Dob.Typesystem.InstanceIdContainer)tmp.Obj.GetMember(member, index);
+                var cont = (InstanceIdContainer) tmp.Obj.GetMember(member, index);
                 cont.Val = id;
             }
-            else if (collectionType == Safir.Dob.Typesystem.CollectionType.DictionaryCollectionType)
+            else if (collectionType == CollectionType.DictionaryCollectionType)
             {
                 changed[index] = false;
-                var cont = (Safir.Dob.Typesystem.InstanceIdContainer)GetDictionaryValue(fieldNameLabel[index].Tag);
+                var cont = (InstanceIdContainer) GetDictionaryValue(fieldNameLabel[index].Tag);
                 cont.Val = id;
             }
-            else if (collectionType == Safir.Dob.Typesystem.CollectionType.SequenceCollectionType)
+            else if (collectionType == CollectionType.SequenceCollectionType)
             {
-                var cont = (Safir.Dob.Typesystem.InstanceIdSequenceContainer)tmp.Obj.GetMember(member, 0);
+                var cont = (InstanceIdSequenceContainer) tmp.Obj.GetMember(member, 0);
                 if (cont.Count > index)
                 {
                     cont[index] = id;
@@ -2776,19 +2813,19 @@ namespace Sate
 
         public override void SetFieldValues()
         {
-            if (collectionType == Safir.Dob.Typesystem.CollectionType.SingleValueCollectionType ||
-                collectionType == Safir.Dob.Typesystem.CollectionType.ArrayCollectionType)
+            if (collectionType == CollectionType.SingleValueCollectionType ||
+                collectionType == CollectionType.ArrayCollectionType)
             {
-                int index = 0;
+                var index = 0;
                 foreach (TextBox t in fieldValueControl)
                 {
-                    ObjectInfo tmp = (ObjectInfo)Tag;
-                    Safir.Dob.Typesystem.InstanceIdContainer cont = (Safir.Dob.Typesystem.InstanceIdContainer)tmp.Obj.GetMember(member, index);
+                    var tmp = (ObjectInfo) Tag;
+                    var cont = (InstanceIdContainer) tmp.Obj.GetMember(member, index);
 
                     if (cont.IsNull())
                     {
                         if (isNullCheckBox.Count > index)
-                            this.isNullCheckBox[index].Checked = true;
+                            isNullCheckBox[index].Checked = true;
                     }
                     else
                     {
@@ -2806,17 +2843,17 @@ namespace Sate
                     index++;
                 }
             }
-            else if (collectionType == Safir.Dob.Typesystem.CollectionType.DictionaryCollectionType)
+            else if (collectionType == CollectionType.DictionaryCollectionType)
             {
-                int index = 0;
+                var index = 0;
                 foreach (TextBox t in fieldValueControl)
                 {
-                    var cont = (Safir.Dob.Typesystem.InstanceIdContainer)GetDictionaryValue(fieldNameLabel[index].Tag);
+                    var cont = (InstanceIdContainer) GetDictionaryValue(fieldNameLabel[index].Tag);
 
                     if (cont.IsNull())
                     {
                         if (isNullCheckBox.Count > index)
-                            this.isNullCheckBox[index].Checked = true;
+                            isNullCheckBox[index].Checked = true;
                     }
                     else
                     {
@@ -2832,11 +2869,11 @@ namespace Sate
                     index++;
                 }
             }
-            else if (collectionType == Safir.Dob.Typesystem.CollectionType.SequenceCollectionType)
+            else if (collectionType == CollectionType.SequenceCollectionType)
             {
                 SetSequenceChanged(false);
-                ObjectInfo tmp = (ObjectInfo)Tag;
-                var cont = (Safir.Dob.Typesystem.InstanceIdSequenceContainer)tmp.Obj.GetMember(member, 0);
+                var tmp = (ObjectInfo) Tag;
+                var cont = (InstanceIdSequenceContainer) tmp.Obj.GetMember(member, 0);
 
                 if (cont.Count != fieldValueControl.Count)
                 {
@@ -2846,7 +2883,7 @@ namespace Sate
                     return;
                 }
 
-                int index = 0;
+                var index = 0;
                 foreach (TextBox t in fieldValueControl)
                 {
                     t.Text = cont[index].ToString();
@@ -2856,29 +2893,19 @@ namespace Sate
             }
         }
     }
-        
+
 
     //---------------------------------------------------
     // Object control
     //---------------------------------------------------
     public class ObjectField : ObjectDataFieldControl
     {
-        class ObjectExpandCollapseButton : CheckBox
-        {
-            private ObjectEditPanel objPanel;
-            public ObjectEditPanel ObjPanel
-            {
-                get { return objPanel; }
-                set { objPanel = value; }
-            }
-        }
-        
-        private long typeId;
+        private readonly long typeId;
 
-        public ObjectField(ObjectInfo objInfo, int member, long typeId, string name, Safir.Dob.Typesystem.CollectionType ct, int arraySize) : base()
+        public ObjectField(ObjectInfo objInfo, int member, long typeId, string name, CollectionType ct, int arraySize)
         {
-            this.typeId=typeId;
-            base.Init(objInfo, member, Safir.Dob.Typesystem.Operations.GetName(typeId), name, ct, arraySize);
+            this.typeId = typeId;
+            Init(objInfo, member, Operations.GetName(typeId), name, ct, arraySize);
         }
 
         public void TypeChange(long newTypeId, ObjectEditPanel sender)
@@ -2887,9 +2914,9 @@ namespace Sate
             var objButton = fieldValueControl[index] as ObjectExpandCollapseButton;
             ChangedValue(fieldValueControl, objButton);
             Controls.Remove(objButton.ObjPanel);
-            ObjectInfo objInfo = new ObjectInfo();
+            var objInfo = new ObjectInfo();
 
-            objInfo.Obj = Safir.Dob.Typesystem.ObjectFactory.Instance.CreateObject(newTypeId);
+            objInfo.Obj = ObjectFactory.Instance.CreateObject(newTypeId);
 
             objButton.Tag = objInfo;
             objButton.ObjPanel = new ObjectEditPanel(objInfo, typeId, true);
@@ -2909,26 +2936,26 @@ namespace Sate
         public void ChangedEditPanel(ObjectEditPanel ep)
         {
             var index = IndexOfEditPanel(ep);
-            ChangedValue(new Control[] { fieldValueControl[index] }, ep);
+            ChangedValue(new[] {fieldValueControl[index]}, ep);
             parentObjectEditPanel.ChangedDataField();
         }
 
         public int IndexOfEditPanel(ObjectEditPanel ep)
         {
-            for (int i = 0; i < fieldValueControl.Count; i++)
+            for (var i = 0; i < fieldValueControl.Count; i++)
             {
                 var objButton = fieldValueControl[i] as ObjectExpandCollapseButton;
-                if (objButton!=null && objButton.ObjPanel==ep)
+                if (objButton != null && objButton.ObjPanel == ep)
                 {
                     return i;
                 }
             }
             return -1;
         }
-        
+
         protected override Control CreateValueControl()
         {
-            ObjectExpandCollapseButton button = new ObjectExpandCollapseButton();            
+            var button = new ObjectExpandCollapseButton();
             button.Appearance = Appearance.Button;
             button.Font = dataFont;
             button.BackColor = ColorMap.ENABLED;
@@ -2936,40 +2963,40 @@ namespace Sate
             button.Text = "Expand";
             button.Height = 20;
             button.Width = 100;
-            button.CheckedChanged += new EventHandler(button_CheckedChanged);
+            button.CheckedChanged += button_CheckedChanged;
             button.ContextMenuStrip = new ContextMenuStrip();
-            if (collectionType == Safir.Dob.Typesystem.CollectionType.SequenceCollectionType)
+            if (collectionType == CollectionType.SequenceCollectionType)
             {
-                button.ContextMenuStrip.Items.Add(new ToolStripMenuItem("Is changed", null, new EventHandler(OnIsChangedMenuItem)));
+                button.ContextMenuStrip.Items.Add(new ToolStripMenuItem("Is changed", null, OnIsChangedMenuItem));
             }
             else
             {
                 button.ContextMenuStrip.Items.AddRange(
-                                    new ToolStripItem[]{
-                                        new ToolStripMenuItem("Is changed", null, new EventHandler(OnIsChangedMenuItem)),
-                                        new ToolStripMenuItem("Is changed here", null, new EventHandler(OnIsChangedHereMenuItem))
-                                    });
+                    new ToolStripItem[]
+                    {
+                        new ToolStripMenuItem("Is changed", null, OnIsChangedMenuItem),
+                        new ToolStripMenuItem("Is changed here", null, OnIsChangedHereMenuItem)
+                    });
             }
-            
 
 
-            MenuItem expandAllMenuItem = new MenuItem("Expand all", new EventHandler(OnExpandAll_ContextMenu));
-            MenuItem collapseAllMenuItem = new MenuItem("Collapse all", new EventHandler(OnCollapseAll_ContextMenu));
-            this.ContextMenu = new ContextMenu(new MenuItem[] { expandAllMenuItem, collapseAllMenuItem });
+            var expandAllMenuItem = new MenuItem("Expand all", OnExpandAll_ContextMenu);
+            var collapseAllMenuItem = new MenuItem("Collapse all", OnCollapseAll_ContextMenu);
+            ContextMenu = new ContextMenu(new[] {expandAllMenuItem, collapseAllMenuItem});
 
             return button;
         }
 
         protected void OnIsChangedHereMenuItem(object sender, EventArgs e)
         {
-            int i = FindMenuItemOwnerControl(sender);
+            var i = FindMenuItemOwnerControl(sender);
 
-            ToolStripMenuItem changedHere = sender as ToolStripMenuItem;
-            ToolStripMenuItem changed=(ToolStripMenuItem)changedHere.GetCurrentParent().Items[0];
+            var changedHere = sender as ToolStripMenuItem;
+            var changed = (ToolStripMenuItem) changedHere.GetCurrentParent().Items[0];
             changedHere.Checked = !changedHere.Checked;
             if (changedHere.Checked)
             {
-               changed.Checked = true;
+                changed.Checked = true;
             }
             if (changed.Checked)
             {
@@ -2986,7 +3013,7 @@ namespace Sate
 
         private void OnExpandAll_ContextMenu(object o, EventArgs e)
         {
-            if (collectionType == Safir.Dob.Typesystem.CollectionType.SequenceCollectionType)
+            if (collectionType == CollectionType.SequenceCollectionType)
             {
                 foreach (ObjectExpandCollapseButton b in fieldValueControl)
                 {
@@ -2995,11 +3022,11 @@ namespace Sate
             }
             else
             {
-                for (int i = 0; i < isNullCheckBox.Count; i++)
+                for (var i = 0; i < isNullCheckBox.Count; i++)
                 {
                     if (!isNullCheckBox[i].Checked)
                     {
-                        ((ObjectExpandCollapseButton)fieldValueControl[i]).Checked = true;
+                        ((ObjectExpandCollapseButton) fieldValueControl[i]).Checked = true;
                     }
                 }
             }
@@ -3007,7 +3034,7 @@ namespace Sate
 
         private void OnCollapseAll_ContextMenu(object o, EventArgs e)
         {
-            if (collectionType == Safir.Dob.Typesystem.CollectionType.SequenceCollectionType)
+            if (collectionType == CollectionType.SequenceCollectionType)
             {
                 foreach (ObjectExpandCollapseButton b in fieldValueControl)
                 {
@@ -3016,9 +3043,9 @@ namespace Sate
             }
             else
             {
-                for (int i = 0; i < isNullCheckBox.Count; i++)
+                for (var i = 0; i < isNullCheckBox.Count; i++)
                 {
-                    ObjectExpandCollapseButton cb = fieldValueControl[i] as ObjectExpandCollapseButton;
+                    var cb = fieldValueControl[i] as ObjectExpandCollapseButton;
                     if (cb.Checked)
                     {
                         cb.Checked = false;
@@ -3043,21 +3070,21 @@ namespace Sate
             if (b.Tag == null)
             {
                 b.Tag = new ObjectInfo();
-                ((ObjectInfo)b.Tag).Obj = Safir.Dob.Typesystem.ObjectFactory.Instance.CreateObject(typeId);
-                b.ObjPanel = new ObjectEditPanel((ObjectInfo)b.Tag, typeId, true);
+                ((ObjectInfo) b.Tag).Obj = ObjectFactory.Instance.CreateObject(typeId);
+                b.ObjPanel = new ObjectEditPanel((ObjectInfo) b.Tag, typeId, true);
                 b.ObjPanel.ParentObjectField = this;
                 b.ObjPanel.AutoScroll = false;
                 fieldValueControl[index].BackColor = ColorMap.CHANGED;
-                ((ToolStripMenuItem)fieldValueControl[index].ContextMenuStrip.Items[0]).Checked = true; //isChanged
+                ((ToolStripMenuItem) fieldValueControl[index].ContextMenuStrip.Items[0]).Checked = true; //isChanged
             }
 
-            ObjectInfo tmp = (ObjectInfo)Tag;
-            var obj = ((ObjectInfo)b.Tag).Obj;
+            var tmp = (ObjectInfo) Tag;
+            var obj = ((ObjectInfo) b.Tag).Obj;
             var container = tmp.Obj.GetMember(member, 0);
             var containerType = container.GetType();
-            containerType.GetMethod("Insert").Invoke(container, new object[] { index, obj });
+            containerType.GetMethod("Insert").Invoke(container, new object[] {index, obj});
         }
-        
+
         protected override bool ValidInput(int index, bool setVal)
         {
             var objButton = fieldValueControl[index] as ObjectExpandCollapseButton;
@@ -3073,33 +3100,34 @@ namespace Sate
             if (!objButton.ObjPanel.SetObjectMembers())
                 return false;
 
-            ObjectInfo tmp = (ObjectInfo)Tag;
-            if (collectionType == Safir.Dob.Typesystem.CollectionType.SingleValueCollectionType || collectionType == Safir.Dob.Typesystem.CollectionType.ArrayCollectionType)
+            var tmp = (ObjectInfo) Tag;
+            if (collectionType == CollectionType.SingleValueCollectionType ||
+                collectionType == CollectionType.ArrayCollectionType)
             {
                 changed[index] = false;
-                Safir.Dob.Typesystem.ObjectContainerBase cont = (Safir.Dob.Typesystem.ObjectContainerBase)tmp.Obj.GetMember(member, index);
-                cont.InternalObj = (Safir.Dob.Typesystem.Object)((ObjectInfo)(objButton.ObjPanel.Tag)).Obj;
+                var cont = (ObjectContainerBase) tmp.Obj.GetMember(member, index);
+                cont.InternalObj = ((ObjectInfo) objButton.ObjPanel.Tag).Obj;
             }
-            else if (collectionType == Safir.Dob.Typesystem.CollectionType.DictionaryCollectionType)
+            else if (collectionType == CollectionType.DictionaryCollectionType)
             {
                 changed[index] = false;
-                var cont = (Safir.Dob.Typesystem.ObjectContainerBase)GetDictionaryValue(fieldNameLabel[index].Tag);
-                cont.InternalObj = (Safir.Dob.Typesystem.Object)((ObjectInfo)(objButton.ObjPanel.Tag)).Obj;
+                var cont = (ObjectContainerBase) GetDictionaryValue(fieldNameLabel[index].Tag);
+                cont.InternalObj = ((ObjectInfo) objButton.ObjPanel.Tag).Obj;
             }
-            else if (collectionType == Safir.Dob.Typesystem.CollectionType.SequenceCollectionType)
+            else if (collectionType == CollectionType.SequenceCollectionType)
             {
-                var obj = ((ObjectInfo)objButton.Tag).Obj;
+                var obj = ((ObjectInfo) objButton.Tag).Obj;
                 var container = tmp.Obj.GetMember(member, 0);
                 var containerType = container.GetType();
 
-                int numValues = (int)containerType.GetProperty("Count").GetValue(container, null);
+                var numValues = (int) containerType.GetProperty("Count").GetValue(container, null);
                 if (numValues > index)
                 {
-                    containerType.GetProperty("Item").SetValue(container, obj, new object[] { index });
+                    containerType.GetProperty("Item").SetValue(container, obj, new object[] {index});
                 }
                 else
                 {
-                    containerType.GetMethod("Add").Invoke(container, new object[] { obj });
+                    containerType.GetMethod("Add").Invoke(container, new object[] {obj});
                 }
             }
             return true;
@@ -3108,43 +3136,42 @@ namespace Sate
 
         public override void SetFieldValues()
         {
-            if (collectionType == Safir.Dob.Typesystem.CollectionType.SingleValueCollectionType ||
-                collectionType == Safir.Dob.Typesystem.CollectionType.ArrayCollectionType ||
-                collectionType==Safir.Dob.Typesystem.CollectionType.DictionaryCollectionType)
+            if (collectionType == CollectionType.SingleValueCollectionType ||
+                collectionType == CollectionType.ArrayCollectionType ||
+                collectionType == CollectionType.DictionaryCollectionType)
             {
-                bool forceResize = false;
-                ObjectInfo tmp = (ObjectInfo)Tag;
-                int index = 0;
+                var forceResize = false;
+                var tmp = (ObjectInfo) Tag;
+                var index = 0;
                 foreach (ObjectExpandCollapseButton b in fieldValueControl)
                 {
-                    var cont = collectionType != Safir.Dob.Typesystem.CollectionType.DictionaryCollectionType ?
-                        (Safir.Dob.Typesystem.ObjectContainerBase)tmp.Obj.GetMember(member, index) : 
-                        (Safir.Dob.Typesystem.ObjectContainerBase)GetDictionaryValue(fieldNameLabel[index].Tag);
+                    var cont = collectionType != CollectionType.DictionaryCollectionType
+                        ? (ObjectContainerBase) tmp.Obj.GetMember(member, index)
+                        : (ObjectContainerBase) GetDictionaryValue(fieldNameLabel[index].Tag);
 
                     if (cont.IsNull())
                     {
                         if (isNullCheckBox.Count > index)
-                            this.isNullCheckBox[index].Checked = true;
+                            isNullCheckBox[index].Checked = true;
 
                         b.Tag = null;
                         b.Checked = false;
                     }
                     else
                     {
-                        ObjectInfo objectInfo = new ObjectInfo();
+                        var objectInfo = new ObjectInfo();
                         objectInfo.Obj = cont.InternalObj;
                         b.Tag = objectInfo;
 
                         if (isNullCheckBox.Count > index)
-                            this.isNullCheckBox[index].Checked = false;
+                            isNullCheckBox[index].Checked = false;
 
                         b.BackColor = ColorMap.ENABLED;
                         var objButton = fieldValueControl[index] as ObjectExpandCollapseButton;
-                        if (objButton.ObjPanel!=null)
+                        if (objButton.ObjPanel != null)
                         {
-
                             //if (((Safir.Dob.Typesystem.Object)(objPanel[index].Tag)).GetTypeId() == cont.InternalObj.GetTypeId())
-                            if (((ObjectInfo)(objButton.ObjPanel.Tag)).Obj.GetTypeId() == cont.InternalObj.GetTypeId())
+                            if (((ObjectInfo) objButton.ObjPanel.Tag).Obj.GetTypeId() == cont.InternalObj.GetTypeId())
                             {
                                 objButton.ObjPanel.UpdateData(objectInfo);
                             }
@@ -3165,16 +3192,16 @@ namespace Sate
                             objButton.ObjPanel.AutoScroll = false;
                         }
 
-                        int w = X_VALUE_START + objButton.ObjPanel.Width + X_STEP;
-                        if (w > this.Width)
+                        var w = X_VALUE_START + objButton.ObjPanel.Width + X_STEP;
+                        if (w > Width)
                         {
-                            this.Width = w;
+                            Width = w;
                         }
                     }
 
                     if (cont.IsChanged())
                     {
-                        if (collectionType == Safir.Dob.Typesystem.CollectionType.DictionaryCollectionType)
+                        if (collectionType == CollectionType.DictionaryCollectionType)
                         {
                             SetDictionaryChanged(cont.IsChanged(), index);
                         }
@@ -3195,14 +3222,14 @@ namespace Sate
                     Invalidate();
                 }
             }
-            else if (collectionType == Safir.Dob.Typesystem.CollectionType.SequenceCollectionType)
+            else if (collectionType == CollectionType.SequenceCollectionType)
             {
                 SetSequenceChanged(false);
-                ObjectInfo tmp = (ObjectInfo)Tag;
+                var tmp = (ObjectInfo) Tag;
                 var container = tmp.Obj.GetMember(member, 0);
                 var containerType = container.GetType();
 
-                if ((int)containerType.GetProperty("Count").GetValue(container, null) != fieldValueControl.Count)
+                if ((int) containerType.GetProperty("Count").GetValue(container, null) != fieldValueControl.Count)
                 {
                     Init(tmp, member, typeName, memberName, collectionType, 1);
                     parentObjectEditPanel.ExpandCollapse(member);
@@ -3211,21 +3238,21 @@ namespace Sate
                 }
 
                 var forceResize = false;
-                int index = 0;
-                var ix = new object[] { index };
+                var index = 0;
+                var ix = new object[] {index};
                 foreach (ObjectExpandCollapseButton b in fieldValueControl)
                 {
                     ix[0] = index++;
-                    var obj = (Safir.Dob.Typesystem.Object)containerType.GetProperty("Item").GetValue(container, ix);
+                    var obj = (Object) containerType.GetProperty("Item").GetValue(container, ix);
                     b.BackColor = ColorMap.ENABLED;
 
-                    ObjectInfo objectInfo = new ObjectInfo();
+                    var objectInfo = new ObjectInfo();
                     objectInfo.Obj = obj;
                     b.Tag = objectInfo;
 
                     if (b.ObjPanel != null)
                     {
-                        if (((ObjectInfo)(b.ObjPanel.Tag)).Obj.GetTypeId() == obj.GetTypeId())
+                        if (((ObjectInfo) b.ObjPanel.Tag).Obj.GetTypeId() == obj.GetTypeId())
                         {
                             b.ObjPanel.UpdateData(objectInfo);
                         }
@@ -3246,10 +3273,10 @@ namespace Sate
                         b.ObjPanel.AutoScroll = false;
                     }
 
-                    int w = X_VALUE_START + b.ObjPanel.Width + X_STEP;
-                    if (w > this.Width)
+                    var w = X_VALUE_START + b.ObjPanel.Width + X_STEP;
+                    if (w > Width)
                     {
-                        this.Width = w;
+                        Width = w;
                     }
                 }
 
@@ -3262,9 +3289,9 @@ namespace Sate
         }
 
         private void button_CheckedChanged(object sender, EventArgs e)
-        {            
-            int index = 0;
-            foreach (Control c in fieldValueControl)
+        {
+            var index = 0;
+            foreach (var c in fieldValueControl)
             {
                 if (c == sender)
                     break;
@@ -3272,7 +3299,7 @@ namespace Sate
                 index++;
             }
 
-            ObjectExpandCollapseButton b = (ObjectExpandCollapseButton)sender;
+            var b = (ObjectExpandCollapseButton) sender;
 
             if (b.Checked)
             {
@@ -3281,34 +3308,35 @@ namespace Sate
                 if (b.Tag == null)
                 {
                     b.Tag = new ObjectInfo();
-                    ((ObjectInfo)b.Tag).Obj = Safir.Dob.Typesystem.ObjectFactory.Instance.CreateObject(typeId);
-                    b.ObjPanel = new ObjectEditPanel((ObjectInfo)b.Tag, typeId, true);
+                    ((ObjectInfo) b.Tag).Obj = ObjectFactory.Instance.CreateObject(typeId);
+                    b.ObjPanel = new ObjectEditPanel((ObjectInfo) b.Tag, typeId, true);
                     b.ObjPanel.ParentObjectField = this;
                     b.ObjPanel.AutoScroll = false;
 
                     fieldValueControl[index].BackColor = ColorMap.CHANGED;
 
-                    ((ToolStripMenuItem)fieldValueControl[index].ContextMenuStrip.Items[0]).Checked = true; //isChanged
-                    ((ToolStripMenuItem)fieldValueControl[index].ContextMenuStrip.Items[1]).Checked = true; //isChangedHere
+                    ((ToolStripMenuItem) fieldValueControl[index].ContextMenuStrip.Items[0]).Checked = true; //isChanged
+                    ((ToolStripMenuItem) fieldValueControl[index].ContextMenuStrip.Items[1]).Checked = true;
+                    //isChangedHere
                     fieldValueControl[index].BackColor = ColorMap.CHANGED;
 
-                    if (collectionType != Safir.Dob.Typesystem.CollectionType.SequenceCollectionType)
-                        changed[index]=true;
+                    if (collectionType != CollectionType.SequenceCollectionType)
+                        changed[index] = true;
                 }
 
-                if (collectionType==Safir.Dob.Typesystem.CollectionType.SingleValueCollectionType || collectionType==Safir.Dob.Typesystem.CollectionType.ArrayCollectionType)
+                if (collectionType == CollectionType.SingleValueCollectionType ||
+                    collectionType == CollectionType.ArrayCollectionType)
                 {
-                    var cont = (Safir.Dob.Typesystem.ObjectContainerBase)((ObjectInfo)Tag).Obj.GetMember(member, index);
-                    cont.InternalObj = (Safir.Dob.Typesystem.Object)((ObjectInfo)b.Tag).Obj;
+                    var cont = (ObjectContainerBase) ((ObjectInfo) Tag).Obj.GetMember(member, index);
+                    cont.InternalObj = ((ObjectInfo) b.Tag).Obj;
 
                     //Safir.Dob.Typesystem.ObjectContainerBase cont = (Safir.Dob.Typesystem.ObjectContainerBase)((Safir.Dob.Typesystem.Object)((ObjectInfo)Tag).Obj).GetMember(member, index);
                     //cont.InternalObj = (Safir.Dob.Typesystem.Object)((ObjectInfo)b.Tag).Obj;
                 }
-                else if (collectionType==Safir.Dob.Typesystem.CollectionType.DictionaryCollectionType)
+                else if (collectionType == CollectionType.DictionaryCollectionType)
                 {
-                    var cont = (Safir.Dob.Typesystem.ObjectContainerBase)GetDictionaryValue(fieldNameLabel[index].Tag);
-                    cont.InternalObj = (Safir.Dob.Typesystem.Object)((ObjectInfo)b.Tag).Obj;
-
+                    var cont = (ObjectContainerBase) GetDictionaryValue(fieldNameLabel[index].Tag);
+                    cont.InternalObj = ((ObjectInfo) b.Tag).Obj;
                 }
             }
             else
@@ -3318,14 +3346,14 @@ namespace Sate
 
             parentObjectEditPanel.ExpandCollapse(member);
 
-            if (collectionType != Safir.Dob.Typesystem.CollectionType.SequenceCollectionType)
+            if (collectionType != CollectionType.SequenceCollectionType)
             {
                 if (isNullCheckBox.Count > index)
                     isNullCheckBox[index].Checked = false;
             }
 
             if (!ValidInput(index, false))
-                this.fieldValueControl[index].BackColor = ColorMap.ERROR;
+                fieldValueControl[index].BackColor = ColorMap.ERROR;
 
             parentObjectEditPanel.ChangedDataField();
 
@@ -3337,17 +3365,17 @@ namespace Sate
             base.PositionControls(index, ref location);
             if (fieldValueControl.Count <= index)
                 return;
-          
-            ObjectExpandCollapseButton b = fieldValueControl[index] as ObjectExpandCollapseButton;
+
+            var b = fieldValueControl[index] as ObjectExpandCollapseButton;
 
             if (b == null)
                 return;
 
             if (b.Checked)
             {
-                int w = X_VALUE_START + b.ObjPanel.Width + X_STEP;
-                if (w > this.Width)
-                    this.Width = w;
+                var w = X_VALUE_START + b.ObjPanel.Width + X_STEP;
+                if (w > Width)
+                    Width = w;
 
                 location.X = X_VALUE_START;
 
@@ -3357,7 +3385,7 @@ namespace Sate
                 location.X = X_NAME_START;
                 location.Y += b.ObjPanel.Height + Y_STEP;
 
-                this.Controls.Add(b.ObjPanel);
+                Controls.Add(b.ObjPanel);
             }
             else
             {
@@ -3374,8 +3402,13 @@ namespace Sate
             base.ResetIndex(i);
             var objButton = fieldValueControl[i] as ObjectExpandCollapseButton;
             (objButton.ContextMenuStrip.Items[1] as ToolStripMenuItem).Checked = false;
-            if (objButton.ObjPanel!= null)
+            if (objButton.ObjPanel != null)
                 objButton.ObjPanel.ResetChanged();
+        }
+
+        private class ObjectExpandCollapseButton : CheckBox
+        {
+            public ObjectEditPanel ObjPanel { get; set; }
         }
     }
 
@@ -3384,7 +3417,7 @@ namespace Sate
     //---------------------------------------------------
     public class BinaryField : ObjectDataFieldControl
     {
-        public BinaryField(ObjectInfo objInfo, int member, string name, Safir.Dob.Typesystem.CollectionType ct, int arraySize)
+        public BinaryField(ObjectInfo objInfo, int member, string name, CollectionType ct, int arraySize)
             : base(objInfo, member, "Binary", name, ct, arraySize)
         {
         }
@@ -3394,23 +3427,24 @@ namespace Sate
             var control = base.CreateValueControl() as TextBox;
             if (control != null)
             {
-                control.ContextMenuStrip.Items.AddRange(new ToolStripItem[]{
-                        new ToolStripSeparator(),
-                        new ToolStripMenuItem("Save to file...", null, OnSaveToFile),
-                        new ToolStripMenuItem("Load from file...", null, OnLoadFromFile)});
-
+                control.ContextMenuStrip.Items.AddRange(new ToolStripItem[]
+                {
+                    new ToolStripSeparator(),
+                    new ToolStripMenuItem("Save to file...", null, OnSaveToFile),
+                    new ToolStripMenuItem("Load from file...", null, OnLoadFromFile)
+                });
             }
             return control;
         }
 
         private void OnSaveToFile(object sender, EventArgs e)
         {
-            int i = FindMenuItemOwnerControl(sender);
+            var i = FindMenuItemOwnerControl(sender);
 
-            SaveFileDialog sfd = new SaveFileDialog();
+            var sfd = new SaveFileDialog();
             if (sfd.ShowDialog() == DialogResult.OK)
             {
-                using (System.IO.TextWriter writer = new System.IO.StreamWriter(sfd.FileName))
+                using (TextWriter writer = new StreamWriter(sfd.FileName))
                 {
                     writer.Write(fieldValueControl[i].Text);
                     writer.Flush();
@@ -3421,13 +3455,13 @@ namespace Sate
 
         private void OnLoadFromFile(object sender, EventArgs e)
         {
-            int i = FindMenuItemOwnerControl(sender);
+            var i = FindMenuItemOwnerControl(sender);
 
-            OpenFileDialog ofd = new OpenFileDialog();
+            var ofd = new OpenFileDialog();
 
             if (ofd.ShowDialog() == DialogResult.OK)
             {
-                using (System.IO.TextReader reader = new System.IO.StreamReader(ofd.FileName))
+                using (TextReader reader = new StreamReader(ofd.FileName))
                 {
                     fieldValueControl[i].Text = reader.ReadToEnd();
                     reader.Close();
@@ -3437,38 +3471,39 @@ namespace Sate
 
         protected override void InsertSequenceItem(int index)
         {
-            ObjectInfo tmp = (ObjectInfo)Tag;
-            var cont = (Safir.Dob.Typesystem.BinarySequenceContainer)tmp.Obj.GetMember(member, 0);
-            cont.Insert(index, new byte[] { });
+            var tmp = (ObjectInfo) Tag;
+            var cont = (BinarySequenceContainer) tmp.Obj.GetMember(member, 0);
+            cont.Insert(index, new byte[] {});
         }
-        
+
         protected override bool ValidInput(int index, bool setVal)
         {
             try
-            {                
-                TextBox c = (TextBox)fieldValueControl[index];
-                byte[] val = System.Convert.FromBase64String(c.Text);
+            {
+                var c = (TextBox) fieldValueControl[index];
+                var val = Convert.FromBase64String(c.Text);
 
                 if (!setVal)
                     return true;
 
-                ObjectInfo tmp = (ObjectInfo)Tag;
-                
-                if (collectionType == Safir.Dob.Typesystem.CollectionType.SingleValueCollectionType || collectionType == Safir.Dob.Typesystem.CollectionType.ArrayCollectionType)
+                var tmp = (ObjectInfo) Tag;
+
+                if (collectionType == CollectionType.SingleValueCollectionType ||
+                    collectionType == CollectionType.ArrayCollectionType)
                 {
                     changed[index] = false;
-                    Safir.Dob.Typesystem.BinaryContainer cont = (Safir.Dob.Typesystem.BinaryContainer)tmp.Obj.GetMember(member, index);
+                    var cont = (BinaryContainer) tmp.Obj.GetMember(member, index);
                     cont.Val = val;
                 }
-                else if (collectionType == Safir.Dob.Typesystem.CollectionType.DictionaryCollectionType)
+                else if (collectionType == CollectionType.DictionaryCollectionType)
                 {
                     changed[index] = false;
-                    var cont = (Safir.Dob.Typesystem.BinaryContainer)GetDictionaryValue(fieldNameLabel[index].Tag);
+                    var cont = (BinaryContainer) GetDictionaryValue(fieldNameLabel[index].Tag);
                     cont.Val = val;
                 }
-                else if (collectionType == Safir.Dob.Typesystem.CollectionType.SequenceCollectionType)
+                else if (collectionType == CollectionType.SequenceCollectionType)
                 {
-                    var cont = (Safir.Dob.Typesystem.BinarySequenceContainer)tmp.Obj.GetMember(member, 0);
+                    var cont = (BinarySequenceContainer) tmp.Obj.GetMember(member, 0);
                     if (cont.Count > index)
                     {
                         cont[index] = val;
@@ -3488,23 +3523,23 @@ namespace Sate
 
         public override void SetFieldValues()
         {
-            if (collectionType == Safir.Dob.Typesystem.CollectionType.SingleValueCollectionType ||
-                collectionType == Safir.Dob.Typesystem.CollectionType.ArrayCollectionType)
+            if (collectionType == CollectionType.SingleValueCollectionType ||
+                collectionType == CollectionType.ArrayCollectionType)
             {
-                int index = 0;
+                var index = 0;
                 foreach (TextBox t in fieldValueControl)
                 {
-                    ObjectInfo tmp = (ObjectInfo)Tag;
-                    Safir.Dob.Typesystem.BinaryContainer cont = (Safir.Dob.Typesystem.BinaryContainer)tmp.Obj.GetMember(member, index);
+                    var tmp = (ObjectInfo) Tag;
+                    var cont = (BinaryContainer) tmp.Obj.GetMember(member, index);
 
                     if (cont.IsNull())
                     {
                         if (isNullCheckBox.Count > index)
-                            this.isNullCheckBox[index].Checked = true;
+                            isNullCheckBox[index].Checked = true;
                     }
                     else
                     {
-                        t.Text = System.Convert.ToBase64String(cont.Val);
+                        t.Text = Convert.ToBase64String(cont.Val);
                         t.BackColor = ColorMap.ENABLED;
                     }
 
@@ -3518,17 +3553,17 @@ namespace Sate
                     index++;
                 }
             }
-            else if (collectionType == Safir.Dob.Typesystem.CollectionType.DictionaryCollectionType)
+            else if (collectionType == CollectionType.DictionaryCollectionType)
             {
-                int index = 0;
+                var index = 0;
                 foreach (TextBox t in fieldValueControl)
                 {
-                    var cont = (Safir.Dob.Typesystem.BinaryContainer)GetDictionaryValue(fieldNameLabel[index].Tag);
+                    var cont = (BinaryContainer) GetDictionaryValue(fieldNameLabel[index].Tag);
 
                     if (cont.IsNull())
                     {
                         if (isNullCheckBox.Count > index)
-                            this.isNullCheckBox[index].Checked = true;
+                            isNullCheckBox[index].Checked = true;
                     }
                     else
                     {
@@ -3544,11 +3579,11 @@ namespace Sate
                     index++;
                 }
             }
-            else if (collectionType == Safir.Dob.Typesystem.CollectionType.SequenceCollectionType)
+            else if (collectionType == CollectionType.SequenceCollectionType)
             {
                 SetSequenceChanged(false);
-                ObjectInfo tmp = (ObjectInfo)Tag;
-                var cont = (Safir.Dob.Typesystem.BinarySequenceContainer)tmp.Obj.GetMember(member, 0);
+                var tmp = (ObjectInfo) Tag;
+                var cont = (BinarySequenceContainer) tmp.Obj.GetMember(member, 0);
 
                 if (cont.Count != fieldValueControl.Count)
                 {
@@ -3558,15 +3593,14 @@ namespace Sate
                     return;
                 }
 
-                int index = 0;
+                var index = 0;
                 foreach (TextBox t in fieldValueControl)
                 {
-                    t.Text = System.Convert.ToBase64String(cont[index]);
+                    t.Text = Convert.ToBase64String(cont[index]);
                     t.BackColor = ColorMap.ENABLED;
                     index++;
                 }
             }
         }
     }
-
 }

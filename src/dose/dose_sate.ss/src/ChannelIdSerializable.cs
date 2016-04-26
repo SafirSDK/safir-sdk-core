@@ -1,4 +1,4 @@
-/******************************************************************************
+﻿/******************************************************************************
 *
 * Copyright Saab AB, 2007-2013 (http://safirsdkcore.com)
 * 
@@ -22,31 +22,29 @@
 *
 ******************************************************************************/
 
-using System;
-using System.Collections.Generic;
-using System.Text;
+using Safir.Dob.Typesystem;
 
 namespace Sate
 {
     public class ChannelIdSerializable
     {
-        public Int64 m_channelId = -1;
+        public long m_channelId = -1;
         public string m_channelIdStr;
 
         public ChannelIdSerializable()
         {
-            Safir.Dob.Typesystem.ChannelId channelId = new Safir.Dob.Typesystem.ChannelId();
+            var channelId = new ChannelId();
             m_channelId = channelId.RawValue;
             m_channelIdStr = channelId.RawString;
         }
 
-        public ChannelIdSerializable(Int64 channelId, string channelIdStr)
+        public ChannelIdSerializable(long channelId, string channelIdStr)
         {
             m_channelId = channelId;
             m_channelIdStr = channelIdStr;
         }
 
-        public ChannelIdSerializable(Int64 channelId)
+        public ChannelIdSerializable(long channelId)
         {
             m_channelId = channelId;
             m_channelIdStr = "";
@@ -58,28 +56,28 @@ namespace Sate
             m_channelIdStr = channelIdStr;
         }
 
-        public ChannelIdSerializable(Safir.Dob.Typesystem.ChannelId channelId)
+        public ChannelIdSerializable(ChannelId channelId)
         {
             m_channelId = channelId.RawValue;
             m_channelIdStr = channelId.RawString;
         }
 
-        public Safir.Dob.Typesystem.ChannelId ChannelId()
+        public ChannelId ChannelId()
         {
             if (m_channelId == -1 && m_channelIdStr == "")
             {
-                return new Safir.Dob.Typesystem.ChannelId();
+                return new ChannelId();
             }
-           
+
             if (m_channelIdStr == "")
             {
-                return new Safir.Dob.Typesystem.ChannelId(m_channelId);
+                return new ChannelId(m_channelId);
             }
             if (m_channelId == -1)
             {
-                return new Safir.Dob.Typesystem.ChannelId(m_channelIdStr);
+                return new ChannelId(m_channelIdStr);
             }
-            return new Safir.Dob.Typesystem.ChannelId(m_channelId, m_channelIdStr);
+            return new ChannelId(m_channelId, m_channelIdStr);
         }
     }
 }

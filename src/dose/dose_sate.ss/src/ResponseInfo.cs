@@ -1,4 +1,4 @@
-/******************************************************************************
+﻿/******************************************************************************
 *
 * Copyright Saab AB, 2007-2013 (http://safirsdkcore.com)
 * 
@@ -22,19 +22,12 @@
 *
 ******************************************************************************/
 
-using System;
-using System.Collections.Generic;
-using System.Text;
+using Safir.Dob;
 
 namespace Sate
 {
-    class ResponseInfo : ObjectInfo
+    internal class ResponseInfo : ObjectInfo
     {
-        private Safir.Dob.Response response;
-        public Safir.Dob.Response Response
-        {
-            get { return response; }
-            set { response = value; }
-        }
+        public Response Response { get; set; }
     }
 }

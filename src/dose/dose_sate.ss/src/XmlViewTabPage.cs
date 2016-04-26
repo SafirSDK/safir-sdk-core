@@ -1,4 +1,4 @@
-/******************************************************************************
+﻿/******************************************************************************
 *
 * Copyright Saab AB, 2007-2013 (http://safirsdkcore.com)
 * 
@@ -22,113 +22,93 @@
 *
 ******************************************************************************/
 
-using System;
-using System.Drawing;
-using System.Collections;
-using System.ComponentModel;
+using System.IO;
 using System.Windows.Forms;
+using Safir.Dob.Typesystem;
 
 namespace Sate
 {
-    public class XmlTabPage : System.Windows.Forms.TabPage
+    public class XmlTabPage : TabPage
     {
-        private XmlRichEdit xmlRichEdit;
-        private string fileName;
-
         public XmlTabPage(ObjectInfo objInfo)
         {
-            string name=Safir.Dob.Typesystem.Operations.GetName(objInfo.Obj.GetTypeId());
-            name=name.Substring(name.LastIndexOf('.')+1);
-            this.Text = name;
+            var name = Operations.GetName(objInfo.Obj.GetTypeId());
+            name = name.Substring(name.LastIndexOf('.') + 1);
+            Text = name;
 
-            fileName = name + ".xml";
-            xmlRichEdit = new XmlRichEdit();
-            xmlRichEdit.Dock=DockStyle.Fill;
-            this.Controls.Add(xmlRichEdit);
-            xmlRichEdit.WriteXml(Safir.Dob.Typesystem.Serialization.ToXml(objInfo.Obj));
+            FileName = name + ".xml";
+            RichEdit = new XmlRichEdit();
+            RichEdit.Dock = DockStyle.Fill;
+            Controls.Add(RichEdit);
+            RichEdit.WriteXml(Serialization.ToXml(objInfo.Obj));
         }
 
         public XmlTabPage(string xmlContent, string fileName)
         {
-            this.fileName=fileName;
-            this.Text=fileName;
-            xmlRichEdit = new XmlRichEdit();
-            xmlRichEdit.Dock=DockStyle.Fill;
-            this.Controls.Add(xmlRichEdit);
-            xmlRichEdit.WriteXml(xmlContent);
-            xmlRichEdit.ReadOnly=false;
+            FileName = fileName;
+            Text = fileName;
+            RichEdit = new XmlRichEdit();
+            RichEdit.Dock = DockStyle.Fill;
+            Controls.Add(RichEdit);
+            RichEdit.WriteXml(xmlContent);
+            RichEdit.ReadOnly = false;
         }
+
+        public string FileName { get; }
+
+        public XmlRichEdit RichEdit { get; }
 
         public void Save(string path)
         {
-            using (System.IO.TextWriter writer = new System.IO.StreamWriter(path))
+            using (TextWriter writer = new StreamWriter(path))
             {
-                writer.Write(xmlRichEdit.Text);
+                writer.Write(RichEdit.Text);
                 writer.Flush();
                 writer.Close();
             }
-        }
-
-        public string FileName
-        {
-            get { return fileName; }
-        }
-
-        public XmlRichEdit RichEdit
-        {
-            get { return xmlRichEdit; }
         }
     }
 
 
     //Json
-    public class JsonTabPage : System.Windows.Forms.TabPage
+    public class JsonTabPage : TabPage
     {
-        private RichTextBox jsonEdit;
-        private string fileName;
-
         public JsonTabPage(ObjectInfo objInfo)
         {
-            string name = Safir.Dob.Typesystem.Operations.GetName(objInfo.Obj.GetTypeId());
+            var name = Operations.GetName(objInfo.Obj.GetTypeId());
             name = name.Substring(name.LastIndexOf('.') + 1);
-            this.Text = name;
+            Text = name;
 
-            fileName = name + ".json";
-            jsonEdit = new XmlRichEdit();
-            jsonEdit.Dock = DockStyle.Fill;
-            this.Controls.Add(jsonEdit);
-            jsonEdit.Text = Safir.Dob.Typesystem.Serialization.ToJson(objInfo.Obj);
+            FileName = name + ".json";
+            RichEdit = new XmlRichEdit();
+            RichEdit.Dock = DockStyle.Fill;
+            Controls.Add(RichEdit);
+            RichEdit.Text = Serialization.ToJson(objInfo.Obj);
         }
 
         public JsonTabPage(string jsonContent, string fileName)
         {
-            this.fileName = fileName;
-            this.Text = fileName;
-            jsonEdit = new XmlRichEdit();
-            jsonEdit.Dock = DockStyle.Fill;
-            this.Controls.Add(jsonEdit);
-            jsonEdit.Text = jsonContent;
-            jsonEdit.ReadOnly = false;
+            FileName = fileName;
+            Text = fileName;
+            RichEdit = new XmlRichEdit();
+            RichEdit.Dock = DockStyle.Fill;
+            Controls.Add(RichEdit);
+            RichEdit.Text = jsonContent;
+            RichEdit.ReadOnly = false;
         }
+
+        public string FileName { get; }
+
+        public RichTextBox RichEdit { get; }
 
         public void Save(string path)
         {
-            using (System.IO.TextWriter writer = new System.IO.StreamWriter(path))
+            using (TextWriter writer = new StreamWriter(path))
             {
-                writer.Write(jsonEdit.Text);
+                writer.Write(RichEdit.Text);
                 writer.Flush();
                 writer.Close();
             }
-        }
-
-        public string FileName
-        {
-            get { return fileName; }
-        }
-
-        public RichTextBox RichEdit
-        {
-            get { return jsonEdit; }
         }
     }
 }
