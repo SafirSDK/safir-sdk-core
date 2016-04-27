@@ -518,6 +518,8 @@ class JenkinsInterface:
         args = list()
         args += ("java","-jar",self.clijar,"-s",self.server)
 
+        if sys.platform == "win32":
+            cmd.append(("-i", "c:\\.ssh\id_rsa"))
         if type(cmd) is str:
             args.append(cmd)
         else:
