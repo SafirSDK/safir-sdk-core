@@ -9,7 +9,7 @@ This document describes how to set up a computer that can build a Safir SDK Core
 Installing Prerequisites
 ------------------------
 
-Visual Studio 2013 or later (express or paid versions work)
+Visual Studio 2010 or later (express or paid versions work)
 Subversion
 Boost (>=1.58)
 Python (>= 2.7)

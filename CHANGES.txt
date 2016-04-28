@@ -1,4 +1,20 @@
 -----------------------------------------------------------------------------------------------------------------------
+2016-04-29 version 6.2
+-----------------------------------------------------------------------------------------------------------------------
+
+This release fixes the following issues (see http://safirsdkcore.com for details):
+
+#288 Add support for VS2015
+#231 Sate does not support sequence and dictionary
+#293 Communication should wait for network interface to come up
+
+Apart from these fixed issues there are also a few other changes:
+ * Tweaks to make Sate look better under Mono
+ * Fixed example app linking issue on ARM
+ * Initial support for Ubuntu 16.04
+ * Minor documentation tweaks
+
+-----------------------------------------------------------------------------------------------------------------------
 2016-03-28 version 6.1.1
 -----------------------------------------------------------------------------------------------------------------------
 
