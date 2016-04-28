@@ -11,6 +11,13 @@ GO
 CREATE SCHEMA [DOPEUSER]
 GO
 
+CREATE USER [DOPEUSER] FROM LOGIN [DOPEUSER];
+go
+
+ALTER ROLE [db_datareader] ADD MEMBER [DOPEUSER]
+ALTER ROLE [db_datawriter] ADD MEMBER [DOPEUSER]
+GO
+
 /****** Object:  Table [dbo].[PersistentEntity]    Script Date: 2015-07-09 09:32:20 ******/
 SET ANSI_NULLS ON
 GO
