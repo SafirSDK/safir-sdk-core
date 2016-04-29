@@ -45,6 +45,7 @@ namespace Sate
         private readonly Timer playTimer = new Timer();
         private ScenarioTools.ScenarioIterator playIterator;
         private Action scenario;
+        private Status _scenarioStatus = Status.Stopped;
 
         public ScenarioControl()
         {
@@ -52,7 +53,11 @@ namespace Sate
             playTimer.Tick += playTimer_Tick;
         }
 
-        public Status ScenarioStatus { get; private set; } = Status.Stopped;
+        public Status ScenarioStatus
+        {
+            get { return _scenarioStatus; }
+            private set { _scenarioStatus = value; }
+        }
 
         public bool ExistUnsavedScenario { get; private set; }
 

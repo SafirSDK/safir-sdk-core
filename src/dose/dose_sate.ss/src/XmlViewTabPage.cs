@@ -30,14 +30,17 @@ namespace Sate
 {
     public class XmlTabPage : TabPage
     {
+        private readonly string _fileName;
+        private readonly XmlRichEdit _richEdit;
+
         public XmlTabPage(ObjectInfo objInfo)
         {
             var name = Operations.GetName(objInfo.Obj.GetTypeId());
             name = name.Substring(name.LastIndexOf('.') + 1);
             Text = name;
 
-            FileName = name + ".xml";
-            RichEdit = new XmlRichEdit();
+            _fileName = name + ".xml";
+            _richEdit = new XmlRichEdit();
             RichEdit.Dock = DockStyle.Fill;
             Controls.Add(RichEdit);
             RichEdit.WriteXml(Serialization.ToXml(objInfo.Obj));
@@ -45,18 +48,24 @@ namespace Sate
 
         public XmlTabPage(string xmlContent, string fileName)
         {
-            FileName = fileName;
+            _fileName = fileName;
             Text = fileName;
-            RichEdit = new XmlRichEdit();
+            _richEdit = new XmlRichEdit();
             RichEdit.Dock = DockStyle.Fill;
             Controls.Add(RichEdit);
             RichEdit.WriteXml(xmlContent);
             RichEdit.ReadOnly = false;
         }
 
-        public string FileName { get; }
+        public string FileName
+        {
+            get { return _fileName; }
+        }
 
-        public XmlRichEdit RichEdit { get; }
+        public XmlRichEdit RichEdit
+        {
+            get { return _richEdit; }
+        }
 
         public void Save(string path)
         {
@@ -73,14 +82,17 @@ namespace Sate
     //Json
     public class JsonTabPage : TabPage
     {
+        private readonly string _fileName;
+        private readonly RichTextBox _richEdit;
+
         public JsonTabPage(ObjectInfo objInfo)
         {
             var name = Operations.GetName(objInfo.Obj.GetTypeId());
             name = name.Substring(name.LastIndexOf('.') + 1);
             Text = name;
 
-            FileName = name + ".json";
-            RichEdit = new XmlRichEdit();
+            _fileName = name + ".json";
+            _richEdit = new XmlRichEdit();
             RichEdit.Dock = DockStyle.Fill;
             Controls.Add(RichEdit);
             RichEdit.Text = Serialization.ToJson(objInfo.Obj);
@@ -88,18 +100,24 @@ namespace Sate
 
         public JsonTabPage(string jsonContent, string fileName)
         {
-            FileName = fileName;
+            _fileName = fileName;
             Text = fileName;
-            RichEdit = new XmlRichEdit();
+            _richEdit = new XmlRichEdit();
             RichEdit.Dock = DockStyle.Fill;
             Controls.Add(RichEdit);
             RichEdit.Text = jsonContent;
             RichEdit.ReadOnly = false;
         }
 
-        public string FileName { get; }
+        public string FileName
+        {
+            get { return _fileName; }
+        }
 
-        public RichTextBox RichEdit { get; }
+        public RichTextBox RichEdit
+        {
+            get { return _richEdit; }
+        }
 
         public void Save(string path)
         {

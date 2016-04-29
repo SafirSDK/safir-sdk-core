@@ -42,6 +42,8 @@ namespace Sate
         private Control classNameControl;
         private ObjectDataFieldControl[] dataMembers;
         private int noMembers;
+        private ObjectField _parentObjectField = null;
+        private readonly long _baseTypeId;
 
         public ObjectEditPanel(ObjectInfo objInfo, bool classComboBox)
             : this(objInfo, objInfo.Obj.GetTypeId(), classComboBox)
@@ -53,7 +55,7 @@ namespace Sate
             if (objInfo == null)
                 return;
 
-            BaseTypeId = baseTypeId;
+            _baseTypeId = baseTypeId;
             Tag = objInfo;
 
             CreateSubject(objInfo, classComboBox);
@@ -70,9 +72,16 @@ namespace Sate
             PositionControls();
         }
 
-        public ObjectField ParentObjectField { get; set; } = null;
+        public ObjectField ParentObjectField
+        {
+            get { return _parentObjectField; }
+            set { _parentObjectField = value; }
+        }
 
-        public long BaseTypeId { get; }
+        public long BaseTypeId
+        {
+            get { return _baseTypeId; }
+        }
 
         private void CreateSubject(ObjectInfo objInfo, bool combo)
         {

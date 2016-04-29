@@ -44,6 +44,7 @@ namespace Sate
 
         private Label label1;
         private Button okbutton;
+        private int _delay = 100;
 
         public DelayForm()
         {
@@ -53,7 +54,11 @@ namespace Sate
             InitializeComponent();
         }
 
-        public int Delay { get; private set; } = 100;
+        public int Delay
+        {
+            get { return _delay; }
+            private set { _delay = value; }
+        }
 
         /// <summary>
         ///     Clean up any resources being used.

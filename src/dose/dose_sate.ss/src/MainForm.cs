@@ -116,6 +116,7 @@ namespace Sate
         private ToolStripSeparator toolStripSeparator1;
         private ToolStripMenuItem typeIdToolStripMenuItem;
         private ToolStripMenuItem viewToolStripMenuItem;
+        private readonly Connection _dose = new Connection();
 
 
         private MainForm()
@@ -200,7 +201,10 @@ namespace Sate
         }
 
         //Get the connection to the DOB
-        public Connection Dose { get; } = new Connection();
+        public Connection Dose
+        {
+            get { return _dose; }
+        }
 
 
         public bool IsConnected { get; private set; }

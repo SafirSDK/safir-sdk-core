@@ -36,7 +36,7 @@ namespace Sate
 
         public HandlerId getHandlerId()
         {
-            return HandlerIdSer?.HandlerId();
+            return HandlerIdSer != null ? HandlerIdSer.HandlerId() : null;
         }
 
         public void setHandlerId(HandlerId handlerId)

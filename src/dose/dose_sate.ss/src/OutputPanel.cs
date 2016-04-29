@@ -33,6 +33,7 @@ namespace Sate
         private readonly RichTextBox richTextBox;
         private readonly PanelLabelControl titleLabel;
         private readonly Panel toppanel;
+        private static readonly OutputPanel Instance1 = new OutputPanel();
 
         private OutputPanel()
         {
@@ -59,7 +60,10 @@ namespace Sate
             titleLabel.CloseEvent += titleLabel_CloseEvent;
         }
 
-        public static OutputPanel Instance { get; } = new OutputPanel();
+        public static OutputPanel Instance
+        {
+            get { return Instance1; }
+        }
 
         public void LogEvent(string text, bool newLine)
         {

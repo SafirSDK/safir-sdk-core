@@ -32,6 +32,8 @@ namespace Sate
     //*****************************************************************************************************
     public class ObjectEditTabPage : TabPage
     {
+        private readonly ObjectEditControl _objEditCtrl;
+
         public ObjectEditTabPage(ObjectInfo objInfo)
         {
             var name = Operations.GetName(objInfo.Obj.GetTypeId());
@@ -40,11 +42,14 @@ namespace Sate
             Tag = objInfo;
             ImageIndex = 4;
 
-            ObjEditCtrl = new ObjectEditControl(objInfo);
+            _objEditCtrl = new ObjectEditControl(objInfo);
             ObjEditCtrl.Dock = DockStyle.Fill;
             Controls.Add(ObjEditCtrl);
         }
 
-        public ObjectEditControl ObjEditCtrl { get; }
+        public ObjectEditControl ObjEditCtrl
+        {
+            get { return _objEditCtrl; }
+        }
     }
 }

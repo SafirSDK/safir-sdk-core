@@ -28,6 +28,9 @@ namespace Sate
 {
     public class ScenarioTabPage : TabPage
     {
+        private static readonly ScenarioTabPage Instance1 = new ScenarioTabPage();
+        private readonly ScenarioControl _player = new ScenarioControl();
+
         private ScenarioTabPage()
         {
             Player.Dock = DockStyle.Fill;
@@ -36,8 +39,14 @@ namespace Sate
             ImageIndex = 2;
         }
 
-        public static ScenarioTabPage Instance { get; } = new ScenarioTabPage();
+        public static ScenarioTabPage Instance
+        {
+            get { return Instance1; }
+        }
 
-        public ScenarioControl Player { get; } = new ScenarioControl();
+        public ScenarioControl Player
+        {
+            get { return _player; }
+        }
     }
 }

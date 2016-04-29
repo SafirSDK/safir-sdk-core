@@ -45,6 +45,7 @@ namespace Sate
         private RadioButton manualradioButton;
         private Button okbutton;
         private TextBox repstextBox;
+        private int _repetitions = 10;
 
         public RepeatForm(int defaultReps)
         {
@@ -64,7 +65,11 @@ namespace Sate
             }
         }
 
-        public int Repetitions { get; private set; } = 10;
+        public int Repetitions
+        {
+            get { return _repetitions; }
+            private set { _repetitions = value; }
+        }
 
         /// <summary>
         ///     Clean up any resources being used.

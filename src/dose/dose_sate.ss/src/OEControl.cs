@@ -64,6 +64,7 @@ namespace Sate
         private readonly LinkLabel toXmlLink;
         private readonly LinkLabel updateEntityReqLink;
         private readonly LinkLabel useReplyLink;
+        private readonly Panel _rightPanel = new Panel();
 
         public ObjectEditControl(ObjectInfo objInfo)
         {
@@ -331,7 +332,10 @@ namespace Sate
             Tag = objInfo;
         }
 
-        public Panel RightPanel { get; } = new Panel();
+        public Panel RightPanel
+        {
+            get { return _rightPanel; }
+        }
 
         public bool LiveData
         {
