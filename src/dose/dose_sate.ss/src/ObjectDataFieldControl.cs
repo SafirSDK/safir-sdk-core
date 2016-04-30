@@ -51,6 +51,8 @@ namespace Sate
         protected static Font font = new Font("Courier New", 8, FontStyle.Bold);
         protected static Font dataFont = new Font("Courier New", 8, FontStyle.Regular);
 
+        protected ToolTip toolTip = new ToolTip();
+
         /// <summary>
         ///     Required designer variable.
         /// </summary>
@@ -260,20 +262,28 @@ namespace Sate
             if (addDlg.ShowDialog() == DialogResult.OK)
             {
                 var key = addDlg.GetKey();
+                var maxKeyWidth = X_VALUE_START - X_NAME_START - 2 * X_STEP;
+                var keyStr = CutTextToFit(font, maxKeyWidth, addDlg.KeyString);
+                var setToolTip = keyStr != addDlg.KeyString;
+                
                 if (fieldValueControl.Count == 0)
                 {
-                    fieldNameLabel[0].Text += string.Format(Environment.NewLine + "[{0}]", addDlg.KeyString);
+                    fieldNameLabel[0].Text += string.Format(Environment.NewLine + "[{0}]", keyStr);
                     fieldNameLabel[0].Tag = key;
+                    if (setToolTip)
+                        toolTip.SetToolTip(fieldNameLabel[0], addDlg.KeyString);
                 }
                 else
                 {
                     var keyIndex = FindDictionaryKeyIndex(key);
                     if (keyIndex < 0)
                     {
-                        var keyLabel = CreateNameLabel(string.Format("[{0}]", addDlg.KeyString));
+                        var keyLabel = CreateNameLabel(string.Format("[{0}]", keyStr));
                         keyLabel.Tag = key;
                         fieldNameLabel.Add(keyLabel);
                         Controls.Add(keyLabel);
+                        if (setToolTip)
+                            toolTip.SetToolTip(keyLabel, addDlg.KeyString);
                     }
                     else
                     {
@@ -621,13 +631,23 @@ namespace Sate
             return cb;
         }
 
+        private string CutTextToFit(Font font, int maxWidth, string text)
+        {
+            while (TextRenderer.MeasureText(text, font).Width > maxWidth && text.Length>5)
+            {
+                text = text.Substring(0, text.Length - 5) + "...";
+            }
+
+            return text;
+        }
+
         protected Label CreateNameLabel(string name)
         {
             var label = new Label();
-            label.Text = name;
             label.ForeColor = Color.Blue;
             label.Font = font;
             label.AutoSize = true;
+            label.Text = CutTextToFit(label.Font, X_VALUE_START - X_NAME_START - X_STEP/2, name);
             return label;
         }
 
