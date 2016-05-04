@@ -1,7 +1,7 @@
-FILE(GLOB headers
+set(headers
   StatusApp.h StatusEntityHandler.h CommandRequestHandler.h)
 
-FILE(GLOB sources
+set(sources
   StatusApp.cpp safir_status.cpp StatusEntityHandler.cpp CommandRequestHandler.cpp)
 
 ADD_EXECUTABLE(safir_status ${sources} ${headers})
