@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <summary>Sent from web api to client.</summary>
+  <name>Safir.Websocket.Parameters</name>
+  <baseClass>Safir.Dob.Parametrization</baseClass>
+  <parameters>
+
+    <!-- Port number -->
+    <parameter>
+      <summary>The port safir_websocket will listen on and accept connections.</summary>
+      <name>Port</name>
+      <type>Int32</type>
+      <value>10000</value>
+    </parameter>
+
+    <!-- Max number of connections -->
+    <parameter>
+      <summary>The maximum number of connections allowed at the same time</summary>
+      <name>MaxNumberOfConnections</name>
+      <type>Int32</type>
+      <value>500</value>
+    </parameter>
+
+    <!-- Wait for DOB until allow connection -->
+    <parameter>
+      <summary>Should we wait until the DOB seems to allow connections before we let websocket clients to connect.</summary>
+      <name>WaitForDob</name>
+      <type>Boolean</type>
+      <value>True</value>
+    </parameter>
+
+  </parameters>
+</class>

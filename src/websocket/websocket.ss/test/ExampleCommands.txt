@@ -1,0 +1,8 @@
+{"Command":"GetTypeHierarchy"}
+
+{"Command":"Open", "ConnectionName":"wstest", "Id":1}
+
+{"Command":"SubscribeMessage", "Type":"Safir.Dob.Message", "Id":2}
+
+{"Command":"Close", "Id":1}
+

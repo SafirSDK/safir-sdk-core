@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <summary>Represents a class type in the Dob</summary>
+    <name>Safir.Websocket.Typesystem.ClassType</name>
+    <baseClass>Safir.Dob.Item</baseClass>
+    <members>
+        <member>
+            <summary>Class summary</summary>
+            <name>Summary</name>
+            <type>String</type>               
+        </member>
+        <member>
+            <summary>Fully qualified name of class type</summary>
+            <name>Name</name>
+            <type>String</type>               
+        </member>
+        <member>
+            <summary>List of members</summary>
+            <name>Members</name>
+            <type>Safir.Websocket.Typesystem.Member</type>
+            <sequence/>
+        </member>
+        <member>
+            <summary>List of descendant classes</summary>
+            <name>Descendants</name>
+            <type>Safir.Websocket.Typesystem.ClassType</type>
+            <sequence/>
+        </member>
+        <member>
+            <summary>Dou file source</summary>
+            <name>SourceFile</name>
+            <type>String</type>            
+        </member>
+    </members>
+</class>

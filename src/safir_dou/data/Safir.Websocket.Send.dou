@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <summary>Command sent from remote application using the web api.</summary>
+  <name>Safir.Websocket.Send</name>
+  <baseClass>Object</baseClass>
+  <members>
+    <member>      
+      <name>Command</name>
+      <type>String</type>
+    </member>
+    
+    <member>
+      <name>Id</name>
+      <type>Int32</type>
+    </member>
+
+    <member>
+      <name>ConnectionName</name>
+      <type>String</type>
+    </member>
+
+    <member>
+      <name>Context</name>
+      <type>Int32</type>
+    </member>
+
+    <member>
+      <name>Type</name>
+      <type>TypeId</type>
+    </member>
+
+    <member>
+      <name>Instance</name>
+      <type>InstanceId</type>
+    </member>
+
+    <member>
+      <name>Handler</name>
+      <type>HandlerId</type>
+    </member>
+
+    <member>
+      <name>Channel</name>
+      <type>ChannelId</type>
+    </member>
+
+    <member> 
+      <name>InstancePolicy</name>
+      <type>Safir.Dob.InstanceIdPolicy</type>
+    </member>
+    
+    <member>
+      <name>Entity</name>
+      <type>Safir.Dob.Entity</type>
+    </member>
+
+    <member>
+      <name>Message</name>
+      <type>Safir.Dob.Message</type>
+    </member>
+
+    <member>
+      <name>Request</name>
+      <type>Object</type>
+    </member>
+	
+	<member>
+      <name>Response</name>
+      <type>Safir.Dob.Response</type>
+    </member>
+
+    <member>
+      <name>Pending</name>
+      <type>Boolean</type>
+    </member>
+
+    <member>
+      <name>InjectionHandler</name>
+      <type>Boolean</type>
+    </member>
+
+    <member>
+      <name>IncludeChangeInfo</name>
+      <type>Boolean</type>
+    </member>
+
+    <member>
+      <name>IncludeSubclasses</name>
+      <type>Boolean</type>
+    </member>
+
+    <member>
+      <name>RestartSubscription</name>
+      <type>Boolean</type>
+    </member>
+
+    <member>
+      <name>IncludeUpdates</name>
+      <type>Boolean</type>
+    </member>
+    
+  </members>
+</class>
