@@ -45,7 +45,7 @@ private:
     boost::asio::io_service& m_ioService;
     std::unique_ptr<boost::asio::io_service::work> m_work;
     std::set<boost::shared_ptr<RemoteClient> > m_connections;
-    //boost::asio::signal_set m_signals;
+    boost::asio::signal_set m_signals;
 
     //own DOB connection
     sd::Connection m_dobConnection;

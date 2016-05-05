@@ -125,11 +125,6 @@ namespace Typesystem
             ct->Name()=Wstr(cd->GetName());
             ct->SourceFile()=Wstr(cd->FileName());
 
-            if (cd->GetName()=="InstanceIdPolicy")
-            {
-                auto fil=cd->FileName();
-            }
-
             for (int i=0; i<cd->GetNumberOfMembers(); ++i)
             {
                 //create member

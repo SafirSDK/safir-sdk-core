@@ -23,8 +23,8 @@
 
     <!-- Wait for DOB until allow connection -->
     <parameter>
-      <summary>Should we wait until the DOB seems to allow connections before we let websocket clients to connect.</summary>
-      <name>WaitForDob</name>
+      <summary>Should typesystem commands be handled, If False typesystem commands are invalid.</summary>
+      <name>EnableTypesystemCommands</name>
       <type>Boolean</type>
       <value>True</value>
     </parameter>

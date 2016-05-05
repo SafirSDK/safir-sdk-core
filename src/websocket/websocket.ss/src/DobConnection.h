@@ -51,6 +51,7 @@ public:
     DobConnection(boost::asio::io_service& ioService, boost::function<void(const std::string&)> send, boost::function<void()> onStopOrder);
     sd::Connection& Connection() {return m_con;}
 
+    bool IsOpen() {return m_con.IsOpen();}
     void Open(const std::wstring& name, int context) {m_con.Open(name, L"-ws", context, this, &m_dispatcher);}
     void Close() {if (m_con.IsOpen()) m_con.Close();}
     void SubscribeMessage(ts::TypeId typeId, const ts::ChannelId& ch, bool includeSubclasses) {m_con.SubscribeMessage(typeId, ch, includeSubclasses, this);}

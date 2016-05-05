@@ -33,26 +33,27 @@ WebsocketServer::WebsocketServer(boost::asio::io_service& ioService)
     ,m_ioService(ioService)
     ,m_work(new boost::asio::io_service::work(m_ioService))
     ,m_connections()
-    //,m_signals(m_ioService, SIGINT, SIGABRT, SIGTERM)
+    ,m_signals(m_ioService, SIGINT, SIGABRT, SIGTERM)
     ,m_dobConnection()
     ,m_dobDispatcher(m_dobConnection, m_ioService)
 {
-    m_server.clear_access_channels(websocketpp::log::alevel::frame_header | websocketpp::log::alevel::frame_payload);
-    m_server.clear_access_channels(websocketpp::log::alevel::all);
 }
 
 void WebsocketServer::Run()
 {
     std::cout<<"Starting ws server"<<std::endl;
 
-    //m_signals.async_wait([=](const boost::system::error_code&, int signal){});
+    m_signals.async_wait([=](const boost::system::error_code&, int signal){Terminate();});
 
-//    std::cout<<"Wait for DOB to let us open a connection..."<<std::endl;
-//    m_dobConnection.Open(L"safir_websocket", L"", 0, this, &m_dobDispatcher);
-//    std::cout<<"done!"<<std::endl;
+    std::cout<<"Wait for DOB to let us open a connection..."<<std::endl;
+    m_dobConnection.Open(L"safir_websocket", L"", 0, this, &m_dobDispatcher);
+    std::cout<<"done!"<<std::endl;
 
     // Initialize ASIO
     m_server.init_asio(&m_ioService);
+
+    //try to disable all logging from websocketpp, seems like info is still logging
+    m_server.set_access_channels(websocketpp::log::alevel::none);
 
     m_server.set_open_handler([=](websocketpp::connection_hdl hdl)
     {
@@ -75,7 +76,26 @@ void WebsocketServer::Run()
 
 void WebsocketServer::Terminate()
 {
+    //At the moment websocketpp is logging info when stop_listening is called and that is normal behavious
+    //according to https://github.com/zaphoyd/websocketpp/issues/498
+    //Cant figure out how to disable the info logging
 
+    std::cout<<"safir_websocket is stopping..."<<std::endl;
+    m_server.stop_listening();
+    for (auto& con : m_connections)
+    {
+        con->Close();
+    }
+
+    if (m_dobConnection.IsOpen())
+    {
+        m_dobConnection.Close();
+    }
+
+    m_work.reset();
+    m_ioService.stop();
+
+    std::cout<<"soon we should stop..."<<std::endl;
 }
 
 void WebsocketServer::OnConnectionClosed(const RemoteClient* con)
@@ -97,13 +117,7 @@ void WebsocketServer::OnConnectionClosed(const RemoteClient* con)
 
 void WebsocketServer::OnStopOrder()
 {
-    m_work.reset();
-    m_server.stop_listening();
-    for (auto& con : m_connections)
-    {
-        con->Close();
-    }
-
+    Terminate();
 }
 
 void WebsocketServer::PrintConnections() const

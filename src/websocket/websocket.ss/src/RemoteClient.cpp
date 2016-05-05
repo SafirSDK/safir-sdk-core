@@ -66,6 +66,7 @@ void RemoteClient::OnMessage(websocketpp::connection_hdl hdl, WsMessage msg)
 {
     std::cout<<"RemoteClient OnMessage "<<msg->get_payload()<<std::endl;
     std::string payload=msg->get_payload();
+
     payload.insert(1, "\"_DouType\":\"Safir.Websocket.Send\",");
 
     auto cmd = ToCommand(payload);
