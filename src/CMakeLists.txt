@@ -293,7 +293,7 @@ endfunction()
 #                                  [ENVIRONMENT ...])
 #
 # TIMEOUT: Time in seconds after which the test is interrupted.
-#          If this option is not specified the timeout will be set to 60s by default.
+#          If this option is not specified the timeout will be set to 120s by default.
 # CONFIG_OVERRIDE: Absolute path to directory containing safir configuration. If not specified
 #                  it will be set to a default configuration.
 # ENVIRONMENT: Specify more environment variables to be passed to the test.
@@ -313,7 +313,7 @@ function (SET_SAFIR_TEST_PROPERTIES)
   if (PROP_TIMEOUT)
     SET_TESTS_PROPERTIES(${PROP_TEST} PROPERTIES TIMEOUT ${PROP_TIMEOUT})
   else()
-    SET_TESTS_PROPERTIES(${PROP_TEST} PROPERTIES TIMEOUT 60)
+    SET_TESTS_PROPERTIES(${PROP_TEST} PROPERTIES TIMEOUT 120)
   endif()
 
   if (NOT PROP_CONFIG_OVERRIDE)
