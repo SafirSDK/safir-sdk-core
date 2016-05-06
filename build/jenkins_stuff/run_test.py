@@ -207,7 +207,7 @@ class WindowsInstaller(object):
 
 class DebianInstaller(object):
     def __init__(self):
-        self.packages = ("safir-sdk-core", "safir-sdk-core-dev", "safir-sdk-core-testsuite")
+        self.packages = ("safir-sdk-core", "safir-sdk-core-tools", "safir-sdk-core-dev", "safir-sdk-core-testsuite")
 
     def __is_installed(self, package_name, cache = None):
         if cache is None:
@@ -248,9 +248,13 @@ class DebianInstaller(object):
     def install(self, development, testsuite):
         runtime = glob.glob("safir-sdk-core_*.deb")
         if len(runtime) != 1:
-            raise SetupError("Unexpected number of runtime packages: "+ str(pkg))
+            raise SetupError("Unexpected number of runtime packages: "+ str(runtime))
 
-        packages = [runtime[0],]
+        tools = glob.glob("safir-sdk-core-tools*.deb")
+        if len(tools) != 1:
+            raise SetupError("Unexpected number of tools packages: "+ str(tools))
+
+        packages = [runtime[0],tools[0]]
 
         if development:
             pkg = glob.glob("safir-sdk-core-dev_*.deb")
