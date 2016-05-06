@@ -15,4 +15,4 @@ ADD_TEST(NAME logging_java
   --safir-show-config $<TARGET_FILE:safir_show_config>
   --dependencies $<TARGET_PROPERTY:logging_java,JAR_FILE>)
 
-SET_SAFIR_TEST_PROPERTIES(TEST logging_java TIMEOUT 120)
+SET_SAFIR_TEST_PROPERTIES(TEST logging_java)

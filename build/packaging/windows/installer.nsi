@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
-; Copyright Saab AB, 2014-2015 (http://safirsdkcore.com)
+; Copyright Saab AB, 2014-2016 (http://safirsdkcore.com)
 ;
 ; Created by: Lars Hagstrom / lars.hagstrom@consoden.se
 ;
@@ -281,16 +281,18 @@ Function .onInit
     ClearErrors
     ${GetOptions} $cmdLineParams '/?' $R0
     IfErrors +3 0
-    MessageBox MB_OK "Accepted command line arguments are /nodevelopment, /testsuite and /silent!"
+    MessageBox MB_OK "Accepted command line arguments are /notools, /nodevelopment, /testsuite and /silent!"
     Abort
 
     Pop $R0
 
     ; Initialise options
     Var /GLOBAL option_development
+    Var /GLOBAL option_tools
     Var /GLOBAL option_testSuite
 
     StrCpy $option_development    1
+    StrCpy $option_tools          1
     StrCpy $option_testSuite      0
 
     ; Parse Parameters
@@ -341,8 +343,9 @@ FunctionEnd
 
   ;Source directories created by build script
   !define StageDirRuntime "..\..\..\stage\Runtime\Program Files\safir-sdk-core"
+  !define StageDirTools "..\..\..\stage\Tools\Program Files\safir-sdk-core"
   !define StageDirDevelopment "..\..\..\stage\Development\Program Files\safir-sdk-core"
-  !define StageDirTest "..\..\..\stage\Test\Program Files\safir-sdk-core"
+  !define StageDirTest "..\..\..\stage\TestSuite\Program Files\safir-sdk-core"
 
   ;Get installation folder from registry if available
   InstallDirRegKey HKLM "Software\Safir SDK Core" ""
@@ -486,6 +489,24 @@ Section "Runtime" SecRuntime
 
 SectionEnd
 
+Section /o "Tools" SecTools
+
+  SetOutPath "$INSTDIR"
+
+  File /r "${StageDirTools}\*"
+
+  #
+  #Start menu items
+  #
+
+  CreateShortCut "${StartMenuDir}\Sate.lnk" \
+                 "$INSTDIR\bin\sate.exe" "" "" "" SW_SHOWNORMAL "" "Safir Application Tester"
+
+  CreateShortCut "${StartMenuDir}\Dobexplorer.lnk" \
+                 "$INSTDIR\bin\dobexplorer.exe" "" "" "" SW_SHOWNORMAL "" "Explore the Dob internals"
+
+SectionEnd
+
 
 Section "Development" SecDevelopment
 
@@ -526,12 +547,6 @@ Section "Development" SecDevelopment
   call ShellLinkSetRunAs
   pop $0
 
-  CreateShortCut "${StartMenuDir}\Sate.lnk" \
-                 "$INSTDIR\bin\sate.exe" "" "" "" SW_SHOWNORMAL "" "Safir Application Tester"
-
-  CreateShortCut "${StartMenuDir}\Dobexplorer.lnk" \
-                 "$INSTDIR\bin\dobexplorer.exe" "" "" "" SW_SHOWNORMAL "" "Explore the Dob internals"
-
   CreateShortCut "${StartMenuDir}\Dobmake.lnk" \
                  "$INSTDIR\bin\dobmake.exe" "" "" "" SW_SHOWNORMAL "" "Build libraries from your dou files."
 
@@ -565,6 +580,11 @@ Function parseParameters
     IfErrors +2 0
     StrCpy $option_development 0
 
+    ; /notools
+    ${GetOptions} $cmdLineParams '/notools' $R0
+    IfErrors +2 0
+    StrCpy $option_tools 0
+
     ; /testsuite
     ${GetOptions} $cmdLineParams '/testsuite' $R0
     IfErrors +2 0
@@ -575,6 +595,12 @@ Function parseParameters
       SectionGetFlags ${SecDevelopment} $0
       IntOp $0 $0 ^ ${SF_SELECTED}
       SectionSetFlags ${SecDevelopment} $0
+    ${EndIf}
+
+    ${If} $option_tools == "0"
+      SectionGetFlags ${SecTools} $0
+      IntOp $0 $0 ^ ${SF_SELECTED}
+      SectionSetFlags ${SecTools} $0
     ${EndIf}
 
     ${If} $option_testSuite == "1"
@@ -588,12 +614,14 @@ FunctionEnd
 
   ;Language strings
   LangString DESC_SecRuntime ${LANG_ENGLISH} "The Runtime parts of Safir SDK Core."
+  LangString DESC_SecTools ${LANG_ENGLISH} "Debugging tools for Safir SDK Core."
   LangString DESC_SecDevelopment ${LANG_ENGLISH} "The development parts of Safir SDK Core."
   LangString DESC_SecTest ${LANG_ENGLISH} "The Safir SDK Core test suite. You probably don't need this."
 
   ;Assign language strings to sections
   !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
   !insertmacro MUI_DESCRIPTION_TEXT ${SecRuntime} $(DESC_SecRuntime)
+  !insertmacro MUI_DESCRIPTION_TEXT ${SecTools} $(DESC_SecTools)
   !insertmacro MUI_DESCRIPTION_TEXT ${SecDevelopment} $(DESC_SecDevelopment)
   !insertmacro MUI_DESCRIPTION_TEXT ${SecTest} $(DESC_SecTest)
   !insertmacro MUI_FUNCTION_DESCRIPTION_END

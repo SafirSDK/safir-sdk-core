@@ -29,4 +29,4 @@ TARGET_LINK_LIBRARIES(dobexplorer PRIVATE
   lluf_crash_reporter
   Qt5::Widgets)
 
-SAFIR_INSTALL(TARGETS dobexplorer DEVELOPMENT)
+SAFIR_INSTALL(TARGETS dobexplorer COMPONENT Tools)

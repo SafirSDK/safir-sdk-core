@@ -38,4 +38,4 @@ target_link_libraries(system_picture_listener PRIVATE
   ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
 SAFIR_INSTALL(TARGETS system_picture)
-SAFIR_INSTALL(TARGETS system_picture_listener DEVELOPMENT)
+SAFIR_INSTALL(TARGETS system_picture_listener COMPONENT Development)

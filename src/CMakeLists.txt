@@ -47,25 +47,32 @@ find_package(Qt5Widgets QUIET)
 #
 # Usage: SAFIR_INSTALL(TARGETS <target1> .. <targetN>
 #                      [JNI]
-#                      [DEVELOPMENT]
-#                      [TEST_SUITE])
+#                      [COMPONENT <component>])
 #
 # JNI: Use flag to specify that this is a Java Native Interface library.
 #      This will cause namelink installation to be handled slightly differently.
-# DEVELOPMENT: Use this flag to specify that this target is part of the
-#              Development component.
-# TEST_SUITE: Use this flag to specify that this target is part of the
-#             Test component
+# COMPONENT: Specify which component the target belongs to. Can be Runtime,
+#            Tools, Development or TestSuite. Is set to Runtime if not specified.
 #
 function (SAFIR_INSTALL)
-  cmake_parse_arguments(INST "TEST_SUITE;DEVELOPMENT;JNI" "" "TARGETS" ${ARGN})
+  cmake_parse_arguments(INST "DEVELOPMENT;TEST_SUITE;JNI" "COMPONENT" "TARGETS" ${ARGN})
 
   if (NOT "${INST_UNPARSED_ARGUMENTS}" STREQUAL "")
     message(FATAL_ERROR "Unknown argument to SAFIR_INSTALL '${INST_UNPARSED_ARGUMENTS}'")
   endif()
 
-  if (INST_DEVELOPMENT AND INST_TEST_SUITE)
-    message(FATAL_ERROR "You can only specify either TEST_SUITE or DEVELOPMENT!")
+  if (INST_DEVELOPMENT OR INST_TEST_SUITE)
+    message(FATAL_ERROR "SAFIR_INSTALL no longer uses DEVELOPMENT or TEST_SUITE targets, use COMPONENT instead")
+  endif()
+
+  #check component and use Runtime if it was not specified explicitly
+  if (NOT INST_COMPONENT)
+    set(INST_COMPONENT Runtime)
+  endif()
+  set (_components Runtime Tools Development TestSuite)
+  list(FIND _components "${INST_COMPONENT}" _valid_component)
+  if(_valid_component EQUAL -1)
+    message(FATAL_ERROR "Invalid COMPONENT '${INST_COMPONENT}'")
   endif()
 
   foreach (target ${INST_TARGETS})
@@ -75,17 +82,6 @@ function (SAFIR_INSTALL)
       ################ Dotnet ####################
       get_target_property(assembly_file ${target} ASSEMBLY_FILE)
       if (assembly_file)
-        if (INST_TEST_SUITE)
-          set (CS_COMP "TEST_SUITE")
-          set (CONFIG_COMPONENT Test)
-        elseif(INST_DEVELOPMENT)
-          set (CS_COMP "DEVELOPMENT")
-          set (CONFIG_COMPONENT Development)
-        else()
-          unset (CS_COMP)
-          set (CONFIG_COMPONENT Runtime)
-        endif()
-
         #by default assemblies get installed here
         set(destination ${SAFIR_INSTALL_DESTINATION_CSHARP})
 
@@ -97,7 +93,7 @@ function (SAFIR_INSTALL)
 
         INSTALL_CSHARP_ASSEMBLY(TARGET ${target}
           DESTINATION ${destination}
-          ${CS_COMP})
+          COMPONENT ${INST_COMPONENT})
 
         #and on unix systems we want a little shell script in bin to launch exes with
         if (UNIX AND NOT ASSEMBLY_KIND STREQUAL "library")
@@ -108,27 +104,19 @@ function (SAFIR_INSTALL)
           #and install it to bin directory
           install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/${target}
             DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN}
-            COMPONENT ${CONFIG_COMPONENT})
+            COMPONENT ${INST_COMPONENT})
         endif()
       endif()
 
       #################### Java ########################
       get_target_property(jar_file ${target} JAR_FILE)
       if (jar_file)
-        if (INST_TEST_SUITE)
-          set (component Test)
-        elseif (INST_DEVELOPMENT)
-          set (component Development)
-        else()
-          set (component Runtime)
-        endif()
-
         get_target_property(install_files ${target} INSTALL_FILES)
 
         if (install_files)
           INSTALL(FILES ${install_files}
             DESTINATION ${SAFIR_INSTALL_DESTINATION_JAR}
-            COMPONENT ${component})
+            COMPONENT ${INST_COMPONENT})
         endif()
       endif()
 
@@ -142,7 +130,7 @@ function (SAFIR_INSTALL)
         if (INST_DEVELOPMENT)
           message(FATAL_ERROR "SAFIR_INSTALL does currently not support the DEVELOPMENT flag for library targets. Add support, if it makes sense.")
         endif()
-        if (INST_TEST_SUITE)
+        if (INST_COMPONENT STREQUAL "TestSuite")
           unset(INST_export)
         else()
           set(INST_export EXPORT SafirSDKCore)
@@ -154,47 +142,41 @@ function (SAFIR_INSTALL)
         unset(debug_suffix)
       endif()
 
-      #if the target is part of the test suite we use the Test component
-      if (INST_TEST_SUITE)
+      #Runtime and Tools components need special treatment.
+      if (INST_COMPONENT STREQUAL "Runtime" OR INST_COMPONENT STREQUAL "Tools")
         INSTALL(TARGETS ${target}
           ${INST_export}
-          RUNTIME DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN} COMPONENT Test
-          LIBRARY DESTINATION ${SAFIR_INSTALL_DESTINATION_LIB} COMPONENT Test
-          ARCHIVE DESTINATION ${SAFIR_INSTALL_DESTINATION_LIB} COMPONENT Test)
-      elseif (INST_DEVELOPMENT)
-        INSTALL(TARGETS ${target}
-          ${INST_export}
-          RUNTIME DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN} COMPONENT Development
-          LIBRARY DESTINATION ${SAFIR_INSTALL_DESTINATION_LIB} COMPONENT Development
-          ARCHIVE DESTINATION ${SAFIR_INSTALL_DESTINATION_LIB} COMPONENT Development)
-      else()
-        INSTALL(TARGETS ${target}
-          ${INST_export}
-          RUNTIME DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN} COMPONENT Runtime
-          LIBRARY DESTINATION ${SAFIR_INSTALL_DESTINATION_LIB} COMPONENT Runtime NAMELINK_SKIP
+          RUNTIME DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN} COMPONENT ${INST_COMPONENT}
+          LIBRARY DESTINATION ${SAFIR_INSTALL_DESTINATION_LIB} COMPONENT ${INST_COMPONENT} NAMELINK_SKIP
           ARCHIVE DESTINATION ${SAFIR_INSTALL_DESTINATION_LIB} COMPONENT Development)
 
         #JNI libraries need to have their namelink installed as part of runtime instead of development.
         if (INST_JNI)
           INSTALL(TARGETS ${target}
-            LIBRARY DESTINATION ${SAFIR_INSTALL_DESTINATION_LIB} COMPONENT Runtime NAMELINK_ONLY)
+            LIBRARY DESTINATION ${SAFIR_INSTALL_DESTINATION_LIB} COMPONENT ${INST_COMPONENT} NAMELINK_ONLY)
         elseif ("${target_type}" STREQUAL "SHARED_LIBRARY")
           INSTALL(TARGETS ${target}
             LIBRARY DESTINATION ${SAFIR_INSTALL_DESTINATION_LIB} COMPONENT Development NAMELINK_ONLY)
         endif()
+      else()
+        INSTALL(TARGETS ${target}
+          ${INST_export}
+          RUNTIME DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN} COMPONENT ${INST_COMPONENT}
+          LIBRARY DESTINATION ${SAFIR_INSTALL_DESTINATION_LIB} COMPONENT ${INST_COMPONENT}
+          ARCHIVE DESTINATION ${SAFIR_INSTALL_DESTINATION_LIB} COMPONENT ${INST_COMPONENT})
       endif()
 
       # Install pdb files on windows
       if(MSVC)
-        if (INST_TEST_SUITE)
+        if (INST_COMPONENT STREQUAL "TestSuite")
           INSTALL(FILES $<TARGET_FILE_DIR:${target}>/${target}.pdb
             DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN}
             CONFIGURATIONS RelWithDebInfo
-            COMPONENT Test)
+            COMPONENT TestSuite)
           INSTALL(FILES $<TARGET_FILE_DIR:${target}>/${target}${debug_suffix}.pdb
             DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN}
             CONFIGURATIONS Debug
-            COMPONENT Test)
+            COMPONENT TestSuite)
         else()
           INSTALL(FILES $<TARGET_FILE_DIR:${target}>/${target}.pdb
             DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN}

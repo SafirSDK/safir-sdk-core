@@ -27,7 +27,7 @@ ADD_TEST(NAME MessageQueue COMMAND dose_message_queue_test)
 ADD_TEST(NAME DistributionData COMMAND distribution_data_test)
 ADD_TEST(NAME WrapAroundCounter COMMAND wrap_around_counter_test)
 
-SET_SAFIR_TEST_PROPERTIES(TEST Semaphore TIMEOUT 60)
+SET_SAFIR_TEST_PROPERTIES(TEST Semaphore)
 SET_SAFIR_TEST_PROPERTIES(TEST MessageQueue TIMEOUT 360)
 SET_SAFIR_TEST_PROPERTIES(TEST DistributionData)
 SET_SAFIR_TEST_PROPERTIES(TEST WrapAroundCounter TIMEOUT 600)

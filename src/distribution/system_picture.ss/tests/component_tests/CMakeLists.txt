@@ -15,14 +15,14 @@ TARGET_LINK_LIBRARIES(sp_test_dm PRIVATE
   lluf_id
   ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
-SAFIR_INSTALL(TARGETS sp_test_ctrl sp_test_dm TEST_SUITE)
+SAFIR_INSTALL(TARGETS sp_test_ctrl sp_test_dm COMPONENT TestSuite)
 
 SAFIR_INSTALL_PYTHON(SCRIPT circular_restart.py
-  COMPONENT Test)
+  COMPONENT TestSuite)
 
 INSTALL(
   DIRECTORY
     config
   DESTINATION ${SAFIR_INSTALL_DESTINATION_TEST_DATA}/system_picture
-  COMPONENT Test
+  COMPONENT TestSuite
   )

@@ -5,4 +5,4 @@ TARGET_LINK_LIBRARIES(consumer_cast_test PRIVATE
 
 ADD_TEST(NAME ConsumerCasting COMMAND consumer_cast_test)
 
-SET_SAFIR_TEST_PROPERTIES(TEST ConsumerCasting TIMEOUT 60)
+SET_SAFIR_TEST_PROPERTIES(TEST ConsumerCasting)

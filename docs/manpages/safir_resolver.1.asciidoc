@@ -1,0 +1,33 @@
+SAFIR_RESOLVER(1)
+=================
+:doctype: manpage
+
+
+NAME
+----
+safir_resolver - Test what addresses Safir SDK Core will resolve.
+
+
+SYNOPSIS
+--------
+*safir_resolver* ['OPTIONS']
+
+DESCRIPTION
+-----------
+Use this tool to check what IP addresses get resolved from names and patterns.
+
+OPTIONS
+-------
+Please check safir_resolver --help for information on options.
+
+
+RESOURCES
+---------
+Web site: <http://www.safirsdkcore.com/>
+
+
+COPYING
+-------
+Copyright \(C) 2004-2016 Saab AB. Free use of this software is granted under
+the terms of the GNU General Public License Version 3 (GPL-3).
+

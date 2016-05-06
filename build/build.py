@@ -467,7 +467,7 @@ class BuilderBase(object):
             self.__install()
 
     def __stage_install(self):
-        for component in ("Runtime", "Development", "Test"):
+        for component in ("Runtime", "Tools", "Development", "TestSuite"):
             command = (cmake(),
                     "-DCOMPONENT="+ component,
                     "-P", "cmake_install.cmake")

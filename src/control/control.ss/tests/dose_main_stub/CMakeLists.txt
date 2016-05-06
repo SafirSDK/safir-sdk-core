@@ -9,4 +9,4 @@ TARGET_LINK_LIBRARIES(dose_main_test_stub PRIVATE
   lluf_utils
   ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
-SAFIR_INSTALL(TARGETS dose_main_test_stub TEST_SUITE)
+SAFIR_INSTALL(TARGETS dose_main_test_stub COMPONENT TestSuite)

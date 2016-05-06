@@ -3154,9 +3154,9 @@ whatever ip address eth0 is using. On Windows there is no such feature, currentl
 If no matching interface can be found retries will be made for the interval specified in
 Safir.Dob.NodeParameters.LocalInterfaceTimeout.
 
-There is a command line utility +communication_resolver+ that can be used to check what
-an address or interface name will resolve to. Use the +-l+ flag to resolve local addresses
-and interfaces.
+There is a command line utility +safir_resolver+ (used to be called
+communication_resolver) that can be used to check what an address or interface name will
+resolve to. Use the +-l+ flag to resolve local addresses and interfaces.
 
 [[node-discovery]]
 ==== Node discovery and system start

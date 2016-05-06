@@ -12,4 +12,4 @@ ADD_TEST(NAME tracer_dotnet
   --sender-exe $<TARGET_PROPERTY:tracer_sender_dotnet,ASSEMBLY_FILE>
   --dependencies $<TARGET_PROPERTY:Safir.SwReports,ASSEMBLY_FILE>,$<TARGET_PROPERTY:Safir.Dob.Typesystem,ASSEMBLY_FILE>)
 
-SET_SAFIR_TEST_PROPERTIES(TEST tracer_dotnet TIMEOUT 120)
+SET_SAFIR_TEST_PROPERTIES(TEST tracer_dotnet)

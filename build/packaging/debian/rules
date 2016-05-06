@@ -1,5 +1,5 @@
 #!/usr/bin/make -f
-.PHONY: override_dh_install install_runtime install_development install_testsuite override_dh_auto_test override_dh_clideps override_dh_strip
+.PHONY: override_dh_install install_runtime install_tools install_development install_testsuite override_dh_auto_test override_dh_clideps override_dh_strip
 
 #upstream recommends NDEBUG for release builds!
 export CPPFLAGS += -DNDEBUG
@@ -7,7 +7,7 @@ export CPPFLAGS += -DNDEBUG
 %:
 	dh $@ --parallel --with=cli
 
-override_dh_auto_install: install_runtime install_development install_testsuite
+override_dh_auto_install: install_runtime install_tools install_development install_testsuite
 
 install_runtime: export DESTDIR=$(shell pwd)/debian/safir-sdk-core
 install_runtime:
@@ -23,13 +23,17 @@ install_runtime:
 	#create some needed directories
 	mkdir -p debian/safir-sdk-core/var/lib/safir-sdk-core
 
+install_tools: export DESTDIR=$(shell pwd)/debian/safir-sdk-core-tools
+install_tools:
+	cd obj-$(DEB_BUILD_GNU_TYPE) && /usr/bin/cmake -DCOMPONENT=Tools -P cmake_install.cmake
+
 install_development: export DESTDIR=$(shell pwd)/debian/safir-sdk-core-dev
 install_development:
 	cd obj-$(DEB_BUILD_GNU_TYPE) && /usr/bin/cmake -DCOMPONENT=Development -P cmake_install.cmake
 
 install_testsuite: export DESTDIR=$(shell pwd)/debian/safir-sdk-core-testsuite
 install_testsuite:
-	cd obj-$(DEB_BUILD_GNU_TYPE) && /usr/bin/cmake -DCOMPONENT=Test -P cmake_install.cmake
+	cd obj-$(DEB_BUILD_GNU_TYPE) && /usr/bin/cmake -DCOMPONENT=TestSuite -P cmake_install.cmake
 
 override_dh_auto_test:
 	touch obj-$(DEB_BUILD_GNU_TYPE)/DartConfiguration.tcl

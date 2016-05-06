@@ -14,4 +14,4 @@ ADD_TEST(NAME swreport_java
   --dependencies $<TARGET_PROPERTY:swre_reports_java,JAR_FILE>
   --safir-show-config $<TARGET_FILE:safir_show_config>)
 
-SET_SAFIR_TEST_PROPERTIES(TEST swreport_java TIMEOUT 120)
+SET_SAFIR_TEST_PROPERTIES(TEST swreport_java)

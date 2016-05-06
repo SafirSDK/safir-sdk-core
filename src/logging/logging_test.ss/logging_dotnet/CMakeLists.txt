@@ -10,5 +10,5 @@ ADD_TEST(NAME logging_dotnet
   --sender-exe $<TARGET_PROPERTY:log_sender_dotnet,ASSEMBLY_FILE>
   --dependencies $<TARGET_PROPERTY:Safir.Logging,ASSEMBLY_FILE>)
 
-SET_SAFIR_TEST_PROPERTIES(TEST logging_dotnet TIMEOUT 120)
+SET_SAFIR_TEST_PROPERTIES(TEST logging_dotnet)
 

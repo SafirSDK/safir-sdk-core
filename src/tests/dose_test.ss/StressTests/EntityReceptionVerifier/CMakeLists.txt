@@ -9,4 +9,4 @@ TARGET_LINK_LIBRARIES(EntityReceptionVerifier PRIVATE
   lluf_utils
   ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
-SAFIR_INSTALL(TARGETS EntityReceptionVerifier TEST_SUITE)
+SAFIR_INSTALL(TARGETS EntityReceptionVerifier COMPONENT TestSuite)

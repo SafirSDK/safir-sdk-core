@@ -16,4 +16,4 @@ ADD_EXECUTABLE(dobmake WIN32 ${sources} ${ui_headers} ${moc_sources} ${headers})
 
 TARGET_LINK_LIBRARIES(dobmake PRIVATE Qt5::Widgets)
 
-SAFIR_INSTALL(TARGETS dobmake DEVELOPMENT)
+SAFIR_INSTALL(TARGETS dobmake COMPONENT Development)

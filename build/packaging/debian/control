@@ -18,6 +18,19 @@ Description: Distributed real-time system framework
  .
  This package contains the runtime for Safir SDK Core.
 
+Package: safir-sdk-core-tools
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, safir-sdk-core
+Description: Safir SDK Core debugging tools
+ Safir SDK Core is a middleware and platform for creation of
+ distributed soft real-time systems. It is Scalable, Reliable,
+ Portable, and last but not least, it is Open!
+ Safir SDK Core is based on modern architectural principles
+ and has a solid foundation in more than 20 years of
+ development of distributed systems at Saab AB.
+ .
+ This package contains some extra tools for Safir SDK Core
+
 Package: safir-sdk-core-dev
 Architecture: any
 Section: libdevel
@@ -35,7 +48,7 @@ Description: Safir SDK Core development files
 Package: safir-sdk-core-testsuite
 Architecture: any
 Section: libdevel
-Depends: ${shlibs:Depends}, ${misc:Depends}, ${cli:Depends}, python (>= 2.7.0), safir-sdk-core
+Depends: ${shlibs:Depends}, ${misc:Depends}, ${cli:Depends}, python (>= 2.7.0), safir-sdk-core, safir-sdk-core-tools
 Description: Safir SDK Core test suite
  Safir SDK Core is a middleware and platform for creation of
  distributed soft real-time systems. It is Scalable, Reliable,

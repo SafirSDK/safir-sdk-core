@@ -1,9 +1,9 @@
-ADD_EXECUTABLE(communication_resolver communication_resolver.cpp)
+ADD_EXECUTABLE(safir_resolver communication_resolver.cpp)
 
-TARGET_LINK_LIBRARIES(communication_resolver PRIVATE
+TARGET_LINK_LIBRARIES(safir_resolver PRIVATE
   ${Boost_PROGRAM_OPTIONS_LIBRARY}
   ${Boost_REGEX_LIBRARY}
   ${Boost_THREAD_LIBRARY}
   ${Boost_SYSTEM_LIBRARY})
 
-SAFIR_INSTALL(TARGETS communication_resolver TEST_SUITE)
+SAFIR_INSTALL(TARGETS safir_resolver COMPONENT Tools)

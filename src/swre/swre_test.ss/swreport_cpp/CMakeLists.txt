@@ -8,4 +8,4 @@ ADD_TEST(NAME swreport_cpp
   --binary $<TARGET_FILE:swreport_sender_cpp>
   --safir-show-config $<TARGET_FILE:safir_show_config>)
 
-SET_SAFIR_TEST_PROPERTIES(TEST swreport_cpp TIMEOUT 120)
+SET_SAFIR_TEST_PROPERTIES(TEST swreport_cpp)

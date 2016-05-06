@@ -5,7 +5,7 @@ TARGET_LINK_LIBRARIES(entity_owner PRIVATE
   safir_generated-DopeTest-cpp
   ${Boost_ATOMIC_LIBRARY})
 
-SAFIR_INSTALL(TARGETS entity_owner TEST_SUITE)
+SAFIR_INSTALL(TARGETS entity_owner COMPONENT TestSuite)
 
 add_subdirectory(none_backend)
 add_subdirectory(file_backend)

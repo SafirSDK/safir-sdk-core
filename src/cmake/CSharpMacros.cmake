@@ -216,14 +216,20 @@ endfunction()
 
 
 function(INSTALL_CSHARP_ASSEMBLY)
-    cmake_parse_arguments(_cs "TEST_SUITE;DEVELOPMENT" "TARGET;DESTINATION" "" ${ARGN})
+    cmake_parse_arguments(_cs "" "TARGET;DESTINATION;COMPONENT" "" ${ARGN})
 
     if (NOT "${_cs_UNPARSED_ARGUMENTS}" STREQUAL "")
       message(FATAL_ERROR "Unknown argument to INSTALL_CSHARP_ASSEMBLY '${_cs_UNPARSED_ARGUMENTS}'")
     endif()
 
-    if (_cs_DEVELOPMENT AND _cs_TEST_SUITE)
-      message(FATAL_ERROR "You can only specify either TEST_SUITE or DEVELOPMENT!")
+    #check component and use Runtime if it was not specified explicitly
+    if (NOT _cs_COMPONENT)
+      set(_cs_COMPONENT Runtime)
+    endif()
+    set (_components Runtime Tools Development TestSuite)
+    list(FIND _components "${_cs_COMPONENT}" _valid_component)
+    if(_valid_component EQUAL -1)
+      message(FATAL_ERROR "Invalid COMPONENT '${_cs_COMPONENT}'")
     endif()
 
     if (NOT CMAKE_VERSION VERSION_LESS "3.0.0")
@@ -244,15 +250,12 @@ function(INSTALL_CSHARP_ASSEMBLY)
     get_property(_cs_DEBUG_INFO_FILE TARGET ${_cs_TARGET} PROPERTY DEBUG_INFO_FILE)
     get_property(_cs_CONFIG_FILE TARGET ${_cs_TARGET} PROPERTY CONFIG_FILE)
 
-    if (_cs_TEST_SUITE)
-      set(_cs_COMPONENT_RUNTIME Test)
-      set(_cs_COMPONENT_DEVELOPMENT Test)
-    elseif (_cs_DEVELOPMENT)
-      set(_cs_COMPONENT_RUNTIME Development)
-      set(_cs_COMPONENT_DEVELOPMENT Development)
-    else()
-      set(_cs_COMPONENT_RUNTIME Runtime)
-      set(_cs_COMPONENT_DEVELOPMENT Development)
+    set(_cs_COMPONENT_RUNTIME ${_cs_COMPONENT})
+    set(_cs_COMPONENT_DEVELOPMENT ${_cs_COMPONENT})
+
+    #runtime and tools targets still want some stuff put in the development component.
+    if (_cs_COMPONENT STREQUAL "Runtime" OR _cs_COMPONENT STREQUAL "Tools")
+      set(_cs_COMPONENT_DEVELOPMENT "Development")
     endif()
 
     if (_cs_TARGET_KIND STREQUAL "library")

@@ -7,4 +7,4 @@ TARGET_LINK_LIBRARIES(communication_test PRIVATE
   ${Boost_THREAD_LIBRARY}
   ${Boost_SYSTEM_LIBRARY})
 
-SAFIR_INSTALL(TARGETS communication_test TEST_SUITE)
+SAFIR_INSTALL(TARGETS communication_test COMPONENT TestSuite)

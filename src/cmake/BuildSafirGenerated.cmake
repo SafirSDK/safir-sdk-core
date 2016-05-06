@@ -490,8 +490,8 @@ FUNCTION(INSTALL_SAFIR_GENERATED_LIBRARY)
       #For installs that happen from within the Safir SDK Core build tree we use
       #a lot of component stuff etc.
       if (_in_TEST_SUITE)
-        set (component_runtime Test)
-        set (component_development Test)
+        set (component_runtime TestSuite)
+        set (component_development TestSuite)
         unset(_in_export)
       else()
         set (component_runtime Runtime)
@@ -526,14 +526,9 @@ FUNCTION(INSTALL_SAFIR_GENERATED_LIBRARY)
       endif()
 
       if (_in_DOTNET_BUILT)
-        if (_in_TEST_SUITE)
-          set (TEST_SUITE "TEST_SUITE")
-        else()
-          unset (TEST_SUITE)
-        endif()
         INSTALL_CSHARP_ASSEMBLY(TARGET safir_generated-${_in_NAME}-dotnet
           DESTINATION ${SAFIR_INSTALL_DESTINATION_CSHARP}
-          ${TEST_SUITE})
+          COMPONENT ${component_runtime})
       endif()
     endif()
   endforeach()

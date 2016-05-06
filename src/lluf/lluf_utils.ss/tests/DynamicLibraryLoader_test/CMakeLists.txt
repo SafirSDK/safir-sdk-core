@@ -21,4 +21,4 @@ ADD_TEST(NAME DynamicLibraryLoader
   --test-exe-3 $<TARGET_FILE:DynamicLibraryLoader_test3>
   --test-exe-4 $<TARGET_FILE:DynamicLibraryLoader_test4>)
 
-SET_SAFIR_TEST_PROPERTIES(TEST DynamicLibraryLoader TIMEOUT 40)
+SET_SAFIR_TEST_PROPERTIES(TEST DynamicLibraryLoader)

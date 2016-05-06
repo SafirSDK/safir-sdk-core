@@ -9,4 +9,4 @@ TARGET_LINK_LIBRARIES(dose_test_cpp PRIVATE
   dose_cpp
   safir_generated-DoseTest-cpp)
 
-SAFIR_INSTALL(TARGETS dose_test_cpp TEST_SUITE)
+SAFIR_INSTALL(TARGETS dose_test_cpp COMPONENT TestSuite)

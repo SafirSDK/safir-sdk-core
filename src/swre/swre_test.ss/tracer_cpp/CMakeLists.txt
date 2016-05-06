@@ -9,4 +9,4 @@ ADD_TEST(NAME tracer_cpp
   --safir-show-config $<TARGET_FILE:safir_show_config>)
 
 
-SET_SAFIR_TEST_PROPERTIES(TEST tracer_cpp TIMEOUT 120)
+SET_SAFIR_TEST_PROPERTIES(TEST tracer_cpp)

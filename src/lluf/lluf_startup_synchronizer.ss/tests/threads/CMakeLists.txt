@@ -6,4 +6,4 @@ TARGET_LINK_LIBRARIES(ss_threads_test PRIVATE
   ${Boost_SYSTEM_LIBRARY})
 
 ADD_TEST(NAME StartupSynchronizer_threads COMMAND ss_threads_test)
-SET_SAFIR_TEST_PROPERTIES(TEST StartupSynchronizer_threads TIMEOUT 120)
+SET_SAFIR_TEST_PROPERTIES(TEST StartupSynchronizer_threads)
