@@ -77,6 +77,11 @@ private:
     void WsSendMessage(const ws::SendPtr& cmd);
     void WsUnsubscribeMessage(const ws::SendPtr& cmd);
 
+    void WsSubscribeEntity(const ws::SendPtr& cmd);
+    void WsUnsubscribeEntity(const ws::SendPtr& cmd);
+    void WsRegisterEntityHandler(const ws::SendPtr& cmd);
+    void WsUnregisterHandler(const ws::SendPtr& cmd);
+
     //---------------helpers---------------------
 
     inline ws::SendPtr ToCommand(const std::string& payload)

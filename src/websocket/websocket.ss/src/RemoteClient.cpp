@@ -212,3 +212,23 @@ void RemoteClient::WsUnsubscribeMessage(const Safir::Websocket::SendPtr &cmd)
     }
 
 }
+
+void RemoteClient::WsSubscribeEntity(const Safir::Websocket::SendPtr &cmd)
+{
+
+}
+
+void RemoteClient::WsUnsubscribeEntity(const Safir::Websocket::SendPtr &cmd)
+{
+
+}
+
+void RemoteClient::WsRegisterEntityHandler(const Safir::Websocket::SendPtr &cmd)
+{
+
+}
+
+void RemoteClient::WsUnregisterHandler(const Safir::Websocket::SendPtr &cmd)
+{
+
+}

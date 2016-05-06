@@ -2,7 +2,7 @@
 <class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <summary>Command sent from remote application using the web api.</summary>
   <name>Safir.Websocket.Send</name>
-  <baseClass>Object</baseClass>
+  <baseClass>Safir.Dob.Service</baseClass>
   <members>
     <member>      
       <name>Command</name>

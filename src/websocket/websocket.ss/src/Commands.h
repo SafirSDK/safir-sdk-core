@@ -31,6 +31,7 @@ namespace Commands
     static const std::wstring SubscribeMessage = L"SubscribeMessage";
     static const std::wstring SendMessage = L"SendMessge";
     static const std::wstring UnsubscribeMessage = L"UnsubscribeMessage";
+    static const std::wstring SubscribeEntity = L"SubscribeEntity";
 
 
     static const std::wstring GetTypeHierarchy = L"GetTypeHierarchy";
