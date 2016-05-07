@@ -287,13 +287,13 @@ Function .onInit
     Pop $R0
 
     ; Initialise options
-    Var /GLOBAL option_development
     Var /GLOBAL option_tools
+    Var /GLOBAL option_development
     Var /GLOBAL option_testSuite
 
-    StrCpy $option_development    1
-    StrCpy $option_tools          1
-    StrCpy $option_testSuite      0
+    StrCpy $option_tools          "1"
+    StrCpy $option_development    "1"
+    StrCpy $option_testSuite      "0"
 
     ; Parse Parameters
     Push $R0
@@ -575,37 +575,36 @@ SectionEnd
 
 ;--------------------------------
 Function parseParameters
-    ; /nodevelopment
-    ${GetOptions} $cmdLineParams '/nodevelopment' $R0
-    IfErrors +2 0
-    StrCpy $option_development 0
-
     ; /notools
     ${GetOptions} $cmdLineParams '/notools' $R0
     IfErrors +2 0
     StrCpy $option_tools 0
+
+    ; /nodevelopment
+    ${GetOptions} $cmdLineParams '/nodevelopment' $R0
+    IfErrors +2 0
+    StrCpy $option_development 0
 
     ; /testsuite
     ${GetOptions} $cmdLineParams '/testsuite' $R0
     IfErrors +2 0
     StrCpy $option_testSuite 1
 
-
-    ${If} $option_development == "0"
-      SectionGetFlags ${SecDevelopment} $0
-      IntOp $0 $0 ^ ${SF_SELECTED}
-      SectionSetFlags ${SecDevelopment} $0
+    ${If} $option_tools == "1"
+      SectionGetFlags ${SecTools} $0
+      IntOp $0 $0 | ${SF_SELECTED}
+      SectionSetFlags ${SecTools} $0
     ${EndIf}
 
-    ${If} $option_tools == "0"
-      SectionGetFlags ${SecTools} $0
-      IntOp $0 $0 ^ ${SF_SELECTED}
-      SectionSetFlags ${SecTools} $0
+    ${If} $option_development == "1"
+      SectionGetFlags ${SecDevelopment} $0
+      IntOp $0 $0 | ${SF_SELECTED}
+      SectionSetFlags ${SecDevelopment} $0
     ${EndIf}
 
     ${If} $option_testSuite == "1"
       SectionGetFlags ${SecTest} $0
-      IntOp $0 $0 ^ ${SF_SELECTED}
+      IntOp $0 $0 | ${SF_SELECTED}
       SectionSetFlags ${SecTest} $0
     ${EndIf}
 FunctionEnd
@@ -614,7 +613,7 @@ FunctionEnd
 
   ;Language strings
   LangString DESC_SecRuntime ${LANG_ENGLISH} "The Runtime parts of Safir SDK Core."
-  LangString DESC_SecTools ${LANG_ENGLISH} "Debugging tools for Safir SDK Core."
+  LangString DESC_SecTools ${LANG_ENGLISH} "Debugging tools for Safir SDK Core (Sate, Dobexplorer, etc)."
   LangString DESC_SecDevelopment ${LANG_ENGLISH} "The development parts of Safir SDK Core."
   LangString DESC_SecTest ${LANG_ENGLISH} "The Safir SDK Core test suite. You probably don't need this."
 
