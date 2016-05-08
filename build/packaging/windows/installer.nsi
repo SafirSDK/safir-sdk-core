@@ -508,7 +508,7 @@ Section /o "Tools" SecTools
 SectionEnd
 
 
-Section "Development" SecDevelopment
+Section /o "Development" SecDevelopment
 
   SetOutPath "$INSTDIR"
 
