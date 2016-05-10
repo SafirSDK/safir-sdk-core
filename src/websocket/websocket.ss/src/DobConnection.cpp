@@ -85,11 +85,14 @@ void DobConnection::OnInitialInjectionsDone(const sd::Typesystem::TypeId typeId,
 //EntitySubscriber interface
 void DobConnection::OnNewEntity(const sd::EntityProxy entityProxy)
 {
+    auto json=ts::Serialization::ToJson(entityProxy.GetBlob());
+    m_wsSend(ts::Utilities::ToUtf8(json));
 
 }
 void DobConnection::OnUpdatedEntity(const sd::EntityProxy entityProxy)
 {
-
+    auto json=ts::Serialization::ToJson(entityProxy.GetBlob());
+    m_wsSend(ts::Utilities::ToUtf8(json));
 }
 void DobConnection::OnDeletedEntity(const sd::EntityProxy entityProxy, const bool)
 {

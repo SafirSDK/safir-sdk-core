@@ -55,8 +55,26 @@ public:
     void Open(const std::wstring& name, int context) {m_con.Open(name, L"-ws", context, this, &m_dispatcher);}
     void Close() {if (m_con.IsOpen()) m_con.Close();}
     void SubscribeMessage(ts::TypeId typeId, const ts::ChannelId& ch, bool includeSubclasses) {m_con.SubscribeMessage(typeId, ch, includeSubclasses, this);}
-    void SendMessage(const sd::MessagePtr msg, const ts::ChannelId& ch) {m_con.Send(msg, ch, this);}
     void UnsubscribeMessage(ts::TypeId typeId, const ts::ChannelId& ch, bool includeSubclasses) {m_con.UnsubscribeMessage(typeId, ch, includeSubclasses, this);}
+    void SendMessage(const sd::MessagePtr msg, const ts::ChannelId& ch) {m_con.Send(msg, ch, this);}
+
+    void SubscribeEntity(ts::TypeId typeId, bool inclUpd, bool inclSub, bool restart) {m_con.SubscribeEntity(typeId, inclUpd, inclSub, restart, this);}
+    void SubscribeEntity(const ts::EntityId& eid, bool inclUpd, bool restart) {m_con.SubscribeEntity(eid, inclUpd, restart, this);}
+    void UnsubscribeEntity(ts::TypeId typeId, bool inclSub) {m_con.UnsubscribeEntity(typeId, inclSub, this);}
+    void UnsubscribeEntity(const ts::EntityId& eid) {m_con.UnsubscribeEntity(eid, this);}
+
+    void RegisterEntity(ts::TypeId typeId, const ts::HandlerId& handler, sd::InstanceIdPolicy::Enumeration policy, bool injection, bool pending)
+    {
+        if (injection)
+            m_con.RegisterEntityHandlerInjection(typeId, handler, policy, this);
+        else if (pending)
+            m_con.RegisterEntityHandlerPending(typeId, handler, policy, this);
+        else
+            m_con.RegisterEntityHandler(typeId, handler, policy, this);
+    }
+
+    void UnregisterHandler(ts::TypeId typeId, const ts::HandlerId& handler) {m_con.UnregisterHandler(typeId, handler);}
+
 
 private:
     sd::Connection m_con;

@@ -38,10 +38,10 @@ namespace CommandValidator
     inline void ValidateSubscribeMessage(const ws::SendPtr& cmd)
     {
         if (cmd->Type().IsNull())
-            throw std::invalid_argument("ConnectionName is mandatory in command 'Open'");
+            throw std::invalid_argument("Type is mandatory in command 'SubscribeMessage'");
 
         if (!Safir::Dob::Typesystem::Operations::IsOfType(cmd->Type().GetVal(), Safir::Dob::Message::ClassTypeId))
-            throw std::invalid_argument("Type must refer to a subtype of Safir.Dob.Message");
+            throw std::invalid_argument("Type must refer to a subtype of Safir.Dob.Message in command 'SubscribeMessage'");
     }
 
     inline void ValidateSendMessage(const ws::SendPtr& cmd)
@@ -54,6 +54,43 @@ namespace CommandValidator
     {
         if (cmd->Type().IsNull())
             throw std::invalid_argument("Type is mandatory in command 'UnsubscribeMessage'");
+    }
+
+    inline void ValidateSubscribeEntity(const ws::SendPtr& cmd)
+    {
+        if (cmd->Type().IsNull())
+            throw std::invalid_argument("Type is mandatory in command 'SubscribeEntity'");
+
+        if (cmd->Instance().IsNull()==false && cmd->IncludeSubclasses().IsNull()==false)
+            throw std::invalid_argument("Not allowed to specify both Instance and IncludeSubclasses for the same subscription. Command 'SubscribeEntity'");
+    }
+
+    inline void ValidateUnsubscribeEntity(const ws::SendPtr& cmd)
+    {
+        if (cmd->Type().IsNull())
+            throw std::invalid_argument("Type is mandatory in command 'UnsubscribeEntity'");
+
+        if (cmd->Instance().IsNull()==false && cmd->IncludeSubclasses().IsNull()==false)
+            throw std::invalid_argument("Not allowed to specify both Instance and IncludeSubclasses for the same subscription. Command 'UnsubscribeEntity'");
+    }
+
+    inline void ValidateRegisterEntityHandler(const ws::SendPtr& cmd)
+    {
+        if (cmd->Type().IsNull())
+            throw std::invalid_argument("Type is mandatory in command 'RegisterEntityHandler'");
+
+        if (!Safir::Dob::Typesystem::Operations::IsOfType(cmd->Type().GetVal(), Safir::Dob::Entity::ClassTypeId))
+            throw std::invalid_argument("Type must refer to a subtype of Safir.Dob.Entity in command 'RegisterEntityHandler'");
+
+        if (cmd->InjectionHandler().IsNull()==false && cmd->InjectionHandler().GetVal()==true &&
+            cmd->Pending().IsNull()==false && cmd->Pending().GetVal()==true)
+            throw std::invalid_argument("Not allowed to specify both Pending and InjectionHandler for the same registration. is mandatory in command 'RegisterEntityHandler'");
+    }
+
+    inline void ValidateUnregisterHandler(const ws::SendPtr& cmd)
+    {
+        if (cmd->Type().IsNull())
+            throw std::invalid_argument("Type is mandatory in command 'nregisterHandler'");
     }
 
 }

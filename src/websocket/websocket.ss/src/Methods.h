@@ -21,12 +21,22 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#include "JsonRpcTest.h"
-#include "CommandValidatorTest.h"
+#pragma once
+#include <string>
 
-int main(int /*argc*/, const char** /*argv*/)
+namespace Methods
 {
-    JsonRpcTest();
-    return 0;
-}
+    static const std::wstring Open = L"Open";
+    static const std::wstring Close = L"Close";
+    static const std::wstring SubscribeMessage = L"SubscribeMessage";
+    static const std::wstring UnsubscribeMessage = L"UnsubscribeMessage";
+    static const std::wstring SendMessage = L"SendMessage";
+    static const std::wstring SubscribeEntity = L"SubscribeEntity";
+    static const std::wstring UnsubscribeEntity = L"UnsubscribeEntity";
+    static const std::wstring RegisterEntityHandler = L"RegisterEntityHandler";
+    static const std::wstring UnregisterHandler = L"UnregisterHandler";
 
+    static const std::wstring GetTypeHierarchy = L"GetTypeHierarchy";
+
+    static const std::wstring GeneralError = L"General Error";
+}

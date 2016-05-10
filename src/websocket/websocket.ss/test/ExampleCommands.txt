@@ -4,5 +4,7 @@
 
 {"Command":"SubscribeMessage", "Type":"Safir.Dob.Message", "Id":2}
 
+{"Command":"SubscribeEntity", "Type":"Safir.Dob.Entity", "Id":2}
+
 {"Command":"Close", "Id":1}
 

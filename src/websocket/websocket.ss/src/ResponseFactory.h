@@ -57,10 +57,16 @@ public:
         return ToString(r);
     }
 
+    static void ResponseAddString(std::ostringstream& response, const std::string& name, const std::string& val)
+    {
+        if (response.tellp()>0)
+            response<<",";
+        response<<"\""<<name<<"\":\""<<val<<"\"";
+    }
+
 private:
     static std::string ToString(const ws::ReceivePtr& r)
     {
         return ts::Utilities::ToUtf8(ts::Serialization::ToJson(r));
     }
-
 };

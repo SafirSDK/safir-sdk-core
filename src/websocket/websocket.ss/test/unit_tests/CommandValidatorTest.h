@@ -21,20 +21,9 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#pragma once
-#include <string>
+#include "../../src/CommandValidator.h"
 
-namespace Commands
+inline void CommandValidatorTest()
 {
-    static const std::wstring Open = L"Open";
-    static const std::wstring Close = L"Close";
-    static const std::wstring SubscribeMessage = L"SubscribeMessage";
-    static const std::wstring SendMessage = L"SendMessge";
-    static const std::wstring UnsubscribeMessage = L"UnsubscribeMessage";
-    static const std::wstring SubscribeEntity = L"SubscribeEntity";
 
-
-    static const std::wstring GetTypeHierarchy = L"GetTypeHierarchy";
-
-    static const std::wstring GeneralError = L"General Error";
 }

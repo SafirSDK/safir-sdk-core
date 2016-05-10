@@ -25,6 +25,7 @@
 #ifndef _dots_dob_internal_h
 #define _dots_dob_internal_h
 
+#include <boost/shared_ptr.hpp>
 #include <Safir/Dob/Typesystem/Defs.h>
 
 namespace Safir
@@ -33,6 +34,9 @@ namespace Dob
 {
 namespace Typesystem
 {
+    class Object;
+    typedef boost::shared_ptr<Object> ObjectPtr;
+
 namespace Internal
 {
     /**
@@ -57,6 +61,26 @@ namespace Internal
      */
     DOTS_CPP_API std::wstring GetDouFilePath(const Dob::Typesystem::TypeId typeId);
         
+    /**
+     * Convert a raw blob to UTF8 JSON string
+     * @param blob The blob to convert.
+     * @return UTF8 JSON string.
+     */
+    std::string ToJson(const char * const blob);
+
+    /**
+     * Deserialize an UTF8 JSON serialization.
+     *
+     * This method creates a new object from a given json serialization.
+     * It uses the ObjectFactory to accomplish this.
+     *
+     * @param [in] json - The json to convert.
+     * @return A boost::shared_ptr to the new object
+     * @exception IllegalValueException If there is something wrong with the JSON or if the type
+     *                                  represented by the serialization isn't found
+     *                                  in the ObjectFactory.
+     */
+    Dob::Typesystem::ObjectPtr ToObjectFromJson(const std::string & json);
 
     //These constants used to be calculated from the strings, but that caused some
     //strange elaboration errors, so they were changed to hard-coded constants.
