@@ -65,249 +65,272 @@ void RemoteClient::OnClose(websocketpp::connection_hdl hdl)
 
 void RemoteClient::OnMessage(websocketpp::connection_hdl hdl, WsMessage msg)
 {
-    std::cout<<"RemoteClient OnMessage "<<msg->get_payload()<<std::endl;
-    std::string payload=msg->get_payload();
-    JsonRpcRequest dummy(payload);
-
-    payload.insert(1, "\"_DouType\":\"Safir.Websocket.Send\",");
-
-    auto cmd = ToCommand(payload);
-    if (cmd)
+    try
     {
-        WsDispatch(cmd);
+        std::cout<<"RemoteClient OnMessage "<<msg->get_payload()<<std::endl;
+        auto payload=msg->get_payload();
+        JsonRpcRequest req(payload);
+        try
+        {
+            req.Validate();
+        }
+        catch (const RequestErrorException& e)
+        {
+            m_connection->send(JsonRpcResponse::Error(req.Id(), e.Code(), e.Message()));
+            return;
+        }
+
+        WsDispatch(req);
     }
-    else
+    catch (const RequestErrorException& e)
     {
-        std::cout<<"Received data from "<<ToString()<<" that could not be understood"<<std::endl<<msg->get_payload()<<std::endl;
-        m_connection->send(ResponseFactory::Error(Methods::GeneralError, L"I dont understand what you mean!"));
+        m_connection->send(JsonRpcResponse::Error(JsonRpcId(), e.Code(), e.Message()));
+    }
+    catch (const std::exception& e)
+    {
+        m_connection->send(JsonRpcResponse::Error(JsonRpcId(), RequestErrorException::InternalError, e.what()));
+    }
+    catch (...)
+    {
+        m_connection->send(JsonRpcResponse::Error(JsonRpcId(), RequestErrorException::InternalError, "Unexpected error in safir_websocket"));
     }
 }
 
 //------------------------------------------------------
 // Websocket client commands
 //------------------------------------------------------
-void RemoteClient::WsDispatch(const ws::SendPtr& cmd)
+void RemoteClient::WsDispatch(const JsonRpcRequest& req)
 {
-    if (cmd->Command().IsNull())
+    if (req.Method()==Methods::GetTypeHierarchy)
     {
-        std::cout<<"Received command that is not supported "<<std::endl;
-        auto msg=ResponseFactory::Error(Methods::GeneralError, L"Command is not supported. "+cmd->Command().GetVal(), ReqId(cmd));
-        m_connection->send(msg);
+        WsGetTypeHierarchy(req);
     }
-    else if (cmd->Command()==Methods::GetTypeHierarchy)
+    else if (req.Method()==Methods::Open)
     {
-        WsGetTypeHierarchy(cmd);
+        WsOpen(req);
+    }    
+    else if (req.Method()==Methods::Close)
+    {
+        WsClose(req);
     }
-    else if (cmd->Command()==Methods::Open)
+    else if (req.Method()==Methods::IsOpen)
     {
-        WsOpen(cmd);
+        WsIsOpen(req);
     }
-    else if (cmd->Command()==Methods::Close)
+    else if (req.Method()==Methods::SubscribeMessage)
     {
-        WsClose(cmd);
+        WsSubscribeMessage(req);
     }
-    else if (cmd->Command()==Methods::SubscribeMessage)
+    else if (req.Method()==Methods::SendMessage)
     {
-        WsSubscribeMessage(cmd);
+        WsSendMessage(req);
     }
-    else if (cmd->Command()==Methods::SendMessage)
+    else if (req.Method()==Methods::UnsubscribeMessage)
     {
-        WsSendMessage(cmd);
+        WsUnsubscribeMessage(req);
     }
-    else if (cmd->Command()==Methods::UnsubscribeMessage)
+    else if (req.Method()==Methods::SubscribeEntity)
     {
-        WsUnsubscribeMessage(cmd);
+        WsSubscribeEntity(req);
     }
-    else if (cmd->Command()==Methods::SubscribeEntity)
+    else if (req.Method()==Methods::RegisterEntityHandler)
     {
-        WsSubscribeEntity(cmd);
+        WsRegisterEntityHandler(req);
     }
-    else if (cmd->Command()==Methods::RegisterEntityHandler)
+    else if (req.Method()==Methods::UnregisterHandler)
     {
-        WsRegisterEntityHandler(cmd);
-    }
-    else if (cmd->Command()==Methods::UnregisterHandler)
-    {
-        WsUnregisterHandler(cmd);
+        WsUnregisterHandler(req);
     }
     else
     {
         std::cout<<"Received command that is not supported "<<std::endl;
-        auto msg=ResponseFactory::Error(Methods::GeneralError, L"Command is not supported. "+cmd->Command().GetVal(), ReqId(cmd));
-        m_connection->send(msg);
+        auto errorMsg=JsonRpcResponse::Error(req.Id(), RequestErrorException::MethodNotFound, "Command is not supported. "+req.Method());
+        m_connection->send(errorMsg);
     }
 }
 
-void RemoteClient::WsOpen(const ws::SendPtr& cmd)
+void RemoteClient::WsOpen(const JsonRpcRequest& req)
 {
     try
     {
-        CommandValidator::ValidateOpen(cmd);
-        auto context=cmd->Context().IsNull() ? 0 : cmd->Context().GetVal();
-        m_dob.Open(cmd->ConnectionName().GetVal(), context);
-        Confirm(Methods::Open, cmd);
+        CommandValidator::ValidateOpen(req);
+        auto context=req.HasContext() ?  req.Context() : 0;
+        m_dob.Open(Wstr(req.ConnectionName()), context);
+        m_connection->send(JsonRpcResponse::String(req.Id(), "OK"));
     }
     catch (const std::exception& e)
     {
-        m_connection->send(ResponseFactory::Error(Methods::Open, Wstr(e.what()), ReqId(cmd)));
+        m_connection->send(JsonRpcResponse::String(req.Id(), e.what()));
     }
 }
 
-void RemoteClient::WsClose(const ws::SendPtr &cmd)
+void RemoteClient::WsClose(const JsonRpcRequest& req)
 {
     try
     {
         m_dob.Close();
-        Confirm(Methods::Close, cmd);
+        m_connection->send(JsonRpcResponse::String(req.Id(), "OK"));
     }
     catch (const std::exception& e)
     {
-        m_connection->send(ResponseFactory::Error(Methods::Close, Wstr(e.what()), ReqId(cmd)));
+        m_connection->send(JsonRpcResponse::String(req.Id(), e.what()));
+    }
+}
+
+void RemoteClient::WsIsOpen(const JsonRpcRequest &req)
+{
+    try
+    {
+        m_connection->send(JsonRpcResponse::Bool(req.Id(), m_dob.IsOpen()));
+    }
+    catch (const std::exception& e)
+    {
+        m_connection->send(JsonRpcResponse::String(req.Id(), e.what()));
+    }
+}
+
+void RemoteClient::WsGetTypeHierarchy(const JsonRpcRequest& req)
+{
+    try
+    {
+        m_connection->send(JsonRpcResponse::Json(req.Id(), Typesystem::GetTypeHierarchy()));
+    }
+    catch (const std::exception& e)
+    {
+        m_connection->send(JsonRpcResponse::Error(req.Id(), RequestErrorException::InternalError, e.what()));
+    }
+}
+
+void RemoteClient::WsSubscribeMessage(const JsonRpcRequest& req)
+{
+    try
+    {
+        CommandValidator::ValidateSubscribeMessage(req);
+        auto channel=req.HasChannelId() ? req.ChannelId() : Safir::Dob::Typesystem::ChannelId();
+        auto includeSub=req.HasIncludeSubclasses() ? req.IncludeSubclasses() : true;
+        m_dob.SubscribeMessage(req.TypeId(), channel, includeSub);
+        m_connection->send(JsonRpcResponse::String(req.Id(), "OK"));
+    }
+    catch (const std::exception& e)
+    {
+        m_connection->send(JsonRpcResponse::String(req.Id(), e.what()));
+    }
+}
+
+void RemoteClient::WsSendMessage(const JsonRpcRequest& req)
+{
+    try
+    {
+        CommandValidator::ValidateSendMessage(req);
+        auto channel=req.HasChannelId() ? req.ChannelId() : Safir::Dob::Typesystem::ChannelId();
+        sd::MessagePtr message=ToObject<sd::Message>(req.Message());
+        m_dob.SendMessage(message, channel);
+        m_connection->send(JsonRpcResponse::String(req.Id(), "OK"));
+    }
+    catch (const std::exception& e)
+    {
+        m_connection->send(JsonRpcResponse::String(req.Id(), e.what()));
     }
 
 }
 
-void RemoteClient::WsGetTypeHierarchy(const ws::SendPtr& cmd)
+void RemoteClient::WsUnsubscribeMessage(const JsonRpcRequest& req)
 {
     try
     {
-        m_connection->send(Typesystem::GetTypeHierarchy());
+        CommandValidator::ValidateUnsubscribeMessage(req);
+        auto channel=req.HasChannelId() ? req.ChannelId() : Safir::Dob::Typesystem::ChannelId();
+        auto includeUpdates=req.HasIncludeSubclasses() ? req.IncludeSubclasses() : true;
+        m_dob.UnsubscribeMessage(req.TypeId(), channel, includeUpdates);
+        m_connection->send(JsonRpcResponse::String(req.Id(), "OK"));
     }
     catch (const std::exception& e)
     {
-        m_connection->send(ResponseFactory::Error(Methods::GetTypeHierarchy, Wstr(e.what()), ReqId(cmd)));
+        m_connection->send(JsonRpcResponse::String(req.Id(), e.what()));
     }
 }
 
-void RemoteClient::WsSubscribeMessage(const ws::SendPtr& cmd)
+void RemoteClient::WsSubscribeEntity(const JsonRpcRequest& req)
 {
     try
     {
-        CommandValidator::ValidateSubscribeMessage(cmd);
-        auto channel=cmd->Channel().IsNull() ? Safir::Dob::Typesystem::ChannelId() : cmd->Channel().GetVal();
-        auto includeSub=cmd->IncludeSubclasses().IsNull() ? true : cmd->IncludeSubclasses().GetVal();
-        m_dob.SubscribeMessage(cmd->Type().GetVal(), channel, includeSub);
-        Confirm(Methods::SubscribeMessage, cmd);
-    }
-    catch (const std::exception& e)
-    {
-        m_connection->send(ResponseFactory::Error(Methods::SubscribeMessage, Wstr(e.what()), ReqId(cmd)));
-    }
-}
+        CommandValidator::ValidateSubscribeEntity(req);
+        auto includeUpdates=req.HasIncludeUpdates() ? req.IncludeUpdates() : true;
+        auto restartSub=req.HasRestartSubscription() ? req.RestartSubscription() : true;
 
-void RemoteClient::WsSendMessage(const Safir::Websocket::SendPtr &cmd)
-{
-    try
-    {
-        CommandValidator::ValidateSendMessage(cmd);
-        auto channel=cmd->Channel().IsNull() ? Safir::Dob::Typesystem::ChannelId() : cmd->Channel().GetVal();
-        m_dob.SendMessage(cmd->Message().GetPtr(), channel);
-        Confirm(Methods::SendMessage, cmd);
-    }
-    catch (const std::exception& e)
-    {
-        m_connection->send(ResponseFactory::Error(Methods::SendMessage, Wstr(e.what()), ReqId(cmd)));
-    }
-
-}
-
-void RemoteClient::WsUnsubscribeMessage(const Safir::Websocket::SendPtr &cmd)
-{
-    try
-    {
-        CommandValidator::ValidateUnsubscribeMessage(cmd);
-        auto channel=cmd->Channel().IsNull() ? Safir::Dob::Typesystem::ChannelId() : cmd->Channel().GetVal();
-        auto inclSub = cmd->IncludeSubclasses().IsNull() ? true : cmd->IncludeSubclasses().GetVal();
-        m_dob.UnsubscribeMessage(cmd->Type().GetVal(), channel, inclSub);
-        Confirm(Methods::UnsubscribeMessage, cmd);
-    }
-    catch (const std::exception& e)
-    {
-        m_connection->send(ResponseFactory::Error(Methods::UnsubscribeMessage, Wstr(e.what()), ReqId(cmd)));
-    }
-}
-
-void RemoteClient::WsSubscribeEntity(const Safir::Websocket::SendPtr &cmd)
-{
-    try
-    {
-        CommandValidator::ValidateSubscribeEntity(cmd);
-        auto includeUpdates=cmd->IncludeUpdates().IsNull() ? true : cmd->IncludeUpdates().GetVal();
-        auto restartSub=cmd->RestartSubscription().IsNull() ? true : cmd->RestartSubscription().GetVal();
-
-        if (cmd->Instance().IsNull())
+        if (req.HasInstanceId())
         {
-            auto includeSubclasses=cmd->IncludeSubclasses().IsNull() ? true : cmd->IncludeSubclasses().GetVal();
-            m_dob.SubscribeEntity(cmd->Type().GetVal(), includeUpdates, includeSubclasses, restartSub);
-        }
-        else
-        {
-            auto entityId=ts::EntityId(cmd->Type().GetVal(), cmd->Instance().GetVal());
+            auto entityId=ts::EntityId(req.TypeId(), req.InstanceId());
             m_dob.SubscribeEntity(entityId, includeUpdates, restartSub);
         }
+        else
+        {
+            auto includeSubclasses=req.HasIncludeSubclasses() ? req.IncludeSubclasses() : true;
+            m_dob.SubscribeEntity(req.TypeId(), includeUpdates, includeSubclasses, restartSub);
+        }
 
-        Confirm(Methods::SubscribeEntity, cmd);
+        m_connection->send(JsonRpcResponse::String(req.Id(), "OK"));
     }
     catch (const std::exception& e)
     {
-        m_connection->send(ResponseFactory::Error(Methods::SubscribeEntity, Wstr(e.what()), ReqId(cmd)));
+        m_connection->send(JsonRpcResponse::String(req.Id(), e.what()));
     }
 }
 
-void RemoteClient::WsUnsubscribeEntity(const Safir::Websocket::SendPtr &cmd)
+void RemoteClient::WsUnsubscribeEntity(const JsonRpcRequest& req)
 {
     try
     {
-        CommandValidator::ValidateUnsubscribeEntity(cmd);
+        CommandValidator::ValidateUnsubscribeEntity(req);
 
-        if (cmd->Instance().IsNull())
+        if (req.HasInstanceId())
         {
-            auto includeSubclasses=cmd->IncludeSubclasses().IsNull() ? true : cmd->IncludeSubclasses().GetVal();
-            m_dob.UnsubscribeEntity(cmd->Type().GetVal(), includeSubclasses);
+            auto entityId=ts::EntityId(req.TypeId(), req.InstanceId());
+            m_dob.UnsubscribeEntity(entityId);
         }
         else
         {
-            auto entityId=ts::EntityId(cmd->Type().GetVal(), cmd->Instance().GetVal());
-            m_dob.UnsubscribeEntity(entityId);
+            auto includeSubclasses=req.HasIncludeSubclasses() ? req.IncludeSubclasses() : true;
+            m_dob.UnsubscribeEntity(req.TypeId(), includeSubclasses);
         }
 
-        Confirm(Methods::UnsubscribeEntity, cmd);
+        m_connection->send(JsonRpcResponse::String(req.Id(), "OK"));
     }
     catch (const std::exception& e)
     {
-        m_connection->send(ResponseFactory::Error(Methods::UnsubscribeEntity, Wstr(e.what()), ReqId(cmd)));
+        m_connection->send(JsonRpcResponse::String(req.Id(), e.what()));
     }
 }
 
-void RemoteClient::WsRegisterEntityHandler(const Safir::Websocket::SendPtr &cmd)
+void RemoteClient::WsRegisterEntityHandler(const JsonRpcRequest& req)
 {
     try
     {
-        CommandValidator::ValidateRegisterEntityHandler(cmd);
-        auto handler=cmd->Handler().IsNull() ? ts::HandlerId() : cmd->Handler().GetVal();
-        auto instPolicy=cmd->InstancePolicy().IsNull() ? sd::InstanceIdPolicy::RequestorDecidesInstanceId : cmd->InstancePolicy().GetVal();
-        auto injectionHandler=cmd->InjectionHandler().IsNull() ? false : cmd->InjectionHandler().GetVal();
-        auto pendingReg=cmd->Pending().IsNull() ? false : cmd->Pending().GetVal();
-        m_dob.RegisterEntity(cmd->Type().GetVal(), handler, instPolicy, injectionHandler, pendingReg);
-        Confirm(Methods::SubscribeMessage, cmd);
+        CommandValidator::ValidateRegisterEntityHandler(req);
+        auto handler=req.HasHandlerId() ? req.HandlerId() : ts::HandlerId();
+        auto instPolicy=req.HasInstanceIdPolicy() ? req.InstanceIdPolicy() : sd::InstanceIdPolicy::RequestorDecidesInstanceId;
+        auto injectionHandler=req.HasInjectionHandler() ? req.InjectionHandler() : false;
+        auto pendingReg=req.HasPending() ? req.Pending() : false;
+        m_dob.RegisterEntity(req.TypeId(), handler, instPolicy, injectionHandler, pendingReg);
+        m_connection->send(JsonRpcResponse::String(req.Id(), "OK"));
     }
     catch (const std::exception& e)
     {
-        m_connection->send(ResponseFactory::Error(Methods::RegisterEntityHandler, Wstr(e.what()), ReqId(cmd)));
+        m_connection->send(JsonRpcResponse::String(req.Id(), e.what()));
     }
 }
 
-void RemoteClient::WsUnregisterHandler(const Safir::Websocket::SendPtr &cmd)
+void RemoteClient::WsUnregisterHandler(const JsonRpcRequest& req)
 {
     try
     {
-        CommandValidator::ValidateUnregisterHandler(cmd);
-        auto handler=cmd->Handler().IsNull() ? ts::HandlerId() : cmd->Handler().GetVal();
-        m_dob.UnregisterHandler(cmd->Type().GetVal(), handler);
-        Confirm(Methods::SubscribeMessage, cmd);
+        CommandValidator::ValidateUnregisterHandler(req);
+        auto handler=req.HasHandlerId() ? req.HandlerId() : ts::HandlerId();
+        m_dob.UnregisterHandler(req.TypeId(), handler);
+        m_connection->send(JsonRpcResponse::String(req.Id(), "OK"));
     }
     catch (const std::exception& e)
     {
-        m_connection->send(ResponseFactory::Error(Methods::UnregisterHandler, Wstr(e.what()), ReqId(cmd)));
+        m_connection->send(JsonRpcResponse::String(req.Id(), e.what()));
     }
 }

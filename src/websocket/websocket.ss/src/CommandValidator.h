@@ -23,74 +23,76 @@
 ******************************************************************************/
 #pragma once
 
-#include <Safir/Websocket/Send.h>
+#include <Safir/Dob/Message.h>
+#include <Safir/Dob/Entity.h>
+#include <Safir/Dob/Service.h>
+#include <Safir/Dob/Response.h>
+#include "JsonRpcRequest.h"
 
-namespace ws = Safir::Websocket;
 
 namespace CommandValidator
 {
-    inline void ValidateOpen(const ws::SendPtr& cmd)
+    inline void ValidateOpen(const JsonRpcRequest& req)
     {
-        if (cmd->ConnectionName().IsNull() && cmd->ConnectionName().GetVal().empty())
-            throw std::invalid_argument("ConnectionName is mandatory in command 'Open'");
+        if (!req.HasConnectionName() || req.ConnectionName().empty())
+            throw RequestErrorException("connectionName is mandatory in command 'Open'", RequestErrorException::InvalidParams);
     }
 
-    inline void ValidateSubscribeMessage(const ws::SendPtr& cmd)
+    inline void ValidateSubscribeMessage(const JsonRpcRequest& req)
     {
-        if (cmd->Type().IsNull())
-            throw std::invalid_argument("Type is mandatory in command 'SubscribeMessage'");
+        if (!req.HasTypeId())
+            throw RequestErrorException("typeId is mandatory in command 'SubscribeMessage'", RequestErrorException::InvalidParams);
 
-        if (!Safir::Dob::Typesystem::Operations::IsOfType(cmd->Type().GetVal(), Safir::Dob::Message::ClassTypeId))
-            throw std::invalid_argument("Type must refer to a subtype of Safir.Dob.Message in command 'SubscribeMessage'");
+        if (!Safir::Dob::Typesystem::Operations::IsOfType(req.TypeId(), Safir::Dob::Message::ClassTypeId))
+            throw RequestErrorException("typeId must refer to a subtype of Safir.Dob.Message in command 'SubscribeMessage'", RequestErrorException::InvalidParams);
     }
 
-    inline void ValidateSendMessage(const ws::SendPtr& cmd)
+    inline void ValidateSendMessage(const JsonRpcRequest& req)
     {
-        if (cmd->Message().IsNull())
-            throw std::invalid_argument("Message is mandatory in command 'SendMessage'");
+        if (!req.HasMessage())
+            throw RequestErrorException("message is mandatory in command 'SendMessage'", RequestErrorException::InvalidParams);
     }
 
-    inline void ValidateUnsubscribeMessage(const ws::SendPtr& cmd)
+    inline void ValidateUnsubscribeMessage(const JsonRpcRequest& req)
     {
-        if (cmd->Type().IsNull())
-            throw std::invalid_argument("Type is mandatory in command 'UnsubscribeMessage'");
+        if (!req.HasTypeId())
+            throw RequestErrorException("typeId is mandatory in command 'UnsubscribeMessage'", RequestErrorException::InvalidParams);
     }
 
-    inline void ValidateSubscribeEntity(const ws::SendPtr& cmd)
+    inline void ValidateSubscribeEntity(const JsonRpcRequest& req)
     {
-        if (cmd->Type().IsNull())
-            throw std::invalid_argument("Type is mandatory in command 'SubscribeEntity'");
+        if (!req.HasTypeId())
+            throw RequestErrorException("typeId is mandatory in command 'SubscribeEntity'", RequestErrorException::InvalidParams);
 
-        if (cmd->Instance().IsNull()==false && cmd->IncludeSubclasses().IsNull()==false)
-            throw std::invalid_argument("Not allowed to specify both Instance and IncludeSubclasses for the same subscription. Command 'SubscribeEntity'");
+        if (req.HasInstanceId() && req.HasIncludeSubclasses())
+            throw RequestErrorException("Not allowed to specify both instance and includeSubclasses for the same subscription. Command 'SubscribeEntity'", RequestErrorException::InvalidParams);
     }
 
-    inline void ValidateUnsubscribeEntity(const ws::SendPtr& cmd)
+    inline void ValidateUnsubscribeEntity(const JsonRpcRequest& req)
     {
-        if (cmd->Type().IsNull())
-            throw std::invalid_argument("Type is mandatory in command 'UnsubscribeEntity'");
+        if (!req.HasTypeId())
+            throw RequestErrorException("typeId is mandatory in command 'UnsubscribeEntity'", RequestErrorException::InvalidParams);
 
-        if (cmd->Instance().IsNull()==false && cmd->IncludeSubclasses().IsNull()==false)
-            throw std::invalid_argument("Not allowed to specify both Instance and IncludeSubclasses for the same subscription. Command 'UnsubscribeEntity'");
+        if (req.HasInstanceId() && req.HasIncludeSubclasses())
+            throw RequestErrorException("Not allowed to specify both Instance and IncludeSubclasses for the same subscription. Command 'UnsubscribeEntity'", RequestErrorException::InvalidParams);
     }
 
-    inline void ValidateRegisterEntityHandler(const ws::SendPtr& cmd)
+    inline void ValidateRegisterEntityHandler(const JsonRpcRequest& req)
     {
-        if (cmd->Type().IsNull())
-            throw std::invalid_argument("Type is mandatory in command 'RegisterEntityHandler'");
+        if (!req.HasTypeId())
+            throw RequestErrorException("typeId is mandatory in command 'RegisterEntityHandler'", RequestErrorException::InvalidParams);
 
-        if (!Safir::Dob::Typesystem::Operations::IsOfType(cmd->Type().GetVal(), Safir::Dob::Entity::ClassTypeId))
-            throw std::invalid_argument("Type must refer to a subtype of Safir.Dob.Entity in command 'RegisterEntityHandler'");
+        if (!Safir::Dob::Typesystem::Operations::IsOfType(req.TypeId(), Safir::Dob::Entity::ClassTypeId))
+            throw RequestErrorException("typeId must refer to a subtype of Safir.Dob.Entity in command 'RegisterEntityHandler'", RequestErrorException::InvalidParams);
 
-        if (cmd->InjectionHandler().IsNull()==false && cmd->InjectionHandler().GetVal()==true &&
-            cmd->Pending().IsNull()==false && cmd->Pending().GetVal()==true)
-            throw std::invalid_argument("Not allowed to specify both Pending and InjectionHandler for the same registration. is mandatory in command 'RegisterEntityHandler'");
+        if (req.HasInjectionHandler() && req.HasPending() && req.InjectionHandler() && req.Pending())
+            throw RequestErrorException("Not allowed to specify both pending and injectionHandler for the same registration. is mandatory in command 'RegisterEntityHandler'", RequestErrorException::InvalidParams);
     }
 
-    inline void ValidateUnregisterHandler(const ws::SendPtr& cmd)
+    inline void ValidateUnregisterHandler(const JsonRpcRequest& req)
     {
-        if (cmd->Type().IsNull())
-            throw std::invalid_argument("Type is mandatory in command 'nregisterHandler'");
+        if (!req.HasTypeId())
+            throw RequestErrorException("typeId is mandatory in command 'nregisterHandler'", RequestErrorException::InvalidParams);
     }
 
 }

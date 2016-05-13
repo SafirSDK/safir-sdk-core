@@ -55,9 +55,10 @@ inline void JsonRpcTest()
                 "}}";
 
         JsonRpcRequest r(json);
+        r.Validate();
         CHECK(r.Method()=="open");
-        CHECK(r.RpcIdType()==JsonRpcRequest::IdStr);
-        CHECK(r.RpcIdStringVal()=="myId");
+        CHECK(r.Id().HasStr());
+        CHECK(r.Id().String()=="myId");
 
         CHECK(r.HasConnectionName());
         CHECK(r.ConnectionName()=="test");
@@ -102,9 +103,10 @@ inline void JsonRpcTest()
                 "}}";
 
         JsonRpcRequest r(json);
+        r.Validate();
         CHECK(r.Method()=="open");
-        CHECK(r.RpcIdType()==JsonRpcRequest::IdInt);
-        CHECK(r.RpcIdIntVal()==3);
+        CHECK(r.Id().HasInt())
+        CHECK(r.Id().Int()==3);
 
         CHECK(!r.HasConnectionName());
         CHECK(!r.HasTypeId());
@@ -133,6 +135,7 @@ inline void JsonRpcTest()
         {
             auto json = "{\"method\": open}";
             JsonRpcRequest r(json);
+            r.Validate();
             CHECK(false);
         }
         catch (const RequestErrorException& e)
@@ -148,6 +151,7 @@ inline void JsonRpcTest()
         {
             auto json = "{\"method\": \"open\"}";
             JsonRpcRequest r(json);
+            r.Validate();
             CHECK(false);
         }
         catch (const RequestErrorException& e)
@@ -163,6 +167,7 @@ inline void JsonRpcTest()
         {
             auto json = "{\"jsonrpc\": \"33.0\", \"method\": \"open\", \"id\": \"myId\"}";
             JsonRpcRequest r(json);
+            r.Validate();
             CHECK(false);
         }
         catch (const RequestErrorException& e)
@@ -178,6 +183,7 @@ inline void JsonRpcTest()
         {
             auto json = "{\"jsonrpc\": \"2.0\", \"id\": 3}";
             JsonRpcRequest r(json);
+            r.Validate();
             CHECK(false);
         }
         catch (const RequestErrorException& e)
@@ -192,19 +198,25 @@ inline void JsonRpcTest()
     {
         //error
         //----------
-        auto json = JsonRpcResponse::Error("Me", 123, "fail");
+        auto json = JsonRpcResponse::Error(JsonRpcId("Me"), 123, "fail");
         CHECK(json=="{\"jsonrpc\":\"2.0\",\"error\":{\"code\":123,\"message\":\"fail\"},\"id\":\"Me\"}");
+    }
+    {
+        //error
+        //----------
+        auto json = JsonRpcResponse::Error(JsonRpcId(), 123, "fail");
+        CHECK(json=="{\"jsonrpc\":\"2.0\",\"error\":{\"code\":123,\"message\":\"fail\"},\"id\":null}");
     }
     {
         //string value
         //------------
-        auto json = JsonRpcResponse::String(-124534534, "Hello world");
+        auto json = JsonRpcResponse::String(JsonRpcId(-124534534), "Hello world");
         CHECK(json=="{\"jsonrpc\":\"2.0\",\"result\":\"Hello world\",\"id\":-124534534}");
     }
     {
         //int value
         //------------
-        auto json = JsonRpcResponse::Int("Me", 100);
+        auto json = JsonRpcResponse::Int(JsonRpcId("Me"), 100);
         CHECK(json=="{\"jsonrpc\":\"2.0\",\"result\":100,\"id\":\"Me\"}");
     }
     {
@@ -216,7 +228,7 @@ inline void JsonRpcTest()
     {
         //JSON value
         //------------
-        auto json = JsonRpcResponse::Json("Mr Donk", "{_DouType:\"Safir.Dob.Entity\"}");
+        auto json = JsonRpcResponse::Json(JsonRpcId("Mr Donk"), "{_DouType:\"Safir.Dob.Entity\"}");
         CHECK(json=="{\"jsonrpc\":\"2.0\",\"result\":{_DouType:\"Safir.Dob.Entity\"},\"id\":\"Mr Donk\"}");
     }
 

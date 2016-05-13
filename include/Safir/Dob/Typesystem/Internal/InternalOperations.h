@@ -66,7 +66,7 @@ namespace Internal
      * @param blob The blob to convert.
      * @return UTF8 JSON string.
      */
-    std::string ToJson(const char * const blob);
+    DOTS_CPP_API std::string ToJson(const char * const blob);
 
     /**
      * Deserialize an UTF8 JSON serialization.
@@ -80,7 +80,7 @@ namespace Internal
      *                                  represented by the serialization isn't found
      *                                  in the ObjectFactory.
      */
-    Dob::Typesystem::ObjectPtr ToObjectFromJson(const std::string & json);
+    DOTS_CPP_API Dob::Typesystem::ObjectPtr ToObjectFromJson(const std::string & json);
 
     //These constants used to be calculated from the strings, but that caused some
     //strange elaboration errors, so they were changed to hard-coded constants.

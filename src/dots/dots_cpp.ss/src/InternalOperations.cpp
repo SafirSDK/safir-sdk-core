@@ -88,7 +88,7 @@ namespace Internal
         DotsC_JsonToBlob(blob, deleter, &json8v[0]);
         if (blob == NULL)
         {
-            throw IllegalValueException(L"Something is wrong with the XML-formated object", __WFILE__,__LINE__);
+            throw IllegalValueException(L"Something is wrong with the JSON-formated object", __WFILE__,__LINE__);
         }
         ObjectPtr p = ObjectFactory::Instance().CreateObject(blob);
         deleter(blob);

@@ -30,7 +30,7 @@
 #include "rapidjson/stringbuffer.h"
 #include "rapidjson/writer.h"
 #include "RequestErrorException.h"
-
+#include "JsonRpcId.h"
 
 namespace rj = rapidjson;
 namespace ts = Safir::Dob::Typesystem;
@@ -38,25 +38,19 @@ namespace ts = Safir::Dob::Typesystem;
 class JsonRpcRequest
 {
 public:
-    enum IdType {IdStr, IdInt, IdNull, IdInvalid};
 
     JsonRpcRequest(const std::string& json)
         :m_doc()
-        ,m_idType(IdNull)
+        ,m_params(nullptr)
     {
-        m_doc.Parse(json.c_str());
-        if (m_doc.HasParseError())
-            throw RequestErrorException("Could not parse JSON.", RequestErrorException::ParseError);
-
-        Validate();
+        Init(json);
     }
 
-    IdType RpcIdType() const {return m_idType;}
-    std::string RpcIdStringVal() const {return m_doc["id"].GetString();}
-    boost::int64_t RpcIdIntVal() const {return m_doc["id"].GetInt64();}
+    const JsonRpcId& Id() const {return m_id;}
 
     std::string Method() const {return m_doc["method"].GetString();}
 
+    void Validate() const {ValidateInternal();}
     //params
     bool HasConnectionName() const {return HasParam("connectionName");}
     std::string ConnectionName() const {return m_doc["params"]["connectionName"].GetString();}
@@ -123,19 +117,27 @@ public:
 
 private:
     rj::Document m_doc;
+    JsonRpcId m_id;
+    mutable const rj::Value* m_params;
 
-    bool m_valid;
-    IdType m_idType;
-    std::string m_method;
-
-    inline bool HasParam(const char* name) const
+    inline void Init(const std::string& json)
     {
-        if (m_doc.HasMember("params"))
+        m_doc.Parse(json.c_str());
+        if (m_doc.HasParseError())
+            throw RequestErrorException("Could not parse JSON.", RequestErrorException::ParseError);
+
+        if (m_doc.HasMember("id"))
         {
-            return m_doc["params"].HasMember(name);
+            if (m_doc["id"].IsString())
+                m_id=JsonRpcId(m_doc["id"].GetString());
+            else if (m_doc["id"].IsInt64())
+                m_id=JsonRpcId(m_doc["id"].GetInt64());
+            else if (!m_doc["id"].IsNull())
+                throw RequestErrorException("Id must be a string value or an integer value.", RequestErrorException::InvalidRequest);
         }
-        return false;
     }
+
+    inline bool HasParam(const char* name) const {return m_params!=nullptr ? m_params->HasMember(name) : false;}
 
     inline std::string GetObject(const char* name) const
     {
@@ -148,92 +150,86 @@ private:
     template<class T>
     T GetHashedVal(const char* name) const
     {
-        const rj::Value& p=m_doc["params"];
-        if (p[name].IsInt64())
-            return T(p[name].GetInt64());
+        if ((*m_params)[name].IsInt64())
+            return T((*m_params)[name].GetInt64());
 
-        return T(ts::Utilities::ToWstring(p[name].GetString()));
+        return T(ts::Utilities::ToWstring((*m_params)[name].GetString()));
     }
 
-
-    inline void Validate()
+    inline void ValidateInternal() const
     {
-        if (!m_doc.HasMember("jsonrpc") || m_doc["jsonrpc"]!="2.0")
+        if (!m_doc.HasMember("jsonrpc"))
             throw RequestErrorException("Missing jsonrpc version.", RequestErrorException::InvalidRequest);
 
-        if (!m_doc.HasMember("method") || !m_doc["method"].IsString())
+        if (m_doc["jsonrpc"]!="2.0")
+            throw RequestErrorException("JSON-RPC version is not supported.", RequestErrorException::InvalidRequest);
+
+        if (!m_doc.HasMember("method"))
             throw RequestErrorException("Missing method.", RequestErrorException::InvalidRequest);
 
-        if (m_doc.HasMember("id"))
-        {
-            if (m_doc["id"].IsString())
-                m_idType=IdStr;
-            else if (m_doc["id"].IsInt64())
-                m_idType=IdInt;
-            else if (!m_doc["id"].IsNull())
-                throw RequestErrorException("Id must be a string value or an integer value.", RequestErrorException::InvalidRequest);
-        }
+        if (!m_doc["method"].IsString())
+            throw RequestErrorException("Method must be a string.", RequestErrorException::InvalidRequest);
 
-        if (!m_doc.HasMember("params"))
-            return;
+        if (m_doc.HasMember("params"))
+            m_params=&m_doc["params"];
+        else
+            return; //nothing more to validate, the rest is params
 
-        const rj::Value& p = m_doc["params"];
-
-        if (p.HasMember("connectionName") && !p["connectionName"].IsString())
+        if (m_params->HasMember("connectionName") && !(*m_params)["connectionName"].IsString())
             throw RequestErrorException("Param 'connectionName' has wrong type.", RequestErrorException::InvalidParams);
 
-        if (p.HasMember("context") && !p["context"].IsInt())
+        if (m_params->HasMember("context") && !(*m_params)["context"].IsInt())
             throw RequestErrorException("Param 'context' has wrong type.", RequestErrorException::InvalidParams);
 
-        if (p.HasMember("typeId") && !p["typeId"].IsString() && !p["typeId"].IsInt64())
+        if (m_params->HasMember("typeId") && !(*m_params)["typeId"].IsString() && !(*m_params)["typeId"].IsInt64())
             throw RequestErrorException("Param 'typeId' has wrong type.", RequestErrorException::InvalidParams);
 
-        if (p.HasMember("instanceId") && !p["instanceId"].IsInt64() && !p["instanceId"].IsString())
+        if (m_params->HasMember("instanceId") && !(*m_params)["instanceId"].IsInt64() && !(*m_params)["instanceId"].IsString())
             throw RequestErrorException("Param 'instanceId' has wrong type.", RequestErrorException::InvalidParams);
 
-        if (p.HasMember("handlerId") && !p["handlerId"].IsInt64() && !p["handlerId"].IsString())
+        if (m_params->HasMember("handlerId") && !(*m_params)["handlerId"].IsInt64() && !(*m_params)["handlerId"].IsString())
             throw RequestErrorException("Param 'handlerId' has wrong type.", RequestErrorException::InvalidParams);
 
-        if (p.HasMember("channelId") && !p["channelId"].IsInt64() && !p["channelId"].IsString())
+        if (m_params->HasMember("channelId") && !(*m_params)["channelId"].IsInt64() && !(*m_params)["channelId"].IsString())
             throw RequestErrorException("Param 'channelId' has wrong type.", RequestErrorException::InvalidParams);
 
-        if (p.HasMember("instanceIdPolicy"))
+        if (m_params->HasMember("instanceIdPolicy"))
         {
-            if (!p["instanceIdPolicy"].IsString())
+            if (!(*m_params)["instanceIdPolicy"].IsString())
                 throw RequestErrorException("Param 'instanceIdPolicy' has wrong type.", RequestErrorException::InvalidParams);
 
-            if (p["instanceIdPolicy"]!="HandlerDecidesInstanceId" && p["instanceIdPolicy"]!="RequestorDecidesInstanceId")
+            if ((*m_params)["instanceIdPolicy"]!="HandlerDecidesInstanceId" && (*m_params)["instanceIdPolicy"]!="RequestorDecidesInstanceId")
                 throw RequestErrorException("Param 'instanceIdPolicy' has an invalid value.", RequestErrorException::InvalidParams);
         }
 
-        if (p.HasMember("entity") && !p["entity"].IsObject())
+        if (m_params->HasMember("entity") && !(*m_params)["entity"].IsObject())
             throw RequestErrorException("Param 'entity' has wrong type.", RequestErrorException::InvalidParams);
 
-        if (p.HasMember("message") && !p["message"].IsObject())
+        if (m_params->HasMember("message") && !(*m_params)["message"].IsObject())
             throw RequestErrorException("Param 'message' has wrong type.", RequestErrorException::InvalidParams);
 
-        if (p.HasMember("request") && !p["request"].IsObject())
+        if (m_params->HasMember("request") && !(*m_params)["request"].IsObject())
             throw RequestErrorException("Param 'request' has wrong type.", RequestErrorException::InvalidParams);
 
-        if (p.HasMember("response") && !p["response"].IsObject())
+        if (m_params->HasMember("response") && !(*m_params)["response"].IsObject())
             throw RequestErrorException("Param 'response' has wrong type.", RequestErrorException::InvalidParams);
 
-        if (p.HasMember("pending") && !p["pending"].IsBool())
+        if (m_params->HasMember("pending") && !(*m_params)["pending"].IsBool())
             throw RequestErrorException("Param 'pending' has wrong type.", RequestErrorException::InvalidParams);
 
-        if (p.HasMember("injectionHandler") && !p["injectionHandler"].IsBool())
+        if (m_params->HasMember("injectionHandler") && !(*m_params)["injectionHandler"].IsBool())
             throw RequestErrorException("Param 'injectionHandler' has wrong type.", RequestErrorException::InvalidParams);
 
-        if (p.HasMember("includeChangeInfo") && !p["includeChangeInfo"].IsBool())
+        if (m_params->HasMember("includeChangeInfo") && !(*m_params)["includeChangeInfo"].IsBool())
             throw RequestErrorException("Param 'includeChangeInfo' has wrong type.", RequestErrorException::InvalidParams);
 
-        if (p.HasMember("includeSubclasses") && !p["includeSubclasses"].IsBool())
+        if (m_params->HasMember("includeSubclasses") && !(*m_params)["includeSubclasses"].IsBool())
             throw RequestErrorException("Param 'includeSubclasses' has wrong type.", RequestErrorException::InvalidParams);
 
-        if (p.HasMember("restartSubscription") && !p["restartSubscription"].IsBool())
+        if (m_params->HasMember("restartSubscription") && !(*m_params)["restartSubscription"].IsBool())
             throw RequestErrorException("Param 'restartSubscription' has wrong type.", RequestErrorException::InvalidParams);
 
-        if (p.HasMember("includeUpdates") && !p["includeUpdates"].IsBool())
+        if (m_params->HasMember("includeUpdates") && !(*m_params)["includeUpdates"].IsBool())
             throw RequestErrorException("Param 'includeUpdates' has wrong type.", RequestErrorException::InvalidParams);
 
     }

@@ -25,6 +25,7 @@
 
 #include <string>
 #include <sstream>
+#include "JsonRpcId.h"
 
 #ifndef SAFIR_WS_QUOTE
 #define SAFIR_WS_QUOTE(x) "\""<<x<<"\""
@@ -36,63 +37,44 @@
 class JsonRpcResponse
 {
 public:
-    template <class IdType>
-    static std::string Error(const IdType& id, int code, const std::string& message)
+    static std::string Error(const JsonRpcId& id, int code, const std::string& message)
     {
         std::ostringstream os;
         os<<"{"<<SAFIR_WS_STR("jsonrpc","2.0")<<","
             <<SAFIR_WS_QUOTE("error")<<":{"<<SAFIR_WS_NUM("code", code)<<","<<SAFIR_WS_STR("message", message)
-            <<"},";
-        End(os, id);
+            <<"},"<<id<<"}";
         return std::move(os.str());
     }
 
-    template <class IdType>
-    static std::string Bool(const IdType& id, bool result)
+    static std::string Bool(const JsonRpcId& id, bool result)
     {
         std::ostringstream os;
-        os<<"{"<<SAFIR_WS_STR("jsonrpc","2.0")<<","<<SAFIR_WS_BOOL("result", result)<<",";
-        End(os, id);
+        os<<"{"<<SAFIR_WS_STR("jsonrpc","2.0")<<","<<SAFIR_WS_BOOL("result", result)<<","<<id<<"}";
         return std::move(os.str());
     }
 
-    template <class IdType>
-    static std::string Int(const IdType& id, int result)
+    static std::string Int(const JsonRpcId& id, int result)
     {
         std::ostringstream os;
-        os<<"{"<<SAFIR_WS_STR("jsonrpc","2.0")<<","<<SAFIR_WS_NUM("result", result)<<",";
-        End(os, id);
+        os<<"{"<<SAFIR_WS_STR("jsonrpc","2.0")<<","<<SAFIR_WS_NUM("result", result)<<","<<id<<"}";
         return std::move(os.str());
     }
 
-    template <class IdType>
-    static std::string String(const IdType& id, const std::string& result)
+    static std::string String(const JsonRpcId& id, const std::string& result)
     {
         std::ostringstream os;
-        os<<"{"<<SAFIR_WS_STR("jsonrpc","2.0")<<","<<SAFIR_WS_STR("result", result)<<",";
-        End(os, id);
+        os<<"{"<<SAFIR_WS_STR("jsonrpc","2.0")<<","<<SAFIR_WS_STR("result", result)<<","<<id<<"}";
         return std::move(os.str());
     }
 
-    template <class IdType>
-    static std::string Json(const IdType& id, const std::string& json)
+    static std::string Json(const JsonRpcId& id, const std::string& json)
     {
         std::ostringstream os;
-        os<<"{"<<SAFIR_WS_STR("jsonrpc","2.0")<<","<<SAFIR_WS_QUOTE("result")<<":"<<json<<",";
-        End(os, id);
+        os<<"{"<<SAFIR_WS_STR("jsonrpc","2.0")<<","<<SAFIR_WS_QUOTE("result")<<":"<<json<<","<<id<<"}";
         return std::move(os.str());
     }
 
 
 private:
 
-    static void End(std::ostringstream& os, const std::string& id)
-    {
-        os<<SAFIR_WS_STR("id",id)<<"}";
-    }
-
-    static void End(std::ostringstream& os, boost::int64_t id)
-    {
-        os<<SAFIR_WS_NUM("id",id)<<"}";
-    }
 };

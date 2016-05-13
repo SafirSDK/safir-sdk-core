@@ -23,32 +23,37 @@
 ******************************************************************************/
 #pragma once
 
+#include <iostream>
 #include <string>
+#include <boost/cstdint.hpp>
 
-class RequestErrorException : public std::exception
+class JsonRpcId
 {
 public:
-    static const int ParseError         = -32700;
-    static const int InvalidRequest     = -32600;
-    static const int MethodNotFound     = -32601;
-    static const int InvalidParams      = -32602;
-    static const int InternalError      = -32602;
-    static const int ServerError        = -32000;
-    static const int SafirException     = -1;
+    JsonRpcId() : m_type(0) {}
+    JsonRpcId(boost::int64_t id) : m_type(1), m_i(id) {}
+    JsonRpcId(const std::string& id) : m_type(2), m_s(id) {}
 
-    RequestErrorException(const std::string& msg, int code)
-        :m_message(msg)
-        ,m_code(code)
-    {
-    }
+    bool IsNull() const {return m_type==0;}
+    bool HasInt() const {return m_type==1;}
+    bool HasStr() const {return m_type==2;}
 
-    const std::string& Message() const {return m_message;}
-    int Code() const {return m_code;}
-
-    virtual const char* what () const throw () {return m_message.c_str();}
+    boost::int64_t Int() const {return m_i;}
+    const std::string& String() const {return m_s;}
 
 private:
-    std::string m_message;
-    int m_code;
+    int m_type; //0=null, 1=int, 2=str
+    boost::int64_t m_i;
+    std::string m_s;
 };
 
+inline std::ostream& operator<<(std::ostream& os, const JsonRpcId& id)
+{
+    if (id.HasStr())
+        os<<"\"id\":\""<<id.String()<<"\"";
+    else if (id.HasInt())
+        os<<"\"id\":"<<id.Int();
+    else
+        os<<"\"id\":null";
+    return os;
+}

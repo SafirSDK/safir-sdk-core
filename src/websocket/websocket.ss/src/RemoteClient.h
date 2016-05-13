@@ -29,9 +29,11 @@
 #include <websocketpp/server.hpp>
 #include <Safir/Dob/Connection.h>
 #include <Safir/Utilities/AsioDispatcher.h>
-#include <Safir/Dob/Typesystem/Serialization.h>
+#include <Safir/Dob/Typesystem/Internal/InternalOperations.h>
 #include <Safir/Websocket/Send.h>
 #include <Safir/Websocket/Receive.h>
+#include "JsonRpcRequest.h"
+#include "JsonRpcResponse.h"
 #include "ResponseFactory.h"
 #include "DobConnection.h"
 #include "JsonHelpers.h"
@@ -69,52 +71,43 @@ private:
 
     // handle client commands
     //------------------------
-    void WsDispatch(const ws::SendPtr& cmd);
-    void WsOpen(const ws::SendPtr& cmd);
-    void WsClose(const ws::SendPtr& cmd);
-    void WsGetTypeHierarchy(const ws::SendPtr& cmd);
-    void WsSubscribeMessage(const ws::SendPtr& cmd);
-    void WsSendMessage(const ws::SendPtr& cmd);
-    void WsUnsubscribeMessage(const ws::SendPtr& cmd);
+    void WsDispatch(const JsonRpcRequest& req);
+    void WsOpen(const JsonRpcRequest& req);
+    void WsClose(const JsonRpcRequest& req);
+    void WsIsOpen(const JsonRpcRequest& req);
+    void WsGetTypeHierarchy(const JsonRpcRequest& req);
+    void WsSubscribeMessage(const JsonRpcRequest& req);
+    void WsSendMessage(const JsonRpcRequest& req);
+    void WsUnsubscribeMessage(const JsonRpcRequest& req);
 
-    void WsSubscribeEntity(const ws::SendPtr& cmd);
-    void WsUnsubscribeEntity(const ws::SendPtr& cmd);
-    void WsRegisterEntityHandler(const ws::SendPtr& cmd);
-    void WsUnregisterHandler(const ws::SendPtr& cmd);
+    void WsSubscribeEntity(const JsonRpcRequest& req);
+    void WsUnsubscribeEntity(const JsonRpcRequest& req);
+    void WsRegisterEntityHandler(const JsonRpcRequest& req);
+    void WsUnregisterHandler(const JsonRpcRequest& req);
 
-    //---------------helpers---------------------
+    //---------------helpers--------------------
 
-    inline ws::SendPtr ToCommand(const std::string& payload)
+    inline std::wstring Wstr(const std::string& s) const {return ts::Utilities::ToWstring(s);}
+    inline std::string Str(const std::wstring& s) const {return ts::Utilities::ToUtf8(s);}
+
+    template <class T>
+    boost::shared_ptr<T> ToObject(const std::string& json) const
     {
         try
         {
-            auto obj=ts::Serialization::ToObjectFromJson(ts::Utilities::ToWstring(payload));
-            if (obj->GetTypeId()==ws::Send::ClassTypeId)
+            auto obj=ts::Internal::ToObjectFromJson(json);
+            auto ptr=boost::dynamic_pointer_cast<T>(obj);
+            if (ptr)
             {
-                ws::SendPtr cmd=boost::dynamic_pointer_cast<ws::Send>(obj);
-                return cmd;
+                return ptr;
             }
         }
         catch (...)
         {
-            std::cout<<"Failed to parse JSON message. Expected a Command message."<<std::endl;
+            throw std::invalid_argument("The JSON serialized Safir.Dob.Object (Entity/Message/Service/Response) could not be parsed.");
         }
 
-        ws::SendPtr nullVal;
-        return nullVal;
-    }
-
-    inline boost::optional<int> ReqId(const ws::SendPtr& c)
-    {
-        return c->Id().IsNull() ? boost::optional<int>() : boost::optional<int>(c->Id().GetVal());
-    }
-
-    inline std::wstring Wstr(const std::string& s) {return ts::Utilities::ToWstring(s);}
-    inline std::string Str(const std::wstring& s) {return ts::Utilities::ToUtf8(s);}
-    inline void Confirm(const std::wstring& command, const ws::SendPtr& cmd)
-    {
-        if (!cmd->Id().IsNull())
-            m_connection->send(ResponseFactory::Success(command, cmd->Id().GetVal()));
+        throw std::invalid_argument("The JSON serialized Safir.Dob.Object is not of correct type (Entity/Message/Service/Response).");
     }
 
     //-------------------------------------------
