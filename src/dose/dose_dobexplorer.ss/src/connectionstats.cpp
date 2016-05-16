@@ -73,8 +73,13 @@ struct Stat
     std::vector<MsgQStat>       msgInQStat;
 
 };
-
-inline void Safir::Dob::Internal::StatisticsCollector(Safir::Dob::Internal::RequestOutQueue& requestOutQueue, void* ptr)
+namespace Safir
+{
+namespace Dob
+{
+namespace Internal
+{
+inline void StatisticsCollector(Safir::Dob::Internal::RequestOutQueue& requestOutQueue, void* ptr)
 {
     ReqQStat* p = static_cast<ReqQStat*>(ptr);
 
@@ -88,7 +93,7 @@ inline void Safir::Dob::Internal::StatisticsCollector(Safir::Dob::Internal::Requ
     p->capacity = requestOutQueue.capacity();
 }
 
-inline void Safir::Dob::Internal::StatisticsCollector(Safir::Dob::Internal::MessageQueue& messageQueue, void* ptr)
+inline void StatisticsCollector(Safir::Dob::Internal::MessageQueue& messageQueue, void* ptr)
 {
     MsgQStat* p = static_cast<MsgQStat*>(ptr);
 
@@ -98,7 +103,7 @@ inline void Safir::Dob::Internal::StatisticsCollector(Safir::Dob::Internal::Mess
     p->capacity = messageQueue.capacity();
 }
 
-inline void Safir::Dob::Internal::StatisticsCollector(Safir::Dob::Internal::RequestInQueue& requestInQueue, void* ptr)
+inline void StatisticsCollector(Safir::Dob::Internal::RequestInQueue& requestInQueue, void* ptr)
 {
     ReqQStat* p = static_cast<ReqQStat*>(ptr);
 
@@ -110,7 +115,7 @@ inline void Safir::Dob::Internal::StatisticsCollector(Safir::Dob::Internal::Requ
     p->size = requestInQueue.size();
     p->capacity = requestInQueue.capacity();
 }
-
+}}}
 
 ConnectionStats::ConnectionStats(QWidget* /*parent*/,  const QString& connectionName):
     m_timer(this),
