@@ -50,24 +50,24 @@ def is_64_bit():
         return PROCESSOR_ARCHITECTURE == "AMD64" or PROCESSOR_ARCHITEW6432 == "AMD64"
 
 def cmake():
-    """Get the name of the cmake executable. Currently only detects the cmake28/cmake difference on
-    centos/rhel 6"""
+    """Get the name of the cmake executable. Currently only detects the cmake3/cmake difference on
+    centos/rhel 7"""
     if not hasattr(cmake, "cmake_executable"):
         try:
-            subprocess.Popen(("cmake28", "--version"), stdout = subprocess.PIPE).communicate()
-            cmake.cmake_executable = "cmake28"
-        except Exception:
+            subprocess.Popen(("cmake3", "--version"), stdout = subprocess.PIPE).communicate()
+            cmake.cmake_executable = "cmake3"
+        except OSError:
             cmake.cmake_executable = "cmake"
     return cmake.cmake_executable
 
 def ctest():
-    """Get the name of the ctest executable. Currently only detects the ctest28/ctest difference on
-    centos/rhel 6"""
+    """Get the name of the ctest executable. Currently only detects the ctest3/ctest difference on
+    centos/rhel 7"""
     if not hasattr(ctest, "ctest_executable"):
         try:
-            subprocess.Popen(("ctest28", "--version"), stdout = subprocess.PIPE).communicate()
-            ctest.ctest_executable = "ctest28"
-        except Exception:
+            subprocess.Popen(("ctest3", "--version"), stdout = subprocess.PIPE).communicate()
+            ctest.ctest_executable = "ctest3"
+        except OSError:
             ctest.ctest_executable = "ctest"
     return ctest.ctest_executable
 
