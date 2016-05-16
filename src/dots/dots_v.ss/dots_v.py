@@ -1449,32 +1449,23 @@ def get_dou_directories():
 def resolve_typesystem_dependencies(unresolved_dependencies):
     result = list()
 
-    #first we try to just split the list items, assuming that
-    #there are no dependencies that need to be resolved using
-    #typesystem.ini information
-
-    try:
-        for dependency in unresolved_dependencies:
-            (module,path) = dependency.split("=")
-            result.append(path)
-        return result
-    except:
-        pass
-
-    #if we get here we need to use try again, using typesystem.ini
-    #information. First of all we need to reset the results list.
-    result = list()
-
-    dirs = set([pair[0] for pair in get_dou_directories()])
+    #Dependencies can have two formats, either just Xxx, which
+    #means that we have a dependency on something outside of
+    #the current cmake build tree, or Yyy=/path/to/dous, which
+    #is a dependency inside the current build tree.
 
     for dependency in unresolved_dependencies:
         pair = dependency.split("=")
         if len(pair) == 1: #an unresolved dependency
-            if pair[0] in dirs:
-                for (module,path) in get_dou_directories():
-                    result.append(path)
-                    if module == pair[0]:
-                        break
+            matches = [path for (module,path) in get_dou_directories() if module == pair[0]]
+            if len(matches) == 1:
+                result.append(matches[0])
+            else:
+                print("Failed to resolve dependency",pair[0])
+                if len(matches) == 0:
+                    print ("Found no matching modules")
+                else:
+                    print ("Found multiple matching modules:", matches)
         elif len(pair) == 2:
             result.append(pair[1])
         else:
