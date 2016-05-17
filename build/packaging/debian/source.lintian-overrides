@@ -1,2 +1,5 @@
 #We use the same control file for many debian-based distros.
 safir-sdk-core: newer-standards-version
+
+#google-breakpad contains a test object file that has no source
+safir-sdk-core: source-is-missing src/lluf/lluf_crash_reporter.ss/src/google-breakpad/breakpad/src/tools/solaris/dump_syms/testdata/dump_syms_regtest.o
