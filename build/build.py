@@ -714,11 +714,10 @@ class DebianPackager(object):
         version_string = read_version()[1]
         remove("tmp")
         mkdir("tmp")
-        self.__run(("/usr/bin/git", "archive", "HEAD",
+        self.__run(("build/git-archive-all/git_archive_all.py",
                     "--prefix", "safir-sdk-core_" + version_string + "/",
-                    "-o", "tmp/safir-sdk-core_" + version_string + ".orig.tar"),
+                    "tmp/safir-sdk-core_" + version_string + ".orig.tar.bz2"),
                    "creating tar archive")
-        self.__run(("/bin/bzip2", "tmp/safir-sdk-core_" + version_string + ".orig.tar"), "compressing archive")
         os.chdir("tmp")
         self.__run(("/bin/tar", "xvfj", "safir-sdk-core_" + version_string + ".orig.tar.bz2"), "extracting archive")
         os.chdir("safir-sdk-core_" + version_string)
