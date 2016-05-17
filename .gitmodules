@@ -1,0 +1,12 @@
+[submodule "breakpad"]
+	path = src/lluf/lluf_crash_reporter.ss/src/google-breakpad/breakpad
+	url = https://github.com/SafirSDK/breakpad.git
+	ignore = dirty
+[submodule "linux-syscall-support"]
+	path = src/lluf/lluf_crash_reporter.ss/src/google-breakpad/linux-syscall-support
+	url = https://github.com/SafirSDK/linux-syscall-support.git
+	ignore = dirty
+[submodule "boost-process"]
+	path = src/control/control.ss/src/boost-process
+	url = https://github.com/SafirSDK/boost-process.git
+	ignore = dirty

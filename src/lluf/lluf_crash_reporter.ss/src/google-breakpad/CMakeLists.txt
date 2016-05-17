@@ -12,46 +12,12 @@
 #source and use that to build on windows.
 include(ExternalProject)
 
-set(MY_SVN_REPOSITORY http://google-breakpad.googlecode.com/svn/trunk)
-set(MY_SVN_REVISION 1408)
-set(TARBALL_MD5 ef2824b22e75d18951e9040d1c5df9b3)
-
-set(CACHE_URL http://safir-jenkins-master:8080/safir/job/Breakpad%20cache/lastSuccessfulBuild/artifact/google-breakpad-${MY_SVN_REVISION}.tar.gz)
-
-file (DOWNLOAD ${CACHE_URL}
-  ${CMAKE_CURRENT_BINARY_DIR}/google-breakpad.tar.gz
-  STATUS download_result
-  )
-list (GET download_result 0 download_result_0)
-
-if (download_result_0 EQUAL 0)
-  file(MD5 ${CMAKE_CURRENT_BINARY_DIR}/google-breakpad.tar.gz md5)
-  if (NOT md5 STREQUAL TARBALL_MD5)
-    message(STATUS "MD5 mismatch. Expected ${TARBALL_MD5}")
-    message(STATUS "                   got ${md5}")
-  endif()
-endif()
-
-if (download_result EQUAL 0 AND md5 STREQUAL TARBALL_MD5)
-  message(STATUS "Found cached breakpad tarball.")
-  set (DOWNLOAD_COMMANDS
-    URL ${CMAKE_CURRENT_BINARY_DIR}/google-breakpad.tar.gz)
-else()
-  message(STATUS "No cached breakpad tarball found will use svn.")
-  set (DOWNLOAD_COMMANDS
-    SVN_REPOSITORY ${MY_SVN_REPOSITORY}
-    SVN_REVISION -r ${MY_SVN_REVISION}
-    )
-endif()
-
 if (MSVC)
   ExternalProject_Add(
     google-breakpad
     PREFIX ""
-    SOURCE_DIR src
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/breakpad
     BINARY_DIR bin
-    ${DOWNLOAD_COMMANDS}
-    UPDATE_COMMAND "" #disable update since we're going against fixed revision
     PATCH_COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/build-breakpad-windows.cmake <SOURCE_DIR>/CMakeLists.txt
     CMAKE_ARGS -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
     INSTALL_COMMAND ""
@@ -60,11 +26,11 @@ else()
   ExternalProject_Add(
     google-breakpad
     PREFIX ""
-    SOURCE_DIR src
-    BINARY_DIR src
-    ${DOWNLOAD_COMMANDS}
-    UPDATE_COMMAND "" #disable update since we're going against fixed revision
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/breakpad
+    BINARY_DIR ${CMAKE_CURRENT_SOURCE_DIR}/breakpad
+    PATCH_COMMAND ${CMAKE_COMMAND} -E create_symlink <SOURCE_DIR>/../linux-syscall-support <SOURCE_DIR>/src/third_party/lss
     CONFIGURE_COMMAND cd <SOURCE_DIR> && ./configure CFLAGS=-fPIC CXXFLAGS=-fPIC
+    BUILD_COMMAND cd <SOURCE_DIR> && make src/client/linux/libbreakpad_client.a
     INSTALL_COMMAND ""
     )
 endif()

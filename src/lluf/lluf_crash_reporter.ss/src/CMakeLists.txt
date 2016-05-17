@@ -35,14 +35,14 @@ endif()
 if (NOT BREAKPAD_FOUND)
   add_subdirectory(google-breakpad)
 
-  set(BREAKPAD_INCLUDE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/google-breakpad/src/src)
+  set(BREAKPAD_INCLUDE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/google-breakpad/breakpad/src)
 
   set(BREAKPAD_LIBRARY breakpad_client)
 
   if (MSVC)
     link_directories(${CMAKE_CURRENT_BINARY_DIR}/google-breakpad/bin/)
   else()
-    link_directories(${CMAKE_CURRENT_BINARY_DIR}/google-breakpad/src/src/client/linux/)
+    link_directories(${CMAKE_CURRENT_SOURCE_DIR}/google-breakpad/breakpad/src/client/linux/)
   endif()
 endif()
 
