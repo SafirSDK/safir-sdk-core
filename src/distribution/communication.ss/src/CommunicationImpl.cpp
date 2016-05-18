@@ -339,7 +339,7 @@ namespace Com
             const Node* senderNode=m_deliveryHandler.GetNode(commonHeader->senderId);
             if (senderNode!=nullptr && senderNode->systemNode)
             {
-                m_gotRecv(commonHeader->senderId);
+                m_gotRecv(commonHeader->senderId, true);
                 lllog(9)<<"COM: Heartbeat from "<<commonHeader->senderId<<std::endl;
             }
         }
@@ -350,7 +350,7 @@ namespace Com
             const Node* senderNode=m_deliveryHandler.GetNode(commonHeader->senderId);
             if (senderNode!=nullptr && senderNode->systemNode)
             {
-                m_gotRecv(commonHeader->senderId);
+                m_gotRecv(commonHeader->senderId, false);
                 const Ack* ack=reinterpret_cast<const Ack*>(data);
                 GetNodeType(senderNode->nodeTypeId).GetAckedDataSender().HandleAck(*ack);
             }

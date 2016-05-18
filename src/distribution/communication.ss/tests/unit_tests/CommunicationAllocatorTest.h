@@ -53,7 +53,7 @@ public:
 
         Com::DeliveryHandlerBasic<AllocatorTest::TestWriter> dh(strand, 1, 4);
 
-        dh.SetGotRecvCallback(boost::bind(&AllocatorTest::GotReceiveFrom, _1));
+        dh.SetGotRecvCallback(boost::bind(&AllocatorTest::GotReceiveFrom, _1, _2));
 
         dh.SetReceiver(boost::bind(&AllocatorTest::OnRecv, _1, _2, _3, _4), 0,
                        [&](size_t s) -> char*
@@ -449,7 +449,7 @@ private:
         delete[] data; //receiver is responsible for deleting data
     }
 
-    static void GotReceiveFrom(int64_t /*fromNodeId*/)
+    static void GotReceiveFrom(int64_t /*fromNodeId*/, bool isHeartbeat)
     {
         //std::cout<<"GotReceiveFrom "<<fromNodeId<<std::endl;
     }

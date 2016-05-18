@@ -47,7 +47,7 @@ Receiver::Receiver(Com::ControlModeTag tag, boost::asio::io_service& ioService, 
     m_timerInclude.async_wait(m_strand.wrap([=](const boost::system::error_code& /*error*/){if (m_running) IncludeNode();}));
 
     m_com.SetDataReceiver(boost::bind(&Receiver::ReceiveData,this,_1,_2,_3,_4), 0, [=](size_t s){return new char[s];}, [=](const char * data){delete[] data;});
-    m_com.SetGotReceiveFromCallback(boost::bind(&Receiver::GotReceiveFrom,this,_1));
+    m_com.SetGotReceiveFromCallback(boost::bind(&Receiver::GotReceiveFrom,this,_1,_2));
     m_com.SetNewNodeCallback(boost::bind(&Receiver::NewNode,this,_1,_2,_3,_4,_5));
     m_com.SetQueueNotFullCallback(boost::bind(&Receiver::QueueNotFull,this,_1), 0);
     m_com.SetRetransmitToCallback(boost::bind(&Receiver::RetransmitTo,this,_1));
@@ -77,7 +77,7 @@ Receiver::Receiver(Com::DataModeTag tag, boost::asio::io_service& ioService, int
     m_timerInclude.async_wait(m_strand.wrap([=](const boost::system::error_code& error){if (!error) IncludeNode();}));
 
     m_com.SetDataReceiver(boost::bind(&Receiver::ReceiveData,this,_1,_2,_3,_4), 0, [=](size_t s){return new char[s];}, [=](const char * data){delete[] data;});
-    m_com.SetGotReceiveFromCallback(boost::bind(&Receiver::GotReceiveFrom,this,_1));
+    m_com.SetGotReceiveFromCallback(boost::bind(&Receiver::GotReceiveFrom,this,_1,_2));
     m_com.SetNewNodeCallback(boost::bind(&Receiver::NewNode,this,_1,_2,_3,_4,_5));
     m_com.SetQueueNotFullCallback(boost::bind(&Receiver::QueueNotFull,this,_1), 0);
     m_com.SetRetransmitToCallback(boost::bind(&Receiver::RetransmitTo,this,_1));
@@ -185,7 +185,7 @@ void Receiver::ReceiveData(int64_t fromNodeId, int64_t fromNodeType, const char*
     it->second.second=val;
 }
 
-void Receiver::GotReceiveFrom(int64_t /*fromNodeId*/)
+void Receiver::GotReceiveFrom(int64_t /*fromNodeId*/, bool isHeartbeat)
 {
 }
 

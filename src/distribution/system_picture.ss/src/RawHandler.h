@@ -135,7 +135,7 @@ namespace SP
             m_allStatisticsMessage.set_data_address(dataAddress);
 
             communication.SetNewNodeCallback(m_strand.wrap(boost::bind(&RawHandlerBasic<CommunicationT>::NewNode,this,_1, _2, _3, _4, _5)));
-            communication.SetGotReceiveFromCallback(m_strand.wrap(boost::bind(&RawHandlerBasic<CommunicationT>::GotReceive,this,_1)));
+            communication.SetGotReceiveFromCallback(m_strand.wrap(boost::bind(&RawHandlerBasic<CommunicationT>::GotReceive,this,_1,_2)));
             communication.SetRetransmitToCallback(m_strand.wrap(boost::bind(&RawHandlerBasic<CommunicationT>::Retransmit,this,_1)));
 
             m_checkDeadNodesTimer->Start();
@@ -595,7 +595,7 @@ namespace SP
                 throw std::logic_error("Got a new node with a node type id that I dont know about!");
             }
 
-            //lastReceiveTime is set by NodeInfo constructor
+            //lastHeartbeatTime is set by NodeInfo constructor
 
             newNode->set_name(name);
             newNode->set_id(id);
@@ -635,7 +635,7 @@ namespace SP
         }
 
         //Must be called in strand!
-        void GotReceive(int64_t id)
+        void GotReceive(int64_t id, bool isHeartbeat)
         {
             const auto now = boost::chrono::steady_clock::now();
             lllog(9) << "SP: GotReceive from node with id " << id <<", time = " << now << std::endl;
@@ -665,7 +665,10 @@ namespace SP
                 node.nodeInfo->set_data_receive_count(node.nodeInfo->data_receive_count() + 1);
             }
 
-            node.lastReceiveTime = now;
+            if (isHeartbeat)
+            {
+                node.lastHeartbeatTime = now;
+            }
         }
 
         //Must be called in strand!
@@ -723,7 +726,7 @@ namespace SP
                 const auto threshold =
                     now - m_nodeTypes.at(pair->second.nodeInfo->node_type_id()).deadTimeout * tolerance;
 
-                if (!pair->second.nodeInfo->is_dead() && pair->second.lastReceiveTime < threshold)
+                if (!pair->second.nodeInfo->is_dead() && pair->second.lastHeartbeatTime < threshold)
                 {
                     lllog(4) << "SP: Node " << pair->second.nodeInfo->name().c_str()
                              << " with id " << pair->first
@@ -736,7 +739,7 @@ namespace SP
                     somethingChanged = true;
                 }
                 else if (pair->second.nodeInfo->is_dead() &&
-                         pair->second.lastReceiveTime < clearThreshold)
+                         pair->second.lastHeartbeatTime < clearThreshold)
                 {
                     lllog(4) << "SP: Node " << pair->second.nodeInfo->name().c_str()
                              << " with id " << pair->first
@@ -841,9 +844,9 @@ namespace SP
         struct NodeInfo
         {
             explicit NodeInfo(RawStatisticsMessage_NodeInfo* const nodeInfo_)
-                : lastReceiveTime(boost::chrono::steady_clock::now()),nodeInfo(nodeInfo_) {}
+                : lastHeartbeatTime(boost::chrono::steady_clock::now()),nodeInfo(nodeInfo_) {}
 
-            boost::chrono::steady_clock::time_point lastReceiveTime;
+            boost::chrono::steady_clock::time_point lastHeartbeatTime;
             RawStatisticsMessage_NodeInfo* nodeInfo;
         };
         typedef std::unordered_map<int64_t, NodeInfo> NodeTable;

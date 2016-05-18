@@ -312,7 +312,7 @@ public:
         ,m_acked(acked)
         ,m_includeNode(includeNode)
         ,m_reportNodeFinished(reportNodeFinished)
-    {        
+    {
     }
 
     void NewNode(const std::string& name, int64_t nodeId, int64_t nodeTypeId, const std::string& address)
@@ -337,13 +337,13 @@ public:
         }
     }
 
-    void GotReceive(int64_t /*id*/)
+    void GotReceive(int64_t /*id*/, bool isHeartbeat)
     {
         //std::cout<<"SP: GotRecv from "<<id<<std::endl;
     }
 
     void GotNack(int64_t /*id*/)
-    {        
+    {
 
     }
 
@@ -497,7 +497,7 @@ int main(int argc, char * argv[])
     std::cout<<"----------------------------------------------------------------------------"<<std::endl;
 
     com->SetDataReceiver([=](int64_t fromNode, int64_t /*fromNodeType*/, const char* msg, size_t size){sp->OnRecv(fromNode, msg, size);}, 123, Allocate, DeAllocate);
-    com->SetGotReceiveFromCallback([=](int64_t id){sp->GotReceive(id);});
+    com->SetGotReceiveFromCallback([=](int64_t id, bool isHeartbeat){sp->GotReceive(id,isHeartbeat);});
     com->SetRetransmitToCallback([=](int64_t id){sp->Retransmit(id);});
     com->SetNewNodeCallback([=](const std::string& name, int64_t nodeId, int64_t nodeTypeId, const std::string& ca, const std::string& /*da*/)
                             {sp->NewNode(name, nodeId, nodeTypeId, ca);});
@@ -614,4 +614,3 @@ int main(int argc, char * argv[])
 
     return 0;
 }
-

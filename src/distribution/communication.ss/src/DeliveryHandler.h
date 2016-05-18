@@ -59,7 +59,7 @@ namespace Com
     typedef boost::function<char*(size_t)> Allocator;
     typedef boost::function<void(const char *)> DeAllocator;
     typedef boost::function<void(int64_t fromNodeId, int64_t fromNodeType, const char* data, size_t size)> ReceiveData;
-    typedef boost::function<void(int64_t fromNodeId)> GotReceiveFrom;
+    typedef boost::function<void(int64_t fromNodeId, bool isHeartbeat)> GotReceiveFrom;
 
     template <class WriterType>
     class DeliveryHandlerBasic : private WriterType
@@ -127,7 +127,7 @@ namespace Com
 
             lllog(8)<<L"COM: Received AppData from "<<header->commonHeader.senderId<<" "<<
                       SendMethodToString(header->sendMethod).c_str()<<", seq: "<<header->sequenceNumber<<std::endl;
-            m_gotRecvFrom(header->commonHeader.senderId); //report that we are receivinga intact data from the node
+            m_gotRecvFrom(header->commonHeader.senderId, false); //report that we are receiving intact data from the node
 
             bool ackNow=false;
             if (header->deliveryGuarantee==Acked)
@@ -160,7 +160,7 @@ namespace Com
             }
 
             SendAck(senderIt->second, header);
-            m_gotRecvFrom(header->commonHeader.senderId); //report that we are receivinga data
+            m_gotRecvFrom(header->commonHeader.senderId, false); //report that we are receivinga data
         }
 
         //Add a node

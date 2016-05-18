@@ -53,8 +53,8 @@ public:
         boost::asio::io_service::strand strand(io);
 
         Com::DeliveryHandlerBasic<DeliveryHandlerTest::TestWriter> dh(strand, 1, 4);
-        
-        dh.SetGotRecvCallback(boost::bind(&DeliveryHandlerTest::GotReceiveFrom, _1));
+
+        dh.SetGotRecvCallback(boost::bind(&DeliveryHandlerTest::GotReceiveFrom, _1, _2));
 
         dh.SetReceiver(boost::bind(&DeliveryHandlerTest::OnRecv, _1, _2, _3, _4), 0, [=](size_t s){return new char[s];}, [](const char * data){delete[] data;});
         dh.Start();
@@ -205,7 +205,7 @@ public:
             CHECKMSG(acked[id]==15, acked[id]);
         }
 
-        TRACELINE        
+        TRACELINE
 
         //---------------------------------------------
         // Test unacked messages
@@ -376,8 +376,9 @@ private:
         delete[] data; //receiver is responsible for deleting data
     }
 
-    static void GotReceiveFrom(int64_t /*fromNodeId*/)
+    static void GotReceiveFrom(int64_t /*fromNodeId*/, bool isHeartbeat)
     {
+        //TODO: add test
         //std::cout<<"GotReceiveFrom "<<fromNodeId<<std::endl;
     }
 

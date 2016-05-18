@@ -44,11 +44,11 @@ public:
 
    //Callbacks functions used in Communications public interface.
     typedef boost::function<void(const std::string& name,
-                               int64_t nodeId,
-                               int64_t nodeTypeId,
-                               const std::string& controlAddress,
-                               const std::string& dataAddress)> NewNode;
-    typedef boost::function<void(int64_t fromNodeId)> GotReceiveFrom;
+                                 int64_t nodeId,
+                                 int64_t nodeTypeId,
+                                 const std::string& controlAddress,
+                                 const std::string& dataAddress)> NewNode;
+    typedef boost::function<void(int64_t fromNodeId, bool isHeartbeat)> GotReceiveFrom;
     typedef boost::function<void(int64_t toNodeId)> RetransmitTo;
 
     void SetNewNodeCallback(const NewNode& callback)
@@ -230,7 +230,7 @@ BOOST_AUTO_TEST_CASE( start_stop )
 
 BOOST_AUTO_TEST_CASE( receive_from_not_known )
 {
-    comm.gotReceiveFromCb(10);
+    comm.gotReceiveFromCb(10,false);
     BOOST_CHECK_THROW(ioService.run(), std::logic_error);
 }
 
@@ -244,9 +244,9 @@ BOOST_AUTO_TEST_CASE( retransmit_to_not_known )
 BOOST_AUTO_TEST_CASE( new_node )
 {
     comm.newNodeCb("asdf",11,10,"asdf","asdf");
-    comm.gotReceiveFromCb(11);
-    comm.gotReceiveFromCb(11);
-    comm.gotReceiveFromCb(11);
+    comm.gotReceiveFromCb(11,true);
+    comm.gotReceiveFromCb(11,true);
+    comm.gotReceiveFromCb(11,true);
     rh->Stop();
 
     std::set<int64_t> correctNodes;
@@ -284,17 +284,26 @@ BOOST_AUTO_TEST_CASE( new_node_twice )
 
 BOOST_AUTO_TEST_CASE( exclude_node )
 {
-    comm.excludeCb=[&]{rh->Stop();};
+    //check that even if we get data (but no heartbeats) we will get excluded
+    bool stopped = false;
+    comm.excludeCb=[&]{rh->Stop();stopped=true;};
 
     comm.newNodeCb("asdf",11,10,"asdf","asdf");
-    comm.gotReceiveFromCb(11);
-    comm.gotReceiveFromCb(11);
-    comm.gotReceiveFromCb(11);
+    comm.gotReceiveFromCb(11,true);
 
     std::set<int64_t> correctNodes;
     correctNodes.insert(11);
 
-    BOOST_CHECK_NO_THROW(ioService.run());
+    int i = 0;
+    while(ioService.run_one())
+    {
+        ++i;
+        if (!stopped)
+        {
+            comm.gotReceiveFromCb(11,false);
+        }
+    }
+    BOOST_CHECK(i > 10);
     BOOST_CHECK(comm.includedNodes == correctNodes);
     BOOST_CHECK(comm.excludedNodes == correctNodes);
 }
@@ -344,9 +353,9 @@ BOOST_AUTO_TEST_CASE( nodes_changed_add_callback )
 
                                });
     comm.newNodeCb("asdf",11,10,"asdffff","asdfqqqq");
-    comm.gotReceiveFromCb(11);
-    comm.gotReceiveFromCb(11);
-    comm.gotReceiveFromCb(11);
+    comm.gotReceiveFromCb(11,true);
+    comm.gotReceiveFromCb(11,true);
+    comm.gotReceiveFromCb(11,true);
     rh->Stop();
     BOOST_CHECK_NO_THROW(ioService.run());
     BOOST_CHECK_EQUAL(cbCalls, 1);
@@ -386,9 +395,9 @@ BOOST_AUTO_TEST_CASE( nodes_changed_removed_callback )
                                    }
                                });
     comm.newNodeCb("asdf",11,10,"asdffff","asdfqqqq");
-    comm.gotReceiveFromCb(11);
-    comm.gotReceiveFromCb(11);
-    comm.gotReceiveFromCb(11);
+    comm.gotReceiveFromCb(11, true);
+    comm.gotReceiveFromCb(11, true);
+    comm.gotReceiveFromCb(11, true);
     comm.retransmitToCb(11);
 
     BOOST_CHECK_NO_THROW(ioService.run());
