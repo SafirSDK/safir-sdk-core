@@ -93,7 +93,7 @@ def mkdir(newdir):
 def remove(path):
     if not os.path.exists(path):
         return
-    if os.path.isfile(path):
+    if os.path.isfile(path) or os.path.islink(path):
         try:
             os.remove(path)
             return
