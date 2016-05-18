@@ -22,6 +22,7 @@
 *
 ******************************************************************************/
 #include <iostream>
+#include <algorithm>
 #include <boost/thread.hpp>
 #include <thread>
 #include "WebsocketServer.h"
@@ -32,12 +33,13 @@
 #include <Safir/Dob/Typesystem/ToolSupport/Serialization.h>
 
 int main(int /*argc*/, const char** /*argv*/)
-{
+{    
     boost::asio::io_service ioService;
     WebsocketServer ws(ioService);
     ioService.post([&]{ws.Run();});
     boost::thread_group threads;
-    for (unsigned int i=0; i<3; ++i)
+    auto numberOfThreads=std::max(static_cast<unsigned int>(3), boost::thread::hardware_concurrency());
+    for (unsigned int i=0; i<numberOfThreads; ++i)
     {
         threads.create_thread([&]{ioService.run();});
     }
@@ -50,5 +52,15 @@ int main(int /*argc*/, const char** /*argv*/)
 }
 
 
+// TODO
+// ------
+// requests
+// ping at interval
+// logging
+// send only if id
+// breakpad
 
 
+// batch
+// dob-object with stats
+// max connections

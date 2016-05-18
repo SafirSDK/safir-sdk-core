@@ -86,8 +86,6 @@ ADD_SAFIR_GENERATED_LIBRARY(NAME Core
   data/Safir.Utilities.ForEach.FullResponse.dou
   data/Safir.Utilities.ForEach.ResponseType.dou
   data/Safir.Utilities.ForEach.UpdateRequest.dou  
-  data/Safir.Websocket.Send.dou
-  data/Safir.Websocket.Receive.dou
   data/Safir.Websocket.Typesystem.EnumType.dou
   data/Safir.Websocket.Typesystem.ClassType.dou
   data/Safir.Websocket.Typesystem.Member.dou

@@ -45,24 +45,32 @@ int main(int argc, char* argv[]) {
 
     // Responses
     //----------------------------------------------------------
-    //    {\"jsonrpc\":\"2.0\",\"result\":false,\"id\":\"joot\"}
-    //    {\"jsonrpc\":\"2.0\",\"result\":\"OK\",\"id\":\"joot\"}
     //    {\"jsonrpc\":\"2.0\",\"result\":true,\"id\":\"joot\"}
-    //    {\"jsonrpc\":\"2.0\",\"result\":\"OK\",\"id\":\"joot\"}
     //    {\"jsonrpc\":\"2.0\",\"result\":false,\"id\":\"joot\"}
+    //    {\"jsonrpc\":\"2.0\",\"result\":\"OK\",\"id\":\"joot\"}
+
+    // Notifications
+    //----------------------------------------------------------
+    //  {\"jsonrpc\":\"2.0\",\"method\":\"onMessage\",\"params\":{\"channelId\":1,\"message\":{\"_DouType\": \"Safir.Application.BackdoorCommand\", \"NodeName\": \"Hello\", \"Command\": \"World\"}}}
 
     std::queue<QueueItem> items;
-
-    items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"isOpen\", \"id\":\"joot\"}", "{\"jsonrpc\":\"2.0\",\"result\":false,\"id\":\"joot\"}"));
-    items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"open\", \"params\":{\"connectionName\":\"test\"}, \"id\":\"joot\"}", "{\"jsonrpc\":\"2.0\",\"result\":\"OK\",\"id\":\"joot\"}"));
-    items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"isOpen\", \"id\":\"joot\"}", "{\"jsonrpc\":\"2.0\",\"result\":true,\"id\":\"joot\"}"));
-    items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"close\", \"id\":\"joot\"}", "{\"jsonrpc\":\"2.0\",\"result\":\"OK\",\"id\":\"joot\"}"));
-    items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"isOpen\", \"id\":\"joot\"}", "{\"jsonrpc\":\"2.0\",\"result\":false,\"id\":\"joot\"}"));
-    items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"open\", \"params\":{\"connectionName\":\"test\"}, \"id\":\"joot\"}", "{\"jsonrpc\":\"2.0\",\"result\":\"OK\",\"id\":\"joot\"}"));
-    items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"subscribeMessage\", \"params\":{\"typeId\":\"Safir.Application.BackdoorCommand\"}, \"id\":\"joot\"}", "{\"jsonrpc\":\"2.0\",\"result\":\"OK\",\"id\":\"joot\"}"));
-    items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"sendMessage\", \"params\":{\"message\":{\"_DouType\": \"Safir.Application.BackdoorCommand\", \"NodeName\": \"Hello\", \"Command\": \"World\"}}, \"id\":\"joot\"}", ""));
-
-
+    items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"isOpen\", \"id\":\"aaa\"}", "{\"jsonrpc\":\"2.0\",\"result\":false,\"id\":\"aaa\"}"));
+    items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"open\", \"params\":{\"connectionName\":\"test\"}, \"id\":\"bbb\"}", "{\"jsonrpc\":\"2.0\",\"result\":\"OK\",\"id\":\"bbb\"}"));
+    items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"isOpen\", \"id\":\"ccc\"}", "{\"jsonrpc\":\"2.0\",\"result\":true,\"id\":\"ccc\"}"));
+    items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"ping\", \"id\":\"bbb\"}", "{\"jsonrpc\":\"2.0\",\"result\":\"pong\",\"id\":\"bbb\"}"));
+    items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"close\", \"id\":\"ddd\"}", "{\"jsonrpc\":\"2.0\",\"result\":\"OK\",\"id\":\"ddd\"}"));
+    items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"isOpen\", \"id\":1}", "{\"jsonrpc\":\"2.0\",\"result\":false,\"id\":1}"));
+    items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"open\", \"params\":{\"connectionName\":\"test\"}, \"id\":2}", "{\"jsonrpc\":\"2.0\",\"result\":\"OK\",\"id\":2}"));
+    items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"subscribeMessage\", \"params\":{\"channelId\":1,\"typeId\":\"Safir.Application.BackdoorCommand\"}, \"id\":3}", "{\"jsonrpc\":\"2.0\",\"result\":\"OK\",\"id\":3}"));
+    items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"subscribeMessage\", \"params\":{\"channelId\":2,\"typeId\":\"Safir.Application.BackdoorCommand\"}, \"id\":4}", "{\"jsonrpc\":\"2.0\",\"result\":\"OK\",\"id\":4}"));
+    items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"sendMessage\", \"params\":{\"channelId\":1,\"message\":{\"_DouType\":\"Safir.Application.BackdoorCommand\",\"NodeName\":\"Hello\",\"Command\":\"World\"}},\"id\":5}", "{\"jsonrpc\":\"2.0\",\"result\":\"OK\",\"id\":5}"));
+    items.push(QueueItem("", "{\"jsonrpc\":\"2.0\",\"method\":\"onMessage\",\"params\":{\"channelId\":1,\"message\":{\"_DouType\":\"Safir.Application.BackdoorCommand\",\"NodeName\":\"Hello\",\"Command\":\"World\"}}}"));
+    items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"sendMessage\", \"params\":{\"channelId\":2,\"message\":{\"_DouType\":\"Safir.Application.BackdoorCommand\",\"NodeName\":\"Hello\",\"Command\":\"World\"}},\"id\":5}", "{\"jsonrpc\":\"2.0\",\"result\":\"OK\",\"id\":5}"));
+    items.push(QueueItem("", "{\"jsonrpc\":\"2.0\",\"method\":\"onMessage\",\"params\":{\"channelId\":2,\"message\":{\"_DouType\":\"Safir.Application.BackdoorCommand\",\"NodeName\":\"Hello\",\"Command\":\"World\"}}}"));
+    items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"unsubscribeMessage\", \"params\":{\"channelId\":1,\"typeId\":\"Safir.Application.BackdoorCommand\"}, \"id\":3}", "{\"jsonrpc\":\"2.0\",\"result\":\"OK\",\"id\":3}"));
+    items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"sendMessage\", \"params\":{\"channelId\":1,\"message\":{\"_DouType\":\"Safir.Application.BackdoorCommand\",\"NodeName\":\"Hello\",\"Command\":\"World\"}},\"id\":5}", "{\"jsonrpc\":\"2.0\",\"result\":\"OK\",\"id\":5}"));
+    items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"sendMessage\", \"params\":{\"channelId\":2,\"message\":{\"_DouType\":\"Safir.Application.BackdoorCommand\",\"NodeName\":\"Hello\",\"Command\":\"World\"}},\"id\":5}", "{\"jsonrpc\":\"2.0\",\"result\":\"OK\",\"id\":5}"));
+    items.push(QueueItem("", "{\"jsonrpc\":\"2.0\",\"method\":\"onMessage\",\"params\":{\"channelId\":2,\"message\":{\"_DouType\":\"Safir.Application.BackdoorCommand\",\"NodeName\":\"Hello\",\"Command\":\"World\"}}}"));
 
 
     std::cout<<"Starting client..."<<std::endl;
@@ -82,6 +90,7 @@ int main(int argc, char* argv[]) {
 
         c.set_open_handler([&](websocketpp::connection_hdl hdl)
         {
+            //we are connected, send first message to get started
             auto& data=items.front().first;
             std::cout<<"--> "<<data<<std::endl;
             c.send(hdl, data, websocketpp::frame::opcode::text);
@@ -92,21 +101,24 @@ int main(int argc, char* argv[]) {
         {
             std::string data = msg->get_payload();
             std::cout<<"<-- "<<data<<std::endl;
-//            if (data!=items.front().second)
-//            {
-//                std::cout<<"Received unexpected data. I exptected:\n"<<items.front().second<<std::endl;
-//                exit(1);
-//            }
+            if (data!=items.front().second)
+            {
+                std::cout<<"Received unexpected data. I exptected:\n"<<items.front().second<<std::endl;
+                exit(1);
+            }
             items.pop();
             if (!items.empty())
             {
                 auto& data=items.front().first;
-                std::cout<<"--> "<<data<<std::endl;
-                c.send(hdl, data, websocketpp::frame::opcode::text);
+                if (!data.empty())
+                {
+                    std::cout<<"--> "<<data<<std::endl;
+                    c.send(hdl, data, websocketpp::frame::opcode::text);
+                }
             }
             else
             {
-               //con->close(websocketpp::close::status::normal, "finished");
+               con->close(websocketpp::close::status::normal, "finished");
             }
         });
 

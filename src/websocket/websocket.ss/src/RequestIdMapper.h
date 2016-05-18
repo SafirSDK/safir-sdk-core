@@ -23,37 +23,33 @@
 ******************************************************************************/
 #pragma once
 
-#include <string>
-#include <sstream>
+#include <boost/unordered_map.hpp>
+#include <Safir/Dob/Defs.h>
+#include "JsonRpcId.h"
 
-#ifndef SAFIR_WS_QUOTE
-#define SAFIR_WS_QUOTE(x) "\""<<x<<"\""
-#define SAFIR_WS_STR(k, v) SAFIR_WS_QUOTE(k)<<":"<<SAFIR_WS_QUOTE(v)
-#define SAFIR_WS_NUM(k, v) SAFIR_WS_QUOTE(k)<<":"<<v
-#define SAFIR_WS_OBJ(k, v) SAFIR_WS_QUOTE(k)<<":"<<v
-#define SAFIR_WS_BOOL(k, v) SAFIR_WS_QUOTE(k)<<":"<<(v?"true":"false")
-#endif
-
-class JsonRpcNotification
+class RequestIdMapper
 {
 public:
-
-    static std::string Empty(const std::string& method)
+    void Add(Safir::Dob::RequestId reqId, const JsonRpcId& id)
     {
-        std::ostringstream os;
-        os<<"{"<<SAFIR_WS_STR("jsonrpc","2.0")<<","<<SAFIR_WS_STR("method",method)<<"}";
-        return std::move(os.str());
+        m_map[reqId]=id;
     }
 
-    static std::string Json(const std::string& method, const std::string& json)
+    JsonRpcId Get(Safir::Dob::RequestId reqId)
     {
-        std::ostringstream os;
-        os<<"{"<<SAFIR_WS_STR("jsonrpc","2.0")<<","<<SAFIR_WS_STR("method",method)<<","<<SAFIR_WS_OBJ("params", json)<<"}";
-        return std::move(os.str());
+        auto it=m_map.find(reqId);
+        if (it!=m_map.end())
+        {
+            auto id=it->second;
+            m_map.erase(it);
+            return id;
+        }
+
+        return JsonRpcId();
     }
 
+    size_t Count() const {return m_map.size();}
 
 private:
-
-
+    boost::unordered_map<Safir::Dob::RequestId, JsonRpcId> m_map;
 };

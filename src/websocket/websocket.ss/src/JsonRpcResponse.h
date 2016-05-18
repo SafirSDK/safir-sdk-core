@@ -31,6 +31,7 @@
 #define SAFIR_WS_QUOTE(x) "\""<<x<<"\""
 #define SAFIR_WS_STR(k, v) SAFIR_WS_QUOTE(k)<<":"<<SAFIR_WS_QUOTE(v)
 #define SAFIR_WS_NUM(k, v) SAFIR_WS_QUOTE(k)<<":"<<v
+#define SAFIR_WS_OBJ(k, v) SAFIR_WS_QUOTE(k)<<":"<<v
 #define SAFIR_WS_BOOL(k, v) SAFIR_WS_QUOTE(k)<<":"<<(v?"true":"false")
 #endif
 
@@ -53,7 +54,7 @@ public:
         return std::move(os.str());
     }
 
-    static std::string Int(const JsonRpcId& id, int result)
+    static std::string Int(const JsonRpcId& id, boost::int64_t result)
     {
         std::ostringstream os;
         os<<"{"<<SAFIR_WS_STR("jsonrpc","2.0")<<","<<SAFIR_WS_NUM("result", result)<<","<<id<<"}";
@@ -70,7 +71,7 @@ public:
     static std::string Json(const JsonRpcId& id, const std::string& json)
     {
         std::ostringstream os;
-        os<<"{"<<SAFIR_WS_STR("jsonrpc","2.0")<<","<<SAFIR_WS_QUOTE("result")<<":"<<json<<","<<id<<"}";
+        os<<"{"<<SAFIR_WS_STR("jsonrpc","2.0")<<","<<SAFIR_WS_OBJ("result", json)<<","<<id<<"}";
         return std::move(os.str());
     }
 

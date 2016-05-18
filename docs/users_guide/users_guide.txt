@@ -2792,6 +2792,16 @@ Upon receiving a stop order the application shall shut down gracefully.
 
 When an application has several connections to the Dob, only one of them should supply a StopHandler. It is the handler of this connections responsibility to tell the other parts of the application to shut down gracefully. If several connections have stop handlers there may be race conditions, since there is no guaranteed order between which stop handler gets called first.
 
+=== Websocket JSON-RPC interface
+Bla bla bla.
+
+- *Java*
++
+[source,java]
+----------------------------
+debug.println("Testing logging " + myFloat + ", " + myInt);
+----------------------------
+
 [[configuration]]
 == Configuration
 Safir SDK Core has two different configuration mechanisms, one for basic system settings, using ini-files, and one for service level settings, using dou-parameters.

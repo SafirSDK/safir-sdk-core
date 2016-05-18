@@ -22,13 +22,76 @@
 *
 ******************************************************************************/
 #include <iostream>
+#include "../../src/JsonHelpers.h"
 #include "../../src/JsonRpcRequest.h"
 #include "../../src/JsonRpcResponse.h"
+#include "../../src/JsonRpcNotification.h"
 
 #define CHECK(expr) {if (!(expr)) { std::cout<<"Test failed! Line: "<<__LINE__<<", expr: "<< #expr <<std::endl; exit(1);}}
 
 inline void JsonRpcTest()
 {
+    //-------------------------------------------
+    // Test JsonHelpers
+    //-------------------------------------------
+    {
+        auto json="[1, 2, [1,2]]";
+        CHECK(JsonHelpers::IsArray(json));
+
+        json="[1, 2, [1,2]]";
+        CHECK(!JsonHelpers::IsObject(json));
+
+        json="{\"param\":1, \"[1,2]\"}";
+        CHECK(!JsonHelpers::IsArray(json));
+
+        json="{\"param\":1, \"[1,2]\"}";
+        CHECK(JsonHelpers::IsObject(json));
+    }
+    {
+        std::ostringstream os;
+        os<<ts::InstanceId(L"Test");
+        CHECK(os.str()=="\"instanceId\":\"Test\"");
+    }
+    {
+        std::ostringstream os;
+        os<<ts::InstanceId(123);
+        CHECK(os.str()=="\"instanceId\":123");
+    }
+    {
+        std::ostringstream os;
+        ts::ChannelId i;
+        os<<ts::ChannelId();
+        std::cout<<i.Utf8String()<<" : "<<i.GetRawValue()<<std::endl;
+        CHECK(os.str()=="\"channelId\":\"DEFAULT_CHANNEL\"");
+    }
+    {
+        std::ostringstream os;
+        os<<ts::ChannelId(L"Test");
+        CHECK(os.str()=="\"channelId\":\"Test\"");
+    }
+    {
+        std::ostringstream os;
+        os<<ts::ChannelId(123);
+        CHECK(os.str()=="\"channelId\":123");
+    }
+    {
+        std::ostringstream os;
+        ts::HandlerId i;
+        os<<ts::HandlerId();
+        std::cout<<i.Utf8String()<<" : "<<i.GetRawValue()<<std::endl;
+        CHECK(os.str()=="\"handlerId\":\"DEFAULT_HANDLER\"");
+    }
+    {
+        std::ostringstream os;
+        os<<ts::HandlerId(L"Test");
+        CHECK(os.str()=="\"handlerId\":\"Test\"");
+    }
+    {
+        std::ostringstream os;
+        os<<ts::HandlerId(123);
+        CHECK(os.str()=="\"handlerId\":123");
+    }
+
     //-------------------------------------------
     // Test JsonRpcRequest
     //-------------------------------------------
@@ -228,8 +291,8 @@ inline void JsonRpcTest()
     {
         //JSON value
         //------------
-        auto json = JsonRpcResponse::Json(JsonRpcId("Mr Donk"), "{_DouType:\"Safir.Dob.Entity\"}");
-        CHECK(json=="{\"jsonrpc\":\"2.0\",\"result\":{_DouType:\"Safir.Dob.Entity\"},\"id\":\"Mr Donk\"}");
+        auto json = JsonRpcResponse::Json(JsonRpcId("Mr Donk"), "{\"_DouType\":\"Safir.Dob.Entity\"}");
+        CHECK(json=="{\"jsonrpc\":\"2.0\",\"result\":{\"_DouType\":\"Safir.Dob.Entity\"},\"id\":\"Mr Donk\"}");
     }
 
     std::cout<<"Test passed!"<<std::endl;

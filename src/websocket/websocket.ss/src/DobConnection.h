@@ -24,23 +24,23 @@
 #pragma once
 
 #include <string>
+#include <vector>
 #include <functional>
 #include <boost/optional.hpp>
 #include <Safir/Dob/Connection.h>
 #include <Safir/Utilities/AsioDispatcher.h>
 #include <Safir/Dob/Typesystem/Serialization.h>
-#include <Safir/Websocket/Send.h>
-#include <Safir/Websocket/Receive.h>
+#include "RequestIdMapper.h"
 
 namespace sd = Safir::Dob;
 namespace ts = Safir::Dob::Typesystem;
 
 class DobConnection :
-        public sd::StopHandler,
         public sd::EntityHandler,
         public sd::EntityHandlerInjection,
         public sd::EntityHandlerPending,
         public sd::EntitySubscriber,
+        public sd::RegistrationSubscriber,
         public sd::Requestor,
         public sd::MessageSender,
         public sd::MessageSubscriber,
@@ -48,12 +48,12 @@ class DobConnection :
 {
 public:
 
-    DobConnection(boost::asio::io_service& ioService, boost::function<void(const std::string&)> send, boost::function<void()> onStopOrder);
+    DobConnection(boost::asio::io_service& ioService, boost::function<void(const std::string&)> send);
     sd::Connection& Connection() {return m_con;}
 
-    bool IsOpen() {return m_con.IsOpen();}
-    void Open(const std::wstring& name, int context) {m_con.Open(name, L"-ws", context, this, &m_dispatcher);}
+    void Open(const std::wstring& name, int context) {m_con.Open(name, L"-ws", context, nullptr, &m_dispatcher);}
     void Close() {if (m_con.IsOpen()) m_con.Close();}
+    bool IsOpen() const {return m_con.IsOpen();}
     void SubscribeMessage(ts::TypeId typeId, const ts::ChannelId& ch, bool includeSubclasses) {m_con.SubscribeMessage(typeId, ch, includeSubclasses, this);}
     void UnsubscribeMessage(ts::TypeId typeId, const ts::ChannelId& ch, bool includeSubclasses) {m_con.UnsubscribeMessage(typeId, ch, includeSubclasses, this);}
     void SendMessage(const sd::MessagePtr msg, const ts::ChannelId& ch) {m_con.Send(msg, ch, this);}
@@ -75,18 +75,105 @@ public:
 
     void UnregisterHandler(ts::TypeId typeId, const ts::HandlerId& handler) {m_con.UnregisterHandler(typeId, handler);}
 
+    void SubscribeRegistration(ts::TypeId typeId, const ts::HandlerId& handler, bool inclSub, bool restart) {m_con.SubscribeRegistration(typeId, handler, inclSub, restart, this);}
+
+    void UnsubscribeRegistration(ts::TypeId typeId, const ts::HandlerId& handler, bool inclSub) {m_con.UnsubscribeRegistration(typeId, handler, inclSub, this);}
+
+    void CreateRequest(const sd::EntityPtr& req, const ts::HandlerId& handler, const JsonRpcId& id)
+    {
+        auto reqId=m_con.CreateRequest(req, handler, this);
+        m_reqIdMapper.Add(reqId, id);
+    }
+
+    void CreateRequest(const sd::EntityPtr& req, const ts::InstanceId& inst, const ts::HandlerId& handler, const JsonRpcId& id)
+    {
+        auto reqId=m_con.CreateRequest(req, inst, handler, this);
+        m_reqIdMapper.Add(reqId, id);
+    }
+
+    void UpdateRequest(const sd::EntityPtr& req, const ts::InstanceId& inst, const ts::HandlerId& handler, const JsonRpcId& id)
+    {
+        auto reqId=m_con.UpdateRequest(req, inst, this);
+        m_reqIdMapper.Add(reqId, id);
+    }
+
+    void DeleteRequest(ts::TypeId typeId, const ts::InstanceId& inst, const JsonRpcId& id)
+    {
+        auto reqId=m_con.DeleteRequest(ts::EntityId(typeId, inst), this);
+        m_reqIdMapper.Add(reqId, id);
+    }
+
+    void ServiceRequest(const sd::ServicePtr& req, const ts::HandlerId& handler, const JsonRpcId& id)
+    {
+        auto reqId=m_con.ServiceRequest(req, handler, this);
+        m_reqIdMapper.Add(reqId, id);
+    }
+
+    void SetChanges(const sd::EntityPtr& entity, const ts::InstanceId& inst, const ts::HandlerId& handler) {m_con.SetChanges(entity, inst, handler);}
+    void SetAll(const sd::EntityPtr& entity, const ts::InstanceId& inst, const ts::HandlerId& handler) {m_con.SetAll(entity, inst, handler);}
+
+    void Delete(ts::TypeId typeId, const ts::InstanceId& inst, const ts::HandlerId& handler)
+    {
+        m_con.Delete(ts::EntityId(typeId, inst), handler);
+    }
+
+    void DeleteAllInstances(ts::TypeId typeId, const ts::HandlerId& handler) {m_con.DeleteAllInstances(typeId, handler);}
+
+    std::string Read(ts::TypeId typeId, const ts::InstanceId& inst) const
+    {
+        auto proxy=m_con.Read(ts::EntityId(typeId, inst));
+        return std::move(ToJson(proxy));
+    }
+
+    bool IsCreated(ts::TypeId typeId, const ts::InstanceId& inst) const {return m_con.IsCreated(ts::EntityId(typeId, inst));}
+
+    ts::Int64 GetNumberOfInstances(ts::TypeId typeId, const ts::HandlerId& handler, bool inclSub) const {return m_con.GetNumberOfInstances(typeId, handler, inclSub);}
+    std::string GetInstanceIdPolicy(ts::TypeId typeId, const ts::HandlerId& handler) const
+    {
+        auto policy=m_con.GetInstanceIdPolicy(typeId, handler);
+        return std::move(ts::Utilities::ToUtf8(sd::InstanceIdPolicy::ToString(policy)));
+    }
+
+    std::vector<ts::InstanceId> GetAllInstanceIds(ts::TypeId typeId) const
+    {
+        std::vector<ts::InstanceId> instances;
+        auto end=sd::EntityIterator();
+        for (auto it=m_con.GetEntityIterator(typeId, false); it!=end; ++it)
+        {
+            instances.emplace_back(it->GetInstanceId());
+        }
+        return std::move(instances);
+    }
+
+    std::string GetName(ts::TypeId typeId) const
+    {
+        try
+        {
+            return ts::Utilities::ToUtf8(ts::Operations::GetName(typeId));
+        }
+        catch (const std::exception& e)
+        {
+            std::cout<<"Not found type"<<std::endl;
+            return "<unknown_type>";
+        }
+    }
 
 private:
     sd::Connection m_con;
     Safir::Utilities::AsioDispatcher m_dispatcher;
     boost::function<void(const std::string&)> m_wsSend;
-    boost::function<void()> m_onStopOrder;
+    RequestIdMapper m_reqIdMapper;
+
+    std::string ToJson(const sd::EntityProxy& proxy) const;
+    std::string ToJson(const sd::MessageProxy& proxy) const;
+    std::string ToJson(const sd::ResponseProxy& proxy) const;
+    std::string ToJson(const sd::ServiceRequestProxy& proxy) const;
+    std::string ToJson(const sd::EntityRequestProxy& proxy) const;
+    std::string ToJson(const sd::InjectedEntityProxy& proxy) const;
+    std::string ToJson(ts::TypeId, const ts::HandlerId& handler) const;
 
     //DOB events
     //-----------------
-    //StopHandler interface
-    void OnStopOrder();
-
     // EntityHandler interface
     void OnCreateRequest(const sd::EntityRequestProxy entityRequestProxy, sd::ResponseSenderPtr responseSender);
     void OnUpdateRequest(const sd::EntityRequestProxy entityRequestProxy, sd::ResponseSenderPtr responseSender);
@@ -105,6 +192,10 @@ private:
     void OnUpdatedEntity(const sd::EntityProxy entityProxy);
     void OnDeletedEntity(const sd::EntityProxy entityProxy, const bool);
 
+    //RegistrationSubscriber interface
+    void OnRegistered(const ts::TypeId typeId, const ts::HandlerId&  handlerId);
+    void OnUnregistered(const ts::TypeId typeId, const Safir::Dob::Typesystem::HandlerId&  handlerId);
+
     //Requestor interface
     void OnResponse(const sd::ResponseProxy responseProxy);
     void OnNotRequestOverflow();
@@ -117,51 +208,4 @@ private:
 
     //ServiceHandler interface
     void OnServiceRequest(const Safir::Dob::ServiceRequestProxy serviceRequestProxy, Safir::Dob::ResponseSenderPtr responseSender);
-
-    /**
-      Open(name, context)
-      Close()
-
-      RegHandler
-      RegHandlerInj
-      RegHandlerPend
-      UnregHandler
-
-      SubscribeMessage(type, channel, includeSubclasses)
-      UnsubMessage
-      SubEnt
-      UnsubEnt
-
-      SubReg
-      UnsubReg
-
-      Request crud
-      SendMessage(message, channel)
-
-      SetAll
-      SetChanges
-      Delete
-      DeleteAll
-      Read
-
-      //----------
-      Open
-      Close
-
-      RegHandler
-      UnregHandler
-
-      Subscribe
-      Unsubscribe
-
-      Request
-      SendMessage
-
-      SetEntity
-      ReadEntity
-
-      ReadParameter
-
-
-      */
 };

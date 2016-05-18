@@ -6,8 +6,10 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../include)
 
 add_executable(safir_websocket_unittests 
                 ${sources} ${headers} 
+                ../../src/JsonHelpers.h
                 ../../src/JsonRpcRequest.h
                 ../../src/JsonRpcResponse.h
+                ../../src/JsonRpcNotification.h
                 ../../src/CommandValidator.h)
 
 target_link_libraries(safir_websocket_unittests PRIVATE

@@ -92,7 +92,128 @@ namespace CommandValidator
     inline void ValidateUnregisterHandler(const JsonRpcRequest& req)
     {
         if (!req.HasTypeId())
-            throw RequestErrorException("typeId is mandatory in command 'nregisterHandler'", RequestErrorException::InvalidParams);
+            throw RequestErrorException("typeId is mandatory in command 'unregisterHandler'", RequestErrorException::InvalidParams);
     }
 
+    inline void ValidateSubscribeRegistration(const JsonRpcRequest& req)
+    {
+        if (!req.HasTypeId())
+            throw RequestErrorException("typeId is mandatory in command 'subscribeRegistration'", RequestErrorException::InvalidParams);
+        if (!Safir::Dob::Typesystem::Operations::IsOfType(req.TypeId(), Safir::Dob::Entity::ClassTypeId) ||
+            !Safir::Dob::Typesystem::Operations::IsOfType(req.TypeId(), Safir::Dob::Service::ClassTypeId))
+            throw RequestErrorException("typeId must refer to a subtype of Safir.Dob.Entity or Safir.Dob.Service in command 'subscribeRegistration'", RequestErrorException::InvalidParams);
+    }
+
+    inline void ValidateUnsubscribeRegistration(const JsonRpcRequest& req)
+    {
+        if (!req.HasTypeId())
+            throw RequestErrorException("typeId is mandatory in command 'unsubscribeRegistration'", RequestErrorException::InvalidParams);
+        if (!Safir::Dob::Typesystem::Operations::IsOfType(req.TypeId(), Safir::Dob::Entity::ClassTypeId) ||
+            !Safir::Dob::Typesystem::Operations::IsOfType(req.TypeId(), Safir::Dob::Service::ClassTypeId))
+            throw RequestErrorException("typeId must refer to a subtype of Safir.Dob.Entity or Safir.Dob.Service in command 'unsubscribeRegistration'", RequestErrorException::InvalidParams);
+    }
+
+    inline void ValidateCreateRequest(const JsonRpcRequest& req)
+    {
+        if (!req.HasEntity())
+            throw RequestErrorException("entity is mandatory in command 'createRequest'", RequestErrorException::InvalidParams);
+    }
+
+    inline void ValidateUpdateRequest(const JsonRpcRequest& req)
+    {
+        if (!req.HasEntity())
+            throw RequestErrorException("entity is mandatory in command 'updateRequest'", RequestErrorException::InvalidParams);
+        if (!req.HasInstanceId())
+            throw RequestErrorException("instanceId is mandatory in command 'updateRequest'", RequestErrorException::InvalidParams);
+    }
+
+    inline void ValidateDeleteRequest(const JsonRpcRequest& req)
+    {
+        if (!req.HasTypeId())
+            throw RequestErrorException("typeId is mandatory in command 'deleteRequest'", RequestErrorException::InvalidParams);
+        if (!Safir::Dob::Typesystem::Operations::IsOfType(req.TypeId(), Safir::Dob::Entity::ClassTypeId))
+            throw RequestErrorException("typeId must refer to a subtype of Safir.Dob.Entity in command 'deleteRequest'", RequestErrorException::InvalidParams);
+        if (!req.HasInstanceId())
+            throw RequestErrorException("instanceId is mandatory in command 'deleteRequest'", RequestErrorException::InvalidParams);
+    }
+
+    inline void ValidateServiceRequest(const JsonRpcRequest& req)
+    {
+        if (!req.HasRequest())
+            throw RequestErrorException("request is mandatory in command 'serviceRequest'", RequestErrorException::InvalidParams);
+    }
+
+    inline void ValidateSetEntityChanges(const JsonRpcRequest& req)
+    {
+        if (!req.HasEntity())
+            throw RequestErrorException("entity is mandatory in command 'setEntityChanges'", RequestErrorException::InvalidParams);
+        if (!req.HasInstanceId())
+            throw RequestErrorException("instanceId is mandatory in command 'setEntityChanges'", RequestErrorException::InvalidParams);
+    }
+
+    inline void ValidateSetEntity(const JsonRpcRequest& req)
+    {
+        if (!req.HasEntity())
+            throw RequestErrorException("entity is mandatory in command 'setEntity'", RequestErrorException::InvalidParams);
+        if (!req.HasInstanceId())
+            throw RequestErrorException("instanceId is mandatory in command 'setEntity'", RequestErrorException::InvalidParams);
+    }
+
+    inline void ValidateDeleteEntity(const JsonRpcRequest& req)
+    {
+        if (!req.HasTypeId())
+            throw RequestErrorException("typeId is mandatory in command 'deleteEntity'", RequestErrorException::InvalidParams);
+        if (!Safir::Dob::Typesystem::Operations::IsOfType(req.TypeId(), Safir::Dob::Entity::ClassTypeId))
+            throw RequestErrorException("typeId must refer to a subtype of Safir.Dob.Entity in command 'deleteEntity'", RequestErrorException::InvalidParams);
+        if (!req.HasInstanceId())
+            throw RequestErrorException("instanceId is mandatory in command 'deleteEntity'", RequestErrorException::InvalidParams);
+    }
+
+    inline void ValidateDeleteAllInstances(const JsonRpcRequest& req)
+    {
+        if (!req.HasTypeId())
+            throw RequestErrorException("typeId is mandatory in command 'deleteAllInstances'", RequestErrorException::InvalidParams);
+        if (!Safir::Dob::Typesystem::Operations::IsOfType(req.TypeId(), Safir::Dob::Entity::ClassTypeId))
+            throw RequestErrorException("typeId must refer to a subtype of Safir.Dob.Entity in command 'deleteAllInstances'", RequestErrorException::InvalidParams);
+    }
+
+    inline void ValidateReadEntity(const JsonRpcRequest& req)
+    {
+        if (!req.HasTypeId())
+            throw RequestErrorException("typeId is mandatory in command 'readEntity'", RequestErrorException::InvalidParams);
+        if (!Safir::Dob::Typesystem::Operations::IsOfType(req.TypeId(), Safir::Dob::Entity::ClassTypeId))
+            throw RequestErrorException("typeId must refer to a subtype of Safir.Dob.Entity in command 'readEntity'", RequestErrorException::InvalidParams);
+        if (!req.HasInstanceId())
+            throw RequestErrorException("instanceId is mandatory in command 'readEntity'", RequestErrorException::InvalidParams);
+    }
+
+    inline void ValidateIsCreated(const JsonRpcRequest& req)
+    {
+        if (!req.HasTypeId())
+            throw RequestErrorException("typeId is mandatory in command 'isCreated'", RequestErrorException::InvalidParams);
+        if (!Safir::Dob::Typesystem::Operations::IsOfType(req.TypeId(), Safir::Dob::Entity::ClassTypeId))
+            throw RequestErrorException("typeId must refer to a subtype of Safir.Dob.Entity in command 'isCreated'", RequestErrorException::InvalidParams);
+        if (!req.HasInstanceId())
+            throw RequestErrorException("instanceId is mandatory in command 'isCreated'", RequestErrorException::InvalidParams);
+    }
+
+    inline void ValidateGetNumberOfInstances(const JsonRpcRequest& req)
+    {
+        if (!req.HasTypeId())
+            throw RequestErrorException("typeId is mandatory in command 'getNumberOfInstances'", RequestErrorException::InvalidParams);
+    }
+
+    inline void ValidateGetAllInstanceIds(const JsonRpcRequest& req)
+    {
+        if (!req.HasTypeId())
+            throw RequestErrorException("typeId is mandatory in command 'getAllInstanceIds'", RequestErrorException::InvalidParams);
+        if (!Safir::Dob::Typesystem::Operations::IsOfType(req.TypeId(), Safir::Dob::Entity::ClassTypeId))
+            throw RequestErrorException("typeId must refer to a subtype of Safir.Dob.Entity in command 'getAllInstanceIds'", RequestErrorException::InvalidParams);
+    }
+
+    inline void ValidateGetInstanceIdPolicy(const JsonRpcRequest& req)
+    {
+        if (!req.HasTypeId())
+            throw RequestErrorException("typeId is mandatory in command 'getInstanceIdPolicy'", RequestErrorException::InvalidParams);
+    }
 }

@@ -37,6 +37,7 @@
 #include "ResponseFactory.h"
 #include "DobConnection.h"
 #include "JsonHelpers.h"
+#include "PingHandler.h"
 
 namespace sd = Safir::Dob;
 namespace ts = Safir::Dob::Typesystem;
@@ -63,6 +64,13 @@ private:
     WsConnection m_connection;
     std::function<void(const RemoteClient*)> m_onConnectionClosed;
     DobConnection m_dob;
+    PingHandler m_pingHandler;
+
+    inline void SendToClient(const std::string& msg)
+    {
+        m_connection->send(msg);
+        m_pingHandler.Update();
+    }
 
     //websocket events
     //-----------------
@@ -72,6 +80,7 @@ private:
     // handle client commands
     //------------------------
     void WsDispatch(const JsonRpcRequest& req);
+    void WsPing(const JsonRpcRequest& req);
     void WsOpen(const JsonRpcRequest& req);
     void WsClose(const JsonRpcRequest& req);
     void WsIsOpen(const JsonRpcRequest& req);
@@ -79,11 +88,26 @@ private:
     void WsSubscribeMessage(const JsonRpcRequest& req);
     void WsSendMessage(const JsonRpcRequest& req);
     void WsUnsubscribeMessage(const JsonRpcRequest& req);
-
     void WsSubscribeEntity(const JsonRpcRequest& req);
     void WsUnsubscribeEntity(const JsonRpcRequest& req);
     void WsRegisterEntityHandler(const JsonRpcRequest& req);
     void WsUnregisterHandler(const JsonRpcRequest& req);
+
+    void WsSubscribeRegistration(const JsonRpcRequest& req);
+    void WsUnsubscribeRegistration(const JsonRpcRequest& req);
+    void WsCreateRequest(const JsonRpcRequest& req);
+    void WsUpdateRequest(const JsonRpcRequest& req);
+    void WsDeleteRequest(const JsonRpcRequest& req);
+    void WsServiceRequest(const JsonRpcRequest& req);
+    void WsSetEntityChanges(const JsonRpcRequest& req);
+    void WsSetEntity(const JsonRpcRequest& req);
+    void WsDeleteEntity(const JsonRpcRequest& req);
+    void WsDeleteAllInstances(const JsonRpcRequest& req);
+    void WsReadEntity(const JsonRpcRequest& req);
+    void WsIsCreated(const JsonRpcRequest& req);
+    void WsGetNumberOfInstances(const JsonRpcRequest& req);
+    void WsGetAllInstanceIds(const JsonRpcRequest& req);
+    void WsGetInstanceIdPolicy(const JsonRpcRequest& req);
 
     //---------------helpers--------------------
 
@@ -109,52 +133,4 @@ private:
 
         throw std::invalid_argument("The JSON serialized Safir.Dob.Object is not of correct type (Entity/Message/Service/Response).");
     }
-
-    //-------------------------------------------
-    /**
-      Open(name, context)
-      Close()
-
-      RegHandler
-      RegHandlerInj
-      RegHandlerPend
-      UnregHandler
-
-      SubscribeMessage(type, channel, includeSubclasses)
-      UnsubMessage
-      SubEnt
-      UnsubEnt
-
-      SubReg
-      UnsubReg
-
-      Request crud
-      SendMessage(message, channel)
-
-      SetAll
-      SetChanges
-      Delete
-      DeleteAll
-      Read
-
-      //----------
-      Open
-      Close
-
-      RegHandler
-      UnregHandler
-
-      Subscribe
-      Unsubscribe
-
-      Request
-      SendMessage
-
-      SetEntity
-      ReadEntity
-
-      ReadParameter
-
-
-      */
 };

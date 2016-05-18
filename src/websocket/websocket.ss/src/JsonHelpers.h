@@ -25,10 +25,39 @@
 
 #include <string>
 #include <vector>
+#include <sstream>
 #include <boost/algorithm/string.hpp>
+#include <Safir/Dob/Typesystem/HandlerId.h>
+#include <Safir/Dob/Typesystem/ChannelId.h>
+#include <Safir/Dob/Typesystem/InstanceId.h>
+
+namespace ts = Safir::Dob::Typesystem;
+
+#ifndef SAFIR_WS_QUOTE
+#define SAFIR_WS_QUOTE(x) "\""<<x<<"\""
+#define SAFIR_WS_STR(k, v) SAFIR_WS_QUOTE(k)<<":"<<SAFIR_WS_QUOTE(v)
+#define SAFIR_WS_NUM(k, v) SAFIR_WS_QUOTE(k)<<":"<<v
+#define SAFIR_WS_OBJ(k, v) SAFIR_WS_QUOTE(k)<<":"<<v
+#define SAFIR_WS_BOOL(k, v) SAFIR_WS_QUOTE(k)<<":"<<(v?"true":"false")
+#endif
 
 namespace JsonHelpers
 {
+    template <class T>
+    std::ostream& AddHashedVal(std::ostream& os, const std::string& name, const T& hash)
+    {
+        if (hash.Utf8StringLength()>0)
+        {
+            os<<SAFIR_WS_STR(name, hash.Utf8String());
+        }
+        else
+        {
+            os<<SAFIR_WS_NUM(name, hash.GetRawValue());
+        }
+
+        return os;
+    }
+
     inline bool IsArray(const std::string& json)
     {
         return json[0]=='[' && json[json.length()-1]==']';
@@ -68,3 +97,8 @@ namespace JsonHelpers
         return result;
     }
 }
+
+inline std::ostream& operator<<(std::ostream& os, const ts::HandlerId& hash) {return JsonHelpers::AddHashedVal(os,"handlerId", hash);}
+inline std::ostream& operator<<(std::ostream& os, const ts::ChannelId& hash) {return JsonHelpers::AddHashedVal(os,"channelId", hash);}
+inline std::ostream& operator<<(std::ostream& os, const ts::InstanceId& hash) {return JsonHelpers::AddHashedVal(os,"instanceId", hash);}
+
