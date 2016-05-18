@@ -61,7 +61,6 @@ inline void JsonRpcTest()
         std::ostringstream os;
         ts::ChannelId i;
         os<<ts::ChannelId();
-        std::cout<<i.Utf8String()<<" : "<<i.GetRawValue()<<std::endl;
         CHECK(os.str()=="\"channelId\":\"DEFAULT_CHANNEL\"");
     }
     {
@@ -78,7 +77,6 @@ inline void JsonRpcTest()
         std::ostringstream os;
         ts::HandlerId i;
         os<<ts::HandlerId();
-        std::cout<<i.Utf8String()<<" : "<<i.GetRawValue()<<std::endl;
         CHECK(os.str()=="\"handlerId\":\"DEFAULT_HANDLER\"");
     }
     {

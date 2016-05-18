@@ -22,11 +22,15 @@
 *
 ******************************************************************************/
 #include "JsonRpcTest.h"
-#include "CommandValidatorTest.h"
+#include "PingHandlerTest.h"
 
 int main(int /*argc*/, const char** /*argv*/)
 {
+    std::cout<<"===== JsonRpcTest ====="<<std::endl;
     JsonRpcTest();
+    std::cout<<"===== PingHandlerTest ====="<<std::endl;
+    PingHandlerTest();
+
     return 0;
 }
 
