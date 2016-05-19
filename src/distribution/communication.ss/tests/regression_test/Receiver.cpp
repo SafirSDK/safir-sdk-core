@@ -185,7 +185,7 @@ void Receiver::ReceiveData(int64_t fromNodeId, int64_t fromNodeType, const char*
     it->second.second=val;
 }
 
-void Receiver::GotReceiveFrom(int64_t /*fromNodeId*/, bool isHeartbeat)
+void Receiver::GotReceiveFrom(int64_t /*fromNodeId*/, bool /*isHeartbeat*/)
 {
 }
 

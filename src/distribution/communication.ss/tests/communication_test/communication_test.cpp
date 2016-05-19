@@ -337,7 +337,7 @@ public:
         }
     }
 
-    void GotReceive(int64_t /*id*/, bool isHeartbeat)
+    void GotReceive(int64_t /*id*/, bool /*isHeartbeat*/)
     {
         //std::cout<<"SP: GotRecv from "<<id<<std::endl;
     }

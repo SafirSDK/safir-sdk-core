@@ -376,9 +376,8 @@ private:
         delete[] data; //receiver is responsible for deleting data
     }
 
-    static void GotReceiveFrom(int64_t /*fromNodeId*/, bool isHeartbeat)
+    static void GotReceiveFrom(int64_t /*fromNodeId*/, bool /*isHeartbeat*/)
     {
-        //TODO: add test
         //std::cout<<"GotReceiveFrom "<<fromNodeId<<std::endl;
     }
 
