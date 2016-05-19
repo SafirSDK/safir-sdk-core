@@ -69,6 +69,11 @@ namespace Internal
         const boost::property_tree::ptree& Typesystem() const;
 
 
+        /**
+         * Get the directory where the currently loaded
+         * configuration files are located.
+         */
+        std::string Path() const;
 
     private:
 
@@ -126,13 +131,13 @@ namespace Internal
          * Throws std::logic_error if SAFIR_INSTANCE is negative or not a number.
          */
         static unsigned int GetSafirInstance();
-    
-        /** 
+
+        /**
          * Get the Safir Instance as a string that can be used to suffix OS primitives.
          *
          * Example: If SAFIR_INSTANCE environment variable is 15, this function will return "_15".
          * If SAFIR_INSTANCE is not set it will return "_0".
-         * 
+         *
          * Throws std::logic_error if SAFIR_INSTANCE is negative or not a number.
          */
         static std::string GetSafirInstanceSuffix();

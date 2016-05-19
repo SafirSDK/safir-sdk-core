@@ -56,6 +56,7 @@ namespace Internal
             {
                 if (TryLoad(dir1))
                 {
+                    m_path = dir1;
                     return;
                 }
                 throw std::logic_error("Failed to load configuration. "
@@ -67,12 +68,14 @@ namespace Internal
                 const Path dir2 = PathFinder::SystemConfigDirectory();
                 if (TryLoad(dir2))
                 {
+                    m_path = dir2;
                     return;
                 }
 
                 const Path dir3 = PathFinder::UserConfigDirectory();
                 if (TryLoad(dir3))
                 {
+                    m_path = dir3;
                     return;
                 }
                 throw std::logic_error("Failed to load configuration. "
@@ -85,6 +88,7 @@ namespace Internal
         boost::property_tree::ptree m_logging;
         boost::property_tree::ptree m_typesystem;
 
+        Path m_path;
     private:
         /**
          * Returns false if it fails to find a configuration in the directory.

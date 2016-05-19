@@ -27,7 +27,7 @@
 namespace
 {
     using namespace Safir::Utilities::Internal;
-    
+
     static Path test_config;
     static Path system_config;
     static Path user_config;
@@ -38,12 +38,12 @@ namespace
         {
             return test_config;
         }
- 
+
         static Path SystemConfigDirectory()
         {
             return system_config;
         }
-        
+
         static Path UserConfigDirectory()
         {
             return user_config;
@@ -75,11 +75,11 @@ namespace
     {
         char path[MAX_PATH];
 
-        if(SUCCEEDED(SHGetFolderPathA(NULL, 
-                                     csidl|CSIDL_FLAG_CREATE, 
-                                     NULL, 
-                                     0, 
-                                     path))) 
+        if(SUCCEEDED(SHGetFolderPathA(NULL,
+                                     csidl|CSIDL_FLAG_CREATE,
+                                     NULL,
+                                     0,
+                                     path)))
         {
             return path;
         }
@@ -115,7 +115,7 @@ int main(const int argc, const char* argv[])
             }
             catch(const std::logic_error&)
             {
-                
+
             }
         }
 
@@ -131,7 +131,7 @@ int main(const int argc, const char* argv[])
             {
                 return 1;
             }
-            
+
             if (impl.m_locations.get<std::string>("env") != "myvalue:blahonga")
             {
                 std::wcout << impl.m_locations.get<std::string>("env").c_str() << std::endl;
@@ -147,6 +147,11 @@ int main(const int argc, const char* argv[])
             {
                 return 1;
             }
+
+            if (impl.m_path.str() != ::user_config.str())
+            {
+                return 1;
+            }
         }
 
         std::wcout << "missing env" << std::endl;
@@ -159,7 +164,7 @@ int main(const int argc, const char* argv[])
                 ConfigReaderImpl impl;
                 impl.Read<TestDirs>();
                 impl.ExpandEnvironmentVariables();
-        
+
                 return 1;
             }
             catch (const std::logic_error&)
@@ -171,7 +176,7 @@ int main(const int argc, const char* argv[])
         std::wcout << "find system" << std::endl;
         {
             ::system_config = dir / "system";
-            
+
             ConfigReaderImpl impl;
             impl.Read<TestDirs>();
             impl.ExpandEnvironmentVariables();
@@ -190,12 +195,17 @@ int main(const int argc, const char* argv[])
             {
                 return 1;
             }
+
+            if (impl.m_path.str() != ::system_config.str())
+            {
+                return 1;
+            }
         }
 
         std::wcout << "find test override" << std::endl;
         {
             ::test_config = dir / "runtime";
-            
+
             ConfigReaderImpl impl;
             impl.Read<TestDirs>();
             impl.ExpandEnvironmentVariables();
@@ -215,6 +225,11 @@ int main(const int argc, const char* argv[])
                 return 1;
             }
 
+            if (impl.m_path.str() != ::test_config.str())
+            {
+                return 1;
+            }
+
             ::test_config = Path("");
         }
 
@@ -230,7 +245,7 @@ int main(const int argc, const char* argv[])
             }
             catch(const std::logic_error&)
             {
-                
+
             }
         }
 
@@ -238,12 +253,17 @@ int main(const int argc, const char* argv[])
         std::wcout << "test windows special folders" << std::endl;
         {
             ::system_config = dir / "windows";
-            
+
             ConfigReaderImpl impl;
             impl.Read<TestDirs>();
             impl.ExpandEnvironmentVariables();
 
             if (impl.m_locations.get<std::string>("special") != GetCSIDL(CSIDL_COMMON_APPDATA) + "/asdf/asdf")
+            {
+                return 1;
+            }
+
+            if (impl.m_path.str() != ::system_config.str())
             {
                 return 1;
             }
@@ -264,5 +284,3 @@ int main(const int argc, const char* argv[])
     std::wcout << "success" << std::endl;
     return 0;
 }
-
-

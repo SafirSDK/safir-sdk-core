@@ -125,6 +125,11 @@ namespace Internal
         return m_impl->m_typesystem;
     }
 
+    std::string ConfigReader::Path() const
+    {
+        return m_impl->m_path.str();
+    }
+
     std::string Expansion::ExpandEnvironment(const std::string& str)
     {
         return Safir::Utilities::Internal::ExpandEnvironment(str);

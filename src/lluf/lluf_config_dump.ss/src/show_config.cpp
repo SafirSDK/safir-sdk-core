@@ -55,6 +55,7 @@ public:
             ("typesystem", "Show contents of typesystem.ini")
             ("locations", "Show contents of locations.ini")
             ("logging", "Show contents of logging.ini")
+            ("config-path", "Show the path where typesystem.ini, locations.ini and logging.ini are loaded from.")
             ("dou-install-dirs", "Show the dou install dirs of all modules defined in typesystem.ini")
             ("module-install-dir", value<std::string>(&moduledir),
              "Get the install dir from typesystem.ini for the specified module")
@@ -87,6 +88,7 @@ public:
         logging = vm.count("logging") != 0;
         typesystem = vm.count("typesystem") != 0;
         locations = vm.count("locations") != 0;
+        config_path = vm.count("config-path") != 0;
         dou_install_dirs = vm.count("dou-install-dirs") != 0;
 
         if (!version &&
@@ -94,6 +96,7 @@ public:
             !logging &&
             !locations &&
             !typesystem &&
+            !config_path &&
             !dou_install_dirs &&
             vm.count("module-install-dir") == 0 &&
             vm.count("module-dependencies") == 0)
@@ -110,6 +113,7 @@ public:
     bool logging;
     bool typesystem;
     bool locations;
+    bool config_path;
     bool dou_install_dirs;
     std::string moduledir;
     std::string moduledep;
@@ -182,6 +186,10 @@ int main(int argc, char * argv[])
         {
             std::cout << "; ==== typesystem.ini ====" << std::endl;
             PrintPTree(reader.Typesystem());
+        }
+        if (options.config_path)
+        {
+            std::cout << reader.Path() << std::endl;
         }
 
         if (options.dou_install_dirs)
