@@ -21,32 +21,12 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#pragma once
+#include <iostream>
+#include "../../src/JsonHelpers.h"
 
-#include <string>
-#include <sstream>
-#include "JsonHelpers.h"
+#define CHECK(expr) {if (!(expr)) { std::cout<<"Test failed! Line: "<<__LINE__<<", expr: "<< #expr <<std::endl; exit(1);}}
 
-class JsonRpcNotification
+inline void ProxyToJsonTest()
 {
-public:
-
-    static std::string Empty(const std::string& method)
-    {
-        std::ostringstream os;
-        os<<"{"<<SAFIR_WS_STR("jsonrpc","2.0")<<","<<SAFIR_WS_STR("method",method)<<"}";
-        return std::move(os.str());
-    }
-
-    static std::string Json(const std::string& method, const std::string& json)
-    {
-        std::ostringstream os;
-        os<<"{"<<SAFIR_WS_STR("jsonrpc","2.0")<<","<<SAFIR_WS_STR("method",method)<<","<<SAFIR_WS_OBJ("params", json)<<"}";
-        return std::move(os.str());
-    }
-
-
-private:
-
-
-};
+    //Not implemented, right now this is tested by th "test_client"
+}

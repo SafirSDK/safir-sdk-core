@@ -31,6 +31,7 @@
 #include "rapidjson/writer.h"
 #include "RequestErrorException.h"
 #include "JsonRpcId.h"
+#include "JsonHelpers.h"
 
 namespace rj = rapidjson;
 namespace ts = Safir::Dob::Typesystem;
@@ -38,6 +39,17 @@ namespace ts = Safir::Dob::Typesystem;
 class JsonRpcRequest
 {
 public:
+
+    static std::string Json(const std::string& method, const std::string& json, const JsonRpcId& id)
+    {
+        std::ostringstream os;
+        if (!id.IsNull())
+            os<<"{"<<SAFIR_WS_STR("jsonrpc","2.0")<<","<<SAFIR_WS_STR("method",method)<<","<<SAFIR_WS_OBJ("params", json)<<","<<id<<"}";
+        else
+            os<<"{"<<SAFIR_WS_STR("jsonrpc","2.0")<<","<<SAFIR_WS_STR("method",method)<<","<<SAFIR_WS_OBJ("params", json)<<"}";
+
+        return std::move(os.str());
+    }
 
     JsonRpcRequest(const std::string& json)
         :m_doc()
@@ -47,6 +59,16 @@ public:
     }
 
     const JsonRpcId& Id() const {return m_id;}
+
+    bool IsResponse() const {return m_doc.HasMember("result");}
+    std::string Result() const
+    {
+        rj::StringBuffer sb;
+        rj::Writer<rj::StringBuffer> writer(sb);
+        m_doc["result"].Accept(writer);
+        return sb.GetString();
+    }
+
 
     std::string Method() const {return m_doc["method"].GetString();}
 
@@ -93,9 +115,6 @@ public:
 
     bool HasRequest() const {return HasParam("request");}
     std::string Request() const {return GetObject("request");}
-
-    bool HasResponse() const {return HasParam("response");}
-    std::string Response() const {return GetObject("response");}
 
     bool HasPending() const {return HasParam("pending");}
     bool Pending() const {return m_doc["params"]["pending"].GetBool();}
@@ -163,6 +182,17 @@ private:
 
         if (m_doc["jsonrpc"]!="2.0")
             throw RequestErrorException("JSON-RPC version is not supported.", RequestErrorException::InvalidRequest);
+
+        //If this is actually a response and not a request, validate as response instead.
+        if (IsResponse())
+        {
+            if (!m_doc.HasMember("result"))
+                throw RequestErrorException("Response must contain the member 'result'.", RequestErrorException::InvalidParams);
+            if (!m_doc["result"].IsObject())
+                throw RequestErrorException("Member 'result' has wrong type. It must be an object of type Safir.Dob.Response", RequestErrorException::InvalidParams);
+
+            return; //response is valid
+        }
 
         if (!m_doc.HasMember("method"))
             throw RequestErrorException("Missing method.", RequestErrorException::InvalidRequest);

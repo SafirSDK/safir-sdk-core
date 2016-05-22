@@ -21,32 +21,34 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#pragma once
+#include "../../src/RequestIdMapper.h"
 
-#include <string>
-#include <sstream>
-#include "JsonHelpers.h"
+#define CHECK(expr) {if (!(expr)) { std::cout<<"Test failed! Line: "<<__LINE__<<", expr: "<< #expr <<std::endl; exit(1);}}
 
-class JsonRpcNotification
+inline void RequestIdMapperTest()
 {
-public:
-
-    static std::string Empty(const std::string& method)
-    {
-        std::ostringstream os;
-        os<<"{"<<SAFIR_WS_STR("jsonrpc","2.0")<<","<<SAFIR_WS_STR("method",method)<<"}";
-        return std::move(os.str());
-    }
-
-    static std::string Json(const std::string& method, const std::string& json)
-    {
-        std::ostringstream os;
-        os<<"{"<<SAFIR_WS_STR("jsonrpc","2.0")<<","<<SAFIR_WS_STR("method",method)<<","<<SAFIR_WS_OBJ("params", json)<<"}";
-        return std::move(os.str());
-    }
-
-
-private:
-
-
-};
+    RequestIdMapper rm;
+    CHECK(rm.Count()==0);
+    auto id=rm.Get(123);
+    CHECK(id.IsNull());
+    rm.Add(1, JsonRpcId("strVal"));
+    rm.Add(2, JsonRpcId(123));
+    CHECK(rm.Count()==2);
+    id=rm.Get(1);
+    CHECK(rm.Count()==1);
+    CHECK(id.HasInt()==false);
+    CHECK(id.HasStr()==true);
+    CHECK(id.String()=="strVal");
+    id=rm.Get(1);
+    CHECK(id.IsNull());
+    CHECK(rm.Count()==1);
+    id=rm.Get(2);
+    CHECK(rm.Count()==0);
+    CHECK(id.HasInt()==true);
+    CHECK(id.HasStr()==false);
+    CHECK(id.Int()==123);
+    CHECK(rm.Count()==0);
+    id=rm.Get(2);
+    CHECK(id.IsNull());
+    CHECK(rm.Count()==0);
+}

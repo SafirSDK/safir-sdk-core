@@ -94,6 +94,16 @@ inline void JsonRpcTest()
     // Test JsonRpcRequest
     //-------------------------------------------
     {
+        auto json=JsonRpcRequest::Json("myMethod", "{\"myVar\":3}", JsonRpcId(1));
+        CHECK(json=="{\"jsonrpc\":\"2.0\",\"method\":\"myMethod\",\"params\":{\"myVar\":3},\"id\":1}");
+
+        json=JsonRpcRequest::Json("myMethod", "{\"myVar\":3}", JsonRpcId("myId"));
+        CHECK(json=="{\"jsonrpc\":\"2.0\",\"method\":\"myMethod\",\"params\":{\"myVar\":3},\"id\":\"myId\"}");
+
+        json=JsonRpcRequest::Json("myMethod", "{\"myVar\":3}", JsonRpcId());
+        CHECK(json=="{\"jsonrpc\":\"2.0\",\"method\":\"myMethod\",\"params\":{\"myVar\":3}}");
+    }
+    {
         //all values set - parse ok
         //--------------------------
         auto json = "{\"jsonrpc\": \"2.0\", \"method\": \"open\", \"id\": \"myId\", \"params\": {"
@@ -106,7 +116,6 @@ inline void JsonRpcTest()
                 "\"entity\": {\"_DouType\":\"Safir.Dob.Entity\"},"
                 "\"message\": {\"_DouType\":\"Safir.Dob.Message\"},"
                 "\"request\": {\"_DouType\":\"Safir.Dob.Service\"},"
-                "\"response\": {\"_DouType\":\"Safir.Dob.Response\"},"
                 "\"pending\": true,"
                 "\"injectionHandler\": false,"
                 "\"includeChangeInfo\": true,"
@@ -137,8 +146,6 @@ inline void JsonRpcTest()
         CHECK(r.Message()=="{\"_DouType\":\"Safir.Dob.Message\"}");
         CHECK(r.HasRequest());
         CHECK(r.Request()=="{\"_DouType\":\"Safir.Dob.Service\"}");
-        CHECK(r.HasResponse());
-        CHECK(r.Response()=="{\"_DouType\":\"Safir.Dob.Response\"}");
         CHECK(r.HasPending());
         CHECK(r.Pending()==true);
         CHECK(r.HasInjectionHandler());
@@ -179,7 +186,6 @@ inline void JsonRpcTest()
         CHECK(r.Entity()=="{\"_DouType\":\"Safir.Dob.Entity\"}");
         CHECK(!r.HasMessage());
         CHECK(!r.HasRequest());
-        CHECK(!r.HasResponse());
         CHECK(r.HasPending());
         CHECK(r.Pending()==true);
         CHECK(!r.HasInjectionHandler());
@@ -256,6 +262,40 @@ inline void JsonRpcTest()
     //-------------------------------------------
     // Test JsonRpcResponse
     //-------------------------------------------
+
+    // ---- Test receive JsonRpcResponse
+    {
+        //Receive response - all values set - parse ok
+        //---------------------------------------------
+        auto json = "{\"jsonrpc\": \"2.0\", \"id\": \"myId\","
+                "\"result\": {\"_DouType\":\"Safir.Dob.Response\"}}";
+
+        JsonRpcRequest r(json);
+        r.Validate();
+        CHECK(r.IsResponse());
+        CHECK(r.Result()=="{\"_DouType\":\"Safir.Dob.Response\"}");
+        CHECK(r.Id().HasStr());
+        CHECK(r.Id().String()=="myId");
+    }
+    {
+        //Receive response - wrong type
+        //-------------------------------
+        try
+        {
+            auto json = "{\"jsonrpc\": \"2.0\", \"id\": \"myId\","
+                    "\"result\": \"strVal\"}";
+
+            JsonRpcRequest r(json);
+            r.Validate();
+            CHECK(false);
+        }
+        catch (const RequestErrorException& e)
+        {
+            CHECK(e.Code()==RequestErrorException::InvalidParams);
+        }
+    }
+
+    // ---- Test send JsonRpcResponse
     {
         //error
         //----------
@@ -293,5 +333,14 @@ inline void JsonRpcTest()
         CHECK(json=="{\"jsonrpc\":\"2.0\",\"result\":{\"_DouType\":\"Safir.Dob.Entity\"},\"id\":\"Mr Donk\"}");
     }
 
-    std::cout<<"Test passed!"<<std::endl;
+    //-------------------------------------------
+    // Test JsonRpcNotification
+    //-------------------------------------------
+    {
+        auto json=JsonRpcNotification::Json("myMethod", "{\"myVar\":3}");
+        CHECK(json=="{\"jsonrpc\":\"2.0\",\"method\":\"myMethod\",\"params\":{\"myVar\":3}}");
+
+        json=JsonRpcNotification::Empty("myMethod");
+        CHECK(json=="{\"jsonrpc\":\"2.0\",\"method\":\"myMethod\"}");
+    }
 }

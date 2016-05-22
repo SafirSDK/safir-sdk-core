@@ -30,7 +30,10 @@
 #include <Safir/Dob/Connection.h>
 #include <Safir/Utilities/AsioDispatcher.h>
 #include <Safir/Dob/Typesystem/Serialization.h>
+#include <Safir/Dob/QueueParameters.h>
 #include "RequestIdMapper.h"
+#include "ResponseSenderStore.h"
+#include "JsonHelpers.h"
 
 namespace sd = Safir::Dob;
 namespace ts = Safir::Dob::Typesystem;
@@ -122,7 +125,7 @@ public:
     std::string Read(ts::TypeId typeId, const ts::InstanceId& inst) const
     {
         auto proxy=m_con.Read(ts::EntityId(typeId, inst));
-        return std::move(ToJson(proxy));
+        return std::move(m_proxyToJson.ToJson(proxy));
     }
 
     bool IsCreated(ts::TypeId typeId, const ts::InstanceId& inst) const {return m_con.IsCreated(ts::EntityId(typeId, inst));}
@@ -158,19 +161,22 @@ public:
         }
     }
 
+    void SendResponse(const sd::ResponsePtr& response, boost::uint64_t id)
+    {
+        auto responseSender=m_responseSenderStore.Get(id);
+        if (responseSender)
+        {
+            responseSender->Send(response);
+        }
+    }
+
 private:
     sd::Connection m_con;
     Safir::Utilities::AsioDispatcher m_dispatcher;
     boost::function<void(const std::string&)> m_wsSend;
     RequestIdMapper m_reqIdMapper;
-
-    std::string ToJson(const sd::EntityProxy& proxy) const;
-    std::string ToJson(const sd::MessageProxy& proxy) const;
-    std::string ToJson(const sd::ResponseProxy& proxy) const;
-    std::string ToJson(const sd::ServiceRequestProxy& proxy) const;
-    std::string ToJson(const sd::EntityRequestProxy& proxy) const;
-    std::string ToJson(const sd::InjectedEntityProxy& proxy) const;
-    std::string ToJson(ts::TypeId, const ts::HandlerId& handler) const;
+    ResponseSenderStore m_responseSenderStore;
+    ProxyToJson m_proxyToJson;
 
     //DOB events
     //-----------------

@@ -99,7 +99,7 @@ namespace CommandValidator
     {
         if (!req.HasTypeId())
             throw RequestErrorException("typeId is mandatory in command 'subscribeRegistration'", RequestErrorException::InvalidParams);
-        if (!Safir::Dob::Typesystem::Operations::IsOfType(req.TypeId(), Safir::Dob::Entity::ClassTypeId) ||
+        if (!Safir::Dob::Typesystem::Operations::IsOfType(req.TypeId(), Safir::Dob::Entity::ClassTypeId) &&
             !Safir::Dob::Typesystem::Operations::IsOfType(req.TypeId(), Safir::Dob::Service::ClassTypeId))
             throw RequestErrorException("typeId must refer to a subtype of Safir.Dob.Entity or Safir.Dob.Service in command 'subscribeRegistration'", RequestErrorException::InvalidParams);
     }
@@ -108,7 +108,7 @@ namespace CommandValidator
     {
         if (!req.HasTypeId())
             throw RequestErrorException("typeId is mandatory in command 'unsubscribeRegistration'", RequestErrorException::InvalidParams);
-        if (!Safir::Dob::Typesystem::Operations::IsOfType(req.TypeId(), Safir::Dob::Entity::ClassTypeId) ||
+        if (!Safir::Dob::Typesystem::Operations::IsOfType(req.TypeId(), Safir::Dob::Entity::ClassTypeId) &&
             !Safir::Dob::Typesystem::Operations::IsOfType(req.TypeId(), Safir::Dob::Service::ClassTypeId))
             throw RequestErrorException("typeId must refer to a subtype of Safir.Dob.Entity or Safir.Dob.Service in command 'unsubscribeRegistration'", RequestErrorException::InvalidParams);
     }
@@ -215,5 +215,13 @@ namespace CommandValidator
     {
         if (!req.HasTypeId())
             throw RequestErrorException("typeId is mandatory in command 'getInstanceIdPolicy'", RequestErrorException::InvalidParams);
+    }
+
+    inline void ValidateResponse(const JsonRpcRequest& req)
+    {
+        if (req.Id().IsNull())
+            throw RequestErrorException("Id can not be null when sending a response.", RequestErrorException::InvalidParams);
+        if (!req.Id().HasInt())
+            throw RequestErrorException("All Safir.RequestIds are numbers. Sending responses with string id's will never match a request.", RequestErrorException::InvalidParams);
     }
 }

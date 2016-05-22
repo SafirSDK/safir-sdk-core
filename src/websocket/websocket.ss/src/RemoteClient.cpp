@@ -110,7 +110,13 @@ void RemoteClient::OnMessage(websocketpp::connection_hdl hdl, WsMessage msg)
 //------------------------------------------------------
 void RemoteClient::WsDispatch(const JsonRpcRequest& req)
 {
-    if (req.Method()==Methods::GetTypeHierarchy)
+    if (req.IsResponse())
+    {
+        //if the received data is a JsonRpc-response, is must
+        //be a response to a Safir-request (Service, or Entity CRUD)
+       WsResponse(req);
+    }
+    else if (req.Method()==Methods::GetTypeHierarchy)
     {
         WsGetTypeHierarchy(req);
     }
@@ -222,6 +228,24 @@ void RemoteClient::WsDispatch(const JsonRpcRequest& req)
     }
 }
 
+void RemoteClient::WsResponse(const JsonRpcRequest &req)
+{
+    try
+    {
+        CommandValidator::ValidateResponse(req);
+        sd::ResponsePtr response=ToObject<sd::Response>(req.Result());
+        m_dob.SendResponse(response, req.Id().Int());
+    }
+    catch (const std::exception& e)
+    {
+        //There is no way to respond to a response, just log the error.
+        //A future improvement could be to send a notification for this kind of errors
+
+        //TODO: log
+        std::cout<<e.what()<<std::endl;
+    }
+}
+
 void RemoteClient::WsPing(const JsonRpcRequest &req)
 {
     SendToClient(JsonRpcResponse::String(req.Id(), "pong"));
@@ -309,7 +333,6 @@ void RemoteClient::WsSendMessage(const JsonRpcRequest& req)
     {
         SendToClient(JsonRpcResponse::String(req.Id(), e.what()));
     }
-
 }
 
 void RemoteClient::WsUnsubscribeMessage(const JsonRpcRequest& req)
@@ -419,7 +442,7 @@ void RemoteClient::WsSubscribeRegistration(const JsonRpcRequest &req)
     {
         CommandValidator::ValidateSubscribeRegistration(req);
         auto handler=req.HasHandlerId() ? req.HandlerId() : ts::HandlerId();
-        auto inclSub=req.IncludeSubclasses() ? req.IncludeSubclasses() : true;
+        auto inclSub=req.HasIncludeSubclasses() ? req.IncludeSubclasses() : true;
         auto restartSub=req.HasRestartSubscription() ? req.RestartSubscription() : true;
         m_dob.SubscribeRegistration(req.TypeId(), handler, inclSub, restartSub);
         SendToClient(JsonRpcResponse::String(req.Id(), "OK"));

@@ -31,15 +31,13 @@ public:
         :m_work(new boost::asio::io_service::work(m_ioService))
         ,m_pingHandler(m_ioService, interval, [=]{OnPing();})
     {
-        std::cout<<"start test"<<std::endl;
         m_ioService.dispatch([=]{m_pingHandler.Start();});
         m_pingTime=boost::chrono::steady_clock::now();
         m_ioService.run();
-        std::cout<<"test passed"<<std::endl;
     }
 
 private:
-    const int interval=2;
+    const int interval=1;
     boost::asio::io_service m_ioService;
     boost::shared_ptr<boost::asio::io_service::work> m_work;
     boost::chrono::steady_clock::time_point m_pingTime;
@@ -50,7 +48,7 @@ private:
         static int count=0;
 
         boost::chrono::duration<double> elapsed=boost::chrono::steady_clock::now()-m_pingTime;
-        std::cout<<"ping "<<elapsed.count()<<std::endl;
+        //std::cout<<"ping "<<elapsed.count()<<std::endl;
         if (elapsed>boost::chrono::seconds(interval+1))
         {
             std::cout<<"took to long between pings"<<std::endl;

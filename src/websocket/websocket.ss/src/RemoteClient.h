@@ -80,6 +80,7 @@ private:
     // handle client commands
     //------------------------
     void WsDispatch(const JsonRpcRequest& req);
+    void WsResponse(const JsonRpcRequest& req);
     void WsPing(const JsonRpcRequest& req);
     void WsOpen(const JsonRpcRequest& req);
     void WsClose(const JsonRpcRequest& req);

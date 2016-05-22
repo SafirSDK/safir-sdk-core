@@ -23,7 +23,7 @@
 ******************************************************************************/
 #include <boost/lexical_cast.hpp>
 #include "DobConnection.h"
-#include "JsonHelpers.h"
+#include "JsonRpcRequest.h"
 #include "JsonRpcNotification.h"
 #include "JsonRpcResponse.h"
 #include "Methods.h"
@@ -32,62 +32,11 @@ DobConnection::DobConnection::DobConnection(boost::asio::io_service &ioService, 
     :m_con()
     ,m_dispatcher(m_con, ioService)
     ,m_wsSend(send)
+    ,m_responseSenderStore(static_cast<size_t>(sd::QueueParameters::QueueRules(0)->RequestInQueueCapacity().IsNull() ? 10
+                                               : sd::QueueParameters::QueueRules(0)->RequestInQueueCapacity().GetVal()))
+    ,m_proxyToJson([=](ts::TypeId t){return GetName(t);}, [=](ts::TypeId t, const ts::HandlerId& h){return m_con.GetInstanceIdPolicy(t,h);})
 {
 
-}
-
-std::string DobConnection::ToJson(const sd::EntityProxy& proxy) const
-{
-    std::ostringstream os;
-    os<<"{"<<proxy.GetInstanceId()<<","<<SAFIR_WS_OBJ("entity",ts::Internal::ToJson(proxy.GetBlob()))<<"}";
-    return std::move(os.str());
-}
-
-std::string DobConnection::ToJson(const sd::MessageProxy& proxy) const
-{
-    std::ostringstream os;
-    os<<"{"<<proxy.GetChannelId()<<","<<SAFIR_WS_OBJ("message",ts::Internal::ToJson(proxy.GetBlob()))<<"}";
-    return std::move(os.str());
-}
-
-std::string DobConnection::ToJson(const sd::ResponseProxy& proxy) const
-{
-    std::ostringstream os;
-    os<<"{"<<SAFIR_WS_BOOL("isSuccess",proxy.IsSuccess())<<","<<SAFIR_WS_OBJ("response", ts::Internal::ToJson(proxy.GetBlob()))<<"}";
-    return std::move(os.str());
-}
-
-std::string DobConnection::ToJson(const sd::ServiceRequestProxy& proxy) const
-{
-    std::ostringstream os;
-    os<<"{"<<proxy.GetReceivingHandlerId()<<","<<SAFIR_WS_OBJ("request",ts::Internal::ToJson(proxy.GetBlob()))<<"}";
-    return std::move(os.str());
-}
-
-std::string DobConnection::ToJson(const Safir::Dob::EntityRequestProxy &proxy) const
-{
-    std::ostringstream os;
-    os<<"{"<<proxy.GetReceivingHandlerId()<<",";
-    if (m_con.GetInstanceIdPolicy(proxy.GetTypeId(), proxy.GetReceivingHandlerId())==sd::InstanceIdPolicy::RequestorDecidesInstanceId)
-    {
-        os<<proxy.GetInstanceId()<<",";
-    }
-    os<<SAFIR_WS_OBJ("request",ts::Internal::ToJson(proxy.GetBlob()))<<"}";
-    return std::move(os.str());
-}
-
-std::string DobConnection::ToJson(const Safir::Dob::InjectedEntityProxy &proxy) const
-{
-    std::ostringstream os;
-    os<<"{"<<proxy.GetInstanceId()<<","<<SAFIR_WS_OBJ("entity",ts::Internal::ToJson(proxy.GetInjectionBlob()))<<"}";
-    return std::move(os.str());
-}
-
-std::string DobConnection::ToJson(Safir::Dob::Typesystem::TypeId typeId, const Safir::Dob::Typesystem::HandlerId &handler) const
-{
-    std::ostringstream os;
-    os<<"{"<<SAFIR_WS_STR("typeId", GetName(typeId))<<","<<handler<<"}";
-    return std::move(os.str());
 }
 
 //------------------------------------------------------
@@ -96,90 +45,98 @@ std::string DobConnection::ToJson(Safir::Dob::Typesystem::TypeId typeId, const S
 // EntityHandler interface
 void DobConnection::OnCreateRequest(const sd::EntityRequestProxy entityRequestProxy, sd::ResponseSenderPtr responseSender)
 {
-    //TODO
+    auto id=m_responseSenderStore.Add(responseSender);
+    auto req=JsonRpcRequest::Json(Methods::OnCreateRequest, m_proxyToJson.ToJson(entityRequestProxy, ProxyToJson::CreateReqType), JsonRpcId(id));
+    m_wsSend(req);
 }
 void DobConnection::OnUpdateRequest(const sd::EntityRequestProxy entityRequestProxy, sd::ResponseSenderPtr responseSender)
 {
-    //TODO
+    auto id=m_responseSenderStore.Add(responseSender);
+    auto req=JsonRpcRequest::Json(Methods::OnUpdateRequest, m_proxyToJson.ToJson(entityRequestProxy, ProxyToJson::UpdateReqType), JsonRpcId(id));
+    m_wsSend(req);
 }
 void DobConnection::OnDeleteRequest(const sd::EntityRequestProxy entityRequestProxy, sd::ResponseSenderPtr responseSender)
 {
-    //TODO
+    auto id=m_responseSenderStore.Add(responseSender);
+    auto req=JsonRpcRequest::Json(Methods::OnDeleteRequest, m_proxyToJson.ToJson(entityRequestProxy, ProxyToJson::DeleteReqType), JsonRpcId(id));
+    m_wsSend(req);
 }
 //ServiceHandler interface
 void DobConnection::OnServiceRequest(const Safir::Dob::ServiceRequestProxy serviceRequestProxy, Safir::Dob::ResponseSenderPtr responseSender)
 {
-    //TODO
+    auto id=m_responseSenderStore.Add(responseSender);
+    auto req=JsonRpcRequest::Json(Methods::OnServiceRequest, m_proxyToJson.ToJson(serviceRequestProxy), JsonRpcId(id));
+    m_wsSend(req);
 }
 
 
 void DobConnection::OnRevokedRegistration(const sd::Typesystem::TypeId typeId, const sd::Typesystem::HandlerId &handlerId)
 {
-    auto notification=JsonRpcNotification::Json(Methods::OnRevokedRegistration, ToJson(typeId, handlerId));
+    auto notification=JsonRpcNotification::Json(Methods::OnRevokedRegistration, m_proxyToJson.ToJson(typeId, handlerId));
     m_wsSend(notification);
 }
 void DobConnection::OnCompletedRegistration(const sd::Typesystem::TypeId typeId, const sd::Typesystem::HandlerId& handlerId)
 {
-    auto notification=JsonRpcNotification::Json(Methods::OnCompletedRegistration, ToJson(typeId, handlerId));
+    auto notification=JsonRpcNotification::Json(Methods::OnCompletedRegistration, m_proxyToJson.ToJson(typeId, handlerId));
     m_wsSend(notification);
 }
 
 //Injection interface
 void DobConnection::OnInjectedNewEntity(const sd::InjectedEntityProxy injectedEntityProxy)
 {
-    auto notification=JsonRpcNotification::Json(Methods::OnInjectedNewEntity, ToJson(injectedEntityProxy));
+    auto notification=JsonRpcNotification::Json(Methods::OnInjectedNewEntity, m_proxyToJson.ToJson(injectedEntityProxy));
     m_wsSend(notification);
 }
 void DobConnection::OnInjectedUpdatedEntity(const sd::InjectedEntityProxy injectedEntityProxy)
 {
-    auto notification=JsonRpcNotification::Json(Methods::OnInjectedUpdatedEntity, ToJson(injectedEntityProxy));
+    auto notification=JsonRpcNotification::Json(Methods::OnInjectedUpdatedEntity, m_proxyToJson.ToJson(injectedEntityProxy));
     m_wsSend(notification);
 }
 void DobConnection::OnInjectedDeletedEntity(const sd::InjectedEntityProxy injectedEntityProxy)
 {
-    auto notification=JsonRpcNotification::Json(Methods::OnInjectedDeletedEntity, ToJson(injectedEntityProxy));
+    auto notification=JsonRpcNotification::Json(Methods::OnInjectedDeletedEntity, m_proxyToJson.ToJson(injectedEntityProxy));
     m_wsSend(notification);
 }
 void DobConnection::OnInitialInjectionsDone(const sd::Typesystem::TypeId typeId, const sd::Typesystem::HandlerId& handlerId)
 {
-    auto notification=JsonRpcNotification::Json(Methods::OnInjectedDeletedEntity, ToJson(typeId, handlerId));
+    auto notification=JsonRpcNotification::Json(Methods::OnInjectedDeletedEntity, m_proxyToJson.ToJson(typeId, handlerId));
     m_wsSend(notification);
 }
 
 //EntitySubscriber interface
 void DobConnection::OnNewEntity(const sd::EntityProxy entityProxy)
 {
-    auto notification=JsonRpcNotification::Json(Methods::OnNewEntity, ToJson(entityProxy));
+    auto notification=JsonRpcNotification::Json(Methods::OnNewEntity, m_proxyToJson.ToJson(entityProxy));
     m_wsSend(notification);
 }
 void DobConnection::OnUpdatedEntity(const sd::EntityProxy entityProxy)
 {
-    auto notification=JsonRpcNotification::Json(Methods::OnUpdatedEntity, ToJson(entityProxy));
+    auto notification=JsonRpcNotification::Json(Methods::OnUpdatedEntity, m_proxyToJson.ToJson(entityProxy));
     m_wsSend(notification);
 }
 void DobConnection::OnDeletedEntity(const sd::EntityProxy entityProxy, const bool)
 {
-    auto notification=JsonRpcNotification::Json(Methods::OnDeletedEntity, ToJson(entityProxy));
+    auto notification=JsonRpcNotification::Json(Methods::OnDeletedEntity, m_proxyToJson.ToJson(entityProxy, true));
     m_wsSend(notification);
 }
 
 //RegistrationSubscriber interface
 void DobConnection::OnRegistered(const ts::TypeId typeId, const ts::HandlerId&  handlerId)
 {
-    auto notification=JsonRpcNotification::Json(Methods::OnRegistered, ToJson(typeId, handlerId));
+    auto notification=JsonRpcNotification::Json(Methods::OnRegistered, m_proxyToJson.ToJson(typeId, handlerId));
     m_wsSend(notification);
 }
 
 void DobConnection::OnUnregistered(const ts::TypeId typeId, const Safir::Dob::Typesystem::HandlerId&  handlerId)
 {
-    auto notification=JsonRpcNotification::Json(Methods::OnUnregistered, ToJson(typeId, handlerId));
+    auto notification=JsonRpcNotification::Json(Methods::OnUnregistered, m_proxyToJson.ToJson(typeId, handlerId));
     m_wsSend(notification);
 }
 
 //Requestor interface
 void DobConnection::OnResponse(const sd::ResponseProxy responseProxy)
 {
-    auto response=JsonRpcResponse::Json(m_reqIdMapper.Get(responseProxy.GetRequestId()), ToJson(responseProxy));
+    auto response=JsonRpcResponse::Json(m_reqIdMapper.Get(responseProxy.GetRequestId()), m_proxyToJson.ToJson(responseProxy));
     m_wsSend(response);
 
 }
@@ -200,6 +157,6 @@ void DobConnection::OnNotMessageOverflow()
 void DobConnection::OnMessage(const sd::MessageProxy messageProxy)
 {
     std::cout<<"OnMessage - "<<messageProxy.GetChannelId()<<std::endl;
-    auto notification=JsonRpcNotification::Json(Methods::OnMessage, ToJson(messageProxy));
+    auto notification=JsonRpcNotification::Json(Methods::OnMessage, m_proxyToJson.ToJson(messageProxy));
     m_wsSend(notification);
 }

@@ -11,6 +11,8 @@ add_executable(safir_websocket_unittests
                 ../../src/JsonRpcResponse.h
                 ../../src/JsonRpcNotification.h
                 ../../src/PingHandler.h
+                ../../src/RequestIdMapper.h
+                ../../src/ResponseSenderStore.h
                 ../../src/CommandValidator.h)
 
 target_link_libraries(safir_websocket_unittests PRIVATE

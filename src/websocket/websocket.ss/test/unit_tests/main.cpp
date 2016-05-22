@@ -23,13 +23,31 @@
 ******************************************************************************/
 #include "JsonRpcTest.h"
 #include "PingHandlerTest.h"
+#include "RequestIdMapperTest.h"
+#include "ResponseSenderStoreTest.h"
+#include "ProxyToJsonTest.h"
 
 int main(int /*argc*/, const char** /*argv*/)
 {
+    std::cout<<"===== RequestIdMapperTest ====="<<std::endl;
+    RequestIdMapperTest();
+    std::cout<<"Test passed!"<<std::endl;
+
+    std::cout<<"===== ResponseSenderStoreTest ====="<<std::endl;
+    ResponseSenderStoreTest();
+    std::cout<<"Test passed!"<<std::endl;
+
     std::cout<<"===== JsonRpcTest ====="<<std::endl;
     JsonRpcTest();
-    std::cout<<"===== PingHandlerTest ====="<<std::endl;
-    PingHandlerTest();
+    std::cout<<"Test passed!"<<std::endl;
+
+    std::cout<<"===== ProxyToJsonTest ====="<<std::endl;
+    ProxyToJsonTest();
+    std::cout<<"Test passed!"<<std::endl;
+
+//    std::cout<<"===== PingHandlerTest ====="<<std::endl;
+//    PingHandlerTest();
+//    std::cout<<"Test passed!"<<std::endl;
 
     return 0;
 }

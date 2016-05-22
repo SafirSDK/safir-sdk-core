@@ -26,14 +26,7 @@
 #include <string>
 #include <sstream>
 #include "JsonRpcId.h"
-
-#ifndef SAFIR_WS_QUOTE
-#define SAFIR_WS_QUOTE(x) "\""<<x<<"\""
-#define SAFIR_WS_STR(k, v) SAFIR_WS_QUOTE(k)<<":"<<SAFIR_WS_QUOTE(v)
-#define SAFIR_WS_NUM(k, v) SAFIR_WS_QUOTE(k)<<":"<<v
-#define SAFIR_WS_OBJ(k, v) SAFIR_WS_QUOTE(k)<<":"<<v
-#define SAFIR_WS_BOOL(k, v) SAFIR_WS_QUOTE(k)<<":"<<(v?"true":"false")
-#endif
+#include "JsonHelpers.h"
 
 class JsonRpcResponse
 {
