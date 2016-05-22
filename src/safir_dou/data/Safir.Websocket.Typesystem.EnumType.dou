@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <summary>Represents an enumeration type in the Dob</summary>
+    <name>Safir.Websocket.Typesystem.EnumType</name>
+    <baseClass>Safir.Dob.Item</baseClass>
+    <members>
+        <member>
+            <summary>Enum summary</summary>
+            <name>Summary</name>
+            <type>String</type>
+        </member>
+        <member>
+            <summary>Name of enum type</summary>
+            <name>Name</name>
+            <type>String</type>
+        </member>
+        <member>
+            <summary>List of enumeration values</summary>
+            <name>Values</name>
+            <type>String</type>
+            <sequence/>
+        </member>
+        <member>
+            <summary>Dou file source</summary>
+            <name>SourceFile</name>
+            <type>String</type>
+        </member>
+    </members>
+</class>

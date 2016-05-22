@@ -28,6 +28,7 @@ ADD_SAFIR_GENERATED_LIBRARY(NAME Core
   config/Safir.Dob.ThisNodeParameters.dou
   config/Safir.Control.Parameters.dou
   config/Safir.Time.LibraryParameters.dou
+  config/Safir.Websocket.Parameters.dou
   data/Safir.Application.BackdoorCommand.dou
   data/Safir.Control.Command.dou
   data/Safir.Control.Operation.dou
@@ -84,7 +85,11 @@ ADD_SAFIR_GENERATED_LIBRARY(NAME Core
   data/Safir.Utilities.ForEach.DeleteRequest.dou
   data/Safir.Utilities.ForEach.FullResponse.dou
   data/Safir.Utilities.ForEach.ResponseType.dou
-  data/Safir.Utilities.ForEach.UpdateRequest.dou
+  data/Safir.Utilities.ForEach.UpdateRequest.dou  
+  data/Safir.Websocket.Typesystem.EnumType.dou
+  data/Safir.Websocket.Typesystem.ClassType.dou
+  data/Safir.Websocket.Typesystem.Member.dou
+  data/Safir.Websocket.Typesystem.TypeHierarchy.dou
 
   DOM_FILES
 

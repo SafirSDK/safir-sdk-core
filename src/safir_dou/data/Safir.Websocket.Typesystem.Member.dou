@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <summary>Represents a class member in a Dob type.</summary>
+    <name>Safir.Websocket.Typesystem.Member</name>
+    <baseClass>Safir.Dob.Item</baseClass>
+    <members>
+        <member>
+            <summary>Member summary</summary>
+            <name>Summary</name>
+            <type>String</type>   
+        </member>
+        <member>
+            <summary>Name of member</summary>
+            <name>Name</name>
+            <type>String</type>   
+        </member>
+        <member>
+            <summary>Fully qualified type name. Can be String, Int32, Safir.Dob.Entity etc.</summary>
+            <name>Type</name>
+            <type>String</type>   
+        </member>
+        <member>
+            <summary>If member is dictionry this is the fully qualified dictionary key type.</summary>
+            <name>DictionaryKeyType</name>
+            <type>String</type>   
+        </member>
+        <member>
+            <summary>
+                If member is array this is the arraySize.
+                If member is sequence this value is set to -1.
+            </summary>
+            <name>ArraySize</name>
+            <type>Int32</type>   
+        </member>
+    </members>
+</class>

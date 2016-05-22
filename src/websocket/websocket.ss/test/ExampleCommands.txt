@@ -1,0 +1,14 @@
+{"jsonrpc":"2.0", "method":"getTypeHierarchy", "id":"joot"}
+
+{"jsonrpc":"2.0", "method":"open", "params":{"connectionName":"test"}, "id":"joot"}
+
+{"jsonrpc":"2.0", "method":"close", "id":"joot"}
+
+{"jsonrpc":"2.0", "method":"isOpen", "id":"joot"}
+
+{"jsonrpc":"2.0", "method":"subscribeMessage", "params":{"typeId":"Safir.Dob.Message"}, "id":"joot"}
+
+{"jsonrpc":"2.0", "method":"subscribeEntity", "params":{"typeId":"Safir.Dob.Entity"}, "id":"joot"}
+
+{"jsonrpc":"2.0", "method":"sendMessage", "params":{"message":{"_DouType":"Safir.Dob.Message"}}, "id":"joot"}
+

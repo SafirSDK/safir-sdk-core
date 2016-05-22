@@ -76,7 +76,7 @@ namespace Internal
 
         inline void WriteMemberName(const char* name, std::ostream& os) const
         {
-            os<<"\""<<name<<"\": ";
+            os<<"\""<<name<<"\":";
         }
 
         void SerializeMembers(const char* blob, std::ostream& os) const
@@ -103,7 +103,7 @@ namespace Internal
                         reader.ReadStatus(memberIx, 0, isNull, isChanged);
                         if (!isNull)
                         {
-                            os<<", ";
+                            os<<",";
                             WriteMemberName(md->GetName(), os);
                             SerializeMember(reader, md, memberIx, 0, os);
                         }
@@ -112,7 +112,7 @@ namespace Internal
                 case ArrayCollectionType:
                     {
                         std::ostringstream arrayValues;
-                        arrayValues<<", ";
+                        arrayValues<<",";
                         WriteMemberName(md->GetName(), arrayValues);
                         arrayValues<<"[";
                         bool nonNullValueInserted=false;
@@ -132,12 +132,12 @@ namespace Internal
                             {
                                 if (hasInsertedValues)
                                 {
-                                    arrayValues<<", ";
+                                    arrayValues<<",";
                                 }
 
                                 for (int nullCount=0; nullCount<accumulatedNulls; ++nullCount)
                                 {
-                                    arrayValues<<"null, ";
+                                    arrayValues<<"null,";
                                 }
                                 accumulatedNulls=0;
                                 nonNullValueInserted=true;
@@ -159,7 +159,7 @@ namespace Internal
                         int numberOfValues=reader.NumberOfValues(memberIx);
                         if (numberOfValues>0)
                         {
-                            os<<", ";
+                            os<<",";
                             WriteMemberName(md->GetName(), os);
                             os<<"[";
 
@@ -167,7 +167,7 @@ namespace Internal
                             {
                                 if (valueIndex>0)
                                 {
-                                    os<<", ";
+                                    os<<",";
                                 }
                                 SerializeMember(reader, md, memberIx, valueIndex, os);
                             }
@@ -181,7 +181,7 @@ namespace Internal
                         int numberOfValues=reader.NumberOfValues(memberIx);
                         if (numberOfValues>0)
                         {
-                            os<<", ";
+                            os<<",";
                             WriteMemberName(md->GetName(), os);
                             os<<"[";
 
@@ -189,12 +189,12 @@ namespace Internal
                             {
                                 if (valueIndex>0)
                                 {
-                                    os<<", ";
+                                    os<<",";
                                 }
                                 os<<"{";
                                 WriteMemberName("key", os);
                                 SerializeKey(reader, md, memberIx, valueIndex, os);
-                                os<<", ";
+                                os<<",";
                                 WriteMemberName("value", os);
                                 if (!SerializeMember(reader, md, memberIx, valueIndex, os))
                                     os<<"null";
@@ -238,7 +238,7 @@ namespace Internal
             WriteMemberName("name", os);
             os<<SAFIR_JSON_QUOTE(TypeUtilities::GetTypeName(m_repository, val.first.typeId));
 
-            os<<", ";
+            os<<",";
             WriteMemberName("instanceId", os);
             if (val.second)
             {

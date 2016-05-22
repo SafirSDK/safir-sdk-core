@@ -401,6 +401,7 @@ add_subdirectory(swre)
 add_subdirectory(foreach)
 add_subdirectory(olib)
 add_subdirectory(dope)
+add_subdirectory(websocket)
 
 add_subdirectory(tests)
 

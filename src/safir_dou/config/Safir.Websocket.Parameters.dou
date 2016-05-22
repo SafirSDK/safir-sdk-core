@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <summary>Sent from web api to client.</summary>
+  <name>Safir.Websocket.Parameters</name>
+  <baseClass>Safir.Dob.Parametrization</baseClass>
+  <parameters>
+
+    <!-- Port number -->
+    <parameter>
+      <summary>The port safir_websocket will listen on and accept connections.</summary>
+      <name>Port</name>
+      <type>Int32</type>
+      <value>10000</value>
+    </parameter>
+
+    <!-- Max number of connections -->
+    <parameter>
+      <summary>The maximum number of connections allowed at the same time</summary>
+      <name>MaxNumberOfConnections</name>
+      <type>Int32</type>
+      <value>500</value>
+    </parameter>
+
+    <!-- Interval at which messges with the ping opcode is sent to clients to keep connection open -->
+    <parameter>
+      <summary>
+        Interval at which messges with the ping opcode is sent to clients to keep connection open.
+        Negative value means never send ping. Disable ping can be usefull if the client does not support websocket
+        Ping/Pong messages. In that case it is better to disable ping by setting this value to -1 and instead
+        fallback to let the client send Safir defined Ping messges to the server at appropriate interval, see documentation.
+      </summary>
+      <name>PingInterval</name>
+      <type>Second32</type>
+      <value>30</value>
+    </parameter>
+
+    <!-- Enable typesystem methods such as getTypeHierarchy -->
+    <parameter>
+      <summary>Should typesystem commands be handled, If False typesystem commands are invalid.</summary>
+      <name>EnableTypesystemCommands</name>
+      <type>Boolean</type>
+      <value>True</value>
+    </parameter>
+
+  </parameters>
+</class>
