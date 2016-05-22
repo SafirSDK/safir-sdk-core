@@ -28,6 +28,8 @@
 #include <Safir/Websocket/Parameters.h>
 #include "WebsocketServer.h"
 
+namespace ws = Safir::Websocket;
+
 WebsocketServer::WebsocketServer(boost::asio::io_service& ioService)
     :m_server()
     ,m_ioService(ioService)

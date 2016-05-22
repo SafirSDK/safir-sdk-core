@@ -30,11 +30,8 @@
 #include <Safir/Dob/Connection.h>
 #include <Safir/Utilities/AsioDispatcher.h>
 #include <Safir/Dob/Typesystem/Internal/InternalOperations.h>
-#include <Safir/Websocket/Send.h>
-#include <Safir/Websocket/Receive.h>
 #include "JsonRpcRequest.h"
 #include "JsonRpcResponse.h"
-#include "ResponseFactory.h"
 #include "DobConnection.h"
 #include "JsonHelpers.h"
 #include "PingHandler.h"
