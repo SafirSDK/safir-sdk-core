@@ -27,7 +27,7 @@ from __future__ import print_function
 import sys, os, fnmatch
 
 #exact matches
-ignore_directories = (".git", ".svn", ".hg", "boost")
+ignore_directories = (".git", ".svn", ".hg", "boost", "rapidjson", "websocketpp")
 
 #glob patterns for files to not check for tabs
 ignore_files = ("*.xcf", "*.xsl", "*.bmp", "*.ico", "*.eap", "*.png", "Makefile", "rules", "*.snk", "*.dia", "*.resx")
