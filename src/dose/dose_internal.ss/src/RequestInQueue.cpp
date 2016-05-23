@@ -163,7 +163,7 @@ namespace Internal
         }
     }
 
-    void RequestInQueue::AttachResponse(const ResponseId responseId, const ConnectionId & sender, const char * const blob, const AttachResponseChecker & checker)
+    void RequestInQueue::AttachResponse(const ResponseId responseId, const ConnectionId & sender, const char * const blob)
     {
         ScopedRequestInQueueLock lck(m_lock);
 
@@ -200,10 +200,6 @@ namespace Internal
                 << Safir::Dob::Typesystem::Operations::GetName(Safir::Dob::Typesystem::Internal::BlobOperations::GetTypeId(blob)));
 
             DistributionData response(response_tag,sender,findIt->GetSenderId(),findIt->GetRequestId(),blob);
-
-            //note that the checker function may throw an exception at this point.
-            //(That is in fact its sole purpose)
-            checker(*findIt,response);
 
             //Move request and response to the handled requests list.
             m_handledRequests.push_back(std::make_pair(*findIt,response));

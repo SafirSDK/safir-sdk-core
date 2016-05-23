@@ -2062,9 +2062,6 @@ A Requestor to this handler *cannot* specify an instance id in its create reques
     The requestor decides which instance it wants, and includes the instance id in the CreateRequest.
 +
 The handler *must* then create that instance, or if it cannot it should send an ErrorResponse. A handler that is registered with RequestorDecidesInstanceId is _not allowed to choose another instance than what is specified in the request_!
-+
-It is also not legal for the handler to send an EntityIdResponse in this case (exception will be raised).
-
 
 [[registering_entity_handler]]
 ===== Registering an entity handler

@@ -49,14 +49,12 @@ namespace Internal
 
         typedef boost::function<void(const DistributionData & response, bool & dontRemove)> DispatchResponseFunc;
 
-        typedef boost::function<void(const DistributionData & request, const DistributionData & response)> AttachResponseChecker;
-
         /** Constructor */
         explicit RequestInQueue(const size_t capacity);
 
         void DispatchRequests(const DispatchRequestFunc & dispatchFunc, const ActionFunc & postFullAction);
 
-        void AttachResponse(const ResponseId responseId, const ConnectionId & sender, const char * const blob, const AttachResponseChecker & checker);
+        void AttachResponse(const ResponseId responseId, const ConnectionId & sender, const char * const blob);
 
         //return false on overflow (not const-ref since responseId needs to be set)
         bool PushRequest(DistributionData request);

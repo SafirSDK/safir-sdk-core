@@ -1354,27 +1354,6 @@ namespace Internal
         SendRequest(request, consumer);
     }
 
-    void CheckResponseType(const DistributionData& request, const DistributionData& response)
-    {
-        if (Typesystem::Operations::IsOfType(response.GetTypeId(),Safir::Dob::EntityIdResponse::ClassTypeId))
-        {
-            ConnectionConsumerPair regOwner;
-            InstanceIdPolicy::Enumeration policy;
-            const ContextId context =
-                ContextSharedTable::Instance().IsContextShared(request.GetTypeId()) ? 0 : request.GetSenderId().m_contextId;
-            EntityTypes::Instance().GetRegisterer(request.GetTypeId(), request.GetHandlerId(), context, regOwner, policy);
-
-            if (policy == InstanceIdPolicy::RequestorDecidesInstanceId)
-            {
-                std::wostringstream ostr;
-                ostr << "This handler is registered as RequestorDecidesInstanceId, so you "
-                     << "cannot send a response that derives from EntityIdResponse. (ResponseType = "
-                     << Typesystem::Operations::GetName(response.GetTypeId()) << " and handler = " << request.GetHandlerId() << ")";
-                throw Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
-            }
-        }
-    }
-
     //-----------------------------------------
     // Response method
     //-----------------------------------------
@@ -1400,7 +1379,7 @@ namespace Internal
         }
 
         m_connection->ForSpecificRequestInQueue(consumer,
-            boost::bind(&RequestInQueue::AttachResponse,_2,responseId,m_connection->Id(),blob, CheckResponseType));
+            boost::bind(&RequestInQueue::AttachResponse,_2,responseId,m_connection->Id(),blob));
 
         m_connection->SignalOut();
     }
