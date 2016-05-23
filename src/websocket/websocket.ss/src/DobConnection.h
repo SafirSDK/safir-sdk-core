@@ -105,7 +105,7 @@ public:
         m_reqIdMapper.Add(reqId, id);
     }
 
-    void UpdateRequest(const sd::EntityPtr& req, const ts::InstanceId& inst, const ts::HandlerId& handler, const JsonRpcId& id)
+    void UpdateRequest(const sd::EntityPtr& req, const ts::InstanceId& inst, const JsonRpcId& id)
     {
         auto reqId=m_con.UpdateRequest(req, inst, this);
         m_reqIdMapper.Add(reqId, id);
@@ -165,7 +165,7 @@ public:
         {
             return ts::Utilities::ToUtf8(ts::Operations::GetName(typeId));
         }
-        catch (const std::exception& e)
+        catch (const std::exception&)
         {
             lllog(5)<<"DobConnection::GetName. Type not found. TypeId"<<typeId<<std::endl;
             return "<unknown_type>";

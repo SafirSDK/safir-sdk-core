@@ -522,9 +522,8 @@ void RemoteClient::WsUpdateRequest(const JsonRpcRequest& req)
     try
     {
         CommandValidator::ValidateUpdateRequest(req);
-        auto handler=req.HasHandlerId() ? req.HandlerId() : ts::HandlerId();
         sd::EntityPtr entity=ToObject<sd::Entity>(req.Entity());
-        m_dob.UpdateRequest(entity, req.InstanceId(), handler, req.Id());
+        m_dob.UpdateRequest(entity, req.InstanceId(), req.Id());
     }
     catch (const std::exception& e)
     {
