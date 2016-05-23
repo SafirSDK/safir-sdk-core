@@ -23,8 +23,20 @@
 ******************************************************************************/
 #include <iostream>
 #include <queue>
+
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4127)
+#pragma warning(disable: 4267)
+#pragma warning(disable: 4996)
+#endif
+
 #include <websocketpp/config/asio_no_tls_client.hpp>
 #include <websocketpp/client.hpp>
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 typedef websocketpp::client<websocketpp::config::asio_client> client;
 typedef websocketpp::config::asio_client::message_type::ptr message_ptr;
@@ -48,7 +60,7 @@ struct QueueItem
     std::string notification;
 };
 
-int main(int argc, char* argv[]) {
+int main() {
 
     //*********************************************************************************
     //  Queue<RequestJSON, ResponseJSON, NotificationJSON>

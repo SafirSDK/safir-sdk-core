@@ -1,7 +1,7 @@
 
-#Date_time is required on windows, even though we build header-only...
+#Date_time and random is required on windows, even though we build header-only...
 if (MSVC)
-  set (BOOST_REQUIRED_ON_WINDOWS date_time)
+  set (BOOST_REQUIRED_ON_WINDOWS date_time random)
 endif()
 
 set(Boost_NO_BOOST_CMAKE ON)

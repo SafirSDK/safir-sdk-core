@@ -9,6 +9,7 @@ add_executable(safir_websocket_testclient
 
 target_link_libraries(safir_websocket_testclient  PRIVATE
     ${Boost_PROGRAM_OPTIONS_LIBRARY}
+    ${Boost_RANDOM_LIBRARY}
     ${Boost_THREAD_LIBRARY}
     ${Boost_SYSTEM_LIBRARY})
 

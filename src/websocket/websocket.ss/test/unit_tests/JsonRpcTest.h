@@ -27,6 +27,10 @@
 #include "../../src/JsonRpcResponse.h"
 #include "../../src/JsonRpcNotification.h"
 
+#ifdef _MSC_VER
+#pragma warning (disable: 4127)
+#endif
+
 #define CHECK(expr) {if (!(expr)) { std::cout<<"Test failed! Line: "<<__LINE__<<", expr: "<< #expr <<std::endl; exit(1);}}
 
 inline void JsonRpcTest()

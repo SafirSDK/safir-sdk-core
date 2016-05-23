@@ -16,6 +16,7 @@ add_executable(safir_websocket_unittests
                 ../../src/CommandValidator.h)
 
 target_link_libraries(safir_websocket_unittests PRIVATE
+  dose_cpp
   safir_generated-Core-cpp
   dots_internal)
 
