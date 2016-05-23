@@ -28,9 +28,9 @@
 #include "JsonRpcResponse.h"
 #include "Methods.h"
 
-DobConnection::DobConnection::DobConnection(boost::asio::io_service &ioService, boost::function<void(const std::string&)> send)
+DobConnection::DobConnection::DobConnection(boost::asio::strand& strand, boost::function<void(const std::string&)> send)
     :m_con()
-    ,m_dispatcher(m_con, ioService)
+    ,m_dispatcher(m_con, strand)
     ,m_wsSend(send)
     ,m_responseSenderStore(static_cast<size_t>(sd::QueueParameters::QueueRules(0)->RequestInQueueCapacity().IsNull() ? 10
                                                : sd::QueueParameters::QueueRules(0)->RequestInQueueCapacity().GetVal()))
@@ -49,6 +49,7 @@ void DobConnection::OnCreateRequest(const sd::EntityRequestProxy entityRequestPr
     auto req=JsonRpcRequest::Json(Methods::OnCreateRequest, m_proxyToJson.ToJson(entityRequestProxy, ProxyToJson::CreateReqType), JsonRpcId(id));
     m_wsSend(req);
 }
+
 void DobConnection::OnUpdateRequest(const sd::EntityRequestProxy entityRequestProxy, sd::ResponseSenderPtr responseSender)
 {
     auto id=m_responseSenderStore.Add(responseSender);

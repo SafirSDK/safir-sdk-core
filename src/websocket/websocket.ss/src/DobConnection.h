@@ -51,7 +51,7 @@ class DobConnection :
 {
 public:
 
-    DobConnection(boost::asio::io_service& ioService, boost::function<void(const std::string&)> send);
+    DobConnection(boost::asio::strand& strand, boost::function<void(const std::string&)> send);
     sd::Connection& Connection() {return m_con;}
 
     void Open(const std::wstring& name, int context) {m_con.Open(name, L"-ws", context, nullptr, &m_dispatcher);}
@@ -125,7 +125,7 @@ public:
     std::string Read(ts::TypeId typeId, const ts::InstanceId& inst) const
     {
         auto proxy=m_con.Read(ts::EntityId(typeId, inst));
-        return std::move(m_proxyToJson.ToJson(proxy));
+        return std::move(ts::Internal::ToJson(proxy.GetBlob()));
     }
 
     bool IsCreated(ts::TypeId typeId, const ts::InstanceId& inst) const {return m_con.IsCreated(ts::EntityId(typeId, inst));}

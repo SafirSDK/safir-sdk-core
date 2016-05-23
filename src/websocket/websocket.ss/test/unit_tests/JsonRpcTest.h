@@ -50,44 +50,44 @@ inline void JsonRpcTest()
     {
         std::ostringstream os;
         os<<ts::InstanceId(L"Test");
-        CHECK(os.str()=="\"instanceId\":\"Test\"");
+        CHECK(os.str()=="\"Test\"");
     }
     {
         std::ostringstream os;
         os<<ts::InstanceId(123);
-        CHECK(os.str()=="\"instanceId\":123");
+        CHECK(os.str()=="123");
     }
     {
         std::ostringstream os;
         ts::ChannelId i;
         os<<ts::ChannelId();
-        CHECK(os.str()=="\"channelId\":\"DEFAULT_CHANNEL\"");
+        CHECK(os.str()=="\"DEFAULT_CHANNEL\"");
     }
     {
         std::ostringstream os;
         os<<ts::ChannelId(L"Test");
-        CHECK(os.str()=="\"channelId\":\"Test\"");
+        CHECK(os.str()=="\"Test\"");
     }
     {
         std::ostringstream os;
         os<<ts::ChannelId(123);
-        CHECK(os.str()=="\"channelId\":123");
+        CHECK(os.str()=="123");
     }
     {
         std::ostringstream os;
         ts::HandlerId i;
         os<<ts::HandlerId();
-        CHECK(os.str()=="\"handlerId\":\"DEFAULT_HANDLER\"");
+        CHECK(os.str()=="\"DEFAULT_HANDLER\"");
     }
     {
         std::ostringstream os;
         os<<ts::HandlerId(L"Test");
-        CHECK(os.str()=="\"handlerId\":\"Test\"");
+        CHECK(os.str()=="\"Test\"");
     }
     {
         std::ostringstream os;
         os<<ts::HandlerId(123);
-        CHECK(os.str()=="\"handlerId\":123");
+        CHECK(os.str()=="123");
     }
 
     //-------------------------------------------
@@ -332,6 +332,37 @@ inline void JsonRpcTest()
         auto json = JsonRpcResponse::Json(JsonRpcId("Mr Donk"), "{\"_DouType\":\"Safir.Dob.Entity\"}");
         CHECK(json=="{\"jsonrpc\":\"2.0\",\"result\":{\"_DouType\":\"Safir.Dob.Entity\"},\"id\":\"Mr Donk\"}");
     }
+    {
+        //string array
+        //------------
+        std::vector<std::string> v={"a","b","c"};
+        auto json = JsonRpcResponse::QuotedArray(JsonRpcId("Mr Donk"), v);
+        CHECK(json=="{\"jsonrpc\":\"2.0\",\"result\":[\"a\",\"b\",\"c\"],\"id\":\"Mr Donk\"}");
+        v.clear();
+        json = JsonRpcResponse::QuotedArray(JsonRpcId("Mr Donk"), v);
+        CHECK(json=="{\"jsonrpc\":\"2.0\",\"result\":[],\"id\":\"Mr Donk\"}");
+    }
+    {
+        //int array
+        //------------
+        std::vector<int> v={1,2,3};
+        auto json = JsonRpcResponse::UnquotedArray(JsonRpcId("Mr Donk"), v);
+        CHECK(json=="{\"jsonrpc\":\"2.0\",\"result\":[1,2,3],\"id\":\"Mr Donk\"}");
+        v.clear();
+        json = JsonRpcResponse::UnquotedArray(JsonRpcId("Mr Donk"), v);
+        CHECK(json=="{\"jsonrpc\":\"2.0\",\"result\":[],\"id\":\"Mr Donk\"}");
+    }
+    {
+        //instanceId array
+        //------------
+        std::vector<ts::InstanceId> v={ts::InstanceId(1), ts::InstanceId(L"id2")};
+        auto json = JsonRpcResponse::UnquotedArray(JsonRpcId("Mr Donk"), v);
+        CHECK(json=="{\"jsonrpc\":\"2.0\",\"result\":[1,\"id2\"],\"id\":\"Mr Donk\"}");
+        v.clear();
+        json = JsonRpcResponse::UnquotedArray(JsonRpcId("Mr Donk"), v);
+        CHECK(json=="{\"jsonrpc\":\"2.0\",\"result\":[],\"id\":\"Mr Donk\"}");
+    }
+
 
     //-------------------------------------------
     // Test JsonRpcNotification

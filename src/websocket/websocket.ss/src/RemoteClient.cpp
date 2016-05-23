@@ -35,14 +35,15 @@ RemoteClient::RemoteClient(WsServer& server,
                            websocketpp::connection_hdl& connectionHandle,
                            std::function<void(const RemoteClient*)> onClose)
     :m_server(server)
+    ,m_strand(ioService)
     ,m_connectionHandle(connectionHandle)
     ,m_connection(m_server.get_con_from_hdl(connectionHandle))
     ,m_onConnectionClosed(onClose)
-    ,m_dob(ioService, [=](const std::string& msg){SendToClient(msg);})
+    ,m_dob(m_strand, [=](const std::string& msg){SendToClient(msg);})
     ,m_pingHandler(ioService, static_cast<int>(Safir::Websocket::Parameters::PingInterval()), [=]{m_connection->ping("");})
 {
-    m_connection->set_close_handler([=](websocketpp::connection_hdl hdl){OnClose(hdl);});
-    m_connection->set_message_handler([=](websocketpp::connection_hdl hdl, WsMessage msg){OnMessage(hdl, msg);});
+    m_connection->set_close_handler(m_strand.wrap([=](websocketpp::connection_hdl hdl){OnClose(hdl);}));
+    m_connection->set_message_handler(m_strand.wrap([=](websocketpp::connection_hdl hdl, WsMessage msg){OnMessage(hdl, msg);}));
 
     m_pingHandler.Start();
 }
@@ -50,9 +51,12 @@ RemoteClient::RemoteClient(WsServer& server,
 void RemoteClient::Close()
 {
     //called from websocket server
-    m_pingHandler.Stop();
-    m_dob.Close();
-    m_server.close(m_connectionHandle, websocketpp::close::status::normal, "onStopOrder");
+    m_strand.dispatch([=]
+    {
+        m_pingHandler.Stop();
+        m_dob.Close();
+        m_server.close(m_connectionHandle, websocketpp::close::status::normal, "onStopOrder");
+    });
 }
 
 std::string RemoteClient::ToString() const
@@ -233,7 +237,7 @@ void RemoteClient::WsResponse(const JsonRpcRequest &req)
     try
     {
         CommandValidator::ValidateResponse(req);
-        sd::ResponsePtr response=ToObject<sd::Response>(req.Result());
+        sd::ResponsePtr response=ToObject<sd::Response>(req.Result());        
         m_dob.SendResponse(response, req.Id().Int());
     }
     catch (const std::exception& e)
@@ -308,7 +312,7 @@ void RemoteClient::WsSubscribeMessage(const JsonRpcRequest& req)
     try
     {
         CommandValidator::ValidateSubscribeMessage(req);
-        auto channel=req.HasChannelId() ? req.ChannelId() : Safir::Dob::Typesystem::ChannelId();
+        auto channel=req.HasChannelId() ? req.ChannelId() : ts::ChannelId::ALL_CHANNELS;
         auto includeSub=req.HasIncludeSubclasses() ? req.IncludeSubclasses() : true;
         m_dob.SubscribeMessage(req.TypeId(), channel, includeSub);
         SendToClient(JsonRpcResponse::String(req.Id(), "OK"));
@@ -324,7 +328,7 @@ void RemoteClient::WsSendMessage(const JsonRpcRequest& req)
     try
     {
         CommandValidator::ValidateSendMessage(req);
-        auto channel=req.HasChannelId() ? req.ChannelId() : Safir::Dob::Typesystem::ChannelId();
+        auto channel=req.HasChannelId() ? req.ChannelId() : ts::ChannelId();
         sd::MessagePtr message=ToObject<sd::Message>(req.Message());
         m_dob.SendMessage(message, channel);
         SendToClient(JsonRpcResponse::String(req.Id(), "OK"));
@@ -340,7 +344,7 @@ void RemoteClient::WsUnsubscribeMessage(const JsonRpcRequest& req)
     try
     {
         CommandValidator::ValidateUnsubscribeMessage(req);
-        auto channel=req.HasChannelId() ? req.ChannelId() : Safir::Dob::Typesystem::ChannelId();
+        auto channel=req.HasChannelId() ? req.ChannelId() : ts::ChannelId::ALL_CHANNELS;
         auto includeUpdates=req.HasIncludeSubclasses() ? req.IncludeSubclasses() : true;
         m_dob.UnsubscribeMessage(req.TypeId(), channel, includeUpdates);
         SendToClient(JsonRpcResponse::String(req.Id(), "OK"));
@@ -426,7 +430,7 @@ void RemoteClient::WsUnregisterHandler(const JsonRpcRequest& req)
     try
     {
         CommandValidator::ValidateUnregisterHandler(req);
-        auto handler=req.HasHandlerId() ? req.HandlerId() : ts::HandlerId();
+        auto handler=req.HasHandlerId() ? req.HandlerId() : ts::HandlerId::ALL_HANDLERS;
         m_dob.UnregisterHandler(req.TypeId(), handler);
         SendToClient(JsonRpcResponse::String(req.Id(), "OK"));
     }
@@ -441,7 +445,7 @@ void RemoteClient::WsSubscribeRegistration(const JsonRpcRequest &req)
     try
     {
         CommandValidator::ValidateSubscribeRegistration(req);
-        auto handler=req.HasHandlerId() ? req.HandlerId() : ts::HandlerId();
+        auto handler=req.HasHandlerId() ? req.HandlerId() : ts::HandlerId::ALL_HANDLERS;
         auto inclSub=req.HasIncludeSubclasses() ? req.IncludeSubclasses() : true;
         auto restartSub=req.HasRestartSubscription() ? req.RestartSubscription() : true;
         m_dob.SubscribeRegistration(req.TypeId(), handler, inclSub, restartSub);
@@ -459,7 +463,7 @@ void RemoteClient::WsUnsubscribeRegistration(const JsonRpcRequest& req)
     try
     {
         CommandValidator::ValidateUnsubscribeRegistration(req);
-        auto handler=req.HasHandlerId() ? req.HandlerId() : ts::HandlerId();
+        auto handler=req.HasHandlerId() ? req.HandlerId() : ts::HandlerId::ALL_HANDLERS;
         auto inclSub=req.IncludeSubclasses() ? req.IncludeSubclasses() : true;
         m_dob.UnsubscribeRegistration(req.TypeId(), handler, inclSub);
         SendToClient(JsonRpcResponse::String(req.Id(), "OK"));
@@ -630,7 +634,7 @@ void RemoteClient::WsGetNumberOfInstances(const JsonRpcRequest& req)
     try
     {
         CommandValidator::ValidateGetNumberOfInstances(req);
-        auto handler=req.HasHandlerId() ? req.HandlerId() : ts::HandlerId();
+        auto handler=req.HasHandlerId() ? req.HandlerId() : ts::HandlerId::ALL_HANDLERS;
         auto inclSub=req.HasIncludeSubclasses() ? req.IncludeSubclasses() : true;
         ts::Int64 num=m_dob.GetNumberOfInstances(req.TypeId(), handler, inclSub);
         SendToClient(JsonRpcResponse::Int(req.Id(), num));
@@ -661,7 +665,9 @@ void RemoteClient::WsGetAllInstanceIds(const JsonRpcRequest& req)
 {
     try
     {
-
+        CommandValidator::ValidateGetAllInstanceIds(req);
+        auto ids=m_dob.GetAllInstanceIds(req.TypeId());
+        SendToClient(JsonRpcResponse::UnquotedArray(req.Id(), ids));
     }
     catch (const std::exception& e)
     {

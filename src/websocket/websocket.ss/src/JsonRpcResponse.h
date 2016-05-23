@@ -68,6 +68,43 @@ public:
         return std::move(os.str());
     }
 
+    template <class T>
+    static std::string QuotedArray(const JsonRpcId& id, const std::vector<T>& array)
+    {
+        std::ostringstream os;
+        os<<"{"<<SAFIR_WS_STR("jsonrpc","2.0")<<","<<SAFIR_WS_QUOTE("result")<<":[";
+        auto coma=false;
+        for (auto& val : array)
+        {
+            if (coma)
+                os<<","<<SAFIR_WS_QUOTE(val);
+            else
+                os<<SAFIR_WS_QUOTE(val);
+
+            coma=true;
+        }
+        os<<"],"<<id<<"}";
+        return std::move(os.str());
+    }
+
+    template <class T>
+    static std::string UnquotedArray(const JsonRpcId& id, const std::vector<T>& array)
+    {
+        std::ostringstream os;
+        os<<"{"<<SAFIR_WS_STR("jsonrpc","2.0")<<","<<SAFIR_WS_QUOTE("result")<<":[";
+        auto coma=false;
+        for (auto& val : array)
+        {
+            if (coma)
+                os<<","<<val;
+            else
+                os<<val;
+
+            coma=true;
+        }
+        os<<"],"<<id<<"}";
+        return std::move(os.str());
+    }
 
 private:
 

@@ -46,15 +46,15 @@ namespace ts = Safir::Dob::Typesystem;
 namespace JsonHelpers
 {
     template <class T>
-    std::ostream& AddHashedVal(std::ostream& os, const std::string& name, const T& hash)
+    std::ostream& AddHashedVal(std::ostream& os, const T& hash)
     {
         if (hash.Utf8StringLength()>0)
         {
-            os<<SAFIR_WS_STR(name, hash.Utf8String());
+            os<<SAFIR_WS_QUOTE(hash.Utf8String());
         }
         else
         {
-            os<<SAFIR_WS_NUM(name, hash.GetRawValue());
+            os<<hash.GetRawValue();
         }
 
         return os;
@@ -100,9 +100,9 @@ namespace JsonHelpers
     }
 }
 
-inline std::ostream& operator<<(std::ostream& os, const ts::HandlerId& hash) {return JsonHelpers::AddHashedVal(os,"handlerId", hash);}
-inline std::ostream& operator<<(std::ostream& os, const ts::ChannelId& hash) {return JsonHelpers::AddHashedVal(os,"channelId", hash);}
-inline std::ostream& operator<<(std::ostream& os, const ts::InstanceId& hash) {return JsonHelpers::AddHashedVal(os,"instanceId", hash);}
+inline std::ostream& operator<<(std::ostream& os, const ts::HandlerId& hash) {return JsonHelpers::AddHashedVal(os, hash);}
+inline std::ostream& operator<<(std::ostream& os, const ts::ChannelId& hash) {return JsonHelpers::AddHashedVal(os, hash);}
+inline std::ostream& operator<<(std::ostream& os, const ts::InstanceId& hash) {return JsonHelpers::AddHashedVal(os, hash);}
 
 class ProxyToJson
 {
@@ -119,14 +119,14 @@ public:
     std::string ToJson(const sd::EntityProxy& proxy, bool previousEntity=false) const
     {
         std::ostringstream os;
-        os<<"{"<<proxy.GetInstanceId()<<","<<SAFIR_WS_OBJ("entity",ts::Internal::ToJson((previousEntity ? proxy.GetPrevious().GetBlob() : proxy.GetBlob())))<<"}";
+        os<<"{"<<SAFIR_WS_OBJ("instanceId",proxy.GetInstanceId())<<","<<SAFIR_WS_OBJ("entity",ts::Internal::ToJson((previousEntity ? proxy.GetPrevious().GetBlob() : proxy.GetBlob())))<<"}";
         return std::move(os.str());
     }
 
     std::string ToJson(const sd::MessageProxy& proxy) const
     {
         std::ostringstream os;
-        os<<"{"<<proxy.GetChannelId()<<","<<SAFIR_WS_OBJ("message",ts::Internal::ToJson(proxy.GetBlob()))<<"}";
+        os<<"{"<<SAFIR_WS_OBJ("channelId",proxy.GetChannelId())<<","<<SAFIR_WS_OBJ("message",ts::Internal::ToJson(proxy.GetBlob()))<<"}";
         return std::move(os.str());
     }
 
@@ -140,14 +140,14 @@ public:
     std::string ToJson(const sd::ServiceRequestProxy& proxy) const
     {
         std::ostringstream os;
-        os<<"{"<<proxy.GetReceivingHandlerId()<<","<<SAFIR_WS_OBJ("request",ts::Internal::ToJson(proxy.GetBlob()))<<"}";
+        os<<"{"<<SAFIR_WS_OBJ("handlerId",proxy.GetReceivingHandlerId())<<","<<SAFIR_WS_OBJ("request",ts::Internal::ToJson(proxy.GetBlob()))<<"}";
         return std::move(os.str());
     }
 
     std::string ToJson(const Safir::Dob::EntityRequestProxy &proxy, EntityRequestType reqType) const
     {
         std::ostringstream os;
-        os<<"{"<<proxy.GetReceivingHandlerId()<<",";
+        os<<"{"<<SAFIR_WS_OBJ("handlerId",proxy.GetReceivingHandlerId())<<",";
 
         switch (reqType)
         {
@@ -155,22 +155,22 @@ public:
             {
                 if (m_getInstIdPolicy(proxy.GetTypeId(), proxy.GetReceivingHandlerId())==sd::InstanceIdPolicy::RequestorDecidesInstanceId)
                 {
-                    os<<proxy.GetInstanceId()<<",";
+                    os<<SAFIR_WS_OBJ("instanceId",proxy.GetInstanceId())<<",";
                 }
-                os<<SAFIR_WS_OBJ("request",ts::Internal::ToJson(proxy.GetBlob()))<<"}";
+                os<<SAFIR_WS_OBJ("entity",ts::Internal::ToJson(proxy.GetBlob()))<<"}";
             }
                 break;
 
             case UpdateReqType:
             {
-                os<<proxy.GetInstanceId()<<",";
-                os<<SAFIR_WS_OBJ("request",ts::Internal::ToJson(proxy.GetBlob()))<<"}";
+                os<<SAFIR_WS_OBJ("instanceId",proxy.GetInstanceId())<<",";
+                os<<SAFIR_WS_OBJ("entity",ts::Internal::ToJson(proxy.GetBlob()))<<"}";
             }
                 break;
 
             case DeleteReqType:
             {
-                os<<SAFIR_WS_STR("typeId", m_typeIdToName(proxy.GetTypeId()))<<","<<proxy.GetInstanceId()<<"}";
+                os<<SAFIR_WS_STR("typeId", m_typeIdToName(proxy.GetTypeId()))<<","<<SAFIR_WS_OBJ("instanceId",proxy.GetInstanceId())<<"}";
             }
                 break;
         }
@@ -181,14 +181,14 @@ public:
     std::string ToJson(const Safir::Dob::InjectedEntityProxy &proxy) const
     {
         std::ostringstream os;
-        os<<"{"<<proxy.GetInstanceId()<<","<<SAFIR_WS_OBJ("entity",ts::Internal::ToJson(proxy.GetInjectionBlob()))<<"}";
+        os<<"{"<<SAFIR_WS_OBJ("instanceId",proxy.GetInstanceId())<<","<<SAFIR_WS_OBJ("entity",ts::Internal::ToJson(proxy.GetInjectionBlob()))<<"}";
         return std::move(os.str());
     }
 
     std::string ToJson(Safir::Dob::Typesystem::TypeId typeId, const Safir::Dob::Typesystem::HandlerId &handler) const
     {
         std::ostringstream os;
-        os<<"{"<<SAFIR_WS_STR("typeId", m_typeIdToName(typeId))<<","<<handler<<"}";
+        os<<"{"<<SAFIR_WS_STR("typeId", m_typeIdToName(typeId))<<","<<SAFIR_WS_OBJ("handlerId",handler)<<"}";
         return std::move(os.str());
     }
 

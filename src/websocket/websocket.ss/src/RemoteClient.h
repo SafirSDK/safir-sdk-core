@@ -57,6 +57,7 @@ public:
 
 private:
     WsServer& m_server;
+    boost::asio::strand m_strand;
     websocketpp::connection_hdl m_connectionHandle;
     WsConnection m_connection;
     std::function<void(const RemoteClient*)> m_onConnectionClosed;

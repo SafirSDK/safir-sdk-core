@@ -45,9 +45,9 @@ int main(int /*argc*/, const char** /*argv*/)
     ProxyToJsonTest();
     std::cout<<"Test passed!"<<std::endl;
 
-//    std::cout<<"===== PingHandlerTest ====="<<std::endl;
-//    PingHandlerTest();
-//    std::cout<<"Test passed!"<<std::endl;
+    std::cout<<"===== PingHandlerTest ====="<<std::endl;
+    PingHandlerTest();
+    std::cout<<"Test passed!"<<std::endl;
 
     return 0;
 }
