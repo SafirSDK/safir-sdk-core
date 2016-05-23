@@ -494,7 +494,7 @@ class BuilderBase(object):
             dummyfile.close()
 
         output = self._run_command((ctest(),
-                                    "-V",
+                                    "--output-on-failure",
                                     "-T", "Test",
                                     "--no-compress-output"),
                                     "Test", allow_fail = True)
