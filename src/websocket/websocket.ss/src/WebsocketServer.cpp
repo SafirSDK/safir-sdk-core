@@ -23,9 +23,19 @@
 ******************************************************************************/
 #include <signal.h>
 #include <boost/make_shared.hpp>
-#include <boost/thread.hpp>
 #include <Safir/Websocket/Parameters.h>
 #include "WebsocketServer.h"
+
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4100)
+#endif
+
+#include <boost/thread.hpp>
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 namespace ws = Safir::Websocket;
 
@@ -42,7 +52,7 @@ WebsocketServer::WebsocketServer(boost::asio::io_service& ioService)
 
 void WebsocketServer::Run()
 {    
-    m_signals.async_wait([=](const boost::system::error_code&, int signal){Terminate();});
+    m_signals.async_wait([=](const boost::system::error_code&, int /*signal*/){Terminate();});
 
     lllog(5)<<"Wait for DOB to let us open a connection..."<<std::endl;
     m_dobConnection.Open(L"safir_websocket", L"", 0, this, &m_dobDispatcher);
@@ -62,7 +72,8 @@ void WebsocketServer::Run()
     });
 
     //Set up listening port
-    m_server.listen(ws::Parameters::Port());
+    //TODO: report error if port number is out of valid range?
+    m_server.listen(static_cast<uint16_t>(ws::Parameters::Port()));
 
     // Start the server accept loop
     m_server.start_accept();

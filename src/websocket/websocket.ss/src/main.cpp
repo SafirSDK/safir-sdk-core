@@ -23,10 +23,21 @@
 ******************************************************************************/
 #include <iostream>
 #include <algorithm>
-#include <boost/thread.hpp>
-#include <thread>
 #include <Safir/Application/CrashReporter.h>
 #include "WebsocketServer.h"
+#include <Safir/Dob/Typesystem/Serialization.h>
+
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4100)
+#endif
+
+#include <boost/thread.hpp>
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
+
 
 int main(int /*argc*/, const char** /*argv*/)
 {

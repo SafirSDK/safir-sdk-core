@@ -28,7 +28,7 @@
 #include "JsonRpcResponse.h"
 #include "Methods.h"
 
-DobConnection::DobConnection::DobConnection(boost::asio::strand& strand, boost::function<void(const std::string&)> send)
+DobConnection::DobConnection(boost::asio::strand& strand, boost::function<void(const std::string&)> send)
     :m_con()
     ,m_dispatcher(m_con, strand)
     ,m_wsSend(send)

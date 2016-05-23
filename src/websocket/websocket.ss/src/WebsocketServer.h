@@ -23,12 +23,14 @@
 ******************************************************************************/
 #pragma once
 
+
 #include <set>
 #include <boost/asio.hpp>
 #include <boost/asio/signal_set.hpp>
-#include <websocketpp/config/asio_no_tls.hpp>
-#include <websocketpp/server.hpp>
 #include "RemoteClient.h"
+
+//websocketpp stuff is already included in RemoteClient.h, and to avoid duplicating
+//all the msvc warning stuff we depend on that.
 
 class WebsocketServer : public sd::StopHandler
 {

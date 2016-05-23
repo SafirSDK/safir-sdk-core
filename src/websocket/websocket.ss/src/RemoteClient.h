@@ -25,8 +25,6 @@
 
 #include <functional>
 #include <boost/optional.hpp>
-#include <websocketpp/config/asio_no_tls.hpp>
-#include <websocketpp/server.hpp>
 #include <Safir/Dob/Connection.h>
 #include <Safir/Utilities/AsioDispatcher.h>
 #include <Safir/Dob/Typesystem/Internal/InternalOperations.h>
@@ -35,6 +33,21 @@
 #include "DobConnection.h"
 #include "JsonHelpers.h"
 #include "PingHandler.h"
+
+
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4127)
+#pragma warning(disable: 4267)
+#pragma warning(disable: 4996)
+#endif
+
+#include <websocketpp/config/asio_no_tls.hpp>
+#include <websocketpp/server.hpp>
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 namespace sd = Safir::Dob;
 namespace ts = Safir::Dob::Typesystem;
