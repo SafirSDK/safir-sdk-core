@@ -41,6 +41,7 @@ namespace Methods
     static const std::string SubscribeEntity = "subscribeEntity";
     static const std::string UnsubscribeEntity = "unsubscribeEntity";
     static const std::string RegisterEntityHandler = "registerEntityHandler";
+    static const std::string RegisterServiceHandler = "registerServiceHandler";
     static const std::string UnregisterHandler = "unregisterHandler";
     static const std::string SubscribeRegistration = "subscribeRegistration";
     static const std::string UnsubscribeRegistration = "unsubscribeRegistration";

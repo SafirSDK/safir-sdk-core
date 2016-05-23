@@ -31,6 +31,8 @@
 #include <Safir/Utilities/AsioDispatcher.h>
 #include <Safir/Dob/Typesystem/Serialization.h>
 #include <Safir/Dob/QueueParameters.h>
+#include <Safir/Utilities/Internal/LowLevelLogger.h>
+#include <Safir/Utilities/Internal/SystemLog.h>
 #include "RequestIdMapper.h"
 #include "ResponseSenderStore.h"
 #include "JsonHelpers.h"
@@ -47,7 +49,8 @@ class DobConnection :
         public sd::Requestor,
         public sd::MessageSender,
         public sd::MessageSubscriber,
-        public sd::ServiceHandler
+        public sd::ServiceHandler,
+        public sd::ServiceHandlerPending
 {
 public:
 
@@ -74,6 +77,14 @@ public:
             m_con.RegisterEntityHandlerPending(typeId, handler, policy, this);
         else
             m_con.RegisterEntityHandler(typeId, handler, policy, this);
+    }
+
+    void RegisterService(ts::TypeId typeId, const ts::HandlerId& handler, bool pending)
+    {
+        if (pending)
+            m_con.RegisterServiceHandlerPending(typeId, handler, this);
+        else
+            m_con.RegisterServiceHandler(typeId, handler, this);
     }
 
     void UnregisterHandler(ts::TypeId typeId, const ts::HandlerId& handler) {m_con.UnregisterHandler(typeId, handler);}
@@ -156,7 +167,7 @@ public:
         }
         catch (const std::exception& e)
         {
-            std::cout<<"Not found type"<<std::endl;
+            lllog(5)<<"DobConnection::GetName. Type not found. TypeId"<<typeId<<std::endl;
             return "<unknown_type>";
         }
     }

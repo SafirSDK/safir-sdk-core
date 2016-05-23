@@ -45,6 +45,7 @@ DobConnection::DobConnection::DobConnection(boost::asio::strand& strand, boost::
 // EntityHandler interface
 void DobConnection::OnCreateRequest(const sd::EntityRequestProxy entityRequestProxy, sd::ResponseSenderPtr responseSender)
 {
+    lllog(5)<<"OnCreateRequest"<<std::endl;
     auto id=m_responseSenderStore.Add(responseSender);
     auto req=JsonRpcRequest::Json(Methods::OnCreateRequest, m_proxyToJson.ToJson(entityRequestProxy, ProxyToJson::CreateReqType), JsonRpcId(id));
     m_wsSend(req);
@@ -52,12 +53,14 @@ void DobConnection::OnCreateRequest(const sd::EntityRequestProxy entityRequestPr
 
 void DobConnection::OnUpdateRequest(const sd::EntityRequestProxy entityRequestProxy, sd::ResponseSenderPtr responseSender)
 {
+    lllog(5)<<"OnUpdateRequest"<<std::endl;
     auto id=m_responseSenderStore.Add(responseSender);
     auto req=JsonRpcRequest::Json(Methods::OnUpdateRequest, m_proxyToJson.ToJson(entityRequestProxy, ProxyToJson::UpdateReqType), JsonRpcId(id));
     m_wsSend(req);
 }
 void DobConnection::OnDeleteRequest(const sd::EntityRequestProxy entityRequestProxy, sd::ResponseSenderPtr responseSender)
 {
+    lllog(5)<<"OnDeleteRequest"<<std::endl;
     auto id=m_responseSenderStore.Add(responseSender);
     auto req=JsonRpcRequest::Json(Methods::OnDeleteRequest, m_proxyToJson.ToJson(entityRequestProxy, ProxyToJson::DeleteReqType), JsonRpcId(id));
     m_wsSend(req);
@@ -65,6 +68,7 @@ void DobConnection::OnDeleteRequest(const sd::EntityRequestProxy entityRequestPr
 //ServiceHandler interface
 void DobConnection::OnServiceRequest(const Safir::Dob::ServiceRequestProxy serviceRequestProxy, Safir::Dob::ResponseSenderPtr responseSender)
 {
+    lllog(5)<<"OnServiceRequest"<<std::endl;
     auto id=m_responseSenderStore.Add(responseSender);
     auto req=JsonRpcRequest::Json(Methods::OnServiceRequest, m_proxyToJson.ToJson(serviceRequestProxy), JsonRpcId(id));
     m_wsSend(req);
@@ -73,11 +77,13 @@ void DobConnection::OnServiceRequest(const Safir::Dob::ServiceRequestProxy servi
 
 void DobConnection::OnRevokedRegistration(const sd::Typesystem::TypeId typeId, const sd::Typesystem::HandlerId &handlerId)
 {
+    lllog(5)<<"OnRevokedRegistration"<<std::endl;
     auto notification=JsonRpcNotification::Json(Methods::OnRevokedRegistration, m_proxyToJson.ToJson(typeId, handlerId));
     m_wsSend(notification);
 }
 void DobConnection::OnCompletedRegistration(const sd::Typesystem::TypeId typeId, const sd::Typesystem::HandlerId& handlerId)
 {
+    lllog(5)<<"OnCompletedRegistration"<<std::endl;
     auto notification=JsonRpcNotification::Json(Methods::OnCompletedRegistration, m_proxyToJson.ToJson(typeId, handlerId));
     m_wsSend(notification);
 }
@@ -85,21 +91,25 @@ void DobConnection::OnCompletedRegistration(const sd::Typesystem::TypeId typeId,
 //Injection interface
 void DobConnection::OnInjectedNewEntity(const sd::InjectedEntityProxy injectedEntityProxy)
 {
+    lllog(5)<<"OnInjectedNewEntity"<<std::endl;
     auto notification=JsonRpcNotification::Json(Methods::OnInjectedNewEntity, m_proxyToJson.ToJson(injectedEntityProxy));
     m_wsSend(notification);
 }
 void DobConnection::OnInjectedUpdatedEntity(const sd::InjectedEntityProxy injectedEntityProxy)
 {
+    lllog(5)<<"OnInjectedUpdatedEntity"<<std::endl;
     auto notification=JsonRpcNotification::Json(Methods::OnInjectedUpdatedEntity, m_proxyToJson.ToJson(injectedEntityProxy));
     m_wsSend(notification);
 }
 void DobConnection::OnInjectedDeletedEntity(const sd::InjectedEntityProxy injectedEntityProxy)
 {
+    lllog(5)<<"OnInjectedDeletedEntity"<<std::endl;
     auto notification=JsonRpcNotification::Json(Methods::OnInjectedDeletedEntity, m_proxyToJson.ToJson(injectedEntityProxy));
     m_wsSend(notification);
 }
 void DobConnection::OnInitialInjectionsDone(const sd::Typesystem::TypeId typeId, const sd::Typesystem::HandlerId& handlerId)
 {
+    lllog(5)<<"OnInitialInjectionsDone"<<std::endl;
     auto notification=JsonRpcNotification::Json(Methods::OnInjectedDeletedEntity, m_proxyToJson.ToJson(typeId, handlerId));
     m_wsSend(notification);
 }
@@ -107,16 +117,19 @@ void DobConnection::OnInitialInjectionsDone(const sd::Typesystem::TypeId typeId,
 //EntitySubscriber interface
 void DobConnection::OnNewEntity(const sd::EntityProxy entityProxy)
 {
+    lllog(5)<<"OnNewEntity"<<std::endl;
     auto notification=JsonRpcNotification::Json(Methods::OnNewEntity, m_proxyToJson.ToJson(entityProxy));
     m_wsSend(notification);
 }
 void DobConnection::OnUpdatedEntity(const sd::EntityProxy entityProxy)
 {
+    lllog(5)<<"OnUpdatedEntity"<<std::endl;
     auto notification=JsonRpcNotification::Json(Methods::OnUpdatedEntity, m_proxyToJson.ToJson(entityProxy));
     m_wsSend(notification);
 }
 void DobConnection::OnDeletedEntity(const sd::EntityProxy entityProxy, const bool)
 {
+    lllog(5)<<"OnDeletedEntity"<<std::endl;
     auto notification=JsonRpcNotification::Json(Methods::OnDeletedEntity, m_proxyToJson.ToJson(entityProxy, true));
     m_wsSend(notification);
 }
@@ -124,12 +137,14 @@ void DobConnection::OnDeletedEntity(const sd::EntityProxy entityProxy, const boo
 //RegistrationSubscriber interface
 void DobConnection::OnRegistered(const ts::TypeId typeId, const ts::HandlerId&  handlerId)
 {
+    lllog(5)<<"OnRegistered"<<std::endl;
     auto notification=JsonRpcNotification::Json(Methods::OnRegistered, m_proxyToJson.ToJson(typeId, handlerId));
     m_wsSend(notification);
 }
 
 void DobConnection::OnUnregistered(const ts::TypeId typeId, const Safir::Dob::Typesystem::HandlerId&  handlerId)
 {
+    lllog(5)<<"OnUnregistered"<<std::endl;
     auto notification=JsonRpcNotification::Json(Methods::OnUnregistered, m_proxyToJson.ToJson(typeId, handlerId));
     m_wsSend(notification);
 }
@@ -137,12 +152,14 @@ void DobConnection::OnUnregistered(const ts::TypeId typeId, const Safir::Dob::Ty
 //Requestor interface
 void DobConnection::OnResponse(const sd::ResponseProxy responseProxy)
 {
+    lllog(5)<<"OnResponse"<<std::endl;
     auto response=JsonRpcResponse::Json(m_reqIdMapper.Get(responseProxy.GetRequestId()), m_proxyToJson.ToJson(responseProxy));
     m_wsSend(response);
 
 }
 void DobConnection::OnNotRequestOverflow()
 {
+    lllog(5)<<"OnNotRequestOverflow"<<std::endl;
     auto notification=JsonRpcNotification::Empty(Methods::OnNotRequestOverflow);
     m_wsSend(notification);
 }
@@ -150,6 +167,7 @@ void DobConnection::OnNotRequestOverflow()
 //MessageSender interface
 void DobConnection::OnNotMessageOverflow()
 {
+    lllog(5)<<"OnNotMessageOverflow"<<std::endl;
     auto notification=JsonRpcNotification::Empty(Methods::OnNotMessageOverflow);
     m_wsSend(notification);
 }
@@ -157,7 +175,7 @@ void DobConnection::OnNotMessageOverflow()
 //MessageSubscriber interface
 void DobConnection::OnMessage(const sd::MessageProxy messageProxy)
 {
-    std::cout<<"OnMessage - "<<messageProxy.GetChannelId()<<std::endl;
+    lllog(5)<<"OnMessage"<<std::endl;
     auto notification=JsonRpcNotification::Json(Methods::OnMessage, m_proxyToJson.ToJson(messageProxy));
     m_wsSend(notification);
 }

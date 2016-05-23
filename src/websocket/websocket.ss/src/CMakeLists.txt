@@ -8,6 +8,7 @@ add_executable(safir_websocket ${sources} ${headers})
 
 target_link_libraries(safir_websocket PRIVATE
   safir_generated-Core-cpp
+  swre_interface_cpp
   dots_internal
   lluf_utils
   dose_cpp)

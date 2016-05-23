@@ -70,7 +70,7 @@ std::string RemoteClient::ToString() const
 void RemoteClient::OnClose(websocketpp::connection_hdl hdl)
 {
     //client closed connection
-    std::cout<<"RemoteClient OnClose"<<std::endl;
+    lllog(5)<<"RemoteClient.OnClose"<<std::endl;
     m_pingHandler.Stop();
     m_dob.Close();
     m_onConnectionClosed(this);
@@ -79,9 +79,10 @@ void RemoteClient::OnClose(websocketpp::connection_hdl hdl)
 void RemoteClient::OnMessage(websocketpp::connection_hdl hdl, WsMessage msg)
 {
     try
-    {
-        std::cout<<"RemoteClient OnMessage "<<msg->get_payload()<<std::endl;
+    {        
         auto payload=msg->get_payload();
+        lllog(5)<<"RemoteClient.OnMessage "<<payload.c_str()<<std::endl;
+
         JsonRpcRequest req(payload);
         try
         {
@@ -120,53 +121,13 @@ void RemoteClient::WsDispatch(const JsonRpcRequest& req)
         //be a response to a Safir-request (Service, or Entity CRUD)
        WsResponse(req);
     }
-    else if (req.Method()==Methods::GetTypeHierarchy)
+    else if (req.Method()==Methods::SetEntity)
     {
-        WsGetTypeHierarchy(req);
+        WsSetEntity(req);
     }
-    else if (req.Method()==Methods::Open)
+    else if (req.Method()==Methods::SetEntityChanges)
     {
-        WsOpen(req);
-    }    
-    else if (req.Method()==Methods::Close)
-    {
-        WsClose(req);
-    }
-    else if (req.Method()==Methods::IsOpen)
-    {
-        WsIsOpen(req);
-    }
-    else if (req.Method()==Methods::SubscribeMessage)
-    {
-        WsSubscribeMessage(req);
-    }
-    else if (req.Method()==Methods::SendMessage)
-    {
-        WsSendMessage(req);
-    }
-    else if (req.Method()==Methods::UnsubscribeMessage)
-    {
-        WsUnsubscribeMessage(req);
-    }
-    else if (req.Method()==Methods::SubscribeEntity)
-    {
-        WsSubscribeEntity(req);
-    }
-    else if (req.Method()==Methods::RegisterEntityHandler)
-    {
-        WsRegisterEntityHandler(req);
-    }
-    else if (req.Method()==Methods::UnregisterHandler)
-    {
-        WsUnregisterHandler(req);
-    }
-    else if (req.Method()==Methods::SubscribeRegistration)
-    {
-        WsSubscribeRegistration(req);
-    }
-    else if (req.Method()==Methods::UnsubscribeRegistration)
-    {
-        WsUnsubscribeRegistration(req);
+        WsSetEntityChanges(req);
     }
     else if (req.Method()==Methods::CreateRequest)
     {
@@ -184,13 +145,13 @@ void RemoteClient::WsDispatch(const JsonRpcRequest& req)
     {
         WsServiceRequest(req);
     }
-    else if (req.Method()==Methods::SetEntityChanges)
+    else if (req.Method()==Methods::SendMessage)
     {
-        WsSetEntityChanges(req);
+        WsSendMessage(req);
     }
-    else if (req.Method()==Methods::SetEntity)
+    else if (req.Method()==Methods::ReadEntity)
     {
-        WsSetEntity(req);
+        WsReadEntity(req);
     }
     else if (req.Method()==Methods::DeleteEntity)
     {
@@ -200,9 +161,37 @@ void RemoteClient::WsDispatch(const JsonRpcRequest& req)
     {
         WsDeleteAllInstances(req);
     }
-    else if (req.Method()==Methods::ReadEntity)
+    else if (req.Method()==Methods::SubscribeMessage)
     {
-        WsReadEntity(req);
+        WsSubscribeMessage(req);
+    }    
+    else if (req.Method()==Methods::UnsubscribeMessage)
+    {
+        WsUnsubscribeMessage(req);
+    }
+    else if (req.Method()==Methods::SubscribeEntity)
+    {
+        WsSubscribeEntity(req);
+    }
+    else if (req.Method()==Methods::RegisterEntityHandler)
+    {
+        WsRegisterEntityHandler(req);
+    }
+    else if (req.Method()==Methods::RegisterServiceHandler)
+    {
+        WsRegisterServiceHandler(req);
+    }
+    else if (req.Method()==Methods::UnregisterHandler)
+    {
+        WsUnregisterHandler(req);
+    }
+    else if (req.Method()==Methods::SubscribeRegistration)
+    {
+        WsSubscribeRegistration(req);
+    }
+    else if (req.Method()==Methods::UnsubscribeRegistration)
+    {
+        WsUnsubscribeRegistration(req);
     }
     else if (req.Method()==Methods::IsCreated)
     {
@@ -215,18 +204,35 @@ void RemoteClient::WsDispatch(const JsonRpcRequest& req)
     else if (req.Method()==Methods::GetAllInstanceIds)
     {
         WsGetAllInstanceIds(req);
+    }    
+    else if (req.Method()==Methods::Ping)
+    {
+        WsPing(req);
+    }
+    else if (req.Method()==Methods::Open)
+    {
+        WsOpen(req);
+    }
+    else if (req.Method()==Methods::Close)
+    {
+        WsClose(req);
+    }
+    else if (req.Method()==Methods::IsOpen)
+    {
+        WsIsOpen(req);
     }
     else if (req.Method()==Methods::GetInstanceIdPolicy)
     {
         WsGetInstanceIdPolicy(req);
     }
-    else if (req.Method()==Methods::Ping)
+    else if (req.Method()==Methods::GetTypeHierarchy)
     {
-        WsPing(req);
+        WsGetTypeHierarchy(req);
     }
     else
     {
-        std::cout<<"Received command that is not supported "<<std::endl;
+        lllog(5)<<"Received command that is not supported: "<<req.Method().c_str()<<std::endl;
+        SEND_SYSTEM_LOG(Error, <<"Received command that is not supported: "<<req.Method().c_str()<<std::endl);
         auto errorMsg=JsonRpcResponse::Error(req.Id(), RequestErrorException::MethodNotFound, "Command is not supported. "+req.Method());
         SendToClient(errorMsg);
     }
@@ -244,9 +250,8 @@ void RemoteClient::WsResponse(const JsonRpcRequest &req)
     {
         //There is no way to respond to a response, just log the error.
         //A future improvement could be to send a notification for this kind of errors
-
-        //TODO: log
-        std::cout<<e.what()<<std::endl;
+        SEND_SYSTEM_LOG(Error, <<"Failed to send response: "<<e.what()<<std::endl);
+        lllog(5)<<"Failed to send response: "<<e.what()<<std::endl;
     }
 }
 
@@ -421,6 +426,22 @@ void RemoteClient::WsRegisterEntityHandler(const JsonRpcRequest& req)
     }
     catch (const std::exception& e)
     {        
+        SendToClient(JsonRpcResponse::String(req.Id(), e.what()));
+    }
+}
+
+void RemoteClient::WsRegisterServiceHandler(const JsonRpcRequest &req)
+{
+    try
+    {
+        CommandValidator::ValidateRegisterServiceHandler(req);
+        auto handler=req.HasHandlerId() ? req.HandlerId() : ts::HandlerId();
+        auto pendingReg=req.HasPending() ? req.Pending() : false;
+        m_dob.RegisterService(req.TypeId(), handler, pendingReg);
+        SendToClient(JsonRpcResponse::String(req.Id(), "OK"));
+    }
+    catch (const std::exception& e)
+    {
         SendToClient(JsonRpcResponse::String(req.Id(), e.what()));
     }
 }

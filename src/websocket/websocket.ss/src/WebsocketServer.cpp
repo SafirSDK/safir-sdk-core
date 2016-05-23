@@ -21,7 +21,6 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#include <iostream>
 #include <signal.h>
 #include <boost/make_shared.hpp>
 #include <boost/thread.hpp>
@@ -42,14 +41,11 @@ WebsocketServer::WebsocketServer(boost::asio::io_service& ioService)
 }
 
 void WebsocketServer::Run()
-{
-    std::cout<<"Starting ws server"<<std::endl;
-
+{    
     m_signals.async_wait([=](const boost::system::error_code&, int signal){Terminate();});
 
-    std::cout<<"Wait for DOB to let us open a connection..."<<std::endl;
+    lllog(5)<<"Wait for DOB to let us open a connection..."<<std::endl;
     m_dobConnection.Open(L"safir_websocket", L"", 0, this, &m_dobDispatcher);
-    std::cout<<"done!"<<std::endl;
 
     // Initialize ASIO
     m_server.init_asio(&m_ioService);
@@ -59,10 +55,9 @@ void WebsocketServer::Run()
 
     m_server.set_open_handler([=](websocketpp::connection_hdl hdl)
     {
-        std::cout<<"Server: new connection added"<<std::endl;
         auto con=boost::make_shared<RemoteClient>(m_server, m_ioService, hdl, [=](const RemoteClient* con){OnConnectionClosed(con);});
         m_connections.insert(con);
-        std::cout<<"new connection: "<<con->ToString()<<std::endl;
+        lllog(5)<<"Server: new connection added: "<<con->ToString().c_str()<<std::endl;
         PrintConnections();
     });
 
@@ -72,8 +67,7 @@ void WebsocketServer::Run()
     // Start the server accept loop
     m_server.start_accept();
 
-    std::cout<<"Running ws server on port "<<ws::Parameters::Port()<<std::endl;
-
+    lllog(5)<<"Running ws server on port "<<ws::Parameters::Port()<<std::endl;
 }
 
 void WebsocketServer::Terminate()
@@ -82,7 +76,7 @@ void WebsocketServer::Terminate()
     //according to https://github.com/zaphoyd/websocketpp/issues/498
     //Cant figure out how to disable the info logging
 
-    std::cout<<"safir_websocket is stopping..."<<std::endl;
+    lllog(5)<<"safir_websocket is starting to shut down..."<<std::endl;
     m_server.stop_listening();
     for (auto& con : m_connections)
     {
@@ -97,7 +91,7 @@ void WebsocketServer::Terminate()
     m_work.reset();
     m_ioService.stop();
 
-    std::cout<<"soon we should stop..."<<std::endl;
+    lllog(5)<<"all connections closed..."<<std::endl;
 }
 
 void WebsocketServer::OnConnectionClosed(const RemoteClient* con)
@@ -106,12 +100,12 @@ void WebsocketServer::OnConnectionClosed(const RemoteClient* con)
 
     if (it!=m_connections.end())
     {
-        std::cout<<"Connection closed: "<<con->ToString()<<std::endl;
+        lllog(5)<<"Connection closed: "<<con->ToString().c_str()<<std::endl;
         m_connections.erase(it);
     }
     else
     {
-        std::cout<<"Server closed con not found"<<std::endl;
+        lllog(5)<<"Cllosed connection was not found."<<std::endl;
     }
 
     PrintConnections();
@@ -124,10 +118,10 @@ void WebsocketServer::OnStopOrder()
 
 void WebsocketServer::PrintConnections() const
 {
-    std::cout<<"Connections\n-----------"<<std::endl;
+    lllog(5)<<"----- Connections -----"<<std::endl;
     for (auto con : m_connections)
     {
-        std::cout<<con->ToString()<<std::endl;
+        lllog(5)<<con->ToString().c_str()<<std::endl;
     }
 }
 

@@ -233,6 +233,23 @@ int main(int argc, char* argv[]) {
                          "{\"jsonrpc\":\"2.0\",\"result\":\"OK\",\"id\":\"delEnt\"}",
                          "{\"jsonrpc\":\"2.0\",\"method\":\"onDeletedEntity\",\"params\":{\"instanceId\":1,\"entity\":{\"_DouType\":\"Safir.Control.Status\",\"NodeId\":1,\"SystemIncarnation\":2}}}"));
 
+    //service request
+    items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"subscribeRegistration\", \"params\":{\"typeId\":\"Safir.Control.Command\"}, \"id\":\"subReg\"}",
+                         "{\"jsonrpc\":\"2.0\",\"result\":\"OK\",\"id\":\"subReg\"}",
+                         ""));
+
+    items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"registerServiceHandler\", \"params\":{\"typeId\":\"Safir.Control.Command\", \"handlerId\":1}, \"id\":\"regSrv\"}",
+                         "{\"jsonrpc\":\"2.0\",\"result\":\"OK\",\"id\":\"regSrv\"}",
+                         "{\"jsonrpc\":\"2.0\",\"method\":\"onRegistered\",\"params\":{\"typeId\":\"Safir.Control.Command\",\"handlerId\":1}}"));
+
+    items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"serviceRequest\", \"params\":{\"handlerId\":1,\"request\":{\"_DouType\":\"Safir.Control.Command\",\"Operation\":\"Shutdown\",\"NodeId\":1}}, \"id\":\"service\"}",
+                         "",
+                         "{\"jsonrpc\":\"2.0\",\"method\":\"onServiceRequest\",\"params\":{\"handlerId\":1,\"request\":{\"_DouType\":\"Safir.Control.Command\",\"Operation\":\"Shutdown\",\"NodeId\":1}},\"id\":4}"));
+
+    items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"result\":{\"_DouType\":\"Safir.Dob.ErrorResponse\",\"Code\":\"Oh no\",\"AdditionalInfo\":\"I will not\"}, \"id\":4}",
+                         "{\"jsonrpc\":\"2.0\",\"result\":{\"isSuccess\":false,\"response\":{\"_DouType\":\"Safir.Dob.ErrorResponse\",\"Code\":\"Oh no\",\"AdditionalInfo\":\"I will not\"}},\"id\":\"service\"}",
+                         ""));
+
     std::cout<<"Starting client..."<<std::endl;
     // Create a client endpoint
     client c;

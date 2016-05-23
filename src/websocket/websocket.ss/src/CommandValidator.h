@@ -89,6 +89,15 @@ namespace CommandValidator
             throw RequestErrorException("Not allowed to specify both pending and injectionHandler for the same registration. is mandatory in command 'RegisterEntityHandler'", RequestErrorException::InvalidParams);
     }
 
+    inline void ValidateRegisterServiceHandler(const JsonRpcRequest& req)
+    {
+        if (!req.HasTypeId())
+            throw RequestErrorException("typeId is mandatory in command 'RegisterServiceHandler'", RequestErrorException::InvalidParams);
+
+        if (!Safir::Dob::Typesystem::Operations::IsOfType(req.TypeId(), Safir::Dob::Service::ClassTypeId))
+            throw RequestErrorException("typeId must refer to a subtype of Safir.Dob.Service in command 'RegisterServiceHandler'", RequestErrorException::InvalidParams);
+    }
+
     inline void ValidateUnregisterHandler(const JsonRpcRequest& req)
     {
         if (!req.HasTypeId())

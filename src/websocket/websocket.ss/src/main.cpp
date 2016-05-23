@@ -25,21 +25,20 @@
 #include <algorithm>
 #include <boost/thread.hpp>
 #include <thread>
+#include <Safir/Application/CrashReporter.h>
 #include "WebsocketServer.h"
 
-#include <Safir/Dob/Typesystem/Serialization.h>
-
-#include "Typesystem.h"
-#include <Safir/Dob/Typesystem/ToolSupport/Serialization.h>
-
 int main(int /*argc*/, const char** /*argv*/)
-{    
+{
+    Safir::Application::ScopedCrashReporter scopedStartStop;
+
+    lllog(5)<<"safir_websocket started"<<std::endl;
+
     boost::asio::io_service ioService;
     WebsocketServer ws(ioService);
     ioService.post([&]{ws.Run();});
     boost::thread_group threads;
     auto numberOfThreads=std::max(static_cast<unsigned int>(3), boost::thread::hardware_concurrency());
-    numberOfThreads=1; //TODO: remove
     for (unsigned int i=0; i<numberOfThreads; ++i)
     {
         threads.create_thread([&]{ioService.run();});
@@ -47,20 +46,15 @@ int main(int /*argc*/, const char** /*argv*/)
 
     threads.join_all();
 
-    std::cout<<"WebsocketServer stopped"<<std::endl;
+    lllog(5)<<"safir_websocket stopped"<<std::endl;
 
     return 0;
 }
 
 
-// TODO
+// TÅDO
 // ------
-// requests
-// logging
 // send only if id
-// breakpad
-
-
 // batch
 // dob-object with stats
 // max connections

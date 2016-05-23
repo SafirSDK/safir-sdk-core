@@ -90,6 +90,7 @@ private:
     void WsSubscribeEntity(const JsonRpcRequest& req);
     void WsUnsubscribeEntity(const JsonRpcRequest& req);
     void WsRegisterEntityHandler(const JsonRpcRequest& req);
+    void WsRegisterServiceHandler(const JsonRpcRequest& req);
     void WsUnregisterHandler(const JsonRpcRequest& req);
 
     void WsSubscribeRegistration(const JsonRpcRequest& req);
