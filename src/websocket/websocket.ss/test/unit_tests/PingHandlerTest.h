@@ -37,7 +37,7 @@ public:
     }
 
 private:
-    const int interval=1;
+    static const int interval=1;
     boost::asio::io_service m_ioService;
     boost::shared_ptr<boost::asio::io_service::work> m_work;
     boost::chrono::steady_clock::time_point m_pingTime;
