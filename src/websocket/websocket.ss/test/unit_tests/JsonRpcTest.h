@@ -339,7 +339,10 @@ inline void JsonRpcTest()
     {
         //string array
         //------------
-        std::vector<std::string> v={"a","b","c"};
+        std::vector<std::string> v;
+        v.push_back("a");
+        v.push_back("b");
+        v.push_back("c");
         auto json = JsonRpcResponse::QuotedArray(JsonRpcId("Mr Donk"), v);
         CHECK(json=="{\"jsonrpc\":\"2.0\",\"result\":[\"a\",\"b\",\"c\"],\"id\":\"Mr Donk\"}");
         v.clear();
@@ -349,7 +352,10 @@ inline void JsonRpcTest()
     {
         //int array
         //------------
-        std::vector<int> v={1,2,3};
+        std::vector<int> v;
+        v.push_back(1);
+        v.push_back(2);
+        v.push_back(3);
         auto json = JsonRpcResponse::UnquotedArray(JsonRpcId("Mr Donk"), v);
         CHECK(json=="{\"jsonrpc\":\"2.0\",\"result\":[1,2,3],\"id\":\"Mr Donk\"}");
         v.clear();
@@ -359,7 +365,9 @@ inline void JsonRpcTest()
     {
         //instanceId array
         //------------
-        std::vector<ts::InstanceId> v={ts::InstanceId(1), ts::InstanceId(L"id2")};
+        std::vector<ts::InstanceId> v;
+        v.push_back(ts::InstanceId(1));
+        v.push_back(ts::InstanceId(L"id2"));
         auto json = JsonRpcResponse::UnquotedArray(JsonRpcId("Mr Donk"), v);
         CHECK(json=="{\"jsonrpc\":\"2.0\",\"result\":[1,\"id2\"],\"id\":\"Mr Donk\"}");
         v.clear();
