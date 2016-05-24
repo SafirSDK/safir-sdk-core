@@ -89,9 +89,9 @@ void WebsocketServer::Terminate()
 
     lllog(5)<<"safir_websocket is starting to shut down..."<<std::endl;
     m_server.stop_listening();
-    for (auto& con : m_connections)
+    for (auto it = m_connections.begin(); it != m_connections.end(); ++it)
     {
-        con->Close();
+        (*it)->Close();
     }
 
     if (m_dobConnection.IsOpen())
@@ -130,9 +130,9 @@ void WebsocketServer::OnStopOrder()
 void WebsocketServer::PrintConnections() const
 {
     lllog(5)<<"----- Connections -----"<<std::endl;
-    for (auto con : m_connections)
+    for (auto it = m_connections.begin(); it != m_connections.end(); ++it)
     {
-        lllog(5)<<con->ToString().c_str()<<std::endl;
+        lllog(5)<<(*it)->ToString().c_str()<<std::endl;
     }
 }
 
