@@ -78,12 +78,12 @@ namespace ToolSupport
 
     typedef boost::shared_ptr<ElementParserBase> ElementParserBasePtr;
     typedef std::vector<ElementParserBasePtr> ElementParserBaseVector;
-    
+
     //----------------------------------------------------------------------------
     // Instantiator class. Instantiates a complete ElementTree based on typelists.
     // See definitions in ElementParserDefs.
     //----------------------------------------------------------------------------
-    template < class ElementTypeVector, int Index > 
+    template < class ElementTypeVector, int Index >
     struct ElementInstantiator
     {
         typedef typename boost::mpl::at< ElementTypeVector, boost::mpl::int_<Index> >::type type;
@@ -125,7 +125,7 @@ namespace ToolSupport
             return os.str();
         }
 
-        virtual bool Match(const std::string& name, ParseState& state) const 
+        virtual bool Match(const std::string& name, ParseState& state) const
         {
             if (m_parser)
             {
@@ -157,13 +157,13 @@ namespace ToolSupport
             return false;
         }
 
-        virtual const std::string& Name() const 
+        virtual const std::string& Name() const
         {
             assert(m_parser);
             return m_parser->Name(); //Will crash if called before a successfull call to Match. By design.
         }
 
-        virtual void Parse(boost::property_tree::ptree& pt, ParseState& state) 
+        virtual void Parse(boost::property_tree::ptree& pt, ParseState& state)
         {
             assert(m_parser);
             m_parser->Parse(pt, state); //Will crash if called before a successfull call to Match. By design.
@@ -206,7 +206,7 @@ namespace ToolSupport
     template <class ElementT>
     class Ignore : public ElementParserBase
     {
-    public: 
+    public:
         explicit Ignore() {}
         explicit Ignore(const ElementParserBase* parent) : ElementParserBase(parent) {}
         static const std::string& ElementName(){return ElementT::Name();}
@@ -216,18 +216,18 @@ namespace ToolSupport
         virtual void Parse(boost::property_tree::ptree&, ParseState&) {}
         virtual void Reset(ParseState&) {}
     };
-    
+
     class IgnoreAny : public ElementParserBase
     {
-    public: 
+    public:
         explicit IgnoreAny() {}
-        explicit IgnoreAny(const ElementParserBase* parent) : ElementParserBase(parent) {}        
+        explicit IgnoreAny(const ElementParserBase* parent) : ElementParserBase(parent) {}
         virtual bool Match(const std::string&, ParseState&) const {return true;}
         virtual const std::string& Name() const {static std::string dummy=""; return dummy;}
         virtual void Parse(boost::property_tree::ptree&, ParseState&) {}
         virtual void Reset(ParseState&) {}
     };
- 
+
     //-------------------------------
     // Element matching algorithms
     //-------------------------------
@@ -278,11 +278,11 @@ namespace ToolSupport
         }
 
         virtual const std::string& Name() const
-        {            
+        {
             return ElementName();
         }
-        
-        virtual bool Match(const std::string& name, ParseState& /*state*/) const 
+
+        virtual bool Match(const std::string& name, ParseState& /*state*/) const
         {
             return MatchElementName(name);
         }
@@ -313,7 +313,7 @@ namespace ToolSupport
             m_used=true;
             ++m_occurrences;
             CheckOccurrence(state);
-            
+
             //Handle element data.
             m_parseAlgorithm(pt, state);
 
@@ -321,8 +321,8 @@ namespace ToolSupport
             for (boost::property_tree::ptree::iterator it=pt.begin(); it!=pt.end(); ++it)
             {
                 //it->first=ElementName, it->second=subTree
-                ElementParserBaseVector::iterator match=std::find_if( m_subElements.begin(), 
-                                                                        m_subElements.end(), 
+                ElementParserBaseVector::iterator match=std::find_if( m_subElements.begin(),
+                                                                        m_subElements.end(),
                                                                         boost::bind(&ElementParserBase::Match, _1,
                                                                                     boost::cref(it->first),
                                                                                     boost::ref(state))
@@ -351,11 +351,12 @@ namespace ToolSupport
         Algorithm m_parseAlgorithm;
 
         void CheckOccurrence(ParseState& state)
-        {            
+        {
             if (!m_occurrences)
             {
                 std::ostringstream ss;
 #ifdef _MSC_VER
+#pragma warning(push)
 #pragma warning(disable:4127) //Get rid of warning that this if-expression is constant (comparing two constants)
 #endif
                 if (m_occurrences.MinOccurrences==m_occurrences.MaxOccurrences)
@@ -367,10 +368,10 @@ namespace ToolSupport
                     ss<<"Element '"<<Name()<<"' only allowed to occur between "<<m_occurrences.MinOccurrences<<" and "<<m_occurrences.MaxOccurrences<<" times at location "<<Parent()->Path()<<". Number of occurrences="<<m_occurrences();
                 }
 #ifdef _MSC_VER
-#pragma warning(default:4127)
+#pragma warning(pop)
 #endif
                 throw ParseError("Wrong number of occurrences", ss.str(), state.currentPath, 15);
-            }            
+            }
         }
     };
 }

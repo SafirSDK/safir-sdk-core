@@ -49,6 +49,7 @@
 
 
 #ifdef _MSC_VER
+#pragma warning (push)
 #pragma warning (disable: 4127)
 #endif
 
@@ -790,5 +791,5 @@ namespace Com
 }
 
 #ifdef _MSC_VER
-#pragma warning (default: 4127)
+#pragma warning (pop)
 #endif

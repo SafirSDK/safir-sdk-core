@@ -28,6 +28,12 @@
 #include "JsonRpcResponse.h"
 #include "Methods.h"
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable:4355)
+#endif
+
+
 DobConnection::DobConnection(boost::asio::strand& strand, boost::function<void(const std::string&)> send)
     :m_con()
     ,m_dispatcher(m_con, strand)
@@ -38,6 +44,11 @@ DobConnection::DobConnection(boost::asio::strand& strand, boost::function<void(c
 {
 
 }
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
+
 
 //------------------------------------------------------
 // DOB events

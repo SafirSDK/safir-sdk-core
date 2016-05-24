@@ -25,6 +25,7 @@
 #define __DOTS_INTERNAL_SERIALIZATION_UTILS_H__
 
 #ifdef _MSC_VER
+#pragma warning(push)
 #pragma warning(disable:4127)
 #endif
 
@@ -593,7 +594,7 @@ namespace SerializationUtils
 } //end namespace Safir::Dob::Typesystem::ToolSupport::Internal
 
 #ifdef _MSC_VER
-#pragma warning(default:4127) //Get rid of warning that this if-expression is constant (comparing two constants)
+#pragma warning(pop)
 #endif
 
 #endif

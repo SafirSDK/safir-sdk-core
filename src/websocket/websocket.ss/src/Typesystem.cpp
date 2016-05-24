@@ -101,10 +101,10 @@ namespace Typesystem
             std::set<ts::TypeId> typeIds;
             rep->GetAllEnumTypeIds(typeIds);
 
-            for (auto tid : typeIds)
+            for (auto it = typeIds.begin(); it != typeIds.end(); ++it)
             {
                 EnumTypePtr et=EnumType::Create();
-                const sup::EnumDescription* ed=rep->GetEnum(tid);
+                const sup::EnumDescription* ed=rep->GetEnum(*it);
                 //et->Summary()=Wstr(ed->Summary());
                 et->Name()=Wstr(ed->GetName());
                 et->SourceFile()=Wstr(ed->FileName());

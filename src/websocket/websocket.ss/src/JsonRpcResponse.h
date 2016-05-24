@@ -73,15 +73,15 @@ public:
     {
         std::ostringstream os;
         os<<"{"<<SAFIR_WS_STR("jsonrpc","2.0")<<","<<SAFIR_WS_QUOTE("result")<<":[";
-        auto coma=false;
-        for (auto& val : array)
+        auto comma=false;
+        for (auto it = array.begin(); it != array.end(); ++it)
         {
-            if (coma)
-                os<<","<<SAFIR_WS_QUOTE(val);
+            if (comma)
+                os<<","<<SAFIR_WS_QUOTE(*it);
             else
-                os<<SAFIR_WS_QUOTE(val);
+                os<<SAFIR_WS_QUOTE(*it);
 
-            coma=true;
+            comma=true;
         }
         os<<"],"<<id<<"}";
         return std::move(os.str());
@@ -92,15 +92,19 @@ public:
     {
         std::ostringstream os;
         os<<"{"<<SAFIR_WS_STR("jsonrpc","2.0")<<","<<SAFIR_WS_QUOTE("result")<<":[";
-        auto coma=false;
-        for (auto& val : array)
+        auto comma=false;
+        for (auto it = array.begin(); it != array.end(); ++it)
         {
-            if (coma)
-                os<<","<<val;
+            if (comma)
+            {
+                os<<","<<*it;
+            }
             else
-                os<<val;
+            {
+                os<<*it;
+            }
 
-            coma=true;
+            comma=true;
         }
         os<<"],"<<id<<"}";
         return std::move(os.str());

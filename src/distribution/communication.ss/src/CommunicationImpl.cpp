@@ -39,6 +39,7 @@ namespace Internal
 namespace Com
 {
 #ifdef _MSC_VER
+#pragma warning (push)
 #pragma warning (disable: 4355)
 #endif
     CommunicationImpl::CommunicationImpl(boost::asio::io_service& ioService,
@@ -89,14 +90,14 @@ namespace Com
         lllog(1)<<L"COM:     using multicast: "<<std::boolalpha<<myNodeType->UseMulticast()<<std::dec<<std::endl;
         lllog(1)<<L"COM: -------------------------------------------------"<<std::endl;
 
-    #ifdef COM_USE_UNRELIABLE_SEND_POLICY
+#ifdef COM_USE_UNRELIABLE_SEND_POLICY
         lllog(1)<<L"*** COM_USE_UNRELIABLE_SEND_POLICY IS DEFINED ***"<<std::endl;
         std::wcout<<L"*** COM_USE_UNRELIABLE_SEND_POLICY IS DEFINED ***"<<std::endl;
-    #endif
+#endif
     }
-    #ifdef _MSC_VER
-    #pragma warning (default: 4355)
-    #endif
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
 
     CommunicationImpl::~CommunicationImpl()
     {

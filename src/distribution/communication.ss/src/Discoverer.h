@@ -57,6 +57,7 @@ namespace Com
     public:
 
 #ifdef _MSC_VER
+#pragma warning (push)
 #pragma warning (disable: 4355)
 #endif
         DiscovererBasic(boost::asio::io_service& ioService,
@@ -78,7 +79,7 @@ namespace Com
         {
         }
 #ifdef _MSC_VER
-#pragma warning (default: 4355)
+#pragma warning (pop)
 #endif
 
         void Start()

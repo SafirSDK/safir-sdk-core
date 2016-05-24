@@ -30,6 +30,11 @@
 #include "Methods.h"
 #include "JsonRpcRequest.h"
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable:4355)
+#endif
+
 RemoteClient::RemoteClient(WsServer& server,
                            boost::asio::io_service& ioService,
                            websocketpp::connection_hdl& connectionHandle,
@@ -47,6 +52,10 @@ RemoteClient::RemoteClient(WsServer& server,
 
     m_pingHandler.Start();
 }
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 void RemoteClient::Close()
 {
