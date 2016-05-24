@@ -164,9 +164,11 @@ void DobConnection::OnUnregistered(const ts::TypeId typeId, const Safir::Dob::Ty
 void DobConnection::OnResponse(const sd::ResponseProxy responseProxy)
 {
     lllog(5)<<"OnResponse"<<std::endl;
-    auto response=JsonRpcResponse::Json(m_reqIdMapper.Get(responseProxy.GetRequestId()), m_proxyToJson.ToJson(responseProxy));
-    m_wsSend(response);
-
+    auto id=m_reqIdMapper.Get(responseProxy.GetRequestId());
+    if (!id.IsNull())
+    {
+        m_wsSend(JsonRpcResponse::Json(id, m_proxyToJson.ToJson(responseProxy)));
+    }
 }
 void DobConnection::OnNotRequestOverflow()
 {

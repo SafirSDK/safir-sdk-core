@@ -72,8 +72,16 @@ void WebsocketServer::Run()
     });
 
     //Set up listening port
-    //TODO: report error if port number is out of valid range?
-    m_server.listen(static_cast<uint16_t>(ws::Parameters::Port()));
+    int port=ws::Parameters::Port();
+    if (port<1 || port>65535)
+    {
+        lllog(5)<<"Server: invalid port number: "<<port<<std::endl;
+        SEND_SYSTEM_LOG(Error, <<"Server: invalid port number: "<<port<<std::endl);
+        std::cout<<"Invalid port number specified"<<std::endl;
+        return;
+    }
+
+    m_server.listen(static_cast<uint16_t>(port));
 
     // Start the server accept loop
     m_server.start_accept();
@@ -83,7 +91,7 @@ void WebsocketServer::Run()
 
 void WebsocketServer::Terminate()
 {
-    //At the moment websocketpp is logging info when stop_listening is called and that is normal behavious
+    //At the moment websocketpp is logging info when stop_listening is called and that is normal behaviour
     //according to https://github.com/zaphoyd/websocketpp/issues/498
     //Cant figure out how to disable the info logging
 

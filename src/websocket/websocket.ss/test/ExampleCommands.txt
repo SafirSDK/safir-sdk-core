@@ -12,3 +12,5 @@
 
 {"jsonrpc":"2.0", "method":"sendMessage", "params":{"message":{"_DouType":"Safir.Dob.Message"}}, "id":"joot"}
 
+{"jsonrpc":"2.0", "method":"readEntity", "params":{"typeId":"Safir.Dob.Entity", "instanceId":100}, "id":"joot"}
+

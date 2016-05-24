@@ -26,9 +26,9 @@
 #include <Safir/Dob/Typesystem/Defs.h>
 #include <Safir/Dob/InstanceIdPolicy.h>
 #include <Safir/Dob/Typesystem/ToolSupport/TypeUtilities.h>
-#include "rapidjson/document.h"
-#include "rapidjson/stringbuffer.h"
-#include "rapidjson/writer.h"
+#include <rapidjson/document.h>
+#include <rapidjson/stringbuffer.h>
+#include <rapidjson/writer.h>
 #include "RequestErrorException.h"
 #include "JsonRpcId.h"
 #include "JsonHelpers.h"
@@ -143,7 +143,7 @@ private:
     {
         m_doc.Parse(json.c_str());
         if (m_doc.HasParseError())
-            throw RequestErrorException("Could not parse JSON.", RequestErrorException::ParseError);
+            throw RequestErrorException(JsonRpcErrorCodes::ParseError, "Could not parse JSON.");
 
         if (m_doc.HasMember("id"))
         {
@@ -152,7 +152,7 @@ private:
             else if (m_doc["id"].IsInt64())
                 m_id=JsonRpcId(m_doc["id"].GetInt64());
             else if (!m_doc["id"].IsNull())
-                throw RequestErrorException("Id must be a string value or an integer value.", RequestErrorException::InvalidRequest);
+                throw RequestErrorException(JsonRpcErrorCodes::InvalidRequest, "Id must be a string value or an integer value.");
         }
     }
 
@@ -178,27 +178,27 @@ private:
     inline void ValidateInternal() const
     {
         if (!m_doc.HasMember("jsonrpc"))
-            throw RequestErrorException("Missing jsonrpc version.", RequestErrorException::InvalidRequest);
+            throw RequestErrorException(JsonRpcErrorCodes::InvalidRequest, "Missing jsonrpc version.");
 
         if (m_doc["jsonrpc"]!="2.0")
-            throw RequestErrorException("JSON-RPC version is not supported.", RequestErrorException::InvalidRequest);
+            throw RequestErrorException(JsonRpcErrorCodes::InvalidRequest, "JSON-RPC version is not supported.");
 
         //If this is actually a response and not a request, validate as response instead.
         if (IsResponse())
         {
             if (!m_doc.HasMember("result"))
-                throw RequestErrorException("Response must contain the member 'result'.", RequestErrorException::InvalidParams);
+                throw RequestErrorException(JsonRpcErrorCodes::InvalidParams, "Response must contain the member 'result'.");
             if (!m_doc["result"].IsObject())
-                throw RequestErrorException("Member 'result' has wrong type. It must be an object of type Safir.Dob.Response", RequestErrorException::InvalidParams);
+                throw RequestErrorException(JsonRpcErrorCodes::InvalidParams, "Member 'result' has wrong type. It must be an object of type Safir.Dob.Response");
 
             return; //response is valid
         }
 
         if (!m_doc.HasMember("method"))
-            throw RequestErrorException("Missing method.", RequestErrorException::InvalidRequest);
+            throw RequestErrorException(JsonRpcErrorCodes::InvalidRequest, "Missing method.");
 
         if (!m_doc["method"].IsString())
-            throw RequestErrorException("Method must be a string.", RequestErrorException::InvalidRequest);
+            throw RequestErrorException(JsonRpcErrorCodes::InvalidRequest, "Method must be a string.");
 
         if (m_doc.HasMember("params"))
             m_params=&m_doc["params"];
@@ -206,61 +206,61 @@ private:
             return; //nothing more to validate, the rest is params
 
         if (m_params->HasMember("connectionName") && !(*m_params)["connectionName"].IsString())
-            throw RequestErrorException("Param 'connectionName' has wrong type.", RequestErrorException::InvalidParams);
+            throw RequestErrorException(JsonRpcErrorCodes::InvalidParams, "Param 'connectionName' has wrong type.");
 
         if (m_params->HasMember("context") && !(*m_params)["context"].IsInt())
-            throw RequestErrorException("Param 'context' has wrong type.", RequestErrorException::InvalidParams);
+            throw RequestErrorException(JsonRpcErrorCodes::InvalidParams, "Param 'context' has wrong type.");
 
         if (m_params->HasMember("typeId") && !(*m_params)["typeId"].IsString() && !(*m_params)["typeId"].IsInt64())
-            throw RequestErrorException("Param 'typeId' has wrong type.", RequestErrorException::InvalidParams);
+            throw RequestErrorException(JsonRpcErrorCodes::InvalidParams, "Param 'typeId' has wrong type.");
 
         if (m_params->HasMember("instanceId") && !(*m_params)["instanceId"].IsInt64() && !(*m_params)["instanceId"].IsString())
-            throw RequestErrorException("Param 'instanceId' has wrong type.", RequestErrorException::InvalidParams);
+            throw RequestErrorException(JsonRpcErrorCodes::InvalidParams, "Param 'instanceId' has wrong type.");
 
         if (m_params->HasMember("handlerId") && !(*m_params)["handlerId"].IsInt64() && !(*m_params)["handlerId"].IsString())
-            throw RequestErrorException("Param 'handlerId' has wrong type.", RequestErrorException::InvalidParams);
+            throw RequestErrorException(JsonRpcErrorCodes::InvalidParams, "Param 'handlerId' has wrong type.");
 
         if (m_params->HasMember("channelId") && !(*m_params)["channelId"].IsInt64() && !(*m_params)["channelId"].IsString())
-            throw RequestErrorException("Param 'channelId' has wrong type.", RequestErrorException::InvalidParams);
+            throw RequestErrorException(JsonRpcErrorCodes::InvalidParams, "Param 'channelId' has wrong type.");
 
         if (m_params->HasMember("instanceIdPolicy"))
         {
             if (!(*m_params)["instanceIdPolicy"].IsString())
-                throw RequestErrorException("Param 'instanceIdPolicy' has wrong type.", RequestErrorException::InvalidParams);
+                throw RequestErrorException(JsonRpcErrorCodes::InvalidParams, "Param 'instanceIdPolicy' has wrong type.");
 
             if ((*m_params)["instanceIdPolicy"]!="HandlerDecidesInstanceId" && (*m_params)["instanceIdPolicy"]!="RequestorDecidesInstanceId")
-                throw RequestErrorException("Param 'instanceIdPolicy' has an invalid value.", RequestErrorException::InvalidParams);
+                throw RequestErrorException(JsonRpcErrorCodes::InvalidParams, "Param 'instanceIdPolicy' has an invalid value.");
         }
 
         if (m_params->HasMember("entity") && !(*m_params)["entity"].IsObject())
-            throw RequestErrorException("Param 'entity' has wrong type.", RequestErrorException::InvalidParams);
+            throw RequestErrorException(JsonRpcErrorCodes::InvalidParams, "Param 'entity' has wrong type.");
 
         if (m_params->HasMember("message") && !(*m_params)["message"].IsObject())
-            throw RequestErrorException("Param 'message' has wrong type.", RequestErrorException::InvalidParams);
+            throw RequestErrorException(JsonRpcErrorCodes::InvalidParams, "Param 'message' has wrong type.");
 
         if (m_params->HasMember("request") && !(*m_params)["request"].IsObject())
-            throw RequestErrorException("Param 'request' has wrong type.", RequestErrorException::InvalidParams);
+            throw RequestErrorException(JsonRpcErrorCodes::InvalidParams, "Param 'request' has wrong type.");
 
         if (m_params->HasMember("response") && !(*m_params)["response"].IsObject())
-            throw RequestErrorException("Param 'response' has wrong type.", RequestErrorException::InvalidParams);
+            throw RequestErrorException(JsonRpcErrorCodes::InvalidParams, "Param 'response' has wrong type.");
 
         if (m_params->HasMember("pending") && !(*m_params)["pending"].IsBool())
-            throw RequestErrorException("Param 'pending' has wrong type.", RequestErrorException::InvalidParams);
+            throw RequestErrorException(JsonRpcErrorCodes::InvalidParams, "Param 'pending' has wrong type.");
 
         if (m_params->HasMember("injectionHandler") && !(*m_params)["injectionHandler"].IsBool())
-            throw RequestErrorException("Param 'injectionHandler' has wrong type.", RequestErrorException::InvalidParams);
+            throw RequestErrorException(JsonRpcErrorCodes::InvalidParams, "Param 'injectionHandler' has wrong type.");
 
         if (m_params->HasMember("includeChangeInfo") && !(*m_params)["includeChangeInfo"].IsBool())
-            throw RequestErrorException("Param 'includeChangeInfo' has wrong type.", RequestErrorException::InvalidParams);
+            throw RequestErrorException(JsonRpcErrorCodes::InvalidParams, "Param 'includeChangeInfo' has wrong type.");
 
         if (m_params->HasMember("includeSubclasses") && !(*m_params)["includeSubclasses"].IsBool())
-            throw RequestErrorException("Param 'includeSubclasses' has wrong type.", RequestErrorException::InvalidParams);
+            throw RequestErrorException(JsonRpcErrorCodes::InvalidParams, "Param 'includeSubclasses' has wrong type.");
 
         if (m_params->HasMember("restartSubscription") && !(*m_params)["restartSubscription"].IsBool())
-            throw RequestErrorException("Param 'restartSubscription' has wrong type.", RequestErrorException::InvalidParams);
+            throw RequestErrorException(JsonRpcErrorCodes::InvalidParams, "Param 'restartSubscription' has wrong type.");
 
         if (m_params->HasMember("includeUpdates") && !(*m_params)["includeUpdates"].IsBool())
-            throw RequestErrorException("Param 'includeUpdates' has wrong type.", RequestErrorException::InvalidParams);
+            throw RequestErrorException(JsonRpcErrorCodes::InvalidParams, "Param 'includeUpdates' has wrong type.");
 
     }
 };

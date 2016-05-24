@@ -25,30 +25,92 @@
 
 #include <string>
 
-class RequestErrorException : public std::exception
+namespace JsonRpcErrorCodes
 {
-public:
+    //JSON-RPC predefined error codes
     static const int ParseError         = -32700;
     static const int InvalidRequest     = -32600;
     static const int MethodNotFound     = -32601;
     static const int InvalidParams      = -32602;
-    static const int InternalError      = -32602;
+    static const int InternalError      = -32603;
     static const int ServerError        = -32000;
-    static const int SafirException     = -1;
 
-    RequestErrorException(const std::string& msg, int code)
-        :m_message(msg)
-        ,m_code(code)
+    //Safir defined error codes
+    static const int SafirNotOpen               = 100;
+    static const int SafirOverflow              = 101;
+    static const int SafirAccessDenied          = 102;
+    static const int SafirGhostExists           = 103;
+    static const int SafirNotFound              = 104;
+    static const int SafirUnexpectedException   = 105;
+
+    static std::string CodeToString(int code)
+    {
+        switch (code)
+        {
+        case ParseError:
+            return "Parse error";
+        case InvalidRequest:
+            return "Invalid request";
+        case MethodNotFound:
+            return "Method not found";
+        case InvalidParams:
+            return "Invalid params";
+        case InternalError:
+            return "Internal error";
+        case ServerError:
+            return "Server error";
+        case SafirNotOpen:
+            return "Not open";
+        case SafirOverflow:
+            return "Overflow";
+        case SafirAccessDenied:
+            return "Access denied";
+        case SafirGhostExists:
+            return "Ghost exists";
+        case SafirNotFound:
+            return "Not found";
+        case SafirUnexpectedException:
+            return "Unexpected Safir exception";
+        default:
+            return "Unexpected error";
+        }
+    }
+}
+
+class RequestErrorException : public std::exception
+{
+public:
+
+    RequestErrorException(int code)
+        :m_code(code)
+        ,m_message(JsonRpcErrorCodes::CodeToString(code))
+        ,m_data("")
     {
     }
 
-    const std::string& Message() const {return m_message;}
-    int Code() const {return m_code;}
+    RequestErrorException(int code, const std::string& data)
+        :m_code(code)
+        ,m_message(JsonRpcErrorCodes::CodeToString(code))
+        ,m_data(data)
+    {
+    }
+
+    RequestErrorException(int code, const std::string& message, const std::string& data)
+        :m_code(code)
+        ,m_message(message)
+        ,m_data(data)
+    {
+    }
 
     virtual const char* what () const throw () {return m_message.c_str();}
 
-private:
-    std::string m_message;
+    int Code() const {return m_code;}
+    const std::string& Message() const {return m_message;}
+    const std::string& Data() const {return m_data;}
+
+private:    
     int m_code;
+    std::string m_message;
+    std::string m_data;
 };
 

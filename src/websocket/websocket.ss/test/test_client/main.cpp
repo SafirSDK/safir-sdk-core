@@ -23,6 +23,7 @@
 ******************************************************************************/
 #include <iostream>
 #include <queue>
+#include <rapidjson/document.h>
 
 #ifdef _MSC_VER
 #pragma warning(push)
@@ -62,6 +63,13 @@ struct QueueItem
     std::string response;
     std::string notification;
 };
+
+bool IsValidJson(const std::string& str)
+{
+    rapidjson::Document doc;
+    doc.Parse(str.c_str());
+    return !doc.HasParseError();
+}
 
 int main() {
 
@@ -293,6 +301,9 @@ int main() {
         {
             std::string data = msg->get_payload();
             std::cout<<"<-- "<<data<<std::endl;
+
+            //check that all received messages are valid json
+            assert(IsValidJson(data));
 
             if (items.empty())
             {

@@ -45,7 +45,7 @@ public:
             return id;
         }
 
-        return JsonRpcId();
+        return JsonRpcId(); //not found, then return a null id
     }
 
     size_t Count() const {return m_map.size();}

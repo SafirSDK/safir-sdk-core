@@ -61,11 +61,3 @@ int main(int /*argc*/, const char** /*argv*/)
 
     return 0;
 }
-
-
-// TÅDO
-// ------
-// send only if id
-// batch
-// dob-object with stats
-// max connections

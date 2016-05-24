@@ -31,12 +31,19 @@
 class JsonRpcResponse
 {
 public:
-    static std::string Error(const JsonRpcId& id, int code, const std::string& message)
+    static std::string Error(const JsonRpcId& id, int code, const std::string& message, const std::string& data)
     {
         std::ostringstream os;
         os<<"{"<<SAFIR_WS_STR("jsonrpc","2.0")<<","
-            <<SAFIR_WS_QUOTE("error")<<":{"<<SAFIR_WS_NUM("code", code)<<","<<SAFIR_WS_STR("message", message)
-            <<"},"<<id<<"}";
+            <<SAFIR_WS_QUOTE("error")<<":{"<<SAFIR_WS_NUM("code", code)<<","<<SAFIR_WS_STR("message", message);
+
+        if (!data.empty())
+        {
+            os<<","<<SAFIR_WS_STR("data", data);
+        }
+
+        os<<"},"<<id<<"}";
+
         return std::move(os.str());
     }
 

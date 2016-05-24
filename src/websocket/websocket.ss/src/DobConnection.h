@@ -33,6 +33,11 @@
 #include <Safir/Dob/QueueParameters.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
+#include <Safir/Dob/NotOpenException.h>
+#include <Safir/Dob/OverflowException.h>
+#include <Safir/Dob/AccessDeniedException.h>
+#include <Safir/Dob/GhostExistsException.h>
+#include <Safir/Dob/NotFoundException.h>
 #include "RequestIdMapper.h"
 #include "ResponseSenderStore.h"
 #include "JsonHelpers.h"

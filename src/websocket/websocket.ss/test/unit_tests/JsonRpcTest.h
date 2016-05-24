@@ -211,7 +211,7 @@ inline void JsonRpcTest()
         }
         catch (const RequestErrorException& e)
         {
-            CHECK(e.Code()==RequestErrorException::ParseError);
+            CHECK(e.Code()==JsonRpcErrorCodes::ParseError);
         }
     }
 
@@ -227,7 +227,7 @@ inline void JsonRpcTest()
         }
         catch (const RequestErrorException& e)
         {
-            CHECK(e.Code()==RequestErrorException::InvalidRequest);
+            CHECK(e.Code()==JsonRpcErrorCodes::InvalidRequest);
         }
     }
 
@@ -243,7 +243,7 @@ inline void JsonRpcTest()
         }
         catch (const RequestErrorException& e)
         {
-            CHECK(e.Code()==RequestErrorException::InvalidRequest);
+            CHECK(e.Code()==JsonRpcErrorCodes::InvalidRequest);
         }
     }
 
@@ -259,7 +259,7 @@ inline void JsonRpcTest()
         }
         catch (const RequestErrorException& e)
         {
-            CHECK(e.Code()==RequestErrorException::InvalidRequest);
+            CHECK(e.Code()==JsonRpcErrorCodes::InvalidRequest);
         }
     }
 
@@ -295,7 +295,7 @@ inline void JsonRpcTest()
         }
         catch (const RequestErrorException& e)
         {
-            CHECK(e.Code()==RequestErrorException::InvalidParams);
+            CHECK(e.Code()==JsonRpcErrorCodes::InvalidParams);
         }
     }
 
@@ -303,13 +303,13 @@ inline void JsonRpcTest()
     {
         //error
         //----------
-        auto json = JsonRpcResponse::Error(JsonRpcId("Me"), 123, "fail");
-        CHECK(json=="{\"jsonrpc\":\"2.0\",\"error\":{\"code\":123,\"message\":\"fail\"},\"id\":\"Me\"}");
+        auto json = JsonRpcResponse::Error(JsonRpcId("Me"), 123, "msg", "data");
+        CHECK(json=="{\"jsonrpc\":\"2.0\",\"error\":{\"code\":123,\"message\":\"msg\",\"data\":\"data\"},\"id\":\"Me\"}");
     }
     {
         //error
         //----------
-        auto json = JsonRpcResponse::Error(JsonRpcId(), 123, "fail");
+        auto json = JsonRpcResponse::Error(JsonRpcId(), 123, "fail", "");
         CHECK(json=="{\"jsonrpc\":\"2.0\",\"error\":{\"code\":123,\"message\":\"fail\"},\"id\":null}");
     }
     {
