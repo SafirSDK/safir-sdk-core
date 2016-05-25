@@ -116,6 +116,7 @@ namespace Sate
         private ToolStripSeparator toolStripSeparator1;
         private ToolStripMenuItem typeIdToolStripMenuItem;
         private ToolStripMenuItem viewToolStripMenuItem;
+        private ToolStripMenuItem externalApplicationsToolStripMenuItem;
         private readonly Connection _dose = new Connection();
 
 
@@ -144,9 +145,10 @@ namespace Sate
 
 
             //-------------------------------------------------------------
-            //First of all read the parameters saved in sate_settings.xml
+            //First of all read the parameters saved in settings files
             //-------------------------------------------------------------
             Settings.Load();
+            ExternalApplicationSettings.Load();
 
             //Create Auto Reply
             if (Settings.Sate.XmlReplyObject != null) //try to load saved response
@@ -468,7 +470,7 @@ namespace Sate
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            var resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.imageList = new System.Windows.Forms.ImageList(this.components);
             this.statusBar = new System.Windows.Forms.StatusBar();
             this.bottomSplitter = new System.Windows.Forms.Splitter();
@@ -513,6 +515,7 @@ namespace Sate
             this.helpToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripSeparator();
             this.aboutSATEToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.externalApplicationsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.bottomPanel.SuspendLayout();
             this.fillPanel.SuspendLayout();
             this.fillfillpanel.SuspendLayout();
@@ -521,8 +524,7 @@ namespace Sate
             // 
             // imageList
             // 
-            this.imageList.ImageStream =
-                ((System.Windows.Forms.ImageListStreamer) (resources.GetObject("imageList.ImageStream")));
+            this.imageList.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imageList.ImageStream")));
             this.imageList.TransparentColor = System.Drawing.Color.Transparent;
             this.imageList.Images.SetKeyName(0, "");
             this.imageList.Images.SetKeyName(1, "");
@@ -629,8 +631,7 @@ namespace Sate
             // 
             this.tabControl.Appearance = System.Windows.Forms.TabAppearance.FlatButtons;
             this.tabControl.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tabControl.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F,
-                System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (0)));
+            this.tabControl.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.tabControl.ImageList = this.imageList;
             this.tabControl.Location = new System.Drawing.Point(0, 0);
             this.tabControl.Name = "tabControl";
@@ -641,13 +642,11 @@ namespace Sate
             // 
             // menuStrip1
             // 
-            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[]
-            {
-                this.connectionToolStripMenuItem,
-                this.viewToolStripMenuItem,
-                this.toolsToolStripMenuItem,
-                this.helpToolStripMenuItem
-            });
+            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.connectionToolStripMenuItem,
+            this.viewToolStripMenuItem,
+            this.toolsToolStripMenuItem,
+            this.helpToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(1160, 24);
@@ -656,27 +655,24 @@ namespace Sate
             // 
             // connectionToolStripMenuItem
             // 
-            this.connectionToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[]
-            {
-                this.connectToolStripMenuItem,
-                this.connectWithContextToolStripMenuItem,
-                this.disconnectToolStripMenuItem,
-                this.toolStripMenuItem1,
-                this.openToolStripMenuItem,
-                this.saveToolStripMenuItem,
-                this.findToolStripMenuItem,
-                this.rescentFilesToolStripMenuItem,
-                this.toolStripMenuItem4,
-                this.exitToolStripMenuItem
-            });
+            this.connectionToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.connectToolStripMenuItem,
+            this.connectWithContextToolStripMenuItem,
+            this.disconnectToolStripMenuItem,
+            this.toolStripMenuItem1,
+            this.openToolStripMenuItem,
+            this.saveToolStripMenuItem,
+            this.findToolStripMenuItem,
+            this.rescentFilesToolStripMenuItem,
+            this.toolStripMenuItem4,
+            this.exitToolStripMenuItem});
             this.connectionToolStripMenuItem.Name = "connectionToolStripMenuItem";
             this.connectionToolStripMenuItem.Size = new System.Drawing.Size(81, 20);
             this.connectionToolStripMenuItem.Text = "Connection";
             // 
             // connectToolStripMenuItem
             // 
-            this.connectToolStripMenuItem.Image =
-                ((System.Drawing.Image) (resources.GetObject("connectToolStripMenuItem.Image")));
+            this.connectToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("connectToolStripMenuItem.Image")));
             this.connectToolStripMenuItem.Name = "connectToolStripMenuItem";
             this.connectToolStripMenuItem.Size = new System.Drawing.Size(196, 22);
             this.connectToolStripMenuItem.Text = "Connect";
@@ -684,19 +680,16 @@ namespace Sate
             // 
             // connectWithContextToolStripMenuItem
             // 
-            this.connectWithContextToolStripMenuItem.Image =
-                ((System.Drawing.Image) (resources.GetObject("connectWithContextToolStripMenuItem.Image")));
+            this.connectWithContextToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("connectWithContextToolStripMenuItem.Image")));
             this.connectWithContextToolStripMenuItem.Name = "connectWithContextToolStripMenuItem";
             this.connectWithContextToolStripMenuItem.Size = new System.Drawing.Size(196, 22);
             this.connectWithContextToolStripMenuItem.Text = "Connect with context...";
-            this.connectWithContextToolStripMenuItem.Click +=
-                new System.EventHandler(this.connectWithContextToolStripMenuItem_Click);
+            this.connectWithContextToolStripMenuItem.Click += new System.EventHandler(this.connectWithContextToolStripMenuItem_Click);
             // 
             // disconnectToolStripMenuItem
             // 
             this.disconnectToolStripMenuItem.Enabled = false;
-            this.disconnectToolStripMenuItem.Image =
-                ((System.Drawing.Image) (resources.GetObject("disconnectToolStripMenuItem.Image")));
+            this.disconnectToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("disconnectToolStripMenuItem.Image")));
             this.disconnectToolStripMenuItem.Name = "disconnectToolStripMenuItem";
             this.disconnectToolStripMenuItem.Size = new System.Drawing.Size(196, 22);
             this.disconnectToolStripMenuItem.Text = "Disconnect";
@@ -709,14 +702,11 @@ namespace Sate
             // 
             // openToolStripMenuItem
             // 
-            this.openToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[]
-            {
-                this.opendoufileToolStripMenuItem,
-                this.openscenarioToolStripMenuItem,
-                this.openserializedObjectToolStripMenuItem
-            });
-            this.openToolStripMenuItem.Image =
-                ((System.Drawing.Image) (resources.GetObject("openToolStripMenuItem.Image")));
+            this.openToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.opendoufileToolStripMenuItem,
+            this.openscenarioToolStripMenuItem,
+            this.openserializedObjectToolStripMenuItem});
+            this.openToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("openToolStripMenuItem.Image")));
             this.openToolStripMenuItem.Name = "openToolStripMenuItem";
             this.openToolStripMenuItem.Size = new System.Drawing.Size(196, 22);
             this.openToolStripMenuItem.Text = "Open";
@@ -740,14 +730,12 @@ namespace Sate
             this.openserializedObjectToolStripMenuItem.Name = "openserializedObjectToolStripMenuItem";
             this.openserializedObjectToolStripMenuItem.Size = new System.Drawing.Size(168, 22);
             this.openserializedObjectToolStripMenuItem.Text = "Serialized object...";
-            this.openserializedObjectToolStripMenuItem.Click +=
-                new System.EventHandler(this.openserializedObjectToolStripMenuItem_Click);
+            this.openserializedObjectToolStripMenuItem.Click += new System.EventHandler(this.openserializedObjectToolStripMenuItem_Click);
             // 
             // saveToolStripMenuItem
             // 
             this.saveToolStripMenuItem.Enabled = false;
-            this.saveToolStripMenuItem.Image =
-                ((System.Drawing.Image) (resources.GetObject("saveToolStripMenuItem.Image")));
+            this.saveToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("saveToolStripMenuItem.Image")));
             this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
             this.saveToolStripMenuItem.Size = new System.Drawing.Size(196, 22);
             this.saveToolStripMenuItem.Text = "Save...";
@@ -756,8 +744,7 @@ namespace Sate
             // findToolStripMenuItem
             // 
             this.findToolStripMenuItem.Enabled = false;
-            this.findToolStripMenuItem.Image =
-                ((System.Drawing.Image) (resources.GetObject("findToolStripMenuItem.Image")));
+            this.findToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("findToolStripMenuItem.Image")));
             this.findToolStripMenuItem.Name = "findToolStripMenuItem";
             this.findToolStripMenuItem.Size = new System.Drawing.Size(196, 22);
             this.findToolStripMenuItem.Text = "Find...";
@@ -783,12 +770,10 @@ namespace Sate
             // 
             // viewToolStripMenuItem
             // 
-            this.viewToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[]
-            {
-                this.classExplorerToolStripMenuItem,
-                this.inboxToolStripMenuItem,
-                this.outputToolStripMenuItem
-            });
+            this.viewToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.classExplorerToolStripMenuItem,
+            this.inboxToolStripMenuItem,
+            this.outputToolStripMenuItem});
             this.viewToolStripMenuItem.Name = "viewToolStripMenuItem";
             this.viewToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
             this.viewToolStripMenuItem.Text = "View";
@@ -822,26 +807,23 @@ namespace Sate
             // 
             // toolsToolStripMenuItem
             // 
-            this.toolsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[]
-            {
-                this.calculatorsToolStripMenuItem,
-                this.scenarioPlayrecordToolStripMenuItem,
-                this.toolStripSeparator1,
-                this.runGarbageCollectorToolStripMenuItem,
-                this.toolStripMenuItem3,
-                this.settingsToolStripMenuItem
-            });
+            this.toolsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.calculatorsToolStripMenuItem,
+            this.scenarioPlayrecordToolStripMenuItem,
+            this.toolStripSeparator1,
+            this.runGarbageCollectorToolStripMenuItem,
+            this.toolStripMenuItem3,
+            this.externalApplicationsToolStripMenuItem,
+            this.settingsToolStripMenuItem});
             this.toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
-            this.toolsToolStripMenuItem.Size = new System.Drawing.Size(47, 20);
+            this.toolsToolStripMenuItem.Size = new System.Drawing.Size(48, 20);
             this.toolsToolStripMenuItem.Text = "Tools";
             // 
             // calculatorsToolStripMenuItem
             // 
-            this.calculatorsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[]
-            {
-                this.typeIdToolStripMenuItem,
-                this.timestampToolStripMenuItem
-            });
+            this.calculatorsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.typeIdToolStripMenuItem,
+            this.timestampToolStripMenuItem});
             this.calculatorsToolStripMenuItem.Image = global::Sate.Resources.TYPEIDCALC;
             this.calculatorsToolStripMenuItem.Name = "calculatorsToolStripMenuItem";
             this.calculatorsToolStripMenuItem.Size = new System.Drawing.Size(193, 22);
@@ -863,8 +845,7 @@ namespace Sate
             // 
             // scenarioPlayrecordToolStripMenuItem
             // 
-            this.scenarioPlayrecordToolStripMenuItem.Image =
-                ((System.Drawing.Image) (resources.GetObject("scenarioPlayrecordToolStripMenuItem.Image")));
+            this.scenarioPlayrecordToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("scenarioPlayrecordToolStripMenuItem.Image")));
             this.scenarioPlayrecordToolStripMenuItem.Name = "scenarioPlayrecordToolStripMenuItem";
             this.scenarioPlayrecordToolStripMenuItem.Size = new System.Drawing.Size(193, 22);
             this.scenarioPlayrecordToolStripMenuItem.Text = "Scenario play/record...";
@@ -880,8 +861,7 @@ namespace Sate
             this.runGarbageCollectorToolStripMenuItem.Name = "runGarbageCollectorToolStripMenuItem";
             this.runGarbageCollectorToolStripMenuItem.Size = new System.Drawing.Size(193, 22);
             this.runGarbageCollectorToolStripMenuItem.Text = "Run Garbage Collector";
-            this.runGarbageCollectorToolStripMenuItem.Click +=
-                new System.EventHandler(this.runGarbageCollectorToolStripMenuItem_Click);
+            this.runGarbageCollectorToolStripMenuItem.Click += new System.EventHandler(this.runGarbageCollectorToolStripMenuItem_Click);
             // 
             // toolStripMenuItem3
             // 
@@ -890,8 +870,7 @@ namespace Sate
             // 
             // settingsToolStripMenuItem
             // 
-            this.settingsToolStripMenuItem.Image =
-                ((System.Drawing.Image) (resources.GetObject("settingsToolStripMenuItem.Image")));
+            this.settingsToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("settingsToolStripMenuItem.Image")));
             this.settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
             this.settingsToolStripMenuItem.Size = new System.Drawing.Size(193, 22);
             this.settingsToolStripMenuItem.Text = "Settings...";
@@ -899,36 +878,40 @@ namespace Sate
             // 
             // helpToolStripMenuItem
             // 
-            this.helpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[]
-            {
-                this.helpToolStripMenuItem1,
-                this.toolStripMenuItem2,
-                this.aboutSATEToolStripMenuItem
-            });
+            this.helpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.helpToolStripMenuItem1,
+            this.toolStripMenuItem2,
+            this.aboutSATEToolStripMenuItem});
             this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
             this.helpToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
             this.helpToolStripMenuItem.Text = "Help";
             // 
             // helpToolStripMenuItem1
             // 
-            this.helpToolStripMenuItem1.Image =
-                ((System.Drawing.Image) (resources.GetObject("helpToolStripMenuItem1.Image")));
+            this.helpToolStripMenuItem1.Image = ((System.Drawing.Image)(resources.GetObject("helpToolStripMenuItem1.Image")));
             this.helpToolStripMenuItem1.Name = "helpToolStripMenuItem1";
-            this.helpToolStripMenuItem1.Size = new System.Drawing.Size(145, 22);
+            this.helpToolStripMenuItem1.Size = new System.Drawing.Size(146, 22);
             this.helpToolStripMenuItem1.Text = "Help...";
             // 
             // toolStripMenuItem2
             // 
             this.toolStripMenuItem2.Name = "toolStripMenuItem2";
-            this.toolStripMenuItem2.Size = new System.Drawing.Size(142, 6);
+            this.toolStripMenuItem2.Size = new System.Drawing.Size(143, 6);
             // 
             // aboutSATEToolStripMenuItem
             // 
             this.aboutSATEToolStripMenuItem.Image = global::Sate.Resources.sate_logo;
             this.aboutSATEToolStripMenuItem.Name = "aboutSATEToolStripMenuItem";
-            this.aboutSATEToolStripMenuItem.Size = new System.Drawing.Size(145, 22);
+            this.aboutSATEToolStripMenuItem.Size = new System.Drawing.Size(146, 22);
             this.aboutSATEToolStripMenuItem.Text = "About SATE...";
             this.aboutSATEToolStripMenuItem.Click += new System.EventHandler(this.aboutmenuItem_Click);
+            // 
+            // externalApplicationsToolStripMenuItem
+            // 
+            this.externalApplicationsToolStripMenuItem.Name = "externalApplicationsToolStripMenuItem";
+            this.externalApplicationsToolStripMenuItem.Size = new System.Drawing.Size(193, 22);
+            this.externalApplicationsToolStripMenuItem.Text = "External Applications...";
+            this.externalApplicationsToolStripMenuItem.Click += new System.EventHandler(this.externalApplicationsToolStripMenuItem_Click);
             // 
             // MainForm
             // 
@@ -941,7 +924,7 @@ namespace Sate
             this.Controls.Add(this.leftPanel);
             this.Controls.Add(this.statusBar);
             this.Controls.Add(this.menuStrip1);
-            this.Icon = ((System.Drawing.Icon) (resources.GetObject("$this.Icon")));
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "MainForm";
             this.Text = "SATE";
@@ -953,6 +936,7 @@ namespace Sate
             this.menuStrip1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
+
         }
 
         #endregion
@@ -975,7 +959,7 @@ namespace Sate
                 Thread.Sleep(1000);
             }
 
-            Application.Run(Instance);
+            System.Windows.Forms.Application.Run(Instance);
         }
 
         //This is executed when the MainForm is first loaded
@@ -1221,6 +1205,17 @@ namespace Sate
         {
             var sf = new SettingsForm();
             sf.ShowDialog();
+        }
+
+
+        private void externalApplicationsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var form = new ExternalApplicationSettingsForm();
+            form.ShowDialog();
+            if (form.DialogResult == DialogResult.OK)
+            {
+                ExplorerPanel.Instance.UpdateExternalProgramsSubmenu();
+            }
         }
 
         //Event handler for menu: Help -> About SATE...
@@ -1917,7 +1912,7 @@ namespace Sate
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Application.Exit();
+            System.Windows.Forms.Application.Exit();
         }
 
         private void timestampToolStripMenuItem_Click(object sender, EventArgs e)
@@ -2218,5 +2213,6 @@ namespace Sate
         }
 
         #endregion
+        
     }
 }

@@ -322,7 +322,6 @@ namespace Sate
                     using (var fs = new FileStream(FILE, FileMode.Open))
                     {
                         Sate = (SateSettings) serializer.Deserialize(fs);
-                        fs.Close();
                     }
                 }
                 else

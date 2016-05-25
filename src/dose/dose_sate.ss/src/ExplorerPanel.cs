@@ -24,7 +24,9 @@
 
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
@@ -42,44 +44,44 @@ namespace Sate
     /// </summary>
     public class ExplorerPanel : Panel
     {
-        private static TreeViewImageHandler imageHandler;
+        private static TreeViewImageHandler _imageHandler;
 
-        private static ExplorerPanel instance;
-        private readonly MenuItem changeImageMenuItem;
+        private static ExplorerPanel _instance;
+        private readonly MenuItem _changeImageMenuItem;
 
         // context menus
-        private readonly ContextMenu contextMenu;
-        private readonly MenuItem deleteRequestMenuItem;
-        private readonly MenuItem dobUnitInfoMenuItem;
-        private readonly MenuItem iterateClassMenuItem;
-        private readonly MenuItem openMenuItem;
-        private readonly MenuItem registerMenuItem;
-        private readonly MenuItem registerOptionsMenuItem;
-        private readonly MenuItem separator1MenuItem;
-        private readonly MenuItem separator2MenuItem;
-        private readonly MenuItem separator3MenuItem;
-        private readonly MenuItem subscribeMenuItem;
-        private readonly MenuItem subscribeOptionsMenuItem;
-        private readonly MenuItem subscribeRegistrationMenuItem;
-        private readonly MenuItem subscribeRegistrationOptionsMenuItem;
-        private readonly TabControl tabControl = new TabControl();
-        private readonly TabPage tabInheritance = new TabPage("Inheritance");
-        private readonly TabPage tabNamespace = new TabPage("Namespace");
-        private readonly TreeView treeViewClassHierarchy;
-        private readonly TreeView treeViewNsHierarchy;
-        private readonly MenuItem unregisterMenuItem;
-        private readonly MenuItem unsubscribeMenuItem;
-        private readonly MenuItem unsubscribeRegistrationMenuItem;
-        private readonly MenuItem viewDouFileMenuItem;
-        private Hashtable clTypeIdHt;
+        private readonly MenuItem _deleteRequestMenuItem;
+        private readonly MenuItem _dobUnitInfoMenuItem;
+        private readonly MenuItem _iterateClassMenuItem;
+        private readonly MenuItem _openMenuItem;
+        private readonly MenuItem _registerMenuItem;
+        private readonly MenuItem _registerOptionsMenuItem;
+        private readonly MenuItem _separator1MenuItem;
+        private readonly MenuItem _separator2MenuItem;
+        private readonly MenuItem _separator3MenuItem;
+        private readonly MenuItem _subscribeMenuItem;
+        private readonly MenuItem _subscribeOptionsMenuItem;
+        private readonly MenuItem _subscribeRegistrationMenuItem;
+        private readonly MenuItem _subscribeRegistrationOptionsMenuItem;
+        private readonly TabControl _tabControl = new TabControl();
+        private readonly TabPage _tabInheritance = new TabPage("Inheritance");
+        private readonly TabPage _tabNamespace = new TabPage("Namespace");
+        private readonly TreeView _treeViewClassHierarchy;
+        private readonly TreeView _treeViewNsHierarchy;
+        private readonly MenuItem _unregisterMenuItem;
+        private readonly MenuItem _unsubscribeMenuItem;
+        private readonly MenuItem _unsubscribeRegistrationMenuItem;
+        private readonly MenuItem _viewDouFileMenuItem;
+        private readonly MenuItem _openInExternalMenuItem;
+        private Hashtable _clTypeIdHt;
         private IContainer components;
-        private ImageList defaultImagesList;
-        private Hashtable dobTypeHt;
-        private Panel fillpanel;
-        private ImageList imageList;
-        private Hashtable nsHt;
-        private Hashtable nsTypeIdHt;
-        private Panel toppanel;
+        private ImageList _defaultImagesList;
+        private Hashtable _dobTypeHt;
+        private Panel _fillpanel;
+        private ImageList _imageList;
+        private Hashtable _nsHt;
+        private Hashtable _nsTypeIdHt;
+        private Panel _toppanel;
 
 
         private ExplorerPanel()
@@ -92,127 +94,131 @@ namespace Sate
             SuspendLayout();
 
             //Load images for the treeview
-            imageHandler = new TreeViewImageHandler(imageList, defaultImagesList);
-            imageHandler.RefreshImageCollection();
+            _imageHandler = new TreeViewImageHandler(_imageList, _defaultImagesList);
+            _imageHandler.RefreshImageCollection();
 
             //context menu setup
-            openMenuItem = new MenuItem("Open");
-            registerMenuItem = new MenuItem("Register handler");
-            registerOptionsMenuItem = new MenuItem("Register handler with options...");
-            unregisterMenuItem = new MenuItem("Unregister handler");
-            separator1MenuItem = new MenuItem("-");
-            subscribeMenuItem = new MenuItem("Subscribe");
-            subscribeOptionsMenuItem = new MenuItem("Subscribe with options...");
-            unsubscribeMenuItem = new MenuItem("Unsubscribe");
-            subscribeRegistrationMenuItem = new MenuItem("Subscribe for registrations");
-            subscribeRegistrationOptionsMenuItem = new MenuItem("Subscribe for registrations with options...");
-            unsubscribeRegistrationMenuItem = new MenuItem("Unsubscribe registrations");
-            separator2MenuItem = new MenuItem("-");
-            deleteRequestMenuItem = new MenuItem("Send delete request");
-            separator3MenuItem = new MenuItem("-");
-            iterateClassMenuItem = new MenuItem("Iterate class...");
-            changeImageMenuItem = new MenuItem("Change image...");
-            dobUnitInfoMenuItem = new MenuItem("View details...");
-            viewDouFileMenuItem = new MenuItem("View dou-file...");
+            _openMenuItem = new MenuItem("Open");
+            _registerMenuItem = new MenuItem("Register handler");
+            _registerOptionsMenuItem = new MenuItem("Register handler with options...");
+            _unregisterMenuItem = new MenuItem("Unregister handler");
+            _separator1MenuItem = new MenuItem("-");
+            _subscribeMenuItem = new MenuItem("Subscribe");
+            _subscribeOptionsMenuItem = new MenuItem("Subscribe with options...");
+            _unsubscribeMenuItem = new MenuItem("Unsubscribe");
+            _subscribeRegistrationMenuItem = new MenuItem("Subscribe for registrations");
+            _subscribeRegistrationOptionsMenuItem = new MenuItem("Subscribe for registrations with options...");
+            _unsubscribeRegistrationMenuItem = new MenuItem("Unsubscribe registrations");
+            _separator2MenuItem = new MenuItem("-");
+            _deleteRequestMenuItem = new MenuItem("Send delete request");
+            _separator3MenuItem = new MenuItem("-");
+            _iterateClassMenuItem = new MenuItem("Iterate class...");
+            _changeImageMenuItem = new MenuItem("Change image...");
+            _dobUnitInfoMenuItem = new MenuItem("View details...");
+            _viewDouFileMenuItem = new MenuItem("View dou-file...");
 
-            openMenuItem.Click += openMenuItem_Click;
+            _openInExternalMenuItem = new MenuItem("Open in external program");
+            UpdateExternalProgramsSubmenu();
+            _openMenuItem.Click += openMenuItem_Click;
 
-            registerMenuItem.Click += registerMenuItem_Click;
-            registerOptionsMenuItem.Click += registerOptionsMenuItem_Click;
-            unregisterMenuItem.Click += unregisterMenuItem_Click;
+            _registerMenuItem.Click += registerMenuItem_Click;
+            _registerOptionsMenuItem.Click += registerOptionsMenuItem_Click;
+            _unregisterMenuItem.Click += unregisterMenuItem_Click;
 
-            subscribeMenuItem.Click += subscribeMenuItem_Click;
-            subscribeOptionsMenuItem.Click += subscribeOptionsMenuItem_Click;
-            unsubscribeMenuItem.Click += unsubscribeMenuItem_Click;
+            _subscribeMenuItem.Click += subscribeMenuItem_Click;
+            _subscribeOptionsMenuItem.Click += subscribeOptionsMenuItem_Click;
+            _unsubscribeMenuItem.Click += unsubscribeMenuItem_Click;
 
-            subscribeRegistrationMenuItem.Click += subscribeRegistrationMenuItem_Click;
-            subscribeRegistrationOptionsMenuItem.Click += subscribeRegistrationOptionsMenuItem_Click;
-            unsubscribeRegistrationMenuItem.Click += unsubscribeRegistrationMenuItem_Click;
+            _subscribeRegistrationMenuItem.Click += subscribeRegistrationMenuItem_Click;
+            _subscribeRegistrationOptionsMenuItem.Click += subscribeRegistrationOptionsMenuItem_Click;
+            _unsubscribeRegistrationMenuItem.Click += unsubscribeRegistrationMenuItem_Click;
 
-            deleteRequestMenuItem.Click += deleteRequestMenuItem_Click;
+            _deleteRequestMenuItem.Click += deleteRequestMenuItem_Click;
 
-            iterateClassMenuItem.Click += iterateClassMenuItem_Click;
+            _iterateClassMenuItem.Click += iterateClassMenuItem_Click;
 
-            changeImageMenuItem.Click += changeImageMenuItem_Click;
-            dobUnitInfoMenuItem.Click += dobUnitInfoMenuItem_Click;
-            viewDouFileMenuItem.Click += viewDouFileMenuItem_Click;
+            _changeImageMenuItem.Click += changeImageMenuItem_Click;
+            _dobUnitInfoMenuItem.Click += dobUnitInfoMenuItem_Click;
+            _viewDouFileMenuItem.Click += viewDouFileMenuItem_Click;
 
-            contextMenu = new ContextMenu(new[]
+            var contextMenu = new ContextMenu(new[]
             {
-                openMenuItem,
-                registerMenuItem,
-                registerOptionsMenuItem,
-                unregisterMenuItem,
-                separator1MenuItem,
-                subscribeMenuItem,
-                subscribeOptionsMenuItem,
-                unsubscribeMenuItem,
-                subscribeRegistrationMenuItem,
-                subscribeRegistrationOptionsMenuItem,
-                unsubscribeRegistrationMenuItem,
-                separator2MenuItem,
-                deleteRequestMenuItem,
-                separator3MenuItem,
-                iterateClassMenuItem,
-                dobUnitInfoMenuItem,
-                viewDouFileMenuItem,
-                changeImageMenuItem
+                _openMenuItem,
+                _registerMenuItem,
+                _registerOptionsMenuItem,
+                _unregisterMenuItem,
+                _separator1MenuItem,
+                _subscribeMenuItem,
+                _subscribeOptionsMenuItem,
+                _unsubscribeMenuItem,
+                _subscribeRegistrationMenuItem,
+                _subscribeRegistrationOptionsMenuItem,
+                _unsubscribeRegistrationMenuItem,
+                _separator2MenuItem,
+                _deleteRequestMenuItem,
+                _separator3MenuItem,
+                _iterateClassMenuItem,
+                _dobUnitInfoMenuItem,
+                _viewDouFileMenuItem,
+                _openInExternalMenuItem,
+                _changeImageMenuItem
             });
 
             contextMenu.Popup += contextMenu_Popup;
 
             //treeViewClassHierarchy
-            treeViewClassHierarchy = new TreeView();
-            treeViewClassHierarchy.ContextMenu = contextMenu;
-            treeViewClassHierarchy.Location = new Point(0, 40);
-            treeViewClassHierarchy.Dock = DockStyle.Fill;
-            treeViewClassHierarchy.ImageList = imageList;
+            _treeViewClassHierarchy = new TreeView();
+            _treeViewClassHierarchy.ContextMenu = contextMenu;
+            _treeViewClassHierarchy.Location = new Point(0, 40);
+            _treeViewClassHierarchy.Dock = DockStyle.Fill;
+            _treeViewClassHierarchy.ImageList = _imageList;
 
-            treeViewClassHierarchy.DoubleClick += treeViewClassHierarchy_DoubleClick;
-            treeViewClassHierarchy.MouseDown += treeViewClassHierarchy_MouseDown;
-            treeViewClassHierarchy.ItemDrag += treeViewClassHierarchy_ItemDrag;
-            treeViewClassHierarchy.TreeViewNodeSorter = new TreeSorter();
+            _treeViewClassHierarchy.DoubleClick += treeViewClassHierarchy_DoubleClick;
+            _treeViewClassHierarchy.MouseDown += treeViewClassHierarchy_MouseDown;
+            _treeViewClassHierarchy.ItemDrag += treeViewClassHierarchy_ItemDrag;
+            _treeViewClassHierarchy.TreeViewNodeSorter = new TreeSorter();
 
             //treeViewNsHierarchy
-            treeViewNsHierarchy = new TreeView();
-            treeViewNsHierarchy.ContextMenu = contextMenu;
-            treeViewNsHierarchy.Location = new Point(0, 40);
-            treeViewNsHierarchy.Dock = DockStyle.Fill;
-            treeViewNsHierarchy.ImageList = imageList;
-            treeViewNsHierarchy.DoubleClick += treeViewNsHierarchy_DoubleClick;
-            treeViewNsHierarchy.MouseDown += treeViewNsHierarchy_MouseDown;
-            treeViewNsHierarchy.ItemDrag += treeViewNsHierarchy_ItemDrag;
-            treeViewNsHierarchy.TreeViewNodeSorter = new TreeSorter();
+            _treeViewNsHierarchy = new TreeView();
+            _treeViewNsHierarchy.ContextMenu = contextMenu;
+            _treeViewNsHierarchy.Location = new Point(0, 40);
+            _treeViewNsHierarchy.Dock = DockStyle.Fill;
+            _treeViewNsHierarchy.ImageList = _imageList;
+            _treeViewNsHierarchy.DoubleClick += treeViewNsHierarchy_DoubleClick;
+            _treeViewNsHierarchy.MouseDown += treeViewNsHierarchy_MouseDown;
+            _treeViewNsHierarchy.ItemDrag += treeViewNsHierarchy_ItemDrag;
+            _treeViewNsHierarchy.TreeViewNodeSorter = new TreeSorter();
 
             //Tabs
-            tabControl.Dock = DockStyle.Fill;
-            tabInheritance.Controls.Add(treeViewClassHierarchy);
-            tabNamespace.Controls.Add(treeViewNsHierarchy);
-            fillpanel.Controls.Add(tabControl);
-            tabControl.TabPages.AddRange(new[] {tabInheritance, tabNamespace});
+            _tabControl.Dock = DockStyle.Fill;
+            _tabInheritance.Controls.Add(_treeViewClassHierarchy);
+            _tabNamespace.Controls.Add(_treeViewNsHierarchy);
+            _fillpanel.Controls.Add(_tabControl);
+            _tabControl.TabPages.AddRange(new[] { _tabInheritance, _tabNamespace });
             if (Settings.Sate.DefaultExplorerView)
-                tabControl.SelectedIndex = 0;
+                _tabControl.SelectedIndex = 0;
             else
-                tabControl.SelectedIndex = 1;
-            tabControl.SelectedIndex = 0;
+                _tabControl.SelectedIndex = 1;
+            _tabControl.SelectedIndex = 0;
 
             //TitleBar
             var titleLabel = new PanelLabelControl("Explorer");
             titleLabel.CloseEvent += titleLabel_CloseEvent;
             titleLabel.Height = 15;
             titleLabel.Dock = DockStyle.Top;
-            toppanel.Controls.Add(titleLabel);
+            _toppanel.Controls.Add(titleLabel);
 
             ResumeLayout(false);
         }
+        
 
         public static ExplorerPanel Instance
         {
             get
             {
-                if (instance == null)
-                    instance = new ExplorerPanel();
-                return instance;
+                if (_instance == null)
+                    _instance = new ExplorerPanel();
+                return _instance;
             }
         }
 
@@ -246,7 +252,7 @@ namespace Sate
                 return;
             }
 
-            var customImageForm = new CustomImageForm(imageHandler, mappingName);
+            var customImageForm = new CustomImageForm(_imageHandler, mappingName);
             customImageForm.ShowDialog();
             if (customImageForm.IsDirty)
             {
@@ -256,21 +262,21 @@ namespace Sate
 
         private void UpdateAllImageIndices()
         {
-            imageHandler.RefreshImageCollection();
+            _imageHandler.RefreshImageCollection();
 
             //always go through every node is not the most efficient way but it's a simple
             //way to get correct image indices.
-            foreach (DictionaryEntry de in clTypeIdHt)
+            foreach (DictionaryEntry de in _clTypeIdHt)
             {
                 var tmp = de.Value as DobUnit;
-                tmp.ImageIndex = imageHandler.GetImageIndex(tmp.TypeId, tmp.ImageType);
+                tmp.ImageIndex = _imageHandler.GetImageIndex(tmp.TypeId, tmp.ImageType);
                 tmp.SelectedImageIndex = tmp.ImageIndex;
             }
 
-            foreach (DictionaryEntry de in nsTypeIdHt)
+            foreach (DictionaryEntry de in _nsTypeIdHt)
             {
                 var tmp = de.Value as DobUnit;
-                tmp.ImageIndex = imageHandler.GetImageIndex(tmp.TypeId, tmp.ImageType);
+                tmp.ImageIndex = _imageHandler.GetImageIndex(tmp.TypeId, tmp.ImageType);
                 tmp.SelectedImageIndex = tmp.ImageIndex;
             }
         }
@@ -299,10 +305,7 @@ namespace Sate
         {
             if (disposing)
             {
-                if (components != null)
-                {
-                    components.Dispose();
-                }
+                components?.Dispose();
             }
             base.Dispose(disposing);
         }
@@ -317,58 +320,58 @@ namespace Sate
         {
             this.components = new System.ComponentModel.Container();
             var resources = new System.ComponentModel.ComponentResourceManager(typeof(ExplorerPanel));
-            this.imageList = new System.Windows.Forms.ImageList(this.components);
-            this.toppanel = new System.Windows.Forms.Panel();
-            this.fillpanel = new System.Windows.Forms.Panel();
-            this.defaultImagesList = new System.Windows.Forms.ImageList(this.components);
+            this._imageList = new System.Windows.Forms.ImageList(this.components);
+            this._toppanel = new System.Windows.Forms.Panel();
+            this._fillpanel = new System.Windows.Forms.Panel();
+            this._defaultImagesList = new System.Windows.Forms.ImageList(this.components);
             this.SuspendLayout();
             //
             // imageList
             //
-            this.imageList.ColorDepth = System.Windows.Forms.ColorDepth.Depth8Bit;
-            this.imageList.ImageSize = new System.Drawing.Size(16, 16);
-            this.imageList.TransparentColor = System.Drawing.Color.Transparent;
+            this._imageList.ColorDepth = System.Windows.Forms.ColorDepth.Depth8Bit;
+            this._imageList.ImageSize = new System.Drawing.Size(16, 16);
+            this._imageList.TransparentColor = System.Drawing.Color.Transparent;
             //
             // toppanel
             //
-            this.toppanel.BackColor = System.Drawing.SystemColors.ActiveCaption;
-            this.toppanel.Dock = System.Windows.Forms.DockStyle.Top;
-            this.toppanel.Location = new System.Drawing.Point(0, 0);
-            this.toppanel.Name = "toppanel";
-            this.toppanel.Size = new System.Drawing.Size(224, 15);
-            this.toppanel.TabIndex = 0;
+            this._toppanel.BackColor = System.Drawing.SystemColors.ActiveCaption;
+            this._toppanel.Dock = System.Windows.Forms.DockStyle.Top;
+            this._toppanel.Location = new System.Drawing.Point(0, 0);
+            this._toppanel.Name = "_toppanel";
+            this._toppanel.Size = new System.Drawing.Size(224, 15);
+            this._toppanel.TabIndex = 0;
             //
             // fillpanel
             //
-            this.fillpanel.BackColor = System.Drawing.SystemColors.Control;
-            this.fillpanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.fillpanel.ForeColor = System.Drawing.SystemColors.Control;
-            this.fillpanel.Location = new System.Drawing.Point(0, 0);
-            this.fillpanel.Name = "fillpanel";
-            this.fillpanel.Padding = new System.Windows.Forms.Padding(0, 20, 0, 0);
-            this.fillpanel.Size = new System.Drawing.Size(224, 504);
-            this.fillpanel.TabIndex = 0;
+            this._fillpanel.BackColor = System.Drawing.SystemColors.Control;
+            this._fillpanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this._fillpanel.ForeColor = System.Drawing.SystemColors.Control;
+            this._fillpanel.Location = new System.Drawing.Point(0, 0);
+            this._fillpanel.Name = "_fillpanel";
+            this._fillpanel.Padding = new System.Windows.Forms.Padding(0, 20, 0, 0);
+            this._fillpanel.Size = new System.Drawing.Size(224, 504);
+            this._fillpanel.TabIndex = 0;
             //
             // defaultImagesList
             //
-            this.defaultImagesList.ImageStream =
-                ((System.Windows.Forms.ImageListStreamer) (resources.GetObject("defaultImagesList.ImageStream")));
-            this.defaultImagesList.TransparentColor = System.Drawing.Color.Transparent;
-            this.defaultImagesList.Images.SetKeyName(0, "package.bmp");
-            this.defaultImagesList.Images.SetKeyName(1, "entity_default.bmp");
-            this.defaultImagesList.Images.SetKeyName(2, "service_default.bmp");
-            this.defaultImagesList.Images.SetKeyName(3, "object_default.bmp");
-            this.defaultImagesList.Images.SetKeyName(4, "message_default.bmp");
-            this.defaultImagesList.Images.SetKeyName(5, "response.bmp");
-            this.defaultImagesList.Images.SetKeyName(6, "item.bmp");
-            this.defaultImagesList.Images.SetKeyName(7, "struct.bmp");
-            this.defaultImagesList.Images.SetKeyName(8, "parameters.bmp");
-            this.defaultImagesList.Images.SetKeyName(9, "class_default.bmp");
+            this._defaultImagesList.ImageStream =
+                ((System.Windows.Forms.ImageListStreamer) (resources.GetObject("_defaultImagesList.ImageStream")));
+            this._defaultImagesList.TransparentColor = System.Drawing.Color.Transparent;
+            this._defaultImagesList.Images.SetKeyName(0, "package.bmp");
+            this._defaultImagesList.Images.SetKeyName(1, "entity_default.bmp");
+            this._defaultImagesList.Images.SetKeyName(2, "service_default.bmp");
+            this._defaultImagesList.Images.SetKeyName(3, "object_default.bmp");
+            this._defaultImagesList.Images.SetKeyName(4, "message_default.bmp");
+            this._defaultImagesList.Images.SetKeyName(5, "response.bmp");
+            this._defaultImagesList.Images.SetKeyName(6, "item.bmp");
+            this._defaultImagesList.Images.SetKeyName(7, "struct.bmp");
+            this._defaultImagesList.Images.SetKeyName(8, "parameters.bmp");
+            this._defaultImagesList.Images.SetKeyName(9, "class_default.bmp");
             //
             // ExplorerPanel
             //
-            this.Controls.Add(this.toppanel);
-            this.Controls.Add(this.fillpanel);
+            this.Controls.Add(this._toppanel);
+            this.Controls.Add(this._fillpanel);
             this.Size = new System.Drawing.Size(224, 504);
             this.Text = "Class Explorer";
             this.ResumeLayout(false);
@@ -378,21 +381,19 @@ namespace Sate
 
         public void LoadClassHierarchy()
         {
-            treeViewClassHierarchy.BeginUpdate();
-            treeViewNsHierarchy.BeginUpdate();
+            _treeViewClassHierarchy.BeginUpdate();
+            _treeViewNsHierarchy.BeginUpdate();
 
-            treeViewClassHierarchy.Nodes.Clear();
-            treeViewNsHierarchy.Nodes.Clear();
+            _treeViewClassHierarchy.Nodes.Clear();
+            _treeViewNsHierarchy.Nodes.Clear();
 
             var objType = typeof(Object);
             var objNode = new ClassNode(objType, Object.ClassTypeId, true);
             objNode.Expand();
-            dobTypeHt = new Hashtable();
-            dobTypeHt[objType] = objNode;
-            clTypeIdHt = new Hashtable();
-            nsTypeIdHt = new Hashtable();
-            nsHt = new Hashtable();
-            clTypeIdHt[GetTypeId(objType)] = objNode;
+            _dobTypeHt = new Hashtable {[objType] = objNode};
+            _clTypeIdHt = new Hashtable {[GetTypeId(objType)] = objNode};
+            _nsTypeIdHt = new Hashtable();
+            _nsHt = new Hashtable();
 
             InsertClassInNsHierarchy(objType, Object.ClassTypeId);
             foreach (var tid in Operations.GetAllTypeIds())
@@ -405,7 +406,7 @@ namespace Sate
                 if (type.IsSubclassOf(objType))
                 {
                     ClassNode node = null;
-                    while (type != objType && dobTypeHt[type] == null)
+                    while (type != objType && _dobTypeHt[type] == null)
                     {
                         var typeId = GetTypeId(type);
                         if (node == null)
@@ -421,27 +422,27 @@ namespace Sate
 
                         InsertClassInNsHierarchy(type, typeId);
 
-                        clTypeIdHt[typeId] = node;
-                        dobTypeHt[type] = node;
+                        _clTypeIdHt[typeId] = node;
+                        _dobTypeHt[type] = node;
                         type = type.BaseType;
                     }
 
                     if (node != null)
                     {
-                        ((ClassNode) dobTypeHt[node.DobType.BaseType]).Nodes.Add(node);
+                        ((ClassNode) _dobTypeHt[node.DobType.BaseType]).Nodes.Add(node);
                     }
                 }
             }
 
-            treeViewClassHierarchy.Nodes.Add(objNode);
+            _treeViewClassHierarchy.Nodes.Add(objNode);
 
-            treeViewClassHierarchy.Sort();
-            treeViewNsHierarchy.Sort();
+            _treeViewClassHierarchy.Sort();
+            _treeViewNsHierarchy.Sort();
 
-            treeViewNsHierarchy.EndUpdate();
-            treeViewClassHierarchy.EndUpdate();
-            treeViewNsHierarchy.HideSelection = false;
-            treeViewClassHierarchy.HideSelection = false;
+            _treeViewNsHierarchy.EndUpdate();
+            _treeViewClassHierarchy.EndUpdate();
+            _treeViewNsHierarchy.HideSelection = false;
+            _treeViewClassHierarchy.HideSelection = false;
         }
 
         private void InsertNamespace(Type type)
@@ -452,7 +453,7 @@ namespace Sate
             for (var i = ns.Length - 1; i >= 0; i--)
             {
                 rest = rest.Substring(0, rest.LastIndexOf('.'));
-                if (nsHt[rest] == null)
+                if (_nsHt[rest] == null)
                 {
                     if (node == null)
                     {
@@ -464,13 +465,13 @@ namespace Sate
                         node = new NamespaceNode(ns[i], type.Namespace);
                         node.Nodes.Add(child);
                     }
-                    nsHt[rest] = node;
+                    _nsHt[rest] = node;
                 }
                 else
                 {
                     if (node != null)
                     {
-                        var parent = (NamespaceNode) nsHt[rest];
+                        var parent = (NamespaceNode) _nsHt[rest];
 
                         var inserted = false;
                         for (var nix = 0; nix < parent.Nodes.Count; nix++)
@@ -489,26 +490,26 @@ namespace Sate
                     return;
                 }
             }
-            nsHt[rest] = node;
-            treeViewNsHierarchy.Nodes.Add(node);
+            _nsHt[rest] = node;
+            _treeViewNsHierarchy.Nodes.Add(node);
         }
 
         private void InsertClassInNsHierarchy(Type type, long typeId)
         {
             InsertNamespace(type);
             var classNode = new ClassNode(type, typeId, false);
-            nsTypeIdHt[typeId] = classNode;
-            ((NamespaceNode) nsHt[type.Namespace]).Nodes.Add(classNode);
+            _nsTypeIdHt[typeId] = classNode;
+            ((NamespaceNode) _nsHt[type.Namespace]).Nodes.Add(classNode);
         }
 
         private void treeViewClassHierarchy_MouseDown(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Right)
             {
-                var clickedNode = treeViewClassHierarchy.GetNodeAt(e.X, e.Y);
+                var clickedNode = _treeViewClassHierarchy.GetNodeAt(e.X, e.Y);
                 if (clickedNode != null)
                 {
-                    treeViewClassHierarchy.SelectedNode = clickedNode;
+                    _treeViewClassHierarchy.SelectedNode = clickedNode;
                 }
             }
         }
@@ -517,9 +518,9 @@ namespace Sate
         private void treeViewClassHierarchy_DoubleClick(object sender, EventArgs e)
         {
             Cursor = Cursors.WaitCursor;
-            if (treeViewClassHierarchy.SelectedNode is ObjectNode)
+            if (_treeViewClassHierarchy.SelectedNode is ObjectNode)
             {
-                var n = (ObjectNode) treeViewClassHierarchy.SelectedNode;
+                var n = (ObjectNode) _treeViewClassHierarchy.SelectedNode;
 
                 try
                 {
@@ -537,25 +538,21 @@ namespace Sate
                 {
                 }
             }
-            else if (treeViewClassHierarchy.SelectedNode is ClassNode)
+            else if (_treeViewClassHierarchy.SelectedNode is ClassNode)
             {
-                var n = (ClassNode) treeViewClassHierarchy.SelectedNode;
-                ObjectInfo objInfo = null;
-                objInfo = new ObjectInfo();
-                if (n == treeViewClassHierarchy.Nodes[0]) //root node is object
+                var n = (ClassNode) _treeViewClassHierarchy.SelectedNode;
+                var objInfo = new ObjectInfo();
+                if (n == _treeViewClassHierarchy.Nodes[0]) //root node is object
                 {
                     objInfo.Obj = new Object();
                 }
                 else
                 {
                     var dobType = MainForm.Instance.GetType(n.TypeId);
-                    MessageInfo msgInfo = null;
-                    ServiceHandlerInfo srvInfo = null;
-                    EntityInfo entityInfo = null;
 
                     if (dobType.IsSubclassOf(typeof(Message)))
                     {
-                        msgInfo = new MessageInfo();
+                        var msgInfo = new MessageInfo();
 
                         var constr = dobType.GetConstructor(Type.EmptyTypes);
                         msgInfo.Obj = (Object) constr.Invoke(null);
@@ -564,7 +561,7 @@ namespace Sate
                     }
                     else if (dobType.IsSubclassOf(typeof(Service)))
                     {
-                        srvInfo = new ServiceHandlerInfo();
+                        var srvInfo = new ServiceHandlerInfo();
 
                         var constr = dobType.GetConstructor(Type.EmptyTypes);
                         srvInfo.Obj = (Object) constr.Invoke(null);
@@ -573,7 +570,7 @@ namespace Sate
                     }
                     else if (dobType.IsSubclassOf(typeof(Entity)))
                     {
-                        entityInfo = new EntityInfo();
+                        var entityInfo = new EntityInfo();
 
                         var constr = dobType.GetConstructor(Type.EmptyTypes);
                         entityInfo.Obj = (Object) constr.Invoke(null);
@@ -596,10 +593,10 @@ namespace Sate
         {
             if (e.Button == MouseButtons.Right)
             {
-                var clickedNode = treeViewNsHierarchy.GetNodeAt(e.X, e.Y);
+                var clickedNode = _treeViewNsHierarchy.GetNodeAt(e.X, e.Y);
                 if (clickedNode != null)
                 {
-                    treeViewNsHierarchy.SelectedNode = clickedNode;
+                    _treeViewNsHierarchy.SelectedNode = clickedNode;
                 }
             }
         }
@@ -607,9 +604,9 @@ namespace Sate
         private void treeViewNsHierarchy_DoubleClick(object sender, EventArgs e)
         {
             Cursor = Cursors.WaitCursor;
-            if (treeViewNsHierarchy.SelectedNode is ObjectNode)
+            if (_treeViewNsHierarchy.SelectedNode is ObjectNode)
             {
-                var n = (ObjectNode) treeViewNsHierarchy.SelectedNode;
+                var n = (ObjectNode) _treeViewNsHierarchy.SelectedNode;
 
                 try
                 {
@@ -627,26 +624,22 @@ namespace Sate
                 {
                 }
             }
-            else if (treeViewNsHierarchy.SelectedNode is ClassNode)
+            else if (_treeViewNsHierarchy.SelectedNode is ClassNode)
             {
-                var n = (ClassNode) treeViewNsHierarchy.SelectedNode;
-                ObjectInfo objInfo = null;
-                objInfo = new ObjectInfo();
+                var n = (ClassNode) _treeViewNsHierarchy.SelectedNode;
+                var objInfo = new ObjectInfo();
 
-                if (n == treeViewNsHierarchy.Nodes[0])
+                if (n == _treeViewNsHierarchy.Nodes[0])
                 {
                     objInfo.Obj = new Object();
                 }
                 else
                 {
                     var dobType = MainForm.Instance.GetType(n.TypeId);
-                    MessageInfo msgInfo = null;
-                    ServiceHandlerInfo srvInfo = null;
-                    EntityInfo entityInfo = null;
 
                     if (dobType.IsSubclassOf(typeof(Message)))
                     {
-                        msgInfo = new MessageInfo();
+                        var msgInfo = new MessageInfo();
 
                         var constr = dobType.GetConstructor(Type.EmptyTypes);
                         msgInfo.Obj = (Object) constr.Invoke(null);
@@ -655,7 +648,7 @@ namespace Sate
                     }
                     else if (dobType.IsSubclassOf(typeof(Service)))
                     {
-                        srvInfo = new ServiceHandlerInfo();
+                        var srvInfo = new ServiceHandlerInfo();
 
                         var constr = dobType.GetConstructor(Type.EmptyTypes);
                         srvInfo.Obj = (Object) constr.Invoke(null);
@@ -664,7 +657,7 @@ namespace Sate
                     }
                     else if (dobType.IsSubclassOf(typeof(Entity)))
                     {
-                        entityInfo = new EntityInfo();
+                        var entityInfo = new EntityInfo();
 
                         var constr = dobType.GetConstructor(Type.EmptyTypes);
                         entityInfo.Obj = (Object) constr.Invoke(null);
@@ -762,9 +755,11 @@ namespace Sate
                                 }
                             }
                         }
-                        var subInfo = new SubInfo();
-                        subInfo.typeId = typeId;
-                        subInfo.channelIdSer = new ChannelIdSerializable(channelId);
+                        var subInfo = new SubInfo
+                        {
+                            typeId = typeId,
+                            channelIdSer = new ChannelIdSerializable(channelId)
+                        };
                         SubscribeMessage(subInfo);
                         if (smf.PermanentSub)
                         {
@@ -1125,7 +1120,7 @@ namespace Sate
             {
                 MainForm.Instance.Dose.SubscribeRegistration(subRegInfo.typeId, subRegInfo.handlerIdSer.HandlerId(),
                     subRegInfo.includeSubClasses, subRegInfo.restartSubscription, MainForm.Instance);
-                SetSubscribed(subRegInfo.typeId, subRegInfo.handlerIdSer.HandlerId());
+                SetSubscribed(subRegInfo.typeId);
                 OutputPanel.Instance.LogEvent(
                     "- Subscribe for registration of " + subRegInfo.typeId + " on handler '" +
                     subRegInfo.handlerIdSer.HandlerId() + "'", true);
@@ -1233,33 +1228,34 @@ namespace Sate
 
         private TreeNode GetSelectedNode()
         {
-            if (treeViewClassHierarchy.Visible)
-                return treeViewClassHierarchy.SelectedNode;
-            if (treeViewNsHierarchy.Visible)
-                return treeViewNsHierarchy.SelectedNode;
+            if (_treeViewClassHierarchy.Visible)
+                return _treeViewClassHierarchy.SelectedNode;
+            if (_treeViewNsHierarchy.Visible)
+                return _treeViewNsHierarchy.SelectedNode;
             return null;
         }
 
         private void contextMenu_Popup(object sender, EventArgs e)
         {
-            openMenuItem.Visible = false;
-            registerMenuItem.Visible = false; //reg
-            registerOptionsMenuItem.Visible = false; //reg_inst
-            unregisterMenuItem.Visible = false; //unreg
-            separator1MenuItem.Visible = false; //sep
-            subscribeMenuItem.Visible = false; //sub
-            subscribeOptionsMenuItem.Visible = false; //sub_inst
-            unsubscribeMenuItem.Visible = false; //unsub
-            subscribeRegistrationMenuItem.Visible = false;
-            subscribeRegistrationOptionsMenuItem.Visible = false;
-            unsubscribeRegistrationMenuItem.Visible = false; //unsub reg
-            separator2MenuItem.Visible = false; //sep
-            deleteRequestMenuItem.Visible = false; //del
-            separator3MenuItem.Visible = false; //sep
-            iterateClassMenuItem.Visible = false; //dobRead
-            dobUnitInfoMenuItem.Visible = false; //info
-            viewDouFileMenuItem.Visible = false; //view
-            changeImageMenuItem.Visible = true; //image
+            _openMenuItem.Visible = false;
+            _registerMenuItem.Visible = false; //reg
+            _registerOptionsMenuItem.Visible = false; //reg_inst
+            _unregisterMenuItem.Visible = false; //unreg
+            _separator1MenuItem.Visible = false; //sep
+            _subscribeMenuItem.Visible = false; //sub
+            _subscribeOptionsMenuItem.Visible = false; //sub_inst
+            _unsubscribeMenuItem.Visible = false; //unsub
+            _subscribeRegistrationMenuItem.Visible = false;
+            _subscribeRegistrationOptionsMenuItem.Visible = false;
+            _unsubscribeRegistrationMenuItem.Visible = false; //unsub reg
+            _separator2MenuItem.Visible = false; //sep
+            _deleteRequestMenuItem.Visible = false; //del
+            _separator3MenuItem.Visible = false; //sep
+            _iterateClassMenuItem.Visible = false; //dobRead
+            _dobUnitInfoMenuItem.Visible = false; //info
+            _viewDouFileMenuItem.Visible = false; //view
+            _openInExternalMenuItem.Visible = false; //external
+            _changeImageMenuItem.Visible = true; //image
 
             var node = GetSelectedNode();
 
@@ -1267,8 +1263,9 @@ namespace Sate
             if (node is DobUnit)
             {
                 typeId = ((DobUnit) node).TypeId;
-                viewDouFileMenuItem.Visible = true;
-                openMenuItem.Visible = true;
+                _viewDouFileMenuItem.Visible = true;
+                _openInExternalMenuItem.Visible = true;
+                _openMenuItem.Visible = true;
             }
             else
             {
@@ -1278,48 +1275,48 @@ namespace Sate
             // No .dou file exists for Safir.Dob.Typesystem.Object
             if (typeId == Object.ClassTypeId)
             {
-                viewDouFileMenuItem.Visible = false;
+                _viewDouFileMenuItem.Visible = false;
             }
 
             if (Operations.IsOfType(typeId, Entity.ClassTypeId))
             {
-                registerMenuItem.Visible = true;
-                registerOptionsMenuItem.Visible = true;
-                unregisterMenuItem.Visible = true;
-                separator1MenuItem.Visible = true;
-                subscribeMenuItem.Visible = true;
-                subscribeOptionsMenuItem.Visible = true;
-                unsubscribeMenuItem.Visible = true;
-                subscribeRegistrationMenuItem.Visible = true;
-                subscribeRegistrationOptionsMenuItem.Visible = true;
-                unsubscribeRegistrationMenuItem.Visible = true;
-                separator3MenuItem.Visible = true;
-                iterateClassMenuItem.Visible = true;
+                _registerMenuItem.Visible = true;
+                _registerOptionsMenuItem.Visible = true;
+                _unregisterMenuItem.Visible = true;
+                _separator1MenuItem.Visible = true;
+                _subscribeMenuItem.Visible = true;
+                _subscribeOptionsMenuItem.Visible = true;
+                _unsubscribeMenuItem.Visible = true;
+                _subscribeRegistrationMenuItem.Visible = true;
+                _subscribeRegistrationOptionsMenuItem.Visible = true;
+                _unsubscribeRegistrationMenuItem.Visible = true;
+                _separator3MenuItem.Visible = true;
+                _iterateClassMenuItem.Visible = true;
                 if (node is ObjectNode)
                 {
-                    separator2MenuItem.Visible = true;
-                    deleteRequestMenuItem.Visible = true;
-                    iterateClassMenuItem.Visible = false;
-                    changeImageMenuItem.Visible = false;
+                    _separator2MenuItem.Visible = true;
+                    _deleteRequestMenuItem.Visible = true;
+                    _iterateClassMenuItem.Visible = false;
+                    _changeImageMenuItem.Visible = false;
                 }
             }
             else if (Operations.IsOfType(typeId, Message.ClassTypeId))
             {
-                subscribeMenuItem.Visible = true;
-                subscribeOptionsMenuItem.Visible = true;
-                unsubscribeMenuItem.Visible = true;
-                separator3MenuItem.Visible = true;
+                _subscribeMenuItem.Visible = true;
+                _subscribeOptionsMenuItem.Visible = true;
+                _unsubscribeMenuItem.Visible = true;
+                _separator3MenuItem.Visible = true;
             }
             else if (Operations.IsOfType(typeId, Service.ClassTypeId))
             {
-                registerMenuItem.Visible = true;
-                registerOptionsMenuItem.Visible = true;
-                unregisterMenuItem.Visible = true;
-                separator1MenuItem.Visible = true;
-                subscribeRegistrationMenuItem.Visible = true;
-                subscribeRegistrationOptionsMenuItem.Visible = true;
-                unsubscribeRegistrationMenuItem.Visible = true;
-                separator3MenuItem.Visible = true;
+                _registerMenuItem.Visible = true;
+                _registerOptionsMenuItem.Visible = true;
+                _unregisterMenuItem.Visible = true;
+                _separator1MenuItem.Visible = true;
+                _subscribeRegistrationMenuItem.Visible = true;
+                _subscribeRegistrationOptionsMenuItem.Visible = true;
+                _unsubscribeRegistrationMenuItem.Visible = true;
+                _separator3MenuItem.Visible = true;
             }
         }
 
@@ -1335,7 +1332,7 @@ namespace Sate
             {
                 MainForm.Instance.Dose.SubscribeMessage(subInfo.typeId, subInfo.channelIdSer.ChannelId(),
                     subInfo.includeSubClasses, MainForm.Instance);
-                SetSubscribed(subInfo.typeId, subInfo.channelIdSer.ChannelId());
+                SetSubscribed(subInfo.typeId);
                 OutputPanel.Instance.LogEvent(
                     "- Subscribe for message, " + subInfo.typeId + ", on channel '" + subInfo.channelIdSer.ChannelId() +
                     "'", true);
@@ -1416,6 +1413,66 @@ namespace Sate
             }
         }
 
+        public void UpdateExternalProgramsSubmenu()
+        {
+            var apps = new List<MenuItem>();
+            foreach (var app in ExternalApplicationSettings.Settings.Applications)
+            {
+                apps.Add(new MenuItem(app.Description + "...", openTypeExternalMenuItem_Click) { Tag = app });
+            }
+
+            _openInExternalMenuItem.MenuItems.Clear();
+            _openInExternalMenuItem.MenuItems.AddRange(apps.ToArray());
+        }
+        
+
+        private void openTypeExternalMenuItem_Click(object sender, EventArgs e)
+        {
+            var s = sender as MenuItem;
+
+            if (s == null)
+            {
+                MessageBox.Show("Something went horribly wrong!");
+                return;
+            }
+
+            var extInfo = s.Tag as Application;
+            if (extInfo == null)
+            {
+                MessageBox.Show("Something went horribly wrong! (No command configured)");
+                return;
+            }
+            var unit = GetSelectedNode() as DobUnit;
+            if (unit == null)
+            {
+                MessageBox.Show("Something went horribly wrong! (Selection is not DobUnit)");
+                return;
+            }
+            var info = new ProcessStartInfo(extInfo.Name, extInfo.Arguments);
+            var typeId = unit.TypeId;
+            info.Arguments = info.Arguments.Replace("%t", typeId.ToString());
+            info.Arguments = info.Arguments.Replace("%n", Operations.GetName(typeId));
+            info.Arguments = info.Arguments.Replace("%d", InternalOperations.GetDouFilePath(typeId));
+
+            var obj = unit as ObjectNode;
+            if (obj != null)
+            {
+                info.Arguments = info.Arguments.Replace("%i", obj.EntityId.InstanceId.ToString());
+            }
+
+            try
+            {
+                var proc = Process.Start(info);
+                if (proc == null)
+                {
+                    MessageBox.Show("Failed to run command '" + info.FileName + "'\nwith arguments '" + info.Arguments + "'");
+                }
+            }
+            catch (Exception exc)
+            {
+                MessageBox.Show("Failed to run command '" + info.FileName + "'\nwith arguments '" + info.Arguments + "'\n\n" + exc);
+            }
+        }
 
         private void openMenuItem_Click(object sender, EventArgs e)
         {
@@ -1442,8 +1499,8 @@ namespace Sate
             {
                 var n = (ClassNode) node;
                 var objInfo = new ObjectInfo();
-                if (n == treeViewClassHierarchy.Nodes[0] ||
-                    n == treeViewNsHierarchy.Nodes[0]) //root node is object
+                if (n == _treeViewClassHierarchy.Nodes[0] ||
+                    n == _treeViewNsHierarchy.Nodes[0]) //root node is object
                 {
                     objInfo.Obj = new Object();
                 }
@@ -1481,7 +1538,7 @@ namespace Sate
             var typeId = entityId.TypeId;
 
             //class hierarchy
-            var root = (ClassNode) clTypeIdHt[typeId];
+            var root = (ClassNode) _clTypeIdHt[typeId];
             for (var i = 0; i < root.Nodes.Count; i++)
             {
                 if (root.Nodes[i] is ObjectNode)
@@ -1501,7 +1558,7 @@ namespace Sate
             }
 
             //namespace hierarchy
-            root = (ClassNode) nsTypeIdHt[typeId];
+            root = (ClassNode) _nsTypeIdHt[typeId];
             for (var i = 0; i < root.Nodes.Count; i++)
             {
                 if (root.Nodes[i] is ObjectNode)
@@ -1524,7 +1581,7 @@ namespace Sate
         public void DeleteObject(EntityId entityId)
         {
             //class hierarchy
-            var root = (ClassNode) clTypeIdHt[entityId.TypeId];
+            var root = (ClassNode) _clTypeIdHt[entityId.TypeId];
             foreach (TreeNode n in root.Nodes)
             {
                 if (n is ObjectNode)
@@ -1538,12 +1595,12 @@ namespace Sate
             }
 
             //namespace hierarchy
-            root = (ClassNode) nsTypeIdHt[entityId.TypeId];
+            root = (ClassNode) _nsTypeIdHt[entityId.TypeId];
             foreach (TreeNode n in root.Nodes)
             {
                 if (n is ObjectNode)
                 {
-                    if (((ObjectNode) n).EntityId.InstanceId.ToString().CompareTo(entityId.InstanceId.ToString()) == 0)
+                    if (string.Compare(((ObjectNode) n).EntityId.InstanceId.ToString(), entityId.InstanceId.ToString(), StringComparison.Ordinal) == 0)
                     {
                         root.Nodes.Remove(n);
                         break;
@@ -1555,8 +1612,8 @@ namespace Sate
         //This application requests to be the owner, i.e pending registration
         public void SetPending(long typeId)
         {
-            var cnode = (DobUnit) clTypeIdHt[typeId];
-            var nnode = (DobUnit) nsTypeIdHt[typeId];
+            var cnode = (DobUnit) _clTypeIdHt[typeId];
+            var nnode = (DobUnit) _nsTypeIdHt[typeId];
             switch (cnode.ImageType)
             {
                 case TreeViewImageHandler.ImageType.Subscribed:
@@ -1571,8 +1628,8 @@ namespace Sate
                     nnode.ImageType = TreeViewImageHandler.ImageType.Pending;
                     break;
             }
-            cnode.ImageIndex = imageHandler.GetImageIndex(cnode.TypeId, cnode.ImageType);
-            nnode.ImageIndex = imageHandler.GetImageIndex(nnode.TypeId, nnode.ImageType);
+            cnode.ImageIndex = _imageHandler.GetImageIndex(cnode.TypeId, cnode.ImageType);
+            nnode.ImageIndex = _imageHandler.GetImageIndex(nnode.TypeId, nnode.ImageType);
             cnode.SelectedImageIndex = cnode.ImageIndex;
             nnode.SelectedImageIndex = nnode.ImageIndex;
         }
@@ -1580,8 +1637,8 @@ namespace Sate
         //This application becomes the owner
         public void SetOwned(long typeId)
         {
-            var cnode = (DobUnit) clTypeIdHt[typeId];
-            var nnode = (DobUnit) nsTypeIdHt[typeId];
+            var cnode = (DobUnit) _clTypeIdHt[typeId];
+            var nnode = (DobUnit) _nsTypeIdHt[typeId];
             switch (cnode.ImageType)
             {
                 case TreeViewImageHandler.ImageType.Subscribed:
@@ -1596,8 +1653,8 @@ namespace Sate
                     nnode.ImageType = TreeViewImageHandler.ImageType.Owned;
                     break;
             }
-            cnode.ImageIndex = imageHandler.GetImageIndex(cnode.TypeId, cnode.ImageType);
-            nnode.ImageIndex = imageHandler.GetImageIndex(nnode.TypeId, nnode.ImageType);
+            cnode.ImageIndex = _imageHandler.GetImageIndex(cnode.TypeId, cnode.ImageType);
+            nnode.ImageIndex = _imageHandler.GetImageIndex(nnode.TypeId, nnode.ImageType);
             cnode.SelectedImageIndex = cnode.ImageIndex;
             nnode.SelectedImageIndex = nnode.ImageIndex;
         }
@@ -1605,8 +1662,8 @@ namespace Sate
         //Registration received via subscription, other application
         public void SetRegistered(long typeId)
         {
-            var cnode = (DobUnit) clTypeIdHt[typeId];
-            var nnode = (DobUnit) nsTypeIdHt[typeId];
+            var cnode = (DobUnit) _clTypeIdHt[typeId];
+            var nnode = (DobUnit) _nsTypeIdHt[typeId];
             switch (cnode.ImageType)
             {
                 case TreeViewImageHandler.ImageType.Owned:
@@ -1622,16 +1679,16 @@ namespace Sate
                     nnode.ImageType = TreeViewImageHandler.ImageType.Registered;
                     break;
             }
-            cnode.ImageIndex = imageHandler.GetImageIndex(cnode.TypeId, cnode.ImageType);
-            nnode.ImageIndex = imageHandler.GetImageIndex(nnode.TypeId, nnode.ImageType);
+            cnode.ImageIndex = _imageHandler.GetImageIndex(cnode.TypeId, cnode.ImageType);
+            nnode.ImageIndex = _imageHandler.GetImageIndex(nnode.TypeId, nnode.ImageType);
             cnode.SelectedImageIndex = cnode.ImageIndex;
             nnode.SelectedImageIndex = nnode.ImageIndex;
         }
 
         public void SetUnregistered(long typeId)
         {
-            var cnode = (DobUnit) clTypeIdHt[typeId];
-            var nnode = (DobUnit) nsTypeIdHt[typeId];
+            var cnode = (DobUnit) _clTypeIdHt[typeId];
+            var nnode = (DobUnit) _nsTypeIdHt[typeId];
             switch (cnode.ImageType)
             {
                 case TreeViewImageHandler.ImageType.Subscribed:
@@ -1645,8 +1702,8 @@ namespace Sate
                     nnode.ImageType = TreeViewImageHandler.ImageType.Default;
                     break;
             }
-            cnode.ImageIndex = imageHandler.GetImageIndex(cnode.TypeId, cnode.ImageType);
-            nnode.ImageIndex = imageHandler.GetImageIndex(nnode.TypeId, nnode.ImageType);
+            cnode.ImageIndex = _imageHandler.GetImageIndex(cnode.TypeId, cnode.ImageType);
+            nnode.ImageIndex = _imageHandler.GetImageIndex(nnode.TypeId, nnode.ImageType);
             cnode.SelectedImageIndex = cnode.ImageIndex;
             nnode.SelectedImageIndex = nnode.ImageIndex;
         }
@@ -1654,8 +1711,8 @@ namespace Sate
 
         private void SetSubscribed(long typeId)
         {
-            var cnode = (DobUnit) clTypeIdHt[typeId];
-            var nnode = (DobUnit) nsTypeIdHt[typeId];
+            var cnode = (DobUnit) _clTypeIdHt[typeId];
+            var nnode = (DobUnit) _nsTypeIdHt[typeId];
             switch (cnode.ImageType)
             {
                 case TreeViewImageHandler.ImageType.Owned:
@@ -1673,97 +1730,22 @@ namespace Sate
                     nnode.ImageType = TreeViewImageHandler.ImageType.Subscribed;
                     break;
             }
-            cnode.ImageIndex = imageHandler.GetImageIndex(cnode.TypeId, cnode.ImageType);
-            nnode.ImageIndex = imageHandler.GetImageIndex(nnode.TypeId, nnode.ImageType);
+            cnode.ImageIndex = _imageHandler.GetImageIndex(cnode.TypeId, cnode.ImageType);
+            nnode.ImageIndex = _imageHandler.GetImageIndex(nnode.TypeId, nnode.ImageType);
             cnode.SelectedImageIndex = cnode.ImageIndex;
             nnode.SelectedImageIndex = nnode.ImageIndex;
         }
 
         private void SetSubscribed(EntityId entityId)
         {
-            var cnode = (DobUnit) clTypeIdHt[entityId.TypeId];
-            var nnode = (DobUnit) nsTypeIdHt[entityId.TypeId];
-            switch (cnode.ImageType)
-            {
-                case TreeViewImageHandler.ImageType.Owned:
-                case TreeViewImageHandler.ImageType.OwnedSubscribed:
-                    cnode.ImageType = TreeViewImageHandler.ImageType.OwnedSubscribed;
-                    nnode.ImageType = TreeViewImageHandler.ImageType.OwnedSubscribed;
-                    break;
-                case TreeViewImageHandler.ImageType.Registered:
-                case TreeViewImageHandler.ImageType.RegisteredSubscribed:
-                    cnode.ImageType = TreeViewImageHandler.ImageType.RegisteredSubscribed;
-                    nnode.ImageType = TreeViewImageHandler.ImageType.RegisteredSubscribed;
-                    break;
-                default:
-                    cnode.ImageType = TreeViewImageHandler.ImageType.Subscribed;
-                    nnode.ImageType = TreeViewImageHandler.ImageType.Subscribed;
-                    break;
-            }
-            cnode.ImageIndex = imageHandler.GetImageIndex(cnode.TypeId, cnode.ImageType);
-            nnode.ImageIndex = imageHandler.GetImageIndex(nnode.TypeId, nnode.ImageType);
-            cnode.SelectedImageIndex = cnode.ImageIndex;
-            nnode.SelectedImageIndex = nnode.ImageIndex;
+            SetSubscribed(entityId.TypeId);
         }
-
-        private void SetSubscribed(long typeId, ChannelId channelId)
-        {
-            var cnode = (DobUnit) clTypeIdHt[typeId];
-            var nnode = (DobUnit) nsTypeIdHt[typeId];
-            switch (cnode.ImageType)
-            {
-                case TreeViewImageHandler.ImageType.Owned:
-                case TreeViewImageHandler.ImageType.OwnedSubscribed:
-                    cnode.ImageType = TreeViewImageHandler.ImageType.OwnedSubscribed;
-                    nnode.ImageType = TreeViewImageHandler.ImageType.OwnedSubscribed;
-                    break;
-                case TreeViewImageHandler.ImageType.Registered:
-                case TreeViewImageHandler.ImageType.RegisteredSubscribed:
-                    cnode.ImageType = TreeViewImageHandler.ImageType.RegisteredSubscribed;
-                    nnode.ImageType = TreeViewImageHandler.ImageType.RegisteredSubscribed;
-                    break;
-                default:
-                    cnode.ImageType = TreeViewImageHandler.ImageType.Subscribed;
-                    nnode.ImageType = TreeViewImageHandler.ImageType.Subscribed;
-                    break;
-            }
-            cnode.ImageIndex = imageHandler.GetImageIndex(cnode.TypeId, cnode.ImageType);
-            nnode.ImageIndex = imageHandler.GetImageIndex(nnode.TypeId, nnode.ImageType);
-            cnode.SelectedImageIndex = cnode.ImageIndex;
-            nnode.SelectedImageIndex = nnode.ImageIndex;
-        }
-
-        private void SetSubscribed(long typeId, HandlerId handlerId)
-        {
-            var cnode = (DobUnit) clTypeIdHt[typeId];
-            var nnode = (DobUnit) nsTypeIdHt[typeId];
-            switch (cnode.ImageType)
-            {
-                case TreeViewImageHandler.ImageType.Owned:
-                case TreeViewImageHandler.ImageType.OwnedSubscribed:
-                    cnode.ImageType = TreeViewImageHandler.ImageType.OwnedSubscribed;
-                    nnode.ImageType = TreeViewImageHandler.ImageType.OwnedSubscribed;
-                    break;
-                case TreeViewImageHandler.ImageType.Registered:
-                case TreeViewImageHandler.ImageType.RegisteredSubscribed:
-                    cnode.ImageType = TreeViewImageHandler.ImageType.RegisteredSubscribed;
-                    nnode.ImageType = TreeViewImageHandler.ImageType.RegisteredSubscribed;
-                    break;
-                default:
-                    cnode.ImageType = TreeViewImageHandler.ImageType.Subscribed;
-                    nnode.ImageType = TreeViewImageHandler.ImageType.Subscribed;
-                    break;
-            }
-            cnode.ImageIndex = imageHandler.GetImageIndex(cnode.TypeId, cnode.ImageType);
-            nnode.ImageIndex = imageHandler.GetImageIndex(nnode.TypeId, nnode.ImageType);
-            cnode.SelectedImageIndex = cnode.ImageIndex;
-            nnode.SelectedImageIndex = nnode.ImageIndex;
-        }
+        
 
         private void SetUnsubscribed(long typeId)
         {
-            var cnode = (DobUnit) clTypeIdHt[typeId];
-            var nnode = (DobUnit) nsTypeIdHt[typeId];
+            var cnode = (DobUnit) _clTypeIdHt[typeId];
+            var nnode = (DobUnit) _nsTypeIdHt[typeId];
             switch (cnode.ImageType)
             {
                 case TreeViewImageHandler.ImageType.Owned:
@@ -1781,17 +1763,17 @@ namespace Sate
                     nnode.ImageType = TreeViewImageHandler.ImageType.Default;
                     break;
             }
-            cnode.ImageIndex = imageHandler.GetImageIndex(cnode.TypeId, cnode.ImageType);
-            nnode.ImageIndex = imageHandler.GetImageIndex(nnode.TypeId, nnode.ImageType);
+            cnode.ImageIndex = _imageHandler.GetImageIndex(cnode.TypeId, cnode.ImageType);
+            nnode.ImageIndex = _imageHandler.GetImageIndex(nnode.TypeId, nnode.ImageType);
             cnode.SelectedImageIndex = cnode.ImageIndex;
             nnode.SelectedImageIndex = nnode.ImageIndex;
         }
 
         public void LocateClass(long typeId)
         {
-            tabControl.SelectedIndex = 0;
-            treeViewClassHierarchy.Focus();
-            treeViewClassHierarchy.SelectedNode = (ClassNode) clTypeIdHt[typeId];
+            _tabControl.SelectedIndex = 0;
+            _treeViewClassHierarchy.Focus();
+            _treeViewClassHierarchy.SelectedNode = (ClassNode) _clTypeIdHt[typeId];
         }
 
 
@@ -1883,7 +1865,7 @@ namespace Sate
             {
                 FullName = fullName;
                 Text = shortName;
-                ImageIndex = imageHandler.NamespaceImageIndex;
+                ImageIndex = _imageHandler.NamespaceImageIndex;
                 SelectedImageIndex = ImageIndex;
             }
         }
@@ -1907,11 +1889,8 @@ namespace Sate
                 TypeId = typeId;
                 DobType = t;
 
-                if (fullName)
-                    Text = t.FullName;
-                else
-                    Text = t.Name;
-                ImageIndex = imageHandler.GetImageIndex(typeId, TreeViewImageHandler.ImageType.Default);
+                Text = fullName ? t.FullName : t.Name;
+                ImageIndex = _imageHandler.GetImageIndex(typeId, TreeViewImageHandler.ImageType.Default);
                 SelectedImageIndex = ImageIndex;
             }
         }
@@ -1922,7 +1901,7 @@ namespace Sate
             {
                 TypeId = entityId.TypeId;
                 EntityId = entityId;
-                ImageIndex = imageHandler.GetImageIndex(entityId, TreeViewImageHandler.ImageType.Default);
+                ImageIndex = _imageHandler.GetImageIndex(entityId, TreeViewImageHandler.ImageType.Default);
                 SelectedImageIndex = ImageIndex;
                 Text = entityId.InstanceId.ToString();
             }
@@ -1940,7 +1919,7 @@ namespace Sate
                     }
                     var n1 = (TreeNode) a;
                     var n2 = (TreeNode) b;
-                    return n1.Text.CompareTo(n2.Text);
+                    return string.Compare(n1.Text, n2.Text, StringComparison.Ordinal);
                 }
                 catch
                 {
