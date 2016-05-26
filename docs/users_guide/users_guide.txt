@@ -2789,15 +2789,76 @@ Upon receiving a stop order the application shall shut down gracefully.
 
 When an application has several connections to the Dob, only one of them should supply a StopHandler. It is the handler of this connections responsibility to tell the other parts of the application to shut down gracefully. If several connections have stop handlers there may be race conditions, since there is no guaranteed order between which stop handler gets called first.
 
-=== Websocket JSON-RPC interface
-Bla bla bla.
+=== DOB Websocket/JSON-RPC API reference
+This section contains an API reference describing all methods exposed through the Safir websocket JSON-RPC interface.
 
-- *Java*
-+
-[source,java]
+==== Methods
+This section describes all methods exposed through the DOB JSON-RPC interface.
+
+===== Method: open
+Opens a connection to the DOB.
+
+Parameters::
+ * `connectionName` - Name of my connection. Name need to be unique.
+ * `context` - Context for connection. _(0)_
+Returns::
+ * `value` - On success the string _OK_ is returned, otherwize an error is returned.
+
+Example::
 ----------------------------
-debug.println("Testing logging " + myFloat + ", " + myInt);
+--> {"jsonrpc": "2.0", "method": "open", "params": {"connectionName": "foo"}, "id": 123}
+<-- {"jsonrpc": "2.0", "result": "OK", "id": 123}
 ----------------------------
+
+===== Method: close
+Close connection to the DOB.
+
+Returns::
+ * `value` - On success the string _OK_ is returned, otherwize an error is returned.
+
+Example::
+----------------------------
+--> {"jsonrpc": "2.0", "method": "close", "id": 123}
+<-- {"jsonrpc": "2.0", "result": "OK", "id": 123}
+----------------------------
+
+===== Method: isOpen
+Check if there is an open connection to the DOB.
+
+Returns::
+ * `value` - If connected to the DOB _true_ is returned, otherwize _false_ is returned.
+
+Example::
+----------------------------
+--> {"jsonrpc": "2.0", "method": "isOpen", "id": 123}
+<-- {"jsonrpc": "2.0", "result": true, "id": 123}
+----------------------------
+
+===== Method: subscribeMessage
+Subscribe for messages.
+
+Parameters::
+ * `typeId` - Name of an existing message type.
+ * `channelId` - Channel to subscribe on. _(ALL_CHANNELS)_
+ * `includeSubclasses` - Also subscribe for all subclasses to the specified typeId. _(true)_
+Returns::
+ * `value` - On success the string _OK_ is returned.
+
+Example::
+----------------------------
+--> {"jsonrpc": "2.0", "method": "subscribeMessage", "params": {"typeId": "Safir.Dob.Message"}, "id": 123}
+<-- {"jsonrpc": "2.0", "result": "OK", "id": 123}
+----------------------------
+
+==== Notifications
+This section contains an API reference describing all methods exposed through the Safir websocket JSON-RPC interface.
+
+==== Receive and respond to requests
+This section contains an API reference describing all methods exposed through the Safir websocket JSON-RPC interface.
+
+==== Errors
+This section contains an API reference describing all methods exposed through the Safir websocket JSON-RPC interface.
+
 
 [[configuration]]
 == Configuration
