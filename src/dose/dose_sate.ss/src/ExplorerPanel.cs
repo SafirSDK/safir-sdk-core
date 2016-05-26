@@ -391,9 +391,9 @@ namespace Sate
             var objNode = new ClassNode(objType, Object.ClassTypeId, true);
             objNode.Expand();
             _dobTypeHt = new Hashtable();
-	    _dobTypeHt[objType] = objNode;
+            _dobTypeHt[objType] = objNode;
             _clTypeIdHt = new Hashtable();
-	    _clTypeIdHt[GetTypeId(objType)] = objNode;
+            _clTypeIdHt[GetTypeId(objType)] = objNode;
             _nsTypeIdHt = new Hashtable();
             _nsHt = new Hashtable();
 
