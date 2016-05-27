@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 ###############################################################################
 #
@@ -23,8 +23,10 @@
 # along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import print_function
-import subprocess, os, time, sys, shutil, random, argparse, traceback, platform, datetime, signal, random
+#import subprocess, os, time, sys, shutil, random, argparse, traceback, datetime, signal, random
+import datetime, sys, argparse, subprocess, signal, time, os, shutil
+from contextlib import closing
+from contextlib import ExitStack
 
 class Failure(Exception):
     pass
@@ -32,6 +34,7 @@ class Failure(Exception):
 def log(*args, **kwargs):
     print(datetime.datetime.now().isoformat(), ":", *args, **kwargs)
     sys.stdout.flush()
+
 
 def rmdir(directory):
     if os.path.exists(directory):
@@ -60,236 +63,196 @@ def mkdir(newdir):
         if tail:
             os.mkdir(newdir)
 
-def launch_control(number, previous, id, env, ownip, seedip, nodetype):
-    command = ("sp_test_ctrl",) + ("--name",    "Node_{0:03d}".format(number),
-                                   "--control-address", ownip + ":33{0:03d}".format(number),
-                                   "--data-address", ownip + ":43{0:03d}".format(number),
-                                   "--force-id", str(id),
-                                   "--check-incarnation",
-                                   "--node-type", str(nodetype))
-    if previous is not None:
-        command += ("--seed", seedip + ":33999")
 
-    output = open("control_{0:03d}.output.txt".format(number),"w")
-    proc = subprocess.Popen(command,
-                            stdout = output,
-                            stderr = subprocess.STDOUT,
-                            env = env,
-                            creationflags = subprocess.CREATE_NEW_PROCESS_GROUP if sys.platform == "win32" else 0)
-    return proc
-
-def launch_dose_main(number, previous, id, env, ownip, nodetype):
-    command = ("sp_test_dm",) + ("--name", "Node_{0:03d}".format(number),
-                                 "--data-address", ownip + ":43{0:03d}".format(number),
-                                 "--force-id", str(id),
-                                 "--node-type", str(nodetype))
-    if previous is not None:
-        command += ("--suicide-trigger", "Node_{0:03d}".format(previous))
-
-    output = open("main_{0:03d}.output.txt".format(number),"w")
-    proc = subprocess.Popen(command,
-                            stdout = output,
-                            stderr = subprocess.STDOUT,
-                            env = env,
-                            creationflags = subprocess.CREATE_NEW_PROCESS_GROUP if sys.platform == "win32" else 0)
-    return proc
-
-
-def launch_node(number, args):
-    id = random.getrandbits(63)
-    nt = random.randint(1,2)
-
-    previous = (number - 1) % args.total_nodes
-    seed = args.seed_ip
-    log("Launching node", number, "of node type", nt, "with previous set to", previous)
+def launch_node(master, ownip, nodetype, num_nodes, masterip = None, revolutions = None, number = None):
+    command = ["system_picture_component_test_node",]
     env = os.environ.copy()
-    env["SAFIR_INSTANCE"] = str(number+1000)
+    if master:
+        command+=("--master",
+                  "--revolutions", str(revolutions))
+    else:
+        command += ("--seed", masterip,
+                    "--number", str(number))
+        env["SAFIR_INSTANCE"] = str(number+1000)
 
-    control = launch_control(number, previous, id, env, args.own_ip, seed, nt)
-    main = launch_dose_main(number, previous, id, env, args.own_ip, nt)
-    return (number,control,main)
+    command += ("--node-type", str(nodetype),
+                "--address", ownip,
+                "--number-of-nodes", str(num_nodes))
 
-def launch_seeder(args):
-    id = random.getrandbits(63)
+    if master:
+        output = open("master.output.txt","w")
+    else:
+        output = open("slave_{0:03d}.output.txt".format(number),"w")
 
-    log("Launching seeder node")
-
-    control = launch_control(999, previous = None, id = id, env = None, ownip = args.own_ip, seedip = None, nodetype=1)
-    main = launch_dose_main(999, previous = None, id = id, env = None, ownip = args.own_ip, nodetype=1)
-    return (control,main)
-
+    proc = subprocess.Popen(command,
+                            stdout = output,
+                            stderr = subprocess.STDOUT,
+                            env = env,
+                            start_new_session=True,
+                            creationflags = subprocess.CREATE_NEW_PROCESS_GROUP if sys.platform == "win32" else 0)
+    return proc
 
 def stop(proc):
     try:
         if sys.platform == "win32":
             #can't send CTRL_C_EVENT to processes started with subprocess, unfortunately
+            #pylint: disable=E1101
             proc.send_signal(signal.CTRL_BREAK_EVENT)
         else:
             proc.terminate()
 
-        proc.wait() #comment this line to get procs killed after 30s
-        for i in range(300): #30 seconds
-            if proc.poll() is not None:
-                return
-            time.sleep(0.1)
-        proc.kill()
         proc.wait()
+
     except OSError:
         pass
 
-def stop_node(i, control, main):
-    log(" - Stopping control")
-    stop(control)
-    log(" - Stopping main")
-    stop(main)
-    if control.returncode != 0:
-        log ("CONTROL", i, "RETURN CODE",control.returncode)
-        raise Failure
-    if main.returncode != 0:
-        log ("DOSE_MAIN", i, "RETURN CODE",main.returncode)
-        raise Failure
+class MasterNode(object):
+    def __init__(self, args):
+        log("Launching master node")
+        self.node = launch_node(master = True,
+                                ownip = args.own_ip,
+                                nodetype=2,
+                                num_nodes=args.total_nodes,
+                                revolutions = args.revolutions)
+        self.returncode = None
 
-parser = argparse.ArgumentParser(description='Run a lot of test stub controls and dose_mains')
-parser.add_argument('--start',type=int,
-                    default = 0,
-                    help = "Node number of first node to start")
-parser.add_argument('--nodes', '-n', type=int,
-                    default=10,
-                    help='Number of controls to run')
-parser.add_argument('--total-nodes', type=int,
-                    default=10,
-                    help='Total number of nodes that should run (if running this script on multiple computers)')
-parser.add_argument("--revolutions", type=int,
-                    default=0,
-                    help="Number of times to restart each node. 0 means run forever")
-parser.add_argument("--own-ip",
-                    default="127.0.0.1",
-                    help="Ip adress to bind to")
-parser.add_argument("--seed-ip",
-                    default="127.0.0.1",
-                    help="Ip address of seed node")
+    def failed(self):
+        poll = self.node.poll()
+        return poll != None and poll != 0
 
-args = parser.parse_args()
+    def finished(self):
+        return self.node.poll() == 0
 
-rmdir("circular_restart_output")
-mkdir("circular_restart_output")
-os.chdir("circular_restart_output")
+    def close(self):
+        stop(self.node)
+        if self.node.returncode != 0:
+            log("Master exited with error code", self.node.returncode)
+        self.returncode = self.node.returncode
 
 
-#This relies on the fact that we're installed in the bin directory on both linux and windows.
-testdatadir = os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),".."))
-if sys.platform != "win32":
-    testdatadir = os.path.join(testdatadir, "share", "safir-sdk-core")
-testdatadir = os.path.join(testdatadir, "test_data")
+class SlaveNode(object):
+    def __init__(self, args, number):
+        self.number = number
+        log("Launching slave node", number)
+        self.node = launch_node(master = False,
+                                number = number,
+                                num_nodes = args.total_nodes,
+                                ownip = args.own_ip,
+                                masterip = args.seed_ip,
+                                nodetype= number%2 +1)
+        self.returncode = None
 
-#Set up to use our own test configuration
-os.environ["SAFIR_TEST_CONFIG_OVERRIDE"] = os.path.join(testdatadir,
-                                                        "system_picture",
-                                                        "config")
+    def failed(self):
+        poll = self.node.poll()
+        return poll != None and poll != 0
 
-os.environ["LLL_LOGDIR"] = os.path.normpath(os.path.join(os.getcwd(),"lll"))
+    def finished(self):
+        return self.node.poll() == 0
 
-seeder = launch_seeder(args) if args.start == 0 else None
+    def close(self):
+        stop(self.node)
+        if self.node.returncode != 0:
+            log("Slave", self.number, "exited with error code", self.node.returncode)
+        self.returncode = self.node.returncode
 
-nodes = list()
+class Slaves(object):
+    def __init__(self, args):
+        self.slaves = [SlaveNode(args, i) for i in range(args.start, args.start + args.nodes)]
+        self.ok = None
 
-success = False
+    def failed(self):
+        for slave in self.slaves:
+            if slave.failed():
+                log("Slave",slave.number,"has failed!")
+                return True
+        return False
 
-try:
-    log("Starting some nodes")
-    for i in range (args.start, args.start + args.nodes):
-        nodes.append(launch_node(i,args))
+    def finished(self):
+        for slave in self.slaves:
+            if slave.finished():
+                return True
+        return False
 
-    #we need to kill the first node manually, after which the circle will start running...
-    if args.start == 0:
-        log("Waiting for nodes to start up")
-        while True:
-            log("Counting nodes")
-            output = subprocess.check_output(("system_picture_listener","--one")).decode("utf-8").splitlines()
-            count = 0
-            for line in output:
-                if " Node_" in line and " D  Node_" not in line:
-                    count += 1
-            log(" found", count,"nodes")
-            if count == args.total_nodes + 1:
-                break
-            time.sleep(10)
+    def close(self):
+        self.ok = True
+        for slave in self.slaves:
+            slave.close()
+            self.ok = self.ok and slave.returncode == 0
 
-        log("Stopping node 0")
-        stop_node(*nodes[0])
+def parse_arguments():
+    parser = argparse.ArgumentParser(description='Run a lot of test stub controls and dose_mains')
+    parser.add_argument('--start',type=int,
+                        default = 0,
+                        help = "Node number of first node to start, if 0 the master will be started also")
+    parser.add_argument('--nodes', '-n', type=int,
+                        default=10,
+                        help='Number of nodes to run')
+    parser.add_argument('--total-nodes', type=int,
+                        default=10,
+                        help='Total number of nodes that should run (if running this script on multiple computers)')
+    parser.add_argument("--revolutions", type=int,
+                        default=1,
+                        help="Number of times to restart each node. 0 means run forever")
+    parser.add_argument("--own-ip",
+                        default="127.0.0.1",
+                        help="Ip adress to bind to")
+    parser.add_argument("--seed-ip",
+                        default="127.0.0.1",
+                        help="Ip address of seed node")
 
-    expected = args.start
-    revolution = 0
-    log("Expected is", expected)
-    time.sleep(10)
+    return parser.parse_args()
 
-    while True:
-        time.sleep(1.0)
-        living = list()
-        dead = list()
-        for i, control, main in nodes:
-            if control.poll() is None and main.poll() is None:
-                living.append((i,control,main))
-            else:
-                log ("Node", i, "is stopping")
-                if i != expected:
-                    log ("Unexpected node died!")
-                    expected = -1
-                    if control.poll() is not None:
-                        log("  control died with exit code", control.returncode)
-                    if main.poll() is not None:
-                        log("  main died with exit code", main.returncode)
-                else:
-                    dead.append(i)
-                    if expected == args.start:
-                        revolution += 1
-                    expected = args.start + (expected + 1) % args.nodes
-                    log("Next expected is", expected)
-                    stop_node(i, control, main)
+def main():
+    args = parse_arguments()
 
-        nodes = living
 
-        for i in dead:
-            if args.revolutions == 0 or revolution < args.revolutions:
-                log ("Restarting node",i, "in 9 seconds")
-                time.sleep(9)
-                nodes.append(launch_node(i,args))
-            else:
-                log("We've done our revolutions, not restarting node", i)
-                success = True
+    rmdir("circular_restart_output")
+    mkdir("circular_restart_output")
+    os.chdir("circular_restart_output")
 
-        if len(nodes) == 0:
-            log("No nodes running, exiting")
-            break;
-except KeyboardInterrupt:
-    pass
-except:
-    traceback.print_exc()
 
-if len(nodes) > 0:
-    log ("Killing", len(nodes), "nodes")
-for i, control, main in nodes:
+    #This relies on the fact that we're installed in the bin directory on both linux and windows.
+    testdatadir = os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),".."))
+    if sys.platform != "win32":
+        testdatadir = os.path.join(testdatadir, "share", "safir-sdk-core")
+    testdatadir = os.path.join(testdatadir, "test_data")
+
+    #Set up to use our own test configuration
+    os.environ["SAFIR_TEST_CONFIG_OVERRIDE"] = os.path.join(testdatadir,
+                                                            "system_picture",
+                                                            "config")
+
+    os.environ["LLL_LOGDIR"] = os.path.normpath(os.path.join(os.getcwd(),"lll"))
+
+    log(args)
     try:
-        stop(main)
-    except ProcessLookupError:
-        pass
-    try:
-        stop(control)
-    except ProcessLookupError:
-        pass
-if seeder is not None:
-    (control,main) = seeder
-    try:
-        stop(main)
-    except ProcessLookupError:
-        pass
-    try:
-        stop(control)
-    except ProcessLookupError:
-        pass
+        with ExitStack() as stack:
+            master = None
+            if args.start == 0:
+                master = stack.enter_context(closing(MasterNode(args)))
+            slaves = stack.enter_context(closing(Slaves(args)))
+            try:
+                while True:
+                    if (master is not None and master.failed()) or slaves.failed():
+                        log ("A process failed")
+                        break
 
-if success:
-    log("Test appears to have been successful")
-else:
-    log("Test failed")
-sys.exit(0 if success else 1)
+                    if (master is None or master.finished()) and slaves.finished():
+                        log ("All processes are finished")
+                        break
+
+                    time.sleep(1)
+            except KeyboardInterrupt:
+                log("Caught Ctrl-C, exiting")
+                raise
+        if (master is None or master.returncode == 0) and slaves.ok:
+            log("All processes returned success")
+            return 0
+        else:
+            log("Something went wrong!")
+            return 1
+    except KeyboardInterrupt:
+        pass
+    return 1
+
+sys.exit(main())

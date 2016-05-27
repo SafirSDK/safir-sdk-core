@@ -1,21 +1,13 @@
-ADD_EXECUTABLE(sp_test_ctrl sp_test_ctrl.cpp)
-ADD_EXECUTABLE(sp_test_dm sp_test_dm.cpp)
+ADD_EXECUTABLE(system_picture_component_test_node system_picture_component_test_node.cpp)
 
-TARGET_LINK_LIBRARIES(sp_test_ctrl PRIVATE
+TARGET_LINK_LIBRARIES(system_picture_component_test_node PRIVATE
   system_picture
   lluf_crash_reporter
   lluf_utils
   lluf_id
   ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
-TARGET_LINK_LIBRARIES(sp_test_dm PRIVATE
-  system_picture
-  lluf_crash_reporter
-  lluf_utils
-  lluf_id
-  ${Boost_PROGRAM_OPTIONS_LIBRARY})
-
-SAFIR_INSTALL(TARGETS sp_test_ctrl sp_test_dm COMPONENT TestSuite)
+SAFIR_INSTALL(TARGETS system_picture_component_test_node COMPONENT TestSuite)
 
 SAFIR_INSTALL_PYTHON(SCRIPT circular_restart.py
   COMPONENT TestSuite)
