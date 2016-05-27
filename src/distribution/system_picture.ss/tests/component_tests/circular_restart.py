@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 ###############################################################################
 #
@@ -23,10 +23,15 @@
 # along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-#import subprocess, os, time, sys, shutil, random, argparse, traceback, datetime, signal, random
+from __future__ import print_function
 import datetime, sys, argparse, subprocess, signal, time, os, shutil
 from contextlib import closing
-from contextlib import ExitStack
+
+try:
+    from contextlib import ExitStack
+except ImportError:
+    #pylint: disable=E0401
+    from contextlib2 import ExitStack
 
 class Failure(Exception):
     pass
@@ -88,7 +93,7 @@ def launch_node(master, ownip, nodetype, num_nodes, masterip = None, revolutions
                             stdout = output,
                             stderr = subprocess.STDOUT,
                             env = env,
-                            start_new_session=True,
+                            preexec_fn=os.setsid,
                             creationflags = subprocess.CREATE_NEW_PROCESS_GROUP if sys.platform == "win32" else 0)
     return proc
 
