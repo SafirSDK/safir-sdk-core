@@ -212,7 +212,7 @@ private:
 class Common
 {
 public:
-    Common(const ProgramOptions& options, const std::int64_t id)
+    Common(const std::int64_t id)
         : m_success(true)
         , m_work(new boost::asio::io_service::work(m_ioService))
         , m_id(id)
@@ -318,7 +318,7 @@ public:
     explicit Control(const ProgramOptions& options,
                      const std::int64_t id,
                      const std::function<void(bool restart)>& stopFcn)
-        : Common(options, id)
+        : Common(id)
         , m_strand(m_ioService)
         , m_options(options)
         , m_stopFcn(stopFcn)
@@ -578,8 +578,8 @@ public:
         return SuccessCommon();
     }
 private:
-    void DataReceived(const int64_t fromNodeId,
-                      const int64_t fromNodeType,
+    void DataReceived(const int64_t /*fromNodeId*/,
+                      const int64_t /*fromNodeType*/,
                       const char* data,
                       const size_t size)
     {
@@ -604,7 +604,7 @@ class Main: public Common
 {
 public:
     explicit Main(const ProgramOptions& options, const std::int64_t id)
-        : Common(options, id)
+        : Common(id)
         , m_strand(m_ioService)
         , m_sendTimer(m_ioService)
         , m_timerStopped(false)
@@ -726,8 +726,8 @@ private:
     std::set<int64_t> m_injectedNodes;
 
     boost::asio::steady_timer m_sendTimer;
-    std::atomic<bool> m_timerStopped;
-    std::uint64_t m_receivedBytes;
+    boost::atomic<bool> m_timerStopped;
+    uint64_t m_receivedBytes;
 };
 
 
