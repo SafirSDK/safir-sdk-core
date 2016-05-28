@@ -769,7 +769,7 @@ int main(int argc, char * argv[])
 #endif
 
         signalSet.async_wait([&work](const boost::system::error_code& error,
-                                     const int signal_number)
+                                     const int /*signal_number*/)
                              {
                                  if (!!error) //fix for ws2012 warning
                                  {
