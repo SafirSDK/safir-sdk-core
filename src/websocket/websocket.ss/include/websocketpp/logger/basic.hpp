@@ -135,12 +135,12 @@ public:
      * @param msg The message to write
      */
     void write(level channel, std::string const & msg) {
-        scoped_lock_type lock(m_lock);
-        if (!this->dynamic_test(channel)) { return; }
-        *m_out << "[" << timestamp << "] "
-                  << "[" << names::channel_name(channel) << "] "
-                  << msg << "\n";
-        m_out->flush();
+//        scoped_lock_type lock(m_lock);
+//        if (!this->dynamic_test(channel)) { return; }
+//        *m_out << "[" << timestamp << "] "
+//                  << "[" << names::channel_name(channel) << "] "
+//                  << msg << "\n";
+//        m_out->flush();
     }
 
     /// Write a cstring message to the given channel
@@ -149,12 +149,12 @@ public:
      * @param msg The message to write
      */
     void write(level channel, char const * msg) {
-        scoped_lock_type lock(m_lock);
-        if (!this->dynamic_test(channel)) { return; }
-        *m_out << "[" << timestamp << "] "
-                  << "[" << names::channel_name(channel) << "] "
-                  << msg << "\n";
-        m_out->flush();
+//        scoped_lock_type lock(m_lock);
+//        if (!this->dynamic_test(channel)) { return; }
+//        *m_out << "[" << timestamp << "] "
+//                  << "[" << names::channel_name(channel) << "] "
+//                  << msg << "\n";
+//        m_out->flush();
     }
 
     _WEBSOCKETPP_CONSTEXPR_TOKEN_ bool static_test(level channel) const {

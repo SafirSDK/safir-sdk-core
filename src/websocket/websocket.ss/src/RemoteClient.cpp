@@ -47,11 +47,22 @@ RemoteClient::RemoteClient(WsServer& server,
     ,m_dob(m_strand, [=](const std::string& msg){SendToClient(msg);})
     ,m_pingHandler(ioService, static_cast<int>(Safir::Websocket::Parameters::PingInterval()), [=]{m_connection->ping("");})
 {
-    m_connection->set_close_handler(m_strand.wrap([=](websocketpp::connection_hdl hdl){OnClose(hdl);}));
-    m_connection->set_message_handler(m_strand.wrap([=](websocketpp::connection_hdl hdl, WsMessage msg){OnMessage(hdl, msg);}));
+    m_connection->set_close_handler([=](websocketpp::connection_hdl hdl)
+    {
+        m_strand.post([=]{OnClose(hdl);});
+    });
+    m_connection->set_fail_handler([=](websocketpp::connection_hdl hdl)
+    {
+        m_strand.post([=]{OnError(hdl);});
+    });
+    m_connection->set_message_handler([=](websocketpp::connection_hdl hdl, WsMessage msg)
+    {
+        m_strand.post([=]{OnMessage(hdl, msg);});
+    });
 
     m_pingHandler.Start();
 }
+
 
 #ifdef _MSC_VER
 #pragma warning(pop)
@@ -59,8 +70,8 @@ RemoteClient::RemoteClient(WsServer& server,
 
 void RemoteClient::Close()
 {
-    //called from websocket server
-    m_strand.dispatch([=]
+    //called from websocket server, usually means we have got a stop order from the DOB
+    m_strand.post([=]
     {
         m_pingHandler.Stop();
         m_dob.Close();
@@ -82,13 +93,33 @@ void RemoteClient::OnClose(websocketpp::connection_hdl hdl)
     lllog(5)<<"RemoteClient.OnClose"<<std::endl;
     m_pingHandler.Stop();
     m_dob.Close();
-    m_onConnectionClosed(this);
+
+    //since m_onConnectionClosed will destruct this object, we must wrap it in a post to let all
+    //already queued events execute first. For example its likely that there is a dispatch waiting
+    //that will crash the entire application if it gets executed after this instance is destroyed.
+    m_strand.post([=]{m_onConnectionClosed(this);});
+}
+
+void RemoteClient::OnError(websocketpp::connection_hdl hdl)
+{
+    //client::connection_ptr con = m_client.get_con_from_hdl(hdl);
+    std::ostringstream os;
+    os<<"RemoteClient.OnError "<<ToString()<<std::endl;
+    os<<"  State: "<<m_connection->get_state()<<std::endl;
+    os<<"  LocalCloseCode: "<<m_connection->get_local_close_code()<<std::endl;
+    os<<"  LocalCloseReason: "<<m_connection->get_local_close_reason()<<std::endl;
+    os<<"  RemoteCloseCode: "<<m_connection->get_remote_close_code()<<std::endl;
+    os<<"  RemoteCloseReason: "<<m_connection->get_remote_close_reason()<<std::endl;
+    os<<"  Error: "<<m_connection->get_ec() << " - " <<m_connection->get_ec().message()<<std::endl;
+    auto errorMsg=os.str();
+    SEND_SYSTEM_LOG(Error, <<errorMsg.c_str()<<std::endl);
+    lllog(5)<<errorMsg.c_str()<<std::endl;
 }
 
 void RemoteClient::OnMessage(websocketpp::connection_hdl hdl, WsMessage msg)
 {
     try
-    {        
+    {
         auto payload=msg->get_payload();
         lllog(5)<<"RemoteClient.OnMessage "<<payload.c_str()<<std::endl;
 

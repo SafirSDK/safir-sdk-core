@@ -121,7 +121,7 @@ void DobConnection::OnInjectedDeletedEntity(const sd::InjectedEntityProxy inject
 void DobConnection::OnInitialInjectionsDone(const sd::Typesystem::TypeId typeId, const sd::Typesystem::HandlerId& handlerId)
 {
     lllog(5)<<"OnInitialInjectionsDone"<<std::endl;
-    auto notification=JsonRpcNotification::Json(Methods::OnInjectedDeletedEntity, m_proxyToJson.ToJson(typeId, handlerId));
+    auto notification=JsonRpcNotification::Json(Methods::OnInitialInjectionsDone, m_proxyToJson.ToJson(typeId, handlerId));
     m_wsSend(notification);
 }
 

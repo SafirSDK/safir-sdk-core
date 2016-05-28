@@ -89,6 +89,7 @@ private:
     //websocket events
     //-----------------
     void OnClose(websocketpp::connection_hdl hdl);
+    void OnError(websocketpp::connection_hdl hdl);
     void OnMessage(websocketpp::connection_hdl hdl, WsMessage msg);
 
     // handle client commands

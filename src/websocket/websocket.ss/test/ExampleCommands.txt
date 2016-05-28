@@ -14,3 +14,6 @@
 
 {"jsonrpc":"2.0", "method":"readEntity", "params":{"typeId":"Safir.Dob.Entity", "instanceId":100}, "id":"joot"}
 
+{"jsonrpc": "2.0", "method": "registerEntityHandler", "params": {"typeId": "Safir.Dob.Entity", "pending":true}, "id": 123}
+
+{"jsonrpc":"2.0", "method":"setEntity", "params":{"instanceId":1, "entity":{"_DouType":"Safir.Dob.Entity"}}, "id":"joot"}

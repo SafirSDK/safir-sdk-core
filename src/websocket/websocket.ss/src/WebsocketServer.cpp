@@ -62,9 +62,10 @@ void WebsocketServer::Run()
 
     //try to disable all logging from websocketpp, seems like info is still logging
     m_server.set_access_channels(websocketpp::log::alevel::none);
+    m_server.set_reuse_addr(true);
 
     m_server.set_open_handler([=](websocketpp::connection_hdl hdl)
-    {
+    {        
         auto con=boost::make_shared<RemoteClient>(m_server, m_ioService, hdl, [=](const RemoteClient* con){OnConnectionClosed(con);});
         m_connections.insert(con);
         lllog(5)<<"Server: new connection added: "<<con->ToString().c_str()<<std::endl;
@@ -87,6 +88,7 @@ void WebsocketServer::Run()
     m_server.start_accept();
 
     lllog(5)<<"Running ws server on port "<<ws::Parameters::Port()<<std::endl;
+    std::cout<<"Running ws server on port "<<ws::Parameters::Port()<<std::endl;
 }
 
 void WebsocketServer::Terminate()
@@ -124,7 +126,7 @@ void WebsocketServer::OnConnectionClosed(const RemoteClient* con)
     }
     else
     {
-        lllog(5)<<"Cllosed connection was not found."<<std::endl;
+        lllog(5)<<"Closed connection was not found."<<std::endl;
     }
 
     PrintConnections();
@@ -132,15 +134,19 @@ void WebsocketServer::OnConnectionClosed(const RemoteClient* con)
 
 void WebsocketServer::OnStopOrder()
 {
+    lllog(5)<<"WebsocketServer got StopOrder. All connected client will be disconnected."<<std::endl;
     Terminate();
 }
 
 void WebsocketServer::PrintConnections() const
 {
-    lllog(5)<<"----- Connections -----"<<std::endl;
-    for (auto it = m_connections.begin(); it != m_connections.end(); ++it)
+    if (Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().LogLevel() >= 5)
     {
-        lllog(5)<<(*it)->ToString().c_str()<<std::endl;
+        lllog(5)<<"----- Connections -----"<<std::endl;
+        for (auto it = m_connections.begin(); it != m_connections.end(); ++it)
+        {
+            lllog(5)<<(*it)->ToString().c_str()<<std::endl;
+        }
     }
 }
 

@@ -73,6 +73,8 @@ bool IsValidJson(const std::string& str)
 
 int main() {
 
+    bool isStopping=false;
+
     //*********************************************************************************
     //  Queue<RequestJSON, ResponseJSON, NotificationJSON>
     //----------------------------------
@@ -273,6 +275,7 @@ int main() {
                          "{\"jsonrpc\":\"2.0\",\"result\":{\"isSuccess\":false,\"response\":{\"_DouType\":\"Safir.Dob.ErrorResponse\",\"Code\":\"Oh no\",\"AdditionalInfo\":\"I will not\"}},\"id\":\"service\"}",
                          ""));
 
+
     std::cout<<"Starting client..."<<std::endl;
     // Create a client endpoint
     client c;
@@ -304,6 +307,40 @@ int main() {
 
             //check that all received messages are valid json
             assert(IsValidJson(data));
+
+            if (isStopping)
+            {
+                rapidjson::Document doc;
+                doc.Parse(data.c_str());
+                if (doc["id"].IsString() && std::string(doc["id"].GetString())=="ProcessInfoInstances")
+                {
+                    //we are stopping and has now got a list of all ProcessInfo instances. Send read request fore each instance to find out which one is safir_websocket server.
+                    const rapidjson::Value& instances=doc["result"];
+
+                    for (rapidjson::SizeType i=0; i<instances.Size(); i++)
+                    {
+                        auto inst=instances[i].GetInt64();
+                        std::ostringstream os;
+                        os<<"{\"jsonrpc\":\"2.0\", \"method\":\"readEntity\", \"params\":{\"typeId\":\"Safir.Dob.ProcessInfo\",\"instanceId\":"<<inst<<"}, \"id\":"<<inst<<"}";
+                        std::string readProcessInfo=os.str();
+                        std::cout<<"--> "<<readProcessInfo<<std::endl;
+                        c.send(hdl, readProcessInfo.c_str(), websocketpp::frame::opcode::text);
+                    }
+                }
+                else if (doc.HasMember("result") && doc["result"].IsObject()
+                         && doc["result"].HasMember("_DouType") && doc["result"]["_DouType"].GetString()==std::string("Safir.Dob.ProcessInfo")
+                         && std::string(doc["result"]["Name"].GetString()).find("safir_websocket")!=std::string::npos)
+                {
+
+                    //we are stopping and have now found instanceId of safir_websocket ProcessInfo. Send deleteRequest to force StopOrder
+                    auto inst=doc["id"].GetInt64();
+                    std::ostringstream os;
+                    os<<"{\"jsonrpc\":\"2.0\", \"method\":\"deleteRequest\", \"params\":{\"typeId\":\"Safir.Dob.ProcessInfo\",\"instanceId\":"<<inst<<"}, \"id\":\"deleteWS\"}";
+                    std::string deleteProcessInfo=os.str();
+                    std::cout<<"--> "<<deleteProcessInfo<<std::endl;
+                    c.send(hdl, deleteProcessInfo.c_str(), websocketpp::frame::opcode::text);
+                }
+            }
 
             if (items.empty())
             {
@@ -337,19 +374,37 @@ int main() {
                 }
                 else
                 {
-                    con->close(websocketpp::close::status::normal, "finished");
+                    std::cout<<"Beginning stop process"<<std::endl;
+                    isStopping=true;
+                    std::string getAllProcessInfo="{\"jsonrpc\":\"2.0\", \"method\":\"getAllInstanceIds\", \"params\":{\"typeId\":\"Safir.Dob.ProcessInfo\"}, \"id\":\"ProcessInfoInstances\"}";
+                    std::cout<<"--> "<<getAllProcessInfo<<std::endl;
+                    c.send(hdl, getAllProcessInfo.c_str(), websocketpp::frame::opcode::text);
                 }
             }
         });
 
         c.set_close_handler([&](websocketpp::connection_hdl hdl)
         {
-            std::cout<<"OnClose"<<std::endl;
+            std::string reason=con->get_remote_close_reason();
+            std::cout<<"OnClose "<<reason<<std::endl;
+
             if (!items.empty())
             {
                 std::cout<<"Connection unexpecedly closed by server!"<<std::endl;
                 std::cout<<"    Next expected response: "<<items.front().response<<std::endl;
                 std::cout<<"    Next expected notification: "<<items.front().notification<<std::endl;
+                exit(1);
+            }
+
+            if (!isStopping)
+            {
+                std::cout<<"Was not supposed to close connection now"<<std::endl;
+                exit(1);
+            }
+
+            if (reason!="onStopOrder")
+            {
+                std::cout<<"Incorrect close reason"<<std::endl;
                 exit(1);
             }
         });
@@ -365,13 +420,16 @@ int main() {
         // exchanged until the event loop starts running in the next line.
         c.connect(con);
 
+
         // Start the ASIO io_service run loop
         // this will cause a single connection to be made to the server. c.run()
         // will exit when this connection is closed.
         c.run();
     } catch (websocketpp::exception const & e) {
         std::cout << e.what() << std::endl;
+        exit(1);
     }
 
     std::cout<<"Test passed!"<<std::endl;
+    return 0;
 }
