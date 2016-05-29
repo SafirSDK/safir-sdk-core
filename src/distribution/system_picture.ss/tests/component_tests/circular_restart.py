@@ -27,12 +27,6 @@ from __future__ import print_function
 import datetime, sys, argparse, subprocess, signal, time, os, shutil
 from contextlib import closing
 
-try:
-    from contextlib import ExitStack
-except ImportError:
-    #pylint: disable=E0401
-    from contextlib2 import ExitStack
-
 class Failure(Exception):
     pass
 
@@ -113,13 +107,17 @@ def stop(proc):
 
 class MasterNode(object):
     def __init__(self, args):
-        log("Launching master node")
-        self.node = launch_node(master = True,
-                                ownip = args.own_ip,
-                                nodetype=2,
-                                num_nodes=args.total_nodes,
-                                revolutions = args.revolutions)
+        if args.start != 0:
+            log("Not launching master node...")
+        else:
+            log("Launching master node")
+            self.node = launch_node(master = True,
+                                    ownip = args.own_ip,
+                                    nodetype=2,
+                                    num_nodes=args.total_nodes,
+                                    revolutions = args.revolutions)
         self.returncode = None
+        self.launched = args.start == 0
 
     def failed(self):
         poll = self.node.poll()
@@ -129,10 +127,11 @@ class MasterNode(object):
         return self.node.poll() == 0
 
     def close(self):
-        stop(self.node)
-        if self.node.returncode != 0:
-            log("Master exited with error code", self.node.returncode)
-        self.returncode = self.node.returncode
+        if self.launched:
+            stop(self.node)
+            if self.node.returncode != 0:
+                log("Master exited with error code", self.node.returncode)
+            self.returncode = self.node.returncode
 
 
 class SlaveNode(object):
@@ -231,18 +230,14 @@ def main():
 
     log(args)
     try:
-        with ExitStack() as stack:
-            master = None
-            if args.start == 0:
-                master = stack.enter_context(closing(MasterNode(args)))
-            slaves = stack.enter_context(closing(Slaves(args)))
+        with closing(MasterNode(args)) as master, closing(Slaves(args)) as slaves:
             try:
                 while True:
-                    if (master is not None and master.failed()) or slaves.failed():
+                    if (master.launched and master.failed()) or slaves.failed():
                         log ("A process failed")
                         break
 
-                    if (master is None or master.finished()) and slaves.finished():
+                    if (not master.launched or master.finished()) and slaves.finished():
                         log ("All processes are finished")
                         break
 
@@ -250,7 +245,7 @@ def main():
             except KeyboardInterrupt:
                 log("Caught Ctrl-C, exiting")
                 raise
-        if (master is None or master.returncode == 0) and slaves.ok:
+        if (not master.launched or master.returncode == 0) and slaves.ok:
             log("All processes returned success")
             return 0
         else:
