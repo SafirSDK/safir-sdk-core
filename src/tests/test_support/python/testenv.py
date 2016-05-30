@@ -24,7 +24,7 @@
 #
 ###############################################################################
 from __future__ import print_function
-import os, subprocess, sys, threading, time, signal
+import subprocess, sys, time, signal
 import syslog_server
 from threading import Thread
 
@@ -32,6 +32,7 @@ try:
     # 3.x name
     from queue import Queue, Empty
 except ImportError:
+    #pylint: disable=E0401
     # 2.x name
     from Queue import Queue, Empty
 
@@ -55,7 +56,7 @@ class TestEnvStopper:
     def __enter__(self):
         return self
 
-    def __exit__(self, type, value, traceback):
+    def __exit__(self, t, value, traceback):
         time.sleep(1.0)
         self.env.killprocs()
 
@@ -129,12 +130,13 @@ class TestEnv:
         try:
             log(" Terminating", name)
             if sys.platform == "win32":
+                #pylint: disable=E1101
                 #can't send CTRL_C_EVENT to processes started with subprocess, unfortunately
                 proc.send_signal(signal.CTRL_BREAK_EVENT)
             else:
                 proc.terminate()
             #let it have a minute to die...
-            for i in range (timeout * 10):
+            for _ in range (timeout * 10):
                 if proc.poll() is not None:
                     log("   Terminate successful")
                     return
@@ -204,7 +206,7 @@ class TestEnv:
                 log (" - Process", name, "exited with code", proc.returncode)
                 log (" - Output:\n", self.Output(name))
                 ok = False
-        return ok;
+        return ok
 
     def ProcessDied(self):
         ok = True
@@ -214,7 +216,7 @@ class TestEnv:
                 log (" - Process", name, "exited with code", proc.returncode)
                 log (" - Output:\n", self.Output(name))
                 ok = False
-        return ok;
+        return ok
 
     def SafirControlRunning(self):
         proc = self.__procs.get("safir_control")
