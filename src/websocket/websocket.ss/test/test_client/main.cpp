@@ -404,7 +404,7 @@ int main() {
 
             if (reason!="onStopOrder")
             {
-                std::cout<<"Incorrect close reason"<<std::endl;
+                std::cout<<"Incorrect close reason "<<reason<<std::endl;
                 exit(1);
             }
         });

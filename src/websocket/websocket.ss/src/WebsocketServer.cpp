@@ -95,6 +95,7 @@ void WebsocketServer::Run()
         std::cout<<"Could not create server endpoint. "<<e.what()<<std::endl;
         return;
     }
+
     m_server.listen(serverTcpEndpoint);
 
     // Start the server accept loop
