@@ -72,14 +72,4 @@ inline void IpAddressHelperTest()
         CHECK(false);
     }
 
-    try
-    {
-        ip="192.0.0";
-        port=10000;
-        IpAddressHelper::CreateEndpoint(ip, port);
-        CHECK(false);
-    }
-    catch (const std::logic_error&)
-    {
-    }
 }

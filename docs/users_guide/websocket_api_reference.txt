@@ -10,6 +10,8 @@ This section describes all methods exposed by the DOB JSON-RPC interface. Method
 a response with the same id is guaranteed. The id can be either a string or a number. If no id is present the method
 will still be executed but the caller will not get any response.
 
+Some parameters have a specified default value. Such parameters can be omitted in a method call and will then adopt their default value.
+
 ==== Method: close
 Close connection to the DOB.
 
@@ -689,7 +691,7 @@ Example::
 ----------------------------
 
 === Errors
-If an error occurs the Safir WebSocket server will send an error to the client. The error can be instead of a response, and if possible the id of the request will be
+If an error occurs the Safir WebSocket server will send an error to the client. The error is sent in place of a response, and if possible the id of the request will be
 preserved. However if it is not possible to extract the id, the error will be sent with a null-id. The error messge is specified in the JSON-RPC 2.0 specification.
 
 Besides the predefined error codes, Safir can send the following error codes
@@ -700,3 +702,8 @@ Error codes::
  * `SafirAccessDenied (102)` - Trying to modify an entity without ownership.
  * `SafirGhostExists (103)` - Trying to modify an entity when there is a ghost instance that hasn't been injected.
  * `SafirNotFound (104)` - Calling read or getInstanceIdPolicy on non-existing instance.
+ 
+ Example::
+----------------------------
+--> {"jsonrpc": "2.0", "error": {"code": 100, "message": "SafirNotOpen", "data": "Could not open connection..."}, "id": 123}
+----------------------------
