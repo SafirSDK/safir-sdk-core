@@ -5,20 +5,17 @@
   <baseClass>Safir.Dob.Parametrization</baseClass>
   <parameters>
 
-    <!-- Port number -->
+    <!-- Websocket server endpoint -->
     <parameter>
-      <summary>The port safir_websocket will listen on and accept connections.</summary>
-      <name>Port</name>
-      <type>Int32</type>
-      <value>10000</value>
-    </parameter>
-
-    <!-- Max number of connections -->
-    <parameter>
-      <summary>The maximum number of connections allowed at the same time</summary>
-      <name>MaxNumberOfConnections</name>
-      <type>Int32</type>
-      <value>500</value>
+      <summary>
+        The ip address and port for the websocket server on the format ip_address:port
+        For example if running on loopback interface and port 10000 specify 127.0.0.1:10000
+        If no ip_address part is specified, the server will use all IPv4 addresses available on the machine. I.e if you specify :10000
+        then the websocket server is available on port 10000 on all network adapters on the machine.
+      </summary>
+      <name>ServerEndpoint</name>
+      <type>String</type>
+      <value>:10000</value>
     </parameter>
 
     <!-- Interval at which messges with the ping opcode is sent to clients to keep connection open -->

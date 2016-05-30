@@ -46,6 +46,7 @@ RemoteClient::RemoteClient(WsServer& server,
     ,m_onConnectionClosed(onClose)
     ,m_dob(m_strand, [=](const std::string& msg){SendToClient(msg);})
     ,m_pingHandler(ioService, static_cast<int>(Safir::Websocket::Parameters::PingInterval()), [=]{m_connection->ping("");})
+    ,m_enableTypeSystem(Safir::Websocket::Parameters::EnableTypesystemCommands())
 {
     m_connection->set_close_handler([=](websocketpp::connection_hdl hdl)
     {
@@ -267,7 +268,7 @@ void RemoteClient::WsDispatch(const JsonRpcRequest& req)
         {
             WsGetInstanceIdPolicy(req);
         }
-        else if (req.Method()==Methods::GetTypeHierarchy)
+        else if (req.Method()==Methods::GetTypeHierarchy && m_enableTypeSystem)
         {
             WsGetTypeHierarchy(req);
         }
@@ -569,9 +570,9 @@ void RemoteClient::WsDeleteAllInstances(const JsonRpcRequest& req)
 void RemoteClient::WsReadEntity(const JsonRpcRequest& req)
 {
     CommandValidator::ValidateReadEntity(req);
-    auto entityProxy=m_dob.Read(req.TypeId(), req.InstanceId());
+    auto entity=m_dob.Read(req.TypeId(), req.InstanceId());
     if (!req.Id().IsNull())
-        SendToClient(JsonRpcResponse::Json(req.Id(), entityProxy));
+        SendToClient(JsonRpcResponse::Json(req.Id(), entity));
 }
 
 void RemoteClient::WsIsCreated(const JsonRpcRequest& req)

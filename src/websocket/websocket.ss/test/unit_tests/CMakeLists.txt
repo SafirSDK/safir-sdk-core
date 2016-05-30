@@ -10,6 +10,7 @@ add_executable(safir_websocket_unittests
                 ../../src/PingHandler.h
                 ../../src/RequestIdMapper.h
                 ../../src/ResponseSenderStore.h
+                ../../src/IpAddressHelper.h
                 ../../src/CommandValidator.h)
 
 target_link_libraries(safir_websocket_unittests PRIVATE

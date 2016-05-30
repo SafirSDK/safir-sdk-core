@@ -79,6 +79,7 @@ private:
     std::function<void(const RemoteClient*)> m_onConnectionClosed;
     DobConnection m_dob;
     PingHandler m_pingHandler;
+    bool m_enableTypeSystem;
 
     inline void SendToClient(const std::string& msg)
     {

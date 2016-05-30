@@ -2789,230 +2789,23 @@ Upon receiving a stop order the application shall shut down gracefully.
 
 When an application has several connections to the Dob, only one of them should supply a StopHandler. It is the handler of this connections responsibility to tell the other parts of the application to shut down gracefully. If several connections have stop handlers there may be race conditions, since there is no guaranteed order between which stop handler gets called first.
 
-=== DOB Websocket/JSON-RPC API reference
-This section contains an API reference describing all methods exposed through the Safir websocket JSON-RPC interface.
+[[safir_websocket]]
+== Safir WebSocket/JSON-RPC interface
+From version 6.3 of Safir SDK Core, a JSON-RPC interface over WebSockets is provided as an alternative to the legacy language inerfaces. The interface is an implementation of the JSON-RPC specification 2.0 (http://www.jsonrpc.org/specification) and uses WebSockets https://tools.ietf.org/html/rfc6455[(RFC 6455)] as carrier.
+Most of the common DOB features are available such as subscribing to entities and messages, sending messages, send or handle request, register as handler of entities, and some typesystem operations.
+If you are not familiair with JSON-RPC, It is strongly recomended to read the JSON-RPC 2.0 Specification. Its a simple protocol and the specification is short and easy to read, it won’t take more than about 10 minutes to read it.
 
-==== Methods
-This section describes all methods exposed through the DOB JSON-RPC interface.
+The API is explained in full detail in <<appendix_b>>, but basically the API consists of 3 types of messages:
 
-===== Method: open
-Opens a connection to the DOB.
+* Requests - sent from client to server.
+* Responses - sent from server to client as a response to a request.
+* Notifications - sent from server to notify client when something happens.
+ 
+The PROS of using the WebSocket/JSON-RPC interface is that no runtime libraries has to be installed, and the interface is accessible from any language or platform that supports WebSockets. That makes Safir available almost everywhere including web browsers and mobile apps.
 
-Parameters::
- * `connectionName` - Name of my connection. Name need to be unique.
- * `context` - Context for connection. _(0)_
-Returns::
- * `value` - On success the string _OK_ is returned, otherwize an error is returned.
+The CONS are worse performance and that you dont get access to the most advanced features. The programming model may also be a bit ackward in some situations.  
 
-Example::
-----------------------------
---> {"jsonrpc": "2.0", "method": "open", "params": {"connectionName": "foo"}, "id": 123}
-<-- {"jsonrpc": "2.0", "result": "OK", "id": 123}
-----------------------------
-
-===== Method: close
-Close connection to the DOB.
-
-Returns::
- * `value` - On success the string _OK_ is returned, otherwize an error is returned.
-
-Example::
-----------------------------
---> {"jsonrpc": "2.0", "method": "close", "id": 123}
-<-- {"jsonrpc": "2.0", "result": "OK", "id": 123}
-----------------------------
-
-===== Method: isOpen
-Check if there is an open connection to the DOB.
-
-Returns::
- * `value` - If connected to the DOB _true_ is returned, otherwize _false_ is returned.
-
-Example::
-----------------------------
---> {"jsonrpc": "2.0", "method": "isOpen", "id": 123}
-<-- {"jsonrpc": "2.0", "result": true, "id": 123}
-----------------------------
-
-===== Method: subscribeMessage
-Subscribe for messages.
-
-Parameters::
- * `typeId` - Name of an existing message type.
- * `channelId` - Channel to subscribe on. _(ALL_CHANNELS)_
- * `includeSubclasses` - Also subscribe for all subclasses to the specified typeId. _(true)_
-Returns::
- * `value` - On success the string _OK_ is returned.
-
-Example::
-----------------------------
---> {"jsonrpc": "2.0", "method": "subscribeMessage", "params": {"typeId": "Safir.Dob.Message"}, "id": 123}
-<-- {"jsonrpc": "2.0", "result": "OK", "id": 123}
-----------------------------
-
-===== Method: unsubscribeMessage
-Unsubscribe for messages.
-
-Parameters::
- * `typeId` - Name of an existing message type.
- * `channelId` - Channel to subscribe on. _(ALL_CHANNELS)_
- * `includeSubclasses` - Also subscribe for all subclasses to the specified typeId. _(true)_
-Returns::
- * `value` - On success the string _OK_ is returned.
-
-Example::
-----------------------------
---> {"jsonrpc": "2.0", "method": "unsubscribeMessage", "params": {"typeId": "Safir.Dob.Message"}, "id": 123}
-<-- {"jsonrpc": "2.0", "result": "OK", "id": 123}
-----------------------------
-
-===== Method: sendMessage
-Send a message.
-
-Parameters::
- * `message` - Message to send.
- * `channelId` - Channel to send on. _(DEFAULT_CHANNELS)_
-Returns::
- * `value` - On success the string _OK_ is returned.
-
-Example::
-----------------------------
---> {"jsonrpc": "2.0", "method": "sendMessage", "params": {"message": {"_DouType": "Safir.Dob.Message"}}, "id": 123}
-<-- {"jsonrpc": "2.0", "result": "OK", "id": 123}
-----------------------------
-
-===== Method: subscribeEntity
-Subscribe for entities.
-
-Parameters::
- * `typeId` - Entity type to subscribe for.
- * `instanceId` - Specific instance. Not allowed if `includeSubclasses` also is present.
- * `includeUpdates` - Get notified on updated entity states. _(true)_
- * `restartSubscription` - Restart subscription to get onNewEntity for all existing instances. _(true)_
- * `includeSubclasses` - Include subclasses to specified typeId. Not allowed if `instanceId` is present _(true)_
-Returns::
- * `value` - On success the string _OK_ is returned.
-
-Example::
-----------------------------
---> {"jsonrpc": "2.0", "method": "subscribeEntity", "params": {"typeId": "Safir.Dob.Entity", "instanceId": 10}, "id": 123}
-<-- {"jsonrpc": "2.0", "result": "OK", "id": 123}
-----------------------------
-
-===== Method: unsubscribeEntity
-Subscribe for entities.
-
-Parameters::
- * `typeId` - Entity type to unsubscribe for.
- * `instanceId` - Unsubscribe for specific instance. Not allowed if `includeSubclasses` also is present.
- * `includeSubclasses` - Also unsubscribe for subclasses to specified typeId. Not allowed if `instanceId` is present. _(true)_
-Returns::
- * `value` - On success the string _OK_ is returned.
-
-Example::
-----------------------------
---> {"jsonrpc": "2.0", "method": "unsubscribeEntity", "params": {"typeId": "Safir.Dob.Entity", "instanceId": 10}, "id": 123}
-<-- {"jsonrpc": "2.0", "result": "OK", "id": 123}
-----------------------------
-    
-===== Method: registerEntityHandler
-Register an entity handler.
-
-Parameters::
- * `typeId` - Entity type to register.
- * `handlerId` - Id of this handler. _(DEFAULT_HANDLER)_
- * `instanceIdPolicy` - Who decides instance ids. A string that can be either _RequestorDecidesInstanceId_ or _HandlerDecidesInstanceId_. _(RequestorDecidesInstanceId)_
- * `injectionHandler` - Does the handler handle injections. _(false)_
- * `pending` - Is this a pending registration _(false)_
-Returns::
- * `value` - On success the string _OK_ is returned.
-
-Example::
-----------------------------
---> {"jsonrpc": "2.0", "method": "registerEntityHandler", "params": {"typeId": "Safir.Dob.Entity"}, "id": 123}
-<-- {"jsonrpc": "2.0", "result": "OK", "id": 123}
-----------------------------
-
-===== Method: registerServiceHandler
-Register a service handler.
-
-Parameters::
- * `typeId` - Service type to register.
- * `handlerId` - Id of this handler. _(DEFAULT_HANDLER)_
- * `pending` - Is this a pending registration _(false)_
-Returns::
- * `value` - On success the string _OK_ is returned.
-
-Example::
-----------------------------
---> {"jsonrpc": "2.0", "method": "registerServiceHandler", "params": {"typeId": "Safir.Dob.ServiceRequest"}, "id": 123}
-<-- {"jsonrpc": "2.0", "result": "OK", "id": 123}
-----------------------------
-
-===== Method: unregisterHandler
-Unregister an entity or service handler.
-
-Parameters::
- * `typeId` - The type to unregister.
- * `handlerId` - Id of the handler to unregister. _(ALL_HANDLERS)_
-Returns::
- * `value` - On success the string _OK_ is returned.
-
-Example::
-----------------------------
---> {"jsonrpc": "2.0", "method": "unregisterHandler", "params": {"typeId": "Safir.Dob.Entity"}, "id": 123}
-<-- {"jsonrpc": "2.0", "result": "OK", "id": 123}
-----------------------------
-    
-    static const std::string SubscribeRegistration = "subscribeRegistration";
-    static const std::string UnsubscribeRegistration = "unsubscribeRegistration";
-    static const std::string CreateRequest = "createRequest";
-    static const std::string UpdateRequest = "updateRequest";
-    static const std::string DeleteRequest = "deleteRequest";
-    static const std::string ServiceRequest = "serviceRequest";
-    static const std::string SetEntityChanges = "setEntityChanges";
-    static const std::string SetEntity = "setEntity";
-    static const std::string DeleteEntity = "deleteEntity";
-    static const std::string DeleteAllInstances = "deleteAllInstances";
-    static const std::string ReadEntity = "readEntity";
-    static const std::string IsCreated = "isCreated";
-    static const std::string GetNumberOfInstances = "getNumberOfInstances";
-    static const std::string GetAllInstanceIds = "getAllInstanceIds";
-    static const std::string GetInstanceIdPolicy = "getInstanceIdPolicy";
-
-    //typesystem
-    static const std::string GetTypeHierarchy = "getTypeHierarchy";
-
-==== Notifications
-This section contains an API reference describing all methods exposed through the Safir websocket JSON-RPC interface.
-
-    static const std::string OnInjectedNewEntity = "onInjectedNewEntity";
-    static const std::string OnInjectedUpdatedEntity = "onInjectedUpdatedEntity";
-    static const std::string OnInjectedDeletedEntity = "onInjectedDeletedEntity";
-    static const std::string OnInitialInjectionsDone = "onInitialInjectionsDone";
-    static const std::string OnRevokedRegistration = "onRevokedRegistration";
-    static const std::string OnCompletedRegistration = "onCompletedRegistration";
-    static const std::string OnNotRequestOverflow = "onNotRequestOverflow";
-    static const std::string OnNotMessageOverflow = "onNotMessageOverflow";
-    static const std::string OnRegistered = "onRegistered";
-    static const std::string OnUnregistered = "onUnregistered";
-    static const std::string OnMessage = "onMessage";
-    static const std::string OnNewEntity = "onNewEntity";
-    static const std::string OnUpdatedEntity = "onUpdatedEntity";
-    static const std::string OnDeletedEntity = "onDeletedEntity";
-
-==== Receive and respond to requests
-This section contains an API reference describing all methods exposed through the Safir websocket JSON-RPC interface.
-
-    static const std::string OnCreateRequest = "onCreateRequest";
-    static const std::string OnUpdateRequest = "onUpdateRequest";
-    static const std::string OnDeleteRequest = "onDeleteRequest";
-    static const std::string OnServiceRequest = "onServiceRequest";
-        
-
-==== Errors
-This section contains an API reference describing all methods exposed through the Safir websocket JSON-RPC interface.
-
+The functioality described above is provided by _safir_websocket_. It has a configuration file Safir.Websocket.Parameters.dou where the ip address and port for the server is set. 
 
 [[configuration]]
 == Configuration
@@ -4466,6 +4259,14 @@ Example app text is located in a separate file, example_applications.txt
 
 include::example_applications.txt[]
 
+[[appendix_b]]
+== Appendix B: DOB WebSocket/JSON-RPC API reference
+
+////
+WebSocket/JSON-RPC Api reference is located in a separate file, websocket_api_reference.txt 
+////
+
+include::websocket_api_reference.txt[]
 
 [[faq]]
 == Appendix C: FAQ

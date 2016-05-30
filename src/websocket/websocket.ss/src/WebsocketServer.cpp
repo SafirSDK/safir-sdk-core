@@ -25,6 +25,7 @@
 #include <boost/make_shared.hpp>
 #include <Safir/Websocket/Parameters.h>
 #include "WebsocketServer.h"
+#include "IpAddressHelper.h"
 
 #ifdef _MSC_VER
 #pragma warning(push)
@@ -72,23 +73,35 @@ void WebsocketServer::Run()
         PrintConnections();
     });
 
-    //Set up listening port
-    int port=ws::Parameters::Port();
-    if (port<1 || port>65535)
+    std::string ip="";
+    unsigned short port=0;
+    if (!IpAddressHelper::SplitAddress(ts::Utilities::ToUtf8(ws::Parameters::ServerEndpoint()), ip, port))
     {
-        lllog(5)<<"Server: invalid port number: "<<port<<std::endl;
-        SEND_SYSTEM_LOG(Error, <<"Server: invalid port number: "<<port<<std::endl);
-        std::cout<<"Invalid port number specified"<<std::endl;
+        lllog(5)<<"ServerEndpoint from configuration could not be parsed as a valid ip address and port. Expected format is <ip>:<port>"<<std::endl;
+        SEND_SYSTEM_LOG(Error, <<"ServerEndpoint from configuration could not be parsed as a valid ip address and port. Expected format is <ip>:<port>"<<std::endl);
+        std::cout<<"ServerEndpoint from configuration could not be parsed as a valid ip address and port. Expected format is <ip>:<port>"<<std::endl;
         return;
     }
 
-    m_server.listen(static_cast<uint16_t>(port));
+    boost::asio::ip::tcp::endpoint serverTcpEndpoint;
+    try
+    {
+        serverTcpEndpoint=IpAddressHelper::CreateEndpoint(ip, port);
+    }
+    catch (const std::exception& e)
+    {
+        lllog(5)<<"Could not create server endpoint. "<<e.what()<<std::endl;
+        SEND_SYSTEM_LOG(Error, <<"Could not create server endpoint. "<<e.what()<<std::endl);
+        std::cout<<"Could not create server endpoint. "<<e.what()<<std::endl;
+        return;
+    }
+    m_server.listen(serverTcpEndpoint);
 
     // Start the server accept loop
     m_server.start_accept();
 
-    lllog(5)<<"Running ws server on port "<<ws::Parameters::Port()<<std::endl;
-    std::cout<<"Running ws server on port "<<ws::Parameters::Port()<<std::endl;
+    lllog(5)<<"Running ws server on "<<serverTcpEndpoint.address().to_string().c_str()<<":"<<serverTcpEndpoint.port()<<std::endl;
+    std::cout<<"Running ws server on "<<serverTcpEndpoint.address().to_string().c_str()<<":"<<serverTcpEndpoint.port()<<std::endl;
 }
 
 void WebsocketServer::Terminate()

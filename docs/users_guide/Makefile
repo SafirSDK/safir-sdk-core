@@ -1,7 +1,7 @@
 .SILENT:
 .PHONY: all clean default
 
-DEPS := users_guide.txt tracer.txt example_applications.txt \
+DEPS := users_guide.txt tracer.txt example_applications.txt websocket_api_reference.txt \
 		$(wildcard images/*.png) \
 		$(patsubst %.dia,%.eps,$(wildcard images/*.dia)) \
 		$(patsubst %.dia,%.png,$(wildcard images/*.dia)) \

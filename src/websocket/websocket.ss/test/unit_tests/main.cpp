@@ -26,9 +26,14 @@
 #include "RequestIdMapperTest.h"
 #include "ResponseSenderStoreTest.h"
 #include "ProxyToJsonTest.h"
+#include "IpAddressHelperTest.h"
 
 int main(int /*argc*/, const char** /*argv*/)
 {
+    std::cout<<"===== IpAddressHelperTest ====="<<std::endl;
+    IpAddressHelperTest();
+    std::cout<<"Test passed!"<<std::endl;
+
     std::cout<<"===== RequestIdMapperTest ====="<<std::endl;
     RequestIdMapperTest();
     std::cout<<"Test passed!"<<std::endl;
