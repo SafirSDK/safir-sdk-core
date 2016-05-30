@@ -186,6 +186,21 @@ Example::
 <-- {"jsonrpc": "2.0", "result": "OK", "id": 123}
 ----------------------------
 
+==== Method: ping
+This method can be used to test a connection. When the Safir WebSocket server receives a ping, it will immediately respond with a "pong".
+This message can also be used in those rare cases when the client WebSocket implementation doesn't support the ping opcode. That is a low level
+keep alive message that will prevent connectons with low traffic to be disconnected. In that case manual pings can be sent with a low frequent
+but periodic timer.
+
+Returns::
+ * `value` - If connected the string "pong" is returned.
+
+Example::
+----------------------------
+--> {"jsonrpc": "2.0", "method": "ping", "id": "testId"}
+<-- {"jsonrpc": "2.0", "result": "pong", "id": "testId"}
+----------------------------
+
 ==== Method: readEntity
 Read current version of an entity in the DOB.
 

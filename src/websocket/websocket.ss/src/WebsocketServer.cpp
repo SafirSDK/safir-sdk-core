@@ -107,24 +107,32 @@ void WebsocketServer::Run()
 
 void WebsocketServer::Terminate()
 {
-    //At the moment websocketpp is logging info when stop_listening is called and that is normal behaviour
-    //according to https://github.com/zaphoyd/websocketpp/issues/498
-    //Cant figure out how to disable the info logging
+    lllog(5)<<"safir_websocket is starting to shut down..."<<std::endl;    
 
-    lllog(5)<<"safir_websocket is starting to shut down..."<<std::endl;
+    //stop accepting new connections
     m_server.stop_listening();
+
+    //close all existing connections
     for (auto it = m_connections.begin(); it != m_connections.end(); ++it)
     {
         (*it)->Close();
     }
 
+    //close this dob connection
     if (m_dobConnection.IsOpen())
     {
         m_dobConnection.Close();
     }
 
     m_work.reset();
-    m_ioService.stop();
+
+    //give a couple of seconds to send pending messages and nice shutdown messages
+    boost::shared_ptr<boost::asio::steady_timer> shutDownTimer=boost::make_shared<boost::asio::steady_timer>(m_ioService);
+    shutDownTimer->expires_from_now(boost::chrono::seconds(3));
+    shutDownTimer->async_wait([this, shutDownTimer](const boost::system::error_code&)
+    {
+        m_ioService.stop();
+    });
 
     lllog(5)<<"all connections closed..."<<std::endl;
 }
