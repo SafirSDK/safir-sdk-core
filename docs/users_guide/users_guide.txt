@@ -2791,8 +2791,8 @@ When an application has several connections to the Dob, only one of them should 
 
 [[safir_websocket]]
 == Safir WebSocket/JSON-RPC interface
-From version 6.3 of Safir SDK Core, a JSON-RPC interface over WebSockets is provided as an alternative to the legacy language inerfaces. The interface is an implementation of the JSON-RPC specification 2.0 (http://www.jsonrpc.org/specification) and uses WebSockets https://tools.ietf.org/html/rfc6455[(RFC 6455)] as carrier.
-Most of the common DOB features are available such as subscribing to entities and messages, sending messages, send or handle request, register as handler of entities, and some typesystem operations.
+From version 6.3 of Safir SDK Core, a JSON-RPC interface over WebSockets is provided as an alternative to the traditional language interfaces. The interface is an implementation of the JSON-RPC specification 2.0 (http://www.jsonrpc.org/specification) and uses WebSockets https://tools.ietf.org/html/rfc6455[(RFC 6455)] as carrier.
+Most of the common DOB features are available such as subscribing to entities and messages, sending messages, sending and handling requests, registering as a handler of entities, and some typesystem operations.
 If you are not familiair with JSON-RPC, It is strongly recomended to read the JSON-RPC 2.0 Specification. Its a simple protocol and the specification is short and easy to read, it won’t take more than about 10 minutes to read it.
 
 The API is explained in full detail in <<appendix_b>>, but basically the API consists of 3 types of messages:
@@ -2800,12 +2800,12 @@ The API is explained in full detail in <<appendix_b>>, but basically the API con
 * Requests - sent from client to server.
 * Responses - sent from server to client as a response to a request.
 * Notifications - sent from server to notify client when something happens.
- 
-The PROS of using the WebSocket/JSON-RPC interface is that no runtime libraries has to be installed, and the interface is accessible from any language or platform that supports WebSockets. That makes Safir available almost everywhere including web browsers and mobile apps.
 
-The CONS are worse performance and that you dont get access to the most advanced features. The programming model may also be a bit ackward in some situations.  
+The pros of using the WebSocket/JSON-RPC interface is that no runtime libraries has to be installed, and the interface is accessible from any language or platform that supports WebSockets. That makes Safir available almost everywhere including web browsers and mobile apps.
 
-The functioality described above is provided by _safir_websocket_. It has a configuration file Safir.Websocket.Parameters.dou where the ip address and port for the server is set. 
+The cons are worse performance and that you don't get access to the most advanced features. The programming model may also be a bit awkward in some situations.
+
+The functioality described above is provided by the executable _safir_websocket_. It has a configuration file Safir.Websocket.Parameters.dou where the ip address and port for the server is set.
 
 [[configuration]]
 == Configuration
@@ -3524,7 +3524,7 @@ In order to get system information, the GUI needs another program, +safir_status
 
 +safir_control_gui+ communicates with the local +safir_status+ program which means that both programs must execute on the same node. However, it is perfectly ok to start these programs on all (or a subset) of the nodes that constitue the system. The Node Control GUI on any node can be used to view the status of the complete system as well as to stop a specific node or all nodes.
 
-<<node_control_overview>> shows a system with 3 nodes. In this case all three Safir nodes run on the local computer using the loopback address. 
+<<node_control_overview>> shows a system with 3 nodes. In this case all three Safir nodes run on the local computer using the loopback address.
 
 [[node_control_overview]]
 .Node Control screen shot
@@ -3541,7 +3541,7 @@ endif::backend-docbook[]
 === Start
 The Dob is started by running the executable +safir_control+. This program will in turn start the executable that is the real framework workhorse, +dose_main+.
 
-How and when +safir_control+ is started is outside the control of Safir SDK Core. For example, the program can be started by a script at computer start-up or manually in a terminal window. 
+How and when +safir_control+ is started is outside the control of Safir SDK Core. For example, the program can be started by a script at computer start-up or manually in a terminal window.
 
 ==== Why isn't there any support for start of applications?
 You may wonder why there isn't any support for starting applications. The answer is that there are plans for this but as of today this is not implemented.
@@ -4263,7 +4263,7 @@ include::example_applications.txt[]
 == Appendix B: DOB WebSocket/JSON-RPC API reference
 
 ////
-WebSocket/JSON-RPC Api reference is located in a separate file, websocket_api_reference.txt 
+WebSocket/JSON-RPC Api reference is located in a separate file, websocket_api_reference.txt
 ////
 
 include::websocket_api_reference.txt[]
