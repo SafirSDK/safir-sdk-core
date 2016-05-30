@@ -1,4 +1,18 @@
 -----------------------------------------------------------------------------------------------------------------------
+2016-05-30 version 6.3
+-----------------------------------------------------------------------------------------------------------------------
+
+This release fixes the following issues (see http://safirsdkcore.com for details):
+
+#297 Add WebSockets interface to Dob enhancement
+#290 Add possibility to open external programs in Sate
+#285 DobExplorer and Sate should be installed with runtime part of Core enhancement
+#283 Dobmake sometimes fails when there is an override in typesystem.ini bug
+#275 It is possible to trick System Picture into believing a node is ok, even if communication is degraded Important
+#251 Google Breakpad code has moved, use new location!
+#299 VS2015 installer readme has incorrect line endings.
+
+-----------------------------------------------------------------------------------------------------------------------
 2016-05-05 version 6.2.1
 -----------------------------------------------------------------------------------------------------------------------
 
