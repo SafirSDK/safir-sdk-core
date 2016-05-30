@@ -33,7 +33,7 @@ parser.add_argument("--safir-control", required=True)
 parser.add_argument("--dose_main", required=True)
 parser.add_argument("--dope_main", required=True)
 parser.add_argument("--safir-websocket", required=True)
-parser.add_argument("--websocket-test-client", required=True)
+parser.add_argument("--websocket-stresstest", required=True)
 parser.add_argument("--safir-show-config", required=True)
 parser.add_argument("--safir-generated-paths", required=True)
 
@@ -52,9 +52,9 @@ env = TestEnv(safir_control = arguments.safir_control,
 with TestEnvStopper(env):
     env.launchProcess("safir_websocket", arguments.safir_websocket)
     time.sleep(60)
-    client = env.launchProcess("safir_websocket_test_client", arguments.websocket_test_client)
+    client = env.launchProcess("safir_websocket_stresstest", (arguments.websocket_stresstest,str(100),str(10),str(25)))
     client.wait()
-    print(env.Output("safir_websocket_test_client"))
+    print(env.Output("safir_websocket_stresstest"))
 
 if not env.ReturnCodesOk():
     print("Some process exited with an unexpected value")
