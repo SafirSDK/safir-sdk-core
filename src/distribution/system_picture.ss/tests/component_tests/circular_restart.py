@@ -87,7 +87,7 @@ def launch_node(master, ownip, nodetype, num_nodes, masterip = None, revolutions
                             stdout = output,
                             stderr = subprocess.STDOUT,
                             env = env,
-                            preexec_fn=os.setsid,
+                            preexec_fn = None if sys.platform == "win32" else os.setsid,
                             creationflags = subprocess.CREATE_NEW_PROCESS_GROUP if sys.platform == "win32" else 0)
     return proc
 
