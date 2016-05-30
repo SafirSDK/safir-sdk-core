@@ -25,6 +25,6 @@ ADD_TEST(NAME websocket_stress_test
 
 #uses the same config files as component tests
 SET_SAFIR_TEST_PROPERTIES(TEST websocket_stress_test
-  TIMEOUT 240
+  TIMEOUT 600
   CONFIG_OVERRIDE ${CMAKE_CURRENT_SOURCE_DIR}/../test_client/test_config)
 
