@@ -50,11 +50,12 @@ env = TestEnv(safir_control = arguments.safir_control,
               dope_main = arguments.dope_main,
               safir_show_config = arguments.safir_show_config)
 with TestEnvStopper(env):
-    env.launchProcess("safir_websocket", arguments.safir_websocket)
+    server = env.launchProcess("safir_websocket", arguments.safir_websocket)
     time.sleep(60)
     client = env.launchProcess("safir_websocket_test_client", arguments.websocket_test_client)
     client.wait()
     print(env.Output("safir_websocket_test_client"))
+    server.wait()
 
 if not env.ReturnCodesOk():
     print("Some process exited with an unexpected value")
