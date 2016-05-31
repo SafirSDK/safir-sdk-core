@@ -45,10 +45,21 @@ WebsocketServer::WebsocketServer(boost::asio::io_service& ioService)
     ,m_ioService(ioService)
     ,m_work(new boost::asio::io_service::work(m_ioService))
     ,m_connections()
-    ,m_signals(m_ioService, SIGINT, SIGABRT, SIGTERM)
+    ,m_signals(m_ioService)
     ,m_dobConnection()
     ,m_dobDispatcher(m_dobConnection, m_ioService)
 {
+#if defined (_WIN32)
+    m_signals.add(SIGABRT);
+    m_signals.add(SIGBREAK);
+    m_signals.add(SIGINT);
+    m_signals.add(SIGTERM);
+#else
+    m_signals.add(SIGQUIT);
+    m_signals.add(SIGINT);
+    m_signals.add(SIGTERM);
+    m_signals.add(SIGABRT);
+#endif
 }
 
 void WebsocketServer::Run()
