@@ -64,6 +64,11 @@ with TestEnvStopper(env):
     server.wait()
     log("Exited, will now exit testenv.")
 
+syslog_output = env.Syslog()
+if len(syslog_output) != 0:
+    log("Unexpected syslog output:\n" + syslog_output)
+    sys.exit(1)
+
 if not env.ReturnCodesOk():
     log("Some process exited with an unexpected value")
     sys.exit(1)
