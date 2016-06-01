@@ -63,7 +63,7 @@ def mkdir(newdir):
             os.mkdir(newdir)
 
 
-def launch_node(master, ownip, nodetype, num_nodes, masterip = None, revolutions = None, number = None):
+def launch_node(master, ownip, nodetype, num_nodes, only_control, masterip = None, revolutions = None, number = None):
     command = ["system_picture_component_test_node",]
     env = os.environ.copy()
     if master:
@@ -73,6 +73,9 @@ def launch_node(master, ownip, nodetype, num_nodes, masterip = None, revolutions
         command += ("--seed", masterip,
                     "--number", str(number))
         env["SAFIR_INSTANCE"] = str(number+1000)
+
+    if only_control:
+        command.append("--only-control")
 
     command += ("--node-type", str(nodetype),
                 "--address", ownip,
@@ -115,7 +118,8 @@ class MasterNode(object):
                                     ownip = args.own_ip,
                                     nodetype=2,
                                     num_nodes=args.total_nodes,
-                                    revolutions = args.revolutions)
+                                    revolutions = args.revolutions,
+                                    only_control = args.only_control)
         self.returncode = None
         self.launched = args.start == 0
 
@@ -143,7 +147,8 @@ class SlaveNode(object):
                                 num_nodes = args.total_nodes,
                                 ownip = args.own_ip,
                                 masterip = args.seed_ip,
-                                nodetype= number%2 +1)
+                                nodetype= number % 2 +1,
+                                only_control = args.only_control)
         self.returncode = None
 
     def failed(self):
@@ -203,6 +208,10 @@ def parse_arguments():
     parser.add_argument("--seed-ip",
                         default="127.0.0.1",
                         help="Ip address of seed node")
+    parser.add_argument("--only-control",
+                        action="store_true",
+                        default=False,
+                        help="Start only the control part of the nodes")
 
     return parser.parse_args()
 

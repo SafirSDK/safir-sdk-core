@@ -115,6 +115,8 @@ public:
             ("help,h", "show help message")
             ("master",
              "Is the node a master. If not specified the node will be a slave")
+            ("only-control",
+             "Don't start the dose_main part of the node")
             ("address",
              value<std::string>(&address)->default_value("127.0.0.1"),
              "Address and port of the control channel")
@@ -156,6 +158,7 @@ public:
         }
 
         master = vm.count("master") != 0;
+        start_main = vm.count("only-control") == 0;
 
         if (vm.count("number-of-nodes") == 0 ||
             vm.count("node-type") == 0)
@@ -187,6 +190,7 @@ public:
     std::string controlAddress;
     std::string dataAddress;
     bool master;
+    bool start_main;
     std::string seed;
     int number;
     int numberOfNodes;
@@ -256,6 +260,11 @@ public:
 
     void Start()
     {
+        if (m_communication == nullptr)
+        {
+            return;
+        }
+
         m_communication->Start();
 
         for (int i = 0; i < 2; ++i)
@@ -610,6 +619,10 @@ public:
         , m_timerStopped(false)
         , m_receivedBytes(0)
     {
+        if (!options.start_main)
+        {
+            return;
+        }
         m_injectedNodes.insert(id);//consider ourselves already injected
 
         m_communication.reset(new Safir::Dob::Internal::Com::Communication
@@ -667,6 +680,10 @@ public:
 
     void Stop()
     {
+        if (m_communication == nullptr)
+        {
+            return;
+        }
         m_sendTimer.cancel();
         m_timerStopped = true;
         StopCommon();
@@ -679,6 +696,10 @@ public:
 
     bool Success() const
     {
+        if (m_communication == nullptr)
+        {
+            return true;
+        }
         return SuccessCommon() && m_receivedBytes != 0;
     }
 private:
@@ -731,10 +752,6 @@ private:
 };
 
 
-
-
-
-
 int main(int argc, char * argv[])
 {
     log << "Pid: " << Safir::Utilities::ProcessInfo::GetPid() << std::endl;
@@ -771,7 +788,7 @@ int main(int argc, char * argv[])
         signalSet.async_wait([&work](const boost::system::error_code& error,
                                      const int /*signal_number*/)
                              {
-                                 if (!!error) //fix for ws2012 warning
+                                 if (!!error && work != nullptr) //fix for ws2012 warning
                                  {
                                      log << "Got a signals error: " << error << std::endl;
                                  }
