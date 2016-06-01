@@ -111,17 +111,18 @@ class TestEnv:
                 log("----------------------------")
                 log("Will keep waiting")
 
-    def launchProcess(self, name, cmd):
+    def launchProcess(self, name, cmd, collect_output = True):
         log("Launching", name)
         proc = subprocess.Popen(cmd,
-                                stdout = subprocess.PIPE,
-                                stderr = subprocess.STDOUT,
+                                stdout = subprocess.PIPE if collect_output else None,
+                                stderr = subprocess.STDOUT if collect_output else None,
                                 creationflags = self.__creationflags,
                                 universal_newlines = True)
         queue = Queue()
-        thread = Thread(target=enqueue_output, args=(proc.stdout, queue))
-        thread.daemon = True #Thread dies with program, no need to stop explicitly
-        thread.start()
+        if collect_output:
+            thread = Thread(target=enqueue_output, args=(proc.stdout, queue))
+            thread.daemon = True #Thread dies with program, no need to stop explicitly
+            thread.start()
 
         self.__procs[name] = (proc,queue,list())
         return proc
