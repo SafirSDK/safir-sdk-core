@@ -58,7 +58,6 @@ WebsocketServer::WebsocketServer(boost::asio::io_service& ioService)
     m_signals.add(SIGQUIT);
     m_signals.add(SIGINT);
     m_signals.add(SIGTERM);
-    m_signals.add(SIGABRT);
 #endif
 }
 

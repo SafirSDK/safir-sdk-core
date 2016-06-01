@@ -28,6 +28,10 @@ import os, sys, argparse, time
 #pylint: disable=E0401
 from testenv import TestEnv, TestEnvStopper
 
+def log(*args, **kwargs):
+    print(*args, **kwargs)
+    sys.stdout.flush()
+
 parser = argparse.ArgumentParser("test script")
 parser.add_argument("--safir-control", required=True)
 parser.add_argument("--dose_main", required=True)
@@ -42,7 +46,7 @@ arguments = parser.parse_args()
 #add all the environment variables. passed on format A=10;B=20
 for pair in arguments.safir_generated_paths.split(";"):
     (name,value) = pair.split("=")
-    print("Setting environment variable", name, "to", value)
+    log("Setting environment variable", name, "to", value)
     os.environ[name] = value
 
 env = TestEnv(safir_control = arguments.safir_control,
@@ -53,12 +57,15 @@ with TestEnvStopper(env):
     server = env.launchProcess("safir_websocket", arguments.safir_websocket)
     time.sleep(60)
     client = env.launchProcess("safir_websocket_test_client", arguments.websocket_test_client)
+    log("Waiting for test client to exit")
     client.wait()
-    print(env.Output("safir_websocket_test_client"))
+    log("Test client output:\n",env.Output("safir_websocket_test_client"))
+    log("Waiting for safir_websocket to exit")
     server.wait()
+    log("Exited, will now exit testenv.")
 
 if not env.ReturnCodesOk():
-    print("Some process exited with an unexpected value")
+    log("Some process exited with an unexpected value")
     sys.exit(1)
 
 sys.exit(0)
