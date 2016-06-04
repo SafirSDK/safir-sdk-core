@@ -98,7 +98,7 @@ namespace
                 }
                 else if (state.GetType()==DistributionData::Action_Disconnect)
                 {
-                    lllog(4)<<"ConnectionHandler - RemoveConnection "<<state.GetConnectionName()<<std::endl;
+                    lllog(4)<<"ConnectionHandler - RemoveConnection "<<state.GetSenderId()<<std::endl;
                     const ConnectionPtr connection = Connections::Instance().GetConnection(state.GetSenderId(), std::nothrow);
                     if (connection == nullptr)
                     {

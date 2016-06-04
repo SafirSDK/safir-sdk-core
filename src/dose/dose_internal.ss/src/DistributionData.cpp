@@ -958,6 +958,7 @@ namespace Internal
 
     const char * const DistributionData::GetConnectionName() const
     {
+        ENSURE(GetType() == Action_Connect, << "GetConnectionName is only valid for Connect messages");
         return GetData() + sizeof(ConnectHeader);
     }
 
