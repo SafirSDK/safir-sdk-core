@@ -624,11 +624,11 @@ BOOST_AUTO_TEST_CASE( three_nodes_remove_elected )
 BOOST_AUTO_TEST_CASE( lots_of_nodes )
 {
 #if !defined(NDEBUG) || defined(__arm__)
-    const int numNodes = 50;
+    const int numNodes = 10;
 #elif defined(_MSC_VER)
-    const int numNodes = 100;
+    const int numNodes = 20;
 #else
-    const int numNodes = 500;
+    const int numNodes = 100;
 #endif
 
     //remember that one node is automatically added by the fixture
@@ -656,11 +656,11 @@ BOOST_AUTO_TEST_CASE( lots_of_nodes )
 BOOST_AUTO_TEST_CASE( lots_of_nodes_remove_some )
 {
 #if !defined(NDEBUG) || defined(__arm__)
-    const int numNodes = 50;
+    const int numNodes = 10;
 #elif defined(_MSC_VER)
-    const int numNodes = 100;
+    const int numNodes = 20;
 #else
-    const int numNodes = 500;
+    const int numNodes = 100;
 #endif
 
     //remember that one node is automatically added by the fixture
@@ -709,7 +709,7 @@ BOOST_AUTO_TEST_CASE( lots_of_nodes_remove_some )
 
 BOOST_AUTO_TEST_CASE( remove_during_election )
 {
-    const int numNodes = 50;
+    const int numNodes = 30;
 
     //remember that one node is automatically added by the fixture
     for (int i = 0; i < numNodes - 1 ; ++i)

@@ -32,11 +32,11 @@
 #include <boost/lexical_cast.hpp>
 
 #ifdef NDEBUG
-const int NUM_SMALL=100;
-const int NUM_BIG=10;
+const int NUM_SMALL=20;
+const int NUM_BIG=3;
 #else
-const int NUM_SMALL=10;
-const int NUM_BIG=2;
+const int NUM_SMALL=5;
+const int NUM_BIG=1;
 #endif
 
 //disable stupid incorrect microsoft warning.

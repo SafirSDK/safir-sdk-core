@@ -24,7 +24,7 @@
 #
 ###############################################################################
 from __future__ import print_function
-import subprocess, os, time, sys, signal, re, argparse
+import os, time, sys, argparse
 from testenv import TestEnv, TestEnvStopper
 
 
@@ -51,18 +51,18 @@ env = TestEnv(safir_control = arguments.safir_control,
               dope_main = arguments.dope_main,
               safir_show_config = arguments.safir_show_config)
 with TestEnvStopper(env):
-    for i in range(95):
+    for i in range(50):
         env.launchProcess("stoppee_" + str(i),stoppee_path)
     while True:
         print("checking if all have started yet")
         done = True
-        for i in range(95):
+        for i in range(50):
             if env.Output("stoppee_" + str(i)).find("Connected") == -1:
                 print("Found one that has not started yet (" + str(i) + "), will keep checking")
                 done = False
                 break
         if done:
-            break;
+            break
         time.sleep(1)
 
 
