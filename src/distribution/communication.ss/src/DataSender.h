@@ -308,7 +308,7 @@ namespace Com
                 {
                     if (it->second.systemNode)
                     {
-                        lllog(5)<<m_logPrefix.c_str()<<" IncluedNode called for an already included node, nodeId: "<<boost::lexical_cast<std::wstring>(id)<<std::endl;
+                        lllog(5)<<m_logPrefix.c_str()<<" IncludeNode called for an already included node, nodeId: "<<boost::lexical_cast<std::wstring>(id)<<std::endl;
                     }
                     else
                     {
