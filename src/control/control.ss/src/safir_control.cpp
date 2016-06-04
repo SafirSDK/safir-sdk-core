@@ -190,7 +190,7 @@ int main(int argc, char * argv[])
     boost::shared_ptr<void> crGuard(static_cast<void*>(0),
                                     [](void*){Safir::Utilities::CrashReporter::Stop();});
 
-    boost::atomic<bool> success(true);
+    bool success = true;
 
     try
     {
@@ -211,45 +211,37 @@ int main(int argc, char * argv[])
         Safir::Utilities::CrashReporter::RegisterCallback(DumpFunc);
         Safir::Utilities::CrashReporter::Start();
 
-        // Set number of threads to 2. Control has an event driven design where parallell execution is of
-        // little use.
-        const auto nbrOfThreads = 2;
-
-        const auto run = [&ioService, &success]
-        {
-            try
-            {
-                ioService.run();
-                return;
-            }
-            catch (const std::exception & exc)
-            {
-                SEND_SYSTEM_LOG(Alert,
-                                << "CTRL: Caught 'std::exception' exception from io_service.run(): "
-                                << "  '" << exc.what() << "'.");
-                success.exchange(false);
-            }
-            catch (...)
-            {
-                SEND_SYSTEM_LOG(Alert,
-                                << "CTRL: Caught '...' exception from io_service.run().");
-                success.exchange(false);
-            }
-        };
+        //We can only run one thread. Boost.asio does not play well with multithreading and fork
+        //on Linux.
+        //For more info see
+        // http://www.boost.org/doc/libs/1_61_0/doc/html/boost_asio/reference/io_service/notify_fork.html
+        //If control ever needs to be multithreaded a possible solution could be to
+        //have it fork a child process before it spawns the threads. This child
+        //process could then be responsible for the forking.
+        //There is an example of this here:
+        // https://stackoverflow.com/questions/21529540/how-do-i-handle-fork-correctly-with-boostasio-in-a-multithreaded-program
 
         ControlApp controlApp(ioService, doseMainPath, options.id, options.ignoreControlCmd);
 
         (void)controlApp;  // to keep compilers from warning about unused variable
 
-        boost::thread_group threads;
-        for (unsigned int i = 0; i < nbrOfThreads-1; ++i)
+        try
         {
-            threads.create_thread(run);
+            ioService.run();
         }
-
-        run();
-
-        threads.join_all();
+        catch (const std::exception & exc)
+        {
+            SEND_SYSTEM_LOG(Alert,
+                            << "CTRL: Caught 'std::exception' exception from io_service.run(): "
+                            << "  '" << exc.what() << "'.");
+            success = false;
+        }
+        catch (...)
+        {
+            SEND_SYSTEM_LOG(Alert,
+                            << "CTRL: Caught '...' exception from io_service.run().");
+            success = false;
+        }
 
         crGuard.reset();
     }
@@ -258,13 +250,13 @@ int main(int argc, char * argv[])
         SEND_SYSTEM_LOG(Alert,
                         << "CTRL: Caught 'std::exception' exception: "
                         << "  '" << exc.what() << "'.");
-        success.exchange(false);
+        success = false;
     }
     catch (...)
     {
         SEND_SYSTEM_LOG(Alert,
                         << "CTRL: Caught '...' exception.");
-        success.exchange(false);
+        success = false;
     }
     if (success)
     {
