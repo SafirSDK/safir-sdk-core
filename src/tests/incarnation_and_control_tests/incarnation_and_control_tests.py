@@ -174,8 +174,9 @@ def checkConnectionToNodes(safir_instance, nodes):
 
 def waitForProcessExit(node):
     #try for one minute
-    for i in range(120):
+    for _ in range(120):
         if not envs[node].SafirControlRunning():
+            envs[node].killprocs()
             return
         time.sleep(0.5)
 
