@@ -640,6 +640,11 @@ namespace SP
             const auto now = boost::chrono::steady_clock::now();
             lllog(9) << "SP: GotReceive from node with id " << id <<", time = " << now << std::endl;
 
+            if (isHeartbeat)
+            {
+                lllog(7) << "SP: GotReceive heartbeat from node with id " << id <<", time = " << now << std::endl;
+            }
+
             const auto findIt = m_nodeTable.find(id);
 
             if (findIt == m_nodeTable.end())

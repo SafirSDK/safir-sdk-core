@@ -151,10 +151,12 @@ int main()
     }
     if (success)
     {
+        lllog(1) << "DOSE_MAIN: Exiting..." << std::endl;
         std::wcout << "DOSE_MAIN: Exiting..." << std::endl;
     }
     else
     {
+        lllog(1) << "DOSE_MAIN: Exiting due to error..." << std::endl;
         std::wcout << "DOSE_MAIN: Exiting due to error..." << std::endl;
     }
     return success ? 0 : 1;

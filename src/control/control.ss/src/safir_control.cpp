@@ -260,10 +260,12 @@ int main(int argc, char * argv[])
     }
     if (success)
     {
+        lllog(1) << "CTRL: Exiting..." << std::endl;
         std::wcout << "CTRL: Exiting..." << std::endl;
     }
     else
     {
+        lllog(1) << "CTRL: Exiting due to error..." << std::endl;
         std::wcout << "CTRL: Exiting due to error..." << std::endl;
     }
     return success ? 0 : 1;

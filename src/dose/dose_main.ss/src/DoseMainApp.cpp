@@ -122,6 +122,7 @@ namespace Internal
                                                                             }),
                                                               m_strand.wrap([this]()
                                                                             {
+                                                                                lllog(1) << "DOSE_MAIN: Got Stop command from control"<< std::endl;
                                                                                 Stop();
                                                                             })) );
 
@@ -136,6 +137,7 @@ namespace Internal
         //since there is no way to ignore it...
         ConsoleCtrlHandlerFcn = m_strand.wrap([this]()
         {
+            lllog(1) << "DOSE_MAIN: Got console Close button Stop"<< std::endl;
             Stop();
         });
         ::SetConsoleCtrlHandler(ConsoleCtrlHandler,TRUE);
