@@ -78,6 +78,7 @@ namespace Com
 
             m_socket.reset(new boost::asio::ip::udp::socket(m_strand.get_io_service()));
             m_socket->open(unicastEndpoint.protocol());
+            m_socket->set_option(boost::asio::ip::udp::socket::reuse_address(true));
             m_socket->bind(unicastEndpoint);
             m_socket->set_option(boost::asio::socket_base::receive_buffer_size(Parameters::SocketBufferSize));
 
