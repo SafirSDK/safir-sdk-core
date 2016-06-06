@@ -45,20 +45,20 @@ RemoteClient::RemoteClient(WsServer& server,
     ,m_connection(m_server.get_con_from_hdl(connectionHandle))
     ,m_onConnectionClosed(onClose)
     ,m_dob(m_strand, [=](const std::string& msg){SendToClient(msg);})
-    ,m_pingHandler(ioService, static_cast<int>(Safir::Websocket::Parameters::PingInterval()), [=]{m_connection->ping("");})
+    ,m_pingHandler(m_strand, static_cast<int>(Safir::Websocket::Parameters::PingInterval()), [=]{m_connection->ping("");})
     ,m_enableTypeSystem(Safir::Websocket::Parameters::EnableTypesystemCommands())
 {
-    m_connection->set_close_handler([=](websocketpp::connection_hdl hdl)
+    m_connection->set_close_handler([=](websocketpp::connection_hdl)
     {
-        m_strand.post([=]{OnClose(hdl);});
+        m_strand.post([=]{OnClose();});
     });
-    m_connection->set_fail_handler([=](websocketpp::connection_hdl hdl)
+    m_connection->set_fail_handler([=](websocketpp::connection_hdl)
     {
-        m_strand.post([=]{OnError(hdl);});
+        m_strand.post([=]{OnError();});
     });
-    m_connection->set_message_handler([=](websocketpp::connection_hdl hdl, WsMessage msg)
+    m_connection->set_message_handler([=](websocketpp::connection_hdl, WsMessage msg)
     {
-        m_strand.post([=]{OnMessage(hdl, msg);});
+        m_strand.post([=]{OnMessage(msg);});
     });
 
     m_pingHandler.Start();
@@ -77,6 +77,7 @@ void RemoteClient::Close()
         m_pingHandler.Stop();
         m_dob.Close();
         m_server.close(m_connectionHandle, websocketpp::close::status::normal, "onStopOrder");
+        //callback OnClose will be triggered an then cause this instance to be deleted.
     });
 }
 
@@ -88,10 +89,10 @@ std::string RemoteClient::ToString() const
 //------------------------------------------------------
 // Websocket events
 //------------------------------------------------------
-void RemoteClient::OnClose(websocketpp::connection_hdl hdl)
+void RemoteClient::OnClose()
 {
     //client closed connection
-    lllog(5)<<"RemoteClient.OnClose"<<std::endl;
+    lllog(5)<<"WS: RemoteClient.OnClose"<<std::endl;
     m_pingHandler.Stop();
     m_dob.Close();
 
@@ -101,7 +102,7 @@ void RemoteClient::OnClose(websocketpp::connection_hdl hdl)
     m_strand.post([=]{m_onConnectionClosed(this);});
 }
 
-void RemoteClient::OnError(websocketpp::connection_hdl hdl)
+void RemoteClient::OnError()
 {
     //client::connection_ptr con = m_client.get_con_from_hdl(hdl);
     std::ostringstream os;
@@ -117,12 +118,12 @@ void RemoteClient::OnError(websocketpp::connection_hdl hdl)
     lllog(5)<<errorMsg.c_str()<<std::endl;
 }
 
-void RemoteClient::OnMessage(websocketpp::connection_hdl hdl, WsMessage msg)
+void RemoteClient::OnMessage(WsMessage msg)
 {
     try
     {
         auto payload=msg->get_payload();
-        lllog(5)<<"RemoteClient.OnMessage "<<payload.c_str()<<std::endl;
+        lllog(5)<<"WS: RemoteClient.OnMessage "<<payload.c_str()<<std::endl;
 
         JsonRpcRequest req(payload);
         try
@@ -311,15 +312,15 @@ void RemoteClient::WsDispatch(const JsonRpcRequest& req)
         RequestErrorException err(JsonRpcErrorCodes::SafirUnexpectedException, e.what());
         auto error=JsonRpcResponse::Error(req.Id(), err.Code(), err.Message(), err.Data());
         SendToClient(error);
-        SEND_SYSTEM_LOG(Error, <<"Got unexpected Safir exception: "<<error.c_str()<<std::endl);
-        lllog(5)<<"Got unexpected Safir exception: "<<error.c_str()<<std::endl;
+        SEND_SYSTEM_LOG(Error, <<"WS: Got unexpected Safir exception: "<<error.c_str()<<std::endl);
+        lllog(5)<<"WS: Got unexpected Safir exception: "<<error.c_str()<<std::endl;
     }
     catch (const std::exception& e)
     {
         RequestErrorException err(JsonRpcErrorCodes::ServerError, e.what());
         SendToClient(JsonRpcResponse::Error(req.Id(), err.Code(), err.Message(), err.Data()));
-        SEND_SYSTEM_LOG(Error, <<"Unexpected exception: "<<e.what()<<std::endl);
-        lllog(5)<<"Unexpected exception: "<<e.what()<<std::endl;
+        SEND_SYSTEM_LOG(Error, <<"WS: Unexpected exception: "<<e.what()<<std::endl);
+        lllog(5)<<"WS: Unexpected exception: "<<e.what()<<std::endl;
     }
 }
 

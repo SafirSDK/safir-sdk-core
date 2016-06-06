@@ -172,7 +172,7 @@ public:
         }
         catch (const std::exception&)
         {
-            lllog(5)<<"DobConnection::GetName. Type not found. TypeId"<<typeId<<std::endl;
+            lllog(5)<<"WS: DobConnection::GetName. Type not found. TypeId"<<typeId<<std::endl;
             return "<unknown_type>";
         }
     }

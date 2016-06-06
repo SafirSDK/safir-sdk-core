@@ -33,7 +33,8 @@ class PingHandlerTest
 public:
     PingHandlerTest()
         :m_work(new boost::asio::io_service::work(m_ioService))
-        ,m_pingHandler(m_ioService, interval, [=]{OnPing();})
+        ,m_strand(m_ioService)
+        ,m_pingHandler(m_strand, interval, [=]{OnPing();})
     {
         m_ioService.dispatch([=]{m_pingHandler.Start();});
         m_pingTime=boost::chrono::steady_clock::now();
@@ -44,6 +45,7 @@ private:
     static const int interval=1;
     boost::asio::io_service m_ioService;
     boost::shared_ptr<boost::asio::io_service::work> m_work;
+    boost::asio::strand m_strand;
     boost::chrono::steady_clock::time_point m_pingTime;
     PingHandler m_pingHandler;
 

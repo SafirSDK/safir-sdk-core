@@ -43,6 +43,7 @@ namespace ws = Safir::Websocket;
 WebsocketServer::WebsocketServer(boost::asio::io_service& ioService)
     :m_server()
     ,m_ioService(ioService)
+    ,m_connectionsStrand(m_ioService)
     ,m_work(new boost::asio::io_service::work(m_ioService))
     ,m_connections()
     ,m_signals(m_ioService)
@@ -65,7 +66,7 @@ void WebsocketServer::Run()
 {    
     m_signals.async_wait([=](const boost::system::error_code&, int /*signal*/){Terminate();});
 
-    lllog(5)<<"Wait for DOB to let us open a connection..."<<std::endl;
+    lllog(5)<<"WS: Wait for DOB to let us open a connection..."<<std::endl;
     m_dobConnection.Open(L"safir_websocket", L"", 0, this, &m_dobDispatcher);
 
     // Initialize ASIO
@@ -78,16 +79,15 @@ void WebsocketServer::Run()
     m_server.set_open_handler([=](websocketpp::connection_hdl hdl)
     {        
         auto con=boost::make_shared<RemoteClient>(m_server, m_ioService, hdl, [=](const RemoteClient* con){OnConnectionClosed(con);});
-        m_connections.insert(con);
-        lllog(5)<<"Server: new connection added: "<<con->ToString().c_str()<<std::endl;
-        PrintConnections();
+        OnConnectionOpen(con);
+        lllog(5)<<"WS: Server: new connection added: "<<con->ToString().c_str()<<std::endl;
     });
 
     std::string ip="";
     unsigned short port=0;
     if (!IpAddressHelper::SplitAddress(ts::Utilities::ToUtf8(ws::Parameters::ServerEndpoint()), ip, port))
     {
-        lllog(5)<<"ServerEndpoint from configuration could not be parsed as a valid ip address and port. Expected format is <ip>:<port>"<<std::endl;
+        lllog(5)<<"WS: ServerEndpoint from configuration could not be parsed as a valid ip address and port. Expected format is <ip>:<port>"<<std::endl;
         SEND_SYSTEM_LOG(Error, <<"ServerEndpoint from configuration could not be parsed as a valid ip address and port. Expected format is <ip>:<port>"<<std::endl);
         std::cout<<"ServerEndpoint from configuration could not be parsed as a valid ip address and port. Expected format is <ip>:<port>"<<std::endl;
         return;
@@ -100,7 +100,7 @@ void WebsocketServer::Run()
     }
     catch (const std::exception& e)
     {
-        lllog(5)<<"Could not create server endpoint. "<<e.what()<<std::endl;
+        lllog(5)<<"WS: Could not create server endpoint. "<<e.what()<<std::endl;
         SEND_SYSTEM_LOG(Error, <<"Could not create server endpoint. "<<e.what()<<std::endl);
         std::cout<<"Could not create server endpoint. "<<e.what()<<std::endl;
         return;
@@ -111,28 +111,30 @@ void WebsocketServer::Run()
     // Start the server accept loop
     m_server.start_accept();
 
-    lllog(5)<<"Running ws server on "<<serverTcpEndpoint.address().to_string().c_str()<<":"<<serverTcpEndpoint.port()<<std::endl;
+    lllog(5)<<"WS: Running ws server on "<<serverTcpEndpoint.address().to_string().c_str()<<":"<<serverTcpEndpoint.port()<<std::endl;
     std::cout<<"Running ws server on "<<serverTcpEndpoint.address().to_string().c_str()<<":"<<serverTcpEndpoint.port()<<std::endl;
 }
 
 void WebsocketServer::Terminate()
 {
-    lllog(5)<<"safir_websocket is starting to shut down..."<<std::endl;    
-
+    lllog(5)<<"WS: safir_websocket is starting to shut down..."<<std::endl;
     //stop accepting new connections
     m_server.stop_listening();
-
-    //close all existing connections
-    for (auto it = m_connections.begin(); it != m_connections.end(); ++it)
-    {
-        (*it)->Close();
-    }
 
     //close this dob connection
     if (m_dobConnection.IsOpen())
     {
         m_dobConnection.Close();
     }
+
+    m_connectionsStrand.post([=]
+    {
+        //close all existing connections
+        for (auto it = m_connections.begin(); it != m_connections.end(); ++it)
+        {
+            (*it)->Close();
+        }
+    });
 
     m_work.reset();
 
@@ -141,32 +143,48 @@ void WebsocketServer::Terminate()
     shutDownTimer->expires_from_now(boost::chrono::seconds(3));
     shutDownTimer->async_wait([this, shutDownTimer](const boost::system::error_code&)
     {
-        m_ioService.stop();
+        m_connectionsStrand.post([=]{m_server.stop();});
     });
 
-    lllog(5)<<"all connections closed..."<<std::endl;
+    lllog(5)<<"WS: all connections closed..."<<std::endl;
+}
+
+void WebsocketServer::OnConnectionOpen(const boost::shared_ptr<RemoteClient>& con)
+{
+    m_connectionsStrand.post([=]
+    {
+        m_connections.insert(con);
+        PrintConnections();
+    });
 }
 
 void WebsocketServer::OnConnectionClosed(const RemoteClient* con)
 {
-    auto it=std::find_if(m_connections.begin(), m_connections.end(), [&](const boost::shared_ptr<RemoteClient>& p){return p.get()==con;});
-
-    if (it!=m_connections.end())
+    m_connectionsStrand.post([=]
     {
-        lllog(5)<<"Connection closed: "<<con->ToString().c_str()<<std::endl;
-        m_connections.erase(it);
-    }
-    else
-    {
-        lllog(5)<<"Closed connection was not found."<<std::endl;
-    }
+        auto it=std::find_if(m_connections.begin(), m_connections.end(), [&](const boost::shared_ptr<RemoteClient>& p){return p.get()==con;});
 
-    PrintConnections();
+        if (it!=m_connections.end())
+        {
+            lllog(5)<<"WS: Connection closed: "<<con->ToString().c_str()<<std::endl;
+            m_connections.erase(it);
+
+            if (m_connections.empty())
+            {
+                lllog(5)<<"WS: Last connection removed"<<std::endl;
+            }
+        }
+        else
+        {
+            lllog(5)<<"WS: Closed connection was not found."<<std::endl;
+        }
+
+    });
 }
 
 void WebsocketServer::OnStopOrder()
 {
-    lllog(5)<<"WebsocketServer got StopOrder. All connected client will be disconnected."<<std::endl;
+    lllog(5)<<"WS: WebsocketServer got StopOrder. All connected client will be disconnected."<<std::endl;
     Terminate();
 }
 
@@ -174,7 +192,7 @@ void WebsocketServer::PrintConnections() const
 {
     if (Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().LogLevel() >= 5)
     {
-        lllog(5)<<"----- Connections -----"<<std::endl;
+        lllog(5)<<"WS: ----- Connections -----"<<std::endl;
         for (auto it = m_connections.begin(); it != m_connections.end(); ++it)
         {
             lllog(5)<<(*it)->ToString().c_str()<<std::endl;

@@ -117,7 +117,7 @@ private:
             }
             else
             {
-                std::cout<<"****** Running Userts *********"<<std::endl;
+                std::cout<<"****** Running Users *********"<<std::endl;
                 for (auto it=m_users.begin(); it!=m_users.end(); ++it)
                 {
                     std::cout<<"USER_"<<it->first<<std::endl;
@@ -130,7 +130,10 @@ private:
     void StartUser()
     {
         ++m_userCount;
-        std::cout<<"TestManager: Start user number "<<m_userCount<<std::endl;
+        if (m_userCount%100==0)
+        {
+            std::cout<<"TestManager: Start user number "<<m_userCount<<std::endl;
+        }
          m_users[m_userCount]=boost::make_shared<ServiceUser>(m_userCount, m_requestsPerUser, [=](int id, bool fail){UserDone(id, fail);});
          m_users[m_userCount]->Run();
     }

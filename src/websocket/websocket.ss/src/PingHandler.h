@@ -39,13 +39,13 @@
 class PingHandler
 {
 public:
-    PingHandler(boost::asio::io_service& ioService, int interval, const boost::function<void()>& sendPing)
+    PingHandler(boost::asio::strand& strand, int interval, const boost::function<void()>& sendPing)
         :m_running(false)
-        ,m_strand(ioService)
+        ,m_strand(strand)
         ,m_sendPing(sendPing)
         ,m_pingInterval(interval)
         ,m_lastSendTime(boost::chrono::steady_clock::now())
-        ,m_timer(ioService)
+        ,m_timer(strand.get_io_service())
     {
     }
 
@@ -63,8 +63,11 @@ public:
     {
         m_strand.dispatch([=]
         {
-            m_running=false;
-            m_timer.cancel();
+            if (m_running)
+            {
+                m_running=false;
+                m_timer.cancel();
+            }
         });
     }
 
@@ -75,7 +78,7 @@ public:
 
 private:
     bool m_running;
-    boost::asio::io_service::strand m_strand;
+    boost::asio::io_service::strand& m_strand;
     boost::function<void()> m_sendPing;
     boost::chrono::seconds m_pingInterval;
     boost::chrono::steady_clock::time_point m_lastSendTime;
