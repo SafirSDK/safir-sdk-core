@@ -142,7 +142,7 @@ private:
 
 int main(int argc, const char** argv)
 {
-    if (argc!=4)
+    if (argc<4)
     {
         std::cout<<"Usage:  safir_websocket_stresstest <total_num_users> <simultaneous_users> <requests_per_user>"<<std::endl;
         return 0;
@@ -151,13 +151,15 @@ int main(int argc, const char** argv)
     int totalNumUsers=boost::lexical_cast<int>(argv[1]);
     int simultaneousUsers=boost::lexical_cast<int>(argv[2]);
     int reqPerUser=boost::lexical_cast<int>(argv[3]);
+    int repeatTest= argc>4 ? boost::lexical_cast<int>(argv[4]) : 1;
 
-    Test test(totalNumUsers, simultaneousUsers, reqPerUser);
-    test.Run();
-
-    boost::this_thread::sleep_for(boost::chrono::seconds(2)); //let io_service stop
-
-    std::cout<<"Test passed!"<<std::endl;
+    for (int i=0; i<repeatTest; ++i)
+    {
+        Test test(totalNumUsers, simultaneousUsers, reqPerUser);
+        test.Run();
+        boost::this_thread::sleep_for(boost::chrono::seconds(2)); //let io_service stop
+        std::cout<<"Test #"<<(i+1)<<" passed!"<<std::endl;
+    }
 
     return 0;
 }
