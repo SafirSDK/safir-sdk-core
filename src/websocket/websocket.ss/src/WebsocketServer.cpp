@@ -162,7 +162,8 @@ void WebsocketServer::OnConnectionClosed(const RemoteClient* con)
 {
     m_connectionsStrand.post([=]
     {
-        auto it=std::find_if(m_connections.begin(), m_connections.end(), [&](const boost::shared_ptr<RemoteClient>& p){return p.get()==con;});
+        auto it=std::find_if(m_connections.begin(), m_connections.end(),
+                             [&](const boost::shared_ptr<RemoteClient>& p) -> bool {return p.get()==con;});
 
         if (it!=m_connections.end())
         {
