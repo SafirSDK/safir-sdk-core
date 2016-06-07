@@ -77,7 +77,7 @@ void WebsocketServer::Run()
     m_server.set_reuse_addr(true);
 
     m_server.set_open_handler([=](websocketpp::connection_hdl hdl)
-    {        
+    {
         auto con=boost::make_shared<RemoteClient>(m_server, m_ioService, hdl, [=](const RemoteClient* con){OnConnectionClosed(con);});
         OnConnectionOpen(con);
         lllog(5)<<"WS: Server: new connection added: "<<con->ToString().c_str()<<std::endl;
@@ -161,7 +161,7 @@ void WebsocketServer::OnConnectionOpen(const boost::shared_ptr<RemoteClient>& co
 void WebsocketServer::OnConnectionClosed(const RemoteClient* con)
 {
     //vs2010 cannot handle nested lambdas, so we need to create the find_if predicate here.
-	std::function<bool(const boost::shared_ptr<RemoteClient>&)> pred =
+    std::function<bool(const boost::shared_ptr<RemoteClient>&)> pred =
         [con](const boost::shared_ptr<RemoteClient>& p) {return p.get()==con;};
 
     m_connectionsStrand.post([=]
