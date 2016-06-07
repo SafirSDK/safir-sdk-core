@@ -28,6 +28,7 @@
 #pragma warning (disable: 4267)
 #endif
 
+#include <boost/enable_shared_from_this.hpp>
 #include <boost/function.hpp>
 #include <boost/asio.hpp>
 #include <boost/asio/steady_timer.hpp>
@@ -36,7 +37,7 @@
 #pragma warning (pop)
 #endif
 
-class PingHandler
+class PingHandler : public boost::enable_shared_from_this<PingHandler>
 {
 public:
     PingHandler(boost::asio::strand& strand, int interval, const boost::function<void()>& sendPing)
@@ -55,25 +56,25 @@ public:
         {
             m_running=true;
             m_timer.expires_from_now(m_pingInterval);
-            m_timer.async_wait(m_strand.wrap([=](const boost::system::error_code&){OnTimeout();}));
+            auto self(shared_from_this());
+            m_timer.async_wait(m_strand.wrap([self](const boost::system::error_code&){self->OnTimeout();}));
         });
     }
 
     void Stop()
     {
-        m_strand.dispatch([=]
+        //always called from strand
+        if (m_running)
         {
-            if (m_running)
-            {
-                m_running=false;
-                m_timer.cancel();
-            }
-        });
+            m_running = false;
+            m_timer.cancel();
+        }
     }
 
     void Update()
     {
-        m_strand.dispatch([=]{m_lastSendTime=boost::chrono::steady_clock::now();});
+        //always called from strand
+        m_lastSendTime = boost::chrono::steady_clock::now();
     }
 
 private:
@@ -100,7 +101,8 @@ private:
                 m_timer.expires_from_now(m_pingInterval-durationSinceSend);
             }
 
-            m_timer.async_wait(m_strand.wrap([=](const boost::system::error_code&){OnTimeout();}));
+            auto self(shared_from_this());
+            m_timer.async_wait(m_strand.wrap([self](const boost::system::error_code&){self->OnTimeout();}));
         }
     }
 };

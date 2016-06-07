@@ -63,7 +63,7 @@ WebsocketServer::WebsocketServer(boost::asio::io_service& ioService)
 }
 
 void WebsocketServer::Run()
-{    
+{
     m_signals.async_wait([=](const boost::system::error_code&, int /*signal*/){Terminate();});
 
     lllog(5)<<"WS: Wait for DOB to let us open a connection..."<<std::endl;
@@ -89,7 +89,7 @@ void WebsocketServer::Run()
     {
         lllog(5)<<"WS: ServerEndpoint from configuration could not be parsed as a valid ip address and port. Expected format is <ip>:<port>"<<std::endl;
         SEND_SYSTEM_LOG(Error, <<"ServerEndpoint from configuration could not be parsed as a valid ip address and port. Expected format is <ip>:<port>"<<std::endl);
-        std::cout<<"ServerEndpoint from configuration could not be parsed as a valid ip address and port. Expected format is <ip>:<port>"<<std::endl;
+        std::wcout<<L"ServerEndpoint from configuration could not be parsed as a valid ip address and port. Expected format is <ip>:<port>"<<std::endl;
         return;
     }
 
@@ -102,7 +102,7 @@ void WebsocketServer::Run()
     {
         lllog(5)<<"WS: Could not create server endpoint. "<<e.what()<<std::endl;
         SEND_SYSTEM_LOG(Error, <<"Could not create server endpoint. "<<e.what()<<std::endl);
-        std::cout<<"Could not create server endpoint. "<<e.what()<<std::endl;
+        std::wcout<<L"Could not create server endpoint. "<<e.what()<<std::endl;
         return;
     }
 
@@ -112,7 +112,7 @@ void WebsocketServer::Run()
     m_server.start_accept();
 
     lllog(5)<<"WS: Running ws server on "<<serverTcpEndpoint.address().to_string().c_str()<<":"<<serverTcpEndpoint.port()<<std::endl;
-    std::cout<<"Running ws server on "<<serverTcpEndpoint.address().to_string().c_str()<<":"<<serverTcpEndpoint.port()<<std::endl;
+    std::wcout<<L"Running ws server on "<<serverTcpEndpoint.address().to_string().c_str()<<L":"<<serverTcpEndpoint.port()<<std::endl;
 }
 
 void WebsocketServer::Terminate()

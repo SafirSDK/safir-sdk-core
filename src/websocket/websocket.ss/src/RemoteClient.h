@@ -78,13 +78,16 @@ private:
     WsConnection m_connection;
     std::function<void(const RemoteClient*)> m_onConnectionClosed;
     DobConnection m_dob;
-    PingHandler m_pingHandler;
+    boost::shared_ptr<PingHandler> m_pingHandler;
     bool m_enableTypeSystem;
 
     inline void SendToClient(const std::string& msg)
     {
         m_connection->send(msg);
-        m_pingHandler.Update();
+        if (m_pingHandler)
+        {
+            m_pingHandler->Update();
+        }
     }
 
     //websocket events

@@ -45,7 +45,7 @@ RemoteClient::RemoteClient(WsServer& server,
     ,m_connection(m_server.get_con_from_hdl(connectionHandle))
     ,m_onConnectionClosed(onClose)
     ,m_dob(m_strand, [=](const std::string& msg){SendToClient(msg);})
-    ,m_pingHandler(m_strand, static_cast<int>(Safir::Websocket::Parameters::PingInterval()), [=]{m_connection->ping("");})
+    ,m_pingHandler(boost::make_shared<PingHandler>(m_strand, static_cast<int>(Safir::Websocket::Parameters::PingInterval()), [=]{m_connection->ping("");}))
     ,m_enableTypeSystem(Safir::Websocket::Parameters::EnableTypesystemCommands())
 {
     m_connection->set_close_handler([=](websocketpp::connection_hdl)
@@ -61,7 +61,7 @@ RemoteClient::RemoteClient(WsServer& server,
         m_strand.post([=]{OnMessage(msg);});
     });
 
-    m_pingHandler.Start();
+    m_pingHandler->Start();
 }
 
 
@@ -74,7 +74,7 @@ void RemoteClient::Close()
     //called from websocket server, usually means we have got a stop order from the DOB
     m_strand.post([=]
     {
-        m_pingHandler.Stop();
+        m_pingHandler->Stop();
         m_dob.Close();
         m_server.close(m_connectionHandle, websocketpp::close::status::normal, "onStopOrder");
         //callback OnClose will be triggered an then cause this instance to be deleted.
@@ -93,7 +93,7 @@ void RemoteClient::OnClose()
 {
     //client closed connection
     lllog(5)<<"WS: RemoteClient.OnClose"<<std::endl;
-    m_pingHandler.Stop();
+    m_pingHandler->Stop();
     m_dob.Close();
 
     //since m_onConnectionClosed will destruct this object, we must wrap it in a post to let all
