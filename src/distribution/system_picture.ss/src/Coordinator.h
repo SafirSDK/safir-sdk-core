@@ -340,7 +340,7 @@ namespace SP
         bool SystemStable() const
         {
             //get all node ids that we've heard about so far
-            std::set<int64_t> knownNodes;
+            std::set<int64_t> knownNodes; 
             knownNodes.insert(m_id); //include ourselves...
 
             for (int i = 0; i < m_lastStatistics.Size(); ++i)
@@ -382,10 +382,7 @@ namespace SP
             return true;
         }
 
-        //This fcn was originally meant to be const, but the m_badElectionIds thing
-        //no longer allows that, unfortunately.
-        //must be called in strand
-        bool CheckPrerequisites()
+        bool CheckPrerequisites() const
         {
             if (!m_lastStatisticsDirty)
             {
@@ -427,17 +424,6 @@ namespace SP
                     lllog(9) << "SP: Remote RAW data from node "
                              << m_lastStatistics.Id(i) << " has wrong election id ("
                              << remote.ElectionId() << "), not updating my state." << std::endl;
-                    m_badElectionIds.push_back(remote.ElectionId());
-                    if (std::count(m_badElectionIds.begin(), m_badElectionIds.end(), remote.ElectionId()) >= 3)
-                    {
-                        lllog(1) << "SP: Have received raw data with incorrect election id "
-                                 << remote.ElectionId()
-                                 << " three times, forcing reelection" << std::endl;
-
-                        m_badElectionIds.clear();
-                        m_electionHandler->ForceElection();
-                    }
-
                     return false;
                 }
             }
@@ -448,9 +434,6 @@ namespace SP
                 lllog(9) << "SP: System is not stable, not updating my state." << std::endl;
                 return false;
             }
-
-            //no bad election ids detected.
-            m_badElectionIds.clear();
 
             return true;
         }
@@ -615,7 +598,7 @@ namespace SP
             {
                 std::set<int64_t> died;
                 //handle nodes that have died since last state
-
+                
                 for (auto lln = lastLiveNodes.cbegin(); lln != lastLiveNodes.cend(); ++lln)
                 {
                     const auto findIt = deadNodes.find(lln->first);
@@ -849,7 +832,6 @@ namespace SP
         RawHandlerT& m_rawHandler;
 
         int m_failedStateUpdates;
-        std::vector<int64_t> m_badElectionIds;
     };
 
     //forward declarations
