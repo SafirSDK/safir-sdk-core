@@ -30,6 +30,7 @@
 #include <Safir/Dob/Internal/ControlConfig.h>
 #include <Safir/Utilities/Internal/Id.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
+#include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <boost/chrono.hpp>
 
 #ifdef _MSC_VER
@@ -327,6 +328,7 @@ namespace Control
 
         void HandleLocalNodeStop(CommandAction cmdAction)
         {
+            lllog(3) << "CTRL: StopHandler::HandleLocalNodeStop" << std::endl;
             m_localNodeStopInProgress = true;
             m_localNodeStopCmdAction = cmdAction;
 
@@ -355,6 +357,7 @@ namespace Control
 
         void HandleSystemStop(CommandAction cmdAction)
         {
+            lllog(3) << "CTRL: StopHandler::HandleSystemStop" << std::endl;
             m_systemStop = true;
 
             m_localNodeStopInProgress = true;
@@ -385,6 +388,7 @@ namespace Control
 
         void StopExternalNode(Control::CommandAction cmdAction, int64_t cmdNodeId, int64_t toNodeId)
         {
+            lllog(3) << "CTRL: StopHandler::StopExternalNode" << std::endl;
             auto nodeIt = m_nodeTable.find(toNodeId);
             if (nodeIt == m_nodeTable.end())
             {
@@ -502,6 +506,7 @@ namespace Control
                                              const boost::shared_ptr<const char[]>& data,
                                              const size_t size)
         {
+            lllog(3) << "CTRL: StopHandler::HandleStopOrderFromExternalNode" << std::endl;
             // Test/debug flag
             if (m_ignoreCmd)
             {
@@ -538,6 +543,7 @@ namespace Control
 
         void HandleStopNotificationFromExternalNode(const int64_t from)
         {
+            lllog(3) << "CTRL: StopHandler::HandleStopNotificationFromExternalNode" << std::endl;
             // We got an indication that a node is about to stop. To get a nice, responsive system we
             // tell both the master instance and the slave instance of System Picture about this.
 
@@ -549,6 +555,7 @@ namespace Control
 
         void SendStopNotification()
         {
+            lllog(3) << "CTRL: StopHandler::SendStopNotification" << std::endl;
             // Send stop notifications to all nodes
 
             // First, collect all node types that we know about ...
