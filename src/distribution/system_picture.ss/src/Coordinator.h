@@ -138,6 +138,12 @@ namespace SP
                 {
                     m_electionHandler->NodesChanged(statistics, completionSignaller);
                 }
+
+                if (flags.BadElectionIdDetected())
+                {
+                    m_electionHandler->ForceElection();
+                }
+
             }));
         }
 

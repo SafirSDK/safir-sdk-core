@@ -43,6 +43,7 @@ namespace SP
             NEW_DATA_CHANNEL_STATISTICS = 0x2,
             NODES_CHANGED = 0x4,
             METADATA_CHANGED = 0x8,
+            BAD_ELECTION_ID_DETECTED = 0x10,
         };
 
         RawChanges(const int flags)
@@ -55,6 +56,7 @@ namespace SP
         bool NewDataChannelStatistics() const {return (m_flags & NEW_DATA_CHANNEL_STATISTICS) != 0;}
         bool NodesChanged() const {return (m_flags & NODES_CHANGED) != 0;}
         bool MetadataChanged() const {return (m_flags & METADATA_CHANGED) != 0;}
+        bool BadElectionIdDetected() const {return (m_flags & BAD_ELECTION_ID_DETECTED) != 0;}
 
         void Print(std::wostream& out) const
         {
@@ -62,7 +64,8 @@ namespace SP
                 << "NewRemoteStatistics = " << NewRemoteStatistics()
                 << ", NewDataChannelStatistics = " << NewDataChannelStatistics()
                 << ", NodesChanged = " << NodesChanged()
-                << ", MetadataChanged = " << MetadataChanged();
+                << ", MetadataChanged = " << MetadataChanged()
+                << ", BadElectionIdDetected = " << BadElectionIdDetected();
         }
 
     private:

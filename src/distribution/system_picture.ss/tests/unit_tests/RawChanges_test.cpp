@@ -34,6 +34,7 @@ BOOST_AUTO_TEST_CASE( no_flags )
     BOOST_CHECK(!flags.NewDataChannelStatistics());
     BOOST_CHECK(!flags.NodesChanged());
     BOOST_CHECK(!flags.MetadataChanged());
+    BOOST_CHECK(!flags.BadElectionIdDetected());
 }
 
 
@@ -44,6 +45,7 @@ BOOST_AUTO_TEST_CASE( new_remote )
     BOOST_CHECK(!flags.NewDataChannelStatistics());
     BOOST_CHECK(!flags.NodesChanged());
     BOOST_CHECK(!flags.MetadataChanged());
+    BOOST_CHECK(!flags.BadElectionIdDetected());
 }
 
 
@@ -54,6 +56,7 @@ BOOST_AUTO_TEST_CASE( new_data )
     BOOST_CHECK(flags.NewDataChannelStatistics());
     BOOST_CHECK(!flags.NodesChanged());
     BOOST_CHECK(!flags.MetadataChanged());
+    BOOST_CHECK(!flags.BadElectionIdDetected());
 }
 
 BOOST_AUTO_TEST_CASE( nodes_changed )
@@ -73,6 +76,17 @@ BOOST_AUTO_TEST_CASE( election_id_changed )
     BOOST_CHECK(!flags.NewDataChannelStatistics());
     BOOST_CHECK(!flags.NodesChanged());
     BOOST_CHECK(flags.MetadataChanged());
+    BOOST_CHECK(!flags.BadElectionIdDetected());
+}
+
+BOOST_AUTO_TEST_CASE( bad_election_id_detected )
+{
+    RawChanges flags(RawChanges::BAD_ELECTION_ID_DETECTED);
+    BOOST_CHECK(!flags.NewRemoteStatistics());
+    BOOST_CHECK(!flags.NewDataChannelStatistics());
+    BOOST_CHECK(!flags.NodesChanged());
+    BOOST_CHECK(!flags.MetadataChanged());
+    BOOST_CHECK(flags.BadElectionIdDetected());
 }
 
 
@@ -83,6 +97,7 @@ BOOST_AUTO_TEST_CASE( two_set )
     BOOST_CHECK(!flags.NewDataChannelStatistics());
     BOOST_CHECK(!flags.NodesChanged());
     BOOST_CHECK(flags.MetadataChanged());
+    BOOST_CHECK(!flags.BadElectionIdDetected());
 }
 
 BOOST_AUTO_TEST_CASE( three_set )
@@ -94,6 +109,7 @@ BOOST_AUTO_TEST_CASE( three_set )
     BOOST_CHECK(!flags.NewDataChannelStatistics());
     BOOST_CHECK(flags.NodesChanged());
     BOOST_CHECK(flags.MetadataChanged());
+    BOOST_CHECK(!flags.BadElectionIdDetected());
 }
 
 BOOST_AUTO_TEST_CASE( four_set )
@@ -106,4 +122,19 @@ BOOST_AUTO_TEST_CASE( four_set )
     BOOST_CHECK(flags.NewDataChannelStatistics());
     BOOST_CHECK(flags.NodesChanged());
     BOOST_CHECK(flags.MetadataChanged());
+    BOOST_CHECK(!flags.BadElectionIdDetected());
+}
+
+BOOST_AUTO_TEST_CASE( five_set )
+{
+    RawChanges flags(RawChanges::NEW_REMOTE_STATISTICS |
+                     RawChanges::NEW_DATA_CHANNEL_STATISTICS |
+                     RawChanges::NODES_CHANGED |
+                     RawChanges::METADATA_CHANGED |
+                     RawChanges::BAD_ELECTION_ID_DETECTED);
+    BOOST_CHECK(flags.NewRemoteStatistics());
+    BOOST_CHECK(flags.NewDataChannelStatistics());
+    BOOST_CHECK(flags.NodesChanged());
+    BOOST_CHECK(flags.MetadataChanged());
+    BOOST_CHECK(flags.BadElectionIdDetected());
 }

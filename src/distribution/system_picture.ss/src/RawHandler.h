@@ -75,13 +75,29 @@ namespace SP
     class RawStatistics;
 
     typedef boost::function<void(const RawStatistics& statistics,
-                               const RawChanges& flags,
-                               boost::shared_ptr<void> completionSignaller)> StatisticsCallback;
+                                 const RawChanges& flags,
+                                 boost::shared_ptr<void> completionSignaller)> StatisticsCallback;
 
     template<class CommunicationT>
     class RawHandlerBasic
         : private boost::noncopyable
     {
+    private:
+        struct NodeInfo
+        {
+            explicit NodeInfo(RawStatisticsMessage_NodeInfo* const nodeInfo_)
+                : lastHeartbeatTime(boost::chrono::steady_clock::now())
+                , nodeInfo(nodeInfo_)
+                , numBadElectionIds(0)
+                , lastBadElectionId(0){}
+
+            boost::chrono::steady_clock::time_point lastHeartbeatTime;
+            RawStatisticsMessage_NodeInfo* nodeInfo;
+            int numBadElectionIds;
+            int64_t lastBadElectionId;
+        };
+        typedef std::unordered_map<int64_t, NodeInfo> NodeTable;
+
     public:
         RawHandlerBasic(boost::asio::io_service& ioService,
                         CommunicationT& communication,
@@ -334,11 +350,60 @@ namespace SP
                     }
                 }
 
+                if (DetectBadElectionIds(node))
+                {
+                    changes |= RawChanges::BAD_ELECTION_ID_DETECTED;
+                }
+
                 if (changes != 0)
                 {
                     PostRawChangedCallback(RawChanges(changes), NULL);
                 }
             });
+        }
+
+        //must be called from within strand
+        bool DetectBadElectionIds(NodeInfo& node)
+        {
+            const int64_t electionId = node.nodeInfo->remote_statistics().election_id();
+            if (electionId == 0 || electionId == m_allStatisticsMessage.election_id())
+            {
+                //good election id
+                //reset counters.
+                node.numBadElectionIds = 0;
+                node.lastBadElectionId = 0;
+            }
+            else
+            {
+                //bad id.
+                lllog(1) << "Bad election id ("
+                         << node.nodeInfo->remote_statistics().election_id()
+                         << ") from node " << node.nodeInfo->name().c_str() << "("
+                         << node.nodeInfo->id() << ")." << std::endl;
+
+                //check if it was the same bad election id as last time
+                if (node.lastBadElectionId != electionId)
+                {
+                    node.lastBadElectionId = electionId;
+                    node.numBadElectionIds = 1;
+                }
+                else
+                {
+                    ++node.numBadElectionIds;
+                    if (node.numBadElectionIds >= 3)
+                    {
+                        lllog(1) << "Have detected 3 bad election ids ("
+                                 << node.nodeInfo->remote_statistics().election_id()
+                                 << ") from node " << node.nodeInfo->name().c_str() << "("
+                                 << node.nodeInfo->id() << ")! Forcing election." << std::endl;
+                        node.numBadElectionIds = 0;
+                        node.lastBadElectionId = 0;
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
 
         void NewDataChannelStatistics(const RawStatistics& data)
@@ -845,16 +910,6 @@ namespace SP
             }
         }
 
-
-        struct NodeInfo
-        {
-            explicit NodeInfo(RawStatisticsMessage_NodeInfo* const nodeInfo_)
-                : lastHeartbeatTime(boost::chrono::steady_clock::now()),nodeInfo(nodeInfo_) {}
-
-            boost::chrono::steady_clock::time_point lastHeartbeatTime;
-            RawStatisticsMessage_NodeInfo* nodeInfo;
-        };
-        typedef std::unordered_map<int64_t, NodeInfo> NodeTable;
 
         boost::asio::io_service& m_ioService;
         CommunicationT& m_communication;
