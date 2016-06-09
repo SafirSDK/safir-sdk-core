@@ -87,11 +87,14 @@ namespace SP
         {
             explicit NodeInfo(RawStatisticsMessage_NodeInfo* const nodeInfo_)
                 : lastHeartbeatTime(boost::chrono::steady_clock::now())
+                , numHeartbeats(0)
                 , nodeInfo(nodeInfo_)
                 , numBadElectionIds(0)
-                , lastBadElectionId(0){}
+                , lastBadElectionId(0)
+            {}
 
             boost::chrono::steady_clock::time_point lastHeartbeatTime;
+            int64_t numHeartbeats;
             RawStatisticsMessage_NodeInfo* nodeInfo;
             int numBadElectionIds;
             int64_t lastBadElectionId;
@@ -738,6 +741,7 @@ namespace SP
             if (isHeartbeat)
             {
                 node.lastHeartbeatTime = now;
+                ++node.numHeartbeats;
             }
         }
 
@@ -784,13 +788,23 @@ namespace SP
             {
                 auto tolerance = 1;
                 //We're more tolerant when nodes have just started, i.e. when we've received
-                //less than 10 packets from them
-                if ((m_master && pair->second.nodeInfo->control_receive_count() < 10) ||
-                    (!m_master && pair->second.nodeInfo->data_receive_count() < 10))
+                //no or just a few heartbeats.
+                if (pair->second.numHeartbeats < 5)
                 {
                     lllog(4) << "SP: Extra tolerant towards new node " << pair->second.nodeInfo->name().c_str()
                              << " with id " << pair->first << std::endl;
-                    tolerance = 2;
+                    if (!m_master && pair->second.numHeartbeats == 0)
+                    {
+                        //if a slave has not received any heartbeats it may mean that the
+                        //node has just been injected to this node, but the other node
+                        //has not yet heard about us, so we really need to give the other
+                        //node plenty of time here.
+                        tolerance = 10;
+                    }
+                    else
+                    {
+                        tolerance = 2;
+                    }
                 }
 
                 const auto threshold =
@@ -940,4 +954,3 @@ namespace SP
 }
 }
 }
-
