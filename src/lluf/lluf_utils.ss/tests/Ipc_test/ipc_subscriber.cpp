@@ -164,12 +164,18 @@ int main(int argc, char* argv[])
     boost::condition_variable cond;
     boost::mutex mut;
     unsigned int nbrOfMsg = 0;
+    bool done = false;
 
     auto subPtr = boost::make_shared<Safir::Utilities::Internal::IpcSubscriberImpl<SubscriberTestPolicy>>(
                     ioService,
                     po.endpointName,
-                    strand.wrap([&nbrOfMsg, &cond, &mut, po](const char* msg, size_t size)
+                    strand.wrap([&nbrOfMsg, &cond, &mut, &done, po](const char* msg, size_t size)
                     {
+                        if (done)
+                        {
+                            return;
+                        }
+
                         if (po.noMessageOutput)
                         {
                             std::wcout << L"Received msg with size " << size << std::endl;
@@ -181,6 +187,10 @@ int main(int argc, char* argv[])
 
                         boost::lock_guard<boost::mutex> lock(mut);
                         ++nbrOfMsg;
+                        if (nbrOfMsg >= po.nbrOfMessages)
+                        {
+                            done = true;
+                        }
                         cond.notify_one();
                     }));
 
@@ -245,5 +255,3 @@ int main(int argc, char* argv[])
 
     return 0;
 }
-
-
