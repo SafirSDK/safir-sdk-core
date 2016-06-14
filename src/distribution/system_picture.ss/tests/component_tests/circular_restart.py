@@ -24,7 +24,7 @@
 #
 ###############################################################################
 from __future__ import print_function
-import datetime, sys, argparse, subprocess, signal, time, os, shutil
+import datetime, sys, argparse, subprocess, signal, time, os, shutil, zipfile
 from contextlib import closing
 
 class Failure(Exception):
@@ -62,6 +62,12 @@ def mkdir(newdir):
         if tail:
             os.mkdir(newdir)
 
+def zipdir(archive_name, path):
+    # ziph is zipfile handle
+    with zipfile.ZipFile(archive_name, 'w', zipfile.ZIP_DEFLATED) as zipf:
+        for root,_ ,files in os.walk(path):
+            for file in files:
+                zipf.write(os.path.join(root, file))
 
 def launch_node(master, ownip, nodetype, num_nodes, only_control, masterip = None, revolutions = None, number = None):
     command = ["system_picture_component_test_node",]
@@ -212,6 +218,10 @@ def parse_arguments():
                         action="store_true",
                         default=False,
                         help="Start only the control part of the nodes")
+    parser.add_argument("--zip-results",
+                        action="store_true",
+                        default=False,
+                        help="Put the results into a zip file called results.zip")
 
     return parser.parse_args()
 
@@ -221,6 +231,7 @@ def main():
 
     rmdir("circular_restart_output")
     mkdir("circular_restart_output")
+    olddir = os.getcwd()
     os.chdir("circular_restart_output")
 
 
@@ -262,6 +273,10 @@ def main():
             return 1
     except KeyboardInterrupt:
         pass
+    finally:
+        if args.zip_results:
+            os.chdir(olddir)
+            zipdir(archive_name = "result.zip", path = "circular_restart_output")
     return 1
 
 sys.exit(main())
