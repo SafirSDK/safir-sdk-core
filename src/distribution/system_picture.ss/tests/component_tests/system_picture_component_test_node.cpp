@@ -802,6 +802,11 @@ int main(int argc, char * argv[])
         boost::function<void(bool restart)> stopFunc;
         stopFunc = [&](const bool restart)
         {
+            if (control == nullptr || main == nullptr)
+            {
+                return;
+            }
+
             control->Stop();
             main->Stop();
 
