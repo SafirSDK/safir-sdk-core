@@ -54,10 +54,9 @@ class WindowsInstaller(object):
         if len(installer) != 1:
             raise SetupError("Unexpected number of installers: "+ str(installer))
         self.installer = installer[0]
-
-    def can_uninstall(self):
         self.uninstaller = None
 
+    def can_uninstall(self):
         #we can't use self.installpath, since it may not be installed there if it was
         #left over from previous installation
         ip = os.path.join(os.environ["ProgramFiles"],"Safir SDK Core")
@@ -86,24 +85,13 @@ class WindowsInstaller(object):
             raise SetupError("No uninstaller found!")
 
         log ("Running uninstaller:", self.uninstaller)
-        result = subprocess.call((self.uninstaller, "/S"))
+        result = subprocess.call((self.uninstaller, "/S", "_?=" + self.installpath))
         if result != 0:
             raise SetupError("Uninstaller failed (" + str(result) + ")!")
 
-        #Wait for uninstaller to complete by polling for install directory...
-        starttime = time.clock()
-        while True:
-            if not os.path.exists(self.installpath):
-                break
-            if time.clock() - starttime > 10*60: # 10 minutes
-                break
-            time.sleep(1.0)
-
-        if os.path.isdir(self.installpath):
+        if os.path.isdir(os.path.join(self.installpath,"dou")):
             raise SetupError("Installer dir still exists after uninstallation! Contents:\n"
                              + str(os.listdir(self.installpath)))
-        if os.path.exists(self.installpath):
-            raise SetupError("Installer dir does not seem to be a directory!")
         return True
 
     def install(self, development, testsuite):
