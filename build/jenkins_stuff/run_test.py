@@ -85,7 +85,8 @@ class WindowsInstaller(object):
             raise SetupError("No uninstaller found!")
 
         log ("Running uninstaller:", self.uninstaller)
-        result = subprocess.call((self.uninstaller, "/S", "_?=" + self.installpath))
+        #The _? argument requires that we concatenate the command like this instead of using a tuple
+        result = subprocess.call((self.uninstaller + " /S _?=" + self.installpath))
         if result != 0:
             raise SetupError("Uninstaller failed (" + str(result) + ")!")
 
