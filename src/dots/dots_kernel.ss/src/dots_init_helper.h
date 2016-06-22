@@ -76,7 +76,7 @@ namespace Internal
             catch(...)
             {
                 SEND_SYSTEM_LOG(Error, <<"Could not read dots_shared_memory_size from typesystem.ini");
-                exit(21);
+                throw std::runtime_error("Could not read dots_shared_memory_size from typesystem.ini");
             }
 
             //get all dou directory strings
@@ -90,7 +90,7 @@ namespace Internal
                 if (!boost::filesystem::exists(douDirectory) || !boost::filesystem::is_directory(douDirectory))
                 {
                     SEND_SYSTEM_LOG(Error, <<"Dir " << douDirectory << " for safir_generated library " << it->first.c_str() << " not found");
-                    exit(22);
+                    throw std::runtime_error("Failed to find dou directory for " + it->first);
                 }
 
                 directories.push_back(douDirectory);
