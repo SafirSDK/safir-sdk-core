@@ -24,7 +24,7 @@
 #
 ###############################################################################
 from __future__ import print_function
-import os, glob, sys, subprocess, time, re, platform, argparse
+import os, glob, sys, subprocess, re, platform, argparse
 
 #try to import a package that we need for the debian installer
 #this will fail quietly on all other platforms, which is all right.
@@ -67,6 +67,7 @@ class WindowsInstaller(object):
         if pf86 is None:
             if os.path.isfile(uninstaller):
                 self.uninstaller = uninstaller
+                installed = len(os.listdir(ip)) > 1
         else:
             ip86 = os.path.join(pf86,"Safir SDK Core")
             uninstaller86 = os.path.join(ip86, "Uninstall.exe")
@@ -75,10 +76,12 @@ class WindowsInstaller(object):
                 raise SetupError("Multiple uninstallers found!")
             elif os.path.isfile(uninstaller):
                 self.uninstaller = uninstaller
+                installed = len(os.listdir(ip)) > 1
             elif os.path.isfile(uninstaller86):
                 self.uninstaller = uninstaller86
+                installed = len(os.listdir(ip86)) > 1
 
-        return self.uninstaller is not None
+        return self.uninstaller is not None and installed
 
     def uninstall(self):
         if not self.can_uninstall():
