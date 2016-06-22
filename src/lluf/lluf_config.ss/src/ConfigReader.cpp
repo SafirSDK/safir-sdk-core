@@ -42,7 +42,7 @@ namespace
         for (std::vector<std::string>::iterator it = douSearchPath.begin();
              it != douSearchPath.end(); ++it)
         {
-            Safir::Utilities::Internal::Path p(*it);
+            Safir::Utilities::Internal::Path p(boost::trim_copy(*it));
             if (p.Exists())
             {
                 checked.push_back(p);

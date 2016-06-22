@@ -1672,7 +1672,7 @@ JNIEXPORT jobjectArray JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_Ge
                  it != javaSearchPath.end(); ++it)
             {
                 using namespace boost::filesystem;
-                const path p = path(*it) / generatedLibraries[i].javaJarName;
+                const path p = path(boost::trim_copy(*it)) / generatedLibraries[i].javaJarName;
                 if (is_regular_file(p))
                 {
                     jarPath = p;
