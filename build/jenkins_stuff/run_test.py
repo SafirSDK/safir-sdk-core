@@ -61,27 +61,26 @@ class WindowsInstaller(object):
         #left over from previous installation
         ip = os.path.join(os.environ["ProgramFiles"],"Safir SDK Core")
         uninstaller = os.path.join(ip, "Uninstall.exe")
+        installed = os.path.isfile(uninstaller) and len(os.listdir(ip)) > 1
 
         pf86 = os.environ.get("ProgramFiles(x86)")
 
         if pf86 is None:
             if os.path.isfile(uninstaller):
                 self.uninstaller = uninstaller
-                installed = len(os.listdir(ip)) > 1
         else:
             ip86 = os.path.join(pf86,"Safir SDK Core")
             uninstaller86 = os.path.join(ip86, "Uninstall.exe")
+            installed86 = os.path.isfile(uninstaller86) and len(os.listdir(ip86)) > 1
 
-            if os.path.isfile(uninstaller) and os.path.isfile(uninstaller86):
-                raise SetupError("Multiple uninstallers found!")
-            elif os.path.isfile(uninstaller):
+            if installed86 and installed:
+                raise SetupError("Multiple installs found!")
+            elif installed:
                 self.uninstaller = uninstaller
-                installed = len(os.listdir(ip)) > 1
-            elif os.path.isfile(uninstaller86):
+            elif installed86:
                 self.uninstaller = uninstaller86
-                installed = len(os.listdir(ip86)) > 1
 
-        return self.uninstaller is not None and installed
+        return self.uninstaller is not None
 
     def uninstall(self):
         if not self.can_uninstall():
