@@ -66,7 +66,7 @@ class WindowsInstaller(object):
         pf86 = os.environ.get("ProgramFiles(x86)")
 
         if pf86 is None:
-            if os.path.isfile(uninstaller):
+            if installed:
                 self.uninstaller = uninstaller
         else:
             ip86 = os.path.join(pf86,"Safir SDK Core")
