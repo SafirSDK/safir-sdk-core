@@ -58,7 +58,7 @@ namespace Com
         ,m_isControlInstance(isControlInstance)
         ,m_nodeTypes(nodeTypes)
         ,m_onNewNode()
-        ,m_gotRecv()
+        ,m_gotRecvFrom()
         ,m_discoverer(m_ioService,
                       m_me,
                      [&nodeTypes]() -> int { //calculate the maximum delay for Discover
@@ -112,7 +112,7 @@ namespace Com
     {
         m_receiveStrand.dispatch([=]
         {
-            m_gotRecv=callback;
+            m_gotRecvFrom=callback;
             m_deliveryHandler.SetGotRecvCallback(callback);
         });
     }
@@ -340,7 +340,7 @@ namespace Com
             const Node* senderNode=m_deliveryHandler.GetNode(commonHeader->senderId);
             if (senderNode!=nullptr && senderNode->systemNode)
             {
-                m_gotRecv(commonHeader->senderId, true);
+                m_gotRecvFrom(commonHeader->senderId, true);
                 lllog(9)<<"COM: Heartbeat from "<<commonHeader->senderId<<std::endl;
             }
         }
@@ -351,7 +351,7 @@ namespace Com
             const Node* senderNode=m_deliveryHandler.GetNode(commonHeader->senderId);
             if (senderNode!=nullptr && senderNode->systemNode)
             {
-                m_gotRecv(commonHeader->senderId, false);
+                m_gotRecvFrom(commonHeader->senderId, false);
                 const Ack* ack=reinterpret_cast<const Ack*>(data);
                 GetNodeType(senderNode->nodeTypeId).GetAckedDataSender().HandleAck(*ack);
             }

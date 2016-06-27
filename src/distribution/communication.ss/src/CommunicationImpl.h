@@ -108,11 +108,11 @@ namespace Com
         Node m_me;
         int m_protocol;
         bool m_isControlInstance;
-        NodeTypeMap m_nodeTypes;        
+        NodeTypeMap m_nodeTypes;
 
         //Callbacks
         NewNode m_onNewNode;
-        GotReceiveFrom m_gotRecv;
+        GotReceiveFrom m_gotRecvFrom;
 
         //main components of communication
         Discoverer m_discoverer;
