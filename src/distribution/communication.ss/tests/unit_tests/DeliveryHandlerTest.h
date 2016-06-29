@@ -98,7 +98,7 @@ public:
             auto size=strlen(payload);
             Com::MessageHeader header(id, 1, 0, Com::MultiReceiverSendMethod, Com::Acked, 1, size, size, 1, 0, 0);
             header.ackNow=1;
-            dh.ReceivedApplicationData(&header, payload);
+            dh.ReceivedApplicationData(&header, payload, false);
         }
 
         TRACELINE
@@ -129,7 +129,7 @@ public:
             auto size=sizeof(int64_t);
             Com::MessageHeader header(id, 1, Com::WelcomeDataType, Com::MultiReceiverSendMethod, Com::Acked, 10, size, size, 1, 0, 0);
             header.ackNow=1;
-            dh.ReceivedApplicationData(&header, reinterpret_cast<const char*>(&welcomeNodeId));
+            dh.ReceivedApplicationData(&header, reinterpret_cast<const char*>(&welcomeNodeId), false);
         }
 
         dh.m_receiveStrand.post([&]{SetReady();});
@@ -155,7 +155,7 @@ public:
             auto size=strlen(payload);
             Com::MessageHeader header(id, 1, 0, Com::MultiReceiverSendMethod, Com::Acked, 11, size, size, 1, 0, 0);
             header.ackNow=1;
-            dh.ReceivedApplicationData(&header, payload);
+            dh.ReceivedApplicationData(&header, payload, false);
         }
 
         TRACELINE
@@ -189,7 +189,7 @@ public:
 
                 Com::MessageHeader header(id, 1, 0, Com::MultiReceiverSendMethod, Com::Acked, seq, strlen(msg), fragmentSize, numberOfFragments, static_cast<uint16_t>(frag), fragmentOffset);
                 header.ackNow=1;
-                dh.ReceivedApplicationData(&header, payload);
+                dh.ReceivedApplicationData(&header, payload, false);
             }
         }
 
@@ -216,7 +216,7 @@ public:
             auto payload="hello";
             auto size=strlen(payload);
             Com::MessageHeader header(id, 1, 0, Com::MultiReceiverSendMethod, Com::Unacked, 16, size, size, 1, 0, 0);
-            dh.ReceivedApplicationData(&header, payload);
+            dh.ReceivedApplicationData(&header, payload, false);
         }
 
         dh.m_receiveStrand.post([&]{SetReady();});
@@ -250,7 +250,7 @@ public:
                 const char* payload=msg+fragmentOffset;
 
                 Com::MessageHeader header(id, 1, 0, Com::MultiReceiverSendMethod, Com::Unacked, seq, strlen(msg), fragmentSize, numberOfFragments, static_cast<uint16_t>(frag), fragmentOffset);
-                dh.ReceivedApplicationData(&header, payload);
+                dh.ReceivedApplicationData(&header, payload, false);
             }
         }
 
@@ -288,7 +288,7 @@ public:
             for (int64_t id=2; id<=4; ++id)
             {
                 Com::MessageHeader header(id, 1, 0, Com::MultiReceiverSendMethod, Com::Unacked, seq, strlen(msg), fragmentSize, numberOfFragments, 1, fragmentOffset);
-                dh.ReceivedApplicationData(&header, payload);
+                dh.ReceivedApplicationData(&header, payload, false);
             }
         }
 
@@ -319,7 +319,7 @@ public:
             auto payload="hello";
             auto size=strlen(payload);
             Com::MessageHeader header(id, 1, 0, Com::MultiReceiverSendMethod, Com::Unacked, 25, size, size, 1, 0, 0);
-            dh.ReceivedApplicationData(&header, payload);
+            dh.ReceivedApplicationData(&header, payload, false);
         }
 
         dh.m_receiveStrand.post([&]{SetReady();});

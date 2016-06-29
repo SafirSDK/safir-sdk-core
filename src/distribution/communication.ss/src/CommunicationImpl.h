@@ -55,7 +55,7 @@ namespace Internal
 {
 namespace Com
 {
-    typedef boost::function<void(const std::string& name, int64_t nodeId, int64_t nodeTypeId, const std::string& controlAddress, const std::string& dataAddress)> NewNode;
+    typedef boost::function<void(const std::string& name, int64_t nodeId, int64_t nodeTypeId, const std::string& controlAddress, const std::string& dataAddress, bool multicast)> NewNode;
 
     class CommunicationImpl : private boost::noncopyable
     {
@@ -119,7 +119,8 @@ namespace Com
         DeliveryHandler m_deliveryHandler;
         DataReceiver m_reader;
 
-        bool OnRecv(const char* data, size_t size); //returns true if it is ok to call OnRecv again, false if flooded with received messages
+        //returns true if it is ok to call OnRecv again, false if flooded with received messages
+        bool OnRecv(const char* data, size_t size, bool multicast);
         void OnNewNode(const Node& node);
 
         //Received internal Communication msg that is not directly passed to application, i.e discover, nodeInfo etc.

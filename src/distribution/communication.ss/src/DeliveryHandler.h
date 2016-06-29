@@ -59,7 +59,7 @@ namespace Com
     typedef boost::function<char*(size_t)> Allocator;
     typedef boost::function<void(const char *)> DeAllocator;
     typedef boost::function<void(int64_t fromNodeId, int64_t fromNodeType, const char* data, size_t size)> ReceiveData;
-    typedef boost::function<void(int64_t fromNodeId, bool isHeartbeat)> GotReceiveFrom;
+    typedef boost::function<void(int64_t fromNodeId, bool isMulticast)> GotReceiveFrom;
 
     template <class WriterType>
     class DeliveryHandlerBasic : private WriterType
@@ -114,7 +114,7 @@ namespace Com
         }
 
         //Handle received data and deliver to application if possible and sends ack back to sender.
-        void ReceivedApplicationData(const MessageHeader* header, const char* payload)
+        void ReceivedApplicationData(const MessageHeader* header, const char* payload, bool multicast)
         {
             //Always called from readStrand
             auto senderIt=m_nodes.find(header->commonHeader.senderId);
@@ -127,7 +127,7 @@ namespace Com
 
             lllog(8)<<L"COM: Received AppData from "<<header->commonHeader.senderId<<" "<<
                       SendMethodToString(header->sendMethod).c_str()<<", seq: "<<header->sequenceNumber<<std::endl;
-            m_gotRecvFrom(header->commonHeader.senderId, false); //report that we are receiving intact data from the node
+            m_gotRecvFrom(header->commonHeader.senderId, multicast); //report that we are receiving intact data from the node
 
             bool ackNow=false;
             if (header->deliveryGuarantee==Acked)
@@ -147,7 +147,7 @@ namespace Com
             }
         }
 
-        void ReceivedAckRequest(const MessageHeader* header)
+        void ReceivedAckRequest(const MessageHeader* header, bool multicast)
         {
             //Always called from readStrand
             lllog(8)<<L"COM: Received AckRequest from "<<header->commonHeader.senderId<<" "<<SendMethodToString(header->sendMethod).c_str()<<std::endl;
@@ -160,7 +160,7 @@ namespace Com
             }
 
             SendAck(senderIt->second, header);
-            m_gotRecvFrom(header->commonHeader.senderId, false); //report that we are receivinga data
+            m_gotRecvFrom(header->commonHeader.senderId, multicast); //report that we are receivinga data
         }
 
         //Add a node

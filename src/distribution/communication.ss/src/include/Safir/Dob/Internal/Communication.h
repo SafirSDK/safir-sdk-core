@@ -71,8 +71,13 @@ namespace Com
     };
 
     //Callbacks functions used in Communications public interface.
-    typedef boost::function<void(const std::string& name, int64_t nodeId, int64_t nodeTypeId, const std::string& controlAddress, const std::string& dataAddress)> NewNode;
-    typedef boost::function<void(int64_t fromNodeId, bool isHeartbeat)> GotReceiveFrom;
+    typedef boost::function<void(const std::string& name,
+                                 int64_t nodeId,
+                                 int64_t nodeTypeId,
+                                 const std::string& controlAddress,
+                                 const std::string& dataAddress,
+                                 bool multicast)> NewNode;
+    typedef boost::function<void(int64_t fromNodeId, bool isMulticast)> GotReceiveFrom;
     typedef boost::function<void(int64_t toNodeId)> RetransmitTo;
     typedef boost::function<void(int64_t fromNodeId, int64_t fromNodeType, const char* data, size_t size)> ReceiveData;
     typedef boost::function<void(int64_t nodeTypeId)> QueueNotFull;

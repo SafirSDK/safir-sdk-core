@@ -85,16 +85,18 @@ namespace SP
     private:
         struct NodeInfo
         {
-            explicit NodeInfo(RawStatisticsMessage_NodeInfo* const nodeInfo_)
-                : lastHeartbeatTime(boost::chrono::steady_clock::now())
-                , numHeartbeats(0)
+            explicit NodeInfo(RawStatisticsMessage_NodeInfo* const nodeInfo_, const bool mc)
+                : multicast(mc)
+                , lastUcReceiveTime(boost::chrono::steady_clock::now())
+                , lastMcReceiveTime(boost::chrono::steady_clock::now())
                 , nodeInfo(nodeInfo_)
                 , numBadElectionIds(0)
                 , lastBadElectionId(0)
             {}
 
-            boost::chrono::steady_clock::time_point lastHeartbeatTime;
-            int64_t numHeartbeats;
+            const bool multicast;
+            boost::chrono::steady_clock::time_point lastUcReceiveTime;
+            boost::chrono::steady_clock::time_point lastMcReceiveTime;
             RawStatisticsMessage_NodeInfo* nodeInfo;
             int numBadElectionIds;
             int64_t lastBadElectionId;
@@ -153,9 +155,26 @@ namespace SP
             m_allStatisticsMessage.set_control_address(controlAddress);
             m_allStatisticsMessage.set_data_address(dataAddress);
 
-            communication.SetNewNodeCallback(m_strand.wrap(boost::bind(&RawHandlerBasic<CommunicationT>::NewNode,this,_1, _2, _3, _4, _5)));
-            communication.SetGotReceiveFromCallback(m_strand.wrap(boost::bind(&RawHandlerBasic<CommunicationT>::GotReceive,this,_1,_2)));
-            communication.SetRetransmitToCallback(m_strand.wrap(boost::bind(&RawHandlerBasic<CommunicationT>::Retransmit,this,_1)));
+            //For some wierdass reason using strand::wrap here doesn't work.
+            //Maybe too many arguments? So we do it manually instead.
+            communication.SetNewNodeCallback([this](const std::string& name,
+                                                    const int64_t id,
+                                                    const int64_t nodeTypeId,
+                                                    const std::string& controlAddress,
+                                                    const std::string& dataAddress,
+                                                    const bool multicast)
+            {
+                m_strand.dispatch([=]
+                {
+                    NewNode(name,id,nodeTypeId,controlAddress,dataAddress,multicast);
+                });
+            });
+
+            communication.SetGotReceiveFromCallback(m_strand.wrap([this](int64_t id, bool multicast)
+            {GotReceive(id,multicast);}));
+
+            communication.SetRetransmitToCallback(m_strand.wrap([this](int64_t id)
+            {Retransmit(id);}));
 
             m_checkDeadNodesTimer->Start();
         }
@@ -177,7 +196,7 @@ namespace SP
 
 
         void PerformOnMyStatisticsMessage(const workaround::function<void(std::unique_ptr<char[]> data,
-                                                                   const size_t size)> & fn) const
+                                                                          const size_t size)> & fn) const
         {
             m_strand.dispatch([this,fn]
             {
@@ -641,9 +660,11 @@ namespace SP
                      const int64_t id,
                      const int64_t nodeTypeId,
                      const std::string& controlAddress,
-                     const std::string& dataAddress)
+                     const std::string& dataAddress,
+                     const bool multicast)
         {
-            lllog(4) << "SP: New node '" << name.c_str() << "' with id " << id << " was added" << std::endl;
+            lllog(4) << "SP: New node '" << name.c_str() << "' with id "
+                     << id << " was added. MC = " << std::boolalpha << multicast << std::endl;
 
             if (id == m_id)
             {
@@ -651,7 +672,7 @@ namespace SP
             }
 
             const auto newNode = this->m_allStatisticsMessage.add_node_info();
-            const auto insertResult = this->m_nodeTable.insert(std::make_pair(id,NodeInfo(newNode)));
+            const auto insertResult = this->m_nodeTable.insert(std::make_pair(id,NodeInfo(newNode,multicast)));
 
             if (!insertResult.second)
             {
@@ -663,7 +684,7 @@ namespace SP
                 throw std::logic_error("Got a new node with a node type id that I dont know about!");
             }
 
-            //lastHeartbeatTime is set by NodeInfo constructor
+            //last receive times are set by NodeInfo constructor
 
             newNode->set_name(name);
             newNode->set_id(id);
@@ -703,15 +724,11 @@ namespace SP
         }
 
         //Must be called in strand!
-        void GotReceive(int64_t id, bool isHeartbeat)
+        void GotReceive(int64_t id, bool multicast)
         {
             const auto now = boost::chrono::steady_clock::now();
-            lllog(9) << "SP: GotReceive from node with id " << id <<", time = " << now << std::endl;
-
-            if (isHeartbeat)
-            {
-                lllog(7) << "SP: GotReceive heartbeat from node with id " << id <<", time = " << now << std::endl;
-            }
+            lllog(9) << "SP: GotReceive (MC=" <<std::boolalpha << multicast
+                     << ") from node with id " << id <<", time = " << now << std::endl;
 
             const auto findIt = m_nodeTable.find(id);
 
@@ -738,10 +755,14 @@ namespace SP
                 node.nodeInfo->set_data_receive_count(node.nodeInfo->data_receive_count() + 1);
             }
 
-            if (isHeartbeat)
+            if (multicast)
             {
-                node.lastHeartbeatTime = now;
-                ++node.numHeartbeats;
+                assert(node.multicast);
+                node.lastMcReceiveTime = now;
+            }
+            else
+            {
+                node.lastUcReceiveTime = now;
             }
         }
 
@@ -774,6 +795,38 @@ namespace SP
             }
         }
 
+        boost::chrono::steady_clock::duration
+        CalculateTimeout(const int64_t id, const NodeInfo& nodeInfo) const
+        {
+            auto tolerance = 1;
+
+            const auto receiveCount = m_master ?
+                nodeInfo.nodeInfo->control_receive_count() : nodeInfo.nodeInfo->data_receive_count();
+
+            if (!m_master && receiveCount == 0)
+            {
+                //if a slave has not received any packets it may mean that the
+                //node has just been injected to this node, but the other node
+                //has not yet heard about us, so we really need to give the other
+                //node plenty of time here.
+                lllog(4) << "SP: Slave is extra tolerant towards new node " << nodeInfo.nodeInfo->name().c_str()
+                         << " with id " << id << " that has not started sending yet" << std::endl;
+                tolerance = 10;
+            }
+            else if (receiveCount < 10)
+            {
+                //We're more tolerant when nodes have just started, i.e. when we've received
+                //less than 10 packets from them
+
+                lllog(4) << "SP: Extra tolerant towards new node " << nodeInfo.nodeInfo->name().c_str()
+                         << " with id " << id << std::endl;
+
+                tolerance = 2;
+            }
+
+            return m_nodeTypes.at(nodeInfo.nodeInfo->node_type_id()).deadTimeout * tolerance;
+        }
+
         //Must be called in strand!
         void CheckDeadNodes()
         {
@@ -783,50 +836,50 @@ namespace SP
 
             bool somethingChanged = false;
 
-
             for (auto pair = m_nodeTable.cbegin(); pair != m_nodeTable.cend(); ++pair)
             {
-                auto tolerance = 1;
-                //We're more tolerant when nodes have just started, i.e. when we've received
-                //no or just a few heartbeats.
-                if (pair->second.numHeartbeats < 5)
+                //some easier names
+                const auto id = pair->first;
+                const auto& node = pair->second;
+
+                //Multicast timeout is longer than the normal timeout, so that we can be tolerant to
+                //starved heartbeats.
+                auto timeout = CalculateTimeout(id,node);
+                const auto anyThreshold = now - timeout;
+                const auto mcThreshold = now - 4 * timeout;
+
+                /*
+                 * if not multicast:
+                 *    node is dead if anyThreshold is exeeded
+                 * if multicast:
+                 *    node is dead if anyThreshold or mcThreshold is exeeded, in that
+                 * order (remember the timeouts differ)
+                 */
+                const auto lastAnyReceiveTime = std::max(node.lastUcReceiveTime, node.lastMcReceiveTime);
+
+                if (!node.nodeInfo->is_dead() &&
+                    (lastAnyReceiveTime < anyThreshold || (node.multicast && node.lastMcReceiveTime < mcThreshold)))
                 {
-                    lllog(4) << "SP: Extra tolerant towards new node " << pair->second.nodeInfo->name().c_str()
-                             << " with id " << pair->first << std::endl;
-                    if (!m_master && pair->second.numHeartbeats == 0)
-                    {
-                        //if a slave has not received any heartbeats it may mean that the
-                        //node has just been injected to this node, but the other node
-                        //has not yet heard about us, so we really need to give the other
-                        //node plenty of time here.
-                        tolerance = 10;
-                    }
-                    else
-                    {
-                        tolerance = 2;
-                    }
-                }
+                    lllog(4) << "SP: Node " << node.nodeInfo->name().c_str()
+                             << " with id " << id
+                             << " was marked as dead (" << std::boolalpha
+                             << node.multicast << ", "
+                             << (node.lastUcReceiveTime < anyThreshold) << ", "
+                             << (node.lastMcReceiveTime < anyThreshold) << ", "
+                             << (node.lastMcReceiveTime < mcThreshold) << ")"
+                             << std::endl;
 
-                const auto threshold =
-                    now - m_nodeTypes.at(pair->second.nodeInfo->node_type_id()).deadTimeout * tolerance;
+                    node.nodeInfo->set_is_dead(true);
 
-                if (!pair->second.nodeInfo->is_dead() && pair->second.lastHeartbeatTime < threshold)
-                {
-                    lllog(4) << "SP: Node " << pair->second.nodeInfo->name().c_str()
-                             << " with id " << pair->first
-                             << " was marked as dead" << std::endl;
-
-                    pair->second.nodeInfo->set_is_dead(true);
-
-                    m_communication.ExcludeNode(pair->first);
+                    m_communication.ExcludeNode(id);
 
                     somethingChanged = true;
                 }
-                else if (pair->second.nodeInfo->is_dead() &&
-                         pair->second.lastHeartbeatTime < clearThreshold)
+                else if (node.nodeInfo->is_dead() &&
+                         lastAnyReceiveTime < clearThreshold)
                 {
-                    lllog(4) << "SP: Node " << pair->second.nodeInfo->name().c_str()
-                             << " with id " << pair->first
+                    lllog(4) << "SP: Node " << node.nodeInfo->name().c_str()
+                             << " with id " << id
                              << " has been dead for five minutes, clearing data." << std::endl;
 
                     const auto lastIndex = m_allStatisticsMessage.node_info_size() - 1;
@@ -834,7 +887,7 @@ namespace SP
                     const auto lastId = m_allStatisticsMessage.node_info(lastIndex).id();
 
                     //if we're not the last element in node_info we need to swap ourselves there
-                    if (lastId != pair->first)
+                    if (lastId != id)
                     {
                         auto lastEntry = m_nodeTable.find(lastId);
                         if (lastEntry == m_nodeTable.end())
@@ -847,7 +900,7 @@ namespace SP
                         int swapIndex = -1;
                         for (int i = 0; m_allStatisticsMessage.node_info_size(); ++i)
                         {
-                            if (m_allStatisticsMessage.node_info(i).id() == pair->first)
+                            if (m_allStatisticsMessage.node_info(i).id() == id)
                             {
                                 swapIndex = i;
                                 break;
@@ -861,8 +914,6 @@ namespace SP
                         m_allStatisticsMessage.mutable_node_info()->SwapElements(lastIndex,swapIndex);
                         lastEntry->second.nodeInfo = m_allStatisticsMessage.mutable_node_info(swapIndex);
                     }
-
-                    const auto id = pair->first;
 
                     //remove node from table
                     m_nodeTable.erase(id);

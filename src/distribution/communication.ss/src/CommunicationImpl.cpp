@@ -72,7 +72,7 @@ namespace Com
                      [=](const Node& n){OnNewNode(n);})
         ,m_deliveryHandler(m_receiveStrand, m_me.nodeId, m_protocol)
         ,m_reader(m_receiveStrand, m_me.unicastAddress, m_nodeTypes[nodeTypeId]->MulticastAddress(),
-                  [=](const char* d, size_t s){return OnRecv(d,s);},
+                  [=](const char* d, size_t s, const bool mc){return OnRecv(d,s,mc);},
     [=](){return m_deliveryHandler.NumberOfUndeliveredMessages()<Parameters::MaxNumberOfUndelivered;})
     {
         if (nodeId==0)
@@ -308,11 +308,16 @@ namespace Com
         m_receiveStrand.dispatch([this, node]{m_deliveryHandler.AddNode(node);});
 
         //callback to host application
-        m_onNewNode(node.name, node.nodeId, node.nodeTypeId, node.controlAddress, node.dataAddress);
+        m_onNewNode(node.name,
+                    node.nodeId,
+                    node.nodeTypeId,
+                    node.controlAddress,
+                    node.dataAddress,
+                    nodeType.UseMulticast());
     }
 
     //returns true if it is ok to call OnRecv again, false if flooded with received messages
-    bool CommunicationImpl::OnRecv(const char* data, size_t size)
+    bool CommunicationImpl::OnRecv(const char* data, size_t size, bool multicast)
     {
         //Always called from readStrand
 
@@ -340,23 +345,23 @@ namespace Com
             const Node* senderNode=m_deliveryHandler.GetNode(commonHeader->senderId);
             if (senderNode!=nullptr && senderNode->systemNode)
             {
-                m_gotRecvFrom(commonHeader->senderId, true);
+                m_gotRecvFrom(commonHeader->senderId, multicast);
                 lllog(9)<<"COM: Heartbeat from "<<commonHeader->senderId<<std::endl;
             }
         }
-            break;
+        break;
 
         case AckType:
         {
             const Node* senderNode=m_deliveryHandler.GetNode(commonHeader->senderId);
             if (senderNode!=nullptr && senderNode->systemNode)
             {
-                m_gotRecvFrom(commonHeader->senderId, false);
+                m_gotRecvFrom(commonHeader->senderId, multicast);
                 const Ack* ack=reinterpret_cast<const Ack*>(data);
                 GetNodeType(senderNode->nodeTypeId).GetAckedDataSender().HandleAck(*ack);
             }
         }
-            break;
+        break;
 
         case AckRequestType:
         {
@@ -366,9 +371,9 @@ namespace Com
                 return true; //corrupt message, return true means it is ok to receive another message
             }
             const MessageHeader* ackReq=reinterpret_cast<const MessageHeader*>(data);
-            m_deliveryHandler.ReceivedAckRequest(ackReq);
+            m_deliveryHandler.ReceivedAckRequest(ackReq, multicast);
         }
-            break;
+        break;
 
         case ControlDataType:
         {
@@ -381,7 +386,7 @@ namespace Com
             const char* payload=data+MessageHeaderSize;
             ReceivedControlData(msgHeader, payload);
         }
-            break;
+        break;
 
         default: //some user defined type
         {
@@ -393,9 +398,9 @@ namespace Com
             }
             const MessageHeader* msgHeader=reinterpret_cast<const MessageHeader*>(data);
             const char* payload=data+MessageHeaderSize;
-            m_deliveryHandler.ReceivedApplicationData(msgHeader, payload);
+            m_deliveryHandler.ReceivedApplicationData(msgHeader, payload, multicast);
         }
-            break;
+        break;
         }
 
         return m_deliveryHandler.NumberOfUndeliveredMessages()<Parameters::MaxNumberOfUndelivered;

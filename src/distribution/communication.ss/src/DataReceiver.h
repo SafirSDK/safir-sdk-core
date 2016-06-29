@@ -66,7 +66,7 @@ namespace Com
         DataReceiverType(boost::asio::io_service::strand& receiveStrand,
                          const std::string& unicastAddress,
                          const std::string& multicastAddress,
-                         const boost::function<bool(const char*, size_t)>& onRecv,
+                         const boost::function<bool(const char*, size_t, bool multicast)>& onRecv,
                          const boost::function<bool(void)>& isReceiverIsReady)
             :m_strand(receiveStrand)
             ,m_timer(m_strand.get_io_service(), boost::chrono::milliseconds(10))
@@ -140,7 +140,7 @@ namespace Com
 #endif
         boost::asio::io_service::strand& m_strand;
         boost::asio::steady_timer m_timer;
-        boost::function<bool(const char*, size_t)> m_onRecv;
+        boost::function<bool(const char*, size_t, bool multicast)> m_onRecv;
         boost::function<bool(void)> m_isReceiverReady;
         boost::shared_ptr<boost::asio::ip::udp::socket> m_socket;
         boost::shared_ptr<boost::asio::ip::udp::socket> m_multicastSocket;
@@ -188,8 +188,10 @@ namespace Com
 
             if (ValidCrc(buf, bytesRecv))
             {
+                assert(socket == m_multicastSocket.get() || socket == m_socket.get());
+                const bool multicast = socket == m_multicastSocket.get();
                 //received message with correct checksum
-                receiverReady=m_onRecv(buf, bytesRecv-sizeof(uint32_t)); //Remove the crc from size. Will return true if it is ready to handle a new message immediately
+                receiverReady=m_onRecv(buf, bytesRecv-sizeof(uint32_t), multicast); //Remove the crc from size. Will return true if it is ready to handle a new message immediately
             }
             else
             {
