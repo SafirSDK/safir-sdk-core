@@ -22,7 +22,7 @@ if (BREAKPAD_LIBRARY AND BREAKPAD_INCLUDE_DIRECTORY)
   MESSAGE(STATUS "Google breakpad seems to be installed on this computer, will use the installed version.")
   set(BREAKPAD_FOUND True)
 else()
-  MESSAGE(STATUS "Google breakpad is not installed on this computer, will download and build it.")
+  MESSAGE(STATUS "Google breakpad is not installed on this computer, will use our included version.")
   set(BREAKPAD_FOUND False)
 endif()
 
@@ -31,7 +31,7 @@ if (NOT MSVC)
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11")
 endif()
 
-#we add our own breakpad build, which will download from svn and build.
+#we add our own breakpad build, which which should already be downloaded (it's a git submodule)
 if (NOT BREAKPAD_FOUND)
   add_subdirectory(google-breakpad)
 
