@@ -64,7 +64,9 @@ def mkdir(newdir):
 
 def zipdir(archive_name, path):
     # ziph is zipfile handle
-    with zipfile.ZipFile(archive_name, 'w', zipfile.ZIP_DEFLATED) as zipf:
+    with zipfile.ZipFile(archive_name, 'w',
+                         compression = zipfile.ZIP_DEFLATED,
+                         allowZip64 = True) as zipf:
         for root,_ ,files in os.walk(path):
             for file in files:
                 zipf.write(os.path.join(root, file))
