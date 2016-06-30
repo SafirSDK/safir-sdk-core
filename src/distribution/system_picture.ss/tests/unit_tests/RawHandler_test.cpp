@@ -283,15 +283,31 @@ BOOST_AUTO_TEST_CASE( new_node_twice )
 
 }
 
-//TODO: Write new tests for the multicast aware dead/alive implementation
-#if 0
-BOOST_AUTO_TEST_CASE( exclude_node )
+BOOST_AUTO_TEST_CASE( exclude_node_unicast )
 {
-    //check that even if we get data (but no heartbeats) we will get excluded
     bool stopped = false;
     comm.excludeCb=[&]{rh->Stop();stopped=true;};
 
     comm.newNodeCb("asdf",11,10,"asdf","asdf", false);
+    comm.gotReceiveFromCb(11,false);
+
+    std::set<int64_t> correctNodes;
+    correctNodes.insert(11);
+
+    BOOST_CHECK_NO_THROW(ioService.run());
+
+    BOOST_CHECK(comm.includedNodes == correctNodes);
+    BOOST_CHECK(comm.excludedNodes == correctNodes);
+}
+
+BOOST_AUTO_TEST_CASE( exclude_node_multicast )
+{
+    //check that even if we get unicast data (but no multicast data) we will get excluded
+    //when we're running in mc mode.
+    bool stopped = false;
+    comm.excludeCb=[&]{rh->Stop();stopped=true;};
+
+    comm.newNodeCb("asdf",11,10,"asdf","asdf", true);
     comm.gotReceiveFromCb(11,false);
 
     std::set<int64_t> correctNodes;
@@ -310,7 +326,9 @@ BOOST_AUTO_TEST_CASE( exclude_node )
     BOOST_CHECK(comm.includedNodes == correctNodes);
     BOOST_CHECK(comm.excludedNodes == correctNodes);
 }
-#endif
+//TODO: Write new tests for the multicast aware dead/alive implementation
+
+
 
 void CheckStatisticsCommon(const RawStatistics& statistics, int externalNodes)
 {
