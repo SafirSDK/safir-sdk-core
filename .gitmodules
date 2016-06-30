@@ -13,3 +13,6 @@
 [submodule "git-archive-all"]
     path = build/git-archive-all
     url = https://github.com/SafirSDK/git-archive-all.git
+[submodule "websocketpp"]
+	path = src/websocket/websocket.ss/dependencies/websocketpp
+	url = https://github.com/SafirSDK/websocketpp.git
