@@ -6,7 +6,8 @@ if (MSVC_VERSION LESS 1800)
   add_definitions(-D_WEBSOCKETPP_NO_CPP11_FUNCTIONAL_)
 endif()
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include
+include_directories(
+  ${CMAKE_CURRENT_SOURCE_DIR}/dependencies/rapidjson/include
   ${CMAKE_CURRENT_SOURCE_DIR}/dependencies/websocketpp)
 
 add_subdirectory(src)
