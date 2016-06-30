@@ -50,6 +50,8 @@ WebsocketServer::WebsocketServer(boost::asio::io_service& ioService)
     ,m_dobConnection()
     ,m_dobDispatcher(m_dobConnection, m_ioService)
 {
+    m_server.clear_access_channels(websocketpp::log::alevel::all);
+    m_server.clear_error_channels(websocketpp::log::alevel::all);
 #if defined (_WIN32)
     m_signals.add(SIGABRT);
     m_signals.add(SIGBREAK);
