@@ -64,6 +64,9 @@ public:
                const int64_t                    id,
                const bool                       ignoreControlCmd);
 
+    ~ControlApp();
+
+    void Stop() {StopThisNode();}
 private:
     void LogStatus(const std::string& str);
 

@@ -25,6 +25,7 @@
 #include "ControlApp.h"
 #include <Safir/Utilities/CrashReporter.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
+#include <Safir/Utilities/Internal/MakeUnique.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
 #include <Safir/Utilities/Internal/Id.h>
 #include <iostream>
@@ -221,9 +222,7 @@ int main(int argc, char * argv[])
         //There is an example of this here:
         // https://stackoverflow.com/questions/21529540/how-do-i-handle-fork-correctly-with-boostasio-in-a-multithreaded-program
 
-        ControlApp controlApp(ioService, doseMainPath, options.id, options.ignoreControlCmd);
-
-        (void)controlApp;  // to keep compilers from warning about unused variable
+        auto controlApp = Safir::make_unique<ControlApp>(ioService, doseMainPath, options.id, options.ignoreControlCmd);
 
         try
         {
@@ -243,6 +242,14 @@ int main(int argc, char * argv[])
             success = false;
         }
 
+        if (!success)
+        {
+            controlApp->Stop();
+            ioService.reset();
+            ioService.run();
+        }
+        
+        controlApp.reset();
         crGuard.reset();
     }
     catch (const std::exception & exc)
@@ -265,8 +272,9 @@ int main(int argc, char * argv[])
     }
     else
     {
-        lllog(1) << "CTRL: Exiting due to error..." << std::endl;
-        std::wcout << "CTRL: Exiting due to error..." << std::endl;
+        SEND_SYSTEM_LOG(Alert,
+                        << "CTRL: Exiting due to error!");
+        std::wcout << "CTRL: Exiting due to error!" << std::endl;
     }
     return success ? 0 : 1;
 }

@@ -123,6 +123,26 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
     m_strand.post([this]{Start();});
 }
 
+ControlApp::~ControlApp()
+{
+    //everything should already be shut down when we get here, so anything we actually
+    //do here is just a last resort.
+    if (m_doseMainRunning)
+    {
+        SEND_SYSTEM_LOG(Critical,
+                        << "CTRL: safir_control is shutting down in an uncontrolled manner, killing dose_main!");
+
+        // Kill dose_main the hard way
+        boost::system::error_code ec;
+        boost::process::terminate(*m_doseMain, ec);
+        // We don't care about the error code from terminate. We're in panic mode after all.
+
+        m_doseMainRunning = false;
+    }
+
+    StopControl();
+}
+
 void ControlApp::LogStatus(const std::string& str)
 {
     lllog(1) << str.c_str() << std::endl;
