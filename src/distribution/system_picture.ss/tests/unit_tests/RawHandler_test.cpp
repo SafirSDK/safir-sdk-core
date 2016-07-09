@@ -326,9 +326,6 @@ BOOST_AUTO_TEST_CASE( exclude_node_multicast )
     BOOST_CHECK(comm.includedNodes == correctNodes);
     BOOST_CHECK(comm.excludedNodes == correctNodes);
 }
-//TODO: Write new tests for the multicast aware dead/alive implementation
-
-
 
 void CheckStatisticsCommon(const RawStatistics& statistics, int externalNodes)
 {
