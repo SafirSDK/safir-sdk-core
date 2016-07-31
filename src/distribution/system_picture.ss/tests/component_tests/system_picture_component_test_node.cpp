@@ -47,12 +47,21 @@
 #include <boost/asio/steady_timer.hpp>
 #include <boost/program_options.hpp>
 #include <boost/thread.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
 
 #if defined _MSC_VER
 #  pragma warning (pop)
 //and disable a warning that happens on instantiation
 #  pragma warning (disable : 4505)
 #endif
+
+std::string nowString()
+{
+    using namespace boost::posix_time;
+    using namespace boost;
+    const time_duration td = microsec_clock::universal_time().time_of_day();
+    return to_simple_string(td);
+}
 
 //This is a magic unlocker that has the strange behaviour of having a bool
 //operator that always returns false. It is for the use in preprocessor
@@ -76,7 +85,7 @@ private:
 };
 boost::recursive_mutex Magic::wcout_lock; //static instance
 
-#define log if(Magic lck_asdf = Magic::Lock()) ; else std::wcout
+#define log if(Magic lck_asdf = Magic::Lock()) ; else std::wcout << "[" << nowString()<< "] "
 
 std::int64_t GenerateId()
 {
@@ -593,15 +602,15 @@ private:
                       const size_t size)
     {
         const std::string message(data, data+size);
-        std::wcout << "Got message: " << message << std::endl;
+        log << "Got message: " << message << std::endl;
         if (message == "restart " + boost::lexical_cast<std::string>(m_options.number))
         {
-            std::wcout << "Oooh, that means me!" << std::endl;
+            log << "Oooh, that means me!" << std::endl;
             m_stopFcn(true);
         }
         else if (message == "exit")
         {
-            std::wcout << "Time to die!" << std::endl;
+            log << "Time to die!" << std::endl;
             m_stopFcn(false);
         }
     }
