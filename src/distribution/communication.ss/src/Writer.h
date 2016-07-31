@@ -73,11 +73,15 @@ namespace Com
 
             try
             {
-                socket.send_to(bufs, to);
+                const size_t sent = socket.send_to(bufs, to);
+                if (sent != sizeof(T) + sizeof(uint32_t))
+                {
+                    SEND_SYSTEM_LOG(Informational, <<"Write<T> to " << to << " failed. Only "
+                                    << sent << " bytes were sent, instead of " << sizeof(T) + sizeof(uint32_t));
+                }
             }
             catch (const boost::system::system_error& sysErr)
             {
-                std::cout<<"Write<T> to " << to << " failed with systemError: "<<sysErr.what()<<std::endl;
                 SEND_SYSTEM_LOG(Error, <<"Write to " << to << " failed with systemError: "<<sysErr.what());
             }
         }
@@ -93,7 +97,7 @@ namespace Com
             const char* header=reinterpret_cast<const char*>(&(val->header));
             boost::crc_32_type crc;
             std::vector< boost::asio::const_buffer > bufs;
-
+            size_t size = MessageHeaderSize;
             bufs.push_back(boost::asio::buffer(header, MessageHeaderSize));
             crc.process_bytes(static_cast<const void*>(header), MessageHeaderSize);
 
@@ -101,19 +105,24 @@ namespace Com
             {
                 bufs.push_back(boost::asio::buffer(val->fragment, val->header.fragmentContentSize));
                 crc.process_bytes(static_cast<const void*>(val->fragment), val->header.fragmentContentSize);
+                size += val->header.fragmentContentSize;
             }
 
             uint32_t crc32=crc.checksum();
             bufs.push_back(boost::asio::buffer(reinterpret_cast<const char*>(&crc32), sizeof(uint32_t)));
-
+            size += sizeof(uint32_t);
 
             try
             {
-                socket.send_to(bufs, to);
+                const size_t sent = socket.send_to(bufs, to);
+                if (sent != size)
+                {
+                    SEND_SYSTEM_LOG(Informational, <<"Write<UserData> to " << to << " failed. Only "
+                                    << sent << " bytes were sent, instead of " << size);
+                }
             }
             catch (const boost::system::system_error& sysErr)
             {
-                std::cout<<"Write<UserData> to " << to << " failed with systemError: "<<sysErr.what()<<std::endl;
                 SEND_SYSTEM_LOG(Error, <<"Write to " << to << " failed with systemError: "<<sysErr.what());
             }
         }
