@@ -176,7 +176,7 @@ public:
 
         switch (severity)
         {
-            // fatal errors are written to lll
+            // write all system logs to lll
             case Emergency:
             {
                 lllog(1) << L"EMERGENCY: " << textAscii << std::endl;
