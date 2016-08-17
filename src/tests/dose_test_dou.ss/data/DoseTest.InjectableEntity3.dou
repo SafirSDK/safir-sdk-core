@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <name>DoseTest.InjectableEntity3</name>
+    <baseClass>DoseTest.RootEntity</baseClass>
+    <members>
+        <member>
+          <name>Int32SequenceMember</name>
+          <sequence/>
+          <type>Int32</type>
+        </member>
+        <member>
+          <name>Int32Int32DictionaryMember</name>
+          <type>Int32</type>
+          <dictionary keyType="Int32"/>
+        </member>
+        <member>
+          <name>Int32ItemDictionaryMember</name>
+          <type>DoseTest.TestItem</type>
+          <dictionary keyType="Int32"/>
+        </member>
+    </members>
+</class>

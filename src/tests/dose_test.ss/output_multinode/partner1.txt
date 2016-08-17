@@ -1337,6 +1337,18 @@ Consumer 0: OnInjectedUpdatedEntity:
     MoreInfo
 
 ==========================================================================
+TESTCASE 486
+Description: Test that timestamps are set correctly on sequence and dictionary members
+Expectation: Partner 1 uses SetAll and SetChanges to update an injectable entity.
+    Partner 0 and 2 gets updates that indicate changes appropriately.
+    P0 has timestamp change info and P2 does not.
+--------- Setup -----------
+Consumer 0: OnInitialInjectionsDone:
+  Type      = DoseTest.InjectableEntity3
+  HandlerId = DEFAULT_HANDLER
+
+--------- Test  -----------
+==========================================================================
 TESTCASE 500
 Description: Test of sending create request (owner on this node)
 Expectation: Partner 0/Consumer 0 receives a success response and the entity info field should be "Created" (part 0/cons 1)
