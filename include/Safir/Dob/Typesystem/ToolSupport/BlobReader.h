@@ -146,18 +146,6 @@ namespace ToolSupport
             m_blob.ValueStatus(member, valueIndex, isNull, isChanged);
         }
 
-        void SpecialReadStatus(DotsC_MemberIndex member, int valueIndex, bool& isNull, bool& isChanged) const
-        {
-            MoveToMember(member);
-            m_blob.ValueStatus(member, valueIndex, isNull, isChanged);
-            if (m_memberDescription->GetCollectionType()==SequenceCollectionType)
-            {
-                isChanged = IsChangedTopLevel(member);
-            }
-            //TODO: hur ska man göra med dictionaries?!
-            //Måste de läsas rekursivt? Och i så fall, måste man göra det på något annat ställe?
-        }
-
         /**
          * Reads the key element of a member value. Only applicable for dictionary members.
          * Supported key types: Int32, Int64, TypeId, Enumeration, String, InstanceId, HandlerId, ChannelId, EntityId.

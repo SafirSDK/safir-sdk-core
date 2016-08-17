@@ -719,7 +719,7 @@ namespace
     }
 
     bool BlobReadHelper::IsChanged(const Dob::Typesystem::MemberIndex member,
-                                   const Dob::Typesystem::ArrayIndex index) const
+                                         const Dob::Typesystem::ArrayIndex index) const
     {
         bool isNull, isChanged;
         DotsC_ReadMemberStatus(m_handle, isNull, isChanged, member, index);

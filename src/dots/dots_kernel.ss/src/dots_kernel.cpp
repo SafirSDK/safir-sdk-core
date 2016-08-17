@@ -1092,7 +1092,7 @@ void DotsC_ReadMemberStatus(DotsC_Handle readerHandle, bool& isNull, bool& isCha
 {
     Init();
     Reader* reader=ReaderFromHandle(readerHandle);
-    reader->SpecialReadStatus(member, arrayIndex, isNull, isChanged);
+    reader->ReadStatus(member, arrayIndex, isNull, isChanged);
 }
 
 bool DotsC_ReadTopLevelChangeFlag(DotsC_Handle readerHandle, DotsC_MemberIndex member)
@@ -1291,7 +1291,7 @@ void DotsC_WriteChangeFlag(DotsC_Handle writerHandle,
 {
     Init();
     Writer* writer=WriterFromHandle(writerHandle);
-    writer->SpecialSetChanged(member, index, changed);
+    writer->SetChanged(member, index, changed);
 }
 
 void DotsC_WriteTopLevelChangeFlag(DotsC_Handle writerHandle, DotsC_MemberIndex member, bool isChanged)
