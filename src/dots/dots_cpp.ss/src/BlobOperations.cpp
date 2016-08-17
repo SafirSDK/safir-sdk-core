@@ -48,6 +48,30 @@ namespace
     {
         return (optionalStr==NULL) ? T(hash) : T(Safir::Dob::Typesystem::Utilities::ToWstring(optionalStr));
     }
+
+    DotsC_CollectionType ReadCollectionType(const TypeId typeId, const MemberIndex member)
+    {
+        DotsC_MemberType memberType;
+        DotsC_MemberType keyType;
+        const char* memberName;
+        DotsC_TypeId complexType;
+        DotsC_TypeId keyTypeId;
+        DotsC_Int32 stringLength;
+        DotsC_CollectionType collectionType;
+        DotsC_Int32 arraySize;
+
+        DotsC_GetMemberInfo(typeId,
+                            member,
+                            memberType,
+                            keyType,
+                            memberName,
+                            complexType,
+                            keyTypeId,
+                            stringLength,
+                            collectionType,
+                            arraySize);
+        return collectionType;
+    }
 }
 
     TypeId BlobOperations::GetTypeId(char const * const blob)
@@ -709,7 +733,8 @@ namespace
      *
      **********************************************************************/
     BlobReadHelper::BlobReadHelper(const char* blob)
-        :m_handle(DotsC_CreateBlobReader(blob))
+        : m_handle(DotsC_CreateBlobReader(blob))
+        , m_typeId(DotsC_GetTypeId(blob))
     {
     }
 
@@ -718,8 +743,18 @@ namespace
         DotsC_DeleteBlobReader(m_handle);
     }
 
+    CollectionType BlobReadHelper::GetCollectionType(const Dob::Typesystem::MemberIndex member)
+    {
+        return ReadCollectionType(m_typeId,member);
+    }
+
+    bool BlobReadHelper::GetTopLevelChangeFlag(const Dob::Typesystem::MemberIndex member)
+    {
+        return DotsC_ReadTopLevelChangeFlag(m_handle, member);
+    }
+
     bool BlobReadHelper::IsChanged(const Dob::Typesystem::MemberIndex member,
-                                         const Dob::Typesystem::ArrayIndex index) const
+                                   const Dob::Typesystem::ArrayIndex index) const
     {
         bool isNull, isChanged;
         DotsC_ReadMemberStatus(m_handle, isNull, isChanged, member, index);
@@ -732,7 +767,8 @@ namespace
      *
      **********************************************************************/
     BlobWriteHelper::BlobWriteHelper(const char* blob)
-        :m_handle(DotsC_CreateBlobWriterFromBlob(blob))
+        : m_handle(DotsC_CreateBlobWriterFromBlob(blob))
+        , m_typeId(DotsC_GetTypeId(blob))
     {
     }
 
@@ -741,9 +777,20 @@ namespace
         DotsC_DeleteBlobWriter(m_handle);
     }
 
+    CollectionType BlobWriteHelper::GetCollectionType(const Dob::Typesystem::MemberIndex member)
+    {
+        return ReadCollectionType(m_typeId,member);
+    }
+
+    void BlobWriteHelper::SetTopLevelChangeFlag(const Dob::Typesystem::MemberIndex member,
+                                                const bool val)
+    {
+        DotsC_WriteTopLevelChangeFlag(m_handle, member, val);
+    }
+
     void BlobWriteHelper::SetChangedHere(const Dob::Typesystem::MemberIndex member,
-                                        Dob::Typesystem::ArrayIndex index,
-                                        bool val)
+                                         const Dob::Typesystem::ArrayIndex index,
+                                         const bool val)
     {
         DotsC_WriteChangeFlag(m_handle, member, index, val);
     }

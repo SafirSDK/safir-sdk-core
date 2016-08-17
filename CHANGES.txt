@@ -1,9 +1,8 @@
 -----------------------------------------------------------------------------------------------------------------------
-2016-08-10 version 6.3.1
+2016-08-17 version 6.3.2
 -----------------------------------------------------------------------------------------------------------------------
 
 This release fixes the following issues (see http://safirsdkcore.com for details):
-
 
 #303 System Picture component tests sometimes fail to form system when running many nodes bug
 #309 safir_control does not stop dose_main if it encounters an exception bug
@@ -15,6 +14,14 @@ This release fixes the following issues (see http://safirsdkcore.com for details
 #306 Safir_control must not be multithreaded due to fork() issue bug
 
 TODO: #307???
+
+-----------------------------------------------------------------------------------------------------------------------
+2016-08-17 version 6.3.1
+-----------------------------------------------------------------------------------------------------------------------
+
+This release fixes the following issue (see http://safirsdkcore.com for details):
+
+#313 Incorrect change flags when using sequences in entities with TimestampChangeInfo
 
 -----------------------------------------------------------------------------------------------------------------------
 2016-05-31 version 6.3

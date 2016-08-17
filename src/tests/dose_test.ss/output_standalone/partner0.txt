@@ -3094,6 +3094,68 @@ Consumer 0: OnDeletedEntity:
   Previous  = <?xml version="1.0" encoding="utf-8"?><DoseTest.InjectableEntity><Info xml:space="preserve">Some info</Info><MoreInfo xml:space="preserve">Some more changed info</MoreInfo></DoseTest.InjectableEntity>
 
 ==========================================================================
+TESTCASE 486
+Description: Test that timestamps are set correctly on sequence and dictionary members
+Expectation: Partner 1 uses SetAll and SetChanges to update an injectable entity.
+    Partner 0 and 2 gets updates that indicate changes appropriately.
+    P0 has timestamp change info and P2 does not.
+--------- Setup -----------
+--------- Test  -----------
+Consumer 0: OnNewEntity:
+  EntityId  = (DoseTest.InjectableEntity3, 565656)
+  Owner     = DEFAULT_HANDLER
+  OwnerConn = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;1</ConnectionName></Safir.Dob.ConnectionInfo>
+  OwnerStr  = DEFAULT_HANDLER
+  Entity    = <?xml version="1.0" encoding="utf-8"?><DoseTest.InjectableEntity3><Int32SequenceMember><Int32>32</Int32><Int32>-32</Int32></Int32SequenceMember><Int32Int32DictionaryMember><entry><key>-32</key><value>-32000</value></entry><entry><key>32</key><value>32000</value></entry></Int32Int32DictionaryMember><Int32ItemDictionaryMember><entry><key>-32</key><DoseTest.TestItem><MyInt>3200</MyInt></DoseTest.TestItem></entry><entry><key>32</key><DoseTest.TestItem><MyInt>-3200</MyInt></DoseTest.TestItem></entry></Int32ItemDictionaryMember></DoseTest.InjectableEntity3>
+  Changed top-level members: 
+    Info
+    MoreInfo
+    Int32SequenceMember
+    Int32Int32DictionaryMember
+    Int32ItemDictionaryMember
+
+Consumer 0: OnUpdatedEntity:
+  EntityId  = (DoseTest.InjectableEntity3, 565656)
+  Owner     = DEFAULT_HANDLER
+  OwnerConn = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;1</ConnectionName></Safir.Dob.ConnectionInfo>
+  OwnerStr  = DEFAULT_HANDLER
+  Entity    = <?xml version="1.0" encoding="utf-8"?><DoseTest.InjectableEntity3><Int32SequenceMember><Int32>32</Int32></Int32SequenceMember><Int32Int32DictionaryMember><entry><key>-32</key><value>-32000</value></entry></Int32Int32DictionaryMember><Int32ItemDictionaryMember><entry><key>-32</key><DoseTest.TestItem><MyInt>3200</MyInt></DoseTest.TestItem></entry></Int32ItemDictionaryMember></DoseTest.InjectableEntity3>
+  Previous  = <?xml version="1.0" encoding="utf-8"?><DoseTest.InjectableEntity3><Int32SequenceMember><Int32>32</Int32><Int32>-32</Int32></Int32SequenceMember><Int32Int32DictionaryMember><entry><key>-32</key><value>-32000</value></entry><entry><key>32</key><value>32000</value></entry></Int32Int32DictionaryMember><Int32ItemDictionaryMember><entry><key>-32</key><DoseTest.TestItem><MyInt>3200</MyInt></DoseTest.TestItem></entry><entry><key>32</key><DoseTest.TestItem><MyInt>-3200</MyInt></DoseTest.TestItem></entry></Int32ItemDictionaryMember></DoseTest.InjectableEntity3>
+  Changed top-level members: 
+    Int32SequenceMember
+    Int32Int32DictionaryMember
+    Int32ItemDictionaryMember
+
+Consumer 0: OnUpdatedEntity:
+  EntityId  = (DoseTest.InjectableEntity3, 565656)
+  Owner     = DEFAULT_HANDLER
+  OwnerConn = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;1</ConnectionName></Safir.Dob.ConnectionInfo>
+  OwnerStr  = DEFAULT_HANDLER
+  Entity    = <?xml version="1.0" encoding="utf-8"?><DoseTest.InjectableEntity3><Int32SequenceMember><Int32>32</Int32></Int32SequenceMember><Int32Int32DictionaryMember><entry><key>-32</key><value>-32000</value></entry></Int32Int32DictionaryMember><Int32ItemDictionaryMember><entry><key>-32</key><DoseTest.TestItem><MyInt>32</MyInt></DoseTest.TestItem></entry></Int32ItemDictionaryMember></DoseTest.InjectableEntity3>
+  Previous  = <?xml version="1.0" encoding="utf-8"?><DoseTest.InjectableEntity3><Int32SequenceMember><Int32>32</Int32></Int32SequenceMember><Int32Int32DictionaryMember><entry><key>-32</key><value>-32000</value></entry></Int32Int32DictionaryMember><Int32ItemDictionaryMember><entry><key>-32</key><DoseTest.TestItem><MyInt>3200</MyInt></DoseTest.TestItem></entry></Int32ItemDictionaryMember></DoseTest.InjectableEntity3>
+  Changed top-level members: 
+    Int32ItemDictionaryMember
+
+Consumer 0: OnUpdatedEntity:
+  EntityId  = (DoseTest.InjectableEntity3, 565656)
+  Owner     = DEFAULT_HANDLER
+  OwnerConn = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;1</ConnectionName></Safir.Dob.ConnectionInfo>
+  OwnerStr  = DEFAULT_HANDLER
+  Entity    = <?xml version="1.0" encoding="utf-8"?><DoseTest.InjectableEntity3></DoseTest.InjectableEntity3>
+  Previous  = <?xml version="1.0" encoding="utf-8"?><DoseTest.InjectableEntity3><Int32SequenceMember><Int32>32</Int32></Int32SequenceMember><Int32Int32DictionaryMember><entry><key>-32</key><value>-32000</value></entry></Int32Int32DictionaryMember><Int32ItemDictionaryMember><entry><key>-32</key><DoseTest.TestItem><MyInt>32</MyInt></DoseTest.TestItem></entry></Int32ItemDictionaryMember></DoseTest.InjectableEntity3>
+  Changed top-level members: 
+    Int32SequenceMember
+    Int32Int32DictionaryMember
+    Int32ItemDictionaryMember
+
+Consumer 0: OnDeletedEntity:
+  EntityId       = (DoseTest.InjectableEntity3, 565656)
+  deletedByOwner = true
+  Owner          = DEFAULT_HANDLER
+  OwnerStr  = DEFAULT_HANDLER
+  Previous  = <?xml version="1.0" encoding="utf-8"?><DoseTest.InjectableEntity3></DoseTest.InjectableEntity3>
+
+==========================================================================
 TESTCASE 500
 Description: Test of sending create request (owner on this node)
 Expectation: Partner 0/Consumer 0 receives a success response and the entity info field should be "Created" (part 0/cons 1)
