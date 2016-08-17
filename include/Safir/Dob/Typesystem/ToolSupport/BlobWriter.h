@@ -145,6 +145,21 @@ namespace ToolSupport
          */
         void SetChanged(DotsC_MemberIndex member, DotsC_Int32 valueIndex, bool isChanged) {m_blob.SetChanged(member, valueIndex, isChanged);}
 
+        void SpecialSetChanged(DotsC_MemberIndex member, DotsC_Int32 valueIndex, bool isChanged)
+        {
+            const MemberDescriptionType* md=m_classDescription->GetMember(member);
+            DotsC_CollectionType collectionType=md->GetCollectionType();
+            //TODO: Kan man göra på samma sätt med dictionaries här?
+            if (collectionType==SequenceCollectionType)
+            {
+                m_blob.SetChangedTopLevel(member,isChanged);
+            }
+            else
+            {
+                m_blob.SetChanged(member, valueIndex, isChanged);
+            }
+        }
+
         /**
          * Write member key to the a blob. Only use this when member is a dictionary otherwize the blob will be corrupt.
          * A new key with value null will be added to the collection for each call to this method. Make sure to call
