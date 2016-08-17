@@ -282,14 +282,33 @@ namespace Internal
 
         for (int member = 0; member < numberOfMembers; ++member)
         {
-            const Typesystem::Int32 arraySize = Typesystem::Members::GetArraySize(typeId,member);
             bool isChanged = false;
-            for (Typesystem::ArrayIndex index = 0; index < arraySize; ++index)
+            const auto collectionType = reader->GetCollectionType(member);
+            if (collectionType == SequenceCollectionType)
             {
-                if (reader->IsChanged(member, index))
+                isChanged = reader->GetTopLevelChangeFlag(member);
+            }
+            else
+            {
+                //dictionaries need to be looped through if they don't have
+                //a change flag set on the top level.
+                //other types always need a loop.
+                if (collectionType == DictionaryCollectionType)
                 {
-                    isChanged = true;
-                    break;
+                    isChanged = reader->GetTopLevelChangeFlag(member);
+                }
+
+                if (!isChanged)
+                {
+                    const Typesystem::Int32 arraySize = Typesystem::Members::GetArraySize(typeId,member);
+                    for (Typesystem::ArrayIndex index = 0; index < arraySize; ++index)
+                    {
+                        if (reader->IsChanged(member, index))
+                        {
+                            isChanged = true;
+                            break;
+                        }
+                    }
                 }
             }
 
@@ -353,10 +372,18 @@ namespace Internal
         {
             if (current.GetMemberTimestamps()[member] > previous.GetMemberTimestamps()[member])
             {
-                const Typesystem::Int32 arraySize = Typesystem::Members::GetArraySize(typeId,member);
-                for (Typesystem::ArrayIndex index = 0; index < arraySize; ++index)
+                const auto collectionType = writer.GetCollectionType(member);
+                if (collectionType == SequenceCollectionType || collectionType == DictionaryCollectionType)
                 {
-                    writer.SetChangedHere(member, index, true);
+                    writer.SetTopLevelChangeFlag(member, true);
+                }
+                else
+                {
+                    const Typesystem::Int32 arraySize = Typesystem::Members::GetArraySize(typeId,member);
+                    for (Typesystem::ArrayIndex index = 0; index < arraySize; ++index)
+                    {
+                        writer.SetChangedHere(member, index, true);
+                    }
                 }
             }
         }

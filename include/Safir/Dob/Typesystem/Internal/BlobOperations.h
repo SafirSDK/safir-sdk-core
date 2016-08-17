@@ -733,10 +733,15 @@ namespace Internal
         explicit BlobReadHelper(const char* blob);
         ~BlobReadHelper();
 
+        CollectionType GetCollectionType(const Dob::Typesystem::MemberIndex member);
+
+        bool GetTopLevelChangeFlag(const Dob::Typesystem::MemberIndex member);
+
         bool IsChanged(const Dob::Typesystem::MemberIndex member,
                        const Dob::Typesystem::ArrayIndex index) const;
     private:
         DotsC_Int64 m_handle;
+        const DotsC_TypeId m_typeId;
     };
 
     /**********************************************************************
@@ -749,6 +754,11 @@ namespace Internal
     public:
         explicit BlobWriteHelper(const char* blob);
         ~BlobWriteHelper();
+
+        CollectionType GetCollectionType(const Dob::Typesystem::MemberIndex member);
+
+        void SetTopLevelChangeFlag(const Dob::Typesystem::MemberIndex member,
+                                   const bool val);
 
         void SetChangedHere(const Dob::Typesystem::MemberIndex member,
                             Dob::Typesystem::ArrayIndex index,
@@ -767,6 +777,7 @@ namespace Internal
 
     private:
         DotsC_Int64 m_handle;
+        const DotsC_TypeId m_typeId;
     };
 
 #ifdef _MSC_VER
