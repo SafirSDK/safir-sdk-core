@@ -1,5 +1,5 @@
 -----------------------------------------------------------------------------------------------------------------------
-2016-08-17 version 6.3.2
+2016-08-25 version 6.3.2
 -----------------------------------------------------------------------------------------------------------------------
 
 This release fixes the following issues (see http://safirsdkcore.com for details):
@@ -12,8 +12,7 @@ This release fixes the following issues (see http://safirsdkcore.com for details
 #296 IPC Unit test failures bug
 #300 Incarnation_And_Control_Tests sometimes fail bug
 #306 Safir_control must not be multithreaded due to fork() issue bug
-
-TODO: #307???
+#314 Make sequence and dictionary SetNull/IsNull call clear/empty enhancement
 
 -----------------------------------------------------------------------------------------------------------------------
 2016-08-17 version 6.3.1
