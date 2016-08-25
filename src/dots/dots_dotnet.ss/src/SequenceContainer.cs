@@ -220,7 +220,7 @@ namespace Safir.Dob.Typesystem
         /// <returns>True if the container is set to null.</returns>
         public override bool IsNull ()
         {
-            return false;
+            return Count == 0;
         }
 
         /// <summary>
@@ -228,7 +228,7 @@ namespace Safir.Dob.Typesystem
         /// </summary>
         public override void SetNull ()
         {
-            throw new SoftwareViolationException("Sequences cannot be null!");
+            Clear();
         }
 
         /// <summary>

@@ -9048,6 +9048,55 @@ public class Test {
 
             }
 
+            //sequences
+            {
+                MemberSequences ms= new MemberSequences();
+
+                check(ms.int32Member().isNull());
+                check(ms.int32Member().isEmpty());
+                check(!ms.int32Member().isChanged());
+                ms.int32Member().add(20);
+                ms.int32Member().add(30);
+                ms.int32Member().add(0, 10);
+                check(!ms.int32Member().isNull());
+                check(ms.int32Member().isChanged());
+                check(!ms.int32Member().isEmpty());
+                check(ms.int32Member().size() == 3);
+                ms.int32Member().setChanged(false);
+                ms.int32Member().setNull();
+                check(ms.int32Member().isNull());
+                check(ms.int32Member().isEmpty());
+                check(ms.int32Member().isChanged());
+            }
+
+            //dictionaries
+            {
+                MemberDictionaries md= new MemberDictionaries();
+
+                check(md.int32StringMember().isNull());
+                check(md.int32StringMember().isEmpty());
+                check(!md.int32StringMember().isChanged());
+                {
+                    StringContainer c = new StringContainer();
+                    c.setVal(ParameterDictionaries.getInt32StringParameter(10));
+                    md.int32StringMember().put(10,c);
+                }
+                {
+                    StringContainer c = new StringContainer();
+                    c.setVal(ParameterDictionaries.getInt32StringParameter(10));
+                    md.int32StringMember().put(20,c);
+                }
+                check(!md.int32StringMember().isNull());
+                check(md.int32StringMember().isChanged());
+                check(!md.int32StringMember().isEmpty());
+                check(md.int32StringMember().size() == 2);
+                md.int32StringMember().setChanged(false);
+                md.int32StringMember().setNull();
+                check(md.int32StringMember().isNull());
+                check(md.int32StringMember().isEmpty());
+                check(md.int32StringMember().isChanged());
+            }
+            
             // Some namespacing checks
             {
                 {

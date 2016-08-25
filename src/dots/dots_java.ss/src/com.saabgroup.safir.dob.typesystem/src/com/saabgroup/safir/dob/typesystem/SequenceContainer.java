@@ -47,12 +47,12 @@ implements java.util.List<T>{
 
     @Override
     public boolean isNull() {
-        return false;
+        return isEmpty();
     }
 
     @Override
     public void setNull() {
-        throw new SoftwareViolationException("Sequences cannot be null!");
+        clear();
     }
 
     @Override

@@ -66,11 +66,11 @@ namespace Typesystem
         {
         }
 
-        virtual bool IsNull() const {return false;}
+        virtual bool IsNull() const {return empty();}
 
         virtual void SetNull()
         {
-            throw SoftwareViolationException(L"Dictionaries cannot be null",__WFILE__,__LINE__);
+            clear();
         }
 
         iterator begin() {return m_values.begin();}

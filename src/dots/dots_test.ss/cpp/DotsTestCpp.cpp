@@ -9955,8 +9955,8 @@ void ContainerTest()
     {
         MemberTypes t;
         t.ObjectMember() = Safir::Dob::Typesystem::Object::Create();
-        t.ObjectMember().GetPtr()->GetTypeId();
-        t.ObjectMember()->GetTypeId();
+        Check(t.ObjectMember().GetPtr()->GetTypeId() == t.ObjectMember()->GetTypeId());
+        
     }
 
     //Copy
@@ -9964,10 +9964,52 @@ void ContainerTest()
         MemberTypes t1,t2;
         t1.Int32Member() = 10;
         t2.Int32Member().Copy(t1.Int32Member());
+        Check(t2.Int32Member() == 10);
+        Check(t2.IsChanged());
     }
 
+    //sequences
+    {
+        DotsTest::MemberSequencesPtr ms=DotsTest::MemberSequences::Create();
 
+        Check(ms->Int32Member().IsNull());
+        Check(ms->Int32Member().empty());
+        Check(!ms->Int32Member().IsChanged());
+        ms->Int32Member().push_back(20);
+        ms->Int32Member().push_back(30);
+        ms->Int32Member().InsertAt(0, 10);
+        Check(!ms->Int32Member().IsNull());
+        Check(ms->Int32Member().IsChanged());
+        Check(!ms->Int32Member().empty());
+        Check(ms->Int32Member().size() == 3);
+        ms->Int32Member().SetChanged(false);
+        ms->Int32Member().SetNull();
+        Check(ms->Int32Member().IsNull());
+        Check(ms->Int32Member().empty());
+        Check(ms->Int32Member().IsChanged());
+    }
 
+    //dictionaries
+    {
+        DotsTest::MemberDictionariesPtr md=DotsTest::MemberDictionaries::Create();
+
+        Check(md->Int32StringMember().IsNull());
+        Check(md->Int32StringMember().empty());
+        Check(!md->Int32StringMember().IsChanged());
+        md->Int32StringMember()[10].SetVal(DotsTest::ParameterDictionaries::Int32StringParameter(10));
+        md->Int32StringMember()[20].SetVal(DotsTest::ParameterDictionaries::Int32StringParameter(20));
+        Check(!md->Int32StringMember().IsNull());
+        Check(md->Int32StringMember().IsChanged());
+        Check(!md->Int32StringMember().empty());
+        Check(md->Int32StringMember().size() == 2);
+        md->Int32StringMember().SetChanged(false);
+        md->Int32StringMember().SetNull();
+        Check(md->Int32StringMember().IsNull());
+        Check(md->Int32StringMember().empty());
+        Check(md->Int32StringMember().IsChanged());
+    }
+
+    
     if (failures != 0)
     {
         std::wcout << "There were " << failures << " failures when running ContainerTest! (out of " << tests << " tests)" << std::endl;

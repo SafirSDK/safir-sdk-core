@@ -14,12 +14,12 @@ implements java.util.Map<K, V> {
 
     @Override
     public boolean isNull() {
-        return false;
+        return isEmpty();
     }
 
     @Override
     public void setNull() {
-        throw new SoftwareViolationException("Dictionaries cannot be null!");
+        clear();
     }
 
     @Override

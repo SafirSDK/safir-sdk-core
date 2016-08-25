@@ -109,6 +109,8 @@ class DotsTestDotnet
         Test_ObjectClone();
         Test_ContainerClone();
         Test_ContainerCopy();
+        var misc = new MiscTests();
+        misc.Test_Containers();
     }
 
     private static void Test_IsException()
@@ -9195,4 +9197,60 @@ class DotsTestDotnet
         }
     }
 
+    private class MiscTests
+    {
+        private int tests = 0;
+        private int failures = 0;
+        private void Check(bool expr)
+        {
+            ++tests;
+            if (!expr) {
+                ++failures;
+                Console.WriteLine("Testcase " + tests + " failed!");
+            }
+        }
+
+
+        public void Test_Containers()
+        {
+            //sequences
+            {
+                DotsTest.MemberSequences ms= new DotsTest.MemberSequences();
+
+                Check(ms.Int32Member.IsNull());
+                Check(ms.Int32Member.Count == 0);
+                Check(!ms.Int32Member.IsChanged());
+                ms.Int32Member.Add(20);
+                ms.Int32Member.Add(30);
+                ms.Int32Member.Insert(0, 10);
+                Check(!ms.Int32Member.IsNull());
+                Check(ms.Int32Member.IsChanged());
+                Check(ms.Int32Member.Count == 3);
+                ms.Int32Member.SetChanged(false);
+                ms.Int32Member.SetNull();
+                Check(ms.Int32Member.IsNull());
+                Check(ms.Int32Member.Count == 0);
+                Check(ms.Int32Member.IsChanged());
+            }
+
+            //dictionaries
+            {
+                DotsTest.MemberDictionaries md= new DotsTest.MemberDictionaries();
+
+                Check(md.Int32StringMember.IsNull());
+                Check(md.Int32StringMember.Count == 0);
+                Check(!md.Int32StringMember.IsChanged());
+                md.Int32StringMember.Add(10,"asdf");
+                md.Int32StringMember.Add(20,"asdfasdf");
+                Check(!md.Int32StringMember.IsNull());
+                Check(md.Int32StringMember.IsChanged());
+                Check(md.Int32StringMember.Count == 2);
+                md.Int32StringMember.SetChanged(false);
+                md.Int32StringMember.SetNull();
+                Check(md.Int32StringMember.IsNull());
+                Check(md.Int32StringMember.Count == 0);
+                Check(md.Int32StringMember.IsChanged());
+            }
+        }
+    }
 }
