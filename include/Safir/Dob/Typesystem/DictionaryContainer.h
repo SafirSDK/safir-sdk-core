@@ -153,7 +153,6 @@ namespace Typesystem
             m_bIsChanged=true;
             ValueContainerType container;
             InsertHelper<ContainedType, ValueContainerType>::SetVal(val, container);
-            container.SetChanged(true);
             m_values.insert(value_type(key, container));
         }
 
