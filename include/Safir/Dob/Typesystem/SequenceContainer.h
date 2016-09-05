@@ -24,7 +24,6 @@
 #pragma once
 
 #include <typeinfo>
-#include <type_traits>
 #include <vector>
 #include <boost/container/vector.hpp>
 #include <Safir/Dob/Typesystem/EntityId.h>
