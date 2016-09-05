@@ -10049,7 +10049,7 @@ void ContainerTest()
         oc.push_back(Object::Create());
         Check(oc.IsChanged());
         Check(oc.IsChangedHere());
-        auto ti = TestItem::Create();
+        TestItemPtr ti = TestItem::Create();
         oc.push_back(ti);
         oc.SetChanged(false);
         ti->MyInt() = 10;

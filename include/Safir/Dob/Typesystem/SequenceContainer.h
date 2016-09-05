@@ -238,9 +238,9 @@ namespace Typesystem
 
     template <class T>
     class GenericObjectSequenceContainer
-        : public SequenceContainerBase<boost::shared_ptr<T>>
+        : public SequenceContainerBase<boost::shared_ptr<T> >
     {
-        typedef SequenceContainerBase<boost::shared_ptr<T>> Base;
+        typedef SequenceContainerBase<boost::shared_ptr<T> > Base;
     public:
 
         //Override of inherited method. Parent comment describes this behaviour too..
