@@ -231,24 +231,6 @@ namespace Safir.Dob.Typesystem
             Clear();
         }
 
-        /// <summary>
-        /// Determines whether this instance is changed.
-        /// </summary>
-        /// <returns><c>true</c> if this instance is changed; otherwise, <c>false</c>.</returns>
-        public override bool IsChanged ()
-        {
-            return m_bIsChanged;
-        }
-
-        /// <summary>
-        /// Sets the changed.
-        /// </summary>
-        /// <param name="changed">If set to <c>true</c> changed.</param>
-        public override void SetChanged (bool changed)
-        {
-            m_bIsChanged = changed;
-        }
-
         #endregion
 
         /// <summary>
@@ -275,8 +257,73 @@ namespace Safir.Dob.Typesystem
         private List<T> m_values = new List<T> ();
     }
 
-    /// <summary>Generic SequenceContainer for Objects.</summary>
-    public class GenericObjectSequenceContainer<T> : SequenceContainer<T> where T : Safir.Dob.Typesystem.Object { }
+    /// <summary>
+    /// Generic SequenceContainer for Objects.
+    ///
+    /// This implements recursive SetChanged and IsChanged behaviour.
+    /// </summary>
+    public abstract class GenericObjectSequenceContainer<T>
+        : SequenceContainer<T> where T:Safir.Dob.Typesystem.Object
+    {
+        /// <summary>
+        /// Override of inherited method. See comment for parent class.
+        /// </summary>
+        /// <returns></returns>
+        public override bool IsChanged ()
+        {
+            if (m_bIsChanged)
+            {
+                return true;
+            }
+
+            foreach (var val in this)
+            {
+                if (val.IsChanged())
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Is the change flag in the container set?
+        /// <para/>
+        /// This method is like IsChanged without the recursion.
+        /// </summary>
+        /// <returns>True if the containers change flag is set.</returns>
+        public bool IsChangedHere ()
+        {
+            return m_bIsChanged;
+        }
+
+        /// <summary>
+        /// Override of inherited method. See comment for parent class.
+        /// </summary>
+        /// <returns></returns>
+        public override void SetChanged (bool changed)
+        {
+            m_bIsChanged = changed;
+
+            foreach (var val in this)
+            {
+                val.SetChanged(changed);
+            }
+        }
+
+        /// <summary>
+        /// Set the change flag in the container.
+        /// <para/>
+        /// This method is like SetChanged without the recursion.
+        /// </summary>
+        /// <param name="changed">The value to set the change flag to.</param>
+        public void SetChangedHere (bool changed)
+        {
+            m_bIsChanged = changed;
+        }
+
+    }
 
     /// <summary>Generic SequenceContainer for non-Object members.</summary>
     public class ValueSequenceContainer<T> : SequenceContainer<T> { }

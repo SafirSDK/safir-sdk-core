@@ -24,6 +24,7 @@
 #pragma once
 
 #include <typeinfo>
+#include <type_traits>
 #include <vector>
 #include <boost/container/vector.hpp>
 #include <Safir/Dob/Typesystem/EntityId.h>
@@ -46,7 +47,7 @@ namespace Typesystem
      * have change flags.
      */
     template <class T>
-    class SequenceContainer : public ContainerBase
+    class SequenceContainerBase : public ContainerBase
     {
     public:
 
@@ -59,7 +60,7 @@ namespace Typesystem
          *
          * Construct a container that is not changed and not null.
          */
-        SequenceContainer()
+        SequenceContainerBase()
             :ContainerBase()
             ,m_values()
         {
@@ -72,17 +73,6 @@ namespace Typesystem
             clear();
         }
 
-        /**
-         * @brief IsChanged - Check if the sequence has changed.
-         * @return True if changed, else false.
-         */
-        virtual bool IsChanged() const {return m_bIsChanged;}
-
-        /**
-         * @brief SetChanged - Set the change state of the sequence.
-         * @param changed [in] - If true, the sequence is set to changed, it is set to not changed.
-         */
-        virtual void SetChanged(const bool changed) {m_bIsChanged=changed;}
 
         /**
          * @brief size - Get the size of the sequence, i.e number of contained values.
@@ -206,7 +196,8 @@ namespace Typesystem
                     throw SoftwareViolationException(L"Invalid call to Copy, containers are not of same type",__WFILE__,__LINE__);
                 }
 
-                const SequenceContainer<ContainedType>& other=static_cast<const SequenceContainer<ContainedType>& >(that);
+                const SequenceContainerBase<ContainedType>& other=
+                    static_cast<const SequenceContainerBase<ContainedType>& >(that);
 
                 m_bIsChanged=other.m_bIsChanged;
                 m_values.clear();
@@ -229,10 +220,88 @@ namespace Typesystem
             static boost::shared_ptr<U> Copy(const boost::shared_ptr<U> & val) {return boost::static_pointer_cast<U>(val->Clone());}
         };
 
+
         StorageType m_values;
     };
 
+    template <class T>
+    class SequenceContainer : public SequenceContainerBase<T>
+    {
+        typedef SequenceContainerBase<T> Base;
+    public:
+
+        //Override of inherited method. Parent comment describes this behaviour too..
+        virtual bool IsChanged() const {return Base::m_bIsChanged;}
+
+        //Override of inherited method. Parent comment describes this behaviour too..
+        virtual void SetChanged(const bool changed) {Base::m_bIsChanged = changed;}
+    };
+
+    template <class T>
+    class GenericObjectSequenceContainer
+        : public SequenceContainerBase<boost::shared_ptr<T>>
+    {
+        typedef SequenceContainerBase<boost::shared_ptr<T>> Base;
+    public:
+
+        //Override of inherited method. Parent comment describes this behaviour too..
+        virtual bool IsChanged() const
+        {
+            if (Base::m_bIsChanged)
+            {
+                return true;
+            }
+
+            for (typename Base::const_iterator it=Base::begin(); it!=Base::end(); ++it)
+            {
+                if ((*it)->IsChanged()) //something in an object has changed
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /**
+         * Is the change flag in the container set?
+         *
+         * This method is like IsChanged without the recursion.
+         *
+         * @return True if the containers change flag is set.
+         */
+        virtual bool IsChangedHere() const
+        {
+            return Base::m_bIsChanged;
+        }
+
+        //Override of inherited method. Parent comment describes this behaviour too..
+        virtual void SetChanged(const bool changed)
+        {
+            Base::m_bIsChanged = changed;
+
+            for (typename Base::const_iterator it=Base::begin(); it!=Base::end(); ++it)
+            {
+                (*it)->SetChanged(changed);
+            }
+        }
+
+        /**
+         * Set the change flag in the container.
+         *
+         * This method is like SetChanged without the recursion
+         *
+         * @param changed [in] - The value to set the change flag to.
+         */
+        virtual void SetChangedHere(const bool changed)
+        {
+            Base::m_bIsChanged = changed;
+        }
+    };
+
+
     /**
+
      * @name Basic type container typedefs
      */
     /** @{ */
@@ -275,7 +344,7 @@ namespace Typesystem
     typedef SequenceContainer<Binary> BinarySequenceContainer;
 
     /** A container containing Object values */
-    typedef SequenceContainer<ObjectPtr> ObjectSequenceContainer;
+    typedef GenericObjectSequenceContainer<Object> ObjectSequenceContainer;
 
     /** @} */
 

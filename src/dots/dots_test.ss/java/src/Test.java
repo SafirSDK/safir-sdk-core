@@ -9067,7 +9067,21 @@ public class Test {
                 check(ms.int32Member().isNull());
                 check(ms.int32Member().isEmpty());
                 check(ms.int32Member().isChanged());
-            }
+
+                //check recursiveness
+                check(!ms.testClassMember().isChanged());
+                ms.testClassMember().add(new TestItem());
+                check(ms.testClassMember().isChanged());
+                ms.testClassMember().setChanged(false);
+                ms.testClassMember().get(0).myInt().setVal(10);;
+                check(ms.testClassMember().get(0).isChanged());
+                check(ms.testClassMember().isChanged(), "sequence recursive ischanged");
+                ms.testClassMember().get(0).setChanged(false);
+                check(!ms.testClassMember().isChanged(), "sequence recursive ischanged 2");
+                ms.testClassMember().setChanged(true);
+                check(ms.testClassMember().isChanged());
+                check(ms.testClassMember().get(0).isChanged(), "sequence recursive ischanged 3");
+}
 
             //dictionaries
             {
@@ -9095,8 +9109,45 @@ public class Test {
                 check(md.int32StringMember().isNull());
                 check(md.int32StringMember().isEmpty());
                 check(md.int32StringMember().isChanged());
+
+                //check recursiveness
+                check(!md.int32ItemMember().isChanged());
+                md.int32ItemMember().put(0, new ObjectContainerImpl<MemberDictionaries>());
+                md.int32ItemMember().get(0).setObj(new MemberDictionaries());
+                check(md.int32ItemMember().isChanged());
+                md.int32ItemMember().setChanged(false);
+                md.int32ItemMember().get(0).getObj().int32Int32Member().put(10,new Int32Container());
+                md.int32ItemMember().get(0).getObj().int32Int32Member().get(10).setVal(10);
+                check(md.int32ItemMember().get(0).isChanged());
+                check(md.int32ItemMember().isChanged());
+                md.int32ItemMember().get(0).setChanged(false);
+                check(!md.int32ItemMember().isChanged());
+                md.int32ItemMember().setChanged(true);
+                check(md.int32ItemMember().isChanged());
+                check(md.int32ItemMember().get(0).isChanged());
             }
-            
+
+            //sequence container Object specialization
+            {
+                Object.SequenceContainer oc = new Object.SequenceContainer();
+                check(!oc.isChanged());
+                check(!oc.isChangedHere());
+                oc.setChangedHere(true);
+                check(oc.isChanged());
+                check(oc.isChangedHere());
+                oc.setChanged(false);
+                oc.add(new Object());
+                check(oc.isChanged());
+                check(oc.isChangedHere());
+                TestItem ti = new TestItem();
+                oc.add(ti);
+                oc.setChanged(false);
+                ti.myInt().setVal(10);
+                check(oc.isChanged(), "recursive ischanged");
+                check(!oc.isChangedHere(), "recursive ischanged 2");
+                check(oc.get(1).isChanged(), "recursive ischanged 3");
+            }
+
             // Some namespacing checks
             {
                 {

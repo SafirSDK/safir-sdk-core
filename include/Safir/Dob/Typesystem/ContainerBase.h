@@ -71,9 +71,11 @@ namespace Typesystem
 
         /**
          * Is the change flag set on the container?
+         *
          * The change flag gets updated every time the contained value changes.
-         * Note: If this is a container containing an object this call will recursively
-         *       check change flags in the contained object.
+         *
+         * Note: If this is a container containing objects this call will recursively
+         *       check change flags in the contained objects.
          *
          * @return True if the containers change flag is set.
          */
@@ -89,8 +91,8 @@ namespace Typesystem
          * The change flag is how receivers of objects can work out what the
          * sender really wanted done on the object.
          *
-         * Note: If this is a container containing an object this call will recursively
-         *       set all the change flags in the contained object.
+         * Note: If this is a container containing one or more objects this call
+         *       will recursively set all the change flags in the contained objects.
          * @param changed [in] - The value to set the change flag(s) to.
          */
         virtual void SetChanged(const bool changed) {m_bIsChanged = changed;}

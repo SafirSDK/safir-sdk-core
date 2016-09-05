@@ -9552,7 +9552,7 @@ void Check(bool expr, const std::string & description = "")
         std::wcout << "Testcase " << tests;
         if (!description.empty())
         {
-            std::wcout << "'" << description.c_str() << "'";
+            std::wcout << " '" << description.c_str() << "'";
         }
         std::wcout << " failed!" << std::endl;
     }
@@ -9956,7 +9956,6 @@ void ContainerTest()
         MemberTypes t;
         t.ObjectMember() = Safir::Dob::Typesystem::Object::Create();
         Check(t.ObjectMember().GetPtr()->GetTypeId() == t.ObjectMember()->GetTypeId());
-        
     }
 
     //Copy
@@ -9987,6 +9986,19 @@ void ContainerTest()
         Check(ms->Int32Member().IsNull());
         Check(ms->Int32Member().empty());
         Check(ms->Int32Member().IsChanged());
+
+        Check(!ms->TestClassMember().IsChanged());
+        ms->TestClassMember().push_back(DotsTest::TestItem::Create());
+        Check(ms->TestClassMember().IsChanged());
+        ms->TestClassMember().SetChanged(false);
+        ms->TestClassMember()[0]->MyInt() = 10;;
+        Check(ms->TestClassMember()[0]->IsChanged());
+        Check(ms->TestClassMember().IsChanged(), "sequence recursive ischanged");
+        ms->TestClassMember()[0]->SetChanged(false);
+        Check(!ms->TestClassMember().IsChanged(), "sequence recursive ischanged 2");
+        ms->TestClassMember().SetChanged(true);
+        Check(ms->TestClassMember().IsChanged());
+        Check(ms->TestClassMember()[0]->IsChanged(), "sequence recursive ischanged 3");
     }
 
     //dictionaries
@@ -9997,7 +10009,7 @@ void ContainerTest()
         Check(md->Int32StringMember().empty());
         Check(!md->Int32StringMember().IsChanged());
         md->Int32StringMember()[10].SetVal(DotsTest::ParameterDictionaries::Int32StringParameter(10));
-        md->Int32StringMember()[20].SetVal(DotsTest::ParameterDictionaries::Int32StringParameter(20));
+        md->Int32StringMember()[20].SetVal(L"asdf");
         Check(!md->Int32StringMember().IsNull());
         Check(md->Int32StringMember().IsChanged());
         Check(!md->Int32StringMember().empty());
@@ -10007,9 +10019,45 @@ void ContainerTest()
         Check(md->Int32StringMember().IsNull());
         Check(md->Int32StringMember().empty());
         Check(md->Int32StringMember().IsChanged());
+
+        //check recursiveness
+        Check(!md->Int32ItemMember().IsChanged());
+        md->Int32ItemMember().Insert(0,DotsTest::MemberDictionaries::Create());
+        Check(md->Int32ItemMember().IsChanged());
+        md->Int32ItemMember().SetChanged(false);
+        md->Int32ItemMember()[0]->Int32Int32Member().Insert(10,10);
+        Check(md->Int32ItemMember()[0]->IsChanged());
+        Check(md->Int32ItemMember().IsChanged());
+        md->Int32ItemMember()[0]->SetChanged(false);
+        Check(!md->Int32ItemMember().IsChanged());
+        md->Int32ItemMember().SetChanged(true);
+        Check(md->Int32ItemMember().IsChanged());
+        Check(md->Int32ItemMember()[0]->IsChanged());
     }
 
-    
+    //sequence container Object specialization
+    {
+        using namespace Safir::Dob::Typesystem;
+        using namespace DotsTest;
+        ObjectSequenceContainer oc;
+        Check(!oc.IsChanged());
+        Check(!oc.IsChangedHere());
+        oc.SetChangedHere(true);
+        Check(oc.IsChanged());
+        Check(oc.IsChangedHere());
+        oc.SetChanged(false);
+        oc.push_back(Object::Create());
+        Check(oc.IsChanged());
+        Check(oc.IsChangedHere());
+        auto ti = TestItem::Create();
+        oc.push_back(ti);
+        oc.SetChanged(false);
+        ti->MyInt() = 10;
+        Check(oc.IsChanged(), "recursive ischanged");
+        Check(!oc.IsChangedHere(), "recursive ischanged 2");
+        Check(oc[1]->IsChanged(), "recursive ischanged 3");
+    }
+
     if (failures != 0)
     {
         std::wcout << "There were " << failures << " failures when running ContainerTest! (out of " << tests << " tests)" << std::endl;

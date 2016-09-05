@@ -304,7 +304,7 @@ namespace @_NAMESPACEV_@
 
     typedef Safir::Dob::Typesystem::ObjectContainerImpl<@_CLASS_@> @_CLASS_@Container;
     typedef Safir::Dob::Typesystem::ArrayContainer<@_CLASS_@Container> @_CLASS_@ContainerArray;
-    typedef Safir::Dob::Typesystem::SequenceContainer<@_CLASS_@Ptr> @_CLASS_@SequenceContainer;
+    typedef Safir::Dob::Typesystem::GenericObjectSequenceContainer<@_CLASS_@> @_CLASS_@SequenceContainer;
 
 @@IF@@ @_EXIST:CLASSSUMMARY_@
     /**

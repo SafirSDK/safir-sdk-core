@@ -9201,12 +9201,19 @@ class DotsTestDotnet
     {
         private int tests = 0;
         private int failures = 0;
-        private void Check(bool expr)
+        private void Check(bool expr, string desc = "")
         {
             ++tests;
             if (!expr) {
                 ++failures;
-                Console.WriteLine("Testcase " + tests + " failed!");
+                if (desc.Length == 0)
+                {
+                    Console.WriteLine("Testcase " + tests + " failed!");
+                }
+                else
+                {
+                    Console.WriteLine("Testcase " + tests + " (" + desc + ") failed!");
+                }
             }
         }
 
@@ -9231,6 +9238,21 @@ class DotsTestDotnet
                 Check(ms.Int32Member.IsNull());
                 Check(ms.Int32Member.Count == 0);
                 Check(ms.Int32Member.IsChanged());
+
+                //check recursiveness
+                Check(!ms.TestClassMember.IsChanged());
+                ms.TestClassMember.Add(new DotsTest.TestItem());
+                Check(ms.TestClassMember.IsChanged());
+                ms.TestClassMember.SetChanged(false);
+                ms.TestClassMember[0].MyInt.Val = 10;;
+                Check(ms.TestClassMember[0].IsChanged());
+                Check(ms.TestClassMember.IsChanged(), "sequence recursive ischanged");
+                ms.TestClassMember[0].SetChanged(false);
+                Check(!ms.TestClassMember.IsChanged(), "sequence recursive ischanged 2");
+                ms.TestClassMember.SetChanged(true);
+                Check(ms.TestClassMember.IsChanged());
+                Check(ms.TestClassMember[0].IsChanged(), "sequence recursive ischanged 3");
+
             }
 
             //dictionaries
@@ -9250,7 +9272,43 @@ class DotsTestDotnet
                 Check(md.Int32StringMember.IsNull());
                 Check(md.Int32StringMember.Count == 0);
                 Check(md.Int32StringMember.IsChanged());
+
+                //check recursiveness
+                Check(!md.Int32ItemMember.IsChanged());
+                md.Int32ItemMember.Add(0, new DotsTest.MemberDictionaries());
+                Check(md.Int32ItemMember.IsChanged());
+                md.Int32ItemMember.SetChanged(false);
+                md.Int32ItemMember[0].Obj.Int32Int32Member.Add(10,10);
+                Check(md.Int32ItemMember[0].IsChanged());
+                Check(md.Int32ItemMember.IsChanged());
+                md.Int32ItemMember[0].SetChanged(false);
+                Check(!md.Int32ItemMember.IsChanged());
+                md.Int32ItemMember.SetChanged(true);
+                Check(md.Int32ItemMember.IsChanged());
+                Check(md.Int32ItemMember[0].IsChanged());
             }
+
+            //sequence container Object specialization
+            {
+                var oc = new Safir.Dob.Typesystem.ObjectSequenceContainer();
+                Check(!oc.IsChanged());
+                Check(!oc.IsChangedHere());
+                oc.SetChangedHere(true);
+                Check(oc.IsChanged());
+                Check(oc.IsChangedHere());
+                oc.SetChanged(false);
+                oc.Add(new Safir.Dob.Typesystem.Object());
+                Check(oc.IsChanged());
+                Check(oc.IsChangedHere());
+                var ti = new DotsTest.TestItem();
+                oc.Add(ti);
+                oc.SetChanged(false);
+                ti.MyInt.Val = 10;
+                Check(oc.IsChanged(), "recursive ischanged");
+                Check(!oc.IsChangedHere(), "recursive ischanged 2");
+                Check(oc[1].IsChanged(), "recursive ischanged 3");
+            }
+
         }
     }
 }

@@ -31,4 +31,52 @@ public class GenericObjectSequenceContainer<T extends com.saabgroup.safir.dob.ty
     public GenericObjectSequenceContainer() {
         super();
     }
+
+    @Override
+    public boolean isChanged() {
+        if (m_isChanged) {
+            return m_isChanged;
+        }
+
+        for (T obj : this) {
+            if (obj.isChanged())
+                return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Is the change flag in the container set?
+     *
+     * This method is like IsChanged without the recursion.
+     *
+     * @return True if the containers change flag is set.
+     */
+    public boolean isChangedHere() {
+        return m_isChanged;
+    }
+
+
+    @Override
+    public void setChanged(boolean changed) {
+        m_isChanged = changed;
+
+        for (T obj : this) {
+            obj.setChanged(changed);
+        }
+
+    }
+
+    /**
+     * Set the change flag in the container.
+     *
+     * This method is like SetChanged without the recursion
+     *
+     * @param changed [in] - The value to set the change flag to.
+     */
+    public void setChangedHere(boolean changed) {
+        m_isChanged = changed;
+    }
+
 }
