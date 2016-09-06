@@ -9090,16 +9090,8 @@ public class Test {
                 check(md.int32StringMember().isNull());
                 check(md.int32StringMember().isEmpty());
                 check(!md.int32StringMember().isChanged());
-                {
-                    StringContainer c = new StringContainer();
-                    c.setVal(ParameterDictionaries.getInt32StringParameter(10));
-                    md.int32StringMember().put(10,c);
-                }
-                {
-                    StringContainer c = new StringContainer();
-                    c.setVal(ParameterDictionaries.getInt32StringParameter(10));
-                    md.int32StringMember().put(20,c);
-                }
+                md.int32StringMember().putVal(10,ParameterDictionaries.getInt32StringParameter(10));
+                md.int32StringMember().putVal(20,ParameterDictionaries.getInt32StringParameter(10));
                 check(!md.int32StringMember().isNull());
                 check(md.int32StringMember().isChanged());
                 check(!md.int32StringMember().isEmpty());
@@ -9479,111 +9471,43 @@ public class Test {
         MemberDictionaries md = new MemberDictionaries();
 
         // int32String
-        {
-            StringContainer c = new StringContainer();
-            c.setVal(ParameterDictionaries.getInt32StringParameter(10));
-            md.int32StringMember().put(10, c);
-        }
-        {
-            StringContainer c = new StringContainer();
-            c.setVal(ParameterDictionaries.getInt32StringParameter(20));
-            md.int32StringMember().put(20, c);
-        }
+        md.int32StringMember().putVal(10, ParameterDictionaries.getInt32StringParameter(10));
+        md.int32StringMember().putVal(20, ParameterDictionaries.getInt32StringParameter(20));
+        md.int64BinaryMember().putVal(100L, ParameterDictionaries.getInt32BinaryParameter(10));
+        md.int64BinaryMember().putVal(200L, ParameterDictionaries.getInt32BinaryParameter(20));
+        md.typeIdEnumMember().putVal(MemberDictionaries.ClassTypeId, ParameterDictionaries.getStringEnumParameter("Billy"));
+        md.typeIdEnumMember().putVal(MemberSequences.ClassTypeId, ParameterDictionaries.getStringEnumParameter("Svarre"));
 
-        // int64Binary
-        {
-            BinaryContainer c = new BinaryContainer();
-            c.setVal(ParameterDictionaries.getInt32BinaryParameter(10));
-            md.int64BinaryMember().put(100L, c);
-        }
-        {
-            BinaryContainer c = new BinaryContainer();
-            c.setVal(ParameterDictionaries.getInt32BinaryParameter(20));
-            md.int64BinaryMember().put(200L, c);
-        }
 
-        // typeIdEnum
-        {
-            TestEnum.Container c = new TestEnum.Container();
-            c.setVal(ParameterDictionaries.getStringEnumParameter("Billy"));
-            md.typeIdEnumMember().put(MemberDictionaries.ClassTypeId, c);
-        }
-        {
-            TestEnum.Container c = new TestEnum.Container();
-            c.setVal(ParameterDictionaries.getStringEnumParameter("Svarre"));
-            md.typeIdEnumMember().put(MemberSequences.ClassTypeId, c);
-        }
-
-        // enumInstanceId
-        {
-            InstanceIdContainer c = new InstanceIdContainer();
-            c.setVal(ParameterDictionaries.getEnumInstanceIdParameter(TestEnum.MY_FIRST));
-            md.enumInstanceIdMember().put(TestEnum.MY_FIRST, c);
-        }
-        {
-            InstanceIdContainer c = new InstanceIdContainer();
-            c.setVal(ParameterDictionaries.getEnumInstanceIdParameter(TestEnum.MY_SECOND));
-            md.enumInstanceIdMember().put(TestEnum.MY_SECOND, c);
-        }
-
-        // instanceIdEntityId
-        {
-            EntityIdContainer c = new EntityIdContainer();
-            c.setVal(ParameterDictionaries.getHandlerIdEntityIdParameter(new HandlerId("handlerOne")));
-            md.instanceIdEntityIdMember().put(new InstanceId("FirstInstance"), c);
-        }
-        {
-            EntityIdContainer c = new EntityIdContainer();
-            c.setVal(ParameterDictionaries.getHandlerIdEntityIdParameter(new HandlerId(2)));
-            md.instanceIdEntityIdMember().put(new InstanceId("SecondInstance"), c);
-        }
+        md.enumInstanceIdMember().putVal(TestEnum.MY_FIRST,
+                                         ParameterDictionaries.getEnumInstanceIdParameter(TestEnum.MY_FIRST));
+        md.enumInstanceIdMember().putVal(TestEnum.MY_SECOND,
+                                         ParameterDictionaries.getEnumInstanceIdParameter(TestEnum.MY_SECOND));
+        md.instanceIdEntityIdMember().putVal(new InstanceId("FirstInstance"),
+                                             ParameterDictionaries.getHandlerIdEntityIdParameter(new HandlerId("handlerOne")));
+        md.instanceIdEntityIdMember().putVal(new InstanceId("SecondInstance"),
+                                             ParameterDictionaries.getHandlerIdEntityIdParameter(new HandlerId(2)));
 
         MemberDictionaries item1 = new MemberDictionaries();
 
-        // entityIdHandlerId
-        {
-            HandlerIdContainer c = new HandlerIdContainer();
-            c.setVal(ParameterDictionaries.getEntityIdHandlerIdParameter(
-                    new EntityId(com.saabgroup.safir.dob.Entity.ClassTypeId, new InstanceId("first"))));
-            EntityId key = new EntityId(com.saabgroup.safir.dob.Entity.ClassTypeId, new InstanceId("first"));
-            item1.entityIdHandlerIdMember().put(key, c);
-        }
-        {
-            HandlerIdContainer c = new HandlerIdContainer();
-            c.setVal(ParameterDictionaries.getEntityIdHandlerIdParameter(
-                    new EntityId(com.saabgroup.safir.dob.Entity.ClassTypeId, new InstanceId("second"))));
-            EntityId key = new EntityId(com.saabgroup.safir.dob.Entity.ClassTypeId, new InstanceId(2));
-            item1.entityIdHandlerIdMember().put(key, c);
-        }
 
-        // stringItem
-        {
-            ObjectContainerImpl<com.saabgroup.dotstest.MemberDictionaries> c = new ObjectContainerImpl<com.saabgroup.dotstest.MemberDictionaries>();
-            c.setObj(item1);
-            md.stringItemMember().put("Karl", c);
-        }
-        {
-            ObjectContainerImpl<com.saabgroup.dotstest.MemberDictionaries> c = new ObjectContainerImpl<com.saabgroup.dotstest.MemberDictionaries>();
-            c.setNull();
-            md.stringItemMember().put("Philip", c);
-        }
-        {
-            ObjectContainerImpl<com.saabgroup.dotstest.MemberDictionaries> c = new ObjectContainerImpl<com.saabgroup.dotstest.MemberDictionaries>();
-            c.setObj(item1);
-            md.stringItemMember().put("Gustav", c);
-        }
+        EntityId key = new EntityId(com.saabgroup.safir.dob.Entity.ClassTypeId, new InstanceId("first"));
+        item1.entityIdHandlerIdMember().putVal(key,
+                                               ParameterDictionaries.getEntityIdHandlerIdParameter
+                                               (new EntityId(com.saabgroup.safir.dob.Entity.ClassTypeId,
+                                                             new InstanceId("first"))));
+        key = new EntityId(com.saabgroup.safir.dob.Entity.ClassTypeId, new InstanceId(2));
+        item1.entityIdHandlerIdMember().putVal(key,
+                                               ParameterDictionaries.getEntityIdHandlerIdParameter
+                                               (new EntityId(com.saabgroup.safir.dob.Entity.ClassTypeId,
+                                                             new InstanceId("second"))));
 
-        // stringObject
-        {
-            ObjectContainerImpl<Object> c = new ObjectContainerImpl<Object>();
-            c.setObj(ParameterDictionaries.getInt32ObjectParameter(10));
-            md.stringObjectMember().put("Dilbert", c);
-        }
-        {
-            ObjectContainerImpl<Object> c = new ObjectContainerImpl<Object>();
-            c.setObj(ParameterDictionaries.getInt32ObjectParameter(20));
-            md.stringObjectMember().put("Wally", c);
-        }
+        md.stringItemMember().putObj("Karl", item1);
+        md.stringItemMember().putObj("Philip", null);
+        md.stringItemMember().putObj("Gustav", item1);
+
+        md.stringObjectMember().putObj("Dilbert", ParameterDictionaries.getInt32ObjectParameter(10));
+        md.stringObjectMember().putObj("Wally", ParameterDictionaries.getInt32ObjectParameter(20));
 
         printDictionaries(md);
 

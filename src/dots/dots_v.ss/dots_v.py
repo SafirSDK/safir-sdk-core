@@ -334,7 +334,7 @@ def parse_dou(gSession, dou_xmlfile):
     parsed.summary = summary_formatter(readTextPropery(xml_root, "summary"))
 
     m_type = parsed.name
-    gSession.dod_types[m_type] = DodType(m_type, m_type, dou_uniform_translate(parsed.type), type_formatter(gSession, m_type), dependency_formatter(gSession, m_type))
+    gSession.dod_types[m_type] = DodType(m_type, m_type, dou_uniform_translate(parsed.type), type_formatter(gSession, m_type), dependency_formatter(gSession, m_type), "foobar")
 
     if parsed.type == "property":
         # For unknown reasons, the old dots_v adds a dependency to Object for all property dous
@@ -372,7 +372,7 @@ def parse_dou(gSession, dou_xmlfile):
             if not (m_type in gSession.dod_types):
                 # This is a dou defined object
                 uniform_type = dou_uniform_lookup(gSession, m_type)
-                gSession.dod_types[m_type] = DodType(m_type, m_type, uniform_type, type_formatter(gSession, m_type), dependency_formatter(gSession, m_type))
+                gSession.dod_types[m_type] = DodType(m_type, m_type, uniform_type, type_formatter(gSession, m_type), dependency_formatter(gSession, m_type), "asdfasdf")
 
                 parsed.unique_dependencies.append(dependency_formatter(gSession, m_type))
             elif len(gSession.dod_types[m_type].dependency) > 0:
@@ -415,7 +415,8 @@ def parse_dou(gSession, dou_xmlfile):
                                                                         found_member.type, \
                                                                         dou_uniform_lookup(gSession, found_member.type), \
                                                                         type_formatter(gSession, found_member.type), \
-                                                                        dependency_formatter(gSession, found_member.type))
+                                                                        dependency_formatter(gSession, found_member.type),
+                                                                                    "flummo")
                                     parsed.unique_dependencies.append(dependency_formatter(gSession, found_member.type))
                                 elif len(gSession.dod_types[found_member.type].dependency) > 0:
                                     parsed.unique_dependencies.append(gSession.dod_types[found_member.type].dependency)
@@ -435,7 +436,7 @@ def parse_dou(gSession, dou_xmlfile):
                             if not (m_type in dod_types):
                                 # This is a dou defined object
                                 uniform_type = dou_uniform_lookup(gSession, m_type)
-                                gSession.dod_types[m_type] = DodType(m_type, m_type, uniform_type, type_formatter(gSession, m_type), dependency_formatter(gSession, m_type))
+                                gSession.dod_types[m_type] = DodType(m_type, m_type, uniform_type, type_formatter(gSession, m_type), dependency_formatter(gSession, m_type), "blahonga")
                                 parsed.unique_dependencies.append(dependency_formatter(gSession, m_type))
                             elif len(gSession.dod_types[m_type].dependency) > 0:
                                 parsed.unique_dependencies.append(gSession.dod_types[m_type].dependency)
@@ -525,7 +526,7 @@ def parse_dou(gSession, dou_xmlfile):
                 # This is a dou defined object
                 uniform_type = dou_uniform_lookup(gSession, m_type)
                 gSession.dod_types[m_type] = DodType(m_type, m_type, uniform_type, type_formatter(gSession,
-                    m_type), dependency_formatter(gSession, m_type))
+                    m_type), dependency_formatter(gSession, m_type), "fubar")
                 parsed.unique_dependencies.append(dependency_formatter(gSession, m_type))
             elif len(gSession.dod_types[m_type].dependency) > 0:
                 parsed.unique_dependencies.append(gSession.dod_types[m_type].dependency)
@@ -611,12 +612,13 @@ def read_dod_exception(line, dod_exceptions):
     return 0
 
 class DodType(object):
-    def __init__(self, dou_name, set_get, uniform_type, generated, dependency):
+    def __init__(self, dou_name, set_get, uniform_type, generated, dependency, boxed):
         self.dou_name = dou_name
         self.set_get = set_get
         self.uniform_type = uniform_type
         self.generated = generated
         self.dependency = dependency
+        self.boxed = boxed
 
     def printme(self):
         return "dou:", self.dou_name, "set/get:", self.set_get, "uniform:", self.uniform_type, "generated:", self.generated, "dependency:", self.dependency
@@ -631,8 +633,9 @@ def read_dod_type(line, dod_types):
     ls3 = ls[3].split("\"")
     generated = ls3[1]
     dependency = ls3[3]
+    boxed = ls3[5] if len(ls3) > 5 else generated
 
-    parsed_type = DodType(dou_name, set_get, set_get, generated, dependency)
+    parsed_type = DodType(dou_name, set_get, set_get, generated, dependency, boxed)
     dod_types[parsed_type.dou_name] = parsed_type
     if loglevel > 5: print("[DEBUG5]", parsed_type.dou_name , "is: [" , parsed_type.printme() , "]")
 
@@ -857,6 +860,7 @@ def process_at_variable_lookup(gSession, var, dou, table_line, parent_table_line
     elif var == "MEMBERSUMMARY" : return dou.members[index].summary
     elif var == "UNIFORM_MEMBERTYPE" : return gSession.dod_types[dou.members[index].type].uniform_type
     elif var == "MEMBERTYPE" : return gSession.dod_types[dou.members[index].type].generated
+    elif var == "BOXEDTYPE" : return gSession.dod_types[dou.members[index].type].boxed
     elif var == "MEMBERISSTRING" : return member_is_string(dou, table_line)
     elif var == "MEMBERISARRAY" : return member_is_array(dou, table_line)
     elif var == "MEMBERISSEQUENCE" : return member_is_sequence(dou, table_line)

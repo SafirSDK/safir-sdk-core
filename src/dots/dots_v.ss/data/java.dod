@@ -64,57 +64,57 @@ Exception:Safir.Dob.Typesystem.SoftwareViolationException:"com.saabgroup.safir.d
 @@-- And "safir::dob.typesystem::String" to be used where the actual type is needed in the code.
 @@-- And that "dots/dots_defs" (with file extension added below) is to be included due to this.
 @@--
-Type:Int32:Int32:"int":""
-Type:Int64:Int64:"long":""
-Type:Float32:Float32:"float":""
-Type:Float64:Float64:"double":""
-Type:Boolean:Boolean:"boolean":""
+Type:Int32:Int32:"int":"":"Integer"
+Type:Int64:Int64:"long":"":"Long"
+Type:Float32:Float32:"float":"":"Float"
+Type:Float64:Float64:"double":"":"Double"
+Type:Boolean:Boolean:"boolean":"":"Boolean"
 Type:String:String:"String":""
 Type:EntityId:EntityId:"com.saabgroup.safir.dob.typesystem.EntityId":""
-Type:TypeId:TypeId:"long":""
+Type:TypeId:TypeId:"long":"":"Long"
 Type:InstanceId:InstanceId:"com.saabgroup.safir.dob.typesystem.InstanceId":""
 Type:ChannelId:ChannelId:"com.saabgroup.safir.dob.typesystem.ChannelId":""
 Type:HandlerId:HandlerId:"com.saabgroup.safir.dob.typesystem.HandlerId":""
 Type:Binary:Binary:"byte[]":""
 Type:Object:Object:"com.saabgroup.safir.dob.typesystem.Object":""
-Type:Ampere32:si32.Ampere:"float":""
-Type:CubicMeter32:si32.CubicMeter:"float":""
-Type:Hertz32:si32.Hertz:"float":""
-Type:Joule32:si32.Joule:"float":""
-Type:Kelvin32:si32.Kelvin:"float":""
-Type:Kilogram32:si32.Kilogram:"float":""
-Type:Meter32:si32.Meter:"float":""
-Type:MeterPerSecond32:si32.MeterPerSecond:"float":""
-Type:MeterPerSecondSquared32:si32.MeterPerSecondSquared:"float":""
-Type:Newton32:si32.Newton:"float":""
-Type:Pascal32:si32.Pascal:"float":""
-Type:Radian32:si32.Radian:"float":""
-Type:RadianPerSecond32:si32.RadianPerSecond:"float":""
-Type:RadianPerSecondSquared32:si32.RadianPerSecondSquared:"float":""
-Type:Second32:si32.Second:"float":""
-Type:SquareMeter32:si32.SquareMeter:"float":""
-Type:Steradian32:si32.Steradian:"float":""
-Type:Volt32:si32.Volt:"float":""
-Type:Watt32:si32.Watt:"float":""
-Type:Ampere64:si64.Ampere:"double":""
-Type:CubicMeter64:si64.CubicMeter:"double":""
-Type:Hertz64:si64.Hertz:"double":""
-Type:Joule64:si64.Joule:"double":""
-Type:Kelvin64:si64.Kelvin:"double":""
-Type:Kilogram64:si64.Kilogram:"double":""
-Type:Meter64:si64.Meter:"double":""
-Type:MeterPerSecond64:si64.MeterPerSecond:"double":""
-Type:MeterPerSecondSquared64:si64.MeterPerSecondSquared:"double":""
-Type:Newton64:si64.Newton:"double":""
-Type:Pascal64:si64.Pascal:"double":""
-Type:Radian64:si64.Radian:"double":""
-Type:RadianPerSecond64:si64.RadianPerSecond:"double":""
-Type:RadianPerSecondSquared64:si64.RadianPerSecondSquared:"double":""
-Type:Second64:si64.Second:"double":""
-Type:SquareMeter64:si64.SquareMeter:"double":""
-Type:Steradian64:si64.Steradian:"double":""
-Type:Volt64:si64.Volt:"double":""
-Type:Watt64:si64.Watt:"double":""
+Type:Ampere32:si32.Ampere:"float":"":"Float"
+Type:CubicMeter32:si32.CubicMeter:"float":"":"Float"
+Type:Hertz32:si32.Hertz:"float":"":"Float"
+Type:Joule32:si32.Joule:"float":"":"Float"
+Type:Kelvin32:si32.Kelvin:"float":"":"Float"
+Type:Kilogram32:si32.Kilogram:"float":"":"Float"
+Type:Meter32:si32.Meter:"float":"":"Float"
+Type:MeterPerSecond32:si32.MeterPerSecond:"float":"":"Float"
+Type:MeterPerSecondSquared32:si32.MeterPerSecondSquared:"float":"":"Float"
+Type:Newton32:si32.Newton:"float":"":"Float"
+Type:Pascal32:si32.Pascal:"float":"":"Float"
+Type:Radian32:si32.Radian:"float":"":"Float"
+Type:RadianPerSecond32:si32.RadianPerSecond:"float":"":"Float"
+Type:RadianPerSecondSquared32:si32.RadianPerSecondSquared:"float":"":"Float"
+Type:Second32:si32.Second:"float":"":"Float"
+Type:SquareMeter32:si32.SquareMeter:"float":"":"Float"
+Type:Steradian32:si32.Steradian:"float":"":"Float"
+Type:Volt32:si32.Volt:"float":"":"Float"
+Type:Watt32:si32.Watt:"float":"":"Float"
+Type:Ampere64:si64.Ampere:"double":"":"Double"
+Type:CubicMeter64:si64.CubicMeter:"double":"":"Double"
+Type:Hertz64:si64.Hertz:"double":"":"Double"
+Type:Joule64:si64.Joule:"double":"":"Double"
+Type:Kelvin64:si64.Kelvin:"double":"":"Double"
+Type:Kilogram64:si64.Kilogram:"double":"":"Double"
+Type:Meter64:si64.Meter:"double":"":"Double"
+Type:MeterPerSecond64:si64.MeterPerSecond:"double":"":"Double"
+Type:MeterPerSecondSquared64:si64.MeterPerSecondSquared:"double":"":"Double"
+Type:Newton64:si64.Newton:"double":"":"Double"
+Type:Pascal64:si64.Pascal:"double":"":"Double"
+Type:Radian64:si64.Radian:"double":"":"Double"
+Type:RadianPerSecond64:si64.RadianPerSecond:"double":"":"Double"
+Type:RadianPerSecondSquared64:si64.RadianPerSecondSquared:"double":"":"Double"
+Type:Second64:si64.Second:"double":"":"Double"
+Type:SquareMeter64:si64.SquareMeter:"double":"":"Double"
+Type:Steradian64:si64.Steradian:"double":"":"Double"
+Type:Volt64:si64.Volt:"double":"":"Double"
+Type:Watt64:si64.Watt:"double":"":"Double"
 @@--
 @@--
 @@--
@@ -131,14 +131,6 @@ package @_NAMESPACE_@;
 @@--
 @@-- PROPERTY
 @@--
-//Dependencies as comments, since they are fully specified in the code:
-@@TABLE@@
-@@IF@@ @_EXIST:DEPENDENCY_@
-//import @_DEPENDENCY_@;
-@@END_IF@@
-@@END_TABLE@@
-//import com.saabgroup.safir.dob.typesystem.*;
-
 @@IF@@ @_EXIST:CLASSSUMMARY_@
 /**
  * @_REPLACE_ALL(\n/\n * ):CLASSSUMMARY_@
@@ -585,14 +577,6 @@ public class @_CLASS_@
 @@--
 @@-- CLASS
 @@--
-//Dependencies as comments, since they are fully specified in the code:
-@@TABLE@@
-@@IF@@ @_EXIST:DEPENDENCY_@
-//import @_DEPENDENCY_@;
-@@END_IF@@
-@@END_TABLE@@
-//import com.saabgroup.safir.dob.typesystem.*;
-
 @@IF@@ @_EXIST:CLASSSUMMARY_@
 /**
  * @_REPLACE_ALL(\n/\n * ):CLASSSUMMARY_@
@@ -889,29 +873,41 @@ public class @_CLASS_@
 @@---------- key: Int32
 @@IF@@ @_UNIFORM_MEMBERDICTIONARYTYPE_@="Int32"
 @@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
-    public com.saabgroup.safir.dob.typesystem.DictionaryContainer<Integer, @_MEMBERTYPE_@.Container> @_LOWER:SLICE(1..1):MEMBER_@@_REPLACE(./):MEMBER_@() {
+    public @_MEMBERTYPE_@.DictionaryContainer<Integer> @_LOWER:SLICE(1..1):MEMBER_@@_REPLACE(./):MEMBER_@() {
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
-    public com.saabgroup.safir.dob.typesystem.DictionaryContainer<Integer, com.saabgroup.safir.dob.typesystem.ObjectContainerImpl<@_MEMBERTYPE_@>> @_LOWER:SLICE(1..1):MEMBER_@@_REPLACE(./):MEMBER_@() {
+    public com.saabgroup.safir.dob.typesystem.ObjectDictionaryContainer<Integer, com.saabgroup.safir.dob.typesystem.ObjectContainerImpl<@_MEMBERTYPE_@>, @_MEMBERTYPE_@> @_LOWER:SLICE(1..1):MEMBER_@@_REPLACE(./):MEMBER_@() {
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=String
+    public com.saabgroup.safir.dob.typesystem.StringDictionaryContainer<Integer> @_LOWER:SLICE(1..1):MEMBER_@@_REPLACE(./):MEMBER_@() {
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Binary
+    public com.saabgroup.safir.dob.typesystem.BinaryDictionaryContainer<Integer> @_LOWER:SLICE(1..1):MEMBER_@@_REPLACE(./):MEMBER_@() {
 @@ELSE@@
-    public com.saabgroup.safir.dob.typesystem.DictionaryContainer<Integer, com.saabgroup.safir.dob.typesystem.@_UNIFORM_MEMBERTYPE_@Container> @_LOWER:SLICE(1..1):MEMBER_@@_REPLACE(./):MEMBER_@() {
+    public com.saabgroup.safir.dob.typesystem.ValueDictionaryContainer<Integer, com.saabgroup.safir.dob.typesystem.@_UNIFORM_MEMBERTYPE_@Container, @_BOXEDTYPE_@> @_LOWER:SLICE(1..1):MEMBER_@@_REPLACE(./):MEMBER_@() {
 @@END_IF@@
 @@---------- key: Int32, TypeId
 @@ELSIF@@ @_UNIFORM_MEMBERDICTIONARYTYPE_@="Int64" or @_UNIFORM_MEMBERDICTIONARYTYPE_@="TypeId"
 @@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
-    public com.saabgroup.safir.dob.typesystem.DictionaryContainer<Long, @_MEMBERTYPE_@.Container> @_LOWER:SLICE(1..1):MEMBER_@@_REPLACE(./):MEMBER_@() {
+    public @_MEMBERTYPE_@.DictionaryContainer<Long> @_LOWER:SLICE(1..1):MEMBER_@@_REPLACE(./):MEMBER_@() {
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
-    public com.saabgroup.safir.dob.typesystem.DictionaryContainer<Long, com.saabgroup.safir.dob.typesystem.ObjectContainerImpl<@_MEMBERTYPE_@>> @_LOWER:SLICE(1..1):MEMBER_@@_REPLACE(./):MEMBER_@() {
+    public com.saabgroup.safir.dob.typesystem.ObjectDictionaryContainer<Long, com.saabgroup.safir.dob.typesystem.ObjectContainerImpl<@_MEMBERTYPE_@>, @_MEMBERTYPE_@> @_LOWER:SLICE(1..1):MEMBER_@@_REPLACE(./):MEMBER_@() {
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=String
+    public com.saabgroup.safir.dob.typesystem.StringDictionaryContainer<Long> @_LOWER:SLICE(1..1):MEMBER_@@_REPLACE(./):MEMBER_@() {
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Binary
+    public com.saabgroup.safir.dob.typesystem.BinaryDictionaryContainer<Long> @_LOWER:SLICE(1..1):MEMBER_@@_REPLACE(./):MEMBER_@() {
 @@ELSE@@
-    public com.saabgroup.safir.dob.typesystem.DictionaryContainer<Long, com.saabgroup.safir.dob.typesystem.@_UNIFORM_MEMBERTYPE_@Container> @_LOWER:SLICE(1..1):MEMBER_@@_REPLACE(./):MEMBER_@() {
+    public com.saabgroup.safir.dob.typesystem.ValueDictionaryContainer<Long, com.saabgroup.safir.dob.typesystem.@_UNIFORM_MEMBERTYPE_@Container, @_BOXEDTYPE_@> @_LOWER:SLICE(1..1):MEMBER_@@_REPLACE(./):MEMBER_@() {
 @@END_IF@@
 @@---------- key: all other
 @@ELSE@@
 @@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
-    public com.saabgroup.safir.dob.typesystem.DictionaryContainer<@_MEMBERDICTIONARYTYPE_@, @_MEMBERTYPE_@.Container> @_LOWER:SLICE(1..1):MEMBER_@@_REPLACE(./):MEMBER_@() {
+    public @_MEMBERTYPE_@.DictionaryContainer<@_MEMBERDICTIONARYTYPE_@> @_LOWER:SLICE(1..1):MEMBER_@@_REPLACE(./):MEMBER_@() {
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
-    public com.saabgroup.safir.dob.typesystem.DictionaryContainer<@_MEMBERDICTIONARYTYPE_@, com.saabgroup.safir.dob.typesystem.ObjectContainerImpl<@_MEMBERTYPE_@>> @_LOWER:SLICE(1..1):MEMBER_@@_REPLACE(./):MEMBER_@() {
+    public com.saabgroup.safir.dob.typesystem.ObjectDictionaryContainer<@_MEMBERDICTIONARYTYPE_@, com.saabgroup.safir.dob.typesystem.ObjectContainerImpl<@_MEMBERTYPE_@>, @_MEMBERTYPE_@> @_LOWER:SLICE(1..1):MEMBER_@@_REPLACE(./):MEMBER_@() {
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=String
+    public com.saabgroup.safir.dob.typesystem.StringDictionaryContainer<@_MEMBERDICTIONARYTYPE_@> @_LOWER:SLICE(1..1):MEMBER_@@_REPLACE(./):MEMBER_@() {
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Binary
+    public com.saabgroup.safir.dob.typesystem.BinaryDictionaryContainer<@_MEMBERDICTIONARYTYPE_@> @_LOWER:SLICE(1..1):MEMBER_@@_REPLACE(./):MEMBER_@() {
 @@ELSE@@
-    public com.saabgroup.safir.dob.typesystem.DictionaryContainer<@_MEMBERDICTIONARYTYPE_@, com.saabgroup.safir.dob.typesystem.@_UNIFORM_MEMBERTYPE_@Container> @_LOWER:SLICE(1..1):MEMBER_@@_REPLACE(./):MEMBER_@() {
+    public com.saabgroup.safir.dob.typesystem.ValueDictionaryContainer<@_MEMBERDICTIONARYTYPE_@, com.saabgroup.safir.dob.typesystem.@_UNIFORM_MEMBERTYPE_@Container, @_BOXEDTYPE_@> @_LOWER:SLICE(1..1):MEMBER_@@_REPLACE(./):MEMBER_@() {
 @@END_IF@@
 @@END_IF@@
 @@------ Single value -------
@@ -1309,29 +1305,60 @@ public class @_CLASS_@
 @@---------- key: Int32
 @@IF@@ @_UNIFORM_MEMBERDICTIONARYTYPE_@="Int32"
 @@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
-    private com.saabgroup.safir.dob.typesystem.DictionaryContainer<Integer, @_MEMBERTYPE_@.Container> m_@_MEMBER_@Member = new com.saabgroup.safir.dob.typesystem.DictionaryContainer<Integer, @_MEMBERTYPE_@.Container>();
+    private @_MEMBERTYPE_@.DictionaryContainer<Integer> m_@_MEMBER_@Member = new @_MEMBERTYPE_@.DictionaryContainer<Integer>();
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
-    private com.saabgroup.safir.dob.typesystem.DictionaryContainer<Integer, com.saabgroup.safir.dob.typesystem.ObjectContainerImpl<@_MEMBERTYPE_@>> m_@_MEMBER_@Member = new com.saabgroup.safir.dob.typesystem.DictionaryContainer<Integer, com.saabgroup.safir.dob.typesystem.ObjectContainerImpl<@_MEMBERTYPE_@>>();
+    private com.saabgroup.safir.dob.typesystem.ObjectDictionaryContainer<Integer, com.saabgroup.safir.dob.typesystem.ObjectContainerImpl<@_MEMBERTYPE_@>, @_MEMBERTYPE_@> m_@_MEMBER_@Member =
+        new com.saabgroup.safir.dob.typesystem.ObjectDictionaryContainer<Integer, com.saabgroup.safir.dob.typesystem.ObjectContainerImpl<@_MEMBERTYPE_@>, @_MEMBERTYPE_@>
+       (new com.saabgroup.safir.dob.typesystem.ObjectContainerImpl<@_MEMBERTYPE_@>().getClass());
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=String
+    private com.saabgroup.safir.dob.typesystem.StringDictionaryContainer<Integer> m_@_MEMBER_@Member =
+        new com.saabgroup.safir.dob.typesystem.StringDictionaryContainer<Integer>();
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Binary
+    private com.saabgroup.safir.dob.typesystem.BinaryDictionaryContainer<Integer> m_@_MEMBER_@Member =
+        new com.saabgroup.safir.dob.typesystem.BinaryDictionaryContainer<Integer>();
 @@ELSE@@
-    private com.saabgroup.safir.dob.typesystem.DictionaryContainer<Integer, com.saabgroup.safir.dob.typesystem.@_UNIFORM_MEMBERTYPE_@Container> m_@_MEMBER_@Member = new com.saabgroup.safir.dob.typesystem.DictionaryContainer<Integer, com.saabgroup.safir.dob.typesystem.@_UNIFORM_MEMBERTYPE_@Container>();
+    private com.saabgroup.safir.dob.typesystem.ValueDictionaryContainer<Integer, com.saabgroup.safir.dob.typesystem.@_UNIFORM_MEMBERTYPE_@Container, @_BOXEDTYPE_@> m_@_MEMBER_@Member =
+        new com.saabgroup.safir.dob.typesystem.ValueDictionaryContainer<Integer, com.saabgroup.safir.dob.typesystem.@_UNIFORM_MEMBERTYPE_@Container, @_BOXEDTYPE_@>
+       (com.saabgroup.safir.dob.typesystem.@_UNIFORM_MEMBERTYPE_@Container.class);
 @@END_IF@@
 @@---------- key: Int32, TypeId
 @@ELSIF@@ @_UNIFORM_MEMBERDICTIONARYTYPE_@="Int64" or @_UNIFORM_MEMBERDICTIONARYTYPE_@="TypeId"
 @@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
-    private com.saabgroup.safir.dob.typesystem.DictionaryContainer<Long, @_MEMBERTYPE_@.Container> m_@_MEMBER_@Member = new com.saabgroup.safir.dob.typesystem.DictionaryContainer<Long, @_MEMBERTYPE_@.Container>();
+    private @_MEMBERTYPE_@.DictionaryContainer<Long> m_@_MEMBER_@Member = new @_MEMBERTYPE_@.DictionaryContainer<Long>();
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
-    private com.saabgroup.safir.dob.typesystem.DictionaryContainer<Long, com.saabgroup.safir.dob.typesystem.ObjectContainerImpl<@_MEMBERTYPE_@>> m_@_MEMBER_@Member = new com.saabgroup.safir.dob.typesystem.DictionaryContainer<Long, com.saabgroup.safir.dob.typesystem.ObjectContainerImpl<@_MEMBERTYPE_@>>();
+    private com.saabgroup.safir.dob.typesystem.ObjectDictionaryContainer<Long, com.saabgroup.safir.dob.typesystem.ObjectContainerImpl<@_MEMBERTYPE_@>, @_MEMBERTYPE_@> m_@_MEMBER_@Member =
+        new com.saabgroup.safir.dob.typesystem.ObjectDictionaryContainer<Long, com.saabgroup.safir.dob.typesystem.ObjectContainerImpl<@_MEMBERTYPE_@>, @_MEMBERTYPE_@>
+       (new com.saabgroup.safir.dob.typesystem.ObjectContainerImpl<@_MEMBERTYPE_@>().getClass());
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=String
+    private com.saabgroup.safir.dob.typesystem.StringDictionaryContainer<Long> m_@_MEMBER_@Member =
+        new com.saabgroup.safir.dob.typesystem.StringDictionaryContainer<Long>();
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Binary
+    private com.saabgroup.safir.dob.typesystem.BinaryDictionaryContainer<Long> m_@_MEMBER_@Member =
+        new com.saabgroup.safir.dob.typesystem.BinaryDictionaryContainer<Long>();
 @@ELSE@@
-    private com.saabgroup.safir.dob.typesystem.DictionaryContainer<Long, com.saabgroup.safir.dob.typesystem.@_UNIFORM_MEMBERTYPE_@Container> m_@_MEMBER_@Member = new com.saabgroup.safir.dob.typesystem.DictionaryContainer<Long, com.saabgroup.safir.dob.typesystem.@_UNIFORM_MEMBERTYPE_@Container>();
+    private com.saabgroup.safir.dob.typesystem.ValueDictionaryContainer<Long, com.saabgroup.safir.dob.typesystem.@_UNIFORM_MEMBERTYPE_@Container, @_BOXEDTYPE_@> m_@_MEMBER_@Member =
+        new com.saabgroup.safir.dob.typesystem.ValueDictionaryContainer<Long, com.saabgroup.safir.dob.typesystem.@_UNIFORM_MEMBERTYPE_@Container, @_BOXEDTYPE_@>
+       (com.saabgroup.safir.dob.typesystem.@_UNIFORM_MEMBERTYPE_@Container.class);
 @@END_IF@@
 @@---------- key: all other
 @@ELSE@@
 @@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
-    private com.saabgroup.safir.dob.typesystem.DictionaryContainer<@_MEMBERDICTIONARYTYPE_@, @_MEMBERTYPE_@.Container> m_@_MEMBER_@Member = new com.saabgroup.safir.dob.typesystem.DictionaryContainer<@_MEMBERDICTIONARYTYPE_@, @_MEMBERTYPE_@.Container>();
+    private @_MEMBERTYPE_@.DictionaryContainer<@_MEMBERDICTIONARYTYPE_@> m_@_MEMBER_@Member = new @_MEMBERTYPE_@.DictionaryContainer<@_MEMBERDICTIONARYTYPE_@>();
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
-    private com.saabgroup.safir.dob.typesystem.DictionaryContainer<@_MEMBERDICTIONARYTYPE_@, com.saabgroup.safir.dob.typesystem.ObjectContainerImpl<@_MEMBERTYPE_@>> m_@_MEMBER_@Member = new com.saabgroup.safir.dob.typesystem.DictionaryContainer<@_MEMBERDICTIONARYTYPE_@, com.saabgroup.safir.dob.typesystem.ObjectContainerImpl<@_MEMBERTYPE_@>>();
+    private com.saabgroup.safir.dob.typesystem.ObjectDictionaryContainer<@_MEMBERDICTIONARYTYPE_@, com.saabgroup.safir.dob.typesystem.ObjectContainerImpl<@_MEMBERTYPE_@>, @_MEMBERTYPE_@> m_@_MEMBER_@Member =
+        new com.saabgroup.safir.dob.typesystem.ObjectDictionaryContainer<@_MEMBERDICTIONARYTYPE_@, com.saabgroup.safir.dob.typesystem.ObjectContainerImpl<@_MEMBERTYPE_@>, @_MEMBERTYPE_@>
+       (new com.saabgroup.safir.dob.typesystem.ObjectContainerImpl<@_MEMBERTYPE_@>().getClass());
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=String
+    private com.saabgroup.safir.dob.typesystem.StringDictionaryContainer<@_MEMBERDICTIONARYTYPE_@> m_@_MEMBER_@Member =
+        new com.saabgroup.safir.dob.typesystem.StringDictionaryContainer<@_MEMBERDICTIONARYTYPE_@>();
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Binary
+    private com.saabgroup.safir.dob.typesystem.BinaryDictionaryContainer<@_MEMBERDICTIONARYTYPE_@> m_@_MEMBER_@Member =
+        new com.saabgroup.safir.dob.typesystem.BinaryDictionaryContainer<@_MEMBERDICTIONARYTYPE_@>();
 @@ELSE@@
-    private com.saabgroup.safir.dob.typesystem.DictionaryContainer<@_MEMBERDICTIONARYTYPE_@, com.saabgroup.safir.dob.typesystem.@_UNIFORM_MEMBERTYPE_@Container> m_@_MEMBER_@Member = new com.saabgroup.safir.dob.typesystem.DictionaryContainer<@_MEMBERDICTIONARYTYPE_@, com.saabgroup.safir.dob.typesystem.@_UNIFORM_MEMBERTYPE_@Container>();
+    private com.saabgroup.safir.dob.typesystem.ValueDictionaryContainer<@_MEMBERDICTIONARYTYPE_@, com.saabgroup.safir.dob.typesystem.@_UNIFORM_MEMBERTYPE_@Container, @_BOXEDTYPE_@> m_@_MEMBER_@Member =
+        new com.saabgroup.safir.dob.typesystem.ValueDictionaryContainer<@_MEMBERDICTIONARYTYPE_@, com.saabgroup.safir.dob.typesystem.@_UNIFORM_MEMBERTYPE_@Container, @_BOXEDTYPE_@>
+       (com.saabgroup.safir.dob.typesystem.@_UNIFORM_MEMBERTYPE_@Container.class);
+
 @@END_IF@@
 @@END_IF@@
 @@----- Single member
@@ -1432,10 +1459,6 @@ public class @_CLASS_@
      */
     static public class SequenceContainer
         extends com.saabgroup.safir.dob.typesystem.GenericObjectSequenceContainer<@_CLASS_@> {
-
-        public SequenceContainer() {
-            super();
-        }
     }
 
 }
@@ -1576,24 +1599,29 @@ public enum @_CLASS_@
      */
     static public class SequenceContainer
         extends com.saabgroup.safir.dob.typesystem.ValueSequenceContainer<@_CLASS_@> {
+    }
 
 
-        public SequenceContainer() {
-            super();
+    /**
+     * Dictionary container
+     */
+    static public class DictionaryContainer<K>
+        extends com.saabgroup.safir.dob.typesystem.DictionaryContainer<K,Container> {
+
+        public Container putVal(K key, @_CLASS_@ value) {
+            m_isChanged=true;
+            Container container = new Container();
+            container.setVal(value);
+
+            return m_values.put(key, container);
         }
     }
+
 }
 @@ELSIF@@ @_UNITTYPE_@=exception
 @@--
 @@-- EXCEPTION
 @@--
-//Dependencies as comments, since they are fully specified in the code:
-@@TABLE@@
-@@IF@@ @_EXIST:DEPENDENCY_@
-//import @_DEPENDENCY_@;
-@@END_IF@@
-@@END_TABLE@@
-
 @@IF@@ @_EXIST:CLASSSUMMARY_@
 /**
  * @_REPLACE_ALL(\n/\n * ):CLASSSUMMARY_@

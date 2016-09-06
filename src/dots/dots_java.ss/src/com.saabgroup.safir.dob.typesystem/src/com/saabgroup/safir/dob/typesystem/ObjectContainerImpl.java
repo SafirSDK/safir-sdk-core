@@ -37,7 +37,7 @@ package com.saabgroup.safir.dob.typesystem;
  *
  * @param <T> The type to contain. Must inherit from Dob::Typesystem::Object.
  */
-public class ObjectContainerImpl<T extends Object>
+public class ObjectContainerImpl<T extends com.saabgroup.safir.dob.typesystem.Object>
     extends ObjectContainerBase {
 
     /**
