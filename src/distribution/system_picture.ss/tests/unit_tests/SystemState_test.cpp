@@ -50,9 +50,9 @@ std::unique_ptr<SystemStateMessage> GetProtobuf(bool empty)
     auto msg = Safir::make_unique<SystemStateMessage>();
     if (empty)
     {
-        return std::move(msg);
+        return msg;
     }
-    
+
     msg->set_elected_id(100);
     msg->set_election_id(1001);
 
@@ -69,8 +69,8 @@ std::unique_ptr<SystemStateMessage> GetProtobuf(bool empty)
         node->set_is_dead(i%2==0);
 
     }
-    return std::move(msg);
-    
+    return msg;
+
 }
 
 BOOST_AUTO_TEST_CASE( test_empty )
@@ -85,15 +85,15 @@ BOOST_AUTO_TEST_CASE( test_not_empty )
     const auto r = SystemStateCreator::Create(GetProtobuf(false));
     BOOST_CHECK(r.ElectedId() == 100);
     BOOST_CHECK(r.ElectionId() == 1001);
-    
+
     BOOST_CHECK(r.Size() == 5);
-    
+
     for (int i = 0; i < 5; ++i)
     {
         const auto iAsStr = boost::lexical_cast<std::string>(i);
-        
+
         BOOST_CHECK(r.Name(i) == iAsStr);
-        
+
         BOOST_CHECK(r.Id(i) == i);
         BOOST_CHECK(r.NodeTypeId(i) == i + 100);
         BOOST_CHECK(r.ControlAddress(i) == iAsStr + ":fobar!");

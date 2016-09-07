@@ -50,7 +50,7 @@ std::unique_ptr<RawStatisticsMessage> GetProtobuf(bool empty,bool recursive)
     auto msg = Safir::make_unique<RawStatisticsMessage>();
     if (empty)
     {
-        return std::move(msg);
+        return msg;
     }
 
     msg->set_name("foo");
@@ -114,7 +114,7 @@ std::unique_ptr<RawStatisticsMessage> GetProtobuf(bool empty,bool recursive)
 
     msg->mutable_more_dead_nodes()->Add(1200);
 
-    return std::move(msg);
+    return msg;
 
 }
 

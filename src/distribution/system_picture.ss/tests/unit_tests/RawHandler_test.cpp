@@ -125,7 +125,7 @@ std::unique_ptr<RawStatisticsMessage> GetProtobuf(bool setIncarnation)
     node->set_data_receive_count(5000);
     node->set_data_retransmit_count(500);
 
-    return std::move(msg);
+    return msg;
 }
 
 struct Fixture

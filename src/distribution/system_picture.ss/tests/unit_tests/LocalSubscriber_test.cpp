@@ -57,7 +57,7 @@ std::unique_ptr<RawStatisticsMessage> GetProtobuf()
     msg->set_data_address("foobar");
     msg->set_election_id(91);
 
-    return std::move(msg);
+    return msg;
 }
 
 

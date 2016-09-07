@@ -81,6 +81,7 @@ namespace Internal
             : m_nodeId(ownNodeId),
               m_communication(),
               m_sp(),
+              m_config(),
               m_localTypes(CalculateLocalTypes()),
               m_nodeTypeIds(CalculateNodeTypeIds(m_config)),
               m_started(false)
@@ -288,7 +289,7 @@ namespace Internal
 
             std::sort(localTypes.begin(),localTypes.end());
             localTypes.shrink_to_fit();
-            return std::move(localTypes);
+            return localTypes;
         }
 
         static std::vector<int64_t> CalculateNodeTypeIds(const ConfigT& config)
@@ -302,7 +303,7 @@ namespace Internal
 
             std::sort(nodeTypeIds.begin(),nodeTypeIds.end());
             nodeTypeIds.shrink_to_fit();
-            return std::move(nodeTypeIds);
+            return nodeTypeIds;
         }
 
         const int64_t m_nodeId;
