@@ -4,7 +4,7 @@
 Safir SDK Core User's Guide
 ==========================
 Lars Hagström, Anders Widén and Joel Ottosson
-2016-05-30
+2016-09-07
 
 :cpp: {basebackend@docbook:c++:cpp}
 :csharp: {basebackend@docbook:c:csharp}
@@ -337,8 +337,10 @@ index has its own IsNull and IsChanged flag.
 
 A sequence is a variable-length collection of simple or complex members. There is only an
 IsChanged flag on the whole collection, i.e. not on individual elements. The change flag
-will be set whenever a value is added, removed or replaced. There is no IsNull flag on
-sequences, and the IsNull operation will always return false.
+will be set whenever a value is added, removed or replaced. IsChanged/SetChanged on
+sequences containing objects are be recursive, just as you would expect. Sequences do not
+have a real IsNull flag, but instead +IsNull()+ is equivalent to the sequence being +empty()+,
+and calling +SetNull()+ is the same as calling +clear()+.
 
 A dictionary is a variable-length collection of key-value pairs. The keys can be any
 simple type (with some exceptions, i.e. Boolean and floating point types) and the values
