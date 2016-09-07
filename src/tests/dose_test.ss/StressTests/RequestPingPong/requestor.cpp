@@ -61,7 +61,7 @@ void Requestor::OnResponse(const Safir::Dob::ResponseProxy responseProxy)
             }
             catch (Safir::Dob::OverflowException)
             {
-                m_Id = entityResponse->Assigned();
+                m_Id = entityResponse->Assigned().GetVal();
             }
         }
         else
