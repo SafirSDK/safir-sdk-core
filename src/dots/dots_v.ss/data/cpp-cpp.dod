@@ -594,7 +594,11 @@ namespace @_NAMESPACEV_@
                 m_@_MEMBER_@Member.push_back(seqVal);
 @@END_IF@@
             }
+@@IF@@ @_UNIFORM_MEMBERTYPE_@=Object
+            m_@_MEMBER_@Member.SetChangedHere(DotsC_ReadTopLevelChangeFlag(handle, g_@_LOWER:MEMBER_@MemberIndex));
+@@ELSE@@
             m_@_MEMBER_@Member.SetChanged(DotsC_ReadTopLevelChangeFlag(handle, g_@_LOWER:MEMBER_@MemberIndex));
+@@END_IF@@
         }
 @@ --- Dictionary member ---
 @@ELSIF@@ @_EXIST:MEMBERISDICTIONARY_@

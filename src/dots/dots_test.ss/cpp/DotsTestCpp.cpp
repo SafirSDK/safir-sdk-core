@@ -48,6 +48,7 @@
 #include <DotsTest/TestEnum.h>
 #include <DotsTest/TestException.h>
 #include <Safir/Dob/Typesystem/Parameters.h>
+#include <Safir/Dob/Typesystem/Internal/BlobOperations.h>
 #include <Safir/Dob/Typesystem/Members.h>
 #include <Safir/Dob/Typesystem/Internal/InternalOperations.h>
 #include <boost/algorithm/string/predicate.hpp>
@@ -10435,6 +10436,30 @@ void TestDictionaries()
     PrintDictionaries(fromJson);
 }
 
+void Test_SequenceDiff()
+{
+    DotsTest::MemberSequencesPtr ms1=DotsTest::MemberSequences::Create();
+    ms1->TestClassMember().push_back(DotsTest::TestItem::Create());
+    ms1->SetChanged(false);
+
+    DotsTest::MemberSequencesPtr ms2=DotsTest::MemberSequences::Create();
+    ms2->SetChanged(false);
+
+    std::vector<char> bin1, bin2;
+    Safir::Dob::Typesystem::Serialization::ToBinary(ms1,bin1);
+    Safir::Dob::Typesystem::Serialization::ToBinary(ms2,bin2);
+    Safir::Dob::Typesystem::Internal::BlobWriteHelper helper(&bin1[0]);
+    helper.Diff(&bin2[0]);
+
+    DotsTest::MemberSequencesPtr ms = boost::static_pointer_cast<DotsTest::MemberSequences>
+        (Safir::Dob::Typesystem::ObjectFactory::Instance().CreateObject(helper.ToBlob())); //TODO delete
+
+    Check (ms->TestClassMember().IsChanged());
+    Check (ms->TestClassMember().IsChangedHere());
+    Check (ms->TestClassMember().size() == 1);
+    Check (ms->TestClassMember()[0]->MyInt().IsChanged());
+}
+
 int main(int /*argc*/, char* /*argv*/[])
 {
     std::wcout << std::boolalpha;
@@ -10451,6 +10476,7 @@ int main(int /*argc*/, char* /*argv*/[])
 
     try
     {
+        Test_SequenceDiff();
         Test_Has_Property();
         Test_GetName();
         Test_GetNumberOfMembers();

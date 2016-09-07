@@ -373,16 +373,17 @@ namespace ToolSupport
                             diff=true;
                             m_blob.SetChangedTopLevel(memIx, true);
                         }
-                        else
+
+                        for (int valIx=0; valIx<m_blob.NumberOfValues(memIx); ++valIx)
                         {
-                            for (int valIx=0; valIx<m_blob.NumberOfValues(memIx); ++valIx)
+                            if (Diff(other, md, memIx, valIx, valIx))
                             {
-                                if (Diff(other, md, memIx, valIx, valIx))
+                                m_blob.SetChangedTopLevel(memIx, true);
+                                if (md->GetMemberType()==ObjectMemberType)
                                 {
-                                    m_blob.SetChangedTopLevel(memIx, true);
-                                    diff=true;
-                                    break;
+                                    m_blob.SetChanged(memIx, valIx, true);
                                 }
+                                diff=true;
                             }
                         }
                     }
