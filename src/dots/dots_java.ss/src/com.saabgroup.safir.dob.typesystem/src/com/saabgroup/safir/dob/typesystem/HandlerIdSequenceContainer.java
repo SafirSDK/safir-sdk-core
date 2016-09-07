@@ -1,4 +1,3 @@
-//------------
 //-*- coding: utf-8 -*-
 /******************************************************************************
  *
@@ -31,11 +30,11 @@ extends ValueSequenceContainer<HandlerId>  {
     public HandlerIdSequenceContainer() {
         super();
     }
-    
+
     public HandlerIdSequenceContainer(HandlerIdSequenceContainer other) {
         super(other);
     }
-    
+
     /**
      * @see com.saabgroup.safir.dob.typesystem.ValueContainer#clone()
      */

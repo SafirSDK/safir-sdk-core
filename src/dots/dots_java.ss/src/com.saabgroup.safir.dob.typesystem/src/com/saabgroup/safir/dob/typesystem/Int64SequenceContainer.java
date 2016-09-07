@@ -1,4 +1,3 @@
-//------------
 //-*- coding: utf-8 -*-
 /******************************************************************************
  *
@@ -31,11 +30,11 @@ extends ValueSequenceContainer<Long> {
     public Int64SequenceContainer() {
         super();
     }
-    
+
     public Int64SequenceContainer(Int64SequenceContainer other) {
         super(other);
     }
-    
+
     /**
      * @see com.saabgroup.safir.dob.typesystem.ValueSequenceContainer#clone()
      */
