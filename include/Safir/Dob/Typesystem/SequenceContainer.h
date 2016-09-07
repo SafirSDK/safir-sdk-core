@@ -168,6 +168,7 @@ namespace Typesystem
          */
         void InsertAt(size_t index, const ContainedType& value)
         {
+            m_bIsChanged=true;
             m_values.insert(m_values.begin()+index, value);
         }
 
