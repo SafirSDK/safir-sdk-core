@@ -4,9 +4,9 @@
 
 This release fixes the following issues (see http://safirsdkcore.com for details):
 
-#315 Update docs for IsNull/SetNull changes bug
-#317 Java DictionaryContainer insertion requires an extra step enhancement
-#316 SequenceContainer SetChanged/IsChanged are not recursive bug enhancement
+#315 Update docs for IsNull/SetNull
+#317 Java DictionaryContainer insertion requires an extra
+#316 SequenceContainer SetChanged/IsChanged are not recursive
 #318 SequenceContainer::InsertAt does not set changeflag
 
 -----------------------------------------------------------------------------------------------------------------------
