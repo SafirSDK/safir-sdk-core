@@ -1063,7 +1063,11 @@ namespace @_NAMESPACE_@
                     m_@_MEMBER_@Member.Add(seqVal);
 @@END_IF@@
                 }
+@@IF@@ @_UNIFORM_MEMBERTYPE_@=Object
+                m_@_MEMBER_@Member.SetChangedHere(Safir.Dob.Typesystem.Internal.BlobOperations.ReadTopLevelChangeFlag(handle,m_@_LOWER:MEMBER_@MemberIndex));
+@@ELSE@@
                 m_@_MEMBER_@Member.SetChanged(Safir.Dob.Typesystem.Internal.BlobOperations.ReadTopLevelChangeFlag(handle,m_@_LOWER:MEMBER_@MemberIndex));
+@@END_IF@@
             }
 @@----------dictionary member ---------------
 @@ELSIF@@ @_EXIST:MEMBERISDICTIONARY_@

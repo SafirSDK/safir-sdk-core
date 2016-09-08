@@ -1113,7 +1113,11 @@ public class @_CLASS_@
                 m_@_MEMBER_@Member.add(com.saabgroup.safir.dob.typesystem.BlobOperations.get@_UNIFORM_MEMBERTYPE_@(handle, m_@_MEMBER_@MemberIndex, i, com.saabgroup.safir.dob.typesystem.BlobOperations.VALUE_MODE));
 @@END_IF@@
             }
+@@IF@@ @_UNIFORM_MEMBERTYPE_@=Object
+            m_@_MEMBER_@Member.setChangedHere(com.saabgroup.safir.dob.typesystem.BlobOperations.readTopLevelChangeFlag(handle, m_@_MEMBER_@MemberIndex));
+@@ELSE@@
             m_@_MEMBER_@Member.setChanged(com.saabgroup.safir.dob.typesystem.BlobOperations.readTopLevelChangeFlag(handle, m_@_MEMBER_@MemberIndex));
+@@END_IF@@
         }
 @@----------dictionary member ---------------
 @@ELSIF@@ @_EXIST:MEMBERISDICTIONARY_@
