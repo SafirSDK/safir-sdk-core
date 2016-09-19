@@ -291,8 +291,7 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
   endif()
 
   ADD_PRECOMPILED_HEADER(safir_generated-${_gen_NAME}-cpp
-    ${precompiled_header_path}/precompiled_header_for_cpp.h
-    FORCEINCLUDE)
+    ${precompiled_header_path}/precompiled_header_for_cpp.h)
 
   #include path for precompiled_header_for_cpp.h
   target_include_directories(safir_generated-${_gen_NAME}-cpp
