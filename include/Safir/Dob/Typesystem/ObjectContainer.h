@@ -446,7 +446,14 @@ namespace Typesystem
          * @return A smart pointer to the contained object.
          * @throws NullException The container is null.
         */
-        const T_Ptr & GetPtr() const {if (IsNull()) throw NullException(L"Object is null",__WFILE__,__LINE__); return m_pObject;}
+        const T_Ptr & GetPtr() const
+        {
+            if (IsNull())
+            {
+                throw NullException(L"Object is null",__WFILE__,__LINE__);
+            }
+            return m_pObject;
+        }
 
         /**
          * Dereference the smart pointer in the container.
@@ -459,11 +466,22 @@ namespace Typesystem
         */
         Object * const operator->() const
         {
-            if (IsNull()) throw NullException(L"Object is null",__WFILE__,__LINE__); return m_pObject.operator->();
+            if (IsNull())
+            {
+                throw NullException(L"Object is null",__WFILE__,__LINE__);
+            }
+            return m_pObject.operator->();
         }
 
         //Override of inherited method. Parent comment describes this behaviour too..
-        virtual void SetChanged(const bool changed) {m_bIsChanged = changed; if (!IsNull()) m_pObject->SetChanged(changed);}
+        virtual void SetChanged(const bool changed)
+        {
+            m_bIsChanged = changed;
+            if (!IsNull())
+            {
+                m_pObject->SetChanged(changed);
+            }
+        }
 
         //Override of inherited method. Parent comment describes this behaviour too..
         virtual bool IsChanged() const {return m_bIsChanged || (!IsNull() && m_pObject->IsChanged());}
