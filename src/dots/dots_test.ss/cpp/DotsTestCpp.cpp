@@ -10450,9 +10450,11 @@ void Test_SequenceDiff()
     Safir::Dob::Typesystem::Serialization::ToBinary(ms2,bin2);
     Safir::Dob::Typesystem::Internal::BlobWriteHelper helper(&bin1[0]);
     helper.Diff(&bin2[0]);
+    boost::shared_ptr<char> blobHolder(helper.ToBlob(),
+                                       Safir::Dob::Typesystem::Internal::BlobOperations::Delete);
 
     DotsTest::MemberSequencesPtr ms = boost::static_pointer_cast<DotsTest::MemberSequences>
-        (Safir::Dob::Typesystem::ObjectFactory::Instance().CreateObject(helper.ToBlob())); //TODO delete
+        (Safir::Dob::Typesystem::ObjectFactory::Instance().CreateObject(blobHolder.get()));
 
     Check (ms->TestClassMember().IsChanged());
     Check (ms->TestClassMember().IsChangedHere());
