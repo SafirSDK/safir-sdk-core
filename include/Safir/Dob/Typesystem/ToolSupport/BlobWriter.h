@@ -143,7 +143,10 @@ namespace ToolSupport
          *                          have to find out the value index in some way. Sequences only have top-level change flag.
          * @param isChanged [in] - The change flag value to set.
          */
-        void SetChanged(DotsC_MemberIndex member, DotsC_Int32 valueIndex, bool isChanged) {m_blob.SetChanged(member, valueIndex, isChanged);}
+        void SetChangedHere(DotsC_MemberIndex member,
+                            DotsC_Int32 valueIndex,
+                            bool isChanged)
+        {m_blob.SetChangedHere(member, valueIndex, isChanged);}
 
         /**
          * Write member key to the a blob. Only use this when member is a dictionary otherwize the blob will be corrupt.
@@ -194,13 +197,13 @@ namespace ToolSupport
             case SingleValueCollectionType:
                 {
                     m_valueIndex=0;
-                    m_blob.SetChanged(m_memberIndex, m_valueIndex, isChanged);
+                    m_blob.SetChangedHere(m_memberIndex, m_valueIndex, isChanged);
                 }
                 break;
             case ArrayCollectionType:
                 {
                     m_valueIndex=index;
-                    m_blob.SetChanged(m_memberIndex, m_valueIndex, isChanged);
+                    m_blob.SetChangedHere(m_memberIndex, m_valueIndex, isChanged);
                 }
                 break;
             case SequenceCollectionType:
@@ -210,7 +213,7 @@ namespace ToolSupport
                 break;
             case DictionaryCollectionType:
                 {
-                    m_blob.SetChanged(m_memberIndex, m_valueIndex, isChanged);
+                    m_blob.SetChangedHere(m_memberIndex, m_valueIndex, isChanged);
                 }
                 break;
             }
@@ -222,10 +225,10 @@ namespace ToolSupport
         }
 
         /**
-         * @brief SetAllChangeFlags - Recursively set all change flags to specified value.
+         * @brief SetChangedRecursive - Recursively set all change flags to specified value.
          * @param isChanged [in] - Value to set all change flags to.
          */
-        void SetAllChangeFlags(bool isChanged)
+        void SetChangedRecursive(bool isChanged)
         {
             bool dummy=false, isNull=false;
 
@@ -237,7 +240,7 @@ namespace ToolSupport
                 {
                 case SingleValueCollectionType:
                     {
-                        m_blob.SetChanged(memIx, 0, isChanged);
+                        m_blob.SetChangedHere(memIx, 0, isChanged);
                         if (md->GetMemberType()==ObjectMemberType)
                         {
                             m_blob.ValueStatus(memIx, 0, isNull, dummy);
@@ -245,7 +248,7 @@ namespace ToolSupport
                             {
                                 std::pair<const char*, DotsC_Int32> obj=m_blob.GetValueBinary(memIx, 0);
                                 BlobWriterType inner(BlobReaderType(m_repository, obj.first));
-                                inner.SetAllChangeFlags(isChanged);
+                                inner.SetChangedRecursive(isChanged);
                                 WriteValue(memIx, 0, inner, isNull, isChanged);
                             }
                         }
@@ -260,13 +263,13 @@ namespace ToolSupport
                                 m_blob.ValueStatus(memIx, valIx, isNull, dummy);
                                 if (isNull)
                                 {
-                                    m_blob.SetChanged(memIx, valIx, isChanged);
+                                    m_blob.SetChangedHere(memIx, valIx, isChanged);
                                 }
                                 else
                                 {
                                     std::pair<const char*, DotsC_Int32> obj=m_blob.GetValueBinary(memIx, valIx);
                                     BlobWriterType inner(BlobReaderType(m_repository, obj.first));
-                                    inner.SetAllChangeFlags(isChanged);
+                                    inner.SetChangedRecursive(isChanged);
                                     WriteValue(memIx, valIx, inner, isNull, isChanged);
                                 }
                             }
@@ -275,7 +278,7 @@ namespace ToolSupport
                         {
                             for (int valIx=0; valIx<m_blob.NumberOfValues(memIx); ++valIx)
                             {
-                                m_blob.SetChanged(memIx, valIx, isChanged);
+                                m_blob.SetChangedHere(memIx, valIx, isChanged);
                             }
                         }
                     }
@@ -293,7 +296,7 @@ namespace ToolSupport
                                 {
                                     std::pair<const char*, DotsC_Int32> obj=m_blob.GetValueBinary(memIx, valIx);
                                     BlobWriterType inner(BlobReaderType(m_repository, obj.first));
-                                    inner.SetAllChangeFlags(isChanged);
+                                    inner.SetChangedRecursive(isChanged);
                                     m_valueIndex=valIx;
                                     WriteValue(inner);
                                 }
@@ -308,7 +311,7 @@ namespace ToolSupport
 
                         for (int valIx=0; valIx<m_blob.NumberOfValues(memIx); ++valIx)
                         {
-                            m_blob.SetChanged(memIx, valIx, isChanged);
+                            m_blob.SetChangedHere(memIx, valIx, isChanged);
                             if (md->GetMemberType()==ObjectMemberType)
                             {
                                 m_blob.ValueStatus(memIx, valIx, isNull, dummy);
@@ -316,7 +319,7 @@ namespace ToolSupport
                                 {
                                     std::pair<const char*, DotsC_Int32> obj=m_blob.GetValueBinary(memIx, valIx);
                                     BlobWriterType inner(BlobReaderType(m_repository, obj.first));
-                                    inner.SetAllChangeFlags(isChanged);
+                                    inner.SetChangedRecursive(isChanged);
                                     m_valueIndex=valIx;
                                     WriteValue(inner);
                                 }
@@ -349,7 +352,7 @@ namespace ToolSupport
                     {
                         if (Diff(other, md, memIx, 0, 0))
                         {
-                            m_blob.SetChanged(memIx, 0, true);
+                            m_blob.SetChangedHere(memIx, 0, true);
                             diff=true;
                         }
                     }
@@ -360,7 +363,7 @@ namespace ToolSupport
                         {
                             if (Diff(other, md, memIx, valIx, valIx))
                             {
-                                m_blob.SetChanged(memIx, valIx, true);
+                                m_blob.SetChangedHere(memIx, valIx, true);
                                 diff=true;
                             }
                         }
@@ -381,7 +384,7 @@ namespace ToolSupport
                                 m_blob.SetChangedTopLevel(memIx, true);
                                 if (md->GetMemberType()==ObjectMemberType)
                                 {
-                                    m_blob.SetChanged(memIx, valIx, true);
+                                    m_blob.SetChangedHere(memIx, valIx, true);
                                 }
                                 diff=true;
                             }
@@ -411,12 +414,12 @@ namespace ToolSupport
                             {
                                 //not found, we have something that is new
                                 m_blob.SetChangedTopLevel(memIx, true);
-                                m_blob.SetChanged(memIx, myIt->second, true);
+                                m_blob.SetChangedHere(memIx, myIt->second, true);
                                 diff=true;
                             }
                             else if (Diff(other, md, memIx, myIt->second, otherIt->second))
                             {
-                                m_blob.SetChanged(memIx, myIt->second, true);
+                                m_blob.SetChangedHere(memIx, myIt->second, true);
                                 diff=true;
                             }
                         }
@@ -616,7 +619,7 @@ namespace ToolSupport
                 {
                     std::pair<const char*, DotsC_Int32> obj=m_blob.GetValueBinary(memberIndex, myValueIndex);
                     BlobWriterType inner(BlobReaderType(m_repository, obj.first));
-                    inner.SetAllChangeFlags(true);
+                    inner.SetChangedRecursive(true);
                     MoveToMember(memberIndex);
                     m_valueIndex=myValueIndex;
                     WriteValue(inner);

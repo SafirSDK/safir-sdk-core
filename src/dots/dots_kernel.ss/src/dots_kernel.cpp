@@ -1088,14 +1088,24 @@ DotsC_Int32 DotsC_GetNumberOfMemberValues(DotsC_Handle readerHandle, DotsC_Membe
     return reader->NumberOfValues(member);
 }
 
-void DotsC_ReadMemberStatus(DotsC_Handle readerHandle, bool& isNull, bool& isChanged, DotsC_MemberIndex member, DotsC_Int32 arrayIndex)
+bool DotsC_IsChangedRecursive(DotsC_Handle readerHandle,
+                              DotsC_MemberIndex member)
 {
     Init();
     Reader* reader=ReaderFromHandle(readerHandle);
-    reader->ReadStatus(member, arrayIndex, isNull, isChanged);
+    return reader->IsChangedRecursive(member);
 }
 
-bool DotsC_ReadTopLevelChangeFlag(DotsC_Handle readerHandle, DotsC_MemberIndex member)
+bool DotsC_IsChangedHere(DotsC_Handle readerHandle,
+                         DotsC_MemberIndex member,
+                         DotsC_Int32 arrayIndex)
+{
+    Init();
+    Reader* reader=ReaderFromHandle(readerHandle);
+    return reader->IsChangedHere(member,arrayIndex);
+}
+
+bool DotsC_IsChangedTopLevel(DotsC_Handle readerHandle, DotsC_MemberIndex member)
 {
    Init();
    Reader* reader=ReaderFromHandle(readerHandle);
@@ -1277,24 +1287,24 @@ void DotsC_WriteBlob(DotsC_Handle writerHandle, char* blobDest)
     writer->CopyRawBlob(blobDest);
 }
 
-void DotsC_WriteAllChangeFlags(DotsC_Handle writerHandle, bool changed)
+void DotsC_SetChangedRecursive(DotsC_Handle writerHandle, bool changed)
 {
     Init();
     Writer* writer=WriterFromHandle(writerHandle);
-    writer->SetAllChangeFlags(changed);
+    writer->SetChangedRecursive(changed);
 }
 
-void DotsC_WriteChangeFlag(DotsC_Handle writerHandle,
-                           DotsC_MemberIndex member,
-                           DotsC_ArrayIndex index,
-                           bool changed)
+void DotsC_SetChangedHere(DotsC_Handle writerHandle,
+                          DotsC_MemberIndex member,
+                          DotsC_ArrayIndex index,
+                          bool changed)
 {
     Init();
     Writer* writer=WriterFromHandle(writerHandle);
-    writer->SetChanged(member, index, changed);
+    writer->SetChangedHere(member, index, changed);
 }
 
-void DotsC_WriteTopLevelChangeFlag(DotsC_Handle writerHandle, DotsC_MemberIndex member, bool isChanged)
+void DotsC_SetChangedTopLevel(DotsC_Handle writerHandle, DotsC_MemberIndex member, bool isChanged)
 {
    Init();
    Writer* writer=WriterFromHandle(writerHandle);

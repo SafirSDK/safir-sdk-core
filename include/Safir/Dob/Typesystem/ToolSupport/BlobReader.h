@@ -116,7 +116,11 @@ namespace ToolSupport
         DotsC_TypeId TypeId() const {return m_blob.TypeId();}
 
         /**
-         * Check if the member is changed at top level. For simple values this has no meaning.
+         * Check if the member is changed at top level.
+         *
+         * This causes undefined behaviour if called on anything
+         * other than a SequenceCollectionType or DictionaryCollectionType.
+         *
          * For sequences and dictionaries changed at top level indicates that the collection has changed in some way.
          * @param member
          * @return
@@ -125,6 +129,124 @@ namespace ToolSupport
         {
             return m_blob.IsChangedTopLevel(member);
         }
+
+        /**
+         * Check change flags on all members, recursively.
+         *
+         * Will check top level change flags as well!
+         */
+        bool IsChangedRecursive() const
+        {
+            for (int member=0; member<m_classDescription->GetNumberOfMembers(); ++member)
+            {
+                if (IsChangedRecursive(member))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        /**
+         * Check change flag on a member, recursively
+         *
+         * Will check top level change flags as well!
+         */
+        bool IsChangedRecursive(DotsC_MemberIndex member) const
+        {
+            MoveToMember(member);
+            auto collectionType = m_memberDescription->GetCollectionType();
+
+            //Check top level change flag for things that have it.
+            if (collectionType == SequenceCollectionType || collectionType == DictionaryCollectionType)
+            {
+                if (m_blob.IsChangedTopLevel(member))
+                {
+                    return true;
+                }
+            }
+
+            const auto size = m_blob.NumberOfValues(member);
+
+            //sequences are a bit different from other members, since
+            //they do not have change flags on the values. But they
+            //do potentially have nestled change flags if it is a
+            //sequence of objects.
+            if (collectionType == SequenceCollectionType)
+            {
+                if (m_memberDescription->GetMemberType() == ObjectMemberType)
+                {
+                    for (int index = 0; index < size; ++index)
+                    {
+                        bool dummy=false, isNull=false;
+                        m_blob.ValueStatus(member, index, isNull, dummy);
+                        if (!isNull)
+                        {
+                            std::pair<const char*, DotsC_Int32> obj=m_blob.GetValueBinary(member, index);
+                            const BlobReader inner(m_repository, obj.first);
+                            if (inner.IsChangedRecursive())
+                            {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                //first check all the change flags that are directly in the member
+                for (int index = 0; index < size; ++index)
+                {
+                    if (IsChangedHere(member, index))
+                    {
+                        return true;
+                    }
+                }
+                //ok, if there are objects in here we need to recurse
+
+                if (m_memberDescription->GetMemberType() == ObjectMemberType)
+                {
+                    for (int index = 0; index < size; ++index)
+                    {
+                        bool dummy=false, isNull=false;
+                        m_blob.ValueStatus(member, index, isNull, dummy);
+                        if (!isNull)
+                        {
+                            std::pair<const char*, DotsC_Int32> obj=m_blob.GetValueBinary(member, index);
+                            const BlobReader inner(m_repository, obj.first);
+                            if (inner.IsChangedRecursive())
+                            {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+
+            //no changes...
+            return false;
+        }
+
+        /**
+         * Check change flag on a member (non-recursively)
+         *
+         * If member is a SingleValueCollectionType then index must be 0.
+         * If member is DictionaryCollectionType or ArrayCollectionType then
+         * index must be within bounds.
+         * Other uses are undefined behavior.
+         * Calling on SequenceCollectionType is undefined behaviour.
+         */
+        bool IsChangedHere(DotsC_MemberIndex member,
+                           DotsC_Int32 index) const
+        {
+#ifndef NDEBUG
+            MoveToMember(member);
+            assert(m_memberDescription->GetCollectionType() != SequenceCollectionType);
+            //array index is asserted in Blob.cpp
+#endif
+            return m_blob.IsChangedHere(member,index);
+        }
+
 
         /**
          * @brief Get the number of values for the member. Only collections may contain more than one value.

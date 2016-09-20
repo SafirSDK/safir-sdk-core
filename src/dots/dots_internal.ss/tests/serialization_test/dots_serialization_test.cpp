@@ -165,7 +165,7 @@ void BlobDiffTest(RepositoryPtr rep)
     first.WriteValue(myDictStringString, 0, "Ralph", false, false);
     first.WriteKey(myDictStringString, "second");
     first.WriteValue(myDictStringString, 0, "Florian", false, false);
-    first.SetAllChangeFlags(false);
+    first.SetChangedRecursive(false);
 
     //Create Second object
     //--------------------
@@ -201,7 +201,7 @@ void BlobDiffTest(RepositoryPtr rep)
     second.WriteValue(myDictStringString, 0, "Florian", false, false);
     second.WriteKey(myDictStringString, "first");
     second.WriteValue(myDictStringString, 0, "Ralph", false, false);
-    second.SetAllChangeFlags(false);
+    second.SetChangedRecursive(false);
 
     bool isNull, isChanged;
     std::vector<char> firstBlob(static_cast<size_t>(first.CalculateBlobSize()));
@@ -479,9 +479,9 @@ void BlobChangeTest(RepositoryPtr rep)
         }
     }
 
-    std::cout<<"--- SetAllChanged"<<std::endl;
+    std::cout<<"--- SetChangedRecursive"<<std::endl;
     BlobWriter<Safir::Dob::Typesystem::ToolSupport::TypeRepository> w3(r);
-    w3.SetAllChangeFlags(true);
+    w3.SetChangedRecursive(true);
 
     {
         //---------- Print Object --------------------------

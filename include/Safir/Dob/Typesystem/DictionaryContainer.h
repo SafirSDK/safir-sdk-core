@@ -105,6 +105,22 @@ namespace Typesystem
         }
 
         /**
+         * @brief Like operator[], but throws std::out_of_range if key is not in dictionary
+         */
+        ValueContainerType& at(const KeyType& key)
+        {
+            iterator it=m_values.find(key);
+            if (it!=m_values.end())
+            {
+                return it->second;
+            }
+            else
+            {
+                throw std::out_of_range("Key is not in dictionary");
+            }
+        }
+
+        /**
          * @brief IsChanged - Check if the sequence has changed.
          * @return True if changed, else false.
          */
@@ -123,7 +139,7 @@ namespace Typesystem
 
             return false; //if we get here nothing is changed
         }
-
+        
         /**
          * @brief SetChanged - Set the change state of the sequence.
          * @param changed [in] - If true, the sequence is set to changed, it is set to not changed.
@@ -135,6 +151,30 @@ namespace Typesystem
             {
                 it->second.SetChanged(changed);
             }
+        }
+
+        /**
+         * Is the change flag in the container set?
+         *
+         * This method is like IsChanged without the recursion.
+         *
+         * @return True if the containers change flag is set.
+         */
+        bool IsChangedHere() const
+        {
+            return m_bIsChanged;
+        }
+
+        /**
+         * Set the change flag in the container.
+         *
+         * This method is like SetChanged without the recursion
+         *
+         * @param changed [in] - The value to set the change flag to.
+         */
+        void SetChangedHere(const bool changed)
+        {
+            m_bIsChanged = changed;
         }
 
         /**

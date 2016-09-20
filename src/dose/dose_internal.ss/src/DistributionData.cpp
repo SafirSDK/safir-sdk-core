@@ -1122,7 +1122,7 @@ namespace Internal
         if (resetChangeFlags)
         {
             Dob::Typesystem::Internal::BlobWriteHelper writer(blob);
-            writer.SetAllChanged(false);
+            writer.SetChangedRecursive(false);
 
             const size_t blobSize = static_cast<size_t>(writer.CalculatedSize());
             const size_t timestampsSize = numTimestamps * sizeof(Typesystem::Int64);
@@ -1175,7 +1175,7 @@ namespace Internal
 
         //create a blobWriter and set all change flags
         Dob::Typesystem::Internal::BlobWriteHelper writer(GetBlob());
-        writer.SetAllChanged(changed);
+        writer.SetChangedRecursive(changed);
 
         //calculate the total size neede for the new distributionData
         size_t newTotalSize=headerAndTimestampSize+static_cast<size_t>(writer.CalculatedSize());
@@ -1186,12 +1186,6 @@ namespace Internal
         writer.ToBlob(dest+headerAndTimestampSize); //copy blob after header part
         return result;
     }
-
-    char * DistributionData::GetBlobCopy() const
-    {
-        return Dob::Typesystem::Internal::BlobOperations::CreateCopy(GetBlob());
-    }
-
 
     bool DistributionData::IsNoState() const
     {

@@ -1064,17 +1064,14 @@ namespace @_NAMESPACE_@
 @@END_IF@@
                 }
 @@IF@@ @_UNIFORM_MEMBERTYPE_@=Object
-                m_@_MEMBER_@Member.SetChangedHere(Safir.Dob.Typesystem.Internal.BlobOperations.ReadTopLevelChangeFlag(handle,m_@_LOWER:MEMBER_@MemberIndex));
+                m_@_MEMBER_@Member.SetChangedHere(Safir.Dob.Typesystem.Internal.BlobOperations.IsChangedTopLevel(handle,m_@_LOWER:MEMBER_@MemberIndex));
 @@ELSE@@
-                m_@_MEMBER_@Member.SetChanged(Safir.Dob.Typesystem.Internal.BlobOperations.ReadTopLevelChangeFlag(handle,m_@_LOWER:MEMBER_@MemberIndex));
+                m_@_MEMBER_@Member.SetChanged(Safir.Dob.Typesystem.Internal.BlobOperations.IsChangedTopLevel(handle,m_@_LOWER:MEMBER_@MemberIndex));
 @@END_IF@@
             }
 @@----------dictionary member ---------------
 @@ELSIF@@ @_EXIST:MEMBERISDICTIONARY_@
             {
-                bool tlChanged = Safir.Dob.Typesystem.Internal.BlobOperations.ReadTopLevelChangeFlag(handle, m_@_LOWER:MEMBER_@MemberIndex);
-                m_@_MEMBER_@Member.SetChanged(tlChanged);
-
                 int size = Safir.Dob.Typesystem.Internal.BlobOperations.NumberOfMemberValues(handle, m_@_LOWER:MEMBER_@MemberIndex);
                 for (int valueIndex=0; valueIndex<size; valueIndex++)
                 {
@@ -1099,12 +1096,8 @@ namespace @_NAMESPACE_@
 @@END_IF@@
                     val = m_@_MEMBER_@Member.Add(key);
                     Safir.Dob.Typesystem.Internal.BlobOperations.Get(val, handle, m_@_LOWER:MEMBER_@MemberIndex, valueIndex);
-                    tlChanged = tlChanged || val.IsChanged();
                 }
-                if (!tlChanged)
-                {
-                    m_@_MEMBER_@Member.SetChanged(false);
-                }
+                m_@_MEMBER_@Member.SetChangedHere(Safir.Dob.Typesystem.Internal.BlobOperations.IsChangedTopLevel(handle, m_@_LOWER:MEMBER_@MemberIndex));
             }
 @@ --- Single member ---
 @@ELSE@@
@@ -1166,7 +1159,12 @@ namespace @_NAMESPACE_@
                 Safir.Dob.Typesystem.Internal.BlobOperations.Set(m_@_MEMBER_@Member[i], false, false, handle, m_@_LOWER:MEMBER_@MemberIndex, i, Safir.Dob.Typesystem.KeyValMode.ValueMode);
 @@END_IF@@
             }
-            Safir.Dob.Typesystem.Internal.BlobOperations.WriteTopLevelChangeFlag(handle, m_@_LOWER:MEMBER_@MemberIndex, m_@_MEMBER_@Member.IsChanged());
+@@IF@@ @_UNIFORM_MEMBERTYPE_@=Object
+            Safir.Dob.Typesystem.Internal.BlobOperations.SetChangedTopLevel(handle, m_@_LOWER:MEMBER_@MemberIndex, m_@_MEMBER_@Member.IsChangedHere());
+@@ELSE@@
+            Safir.Dob.Typesystem.Internal.BlobOperations.SetChangedTopLevel(handle, m_@_LOWER:MEMBER_@MemberIndex, m_@_MEMBER_@Member.IsChanged());
+@@END_IF@@
+
 @@ --- Dictionary member ---
 @@ELSIF@@ @_EXIST:MEMBERISDICTIONARY_@
             foreach (var kv in m_@_MEMBER_@Member)
@@ -1179,7 +1177,7 @@ namespace @_NAMESPACE_@
 @@END_IF@@
                 Safir.Dob.Typesystem.Internal.BlobOperations.Set(kv.Value, handle, m_@_LOWER:MEMBER_@MemberIndex, 0);
             }
-            Safir.Dob.Typesystem.Internal.BlobOperations.WriteTopLevelChangeFlag(handle, m_@_LOWER:MEMBER_@MemberIndex, m_@_MEMBER_@Member.IsChanged());
+            Safir.Dob.Typesystem.Internal.BlobOperations.SetChangedTopLevel(handle, m_@_LOWER:MEMBER_@MemberIndex, m_@_MEMBER_@Member.IsChangedHere());
 @@ --- Single member ---
 @@ELSE@@
 @@IF@@ @_UNIFORM_MEMBERTYPE_@=String

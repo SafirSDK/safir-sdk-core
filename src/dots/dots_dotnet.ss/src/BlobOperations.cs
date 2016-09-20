@@ -111,9 +111,9 @@ namespace Safir.Dob.Typesystem.Internal
         /// <returns>True if change flag is set.</returns>
         /// <param name="handle">Handle.</param>
         /// <param name="member">Member.</param>
-        public static bool ReadTopLevelChangeFlag(System.Int64 handle, System.Int32 member)
+        public static bool IsChangedTopLevel(System.Int64 handle, System.Int32 member)
         {
-            return InternalOperations.BoolOf(Kernel.DotsC_ReadTopLevelChangeFlag(handle,member));
+            return InternalOperations.BoolOf(Kernel.DotsC_IsChangedTopLevel(handle,member));
         }
 
         /// <summary>
@@ -127,9 +127,9 @@ namespace Safir.Dob.Typesystem.Internal
         /// <param name="handle">Handle.</param>
         /// <param name="member">Member.</param>
         /// <param name="isChanged">The value to set the change flag to.</param>
-        public static void WriteTopLevelChangeFlag(System.Int64 handle, System.Int32 member, bool isChanged)
+        public static void SetChangedTopLevel(System.Int64 handle, System.Int32 member, bool isChanged)
         {
-            Kernel.DotsC_WriteTopLevelChangeFlag(handle,member,InternalOperations.ByteOf(isChanged));
+            Kernel.DotsC_SetChangedTopLevel(handle,member,InternalOperations.ByteOf(isChanged));
         }
 
         #region Container operations on Blobs

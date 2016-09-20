@@ -1204,7 +1204,7 @@ void DoseC_Diff(const char* const previousState,
 
             if (!previous.IsCreated())
             {
-                writer.SetAllChanged(true);
+                writer.SetChangedRecursive(true);
             }
             else
             {
@@ -1227,7 +1227,7 @@ void DoseC_Diff(const char* const previousState,
 
             if (!current.IsCreated())
             {
-                writer.SetAllChanged(true);
+                writer.SetChangedRecursive(true);
             }
             else
             {

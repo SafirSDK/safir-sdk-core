@@ -743,22 +743,9 @@ namespace
         DotsC_DeleteBlobReader(m_handle);
     }
 
-    CollectionType BlobReadHelper::GetCollectionType(const Dob::Typesystem::MemberIndex member)
+    bool BlobReadHelper::IsChangedRecursive(const Dob::Typesystem::MemberIndex member) const
     {
-        return ReadCollectionType(m_typeId,member);
-    }
-
-    bool BlobReadHelper::GetTopLevelChangeFlag(const Dob::Typesystem::MemberIndex member)
-    {
-        return DotsC_ReadTopLevelChangeFlag(m_handle, member);
-    }
-
-    bool BlobReadHelper::IsChanged(const Dob::Typesystem::MemberIndex member,
-                                   const Dob::Typesystem::ArrayIndex index) const
-    {
-        bool isNull, isChanged;
-        DotsC_ReadMemberStatus(m_handle, isNull, isChanged, member, index);
-        return isChanged;
+        return DotsC_IsChangedRecursive(m_handle,member);
     }
 
     /**********************************************************************
@@ -782,22 +769,22 @@ namespace
         return ReadCollectionType(m_typeId,member);
     }
 
-    void BlobWriteHelper::SetTopLevelChangeFlag(const Dob::Typesystem::MemberIndex member,
+    void BlobWriteHelper::SetChangedTopLevel(const Dob::Typesystem::MemberIndex member,
                                                 const bool val)
     {
-        DotsC_WriteTopLevelChangeFlag(m_handle, member, val);
+        DotsC_SetChangedTopLevel(m_handle, member, val);
     }
 
     void BlobWriteHelper::SetChangedHere(const Dob::Typesystem::MemberIndex member,
                                          const Dob::Typesystem::ArrayIndex index,
                                          const bool val)
     {
-        DotsC_WriteChangeFlag(m_handle, member, index, val);
+        DotsC_SetChangedHere(m_handle, member, index, val);
     }
 
-    void BlobWriteHelper::SetAllChanged(bool val)
+    void BlobWriteHelper::SetChangedRecursive(bool val)
     {
-        DotsC_WriteAllChangeFlags(m_handle, val);
+        DotsC_SetChangedRecursive(m_handle, val);
     }
 
     bool BlobWriteHelper::Diff(const char* otherBlob)

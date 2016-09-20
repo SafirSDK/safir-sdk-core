@@ -516,8 +516,6 @@ namespace Internal
         //are updated to given value.
         const DistributionData SetChangeFlags(bool changed) const;
 
-        char* GetBlobCopy() const;
-
         /** @} */
 
         /**

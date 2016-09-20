@@ -142,7 +142,7 @@
         </member>
         <member>
             <name>Int64ItemMember</name>
-            <type>DotsTest.MemberDictionaries</type>
+            <type>DotsTest.TestItem</type>
             <dictionary keyType="Int64"/>
         </member>
         <!-- Dictionaries keyType=String -->
@@ -284,7 +284,7 @@
         </member>
         <member>
             <name>TypeIdItemMember</name>
-            <type>DotsTest.MemberDictionaries</type>
+            <type>DotsTest.TestItem</type>
             <dictionary keyType="TypeId"/>
         </member>
         <!-- Dictionaries keyType=TestEnum -->
@@ -355,7 +355,7 @@
         </member>
         <member>
             <name>EnumItemMember</name>
-            <type>DotsTest.MemberDictionaries</type>
+            <type>DotsTest.TestItem</type>
             <dictionary keyType="DotsTest.TestEnum"/>
         </member>
         <!-- Dictionaries keyType=EntityId -->

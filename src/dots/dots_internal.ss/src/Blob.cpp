@@ -22,6 +22,7 @@
 *
 ******************************************************************************/
 #include <Safir/Dob/Typesystem/ToolSupport/Internal/Blob.h>
+#include <cassert>
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -106,8 +107,21 @@ namespace Internal
 
     bool Blob::IsChangedTopLevel(int member) const
     {
-        return  m_object->members(member).has_is_changed_top_level() && m_object->members(member).is_changed_top_level();
+        return m_object->members(member).has_is_changed_top_level()
+            && m_object->members(member).is_changed_top_level();
     }
+
+    bool Blob::IsChangedHere(int member,
+                             int index) const
+    {
+        assert (index < m_object->members(member).values_size());
+
+        const AnyObject_Value& val=m_object->members(member).values(index);
+
+        return val.has_is_changed()
+            && val.is_changed();
+    }
+
 
     int Blob::NumberOfValues(int member) const
     {
@@ -242,7 +256,7 @@ namespace Internal
         return m->values_size()-1;
     }
 
-    void Blob::SetChanged(int member, int index, bool isChanged)
+    void Blob::SetChangedHere(int member, int index, bool isChanged)
     {
         AnyObject_Member* m=m_object->mutable_members(member);
         AnyObject_Value* v=m->mutable_values(index);

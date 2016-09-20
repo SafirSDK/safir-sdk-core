@@ -306,6 +306,17 @@ namespace Safir.Dob.Typesystem
         }
 
         /// <summary>
+        /// Is the change flag in the container set?
+        /// <para/>
+        /// This method is like IsChanged without the recursion.
+        /// </summary>
+        /// <returns>True if the containers change flag is set.</returns>
+        public bool IsChangedHere ()
+        {
+            return m_bIsChanged;
+        }
+
+        /// <summary>
         /// Sets the container changed.
         /// </summary>
         /// <param name="changed">If set to <c>true</c> changed.</param>
@@ -316,6 +327,17 @@ namespace Safir.Dob.Typesystem
             {
                 kv.Value.SetChanged (changed);
             }
+        }
+
+        /// <summary>
+        /// Set the change flag in the container.
+        /// <para/>
+        /// This method is like SetChanged without the recursion.
+        /// </summary>
+        /// <param name="changed">The value to set the change flag to.</param>
+        public void SetChangedHere (bool changed)
+        {
+            m_bIsChanged = changed;
         }
 
         #endregion

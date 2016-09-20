@@ -121,12 +121,24 @@ namespace Typesystem
 
         /**
          * @brief operator [] - Get const reference to the value with specified index.
+         * Note that no checks are made to see whether index is inside range.
          * @param index [in] - Index of the value to get.
          * @return Const reference to a value.
          */
         const ContainedType& operator [](size_t index) const
         {
             return m_values[index];
+        }
+
+        /**
+         * @brief operator [] - Get const reference to the value with specified index.
+         * @param index [in] - Index of the value to get.
+         * @return Const reference to a value.
+         * @throws std::out_of_range exception if index is not in range
+         */
+        const ContainedType& at(size_t index) const
+        {
+            return m_values.at(index);
         }
 
         /**
@@ -270,7 +282,7 @@ namespace Typesystem
          *
          * @return True if the containers change flag is set.
          */
-        virtual bool IsChangedHere() const
+        bool IsChangedHere() const
         {
             return Base::m_bIsChanged;
         }
@@ -293,7 +305,7 @@ namespace Typesystem
          *
          * @param changed [in] - The value to set the change flag to.
          */
-        virtual void SetChangedHere(const bool changed)
+        void SetChangedHere(const bool changed)
         {
             Base::m_bIsChanged = changed;
         }

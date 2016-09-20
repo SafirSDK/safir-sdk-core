@@ -90,14 +90,14 @@ public class BlobOperations {
         return Kernel.GetNumberOfMemberValues (handle, member);
     }
 
-    public static boolean readTopLevelChangeFlag(long handle, int member)
+    public static boolean isChangedTopLevel(long handle, int member)
     {
-        return Kernel.ReadTopLevelChangeFlag(handle,member);
+        return Kernel.IsChangedTopLevel(handle,member);
     }
 
-    public static void writeTopLevelChangeFlag(long handle, int member, boolean isChanged)
+    public static void setChangedTopLevel(long handle, int member, boolean isChanged)
     {
-        Kernel.WriteTopLevelChangeFlag(handle,member,isChanged);
+        Kernel.SetChangedTopLevel(handle,member,isChanged);
     }
 
     //**********************************************************************

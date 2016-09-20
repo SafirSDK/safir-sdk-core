@@ -24,7 +24,7 @@
 #
 ###############################################################################
 from __future__ import print_function
-import sys, subprocess, os, shutil, difflib, argparse
+import sys, subprocess, os, shutil, difflib, argparse, re
 from syslog_server import SyslogServer
 
 parser = argparse.ArgumentParser("test script")
@@ -73,7 +73,14 @@ else:
 print("Test suite command is '" + " ".join(command) + "'")
 
 proc = subprocess.Popen(command, stdout = subprocess.PIPE, stderr = subprocess.STDOUT, universal_newlines=True)
-res = proc.communicate()[0].replace("\r","").splitlines(1) #fix any DOS newlines
+res = proc.communicate()[0].replace("\r","")
+
+#Boost.test prints some status messages that we need to suppress.
+res = res.replace("\n*** No errors detected\n","")
+res =re.sub(r"^Running [0-9]+ test cases\.\.\.\n", "", res)
+
+res = res.splitlines(1) #fix any DOS newlines
+
 
 with open(arguments.output) as expected_file:
     expected_output = expected_file.read().replace("\r","").splitlines(1) #fix any DOS newlines
@@ -88,6 +95,9 @@ logs = syslog.get_data(0.5) #we wait for a very short while for any logs to prop
 if len(logs) > 0:
     print("Unexpected logs in system log!")
     print(logs)
+if proc.returncode != 0:
+    print ("Unexpected returncode", proc.returncode)
+    sys.exit(1)
 
 print("Expected output achieved")
 sys.exit(0)

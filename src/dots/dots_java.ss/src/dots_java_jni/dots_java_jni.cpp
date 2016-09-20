@@ -1072,27 +1072,13 @@ jint JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetNumberOfMemberVal
 
 /*
  * Class:     com_saabgroup_safir_dob_typesystem_Kernel
- * Method:    ReadMemberStatus
- * Signature: (J[Z[ZII)V
- */
-void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_ReadMemberStatus
-  (JNIEnv * env, jclass, jlong _readerHandle, jbooleanArray _isNull, jbooleanArray _isChanged, jint _member, jint _valueIndex)
-{
-    bool isNull, isChanged;
-    DotsC_ReadMemberStatus(_readerHandle, isNull, isChanged, _member, _valueIndex);
-    SetJArray(env, _isNull, isNull);
-    SetJArray(env, _isChanged, isChanged);
-}
-
-/*
- * Class:     com_saabgroup_safir_dob_typesystem_Kernel
- * Method:    ReadTopLevelChangeFlag
+ * Method:    IsChangedTopLevel
  * Signature: (JI)Z
  */
-JNIEXPORT jboolean JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_ReadTopLevelChangeFlag
+JNIEXPORT jboolean JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_IsChangedTopLevel
   (JNIEnv *, jclass, jlong _readerHandle, jint _member)
 {
-    return DotsC_ReadTopLevelChangeFlag(_readerHandle, _member);
+    return DotsC_IsChangedTopLevel(_readerHandle, _member);
 }
 
 /*
@@ -1359,35 +1345,35 @@ void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_WriteBlob
 
 /*
  * Class:     com_saabgroup_safir_dob_typesystem_Kernel
- * Method:    WriteAllChangeFlags
+ * Method:    SetChangedRecursive
  * Signature: (JZ)V
  */
-void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_WriteAllChangeFlags
+void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_SetChangedRecursive
   (JNIEnv *, jclass, jlong _writerHandle, jboolean _changed)
 {
-    DotsC_WriteAllChangeFlags(_writerHandle, _changed == JNI_TRUE);
+    DotsC_SetChangedRecursive(_writerHandle, _changed == JNI_TRUE);
 }
 
 /*
  * Class:     com_saabgroup_safir_dob_typesystem_Kernel
- * Method:    WriteChangeFlag
+ * Method:    SetChangedHere
  * Signature: (JIIZ)V
  */
-void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_WriteChangeFlag
+void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_SetChangedHere
   (JNIEnv *, jclass, jlong _writerHandle, jint _member, jint _index, jboolean _changed)
 {
-    DotsC_WriteChangeFlag(_writerHandle, _member, _index, _changed == JNI_TRUE);
+    DotsC_SetChangedHere(_writerHandle, _member, _index, _changed == JNI_TRUE);
 }
 
 /*
  * Class:     com_saabgroup_safir_dob_typesystem_Kernel
- * Method:    WriteTopLevelChangeFlag
+ * Method:    SetChangedTopLevel
  * Signature: (JIZ)V
  */
-JNIEXPORT void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_WriteTopLevelChangeFlag
+JNIEXPORT void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_SetChangedTopLevel
   (JNIEnv *, jclass, jlong _writerHandle, jint _member, jboolean _changed)
 {
-    DotsC_WriteTopLevelChangeFlag(_writerHandle,_member,_changed == JNI_TRUE);
+    DotsC_SetChangedTopLevel(_writerHandle,_member,_changed == JNI_TRUE);
 }
 /*
  * Class:     com_saabgroup_safir_dob_typesystem_Kernel

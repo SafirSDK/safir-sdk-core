@@ -109,8 +109,9 @@ class DotsTestDotnet
         Test_ObjectClone();
         Test_ContainerClone();
         Test_ContainerCopy();
-        var misc = new MiscTests();
+        var misc = new Misc.MiscTests();
         misc.Test_Containers();
+        misc.Test_BlobChangeFlags();
     }
 
     private static void Test_IsException()
@@ -9196,8 +9197,17 @@ class DotsTestDotnet
             }
         }
     }
+}
 
-    private class MiscTests
+//Put some misc tests in a separate namespace so we can use "using"
+namespace Misc
+{
+    using Safir;
+    using Safir.Dob;
+    using Safir.Dob.Typesystem;
+    using DotsTest;
+
+    public class MiscTests
     {
         private int tests = 0;
         private int failures = 0;
@@ -9309,6 +9319,274 @@ class DotsTestDotnet
                 Check(oc[1].IsChanged(), "recursive ischanged 3");
             }
 
+        }
+
+        delegate void Checks(Safir.Dob.Typesystem.Object obj);
+
+        void RunSerializationChecks(Object before,
+                                    Checks checks)
+        {
+            //System.Console.WriteLine("-- BEFORE --");
+            checks(before);
+            byte[] bin = Serialization.ToBinary(before);
+            before = null;
+            Object after = Serialization.ToObject(bin);
+            //System.Console.WriteLine("-- AFTER --");
+            checks(after);
+        }
+
+
+        private void Test_BlobChangeFlags_member_types()
+        {
+            MemberTypes before = new MemberTypes();
+            before.Int32Member.Val = 10;
+            before.StringMember.Val = "asdf";
+            before.ObjectMember.Obj = new Object();
+
+            //change flag only set inside item, not on the member itself
+            before.TestClassMember.Obj = new TestItem();
+            before.TestClassMember.Obj.MyInt.Val = 1;
+            before.TestClassMember.SetChangedHere(false);
+
+            Checks checks = (Object o) =>
+                {
+                    var obj = o as MemberTypes;
+                    Check(obj.IsChanged());
+                    Check(obj.Int32Member.IsChanged(),"A");
+                    Check(obj.StringMember.IsChanged(),"B");
+                    Check(obj.ObjectMember.IsChanged(),"C");
+                    Check(!obj.ObjectMember.Obj.IsChanged(),"D");
+                    Check(obj.TestClassMember.IsChanged(),"E");
+                    Check(!obj.TestClassMember.IsChangedHere(),"F");
+                    Check(obj.TestClassMember.Obj.MyInt.IsChanged(),"G");
+                };
+
+            RunSerializationChecks(before,checks);
+
+        }
+
+        private void Test_BlobChangeFlags_member_types_2()
+        {
+            MemberTypes before = new MemberTypes();
+            //change flag only set on member, not inside item
+            before.TestClassMember.Obj = new TestItem();
+            before.TestClassMember.Obj.MyInt.Val = 1;
+            before.SetChanged(false);
+            before.TestClassMember.SetChangedHere(true);
+
+            Checks checks = (Object o) =>
+                {
+                    var obj = o as MemberTypes;
+                    Check(obj.IsChanged());
+                    Check(obj.TestClassMember.IsChanged());
+                    Check(obj.TestClassMember.IsChangedHere());
+                    Check(!obj.TestClassMember.Obj.MyInt.IsChanged());
+                };
+
+            RunSerializationChecks(before,checks);
+        }
+
+
+        private void Test_BlobChangeFlags_member_arrays()
+        {
+            MemberArrays before = new MemberArrays();
+            before.Int32Member[0].Val = 10;
+            before.StringMember[0].Val = "asdf";
+            before.ObjectMember[1].Obj = new Object();
+
+            //change flag only set inside item, not on the member itself
+            before.TestClassMember[0].Obj = new TestItem();
+            before.TestClassMember[0].Obj.MyInt.Val = 1;
+            before.TestClassMember[0].SetChangedHere(false);
+
+            //change flag only set on member, not inside item
+            before.TestClassMember[1].Obj = new TestItem();
+            before.TestClassMember[1].Obj.MyInt.Val = 1;
+            before.TestClassMember[1].SetChanged(false);
+            before.TestClassMember[1].SetChangedHere(true);
+
+            Checks checks = (Object o) =>
+                {
+                    var obj = o as MemberArrays;
+                    Check(obj.IsChanged());
+                    Check(obj.Int32Member.IsChanged());
+                    Check(obj.Int32Member[0].IsChanged());
+                    Check(!obj.Int32Member[1].IsChanged());
+                    Check(obj.StringMember.IsChanged());
+                    Check(obj.StringMember[0].IsChanged());
+                    Check(!obj.StringMember[1].IsChanged());
+                    Check(obj.ObjectMember.IsChanged());
+                    Check(!obj.ObjectMember[0].IsChanged());
+                    Check(obj.ObjectMember[1].IsChanged());
+
+                    Check(obj.TestClassMember.IsChanged());
+                    Check(obj.TestClassMember[0].IsChanged());
+                    Check(!obj.TestClassMember[0].IsChangedHere());
+                    Check(obj.TestClassMember[0].Obj.MyInt.IsChanged());
+                    Check(obj.TestClassMember[1].IsChanged());
+                    Check(obj.TestClassMember[1].IsChangedHere());
+                    Check(!obj.TestClassMember[1].Obj.MyInt.IsChanged());
+                };
+
+            RunSerializationChecks(before,checks);
+        }
+
+
+        private void Test_BlobChangeFlags_member_sequences()
+        {
+            MemberSequences before = new MemberSequences();
+            Check(!before.IsChanged());
+
+            Check(!before.Int32Member.IsChanged());
+            Check(!before.StringMember.IsChanged());
+            Check(!before.ObjectMember.IsChanged());
+            Check(!before.ObjectMember.IsChangedHere());
+
+            before.Int32Member.Add(10);
+            before.StringMember.Add("asdf");
+            before.ObjectMember.Add(new Object());
+
+
+            //change flag only set inside item, not on the member itself
+            before.TestClassMember.Add(new TestItem());
+            before.TestClassMember[0].MyInt.Val = 1;
+            before.TestClassMember.SetChangedHere(false);
+
+            Checks checks = (Object o) =>
+                {
+                    var obj = o as MemberSequences;
+                    Check(obj.IsChanged());
+                    Check(obj.Int32Member.IsChanged());
+                    Check(obj.StringMember.IsChanged());
+                    Check(obj.ObjectMember.IsChanged());
+                    Check(obj.ObjectMember.IsChangedHere());
+                    Check(!obj.ObjectMember[0].IsChanged());
+
+                    Check(obj.TestClassMember.IsChanged());
+                    Check(obj.TestClassMember[0].IsChanged());
+                    Check(!obj.TestClassMember.IsChangedHere());
+                    Check(obj.TestClassMember[0].MyInt.IsChanged());
+                };
+
+            RunSerializationChecks(before,checks);
+        }
+
+
+        private void Test_BlobChangeFlags_member_sequences_2()
+        {
+            MemberSequences before = new MemberSequences();
+
+            //change flag only set on member, not inside item
+            before.TestClassMember.Add(new TestItem());
+            before.TestClassMember[0].MyInt.Val = 1;
+            before.SetChanged(false);
+            before.TestClassMember.SetChangedHere(true);
+
+            Checks checks = (Object o) =>
+                {
+                    var obj = o as MemberSequences;
+                    Check(obj.IsChanged());
+                    Check(obj.TestClassMember.IsChanged());
+                    Check(!obj.TestClassMember[0].IsChanged());
+                    Check(obj.TestClassMember.IsChangedHere());
+                    Check(!obj.TestClassMember[0].MyInt.IsChanged());
+                };
+
+            RunSerializationChecks(before,checks);
+
+        }
+
+
+        private void Test_BlobChangeFlags_member_dictionaries()
+        {
+            MemberDictionaries before = new MemberDictionaries();
+            Check(!before.IsChanged());
+
+            Check(!before.Int32Int32Member.IsChanged());
+            Check(!before.Int32ObjectMember.IsChanged());
+            Check(!before.Int32ObjectMember.IsChangedHere());
+
+            // change flag only set inside value, not on the member itself
+            before.Int32Int32Member.Add(10,10);
+            before.Int32Int64Member.Add(20,20);
+            before.Int32Int64Member.SetChangedHere(false);
+
+            // change flag only set on dict, not on value
+            before.Int64Int32Member.Add(30,30);
+            before.Int64Int32Member.SetChanged(false);
+            before.Int64Int32Member.SetChangedHere(true);
+
+            //change flags set all over the place
+            before.StringStringMember.Add("asdf","adsf");
+            before.Int32ObjectMember.Add(1,new Object());
+
+
+            //On item dict members there are three change flag levels:
+            //A: the dictionary, B: the item container, C: the members inside the item.
+
+            // Only C set
+            before.Int64ItemMember.Add(10,new TestItem());
+            before.Int64ItemMember[10].Obj.MyInt.Val = 1;
+            before.Int64ItemMember.SetChangedHere(false);
+            before.Int64ItemMember[10].SetChangedHere(false);
+
+            // Only B set
+            before.TypeIdItemMember.Add(10,new TestItem());
+            before.TypeIdItemMember[10].Obj.MyInt.Val = 1;
+            before.TypeIdItemMember.SetChanged(false);
+            before.TypeIdItemMember[10].SetChangedHere(true);
+
+            // Only A set
+            before.EnumItemMember.Add(TestEnum.Enumeration.MyFirst,new TestItem());
+            before.EnumItemMember[TestEnum.Enumeration.MyFirst].Obj.MyInt.Val = 1;
+            before.EnumItemMember.SetChanged(false);
+            before.EnumItemMember.SetChangedHere(true);
+
+            Checks checks = (Object o) =>
+                {
+                    var obj = o as MemberDictionaries;
+                    Check(obj.IsChanged());
+                    Check(obj.Int32Int32Member.IsChanged());
+                    Check(obj.Int32Int32Member.IsChangedHere());
+                    Check(obj.Int32Int32Member[10].IsChanged());
+                    Check(obj.Int32Int64Member.IsChanged());
+                    Check(!obj.Int32Int64Member.IsChangedHere());
+                    Check(obj.Int32Int64Member[20].IsChanged());
+                    Check(obj.Int64Int32Member.IsChanged());
+                    Check(obj.Int64Int32Member.IsChangedHere());
+                    Check(!obj.Int64Int32Member[30].IsChanged());
+                    Check(obj.StringStringMember.IsChanged());
+                    Check(obj.Int32ObjectMember.IsChanged(),"A");
+                    Check(obj.Int32ObjectMember.IsChangedHere(),"B");
+                    Check(!obj.Int32ObjectMember[1].Obj.IsChanged(),"C");
+
+                    Check(obj.Int64ItemMember.IsChanged());
+                    Check(!obj.Int64ItemMember.IsChangedHere());
+                    Check(!obj.Int64ItemMember[10].IsChangedHere());
+                    Check(obj.Int64ItemMember[10].Obj.MyInt.IsChanged());
+
+                    Check(obj.TypeIdItemMember.IsChanged());
+                    Check(!obj.TypeIdItemMember.IsChangedHere());
+                    Check(obj.TypeIdItemMember[10].IsChangedHere());
+                    Check(!obj.TypeIdItemMember[10].Obj.MyInt.IsChanged());
+
+                    Check(obj.EnumItemMember.IsChanged());
+                    Check(obj.EnumItemMember.IsChangedHere());
+                    Check(!obj.EnumItemMember[TestEnum.Enumeration.MyFirst].IsChangedHere());
+                    Check(!obj.EnumItemMember[TestEnum.Enumeration.MyFirst].Obj.MyInt.IsChanged());
+                };
+
+            RunSerializationChecks(before,checks);
+        }
+
+        public void Test_BlobChangeFlags()
+        {
+            Test_BlobChangeFlags_member_types();
+            Test_BlobChangeFlags_member_types_2();
+            Test_BlobChangeFlags_member_arrays();
+            Test_BlobChangeFlags_member_sequences();
+            Test_BlobChangeFlags_member_sequences_2();
+            Test_BlobChangeFlags_member_dictionaries();
         }
     }
 }

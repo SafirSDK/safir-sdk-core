@@ -733,12 +733,7 @@ namespace Internal
         explicit BlobReadHelper(const char* blob);
         ~BlobReadHelper();
 
-        CollectionType GetCollectionType(const Dob::Typesystem::MemberIndex member);
-
-        bool GetTopLevelChangeFlag(const Dob::Typesystem::MemberIndex member);
-
-        bool IsChanged(const Dob::Typesystem::MemberIndex member,
-                       const Dob::Typesystem::ArrayIndex index) const;
+        bool IsChangedRecursive(const Dob::Typesystem::MemberIndex member) const;
     private:
         DotsC_Int64 m_handle;
         const DotsC_TypeId m_typeId;
@@ -757,14 +752,14 @@ namespace Internal
 
         CollectionType GetCollectionType(const Dob::Typesystem::MemberIndex member);
 
-        void SetTopLevelChangeFlag(const Dob::Typesystem::MemberIndex member,
+        void SetChangedTopLevel(const Dob::Typesystem::MemberIndex member,
                                    const bool val);
 
         void SetChangedHere(const Dob::Typesystem::MemberIndex member,
                             Dob::Typesystem::ArrayIndex index,
                             bool val);
 
-        void SetAllChanged(bool val);
+        void SetChangedRecursive(bool val);
 
         bool Diff(const char* otherBlob);
 

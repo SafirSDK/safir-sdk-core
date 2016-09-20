@@ -261,14 +261,8 @@ public final class Kernel {
 
     public static native int GetNumberOfMemberValues(long readerHandle, int member);
 
-    public static native void ReadMemberStatus(long readerHandle,
-            boolean[] isNull,
-            boolean[] isChanged,
-            int member,
-            int valueIndex);
-
-    public static native boolean ReadTopLevelChangeFlag(long readerHandle,
-                                                        int member);
+    public static native boolean IsChangedTopLevel(long readerHandle,
+                                                   int member);
 
     public static native void ReadInt32Member(long readerHandle,
             int[] val,
@@ -361,9 +355,9 @@ public final class Kernel {
     public static native void DeleteBlobWriter(long writerHandle);
     public static native int CalculateBlobSize(long writerHandle);
     public static native void WriteBlob(long writerHandle, ByteBuffer blob);
-    public static native void WriteAllChangeFlags(long writerHandle, boolean changed);
-    public static native void WriteChangeFlag(long writerHandle, int member, int index, boolean changed);
-    public static native void WriteTopLevelChangeFlag(long writerHandle, int member, boolean changed);
+    public static native void SetChangedRecursive(long writerHandle, boolean changed);
+    public static native void SetChangedHere(long writerHandle, int member, int index, boolean changed);
+    public static native void SetChangedTopLevel(long writerHandle, int member, boolean changed);
     public static native boolean MarkChanges(long originalReader, long currentWriter);
 
     public static native void WriteInt32Member(long writerHandle, int val, boolean isNull, boolean isChanged,

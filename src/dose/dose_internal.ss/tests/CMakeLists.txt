@@ -9,8 +9,6 @@ ADD_EXECUTABLE(wrap_around_counter_test wrap_around_counter_test.cpp)
 TARGET_LINK_LIBRARIES(distribution_data_test PRIVATE
   dose_internal)
 
-
-
 TARGET_LINK_LIBRARIES(dose_message_queue_test PRIVATE
   lluf_utils
   dose_internal

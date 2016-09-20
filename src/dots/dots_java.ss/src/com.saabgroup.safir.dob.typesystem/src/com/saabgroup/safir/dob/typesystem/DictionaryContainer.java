@@ -60,12 +60,34 @@ implements java.util.Map<K, V> {
         return false;
     }
 
+    /**
+     * Is the change flag in the container set?
+     *
+     * This method is like IsChanged without the recursion.
+     *
+     * @return True if the containers change flag is set.
+     */
+    public boolean isChangedHere() {
+        return m_isChanged;
+    }
+
     @Override
     public void setChanged(boolean changed) {
         m_isChanged = changed;
         for (V val : m_values.values()) {
             val.setChanged(changed);
         }
+    }
+
+    /**
+     * Set the change flag in the container.
+     *
+     * This method is like SetChanged without the recursion
+     *
+     * @param changed [in] - The value to set the change flag to.
+     */
+    public void setChangedHere(boolean changed) {
+        m_isChanged = changed;
     }
 
     @Override

@@ -54,6 +54,10 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/filesystem/operations.hpp>
 
+#define BOOST_TEST_MODULE DotsTestCpp
+#include <boost/test/unit_test.hpp>
+
+
 #ifdef _MSC_VER
 //disable warning about hiding previous declaration.
 #pragma warning (disable:4456)
@@ -10462,7 +10466,7 @@ void Test_SequenceDiff()
     Check (ms->TestClassMember()[0]->MyInt().IsChanged());
 }
 
-int main(int /*argc*/, char* /*argv*/[])
+BOOST_AUTO_TEST_CASE (old_style_tests)
 {
     std::wcout << std::boolalpha;
 
@@ -10558,6 +10562,261 @@ int main(int /*argc*/, char* /*argv*/[])
     {
         std::wcout << "Caught ... exception in _tmain: "<<std::endl;
     }
+}
 
-    return 0;
+
+using namespace DotsTest;
+using namespace Safir;
+using namespace Safir::Dob;
+using namespace Safir::Dob::Typesystem;
+
+template<class T>
+void run_serialization_checks(const T& before,
+                              std::function<void(const T& obj)> checks)
+{
+    BOOST_TEST_MESSAGE("-- BEFORE --");
+    checks(before);
+    BinarySerialization bin;
+    Serialization::ToBinary(before,bin);
+
+    T after = boost::static_pointer_cast<typename T::element_type>(ObjectFactory::Instance().CreateObject(&bin[0]));
+    BOOST_TEST_MESSAGE("-- AFTER --");
+    checks(after);
+}
+
+BOOST_AUTO_TEST_CASE(member_types)
+{
+    MemberTypesPtr before = MemberTypes::Create();
+    before->Int32Member() = 10;
+    before->StringMember() = L"asdf";
+    before->ObjectMember() = Object::Create();
+
+    //change flag only set inside item, not on the member itself
+    before->TestClassMember() = TestItem::Create();
+    before->TestClassMember()->MyInt() = 1;
+    before->TestClassMember().SetChangedHere(false);
+
+    auto checks = [](const MemberTypesPtr& obj)
+    {
+        BOOST_CHECK(obj->IsChanged());
+        BOOST_CHECK(obj->Int32Member().IsChanged());
+        BOOST_CHECK(obj->StringMember().IsChanged());
+        BOOST_CHECK(obj->ObjectMember().IsChanged());
+        BOOST_CHECK(!obj->ObjectMember()->IsChanged());
+        BOOST_CHECK(obj->TestClassMember().IsChanged());
+        BOOST_CHECK(!obj->TestClassMember().IsChangedHere());
+        BOOST_CHECK(obj->TestClassMember()->MyInt().IsChanged());
+    };
+
+    run_serialization_checks<MemberTypesPtr>(before,checks);
+
+}
+
+BOOST_AUTO_TEST_CASE(member_types_2)
+{
+    MemberTypesPtr before = MemberTypes::Create();
+    //change flag only set on member, not inside item
+    before->TestClassMember() = TestItem::Create();
+    before->TestClassMember()->MyInt() = 1;
+    before->SetChanged(false);
+    before->TestClassMember().SetChangedHere(true);
+
+    auto checks = [](const MemberTypesPtr& obj)
+    {
+        BOOST_CHECK(obj->IsChanged());
+        BOOST_CHECK(obj->TestClassMember().IsChanged());
+        BOOST_CHECK(obj->TestClassMember().IsChangedHere());
+        BOOST_CHECK(!obj->TestClassMember()->MyInt().IsChanged());
+    };
+
+    run_serialization_checks<MemberTypesPtr>(before,checks);
+}
+
+
+BOOST_AUTO_TEST_CASE(member_arrays)
+{
+    MemberArraysPtr before = MemberArrays::Create();
+    before->Int32Member()[0].SetVal(10);
+    before->StringMember()[0].SetVal(L"asdf");
+    before->ObjectMember()[1].SetPtr(Object::Create());
+
+    //change flag only set inside item, not on the member itself
+    before->TestClassMember()[0].SetPtr(TestItem::Create());
+    before->TestClassMember()[0]->MyInt() = 1;
+    before->TestClassMember()[0].SetChangedHere(false);
+
+    //change flag only set on member, not inside item
+    before->TestClassMember()[1].SetPtr(TestItem::Create());
+    before->TestClassMember()[1]->MyInt() = 1;
+    before->TestClassMember()[1]->SetChanged(false);
+    before->TestClassMember()[1].SetChangedHere(true);
+
+    auto checks = [](const MemberArraysPtr& obj)
+    {
+        BOOST_CHECK(obj->IsChanged());
+        BOOST_CHECK(obj->Int32Member().IsChanged());
+        BOOST_CHECK(obj->Int32Member()[0].IsChanged());
+        BOOST_CHECK(!obj->Int32Member()[1].IsChanged());
+        BOOST_CHECK(obj->StringMember().IsChanged());
+        BOOST_CHECK(obj->StringMember()[0].IsChanged());
+        BOOST_CHECK(!obj->StringMember()[1].IsChanged());
+        BOOST_CHECK(obj->ObjectMember().IsChanged());
+        BOOST_CHECK(!obj->ObjectMember()[0].IsChanged());
+        BOOST_CHECK(obj->ObjectMember()[1].IsChanged());
+
+        BOOST_CHECK(obj->TestClassMember().IsChanged());
+        BOOST_CHECK(obj->TestClassMember()[0].IsChanged());
+        BOOST_CHECK(!obj->TestClassMember()[0].IsChangedHere());
+        BOOST_CHECK(obj->TestClassMember()[0]->MyInt().IsChanged());
+        BOOST_CHECK(obj->TestClassMember()[1].IsChanged());
+        BOOST_CHECK(obj->TestClassMember()[1].IsChangedHere());
+        BOOST_CHECK(!obj->TestClassMember()[1]->MyInt().IsChanged());
+    };
+
+    run_serialization_checks<MemberArraysPtr>(before,checks);
+}
+
+
+BOOST_AUTO_TEST_CASE(member_sequences)
+{
+    MemberSequencesPtr before = MemberSequences::Create();
+    BOOST_CHECK(!before->IsChanged());
+
+    BOOST_CHECK(!before->Int32Member().IsChanged());
+    BOOST_CHECK(!before->StringMember().IsChanged());
+    BOOST_CHECK(!before->ObjectMember().IsChanged());
+    BOOST_CHECK(!before->ObjectMember().IsChangedHere());
+
+    before->Int32Member().push_back(10);
+    before->StringMember().push_back(L"asdf");
+    before->ObjectMember().push_back(Object::Create());
+
+
+    //change flag only set inside item, not on the member itself
+    before->TestClassMember().push_back(TestItem::Create());
+    before->TestClassMember()[0]->MyInt() = 1;
+    before->TestClassMember().SetChangedHere(false);
+
+    auto checks = [](const MemberSequencesPtr& obj)
+    {
+        BOOST_CHECK(obj->IsChanged());
+        BOOST_CHECK(obj->Int32Member().IsChanged());
+        BOOST_CHECK(obj->StringMember().IsChanged());
+        BOOST_CHECK(obj->ObjectMember().IsChanged());
+        BOOST_CHECK(obj->ObjectMember().IsChangedHere());
+        BOOST_CHECK(!obj->ObjectMember()[0]->IsChanged());
+
+        BOOST_CHECK(obj->TestClassMember().IsChanged());
+        BOOST_CHECK(obj->TestClassMember()[0]->IsChanged());
+        BOOST_CHECK(!obj->TestClassMember().IsChangedHere());
+        BOOST_CHECK(obj->TestClassMember()[0]->MyInt().IsChanged());
+    };
+
+    run_serialization_checks<MemberSequencesPtr>(before,checks);
+}
+
+
+BOOST_AUTO_TEST_CASE(member_sequences_2)
+{
+    MemberSequencesPtr before = MemberSequences::Create();
+
+    //change flag only set on member, not inside item
+    before->TestClassMember().push_back(TestItem::Create());
+    before->TestClassMember()[0]->MyInt() = 1;
+    before->SetChanged(false);
+    before->TestClassMember().SetChangedHere(true);
+
+    auto checks = [](const MemberSequencesPtr& obj)
+    {
+        BOOST_CHECK(obj->IsChanged());
+        BOOST_CHECK(obj->TestClassMember().IsChanged());
+        BOOST_CHECK(!obj->TestClassMember()[0]->IsChanged());
+        BOOST_CHECK(obj->TestClassMember().IsChangedHere());
+        BOOST_CHECK(!obj->TestClassMember()[0]->MyInt().IsChanged());
+    };
+
+    run_serialization_checks<MemberSequencesPtr>(before,checks);
+
+}
+
+
+BOOST_AUTO_TEST_CASE(member_dictionaries)
+{
+    MemberDictionariesPtr before = MemberDictionaries::Create();
+    BOOST_CHECK(!before->IsChanged());
+
+    BOOST_CHECK(!before->Int32Int32Member().IsChanged());
+    BOOST_CHECK(!before->Int32ObjectMember().IsChanged());
+    BOOST_CHECK(!before->Int32ObjectMember().IsChangedHere());
+
+    // change flag only set inside value, not on the member itself
+    before->Int32Int32Member().Insert(10,10);
+    before->Int32Int64Member().Insert(20,20);
+    before->Int32Int64Member().SetChangedHere(false);
+
+    // change flag only set on dict, not on value
+    before->Int64Int32Member().Insert(30,30);
+    before->Int64Int32Member().SetChanged(false);
+    before->Int64Int32Member().SetChangedHere(true);
+
+    //change flags set all over the place
+    before->StringStringMember().Insert(L"asdf",L"adsf");
+    before->Int32ObjectMember().Insert(1,Object::Create());
+
+
+    //On item dict members there are three change flag levels:
+    //A: the dictionary, B: the item container, C: the members inside the item.
+
+    // Only C set
+    before->Int64ItemMember().Insert(10,TestItem::Create());
+    before->Int64ItemMember()[10]->MyInt() = 1;
+    before->Int64ItemMember().SetChangedHere(false);
+    before->Int64ItemMember()[10].SetChangedHere(false);
+
+    // Only B set
+    before->TypeIdItemMember().Insert(10,TestItem::Create());
+    before->TypeIdItemMember()[10]->MyInt() = 1;
+    before->TypeIdItemMember().SetChanged(false);
+    before->TypeIdItemMember()[10].SetChangedHere(true);
+
+    // Only A set
+    before->EnumItemMember().Insert(TestEnum::MyFirst,TestItem::Create());
+    before->EnumItemMember()[TestEnum::MyFirst]->MyInt() = 1;
+    before->EnumItemMember().SetChanged(false);
+    before->EnumItemMember().SetChangedHere(true);
+
+    auto checks = [](const MemberDictionariesPtr& obj)
+    {
+        BOOST_CHECK(obj->IsChanged());
+        BOOST_CHECK(obj->Int32Int32Member().IsChanged());
+        BOOST_CHECK(obj->Int32Int32Member().IsChangedHere());
+        BOOST_CHECK(obj->Int32Int32Member()[10].IsChanged());
+        BOOST_CHECK(obj->Int32Int64Member().IsChanged());
+        BOOST_CHECK(!obj->Int32Int64Member().IsChangedHere());
+        BOOST_CHECK(obj->Int32Int64Member()[20].IsChanged());
+        BOOST_CHECK(obj->Int64Int32Member().IsChanged());
+        BOOST_CHECK(obj->Int64Int32Member().IsChangedHere());
+        BOOST_CHECK(!obj->Int64Int32Member()[30].IsChanged());
+        BOOST_CHECK(obj->StringStringMember().IsChanged());
+        BOOST_CHECK(obj->Int32ObjectMember().IsChanged());
+        BOOST_CHECK(obj->Int32ObjectMember().IsChangedHere());
+        BOOST_CHECK(!obj->Int32ObjectMember()[1]->IsChanged());
+
+        BOOST_CHECK(obj->Int64ItemMember().IsChanged());
+        BOOST_CHECK(!obj->Int64ItemMember().IsChangedHere());
+        BOOST_CHECK(!obj->Int64ItemMember()[10].IsChangedHere());
+        BOOST_CHECK(obj->Int64ItemMember()[10]->MyInt().IsChanged());
+
+        BOOST_CHECK(obj->TypeIdItemMember().IsChanged());
+        BOOST_CHECK(!obj->TypeIdItemMember().IsChangedHere());
+        BOOST_CHECK(obj->TypeIdItemMember()[10].IsChangedHere());
+        BOOST_CHECK(!obj->TypeIdItemMember()[10]->MyInt().IsChanged());
+
+        BOOST_CHECK(obj->EnumItemMember().IsChanged());
+        BOOST_CHECK(obj->EnumItemMember().IsChangedHere());
+        BOOST_CHECK(!obj->EnumItemMember()[TestEnum::MyFirst].IsChangedHere());
+        BOOST_CHECK(!obj->EnumItemMember()[TestEnum::MyFirst]->MyInt().IsChanged());
+    };
+
+    run_serialization_checks<MemberDictionariesPtr>(before,checks);
 }

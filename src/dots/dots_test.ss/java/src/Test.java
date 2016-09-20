@@ -113,6 +113,7 @@ public class Test {
 
         MiscTests misc_tests = new MiscTests();
         misc_tests.test_Containers();
+        misc_tests.Test_BlobChangeFlags();
     }
 
     private static void Header(String label) {
@@ -9183,11 +9184,286 @@ public class Test {
                 }
 
             }
-
-            if (failures != 0) {
-                System.out.println("There were " + failures + " failures!! (out of " + tests + " tests)");
-            }
         }
+
+        interface Checks {
+            void doCheck(Object obj);
+        }
+
+        void RunSerializationChecks(Object before,
+                                    Checks checks)
+        {
+            //System.Console.WriteLine("-- BEFORE --");
+            checks.doCheck(before);
+            byte[] bin = Serialization.toBinary(before);
+            before = null;
+            Object after = Serialization.toObject(bin);
+            //System.Console.WriteLine("-- AFTER --");
+            checks.doCheck(after);
+        }
+
+        private void Test_BlobChangeFlags_member_types()
+        {
+            MemberTypes before = new MemberTypes();
+            before.int32Member().setVal(10);
+            before.stringMember().setVal("asdf");
+            before.objectMember().setObj(new Object());
+
+            //change flag only set inside item, not on the member itself
+            before.testClassMember().setObj(new TestItem());
+            before.testClassMember().getObj().myInt().setVal(1);
+            before.testClassMember().setChangedHere(false);
+
+            Checks checks = new Checks () {
+                    public void doCheck(Object o) {
+                        MemberTypes obj = (MemberTypes)o;
+                        check(obj.isChanged());
+                        check(obj.int32Member().isChanged(),"A");
+                        check(obj.stringMember().isChanged(),"B");
+                        check(obj.objectMember().isChanged(),"C");
+                        check(!obj.objectMember().getObj().isChanged(),"D");
+                        check(obj.testClassMember().isChanged(),"E");
+                        check(!obj.testClassMember().isChangedHere(),"F");
+                        check(obj.testClassMember().getObj().myInt().isChanged(),"G");
+                    }
+                };
+
+            RunSerializationChecks(before,checks);
+        }
+        
+        private void Test_BlobChangeFlags_member_types_2()
+        {
+            MemberTypes before = new MemberTypes();
+            //change flag only set on member, not inside item
+            before.testClassMember().setObj(new TestItem());
+            before.testClassMember().getObj().myInt().setVal(1);
+            before.setChanged(false);
+            before.testClassMember().setChangedHere(true);
+
+            Checks checks = new Checks () {
+                    public void doCheck(Object o) {
+                        MemberTypes obj = (MemberTypes)o;
+                        check(obj.isChanged());
+                        check(obj.testClassMember().isChanged());
+                        check(obj.testClassMember().isChangedHere());
+                        check(!obj.testClassMember().getObj().myInt().isChanged());
+                    }
+                };
+
+            RunSerializationChecks(before,checks);
+        }
+
+
+        private void Test_BlobChangeFlags_member_arrays()
+        {
+            MemberArrays before = new MemberArrays();
+            before.int32Member().get(0).setVal(10);
+            before.stringMember().get(0).setVal("asdf");
+            before.objectMember().get(1).setObj(new Object());
+
+            //change flag only set inside item, not on the member itself
+            before.testClassMember().get(0).setObj(new TestItem());
+            before.testClassMember().get(0).getObj().myInt().setVal(1);
+            before.testClassMember().get(0).setChangedHere(false);
+
+            //change flag only set on member, not inside item
+            before.testClassMember().get(1).setObj(new TestItem());
+            before.testClassMember().get(1).getObj().myInt().setVal(1);
+            before.testClassMember().get(1).setChanged(false);
+            before.testClassMember().get(1).setChangedHere(true);
+
+            Checks checks = new Checks () {
+                    public void doCheck(Object o) {
+                        MemberArrays obj = (MemberArrays)o;
+
+                    check(obj.isChanged());
+                    check(obj.int32Member().isChanged());
+                    check(obj.int32Member().get(0).isChanged());
+                    check(!obj.int32Member().get(1).isChanged());
+                    check(obj.stringMember().isChanged());
+                    check(obj.stringMember().get(0).isChanged());
+                    check(!obj.stringMember().get(1).isChanged());
+                    check(obj.objectMember().isChanged());
+                    check(!obj.objectMember().get(0).isChanged());
+                    check(obj.objectMember().get(1).isChanged());
+
+                    check(obj.testClassMember().isChanged());
+                    check(obj.testClassMember().get(0).isChanged());
+                    check(!obj.testClassMember().get(0).isChangedHere());
+                    check(obj.testClassMember().get(0).getObj().myInt().isChanged());
+                    check(obj.testClassMember().get(1).isChanged());
+                    check(obj.testClassMember().get(1).isChangedHere());
+                    check(!obj.testClassMember().get(1).getObj().myInt().isChanged());
+                    }
+                };
+
+            RunSerializationChecks(before,checks);
+        }
+
+
+        private void Test_BlobChangeFlags_member_sequences()
+        {
+            MemberSequences before = new MemberSequences();
+            check(!before.isChanged());
+
+            check(!before.int32Member().isChanged());
+            check(!before.stringMember().isChanged());
+            check(!before.objectMember().isChanged());
+            check(!before.objectMember().isChangedHere());
+
+            before.int32Member().add(10);
+            before.stringMember().add("asdf");
+            before.objectMember().add(new Object());
+
+
+            //change flag only set inside item, not on the member itself
+            before.testClassMember().add(new TestItem());
+            before.testClassMember().get(0).myInt().setVal(1);
+            before.testClassMember().setChangedHere(false);
+
+            Checks checks = new Checks () {
+                    public void doCheck(Object o) {
+                        MemberSequences obj = (MemberSequences)o;
+
+                    check(obj.isChanged());
+                    check(obj.int32Member().isChanged());
+                    check(obj.stringMember().isChanged());
+                    check(obj.objectMember().isChanged());
+                    check(obj.objectMember().isChangedHere());
+                    check(!obj.objectMember().get(0).isChanged());
+
+                    check(obj.testClassMember().isChanged());
+                    check(obj.testClassMember().get(0).isChanged());
+                    check(!obj.testClassMember().isChangedHere());
+                    check(obj.testClassMember().get(0).myInt().isChanged());
+                    }
+                };
+
+            RunSerializationChecks(before,checks);
+        }
+
+
+        private void Test_BlobChangeFlags_member_sequences_2()
+        {
+            MemberSequences before = new MemberSequences();
+
+            //change flag only set on member, not inside item
+            before.testClassMember().add(new TestItem());
+            before.testClassMember().get(0).myInt().setVal(1);
+            before.setChanged(false);
+            before.testClassMember().setChangedHere(true);
+
+            Checks checks = new Checks () {
+                    public void doCheck(Object o) {
+                        MemberSequences obj = (MemberSequences)o;
+
+                    check(obj.isChanged());
+                    check(obj.testClassMember().isChanged());
+                    check(!obj.testClassMember().get(0).isChanged());
+                    check(obj.testClassMember().isChangedHere());
+                    check(!obj.testClassMember().get(0).myInt().isChanged());
+                    }
+                };
+
+            RunSerializationChecks(before,checks);
+
+        }
+
+
+        private void Test_BlobChangeFlags_member_dictionaries()
+        {
+            MemberDictionaries before = new MemberDictionaries();
+            check(!before.isChanged());
+
+            check(!before.int32Int32Member().isChanged());
+            check(!before.int32ObjectMember().isChanged());
+            check(!before.int32ObjectMember().isChangedHere());
+
+            // change flag only set inside value, not on the member itself
+            before.int32Int32Member().putVal(10,10);
+            before.int32Int64Member().putVal(20,20L);
+            before.int32Int64Member().setChangedHere(false);
+
+            // change flag only set on dict, not on value
+            before.int64Int32Member().putVal(30L,30);
+            before.int64Int32Member().setChanged(false);
+            before.int64Int32Member().setChangedHere(true);
+
+            //change flags set all over the place
+            before.stringStringMember().putVal("asdf","adsf");
+            before.int32ObjectMember().putObj(1,new Object());
+
+
+            //On item dict members there are three change flag levels:
+            //A: the dictionary, B: the item container, C: the members inside the item.
+
+            // Only C set
+            before.int64ItemMember().putObj(10L,new TestItem());
+            before.int64ItemMember().get(10L).getObj().myInt().setVal(1);
+            before.int64ItemMember().setChangedHere(false);
+            before.int64ItemMember().get(10L).setChangedHere(false);
+
+            // Only B set
+            before.typeIdItemMember().putObj(10L,new TestItem());
+            before.typeIdItemMember().get(10L).getObj().myInt().setVal(1);
+            before.typeIdItemMember().setChanged(false);
+            before.typeIdItemMember().get(10L).setChangedHere(true);
+
+            // Only A set
+            before.enumItemMember().putObj(TestEnum.MY_FIRST,new TestItem());
+            before.enumItemMember().get(TestEnum.MY_FIRST).getObj().myInt().setVal(1);
+            before.enumItemMember().setChanged(false);
+            before.enumItemMember().setChangedHere(true);
+
+            Checks checks = new Checks () {
+                    public void doCheck(Object o) {
+                        MemberDictionaries obj = (MemberDictionaries)o;
+
+                    check(obj.isChanged());
+                    check(obj.int32Int32Member().isChanged());
+                    check(obj.int32Int32Member().isChangedHere());
+                    check(obj.int32Int32Member().get(10).isChanged());
+                    check(obj.int32Int64Member().isChanged());
+                    check(!obj.int32Int64Member().isChangedHere());
+                    check(obj.int32Int64Member().get(20).isChanged());
+                    check(obj.int64Int32Member().isChanged());
+                    check(obj.int64Int32Member().isChangedHere());
+                    check(!obj.int64Int32Member().get(30L).isChanged());
+                    check(obj.stringStringMember().isChanged());
+                    check(obj.int32ObjectMember().isChanged(),"A");
+                    check(obj.int32ObjectMember().isChangedHere(),"B");
+                    check(!obj.int32ObjectMember().get(1).getObj().isChanged(),"C");
+
+                    check(obj.int64ItemMember().isChanged());
+                    check(!obj.int64ItemMember().isChangedHere());
+                    check(!obj.int64ItemMember().get(10L).isChangedHere());
+                    check(obj.int64ItemMember().get(10L).getObj().myInt().isChanged());
+
+                    check(obj.typeIdItemMember().isChanged());
+                    check(!obj.typeIdItemMember().isChangedHere());
+                    check(obj.typeIdItemMember().get(10L).isChangedHere());
+                    check(!obj.typeIdItemMember().get(10L).getObj().myInt().isChanged());
+
+                    check(obj.enumItemMember().isChanged());
+                    check(obj.enumItemMember().isChangedHere());
+                    check(!obj.enumItemMember().get(TestEnum.MY_FIRST).isChangedHere());
+                    check(!obj.enumItemMember().get(TestEnum.MY_FIRST).getObj().myInt().isChanged());
+                    }
+                };
+
+            RunSerializationChecks(before,checks);
+        }
+        
+        public void Test_BlobChangeFlags()
+        {
+            Test_BlobChangeFlags_member_types();
+            Test_BlobChangeFlags_member_types_2();
+            Test_BlobChangeFlags_member_arrays();
+            Test_BlobChangeFlags_member_sequences();
+            Test_BlobChangeFlags_member_sequences_2();
+            Test_BlobChangeFlags_member_dictionaries();
+        }
+
     }
 
     private static void printSequences(MemberSequences ms) {

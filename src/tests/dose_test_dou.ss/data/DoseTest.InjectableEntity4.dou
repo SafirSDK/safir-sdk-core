@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <name>DoseTest.InjectableEntity4</name>
+    <baseClass>DoseTest.RootEntity</baseClass>
+    <members>
+        <member>
+            <name>Int32Member</name>
+            <type>Int32</type>
+        </member>
+        <member>
+            <name>Int64Member</name>
+            <type>Int64</type>
+        </member>
+        <member>
+            <name>ArrayMember</name>
+            <arraySize>10</arraySize>
+            <type>Int32</type>
+        </member>
+        <member>
+            <name>SequenceMember</name>
+            <sequence/>
+            <type>Int32</type>
+        </member>
+        <member>
+            <name>DictionaryMember</name>
+            <type>Int32</type>
+            <dictionary keyType="Int32"/>
+        </member>
+        <member>
+            <name>ItemMember1</name>
+            <type>DoseTest.TestItem</type>
+        </member>
+        <member>
+            <name>ItemMember2</name>
+            <type>DoseTest.TestItem</type>
+        </member>
+        <member>
+            <name>ItemMember3</name>
+            <type>DoseTest.TestItem</type>
+        </member>
+        <member>
+            <name>ItemArrayMember1</name>
+            <arraySize>10</arraySize>
+            <type>DoseTest.TestItem</type>
+        </member>
+        <member>
+            <name>ItemArrayMember2</name>
+            <arraySize>10</arraySize>
+            <type>DoseTest.TestItem</type>
+        </member>
+        <member>
+            <name>ItemArrayMember3</name>
+            <arraySize>10</arraySize>
+            <type>DoseTest.TestItem</type>
+        </member>
+        <member>
+            <name>ItemSequenceMember1</name>
+            <sequence/>
+            <type>DoseTest.TestItem</type>
+        </member>
+        <member>
+            <name>ItemSequenceMember2</name>
+            <sequence/>
+            <type>DoseTest.TestItem</type>
+        </member>
+        <member>
+            <name>ItemSequenceMember3</name>
+            <sequence/>
+            <type>DoseTest.TestItem</type>
+        </member>
+        <member>
+            <name>ItemDictionaryMember1</name>
+            <type>DoseTest.TestItem</type>
+            <dictionary keyType="Int32"/>
+        </member>
+        <member>
+            <name>ItemDictionaryMember2</name>
+            <type>DoseTest.TestItem</type>
+            <dictionary keyType="Int32"/>
+        </member>
+        <member>
+            <name>ItemDictionaryMember3</name>
+            <type>DoseTest.TestItem</type>
+            <dictionary keyType="Int32"/>
+        </member>
+        <member>
+            <name>ItemDictionaryMember4</name>
+            <type>DoseTest.TestItem</type>
+            <dictionary keyType="Int32"/>
+        </member>
+    </members>
+</class>

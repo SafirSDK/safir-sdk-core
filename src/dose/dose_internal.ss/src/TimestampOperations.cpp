@@ -282,37 +282,7 @@ namespace Internal
 
         for (int member = 0; member < numberOfMembers; ++member)
         {
-            bool isChanged = false;
-            const auto collectionType = reader->GetCollectionType(member);
-            if (collectionType == SequenceCollectionType)
-            {
-                isChanged = reader->GetTopLevelChangeFlag(member);
-            }
-            else
-            {
-                //dictionaries need to be looped through if they don't have
-                //a change flag set on the top level.
-                //other types always need a loop.
-                if (collectionType == DictionaryCollectionType)
-                {
-                    isChanged = reader->GetTopLevelChangeFlag(member);
-                }
-
-                if (!isChanged)
-                {
-                    const Typesystem::Int32 arraySize = Typesystem::Members::GetArraySize(typeId,member);
-                    for (Typesystem::ArrayIndex index = 0; index < arraySize; ++index)
-                    {
-                        if (reader->IsChanged(member, index))
-                        {
-                            isChanged = true;
-                            break;
-                        }
-                    }
-                }
-            }
-
-            if (isChanged)
+            if (reader->IsChangedRecursive(member))
             {
                 entityState.GetMemberTimestamps()[member] = timestamp;
             }
@@ -356,9 +326,10 @@ namespace Internal
     {
         const Typesystem::TypeId typeId = current.GetTypeId();
         ENSURE(InjectionKindTable::Instance().IsInjectable(typeId),
-            << "TimestampOperations::SetChangeFlagsForNewerMembers: It is only possible to call this method if the type is Injectable");
+            << "TimestampOperations::SetChangeFlags: It is only possible to call this method if the type is Injectable");
 
-        ENSURE(previous.HasBlob() && current.HasBlob(), << "TimestampOperations::SetChangeFlagsForNewerMembers: Both states must have blobs!");
+        ENSURE(previous.HasBlob() && current.HasBlob(),
+               << "TimestampOperations::SetChangeFlags: Both states must have blobs!");
 
         if (previous.GetTopTimestamp() >= current.GetTopTimestamp())
         {
@@ -375,7 +346,7 @@ namespace Internal
                 const auto collectionType = writer.GetCollectionType(member);
                 if (collectionType == SequenceCollectionType || collectionType == DictionaryCollectionType)
                 {
-                    writer.SetTopLevelChangeFlag(member, true);
+                    writer.SetChangedTopLevel(member, true);
                 }
                 else
                 {

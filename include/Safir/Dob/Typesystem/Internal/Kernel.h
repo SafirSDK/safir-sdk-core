@@ -666,19 +666,28 @@ extern "C"
     DOTS_KERNEL_API DotsC_Int32 DotsC_GetNumberOfMemberValues(DotsC_Handle readerHandle, DotsC_MemberIndex member);
 
     /**
-     * Read member status for a specific member.
+     * Read the change flag on a member (non-recursively)
      *
      * @param readerHandle [in] - Handle to blob reader.
-     * @param isNull [out] - The isNull status. Set to true if null.
-     * @param isChanged [out] - The isChanged status. Set to true if changed.
      * @param member [in] - The member.
-     * @param valueIndex [in] - The value index.
+     * @param index of the value (in array or dictionary)
+     * @return Value of the change flag.
      */
-    DOTS_KERNEL_API void DotsC_ReadMemberStatus(DotsC_Handle readerHandle,
-                                                bool& isNull,
-                                                bool& isChanged,
-                                                DotsC_MemberIndex member,
-                                                DotsC_Int32 valueIndex);
+    DOTS_KERNEL_API bool DotsC_IsChangedHere(DotsC_Handle readerHandle,
+                                             DotsC_MemberIndex member,
+                                             DotsC_Int32 index);
+
+    /**
+     * Recursively check if a member or anything inside a member has changed.
+     * Will check all indices for arrays/dictionaries and object sequences.
+     *
+     * @param readerHandle [in] - Handle to blob reader.
+     * @param member [in] - The member.
+     * @return Value of the change flag.
+     */
+    DOTS_KERNEL_API bool DotsC_IsChangedRecursive(DotsC_Handle readerHandle,
+                                                  DotsC_MemberIndex member);
+
 
     /**
      * Read the top level change flag on a sequence or dictionary member.
@@ -687,9 +696,8 @@ extern "C"
      * @param member [in] - The member.
      * @return Value of the change flag.
      */
-    DOTS_KERNEL_API bool DotsC_ReadTopLevelChangeFlag(DotsC_Handle readerHandle,
-                                                      DotsC_MemberIndex member);
-
+    DOTS_KERNEL_API bool DotsC_IsChangedTopLevel(DotsC_Handle readerHandle,
+                                                 DotsC_MemberIndex member);
     /**
      * Read a value from the blob managed by the specified blob reader.
      *
@@ -766,7 +774,7 @@ extern "C"
      * @param writerHandle [in,out] - Handle to blob writer.
      * @param changed [in] - The value to set all change flags to
      */
-    DOTS_KERNEL_API void DotsC_WriteAllChangeFlags(DotsC_Handle writerHandle, bool changed);
+    DOTS_KERNEL_API void DotsC_SetChangedRecursive(DotsC_Handle writerHandle, bool changed);
 
     /**
      * Set the change flag on one member (non-recursively).
@@ -776,7 +784,7 @@ extern "C"
      * @param index [in] - array index of member. Shall be 0 if member is not an array.
      * @param changed [in] - The value to set change flag to.
      */
-    DOTS_KERNEL_API void DotsC_WriteChangeFlag(DotsC_Handle writerHandle,
+    DOTS_KERNEL_API void DotsC_SetChangedHere(DotsC_Handle writerHandle,
                                                DotsC_MemberIndex member,
                                                DotsC_ArrayIndex index,
                                                bool changed);
@@ -788,9 +796,9 @@ extern "C"
      * @param member [in] - id of the member.
      * @param changed [in] - The value to set change flag to.
      */
-    DOTS_KERNEL_API void DotsC_WriteTopLevelChangeFlag(DotsC_Handle writerHandle,
-                                                       DotsC_MemberIndex member,
-                                                       bool isChanged);
+    DOTS_KERNEL_API void DotsC_SetChangedTopLevel(DotsC_Handle writerHandle,
+                                                  DotsC_MemberIndex member,
+                                                  bool isChanged);
 
     /**
       * Diff content of currentWriter and originalReader and mark all changes in currentWriter;

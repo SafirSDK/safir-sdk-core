@@ -40,7 +40,7 @@ namespace ToolSupport
 {
 namespace Internal
 {
-    class AnyObject; //forward declaration of protoBuf type     
+    class AnyObject; //forward declaration of protoBuf type
 
     /**
      * Wrapper around a protobub AnyObject. No checks made here that a type is correct according to dou-files
@@ -72,13 +72,31 @@ namespace Internal
         //----------------------------------------
         // Read
         //----------------------------------------
-        //changed at member top level
+        /**
+         * Check if member is changed at member top level.
+         *
+         * This causes undefined behaviour if called on anything
+         * other than a SequenceCollectionType or DictionaryCollectionType.
+         */
         bool IsChangedTopLevel(int member) const;
+
+        /**
+         * Check change flag on a member (non-recursively)
+         *
+         * If member is a SingleValueCollectionType then index must be 0.
+         * If member is DictionaryCollectionType or ArrayCollectionType then
+         * index must be within bounds.
+         * Other uses are undefined behavior.
+         * Calling on SequenceCollectionType is undefined behaviour.
+         */
+        bool IsChangedHere(int member,
+                           int index) const;
+
 
         //get number of values in current member
         int NumberOfValues(int member) const;
 
-        //get isNull and isChanged
+        //get isNull and isChanged (non-recursive)
         void ValueStatus(int member, int index, bool& isNull, bool& isChanged) const;
 
         //get keys, undefined behaviour if IsNull=true
@@ -99,7 +117,7 @@ namespace Internal
 
         //----------------------------------------
         // Write
-        //----------------------------------------        
+        //----------------------------------------
         //set isChanged on top level, only meaningful for sequences and dictionaries
         void SetChangedTopLevel(int member, bool isChanged);
 
@@ -108,7 +126,7 @@ namespace Internal
         int AddValue(int member, bool isChanged);
 
         //set change flat on individual value
-        void SetChanged(int member, int index, bool isChanged);
+        void SetChangedHere(int member, int index, bool isChanged);
 
         //set key for last added value
         void SetKeyInt32(int member, int index, boost::int32_t val);

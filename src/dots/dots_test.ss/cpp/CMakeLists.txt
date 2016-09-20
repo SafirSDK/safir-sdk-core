@@ -9,7 +9,6 @@ ADD_EXECUTABLE(dots_test_cpp ${sources})
 
 TARGET_LINK_LIBRARIES(dots_test_cpp PRIVATE
   safir_generated-DotsTest-cpp
-#  dots_kernel
-#  dots_cpp
+  ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
   ${Boost_FILESYSTEM_LIBRARY}
-)
+  )

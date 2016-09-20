@@ -1728,7 +1728,7 @@ namespace Internal
             if (blob!=NULL)
             {
                 Dob::Typesystem::Internal::BlobWriteHelper writer(blob);
-                writer.SetAllChanged(false);
+                writer.SetChangedRecursive(false);
                 newRealState = DistributionData(entity_state_tag,
                                                 connection->Id(),
                                                 m_typeId,
