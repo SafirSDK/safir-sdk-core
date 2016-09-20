@@ -155,7 +155,7 @@ namespace ToolSupport
         bool IsChangedRecursive(DotsC_MemberIndex member) const
         {
             MoveToMember(member);
-            auto collectionType = m_memberDescription->GetCollectionType();
+            const DotsC_CollectionType collectionType = m_memberDescription->GetCollectionType();
 
             //Check top level change flag for things that have it.
             if (collectionType == SequenceCollectionType || collectionType == DictionaryCollectionType)
@@ -166,7 +166,7 @@ namespace ToolSupport
                 }
             }
 
-            const auto size = m_blob.NumberOfValues(member);
+            const int size = m_blob.NumberOfValues(member);
 
             //sequences are a bit different from other members, since
             //they do not have change flags on the values. But they
