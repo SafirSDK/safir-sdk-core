@@ -559,7 +559,7 @@ BOOST_AUTO_TEST_CASE(Merge_SimpleNewCollections)
     BOOST_CHECK(!after->Int32Member().IsChanged());
 
     BOOST_CHECK(after->SequenceMember().IsChanged());
-    BOOST_CHECK_EQUAL(after->SequenceMember().size(),1);
+    BOOST_CHECK_EQUAL(after->SequenceMember().size(),1U);
 
     BOOST_CHECK(after->DictionaryMember().IsChanged());
     BOOST_CHECK(after->DictionaryMember()[20].IsChanged());
