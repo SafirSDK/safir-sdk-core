@@ -59,7 +59,7 @@ if arguments.dependencies is not None:
         shutil.copy2(dep,".")
 
 if arguments.language == "cpp":
-    command = (arguments.binary,)
+    command = (arguments.binary,"--detect_memory_leaks=0")
 elif arguments.language == "java":
     command = ("java",
                "-Xfuture",
