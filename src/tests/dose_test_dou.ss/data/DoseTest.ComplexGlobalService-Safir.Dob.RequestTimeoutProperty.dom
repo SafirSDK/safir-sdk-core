@@ -5,7 +5,7 @@
     <memberMapping>
         <member>
             <propertyMember>Timeout</propertyMember>
-            <value>20</value>
+            <value>120</value>
         </member>
     </memberMapping>
 </propertyMapping>
