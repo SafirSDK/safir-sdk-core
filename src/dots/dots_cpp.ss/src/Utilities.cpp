@@ -21,21 +21,23 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-
-#include <Safir/Dob/Typesystem/EntityId.h>
 #include <Safir/Dob/Typesystem/Utilities.h>
+
+#include <Safir/Dob/Typesystem/DictionaryContainer.h>
+#include <Safir/Dob/Typesystem/EntityId.h>
+#include <Safir/Dob/Typesystem/Exceptions.h>
+#include <Safir/Dob/Typesystem/Internal/Kernel.h>
 #include <Safir/Dob/Typesystem/Members.h>
 #include <Safir/Dob/Typesystem/Object.h>
-#include <Safir/Dob/Typesystem/Exceptions.h>
 #include <Safir/Dob/Typesystem/ObjectContainer.h>
 #include <Safir/Dob/Typesystem/Operations.h>
-#include <Safir/Dob/Typesystem/Internal/Kernel.h>
-#include <Safir/Utilities/Internal/StringEncoding.h>
-#include <Safir/Utilities/Internal/LowLevelLogger.h>
-#include <Safir/Utilities/Internal/SystemLog.h>
-#include <iostream>
-#include <boost/shared_array.hpp>
+#include <Safir/Dob/Typesystem/SequenceContainer.h>
 #include <Safir/Dob/Typesystem/ValueContainers.h>
+#include <Safir/Utilities/Internal/LowLevelLogger.h>
+#include <Safir/Utilities/Internal/StringEncoding.h>
+#include <Safir/Utilities/Internal/SystemLog.h>
+#include <boost/shared_array.hpp>
+#include <iostream>
 #include <typeinfo>
 
 //disable warnings in boost
@@ -70,8 +72,7 @@ namespace Utilities
     }
 
 
-
-    void MergeChanges(ObjectPtr into, const ObjectPtr from)
+    void MergeChanges(ObjectPtr into, const ObjectConstPtr& from)
     {
         if (from == NULL || into == NULL)
         {
@@ -98,19 +99,11 @@ namespace Utilities
                     if (dynamic_cast<const ObjectContainerBase*>(&fromContainerB) != NULL)
                     {
                         const ObjectContainerBase & fromContainerOB = static_cast<const ObjectContainerBase&>(fromContainerB);
-                        ObjectContainerBase & intoContainerOB = dynamic_cast<ObjectContainerBase&>(intoContainerB);
+                        ObjectContainerBase & intoContainerOB = static_cast<ObjectContainerBase&>(intoContainerB);
 
                         if (fromContainerOB.IsChangedHere()) //this specific member has changed
                         {
-                            if (fromContainerOB.IsNull())
-                            {
-                                intoContainerOB.SetNull();
-                            }
-                            else
-                            {
-                                intoContainerOB.SetPtr(fromContainerOB.GetObjectPointer()->Clone());
-                                intoContainerOB.SetChangedHere(true);
-                            }
+                            intoContainerOB.Copy(fromContainerOB);
                         }
                         else if (fromContainerOB.IsChanged()) //some child has changed we need to recurse
                         {
@@ -125,9 +118,8 @@ namespace Utilities
 
                                 //if it was null we don't warn (even if it is a little bit suspicious to do that...)
 
-                                intoContainerOB.SetPtr(fromContainerOB.GetObjectPointer()->Clone());
+                                intoContainerOB.Copy(fromContainerOB);
                                 intoContainerOB.SetChangedHere(true);
-
                             }
                             else
                             {
@@ -135,6 +127,41 @@ namespace Utilities
                                 MergeChanges(intoContainerOB.GetObjectPointer(), fromContainerOB.GetObjectPointer());
                             }
                         }
+                    }
+                    //is it a dictionary?
+                    else if (dynamic_cast<const DictionaryContainerBase*>(&fromContainerB) != NULL)
+                    {
+                        assert(typeid(fromContainerB) == typeid(intoContainerB));
+                        const DictionaryContainerBase & fromContainerDB =
+                            static_cast<const DictionaryContainerBase&>(fromContainerB);
+                        DictionaryContainerBase & intoContainerDB =
+                            static_cast<DictionaryContainerBase&>(intoContainerB);
+                        if (fromContainerDB.IsChangedHere())
+                        {
+                            intoContainerDB.Copy(fromContainerDB);
+                        }
+                        else
+                        {
+                            intoContainerDB.Merge(fromContainerDB);
+                        }
+                    }
+                    //is it an object sequence?
+                    else if (dynamic_cast<const GenericObjectSequenceContainerBase*>(&fromContainerB) != NULL)
+                    {
+                        assert(typeid(fromContainerB) == typeid(intoContainerB));
+                        const GenericObjectSequenceContainerBase& fromContainerDB =
+                            dynamic_cast<const GenericObjectSequenceContainerBase&>(fromContainerB);
+                        if (fromContainerDB.IsChangedHere())
+                        {
+                            intoContainerB.Copy(fromContainerB);
+                        }
+                        else
+                        {
+                            GenericObjectSequenceContainerBase & intoContainerDB =
+                                dynamic_cast<GenericObjectSequenceContainerBase&>(intoContainerB);
+                            intoContainerDB.Merge(fromContainerDB);
+                        }
+
                     }
                     else //no, normal member
                     {

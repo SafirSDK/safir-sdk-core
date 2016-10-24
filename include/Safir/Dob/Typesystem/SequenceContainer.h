@@ -233,6 +233,7 @@ namespace Typesystem
         };
 
 
+
         StorageType m_values;
     };
 
@@ -249,9 +250,46 @@ namespace Typesystem
         virtual void SetChanged(const bool changed) {Base::m_bIsChanged = changed;}
     };
 
+
+    /** Base class for all object sequences. Needed for the reflection stuff. */
+    class GenericObjectSequenceContainerBase
+    {
+    public:
+        /**
+         * Is the change flag in the container set?
+         *
+         * This method is like IsChanged without the recursion.
+         *
+         * @return True if the containers change flag is set.
+         */
+        virtual bool IsChangedHere() const = 0;
+
+
+        /**
+         * Set the change flag in the container.
+         *
+         * This method is like SetChanged without the recursion
+         *
+         * @param changed [in] - The value to set the change flag to.
+         */
+        virtual void SetChangedHere(const bool changed) = 0;
+
+    private:
+        friend void Utilities::MergeChanges(ObjectPtr into, const ObjectConstPtr& from);
+
+        /**
+         * Function needed by Utilities::MergeChanges to be able to merge
+         * dictionaries. Will in turn call Utilities::MergeChanges recursively
+         * if it needs to merge objects.
+         */
+        virtual void Merge(const GenericObjectSequenceContainerBase& other) = 0;
+    };
+
+
     template <class T>
     class GenericObjectSequenceContainer
         : public SequenceContainerBase<boost::shared_ptr<T> >
+        , public GenericObjectSequenceContainerBase
     {
         typedef SequenceContainerBase<boost::shared_ptr<T> > Base;
     public:
@@ -308,6 +346,43 @@ namespace Typesystem
         void SetChangedHere(const bool changed)
         {
             Base::m_bIsChanged = changed;
+        }
+
+    private:
+        virtual void Merge(const GenericObjectSequenceContainerBase& that)
+        {
+#ifndef NDEBUG
+            if (typeid(GenericObjectSequenceContainer<T>) != typeid(that))
+            {
+                throw SoftwareViolationException(L"Invalid call to Merge, containers are not of same type",
+                                                 __WFILE__,__LINE__);
+            }
+#endif
+
+            const GenericObjectSequenceContainer<T>& other =
+                static_cast<const GenericObjectSequenceContainer<T>&>(that);
+
+            //Note: this function only gets called when IsChangedHere() == false
+
+            if (!other.IsChanged())
+            {
+                return;
+            }
+
+            if (Base::size() != other.size())
+            {
+                throw SoftwareViolationException(L"It is not possible to merge two object sequences of different sizes.",
+                                                 __WFILE__,__LINE__);
+            }
+
+            for (size_t i = 0; i < Base::size(); ++i)
+            {
+                if (other.at(i)->IsChanged())
+                {
+                    //recurse
+                    Utilities::MergeChanges(Base::at(i),other.at(i));
+                }
+            }
         }
     };
 

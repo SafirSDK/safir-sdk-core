@@ -24,7 +24,7 @@
 #
 ###############################################################################
 from __future__ import print_function
-import subprocess, os, time, sys, argparse, shutil
+import subprocess, os, time, sys, argparse, shutil, re
 import syslog_server
 from safe_print import *
 
@@ -47,12 +47,15 @@ sender_cmd = ("java",
 
 log_server = syslog_server.SyslogServer(arguments.safir_show_config)
 
-o1 = subprocess.check_output(sender_cmd, stderr=subprocess.STDOUT)
-o2 = subprocess.check_output(sender_cmd, stderr=subprocess.STDOUT)
-o3 = subprocess.check_output(sender_cmd, stderr=subprocess.STDOUT)
+o1 = subprocess.check_output(sender_cmd, stderr=subprocess.STDOUT, universal_newlines=True)
+o2 = subprocess.check_output(sender_cmd, stderr=subprocess.STDOUT, universal_newlines=True)
+o3 = subprocess.check_output(sender_cmd, stderr=subprocess.STDOUT, universal_newlines=True)
 
 syslog_output = log_server.get_data(1)
 stdout_output = (o1 + o2 + o3)
+
+#java sometimes outputs some stuff
+stdout_output =re.sub(r"Picked up _JAVA_OPTIONS: .*\n", "", stdout_output)
 
 def fail(message):
     print("Failed! Wrong number of ",message)

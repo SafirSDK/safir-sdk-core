@@ -47,12 +47,15 @@ sender_cmd = ("java",
 
 syslog = syslog_server.SyslogServer(arguments.safir_show_config)
 
-o1 = subprocess.check_output(sender_cmd, stderr=subprocess.STDOUT)
-o2 = subprocess.check_output(sender_cmd, stderr=subprocess.STDOUT)
-o3 = subprocess.check_output(sender_cmd, stderr=subprocess.STDOUT)
+o1 = subprocess.check_output(sender_cmd, stderr=subprocess.STDOUT, universal_newlines=True)
+o2 = subprocess.check_output(sender_cmd, stderr=subprocess.STDOUT, universal_newlines=True)
+o3 = subprocess.check_output(sender_cmd, stderr=subprocess.STDOUT, universal_newlines=True)
 
 stdout_output = o1 + o2 + o3
 syslog_output = syslog.get_data(1)
+
+#java sometimes outputs some stuff
+stdout_output =re.sub(r"Picked up _JAVA_OPTIONS: .*\n", "", stdout_output)
 
 def fail(message):
     print("Failed! Wrong number of",message)

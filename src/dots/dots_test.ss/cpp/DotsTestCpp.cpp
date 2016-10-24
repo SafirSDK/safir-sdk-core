@@ -23,7 +23,6 @@
 ******************************************************************************/
 
 #include <iostream>
-
 #include <Safir/Dob/Typesystem/Internal/Kernel.h>
 #include <Safir/Dob/Typesystem/ObjectFactory.h>
 #include <Safir/Dob/Typesystem/ToolSupport/Serialization.h>
@@ -130,6 +129,16 @@ std::wstring utf8_to_wstr( const std::string& str )
     delete [] pwszBuf;
     return wstr;
 }
+
+namespace std
+{
+    //needed by boost test, and must be in std for it to work.
+    std::ostream& operator <<(std::ostream& out, const std::wstring& str)
+    {
+        return out << str.c_str();
+    }
+}
+
 
 std::wostream & operator<<(std::wostream & out, const Safir::Dob::Typesystem::MemberType value)
 {
@@ -10564,7 +10573,6 @@ BOOST_AUTO_TEST_CASE (old_style_tests)
     }
 }
 
-
 using namespace DotsTest;
 using namespace Safir;
 using namespace Safir::Dob;
@@ -10820,3 +10828,808 @@ BOOST_AUTO_TEST_CASE(member_dictionaries)
 
     run_serialization_checks<MemberDictionariesPtr>(before,checks);
 }
+
+BOOST_AUTO_TEST_CASE(MergeChanges_Simple)
+{
+    auto from = MemberTypes::Create();
+    auto into = MemberTypes::Create();
+
+    from->Int32Member() = 10;
+    from->Int64Member() = 20;
+    from->Int64Member().SetChanged(false);
+
+    from->StringMember() = L"asdf";
+    from->EnumerationMember() = TestEnum::MyFirst;
+
+    ts::Utilities::MergeChanges(into,from);
+
+    BOOST_CHECK(into->Int32Member().IsChanged());
+    BOOST_CHECK_EQUAL(into->Int32Member(),10);
+    BOOST_CHECK(!into->Int64Member().IsChanged());
+    BOOST_CHECK(into->Int64Member().IsNull());
+    BOOST_CHECK(into->StringMember() == L"asdf");
+    BOOST_CHECK_EQUAL(into->EnumerationMember(), TestEnum::MyFirst);
+}
+
+BOOST_AUTO_TEST_CASE(MergeChanges_Arrays)
+{
+    auto from = MemberArrays::Create();
+    auto into = MemberArrays::Create();
+
+    from->Int32Member()[0].SetVal(10);
+    from->Int64Member()[0].SetVal(20);
+    from->Int64Member()[0].SetChanged(false);
+
+    from->StringMember()[0].SetVal(L"asdf");
+    from->StringMember()[1].SetVal(L"asdfasdf");
+    from->StringMember()[1].SetChanged(false);
+    from->EnumerationMember()[0].SetVal(TestEnum::MyFirst);
+    from->EnumerationMember()[1].SetVal(TestEnum::MySecond);
+    from->EnumerationMember()[1].SetChanged(false);
+
+    ts::Utilities::MergeChanges(into,from);
+
+    BOOST_CHECK(into->Int32Member()[0].IsChanged());
+    BOOST_CHECK_EQUAL(into->Int32Member()[0].GetVal(),10);
+    BOOST_CHECK(!into->Int64Member().IsChanged());
+    BOOST_CHECK(into->Int64Member()[0].IsNull());
+    BOOST_CHECK(into->StringMember()[0].GetVal() == L"asdf");
+    BOOST_CHECK(into->StringMember()[1].IsNull());
+    BOOST_CHECK_EQUAL(into->EnumerationMember()[0].GetVal(), TestEnum::MyFirst);
+    BOOST_CHECK(into->EnumerationMember()[1].IsNull());
+}
+
+
+BOOST_AUTO_TEST_CASE(MergeChanges_Objects)
+{
+    auto from = MemberTypes::Create();
+    auto into = MemberTypes::Create();
+
+    from->TestClassMember() = TestItem::Create();
+    from->TestClassMember()->MyInt() = 10;
+    from->TestClassMember().SetChangedHere(false);
+    from->ObjectMember() = TestItem::Create();
+    boost::static_pointer_cast<TestItem>(from->ObjectMember().GetPtr())->MyInt() = 20;
+    from->ObjectMember().SetChangedHere(false);
+
+    ts::Utilities::MergeChanges(into,from);
+
+    BOOST_CHECK_EQUAL(into->TestClassMember()->MyInt(),10);
+    BOOST_CHECK(into->TestClassMember()->MyInt().IsChanged());
+    BOOST_CHECK(into->TestClassMember().IsChanged());
+    BOOST_CHECK(into->TestClassMember().IsChangedHere());
+    BOOST_CHECK_EQUAL(boost::dynamic_pointer_cast<TestItem>(into->ObjectMember().GetPtr())->MyInt(),20);
+}
+
+BOOST_AUTO_TEST_CASE(MergeChanges_Objects_BothHaveData)
+{
+    auto from = MemberTypes::Create();
+
+    from->TestClassMember() = TestItem::Create();
+    from->ObjectMember() = TestItem::Create();
+    from->SetChanged(false);
+
+    auto into = boost::static_pointer_cast<MemberTypes>(from->Clone());
+
+    from->TestClassMember()->MyInt() = 10;
+    from->TestClassMember().SetChangedHere(false);
+    boost::static_pointer_cast<TestItem>(from->ObjectMember().GetPtr())->MyInt() = 20;
+    from->ObjectMember().SetChangedHere(false);
+
+    ts::Utilities::MergeChanges(into,from);
+
+    BOOST_CHECK_EQUAL(into->TestClassMember()->MyInt(),10);
+    BOOST_CHECK(into->TestClassMember()->MyInt().IsChanged());
+    BOOST_CHECK(into->TestClassMember().IsChanged());
+    BOOST_CHECK(!into->TestClassMember().IsChangedHere());
+    BOOST_CHECK_EQUAL(boost::dynamic_pointer_cast<TestItem>(into->ObjectMember().GetPtr())->MyInt(),20);
+    BOOST_CHECK(!into->ObjectMember().IsChangedHere());
+}
+
+
+BOOST_AUTO_TEST_CASE(MergeChanges_Sequences)
+{
+    auto from = MemberSequences::Create();
+    auto into = MemberSequences::Create();
+
+    into->Int32Member().push_back(20);
+    into->SetChanged(false);
+
+    from->Int32Member().push_back(10);
+    from->Int64Member().push_back(20);
+    from->Int64Member().SetChanged(false);
+
+    from->StringMember().push_back(L"asdf");
+
+    from->EnumerationMember().push_back(TestEnum::MyFirst);
+    from->EnumerationMember().SetChanged(false);
+
+    ts::Utilities::MergeChanges(into,from);
+
+    BOOST_CHECK(into->Int32Member().IsChanged());
+    BOOST_CHECK_EQUAL(into->Int32Member()[0],10);
+    BOOST_CHECK(!into->Int64Member().IsChanged());
+    BOOST_CHECK(into->Int64Member().empty());
+    BOOST_CHECK(into->StringMember()[0] == L"asdf");
+    BOOST_CHECK(into->EnumerationMember().empty());
+}
+
+BOOST_AUTO_TEST_CASE(MergeChanges_Dictionaries_IntoEmpty)
+{
+    auto from = MemberDictionaries::Create();
+    auto into = MemberDictionaries::Create();
+
+    from->Int32Int32Member().Insert(10,10);
+    from->Int32Int32Member().Insert(20,20);
+
+    from->Int32Int64Member().Insert(10,10);
+    from->Int32Int64Member().Insert(20,20);
+    from->Int32Int64Member()[20].SetChanged(false);
+
+    from->Int64Int64Member().Insert(10,10);
+    from->Int64Int64Member().Insert(20,20);
+    from->Int64Int64Member().SetChanged(false);
+
+    ts::Utilities::MergeChanges(into,from);
+
+    BOOST_CHECK(into->Int32Int32Member().IsChanged());
+    BOOST_CHECK(into->Int32Int32Member().IsChangedHere());
+    BOOST_CHECK(into->Int32Int32Member()[10].IsChanged());
+    BOOST_CHECK_EQUAL(into->Int32Int32Member()[10].GetVal(),10);
+    BOOST_CHECK(into->Int32Int32Member()[20].IsChanged());
+    BOOST_CHECK_EQUAL(into->Int32Int32Member()[20].GetVal(),20);
+
+    BOOST_CHECK(into->Int32Int64Member().IsChanged());
+    BOOST_CHECK(into->Int32Int64Member().IsChangedHere());
+    BOOST_CHECK(into->Int32Int64Member()[10].IsChanged());
+    BOOST_CHECK_EQUAL(into->Int32Int64Member()[10].GetVal(),10);
+    BOOST_CHECK(!into->Int32Int64Member()[20].IsChanged());
+    BOOST_CHECK_EQUAL(into->Int32Int64Member()[20].GetVal(),20);
+
+    BOOST_CHECK(!into->Int64Int32Member().IsChanged());
+    BOOST_CHECK_EQUAL(into->Int64Int32Member().size(), 0);
+}
+
+BOOST_AUTO_TEST_CASE(MergeChanges_Dictionaries_IntoEmpty_Error)
+{
+    auto from = MemberDictionaries::Create();
+    auto into = MemberDictionaries::Create();
+
+    from->Int64Int32Member().Insert(10,10);
+    from->Int64Int32Member().Insert(20,20);
+    from->Int64Int32Member().SetChangedHere(false);
+
+    BOOST_CHECK_THROW(ts::Utilities::MergeChanges(into,from), ts::SoftwareViolationException);
+}
+
+BOOST_AUTO_TEST_CASE(MergeChanges_Dictionaries_IntoNonEmpty_1)
+{
+    auto into = MemberDictionaries::Create();
+    into->Int32Int32Member().Insert(1,10);
+    into->Int32Int32Member().Insert(2,20);
+
+    into->Int32Int64Member().Insert(1,10);
+    into->Int32Int64Member().Insert(2,20);
+
+    into->Int64Int32Member().Insert(1,10);
+    into->Int64Int32Member().Insert(2,20);
+
+    into->Int64Int64Member().Insert(1,10);
+    into->Int64Int64Member().Insert(2,20);
+
+    into->SetChanged(false);
+
+    auto from = MemberDictionaries::Create();
+
+    from->Int32Int32Member().Insert(3,30);
+
+    from->Int32Int64Member().Insert(1,100);
+    from->Int32Int64Member().Insert(2,20);
+    from->Int32Int64Member()[2].SetChanged(false);
+    from->Int32Int64Member().SetChangedHere(false);
+
+    from->Int64Int32Member().Insert(1,100);
+    from->Int64Int32Member().Insert(2,555);
+    from->Int64Int32Member()[2].SetChanged(false);
+    from->Int64Int32Member().SetChangedHere(false);
+
+    from->Int64Int64Member().Insert(1,100);
+    from->Int64Int64Member().SetChangedHere(false);
+
+    ts::Utilities::MergeChanges(into,from);
+
+    BOOST_CHECK(into->Int32Int32Member().IsChanged());
+    BOOST_CHECK(into->Int32Int32Member().IsChangedHere());
+    BOOST_CHECK_EQUAL(into->Int32Int32Member().size(), 1);
+    BOOST_CHECK(into->Int32Int32Member()[3].IsChanged());
+    BOOST_CHECK_EQUAL(into->Int32Int32Member()[3].GetVal(),30);
+
+    BOOST_CHECK(into->Int32Int64Member().IsChanged());
+    BOOST_CHECK(!into->Int32Int64Member().IsChangedHere());
+    BOOST_CHECK_EQUAL(into->Int32Int64Member().size(), 2);
+    BOOST_CHECK(into->Int32Int64Member()[1].IsChanged());
+    BOOST_CHECK_EQUAL(into->Int32Int64Member()[1].GetVal(),100);
+    BOOST_CHECK(!into->Int32Int64Member()[2].IsChanged());
+    BOOST_CHECK_EQUAL(into->Int32Int64Member()[2].GetVal(),20);
+
+    BOOST_CHECK(into->Int64Int32Member().IsChanged());
+    BOOST_CHECK(!into->Int64Int32Member().IsChangedHere());
+    BOOST_CHECK_EQUAL(into->Int64Int32Member().size(), 2);
+    BOOST_CHECK(into->Int64Int32Member()[1].IsChanged());
+    BOOST_CHECK_EQUAL(into->Int64Int32Member()[1].GetVal(),100);
+    BOOST_CHECK(!into->Int64Int32Member()[2].IsChanged());
+    BOOST_CHECK_EQUAL(into->Int64Int32Member()[2].GetVal(),20);
+
+    BOOST_CHECK(into->Int64Int64Member().IsChanged());
+    BOOST_CHECK(!into->Int64Int64Member().IsChangedHere());
+    BOOST_CHECK_EQUAL(into->Int64Int64Member().size(), 2);
+    BOOST_CHECK(into->Int64Int64Member()[1].IsChanged());
+    BOOST_CHECK_EQUAL(into->Int64Int64Member()[1].GetVal(),100);
+    BOOST_CHECK(!into->Int64Int64Member()[2].IsChanged());
+    BOOST_CHECK_EQUAL(into->Int64Int64Member()[2].GetVal(),20);
+
+}
+
+
+BOOST_AUTO_TEST_CASE(MergeChanges_Dictionaries_IntoNonEmpty_2)
+{
+    auto into = MemberDictionaries::Create();
+    into->Int32Int32Member().Insert(1,10);
+    into->Int32Int32Member().Insert(2,20);
+
+    into->Int32Int64Member().Insert(1,10);
+    into->Int32Int64Member().Insert(2,20);
+
+    into->Int64Int32Member().Insert(1,10);
+    into->Int64Int32Member().Insert(2,20);
+
+    into->Int64Int64Member().Insert(1,10);
+    into->Int64Int64Member().Insert(2,20);
+
+    into->SetChanged(false);
+
+    auto from = MemberDictionaries::Create();
+
+    from->Int32Int32Member().Insert(1,10);
+    from->Int32Int32Member()[1].SetChanged(false);
+
+    from->Int32Int64Member().Insert(1,100);
+
+    from->Int64Int32Member().Insert(1,100);
+    from->Int64Int32Member()[1].SetChanged(false);
+
+    from->Int64Int64Member().Insert(1,100);
+    from->Int64Int64Member().SetChanged(false);
+
+    ts::Utilities::MergeChanges(into,from);
+
+    BOOST_CHECK(into->Int32Int32Member().IsChanged());
+    BOOST_CHECK(into->Int32Int32Member().IsChangedHere());
+    BOOST_CHECK_EQUAL(into->Int32Int32Member().size(), 1);
+    BOOST_CHECK(!into->Int32Int32Member()[1].IsChanged());
+    BOOST_CHECK_EQUAL(into->Int32Int32Member()[1].GetVal(),10);
+
+    BOOST_CHECK(into->Int32Int64Member().IsChanged());
+    BOOST_CHECK(into->Int32Int64Member().IsChangedHere());
+    BOOST_CHECK_EQUAL(into->Int32Int64Member().size(), 1);
+    BOOST_CHECK(into->Int32Int64Member()[1].IsChanged());
+    BOOST_CHECK_EQUAL(into->Int32Int64Member()[1].GetVal(),100);
+
+    BOOST_CHECK(into->Int64Int32Member().IsChanged());
+    BOOST_CHECK(into->Int64Int32Member().IsChangedHere());
+    BOOST_CHECK_EQUAL(into->Int64Int32Member().size(), 1);
+    BOOST_CHECK(!into->Int64Int32Member()[1].IsChanged());
+    BOOST_CHECK_EQUAL(into->Int64Int32Member()[1].GetVal(),100);
+
+    BOOST_CHECK(!into->Int64Int64Member().IsChanged());
+    BOOST_CHECK_EQUAL(into->Int64Int64Member().size(), 2);
+    BOOST_CHECK_EQUAL(into->Int64Int64Member()[1].GetVal(),10);
+    BOOST_CHECK_EQUAL(into->Int64Int64Member()[2].GetVal(),20);
+}
+
+
+
+BOOST_AUTO_TEST_CASE(MergeChanges_Dictionaries_IntoNonEmpty_Error)
+{
+    auto into = MemberDictionaries::Create();
+    into->Int32Int32Member().Insert(1,10);
+    into->Int32Int32Member().Insert(2,20);
+    into->SetChanged(false);
+
+    auto from = MemberDictionaries::Create();
+
+    from->Int32Int32Member().Insert(3,30);
+    from->Int32Int32Member().SetChangedHere(false);
+
+    BOOST_CHECK_THROW(ts::Utilities::MergeChanges(into,from), ts::SoftwareViolationException);
+}
+
+BOOST_AUTO_TEST_CASE(MergeChanges_ObjectDictionaries_IntoEmpty_1)
+{
+    auto from = MemberDictionaries::Create();
+    auto into = MemberDictionaries::Create();
+
+    //empty + x[x1:(xM=10)] => x[x1:(xM=10)]
+    from->Int64ItemMember().Insert(1,TestItem::Create());
+    from->Int64ItemMember().at(1)->MyInt() = 10;
+
+    //empty + x[1:(xM=10)] => x[1:(xM=10)]
+    from->TypeIdItemMember().Insert(1,TestItem::Create());
+    from->TypeIdItemMember().at(1)->MyInt() = 20;
+    from->TypeIdItemMember().at(1).SetChangedHere(false);
+
+    //empty + x[x1:(M=10)] => x[x1:(M=10)]
+    from->EnumItemMember().Insert(TestEnum::MySecond,TestItem::Create());
+    from->EnumItemMember().at(TestEnum::MySecond)->MyInt() = 30;
+    from->EnumItemMember().at(TestEnum::MySecond).SetChanged(false);
+
+    ts::Utilities::MergeChanges(into,from);
+
+    BOOST_CHECK(into->Int64ItemMember().IsChangedHere());
+    BOOST_CHECK(into->Int64ItemMember().at(1).IsChangedHere());
+    BOOST_CHECK(into->Int64ItemMember().at(1)->MyInt().IsChanged());
+    BOOST_CHECK_EQUAL(into->Int64ItemMember().at(1)->MyInt(),10);
+
+    BOOST_CHECK(into->TypeIdItemMember().IsChangedHere());
+    BOOST_CHECK(!into->TypeIdItemMember().at(1).IsChangedHere());
+    BOOST_CHECK(into->TypeIdItemMember().at(1)->MyInt().IsChanged());
+    BOOST_CHECK_EQUAL(into->TypeIdItemMember().at(1)->MyInt(),20);
+
+    BOOST_CHECK(into->EnumItemMember().IsChangedHere());
+    BOOST_CHECK(!into->EnumItemMember().at(TestEnum::MySecond).IsChangedHere());
+    BOOST_CHECK(!into->EnumItemMember().at(TestEnum::MySecond)->MyInt().IsChanged());
+    BOOST_CHECK_EQUAL(into->EnumItemMember().at(TestEnum::MySecond)->MyInt(),30);
+}
+
+BOOST_AUTO_TEST_CASE(MergeChanges_ObjectDictionaries_IntoEmpty_Error_1)
+{
+    auto from = MemberDictionaries::Create();
+    auto into = MemberDictionaries::Create();
+
+    //empty + [x1:(xM=10)] => error
+    from->Int64ItemMember().Insert(1,TestItem::Create());
+    from->Int64ItemMember().at(1)->MyInt() = 10;
+    from->Int64ItemMember().SetChangedHere(false);
+
+    BOOST_CHECK_THROW(ts::Utilities::MergeChanges(into,from),
+                      ts::SoftwareViolationException);
+}
+
+BOOST_AUTO_TEST_CASE(MergeChanges_ObjectDictionaries_IntoEmpty_Error_2)
+{
+    auto from = MemberDictionaries::Create();
+    auto into = MemberDictionaries::Create();
+
+    //empty + [x1:(M=10)] => error
+    from->Int64ItemMember().Insert(1,TestItem::Create());
+    from->Int64ItemMember().at(1)->MyInt() = 10;
+    from->Int64ItemMember().SetChangedHere(false);
+    from->Int64ItemMember().at(1)->MyInt().SetChanged(false);
+
+    BOOST_CHECK_THROW(ts::Utilities::MergeChanges(into,from),
+                      ts::SoftwareViolationException);
+}
+
+BOOST_AUTO_TEST_CASE(MergeChanges_ObjectDictionaries_IntoEmpty_Error_3)
+{
+    auto from = MemberDictionaries::Create();
+    auto into = MemberDictionaries::Create();
+
+    //empty + [1:(xM=10)] => error
+    from->Int64ItemMember().Insert(1,TestItem::Create());
+    from->Int64ItemMember().at(1)->MyInt() = 10;
+    from->Int64ItemMember().SetChangedHere(false);
+    from->Int64ItemMember().at(1).SetChangedHere(false);
+
+    BOOST_CHECK_THROW(ts::Utilities::MergeChanges(into,from),
+                      ts::SoftwareViolationException);
+}
+
+BOOST_AUTO_TEST_CASE(MergeChanges_ObjectDictionaries_IntoEmpty_2)
+{
+    auto from = MemberDictionaries::Create();
+    auto into = MemberDictionaries::Create();
+
+    //empty + [1:(M=10)] => empty
+    from->Int64ItemMember().Insert(1,TestItem::Create());
+    from->Int64ItemMember().at(1)->MyInt() = 10;
+    from->Int64ItemMember().SetChanged(false);
+
+    ts::Utilities::MergeChanges(into,from);
+
+    BOOST_CHECK(!into->Int64ItemMember().IsChangedHere());
+    BOOST_CHECK_EQUAL(into->Int64ItemMember().size(), 0);
+}
+
+struct NonEmptyObjectDictionariesFixture
+{
+    MemberDictionariesPtr into;
+    MemberDictionariesPtr from;
+
+    NonEmptyObjectDictionariesFixture()
+        : into(MemberDictionaries::Create())
+        , from(MemberDictionaries::Create())
+    {
+        into->Int64ItemMember().Insert(1,TestItem::Create());
+        into->Int64ItemMember().at(1)->MyInt() = 10;
+        into->Int64ItemMember().at(1)->MyString() = L"one";
+        into->Int64ItemMember().Insert(2,TestItem::Create());
+        into->Int64ItemMember().at(2)->MyInt() = 20;
+        into->Int64ItemMember().at(2)->MyString() = L"two";
+
+        into->TypeIdItemMember().Insert(1,TestItem::Create());
+        into->TypeIdItemMember().at(1)->MyInt() = 10;
+        into->TypeIdItemMember().at(1)->MyString() = L"one";
+        into->TypeIdItemMember().Insert(2,TestItem::Create());
+        into->TypeIdItemMember().at(2)->MyInt() = 20;
+        into->TypeIdItemMember().at(2)->MyString() = L"two";
+
+        into->EnumItemMember().Insert(TestEnum::MyFirst,TestItem::Create());
+        into->EnumItemMember().at(TestEnum::MyFirst)->MyInt() = 10;
+        into->EnumItemMember().at(TestEnum::MyFirst)->MyString() = L"one";
+        into->EnumItemMember().Insert(TestEnum::MySecond,TestItem::Create());
+        into->EnumItemMember().at(TestEnum::MySecond)->MyInt() = 20;
+        into->EnumItemMember().at(TestEnum::MySecond)->MyString() = L"two";
+
+        into->SetChanged(false);
+    }
+};
+
+BOOST_FIXTURE_TEST_SUITE( s, NonEmptyObjectDictionariesFixture )
+
+BOOST_AUTO_TEST_CASE(MergeChanges_ObjectDictionaries_IntoNonEmpty_1)
+{
+    //[1:(M=10,S=one),2:(M=20,S=two)] + x[x1:(xM=100)] => x[x1:(xM=100)]
+    from->Int64ItemMember().Insert(1,TestItem::Create());
+    from->Int64ItemMember().at(1)->MyInt() = 100;
+
+    //[1:(M=10,S=one),2:(M=20,S=two)] + x[ 1:(xM=200)] => x[ 1:(xM=200)]
+    from->TypeIdItemMember().Insert(1,TestItem::Create());
+    from->TypeIdItemMember().at(1)->MyInt() = 200;
+    from->TypeIdItemMember().at(1).SetChangedHere(false);
+
+    //[1:(M=10,S=one),2:(M=20,S=two)] + x[ 1:( M=300)] => x[ 1:( M=300)]
+    from->EnumItemMember().Insert(TestEnum::MySecond,TestItem::Create());
+    from->EnumItemMember().at(TestEnum::MySecond)->MyInt() = 300;
+    from->EnumItemMember().at(TestEnum::MySecond).SetChanged(false);
+    ts::Utilities::MergeChanges(into,from);
+
+    BOOST_CHECK_EQUAL(into->Int64ItemMember().size(), 1);
+    BOOST_CHECK(into->Int64ItemMember().IsChangedHere());
+    BOOST_CHECK(into->Int64ItemMember().at(1).IsChangedHere());
+    BOOST_CHECK(into->Int64ItemMember().at(1)->MyInt().IsChanged());
+    BOOST_CHECK_EQUAL(into->Int64ItemMember().at(1)->MyInt(),100);
+    BOOST_CHECK(into->Int64ItemMember().at(1)->MyString().IsNull());
+
+    BOOST_CHECK_EQUAL(into->TypeIdItemMember().size(), 1);
+    BOOST_CHECK(into->TypeIdItemMember().IsChangedHere());
+    BOOST_CHECK(!into->TypeIdItemMember().at(1).IsChangedHere());
+    BOOST_CHECK(into->TypeIdItemMember().at(1)->MyInt().IsChanged());
+    BOOST_CHECK_EQUAL(into->TypeIdItemMember().at(1)->MyInt(),200);
+    BOOST_CHECK(into->TypeIdItemMember().at(1)->MyString().IsNull());
+
+    BOOST_CHECK_EQUAL(into->EnumItemMember().size(), 1);
+    BOOST_CHECK(into->EnumItemMember().IsChangedHere());
+    BOOST_CHECK(!into->EnumItemMember().at(TestEnum::MySecond).IsChangedHere());
+    BOOST_CHECK(!into->EnumItemMember().at(TestEnum::MySecond)->MyInt().IsChanged());
+    BOOST_CHECK_EQUAL(into->EnumItemMember().at(TestEnum::MySecond)->MyInt(),300);
+    BOOST_CHECK(into->EnumItemMember().at(TestEnum::MySecond)->MyString().IsNull());
+}
+
+BOOST_AUTO_TEST_CASE(MergeChanges_ObjectDictionaries_IntoNonEmpty_2)
+{
+    //[1:(M=10,S=one),2:(M=20,S=two)] + x[ 3:( M=300)] => x[ 3:( M=300)]
+    from->Int64ItemMember().Insert(3,TestItem::Create());
+    from->Int64ItemMember().at(3)->MyInt() = 300;
+    from->Int64ItemMember().at(3).SetChanged(false);
+
+    //[1:(M=10,S=one),2:(M=20,S=two)] +  [x2:(xM=200)] =>  [ 1:( M=10, S=one),x2:(xM:200)]
+    from->TypeIdItemMember().Insert(2,TestItem::Create());
+    from->TypeIdItemMember().at(2)->MyInt() = 200;
+    from->TypeIdItemMember().SetChangedHere(false);
+
+    //[1:(M=10,S=one),2:(M=20,S=two)] +  [ 2:(xM=300)] =>  [ 1:( M=10, S=one), 2:(xM:300, S=two)]
+    from->EnumItemMember().Insert(TestEnum::MySecond,TestItem::Create());
+    from->EnumItemMember().at(TestEnum::MySecond)->MyInt() = 300;
+    from->EnumItemMember().SetChangedHere(false);
+    from->EnumItemMember().at(TestEnum::MySecond).SetChangedHere(false);
+
+    ts::Utilities::MergeChanges(into,from);
+
+    BOOST_CHECK_EQUAL(into->Int64ItemMember().size(), 1);
+    BOOST_CHECK(into->Int64ItemMember().IsChangedHere());
+    BOOST_CHECK(!into->Int64ItemMember().at(3).IsChangedHere());
+    BOOST_CHECK(!into->Int64ItemMember().at(3)->MyInt().IsChanged());
+    BOOST_CHECK_EQUAL(into->Int64ItemMember().at(3)->MyInt(),300);
+    BOOST_CHECK(into->Int64ItemMember().at(3)->MyString().IsNull());
+
+    BOOST_CHECK_EQUAL(into->TypeIdItemMember().size(), 2);
+    BOOST_CHECK(!into->TypeIdItemMember().IsChangedHere());
+    BOOST_CHECK(!into->TypeIdItemMember().at(1).IsChanged());
+    BOOST_CHECK_EQUAL(into->TypeIdItemMember().at(1)->MyInt(),10);
+    BOOST_CHECK(into->TypeIdItemMember().at(1)->MyString() == L"one");
+    BOOST_CHECK(into->TypeIdItemMember().at(2).IsChangedHere());
+    BOOST_CHECK(into->TypeIdItemMember().at(2)->MyInt().IsChanged());
+    BOOST_CHECK_EQUAL(into->TypeIdItemMember().at(2)->MyInt(),200);
+    BOOST_CHECK(!into->TypeIdItemMember().at(2)->MyString().IsChanged());
+    BOOST_CHECK(into->TypeIdItemMember().at(2)->MyString().IsNull());
+
+    BOOST_CHECK_EQUAL(into->EnumItemMember().size(), 2);
+    BOOST_CHECK(!into->EnumItemMember().IsChangedHere());
+    BOOST_CHECK(!into->EnumItemMember().at(TestEnum::MyFirst).IsChanged());
+    BOOST_CHECK_EQUAL(into->EnumItemMember().at(TestEnum::MyFirst)->MyInt(),10);
+    BOOST_CHECK(into->EnumItemMember().at(TestEnum::MyFirst)->MyString() == L"one");
+    BOOST_CHECK(!into->EnumItemMember().at(TestEnum::MySecond).IsChangedHere());
+    BOOST_CHECK(into->EnumItemMember().at(TestEnum::MySecond)->MyInt().IsChanged());
+    BOOST_CHECK_EQUAL(into->EnumItemMember().at(TestEnum::MySecond)->MyInt(),300);
+    BOOST_CHECK(into->EnumItemMember().at(TestEnum::MySecond)->MyString() == L"two");
+    BOOST_CHECK(!into->EnumItemMember().at(TestEnum::MySecond)->MyString().IsChanged());
+}
+
+
+BOOST_AUTO_TEST_CASE(MergeChanges_ObjectDictionaries_IntoNonEmpty_3)
+{
+    //[1:(M=10,S=one),2:(M=20,S=two)] +  [x2:( M=200)] =>  [ 1:( M=10, S=one),x2:( M:200)]
+    from->Int64ItemMember().Insert(2,TestItem::Create());
+    from->Int64ItemMember().at(2)->MyInt() = 200;
+    from->Int64ItemMember().SetChangedHere(false);
+    from->Int64ItemMember().at(2)->MyInt().SetChanged(false);
+
+    //[1:(M=10,S=one),2:(M=20,S=two)] +  [ 3:( M=300)] =>  [ 1:( M=10, S=one), 2:( M:20, S=two)]
+    from->TypeIdItemMember().Insert(3,TestItem::Create());
+    from->TypeIdItemMember().at(3)->MyInt() = 300;
+    from->TypeIdItemMember().SetChanged(false);
+
+    //[1:(M=10,S=one),2:(M=20,S=two)] +  [ 2:( M=200)] =>  [ 1:( M=10, S=one), 2:( M:20, S=two)]
+    from->EnumItemMember().Insert(TestEnum::MySecond,TestItem::Create());
+    from->EnumItemMember().at(TestEnum::MySecond)->MyInt() = 200;
+    from->EnumItemMember().SetChanged(false);
+
+    ts::Utilities::MergeChanges(into,from);
+    BOOST_CHECK_EQUAL(into->Int64ItemMember().size(), 2);
+    BOOST_CHECK(!into->Int64ItemMember().IsChangedHere());
+    BOOST_CHECK(!into->Int64ItemMember().at(1).IsChanged());
+    BOOST_CHECK_EQUAL(into->Int64ItemMember().at(1)->MyInt(),10);
+    BOOST_CHECK_EQUAL(into->Int64ItemMember().at(1)->MyString(),L"one");
+    BOOST_CHECK(into->Int64ItemMember().at(2).IsChangedHere());
+    BOOST_CHECK(!into->Int64ItemMember().at(2)->MyInt().IsChanged());
+    BOOST_CHECK_EQUAL(into->Int64ItemMember().at(2)->MyInt(),200);
+    BOOST_CHECK(into->Int64ItemMember().at(2)->MyString().IsNull());
+
+    BOOST_CHECK_EQUAL(into->TypeIdItemMember().size(), 2);
+    BOOST_CHECK(!into->TypeIdItemMember().IsChanged());
+    BOOST_CHECK_EQUAL(into->TypeIdItemMember().at(1)->MyInt(),10);
+    BOOST_CHECK_EQUAL(into->TypeIdItemMember().at(1)->MyString(),L"one");
+    BOOST_CHECK_EQUAL(into->TypeIdItemMember().at(2)->MyInt(),20);
+    BOOST_CHECK_EQUAL(into->TypeIdItemMember().at(2)->MyString(),L"two");
+
+    BOOST_CHECK_EQUAL(into->EnumItemMember().size(), 2);
+    BOOST_CHECK(!into->EnumItemMember().IsChanged());
+    BOOST_CHECK_EQUAL(into->EnumItemMember().at(TestEnum::MyFirst)->MyInt(),10);
+    BOOST_CHECK_EQUAL(into->EnumItemMember().at(TestEnum::MyFirst)->MyString(),L"one");
+    BOOST_CHECK_EQUAL(into->EnumItemMember().at(TestEnum::MySecond)->MyInt(),20);
+    BOOST_CHECK_EQUAL(into->EnumItemMember().at(TestEnum::MySecond)->MyString(),L"two");
+}
+
+BOOST_AUTO_TEST_CASE(MergeChanges_ObjectDictionaries_IntoNonEmpty_Error_1)
+{
+    //[1:(M=10,S=one),2:(M=20,S=two)] +  [x3:( M=300)] =>  error
+    from->Int64ItemMember().Insert(3,TestItem::Create());
+    from->Int64ItemMember().at(3)->MyInt() = 300;
+    from->Int64ItemMember().SetChanged(false);
+    from->Int64ItemMember().at(3).SetChangedHere(true);
+
+    BOOST_CHECK_THROW(ts::Utilities::MergeChanges(into,from),
+                      ts::SoftwareViolationException);
+}
+
+BOOST_AUTO_TEST_CASE(MergeChanges_ObjectDictionaries_IntoNonEmpty_Error_2)
+{
+    //[1:(M=10,S=one),2:(M=20,S=two)] +  [ 3:(xM=300)] =>  error
+    from->Int64ItemMember().Insert(3,TestItem::Create());
+    from->Int64ItemMember().at(3)->MyInt() = 300;
+    from->Int64ItemMember().SetChanged(false);
+    from->Int64ItemMember().at(3)->MyInt().SetChanged(true);
+
+    BOOST_CHECK_THROW(ts::Utilities::MergeChanges(into,from),
+                      ts::SoftwareViolationException);
+}
+
+BOOST_AUTO_TEST_CASE(MergeChanges_ObjectDictionaries_EmptyIntoNonEmpty)
+{
+    //[1:(M=10,S=one),2:(M=20,S=two)] +  x[] =>  x[]
+    from->Int64ItemMember().SetChangedHere(true);
+
+    //[1:(M=10,S=one),2:(M=20,S=two)] +  [] =>  [1:(M=10,S=one),2:(M:20,S=two)]
+    //nothing to do...
+
+    ts::Utilities::MergeChanges(into,from);
+    BOOST_CHECK_EQUAL(into->Int64ItemMember().size(), 0);
+    BOOST_CHECK(into->Int64ItemMember().IsChangedHere());
+
+    BOOST_CHECK_EQUAL(into->TypeIdItemMember().size(), 2);
+    BOOST_CHECK(!into->TypeIdItemMember().IsChanged());
+    BOOST_CHECK_EQUAL(into->TypeIdItemMember().at(1)->MyInt(),10);
+    BOOST_CHECK_EQUAL(into->TypeIdItemMember().at(1)->MyString(),L"one");
+    BOOST_CHECK_EQUAL(into->TypeIdItemMember().at(2)->MyInt(),20);
+    BOOST_CHECK_EQUAL(into->TypeIdItemMember().at(2)->MyString(),L"two");
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+
+struct EmptyObjectSequenceFixture
+{
+    EmptyObjectSequenceFixture()
+        : from(MemberSequences::Create())
+        , into(MemberSequences::Create())
+    {
+
+    }
+    MemberSequencesPtr from;
+    MemberSequencesPtr into;
+};
+
+BOOST_FIXTURE_TEST_SUITE( seq, EmptyObjectSequenceFixture)
+
+BOOST_AUTO_TEST_CASE(MergeChanges_ObjectSequences_1)
+{
+    //[] + x{(xM=10)} => x{(xM=10)}
+    from->TestClassMember().push_back(TestItem::Create());
+    from->TestClassMember().at(0)->MyInt() = 10;
+
+    ts::Utilities::MergeChanges(into,from);
+
+    BOOST_CHECK_EQUAL(into->TestClassMember().size(),1);
+    BOOST_CHECK(into->TestClassMember().IsChangedHere());
+    BOOST_CHECK(into->TestClassMember().at(0)->MyInt().IsChanged());
+    BOOST_CHECK_EQUAL(into->TestClassMember().at(0)->MyInt(),10);
+}
+
+BOOST_AUTO_TEST_CASE(MergeChanges_ObjectSequences_2)
+{
+    //[] + {(xM=10)} => ERROR
+    from->TestClassMember().push_back(TestItem::Create());
+    from->TestClassMember().at(0)->MyInt() = 10;
+    from->TestClassMember().SetChangedHere(false);
+
+    BOOST_CHECK_THROW(ts::Utilities::MergeChanges(into,from),
+                      ts::SoftwareViolationException);
+}
+
+BOOST_AUTO_TEST_CASE(MergeChanges_ObjectSequences_3)
+{
+    //[] + {( M=10)} => []
+    from->TestClassMember().push_back(TestItem::Create());
+    from->TestClassMember().at(0)->MyInt() = 10;
+    from->TestClassMember().SetChanged(false);
+
+    ts::Utilities::MergeChanges(into,from);
+    BOOST_CHECK_EQUAL(into->TestClassMember().size(),0);
+    BOOST_CHECK(!into->TestClassMember().IsChanged());
+}
+
+
+BOOST_AUTO_TEST_CASE(MergeChanges_ObjectSequences_4)
+{
+    //[] + x[] => x[]
+    from->TestClassMember().SetChanged(true);
+
+    ts::Utilities::MergeChanges(into,from);
+    BOOST_CHECK_EQUAL(into->TestClassMember().size(),0);
+    BOOST_CHECK(into->TestClassMember().IsChanged());
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+
+struct NonEmptyObjectSequenceFixture
+{
+    NonEmptyObjectSequenceFixture()
+        : from(MemberSequences::Create())
+        , into(MemberSequences::Create())
+    {
+        into->TestClassMember().push_back(TestItem::Create());
+        into->TestClassMember().at(0)->MyInt() = 10;
+        into->TestClassMember().at(0)->MyString() = L"one";
+        into->TestClassMember().push_back(TestItem::Create());
+        into->TestClassMember().at(1)->MyInt() = 20;
+        into->TestClassMember().at(1)->MyString() = L"two";
+        into->SetChanged(false);
+    }
+    MemberSequencesPtr from;
+    MemberSequencesPtr into;
+};
+
+BOOST_FIXTURE_TEST_SUITE( seq2, NonEmptyObjectSequenceFixture)
+
+BOOST_AUTO_TEST_CASE(MergeChanges_ObjectSequences_IntoNonEmpty_1)
+{
+    //{(M=10,S=one),(M=20,S=two)} + x{(M=30)} => x{(M=30)}
+    from->TestClassMember().push_back(TestItem::Create());
+    from->TestClassMember().at(0)->MyInt() = 30;
+    from->TestClassMember().at(0)->MyInt().SetChanged(false);
+
+    ts::Utilities::MergeChanges(into,from);
+
+    BOOST_CHECK_EQUAL(into->TestClassMember().size(),1);
+    BOOST_CHECK(into->TestClassMember().IsChangedHere());
+    BOOST_CHECK(!into->TestClassMember().at(0)->MyInt().IsChanged());
+    BOOST_CHECK_EQUAL(into->TestClassMember().at(0)->MyInt(),30);
+}
+
+
+BOOST_AUTO_TEST_CASE(MergeChanges_ObjectSequences_IntoNonEmpty_2)
+{
+    //{(M=10,S=one),(M=20,S=two)} + {(M=30)} => {(M=10,S=one),(M=20,S=two)}
+    from->TestClassMember().push_back(TestItem::Create());
+    from->TestClassMember().at(0)->MyInt() = 30;
+    from->TestClassMember().SetChanged(false);
+
+    ts::Utilities::MergeChanges(into,from);
+
+    BOOST_CHECK_EQUAL(into->TestClassMember().size(),2);
+    BOOST_CHECK(!into->TestClassMember().IsChanged());
+    BOOST_CHECK_EQUAL(into->TestClassMember().at(0)->MyInt(),10);
+    BOOST_CHECK_EQUAL(into->TestClassMember().at(0)->MyString(),L"one");
+    BOOST_CHECK_EQUAL(into->TestClassMember().at(1)->MyInt(),20);
+    BOOST_CHECK_EQUAL(into->TestClassMember().at(1)->MyString(),L"two");
+}
+
+BOOST_AUTO_TEST_CASE(MergeChanges_ObjectSequences_IntoNonEmpty_3)
+{
+    //{(M=10,S=one),(M=20,S=two)} + {(xM=30)} => error??
+    from->TestClassMember().push_back(TestItem::Create());
+    from->TestClassMember().at(0)->MyInt() = 30;
+    from->TestClassMember().SetChangedHere(false);
+
+    BOOST_CHECK_THROW(ts::Utilities::MergeChanges(into,from),
+                      ts::SoftwareViolationException);
+}
+
+BOOST_AUTO_TEST_CASE(MergeChanges_ObjectSequences_IntoNonEmpty_4)
+{
+    //{(M=10,S=one),(M=20,S=two)} + {(xM=30),()} => {(xM=30,S=one),(M=20,S=two)}
+    from->TestClassMember().push_back(TestItem::Create());
+    from->TestClassMember().push_back(TestItem::Create());
+    from->TestClassMember().at(0)->MyInt() = 30;
+    from->TestClassMember().SetChangedHere(false);
+
+    ts::Utilities::MergeChanges(into,from);
+
+    BOOST_CHECK_EQUAL(into->TestClassMember().size(),2);
+    BOOST_CHECK(!into->TestClassMember().IsChangedHere());
+    BOOST_CHECK(!into->TestClassMember().at(1)->IsChanged());
+    BOOST_CHECK(into->TestClassMember().at(0)->MyInt().IsChanged());
+    BOOST_CHECK(!into->TestClassMember().at(0)->MyString().IsChanged());
+    BOOST_CHECK_EQUAL(into->TestClassMember().at(0)->MyInt(),30);
+    BOOST_CHECK_EQUAL(into->TestClassMember().at(0)->MyString(),L"one");
+    BOOST_CHECK_EQUAL(into->TestClassMember().at(1)->MyInt(),20);
+    BOOST_CHECK_EQUAL(into->TestClassMember().at(1)->MyString(),L"two");
+
+}
+
+BOOST_AUTO_TEST_CASE(MergeChanges_ObjectSequences_IntoNonEmpty_5)
+{
+    //{(M=10,S=one),(M=20,S=two)} + {(xM=30),(S=blahonga)} => {(xM=30,S=one),(M=20,S=two)}
+    from->TestClassMember().push_back(TestItem::Create());
+    from->TestClassMember().push_back(TestItem::Create());
+    from->TestClassMember().SetChangedHere(false);
+    from->TestClassMember().at(0)->MyInt() = 30;
+    from->TestClassMember().at(1)->MyString() = L"blahonga";
+    from->TestClassMember().at(1)->MyString().SetChanged(false);
+
+    ts::Utilities::MergeChanges(into,from);
+
+    BOOST_CHECK_EQUAL(into->TestClassMember().size(),2);
+    BOOST_CHECK(!into->TestClassMember().IsChangedHere());
+    BOOST_CHECK(!into->TestClassMember().at(1)->IsChanged());
+    BOOST_CHECK(into->TestClassMember().at(0)->MyInt().IsChanged());
+    BOOST_CHECK(!into->TestClassMember().at(0)->MyString().IsChanged());
+    BOOST_CHECK_EQUAL(into->TestClassMember().at(0)->MyInt(),30);
+    BOOST_CHECK_EQUAL(into->TestClassMember().at(0)->MyString(),L"one");
+    BOOST_CHECK_EQUAL(into->TestClassMember().at(1)->MyInt(),20);
+    BOOST_CHECK_EQUAL(into->TestClassMember().at(1)->MyString(),L"two");
+}
+
+
+
+BOOST_AUTO_TEST_SUITE_END()

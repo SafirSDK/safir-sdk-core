@@ -114,6 +114,10 @@ public class Test {
         MiscTests misc_tests = new MiscTests();
         misc_tests.test_Containers();
         misc_tests.Test_BlobChangeFlags();
+
+        MergeChangesTests merge_tests = new MergeChangesTests();
+        merge_tests.Test_MergeChanges();
+
     }
 
     private static void Header(String label) {
@@ -8308,9 +8312,10 @@ public class Test {
         System.out.println("Class name: " + Operations.getName(obj.getTypeId()));
     }
 
+    private static int tests = 0;
+    private static int failures = 0;
+
     static class MiscTests {
-        private int tests = 0;
-        private int failures = 0;
 
         private void check(boolean expr) {
             ++tests;
@@ -9230,7 +9235,7 @@ public class Test {
 
             RunSerializationChecks(before,checks);
         }
-        
+
         private void Test_BlobChangeFlags_member_types_2()
         {
             MemberTypes before = new MemberTypes();
@@ -9453,7 +9458,7 @@ public class Test {
 
             RunSerializationChecks(before,checks);
         }
-        
+
         public void Test_BlobChangeFlags()
         {
             Test_BlobChangeFlags_member_types();
@@ -9803,4 +9808,956 @@ public class Test {
         MemberDictionaries fromJson = (MemberDictionaries) Serialization.toObjectFromJson(json);
         printDictionaries(fromJson);
     }
+
+    interface ThrowingFunction {
+        void func();
+    }
+
+
+    public static class MergeChangesTests
+    {
+        private void Check(boolean expr, String desc)
+        {
+            ++tests;
+            if (!expr) {
+                ++failures;
+                if (desc.length() == 0)
+                {
+                    System.out.println("Testcase " + tests + " failed!");
+                }
+                else
+                {
+                    System.out.println("Testcase " + tests + " (" + desc + ") failed!");
+                }
+            }
+        }
+
+        private void Check(boolean expr)
+        {
+            Check(expr, "");
+        }
+
+        private void CheckEqual(int a, int b)
+        {
+            if (a != b)
+            {
+                System.out.println("Failed test: " + a + " != " + b);
+            }
+            Check(a==b);
+        }
+
+        private void CheckEqual(long a, long b)
+        {
+            if (a != b)
+            {
+                System.out.println("Failed test: " + a + " != " + b);
+            }
+            Check(a==b);
+        }
+        private void CheckEqual(String a, String b)
+        {
+            if (a != b)
+            {
+                System.out.println("Failed test: " + a + " != " + b);
+            }
+            Check(a==b);
+        }
+
+        private void CheckEqual(TestEnum a, TestEnum b)
+        {
+            if (a != b)
+            {
+                System.out.println("Failed test: " + a + " != " + b);
+            }
+            Check(a==b);
+        }
+
+
+        private void CheckThrowSV(ThrowingFunction fn)
+        {
+            boolean caught = false;
+            try
+            {
+                fn.func();
+            }
+            catch(SoftwareViolationException e)
+            {
+                caught = true;
+            }
+            Check(caught);
+        }
+
+        private void Simple()
+        {
+            MemberTypes from = new MemberTypes();
+            MemberTypes into = new MemberTypes();
+
+            from.int32Member().setVal(10);
+            from.int64Member().setVal(20L);
+            from.int64Member().setChanged(false);
+
+            from.stringMember().setVal("asdf");
+            from.enumerationMember().setVal(TestEnum.MY_FIRST);
+
+            Utilities.mergeChanges(into,from);
+
+            Check(into.int32Member().isChanged());
+            CheckEqual(into.int32Member().getVal(),10);
+            Check(!into.int64Member().isChanged());
+            Check(into.int64Member().isNull());
+            Check(into.stringMember().getVal() == "asdf");
+            CheckEqual(into.enumerationMember().getVal(), TestEnum.MY_FIRST);
+        }
+
+
+        private void Arrays()
+        {
+            MemberArrays from = new MemberArrays();
+            MemberArrays into = new MemberArrays();
+
+            from.int32Member().get(0).setVal(10);
+            from.int64Member().get(0).setVal(20L);
+            from.int64Member().get(0).setChanged(false);
+
+            from.stringMember().get(0).setVal("asdf");
+            from.stringMember().get(1).setVal("asdfasdf");
+            from.stringMember().get(1).setChanged(false);
+            from.enumerationMember().get(0).setVal(TestEnum.MY_FIRST);
+            from.enumerationMember().get(1).setVal(TestEnum.MY_SECOND);
+            from.enumerationMember().get(1).setChanged(false);
+
+            Utilities.mergeChanges(into,from);
+
+            Check(into.int32Member().get(0).isChanged());
+            CheckEqual(into.int32Member().get(0).getVal(),10);
+            Check(!into.int64Member().isChanged());
+            Check(into.int64Member().get(0).isNull());
+            Check(into.stringMember().get(0).getVal() == "asdf");
+            Check(into.stringMember().get(1).isNull());
+            CheckEqual(into.enumerationMember().get(0).getVal(), TestEnum.MY_FIRST);
+            Check(into.enumerationMember().get(1).isNull());
+        }
+
+
+        private void Objects()
+        {
+            MemberTypes from = new MemberTypes();
+            MemberTypes into = new MemberTypes();
+
+            from.testClassMember().setObj(new TestItem());
+            from.testClassMember().getObj().myInt().setVal(10);
+            from.testClassMember().setChangedHere(false);
+            from.objectMember().setObj(new TestItem());
+            ((TestItem)from.objectMember().getObj()).myInt().setVal(20);
+            from.objectMember().setChangedHere(false);
+
+            Utilities.mergeChanges(into,from);
+
+            CheckEqual(into.testClassMember().getObj().myInt().getVal(),10);
+            Check(into.testClassMember().getObj().myInt().isChanged());
+            Check(into.testClassMember().isChanged());
+            Check(into.testClassMember().isChangedHere());
+            CheckEqual(((TestItem)into.objectMember().getObj()).myInt().getVal(),20);
+        }
+
+        private void Objects_BothHaveData()
+        {
+            MemberTypes from = new MemberTypes();
+            MemberTypes into = new MemberTypes();
+
+            from.testClassMember().setObj(new TestItem());
+            from.objectMember().setObj(new TestItem());
+            from.setChanged(false);
+
+            into.testClassMember().setObj(new TestItem());
+            into.objectMember().setObj(new TestItem());
+            into.setChanged(false);
+
+
+            from.testClassMember().getObj().myInt().setVal(10);
+            from.testClassMember().setChangedHere(false);
+            ((TestItem)from.objectMember().getObj()).myInt().setVal(20);
+            from.objectMember().setChangedHere(false);
+
+            Utilities.mergeChanges(into,from);
+
+            CheckEqual(into.testClassMember().getObj().myInt().getVal(),10);
+            Check(into.testClassMember().getObj().myInt().isChanged());
+            Check(into.testClassMember().isChanged());
+            Check(!into.testClassMember().isChangedHere());
+            CheckEqual(((TestItem)into.objectMember().getObj()).myInt().getVal(),20);
+            Check(!into.objectMember().isChangedHere());
+        }
+
+        private void Sequences()
+        {
+            MemberSequences from = new MemberSequences();
+            MemberSequences into = new MemberSequences();
+
+            into.int32Member().add(20);
+            into.setChanged(false);
+
+            from.int32Member().add(10);
+            from.int64Member().add(20L);
+            from.int64Member().setChanged(false);
+
+            from.stringMember().add("asdf");
+
+            from.enumerationMember().add(TestEnum.MY_FIRST);
+            from.enumerationMember().setChanged(false);
+
+            Utilities.mergeChanges(into,from);
+
+            Check(into.int32Member().isChanged());
+            CheckEqual(into.int32Member().get(0),10);
+            Check(!into.int64Member().isChanged());
+            Check(into.int64Member().size() == 0);
+            Check(into.stringMember().get(0) == "asdf");
+            Check(into.enumerationMember().size() == 0);
+        }
+
+        private void Dictionaries_IntoEmpty()
+        {
+            MemberDictionaries from = new MemberDictionaries();
+            MemberDictionaries into = new MemberDictionaries();
+
+            from.int32Int32Member().putVal(10,10);
+            from.int32Int32Member().putVal(20,20);
+
+            from.int32Int64Member().putVal(10,10L);
+            from.int32Int64Member().putVal(20,20L);
+            from.int32Int64Member().get(20).setChanged(false);
+
+            from.int64Int64Member().putVal(10L,10L);
+            from.int64Int64Member().putVal(20L,20L);
+            from.int64Int64Member().setChanged(false);
+
+            Utilities.mergeChanges(into,from);
+
+            Check(into.int32Int32Member().isChanged());
+            Check(into.int32Int32Member().isChangedHere());
+            Check(into.int32Int32Member().get(10).isChanged());
+            CheckEqual(into.int32Int32Member().get(10).getVal(),10);
+            Check(into.int32Int32Member().get(20).isChanged());
+            CheckEqual(into.int32Int32Member().get(20).getVal(),20);
+
+            Check(into.int32Int64Member().isChanged());
+            Check(into.int32Int64Member().isChangedHere());
+            Check(into.int32Int64Member().get(10).isChanged());
+            CheckEqual(into.int32Int64Member().get(10).getVal(),10);
+            Check(!into.int32Int64Member().get(20).isChanged());
+            CheckEqual(into.int32Int64Member().get(20).getVal(),20);
+
+            Check(!into.int64Int32Member().isChanged());
+            CheckEqual(into.int64Int32Member().size(), 0);
+        }
+
+        private void Dictionaries_IntoEmpty_Error()
+        {
+            final MemberDictionaries from = new MemberDictionaries();
+            final MemberDictionaries into = new MemberDictionaries();
+
+            from.int64Int32Member().putVal(10L,10);
+            from.int64Int32Member().putVal(20L,20);
+            from.int64Int32Member().setChangedHere(false);
+
+            CheckThrowSV(new ThrowingFunction () {
+                    public void func() {Utilities.mergeChanges(into,from);}});
+        }
+
+        private void Dictionaries_IntoNonEmpty_1()
+        {
+            MemberDictionaries into = new MemberDictionaries();
+            into.int32Int32Member().putVal(1,10);
+            into.int32Int32Member().putVal(2,20);
+
+            into.int32Int64Member().putVal(1,10L);
+            into.int32Int64Member().putVal(2,20L);
+
+            into.int64Int32Member().putVal(1L,10);
+            into.int64Int32Member().putVal(2L,20);
+
+            into.int64Int64Member().putVal(1L,10L);
+            into.int64Int64Member().putVal(2L,20L);
+
+            into.setChanged(false);
+
+            MemberDictionaries from = new MemberDictionaries();
+
+            from.int32Int32Member().putVal(3,30);
+
+            from.int32Int64Member().putVal(1,100L);
+            from.int32Int64Member().putVal(2,20L);
+            from.int32Int64Member().get(2).setChanged(false);
+            from.int32Int64Member().setChangedHere(false);
+
+            from.int64Int32Member().putVal(1L,100);
+            from.int64Int32Member().putVal(2L,555);
+            from.int64Int32Member().get(2L).setChanged(false);
+            from.int64Int32Member().setChangedHere(false);
+
+            from.int64Int64Member().putVal(1L,100L);
+            from.int64Int64Member().setChangedHere(false);
+
+            Utilities.mergeChanges(into,from);
+
+            Check(into.int32Int32Member().isChanged());
+            Check(into.int32Int32Member().isChangedHere());
+            CheckEqual(into.int32Int32Member().size(), 1);
+            Check(into.int32Int32Member().get(3).isChanged());
+            CheckEqual(into.int32Int32Member().get(3).getVal(),30);
+
+            Check(into.int32Int64Member().isChanged());
+            Check(!into.int32Int64Member().isChangedHere());
+            CheckEqual(into.int32Int64Member().size(), 2);
+            Check(into.int32Int64Member().get(1).isChanged());
+            CheckEqual(into.int32Int64Member().get(1).getVal(),100);
+            Check(!into.int32Int64Member().get(2).isChanged());
+            CheckEqual(into.int32Int64Member().get(2).getVal(),20);
+
+            Check(into.int64Int32Member().isChanged());
+            Check(!into.int64Int32Member().isChangedHere());
+            CheckEqual(into.int64Int32Member().size(), 2);
+            Check(into.int64Int32Member().get(1L).isChanged());
+            CheckEqual(into.int64Int32Member().get(1L).getVal(),100);
+            Check(!into.int64Int32Member().get(2L).isChanged());
+            CheckEqual(into.int64Int32Member().get(2L).getVal(),20);
+
+            Check(into.int64Int64Member().isChanged());
+            Check(!into.int64Int64Member().isChangedHere());
+            CheckEqual(into.int64Int64Member().size(), 2);
+            Check(into.int64Int64Member().get(1L).isChanged());
+            CheckEqual(into.int64Int64Member().get(1L).getVal(),100);
+            Check(!into.int64Int64Member().get(2L).isChanged());
+            CheckEqual(into.int64Int64Member().get(2L).getVal(),20);
+
+        }
+
+
+        private void Dictionaries_IntoNonEmpty_2()
+        {
+            MemberDictionaries into = new MemberDictionaries();
+            into.int32Int32Member().putVal(1,10);
+            into.int32Int32Member().putVal(2,20);
+
+            into.int32Int64Member().putVal(1,10L);
+            into.int32Int64Member().putVal(2,20L);
+
+            into.int64Int32Member().putVal(1L,10);
+            into.int64Int32Member().putVal(2L,20);
+
+            into.int64Int64Member().putVal(1L,10L);
+            into.int64Int64Member().putVal(2L,20L);
+
+            into.setChanged(false);
+
+            MemberDictionaries from = new MemberDictionaries();
+
+            from.int32Int32Member().putVal(1,10);
+            from.int32Int32Member().get(1).setChanged(false);
+
+            from.int32Int64Member().putVal(1,100L);
+
+            from.int64Int32Member().putVal(1L,100);
+            from.int64Int32Member().get(1L).setChanged(false);
+
+            from.int64Int64Member().putVal(1L,100L);
+            from.int64Int64Member().setChanged(false);
+
+            Utilities.mergeChanges(into,from);
+
+            Check(into.int32Int32Member().isChanged());
+            Check(into.int32Int32Member().isChangedHere());
+            CheckEqual(into.int32Int32Member().size(), 1);
+            Check(!into.int32Int32Member().get(1).isChanged());
+            CheckEqual(into.int32Int32Member().get(1).getVal(),10);
+
+            Check(into.int32Int64Member().isChanged());
+            Check(into.int32Int64Member().isChangedHere());
+            CheckEqual(into.int32Int64Member().size(), 1);
+            Check(into.int32Int64Member().get(1).isChanged());
+            CheckEqual(into.int32Int64Member().get(1).getVal(),100);
+
+            Check(into.int64Int32Member().isChanged());
+            Check(into.int64Int32Member().isChangedHere());
+            CheckEqual(into.int64Int32Member().size(), 1);
+            Check(!into.int64Int32Member().get(1L).isChanged());
+            CheckEqual(into.int64Int32Member().get(1L).getVal(),100);
+
+            Check(!into.int64Int64Member().isChanged());
+            CheckEqual(into.int64Int64Member().size(), 2);
+            CheckEqual(into.int64Int64Member().get(1L).getVal(),10);
+            CheckEqual(into.int64Int64Member().get(2L).getVal(),20);
+        }
+
+
+
+        private void Dictionaries_IntoNonEmpty_Error()
+        {
+            final MemberDictionaries into = new MemberDictionaries();
+            into.int32Int32Member().putVal(1,10);
+            into.int32Int32Member().putVal(2,20);
+            into.setChanged(false);
+
+            final MemberDictionaries from = new MemberDictionaries();
+
+            from.int32Int32Member().putVal(3,30);
+            from.int32Int32Member().setChangedHere(false);
+
+            CheckThrowSV(new ThrowingFunction () {
+                    public void func() {Utilities.mergeChanges(into,from);}});
+        }
+
+        private void ObjectDictionaries_IntoEmpty_1()
+        {
+            MemberDictionaries from = new MemberDictionaries();
+            MemberDictionaries into = new MemberDictionaries();
+
+            //empty + x[x1:(xM=10)] => x[x1:(xM=10)]
+            from.int64ItemMember().putObj(1L, new TestItem());
+            from.int64ItemMember().get(1L).getObj().myInt().setVal(10);
+
+            //empty + x[1:(xM=10)] => x[1:(xM=10)]
+            from.typeIdItemMember().putObj(1L, new TestItem());
+            from.typeIdItemMember().get(1L).getObj().myInt().setVal(20);
+            from.typeIdItemMember().get(1L).setChangedHere(false);
+
+            //empty + x[x1:(M=10)] => x[x1:(M=10)]
+            from.enumItemMember().putObj(TestEnum.MY_SECOND, new TestItem());
+            from.enumItemMember().get(TestEnum.MY_SECOND).getObj().myInt().setVal(30);
+            from.enumItemMember().get(TestEnum.MY_SECOND).setChanged(false);
+
+            Utilities.mergeChanges(into,from);
+
+            Check(into.int64ItemMember().isChangedHere());
+            Check(into.int64ItemMember().get(1L).isChangedHere());
+            Check(into.int64ItemMember().get(1L).getObj().myInt().isChanged());
+            CheckEqual(into.int64ItemMember().get(1L).getObj().myInt().getVal(),10);
+
+            Check(into.typeIdItemMember().isChangedHere());
+            Check(!into.typeIdItemMember().get(1L).isChangedHere());
+            Check(into.typeIdItemMember().get(1L).getObj().myInt().isChanged());
+            CheckEqual(into.typeIdItemMember().get(1L).getObj().myInt().getVal(),20);
+
+            Check(into.enumItemMember().isChangedHere());
+            Check(!into.enumItemMember().get(TestEnum.MY_SECOND).isChangedHere());
+            Check(!into.enumItemMember().get(TestEnum.MY_SECOND).getObj().myInt().isChanged());
+            CheckEqual(into.enumItemMember().get(TestEnum.MY_SECOND).getObj().myInt().getVal(),30);
+        }
+
+        private void ObjectDictionaries_IntoEmpty_Error_1()
+        {
+            final MemberDictionaries from = new MemberDictionaries();
+            final MemberDictionaries into = new MemberDictionaries();
+
+            //empty + [x1:(xM=10)] => error
+            from.int64ItemMember().putObj(1L, new TestItem());
+            from.int64ItemMember().get(1L).getObj().myInt().setVal(10);
+            from.int64ItemMember().setChangedHere(false);
+
+            CheckThrowSV(new ThrowingFunction () {
+                    public void func() {Utilities.mergeChanges(into,from);}});
+        }
+
+        private void ObjectDictionaries_IntoEmpty_Error_2()
+        {
+            final MemberDictionaries from = new MemberDictionaries();
+            final MemberDictionaries into = new MemberDictionaries();
+
+            //empty + [x1:(M=10)] => error
+            from.int64ItemMember().putObj(1L, new TestItem());
+            from.int64ItemMember().get(1L).getObj().myInt().setVal(10);
+            from.int64ItemMember().setChangedHere(false);
+            from.int64ItemMember().get(1L).getObj().myInt().setChanged(false);
+
+            CheckThrowSV(new ThrowingFunction () {
+                    public void func() {Utilities.mergeChanges(into,from);}});
+        }
+
+        private void ObjectDictionaries_IntoEmpty_Error_3()
+        {
+            final MemberDictionaries from = new MemberDictionaries();
+            final MemberDictionaries into = new MemberDictionaries();
+
+            //empty + [1:(xM=10)] => error
+            from.int64ItemMember().putObj(1L, new TestItem());
+            from.int64ItemMember().get(1L).getObj().myInt().setVal(10);
+            from.int64ItemMember().setChangedHere(false);
+            from.int64ItemMember().get(1L).setChangedHere(false);
+
+            CheckThrowSV(new ThrowingFunction () {
+                    public void func() {Utilities.mergeChanges(into,from);}});
+        }
+
+        private void ObjectDictionaries_IntoEmpty_2()
+        {
+            MemberDictionaries from = new MemberDictionaries();
+            MemberDictionaries into = new MemberDictionaries();
+
+            //empty + [1:(M=10)] => empty
+            from.int64ItemMember().putObj(1L, new TestItem());
+            from.int64ItemMember().get(1L).getObj().myInt().setVal(10);
+            from.int64ItemMember().setChanged(false);
+
+            Utilities.mergeChanges(into,from);
+
+            Check(!into.int64ItemMember().isChangedHere());
+            CheckEqual(into.int64ItemMember().size(), 0);
+        }
+
+        private abstract class NonEmptyObjectDictionariesFixture
+        {
+            protected MemberDictionaries into = new MemberDictionaries();
+            protected MemberDictionaries from = new MemberDictionaries();
+
+            protected NonEmptyObjectDictionariesFixture()
+            {
+                into.int64ItemMember().putObj(1L, new TestItem());
+                into.int64ItemMember().get(1L).getObj().myInt().setVal(10);
+                into.int64ItemMember().get(1L).getObj().myString().setVal("one");
+                into.int64ItemMember().putObj(2L, new TestItem());
+                into.int64ItemMember().get(2L).getObj().myInt().setVal(20);
+                into.int64ItemMember().get(2L).getObj().myString().setVal("two");
+
+                into.typeIdItemMember().putObj(1L, new TestItem());
+                into.typeIdItemMember().get(1L).getObj().myInt().setVal(10);
+                into.typeIdItemMember().get(1L).getObj().myString().setVal("one");
+                into.typeIdItemMember().putObj(2L, new TestItem());
+                into.typeIdItemMember().get(2L).getObj().myInt().setVal(20);
+                into.typeIdItemMember().get(2L).getObj().myString().setVal("two");
+
+                into.enumItemMember().putObj(TestEnum.MY_FIRST, new TestItem());
+                into.enumItemMember().get(TestEnum.MY_FIRST).getObj().myInt().setVal(10);
+                into.enumItemMember().get(TestEnum.MY_FIRST).getObj().myString().setVal("one");
+                into.enumItemMember().putObj(TestEnum.MY_SECOND, new TestItem());
+                into.enumItemMember().get(TestEnum.MY_SECOND).getObj().myInt().setVal(20);
+                into.enumItemMember().get(TestEnum.MY_SECOND).getObj().myString().setVal("two");
+
+                into.setChanged(false);
+            }
+        };
+
+        private class ObjectDictionaries_IntoNonEmpty_1 extends NonEmptyObjectDictionariesFixture
+        {
+
+            public ObjectDictionaries_IntoNonEmpty_1()
+            {
+                //[1:(M=10,S=one),2:(M=20,S=two)] + x[x1:(xM=100)] => x[x1:(xM=100)]
+                from.int64ItemMember().putObj(1L, new TestItem());
+                from.int64ItemMember().get(1L).getObj().myInt().setVal(100);
+
+                //[1:(M=10,S=one),2:(M=20,S=two)] + x[ 1:(xM=200)] => x[ 1:(xM=200)]
+                from.typeIdItemMember().putObj(1L, new TestItem());
+                from.typeIdItemMember().get(1L).getObj().myInt().setVal(200);
+                from.typeIdItemMember().get(1L).setChangedHere(false);
+
+                //[1:(M=10,S=one),2:(M=20,S=two)] + x[ 1:( M=300)] => x[ 1:( M=300)]
+                from.enumItemMember().putObj(TestEnum.MY_SECOND, new TestItem());
+                from.enumItemMember().get(TestEnum.MY_SECOND).getObj().myInt().setVal(300);
+                from.enumItemMember().get(TestEnum.MY_SECOND).setChanged(false);
+                Utilities.mergeChanges(into,from);
+
+                CheckEqual(into.int64ItemMember().size(), 1);
+                Check(into.int64ItemMember().isChangedHere());
+                Check(into.int64ItemMember().get(1L).isChangedHere());
+                Check(into.int64ItemMember().get(1L).getObj().myInt().isChanged());
+                CheckEqual(into.int64ItemMember().get(1L).getObj().myInt().getVal(),100);
+                Check(into.int64ItemMember().get(1L).getObj().myString().isNull());
+
+                CheckEqual(into.typeIdItemMember().size(), 1);
+                Check(into.typeIdItemMember().isChangedHere());
+                Check(!into.typeIdItemMember().get(1L).isChangedHere());
+                Check(into.typeIdItemMember().get(1L).getObj().myInt().isChanged());
+                CheckEqual(into.typeIdItemMember().get(1L).getObj().myInt().getVal(),200);
+                Check(into.typeIdItemMember().get(1L).getObj().myString().isNull());
+
+                CheckEqual(into.enumItemMember().size(), 1);
+                Check(into.enumItemMember().isChangedHere());
+                Check(!into.enumItemMember().get(TestEnum.MY_SECOND).isChangedHere());
+                Check(!into.enumItemMember().get(TestEnum.MY_SECOND).getObj().myInt().isChanged());
+                CheckEqual(into.enumItemMember().get(TestEnum.MY_SECOND).getObj().myInt().getVal(),300);
+                Check(into.enumItemMember().get(TestEnum.MY_SECOND).getObj().myString().isNull());
+
+            }
+        };
+
+        private class ObjectDictionaries_IntoNonEmpty_2 extends NonEmptyObjectDictionariesFixture
+        {
+
+            public ObjectDictionaries_IntoNonEmpty_2()
+            {
+                //[1:(M=10,S=one),2:(M=20,S=two)] + x[ 3:( M=300)] => x[ 3:( M=300)]
+                from.int64ItemMember().putObj(3L, new TestItem());
+                from.int64ItemMember().get(3L).getObj().myInt().setVal(300);
+                from.int64ItemMember().get(3L).setChanged(false);
+
+                //[1:(M=10,S=one),2:(M=20,S=two)] +  [x2:(xM=200)] =>  [ 1:( M=10, S=one),x2:(xM:200)]
+                from.typeIdItemMember().putObj(2L, new TestItem());
+                from.typeIdItemMember().get(2L).getObj().myInt().setVal(200);
+                from.typeIdItemMember().setChangedHere(false);
+
+                //[1:(M=10,S=one),2:(M=20,S=two)] +  [ 2:(xM=300)] =>  [ 1:( M=10, S=one), 2:(xM:300, S=two)]
+                from.enumItemMember().putObj(TestEnum.MY_SECOND, new TestItem());
+                from.enumItemMember().get(TestEnum.MY_SECOND).getObj().myInt().setVal(300);
+                from.enumItemMember().setChangedHere(false);
+                from.enumItemMember().get(TestEnum.MY_SECOND).setChangedHere(false);
+
+                Utilities.mergeChanges(into,from);
+
+                CheckEqual(into.int64ItemMember().size(), 1);
+                Check(into.int64ItemMember().isChangedHere());
+                Check(!into.int64ItemMember().get(3L).isChangedHere());
+                Check(!into.int64ItemMember().get(3L).getObj().myInt().isChanged());
+                CheckEqual(into.int64ItemMember().get(3L).getObj().myInt().getVal(),300);
+                Check(into.int64ItemMember().get(3L).getObj().myString().isNull());
+
+                CheckEqual(into.typeIdItemMember().size(), 2);
+                Check(!into.typeIdItemMember().isChangedHere());
+                Check(!into.typeIdItemMember().get(1L).isChanged());
+                CheckEqual(into.typeIdItemMember().get(1L).getObj().myInt().getVal(),10);
+                Check(into.typeIdItemMember().get(1L).getObj().myString().getVal() == "one");
+                Check(into.typeIdItemMember().get(2L).isChangedHere());
+                Check(into.typeIdItemMember().get(2L).getObj().myInt().isChanged());
+                CheckEqual(into.typeIdItemMember().get(2L).getObj().myInt().getVal(),200);
+                Check(!into.typeIdItemMember().get(2L).getObj().myString().isChanged());
+                Check(into.typeIdItemMember().get(2L).getObj().myString().isNull());
+
+                CheckEqual(into.enumItemMember().size(), 2);
+                Check(!into.enumItemMember().isChangedHere());
+                Check(!into.enumItemMember().get(TestEnum.MY_FIRST).isChanged());
+                CheckEqual(into.enumItemMember().get(TestEnum.MY_FIRST).getObj().myInt().getVal(),10);
+                Check(into.enumItemMember().get(TestEnum.MY_FIRST).getObj().myString().getVal() == "one");
+                Check(!into.enumItemMember().get(TestEnum.MY_SECOND).isChangedHere());
+                Check(into.enumItemMember().get(TestEnum.MY_SECOND).getObj().myInt().isChanged());
+                CheckEqual(into.enumItemMember().get(TestEnum.MY_SECOND).getObj().myInt().getVal(),300);
+                Check(into.enumItemMember().get(TestEnum.MY_SECOND).getObj().myString().getVal() == "two");
+                Check(!into.enumItemMember().get(TestEnum.MY_SECOND).getObj().myString().isChanged());
+            }
+        };
+
+        private class ObjectDictionaries_IntoNonEmpty_3 extends NonEmptyObjectDictionariesFixture
+        {
+            public ObjectDictionaries_IntoNonEmpty_3()
+            {
+                //[1:(M=10,S=one),2:(M=20,S=two)] +  [x2:( M=200)] =>  [ 1:( M=10, S=one),x2:( M:200)]
+                from.int64ItemMember().putObj(2L, new TestItem());
+                from.int64ItemMember().get(2L).getObj().myInt().setVal(200);
+                from.int64ItemMember().setChangedHere(false);
+                from.int64ItemMember().get(2L).getObj().myInt().setChanged(false);
+
+                //[1:(M=10,S=one),2:(M=20,S=two)] +  [ 3:( M=300)] =>  [ 1:( M=10, S=one), 2:( M:20, S=two)]
+                from.typeIdItemMember().putObj(3L, new TestItem());
+                from.typeIdItemMember().get(3L).getObj().myInt().setVal(300);
+                from.typeIdItemMember().setChanged(false);
+
+                //[1:(M=10,S=one),2:(M=20,S=two)] +  [ 2:( M=200)] =>  [ 1:( M=10, S=one), 2:( M:20, S=two)]
+                from.enumItemMember().putObj(TestEnum.MY_SECOND, new TestItem());
+                from.enumItemMember().get(TestEnum.MY_SECOND).getObj().myInt().setVal(200);
+                from.enumItemMember().setChanged(false);
+
+                Utilities.mergeChanges(into,from);
+                CheckEqual(into.int64ItemMember().size(), 2);
+                Check(!into.int64ItemMember().isChangedHere());
+                Check(!into.int64ItemMember().get(1L).isChanged());
+                CheckEqual(into.int64ItemMember().get(1L).getObj().myInt().getVal(),10);
+                CheckEqual(into.int64ItemMember().get(1L).getObj().myString().getVal(),"one");
+                Check(into.int64ItemMember().get(2L).isChangedHere());
+                Check(!into.int64ItemMember().get(2L).getObj().myInt().isChanged());
+                CheckEqual(into.int64ItemMember().get(2L).getObj().myInt().getVal(),200);
+                Check(into.int64ItemMember().get(2L).getObj().myString().isNull());
+
+                CheckEqual(into.typeIdItemMember().size(), 2);
+                Check(!into.typeIdItemMember().isChanged());
+                CheckEqual(into.typeIdItemMember().get(1L).getObj().myInt().getVal(),10);
+                CheckEqual(into.typeIdItemMember().get(1L).getObj().myString().getVal(),"one");
+                CheckEqual(into.typeIdItemMember().get(2L).getObj().myInt().getVal(),20);
+                CheckEqual(into.typeIdItemMember().get(2L).getObj().myString().getVal(),"two");
+
+                CheckEqual(into.enumItemMember().size(), 2);
+                Check(!into.enumItemMember().isChanged());
+                CheckEqual(into.enumItemMember().get(TestEnum.MY_FIRST).getObj().myInt().getVal(),10);
+                CheckEqual(into.enumItemMember().get(TestEnum.MY_FIRST).getObj().myString().getVal(),"one");
+                CheckEqual(into.enumItemMember().get(TestEnum.MY_SECOND).getObj().myInt().getVal(),20);
+                CheckEqual(into.enumItemMember().get(TestEnum.MY_SECOND).getObj().myString().getVal(),"two");
+            }
+        };
+
+        private class ObjectDictionaries_IntoNonEmpty_Error_1 extends NonEmptyObjectDictionariesFixture
+        {
+            public ObjectDictionaries_IntoNonEmpty_Error_1()
+            {
+                //[1:(M=10,S=one),2:(M=20,S=two)] +  [x3:( M=300)] =>  error
+                from.int64ItemMember().putObj(3L, new TestItem());
+                from.int64ItemMember().get(3L).getObj().myInt().setVal(300);
+                from.int64ItemMember().setChanged(false);
+                from.int64ItemMember().get(3L).setChangedHere(true);
+
+            CheckThrowSV(new ThrowingFunction () {
+                    public void func() {Utilities.mergeChanges(into,from);}});
+            }
+        };
+
+        private class ObjectDictionaries_IntoNonEmpty_Error_2 extends NonEmptyObjectDictionariesFixture
+        {
+            public ObjectDictionaries_IntoNonEmpty_Error_2()
+            {
+                //[1:(M=10,S=one),2:(M=20,S=two)] +  [ 3:(xM=300)] =>  error
+                from.int64ItemMember().putObj(3L, new TestItem());
+                from.int64ItemMember().get(3L).getObj().myInt().setVal(300);
+                from.int64ItemMember().setChanged(false);
+                from.int64ItemMember().get(3L).getObj().myInt().setChanged(true);
+
+            CheckThrowSV(new ThrowingFunction () {
+                    public void func() {Utilities.mergeChanges(into,from);}});
+            }
+        };
+
+        private class ObjectDictionaries_EmptyIntoNonEmpty extends NonEmptyObjectDictionariesFixture
+        {
+            public ObjectDictionaries_EmptyIntoNonEmpty()
+            {
+                //[1:(M=10,S=one),2:(M=20,S=two)] +  x[] =>  x[]
+                from.int64ItemMember().setChangedHere(true);
+
+                //[1:(M=10,S=one),2:(M=20,S=two)] +  [] =>  [1:(M=10,S=one),2:(M:20,S=two)]
+                //nothing to do...
+
+                Utilities.mergeChanges(into,from);
+                CheckEqual(into.int64ItemMember().size(), 0);
+                Check(into.int64ItemMember().isChangedHere());
+
+                CheckEqual(into.typeIdItemMember().size(), 2);
+                Check(!into.typeIdItemMember().isChanged());
+                CheckEqual(into.typeIdItemMember().get(1L).getObj().myInt().getVal(),10);
+                CheckEqual(into.typeIdItemMember().get(1L).getObj().myString().getVal(),"one");
+                CheckEqual(into.typeIdItemMember().get(2L).getObj().myInt().getVal(),20);
+                CheckEqual(into.typeIdItemMember().get(2L).getObj().myString().getVal(),"two");
+            }
+        };
+        private abstract class EmptyObjectSequenceFixture
+        {
+            protected MemberSequences into = new MemberSequences();
+            protected MemberSequences from = new MemberSequences();
+
+            protected EmptyObjectSequenceFixture()
+            {
+            }
+        };
+
+        private class ObjectSequences_1 extends EmptyObjectSequenceFixture
+        {
+            public ObjectSequences_1()
+            {
+                //[] + x{(xM=10)} => x{(xM=10)}
+                from.testClassMember().add(new TestItem());
+                from.testClassMember().get(0).myInt().setVal(10);
+
+                Utilities.mergeChanges(into,from);
+
+                CheckEqual(into.testClassMember().size(),1);
+                Check(into.testClassMember().isChangedHere());
+                Check(into.testClassMember().get(0).myInt().isChanged());
+                CheckEqual(into.testClassMember().get(0).myInt().getVal(),10);
+            }
+        };
+
+
+        private class ObjectSequences_2 extends EmptyObjectSequenceFixture
+        {
+            public ObjectSequences_2()
+            {
+                //[] + {(xM=10)} => ERROR
+                from.testClassMember().add(new TestItem());
+                from.testClassMember().get(0).myInt().setVal(10);
+                from.testClassMember().setChangedHere(false);
+
+            CheckThrowSV(new ThrowingFunction () {
+                    public void func() {Utilities.mergeChanges(into,from);}});
+            }
+        };
+
+        private class ObjectSequences_3 extends EmptyObjectSequenceFixture
+        {
+            public ObjectSequences_3()
+            {
+                //[] + {( M=10)} => []
+                from.testClassMember().add(new TestItem());
+                from.testClassMember().get(0).myInt().setVal(10);
+                from.testClassMember().setChanged(false);
+
+                Utilities.mergeChanges(into,from);
+                CheckEqual(into.testClassMember().size(),0);
+                Check(!into.testClassMember().isChanged());
+            }
+        };
+
+        private class ObjectSequences_4 extends EmptyObjectSequenceFixture
+        {
+            public ObjectSequences_4()
+            {
+                //[] + x[] => x[]
+                from.testClassMember().setChanged(true);
+
+                Utilities.mergeChanges(into,from);
+                CheckEqual(into.testClassMember().size(),0);
+                Check(into.testClassMember().isChanged());
+            }
+        };
+
+        private abstract class NonEmptyObjectSequenceFixture
+        {
+            protected MemberSequences into = new MemberSequences();
+            protected MemberSequences from = new MemberSequences();
+
+            protected NonEmptyObjectSequenceFixture()
+            {
+                into.testClassMember().add(new TestItem());
+                into.testClassMember().get(0).myInt().setVal(10);
+                into.testClassMember().get(0).myString().setVal("one");
+                into.testClassMember().add(new TestItem());
+                into.testClassMember().get(1).myInt().setVal(20);
+                into.testClassMember().get(1).myString().setVal("two");
+                into.setChanged(false);
+            }
+        };
+
+        private class ObjectSequences_IntoNonEmpty_1 extends NonEmptyObjectSequenceFixture
+        {
+            public ObjectSequences_IntoNonEmpty_1()
+            {
+                //{(M=10,S=one),(M=20,S=two)} + x{(M=30)} => x{(M=30)}
+                from.testClassMember().add(new TestItem());
+                from.testClassMember().get(0).myInt().setVal(30);
+                from.testClassMember().get(0).myInt().setChanged(false);
+
+                Utilities.mergeChanges(into,from);
+
+                CheckEqual(into.testClassMember().size(),1);
+                Check(into.testClassMember().isChangedHere());
+                Check(!into.testClassMember().get(0).myInt().isChanged());
+                CheckEqual(into.testClassMember().get(0).myInt().getVal(),30);
+            }
+        }
+
+
+        private class ObjectSequences_IntoNonEmpty_2 extends NonEmptyObjectSequenceFixture
+        {
+            public ObjectSequences_IntoNonEmpty_2()
+            {
+                //{(M=10,S=one),(M=20,S=two)} + {(M=30)} => {(M=10,S=one),(M=20,S=two)}
+                from.testClassMember().add(new TestItem());
+                from.testClassMember().get(0).myInt().setVal(30);
+                from.testClassMember().setChanged(false);
+
+                Utilities.mergeChanges(into,from);
+
+                CheckEqual(into.testClassMember().size(),2);
+                Check(!into.testClassMember().isChanged());
+                CheckEqual(into.testClassMember().get(0).myInt().getVal(),10);
+                CheckEqual(into.testClassMember().get(0).myString().getVal(),"one");
+                CheckEqual(into.testClassMember().get(1).myInt().getVal(),20);
+                CheckEqual(into.testClassMember().get(1).myString().getVal(),"two");
+            }
+        };
+
+        private class ObjectSequences_IntoNonEmpty_3 extends NonEmptyObjectSequenceFixture
+        {
+            public ObjectSequences_IntoNonEmpty_3()
+            {
+                //{(M=10,S=one),(M=20,S=two)} + {(xM=30)} => error??
+                from.testClassMember().add(new TestItem());
+                from.testClassMember().get(0).myInt().setVal(30);
+                from.testClassMember().setChangedHere(false);
+
+                CheckThrowSV(new ThrowingFunction () {
+                        public void func() {Utilities.mergeChanges(into,from);}});
+            }
+        };
+
+        private class ObjectSequences_IntoNonEmpty_4 extends NonEmptyObjectSequenceFixture
+        {
+            public ObjectSequences_IntoNonEmpty_4()
+            {
+                //{(M=10,S=one),(M=20,S=two)} + {(xM=30),()} => {(xM=30,S=one),(M=20,S=two)}
+                from.testClassMember().add(new TestItem());
+                from.testClassMember().add(new TestItem());
+                from.testClassMember().get(0).myInt().setVal(30);
+                from.testClassMember().setChangedHere(false);
+
+                Utilities.mergeChanges(into,from);
+
+                CheckEqual(into.testClassMember().size(),2);
+                Check(!into.testClassMember().isChangedHere());
+                Check(!into.testClassMember().get(1).isChanged());
+                Check(into.testClassMember().get(0).myInt().isChanged());
+                Check(!into.testClassMember().get(0).myString().isChanged());
+                CheckEqual(into.testClassMember().get(0).myInt().getVal(),30);
+                CheckEqual(into.testClassMember().get(0).myString().getVal(),"one");
+                CheckEqual(into.testClassMember().get(1).myInt().getVal(),20);
+                CheckEqual(into.testClassMember().get(1).myString().getVal(),"two");
+            }
+        };
+        private class ObjectSequences_IntoNonEmpty_5 extends NonEmptyObjectSequenceFixture
+        {
+            public ObjectSequences_IntoNonEmpty_5()
+            {
+                //{(M=10,S=one),(M=20,S=two)} + {(xM=30),(S=blahonga)} => {(xM=30,S=one),(M=20,S=two)}
+                from.testClassMember().add(new TestItem());
+                from.testClassMember().add(new TestItem());
+                from.testClassMember().setChangedHere(false);
+                from.testClassMember().get(0).myInt().setVal(30);
+                from.testClassMember().get(1).myString().setVal("blahonga");
+                from.testClassMember().get(1).myString().setChanged(false);
+
+                Utilities.mergeChanges(into,from);
+
+                CheckEqual(into.testClassMember().size(),2);
+                Check(!into.testClassMember().isChangedHere());
+                Check(!into.testClassMember().get(1).isChanged());
+                Check(into.testClassMember().get(0).myInt().isChanged());
+                Check(!into.testClassMember().get(0).myString().isChanged());
+                CheckEqual(into.testClassMember().get(0).myInt().getVal(),30);
+                CheckEqual(into.testClassMember().get(0).myString().getVal(),"one");
+                CheckEqual(into.testClassMember().get(1).myInt().getVal(),20);
+                CheckEqual(into.testClassMember().get(1).myString().getVal(),"two");
+            }
+        };
+
+
+
+        public void Test_MergeChanges()
+        {
+            Simple();
+            Arrays();
+            Objects();
+            Objects_BothHaveData();
+            Sequences();
+            Dictionaries_IntoEmpty();
+            Dictionaries_IntoEmpty_Error();
+            Dictionaries_IntoNonEmpty_1();
+            Dictionaries_IntoNonEmpty_2();
+            Dictionaries_IntoNonEmpty_Error();
+            ObjectDictionaries_IntoEmpty_1();
+            ObjectDictionaries_IntoEmpty_Error_1();
+            ObjectDictionaries_IntoEmpty_Error_2();
+            ObjectDictionaries_IntoEmpty_Error_3();
+            ObjectDictionaries_IntoEmpty_2();
+            new ObjectDictionaries_IntoNonEmpty_1();
+            new ObjectDictionaries_IntoNonEmpty_2();
+            new ObjectDictionaries_IntoNonEmpty_3();
+            new ObjectDictionaries_IntoNonEmpty_Error_1();
+            new ObjectDictionaries_IntoNonEmpty_Error_2();
+            new ObjectDictionaries_EmptyIntoNonEmpty();
+            new ObjectSequences_1();
+            new ObjectSequences_2();
+            new ObjectSequences_3();
+            new ObjectSequences_4();
+            new ObjectSequences_IntoNonEmpty_1();
+            new ObjectSequences_IntoNonEmpty_2();
+            new ObjectSequences_IntoNonEmpty_3();
+            new ObjectSequences_IntoNonEmpty_4();
+            new ObjectSequences_IntoNonEmpty_5();
+        }
+    }
+
 }

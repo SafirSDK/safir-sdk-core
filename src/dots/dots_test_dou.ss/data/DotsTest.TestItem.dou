@@ -7,5 +7,9 @@
             <name>MyInt</name>
             <type>Int32</type>
         </member>
+        <member>
+            <name>MyString</name>
+            <type>String</type>
+        </member>
     </members>
 </class>

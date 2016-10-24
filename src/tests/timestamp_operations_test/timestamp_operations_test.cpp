@@ -876,7 +876,3 @@ BOOST_AUTO_TEST_CASE(SetChangeFlags_New)
 }
 
 #endif
-BOOST_AUTO_TEST_CASE(SetChanges)
-{
-//TODO: Test SetChanges, ie dose SetChanges on entity, the merge bit
-}

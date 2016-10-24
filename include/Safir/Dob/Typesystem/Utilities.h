@@ -41,6 +41,9 @@ namespace Typesystem
     /** A smart pointer to an Object. */
     typedef boost::shared_ptr<Object> ObjectPtr;
 
+    /** A smart pointer to a const Object. */
+    typedef boost::shared_ptr<const Object> ObjectConstPtr;
+
     /**
      * Utility functions for users of the DOB type system.
      */
@@ -72,7 +75,7 @@ namespace Utilities
      * @param into [in] - Object to merge into.
      * @param from [in,out] - Object whose changes shall be merged into "into".
      */
-    DOTS_CPP_API void MergeChanges(ObjectPtr into, const ObjectPtr from);
+    DOTS_CPP_API void MergeChanges(ObjectPtr into, const ObjectConstPtr& from);
 
     /**
      * Converts binary data to Base64.

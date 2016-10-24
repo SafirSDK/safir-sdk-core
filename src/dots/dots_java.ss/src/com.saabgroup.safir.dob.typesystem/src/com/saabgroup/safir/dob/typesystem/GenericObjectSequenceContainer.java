@@ -78,4 +78,34 @@ public class GenericObjectSequenceContainer<T extends com.saabgroup.safir.dob.ty
         m_isChanged = changed;
     }
 
+    /** Used by MergeChanges to do its magic. */
+    void merge(GenericObjectSequenceContainer that)
+    {
+        if (!getClass().equals(that.getClass()))
+        {
+            throw new SoftwareViolationException("Invalid call to Merge, containers are not of same type");
+        }
+
+        //Note: this function only gets called when IsChangedHere() == false
+
+        if (!that.isChanged())
+        {
+            return;
+        }
+
+        if (size() != that.size())
+        {
+            throw new SoftwareViolationException("It is not possible to merge two object sequences of different sizes.");
+        }
+
+        GenericObjectSequenceContainer<T> other = that;
+        for (int i = 0; i < size(); ++i)
+        {
+            if (other.get(i).isChanged())
+            {
+                //recurse
+                Utilities.mergeChanges(this.get(i),other.get(i));
+            }
+        }
+    }
 }

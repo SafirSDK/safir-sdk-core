@@ -97,12 +97,51 @@ public class Utilities
                                 //if it was null we don't warn (even if it is a little bit suspicious to do that...)
 
                                 intoContainerOB.ShallowCopy(fromContainerOB);
+                                intoContainerOB.SetChangedHere(true);
                             }
                             else
                             {
                                 //recurse
                                 MergeChanges(intoContainerOB.InternalObj, fromContainerOB.InternalObj);
                             }
+                        }
+                    }
+                    //is it a dictionary?
+                    else if (fromContainerB is DictionaryContainerBase)
+                    {
+                        if (fromContainerB.GetType() != intoContainerB.GetType())
+                        {
+                            throw new SoftwareViolationException("Incompatible dictionary types in merge");
+                        }
+                        var fromContainerDB = (DictionaryContainerBase)fromContainerB;
+                        var intoContainerDB = (DictionaryContainerBase)intoContainerB;
+
+                        if (fromContainerDB.IsChangedHere())
+                        {
+                            intoContainerDB.ShallowCopy(fromContainerDB);
+                        }
+                        else
+                        {
+                            intoContainerDB.Merge(fromContainerDB);
+                        }
+
+                    }
+                    //is it an object sequence?
+                    else if (fromContainerB is GenericObjectSequenceContainerBase)
+                    {
+                        if (fromContainerB.GetType() != intoContainerB.GetType())
+                        {
+                            throw new SoftwareViolationException("Incompatible sequence types in merge");
+                        }
+                        var fromContainerDB = fromContainerB as GenericObjectSequenceContainerBase;
+                        if (fromContainerDB.IsChangedHere())
+                        {
+                            intoContainerB.ShallowCopy(fromContainerB);
+                        }
+                        else
+                        {
+                            var intoContainerDB = intoContainerB as GenericObjectSequenceContainerBase;
+                            intoContainerDB.Merge(fromContainerDB);
                         }
                     }
                     else //no, normal member

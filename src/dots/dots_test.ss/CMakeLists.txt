@@ -23,7 +23,7 @@ if (CSHARP_FOUND)
     --show-safir-config $<TARGET_FILE:safir_show_config>
     --language dotnet
     --binary $<TARGET_PROPERTY:dots_test_dotnet,ASSEMBLY_FILE>
-    --dependencies $<TARGET_PROPERTY:Safir.Dob.Typesystem,ASSEMBLY_FILE>,$<TARGET_PROPERTY:safir_generated-DotsTest-dotnet,ASSEMBLY_FILE>
+    --dependencies $<TARGET_PROPERTY:Safir.Logging,ASSEMBLY_FILE>,$<TARGET_PROPERTY:Safir.Dob.Typesystem,ASSEMBLY_FILE>,$<TARGET_PROPERTY:safir_generated-DotsTest-dotnet,ASSEMBLY_FILE>
     --output ${CMAKE_CURRENT_SOURCE_DIR}/output.txt
     --safir-generated-paths "${SAFIR_GENERATED_PATHS}"
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/dotnet)

@@ -129,16 +129,16 @@ implements java.util.Map<K, V> {
     @Override
     public V put(K key, V value) {
         m_isChanged=true;
-        value.setChanged(true);
+        if (value == null)
+        {
+            throw new SoftwareViolationException("Container cannot contain null objects");
+        }
         return m_values.put(key, value);
     }
 
     @Override
     public void putAll(Map<? extends K, ? extends V> m) {
         m_isChanged=true;
-        for (V v : m.values()) {
-            v.setChanged(true);
-        }
         m_values.putAll(m);
     }
 
@@ -165,6 +165,62 @@ implements java.util.Map<K, V> {
         super.shallowCopy(other);
         DictionaryContainer that = (DictionaryContainer)other;
         m_values = that.m_values;
+    }
+
+    /** Used by MergeChanges to do its magic. */
+    void merge(DictionaryContainer that)
+    {
+        DictionaryContainer<K,V> other = that;
+        for (Map.Entry<K,V> entry : ((DictionaryContainer<K,V>)that).m_values.entrySet())
+        {
+            //is it an object member?
+            if (entry.getValue() instanceof ObjectContainerBase)
+            {
+                ObjectContainerBase fromContainerOB = (ObjectContainerBase)entry.getValue();
+                if (fromContainerOB.isChangedHere())
+                {
+                    V findVal = get(entry.getKey());
+
+                    if (findVal == null)
+                    {
+                        throw new SoftwareViolationException
+                            ("DictionaryContainer::Merge: Changed key not found in target!");
+                    }
+
+                    findVal.shallowCopy(fromContainerOB);
+                }
+                else if (fromContainerOB.isChanged())
+                {
+                    V findVal = get(entry.getKey());
+
+                    if (findVal == null)
+                    {
+                        throw new SoftwareViolationException
+                            ("DictionaryContainer::Merge: Changed key not found in target!");
+                    }
+
+                    ObjectContainerBase intoContainerOB = (ObjectContainerBase)findVal;
+
+                    //recurse
+                    Utilities.mergeChanges(intoContainerOB.getObjInternal(),fromContainerOB.getObjInternal());
+                }
+            }
+            else
+            {
+                if (entry.getValue().isChanged())
+                {
+                    V findVal = get(entry.getKey());
+
+                    if (findVal == null)
+                    {
+                        throw new SoftwareViolationException
+                            ("DictionaryContainer::Merge: Changed key not found in target!");
+                    }
+
+                    findVal.shallowCopy(entry.getValue());
+                }
+            }
+        }
     }
 
     protected java.util.TreeMap<K, V> m_values = new java.util.TreeMap<K, V>();

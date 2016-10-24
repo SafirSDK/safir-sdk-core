@@ -27,7 +27,9 @@
 #include <vector>
 #include <map>
 #include <Safir/Dob/Typesystem/ContainerBase.h>
+#include <Safir/Dob/Typesystem/ObjectContainer.h>
 #include <Safir/Dob/Typesystem/Exceptions.h>
+#include <Safir/Dob/Typesystem/Utilities.h>
 
 #include <boost/shared_ptr.hpp>
 
@@ -38,12 +40,61 @@ namespace Dob
 namespace Typesystem
 {
     /**
+     * Base class for all dictionary containers.
+     * The reason for the existence of this class is that code that uses the reflection
+     * functionality must be able to get hold of members of items.
+     */
+    class DictionaryContainerBase : public ContainerBase
+    {
+    public:
+        /** Default Constructor. */
+        DictionaryContainerBase()
+            :ContainerBase()
+        {
+        }
+
+        /**
+         * Is the change flag in the container set?
+         *
+         * This method is like IsChanged without the recursion.
+         *
+         * @return True if the containers change flag is set.
+         */
+        bool IsChangedHere() const
+        {
+            return m_bIsChanged;
+        }
+
+        /**
+         * Set the change flag in the container.
+         *
+         * This method is like SetChanged without the recursion
+         *
+         * @param changed [in] - The value to set the change flag to.
+         */
+        void SetChangedHere(const bool changed)
+        {
+            m_bIsChanged = changed;
+        }
+
+    private:
+        friend void Utilities::MergeChanges(ObjectPtr into, const ObjectConstPtr& from);
+
+        /**
+         * Function needed by Utilities::MergeChanges to be able to merge
+         * dictionaries. Will in turn call Utilities::MergeChanges recursively
+         * if it needs to merge objects.
+         */
+        virtual void Merge(const DictionaryContainerBase& other) = 0;
+    };
+
+    /**
      * Container class for dictionaries of key value pairs. A dictionary is a collection of values that can dynamically
      * grow or shrink in size. The whole container has a change flag that will automatically
      * be set when values are added, removed or changed.
      */
     template <class KeyT, class ValT>
-    class DictionaryContainer : public ContainerBase
+    class DictionaryContainer : public DictionaryContainerBase
     {
     public:
 
@@ -61,7 +112,7 @@ namespace Typesystem
          * Construct a container that is not changed and not null.
          */
         DictionaryContainer()
-            :ContainerBase()
+            :DictionaryContainerBase()
             ,m_values()
         {
         }
@@ -99,7 +150,6 @@ namespace Typesystem
             {
                 m_bIsChanged=true;
                 ValueContainerType& ct=m_values[key];
-                ct.SetChanged(true);
                 return ct;
             }
         }
@@ -121,6 +171,15 @@ namespace Typesystem
         }
 
         /**
+         * @brief Like operator[], but throws std::out_of_range if key is not in dictionary.
+         * Const version
+         */
+        const ValueContainerType& at(const KeyType& key) const
+        {
+            return const_cast<DictionaryContainer&>(*this).at(key);
+        }
+
+        /**
          * @brief IsChanged - Check if the sequence has changed.
          * @return True if changed, else false.
          */
@@ -139,7 +198,7 @@ namespace Typesystem
 
             return false; //if we get here nothing is changed
         }
-        
+
         /**
          * @brief SetChanged - Set the change state of the sequence.
          * @param changed [in] - If true, the sequence is set to changed, it is set to not changed.
@@ -153,29 +212,6 @@ namespace Typesystem
             }
         }
 
-        /**
-         * Is the change flag in the container set?
-         *
-         * This method is like IsChanged without the recursion.
-         *
-         * @return True if the containers change flag is set.
-         */
-        bool IsChangedHere() const
-        {
-            return m_bIsChanged;
-        }
-
-        /**
-         * Set the change flag in the container.
-         *
-         * This method is like SetChanged without the recursion
-         *
-         * @param changed [in] - The value to set the change flag to.
-         */
-        void SetChangedHere(const bool changed)
-        {
-            m_bIsChanged = changed;
-        }
 
         /**
          * @brief clear - Clear the sequence, i.e remove all values. After a call to clear
@@ -209,18 +245,14 @@ namespace Typesystem
         /**
          * @brief Copy - Copy all the members from "that" into "this". Types must be the same for this to work!
          * @param that [in] - The object to copy into this.
-         * @throws SoftwareViolationException If the types are not of the same kind.
+         *
+         * Note: if types are not compatible the behaviour is undefined.
          */
         virtual void Copy(const ContainerBase& that)
         {
             if (this != &that)
             {
-                if (typeid(*this) != typeid(that))
-                {
-                    throw SoftwareViolationException(L"Invalid call to Copy, containers are not of same type",__WFILE__,__LINE__);
-                }
-
-                const DictionaryContainer<KeyType, ValueContainerType>& other=static_cast<const DictionaryContainer<KeyT, ValT>& >(that);
+                const DictionaryContainer<KeyT, ValT>& other = Cast(that);
 
                 clear();
                 m_bIsChanged=other.m_bIsChanged;
@@ -235,6 +267,66 @@ namespace Typesystem
         }
 
     private:
+
+        virtual void Merge(const DictionaryContainerBase& that)
+        {
+            const DictionaryContainer<KeyT, ValT>& other = Cast(that);
+
+            for (const_iterator it = other.begin(); it != other.end(); ++it)
+            {
+                const ObjectContainerBase* fromContainerOB =
+                    dynamic_cast<const ObjectContainerBase*>(&it->second);
+                //is it an object member?
+                if (fromContainerOB != NULL)
+                {
+                    if (fromContainerOB->IsChangedHere())
+                    {
+                        iterator findIt = find(it->first);
+                        if (findIt == end())
+                        {
+                            throw SoftwareViolationException
+                                (L"DictionaryContainer::Merge: Changed key not found in target!",
+                                 __WFILE__, __LINE__);
+                        }
+
+                        findIt->second.Copy(*fromContainerOB);
+                    }
+                    else if (fromContainerOB->IsChanged())
+                    {
+                        iterator findIt = find(it->first);
+                        if (findIt == end())
+                        {
+                            throw SoftwareViolationException
+                                (L"DictionaryContainer::Merge: Changed key not found in target!",
+                                 __WFILE__, __LINE__);
+                        }
+                        ObjectContainerBase* intoContainerOB = dynamic_cast<ObjectContainerBase*>(&findIt->second);
+
+                        ObjectPtr into = intoContainerOB->GetObjectPointer();
+                        ObjectConstPtr from = fromContainerOB->GetObjectPointer();
+
+                        //recurse
+                        Utilities::MergeChanges(into,from);
+                    }
+                }
+                else
+                {
+                    if (it->second.IsChanged())
+                    {
+                        iterator findIt = find(it->first);
+                        if (findIt == end())
+                        {
+                            throw SoftwareViolationException
+                                (L"DictionaryContainer::Merge: Changed key not found in target!",
+                                 __WFILE__, __LINE__);
+                        }
+
+                        findIt->second.Copy(it->second);
+                    }
+                }
+            }
+        }
+
         std::map<KeyT, ValT> m_values;
 
         template <class V, class C> struct InsertHelper
@@ -246,6 +338,23 @@ namespace Typesystem
         {
             static void SetVal(const boost::shared_ptr<V>& v, C& c) {c.SetPtr(v);}
         };
+
+        static DictionaryContainer<KeyT,ValT>& Cast(ContainerBase& base)
+        {
+#ifndef NDEBUG
+            if (typeid(DictionaryContainer<KeyT,ValT>) != typeid(base))
+            {
+                throw SoftwareViolationException(L"Invalid call to Copy or Merge, containers are not of same type",
+                                                 __WFILE__,__LINE__);
+            }
+#endif
+            return static_cast<DictionaryContainer<KeyT, ValT>&>(base);
+        }
+
+        static const DictionaryContainer<KeyT,ValT>& Cast(const ContainerBase& base)
+        {
+            return Cast(const_cast<ContainerBase&>(base));
+        }
     };
 }
 }

@@ -28,9 +28,44 @@ using System.Collections.Generic;
 namespace Safir.Dob.Typesystem
 {
     /// <summary>
+    /// Dictionary container base.
+    /// </summary>
+    abstract public class DictionaryContainerBase: ContainerBase
+    {
+        /// <summary>
+        /// Is the change flag in the container set?
+        /// <para/>
+        /// This method is like IsChanged without the recursion.
+        /// </summary>
+        /// <returns>True if the containers change flag is set.</returns>
+        public bool IsChangedHere ()
+        {
+            return m_bIsChanged;
+        }
+
+        /// <summary>
+        /// Set the change flag in the container.
+        /// <para/>
+        /// This method is like SetChanged without the recursion.
+        /// </summary>
+        /// <param name="changed">The value to set the change flag to.</param>
+        public void SetChangedHere (bool changed)
+        {
+            m_bIsChanged = changed;
+        }
+
+        /// <summary>
+        /// Function needed by Utilities::MergeChanges to be able to merge
+        /// dictionaries. Will in turn call Utilities::MergeChanges recursively if it
+        /// needs to merge objects.
+        /// </summary>
+        internal abstract void Merge(DictionaryContainerBase other);
+    };
+
+    /// <summary>
     /// Dictionary container.
     /// </summary>
-    public class DictionaryContainer<KeyT, ValT> : ContainerBase, IDictionary<KeyT, ValT>
+    public class DictionaryContainer<KeyT, ValT> : DictionaryContainerBase, IDictionary<KeyT, ValT>
         where ValT : ContainerBase, new()
     {
         /// <summary>
@@ -59,7 +94,6 @@ namespace Safir.Dob.Typesystem
         public void Add (KeyT key, ValT value)
         {
             m_bIsChanged = true;
-            value.SetChanged (true);
             m_values.Add (key, value);
         }
 
@@ -127,7 +161,6 @@ namespace Safir.Dob.Typesystem
             }
             set {
                 m_bIsChanged = true;
-                value.SetChanged (true);
                 m_values [index] = value;
             }
         }
@@ -305,16 +338,6 @@ namespace Safir.Dob.Typesystem
             return false;
         }
 
-        /// <summary>
-        /// Is the change flag in the container set?
-        /// <para/>
-        /// This method is like IsChanged without the recursion.
-        /// </summary>
-        /// <returns>True if the containers change flag is set.</returns>
-        public bool IsChangedHere ()
-        {
-            return m_bIsChanged;
-        }
 
         /// <summary>
         /// Sets the container changed.
@@ -329,16 +352,6 @@ namespace Safir.Dob.Typesystem
             }
         }
 
-        /// <summary>
-        /// Set the change flag in the container.
-        /// <para/>
-        /// This method is like SetChanged without the recursion.
-        /// </summary>
-        /// <param name="changed">The value to set the change flag to.</param>
-        public void SetChangedHere (bool changed)
-        {
-            m_bIsChanged = changed;
-        }
 
         #endregion
 
@@ -359,6 +372,59 @@ namespace Safir.Dob.Typesystem
             DictionaryContainer<KeyT,ValT> that = (DictionaryContainer<KeyT,ValT>)other;
             m_values = that.m_values;
         }
+
+        internal override void Merge(DictionaryContainerBase that)
+        {
+            var other = (DictionaryContainer<KeyT, ValT>)that;
+            foreach (var kv in other.m_values)
+            {
+                var fromContainerOB = kv.Value as ObjectContainerBase;
+                //is it an object member?
+                if (fromContainerOB != null)
+                {
+                    if (fromContainerOB.IsChangedHere())
+                    {
+                        ValT findVal;
+                        if (!TryGetValue(kv.Key,out findVal))
+                        {
+                            throw new SoftwareViolationException
+                                ("DictionaryContainer::Merge: Changed key not found in target!");
+                        }
+
+                        findVal.ShallowCopy(fromContainerOB);
+                    }
+                    else if (fromContainerOB.IsChanged())
+                    {
+                        ValT findVal;
+                        if (!TryGetValue(kv.Key,out findVal))
+                        {
+                            throw new SoftwareViolationException
+                                ("DictionaryContainer::Merge: Changed key not found in target!");
+                        }
+
+                        ObjectContainerBase intoContainerOB = findVal as ObjectContainerBase;
+
+                        //recurse
+                        Utilities.MergeChanges(intoContainerOB.InternalObj,fromContainerOB.InternalObj);
+                    }
+                }
+                else
+                {
+                    if (kv.Value.IsChanged())
+                    {
+                        ValT findVal;
+                        if (!TryGetValue(kv.Key,out findVal))
+                        {
+                            throw new SoftwareViolationException
+                                ("DictionaryContainer::Merge: Changed key not found in target!");
+                        }
+
+                        findVal.ShallowCopy(kv.Value);
+                    }
+                }
+            }
+        }
+
 
         private SortedDictionary<KeyT, ValT> m_values;
     }

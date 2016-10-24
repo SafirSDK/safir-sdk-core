@@ -79,6 +79,9 @@ res = proc.communicate()[0].replace("\r","")
 res = res.replace("\n*** No errors detected\n","")
 res =re.sub(r"^Running [0-9]+ test cases\.\.\.\n", "", res)
 
+#java sometimes outputs some stuff
+res =re.sub(r"^Picked up _JAVA_OPTIONS: .*\n", "", res)
+
 res = res.splitlines(1) #fix any DOS newlines
 
 

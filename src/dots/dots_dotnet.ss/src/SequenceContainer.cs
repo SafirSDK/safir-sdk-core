@@ -258,12 +258,45 @@ namespace Safir.Dob.Typesystem
     }
 
     /// <summary>
+    /// Base class for all object sequences. Needed for the reflection stuff.
+    /// </summary>
+    public interface GenericObjectSequenceContainerBase
+    {
+        /// <summary>
+        /// Is the change flag in the container set?
+        /// <para/>
+        /// This method is like IsChanged without the recursion.
+        /// </summary>
+        /// <returns>True if the containers change flag is set.</returns>
+        bool IsChangedHere ();
+
+        /// <summary>
+        /// Set the change flag in the container.
+        /// <para/>
+        /// This method is like SetChanged without the recursion.
+        /// </summary>
+        /// <param name="changed">The value to set the change flag to.</param>
+        void SetChangedHere (bool changed);
+
+
+        /// <summary>
+        /// Function needed by Utilities::MergeChanges to be able to merge
+        /// dictionaries. Will in turn call Utilities::MergeChanges recursively if it
+        /// needs to merge objects.
+        /// NOTE: Don't Call This Function (TM)!
+        /// </summary>
+        void Merge(GenericObjectSequenceContainerBase other);
+
+    }
+    /// <summary>
     /// Generic SequenceContainer for Objects.
     ///
     /// This implements recursive SetChanged and IsChanged behaviour.
     /// </summary>
     public abstract class GenericObjectSequenceContainer<T>
-        : SequenceContainer<T> where T:Safir.Dob.Typesystem.Object
+        : SequenceContainer<T>
+        , GenericObjectSequenceContainerBase
+        where T:Safir.Dob.Typesystem.Object
     {
         /// <summary>
         /// Override of inherited method. See comment for parent class.
@@ -321,6 +354,44 @@ namespace Safir.Dob.Typesystem
         public void SetChangedHere (bool changed)
         {
             m_bIsChanged = changed;
+        }
+
+        /// <summary>
+        /// Function needed by Utilities::MergeChanges to be able to merge
+        /// dictionaries. Will in turn call Utilities::MergeChanges recursively if it
+        /// needs to merge objects.
+        /// NOTE: Don't Call This Function (TM)!
+        /// </summary>
+        public void Merge(GenericObjectSequenceContainerBase that)
+        {
+            if (GetType() != that.GetType())
+            {
+                throw new SoftwareViolationException("Invalid call to Merge, containers are not of same type");
+            }
+
+            var other = that as GenericObjectSequenceContainer<T>;
+
+            //Note: this function only gets called when IsChangedHere() == false
+
+            if (!other.IsChanged())
+            {
+                return;
+            }
+
+            if (Count != other.Count)
+            {
+                throw new SoftwareViolationException("It is not possible to merge two object sequences of different sizes.");
+            }
+
+            for (var i = 0; i < Count; ++i)
+            {
+                if (other[i].IsChanged())
+                {
+                    //recurse
+                    Utilities.MergeChanges(this[i],other[i]);
+                }
+            }
+
         }
 
     }

@@ -24,24 +24,26 @@
 #ifndef __SAFIR_GENERATED_PRECOMPILED_HEADER_H__
 #define __SAFIR_GENERATED_PRECOMPILED_HEADER_H__
 
-#include <Safir/Dob/Typesystem/Internal/Kernel.h>
-#include <Safir/Dob/Typesystem/Internal/BlobOperations.h>
-#include <Safir/Dob/Typesystem/Defs.h>
-#include <Safir/Dob/Typesystem/Exceptions.h>
-#include <Safir/Dob/Typesystem/Object.h>
-#include <Safir/Dob/Typesystem/EntityId.h>
+#include <Safir/Dob/Typesystem/ArrayContainer.h>
 #include <Safir/Dob/Typesystem/ChannelId.h>
+#include <Safir/Dob/Typesystem/Defs.h>
+#include <Safir/Dob/Typesystem/DictionaryContainer.h>
+#include <Safir/Dob/Typesystem/EntityId.h>
+#include <Safir/Dob/Typesystem/Exceptions.h>
 #include <Safir/Dob/Typesystem/HandlerId.h>
 #include <Safir/Dob/Typesystem/InstanceId.h>
-#include <Safir/Dob/Typesystem/ObjectFactory.h>
+#include <Safir/Dob/Typesystem/Internal/BlobOperations.h>
+#include <Safir/Dob/Typesystem/Internal/Kernel.h>
+#include <Safir/Dob/Typesystem/LibraryExceptions.h>
+#include <Safir/Dob/Typesystem/Members.h>
+#include <Safir/Dob/Typesystem/Object.h>
 #include <Safir/Dob/Typesystem/ObjectContainer.h>
+#include <Safir/Dob/Typesystem/ObjectFactory.h>
 #include <Safir/Dob/Typesystem/Operations.h>
 #include <Safir/Dob/Typesystem/Parameters.h>
 #include <Safir/Dob/Typesystem/Properties.h>
-#include <Safir/Dob/Typesystem/Members.h>
+#include <Safir/Dob/Typesystem/SequenceContainer.h>
 #include <Safir/Dob/Typesystem/Serialization.h>
 #include <Safir/Dob/Typesystem/Utilities.h>
-#include <Safir/Dob/Typesystem/LibraryExceptions.h>
-#include <Safir/Dob/Typesystem/ArrayContainer.h>
 
 #endif

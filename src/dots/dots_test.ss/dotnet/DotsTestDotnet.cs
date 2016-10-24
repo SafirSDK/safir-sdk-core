@@ -112,6 +112,10 @@ class DotsTestDotnet
         var misc = new Misc.MiscTests();
         misc.Test_Containers();
         misc.Test_BlobChangeFlags();
+
+        var merge = new Misc.MergeChangesTests();
+        merge.Test_MergeChanges();
+
     }
 
     private static void Test_IsException()
@@ -9589,4 +9593,935 @@ namespace Misc
             Test_BlobChangeFlags_member_dictionaries();
         }
     }
+
+    public class MergeChangesTests
+    {
+        private static int tests = 0;
+        private static int failures = 0;
+        private static void Check(bool expr, string desc = "")
+        {
+            ++tests;
+            if (!expr) {
+                ++failures;
+                if (desc.Length == 0)
+                {
+                    Console.WriteLine("Testcase " + tests + " failed!");
+                }
+                else
+                {
+                    Console.WriteLine("Testcase " + tests + " (" + desc + ") failed!");
+                }
+            }
+        }
+
+        private static void CheckEqual(int a, int b)
+        {
+            if (a != b)
+            {
+                Console.WriteLine("Failed test: {0} != {1}", a,b);
+            }
+            Check(a==b);
+        }
+
+        private static void CheckEqual(long a, long b)
+        {
+            if (a != b)
+            {
+                Console.WriteLine("Failed test: {0} != {1}", a,b);
+            }
+            Check(a==b);
+        }
+        private static void CheckEqual(string a, string b)
+        {
+            if (a != b)
+            {
+                Console.WriteLine("Failed test: {0} != {1}", a,b);
+            }
+            Check(a==b);
+        }
+
+        private static void CheckEqual(TestEnum.Enumeration a, TestEnum.Enumeration b)
+        {
+            if (a != b)
+            {
+                Console.WriteLine("Failed test: {0} != {1}", a,b);
+            }
+            Check(a==b);
+        }
+
+        delegate void ThrowingFunction();
+
+        private static void CheckThrow<T>(ThrowingFunction fn) where T:System.Exception
+        {
+            bool caught = false;
+            try
+            {
+                fn();
+            }
+            catch(T)
+            {
+                caught = true;
+            }
+            Check(caught);
+        }
+
+        private void Simple()
+        {
+            var from = new MemberTypes();
+            var into = new MemberTypes();
+
+            from.Int32Member.Val = 10;
+            from.Int64Member.Val = 20;
+            from.Int64Member.SetChanged(false);
+
+            from.StringMember.Val = "asdf";
+            from.EnumerationMember.Val = TestEnum.Enumeration.MyFirst;
+
+            Utilities.MergeChanges(into,from);
+
+            Check(into.Int32Member.IsChanged());
+            CheckEqual(into.Int32Member.Val,10);
+            Check(!into.Int64Member.IsChanged());
+            Check(into.Int64Member.IsNull());
+            Check(into.StringMember.Val == "asdf");
+            CheckEqual(into.EnumerationMember.Val, TestEnum.Enumeration.MyFirst);
+        }
+
+
+        private void Arrays()
+        {
+            var from = new MemberArrays();
+            var into = new MemberArrays();
+
+            from.Int32Member[0].Val = 10;
+            from.Int64Member[0].Val = 20;
+            from.Int64Member[0].SetChanged(false);
+
+            from.StringMember[0].Val = "asdf";
+            from.StringMember[1].Val = "asdfasdf";
+            from.StringMember[1].SetChanged(false);
+            from.EnumerationMember[0].Val = TestEnum.Enumeration.MyFirst;
+            from.EnumerationMember[1].Val = TestEnum.Enumeration.MySecond;
+            from.EnumerationMember[1].SetChanged(false);
+
+            Utilities.MergeChanges(into,from);
+
+            Check(into.Int32Member[0].IsChanged());
+            CheckEqual(into.Int32Member[0].Val,10);
+            Check(!into.Int64Member.IsChanged());
+            Check(into.Int64Member[0].IsNull());
+            Check(into.StringMember[0].Val == "asdf");
+            Check(into.StringMember[1].IsNull());
+            CheckEqual(into.EnumerationMember[0].Val, TestEnum.Enumeration.MyFirst);
+            Check(into.EnumerationMember[1].IsNull());
+        }
+
+        private void Objects()
+        {
+            var from = new MemberTypes();
+            var into = new MemberTypes();
+
+            from.TestClassMember.Obj = new TestItem();
+            from.TestClassMember.Obj.MyInt.Val = 10;
+            from.TestClassMember.SetChangedHere(false);
+            from.ObjectMember.Obj = new TestItem();
+            ((TestItem)from.ObjectMember.Obj).MyInt.Val = 20;
+            from.ObjectMember.SetChangedHere(false);
+
+            Utilities.MergeChanges(into,from);
+
+            CheckEqual(into.TestClassMember.Obj.MyInt.Val,10);
+            Check(into.TestClassMember.Obj.MyInt.IsChanged());
+            Check(into.TestClassMember.IsChanged());
+            Check(into.TestClassMember.IsChangedHere());
+            CheckEqual(((TestItem)into.ObjectMember.Obj).MyInt.Val,20);
+        }
+
+        private void Objects_BothHaveData()
+        {
+            var from = new MemberTypes();
+
+            from.TestClassMember.Obj = new TestItem();
+            from.ObjectMember.Obj = new TestItem();
+            from.SetChanged(false);
+
+            var into = from.Clone();
+
+            from.TestClassMember.Obj.MyInt.Val = 10;
+            from.TestClassMember.SetChangedHere(false);
+            ((TestItem)from.ObjectMember.Obj).MyInt.Val = 20;
+            from.ObjectMember.SetChangedHere(false);
+
+            Utilities.MergeChanges(into,from);
+
+            CheckEqual(into.TestClassMember.Obj.MyInt.Val,10);
+            Check(into.TestClassMember.Obj.MyInt.IsChanged());
+            Check(into.TestClassMember.IsChanged());
+            Check(!into.TestClassMember.IsChangedHere());
+            CheckEqual(((TestItem)into.ObjectMember.Obj).MyInt.Val,20);
+            Check(!into.ObjectMember.IsChangedHere());
+        }
+
+        private void Sequences()
+        {
+            var from = new MemberSequences();
+            var into = new MemberSequences();
+
+            into.Int32Member.Add(20);
+            into.SetChanged(false);
+
+            from.Int32Member.Add(10);
+            from.Int64Member.Add(20);
+            from.Int64Member.SetChanged(false);
+
+            from.StringMember.Add("asdf");
+
+            from.EnumerationMember.Add(TestEnum.Enumeration.MyFirst);
+            from.EnumerationMember.SetChanged(false);
+
+            Utilities.MergeChanges(into,from);
+
+            Check(into.Int32Member.IsChanged());
+            CheckEqual(into.Int32Member[0],10);
+            Check(!into.Int64Member.IsChanged());
+            Check(into.Int64Member.Count == 0);
+            Check(into.StringMember[0] == "asdf");
+            Check(into.EnumerationMember.Count == 0);
+        }
+
+        private void Dictionaries_IntoEmpty()
+        {
+            var from = new MemberDictionaries();
+            var into = new MemberDictionaries();
+
+            from.Int32Int32Member.Add(10,10);
+            from.Int32Int32Member.Add(20,20);
+
+            from.Int32Int64Member.Add(10,10);
+            from.Int32Int64Member.Add(20,20);
+            from.Int32Int64Member[20].SetChanged(false);
+
+            from.Int64Int64Member.Add(10,10);
+            from.Int64Int64Member.Add(20,20);
+            from.Int64Int64Member.SetChanged(false);
+
+            Utilities.MergeChanges(into,from);
+
+            Check(into.Int32Int32Member.IsChanged());
+            Check(into.Int32Int32Member.IsChangedHere());
+            Check(into.Int32Int32Member[10].IsChanged());
+            CheckEqual(into.Int32Int32Member[10].Val,10);
+            Check(into.Int32Int32Member[20].IsChanged());
+            CheckEqual(into.Int32Int32Member[20].Val,20);
+
+            Check(into.Int32Int64Member.IsChanged());
+            Check(into.Int32Int64Member.IsChangedHere());
+            Check(into.Int32Int64Member[10].IsChanged());
+            CheckEqual(into.Int32Int64Member[10].Val,10);
+            Check(!into.Int32Int64Member[20].IsChanged());
+            CheckEqual(into.Int32Int64Member[20].Val,20);
+
+            Check(!into.Int64Int32Member.IsChanged());
+            CheckEqual(into.Int64Int32Member.Count, 0);
+        }
+
+        private void Dictionaries_IntoEmpty_Error()
+        {
+            var from = new MemberDictionaries();
+            var into = new MemberDictionaries();
+
+            from.Int64Int32Member.Add(10,10);
+            from.Int64Int32Member.Add(20,20);
+            from.Int64Int32Member.SetChangedHere(false);
+
+            CheckThrow<SoftwareViolationException>(() => Utilities.MergeChanges(into,from));
+        }
+
+        private void Dictionaries_IntoNonEmpty_1()
+        {
+            var into = new MemberDictionaries();
+            into.Int32Int32Member.Add(1,10);
+            into.Int32Int32Member.Add(2,20);
+
+            into.Int32Int64Member.Add(1,10);
+            into.Int32Int64Member.Add(2,20);
+
+            into.Int64Int32Member.Add(1,10);
+            into.Int64Int32Member.Add(2,20);
+
+            into.Int64Int64Member.Add(1,10);
+            into.Int64Int64Member.Add(2,20);
+
+            into.SetChanged(false);
+
+            var from = new MemberDictionaries();
+
+            from.Int32Int32Member.Add(3,30);
+
+            from.Int32Int64Member.Add(1,100);
+            from.Int32Int64Member.Add(2,20);
+            from.Int32Int64Member[2].SetChanged(false);
+            from.Int32Int64Member.SetChangedHere(false);
+
+            from.Int64Int32Member.Add(1,100);
+            from.Int64Int32Member.Add(2,555);
+            from.Int64Int32Member[2].SetChanged(false);
+            from.Int64Int32Member.SetChangedHere(false);
+
+            from.Int64Int64Member.Add(1,100);
+            from.Int64Int64Member.SetChangedHere(false);
+
+            Utilities.MergeChanges(into,from);
+
+            Check(into.Int32Int32Member.IsChanged());
+            Check(into.Int32Int32Member.IsChangedHere());
+            CheckEqual(into.Int32Int32Member.Count, 1);
+            Check(into.Int32Int32Member[3].IsChanged());
+            CheckEqual(into.Int32Int32Member[3].Val,30);
+
+            Check(into.Int32Int64Member.IsChanged());
+            Check(!into.Int32Int64Member.IsChangedHere());
+            CheckEqual(into.Int32Int64Member.Count, 2);
+            Check(into.Int32Int64Member[1].IsChanged());
+            CheckEqual(into.Int32Int64Member[1].Val,100);
+            Check(!into.Int32Int64Member[2].IsChanged());
+            CheckEqual(into.Int32Int64Member[2].Val,20);
+
+            Check(into.Int64Int32Member.IsChanged());
+            Check(!into.Int64Int32Member.IsChangedHere());
+            CheckEqual(into.Int64Int32Member.Count, 2);
+            Check(into.Int64Int32Member[1].IsChanged());
+            CheckEqual(into.Int64Int32Member[1].Val,100);
+            Check(!into.Int64Int32Member[2].IsChanged());
+            CheckEqual(into.Int64Int32Member[2].Val,20);
+
+            Check(into.Int64Int64Member.IsChanged());
+            Check(!into.Int64Int64Member.IsChangedHere());
+            CheckEqual(into.Int64Int64Member.Count, 2);
+            Check(into.Int64Int64Member[1].IsChanged());
+            CheckEqual(into.Int64Int64Member[1].Val,100);
+            Check(!into.Int64Int64Member[2].IsChanged());
+            CheckEqual(into.Int64Int64Member[2].Val,20);
+
+        }
+
+
+        private void Dictionaries_IntoNonEmpty_2()
+        {
+            var into = new MemberDictionaries();
+            into.Int32Int32Member.Add(1,10);
+            into.Int32Int32Member.Add(2,20);
+
+            into.Int32Int64Member.Add(1,10);
+            into.Int32Int64Member.Add(2,20);
+
+            into.Int64Int32Member.Add(1,10);
+            into.Int64Int32Member.Add(2,20);
+
+            into.Int64Int64Member.Add(1,10);
+            into.Int64Int64Member.Add(2,20);
+
+            into.SetChanged(false);
+
+            var from = new MemberDictionaries();
+
+            from.Int32Int32Member.Add(1,10);
+            from.Int32Int32Member[1].SetChanged(false);
+
+            from.Int32Int64Member.Add(1,100);
+
+            from.Int64Int32Member.Add(1,100);
+            from.Int64Int32Member[1].SetChanged(false);
+
+            from.Int64Int64Member.Add(1,100);
+            from.Int64Int64Member.SetChanged(false);
+
+            Utilities.MergeChanges(into,from);
+
+            Check(into.Int32Int32Member.IsChanged());
+            Check(into.Int32Int32Member.IsChangedHere());
+            CheckEqual(into.Int32Int32Member.Count, 1);
+            Check(!into.Int32Int32Member[1].IsChanged());
+            CheckEqual(into.Int32Int32Member[1].Val,10);
+
+            Check(into.Int32Int64Member.IsChanged());
+            Check(into.Int32Int64Member.IsChangedHere());
+            CheckEqual(into.Int32Int64Member.Count, 1);
+            Check(into.Int32Int64Member[1].IsChanged());
+            CheckEqual(into.Int32Int64Member[1].Val,100);
+
+            Check(into.Int64Int32Member.IsChanged());
+            Check(into.Int64Int32Member.IsChangedHere());
+            CheckEqual(into.Int64Int32Member.Count, 1);
+            Check(!into.Int64Int32Member[1].IsChanged());
+            CheckEqual(into.Int64Int32Member[1].Val,100);
+
+            Check(!into.Int64Int64Member.IsChanged());
+            CheckEqual(into.Int64Int64Member.Count, 2);
+            CheckEqual(into.Int64Int64Member[1].Val,10);
+            CheckEqual(into.Int64Int64Member[2].Val,20);
+        }
+
+
+
+        private void Dictionaries_IntoNonEmpty_Error()
+        {
+            var into = new MemberDictionaries();
+            into.Int32Int32Member.Add(1,10);
+            into.Int32Int32Member.Add(2,20);
+            into.SetChanged(false);
+
+            var from = new MemberDictionaries();
+
+            from.Int32Int32Member.Add(3,30);
+            from.Int32Int32Member.SetChangedHere(false);
+
+            CheckThrow<SoftwareViolationException>(() => Utilities.MergeChanges(into,from));
+        }
+
+        private void ObjectDictionaries_IntoEmpty_1()
+        {
+            var from = new MemberDictionaries();
+            var into = new MemberDictionaries();
+
+            //empty + x[x1:(xM=10)] => x[x1:(xM=10)]
+            from.Int64ItemMember.Add(1, new TestItem());
+            from.Int64ItemMember[1].Obj.MyInt.Val = 10;
+
+            //empty + x[1:(xM=10)] => x[1:(xM=10)]
+            from.TypeIdItemMember.Add(1, new TestItem());
+            from.TypeIdItemMember[1].Obj.MyInt.Val = 20;
+            from.TypeIdItemMember[1].SetChangedHere(false);
+
+            //empty + x[x1:(M=10)] => x[x1:(M=10)]
+            from.EnumItemMember.Add(TestEnum.Enumeration.MySecond, new TestItem());
+            from.EnumItemMember[TestEnum.Enumeration.MySecond].Obj.MyInt.Val = 30;
+            from.EnumItemMember[TestEnum.Enumeration.MySecond].SetChanged(false);
+
+            Utilities.MergeChanges(into,from);
+
+            Check(into.Int64ItemMember.IsChangedHere());
+            Check(into.Int64ItemMember[1].IsChangedHere());
+            Check(into.Int64ItemMember[1].Obj.MyInt.IsChanged());
+            CheckEqual(into.Int64ItemMember[1].Obj.MyInt.Val,10);
+
+            Check(into.TypeIdItemMember.IsChangedHere());
+            Check(!into.TypeIdItemMember[1].IsChangedHere());
+            Check(into.TypeIdItemMember[1].Obj.MyInt.IsChanged());
+            CheckEqual(into.TypeIdItemMember[1].Obj.MyInt.Val,20);
+
+            Check(into.EnumItemMember.IsChangedHere());
+            Check(!into.EnumItemMember[TestEnum.Enumeration.MySecond].IsChangedHere());
+            Check(!into.EnumItemMember[TestEnum.Enumeration.MySecond].Obj.MyInt.IsChanged());
+            CheckEqual(into.EnumItemMember[TestEnum.Enumeration.MySecond].Obj.MyInt.Val,30);
+        }
+
+        private void ObjectDictionaries_IntoEmpty_Error_1()
+        {
+            var from = new MemberDictionaries();
+            var into = new MemberDictionaries();
+
+            //empty + [x1:(xM=10)] => error
+            from.Int64ItemMember.Add(1, new TestItem());
+            from.Int64ItemMember[1].Obj.MyInt.Val = 10;
+            from.Int64ItemMember.SetChangedHere(false);
+
+            CheckThrow<SoftwareViolationException>(() => Utilities.MergeChanges(into,from));
+        }
+
+        private void ObjectDictionaries_IntoEmpty_Error_2()
+        {
+            var from = new MemberDictionaries();
+            var into = new MemberDictionaries();
+
+            //empty + [x1:(M=10)] => error
+            from.Int64ItemMember.Add(1, new TestItem());
+            from.Int64ItemMember[1].Obj.MyInt.Val = 10;
+            from.Int64ItemMember.SetChangedHere(false);
+            from.Int64ItemMember[1].Obj.MyInt.SetChanged(false);
+
+            CheckThrow<SoftwareViolationException>(() => Utilities.MergeChanges(into,from));
+        }
+
+        private void ObjectDictionaries_IntoEmpty_Error_3()
+        {
+            var from = new MemberDictionaries();
+            var into = new MemberDictionaries();
+
+            //empty + [1:(xM=10)] => error
+            from.Int64ItemMember.Add(1, new TestItem());
+            from.Int64ItemMember[1].Obj.MyInt.Val = 10;
+            from.Int64ItemMember.SetChangedHere(false);
+            from.Int64ItemMember[1].SetChangedHere(false);
+
+            CheckThrow<SoftwareViolationException>(() => Utilities.MergeChanges(into,from));
+        }
+
+        private void ObjectDictionaries_IntoEmpty_2()
+        {
+            var from = new MemberDictionaries();
+            var into = new MemberDictionaries();
+
+            //empty + [1:(M=10)] => empty
+            from.Int64ItemMember.Add(1, new TestItem());
+            from.Int64ItemMember[1].Obj.MyInt.Val = 10;
+            from.Int64ItemMember.SetChanged(false);
+
+            Utilities.MergeChanges(into,from);
+
+            Check(!into.Int64ItemMember.IsChangedHere());
+            CheckEqual(into.Int64ItemMember.Count, 0);
+        }
+
+        private abstract class NonEmptyObjectDictionariesFixture
+        {
+            protected MemberDictionaries into = new MemberDictionaries();
+            protected MemberDictionaries from = new MemberDictionaries();
+
+            protected NonEmptyObjectDictionariesFixture()
+            {
+                into.Int64ItemMember.Add(1, new TestItem());
+                into.Int64ItemMember[1].Obj.MyInt.Val = 10;
+                into.Int64ItemMember[1].Obj.MyString.Val = "one";
+                into.Int64ItemMember.Add(2, new TestItem());
+                into.Int64ItemMember[2].Obj.MyInt.Val = 20;
+                into.Int64ItemMember[2].Obj.MyString.Val = "two";
+
+                into.TypeIdItemMember.Add(1, new TestItem());
+                into.TypeIdItemMember[1].Obj.MyInt.Val = 10;
+                into.TypeIdItemMember[1].Obj.MyString.Val = "one";
+                into.TypeIdItemMember.Add(2, new TestItem());
+                into.TypeIdItemMember[2].Obj.MyInt.Val = 20;
+                into.TypeIdItemMember[2].Obj.MyString.Val = "two";
+
+                into.EnumItemMember.Add(TestEnum.Enumeration.MyFirst, new TestItem());
+                into.EnumItemMember[TestEnum.Enumeration.MyFirst].Obj.MyInt.Val = 10;
+                into.EnumItemMember[TestEnum.Enumeration.MyFirst].Obj.MyString.Val = "one";
+                into.EnumItemMember.Add(TestEnum.Enumeration.MySecond, new TestItem());
+                into.EnumItemMember[TestEnum.Enumeration.MySecond].Obj.MyInt.Val = 20;
+                into.EnumItemMember[TestEnum.Enumeration.MySecond].Obj.MyString.Val = "two";
+
+                into.SetChanged(false);
+            }
+        };
+
+        private class ObjectDictionaries_IntoNonEmpty_1: NonEmptyObjectDictionariesFixture
+        {
+
+            public ObjectDictionaries_IntoNonEmpty_1()
+            {
+                //[1:(M=10,S=one),2:(M=20,S=two)] + x[x1:(xM=100)] => x[x1:(xM=100)]
+                from.Int64ItemMember.Add(1, new TestItem());
+                from.Int64ItemMember[1].Obj.MyInt.Val = 100;
+
+                //[1:(M=10,S=one),2:(M=20,S=two)] + x[ 1:(xM=200)] => x[ 1:(xM=200)]
+                from.TypeIdItemMember.Add(1, new TestItem());
+                from.TypeIdItemMember[1].Obj.MyInt.Val = 200;
+                from.TypeIdItemMember[1].SetChangedHere(false);
+
+                //[1:(M=10,S=one),2:(M=20,S=two)] + x[ 1:( M=300)] => x[ 1:( M=300)]
+                from.EnumItemMember.Add(TestEnum.Enumeration.MySecond, new TestItem());
+                from.EnumItemMember[TestEnum.Enumeration.MySecond].Obj.MyInt.Val = 300;
+                from.EnumItemMember[TestEnum.Enumeration.MySecond].SetChanged(false);
+                Utilities.MergeChanges(into,from);
+
+                CheckEqual(into.Int64ItemMember.Count, 1);
+                Check(into.Int64ItemMember.IsChangedHere());
+                Check(into.Int64ItemMember[1].IsChangedHere());
+                Check(into.Int64ItemMember[1].Obj.MyInt.IsChanged());
+                CheckEqual(into.Int64ItemMember[1].Obj.MyInt.Val,100);
+                Check(into.Int64ItemMember[1].Obj.MyString.IsNull());
+
+                CheckEqual(into.TypeIdItemMember.Count, 1);
+                Check(into.TypeIdItemMember.IsChangedHere());
+                Check(!into.TypeIdItemMember[1].IsChangedHere());
+                Check(into.TypeIdItemMember[1].Obj.MyInt.IsChanged());
+                CheckEqual(into.TypeIdItemMember[1].Obj.MyInt.Val,200);
+                Check(into.TypeIdItemMember[1].Obj.MyString.IsNull());
+
+                CheckEqual(into.EnumItemMember.Count, 1);
+                Check(into.EnumItemMember.IsChangedHere());
+                Check(!into.EnumItemMember[TestEnum.Enumeration.MySecond].IsChangedHere());
+                Check(!into.EnumItemMember[TestEnum.Enumeration.MySecond].Obj.MyInt.IsChanged());
+                CheckEqual(into.EnumItemMember[TestEnum.Enumeration.MySecond].Obj.MyInt.Val,300);
+                Check(into.EnumItemMember[TestEnum.Enumeration.MySecond].Obj.MyString.IsNull());
+
+            }
+        };
+
+        private class ObjectDictionaries_IntoNonEmpty_2: NonEmptyObjectDictionariesFixture
+        {
+
+            public ObjectDictionaries_IntoNonEmpty_2()
+            {
+                //[1:(M=10,S=one),2:(M=20,S=two)] + x[ 3:( M=300)] => x[ 3:( M=300)]
+                from.Int64ItemMember.Add(3, new TestItem());
+                from.Int64ItemMember[3].Obj.MyInt.Val = 300;
+                from.Int64ItemMember[3].SetChanged(false);
+
+                //[1:(M=10,S=one),2:(M=20,S=two)] +  [x2:(xM=200)] =>  [ 1:( M=10, S=one),x2:(xM:200)]
+                from.TypeIdItemMember.Add(2, new TestItem());
+                from.TypeIdItemMember[2].Obj.MyInt.Val = 200;
+                from.TypeIdItemMember.SetChangedHere(false);
+
+                //[1:(M=10,S=one),2:(M=20,S=two)] +  [ 2:(xM=300)] =>  [ 1:( M=10, S=one), 2:(xM:300, S=two)]
+                from.EnumItemMember.Add(TestEnum.Enumeration.MySecond, new TestItem());
+                from.EnumItemMember[TestEnum.Enumeration.MySecond].Obj.MyInt.Val = 300;
+                from.EnumItemMember.SetChangedHere(false);
+                from.EnumItemMember[TestEnum.Enumeration.MySecond].SetChangedHere(false);
+
+                Utilities.MergeChanges(into,from);
+
+                CheckEqual(into.Int64ItemMember.Count, 1);
+                Check(into.Int64ItemMember.IsChangedHere());
+                Check(!into.Int64ItemMember[3].IsChangedHere());
+                Check(!into.Int64ItemMember[3].Obj.MyInt.IsChanged());
+                CheckEqual(into.Int64ItemMember[3].Obj.MyInt.Val,300);
+                Check(into.Int64ItemMember[3].Obj.MyString.IsNull());
+
+                CheckEqual(into.TypeIdItemMember.Count, 2);
+                Check(!into.TypeIdItemMember.IsChangedHere());
+                Check(!into.TypeIdItemMember[1].IsChanged());
+                CheckEqual(into.TypeIdItemMember[1].Obj.MyInt.Val,10);
+                Check(into.TypeIdItemMember[1].Obj.MyString.Val == "one");
+                Check(into.TypeIdItemMember[2].IsChangedHere());
+                Check(into.TypeIdItemMember[2].Obj.MyInt.IsChanged());
+                CheckEqual(into.TypeIdItemMember[2].Obj.MyInt.Val,200);
+                Check(!into.TypeIdItemMember[2].Obj.MyString.IsChanged());
+                Check(into.TypeIdItemMember[2].Obj.MyString.IsNull());
+
+                CheckEqual(into.EnumItemMember.Count, 2);
+                Check(!into.EnumItemMember.IsChangedHere());
+                Check(!into.EnumItemMember[TestEnum.Enumeration.MyFirst].IsChanged());
+                CheckEqual(into.EnumItemMember[TestEnum.Enumeration.MyFirst].Obj.MyInt.Val,10);
+                Check(into.EnumItemMember[TestEnum.Enumeration.MyFirst].Obj.MyString.Val == "one");
+                Check(!into.EnumItemMember[TestEnum.Enumeration.MySecond].IsChangedHere());
+                Check(into.EnumItemMember[TestEnum.Enumeration.MySecond].Obj.MyInt.IsChanged());
+                CheckEqual(into.EnumItemMember[TestEnum.Enumeration.MySecond].Obj.MyInt.Val,300);
+                Check(into.EnumItemMember[TestEnum.Enumeration.MySecond].Obj.MyString.Val == "two");
+                Check(!into.EnumItemMember[TestEnum.Enumeration.MySecond].Obj.MyString.IsChanged());
+            }
+        };
+
+        private class ObjectDictionaries_IntoNonEmpty_3: NonEmptyObjectDictionariesFixture
+        {
+            public ObjectDictionaries_IntoNonEmpty_3()
+            {
+                //[1:(M=10,S=one),2:(M=20,S=two)] +  [x2:( M=200)] =>  [ 1:( M=10, S=one),x2:( M:200)]
+                from.Int64ItemMember.Add(2, new TestItem());
+                from.Int64ItemMember[2].Obj.MyInt.Val = 200;
+                from.Int64ItemMember.SetChangedHere(false);
+                from.Int64ItemMember[2].Obj.MyInt.SetChanged(false);
+
+                //[1:(M=10,S=one),2:(M=20,S=two)] +  [ 3:( M=300)] =>  [ 1:( M=10, S=one), 2:( M:20, S=two)]
+                from.TypeIdItemMember.Add(3, new TestItem());
+                from.TypeIdItemMember[3].Obj.MyInt.Val = 300;
+                from.TypeIdItemMember.SetChanged(false);
+
+                //[1:(M=10,S=one),2:(M=20,S=two)] +  [ 2:( M=200)] =>  [ 1:( M=10, S=one), 2:( M:20, S=two)]
+                from.EnumItemMember.Add(TestEnum.Enumeration.MySecond, new TestItem());
+                from.EnumItemMember[TestEnum.Enumeration.MySecond].Obj.MyInt.Val = 200;
+                from.EnumItemMember.SetChanged(false);
+
+                Utilities.MergeChanges(into,from);
+                CheckEqual(into.Int64ItemMember.Count, 2);
+                Check(!into.Int64ItemMember.IsChangedHere());
+                Check(!into.Int64ItemMember[1].IsChanged());
+                CheckEqual(into.Int64ItemMember[1].Obj.MyInt.Val,10);
+                CheckEqual(into.Int64ItemMember[1].Obj.MyString.Val,"one");
+                Check(into.Int64ItemMember[2].IsChangedHere());
+                Check(!into.Int64ItemMember[2].Obj.MyInt.IsChanged());
+                CheckEqual(into.Int64ItemMember[2].Obj.MyInt.Val,200);
+                Check(into.Int64ItemMember[2].Obj.MyString.IsNull());
+
+                CheckEqual(into.TypeIdItemMember.Count, 2);
+                Check(!into.TypeIdItemMember.IsChanged());
+                CheckEqual(into.TypeIdItemMember[1].Obj.MyInt.Val,10);
+                CheckEqual(into.TypeIdItemMember[1].Obj.MyString.Val,"one");
+                CheckEqual(into.TypeIdItemMember[2].Obj.MyInt.Val,20);
+                CheckEqual(into.TypeIdItemMember[2].Obj.MyString.Val,"two");
+
+                CheckEqual(into.EnumItemMember.Count, 2);
+                Check(!into.EnumItemMember.IsChanged());
+                CheckEqual(into.EnumItemMember[TestEnum.Enumeration.MyFirst].Obj.MyInt.Val,10);
+                CheckEqual(into.EnumItemMember[TestEnum.Enumeration.MyFirst].Obj.MyString.Val,"one");
+                CheckEqual(into.EnumItemMember[TestEnum.Enumeration.MySecond].Obj.MyInt.Val,20);
+                CheckEqual(into.EnumItemMember[TestEnum.Enumeration.MySecond].Obj.MyString.Val,"two");
+            }
+        };
+
+        private class ObjectDictionaries_IntoNonEmpty_Error_1: NonEmptyObjectDictionariesFixture
+        {
+            public ObjectDictionaries_IntoNonEmpty_Error_1()
+            {
+                //[1:(M=10,S=one),2:(M=20,S=two)] +  [x3:( M=300)] =>  error
+                from.Int64ItemMember.Add(3, new TestItem());
+                from.Int64ItemMember[3].Obj.MyInt.Val = 300;
+                from.Int64ItemMember.SetChanged(false);
+                from.Int64ItemMember[3].SetChangedHere(true);
+
+                CheckThrow<SoftwareViolationException>(() => Utilities.MergeChanges(into,from));
+            }
+        };
+
+        private class ObjectDictionaries_IntoNonEmpty_Error_2: NonEmptyObjectDictionariesFixture
+        {
+            public ObjectDictionaries_IntoNonEmpty_Error_2()
+            {
+                //[1:(M=10,S=one),2:(M=20,S=two)] +  [ 3:(xM=300)] =>  error
+                from.Int64ItemMember.Add(3, new TestItem());
+                from.Int64ItemMember[3].Obj.MyInt.Val = 300;
+                from.Int64ItemMember.SetChanged(false);
+                from.Int64ItemMember[3].Obj.MyInt.SetChanged(true);
+
+                CheckThrow<SoftwareViolationException>(() => Utilities.MergeChanges(into,from));
+            }
+        };
+
+        private class ObjectDictionaries_EmptyIntoNonEmpty: NonEmptyObjectDictionariesFixture
+        {
+            public ObjectDictionaries_EmptyIntoNonEmpty()
+            {
+                //[1:(M=10,S=one),2:(M=20,S=two)] +  x[] =>  x[]
+                from.Int64ItemMember.SetChangedHere(true);
+
+                //[1:(M=10,S=one),2:(M=20,S=two)] +  [] =>  [1:(M=10,S=one),2:(M:20,S=two)]
+                //nothing to do...
+
+                Utilities.MergeChanges(into,from);
+                CheckEqual(into.Int64ItemMember.Count, 0);
+                Check(into.Int64ItemMember.IsChangedHere());
+
+                CheckEqual(into.TypeIdItemMember.Count, 2);
+                Check(!into.TypeIdItemMember.IsChanged());
+                CheckEqual(into.TypeIdItemMember[1].Obj.MyInt.Val,10);
+                CheckEqual(into.TypeIdItemMember[1].Obj.MyString.Val,"one");
+                CheckEqual(into.TypeIdItemMember[2].Obj.MyInt.Val,20);
+                CheckEqual(into.TypeIdItemMember[2].Obj.MyString.Val,"two");
+            }
+        };
+        private abstract class EmptyObjectSequenceFixture
+        {
+            protected MemberSequences into = new MemberSequences();
+            protected MemberSequences from = new MemberSequences();
+
+            protected EmptyObjectSequenceFixture()
+            {
+            }
+        };
+
+        private class ObjectSequences_1: EmptyObjectSequenceFixture
+        {
+            public ObjectSequences_1()
+            {
+                //[] + x{(xM=10)} => x{(xM=10)}
+                from.TestClassMember.Add(new TestItem());
+                from.TestClassMember[0].MyInt.Val = 10;
+
+                Utilities.MergeChanges(into,from);
+
+                CheckEqual(into.TestClassMember.Count,1);
+                Check(into.TestClassMember.IsChangedHere());
+                Check(into.TestClassMember[0].MyInt.IsChanged());
+                CheckEqual(into.TestClassMember[0].MyInt.Val,10);
+            }
+        };
+
+
+        private class ObjectSequences_2: EmptyObjectSequenceFixture
+        {
+            public ObjectSequences_2()
+            {
+                //[] + {(xM=10)} => ERROR
+                from.TestClassMember.Add(new TestItem());
+                from.TestClassMember[0].MyInt.Val = 10;
+                from.TestClassMember.SetChangedHere(false);
+
+                CheckThrow<SoftwareViolationException>(() => Utilities.MergeChanges(into,from));
+            }
+        };
+
+        private class ObjectSequences_3: EmptyObjectSequenceFixture
+        {
+            public ObjectSequences_3()
+            {
+                //[] + {( M=10)} => []
+                from.TestClassMember.Add(new TestItem());
+                from.TestClassMember[0].MyInt.Val = 10;
+                from.TestClassMember.SetChanged(false);
+
+                Utilities.MergeChanges(into,from);
+                CheckEqual(into.TestClassMember.Count,0);
+                Check(!into.TestClassMember.IsChanged());
+            }
+        };
+
+        private class ObjectSequences_4: EmptyObjectSequenceFixture
+        {
+            public ObjectSequences_4()
+            {
+                //[] + x[] => x[]
+                from.TestClassMember.SetChanged(true);
+
+                Utilities.MergeChanges(into,from);
+                CheckEqual(into.TestClassMember.Count,0);
+                Check(into.TestClassMember.IsChanged());
+            }
+        };
+
+        private abstract class NonEmptyObjectSequenceFixture
+        {
+            protected MemberSequences into = new MemberSequences();
+            protected MemberSequences from = new MemberSequences();
+
+            protected NonEmptyObjectSequenceFixture()
+            {
+                into.TestClassMember.Add(new TestItem());
+                into.TestClassMember[0].MyInt.Val = 10;
+                into.TestClassMember[0].MyString.Val = "one";
+                into.TestClassMember.Add(new TestItem());
+                into.TestClassMember[1].MyInt.Val = 20;
+                into.TestClassMember[1].MyString.Val = "two";
+                into.SetChanged(false);
+            }
+        };
+
+        private class ObjectSequences_IntoNonEmpty_1: NonEmptyObjectSequenceFixture
+        {
+            public ObjectSequences_IntoNonEmpty_1()
+            {
+                //{(M=10,S=one),(M=20,S=two)} + x{(M=30)} => x{(M=30)}
+                from.TestClassMember.Add(new TestItem());
+                from.TestClassMember[0].MyInt.Val = 30;
+                from.TestClassMember[0].MyInt.SetChanged(false);
+
+                Utilities.MergeChanges(into,from);
+
+                CheckEqual(into.TestClassMember.Count,1);
+                Check(into.TestClassMember.IsChangedHere());
+                Check(!into.TestClassMember[0].MyInt.IsChanged());
+                CheckEqual(into.TestClassMember[0].MyInt.Val,30);
+            }
+        }
+
+
+        private class ObjectSequences_IntoNonEmpty_2: NonEmptyObjectSequenceFixture
+        {
+            public ObjectSequences_IntoNonEmpty_2()
+            {
+                //{(M=10,S=one),(M=20,S=two)} + {(M=30)} => {(M=10,S=one),(M=20,S=two)}
+                from.TestClassMember.Add(new TestItem());
+                from.TestClassMember[0].MyInt.Val = 30;
+                from.TestClassMember.SetChanged(false);
+
+                Utilities.MergeChanges(into,from);
+
+                CheckEqual(into.TestClassMember.Count,2);
+                Check(!into.TestClassMember.IsChanged());
+                CheckEqual(into.TestClassMember[0].MyInt.Val,10);
+                CheckEqual(into.TestClassMember[0].MyString.Val,"one");
+                CheckEqual(into.TestClassMember[1].MyInt.Val,20);
+                CheckEqual(into.TestClassMember[1].MyString.Val,"two");
+            }
+        };
+
+        private class ObjectSequences_IntoNonEmpty_3: NonEmptyObjectSequenceFixture
+        {
+            public ObjectSequences_IntoNonEmpty_3()
+            {
+                //{(M=10,S=one),(M=20,S=two)} + {(xM=30)} => error??
+                from.TestClassMember.Add(new TestItem());
+                from.TestClassMember[0].MyInt.Val = 30;
+                from.TestClassMember.SetChangedHere(false);
+
+                CheckThrow<SoftwareViolationException>(() => Utilities.MergeChanges(into,from));
+            }
+        };
+
+        private class ObjectSequences_IntoNonEmpty_4: NonEmptyObjectSequenceFixture
+        {
+            public ObjectSequences_IntoNonEmpty_4()
+            {
+                //{(M=10,S=one),(M=20,S=two)} + {(xM=30),()} => {(xM=30,S=one),(M=20,S=two)}
+                from.TestClassMember.Add(new TestItem());
+                from.TestClassMember.Add(new TestItem());
+                from.TestClassMember[0].MyInt.Val = 30;
+                from.TestClassMember.SetChangedHere(false);
+
+                Utilities.MergeChanges(into,from);
+
+                CheckEqual(into.TestClassMember.Count,2);
+                Check(!into.TestClassMember.IsChangedHere());
+                Check(!into.TestClassMember[1].IsChanged());
+                Check(into.TestClassMember[0].MyInt.IsChanged());
+                Check(!into.TestClassMember[0].MyString.IsChanged());
+                CheckEqual(into.TestClassMember[0].MyInt.Val,30);
+                CheckEqual(into.TestClassMember[0].MyString.Val,"one");
+                CheckEqual(into.TestClassMember[1].MyInt.Val,20);
+                CheckEqual(into.TestClassMember[1].MyString.Val,"two");
+            }
+        };
+        private class ObjectSequences_IntoNonEmpty_5: NonEmptyObjectSequenceFixture
+        {
+            public ObjectSequences_IntoNonEmpty_5()
+            {
+                //{(M=10,S=one),(M=20,S=two)} + {(xM=30),(S=blahonga)} => {(xM=30,S=one),(M=20,S=two)}
+                from.TestClassMember.Add(new TestItem());
+                from.TestClassMember.Add(new TestItem());
+                from.TestClassMember.SetChangedHere(false);
+                from.TestClassMember[0].MyInt.Val = 30;
+                from.TestClassMember[1].MyString.Val = "blahonga";
+                from.TestClassMember[1].MyString.SetChanged(false);
+
+                Utilities.MergeChanges(into,from);
+
+                CheckEqual(into.TestClassMember.Count,2);
+                Check(!into.TestClassMember.IsChangedHere());
+                Check(!into.TestClassMember[1].IsChanged());
+                Check(into.TestClassMember[0].MyInt.IsChanged());
+                Check(!into.TestClassMember[0].MyString.IsChanged());
+                CheckEqual(into.TestClassMember[0].MyInt.Val,30);
+                CheckEqual(into.TestClassMember[0].MyString.Val,"one");
+                CheckEqual(into.TestClassMember[1].MyInt.Val,20);
+                CheckEqual(into.TestClassMember[1].MyString.Val,"two");
+            }
+        };
+
+
+
+        public void Test_MergeChanges()
+        {
+            Simple();
+            Arrays();
+            Objects();
+            Objects_BothHaveData();
+            Sequences();
+            Dictionaries_IntoEmpty();
+            Dictionaries_IntoEmpty_Error();
+            Dictionaries_IntoNonEmpty_1();
+            Dictionaries_IntoNonEmpty_2();
+            Dictionaries_IntoNonEmpty_Error();
+            ObjectDictionaries_IntoEmpty_1();
+            ObjectDictionaries_IntoEmpty_Error_1();
+            ObjectDictionaries_IntoEmpty_Error_2();
+            ObjectDictionaries_IntoEmpty_Error_3();
+            ObjectDictionaries_IntoEmpty_2();
+            new ObjectDictionaries_IntoNonEmpty_1();
+            new ObjectDictionaries_IntoNonEmpty_2();
+            new ObjectDictionaries_IntoNonEmpty_3();
+            new ObjectDictionaries_IntoNonEmpty_Error_1();
+            new ObjectDictionaries_IntoNonEmpty_Error_2();
+            new ObjectDictionaries_EmptyIntoNonEmpty();
+            new ObjectSequences_1();
+            new ObjectSequences_2();
+            new ObjectSequences_3();
+            new ObjectSequences_4();
+            new ObjectSequences_IntoNonEmpty_1();
+            new ObjectSequences_IntoNonEmpty_2();
+            new ObjectSequences_IntoNonEmpty_3();
+            new ObjectSequences_IntoNonEmpty_4();
+            new ObjectSequences_IntoNonEmpty_5();
+        }
+    }
+
 }

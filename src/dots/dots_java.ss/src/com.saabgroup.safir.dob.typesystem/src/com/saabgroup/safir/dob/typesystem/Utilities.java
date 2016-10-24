@@ -92,12 +92,51 @@ public class Utilities {
                                 //if it was null we don't warn (even if it is a little bit suspicious to do that...)
 
                                 intoContainerOB.shallowCopy(fromContainerOB);
+                                intoContainerOB.setChangedHere(true);
                             }
                             else
                             {
                                 //recurse
                                 mergeChanges(intoContainerOB.getObjInternal(), fromContainerOB.getObjInternal());
                             }
+                        }
+                    }
+                    //is it a dictionary?
+                    else if (fromContainerB instanceof DictionaryContainer)
+                    {
+                        if (!fromContainerB.getClass().equals(intoContainerB.getClass()))
+                        {
+                            throw new SoftwareViolationException("Incompatible dictionary types in merge");
+                        }
+                        DictionaryContainer fromContainerDB = (DictionaryContainer)fromContainerB;
+                        DictionaryContainer intoContainerDB = (DictionaryContainer)intoContainerB;
+
+                        if (fromContainerDB.isChangedHere())
+                        {
+                            intoContainerDB.shallowCopy(fromContainerDB);
+                        }
+                        else
+                        {
+                            intoContainerDB.merge(fromContainerDB);
+                        }
+                    }
+                    //is it an object sequence?
+                    else if (fromContainerB instanceof GenericObjectSequenceContainer)
+                    {
+                        if (!fromContainerB.getClass().equals(intoContainerB.getClass()))
+                        {
+                            throw new SoftwareViolationException("Incompatible sequence types in merge");
+                        }
+                        GenericObjectSequenceContainer fromContainerDB = (GenericObjectSequenceContainer)fromContainerB;
+                        if (fromContainerDB.isChangedHere())
+                        {
+                            intoContainerB.shallowCopy(fromContainerB);
+                        }
+                        else
+                        {
+                            GenericObjectSequenceContainer intoContainerDB =
+                                (GenericObjectSequenceContainer)intoContainerB;
+                            intoContainerDB.merge(fromContainerDB);
                         }
                     }
                     else //no, normal member
