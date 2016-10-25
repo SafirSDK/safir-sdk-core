@@ -164,7 +164,7 @@ namespace BasicTypeOperations
      * @param typeName [in] - name of a type
      * @return Corresponding memberType.
      */
-    inline const DotsC_MemberType StringToMemberType(const std::string& typeName)
+    inline DotsC_MemberType StringToMemberType(const std::string& typeName)
     {
         if (typeName==TypeIdMemberTypeName::Get()) return TypeIdMemberType;
         if (typeName==EntityIdMemberTypeName::Get()) return EntityIdMemberType;

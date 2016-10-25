@@ -130,7 +130,7 @@ namespace Typesystem
              *
              * @return The line number where the exception occurred.
              */
-            const Dob::Typesystem::Int64 GetLineNumber() const {return m_LineNumber;}
+            Dob::Typesystem::Int64 GetLineNumber() const {return m_LineNumber;}
 
             /** @} */
 

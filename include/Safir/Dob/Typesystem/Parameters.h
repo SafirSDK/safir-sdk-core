@@ -310,7 +310,7 @@ namespace Typesystem
          * @param key [in] - Dictionary key.
          * @return Index or -1 if key does not exist.
          */
-        DOTS_CPP_API const Int32 DictionaryKeyToIndex(const TypeId typeId,
+        DOTS_CPP_API Int32 DictionaryKeyToIndex(const TypeId typeId,
                                                       const ParameterIndex parameter,
                                                        const Int32 key);
 
@@ -323,7 +323,7 @@ namespace Typesystem
          * @param key [in] - Dictionary key.
          * @return Index or -1 if key does not exist.
          */
-        DOTS_CPP_API const Int32 DictionaryKeyToIndex(const TypeId typeId,
+        DOTS_CPP_API Int32 DictionaryKeyToIndex(const TypeId typeId,
                                                       const ParameterIndex parameter,
                                                       const Int64 key);
 
@@ -336,7 +336,7 @@ namespace Typesystem
          * @param key [in] - Dictionary key.
          * @return Index or -1 if key does not exist.
          */
-        DOTS_CPP_API const Int32 DictionaryKeyToIndex(const TypeId typeId,
+        DOTS_CPP_API Int32 DictionaryKeyToIndex(const TypeId typeId,
                                                       const ParameterIndex parameter,
                                                       const std::wstring& key);
 
@@ -349,7 +349,7 @@ namespace Typesystem
          * @param key [in] - Dictionary key.
          * @return Index or -1 if key does not exist.
          */
-        DOTS_CPP_API const Int32 DictionaryKeyToIndex(const TypeId typeId,
+        DOTS_CPP_API Int32 DictionaryKeyToIndex(const TypeId typeId,
                                                       const ParameterIndex parameter,
                                                       const EntityId& key);
 
@@ -362,7 +362,7 @@ namespace Typesystem
          * @param key [in] - Dictionary key.
          * @return Index or -1 if key does not exist.
          */
-        DOTS_CPP_API const Int32 DictionaryKeyToIndex(const TypeId typeId,
+        DOTS_CPP_API Int32 DictionaryKeyToIndex(const TypeId typeId,
                                                       const ParameterIndex parameter,
                                                       const InstanceId& key);
 
@@ -375,7 +375,7 @@ namespace Typesystem
          * @param key [in] - Dictionary key.
          * @return Index or -1 if key does not exist.
          */
-        DOTS_CPP_API const Int32 DictionaryKeyToIndex(const TypeId typeId,
+        DOTS_CPP_API Int32 DictionaryKeyToIndex(const TypeId typeId,
                                                       const ParameterIndex parameter,
                                                       const HandlerId& key);
 
@@ -388,7 +388,7 @@ namespace Typesystem
          * @param key [in] - Dictionary key.
          * @return Index or -1 if key does not exist.
          */
-        DOTS_CPP_API const Int32 DictionaryKeyToIndex(const TypeId typeId,
+        DOTS_CPP_API Int32 DictionaryKeyToIndex(const TypeId typeId,
                                                       const ParameterIndex parameter,
                                                       const ChannelId& key);
 

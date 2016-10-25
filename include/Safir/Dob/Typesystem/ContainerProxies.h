@@ -306,7 +306,7 @@ namespace Typesystem
 
         operator const ContainedType () const {return m_container.GetPtr();}
 
-        U* const operator->() const
+        U* operator->() const
         { return m_container.operator->(); }
 
         bool IsNull() const {return m_container.IsNull();}
@@ -355,7 +355,7 @@ namespace Typesystem
 
         operator const ContainedType () const {return m_container.GetPtr();}
 
-        Object* const operator->() const
+        Object* operator->() const
         { return m_container.operator->(); }
 
         bool IsNull() const {return m_container.IsNull();}

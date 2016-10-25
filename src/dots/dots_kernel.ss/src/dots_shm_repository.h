@@ -199,7 +199,7 @@ namespace Internal
         const char* GetName() const {return m_name.c_str();}
         const ExceptionDescriptionShm* GetBaseClass() const {return m_base.get();}
 
-        const void SetBaseClass(const ExceptionDescriptionShm* base) {m_base=base;}
+        void SetBaseClass(const ExceptionDescriptionShm* base) {m_base=base;}
 
     private:
         DotsC_TypeId m_typeId;

@@ -60,7 +60,7 @@ namespace ToolSupport
         virtual const std::string& Name() const=0;
         virtual void Parse(boost::property_tree::ptree& pt, ParseState& state)=0;
         virtual void Reset(ParseState& state)=0;
-        virtual const ElementParserBase * const Parent() const {return m_parent;}
+        virtual const ElementParserBase * Parent() const {return m_parent;}
         virtual std::string Path() const
         {
             std::string result="<" + Name() + ">";

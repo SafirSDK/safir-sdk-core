@@ -315,54 +315,54 @@ namespace Parameters
         return binary;
     }
 
-    const Int32 DictionaryKeyToIndex(const TypeId typeId,
-                                     const ParameterIndex parameter,
-                                     const Int32 key)
+    Int32 DictionaryKeyToIndex(const TypeId typeId,
+                               const ParameterIndex parameter,
+                               const Int32 key)
     {
         return DotsC_DictionaryInt32KeyToIndex(typeId, parameter, key);
     }
 
-    const Int32 DictionaryKeyToIndex(const TypeId typeId,
-                                     const ParameterIndex parameter,
-                                     const Int64 key)
+    Int32 DictionaryKeyToIndex(const TypeId typeId,
+                               const ParameterIndex parameter,
+                               const Int64 key)
     {
         return DotsC_DictionaryInt64KeyToIndex(typeId, parameter, key);
     }
 
 
-    const Int32 DictionaryKeyToIndex(const TypeId typeId,
-                                     const ParameterIndex parameter,
-                                     const std::wstring& key)
+    Int32 DictionaryKeyToIndex(const TypeId typeId,
+                               const ParameterIndex parameter,
+                               const std::wstring& key)
     {
         return DotsC_DictionaryStringKeyToIndex(typeId, parameter, Utilities::ToUtf8(key).c_str());
     }
 
 
-    const Int32 DictionaryKeyToIndex(const TypeId typeId,
-                                     const ParameterIndex parameter,
-                                     const EntityId& key)
+    Int32 DictionaryKeyToIndex(const TypeId typeId,
+                               const ParameterIndex parameter,
+                               const EntityId& key)
     {
         DotsC_EntityId eid={key.GetTypeId(), key.GetInstanceId().GetRawValue()};
         return DotsC_DictionaryEntityIdKeyToIndex(typeId, parameter, eid);
     }
 
-    const Int32 DictionaryKeyToIndex(const TypeId typeId,
-                                     const ParameterIndex parameter,
-                                     const InstanceId& key)
+    Int32 DictionaryKeyToIndex(const TypeId typeId,
+                               const ParameterIndex parameter,
+                               const InstanceId& key)
     {
         return DotsC_DictionaryInt64KeyToIndex(typeId, parameter, key.GetRawValue());
     }
 
-    const Int32 DictionaryKeyToIndex(const TypeId typeId,
-                                     const ParameterIndex parameter,
-                                     const HandlerId& key)
+    Int32 DictionaryKeyToIndex(const TypeId typeId,
+                               const ParameterIndex parameter,
+                               const HandlerId& key)
     {
         return DotsC_DictionaryInt64KeyToIndex(typeId, parameter, key.GetRawValue());
     }
 
-    const Int32 DictionaryKeyToIndex(const TypeId typeId,
-                                     const ParameterIndex parameter,
-                                     const ChannelId& key)
+    Int32 DictionaryKeyToIndex(const TypeId typeId,
+                               const ParameterIndex parameter,
+                               const ChannelId& key)
     {
         return DotsC_DictionaryInt64KeyToIndex(typeId, parameter, key.GetRawValue());
     }

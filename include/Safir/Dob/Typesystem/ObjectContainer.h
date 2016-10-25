@@ -288,7 +288,7 @@ namespace Typesystem
          * @return A pointer to the contained object.
          * @throws NullException The container is null.
         */
-        T * const operator->() const
+        T * operator->() const
         { if (IsNull()) throw NullException(L"Object is null",__WFILE__,__LINE__); return m_pObject.operator->(); }
 
 
@@ -464,7 +464,7 @@ namespace Typesystem
          * @return A pointer to the contained object.
          * @throws NullException The container is null.
         */
-        Object * const operator->() const
+        Object * operator->() const
         {
             if (IsNull())
             {
