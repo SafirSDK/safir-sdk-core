@@ -49,7 +49,7 @@ void InjectionTimestampHandler::OnRevokedRegistration(const Safir::Dob::Typesyst
     throw Safir::Dob::Typesystem::SoftwareViolationException(L"Someone overregistered my handler for LastInjectionTimestamp!",__WFILE__,__LINE__);
 }
 
-void InjectionTimestampHandler::OnCreateRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy,
+void InjectionTimestampHandler::OnCreateRequest(const Safir::Dob::EntityRequestProxy /*entityRequestProxy*/,
                                                 Safir::Dob::ResponseSenderPtr        responseSender)
 {
     responseSender->Send(Safir::Dob::ErrorResponse::CreateErrorResponse
@@ -67,7 +67,7 @@ void InjectionTimestampHandler::OnUpdateRequest(const Safir::Dob::EntityRequestP
     responseSender->Send(Safir::Dob::SuccessResponse::Create());
 }
 
-void InjectionTimestampHandler::OnDeleteRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy,
+void InjectionTimestampHandler::OnDeleteRequest(const Safir::Dob::EntityRequestProxy /*entityRequestProxy*/,
                                                 Safir::Dob::ResponseSenderPtr        responseSender)
 {
     responseSender->Send(Safir::Dob::ErrorResponse::CreateErrorResponse

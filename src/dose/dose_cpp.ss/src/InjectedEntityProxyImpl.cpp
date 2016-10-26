@@ -49,7 +49,7 @@ namespace Internal
         (void)m_currentState; //currently unused
     }
 
-    const Dob::Typesystem::TypeId
+    Dob::Typesystem::TypeId
     InjectedEntityProxyImpl::GetTypeId() const
     {
         if (m_injectionBlob == NULL)

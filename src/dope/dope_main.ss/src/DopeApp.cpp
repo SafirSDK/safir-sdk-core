@@ -160,19 +160,19 @@ void DopeApp::OnCompletedRegistration(const Safir::Dob::Typesystem::TypeId     t
     }
 }
 
-void DopeApp::OnCreateRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy,
+void DopeApp::OnCreateRequest(const Safir::Dob::EntityRequestProxy /*entityRequestProx*/,
                               Safir::Dob::ResponseSenderPtr        responseSender)
 {
     responseSender->Send(Safir::Dob::ErrorResponse::Create());
 };
 
-void DopeApp::OnUpdateRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy,
+void DopeApp::OnUpdateRequest(const Safir::Dob::EntityRequestProxy /*entityRequestProxy*/,
                               Safir::Dob::ResponseSenderPtr        responseSender)
 {
     responseSender->Send(Safir::Dob::ErrorResponse::Create());
 };
 
-void DopeApp::OnDeleteRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy,
+void DopeApp::OnDeleteRequest(const Safir::Dob::EntityRequestProxy /*entityRequestProxy*/,
                               Safir::Dob::ResponseSenderPtr        responseSender)
 {
     responseSender->Send(Safir::Dob::ErrorResponse::Create());

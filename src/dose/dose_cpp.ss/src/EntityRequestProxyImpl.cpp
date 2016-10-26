@@ -45,7 +45,7 @@ namespace Internal
 
     }
 
-    const Dob::Typesystem::TypeId EntityRequestProxyImpl::GetTypeId() const
+    Dob::Typesystem::TypeId EntityRequestProxyImpl::GetTypeId() const
     {
         if (m_requestBlob == NULL)
         {

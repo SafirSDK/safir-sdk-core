@@ -59,7 +59,7 @@ namespace Dob
          *
          * @return Type id.
          */
-        const Dob::Typesystem::TypeId GetTypeId() const;
+        Dob::Typesystem::TypeId GetTypeId() const;
 
         /**
          * Get service request.

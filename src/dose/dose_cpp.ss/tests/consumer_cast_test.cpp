@@ -49,41 +49,41 @@ class Consumer :
 public:
     virtual void OnStopOrder() {}
     virtual void OnDoDispatch() {}
-    virtual void OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId     /*typeId*/,
-                                       const Safir::Dob::Typesystem::HandlerId& /*handlerId*/){}
-    virtual void OnCompletedRegistration(const Safir::Dob::Typesystem::TypeId     /*typeId*/,
-                                         const Safir::Dob::Typesystem::HandlerId& /*handlerId*/){}
+    virtual void OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId,
+                                       const Safir::Dob::Typesystem::HandlerId&){}
+    virtual void OnCompletedRegistration(const Safir::Dob::Typesystem::TypeId,
+                                         const Safir::Dob::Typesystem::HandlerId&){}
 
-    virtual void OnCreateRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy,
-                                 Safir::Dob::ResponseSenderPtr        responseSender){}
+    virtual void OnCreateRequest(const Safir::Dob::EntityRequestProxy,
+                                 Safir::Dob::ResponseSenderPtr){}
 
-    virtual void OnUpdateRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy,
-                                 Safir::Dob::ResponseSenderPtr        responseSender){}
+    virtual void OnUpdateRequest(const Safir::Dob::EntityRequestProxy,
+                                 Safir::Dob::ResponseSenderPtr){}
 
-    virtual void OnDeleteRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy,
-                                 Safir::Dob::ResponseSenderPtr        responseSender){}
-    virtual void OnServiceRequest(const Safir::Dob::ServiceRequestProxy serviceRequestProxy,
-                                  Safir::Dob::ResponseSenderPtr         responseSender){}
-    virtual void OnResponse(const Safir::Dob::ResponseProxy responseProxy) {}
+    virtual void OnDeleteRequest(const Safir::Dob::EntityRequestProxy,
+                                 Safir::Dob::ResponseSenderPtr){}
+    virtual void OnServiceRequest(const Safir::Dob::ServiceRequestProxy,
+                                  Safir::Dob::ResponseSenderPtr){}
+    virtual void OnResponse(const Safir::Dob::ResponseProxy) {}
 
     virtual void OnNotRequestOverflow() {}
 
     virtual void OnNotMessageOverflow() {}
 
-    virtual void OnRegistered(const Safir::Dob::Typesystem::TypeId      /*typeId*/,
-                              const Safir::Dob::Typesystem::HandlerId&  /*handlerId*/) {}
+    virtual void OnRegistered(const Safir::Dob::Typesystem::TypeId,
+                              const Safir::Dob::Typesystem::HandlerId&) {}
 
-    virtual void OnUnregistered(const Safir::Dob::Typesystem::TypeId      /*typeId*/,
-                                const Safir::Dob::Typesystem::HandlerId&  /*handlerId*/) {}
+    virtual void OnUnregistered(const Safir::Dob::Typesystem::TypeId,
+                                const Safir::Dob::Typesystem::HandlerId&) {}
 
-    virtual void OnMessage(const Safir::Dob::MessageProxy messageProxy) {}
+    virtual void OnMessage(const Safir::Dob::MessageProxy) {}
 
-    virtual void OnNewEntity(const Safir::Dob::EntityProxy entityProxy) {}
+    virtual void OnNewEntity(const Safir::Dob::EntityProxy) {}
 
-    virtual void OnUpdatedEntity(const Safir::Dob::EntityProxy entityProxy) {}
+    virtual void OnUpdatedEntity(const Safir::Dob::EntityProxy) {}
 
-    virtual void OnDeletedEntity(const Safir::Dob::EntityProxy entityProxy,
-                                 const bool                    /*deletedByOwner*/) {}
+    virtual void OnDeletedEntity(const Safir::Dob::EntityProxy,
+                                 const bool) {}
 
 
 };

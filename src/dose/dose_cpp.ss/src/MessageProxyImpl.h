@@ -45,7 +45,7 @@ namespace Internal
         MessageProxyImpl(const char * const messageBlob,
                          const char * const state);
 
-        const Dob::Typesystem::TypeId GetTypeId() const;
+        Dob::Typesystem::TypeId GetTypeId() const;
 
         const Dob::MessagePtr GetMessage() const;
 

@@ -90,7 +90,7 @@ namespace Internal
     }
 
 
-    void NodeInfoHandler::OnCreateRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy,
+    void NodeInfoHandler::OnCreateRequest(const Safir::Dob::EntityRequestProxy /*entityRequestProxy*/,
                                           Safir::Dob::ResponseSenderPtr    responseSender)
     {
         responseSender->Send(Safir::Dob::ErrorResponse::CreateErrorResponse
@@ -98,7 +98,7 @@ namespace Internal
              L"It is not possible to send create requests on Safir::Dob::NodeStatus"));
     }
 
-    void NodeInfoHandler::OnUpdateRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy,
+    void NodeInfoHandler::OnUpdateRequest(const Safir::Dob::EntityRequestProxy /*entityRequestProxy*/,
                                           Safir::Dob::ResponseSenderPtr    responseSender)
     {
         responseSender->Send(Safir::Dob::ErrorResponse::CreateErrorResponse
@@ -106,7 +106,7 @@ namespace Internal
                               L"It is not possible to send update requests on Safir::Dob::NodeStatus"));
     }
 
-    void NodeInfoHandler::OnDeleteRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy,
+    void NodeInfoHandler::OnDeleteRequest(const Safir::Dob::EntityRequestProxy /*entityRequestProxy*/,
                                           Safir::Dob::ResponseSenderPtr    responseSender)
     {
         responseSender->Send(Safir::Dob::ErrorResponse::CreateErrorResponse

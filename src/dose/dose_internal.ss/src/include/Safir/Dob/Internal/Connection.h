@@ -73,7 +73,7 @@ namespace Internal
         Typesystem::Int32 Counter() const {return m_counter;}
 
         const ConnectionId & Id() const {return m_id;}
-        const pid_t Pid() const {return m_pid;}
+        pid_t Pid() const {return m_pid;}
 
         bool IsLocal() const;
 

@@ -62,7 +62,7 @@ namespace SP
 
             rawHandler.AddRawChangedCallback(m_strand.wrap([this](const RawStatistics&,
                                                                   const RawChanges flags,
-                                                                  boost::shared_ptr<void> completionSignaller)
+                                                                  boost::shared_ptr<void> /*completionSignaller*/)
             {
                 if (flags.NodesChanged() || flags.MetadataChanged())
                 {

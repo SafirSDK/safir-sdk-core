@@ -79,13 +79,15 @@ void Handler::OnCreateRequest(const Safir::Dob::EntityRequestProxy entityRequest
 }
 
 
-void Handler::OnUpdateRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy, Safir::Dob::ResponseSenderPtr responseSender)
+void Handler::OnUpdateRequest(const Safir::Dob::EntityRequestProxy /*entityRequestProxy*/,
+                              Safir::Dob::ResponseSenderPtr responseSender)
 {
     responseSender->Send(Safir::Dob::ErrorResponse::Create());
 }
 
 
-void Handler::OnDeleteRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy, Safir::Dob::ResponseSenderPtr responseSender)
+void Handler::OnDeleteRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy,
+                              Safir::Dob::ResponseSenderPtr responseSender)
 {
     m_Connection.Delete(entityRequestProxy.GetEntityId(), m_handlerId);
     responseSender->Send(Safir::Dob::SuccessResponse::Create());

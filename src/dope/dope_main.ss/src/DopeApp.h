@@ -92,8 +92,8 @@ private:
 
     /** Implements Safir::Dob::EntitySubscriber. */
     virtual void OnNewEntity(const Safir::Dob::EntityProxy entityProxy) override;
-    virtual void OnUpdatedEntity(const Safir::Dob::EntityProxy entityProxy) override{};
-    virtual void OnDeletedEntity(const Safir::Dob::EntityProxy entityProxy, const bool ) override{};
+    virtual void OnUpdatedEntity(const Safir::Dob::EntityProxy /*entityProxy*/) override{};
+    virtual void OnDeletedEntity(const Safir::Dob::EntityProxy /*entityProxy*/, const bool ) override{};
 
 
     void StartUp(bool restore);

@@ -41,7 +41,7 @@ namespace Dob
     }
 
 
-    const Dob::Typesystem::TypeId ResponseProxy::GetTypeId() const
+    Dob::Typesystem::TypeId ResponseProxy::GetTypeId() const
     {
         return m_pImpl->GetTypeId();
     }
@@ -64,12 +64,12 @@ namespace Dob
     }
 
 
-    const Dob::RequestId ResponseProxy::GetRequestId() const
+    Dob::RequestId ResponseProxy::GetRequestId() const
     {
         return m_pImpl->GetRequestId();
     }
 
-    const Dob::Typesystem::TypeId ResponseProxy::GetRequestTypeId() const
+    Dob::Typesystem::TypeId ResponseProxy::GetRequestTypeId() const
     {
         return m_pImpl->GetRequestTypeId();
     }

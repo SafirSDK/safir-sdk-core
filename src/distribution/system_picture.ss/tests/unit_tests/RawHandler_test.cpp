@@ -354,7 +354,7 @@ BOOST_AUTO_TEST_CASE( nodes_changed_add_callback )
     int cbCalls = 0;
     rh->AddRawChangedCallback([&](const RawStatistics& statistics,
                                  const RawChanges& flags,
-                                 boost::shared_ptr<void> completionSignaller)
+                                 boost::shared_ptr<void> /*completionSignaller*/)
                                {
                                    ++cbCalls;
                                    CheckStatisticsCommon(statistics, 1);
@@ -388,7 +388,7 @@ BOOST_AUTO_TEST_CASE( nodes_changed_removed_callback )
     int cbCalls = 0;
     rh->AddRawChangedCallback([&](const RawStatistics& statistics,
                                  const RawChanges& flags,
-                                 boost::shared_ptr<void> completionSignaller)
+                                 boost::shared_ptr<void> /*completionSignaller*/)
                                {
                                    ++cbCalls;
                                    CheckStatisticsCommon(statistics, 1);
@@ -450,7 +450,7 @@ BOOST_AUTO_TEST_CASE( raw_changed_callback )
     int cbCalls = 0;
     rh->AddRawChangedCallback([&](const RawStatistics& statistics,
                                   const RawChanges& flags,
-                                  boost::shared_ptr<void> completionSignaller)
+                                  boost::shared_ptr<void> /*completionSignaller*/)
                                {
                                    ++cbCalls;
                                    CheckStatisticsCommon(statistics, 1);
@@ -507,7 +507,7 @@ BOOST_AUTO_TEST_CASE( no_incarnations_discard )
     int cbCalls = 0;
     rh->AddRawChangedCallback([&](const RawStatistics& statistics,
                                   const RawChanges& flags,
-                                  boost::shared_ptr<void> completionSignaller)
+                                  boost::shared_ptr<void> /*completionSignaller*/)
                                {
                                    ++cbCalls;
                                    CheckStatisticsCommon(statistics, 1);
@@ -549,7 +549,7 @@ BOOST_AUTO_TEST_CASE( election_id_changed_callback)
     int cbCalls = 0;
     rh->AddRawChangedCallback([&](const RawStatistics& statistics,
                                   const RawChanges& flags,
-                                  boost::shared_ptr<void> completionSignaller)
+                                  boost::shared_ptr<void> /*completionSignaller*/)
                              {
                                  ++cbCalls;
 
@@ -585,7 +585,7 @@ BOOST_AUTO_TEST_CASE( join_system_callback)
     int cbCalls = 0;
     rh->AddRawChangedCallback([&](const RawStatistics& statistics,
                                   const RawChanges& flags,
-                                  boost::shared_ptr<void> completionSignaller)
+                                  boost::shared_ptr<void> /*completionSignaller*/)
                                {
                                    ++cbCalls;
                                    CheckStatisticsCommon(statistics, 1);
@@ -630,7 +630,7 @@ BOOST_AUTO_TEST_CASE( join_system_forbid)
     int cbCalls = 0;
     rh->AddRawChangedCallback([&](const RawStatistics& statistics,
                                   const RawChanges& flags,
-                                  boost::shared_ptr<void> completionSignaller)
+                                  boost::shared_ptr<void> /*completionSignaller*/)
                                {
                                    ++cbCalls;
                                    CheckStatisticsCommon(statistics, 1);
@@ -669,7 +669,7 @@ BOOST_AUTO_TEST_CASE( form_system )
     int cbCalls = 0;
     rh->AddRawChangedCallback([&](const RawStatistics& statistics,
                                   const RawChanges& flags,
-                                  boost::shared_ptr<void> completionSignaller)
+                                  boost::shared_ptr<void> /*completionSignaller*/)
                                {
                                    ++cbCalls;
                                    CheckStatisticsCommon(statistics, 0);
@@ -697,7 +697,7 @@ BOOST_AUTO_TEST_CASE( form_system_denies )
     int cbCalls = 0;
     rh->AddRawChangedCallback([&](const RawStatistics& statistics,
                                   const RawChanges& flags,
-                                  boost::shared_ptr<void> completionSignaller)
+                                  boost::shared_ptr<void> /*completionSignaller*/)
                                {
                                    ++cbCalls;
                                    CheckStatisticsCommon(statistics, 0);
@@ -729,7 +729,7 @@ BOOST_AUTO_TEST_CASE( form_system_delay_then_join )
     int cbCalls = 0;
     rh->AddRawChangedCallback([&](const RawStatistics& statistics,
                                   const RawChanges& flags,
-                                  boost::shared_ptr<void> completionSignaller)
+                                  boost::shared_ptr<void> /*completionSignaller*/)
                                {
                                    ++cbCalls;
                                    CheckStatisticsCommon(statistics, 1);
@@ -767,7 +767,7 @@ BOOST_AUTO_TEST_CASE( explicit_exclude_node )
     int cbCalls = 0;
     rh->AddRawChangedCallback([&](const RawStatistics& statistics,
                                   const RawChanges& flags,
-                                  boost::shared_ptr<void> completionSignaller)
+                                  boost::shared_ptr<void> /*completionSignaller*/)
                               {
                                    ++cbCalls;
 
@@ -810,7 +810,7 @@ BOOST_AUTO_TEST_CASE( recently_dead_nodes )
     int cbCalls = 0;
     rh->AddRawChangedCallback([&](const RawStatistics& statistics,
                                   const RawChanges& flags,
-                                  boost::shared_ptr<void> completionSignaller)
+                                  boost::shared_ptr<void> /*completionSignaller*/)
                                {
                                    ++cbCalls;
 

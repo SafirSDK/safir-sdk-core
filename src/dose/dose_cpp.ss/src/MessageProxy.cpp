@@ -37,7 +37,7 @@ namespace Dob
         ENSURE(pImpl != NULL, << "MessageProxy constructor was called with a NULL pImpl!");
     }
 
-    const Dob::Typesystem::TypeId MessageProxy::GetTypeId() const
+    Dob::Typesystem::TypeId MessageProxy::GetTypeId() const
     {
         return m_pImpl->GetTypeId();
     }

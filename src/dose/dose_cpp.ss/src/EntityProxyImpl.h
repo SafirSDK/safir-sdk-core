@@ -51,7 +51,7 @@ namespace Internal
                         const bool addReference,
                         const bool timestampDiff);
 
-        const Dob::Typesystem::TypeId GetTypeId() const;
+        Dob::Typesystem::TypeId GetTypeId() const;
 
         const Dob::Typesystem::InstanceId GetInstanceId() const;
 
@@ -73,9 +73,9 @@ namespace Internal
 
         const Dob::Typesystem::HandlerId GetOwnerWithStringRepresentation() const;
 
-        const Dob::Typesystem::Int64 GetTimestamp() const;
+        Dob::Typesystem::Int64 GetTimestamp() const;
 
-        const Dob::Typesystem::Int64 GetTimestamp(const Dob::Typesystem::MemberIndex member) const;
+        Dob::Typesystem::Int64 GetTimestamp(const Dob::Typesystem::MemberIndex member) const;
 
     private:
         const char* const m_currentBlob;

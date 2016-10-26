@@ -60,7 +60,7 @@ namespace Dob
          *
          * @return Type id.
          */
-        const Dob::Typesystem::TypeId GetTypeId() const;
+        Dob::Typesystem::TypeId GetTypeId() const;
 
         /**
          * Get instance id.

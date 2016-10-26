@@ -103,7 +103,7 @@ private:
         m_con->send(os.str());
     }
 
-    void OnOpen(websocketpp::connection_hdl hdl)
+    void OnOpen(websocketpp::connection_hdl /*hdl*/)
     {
         //std::cout<<"USER_"<<m_id<<" OnOpen"<<std::endl;
         std::ostringstream os;
@@ -112,7 +112,7 @@ private:
         SendReq();
     }
 
-    void OnClose(websocketpp::connection_hdl hdl)
+    void OnClose(websocketpp::connection_hdl /*hdl*/)
     {
     }
 
@@ -139,7 +139,7 @@ private:
         std::cout<<os.str()<<std::endl;
     }
 
-    void OnMessage(websocketpp::connection_hdl hdl, message_ptr msg)
+    void OnMessage(websocketpp::connection_hdl /*hdl*/, message_ptr msg)
     {
         std::string data = msg->get_payload();
         //std::cout<<"USER_"<<m_id<<" RECV: "<<data<<std::endl;

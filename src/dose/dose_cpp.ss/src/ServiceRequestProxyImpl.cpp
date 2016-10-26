@@ -44,7 +44,7 @@ namespace Internal
 
     }
 
-    const Dob::Typesystem::TypeId ServiceRequestProxyImpl::GetTypeId() const
+    Dob::Typesystem::TypeId ServiceRequestProxyImpl::GetTypeId() const
     {
         return Safir::Dob::Typesystem::Internal::BlobOperations::GetTypeId(m_requestBlob);
     }

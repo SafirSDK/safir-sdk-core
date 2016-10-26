@@ -33,16 +33,14 @@ namespace Dob
 {
 namespace Internal
 {
-    inline
-    const ContextId ComposeMinusOneContext(const ContextId context)
+    inline ContextId ComposeMinusOneContext(const ContextId context)
     {
         ENSURE(context >= 0 && context < 1000000, << "Invalid context!");
         
         return (context + 1000000) * -1;
     }
 
-    inline
-    const ContextId ComposeContext(const ContextId minusOneContext)
+    inline ContextId ComposeContext(const ContextId minusOneContext)
     {
         ENSURE(minusOneContext <= -1000000, << "Invalid \"minus one\" context!");
 

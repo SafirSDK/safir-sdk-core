@@ -50,7 +50,7 @@ namespace Internal
 
         bool IsSuccess() const;
 
-        const Dob::Typesystem::TypeId GetTypeId() const;
+        Dob::Typesystem::TypeId GetTypeId() const;
 
         const Dob::ResponsePtr GetResponse() const;
 
@@ -58,9 +58,9 @@ namespace Internal
 
         const char * GetBlob() const {return m_responseBlob;}
 
-        const Dob::RequestId GetRequestId() const {return m_requestId;}
+        Dob::RequestId GetRequestId() const {return m_requestId;}
 
-        const Dob::Typesystem::TypeId GetRequestTypeId() const;
+        Dob::Typesystem::TypeId GetRequestTypeId() const;
 
         const Dob::Typesystem::InstanceId GetRequestInstanceId() const;
 

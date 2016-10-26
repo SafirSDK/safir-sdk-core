@@ -95,7 +95,7 @@ private:
     boost::int64_t m_numHandledRequests;
     boost::shared_ptr<boost::thread> m_runner;
 
-    void OnOpen(websocketpp::connection_hdl hdl)
+    void OnOpen(websocketpp::connection_hdl /*hdl*/)
     {
         auto open="{\"jsonrpc\":\"2.0\", \"method\":\"open\", \"params\":{\"connectionName\":\"testHandler\"}, \"id\":\"open\"}";
         m_con->send(open);
@@ -103,17 +103,17 @@ private:
         m_con->send(regSrvHandler);
     }
 
-    void OnClose(websocketpp::connection_hdl hdl)
+    void OnClose(websocketpp::connection_hdl /*hdl*/)
     {
         std::cout<<"HANDLER"<<" OnClose"<<std::endl;
     }
 
-    void OnError(websocketpp::connection_hdl hdl)
+    void OnError(websocketpp::connection_hdl /*hdl*/)
     {
         std::cout<<"HANDLER"<<" ***OnError***"<<std::endl;
     }
 
-    void OnMessage(websocketpp::connection_hdl hdl, message_ptr msg)
+    void OnMessage(websocketpp::connection_hdl /*hdl*/, message_ptr msg)
     {
         std::string data = msg->get_payload();
         //std::cout<<"HANDLER RECV: "<<data<<std::endl;

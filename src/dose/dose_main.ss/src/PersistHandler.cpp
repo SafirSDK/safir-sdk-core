@@ -236,7 +236,7 @@ namespace Internal
     }
 
     // OnDoDispatch guarantees that strand is taken when this method is called
-    void PersistHandler::OnServiceRequest(const Safir::Dob::ServiceRequestProxy serviceRequestProxy,
+    void PersistHandler::OnServiceRequest(const Safir::Dob::ServiceRequestProxy /*serviceRequestProxy*/,
                                           Safir::Dob::ResponseSenderPtr   responseSender)
     {
         responseSender->Send(Dob::SuccessResponse::Create());

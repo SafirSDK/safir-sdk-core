@@ -35,8 +35,7 @@ namespace Dob
     {
     }
 
-    const Dob::Typesystem::TypeId
-    EntityProxy::GetTypeId() const
+    Dob::Typesystem::TypeId EntityProxy::GetTypeId() const
     {
         return m_pImpl->GetTypeId();
     }
@@ -101,13 +100,12 @@ namespace Dob
         return m_pImpl->GetOwnerWithStringRepresentation();
     }
 
-    const Dob::Typesystem::Int64
-    EntityProxy::GetTimestamp() const
+    Dob::Typesystem::Int64 EntityProxy::GetTimestamp() const
     {
         return m_pImpl->GetTimestamp();
     }
 
-    const Dob::Typesystem::Int64
+    Dob::Typesystem::Int64
     EntityProxy::GetTimestamp(const Dob::Typesystem::MemberIndex member) const
     {
         return m_pImpl->GetTimestamp(member);

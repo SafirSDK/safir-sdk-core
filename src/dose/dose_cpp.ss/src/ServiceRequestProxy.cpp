@@ -35,7 +35,7 @@ namespace Dob
     {
     }
 
-    const Dob::Typesystem::TypeId ServiceRequestProxy::GetTypeId() const
+    Dob::Typesystem::TypeId ServiceRequestProxy::GetTypeId() const
     {
         return m_pImpl->GetTypeId();
     }

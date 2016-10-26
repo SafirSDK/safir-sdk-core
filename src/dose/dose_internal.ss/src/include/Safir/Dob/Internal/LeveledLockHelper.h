@@ -68,7 +68,7 @@ namespace Internal
         ~LeveledLockHelper();
 
         // Get the lowest held lock level for the calling thread. Returns 0 if no lock is taken.
-        const unsigned short GetLowestHeldLevel() const;
+        unsigned short GetLowestHeldLevel() const;
 
         void AddLevel(const unsigned short level);
 
@@ -76,7 +76,7 @@ namespace Internal
 
         bool IsHeld(const unsigned short level) const;
 
-        const unsigned int GetNumberOfHeldLocks() const;
+        unsigned int GetNumberOfHeldLocks() const;
 
     private:
 

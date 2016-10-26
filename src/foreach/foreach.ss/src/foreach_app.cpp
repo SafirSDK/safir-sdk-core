@@ -45,7 +45,7 @@ namespace Utilities
 namespace ForEach
 {
 
-    const Safir::Dob::Typesystem::Int32 ComposeMinusOneContext(const Safir::Dob::Typesystem::Int32 context)
+    Safir::Dob::Typesystem::Int32 ComposeMinusOneContext(const Safir::Dob::Typesystem::Int32 context)
     {
         return (context + 1000000) * -1;
     }

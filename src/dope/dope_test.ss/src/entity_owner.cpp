@@ -138,14 +138,14 @@ private:
     virtual void OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId,
         const Safir::Dob::Typesystem::HandlerId&) {}
 
-    virtual void OnCreateRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy,
-        Safir::Dob::ResponseSenderPtr        responseSender) {}
+    virtual void OnCreateRequest(const Safir::Dob::EntityRequestProxy /*entityRequestProxy*/,
+        Safir::Dob::ResponseSenderPtr        /*responseSender*/) {}
 
-    virtual void OnUpdateRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy,
-        Safir::Dob::ResponseSenderPtr        responseSender) {}
+    virtual void OnUpdateRequest(const Safir::Dob::EntityRequestProxy /*entityRequestProxy*/,
+        Safir::Dob::ResponseSenderPtr        /*responseSender*/) {}
 
-    virtual void OnDeleteRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy,
-        Safir::Dob::ResponseSenderPtr        responseSender) {}
+    virtual void OnDeleteRequest(const Safir::Dob::EntityRequestProxy /*entityRequestProxy*/,
+        Safir::Dob::ResponseSenderPtr        /*responseSender*/) {}
 
     virtual void OnInjectedNewEntity(const Safir::Dob::InjectedEntityProxy injectedEntityProxy)
     {

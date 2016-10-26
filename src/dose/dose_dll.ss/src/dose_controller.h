@@ -119,10 +119,10 @@ namespace Internal
         //---------------------------
 
         // Returns composed connection name
-        const char * const GetConnectionName() const;
+        const char* GetConnectionName() const;
 
-        const char * const GetConnectionNameCommonPart() const;
-        const char * const GetConnectionNameInstancePart() const;
+        const char* GetConnectionNameCommonPart() const;
+        const char* GetConnectionNameInstancePart() const;
 
         bool NameIsEqual (const std::string & connectionNameCommonPart,
                           const std::string & connectionNameInstancePart) const;

@@ -383,7 +383,7 @@ int main() {
             }
         });
 
-        c.set_close_handler([&](websocketpp::connection_hdl hdl)
+        c.set_close_handler([&](websocketpp::connection_hdl /*hdl*/)
         {
             std::string reason=con->get_remote_close_reason();
             std::cout<<"OnClose "<<reason<<std::endl;

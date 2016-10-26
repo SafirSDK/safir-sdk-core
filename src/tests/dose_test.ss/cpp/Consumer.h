@@ -133,7 +133,7 @@ private:
     class TimestampRequestor:
     public Safir::Dob::Requestor
     {
-        void OnResponse(const Safir::Dob::ResponseProxy responseProxy) {}
+        void OnResponse(const Safir::Dob::ResponseProxy /*responseProxy*/) {}
         void OnNotRequestOverflow() {}
     };
 

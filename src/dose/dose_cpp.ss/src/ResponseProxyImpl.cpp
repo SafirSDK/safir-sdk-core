@@ -57,7 +57,7 @@ namespace Internal
     }
 
 
-    const Dob::Typesystem::TypeId ResponseProxyImpl::GetTypeId() const
+    Dob::Typesystem::TypeId ResponseProxyImpl::GetTypeId() const
     {
         return Typesystem::Internal::BlobOperations::GetTypeId(m_responseBlob);
     }
@@ -92,7 +92,7 @@ namespace Internal
 
 
 
-    const Dob::Typesystem::TypeId ResponseProxyImpl::GetRequestTypeId() const
+    Dob::Typesystem::TypeId ResponseProxyImpl::GetRequestTypeId() const
     {
         bool success;
         Typesystem::TypeId typeId;

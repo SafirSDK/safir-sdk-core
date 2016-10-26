@@ -61,7 +61,7 @@ namespace Dob
          *
          * @return Type id.
          */
-        const Dob::Typesystem::TypeId GetTypeId() const;
+        Dob::Typesystem::TypeId GetTypeId() const;
 
         /**
          * Get instance id.
@@ -211,7 +211,7 @@ namespace Dob
          *
          * @return Timestamp.
          */
-        const Dob::Typesystem::Int64 GetTimestamp() const;
+        Dob::Typesystem::Int64 GetTimestamp() const;
 
         /**
          * Retrieves the timestamp for the given top member.
@@ -221,7 +221,7 @@ namespace Dob
          * @param [in] member Top level member index.
          * @return Timestamp.
          */
-        const Dob::Typesystem::Int64 GetTimestamp(const Dob::Typesystem::MemberIndex member) const;
+        Dob::Typesystem::Int64 GetTimestamp(const Dob::Typesystem::MemberIndex member) const;
 
         /** @} */
 

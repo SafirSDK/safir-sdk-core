@@ -956,7 +956,7 @@ namespace Internal
         return Typesystem::EntityId(GetTypeId(), GetInstanceId());
     }
 
-    const char * const DistributionData::GetConnectionName() const
+    const char* DistributionData::GetConnectionName() const
     {
         ENSURE(GetType() == Action_Connect, << "GetConnectionName is only valid for Connect messages");
         return GetData() + sizeof(ConnectHeader);
@@ -982,7 +982,7 @@ namespace Internal
     }
 
 
-    const char * const
+    const char*
     DistributionData::GetBlob() const
     {
         switch (GetType())

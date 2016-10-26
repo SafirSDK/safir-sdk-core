@@ -57,7 +57,7 @@ namespace Internal
     {
     }
 
-    const unsigned short
+    unsigned short
     LeveledLockHelper::GetLowestHeldLevel() const
     {
         boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_levelMapLock);
@@ -135,7 +135,7 @@ namespace Internal
         return mapIt->second.find(level) != mapIt->second.end();
     }
 
-    const unsigned int LeveledLockHelper::GetNumberOfHeldLocks() const
+    unsigned int LeveledLockHelper::GetNumberOfHeldLocks() const
     {
         boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_levelMapLock);
 

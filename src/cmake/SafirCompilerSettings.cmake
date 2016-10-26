@@ -11,8 +11,8 @@ if (UNIX)
    endif()
 
    #turn on more warnings, set up use of threads, and set symbol visibility to hide as much as possible
-   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pthread -fvisibility=hidden -fvisibility-inlines-hidden ${stack_protector_option} -std=c++11")
-   SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -pthread -fvisibility=hidden -Bsymbolic ${stack_protector_option}")
+   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -Winvalid-pch -pthread -fvisibility=hidden -fvisibility-inlines-hidden ${stack_protector_option} -std=c++11")
+   SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Wpedantic -Winvalid-pch -pthread -fvisibility=hidden -Bsymbolic ${stack_protector_option}")
 
    SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--exclude-libs=ALL -Wl,--warn-common -Wl,--fatal-warnings")
    SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--exclude-libs=ALL -Wl,--warn-common -Wl,--fatal-warnings")
@@ -36,11 +36,11 @@ if (MSVC)
    ADD_DEFINITIONS(-DWIN32_LEAN_AND_MEAN)
    ADD_DEFINITIONS(/wd4503) #decorated name length exceeded
    ADD_DEFINITIONS(/wd4512) #assignment operator could not be generated
-   
+
    if (MSVC_VERSION EQUAL 1600)
      ADD_DEFINITIONS(/wd4481) #nonstandard extension used, removed due to vs2010 not having full c++11 support
    endif()
-   
+
    # increase warning level
    # Use the highest warning level for visual studio.
    IF(CMAKE_CXX_FLAGS MATCHES "/W[0-4]")

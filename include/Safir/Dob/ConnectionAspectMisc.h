@@ -59,7 +59,7 @@ namespace Dob
          *
          * @return Id of the callback you are currently inside, or None if not in a callback.
          */
-        const Dob::CallbackId::Enumeration GetCurrentCallbackId() const;
+        Dob::CallbackId::Enumeration GetCurrentCallbackId() const;
 
         /**
          * @name Connection info

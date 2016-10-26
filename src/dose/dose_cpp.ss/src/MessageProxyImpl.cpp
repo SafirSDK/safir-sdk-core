@@ -45,7 +45,7 @@ namespace Internal
 
     }
 
-    const Dob::Typesystem::TypeId
+    Dob::Typesystem::TypeId
     MessageProxyImpl::GetTypeId() const
     {
         return Typesystem::Internal::BlobOperations::GetTypeId(m_messageBlob);

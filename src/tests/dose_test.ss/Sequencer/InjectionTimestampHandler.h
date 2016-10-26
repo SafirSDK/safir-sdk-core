@@ -52,7 +52,7 @@ private:
     virtual void OnInitialInjectionsDone(const Safir::Dob::Typesystem::TypeId typeId,
                                          const Safir::Dob::Typesystem::HandlerId& handlerId);
 
-    virtual void OnInjectedNewEntity(const Safir::Dob::InjectedEntityProxy injectedEntityProxy)
+    virtual void OnInjectedNewEntity(const Safir::Dob::InjectedEntityProxy /*injectedEntityProxy*/)
     {m_hasInstance = true;}
 
     Safir::Dob::SecondaryConnection m_connection;

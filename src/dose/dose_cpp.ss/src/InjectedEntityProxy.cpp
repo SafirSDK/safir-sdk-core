@@ -35,8 +35,7 @@ namespace Dob
     {
     }
 
-    const Dob::Typesystem::TypeId
-    InjectedEntityProxy::GetTypeId() const
+    Dob::Typesystem::TypeId InjectedEntityProxy::GetTypeId() const
     {
         return m_pImpl->GetTypeId();
     }

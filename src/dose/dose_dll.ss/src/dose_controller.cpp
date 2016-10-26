@@ -373,7 +373,7 @@ namespace Internal
                                                            _2));
     }
 
-    const char * const
+    const char*
     Controller::GetConnectionName() const
     {
         if (!m_isConnected)
@@ -383,7 +383,7 @@ namespace Internal
         return m_connection->NameWithCounter();
     }
 
-    const char * const
+    const char*
     Controller::GetConnectionNameCommonPart() const
     {
         if (!m_isConnected)
@@ -393,7 +393,7 @@ namespace Internal
         return m_connectionNameCommonPart.c_str();
     }
 
-    const char * const
+    const char*
     Controller::GetConnectionNameInstancePart() const
     {
         if (!m_isConnected)

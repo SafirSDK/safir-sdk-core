@@ -66,7 +66,7 @@ namespace Dob
          *
          * @return Type id.
          */
-        const Dob::Typesystem::TypeId GetTypeId() const;
+        Dob::Typesystem::TypeId GetTypeId() const;
 
         /**
          * Get response.
@@ -115,14 +115,14 @@ namespace Dob
          *
          * @return Request id.
          */
-        const Dob::RequestId GetRequestId() const;
+        Dob::RequestId GetRequestId() const;
 
         /**
          * Get type id of the entity or service sent in the original request.
          *
          * @return Type id.
          */
-        const Dob::Typesystem::TypeId GetRequestTypeId() const;
+        Dob::Typesystem::TypeId GetRequestTypeId() const;
 
          /**
          * Get the instance id used in the original request. (Only for entity requests)

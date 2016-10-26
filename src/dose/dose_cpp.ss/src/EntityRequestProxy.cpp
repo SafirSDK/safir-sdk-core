@@ -36,7 +36,7 @@ namespace Dob
     }
 
 
-    const Dob::Typesystem::TypeId EntityRequestProxy::GetTypeId() const
+    Dob::Typesystem::TypeId EntityRequestProxy::GetTypeId() const
     {
         return m_pImpl->GetTypeId();
     }

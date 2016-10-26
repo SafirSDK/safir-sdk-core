@@ -392,7 +392,7 @@ public:
         return electedId == node;
     }
 
-    void NodesChanged(RawStatistics statistics, boost::shared_ptr<void> completionSignaller)
+    void NodesChanged(RawStatistics /*statistics*/, boost::shared_ptr<void> /*completionSignaller*/)
     {
         nodesChangedCalled = true;
     }

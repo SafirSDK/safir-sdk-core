@@ -48,7 +48,7 @@ class Requestor
 {
 public:
     // From Safir::Dob::Requestor
-    void OnResponse(const Safir::Dob::ResponseProxy responseProxy) override {}
+    void OnResponse(const Safir::Dob::ResponseProxy /*responseProxy*/) override {}
     void OnNotRequestOverflow() override {}
 
 };

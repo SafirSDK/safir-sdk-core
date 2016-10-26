@@ -350,7 +350,10 @@ namespace Dob
          * @param [in] injectedEntityProxy - Proxy object containing entity and meta information 
          *                                   about the new entity that is about to be injected.
          */
-        virtual void OnInjectedNewEntity(const Safir::Dob::InjectedEntityProxy injectedEntityProxy) {}
+        virtual void OnInjectedNewEntity(const Safir::Dob::InjectedEntityProxy injectedEntityProxy)
+        {
+            (void)injectedEntityProxy; //unused
+        }
 
         /**
          * Called when an updated entity is about to be injected in the system.
@@ -358,7 +361,10 @@ namespace Dob
          * @param [in] injectedEntityProxy - Proxy object containing entity and meta information 
          *                                   about the updated entity that is about to be injected.
          */
-        virtual void OnInjectedUpdatedEntity(const Safir::Dob::InjectedEntityProxy injectedEntityProxy) {}
+        virtual void OnInjectedUpdatedEntity(const Safir::Dob::InjectedEntityProxy injectedEntityProxy)
+        {
+            (void)injectedEntityProxy; //unused
+        }
 
         /**
          * Called when an entity delete is about to be injected in the system.
@@ -366,7 +372,10 @@ namespace Dob
          * @param [in] injectedEntityProxy - Proxy object containing information about the entity about to
          *                                   be deleted.
          */
-        virtual void OnInjectedDeletedEntity(const Safir::Dob::InjectedEntityProxy injectedEntityProxy) {}
+        virtual void OnInjectedDeletedEntity(const Safir::Dob::InjectedEntityProxy injectedEntityProxy)
+        {
+            (void)injectedEntityProxy; //unused
+        }
 
         /**
          * Indicates that all initial injection data has been transfered to the handler.
@@ -386,10 +395,10 @@ namespace Dob
          */
          virtual void OnInitialInjectionsDone(const Safir::Dob::Typesystem::TypeId typeId,
                                               const Dob::Typesystem::HandlerId& handlerId)
-         { //This is an empty implementation, but we have this little bit to avoid MSVC++ warnings
-#ifdef _MSC_VER
-             typeId;handlerId;
-#endif
+         {
+             //unused parameters
+             (void)typeId;
+             (void)handlerId;
          }
 
 

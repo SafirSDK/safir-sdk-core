@@ -52,7 +52,7 @@ namespace Internal
     }
 
 
-    const Dob::Typesystem::TypeId
+    Dob::Typesystem::TypeId
     PreviousEntityProxyImpl::GetTypeId() const
     {
         if (m_currentBlob == NULL)
@@ -232,7 +232,7 @@ namespace Internal
         return GetOwner();
     }
 
-    const Dob::Typesystem::Int64
+    Dob::Typesystem::Int64
     PreviousEntityProxyImpl::GetTimestamp() const
     {
         Typesystem::Int64 timestamp;
@@ -245,7 +245,7 @@ namespace Internal
         return timestamp;
     }
 
-    const Dob::Typesystem::Int64
+    Dob::Typesystem::Int64
     PreviousEntityProxyImpl::GetTimestamp(const Dob::Typesystem::MemberIndex member) const
     {
         Typesystem::Int64 timestamp;

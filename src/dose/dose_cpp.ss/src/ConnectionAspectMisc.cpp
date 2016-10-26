@@ -32,7 +32,7 @@ namespace Safir
 {
 namespace Dob
 {
-    const CallbackId::Enumeration ConnectionAspectMisc::GetCurrentCallbackId() const
+    CallbackId::Enumeration ConnectionAspectMisc::GetCurrentCallbackId() const
     {
         DotsC_Int32 callback;
         bool success;

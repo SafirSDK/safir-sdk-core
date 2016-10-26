@@ -387,7 +387,7 @@ namespace Internal
         // - Request_EntityCreate,
         // - Request_EntityUpdate,
         // - Response,
-        const char * const GetBlob() const;
+        const char* GetBlob() const;
 
         //Reads and writes sender id from data, valid for all types
         const ConnectionId & GetSenderId() const {return GetHeader().m_sender;}
@@ -403,7 +403,7 @@ namespace Internal
          * The returned pointer points inside the msg, and is null-terminated.
          * Its length is MAX_CONNECTION_NAME_LENGTH or shorter.
          */
-        const char * const GetConnectionName() const;
+        const char* GetConnectionName() const;
 
         Typesystem::Int32 GetCounter() const {return GetConnectHeader().m_counter;}
         /** @} */
@@ -456,7 +456,7 @@ namespace Internal
          */
         /** @{ */
 
-        const InstanceIdPolicy::Enumeration GetInstanceIdPolicy() const {return GetRegistrationStateHeader().m_instanceIdPolicy;}
+        InstanceIdPolicy::Enumeration GetInstanceIdPolicy() const {return GetRegistrationStateHeader().m_instanceIdPolicy;}
         void SetInstanceIdPolicy(const InstanceIdPolicy::Enumeration instanceIdPolicy)
         {GetRegistrationStateHeader().m_instanceIdPolicy = instanceIdPolicy;}
 

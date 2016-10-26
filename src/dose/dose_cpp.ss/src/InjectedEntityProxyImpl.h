@@ -50,7 +50,7 @@ namespace Internal
                                 const char * const currentBlob,
                                 const char * const currentState);
 
-        const Dob::Typesystem::TypeId GetTypeId() const;
+        Dob::Typesystem::TypeId GetTypeId() const;
 
         const Dob::Typesystem::InstanceId GetInstanceId() const;
 

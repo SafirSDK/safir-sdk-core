@@ -240,7 +240,7 @@ namespace Internal
                         << "going to be able to update this entity any longer!");
     }
 
-    void ProcessInfoHandler::OnCreateRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy,
+    void ProcessInfoHandler::OnCreateRequest(const Safir::Dob::EntityRequestProxy /*entityRequestProxy*/,
                                              Safir::Dob::ResponseSenderPtr    responseSender)
     {
         responseSender->Send(Safir::Dob::ErrorResponse::CreateErrorResponse
@@ -248,7 +248,7 @@ namespace Internal
              L"It is not possible to send create requests on Safir::Dob::ProcessInfo"));
     }
 
-    void ProcessInfoHandler::OnUpdateRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy,
+    void ProcessInfoHandler::OnUpdateRequest(const Safir::Dob::EntityRequestProxy /*entityRequestProxy*/,
                                              Safir::Dob::ResponseSenderPtr    responseSender)
     {
         responseSender->Send(Safir::Dob::ErrorResponse::CreateErrorResponse

@@ -46,7 +46,7 @@ namespace Internal
         EntityRequestProxyImpl(const char * const requestBlob,
                                const char * const state);
 
-        const Dob::Typesystem::TypeId GetTypeId() const;
+        Dob::Typesystem::TypeId GetTypeId() const;
 
         const Dob::Typesystem::InstanceId GetInstanceId() const;
 
