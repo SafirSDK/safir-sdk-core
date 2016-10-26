@@ -142,8 +142,8 @@ namespace SwReports
      */
     SWRE_INTERFACE_CPP_API void SendProgramInfoReport(const std::wstring&   text);
 
-};
-};
+}
+}
 #endif
 
 #endif

@@ -136,7 +136,7 @@ namespace Safir
                 Safir::Application::BackdoorKeeper m_backdoorKeeper;
 #endif
             };
-        };
+        }
     }
 }
 #endif
