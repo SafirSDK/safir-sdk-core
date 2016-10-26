@@ -66,11 +66,11 @@ typedef Internal::Parameter<SQL_C_SLONG, SQL_INTEGER, Safir::Dob::Typesystem::In
 
 typedef Internal::Parameter<SQL_C_SBIGINT, SQL_BIGINT, Safir::Dob::Typesystem::Int64,SQL_PARAM_INPUT,20> Int64Parameter;
 
-};  // Odbc
+}  // Odbc
 
-};  // Databases
+}  // Databases
 
-};  // Safir
+}  // Safir
 
 #endif
 #endif //Safir_Databases_Odbc_Input_Parameter_h

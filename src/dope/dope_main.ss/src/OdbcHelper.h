@@ -96,5 +96,5 @@ public:
                                SQLHANDLE handle);
 
 private:
-    SQLLEN m_int64Size;;
+    SQLLEN m_int64Size;
 };

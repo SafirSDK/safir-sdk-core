@@ -43,7 +43,7 @@ namespace Dob
 
     typedef Safir::Dob::Typesystem::Int32 ContextId;
 
-};
-};
+}
+}
 
 #endif

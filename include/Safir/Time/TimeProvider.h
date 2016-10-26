@@ -102,7 +102,7 @@ namespace Time
         static Safir::Dob::Typesystem::Si64::Second ToDouble(const boost::posix_time::ptime & utcTime);
     };
 
-}; // namespace Time
-}; // namespace Safir
+} // namespace Time
+} // namespace Safir
 
 #endif //__DOUF_TIME_H

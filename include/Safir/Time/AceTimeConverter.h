@@ -132,7 +132,7 @@ namespace Time
     }
 
 
-}; // namespace Time
-}; // namespace Safir
+} // namespace Time
+} // namespace Safir
 
 #endif //__DOUF_ACE_TIME_CONVERTER_H

@@ -137,11 +137,11 @@ inline void TimeColumn::GetValue(Safir::Dob::Typesystem::Si64::Second & time) co
     time = Safir::Time::TimeProvider::ToDouble( pTime );
 }
 
-};  // Odbc
+}  // Odbc
 
-};  // Databases
+}  // Databases
 
-};  // Safir
+}  // Safir
 
 #endif
 

@@ -312,7 +312,7 @@ protected:
     }
 
     virtual ~Common() {}
-    boost::atomic<bool> m_success;;
+    boost::atomic<bool> m_success;
     boost::thread_group m_threads;
 
     boost::asio::io_service m_ioService;

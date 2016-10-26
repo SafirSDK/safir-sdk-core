@@ -115,7 +115,7 @@ namespace Time
             Dob::Typesystem::Int64(fraction * pow(10.0,boost::posix_time::time_duration::num_fractional_digits()) + 0.5));
 
         return _1_JAN_1970 + duration;
-    };
+    }
 
     //---------------------------------------------------------------------------
     Safir::Dob::Typesystem::Si64::Second TimeProvider::ToDouble(const boost::posix_time::ptime& utcTime)
@@ -124,6 +124,6 @@ namespace Time
         return(double)d.ticks() / d.ticks_per_second();
     }
 
-}; // namespace Time
-}; // namespace Safir
+} // namespace Time
+} // namespace Safir
 

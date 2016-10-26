@@ -164,19 +164,19 @@ void DopeApp::OnCreateRequest(const Safir::Dob::EntityRequestProxy /*entityReque
                               Safir::Dob::ResponseSenderPtr        responseSender)
 {
     responseSender->Send(Safir::Dob::ErrorResponse::Create());
-};
+}
 
 void DopeApp::OnUpdateRequest(const Safir::Dob::EntityRequestProxy /*entityRequestProxy*/,
                               Safir::Dob::ResponseSenderPtr        responseSender)
 {
     responseSender->Send(Safir::Dob::ErrorResponse::Create());
-};
+}
 
 void DopeApp::OnDeleteRequest(const Safir::Dob::EntityRequestProxy /*entityRequestProxy*/,
                               Safir::Dob::ResponseSenderPtr        responseSender)
 {
     responseSender->Send(Safir::Dob::ErrorResponse::Create());
-};
+}
 
 //-------------------------------------------------------
 

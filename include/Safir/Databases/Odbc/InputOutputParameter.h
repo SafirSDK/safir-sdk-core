@@ -57,11 +57,11 @@ typedef Internal::Parameter<SQL_C_SBIGINT, SQL_BIGINT, Safir::Dob::Typesystem::I
 
 typedef Internal::TimeParameter<SQL_PARAM_INPUT_OUTPUT> TimeInputOutputParameter;
 
-};  // Odbc
+}  // Odbc
 
-};  // Databases
+}  // Databases
 
-};  // Safir
+}  // Safir
 
 #endif
 #endif //Safir_Databases_Odbc_Input_Output_Parameter_h
