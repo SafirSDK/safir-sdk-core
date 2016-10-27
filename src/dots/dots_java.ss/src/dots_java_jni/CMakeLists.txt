@@ -2,6 +2,12 @@
 #so we never want the "d" suffix on debug builds, which is default on windows.
 SET(CMAKE_DEBUG_POSTFIX "")
 
+#we need to disable some warnings, since we do some wierd things with pointers
+if (NOT MSVC)
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-pedantic -Wno-extra")
+endif()
+
+
 ADD_LIBRARY(dots_java_jni SHARED
   dots_java_jni.cpp)
 
