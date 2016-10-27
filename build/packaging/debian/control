@@ -20,7 +20,7 @@ Description: Distributed real-time system framework
 
 Package: safir-sdk-core-tools
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, safir-sdk-core
+Depends: ${shlibs:Depends}, ${misc:Depends}, safir-sdk-core (= ${binary:Version})
 Description: Safir SDK Core debugging tools
  Safir SDK Core is a middleware and platform for creation of
  distributed soft real-time systems. It is Scalable, Reliable,
@@ -34,7 +34,7 @@ Description: Safir SDK Core debugging tools
 Package: safir-sdk-core-dev
 Architecture: any
 Section: libdevel
-Depends: ${shlibs:Depends}, ${misc:Depends}, python (>= 2.7.0), safir-sdk-core
+Depends: ${shlibs:Depends}, ${misc:Depends}, python (>= 2.7.0), unixodbc-dev, libboost-all-dev, safir-sdk-core (= ${binary:Version})
 Description: Safir SDK Core development files
  Safir SDK Core is a middleware and platform for creation of
  distributed soft real-time systems. It is Scalable, Reliable,
@@ -48,7 +48,8 @@ Description: Safir SDK Core development files
 Package: safir-sdk-core-testsuite
 Architecture: any
 Section: libdevel
-Depends: ${shlibs:Depends}, ${misc:Depends}, ${cli:Depends}, python (>= 2.7.0), safir-sdk-core, safir-sdk-core-tools
+Depends: ${shlibs:Depends}, ${misc:Depends}, ${cli:Depends}, python (>= 2.7.0),
+         safir-sdk-core(= ${binary:Version}), safir-sdk-core-tools (= ${binary:Version})
 Description: Safir SDK Core test suite
  Safir SDK Core is a middleware and platform for creation of
  distributed soft real-time systems. It is Scalable, Reliable,
