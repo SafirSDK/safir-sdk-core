@@ -11479,7 +11479,7 @@ BOOST_AUTO_TEST_CASE(MergeChanges_ObjectSequences_1)
 
     ts::Utilities::MergeChanges(into,from);
 
-    BOOST_CHECK_EQUAL(into->TestClassMember().size(),1);
+    BOOST_CHECK_EQUAL(into->TestClassMember().size(), 1U);
     BOOST_CHECK(into->TestClassMember().IsChangedHere());
     BOOST_CHECK(into->TestClassMember().at(0)->MyInt().IsChanged());
     BOOST_CHECK_EQUAL(into->TestClassMember().at(0)->MyInt(),10);
@@ -11504,7 +11504,7 @@ BOOST_AUTO_TEST_CASE(MergeChanges_ObjectSequences_3)
     from->TestClassMember().SetChanged(false);
 
     ts::Utilities::MergeChanges(into,from);
-    BOOST_CHECK_EQUAL(into->TestClassMember().size(),0);
+    BOOST_CHECK_EQUAL(into->TestClassMember().size(), 0U);
     BOOST_CHECK(!into->TestClassMember().IsChanged());
 }
 
@@ -11515,7 +11515,7 @@ BOOST_AUTO_TEST_CASE(MergeChanges_ObjectSequences_4)
     from->TestClassMember().SetChanged(true);
 
     ts::Utilities::MergeChanges(into,from);
-    BOOST_CHECK_EQUAL(into->TestClassMember().size(),0);
+    BOOST_CHECK_EQUAL(into->TestClassMember().size(), 0U);
     BOOST_CHECK(into->TestClassMember().IsChanged());
 }
 
@@ -11550,7 +11550,7 @@ BOOST_AUTO_TEST_CASE(MergeChanges_ObjectSequences_IntoNonEmpty_1)
 
     ts::Utilities::MergeChanges(into,from);
 
-    BOOST_CHECK_EQUAL(into->TestClassMember().size(),1);
+    BOOST_CHECK_EQUAL(into->TestClassMember().size(), 1U);
     BOOST_CHECK(into->TestClassMember().IsChangedHere());
     BOOST_CHECK(!into->TestClassMember().at(0)->MyInt().IsChanged());
     BOOST_CHECK_EQUAL(into->TestClassMember().at(0)->MyInt(),30);
@@ -11566,7 +11566,7 @@ BOOST_AUTO_TEST_CASE(MergeChanges_ObjectSequences_IntoNonEmpty_2)
 
     ts::Utilities::MergeChanges(into,from);
 
-    BOOST_CHECK_EQUAL(into->TestClassMember().size(),2);
+    BOOST_CHECK_EQUAL(into->TestClassMember().size(), 2U);
     BOOST_CHECK(!into->TestClassMember().IsChanged());
     BOOST_CHECK_EQUAL(into->TestClassMember().at(0)->MyInt(),10);
     BOOST_CHECK_EQUAL(into->TestClassMember().at(0)->MyString(),L"one");
@@ -11595,7 +11595,7 @@ BOOST_AUTO_TEST_CASE(MergeChanges_ObjectSequences_IntoNonEmpty_4)
 
     ts::Utilities::MergeChanges(into,from);
 
-    BOOST_CHECK_EQUAL(into->TestClassMember().size(),2);
+    BOOST_CHECK_EQUAL(into->TestClassMember().size(), 2U);
     BOOST_CHECK(!into->TestClassMember().IsChangedHere());
     BOOST_CHECK(!into->TestClassMember().at(1)->IsChanged());
     BOOST_CHECK(into->TestClassMember().at(0)->MyInt().IsChanged());
@@ -11619,7 +11619,7 @@ BOOST_AUTO_TEST_CASE(MergeChanges_ObjectSequences_IntoNonEmpty_5)
 
     ts::Utilities::MergeChanges(into,from);
 
-    BOOST_CHECK_EQUAL(into->TestClassMember().size(),2);
+    BOOST_CHECK_EQUAL(into->TestClassMember().size(), 2U);
     BOOST_CHECK(!into->TestClassMember().IsChangedHere());
     BOOST_CHECK(!into->TestClassMember().at(1)->IsChanged());
     BOOST_CHECK(into->TestClassMember().at(0)->MyInt().IsChanged());
