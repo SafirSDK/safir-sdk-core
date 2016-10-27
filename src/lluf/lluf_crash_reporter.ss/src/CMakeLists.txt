@@ -29,7 +29,7 @@ endif()
 #breakpad needs the GNU extensions to build, so we append a new -std= here
 #also disable some warnings
 if (NOT MSVC)
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11 -Wno-pedantic -Wno-extra")
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11 -Wno-pedantic")
 endif()
 
 #we add our own breakpad build, which which should already be downloaded (it's a git submodule)

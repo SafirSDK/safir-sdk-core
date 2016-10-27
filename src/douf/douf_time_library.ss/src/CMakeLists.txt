@@ -4,6 +4,12 @@ SET(CMAKE_DEBUG_POSTFIX "")
 
 FILE(GLOB sources *.cpp)
 
+#we need to disable some warnings, since we do some wierd things with pointers
+if (NOT MSVC)
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-pedantic")
+endif()
+
+
 ADD_LIBRARY(douf_time_library SHARED ${sources})
 
 #Make our INTERNAL headers available to other parts of Core.

@@ -1,6 +1,6 @@
 #we need to disable some warnings, since the crasher does some wierd things.
 if (NOT MSVC)
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-pedantic -Wno-extra")
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-pedantic")
 endif()
 
 
