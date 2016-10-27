@@ -1,3 +1,9 @@
+#we need to disable some warnings, since the crasher does some wierd things.
+if (NOT MSVC)
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-pedantic -Wno-extra")
+endif()
+
+
 ADD_EXECUTABLE(crasher crasher.cpp)
 
 TARGET_LINK_LIBRARIES (crasher PRIVATE lluf_crash_reporter)

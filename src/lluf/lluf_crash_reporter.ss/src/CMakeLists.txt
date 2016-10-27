@@ -27,6 +27,7 @@ else()
 endif()
 
 #breakpad needs the GNU extensions to build, so we append a new -std= here
+#also disable some warnings
 if (NOT MSVC)
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11 -Wno-pedantic -Wno-extra")
 endif()
