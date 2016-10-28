@@ -348,6 +348,20 @@ can be simple or complex members. Each value has its own IsNull and IsChanged fl
 the collection itself has an IsChanged flag that will be set whenever a value is added or
 removed.
 
+==== A note on collections in Java
+Due to the nature of function overloading in Java the operations for adding elements to
+dictionaries and sequences in Java differ slightly from the other languages. The +put()+
+function expects a _Container_, not a value, which makes it rather difficult to work
+with. Unfortunately it is not possible to overload this function in a sensible way, so
+instead there is another operation +putVal()+ (or +putObj()+ for objects). Use this
+operation to not have to worry about the containers.
+
+.Note
+************************************
+Use +putVal(...)+/+putObj(...)+ instead of +put(...)+ when adding elements to collections
+in Java.
+************************************
+
 [[parameters]]
 === Parameters
 Apart from members a class can also contain constant parameters. These parameters are not
