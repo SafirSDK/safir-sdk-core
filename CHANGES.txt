@@ -29,15 +29,15 @@ This release fixes the following issues (see http://safirsdkcore.com for details
 
 This release fixes the following issues (see http://safirsdkcore.com for details):
 
-#303 System Picture component tests sometimes fail to form system when running many nodes bug
-#309 safir_control does not stop dose_main if it encounters an exception bug
-#301 Safir_control fails silently when started on computer without networking bug
-#308 Use git submodules for the new dependencies for websockets bug
+#303 System Picture component tests sometimes fail to form system when running many nodes
+#309 safir_control does not stop dose_main if it encounters an exception
+#301 Safir_control fails silently when started on computer without networking
+#308 Use git submodules for the new dependencies for websockets
 #302 safir_websocket crash
-#296 IPC Unit test failures bug
-#300 Incarnation_And_Control_Tests sometimes fail bug
-#306 Safir_control must not be multithreaded due to fork() issue bug
-#314 Make sequence and dictionary SetNull/IsNull call clear/empty enhancement
+#296 IPC Unit test failures
+#300 Incarnation_And_Control_Tests sometimes fail
+#306 Safir_control must not be multithreaded due to fork() issue
+#314 Make sequence and dictionary SetNull/IsNull call clear/empty
 
 -----------------------------------------------------------------------------------------------------------------------
 2016-08-17 version 6.3.1
