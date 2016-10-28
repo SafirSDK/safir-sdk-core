@@ -1,4 +1,18 @@
 -----------------------------------------------------------------------------------------------------------------------
+2016-10-30 version 6.3.4
+-----------------------------------------------------------------------------------------------------------------------
+
+This release fixes the following issues (see http://safirsdkcore.com for details):
+
+#319 Changeflags in Objects in Sequences inside AsynchronousInjectable entities do not behave as expected
+#320 Add documentation for #317
+#323 SetChanges on entities containing Object Sequences and Dictionaries doesn't behave as expected
+#325 Missing dependency on unixodbc-dev
+#326 Internal dependencies should require equal version
+
+TODO more?
+
+-----------------------------------------------------------------------------------------------------------------------
 2016-09-07 version 6.3.3
 -----------------------------------------------------------------------------------------------------------------------
 
