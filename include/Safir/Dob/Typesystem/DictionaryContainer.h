@@ -23,15 +23,15 @@
 ******************************************************************************/
 #pragma once
 
+#include <Safir/Dob/Typesystem/ContainerBase.h>
+#include <Safir/Dob/Typesystem/Exceptions.h>
+#include <Safir/Dob/Typesystem/ObjectContainer.h>
+#include <Safir/Dob/Typesystem/Utilities.h>
+#include <boost/shared_ptr.hpp>
+#include <map>
+#include <stdexcept>
 #include <typeinfo>
 #include <vector>
-#include <map>
-#include <Safir/Dob/Typesystem/ContainerBase.h>
-#include <Safir/Dob/Typesystem/ObjectContainer.h>
-#include <Safir/Dob/Typesystem/Exceptions.h>
-#include <Safir/Dob/Typesystem/Utilities.h>
-
-#include <boost/shared_ptr.hpp>
 
 namespace Safir
 {

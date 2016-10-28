@@ -23,15 +23,16 @@
 ******************************************************************************/
 #pragma once
 
+#include <Safir/Dob/Typesystem/ChannelId.h>
+#include <Safir/Dob/Typesystem/ContainerBase.h>
+#include <Safir/Dob/Typesystem/EntityId.h>
+#include <Safir/Dob/Typesystem/HandlerId.h>
+#include <Safir/Dob/Typesystem/Object.h>
+#include <Safir/Dob/Typesystem/Utilities.h>
+#include <boost/container/vector.hpp>
+#include <stdexcept>
 #include <typeinfo>
 #include <vector>
-#include <boost/container/vector.hpp>
-#include <Safir/Dob/Typesystem/EntityId.h>
-#include <Safir/Dob/Typesystem/Utilities.h>
-#include <Safir/Dob/Typesystem/ChannelId.h>
-#include <Safir/Dob/Typesystem/HandlerId.h>
-#include <Safir/Dob/Typesystem/ContainerBase.h>
-#include <Safir/Dob/Typesystem/Object.h>
 
 namespace Safir
 {
