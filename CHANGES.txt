@@ -9,8 +9,7 @@ This release fixes the following issues (see http://safirsdkcore.com for details
 #323 SetChanges on entities containing Object Sequences and Dictionaries doesn't behave as expected
 #325 Missing dependency on unixodbc-dev
 #326 Internal dependencies should require equal version
-
-TODO more?
+#328 Setting SAFIR_DONT_BUILD_JAVA to False or 0 still disables java builds
 
 -----------------------------------------------------------------------------------------------------------------------
 2016-09-07 version 6.3.3
@@ -19,7 +18,7 @@ TODO more?
 This release fixes the following issues (see http://safirsdkcore.com for details):
 
 #315 Update docs for IsNull/SetNull
-#317 Java DictionaryContainer insertion requires an extra
+#317 Java DictionaryContainer insertion requires an extra step
 #316 SequenceContainer SetChanged/IsChanged are not recursive
 #318 SequenceContainer::InsertAt does not set changeflag
 
