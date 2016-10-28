@@ -29,7 +29,7 @@ else()
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/breakpad
     BINARY_DIR ${CMAKE_CURRENT_SOURCE_DIR}/breakpad
     PATCH_COMMAND ${CMAKE_COMMAND} -E create_symlink <SOURCE_DIR>/../linux-syscall-support <SOURCE_DIR>/src/third_party/lss
-    CONFIGURE_COMMAND cd <SOURCE_DIR> && ./configure CFLAGS=-fPIC CXXFLAGS=-fPIC
+    CONFIGURE_COMMAND cd <SOURCE_DIR> && ./configure
     BUILD_COMMAND cd <SOURCE_DIR> && make src/client/linux/libbreakpad_client.a
     INSTALL_COMMAND ""
     )
