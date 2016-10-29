@@ -576,7 +576,7 @@ namespace @_NAMESPACEV_@
 @@ --- Sequence member ---
 @@ELSIF@@ @_EXIST:MEMBERISSEQUENCE_@
         {
-            const auto size = DotsC_GetNumberOfMemberValues(handle, g_@_LOWER:MEMBER_@MemberIndex);
+            const DotsC_Int32 size = DotsC_GetNumberOfMemberValues(handle, g_@_LOWER:MEMBER_@MemberIndex);
             for (int valueIndex=0; valueIndex<size; ++valueIndex)
             {
                 bool isNull, isChanged;
@@ -603,7 +603,7 @@ namespace @_NAMESPACEV_@
 @@ --- Dictionary member ---
 @@ELSIF@@ @_EXIST:MEMBERISDICTIONARY_@
         {
-            const auto size = DotsC_GetNumberOfMemberValues(handle, g_@_LOWER:MEMBER_@MemberIndex);
+            const DotsC_Int32 size = DotsC_GetNumberOfMemberValues(handle, g_@_LOWER:MEMBER_@MemberIndex);
             for (int valueIndex=0; valueIndex<size; ++valueIndex)
             {
                 bool dummy1, dummy2;
@@ -700,7 +700,25 @@ namespace @_NAMESPACEV_@
 @@ --- Dictionary member ---
 @@ELSIF@@ @_EXIST:MEMBERISDICTIONARY_@
         {
-        for (auto it = m_@_MEMBER_@Member.begin(); it != m_@_MEMBER_@Member.end(); ++it)
+@@IF@@ @_UNIFORM_MEMBERDICTIONARYTYPE_@=Enumeration
+@@IF@@ (@_UNIFORM_MEMBERTYPE_@ = String) or (@_UNIFORM_MEMBERTYPE_@ = Boolean)
+        for (Safir::Dob::Typesystem::DictionaryContainer<@_MEMBERDICTIONARYTYPE_@::Enumeration, Safir::Dob::Typesystem::@_UNIFORM_MEMBERTYPE_@Container>
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
+        for (Safir::Dob::Typesystem::DictionaryContainer<@_MEMBERDICTIONARYTYPE_@::Enumeration, @_MEMBERTYPE_@::EnumerationContainer>
+@@ELSE@@
+        for (Safir::Dob::Typesystem::DictionaryContainer<@_MEMBERDICTIONARYTYPE_@::Enumeration, @_MEMBERTYPE_@Container>
+@@END_IF@@
+@@ELSE@@
+@@IF@@ (@_UNIFORM_MEMBERTYPE_@ = String) or (@_UNIFORM_MEMBERTYPE_@ = Boolean)
+        for(Safir::Dob::Typesystem::DictionaryContainer<@_MEMBERDICTIONARYTYPE_@, Safir::Dob::Typesystem::@_UNIFORM_MEMBERTYPE_@Container>
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
+        for(Safir::Dob::Typesystem::DictionaryContainer<@_MEMBERDICTIONARYTYPE_@, @_MEMBERTYPE_@::EnumerationContainer>
+@@ELSE@@
+        for(Safir::Dob::Typesystem::DictionaryContainer<@_MEMBERDICTIONARYTYPE_@, @_MEMBERTYPE_@Container>
+@@END_IF@@
+@@END_IF@@
+             ::const_iterator it = m_@_MEMBER_@Member.begin();
+             it != m_@_MEMBER_@Member.end(); ++it)
         {
             Safir::Dob::Typesystem::Internal::BlobOperations::Set(it->first,
                                                                   false,
