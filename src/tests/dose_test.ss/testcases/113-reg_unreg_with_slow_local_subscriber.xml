@@ -3,7 +3,7 @@
   <Description xml:space="preserve">Test of registering a service handler while there is an unregister state remaining (local)</Description>
   <Expectation xml:space="preserve">Consumer 0 receives one OnRegistered</Expectation>
   <TestCaseSetupActions>
-    <DoseTest.Action index="0">
+    <DoseTest.Action>
       <ActionKind>SubscribeRegistration</ActionKind>
       <Partner>0</Partner>
       <Consumer>0</Consumer>
@@ -14,38 +14,38 @@
     </DoseTest.Action>
   </TestCaseSetupActions>
   <TestActions>
-    <DoseTest.Action index="0">
+    <DoseTest.Action>
       <ActionKind>Sleep</ActionKind>
       <Partner>0</Partner>
-      <SleepDuration>1</SleepDuration>
+      <SleepDuration>2</SleepDuration>
     </DoseTest.Action>
-    <DoseTest.Action index="1">
+    <DoseTest.Action>
       <ActionKind>RegisterServiceHandler</ActionKind>
       <Partner>1</Partner>
       <Consumer>0</Consumer>
       <TypeId>DoseTest.LocalService</TypeId>
       <Handler>DEFAULT_HANDLER</Handler>
     </DoseTest.Action>
-    <DoseTest.Action index="2">
+    <DoseTest.Action>
       <ActionKind>Close</ActionKind>
       <Partner>1</Partner>
     </DoseTest.Action>
-    <DoseTest.Action index="3">
+    <DoseTest.Action>
       <ActionKind>Open</ActionKind>
       <Partner>1</Partner>
     </DoseTest.Action>
-    <DoseTest.Action index="4">
+    <DoseTest.Action>
       <ActionKind>RegisterServiceHandler</ActionKind>
       <Partner>1</Partner>
       <Consumer>0</Consumer>
       <TypeId>DoseTest.LocalService</TypeId>
       <Handler>DEFAULT_HANDLER</Handler>
     </DoseTest.Action>
-    <DoseTest.Action index="5">
+    <DoseTest.Action>
       <ActionKind>Sleep</ActionKind>
-      <SleepDuration>2</SleepDuration>
+      <SleepDuration>4</SleepDuration>
     </DoseTest.Action>
-    <DoseTest.Action index="6">
+    <DoseTest.Action>
       <ActionKind>UnsubscribeRegistration</ActionKind>
       <Partner>0</Partner>
       <Consumer>0</Consumer>
