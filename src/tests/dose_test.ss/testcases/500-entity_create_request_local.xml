@@ -22,7 +22,7 @@
     </DoseTest.Action>
   </TestCaseSetupActions>
   <TestActions>
-    <DoseTest.Action index="0">
+    <DoseTest.Action>
       <ActionKind>CreateRequest</ActionKind>
       <Partner>0</Partner>
       <Consumer>0</Consumer>
@@ -32,7 +32,11 @@
         <Info xml:space="preserve">Created</Info>
       </Object>
     </DoseTest.Action>
-    <DoseTest.Action index="1">
+    <DoseTest.Action>
+      <ActionKind>Sleep</ActionKind>
+      <SleepDuration>1</SleepDuration>
+    </DoseTest.Action>
+    <DoseTest.Action>
       <ActionKind>Read</ActionKind>
       <Partner>0</Partner>
       <Consumer>1</Consumer>
