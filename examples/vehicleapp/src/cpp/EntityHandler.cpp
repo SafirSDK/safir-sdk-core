@@ -71,6 +71,7 @@ namespace VehicleAppCpp
 
     void EntityHandler::OnInjectedNewEntity(const Safir::Dob::InjectedEntityProxy injectedEntityProxy)
     {
+        (void)injectedEntityProxy; //fix 'unused' warning
         // The default implementation will automatically accept the object.
 
         // Send notification message when the number of created vehicles
@@ -88,6 +89,7 @@ namespace VehicleAppCpp
 
     void EntityHandler::OnInjectedDeletedEntity(const Safir::Dob::InjectedEntityProxy injectedEntityProxy)
     {
+        (void)injectedEntityProxy; //fix 'unused' warning
         // The default implementation will automatically accept the deletion.
     }
 
@@ -230,4 +232,4 @@ namespace VehicleAppCpp
         responseSender -> Send(Safir::Dob::SuccessResponse::Create());
         //StopRemoveInExercise
     }
- };
+}

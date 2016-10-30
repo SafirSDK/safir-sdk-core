@@ -65,5 +65,5 @@ namespace VehicleAppCpp
         // This class uses this secondary connection for Dob calls.
         Safir::Dob::SecondaryConnection m_connection;
     };
-};
+}
 #endif

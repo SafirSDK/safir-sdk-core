@@ -25,7 +25,7 @@ endif()
 
 if (UNIX)
    #set up use of threads and turn on more warnings
-   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -Wall")
+   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -Wall -Wextra -Wpedantic")
 endif ()
 
 
