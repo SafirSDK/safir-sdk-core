@@ -3,14 +3,14 @@
   <Description xml:space="preserve">Test of registration subscription including subclasses (global)</Description>
   <Expectation xml:space="preserve">Partner 2/Consumer 2 receives OnRegistered for ROOT_HANDLER_0, GLOBAL_HANDLER_0 and GLOBAL_HANDLER_1</Expectation>
   <TestCaseSetupActions>
-    <DoseTest.Action index="0">
+    <DoseTest.Action>
       <ActionKind>RegisterServiceHandler</ActionKind>
       <Partner>1</Partner>
       <Consumer>1</Consumer>
       <TypeId>DoseTest.RootService</TypeId>
       <Handler>ROOT_HANDLER_0</Handler>
     </DoseTest.Action>
-    <DoseTest.Action index="1">
+    <DoseTest.Action>
       <ActionKind>RegisterServiceHandler</ActionKind>
       <Partner>1</Partner>
       <Consumer>1</Consumer>
@@ -19,7 +19,7 @@
     </DoseTest.Action>
   </TestCaseSetupActions>
   <TestActions>
-    <DoseTest.Action index="0">
+    <DoseTest.Action>
       <ActionKind>SubscribeRegistration</ActionKind>
       <Partner>2</Partner>
       <Consumer>2</Consumer>
@@ -28,7 +28,7 @@
       <IncludeSubclasses>true</IncludeSubclasses>
       <RestartSubscription>false</RestartSubscription>
     </DoseTest.Action>
-    <DoseTest.Action index="1">
+    <DoseTest.Action>
       <ActionKind>UnsubscribeRegistration</ActionKind>
       <Partner>2</Partner>
       <Consumer>2</Consumer>
@@ -36,21 +36,21 @@
       <Handler>ALL_HANDLERS</Handler>
       <IncludeSubclasses>false</IncludeSubclasses>
     </DoseTest.Action>
-    <DoseTest.Action index="2">
+    <DoseTest.Action>
       <ActionKind>RegisterServiceHandler</ActionKind>
       <Partner>1</Partner>
       <Consumer>1</Consumer>
       <TypeId>DoseTest.RootService</TypeId>
       <Handler>ROOT_HANDLER_1</Handler>
     </DoseTest.Action>
-    <DoseTest.Action index="3">
+    <DoseTest.Action>
       <ActionKind>RegisterServiceHandler</ActionKind>
       <Partner>1</Partner>
       <Consumer>1</Consumer>
       <TypeId>DoseTest.GlobalService</TypeId>
       <Handler>GLOBAL_HANDLER_1</Handler>
     </DoseTest.Action>
-    <DoseTest.Action index="4">
+    <DoseTest.Action>
       <ActionKind>UnsubscribeRegistration</ActionKind>
       <Partner>2</Partner>
       <Consumer>2</Consumer>
@@ -58,12 +58,16 @@
       <Handler>ALL_HANDLERS</Handler>
       <IncludeSubclasses>true</IncludeSubclasses>
     </DoseTest.Action>
-    <DoseTest.Action index="5">
+    <DoseTest.Action>
       <ActionKind>RegisterServiceHandler</ActionKind>
       <Partner>1</Partner>
       <Consumer>1</Consumer>
       <TypeId>DoseTest.GlobalService</TypeId>
       <Handler>GLOBAL_HANDLER_2</Handler>
+    </DoseTest.Action>
+    <DoseTest.Action>
+      <ActionKind>Sleep</ActionKind>
+      <SleepDuration>1</SleepDuration>
     </DoseTest.Action>
   </TestActions>
 </DoseTest.Items.TestCase>
