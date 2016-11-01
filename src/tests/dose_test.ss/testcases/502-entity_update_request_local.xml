@@ -3,7 +3,7 @@
   <Description xml:space="preserve">Test of sending update request of created instance (owner on this node)</Description>
   <Expectation xml:space="preserve">Partner 0/Consumer 1 receives a success response and the entity info field is "Updated" (part 0/cons 1)</Expectation>
   <TestCaseSetupActions>
-    <DoseTest.Action index="0">
+    <DoseTest.Action>
       <ActionKind>SendResponse</ActionKind>
       <Partner>1</Partner>
       <ActionCallback>OnUpdateRequest</ActionCallback>
@@ -12,7 +12,7 @@
         <Info xml:space="preserve">Succesful response</Info>
       </Object>
     </DoseTest.Action>
-    <DoseTest.Action index="1">
+    <DoseTest.Action>
       <ActionKind>RegisterEntityHandler</ActionKind>
       <Partner>1</Partner>
       <Consumer>1</Consumer>
@@ -20,7 +20,7 @@
       <Handler>DEFAULT_HANDLER</Handler>
       <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
     </DoseTest.Action>
-    <DoseTest.Action index="2">
+    <DoseTest.Action>
       <ActionKind>SetAll</ActionKind>
       <Partner>1</Partner>
       <Consumer>1</Consumer>
@@ -32,7 +32,7 @@
     </DoseTest.Action>
   </TestCaseSetupActions>
   <TestActions>
-    <DoseTest.Action index="0">
+    <DoseTest.Action>
       <ActionKind>UpdateRequest</ActionKind>
       <Partner>0</Partner>
       <Consumer>1</Consumer>
@@ -42,7 +42,11 @@
         <Info xml:space="preserve">Updated</Info>
       </Object>
     </DoseTest.Action>
-    <DoseTest.Action index="1">
+    <DoseTest.Action>
+      <ActionKind>Sleep</ActionKind>
+      <SleepDuration>1</SleepDuration>
+    </DoseTest.Action>
+    <DoseTest.Action>
       <ActionKind>Read</ActionKind>
       <Partner>0</Partner>
       <Consumer>1</Consumer>
