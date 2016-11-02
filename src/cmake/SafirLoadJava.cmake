@@ -6,8 +6,8 @@
 # Also defines a function SAFIR_JAVAH which is described below.
 #
 
-if (NOT $ENV{SAFIR_DONT_BUILD_JAVA})
-  message (FATAL_ERROR "Not building java")
+if ($ENV{SAFIR_DONT_BUILD_JAVA})
+  message (STATUS "Not building java, since SAFIR_DONT_BUILD_JAVA is set")
   SET(Java_FOUND Java-NOTFOUND)
   return()
 endif()
