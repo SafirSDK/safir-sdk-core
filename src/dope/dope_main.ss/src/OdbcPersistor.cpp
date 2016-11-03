@@ -197,8 +197,8 @@ void OdbcPersistor::Store(const Safir::Dob::Typesystem::EntityId& entityId,
 
             if (!update)
             {
-                // After global instanceid's we can no longer assume that all instanceid's are written to the
-                // the database at startup. So try to insert them here if the entity already exist
+                //If this is not an update we need to insert a row in the table for our entity
+                //before storing it.
                 Insert(entityId);
             }
 
@@ -538,11 +538,11 @@ void OdbcPersistor::RestoreAll()
                     //we were in case the db goes down during restore
                     restoredObjects.insert(entityId);
                 }
-                catch(const Safir::Dob::Typesystem::IllegalValueException &)
+                catch(const Safir::Dob::Typesystem::IllegalValueException & e)
                 {
                     m_debug << "Could not restore "
                             << entityId.ToString()
-                            << ", removing it" << std::endl;
+                            << ", removing it. (Got exception: " << e.what() << ")" << std::endl;
 
                     Safir::Logging::SendSystemLog(Safir::Logging::Error,
                                                     L"Failed to restore entity" +
@@ -817,7 +817,6 @@ OdbcPersistor::ConnectIfNeeded(SQLHDBC connection,
         {
             OdbcHelper::ThrowException(SQL_HANDLE_DBC, connection);
         }
-
     }
 }
 
