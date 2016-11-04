@@ -571,7 +571,7 @@ void OdbcPersistor::RestoreAll()
 
             if (isConnected)
             {
-                Disconnect(getAllConnection);
+                OdbcHelper::Disconnect(getAllConnection);
                 isConnected = false;
             }
 
@@ -593,7 +593,7 @@ void OdbcPersistor::RestoreAll()
     {
         if (isConnected)
         {
-            Disconnect(getAllConnection);
+            OdbcHelper::Disconnect(getAllConnection);
         }
         FreeConnection(getAllConnection);
     }
@@ -766,7 +766,7 @@ OdbcPersistor::DisconnectOdbcConnection()
 {
     if (m_isOdbcConnected)
     {
-        Disconnect(m_odbcConnection);
+        OdbcHelper::Disconnect(m_odbcConnection);
         m_isOdbcConnected = false;
     }
 
@@ -911,17 +911,6 @@ void
 OdbcPersistor::FreeConnection(SQLHDBC connection)
 {
     const SQLRETURN ret = ::SQLFreeHandle(SQL_HANDLE_DBC, connection);
-    if (!SQL_SUCCEEDED(ret))
-    {
-        OdbcHelper::ThrowException(SQL_HANDLE_DBC, connection);
-    }
-}
-
-
-void
-OdbcPersistor::Disconnect(SQLHDBC connection)
-{
-    const SQLRETURN ret = ::SQLDisconnect(connection);
     if (!SQL_SUCCEEDED(ret))
     {
         OdbcHelper::ThrowException(SQL_HANDLE_DBC, connection);

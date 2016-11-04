@@ -114,7 +114,7 @@ void RunStatement(const ProgramOptions& options)
     SQLRETURN ret = ::SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &environment);
     if (!SQL_SUCCEEDED(ret))
     {
-        helper.ThrowException(SQL_HANDLE_ENV, SQL_NULL_HANDLE);
+        OdbcHelper::ThrowException(SQL_HANDLE_ENV, SQL_NULL_HANDLE);
     }
 
     ret = ::SQLSetEnvAttr(environment,
@@ -123,22 +123,22 @@ void RunStatement(const ProgramOptions& options)
                             SQL_IS_UINTEGER);
     if (!SQL_SUCCEEDED(ret))
     {
-        helper.ThrowException(SQL_HANDLE_ENV, environment);
+        OdbcHelper::ThrowException(SQL_HANDLE_ENV, environment);
     }
 
     ret = ::SQLAllocHandle(SQL_HANDLE_DBC, environment, &connection);
     if (!SQL_SUCCEEDED(ret))
     {
-        helper.ThrowException(SQL_HANDLE_ENV, environment);
+        OdbcHelper::ThrowException(SQL_HANDLE_ENV, environment);
     }
 
-    helper.Connect(connection, options.connectionString);
+    OdbcHelper::Connect(connection, options.connectionString);
 
     SQLHSTMT statement;
-    helper.AllocStatement(&statement, connection);
+    OdbcHelper::AllocStatement(&statement, connection);
 
-    helper.Prepare(statement, options.statement);
-    helper.Execute(statement);
+    OdbcHelper::Prepare(statement, options.statement);
+    OdbcHelper::Execute(statement);
 
     int rows = 0;
     SQLSMALLINT columns = 0;
@@ -146,17 +146,18 @@ void RunStatement(const ProgramOptions& options)
     ret = ::SQLNumResultCols(statement, &columns);
     if (!SQL_SUCCEEDED(ret))
     {
-        helper.ThrowException(SQL_HANDLE_STMT,statement);
+        OdbcHelper::ThrowException(SQL_HANDLE_STMT,statement);
     }
 
     if (columns != 0)
     {
-        while(helper.Fetch(statement))
+        while(OdbcHelper::Fetch(statement))
         {
             ++rows;
         }
     }
     std::wcout << "Got " << rows << " rows." << std::endl;
+    OdbcHelper::Disconnect(connection);
 }
 
 

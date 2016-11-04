@@ -194,6 +194,17 @@ void OdbcHelper::Connect(SQLHDBC connection, const std::string& connectionString
     }
 }
 
+
+void OdbcHelper::Disconnect(SQLHDBC connection)
+{
+    const SQLRETURN ret = ::SQLDisconnect(connection);
+
+    if (!SQL_SUCCEEDED(ret))
+    {
+        ThrowException(SQL_HANDLE_DBC, connection);
+    }
+}
+
 void OdbcHelper::Execute(SQLHSTMT statement)
 {
     const SQLRETURN ret = ::SQLExecute(statement);

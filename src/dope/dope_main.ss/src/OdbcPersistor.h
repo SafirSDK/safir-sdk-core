@@ -91,10 +91,6 @@ private:
     // Free an previously allocated connection
     static void FreeConnection(SQLHDBC connection);
 
-    // Disconnects a connection.
-    static void Disconnect(SQLHDBC connection);
-
-
     // Disconnects the ODBC connection with all boolean correctly reset.
     void DisconnectOdbcConnection();
 

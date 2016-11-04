@@ -85,6 +85,8 @@ public:
     static void Connect(SQLHDBC connection,
                         const std::string& connectionString);
 
+    static void Disconnect(SQLHDBC connection);
+
     static void Execute(SQLHSTMT statement);
 
     static bool Fetch(SQLHSTMT statement);
