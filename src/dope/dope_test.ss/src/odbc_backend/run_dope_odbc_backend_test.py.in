@@ -70,7 +70,7 @@ class Parameters:
         elif self.driver == "postgres":
             driver = os.environ.get("POSTGRESQL_ODBC_DRIVER_NAME")
             if driver is None:
-                driver = "PostgreSQL"
+                driver = "PostgreSQL UNICODE"
 
         #set up the connection string, starting with the driver specific parts
         if self.driver == "mimer":
