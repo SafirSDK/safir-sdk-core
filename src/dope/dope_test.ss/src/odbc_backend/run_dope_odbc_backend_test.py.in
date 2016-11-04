@@ -80,7 +80,7 @@ class Parameters:
         elif self.driver == "ms-sql":
             self.connection_string = "Driver={{{driver}}};Server={hostname};"
         elif self.driver == "postgres":
-            self.connection_string = "Driver={{{driver}}};Server={hostname};ByteaAsLongVarBinary=1;"
+            self.connection_string = "DRIVER={{{driver}}};Server={hostname};ByteaAsLongVarBinary=1;"
 
         self.connection_string += "Database={database};Uid=dopeuser;Pwd=dopeuser"
 
