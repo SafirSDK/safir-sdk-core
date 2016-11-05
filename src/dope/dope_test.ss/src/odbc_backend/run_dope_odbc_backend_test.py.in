@@ -91,7 +91,7 @@ class Parameters:
         log("Using connection string", self.connection_string)
         os.environ["DOPE_TEST_ODBC_CONNECT_STRING"] = self.connection_string
 
-        os.environ["DOPE_TEST_XML_DATA_COLUMN_IS_UTF8"] = str(sys.platform != "win32")
+        os.environ["DOPE_TEST_XML_DATA_COLUMN_IS_UTF8"] = str(sys.platform != "win32" and driver != "postgres")
 
 run_sql_pattern = re.compile(r"Got ([0-9]+) rows.")
 
