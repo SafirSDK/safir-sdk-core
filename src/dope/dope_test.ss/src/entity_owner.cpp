@@ -30,6 +30,7 @@
 #include <DopeTest/SmallEntity.h>
 #include <DopeTest/BigEntity.h>
 #include <boost/lexical_cast.hpp>
+#include <boost/algorithm/hex.hpp>
 
 #ifdef NDEBUG
 const int NUM_SMALL=20;
@@ -161,13 +162,16 @@ private:
         const auto small = boost::dynamic_pointer_cast<DopeTest::SmallEntity>(injectedEntityProxy.GetInjection());
         if (small != nullptr)
         {
-            if (small->Name() == L"testelitest\n\u00e4\u203d." || small->Name() == L"name is changed\n\u00e4\u203d.")
+            if (small->Name() == L"testelitest\n\u00e4\u203d." ||
+                small->Name() == L"name is changed\n\u00e4\u203d.")
             {
                 std::wcout << "Correct string!" << std::endl;
             }
             else
             {
-                std::wcout << "Incorrect string!" << std::endl;
+                std::wcout << "Incorrect string! Wide hex dump '";
+                boost::algorithm::hex(small->Name().GetVal(),std::ostream_iterator<wchar_t,wchar_t>(std::wcout));
+                std::wcout << "'" << std::endl;
             }
         }
     }
