@@ -30,6 +30,18 @@ def log(*args, **kwargs):
     print(*args, **kwargs)
     sys.stdout.flush()
 
+def is_64_bit():
+    """Detecting this is a lot more complex than it should be.
+    See http://stackoverflow.com/questions/2764356/python-get-windows-os-version-and-architecture
+    and http://bytes.com/topic/python/answers/509764-detecting-64bit-vs-32bit-linux
+    This will work reasonably well on our supported systems:"""
+    if sys.platform.startswith("linux"):
+        return platform.architecture()[0] == "64bit"
+    else:
+        PROCESSOR_ARCHITECTURE = os.environ.get("PROCESSOR_ARCHITECTURE")
+        PROCESSOR_ARCHITEW6432 = os.environ.get("PROCESSOR_ARCHITEW6432")
+        return PROCESSOR_ARCHITECTURE == "AMD64" or PROCESSOR_ARCHITEW6432 == "AMD64"
+
 class Parameters:
     def __init__(self):
         from optparse import OptionParser
@@ -70,7 +82,7 @@ class Parameters:
         elif self.driver == "postgres":
             driver = os.environ.get("POSTGRESQL_ODBC_DRIVER_NAME")
             if driver is None:
-                driver = "PostgreSQL UNICODE"
+                driver = "PostgreSQL UNICODE" + "(x64)" if is_64_bit() else ""
 
         #set up the connection string, starting with the driver specific parts
         if self.driver == "mimer":
@@ -80,7 +92,7 @@ class Parameters:
         elif self.driver == "ms-sql":
             self.connection_string = "Driver={{{driver}}};Server={hostname};"
         elif self.driver == "postgres":
-            self.connection_string = "DRIVER={{{driver}}};Server={hostname};ByteaAsLongVarBinary=1;"
+            self.connection_string = "DRIVER={{{driver}}};Server={hostname};ByteaAsLongVarBinary=1;LFConversion=0;"
 
         self.connection_string += "Database={database};Uid=dopeuser;Pwd=dopeuser"
 
@@ -91,7 +103,7 @@ class Parameters:
         log("Using connection string", self.connection_string)
         os.environ["DOPE_TEST_ODBC_CONNECT_STRING"] = self.connection_string
 
-        os.environ["DOPE_TEST_XML_DATA_COLUMN_IS_UTF8"] = str(sys.platform != "win32" or driver == "postgres")
+        os.environ["DOPE_TEST_XML_DATA_COLUMN_IS_UTF8"] = str(sys.platform != "win32")
 
 run_sql_pattern = re.compile(r"Got ([0-9]+) rows.")
 
