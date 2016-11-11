@@ -551,14 +551,15 @@ class JenkinsInterface:
         jobs = output.splitlines()
         return jobs
 
-    def __to_bool(self,output):
+    def __to_bool(self,output, on_error):
         output = output.strip()
         if output not in ("true", "false"):
-            log ("Unexpected boolean value: '{0}' was not found in {1}. Treating as false".format(output, ("true","false")))
+            log ("Unexpected boolean value: '{0}' was not found in {1}. Treating as {2}".format(output, ("true","false", on_error)))
+            return on_error
         return output == "true"
 
 
-    def is_building(self,job):
+    def is_building(self,job,on_error):
         script = """
                  import hudson.model.*
                  item = Hudson.instance.getItem("JOB_NAME")
@@ -566,20 +567,20 @@ class JenkinsInterface:
                  """
         script = script.replace("JOB_NAME",job)
         output = self.__run_groovy(script)
-        return self.__to_bool(output)
+        return self.__to_bool(output, on_error)
 
     def wait_for_job(self,job,duration=None):
         if duration is None:
-            while self.is_building(job):
+            while self.is_building(job,True):
                 time.sleep(1.0)
         else:
             future = time.time() + duration
-            while time.time() < future and self.is_building(job):
+            while time.time() < future and self.is_building(job,True):
                 time.sleep(1.0)
 
     def build(self,job):
         self.__run_command(("build",job))
-        while not self.is_building(job):
+        while not self.is_building(job,False):
             time.sleep(1.0)
 
     def cancel_job(self,job):
