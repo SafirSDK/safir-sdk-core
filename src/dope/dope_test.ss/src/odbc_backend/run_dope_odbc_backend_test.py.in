@@ -24,7 +24,7 @@
 #
 ###############################################################################
 from __future__ import print_function
-import sys, os, shutil, xml.dom.minidom, glob, time, subprocess, re
+import sys, os, shutil, xml.dom.minidom, glob, time, subprocess, re, platform
 
 def log(*args, **kwargs):
     print(*args, **kwargs)
@@ -41,6 +41,9 @@ def is_64_bit():
         PROCESSOR_ARCHITECTURE = os.environ.get("PROCESSOR_ARCHITECTURE")
         PROCESSOR_ARCHITEW6432 = os.environ.get("PROCESSOR_ARCHITEW6432")
         return PROCESSOR_ARCHITECTURE == "AMD64" or PROCESSOR_ARCHITEW6432 == "AMD64"
+
+def is_windows():
+    return sys.platform == "win32"
 
 class Parameters:
     def __init__(self):
@@ -82,7 +85,7 @@ class Parameters:
         elif self.driver == "postgres":
             driver = os.environ.get("POSTGRESQL_ODBC_DRIVER_NAME")
             if driver is None:
-                driver = "PostgreSQL UNICODE" + ("(x64)" if is_64_bit() else "")
+                driver = "PostgreSQL UNICODE" + ("(x64)" if is_64_bit() and is_windows() else "")
 
         #set up the connection string, starting with the driver specific parts
         if self.driver == "mimer":
@@ -103,7 +106,7 @@ class Parameters:
         log("Using connection string", self.connection_string)
         os.environ["DOPE_TEST_ODBC_CONNECT_STRING"] = self.connection_string
 
-        os.environ["DOPE_TEST_XML_DATA_COLUMN_IS_UTF8"] = str(sys.platform != "win32")
+        os.environ["DOPE_TEST_XML_DATA_COLUMN_IS_UTF8"] = str(is_windows())
 
 run_sql_pattern = re.compile(r"Got ([0-9]+) rows.")
 
@@ -151,7 +154,7 @@ def delete_binary(parameters):
 #This relies on the fact that we're installed in the bin directory on both linux and windows.
 install_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)),"..")
 
-dose_main_path = os.path.join(install_dir,"bin","dose_main" + (".exe" if sys.platform == "win32" else ""))
+dose_main_path = os.path.join(install_dir,"bin","dose_main" + (".exe" if is_windows() else ""))
 #Get the default dou directory and set it as an environment variable that can be
 #picked up by the typesystem.ini that belongs to the test suite.
 #Note: The last part of this path is set by cmake during configuration/installation.
