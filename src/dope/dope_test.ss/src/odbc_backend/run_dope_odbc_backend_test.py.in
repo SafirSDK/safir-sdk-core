@@ -106,7 +106,7 @@ class Parameters:
         log("Using connection string", self.connection_string)
         os.environ["DOPE_TEST_ODBC_CONNECT_STRING"] = self.connection_string
 
-        os.environ["DOPE_TEST_XML_DATA_COLUMN_IS_UTF8"] = str(is_windows())
+        os.environ["DOPE_TEST_XML_DATA_COLUMN_IS_UTF8"] = str(not is_windows())
 
 run_sql_pattern = re.compile(r"Got ([0-9]+) rows.")
 
