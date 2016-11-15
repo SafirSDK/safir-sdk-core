@@ -32,6 +32,7 @@
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/iostreams/stream.hpp>
 #include <boost/iostreams/device/array.hpp>
+#include <boost/container/map.hpp> //this is only here to avoid a GCC 6 / Boost 1.62 error.
 #include <Safir/Utilities/Internal/Id.h>
 #include <Safir/Dob/Typesystem/ToolSupport/TypeRepository.h>
 #include <Safir/Dob/Typesystem/ToolSupport/BlobWriter.h>
