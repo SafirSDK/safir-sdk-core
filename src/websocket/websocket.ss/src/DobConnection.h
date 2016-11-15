@@ -141,7 +141,7 @@ public:
     std::string Read(ts::TypeId typeId, const ts::InstanceId& inst) const
     {
         auto proxy=m_con.Read(ts::EntityId(typeId, inst));
-        return std::move(ts::Internal::ToJson(proxy.GetBlob()));
+        return ts::Internal::ToJson(proxy.GetBlob());
     }
 
     bool IsCreated(ts::TypeId typeId, const ts::InstanceId& inst) const {return m_con.IsCreated(ts::EntityId(typeId, inst));}
@@ -150,7 +150,7 @@ public:
     std::string GetInstanceIdPolicy(ts::TypeId typeId, const ts::HandlerId& handler) const
     {
         auto policy=m_con.GetInstanceIdPolicy(typeId, handler);
-        return std::move(ts::Utilities::ToUtf8(sd::InstanceIdPolicy::ToString(policy)));
+        return ts::Utilities::ToUtf8(sd::InstanceIdPolicy::ToString(policy));
     }
 
     std::vector<ts::InstanceId> GetAllInstanceIds(ts::TypeId typeId) const
@@ -161,7 +161,7 @@ public:
         {
             instances.emplace_back(it->GetInstanceId());
         }
-        return std::move(instances);
+        return instances;
     }
 
     std::string GetName(ts::TypeId typeId) const

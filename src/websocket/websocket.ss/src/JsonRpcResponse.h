@@ -44,35 +44,35 @@ public:
 
         os<<"},"<<id<<"}";
 
-        return std::move(os.str());
+        return os.str();
     }
 
     static std::string Bool(const JsonRpcId& id, bool result)
     {
         std::ostringstream os;
         os<<"{"<<SAFIR_WS_STR("jsonrpc","2.0")<<","<<SAFIR_WS_BOOL("result", result)<<","<<id<<"}";
-        return std::move(os.str());
+        return os.str();
     }
 
     static std::string Int(const JsonRpcId& id, boost::int64_t result)
     {
         std::ostringstream os;
         os<<"{"<<SAFIR_WS_STR("jsonrpc","2.0")<<","<<SAFIR_WS_NUM("result", result)<<","<<id<<"}";
-        return std::move(os.str());
+        return os.str();
     }
 
     static std::string String(const JsonRpcId& id, const std::string& result)
     {
         std::ostringstream os;
         os<<"{"<<SAFIR_WS_STR("jsonrpc","2.0")<<","<<SAFIR_WS_STR("result", result)<<","<<id<<"}";
-        return std::move(os.str());
+        return os.str();
     }
 
     static std::string Json(const JsonRpcId& id, const std::string& json)
     {
         std::ostringstream os;
         os<<"{"<<SAFIR_WS_STR("jsonrpc","2.0")<<","<<SAFIR_WS_OBJ("result", json)<<","<<id<<"}";
-        return std::move(os.str());
+        return os.str();
     }
 
     template <class T>
@@ -91,7 +91,7 @@ public:
             comma=true;
         }
         os<<"],"<<id<<"}";
-        return std::move(os.str());
+        return os.str();
     }
 
     template <class T>
@@ -114,7 +114,7 @@ public:
             comma=true;
         }
         os<<"],"<<id<<"}";
-        return std::move(os.str());
+        return os.str();
     }
 
 private:

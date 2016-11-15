@@ -51,7 +51,6 @@ public:
     explicit App(std::wstring name, int attempts, int timeout, int instance, bool useMenu)
         : m_firstDispatcher(boost::bind(&App::DispatchFirstConnection,this), m_ioService)
         , m_secondDispatcher(boost::bind(&App::DispatchSecondConnection,this), m_ioService)
-        , m_exit(false)
         , m_connectionsFirst(StatisticsCollection::Instance().AddHzCollector(L"Connections on first"))
         , m_failedConnectionsFirst(StatisticsCollection::Instance().AddPercentageCollector(L"Failed connections on first", m_connectionsFirst))
         , m_connectionsSecond(StatisticsCollection::Instance().AddHzCollector(L"Connections on second"))
@@ -215,7 +214,6 @@ private:
     Dispatcher                                 m_secondDispatcher;
     Safir::Dob::Connection                     m_firstConnection;
     Safir::Dob::Connection                     m_secondConnection;
-    bool                                       m_exit;
     HzCollector *                              m_connectionsFirst;
     PercentageCollector *                      m_failedConnectionsFirst;
     HzCollector *                              m_connectionsSecond;

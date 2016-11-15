@@ -35,14 +35,14 @@ public:
     {
         std::ostringstream os;
         os<<"{"<<SAFIR_WS_STR("jsonrpc","2.0")<<","<<SAFIR_WS_STR("method",method)<<"}";
-        return std::move(os.str());
+        return os.str();
     }
 
     static std::string Json(const std::string& method, const std::string& json)
     {
         std::ostringstream os;
         os<<"{"<<SAFIR_WS_STR("jsonrpc","2.0")<<","<<SAFIR_WS_STR("method",method)<<","<<SAFIR_WS_OBJ("params", json)<<"}";
-        return std::move(os.str());
+        return os.str();
     }
 
 

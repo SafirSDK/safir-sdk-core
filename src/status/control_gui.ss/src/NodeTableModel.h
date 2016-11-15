@@ -56,9 +56,9 @@ public:
     NodeTableModel(QObject *parent = 0);
 
     //Dob stuff
-    virtual void OnNewEntity(const Safir::Dob::EntityProxy entityProxy);
-    virtual void OnUpdatedEntity(const Safir::Dob::EntityProxy entityProxy);
-    virtual void OnDeletedEntity(const Safir::Dob::EntityProxy entityProxy, const bool /*del*/);
+    virtual void OnNewEntity(const Safir::Dob::EntityProxy entityProxy) override;
+    virtual void OnUpdatedEntity(const Safir::Dob::EntityProxy entityProxy) override;
+    virtual void OnDeletedEntity(const Safir::Dob::EntityProxy entityProxy, const bool /*del*/) override;
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const Q_DECL_OVERRIDE;
     int columnCount(const QModelIndex &parent = QModelIndex()) const Q_DECL_OVERRIDE;

@@ -48,7 +48,7 @@ public:
         else
             os<<"{"<<SAFIR_WS_STR("jsonrpc","2.0")<<","<<SAFIR_WS_STR("method",method)<<","<<SAFIR_WS_OBJ("params", json)<<"}";
 
-        return std::move(os.str());
+        return os.str();
     }
 
     JsonRpcRequest(const std::string& json)

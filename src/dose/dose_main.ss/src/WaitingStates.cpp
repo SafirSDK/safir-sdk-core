@@ -34,8 +34,7 @@ namespace Dob
 namespace Internal
 {
     WaitingStates::WaitingStates():
-        m_isPerforming(false),
-        m_lastSize(0)
+        m_isPerforming(false)
     {
     }
 

@@ -120,28 +120,28 @@ public:
     {
         std::ostringstream os;
         os<<"{"<<SAFIR_WS_OBJ("instanceId",proxy.GetInstanceId())<<","<<SAFIR_WS_OBJ("entity",ts::Internal::ToJson((previousEntity ? proxy.GetPrevious().GetBlob() : proxy.GetBlob())))<<"}";
-        return std::move(os.str());
+        return os.str();
     }
 
     std::string ToJson(const sd::MessageProxy& proxy) const
     {
         std::ostringstream os;
         os<<"{"<<SAFIR_WS_OBJ("channelId",proxy.GetChannelId())<<","<<SAFIR_WS_OBJ("message",ts::Internal::ToJson(proxy.GetBlob()))<<"}";
-        return std::move(os.str());
+        return os.str();
     }
 
     std::string ToJson(const sd::ResponseProxy& proxy) const
     {
         std::ostringstream os;
         os<<"{"<<SAFIR_WS_BOOL("isSuccess",proxy.IsSuccess())<<","<<SAFIR_WS_OBJ("response", ts::Internal::ToJson(proxy.GetBlob()))<<"}";
-        return std::move(os.str());
+        return os.str();
     }
 
     std::string ToJson(const sd::ServiceRequestProxy& proxy) const
     {
         std::ostringstream os;
         os<<"{"<<SAFIR_WS_OBJ("handlerId",proxy.GetReceivingHandlerId())<<","<<SAFIR_WS_OBJ("request",ts::Internal::ToJson(proxy.GetBlob()))<<"}";
-        return std::move(os.str());
+        return os.str();
     }
 
     std::string ToJson(const Safir::Dob::EntityRequestProxy &proxy, EntityRequestType reqType) const
@@ -175,21 +175,21 @@ public:
                 break;
         }
 
-        return std::move(os.str());
+        return os.str();
     }
 
     std::string ToJson(const Safir::Dob::InjectedEntityProxy &proxy) const
     {
         std::ostringstream os;
         os<<"{"<<SAFIR_WS_OBJ("instanceId",proxy.GetInstanceId())<<","<<SAFIR_WS_OBJ("entity",ts::Internal::ToJson(proxy.GetInjectionBlob()))<<"}";
-        return std::move(os.str());
+        return os.str();
     }
 
     std::string ToJson(Safir::Dob::Typesystem::TypeId typeId, const Safir::Dob::Typesystem::HandlerId &handler) const
     {
         std::ostringstream os;
         os<<"{"<<SAFIR_WS_STR("typeId", m_typeIdToName(typeId))<<","<<SAFIR_WS_OBJ("handlerId",handler)<<"}";
-        return std::move(os.str());
+        return os.str();
     }
 
 private:

@@ -145,8 +145,6 @@ namespace Internal
         bool m_isPerforming;
 
         void UnsetPerformingFlag(void *){m_isPerforming = false;}
-
-        size_t m_lastSize;
     };
 }
 }
