@@ -1,28 +1,31 @@
 #==============================================================
 #
-# Copyright:      Saab AB 2010-2015
-# Author:         Mikael Wennerberg
+# Copyright:      Saab AB 2010-2016
+# Author:         Lars Hagström
 #
 # Purpose:        MYSQL DOPE database sql script.
 #
 #==============================================================
 
 
-#==============================================================
-# Create databanks to hold the tables.
-#==============================================================
+# Switch to mysql db, so that we can drop dope_db if it
+# exists
+use information_schema;
 
+# Drop database and user, if they exist
+DROP DATABASE IF EXISTS dope_db;
+DROP USER IF EXISTS dopeuser;
+
+
+# Create user and db
 CREATE USER dopeuser IDENTIFIED BY 'dopeuser';
-
 CREATE DATABASE dope_db;
+
+# Switch to the new db
 USE dope_db;
 
-GRANT ALL ON dope_db.* TO dopeuser;
 
-#==============================================================
-# Create tables.
-#==============================================================
-
+# Create table
 CREATE table PersistentEntity
 (
     TYPEID bigint  NOT NULL,
@@ -35,5 +38,6 @@ CREATE table PersistentEntity
     PRIMARY KEY(TYPEID, INSTANCE)
 ) CHARACTER SET=utf8;
 
+#give dopeuser permissions.
+GRANT INSERT, UPDATE, SELECT, DELETE ON TABLE PersistentEntity TO dopeuser;
 
-# EXIT
