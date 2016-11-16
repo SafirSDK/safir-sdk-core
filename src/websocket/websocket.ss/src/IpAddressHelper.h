@@ -29,7 +29,7 @@
 
 namespace IpAddressHelper
 {
-    //Splig addrss into ip and port. Indata on form "addr:port"
+    //Split addrss into ip and port. Indata on form "addr:port"
     inline bool SplitAddress(const std::string& address, std::string& ip, unsigned short& port)
     {
         size_t startPortSearch=address.find_last_of(']'); //if ip6, start search after address end
@@ -82,7 +82,3 @@ namespace IpAddressHelper
         throw std::logic_error("Failed to parse '"+ip+"' as an tcp endpoint.");
     }
 }
-
-#ifdef _MSC_VER
-#pragma warning (pop)
-#endif
