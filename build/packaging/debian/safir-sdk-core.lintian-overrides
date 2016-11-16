@@ -14,4 +14,4 @@ safir-sdk-core: extra-license-file
 safir-sdk-core: incompatible-java-bytecode-format
 
 #Invalid warning. That is a source file!
-safir-sdk-core source: source-is-missing src/websocket/websocket.ss/dependencies/rapidjson/bin/types/paragraphs.json
+safir-sdk-core: source-is-missing src/websocket/websocket.ss/dependencies/rapidjson/bin/types/paragraphs.json
