@@ -42,6 +42,11 @@
 
 #ifdef _MSC_VER
 #pragma warning(pop)
+
+//Disable the warning
+//  'this' : used in base member initializer list
+//that  we will get in the Test class below.
+#pragma warning (disable : 4355)
 #endif
 
 class Test
