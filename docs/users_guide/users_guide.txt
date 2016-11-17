@@ -4,7 +4,7 @@
 Safir SDK Core User's Guide
 ==========================
 Lars Hagström, Anders Widén and Joel Ottosson
-2016-10-28
+2016-11-17
 
 :cpp: {basebackend@docbook:c++:cpp}
 :csharp: {basebackend@docbook:c:csharp}
@@ -2498,7 +2498,7 @@ in this chapter, but in <<systems_of_systems>>).
 
 But first a word on why they're called _synchronous_; Persistence injections are known as
 synchronous injections since they will always occur synchronously, at application startup
-(or rather, when registration occurs), whereas the other kind of injection can occur
+(or rather, when registration occurs), whereas the last kind of injection can occur
 asynchronously throughout the lifetime of an entity instance.
 
 ===== SynchronousVolatile
@@ -3293,7 +3293,7 @@ it, with the value "Local" as DistributionChannel, using a dom file.
 
 [[persistence_config]]
 === Persistence config
-The persistence service, provided by the +dope_main+ executable has a few different features that might be good to know about. It has two _backends_, one that persists entities to files, and one that persists them to a database.
+The persistence service, provided by the +dope_main+ executable has a few different features that might be good to know about. It has three _backends_, one that does nothing, one that persists entities to files, and one that persists them to a database.
 
 A few relevant parameters for the persistence service, apart from the ones described in <<using_persistence>>.
 
@@ -3633,25 +3633,116 @@ include::tracer.txt[]
 
 [[persistence_service]]
 == The persistence service
-The persistence service is provided by the executable dope_main, which performs the storing of the entities to files on disk or to a database (configuration is described in <<persistence_config>>).
+The persistence service is provided by the executable +dope_main+, which performs the storing of the entities to files on disk or to a database (configuration is described in <<persistence_config>>).
 
-Regardless of whether the database or file backend is used the entities are stored in binary format (blobs). There is a tool +dope_bin2xml+ (run with --help to get some brief help) that converts the binary blobs into xml, which is easier to read or manipulate. The xml is placed in the xmldata column of the database, or in a file with .xml as extension (the binaries are removed when this is done, so that there will be only one source of persistence data when starting the persistence service next time). When the persistence service starts, it first looks for xml data, and only when that is not found does it look for binary data.
+=== Converting persisted entities to and from XML
+Regardless of whether the database or file backend is used the entities are stored in
+binary format (blobs). There is a tool +dope_bin2xml+ (run with --help to get some brief
+help) that converts the binary blobs into xml, which is easier to read or manipulate. The
+xml is placed in the xmldata column of the database, or in a file with .xml as extension
+(the binaries are removed when this is done, so that there will be only one source of
+persistence data when starting the persistence service next time).
 
-This means that it is possible to run dope_bin2xml, edit the xml data, and then start the system to get the edited data presented as persistent data.
+When the persistence service starts, it first looks for xml data, and only when that is
+not found does it look for binary data.
 
-This also allows for a solution to a common problem: When a dou file is changed in
-certain ways (a member is added or removed, or members are reordered) any old stored
-binary persistent data becomes unusable. But loading stored data in xml format is much
-more "compatible" with respect to dou-file changes, so if you run dope_bin2xml, then
-change the dou-files and rerun dobmake, and then start the system you are much more
-likely to have usable data in the persistent entities.
+This means that it is possible to run dope_bin2xml, edit the xml data, and then start the
+system to get the edited data presented as persistent data.
 
-This works with adding members, or changing array lengths, but not with removing or renaming members (unless they are _null_ in the persisted data, in which case they are not present in the xml). Of course if your persistent data is valuable, you can always edit the xml "by hand" to keep it. Just remember to do dope_bin2xml _before_ you change your Dob object definitions.
+==== Preserving persisted data when objects change
+The blob to/from xml mechanism also allows for a solution to a common problem:
 
-The persistence service has support for hot-standby/redundancy.
-To enable hot-standby persistence configure the persistence storage to point out a shared network storage like a shared disk/NAS or a database/database cluster.
-Then you can start dope_main in 2 or more nodes. The dope_main that starts first become the active one, and the other ones starts in a hot-standby mode.
-If the node running the active dope_main goes down, one of the hot-standby dope_main is activated and the persistence service will continue to run.
+When a dou file is changed in certain ways (a member is added or removed, or members are
+reordered) any old stored binary persistent data becomes unusable. But loading stored
+data in xml format is much more "compatible" with respect to dou-file changes, so if you
+run dope_bin2xml, then change the dou-files and rerun dobmake, and then start the system
+you are much more likely to have usable data in the persistent entities.
+
+This works with adding members, or changing array lengths, but not with removing or
+renaming members (unless they are _null_ in the persisted data, in which case they are
+not present in the xml). Of course if your persistent data is valuable, you can always
+edit the xml "by hand" to keep it. Just remember to do dope_bin2xml _before_ you change
+your Dob object definitions.
+
+=== Redundancy
+The persistence service has support for redundancy.
+
+To enable redundant persistent storage you need to configure your system in the following
+way:
+
+ * Configure the persistence storage to point out a shared network storage like a shared
+   disk/NAS or a database/database cluster.
+ * Start dope_main in 2 or more nodes.
+
+The dope_main that starts first become the active one, and the other ones starts in a
+standby mode. If the node running the active dope_main goes down, one of the standby
+instances is activated and the persistence service will continue to run.
+
+=== Configuring database persistence
+A complete guide to configuring databases is far outside the scope of this document, but some hints are in place.
+
+Safir SDK Core currently has tested support for _PostgreSQL_, _MySQL/MariaDB_, _Microsoft SQL
+Server_ and _Mimer SQL_. Since dope_main uses ODBC for database communication it is
+likely that it can be used with other databases as well.
+
+As part of the installation Safir SDK Core provides examples of database installation
+scripts. These can be found in the in +/usr/share/safir-sdk-core/db+ on Linux and in
++C:\Program Files\Safir SDK Core\db+ on Windows. Also provided is a README.txt file for
+each database, that gives some information about how to run the script. These scripts are
+far from complete or fool-proof, so you are expected to read them and adapt them to your
+needs.
+
+Some common features of the scripts are:
+
+Database name::
+  The database that the script creates will be called +dope_db+.
+User name::
+  The user name that will be granted access to the persistence database will be +dopeuser+.
+Password::
+  The password of the user will be +dopeuser+
+
+In the case of Microsoft SQL Server no password will be set, as it is assumed that a
+login for +dopeuser+ has already been created in the database.
+
+You will probably want to modify at least the password.
+
+==== Connection strings
+
+dope_main connects to the database you have configured with a connection string. These
+differ slightly between different databases, and also we require that you set certain
+options in them to get correct handling of Unicode code points in the xml data.
+
+Some databases also appear to be sensitive to casing in the connection string, and others
+are not.
+
+Here are some examples of connection strings for the different databases, taken from our
+test suite in its Windows configuration. Also listed are any required connection string
+options, without which something bad will happen (usually what will happen is that
+Unicode strings and dope_bin2xml will fail on Windows).
+
+PostgreSQL::
+    +DRIVER=\{PostgreSQL UNICODE(x64)\};Server=localhost;ByteaAsLongVarBinary=1;LFConversion=0;Database=dope_db;Uid=dopeuser;Pwd=dopeuser+
+    +
+    Required options: *ByteaAsLongVarBinary=1;LFConversion=0*
+MySQL/MariaDB::
+    +DRIVER=\{MariaDB ODBC 2.0 Driver\};Server=localhost;charset=utf8;Database=dope_db;Uid=dopeuser;Pwd=dopeuser+
+    +
+    Required options: *charset=utf8*
+Microsoft SQL Server::
+    +Driver=\{SQL Server\};Server=localhost\SQLEXPRESS;Database=dope_db;Uid=dopeuser;Pwd=dopeuser+
+    +
+    Required options: None
+Mimer::
+    +Driver=\{MIMER\};Protocol=tcp;Node=localhost;Database=dope_db;Uid=dopeuser;Pwd=dopeuser+
+    +
+    Required options: None
+
+Note that the Microsoft SQL Server connection string above implies that we're using mixed
+mode authentication, which is something you might not want to do. Change accordingly.
+
+There is also a parameter +Safir.Dob.PersistenceParameters.TextColumnsAreUtf8+ which
+controls how dope_main manipulates text columns in the database. Most likely you do not
+have to touch this, but there is some info about it in the FAQ section.
 
 == Utilities
 
@@ -4348,6 +4439,21 @@ since it wasn't being used, but in C# there is apparently quite a lot of user co
 calls Clone(), so in C# we decided to deprecate the API instead. However, the underlying
 implementation now uses C# reflection, which means that we don't need to write and
 maintain all the Clone code for the new collection types.
+
+What is the point of the parameter +Safir.Dob.PersistenceParameters.TextColumnsAreUtf8+?::
+Well, we're not sure at the moment... When it is set to True +SQL_CHAR+ ODBC operations
+are used to access the XmlData and TypeName columns in the persistence database
+table. When it is set to False +SQL_WCHAR+ operations are used instead.
++
+So when it is set to True the ODBC driver is expected to pass UTF-8 strings to the
+persistence service, and when it is set to False it is expected to pass UCS-2, UTF-16 or
+UTF-32 strings. In the end it appears that it can be set to True on Linux and False on
+Windows, and everything works (which is why this is the default). But who knows, maybe
+some ODBC driver or database may need another way of accessing Unicode strings. So that
+is why it is a parameter.
++
+Unicode support is a messy business. But that is not our fault...
+
 
 == Appendix D: Building from source
 Since Safir SDK Core is released under an Open Source license (as described in <<licenses>>) you are able to download and build the source code from scratch. Instructions for building is included in the source distribution of Safir SDK Core obtained from http://safirsdkcore.com/[].

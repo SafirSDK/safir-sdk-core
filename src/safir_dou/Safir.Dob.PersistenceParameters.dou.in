@@ -41,8 +41,8 @@
       </parameter>
       <parameter>
         <summary>If this is true the XmlData and the TypeName column is manipulated using
-                 char operations instead of wchar_t operations. Needs to be False on MS
-                 SQL Server.</summary>
+                 SQL_CHAR operations instead of SQL_WCHAR operations. For most cases this can
+                 be left as the default, which is True on Linux and False on Windows.</summary>
         <name>TextColumnsAreUtf8</name>
         <type>Boolean</type>
         <value>@DEFAULT_XML_DATA_COLUMN_IS_UTF_8@</value>
