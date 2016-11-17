@@ -12,6 +12,3 @@ safir-sdk-core: extra-license-file
 
 #I believe this warning comes only on ubuntu, since they're using a different default java than lintian expects.
 safir-sdk-core: incompatible-java-bytecode-format
-
-#Invalid warning. That is a source file!
-safir-sdk-core: source-is-missing src/websocket/websocket.ss/dependencies/rapidjson/bin/types/paragraphs.json
