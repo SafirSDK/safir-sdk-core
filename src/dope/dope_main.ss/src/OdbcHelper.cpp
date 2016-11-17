@@ -22,11 +22,13 @@
 *
 ******************************************************************************/
 #include "OdbcHelper.h"
+#include <boost/static_assert.hpp>
 
 OdbcHelper::OdbcHelper()
     : m_int64Size(sizeof(int64_t))
 {
-
+    BOOST_STATIC_ASSERT(sizeof(SQL_WCHAR) == sizeof(wchar_t));
+    BOOST_STATIC_ASSERT(sizeof(SQLCHAR) == sizeof(char));
 }
 
 void OdbcHelper::ThrowException(SQLSMALLINT handleType,
