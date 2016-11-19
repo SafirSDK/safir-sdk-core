@@ -41,7 +41,7 @@
       </parameter>
       <parameter>
         <summary>If this is true the XmlData and the TypeName column is manipulated using
-                 SQL_CHAR operations instead of SQL_WCHAR operations. For most cases this can
+                 SQLCHAR operations instead of SQLWCHAR operations. For most cases this can
                  be left as the default, which is True on Linux and False on Windows.</summary>
         <name>TextColumnsAreUtf8</name>
         <type>Boolean</type>
