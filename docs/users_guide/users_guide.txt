@@ -4,7 +4,7 @@
 Safir SDK Core User's Guide
 ==========================
 Lars Hagström, Anders Widén and Joel Ottosson
-2016-11-17
+2016-11-22
 
 :cpp: {basebackend@docbook:c++:cpp}
 :csharp: {basebackend@docbook:c:csharp}
@@ -667,7 +667,7 @@ From version 5.0 of Safir SDK Core it is also possible to write member values in
         <values>
             <value>
                 <member>Altitude</member>
-                <value>0</value> <!-- No need to declare a dummy paramater -->
+                <value>0</value> <!-- No need to declare a dummy parameter -->
             </value>
         </values>
     </createRoutine>
@@ -3329,7 +3329,7 @@ Note that the RequestTimeoutProperty is inherited, whereas the RequestTimeoutOve
 === Queue lengths config
 By default all the length of the in and out queues of messages and requests is 10. The queue lengths can be customized by changing the parameter +Safir.Dob.QueueParameters.QueueRules+.
 
-The QueueRules paramater is an array of +Safir.Dob.QueueRule+ items, each containing one rule to apply to the queue lengths. An example is shown below.
+The QueueRules parameter is an array of +Safir.Dob.QueueRule+ items, each containing one rule to apply to the queue lengths. An example is shown below.
 
 .A queue length parameterization
 [source,xml]
@@ -3739,10 +3739,6 @@ Mimer::
 
 Note that the Microsoft SQL Server connection string above implies that we're using mixed
 mode authentication, which is something you might not want to do. Change accordingly.
-
-There is also a parameter +Safir.Dob.PersistenceParameters.TextColumnsAreUtf8+ which
-controls how dope_main manipulates text columns in the database. Most likely you do not
-have to touch this, but there is some info about it in the FAQ section.
 
 == Utilities
 
@@ -4440,20 +4436,10 @@ calls Clone(), so in C# we decided to deprecate the API instead. However, the un
 implementation now uses C# reflection, which means that we don't need to write and
 maintain all the Clone code for the new collection types.
 
-What is the point of the parameter +Safir.Dob.PersistenceParameters.TextColumnsAreUtf8+?::
-Well, we're not sure at the moment... When it is set to True +SQL_CHAR+ ODBC operations
-are used to access the XmlData and TypeName columns in the persistence database
-table. When it is set to False +SQL_WCHAR+ operations are used instead.
-+
-So when it is set to True the ODBC driver is expected to pass UTF-8 strings to the
-persistence service, and when it is set to False it is expected to pass UCS-2, UTF-16 or
-UTF-32 strings. In the end it appears that it can be set to True on Linux and False on
-Windows, and everything works (which is why this is the default). But who knows, maybe
-some ODBC driver or database may need another way of accessing Unicode strings. So that
-is why it is a parameter.
-+
-Unicode support is a messy business. But that is not our fault...
-
+What happened to the +Safir.Dob.PersistenceParameters.TextColumnsAreUtf8+ parameter?::
+This had to do with messy ODBC Unicode support. We have tried to make a solution that
+should work without parametrization. If you really need the parameter, please let us
+know!
 
 == Appendix D: Building from source
 Since Safir SDK Core is released under an Open Source license (as described in <<licenses>>) you are able to download and build the source code from scratch. Instructions for building is included in the source distribution of Safir SDK Core obtained from http://safirsdkcore.com/[].
