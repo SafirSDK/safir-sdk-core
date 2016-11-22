@@ -46,6 +46,8 @@ public:
     ~OdbcPersistor();
 
 private:
+    void PerformStartupChecks() override;
+
     void Store(const Safir::Dob::Typesystem::EntityId& entityId,
                const Safir::Dob::Typesystem::HandlerId& handlerId,
                Safir::Dob::Typesystem::BinarySerialization& bin,

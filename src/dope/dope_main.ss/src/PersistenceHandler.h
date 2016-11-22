@@ -89,6 +89,8 @@ private:
 
     void Write(const Safir::Dob::EntityProxy& entityProxy, const bool update);
 
+    virtual void PerformStartupChecks() {}
+
     /**
      * Persist an object. ObjectId of the object should be used as key.
      */

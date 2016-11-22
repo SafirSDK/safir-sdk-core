@@ -132,7 +132,7 @@ void PersistenceHandler::Start(bool restore)
     }
 
     m_debug << "Starting Persistence handling"<< std::endl;
-    //m_dobConnection.Attach();
+
     try
     {
         m_dobConnection.Open(L"DOPE_SUBSCRIBE", L"0", PERSISTENCE_CONTEXT, nullptr, &m_dispatcher);
@@ -144,6 +144,8 @@ void PersistenceHandler::Start(bool restore)
                                       L"PersistenceHandler failed to connect to Dob, Maybe Dope is already running?");
         throw StartupError();
     }
+
+    PerformStartupChecks();
 
     if (restore)
     {

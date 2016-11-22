@@ -30,6 +30,8 @@
 #include <Safir/Dob/PersistenceParameters.h>
 #include <Safir/Logging/Log.h>
 #include <Safir/Dob/ConnectionAspectInjector.h>
+#include <boost/algorithm/hex.hpp>
+#include <boost/function_output_iterator.hpp>
 
 #ifdef _MSC_VER
 #pragma warning(push)
@@ -133,6 +135,299 @@ OdbcPersistor::~OdbcPersistor()
     }
 }
 
+
+void OdbcPersistor::PerformStartupChecks()
+{
+    int connectionAttempts = 0;
+    bool errorReported = false;
+
+    const int xmlSize = Safir::Dob::PersistenceParameters::XmlDataColumnSize();
+
+    SQLHDBC                                     checkUnicodeConnection = SQL_NULL_HANDLE;
+    bool                                        isConnected = false;
+    bool                                        deleteUnicodeIsValid = false;
+    SQLHSTMT                                    deleteUnicodeStatement = SQL_NULL_HANDLE;
+    bool                                        writeUnicodeIsValid = false;
+    SQLHSTMT                                    writeUnicodeStatement = SQL_NULL_HANDLE;
+    bool                                        readUnicodeIsValid = false;
+    SQLHSTMT                                    readUnicodeStatement = SQL_NULL_HANDLE;
+
+    const std::wstring                          data = L"testelitest\n\u00e4\u203d.";
+    boost::scoped_array<char>                   xmlDataParam(new char[Safir::Dob::PersistenceParameters::XmlDataColumnSize()]);
+    boost::scoped_array<wchar_t>                xmlDataParamW(new wchar_t[Safir::Dob::PersistenceParameters::XmlDataColumnSize() / sizeof(wchar_t)]);
+    SQLLEN                                      xmlDataParamSize(0);
+
+    boost::scoped_array<char>                   xmlBuffer(new char[xmlSize]);
+    boost::scoped_array<wchar_t>                xmlBufferW(new wchar_t[xmlSize / sizeof(wchar_t)]);
+    SQLLEN                                      currentXmlSize = 0;
+
+    const SQLRETURN ret = ::SQLAllocHandle(SQL_HANDLE_DBC, m_environment, &checkUnicodeConnection);
+    if (!SQL_SUCCEEDED(ret))
+    {
+        OdbcHelper::ThrowException(SQL_HANDLE_ENV, m_environment);
+    }
+
+    m_debug << "Performing Unicode Database Read/Write test" << std::endl;
+
+    bool done = false;
+    while (!done)
+    {
+        try
+        {
+            ConnectIfNeeded(checkUnicodeConnection, isConnected, connectionAttempts);
+
+            m_debug << " - Will delete any old test rows from db" << std::endl;
+            //delete the test row from the db, if it is there
+            for (;;)
+            {
+                //deleteUnicode statement execution (will loop here until we successfully execute)
+                if (!deleteUnicodeIsValid)
+                {
+                    m_helper.AllocStatement(&deleteUnicodeStatement, checkUnicodeConnection);
+                    m_helper.Prepare(deleteUnicodeStatement,
+                                     "delete from PersistentEntity where typeid = 0 and instance = 0");
+                }
+                try
+                {
+                    m_helper.Execute(deleteUnicodeStatement);
+                    break;
+                }
+                catch(const OdbcException& e)
+                {
+                    const std::wstring err = Safir::Dob::Typesystem::Utilities::ToWstring(e.what());
+                    m_debug << "Caught a RetryException in PerformStartupChecks:\n" << err << std::endl;
+                    boost::this_thread::sleep_for(RETRY_EXCEPTION_DELAY);
+                }
+            }
+
+            m_debug << " - Writing Unicode string to db" << std::endl;
+            //now write some unicode stuff in the db
+            for (;;)
+            {
+                //writeUnicode statement execution (will loop here until we successfully execute)
+                if (!writeUnicodeIsValid)
+                {
+                    m_helper.AllocStatement(&writeUnicodeStatement, checkUnicodeConnection);
+                    m_helper.Prepare(writeUnicodeStatement,
+                                     "INSERT INTO PersistentEntity (typeid, instance, typename, xmldata) "
+                                     "values (0, 0, 'UnicodeTestingPlaceholder', ?)");
+
+                    if (Safir::Dob::PersistenceParameters::TextColumnsAreUtf8())
+                    {
+                        OdbcHelper::BindParamString(writeUnicodeStatement,
+                                                    1,
+                                                    xmlSize,
+                                                    xmlDataParam.get(),
+                                                    &xmlDataParamSize);
+                        const std::string utf8 = Safir::Dob::Typesystem::Utilities::ToUtf8(data);
+
+                        const size_t size = (utf8.size() + 1)* sizeof (char);
+                        if (size > static_cast<size_t>(Safir::Dob::PersistenceParameters::XmlDataColumnSize()))
+                        {
+                            throw Safir::Dob::Typesystem::SoftwareViolationException
+                                (L"The size in bytes of the unicode test data"
+                                 L" exceeds Safir.Dob.PersistenceParameters.XmlDataColumnSize",
+                                 __WFILE__, __LINE__);
+                        }
+                        memcpy(xmlDataParam.get(), utf8.c_str(), size);
+
+
+                    }
+                    else
+                    {
+                        OdbcHelper::BindParamStringW(writeUnicodeStatement,
+                                                     1,
+                                                     xmlSize / sizeof(wchar_t),
+                                                     xmlDataParamW.get(),
+                                                     &xmlDataParamSize);
+                        const size_t size = (data.size() + 1)* sizeof (wchar_t);
+                        if (size > static_cast<size_t>(Safir::Dob::PersistenceParameters::XmlDataColumnSize()))
+                        {
+                            throw Safir::Dob::Typesystem::SoftwareViolationException
+                                (L"The size in bytes of the unicode test data"
+                                 L" exceeds Safir.Dob.PersistenceParameters.XmlDataColumnSize",
+                                 __WFILE__, __LINE__);
+                        }
+                        memcpy(xmlDataParamW.get(), data.c_str(), size);
+                    }
+                }
+                xmlDataParamSize = SQL_NTS;
+
+                try
+                {
+                    m_helper.Execute(writeUnicodeStatement);
+                    break;
+                }
+                catch(const OdbcException& e)
+                {
+                    const std::wstring err = Safir::Dob::Typesystem::Utilities::ToWstring(e.what());
+                    m_debug << "Caught a RetryException in GetAll:\n" << err << std::endl;
+                    boost::this_thread::sleep_for(RETRY_EXCEPTION_DELAY);
+                }
+            }
+
+            m_debug << " - Reading the string again" << std::endl;
+            //now read the data again and check that we got it right
+            for (;;)
+            {
+                //readUnicode statement execution (will loop here until we successfully execute)
+                if (!readUnicodeIsValid)
+                {
+                    m_helper.AllocStatement(&readUnicodeStatement, checkUnicodeConnection);
+                    m_helper.Prepare(readUnicodeStatement,
+                                     "SELECT xmldata FROM PersistentEntity "
+                                     "WHERE typeid = 0 AND instance = 0");
+
+                    if (Safir::Dob::PersistenceParameters::TextColumnsAreUtf8())
+                    {
+                        BindColumnString(readUnicodeStatement, 1, xmlSize, xmlBuffer.get(), &currentXmlSize);
+                    }
+                    else
+                    {
+                        BindColumnStringW(readUnicodeStatement,
+                                          1,
+                                          xmlSize / sizeof(wchar_t),
+                                          xmlBufferW.get(),
+                                          &currentXmlSize);
+                    }
+                }
+
+                try
+                {
+                    m_helper.Execute(readUnicodeStatement);
+                    m_helper.Fetch(readUnicodeStatement);
+                    std::wstring readData;
+                    if (Safir::Dob::PersistenceParameters::TextColumnsAreUtf8())
+                    {
+                        readData = Safir::Dob::Typesystem::Utilities::ToWstring(xmlBuffer.get());
+                    }
+                    else
+                    {
+                        readData = xmlBufferW.get();
+                    }
+
+                    if (readData != data)
+                    {
+                        // Define a lambda output iterator, that inserts spaces between each character
+                        // in the hex output
+                        int counter = 0;
+                        std::function<void(const wchar_t c)> hexFormatter = [this, &counter](const wchar_t c)
+                            {
+                                ++counter;
+                                m_debug << c;
+                                if (counter % sizeof(wchar_t) * 2 == 0)
+                                {
+                                    m_debug << ' ';
+                                }
+                            };
+
+                        m_debug << " - Unicode string mismatch, issuing warning.\n"
+                                << " - Expected (hex): ";
+                        boost::algorithm::hex(data,
+                                              boost::make_function_output_iterator(hexFormatter));
+
+                        m_debug << "\n"
+                                << " - Got (hex)     : ";
+                        counter = 0;
+                        boost::algorithm::hex(readData,
+                                              boost::make_function_output_iterator(hexFormatter));
+                        m_debug << std::endl;
+
+                        Safir::Logging::SendSystemLog
+                            (Safir::Logging::Warning,
+                             L"Database unicode encoding error! Failed to write and "
+                             L"restore unicode string to persistence database.");
+                    }
+                    else
+                    {
+                        m_debug << " - String matched! Everything is golden!" << std::endl;
+                    }
+                    break;
+                }
+                catch(const OdbcException& e)
+                {
+                    const std::wstring err = Safir::Dob::Typesystem::Utilities::ToWstring(e.what());
+                    m_debug << "Caught a RetryException in GetAll:\n" << err << std::endl;
+                    boost::this_thread::sleep_for(RETRY_EXCEPTION_DELAY);
+                }
+            }
+
+            m_debug << " - And delete the test row from the db" << std::endl;
+            //delete the test row from the db,
+            for (;;)
+            {
+                //deleteUnicode statement execution (will loop here until we successfully execute)
+                if (!deleteUnicodeIsValid)
+                {
+                    m_helper.AllocStatement(&deleteUnicodeStatement, checkUnicodeConnection);
+                    m_helper.Prepare(deleteUnicodeStatement,
+                                     "delete from PersistentEntity where typeid = 0 and instance = 0");
+                }
+                try
+                {
+                    m_helper.Execute(deleteUnicodeStatement);
+                    done = true;
+                    break;
+                }
+                catch(const OdbcException& e)
+                {
+                    const std::wstring err = Safir::Dob::Typesystem::Utilities::ToWstring(e.what());
+                    m_debug << "Caught a RetryException in PerformStartupChecks:\n" << err << std::endl;
+                    boost::this_thread::sleep_for(RETRY_EXCEPTION_DELAY);
+                }
+            }
+        }
+        catch(const OdbcException& e)
+        {
+            const std::wstring err = Safir::Dob::Typesystem::Utilities::ToWstring(e.what());
+            m_debug << "Caught a ReconnectException in PerformStartupChecks:\n" << err << std::endl;
+            if (connectionAttempts > REPORT_AFTER_RECONNECTS && !errorReported)
+            {
+                Safir::Logging::SendSystemLog(Safir::Logging::Error,
+                                              L"PerformStartupChecks: Failed to connect to the database, will keep trying. Exception info: " +
+                                              err);
+                errorReported = true;
+            }
+
+            if (isConnected)
+            {
+                OdbcHelper::Disconnect(checkUnicodeConnection);
+                isConnected = false;
+            }
+
+            writeUnicodeIsValid = false;
+
+            boost::this_thread::sleep_for(RECONNECT_EXCEPTION_DELAY);
+        }
+    }
+
+    if (errorReported)
+    {
+        Safir::Logging::SendSystemLog(Safir::Logging::Informational,
+                                      L"Successfully connected to the database");
+        errorReported = false;
+        connectionAttempts = 0;
+    }
+
+    try
+    {
+        if (isConnected)
+        {
+            OdbcHelper::Disconnect(checkUnicodeConnection);
+        }
+        FreeConnection(checkUnicodeConnection);
+    }
+    catch(const OdbcException& e)
+    {
+        const std::wstring err = Safir::Dob::Typesystem::Utilities::ToWstring(e.what());
+        Safir::Logging::SendSystemLog(Safir::Logging::Error,
+                                        L"Whoops. Error while disconnecting the checkUnicodeConnection. Ignoring this and moving on. Exception info: " +
+                                        err);
+    }
+
+    m_debug << "Unicode Database Read/Write test is complete" << std::endl;
+
+}
 
 //-------------------------------------------------------
 void OdbcPersistor::Store(const Safir::Dob::Typesystem::EntityId& entityId,
@@ -641,7 +936,7 @@ OdbcPersistor::Insert(const Safir::Dob::Typesystem::EntityId& entityId)
                 m_helper.Prepare
                     (m_insertStatement,
                      "INSERT INTO PersistentEntity (typeid, instance, typename) "
-                     "values (?, ?, ?); ");
+                     "values (?, ?, ?)");
 
                 m_helper.BindParamInt64(m_rowExistsStatement, 1, &m_type);
                 m_helper.BindParamInt64(m_rowExistsStatement, 2, &m_instance);
