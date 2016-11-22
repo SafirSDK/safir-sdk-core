@@ -40,14 +40,6 @@
         <value>944</value>
       </parameter>
       <parameter>
-        <summary>If this is true the XmlData and the TypeName column is manipulated using
-                 SQLCHAR operations instead of SQLWCHAR operations. For most cases this can
-                 be left as the default, which is True on Linux and False on Windows.</summary>
-        <name>TextColumnsAreUtf8</name>
-        <type>Boolean</type>
-        <value>@DEFAULT_XML_DATA_COLUMN_IS_UTF_8@</value>
-      </parameter>
-      <parameter>
         <summary>The size of the BinaryData column in the database. Unit is bytes.</summary>
         <name>BinaryDataColumnSize</name>
         <type>Int32</type>

@@ -51,6 +51,12 @@ const boost::chrono::steady_clock::duration RETRY_EXCEPTION_DELAY = boost::chron
 
 const int REPORT_AFTER_RECONNECTS = 100;
 
+#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
+const bool USE_CHAR_OPERATIONS_FOR_TEXT_COLUMNS = false;
+#elif defined(linux) || defined(__linux) || defined(__linux__)
+const bool USE_CHAR_OPERATIONS_FOR_TEXT_COLUMNS = true;
+#endif
+
 //-------------------------------------------------------
 OdbcPersistor::OdbcPersistor(boost::asio::io_service& ioService) :
     PersistenceHandler(ioService, false),
@@ -212,7 +218,7 @@ void OdbcPersistor::PerformStartupChecks()
                                      "INSERT INTO PersistentEntity (typeid, instance, typename, xmldata) "
                                      "values (0, 0, 'UnicodeTestingPlaceholder', ?)");
 
-                    if (Safir::Dob::PersistenceParameters::TextColumnsAreUtf8())
+                    if (USE_CHAR_OPERATIONS_FOR_TEXT_COLUMNS)
                     {
                         OdbcHelper::BindParamString(writeUnicodeStatement,
                                                     1,
@@ -278,7 +284,7 @@ void OdbcPersistor::PerformStartupChecks()
                                      "SELECT xmldata FROM PersistentEntity "
                                      "WHERE typeid = 0 AND instance = 0");
 
-                    if (Safir::Dob::PersistenceParameters::TextColumnsAreUtf8())
+                    if (USE_CHAR_OPERATIONS_FOR_TEXT_COLUMNS)
                     {
                         BindColumnString(readUnicodeStatement, 1, xmlSize, xmlBuffer.get(), &currentXmlSize);
                     }
@@ -297,7 +303,7 @@ void OdbcPersistor::PerformStartupChecks()
                     m_helper.Execute(readUnicodeStatement);
                     m_helper.Fetch(readUnicodeStatement);
                     std::wstring readData;
-                    if (Safir::Dob::PersistenceParameters::TextColumnsAreUtf8())
+                    if (USE_CHAR_OPERATIONS_FOR_TEXT_COLUMNS)
                     {
                         readData = Safir::Dob::Typesystem::Utilities::ToWstring(xmlBuffer.get());
                     }
@@ -704,7 +710,7 @@ void OdbcPersistor::RestoreAll()
                     m_helper.BindColumnInt64(getAllStatement, 2, &instance);
                     m_helper.BindColumnInt64(getAllStatement, 3, &handlerId);
 
-                    if (Safir::Dob::PersistenceParameters::TextColumnsAreUtf8())
+                    if (USE_CHAR_OPERATIONS_FOR_TEXT_COLUMNS)
                     {
                         BindColumnString(getAllStatement, 4, xmlSize, xmlBuffer.get(), &currentXmlSize);
                     }
@@ -768,7 +774,7 @@ void OdbcPersistor::RestoreAll()
                     { //some xml persistent data set
                         std::wstring xml;
 
-                        if (Safir::Dob::PersistenceParameters::TextColumnsAreUtf8())
+                        if (USE_CHAR_OPERATIONS_FOR_TEXT_COLUMNS)
                         {
                            xml = Safir::Dob::Typesystem::Utilities::ToWstring(xmlBuffer.get());
                         }
@@ -946,7 +952,7 @@ OdbcPersistor::Insert(const Safir::Dob::Typesystem::EntityId& entityId)
                 m_helper.BindParamInt64(m_insertStatement, 1, &m_type);
                 m_helper.BindParamInt64(m_insertStatement, 2, &m_instance);
 
-                if (Safir::Dob::PersistenceParameters::TextColumnsAreUtf8())
+                if (USE_CHAR_OPERATIONS_FOR_TEXT_COLUMNS)
                 {
                     m_helper.BindParamString(m_insertStatement,
                                              3,
@@ -975,7 +981,7 @@ OdbcPersistor::Insert(const Safir::Dob::Typesystem::EntityId& entityId)
                 m_instance = entityId.GetInstanceId().GetRawValue();
 
                 const std::wstring typeName = Safir::Dob::Typesystem::Operations::GetName(m_type);
-                if (Safir::Dob::PersistenceParameters::TextColumnsAreUtf8())
+                if (USE_CHAR_OPERATIONS_FOR_TEXT_COLUMNS)
                 {
                     const std::string typeNameUtf8 = Safir::Dob::Typesystem::Utilities::ToUtf8(typeName);
 

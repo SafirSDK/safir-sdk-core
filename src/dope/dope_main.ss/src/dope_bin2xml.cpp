@@ -48,6 +48,13 @@
 #include <clocale>
 #include "OdbcHelper.h"
 
+#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
+const bool USE_CHAR_OPERATIONS_FOR_TEXT_COLUMNS = false;
+#elif defined(linux) || defined(__linux) || defined(__linux__)
+const bool USE_CHAR_OPERATIONS_FOR_TEXT_COLUMNS = true;
+#endif
+
+
 enum WhatToConvert {db, files};
 
 WhatToConvert g_whatToConvert;
@@ -179,7 +186,7 @@ void ConvertDb()
                    "SET xmlData=?, binarySmallData=NULL, binaryData=NULL "
                    "WHERE typeId=? AND instance=?");
 
-    if (Safir::Dob::PersistenceParameters::TextColumnsAreUtf8())
+    if (USE_CHAR_OPERATIONS_FOR_TEXT_COLUMNS)
     {
         helper.BindParamString(hUpdateStatement,
                                1,
@@ -243,7 +250,7 @@ void ConvertDb()
             updateTypeIdParam = entityId.GetTypeId();
             updateInstanceParam = entityId.GetInstanceId().GetRawValue();
 
-            if (Safir::Dob::PersistenceParameters::TextColumnsAreUtf8())
+            if (USE_CHAR_OPERATIONS_FOR_TEXT_COLUMNS)
             {
                 const std::string xml = Safir::Dob::Typesystem::Utilities::ToUtf8
                     (Safir::Dob::Typesystem::Serialization::ToXml(object));
