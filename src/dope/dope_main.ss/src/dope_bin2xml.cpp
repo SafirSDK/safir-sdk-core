@@ -33,6 +33,11 @@
 
 #ifdef _MSC_VER
 #pragma warning(pop)
+
+//Disable warning about constant conditional expressions, caused
+//by USE_CHAR_OPERATIONS_FOR_TEXT_COLUMNS.
+#pragma warning (disable : 4127)
+
 #endif
 
 #include <Safir/Dob/PersistenceParameters.h>

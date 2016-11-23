@@ -50,7 +50,8 @@
 
 //Disable warning about constant conditional expressions, caused
 //by USE_CHAR_OPERATIONS_FOR_TEXT_COLUMNS.
-#pragma warning (disable : C4127)
+#pragma warning (disable : 4127)
+
 #endif
 
 const boost::chrono::steady_clock::duration RECONNECT_EXCEPTION_DELAY = boost::chrono::milliseconds(100);
