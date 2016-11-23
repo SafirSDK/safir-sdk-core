@@ -44,6 +44,13 @@
 
 #ifdef _MSC_VER
 #pragma warning(pop)
+
+//Disable incorrect VS2010 warning about unicode characters.
+#pragma warning (disable : 4428)
+
+//Disable warning about constant conditional expressions, caused
+//by USE_CHAR_OPERATIONS_FOR_TEXT_COLUMNS.
+#pragma warning (disable : C4127)
 #endif
 
 const boost::chrono::steady_clock::duration RECONNECT_EXCEPTION_DELAY = boost::chrono::milliseconds(100);
