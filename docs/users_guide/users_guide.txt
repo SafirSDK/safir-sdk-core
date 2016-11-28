@@ -4,7 +4,7 @@
 Safir SDK Core User's Guide
 ==========================
 Lars Hagström, Anders Widén and Joel Ottosson
-2016-11-22
+2016-11-28
 
 :cpp: {basebackend@docbook:c++:cpp}
 :csharp: {basebackend@docbook:c:csharp}
@@ -22,7 +22,10 @@ This document is intended to be used both as an introduction to new users of the
 === Acknowledgements
 This document is a combination of several other documents, so some parts of the text have different authors, or is based on texts authored by other people.
 
-More specifically the database section is written by Jörgen Johansson, the section on Safir.Utilities.Foreach was written by Stefan Lindström, and the appendix about the example applications was written by Petter Lönnstedt. Most of the text on the basic Dob services is based on the original Dob Software User's Guide written by Jörgen Johansson. Mikael Wennerberg wrote the section on redundant persistency.
+More specifically the section on Safir.Utilities.Foreach was written by Stefan Lindström,
+and the appendix about the example applications was written by Petter Lönnstedt. Most of
+the text on the basic Dob services is based on the original Dob Software User's Guide
+written by Jörgen Johansson.
 
 === Versions of this document
 To obtain the latest version, please visit http://safirsdkcore.com/[].
@@ -74,7 +77,6 @@ Safir SDK Core consists of a number of _components_, some of which have cryptic 
 |N/A                             |Control      |Application launching and monitoring (currently limited implementation).
 |Dob Utility Functions           |Douf         |Utility functions for applications using the Dob.
 |Software Reports                |Swre         |Debug trace logging.
-|ODBC Library                    |Olib         |C++ wrapper classes for Odbc database access (deprecated).
 |Dob Persistence                 |Dope         |Persistent storage of Dob entities.
 |N/A                             |Foreach      |Functionality for operating on multiple entity instances.
 
