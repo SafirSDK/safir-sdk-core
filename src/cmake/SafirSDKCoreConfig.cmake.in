@@ -75,20 +75,26 @@ set(SAFIR_SDK_CORE_CSHARP_LIBRARY_PATH "${SAFIR_SDK_CORE_INSTALL_DIR}/@SAFIR_INS
 set(SAFIR_SDK_CORE_JAVA_DIR "${SAFIR_SDK_CORE_INSTALL_DIR}/@SAFIR_INSTALL_DESTINATION_JAR@")
 set(SAFIR_SDK_CORE_GENERATION_DIR "${SAFIR_SDK_CORE_INSTALL_DIR}/@SAFIR_INSTALL_DESTINATION_GENERATION@")
 
-set(libraries olib swre_interface_cpp douf_time_cpp dose_cpp
+set(libraries swre_interface_cpp douf_time_cpp dose_cpp
               safir_generated-Core-cpp dots_cpp logging_cpp lluf_utils)
 
 if (MSVC)
+  #on windows we assume that boost has been installed into the
+  #the safir installation directory, like our installer does.
   foreach(lib IN LISTS libraries)
     list (APPEND SAFIR_SDK_CORE_LIBRARIES
             debug "${SAFIR_SDK_CORE_LIBRARIES_DIR}/${lib}d.lib"
             optimized "${SAFIR_SDK_CORE_LIBRARIES_DIR}/${lib}.lib")
   endforeach()
-  #on windows we assume that boost has been installed into the
-  #the safir installation directory, like our installer does.
+
+  set (SAFIR_SDK_CORE_OLIB_LIBRARIES
+            debug "${SAFIR_SDK_CORE_LIBRARIES_DIR}/olibd.lib"
+            optimized "${SAFIR_SDK_CORE_LIBRARIES_DIR}/olib.lib")
+
 else()
   include("${SAFIR_SDK_CORE_CMAKE_DIR}/SafirSDKCore.cmake")
   set(SAFIR_SDK_CORE_LIBRARIES ${libraries})
+  set(SAFIR_SDK_CORE_OLIB_LIBRARIES olib)
 endif()
 unset(libraries)
 

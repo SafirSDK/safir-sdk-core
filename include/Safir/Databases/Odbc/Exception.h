@@ -26,6 +26,7 @@
 
 #ifndef SAFIR_NO_DEPRECATED
 
+#include <Safir/Databases/Odbc/Defs.h>
 #include <Safir/Databases/Odbc/IntegrityConstraintException.h>
 #include <Safir/Databases/Odbc/ReconnectException.h>
 #include <Safir/Databases/Odbc/RetryException.h>

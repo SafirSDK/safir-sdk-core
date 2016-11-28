@@ -26,6 +26,25 @@
 
 #ifndef SAFIR_NO_DEPRECATED
 
+
+#ifndef SAFIR_DISABLE_OLIB_DEPRECATION_WARNING
+
+//There is no standard way to give a warning on all compilers.
+
+#if defined (_MSC_VER)
+#  define STRINGIZE_HELPER(x) #x
+#  define STRINGIZE(x) STRINGIZE_HELPER(x)
+#  define WARNING(desc) message(__FILE__ "(" STRINGIZE(__LINE__) ") : warning: " #desc)
+#  pragma WARNING(Olib, i.e. everything in the Safir::Databases::Odbc namespace, is deprecated! It will disappear soon!)
+
+#elif defined (__GNUC__)
+#  warning "Olib, i.e. everything in the Safir::Databases::Odbc namespace, is deprecated! It will disappear soon!"
+#else
+#  error "Olib, i.e. everything in the Safir::Databases::Odbc namespace, is deprecated! It will disappear soon!"
+#endif
+
+#endif
+
 namespace Safir
 {
 namespace Databases

@@ -1,3 +1,6 @@
+#The test suite for a deprecated feature obviously doesn't want deprecation warnings...
+add_definitions(-DSAFIR_DISABLE_OLIB_DEPRECATION_WARNING)
+
 add_executable(olib_test main.cpp DbOlibTest.cpp DbOlibTest.h)
 
 TARGET_LINK_LIBRARIES(olib_test PRIVATE
