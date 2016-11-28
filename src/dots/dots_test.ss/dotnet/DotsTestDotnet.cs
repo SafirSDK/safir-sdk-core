@@ -9591,6 +9591,32 @@ namespace Misc
             Test_BlobChangeFlags_member_sequences();
             Test_BlobChangeFlags_member_sequences_2();
             Test_BlobChangeFlags_member_dictionaries();
+            Test_ObjectSequenceReflection();
+        }
+
+        public void Test_ObjectSequenceReflection()
+        {
+            var seq = new MemberSequences();
+            seq.TestClassMember.Add(new TestItem());
+            seq.TestClassMember[0].MyInt.Val = 10;
+            seq.TestClassMember.Add(new TestItem());
+            seq.TestClassMember[1].MyInt.Val = 20;
+
+            {
+                GenericObjectSequenceContainerBase b = seq.TestClassMember;
+                Check(b.Count == 2);
+
+                Check(((Int32Container)b[0].GetMember(TestItem.MyIntMemberIndex,0)).Val == 10);
+                Check(((Int32Container)b[1].GetMember(TestItem.MyIntMemberIndex,0)).Val == 20);
+
+                //Try to iterate as well, just for the laughs
+                int i = 1;
+                foreach (var o in b)
+                {
+                    Check(((Int32Container)o.GetMember(TestItem.MyIntMemberIndex,0)).Val == 10*i);
+                    ++i;
+                }
+            }
         }
     }
 

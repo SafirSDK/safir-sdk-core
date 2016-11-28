@@ -260,7 +260,7 @@ namespace Safir.Dob.Typesystem
     /// <summary>
     /// Base class for all object sequences. Needed for the reflection stuff.
     /// </summary>
-    public interface GenericObjectSequenceContainerBase
+    public interface GenericObjectSequenceContainerBase: IList<Object>
     {
         /// <summary>
         /// Is the change flag in the container set?
@@ -278,7 +278,6 @@ namespace Safir.Dob.Typesystem
         /// <param name="changed">The value to set the change flag to.</param>
         void SetChangedHere (bool changed);
 
-
         /// <summary>
         /// Function needed by Utilities::MergeChanges to be able to merge
         /// dictionaries. Will in turn call Utilities::MergeChanges recursively if it
@@ -286,7 +285,6 @@ namespace Safir.Dob.Typesystem
         /// NOTE: Don't Call This Function (TM)!
         /// </summary>
         void Merge(GenericObjectSequenceContainerBase other);
-
     }
     /// <summary>
     /// Generic SequenceContainer for Objects.
@@ -394,6 +392,55 @@ namespace Safir.Dob.Typesystem
 
         }
 
+        #region IList<Object> implementation, from GenericObjectSequenceContainerBase
+
+        IEnumerator<Safir.Dob.Typesystem.Object> IEnumerable<Object>.GetEnumerator()
+        {
+            return base.GetEnumerator();
+        }
+
+        void ICollection<Object>.Add (Object item)
+        {
+            base.Add ((T)item);
+        }
+
+        bool ICollection<Object>.Contains (Object item)
+        {
+            return base.Contains ((T)item);
+        }
+
+        void ICollection<Object>.CopyTo (Object[] array, int arrayIndex)
+        {
+            base.CopyTo ((T[])array, arrayIndex);
+        }
+
+        bool ICollection<Object>.Remove (Object item)
+        {
+            return base.Remove((T)item);
+        }
+
+        Object IList<Object>.this [int index]
+        {
+            get
+            {
+                return base[index];
+            }
+            set
+            {
+                base[index] = (T)value;
+            }
+        }
+
+        int IList<Object>.IndexOf (Object item)
+        {
+            return base.IndexOf ((T)item);
+        }
+
+        void IList<Object>.Insert (int index, Object item)
+        {
+            base.Insert (index, (T)item);
+        }
+        #endregion
     }
 
     /// <summary>Generic SequenceContainer for non-Object members.</summary>

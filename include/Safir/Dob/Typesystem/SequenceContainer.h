@@ -275,6 +275,18 @@ namespace Typesystem
          */
         virtual void SetChangedHere(const bool changed) = 0;
 
+        /**
+         * @brief size - Get the size of the sequence, i.e number of contained values.
+         * @return The number of values in the sequence.
+         */
+        virtual size_t size() const = 0;
+
+        /**
+         * TODO
+         */
+        virtual ObjectPtr GetObj(const size_t index) = 0;
+        virtual ObjectConstPtr GetObj(const size_t index) const = 0;
+
     private:
         friend void Utilities::MergeChanges(ObjectPtr into, const ObjectConstPtr& from);
 
@@ -348,6 +360,11 @@ namespace Typesystem
         {
             Base::m_bIsChanged = changed;
         }
+
+        size_t size() const {return Base::size();}
+
+        ObjectPtr GetObj(const size_t index) {return Base::operator[](index);}
+        ObjectConstPtr GetObj(const size_t index) const {return Base::operator[](index);}
 
     private:
         virtual void Merge(const GenericObjectSequenceContainerBase& that)

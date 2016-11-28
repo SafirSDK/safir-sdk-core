@@ -11633,3 +11633,34 @@ BOOST_AUTO_TEST_CASE(MergeChanges_ObjectSequences_IntoNonEmpty_5)
 
 
 BOOST_AUTO_TEST_SUITE_END()
+
+
+BOOST_AUTO_TEST_CASE(ObjectSequenceReflection)
+{
+    MemberSequencesPtr seq = MemberSequences::Create();
+
+    seq->TestClassMember().push_back(TestItem::Create());
+    seq->TestClassMember().at(0)->MyInt() = 10;
+    seq->TestClassMember().push_back(TestItem::Create());
+    seq->TestClassMember().at(1)->MyInt() = 20;
+
+    {
+        GenericObjectSequenceContainerBase& base = seq->TestClassMember();
+        BOOST_CHECK_EQUAL(base.size(), 2);
+        BOOST_CHECK_EQUAL(dynamic_cast<Int32Container&>(base.GetObj(0)->
+                                                        GetMember(TestItem::MyIntMemberIndex(),0)).GetVal(), 10);
+        BOOST_CHECK_EQUAL(dynamic_cast<Int32Container&>(base.GetObj(1)->
+                                                        GetMember(TestItem::MyIntMemberIndex(),0)).GetVal(), 20);
+        dynamic_cast<Int32Container&>(base.GetObj(1)->
+                                      GetMember(TestItem::MyIntMemberIndex(),0)).SetVal(30);
+    }
+
+    {
+        const GenericObjectSequenceContainerBase& base = seq->TestClassMember();
+        BOOST_CHECK_EQUAL(base.size(), 2);
+        BOOST_CHECK_EQUAL(dynamic_cast<const Int32Container&>(base.GetObj(0)->
+                                                              GetMember(TestItem::MyIntMemberIndex(),0)).GetVal(), 10);
+        BOOST_CHECK_EQUAL(dynamic_cast<const Int32Container&>(base.GetObj(1)->
+                                                              GetMember(TestItem::MyIntMemberIndex(),0)).GetVal(), 30);
+    }
+}

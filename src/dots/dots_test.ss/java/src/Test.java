@@ -114,6 +114,7 @@ public class Test {
         MiscTests misc_tests = new MiscTests();
         misc_tests.test_Containers();
         misc_tests.Test_BlobChangeFlags();
+        misc_tests.Test_Misc();
 
         MergeChangesTests merge_tests = new MergeChangesTests();
         merge_tests.Test_MergeChanges();
@@ -9469,6 +9470,39 @@ public class Test {
             Test_BlobChangeFlags_member_dictionaries();
         }
 
+        public void Test_Misc()
+        {
+            Test_ObjectSequenceReflection();
+        }
+
+        private void Test_ObjectSequenceReflection()
+        {
+            MemberSequences seq = new MemberSequences();
+
+            seq.testClassMember().add(new TestItem());
+            seq.testClassMember().get(0).myInt().setVal(10);
+            seq.testClassMember().add(new TestItem());
+            seq.testClassMember().get(1).myInt().setVal(20);
+
+            {
+                GenericObjectSequenceContainer b = seq.testClassMember();
+                check(b.size() == 2);
+
+                check(((Int32Container)((com.saabgroup.safir.dob.typesystem.Object)b.get(0)).
+                       getMember(TestItem.getMyIntMemberIndex(),0)).getVal() == 10);
+                check(((Int32Container)((com.saabgroup.safir.dob.typesystem.Object)b.get(1)).
+                       getMember(TestItem.getMyIntMemberIndex(),0)).getVal() == 20);
+
+                //Try to iterate as well, just for the laughs
+                int i = 1;
+                for (com.saabgroup.safir.dob.typesystem.Object o :
+                         (GenericObjectSequenceContainer<com.saabgroup.safir.dob.typesystem.Object>)b)
+                {
+                    check(((Int32Container)o.getMember(TestItem.getMyIntMemberIndex(),0)).getVal() == 10*i);
+                    ++i;
+                }
+            }
+        }
     }
 
     private static void printSequences(MemberSequences ms) {
