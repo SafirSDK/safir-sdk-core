@@ -11646,7 +11646,7 @@ BOOST_AUTO_TEST_CASE(ObjectSequenceReflection)
 
     {
         GenericObjectSequenceContainerBase& base = seq->TestClassMember();
-        BOOST_CHECK_EQUAL(base.size(), 2);
+        BOOST_CHECK_EQUAL(base.size(), 2U);
         BOOST_CHECK_EQUAL(dynamic_cast<Int32Container&>(base.GetObj(0)->
                                                         GetMember(TestItem::MyIntMemberIndex(),0)).GetVal(), 10);
         BOOST_CHECK_EQUAL(dynamic_cast<Int32Container&>(base.GetObj(1)->
@@ -11657,7 +11657,7 @@ BOOST_AUTO_TEST_CASE(ObjectSequenceReflection)
 
     {
         const GenericObjectSequenceContainerBase& base = seq->TestClassMember();
-        BOOST_CHECK_EQUAL(base.size(), 2);
+        BOOST_CHECK_EQUAL(base.size(), 2U);
         BOOST_CHECK_EQUAL(dynamic_cast<const Int32Container&>(base.GetObj(0)->
                                                               GetMember(TestItem::MyIntMemberIndex(),0)).GetVal(), 10);
         BOOST_CHECK_EQUAL(dynamic_cast<const Int32Container&>(base.GetObj(1)->
