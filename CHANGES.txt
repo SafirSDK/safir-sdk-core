@@ -1,4 +1,19 @@
 -----------------------------------------------------------------------------------------------------------------------
+2016-11-30 version 6.3.6
+-----------------------------------------------------------------------------------------------------------------------
+
+This release fixes the following issues (see http://safirsdkcore.com for details):
+
+#322 Add support for persisting to PostgreSQL
+#331 Improve reflection interface for Object Sequences
+#333 Add check for misconfigured database to dope startup
+#219 Generate warnings when Olib is used (deprecated)
+#337 Remove TextColumnsAreUtf8 parameter
+#334 Write some hints on dope database creation in users guide
+#332 Bump rapidjson to latest version
+#330 Bump Ninja version on windows build slaves
+
+-----------------------------------------------------------------------------------------------------------------------
 2016-11-02 version 6.3.5
 -----------------------------------------------------------------------------------------------------------------------
 
