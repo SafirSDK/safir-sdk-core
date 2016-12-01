@@ -282,10 +282,40 @@ namespace Typesystem
         virtual size_t size() const = 0;
 
         /**
-         * TODO
+         * @name Reflection part.
+         * These methods allow applications to manipulate the members of objects
+         * without having been compiled against it.
+         * There should be no reason for most applications to use these methods.
+         */
+        /** @{ */
+
+        /**
+         * Get a generic poionter to the object at the specified index.
+         *
+         * Note: Unless you know that you need to use the reflection interface you should
+         * prefer to use the functions in GenericObjectSequenceContainer.
+         *
+         * Indexing outside the sequence provokes undefined behavior.
+         *
+         * @param index [in] - The index of the object to get.
+         * @return Pointer to object.
          */
         virtual ObjectPtr GetObj(const size_t index) = 0;
+
+        /**
+         * Get a const generic poionter to the object at the specified index.
+         *
+         * Note: Unless you know that you need to use the reflection interface you should
+         * prefer to use the functions in GenericObjectSequenceContainer.
+         *
+         * Indexing outside the sequence provokes undefined behavior.
+         *
+         * @param index [in] - The index of the object to get.
+         * @return Const pointer to object.
+         */
         virtual ObjectConstPtr GetObj(const size_t index) const = 0;
+
+        /** @} */
 
     private:
         friend void Utilities::MergeChanges(ObjectPtr into, const ObjectConstPtr& from);
