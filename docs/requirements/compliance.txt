@@ -30,6 +30,10 @@ Version
 | 2015-10-14
 | Lars Hagström
 
+| 6.3.6
+| 2016-12-04
+| Lars Hagström
+
 |=========================================================
 
 === Typical Systems
@@ -57,10 +61,6 @@ SDK Core Jenkins server at http://safirsdkcore.com.
 
 However, as is described in that whitepaper it is actually possible to send ``messages''
 using +foreach+ and UpdateRequests.
-
-=== Persistence
-
-*pers_req_7* is not implemented.
 
 === OS, Platform and Compiler support
 
