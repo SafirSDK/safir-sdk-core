@@ -21,6 +21,7 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
+syntax = "proto2";
 option optimize_for = LITE_RUNTIME;
 
 package Safir.Dob.Internal.Control;

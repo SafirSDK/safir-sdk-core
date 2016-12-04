@@ -21,6 +21,7 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
+syntax = "proto2";
 option optimize_for = LITE_RUNTIME;
 
 package Safir.Dob.Internal.Control;
@@ -33,7 +34,7 @@ message ControlCmd {
       SHUTDOWN = 1;
       REBOOT = 2;
     }
-        
+
    // Fields
    required CmdType cmd_type = 1;
    optional sfixed64 node_id = 2;
