@@ -59,6 +59,7 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
                        const boost::int64_t             id,
                        const bool                       ignoreControlCmd)
     : m_ioService(ioService)
+    , m_stopped(false)
     , m_resolutionStartTime(boost::chrono::steady_clock::now())
     , m_strand(ioService)
     , m_wcoutStrand(ioService)
@@ -68,7 +69,6 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
     , m_terminationTimer(ioService)
     , m_incarnationBlackListHandler(m_conf.incarnationBlacklistFileName)
     , m_controlInfoReceiverReady(false)
-    , m_controlStopped(false)
     , m_doseMainRunning(false)
     , m_requiredForStart(false)
     , m_incarnationIdStorage(new AlignedStorage())
@@ -539,11 +539,11 @@ void ControlApp::StopDoseMain()
 
 void ControlApp::StopControl()
 {
-    if (m_controlStopped)
+    if (m_stopped)
     {
         return;
     }
-    m_controlStopped = true;
+    m_stopped = true;
 
     m_startTimer.cancel();
 
