@@ -5,7 +5,7 @@
 MAJOR=6
 MINOR=3
 PATCH=7
-SUFFIX=~beta1
+SUFFIX=
 
 #Set the SUFFIX to empty string for stable releases (but keep the equal sign).
 #if the SUFFIX is used for alpha or beta tags, the first character must be a tilde (~),
