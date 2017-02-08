@@ -15,4 +15,4 @@ ADD_JAR(dose_test_java
   ENTRY_POINT Program
   MANIFEST ${CMAKE_CURRENT_SOURCE_DIR}/Manifest.txt)
 
-SAFIR_INSTALL(TARGETS dose_test_java)
+SAFIR_INSTALL(TARGETS dose_test_java COMPONENT TestSuite)
