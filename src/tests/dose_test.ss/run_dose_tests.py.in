@@ -201,8 +201,14 @@ class Parameters:
 
         self.dose_test_cpp_cmd = ("dose_test_cpp",)
         self.dose_test_dotnet_cmd = ("dose_test_dotnet",)
-        self.dose_test_java_cmd = ("java", "-Xfuture", "-jar",
-                                   os.path.join(jar_install_path,"dose_test_java.jar"))
+        self.dose_test_java_cmd = ("java",)
+
+        #-Xfuture gives weird errors on RPi and BBone (both on debian jessie)
+        #so we only enable the strict checks on other platforms.
+        if not os.uname()[4].startswith("arm"):
+            self.dose_test_java_cmd += ("-Xfuture",)
+
+        self.dose_test_java_cmd += ("-jar", os.path.join(jar_install_path,"dose_test_java.jar"))
 
         self.testcases_path = os.path.join(self.test_data_directory, "dose", "testcases")
         self.dose_test_sequencer_cmd = ("dose_test_sequencer",
