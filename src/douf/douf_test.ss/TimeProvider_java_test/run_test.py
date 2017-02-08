@@ -38,9 +38,10 @@ for dep in dependencies:
     shutil.copy2(dep,
                  ".")
 
-result = subprocess.call(("java",
-                          "-Xfuture",
-                          "-jar", arguments.jar))
+#-Xfuture gives weird errors on RPi and BBone (both on debian jessie)
+result = subprocess.call(("java",) +
+                         (("-Xfuture",) if not os.uname()[4].startswith("arm") else tuple()) +
+                         ("-jar", arguments.jar))
 
 print("Result =", result)
 

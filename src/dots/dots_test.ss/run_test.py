@@ -61,9 +61,10 @@ if arguments.dependencies is not None:
 if arguments.language == "cpp":
     command = (arguments.binary,"--detect_memory_leaks=0")
 elif arguments.language == "java":
-    command = ("java",
-               "-Xfuture",
-               "-jar", arguments.jar)
+    #-Xfuture gives weird errors on RPi and BBone (both on debian jessie)
+    command = ("java",) + \
+      (("-Xfuture",) if not os.uname()[4].startswith("arm") else tuple()) + \
+      ("-jar", arguments.jar)
 elif arguments.language == "dotnet":
     command = (arguments.binary,)
 else:
