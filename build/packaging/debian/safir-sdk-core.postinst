@@ -4,6 +4,8 @@ set -e
 
 case "${1}" in
     configure)
+        ldconfig
+
         if ! getent group safirusers > /dev/null 2>&1
         then
             echo "Creating safirusers group..."
