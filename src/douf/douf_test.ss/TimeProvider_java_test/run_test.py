@@ -24,7 +24,7 @@
 #
 ###############################################################################
 from __future__ import print_function
-import subprocess, sys, os, shutil, time, argparse
+import subprocess, sys, os, shutil, time, argparse, platform
 
 parser = argparse.ArgumentParser("test script")
 parser.add_argument("--jar", required=True)
@@ -40,7 +40,7 @@ for dep in dependencies:
 
 #-Xfuture gives weird errors on RPi and BBone (both on debian jessie)
 result = subprocess.call(("java",) +
-                         (("-Xfuture",) if not os.uname()[4].startswith("arm") else tuple()) +
+                         (("-Xfuture",) if not platform.machine().startswith("arm") else tuple()) +
                          ("-jar", arguments.jar))
 
 print("Result =", result)

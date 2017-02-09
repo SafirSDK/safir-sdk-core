@@ -24,7 +24,7 @@
 #
 ###############################################################################
 from __future__ import print_function
-import subprocess, os, time, sys, signal, re, argparse, shutil
+import subprocess, os, time, sys, signal, re, argparse, shutil, platform
 import syslog_server
 from safe_print import *
 
@@ -43,7 +43,7 @@ for dep in dependencies:
 
 #-Xfuture gives weird errors on RPi and BBone (both on debian jessie)
 sender_cmd = ("java",) + \
-             (("-Xfuture",) if not os.uname()[4].startswith("arm") else tuple()) + \
+             (("-Xfuture",) if not platform.machine().startswith("arm") else tuple()) + \
              ("-jar", arguments.jar)
 
 syslog = syslog_server.SyslogServer(arguments.safir_show_config)

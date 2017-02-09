@@ -24,7 +24,7 @@
 #
 ###############################################################################
 from __future__ import print_function
-import sys, subprocess, os, shutil, difflib, argparse, re
+import sys, subprocess, os, shutil, difflib, argparse, re, platform
 from syslog_server import SyslogServer
 
 parser = argparse.ArgumentParser("test script")
@@ -63,7 +63,7 @@ if arguments.language == "cpp":
 elif arguments.language == "java":
     #-Xfuture gives weird errors on RPi and BBone (both on debian jessie)
     command = ("java",) + \
-      (("-Xfuture",) if not os.uname()[4].startswith("arm") else tuple()) + \
+      (("-Xfuture",) if not platform.machine().startswith("arm") else tuple()) + \
       ("-jar", arguments.jar)
 elif arguments.language == "dotnet":
     command = (arguments.binary,)

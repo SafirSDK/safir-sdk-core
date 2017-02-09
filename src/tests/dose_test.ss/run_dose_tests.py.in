@@ -204,7 +204,7 @@ class Parameters:
 
         #-Xfuture gives weird errors on RPi and BBone (both on debian jessie)
         self.dose_test_java_cmd = ("java",) + \
-                                  (("-Xfuture",) if not os.uname()[4].startswith("arm") else tuple()) + \
+                                  (("-Xfuture",) if not platform.machine().startswith("arm") else tuple()) + \
                                   ("-jar", os.path.join(jar_install_path,"dose_test_java.jar"))
 
         self.testcases_path = os.path.join(self.test_data_directory, "dose", "testcases")
