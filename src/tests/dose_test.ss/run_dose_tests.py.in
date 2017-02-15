@@ -557,7 +557,7 @@ class JenkinsInterface:
     def __to_bool(self,output, on_error):
         output = output.strip()
         if output not in ("true", "false"):
-            log ("Unexpected boolean value: '{0}' was not found in {1}. Treating as {2}".format(output, ("true","false", on_error)))
+            log ("Unexpected boolean value: '{0}' was not found in {1}. Treating as {2}".format(output, ("true","false"), on_error))
             return on_error
         return output == "true"
 
