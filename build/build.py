@@ -692,6 +692,10 @@ class DebianPackager(object):
         self.total_tests = -1
         self.failed_tests = -1
 
+        self.arguments = arguments
+        if len(self.arguments.configs) != 1:
+            die("DebianPackager can only build one config")
+
     @staticmethod
     def can_use():
         return sys.platform.startswith("linux") and \
@@ -723,7 +727,8 @@ class DebianPackager(object):
         os.chdir("safir-sdk-core_" + version_string)
         shutil.copytree(os.path.join("build", "packaging", "debian"), "debian")
         self.__run(("debuild",
-                    "--set-envvar", "DEB_BUILD_OPTIONS=parallel="+ str(self.num_jobs),
+                    "--set-envvar", "DEB_BUILD_OPTIONS=parallel="+ str(self.num_jobs) + \
+                        " config=" + self.arguments.configs[0],
                     "--prepend-path",
                     "/usr/lib/ccache/",
                     "-us", "-uc"),

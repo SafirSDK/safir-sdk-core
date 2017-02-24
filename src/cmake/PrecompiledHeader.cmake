@@ -73,10 +73,10 @@ function(ADD_PRECOMPILED_HEADER _targetName _input)
       LIST(APPEND _compiler_FLAGS "-D${_flag}")
     endforeach()
 
-    #MESSAGE(STATUS "PCH command line: ${CMAKE_CXX_COMPILER} ${_compiler_FLAGS} -x c++-header ${_source} -o ${_output}")
+    #MESSAGE(STATUS "PCH command line: ${CMAKE_CXX_COMPILER} ${_compiler_FLAGS} ${_source} -o ${_output}")
     ADD_CUSTOM_COMMAND(
       OUTPUT ${_output}
-      COMMAND ${CMAKE_CXX_COMPILER} ${_compiler_FLAGS} -x c++-header  ${_source} -o ${_output}
+      COMMAND ${CMAKE_CXX_COMPILER} ${_compiler_FLAGS}  ${_source} -o ${_output}
       DEPENDS ${_source} )
     ADD_CUSTOM_TARGET(${_targetName}_gch DEPENDS ${_output})
     ADD_DEPENDENCIES(${_targetName} ${_targetName}_gch)

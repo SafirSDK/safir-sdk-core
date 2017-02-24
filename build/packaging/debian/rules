@@ -1,8 +1,18 @@
 #!/usr/bin/make -f
 .PHONY: override_dh_install install_runtime install_tools install_development install_testsuite override_dh_auto_test override_dh_clideps override_dh_strip
 
-#upstream recommends NDEBUG for release builds!
-export CPPFLAGS += -DNDEBUG
+
+#upstream wants to control compilation flags
+CFLAGS=
+CPPFLAGS=
+ifneq (,$(filter config=%,$(DEB_BUILD_OPTIONS)))
+	CMAKE_BUILD_TYPE = $(patsubst config=%,%,$(filter config=%,$(DEB_BUILD_OPTIONS)))
+else
+	CMAKE_BUILD_TYPE=RelWithDebInfo
+endif
+
+override_dh_auto_configure:
+	dh_auto_configure -- -DCMAKE_BUILD_TYPE:STRING=$(CMAKE_BUILD_TYPE)
 
 %:
 	dh $@ --parallel --with=cli
