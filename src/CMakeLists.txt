@@ -100,7 +100,10 @@ function (SAFIR_INSTALL)
           #we need the assembly file name, so we get the full path first
           get_property(assembly_file TARGET ${target} PROPERTY ASSEMBLY_FILE)
           get_filename_component(assembly_file ${assembly_file} NAME) #and strip the path off
-          FILE(WRITE ${CMAKE_CURRENT_BINARY_DIR}/${target} "#!/bin/sh\nexec /usr/bin/mono $MONO_OPTIONS ${CMAKE_INSTALL_PREFIX}/${SAFIR_INSTALL_DESTINATION_CSHARP}/${assembly_file} $@")
+          if (ASSEMBLY_KIND STREQUAL "winexe")
+            set(winforms_workaround "--verify-all")
+          endif()
+          FILE(WRITE ${CMAKE_CURRENT_BINARY_DIR}/${target} "#!/bin/sh\nexec /usr/bin/mono ${winforms_workaround} $MONO_OPTIONS ${CMAKE_INSTALL_PREFIX}/${SAFIR_INSTALL_DESTINATION_CSHARP}/${assembly_file} $@")
           #and install it to bin directory
           install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/${target}
             DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN}
