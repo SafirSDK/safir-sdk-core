@@ -404,7 +404,16 @@ namespace Sate
                 {
                     continue;
                 }
-                var type = MainForm.Instance.GetType(tid);
+
+                Type type;
+                try
+                {
+                    type = MainForm.Instance.GetType(tid);
+                }
+                catch (Safir.Dob.Typesystem.IllegalValueException)
+                {
+                    continue;
+                }
                 if (type.IsSubclassOf(objType))
                 {
                     ClassNode node = null;
