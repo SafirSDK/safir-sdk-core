@@ -556,12 +556,17 @@ public:
                           const std::int64_t id,
                           const std::function<void(bool restart)>& stopFcn)
         : Control(options, id, stopFcn)
+        , m_stop(false)
     {
         // Start subscription to system state changes from SP
         m_systemPicture->StartStateSubscription(m_strand.wrap([this](const Safir::Dob::Internal::SP::SystemState& data)
         {
             log << "Got new state:\n" << data << std::endl;
             m_lastState = data;
+            if (m_stop)
+            {
+                Stop(m_restart);
+            }
         }));
 
         m_communication->SetDataReceiver(m_strand.wrap([this](const int64_t fromNodeId,
@@ -596,6 +601,21 @@ public:
         return SuccessCommon();
     }
 private:
+    void Stop(bool restart)
+    {
+        //naive size check
+        if (m_lastState.Size() >= m_options.numberOfNodes)
+        {
+            m_stopFcn(restart);
+        }
+        else
+        {
+            log << "Delaying stop, since we've not seen enough nodes yet" << std::endl;
+            m_stop = true;
+            m_restart = restart;
+        }
+    }
+
     void DataReceived(const int64_t /*fromNodeId*/,
                       const int64_t /*fromNodeType*/,
                       const char* data,
@@ -606,16 +626,18 @@ private:
         if (message == "restart " + boost::lexical_cast<std::string>(m_options.number))
         {
             log << "Oooh, that means me!" << std::endl;
-            m_stopFcn(true);
+            Stop(true);
         }
         else if (message == "exit")
         {
             log << "Time to die!" << std::endl;
-            m_stopFcn(false);
+            Stop(false);
         }
     }
 
     Safir::Dob::Internal::SP::SystemState m_lastState;
+    int m_stop;
+    bool m_restart;
 };
 
 class Main: public Common
