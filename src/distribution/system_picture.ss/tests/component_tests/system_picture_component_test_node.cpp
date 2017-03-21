@@ -876,8 +876,10 @@ int main(int argc, char * argv[])
             }
             else
             {
+                log << "Going to reset work and cancel the signalSet" << std::endl;
                 work.reset();
                 signalSet.cancel();
+                log << "Done. ioService should stop running now" << std::endl;
             }
         };
 

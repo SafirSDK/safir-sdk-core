@@ -104,6 +104,11 @@ def launch_node(master, ownip, nodetype, num_nodes, only_control, masterip = Non
 
 def stop(proc):
     try:
+        for _ in range(100):
+            if proc.poll() is not None:
+                return
+            time.sleep(0.1)
+        log("Having to kill process that did not exit on its own in ten seconds")
         if sys.platform == "win32":
             #can't send CTRL_C_EVENT to processes started with subprocess, unfortunately
             #pylint: disable=E1101
