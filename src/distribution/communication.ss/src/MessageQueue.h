@@ -95,11 +95,13 @@ namespace Com
             return m_firstUnhandled;
         }
 
-        void clear_queue()
+        size_t clear_queue()
         {
+            size_t numRemoved=ThisType::size()+m_tempStorage.size();
             ThisType::clear();
             m_tempStorage.clear();
             m_firstUnhandled=0;
+            return numRemoved; //return total number of items that were removed
         }
 
         template <class OStreamT>

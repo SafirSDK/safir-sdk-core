@@ -146,6 +146,33 @@ public:
         CHECK(!mq.full());
         CHECK(mq.empty());
 
+        mq.enqueue("1");
+        mq.enqueue("2");
+        mq.enqueue("3");
+        CHECK(mq.clear_queue()==3);
+        CHECK(!mq.has_unhandled());
+        CHECK(mq.first_unhandled_index()==mq.size());
+        CHECK(mq.size()==0);
+        CHECK(!mq.full());
+        CHECK(mq.empty());
+
+        mq.enqueue("1");
+        mq.enqueue("2");
+        mq.enqueue("3");
+        mq.enqueue("4");
+        mq.enqueue("5");
+        mq.enqueue("6");
+        mq.enqueue("7");
+        mq.enqueue("8");
+        mq.enqueue("9");
+        mq.enqueue("10");
+        CHECK(mq.clear_queue()==10);
+        CHECK(!mq.has_unhandled());
+        CHECK(mq.first_unhandled_index()==mq.size());
+        CHECK(mq.size()==0);
+        CHECK(!mq.full());
+        CHECK(mq.empty());
+
         std::cout<<"MessageQueue tests passed"<<std::endl;
 
         //--------------------------------
