@@ -153,15 +153,18 @@ namespace Internal
             }
 
         }
-        catch (const boost::interprocess::interprocess_exception&)
+        catch (const boost::interprocess::interprocess_exception&e)
         {
-            SEND_SYSTEM_LOG(Error, << "Ran out of shared memory while loading types and parameters." <<std::endl
-                            << "Please increase the shared memory size specified in typesystem.ini");
+            SEND_SYSTEM_LOG(Error,
+                            << "Encountered an error when loading types and parameters (in RepositoryShm)."
+                            << "This could be a sign that you should increase the shared memory "
+                            << "size specified in typesystem.ini. If that does not help, here is "
+                            << "some exception information: " << e.what());
         }
         catch (const std::exception& ex)
         {
-            SEND_SYSTEM_LOG(Error, << "Failure while loading types and parameters into shared memory" <<std::endl
-                            << ex.what());
+            SEND_SYSTEM_LOG(Error,
+                            << "Failure while loading types and parameters into shared memory: " << ex.what());
         }
 
     }
