@@ -690,7 +690,7 @@ namespace Com
                 //It is possible that m_sendQueueSize has been increased by 1 in AddToSendQueue but still the item has not been added to the queue.
                 //to avoid raise conditions we can't just set m_sendQueueSize=0 here but instead decrease it with the actual number of items removed.
                 auto numberOfRemoved=m_sendQueue.clear_queue();
-                m_sendQueueSize-=numberOfRemoved;
+                m_sendQueueSize -= static_cast<unsigned int>(numberOfRemoved);
                 lllog(8)<<m_logPrefix.c_str()<<"No receivers left, clear sendQueue, numberOfRemoved: "<<numberOfRemoved<<std::endl;
             }
 
