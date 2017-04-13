@@ -1001,14 +1001,10 @@ void Consumer::ExecuteAction(DoseTest::ActionPtr action)
                     break;
                 case DoseTest::ActionEnum::InjectChanges:
                     {
-                        Safir::Dob::Typesystem::Int64 timestamp =  GetTimestamp(action);
-                        std::wcout << "InjectChanges: "
-                                   << Safir::Dob::Typesystem::Serialization::ToXml(action->Object())
-                                   << " with timestamp " << timestamp << std::endl;
                         Safir::Dob::ConnectionAspectInjector(m_connection).InjectChanges
                             (boost::static_pointer_cast<Safir::Dob::Entity>(action->Object().GetPtr()),
                              action->Instance(),
-                             timestamp,
+                             GetTimestamp(action),
                              action->Handler());
                     }
                     break;
