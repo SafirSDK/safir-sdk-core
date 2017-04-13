@@ -32,10 +32,11 @@
 #include <Safir/Utilities/ProcessInfo.h>
 #include <boost/atomic.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/thread.hpp>
+#include <boost/thread/recursive_mutex.hpp>
 #include <fstream>
 #include <iostream>
 #include <map>
-#include <boost/thread/recursive_mutex.hpp>
 
 //disable warnings in boost
 #if defined _MSC_VER
@@ -484,6 +485,11 @@ private:
             if (m_revolutions >= m_options.revolutions && !m_waitForExit)
             {
                 log << "Finished our revolutions, will tell all slaves to exit"  << std::endl;
+
+                //Sleep a short while, so that the last main gets a chance to receive some data.
+                //This could probably be done in a more elgant way, but this was easy :-)
+                boost::this_thread::sleep_for(boost::chrono::milliseconds(5000));
+
                 Send("exit");
                 m_waitForExit = true;
             }
