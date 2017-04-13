@@ -196,7 +196,12 @@ private:
 
     void SleepyTime(const DoseTest::ActionEnum::Enumeration actionKind)
     {
-
+        //ARM tends to be slow, so we give tests there some extra time
+#ifdef __arm__
+        const int multiplier = 2;
+#else
+        const int multiplier = 1;
+#endif
         switch (actionKind)
         {
         case DoseTest::ActionEnum::CreateRequest:
@@ -219,10 +224,10 @@ private:
         case DoseTest::ActionEnum::UnregisterHandler:
         case DoseTest::ActionEnum::UpdateRequest:
         case DoseTest::ActionEnum::ResumePostponed:
-            boost::this_thread::sleep_for(boost::chrono::milliseconds(140));
+            boost::this_thread::sleep_for(boost::chrono::milliseconds(140 * multiplier));
             break;
         default:
-            boost::this_thread::sleep_for(boost::chrono::milliseconds(40));
+            boost::this_thread::sleep_for(boost::chrono::milliseconds(40 * multiplier));
             break;
         }
     }
