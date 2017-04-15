@@ -32,8 +32,6 @@
 #include <Safir/Utilities/ProcessInfo.h>
 #include <boost/atomic.hpp>
 #include <boost/lexical_cast.hpp>
-#include <boost/thread.hpp>
-#include <boost/thread/recursive_mutex.hpp>
 #include <fstream>
 #include <iostream>
 #include <map>
@@ -48,6 +46,7 @@
 #include <boost/asio/steady_timer.hpp>
 #include <boost/program_options.hpp>
 #include <boost/thread.hpp>
+#include <boost/thread/recursive_mutex.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
 #if defined _MSC_VER
