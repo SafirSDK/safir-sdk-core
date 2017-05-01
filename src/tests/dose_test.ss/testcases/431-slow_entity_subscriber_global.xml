@@ -25,7 +25,7 @@
     <DoseTest.Action index="0">
       <ActionKind>Sleep</ActionKind>
       <Partner>0</Partner>
-      <SleepDuration>1</SleepDuration>
+      <SleepDuration>3</SleepDuration>
     </DoseTest.Action>
     <DoseTest.Action index="1">
       <ActionKind>SetChanges</ActionKind>
@@ -49,12 +49,12 @@
     </DoseTest.Action>
     <DoseTest.Action index="3">
       <ActionKind>Sleep</ActionKind>
-      <SleepDuration>2</SleepDuration>
+      <SleepDuration>6</SleepDuration>
     </DoseTest.Action>
     <DoseTest.Action index="4">
       <ActionKind>Sleep</ActionKind>
       <Partner>0</Partner>
-      <SleepDuration>1</SleepDuration>
+      <SleepDuration>3</SleepDuration>
     </DoseTest.Action>
     <DoseTest.Action index="5">
       <ActionKind>SetChanges</ActionKind>
@@ -78,12 +78,12 @@
     </DoseTest.Action>
     <DoseTest.Action index="7">
       <ActionKind>Sleep</ActionKind>
-      <SleepDuration>2</SleepDuration>
+      <SleepDuration>6</SleepDuration>
     </DoseTest.Action>
     <DoseTest.Action index="8">
       <ActionKind>Sleep</ActionKind>
       <Partner>0</Partner>
-      <SleepDuration>1</SleepDuration>
+      <SleepDuration>3</SleepDuration>
     </DoseTest.Action>
     <DoseTest.Action index="9">
       <ActionKind>SetChanges</ActionKind>
@@ -107,7 +107,7 @@
     </DoseTest.Action>
     <DoseTest.Action index="11">
       <ActionKind>Sleep</ActionKind>
-      <SleepDuration>2</SleepDuration>
+      <SleepDuration>6</SleepDuration>
     </DoseTest.Action>
   </TestActions>
 </DoseTest.Items.TestCase>

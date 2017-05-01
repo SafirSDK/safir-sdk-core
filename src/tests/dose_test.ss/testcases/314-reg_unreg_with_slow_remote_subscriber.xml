@@ -17,7 +17,7 @@
     <DoseTest.Action index="0">
       <ActionKind>Sleep</ActionKind>
       <Partner>0</Partner>
-      <SleepDuration>1</SleepDuration>
+      <SleepDuration>3</SleepDuration>
     </DoseTest.Action>
     <DoseTest.Action index="1">
       <ActionKind>RegisterEntityHandler</ActionKind>
@@ -45,7 +45,7 @@
     </DoseTest.Action>
     <DoseTest.Action index="5">
       <ActionKind>Sleep</ActionKind>
-      <SleepDuration>2</SleepDuration>
+      <SleepDuration>6</SleepDuration>
     </DoseTest.Action>
     <DoseTest.Action index="6">
       <ActionKind>UnsubscribeRegistration</ActionKind>
