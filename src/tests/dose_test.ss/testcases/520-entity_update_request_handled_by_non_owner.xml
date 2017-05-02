@@ -3,7 +3,7 @@
   <Description xml:space="preserve">A handler receives an update request for a non-existing entity.</Description>
   <Expectation xml:space="preserve">Partner 0 receives a SafirNotRegistered response.</Expectation>
   <TestCaseSetupActions>
-    <DoseTest.Action index="0">
+    <DoseTest.Action>
       <ActionKind>RegisterEntityHandler</ActionKind>
       <Partner>2</Partner>
       <Consumer>2</Consumer>
@@ -11,20 +11,20 @@
       <Handler>DEFAULT_HANDLER</Handler>
       <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
     </DoseTest.Action>
-    <DoseTest.Action index="1">
+    <DoseTest.Action>
       <ActionKind>DiscardResponseSender</ActionKind>
       <Partner>2</Partner>
       <ActionCallback>OnUpdateRequest</ActionCallback>
       <Consumer>2</Consumer>
     </DoseTest.Action>
-    <DoseTest.Action index="2">
+    <DoseTest.Action>
       <ActionKind>Postpone</ActionKind>
       <Partner>2</Partner>
       <ActionCallback>OnUpdateRequest</ActionCallback>
       <Consumer>2</Consumer>
       <RedispatchCurrent>true</RedispatchCurrent>
     </DoseTest.Action>
-    <DoseTest.Action index="3">
+    <DoseTest.Action>
       <ActionKind>SetAll</ActionKind>
       <Partner>2</Partner>
       <Consumer>2</Consumer>
@@ -36,7 +36,7 @@
     </DoseTest.Action>
   </TestCaseSetupActions>
   <TestActions>
-    <DoseTest.Action index="0">
+    <DoseTest.Action>
       <ActionKind>UpdateRequest</ActionKind>
       <Partner>0</Partner>
       <Consumer>0</Consumer>
@@ -46,7 +46,11 @@
         <Info xml:space="preserve">hej pa dig!</Info>
       </Object>
     </DoseTest.Action>
-    <DoseTest.Action index="1">
+    <DoseTest.Action>
+      <ActionKind>Sleep</ActionKind>
+      <SleepDuration>2</SleepDuration>
+    </DoseTest.Action>
+    <DoseTest.Action>
       <ActionKind>Delete</ActionKind>
       <Partner>2</Partner>
       <Consumer>2</Consumer>
@@ -56,12 +60,12 @@
         <instanceId>321321</instanceId>
       </EntityId>
     </DoseTest.Action>
-    <DoseTest.Action index="2">
+    <DoseTest.Action>
       <ActionKind>ResetCallbackActions</ActionKind>
       <Partner>2</Partner>
       <Consumer>2</Consumer>
     </DoseTest.Action>
-    <DoseTest.Action index="3">
+    <DoseTest.Action>
       <ActionKind>ResumePostponed</ActionKind>
       <Partner>2</Partner>
       <Consumer>2</Consumer>
