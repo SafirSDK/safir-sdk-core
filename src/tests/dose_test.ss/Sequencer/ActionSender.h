@@ -198,7 +198,7 @@ private:
     {
         //ARM tends to be slow, so we give tests there some extra time
 #ifdef __arm__
-        const int multiplier = 10;
+        const int multiplier = 4;
 #else
         const int multiplier = 1;
 #endif

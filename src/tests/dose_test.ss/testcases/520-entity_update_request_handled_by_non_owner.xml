@@ -47,10 +47,6 @@
       </Object>
     </DoseTest.Action>
     <DoseTest.Action>
-      <ActionKind>Sleep</ActionKind>
-      <SleepDuration>2</SleepDuration>
-    </DoseTest.Action>
-    <DoseTest.Action>
       <ActionKind>Delete</ActionKind>
       <Partner>2</Partner>
       <Consumer>2</Consumer>
