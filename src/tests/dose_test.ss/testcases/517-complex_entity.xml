@@ -1153,7 +1153,7 @@
     </DoseTest.Action>
     <DoseTest.Action index="1">
       <ActionKind>Sleep</ActionKind>
-      <SleepDuration>10</SleepDuration>
+      <SleepDuration>20</SleepDuration>
     </DoseTest.Action>
     <DoseTest.Action index="2">
       <ActionKind>UpdateRequest</ActionKind>
@@ -2247,7 +2247,7 @@
     </DoseTest.Action>
     <DoseTest.Action index="3">
       <ActionKind>Sleep</ActionKind>
-      <SleepDuration>10</SleepDuration>
+      <SleepDuration>20</SleepDuration>
     </DoseTest.Action>
     <DoseTest.Action index="4">
       <ActionKind>DeleteRequest</ActionKind>
@@ -2261,7 +2261,7 @@
     </DoseTest.Action>
     <DoseTest.Action index="5">
       <ActionKind>Sleep</ActionKind>
-      <SleepDuration>10</SleepDuration>
+      <SleepDuration>20</SleepDuration>
     </DoseTest.Action>
   </TestActions>
 </DoseTest.Items.TestCase>
