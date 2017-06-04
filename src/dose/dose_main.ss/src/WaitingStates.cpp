@@ -257,11 +257,16 @@ namespace Internal
                      << "warning can be ignored.\n"
                      << "ConnectionId=" << element->second.connectionId << "\n"
                      << "registrationState=" << element->second.registrationState.state.Image() << "\n"
-                     << "entityStates=\n";
-                for (auto entityState = element->second.entityStates.cbegin(); entityState != element->second.entityStates.cend(); ++entityState)
+                     << "Number of entityStates=" << element->second.entityStates.size();
+                if (!element->second.entityStates.empty())
                 {
-                    ostr << entityState->state.Image() << "\n";
+                    ostr << "First entityState=" << element->second.entityStates.cbegin()->state.Image();
                 }
+
+                // for (auto entityState = element->second.entityStates.cbegin(); entityState != element->second.entityStates.cend(); ++entityState)
+                // {
+                //     ostr << entityState->state.Image() << "\n";
+                // }
                 Safir::Utilities::Internal::Log::Send(Safir::Utilities::Internal::Log::Warning,
                                                       ostr.str());
 
