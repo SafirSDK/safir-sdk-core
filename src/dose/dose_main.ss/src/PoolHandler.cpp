@@ -52,7 +52,7 @@ namespace Internal
         ,m_poolDistributor(m_strand.get_io_service(), m_distribution)
         ,m_poolDistributionRequests(m_strand.get_io_service(), m_distribution.GetCommunication())
         ,m_waitingStatesSanityTimer(m_strand.get_io_service())
-        ,m_persistensReady(false)
+        ,m_persistenceReady(false)
         ,m_poolDistributionComplete(false)
         ,m_pdCompleteSignaled(false)
         ,m_numReceivedPdComplete(0)
@@ -77,7 +77,7 @@ namespace Internal
             {
                 if (this_->m_nodes.insert(std::make_pair(id, nt)).second)
                 {
-                    if (!this_->m_poolDistributionComplete || !this_->m_persistensReady)
+                    if (!this_->m_poolDistributionComplete || !this_->m_persistenceReady)
                     {
                         this_->m_poolDistributionComplete=false;
                         this_->m_poolDistributionRequests.RequestPoolDistribution(id, nt);
@@ -148,7 +148,7 @@ namespace Internal
     {
         m_strand.dispatch([=]
         {
-            if (m_persistensReady)
+            if (m_persistenceReady)
             {
                 return; //already got this event
             }
@@ -163,7 +163,7 @@ namespace Internal
                 //tell poolDistributor that until we are started, we have no pool or persistence to provide
                 m_poolDistributor.SetHaveNothing();
             }
-            m_persistensReady=true;
+            m_persistenceReady=true;
             SignalPdComplete();
 
         });
@@ -279,7 +279,7 @@ namespace Internal
                 {
                     lllog(5)<<"PoolHandler: got PdComplete from "<<fromNodeId<<std::endl;
                     ++m_numReceivedPdComplete;
-                    m_persistHandler->SetPersistentDataReady(); //persistens is ready as soon as we have received one pdComplete
+                    m_persistHandler->SetPersistentDataReady(); //persistence is ready as soon as we have received one pdComplete
                     m_poolDistributionRequests.PoolDistributionFinished(fromNodeId);
                 }
                 break;
@@ -335,7 +335,7 @@ namespace Internal
 
     void PoolHandler::SignalPdComplete()
     {
-        if (m_persistensReady && m_poolDistributionComplete && !m_pdCompleteSignaled)
+        if (m_persistenceReady && m_poolDistributionComplete && !m_pdCompleteSignaled)
         {
             lllog(1)<<"PD complete"<<std::endl;
             m_pdCompleteSignaled=true;
@@ -364,7 +364,7 @@ namespace Internal
     {
         m_waitingStates.SanityCheck();
 
-        m_waitingStatesSanityTimer.expires_from_now(boost::chrono::seconds(30));
+        m_waitingStatesSanityTimer.expires_from_now(boost::chrono::seconds(240));
         m_waitingStatesSanityTimer.async_wait(m_strand.wrap([=](const boost::system::error_code& error)
         {
             if (!error)

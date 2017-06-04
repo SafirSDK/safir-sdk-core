@@ -300,7 +300,7 @@ namespace Internal
              }
              else
              {
-                m_unsentResponses.insert(std::make_pair(fromNodeId, fromNodeType));
+                 m_unsentResponses.insert(std::make_pair(fromNodeId, fromNodeType));
              }
         }
         else if (msg.GetType() == DistributionData::Action_HavePersistenceDataResponse)

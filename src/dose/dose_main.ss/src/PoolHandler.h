@@ -79,7 +79,7 @@ namespace Internal
         std::unordered_map<int64_t, std::unique_ptr<StateDistributorType> > m_stateDistributors; //map<nodeType, StateDistributor>
 
         std::function<void()> m_poolDistributionCompleteCallback;
-        bool m_persistensReady;
+        bool m_persistenceReady;
         bool m_poolDistributionComplete;
         bool m_pdCompleteSignaled;
         int m_numReceivedPdComplete;
