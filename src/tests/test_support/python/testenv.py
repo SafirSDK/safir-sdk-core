@@ -124,7 +124,6 @@ class TestEnv:
                                 stdout = subprocess.PIPE if collect_output else None,
                                 stderr = subprocess.STDOUT if collect_output else None,
                                 creationflags = self.__creationflags,
-                                start_new_session = True,
                                 universal_newlines = True)
         queue = Queue()
         if collect_output:

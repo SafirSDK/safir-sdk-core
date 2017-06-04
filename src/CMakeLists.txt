@@ -357,7 +357,7 @@ ADD_DEFINITIONS(-DSAFIR_NO_AUTOLINK)
 #
 # Set up .NET compilation
 #
-include(SafirLoadCSharp)
+#include(SafirLoadCSharp)
 
 #
 # Set up Java compilation
