@@ -70,19 +70,25 @@ class TestEnv:
 
     If the exes are in the PATH, its okay to just use exe names.
     """
-    def __init__(self, safir_control, dose_main, dope_main, safir_show_config, start_syslog_server = True, ignore_control_cmd = False ):
+    def __init__(self, safir_control, dose_main, dope_main, safir_show_config, start_syslog_server = True, ignore_control_cmd = False, wait_for_persistence = True):
         self.__procs = dict()
         self.__creationflags = 0
         if sys.platform == "win32":
             self.__creationflags= subprocess.CREATE_NEW_PROCESS_GROUP
         self.safir_control = self.launchProcess("safir_control", (safir_control, "--dose-main-path", dose_main, "--ignore-control-cmd", str(ignore_control_cmd)))
-        self.launchProcess("dope_main", (dope_main,))
+        self.dope = dope_main is not None
+        if self.dope:
+            self.launchProcess("dope_main", (dope_main,))
 
         self.start_syslog_server = start_syslog_server
         if self.start_syslog_server == True:
             self.syslog = syslog_server.SyslogServer(safir_show_config)
         self.syslog_output = list()
 
+        if wait_for_persistence:
+            self.WaitForPersistence()
+
+    def WaitForPersistence(self):
         start_time = time.time()
         log("Waiting for safir_control to be ready")
 
@@ -103,8 +109,9 @@ class TestEnv:
                 log("safir_control and/or dose_main seems slow to start. Here is some output:")
                 log("----- safir_control output -----")
                 log(self.Output("safir_control"))
-                log("----- dope_main output -----")
-                log(self.Output("dope_main"))
+                if self.dope:
+                    log("----- dope_main output -----")
+                    log(self.Output("dope_main"))
                 log("---- syslog output ----")
                 if self.start_syslog_server == True:
                     log(self.syslog.get_data(0))
@@ -117,6 +124,7 @@ class TestEnv:
                                 stdout = subprocess.PIPE if collect_output else None,
                                 stderr = subprocess.STDOUT if collect_output else None,
                                 creationflags = self.__creationflags,
+                                start_new_session = True,
                                 universal_newlines = True)
         queue = Queue()
         if collect_output:
@@ -219,6 +227,10 @@ class TestEnv:
                 ok = False
         return ok
 
+    def WaitForProcess(self,name):
+        proc = self.__procs.get(name)
+        return proc[0].wait()
+    
     def SafirControlRunning(self):
         proc = self.__procs.get("safir_control")
 
