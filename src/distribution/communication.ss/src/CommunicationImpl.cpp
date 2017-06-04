@@ -194,25 +194,21 @@ namespace Com
 
     void CommunicationImpl::IncludeNodeInternal(int64_t id)
     {
-        //We do post here to be sure the AddNode job will be executed before IncludeNode. Otherwize we
-        //risk losing a node.
-        //We also do the DataSender inside readerStrand since
-        //it only through the deliveryHandler we can lookup nodeTypeId from a nodeId. Since this a a very low frequent operaton this is ok.
-        m_receiveStrand.post([=]
+        //There is no way for us at this point to know which nodeType the node belongs to without entering the
+        //m_receiveStrand, and that is not an option here. We must be sure to post the includeNode right now to
+        //ensure it is handled before any forthcoming Sends. Since includeNode in DataSender will ignore any calls
+        //when the node does not exist, we call includeNode on all nodeTypes knowing it will only have effect on
+        //the one where the node exists.
+        for (auto nt : m_nodeTypes)
         {
-            lllog(6)<<L"COM: Execute IncludeNodeInternal id="<<id<<std::endl;
-            auto node=m_deliveryHandler.GetNode(id);
+             //calling IncludeNode will post on the sendStrand of the nodeType
+            nt.second->GetAckedDataSender().IncludeNode(id);
+            nt.second->GetUnackedDataSender().IncludeNode(id);
+        }
 
-            if (node==nullptr)
-            {
-                throw std::logic_error(std::string("COM: IncludeNodeInternal unknown or excluded node. NodeId: ")+boost::lexical_cast<std::string>(id));
-            }
-
-            auto& nodeType=GetNodeType(node->nodeTypeId);
-            nodeType.GetAckedDataSender().IncludeNode(id);
-            nodeType.GetUnackedDataSender().IncludeNode(id);
-            m_deliveryHandler.IncludeNode(id);
-        });
+        //We do post (not dispatch) here to be sure the AddNode job will be executed before IncludeNode. Otherwize we
+        //risk losing a node.
+        m_receiveStrand.post([=]{m_deliveryHandler.IncludeNode(id);});
     }
 
     void CommunicationImpl::ExcludeNode(int64_t id)

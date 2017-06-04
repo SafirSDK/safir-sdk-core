@@ -471,17 +471,33 @@ namespace Com
                 {
                     ud->header.ackNow=1; //for simplicity we request ack immediately for node specific messages
                     auto nodeIt=m_nodes.find(ud->header.commonHeader.receiverId);
-                    if (nodeIt!=m_nodes.end())
+                    if (nodeIt!=m_nodes.end() && nodeIt->second.systemNode)
                     {
-                        lllog(9)<<m_logPrefix.c_str()<<"Send to: "<<ud->header.commonHeader.receiverId<<",  seq: "<<ud->header.sequenceNumber<<", ackNow: "<<static_cast<int>(ud->header.ackNow)<<std::endl;
+                        lllog(9)<<m_logPrefix.c_str()<<"Send to: "<<ud->header.commonHeader.receiverId
+                                <<",  seq: "<<ud->header.sequenceNumber<<", ackNow: "<<static_cast<int>(ud->header.ackNow)
+                                << ", dataType:" << ud->header.commonHeader.dataType <<std::endl;
                         ud->receivers.insert(ud->header.commonHeader.receiverId);
                         NodeInfo& n=nodeIt->second;
                         WriterType::SendTo(ud, n.endpoint);
                     }
                     else
                     {
-                        //Not a system node, remove from sendList
-                        lllog(8)<<m_logPrefix.c_str()<<"receiver does not exist, id:  "<<ud->header.commonHeader.receiverId<<std::endl;
+                        if (nodeIt==m_nodes.end())
+                        {
+                            //The node does not exist, this can happen if an application sends a message after the node has been excluded
+                            //and is a  valid case that should be handled.
+                            lllog(8)<<m_logPrefix.c_str()<<"receiver does not exist, id:  "<<ud->header.commonHeader.receiverId<<std::endl;
+                        }
+                        else //systemNode==false
+                        {
+                            //This case should not be possible for SingleReceiverSendMethod.
+                            std::ostringstream os;
+                            os<<m_logPrefix<<"Programming Error! There is an unsent message for a non-systemNode in the queue using SingleReceiverSendMethod. \n"
+                                 <<ud->header.ToString()<<"\n"<<SendQueueToString();
+                            lllog(1)<<os.str().c_str()<<std::endl;
+                            SEND_SYSTEM_LOG(Error, <<os.str().c_str()<<std::endl);
+                            throw std::logic_error(os.str());
+                        }
                     }
                 }
 
@@ -688,7 +704,7 @@ namespace Com
             else
             {
                 //It is possible that m_sendQueueSize has been increased by 1 in AddToSendQueue but still the item has not been added to the queue.
-                //to avoid raise conditions we can't just set m_sendQueueSize=0 here but instead decrease it with the actual number of items removed.
+                //to avoid race conditions we can't just set m_sendQueueSize=0 here but instead decrease it with the actual number of items removed.
                 auto numberOfRemoved=m_sendQueue.clear_queue();
                 m_sendQueueSize -= static_cast<unsigned int>(numberOfRemoved);
                 lllog(8)<<m_logPrefix.c_str()<<"No receivers left, clear sendQueue, numberOfRemoved: "<<numberOfRemoved<<std::endl;

@@ -180,8 +180,12 @@ namespace Com
         //Make node included. If excluded it is also removed.
         void IncludeNode(int64_t id)
         {
+            lllog(6)<<L"COM: DeliveryHandler IncludeNode id="<<id<<std::endl;
             const auto it=m_nodes.find(id);
-            assert(it!=m_nodes.end());
+            if (it==m_nodes.end())
+            {
+                throw std::logic_error(std::string("COM: DeliveryHandler IncludeNode unknown or excluded node. NodeId: ")+boost::lexical_cast<std::string>(id));
+            }
 
             it->second.node.systemNode=true;
         }
