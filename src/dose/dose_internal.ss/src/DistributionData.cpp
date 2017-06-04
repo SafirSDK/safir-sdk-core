@@ -828,14 +828,11 @@ namespace Internal
 
         case Action_Connect:
         case Action_Disconnect:
-            {
-                ENSURE(false, << "Calling DistributionData::GetTypeId for msg Action_Connect or Action_Disconnect");
-            }
+            ENSURE(false, << "Calling DistributionData::GetTypeId for msg Action_Connect or Action_Disconnect");
+            break;
 
         default:
-            {
-                ENSURE(false, << "Calling DistributionData::GetTypeId for msg unknown type " << GetType());
-            }
+            ENSURE(false, << "Calling DistributionData::GetTypeId for msg unknown type " << GetType());
         }
         //keep compiler happy. We never get here!
         throw Safir::Dob::Typesystem::SoftwareViolationException(L"Internal error, got to end of DistributionData::GetTypeId()", __WFILE__,__LINE__);
