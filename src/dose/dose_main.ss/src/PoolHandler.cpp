@@ -415,6 +415,7 @@ namespace Internal
             }
             else
             {
+                lllog(9) << "RemoteSetRegistrationState not successful, adding to waiting states" << std::endl;
                 m_waitingStates.Add(state, fromNodeType);
             }
         }
@@ -460,6 +461,8 @@ namespace Internal
                                                                          state);
                 if (result == RemoteSetNeedRegistration)
                 {
+                    lllog(9) << "RemoteSetRealEntityState (missing reg) not successful,"
+                             << " adding to waiting states" << std::endl;
                     m_waitingStates.Add(state, fromNodeType);
                 }
 
@@ -489,6 +492,9 @@ namespace Internal
 
                     if (result == RemoteSetNeedRegistration || result == RemoteSetNeedConnection)
                     {
+                        lllog(9) << "RemoteSetRealEntityState (result = " << result << ") not successful,"
+                                 << " adding to waiting states" << std::endl;
+
                         m_waitingStates.Add(state, fromNodeType);
                     }
                 }
@@ -501,6 +507,8 @@ namespace Internal
 
                     if (result == RemoteSetNeedRegistration)
                     {
+                        lllog(9) << "RemoteSetRealEntityState (missing reg) not successful,"
+                                 << " adding to waiting states" << std::endl;
                         m_waitingStates.Add(state, fromNodeType);
                     }
                 }

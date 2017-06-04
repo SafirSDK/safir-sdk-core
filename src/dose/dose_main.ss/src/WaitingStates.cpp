@@ -42,6 +42,7 @@ namespace Internal
     {
         if (m_isPerforming)
         {
+            lllog(5) << "WaitingStates::Add: We are performing. Ignoring add" << std::endl;
             // Ignore Adds while we're performing a state.
             return;
         }
@@ -54,7 +55,8 @@ namespace Internal
         if (regIt == m_waitingStateTable.end())
         { //haven't seen this combo before, add it.
             regIt = m_waitingStateTable.insert(std::make_pair(key,States())).first;
-            lllout << "WaitingStates::Add: A new registration has been added to WaitingStates, due to state " << state.Image() << std::endl;
+            lllout << "WaitingStates::Add: A new registration has been added to WaitingStates, due to state "
+                   << state.Image() << std::endl;
         }
 
         //make a ref to the state struct to make the code below easier to read.
