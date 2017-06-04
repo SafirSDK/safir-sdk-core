@@ -93,7 +93,8 @@ int main()
     {
         Safir::Dob::Internal::DoseMainApp theApp(ioService);
 
-        //Set number of threads to at least 2, or the number of cpu kernels
+        //We want a fair number of threads here. A word of warning: Turning this down
+        //below the number of Dob connections in dose_main can cause a deadlock at startup.
         auto nbrOfThreads = std::max<size_t>(10, boost::thread::hardware_concurrency());
 
         const auto run = [&ioService,&theApp,&success]
