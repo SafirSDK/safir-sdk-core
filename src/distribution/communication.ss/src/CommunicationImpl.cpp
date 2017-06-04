@@ -199,11 +199,11 @@ namespace Com
         //ensure it is handled before any forthcoming Sends. Since includeNode in DataSender will ignore any calls
         //when the node does not exist, we call includeNode on all nodeTypes knowing it will only have effect on
         //the one where the node exists.
-        for (auto nt : m_nodeTypes)
+        for (auto nt = m_nodeTypes.begin(); nt != m_nodeTypes.end(); ++nt)
         {
              //calling IncludeNode will post on the sendStrand of the nodeType
-            nt.second->GetAckedDataSender().IncludeNode(id);
-            nt.second->GetUnackedDataSender().IncludeNode(id);
+            nt->second->GetAckedDataSender().IncludeNode(id);
+            nt->second->GetUnackedDataSender().IncludeNode(id);
         }
 
         //We do post (not dispatch) here to be sure the AddNode job will be executed before IncludeNode. Otherwize we
