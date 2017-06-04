@@ -22,15 +22,10 @@
 *
 ******************************************************************************/
 #include <iostream>
-// #include <Safir/Dob/Typesystem/Operations.h>
-// #include <Safir/Dob/Typesystem/Serialization.h>
 #include <Safir/Dob/Connection.h>
-// #include <Safir/Dob/Consumer.h>
 #include <Safir/Utilities/AsioDispatcher.h>
 #include <DoseTest/SynchronousPermanentEntity.h>
 #include <boost/lexical_cast.hpp>
-// #include <boost/algorithm/hex.hpp>
-
 
 class StopHandler :
     public Safir::Dob::StopHandler
@@ -51,6 +46,7 @@ public:
     explicit EntityOwner(boost::asio::io_service& ioService)
         : m_ioService(ioService)
         , m_timer(ioService)
+        , m_handler(Safir::Dob::Typesystem::InstanceId::GenerateRandom().GetRawValue())
     {
         using namespace Safir::Dob;
         m_connection.Attach();
@@ -77,8 +73,6 @@ public:
 private:
     void Update()
     {
-        //std::wcout << "Updating" << std::endl;
-
         for (auto && inst : m_instances)
         {
             auto ent = DoseTest::SynchronousPermanentEntity::Create();
@@ -119,8 +113,7 @@ private:
     boost::asio::deadline_timer m_timer;
     std::vector<Safir::Dob::Typesystem::InstanceId> m_instances;
     
-    const Safir::Dob::Typesystem::HandlerId m_handler = Safir::Dob::Typesystem::HandlerId
-        (Safir::Dob::Typesystem::InstanceId::GenerateRandom().GetRawValue());
+    const Safir::Dob::Typesystem::HandlerId m_handler;
 };
 
 int main()
@@ -143,12 +136,9 @@ int main()
                         0, // Context
                         &stopHandler,
                         &dispatcher);
-        //std::wcout << "Creating owner" << std::endl;
         EntityOwner owner(ioService);
-        //std::wcout << "Starting ioService" << std::endl;
         boost::asio::io_service::work keepRunning(ioService);
         ioService.run();
-        //std::wcout << "Leaving ioService" << std::endl;
 
         connection.Close();
     }
