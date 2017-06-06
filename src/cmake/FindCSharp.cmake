@@ -19,7 +19,7 @@
 # Redistribution and use is allowed according to the terms of the GPL license.
 
 
-FIND_PROGRAM (CSHARP_COMPILER NAMES csc cli-csc gmcs gmcs2 mcs)
+FIND_PROGRAM (CSHARP_COMPILER NAMES mcs csc cli-csc gmcs gmcs2)
 FIND_PROGRAM (CSHARP_LINKER NAMES cli-al al)
 FIND_PROGRAM (GACUTIL_EXECUTABLE gacutil)
 FIND_PROGRAM (RESGEN_EXECUTABLE NAMES cli-resgen resgen2 resgen PATH_SUFFIXES ..) #in vs2013 express x64 we need to look one step up!
