@@ -263,10 +263,6 @@ namespace Internal
                     ostr << "First entityState=" << element->second.entityStates.cbegin()->state.Image();
                 }
 
-                // for (auto entityState = element->second.entityStates.cbegin(); entityState != element->second.entityStates.cend(); ++entityState)
-                // {
-                //     ostr << entityState->state.Image() << "\n";
-                // }
                 Safir::Utilities::Internal::Log::Send(Safir::Utilities::Internal::Log::Warning,
                                                       ostr.str());
 
