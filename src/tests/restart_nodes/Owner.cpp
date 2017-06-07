@@ -73,13 +73,13 @@ public:
 private:
     void Update()
     {
-        for (auto && inst : m_instances)
+        for (auto inst = m_instances.begin(); inst != m_instances.end(); ++inst)
         {
             auto ent = DoseTest::SynchronousPermanentEntity::Create();
             ent->Info() = L"test" + boost::lexical_cast<std::wstring>
                 (Safir::Dob::Typesystem::InstanceId::GenerateRandom().GetRawValue());
             m_connection.SetChanges(ent,
-                                    inst,
+                                    *inst,
                                     m_handler);
         }
 
