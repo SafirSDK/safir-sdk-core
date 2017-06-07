@@ -69,7 +69,7 @@ public:
         m_timer.expires_from_now(boost::posix_time::seconds(1));
         m_timer.async_wait([=](const boost::system::error_code&){Update();});
     }
-    
+
 private:
     void Update()
     {
@@ -112,7 +112,7 @@ private:
     boost::asio::io_service& m_ioService;
     boost::asio::deadline_timer m_timer;
     std::vector<Safir::Dob::Typesystem::InstanceId> m_instances;
-    
+
     const Safir::Dob::Typesystem::HandlerId m_handler;
 };
 
@@ -158,5 +158,3 @@ int main()
 
     return 0;
 }
-
-

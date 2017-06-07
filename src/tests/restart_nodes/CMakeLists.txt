@@ -1,12 +1,9 @@
-
 add_executable(WaitingStatesOwner Owner.cpp)
 
 target_link_libraries(WaitingStatesOwner
   PRIVATE
   dose_cpp
-  safir_generated-DoseTest-cpp
-  )
-  #safir_generated-WaitingStates-cpp ${SAFIR_SDK_CORE_LIBRARIES})
+  safir_generated-DoseTest-cpp)
 
 
 get_property(SAFIR_GENERATED_PATHS GLOBAL PROPERTY SAFIR_GENERATED_PATHS)
