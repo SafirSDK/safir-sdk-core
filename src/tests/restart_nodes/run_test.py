@@ -49,11 +49,6 @@ def launch_node(args, instance):
 
     if instance == 0:
         env.launchProcess("WaitingStatesOwner",args.owner)
-        #while True:
-        #    time.sleep(1)
-        #    print(env.Output("WaitingStatesOwner"))
-        #env.launchProcess("dobexplorer", args.dobexplorer)
-        #env.launchProcess("sate", shutil.which("sate")
     return env
 
 def parse_arguments():
@@ -95,7 +90,15 @@ def main():
                 for i in range(1,CLIENTS+1):
                     env[i].WaitForPersistence()
                     output = env[i].Output("safir_control")
-                    inc = int(re.search(r"Joined system with incarnation id (.*)",output).group(1))
+                    res = re.search(r"Joined system with incarnation id (.*)",output)
+                    if res is None:
+                        print("Failed to find join statement in:")
+                        print(output)
+                        print("Sleeping a while, to see if that will let us join")
+                        time.sleep(10)
+                        print(env[i].Output("safir_control"))
+                        return 1
+                    inc = int(res.group(1))
                     if inc != incarnation:
                         print ("Joined invalid incarnation!!!!")
                         return 1
