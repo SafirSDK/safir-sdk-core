@@ -37,7 +37,10 @@ def launch_node(args, instance):
     os.environ["SAFIR_CONTROL_ADDRESS"] = makeaddr(30000 + instance)
     os.environ["SAFIR_DATA_ADDRESS"] = makeaddr(40000 + instance)
     if instance == 0:
-        os.environ["SAFIR_SEED_ADDRESS"] = " "
+        #try an ugly workaround for windows not allow empty strings in environment
+        #so we put a return character in there instead :-D
+        os.environ["SAFIR_SEED_ADDRESS"] = """
+"""
     else:
         os.environ["SAFIR_SEED_ADDRESS"] = makeaddr(30000)
     os.environ["SYSLOG_SERVER_PORT"] = str(20000 + instance)
