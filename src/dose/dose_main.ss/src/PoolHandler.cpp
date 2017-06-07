@@ -364,7 +364,8 @@ namespace Internal
     {
         m_waitingStates.SanityCheck();
 
-        m_waitingStatesSanityTimer.expires_from_now(boost::chrono::seconds(240));
+        /* We run this timer fairly infrequently, to reduce false warnings */
+        m_waitingStatesSanityTimer.expires_from_now(boost::chrono::minutes(6));
         m_waitingStatesSanityTimer.async_wait(m_strand.wrap([=](const boost::system::error_code& error)
         {
             if (!error)
