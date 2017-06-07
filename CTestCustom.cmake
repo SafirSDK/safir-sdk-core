@@ -6,5 +6,6 @@ if ($ENV{SAFIR_SKIP_SLOW_TESTS})
     ElectionHandler_test_with_overflows
     LamportClocks
     dope_file_backend_test
+    restart_nodes
     )
 endif()

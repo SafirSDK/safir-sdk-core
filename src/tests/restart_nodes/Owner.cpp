@@ -27,6 +27,18 @@
 #include <DoseTest/SynchronousPermanentEntity.h>
 #include <boost/lexical_cast.hpp>
 
+//disable warnings in boost
+#if defined _MSC_VER
+  #pragma warning (push)
+  #pragma warning (disable : 4244 4267 4100)
+#endif
+
+#include <boost/thread.hpp>
+#if defined _MSC_VER
+  #pragma warning (pop)
+#endif
+
+
 class StopHandler :
     public Safir::Dob::StopHandler
 {
@@ -118,6 +130,17 @@ private:
 
 int main()
 {
+#ifdef _WIN32
+    // when this test is run on a single cpu it appears that we have some
+    // starvation issues, so we reduce priority then.
+    if (boost::thread::hardware_concurrency() == 1)
+    {
+        if(!SetPriorityClass(GetCurrentProcess(), BELOW_NORMAL_PRIORITY_CLASS))
+        {
+            std::wcerr << "Failed to set priority on windows" << std::endl;
+        }
+    }
+#endif
     try
     {
         const std::wstring nameCommonPart = L"C++";

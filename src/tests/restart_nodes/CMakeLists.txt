@@ -19,6 +19,6 @@ ADD_TEST(NAME restart_nodes
   --safir-generated-paths "${SAFIR_GENERATED_PATHS}")
 
 SET_SAFIR_TEST_PROPERTIES(TEST restart_nodes
-  TIMEOUT 600
+  TIMEOUT 3000
   CONFIG_OVERRIDE ${CMAKE_CURRENT_SOURCE_DIR}/test_config)
 
