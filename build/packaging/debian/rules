@@ -58,3 +58,7 @@ override_dh_clideps:
 #make debug symbols go in separate package
 override_dh_strip:
 	dh_strip --dbg-package=safir-sdk-core-dbg
+
+#dont compress examples
+override_dh_compress:
+        dh_compress -Xexample
