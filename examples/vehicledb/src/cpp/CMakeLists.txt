@@ -16,3 +16,5 @@ TARGET_LINK_LIBRARIES(VehicleAppDb
   safir_generated-Example-cpp
   ${SAFIR_SDK_CORE_OLIB_LIBRARIES}
   ${SAFIR_SDK_CORE_LIBRARIES})
+
+#no installation, since it is deprecated!

@@ -8,3 +8,5 @@ ADD_EXECUTABLE(VehicleAppCpp
 TARGET_LINK_LIBRARIES(VehicleAppCpp PRIVATE
   safir_generated-Example-cpp
   ${SAFIR_SDK_CORE_LIBRARIES})
+
+INSTALL(TARGETS VehicleAppCpp DESTINATION bin)

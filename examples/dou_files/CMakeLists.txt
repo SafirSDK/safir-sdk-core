@@ -24,3 +24,15 @@ ADD_SAFIR_GENERATED_LIBRARY(NAME Example DEPENDENCIES Core
    data/Safir-java.namespace.txt
 )
 
+#The paths here are relative, so they will be put in the corresponding folders under
+#CMAKE_INSTALL_PREFIX
+
+INSTALL_SAFIR_GENERATED_LIBRARY(
+  TARGETS Example
+  CXX_RUNTIME bin
+  CXX_LIBRARY lib
+  CXX_INCLUDE include
+  JAR java
+  DOTNET dotnet
+  DOU_BASE dou   #files will be installed to dou/Example
+  )

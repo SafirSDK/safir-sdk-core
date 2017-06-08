@@ -10,4 +10,5 @@ ADD_JAR(vehicleappjava
   ENTRY_POINT com.saabgroup.safir.samples.vehicleappjava.VehicleAppJava
   MANIFEST ${CMAKE_CURRENT_SOURCE_DIR}/Manifest.txt)
 
-
+#Yeah, this is a bit rough...
+INSTALL(FILES vehicleappjava.jar DESTINATION bin)
