@@ -131,14 +131,10 @@ private:
 int main()
 {
 #ifdef _WIN32
-    // when this test is run on a single cpu it appears that we have some
-    // starvation issues, so we reduce priority then.
-    if (boost::thread::hardware_concurrency() == 1)
+    // On Windows we seem to have starvation issues, so we reduce priority then.
+    if(!SetPriorityClass(GetCurrentProcess(), BELOW_NORMAL_PRIORITY_CLASS))
     {
-        if(!SetPriorityClass(GetCurrentProcess(), BELOW_NORMAL_PRIORITY_CLASS))
-        {
-            std::wcerr << "Failed to set priority on windows" << std::endl;
-        }
+        std::wcerr << "Failed to set priority on windows" << std::endl;
     }
 #endif
     try

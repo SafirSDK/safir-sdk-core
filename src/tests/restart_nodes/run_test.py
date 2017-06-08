@@ -72,7 +72,8 @@ def parse_arguments():
 
     return arguments
 
-CLIENTS=10
+#windows is sloooow
+CLIENTS = 4 if sys.platform == "win32" else 10
 
 def main():
     args = parse_arguments()
