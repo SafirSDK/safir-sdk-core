@@ -1,3 +1,6 @@
+if (NOT CSHARP_FOUND)
+  return()
+endif()
 
 FILE(GLOB sources *.cs Properties/*.cs)
 FILE(GLOB resx_files *.resx)
