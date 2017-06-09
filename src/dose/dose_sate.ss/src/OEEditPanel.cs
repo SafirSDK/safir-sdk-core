@@ -117,10 +117,19 @@ namespace Sate
                 {
                     if (Operations.IsClass(tid))
                     {
-                        var type = MainForm.Instance.GetType(tid);
-                        if (type.IsSubclassOf(baseType))
+                        try
                         {
-                            cb.Items.Add(type);
+                            var type = MainForm.Instance.GetType(tid);
+                            if (type.IsSubclassOf(baseType))
+                            {
+                                cb.Items.Add(type);
+                            }
+                        }
+                        catch (Safir.Dob.Typesystem.IllegalValueException)
+                        {
+                            /* this is to handle the case where a type is in dots_kernel, but has
+                               not been built. I.e. a parameter class */
+                            continue;
                         }
                     }
                 }

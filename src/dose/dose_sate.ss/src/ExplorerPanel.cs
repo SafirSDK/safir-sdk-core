@@ -412,6 +412,8 @@ namespace Sate
                 }
                 catch (Safir.Dob.Typesystem.IllegalValueException)
                 {
+                    /* this is to handle the case where a type is in dots_kernel, but has
+                       not been built. I.e. a parameter class */
                     continue;
                 }
                 if (type.IsSubclassOf(objType))
