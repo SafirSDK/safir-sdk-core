@@ -61,4 +61,4 @@ override_dh_strip:
 
 #dont compress examples
 override_dh_compress:
-        dh_compress -Xexample
+	dh_compress -Xexample
