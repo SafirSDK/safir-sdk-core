@@ -1,5 +1,5 @@
 #!/usr/bin/make -f
-.PHONY: override_dh_install install_runtime install_tools install_development install_testsuite override_dh_auto_test override_dh_clideps override_dh_strip
+.PHONY: override_dh_install install_runtime install_tools install_development install_testsuite override_dh_auto_test override_dh_clideps override_dh_strip override_dh_compress
 
 
 #upstream wants to control compilation flags
@@ -61,4 +61,4 @@ override_dh_strip:
 
 #dont compress examples
 override_dh_compress:
-	dh_compress -Xexample
+	dh_compress -X.cpp -X.cs -X.h -X.java -X.resx -X.sql -X.ui
