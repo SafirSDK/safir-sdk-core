@@ -510,6 +510,10 @@ class JenkinsInterface:
             if self.server is None:
                 log("No JENKINS_URL found")
                 sys.exit(1)
+        self.user = os.environ.get("JENKINS_USER")
+        if self.server is None:
+            log("No JENKINS_USER found")
+            sys.exit(1)
         log("Using jenkins server",self.server)
 
         cliurl = self.server + "/jnlpJars/jenkins-cli.jar"
@@ -519,7 +523,7 @@ class JenkinsInterface:
 
     def __run_command(self,cmd,inp = None):
         args = list()
-        args += ("java","-jar",self.clijar,"-s",self.server)
+        args += ("java","-jar",self.clijar,"-s",self.server,"-ssh","-user",self.user)
 
         if sys.platform == "win32":
             args += ("-i", "c:\\.ssh\\id_rsa")
