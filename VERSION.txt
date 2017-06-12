@@ -5,11 +5,11 @@
 MAJOR=6
 MINOR=3
 PATCH=10
-SUFFIX=~alpha-1
+SUFFIX=~alpha
 
 #Set the SUFFIX to empty string for stable releases (but keep the equal sign).
 #if the SUFFIX is used for alpha or beta tags, the first character must be a tilde (~),
-#so for example it could be set like this: SUFFIX=~alpha-1
+#so for example it could be set like this: SUFFIX=~alpha
 #The reason for using a tilde instead of a dash is that debian versioning
 #wants it that way.
 
