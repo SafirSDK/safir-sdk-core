@@ -10,4 +10,4 @@ ADD_CSHARP_ASSEMBLY(VehicleAppCs EXE
   REFERENCES Safir.Dob safir_generated-Example-dotnet safir_generated-Core-dotnet Safir.Dob.Typesystem Safir.Logging Safir.SwReports
   NOVERSION)
 
-INSTALL(FILES VehicleAppCs.exe DESTINATION bin)
+INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/VehicleAppCs.exe DESTINATION bin)

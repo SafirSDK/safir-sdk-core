@@ -14,4 +14,4 @@ ADD_CSHARP_ASSEMBLY(VehicleMmiCsWinForms WINEXE
              Safir.Logging Safir.SwReports System.Drawing System.Windows.Forms
   NOVERSION)
 
-INSTALL(FILES VehicleMmiCsWinForms.exe DESTINATION bin)
+INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/VehicleMmiCsWinForms.exe DESTINATION bin)
