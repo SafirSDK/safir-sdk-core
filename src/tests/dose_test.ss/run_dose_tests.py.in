@@ -516,6 +516,10 @@ class JenkinsInterface:
             sys.exit(1)
         log("Using jenkins server",self.server)
 
+        self.log_level = os.environ.get("JENKINS_CLI_LOGGING")
+        if self.log_level is None:
+            self.log_level = "OFF"
+
         cliurl = self.server + "/jnlpJars/jenkins-cli.jar"
         #log "will download jenkins-cli.jar using url", cliurl
         self.clijar = os.path.join(parameters.tempdir,"jenkins-cli.jar")
@@ -523,7 +527,7 @@ class JenkinsInterface:
 
     def __run_command(self,cmd,inp = None):
         args = list()
-        args += ("java","-jar",self.clijar,"-s",self.server,"-ssh","-user",self.user)
+        args += ("java","-jar",self.clijar,"-s",self.server,"-logger",self.log_level,"-ssh","-user",self.user)
 
         if sys.platform == "win32":
             args += ("-i", "c:\\.ssh\\id_rsa")
