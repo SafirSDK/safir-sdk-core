@@ -207,12 +207,12 @@ void RawStatisticsPage::UpdateLocalTable()
                 SetText(localTable->item(row,COLUMN_INCARNATION_ID), "");
             }
 
-            ids.erase(id_);
-
             if (m_statistics.IsDead(findIt->second))
             {
                 SetDead(localTable, row);
             }
+
+            ids.erase(id_);
         }
     }
 
@@ -343,12 +343,13 @@ void RawStatisticsPage::UpdateRemoteTable()
                         SetText(remoteTable->item(row,COLUMN_DATA_RETRANSMIT_COUNT),
                                 statistics.DataRetransmitCount(findIt->second));
 
-                        ids.erase(id_);
 
                         if (statistics.IsDead(findIt->second))
                         {
                             SetDead(remoteTable, row);
                         }
+
+                        ids.erase(id_);
                     }
                 }
 
