@@ -68,7 +68,7 @@ public:
                                                     InstanceIdPolicy::HandlerDecidesInstanceId,
                                                     this);
 
-        for (int i = 0; i < 20; ++i)
+        for (int i = 0; i < 100; ++i)
         {
             auto ent = DoseTest::SynchronousPermanentEntity::Create();
             ent->Info() = L"test" + boost::lexical_cast<std::wstring>(Typesystem::InstanceId::GenerateRandom().GetRawValue());

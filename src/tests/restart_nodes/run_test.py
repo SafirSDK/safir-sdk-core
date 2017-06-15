@@ -50,6 +50,9 @@ def launch_node(args, instance):
 
     if instance == 0:
         env.launchProcess("WaitingStatesOwner",args.owner)
+        env.launchProcess("dobexplorer",args.dobexplorer)
+        time.sleep(60)
+
     return env
 
 def parse_arguments():
@@ -106,6 +109,7 @@ def main():
                         return 1
 
                 for i in range(1,CLIENTS+1):
+                    time.sleep(10000)
                     env[i].killprocs()
                     if not env[i].ReturnCodesOk():
                         print("Some process failed")

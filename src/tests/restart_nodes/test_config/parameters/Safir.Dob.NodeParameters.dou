@@ -94,7 +94,7 @@
             <HeartbeatInterval>1.0</HeartbeatInterval>
             <MaxLostHeartbeats>5</MaxLostHeartbeats>
             <SlidingWindowsSize>10</SlidingWindowsSize>
-            <RetryTimeout>0.02</RetryTimeout>
+            <RetryTimeout>0.1</RetryTimeout>
             <RequiredForStart>True</RequiredForStart>
           </Safir.Dob.NodeType>
         </arrayElement>
