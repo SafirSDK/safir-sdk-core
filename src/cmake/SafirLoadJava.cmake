@@ -88,7 +88,7 @@ function (SAFIR_JAVAH)
 
     COMMAND ${Java_JAVAH_EXECUTABLE} -classpath $<TARGET_PROPERTY:${_javah_JAR},JAR_FILE> ${_javah_CLASS}
 
-    DEPENDS ${_javah_jar_file}
+    DEPENDS ${_javah_JAR} ${_javah_jar_file}
     WORKING_DIRECTORY ${_javah_OUTPUT_DIR}
 
     COMMENT "Generating javah header files from ${_javah_JAR}")
