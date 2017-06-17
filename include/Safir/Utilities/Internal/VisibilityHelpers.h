@@ -42,6 +42,13 @@
 #  endif
 #endif
 
+// This is a workaround for the bug described in https://gcc.gnu.org/bugzilla/show_bug.cgi?id=80947
+#if __GNUC__ == 7
+#  define SAFIR_GCC_VISIBILITY_BUG_WORKAROUND  __attribute__ ((visibility ("default")))
+#else
+#  define SAFIR_GCC_VISIBILITY_BUG_WORKAROUND
+#endif
+
 
 #endif
 

@@ -115,6 +115,7 @@ namespace SP
                         const bool master,
                         const boost::function<bool (const int64_t incarnationId)>& validateJoinSystemCallback,
                         const boost::function<bool (const int64_t incarnationId)>& validateFormSystemCallback)
+        SAFIR_GCC_VISIBILITY_BUG_WORKAROUND
             : m_ioService(ioService)
             , m_communication(communication)
             , m_id(id)
@@ -128,24 +129,25 @@ namespace SP
             , m_stopped(false)
         {
 
-            m_checkDeadNodesTimer.reset(new Safir::Utilities::Internal::AsioPeriodicTimer(ioService,
-                                                                                          CalculateDeadCheckPeriod(nodeTypes),
-                                                                                          m_strand.wrap([this](const boost::system::error_code& error)
-                                                                                          {
-                                                                                              if (m_stopped)
-                                                                                              {
-                                                                                                  return;
-                                                                                              }
+            m_checkDeadNodesTimer.reset(new Safir::Utilities::Internal::AsioPeriodicTimer
+                                        (ioService,
+                                         CalculateDeadCheckPeriod(nodeTypes),
+                                         m_strand.wrap([this](const boost::system::error_code& error)
+                                                       {
+                                                           if (m_stopped)
+                                                           {
+                                                               return;
+                                                           }
 
-                                                                                              if (!!error) //fix for vs2012 warning
-                                                                                              {
-                                                                                                  SEND_SYSTEM_LOG(Alert,
-                                                                                                                  << "Unexpected error in CheckDeadNodes: " << error);
-                                                                                                  throw std::logic_error("Unexpected error in CheckDeadNodes");
-                                                                                              }
+                                                           if (!!error) //fix for vs2012 warning
+                                                           {
+                                                               SEND_SYSTEM_LOG(Alert,
+                                                                               << "Unexpected error in CheckDeadNodes: " << error);
+                                                               throw std::logic_error("Unexpected error in CheckDeadNodes");
+                                                           }
 
-                                                                                              CheckDeadNodes();
-                                                                                            })));
+                                                           CheckDeadNodes();
+                                                       })));
 
 
             //set up some info about ourselves in our message

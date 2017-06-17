@@ -67,7 +67,7 @@ namespace Internal
         {
         }
 
-        void Run()
+        void Run() SAFIR_GCC_VISIBILITY_BUG_WORKAROUND
         {
             m_strand.dispatch([=]
             {
@@ -211,7 +211,7 @@ namespace Internal
             DispatchStates(conPtr, context);
         }
 
-        void DispatchStates(const Safir::Dob::Internal::ConnectionPtr& conPtr, int context)
+        void DispatchStates(const Safir::Dob::Internal::ConnectionPtr& conPtr, int context) SAFIR_GCC_VISIBILITY_BUG_WORKAROUND
         {
             if (!m_running)
             {

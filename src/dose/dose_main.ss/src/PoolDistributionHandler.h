@@ -24,6 +24,7 @@
 #pragma once
 #include <deque>
 #include <functional>
+#include <Safir/Utilities/Internal/VisibilityHelpers.h>
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -104,7 +105,7 @@ namespace Internal
         }
 
         //Called when a new pdRequest is received. Will result in a pd to the node with specified id.
-        void AddPoolDistribution(int64_t nodeId, int64_t nodeTypeId)
+        void AddPoolDistribution(int64_t nodeId, int64_t nodeTypeId) SAFIR_GCC_VISIBILITY_BUG_WORKAROUND
         {
             m_strand.dispatch([this, nodeId, nodeTypeId]
             {

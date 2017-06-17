@@ -82,7 +82,7 @@ namespace Com
 #pragma warning (pop)
 #endif
 
-        void Start()
+        void Start() SAFIR_GCC_VISIBILITY_BUG_WORKAROUND
         {
             m_strand.dispatch([=]
             {

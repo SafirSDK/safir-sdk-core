@@ -273,8 +273,7 @@ namespace
             break;
 
             case DistributionData::Request_EntityUpdate:
-            case DistributionData::Request_EntityDelete: //BEWARE of the fallthrough below!!!
-                                                         //THERE IS NO break INTENTIONALLY
+            case DistributionData::Request_EntityDelete:
             {
                 try
                 {
@@ -299,9 +298,35 @@ namespace
                     handled = true;
                     return;
                 }
-            }//BEWARE of the fallthrough here!!! THERE IS NO break INTENTIONALLY
 
-            case DistributionData::Request_EntityCreate: //NOTE the fallthrough above!
+                InstanceIdPolicy::Enumeration instanceIdPolicy;
+
+                EntityTypes::Instance().GetRegisterer(request.GetTypeId(),
+                                                      request.GetHandlerId(),
+                                                      context,
+                                                      receiver,
+                                                      instanceIdPolicy);
+
+                if (receiver.connection == NULL)
+                {
+                    // No registered handler, generate an automatic response.
+                    std::wostringstream ostr;
+                    ostr << "The handler " << request.GetHandlerId() << " is not registered for the type "
+                         << Typesystem::Operations::GetName(request.GetTypeId()) << "!";
+
+                    Dob::ErrorResponsePtr errorResponse = Dob::ErrorResponse::CreateErrorResponse
+                        (Dob::ResponseGeneralErrorCodes::SafirNotRegistered(),
+                         ostr.str());
+
+                    SendAutoResponse(errorResponse, request.GetRequestId(), sender);
+
+                    handled = true;
+                    return;
+                }
+            }
+            break;
+
+            case DistributionData::Request_EntityCreate:
             {
                 InstanceIdPolicy::Enumeration instanceIdPolicy;
 
@@ -328,55 +353,52 @@ namespace
                     return;
                 }
 
-                if (request.GetType() == DistributionData::Request_EntityCreate)
+                // It's an entity create request, check that the request is valid for
+                // the instance id policy applied by the handler.
+                switch (instanceIdPolicy)
                 {
-                    // It's an entity create request, check that the request is valid for
-                    // the instance id policy applied by the handler.
-                    switch (instanceIdPolicy)
+                case Dob::InstanceIdPolicy::HandlerDecidesInstanceId:
                     {
-                        case Dob::InstanceIdPolicy::HandlerDecidesInstanceId:
+                        if (request.HasInstanceId())
                         {
-                            if (request.HasInstanceId())
-                            {
-                                std::wostringstream ostr;
-                                ostr << "The handler " << request.GetHandlerId() << " for type "
-                                     << Typesystem::Operations::GetName(request.GetTypeId())
-                                     << " doesn't expect instance id to be specified by the requestor.";
+                            std::wostringstream ostr;
+                            ostr << "The handler " << request.GetHandlerId() << " for type "
+                                 << Typesystem::Operations::GetName(request.GetTypeId())
+                                 << " doesn't expect instance id to be specified by the requestor.";
 
-                                Dob::ErrorResponsePtr errorResponse = Dob::ErrorResponse::CreateErrorResponse
-                                    (Dob::ResponseGeneralErrorCodes::SafirReqErr(),
-                                     ostr.str());
+                            Dob::ErrorResponsePtr errorResponse = Dob::ErrorResponse::CreateErrorResponse
+                                (Dob::ResponseGeneralErrorCodes::SafirReqErr(),
+                                 ostr.str());
 
-                                SendAutoResponse(errorResponse, request.GetRequestId(), sender);
-                                handled = true;
-                                return;
-                            }
+                            SendAutoResponse(errorResponse, request.GetRequestId(), sender);
+                            handled = true;
+                            return;
                         }
-                        break;
-
-                        case Dob::InstanceIdPolicy::RequestorDecidesInstanceId:
-                        {
-                            if (!request.HasInstanceId())
-                            {
-                                std::wostringstream ostr;
-                                ostr << "The handler " << request.GetHandlerId() << " for type "
-                                     << Typesystem::Operations::GetName(request.GetTypeId())
-                                     << " expects instance id to be specified by the requestor.";
-
-                                Dob::ErrorResponsePtr errorResponse = Dob::ErrorResponse::CreateErrorResponse
-                                    (Dob::ResponseGeneralErrorCodes::SafirReqErr(),
-                                     ostr.str());
-
-                                SendAutoResponse(errorResponse, request.GetRequestId(), sender);
-                                handled = true;
-                                return;
-                            }
-                        }
-                        break;
-
-                        default:
-                            ENSURE(false, << "Unknown instance id policy!");
                     }
+                    break;
+
+                case Dob::InstanceIdPolicy::RequestorDecidesInstanceId:
+                    {
+                        if (!request.HasInstanceId())
+                        {
+                            std::wostringstream ostr;
+                            ostr << "The handler " << request.GetHandlerId() << " for type "
+                                 << Typesystem::Operations::GetName(request.GetTypeId())
+                                 << " expects instance id to be specified by the requestor.";
+
+                            Dob::ErrorResponsePtr errorResponse = Dob::ErrorResponse::CreateErrorResponse
+                                (Dob::ResponseGeneralErrorCodes::SafirReqErr(),
+                                 ostr.str());
+
+                            SendAutoResponse(errorResponse, request.GetRequestId(), sender);
+                            handled = true;
+                            return;
+                        }
+                    }
+                    break;
+
+                default:
+                    ENSURE(false, << "Unknown instance id policy!");
                 }
             }
             break;

@@ -117,7 +117,7 @@ namespace Internal
         }
 
         //dispatch states
-        void OnDoDispatch() override
+        void OnDoDispatch() override SAFIR_GCC_VISIBILITY_BUG_WORKAROUND
         {
             if (!m_dispatcherNotified)
             {

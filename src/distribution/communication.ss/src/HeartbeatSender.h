@@ -78,7 +78,7 @@ namespace Com
             
         }
 
-        void Start()
+        void Start() SAFIR_GCC_VISIBILITY_BUG_WORKAROUND
         {
             m_strand.dispatch([=]
             {
