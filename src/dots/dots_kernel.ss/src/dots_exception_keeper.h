@@ -80,9 +80,7 @@ namespace Internal
 
         struct ExceptionData
         {
-            ExceptionData():isSet(false){}
-            ExceptionData(const DotsC_TypeId id, const std::string & descr):
-                exceptionId(id), description(descr){}
+            ExceptionData():isSet(false), exceptionId(0){}
 
             bool isSet;
             DotsC_TypeId exceptionId;
