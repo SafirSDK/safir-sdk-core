@@ -32,6 +32,7 @@ import java.util.Set;
 public class ValueDictionaryContainer<K, C extends ValueContainer<V>, V>
     extends DictionaryContainer<K,C>
 {
+    @SuppressWarnings("unchecked")
     public ValueDictionaryContainer(final Class containerClass) {
         super();
         m_containerClass = (Class<C>)containerClass;

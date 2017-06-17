@@ -98,6 +98,7 @@ public class GenericObjectSequenceContainer<T extends com.saabgroup.safir.dob.ty
             throw new SoftwareViolationException("It is not possible to merge two object sequences of different sizes.");
         }
 
+        @SuppressWarnings("unchecked")
         GenericObjectSequenceContainer<T> other = that;
         for (int i = 0; i < size(); ++i)
         {

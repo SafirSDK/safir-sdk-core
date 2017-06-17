@@ -168,6 +168,7 @@ implements java.util.Map<K, V> {
     }
 
     /** Used by MergeChanges to do its magic. */
+    @SuppressWarnings("unchecked")
     void merge(DictionaryContainer that)
     {
         DictionaryContainer<K,V> other = that;

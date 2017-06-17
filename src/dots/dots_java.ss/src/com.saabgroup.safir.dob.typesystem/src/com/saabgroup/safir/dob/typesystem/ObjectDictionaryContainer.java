@@ -32,6 +32,7 @@ import java.util.Set;
 public class ObjectDictionaryContainer<K, C extends ObjectContainerImpl<O>, O extends com.saabgroup.safir.dob.typesystem.Object>
     extends DictionaryContainer<K,C>
 {
+    @SuppressWarnings("unchecked")
     public ObjectDictionaryContainer(final Class containerClass) {
         super();
         m_containerClass = (Class<C>)containerClass;

@@ -9475,6 +9475,7 @@ public class Test {
             Test_ObjectSequenceReflection();
         }
 
+        @SuppressWarnings("unchecked")
         private void Test_ObjectSequenceReflection()
         {
             MemberSequences seq = new MemberSequences();
