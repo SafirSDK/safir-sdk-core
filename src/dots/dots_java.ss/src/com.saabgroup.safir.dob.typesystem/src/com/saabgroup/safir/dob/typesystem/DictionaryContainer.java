@@ -168,11 +168,11 @@ implements java.util.Map<K, V> {
     }
 
     /** Used by MergeChanges to do its magic. */
-    @SuppressWarnings("unchecked")
     void merge(DictionaryContainer that)
     {
+        @SuppressWarnings("unchecked")
         DictionaryContainer<K,V> other = that;
-        for (Map.Entry<K,V> entry : ((DictionaryContainer<K,V>)that).m_values.entrySet())
+        for (Map.Entry<K,V> entry : other.m_values.entrySet())
         {
             //is it an object member?
             if (entry.getValue() instanceof ObjectContainerBase)
