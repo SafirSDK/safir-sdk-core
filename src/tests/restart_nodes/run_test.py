@@ -72,9 +72,6 @@ def parse_arguments():
 
     return arguments
 
-#windows is sloooow
-CLIENTS = 4 if sys.platform == "win32" else 10
-
 def main():
     args = parse_arguments()
     server = launch_node(args, 0)
@@ -82,34 +79,30 @@ def main():
     incarnation = int(re.search(r"Starting system with incarnation id (.*)",output).group(1))
     print ("This system has incarnation", incarnation)
 
+    i = 0
     with TestEnvStopper(server):
         env = dict()
         try:
-            for _ in range(3):
-                for i in range(1,CLIENTS+1):
-                    env[i] = launch_node(args,i)
+            while True:
+                i = i + 1
+                start_time = time.time()
+                env[i] = launch_node(args,i)
+                env[i].WaitForPersistence()
+                output = env[i].Output("safir_control")
+                res = re.search(r"Joined system with incarnation id (.*)",output)
+                if res is None:
+                    print("Failed to find join statement in:")
+                    print(output)
+                    print("Sleeping a while, to see if that will let us join")
+                    time.sleep(10)
+                    print(env[i].Output("safir_control"))
+                    return 1
+                inc = int(res.group(1))
+                if inc != incarnation:
+                    print ("Joined invalid incarnation!!!!")
+                    return 1
+                print("It took", time.time() - start_time, "seconds to start the node")
 
-                for i in range(1,CLIENTS+1):
-                    env[i].WaitForPersistence()
-                    output = env[i].Output("safir_control")
-                    res = re.search(r"Joined system with incarnation id (.*)",output)
-                    if res is None:
-                        print("Failed to find join statement in:")
-                        print(output)
-                        print("Sleeping a while, to see if that will let us join")
-                        time.sleep(10)
-                        print(env[i].Output("safir_control"))
-                        return 1
-                    inc = int(res.group(1))
-                    if inc != incarnation:
-                        print ("Joined invalid incarnation!!!!")
-                        return 1
-
-                for i in range(1,CLIENTS+1):
-                    env[i].killprocs()
-                    if not env[i].ReturnCodesOk():
-                        print("Some process failed")
-                        return
         finally:
             for i,e in env.items():
                 e.killprocs()
