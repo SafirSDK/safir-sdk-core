@@ -90,14 +90,14 @@ class TestEnv:
 
     def WaitForPersistence(self):
         start_time = time.time()
-        log("Waiting for safir_control to be ready")
+        #log("Waiting for safir_control to be ready")
 
         phrase="persistence data is ready"
 
         while True:
             time.sleep(0.2)
             if self.Output("safir_control").find(phrase) != -1:
-                log(" dose_main seems to be ready")
+                #log(" dose_main seems to be ready")
                 break
             if self.safir_control.poll() is not None:
                 raise Exception(" safir_control terminated!\n" +
@@ -119,7 +119,7 @@ class TestEnv:
                 log("Will keep waiting")
 
     def launchProcess(self, name, cmd, collect_output = True):
-        log("Launching", name)
+        #log("Launching", name)
         proc = subprocess.Popen(cmd,
                                 stdout = subprocess.PIPE if collect_output else None,
                                 stderr = subprocess.STDOUT if collect_output else None,

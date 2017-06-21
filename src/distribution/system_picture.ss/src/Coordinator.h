@@ -238,8 +238,9 @@ namespace SP
                         if (m_stateMessage.node_info(i).is_dead())
                         {
                             SEND_SYSTEM_LOG(Alert,
-                                            << "Got a SystemState in which I am dead!");
-                            throw std::logic_error("Got a SystemState in which I am dead!");
+                                            << "Got a SystemState in which I am dead! Discarding");
+                            return;
+                            //throw std::logic_error("Got a SystemState in which I am dead!");
                         }
                     }
                 }
@@ -270,10 +271,11 @@ namespace SP
                     if (!m_lastStatistics.IsDead(i) &&
                         deadNodes.find(m_lastStatistics.Id(i)) != deadNodes.end())
                     {
-                        lllog (4) << "SP: Elected coordinator thinks that node "
+                        SEND_SYSTEM_LOG(Alert,
+                                        << "SP: Elected coordinator thinks that node "
                                   << m_lastStatistics.Name(i).c_str()
                                   << " with id " << m_lastStatistics.Id(i)
-                                  << " is dead, so I'll mark him as dead." << std::endl;
+                                        << " is dead, so I'll mark him as dead.");
 
                         m_rawHandler.ExcludeNode(m_lastStatistics.Id(i));
                     }
@@ -454,10 +456,10 @@ namespace SP
                 if (!m_lastStatistics.IsDead(i) &&
                     deadNodes.find(m_lastStatistics.Id(i)) != deadNodes.end())
                 {
-                    lllog (4) << "SP: Someone thinks that node " << m_lastStatistics.Name(i).c_str()
+                    SEND_SYSTEM_LOG(Alert, << "SP: Node " << m_lastStatistics.Id()
+                                    << " thinks that node " << m_lastStatistics.Name(i).c_str()
                               << " with id " << m_lastStatistics.Id(i)
-                              << " is dead, so I'll exclude him."
-                              << std::endl;
+                                     << " is dead, so I'll exclude him.");
                     m_rawHandler.ExcludeNode(m_lastStatistics.Id(i));
                     changes = true;
                 }

@@ -15,7 +15,7 @@
             <summary>Node type for this node</summary>
             <name>NodeType</name>
             <type>String</type>
-            <value>Server</value>
+            <value>$(SAFIR_NODE_TYPE)</value>
         </parameter>
 
         <parameter>

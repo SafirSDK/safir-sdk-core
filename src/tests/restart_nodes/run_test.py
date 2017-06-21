@@ -27,13 +27,20 @@ from __future__ import print_function
 import os, time, sys, argparse, re
 from testenv import TestEnv, TestEnvStopper
 
+def log(*args, **kwargs):
+    print(*args, **kwargs)
+    sys.stdout.flush()
+
+def inst_to_str(inst):
+    return "{0:02d}".format(inst)
+
 def makeaddr(port):
     return "127.0.0.1:" + str(port)
 
 def launch_node(args, instance):
-    print("Launching node", instance)
-    os.environ["SAFIR_INSTANCE"] = str(instance)
-    os.environ["SAFIR_NODE_NAME"] = "Node_" + str(instance)
+    os.environ["SAFIR_INSTANCE"] = inst_to_str(instance)
+    os.environ["SAFIR_NODE_NAME"] = "Node_" + inst_to_str(instance)
+    os.environ["SAFIR_NODE_TYPE"] = "Server" if instance == 0 else "Client"
     os.environ["SAFIR_CONTROL_ADDRESS"] = makeaddr(30000 + instance)
     os.environ["SAFIR_DATA_ADDRESS"] = makeaddr(40000 + instance)
     if instance == 0:
@@ -50,6 +57,7 @@ def launch_node(args, instance):
 
     if instance == 0:
         env.launchProcess("WaitingStatesOwner",args.owner)
+        env.launchProcess("dobexplorer",args.dobexplorer)
     return env
 
 def parse_arguments():
@@ -67,7 +75,7 @@ def parse_arguments():
     #add all the environment variables. passed on format A=10;B=20
     for pair in arguments.safir_generated_paths.split(";"):
         (name,value) = pair.split("=")
-        print("Setting environment variable", name, "to", value)
+        log("Setting environment variable", name, "to", value)
         os.environ[name] = value
 
     return arguments
@@ -77,7 +85,7 @@ def main():
     server = launch_node(args, 0)
     output = server.Output("safir_control")
     incarnation = int(re.search(r"Starting system with incarnation id (.*)",output).group(1))
-    print ("This system has incarnation", incarnation)
+    log ("This system has incarnation", incarnation)
 
     i = 0
     with TestEnvStopper(server):
@@ -85,23 +93,25 @@ def main():
         try:
             while True:
                 i = i + 1
+                if i == 55:
+                    time.sleep(999999)
                 start_time = time.time()
                 env[i] = launch_node(args,i)
                 env[i].WaitForPersistence()
                 output = env[i].Output("safir_control")
                 res = re.search(r"Joined system with incarnation id (.*)",output)
                 if res is None:
-                    print("Failed to find join statement in:")
-                    print(output)
-                    print("Sleeping a while, to see if that will let us join")
+                    log("Failed to find join statement in:")
+                    log(output)
+                    log("Sleeping a while, to see if that will let us join")
                     time.sleep(10)
-                    print(env[i].Output("safir_control"))
+                    log(env[i].Output("safir_control"))
                     return 1
                 inc = int(res.group(1))
                 if inc != incarnation:
-                    print ("Joined invalid incarnation!!!!")
+                    log ("Joined invalid incarnation!!!!")
                     return 1
-                print("It took", time.time() - start_time, "seconds to start the node")
+                log(i, ",", time.time() - start_time)
 
         finally:
             for i,e in env.items():
@@ -109,7 +119,7 @@ def main():
 
 
     if not server.ReturnCodesOk():
-        print("Some process exited with an unexpected value")
+        log("Some process exited with an unexpected value")
         return 1
 
     return 0

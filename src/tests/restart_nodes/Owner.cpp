@@ -68,7 +68,7 @@ public:
                                                     InstanceIdPolicy::HandlerDecidesInstanceId,
                                                     this);
 
-        for (int i = 0; i < 20; ++i)
+        for (int i = 0; i < 100; ++i)
         {
             auto ent = DoseTest::SynchronousPermanentEntity::Create();
             ent->Info() = L"test" + boost::lexical_cast<std::wstring>(Typesystem::InstanceId::GenerateRandom().GetRawValue());
@@ -78,15 +78,16 @@ public:
                                     m_handler);
         }
 
-        m_timer.expires_from_now(boost::posix_time::seconds(1));
+        m_timer.expires_from_now(boost::posix_time::milliseconds(10));
         m_timer.async_wait([=](const boost::system::error_code&){Update();});
     }
 
 private:
     void Update()
     {
-        for (auto inst = m_instances.begin(); inst != m_instances.end(); ++inst)
+        for (int i = 0; i < 3; ++i)
         {
+            auto inst = m_instances.begin() + rand() % m_instances.size();
             auto ent = DoseTest::SynchronousPermanentEntity::Create();
             ent->Info() = L"test" + boost::lexical_cast<std::wstring>
                 (Safir::Dob::Typesystem::InstanceId::GenerateRandom().GetRawValue());
