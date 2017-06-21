@@ -51,9 +51,10 @@ if (MSVC)
    ENDIF()
 
    #generated libraries sometimes get very large, so we need to use bigobj compiler flag
-   if(MSVC)
-     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /bigobj")
-   endif()
+   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /bigobj")
+
+   #enable auto-inlining for RelWithDebInfo builds
+   set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} /Ob2")
 
    #Set linker flag /OPT:REF (eliminates functions and/or data that are never referenced)
    #reduces size of executable to approx the same size as in Release mode.
