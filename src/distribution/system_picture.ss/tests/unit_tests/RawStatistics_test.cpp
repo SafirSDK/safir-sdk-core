@@ -73,8 +73,10 @@ std::unique_ptr<RawStatisticsMessage> GetProtobuf(bool empty,bool recursive)
         node->set_data_address(iAsStr + ":flopp");
         node->set_is_dead(i%2==0);
         node->set_control_receive_count(i + 1000);
+        node->set_control_duplicate_count(i + 2000);
         node->set_control_retransmit_count(100 + i);
         node->set_data_receive_count(i + 5000);
+        node->set_data_duplicate_count(i + 10000);
         node->set_data_retransmit_count(500 + i);
 
         if (recursive)
@@ -101,8 +103,10 @@ std::unique_ptr<RawStatisticsMessage> GetProtobuf(bool empty,bool recursive)
                 rnode->set_data_address(iAsStr + ":flopp" + jAsStr);
                 rnode->set_is_dead((i + j)%2==0);
                 rnode->set_control_receive_count(i*j + 1000);
+                rnode->set_control_receive_count(i*j + 2000);
                 rnode->set_control_retransmit_count(100 + i*j);
                 rnode->set_data_receive_count(i*j + 5000);
+                rnode->set_data_receive_count(i*j + 10000);
                 rnode->set_data_retransmit_count(500 + i*j);
 
                 remote->mutable_more_dead_nodes()->Add(1000 + j);
@@ -165,8 +169,10 @@ BOOST_AUTO_TEST_CASE( test_one_level )
         BOOST_CHECK(r.DataAddress(i) == boost::lexical_cast<std::string>(i) + ":flopp");
         BOOST_CHECK(r.IsDead(i) == (i%2==0));
         BOOST_CHECK(r.ControlReceiveCount(i) == static_cast<uint32_t>(i + 1000));
+        BOOST_CHECK(r.ControlDuplicateCount(i) == static_cast<uint32_t>(i + 2000));
         BOOST_CHECK(r.ControlRetransmitCount(i) == static_cast<uint32_t>(100 + i));
         BOOST_CHECK(r.DataReceiveCount(i) == static_cast<uint32_t>(i + 5000));
+        BOOST_CHECK(r.DataDuplicateCount(i) == static_cast<uint32_t>(i + 10000));
         BOOST_CHECK(r.DataRetransmitCount(i) == static_cast<uint32_t>(500 + i));
         BOOST_CHECK(!r.HasRemoteStatistics(i));
     }
@@ -209,8 +215,10 @@ BOOST_AUTO_TEST_CASE( test_two_levels )
             BOOST_CHECK(remote.DataAddress(j) == iAsStr + ":flopp" + jAsStr);
             BOOST_CHECK(remote.IsDead(j) == ((i+j)%2==0));
             BOOST_CHECK(remote.ControlReceiveCount(j) == static_cast<uint32_t>(i*j + 1000));
+            BOOST_CHECK(remote.ControlDuplicateCount(j) == static_cast<uint32_t>(i*j + 2000));
             BOOST_CHECK(remote.ControlRetransmitCount(j) == static_cast<uint32_t>(100 + i*j));
             BOOST_CHECK(remote.DataReceiveCount(j) == static_cast<uint32_t>(i*j + 5000));
+            BOOST_CHECK(remote.DataDuplicateCount(j) == static_cast<uint32_t>(i*j + 10000));
             BOOST_CHECK(remote.DataRetransmitCount(j) == static_cast<uint32_t>(500 + i*j));
             BOOST_CHECK(!remote.HasRemoteStatistics(j));
             BOOST_CHECK_EQUAL(remote.MoreDeadNodes(j), 1000 + j);

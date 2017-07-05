@@ -728,6 +728,7 @@ namespace SP
         //Must be called in strand!
         void GotReceive(int64_t id, bool multicast)
         {
+            const bool duplicate = false; //TODO
             const auto now = boost::chrono::steady_clock::now();
             lllog(9) << "SP: GotReceive (MC=" <<std::boolalpha << multicast
                      << ") from node with id " << id <<", time = " << now << std::endl;
@@ -748,13 +749,27 @@ namespace SP
                 return;
             }
 
-            if (m_master)
+            if (duplicate)
             {
-                node.nodeInfo->set_control_receive_count(node.nodeInfo->control_receive_count() + 1);
+                if (m_master)
+                {
+                    node.nodeInfo->set_control_duplicate_count(node.nodeInfo->control_duplicate_count() + 1);
+                }
+                else
+                {
+                    node.nodeInfo->set_data_duplicate_count(node.nodeInfo->data_duplicate_count() + 1);
+                }
             }
             else
             {
-                node.nodeInfo->set_data_receive_count(node.nodeInfo->data_receive_count() + 1);
+                if (m_master)
+                {
+                    node.nodeInfo->set_control_receive_count(node.nodeInfo->control_receive_count() + 1);
+                }
+                else
+                {
+                    node.nodeInfo->set_data_receive_count(node.nodeInfo->data_receive_count() + 1);
+                }
             }
 
             if (multicast)

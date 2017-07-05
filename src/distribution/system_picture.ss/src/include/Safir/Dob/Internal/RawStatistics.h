@@ -94,8 +94,10 @@ namespace SP
         //status fields
         bool IsDead(const int index) const;
         uint32_t ControlReceiveCount(const int index) const;
+        uint32_t ControlDuplicateCount(const int index) const;
         uint32_t ControlRetransmitCount(const int index) const;
         uint32_t DataReceiveCount(const int index) const;
+        uint32_t DataDuplicateCount(const int index) const;
         uint32_t DataRetransmitCount(const int index) const;
         /**
          * Check if we have any remote statistics.

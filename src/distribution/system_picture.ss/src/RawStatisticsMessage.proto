@@ -39,13 +39,15 @@ message RawStatisticsMessage
 
         required bool is_dead = 6;
         required uint32 control_receive_count = 7;
-        required uint32 control_retransmit_count = 8;
-        required uint32 data_receive_count = 9;
-        required uint32 data_retransmit_count = 10;
+        required uint32 control_duplicate_count = 8;
+        required uint32 control_retransmit_count = 9;
+        required uint32 data_receive_count = 10;
+        required uint32 data_duplicate_count = 11;
+        required uint32 data_retransmit_count = 12;
 
         //if this message is a node-local SP to SP message (e.g. between control and dose_main and dobexplorer)
         //it will contain all the node statistics received from other nodes.
-        optional RawStatisticsMessage remote_statistics = 11;
+        optional RawStatisticsMessage remote_statistics = 13;
     }
 
     //information about myself

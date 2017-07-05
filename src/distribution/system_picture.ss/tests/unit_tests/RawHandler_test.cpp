@@ -121,8 +121,10 @@ std::unique_ptr<RawStatisticsMessage> GetProtobuf(bool setIncarnation)
     node->set_data_address(":flopp");
     node->set_is_dead(false);
     node->set_control_receive_count(1000);
+    node->set_control_duplicate_count(2000);
     node->set_control_retransmit_count(100);
     node->set_data_receive_count(5000);
+    node->set_data_duplicate_count(10000);
     node->set_data_retransmit_count(500);
 
     return msg;
@@ -365,8 +367,10 @@ BOOST_AUTO_TEST_CASE( nodes_changed_add_callback )
 
                                    BOOST_CHECK(!statistics.IsDead(0));
                                    BOOST_CHECK(statistics.ControlReceiveCount(0) == 0);
+                                   BOOST_CHECK(statistics.ControlDuplicateCount(0) == 0);
                                    BOOST_CHECK(statistics.ControlRetransmitCount(0) == 0);
                                    BOOST_CHECK(statistics.DataReceiveCount(0) == 0);
+                                   BOOST_CHECK(statistics.DataDuplicateCount(0) == 0);
                                    BOOST_CHECK(statistics.DataRetransmitCount(0) == 0);
                                    BOOST_CHECK(!statistics.HasRemoteStatistics(0));
 
@@ -398,18 +402,21 @@ BOOST_AUTO_TEST_CASE( nodes_changed_removed_callback )
                                    BOOST_CHECK(!flags.MetadataChanged());
 
                                    BOOST_CHECK(statistics.DataReceiveCount(0) == 0);
+                                   BOOST_CHECK(statistics.DataDuplicateCount(0) == 0);
                                    BOOST_CHECK(statistics.DataRetransmitCount(0) == 0);
 
                                    if (cbCalls == 1)
                                    {
                                        BOOST_CHECK(!statistics.IsDead(0));
                                        BOOST_CHECK(statistics.ControlReceiveCount(0) == 0);
+                                       BOOST_CHECK(statistics.ControlDuplicateCount(0) == 0);
                                        BOOST_CHECK(statistics.ControlRetransmitCount(0) == 0);
                                    }
                                    else
                                    {
                                        BOOST_CHECK(statistics.IsDead(0));
                                        BOOST_CHECK(statistics.ControlReceiveCount(0) == 3);
+                                       BOOST_CHECK(statistics.ControlDuplicateCount(0) == 0);
                                        BOOST_CHECK(statistics.ControlRetransmitCount(0) == 1);
                                    }
                                });
@@ -439,8 +446,10 @@ void CheckRemotesCommon(const RawStatistics& remote)
     BOOST_CHECK_EQUAL(remote.DataAddress(0), ":flopp");
     BOOST_CHECK(!remote.IsDead(0));
     BOOST_CHECK(remote.ControlReceiveCount(0) == 1000);
+    BOOST_CHECK(remote.ControlDuplicateCount(0) == 2000);
     BOOST_CHECK(remote.ControlRetransmitCount(0) == 100);
     BOOST_CHECK(remote.DataReceiveCount(0) == 5000);
+    BOOST_CHECK(remote.DataDuplicateCount(0) == 10000);
     BOOST_CHECK(remote.DataRetransmitCount(0) == 500);
 }
 
@@ -937,3 +946,4 @@ BOOST_AUTO_TEST_CASE(completion_signaller_more)
     BOOST_CHECK_EQUAL(calls, 1);
 }
 
+//TODO: test duplicates
