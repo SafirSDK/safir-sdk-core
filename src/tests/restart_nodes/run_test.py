@@ -61,7 +61,7 @@ def parse_arguments():
     parser.add_argument("--dope_main", required=True)
     parser.add_argument("--safir-show-config", required=True)
     parser.add_argument("--safir-generated-paths", required=True)
-
+    parser.add_argument("--clients", default=10)
     arguments = parser.parse_args()
 
     #add all the environment variables. passed on format A=10;B=20
@@ -71,12 +71,6 @@ def parse_arguments():
         os.environ[name] = value
 
     return arguments
-
-
-if sys.platform == "win32":
-    CLIENTS = 2 if os.environ.get("Config") == "DebugOnly" else 4
-else:
-    CLIENTS = 10
 
 def main():
     args = parse_arguments()
@@ -89,10 +83,10 @@ def main():
         env = dict()
         try:
             for _ in range(3):
-                for i in range(1,CLIENTS+1):
+                for i in range(1,args.clients+1):
                     env[i] = launch_node(args,i)
 
-                for i in range(1,CLIENTS+1):
+                for i in range(1,args.clients+1):
                     env[i].WaitForPersistence()
                     output = env[i].Output("safir_control")
                     res = re.search(r"Joined system with incarnation id (.*)",output)
@@ -108,7 +102,7 @@ def main():
                         print ("Joined invalid incarnation!!!!")
                         return 1
 
-                for i in range(1,CLIENTS+1):
+                for i in range(1,args.clients+1):
                     env[i].killprocs()
                     if not env[i].ReturnCodesOk():
                         print("Some process failed")
