@@ -72,8 +72,11 @@ def parse_arguments():
 
     return arguments
 
-#windows is sloooow
-CLIENTS = 4 if sys.platform == "win32" else 10
+
+if sys.platform == "win32":
+    CLIENTS = 2 if os.environ.get("Config") == "DebugOnly" else 4
+else:
+    CLIENTS = 10
 
 def main():
     args = parse_arguments()
