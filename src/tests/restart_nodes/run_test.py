@@ -61,7 +61,7 @@ def parse_arguments():
     parser.add_argument("--dope_main", required=True)
     parser.add_argument("--safir-show-config", required=True)
     parser.add_argument("--safir-generated-paths", required=True)
-    parser.add_argument("--clients", default=10)
+    parser.add_argument("--clients", type=int, default=10)
     arguments = parser.parse_args()
 
     #add all the environment variables. passed on format A=10;B=20
