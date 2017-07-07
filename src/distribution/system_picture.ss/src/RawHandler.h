@@ -173,7 +173,8 @@ namespace SP
             });
 
             communication.SetGotReceiveFromCallback(m_strand.wrap([this](int64_t id, bool multicast)
-            {GotReceive(id,multicast);}));
+            {GotReceive(id,multicast,false);}));
+            //TODO: use real value for isDuplicate
 
             communication.SetRetransmitToCallback(m_strand.wrap([this](int64_t id)
             {Retransmit(id);}));
@@ -726,9 +727,8 @@ namespace SP
         }
 
         //Must be called in strand!
-        void GotReceive(int64_t id, bool multicast)
+        void GotReceive(const int64_t id, const bool multicast, const bool duplicate)
         {
-            const bool duplicate = false; //TODO
             const auto now = boost::chrono::steady_clock::now();
             lllog(9) << "SP: GotReceive (MC=" <<std::boolalpha << multicast
                      << ") from node with id " << id <<", time = " << now << std::endl;
