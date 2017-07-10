@@ -527,7 +527,14 @@ class JenkinsInterface:
 
     def __run_command(self,cmd,inp = None):
         args = list()
-        args += ("java","-jar",self.clijar,"-s",self.server,"-logger",self.log_level,"-ssh","-user",self.user)
+
+        #on some slaves java 7 is the default java, so we use environment variable to find java 8, which
+        #jenkins needs.
+        java = os.environ.get("JAVA_8_PATH")
+        if java is None:
+            java = "java"
+
+        args += (java,"-jar",self.clijar,"-s",self.server,"-logger",self.log_level,"-ssh","-user",self.user)
 
         if sys.platform == "win32":
             args += ("-i", "c:\\.ssh\\id_rsa")
