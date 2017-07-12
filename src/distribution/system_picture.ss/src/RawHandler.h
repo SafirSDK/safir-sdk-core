@@ -174,7 +174,6 @@ namespace SP
 
             communication.SetGotReceiveFromCallback(m_strand.wrap([this](int64_t id, bool multicast, bool duplicate)
             {GotReceive(id,multicast,duplicate);}));
-            //TODO: use real value for isDuplicate
 
             communication.SetRetransmitToCallback(m_strand.wrap([this](int64_t id)
             {Retransmit(id);}));
