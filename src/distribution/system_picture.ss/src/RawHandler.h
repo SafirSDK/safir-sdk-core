@@ -473,6 +473,7 @@ namespace SP
                     }
 
                     node.nodeInfo->set_data_receive_count(data.DataReceiveCount(i));
+                    node.nodeInfo->set_data_duplicate_count(data.DataDuplicateCount(i));
                     node.nodeInfo->set_data_retransmit_count(data.DataRetransmitCount(i));
 
                     changes |= RawChanges::NEW_DATA_CHANNEL_STATISTICS;
@@ -696,8 +697,10 @@ namespace SP
 
             newNode->set_is_dead(false);
             newNode->set_control_receive_count(0);
+            newNode->set_control_duplicate_count(0);
             newNode->set_control_retransmit_count(0);
             newNode->set_data_receive_count(0);
+            newNode->set_data_duplicate_count(0);
             newNode->set_data_retransmit_count(0);
 
             if (m_moreDeadNodes.find(id) != m_moreDeadNodes.end())
