@@ -59,7 +59,7 @@ namespace Com
     typedef boost::function<char*(size_t)> Allocator;
     typedef boost::function<void(const char *)> DeAllocator;
     typedef boost::function<void(int64_t fromNodeId, int64_t fromNodeType, const char* data, size_t size)> ReceiveData;
-    typedef boost::function<void(int64_t fromNodeId, bool isMulticast)> GotReceiveFrom;
+    typedef boost::function<void(int64_t fromNodeId, bool isMulticast, bool isDuplicate)> GotReceiveFrom;
 
     template <class WriterType>
     class DeliveryHandlerBasic : private WriterType
@@ -127,16 +127,16 @@ namespace Com
 
             lllog(8)<<L"COM: Received AppData from "<<header->commonHeader.senderId<<" "<<
                       SendMethodToString(header->sendMethod).c_str()<<", seq: "<<header->sequenceNumber<<std::endl;
-            m_gotRecvFrom(header->commonHeader.senderId, multicast); //report that we are receiving intact data from the node
+            //m_gotRecvFrom(header->commonHeader.senderId, multicast); //report that we are receiving intact data from the node
 
             bool ackNow=false;
             if (header->deliveryGuarantee==Acked)
             {
-                ackNow=HandleAckedMessage(header, payload, senderIt->second);
+                ackNow=HandleAckedMessage(header, multicast, payload, senderIt->second);
             }
             else
             {
-                HandleUnackedMessage(header, payload, senderIt->second);
+                HandleUnackedMessage(header, multicast, payload, senderIt->second);
             }
 
             Deliver(senderIt->second, header); //if something is now fully received, deliver it to application
@@ -160,7 +160,7 @@ namespace Com
             }
 
             SendAck(senderIt->second, header);
-            m_gotRecvFrom(header->commonHeader.senderId, multicast); //report that we are receivinga data
+            m_gotRecvFrom(header->commonHeader.senderId, multicast, false); //report that we are receivinga data
         }
 
         //Add a node
@@ -476,7 +476,7 @@ namespace Com
             memcpy(dest, payload, header->fragmentContentSize);
         }
 
-        void HandleUnackedMessage(const MessageHeader* header, const char* payload, NodeInfo& ni)
+        void HandleUnackedMessage(const MessageHeader* header, bool multicast, const char* payload, NodeInfo& ni)
         {
             lllog(8)<<L"COM: recvUnacked from: "<<ni.node.nodeId<<L", sendMethod: "<<
                       SendMethodToString(header->sendMethod).c_str()<<
@@ -486,10 +486,13 @@ namespace Com
 
             if (header->sequenceNumber==ch.lastInSequence+1)
             {
+                m_gotRecvFrom(header->commonHeader.senderId, multicast, false);
                 Insert(header, payload, ni); //message received in correct order, just insert
             }
             else if (header->sequenceNumber>ch.lastInSequence)
             {
+                m_gotRecvFrom(header->commonHeader.senderId, multicast, false);
+
                 //this is a message with bigger seq but we have missed something inbetween
                 //reset receive queue, since theres nothing old we want to keep any longer
                 //we need to deallocate the data since it has not been delivered to the subscriber
@@ -535,6 +538,7 @@ namespace Com
             else
             {
                 lllog(8)<<L"COM: Recv unacked message too old seqNo, received seqNo "<<header->sequenceNumber<<L", expected "<<ch.lastInSequence+1<<std::endl;
+                m_gotRecvFrom(header->commonHeader.senderId, multicast, true); //duplicated message
             }
         }
 
@@ -598,7 +602,7 @@ namespace Com
         }
 
         //Return true if ack shall be sent immediately.
-        bool HandleAckedMessage(const MessageHeader* header, const char* payload, NodeInfo& ni)
+        bool HandleAckedMessage(const MessageHeader* header, bool multicast, const char* payload, NodeInfo& ni)
         {
             if (header->commonHeader.dataType==WelcomeDataType)
             {
@@ -615,17 +619,20 @@ namespace Com
             {
                 //this message was sent before we got a welcome message, i.e not for us
                 lllog(5)<<"Acked msg seq: "<<header->sequenceNumber<<" from: "<<header->commonHeader.senderId<<", was sent before we got welcome. I will not ack."<<std::endl;
+                m_gotRecvFrom(header->commonHeader.senderId, multicast, false);
                 return false; //dont send ack
             }
             else if (header->sequenceNumber<=ch.lastInSequence)
             {
                 //duplicated message, we must always ack this since it is possible that an ack is lost and the sender has started to resend.
                 lllog(8)<<L"COM: Recv duplicated message in order. Seq: "<<header->sequenceNumber<<L" from node "<<ni.node.name.c_str()<<std::endl;
+                m_gotRecvFrom(header->commonHeader.senderId, multicast, true);
                 return true;
             }
             else if (header->sequenceNumber==ch.lastInSequence+1)
             {
                 //The Normal case: Message in correct order. Ack only if sender has requested an ack.
+                m_gotRecvFrom(header->commonHeader.senderId, multicast, false);
                 Insert(header, payload, ni);
                 return header->ackNow==1;
             }
@@ -633,11 +640,14 @@ namespace Com
             {
                 //This is something within our receive window but out of order, the gaps will eventually be filled in
                 //when sender retransmits non-acked messages.
+                m_gotRecvFrom(header->commonHeader.senderId, multicast, false);
                 Insert(header, payload, ni);
                 return true; //we ack everything we have so far so that the sender becomes aware of the gaps
             }
             else //lost messages, got something too far ahead
             {
+                m_gotRecvFrom(header->commonHeader.senderId, multicast, false);
+
                 //This is a logic error in the code. We received something too far ahead. Means that the sender thinks that we have acked a
                 //message that we dont think we have got at all.
                 //All the code here just produce helpfull logs.
