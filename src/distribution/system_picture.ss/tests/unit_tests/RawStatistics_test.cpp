@@ -103,10 +103,10 @@ std::unique_ptr<RawStatisticsMessage> GetProtobuf(bool empty,bool recursive)
                 rnode->set_data_address(iAsStr + ":flopp" + jAsStr);
                 rnode->set_is_dead((i + j)%2==0);
                 rnode->set_control_receive_count(i*j + 1000);
-                rnode->set_control_receive_count(i*j + 2000);
+                rnode->set_control_duplicate_count(i*j + 2000);
                 rnode->set_control_retransmit_count(100 + i*j);
                 rnode->set_data_receive_count(i*j + 5000);
-                rnode->set_data_receive_count(i*j + 10000);
+                rnode->set_data_duplicate_count(i*j + 10000);
                 rnode->set_data_retransmit_count(500 + i*j);
 
                 remote->mutable_more_dead_nodes()->Add(1000 + j);

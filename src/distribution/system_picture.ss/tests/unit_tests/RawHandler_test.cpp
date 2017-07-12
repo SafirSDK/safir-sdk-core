@@ -49,7 +49,9 @@ public:
                                  const std::string& controlAddress,
                                  const std::string& dataAddress,
                                  bool multicast)> NewNode;
-    typedef boost::function<void(int64_t fromNodeId, bool isMulticast, bool isDuplicate)> GotReceiveFrom;
+    typedef boost::function<void(int64_t fromNodeId,
+                                 bool isMulticast,
+                                 bool isDuplicate)> GotReceiveFrom;
     typedef boost::function<void(int64_t toNodeId)> RetransmitTo;
 
     void SetNewNodeCallback(const NewNode& callback)
@@ -355,26 +357,25 @@ BOOST_AUTO_TEST_CASE( nodes_changed_add_callback )
 {
     int cbCalls = 0;
     rh->AddRawChangedCallback([&](const RawStatistics& statistics,
-                                 const RawChanges& flags,
-                                 boost::shared_ptr<void> /*completionSignaller*/)
-                               {
-                                   ++cbCalls;
-                                   CheckStatisticsCommon(statistics, 1);
+                                  const RawChanges& flags,
+                                  boost::shared_ptr<void> /*completionSignaller*/)
+                              {
+                                  ++cbCalls;
+                                  CheckStatisticsCommon(statistics, 1);
 
-                                   BOOST_CHECK(flags.NodesChanged());
-                                   BOOST_CHECK(!flags.NewRemoteStatistics());
-                                   BOOST_CHECK(!flags.MetadataChanged());
+                                  BOOST_CHECK(flags.NodesChanged());
+                                  BOOST_CHECK(!flags.NewRemoteStatistics());
+                                  BOOST_CHECK(!flags.MetadataChanged());
 
-                                   BOOST_CHECK(!statistics.IsDead(0));
-                                   BOOST_CHECK(statistics.ControlReceiveCount(0) == 0);
-                                   BOOST_CHECK(statistics.ControlDuplicateCount(0) == 0);
-                                   BOOST_CHECK(statistics.ControlRetransmitCount(0) == 0);
-                                   BOOST_CHECK(statistics.DataReceiveCount(0) == 0);
-                                   BOOST_CHECK(statistics.DataDuplicateCount(0) == 0);
-                                   BOOST_CHECK(statistics.DataRetransmitCount(0) == 0);
-                                   BOOST_CHECK(!statistics.HasRemoteStatistics(0));
-
-                               });
+                                  BOOST_CHECK(!statistics.IsDead(0));
+                                  BOOST_CHECK(statistics.ControlReceiveCount(0) == 0);
+                                  BOOST_CHECK(statistics.ControlDuplicateCount(0) == 0);
+                                  BOOST_CHECK(statistics.ControlRetransmitCount(0) == 0);
+                                  BOOST_CHECK(statistics.DataReceiveCount(0) == 0);
+                                  BOOST_CHECK(statistics.DataDuplicateCount(0) == 0);
+                                  BOOST_CHECK(statistics.DataRetransmitCount(0) == 0);
+                                  BOOST_CHECK(!statistics.HasRemoteStatistics(0));
+                              });
     comm.newNodeCb("asdf",11,10,"asdffff","asdfqqqq", false);
     comm.gotReceiveFromCb(11,false,false);
     comm.gotReceiveFromCb(11,false,false);
@@ -415,15 +416,16 @@ BOOST_AUTO_TEST_CASE( nodes_changed_removed_callback )
                                    else
                                    {
                                        BOOST_CHECK(statistics.IsDead(0));
-                                       BOOST_CHECK(statistics.ControlReceiveCount(0) == 3);
-                                       BOOST_CHECK(statistics.ControlDuplicateCount(0) == 0);
+                                       BOOST_CHECK(statistics.ControlReceiveCount(0) == 2);
+                                       BOOST_CHECK(statistics.ControlDuplicateCount(0) == 1);
                                        BOOST_CHECK(statistics.ControlRetransmitCount(0) == 1);
                                    }
                                });
     comm.newNodeCb("asdf",11,10,"asdffff","asdfqqqq", false);
     comm.gotReceiveFromCb(11, false, false);
     comm.gotReceiveFromCb(11, false, false);
-    comm.gotReceiveFromCb(11, false, false);
+    comm.gotReceiveFromCb(11, false, true);
+
     comm.retransmitToCb(11);
 
     BOOST_CHECK_NO_THROW(ioService.run());
@@ -945,5 +947,3 @@ BOOST_AUTO_TEST_CASE(completion_signaller_more)
     }
     BOOST_CHECK_EQUAL(calls, 1);
 }
-
-//TODO: test duplicates
