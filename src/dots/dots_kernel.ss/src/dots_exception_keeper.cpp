@@ -104,7 +104,7 @@ namespace Internal
             SEND_SYSTEM_LOG(Critical,
                             << "ExceptionKeeper::AppendDescription: Called even though there is no exception set!!!");
         }
-        exc.description.append("\n-------------- More Description -------------\n");
+        exc.description.append("\nMore Info:\n");
         exc.description.append(moreDescription);
     }
 
