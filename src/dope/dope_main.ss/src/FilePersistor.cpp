@@ -80,18 +80,21 @@ void FilePersistor::RemoveFile(const boost::filesystem::path& path) const
 //-------------------------------------------------------
 const boost::filesystem::path GetStorageDirectory()
 {
+    using namespace Safir::Dob::Typesystem::Utilities;
+
+    const auto str = Safir::Dob::PersistenceParameters::FileStoragePath();
+
     try
     {
-        boost::filesystem::path path;// = boost::filesystem::path(str,boost::filesystem::native);
-
-        path /= Safir::Dob::Typesystem::Utilities::ToUtf8(Safir::Dob::PersistenceParameters::FileStoragePath());
+        boost::filesystem::path path(ToUtf8(str));
 
         if (boost::filesystem::exists(path))
         {
             if (!boost::filesystem::is_directory(path))
             {
-                throw Safir::Dob::Typesystem::SoftwareViolationException
-                    (Safir::Dob::Typesystem::Utilities::ToWstring(path.string()) + L" is not a directory",__WFILE__,__LINE__);
+                throw Safir::Dob::Typesystem::ConfigurationErrorException
+                    (L"Cannot use configured persistence file storage path. '"
+                     + ToWstring(path.string()) + L"' is not a directory",__WFILE__,__LINE__);
             }
         }
         else
@@ -103,9 +106,9 @@ const boost::filesystem::path GetStorageDirectory()
     }
     catch (const boost::filesystem::filesystem_error & e)
     {
-        throw Safir::Dob::Typesystem::SoftwareViolationException
-            (L"Failed to get hold of the directory for file persistence. Got this info from boost::filesystem::filesystem_error" +
-            Safir::Dob::Typesystem::Utilities::ToWstring(e.what()),__WFILE__,__LINE__);
+        throw Safir::Dob::Typesystem::ConfigurationErrorException
+            (L"Failed to create the file persistence storage directory, '" + str + L"': "
+             + ToWstring(e.what()),__WFILE__,__LINE__);
     }
 }
 

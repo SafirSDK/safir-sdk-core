@@ -215,14 +215,14 @@ void DopeApp::Start(bool restore)
             break;
         case Safir::Dob::PersistenceBackend::File:
             {
-                m_debug << "Using file persistence" << std::endl;
+                m_debug << "Using 'File' persistence" << std::endl;
                 m_persistenceHandler.reset(new FilePersistor(m_ioService));
             }
             break;
 
         case Safir::Dob::PersistenceBackend::Odbc:
             {
-                m_debug << "Using database persistence" << std::endl;
+                m_debug << "Using 'Odbc' persistence" << std::endl;
 
                 //Mimer requires locale to be set like this for character conversions
                 //to work properly. Hopefully this does not adversely affect other

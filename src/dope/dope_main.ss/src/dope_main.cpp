@@ -37,10 +37,12 @@ int main()
     }
     catch (const StartupError&)
     {
+        std::wcout << "Error occurred during startup, plese check the system log for more info." << std::endl;
         //errors should already have been reported
     }
     catch (const std::exception& e)
     {
+        std::wcout << "Terminated due to an exception, plese check the system log for more info." << std::endl;
         Safir::Logging::SendSystemLog(Safir::Logging::Critical,
                                       L"Unhandled exception in main: " +
                                       Safir::Dob::Typesystem::Utilities::ToWstring(e.what()));
