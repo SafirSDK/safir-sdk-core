@@ -172,8 +172,8 @@ namespace SP
                 });
             });
 
-            communication.SetGotReceiveFromCallback(m_strand.wrap([this](int64_t id, bool multicast)
-            {GotReceive(id,multicast);}));
+            communication.SetGotReceiveFromCallback(m_strand.wrap([this](int64_t id, bool multicast, bool duplicate)
+            {GotReceive(id,multicast,duplicate);}));
 
             communication.SetRetransmitToCallback(m_strand.wrap([this](int64_t id)
             {Retransmit(id);}));
@@ -473,6 +473,7 @@ namespace SP
                     }
 
                     node.nodeInfo->set_data_receive_count(data.DataReceiveCount(i));
+                    node.nodeInfo->set_data_duplicate_count(data.DataDuplicateCount(i));
                     node.nodeInfo->set_data_retransmit_count(data.DataRetransmitCount(i));
 
                     changes |= RawChanges::NEW_DATA_CHANNEL_STATISTICS;
@@ -696,8 +697,10 @@ namespace SP
 
             newNode->set_is_dead(false);
             newNode->set_control_receive_count(0);
+            newNode->set_control_duplicate_count(0);
             newNode->set_control_retransmit_count(0);
             newNode->set_data_receive_count(0);
+            newNode->set_data_duplicate_count(0);
             newNode->set_data_retransmit_count(0);
 
             if (m_moreDeadNodes.find(id) != m_moreDeadNodes.end())
@@ -726,7 +729,7 @@ namespace SP
         }
 
         //Must be called in strand!
-        void GotReceive(int64_t id, bool multicast)
+        void GotReceive(const int64_t id, const bool multicast, const bool duplicate)
         {
             const auto now = boost::chrono::steady_clock::now();
             lllog(9) << "SP: GotReceive (MC=" <<std::boolalpha << multicast
@@ -748,13 +751,27 @@ namespace SP
                 return;
             }
 
-            if (m_master)
+            if (duplicate)
             {
-                node.nodeInfo->set_control_receive_count(node.nodeInfo->control_receive_count() + 1);
+                if (m_master)
+                {
+                    node.nodeInfo->set_control_duplicate_count(node.nodeInfo->control_duplicate_count() + 1);
+                }
+                else
+                {
+                    node.nodeInfo->set_data_duplicate_count(node.nodeInfo->data_duplicate_count() + 1);
+                }
             }
             else
             {
-                node.nodeInfo->set_data_receive_count(node.nodeInfo->data_receive_count() + 1);
+                if (m_master)
+                {
+                    node.nodeInfo->set_control_receive_count(node.nodeInfo->control_receive_count() + 1);
+                }
+                else
+                {
+                    node.nodeInfo->set_data_receive_count(node.nodeInfo->data_receive_count() + 1);
+                }
             }
 
             if (multicast)

@@ -49,7 +49,9 @@ public:
                                  const std::string& controlAddress,
                                  const std::string& dataAddress,
                                  bool multicast)> NewNode;
-    typedef boost::function<void(int64_t fromNodeId, bool isMulticast)> GotReceiveFrom;
+    typedef boost::function<void(int64_t fromNodeId,
+                                 bool isMulticast,
+                                 bool isDuplicate)> GotReceiveFrom;
     typedef boost::function<void(int64_t toNodeId)> RetransmitTo;
 
     void SetNewNodeCallback(const NewNode& callback)
@@ -121,8 +123,10 @@ std::unique_ptr<RawStatisticsMessage> GetProtobuf(bool setIncarnation)
     node->set_data_address(":flopp");
     node->set_is_dead(false);
     node->set_control_receive_count(1000);
+    node->set_control_duplicate_count(2000);
     node->set_control_retransmit_count(100);
     node->set_data_receive_count(5000);
+    node->set_data_duplicate_count(10000);
     node->set_data_retransmit_count(500);
 
     return msg;
@@ -231,7 +235,7 @@ BOOST_AUTO_TEST_CASE( start_stop )
 
 BOOST_AUTO_TEST_CASE( receive_from_not_known )
 {
-    comm.gotReceiveFromCb(10,false);
+    comm.gotReceiveFromCb(10,false,false);
     BOOST_CHECK_THROW(ioService.run(), std::logic_error);
 }
 
@@ -245,9 +249,9 @@ BOOST_AUTO_TEST_CASE( retransmit_to_not_known )
 BOOST_AUTO_TEST_CASE( new_node )
 {
     comm.newNodeCb("asdf",11,10,"asdf","asdf", false);
-    comm.gotReceiveFromCb(11,false);
-    comm.gotReceiveFromCb(11,false);
-    comm.gotReceiveFromCb(11,false);
+    comm.gotReceiveFromCb(11,false,false);
+    comm.gotReceiveFromCb(11,false,false);
+    comm.gotReceiveFromCb(11,false,false);
     rh->Stop();
 
     std::set<int64_t> correctNodes;
@@ -289,7 +293,7 @@ BOOST_AUTO_TEST_CASE( exclude_node_unicast )
     comm.excludeCb=[&]{rh->Stop();stopped=true;};
 
     comm.newNodeCb("asdf",11,10,"asdf","asdf", false);
-    comm.gotReceiveFromCb(11,false);
+    comm.gotReceiveFromCb(11,false,false);
 
     std::set<int64_t> correctNodes;
     correctNodes.insert(11);
@@ -308,7 +312,7 @@ BOOST_AUTO_TEST_CASE( exclude_node_multicast )
     comm.excludeCb=[&]{rh->Stop();stopped=true;};
 
     comm.newNodeCb("asdf",11,10,"asdf","asdf", true);
-    comm.gotReceiveFromCb(11,false);
+    comm.gotReceiveFromCb(11,false,false);
 
     std::set<int64_t> correctNodes;
     correctNodes.insert(11);
@@ -319,7 +323,7 @@ BOOST_AUTO_TEST_CASE( exclude_node_multicast )
         ++i;
         if (!stopped)
         {
-            comm.gotReceiveFromCb(11,false);
+            comm.gotReceiveFromCb(11,false,false);
         }
     }
     BOOST_CHECK(i > 10);
@@ -353,28 +357,29 @@ BOOST_AUTO_TEST_CASE( nodes_changed_add_callback )
 {
     int cbCalls = 0;
     rh->AddRawChangedCallback([&](const RawStatistics& statistics,
-                                 const RawChanges& flags,
-                                 boost::shared_ptr<void> /*completionSignaller*/)
-                               {
-                                   ++cbCalls;
-                                   CheckStatisticsCommon(statistics, 1);
+                                  const RawChanges& flags,
+                                  boost::shared_ptr<void> /*completionSignaller*/)
+                              {
+                                  ++cbCalls;
+                                  CheckStatisticsCommon(statistics, 1);
 
-                                   BOOST_CHECK(flags.NodesChanged());
-                                   BOOST_CHECK(!flags.NewRemoteStatistics());
-                                   BOOST_CHECK(!flags.MetadataChanged());
+                                  BOOST_CHECK(flags.NodesChanged());
+                                  BOOST_CHECK(!flags.NewRemoteStatistics());
+                                  BOOST_CHECK(!flags.MetadataChanged());
 
-                                   BOOST_CHECK(!statistics.IsDead(0));
-                                   BOOST_CHECK(statistics.ControlReceiveCount(0) == 0);
-                                   BOOST_CHECK(statistics.ControlRetransmitCount(0) == 0);
-                                   BOOST_CHECK(statistics.DataReceiveCount(0) == 0);
-                                   BOOST_CHECK(statistics.DataRetransmitCount(0) == 0);
-                                   BOOST_CHECK(!statistics.HasRemoteStatistics(0));
-
-                               });
+                                  BOOST_CHECK(!statistics.IsDead(0));
+                                  BOOST_CHECK(statistics.ControlReceiveCount(0) == 0);
+                                  BOOST_CHECK(statistics.ControlDuplicateCount(0) == 0);
+                                  BOOST_CHECK(statistics.ControlRetransmitCount(0) == 0);
+                                  BOOST_CHECK(statistics.DataReceiveCount(0) == 0);
+                                  BOOST_CHECK(statistics.DataDuplicateCount(0) == 0);
+                                  BOOST_CHECK(statistics.DataRetransmitCount(0) == 0);
+                                  BOOST_CHECK(!statistics.HasRemoteStatistics(0));
+                              });
     comm.newNodeCb("asdf",11,10,"asdffff","asdfqqqq", false);
-    comm.gotReceiveFromCb(11,false);
-    comm.gotReceiveFromCb(11,false);
-    comm.gotReceiveFromCb(11,false);
+    comm.gotReceiveFromCb(11,false,false);
+    comm.gotReceiveFromCb(11,false,false);
+    comm.gotReceiveFromCb(11,false,false);
     rh->Stop();
     BOOST_CHECK_NO_THROW(ioService.run());
     BOOST_CHECK_EQUAL(cbCalls, 1);
@@ -398,25 +403,29 @@ BOOST_AUTO_TEST_CASE( nodes_changed_removed_callback )
                                    BOOST_CHECK(!flags.MetadataChanged());
 
                                    BOOST_CHECK(statistics.DataReceiveCount(0) == 0);
+                                   BOOST_CHECK(statistics.DataDuplicateCount(0) == 0);
                                    BOOST_CHECK(statistics.DataRetransmitCount(0) == 0);
 
                                    if (cbCalls == 1)
                                    {
                                        BOOST_CHECK(!statistics.IsDead(0));
                                        BOOST_CHECK(statistics.ControlReceiveCount(0) == 0);
+                                       BOOST_CHECK(statistics.ControlDuplicateCount(0) == 0);
                                        BOOST_CHECK(statistics.ControlRetransmitCount(0) == 0);
                                    }
                                    else
                                    {
                                        BOOST_CHECK(statistics.IsDead(0));
-                                       BOOST_CHECK(statistics.ControlReceiveCount(0) == 3);
+                                       BOOST_CHECK(statistics.ControlReceiveCount(0) == 2);
+                                       BOOST_CHECK(statistics.ControlDuplicateCount(0) == 1);
                                        BOOST_CHECK(statistics.ControlRetransmitCount(0) == 1);
                                    }
                                });
     comm.newNodeCb("asdf",11,10,"asdffff","asdfqqqq", false);
-    comm.gotReceiveFromCb(11, false);
-    comm.gotReceiveFromCb(11, false);
-    comm.gotReceiveFromCb(11, false);
+    comm.gotReceiveFromCb(11, false, false);
+    comm.gotReceiveFromCb(11, false, false);
+    comm.gotReceiveFromCb(11, false, true);
+
     comm.retransmitToCb(11);
 
     BOOST_CHECK_NO_THROW(ioService.run());
@@ -439,8 +448,10 @@ void CheckRemotesCommon(const RawStatistics& remote)
     BOOST_CHECK_EQUAL(remote.DataAddress(0), ":flopp");
     BOOST_CHECK(!remote.IsDead(0));
     BOOST_CHECK(remote.ControlReceiveCount(0) == 1000);
+    BOOST_CHECK(remote.ControlDuplicateCount(0) == 2000);
     BOOST_CHECK(remote.ControlRetransmitCount(0) == 100);
     BOOST_CHECK(remote.DataReceiveCount(0) == 5000);
+    BOOST_CHECK(remote.DataDuplicateCount(0) == 10000);
     BOOST_CHECK(remote.DataRetransmitCount(0) == 500);
 }
 
@@ -936,4 +947,3 @@ BOOST_AUTO_TEST_CASE(completion_signaller_more)
     }
     BOOST_CHECK_EQUAL(calls, 1);
 }
-

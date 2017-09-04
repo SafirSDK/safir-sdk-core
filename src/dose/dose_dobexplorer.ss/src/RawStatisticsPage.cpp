@@ -39,8 +39,10 @@ namespace
         COLUMN_CONTROL_ADDRESS,
         COLUMN_DATA_ADDRESS,
         COLUMN_CONTROL_RECEIVE_COUNT,
+        COLUMN_CONTROL_DUPLICATE_COUNT,
         COLUMN_CONTROL_RETRANSMIT_COUNT,
         COLUMN_DATA_RECEIVE_COUNT,
+        COLUMN_DATA_DUPLICATE_COUNT,
         COLUMN_DATA_RETRANSMIT_COUNT,
 
         COLUMN_INCARNATION_ID, //this is only in the local table
@@ -188,11 +190,17 @@ void RawStatisticsPage::UpdateLocalTable()
             SetText(localTable->item(row,COLUMN_CONTROL_RECEIVE_COUNT),
                     m_statistics.ControlReceiveCount(findIt->second));
 
+            SetText(localTable->item(row,COLUMN_CONTROL_DUPLICATE_COUNT),
+                    m_statistics.ControlDuplicateCount(findIt->second));
+
             SetText(localTable->item(row,COLUMN_CONTROL_RETRANSMIT_COUNT),
                     m_statistics.ControlRetransmitCount(findIt->second));
 
             SetText(localTable->item(row,COLUMN_DATA_RECEIVE_COUNT),
                     m_statistics.DataReceiveCount(findIt->second));
+
+            SetText(localTable->item(row,COLUMN_DATA_DUPLICATE_COUNT),
+                    m_statistics.DataDuplicateCount(findIt->second));
 
             SetText(localTable->item(row,COLUMN_DATA_RETRANSMIT_COUNT),
                     m_statistics.DataRetransmitCount(findIt->second));
@@ -243,12 +251,18 @@ void RawStatisticsPage::UpdateLocalTable()
                              COLUMN_CONTROL_RECEIVE_COUNT,
                              new QTableWidgetItem(QString::number(m_statistics.ControlReceiveCount(it->second))));
         localTable->setItem(row,
+                             COLUMN_CONTROL_DUPLICATE_COUNT,
+                             new QTableWidgetItem(QString::number(m_statistics.ControlDuplicateCount(it->second))));
+        localTable->setItem(row,
                              COLUMN_CONTROL_RETRANSMIT_COUNT,
                              new QTableWidgetItem(QString::number(m_statistics.ControlRetransmitCount(it->second))));
 
         localTable->setItem(row,
                              COLUMN_DATA_RECEIVE_COUNT,
                              new QTableWidgetItem(QString::number(m_statistics.DataReceiveCount(it->second))));
+        localTable->setItem(row,
+                             COLUMN_DATA_DUPLICATE_COUNT,
+                             new QTableWidgetItem(QString::number(m_statistics.DataDuplicateCount(it->second))));
         localTable->setItem(row,
                              COLUMN_DATA_RETRANSMIT_COUNT,
                              new QTableWidgetItem(QString::number(m_statistics.DataRetransmitCount(it->second))));
@@ -334,11 +348,17 @@ void RawStatisticsPage::UpdateRemoteTable()
                         SetText(remoteTable->item(row,COLUMN_CONTROL_RECEIVE_COUNT),
                                 statistics.ControlReceiveCount(findIt->second));
 
+                        SetText(remoteTable->item(row,COLUMN_CONTROL_DUPLICATE_COUNT),
+                                statistics.ControlDuplicateCount(findIt->second));
+
                         SetText(remoteTable->item(row,COLUMN_CONTROL_RETRANSMIT_COUNT),
                                 statistics.ControlRetransmitCount(findIt->second));
 
                         SetText(remoteTable->item(row,COLUMN_DATA_RECEIVE_COUNT),
                                 statistics.DataReceiveCount(findIt->second));
+
+                        SetText(remoteTable->item(row,COLUMN_DATA_DUPLICATE_COUNT),
+                                statistics.DataDuplicateCount(findIt->second));
 
                         SetText(remoteTable->item(row,COLUMN_DATA_RETRANSMIT_COUNT),
                                 statistics.DataRetransmitCount(findIt->second));
@@ -380,11 +400,17 @@ void RawStatisticsPage::UpdateRemoteTable()
                                          COLUMN_CONTROL_RECEIVE_COUNT,
                                          new QTableWidgetItem(QString::number(statistics.ControlReceiveCount(it->second))));
                     remoteTable->setItem(row,
+                                         COLUMN_CONTROL_DUPLICATE_COUNT,
+                                         new QTableWidgetItem(QString::number(statistics.ControlDuplicateCount(it->second))));
+                    remoteTable->setItem(row,
                                          COLUMN_CONTROL_RETRANSMIT_COUNT,
                                          new QTableWidgetItem(QString::number(statistics.ControlRetransmitCount(it->second))));
                     remoteTable->setItem(row,
                                          COLUMN_DATA_RECEIVE_COUNT,
                                          new QTableWidgetItem(QString::number(statistics.DataReceiveCount(it->second))));
+                    remoteTable->setItem(row,
+                                         COLUMN_DATA_DUPLICATE_COUNT,
+                                         new QTableWidgetItem(QString::number(statistics.DataDuplicateCount(it->second))));
                     remoteTable->setItem(row,
                                          COLUMN_DATA_RETRANSMIT_COUNT,
                                          new QTableWidgetItem(QString::number(statistics.DataRetransmitCount(it->second))));

@@ -87,8 +87,10 @@ namespace
             {
                 out << "\n" << indent << "        "
                     <<"ctrlRecv = " << node.control_receive_count() << ", "
+                    <<"ctrlDup = " << node.control_duplicate_count() << ", "
                     <<"ctrlRetry = " << node.control_retransmit_count() << ", "
                     <<"dataRecv = " << node.data_receive_count() << ", "
+                    <<"dataDup = " << node.data_duplicate_count() << ", "
                     <<"dataRetry = " << node.data_retransmit_count();
             }
 
@@ -225,6 +227,11 @@ namespace SP
             return m_message.node_info(index).control_receive_count();
         }
 
+        uint32_t ControlDuplicateCount(const int index) const
+        {
+            return m_message.node_info(index).control_duplicate_count();
+        }
+
         uint32_t ControlRetransmitCount(const int index) const
         {
             return m_message.node_info(index).control_retransmit_count();
@@ -233,6 +240,11 @@ namespace SP
         uint32_t DataReceiveCount(const int index) const
         {
             return m_message.node_info(index).data_receive_count();
+        }
+
+        uint32_t DataDuplicateCount(const int index) const
+        {
+            return m_message.node_info(index).data_duplicate_count();
         }
 
         uint32_t DataRetransmitCount(const int index) const
@@ -307,8 +319,10 @@ namespace SP
 
     bool RawStatistics::IsDead(const int index) const {return m_impl->IsDead(index);}
     uint32_t RawStatistics::ControlReceiveCount(const int index) const {return m_impl->ControlReceiveCount(index);}
+    uint32_t RawStatistics::ControlDuplicateCount(const int index) const {return m_impl->ControlDuplicateCount(index);}
     uint32_t RawStatistics::ControlRetransmitCount(const int index) const {return m_impl->ControlRetransmitCount(index);}
     uint32_t RawStatistics::DataReceiveCount(const int index) const {return m_impl->DataReceiveCount(index);}
+    uint32_t RawStatistics::DataDuplicateCount(const int index) const {return m_impl->DataDuplicateCount(index);}
     uint32_t RawStatistics::DataRetransmitCount(const int index) const {return m_impl->DataRetransmitCount(index);}
 
     bool RawStatistics::HasRemoteStatistics(const int index) const {return m_impl->HasRemoteStatistics(index);}

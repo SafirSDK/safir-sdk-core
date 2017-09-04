@@ -201,6 +201,14 @@
       </column>
       <column>
        <property name="text">
+        <string># DupCtrl</string>
+       </property>
+       <property name="toolTip">
+        <string>Number of duplicate control packets received from this node.</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
         <string># RetryCtrl</string>
        </property>
        <property name="toolTip">
@@ -213,6 +221,14 @@
        </property>
        <property name="toolTip">
         <string>Number of data packets received from this node.</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string># DupData</string>
+       </property>
+       <property name="toolTip">
+        <string>Number of duplicate data packets received from this node.</string>
        </property>
       </column>
       <column>
@@ -298,6 +314,14 @@
       </column>
       <column>
        <property name="text">
+        <string># DupCtrl</string>
+       </property>
+       <property name="toolTip">
+        <string>Number of duplicate control packets received from this node.</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
         <string># RetryCtrl</string>
        </property>
        <property name="toolTip">
@@ -310,6 +334,14 @@
        </property>
        <property name="toolTip">
         <string>Number of data packets received from this node.</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string># DupData</string>
+       </property>
+       <property name="toolTip">
+        <string>Number of duplicate data packets received from this node.</string>
        </property>
       </column>
       <column>
