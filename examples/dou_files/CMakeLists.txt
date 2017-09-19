@@ -33,6 +33,6 @@ INSTALL_SAFIR_GENERATED_LIBRARY(
   CXX_LIBRARY lib
   CXX_INCLUDE include
   JAR java
-  DOTNET dotnet
+  DOTNET bin
   DOU_BASE dou   #files will be installed to dou/Example
   )
