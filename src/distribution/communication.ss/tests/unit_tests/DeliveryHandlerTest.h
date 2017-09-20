@@ -30,7 +30,7 @@ class DeliveryHandlerTest
 public:
     static void Run()
     {
-        std::cout<<"DeliveryHandler started"<<std::endl;
+        std::wcout<<"DeliveryHandler started"<<std::endl;
 
         boost::atomic<unsigned int> go(0);
         auto SetReady=[&]{go=1;};
@@ -54,7 +54,7 @@ public:
 
         Com::DeliveryHandlerBasic<DeliveryHandlerTest::TestWriter> dh(strand, 1, 4);
 
-        dh.SetGotRecvCallback(boost::bind(&DeliveryHandlerTest::GotReceiveFrom, _1, _2));
+        dh.SetGotRecvCallback(boost::bind(&DeliveryHandlerTest::GotReceiveFrom, _1, _2, _3));
 
         dh.SetReceiver(boost::bind(&DeliveryHandlerTest::OnRecv, _1, _2, _3, _4), 0, [=](size_t s){return new char[s];}, [](const char * data){delete[] data;});
         dh.Start();
@@ -341,6 +341,20 @@ public:
 
         TRACELINE
 
+        std::cout<<"========================="<<std::endl;
+        std::cout<<"Duplicated messages"<<std::endl;
+        std::cout<<"========================="<<std::endl;
+        CHECK(duplicates==0);
+        //Send one duplicated message to each node
+        for (int64_t id=2; id<=4; ++id)
+        {
+            auto payload="hello";
+            auto size=strlen(payload);
+            Com::MessageHeader header(id, 1, 0, Com::MultiReceiverSendMethod, Com::Unacked, 25, size, size, 1, 0, 0);
+            dh.ReceivedApplicationData(&header, payload, false);
+        }
+        CHECK(duplicates==3);
+
         dh.Stop();
         work.reset();
         threads.join_all();
@@ -352,6 +366,7 @@ private:
     static boost::mutex mutex;
     static std::map<int64_t, int> received;
     static std::map<int64_t, uint64_t> acked;
+    static int duplicates;
 
     struct TestSendPolicy
     {
@@ -376,9 +391,13 @@ private:
         delete[] data; //receiver is responsible for deleting data
     }
 
-    static void GotReceiveFrom(int64_t /*fromNodeId*/, bool /*isHeartbeat*/)
+    static void GotReceiveFrom(int64_t /*fromNodeId*/, bool /*isMulticas*/, bool isDuplicate)
     {
         //std::cout<<"GotReceiveFrom "<<fromNodeId<<std::endl;
+        if (isDuplicate)
+        {
+            ++duplicates;
+        }
     }
 
     static void DumpReceived()
@@ -406,3 +425,4 @@ private:
 boost::mutex DeliveryHandlerTest::mutex;
 std::map<int64_t, int> DeliveryHandlerTest::received;
 std::map<int64_t, uint64_t> DeliveryHandlerTest::acked;
+int DeliveryHandlerTest::duplicates;
