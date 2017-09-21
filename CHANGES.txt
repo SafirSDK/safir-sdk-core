@@ -1,4 +1,14 @@
 -----------------------------------------------------------------------------------------------------------------------
+2017-09-21 version 6.3.10
+-----------------------------------------------------------------------------------------------------------------------
+
+This release fixes the following issue (see http://safirsdkcore.com for details):
+
+#355 Add counter for duplicate packets to Raw Statistics in Dobexplorer
+#354 Write Quick Start guide for building and running the example apps
+#353 Dope fails quietly to start if unable to create file persistence directory
+
+-----------------------------------------------------------------------------------------------------------------------
 2017-06-09 version 6.3.9
 -----------------------------------------------------------------------------------------------------------------------
 
