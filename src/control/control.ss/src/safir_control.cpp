@@ -191,7 +191,7 @@ int main(int argc, char * argv[])
     boost::shared_ptr<void> crGuard(static_cast<void*>(0),
                                     [](void*){Safir::Utilities::CrashReporter::Stop();});
 
-    bool success = true;
+    boost::atomic<bool> success(true);
 
     try
     {
@@ -212,35 +212,55 @@ int main(int argc, char * argv[])
         Safir::Utilities::CrashReporter::RegisterCallback(DumpFunc);
         Safir::Utilities::CrashReporter::Start();
 
-        //We can only run one thread. Boost.asio does not play well with multithreading and fork
-        //on Linux.
-        //For more info see
-        // http://www.boost.org/doc/libs/1_61_0/doc/html/boost_asio/reference/io_service/notify_fork.html
-        //If control ever needs to be multithreaded a possible solution could be to
-        //have it fork a child process before it spawns the threads. This child
-        //process could then be responsible for the forking.
-        //There is an example of this here:
-        // https://stackoverflow.com/questions/21529540/how-do-i-handle-fork-correctly-with-boostasio-in-a-multithreaded-program
 
         auto controlApp = Safir::make_unique<ControlApp>(ioService, doseMainPath, options.id, options.ignoreControlCmd);
 
-        try
+        const auto run = [&ioService,&controlApp,&success]
         {
-            ioService.run();
-        }
-        catch (const std::exception & exc)
-        {
-            SEND_SYSTEM_LOG(Alert,
+            try
+            {
+                ioService.run();
+                return;
+            }
+            catch (const std::exception & exc)
+            {
+                SEND_SYSTEM_LOG(Alert,
                             << "CTRL: Caught 'std::exception' exception from io_service.run(): "
-                            << "  '" << exc.what() << "'.");
-            success = false;
-        }
-        catch (...)
+                                << "  '" << exc.what() << "'.");
+                success.exchange(false);
+            }
+            catch (...)
+            {
+                SEND_SYSTEM_LOG(Alert,
+                                << "CTRL: Caught '...' exception from io_service.run().");
+                success.exchange(false);
+            }
+
+            controlApp->Stop();
+        };
+
+#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
+        auto nbrOfThreads = 4;
+#elif defined(linux) || defined(__linux) || defined(__linux__)
+        //We can only run one thread on Linux. Boost.asio does not play well with
+        //multithreading and fork on Linux. For more info see
+        //http://www.boost.org/doc/libs/1_61_0/doc/html/boost_asio/reference/io_service/notify_fork.html
+        //If control ever needs to be multithreaded a possible solution could be to have
+        //it fork a child process before it spawns the threads. This child process could
+        //then be responsible for the forking.  There is an example of this here:
+        //https://stackoverflow.com/questions/21529540/how-do-i-handle-fork-correctly-with-boostasio-in-a-multithreaded-program
+        auto nbrOfThreads = 0;
+#endif
+
+        boost::thread_group threads;
+        for (auto i = 0; i < nbrOfThreads-1; ++i)
         {
-            SEND_SYSTEM_LOG(Alert,
-                            << "CTRL: Caught '...' exception from io_service.run().");
-            success = false;
+            threads.create_thread(run);
         }
+
+        run();
+
+        threads.join_all();
 
         if (!success)
         {
@@ -248,7 +268,7 @@ int main(int argc, char * argv[])
             ioService.reset();
             ioService.run();
         }
-        
+
         controlApp.reset();
         crGuard.reset();
     }
