@@ -22,6 +22,7 @@
 *
 ******************************************************************************/
 #include <set>
+#include <iostream>
 #include <boost/atomic.hpp>
 #include <boost/make_shared.hpp>
 #include "../../src/PoolDistributionRequestSender.h"

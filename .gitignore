@@ -119,3 +119,7 @@ version.cs
 tmp
 *.sublime-project
 *.sublime-workspace
+
+
+CMakeDoxyfile.in
+CMakeDoxygenDefaults.cmake

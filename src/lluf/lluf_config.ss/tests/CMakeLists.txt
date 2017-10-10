@@ -8,7 +8,10 @@ ADD_EXECUTABLE(ConfigReaderImpl_test ConfigReaderImpl_test.cpp)
 ADD_EXECUTABLE(ConfigHelper_test ConfigHelper_test.cpp)
 
 TARGET_LINK_LIBRARIES (read_parameter_test PRIVATE lluf_config)
-TARGET_LINK_LIBRARIES (ConfigHelper_test PRIVATE lluf_config ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+TARGET_LINK_LIBRARIES (ConfigHelper_test PRIVATE lluf_config
+  ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+  ${Boost_SYSTEM_LIBRARY}
+  )
 
 ADD_TEST(NAME display_test_env COMMAND display_env)
 SET_SAFIR_TEST_PROPERTIES(TEST display_test_env)

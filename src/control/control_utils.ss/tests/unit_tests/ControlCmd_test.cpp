@@ -22,6 +22,7 @@
 *
 ******************************************************************************/
 #include <Safir/Dob/Internal/ControlCmd.h>
+#include <iostream>
 
 #ifdef _MSC_VER
 #pragma warning (push)

@@ -26,6 +26,7 @@
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/MakeUnique.h>
 #include <memory>
+#include <iostream>
 
 //disable warnings in boost
 #if defined _MSC_VER

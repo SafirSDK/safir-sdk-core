@@ -26,6 +26,7 @@
 #include <Safir/Utilities/Internal/MakeUnique.h>
 #include <boost/thread/mutex.hpp>
 #include <memory>
+#include <iostream>
 #include <time.h>
 
 #ifdef _MSC_VER

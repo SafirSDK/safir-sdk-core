@@ -22,6 +22,7 @@
 *
 ******************************************************************************/
 #include <Safir/Dob/Internal/DoseMainCmd.h>
+#include <iostream>
 
 #ifdef _MSC_VER
 #pragma warning (push)

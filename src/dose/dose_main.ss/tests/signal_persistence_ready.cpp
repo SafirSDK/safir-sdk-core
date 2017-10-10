@@ -28,6 +28,7 @@
 #include <boost/chrono.hpp>
 #include <boost/asio/steady_timer.hpp>
 #include <Safir/Dob/PersistentDataReady.h>
+#include <iostream>
 
 class StopHandler
     : public Safir::Dob::StopHandler
