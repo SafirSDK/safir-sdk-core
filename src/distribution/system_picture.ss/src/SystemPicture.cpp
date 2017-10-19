@@ -87,6 +87,7 @@ namespace SP
              const int64_t id,
              const int64_t nodeTypeId,
              const std::map<int64_t, NodeType>& nodeTypes,
+             const boost::chrono::steady_clock::duration& aloneTimeout,
              const boost::function<bool (const int64_t incarnationId)>& validateJoinSystemCallback,
              const boost::function<bool (const int64_t incarnationId)>& validateFormSystemCallback)
             : m_rawHandler(Safir::make_unique<RawHandler>(ioService,
@@ -126,6 +127,7 @@ namespace SP
                                                             communication.ControlAddress(),
                                                             communication.DataAddress(),
                                                             nodeTypes,
+                                                            aloneTimeout,
                                                             MASTER_REMOTE_ELECTION_NAME,
                                                             *m_rawHandler))
             , m_statePublisherLocal(Safir::make_unique<StatePublisherLocal>(ioService,
@@ -352,6 +354,7 @@ namespace SP
                                  const int64_t id,
                                  const int64_t nodeTypeId,
                                  const std::map<int64_t, NodeType>& nodeTypes,
+                                 const boost::chrono::steady_clock::duration& aloneTimeout,
                                  const boost::function<bool (const int64_t incarnationId)>& validateJoinSystemCallback,
                                  const boost::function<bool (const int64_t incarnationId)>& validateFormSystemCallback)
         : m_impl(Safir::make_unique<Impl>(master_tag,
@@ -361,6 +364,7 @@ namespace SP
                                           id,
                                           nodeTypeId,
                                           nodeTypes,
+                                          aloneTimeout,
                                           validateJoinSystemCallback,
                                           validateFormSystemCallback))
     {

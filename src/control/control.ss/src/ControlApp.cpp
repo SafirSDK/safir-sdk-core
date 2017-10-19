@@ -220,6 +220,7 @@ void ControlApp::Start()
                                      m_nodeId,
                                      m_conf.thisNodeParam.nodeTypeId,
                                      std::move(spNodeTypes),
+                                     m_conf.aloneTimeout,
                                      // Join system callback
                                      [this](const int64_t incarnationId) -> bool
                                      {

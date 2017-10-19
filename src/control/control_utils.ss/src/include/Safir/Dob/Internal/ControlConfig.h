@@ -298,12 +298,15 @@ namespace Control
             }
 
             localInterfaceTimeout = boost::chrono::milliseconds(static_cast<int64_t>(Safir::Dob::NodeParameters::LocalInterfaceTimeout() * 1000));
+            aloneTimeout = boost::chrono::milliseconds(static_cast<int64_t>(Safir::Dob::NodeParameters::NewSystemFormationTimeout() * 1000));
+            
         }
 
         std::vector<NodeType> nodeTypesParam;
         ThisNode thisNodeParam;
         std::string incarnationBlacklistFileName;
         boost::chrono::steady_clock::duration localInterfaceTimeout;
+        boost::chrono::steady_clock::duration aloneTimeout;
     };
 }
 }

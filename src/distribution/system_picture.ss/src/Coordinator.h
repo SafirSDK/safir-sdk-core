@@ -80,6 +80,7 @@ namespace SP
                          const std::string& controlAddress,
                          const std::string& dataAddress,
                          const std::map<int64_t, NodeType>& nodeTypes,
+                         const boost::chrono::steady_clock::duration& aloneTimeout,
                          const char* const receiverId,
                          RawHandlerT& rawHandler)
             : m_strand (ioService)
@@ -99,6 +100,7 @@ namespace SP
                                                          communication,
                                                          id,
                                                          nodeTypes,
+                                                         aloneTimeout,
                                                          receiverId,
                                                          [this](const int64_t nodeId, const int64_t electionId)
                                                          {

@@ -72,6 +72,7 @@ namespace SP
                              CommunicationT& communication,
                              const int64_t id,
                              const std::map<int64_t, NodeType>& nodeTypes,
+                             const boost::chrono::steady_clock::duration& aloneTimeout,
                              const char* const receiverId,
                              const boost::function<void(const int64_t nodeId,
                                                       const int64_t electionId)>& electionCompleteCallback,
@@ -83,7 +84,7 @@ namespace SP
             , m_id(id)
             , m_nodeTypes(nodeTypes)
             , m_nonLightNodeTypes(GetNonLightNodeTypes(nodeTypes))
-            , m_aloneTimeout(CalculateAloneTimeout(nodeTypes))
+            , m_aloneTimeout(CalculateAloneTimeout(nodeTypes, aloneTimeout))
             , m_electionTimeout(CalculateElectionTimeout(nodeTypes))
             , m_electedStorage(new AlignedStorage())
             , m_elected(reinterpret_cast<boost::atomic<int64_t>&>(*m_electedStorage))
@@ -179,8 +180,14 @@ namespace SP
 
         /** Calculate the time to wait for other nodes to come up before assuming that
          * we're alone and proclaiming victory. */
-        static boost::chrono::steady_clock::duration CalculateAloneTimeout(const std::map<int64_t, NodeType>& nodeTypes)
+        static boost::chrono::steady_clock::duration
+        CalculateAloneTimeout(const std::map<int64_t, NodeType>& nodeTypes,
+                              const boost::chrono::steady_clock::duration& aloneTimeout)
         {
+            if (aloneTimeout < boost::chrono::seconds(0))
+            {
+                return aloneTimeout;
+            }
             //use max of non-light node types heartbeatInterval * maxLostHeartbeats * 2
             boost::chrono::steady_clock::duration max = boost::chrono::milliseconds(100);
 
@@ -195,7 +202,8 @@ namespace SP
         }
 
         /** Calculate the time to wait for other nodes to respond to our INQUIRY. */
-        static boost::chrono::steady_clock::duration CalculateElectionTimeout(const std::map<int64_t, NodeType>& nodeTypes)
+        static boost::chrono::steady_clock::duration
+        CalculateElectionTimeout(const std::map<int64_t, NodeType>& nodeTypes)
         {
             //use max of non-light node types retryTimeout * maxLostHeartbeats
             boost::chrono::steady_clock::duration max = boost::chrono::milliseconds(100);

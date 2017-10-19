@@ -364,6 +364,7 @@ public:
                                m_id,
                                options.nodeType,
                                m_spNodeTypes,
+                               boost::chrono::seconds(0), //use auto aloneTimeout
                                [this](const int64_t id)
                                {return CheckJoinSystem(id);},
                                [this](const int64_t id)

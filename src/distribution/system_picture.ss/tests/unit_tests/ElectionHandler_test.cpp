@@ -284,6 +284,7 @@ struct Node
                                                          comm,
                                                          id_,
                                                          GetNodeTypes(),
+                                                         boost::chrono::seconds(0), //use auto aloneTimeout
                                                          "not used",
                                                          [this](const int64_t nodeId,
                                                                 const int64_t electionId)

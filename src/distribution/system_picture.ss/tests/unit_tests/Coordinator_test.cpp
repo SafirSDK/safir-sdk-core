@@ -369,6 +369,7 @@ public:
                         CommunicationStub& /*communication*/,
                         const int64_t id_,
                         const std::map<int64_t, NodeType>& /*nodeTypes*/,
+                        const boost::chrono::steady_clock::duration& /*aloneTimeout*/,
                         const char* const /*receiverId*/,
                         const boost::function<void(const int64_t nodeId,
                                                  const int64_t electionId)>& electionCompleteCallback_,
@@ -433,6 +434,7 @@ struct Fixture
                       "klopp",
                       "flupp",
                       GetNodeTypes(),
+                      boost::chrono::seconds(0),
                       "snoop",
                       rh)
     {

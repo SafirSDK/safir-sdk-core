@@ -71,9 +71,19 @@
       </summary>
       <name>LocalInterfaceTimeout</name>
       <type>Second64</type>
-      <value>60.0</value>
+      <value>33.0</value>
     </parameter>
 
+    <parameter>
+      <summary>
+        How long to wait at startup to find other nodes before forming a new system.
+        If this is 0 an automatic timeout will be calculated, the maximum value of
+        MaxLostHeartbeats*HeartbeatInterval*2 for all node types.
+      </summary>
+      <name>NewSystemFormationTimeout</name>
+      <type>Second64</type>
+      <value>123</value>
+    </parameter>
 
     <parameter>
       <summary>Defines the different node types in the system.</summary>
