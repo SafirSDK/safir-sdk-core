@@ -61,10 +61,10 @@ namespace Com
         ,m_onNewNode()
         ,m_gotRecvFrom()
         ,m_discoverer(m_ioService, m_me, fragmentSize, [=](const Node& n){OnNewNode(n);})
-        ,m_deliveryHandler(m_receiveStrand, m_me.nodeId, m_protocol, m_nodeTypes[m_me.nodeId]->SlidingWindowSize())
+        ,m_deliveryHandler(m_receiveStrand, m_me.nodeId, m_protocol, m_nodeTypes[nodeTypeId]->SlidingWindowSize())
         ,m_reader(m_receiveStrand, m_me.unicastAddress, m_nodeTypes[nodeTypeId]->MulticastAddress(),
                   [=](const char* d, size_t s, const bool mc){return OnRecv(d,s,mc);},
-    [=](){return m_deliveryHandler.NumberOfUndeliveredMessages()<Parameters::MaxNumberOfUndelivered;})
+                  [=](){return m_deliveryHandler.NumberOfUndeliveredMessages()<Parameters::MaxNumberOfUndelivered;})
     {
         if (nodeId==0)
         {
