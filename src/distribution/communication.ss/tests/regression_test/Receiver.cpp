@@ -36,11 +36,14 @@ Receiver::Receiver(Com::ControlModeTag tag, boost::asio::io_service& ioService, 
            Com::ResolvedAddress(std::string("127.0.0.1:1100")+boost::lexical_cast<std::string>(nodeId)),
            []() -> std::vector<Com::NodeTypeDefinition>  //This lambda just generates a vector of nodetypes. It used to be an initializer list
            {  //but VS2012 doesnt have initializer lists :-(
+               std::vector<int> retryTimeout;
+               retryTimeout.push_back(10);
                std::vector<Com::NodeTypeDefinition> n;
-               n.push_back(Com::NodeTypeDefinition(10, "nt10", "", "", 1000, 1000, 10));
-               n.push_back(Com::NodeTypeDefinition(11, "nt11", "224.90.90.241:12000", "224.90.90.241:13000", 1000, 1000, 10));
+               n.push_back(Com::NodeTypeDefinition(10, "nt10", "", "", 1000, 10, 20, 10, retryTimeout));
+               n.push_back(Com::NodeTypeDefinition(11, "nt11", "224.90.90.241:12000", "224.90.90.241:13000", 1000, 10, 20, 10, retryTimeout));
                return n;
-           }())
+           }(),
+           1450)
     ,m_running(true)
 {
     m_timerInclude.expires_from_now(boost::chrono::milliseconds(1000));
@@ -66,11 +69,14 @@ Receiver::Receiver(Com::DataModeTag tag, boost::asio::io_service& ioService, int
            Com::ResolvedAddress(std::string("127.0.0.1:1100")+boost::lexical_cast<std::string>(nodeId)),
            []() ->  std::vector<Com::NodeTypeDefinition> //This lambda just generates a vector of nodetypes. It used to be an initializer list
            {  //but VS2012 doesnt have initializer lists :-(
+                std::vector<int> retryTimeout;
+                retryTimeout.push_back(10);
                 std::vector<Com::NodeTypeDefinition> n;
-                n.push_back(Com::NodeTypeDefinition(10, "nt10", "", "", 1000, 1000, 10));
-                n.push_back(Com::NodeTypeDefinition(11, "nt11", "224.90.90.241:12000", "224.90.90.241:13000", 1000, 1000, 10));
+                n.push_back(Com::NodeTypeDefinition(10, "nt10", "", "", 1000, 10, 20, 10, retryTimeout));
+                n.push_back(Com::NodeTypeDefinition(11, "nt11", "224.90.90.241:12000", "224.90.90.241:13000", 1000, 10, 20, 10, retryTimeout));
                 return n;
-           }())
+           }(),
+           1450)
     ,m_running(true)
 {
     m_timerInclude.expires_from_now(boost::chrono::milliseconds(1000));

@@ -49,15 +49,24 @@ namespace Com
     {
         NodeTypeDefinition() {}
 
-        NodeTypeDefinition( int64_t id_, std::string name_, std::string controlMulticastAddress_, std::string dataMulticastAddress_,
-                            int heartbeatInterval_, int retryTimeout_, int maxLostHeartbeats_) 
-                            : id(id_)
-                            , name(name_)
-                            , controlMulticastAddress(controlMulticastAddress_)
-                            , dataMulticastAddress(dataMulticastAddress_)
-                            , heartbeatInterval(heartbeatInterval_)
-                            , retryTimeout(retryTimeout_)
-                            , maxLostHeartbeats(maxLostHeartbeats_)
+        NodeTypeDefinition( int64_t id_,
+                            const std::string& name_,
+                            const std::string& controlMulticastAddress_,
+                            const std::string& dataMulticastAddress_,
+                            int heartbeatInterval_,
+                            int maxLostHeartbeats_,
+                            int slidingWindowSize_,
+                            int ackRequestThreshold_,
+                            const std::vector<int>& retryTimeout_)
+                            :id(id_)
+                            ,name(name_)
+                            ,controlMulticastAddress(controlMulticastAddress_)
+                            ,dataMulticastAddress(dataMulticastAddress_)
+                            ,heartbeatInterval(heartbeatInterval_)
+                            ,maxLostHeartbeats(maxLostHeartbeats_)
+                            ,slidingWindowSize(slidingWindowSize_)
+                            ,ackRequestThreshold(ackRequestThreshold_)
+                            ,retryTimeout(retryTimeout_)
                             {
                             }
 
@@ -66,8 +75,10 @@ namespace Com
         std::string controlMulticastAddress;    //multicast address including port number, 'address:port' empty string if not multicast enabled
         std::string dataMulticastAddress;       //multicast address including port number, 'address:port' empty string if not multicast enabled
         int heartbeatInterval;                  //time between heartbeats (milliseconds)
-        int retryTimeout;                       //time to wait before retransmitting data (milliseconds)
         int maxLostHeartbeats;                  //max lost heartbeats before exclusion
+        int slidingWindowSize;                  //maximum outstanding messages at the same time
+        int ackRequestThreshold;                //maximum outstanding before requesting ack from receiver
+        std::vector<int> retryTimeout;          //time to wait before retransmitting data (milliseconds)
     };
 
     //Callbacks functions used in Communications public interface.
@@ -136,6 +147,7 @@ namespace Com
          * @param controlAddress [in] - Control channel unicast address on format address:port, mandatory.
          * @param dataAddress [in] -  Data channel unicast address on format address:port, mandatory.
          * @param nodeTypes [in] - List of all node types that we shall be able to communicate with.
+         * @param fragmentSize [in] - Network fragment size.
          */
         Communication(ControlModeTag,
                       boost::asio::io_service& ioService,
@@ -144,7 +156,8 @@ namespace Com
                       int64_t nodeTypeId,
                       const ResolvedAddress& controlAddress,
                       const ResolvedAddress& dataAddress,
-                      const std::vector<NodeTypeDefinition>& nodeTypes);
+                      const std::vector<NodeTypeDefinition>& nodeTypes,
+                      int fragmentSize);
 
         /**
          * @brief Communication - Creates an instance of Communication in data mode. Will not run discover and nodes must be added manually.
@@ -155,6 +168,7 @@ namespace Com
          * @param nodeTypeId [in] - The node type of this node.
          * @param dataAddress [in] -  Data channel unicast address on format address:port, mandatory.
          * @param nodeTypes [in] - List of all node types that we shall be able to communicate with.
+         * @param fragmentSize [in] - Network fragment size.
          */
         Communication(DataModeTag,
                       boost::asio::io_service& ioService,
@@ -162,7 +176,8 @@ namespace Com
                       int64_t nodeId, //0 is not a valid id.
                       int64_t nodeTypeId,
                       const ResolvedAddress& dataAddress,
-                      const std::vector<NodeTypeDefinition>& nodeTypes);
+                      const std::vector<NodeTypeDefinition>& nodeTypes,
+                      int fragmentSize);
 
         /**
          * ~Communication - destructor.

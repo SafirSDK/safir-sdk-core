@@ -67,7 +67,8 @@ namespace Com
                           const std::string& controlAddress,
                           const std::string& dataAddress,
                           bool isControlInstance,
-                          const NodeTypeMap& nodeTypes);
+                          const NodeTypeMap& nodeTypes,
+                          int fragmentSize);
 
         virtual ~CommunicationImpl();
 

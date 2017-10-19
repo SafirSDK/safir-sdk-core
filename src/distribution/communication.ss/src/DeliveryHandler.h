@@ -65,10 +65,11 @@ namespace Com
     class DeliveryHandlerBasic : private WriterType
     {
     public:
-        DeliveryHandlerBasic(boost::asio::io_service::strand& receiveStrand, int64_t myNodeId, int ipVersion)
+        DeliveryHandlerBasic(boost::asio::io_service::strand& receiveStrand, int64_t myNodeId, int ipVersion, int slidingWindowSize)
             :WriterType(receiveStrand.get_io_service(), ipVersion)
             ,m_running(false)
             ,m_myId(myNodeId)
+            ,m_slidingWindowSize(static_cast<size_t>(slidingWindowSize))
             ,m_receiveStrand(receiveStrand)
             ,m_deliverStrand(receiveStrand.get_io_service())
             ,m_nodes()
@@ -174,7 +175,7 @@ namespace Com
             }
 
             //Always called from readStrand
-            m_nodes.insert(std::make_pair(node.nodeId, NodeInfo(node)));
+            m_nodes.insert(std::make_pair(node.nodeId, NodeInfo(node, m_slidingWindowSize)));
         }
 
         //Make node included. If excluded it is also removed.
@@ -291,11 +292,11 @@ namespace Com
             uint64_t lastInSequence; //last sequence number that was moved out of the queue. seq(queue[0])-1
             uint64_t biggestSequence; //biggest sequence number recevived (within our window)
             CircularArray<RecvData> queue;
-            Channel()
+            Channel(size_t slidingWindowSize)
                 :welcome(0)
                 ,lastInSequence(0)
                 ,biggestSequence(0)
-                ,queue(Parameters::SlidingWindowSize)
+                ,queue(slidingWindowSize)
             {
             }
 
@@ -321,9 +322,13 @@ namespace Com
             Channel ackedSingleReceiverChannel;
             Channel ackedMultiReceiverChannel;
 
-            NodeInfo(const Node& node_)
+            NodeInfo(const Node& node_, size_t slidingWindowSize)
                 :node(node_)
                 ,endpoint(Resolver::StringToEndpoint(node.unicastAddress))
+                ,unackedSingleReceiverChannel(slidingWindowSize)
+                ,unackedMultiReceiverChannel(slidingWindowSize)
+                ,ackedSingleReceiverChannel(slidingWindowSize)
+                ,ackedMultiReceiverChannel(slidingWindowSize)
             {
                 ackedMultiReceiverChannel.welcome=UINT64_MAX;
             }
@@ -349,7 +354,8 @@ namespace Com
         typedef std::map<int64_t, NodeInfo> NodeInfoMap;
 
         bool m_running;
-        int64_t m_myId;
+        const int64_t m_myId;
+        const size_t m_slidingWindowSize;
         boost::asio::strand& m_receiveStrand; //for sending acks, same strand as all public methods are supposed to be called from
         boost::asio::strand m_deliverStrand; //for delivering data to application
         boost::atomic<unsigned int> m_numberOfUndeliveredMessages;
@@ -636,7 +642,7 @@ namespace Com
                 Insert(header, payload, ni);
                 return header->ackNow==1;
             }
-            else if (header->sequenceNumber<=ch.lastInSequence+Parameters::SlidingWindowSize)
+            else if (header->sequenceNumber<=ch.lastInSequence+m_slidingWindowSize)
             {
                 //This is something within our receive window but out of order, the gaps will eventually be filled in
                 //when sender retransmits non-acked messages.
@@ -652,7 +658,7 @@ namespace Com
                 //message that we dont think we have got at all.
                 //All the code here just produce helpfull logs.
                 std::ostringstream os;
-                os<<"COM: Logic Error! Node "<<m_myId<<" received message from node "<<header->commonHeader.senderId<<
+                os<<"COM: I must be dead, the others are moving forward without me!!! Node "<<m_myId<<" received message from node "<<header->commonHeader.senderId<<
                     " that is too far ahead which means that we have lost a message. "<<
                     SendMethodToString(header->sendMethod)<<", seq: "<<header->sequenceNumber<<"\n     RecvQueue - lastInSeq: "<<ch.lastInSequence<<
                     ", biggestSeq: "<<ch.biggestSequence<<", welcome: "<<ch.welcome<<
@@ -685,8 +691,7 @@ namespace Com
                 }
                 SEND_SYSTEM_LOG(Error, <<os.str().c_str());
                 lllog(8)<<os.str().c_str()<<std::endl;
-
-                throw std::logic_error(os.str());
+                return false;
             }
         }
 
@@ -696,7 +701,7 @@ namespace Com
             currentIndex=static_cast<size_t>(header->sequenceNumber-lastSeq-1);
             int first=static_cast<int>(currentIndex)-header->fragmentNumber;
             firstIndex=static_cast<size_t>( std::max(0, first) );
-            lastIndex=std::min(Parameters::SlidingWindowSize-1, currentIndex+header->numberOfFragments-header->fragmentNumber-1);
+            lastIndex=std::min(m_slidingWindowSize-1, currentIndex+header->numberOfFragments-header->fragmentNumber-1);
         }
 
         void Deliver(NodeInfo& ni, const MessageHeader* header)
@@ -781,7 +786,7 @@ namespace Com
             auto ackPtr=boost::make_shared<Ack>(m_myId, header->commonHeader.senderId, ch.biggestSequence, header->sendMethod);
 
             uint64_t seq=ch.biggestSequence;
-            for (size_t i=0; i<Parameters::SlidingWindowSize; ++i)
+            for (size_t i=0; i<m_slidingWindowSize; ++i)
             {
                 if (seq>ch.lastInSequence)
                 {

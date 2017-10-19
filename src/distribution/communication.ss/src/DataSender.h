@@ -81,17 +81,21 @@ namespace Com
                         int ipVersion,
                         const std::string& localIf,
                         const std::string& multicastAddress,
-                        int waitForAckTimeout,
-                        size_t fragmentSize)
+                        int slidingWindowSize,
+                        int ackRequestThreshold,
+                        const std::vector<int>& retryTimeout,
+                        int fragmentSize)
             :WriterType(ioService, ipVersion, localIf, multicastAddress)
             ,m_strand(ioService)
             ,m_deliveryGuarantee(deliveryGuarantee)
             ,m_nodeTypeId(nodeTypeId)
             ,m_nodeId(nodeId)
+            ,m_slidingWindowSize(static_cast<size_t>(slidingWindowSize))
+            ,m_ackRequestThreshold(static_cast<size_t>(ackRequestThreshold))
             ,m_sendQueue(Parameters::SendQueueSize)
             ,m_running(false)
-            ,m_waitForAckTimeout(waitForAckTimeout)
-            ,m_fragmentDataSize(fragmentSize-MessageHeaderSize)
+            ,m_retryTimeout(retryTimeout)
+            ,m_fragmentDataSize(static_cast<size_t>(fragmentSize)-MessageHeaderSize)
             ,m_nodes()
             ,m_lastSentMultiReceiverSeqNo(0)
             ,m_lastAckRequestMultiReceiver(0)
@@ -244,7 +248,7 @@ namespace Com
                         //calculate index in missing-array
                         size_t index=static_cast<size_t>(ack.sequenceNumber-ud->header.sequenceNumber);
 
-                        if (index>Parameters::SlidingWindowSize-1)
+                        if (index>m_slidingWindowSize-1)
                         {
                             std::ostringstream os;
                             os<<m_logPrefix<<"Programming Error! Index out of range. Calculated missing index: "<<index<<". AckContent: "<<ack.ToString()<<"\n"<<SendQueueToString();
@@ -253,7 +257,7 @@ namespace Com
                             throw std::logic_error(os.str());
                         }
 
-                        if (ack.missing[index]==0)
+                        if (ack.missing[index]!=1)
                         {
                             ud->receivers.erase(receiverListIt);
                         }
@@ -354,14 +358,16 @@ namespace Com
         };
 
         boost::asio::io_service::strand m_strand;
-        uint8_t m_deliveryGuarantee;
-        int64_t m_nodeTypeId;
-        int64_t m_nodeId;
+        const uint8_t m_deliveryGuarantee;
+        const int64_t m_nodeTypeId;
+        const int64_t m_nodeId;
+        const size_t m_slidingWindowSize;
+        const size_t m_ackRequestThreshold;
         MessageQueue<UserDataPtr> m_sendQueue;
         boost::atomic<unsigned int> m_sendQueueSize;
         bool m_running;
-        int m_waitForAckTimeout;
-        size_t m_fragmentDataSize; //size of a fragments data part, excluding header size.
+        const std::vector<int> m_retryTimeout;
+        const size_t m_fragmentDataSize; //size of a fragments data part, excluding header size.
         std::map<int64_t, NodeInfo> m_nodes;
         uint64_t m_lastSentMultiReceiverSeqNo; // used both for multicast and unicast as long as the message is a multireceiver message
         uint64_t m_lastAckRequestMultiReceiver; //the last seq we have requested ack
@@ -403,13 +409,12 @@ namespace Com
             HandleSendQueue();
         }
 
-        static bool RequestAck(MessageHeader& header)
+        bool RequestAck(MessageHeader& header) const
         {
-            static const size_t AckThreshold=Parameters::SlidingWindowSize/2;
-            return (header.sequenceNumber % AckThreshold==0);
+            return (header.sequenceNumber % m_ackRequestThreshold==0);
         }
 
-        static void SetRequestAck(MessageHeader& header)
+        void SetRequestAck(MessageHeader& header) const
         {
             if (RequestAck(header))
             {
@@ -426,7 +431,7 @@ namespace Com
             //must be called from writeStrand
 
             //Send all unhandled messges that are within our sender window
-            while (m_sendQueue.has_unhandled() && m_sendQueue.first_unhandled_index()<Parameters::SlidingWindowSize)
+            while (m_sendQueue.has_unhandled() && m_sendQueue.first_unhandled_index()<m_slidingWindowSize)
             {
                 UserDataPtr& ud=m_sendQueue[m_sendQueue.first_unhandled_index()];
                 ++ud->transmitCount;
@@ -515,6 +520,13 @@ namespace Com
             }
         }
 
+        boost::chrono::milliseconds GetRetryTimeout(size_t transmitCount) const
+        {
+            return m_retryTimeout.size()>transmitCount ?
+                        boost::chrono::milliseconds(m_retryTimeout[transmitCount]) :
+                        boost::chrono::milliseconds(m_retryTimeout.back());
+        }
+
         void RetransmitUnackedMessages()
         {
             if (!m_running)
@@ -522,33 +534,25 @@ namespace Com
                 return;
             }
 
-            //Always called from writeStrand
-            static const boost::chrono::milliseconds timerInterval(m_waitForAckTimeout/2-5);
-            static const boost::chrono::milliseconds requestAckLimit(m_waitForAckTimeout/2);
-            static const boost::chrono::milliseconds retransmitLimit(m_waitForAckTimeout);
-            static const boost::chrono::milliseconds mustBeSeriousError(10000);
+            //Always called from writeStrand            
+            static const boost::chrono::milliseconds timerInterval(m_retryTimeout.front()/2);
 
             //Check if there is any unacked messages that are old enough to be retransmitted
             for (size_t i=0; i<m_sendQueue.first_unhandled_index(); ++i)
             {
                 UserDataPtr& ud=m_sendQueue[i];
                 auto durationSinceSend=boost::chrono::steady_clock::now()-ud->sendTime;
+                auto retransmitLimit = GetRetryTimeout(ud->transmitCount);
                 if (durationSinceSend>retransmitLimit)
                 {
                     RetransmitMessage(ud);
                 }
-                else if (durationSinceSend>requestAckLimit && ud->transmitCount<2)
+                else if (durationSinceSend>retransmitLimit/2 && ud->transmitCount<2 && m_ackRequestThreshold>1)
                 {
                     //this message has never been retransmitted, we have not asked receiver to ack,
                     //and half the restransmitInterval has expired. It is time to send an explicit ack-request
-                    //to avoid unecessary retransmits.
+                    //to avoid unecessary retransmits. If m_ackRequestThreshold==1 we have alredy requested ack at send-time
                     m_sendAckRequestForMsgIndex.push_back(i);
-                }
-
-                if (durationSinceSend>mustBeSeriousError)
-                {
-                    lllog(9)<<m_logPrefix.c_str()<<"Seems like we are retransmitting forever. Seq: "<<ud->header.sequenceNumber<<", "<<
-                              SendMethodToString(ud->header.sendMethod).c_str()<<L"\n"<<SendQueueToString().c_str()<<std::endl;
                 }
             }
 

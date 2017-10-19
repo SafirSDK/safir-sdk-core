@@ -45,7 +45,9 @@ public:
         //-------------------
         // Tests
         //-------------------
-        Sender sender(io, Com::Acked, 1, 1, 4, "127.0.0.1:10000", "224.90.90.241:10000", 500, Com::MessageHeaderSize+3); //ntId, nId, ipV, mc, waitForAck, fragmentSize
+        std::vector<int> retryTimeout;
+        retryTimeout.push_back(500);
+        Sender sender(io, Com::Acked, 1, 1, 4, "127.0.0.1:10000", "224.90.90.241:10000", 20, 10, retryTimeout, Com::MessageHeaderSize+3); //ntId, nId, ipV, mc, waitForAck, fragmentSize
 
         boost::atomic<unsigned int> go(0);
         auto WaitUntilReady=[&]
@@ -273,7 +275,7 @@ private:
     static Com::Ack Ack(int64_t sender, int64_t receiver, uint64_t seqNo, uint8_t sendMethod)
     {
         Com::Ack a(sender, receiver, seqNo, sendMethod);
-        for (size_t i=0; i<Com::Parameters::SlidingWindowSize; ++i)
+        for (size_t i=0; i<Com::Parameters::MaxSlidingWindowSize; ++i)
         {
             a.missing[i]=0;
         }
@@ -341,7 +343,9 @@ public:
         //-------------------
         // Tests
         //-------------------
-        Sender sender(io, Com::Unacked, 1, 1, 4, "127.0.0.1:10000", "224.90.90.241:10000", 500, 10); //ntId, nId, ipV, mc, waitForAck, fragmentSize
+        std::vector<int> retryTimeout;
+        retryTimeout.push_back(500);
+        Sender sender(io, Com::Unacked, 1, 1, 4, "127.0.0.1:10000", "224.90.90.241:10000", 20, 10, retryTimeout, 10); //ntId, nId, ipV, mc, waitForAck, fragmentSize
 
         boost::atomic<unsigned int> go(0);
         auto WaitUntilReady=[&]

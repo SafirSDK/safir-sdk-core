@@ -49,7 +49,8 @@ public:
                   int64_t /*nodeId*/, //0 is not a valid id.
                   int64_t /*nodeTypeId*/,
                   const Safir::Dob::Internal::Com::ResolvedAddress& /*dataAddress*/,
-                  const std::vector<Safir::Dob::Internal::Com::NodeTypeDefinition>& /*nodeTypes*/)
+                  const std::vector<Safir::Dob::Internal::Com::NodeTypeDefinition>& /*nodeTypes*/,
+                  int /*fragmentSize*/)
     {}
 
     void InjectNode(const std::string& /*name*/, int64_t /*id*/, int64_t /*nodeTypeId*/, const std::string& /*dataAddress*/) {}
@@ -80,7 +81,8 @@ struct NodeType
     int heartbeatInterval;
     int maxLostHeartbeats;
     int slidingWindowSize;
-    int retryTimeout;
+    int ackRequestThreshold;
+    std::vector<int> retryTimeout;
     std::vector<std::string> wantedTypes;
     std::vector<std::string> unwantedTypes;
 };
@@ -90,6 +92,7 @@ class Config
 public:
 
     std::vector<NodeType> nodeTypesParam;
+    int fragmentSize;
 };
 
 struct Fixture
@@ -101,7 +104,7 @@ struct Fixture
                       "Pelle",
                       6565,
                       878787,
-                      "127.0.0.1:5555") {};
+                      "127.0.0.1:5555") {}
 
     boost::asio::io_service ioService;
     Safir::Dob::Internal::DistributionBasic<Communication, SP, Config> distribution;

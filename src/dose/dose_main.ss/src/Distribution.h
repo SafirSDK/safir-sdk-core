@@ -99,8 +99,10 @@ namespace Internal
                                          nt->multicastAddressControl,
                                          nt->multicastAddressData,
                                          nt->heartbeatInterval,
-                                         nt->retryTimeout,
-                                         nt->maxLostHeartbeats));
+                                         nt->maxLostHeartbeats,
+                                         nt->slidingWindowSize,
+                                         nt->ackRequestThreshold,
+                                         nt->retryTimeout));
 
                 spNodeTypes.insert(std::make_pair(nt->id,
                                                   SP::NodeType(nt->id,
@@ -108,7 +110,7 @@ namespace Internal
                                                                false,
                                                                boost::chrono::milliseconds(nt->heartbeatInterval),
                                                                nt->maxLostHeartbeats,
-                                                               boost::chrono::milliseconds(nt->retryTimeout))));
+                                                               boost::chrono::milliseconds(nt->retryTimeout.front()))));
             }
 
             m_communication.reset(new CommunicationT(Com::dataModeTag,
@@ -117,7 +119,8 @@ namespace Internal
                                                      ownNodeId,
                                                      ownNodeTypeId,
                                                      Com::ResolvedAddress(ownDataAddress),
-                                                     commNodeTypes));
+                                                     commNodeTypes,
+                                                     m_config.fragmentSize));
 
             m_sp.reset(new SystemPictureT(SP::slave_tag,
                                           ioService,

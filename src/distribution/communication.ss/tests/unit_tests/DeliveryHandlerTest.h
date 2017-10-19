@@ -52,7 +52,7 @@ public:
         }
         boost::asio::io_service::strand strand(io);
 
-        Com::DeliveryHandlerBasic<DeliveryHandlerTest::TestWriter> dh(strand, 1, 4);
+        Com::DeliveryHandlerBasic<DeliveryHandlerTest::TestWriter> dh(strand, 1, 4, 20);
 
         dh.SetGotRecvCallback(boost::bind(&DeliveryHandlerTest::GotReceiveFrom, _1, _2, _3));
 

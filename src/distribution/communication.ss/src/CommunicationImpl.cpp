@@ -49,7 +49,8 @@ namespace Com
                                          const std::string& controlAddress,
                                          const std::string& dataAddress,
                                          bool isControlInstance,
-                                         const NodeTypeMap& nodeTypes)
+                                         const NodeTypeMap& nodeTypes,
+                                         int fragmentSize)
         :m_disableProtobufLogs()
         ,m_ioService(ioService)
         ,m_receiveStrand(ioService)
@@ -59,18 +60,8 @@ namespace Com
         ,m_nodeTypes(nodeTypes)
         ,m_onNewNode()
         ,m_gotRecvFrom()
-        ,m_discoverer(m_ioService,
-                      m_me,
-                     [&nodeTypes]() -> int { //calculate the maximum delay for Discover
-                         int ep=100;
-                         for (auto vt = nodeTypes.begin(); vt != nodeTypes.end(); ++vt)
-                         {
-                             ep=(std::max)(ep, vt->second->RetryTimeout()*vt->second->MaxLostHeartbeats());
-                         }
-                         return ep;
-                     }(),
-                     [=](const Node& n){OnNewNode(n);})
-        ,m_deliveryHandler(m_receiveStrand, m_me.nodeId, m_protocol)
+        ,m_discoverer(m_ioService, m_me, fragmentSize, [=](const Node& n){OnNewNode(n);})
+        ,m_deliveryHandler(m_receiveStrand, m_me.nodeId, m_protocol, m_nodeTypes[m_me.nodeId]->SlidingWindowSize())
         ,m_reader(m_receiveStrand, m_me.unicastAddress, m_nodeTypes[nodeTypeId]->MulticastAddress(),
                   [=](const char* d, size_t s, const bool mc){return OnRecv(d,s,mc);},
     [=](){return m_deliveryHandler.NumberOfUndeliveredMessages()<Parameters::MaxNumberOfUndelivered;})

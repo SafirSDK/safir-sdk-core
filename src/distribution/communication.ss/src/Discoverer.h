@@ -62,10 +62,12 @@ namespace Com
 #endif
         DiscovererBasic(boost::asio::io_service& ioService,
                         const Node& me,
-                        int sendInterval,
+                        int fragmentSize,
                         const boost::function<void(const Node&)>& onNewNode)
             :WriterType(ioService, Resolver::Protocol(me.unicastAddress))
             ,m_running(false)
+            ,m_fragmentSize(static_cast<size_t>(fragmentSize))
+            ,m_numberOfNodesPerNodeInfoMsg((m_fragmentSize-NodeInfoFixedSize)/NodeInfoPerNodeSize)
             ,m_seeds()
             ,m_nodes()
             ,m_reportedNodes()
@@ -75,7 +77,7 @@ namespace Com
             ,m_me(me)
             ,m_onNewNode(onNewNode)
             ,m_timer(ioService)
-            ,m_random(sendInterval, 3*sendInterval)
+            ,m_random(1000, 3000)
         {
         }
 #ifdef _MSC_VER
@@ -87,8 +89,7 @@ namespace Com
             m_strand.dispatch([=]
             {
                 m_running=true;
-                int firstTimeout=(m_random.Get()-490)%1000; //10 - 1000 ms first time
-                m_timer.expires_from_now(boost::chrono::milliseconds(firstTimeout));
+                m_timer.expires_from_now(boost::chrono::milliseconds(m_random.Get()));
                 m_timer.async_wait(m_strand.wrap([=](const boost::system::error_code& error){OnTimeout(error);}));
             });
         }
@@ -233,15 +234,17 @@ namespace Com
 #ifndef SAFIR_TEST
     private:
 #endif
-        static const int DiscovererLogLevel=2;
-        bool m_running;
+        static const int DiscovererLogLevel=2;        
 
         //Constant defining how many nodes that can be sent in a singel NodeInfo message without risking that fragmentSize is exceeded.
         //The stuff in CommunicationMessage+NodeInfo is less than 30 bytes plus sent_from_node, and each individual Node (also sent_from_node) is less than 100 bytes.
         //Hence this constant is calculated as (MaxFragmentSize-100-30)/100 = MaxNumberOfNodesPerMessage. (Assuming sent_from_node is set in every msg)
         static const int NodeInfoPerNodeSize=100;
         static const int NodeInfoFixedSize=30+NodeInfoPerNodeSize;
-        static const int NumberOfNodesPerNodeInfoMsg=(Parameters::FragmentSize-NodeInfoFixedSize)/NodeInfoPerNodeSize;
+
+        bool m_running;
+        const size_t m_fragmentSize;
+        const int m_numberOfNodesPerNodeInfoMsg;
 
         NodeMap m_seeds; //id generated from ip:port
         NodeMap m_nodes; //known nodes
@@ -295,7 +298,7 @@ namespace Com
         {
             //This method must always be called from within writeStrand
             const int totalNumberOfNodes=static_cast<int>(m_seeds.size()+m_nodes.size());
-            const int numberOfPackets=totalNumberOfNodes/NumberOfNodesPerNodeInfoMsg+(totalNumberOfNodes%NumberOfNodesPerNodeInfoMsg>0 ? 1 : 0);
+            const int numberOfPackets=totalNumberOfNodes/m_numberOfNodesPerNodeInfoMsg+(totalNumberOfNodes%m_numberOfNodesPerNodeInfoMsg>0 ? 1 : 0);
 
             //Compose a DiscoverMessage
             CommunicationMessage cm;
@@ -319,7 +322,7 @@ namespace Com
                 ptr->set_name(seedIt->second.name);
                 ptr->set_node_id(0);
                 ptr->set_control_address(seedIt->second.controlAddress);
-                if (cm.node_info().nodes().size()==NumberOfNodesPerNodeInfoMsg)
+                if (cm.node_info().nodes().size()==m_numberOfNodesPerNodeInfoMsg)
                 {
                     cm.mutable_node_info()->set_packet_number(packetNumber);
                     SendMessageTo(cm, toEndpoint);
@@ -339,7 +342,7 @@ namespace Com
                 ptr->set_control_address(node.controlAddress);
                 ptr->set_data_address(node.dataAddress);
 
-                if (cm.node_info().nodes().size()==NumberOfNodesPerNodeInfoMsg)
+                if (cm.node_info().nodes().size()==m_numberOfNodesPerNodeInfoMsg)
                 {
                     cm.mutable_node_info()->set_packet_number(packetNumber);
                     SendMessageTo(cm, toEndpoint);

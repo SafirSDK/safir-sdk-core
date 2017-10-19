@@ -49,7 +49,8 @@ namespace Control
                  const int heartbeatInterval_,
                  const int maxLostHeartbeats_,
                  const int slidingWindowSize_,
-                 const int retryTimeout_,
+                 const int ackRequestThreshold_,
+                 const std::vector<int>& retryTimeout_,
                  const bool requiredForStart_)
 
             : name(name_),
@@ -59,6 +60,7 @@ namespace Control
               heartbeatInterval(heartbeatInterval_),
               maxLostHeartbeats(maxLostHeartbeats_),
               slidingWindowSize(slidingWindowSize_),
+              ackRequestThreshold(ackRequestThreshold_),
               retryTimeout(retryTimeout_),
               requiredForStart(requiredForStart_)
         {}
@@ -70,7 +72,8 @@ namespace Control
         const int heartbeatInterval;
         const int maxLostHeartbeats;
         const int slidingWindowSize;
-        const int retryTimeout;
+        const int ackRequestThreshold;
+        const std::vector<int> retryTimeout;
         const bool requiredForStart;
     };
 
@@ -201,8 +204,26 @@ namespace Control
                     throw std::logic_error("Parameter error: "
                                            "Node type " + nodeTypeName + ": SlidingWindowsSize is mandatory");
                 }
+                if (nt->SlidingWindowsSize()>20)
+                {
+                    throw std::logic_error("Parameter error: "
+                                           "Node type " + nodeTypeName + ": SlidingWindowsSize must not exceed 20.");
+                }
 
                 auto slidingWindowsSize = nt->SlidingWindowsSize();
+
+                // AckRequestThreshold
+                if (nt->AckRequestThreshold().IsNull())
+                {
+                    throw std::logic_error("Parameter error: "
+                                           "Node type " + nodeTypeName + ": AckRequestThreshold is mandatory");
+                }
+                auto ackRequestThreshold = nt->AckRequestThreshold();
+                if (ackRequestThreshold>=slidingWindowsSize)
+                {
+                    throw std::logic_error("Parameter error: "
+                                           "Node type " + nodeTypeName + ": AckRequestThreshold are not allowed to be greater than SlidingWindowsSize.");
+                }
 
                 // RetryTimeout
                 if (nt->RetryTimeout().IsNull())
@@ -211,7 +232,11 @@ namespace Control
                                            "Node type " + nodeTypeName + ": RetryTimeout is mandatory");
                 }
 
-                auto retryTimeout = nt->RetryTimeout();
+                std::vector<int> retryTimeout;
+                for (size_t i=0; i<nt->RetryTimeout().size(); ++i)
+                {
+                    retryTimeout.push_back(static_cast<int>(nt->RetryTimeout()[i] * 1000));
+                }
 
                 // RequiredForStart
                 if (nt->RequiredForStart().IsNull())
@@ -228,7 +253,8 @@ namespace Control
                                                   static_cast<int>(heartbeatInterval * 1000), // seconds -> milliseconds
                                                   maxLostHeartbeats,
                                                   slidingWindowsSize,
-                                                  static_cast<int>(retryTimeout * 1000), // seconds -> milliseconds
+                                                  ackRequestThreshold,
+                                                  retryTimeout,
                                                   requiredForStart));
 
             }
@@ -299,6 +325,8 @@ namespace Control
 
             localInterfaceTimeout = boost::chrono::milliseconds(static_cast<int64_t>(Safir::Dob::NodeParameters::LocalInterfaceTimeout() * 1000));
             aloneTimeout = boost::chrono::milliseconds(static_cast<int64_t>(Safir::Dob::NodeParameters::NewSystemFormationTimeout() * 1000));
+
+            fragmentSize = Safir::Dob::NodeParameters::FragmentSize();
             
         }
 
@@ -307,6 +335,7 @@ namespace Control
         std::string incarnationBlacklistFileName;
         boost::chrono::steady_clock::duration localInterfaceTimeout;
         boost::chrono::steady_clock::duration aloneTimeout;
+        int fragmentSize;
     };
 }
 }

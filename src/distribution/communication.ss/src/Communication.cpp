@@ -54,7 +54,8 @@ namespace
                                             int64_t nodeTypeId,
                                             const std::string& controlAddress,
                                             const std::string& dataAddress,
-                                            const std::vector<NodeTypeDefinition>& nodeTypes)
+                                            const std::vector<NodeTypeDefinition>& nodeTypes,
+                                            int fragmentSize)
     {
         //find address of local interface to use
         Resolver resolver(ioService);
@@ -93,12 +94,15 @@ namespace
                                                                                                                      ipVersion,
                                                                                                                      nt->heartbeatInterval,
                                                                                                                      nt->maxLostHeartbeats,
+                                                                                                                     nt->slidingWindowSize,
+                                                                                                                     nt->ackRequestThreshold,
+                                                                                                                     fragmentSize,
                                                                                                                      nt->retryTimeout));
             nodeTypeMap.insert(NodeTypeMap::value_type(nt->id, ptr));
         }
 
         //create impl object
-        return std::unique_ptr<CommunicationImpl>(new CommunicationImpl(ioService, nodeName, nodeId, nodeTypeId, controlAddress, dataAddress, isControlInstance, nodeTypeMap));
+        return std::unique_ptr<CommunicationImpl>(new CommunicationImpl(ioService, nodeName, nodeId, nodeTypeId, controlAddress, dataAddress, isControlInstance, nodeTypeMap, fragmentSize));
     }
 }
 
@@ -123,8 +127,9 @@ namespace
                                  int64_t nodeTypeId,
                                  const ResolvedAddress& controlAddress,
                                  const ResolvedAddress& dataAddress,
-                                 const std::vector<NodeTypeDefinition>& nodeTypes)
-        :m_impl(Init(true, ioService, nodeName, nodeId, nodeTypeId, controlAddress.Address(), dataAddress.Address(), nodeTypes))
+                                 const std::vector<NodeTypeDefinition>& nodeTypes,
+                                 int fragmentSize)
+        :m_impl(Init(true, ioService, nodeName, nodeId, nodeTypeId, controlAddress.Address(), dataAddress.Address(), nodeTypes, fragmentSize))
     {
     }
 
@@ -135,8 +140,9 @@ namespace
                                  int64_t nodeId, //0 is not a valid id.
                                  int64_t nodeTypeId,
                                  const ResolvedAddress& dataAddress,
-                                 const std::vector<NodeTypeDefinition>& nodeTypes)
-        :m_impl(Init(false, ioService, nodeName, nodeId, nodeTypeId, "", dataAddress.Address(), nodeTypes))
+                                 const std::vector<NodeTypeDefinition>& nodeTypes,
+                                 int fragmentSize)
+        :m_impl(Init(false, ioService, nodeName, nodeId, nodeTypeId, "", dataAddress.Address(), nodeTypes, fragmentSize))
     {
     }
 

@@ -33,15 +33,12 @@ namespace Com
 {
     namespace Parameters
     {
-        //Size of a fragment, if total message is bigger the message will be sent at more than one fragment
-        static const size_t FragmentSize=3000;
-
         //Size of the send queue, number of outstanding messages
         static const size_t SendQueueSize = 100;
 
         //Max number of messages that can be sent in sequence before waiting for ack.
         //Max number of messages out of order that are saved
-        static const size_t SlidingWindowSize=20;
+        static const size_t MaxSlidingWindowSize=20;
 
         //Max number of undelivered messages to application allowed before slowing down receiver
         static const size_t MaxNumberOfUndelivered=20;

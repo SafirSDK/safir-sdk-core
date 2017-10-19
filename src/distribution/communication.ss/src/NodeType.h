@@ -59,18 +59,23 @@ namespace Com
                  int ipVersion,
                  int heartbeatInterval,
                  int maxLostHeartbeats,
-                 int retryTimeout)
+                 int slidingWindowSize,
+                 int ackRequestThreshold,
+                 int fragmentSize,
+                 const std::vector<int>& retryTimeout)
             :m_id(id)
             ,m_name(name)
             ,m_multicastAddress(multicastAddr)
             ,m_ipVersion(ipVersion)
             ,m_heartbeatInterval(heartbeatInterval)
             ,m_maxLostHeartbeats(maxLostHeartbeats)
+            ,m_slidingWindowSize(slidingWindowSize)
+            ,m_ackRequestThreshold(ackRequestThreshold)
             ,m_retryTimeout(retryTimeout)
             ,m_useMulticast(useMulticast)
             ,m_heartbeatSender(ioService, id, thisNodeId, m_ipVersion, localIf, McAddr(m_multicastAddress, m_useMulticast), heartbeatInterval)
-            ,m_ackedDataSender(ioService, Acked, m_id, thisNodeId, m_ipVersion, localIf, McAddr(m_multicastAddress, m_useMulticast), retryTimeout, Parameters::FragmentSize)
-            ,m_unackedDataSender(ioService, Unacked, m_id, thisNodeId, m_ipVersion, localIf, McAddr(m_multicastAddress, m_useMulticast), retryTimeout, Parameters::FragmentSize)
+            ,m_ackedDataSender(ioService, Acked, m_id, thisNodeId, m_ipVersion, localIf, McAddr(m_multicastAddress, m_useMulticast), slidingWindowSize, ackRequestThreshold, retryTimeout, fragmentSize)
+            ,m_unackedDataSender(ioService, Unacked, m_id, thisNodeId, m_ipVersion, localIf, McAddr(m_multicastAddress, m_useMulticast), slidingWindowSize, ackRequestThreshold, retryTimeout, fragmentSize)
         {
         }
 
@@ -81,7 +86,9 @@ namespace Com
         int IpVersion() const {return m_ipVersion;}
         int HeartbeatInterval() const {return m_heartbeatInterval;}
         int MaxLostHeartbeats() const {return m_maxLostHeartbeats;}
-        int RetryTimeout() const {return m_retryTimeout;}
+        int SlidingWindowSize() const {return m_slidingWindowSize;}
+        int AckRequestThreshold() const {return m_ackRequestThreshold;}
+        const std::vector<int>& RetryTimeout() const {return m_retryTimeout;}
 
         HeartbeatSender& GetHeartbeatSender() {return m_heartbeatSender;}
         const HeartbeatSender& GetHeartbeatSender() const {return m_heartbeatSender;}
@@ -93,14 +100,16 @@ namespace Com
         const DataSender& GetUnackedDataSender() const {return m_unackedDataSender;}
 
     private:
-        int64_t m_id;
-        std::string m_name;               //unique readable name
-        std::string m_multicastAddress;   //multicast address including port number, 'address:port' empty string if not multicast enabled
-        int m_ipVersion;
-        int m_heartbeatInterval;          //time between heartbeats
-        int m_maxLostHeartbeats;
-        int m_retryTimeout;               //time to wait before retransmitting unacked data
-        bool m_useMulticast;
+        const int64_t m_id;
+        const std::string m_name;               //unique readable name
+        const std::string m_multicastAddress;   //multicast address including port number, 'address:port' empty string if not multicast enabled
+        const int m_ipVersion;
+        const int m_heartbeatInterval;          //time between heartbeats
+        const int m_maxLostHeartbeats;
+        const int m_slidingWindowSize;
+        const int m_ackRequestThreshold;
+        const std::vector<int> m_retryTimeout;  //time to wait before retransmitting unacked data
+        const bool m_useMulticast;
 
         HeartbeatSender m_heartbeatSender;
         DataSender m_ackedDataSender;

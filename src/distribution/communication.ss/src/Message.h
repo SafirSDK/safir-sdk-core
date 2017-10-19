@@ -132,12 +132,14 @@ namespace Com
         CommonHeader commonHeader;
         uint64_t sequenceNumber;
         uint8_t sendMethod; //tells if message being acked was sent to one or many receivers (different sequence numbers)
-        unsigned char missing[Parameters::SlidingWindowSize]; //1 means missing, 0 not missing sequenceNumber is index 0, seqNo-1 is index 1 and so on.
+        unsigned char missing[Parameters::MaxSlidingWindowSize]; //1 means missing, 0 not missing sequenceNumber is index 0, seqNo-1 is index 1 and so on.
         Ack(int64_t senderId_, int64_t receiverId_, uint64_t sequenceNumber_, uint8_t sendMethod_)
             :commonHeader(senderId_, receiverId_, AckType)
             ,sequenceNumber(sequenceNumber_)
             ,sendMethod(sendMethod_)
         {
+            for (size_t i=0; i<Parameters::MaxSlidingWindowSize; ++i)
+                missing[i]='#';
         }
 
         std::string ToString() const
@@ -145,7 +147,7 @@ namespace Com
             std::ostringstream os;
             os<<"AckContent: {"<<commonHeader.ToString()<<", sendMethod: "<<SendMethodToString(sendMethod)<<", seq: "<<sequenceNumber<<", gaps: [";
 
-            for (unsigned int i = 0; i < Parameters::SlidingWindowSize; ++i)
+            for (unsigned int i = 0; i < Parameters::MaxSlidingWindowSize; ++i)
             {
                     os<<static_cast<int>(missing[i]);
             }
@@ -219,7 +221,7 @@ namespace Com
         const char* fragment; //This is what is sent in this UserData. If not fragmented these will be the same as payload and payloadSize
         Receivers receivers; //Set of receivers, can be filled with a receiver list, or if MultiReceiverSendMethod it will be filled when its sent
         boost::chrono::steady_clock::time_point sendTime; //timestamp when this messages was last transmitted so we know when it's time to make retransmit
-        int transmitCount;
+        size_t transmitCount;
 
         UserData(const int64_t senderId,
                  const int64_t receiverId,

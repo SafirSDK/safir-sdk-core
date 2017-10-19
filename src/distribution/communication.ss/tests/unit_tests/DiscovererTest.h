@@ -46,11 +46,11 @@ public:
         //----------------------
         // Test
         //----------------------
-        Discoverer s0(io, CreateNode(100), 100, [&](const Com::Node&){});
-        Discoverer s1(io, CreateNode(200), 100, [&](const Com::Node&){});
-        Discoverer n0(io, CreateNode(0), 100, [&](const Com::Node&){});
-        Discoverer n1(io, CreateNode(1), 100, [&](const Com::Node&){});
-        Discoverer n2(io, CreateNode(2), 100, [&](const Com::Node&){});
+        Discoverer s0(io, CreateNode(100), 1500, [&](const Com::Node&){});
+        Discoverer s1(io, CreateNode(200), 1500, [&](const Com::Node&){});
+        Discoverer n0(io, CreateNode(0), 1500, [&](const Com::Node&){});
+        Discoverer n1(io, CreateNode(1), 1500, [&](const Com::Node&){});
+        Discoverer n2(io, CreateNode(2), 1500, [&](const Com::Node&){});
 
         TRACELINE
         std::vector<std::string> seeds;
@@ -74,6 +74,8 @@ public:
         std::cout<<"n0 NumSeeds: "<<n0.m_seeds.size()<<", sentDiscovers: "<<discoversSentToSeed100[0]<<"/"<<discoversSentToSeed200[0]<<std::endl;
         std::cout<<"n1 NumSeeds: "<<n1.m_seeds.size()<<", sentDiscovers: "<<discoversSentToSeed100[1]<<"/"<<discoversSentToSeed200[1]<<std::endl;
         std::cout<<"n2 NumSeeds: "<<n2.m_seeds.size()<<", sentDiscovers: "<<discoversSentToSeed100[2]<<"/"<<discoversSentToSeed200[2]<<std::endl;
+
+        Wait(3100); //after this time all nodes should have sent discovers
 
         bool passed=false;
         {
@@ -117,7 +119,7 @@ public:
         n2.m_strand.post([&]{++fence;});
         while(fence<3)
         {
-            Wait(100);
+            Wait(1000);
         }
 
         //reset sent discovers
@@ -447,7 +449,7 @@ private:
 
         Info(int64_t id, boost::asio::io_service& io)
         {
-            discover.reset(new HandleDiscover::Discoverer(io, HandleDiscover::CreateNode(id), 100, [=](const Com::Node& n){HandleDiscover::OnNewNode(id, n);}));
+            discover.reset(new HandleDiscover::Discoverer(io, HandleDiscover::CreateNode(id), 1500, [=](const Com::Node& n){HandleDiscover::OnNewNode(id, n);}));
         }
     };
     static std::map<int64_t, HandleDiscover::Info> discoverState;

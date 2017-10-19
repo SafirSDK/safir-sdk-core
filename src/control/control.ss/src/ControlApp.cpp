@@ -175,8 +175,10 @@ void ControlApp::Start()
                                                         nt->multicastAddressControl,
                                                         nt->multicastAddressData,
                                                         nt->heartbeatInterval,
-                                                        nt->retryTimeout,
-                                                        nt->maxLostHeartbeats));
+                                                        nt->maxLostHeartbeats,
+                                                        nt->slidingWindowSize,
+                                                        nt->ackRequestThreshold,
+                                                        nt->retryTimeout));
     }
     m_communication.reset(new Com::Communication(Com::controlModeTag,
                                                  m_ioService,
@@ -185,7 +187,8 @@ void ControlApp::Start()
                                                  m_conf.thisNodeParam.nodeTypeId,
                                                  addresses.first,
                                                  addresses.second,
-                                                 commNodeTypes));
+                                                 commNodeTypes,
+                                                 m_conf.fragmentSize));
 
     if (!m_conf.thisNodeParam.seeds.empty())
     {
@@ -204,7 +207,7 @@ void ControlApp::Start()
                                                        false,
                                                        boost::chrono::milliseconds(nt->heartbeatInterval),
                                                        nt->maxLostHeartbeats,
-                                                       boost::chrono::milliseconds(nt->retryTimeout))));
+                                                       boost::chrono::milliseconds(nt->retryTimeout.front()))));
     }
 
 

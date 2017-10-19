@@ -230,14 +230,21 @@ public:
         , m_work(new boost::asio::io_service::work(m_ioService))
         , m_id(id)
     {
+        std::vector<int> retryTimeout20;
+        retryTimeout20.push_back(20);
+        std::vector<int> retryTimeout50;
+        retryTimeout50.push_back(50);
+
         m_commNodeTypes.push_back(Safir::Dob::Internal::Com::NodeTypeDefinition
                                   (1,
                                    "NodeTypeA",
                                    "", //no multicast
                                    "", //no multicast
                                    1000,
+                                   15,
                                    20,
-                                   15));
+                                   10,
+                                   retryTimeout20));
 
         m_spNodeTypes.insert(std::make_pair(1,
                                             Safir::Dob::Internal::SP::NodeType
@@ -254,8 +261,10 @@ public:
                                    "224.123.45.67:10000",
                                    "224.123.45.67:10001",
                                    2000,
-                                   50,
-                                   8));
+                                   8,
+                                   20,
+                                   10,
+                                   retryTimeout50));
 
         m_spNodeTypes.insert(std::make_pair(2,
                                             Safir::Dob::Internal::SP::NodeType
@@ -350,7 +359,8 @@ public:
                                options.nodeType,
                                Safir::Dob::Internal::Com::ResolvedAddress(options.controlAddress),
                                Safir::Dob::Internal::Com::ResolvedAddress(options.dataAddress),
-                               m_commNodeTypes));
+                               m_commNodeTypes,
+                               1450));
 
         std::vector<std::string> seeds;
         seeds.push_back(options.seed + ":33999");
@@ -669,7 +679,8 @@ public:
                                m_id,
                                options.nodeType,
                                Safir::Dob::Internal::Com::ResolvedAddress(options.dataAddress),
-                               m_commNodeTypes));
+                               m_commNodeTypes,
+                               1450));
 
 
         m_systemPicture.reset(new Safir::Dob::Internal::SP::SystemPicture

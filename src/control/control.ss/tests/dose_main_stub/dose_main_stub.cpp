@@ -111,8 +111,10 @@ int main(int /*argc*/, char * /*argv*/[])
                                                          nt->multicastAddressControl,
                                                          nt->multicastAddressData,
                                                          nt->heartbeatInterval,
-                                                         nt->retryTimeout,
-                                                         nt->maxLostHeartbeats));
+                                                         nt->maxLostHeartbeats,
+                                                         nt->slidingWindowSize,
+                                                         nt->ackRequestThreshold,
+                                                         nt->retryTimeout));
 
         spNodeTypes.insert(std::make_pair(nt->id,
                                           SP::NodeType(nt->id,
@@ -120,7 +122,7 @@ int main(int /*argc*/, char * /*argv*/[])
                                                        false,
                                                        boost::chrono::milliseconds(nt->heartbeatInterval),
                                                        nt->maxLostHeartbeats,
-                                                       boost::chrono::milliseconds(nt->retryTimeout))));
+                                                       boost::chrono::milliseconds(nt->retryTimeout.front()))));
     }
 
     std::unique_ptr<Com::Communication> communication;
@@ -180,7 +182,8 @@ int main(int /*argc*/, char * /*argv*/[])
                                                                         nodeId,
                                                                         nodeTypeId,
                                                                         Safir::Dob::Internal::Com::ResolvedAddress(dataAddress),
-                                                                        commNodeTypes));
+                                                                        commNodeTypes,
+                                                                        1450));
                              // ... and the System Picture instance
                              sp.reset(new SP::SystemPicture(SP::slave_tag,
                                                             ioService,

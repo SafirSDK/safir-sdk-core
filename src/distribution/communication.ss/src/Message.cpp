@@ -35,9 +35,8 @@ namespace Com
 
     BOOST_STATIC_ASSERT(CommonHeaderSize == 3*8);
     BOOST_STATIC_ASSERT(sizeof(Heartbeat) == CommonHeaderSize);
-    BOOST_STATIC_ASSERT(sizeof(Ack) == CommonHeaderSize + 8 + 1 + Parameters::SlidingWindowSize);
-    BOOST_STATIC_ASSERT(sizeof(MessageHeader) == CommonHeaderSize
-                        + 8 + 6 * 4);
+    BOOST_STATIC_ASSERT(sizeof(Ack) == CommonHeaderSize + 8 + 1 + Parameters::MaxSlidingWindowSize);
+    BOOST_STATIC_ASSERT(sizeof(MessageHeader) == CommonHeaderSize + 8 + 6 * 4);
 }
 }
 }

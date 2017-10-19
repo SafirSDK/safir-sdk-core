@@ -182,13 +182,13 @@ public:
     NodeTypes()
     {
         for (int i=0; i<NumberOfNodeTypes; ++i)
-        {
+        {            
             Safir::Dob::Internal::Com::NodeTypeDefinition n;
             n.name="nt"+boost::lexical_cast<std::string>(i);
             n.id=LlufId_Generate64(n.name.c_str());
             n.heartbeatInterval=1000+500*i;
             n.maxLostHeartbeats=10;
-            n.retryTimeout=40;
+            n.retryTimeout.push_back(40);
             if (i>0)
             {
                 n.controlMulticastAddress=std::string("224.90.90.241:")+boost::lexical_cast<std::string>(11000+i);
@@ -486,7 +486,8 @@ int main(int argc, char * argv[])
                                                            myNodeTypeId,
                                                            Safir::Dob::Internal::Com::ResolvedAddress(cmd.unicastAddress),
                                                            Safir::Dob::Internal::Com::ResolvedAddress(cmd.unicastAddress),
-                                                           nodeTypes.ToVector()));
+                                                           nodeTypes.ToVector(),
+                                                           1450));
 
     std::cout<<"----------------------------------------------------------------------------"<<std::endl;
     std::cout<<"-- Name:      "<<com->Name()<<std::endl;
