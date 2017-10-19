@@ -86,6 +86,13 @@
     </parameter>
 
     <parameter>
+      <summary>Network fragment size. Messages larger than this value will be splitted up in fragmenst.</summary>
+      <name>FragmentSize</name>
+      <type>Int32</type>
+      <value>1450</value>
+    </parameter>
+    
+    <parameter>
       <summary>Defines the different node types in the system.</summary>
       <name>NodeTypes</name>
       <type>Safir.Dob.NodeType</type>
@@ -97,8 +104,11 @@
             <MulticastAddressData>192.0.0.1:9501</MulticastAddressData>
             <HeartbeatInterval>1.0</HeartbeatInterval>
             <MaxLostHeartbeats>5</MaxLostHeartbeats>
-            <SlidingWindowsSize>10</SlidingWindowsSize>
-            <RetryTimeout>0.2</RetryTimeout>
+            <SlidingWindowsSize>20</SlidingWindowsSize>
+            <AckRequestThreshold>10</AckRequestThreshold>
+            <RetryTimeout>
+                <Second64>0.2</Second64>
+            </RetryTimeout>
             <RequiredForStart>True</RequiredForStart>
           </Safir.Dob.NodeType>
         </arrayElement>
@@ -110,8 +120,11 @@
             <MulticastAddressData></MulticastAddressData>
             <HeartbeatInterval>5.0</HeartbeatInterval>
             <MaxLostHeartbeats>5</MaxLostHeartbeats>
-            <SlidingWindowsSize>10</SlidingWindowsSize>
-            <RetryTimeout>2.0</RetryTimeout>
+            <SlidingWindowsSize>20</SlidingWindowsSize>
+            <AckRequestThreshold>10</AckRequestThreshold>
+            <RetryTimeout>
+                <Second64>2.0</Second64>
+            </RetryTimeout>
             <RequiredForStart>False</RequiredForStart>
           </Safir.Dob.NodeType>
         </arrayElement>
@@ -121,8 +134,11 @@
             <Name>RemoteClient</Name>
             <HeartbeatInterval>30.00</HeartbeatInterval>
             <MaxLostHeartbeats>5</MaxLostHeartbeats>
-            <SlidingWindowsSize>10</SlidingWindowsSize>
-            <RetryTimeout>5.0</RetryTimeout>
+            <SlidingWindowsSize>20</SlidingWindowsSize>
+            <AckRequestThreshold>10</AckRequestThreshold>
+            <RetryTimeout>
+                <Second64>5.0</Second64>
+            </RetryTimeout>
             <RequiredForStart>False</RequiredForStart>
           </Safir.Dob.NodeType>
         </arrayElement>

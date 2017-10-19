@@ -82,7 +82,13 @@
       <type>Second64</type>
       <value>0</value>
     </parameter>
-
+    
+    <parameter>
+      <summary>Network fragment size. Messages larger than this value will be splitted up in fragmenst.</summary>
+      <name>FragmentSize</name>
+      <type>Int32</type>
+      <value>1450</value>
+    </parameter>
 
     <parameter>
       <summary>Defines the different node types in the system.</summary>
@@ -97,8 +103,12 @@
             <MulticastAddressData>224.11.11.11:24000</MulticastAddressData>
             <HeartbeatInterval>1.0</HeartbeatInterval>
             <MaxLostHeartbeats>5</MaxLostHeartbeats>
-            <SlidingWindowsSize>10</SlidingWindowsSize>
-            <RetryTimeout>0.02</RetryTimeout>
+            <SlidingWindowsSize>20</SlidingWindowsSize>
+            <AckRequestThreshold>10</AckRequestThreshold>
+            <RetryTimeout>
+                <Second64>0.02</Second64>
+                <Second64>0.08</Second64>
+            </RetryTimeout>
             <RequiredForStart>True</RequiredForStart>
           </Safir.Dob.NodeType>
         </arrayElement>
