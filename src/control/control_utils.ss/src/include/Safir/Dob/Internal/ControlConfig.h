@@ -233,9 +233,9 @@ namespace Control
                 }
 
                 std::vector<int> retryTimeout;
-                for (size_t i=0; i<nt->RetryTimeout().size(); ++i)
+                for (size_t index=0; index<nt->RetryTimeout().size(); ++index)
                 {
-                    retryTimeout.push_back(static_cast<int>(nt->RetryTimeout()[i] * 1000));
+                    retryTimeout.push_back(static_cast<int>(nt->RetryTimeout()[index] * 1000));
                 }
 
                 // RequiredForStart
