@@ -353,7 +353,7 @@ namespace Com
         {
             bool systemNode;
             boost::asio::ip::udp::endpoint endpoint;
-            uint64_t lastSentSeqNo;
+            uint64_t lastSentSeqNo; //last used, added to sendQueue, not necessarily sent.
             uint64_t welcome;
         };
 
@@ -369,7 +369,7 @@ namespace Com
         const std::vector<int> m_retryTimeout;
         const size_t m_fragmentDataSize; //size of a fragments data part, excluding header size.
         std::map<int64_t, NodeInfo> m_nodes;
-        uint64_t m_lastSentMultiReceiverSeqNo; // used both for multicast and unicast as long as the message is a multireceiver message
+        uint64_t m_lastSentMultiReceiverSeqNo; // used both for multicast and unicast as long as the message is a multireceiver message. Actually it is lastUsedSeq since message may not have been sent yet.
         uint64_t m_lastAckRequestMultiReceiver; //the last seq we have requested ack
         boost::asio::steady_timer m_resendTimer;
         RetransmitTo m_retransmitNotification;
@@ -522,8 +522,9 @@ namespace Com
 
         boost::chrono::milliseconds GetRetryTimeout(size_t transmitCount) const
         {
-            return m_retryTimeout.size()>transmitCount ?
-                        boost::chrono::milliseconds(m_retryTimeout[transmitCount]) :
+            size_t index = transmitCount>0 ? transmitCount-1 : 0;
+            return m_retryTimeout.size()>index ?
+                        boost::chrono::milliseconds(m_retryTimeout[index]) :
                         boost::chrono::milliseconds(m_retryTimeout.back());
         }
 
@@ -534,8 +535,8 @@ namespace Com
                 return;
             }
 
-            //Always called from writeStrand            
-            static const boost::chrono::milliseconds timerInterval(m_retryTimeout.front()/2);
+            //Always called from writeStrand
+            static const boost::chrono::milliseconds timerInterval(*std::min_element(m_retryTimeout.begin(), m_retryTimeout.end()) / 2);
 
             //Check if there is any unacked messages that are old enough to be retransmitted
             for (size_t i=0; i<m_sendQueue.first_unhandled_index(); ++i)
@@ -787,7 +788,9 @@ namespace Com
                     os<<"U ";
 
                 const auto& ud=m_sendQueue[i];
-                os<<"q["<<i<<"]"<<" ("<<SendMethodToString(ud->header.sendMethod)<<") sequenceNumber="<<ud->header.sequenceNumber<<std::endl;
+                os<<"q["<<i<<"]"<<" ("<<SendMethodToString(ud->header.sendMethod)
+                    <<") sequenceNumber="<<ud->header.sequenceNumber
+                    <<" transmitCount="<<ud->transmitCount<<std::endl;
                 if (ud->receivers.empty())
                 {
                     os<<"    No_Receivers"<<std::endl;

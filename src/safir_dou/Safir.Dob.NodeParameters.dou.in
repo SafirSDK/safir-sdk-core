@@ -99,7 +99,6 @@
       <value>1450</value>
     </parameter>
 
-
     <parameter>
       <summary>Defines the different node types in the system.</summary>
       <name>NodeTypes</name>

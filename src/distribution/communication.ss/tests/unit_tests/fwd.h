@@ -58,11 +58,11 @@
 #pragma warning(disable:4127) //Get rid of warning that this if-expression is constant (comparing two constants)
 #endif
 
-#define CHECK(expr) {if (!(expr)) { std::cout<<"Test failed! Line: "<<__LINE__<<", expr: "<< #expr <<std::endl; exit(1);}}
-#define CHECKMSG(expr, msg) {if (!(expr)) { std::cout<<"Test failed! Line: "<<__LINE__<<", expr: "<< #expr <<", msg: "<<msg<<std::endl; exit(1);}}
-#define CHECKINF(expr, msg) {if (!(expr)) { std::cout<<"Test failed! Line: "<<__LINE__<<", expr: "<< #expr <<", msg: " ## msg << std::endl; exit(1);}}
+#define CHECK(expr) {if (!(expr)) { std::wcout<<"Test failed! Line: "<<__LINE__<<", expr: "<< #expr <<std::endl; exit(1);}}
+#define CHECKMSG(expr, msg) {if (!(expr)) { std::wcout<<"Test failed! Line: "<<__LINE__<<", expr: "<< #expr <<", msg: "<<msg<<std::endl; exit(1);}}
+#define CHECKINF(expr, msg) {if (!(expr)) { std::wcout<<"Test failed! Line: "<<__LINE__<<", expr: "<< #expr <<", msg: " ## msg << std::endl; exit(1);}}
 
-#define TRACELINE {std::cout<<"line "<<__LINE__<<std::endl;}
+#define TRACELINE {std::wcout<<"line "<<__LINE__<<std::endl;}
 
 namespace Com = Safir::Dob::Internal::Com;
 
