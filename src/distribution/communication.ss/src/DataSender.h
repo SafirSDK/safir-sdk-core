@@ -195,6 +195,7 @@ namespace Com
                     userData->header.deliveryGuarantee=m_deliveryGuarantee;
                     userData->header.numberOfFragments=static_cast<uint16_t>(totalNumberOfFragments);
                     userData->header.fragmentNumber=static_cast<uint16_t>(frag);
+                    SetRequestAck(userData->header);
                     m_sendQueue.enqueue(userData);
                 }
 
@@ -209,6 +210,7 @@ namespace Com
                     userData->header.deliveryGuarantee=m_deliveryGuarantee;
                     userData->header.numberOfFragments=static_cast<uint16_t>(totalNumberOfFragments);
                     userData->header.fragmentNumber=static_cast<uint16_t>(totalNumberOfFragments-1);
+                    SetRequestAck(userData->header);
                     m_sendQueue.enqueue(userData);
                 }
 
@@ -409,20 +411,10 @@ namespace Com
             HandleSendQueue();
         }
 
-        bool RequestAck(MessageHeader& header) const
-        {
-            return (header.sequenceNumber % m_ackRequestThreshold==0);
-        }
-
         void SetRequestAck(MessageHeader& header) const
         {
-            if (RequestAck(header))
-            {
-                header.ackNow=1;
-            }
-
-            //let ackNow be as it was before, PostWelcome will explicitly set the ackNow=1
-            //so we dont have to check it here for every message
+            auto requestAck = (header.sendMethod==SingleReceiverSendMethod) || (header.sequenceNumber % m_ackRequestThreshold==0);
+            header.ackNow = requestAck ? 1 : 0;
         }
 
         //Send new messages in sendQueue. No retransmits sent here.
@@ -435,12 +427,9 @@ namespace Com
             {
                 UserDataPtr& ud=m_sendQueue[m_sendQueue.first_unhandled_index()];
                 ++ud->transmitCount;
-                ud->header.ackNow=0;
 
                 if (ud->header.sendMethod==MultiReceiverSendMethod) //this is message that shall be sent to every system node
                 {
-                    SetRequestAck(ud->header);
-
                     lllog(9)<<m_logPrefix.c_str()<<"Send to all seq: "<<ud->header.sequenceNumber<<", ackNow: "<<static_cast<int>(ud->header.ackNow)<<std::endl;
 
                     if (WriterType::IsMulticastEnabled()) //this node and all the receivers are capable of sending and receiving multicast
@@ -474,7 +463,6 @@ namespace Com
                 }
                 else //messages has a specific receiver, send using unicast
                 {
-                    ud->header.ackNow=1; //for simplicity we request ack immediately for node specific messages
                     auto nodeIt=m_nodes.find(ud->header.commonHeader.receiverId);
                     if (nodeIt!=m_nodes.end() && nodeIt->second.systemNode)
                     {
