@@ -59,7 +59,7 @@ int main(int argc, char* argv[])
         CHECK(conf.nodeTypesParam[0].multicastAddressData == "192.0.0.1:9501");
         CHECK(conf.nodeTypesParam[0].heartbeatInterval == 1000);
         CHECK(conf.nodeTypesParam[0].maxLostHeartbeats == 5);
-        CHECK(conf.nodeTypesParam[0].slidingWindowSize == 10);
+        CHECK(conf.nodeTypesParam[0].slidingWindowSize == 20);
         CHECK(conf.nodeTypesParam[0].retryTimeout.front() == 200);
         CHECK(conf.nodeTypesParam[0].requiredForStart == true);
         // CHECK(conf.nodeTypesParam[0].wantedTypes.size() == 1);
@@ -75,7 +75,7 @@ int main(int argc, char* argv[])
         CHECK(conf.nodeTypesParam[1].multicastAddressData == "");
         CHECK(conf.nodeTypesParam[1].heartbeatInterval == 5000);
         CHECK(conf.nodeTypesParam[1].maxLostHeartbeats == 5);
-        CHECK(conf.nodeTypesParam[1].slidingWindowSize == 10);
+        CHECK(conf.nodeTypesParam[1].slidingWindowSize == 20);
         CHECK(conf.nodeTypesParam[1].retryTimeout.front() == 2000);
         CHECK(conf.nodeTypesParam[1].requiredForStart == false);
         // CHECK(conf.nodeTypesParam[1].wantedTypes.size() == 1);
@@ -91,7 +91,7 @@ int main(int argc, char* argv[])
         CHECK(conf.nodeTypesParam[2].multicastAddressData == "");
         CHECK(conf.nodeTypesParam[2].heartbeatInterval == 30000);
         CHECK(conf.nodeTypesParam[2].maxLostHeartbeats == 5);
-        CHECK(conf.nodeTypesParam[2].slidingWindowSize == 10);
+        CHECK(conf.nodeTypesParam[2].slidingWindowSize == 20);
         CHECK(conf.nodeTypesParam[2].retryTimeout.front() == 5000);
         CHECK(conf.nodeTypesParam[2].requiredForStart == false);
         // CHECK(conf.nodeTypesParam[2].wantedTypes.size() == 1);

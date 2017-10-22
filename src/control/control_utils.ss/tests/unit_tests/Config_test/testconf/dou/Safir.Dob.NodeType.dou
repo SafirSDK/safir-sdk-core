@@ -38,9 +38,15 @@
             <type>Int32</type>
         </member>
         <member>
-            <summary>Time to wait for Ack before retrying transmission to this node.</summary>
+            <summary>Maximum number of outstanding messages before request receiver to ack. Should never be more than half SlidingWindowsSize.</summary>
+            <name>AckRequestThreshold</name>
+            <type>Int32</type>
+        </member>
+        <member>
+            <summary>Time to wait for Ack before retrying transmission to this node. First resend will use first timeout, second the secont and so on. Last one is used until the end.</summary>
             <name>RetryTimeout</name>
             <type>Second64</type>
+            <sequence/>
         </member>
         <member>
             <summary>If True, at least one node of this type is required for the system to start. Nodes with a node
