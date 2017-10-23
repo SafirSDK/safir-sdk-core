@@ -67,7 +67,7 @@ namespace Com
             :WriterType(ioService, Resolver::Protocol(me.unicastAddress))
             ,m_running(false)
             ,m_fragmentSize(static_cast<size_t>(fragmentSize))
-            ,m_numberOfNodesPerNodeInfoMsg((m_fragmentSize-NodeInfoFixedSize)/NodeInfoPerNodeSize)
+            ,m_numberOfNodesPerNodeInfoMsg(static_cast<int>((m_fragmentSize-NodeInfoFixedSize)/NodeInfoPerNodeSize))
             ,m_seeds()
             ,m_nodes()
             ,m_reportedNodes()
