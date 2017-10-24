@@ -219,7 +219,7 @@ namespace Control
                                            "Node type " + nodeTypeName + ": AckRequestThreshold is mandatory");
                 }
                 auto ackRequestThreshold = nt->AckRequestThreshold();
-                if (ackRequestThreshold>=slidingWindowsSize)
+                if (ackRequestThreshold>slidingWindowsSize)
                 {
                     throw std::logic_error("Parameter error: "
                                            "Node type " + nodeTypeName + ": AckRequestThreshold are not allowed to be greater than SlidingWindowsSize.");
