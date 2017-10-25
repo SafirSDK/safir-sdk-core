@@ -1,4 +1,17 @@
 -----------------------------------------------------------------------------------------------------------------------
+2017-10-25 version 6.3.11
+-----------------------------------------------------------------------------------------------------------------------
+
+This release fixes the following issue (see http://safirsdkcore.com for details):
+
+#359 Add backoff to packet send retries
+#358 Add parameter to control MTU in Communication
+#357 Implement use of parameter SlidingWindowSize
+#356 Add parameter to control AloneTimeout
+
+Also a workaround for #360 Communication does not like being single threaded, like in safir_control was added.
+
+-----------------------------------------------------------------------------------------------------------------------
 2017-09-21 version 6.3.10
 -----------------------------------------------------------------------------------------------------------------------
 
