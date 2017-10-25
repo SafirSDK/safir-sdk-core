@@ -182,19 +182,26 @@ public:
     NodeTypes()
     {
         for (int i=0; i<NumberOfNodeTypes; ++i)
-        {            
-            Safir::Dob::Internal::Com::NodeTypeDefinition n;
-            n.name="nt"+boost::lexical_cast<std::string>(i);
-            n.id=LlufId_Generate64(n.name.c_str());
-            n.heartbeatInterval=1000+500*i;
-            n.maxLostHeartbeats=10;
-            n.retryTimeout.push_back(40);
+        {
+            std::string name = "nt"+boost::lexical_cast<std::string>(i);
+            boost::int64_t id=LlufId_Generate64(name.c_str());
+            std::vector<int> retryTimeout;
+            retryTimeout.push_back(40);
+            int heartbeatInterval=1000+500*i;
+            int maxLostHeartbeats=10;
+            int slidingWindowSize=20;
+            int ackRequestThreshold=10;
+            std::string controlMulticastAddress = "";
+            std::string dataMulticastAddress = "";
             if (i>0)
             {
-                n.controlMulticastAddress=std::string("224.90.90.241:")+boost::lexical_cast<std::string>(11000+i);
-                n.dataMulticastAddress=std::string("224.90.90.241:")+boost::lexical_cast<std::string>(12000+i);
+                controlMulticastAddress=std::string("224.90.90.241:")+boost::lexical_cast<std::string>(11000+i);
+                dataMulticastAddress=std::string("224.90.90.241:")+boost::lexical_cast<std::string>(12000+i);
             }
 
+            Safir::Dob::Internal::Com::NodeTypeDefinition n(id, name, controlMulticastAddress,dataMulticastAddress,
+                                                            heartbeatInterval, maxLostHeartbeats,
+                                                            slidingWindowSize, ackRequestThreshold,retryTimeout);
             m_nodeTypes.insert(std::make_pair(n.id, n));
         }
     }

@@ -47,8 +47,6 @@ namespace Com
      */
     struct NodeTypeDefinition
     {
-        NodeTypeDefinition() {}
-
         NodeTypeDefinition( int64_t id_,
                             const std::string& name_,
                             const std::string& controlMulticastAddress_,
