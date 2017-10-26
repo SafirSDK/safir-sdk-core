@@ -85,10 +85,10 @@ namespace Internal
             m_acceptor = boost::make_shared<Acceptor>(
                              m_strand,
                              name,
-                             [this] (typename Acceptor::StreamPtr streamPtr)
+                             [this, name] (typename Acceptor::StreamPtr streamPtr)
                              {
                                  m_sessions.insert(boost::make_shared<SessionType>
-                                                   (streamPtr, m_strand, m_subscriberDisconnectedCb));
+                                                   (name, streamPtr, m_strand, m_subscriberDisconnectedCb));
 
                                  if (!m_subscriberConnectedCb.empty())
                                  {

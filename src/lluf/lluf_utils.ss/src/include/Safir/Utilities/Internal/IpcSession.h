@@ -68,10 +68,12 @@ namespace Internal
         : public boost::enable_shared_from_this<Session<StreamPtr>>
     {
     public:
-        Session(const StreamPtr&                    streamPtr,
+        Session(const std::string&                  name,
+                const StreamPtr&                    streamPtr,
                 boost::asio::io_service::strand&    strand,
-                boost::function<void()>               sessionClosedCb)
-            : m_streamPtr(streamPtr),
+                boost::function<void()>             sessionClosedCb)
+            : m_name(name),
+              m_streamPtr(streamPtr),
               m_msgQueue(),
               m_strand(strand),
               m_sessionClosedCb(sessionClosedCb)
@@ -92,11 +94,11 @@ namespace Internal
             m_msgQueue.push_back(Msg(msg, msgSize));
             if (m_msgQueue.size() > 1000)
             {
-                throw std::logic_error("IpcSession send message queue overflow.");
+                throw std::logic_error("IpcSession send message queue overflow for '" + m_name + "'.");
             }
             if (!writeInProgress)
             {
-              Write();
+                Write();
             }
         }
 
@@ -148,10 +150,11 @@ namespace Internal
                 }));
         }
 
+        const std::string                   m_name;
         StreamPtr                           m_streamPtr;
         std::deque<Msg>                     m_msgQueue;
         boost::asio::io_service::strand&    m_strand;
-        boost::function<void()>               m_sessionClosedCb;
+        boost::function<void()>             m_sessionClosedCb;
     };
 
 }
