@@ -123,7 +123,7 @@ class Parameters:
         self.run_until_failure = options.run_until_failure
 
         if options.autostart_slave and not self.multicomputer:
-            log("--autostart-slave can only be used together with --multinode")
+            log("--autostart-slave can only be used together with --multicomputer")
             sys.exit(1)
         if options.slave and options.multicomputer:
             log("Don't specify both --slave and --multinode")
@@ -587,6 +587,13 @@ class JenkinsInterface:
         output = self.__run_groovy(script)
         return self.__to_bool(output, on_error)
 
+    def is_restarting(self,job,on_error):
+        script = """
+                 import hudson.model.*
+                 println(Hudson.instance.isQuietingDown())
+                 """
+        return self.__to_bool(output, on_error)
+
     def wait_for_job(self,job,duration=None):
         if duration is None:
             while self.is_building(job,True):
@@ -656,6 +663,13 @@ class JenkinsController:
             log(auth)
             sys.exit(1)
 
+    def is_restarting(self):
+        if self.interface.is_restarting():
+            log(" !! Jenkins is restarting")
+            return True
+        else
+            return True
+
     def start_slave(self):
         log(" * Starting slave")
         self.interface.wait_for_job(self.job_name)
@@ -684,6 +698,9 @@ def main():
 
         if parameters.autostart_jenkins_slave:
             jenkinsController = JenkinsController(parameters)
+            if jenkinscontroller.is_restarting():
+                log("Jenkins is restarting, exiting quickly...")
+                return 1
             jenkinsController.start_slave()
 
         runner = Runner()
