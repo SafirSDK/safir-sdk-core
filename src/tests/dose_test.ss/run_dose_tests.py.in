@@ -667,7 +667,7 @@ class JenkinsController:
         if self.interface.is_restarting():
             log(" !! Jenkins is restarting")
             return True
-        else
+        else:
             return True
 
     def start_slave(self):
