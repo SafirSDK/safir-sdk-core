@@ -698,7 +698,7 @@ def main():
 
         if parameters.autostart_jenkins_slave:
             jenkinsController = JenkinsController(parameters)
-            if jenkinscontroller.is_restarting():
+            if jenkinsController.is_restarting():
                 log("Jenkins is restarting, exiting quickly...")
                 return 1
             jenkinsController.start_slave()
