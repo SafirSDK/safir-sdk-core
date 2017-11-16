@@ -587,12 +587,12 @@ class JenkinsInterface:
         output = self.__run_groovy(script)
         return self.__to_bool(output, on_error)
 
-    def is_restarting(self,job,on_error):
+    def is_restarting(self):
         script = """
                  import hudson.model.*
                  println(Hudson.instance.isQuietingDown())
                  """
-        return self.__to_bool(output, on_error)
+        return self.__to_bool(output, True)
 
     def wait_for_job(self,job,duration=None):
         if duration is None:
