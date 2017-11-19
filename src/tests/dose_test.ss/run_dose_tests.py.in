@@ -592,6 +592,7 @@ class JenkinsInterface:
                  import hudson.model.*
                  println(Hudson.instance.isQuietingDown())
                  """
+        output = self.__run_groovy(script)
         return self.__to_bool(output, True)
 
     def wait_for_job(self,job,duration=None):
