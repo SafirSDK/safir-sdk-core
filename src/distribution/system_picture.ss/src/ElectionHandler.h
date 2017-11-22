@@ -184,10 +184,11 @@ namespace SP
         CalculateAloneTimeout(const std::map<int64_t, NodeType>& nodeTypes,
                               const boost::chrono::steady_clock::duration& aloneTimeout)
         {
-            if (aloneTimeout < boost::chrono::seconds(0))
+            if (aloneTimeout > boost::chrono::seconds(0))
             {
                 return aloneTimeout;
             }
+
             //use max of non-light node types heartbeatInterval * maxLostHeartbeats * 2
             boost::chrono::steady_clock::duration max = boost::chrono::milliseconds(100);
 
