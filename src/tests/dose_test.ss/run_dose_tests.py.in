@@ -669,7 +669,7 @@ class JenkinsController:
             log(" !! Jenkins is restarting")
             return True
         else:
-            return True
+            return False
 
     def start_slave(self):
         log(" * Starting slave")
