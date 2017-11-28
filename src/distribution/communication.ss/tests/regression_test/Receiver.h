@@ -52,7 +52,7 @@ protected:
 
     void NewNode(const std::string& name, int64_t nodeId, int64_t nodeTypeId, const std::string& controlAddress, const std::string& dataAddress);
     void GotReceiveFrom(int64_t fromNodeId, bool isHeartbeat);
-    void RetransmitTo(int64_t toNodeId);
+    void RetransmitTo(int64_t toNodeId, size_t tc);
     void ReceiveData(int64_t fromNodeId, int64_t fromNodeType, const char* data, size_t size);
     void QueueNotFull(int64_t nodeTypeId);
     void IncludeNode();

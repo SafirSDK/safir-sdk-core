@@ -53,7 +53,7 @@ Receiver::Receiver(Com::ControlModeTag tag, boost::asio::io_service& ioService, 
     m_com.SetGotReceiveFromCallback(boost::bind(&Receiver::GotReceiveFrom,this,_1,_2));
     m_com.SetNewNodeCallback(boost::bind(&Receiver::NewNode,this,_1,_2,_3,_4,_5));
     m_com.SetQueueNotFullCallback(boost::bind(&Receiver::QueueNotFull,this,_1), 0);
-    m_com.SetRetransmitToCallback(boost::bind(&Receiver::RetransmitTo,this,_1));
+    m_com.SetRetransmitToCallback(boost::bind(&Receiver::RetransmitTo,this,_1,_2));
 
     m_com.Start();
 }
@@ -86,7 +86,7 @@ Receiver::Receiver(Com::DataModeTag tag, boost::asio::io_service& ioService, int
     m_com.SetGotReceiveFromCallback(boost::bind(&Receiver::GotReceiveFrom,this,_1,_2));
     m_com.SetNewNodeCallback(boost::bind(&Receiver::NewNode,this,_1,_2,_3,_4,_5));
     m_com.SetQueueNotFullCallback(boost::bind(&Receiver::QueueNotFull,this,_1), 0);
-    m_com.SetRetransmitToCallback(boost::bind(&Receiver::RetransmitTo,this,_1));
+    m_com.SetRetransmitToCallback(boost::bind(&Receiver::RetransmitTo,this,_1,_2));
     m_com.Start();
 }
 
@@ -195,7 +195,7 @@ void Receiver::GotReceiveFrom(int64_t /*fromNodeId*/, bool /*isHeartbeat*/)
 {
 }
 
-void Receiver::RetransmitTo(int64_t /*toNodeId*/)
+void Receiver::RetransmitTo(int64_t /*toNodeId*/, size_t /*tc*/)
 {
 }
 

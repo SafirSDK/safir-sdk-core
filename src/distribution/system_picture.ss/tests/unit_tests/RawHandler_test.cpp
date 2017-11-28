@@ -52,7 +52,7 @@ public:
     typedef boost::function<void(int64_t fromNodeId,
                                  bool isMulticast,
                                  bool isDuplicate)> GotReceiveFrom;
-    typedef boost::function<void(int64_t toNodeId)> RetransmitTo;
+    typedef boost::function<void(int64_t toNodeId, size_t transmitCount)> RetransmitTo;
 
     void SetNewNodeCallback(const NewNode& callback)
     {
@@ -241,7 +241,7 @@ BOOST_AUTO_TEST_CASE( receive_from_not_known )
 
 BOOST_AUTO_TEST_CASE( retransmit_to_not_known )
 {
-    comm.retransmitToCb(10);
+    comm.retransmitToCb(10, 2);
     BOOST_CHECK_THROW(ioService.run(), std::logic_error);
 }
 
@@ -426,7 +426,7 @@ BOOST_AUTO_TEST_CASE( nodes_changed_removed_callback )
     comm.gotReceiveFromCb(11, false, false);
     comm.gotReceiveFromCb(11, false, true);
 
-    comm.retransmitToCb(11);
+    comm.retransmitToCb(11, 2);
 
     BOOST_CHECK_NO_THROW(ioService.run());
     BOOST_CHECK_EQUAL(cbCalls, 2);

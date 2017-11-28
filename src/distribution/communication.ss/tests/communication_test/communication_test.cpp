@@ -354,7 +354,7 @@ public:
 
     }
 
-    void Retransmit(int64_t /*id*/)
+    void Retransmit(int64_t /*id*/, size_t /*tc*/)
     {
         ++m_retransmitCount;
     }
@@ -506,7 +506,7 @@ int main(int argc, char * argv[])
 
     com->SetDataReceiver([=](int64_t fromNode, int64_t /*fromNodeType*/, const char* msg, size_t size){sp->OnRecv(fromNode, msg, size);}, 123, Allocate, DeAllocate);
     com->SetGotReceiveFromCallback([=](int64_t id, bool isHeartbeat, bool isDuplicate){sp->GotReceive(id,isHeartbeat,isDuplicate);});
-    com->SetRetransmitToCallback([=](int64_t id){sp->Retransmit(id);});
+    com->SetRetransmitToCallback([=](int64_t id, size_t tc){sp->Retransmit(id, tc);});
     com->SetNewNodeCallback([=](const std::string& name, int64_t nodeId, int64_t nodeTypeId, const std::string& ca, const std::string& /*da*/, bool /*mc*/)
                             {sp->NewNode(name, nodeId, nodeTypeId, ca);});
 

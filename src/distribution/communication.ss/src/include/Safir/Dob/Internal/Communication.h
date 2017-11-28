@@ -87,7 +87,7 @@ namespace Com
                                  const std::string& dataAddress,
                                  bool multicast)> NewNode;
     typedef boost::function<void(int64_t fromNodeId, bool isMulticast, bool isDuplicate)> GotReceiveFrom;
-    typedef boost::function<void(int64_t toNodeId)> RetransmitTo;
+    typedef boost::function<void(int64_t toNodeId, size_t transmitCount)> RetransmitTo; //transmitCount is the total number of times the specific message has been sent
     typedef boost::function<void(int64_t fromNodeId, int64_t fromNodeType, const char* data, size_t size)> ReceiveData;
     typedef boost::function<void(int64_t nodeTypeId)> QueueNotFull;
     typedef boost::function<char*(size_t)> Allocator;

@@ -175,8 +175,8 @@ namespace SP
             communication.SetGotReceiveFromCallback(m_strand.wrap([this](int64_t id, bool multicast, bool duplicate)
             {GotReceive(id,multicast,duplicate);}));
 
-            communication.SetRetransmitToCallback(m_strand.wrap([this](int64_t id)
-            {Retransmit(id);}));
+            communication.SetRetransmitToCallback(m_strand.wrap([this](int64_t id, size_t tc)
+            {Retransmit(id, tc);}));
 
             m_checkDeadNodesTimer->Start();
         }
@@ -786,7 +786,7 @@ namespace SP
         }
 
         //Must be called in strand!
-        void Retransmit(int64_t id)
+        void Retransmit(int64_t id, size_t /*transmitCount*/)
         {
             lllog(9) << "SP: Retransmit to node with id " << id <<  std::endl;
 

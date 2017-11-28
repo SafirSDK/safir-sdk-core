@@ -67,7 +67,7 @@ namespace Com
      * messages that have not been acked.
      */
 
-    typedef boost::function<void(int64_t toNodeId)> RetransmitTo;
+    typedef boost::function<void(int64_t toNodeId, size_t transmitCount)> RetransmitTo;
     typedef boost::function<void(int64_t nodeTypeId)> QueueNotFull;
 
     template <class WriterType>
@@ -624,7 +624,7 @@ namespace Com
                     ud->header.ackNow=1; //request ack immediately for retransmitted messages
 
                     WriterType::SendTo(ud, nodeIt->second.endpoint);
-                    m_retransmitNotification(nodeIt->first);
+                    m_retransmitNotification(nodeIt->first, ud->transmitCount);
                     lllog(9)<<m_logPrefix.c_str()<<"Retransmit  "<<SendMethodToString(ud->header.sendMethod).c_str()<<
                               ", seq: "<<ud->header.sequenceNumber<<" to "<<*recvIt<<std::endl;
                     ++recvIt;

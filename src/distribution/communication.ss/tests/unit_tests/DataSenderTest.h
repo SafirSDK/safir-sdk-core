@@ -62,7 +62,7 @@ public:
         bool gotQueueNotFull1=false, gotQueueNotFull2=false;
         sender.SetNotFullCallback([&](int64_t id){gotQueueNotFull1=true; std::wcout<<"QueueNotFull 1 nodeType "<<id<<std::endl;});
         sender.SetNotFullCallback([&](int64_t id){gotQueueNotFull2=true; std::wcout<<"QueueNotFull 2 nodeType "<<id<<std::endl;});
-        sender.SetRetransmitCallback([=](int64_t id){std::wcout<<"Retransmit to "<<id<<std::endl;});
+        sender.SetRetransmitCallback([=](int64_t id, size_t tc){std::wcout<<"Retransmit to "<<id<<", transmitCount: "<<tc<<std::endl;});
 
         // Test request ack calculations
         {
@@ -183,6 +183,8 @@ public:
 
         TRACELINE
         WaitUntilReady();
+
+        //Ack all messages
         sender.HandleAck(Ack(2, 1, 3, Com::MultiReceiverSendMethod));  //Ack(sender, receiver, seqNo, sendMethod)
         sender.m_strand.post([&]{CHECKMSG(sender.SendQueueSize()==3, sender.SendQueueSize());});
         WaitUntilReady();
@@ -408,8 +410,6 @@ public:
             go=0;
         };
 
-
-        sender.SetRetransmitCallback([=](int64_t id){std::wcout<<"Retransmit to "<<id<<std::endl;});
         sender.Start();
         sender.AddNode(2, "127.0.0.1:2");
         sender.AddNode(3, "127.0.0.1:3");
@@ -557,7 +557,7 @@ public:
         bool gotQueueNotFull1=false, gotQueueNotFull2=false;
         sender.SetNotFullCallback([&](int64_t id){gotQueueNotFull1=true; std::wcout<<"QueueNotFull 1 nodeType "<<id<<std::endl;});
         sender.SetNotFullCallback([&](int64_t id){gotQueueNotFull2=true; std::wcout<<"QueueNotFull 2 nodeType "<<id<<std::endl;});
-        sender.SetRetransmitCallback([=](int64_t id){std::wcout<<"Retransmit to "<<id<<std::endl;});
+        sender.SetRetransmitCallback([=](int64_t id, size_t tc){std::wcout<<"Retransmit to "<<id<<", transmitCount: "<<tc<<std::endl;});
         sender.Start();
 
         TRACELINE
@@ -838,12 +838,269 @@ private:
 boost::mutex SmallWindowSenderTest::mutex;
 std::vector< boost::shared_ptr<Com::UserData> > SmallWindowSenderTest::sent;
 
+//------------------------------------
+// Test retransmission of messages
+//------------------------------------
+class RetransmissionTest
+{
+public:
+    static void Run()
+    {
+        std::wcout<<"RetransmissionTest started"<<std::endl;
+
+        boost::asio::io_service io;
+        auto work=boost::make_shared<boost::asio::io_service::work>(io);
+        boost::thread_group threads;
+        for (int i = 0; i < 9; ++i)
+        {
+            threads.create_thread([&]{io.run();});
+        }
+
+        TRACELINE
+
+        //-------------------
+        // Tests
+        //-------------------
+        std::vector<int> retryTimeout;
+        retryTimeout.push_back(500);
+        Sender sender(io, Com::Acked, 1, 1, 4, "127.0.0.1:10000", "224.90.90.241:10000", SlidingWindowSize, RequestAckThreshold, retryTimeout, Com::MessageHeaderSize+3); //ntId, nId, ipV, mc, waitForAck, fragmentSize
+
+        boost::atomic<unsigned int> go(0);
+        auto WaitUntilReady=[&]
+        {
+            sender.m_strand.post([&]{go=1;});
+
+            while(go==0)
+                Wait(20);
+            go=0;
+        };
+
+        TRACELINE
+
+        sender.SetRetransmitCallback([=](int64_t id, size_t tc)
+        {
+            boost::mutex::scoped_lock lock(mutex);
+            retransmit.push_back(std::pair<int64_t, size_t>(id, tc));
+        });
+
+        sender.Start();
+
+        TRACELINE
+
+        sender.AddNode(2, "127.0.0.1:2");
+        sender.AddNode(3, "127.0.0.1:3");
+        sender.IncludeNode(2); //generates welcome with seq 1
+        sender.IncludeNode(3); //generates welcome with seq 2
+
+        TRACELINE
+
+        //Check that welcome messages have been posted
+        sender.m_strand.post([&]
+        {
+            CHECK(sender.m_nodes.size()==2);
+            CHECK(sender.m_nodes.find(2)->second.systemNode==true);
+            CHECK(sender.m_nodes.find(2)->second.welcome==1);
+            CHECK(sender.m_nodes.find(3)->second.systemNode==true);
+            CHECK(sender.m_nodes.find(3)->second.welcome==2);
+            CHECKMSG(sender.SendQueueSize()==2, sender.SendQueueSize());
+            CHECK(sender.m_sendQueue[0]->transmitCount>0); //only one welcome has been sent since sendWindow is 1
+            CHECK(sender.m_sendQueue[1]->transmitCount>0); //still not sent
+        });
+
+        WaitUntilReady();
+
+        TRACELINE
+        //Ack welcome messages
+        sender.HandleAck(Ack(2, 1, 1, Com::MultiReceiverSendMethod));  //Ack(sender, receiver, seqNo, sendMethod)
+        sender.HandleAck(Ack(2, 1, 2, Com::MultiReceiverSendMethod));  //Ack(sender, receiver, seqNo, sendMethod)
+        sender.HandleAck(Ack(3, 1, 2, Com::MultiReceiverSendMethod));  //Ack(sender, receiver, seqNo, sendMethod)
+        TRACELINE
+        WaitUntilReady();
+
+        sender.m_strand.post([&]
+        {
+            //all messages should now have been removed
+            CHECK(sender.m_sendQueue.empty());
+            CHECK(sender.m_nodes.size()==2);
+
+            boost::mutex::scoped_lock lock(mutex);
+            CHECK(retransmit.empty());
+            sent.clear();
+        });
+
+        WaitUntilReady();
+
+        TRACELINE
+
+        TRACELINE
+
+        // Test retransmission when sending multireceiver
+        sender.AddToSendQueue(0, MakeShared("1"), 1, 1); //toId, data, size, dataType
+        Wait(800);
+        sender.m_strand.post([&]
+        {
+            boost::mutex::scoped_lock lock(mutex);
+            CHECK(sender.m_sendQueue.size()==1);
+            CHECK(sender.m_sendQueue[0]->receivers.size()==2);
+            CHECK(sender.m_sendQueue[0]->receivers.find(2)!=sender.m_sendQueue[0]->receivers.end());
+            CHECK(sender.m_sendQueue[0]->receivers.find(3)!=sender.m_sendQueue[0]->receivers.end());
+
+            CHECKMSG(sender.m_sendQueue[0]->transmitCount==2, sender.m_sendQueue[0]->transmitCount); //has been resent once
+            CHECK(retransmit.size()==2);
+
+            //retransmit to node 2 with transmitCount 2
+            CHECK(retransmit[0].first==2); //toNode
+            CHECK(retransmit[0].second==2); //transmitCount
+
+            //retransmit to node 2 with transmitCount 3
+            CHECK(retransmit[1].first==3); //toNode
+            CHECK(retransmit[1].second==2); //transmitCount
+        });
+
+        TRACELINE
+        WaitUntilReady();
+
+        //node 2 will ack the only message in sendQueue (seq=3)
+        sender.HandleAck(Ack(2, 1, 3, Com::MultiReceiverSendMethod));  //Ack(sender, receiver, seqNo, sendMethod)
+        sender.m_strand.post([&]
+        {
+            CHECKMSG(sender.SendQueueSize()==1, sender.SendQueueSize());
+            CHECK(sender.m_sendQueue[0]->receivers.size()==1);
+            CHECK(sender.m_sendQueue[0]->receivers.find(3)!=sender.m_sendQueue[0]->receivers.end());
+            CHECK(sender.m_sendQueue[0]->transmitCount==2); //has still been sent 2 times
+        });
+
+        WaitUntilReady();
+
+        //wait for 2 more resends to node 3
+        Wait(1000);
+        sender.m_strand.post([&]
+        {
+            boost::mutex::scoped_lock lock(mutex);
+            CHECK(sender.m_sendQueue.size()==1);
+            CHECK(sender.m_sendQueue[0]->receivers.size()==1);
+            CHECK(sender.m_sendQueue[0]->receivers.find(3)!=sender.m_sendQueue[0]->receivers.end());
+
+            //now msg should have been sent 4 times, first two to both node 2 and 3, and last two only to node 3
+            CHECKMSG(sender.m_sendQueue[0]->transmitCount==4, sender.m_sendQueue[0]->transmitCount); //has been resent once
+            CHECK(retransmit.size()==4);
+
+            //retransmit to node 3 with transmitCount 3
+            CHECK(retransmit[2].first==3); //toNode
+            CHECK(retransmit[2].second==3); //transmitCount
+
+            //retransmit to node 3 with transmitCount 4
+            CHECK(retransmit[3].first==3); //toNode
+            CHECK(retransmit[3].second==4); //transmitCount
+
+            retransmit.clear(); //for convenience
+        });
+
+        //node 3 will ack the only message in sendQueue (seq=3)
+        sender.HandleAck(Ack(3, 1, 3, Com::MultiReceiverSendMethod)); //Ack(sender, receiver, seqNo, sendMethod)
+        sender.m_strand.post([&]{CHECKMSG(sender.SendQueueSize()==0, sender.SendQueueSize());});
+        WaitUntilReady();
+
+        //no more retransmission expected
+        Wait(800);
+        sender.m_strand.post([&]
+        {
+            boost::mutex::scoped_lock lock(mutex);
+            CHECK(sender.m_sendQueue.empty());
+            CHECK(retransmit.empty());
+        });
+
+        //finished
+        TRACELINE
+        sender.m_strand.post([&]
+        {
+            sender.Stop();
+            work.reset();
+        });
+
+        TRACELINE
+
+        threads.join_all();
+        std::wcout<<"RetransmissionTest tests passed"<<std::endl;
+    }
+
+private:
+
+    static const size_t SlidingWindowSize = 10;
+    static const size_t RequestAckThreshold = 1;
+
+    static boost::mutex mutex;
+    static std::vector< boost::shared_ptr<Com::UserData> > sent;
+    static std::vector< std::pair<int64_t, size_t> > retransmit;
+
+    static Com::Ack Ack(int64_t sender, int64_t receiver, uint64_t seqNo, uint8_t sendMethod)
+    {
+        Com::Ack a(sender, receiver, seqNo, sendMethod);
+        for (size_t i=0; i<SlidingWindowSize; ++i)
+        {
+            a.missing[i]=0;
+        }
+        return a;
+    }
+
+    static std::string GetSentData(size_t index)
+    {
+        const auto& p=sent[index];
+        return std::string(p->fragment, p->header.fragmentContentSize);
+    }
+
+    static uint64_t LastSentSeq()
+    {
+        boost::mutex::scoped_lock lock(mutex);
+        return sent.back()->header.sequenceNumber;
+    }
+
+    struct TestSendPolicy
+    {
+        void Send(const boost::shared_ptr<Com::UserData>& val,
+                  boost::asio::ip::udp::socket& /*socket*/,
+                  const boost::asio::ip::udp::endpoint& /*to*/)
+        {
+            boost::mutex::scoped_lock lock(mutex);
+
+            if (Com::IsCommunicationDataType(val->header.commonHeader.dataType))
+            {
+                return;
+            }
+
+            auto expectedAckNow = (val->header.sendMethod==Com::SingleReceiverSendMethod) ||
+                    val->transmitCount>1 ||
+                    (val->header.sequenceNumber % RequestAckThreshold==0) ? 1 : 0;
+            if (val->header.ackNow!=expectedAckNow)
+            {
+                std::wcout<<L"Unexpected ackNow - "<<val->header.ToString().c_str()<<std::endl;
+            }
+            CHECK(val->header.ackNow==expectedAckNow);
+
+            std::string s(val->fragment, val->header.fragmentContentSize);
+            //std::wcout<<"Writer.Send to_port: "<<to.port()<<", seq: "<<val->header.sequenceNumber<<", data: '"<<s<<"'"<<std::endl;
+            sent.push_back(val);
+        }
+    };
+
+    typedef Com::Writer<Com::UserData, RetransmissionTest::TestSendPolicy> TestWriter;
+    typedef Com::DataSenderBasic<TestWriter> Sender;
+};
+
+boost::mutex RetransmissionTest::mutex;
+std::vector< boost::shared_ptr<Com::UserData> > RetransmissionTest::sent;
+std::vector< std::pair<int64_t, size_t> > RetransmissionTest::retransmit;
+
+//-----------------------
+// Start Sender tests
+//-----------------------
 struct DataSenderTest
 {
     static void Run()
     {
         AckedDataSenderTest::Run();
         SmallWindowSenderTest::Run();
-        //UnackedDataSenderTest::Run();
+        RetransmissionTest::Run();
+        UnackedDataSenderTest::Run();
     }
 };
