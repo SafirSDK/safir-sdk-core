@@ -58,6 +58,7 @@ namespace Com
     static const int64_t AckType=-6769271806353797703; //Hash for 'Communication.Ack'
     static const int64_t AckRequestType=-3908639933957133038; //Hash for 'Communication.AckRequest'
     static const int64_t ControlDataType=186858702748131856; //Hash for 'Communication.ControlData'
+    static const int64_t PingDataType=8729948154137041257; //Hash for 'Communication.Ping'
 
     //Send method
     static const uint8_t SingleReceiverSendMethod=0;
@@ -89,6 +90,7 @@ namespace Com
     inline bool IsCommunicationDataType(int64_t dataType)
     {
         return  dataType==HeartbeatType ||
+                dataType==PingDataType ||
                 dataType==AckType ||
                 dataType==AckRequestType ||
                 dataType==ControlDataType ||

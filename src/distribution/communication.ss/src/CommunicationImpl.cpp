@@ -375,7 +375,7 @@ namespace Com
         }
         break;
 
-        default: //some user defined type
+        default: //some user defined type or welcome or ping
         {
             //Application data
             if (size<MessageHeaderSize)

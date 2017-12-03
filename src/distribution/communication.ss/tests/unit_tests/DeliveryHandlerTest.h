@@ -57,6 +57,10 @@ public:
         dh.SetGotRecvCallback(boost::bind(&DeliveryHandlerTest::GotReceiveFrom, _1, _2, _3));
 
         dh.SetReceiver(boost::bind(&DeliveryHandlerTest::OnRecv, _1, _2, _3, _4), 0, [=](size_t s){return new char[s];}, [](const char * data){delete[] data;});
+
+        //we dont expect this to be called with ping, normally this type of receiver is to be considered a programming error.
+        //just want to check that ping is never transfered to application regardless of receivers
+        dh.SetReceiver(boost::bind(&DeliveryHandlerTest::OnRecv, _1, _2, _3, _4), Com::PingDataType, [=](size_t s){return new char[s];}, [](const char * data){delete[] data;});
         dh.Start();
 
         TRACELINE
@@ -205,6 +209,26 @@ public:
             CHECKMSG(acked[id]==15, acked[id]);
         }
 
+        // Test acked Ping messages, should not be handed over to application but still generate a gotRecv callback.
+        gotRecv=0;
+        for (int64_t id=2; id<=4; ++id)
+        {
+            auto payload="ping";
+            auto size=strlen(payload);
+            Com::MessageHeader header(id, 1, Com::PingDataType, Com::MultiReceiverSendMethod, Com::Acked, 16, size, size, 1, 0, 0);
+            header.ackNow=1;
+            dh.ReceivedApplicationData(&header, payload, false);
+        }
+        dh.m_receiveStrand.post([&]{SetReady();});
+        WaitUntilReady();
+
+        for (int64_t id=2; id<=4; ++id)
+        {
+            CHECKMSG(received[id]==2, received[id]); //still 2 in application onRecv
+            CHECKMSG(acked[id]==16, acked[id]); //the ping has been acked
+            CHECKMSG(gotRecv==3, gotRecv); //ping has generated a gotRecv callback
+        }
+
         TRACELINE
 
         //---------------------------------------------
@@ -215,7 +239,7 @@ public:
         {
             auto payload="hello";
             auto size=strlen(payload);
-            Com::MessageHeader header(id, 1, 0, Com::MultiReceiverSendMethod, Com::Unacked, 16, size, size, 1, 0, 0);
+            Com::MessageHeader header(id, 1, 0, Com::MultiReceiverSendMethod, Com::Unacked, 17, size, size, 1, 0, 0);
             dh.ReceivedApplicationData(&header, payload, false);
         }
 
@@ -228,7 +252,7 @@ public:
         for (int64_t id=2; id<=4; ++id)
         {
             CHECKMSG(received[id]==3, received[id]);
-            CHECKMSG(acked[id]==15, acked[id]);
+            CHECKMSG(acked[id]==16, acked[id]);
         }
 
         DumpNodeInfo(dh);
@@ -240,7 +264,7 @@ public:
         for (int frag=0; frag<4; ++frag)
         {
             const char* msg="ABCDEFGH";
-            uint64_t seq=17+frag;
+            uint64_t seq=18+frag;
             const size_t fragmentSize=2;
             const uint16_t numberOfFragments=4;
 
@@ -263,7 +287,7 @@ public:
         for (int64_t id=2; id<=4; ++id)
         {
             CHECKMSG(received[id]==4, received[id]);
-            CHECKMSG(acked[id]==15, acked[id]);
+            CHECKMSG(acked[id]==16, acked[id]);
         }
 
 
@@ -279,7 +303,7 @@ public:
         //and expected seqNo should be the start of the next message.
         {
             const char* msg="12345678";
-            uint64_t seq=22;
+            uint64_t seq=23;
             const size_t fragmentSize=2;
             const uint16_t numberOfFragments=4;
             size_t fragmentOffset=2;
@@ -301,7 +325,7 @@ public:
         for (int64_t id=2; id<=4; ++id)
         {
             CHECKMSG(received[id]==4, received[id]);
-            CHECKMSG(acked[id]==15, acked[id]);
+            CHECKMSG(acked[id]==16, acked[id]);
         }
 
 
@@ -318,7 +342,7 @@ public:
         {
             auto payload="hello";
             auto size=strlen(payload);
-            Com::MessageHeader header(id, 1, 0, Com::MultiReceiverSendMethod, Com::Unacked, 25, size, size, 1, 0, 0);
+            Com::MessageHeader header(id, 1, 0, Com::MultiReceiverSendMethod, Com::Unacked, 26, size, size, 1, 0, 0);
             dh.ReceivedApplicationData(&header, payload, false);
         }
 
@@ -335,8 +359,8 @@ public:
         for (int64_t id=2; id<=4; ++id)
         {
             CHECKMSG(received[id]==5, received[id]);
-            CHECKMSG(acked[id]==15, acked[id]);
-            CHECK(dh.m_nodes.find(id)->second.unackedMultiReceiverChannel.lastInSequence==25);
+            CHECKMSG(acked[id]==16, acked[id]);
+            CHECK(dh.m_nodes.find(id)->second.unackedMultiReceiverChannel.lastInSequence==26);
         }
 
         TRACELINE
@@ -350,7 +374,7 @@ public:
         {
             auto payload="hello";
             auto size=strlen(payload);
-            Com::MessageHeader header(id, 1, 0, Com::MultiReceiverSendMethod, Com::Unacked, 25, size, size, 1, 0, 0);
+            Com::MessageHeader header(id, 1, 0, Com::MultiReceiverSendMethod, Com::Unacked, 26, size, size, 1, 0, 0);
             dh.ReceivedApplicationData(&header, payload, false);
         }
         CHECK(duplicates==3);
@@ -363,10 +387,10 @@ public:
 
 
 private:
-    static boost::mutex mutex;
     static std::map<int64_t, int> received;
     static std::map<int64_t, uint64_t> acked;
     static int duplicates;
+    static int gotRecv;
 
     struct TestSendPolicy
     {
@@ -393,6 +417,8 @@ private:
 
     static void GotReceiveFrom(int64_t /*fromNodeId*/, bool /*isMulticas*/, bool isDuplicate)
     {
+        ++gotRecv;
+
         //std::cout<<"GotReceiveFrom "<<fromNodeId<<std::endl;
         if (isDuplicate)
         {
@@ -422,7 +448,7 @@ private:
     }
 };
 
-boost::mutex DeliveryHandlerTest::mutex;
 std::map<int64_t, int> DeliveryHandlerTest::received;
 std::map<int64_t, uint64_t> DeliveryHandlerTest::acked;
-int DeliveryHandlerTest::duplicates;
+int DeliveryHandlerTest::duplicates = 0;
+int DeliveryHandlerTest::gotRecv = 0;

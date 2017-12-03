@@ -48,6 +48,9 @@ namespace Com
 
         //This is the socket send and receive buffer. On Windows the default is 8192 wich is far too low.
         static const int SocketBufferSize = 106496;
+
+        //If no acked data has been sent for this time, the system will send a ping message to all other nodes.
+        static const int SendPingThreshold = 7000; //millisec
     }
 }
 }

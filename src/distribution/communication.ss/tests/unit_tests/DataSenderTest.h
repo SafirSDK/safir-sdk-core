@@ -972,6 +972,8 @@ public:
 
         WaitUntilReady();
 
+        TRACELINE
+
         //wait for 2 more resends to node 3
         Wait(1000);
         sender.m_strand.post([&]
@@ -1001,6 +1003,8 @@ public:
         sender.m_strand.post([&]{CHECKMSG(sender.SendQueueSize()==0, sender.SendQueueSize());});
         WaitUntilReady();
 
+        TRACELINE
+
         //no more retransmission expected
         Wait(800);
         sender.m_strand.post([&]
@@ -1008,7 +1012,38 @@ public:
             boost::mutex::scoped_lock lock(mutex);
             CHECK(sender.m_sendQueue.empty());
             CHECK(retransmit.empty());
+            sent.clear(); //also clear sent, from now on we only expect Ping messages to be sent
         });
+
+        //be quiet long enough, then DataSender shall send a Ping
+        while (sender.m_sendQueue.empty())
+        {
+            Wait(3000);
+        }
+        Wait(2000);
+
+        TRACELINE
+        sender.m_strand.post([&]
+        {
+            boost::mutex::scoped_lock lock(mutex);
+            CHECK(sender.m_sendQueue.size()==1);
+            CHECK(sender.SendQueueSize()==1);
+            CHECK(sender.m_sendQueue.front()->header.commonHeader.dataType==Safir::Dob::Internal::Com::PingDataType);
+            CHECK(sender.m_sendQueue.front()->header.ackNow==1);
+            CHECK(sent.size()>1);
+            CHECK(sent.size()>0);
+            CHECK(sender.m_sendQueue.front()->transmitCount>0);
+            CHECK(retransmit.size()>0);
+            CHECK(retransmit.back().second==sender.m_sendQueue.front()->transmitCount);
+        });
+
+        WaitUntilReady();
+
+        sender.HandleAck(Ack(2, 1, 4, Com::MultiReceiverSendMethod));  //Ack(sender, receiver, seqNo, sendMethod)
+        sender.HandleAck(Ack(3, 1, 4, Com::MultiReceiverSendMethod));  //Ack(sender, receiver, seqNo, sendMethod)
+
+        sender.m_strand.post([&]{CHECKMSG(sender.SendQueueSize()==0, sender.SendQueueSize());});
+        WaitUntilReady();
 
         //finished
         TRACELINE
@@ -1031,7 +1066,7 @@ private:
 
     static boost::mutex mutex;
     static std::vector< boost::shared_ptr<Com::UserData> > sent;
-    static std::vector< std::pair<int64_t, size_t> > retransmit;
+    static std::vector< std::pair<int64_t, size_t> > retransmit; //pair<toId, transmitCount>
 
     static Com::Ack Ack(int64_t sender, int64_t receiver, uint64_t seqNo, uint8_t sendMethod)
     {
@@ -1063,10 +1098,8 @@ private:
         {
             boost::mutex::scoped_lock lock(mutex);
 
-            if (Com::IsCommunicationDataType(val->header.commonHeader.dataType))
-            {
+            if (Com::WelcomeDataType==val->header.commonHeader.dataType)
                 return;
-            }
 
             auto expectedAckNow = (val->header.sendMethod==Com::SingleReceiverSendMethod) ||
                     val->transmitCount>1 ||

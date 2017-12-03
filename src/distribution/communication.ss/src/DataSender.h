@@ -100,6 +100,7 @@ namespace Com
             ,m_lastSentMultiReceiverSeqNo(0)
             ,m_lastAckRequestMultiReceiver(0)
             ,m_resendTimer(ioService)
+            ,m_pingTimer(ioService)
             ,m_retransmitNotification()
             ,m_queueNotFullNotification()
             ,m_queueNotFullNotificationLimit(Parameters::SendQueueSize/2)
@@ -131,6 +132,13 @@ namespace Com
                 if (m_deliveryGuarantee==Acked)
                 {
                     RetransmitUnackedMessages();
+                    if (WriterType::IsMulticastEnabled())
+                    {
+                        //if multicast nodeType we have to assure some acked traffic to prevent nodes from missunderstanding received heartbeats
+                        //from nodes that have excluded us. By sending low traffic acked pings, we detect nodes that does not respond to us.
+                        m_lastSendTime=boost::chrono::steady_clock::now();
+                        Ping();
+                    }
                 }
             });
         }
@@ -144,6 +152,10 @@ namespace Com
                 if (m_deliveryGuarantee==Acked)
                 {
                     m_resendTimer.cancel();
+                    if (WriterType::IsMulticastEnabled())
+                    {
+                        m_pingTimer.cancel();
+                    }
                 }
             });
         }
@@ -151,6 +163,11 @@ namespace Com
         //Add message to send queue. Message will be retranmitted unitl all receivers have acked. Returns false if queue is full.
         bool AddToSendQueue(int64_t toId, const boost::shared_ptr<const char[]>& msg, size_t size, int64_t dataTypeIdentifier)
         {
+            if (size==0 || !msg)
+            {
+                return true; //we dont sent empty messages
+            }
+
             //calculate number of fragments
             size_t numberOfFullFragments=size/m_fragmentDataSize;
             size_t restSize=size%m_fragmentDataSize;
@@ -161,7 +178,6 @@ namespace Com
                 //there is room for at least one fragment within the queue limit.
                 //then we step up the total amount, even if it will exceed the queue limit. Send queue will handle this case.
                 m_sendQueueSize+=static_cast<unsigned int>(totalNumberOfFragments-1); //note that one already been added
-
             }
             else //not room for one more fragment
             {
@@ -374,6 +390,8 @@ namespace Com
         uint64_t m_lastSentMultiReceiverSeqNo; // used both for multicast and unicast as long as the message is a multireceiver message. Actually it is lastUsedSeq since message may not have been sent yet.
         uint64_t m_lastAckRequestMultiReceiver; //the last seq we have requested ack
         boost::asio::steady_timer m_resendTimer;
+        boost::asio::steady_timer m_pingTimer;
+        boost::chrono::steady_clock::time_point m_lastSendTime; //timestamp of last time something was sent
         RetransmitTo m_retransmitNotification;
         std::vector<QueueNotFull> m_queueNotFullNotification;
         size_t m_queueNotFullNotificationLimit; //below number of used slots. NOT percent.
@@ -413,7 +431,9 @@ namespace Com
 
         void SetRequestAck(MessageHeader& header) const
         {
-            auto requestAck = (header.sendMethod==SingleReceiverSendMethod) || (header.sequenceNumber % m_ackRequestThreshold==0);
+            auto requestAck = (header.sendMethod==SingleReceiverSendMethod) ||
+                    (header.sequenceNumber % m_ackRequestThreshold==0) ||
+                    header.commonHeader.dataType==PingDataType;
             header.ackNow = requestAck ? 1 : 0;
         }
 
@@ -497,6 +517,7 @@ namespace Com
                 if (m_deliveryGuarantee==Acked)
                 {
                     ud->sendTime=boost::chrono::steady_clock::now();
+                    m_lastSendTime=ud->sendTime;
                     m_sendQueue.step_unhandled();
                 }
                 else
@@ -640,6 +661,33 @@ namespace Com
             }
 
             ud->sendTime=boost::chrono::steady_clock::now(); //update sendTime so that we will wait for an new WaitForAckTime period before retransmit again
+            m_lastSendTime=ud->sendTime;
+        }
+
+        void Ping()
+        {
+            if (!m_running)
+            {
+                return;
+            }
+
+            //Always called from writeStrand
+            if (m_sendQueue.empty() && m_nodes.size()>0)
+            {
+                static const boost::chrono::milliseconds PingSendThreshold = boost::chrono::milliseconds(Parameters::SendPingThreshold);
+                auto durationSinceSend=boost::chrono::steady_clock::now()-m_lastSendTime;
+                if (durationSinceSend>PingSendThreshold)
+                {
+                    //add ping to the normal sendQueue
+                    lllog(8)<<m_logPrefix.c_str()<<"Add Ping to sendQueue"<<std::endl;
+                    boost::shared_ptr<char[]> ping=boost::make_shared<char[]>(1); //AddToSendQueue will throw away empty messages, add dummy content
+                    AddToSendQueue(0, ping, 1, PingDataType);
+                }
+            }
+
+            //Restart timer
+            m_pingTimer.expires_from_now(boost::chrono::milliseconds(Parameters::SendPingThreshold));
+            m_pingTimer.async_wait(m_strand.wrap([=](const boost::system::error_code& /*error*/){Ping();}));
         }
 
         void RemoveExcludedReceivers()

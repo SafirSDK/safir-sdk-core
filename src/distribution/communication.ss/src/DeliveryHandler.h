@@ -715,7 +715,7 @@ namespace Com
                 {
                     assert(rd.sequenceNumber==ch.lastInSequence+1);
                     ch.lastInSequence=rd.sequenceNumber;
-                    if (rd.fragmentNumber+1==rd.numberOfFragments)
+                    if (rd.fragmentNumber+1==rd.numberOfFragments && !IsCommunicationDataType(rd.dataType))
                     {
                         //last fragment has been received, we can deliver this message to application
                         auto fromId=ni.node.nodeId;
