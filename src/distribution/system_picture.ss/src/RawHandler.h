@@ -818,6 +818,9 @@ namespace SP
             //multicast scenarios). So we exclude the node.
             if (transmitCount >= 20)
             {
+                SEND_SYSTEM_LOG(Warning,
+                                << "Excessive retransmits to node " << id << ", excluding it!");
+
                 m_communication.ExcludeNode(id);
             }
         }
