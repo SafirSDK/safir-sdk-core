@@ -819,7 +819,7 @@ namespace SP
             if (transmitCount >= 20)
             {
                 SEND_SYSTEM_LOG(Warning,
-                                << "Excessive retransmits to node "
+                                << "Excessive retransmits (" << transmitCount << ") to node "
                                 << node.nodeInfo->name().c_str() << "(" <<  id << "), excluding it!");
 
                 m_communication.ExcludeNode(id);
