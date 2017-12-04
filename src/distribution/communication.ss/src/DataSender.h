@@ -132,7 +132,7 @@ namespace Com
                 if (m_deliveryGuarantee==Acked)
                 {
                     RetransmitUnackedMessages();
-                    if (WriterType::IsMulticastEnabled())
+                    if (IsMulticastEnabled())
                     {
                         //if multicast nodeType we have to assure some acked traffic to prevent nodes from missunderstanding received heartbeats
                         //from nodes that have excluded us. By sending low traffic acked pings, we detect nodes that does not respond to us.
@@ -152,7 +152,7 @@ namespace Com
                 if (m_deliveryGuarantee==Acked)
                 {
                     m_resendTimer.cancel();
-                    if (WriterType::IsMulticastEnabled())
+                    if (IsMulticastEnabled())
                     {
                         m_pingTimer.cancel();
                     }
@@ -367,6 +367,10 @@ namespace Com
 #ifndef SAFIR_TEST
     private:
 #endif
+        //VS2010 does not allow call of WriterType::IsMulticastEnabled inside lambdas (sigh), so
+        //we make it explicitly available in this class, so we can call it without qualification.
+        using WriterType::IsMulticastEnabled;
+
         struct NodeInfo
         {
             bool systemNode;
@@ -617,7 +621,7 @@ namespace Com
 
             //Send ackRequests for MultiReceiver channel
             ud->header.sendMethod=MultiReceiverSendMethod;
-           
+
             for (auto recvId = multiReceiverSendMethod.cbegin(); recvId != multiReceiverSendMethod.cend(); ++recvId)
             {
                 auto nodeIt=m_nodes.find(*recvId);
