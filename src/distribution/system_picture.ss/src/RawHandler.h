@@ -786,7 +786,7 @@ namespace SP
         }
 
         //Must be called in strand!
-        void Retransmit(int64_t id, size_t /*transmitCount*/)
+        void Retransmit(int64_t id, size_t transmitCount)
         {
             lllog(9) << "SP: Retransmit to node with id " << id <<  std::endl;
 
@@ -811,6 +811,14 @@ namespace SP
             else
             {
                 node.nodeInfo->set_data_retransmit_count(node.nodeInfo->data_retransmit_count() + 1);
+            }
+
+            //if we have a great number of retransmits it means that either we have one-sided communication
+            //or that the other node has excluded us, but is still sending heartbeats to us (can happen in
+            //multicast scenarios). So we exclude the node.
+            if (transmitCount >= 20)
+            {
+                m_communication.ExcludeNode(id);
             }
         }
 

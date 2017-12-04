@@ -302,6 +302,7 @@ BOOST_AUTO_TEST_CASE( exclude_node_unicast )
 
     BOOST_CHECK(comm.includedNodes == correctNodes);
     BOOST_CHECK(comm.excludedNodes == correctNodes);
+    BOOST_CHECK(stopped);
 }
 
 BOOST_AUTO_TEST_CASE( exclude_node_multicast )
@@ -328,6 +329,33 @@ BOOST_AUTO_TEST_CASE( exclude_node_multicast )
     }
     BOOST_CHECK(i > 10);
     BOOST_CHECK(comm.includedNodes == correctNodes);
+    BOOST_CHECK(comm.excludedNodes == correctNodes);
+    BOOST_CHECK(stopped);
+}
+
+
+BOOST_AUTO_TEST_CASE( exclude_node_due_to_retransmit )
+{
+    comm.newNodeCb("asdf",11,10,"asdf","asdf", false);
+    comm.newNodeCb("asdf",12,10,"asdf","asdf", false);
+    comm.newNodeCb("asdf",13,10,"asdf","asdf", false);
+    comm.newNodeCb("asdf",14,10,"asdf","asdf", false);
+    comm.newNodeCb("asdf",15,10,"asdf","asdf", false);
+    comm.retransmitToCb(11,1);
+    comm.retransmitToCb(12,19);
+    comm.retransmitToCb(13,20);
+    comm.retransmitToCb(14,100);
+    comm.retransmitToCb(15,1);
+    comm.retransmitToCb(15,20);
+    rh->Stop();
+
+    std::set<int64_t> correctNodes;
+    correctNodes.insert(13);
+    correctNodes.insert(14);
+    correctNodes.insert(15);
+
+    BOOST_CHECK_NO_THROW(ioService.run());
+
     BOOST_CHECK(comm.excludedNodes == correctNodes);
 }
 
