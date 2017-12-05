@@ -807,23 +807,25 @@ namespace SP
             if (m_master)
             {
                 node.nodeInfo->set_control_retransmit_count(node.nodeInfo->control_retransmit_count() + 1);
+
+                //if we have a great number of retransmits it means that either we have one-sided communication
+                //or that the other node has excluded us, but is still sending heartbeats to us (can happen in
+                //multicast scenarios). So we exclude the node.
+                //However, during startup we can get a lot of retransmits while nodes are getting connected.
+                if ((node.nodeInfo->control_receive_count() > 0 && transmitCount >= 20) || transmitCount > 10000)
+                {
+                    SEND_SYSTEM_LOG(Warning,
+                                    << "Excessive retransmits (" << transmitCount << ") to node "
+                                    << node.nodeInfo->name().c_str() << "(" <<  id << "), excluding it!");
+
+                    m_communication.ExcludeNode(id);
+                }
             }
             else
             {
                 node.nodeInfo->set_data_retransmit_count(node.nodeInfo->data_retransmit_count() + 1);
             }
 
-            //if we have a great number of retransmits it means that either we have one-sided communication
-            //or that the other node has excluded us, but is still sending heartbeats to us (can happen in
-            //multicast scenarios). So we exclude the node.
-            if (transmitCount >= 20)
-            {
-                SEND_SYSTEM_LOG(Warning,
-                                << "Excessive retransmits (" << transmitCount << ") to node "
-                                << node.nodeInfo->name().c_str() << "(" <<  id << "), excluding it!");
-
-                m_communication.ExcludeNode(id);
-            }
         }
 
         boost::chrono::steady_clock::duration
