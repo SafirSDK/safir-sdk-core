@@ -154,19 +154,24 @@ struct Fixture
 
     static std::map<int64_t, NodeType> GetNodeTypes()
     {
+        std::vector<boost::chrono::steady_clock::duration> retryTimeouts;
+        retryTimeouts.push_back(boost::chrono::seconds(1));
+        retryTimeouts.push_back(boost::chrono::seconds(2));
+
         std::map<int64_t, NodeType> nodeTypes;
         nodeTypes.insert(std::make_pair(10, NodeType(10,
                                                      "mupp",
                                                      false,
                                                      boost::chrono::milliseconds(1),
                                                      10,
-                                                     boost::chrono::seconds(1))));
+                                                     retryTimeouts)));
+
         nodeTypes.insert(std::make_pair(20, NodeType(20,
                                                      "tupp",
                                                      true,
                                                      boost::chrono::seconds(1),
                                                      22,
-                                                     boost::chrono::seconds(1))));
+                                                     retryTimeouts)));
         return nodeTypes;
     }
 
@@ -341,17 +346,21 @@ BOOST_AUTO_TEST_CASE( exclude_node_due_to_retransmit_no_recv )
     comm.newNodeCb("asdf",13,10,"asdf","asdf", false);
     comm.newNodeCb("asdf",14,10,"asdf","asdf", false);
     comm.newNodeCb("asdf",15,10,"asdf","asdf", false);
+    comm.newNodeCb("asdf",16,10,"asdf","asdf", false);
     comm.retransmitToCb(11,1);
     comm.retransmitToCb(12,19);
     comm.retransmitToCb(13,20);
-    comm.retransmitToCb(14,100);
+    comm.retransmitToCb(14,61); //should be excluded since 1s + 60*2s > 2 minutes
     comm.retransmitToCb(15,1);
-    comm.retransmitToCb(15,20);
+    comm.retransmitToCb(16,60); //should not be excluded since 1s + 59*2s < 2 minutes
     rh->Stop();
+
+    std::set<int64_t> correctNodes;
+    correctNodes.insert(14);
 
     BOOST_CHECK_NO_THROW(ioService.run());
 
-    BOOST_CHECK(comm.excludedNodes.empty());
+    BOOST_CHECK(comm.excludedNodes == correctNodes);
 }
 
 BOOST_AUTO_TEST_CASE( exclude_node_due_to_retransmit )

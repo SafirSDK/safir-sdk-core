@@ -253,7 +253,8 @@ public:
                                              false,
                                              boost::chrono::milliseconds(1000),
                                              15,
-                                             boost::chrono::milliseconds(20))));
+                                             std::vector<boost::chrono::steady_clock::duration>
+                                               (1,boost::chrono::milliseconds(20)))));
 
         m_commNodeTypes.push_back(Safir::Dob::Internal::Com::NodeTypeDefinition
                                   (2,
@@ -273,7 +274,8 @@ public:
                                              false,
                                              boost::chrono::milliseconds(2000),
                                              8,
-                                             boost::chrono::milliseconds(50))));
+                                             std::vector<boost::chrono::steady_clock::duration>
+                                               (1,boost::chrono::milliseconds(50)))));
     }
 
     void Start()

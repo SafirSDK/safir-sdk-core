@@ -103,10 +103,13 @@ BOOST_AUTO_TEST_CASE( send_ten )
     Communication communication;
     boost::asio::io_service ioService;
 
+    std::vector<boost::chrono::steady_clock::duration> retryTimeouts;
+    retryTimeouts.push_back(boost::chrono::seconds(1));
+    retryTimeouts.push_back(boost::chrono::seconds(2));
 
     std::map<int64_t, NodeType> nodeTypes;
-    nodeTypes.insert(std::make_pair(10, NodeType(10,"mupp",false,boost::chrono::seconds(1),10,boost::chrono::seconds(1))));
-    nodeTypes.insert(std::make_pair(20, NodeType(20,"tupp",true,boost::chrono::seconds(1),22,boost::chrono::seconds(1))));
+    nodeTypes.insert(std::make_pair(10, NodeType(10,"mupp",false,boost::chrono::seconds(1),10,retryTimeouts)));
+    nodeTypes.insert(std::make_pair(20, NodeType(20,"tupp",true,boost::chrono::seconds(1),22,retryTimeouts)));
 
     RawPublisherRemoteBasic<::Handler, ::Communication> publisher
         (ioService,communication,nodeTypes,"foo",h,boost::chrono::milliseconds(10));
@@ -131,10 +134,13 @@ BOOST_AUTO_TEST_CASE( callbacks )
     Communication communication;
     boost::asio::io_service ioService;
 
+    std::vector<boost::chrono::steady_clock::duration> retryTimeouts;
+    retryTimeouts.push_back(boost::chrono::seconds(1));
+    retryTimeouts.push_back(boost::chrono::seconds(2));
 
     std::map<int64_t, NodeType> nodeTypes;
-    nodeTypes.insert(std::make_pair(10, NodeType(10,"mupp",false,boost::chrono::seconds(1),10,boost::chrono::seconds(1))));
-    nodeTypes.insert(std::make_pair(20, NodeType(20,"tupp",true,boost::chrono::seconds(1),22,boost::chrono::seconds(1))));
+    nodeTypes.insert(std::make_pair(10, NodeType(10,"mupp",false,boost::chrono::seconds(1),10,retryTimeouts)));
+    nodeTypes.insert(std::make_pair(20, NodeType(20,"tupp",true,boost::chrono::seconds(1),22,retryTimeouts)));
 
     RawPublisherRemoteBasic<::Handler, ::Communication> publisher
         (ioService,communication,nodeTypes,"foo",h,boost::chrono::hours(10));

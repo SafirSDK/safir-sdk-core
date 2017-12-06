@@ -104,13 +104,19 @@ namespace Internal
                                          nt->ackRequestThreshold,
                                          nt->retryTimeout));
 
+                std::vector<boost::chrono::steady_clock::duration> retryTimeouts;
+                for (auto rt = nt->retryTimeout.cbegin(); rt != nt->retryTimeout.cend(); ++rt)
+                {
+                    retryTimeouts.push_back(boost::chrono::milliseconds(*rt));
+                }
+
                 spNodeTypes.insert(std::make_pair(nt->id,
                                                   SP::NodeType(nt->id,
                                                                nt->name,
                                                                false,
                                                                boost::chrono::milliseconds(nt->heartbeatInterval),
                                                                nt->maxLostHeartbeats,
-                                                               boost::chrono::milliseconds(nt->retryTimeout.front()))));
+                                                               retryTimeouts)));
             }
 
             m_communication.reset(new CommunicationT(Com::dataModeTag,

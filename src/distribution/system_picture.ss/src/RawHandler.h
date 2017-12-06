@@ -808,17 +808,43 @@ namespace SP
             {
                 node.nodeInfo->set_control_retransmit_count(node.nodeInfo->control_retransmit_count() + 1);
 
-                //if we have a great number of retransmits it means that either we have one-sided communication
-                //or that the other node has excluded us, but is still sending heartbeats to us (can happen in
-                //multicast scenarios). So we exclude the node.
-                //However, during startup we can get a lot of retransmits while nodes are getting connected.
-                if ((node.nodeInfo->control_receive_count() > 0 && transmitCount >= 20) || transmitCount > 10000)
+                if (transmitCount > 0) //we only really need to do this if it is a retransmit
                 {
-                    SEND_SYSTEM_LOG(Warning,
-                                    << "Excessive retransmits (" << transmitCount << ") to node "
-                                    << node.nodeInfo->name().c_str() << "(" <<  id << "), excluding it!");
+                    //if we have a great number of retransmits it means that either we have one-sided communication
+                    //or that the other node has excluded us, but is still sending heartbeats to us (can happen in
+                    //multicast scenarios). So we exclude the node.
+                    //However, during startup we can get a lot of retransmits while nodes are getting connected.
+                    if (node.nodeInfo->control_receive_count() > 0)
+                    {
+                        if (transmitCount >= 20)
+                        {
+                            SEND_SYSTEM_LOG(Warning,
+                                            << "Excessive retransmits (" << transmitCount << ") to node "
+                                            << node.nodeInfo->name().c_str() << "(" <<  id << "), excluding it!");
 
-                    m_communication.ExcludeNode(id);
+                            m_communication.ExcludeNode(id);
+                        }
+                    }
+                    else
+                    {
+                        //so here (when we have not received anything from the other node) we want to
+                        //wait for two minutes before excluding the node.
+                        auto nodeType = m_nodeTypes.find(node.nodeInfo->node_type_id());
+
+                        if (nodeType == m_nodeTypes.end())
+                        {
+                            throw std::logic_error("Failed to find node type in Retransmit");
+                        }
+
+                        if (transmitCount >= nodeType->second.twoMinutesOfRetries)
+                        {
+                            SEND_SYSTEM_LOG(Warning,
+                                            << "Two minutes of retransmits (" << transmitCount << ") to node "
+                                            << node.nodeInfo->name().c_str() << "(" <<  id << "), excluding it!");
+
+                            m_communication.ExcludeNode(id);
+                        }
+                    }
                 }
             }
             else

@@ -27,6 +27,7 @@
 #include <utility>
 #include <cstdint>
 #include <string>
+#include <vector>
 #include <boost/chrono.hpp>
 
 #ifdef system_picture_EXPORTS
@@ -52,22 +53,53 @@ namespace SP
                  const bool isLight_,
                  const boost::chrono::steady_clock::duration& heartbeatInterval_,
                  const int maxLostHeartbeats_,
-                 const boost::chrono::steady_clock::duration& retryTimeout_)
+                 const std::vector<boost::chrono::steady_clock::duration>& retryTimeout_)
             : id(id_)
             , name(std::move(name_))
             , isLight(isLight_)
             , heartbeatInterval(heartbeatInterval_)
             , maxLostHeartbeats(maxLostHeartbeats_)
             , retryTimeout(retryTimeout_)
-            , deadTimeout(maxLostHeartbeats_ * (heartbeatInterval_ + boost::chrono::milliseconds(50))){}
+            , deadTimeout(maxLostHeartbeats_ * (heartbeatInterval_ + boost::chrono::milliseconds(50)))
+            , twoMinutesOfRetries(TwoMinutes(retryTimeout_)) {}
 
         const int64_t id;                                                //node type id
         const std::string name;                                          //readable name
         const bool isLight;                                              //is the node a light node
         const boost::chrono::steady_clock::duration heartbeatInterval;   //time between heartbeats
         const int maxLostHeartbeats;                                     //number of heartbeats that can be lost before node is considered dead
-        const boost::chrono::steady_clock::duration retryTimeout;        //time to wait for replies.
+        const std::vector<boost::chrono::steady_clock::duration> retryTimeout;        //time to wait for replies.
         const boost::chrono::steady_clock::duration deadTimeout;         //heartbeatInterval * maxLostHeartbeats + a little extra
+        const size_t twoMinutesOfRetries;                                //Number of retries to make up two minutes
+
+    private:
+        static size_t TwoMinutes(const std::vector<boost::chrono::steady_clock::duration>& retryTimeouts)
+        {
+            size_t retries = 0;
+            boost::chrono::steady_clock::duration twoMinutes = boost::chrono::minutes(2);
+            for (auto rt = retryTimeouts.cbegin(); rt != retryTimeouts.cend(); ++rt)
+            {
+                twoMinutes -= *rt;
+                ++retries;
+                if (twoMinutes < boost::chrono::seconds(0))
+                {
+                    return retries;
+                }
+            }
+
+            if (retryTimeouts.back() == boost::chrono::seconds(0))
+            {
+                throw std::logic_error("Invalid timeout");
+            }
+
+            while(twoMinutes >= boost::chrono::seconds(0))
+            {
+                twoMinutes -= retryTimeouts.back();
+                ++retries;
+            }
+
+            return retries;
+        }
     };
 }
 }

@@ -206,14 +206,14 @@ namespace SP
         static boost::chrono::steady_clock::duration
         CalculateElectionTimeout(const std::map<int64_t, NodeType>& nodeTypes)
         {
-            //use max of non-light node types retryTimeout * maxLostHeartbeats
+            //use max of non-light node types retryTimeout[0] * maxLostHeartbeats
             boost::chrono::steady_clock::duration max = boost::chrono::milliseconds(100);
 
             for (auto nt = nodeTypes.cbegin(); nt != nodeTypes.cend(); ++nt)
             {
                 if (!nt->second.isLight)
                 {
-                    max = std::max(max,nt->second.retryTimeout * nt->second.maxLostHeartbeats);
+                    max = std::max(max,nt->second.retryTimeout.at(0) * nt->second.maxLostHeartbeats);
                 }
             }
             return max;
