@@ -818,9 +818,8 @@ namespace SP
                     {
                         if (transmitCount >= 20)
                         {
-                            SEND_SYSTEM_LOG(Warning,
-                                            << "Excessive retransmits (" << transmitCount << ") to node "
-                                            << node.nodeInfo->name().c_str() << "(" <<  id << "), excluding it!");
+                            lllog(1) << "Excessive retransmits (" << transmitCount << ") to node "
+                                     << node.nodeInfo->name().c_str() << "(" <<  id << "), excluding it!" << std::endl;
 
                             m_communication.ExcludeNode(id);
                         }
@@ -838,9 +837,8 @@ namespace SP
 
                         if (transmitCount >= nodeType->second.twoMinutesOfRetries)
                         {
-                            SEND_SYSTEM_LOG(Warning,
-                                            << "Two minutes of retransmits (" << transmitCount << ") to node "
-                                            << node.nodeInfo->name().c_str() << "(" <<  id << "), excluding it!");
+                            lllog(1) << "Two minutes of retransmits (" << transmitCount << ") to node "
+                                     << node.nodeInfo->name().c_str() << "(" <<  id << "), excluding it!" << std::endl;
 
                             m_communication.ExcludeNode(id);
                         }

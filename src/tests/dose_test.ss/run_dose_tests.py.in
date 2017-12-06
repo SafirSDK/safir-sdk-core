@@ -462,7 +462,7 @@ class Runner:
             self.__kill("safir_control", self.safir_control_1,120) #We give safir_control some extra time to stop
 
         #Processes have up to 20 seconds to exit from the stop order
-        future = time.time() + 20 #ten seconds
+        future = time.time() + 20
         for name, (proc,output) in self.procs.items():
             while time.time() < future:
                 if proc.poll() is not None:
