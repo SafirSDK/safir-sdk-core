@@ -84,6 +84,13 @@ namespace Com
                                                            [=](int64_t, int64_t, const char* data, size_t) {delete[] data;})
                                               )
                                );
+
+            m_receivers.insert(std::make_pair(PingDataType,
+                                              DataReceiver([=](size_t size){return new char[size];},
+                                                           [=](const char* data) {delete[] data;},
+                                                           [=](int64_t, int64_t, const char* data, size_t) {delete[] data;})
+                                              )
+                               );
         }
 
         void Start()
@@ -715,7 +722,7 @@ namespace Com
                 {
                     assert(rd.sequenceNumber==ch.lastInSequence+1);
                     ch.lastInSequence=rd.sequenceNumber;
-                    if (rd.fragmentNumber+1==rd.numberOfFragments && !IsCommunicationDataType(rd.dataType))
+                    if (rd.fragmentNumber+1==rd.numberOfFragments)
                     {
                         //last fragment has been received, we can deliver this message to application
                         auto fromId=ni.node.nodeId;
