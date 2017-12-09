@@ -41,6 +41,10 @@
       <RestartSubscription>false</RestartSubscription>
     </DoseTest.Action>
     <DoseTest.Action index="3">
+      <ActionKind>Sleep</ActionKind>
+      <SleepDuration>1</SleepDuration>
+    </DoseTest.Action>
+    <DoseTest.Action index="4">
       <ActionKind>UnsubscribeRegistration</ActionKind>
       <Partner>0</Partner>
       <Consumer>0</Consumer>
