@@ -808,7 +808,9 @@ namespace SP
             {
                 node.nodeInfo->set_control_retransmit_count(node.nodeInfo->control_retransmit_count() + 1);
 
-                if (transmitCount > 0) //we only really need to do this if it is a retransmit
+                //we want to do this seldom, since there is a bit of work in here
+                //so we only do these checks on the second retransmit...
+                if (transmitCount > 1)
                 {
                     //if we have a great number of retransmits it means that either we have one-sided communication
                     //or that the other node has excluded us, but is still sending heartbeats to us (can happen in
