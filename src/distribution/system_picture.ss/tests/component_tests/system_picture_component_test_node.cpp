@@ -220,7 +220,15 @@ private:
 };
 
 
-
+std::vector<boost::chrono::steady_clock::duration> ToChronoDurations(const std::vector<int>& ms)
+{
+    std::vector<boost::chrono::steady_clock::duration> ch;
+    for(auto it = ms.cbegin(); it != ms.cend(); ++it)
+    {
+        ch.push_back(boost::chrono::milliseconds(*it));
+    }
+    return ch;
+}
 
 class Common
 {
@@ -232,8 +240,10 @@ public:
     {
         std::vector<int> retryTimeout20;
         retryTimeout20.push_back(20);
+        retryTimeout20.push_back(200);
         std::vector<int> retryTimeout50;
         retryTimeout50.push_back(50);
+        retryTimeout50.push_back(250);
 
         m_commNodeTypes.push_back(Safir::Dob::Internal::Com::NodeTypeDefinition
                                   (1,
@@ -253,8 +263,7 @@ public:
                                              false,
                                              boost::chrono::milliseconds(1000),
                                              15,
-                                             std::vector<boost::chrono::steady_clock::duration>
-                                               (1,boost::chrono::milliseconds(20)))));
+                                             ToChronoDurations(retryTimeout20))));
 
         m_commNodeTypes.push_back(Safir::Dob::Internal::Com::NodeTypeDefinition
                                   (2,
@@ -274,8 +283,7 @@ public:
                                              false,
                                              boost::chrono::milliseconds(2000),
                                              8,
-                                             std::vector<boost::chrono::steady_clock::duration>
-                                               (1,boost::chrono::milliseconds(50)))));
+                                             ToChronoDurations(retryTimeout20))));
     }
 
     void Start()
