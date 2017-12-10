@@ -820,10 +820,11 @@ namespace SP
                     {
                         if (transmitCount >= 20)
                         {
-                            lllog(1) << "Excessive retransmits (" << transmitCount << ") to node "
-                                     << node.nodeInfo->name().c_str() << "(" <<  id
-                                     << ") from which i have received "
-                                     << node.nodeInfo->control_receive_count() << "packets, excluding it!" << std::endl;
+                            SEND_SYSTEM_LOG(Warning,
+                                            << "Excessive retransmits (" << transmitCount << ") to node "
+                                            << node.nodeInfo->name().c_str() << "(" <<  id
+                                            << ") from which i have received "
+                                            << node.nodeInfo->control_receive_count() << "packets, excluding it!");;
 
                             m_communication.ExcludeNode(id);
                         }
@@ -841,8 +842,9 @@ namespace SP
 
                         if (transmitCount >= nodeType->second.twoMinutesOfRetries)
                         {
-                            lllog(1) << "Two minutes of retransmits (" << transmitCount << ") to node "
-                                     << node.nodeInfo->name().c_str() << "(" <<  id << "), excluding it!" << std::endl;
+                            SEND_SYSTEM_LOG(Warning,
+                                            << "Two minutes of retransmits (" << transmitCount << ") to node "
+                                            << node.nodeInfo->name().c_str() << "(" <<  id << "), excluding it!");
 
                             m_communication.ExcludeNode(id);
                         }
