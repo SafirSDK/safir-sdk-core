@@ -821,7 +821,9 @@ namespace SP
                         if (transmitCount >= 20)
                         {
                             lllog(1) << "Excessive retransmits (" << transmitCount << ") to node "
-                                     << node.nodeInfo->name().c_str() << "(" <<  id << "), excluding it!" << std::endl;
+                                     << node.nodeInfo->name().c_str() << "(" <<  id
+                                     << ") from which i have received "
+                                     << node.nodeInfo->control_receive_count() << "packets, excluding it!" << std::endl;
 
                             m_communication.ExcludeNode(id);
                         }
