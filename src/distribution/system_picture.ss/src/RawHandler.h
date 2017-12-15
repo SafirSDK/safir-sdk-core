@@ -810,12 +810,13 @@ namespace SP
 
                 //we want to do this seldom, since there is a bit of work in here
                 //so we only do these checks on the second retransmit...
-                if (transmitCount > 1)
+                if (transmitCount > 1 && node.multicast)
                 {
-                    //if we have a great number of retransmits it means that either we have one-sided communication
-                    //or that the other node has excluded us, but is still sending heartbeats to us (can happen in
-                    //multicast scenarios). So we exclude the node.
-                    //However, during startup we can get a lot of retransmits while nodes are getting connected.
+                    //if we have a great number of retransmits it means that either we
+                    //have one-sided communication or that the other node has excluded
+                    //us, but is still sending heartbeats to us (can happen in multicast
+                    //scenarios). So we exclude the node.  However, during startup we can
+                    //get a lot of retransmits while nodes are getting connected.
                     if (node.nodeInfo->control_receive_count() > 0)
                     {
                         if (transmitCount >= 20)
@@ -824,7 +825,7 @@ namespace SP
                                             << "Excessive retransmits (" << transmitCount << ") to node "
                                             << node.nodeInfo->name().c_str() << "(" <<  id
                                             << ") from which i have received "
-                                            << node.nodeInfo->control_receive_count() << "packets, excluding it!");;
+                                            << node.nodeInfo->control_receive_count() << " packets, excluding it!");;
 
                             m_communication.ExcludeNode(id);
                         }
