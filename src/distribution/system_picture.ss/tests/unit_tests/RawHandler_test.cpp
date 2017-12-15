@@ -341,12 +341,12 @@ BOOST_AUTO_TEST_CASE( exclude_node_multicast )
 
 BOOST_AUTO_TEST_CASE( exclude_node_due_to_retransmit_no_recv )
 {
-    comm.newNodeCb("asdf",11,10,"asdf","asdf", false);
-    comm.newNodeCb("asdf",12,10,"asdf","asdf", false);
-    comm.newNodeCb("asdf",13,10,"asdf","asdf", false);
-    comm.newNodeCb("asdf",14,10,"asdf","asdf", false);
-    comm.newNodeCb("asdf",15,10,"asdf","asdf", false);
-    comm.newNodeCb("asdf",16,10,"asdf","asdf", false);
+    comm.newNodeCb("asdf",11,10,"asdf","asdf", true);
+    comm.newNodeCb("asdf",12,10,"asdf","asdf", true);
+    comm.newNodeCb("asdf",13,10,"asdf","asdf", true);
+    comm.newNodeCb("asdf",14,10,"asdf","asdf", true);
+    comm.newNodeCb("asdf",15,10,"asdf","asdf", true);
+    comm.newNodeCb("asdf",16,10,"asdf","asdf", true);
     comm.retransmitToCb(11,1);
     comm.retransmitToCb(12,19);
     comm.retransmitToCb(13,20);
@@ -363,13 +363,34 @@ BOOST_AUTO_TEST_CASE( exclude_node_due_to_retransmit_no_recv )
     BOOST_CHECK(comm.excludedNodes == correctNodes);
 }
 
-BOOST_AUTO_TEST_CASE( exclude_node_due_to_retransmit )
+BOOST_AUTO_TEST_CASE( dont_exclude_node_due_to_retransmit_no_recv_unicast )
 {
     comm.newNodeCb("asdf",11,10,"asdf","asdf", false);
     comm.newNodeCb("asdf",12,10,"asdf","asdf", false);
     comm.newNodeCb("asdf",13,10,"asdf","asdf", false);
     comm.newNodeCb("asdf",14,10,"asdf","asdf", false);
     comm.newNodeCb("asdf",15,10,"asdf","asdf", false);
+    comm.newNodeCb("asdf",16,10,"asdf","asdf", false);
+    comm.retransmitToCb(11,1);
+    comm.retransmitToCb(12,19);
+    comm.retransmitToCb(13,20);
+    comm.retransmitToCb(14,61); //should be excluded since 1s + 60*2s > 2 minutes
+    comm.retransmitToCb(15,1);
+    comm.retransmitToCb(16,60); //should not be excluded since 1s + 59*2s < 2 minutes
+    rh->Stop();
+
+    BOOST_CHECK_NO_THROW(ioService.run());
+
+    BOOST_CHECK(comm.excludedNodes.empty());
+}
+
+BOOST_AUTO_TEST_CASE( exclude_node_due_to_retransmit )
+{
+    comm.newNodeCb("asdf",11,10,"asdf","asdf", true);
+    comm.newNodeCb("asdf",12,10,"asdf","asdf", true);
+    comm.newNodeCb("asdf",13,10,"asdf","asdf", true);
+    comm.newNodeCb("asdf",14,10,"asdf","asdf", true);
+    comm.newNodeCb("asdf",15,10,"asdf","asdf", true);
     comm.gotReceiveFromCb(11,false,false);
     comm.gotReceiveFromCb(12,false,false);
     comm.gotReceiveFromCb(13,false,false);
@@ -392,6 +413,33 @@ BOOST_AUTO_TEST_CASE( exclude_node_due_to_retransmit )
 
     BOOST_CHECK(comm.excludedNodes == correctNodes);
 }
+
+BOOST_AUTO_TEST_CASE( dont_exclude_node_due_to_retransmit_unicast )
+{
+    comm.newNodeCb("asdf",11,10,"asdf","asdf", false);
+    comm.newNodeCb("asdf",12,10,"asdf","asdf", false);
+    comm.newNodeCb("asdf",13,10,"asdf","asdf", false);
+    comm.newNodeCb("asdf",14,10,"asdf","asdf", false);
+    comm.newNodeCb("asdf",15,10,"asdf","asdf", false);
+    comm.gotReceiveFromCb(11,false,false);
+    comm.gotReceiveFromCb(12,false,false);
+    comm.gotReceiveFromCb(13,false,false);
+    comm.gotReceiveFromCb(14,false,false);
+    comm.gotReceiveFromCb(15,false,false);
+    comm.retransmitToCb(11,1);
+    comm.retransmitToCb(12,19);
+    comm.retransmitToCb(13,20);
+    comm.retransmitToCb(14,100);
+    comm.retransmitToCb(15,1);
+    comm.retransmitToCb(15,20);
+    rh->Stop();
+
+    BOOST_CHECK_NO_THROW(ioService.run());
+
+    BOOST_CHECK(comm.excludedNodes.empty());
+}
+
+
 
 void CheckStatisticsCommon(const RawStatistics& statistics, int externalNodes)
 {
