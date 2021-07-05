@@ -102,20 +102,13 @@ function(ADD_CSHARP_ASSEMBLY TARGET_NAME)
 
     foreach(_cs_ref ${_cs_REFERENCES})
 
-      if (NOT CMAKE_VERSION VERSION_LESS "3.0.0")
-        #This disables a warning about getting properties for targets that dont exist
-        #which is exactly what we do below.
-        cmake_policy(SET CMP0045 OLD)
-      endif()
-
-      get_target_property(_cs_ref_file ${_cs_ref} ASSEMBLY_FILE)
-      if (_cs_ref_file)
+      if (TARGET ${_cs_TARGET})
+        get_target_property(_cs_ref_file ${_cs_ref} ASSEMBLY_FILE)
         set(references "${references} -reference:\"${_cs_ref_file}\"")
         set(_cs_target_dependencies ${_cs_target_dependencies} ${_cs_ref})
       else()
         set(references "${references} -reference:\"${_cs_ref}.dll\"")
       endif()
-      #set(ref_depends ${ref_depends} ${_cs_ref_file})
     endforeach()
 
     if (_cs_LIBRARY_PATHS OR CSHARP_LIBRARY_PATHS)
@@ -232,19 +225,12 @@ function(INSTALL_CSHARP_ASSEMBLY)
       message(FATAL_ERROR "Invalid COMPONENT '${_cs_COMPONENT}'")
     endif()
 
-    if (NOT CMAKE_VERSION VERSION_LESS "3.0.0")
-      #This disables a warning about getting properties for targets that dont exist
-      #which is exactly what we do below.
-      cmake_policy(SET CMP0045 OLD)
-    endif()
-
-    get_property(_cs_ASSEMBLY_FILE TARGET ${_cs_TARGET} PROPERTY ASSEMBLY_FILE)
-
-    if (NOT _cs_ASSEMBLY_FILE)
+    if (NOT TARGET ${_cs_TARGET})
       message(FATAL_ERROR "The target ${_TARGET_NAME} is not known in this scope.")
       return()
     endif()
 
+    get_property(_cs_ASSEMBLY_FILE TARGET ${_cs_TARGET} PROPERTY ASSEMBLY_FILE)
     get_property(_cs_TARGET_KIND TARGET ${_cs_TARGET} PROPERTY TARGET_KIND)
     get_property(_cs_DOC_FILE TARGET ${_cs_TARGET} PROPERTY DOC_FILE)
     get_property(_cs_DEBUG_INFO_FILE TARGET ${_cs_TARGET} PROPERTY DEBUG_INFO_FILE)
