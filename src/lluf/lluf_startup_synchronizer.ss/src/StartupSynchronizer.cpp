@@ -23,11 +23,7 @@
 ******************************************************************************/
 #include <Safir/Utilities/StartupSynchronizer.h>
 #include <Safir/Utilities/Internal/ConfigReader.h>
-#include <boost/thread/once.hpp>
-#include <boost/thread/mutex.hpp>
-#include <boost/thread/locks.hpp>
-#include <boost/bind.hpp>
-#include <boost/weak_ptr.hpp>
+#include <thread>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/convenience.hpp>
 #include <boost/filesystem/fstream.hpp>
@@ -142,7 +138,7 @@ namespace Utilities
 
         void Start(Synchronized* const synchronized)
         {
-            boost::lock_guard<boost::mutex> lck(m_threadLock);
+            std::lock_guard<std::mutex> lck(m_threadLock);
 
             m_synchronized.insert(synchronized);
 
@@ -219,7 +215,7 @@ namespace Utilities
 
         void Remove(Synchronized* const synchronized)
         {
-            boost::lock_guard<boost::mutex> lck(m_threadLock);
+            std::lock_guard<std::mutex> lck(m_threadLock);
             std::multiset<Synchronized*>::iterator findIt = m_synchronized.find(synchronized);
             if (findIt == m_synchronized.end())
             {
@@ -283,7 +279,7 @@ namespace Utilities
 
         //The idea is to take these locks in a specific fashion, and to never
         //release them. They get released when the process exits.
-        boost::mutex m_threadLock;
+        std::mutex m_threadLock;
         boost::interprocess::file_lock m_firstLock;
         boost::interprocess::file_lock m_secondLock;
 
@@ -311,17 +307,17 @@ namespace Utilities
     public:
         static ImplKeeper& Instance()
         {
-            boost::call_once(SingletonHelper::m_onceFlag,boost::bind(SingletonHelper::Instance));
+            std::call_once(SingletonHelper::m_onceFlag,[]{SingletonHelper::Instance();});
             return SingletonHelper::Instance();
         }
 
-        const boost::shared_ptr<StartupSynchronizerImpl> Get(const std::string& uniqueName)
+        const std::shared_ptr<StartupSynchronizerImpl> Get(const std::string& uniqueName)
         {
-            boost::lock_guard<boost::mutex> lck(m_lock);
+            std::lock_guard<std::mutex> lck(m_lock);
             Table::iterator findIt = m_table.find(uniqueName);
             if (findIt != m_table.end())
             {
-                boost::shared_ptr<StartupSynchronizerImpl> impl = findIt->second.lock();
+                std::shared_ptr<StartupSynchronizerImpl> impl = findIt->second.lock();
                 if (impl != NULL)
                 {
                     return impl;
@@ -333,9 +329,9 @@ namespace Utilities
             }
 
             //Either not found or had already been deleted. Create a new one
-            boost::shared_ptr<StartupSynchronizerImpl> newImpl(new StartupSynchronizerImpl(uniqueName),
-                                                               boost::bind(&ImplKeeper::Deleter,this,_1));
-            m_table.insert(std::make_pair(uniqueName,boost::weak_ptr<StartupSynchronizerImpl>(newImpl)));
+            std::shared_ptr<StartupSynchronizerImpl> newImpl(new StartupSynchronizerImpl(uniqueName),
+                                                             [this](StartupSynchronizerImpl* impl){Deleter(impl);});
+            m_table.insert(std::make_pair(uniqueName,std::weak_ptr<StartupSynchronizerImpl>(newImpl)));
             return newImpl;
         }
 
@@ -354,7 +350,7 @@ namespace Utilities
 
         void Deleter(StartupSynchronizerImpl* impl)
         {
-            boost::lock_guard<boost::mutex> lck(m_lock);
+            std::lock_guard<std::mutex> lck(m_lock);
             Table::iterator findIt = m_table.find(impl->Name());
 
             if (findIt == m_table.end())
@@ -367,9 +363,9 @@ namespace Utilities
         }
 
 
-        boost::mutex m_lock;
+        std::mutex m_lock;
 
-        typedef std::map<std::string,boost::weak_ptr<StartupSynchronizerImpl> > Table;
+        typedef std::map<std::string,std::weak_ptr<StartupSynchronizerImpl> > Table;
         Table m_table;
 
 
@@ -390,13 +386,13 @@ namespace Utilities
                 static ImplKeeper instance;
                 return instance;
             }
-            static boost::once_flag m_onceFlag;
+            static std::once_flag m_onceFlag;
         };
 
     };
 
     //mandatory static initialization
-    boost::once_flag ImplKeeper::SingletonHelper::m_onceFlag = BOOST_ONCE_INIT;
+    std::once_flag ImplKeeper::SingletonHelper::m_onceFlag;
 
 
 

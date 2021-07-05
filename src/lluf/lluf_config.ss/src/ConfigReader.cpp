@@ -99,7 +99,7 @@ namespace Internal
 {
 
     ConfigReader::ConfigReader()
-        : m_impl(new ConfigReaderImpl())
+        : m_impl(std::make_shared<ConfigReaderImpl>())
     {
 #ifdef LLUF_CONFIG_READER_USE_WINDOWS
         typedef WindowsPathFinder PathFinder;

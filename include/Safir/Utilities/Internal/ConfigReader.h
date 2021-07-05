@@ -33,8 +33,8 @@
 #endif
 #define LLUF_CONFIG_LOCAL SAFIR_HELPER_DLL_LOCAL
 
-#include <boost/shared_ptr.hpp>
 #include <boost/property_tree/ptree.hpp>
+#include <memory>
 #include <vector>
 #include <set>
 
@@ -82,7 +82,7 @@ namespace Internal
 #pragma warning (disable: 4251)
 #endif
 
-        boost::shared_ptr<ConfigReaderImpl> m_impl;
+        std::shared_ptr<ConfigReaderImpl> m_impl;
 
 #ifdef _MSC_VER
 #pragma warning (pop)

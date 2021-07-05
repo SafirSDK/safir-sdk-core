@@ -36,9 +36,7 @@
 #endif
 #define LLUF_STARTUP_SYNCHRONIZER_LOCAL SAFIR_HELPER_DLL_LOCAL
 
-#include <boost/noncopyable.hpp>
-#include <boost/shared_ptr.hpp>
-
+#include <memory>
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -54,7 +52,7 @@ namespace Utilities
     class StartupSynchronizerImpl;
 
 
-    /** 
+    /**
      * Interface for a synchronized object.
      * Note that NONE of these callbacks are exception safe! If you let an
      * exception propagate through the callback anything could happen!
@@ -64,13 +62,13 @@ namespace Utilities
     public:
         virtual ~Synchronized() {}
 
-        /** 
+        /**
          * Guarantees are that only one call to Create in all processes will be made.
-         * Even the process that gets a call to Create will get a call to Use after 
+         * Even the process that gets a call to Create will get a call to Use after
          * Create is finished.
          * Use this callback to create the shared resource.
          *
-         * Note that this callback must not assume that a previous instance has 
+         * Note that this callback must not assume that a previous instance has
          * been able to call Destroy (see below), but may have to perform cleanup
          * before creating the shared resource.
          */
@@ -101,14 +99,13 @@ namespace Utilities
      * One and only one call to Start will generate a Create() callback.
      * All instances (including the Creator) will get a Use() callback when the create
      * has completed.
-     * The last instance of StartupSynchronizer to be destroyed will generate a 
+     * The last instance of StartupSynchronizer to be destroyed will generate a
      * Destroy callback.
      *
      * Note that multiple threads within a process may call these functions simultaneously
      * on *different* instances with different arguments to no ill effect.
      */
-    class LLUF_STARTUP_SYNCHRONIZER_API StartupSynchronizer:
-        private boost::noncopyable
+    class LLUF_STARTUP_SYNCHRONIZER_API StartupSynchronizer
     {
     public:
         /**
@@ -140,17 +137,20 @@ namespace Utilities
 
     private:
 
+    StartupSynchronizer(StartupSynchronizer&) = delete;
+    StartupSynchronizer& operator=(const StartupSynchronizer&) = delete;
+    
 #ifdef _MSC_VER
 #pragma warning (push)
 #pragma warning (disable: 4251)
 #endif
 
-        boost::shared_ptr<StartupSynchronizerImpl> m_impl;
+        std::shared_ptr<StartupSynchronizerImpl> m_impl;
 
 #ifdef _MSC_VER
 #pragma warning (pop)
 #endif
-        
+
         Synchronized* m_synchronized;
 
     };
@@ -165,4 +165,3 @@ namespace Utilities
 
 
 #endif
-
