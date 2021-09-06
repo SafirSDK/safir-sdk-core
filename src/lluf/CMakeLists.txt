@@ -1,6 +1,6 @@
 add_subdirectory(lluf_config.ss)
 add_subdirectory(lluf_config_dump.ss/src)
-#TODO laha add_subdirectory(lluf_crash_reporter.ss)
+add_subdirectory(lluf_crash_reporter.ss)
 add_subdirectory(lluf_startup_synchronizer.ss)
 #TODO laha add_subdirectory(lluf_utils.ss)
 #TODO laha add_subdirectory(lluf_crash_dump_monitor.ss)

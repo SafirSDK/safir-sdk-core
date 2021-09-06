@@ -25,10 +25,8 @@
 #include <Safir/Utilities/Internal/ConfigReader.h>
 #include <string>
 #include <vector>
-#include <boost/bind.hpp>
-#include <boost/thread/once.hpp>
-#include <boost/thread/mutex.hpp>
-#include <boost/thread/locks.hpp>
+#include <mutex>
+#include <memory>
 
 #if defined(linux) || defined(__linux) || defined(__linux__)
 #define LLUF_CRASH_REPORTER_LINUX
@@ -58,6 +56,7 @@
 
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/convenience.hpp>
+#include <boost/filesystem/exception.hpp>
 
 
 namespace
@@ -114,9 +113,9 @@ namespace
 
         void HandleCallback(const char* const dumpPath);
 
-        boost::shared_ptr<google_breakpad::ExceptionHandler> m_handler;
+        std::shared_ptr<google_breakpad::ExceptionHandler> m_handler;
 
-        boost::mutex m_lock;
+        std::mutex m_lock;
         bool m_started;
         bool m_stopped;
 
@@ -142,12 +141,12 @@ namespace
             friend State& State::Instance();
 
             static State& Instance();
-            static boost::once_flag m_onceFlag;
+            static std::once_flag m_onceFlag;
         };
     };
 
 
-    boost::once_flag State::SingletonHelper::m_onceFlag = BOOST_ONCE_INIT;
+    std::once_flag State::SingletonHelper::m_onceFlag;
 
     State & State::SingletonHelper::Instance()
     {
@@ -157,7 +156,7 @@ namespace
 
     State & State::Instance()
     {
-        boost::call_once(SingletonHelper::m_onceFlag,boost::bind(SingletonHelper::Instance));
+        std::call_once(SingletonHelper::m_onceFlag,boost::bind(SingletonHelper::Instance));
         return SingletonHelper::Instance();
     }
 
@@ -187,7 +186,7 @@ namespace
     void State::Start()
     {
 
-        boost::lock_guard<boost::mutex> lck(m_lock);
+        std::unique_lock<std::mutex> lck(m_lock);
         if (m_stopped)
         {
             throw std::logic_error("Cannot restart the CrashReporter after it has been stopped!");
@@ -230,7 +229,7 @@ namespace
 
     void State::Stop()
     {
-        boost::lock_guard<boost::mutex> lck(m_lock);
+        std::unique_lock<std::mutex> lck(m_lock);
         if (m_started && !m_stopped)
         {
 #ifdef LLUF_CRASH_REPORTER_WINDOWS
@@ -245,7 +244,7 @@ namespace
 
     void State::RegisterCallback(const CrashReporter::DumpCallback callback)
     {
-        boost::lock_guard<boost::mutex> lck(m_lock);
+        std::unique_lock<std::mutex> lck(m_lock);
         if (m_started || m_stopped)
         {
             throw std::logic_error("CrashReporter must not be started when registering callbacks!");
@@ -256,7 +255,7 @@ namespace
 
     bool State::Dump()
     {
-        boost::lock_guard<boost::mutex> lck(m_lock);
+        std::unique_lock<std::mutex> lck(m_lock);
         if (!m_started)
         {
             return false;
