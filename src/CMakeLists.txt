@@ -392,55 +392,55 @@ INCLUDE_DIRECTORIES(${PROTOBUF_INCLUDE_DIRS})
 
 add_subdirectory(patch_check)
 add_subdirectory(lluf)
-add_subdirectory(logging)
-add_subdirectory(distribution)
-add_subdirectory(dots)
-add_subdirectory(safir_dou)
-add_subdirectory(control)
-add_subdirectory(dose)
-add_subdirectory(status)
-add_subdirectory(douf)
-add_subdirectory(swre)
-add_subdirectory(foreach)
-add_subdirectory(olib)
-add_subdirectory(dope)
-add_subdirectory(websocket)
+#TODO laha add_subdirectory(logging)
+#TODO laha add_subdirectory(distribution)
+#TODO laha add_subdirectory(dots)
+#TODO laha add_subdirectory(safir_dou)
+#TODO laha add_subdirectory(control)
+#TODO laha add_subdirectory(dose)
+#TODO laha add_subdirectory(status)
+#TODO laha add_subdirectory(douf)
+#TODO laha add_subdirectory(swre)
+#TODO laha add_subdirectory(foreach)
+#TODO laha add_subdirectory(olib)
+#TODO laha add_subdirectory(dope)
+#TODO laha add_subdirectory(websocket)
 
-add_subdirectory(tests)
+#TODO laha add_subdirectory(tests)
 
 
-add_subdirectory(util)
-add_subdirectory(config)
+#TODO laha add_subdirectory(util)
+#TODO laha add_subdirectory(config)
 
 
 #non-msvc systems need the cmake export file.
 #msvc uses autolinking, so we don't need this file there.
-if (NOT MSVC)
-  INSTALL(EXPORT SafirSDKCore DESTINATION ${SAFIR_INSTALL_DESTINATION_CMAKE}
-    COMPONENT Development)
-endif()
+#TODO laha if (NOT MSVC)
+#TODO laha   INSTALL(EXPORT SafirSDKCore DESTINATION ${SAFIR_INSTALL_DESTINATION_CMAKE}
+#TODO laha     COMPONENT Development)
+#TODO laha endif()
 
-configure_file(cmake/SafirSDKCoreConfig.cmake.in
-  "${CMAKE_CURRENT_BINARY_DIR}/cmake/SafirSDKCoreConfig.cmake" @ONLY)
+#TODO laha configure_file(cmake/SafirSDKCoreConfig.cmake.in
+#TODO laha   "${CMAKE_CURRENT_BINARY_DIR}/cmake/SafirSDKCoreConfig.cmake" @ONLY)
 
-INSTALL(FILES
-  cmake/BuildSafirGenerated.cmake
-  cmake/CSharpMacros.cmake
-  cmake/SafirCompilerSettings.cmake
-  cmake/SafirLoadCSharp.cmake
-  cmake/FindCSharp.cmake
-  cmake/SafirLoadJava.cmake
-  cmake/PrecompiledHeader.cmake
-  "${CMAKE_CURRENT_BINARY_DIR}/cmake/SafirSDKCoreConfig.cmake"
-  DESTINATION ${SAFIR_INSTALL_DESTINATION_CMAKE}
-  COMPONENT Development)
+#TODO laha INSTALL(FILES
+#TODO laha   cmake/BuildSafirGenerated.cmake
+#TODO laha   cmake/CSharpMacros.cmake
+#TODO laha   cmake/SafirCompilerSettings.cmake
+#TODO laha   cmake/SafirLoadCSharp.cmake
+#TODO laha   cmake/FindCSharp.cmake
+#TODO laha   cmake/SafirLoadJava.cmake
+#TODO laha   cmake/PrecompiledHeader.cmake
+#TODO laha   "${CMAKE_CURRENT_BINARY_DIR}/cmake/SafirSDKCoreConfig.cmake"
+#TODO laha   DESTINATION ${SAFIR_INSTALL_DESTINATION_CMAKE}
+#TODO laha   COMPONENT Development)
 
-INSTALL(FILES
-  cmake/UseJavaWithManifest/README.txt
-  cmake/UseJavaWithManifest/Copyright.txt
-  cmake/UseJavaWithManifest/CMakeParseArguments.cmake
-  cmake/UseJavaWithManifest/UseJava.cmake
-  cmake/UseJavaWithManifest/UseJavaSymlinks.cmake
-  cmake/UseJavaWithManifest/UseJavaClassFilelist.cmake
-  DESTINATION ${SAFIR_INSTALL_DESTINATION_CMAKE}/UseJavaWithManifest
-  COMPONENT Development)
+#TODO laha INSTALL(FILES
+#TODO laha   cmake/UseJavaWithManifest/README.txt
+#TODO laha   cmake/UseJavaWithManifest/Copyright.txt
+#TODO laha   cmake/UseJavaWithManifest/CMakeParseArguments.cmake
+#TODO laha   cmake/UseJavaWithManifest/UseJava.cmake
+#TODO laha   cmake/UseJavaWithManifest/UseJavaSymlinks.cmake
+#TODO laha   cmake/UseJavaWithManifest/UseJavaClassFilelist.cmake
+#TODO laha   DESTINATION ${SAFIR_INSTALL_DESTINATION_CMAKE}/UseJavaWithManifest
+#TODO laha   COMPONENT Development)
