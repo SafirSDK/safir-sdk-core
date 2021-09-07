@@ -26,8 +26,6 @@
 #define __PROCESSINFO_H__
 
 #include <string>
-#include <boost/noncopyable.hpp>
-#include <boost/shared_ptr.hpp>
 #include <Safir/Utilities/Internal/VisibilityHelpers.h>
 
 #ifdef lluf_utils_EXPORTS
@@ -50,7 +48,7 @@
 #endif
 
 #ifdef _MSC_VER
-#pragma warning(push) 
+#pragma warning(push)
 #pragma warning(disable: 4275)
 #endif
 
@@ -58,8 +56,7 @@ namespace Safir
 {
 namespace Utilities
 {
-    class LLUF_UTILS_API ProcessInfo:
-        private boost::noncopyable //we probably do not want this to be copyable if it is to be extended in the future.
+    class LLUF_UTILS_API ProcessInfo
     {
     public:
         /** Create a ProcessInfo object for a specific process. */
@@ -80,12 +77,16 @@ namespace Utilities
          */
         const std::string GetProcessName() const;
 
-        /** This method will probably return the command line used to start 
+        /** This method will probably return the command line used to start
          * the current process.
          * At the very least it will return the pid as a string.
          */
         static const std::string GetProcessDescription();
     private:
+        //we probably do not want this to be copyable if it is to be extended in the future.
+        ProcessInfo(const ProcessInfo&) = delete;
+        ProcessInfo& operator=(const ProcessInfo&) = delete;
+
         const pid_t m_pid;
     };
 
@@ -97,5 +98,3 @@ namespace Utilities
 #endif
 
 #endif
-
-

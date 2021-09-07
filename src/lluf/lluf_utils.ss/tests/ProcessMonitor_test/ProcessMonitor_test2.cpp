@@ -70,7 +70,7 @@ int main(int argc, char** argv)
         monitor.StartMonitorPid(*it);
     }
 
-    boost::thread thread(boost::bind(&boost::asio::io_service::run,&ioService));
+    boost::thread thread([&ioService]{ioService.run();});
 
     boost::this_thread::sleep_for(boost::chrono::milliseconds(200));
 

@@ -33,7 +33,7 @@ namespace Safir
 namespace Utilities
 {
     ProcessMonitorImpl::ProcessMonitorImpl(boost::asio::io_service& ioService,
-                                           const boost::function<void(const pid_t pid)>& callback,
+                                           const std::function<void(const pid_t pid)>& callback,
                                            const boost::chrono::steady_clock::duration& pollPeriod)
         : m_callback(callback)
         , m_ioService(ioService)
@@ -42,8 +42,8 @@ namespace Utilities
         , m_pollPeriod(pollPeriod)
         , m_pollTimer(ioService)
     {
-        m_pollTimer.expires_from_now(m_pollPeriod);
-        m_pollTimer.async_wait(m_strand.wrap(boost::bind(&ProcessMonitorImpl::Poll,this,_1)));
+        m_pollTimer.expires_after(m_pollPeriod);
+        m_pollTimer.async_wait(m_strand.wrap([this](const boost::system::error_code& error){Poll(error);}));
     }
 
 
@@ -52,7 +52,7 @@ namespace Utilities
         const bool was_stopped = m_stopped.exchange(true);
         if (!was_stopped)
         {
-            m_strand.dispatch(boost::bind(&boost::asio::steady_timer::cancel,&m_pollTimer));
+            boost::asio::dispatch(m_strand,[this]{m_pollTimer.cancel();});
         }
     }
 
@@ -63,7 +63,7 @@ namespace Utilities
             return;
         }
         m_pollTimer.expires_from_now(m_pollPeriod);
-        m_pollTimer.async_wait(m_strand.wrap(boost::bind(&ProcessMonitorImpl::Poll,this,_1)));
+        m_pollTimer.async_wait(m_strand.wrap([this](const boost::system::error_code& error){Poll(error);}));
 
         using namespace boost::filesystem;
 
@@ -83,7 +83,7 @@ namespace Utilities
             it != missingPids.end(); ++it)
         {
             m_monitoredPids.erase(*it);
-            m_ioService.post(boost::bind(m_callback,*it));
+            m_ioService.post([this,it]{m_callback(*it);});
         }
 
     }

@@ -24,11 +24,12 @@
 #pragma once
 
 #include <boost/asio.hpp>
+#include <boost/asio/io_service.hpp>
 #include <boost/asio/steady_timer.hpp>
-#include <boost/bind.hpp>
-#include <boost/function.hpp>
+//TODO laha #include <boost/chrono.hpp>
+#include <functional>
+#include <atomic>
 #include <set>
-#include <boost/atomic.hpp>
 
 namespace Safir
 {
@@ -38,19 +39,19 @@ namespace Utilities
     {
     public:
         ProcessMonitorImpl(boost::asio::io_service& ioService,
-                           const boost::function<void(const pid_t pid)>& callback,
+                           const std::function<void(const pid_t pid)>& callback,
                            const boost::chrono::steady_clock::duration& pollPeriod);
 
         void Stop();
 
         void StartMonitorPid(const pid_t pid)
         {
-            m_strand.dispatch(boost::bind(&ProcessMonitorImpl::StartMonitorPidInternal,this,pid));
+            boost::asio::dispatch(m_strand,[this,pid]{StartMonitorPidInternal(pid);});
         }
 
         void StopMonitorPid(const pid_t pid)
         {
-            m_strand.dispatch(boost::bind(&ProcessMonitorImpl::StopMonitorPidInternal,this,pid));
+            boost::asio::dispatch(m_strand,[this,pid]{StopMonitorPidInternal(pid);});
         }
 
     private:
@@ -60,11 +61,11 @@ namespace Utilities
         void Poll(const boost::system::error_code& error);
 
         // Client callback
-        boost::function<void(const pid_t pid)> m_callback;
+        std::function<void(const pid_t pid)> m_callback;
 
         boost::asio::io_service& m_ioService;
         boost::asio::io_service::strand m_strand;
-        boost::atomic<bool> m_stopped;
+        std::atomic<bool> m_stopped;
 
         const boost::chrono::steady_clock::duration m_pollPeriod;
         boost::asio::steady_timer m_pollTimer;

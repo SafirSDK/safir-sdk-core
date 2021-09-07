@@ -31,12 +31,12 @@
 #pragma warning (disable:4702)
 #endif
 
-#include <boost/bind.hpp>
 #include <boost/filesystem/exception.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/convenience.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/date_time.hpp>
 
 #ifdef _MSC_VER
 #pragma warning (pop)
@@ -56,7 +56,7 @@ namespace //anonymous namespace for internal functions
         {
             boost::filesystem::create_directories(path);
         }
-        catch (const boost::filesystem::filesystem_error)
+        catch (const boost::filesystem::filesystem_error&)
         {
             throw std::logic_error("Failed to create log directory");
         }
@@ -74,7 +74,7 @@ namespace //anonymous namespace for internal functions
             }
             return fullpath;
         }
-        catch (const boost::filesystem::filesystem_error &)
+        catch (const boost::filesystem::filesystem_error&)
         {
             //failed to find useful name
             return std::string("strange-") + boost::lexical_cast<std::string>(rand());
@@ -222,7 +222,7 @@ namespace Internal
         TimestampingStreambuf m_buffer;
     };
 
-    boost::once_flag LowLevelLogger::SingletonHelper::m_onceFlag = BOOST_ONCE_INIT;
+    std::once_flag LowLevelLogger::SingletonHelper::m_onceFlag;
 
     LowLevelLogger & LowLevelLogger::SingletonHelper::Instance()
     {
@@ -232,7 +232,7 @@ namespace Internal
 
     LowLevelLogger & LowLevelLogger::Instance()
     {
-        boost::call_once(SingletonHelper::m_onceFlag,boost::bind(SingletonHelper::Instance));
+        std::call_once(SingletonHelper::m_onceFlag,[]{SingletonHelper::Instance();});
         return SingletonHelper::Instance();
     }
 

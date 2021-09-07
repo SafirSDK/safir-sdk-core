@@ -38,7 +38,7 @@ SET(Boost_LIBRARIES "DONT_USE_Boost_LIBRARIES_VARIABLE")
 #Boost Asio strands can share the same implementation instance which means that hanging or long running operations can potentially block
 #other strands. This symbol will make the first 193 strands unique and therefor in practice avoid any shared instances. 
 ADD_DEFINITIONS(-DBOOST_ASIO_ENABLE_SEQUENTIAL_STRAND_ALLOCATION)
-ADD_DEFINITIONS(-DBOOST_ASIO_NO_DEPRECATED)
+#TODO laha ADD_DEFINITIONS(-DBOOST_ASIO_NO_DEPRECATED)
 #use dynamic linking with boost
 ADD_DEFINITIONS(-DBOOST_ALL_DYN_LINK)
 

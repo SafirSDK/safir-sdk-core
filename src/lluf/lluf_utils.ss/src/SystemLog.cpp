@@ -26,11 +26,9 @@
 #include <Safir/Utilities/Internal/ConfigReader.h>
 #include <Safir/Utilities/Internal/StringEncoding.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
-#include <boost/weak_ptr.hpp>
-#include <boost/thread/once.hpp>
-#include <boost/thread/locks.hpp>
-#include <boost/thread/mutex.hpp>
 #include <boost/algorithm/string/replace.hpp>
+#include <mutex>
+#include <memory>
 
 #if defined _MSC_VER
   #pragma warning (push)
@@ -283,7 +281,7 @@ private:
                 throw std::logic_error("LogImpl::SendNativeLog: Unknown severity!");
         }
 
-        boost::lock_guard<boost::mutex> lck(m_lock);
+        std::lock_guard<std::mutex> lck(m_lock);
 
         m_eventLog.Send(eventType, text);
 #endif
@@ -315,7 +313,7 @@ private:
         }
 
         // The asio socket is not thread safe
-        boost::lock_guard<boost::mutex> lck(m_lock);
+        std::lock_guard<std::mutex> lck(m_lock);
 
         m_sock.send_to(boost::asio::buffer(logStr.c_str(),
                                            logStr.size()),
@@ -368,7 +366,7 @@ private:
     boost::asio::ip::udp::endpoint  m_syslogServerEndpoint;
     boost::asio::io_service         m_service;
     boost::asio::ip::udp::socket    m_sock;
-    boost::mutex                    m_lock;
+    std::mutex                    m_lock;
 
 #ifdef _MSC_VER
 #pragma warning(pop)
@@ -381,7 +379,7 @@ class SystemLogImplKeeper
 public:
     static SystemLogImplKeeper& Instance()
     {
-        boost::call_once(SingletonHelper::m_onceFlag,boost::bind(SingletonHelper::Instance));
+        std::call_once(SingletonHelper::m_onceFlag,[]{SingletonHelper::Instance();});
 
         if (destroyed)
         {
@@ -391,20 +389,20 @@ public:
         return SingletonHelper::Instance();
     }
 
-    const boost::shared_ptr<SystemLogImpl> Get()
+    const std::shared_ptr<SystemLogImpl> Get()
     {
-        boost::lock_guard<boost::mutex> lck(m_lock);
+        std::lock_guard<std::mutex> lck(m_lock);
 
         if (!m_impl)
         {
-            m_impl = boost::shared_ptr<SystemLogImpl>(new SystemLogImpl());
+            m_impl = std::shared_ptr<SystemLogImpl>(new SystemLogImpl());
         }
         return m_impl;
     }
 
     void Reset()
     {
-        boost::lock_guard<boost::mutex> lck(m_lock);
+        std::lock_guard<std::mutex> lck(m_lock);
         m_impl.reset();
     }
 
@@ -415,14 +413,14 @@ private:
 
     ~SystemLogImplKeeper()
     {
-        boost::lock_guard<boost::mutex> lck(m_lock);
+        std::lock_guard<std::mutex> lck(m_lock);
 
         m_impl.reset();
         destroyed = true;
     }
 
-    boost::shared_ptr<SystemLogImpl> m_impl;
-    boost::mutex                     m_lock;
+    std::shared_ptr<SystemLogImpl>   m_impl;
+    std::mutex                       m_lock;
 
     static bool                      destroyed;
 
@@ -442,13 +440,13 @@ private:
             static SystemLogImplKeeper instance;
             return instance;
         }
-        static boost::once_flag m_onceFlag;
+        static std::once_flag m_onceFlag;
     };
 
 };
 
 //mandatory static initialization
-boost::once_flag SystemLogImplKeeper::SingletonHelper::m_onceFlag = BOOST_ONCE_INIT;
+std::once_flag SystemLogImplKeeper::SingletonHelper::m_onceFlag;
 bool SystemLogImplKeeper::destroyed = false;
 
 void TrySendNativeLog(const std::string& errTxt)

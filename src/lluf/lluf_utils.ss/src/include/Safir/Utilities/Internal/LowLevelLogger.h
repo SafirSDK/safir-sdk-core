@@ -25,11 +25,8 @@
 #define __LLUF_LOW_LEVEL_LOGGER_NEW_H__
 
 #include <Safir/Utilities/Internal/UtilsExportDefs.h>
-#include <boost/noncopyable.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/thread/once.hpp>
-#include <boost/thread/recursive_mutex.hpp>
-#include <boost/mem_fn.hpp>
+#include <mutex>
+#include <memory>
 #include <ostream>
 #include <boost/static_assert.hpp>
 
@@ -67,8 +64,7 @@ namespace Internal
 #pragma warning(disable: 4251)
 #endif
         class LLUF_UTILS_API LowLevelLogger :
-            public std::wostream,
-            private boost::noncopyable
+            public std::wostream
         {
         public:
             static LowLevelLogger & Instance();
@@ -84,8 +80,8 @@ namespace Internal
             class Magic
             {
             public:
-                explicit Magic(boost::recursive_mutex& mutex):
-                    m_lock(&mutex,boost::mem_fn(&boost::recursive_mutex::unlock))
+                explicit Magic(std::recursive_mutex& mutex):
+                    m_lock(&mutex,[this](std::recursive_mutex* mutex){mutex->unlock();})
                 {
                 }
 
@@ -94,7 +90,7 @@ namespace Internal
                     return false;
                 }
             private:
-                boost::shared_ptr<boost::recursive_mutex> m_lock;
+                std::shared_ptr<std::recursive_mutex> m_lock;
             };
 
             //Returns a Magic object that will unlock the lock when destroyed
@@ -111,9 +107,12 @@ namespace Internal
             /** Destructor */
             ~LowLevelLogger();
 
+            LowLevelLogger(const LowLevelLogger&) = delete;
+            LowLevelLogger& operator=(const LowLevelLogger&) = delete;
+            
             /**
              * This class is here to ensure that only the Instance method can get at the
-             * instance, so as to be sure that boost call_once is used correctly.
+             * instance, so as to be sure that call_once is used correctly.
              * Also makes it easier to grep for singletons in the code, if all
              * singletons use the same construction and helper-name.
              */
@@ -123,11 +122,11 @@ namespace Internal
                 friend LowLevelLogger& LowLevelLogger::Instance();
 
                 static LowLevelLogger& Instance();
-                static boost::once_flag m_onceFlag;
+                static std::once_flag m_onceFlag;
             };
 
             class Impl;
-            boost::shared_ptr<Impl> m_impl;
+            std::shared_ptr<Impl> m_impl;
 
             const int* m_pLogLevel;
 
@@ -135,7 +134,7 @@ namespace Internal
             //it needs to be recursive. For example:
             /// lllog << GetFoo() << std::endl;
             /// and GetFoo also uses lllog.
-            boost::recursive_mutex m_lock;
+            std::recursive_mutex m_lock;
 
         };
 #ifdef _MSC_VER

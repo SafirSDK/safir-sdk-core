@@ -25,7 +25,6 @@
 #define __LLUF_SYSTEMLOG_H__
 
 #include <Safir/Utilities/Internal/UtilsExportDefs.h>
-#include <boost/shared_ptr.hpp>
 #include <string>
 #include <sstream>
 

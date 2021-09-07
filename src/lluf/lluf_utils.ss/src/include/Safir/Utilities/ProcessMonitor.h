@@ -26,12 +26,10 @@
 
 #include <Safir/Utilities/Internal/UtilsExportDefs.h>
 #include <Safir/Utilities/ProcessInfo.h>
-#include <boost/function.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/chrono.hpp>
-
-//forward declaration
-namespace boost { namespace asio { class io_service; } }
+#include <boost/asio/io_service.hpp>
+//TODO Laha #include <boost/chrono.hpp>
+#include <functional>
+#include <memory>
 
 namespace Safir
 {
@@ -51,7 +49,7 @@ namespace Utilities
          *                        instead of events. This should be set to something like 1 second.
          */
         ProcessMonitor(boost::asio::io_service& ioService,
-                       const boost::function<void(const pid_t pid)>& callback,
+                       const std::function<void(const pid_t pid)>& callback,
                        const boost::chrono::steady_clock::duration& pollPeriod);
 
         /**
@@ -89,7 +87,7 @@ namespace Utilities
 #pragma warning (disable: 4251)
 #endif
 
-        boost::shared_ptr<ProcessMonitorImpl> m_impl;
+        std::shared_ptr<ProcessMonitorImpl> m_impl;
 
 #ifdef _MSC_VER
 #pragma warning (pop)

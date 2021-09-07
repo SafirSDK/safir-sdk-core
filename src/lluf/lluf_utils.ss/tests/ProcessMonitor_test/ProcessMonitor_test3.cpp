@@ -22,7 +22,6 @@
 *
 ******************************************************************************/
 #include <Safir/Utilities/ProcessMonitor.h>
-#include <boost/bind.hpp>
 #include <boost/lexical_cast.hpp>
 #include <vector>
 #include <set>
@@ -62,7 +61,7 @@ struct Fixture
 {
     Fixture()
         : monitor(ioService,
-                  boost::bind(&Fixture::TerminatedCb,this,_1),
+                  [this](const pid_t pid){TerminatedCb(pid);},
                   boost::chrono::milliseconds(20)) //high polling rate to speed up tests.
     {
         BOOST_TEST_MESSAGE("setup fixture");
@@ -93,11 +92,10 @@ struct Fixture
 #endif
     }
 
-
     void RunIoService()
     {
         work.reset(new boost::asio::io_service::work(ioService));
-        thread = boost::thread(boost::bind(&boost::asio::io_service::run, &ioService));
+        thread = boost::thread([this]{ioService.run();});
     }
 
     void Stop()

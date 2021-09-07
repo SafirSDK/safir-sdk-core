@@ -69,7 +69,7 @@ namespace Internal
         {
 
         }
-
+        //TODO laha: an extra constructor with std:chrono???
         /**
          * Start the timer.
          * Thread safe, and multiple calls will be ignored.
@@ -136,7 +136,7 @@ namespace Internal
                                              }));
         }
 
-        boost::asio::strand m_strand;
+        boost::asio::io_service::strand m_strand;
         boost::asio::steady_timer m_timer;
         const boost::chrono::steady_clock::duration m_period;
         const boost::function<void(const boost::system::error_code& error)> m_handler;

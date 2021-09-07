@@ -76,7 +76,7 @@ int main(int argc, char** argv)
     std::wcout << "Starting thread" << std::endl;
 
     boost::shared_ptr<boost::asio::io_service::work> work(new boost::asio::io_service::work(gIoService));
-    boost::thread thread(boost::bind(&boost::asio::io_service::run,&gIoService));
+    boost::thread thread([]{gIoService.run();});
 
     std::wcout << "Adding pids to monitor" << std::endl;
     for(std::vector<std::string>::const_iterator it = pidStrings.begin();
