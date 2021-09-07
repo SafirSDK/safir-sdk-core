@@ -34,10 +34,10 @@ int main()
         LlufId_Generate64("Safir.Dob.Typesystem.FundamentalException") == 6297553511903368764LL &&
         LlufId_Generate64("Safir.Dob.Typesystem.SoftwareViolationException") == -2318636033853590373LL;
 
-    boost::int64_t ored = 0;
+    std::int64_t ored = 0;
     for (int i = 0; i < 100000; ++i)
     {
-        const boost::int64_t num = LlufId_GenerateRandom64();
+        const std::int64_t num = LlufId_GenerateRandom64();
 
         //never generate 0, 1 or -1
         result &=
@@ -49,7 +49,7 @@ int main()
     }
 
     //all bits must have been set at least once!
-    result &= (ored == (boost::int64_t)0xffffffffffffffffLL);
+    result &= (ored == (std::int64_t)0xffffffffffffffffLL);
     std::wcout << "Bits that were set at least once in all the random numbers: 0x"
                << std::setw(16) << std::hex << ored << std::endl;
 

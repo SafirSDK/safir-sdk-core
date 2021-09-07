@@ -26,12 +26,10 @@
 #include <Safir/Utilities/ProcessInfo.h>
 #include "md5.h"
 #include <boost/limits.hpp>
-#include <boost/thread/once.hpp>
-#include <boost/thread/locks.hpp>
-#include <boost/bind.hpp>
 #include <ctime>
 #include <string.h>
 #include <limits>
+#include <mutex>
 
 //disable warnings in boost
 #if defined _MSC_VER
@@ -44,7 +42,6 @@
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/random/ranlux.hpp>
-#include <boost/thread/mutex.hpp>
 
 //and enable the warnings again
 #if defined _MSC_VER
@@ -52,7 +49,7 @@
 #endif
 
 
-boost::int64_t LlufId_Generate64(const char* str)
+std::int64_t LlufId_Generate64(const char* str)
 {
     md5_state_s md5;
     md5_init(&md5);
@@ -60,8 +57,8 @@ boost::int64_t LlufId_Generate64(const char* str)
     union  {
       md5_byte_t digest [16];
       struct {
-        boost::int64_t first64bits;
-        boost::int64_t second64bits;
+        std::int64_t first64bits;
+        std::int64_t second64bits;
       } ints;
     } digest_converter;
 
@@ -72,18 +69,18 @@ boost::int64_t LlufId_Generate64(const char* str)
 
 union conglomerate
 {
-    boost::int64_t i64;
+    std::int64_t i64;
     struct
     {
-        boost::int32_t p1;
-        boost::int32_t p2;
+        std::int32_t p1;
+        std::int32_t p2;
     } parts;
 
     //This function is never meant to be called, it should only contain BOOST_STATIC_ASSERTs,
     //that get executed at *compiletime*!
     static void CheckSize()
     {
-        BOOST_STATIC_ASSERT(sizeof(conglomerate) == sizeof(boost::int64_t));
+        BOOST_STATIC_ASSERT(sizeof(conglomerate) == sizeof(std::int64_t));
     }
 };
 
@@ -101,35 +98,37 @@ boost::ranlux64_4 CreateGenerator()
 }
 
 
-class RandomGenerator:
-    private boost::noncopyable
+class RandomGenerator
 {
 public:
     static RandomGenerator& Instance()
     {
-        boost::call_once(SingletonHelper::m_onceFlag,boost::bind(SingletonHelper::Instance));
+        std::call_once(SingletonHelper::m_onceFlag,[]{SingletonHelper::Instance();});
         return SingletonHelper::Instance();
     }
 
-    boost::int64_t Generate()
+    std::int64_t Generate()
     {
-        boost::lock_guard<boost::mutex> lck(m_lock);
-        
+        std::lock_guard<std::mutex> lck(m_lock);
+
         conglomerate num;
-        num.parts.p1 = static_cast<boost::int32_t>(0x00000000ffffffffLL & (m_randomGenerator)());
-        num.parts.p2 = static_cast<boost::int32_t>(0x00000000ffffffffLL & (m_randomGenerator)());
+        num.parts.p1 = static_cast<std::int32_t>(0x00000000ffffffffLL & (m_randomGenerator)());
+        num.parts.p2 = static_cast<std::int32_t>(0x00000000ffffffffLL & (m_randomGenerator)());
         return num.i64;
     }
 
 private:
+    RandomGenerator(const RandomGenerator&) = delete;
+    const RandomGenerator& operator=(const RandomGenerator&) = delete;
+
     RandomGenerator()
     {
         using namespace boost::posix_time;
         const ptime epoch(boost::gregorian::date(2008,1,1));
         const ptime now = microsec_clock::universal_time();
         const time_duration diff = now - epoch;
-        const boost::uint32_t my_seed = 
-            (static_cast<boost::uint32_t>(diff.total_microseconds()) * Safir::Utilities::ProcessInfo::GetPid()) 
+        const boost::uint32_t my_seed =
+            (static_cast<boost::uint32_t>(diff.total_microseconds()) * Safir::Utilities::ProcessInfo::GetPid())
             % std::numeric_limits<boost::uint32_t>::max();
         m_randomGenerator.seed(my_seed);
     }
@@ -140,42 +139,42 @@ private:
     }
 
     boost::ranlux64_4 m_randomGenerator;
-    boost::mutex m_lock;
+    std::mutex m_lock;
     /**
-     * This class is here to ensure that only the Instance method can get at the 
-     * instance, so as to be sure that boost call_once is used correctly.
-     * Also makes it easier to grep for singletons in the code, if all 
+     * This class is here to ensure that only the Instance method can get at the
+     * instance, so as to be sure that call_once is used correctly.
+     * Also makes it easier to grep for singletons in the code, if all
      * singletons use the same construction and helper-name.
      */
     struct SingletonHelper
     {
     private:
         friend RandomGenerator& RandomGenerator::Instance();
-        
+
         static RandomGenerator& Instance()
         {
             static RandomGenerator instance;
             return instance;
         }
-        static boost::once_flag m_onceFlag;
+        static std::once_flag m_onceFlag;
     };
 
 };
 
-boost::once_flag RandomGenerator::SingletonHelper::m_onceFlag = BOOST_ONCE_INIT;
+std::once_flag RandomGenerator::SingletonHelper::m_onceFlag;
 
 
-boost::int64_t LlufId_GenerateRandom64()
+std::int64_t LlufId_GenerateRandom64()
 {
     //0, 1, -1, max and min are "reserved" so we loop until we have a really random number...
-    boost::int64_t result;
+    std::int64_t result;
     do
     {
        result = RandomGenerator::Instance().Generate();
     }
-    while (result == 0 || result == -1 || result == 1 
-               || result == std::numeric_limits<boost::int64_t>::max()
-               || result == std::numeric_limits<boost::int64_t>::min());
+    while (result == 0 || result == -1 || result == 1
+               || result == std::numeric_limits<std::int64_t>::max()
+               || result == std::numeric_limits<std::int64_t>::min());
 
     return result;
 }

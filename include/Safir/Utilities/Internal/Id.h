@@ -34,7 +34,7 @@
 #endif
 #define LLUF_ID_LOCAL SAFIR_HELPER_DLL_LOCAL
 
-#include <boost/cstdint.hpp>
+#include <cstdint>
 
 extern "C"
 {
@@ -44,7 +44,7 @@ extern "C"
      * @param str The string to hash.
      * @return A 64 bit hash.
      */
-    LLUF_ID_API boost::int64_t LlufId_Generate64(const char* str);
+    LLUF_ID_API std::int64_t LlufId_Generate64(const char* str);
 
     /**
      * Generates a 64 bits long integer randomly.
@@ -52,7 +52,7 @@ extern "C"
      *
      * @return A 64 bit randon number.
      */
-    LLUF_ID_API boost::int64_t LlufId_GenerateRandom64();
+    LLUF_ID_API std::int64_t LlufId_GenerateRandom64();
 }
 
 #endif

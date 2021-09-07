@@ -24,9 +24,8 @@
 #ifndef __LLUF_ASIO_PERIODIC_TIMER_H__
 #define __LLUF_ASIO_PERIODIC_TIMER_H__
 
-#include <boost/atomic.hpp>
-#include <boost/function.hpp>
-#include <boost/noncopyable.hpp>
+#include <atomic>
+#include <functional>
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -55,12 +54,11 @@ namespace Internal
      * that the handler callback took.
      */
     class AsioPeriodicTimer
-        : private boost::noncopyable
     {
     public:
         AsioPeriodicTimer(boost::asio::io_service& ioService,
                           const boost::chrono::steady_clock::duration& period,
-                          const boost::function<void(const boost::system::error_code& error)>& handler)
+                          const std::function<void(const boost::system::error_code& error)>& handler)
             : m_strand(ioService)
             , m_timer(ioService)
             , m_period(period)
@@ -69,7 +67,7 @@ namespace Internal
         {
 
         }
-        //TODO laha: an extra constructor with std:chrono???
+
         /**
          * Start the timer.
          * Thread safe, and multiple calls will be ignored.
@@ -105,6 +103,8 @@ namespace Internal
         }
 
     private:
+        AsioPeriodicTimer(const AsioPeriodicTimer&) = delete;
+        const AsioPeriodicTimer& operator=(const AsioPeriodicTimer&) = delete;
 
         void Timeout(const boost::system::error_code& error)
         {
@@ -139,8 +139,8 @@ namespace Internal
         boost::asio::io_service::strand m_strand;
         boost::asio::steady_timer m_timer;
         const boost::chrono::steady_clock::duration m_period;
-        const boost::function<void(const boost::system::error_code& error)> m_handler;
-        boost::atomic<bool> m_started;
+        const std::function<void(const boost::system::error_code& error)> m_handler;
+        std::atomic<bool> m_started;
     };
 }
 }

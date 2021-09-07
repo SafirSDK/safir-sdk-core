@@ -35,7 +35,7 @@ int main()
 
         int countdown = 10;
 
-        boost::function<void()> stopCb;
+        std::function<void()> stopCb;
 
         Safir::Utilities::Internal::AsioPeriodicTimer timer(ioService,
                                                             boost::chrono::milliseconds(10),

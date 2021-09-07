@@ -27,7 +27,6 @@
 #include <Safir/Utilities/Internal/UtilsExportDefs.h>
 #include <Safir/Utilities/ProcessInfo.h>
 #include <boost/asio/io_service.hpp>
-//TODO Laha #include <boost/chrono.hpp>
 #include <functional>
 #include <memory>
 
