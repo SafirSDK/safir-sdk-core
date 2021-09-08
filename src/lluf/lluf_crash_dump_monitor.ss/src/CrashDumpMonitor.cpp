@@ -24,9 +24,9 @@
 #include <Safir/Utilities/Internal/ConfigReader.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
 #include <Safir/Utilities/Internal/StringEncoding.h>
-#include <boost/bind.hpp>
-#include <boost/chrono.hpp>
 #include <iostream>
+#include <thread>
+#include <chrono>
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -36,7 +36,6 @@
 
 #include <boost/program_options.hpp>
 #include <boost/filesystem.hpp>
-#include <boost/thread.hpp>
 
 #ifdef _MSC_VER
 #pragma warning (pop)
@@ -53,7 +52,7 @@ public:
     {
         using namespace boost::program_options;
         Safir::Utilities::Internal::ConfigReader reader;
-        
+
         options_description desc("Allowed options");
         desc.add_options()
             ("help,h", "show help message")
@@ -61,7 +60,7 @@ public:
             ("check-interval,c", value<int>(&checkInterval)->default_value(30), "Check interval in seconds.")
             ("run-once,o", value<bool>(&runOnce)->zero_tokens(), "Run the program once and then return.")
             ;
-        
+
         variables_map vm;
 
         try
@@ -158,7 +157,7 @@ int main(int argc, char * argv[])
         {
             return 0;
         }
-        boost::this_thread::sleep_for(boost::chrono::seconds(options.checkInterval));
+        std::this_thread::sleep_for(std::chrono::seconds(options.checkInterval));
     }
 
 #ifndef _MSC_VER
