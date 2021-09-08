@@ -27,13 +27,11 @@
 #if defined(linux) || defined(__linux) || defined(__linux__)
 
 #include <set>
-#include <boost/cstdint.hpp>
+#include <memory>
+#include <functional>
+
 #include <boost/asio.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/shared_array.hpp>
-#include <boost/enable_shared_from_this.hpp>
-#include <boost/make_shared.hpp>
-#include <boost/function.hpp>
+
 #include <Safir/Utilities/Internal/ConfigReader.h>
 #include <Safir/Utilities/Internal/IpcName.h>
 
@@ -46,11 +44,11 @@ namespace Internal
 {
 
     class LinuxAcceptor
-        : public boost::enable_shared_from_this<LinuxAcceptor>
+        : public std::enable_shared_from_this<LinuxAcceptor>
     {
     public:
-        typedef boost::shared_ptr<boost::asio::local::stream_protocol::socket>  StreamPtr;
-        typedef boost::function<void(StreamPtr)>                                StreamCreatedCallback;
+        typedef std::shared_ptr<boost::asio::local::stream_protocol::socket>  StreamPtr;
+        typedef std::function<void(StreamPtr)>                                StreamCreatedCallback;
 
         // The Acceptor class uses shared_from_this so remember to always access it via a shared pointer.
         LinuxAcceptor(boost::asio::io_service::strand& strand,
@@ -100,7 +98,7 @@ namespace Internal
             auto selfHandle(this->shared_from_this());
 
             auto streamPtr =
-                    boost::make_shared<boost::asio::local::stream_protocol::socket>(m_strand.context());
+                    std::make_shared<boost::asio::local::stream_protocol::socket>(m_strand.context());
 
             m_acceptor.async_accept(*streamPtr,
                                     m_strand.wrap(

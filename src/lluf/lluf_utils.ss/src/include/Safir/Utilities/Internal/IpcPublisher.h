@@ -25,13 +25,8 @@
 #define __LLUF_IPC_PUBLISHER_H__
 
 #include <set>
-#include <boost/atomic.hpp>
-#include <boost/cstdint.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/shared_array.hpp>
-#include <boost/enable_shared_from_this.hpp>
-#include <boost/make_shared.hpp>
-#include <boost/function.hpp>
+#include <functional>
+#include <memory>
 #include <boost/filesystem.hpp>
 
 #include <Safir/Utilities/Internal/IpcSession.h>
@@ -66,15 +61,15 @@ namespace Internal
      */
     template<typename TestPolicy, typename Acceptor>
     class IpcPublisherImpl
-        : public boost::enable_shared_from_this<IpcPublisherImpl<TestPolicy, Acceptor>>,
+        : public std::enable_shared_from_this<IpcPublisherImpl<TestPolicy, Acceptor>>,
           private boost::noncopyable
     {
     public:
 
         IpcPublisherImpl(boost::asio::io_service&       ioService,
                          const std::string&             name,
-                         const boost::function<void()>    subscriberConnectedCb,
-                         const boost::function<void()>    subscriberDisconnectedCb)
+                         const std::function<void()>    subscriberConnectedCb,
+                         const std::function<void()>    subscriberDisconnectedCb)
             : m_running(false),
               m_strand(ioService),
               m_acceptor(),
@@ -82,15 +77,15 @@ namespace Internal
               m_subscriberConnectedCb(subscriberConnectedCb),
               m_subscriberDisconnectedCb(subscriberDisconnectedCb)
         {
-            m_acceptor = boost::make_shared<Acceptor>(
+            m_acceptor = std::make_shared<Acceptor>(
                              m_strand,
                              name,
                              [this, name] (typename Acceptor::StreamPtr streamPtr)
                              {
-                                 m_sessions.insert(boost::make_shared<SessionType>
+                                 m_sessions.insert(std::make_shared<SessionType>
                                                    (name, streamPtr, m_strand, m_subscriberDisconnectedCb));
 
-                                 if (!m_subscriberConnectedCb.empty())
+                                 if (m_subscriberConnectedCb != nullptr)
                                  {
                                     m_subscriberConnectedCb();
                                  }
@@ -150,7 +145,7 @@ namespace Internal
 
             auto selfHandle(this->shared_from_this());
 
-            boost::shared_ptr<char[]> msgSharedPtr(std::move(msg));
+            std::shared_ptr<char[]> msgSharedPtr(std::move(msg));
 
             m_strand.dispatch(
                         [this, selfHandle, msgSharedPtr, msgSize]()
@@ -187,15 +182,15 @@ namespace Internal
 
         typedef Session<typename Acceptor::StreamPtr> SessionType;
 
-        typedef boost::shared_ptr<SessionType> SessionPtr;
-        typedef boost::shared_ptr<Acceptor> AcceptorPtr;
+        typedef std::shared_ptr<SessionType> SessionPtr;
+        typedef std::shared_ptr<Acceptor> AcceptorPtr;
 
-        boost::atomic<bool>                 m_running;
+        std::atomic<bool>                   m_running;
         boost::asio::io_service::strand     m_strand;
         AcceptorPtr                         m_acceptor;
         std::set<SessionPtr>                m_sessions;
-        boost::function<void()>               m_subscriberConnectedCb;
-        boost::function<void()>               m_subscriberDisconnectedCb;
+        std::function<void()>               m_subscriberConnectedCb;
+        std::function<void()>               m_subscriberDisconnectedCb;
     };
 
     struct IpcPublisherNoTest
@@ -236,9 +231,9 @@ namespace Internal
          */
         IpcPublisher(boost::asio::io_service&       ioService,
                      const std::string&             name,
-                     const boost::function<void()>    subscriberConnectedCb,
-                     const boost::function<void()>    subscriberDisconnectedCb)
-            : m_pimpl(boost::make_shared<IpcPubImpl>(ioService,
+                     const std::function<void()>    subscriberConnectedCb,
+                     const std::function<void()>    subscriberDisconnectedCb)
+            : m_pimpl(std::make_shared<IpcPubImpl>(ioService,
                                                      name,
                                                      subscriberConnectedCb,
                                                      subscriberDisconnectedCb))
@@ -281,7 +276,7 @@ namespace Internal
         }
 
     private:
-        boost::shared_ptr<IpcPubImpl> m_pimpl;
+        std::shared_ptr<IpcPubImpl> m_pimpl;
 
     };
 

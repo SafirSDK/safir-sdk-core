@@ -28,10 +28,6 @@
 #include <memory>
 #include <functional>
 
-#include <boost/shared_ptr.hpp>
-#include <boost/make_shared.hpp>
-#include <boost/enable_shared_from_this.hpp>
-
 #include <boost/filesystem.hpp>
 #include <boost/system/error_code.hpp>
 #include <Safir/Utilities/Internal/AsioPeriodicTimer.h>
@@ -63,7 +59,7 @@ namespace Internal
      */
     template<typename TestPolicy>
     class IpcSubscriberImpl
-        : public boost::enable_shared_from_this<IpcSubscriberImpl<TestPolicy>>,
+        : public std::enable_shared_from_this<IpcSubscriberImpl<TestPolicy>>,
           private boost::noncopyable
     {
 
@@ -360,7 +356,7 @@ namespace Internal
         IpcSubscriber(boost::asio::io_service&     ioService,
                       const std::string&           name,
                       const RecvDataCallback&      onRecvData)
-            : m_pimpl(boost::make_shared<IpcSubscriberImpl<IpcSubscriberNoTest>>(ioService, name, onRecvData))
+            : m_pimpl(std::make_shared<IpcSubscriberImpl<IpcSubscriberNoTest>>(ioService, name, onRecvData))
         {
         }
 
@@ -392,7 +388,7 @@ namespace Internal
         }
 
     private:
-        boost::shared_ptr<IpcSubscriberImpl<IpcSubscriberNoTest>> m_pimpl;
+        std::shared_ptr<IpcSubscriberImpl<IpcSubscriberNoTest>> m_pimpl;
     };
 }
 }

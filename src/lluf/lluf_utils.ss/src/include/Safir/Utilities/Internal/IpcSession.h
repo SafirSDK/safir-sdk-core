@@ -26,9 +26,9 @@
 
 #include <deque>
 #include <vector>
-#include <boost/cstdint.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/enable_shared_from_this.hpp>
+#include <cstdint>
+#include <memory>
+#include <functional>
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -50,13 +50,13 @@ namespace Internal
 
     struct Msg
     {
-        Msg( boost::shared_ptr<char[]> data_,  uint32_t size_ )
+        Msg(std::shared_ptr<char[]> data_,  uint32_t size_ )
             : data(data_)
             , size(size_)
         {
         }
 
-        boost::shared_ptr<char[]>   data;
+        std::shared_ptr<char[]>   data;
         uint32_t                    size;
     };
 
@@ -65,13 +65,13 @@ namespace Internal
      */
     template<typename StreamPtr>
     class Session
-        : public boost::enable_shared_from_this<Session<StreamPtr>>
+        : public std::enable_shared_from_this<Session<StreamPtr>>
     {
     public:
         Session(const std::string&                  name,
                 const StreamPtr&                    streamPtr,
                 boost::asio::io_service::strand&    strand,
-                boost::function<void()>             sessionClosedCb)
+                std::function<void()>             sessionClosedCb)
             : m_name(name),
               m_streamPtr(streamPtr),
               m_msgQueue(),
@@ -88,7 +88,7 @@ namespace Internal
             }
         }
 
-        void Send(boost::shared_ptr<char[]> msg, uint32_t msgSize)
+        void Send(std::shared_ptr<char[]> msg, uint32_t msgSize)
         {
             bool writeInProgress = !m_msgQueue.empty();
             m_msgQueue.push_back(Msg(msg, msgSize));
@@ -142,7 +142,7 @@ namespace Internal
 
                         m_streamPtr->close();
 
-                        if (!m_sessionClosedCb.empty())
+                        if (m_sessionClosedCb != nullptr)
                         {
                             m_sessionClosedCb();
                         }
@@ -154,7 +154,7 @@ namespace Internal
         StreamPtr                           m_streamPtr;
         std::deque<Msg>                     m_msgQueue;
         boost::asio::io_service::strand&    m_strand;
-        boost::function<void()>             m_sessionClosedCb;
+        std::function<void()>               m_sessionClosedCb;
     };
 
 }

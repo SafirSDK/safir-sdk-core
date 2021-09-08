@@ -26,10 +26,8 @@
 
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
 
-#include <boost/shared_ptr.hpp>
-#include <boost/enable_shared_from_this.hpp>
-#include <boost/make_shared.hpp>
-#include <boost/function.hpp>
+#include <memory>
+#include <functional>
 #include <boost/system/error_code.hpp>
 #include <Safir/Utilities/Internal/IpcName.h>
 
@@ -51,11 +49,11 @@ namespace Utilities
 namespace Internal
 {
     class Win32Acceptor
-            : public boost::enable_shared_from_this<Win32Acceptor>
+            : public std::enable_shared_from_this<Win32Acceptor>
     {
     public:
-        typedef boost::shared_ptr<boost::asio::windows::stream_handle>  StreamPtr;
-        typedef boost::function<void(StreamPtr)>                        StreamCreatedCallback;
+        typedef std::shared_ptr<boost::asio::windows::stream_handle>  StreamPtr;
+        typedef std::function<void(StreamPtr)>                        StreamCreatedCallback;
 
         // The Acceptor class uses shared_from_this so remember to always access it via a shared pointer.
         Win32Acceptor(boost::asio::io_service::strand& strand,
@@ -134,7 +132,7 @@ namespace Internal
                             }
 
                             // Save pointer to "current connect handle" so we can close it in case of a stop call
-                            m_currentConnectHandle = boost::make_shared<boost::asio::windows::stream_handle>(m_strand.get_io_service(), pipe);
+                            m_currentConnectHandle = std::make_shared<boost::asio::windows::stream_handle>(m_strand.get_io_service(), pipe);
 
 
                             //auto& selfHandleRedirect = selfHandle;
@@ -213,7 +211,7 @@ namespace Internal
         boost::asio::io_service::strand&                        m_strand;
         std::string                                             m_pipeName;
         const StreamCreatedCallback                             m_callback;
-        boost::shared_ptr<boost::asio::windows::stream_handle>  m_currentConnectHandle;
+        std::shared_ptr<boost::asio::windows::stream_handle>    m_currentConnectHandle;
 
     };
 }

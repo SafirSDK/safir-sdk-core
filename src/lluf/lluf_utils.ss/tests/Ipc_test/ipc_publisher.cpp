@@ -31,7 +31,6 @@
 #include <Safir/Utilities/Internal/StringEncoding.h>
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
-#include <boost/make_shared.hpp>
 #include <boost/program_options.hpp>
 #include <stdlib.h>
 #include <string>
@@ -170,9 +169,9 @@ int main(int argc, char* argv[])
     boost::asio::io_service ioService;
     boost::asio::io_service::strand strand(ioService);
 
-    boost::shared_ptr<boost::asio::io_service::work> work (new boost::asio::io_service::work(ioService));
+    std::shared_ptr<boost::asio::io_service::work> work (new boost::asio::io_service::work(ioService));
 
-    auto pubPtr = boost::make_shared<IpcPublisher>(ioService,
+    auto pubPtr = std::make_shared<IpcPublisher>(ioService,
                                                    po.endpointName,
                                                    strand.wrap([](){std::wcout <<  "A Subscriber connected!" << std::endl;}),
                                                    strand.wrap([](){std::wcout <<  "A Subscriber disconnected!" << std::endl;}));

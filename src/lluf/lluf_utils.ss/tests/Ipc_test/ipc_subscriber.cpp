@@ -24,11 +24,11 @@
 #include "../../src/include/Safir/Utilities/Internal/IpcSubscriber.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
-#include <boost/make_shared.hpp>
 #include <boost/program_options.hpp>
 #include <Safir/Utilities/Internal/StringEncoding.h>
 #include <stdlib.h>
 #include <iostream>
+#include <memory>
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -152,7 +152,7 @@ int main(int argc, char* argv[])
     boost::asio::io_service ioService;
     boost::asio::io_service::strand strand(ioService);
 
-    boost::shared_ptr<boost::asio::io_service::work> work (new boost::asio::io_service::work(ioService));
+    std::shared_ptr<boost::asio::io_service::work> work (new boost::asio::io_service::work(ioService));
 
     boost::thread_group threads;
     for (int i = 0; i < 1; ++i)
@@ -166,7 +166,7 @@ int main(int argc, char* argv[])
     unsigned int nbrOfMsg = 0;
     bool done = false;
 
-    auto subPtr = boost::make_shared<Safir::Utilities::Internal::IpcSubscriberImpl<SubscriberTestPolicy>>(
+    auto subPtr = std::make_shared<Safir::Utilities::Internal::IpcSubscriberImpl<SubscriberTestPolicy>>(
                     ioService,
                     po.endpointName,
                     strand.wrap([&nbrOfMsg, &cond, &mut, &done, po](const char* msg, size_t size)
