@@ -24,12 +24,14 @@
 #ifndef __LLUF_IPC_SUBSCRIBER_H__
 #define __LLUF_IPC_SUBSCRIBER_H__
 
-#include <atomic>
-#include <boost/cstdint.hpp>
+#include <cstdint>
+#include <memory>
+#include <functional>
+
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/enable_shared_from_this.hpp>
-#include <boost/function.hpp>
+
 #include <boost/filesystem.hpp>
 #include <boost/system/error_code.hpp>
 #include <Safir/Utilities/Internal/AsioPeriodicTimer.h>
@@ -54,7 +56,7 @@ namespace Utilities
 namespace Internal
 {
 
-    typedef boost::function<void(const char*, size_t)> RecvDataCallback;
+    typedef std::function<void(const char*, size_t)> RecvDataCallback;
 
     /**
      * Implementation class. Users should use class IpcSubscriber.
@@ -317,7 +319,7 @@ namespace Internal
         boost::asio::deadline_timer                                         m_connectRetryTimer;
         const std::string                                                   m_streamId;
         const RecvDataCallback                                              m_callback;
-        boost::uint32_t                                                     m_msgSize;
+        std::uint32_t                                                       m_msgSize;
         std::atomic<bool>                                                   m_connected;
         std::vector<char>                                                   m_msgRecvBuffer;
     };
