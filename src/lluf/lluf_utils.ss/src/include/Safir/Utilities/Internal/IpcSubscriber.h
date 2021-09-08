@@ -24,6 +24,7 @@
 #ifndef __LLUF_IPC_SUBSCRIBER_H__
 #define __LLUF_IPC_SUBSCRIBER_H__
 
+#include <atomic>
 #include <boost/cstdint.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
@@ -208,7 +209,7 @@ namespace Internal
                             {
                                 std::ostringstream ostr;
                                 ostr << "Ec: " << ec << " " << ec.message().c_str()
-                                     << L" IPC Subscriber fatal error when connecting to " << m_streamId << std::endl;
+                                     << " IPC Subscriber fatal error when connecting to " << m_streamId << std::endl;
                                 throw std::logic_error(ostr.str());
                             }
                         });
@@ -317,7 +318,7 @@ namespace Internal
         const std::string                                                   m_streamId;
         const RecvDataCallback                                              m_callback;
         boost::uint32_t                                                     m_msgSize;
-        boost::atomic<bool>                                                 m_connected;
+        std::atomic<bool>                                                   m_connected;
         std::vector<char>                                                   m_msgRecvBuffer;
     };
 

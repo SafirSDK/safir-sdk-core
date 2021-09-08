@@ -1,4 +1,4 @@
-#TODO laha ADD_SUBDIRECTORY(Ipc_test)
+ADD_SUBDIRECTORY(Ipc_test)
 ADD_SUBDIRECTORY(Atomic_test)
 ADD_SUBDIRECTORY(AsioPeriodicTimer_test)
 ADD_SUBDIRECTORY(DynamicLibraryLoader_test)

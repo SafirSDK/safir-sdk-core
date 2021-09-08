@@ -60,7 +60,7 @@ namespace Internal
               m_ipcPath(GetIpcStreamId(name)),
               m_callback(onStreamCreated),
               m_endpoint(m_ipcPath),
-              m_acceptor(strand.get_io_service())
+              m_acceptor(strand.context())
         {
         }
 
@@ -100,7 +100,7 @@ namespace Internal
             auto selfHandle(this->shared_from_this());
 
             auto streamPtr =
-                    boost::make_shared<boost::asio::local::stream_protocol::socket>(m_strand.get_io_service());
+                    boost::make_shared<boost::asio::local::stream_protocol::socket>(m_strand.context());
 
             m_acceptor.async_accept(*streamPtr,
                                     m_strand.wrap(
