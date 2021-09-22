@@ -1,6 +1,6 @@
 add_subdirectory(logging_cpp)
-add_subdirectory(logging_dotnet)
-add_subdirectory(logging_java)
+#TODO LAHA add_subdirectory(logging_dotnet)
+#TODO LAHA add_subdirectory(logging_java)
 
 
 

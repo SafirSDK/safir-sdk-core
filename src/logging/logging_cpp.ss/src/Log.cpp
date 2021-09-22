@@ -36,7 +36,7 @@ namespace Logging
     void SendSystemLog(const Severity       severity,
                        const std::wstring&  message)
     {
-        LoggingC_SendSystemLog(static_cast<const boost::int32_t>(severity), ToUtf8(message).c_str());
+        LoggingC_SendSystemLog(static_cast<boost::int32_t>(severity), ToUtf8(message).c_str());
     }
 }
 }

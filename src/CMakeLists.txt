@@ -392,7 +392,7 @@ INCLUDE_DIRECTORIES(${PROTOBUF_INCLUDE_DIRS})
 
 add_subdirectory(patch_check)
 add_subdirectory(lluf)
-#TODO laha add_subdirectory(logging)
+add_subdirectory(logging)
 #TODO laha add_subdirectory(distribution)
 #TODO laha add_subdirectory(dots)
 #TODO laha add_subdirectory(safir_dou)
