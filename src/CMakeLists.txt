@@ -226,7 +226,8 @@ endif()
 #
 function(add_library NAME)
   list(FIND ARGN "IMPORTED" is_imported)
-  if(NOT is_imported EQUAL -1)
+  list(FIND ARGN "INTERFACE" is_interface)
+  if(NOT is_imported EQUAL -1 OR NOT is_interface EQUAL -1)
     #call the real add_library function
     _add_library(${NAME} ${ARGN})
 
