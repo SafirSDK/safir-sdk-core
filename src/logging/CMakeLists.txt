@@ -1,6 +1,6 @@
 add_subdirectory(logging_library.ss/src)
 add_subdirectory(logging_cpp.ss/src)
-#TODO LAHA add_subdirectory(logging_dotnet.ss/src)
+add_subdirectory(logging_dotnet.ss/src)
 add_subdirectory(logging_java.ss/src)
 
 #LOGGING unit tests

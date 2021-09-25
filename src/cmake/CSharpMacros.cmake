@@ -102,7 +102,7 @@ function(ADD_CSHARP_ASSEMBLY TARGET_NAME)
 
     foreach(_cs_ref ${_cs_REFERENCES})
 
-      if (TARGET ${_cs_TARGET})
+      if (TARGET ${_cs_ref})
         get_target_property(_cs_ref_file ${_cs_ref} ASSEMBLY_FILE)
         set(references "${references} -reference:\"${_cs_ref_file}\"")
         set(_cs_target_dependencies ${_cs_target_dependencies} ${_cs_ref})
