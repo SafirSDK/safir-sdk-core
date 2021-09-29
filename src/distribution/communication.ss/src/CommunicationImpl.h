@@ -24,8 +24,8 @@
 #pragma once
 
 #include <set>
-#include <boost/noncopyable.hpp>
-#include <boost/function.hpp>
+#include <memory>
+#include <functional>
 #include "NodeType.h"
 #include "Node.h"
 #include "DataReceiver.h"
@@ -44,7 +44,7 @@
 #include <boost/asio.hpp>
 
 #ifdef _MSC_VER
-#pragma warning (pop)
+ #pragma warning (pop)
 #endif
 
 namespace Safir
@@ -55,9 +55,9 @@ namespace Internal
 {
 namespace Com
 {
-    typedef boost::function<void(const std::string& name, int64_t nodeId, int64_t nodeTypeId, const std::string& controlAddress, const std::string& dataAddress, bool multicast)> NewNode;
+    typedef std::function<void(const std::string& name, int64_t nodeId, int64_t nodeTypeId, const std::string& controlAddress, const std::string& dataAddress, bool multicast)> NewNode;
 
-    class CommunicationImpl : private boost::noncopyable
+    class CommunicationImpl
     {
     public:
         CommunicationImpl(boost::asio::io_service& ioService,
@@ -72,6 +72,9 @@ namespace Com
 
         virtual ~CommunicationImpl();
 
+        CommunicationImpl(const CommunicationImpl&) = delete;
+        const CommunicationImpl&operator=(const CommunicationImpl&) = delete;
+        
         //set callbacks
         void SetNewNodeCallback(const NewNode& callback);
         void SetGotReceiveFromCallback(const GotReceiveFrom& callback);
@@ -90,7 +93,7 @@ namespace Com
 
         bool Send(int64_t nodeId,
                   int64_t nodeTypeId,
-                  const boost::shared_ptr<const char[]>& data,
+                  const std::shared_ptr<const char[]>& data,
                   size_t size,
                   int64_t dataTypeIdentifier,
                   bool deliveryGuarantee);

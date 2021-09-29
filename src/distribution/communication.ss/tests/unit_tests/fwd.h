@@ -28,7 +28,7 @@
 #include <boost/atomic.hpp>
 #include <map>
 #include <queue>
-#include <boost/make_shared.hpp>
+#include <memory>
 #include <boost/optional.hpp>
 #include <boost/lexical_cast.hpp>
 
@@ -68,9 +68,9 @@ namespace Com = Safir::Dob::Internal::Com;
 
 void Wait(int millis) {boost::this_thread::sleep_for(boost::chrono::milliseconds(millis));}
 
-boost::shared_ptr<char[]> MakeShared(const std::string& str)
+std::shared_ptr<char[]> MakeShared(const std::string& str)
 {
-    boost::shared_ptr<char[]> ptr(new char[str.length()]);
+    std::shared_ptr<char[]> ptr(new char[str.length()]);
     memcpy(ptr.get(), str.c_str(), str.length());
     return ptr;
 }

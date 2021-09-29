@@ -33,7 +33,7 @@ public:
         std::cout<<"HeartBeatSender started"<<std::endl;
         const int Interval=1000;
         boost::asio::io_service io;
-        auto work=boost::make_shared<boost::asio::io_service::work>(io);
+        auto work=std::make_shared<boost::asio::io_service::work>(io);
 
         boost::thread_group threads;
         for (int i = 0; i < 9; ++i)
@@ -104,7 +104,7 @@ private:
 
     struct TestSendPolicy
     {
-        void Send(const boost::shared_ptr<Com::Heartbeat>& /*val*/,
+        void Send(const std::shared_ptr<Com::Heartbeat>& /*val*/,
                   boost::asio::ip::udp::socket& /*socket*/,
                   const boost::asio::ip::udp::endpoint& to)
         {

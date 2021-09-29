@@ -24,6 +24,7 @@
 #pragma once
 
 #include "fwd.h"
+#include <memory>
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -38,7 +39,7 @@
 #endif
 
 
-inline boost::shared_ptr<int> Int(int i) {return boost::make_shared<int>(i);}
+inline std::shared_ptr<int> Int(int i) {return std::make_shared<int>(i);}
 
 class DataReceiverTest
 {
@@ -48,7 +49,7 @@ public:
         std::cout<<"DataReceiverTest started"<<std::endl;
 
         boost::asio::io_service io;
-        auto work=boost::make_shared<boost::asio::io_service::work>(io);
+        auto work=std::make_shared<boost::asio::io_service::work>(io);
         boost::thread_group threads;
         for (int i = 0; i < 9; ++i)
         {
@@ -61,8 +62,14 @@ public:
         //--------------------------
         TRACELINE
 
-        
-        receiver.reset(new TestDataReceiver(strand, "127.0.0.1:10000", "239.192.1.1:11000", boost::bind(&DataReceiverTest::Recv, _1, _2), boost::bind(&DataReceiverTest::IsReaderReady)));
+
+        receiver.reset(new TestDataReceiver
+                       (strand,
+                        "127.0.0.1:10000",
+                        "239.192.1.1:11000",
+                        [](const char* data, size_t size, bool /*multicast*/){return Recv(data,size);},
+                        []{return IsReaderReady();}));
+
         TRACELINE
         receiver->Start();
 
@@ -259,12 +266,12 @@ private:
         void AsyncReceive(char* buf,
                           size_t bufSize,
                           boost::asio::ip::udp::socket* socket,
-                          const boost::function< void(const boost::system::error_code&, size_t) >& completionHandler)
+                          const std::function< void(const boost::system::error_code&, size_t) >& completionHandler)
         {
             CHECK(bufSize>=sizeof(int)+sizeof(uint32_t)); //int and checksum
             bool unicast=(socket->local_endpoint().port()==10000);
             std::queue<int>* sendQueue=unicast ? &sentUnicast : &sentMulticast;
-            receiver->m_strand.get_io_service().post([&, sendQueue, buf, completionHandler]
+            receiver->m_strand.context().post([&, sendQueue, buf, completionHandler]
             {
                 bool received=false;
 

@@ -26,12 +26,9 @@
 #include <cstdint>
 #include <vector>
 #include <memory>
-#include <boost/function.hpp>
-#include <boost/noncopyable.hpp>
-#include <boost/shared_ptr.hpp>
+#include <functional>
+#include <boost/asio/io_service.hpp>
 #include <Safir/Dob/Internal/CommunicationExportDefs.h>
-
-namespace boost{namespace asio{class io_service;}} //forward declaration
 
 namespace Safir
 {
@@ -80,18 +77,18 @@ namespace Com
     };
 
     //Callbacks functions used in Communications public interface.
-    typedef boost::function<void(const std::string& name,
+    typedef std::function<void(const std::string& name,
                                  int64_t nodeId,
                                  int64_t nodeTypeId,
                                  const std::string& controlAddress,
                                  const std::string& dataAddress,
                                  bool multicast)> NewNode;
-    typedef boost::function<void(int64_t fromNodeId, bool isMulticast, bool isDuplicate)> GotReceiveFrom;
-    typedef boost::function<void(int64_t toNodeId, size_t transmitCount)> RetransmitTo; //transmitCount is the total number of times the specific message has been sent
-    typedef boost::function<void(int64_t fromNodeId, int64_t fromNodeType, const char* data, size_t size)> ReceiveData;
-    typedef boost::function<void(int64_t nodeTypeId)> QueueNotFull;
-    typedef boost::function<char*(size_t)> Allocator;
-    typedef boost::function<void(const char *)> DeAllocator;
+    typedef std::function<void(int64_t fromNodeId, bool isMulticast, bool isDuplicate)> GotReceiveFrom;
+    typedef std::function<void(int64_t toNodeId, size_t transmitCount)> RetransmitTo; //transmitCount is the total number of times the specific message has been sent
+    typedef std::function<void(int64_t fromNodeId, int64_t fromNodeType, const char* data, size_t size)> ReceiveData;
+    typedef std::function<void(int64_t nodeTypeId)> QueueNotFull;
+    typedef std::function<char*(size_t)> Allocator;
+    typedef std::function<void(const char *)> DeAllocator;
 
     struct ControlModeTag {};
     const ControlModeTag controlModeTag = ControlModeTag();
@@ -131,10 +128,9 @@ namespace Com
      * NodeId 0 is reserved and represents all nodes. It is not allowed to use nodeId 0 in any other meaning than all nodes,
      * for example when calling send. Assigning nodeId 0 to a node results in undefined behaviour.
      */
-    class DISTRIBUTION_COMMUNICATION_API Communication : private boost::noncopyable
+    class DISTRIBUTION_COMMUNICATION_API Communication
     {
     public:
-
         /**
          * @brief Communication - Creates an instance of Communication in control mode. It will run the discover mechanism after calling start.
          * @param controlModeTag [in] - Tag that specifies that this instance will be used in control mode.
@@ -181,6 +177,10 @@ namespace Com
          * ~Communication - destructor.
          */
         virtual ~Communication();
+
+        //make noncopyable
+        Communication(const Communication&) = delete;
+        const Communication& operator=(const Communication&) = delete;
 
         /**
          * Set callback for notification of new discovered nodes. Must be called before calling Start.
@@ -300,7 +300,7 @@ namespace Com
          */
         bool Send(int64_t nodeId,
                   int64_t nodeTypeId,
-                  const boost::shared_ptr<const char[]>& data,
+                  const std::shared_ptr<const char[]>& data,
                   size_t size,
                   int64_t dataTypeIdentifier,
                   bool deliveryGuarantee);

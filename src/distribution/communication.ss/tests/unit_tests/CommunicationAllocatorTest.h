@@ -42,7 +42,7 @@ public:
         };
 
         boost::asio::io_service io;
-        auto work=boost::make_shared<boost::asio::io_service::work>(io);
+        auto work=std::make_shared<boost::asio::io_service::work>(io);
 
         boost::thread_group threads;
         for (int i = 0; i < 9; ++i)
@@ -53,9 +53,12 @@ public:
 
         Com::DeliveryHandlerBasic<AllocatorTest::TestWriter> dh(strand, 1, 4, 20);
 
-        dh.SetGotRecvCallback(boost::bind(&AllocatorTest::GotReceiveFrom, _1, _2));
+        dh.SetGotRecvCallback([](int64_t fromNodeId, bool isMulticast, bool isDuplicate)
+                              {GotReceiveFrom(fromNodeId,isMulticast,isDuplicate);});
 
-        dh.SetReceiver(boost::bind(&AllocatorTest::OnRecv, _1, _2, _3, _4), 0,
+        dh.SetReceiver([](int64_t fromNodeId, int64_t fromNodeType, const char* data, size_t size)
+                         {OnRecv(fromNodeId,fromNodeType,data,size);},
+                       0,
                        [&](size_t s) -> char*
                         {
                             ++numAllocs;
@@ -425,7 +428,7 @@ private:
 
     struct TestSendPolicy
     {
-        void Send(const boost::shared_ptr<Com::Ack>& ack,
+        void Send(const std::shared_ptr<Com::Ack>& ack,
                   boost::asio::ip::udp::socket& /*socket*/,
                   const boost::asio::ip::udp::endpoint& to)
         {
@@ -449,7 +452,7 @@ private:
         delete[] data; //receiver is responsible for deleting data
     }
 
-    static void GotReceiveFrom(int64_t /*fromNodeId*/, bool /*isHeartbeat*/)
+    static void GotReceiveFrom(int64_t /*fromNodeId*/, bool /*isMulticast*/, bool /*isDuplicate*/)
     {
         //std::cout<<"GotReceiveFrom "<<fromNodeId<<std::endl;
     }

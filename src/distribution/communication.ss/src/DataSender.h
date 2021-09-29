@@ -24,10 +24,9 @@
 #pragma once
 
 #include <map>
+#include <memory>
 #include <boost/atomic.hpp>
-#include <boost/noncopyable.hpp>
-#include <boost/function.hpp>
-#include <boost/make_shared.hpp>
+#include <functional>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
 #include "Node.h"
@@ -67,8 +66,8 @@ namespace Com
      * messages that have not been acked.
      */
 
-    typedef boost::function<void(int64_t toNodeId, size_t transmitCount)> RetransmitTo;
-    typedef boost::function<void(int64_t nodeTypeId)> QueueNotFull;
+    typedef std::function<void(int64_t toNodeId, size_t transmitCount)> RetransmitTo;
+    typedef std::function<void(int64_t nodeTypeId)> QueueNotFull;
 
     template <class WriterType>
     class DataSenderBasic : private WriterType
@@ -114,18 +113,18 @@ namespace Com
         //Set notifier called every time something is retransmitted
         void SetRetransmitCallback(const RetransmitTo& callback)
         {
-            m_strand.dispatch([=]{m_retransmitNotification=callback;});
+            m_strand.dispatch([this,callback]{m_retransmitNotification=callback;});
         }
 
         void SetNotFullCallback(const QueueNotFull& callback)
         {
-            m_strand.dispatch([=]{m_queueNotFullNotification.push_back(callback);});
+            m_strand.dispatch([this,callback]{m_queueNotFullNotification.push_back(callback);});
         }
 
         //Start writer component
         void Start()
         {
-            m_strand.dispatch([=]
+            m_strand.dispatch([this]
             {
                 m_running=true;
                 //start retransmit timer
@@ -146,7 +145,7 @@ namespace Com
         //Stop
         void Stop()
         {
-            m_strand.dispatch([=]
+            m_strand.dispatch([this]
             {
                 m_running=false;
                 if (m_deliveryGuarantee==Acked)
@@ -161,7 +160,7 @@ namespace Com
         }
 
         //Add message to send queue. Message will be retranmitted unitl all receivers have acked. Returns false if queue is full.
-        bool AddToSendQueue(int64_t toId, const boost::shared_ptr<const char[]>& msg, size_t size, int64_t dataTypeIdentifier)
+        bool AddToSendQueue(int64_t toId, const std::shared_ptr<const char[]>& msg, size_t size, int64_t dataTypeIdentifier)
         {
             if (size==0 || !msg)
             {
@@ -188,7 +187,7 @@ namespace Com
             }
 
             //The actual work where the data is inserted in the queue must be done inside the strand.
-            m_strand.post([=]
+            m_strand.post([this,toId,totalNumberOfFragments,numberOfFullFragments,msg,size,restSize,dataTypeIdentifier]
             {
                 uint8_t sendMethod;
                 uint64_t* sequenceSerie=GetSequenceSerieIfExist(toId, sendMethod);
@@ -242,7 +241,7 @@ namespace Com
             //Called from readStrand
 
             //Will only check ack against sent messages. If an ack is received for a message that is still unsent, that ack will be ignored.
-            m_strand.dispatch([=]
+            m_strand.dispatch([this,ack]
             {
                 if (Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().LogLevel()==9)
                 {
@@ -302,7 +301,7 @@ namespace Com
         //Add a node.
         void AddNode(int64_t id, const std::string& address)
         {
-            m_strand.dispatch([=]
+            m_strand.dispatch([this,id,address]
             {
                 if (m_nodes.find(id)!=m_nodes.end())
                 {
@@ -323,7 +322,7 @@ namespace Com
         //Make node included or excluded. If excluded it is also removed.
         void IncludeNode(int64_t id)
         {
-            m_strand.post([=]
+            m_strand.post([this,id]
             {
                 const auto it=m_nodes.find(id);
                 if (it!=m_nodes.end())
@@ -351,7 +350,7 @@ namespace Com
         //Make node included or excluded. If excluded it is also removed.
         void RemoveNode(int64_t id)
         {
-            m_strand.post([=]
+            m_strand.post([this,id]
             {
                 m_nodes.erase(id);
                 RemoveExcludedReceivers();
@@ -417,9 +416,9 @@ namespace Com
             ni.welcome=m_lastSentMultiReceiverSeqNo;
 
             ++m_sendQueueSize;
-            boost::shared_ptr<char[]> welcome=boost::make_shared<char[]>(sizeof(int64_t));
+            std::shared_ptr<char[]> welcome=std::make_shared<char[]>(sizeof(int64_t));
             memcpy(static_cast<void*>(welcome.get()), static_cast<const void*>(&nodeId), sizeof(int64_t));
-            UserDataPtr userData=boost::make_shared<UserData>(m_nodeId, 0, WelcomeDataType, welcome, sizeof(int64_t), welcome.get(), sizeof(int64_t));
+            UserDataPtr userData=std::make_shared<UserData>(m_nodeId, 0, WelcomeDataType, welcome, sizeof(int64_t), welcome.get(), sizeof(int64_t));
             userData->header.sendMethod=MultiReceiverSendMethod;
             userData->header.sequenceNumber=ni.welcome;
             userData->header.deliveryGuarantee=true;
@@ -576,7 +575,7 @@ namespace Com
 
             //Restart timer
             m_resendTimer.expires_from_now(timerInterval);
-            m_resendTimer.async_wait(m_strand.wrap([=](const boost::system::error_code& /*error*/){RetransmitUnackedMessages();}));
+            m_resendTimer.async_wait(m_strand.wrap([this](const boost::system::error_code& /*error*/){RetransmitUnackedMessages();}));
         }
 
         void SendAckRequests()
@@ -602,8 +601,8 @@ namespace Com
                 }
             }
 
-            boost::shared_ptr<char[]> noData;
-            UserDataPtr ud=boost::make_shared<UserData>(m_nodeId, 0, AckRequestType, noData, 0);
+            std::shared_ptr<char[]> noData;
+            UserDataPtr ud=std::make_shared<UserData>(m_nodeId, 0, AckRequestType, noData, 0);
 
             //Send ackRequests for SingleReceiver channel
             ud->header.sendMethod=SingleReceiverSendMethod;
@@ -684,14 +683,14 @@ namespace Com
                 {
                     //add ping to the normal sendQueue
                     lllog(8)<<m_logPrefix.c_str()<<"Add Ping to sendQueue"<<std::endl;
-                    boost::shared_ptr<char[]> ping=boost::make_shared<char[]>(1); //AddToSendQueue will throw away empty messages, add dummy content
+                    std::shared_ptr<char[]> ping=std::make_shared<char[]>(1); //AddToSendQueue will throw away empty messages, add dummy content
                     AddToSendQueue(0, ping, 1, PingDataType);
                 }
             }
 
             //Restart timer
             m_pingTimer.expires_from_now(boost::chrono::milliseconds(Parameters::SendPingThreshold));
-            m_pingTimer.async_wait(m_strand.wrap([=](const boost::system::error_code& /*error*/){Ping();}));
+            m_pingTimer.async_wait(m_strand.wrap([this](const boost::system::error_code& /*error*/){Ping();}));
         }
 
         void RemoveExcludedReceivers()
@@ -765,7 +764,7 @@ namespace Com
             if (m_sendQueue.has_unhandled())
             {
                 //this can only happen if messages have been moved from the extension part of sendQueue
-                m_strand.post([=]{HandleSendQueue();});
+                m_strand.post([this]{HandleSendQueue();});
             }
         }
 
@@ -801,7 +800,7 @@ namespace Com
                 m_notifyQueueNotFull=false; //very important that this flag is set before the notification call since a new overflow may occur after notification.
                 if (!m_queueNotFullNotification.empty())
                 {
-                     m_strand.get_io_service().post([this]
+                     m_strand.context().post([this]
                      {
                          for (auto callback = m_queueNotFullNotification.cbegin(); callback != m_queueNotFullNotification.cend(); ++callback)
                          {

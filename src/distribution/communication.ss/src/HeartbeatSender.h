@@ -23,8 +23,7 @@
 ******************************************************************************/
 #pragma once
 
-#include <boost/noncopyable.hpp>
-#include <boost/function.hpp>
+#include <memory>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
 #include "Node.h"
@@ -80,17 +79,17 @@ namespace Com
 
         void Start() SAFIR_GCC_VISIBILITY_BUG_WORKAROUND
         {
-            m_strand.dispatch([=]
+            m_strand.dispatch([this]
             {
                 m_running=true;
                 m_heartbeatTimer.expires_from_now(boost::chrono::milliseconds(m_interval));
-                m_heartbeatTimer.async_wait(m_strand.wrap([=](const boost::system::error_code&){OnTimeout();}));
+                m_heartbeatTimer.async_wait(m_strand.wrap([this](const boost::system::error_code&){OnTimeout();}));
             });
         }
 
         void Stop()
         {
-            m_strand.dispatch([=]
+            m_strand.dispatch([this]
             {
                 m_running=false;
                 m_heartbeatTimer.cancel();
@@ -100,7 +99,7 @@ namespace Com
         //Add a node and starts sending heartbeats
         void AddNode(int64_t id, const std::string address)
         {
-            m_strand.dispatch([=]
+            m_strand.dispatch([this,id,address]
             {
                 if (m_nodes.find(id)!=m_nodes.end())
                 {
@@ -115,7 +114,7 @@ namespace Com
 
         void RemoveNode(int64_t id)
         {
-            m_strand.dispatch([=]
+            m_strand.dispatch([this,id]
             {
                 m_nodes.erase(id);
             });
@@ -124,7 +123,7 @@ namespace Com
     private:
         boost::asio::io_service::strand m_strand;
         boost::asio::steady_timer m_heartbeatTimer;
-        boost::shared_ptr<Heartbeat> m_heartbeat;
+        std::shared_ptr<Heartbeat> m_heartbeat;
         int m_interval;
         std::map<int64_t, boost::asio::ip::udp::endpoint> m_nodes;
         bool m_running;
@@ -156,7 +155,7 @@ namespace Com
                 }
 
                 m_heartbeatTimer.expires_from_now(boost::chrono::milliseconds(m_interval));
-                m_heartbeatTimer.async_wait(m_strand.wrap([=](const boost::system::error_code&){OnTimeout();}));
+                m_heartbeatTimer.async_wait(m_strand.wrap([this](const boost::system::error_code&){OnTimeout();}));
             }
         }
     };

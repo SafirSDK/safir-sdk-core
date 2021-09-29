@@ -23,7 +23,6 @@
 ******************************************************************************/
 #include <iostream>
 #include <boost/lexical_cast.hpp>
-#include <boost/make_shared.hpp>
 #include <Safir/Utilities/Internal/Id.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include "Parameters.h"
@@ -60,11 +59,11 @@ namespace Com
         ,m_nodeTypes(nodeTypes)
         ,m_onNewNode()
         ,m_gotRecvFrom()
-        ,m_discoverer(m_ioService, m_me, fragmentSize, [=](const Node& n){OnNewNode(n);})
+        ,m_discoverer(m_ioService, m_me, fragmentSize, [this](const Node& n){OnNewNode(n);})
         ,m_deliveryHandler(m_receiveStrand, m_me.nodeId, m_protocol, m_nodeTypes[nodeTypeId]->SlidingWindowSize())
         ,m_reader(m_receiveStrand, m_me.unicastAddress, m_nodeTypes[nodeTypeId]->MulticastAddress(),
-                  [=](const char* d, size_t s, const bool mc){return OnRecv(d,s,mc);},
-                  [=](){return m_deliveryHandler.NumberOfUndeliveredMessages()<Parameters::MaxNumberOfUndelivered;})
+                  [this](const char* d, size_t s, const bool mc){return OnRecv(d,s,mc);},
+                  [this](){return m_deliveryHandler.NumberOfUndeliveredMessages()<Parameters::MaxNumberOfUndelivered;})
     {
         if (nodeId==0)
         {
@@ -101,7 +100,7 @@ namespace Com
 
     void CommunicationImpl::SetGotReceiveFromCallback(const GotReceiveFrom& callback)
     {
-        m_receiveStrand.dispatch([=]
+        m_receiveStrand.dispatch([this,callback]
         {
             m_gotRecvFrom=callback;
             m_deliveryHandler.SetGotRecvCallback(callback);
@@ -118,7 +117,8 @@ namespace Com
 
     void CommunicationImpl::SetDataReceiver(const ReceiveData& callback, int64_t dataTypeIdentifier, const Allocator& allocator, const DeAllocator& deallocator)
     {
-        m_receiveStrand.post([=]{m_deliveryHandler.SetReceiver(callback, dataTypeIdentifier, allocator, deallocator);});
+        m_receiveStrand.post([this,callback,dataTypeIdentifier,allocator,deallocator]
+        {m_deliveryHandler.SetReceiver(callback, dataTypeIdentifier, allocator, deallocator);});
     }
 
     void CommunicationImpl::SetQueueNotFullCallback(const QueueNotFull& callback, int64_t nodeTypeId)
@@ -199,14 +199,14 @@ namespace Com
 
         //We do post (not dispatch) here to be sure the AddNode job will be executed before IncludeNode. Otherwize we
         //risk losing a node.
-        m_receiveStrand.post([=]{m_deliveryHandler.IncludeNode(id);});
+        m_receiveStrand.post([this,id]{m_deliveryHandler.IncludeNode(id);});
     }
 
     void CommunicationImpl::ExcludeNode(int64_t id)
     {
         lllog(6)<<L"COM: ExcludeNode "<<id<<std::endl;
 
-        m_receiveStrand.post([=]
+        m_receiveStrand.post([this,id]
         {
             lllog(6)<<L"COM: Execute ExcludeNode id="<<id<<std::endl;
             auto node=m_deliveryHandler.GetNode(id);
@@ -243,7 +243,7 @@ namespace Com
         IncludeNodeInternal(id);
     }
 
-    bool CommunicationImpl::Send(int64_t nodeId, int64_t nodeTypeId, const boost::shared_ptr<const char[]>& data, size_t size, int64_t dataTypeIdentifier, bool deliveryGuarantee)
+    bool CommunicationImpl::Send(int64_t nodeId, int64_t nodeTypeId, const std::shared_ptr<const char[]>& data, size_t size, int64_t dataTypeIdentifier, bool deliveryGuarantee)
     {
         if (deliveryGuarantee)
         {

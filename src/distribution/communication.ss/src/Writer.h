@@ -24,8 +24,7 @@
 #pragma once
 
 #include <map>
-#include <boost/noncopyable.hpp>
-#include <boost/function.hpp>
+#include <memory>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
 #include "Message.h"
@@ -59,7 +58,7 @@ namespace Com
     template <class T>
     struct BasicSendPolicy
     {
-        void Send(const boost::shared_ptr<T>& val,
+        void Send(const std::shared_ptr<T>& val,
                   boost::asio::ip::udp::socket& socket,
                   const boost::asio::ip::udp::endpoint& to)
         {
@@ -186,7 +185,7 @@ namespace Com
     template <class T>
     struct BasicSendPolicy : private UnreliableSender
     {
-        void Send(const boost::shared_ptr<T>& val,
+        void Send(const std::shared_ptr<T>& val,
                   boost::asio::ip::udp::socket& socket,
                   const boost::asio::ip::udp::endpoint& to)
         {
@@ -235,10 +234,10 @@ namespace Com
      * Communication easier to test.
      */
     template <class T, class SendPolicy=BasicSendPolicy<T> >
-    class Writer : private SendPolicy, private boost::noncopyable
+    class Writer : private SendPolicy
     {
     public:
-        typedef boost::shared_ptr<T> Ptr;
+        typedef std::shared_ptr<T> Ptr;
 
         Writer(boost::asio::io_service& ioService, int protocol)
             :m_socket(ioService,  Resolver::Protocol(protocol))
@@ -267,6 +266,10 @@ namespace Com
                 m_socket.set_option(boost::asio::ip::multicast::join_group(m_multicastEndpoint.address()));
             }
         }
+
+        //make noncopyable
+        Writer(const Writer&) = delete;
+        const Writer& operator=(const Writer&) = delete;
 
         bool IsMulticastEnabled() const {return m_multicastEnabled;}
 

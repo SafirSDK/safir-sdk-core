@@ -118,7 +118,7 @@ namespace Com
         static std::string McAddr(const std::string& addr, bool use){return use ? addr : "";}
     };
 
-    typedef boost::shared_ptr<NodeType> NodeTypePtr;
+    typedef std::shared_ptr<NodeType> NodeTypePtr;
     typedef std::map<int64_t, NodeTypePtr> NodeTypeMap;
 }
 }

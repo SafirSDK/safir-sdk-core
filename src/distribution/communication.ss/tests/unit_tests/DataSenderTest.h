@@ -314,7 +314,7 @@ private:
     static const size_t RequestAckThreshold = 5;
 
     static boost::mutex mutex;
-    static std::vector< boost::shared_ptr<Com::UserData> > sent;
+    static std::vector< std::shared_ptr<Com::UserData> > sent;
 
     static Com::Ack Ack(int64_t sender, int64_t receiver, uint64_t seqNo, uint8_t sendMethod)
     {
@@ -340,7 +340,7 @@ private:
 
     struct TestSendPolicy
     {
-        void Send(const boost::shared_ptr<Com::UserData>& val,
+        void Send(const std::shared_ptr<Com::UserData>& val,
                   boost::asio::ip::udp::socket& /*socket*/,
                   const boost::asio::ip::udp::endpoint& /*to*/)
         {
@@ -371,7 +371,7 @@ private:
 };
 
 boost::mutex AckedDataSenderTest::mutex;
-std::vector< boost::shared_ptr<Com::UserData> > AckedDataSenderTest::sent;
+std::vector< std::shared_ptr<Com::UserData> > AckedDataSenderTest::sent;
 
 //------------------------------------
 // Unacked messages
@@ -480,11 +480,11 @@ public:
 private:
 
     static boost::mutex mutex;
-    static std::queue< boost::shared_ptr<Com::UserData> > sent;
+    static std::queue< std::shared_ptr<Com::UserData> > sent;
 
     struct TestSendPolicy
     {
-        void Send(const boost::shared_ptr<Com::UserData>& val,
+        void Send(const std::shared_ptr<Com::UserData>& val,
                   boost::asio::ip::udp::socket& /*socket*/,
                   const boost::asio::ip::udp::endpoint& /*to*/)
         {
@@ -512,7 +512,7 @@ private:
 };
 
 boost::mutex UnackedDataSenderTest::mutex;
-std::queue< boost::shared_ptr<Com::UserData> > UnackedDataSenderTest::sent;
+std::queue< std::shared_ptr<Com::UserData> > UnackedDataSenderTest::sent;
 
 //------------------------------------
 // Acked with small sliding window
@@ -779,7 +779,7 @@ private:
     static const size_t RequestAckThreshold = 1;
 
     static boost::mutex mutex;
-    static std::vector< boost::shared_ptr<Com::UserData> > sent;
+    static std::vector< std::shared_ptr<Com::UserData> > sent;
 
     static Com::Ack Ack(int64_t sender, int64_t receiver, uint64_t seqNo, uint8_t sendMethod)
     {
@@ -805,7 +805,7 @@ private:
 
     struct TestSendPolicy
     {
-        void Send(const boost::shared_ptr<Com::UserData>& val,
+        void Send(const std::shared_ptr<Com::UserData>& val,
                   boost::asio::ip::udp::socket& /*socket*/,
                   const boost::asio::ip::udp::endpoint& /*to*/)
         {
@@ -836,7 +836,7 @@ private:
 };
 
 boost::mutex SmallWindowSenderTest::mutex;
-std::vector< boost::shared_ptr<Com::UserData> > SmallWindowSenderTest::sent;
+std::vector< std::shared_ptr<Com::UserData> > SmallWindowSenderTest::sent;
 
 //------------------------------------
 // Test retransmission of messages
@@ -1065,7 +1065,7 @@ private:
     static const size_t RequestAckThreshold = 1;
 
     static boost::mutex mutex;
-    static std::vector< boost::shared_ptr<Com::UserData> > sent;
+    static std::vector< std::shared_ptr<Com::UserData> > sent;
     static std::vector< std::pair<int64_t, size_t> > retransmit; //pair<toId, transmitCount>
 
     static Com::Ack Ack(int64_t sender, int64_t receiver, uint64_t seqNo, uint8_t sendMethod)
@@ -1092,7 +1092,7 @@ private:
 
     struct TestSendPolicy
     {
-        void Send(const boost::shared_ptr<Com::UserData>& val,
+        void Send(const std::shared_ptr<Com::UserData>& val,
                   boost::asio::ip::udp::socket& /*socket*/,
                   const boost::asio::ip::udp::endpoint& /*to*/)
         {
@@ -1121,7 +1121,7 @@ private:
 };
 
 boost::mutex RetransmissionTest::mutex;
-std::vector< boost::shared_ptr<Com::UserData> > RetransmissionTest::sent;
+std::vector< std::shared_ptr<Com::UserData> > RetransmissionTest::sent;
 std::vector< std::pair<int64_t, size_t> > RetransmissionTest::retransmit;
 
 //-----------------------

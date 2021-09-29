@@ -84,20 +84,21 @@ namespace
 
             const std::string& mc=isControlInstance ? nt->controlMulticastAddress : nt->dataMulticastAddress;
             bool useMulticast=(thisNodeIsMulticastEnabled && !mc.empty());
-            auto ptr= boost::shared_ptr<Safir::Dob::Internal::Com::NodeType>(new Safir::Dob::Internal::Com::NodeType(ioService,
-                                                                                                                     nodeId,
-                                                                                                                     localIf,
-                                                                                                                     useMulticast,
-                                                                                                                     nt->id,
-                                                                                                                     nt->name,
-                                                                                                                     mc,
-                                                                                                                     ipVersion,
-                                                                                                                     nt->heartbeatInterval,
-                                                                                                                     nt->maxLostHeartbeats,
-                                                                                                                     nt->slidingWindowSize,
-                                                                                                                     nt->ackRequestThreshold,
-                                                                                                                     fragmentSize,
-                                                                                                                     nt->retryTimeout));
+            auto ptr= std::shared_ptr<Safir::Dob::Internal::Com::NodeType>
+                (new Safir::Dob::Internal::Com::NodeType(ioService,
+                                                         nodeId,
+                                                         localIf,
+                                                         useMulticast,
+                                                         nt->id,
+                                                         nt->name,
+                                                         mc,
+                                                         ipVersion,
+                                                         nt->heartbeatInterval,
+                                                         nt->maxLostHeartbeats,
+                                                         nt->slidingWindowSize,
+                                                         nt->ackRequestThreshold,
+                                                         fragmentSize,
+                                                         nt->retryTimeout));
             nodeTypeMap.insert(NodeTypeMap::value_type(nt->id, ptr));
         }
 
@@ -208,7 +209,7 @@ namespace
 
     bool Communication::Send(int64_t nodeId,
                              int64_t nodeTypeId,
-                             const boost::shared_ptr<const char[]>& data,
+                             const std::shared_ptr<const char[]>& data,
                              size_t size,
                              int64_t dataTypeIdentifier,
                              bool deliveryGuarantee)

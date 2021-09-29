@@ -23,11 +23,10 @@
 ******************************************************************************/
 #pragma once
 
+#include <memory>
 #include <boost/atomic.hpp>
 #include <boost/unordered_map.hpp>
-#include <boost/function.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/make_shared.hpp>
+#include <functional>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
 #include "Parameters.h"
@@ -56,22 +55,22 @@ namespace Internal
 {
 namespace Com
 {
-    typedef boost::function<char*(size_t)> Allocator;
-    typedef boost::function<void(const char *)> DeAllocator;
-    typedef boost::function<void(int64_t fromNodeId, int64_t fromNodeType, const char* data, size_t size)> ReceiveData;
-    typedef boost::function<void(int64_t fromNodeId, bool isMulticast, bool isDuplicate)> GotReceiveFrom;
+    typedef std::function<char*(size_t)> Allocator;
+    typedef std::function<void(const char *)> DeAllocator;
+    typedef std::function<void(int64_t fromNodeId, int64_t fromNodeType, const char* data, size_t size)> ReceiveData;
+    typedef std::function<void(int64_t fromNodeId, bool isMulticast, bool isDuplicate)> GotReceiveFrom;
 
     template <class WriterType>
     class DeliveryHandlerBasic : private WriterType
     {
     public:
         DeliveryHandlerBasic(boost::asio::io_service::strand& receiveStrand, int64_t myNodeId, int ipVersion, int slidingWindowSize)
-            :WriterType(receiveStrand.get_io_service(), ipVersion)
+            :WriterType(receiveStrand.context(), ipVersion)
             ,m_running(false)
             ,m_myId(myNodeId)
             ,m_slidingWindowSize(static_cast<size_t>(slidingWindowSize))
             ,m_receiveStrand(receiveStrand)
-            ,m_deliverStrand(receiveStrand.get_io_service())
+            ,m_deliverStrand(receiveStrand.context())
             ,m_nodes()
             ,m_receivers()
             ,m_gotRecvFrom()
@@ -95,7 +94,7 @@ namespace Com
 
         void Start()
         {
-            m_receiveStrand.dispatch([=]
+            m_receiveStrand.dispatch([this]
             {
                 m_running=true;
             });
@@ -103,7 +102,7 @@ namespace Com
 
         void Stop()
         {
-            m_receiveStrand.dispatch([=]
+            m_receiveStrand.dispatch([this]
             {
                 m_running=false;
             });
@@ -363,8 +362,8 @@ namespace Com
         bool m_running;
         const int64_t m_myId;
         const size_t m_slidingWindowSize;
-        boost::asio::strand& m_receiveStrand; //for sending acks, same strand as all public methods are supposed to be called from
-        boost::asio::strand m_deliverStrand; //for delivering data to application
+        boost::asio::io_service::strand& m_receiveStrand; //for sending acks, same strand as all public methods are supposed to be called from
+        boost::asio::io_service::strand m_deliverStrand; //for delivering data to application
         boost::atomic<unsigned int> m_numberOfUndeliveredMessages;
 
         NodeInfoMap m_nodes;
@@ -732,7 +731,7 @@ namespace Com
                         auto dataType=rd.dataType;
 
                         m_numberOfUndeliveredMessages++;
-                        m_deliverStrand.post([=]
+                        m_deliverStrand.post([this,dataType,fromId, fromNodeType,dataPtr,dataSize]
                         {
                             auto recvIt=m_receivers.find(dataType); //m_receivers shall be safe to use inside m_deliverStrand since it is not supposed to be modified after start
                             if (recvIt!=m_receivers.end())
@@ -790,7 +789,7 @@ namespace Com
         inline void SendAck(NodeInfo& ni, const MessageHeader* header)
         {
             Channel& ch=ni.GetChannel(header);
-            auto ackPtr=boost::make_shared<Ack>(m_myId, header->commonHeader.senderId, ch.biggestSequence, header->sendMethod);
+            auto ackPtr=std::make_shared<Ack>(m_myId, header->commonHeader.senderId, ch.biggestSequence, header->sendMethod);
 
             uint64_t seq=ch.biggestSequence;
             for (size_t i=0; i<m_slidingWindowSize; ++i)
@@ -811,9 +810,9 @@ namespace Com
             WriterType::SendTo(ackPtr, ni.endpoint);
         }
 
-        inline boost::shared_ptr<char[]> MakePtr(const char* data, size_t size)
+        inline std::shared_ptr<char[]> MakePtr(const char* data, size_t size)
         {
-            boost::shared_ptr<char[]> ptr=boost::make_shared<char[]>(size);
+            std::shared_ptr<char[]> ptr=std::make_shared<char[]>(size);
             memcpy(ptr.get(), data, size);
             return ptr;
         }

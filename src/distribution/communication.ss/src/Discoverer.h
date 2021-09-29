@@ -24,7 +24,7 @@
 #pragma once
 
 #include <set>
-#include <boost/function.hpp>
+#include <functional>
 #include <boost/random.hpp>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/Id.h>
@@ -63,7 +63,7 @@ namespace Com
         DiscovererBasic(boost::asio::io_service& ioService,
                         const Node& me,
                         int fragmentSize,
-                        const boost::function<void(const Node&)>& onNewNode)
+                        const std::function<void(const Node&)>& onNewNode)
             :WriterType(ioService, Resolver::Protocol(me.unicastAddress))
             ,m_running(false)
             ,m_fragmentSize(static_cast<size_t>(fragmentSize))
@@ -86,17 +86,17 @@ namespace Com
 
         void Start() SAFIR_GCC_VISIBILITY_BUG_WORKAROUND
         {
-            m_strand.dispatch([=]
+            m_strand.dispatch([this]
             {
                 m_running=true;
                 m_timer.expires_from_now(boost::chrono::milliseconds(m_random.Get()));
-                m_timer.async_wait(m_strand.wrap([=](const boost::system::error_code& error){OnTimeout(error);}));
+                m_timer.async_wait(m_strand.wrap([this](const boost::system::error_code& error){OnTimeout(error);}));
             });
         }
 
         void Stop()
         {
-            m_strand.dispatch([=]
+            m_strand.dispatch([this]
             {
                 m_running=false;
                 m_timer.cancel();
@@ -105,7 +105,7 @@ namespace Com
 
         void AddSeeds(const std::vector<std::string>& seeds)
         {
-            m_strand.dispatch([=]
+            m_strand.dispatch([this,seeds]
             {
                 for (auto seed = seeds.cbegin(); seed != seeds.cend(); ++seed)
                 {
@@ -118,7 +118,7 @@ namespace Com
         {
             lllog(DiscovererLogLevel)<<L"COM["<<m_me.nodeId<<L"]: Received discover from "<<msg.from().name().c_str()<<L" ["<<msg.from().node_id()<<L"]"<<std::endl;
 
-            m_strand.dispatch([=]
+            m_strand.dispatch([this,msg]
             {
                 if (!m_running)
                 {
@@ -154,7 +154,7 @@ namespace Com
         {
             lllog(DiscovererLogLevel)<<L"COM["<<m_me.nodeId<<L"]: Received node info from "<<(msg.has_sent_from_node() ? msg.sent_from_node().name().c_str() : "<NotPresent>")<<", numNodes="<<msg.nodes().size()<<std::endl;
 
-            m_strand.dispatch([=]
+            m_strand.dispatch([this,msg]
             {
                 if (!m_running)
                 {
@@ -213,7 +213,7 @@ namespace Com
 
         void ExcludeNode(int64_t nodeId)
         {
-            m_strand.dispatch([=]
+            m_strand.dispatch([this,nodeId]
             {
                 m_excludedNodes.insert(nodeId);
                 m_reportedNodes.erase(nodeId);
@@ -253,7 +253,7 @@ namespace Com
         std::set<int64_t> m_excludedNodes;
         boost::asio::io_service::strand m_strand;
         Node m_me;
-        boost::function<void(const Node&)> m_onNewNode;
+        std::function<void(const Node&)> m_onNewNode;
         boost::asio::steady_timer m_timer;
         Utilities::Random m_random;
 
@@ -363,8 +363,8 @@ namespace Com
 
         void SendMessageTo(const CommunicationMessage& cm, const boost::asio::ip::udp::endpoint& toEndpoint)
         {
-            int size=cm.ByteSize();
-            boost::shared_ptr<char[]> payload(new char[size]);
+            const auto size=cm.ByteSizeLong();
+            std::shared_ptr<char[]> payload(new char[size]);
             google::protobuf::uint8* buf=reinterpret_cast<google::protobuf::uint8*>(const_cast<char*>(payload.get()));
             cm.SerializeWithCachedSizesToArray(buf);
             UserDataPtr ud(new UserData(m_me.nodeId, 0, ControlDataType, payload, static_cast<size_t>(size)));
@@ -512,7 +512,7 @@ namespace Com
 
                 //restart timer
                 m_timer.expires_from_now(boost::chrono::milliseconds(m_random.Get()));
-                m_timer.async_wait(m_strand.wrap([=](const boost::system::error_code& error){OnTimeout(error);}));
+                m_timer.async_wait(m_strand.wrap([this](const boost::system::error_code& error){OnTimeout(error);}));
             }
         }
     };

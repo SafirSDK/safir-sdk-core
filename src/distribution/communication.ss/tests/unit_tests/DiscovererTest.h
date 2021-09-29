@@ -35,7 +35,7 @@ public:
     {
         std::cout<<"SendDiscoverToSeed started"<<std::endl;
         boost::asio::io_service io;
-        auto work=boost::make_shared<boost::asio::io_service::work>(io);
+        auto work=std::make_shared<boost::asio::io_service::work>(io);
         boost::thread_group threads;
         for (int i = 0; i < 9; ++i)
         {
@@ -267,7 +267,7 @@ public:
         std::cout<<"HandleDiscover started"<<std::endl;
 
         boost::asio::io_service io;
-        auto work=boost::make_shared<boost::asio::io_service::work>(io);
+        auto work=std::make_shared<boost::asio::io_service::work>(io);
         boost::thread_group threads;
         for (int i = 0; i < 9; ++i)
         {
@@ -443,7 +443,7 @@ private:
         std::vector<int64_t> sentDiscoverTo;
         std::vector<int64_t> sentNodeInfoTo;
         std::queue<Com::CommunicationMessage> recvQueue;
-        boost::shared_ptr<HandleDiscover::Discoverer> discover;
+        std::shared_ptr<HandleDiscover::Discoverer> discover;
 
         Info() {}
 

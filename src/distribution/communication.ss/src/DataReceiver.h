@@ -23,8 +23,8 @@
 ******************************************************************************/
 #pragma once
 
-#include <boost/function.hpp>
-#include <boost/bind.hpp>
+#include <memory>
+#include <functional>
 #include <boost/chrono.hpp>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
@@ -59,24 +59,23 @@ namespace Com
      * by the application and in that case DataReceiver will sleep until callback isReceiverReady is returning true again.
      */
     template <class ReaderType>
-    class DataReceiverType : private ReaderType, private boost::noncopyable
+    class DataReceiverType : private ReaderType
     {
     public:
-
         DataReceiverType(boost::asio::io_service::strand& receiveStrand,
                          const std::string& unicastAddress,
                          const std::string& multicastAddress,
-                         const boost::function<bool(const char*, size_t, bool multicast)>& onRecv,
-                         const boost::function<bool(void)>& isReceiverIsReady)
+                         const std::function<bool(const char*, size_t, bool multicast)>& onRecv,
+                         const std::function<bool(void)>& isReceiverIsReady)
             :m_strand(receiveStrand)
-            ,m_timer(m_strand.get_io_service(), boost::chrono::milliseconds(10))
+            ,m_timer(m_strand.context(), boost::chrono::milliseconds(10))
             ,m_onRecv(onRecv)
             ,m_isReceiverReady(isReceiverIsReady)
             ,m_running(false)
         {
             auto unicastEndpoint=Resolver::StringToEndpoint(unicastAddress);
 
-            m_socket.reset(new boost::asio::ip::udp::socket(m_strand.get_io_service()));
+            m_socket.reset(new boost::asio::ip::udp::socket(m_strand.context()));
             m_socket->open(unicastEndpoint.protocol());
             m_socket->set_option(boost::asio::ip::udp::socket::reuse_address(true));
             m_socket->bind(unicastEndpoint);
@@ -91,7 +90,7 @@ namespace Com
                 {
                     throw std::logic_error("Unicast address and multicast address is not in same format (IPv4 and IPv6)");
                 }
-                m_multicastSocket.reset(new boost::asio::ip::udp::socket(m_strand.get_io_service()));
+                m_multicastSocket.reset(new boost::asio::ip::udp::socket(m_strand.context()));
                 m_multicastSocket->open(mcEndpoint.protocol());
                 m_multicastSocket->set_option(boost::asio::ip::udp::socket::reuse_address(true));
                 m_multicastSocket->set_option(boost::asio::ip::multicast::enable_loopback(true));
@@ -104,9 +103,13 @@ namespace Com
 
         }
 
+        //make noncopyable
+        DataReceiverType(const DataReceiverType&) = delete;
+        const DataReceiverType& operator=(const DataReceiverType&) = delete;
+
         void Start()
         {
-            m_strand.dispatch([=]
+            m_strand.dispatch([this]
             {
                 m_running=true;
                 AsyncReceive(m_bufferUnicast, m_socket.get());
@@ -119,7 +122,7 @@ namespace Com
 
         void Stop()
         {
-            m_strand.dispatch([=]
+            m_strand.dispatch([this]
             {
                 m_running=false;
                 m_timer.cancel();
@@ -140,10 +143,10 @@ namespace Com
 #endif
         boost::asio::io_service::strand& m_strand;
         boost::asio::steady_timer m_timer;
-        boost::function<bool(const char*, size_t, bool multicast)> m_onRecv;
-        boost::function<bool(void)> m_isReceiverReady;
-        boost::shared_ptr<boost::asio::ip::udp::socket> m_socket;
-        boost::shared_ptr<boost::asio::ip::udp::socket> m_multicastSocket;
+        std::function<bool(const char*, size_t, bool multicast)> m_onRecv;
+        std::function<bool(void)> m_isReceiverReady;
+        std::shared_ptr<boost::asio::ip::udp::socket> m_socket;
+        std::shared_ptr<boost::asio::ip::udp::socket> m_multicastSocket;
         bool m_running;
 
         char m_bufferUnicast[Parameters::ReceiveBufferSize];
@@ -154,7 +157,7 @@ namespace Com
             ReaderType::AsyncReceive(buf,
                                      Parameters::ReceiveBufferSize,
                                      socket,
-                                     m_strand.wrap([=](const boost::system::error_code& error, size_t bytesRecv)
+                                     m_strand.wrap([this,buf,socket](const boost::system::error_code& error, size_t bytesRecv)
                                      {
                                          HandleReceive(error, bytesRecv, buf, socket);
                                      }));
@@ -241,7 +244,7 @@ namespace Com
         void SetWakeUpTimer(char* buf, boost::asio::ip::udp::socket* socket)
         {
             m_timer.expires_from_now(boost::chrono::milliseconds(10));
-            m_timer.async_wait(m_strand.wrap([=](const boost::system::error_code& error){WakeUpAfterSleep(error, buf, socket);}));
+            m_timer.async_wait(m_strand.wrap([this,buf,socket](const boost::system::error_code& error){WakeUpAfterSleep(error, buf, socket);}));
         }
 
         void WakeUpAfterSleep(const boost::system::error_code& /*error*/, char* buf, boost::asio::ip::udp::socket* socket)
@@ -269,7 +272,7 @@ namespace Com
         void AsyncReceive(char* buf,
                           size_t bufSize,
                           boost::asio::ip::udp::socket* socket,
-                          const boost::function< void(const boost::system::error_code&, size_t) >& completionHandler)
+                          const std::function< void(const boost::system::error_code&, size_t) >& completionHandler)
         {
             socket->async_receive(boost::asio::buffer(buf, bufSize), completionHandler);
         }
