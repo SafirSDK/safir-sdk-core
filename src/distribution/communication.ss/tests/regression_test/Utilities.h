@@ -41,7 +41,6 @@
 
 #include <boost/asio/steady_timer.hpp>
 #include <boost/lexical_cast.hpp>
-#include <boost/make_shared.hpp>
 #include <Safir/Dob/Internal/Communication.h>
 #include <boost/chrono.hpp>
 
@@ -65,9 +64,9 @@ namespace Utilities
         return checksum==crc.checksum();
     }
 
-    inline boost::shared_ptr<char[]> CreateMsg(uint64_t value, size_t size)
+    inline std::shared_ptr<char[]> CreateMsg(uint64_t value, size_t size)
     {
-        boost::shared_ptr<char[]> data=boost::make_shared<char[]>(size);
+        std::shared_ptr<char[]> data=std::make_shared<char[]>(size);
         (*reinterpret_cast<uint64_t*>(data.get()))=value;
         SetCRC(data.get(), size);
         return data;

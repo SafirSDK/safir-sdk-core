@@ -23,10 +23,10 @@
 ******************************************************************************/
 #include <iostream>
 #include <limits>
+#include <functional>
+#include <memory>
 #include <boost/chrono.hpp>
-#include <boost/function.hpp>
 #include <boost/program_options.hpp>
-#include <boost/make_shared.hpp>
 #include <Safir/Utilities/Internal/Id.h>
 #include <Safir/Dob/Internal/Communication.h>
 
@@ -293,9 +293,9 @@ inline bool ValidCRC(const char* ptr, size_t size)
     return checksum==crc.checksum();
 }
 
-inline boost::shared_ptr<char[]> CreateMessage(uint64_t val, size_t size)
+inline std::shared_ptr<char[]> CreateMessage(uint64_t val, size_t size)
 {
-    boost::shared_ptr<char[]> msg=boost::make_shared<char[]>(size);
+    std::shared_ptr<char[]> msg=std::make_shared<char[]>(size);
     memset(msg.get(), 0, size);
     (*reinterpret_cast<uint64_t*>(msg.get()))=val;
     SetCRC(msg.get(), size);
@@ -307,8 +307,8 @@ class Sp : private boost::noncopyable
 public:
 
     Sp(uint64_t numRecv, bool accumulated, bool acked,
-       const boost::function< void(int64_t) >& includeNode,
-       const boost::function< void(int64_t) >& reportNodeFinished)
+       const std::function< void(int64_t) >& includeNode,
+       const std::function< void(int64_t) >& reportNodeFinished)
         :m_nodeTypes()
         ,m_nodeNames()
         ,m_recvCount()
@@ -436,8 +436,8 @@ private:
     uint64_t m_numRecv;
     bool m_accumulated;
     bool m_acked;
-    boost::function< void(int64_t) > m_includeNode;
-    boost::function< void(int64_t) > m_reportNodeFinished;
+    std::function< void(int64_t) > m_includeNode;
+    std::function< void(int64_t) > m_reportNodeFinished;
 };
 
 char* Allocate(size_t size) {return new char[size];}
@@ -458,15 +458,15 @@ int main(int argc, char * argv[])
     std::ostringstream name;
     name<<"Test_"<<cmd.unicastAddress;
     boost::asio::io_service ioService;
-    auto work=boost::make_shared<boost::asio::io_service::work>(ioService);
+    auto work=std::make_shared<boost::asio::io_service::work>(ioService);
     int numberOfDiscoveredNodes=0;
     boost::barrier startBarrier(2);
     Semaphore stopCondition(cmd.accumulatedRecv ? 1 : cmd.await, false); //if accumulated only one node will report finished, the one posting the last message.
     Semaphore queueFullSem(1, true);
 
     std::set<int64_t> nodes;
-    boost::shared_ptr<Safir::Dob::Internal::Com::Communication> com;
-    boost::shared_ptr<Sp> sp(new Sp(cmd.nrecv, cmd.accumulatedRecv, cmd.acked,
+    std::shared_ptr<Safir::Dob::Internal::Com::Communication> com;
+    std::shared_ptr<Sp> sp(new Sp(cmd.nrecv, cmd.accumulatedRecv, cmd.acked,
     [&](int64_t id)
     {
         nodes.insert(id);
