@@ -39,8 +39,8 @@ size_t gsize = 0;
 class Handler
 {
 public:
-    void PerformOnStateMessage(const workaround::function<void(std::unique_ptr<char []> data,
-                                                        const size_t size)> & fn,
+    void PerformOnStateMessage(const std::function<void(std::unique_ptr<char []> data,
+                               const size_t size)> & fn,
                                const bool onlyOwnState) const
     {
         BOOST_CHECK(onlyOwnState == false);
@@ -58,7 +58,7 @@ public:
         }
     }
 
-    boost::function<void()> stopCall;
+    std::function<void()> stopCall;
 };
 
 class Publisher

@@ -87,11 +87,11 @@ public:
 
     bool SendTo(const int64_t nodeId,
                 const int64_t sender,
-                const boost::shared_ptr<const char[]>& data,
+                const std::shared_ptr<const char[]>& data,
                 const size_t size);
 
     bool SendAll(const int64_t sender,
-                 const boost::shared_ptr<const char[]>& data,
+                 const std::shared_ptr<const char[]>& data,
                  const size_t size);
 
     void EnableOverflows() {m_overflows = true;}
@@ -132,16 +132,16 @@ public:
     }
 
    //Callbacks functions used in Communications public interface.
-    typedef boost::function<void(const std::string& name, int64_t nodeId, int64_t nodeTypeId, const std::string& controlAddress, const std::string& dataAddress)> NewNode;
-    typedef boost::function<void(int64_t fromNodeId)> GotReceiveFrom;
-    typedef boost::function<void(int64_t toNodeId)> RetransmitTo;
-    typedef boost::function<void(int64_t fromNodeId,
+    typedef std::function<void(const std::string& name, int64_t nodeId, int64_t nodeTypeId, const std::string& controlAddress, const std::string& dataAddress)> NewNode;
+    typedef std::function<void(int64_t fromNodeId)> GotReceiveFrom;
+    typedef std::function<void(int64_t toNodeId)> RetransmitTo;
+    typedef std::function<void(int64_t fromNodeId,
                                int64_t fromNodeType,
                                const char* const data,
                                size_t size)> ReceiveData;
 
-    typedef boost::function<char*(size_t size)> Allocator;
-    typedef boost::function<void(const char *)> DeAllocator;
+    typedef std::function<char*(size_t size)> Allocator;
+    typedef std::function<void(const char *)> DeAllocator;
 
     void SetDataReceiver(const ReceiveData& callback, const int64_t /*dataTypeIdentifier*/, const Allocator& alloc, const DeAllocator& dealloc)
     {
@@ -153,7 +153,7 @@ public:
 
     bool Send(const int64_t nodeId,
               const int64_t nodeTypeId,
-              const boost::shared_ptr<const char[]>& data,
+              const std::shared_ptr<const char[]>& data,
               const size_t size,
               const int64_t /*dataTypeIdentifier*/,
               const bool ack)
@@ -199,7 +199,7 @@ public:
 
 bool Connector::SendTo(const int64_t nodeId,
                        const int64_t sender,
-                       const boost::shared_ptr<const char[]>& data,
+                       const std::shared_ptr<const char[]>& data,
                        const size_t size)
 {
     if (!DeliverMessage())
@@ -234,7 +234,7 @@ bool Connector::SendTo(const int64_t nodeId,
 
 
 bool Connector::SendAll(const int64_t sender,
-                        const boost::shared_ptr<const char[]>& data,
+                        const std::shared_ptr<const char[]>& data,
                         const size_t size)
 {
     if (!DeliverMessage())
@@ -441,7 +441,7 @@ struct Fixture
             }
         }
 
-        boost::shared_ptr<void> dummy;
+        std::shared_ptr<void> dummy;
         const auto raw = RawStatisticsCreator::Create(std::move(msg));
         
         for (auto node = nodes.cbegin(); node != nodes.cend(); ++node)
@@ -479,7 +479,7 @@ BOOST_FIXTURE_TEST_SUITE( s, Fixture )
 
 BOOST_AUTO_TEST_CASE( start_stop )
 {
-    BOOST_CHECK(!nodes[0]->comm.receiveDataCb.empty());
+    BOOST_CHECK(nodes[0]->comm.receiveDataCb != nullptr);
     BOOST_CHECK(!nodes[0]->eh->IsElected());
 
     //this is kind of an implementation detail...

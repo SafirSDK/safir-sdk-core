@@ -113,7 +113,7 @@ public:
         n2.HandleReceivedNodeInfo(ni1);
 
         //Wait for HandleReceivedNodeInfo to be executed
-        boost::atomic<int> fence(0);
+        std::atomic<int> fence(0);
         n0.m_strand.post([&]{++fence;});
         n1.m_strand.post([&]{++fence;});
         n2.m_strand.post([&]{++fence;});

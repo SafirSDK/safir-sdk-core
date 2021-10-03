@@ -29,16 +29,6 @@
 #include <ostream>
 #include <string>
 
-//Forward declare some asio stuff.
-namespace boost
-{
-namespace asio
-{
-    class io_service;
-}
-}
-
-
 namespace Safir
 {
 namespace Dob

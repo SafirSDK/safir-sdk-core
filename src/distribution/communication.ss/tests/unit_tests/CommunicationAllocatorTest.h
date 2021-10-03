@@ -32,7 +32,7 @@ public:
     {
         std::cout<<"AllocatorTest started"<<std::endl;
 
-        boost::atomic<unsigned int> go(0);
+        std::atomic<unsigned int> go(0);
         auto SetReady=[&]{go=1;};
         auto WaitUntilReady=[&]
         {
@@ -424,7 +424,7 @@ private:
     static boost::mutex mutex;
     static std::map<int64_t, int> received;
     static std::map<int64_t, uint64_t> acked;
-    static boost::atomic<unsigned int> numAllocs;
+    static std::atomic<unsigned int> numAllocs;
 
     struct TestSendPolicy
     {
@@ -482,4 +482,4 @@ private:
 boost::mutex AllocatorTest::mutex;
 std::map<int64_t, int> AllocatorTest::received;
 std::map<int64_t, uint64_t> AllocatorTest::acked;
-boost::atomic<unsigned int> AllocatorTest::numAllocs(0);
+std::atomic<unsigned int> AllocatorTest::numAllocs(0);

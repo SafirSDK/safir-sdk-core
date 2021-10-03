@@ -26,13 +26,12 @@
 #include <Safir/Dob/Internal/RawStatistics.h>
 #include <Safir/Dob/Internal/SystemPictureDefs.h>
 #include <boost/noncopyable.hpp>
-#include <boost/shared_ptr.hpp>
 #include <Safir/Utilities/Internal/SystemLog.h>
-#include "Function.h"
 #include <limits>
-#include <boost/atomic.hpp>
 #include <map>
 #include <set>
+#include <memory>
+#include <functional>
 #include "ElectionHandler.h"
 #include "MessagePrinting.h"
 #include "RawChanges.h"
@@ -124,7 +123,7 @@ namespace SP
 
             rawHandler.AddRawChangedCallback(m_strand.wrap([this](const RawStatistics& statistics,
                                                                   const RawChanges flags,
-                                                                  boost::shared_ptr<void> completionSignaller)
+                                                                  std::shared_ptr<void> completionSignaller)
             {
                 lllog(8) << "SP: Coordinator got new raw data (" << flags << ")" << std::endl;
 
@@ -149,7 +148,7 @@ namespace SP
             }));
         }
 
-        void SetStateChangedCallback(const boost::function<void(const SystemStateMessage& data)>& callback)
+        void SetStateChangedCallback(const std::function<void(const SystemStateMessage& data)>& callback)
         {
             m_strand.dispatch([this,callback]
                               {
@@ -160,8 +159,8 @@ namespace SP
         //used to send state message
         //if onlyOwnState is true the callback will only be called if we're elected
         //and have a valid own system state that is ok to send.
-        void PerformOnStateMessage(const workaround::function<void(std::unique_ptr<char []> data,
-                                                            const size_t size)> & fn,
+        void PerformOnStateMessage(const std::function<void(std::unique_ptr<char []> data,
+                                   const size_t size)> & fn,
                                    const bool onlyOwnState)
         {
             m_strand.dispatch([this,fn,onlyOwnState]
@@ -185,7 +184,7 @@ namespace SP
                 }
 
                 lllog(8) << " - Ok to send!" << std::endl;
-                const size_t size = m_stateMessage.ByteSize();
+                const size_t size = m_stateMessage.ByteSizeLong();
                 auto data = std::unique_ptr<char[]>(new char[size]);
                 m_stateMessage.SerializeWithCachedSizesToArray
                     (reinterpret_cast<google::protobuf::uint8*>(data.get()));
@@ -195,7 +194,7 @@ namespace SP
 
         //new incoming system state from elected coordinator
         void NewRemoteStatistics(const int64_t from,
-                                 const boost::shared_ptr<const char[]>& data,
+                                 const std::shared_ptr<const char[]>& data,
                                  const size_t size)
         {
             m_strand.dispatch([this,from,data,size]
@@ -282,7 +281,7 @@ namespace SP
                 }
 
 
-                if (!m_stateChangedCallback.empty())
+                if (m_stateChangedCallback != nullptr)
                 {
                     m_stateChangedCallback(m_stateMessage);
                 }
@@ -807,7 +806,7 @@ namespace SP
                 lllog(9) << "SP: New state:\n" << m_stateMessage << "\n";
             }
 
-            if (!m_stateChangedCallback.empty())
+            if (m_stateChangedCallback != nullptr)
             {
                 m_stateChangedCallback(m_stateMessage);
             }
@@ -819,7 +818,7 @@ namespace SP
         }
 
 
-        mutable boost::asio::strand m_strand;
+        mutable boost::asio::io_service::strand m_strand;
         CommunicationT& m_communication;
 
         std::unique_ptr<ElectionHandlerT> m_electionHandler;
@@ -827,7 +826,7 @@ namespace SP
         RawStatistics m_lastStatistics;
         bool m_lastStatisticsDirty;
 
-        boost::function<void(const SystemStateMessage& data)> m_stateChangedCallback;
+        std::function<void(const SystemStateMessage& data)> m_stateChangedCallback;
 
         SystemStateMessage m_stateMessage;
 

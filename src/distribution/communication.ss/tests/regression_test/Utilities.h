@@ -39,6 +39,7 @@
 #pragma warning (pop)
 #endif
 
+#include <memory>
 #include <boost/asio/steady_timer.hpp>
 #include <boost/lexical_cast.hpp>
 #include <Safir/Dob/Internal/Communication.h>
@@ -66,7 +67,7 @@ namespace Utilities
 
     inline std::shared_ptr<char[]> CreateMsg(uint64_t value, size_t size)
     {
-        std::shared_ptr<char[]> data=std::make_shared<char[]>(size);
+        auto data=std::shared_ptr<char[]>(new char[size]);
         (*reinterpret_cast<uint64_t*>(data.get()))=value;
         SetCRC(data.get(), size);
         return data;

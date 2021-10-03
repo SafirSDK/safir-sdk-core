@@ -1,5 +1,7 @@
 #This file sets up some of the compiler flags we want for GCC and MSVC.
 
+set(CXX_STANDARD 20)
+
 if (UNIX)
 
    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
@@ -11,7 +13,7 @@ if (UNIX)
    endif()
 
    #turn on more warnings, set up use of threads, and set symbol visibility to hide as much as possible
-   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -Winvalid-pch -pthread -fvisibility=hidden -fvisibility-inlines-hidden ${stack_protector_option} -std=c++20")
+   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -Winvalid-pch -pthread -fvisibility=hidden -fvisibility-inlines-hidden ${stack_protector_option}")
    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Wpedantic -Winvalid-pch -pthread -fvisibility=hidden -Bsymbolic ${stack_protector_option}")
 
    SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--exclude-libs=ALL -Wl,--warn-common -Wl,--fatal-warnings")

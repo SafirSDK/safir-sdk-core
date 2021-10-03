@@ -23,6 +23,7 @@
 ******************************************************************************/
 #pragma once
 
+#include <boost/asio/io_service.hpp>
 #include <boost/noncopyable.hpp>
 #include <Safir/Dob/Internal/RawStatistics.h>
 #include <Safir/Dob/Internal/SystemState.h>
@@ -30,16 +31,6 @@
 #include <map>
 #include <vector>
 #include <memory>
-
-//Forward declare some asio stuff.
-namespace boost
-{
-namespace asio
-{
-    class io_service;
-}
-}
-
 
 namespace Safir
 {
@@ -97,8 +88,8 @@ namespace SP
                       const int64_t nodeTypeId,
                       const std::map<int64_t, NodeType>& nodeTypes,
                       const boost::chrono::steady_clock::duration& aloneTimeout,
-                      const boost::function<bool (const int64_t incarnationId)>& validateJoinSystemCallback,
-                      const boost::function<bool (const int64_t incarnationId)>& validateFormSystemCallback);
+                      const std::function<bool (const int64_t incarnationId)>& validateJoinSystemCallback,
+                      const std::function<bool (const int64_t incarnationId)>& validateFormSystemCallback);
 
 
         /**
@@ -137,7 +128,7 @@ namespace SP
          * Call Stop to end all subscriptions.
          * Note that it is not possible to call Start again after a Stop call.
          */
-        void StartRawSubscription(const boost::function<void (const RawStatistics& data)>& dataCallback);
+        void StartRawSubscription(const std::function<void (const RawStatistics& data)>& dataCallback);
 
         /**
          * Start a subscription to system state information.
@@ -145,7 +136,7 @@ namespace SP
          * Call Stop to end all subscriptions.
          * Note that it is not possible to call Start again after a Stop call.
          */
-        void StartStateSubscription(const boost::function<void (const SystemState& data)>& dataCallback);
+        void StartStateSubscription(const std::function<void (const SystemState& data)>& dataCallback);
 
 
         /**

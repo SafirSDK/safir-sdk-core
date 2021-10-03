@@ -43,7 +43,7 @@
 
 using namespace Safir::Dob::Internal::SP;
 
-boost::shared_ptr<void> cs;
+std::shared_ptr<void> cs;
 
 RawStatistics GetRawWithOneNode()
 {
@@ -309,9 +309,9 @@ SystemStateMessage GetStateWithTwoNodes()
 }
 
 
-typedef boost::function<void(const RawStatistics& statistics,
+typedef std::function<void(const RawStatistics& statistics,
                            const RawChanges& flags,
-                           boost::shared_ptr<void> completionSignaller)> StatisticsCallback;
+                           std::shared_ptr<void> completionSignaller)> StatisticsCallback;
 
 
 class CommunicationStub
@@ -371,9 +371,9 @@ public:
                         const std::map<int64_t, NodeType>& /*nodeTypes*/,
                         const boost::chrono::steady_clock::duration& /*aloneTimeout*/,
                         const char* const /*receiverId*/,
-                        const boost::function<void(const int64_t nodeId,
+                        const std::function<void(const int64_t nodeId,
                                                  const int64_t electionId)>& electionCompleteCallback_,
-                        const boost::function<void(const int64_t incarnationId)>& /*setIncarnationIdCallback_*/)
+                        const std::function<void(const int64_t incarnationId)>& /*setIncarnationIdCallback_*/)
         : id(id_)
         , electedId(0)
         , stopped(false)
@@ -393,7 +393,7 @@ public:
         return electedId == node;
     }
 
-    void NodesChanged(RawStatistics /*statistics*/, boost::shared_ptr<void> /*completionSignaller*/)
+    void NodesChanged(RawStatistics /*statistics*/, std::shared_ptr<void> /*completionSignaller*/)
     {
         nodesChangedCalled = true;
     }
@@ -414,7 +414,7 @@ public:
     bool stopped;
     bool nodesChangedCalled;
 
-    const boost::function<void(const int64_t nodeId,
+    const std::function<void(const int64_t nodeId,
                              const int64_t electionId)> electionCompleteCallback;
 
 
@@ -488,7 +488,7 @@ BOOST_AUTO_TEST_CASE( start_stop )
     ioService.run();
     BOOST_REQUIRE(ElectionHandlerStub::lastInstance != nullptr);
     BOOST_CHECK(ElectionHandlerStub::lastInstance->stopped);
-    BOOST_CHECK(!rh.rawCb.empty());
+    BOOST_CHECK(rh.rawCb != nullptr);
 }
 
 BOOST_AUTO_TEST_CASE( perform_only_own_unelected )
@@ -597,8 +597,8 @@ BOOST_AUTO_TEST_CASE( propagate_state_from_other )
     rh.rawCb(GetRawWithOneNode(),RawChanges(RawChanges::NODES_CHANGED),cs);
     auto state = GetStateWithOneNode();
 
-    const size_t size = state.ByteSize();
-    auto data = boost::shared_ptr<char[]>(new char[size]);
+    const size_t size = state.ByteSizeLong();
+    auto data = std::shared_ptr<char[]>(new char[size]);
     state.SerializeWithCachedSizesToArray
         (reinterpret_cast<google::protobuf::uint8*>(data.get()));
 
@@ -656,8 +656,8 @@ BOOST_AUTO_TEST_CASE( remote_from_other_with_dead )
     rh.rawCb(GetRawWithTwoNodes(),RawChanges(RawChanges::NODES_CHANGED),cs);
     auto state = GetStateWithTwoNodes();
 
-    const size_t size = state.ByteSize();
-    auto data = boost::shared_ptr<char[]>(new char[size]);
+    const size_t size = state.ByteSizeLong();
+    auto data = std::shared_ptr<char[]>(new char[size]);
     state.SerializeWithCachedSizesToArray
         (reinterpret_cast<google::protobuf::uint8*>(data.get()));
 

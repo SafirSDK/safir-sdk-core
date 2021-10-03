@@ -51,7 +51,7 @@ namespace Internal
             : m_identifier(identifier)
             , m_tolerance(warningThreshold)
             , m_strand(strand)
-            , m_timer(m_strand.get_io_service())
+            , m_timer(m_strand.context())
             , m_stop(false)
         {
             ScheduleTimer();
@@ -103,7 +103,7 @@ namespace Internal
         boost::asio::io_service::strand& m_strand;
         boost::asio::steady_timer m_timer;
 
-        boost::atomic<bool> m_stop;
+        std::atomic<bool> m_stop;
     };
 }
 }

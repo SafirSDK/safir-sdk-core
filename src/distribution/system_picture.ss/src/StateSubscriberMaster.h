@@ -64,7 +64,7 @@ namespace SP
 
                                                     m_strand.post([this_, dataCopy]
                                                                   {
-                                                                      if (!this_->m_dataCallback.empty())
+                                                                      if (this_->m_dataCallback != nullptr)
                                                                       {
                                                                           this_->m_dataCallback(dataCopy);
                                                                       }
@@ -72,11 +72,11 @@ namespace SP
                                                 });
         }
 
-        void Start(const boost::function<void (const SystemState& data)>& dataCallback) override
+        void Start(const std::function<void (const SystemState& data)>& dataCallback) override
         {
             m_strand.dispatch([this, dataCallback]
                               {
-                                  if (!m_dataCallback.empty())
+                                  if (m_dataCallback != nullptr)
                                   {
                                       throw std::logic_error("StateSubscriberMaster already started");
                                   }
@@ -95,8 +95,8 @@ namespace SP
 
     private:
 
-        boost::function<void (const SystemState& data)> m_dataCallback;
-        boost::asio::strand m_strand;
+        std::function<void (const SystemState& data)> m_dataCallback;
+        boost::asio::io_service::strand m_strand;
     };
 
 

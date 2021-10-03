@@ -40,8 +40,8 @@ size_t gsize = 0;
 class Handler
 {
 public:
-    void PerformOnStateMessage(const workaround::function<void(std::unique_ptr<char []> data,
-                                                        const size_t size)> & fn,
+    void PerformOnStateMessage(const std::function<void(std::unique_ptr<char []> data,
+                               const size_t size)> & fn,
                                const bool onlyOwnState) const
     {
         BOOST_CHECK(onlyOwnState == true);
@@ -59,7 +59,7 @@ public:
         }
     }
 
-    boost::function<void()> stopCall;
+    std::function<void()> stopCall;
 };
 
 class Communication
@@ -67,7 +67,7 @@ class Communication
 public:
     bool Send(int64_t nodeId,
               int64_t nodeTypeId,
-              const boost::shared_ptr<char[]>& data,
+              const std::shared_ptr<char[]>& data,
               size_t size,
               int64_t /*dataTypeIdentifier*/,
               bool acked)

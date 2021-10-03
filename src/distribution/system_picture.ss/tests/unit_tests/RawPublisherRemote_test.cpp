@@ -46,8 +46,8 @@ public:
         cb = callback;
     }
 
-    void PerformOnMyStatisticsMessage(const workaround::function<void(std::unique_ptr<char []> data,
-                                                               const size_t size)> & fn) const
+    void PerformOnMyStatisticsMessage(const std::function<void(std::unique_ptr<char []> data,
+                                      const size_t size)> & fn) const
     {
         std::wcout << "Perform " << numPerform << std::endl;
         const size_t size = 10;
@@ -63,7 +63,7 @@ public:
         }
     }
 
-    boost::function<void()> stopCall;
+    std::function<void()> stopCall;
 };
 
 class Communication
@@ -71,7 +71,7 @@ class Communication
 public:
     bool Send(int64_t nodeId,
               int64_t nodeTypeId,
-              const boost::shared_ptr<char[]>& data,
+              const std::shared_ptr<char[]>& data,
               size_t size,
               int64_t /*dataTypeIdentifier*/,
               bool acked)
@@ -146,7 +146,7 @@ BOOST_AUTO_TEST_CASE( callbacks )
         (ioService,communication,nodeTypes,"foo",h,boost::chrono::hours(10));
 
     h.stopCall = [&]{publisher.Stop();};
-    boost::shared_ptr<void> cs;
+    std::shared_ptr<void> cs;
 
     cb(RawStatistics(), RawChanges(RawChanges::NODES_CHANGED), cs);
     cb(RawStatistics(), RawChanges(RawChanges::NODES_CHANGED), cs);

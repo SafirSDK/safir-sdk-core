@@ -49,7 +49,7 @@ namespace SP
                                                  const char* const data,
                                                  const size_t size)
                                           {
-                                              GotData(from,boost::shared_ptr<const char[]>(data),size);
+                                              GotData(from,std::shared_ptr<const char[]>(data),size);
                                           },
                                           LlufId_Generate64(receiverId),
                                           [](size_t size){return new char[size];},
@@ -58,7 +58,7 @@ namespace SP
 
     private:
         void GotData(const int64_t from,
-                     const boost::shared_ptr<const char[]>& data,
+                     const std::shared_ptr<const char[]>& data,
                      const size_t size)
         {
             m_receiver.NewRemoteStatistics(from, data, size);

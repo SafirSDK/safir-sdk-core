@@ -32,15 +32,13 @@
 #include "MessageWrapperCreators.h"
 #include "RawChanges.h"
 #include "AsioLatencyMonitor.h"
-#include "Function.h"
-#include <boost/make_shared.hpp>
 #include <boost/chrono.hpp>
 #include <boost/noncopyable.hpp>
-#include <boost/bind.hpp>
 #include <string>
+#include <functional>
 #include <unordered_map>
 #include <set>
-
+#include <memory>
 
 #ifdef _MSC_VER
 #  pragma warning (push)
@@ -74,9 +72,9 @@ namespace SP
     //forward declaration
     class RawStatistics;
 
-    typedef boost::function<void(const RawStatistics& statistics,
+    typedef std::function<void(const RawStatistics& statistics,
                                  const RawChanges& flags,
-                                 boost::shared_ptr<void> completionSignaller)> StatisticsCallback;
+                                 std::shared_ptr<void> completionSignaller)> StatisticsCallback;
 
     template<class CommunicationT>
     class RawHandlerBasic
@@ -113,8 +111,8 @@ namespace SP
                         const std::string& dataAddress,
                         const std::map<int64_t, NodeType>& nodeTypes,
                         const bool master,
-                        const boost::function<bool (const int64_t incarnationId)>& validateJoinSystemCallback,
-                        const boost::function<bool (const int64_t incarnationId)>& validateFormSystemCallback)
+                        const std::function<bool (const int64_t incarnationId)>& validateJoinSystemCallback,
+                        const std::function<bool (const int64_t incarnationId)>& validateFormSystemCallback)
         SAFIR_GCC_VISIBILITY_BUG_WORKAROUND
             : m_ioService(ioService)
             , m_communication(communication)
@@ -166,7 +164,7 @@ namespace SP
                                                     const std::string& dataAddress,
                                                     const bool multicast)
             {
-                m_strand.dispatch([=]
+                m_strand.dispatch([this,name,id,nodeTypeId,controlAddress,dataAddress,multicast]
                 {
                     NewNode(name,id,nodeTypeId,controlAddress,dataAddress,multicast);
                 });
@@ -197,7 +195,7 @@ namespace SP
         }
 
 
-        void PerformOnMyStatisticsMessage(const workaround::function<void(std::unique_ptr<char[]> data,
+        void PerformOnMyStatisticsMessage(const std::function<void(std::unique_ptr<char[]> data,
                                                                           const size_t size)> & fn) const
         {
             m_strand.dispatch([this,fn]
@@ -222,7 +220,7 @@ namespace SP
                     }
                 }
 
-                const size_t size = m_allStatisticsMessage.ByteSize();
+                const size_t size = m_allStatisticsMessage.ByteSizeLong();
 
                 auto data = std::unique_ptr<char[]>(new char[size]);
 
@@ -242,12 +240,12 @@ namespace SP
         }
 
 
-        void PerformOnAllStatisticsMessage(const workaround::function<void(std::unique_ptr<char []> data,
+        void PerformOnAllStatisticsMessage(const std::function<void(std::unique_ptr<char []> data,
                                                                     const size_t size)> & fn) const
         {
             m_strand.dispatch([this,fn]
                               {
-                                  const size_t size = m_allStatisticsMessage.ByteSize();
+                                  const size_t size = m_allStatisticsMessage.ByteSizeLong();
                                   auto data = std::unique_ptr<char[]>(new char[size]);
                                   m_allStatisticsMessage.SerializeWithCachedSizesToArray
                                       (reinterpret_cast<google::protobuf::uint8*>(data.get()));
@@ -255,7 +253,7 @@ namespace SP
                               });
         }
 
-        void NewRemoteStatistics(const int64_t from, const boost::shared_ptr<const char[]>& data, const size_t size)
+        void NewRemoteStatistics(const int64_t from, const std::shared_ptr<const char[]>& data, const size_t size)
         {
             m_strand.dispatch([this,from,data,size]
             {
@@ -1015,7 +1013,7 @@ namespace SP
          *
          * must be called in strand, completionHandler can be 0
          */
-        void PostRawChangedCallback(const RawChanges& flags, const boost::function<void()>& completionHandler)
+        void PostRawChangedCallback(const RawChanges& flags, const std::function<void()>& completionHandler)
         {
             lllog(7) << "SP: PostRawChangedCallback " << flags << std::endl;
             const auto copy = RawStatisticsCreator::Create
@@ -1023,10 +1021,10 @@ namespace SP
 
             //this will create an object that will cause one and only one call to the completion handler
             //when the last callback is complete.
-            boost::shared_ptr<void> completionCaller(static_cast<void*>(nullptr),
+            std::shared_ptr<void> completionCaller(static_cast<void*>(nullptr),
                                                      [completionHandler](void*)
                                                      {
-                                                         if (!completionHandler.empty())
+                                                         if (completionHandler != nullptr)
                                                          {
                                                              completionHandler();
                                                          }
@@ -1045,7 +1043,7 @@ namespace SP
 
         const int64_t m_id;
         const std::map<int64_t, NodeType> m_nodeTypes;
-        mutable boost::asio::strand m_strand;
+        mutable boost::asio::io_service::strand m_strand;
         AsioLatencyMonitor m_latencyMonitor;
 
         std::unique_ptr<Safir::Utilities::Internal::AsioPeriodicTimer> m_checkDeadNodesTimer;
@@ -1058,10 +1056,10 @@ namespace SP
         std::vector<StatisticsCallback> m_rawChangedCallbacks;
 
         const bool m_master; //true if running in SystemPicture master instance
-        const boost::function<bool (const int64_t incarnationId)> m_validateJoinSystemCallback;
-        const boost::function<bool (const int64_t incarnationId)> m_validateFormSystemCallback;
+        const std::function<bool (const int64_t incarnationId)> m_validateJoinSystemCallback;
+        const std::function<bool (const int64_t incarnationId)> m_validateFormSystemCallback;
 
-        boost::atomic<bool> m_stopped;
+        std::atomic<bool> m_stopped;
     };
 
     typedef RawHandlerBasic<Com::Communication> RawHandler;

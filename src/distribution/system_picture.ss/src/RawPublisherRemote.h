@@ -62,7 +62,7 @@ namespace SP
 
             rawHandler.AddRawChangedCallback(m_strand.wrap([this](const RawStatistics&,
                                                                   const RawChanges flags,
-                                                                  boost::shared_ptr<void> /*completionSignaller*/)
+                                                                  std::shared_ptr<void> /*completionSignaller*/)
             {
                 if (flags.NodesChanged() || flags.MetadataChanged())
                 {
@@ -137,7 +137,7 @@ namespace SP
                                                        const size_t size)
             {
                 //we need to move the data into a shared_ptr
-                boost::shared_ptr<char[]> data(std::move(d));
+                std::shared_ptr<char[]> data(std::move(d));
                 std::set<int64_t> overflowNodes;
 
                 for (auto id = toNodeTypes.cbegin(); id != toNodeTypes.cend(); ++id)
@@ -158,9 +158,9 @@ namespace SP
             });
         }
 
-        boost::asio::strand m_strand;
+        boost::asio::io_service::strand m_strand;
         boost::asio::steady_timer m_timer;
-        boost::atomic<bool> m_stopped;
+        std::atomic<bool> m_stopped;
         CommunicationT& m_communication;
         const uint64_t m_senderId;
         const std::map<int64_t, NodeType> m_nodeTypes;

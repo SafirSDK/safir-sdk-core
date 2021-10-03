@@ -49,7 +49,7 @@ public:
         retryTimeout.push_back(500);
         Sender sender(io, Com::Acked, 1, 1, 4, "127.0.0.1:10000", "224.90.90.241:10000", SlidingWindowSize, RequestAckThreshold, retryTimeout, Com::MessageHeaderSize+3); //ntId, nId, ipV, mc, waitForAck, fragmentSize
 
-        boost::atomic<unsigned int> go(0);
+        std::atomic<unsigned int> go(0);
         auto WaitUntilReady=[&]
         {
             sender.m_strand.post([&]{go=1;});
@@ -400,7 +400,7 @@ public:
         retryTimeout.push_back(500);
         Sender sender(io, Com::Unacked, 1, 1, 4, "127.0.0.1:10000", "224.90.90.241:10000", 20, 10, retryTimeout, 10); //ntId, nId, ipV, mc, waitForAck, fragmentSize
 
-        boost::atomic<unsigned int> go(0);
+        std::atomic<unsigned int> go(0);
         auto WaitUntilReady=[&]
         {
             sender.m_strand.post([&]{go=1;});
@@ -542,7 +542,7 @@ public:
         retryTimeout.push_back(3000);
         Sender sender(io, Com::Acked, 1, 1, 4, "127.0.0.1:10000", "224.90.90.241:10000", SlidingWindowSize, RequestAckThreshold, retryTimeout, Com::MessageHeaderSize+3); //ntId, nId, ipV, mc, waitForAck, fragmentSize
 
-        boost::atomic<unsigned int> go(0);
+        std::atomic<unsigned int> go(0);
         auto WaitUntilReady=[&]
         {
             sender.m_strand.post([&]{go=1;});
@@ -865,7 +865,7 @@ public:
         retryTimeout.push_back(500);
         Sender sender(io, Com::Acked, 1, 1, 4, "127.0.0.1:10000", "224.90.90.241:10000", SlidingWindowSize, RequestAckThreshold, retryTimeout, Com::MessageHeaderSize+3); //ntId, nId, ipV, mc, waitForAck, fragmentSize
 
-        boost::atomic<unsigned int> go(0);
+        std::atomic<unsigned int> go(0);
         auto WaitUntilReady=[&]
         {
             sender.m_strand.post([&]{go=1;});

@@ -88,8 +88,8 @@ namespace SP
              const int64_t nodeTypeId,
              const std::map<int64_t, NodeType>& nodeTypes,
              const boost::chrono::steady_clock::duration& aloneTimeout,
-             const boost::function<bool (const int64_t incarnationId)>& validateJoinSystemCallback,
-             const boost::function<bool (const int64_t incarnationId)>& validateFormSystemCallback)
+             const std::function<bool (const int64_t incarnationId)>& validateJoinSystemCallback,
+             const std::function<bool (const int64_t incarnationId)>& validateFormSystemCallback)
             : m_rawHandler(Safir::make_unique<RawHandler>(ioService,
                                                           communication,
                                                           name,
@@ -176,8 +176,8 @@ namespace SP
                                                           communication.DataAddress(),
                                                           nodeTypes,
                                                           false,
-                                                          boost::function<bool (const int64_t)>(),
-                                                          boost::function<bool (const int64_t)>())) //NULL function pointers to make vs2010 happy
+                                                          std::function<bool (const int64_t)>(),
+                                                          std::function<bool (const int64_t)>())) //NULL function pointers to make vs2010 happy
             , m_rawPublisherLocal(Safir::make_unique<RawPublisherLocal>(ioService,
                                                                         *m_rawHandler,
                                                                         SLAVE_LOCAL_RAW_NAME,
@@ -286,7 +286,7 @@ namespace SP
             }
         }
 
-        void StartRawSubscription(const boost::function<void (const RawStatistics& data)>& dataCallback)
+        void StartRawSubscription(const std::function<void (const RawStatistics& data)>& dataCallback)
         {
             if (m_stopped)
             {
@@ -301,7 +301,7 @@ namespace SP
             m_rawSubscriberLocal->Start(dataCallback);
         }
 
-        void StartStateSubscription(const boost::function<void (const SystemState& data)>& dataCallback)
+        void StartStateSubscription(const std::function<void (const SystemState& data)>& dataCallback)
         {
             if (m_stopped)
             {
@@ -344,7 +344,7 @@ namespace SP
         std::unique_ptr<StatePublisherRemote> m_statePublisherRemote;
         std::unique_ptr<RemoteSubscriber<Com::Communication, Coordinator>> m_stateSubscriberRemote;
 
-        boost::atomic<bool> m_stopped;
+        std::atomic<bool> m_stopped;
     };
 
     SystemPicture::SystemPicture(master_tag_t,
@@ -355,8 +355,8 @@ namespace SP
                                  const int64_t nodeTypeId,
                                  const std::map<int64_t, NodeType>& nodeTypes,
                                  const boost::chrono::steady_clock::duration& aloneTimeout,
-                                 const boost::function<bool (const int64_t incarnationId)>& validateJoinSystemCallback,
-                                 const boost::function<bool (const int64_t incarnationId)>& validateFormSystemCallback)
+                                 const std::function<bool (const int64_t incarnationId)>& validateJoinSystemCallback,
+                                 const std::function<bool (const int64_t incarnationId)>& validateFormSystemCallback)
         : m_impl(Safir::make_unique<Impl>(master_tag,
                                           ioService,
                                           communication,
@@ -407,12 +407,12 @@ namespace SP
         m_impl->Stop();
     }
 
-    void SystemPicture::StartRawSubscription(const boost::function<void (const RawStatistics& data)>& dataCallback)
+    void SystemPicture::StartRawSubscription(const std::function<void (const RawStatistics& data)>& dataCallback)
     {
         m_impl->StartRawSubscription(dataCallback);
     }
 
-    void SystemPicture::StartStateSubscription(const boost::function<void (const SystemState& data)>& dataCallback)
+    void SystemPicture::StartStateSubscription(const std::function<void (const SystemState& data)>& dataCallback)
     {
         m_impl->StartStateSubscription(dataCallback);
     }

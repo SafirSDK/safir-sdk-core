@@ -28,7 +28,6 @@
 #include <Safir/Utilities/Internal/SystemLog.h>
 #include "SubscriberInterfaces.h"
 #include <functional>
-#include <boost/atomic.hpp>
 
 #ifdef _MSC_VER
 #  pragma warning (push)
@@ -55,7 +54,7 @@ namespace SP
         : public SubscriberInterfaceT
     {
     public:
-        typedef boost::function<void (const typename SubscriberInterfaceT::DataWrapper& data)> DataCallback;
+        typedef std::function<void (const typename SubscriberInterfaceT::DataWrapper& data)> DataCallback;
 
         LocalSubscriber(boost::asio::io_service& ioService,
                         const char* const name)

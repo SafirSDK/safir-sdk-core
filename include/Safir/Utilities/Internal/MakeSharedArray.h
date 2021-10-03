@@ -1,8 +1,8 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2015 (http://safirsdkcore.com)
+* Copyright Saab AB, 2021 (http://safirsdkcore.com)
 *
-* Created by: Lars Hagström / lars.hagstrom@consoden.se
+* Created by: Lars Hagström / lars@foldspace.nu
 *
 *******************************************************************************
 *
@@ -23,18 +23,22 @@
 ******************************************************************************/
 #pragma once
 
-#ifdef _MSC_VER
-#  include <boost/function.hpp>
-#else
-#  include <functional>
-#endif
-
-namespace workaround
+namespace Safir
 {
-#ifdef _MSC_VER
-    using namespace boost;
+namespace Utilities
+{
+namespace Internal
+{
+    static inline std::shared_ptr<char[]> MakeSharedArray(const size_t size)
+    {
+#if (_MSC_VER >= 1927) || (__GNUC__ && __cpp_lib_shared_ptr_arrays >= 201707L)
+        return std::make_shared<char[]>(size);
 #else
-    using namespace std;
+        return std::shared_ptr<char[]>(new char[size]);
 #endif
+    }
 }
+}
+}
+
 

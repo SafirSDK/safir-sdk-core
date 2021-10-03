@@ -32,7 +32,7 @@ public:
     {
         std::wcout<<"DeliveryHandler started"<<std::endl;
 
-        boost::atomic<unsigned int> go(0);
+        std::atomic<unsigned int> go(0);
         auto SetReady=[&]{go=1;};
         auto WaitUntilReady=[&]
         {

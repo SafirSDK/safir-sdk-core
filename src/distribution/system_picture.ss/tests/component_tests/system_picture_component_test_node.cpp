@@ -30,7 +30,7 @@
 #include <Safir/Utilities/Internal/MakeUnique.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
 #include <Safir/Utilities/ProcessInfo.h>
-#include <boost/atomic.hpp>
+#include <atomic>
 #include <boost/lexical_cast.hpp>
 #include <fstream>
 #include <iostream>
@@ -80,7 +80,7 @@ private:
     {
     }
 
-    boost::shared_ptr<boost::recursive_mutex> m_lock;
+    std::shared_ptr<boost::recursive_mutex> m_lock;
     static boost::recursive_mutex wcout_lock;
 };
 boost::recursive_mutex Magic::wcout_lock; //static instance
@@ -331,7 +331,7 @@ protected:
     }
 
     virtual ~Common() {}
-    boost::atomic<bool> m_success;
+    std::atomic<bool> m_success;
     boost::thread_group m_threads;
 
     boost::asio::io_service m_ioService;
@@ -553,7 +553,7 @@ private:
     void Send(const std::string& message)
     {
         const size_t size = message.size();
-        const boost::shared_ptr<char[]> data(new char[size]);
+        const std::shared_ptr<char[]> data(new char[size]);
         memcpy(data.get(), &message[0], size);
         //send the data to both node types.
 
@@ -707,7 +707,7 @@ public:
                                             const char* data_,
                                             const size_t size)
         {
-            const boost::shared_ptr<const char[]> data(data_);
+            const std::shared_ptr<const char[]> data(data_);
             if (size != 10000)
             {
                 throw std::logic_error("Received incorrectly sized data!");
@@ -769,7 +769,7 @@ private:
         }
 
         const size_t size = 10000;
-        const boost::shared_ptr<char[]> data(new char[size]);
+        const std::shared_ptr<char[]> data(new char[size]);
         memset(data.get(), 3, size);
         //send the data to both node types.
         m_communication->Send(0,1,data,size,1000100222,true);
@@ -805,7 +805,7 @@ private:
     std::set<int64_t> m_injectedNodes;
 
     boost::asio::steady_timer m_sendTimer;
-    boost::atomic<bool> m_timerStopped;
+    std::atomic<bool> m_timerStopped;
     uint64_t m_receivedBytes;
 };
 
@@ -817,7 +817,7 @@ int main(int argc, char * argv[])
     try
     {
         //ensure call to CrashReporter::Stop at application exit
-        boost::shared_ptr<void> crGuard(static_cast<void*>(0),
+        std::shared_ptr<void> crGuard(static_cast<void*>(0),
                                         [](void*){Safir::Utilities::CrashReporter::Stop();});
         Safir::Utilities::CrashReporter::Start();
 
@@ -857,7 +857,7 @@ int main(int argc, char * argv[])
         std::unique_ptr<Control> control;
         std::unique_ptr<Main> main;
 
-        boost::function<void(bool restart)> stopFunc;
+        std::function<void(bool restart)> stopFunc;
         stopFunc = [&](const bool restart)
         {
             if (control == nullptr || main == nullptr)

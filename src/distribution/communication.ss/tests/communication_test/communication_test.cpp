@@ -28,6 +28,7 @@
 #include <boost/chrono.hpp>
 #include <boost/program_options.hpp>
 #include <Safir/Utilities/Internal/Id.h>
+#include <Safir/Utilities/Internal/MakeSharedArray.h>
 #include <Safir/Dob/Internal/Communication.h>
 
 #ifdef _MSC_VER
@@ -295,7 +296,7 @@ inline bool ValidCRC(const char* ptr, size_t size)
 
 inline std::shared_ptr<char[]> CreateMessage(uint64_t val, size_t size)
 {
-    std::shared_ptr<char[]> msg=std::make_shared<char[]>(size);
+    auto msg=Safir::Utilities::Internal::MakeSharedArray(size);
     memset(msg.get(), 0, size);
     (*reinterpret_cast<uint64_t*>(msg.get()))=val;
     SetCRC(msg.get(), size);

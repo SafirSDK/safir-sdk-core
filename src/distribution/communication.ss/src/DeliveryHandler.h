@@ -24,11 +24,12 @@
 #pragma once
 
 #include <memory>
-#include <boost/atomic.hpp>
+#include <atomic>
 #include <boost/unordered_map.hpp>
 #include <functional>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
+#include <Safir/Utilities/Internal/MakeSharedArray.h>
 #include "Parameters.h"
 #include "Message.h"
 #include "MessageQueue.h"
@@ -364,7 +365,7 @@ namespace Com
         const size_t m_slidingWindowSize;
         boost::asio::io_service::strand& m_receiveStrand; //for sending acks, same strand as all public methods are supposed to be called from
         boost::asio::io_service::strand m_deliverStrand; //for delivering data to application
-        boost::atomic<unsigned int> m_numberOfUndeliveredMessages;
+        std::atomic<unsigned int> m_numberOfUndeliveredMessages;
 
         NodeInfoMap m_nodes;
         ReceiverMap m_receivers;
@@ -812,7 +813,7 @@ namespace Com
 
         inline std::shared_ptr<char[]> MakePtr(const char* data, size_t size)
         {
-            std::shared_ptr<char[]> ptr=std::make_shared<char[]>(size);
+            auto ptr=Safir::Utilities::Internal::MakeSharedArray(size);
             memcpy(ptr.get(), data, size);
             return ptr;
         }

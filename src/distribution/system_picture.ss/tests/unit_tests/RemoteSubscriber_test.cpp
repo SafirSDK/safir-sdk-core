@@ -21,7 +21,7 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#include <boost/function.hpp>
+#include <functional>
 #include <Safir/Utilities/Internal/MakeUnique.h>
 #include "../../src/RemoteSubscriber.h"
 
@@ -32,24 +32,24 @@
 
 using namespace Safir::Dob::Internal::SP;
 
-boost::function<void(int64_t fromNodeId,
+std::function<void(int64_t fromNodeId,
                    int64_t fromNodeType,
                    const char* const data,
                    size_t size)> gDataCallback;
 
-boost::function<char*(size_t)> allocator;
-boost::function<void(const char* data)> deallocator;
+std::function<char*(size_t)> allocator;
+std::function<void(const char* data)> deallocator;
 
 class Com
 {
 public:
-    void SetDataReceiver(const boost::function<void(int64_t fromNodeId,
+    void SetDataReceiver(const std::function<void(int64_t fromNodeId,
                                                   int64_t fromNodeType,
                                                   const char* const data,
                                                   size_t size)>& callback,
                          int64_t /*dataTypeIdentifier*/,
-                         const boost::function<char*(size_t)>& alloc,
-                         const boost::function<void(const char* data)>& dealloc)
+                         const std::function<char*(size_t)>& alloc,
+                         const std::function<void(const char* data)>& dealloc)
     {
         gDataCallback = callback;
         allocator = alloc;
@@ -63,7 +63,7 @@ class Handler
 {
 public:
     void NewRemoteStatistics(const int64_t from,
-                             const boost::shared_ptr<const char[]>& data,
+                             const std::shared_ptr<const char[]>& data,
                              const size_t size)
     {
         ++updates;
@@ -81,7 +81,7 @@ BOOST_AUTO_TEST_CASE( send_one )
     RemoteSubscriber<::Com, ::Handler> subscriber(c, "foo", h);
 
     const size_t size = 10;
-    auto data = boost::shared_ptr<char[]>(new char[size]);
+    auto data = std::shared_ptr<char[]>(new char[size]);
     strcpy(data.get(), "123456789");
     char* dataCopy = allocator(size);
     memcpy(dataCopy,data.get(),size);

@@ -25,10 +25,11 @@
 
 #include <map>
 #include <memory>
-#include <boost/atomic.hpp>
+#include <atomic>
 #include <functional>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
+#include <Safir/Utilities/Internal/MakeSharedArray.h>
 #include "Node.h"
 #include "MessageQueue.h"
 #include "Parameters.h"
@@ -385,7 +386,7 @@ namespace Com
         const size_t m_slidingWindowSize;
         const size_t m_ackRequestThreshold;
         MessageQueue<UserDataPtr> m_sendQueue;
-        boost::atomic<unsigned int> m_sendQueueSize;
+        std::atomic<unsigned int> m_sendQueueSize;
         bool m_running;
         const std::vector<int> m_retryTimeout;
         const size_t m_fragmentDataSize; //size of a fragments data part, excluding header size.
@@ -398,7 +399,7 @@ namespace Com
         RetransmitTo m_retransmitNotification;
         std::vector<QueueNotFull> m_queueNotFullNotification;
         size_t m_queueNotFullNotificationLimit; //below number of used slots. NOT percent.
-        boost::atomic<bool> m_notifyQueueNotFull;
+        std::atomic<bool> m_notifyQueueNotFull;
         std::vector<size_t> m_sendAckRequestForMsgIndex;
         const std::string m_logPrefix;
 
@@ -416,7 +417,7 @@ namespace Com
             ni.welcome=m_lastSentMultiReceiverSeqNo;
 
             ++m_sendQueueSize;
-            std::shared_ptr<char[]> welcome=std::make_shared<char[]>(sizeof(int64_t));
+            auto welcome=Safir::Utilities::Internal::MakeSharedArray(sizeof(int64_t));
             memcpy(static_cast<void*>(welcome.get()), static_cast<const void*>(&nodeId), sizeof(int64_t));
             UserDataPtr userData=std::make_shared<UserData>(m_nodeId, 0, WelcomeDataType, welcome, sizeof(int64_t), welcome.get(), sizeof(int64_t));
             userData->header.sendMethod=MultiReceiverSendMethod;
@@ -683,7 +684,7 @@ namespace Com
                 {
                     //add ping to the normal sendQueue
                     lllog(8)<<m_logPrefix.c_str()<<"Add Ping to sendQueue"<<std::endl;
-                    std::shared_ptr<char[]> ping=std::make_shared<char[]>(1); //AddToSendQueue will throw away empty messages, add dummy content
+                    auto ping = Safir::Utilities::Internal::MakeSharedArray(1); //AddToSendQueue will throw away empty messages, add dummy content
                     AddToSendQueue(0, ping, 1, PingDataType);
                 }
             }

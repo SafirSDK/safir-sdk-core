@@ -61,7 +61,7 @@ std::unique_ptr<RawStatisticsMessage> GetProtobuf()
 }
 
 
-boost::function<void(const char* const data, const size_t size)> gDataCallback;
+std::function<void(const char* const data, const size_t size)> gDataCallback;
 
 int connect_calls = 0;
 int disconnect_calls = 0;
@@ -71,7 +71,7 @@ class Subscriber
 public:
     Subscriber(boost::asio::io_service&,
                const std::string& name,
-               const boost::function<void(const char* const data, const size_t size)>& callback)
+               const std::function<void(const char* const data, const size_t size)>& callback)
     {
         connect_calls = 0;
         disconnect_calls = 0;
@@ -107,7 +107,7 @@ BOOST_AUTO_TEST_CASE( send_one )
 
 
     const auto pbuf = GetProtobuf();
-    const size_t size = pbuf->ByteSize();
+    const size_t size = pbuf->ByteSizeLong();
     auto data = std::unique_ptr<char[]>(new char[size]);
     pbuf->SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(data.get()));
 
@@ -158,7 +158,7 @@ BOOST_AUTO_TEST_CASE( two_subscribers )
 
 
     const auto pbuf = GetProtobuf();
-    const size_t size = pbuf->ByteSize();
+    const size_t size = pbuf->ByteSizeLong();
     auto data = std::unique_ptr<char[]>(new char[size]);
     pbuf->SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(data.get()));
 
@@ -207,7 +207,7 @@ BOOST_AUTO_TEST_CASE( add_before_start )
 
 
     const auto pbuf = GetProtobuf();
-    const size_t size = pbuf->ByteSize();
+    const size_t size = pbuf->ByteSizeLong();
     auto data = std::unique_ptr<char[]>(new char[size]);
     pbuf->SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(data.get()));
 

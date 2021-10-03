@@ -25,10 +25,10 @@
 
 #include <cstdint>
 #include <vector>
-#include <memory>
 #include <functional>
 #include <boost/asio/io_service.hpp>
 #include <Safir/Dob/Internal/CommunicationExportDefs.h>
+#include <memory>
 
 namespace Safir
 {
@@ -38,7 +38,6 @@ namespace Internal
 {
 namespace Com
 {
-
     /**
      * Definition of a NodeType.
      */

@@ -26,17 +26,14 @@
 #include <Safir/Utilities/Internal/Id.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
+#include <Safir/Utilities/Internal/MakeSharedArray.h>
 #include <Safir/Dob/Internal/SystemPictureDefs.h>
 #include <Safir/Dob/Internal/RawStatistics.h>
 #include <boost/noncopyable.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/make_shared.hpp>
 #include <functional>
 #include <limits>
-#include <boost/atomic.hpp>
-#include <boost/aligned_storage.hpp>
-#include <boost/bind.hpp>
 #include <map>
+#include <memory>
 #include <set>
 
 #ifdef _MSC_VER
@@ -74,9 +71,9 @@ namespace SP
                              const std::map<int64_t, NodeType>& nodeTypes,
                              const boost::chrono::steady_clock::duration& aloneTimeout,
                              const char* const receiverId,
-                             const boost::function<void(const int64_t nodeId,
+                             const std::function<void(const int64_t nodeId,
                                                       const int64_t electionId)>& electionCompleteCallback,
-                             const boost::function<void(const int64_t incarnationId)>& formSystemCallback)
+                             const std::function<void(const int64_t incarnationId)>& formSystemCallback)
             : m_strand (ioService)
             , m_stopped(false)
             , m_communication(communication)
@@ -87,7 +84,7 @@ namespace SP
             , m_aloneTimeout(CalculateAloneTimeout(nodeTypes, aloneTimeout))
             , m_electionTimeout(CalculateElectionTimeout(nodeTypes))
             , m_electedStorage(new AlignedStorage())
-            , m_elected(reinterpret_cast<boost::atomic<int64_t>&>(*m_electedStorage))
+            , m_elected(reinterpret_cast<std::atomic<int64_t>&>(*m_electedStorage))
             , m_electionTimer(ioService)
             , m_electionInProgress(false)
             , m_currentElectionId(0)
@@ -96,14 +93,14 @@ namespace SP
             , m_electionCompleteCallback(electionCompleteCallback)
             , m_formSystemCallback(formSystemCallback)
         {
-            new (m_electedStorage.get()) boost::atomic<uint64_t>(std::numeric_limits<int64_t>::min());
+            new (m_electedStorage.get()) std::atomic<uint64_t>(std::numeric_limits<int64_t>::min());
 
             communication.SetDataReceiver([this](const int64_t from,
                                                  const int64_t nodeTypeId,
                                                  const char* const data,
                                                  const size_t size)
                                           {
-                                              GotData(from, nodeTypeId, boost::shared_ptr<const char[]>(data), size);
+                                              GotData(from, nodeTypeId, std::shared_ptr<const char[]>(data), size);
                                           },
                                           m_receiverId,
                                           [](size_t size){return new char[size];},
@@ -141,7 +138,7 @@ namespace SP
                               });
         }
 
-        void NodesChanged(const RawStatistics& statistics, boost::shared_ptr<void> completionSignaller)
+        void NodesChanged(const RawStatistics& statistics, std::shared_ptr<void> completionSignaller)
         {
             m_strand.dispatch([this, statistics, completionSignaller]
                               {
@@ -310,7 +307,7 @@ namespace SP
                 m_electionInProgress = true;
                 m_electionTimer.expires_from_now(m_electionTimeout);
 
-                m_electionTimer.async_wait(m_strand.wrap(boost::bind(&ElectionHandlerBasic<CommunicationT>::ElectionTimeout, this, _1)));
+                m_electionTimer.async_wait(m_strand.wrap([this](const boost::system::error_code& error){ElectionTimeout(error);}));
             }));
         }
 
@@ -357,7 +354,7 @@ namespace SP
         //not in strand
         void GotData(const int64_t from,
                      const int64_t nodeTypeId,
-                     const boost::shared_ptr<const char[]>& data,
+                     const std::shared_ptr<const char[]>& data,
                      size_t size)
         {
             ElectionMessage message;
@@ -480,8 +477,8 @@ namespace SP
                     aliveMsg.set_action(ALIVE);
                     aliveMsg.set_election_id(it->second.second);
 
-                    const auto size = aliveMsg.ByteSize();
-                    boost::shared_ptr<char[]> data = boost::make_shared<char[]>(size);
+                    const auto size = aliveMsg.ByteSizeLong();
+                    std::shared_ptr<char[]> data = Safir::Utilities::Internal::MakeSharedArray(size);
                     aliveMsg.SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(data.get()));
 
                     const bool sent = m_communication.Send(it->first,
@@ -510,8 +507,8 @@ namespace SP
                     victoryMsg.set_action(VICTORY);
                     victoryMsg.set_election_id(m_currentElectionId);
 
-                    const auto size = victoryMsg.ByteSize();
-                    boost::shared_ptr<char[]> data = boost::make_shared<char[]>(size);
+                    const auto size = victoryMsg.ByteSizeLong();
+                    std::shared_ptr<char[]> data = Safir::Utilities::Internal::MakeSharedArray(size);
                     victoryMsg.SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(data.get()));
 
                     const bool sent = m_communication.Send(0, *it, std::move(data), size, m_receiverId, true);
@@ -535,8 +532,8 @@ namespace SP
                     message.set_action(INQUIRY);
                     message.set_election_id(m_currentElectionId);
 
-                    const auto size = message.ByteSize();
-                    boost::shared_ptr<char[]> data = boost::make_shared<char[]>(size);
+                    const auto size = message.ByteSizeLong();
+                    std::shared_ptr<char[]> data = Safir::Utilities::Internal::MakeSharedArray(size);
                     message.SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(data.get()));
 
                     const bool sent = m_communication.Send(0, *it, std::move(data), size, m_receiverId, true);
@@ -569,7 +566,7 @@ namespace SP
         }
 
 
-        mutable boost::asio::strand m_strand;
+        mutable boost::asio::io_service::strand m_strand;
         bool m_stopped;
         CommunicationT& m_communication;
         const uint64_t m_receiverId;
@@ -585,12 +582,12 @@ namespace SP
 
         //64 bit atomic needs to be aligned on 64 bit boundary even on 32 bit systems,
         //so we need to use alignment magic.
-        typedef boost::aligned_storage<sizeof(boost::atomic<int64_t>),sizeof(boost::atomic<int64_t>)>::type AlignedStorage;
+        typedef std::aligned_storage<sizeof(std::atomic<int64_t>),sizeof(std::atomic<int64_t>)>::type AlignedStorage;
         std::unique_ptr<AlignedStorage> m_electedStorage;
-        boost::atomic<int64_t>& m_elected;
+        std::atomic<int64_t>& m_elected;
         boost::asio::steady_timer m_electionTimer;
         bool m_electionInProgress;
-        boost::atomic<int64_t> m_currentElectionId;
+        std::atomic<int64_t> m_currentElectionId;
 
         boost::asio::steady_timer m_generateIncarnationIdTimer;
 
@@ -608,11 +605,11 @@ namespace SP
         std::set<int64_t> m_pendingVictories;
 
         //callback to call on completed election
-        const boost::function<void(const int64_t nodeId,
+        const std::function<void(const int64_t nodeId,
                                  const int64_t electionId)> m_electionCompleteCallback;
 
         //callback to call when generating a new incarnation id
-        const boost::function<void(const int64_t incarnationId)> m_formSystemCallback;
+        const std::function<void(const int64_t incarnationId)> m_formSystemCallback;
 
 
     };

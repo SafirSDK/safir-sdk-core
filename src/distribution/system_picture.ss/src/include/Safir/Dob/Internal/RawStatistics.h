@@ -24,20 +24,10 @@
 #pragma once
 
 #include <Safir/Dob/Internal/SystemPictureDefs.h>
-#include <boost/function.hpp>
+#include <functional>
 #include <memory>
 #include <ostream>
 #include <string>
-
-//Forward declare some asio stuff.
-namespace boost
-{
-namespace asio
-{
-    class io_service;
-}
-}
-
 
 namespace Safir
 {
