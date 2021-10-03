@@ -87,7 +87,7 @@ namespace Internal
 
     boost::int32_t Blob::CalculateBlobSize()
     {
-        m_blobSize=static_cast<boost::int32_t>(HeaderSize)+static_cast<boost::int32_t>(m_object->ByteSize());
+        m_blobSize=static_cast<boost::int32_t>(HeaderSize + m_object->ByteSizeLong());
         return m_blobSize;
     }
 

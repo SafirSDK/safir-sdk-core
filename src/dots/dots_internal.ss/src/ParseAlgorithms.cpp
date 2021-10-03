@@ -559,7 +559,7 @@ namespace ToolSupport
     void SetupBaseClass(boost::unordered_map< DotsC_TypeId, boost::shared_ptr<Descr> >& m,
                         std::set<DotsC_TypeId>& endConditions,
                         Descr* d,
-                        const boost::function<void(Descr*, Descr*)>& setBase,
+                        const std::function<void(Descr*, Descr*)>& setBase,
                         int& recursionLevel)
     {
         static const int MaxInheritanceLevel=100; //Simple and sufficient way to find circular inheritance. More than 100 levels of inheritance is disallowed.
@@ -945,7 +945,7 @@ namespace ToolSupport
         endConditions.insert(illegalValueException->typeId);
         endConditions.insert(softwareViolationException->typeId);
         endConditions.insert(configurationErrorException->typeId);
-        boost::function<void(ExceptionDescriptionLocal*, ExceptionDescriptionLocal*)> setExeptBaseFun(SetExceptionBase);
+        std::function<void(ExceptionDescriptionLocal*, ExceptionDescriptionLocal*)> setExeptBaseFun(SetExceptionBase);
         for (boost::unordered_map<DotsC_TypeId, ExceptionDescriptionLocalPtr>::iterator it=state.repository->m_exceptions.begin(); it!=state.repository->m_exceptions.end(); ++it)
         {
             int recLevel=0;
@@ -961,7 +961,7 @@ namespace ToolSupport
         //Classes - set baseClass, create members, parameters, createRoutines.
         std::vector<ClassDescriptionLocal*> classesWithCreateRoutines;
         classesWithCreateRoutines.reserve(100);
-        boost::function<void(ClassDescriptionLocal*, ClassDescriptionLocal*)> setClassBaseFun(SetClassBase);
+        std::function<void(ClassDescriptionLocal*, ClassDescriptionLocal*)> setClassBaseFun(SetClassBase);
         endConditions.clear();
         endConditions.insert(obj->typeId);
         for (boost::unordered_map<DotsC_TypeId, ClassDescriptionLocalPtr>::iterator it=state.repository->m_classes.begin(); it!=state.repository->m_classes.end(); ++it)
@@ -995,7 +995,9 @@ namespace ToolSupport
         DeserializeObjects(state);
 
         //Create routines - verify types, check duplicates etc.
-        std::for_each(classesWithCreateRoutines.begin(), classesWithCreateRoutines.end(), boost::bind(&DouCompletionAlgorithm::HandleCreateRoutines, this, boost::ref(state), _1));
+        std::for_each(classesWithCreateRoutines.begin(),
+                      classesWithCreateRoutines.end(),
+                      [this, &state](ClassDescriptionLocal* cd){HandleCreateRoutines(state,cd);});
     }
 
     void DouCompletionAlgorithm::DeserializeObjects(const ParseState& state)
@@ -1364,17 +1366,20 @@ namespace ToolSupport
         //array size refs
         std::for_each(state.arraySizeReferences.begin(),
                       state.arraySizeReferences.end(),
-                      boost::bind(&DouCompletionAlgorithm::ResolveArraySizeRef, this, boost::ref(state), _1));
+                      [this,&state](const ParseState::ParameterReference<MemberDescriptionLocal>& ref)
+                          {ResolveArraySizeRef(state,ref);});
 
         //max length refs
         std::for_each(state.maxLengthReferences.begin(),
                       state.maxLengthReferences.end(),
-                      boost::bind(&DouCompletionAlgorithm::ResolveMaxLengthRef, this, boost::ref(state), _1));
+                      [this,&state](const ParseState::ParameterReference<MemberDescriptionLocal>& ref)
+                          {ResolveMaxLengthRef(state,ref);});
 
         //hidden create routine basic type parameters (not enums or objects)
         std::for_each(state.createRoutineIncompleteHiddenParameters.begin(),
                       state.createRoutineIncompleteHiddenParameters.end(),
-                      boost::bind(&DouCompletionAlgorithm::ResolveCreateRoutineParams, this, boost::ref(state), _1));
+                      [this,&state](const ParseState::ParameterReference<CreateRoutineDescriptionLocal>& ref)
+                      {ResolveCreateRoutineParams(state,ref);});
     }
 
     void DouCompletionAlgorithm::HandleCreateRoutines(const ParseState& state, ClassDescriptionLocal* cd)
@@ -1482,8 +1487,9 @@ namespace ToolSupport
     void DomCompletionAlgorithm::operator()(const ParseState& state)
     {
         //Insert propertyMappings and check for duplicates and missing memberMappings
-        std::for_each(state.notInsertedPropertyMappings.begin(), state.notInsertedPropertyMappings.end(),
-                      boost::bind(&DomCompletionAlgorithm::InsertPropertyMapping, this, _1));
+        std::for_each(state.notInsertedPropertyMappings.begin(),
+                      state.notInsertedPropertyMappings.end(),
+                      [this](const PropertyMappingDescriptionLocalPtr& pm){InsertPropertyMapping(pm);});
 
         //Insert hidden parameters
         for (std::vector< std::pair<ClassDescriptionLocal*, ParameterDescriptionLocalPtr> >::const_iterator parIt=state.notInsertedParameters.begin();

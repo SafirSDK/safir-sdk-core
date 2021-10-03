@@ -140,7 +140,7 @@ namespace Control
 
         void Send(const ControlInfo& info)
         {
-            const auto size = info.ByteSize();
+            const auto size = info.ByteSizeLong();
             auto data = std::unique_ptr<char[]>(new char[size]);
             info.SerializeWithCachedSizesToArray
                 (reinterpret_cast<google::protobuf::uint8*>(data.get()));

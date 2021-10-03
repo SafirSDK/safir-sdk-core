@@ -33,6 +33,7 @@
 #include <Safir/Dob/Typesystem/ToolSupport/Internal/XmlToBlobSerializer.h>
 #include "ParseState.h"
 #include "ElementNames.h"
+#include <functional>
 
 //--------------------------------------------------------------------------------------------------------------
 //This file contains all algoritms that is performed during the xml-parsing. Work done here must be fully
@@ -75,7 +76,7 @@ namespace ToolSupport
     void CreateTopLevelDefinition(boost::property_tree::ptree& pt,
                                   const std::string& currentPath,
                                   const std::string& elementName,
-                                  const boost::function< bool(const boost::shared_ptr<Descr>&) >& insert,
+                                  const std::function< bool(const boost::shared_ptr<Descr>&) >& insert,
                                   boost::shared_ptr<Descr>& lastInserted)
     {
         try
@@ -281,12 +282,14 @@ namespace ToolSupport
     {
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
-            boost::function< bool(const ClassDescriptionLocalPtr&) > insert=boost::bind(&RepositoryLocal::InsertClass, state.repository, _1);
-            CreateTopLevelDefinition(pt,
-                                     state.currentPath,
-                                     Elements::ClassName::Name(),
-                                     insert,
-                                     state.lastInsertedClass);
+            std::function<bool(const ClassDescriptionLocalPtr&)> insert =
+                [&state](const ClassDescriptionLocalPtr& val){return state.repository->InsertClass(val);};
+            CreateTopLevelDefinition
+                (pt,
+                 state.currentPath,
+                 Elements::ClassName::Name(),
+                 insert,
+                 state.lastInsertedClass);
         }
     };
 
@@ -295,7 +298,8 @@ namespace ToolSupport
     {
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
-            boost::function< bool(const EnumDescriptionLocalPtr&) > insert=boost::bind(&RepositoryLocal::InsertEnum, state.repository, _1);
+            std::function< bool(const EnumDescriptionLocalPtr&) > insert =
+                [&state](const EnumDescriptionLocalPtr& val){return state.repository->InsertEnum(val);};
             CreateTopLevelDefinition(pt,
                                      state.currentPath,
                                      Elements::EnumerationName::Name(),
@@ -308,7 +312,8 @@ namespace ToolSupport
     {
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
-            boost::function< bool(const ExceptionDescriptionLocalPtr&) > insert=boost::bind(&RepositoryLocal::InsertException, state.repository, _1);
+            std::function< bool(const ExceptionDescriptionLocalPtr&) > insert =
+                [&state](const ExceptionDescriptionLocalPtr& val){return state.repository->InsertException(val);};
             CreateTopLevelDefinition(pt,
                                      state.currentPath,
                                      Elements::ExceptionName::Name(),
@@ -321,7 +326,8 @@ namespace ToolSupport
     {
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
-            boost::function< bool(const PropertyDescriptionLocalPtr&) > insert=boost::bind(&RepositoryLocal::InsertProperty, state.repository, _1);
+            std::function< bool(const PropertyDescriptionLocalPtr&) > insert =
+                [&state](const PropertyDescriptionLocalPtr& val){return state.repository->InsertProperty(val);};
             CreateTopLevelDefinition(pt,
                                      state.currentPath,
                                      Elements::PropertyName::Name(),
@@ -334,6 +340,8 @@ namespace ToolSupport
     {
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
+            using namespace std::placeholders; //for _1, _2 etc
+            
             MemberDescriptionLocalPtr def=boost::make_shared<MemberDescriptionLocal>();
             try
             {
@@ -351,8 +359,10 @@ namespace ToolSupport
             }
 
             //check for duplicates
-            if (std::find_if(state.lastInsertedClass->members.begin(), state.lastInsertedClass->members.end(),
-                             boost::bind(NameComparerPtr<MemberDescriptionLocalPtr>, _1, def->name))!=state.lastInsertedClass->members.end())
+            if (std::find_if(state.lastInsertedClass->members.begin(),
+                             state.lastInsertedClass->members.end(),
+                             std::bind(NameComparerPtr<MemberDescriptionLocalPtr>, _1, def->name))
+                !=state.lastInsertedClass->members.end())
             {
                 std::ostringstream os;
                 os<<"A member with name '"<<def->name<<"' is defined more than one time in class "<<state.lastInsertedClass->name;
@@ -684,6 +694,8 @@ namespace ToolSupport
     {
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
+            using namespace std::placeholders; //for _1, _2 etc
+            
             ParameterDescriptionLocalPtr def=boost::make_shared<ParameterDescriptionLocal>();
 
             //Check parameter name
@@ -691,9 +703,10 @@ namespace ToolSupport
             {
                 def->name=pt.get<std::string>(Elements::ParameterName::Name());
                 SerializationUtils::Trim(def->name);
-                std::vector<ParameterDescriptionLocalPtr>::const_iterator found=std::find_if(state.lastInsertedClass->ownParameters.begin(),
-                                                                                             state.lastInsertedClass->ownParameters.end(),
-                                                                                             boost::bind(NameComparerPtr<ParameterDescriptionLocalPtr>, _1, def->name));
+                std::vector<ParameterDescriptionLocalPtr>::const_iterator found =
+                    std::find_if(state.lastInsertedClass->ownParameters.begin(),
+                                 state.lastInsertedClass->ownParameters.end(),
+                                 std::bind(NameComparerPtr<ParameterDescriptionLocalPtr>, _1, def->name));
                 if (found!=state.lastInsertedClass->ownParameters.end())
                 {
                     std::ostringstream os;
@@ -1003,6 +1016,8 @@ namespace ToolSupport
     {
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
+            using namespace std::placeholders; //for _1, _2 etc
+
             MemberDescriptionLocalPtr def=boost::make_shared<MemberDescriptionLocal>();
 
             try
@@ -1022,7 +1037,9 @@ namespace ToolSupport
                 throw ParseError("Invalid name", os.str(), state.currentPath, 68);
             }
 
-            if (std::find_if(state.lastInsertedProperty->members.begin(), state.lastInsertedProperty->members.end(), boost::bind(NameComparerPtr<MemberDescriptionLocalPtr>, _1, def->name))!=
+            if (std::find_if(state.lastInsertedProperty->members.begin(),
+                             state.lastInsertedProperty->members.end(),
+                             std::bind(NameComparerPtr<MemberDescriptionLocalPtr>, _1, def->name))!=
                 state.lastInsertedProperty->members.end())
             {
                 throw ParseError("Duplicated property member", def->name+" is defined more than one time in property "+state.lastInsertedProperty->name, state.currentPath, 69);

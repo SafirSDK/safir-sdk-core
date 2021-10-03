@@ -30,7 +30,6 @@
 #include <stack>
 #include <assert.h>
 #include <algorithm>
-#include <boost/bind.hpp>
 #include <boost/mpl/at.hpp>
 #include <boost/mpl/vector.hpp>
 #include "ParseAlgorithms.h"
@@ -291,7 +290,9 @@ namespace ToolSupport
         {
             if (m_used)
             {
-                std::for_each(m_subElements.begin(), m_subElements.end(), boost::bind(&ElementParserBase::Reset, _1, boost::ref(state)));
+                std::for_each(m_subElements.begin(),
+                              m_subElements.end(),
+                              [&state](const ElementParserBasePtr& el){el->Reset(state);});
             }
             CheckOccurrence(state);
             m_used=false;
@@ -308,7 +309,9 @@ namespace ToolSupport
         {
             if (m_used)
             {
-                std::for_each(m_subElements.begin(), m_subElements.end(), boost::bind(&ElementParserBase::Reset, _1, boost::ref(state)));
+                std::for_each(m_subElements.begin(),
+                              m_subElements.end(),
+                              [&state](const ElementParserBasePtr& el){el->Reset(state);});
             }
             m_used=true;
             ++m_occurrences;
@@ -321,12 +324,11 @@ namespace ToolSupport
             for (boost::property_tree::ptree::iterator it=pt.begin(); it!=pt.end(); ++it)
             {
                 //it->first=ElementName, it->second=subTree
-                ElementParserBaseVector::iterator match=std::find_if( m_subElements.begin(),
-                                                                        m_subElements.end(),
-                                                                        boost::bind(&ElementParserBase::Match, _1,
-                                                                                    boost::cref(it->first),
-                                                                                    boost::ref(state))
-                                                                        );
+                ElementParserBaseVector::iterator match =
+                    std::find_if(m_subElements.begin(),
+                                 m_subElements.end(),
+                                 [&state,it](const ElementParserBasePtr& el){return el->Match(it->first,state);});
+
                 if (match!=m_subElements.end())
                 {
                     (*match)->Parse(it->second, state);

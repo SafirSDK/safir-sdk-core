@@ -21,8 +21,7 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#include <boost/bind.hpp>
-#include <boost/function.hpp>
+#include <functional>
 #include <boost/make_shared.hpp>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include "ParseJob.h"

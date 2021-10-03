@@ -235,7 +235,7 @@ namespace
             cmd.set_node_id(nodeId);
         }
 
-        const auto size = cmd.ByteSize();
+        const auto size = cmd.ByteSizeLong();
         auto data = std::unique_ptr<char[]>(new char[size]);
         cmd.SerializeWithCachedSizesToArray
             (reinterpret_cast<google::protobuf::uint8*>(data.get()));

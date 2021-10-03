@@ -31,7 +31,7 @@ struct TestCase
 };
 struct CompareTestCase
 {
-    bool operator()(const TestCase& a, const TestCase& b) {return a.testNumber<=b.testNumber;}
+    bool operator()(const TestCase& a, const TestCase& b) const {return a.testNumber<=b.testNumber;}
 };
 typedef  std::set<TestCase, CompareTestCase> TestSet;
 
