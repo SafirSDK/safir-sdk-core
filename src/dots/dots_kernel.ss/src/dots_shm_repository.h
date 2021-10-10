@@ -24,7 +24,6 @@
 #ifndef __DOTS_KERNEL_REPOSITORY_H__
 #define __DOTS_KERNEL_REPOSITORY_H__
 
-#include <boost/noncopyable.hpp>
 #include <boost/interprocess/containers/vector.hpp>
 #include <boost/interprocess/containers/string.hpp>
 #include <boost/interprocess/managed_shared_memory.hpp>
@@ -670,9 +669,11 @@ namespace Internal
     };
     typedef MapShm<ClassDescriptionShm>::Type ClassMapShm;
 
-    class RepositoryShm : private boost::noncopyable
+    class RepositoryShm
     {
     public:
+        RepositoryShm(const RepositoryShm&) = delete;
+        RepositoryShm& operator=(RepositoryShm&) = delete;
 
         /**
          * @brief CreateShmCopyOfRepository - creates a named RepositoryShm repository with identical content as srcRepository

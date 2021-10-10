@@ -1,5 +1,5 @@
 add_subdirectory(dots_internal.ss)
-#TODO laha add_subdirectory(dots_kernel.ss)
+add_subdirectory(dots_kernel.ss)
 #TODO laha add_subdirectory(dots_configuration_check.ss/src)
 #TODO laha add_subdirectory(dots_cpp.ss)
 #TODO laha add_subdirectory(dots_dotnet.ss/src)

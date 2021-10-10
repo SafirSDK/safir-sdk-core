@@ -21,11 +21,8 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
+#pragma once
 
-#ifndef __DOTS_EXCEPTION_KEEPER_H__
-#define __DOTS_EXCEPTION_KEEPER_H__
-
-#include <boost/noncopyable.hpp>
 #include <Safir/Dob/Typesystem/LanguageInterfaceDefs.h>
 #include <map>
 //disable warnings in boost
@@ -57,8 +54,7 @@ namespace Internal
     /**
      * A class to hold the current exception for each thread.
      */
-    class ExceptionKeeper:
-        private boost::noncopyable
+    class ExceptionKeeper
     {
     public:
         static ExceptionKeeper & Instance();
@@ -77,6 +73,9 @@ namespace Internal
     private:
         ExceptionKeeper();
         ~ExceptionKeeper();
+
+        ExceptionKeeper(const ExceptionKeeper&) = delete;
+        ExceptionKeeper& operator=(const ExceptionKeeper&) = delete;
 
         struct ExceptionData
         {

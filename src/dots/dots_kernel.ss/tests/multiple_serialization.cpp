@@ -6,7 +6,6 @@
 *
 ******************************************************************************/
 #include <Safir/Dob/Typesystem/Internal/Kernel.h>
-#include <boost/bind.hpp>
 #include <fstream>
 #include <iostream>
 
@@ -66,7 +65,7 @@ int main(int argc, char* argv[])
     boost::thread_group tg;
     for (int i = 0; i < 50; ++i)
     {
-        tg.create_thread(boost::bind(access));
+        tg.create_thread([]{access();});
     }
     tg.join_all();
 
