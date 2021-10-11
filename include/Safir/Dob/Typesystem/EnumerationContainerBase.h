@@ -76,20 +76,20 @@ namespace Typesystem
          * @return The ordinal value of the container.
          * @throws NullException The container is null.
          */
-        virtual EnumerationValue GetOrdinal() const= 0;
+        virtual EnumerationValue GetOrdinal() const = 0;
 
         //implementation of pure virtual in ContainerBase.
-        virtual bool IsNull() const {return m_bIsNull;}
+        bool IsNull() const override {return m_bIsNull;}
 
         //implementation of pure virtual in ContainerBase.
-        virtual void SetNull()
+        void SetNull() override
         {
             m_bIsNull = true;
             m_bIsChanged = true;
         }
 
         //implementation of pure virtual in ContainerBase.
-        virtual void Copy(const ContainerBase & that)
+        void Copy(const ContainerBase & that) override
         {
             if (this != &that)
             {
@@ -129,4 +129,3 @@ namespace Typesystem
 }
 }
 #endif
-

@@ -461,7 +461,7 @@ public:
 
     }
 
-    bool Success() const
+    bool Success() const override
     {
         return SuccessCommon();
     }
@@ -607,7 +607,7 @@ public:
 
     }
 
-    bool Success() const
+    bool Success() const override
     {
         //including the master and excluding ourselves there should be 10 nodes.
         int nodes = 0;

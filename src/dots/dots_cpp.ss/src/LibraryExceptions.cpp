@@ -1,7 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2007-2013 (http://safirsdkcore.com)
-* 
+*
 * Created by: Lars Hagström / stlrha
 *
 *******************************************************************************
@@ -29,7 +29,6 @@
 #include <sstream>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <boost/thread/mutex.hpp>
-#include <boost/bind.hpp>
 
 namespace Safir
 {
@@ -37,7 +36,7 @@ namespace Dob
 {
 namespace Typesystem
 {
-    boost::once_flag LibraryExceptions::SingletonHelper::m_onceFlag = BOOST_ONCE_INIT;
+    std::once_flag LibraryExceptions::SingletonHelper::m_onceFlag;
 
     // -----------------------------------------------------------
     LibraryExceptions & LibraryExceptions::SingletonHelper::Instance()
@@ -49,7 +48,7 @@ namespace Typesystem
     // -----------------------------------------------------------
     LibraryExceptions & LibraryExceptions::Instance()
     {
-        boost::call_once(SingletonHelper::m_onceFlag,boost::bind(SingletonHelper::Instance));
+        std::call_once(SingletonHelper::m_onceFlag,[]{SingletonHelper::Instance();});
         return SingletonHelper::Instance();
     }
 
@@ -142,7 +141,7 @@ namespace Typesystem
 #pragma warning (disable: 4702) //unreachable code
 #endif
 
-        const char * what() const throw ()
+        const char * what() const throw () override
         {
             try
             {

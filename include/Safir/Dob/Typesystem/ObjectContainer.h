@@ -47,6 +47,10 @@ namespace Typesystem
         /** Default constructor. */
         ObjectContainerBase():ContainerBase() {}
 
+
+        /** Copy constructor. */
+        ObjectContainerBase(const ObjectContainerBase&) = default;
+
         /**
          * Set the smart pointer in the container.
          *
@@ -257,8 +261,7 @@ namespace Typesystem
             m_pObject = ptr;
         }
 
-        //implementation of pure virtual method.
-        virtual void SetPtr(const ObjectPtr & ptr)
+        void SetPtr(const ObjectPtr & ptr) override
         {
             m_bIsChanged = true;
             m_pObject = boost::dynamic_pointer_cast<T>(ptr);
@@ -277,7 +280,8 @@ namespace Typesystem
          * @return A smart pointer to the contained object.
          * @throws NullException The container is null.
         */
-        const T_Ptr & GetPtr() const {if (IsNull()) throw NullException(L"Object is null",__WFILE__,__LINE__); return m_pObject;}
+        const T_Ptr & GetPtr() const
+        {if (IsNull()) throw NullException(L"Object is null",__WFILE__,__LINE__); return m_pObject;}
 
         /**
          * Dereference the smart pointer in the container.
@@ -292,24 +296,19 @@ namespace Typesystem
         { if (IsNull()) throw NullException(L"Object is null",__WFILE__,__LINE__); return m_pObject.operator->(); }
 
 
-        //Override of inherited method. Parent comment describes this behaviour too..
-        virtual void SetChanged(const bool changed) {m_bIsChanged = changed; if (!IsNull()) m_pObject->SetChanged(changed);}
+        void SetChanged(const bool changed) override {m_bIsChanged = changed; if (!IsNull()) m_pObject->SetChanged(changed);}
 
-        //Override of inherited method. Parent comment describes this behaviour too..
-        virtual bool IsChanged() const {return m_bIsChanged || (!IsNull() && m_pObject->IsChanged());}
+        bool IsChanged() const override {return m_bIsChanged || (!IsNull() && m_pObject->IsChanged());}
 
-        //override of pure virtual method
-        virtual bool IsNull() const {return m_pObject == NULL;}
+        bool IsNull() const override {return m_pObject == NULL;}
 
-        //override of pure virtual method
-        virtual void SetNull()
+        void SetNull() override
         {
             m_bIsChanged = true;
             m_pObject.reset();
         }
 
-        //implementation of pure virtual in ContainerBase.
-        virtual void Copy(const ContainerBase & that)
+        void Copy(const ContainerBase & that) override
         {
             if (this != &that)
             {
@@ -329,11 +328,11 @@ namespace Typesystem
                 }
             }
         }
+
         //Reflection part (Don't use unless you really know what you're doing!!)
-        //Comments are in ObjectContainerBase.
-        virtual       ContainerBase & GetMember(const int member, const int index)
+        ContainerBase & GetMember(const int member, const int index) override
         {if (IsNull()) throw NullException(L"Object is null",__WFILE__,__LINE__); return m_pObject->GetMember(member,index);}
-        virtual const ContainerBase & GetMember(const int member, const int index) const
+        const ContainerBase & GetMember(const int member, const int index) const override
         {if (IsNull()) throw NullException(L"Object is null",__WFILE__,__LINE__); return m_pObject->GetMember(member,index);}
 
 
@@ -353,8 +352,8 @@ namespace Typesystem
 
         /** @} */
 
-        virtual const ObjectPtr GetObjectPointer() const {return boost::static_pointer_cast<Object>(m_pObject);}
-        virtual void SetObjectPointer(const ObjectPtr ptr)
+        const ObjectPtr GetObjectPointer() const override {return boost::static_pointer_cast<Object>(m_pObject);}
+        void SetObjectPointer(const ObjectPtr ptr) override
         {
 #ifndef NDEBUG
             m_pObject = boost::dynamic_pointer_cast<T>(ptr);
@@ -366,7 +365,7 @@ namespace Typesystem
             m_pObject = boost::static_pointer_cast<T>(ptr);
 #endif
         }
-        virtual void ResetObjectPointer(){m_pObject.reset();}
+        void ResetObjectPointer() override {m_pObject.reset();}
     private:
         T_Ptr m_pObject;
     };
@@ -430,8 +429,7 @@ namespace Typesystem
         }
 
 
-        //implementation of pure virtual method.
-        virtual void SetPtr(const ObjectPtr & ptr)
+        void SetPtr(const ObjectPtr & ptr) override
         {
             m_bIsChanged = true;
             m_pObject = ptr;
@@ -473,8 +471,7 @@ namespace Typesystem
             return m_pObject.operator->();
         }
 
-        //Override of inherited method. Parent comment describes this behaviour too..
-        virtual void SetChanged(const bool changed)
+        void SetChanged(const bool changed) override
         {
             m_bIsChanged = changed;
             if (!IsNull())
@@ -483,21 +480,17 @@ namespace Typesystem
             }
         }
 
-        //Override of inherited method. Parent comment describes this behaviour too..
-        virtual bool IsChanged() const {return m_bIsChanged || (!IsNull() && m_pObject->IsChanged());}
+        bool IsChanged() const override {return m_bIsChanged || (!IsNull() && m_pObject->IsChanged());}
 
-        //override of pure virtual method
-        virtual bool IsNull() const {return m_pObject == NULL;}
+        bool IsNull() const override {return m_pObject == NULL;}
 
-        //override of pure virtual method
-        virtual void SetNull()
+        void SetNull() override
         {
             m_bIsChanged = true;
             m_pObject.reset();
         }
 
-        //implementation of pure virtual in ContainerBase.
-        virtual void Copy(const ContainerBase & that)
+        void Copy(const ContainerBase & that) override
         {
             if (this != &that)
             {
@@ -519,19 +512,18 @@ namespace Typesystem
         }
 
         //Reflection part (Don't use unless you really know what you're doing!!)
-        //Comments are in ObjectContainerBase.
-        virtual       ContainerBase & GetMember(const int member, const int index)
+        ContainerBase & GetMember(const int member, const int index) override
         {if (IsNull()) throw NullException(L"Object is null",__WFILE__,__LINE__); return m_pObject->GetMember(member,index);}
-        virtual const ContainerBase & GetMember(const int member, const int index) const
+        const ContainerBase & GetMember(const int member, const int index) const override
         {if (IsNull()) throw NullException(L"Object is null",__WFILE__,__LINE__); return m_pObject->GetMember(member,index);}
 
     private:
-        virtual const ObjectPtr GetObjectPointer() const {return boost::static_pointer_cast<Object>(m_pObject);}
-        virtual void SetObjectPointer(const ObjectPtr ptr)
+        const ObjectPtr GetObjectPointer() const override {return boost::static_pointer_cast<Object>(m_pObject);}
+        void SetObjectPointer(const ObjectPtr ptr) override
         {
             m_pObject = ptr;
         }
-        virtual void ResetObjectPointer(){m_pObject.reset();}
+        void ResetObjectPointer() override {m_pObject.reset();}
 
 
         T_Ptr m_pObject;

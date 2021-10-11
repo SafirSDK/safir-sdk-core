@@ -63,9 +63,9 @@ namespace Internal
         ~RepositoryKeeper();
 
         //StartupSynchronizer stuff
-        virtual void Create();
-        virtual void Use();
-        virtual void Destroy();
+        void Create() override;
+        void Use() override;
+        void Destroy() override;
     };
 }
 }

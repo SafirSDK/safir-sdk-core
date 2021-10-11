@@ -28,9 +28,9 @@
 #include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/unordered_map.hpp>
-#include <boost/thread/once.hpp>
 #include <Safir/Dob/Typesystem/Defs.h>
 #include <Safir/Dob/Typesystem/Exceptions.h>
+#include <mutex>
 
 #ifdef _MSC_VER
 #pragma warning(push) 
@@ -154,7 +154,7 @@ namespace Typesystem
             friend ObjectFactory& ObjectFactory::Instance();
 
             static ObjectFactory& Instance();
-            static boost::once_flag m_onceFlag;
+            static std::once_flag m_onceFlag;
         };
     };
 }

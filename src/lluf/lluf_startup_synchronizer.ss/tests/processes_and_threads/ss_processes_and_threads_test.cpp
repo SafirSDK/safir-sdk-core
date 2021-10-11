@@ -56,16 +56,16 @@ public:
 private:
     int & m_state;
 
-    virtual void Create()
+    void Create() override
     {
         m_state |= Created;
     }
-    virtual void Use()
+    void Use() override
     {
         m_state |= Used;
     }
 
-    virtual void Destroy()
+    void Destroy() override
     {
         m_state |= Destroyed;
     }

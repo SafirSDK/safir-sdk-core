@@ -107,15 +107,15 @@ namespace ToolSupport
         }
 
         //Visible interface
-        virtual const char* Summary() const {return summary.c_str();}
-        virtual DotsC_TypeId GetTypeId() const {return typeId;}
-        virtual const char* GetName() const { return name.c_str(); }
-        virtual DotsC_MemberType GetMemberType() const {return memberType;}
-        virtual DotsC_CollectionType GetCollectionType() const {return collectionType;}
-        virtual DotsC_MemberType GetKeyType() const {return keyType;}
-        virtual DotsC_TypeId GetKeyTypeId() const {return keyTypeId;}
-        virtual int GetArraySize() const {return arraySize;}
-        virtual int GetMaxLength() const {return maxLength;}
+        const char* Summary() const override {return summary.c_str();}
+        DotsC_TypeId GetTypeId() const override {return typeId;}
+        const char* GetName() const override { return name.c_str(); }
+        DotsC_MemberType GetMemberType() const override {return memberType;}
+        DotsC_CollectionType GetCollectionType() const override {return collectionType;}
+        DotsC_MemberType GetKeyType() const override {return keyType;}
+        DotsC_TypeId GetKeyTypeId() const override {return keyTypeId;}
+        int GetArraySize() const override {return arraySize;}
+        int GetMaxLength() const override {return maxLength;}
 
         //Fields
         std::string summary;
@@ -140,13 +140,13 @@ namespace ToolSupport
         }
 
         //Visible interface
-        virtual const char* FileName() const {return fileName.c_str();}
-        virtual const char* Summary() const {return summary.c_str();}
-        virtual DotsC_TypeId GetTypeId() const {return typeId;}
-        virtual const char* GetName() const {return name.c_str();}
-        virtual int GetNumberOfMembers() const {return static_cast<int>(members.size());}
-        virtual DotsC_MemberIndex GetMemberIndex(const std::string& memberName) const;
-        virtual const MemberDescription* GetMember(DotsC_MemberIndex index) const {return members[index].get();}
+        const char* FileName() const override {return fileName.c_str();}
+        const char* Summary() const override {return summary.c_str();}
+        DotsC_TypeId GetTypeId() const override {return typeId;}
+        const char* GetName() const override {return name.c_str();}
+        int GetNumberOfMembers() const override {return static_cast<int>(members.size());}
+        DotsC_MemberIndex GetMemberIndex(const std::string& memberName) const override;
+        const MemberDescription* GetMember(DotsC_MemberIndex index) const override {return members[index].get();}
 
         //Fields
         DotsC_TypeId typeId;
@@ -166,11 +166,11 @@ namespace ToolSupport
         }
 
         //Visible interface
-        virtual const char* FileName() const {return fileName.c_str();}
-        virtual const char* Summary() const {return summary.c_str();}
-        virtual DotsC_TypeId GetTypeId() const {return typeId;}
-        virtual const char* GetName() const {return name.c_str();}
-        virtual const ExceptionDescription* GetBaseClass() const {return base;}
+        const char* FileName() const override {return fileName.c_str();}
+        const char* Summary() const override {return summary.c_str();}
+        DotsC_TypeId GetTypeId() const override {return typeId;}
+        const char* GetName() const override {return name.c_str();}
+        const ExceptionDescription* GetBaseClass() const override {return base;}
 
         //Fields
         DotsC_TypeId typeId;
@@ -192,36 +192,36 @@ namespace ToolSupport
         }
 
         //Visible interface
-        virtual const char* Summary() const {return summary.c_str();}
-        virtual const char* GetName() const {return name.c_str();}
-        virtual DotsC_TypeId GetClassTypeId() const {return classTypeId;}
-        virtual const char* GetQualifiedName() const {return qualifiedName.c_str();}
-        virtual DotsC_MemberType GetMemberType() const {return memberType;}
-        virtual DotsC_TypeId GetTypeId() const {return typeId;} //only valid if MemberType is object or enum
-        virtual DotsC_CollectionType GetCollectionType() const {return collectionType;}
-        virtual DotsC_MemberType GetKeyType() const {return keyType;} //only valid if collectionType is Dictionary
-        virtual DotsC_TypeId GetKeyTypeId() const {return keyTypeId;}
-        virtual int GetNumberOfValues() const {return static_cast<int>(values.size());}
-        virtual bool IsHidden() const {return hidden;}
+        const char* Summary() const override {return summary.c_str();}
+        const char* GetName() const override {return name.c_str();}
+        DotsC_TypeId GetClassTypeId() const override {return classTypeId;}
+        const char* GetQualifiedName() const override {return qualifiedName.c_str();}
+        DotsC_MemberType GetMemberType() const override {return memberType;}
+        DotsC_TypeId GetTypeId() const override {return typeId;} //only valid if MemberType is object or enum
+        DotsC_CollectionType GetCollectionType() const override {return collectionType;}
+        DotsC_MemberType GetKeyType() const override {return keyType;} //only valid if collectionType is Dictionary
+        DotsC_TypeId GetKeyTypeId() const override {return keyTypeId;}
+        int GetNumberOfValues() const override {return static_cast<int>(values.size());}
+        bool IsHidden() const override {return hidden;}
 
         //GetValues
-        virtual DotsC_Int32 GetInt32Value(int index) const {return Value(static_cast<size_t>(index)).val.int32;}
-        virtual DotsC_Int64 GetInt64Value(int index) const {return Value(static_cast<size_t>(index)).val.int64;}
-        virtual DotsC_Float32 GetFloat32Value(int index) const {return Value(static_cast<size_t>(index)).val.float32;}
-        virtual DotsC_Float64 GetFloat64Value(int index) const {return Value(static_cast<size_t>(index)).val.float64;}
-        virtual bool GetBoolValue(int index) const {return Value(static_cast<size_t>(index)).val.boolean;}
-        virtual const char* GetStringValue(int index) const {return Value(static_cast<size_t>(index)).val.str.c_str();}
-        virtual std::pair<const char*, DotsC_Int32> GetObjectValue(int index) const
+        DotsC_Int32 GetInt32Value(int index) const override {return Value(static_cast<size_t>(index)).val.int32;}
+        DotsC_Int64 GetInt64Value(int index) const override {return Value(static_cast<size_t>(index)).val.int64;}
+        DotsC_Float32 GetFloat32Value(int index) const override {return Value(static_cast<size_t>(index)).val.float32;}
+        DotsC_Float64 GetFloat64Value(int index) const override {return Value(static_cast<size_t>(index)).val.float64;}
+        bool GetBoolValue(int index) const override {return Value(static_cast<size_t>(index)).val.boolean;}
+        const char* GetStringValue(int index) const override {return Value(static_cast<size_t>(index)).val.str.c_str();}
+        std::pair<const char*, DotsC_Int32> GetObjectValue(int index) const override
         {
             const ValueDefinition& v=Value(static_cast<size_t>(index));
             return std::make_pair(&v.val.bin[0], static_cast<DotsC_Int32>(v.val.bin.size()));
         }
-        virtual std::pair<const char*, DotsC_Int32> GetBinaryValue(int index) const
+        std::pair<const char*, DotsC_Int32> GetBinaryValue(int index) const override
         {
             const ValueDefinition& v=Value(static_cast<size_t>(index));
             return std::make_pair(v.val.str.c_str(), static_cast<DotsC_Int32>(v.val.str.size()));
         }
-        virtual std::pair<DotsC_Int64, const char*> GetHashedValue(int index) const
+        std::pair<DotsC_Int64, const char*> GetHashedValue(int index) const override
         {
             const ValueDefinition& v=Value(static_cast<size_t>(index));
             if (!v.val.str.empty() && v.val.hash==0)
@@ -234,19 +234,19 @@ namespace ToolSupport
         }
 
         //keys
-        virtual const char* GetStringKey(int index) const
+        const char* GetStringKey(int index) const override
         {
             return Value(static_cast<size_t>(index)).key.str.c_str();
         }
-        virtual DotsC_Int32 GetInt32Key(int index) const
+        DotsC_Int32 GetInt32Key(int index) const override
         {
             return static_cast<DotsC_Int32>(Value(static_cast<size_t>(index)).key.int32);
         }
-        virtual DotsC_Int64 GetInt64Key(int index) const
+        DotsC_Int64 GetInt64Key(int index) const override
         {
             return Value(static_cast<size_t>(index)).key.int64;
         }
-        virtual std::pair<DotsC_Int64, const char*> GetHashedKey(int index) const
+        std::pair<DotsC_Int64, const char*> GetHashedKey(int index) const override
         {
             const ValueDefinition& val=Value(static_cast<size_t>(index));
             if (!val.key.str.empty() && val.key.hash==0)
@@ -258,7 +258,7 @@ namespace ToolSupport
             return std::make_pair(val.key.hash, val.key.str.empty() ? NULL : val.key.str.c_str());
         }
 
-        virtual int GetIndexByUnifiedKey(DotsC_Int64 unifiedKey) const
+        int GetIndexByUnifiedKey(DotsC_Int64 unifiedKey) const override
         {
             std::map<DotsC_Int64, int>::const_iterator it=unifiedKeyToIndex.find(unifiedKey);
             if (it!=unifiedKeyToIndex.end())
@@ -268,7 +268,7 @@ namespace ToolSupport
             return -1;
         }
 
-        virtual const std::map<DotsC_Int64, int>& UnifiedKeyToIndexMap() const
+        const std::map<DotsC_Int64, int>& UnifiedKeyToIndexMap() const override
         {
             return unifiedKeyToIndex;
         }
@@ -316,14 +316,14 @@ namespace ToolSupport
         }
 
         //Visible interface
-        virtual const char* FileName() const {return fileName.c_str();}
-        virtual const char* Summary() const {return summary.c_str();}
-        virtual DotsC_TypeId GetTypeId() const {return typeId;}
-        virtual const char* GetName() const {return name.c_str();}
-        virtual DotsC_TypeId GetCheckSum() const {return checksum;}
-        virtual int GetNumberOfValues() const {return static_cast<int>(enumerationValues.size());}
-        virtual const char* GetValueName(DotsC_EnumerationValue val) const {return enumerationValues[val].c_str();}
-        virtual int GetIndexOfValue(const std::string& valueName) const;
+        const char* FileName() const override {return fileName.c_str();}
+        const char* Summary() const override {return summary.c_str();}
+        DotsC_TypeId GetTypeId() const override {return typeId;}
+        const char* GetName() const override {return name.c_str();}
+        DotsC_TypeId GetCheckSum() const override {return checksum;}
+        int GetNumberOfValues() const override {return static_cast<int>(enumerationValues.size());}
+        const char* GetValueName(DotsC_EnumerationValue val) const override {return enumerationValues[val].c_str();}
+        int GetIndexOfValue(const std::string& valueName) const override;
 
         //Fields
         DotsC_TypeId typeId;
@@ -344,10 +344,10 @@ namespace ToolSupport
         }
 
         //Visible interface
-        virtual DotsC_PropertyMappingKind GetMappingKind() const {return kind;}
-        virtual std::pair<const ParameterDescription*, int /*paramIndex*/> GetParameter() const {return std::make_pair(paramRef, paramIndex);} //if mapped to parameter
-        virtual int MemberReferenceDepth() const {return static_cast<int>(memberRef.size());} //if mapped to member
-        virtual std::pair<DotsC_MemberIndex, DotsC_Int32> GetMemberReference(int depth) const {return memberRef[depth];} //if mapped to member
+        DotsC_PropertyMappingKind GetMappingKind() const override {return kind;}
+        std::pair<const ParameterDescription*, int /*paramIndex*/> GetParameter() const override {return std::make_pair(paramRef, paramIndex);} //if mapped to parameter
+        int MemberReferenceDepth() const override {return static_cast<int>(memberRef.size());} //if mapped to member
+        std::pair<DotsC_MemberIndex, DotsC_Int32> GetMemberReference(int depth) const override {return memberRef[depth];} //if mapped to member
 
         //Fields
         DotsC_PropertyMappingKind kind;
@@ -366,11 +366,11 @@ namespace ToolSupport
         }
 
         //Visible interface
-        virtual const char* FileName() const {return fileName.c_str();}
-        virtual const char* Summary() const {return summary.c_str();}
-        virtual const PropertyDescription* GetProperty() const;
-        virtual const ClassDescription* GetClass() const;
-        virtual const MemberMappingDescription* GetMemberMapping(int propertyMemberIndex) const {return memberMappings[propertyMemberIndex].get();}
+        const char* FileName() const override {return fileName.c_str();}
+        const char* Summary() const override {return summary.c_str();}
+        const PropertyDescription* GetProperty() const override;
+        const ClassDescription* GetClass() const override;
+        const MemberMappingDescription* GetMemberMapping(int propertyMemberIndex) const override {return memberMappings[propertyMemberIndex].get();}
 
         //Fields
         std::string summary;
@@ -390,16 +390,16 @@ namespace ToolSupport
         {
         }
 
-        virtual const char* Summary() const {return summary.c_str();}
-        virtual const char* GetName() const {return name.c_str();}
+        const char* Summary() const override {return summary.c_str();}
+        const char* GetName() const override {return name.c_str();}
 
-        virtual int GetNumberOfInParameters() const {return static_cast<int>(parameters.size());}
-        virtual const MemberDescription* GetInParameterMember(int index) const;
+        int GetNumberOfInParameters() const override {return static_cast<int>(parameters.size());}
+        const MemberDescription* GetInParameterMember(int index) const override;
 
-        virtual int GetNumberOfDefaultValues() const {return static_cast<int>(memberValues.size());}
-        virtual const MemberDescription* GetDefaultValueMember(int index) const;
+        int GetNumberOfDefaultValues() const override {return static_cast<int>(memberValues.size());}
+        const MemberDescription* GetDefaultValueMember(int index) const override;
 
-        virtual std::pair<const ParameterDescription*, int /*paramIndex*/> GetDefaultValue(int index) const;
+        std::pair<const ParameterDescription*, int /*paramIndex*/> GetDefaultValue(int index) const override;
 
         std::string summary;
         std::string name;
@@ -420,29 +420,29 @@ namespace ToolSupport
         }
 
         //Visible interface
-        virtual const char* FileName() const {return fileName.c_str();}
-        virtual const char* Summary() const {return summary.c_str();}
-        virtual DotsC_TypeId GetTypeId() const {return typeId;}
-        virtual const char* GetName() const {return name.c_str();}
-        virtual const ClassDescription* GetBaseClass() const {return base;}
-        virtual int GetNumberOfDescendants() const {return static_cast<int>(descendants.size());}
-        virtual const ClassDescription* GetDescendant(int index) const {return descendants[index];}
-        virtual int GetNumberOfOwnMembers() const {return static_cast<int>(members.size());}
-        virtual int GetNumberOfInheritedMembers() const {return base ? base->GetNumberOfMembers() : 0;}
-        virtual int GetNumberOfMembers() const {return GetNumberOfOwnMembers()+GetNumberOfInheritedMembers();}
-        virtual DotsC_MemberIndex GetMemberIndex(const std::string& memberName) const;
-        virtual const MemberDescription* GetMember(DotsC_MemberIndex index) const;
+        const char* FileName() const override {return fileName.c_str();}
+        const char* Summary() const override {return summary.c_str();}
+        DotsC_TypeId GetTypeId() const override {return typeId;}
+        const char* GetName() const override {return name.c_str();}
+        const ClassDescription* GetBaseClass() const override {return base;}
+        int GetNumberOfDescendants() const override {return static_cast<int>(descendants.size());}
+        const ClassDescription* GetDescendant(int index) const override {return descendants[index];}
+        int GetNumberOfOwnMembers() const override {return static_cast<int>(members.size());}
+        int GetNumberOfInheritedMembers() const override {return base ? base->GetNumberOfMembers() : 0;}
+        int GetNumberOfMembers() const override {return GetNumberOfOwnMembers()+GetNumberOfInheritedMembers();}
+        DotsC_MemberIndex GetMemberIndex(const std::string& memberName) const override;
+        const MemberDescription* GetMember(DotsC_MemberIndex index) const override;
 
-        virtual int GetNumberOfOwnParameters() const {return static_cast<int>(ownParameters.size());}
-        virtual int GetNumberOfInheritedParameters() const {return base ? base->GetNumberOfParameters() : 0;}
-        virtual int GetNumberOfParameters() const {return GetNumberOfOwnParameters()+GetNumberOfInheritedParameters();}
-        virtual const ParameterDescription* GetParameter(DotsC_ParameterIndex index) const;
+        int GetNumberOfOwnParameters() const override {return static_cast<int>(ownParameters.size());}
+        int GetNumberOfInheritedParameters() const override {return base ? base->GetNumberOfParameters() : 0;}
+        int GetNumberOfParameters() const override {return GetNumberOfOwnParameters()+GetNumberOfInheritedParameters();}
+        const ParameterDescription* GetParameter(DotsC_ParameterIndex index) const override;
 
-        virtual void GetPropertyIds(std::set<DotsC_TypeId>& propertyIds) const;
-        virtual const PropertyMappingDescription* GetPropertyMapping(DotsC_TypeId propertyTypeId, bool & isInherited) const;
+        void GetPropertyIds(std::set<DotsC_TypeId>& propertyIds) const override;
+        const PropertyMappingDescription* GetPropertyMapping(DotsC_TypeId propertyTypeId, bool & isInherited) const override;
 
-        virtual int GetNumberOfCreateRoutines() const {return static_cast<int>(createRoutines.size());}
-        virtual const CreateRoutineDescription* GetCreateRoutine(int index) const {return createRoutines[index].get();}
+        int GetNumberOfCreateRoutines() const override {return static_cast<int>(createRoutines.size());}
+        const CreateRoutineDescription* GetCreateRoutine(int index) const override {return createRoutines[index].get();}
 
         //Fields
         DotsC_TypeId typeId;
@@ -464,24 +464,24 @@ namespace ToolSupport
     {
     public:
         //Enmerations
-        virtual const EnumDescription* GetEnum(DotsC_TypeId typeId) const {return GetPtr(m_enums, typeId);}
-        virtual int GetNumberOfEnums() const {return static_cast<int>(m_enums.size());}
-        virtual void GetAllEnumTypeIds(std::set<DotsC_TypeId>& typeIds) const {GetKeys(m_enums, typeIds);}
+        const EnumDescription* GetEnum(DotsC_TypeId typeId) const override {return GetPtr(m_enums, typeId);}
+        int GetNumberOfEnums() const override {return static_cast<int>(m_enums.size());}
+        void GetAllEnumTypeIds(std::set<DotsC_TypeId>& typeIds) const override {GetKeys(m_enums, typeIds);}
 
         //properties
-        virtual const PropertyDescription* GetProperty(DotsC_TypeId typeId) const {return GetPtr(m_properties, typeId);}
-        virtual int GetNumberOfProperties() const {return static_cast<int>(m_properties.size());}
-        virtual void GetAllPropertyTypeIds(std::set<DotsC_TypeId>& typeIds) const {GetKeys(m_properties, typeIds);}
+        const PropertyDescription* GetProperty(DotsC_TypeId typeId) const override {return GetPtr(m_properties, typeId);}
+        int GetNumberOfProperties() const override {return static_cast<int>(m_properties.size());}
+        void GetAllPropertyTypeIds(std::set<DotsC_TypeId>& typeIds) const override {GetKeys(m_properties, typeIds);}
 
         //classes
-        virtual const ClassDescription* GetClass(DotsC_TypeId typeId) const {return GetPtr(m_classes, typeId);}
-        virtual int GetNumberOfClasses() const {return static_cast<int>(m_classes.size());}
-        virtual void GetAllClassTypeIds(std::set<DotsC_TypeId>& typeIds) const {GetKeys(m_classes, typeIds);}
+        const ClassDescription* GetClass(DotsC_TypeId typeId) const override {return GetPtr(m_classes, typeId);}
+        int GetNumberOfClasses() const override {return static_cast<int>(m_classes.size());}
+        void GetAllClassTypeIds(std::set<DotsC_TypeId>& typeIds) const override {GetKeys(m_classes, typeIds);}
 
         //exceptions
-        virtual const ExceptionDescription* GetException(DotsC_TypeId typeId) const {return GetPtr(m_exceptions, typeId);}
-        virtual int GetNumberOfExceptions() const {return static_cast<int>(m_exceptions.size());}
-        virtual void GetAllExceptionTypeIds(std::set<DotsC_TypeId>& typeIds) const {GetKeys(m_exceptions, typeIds);}
+        const ExceptionDescription* GetException(DotsC_TypeId typeId) const override {return GetPtr(m_exceptions, typeId);}
+        int GetNumberOfExceptions() const override {return static_cast<int>(m_exceptions.size());}
+        void GetAllExceptionTypeIds(std::set<DotsC_TypeId>& typeIds) const override {GetKeys(m_exceptions, typeIds);}
 
         //Extra methods not from TypeRepository interface
         bool InsertEnum(const EnumDescriptionLocalPtr& val) {return m_enums.insert(std::make_pair(val->typeId, val)).second;}

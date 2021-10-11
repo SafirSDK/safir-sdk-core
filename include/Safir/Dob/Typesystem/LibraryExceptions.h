@@ -27,7 +27,7 @@
 
 #include <boost/noncopyable.hpp>
 #include <boost/unordered_map.hpp>
-#include <boost/thread/once.hpp>
+#include <mutex>
 #include <Safir/Dob/Typesystem/Defs.h>
 #include <Safir/Dob/Typesystem/Exceptions.h>
 
@@ -270,7 +270,7 @@ namespace Typesystem
             friend LibraryExceptions& LibraryExceptions::Instance();
 
             static LibraryExceptions& Instance();
-            static boost::once_flag m_onceFlag;
+            static std::once_flag m_onceFlag;
         };
     };
 }

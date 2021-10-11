@@ -87,17 +87,17 @@ namespace Typesystem
         T GetVal() const    {if (m_bIsNull) throw NullException(L"value is null",__WFILE__,__LINE__); return m_Value;}
 
         //implementation of pure virtual in ContainerBase.
-        virtual bool IsNull() const {return m_bIsNull;}
+        bool IsNull() const override {return m_bIsNull;}
 
         //implementation of pure virtual in ContainerBase.
-        virtual void SetNull()
+        void SetNull() override
         {
             m_bIsNull = true;
             m_bIsChanged = true;
         }
 
         //implementation of pure virtual in ContainerBase.
-        virtual void Copy(const ContainerBase & that)
+        void Copy(const ContainerBase & that) override
         {
             if (this != &that)
             {
@@ -152,11 +152,10 @@ namespace Typesystem
          */
         const std::wstring & GetVal() const    {if (m_bIsNull) throw NullException(L"value is null",__WFILE__,__LINE__); return m_Value;}
 
-        //implementation of pure virtual in ContainerBase.
-        virtual bool IsNull() const {return m_bIsNull;}
+        bool IsNull() const override {return m_bIsNull;}
 
         //implementation of pure virtual in ContainerBase.
-        virtual void SetNull()
+        void SetNull() override
         {
             m_bIsNull = true;
             m_bIsChanged = true;
@@ -164,7 +163,7 @@ namespace Typesystem
         }
 
         //implementation of pure virtual in ContainerBase.
-        virtual void Copy(const ContainerBase & that)
+        void Copy(const ContainerBase & that) override
         {
             if (this != &that)
             {
@@ -283,17 +282,17 @@ namespace Typesystem
 
 
         //implementation of pure virtual in ContainerBase.
-        virtual bool IsNull() const {return m_bIsNull;}
+        bool IsNull() const override {return m_bIsNull;}
 
         //implementation of pure virtual in ContainerBase.
-        virtual void SetNull()
+        void SetNull() override
         {
             m_bIsNull = true;
             m_bIsChanged = true;
         }
 
         //implementation of pure virtual in ContainerBase.
-        virtual void Copy(const ContainerBase & that)
+        void Copy(const ContainerBase & that) override
         {
             if (this != &that)
             {
@@ -481,4 +480,3 @@ namespace Typesystem
 }
 }
 #endif
-

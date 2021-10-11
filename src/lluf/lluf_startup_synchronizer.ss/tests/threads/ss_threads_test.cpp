@@ -41,13 +41,13 @@
 #endif
 
 
-class Synchronized 
+class Synchronized
     : public Safir::Utilities::Synchronized
     , private boost::noncopyable
 {
 public:
     enum State { None = 0, Created = 1, Used = 2, Destroyed = 4};
-    
+
     explicit Synchronized(int & state)
       : m_state(state)
     {
@@ -56,22 +56,22 @@ public:
 private:
     int & m_state;
 
-    virtual void Create()
+    void Create() override
     {
         m_state |= Created;
     }
-    virtual void Use()
+    void Use() override
     {
         m_state |= Used;
     }
 
-    virtual void Destroy()
+    void Destroy() override
     {
         m_state |= Destroyed;
     }
 };
 
-int threadFun(boost::barrier& barrier1, boost::barrier& barrier2) 
+int threadFun(boost::barrier& barrier1, boost::barrier& barrier2)
 {
     int state = 0;
     Synchronized synched(state);
@@ -139,5 +139,3 @@ int main()
         return 1;
     }
 }
-
-

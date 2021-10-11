@@ -124,7 +124,7 @@ namespace ToolSupport
             return os.str();
         }
 
-        virtual bool Match(const std::string& name, ParseState& state) const
+        bool Match(const std::string& name, ParseState& state) const override
         {
             if (m_parser)
             {
@@ -156,19 +156,19 @@ namespace ToolSupport
             return false;
         }
 
-        virtual const std::string& Name() const
+        const std::string& Name() const override
         {
             assert(m_parser);
             return m_parser->Name(); //Will crash if called before a successfull call to Match. By design.
         }
 
-        virtual void Parse(boost::property_tree::ptree& pt, ParseState& state)
+        void Parse(boost::property_tree::ptree& pt, ParseState& state) override
         {
             assert(m_parser);
             m_parser->Parse(pt, state); //Will crash if called before a successfull call to Match. By design.
         }
 
-        virtual void Reset(ParseState& state)
+        void Reset(ParseState& state) override
         {
             if (m_parser)
             {
@@ -210,10 +210,10 @@ namespace ToolSupport
         explicit Ignore(const ElementParserBase* parent) : ElementParserBase(parent) {}
         static const std::string& ElementName(){return ElementT::Name();}
         static bool MatchElementName(const std::string& name){return ElementName()==name;}
-        virtual bool Match(const std::string& name, ParseState&) const {return MatchElementName(name);}
-        virtual const std::string& Name() const {return ElementName();}
-        virtual void Parse(boost::property_tree::ptree&, ParseState&) {}
-        virtual void Reset(ParseState&) {}
+        bool Match(const std::string& name, ParseState&) const override {return MatchElementName(name);}
+        const std::string& Name() const override {return ElementName();}
+        void Parse(boost::property_tree::ptree&, ParseState&) override  {}
+        void Reset(ParseState&) override  {}
     };
 
     class IgnoreAny : public ElementParserBase
@@ -221,10 +221,10 @@ namespace ToolSupport
     public:
         explicit IgnoreAny() {}
         explicit IgnoreAny(const ElementParserBase* parent) : ElementParserBase(parent) {}
-        virtual bool Match(const std::string&, ParseState&) const {return true;}
-        virtual const std::string& Name() const {static std::string dummy=""; return dummy;}
-        virtual void Parse(boost::property_tree::ptree&, ParseState&) {}
-        virtual void Reset(ParseState&) {}
+        bool Match(const std::string&, ParseState&) const override {return true;}
+        const std::string& Name() const override {static std::string dummy=""; return dummy;}
+        void Parse(boost::property_tree::ptree&, ParseState&) override  {}
+        void Reset(ParseState&) override  {}
     };
 
     //-------------------------------
@@ -276,17 +276,17 @@ namespace ToolSupport
             return MatchAlg::Match(ElementName(), name);
         }
 
-        virtual const std::string& Name() const
+        const std::string& Name() const override
         {
             return ElementName();
         }
 
-        virtual bool Match(const std::string& name, ParseState& /*state*/) const
+        bool Match(const std::string& name, ParseState& /*state*/) const override
         {
             return MatchElementName(name);
         }
 
-        virtual void Reset(ParseState& state)
+        void Reset(ParseState& state) override
         {
             if (m_used)
             {
@@ -305,7 +305,7 @@ namespace ToolSupport
 #pragma warning (push)
 #pragma warning (disable:4702)
 #endif
-        virtual void Parse(boost::property_tree::ptree& pt, ParseState& state)
+        void Parse(boost::property_tree::ptree& pt, ParseState& state) override
         {
             if (m_used)
             {

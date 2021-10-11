@@ -39,13 +39,13 @@
 #endif
 
 
-class Synchronized 
+class Synchronized
     : public Safir::Utilities::Synchronized
     , private boost::noncopyable
 {
 public:
     enum State { None = 0, Created = 1, Used = 2};
-    
+
     explicit Synchronized(int & state)
       : m_state(state)
     {
@@ -54,20 +54,20 @@ public:
 private:
     int & m_state;
 
-    virtual void Create()
+    void Create() override
     {
         std::wcout << "Ignore this line" << std::endl;
         std::wcout << "-- Create" << std::endl;
         m_state |= Created;
     }
-    virtual void Use()
+    void Use() override
     {
         std::wcout << "Ignore this line" << std::endl;
         std::wcout << "-- Use" << std::endl;
         m_state |= Used;
     }
 
-    virtual void Destroy()
+    void Destroy() override
     {
         std::wcout << "-- Destroy" << std::endl;
     }
@@ -86,5 +86,3 @@ int main()
     }
     return state;
 }
-
-

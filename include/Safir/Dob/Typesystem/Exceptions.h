@@ -148,7 +148,7 @@ namespace Typesystem
              *
              * @return The exception information as a UTF8 encoded string.
              */
-            virtual const char * what() const throw();
+            const char * what() const throw() override;
 
             /**
              * Get the type id of this exception.
@@ -212,7 +212,7 @@ namespace Typesystem
         static const TypeId ExceptionTypeId = 5177142987005172374LL;
 
         //override of CommonExceptionBase::GetTypeId
-        virtual TypeId GetTypeId() const {return ExceptionTypeId;}
+        TypeId GetTypeId() const override {return ExceptionTypeId;}
     };
 
     /**
@@ -245,7 +245,7 @@ namespace Typesystem
         static const TypeId ExceptionTypeId = 8409897425067168944LL;
 
         //override of CommonExceptionBase::GetTypeId
-        virtual TypeId GetTypeId() const {return ExceptionTypeId;}
+        TypeId GetTypeId() const override {return ExceptionTypeId;}
     };
 
     /**
@@ -273,14 +273,12 @@ namespace Typesystem
                               const Dob::Typesystem::Int64 lineNumber)://Use the __LINE__ macro
             FundamentalException(message,fileName,lineNumber) {}
 
-        //override of CommonExceptionBase::GetName
-        const std::wstring GetName() const {return L"Safir.Dob.Typesystem.IllegalValueException";}
+        const std::wstring GetName() const override {return L"Safir.Dob.Typesystem.IllegalValueException";}
 
         /** The TypeId of this exception. */
         static const TypeId ExceptionTypeId = -3653935143986901894LL;
 
-        //override of CommonExceptionBase::GetTypeId
-        virtual TypeId GetTypeId() const {return ExceptionTypeId;}
+        TypeId GetTypeId() const override {return ExceptionTypeId;}
     };
 
     /**
@@ -308,14 +306,12 @@ namespace Typesystem
                                    const Dob::Typesystem::Int64 lineNumber)://Use the __LINE__ macro
             FundamentalException(message,fileName,lineNumber) {}
 
-        //override of CommonExceptionBase::GetName
-        const std::wstring GetName() const {return L"Safir.Dob.Typesystem.IncompatibleTypesException";}
+        const std::wstring GetName() const override {return L"Safir.Dob.Typesystem.IncompatibleTypesException";}
 
         /** The TypeId of this exception. */
         static const TypeId ExceptionTypeId = -5150658527844777416LL;
 
-        //override of CommonExceptionBase::GetTypeId
-        virtual TypeId GetTypeId() const {return ExceptionTypeId;}
+        TypeId GetTypeId() const override {return ExceptionTypeId;}
     };
 
     /**
@@ -343,14 +339,12 @@ namespace Typesystem
                                     const Dob::Typesystem::Int64 lineNumber)://Use the __LINE__ macro
             FundamentalException(message,fileName,lineNumber) {}
 
-        //override of CommonExceptionBase::GetName
-        const std::wstring GetName() const {return L"Safir.Dob.Typesystem.ConfigurationErrorException";}
+        const std::wstring GetName() const override {return L"Safir.Dob.Typesystem.ConfigurationErrorException";}
 
         /** The TypeId of this exception. */
         static const TypeId ExceptionTypeId = 2909620812590558895LL;
 
-        //override of CommonExceptionBase::GetTypeId
-        virtual TypeId GetTypeId() const {return ExceptionTypeId;}
+        TypeId GetTypeId() const override {return ExceptionTypeId;}
     };
 
     /**
@@ -379,14 +373,12 @@ namespace Typesystem
                                    const Dob::Typesystem::Int64 lineNumber)://Use the __LINE__ macro
             FundamentalException(message,fileName,lineNumber) {}
 
-        //override of CommonExceptionBase::GetName
-        const std::wstring GetName() const {return L"Safir.Dob.Typesystem.SoftwareViolationException";}
+        const std::wstring GetName() const override {return L"Safir.Dob.Typesystem.SoftwareViolationException";}
 
         /** The TypeId of this exception. */
         static const TypeId ExceptionTypeId = -2318636033853590373LL;
 
-        //override of CommonExceptionBase::GetTypeId
-        virtual TypeId GetTypeId() const {return ExceptionTypeId;}
+        TypeId GetTypeId() const override {return ExceptionTypeId;}
     };
 
     /**
@@ -413,14 +405,12 @@ namespace Typesystem
                       const Dob::Typesystem::Int64 lineNumber)://Use the __LINE__ macro
             FundamentalException(message,fileName,lineNumber) {}
 
-        //override of CommonExceptionBase::GetName
-        const std::wstring GetName() const {return L"Safir.Dob.Typesystem.NullException";}
+        const std::wstring GetName() const override {return L"Safir.Dob.Typesystem.NullException";}
 
         /** The TypeId of this exception. */
         static const TypeId ExceptionTypeId = -6392953138294149211LL;
 
-        //override of CommonExceptionBase::GetTypeId
-        virtual TypeId GetTypeId() const {return ExceptionTypeId;}
+        TypeId GetTypeId() const override {return ExceptionTypeId;}
     };
 
 
@@ -449,14 +439,12 @@ namespace Typesystem
                           const Dob::Typesystem::Int64 lineNumber)://Use the __LINE__ macro
             FundamentalException(message,fileName,lineNumber) {}
 
-        //override of CommonExceptionBase::GetName
-        const std::wstring GetName() const {return L"Safir.Dob.Typesystem.ReadOnlyException";}
+        const std::wstring GetName() const override {return L"Safir.Dob.Typesystem.ReadOnlyException";}
 
         /** The TypeId of this exception. */
         static const TypeId ExceptionTypeId = -4804695341042352897LL;
 
-        //override of CommonExceptionBase::GetTypeId
-        virtual TypeId GetTypeId() const {return ExceptionTypeId;}
+        TypeId GetTypeId() const override {return ExceptionTypeId;}
     };
 }
 }

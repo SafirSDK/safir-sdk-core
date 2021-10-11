@@ -50,6 +50,9 @@ namespace Typesystem
          */
         ContainerBase(): m_bIsChanged(false) {}
 
+        /* Copy constructor. */
+        ContainerBase(const ContainerBase&) = default;
+
         /**
          * Virtual destructor.
          *

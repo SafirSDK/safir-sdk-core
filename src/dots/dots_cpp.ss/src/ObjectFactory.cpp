@@ -30,8 +30,6 @@
 #include <Safir/Utilities/DynamicLibraryLoader.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
-#include <boost/bind.hpp>
-#include <boost/thread/mutex.hpp>
 #include <sstream>
 
 namespace Safir
@@ -110,7 +108,7 @@ namespace Typesystem
         const Unused loadedLibraries = LoadGeneratedLibraries();
     }
 
-    boost::once_flag ObjectFactory::SingletonHelper::m_onceFlag = BOOST_ONCE_INIT;
+    std::once_flag ObjectFactory::SingletonHelper::m_onceFlag;
 
     ObjectFactory & ObjectFactory::SingletonHelper::Instance()
     {
@@ -120,7 +118,7 @@ namespace Typesystem
 
     ObjectFactory & ObjectFactory::Instance()
     {
-        boost::call_once(SingletonHelper::m_onceFlag,boost::bind(SingletonHelper::Instance));
+        std::call_once(SingletonHelper::m_onceFlag,[]{SingletonHelper::Instance();});
         return SingletonHelper::Instance();
     }
 

@@ -106,7 +106,7 @@ namespace ToolSupport
          *
          * @return Error information.
          */
-        virtual const char* what () const throw ()
+        const char* what () const throw () override
         {
             if (m_what.empty())
             {
