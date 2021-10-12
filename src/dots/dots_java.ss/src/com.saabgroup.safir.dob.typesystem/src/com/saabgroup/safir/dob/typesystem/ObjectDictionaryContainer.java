@@ -42,9 +42,12 @@ public class ObjectDictionaryContainer<K, C extends ObjectContainerImpl<O>, O ex
         m_isChanged=true;
         C container;
         try {
-            container = m_containerClass.newInstance();
+            container = m_containerClass.getDeclaredConstructor().newInstance();
         }
-        catch (InstantiationException | IllegalAccessException e) {
+        catch (InstantiationException |
+               IllegalAccessException |
+               java.lang.NoSuchMethodException |
+               java.lang.reflect.InvocationTargetException e) {
             throw new SoftwareViolationException("Internal error in ObjectDictionaryContainer: " +
                                                  "Failed to instantiate container.");
         }

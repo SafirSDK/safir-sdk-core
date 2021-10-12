@@ -41,7 +41,6 @@
 #include <assert.h>
 #include <boost/shared_ptr.hpp>
 #include <boost/scoped_array.hpp>
-#include <boost/bind.hpp>
 #include <string.h>
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string.hpp>
@@ -137,7 +136,7 @@ const StringHolder GetUtf8(JNIEnv * env, const jstring & jstr)
 {
     jboolean isCopy=false;
     boost::shared_ptr<const char> holder(env->GetStringUTFChars(jstr, &isCopy),
-                                         boost::bind(&JNIEnv::ReleaseStringUTFChars,env,jstr,_1));
+                                         [env,jstr](const char* utf){env->ReleaseStringUTFChars(jstr,utf);});
 
     assert(isCopy);
     return holder;

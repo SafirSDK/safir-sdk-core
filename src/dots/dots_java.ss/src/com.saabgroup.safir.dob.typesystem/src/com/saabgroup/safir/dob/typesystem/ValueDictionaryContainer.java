@@ -42,9 +42,12 @@ public class ValueDictionaryContainer<K, C extends ValueContainer<V>, V>
         m_isChanged=true;
         C container;
         try {
-            container = m_containerClass.newInstance();
+            container = m_containerClass.getDeclaredConstructor().newInstance();
         }
-        catch (InstantiationException | IllegalAccessException e) {
+        catch (InstantiationException |
+               IllegalAccessException |
+               java.lang.NoSuchMethodException |
+               java.lang.reflect.InvocationTargetException e) {
             throw new SoftwareViolationException("Internal error in ValueDictionaryContainer: " +
                                                  "Failed to instantiate container.");
         }
