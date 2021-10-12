@@ -67,7 +67,7 @@ namespace Typesystem
          *
          * Creates a null and not changed container.
          */
-        ValueContainer():ContainerBase(),m_bIsNull(true), m_Value() {}
+        constexpr ValueContainer():ContainerBase(),m_bIsNull(true), m_Value() {}
 
         /**
          * Set the value of the container.

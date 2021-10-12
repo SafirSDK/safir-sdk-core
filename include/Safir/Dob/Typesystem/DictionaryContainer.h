@@ -117,9 +117,9 @@ namespace Typesystem
         {
         }
 
-        virtual bool IsNull() const {return empty();}
+        bool IsNull() const override {return empty();}
 
-        virtual void SetNull()
+        void SetNull() override
         {
             clear();
         }
@@ -183,7 +183,7 @@ namespace Typesystem
          * @brief IsChanged - Check if the sequence has changed.
          * @return True if changed, else false.
          */
-        virtual bool IsChanged() const
+        bool IsChanged() const override
         {
             if (m_bIsChanged)
             {
@@ -203,7 +203,7 @@ namespace Typesystem
          * @brief SetChanged - Set the change state of the sequence.
          * @param changed [in] - If true, the sequence is set to changed, it is set to not changed.
          */
-        virtual void SetChanged(const bool changed)
+        void SetChanged(const bool changed) override
         {
             m_bIsChanged=changed;
             for (iterator it=m_values.begin(); it!=m_values.end(); ++it)
@@ -248,7 +248,7 @@ namespace Typesystem
          *
          * Note: if types are not compatible the behaviour is undefined.
          */
-        virtual void Copy(const ContainerBase& that)
+        void Copy(const ContainerBase& that) override
         {
             if (this != &that)
             {
@@ -268,7 +268,7 @@ namespace Typesystem
 
     private:
 
-        virtual void Merge(const DictionaryContainerBase& that)
+        void Merge(const DictionaryContainerBase& that) override
         {
             const DictionaryContainer<KeyT, ValT>& other = Cast(that);
 

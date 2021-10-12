@@ -66,9 +66,9 @@ namespace Typesystem
         {
         }
 
-        virtual bool IsNull() const {return empty();}
+        bool IsNull() const override {return empty();}
 
-        virtual void SetNull()
+        void SetNull() override
         {
             clear();
         }
@@ -200,7 +200,7 @@ namespace Typesystem
          * @param that [in] - The object to copy into this.
          * @throws SoftwareViolationException If the types are not of the same kind.
          */
-        virtual void Copy(const ContainerBase& that)
+        void Copy(const ContainerBase& that) override
         {
             if (this != &that)
             {
@@ -245,10 +245,10 @@ namespace Typesystem
     public:
 
         //Override of inherited method. Parent comment describes this behaviour too..
-        virtual bool IsChanged() const {return Base::m_bIsChanged;}
+        bool IsChanged() const override {return Base::m_bIsChanged;}
 
         //Override of inherited method. Parent comment describes this behaviour too..
-        virtual void SetChanged(const bool changed) {Base::m_bIsChanged = changed;}
+        void SetChanged(const bool changed) override {Base::m_bIsChanged = changed;}
     };
 
 
@@ -338,7 +338,7 @@ namespace Typesystem
     public:
 
         //Override of inherited method. Parent comment describes this behaviour too..
-        virtual bool IsChanged() const
+        bool IsChanged() const override
         {
             if (Base::m_bIsChanged)
             {
@@ -363,13 +363,13 @@ namespace Typesystem
          *
          * @return True if the containers change flag is set.
          */
-        bool IsChangedHere() const
+        bool IsChangedHere() const override
         {
             return Base::m_bIsChanged;
         }
 
         //Override of inherited method. Parent comment describes this behaviour too..
-        virtual void SetChanged(const bool changed)
+        void SetChanged(const bool changed) override
         {
             Base::m_bIsChanged = changed;
 
@@ -386,18 +386,18 @@ namespace Typesystem
          *
          * @param changed [in] - The value to set the change flag to.
          */
-        void SetChangedHere(const bool changed)
+        void SetChangedHere(const bool changed) override
         {
             Base::m_bIsChanged = changed;
         }
 
-        size_t size() const {return Base::size();}
+        size_t size() const override {return Base::size();}
 
-        ObjectPtr GetObj(const size_t index) {return Base::operator[](index);}
-        ObjectConstPtr GetObj(const size_t index) const {return Base::operator[](index);}
+        ObjectPtr GetObj(const size_t index) override {return Base::operator[](index);}
+        ObjectConstPtr GetObj(const size_t index) const override {return Base::operator[](index);}
 
     private:
-        virtual void Merge(const GenericObjectSequenceContainerBase& that)
+        void Merge(const GenericObjectSequenceContainerBase& that) override
         {
 #ifndef NDEBUG
             if (typeid(GenericObjectSequenceContainer<T>) != typeid(that))

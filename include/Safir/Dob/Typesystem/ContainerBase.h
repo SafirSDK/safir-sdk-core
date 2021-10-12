@@ -48,10 +48,10 @@ namespace Typesystem
          *
          * Construct a container that is not changed.
          */
-        ContainerBase(): m_bIsChanged(false) {}
+        constexpr ContainerBase(): m_bIsChanged(false) {}
 
-        /* Copy constructor. */
-        ContainerBase(const ContainerBase&) = default;
+        /** Copy constructor. */
+        constexpr ContainerBase(const ContainerBase&) = default;
 
         /**
          * Virtual destructor.

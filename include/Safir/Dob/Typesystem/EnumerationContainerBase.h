@@ -54,7 +54,7 @@ namespace Typesystem
          * Default Constructor.
          * Constructs an enumeration container that is null and not changed.
          */
-        EnumerationContainerBase():ContainerBase(),m_bIsNull(true),m_Value() {}
+        constexpr EnumerationContainerBase():ContainerBase(),m_bIsNull(true),m_Value() {}
 
         /**
          * Set the ordinal value of the enumeration container.
@@ -107,8 +107,7 @@ namespace Typesystem
          * @param other [in] - The object to copy.
          * @return A reference to this.
          */
-        EnumerationContainerBase & operator=(const EnumerationContainerBase & other)
-        {ContainerBase::operator =(other); m_Value = other.m_Value; m_bIsNull = other.m_bIsNull; return *this;}
+        EnumerationContainerBase& operator=(const EnumerationContainerBase & other) = default;
 
         /**
          * The null flag for the enumeration container.
