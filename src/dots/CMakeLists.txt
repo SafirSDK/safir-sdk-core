@@ -9,4 +9,4 @@ add_subdirectory(dots_dobmake.ss/src)
 
 add_subdirectory(dots_test_dou.ss)
 add_subdirectory(dots_test_extra_dou.ss)
-#TODO laha add_subdirectory(dots_test.ss)
+add_subdirectory(dots_test.ss)

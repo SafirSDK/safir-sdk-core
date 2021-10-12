@@ -135,8 +135,15 @@ namespace std
     //needed by boost test, and must be in std for it to work.
     std::ostream& operator <<(std::ostream& out, const std::wstring& str)
     {
-        return out << str.c_str();
+        return out << Safir::Dob::Typesystem::Utilities::ToUtf8(str);
     }
+
+    //needed by boost test, and must be in std for it to work.
+    std::ostream& operator <<(std::ostream& out, const wchar_t* str)
+    {
+        return out << Safir::Dob::Typesystem::Utilities::ToUtf8(str);
+    }
+
 }
 
 
