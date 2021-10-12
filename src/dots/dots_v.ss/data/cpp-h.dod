@@ -321,7 +321,7 @@ namespace @_NAMESPACEV_@
     public:
         //Constructors and Create routines
         @_CLASS_@();
-        virtual Safir::Dob::Typesystem::ObjectPtr Clone() const;
+        Safir::Dob::Typesystem::ObjectPtr Clone() const override;
         static @_CLASS_@Ptr Create();
 
 @@TABLE@@
@@ -400,7 +400,7 @@ namespace @_NAMESPACEV_@
 @@ELSE@@
         static @_PARAMETERTYPE_@ @_PARAMETER_@(const @_PARAMETERDICTIONARYTYPE_@::Enumeration& key);
 @@END_IF@@
-@@ELSE@@    
+@@ELSE@@
 @@IF@@ @_UNIFORM_PARAMETERTYPE_@=Enumeration
         static @_PARAMETERTYPE_@::Enumeration @_PARAMETER_@(const @_PARAMETERDICTIONARYTYPE_@& key);
 @@ELSIF@@ (@_UNIFORM_PARAMETERTYPE_@ = Object)
@@ -519,22 +519,22 @@ namespace @_NAMESPACEV_@
         static const Safir::Dob::Typesystem::TypeId ClassTypeId = @_TYPEID_@LL;
 
         //Type id for @_CLASS_@
-        virtual Safir::Dob::Typesystem::TypeId GetTypeId() const {return ClassTypeId;}
+        Safir::Dob::Typesystem::TypeId GetTypeId() const override {return ClassTypeId;}
 
         //Check if anything in the object has change flags set
-        virtual bool IsChanged();
+        bool IsChanged() override;
 
         //Recursively set all change flags in the object
-        virtual void SetChanged(const bool changed);
+        void SetChanged(const bool changed) override;
 
 
         //Reflection part (Don't use unless you really know what you're doing!!)
-        virtual       Safir::Dob::Typesystem::ContainerBase & GetMember(const Safir::Dob::Typesystem::MemberIndex member,
-                                                                        const Safir::Dob::Typesystem::ArrayIndex index);
-        virtual const Safir::Dob::Typesystem::ContainerBase & GetMember(const Safir::Dob::Typesystem::MemberIndex member,
-                                                                        const Safir::Dob::Typesystem::ArrayIndex index) const;
-       
-        virtual void WriteToBlob(Safir::Dob::Typesystem::Int64 handle) const;
+        Safir::Dob::Typesystem::ContainerBase & GetMember(const Safir::Dob::Typesystem::MemberIndex member,
+                                                          const Safir::Dob::Typesystem::ArrayIndex index) override;
+        const Safir::Dob::Typesystem::ContainerBase & GetMember(const Safir::Dob::Typesystem::MemberIndex member,
+                                                                const Safir::Dob::Typesystem::ArrayIndex index) const override;
+
+        void WriteToBlob(Safir::Dob::Typesystem::Int64 handle) const override;
         explicit @_CLASS_@(Safir::Dob::Typesystem::Int64 handle);
 
     private:
@@ -676,9 +676,9 @@ namespace @_NAMESPACEV_@
         {
         public:
             typedef Enumeration ContainedType;
-        
+
             //Will throw IllegalValueException if value is not in first .. last
-            virtual void SetOrdinal(const Safir::Dob::Typesystem::EnumerationValue value)
+            void SetOrdinal(const Safir::Dob::Typesystem::EnumerationValue value) override
             {
                 if (value < FirstOrdinal() || value > LastOrdinal())
                 {
@@ -689,7 +689,7 @@ namespace @_NAMESPACEV_@
                 m_Value = value;
             }
 
-            virtual Safir::Dob::Typesystem::EnumerationValue GetOrdinal() const
+            Safir::Dob::Typesystem::EnumerationValue GetOrdinal() const override
             {
                 if (IsNull())
                 {
@@ -788,14 +788,12 @@ namespace @_NAMESPACEV_@
              const std::wstring & fileName,       //Use the __WFILE__ macro
              const Safir::Dob::Typesystem::Int64 lineNumber);//Use the __LINE__ macro
 
-        //override of pure virtual
-        virtual const std::wstring GetName() const;
+        const std::wstring GetName() const override;
 
         /** Type id for @_CLASS_@. */
         static const Safir::Dob::Typesystem::TypeId ExceptionTypeId = @_TYPEID_@LL;
 
-        //override of pure virtual
-        virtual Safir::Dob::Typesystem::TypeId GetTypeId() const {return ExceptionTypeId;}
+        Safir::Dob::Typesystem::TypeId GetTypeId() const override {return ExceptionTypeId;}
 
     };
 

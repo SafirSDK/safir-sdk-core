@@ -127,7 +127,7 @@ QString Dobmake::GetDobmakeBatchScript()
 #endif
 
     const QString pathenv = QProcessEnvironment::systemEnvironment().value("PATH");
-    const QStringList paths = pathenv.split(separator,QString::SkipEmptyParts);
+    const QStringList paths = pathenv.split(separator,Qt::SkipEmptyParts);
 
     for (QStringList::const_iterator it = paths.begin();
          it != paths.end(); ++it)

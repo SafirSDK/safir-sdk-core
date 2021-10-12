@@ -26,7 +26,7 @@ if (Java_Development_FOUND AND Java_Runtime_FOUND)
       INCLUDE(UseJava)
     endif()
 
-    SET(CMAKE_JAVA_COMPILE_FLAGS -encoding UTF-8 -Xlint:unchecked)
+    SET(CMAKE_JAVA_COMPILE_FLAGS -encoding UTF-8 -Xlint:unchecked -Xlint:deprecation)
   else()
     SET(Java_FOUND Java-NOTFOUND)
   endif()

@@ -65,7 +65,7 @@ signals:
     void BuildComplete(const bool result);
 
 private:
-    void run()
+    void run() override
     {
         QStringList params;
 
