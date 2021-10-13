@@ -24,15 +24,8 @@
 #pragma once
 
 #include <Safir/Dob/Internal/ControlUtilsExportDefs.h>
-#include <boost/function.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/noncopyable.hpp>
 #include <string>
-
-//forward declaration
-namespace boost { namespace asio {
-    class io_service;
-}}
+#include <boost/asio/io_service.hpp>
 
 namespace Safir
 {
@@ -53,7 +46,6 @@ namespace Control
      * Class to be used to receive Control info
      */
     class CONTROL_UTILS_API ControlInfoReceiver
-        : private boost::noncopyable
     {
     public:
 
@@ -61,6 +53,10 @@ namespace Control
 
         ControlInfoReceiver(boost::asio::io_service& ioService,
                             const InfoCb&            infoCb);
+
+
+        ControlInfoReceiver(const ControlInfoReceiver&) = delete;
+        const ControlInfoReceiver& operator=(const ControlInfoReceiver&) = delete;
 
         // Start command reception
         void Start();
@@ -72,19 +68,21 @@ namespace Control
 
         class Impl;
 
-        boost::shared_ptr<Impl> m_impl;
+        std::shared_ptr<Impl> m_impl;
     };
 
     /**
      *  Class to be used to send Control info
      */
     class CONTROL_UTILS_API ControlInfoSender
-        : private boost::noncopyable
     {
     public:
 
         ControlInfoSender(boost::asio::io_service&      ioService,
                           const std::function<void()>   receiverConnectedCb);
+
+        ControlInfoSender(const ControlInfoSender&) = delete;
+        const ControlInfoSender& operator=(const ControlInfoSender&) = delete;
 
         // Start sender
         void Start();
@@ -98,7 +96,7 @@ namespace Control
     private:
         class Impl;
 
-        boost::shared_ptr<Impl> m_impl;
+        std::shared_ptr<Impl> m_impl;
     };
 
 #ifdef _MSC_VER

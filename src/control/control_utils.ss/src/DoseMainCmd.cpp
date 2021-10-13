@@ -40,7 +40,6 @@ namespace Control
 
     // Receiver impl
     class DoseMainCmdReceiver::Impl
-        : private boost::noncopyable
     {
     public:
 
@@ -63,6 +62,9 @@ namespace Control
                                                                                      RecvDataCb(data, size);
                                                                                  }));
         }
+
+        Impl(const Impl&) = delete;
+        const Impl& operator=(const Impl&) = delete;
 
         void Start()
         {
@@ -166,7 +168,6 @@ namespace Control
 
     // Sender impl
     class DoseMainCmdSender::Impl
-        : private boost::noncopyable
     {
     public:
 
@@ -175,6 +176,9 @@ namespace Control
             : m_ipcPublisher(ioService, doseMainCmdChannel, doseMainConnectedCb, NULL)
         {
         }
+
+        Impl(const Impl&) = delete;
+        const Impl& operator=(const Impl&) = delete;
 
         void Start()
         {

@@ -56,13 +56,16 @@ namespace Com = Safir::Dob::Internal::Com;
 namespace SP = Safir::Dob::Internal::SP;
 namespace Control = Safir::Dob::Internal::Control;
 
-class ControlApp : private boost::noncopyable
+class ControlApp
 {
 public:
     ControlApp(boost::asio::io_service&         ioService,
                const boost::filesystem::path&   doseMainPath,
                const int64_t                    id,
                const bool                       ignoreControlCmd);
+
+    ControlApp(const ControlApp&) = delete;
+    const ControlApp& operator=(const ControlApp&) = delete;
 
     ~ControlApp();
 

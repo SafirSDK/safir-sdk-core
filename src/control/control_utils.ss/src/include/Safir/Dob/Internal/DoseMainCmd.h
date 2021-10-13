@@ -24,15 +24,8 @@
 #pragma once
 
 #include <Safir/Dob/Internal/ControlUtilsExportDefs.h>
-#include <boost/function.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/noncopyable.hpp>
+#include <boost/asio/io_service.hpp>
 #include <string>
-
-//forward declaration
-namespace boost { namespace asio {
-    class io_service;
-}}
 
 namespace Safir
 {
@@ -53,9 +46,10 @@ namespace Control
      * Class to be used by dose_main to receive commands from Control
      */
     class CONTROL_UTILS_API DoseMainCmdReceiver
-        : private boost::noncopyable
     {
     public:
+        DoseMainCmdReceiver(const DoseMainCmdReceiver&) = delete;
+        DoseMainCmdReceiver& operator=(const DoseMainCmdReceiver&) = delete;
 
         typedef std::function<void(const std::string& nodeName,
                                                     int64_t nodeId,
@@ -85,19 +79,21 @@ namespace Control
 
         class Impl;
 
-        boost::shared_ptr<Impl> m_impl;
+        std::shared_ptr<Impl> m_impl;
     };
 
     /**
      * Class to be used by Control to send commands to dose_main
      */
     class CONTROL_UTILS_API DoseMainCmdSender
-        : private boost::noncopyable
     {
     public:
 
         DoseMainCmdSender(boost::asio::io_service&      ioService,
                           const std::function<void()>   doseMainConnectedCb);
+
+        DoseMainCmdSender(const DoseMainCmdSender&) = delete;
+        const DoseMainCmdSender& operator=(const DoseMainCmdSender&) = delete;
 
         // Start sender
         void Start();
@@ -126,7 +122,7 @@ namespace Control
     private:
         class Impl;
 
-        boost::shared_ptr<Impl> m_impl;
+        std::shared_ptr<Impl> m_impl;
     };
 
 #ifdef _MSC_VER
@@ -137,6 +133,3 @@ namespace Control
 }
 }
 }
-
-
-

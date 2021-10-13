@@ -102,7 +102,6 @@ namespace
 
     // Receiver impl
     class ControlCmdReceiver::Impl
-        : private boost::noncopyable
     {
     public:
 
@@ -120,6 +119,9 @@ namespace
                                                                                     m_cmdCb(cmd.first, cmd.second);
                                                                                  }));
         }
+
+        Impl(const Impl&) = delete;
+        const Impl& operator=(const Impl&) = delete;
 
         void Start()
         {
@@ -166,7 +168,6 @@ namespace
 
     // Sender impl
     class ControlCmdSender::Impl
-        : private boost::noncopyable
     {
     public:
 
@@ -175,6 +176,9 @@ namespace
             : m_ipcPublisher(ioService, controlCmdChannel, controlConnectedCb, NULL)
         {
         }
+
+        Impl(const Impl&) = delete;
+        const Impl& operator=(const Impl&) = delete;
 
         void Start()
         {

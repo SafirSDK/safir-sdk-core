@@ -23,7 +23,6 @@
 ******************************************************************************/
 #pragma once
 
-#include <boost/function.hpp>
 #include <Safir/Dob/Internal/SystemState.h>
 
 #ifdef _MSC_VER
@@ -82,9 +81,9 @@ namespace Control
     {
     public:
 
-        typedef boost::function<void(const Node& node)> NodeIncludedCb;
+        typedef std::function<void(const Node& node)> NodeIncludedCb;
 
-        typedef boost::function<void(const int64_t nodeId, const int64_t nodeTypeId)> NodeDownCb;
+        typedef std::function<void(const int64_t nodeId, const int64_t nodeTypeId)> NodeDownCb;
 
         SystemStateHandlerBasic(const int64_t                    ownNodeId,
                                 const NodeIncludedCb&            nodeIncludedCb,

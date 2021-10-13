@@ -22,13 +22,14 @@
 *
 ******************************************************************************/
 #include <Safir/Dob/Internal/Communication.h>
-#include <Safir/Utilities/Internal/LowLevelLogger.h>
-#include <Safir/Utilities/Internal/SystemLog.h>
-#include <Safir/Utilities/Internal/MakeUnique.h>
-#include <Safir/Dob/Internal/SystemPicture.h>
-#include <Safir/Utilities/Internal/Id.h>
 #include <Safir/Dob/Internal/ControlConfig.h>
 #include <Safir/Dob/Internal/DoseMainCmd.h>
+#include <Safir/Dob/Internal/SystemPicture.h>
+#include <Safir/Utilities/Internal/Id.h>
+#include <Safir/Utilities/Internal/LowLevelLogger.h>
+#include <Safir/Utilities/Internal/MakeSharedArray.h>
+#include <Safir/Utilities/Internal/MakeUnique.h>
+#include <Safir/Utilities/Internal/SystemLog.h>
 #include <iostream>
 #include <map>
 
@@ -70,9 +71,9 @@ void QueueNotFullCb(int64_t nodeTypeId)
     lllog(3) << "DOSE_MAIN: Got queue not full indication for nodetypeId " << nodeTypeId << std::endl;
 }
 
-boost::shared_ptr<char[]> StrToPtr(const std::string& s)
+std::shared_ptr<char[]> StrToPtr(const std::string& s)
 {
-    boost::shared_ptr<char[]> ptr(new char[s.length()]);
+    std::shared_ptr<char[]> ptr = Safir::Utilities::Internal::MakeSharedArray(s.length());;
 
     memcpy(ptr.get(), s.c_str(), s.length());
     return ptr;
@@ -209,7 +210,7 @@ int main(int /*argc*/, char * /*argv*/[])
                                    const char* const data_,
                                    size_t size)
                                   {
-                                      const boost::shared_ptr<const char[]> data(data_);
+                                      const std::shared_ptr<const char[]> data(data_);
                                       std::string msg(data.get(), size);
                                       std::ostringstream os;
                                       os << "DOSE_MAIN: Received " << msg

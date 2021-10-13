@@ -24,15 +24,8 @@
 #pragma once
 
 #include <Safir/Dob/Internal/ControlUtilsExportDefs.h>
-#include <boost/function.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/noncopyable.hpp>
 #include <string>
-
-//forward declaration
-namespace boost { namespace asio {
-    class io_service;
-}}
+#include <boost/asio/io_service.hpp>
 
 namespace Safir
 {
@@ -60,7 +53,6 @@ namespace Control
      * Class to be used to receive Control commands
      */
     class CONTROL_UTILS_API ControlCmdReceiver
-        : private boost::noncopyable
     {
     public:
 
@@ -68,6 +60,9 @@ namespace Control
 
         ControlCmdReceiver(boost::asio::io_service& ioService,
                            const CmdCb&             cmdCb);
+
+        ControlCmdReceiver(const ControlCmdReceiver&) = delete;
+        const ControlCmdReceiver& operator=(const ControlCmdReceiver&) = delete;
 
         // Start command reception
         void Start();
@@ -79,19 +74,20 @@ namespace Control
 
         class Impl;
 
-        boost::shared_ptr<Impl> m_impl;
+        std::shared_ptr<Impl> m_impl;
     };
 
     /**
      *  Class to be used to send Control commands
      */
     class CONTROL_UTILS_API ControlCmdSender
-        : private boost::noncopyable
     {
     public:
-
         ControlCmdSender(boost::asio::io_service&      ioService,
                          const std::function<void()>   controlConnectedCb);
+
+        ControlCmdSender(const ControlCmdSender&) = delete;
+        const ControlCmdSender& operator=(const ControlCmdSender&) = delete;
 
         // Start sender
         void Start();
@@ -105,7 +101,7 @@ namespace Control
     private:
         class Impl;
 
-        boost::shared_ptr<Impl> m_impl;
+        std::shared_ptr<Impl> m_impl;
     };
 
     CONTROL_UTILS_API std::pair<std::unique_ptr<char[]>, size_t> SerializeCmd(CommandAction  cmdAction,

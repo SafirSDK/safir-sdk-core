@@ -40,7 +40,6 @@ namespace Control
 
     // Receiver impl
     class ControlInfoReceiver::Impl
-        : private boost::noncopyable
     {
     public:
 
@@ -55,6 +54,9 @@ namespace Control
                                                                                      RecvDataCb(data, size);
                                                                                  }));
         }
+
+        Impl(const Impl&) = delete;
+        const Impl& operator=(const Impl&) = delete;
 
         void Start()
         {
@@ -103,15 +105,16 @@ namespace Control
 
     // Sender impl
     class ControlInfoSender::Impl
-        : private boost::noncopyable
     {
     public:
-
         Impl(boost::asio::io_service&       ioService,
              const std::function<void()>    receiverConnectedCb)
             : m_ipcPublisher(ioService, controlInfoChannel, receiverConnectedCb, NULL)
         {
         }
+
+        Impl(const Impl&) = delete;
+        const Impl& operator=(const Impl&) = delete;
 
         void Start()
         {

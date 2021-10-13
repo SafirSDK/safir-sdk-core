@@ -31,6 +31,7 @@
 #include <Safir/Utilities/Internal/Id.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
+#include <Safir/Utilities/Internal/MakeSharedArray.h>
 #include <boost/chrono.hpp>
 
 #ifdef _MSC_VER
@@ -150,7 +151,7 @@ namespace Control
                                                 const size_t size)
                                          {
                                              HandleStopOrderFromExternalNode(from,
-                                                                              boost::shared_ptr<const char[]>(data),size);
+                                                                              std::shared_ptr<const char[]>(data),size);
                                          }),
                                          m_stopOrderMsgTypeId,
                                          [](size_t size){return new char[size];},
@@ -448,7 +449,7 @@ namespace Control
 
                             m_communication.Send(nodeIt->first,
                                                  nodeIt->second.nodeTypeId,
-                                                 boost::shared_ptr<char[]>(std::move(cmd.first)),
+                                                 std::shared_ptr<char[]>(std::move(cmd.first)),
                                                  cmd.second, // size
                                                  m_stopOrderMsgTypeId,
                                                  true); // delivery guarantee
@@ -478,7 +479,7 @@ namespace Control
 
                     m_communication.Send(0, // all nodes ...
                                          *nodeTypeIdIt, // ... of this type
-                                         boost::shared_ptr<char[]>(std::move(cmd.first)),
+                                         std::shared_ptr<char[]>(std::move(cmd.first)),
                                          cmd.second, // size
                                          m_stopOrderMsgTypeId,
                                          true); // delivery guarantee
@@ -503,7 +504,7 @@ namespace Control
         }
 
         void HandleStopOrderFromExternalNode(const int64_t from,
-                                             const boost::shared_ptr<const char[]>& data,
+                                             const std::shared_ptr<const char[]>& data,
                                              const size_t size)
         {
             lllog(3) << "CTRL: StopHandler::HandleStopOrderFromExternalNode" << std::endl;
@@ -573,7 +574,7 @@ namespace Control
             {
                 m_communication.Send(0, // all nodes
                                      *nodeTypeIdIt,
-                                     boost::shared_ptr<char[]>(new char[1]),  // dummy
+                                     Safir::Utilities::Internal::MakeSharedArray(1), // dummy
                                      1, // size
                                      m_stopNotificationMsgTypeId,
                                      false); // no delivery guarantee

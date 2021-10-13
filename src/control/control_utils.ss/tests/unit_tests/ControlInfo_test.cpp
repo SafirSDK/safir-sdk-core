@@ -48,8 +48,8 @@ BOOST_AUTO_TEST_CASE( send_commands )
     boost::asio::io_service pubIoService;
     boost::asio::io_service subIoService;
 
-    boost::shared_ptr<boost::asio::io_service::work> pubWork (new boost::asio::io_service::work(pubIoService));
-    boost::shared_ptr<boost::asio::io_service::work> subWork (new boost::asio::io_service::work(subIoService));
+    std::shared_ptr<boost::asio::io_service::work> pubWork (new boost::asio::io_service::work(pubIoService));
+    std::shared_ptr<boost::asio::io_service::work> subWork (new boost::asio::io_service::work(subIoService));
 
     boost::thread_group threads;
     threads.create_thread([&pubIoService](){pubIoService.run();});

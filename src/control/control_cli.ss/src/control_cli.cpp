@@ -122,7 +122,7 @@ int main(int argc, char * argv[])
     if (cmd.help) return 0; //only show help
 
     boost::asio::io_service ioService;
-    boost::shared_ptr<boost::asio::io_service::work> work(new boost::asio::io_service::work(ioService));
+    std::shared_ptr<boost::asio::io_service::work> work(new boost::asio::io_service::work(ioService));
 
     boost::asio::steady_timer timeOutTimer(ioService);
     timeOutTimer.expires_from_now(boost::chrono::seconds(cmd.timeOut));
