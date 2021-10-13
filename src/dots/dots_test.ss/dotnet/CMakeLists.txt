@@ -6,3 +6,5 @@ ADD_CSHARP_ASSEMBLY(dots_test_dotnet EXE
   SOURCES AssemblyInfo.cs DotsTestDotnet.cs
   REFERENCES Safir.Dob.Typesystem safir_generated-DotsTest-dotnet)
 
+ADD_DEPENDENCIES(dots_test_dotnet safir_generated-DotsTestExtra-dotnet)
+

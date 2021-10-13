@@ -12,3 +12,5 @@ TARGET_LINK_LIBRARIES(dots_test_cpp PRIVATE
   ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
   ${Boost_FILESYSTEM_LIBRARY}
   )
+
+ADD_DEPENDENCIES(dots_test_cpp safir_generated-DotsTestExtra-cpp)

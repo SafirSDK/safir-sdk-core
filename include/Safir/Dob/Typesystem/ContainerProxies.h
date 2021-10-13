@@ -134,25 +134,24 @@ namespace Typesystem
     };
 
     static inline bool operator==(const ContainerProxy<ChannelIdContainer>& first, const ChannelId& second)
-    {return first == second;}
+    {return second == first.GetVal();}
     static inline bool operator!=(const ContainerProxy<ChannelIdContainer>& first, const ChannelId& second)
-    {return first != second;}
+    {return second != first.GetVal();}
 
     static inline bool operator==(const ContainerProxy<HandlerIdContainer>& first, const HandlerId& second)
-    {return first == second;}
+    {return second == first.GetVal();}
     static inline bool operator!=(const ContainerProxy<HandlerIdContainer>& first, const HandlerId& second)
-    {return first != second;}
+    {return second != first.GetVal();}
 
     static inline bool operator==(const ContainerProxy<InstanceIdContainer>& first, const InstanceId& second)
-    {return first == second;}
+    {return second == first.GetVal();}
     static inline bool operator!=(const ContainerProxy<InstanceIdContainer>& first, const InstanceId& second)
-    {return first != second;}
+    {return second != first.GetVal();}
 
     static inline bool operator==(const ContainerProxy<EntityIdContainer>& first, const EntityId& second)
-    {return first == second;}
+    {return second == first.GetVal();}
     static inline bool operator!=(const ContainerProxy<EntityIdContainer>& first, const EntityId& second)
-    {return first != second;}
-
+    {return second != first.GetVal();}
 
     template <>
     class ContainerProxy<StringContainer>
@@ -216,12 +215,10 @@ namespace Typesystem
         StringContainer& m_container;
     };
 
-
     static inline bool operator==(const std::wstring& first, const ContainerProxy<StringContainer>& second)
-    {return second == first;}
+    {return second.GetVal() == first;}
     static inline bool operator!=(const std::wstring& first, const ContainerProxy<StringContainer>& second)
-    {return second != first;}
-
+    {return second.GetVal() != first;}
 
     template <>
     class ContainerProxy<BinaryContainer>
@@ -276,10 +273,9 @@ namespace Typesystem
     };
 
     static inline bool operator==(const Binary& first, const ContainerProxy<BinaryContainer>& second)
-    {return second == first;}
+    {return second.GetVal() == first;}
     static inline bool operator!=(const Binary& first, const ContainerProxy<BinaryContainer>& second)
-    {return second != first;}
-
+    {return second.GetVal() != first;}
 
     template <class U>
     class ContainerProxy<ObjectContainerImpl<U> >

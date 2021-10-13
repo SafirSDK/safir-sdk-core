@@ -62,11 +62,9 @@ if arguments.language == "cpp":
     command = (arguments.binary,"--detect_memory_leaks=0")
 elif arguments.language == "java":
     #-Xfuture gives weird errors on RPi and BBone (both on debian jessie)
-    command = ("java",) + \
-      (("-Xfuture",) if not platform.machine().startswith("arm") else tuple()) + \
-      ("-jar", arguments.jar)
+    command = ("java", "-jar", arguments.jar)
 elif arguments.language == "dotnet":
-    command = (arguments.binary,)
+    command = ("mono", arguments.binary)
 else:
     print("Not implemented")
     sys.exit(1)
@@ -77,7 +75,7 @@ proc = subprocess.Popen(command, stdout = subprocess.PIPE, stderr = subprocess.S
 res = proc.communicate()[0].replace("\r","")
 
 #Boost.test prints some status messages that we need to suppress.
-res = res.replace("\n*** No errors detected\n","")
+res = re.sub("\n.*\*\*\* No errors detected\n.*","",res)
 res =re.sub(r"^Running [0-9]+ test cases\.\.\.\n", "", res)
 
 #java sometimes outputs some stuff
