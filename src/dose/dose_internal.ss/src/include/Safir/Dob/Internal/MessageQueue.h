@@ -54,8 +54,8 @@ namespace Internal
         //Returns false if queue is full
         bool push(const DistributionData & msg);
 
-        typedef boost::function<void(const DistributionData & msg, bool & exitDispatch, bool & dontRemove)> DispatchFunc;
-        typedef boost::function<void (void)> ActionFunc;
+        typedef std::function<void(const DistributionData & msg, bool & exitDispatch, bool & dontRemove)> DispatchFunc;
+        typedef std::function<void (void)> ActionFunc;
 
         //returns number of dispatched messages
         size_t Dispatch(const DispatchFunc & dispatchFunc, const ActionFunc & postFullAction);

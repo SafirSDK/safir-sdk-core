@@ -22,13 +22,11 @@
 *
 ******************************************************************************/
 
-#ifndef _dose_wrap_around_counter_h
-#define _dose_wrap_around_counter_h
-
+#pragma once
 
 #include <iostream>
+#include <functional>
 #include <boost/limits.hpp>
-#include <boost/functional/hash.hpp>
 #include <Safir/Dob/Typesystem/Defs.h>
 
 namespace Safir
@@ -39,25 +37,25 @@ namespace Internal
 {
     /**
      *  A simple wrap around counter.
-     *  will count from std::numeric_limits<Typesystem::Int32>::min() to 
+     *  will count from std::numeric_limits<Typesystem::Int32>::min() to
      *  std::numeric_limits<Typesystem::Int32>::max()
      */
     class WrapAroundCounter
     {
     public:
         WrapAroundCounter() : m_counter(min()) {}
-        explicit WrapAroundCounter(const Safir::Dob::Typesystem::Int32 counter) 
-            : m_counter(counter) 
+        explicit WrapAroundCounter(const Safir::Dob::Typesystem::Int32 counter)
+            : m_counter(counter)
         {
-        
+
         }
 
-        bool operator==(const WrapAroundCounter& rhs) const 
+        bool operator==(const WrapAroundCounter& rhs) const
         {
             return this->m_counter == rhs.m_counter;
         }
 
-        bool operator!=(const WrapAroundCounter& rhs) const 
+        bool operator!=(const WrapAroundCounter& rhs) const
         {
             return !operator==(rhs);
         }
@@ -72,7 +70,7 @@ namespace Internal
             {
                 m_counter = min();
             }
-            
+
             return *this;
         }
 
@@ -93,7 +91,7 @@ namespace Internal
             {
                 m_counter = max();
             }
-            
+
             return *this;
         }
 
@@ -105,7 +103,7 @@ namespace Internal
         static inline Safir::Dob::Typesystem::Int32 min()
         {return std::numeric_limits<Safir::Dob::Typesystem::Int32>::min();}
 
-        static inline Safir::Dob::Typesystem::Int32 max() 
+        static inline Safir::Dob::Typesystem::Int32 max()
         {return std::numeric_limits<Safir::Dob::Typesystem::Int32>::max();}
 
         Safir::Dob::Typesystem::Int32 m_counter;
@@ -118,12 +116,10 @@ namespace Internal
 
     inline std::size_t hash_value(Safir::Dob::Internal::WrapAroundCounter const& c)
     {
-        boost::hash<int> hasher;
+        std::hash<int> hasher;
         return hasher(c.GetCounter());
     }
 }
 }
 }
 
-
-#endif

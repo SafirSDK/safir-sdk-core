@@ -77,7 +77,7 @@ namespace Internal
         // Returns true if the given subscription is active
         bool HasSubscription(const SubscriptionId&   subscriptionId) const;
 
-        typedef boost::function<void(const Dob::Typesystem::Int64 key,
+        typedef std::function<void(const Dob::Typesystem::Int64 key,
                                      const StateSharedPtr& stateSharedPtr,
                                      bool& exitDispatch)> ForEachStateActionFunc;
 
@@ -87,7 +87,7 @@ namespace Internal
         // the container pointer will be downgraded.
         void ForEachState(const ForEachStateActionFunc& actionFunc, const bool includeReleasedStates);
 
-        typedef boost::function<void(const Dob::Typesystem::Int64 key,
+        typedef std::function<void(const Dob::Typesystem::Int64 key,
                                      const StateSharedPtr& stateSharedPtr)> ForSpecificStateActionFunc;
 
         // Calls actionFunc for the specific state. The state is locked during the callback.

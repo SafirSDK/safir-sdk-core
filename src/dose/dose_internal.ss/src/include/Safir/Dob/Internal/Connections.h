@@ -73,7 +73,7 @@ namespace Internal
          * undefined results...
          * Is intended to be called from the dispatch thread in dose_dll.
          */
-        const boost::function<void(void)> GetConnectionSignalWaiter(const ConnectionId & connectionId);
+        const std::function<void(void)> GetConnectionSignalWaiter(const ConnectionId & connectionId);
 
         /**
          * This is for DoseMain to wait for events from connections.
@@ -169,21 +169,21 @@ namespace Internal
          */
         void AllowConnect(const long context);
 
-        void HandleConnectionOutEvents(const boost::function<void(const ConnectionPtr&)> & handler);
+        void HandleConnectionOutEvents(const std::function<void(const ConnectionPtr&)> & handler);
 
         //look through all connections and see if there is a pending reg that is accepted
         bool IsPendingAccepted(const Typesystem::TypeId typeId, const Typesystem::HandlerId & handlerId, const ContextId contextId) const;
 
         // Removes connection(s) from specified node.
-        void RemoveConnectionFromNode(const int64_t node, const boost::function<void(const ConnectionPtr & connection)> & connectionFunc);
+        void RemoveConnectionFromNode(const int64_t node, const std::function<void(const ConnectionPtr & connection)> & connectionFunc);
 
         //A reader lock on the connection vector will be taken during the looping and the callback!
-        void ForEachConnection(const boost::function<void(const Connection & connection)> & connectionFunc) const;
-        void ForEachConnectionPtr(const boost::function<void(const ConnectionPtr & connection)> & connectionFunc) const;
+        void ForEachConnection(const std::function<void(const Connection & connection)> & connectionFunc) const;
+        void ForEachConnectionPtr(const std::function<void(const ConnectionPtr & connection)> & connectionFunc) const;
 
         // A reader lock will be taken during the callback.
         void ForSpecificConnection(const ConnectionId& connectionId,
-                                   const boost::function<void(const ConnectionPtr & connection)> & connectionFunc) const;
+                                   const std::function<void(const ConnectionPtr & connection)> & connectionFunc) const;
 
         //send the ConnectOrOut signal without setting any of the event flags.
         //This is ONLY useful for dose_main when it wants to stop the thread that

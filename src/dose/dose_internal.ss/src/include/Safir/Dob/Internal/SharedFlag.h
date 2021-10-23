@@ -25,7 +25,7 @@
 #define __DOSE_SHARED_FLAG_H__
 
 #include <Safir/Utilities/Internal/Atomic.h>
-#include <boost/function.hpp>
+#include <functional>
 
 namespace Safir
 {
@@ -36,8 +36,8 @@ namespace Internal
     class SharedFlag
     {
     public:
-        typedef boost::function<void (void)> SetFunction;
-        typedef boost::function<bool (void)> ProcessFunction;
+        typedef std::function<void (void)> SetFunction;
+        typedef std::function<bool (void)> ProcessFunction;
 
         SharedFlag() : m_flag(0) {}
         explicit SharedFlag(const bool isSet):m_flag(isSet? 1 : 0) {}

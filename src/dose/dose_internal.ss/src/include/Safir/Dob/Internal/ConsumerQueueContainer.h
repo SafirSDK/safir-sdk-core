@@ -156,7 +156,7 @@ namespace Internal
         }
 
 
-        typedef boost::function<void(const ConsumerId& consumer, T& queue)> QueueFunc;
+        typedef std::function<void(const ConsumerId& consumer, T& queue)> QueueFunc;
 
         void ForEach(const QueueFunc& queueFunc) const
         {

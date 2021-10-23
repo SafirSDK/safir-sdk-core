@@ -32,7 +32,6 @@
 #include <Safir/Dob/Internal/WrapAroundCounter.h>
 #include <Safir/Dob/Internal/LamportClocks.h>
 #include <Safir/Dob/Internal/ConsumerId.h>
-#include <boost/function.hpp>
 #include <boost/tuple/tuple.hpp>
 
 namespace Safir

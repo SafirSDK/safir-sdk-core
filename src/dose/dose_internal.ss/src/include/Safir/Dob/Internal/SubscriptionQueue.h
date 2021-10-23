@@ -53,7 +53,7 @@ namespace Internal
 
         void push(const SubscriptionPtr& subscription);
 
-        typedef boost::function<void(const SubscriptionPtr& subscription, bool& exitDispatch, bool& dontRemove)> DispatchFunc;
+        typedef std::function<void(const SubscriptionPtr& subscription, bool& exitDispatch, bool& dontRemove)> DispatchFunc;
 
         void Dispatch(const DispatchFunc& dispatchFunc);
 

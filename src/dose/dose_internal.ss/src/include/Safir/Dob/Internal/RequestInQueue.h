@@ -43,11 +43,11 @@ namespace Internal
         private boost::noncopyable
     {
     public:
-        typedef boost::function<void(const DistributionData & request, bool & exitDispatch, bool & postpone)>
+        typedef std::function<void(const DistributionData & request, bool & exitDispatch, bool & postpone)>
             DispatchRequestFunc;
-        typedef boost::function<void (void)> ActionFunc;
+        typedef std::function<void (void)> ActionFunc;
 
-        typedef boost::function<void(const DistributionData & response, bool & dontRemove)> DispatchResponseFunc;
+        typedef std::function<void(const DistributionData & response, bool & dontRemove)> DispatchResponseFunc;
 
         /** Constructor */
         explicit RequestInQueue(const size_t capacity);

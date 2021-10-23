@@ -22,15 +22,12 @@
 *
 ******************************************************************************/
 
-#ifndef __DOSE_SIGNALS_H__
-#define __DOSE_SIGNALS_H__
+#pragma once
 
-
+#include <map>
 #include <Safir/Dob/Internal/Semaphore.h>
 #include <boost/noncopyable.hpp>
-#include <boost/shared_ptr.hpp>
 #include <boost/thread/mutex.hpp>
-#include <boost/unordered_map.hpp>
 #include <boost/thread/shared_mutex.hpp>
 #include <Safir/Dob/Internal/ConnectionId.h>
 #include <Safir/Dob/Internal/LeveledLock.h>
@@ -50,7 +47,7 @@ namespace Internal
         private boost::noncopyable
     {
     public:
-        typedef boost::shared_ptr<NamedSemaphore> SemaphorePtr;
+        typedef std::shared_ptr<NamedSemaphore> SemaphorePtr;
 
         static Signals & Instance();
 
@@ -68,7 +65,7 @@ namespace Internal
          * undefined results...
          * Only meant to be called from inside Connections::WaitForConnectionSignal
          */
-        const boost::function<void(void)> GetConnectionSignalWaiter(const ConnectionId& connectionId);
+        const std::function<void(void)> GetConnectionSignalWaiter(const ConnectionId& connectionId);
 
         /**
          * Signal that an application wants to connect or wants something else done by dose_main.
@@ -109,7 +106,7 @@ namespace Internal
 
             //Note that this contains semaphores allocated with new!
             //remember to delete the semaphore if removing from map!
-            typedef boost::unordered_map<Identifier, SemaphorePtr> Semaphores;
+            typedef std::unordered_map<Identifier, SemaphorePtr> Semaphores;
             Semaphores m_semaphores;
 
             typedef Safir::Dob::Internal::LeveledLock<boost::shared_mutex,
@@ -124,9 +121,9 @@ namespace Internal
         NamedSemaphore m_connectOrOutSignal;
 
         /**
-         * This class is here to ensure that only the Instance method can get at the 
+         * This class is here to ensure that only the Instance method can get at the
          * instance, so as to be sure that call_once is used correctly.
-         * Also makes it easier to grep for singletons in the code, if all 
+         * Also makes it easier to grep for singletons in the code, if all
          * singletons use the same construction and helper-name.
          */
         struct SingletonHelper
@@ -142,6 +139,3 @@ namespace Internal
 }
 }
 }
-
-#endif
-

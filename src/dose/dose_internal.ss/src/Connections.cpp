@@ -110,7 +110,7 @@ namespace Internal
         //std::wcout << "WaitForDoseMainSignal: connect = " << std::boolalpha << connect << ", connectionOut = " << connectionOut << std::endl;
     }
 
-    const boost::function<void(void)> Connections::GetConnectionSignalWaiter(const ConnectionId & connectionId)
+    const std::function<void(void)> Connections::GetConnectionSignalWaiter(const ConnectionId & connectionId)
     {
         return Signals::Instance().GetConnectionSignalWaiter(connectionId);
     }
@@ -411,7 +411,7 @@ namespace Internal
 
 
 
-    void Connections::HandleConnectionOutEvents(const boost::function<void(const ConnectionPtr&)>& handler)
+    void Connections::HandleConnectionOutEvents(const std::function<void(const ConnectionPtr&)>& handler)
     {
         std::vector<ConnectionPtr> signalledConnections;
 
@@ -540,7 +540,7 @@ namespace Internal
         }
     }
 
-    void Connections::RemoveConnectionFromNode(const int64_t node, const boost::function<void(const ConnectionPtr & connection)> & connectionFunc)
+    void Connections::RemoveConnectionFromNode(const int64_t node, const std::function<void(const ConnectionPtr & connection)> & connectionFunc)
     {
         std::vector<ConnectionPtr> removeConnections;
 
@@ -582,7 +582,7 @@ namespace Internal
     }
 
 
-    void Connections::ForEachConnection(const boost::function<void(const Connection & connection)> & connectionFunc) const
+    void Connections::ForEachConnection(const std::function<void(const Connection & connection)> & connectionFunc) const
     {
         boost::interprocess::scoped_lock<ConnectionsTableLock> lck(m_connectionTablesLock);
         for (ConnectionTable::const_iterator it = m_connections.begin();
@@ -592,7 +592,7 @@ namespace Internal
         }
     }
 
-    void Connections::ForEachConnectionPtr(const boost::function<void(const ConnectionPtr & connection)> & connectionFunc) const
+    void Connections::ForEachConnectionPtr(const std::function<void(const ConnectionPtr & connection)> & connectionFunc) const
     {
         boost::interprocess::scoped_lock<ConnectionsTableLock> lck(m_connectionTablesLock);
         for (ConnectionTable::const_iterator it = m_connections.begin();
@@ -603,7 +603,7 @@ namespace Internal
     }
 
     void Connections::ForSpecificConnection(const ConnectionId& connectionId,
-                                            const boost::function<void(const ConnectionPtr & connection)> & connectionFunc) const
+                                            const std::function<void(const ConnectionPtr & connection)> & connectionFunc) const
     {
         boost::interprocess::scoped_lock<ConnectionsTableLock> lck(m_connectionTablesLock);
 

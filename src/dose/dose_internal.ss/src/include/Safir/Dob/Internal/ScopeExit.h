@@ -24,8 +24,7 @@
 #ifndef __DOSE_INTERNAL_SCOPE_EXIT_H__
 #define __DOSE_INTERNAL_SCOPE_EXIT_H__
 
-#include <boost/function.hpp>
-#include <boost/noncopyable.hpp>
+#include <functional>
 
 namespace Safir
 {
@@ -33,14 +32,17 @@ namespace Dob
 {
 namespace Internal
 {
-    class ScopeExit:
-        private boost::noncopyable
+    class ScopeExit
     {
     public:
-        ScopeExit(const boost::function<void(void)> & function):m_function(function) {}
+        ScopeExit(const std::function<void(void)> & function):m_function(function) {}
         ~ScopeExit() {m_function();}
+
+        ScopeExit(const ScopeExit&) = delete;
+        const ScopeExit& operator=(const ScopeExit&) = delete;
+        
     private:
-        const boost::function<void(void)> m_function;
+        const std::function<void(void)> m_function;
     };
 }
 }

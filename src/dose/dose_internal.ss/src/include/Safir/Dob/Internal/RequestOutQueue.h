@@ -46,14 +46,14 @@ namespace Internal
         explicit RequestOutQueue(const size_t capacity);
 
 
-        typedef boost::function<void(const DistributionData & request,
+        typedef std::function<void(const DistributionData & request,
                                      bool & handled)> DispatchRequestFunc;
 
-        typedef boost::function<void(const DistributionData & response,
+        typedef std::function<void(const DistributionData & response,
                                      const DistributionData & request,
                                      bool & exitDispatch)> DispatchResponseFunc;
 
-        typedef boost::function<void(const DistributionData & request)> ForEachDispatchedRequestFunc;
+        typedef std::function<void(const DistributionData & request)> ForEachDispatchedRequestFunc;
 
         /**Checks if the queue is full. Will also return true if queue is set to simulate overflows. */
         bool full() const

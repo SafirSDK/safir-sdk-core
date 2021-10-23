@@ -155,7 +155,7 @@ namespace Internal
             ;
     }
 
-    const boost::function<void(void)> Signals::GetConnectionSignalWaiter(const ConnectionId& connection)
+    const std::function<void(void)> Signals::GetConnectionSignalWaiter(const ConnectionId& connection)
     {
         return [this,connection]{m_waitSignals.GetSemaphore(connection)->wait();};
     }
