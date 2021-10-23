@@ -52,6 +52,8 @@ namespace Internal
             return *this;
         }
 
+        ShmHandlerId(const ShmHandlerId&) = default;
+
         /**
          * Equality operator.
          *

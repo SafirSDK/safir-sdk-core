@@ -53,6 +53,8 @@ namespace Internal
         bool operator==(const ConnectionConsumerPair& other) const;
 
         ConnectionConsumerPair& operator=(const ConnectionConsumerPair& other);
+
+        ConnectionConsumerPair(const ConnectionConsumerPair&) = default;
     };
 
 }

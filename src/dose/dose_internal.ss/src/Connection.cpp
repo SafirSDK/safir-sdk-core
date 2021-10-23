@@ -39,7 +39,6 @@
 #include <Safir/Dob/Typesystem/Operations.h>
 #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
-#include <boost/bind.hpp>
 #include <boost/regex.hpp>
 
 #ifdef _MSC_VER
@@ -53,15 +52,14 @@
   #pragma warning(pop)
 #endif
 
+using namespace std::placeholders;
+
 namespace Safir
 {
 namespace Dob
 {
 namespace Internal
 {
-
-
-
     Identifier Connection::CalculateIdentifier(const std::string & name)
     {
         return LlufId_Generate64(name.c_str());
@@ -149,7 +147,7 @@ namespace Internal
         registrations.swap(m_registrations);
         std::for_each(registrations.begin(),
                       registrations.end(),
-                      boost::bind(&Connection::Unregister, this, _1, explicitUnregister));
+                      [this,explicitUnregister](const auto& reg){Unregister(reg, explicitUnregister);});
 
         // Remove all subscriptions
         for (TypesSetVector::iterator it = m_subscribedTypes.begin(); it < m_subscribedTypes.end(); ++it)
@@ -160,7 +158,7 @@ namespace Internal
             subscribedTypes.swap(*it);
             std::for_each(subscribedTypes.begin(),
                           subscribedTypes.end(),
-                          boost::bind(&Connection::Unsubscribe, this, _1));
+                          [this](const Typesystem::TypeId typeId){Unsubscribe(typeId);});
         }
 
         //We do nothing about the message in queue, we don't care if the app hasn't emptied its in-queue before exiting.
@@ -545,7 +543,8 @@ namespace Internal
         ScopedConnectionLock lck(m_lock);
 
         PendingOwnerships::iterator firstRemoved =
-            std::partition(m_pendingOwnerships.begin(),m_pendingOwnerships.end(),!boost::bind(&PendingRegistration::IsRemoved,_1));
+            std::partition(m_pendingOwnerships.begin(),m_pendingOwnerships.end(),
+                           [](const auto& reg){return reg.IsRemoved();});
         std::copy(firstRemoved,m_pendingOwnerships.end(),std::back_inserter(prv));
         m_pendingOwnerships.erase(firstRemoved,m_pendingOwnerships.end());
         return prv;
@@ -580,8 +579,9 @@ namespace Internal
         // Acquire connection lock
         ScopedConnectionLock lck(m_lock);
 
-        PendingOwnerships::iterator removeEnd = std::remove_if(m_pendingOwnerships.begin(),m_pendingOwnerships.end(),
-                                                               boost::bind(RequestIdMatches,_1,requestId));
+        PendingOwnerships::iterator removeEnd = std::remove_if
+            (m_pendingOwnerships.begin(),m_pendingOwnerships.end(),
+             [requestId](const auto& reg){return RequestIdMatches(reg, requestId);});
 
         if (removeEnd != m_pendingOwnerships.end())
         {

@@ -35,7 +35,7 @@ namespace Internal
     // to add methods that fetch lock-related information for any process/thread. If the fetching of such information
     // is not anticipated there should be no problem to store the data in process internal memory.
 
-    boost::once_flag LeveledLockHelper::SingletonHelper::m_onceFlag = BOOST_ONCE_INIT;
+    std::once_flag LeveledLockHelper::SingletonHelper::m_onceFlag ;
 
     LeveledLockHelper & LeveledLockHelper::SingletonHelper::Instance()
     {
@@ -45,7 +45,7 @@ namespace Internal
 
     LeveledLockHelper & LeveledLockHelper::Instance()
     {
-        boost::call_once(SingletonHelper::m_onceFlag,boost::bind(SingletonHelper::Instance));
+        std::call_once(SingletonHelper::m_onceFlag,[]{SingletonHelper::Instance();});
         return SingletonHelper::Instance();
     }
 

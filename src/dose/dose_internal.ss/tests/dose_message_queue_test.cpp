@@ -111,13 +111,11 @@ int main(int, char**)
 
     //ensure call to CrashReporter::Stop at application exit
     boost::shared_ptr<void> guard(static_cast<void*>(0),
-                                  boost::bind(Safir::Utilities::CrashReporter::Stop));
+                                  [](void*){Safir::Utilities::CrashReporter::Stop();});
 
     lllog(1) << "Starting thread" << std::endl;
     long sent = 0;
-    boost::thread t(boost::bind(Sender,
-                                boost::ref(queue),
-                                boost::ref(sent)));
+    boost::thread t([&queue,&sent]{Sender(queue,sent);});
 
     lllog(1) << "Dispatch loop starting" << std::endl;
     for(;;)

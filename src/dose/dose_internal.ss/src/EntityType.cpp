@@ -37,7 +37,7 @@
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
 
-#include <boost/bind.hpp>
+using namespace std::placeholders;
 
 namespace Safir
 {
@@ -152,12 +152,12 @@ namespace Internal
             ScopedTypeLock lck(m_typeLocks[context]);
 
             RegisterTime regTime = registrationState.GetRegistrationTime();
-            m_entityStates[context].ForEachState(boost::bind(&EntityType::RemoveGhost,
-                                                                 this,
-                                                                 _2,
-                                                                 boost::cref(handlerId),
-                                                                 boost::cref(regTime)),
-                                                                false); // false => Do not include released states
+            m_entityStates[context].ForEachState
+                ([this,&handlerId,&regTime](const auto /*key*/,
+                                            const auto& stateSharedPtr,
+                                            bool& /*exitDispatch*/)
+                  {RemoveGhost(stateSharedPtr,handlerId,regTime);},
+                 false); // false => Do not include released states
 
             m_handlerRegistrations[context].RemoteSetRegistrationState(connection, registrationState);
         }
@@ -238,27 +238,19 @@ namespace Internal
         if (!initialInjection)
         {
             // Add a state if it is not already present
-            m_entityStates[context].ForSpecificStateAdd(instanceId.GetRawValue(),
-                                                        boost::bind(&EntityType::SetEntityInternal,
-                                                                    this,
-                                                                    _2,
-                                                                    boost::cref(connection),
-                                                                    boost::cref(handlerId),
-                                                                    boost::cref(instanceId),
-                                                                    considerChangeFlags,
-                                                                    blob));
+            m_entityStates[context].ForSpecificStateAdd
+                (instanceId.GetRawValue(),
+                 [this,&connection,&handlerId,&instanceId,considerChangeFlags,blob]
+                     (const auto /*key*/, const auto& stateSharedPtr)
+                     {SetEntityInternal(stateSharedPtr,connection,handlerId,instanceId,considerChangeFlags,blob);});
         }
         else
         {
             // Add a state if it is not already present
-            m_entityStates[context].ForSpecificStateAdd(instanceId.GetRawValue(),
-                                                        boost::bind(&EntityType::SetInitalGhostInternal,
-                                                                    this,
-                                                                    _2,
-                                                                    boost::cref(connection),
-                                                                    boost::cref(handlerId),
-                                                                    boost::cref(instanceId),
-                                                                    blob));
+            m_entityStates[context].ForSpecificStateAdd
+                (instanceId.GetRawValue(),
+                 [this,&connection,&handlerId,&instanceId,blob](const auto /*key*/, const auto& stateSharedPtr)
+                 {SetInitalGhostInternal(stateSharedPtr,connection,handlerId,instanceId,blob);});
         }
     }
 
@@ -281,24 +273,20 @@ namespace Internal
 
         if (allInstances)
         {
-            m_entityStates[context].ForEachState(boost::bind(&EntityType::DeleteAllInstancesInternal,
-                                                             this,
-                                                             _2,
-                                                             boost::cref(connection),
-                                                             boost::cref(handlerId),
-                                                             _3),
-                                                 false); // no need to include already released states
+            m_entityStates[context].ForEachState
+                ([this,&connection,&handlerId]
+                     (const auto /*key*/, const auto& stateSharedPtr, bool& exitDispatch)
+                     {DeleteAllInstancesInternal(stateSharedPtr,connection,handlerId,exitDispatch);},
+                 false); // no need to include already released states
         }
         else
         {
-            m_entityStates[context].ForSpecificState(instanceId.GetRawValue(),
-                                                     boost::bind(&EntityType::DeleteEntityInternal,
-                                                                 this,
-                                                                 _2,
-                                                                 boost::cref(connection),
-                                                                 boost::cref(handlerId),
-                                                                 boost::cref(instanceId)),
-                                                     false); // no need to include already released state
+            m_entityStates[context].ForSpecificState
+                (instanceId.GetRawValue(),
+                 [this,&connection,&handlerId,&instanceId]
+                     (const auto /*key*/, const auto& stateSharedPtr)
+                     {DeleteEntityInternal(stateSharedPtr,connection,handlerId,instanceId);},
+                 false); // no need to include already released state
         }
     }
 
@@ -324,15 +312,11 @@ namespace Internal
 
         ScopedTypeLock lck(m_typeLocks[context]);
 
-        m_entityStates[context].ForSpecificStateAdd(instanceId.GetRawValue(),
-                                                    boost::bind(&EntityType::InjectEntityInternal,
-                                                                this,
-                                                                _2,
-                                                                connection,
-                                                                boost::cref(handlerId),
-                                                                boost::cref(instanceId),
-                                                                blob,
-                                                                timestamp));
+        m_entityStates[context].ForSpecificStateAdd
+            (instanceId.GetRawValue(),
+             [this,connection,&handlerId,&instanceId,blob,timestamp]
+                 (const auto /*key*/, const auto& stateSharedPtr)
+             {InjectEntityInternal(stateSharedPtr,connection,handlerId,instanceId,blob,timestamp);});
     }
 
     void EntityType::InjectDeletedEntity(const ConnectionPtr&                 connection,
@@ -355,14 +339,11 @@ namespace Internal
 
         ScopedTypeLock lck(m_typeLocks[context]);
 
-        m_entityStates[context].ForSpecificStateAdd(instanceId.GetRawValue(),
-                                                    boost::bind(&EntityType::InjectDeletedEntityInternal,
-                                                                this,
-                                                                _2,
-                                                                connection,
-                                                                boost::cref(handlerId),
-                                                                boost::cref(instanceId),
-                                                                timestamp));
+        m_entityStates[context].ForSpecificStateAdd
+            (instanceId.GetRawValue(),
+             [this,connection,&handlerId,&instanceId,timestamp]
+                 (const auto /*key*/, const auto& stateSharedPtr)
+                 {InjectDeletedEntityInternal(stateSharedPtr,connection,handlerId,instanceId,timestamp);});
     }
 
     void EntityType::AcceptInjection(const ConnectionPtr&       connection,
@@ -380,14 +361,12 @@ namespace Internal
         ScopedTypeLock lck(m_typeLocks[context]);
 
 
-        m_entityStates[context].ForSpecificState(injectionState.GetInstanceId().GetRawValue(),
-                                                 boost::bind(&EntityType::AcceptInjectionInternal,
-                                                             this,
-                                                             _2,
-                                                             boost::cref(connection),
-                                                             boost::ref(injectionState),
-                                                             boost::cref(originalInjectionState)),
-                                                 false); // false => don't include released states;
+        m_entityStates[context].ForSpecificState
+            (injectionState.GetInstanceId().GetRawValue(),
+             [this,&connection,&injectionState,&originalInjectionState]
+                 (const auto /*key*/, const auto& stateSharedPtr)
+                 {AcceptInjectionInternal(stateSharedPtr,connection,injectionState,originalInjectionState);},
+             false); // false => don't include released states;
 
 
     }
@@ -411,17 +390,18 @@ namespace Internal
 
         ScopedTypeLock lck(m_typeLocks[context]);
 
-        m_entityStates[context].ForSpecificState(instanceId.GetRawValue(),
-                                                 boost::bind(&EntityType::SetInjectionInternal,
-                                                             this,
-                                                             _2,
-                                                             boost::cref(connection),
-                                                             boost::cref(handlerId),
-                                                             boost::cref(instanceId),
-                                                             considerChangeFlags,
-                                                             blob,
-                                                             boost::cref(originalInjectionState)),
-                                                 false); // false => don't include released states;
+        m_entityStates[context].ForSpecificState
+            (instanceId.GetRawValue(),
+             [this, &connection, &handlerId, &instanceId, considerChangeFlags, blob, &originalInjectionState]
+                 (const auto /*key*/, const auto& stateSharedPtr)
+                 {SetInjectionInternal(stateSharedPtr,
+                                       connection,
+                                       handlerId,
+                                       instanceId,
+                                       considerChangeFlags,
+                                       blob,
+                                       originalInjectionState);},
+             false); // false => don't include released states;
     }
 
 
@@ -443,15 +423,12 @@ namespace Internal
 
         ScopedTypeLock lck(m_typeLocks[context]);
 
-        m_entityStates[context].ForSpecificState(instanceId.GetRawValue(),
-                                                 boost::bind(&EntityType::DeleteInjectionInternal,
-                                                             this,
-                                                             _2,
-                                                             boost::cref(connection),
-                                                             boost::cref(handlerId),
-                                                             boost::cref(instanceId),
-                                                             boost::cref(originalInjectionState)),
-                                                  false); // No need to include already released states
+        m_entityStates[context].ForSpecificState
+            (instanceId.GetRawValue(),
+             [this,&connection,&handlerId,&instanceId,&originalInjectionState]
+                 (const auto /*key*/, const auto& stateSharedPtr)
+                 {DeleteInjectionInternal(stateSharedPtr,connection,handlerId,instanceId,originalInjectionState);},
+             false); // No need to include already released states
     }
 
     void EntityType::RemoteSetInjectionEntityState(const DistributionData& entityState)
@@ -470,11 +447,10 @@ namespace Internal
 
         m_clock.UpdateCurrentTimestamp(entityState.GetCreationTime());
 
-        m_entityStates[context].ForSpecificStateAdd(entityState.GetInstanceId().GetRawValue(),
-                                                    boost::bind(&EntityType::RemoteSetInjectionEntityStateInternal,
-                                                                this,
-                                                                boost::cref(entityState),
-                                                                _2));
+        m_entityStates[context].ForSpecificStateAdd
+            (entityState.GetInstanceId().GetRawValue(),
+             [this,&entityState](const auto /*key*/, const auto& stateSharedPtr)
+             {RemoteSetInjectionEntityStateInternal(entityState,stateSharedPtr);});
     }
 
     RemoteSetResult EntityType::RemoteSetDeleteEntityState(const DistributionData&   entityState)
@@ -494,12 +470,10 @@ namespace Internal
 
             m_clock.UpdateCurrentTimestamp(entityState.GetCreationTime());
 
-            m_entityStates[context].ForSpecificStateAdd(entityState.GetInstanceId().GetRawValue(),
-                                                        boost::bind(&EntityType::RemoteSetDeleteEntityStateInternal,
-                                                                    this,
-                                                                    boost::cref(entityState),
-                                                                    _2,
-                                                                    boost::ref(result)));
+            m_entityStates[context].ForSpecificStateAdd
+                (entityState.GetInstanceId().GetRawValue(),
+                     [this,&entityState,&result](const auto /*key*/, const auto& stateSharedPtr)
+                     {RemoteSetDeleteEntityStateInternal(entityState, stateSharedPtr, result);});
         }
 
         bool isGhost = !entityState.IsNoState() && entityState.GetEntityStateKind()==DistributionData::Ghost;
@@ -529,13 +503,10 @@ namespace Internal
 
             m_clock.UpdateCurrentTimestamp(entityState.GetCreationTime());
 
-            m_entityStates[context].ForSpecificStateAdd(entityState.GetInstanceId().GetRawValue(),
-                                                        boost::bind(&EntityType::RemoteSetRealEntityStateInternal,
-                                                                    this,
-                                                                    boost::cref(connection),
-                                                                    boost::cref(entityState),
-                                                                    _2,
-                                                                    boost::ref(result)));
+            m_entityStates[context].ForSpecificStateAdd
+                (entityState.GetInstanceId().GetRawValue(),
+                 [this,&connection,&entityState,&result](const auto /*key*/, const auto& stateSharedPtr)
+                 {RemoteSetRealEntityStateInternal(connection,entityState,stateSharedPtr,result);});
         }
 
         bool isGhost = !entityState.IsNoState() && entityState.GetEntityStateKind()==DistributionData::Ghost;
@@ -614,12 +585,11 @@ namespace Internal
         // to skip this entity but wait for it to be set to not released. (Of course, a released entity can also
         // be just released so that case must be handled properly.) All this explains why we include
         // released states here.
-        m_entityStates[context].ForSpecificState(instanceId.GetRawValue(),
-                                                 boost::bind(&EntityType::ReadEntityInternal,
-                                                             this,
-                                                             _2,
-                                                             boost::ref(realState)),
-                                                 true); // true => include released states.
+        m_entityStates[context].ForSpecificState
+            (instanceId.GetRawValue(),
+             [this,&realState](const auto /*key*/, const auto& stateSharedPtr)
+                 {ReadEntityInternal(stateSharedPtr,realState);},
+             true); // true => include released states.
 
         if (realState.IsNoState())
         {
@@ -711,7 +681,9 @@ namespace Internal
         if (handlerId==Safir::Dob::Typesystem::HandlerId::ALL_HANDLERS)
         {
             //We want to clean old ghost for all handlers. First find out which handlers exist.
-            m_entityStates[context].ForEachState(boost::bind(&EntityType::FindAllHandlers, this, _2, boost::ref(handlers)), false);
+            m_entityStates[context].ForEachState
+                ([this,&handlers](const auto /*key*/, const auto& stateSharedPtr, bool& /*exitDispatch*/)
+                    {FindAllHandlers(stateSharedPtr,handlers);},false);
         }
         else
         {
@@ -725,21 +697,19 @@ namespace Internal
             RegisterTime mostRecentRegisterTime;
 
             // Make a first pass to find the most recent registration time for a ghost.
-            m_entityStates[context].ForEachState(boost::bind(&EntityType::GetMostRecentGhostRegTime,
-                                                             this,
-                                                             _2,
-                                                             boost::cref(handlerId),
-                                                             boost::ref(mostRecentRegisterTime)),
-                                                 false); // false => Do not include released states
+            m_entityStates[context].ForEachState
+                ([this,&handlerId,&mostRecentRegisterTime]
+                     (const auto /*key*/, const auto& stateSharedPtr, bool& /*exitDispatch*/)
+                     {GetMostRecentGhostRegTime(stateSharedPtr,handlerId,mostRecentRegisterTime);},
+                 false); // false => Do not include released states
 
             // Make a second pass and remove (set the state to released) any ghost that is older
             // than the most recent registration time for any ghost.
-            m_entityStates[context].ForEachState(boost::bind(&EntityType::RemoveGhost,
-                                                                 this,
-                                                                 _2,
-                                                                 boost::cref(handlerId),
-                                                                 boost::cref(mostRecentRegisterTime)),
-                                                 false); // false => Do not include released states
+            m_entityStates[context].ForEachState
+                ([this,&handlerId,&mostRecentRegisterTime]
+                     (const auto /*key*/, const auto& stateSharedPtr, bool& /*exitDispatch*/)
+                     {RemoveGhost(stateSharedPtr,handlerId,mostRecentRegisterTime);},
+                 false); // false => Do not include released states
         }
     }
 
@@ -753,14 +723,11 @@ namespace Internal
         bool gotIt = false;
 
         // For an explanation regarding why we include released states here see the corresponding comment for ReadEntiy
-        m_entityStates[context].ForSpecificState(instanceId.GetRawValue(),
-                                                 boost::bind(&EntityType::GetHandlerOfInstanceInternal,
-                                                             this,
-                                                             _2,
-                                                             boost::ref(handlerId),
-                                                             false,
-                                                             boost::ref(gotIt)),
-                                                 true); // true => include released states
+        m_entityStates[context].ForSpecificState
+            (instanceId.GetRawValue(),
+                 [this,&handlerId,&gotIt](const auto /*key*/, const auto& stateSharedPtr)
+                 {GetHandlerOfInstanceInternal(stateSharedPtr,handlerId,false,gotIt);},
+             true); // true => include released states
 
         if (!gotIt)
         {
@@ -781,12 +748,11 @@ namespace Internal
         bool isCreated = false;
 
         // For an explanation regarding why we include released states here see the corresponding comment for ReadEntiy
-        m_entityStates[context].ForSpecificState(instanceId.GetRawValue(),
-                                                 boost::bind(&EntityType::IsCreatedInternal,
-                                                             this,
-                                                             _2,
-                                                             boost::ref(isCreated)),
-                                                 true); // true => include released states
+        m_entityStates[context].ForSpecificState
+            (instanceId.GetRawValue(),
+                 [this,&isCreated](const auto /*key*/, const auto& stateSharedPtr)
+                 {IsCreatedInternal(stateSharedPtr,isCreated);},
+             true); // true => include released states
 
         return isCreated;
     }
@@ -801,14 +767,11 @@ namespace Internal
         bool isOwner = false;
 
         // For an explanation regarding why we include released states here see the corresponding comment for ReadEntiy
-        m_entityStates[context].ForSpecificState(instanceId.GetRawValue(),
-                                                 boost::bind(&EntityType::IsOwnerInternal,
-                                                             this,
-                                                             _2,
-                                                             boost::cref(handlerId),
-                                                             boost::cref(registerer),
-                                                             boost::ref(isOwner)),
-                                                 true); // true => include released states
+        m_entityStates[context].ForSpecificState
+            (instanceId.GetRawValue(),
+                 [this,&handlerId,&registerer,&isOwner](const auto /*key*/, const auto& stateSharedPtr)
+                 {IsOwnerInternal(stateSharedPtr,handlerId,registerer,isOwner);},
+             true); // true => include released states
 
         return isOwner;
     }

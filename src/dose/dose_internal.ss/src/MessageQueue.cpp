@@ -93,11 +93,8 @@ namespace Internal
 
             //This will cause the FinishDispatch method to be called when the scope exits
             //normally or if exitDispatch is used or there is an exception.
-            ScopeExit spliceBackGuard(boost::bind(&MessageQueue::FinishDispatch,
-                                                  this,
-                                                  boost::ref(toDispatch),
-                                                  boost::cref(numDispatched),
-                                                  boost::ref(isNoLongerFull)));
+            ScopeExit spliceBackGuard([this, &toDispatch, &numDispatched, &isNoLongerFull]
+                                        {FinishDispatch(toDispatch, numDispatched, isNoLongerFull);});
 
             //Algorith: Swap the list into a local variable, to hold the lock as little as possible.
             //Then dispatch the messages, and then retake the lock and put any remaining messages back.

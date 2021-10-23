@@ -61,9 +61,7 @@ namespace Internal
 
         //This will cause any undispatched parts of the queue to be spliced back
         //onto the queue if exitDispatch is used or there is an exception.
-        ScopeExit spliceBackGuard(boost::bind(&SubscriptionQueue::SpliceBack,
-                                              this,
-                                              boost::ref(toDispatch)));
+        ScopeExit spliceBackGuard([this,&toDispatch]{SpliceBack(toDispatch);});
 
         //Algorithm: Swap the list into a local variable, to hold the lock as little as possible.
         //Then dispatch the subscriptions, and then retake the lock and put any remaining messages back.

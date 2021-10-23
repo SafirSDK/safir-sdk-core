@@ -1,6 +1,4 @@
-ADD_DEFINITIONS(-Ddose_internal_EXPORTS)
 ADD_EXECUTABLE(lamport_clock_test lamport_clock_test.cpp)
-#TARGET_INCLUDE_DIRECTORIES(lamport_clock_test PRIVATE ../../src/include)
 
 TARGET_LINK_LIBRARIES(lamport_clock_test PRIVATE
   dose_internal

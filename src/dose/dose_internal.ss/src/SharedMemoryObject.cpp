@@ -26,7 +26,6 @@
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/ConfigReader.h>
 #include <Safir/Dob/NodeParameters.h>
-#include <boost/bind.hpp>
 
 namespace //anonymous namespace for internal stuff
 {
@@ -48,7 +47,7 @@ namespace Internal
 
     /** @{ */
 
-    boost::once_flag SharedMemoryObject::SharedMemoryHolder::SingletonHelper::m_onceFlag = BOOST_ONCE_INIT;
+    std::once_flag SharedMemoryObject::SharedMemoryHolder::SingletonHelper::m_onceFlag ;
 
     SharedMemoryObject::SharedMemoryHolder & SharedMemoryObject::SharedMemoryHolder::SingletonHelper::Instance()
     {
@@ -58,7 +57,7 @@ namespace Internal
 
     SharedMemoryObject::SharedMemoryHolder & SharedMemoryObject::SharedMemoryHolder::Instance()
     {
-        boost::call_once(SingletonHelper::m_onceFlag,boost::bind(SingletonHelper::Instance));
+        std::call_once(SingletonHelper::m_onceFlag,[]{SingletonHelper::Instance();});
         return SingletonHelper::Instance();
     }
 

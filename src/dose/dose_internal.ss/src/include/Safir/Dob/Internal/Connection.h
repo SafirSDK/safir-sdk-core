@@ -25,6 +25,7 @@
 #ifndef __DOSE_CONNECTION_H__
 #define __DOSE_CONNECTION_H__
 
+#include <functional>
 #include <Safir/Dob/Internal/ConnectionId.h>
 #include <Safir/Dob/ConnectionQueueId.h>
 #include <Safir/Dob/Internal/InternalDefs.h>

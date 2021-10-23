@@ -26,9 +26,10 @@
 #include <Safir/Dob/Internal/StateDeleter.h>
 #include <Safir/Dob/Internal/Connection.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
-#include <boost/bind.hpp>
 #include <boost/interprocess/sync/scoped_lock.hpp>
 #include <boost/interprocess/sync/sharable_lock.hpp>
+
+using namespace std::placeholders;
 
 namespace Safir
 {
@@ -93,24 +94,19 @@ namespace Internal
         if (allKeys)
         {
             // Create a subscription for each existing state
-            ForEachState(boost::bind(&StateContainer::AddSubscription,
-                                     this,
-                                     _2,
-                                     boost::cref(subscriptionId),
-                                     restartSubscription,
-                                     boost::cref(subIt->second.GetSubscriptionOptions())),
-                         true);    // true => include released states
+            ForEachState
+                ([this,&subscriptionId,restartSubscription,&options = subIt->second.GetSubscriptionOptions()]
+                     (const auto /*key*/, const auto& stateSharedPtr, bool& /*exitDispatch*/)
+                     {AddSubscription(stateSharedPtr,subscriptionId,restartSubscription,options);},
+                 true);    // true => include released states
         }
         else
         {
             // Create a subscription for a single state
             ForSpecificState(key,
-                             boost::bind(&StateContainer::AddSubscription,
-                                         this,
-                                         _2,
-                                         boost::cref(subscriptionId),
-                                         restartSubscription,
-                                         boost::cref(subIt->second.GetSubscriptionOptions())),
+                             [this,&subscriptionId,restartSubscription,&options=subIt->second.GetSubscriptionOptions()]
+                                 (const auto /*key*/, const auto& stateSharedPtr)
+                                 {AddSubscription(stateSharedPtr, subscriptionId, restartSubscription, options);},
                              true); // true => include released states
         }
     }
@@ -440,10 +436,9 @@ namespace Internal
         if (allKeys)
         {
             // Remove  a subscription for all handlers
-            ForEachState(boost::bind(&StateContainer::RemoveSubscription,
-                                     this,
-                                     _2,
-                                     boost::cref(subscriptionId)),
+            ForEachState([this, &subscriptionId]
+                             (const auto /*key*/, const auto& stateSharedPtr, bool& /*exitDispatch*/)
+                             {RemoveSubscription(stateSharedPtr,subscriptionId);},
                          true); // true => include released states. We must ensure that the subscribed flag in a subscription is set to
                                 //         'not subscribed' also for released entities, otherwise a subscription in the dirty subscription
                                 //         queue might get dispatched after an application has made an Unsubscribe.
@@ -452,10 +447,8 @@ namespace Internal
         {
             // Remove a subscription for a single handler
             ForSpecificState(key,
-                             boost::bind(&StateContainer::RemoveSubscription,
-                                         this,
-                                         _2,
-                                         boost::cref(subscriptionId)),
+                             [this,&subscriptionId](const auto /*key*/, const auto& stateSharedPtr)
+                                 {RemoveSubscription(stateSharedPtr,subscriptionId);},
                              true); // true => include released states. We must ensure that the subscribed flag in a subscription is set to
                                     //         'not subscribed' also for released entities, otherwise a subscription in the dirty subscription
                                     //         queue might get dispatched after an application has made an Unsubscribe.

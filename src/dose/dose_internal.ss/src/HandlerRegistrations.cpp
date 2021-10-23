@@ -83,6 +83,7 @@ namespace Internal
 
         ConnectionConsumerPair registerer(connection, consumer);
 
+        //TODO: remove this crap
         // The input parameters are put in a struct because the current boost bind implementation can
         // handle only 9 parameters.
         RegisterInternalInput input;
@@ -94,12 +95,10 @@ namespace Internal
         input.overrideRegistration = overrideRegistration;
 
         // Add a state if not already present
-        m_registrations.ForSpecificStateAdd(handlerId.GetRawValue(),
-                                            boost::bind(&HandlerRegistrations::RegisterInternal,
-                                                        this,
-                                                        _2,
-                                                        boost::cref(input),
-                                                        boost::ref(regDone)));
+        m_registrations.ForSpecificStateAdd
+            (handlerId.GetRawValue(),
+             [this,&inp = std::as_const(input),&regDone](const auto /*key*/, const auto& stateSharedPtr)
+               {RegisterInternal(stateSharedPtr,inp,regDone);});
 
         return regDone;
     }
@@ -107,15 +106,15 @@ namespace Internal
     void HandlerRegistrations::Unregister(const ConnectionPtr&                  connection,
                                           const Dob::Typesystem::HandlerId&     handlerId)
     {
-        m_registrations.ForSpecificStateAdd(handlerId.GetRawValue(),
-                                            boost::bind(&HandlerRegistrations::UnregisterInternal,
-                                                        this,
-                                                        boost::cref(connection),
-                                                        boost::cref(handlerId),
-                                                        true,  // true => explicit unregistration
-                                                        m_nodeId,
-                                                        connection->Id().m_contextId,
-                                                        _2));
+        m_registrations.ForSpecificStateAdd
+            (handlerId.GetRawValue(),
+             [this,&connection,&handlerId](const auto /*key*/, const auto& stateSharedPtr)
+             {UnregisterInternal(connection,
+                                 handlerId,
+                                 true, // true => explicit unregistration
+                                 m_nodeId,
+                                 connection->Id().m_contextId,
+                                 stateSharedPtr);});
     }
 
     void HandlerRegistrations::RegisterInternal(const StateSharedPtr&         statePtr,
@@ -375,13 +374,12 @@ namespace Internal
     void HandlerRegistrations::UnregisterAll(const ConnectionPtr& connection,
                                              const bool           explicitUnregister)
     {
-        m_registrations.ForEachState(boost::bind(&HandlerRegistrations::UnregisterAllInternal,
-                                                 this,
-                                                 boost::cref(connection),
-                                                 explicitUnregister,
-                                                 _2,
-                                                 _3),
-                                     false);  // no need to include already released states
+        m_registrations.ForEachState
+            ([this,&connection,explicitUnregister](const auto /*key*/,
+                                                   const auto& stateSharedPtr,
+                                                   bool& exitDispatch)
+            {UnregisterAllInternal(connection,explicitUnregister,stateSharedPtr,exitDispatch);},
+             false);  // no need to include already released states
     }
 
     void HandlerRegistrations::UnregisterAllInternal(const ConnectionPtr&           connection,
@@ -416,12 +414,10 @@ namespace Internal
     {
         Dob::Typesystem::HandlerId handlerId = registrationState.GetHandlerId();
 
-        m_registrations.ForSpecificStateAdd(handlerId.GetRawValue(),
-                                            boost::bind(&HandlerRegistrations::RemoteRegistrationStateInternal,
-                                                        this,
-                                                        boost::cref(connection),
-                                                        boost::cref(registrationState),
-                                                        _2));
+        m_registrations.ForSpecificStateAdd
+            (handlerId.GetRawValue(),
+             [this,&connection,&registrationState](const auto /*key*/, const auto& stateSharedPtr)
+             {RemoteRegistrationStateInternal(connection,registrationState,stateSharedPtr);});
     }
 
     bool HandlerRegistrations::IsRegistered(const Dob::Typesystem::HandlerId& handlerId) const
@@ -430,16 +426,14 @@ namespace Internal
 
         // For an explanation regarding why we include released states here see the corresponding
         // comment for EntityType::ReadEntiy
-        m_registrations.ForSpecificState(handlerId.GetRawValue(),
-                                         boost::bind(&HandlerRegistrations::IsRegisteredInternal,
-                                                     this,
-                                                     _2,
-                                                     boost::ref(isRegistered)),
-                                         true); // true => include released states);
+        m_registrations.ForSpecificState
+            (handlerId.GetRawValue(),
+             [this,&isRegistered](const auto /*key*/, const auto& stateSharedPtr)
+               {IsRegisteredInternal(stateSharedPtr,isRegistered);},
+             true); // true => include released states);
 
         return isRegistered;
     }
-
 
     const ConnectionConsumerPair
     HandlerRegistrations::GetRegisterer(const Dob::Typesystem::HandlerId& handlerId) const
@@ -450,16 +444,14 @@ namespace Internal
 
         // For an explanation regarding why we include released states here see the corresponding
         // comment for EntityType::ReadEntiy
-        m_registrations.ForSpecificState(handlerId.GetRawValue(),
-                                         boost::bind(&HandlerRegistrations::GetRegistererInternal,
-                                                     this,
-                                                     _2,
-                                                     boost::ref(registerer),
-                                                     boost::ref(instanceIdPolicy),
-                                                     boost::ref(registrationTime)),
-                                         true); // true => include released states
+        m_registrations.ForSpecificState
+            (handlerId.GetRawValue(),
+             [this,&registerer,&instanceIdPolicy,&registrationTime](const auto /*key*/, const auto& stateSharedPtr)
+               {GetRegistererInternal(stateSharedPtr,registerer,instanceIdPolicy,registrationTime);},
+             true); // true => include released states
         return registerer;
     }
+
 
     bool
     HandlerRegistrations::GetRegisterer(const Dob::Typesystem::HandlerId& handlerId,
@@ -470,14 +462,11 @@ namespace Internal
 
         // For an explanation regarding why we include released states here see the corresponding
         // comment for EntityType::ReadEntiy
-        m_registrations.ForSpecificState(handlerId.GetRawValue(),
-                                         boost::bind(&HandlerRegistrations::GetRegistererInternal,
-                                                     this,
-                                                     _2,
-                                                     boost::ref(registerer),
-                                                     boost::ref(instanceIdPolicy),
-                                                     boost::ref(registrationTime)),
-                                         true); // true => include released states
+        m_registrations.ForSpecificState
+            (handlerId.GetRawValue(),
+             [this,&registerer,&instanceIdPolicy,&registrationTime](const auto /*key*/, const auto& stateSharedPtr)
+               {GetRegistererInternal(stateSharedPtr,registerer,instanceIdPolicy,registrationTime);},
+             true); // true => include released states
 
         return registerer.connection != NULL;
     }
@@ -491,14 +480,11 @@ namespace Internal
 
         // For an explanation regarding why we include released states here see the corresponding
         // comment for EntityType::ReadEntiy
-        m_registrations.ForSpecificState(handlerId.GetRawValue(),
-                                         boost::bind(&HandlerRegistrations::GetRegistererInternal,
-                                                     this,
-                                                     _2,
-                                                     boost::ref(registerer),
-                                                     boost::ref(instanceIdPolicy),
-                                                     boost::ref(registrationTime)),
-                                         true); // true => include released states
+        m_registrations.ForSpecificState
+            (handlerId.GetRawValue(),
+             [this,&registerer,&instanceIdPolicy,&registrationTime](const auto /*key*/, const auto& stateSharedPtr)
+               {GetRegistererInternal(stateSharedPtr,registerer,instanceIdPolicy,registrationTime);},
+             true); // true => include released states
 
         return registerer.connection != NULL;
     }
@@ -602,14 +588,12 @@ namespace Internal
         {
             // This is an unregistration for en entity type so delete (or set as ghost) all instances
             // owned by the current registerer.
-            m_entityContainerPtr->ForEachState(boost::bind(&HandlerRegistrations::RevokeEntity,
-                                               this,
-                                               _2,
-                                               connection,
-                                               handlerId,
-                                               currentRegisterTime,
-                                               _3),
-                                               false);  // No need to include already released states
+            m_entityContainerPtr->ForEachState
+                ([this,connection,handlerId,currentRegisterTime](const auto /*key*/,
+                                                                 const auto& stateSharedPtr,
+                                                                 bool& exitDispatch)
+                  {RevokeEntity(stateSharedPtr,connection,handlerId,currentRegisterTime,exitDispatch);},
+                 false);  // No need to include already released states
         }
 
 
@@ -831,7 +815,6 @@ namespace Internal
     {
         return m_registrations.CanAcquireContainerWriterLock(lockTimeout);
     }
-
 }
 }
 }

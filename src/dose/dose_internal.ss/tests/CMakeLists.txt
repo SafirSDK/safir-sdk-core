@@ -17,8 +17,8 @@ TARGET_LINK_LIBRARIES(dose_message_queue_test PRIVATE
 TARGET_LINK_LIBRARIES(dose_sem_wrapper_test PRIVATE
   lluf_config)
 
-target_include_directories(wrap_around_counter_test PRIVATE ../src/include)
 target_include_directories(dose_sem_wrapper_test PRIVATE ../src/include)
+target_include_directories(wrap_around_counter_test PRIVATE ../src/include)
 
 ADD_TEST(NAME Semaphore COMMAND dose_sem_wrapper_test)
 ADD_TEST(NAME MessageQueue COMMAND dose_message_queue_test)

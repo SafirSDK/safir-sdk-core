@@ -26,7 +26,6 @@
 #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <iostream>
-#include <boost/bind.hpp>
 
 #ifdef _MSC_VER
   #pragma warning(push)
@@ -56,7 +55,7 @@ namespace Internal
     const char * ConnectOrOutSignalName = "SAFIR_DOSE_CONN_OR_OUT";
 
 
-    boost::once_flag Signals::SingletonHelper::m_onceFlag = BOOST_ONCE_INIT;
+    std::once_flag Signals::SingletonHelper::m_onceFlag;
 
     Signals & Signals::SingletonHelper::Instance()
     {
@@ -66,7 +65,7 @@ namespace Internal
 
     Signals & Signals::Instance()
     {
-        boost::call_once(SingletonHelper::m_onceFlag,boost::bind(SingletonHelper::Instance));
+        std::call_once(SingletonHelper::m_onceFlag,[]{SingletonHelper::Instance();});
         return SingletonHelper::Instance();
     }
 
@@ -158,16 +157,8 @@ namespace Internal
 
     const boost::function<void(void)> Signals::GetConnectionSignalWaiter(const ConnectionId& connection)
     {
-        return boost::bind(wait,m_waitSignals.GetSemaphore(connection));
+        return [this,connection]{m_waitSignals.GetSemaphore(connection)->wait();};
     }
-/*    void Signals::WaitForConnectionSignal(const ConnectionId& connection)
-    {
-        SemaphorePtr sem = m_waitSignals.GetSemaphore(connection);
-        sem->wait();
-        //remove any further signals from the semaphore
-        while(sem->try_wait())
-            ;
-    }*/
 
     void Signals::WaitForConnectOrOut()
     {

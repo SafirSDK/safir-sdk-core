@@ -32,7 +32,6 @@
 #include <boost/interprocess/sync/scoped_lock.hpp>
 #include <Safir/Dob/Internal/ConsumerId.h>
 #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
-#include <boost/bind.hpp>
 
 namespace Safir
 {

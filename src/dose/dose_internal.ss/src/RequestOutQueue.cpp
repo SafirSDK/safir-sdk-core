@@ -26,9 +26,10 @@
 #include <Safir/Dob/Internal/StateDeleter.h>
 #include <Safir/Dob/Typesystem/Operations.h>
 #include <Safir/Dob/Internal/ScopeExit.h>
-#include <boost/bind.hpp>
 #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
+
+using namespace std::placeholders;
 
 namespace Safir
 {
@@ -100,11 +101,9 @@ namespace Internal
 
         //This will cause the FinishDispatchResponses method to be called when the scope exits
         //normally or if exitDispatch is used or there is an exception.
-        ScopeExit spliceBackGuard(boost::bind(&RequestOutQueue::FinishDispatchRequests,
-                                              this,
-                                              boost::ref(toDispatch),
-                                              boost::ref(dispatchedRequests),
-                                              boost::cref(numDispatched)));
+        ScopeExit spliceBackGuard
+            ([this,&toDispatch,&dispatchedRequests,&numDispatched]
+                {FinishDispatchRequests(toDispatch,dispatchedRequests,numDispatched);});
 
         {
             ScopedRequestOutQueueLock lck(m_lock);
@@ -126,8 +125,8 @@ namespace Internal
 
             //Guarantee that we set the m_currentlyDispatchingRequest variable to NULL
             //when we leave the scope
-            ScopeExit zeroiseReferenceGuard(boost::bind(&RequestOutQueue::RemoveCurrentReference,
-                                                        this));
+            ScopeExit zeroiseReferenceGuard([this]{RemoveCurrentReference();});
+
             m_currentlyDispatchingRequest = &current;
             ++it;
 
@@ -174,10 +173,8 @@ namespace Internal
 
         //This will cause the FinishDispatchResponses method to be called when the scope exits
         //normally or if exitDispatch is used or there is an exception.
-        ScopeExit spliceBackGuard(boost::bind(&RequestOutQueue::FinishDispatchResponses,
-                                              this,
-                                              boost::ref(toDispatch),
-                                              boost::cref(numDispatched)));
+        ScopeExit spliceBackGuard
+            ([this,&toDispatch,&numDispatched]{FinishDispatchResponses(toDispatch,numDispatched);});
 
         {
             ScopedRequestOutQueueLock lck(m_lock);

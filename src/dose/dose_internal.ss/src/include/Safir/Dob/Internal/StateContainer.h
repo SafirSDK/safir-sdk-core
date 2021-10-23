@@ -118,6 +118,8 @@ namespace Internal
             /** Construct an "end" iterator.*/
             Iterator():m_entity(no_state_tag) {}
 
+            Iterator(const Iterator&) = default;
+            
             Iterator& operator=(const Iterator& other) {
                 m_state = other.m_state;
                 m_stateReferenceHolder = other.m_stateReferenceHolder;

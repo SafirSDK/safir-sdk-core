@@ -28,7 +28,7 @@ using namespace Safir::Dob::Internal;
 void user(const ConnectionId& connection)
 {
     Signals::Instance().GetConnectionSignalWaiter(connection)();
-    Signals::Instance().SignalConnectOrOut();    
+    Signals::Instance().SignalConnectOrOut();
 }
 
 int main()
@@ -40,7 +40,7 @@ int main()
         ConnectionId id(0,0,i);
         Signals::Remove(id);
         connids.insert(id);
-        threads.create_thread(boost::bind(user,id));
+        threads.create_thread([id]{user(id);});
     }
 
     for (std::set<ConnectionId>::iterator it = connids.begin();
@@ -54,5 +54,3 @@ int main()
 
     return 0;
 }
-
-

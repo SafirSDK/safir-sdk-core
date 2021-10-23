@@ -118,7 +118,7 @@ namespace Internal
 
     void Subscription::AddToDirtySubscriptionQueue(const SubscriptionPtr& subPtr)
     {
-        subPtr->DirtyFlag().Set(boost::bind(AddDirty,boost::cref(subPtr)));
+        subPtr->DirtyFlag().Set([&subPtr]{AddDirty(subPtr);});
     }
 }
 }

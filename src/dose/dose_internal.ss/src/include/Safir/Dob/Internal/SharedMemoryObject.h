@@ -25,11 +25,10 @@
 #ifndef __DOSE_SHARED_MEMORY_OBJECT_H__
 #define __DOSE_SHARED_MEMORY_OBJECT_H__
 
+#include <mutex>
+#include <memory>
 #include <Safir/Dob/Internal/InternalExportDefs.h>
 #include <Safir/Utilities/StartupSynchronizer.h>
-#include <boost/thread/mutex.hpp>
-
-
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -53,8 +52,6 @@ void intrusive_ptr_release(const char * p);
 #include <boost/interprocess/smart_ptr/intrusive_ptr.hpp>
 #include <boost/interprocess/smart_ptr/weak_ptr.hpp>
 #include <boost/noncopyable.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/thread/once.hpp>
 
 #ifdef _MSC_VER
 #pragma warning (pop)
@@ -85,7 +82,6 @@ namespace Internal
         class DOSE_INTERNAL_API SharedMemoryHolder:
             private boost::noncopyable,
             public Safir::Utilities::Synchronized
-
         {
         public:
             static SharedMemoryHolder & Instance();
@@ -96,25 +92,25 @@ namespace Internal
             ~SharedMemoryHolder();
 
             //Synchronized stuff
-            virtual void Create();
-            virtual void Use();
-            virtual void Destroy();
+            void Create() override;
+            void Use() override;
+            void Destroy() override;
 
-            boost::shared_ptr<boost::interprocess::managed_shared_memory> m_shmem;
+            std::shared_ptr<boost::interprocess::managed_shared_memory> m_shmem;
 
             /**
-             * This class is here to ensure that only the Instance method can get at the 
-             * instance, so as to be sure that boost call_once is used correctly.
-             * Also makes it easier to grep for singletons in the code, if all 
+             * This class is here to ensure that only the Instance method can get at the
+             * instance, so as to be sure that std call_once is used correctly.
+             * Also makes it easier to grep for singletons in the code, if all
              * singletons use the same construction and helper-name.
              */
             struct SingletonHelper
             {
             private:
                 friend SharedMemoryHolder& SharedMemoryHolder::Instance();
-                
+
                 static SharedMemoryHolder& Instance();
-                static boost::once_flag m_onceFlag;
+                static std::once_flag m_onceFlag;
             };
 
             Safir::Utilities::StartupSynchronizer m_startupSynchronizer;
@@ -347,4 +343,3 @@ namespace Internal
 
 
 #endif
-
