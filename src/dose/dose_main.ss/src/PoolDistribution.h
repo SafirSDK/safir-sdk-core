@@ -25,7 +25,6 @@
 #include <queue>
 #include <functional>
 #include <boost/lexical_cast.hpp>
-#include <boost/make_shared.hpp>
 #include <boost/asio.hpp>
 #include <boost/chrono.hpp>
 #include <boost/asio/steady_timer.hpp>
@@ -34,6 +33,7 @@
 #include <Safir/Dob/Connection.h>
 #include <Safir/Dob/ConnectionAspectMisc.h>
 #include <Safir/Dob/ConnectionAspectInjector.h>
+#include <Safir/Utilities/Internal/MakeSharedArray.h>
 
 namespace Safir
 {
@@ -60,7 +60,7 @@ namespace Internal
             :m_nodeId(nodeId)
             ,m_nodeType(nodeType)
             ,m_strand(strand)
-            ,m_timer(strand.get_io_service())
+            ,m_timer(strand.context())
             ,m_distribution(distribution)
             ,m_completionHandler(completionHandler)
             ,m_running(false)
@@ -69,7 +69,7 @@ namespace Internal
 
         void Run() SAFIR_GCC_VISIBILITY_BUG_WORKAROUND
         {
-            m_strand.dispatch([=]
+            m_strand.dispatch([this]
             {
                 if (m_running)
                     return;
@@ -78,7 +78,7 @@ namespace Internal
 
                 m_running=true;
                 //collect all connections on this node
-                Connections::Instance().ForEachConnection([=](const Connection& connection)
+                Connections::Instance().ForEachConnection([this](const Connection& connection)
                 {
                     //auto notDoseConnection=std::string(connection.NameWithoutCounter()).find(";dose_main;")==std::string::npos;
                     auto localContext=Safir::Dob::NodeParameters::LocalContexts(connection.Id().m_contextId);
@@ -99,7 +99,7 @@ namespace Internal
 
         void Cancel()
         {
-            m_strand.dispatch([=]
+            m_strand.dispatch([this]
             {
                 m_running=false;
             });
@@ -135,7 +135,7 @@ namespace Internal
             while (CanSend() && !m_connections.empty())
             {
                 const DistributionData& d=m_connections.front();
-                boost::shared_ptr<const char[]> p(d.GetReference(), [=](const char* ptr){DistributionData::DropReference(ptr);});
+                std::shared_ptr<const char[]> p(d.GetReference(), [=](const char* ptr){DistributionData::DropReference(ptr);});
 
                 if (m_distribution.GetCommunication().Send(m_nodeId, m_nodeType, p, d.Size(), ConnectionMessageDataTypeId, true))
                 {
@@ -149,14 +149,14 @@ namespace Internal
 
             if (m_connections.empty())
             {
-                m_strand.post([=]
+                m_strand.post([this]
                 {
                     SendStates(0);
                 });
             }
             else
             {
-                SetTimer([=]{SendConnections();});
+                SetTimer([this]{SendConnections();});
             }
         }
 
@@ -169,7 +169,7 @@ namespace Internal
 
             if (context>=Safir::Dob::NodeParameters::NumberOfContexts())
             {
-                m_strand.post([=]{SendPdComplete();});
+                m_strand.post([this]{SendPdComplete();});
                 return;
             }
 
@@ -245,11 +245,11 @@ namespace Internal
 
             if (overflow)
             {
-                SetTimer([=]{DispatchStates(conPtr, context);});
+                SetTimer([this,conPtr,context]{DispatchStates(conPtr, context);});
             }
             else //continue with next context
             {
-                m_strand.dispatch([=]{SendStates(context+1);});
+                m_strand.dispatch([this,context]{SendStates(context+1);});
             }
         }
 
@@ -262,7 +262,7 @@ namespace Internal
 
             m_dobConnection.Close();
 
-            auto req=boost::make_shared<char[]>(sizeof(PoolDistributionInfo));
+            auto req=Safir::Utilities::Internal::MakeSharedArray(sizeof(PoolDistributionInfo));
             (*reinterpret_cast<PoolDistributionInfo*>(req.get()))=PdComplete;
 
             if (m_distribution.GetCommunication().Send(m_nodeId, m_nodeType, req, sizeof(PoolDistributionInfo), PoolDistributionInfoDataTypeId, true))
@@ -272,7 +272,7 @@ namespace Internal
             }
             else
             {
-                SetTimer([=]{SendPdComplete();});
+                SetTimer([this]{SendPdComplete();});
             }
         }
 
@@ -378,16 +378,16 @@ namespace Internal
                 return;
 
             m_timer.expires_from_now(boost::chrono::milliseconds(10));
-            m_timer.async_wait(m_strand.wrap([=](const boost::system::error_code&)
+            m_timer.async_wait(m_strand.wrap([this,completionHandler](const boost::system::error_code&)
             {
                 if (m_running)
                     completionHandler();
             }));
         }
 
-        static inline boost::shared_ptr<const char[]> ToPtr(const DistributionData& d)
+        static inline std::shared_ptr<const char[]> ToPtr(const DistributionData& d)
         {
-            boost::shared_ptr<const char[]> p(d.GetReference(), [=](const char* ptr){DistributionData::DropReference(ptr);});
+            std::shared_ptr<const char[]> p(d.GetReference(), [](const char* ptr){DistributionData::DropReference(ptr);});
             return p;
         }
 

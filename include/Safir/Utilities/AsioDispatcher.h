@@ -25,12 +25,8 @@
 
 #include <Safir/Dob/Connection.h>
 #include <Safir/Utilities/Internal/Atomic.h>
-#include <boost/bind.hpp>
-#include <boost/bind/protect.hpp>
 #include <boost/noncopyable.hpp>
-#include <boost/function.hpp>
 #include <boost/atomic.hpp>
-#include <boost/make_shared.hpp>
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -70,7 +66,7 @@ namespace Utilities
         AsioDispatcher(const Safir::Dob::Connection & connection,
                        boost::asio::io_service& ioService)
             : m_connection(connection)
-            , m_strand(new boost::asio::strand(ioService))
+            , m_strand(new boost::asio::io_service::strand(ioService))
             , m_isNotified()
         {
 
@@ -86,7 +82,7 @@ namespace Utilities
         * @param [in] strand  - The strand to dispatch from.
         */
         AsioDispatcher(const Safir::Dob::Connection & connection,
-                       boost::asio::strand& strand)
+                       boost::asio::io_service::strand& strand)
             : m_connection(connection)
             , m_strand(&strand,null_deleter())
             , m_isNotified()
@@ -97,7 +93,7 @@ namespace Utilities
         /**
          * Get the strand that the dispatcher uses.
          */
-        boost::asio::strand& Strand() {return *m_strand;}
+        boost::asio::io_service::strand& Strand() {return *m_strand;}
 
     private:
         struct null_deleter
@@ -120,18 +116,17 @@ namespace Utilities
          * OnDoDispatch notifies the dob connection thread that it's time to perform a dispatch.
          * Overrides Safir::Dob::Dispatcher.
          */
-        void OnDoDispatch()
+        void OnDoDispatch() override
         {
             if (!m_isNotified.test_and_set())
             {
-                m_strand->dispatch(boost::bind(&AsioDispatcher::CallDobDispatch,this));
+                m_strand->dispatch([this]{CallDobDispatch();});
             }
         }
 
-        const Safir::Dob::Connection&      m_connection;
-        boost::function<void()>            m_notifyFunction;
-        boost::shared_ptr<boost::asio::strand> m_strand;
-        boost::atomic_flag                 m_isNotified;
+        const Safir::Dob::Connection&                      m_connection;
+        boost::shared_ptr<boost::asio::io_service::strand> m_strand;
+        boost::atomic_flag                                 m_isNotified;
     };
 
 

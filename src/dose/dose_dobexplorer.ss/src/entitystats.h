@@ -46,12 +46,12 @@ public:
     // override Safir::Dob::Internal::IStatisticsCollector
     void ProcessState(const Safir::Dob::Typesystem::Int64 instance,
                       const Safir::Dob::Internal::StateSharedPtr& statePtr,
-                      Safir::Dob::Internal::Arguments& arguments);
+                      Safir::Dob::Internal::Arguments& arguments) override;
 
-    void AddContextRow(Safir::Dob::Internal::EntityType& entityType, Safir::Dob::Internal::Arguments& argumentsXS);
-    void InitRemoveInstances(Safir::Dob::Internal::Arguments& arguments);
-    void RemoveInstances();
-    void AddContextGlobalData(Safir::Dob::Internal::Arguments& arguments);
+    void AddContextRow(Safir::Dob::Internal::EntityType& entityType, Safir::Dob::Internal::Arguments& argumentsXS) override;
+    void InitRemoveInstances(Safir::Dob::Internal::Arguments& arguments) override;
+    void RemoveInstances() override;
+    void AddContextGlobalData(Safir::Dob::Internal::Arguments& arguments) override;
 
 public slots:
     void UpdateStatistics();

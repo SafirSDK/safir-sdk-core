@@ -159,10 +159,10 @@ void Safir::Dob::Internal::StatisticsCollector(Safir::Dob::Internal::State& stat
 void Safir::Dob::Internal::StatisticsCollector(Safir::Dob::Internal::StateContainer& stateContainer, void* arg)
 {
     Arguments& arguments = *static_cast<Arguments*>(arg);
-    stateContainer.ForEachState(boost::bind(&IStatisticsCollector::ProcessState,
-        arguments._this,
-        _1,
-        _2,
-        boost::ref(arguments)),
-        true);
+    stateContainer.ForEachState
+        ([&arguments](const Dob::Typesystem::Int64 key,
+                      const StateSharedPtr& stateSharedPtr,
+                      bool& /*exitDispatch*/)
+             {arguments._this->ProcessState(key,stateSharedPtr,arguments);},
+         true);
 }

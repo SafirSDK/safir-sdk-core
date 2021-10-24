@@ -24,7 +24,6 @@
 #include "ConnectionKiller.h"
 
 #include <Safir/Dob/Internal/Connections.h>
-#include <boost/bind.hpp>
 
 namespace Safir
 {

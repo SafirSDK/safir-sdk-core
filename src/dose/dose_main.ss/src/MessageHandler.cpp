@@ -24,7 +24,7 @@
 
 #include "MessageHandler.h"
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/Id.h>
 #include <Safir/Dob/Internal/DistributionData.h>
@@ -132,11 +132,11 @@ namespace Internal
             return;
         }
 
-        boost::shared_ptr<const char[]> msgP(msg.GetReference(),
-                                             [](const char* data)
-                                             {
-                                                 DistributionData::DropReference(data);
-                                             });
+        std::shared_ptr<const char[]> msgP(msg.GetReference(),
+                                           [](const char* data)
+                                           {
+                                               DistributionData::DropReference(data);
+                                           });
 
         // Send message to all node types
         for (auto nodeType = m_distribution.GetNodeTypeIds().cbegin(); nodeType != m_distribution.GetNodeTypeIds().cend(); ++nodeType)

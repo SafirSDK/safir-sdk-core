@@ -66,7 +66,8 @@ namespace
         const int ipVersion=Resolver::Protocol(localIf);
 
         //find own node type and check if we are multicast enabled
-        auto nodeTypeIt=std::find_if(nodeTypes.cbegin(), nodeTypes.cend(), [=](const NodeTypeDefinition& n){return n.id==nodeTypeId;});
+        auto nodeTypeIt=std::find_if(nodeTypes.cbegin(), nodeTypes.cend(),
+                                     [nodeTypeId](const NodeTypeDefinition& n){return n.id==nodeTypeId;});
         if (nodeTypeIt==nodeTypes.end())
         {
             throw std::logic_error("Own nodeType does not exist "+std::string(__FILE__));

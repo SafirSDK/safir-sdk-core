@@ -32,7 +32,6 @@
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Dob/ThisNodeParameters.h>
 #include <Safir/Utilities/Internal/MakeUnique.h>
-#include <boost/make_shared.hpp>
 
 namespace Safir
 {
@@ -162,7 +161,7 @@ namespace Internal
                     std::pair<PendingRegistrationHandler::PendingRegistrations::iterator, bool> result =
                         m_pendingRegistrations.emplace
                         (std::make_pair(reg.id,
-                                        Safir::make_unique<PendingRegistrationInfo>(m_strand.get_io_service(),
+                                        Safir::make_unique<PendingRegistrationInfo>(m_strand.context(),
                                                                                     connection->Id(),
                                                                                     reg.typeId,
                                                                                     reg.handlerId.GetHandlerId())));
@@ -274,7 +273,7 @@ namespace Internal
                              findIt->second->lastRequestTimestamp,
                              findIt->first);
 
-        boost::shared_ptr<const char[]> msgP(msg.GetReference(),
+        std::shared_ptr<const char[]> msgP(msg.GetReference(),
                                              [](const char* data)
                                              {
                                                  DistributionData::DropReference(data);
@@ -423,7 +422,7 @@ namespace Internal
                 }
 
                 lllout << "Sending response " << std::boolalpha << msg.GetPendingResponse() << std::endl;
-                boost::shared_ptr<const char[]> respP(resp.GetReference(),
+                std::shared_ptr<const char[]> respP(resp.GetReference(),
                                                       [](const char* data)
                                                       {
                                                           DistributionData::DropReference(data);

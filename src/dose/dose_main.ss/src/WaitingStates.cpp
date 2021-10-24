@@ -168,9 +168,9 @@ namespace Internal
             return;
         }
         //use a shared ptr to guarantee that the performing flag is unset when we exit method.
-        boost::shared_ptr<void> guard =
-                boost::shared_ptr<void>(static_cast<void*>(NULL),
-                                        boost::bind(&WaitingStates::UnsetPerformingFlag,this,_1));
+        std::shared_ptr<void> guard =
+                std::shared_ptr<void>(static_cast<void*>(NULL),
+                                        [this](void*){UnsetPerformingFlag();});
         m_isPerforming = true;
 
         for (WaitingStateTable::iterator it = m_waitingStateTable.begin();
@@ -217,9 +217,9 @@ namespace Internal
         }
 
         //use a shared ptr to guarantee that the performing flag is unset when we exit method.
-        boost::shared_ptr<void> guard =
-                boost::shared_ptr<void>(static_cast<void*>(NULL),
-                                        boost::bind(&WaitingStates::UnsetPerformingFlag,this,_1));
+        std::shared_ptr<void> guard =
+                std::shared_ptr<void>(static_cast<void*>(NULL),
+                                      [this](void*){UnsetPerformingFlag();});
 
         m_isPerforming = true;
 

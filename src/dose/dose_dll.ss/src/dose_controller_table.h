@@ -31,6 +31,7 @@
 #include <cstdint>
 #include <boost/thread/mutex.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/noncopyable.hpp>
 
 #ifdef _MSC_VER
 #  pragma warning(push)
@@ -95,7 +96,7 @@ namespace Internal
 
         /**
          * This class is here to ensure that only the Instance method can get at the
-         * instance, so as to be sure that boost call_once is used correctly.
+         * instance, so as to be sure that call_once is used correctly.
          * Also makes it easier to grep for singletons in the code, if all
          * singletons use the same construction and helper-name.
          */
@@ -105,7 +106,7 @@ namespace Internal
             friend ControllerTable& ControllerTable::Instance();
 
             static ControllerTable& Instance();
-            static boost::once_flag m_onceFlag;
+            static std::once_flag m_onceFlag;
         };
 
         mutable boost::mutex m_lock;

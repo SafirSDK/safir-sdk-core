@@ -49,7 +49,7 @@ namespace Dob
 {
 namespace Internal
 {
-    boost::once_flag ControllerTable::SingletonHelper::m_onceFlag = BOOST_ONCE_INIT;
+    std::once_flag ControllerTable::SingletonHelper::m_onceFlag;
 
     ControllerTable & ControllerTable::SingletonHelper::Instance()
     {
@@ -59,7 +59,7 @@ namespace Internal
 
     ControllerTable & ControllerTable::Instance()
     {
-        boost::call_once(SingletonHelper::m_onceFlag,boost::bind(SingletonHelper::Instance));
+        std::call_once(SingletonHelper::m_onceFlag,[]{SingletonHelper::Instance();});
         return SingletonHelper::Instance();
     }
 

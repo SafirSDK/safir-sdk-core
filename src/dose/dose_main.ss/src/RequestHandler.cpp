@@ -42,7 +42,6 @@
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Dob/NotFoundException.h>
 #include <Safir/Dob/SuccessResponse.h>
-#include <boost/bind.hpp>
 #include <Safir/Utilities/Internal/SystemLog.h>
 
 namespace Safir
@@ -550,7 +549,7 @@ namespace
             return true;
         }
 
-        auto data = boost::shared_ptr<const char[]> (request.GetReference(),
+        auto data = std::shared_ptr<const char[]> (request.GetReference(),
                                                      [](const char* data)
                                                      {
                                                          DistributionData::DropReference(data);

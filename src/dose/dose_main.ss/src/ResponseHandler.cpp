@@ -34,7 +34,7 @@ namespace Dob
 {
 namespace Internal
 {
-    ResponseHandler::ResponseHandler(boost::asio::strand& strand,
+    ResponseHandler::ResponseHandler(boost::asio::io_service::strand& strand,
                                      Distribution& distribution,
                                      const std::function<void(const ConnectionId& connectionId,
                                                               const InternalRequestId requestId)>& responsePostedCallback)
@@ -168,7 +168,7 @@ namespace Internal
        //Response to another node
        lllout << "Sending the response to node " << toConnection.m_node << std::endl;
 
-       boost::shared_ptr<const char[]> responseP(response.GetReference(),
+       std::shared_ptr<const char[]> responseP(response.GetReference(),
                                                  [](const char* data)
                                                  {
                                                      DistributionData::DropReference(data);

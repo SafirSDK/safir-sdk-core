@@ -63,7 +63,7 @@ namespace Dob
         virtual void OnStopOrder() = 0;
 
     private:
-        virtual StopHandler * ToStopHandler() {return this;}
+        StopHandler * ToStopHandler() override {return this;}
     };
 
     /**
@@ -88,7 +88,7 @@ namespace Dob
         virtual void OnDoDispatch() = 0;
 
     private:
-        virtual Dispatcher * ToDispatcher() {return this;}
+        Dispatcher * ToDispatcher() override {return this;}
     };
 
     /**
@@ -115,7 +115,7 @@ namespace Dob
     {
 
     private:
-        virtual EntityHandler * ToEntityHandler() {return this;}
+        EntityHandler * ToEntityHandler() override {return this;}
     };
 
     /**
@@ -155,7 +155,7 @@ namespace Dob
     {
 
     private:
-        virtual EntityHandlerInjection * ToEntityHandlerInjection() {return this;}
+        EntityHandlerInjection * ToEntityHandlerInjection() override {return this;}
     };
 
     /**
@@ -197,7 +197,7 @@ namespace Dob
     {
 
     private:
-        virtual EntityHandlerPending * ToEntityHandlerPending() {return this;}
+        EntityHandlerPending * ToEntityHandlerPending() override {return this;}
     };
 
     /**
@@ -218,7 +218,7 @@ namespace Dob
     {
 
     private:
-        virtual ServiceHandler * ToServiceHandler() {return this;}
+        ServiceHandler * ToServiceHandler() override {return this;}
     };
 
     /**
@@ -242,7 +242,7 @@ namespace Dob
     {
 
     private:
-        virtual ServiceHandlerPending * ToServiceHandlerPending() {return this;}
+        ServiceHandlerPending * ToServiceHandlerPending() override {return this;}
     };
 
     /**
@@ -269,7 +269,7 @@ namespace Dob
         virtual void OnNotRequestOverflow() = 0;
 
     private:
-        virtual Requestor * ToRequestor() {return this;}
+        Requestor * ToRequestor() override {return this;}
     };
 
     /**
@@ -288,7 +288,7 @@ namespace Dob
         virtual void OnNotMessageOverflow() = 0;
 
     private:
-        virtual MessageSender * ToMessageSender() {return this;}
+        MessageSender * ToMessageSender() override {return this;}
     };
 
     /**
@@ -320,7 +320,7 @@ namespace Dob
                                     const Safir::Dob::Typesystem::HandlerId&  handlerId) = 0;
 
     private:
-        virtual RegistrationSubscriber * ToRegistrationSubscriber() {return this;}
+        RegistrationSubscriber * ToRegistrationSubscriber() override {return this;}
     };
 
     /**
@@ -341,7 +341,7 @@ namespace Dob
         virtual void OnMessage(const Safir::Dob::MessageProxy messageProxy) = 0;
 
     private:
-        virtual MessageSubscriber * ToMessageSubscriber() {return this;}
+        MessageSubscriber * ToMessageSubscriber() override {return this;}
     };
 
     /**
@@ -384,7 +384,7 @@ namespace Dob
                                      const bool                    deprecated) = 0;
 
     private:
-        virtual EntitySubscriber * ToEntitySubscriber() {return this;}
+        EntitySubscriber * ToEntitySubscriber() override {return this;}
     };
 
 }

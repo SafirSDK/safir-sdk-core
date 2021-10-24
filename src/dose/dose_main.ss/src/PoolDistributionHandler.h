@@ -51,7 +51,7 @@ namespace Internal
     /// of the system.
     ///
     template <class DistributionT, class PoolDistributionT>
-    class PoolDistributionHandler : private boost::noncopyable
+    class PoolDistributionHandler
     {
     public:
         PoolDistributionHandler(boost::asio::io_service& io, DistributionT& distribution)
@@ -62,10 +62,13 @@ namespace Internal
         {
         }
 
+        PoolDistributionHandler(const PoolDistributionHandler&) = delete;
+        const PoolDistributionHandler& operator=(const PoolDistributionHandler&) = delete;
+
         //make sure that start is not called before persistent data is ready
         void Start()
         {
-            m_strand.dispatch([=]
+            m_strand.dispatch([this]
             {
                 if (!m_running) //dont call start if its already started
                 {
@@ -78,7 +81,7 @@ namespace Internal
 
         void Stop()
         {
-            m_strand.post([=]
+            m_strand.post([this]
             {
                 m_running=false;
                 if (!m_pendingPoolDistributions.empty())
@@ -90,7 +93,7 @@ namespace Internal
 
         void SetHaveNothing()
         {
-            m_strand.dispatch([=]
+            m_strand.dispatch([this]
             {
                 if (m_running)
                     return; //not allowed if we are started
@@ -115,11 +118,18 @@ namespace Internal
                     return;
                 }
 
-                auto pd=PoolDistributionHandler<DistributionT, PoolDistributionT>::PdPtr(new PoolDistributionT(nodeId, nodeTypeId, m_strand, m_distribution, [=](int64_t nodeId)
+                auto pd=PoolDistributionHandler<DistributionT, PoolDistributionT>::PdPtr
+                    (new PoolDistributionT(nodeId,
+                                           nodeTypeId,
+                                           m_strand,
+                                           m_distribution,
+                                           [this](int64_t nodeId)
                 {
                     if (!m_pendingPoolDistributions.empty() && m_pendingPoolDistributions.front()->NodeId()==nodeId)
                     {
-                        m_strand.post([=] //since this code is called from the m_pendingPoolDistributions.front object, we must post before we can pop_front
+                        //since this code is called from the m_pendingPoolDistributions.front object, we must
+                        //post before we can pop_front
+                        m_strand.post([this]
                         {
                             m_pendingPoolDistributions.pop_front();
                             StartNextPoolDistribution();
@@ -179,12 +189,12 @@ namespace Internal
 
         void SendHaveNothing(int64_t nodeId, int64_t nodeType)
         {
-            auto msg=boost::make_shared<char[]>(sizeof(PoolDistributionInfo));
+            auto msg=Safir::Utilities::Internal::MakeSharedArray(sizeof(PoolDistributionInfo));
             (*reinterpret_cast<PoolDistributionInfo*>(msg.get()))=PdHaveNothing;
 
             if (!m_distribution.GetCommunication().Send(nodeId, nodeType, msg, sizeof(PoolDistributionInfo), PoolDistributionInfoDataTypeId, true))
             {
-                m_strand.post([=]{SendHaveNothing(nodeId, nodeType);});
+                m_strand.post([this,nodeId,nodeType]{SendHaveNothing(nodeId, nodeType);});
             }
         }
     };

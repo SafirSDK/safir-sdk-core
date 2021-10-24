@@ -47,55 +47,55 @@ class Consumer :
     //#endif
 {
 public:
-    virtual void OnStopOrder() {}
-    virtual void OnDoDispatch() {}
-    virtual void OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId,
-                                       const Safir::Dob::Typesystem::HandlerId&){}
-    virtual void OnCompletedRegistration(const Safir::Dob::Typesystem::TypeId,
-                                         const Safir::Dob::Typesystem::HandlerId&){}
+    void OnStopOrder() override {}
+    void OnDoDispatch() override {}
+    void OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId,
+                               const Safir::Dob::Typesystem::HandlerId&) override{}
+    void OnCompletedRegistration(const Safir::Dob::Typesystem::TypeId,
+                                 const Safir::Dob::Typesystem::HandlerId&) override{}
 
-    virtual void OnCreateRequest(const Safir::Dob::EntityRequestProxy,
-                                 Safir::Dob::ResponseSenderPtr){}
+    void OnCreateRequest(const Safir::Dob::EntityRequestProxy,
+                         Safir::Dob::ResponseSenderPtr) override{}
 
-    virtual void OnUpdateRequest(const Safir::Dob::EntityRequestProxy,
-                                 Safir::Dob::ResponseSenderPtr){}
+    void OnUpdateRequest(const Safir::Dob::EntityRequestProxy,
+                         Safir::Dob::ResponseSenderPtr) override{}
 
-    virtual void OnDeleteRequest(const Safir::Dob::EntityRequestProxy,
-                                 Safir::Dob::ResponseSenderPtr){}
-    virtual void OnServiceRequest(const Safir::Dob::ServiceRequestProxy,
-                                  Safir::Dob::ResponseSenderPtr){}
-    virtual void OnResponse(const Safir::Dob::ResponseProxy) {}
+    void OnDeleteRequest(const Safir::Dob::EntityRequestProxy,
+                         Safir::Dob::ResponseSenderPtr) override{}
+    void OnServiceRequest(const Safir::Dob::ServiceRequestProxy,
+                          Safir::Dob::ResponseSenderPtr) override{}
+    void OnResponse(const Safir::Dob::ResponseProxy) override {}
 
-    virtual void OnNotRequestOverflow() {}
+    void OnNotRequestOverflow() override {}
 
-    virtual void OnNotMessageOverflow() {}
+    void OnNotMessageOverflow() override {}
 
-    virtual void OnRegistered(const Safir::Dob::Typesystem::TypeId,
-                              const Safir::Dob::Typesystem::HandlerId&) {}
+    void OnRegistered(const Safir::Dob::Typesystem::TypeId,
+                      const Safir::Dob::Typesystem::HandlerId&) override {}
 
-    virtual void OnUnregistered(const Safir::Dob::Typesystem::TypeId,
-                                const Safir::Dob::Typesystem::HandlerId&) {}
+    void OnUnregistered(const Safir::Dob::Typesystem::TypeId,
+                        const Safir::Dob::Typesystem::HandlerId&) override {}
 
-    virtual void OnMessage(const Safir::Dob::MessageProxy) {}
+    void OnMessage(const Safir::Dob::MessageProxy) override {}
 
-    virtual void OnNewEntity(const Safir::Dob::EntityProxy) {}
+    void OnNewEntity(const Safir::Dob::EntityProxy) override {}
 
-    virtual void OnUpdatedEntity(const Safir::Dob::EntityProxy) {}
+    void OnUpdatedEntity(const Safir::Dob::EntityProxy) override {}
 
-    virtual void OnDeletedEntity(const Safir::Dob::EntityProxy,
-                                 const bool) {}
+    void OnDeletedEntity(const Safir::Dob::EntityProxy,
+                         const bool) override {}
 
 
 };
 
 
-namespace Safir 
+namespace Safir
 {
 namespace Dob
 {
 namespace Internal
 {
-    class Callbacks 
+    class Callbacks
     {
     public:
         Callbacks(): m_success(true) {}
@@ -117,7 +117,7 @@ namespace Internal
             Consumer cons;
             Consumer * c = &cons;
             void * v = static_cast<Internal::ConsumerBase*>(c);
-            
+
             CheckAddr(L"StopHandler",static_cast<StopHandler*>(c),ConsumerBase::ToStopHandler(v));
             CheckAddr(L"Dispatcher",static_cast<Dispatcher*>(c),ConsumerBase::ToDispatcher(v));
             CheckAddr(L"EntityHandler",static_cast<EntityHandler*>(c),ConsumerBase::ToEntityHandler(v));
@@ -130,7 +130,7 @@ namespace Internal
             CheckAddr(L"RegistrationSubscriber",static_cast<RegistrationSubscriber*>(c),ConsumerBase::ToRegistrationSubscriber(v));
             CheckAddr(L"MessageSubscriber",static_cast<MessageSubscriber*>(c),ConsumerBase::ToMessageSubscriber(v));
             CheckAddr(L"EntitySubscriber",static_cast<EntitySubscriber*>(c),ConsumerBase::ToEntitySubscriber(v));
-            
+
             CheckAddr(L"RevokedRegistrationBase",static_cast<RevokedRegistrationBase*>(c),ConsumerBase::ToRevokedRegistrationBase(v));
             CheckAddr(L"CompletedRegistrationBase",static_cast<CompletedRegistrationBase*>(c),ConsumerBase::ToCompletedRegistrationBase(v));
             CheckAddr(L"EntityRequestBase",static_cast<EntityRequestBase*>(c),ConsumerBase::ToEntityRequestBase(v));
@@ -160,13 +160,13 @@ namespace Internal
     };
 }
 }
-}   
+}
 
 
 int main(int, char**)
 {
     Safir::Dob::Internal::Callbacks tester;
     tester.Test();
-    
+
     return tester.Result();
 }

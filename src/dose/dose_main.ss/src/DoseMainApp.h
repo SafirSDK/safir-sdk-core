@@ -93,7 +93,7 @@ namespace Internal
 
         boost::asio::io_service::strand m_strand;
         boost::asio::io_service::strand m_wcoutStrand;
-        boost::shared_ptr<boost::asio::io_service::work> m_work;
+        std::shared_ptr<boost::asio::io_service::work> m_work;
 
         int64_t m_nodeId;
         std::unique_ptr<Distribution> m_distribution;

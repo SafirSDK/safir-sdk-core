@@ -21,7 +21,6 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#include <boost/make_shared.hpp>
 #include <Safir/Utilities/Internal/Id.h>
 #include <Safir/Dob/Typesystem/Operations.h>
 #include <Safir/Dob/Service.h>
@@ -46,59 +45,55 @@ namespace Internal
                              const std::function<void(int64_t)>& checkPendingReg,
                              const std::function<void(const std::string& str)>& logStatus)
         :m_strand(strand)
-        ,m_endStatesTimer(m_strand.get_io_service())
+        ,m_endStatesTimer(m_strand.context())
         ,m_distribution(distribution)
         ,m_log(logStatus)
-        ,m_poolDistributor(m_strand.get_io_service(), m_distribution)
-        ,m_poolDistributionRequests(m_strand.get_io_service(), m_distribution.GetCommunication())
-        ,m_waitingStatesSanityTimer(m_strand.get_io_service())
+        ,m_poolDistributor(m_strand.context(), m_distribution)
+        ,m_poolDistributionRequests(m_strand.context(), m_distribution.GetCommunication())
+        ,m_waitingStatesSanityTimer(m_strand.context())
         ,m_persistenceReady(false)
         ,m_poolDistributionComplete(false)
         ,m_pdCompleteSignaled(false)
         ,m_numReceivedPdComplete(0)
     {
-        m_persistHandler.reset(new PersistHandler(m_strand.get_io_service(),
+        m_persistHandler.reset(new PersistHandler(m_strand.context(),
                                                   distribution,
                                                   logStatus,
-                                                  [=] // persistentDataReadyCb
+                                                  [this] // persistentDataReadyCb
                                                   {
                                                       OnPersistenceReady();
                                                   },
-                                                  [=] // persistentDataAllowedCb
+                                                  [this] // persistentDataAllowedCb
                                                   {
                                                       Connections::Instance().AllowConnect(-1);
                                                   }));
 
-        auto injectNode=[=](const std::string&, int64_t id, int64_t nt, const std::string&)
+        auto injectNode=[this](const std::string&, int64_t id, int64_t nt, const std::string&)
         {
-            auto this_ = this; //fix for vs 2010 issues with lambdas
-
-            m_strand.dispatch([=]
+            m_strand.dispatch([this,id,nt]
             {
-                if (this_->m_nodes.insert(std::make_pair(id, nt)).second)
+                if (m_nodes.insert(std::make_pair(id, nt)).second)
                 {
-                    if (!this_->m_poolDistributionComplete || !this_->m_persistenceReady)
+                    if (!m_poolDistributionComplete || !m_persistenceReady)
                     {
-                        this_->m_poolDistributionComplete=false;
-                        this_->m_poolDistributionRequests.RequestPoolDistribution(id, nt);
+                        m_poolDistributionComplete=false;
+                        m_poolDistributionRequests.RequestPoolDistribution(id, nt);
                     }
                 }
             });
         };
 
-        auto excludeNode=[=](int64_t id, int64_t)
+        auto excludeNode=[this](int64_t id, int64_t)
         {
-            auto this_ = this; //fix for vs 2010 issues with lambdas
-
-            m_strand.post([=]
+            m_strand.post([this,id]
             {
-                if (this_->m_nodes.erase(id)>0)
+                if (m_nodes.erase(id)>0)
                 {
-                    this_->m_poolDistributionRequests.PoolDistributionFinished(id);
-                    this_->m_poolDistributor.RemovePoolDistribution(id);
+                    m_poolDistributionRequests.PoolDistributionFinished(id);
+                    m_poolDistributor.RemovePoolDistribution(id);
                 }
 
-                this_->m_waitingStates.NodeDown(id);
+                m_waitingStates.NodeDown(id);
             });
         };
 
@@ -106,30 +101,30 @@ namespace Internal
         distribution.SubscribeNodeEvents(injectNode, excludeNode);
 
         //set data receiver for pool distribution information
-        m_distribution.GetCommunication().SetDataReceiver([=](int64_t fromNodeId, int64_t fromNodeType, const char *data, size_t size)
+        m_distribution.GetCommunication().SetDataReceiver([this](int64_t fromNodeId, int64_t fromNodeType, const char *data, size_t size)
                                                           {
                                                               OnPoolDistributionInfo(fromNodeId, fromNodeType, data, size);
                                                           },
                                                           PoolDistributionInfoDataTypeId,
-                                                          [=](size_t s){return new char[s];},
+                                                          [this](size_t s){return new char[s];},
                                                           [](const char* data){ delete[] data;});
 
         //set data receiver for registration states
-        m_distribution.GetCommunication().SetDataReceiver([=](int64_t fromNodeId, int64_t fromNodeType, const char *data, size_t size)
+        m_distribution.GetCommunication().SetDataReceiver([this](int64_t fromNodeId, int64_t fromNodeType, const char *data, size_t size)
                                                           {
                                                               OnRegistrationState(fromNodeId, fromNodeType, data, size);
                                                           },
                                                           RegistrationStateDataTypeId,
-                                                          [=](size_t s){return DistributionData::NewData(s);},
+                                                          [this](size_t s){return DistributionData::NewData(s);},
                                                           [](const char* data){DistributionData::DropReference(data);});
 
         //set data receiver for entity states
-        m_distribution.GetCommunication().SetDataReceiver([=](int64_t fromNodeId, int64_t fromNodeType, const char *data, size_t size)
+        m_distribution.GetCommunication().SetDataReceiver([this](int64_t fromNodeId, int64_t fromNodeType, const char *data, size_t size)
                                                           {
                                                               OnEntityState(fromNodeId, fromNodeType, data, size);
                                                           },
                                                           EntityStateDataTypeId,
-                                                          [=](size_t s){return DistributionData::NewData(s);},
+                                                          [this](size_t s){return DistributionData::NewData(s);},
                                                           [](const char* data){DistributionData::DropReference(data);});
 
         //create one StateDistributor per nodeType
@@ -146,7 +141,7 @@ namespace Internal
 
     void PoolHandler::OnPersistenceReady()
     {
-        m_strand.dispatch([=]
+        m_strand.dispatch([this]
         {
             if (m_persistenceReady)
             {
@@ -171,20 +166,18 @@ namespace Internal
 
     void PoolHandler::Start()
     {
-        m_strand.post([=]
+        m_strand.post([this]
         {
             m_persistHandler->Start();
 
             RunEndStatesTimer();
             RunWaitingStatesSanityCheckTimer();
 
-            auto this_ = this;
-
             //request pool distributions
-            m_poolDistributionRequests.Start(m_strand.wrap([this_]
+            m_poolDistributionRequests.Start(m_strand.wrap([this]
             {
-                this_->m_poolDistributionComplete=true;
-                this_->SignalPdComplete();
+                m_poolDistributionComplete=true;
+                SignalPdComplete();
             }));
 
             //start distributing states to other nodes
@@ -197,7 +190,7 @@ namespace Internal
 
     void PoolHandler::Stop()
     {
-        m_strand.post([=]
+        m_strand.post([this]
         {
             if (m_nodeInfoHandler != nullptr)
             {
@@ -227,19 +220,17 @@ namespace Internal
     {
         m_strand.post([this, connId]
         {
-            auto this_ = this;
-
             m_waitingStates.PerformStatesWaitingForConnection(connId,
-                                                              [this_](const DistributionData& state,
+                                                              [this](const DistributionData& state,
                                                                      int64_t fromNodeType)
             {
                 if (state.GetType() == DistributionData::RegistrationState)
                 {
-                    this_->HandleRegistrationState(state, fromNodeType);
+                    HandleRegistrationState(state, fromNodeType);
                 }
                 else if (state.GetType() == DistributionData::EntityState)
                 {
-                    this_->HandleEntityState(state, fromNodeType);
+                    HandleEntityState(state, fromNodeType);
                 }
                 else
                 {
@@ -263,7 +254,7 @@ namespace Internal
         const PoolDistributionInfo pdInfo=*reinterpret_cast<const PoolDistributionInfo*>(data);
         delete[] data;
 
-        m_strand.dispatch([=]
+        m_strand.dispatch([this,pdInfo,fromNodeType,fromNodeId]
         {
             switch (pdInfo)
             {
@@ -299,7 +290,7 @@ namespace Internal
 
     void PoolHandler::OnRegistrationState(int64_t fromNodeId, int64_t fromNodeType, const char* data, size_t /*size*/)
     {
-        m_strand.post([=]
+        m_strand.post([this,data,fromNodeId,fromNodeType]
         {
             const auto state=DistributionData::ConstConstructor(new_data_tag, data);
             DistributionData::DropReference(data);
@@ -317,7 +308,7 @@ namespace Internal
 
     void PoolHandler::OnEntityState(int64_t fromNodeId, int64_t fromNodeType, const char* data, size_t /*size*/)
     {
-        m_strand.post([=]
+        m_strand.post([this,data,fromNodeId,fromNodeType]
         {
             const auto state=DistributionData::ConstConstructor(new_data_tag, data);
             DistributionData::DropReference(data);
@@ -342,7 +333,7 @@ namespace Internal
             m_poolDistributor.Start();
             Connections::Instance().AllowConnect(-1);
             Connections::Instance().AllowConnect(0);
-            m_nodeInfoHandler.reset(new NodeInfoHandler(m_strand.get_io_service(), m_distribution));
+            m_nodeInfoHandler.reset(new NodeInfoHandler(m_strand.context(), m_distribution));
         }
     }
 
@@ -351,7 +342,7 @@ namespace Internal
         Safir::Dob::Internal::EndStates::Instance().HandleTimeout();
 
         m_endStatesTimer.expires_from_now(boost::chrono::seconds(60));
-        m_endStatesTimer.async_wait(m_strand.wrap([=](const boost::system::error_code& error)
+        m_endStatesTimer.async_wait(m_strand.wrap([this](const boost::system::error_code& error)
         {
             if (!error)
             {
@@ -366,7 +357,7 @@ namespace Internal
 
         /* We run this timer fairly infrequently, to reduce false warnings */
         m_waitingStatesSanityTimer.expires_from_now(boost::chrono::minutes(6));
-        m_waitingStatesSanityTimer.async_wait(m_strand.wrap([=](const boost::system::error_code& error)
+        m_waitingStatesSanityTimer.async_wait(m_strand.wrap([this](const boost::system::error_code& error)
         {
             if (!error)
             {

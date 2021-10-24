@@ -22,7 +22,6 @@
 *
 ******************************************************************************/
 #include "connectionstats.h"
-//#include <iostream>
 #include <sstream>
 #include <math.h>
 
@@ -202,10 +201,8 @@ void ConnectionStats::UpdateStatistics(const bool ignoreVisible)
 
     Safir::Dob::Internal::Connections::Instance().ForSpecificConnection
         (m_connectionId,
-         boost::bind(&ProcessConnection,
-                     _1,
-                     boost::ref(stat),
-                     boost::ref(connectionExists)));
+         [this,&stat,&connectionExists](const auto& connectionPtr)
+            {ProcessConnection(connectionPtr,stat,connectionExists);});
 
     if (connectionExists)
     {
@@ -359,19 +356,15 @@ void ConnectionStats::ProcessConnection(const Safir::Dob::Internal::ConnectionPt
     Safir::Dob::Internal::RequestOutQueue& reqOutQ = connection->GetRequestOutQueue();
     StatisticsCollector(reqOutQ, &stat.reqOutQStat);
 
-    connection->ForEachRequestInQueue(boost::bind(&ProcessReqInQ,
-                                                  _1,
-                                                  _2,
-                                                  boost::ref(stat)));
+    connection->ForEachRequestInQueue([&stat](const auto& consumer, auto& queue)
+                                      {ProcessReqInQ(consumer,queue,stat);});
+
 
     Safir::Dob::Internal::MessageQueue& msgOutQ = connection->GetMessageOutQueue();
     StatisticsCollector(msgOutQ, &stat.msgOutQStat);
 
-    connection->ForEachMessageInQueue(boost::bind(&ProcessMsgInQ,
-                                                  _1,
-                                                  _2,
-                                                  boost::ref(stat)));
-
+    connection->ForEachMessageInQueue([&stat](const auto& consumer, auto& queue)
+                                      {ProcessMsgInQ(consumer,queue,stat);});
 
 }
 

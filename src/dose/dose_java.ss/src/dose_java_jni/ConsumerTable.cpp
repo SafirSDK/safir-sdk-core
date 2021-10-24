@@ -23,10 +23,9 @@
 ******************************************************************************/
 #include "ConsumerTable.h"
 #include <iostream>
-#include <boost/bind.hpp>
 #include <boost/thread/locks.hpp>
 
-boost::once_flag ConsumerTable::SingletonHelper::m_onceFlag = BOOST_ONCE_INIT;
+std::once_flag ConsumerTable::SingletonHelper::m_onceFlag;
 
 ConsumerTable & ConsumerTable::SingletonHelper::Instance()
 {
@@ -36,7 +35,7 @@ ConsumerTable & ConsumerTable::SingletonHelper::Instance()
 
 ConsumerTable & ConsumerTable::Instance()
 {
-    boost::call_once(SingletonHelper::m_onceFlag,boost::bind(SingletonHelper::Instance));
+    std::call_once(SingletonHelper::m_onceFlag,[]{SingletonHelper::Instance();});
     return SingletonHelper::Instance();
 }
 

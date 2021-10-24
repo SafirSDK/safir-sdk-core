@@ -106,12 +106,12 @@ namespace Dob
          *
          * @return True if the SecondaryConnection is attached to a Connection and that Connection is open.
          */
-        virtual bool IsOpen() const;
+        bool IsOpen() const override;
 
     private:
 
         //implementation of pure virtual
-        virtual DotsC_Int32 GetControllerId() const;
+        DotsC_Int32 GetControllerId() const override;
 
         DotsC_Int32 m_ctrl;
 

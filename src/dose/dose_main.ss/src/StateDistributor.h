@@ -25,7 +25,6 @@
 #include <boost/atomic.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/asio.hpp>
-#include <boost/function.hpp>
 #include <Safir/Dob/Connection.h>
 #include <Safir/Dob/Internal/Connections.h>
 #include <Safir/Dob/Internal/ConnectionId.h>
@@ -65,7 +64,7 @@ namespace Internal
             ,m_connections(static_cast<size_t>(Safir::Dob::NodeParameters::NumberOfContexts()))
         {
             m_dispatcherNotified=false;
-            m_distribution.GetCommunication().SetQueueNotFullCallback([=](int64_t){OnDoDispatch();}, m_nodeType);
+            m_distribution.GetCommunication().SetQueueNotFullCallback([this](int64_t){OnDoDispatch();}, m_nodeType);
             for (auto it = m_connections.begin(); it != m_connections.end(); ++it)
             {
                 it->reset(new SubcriptionConnection());
@@ -74,12 +73,12 @@ namespace Internal
 
         void Start()
         {
-            m_strand.dispatch([=]{SubscribeStates();});
+            m_strand.dispatch([this]{SubscribeStates();});
         }
 
         void Stop()
         {
-            m_strand.dispatch([=]
+            m_strand.dispatch([this]
             {
                 for (auto context=0; context<Safir::Dob::NodeParameters::NumberOfContexts(); ++context)
                 {
@@ -90,7 +89,7 @@ namespace Internal
 
         void CheckForPending(Typesystem::TypeId typeId)
         {
-            m_strand.dispatch([=]
+            m_strand.dispatch([this,typeId]
             {
                 m_checkPendingReg(typeId);
             });
@@ -110,9 +109,9 @@ namespace Internal
         std::vector<std::unique_ptr<SubcriptionConnection>> m_connections;
         boost::atomic<bool> m_dispatcherNotified;
 
-        static inline boost::shared_ptr<const char[]> ToPtr(const DistributionData& d)
+        static inline std::shared_ptr<const char[]> ToPtr(const DistributionData& d)
         {
-            boost::shared_ptr<const char[]> p(d.GetReference(), [=](const char* ptr){DistributionData::DropReference(ptr);});
+            std::shared_ptr<const char[]> p(d.GetReference(), [](const char* ptr){DistributionData::DropReference(ptr);});
             return p;
         }
 
@@ -122,33 +121,30 @@ namespace Internal
             if (!m_dispatcherNotified)
             {
                 m_dispatcherNotified=true;
-                m_strand.dispatch([=]
+                m_strand.dispatch([this]
                 {
                     m_dispatcherNotified=false;
-
-                    auto this_ = this;
 
                     for (auto context = 0; context < Safir::Dob::NodeParameters::NumberOfContexts(); ++context)
                     {
                         auto& queue=m_connections[static_cast<size_t>(context)]->connectionPtr->GetDirtySubscriptionQueue();
-                        queue.Dispatch([=](const SubscriptionPtr& subscription, bool& exitDispatch, bool& dontRemove)
+                        queue.Dispatch([this](const SubscriptionPtr& subscription, bool& exitDispatch, bool& dontRemove)
                         {
-                            auto this__ = this_;
                             dontRemove=false;
                             DistributionData realState = subscription->GetState()->GetRealState();
                             if (!realState.IsNoState() && realState.GetType()==DistributionData::RegistrationState)
                             {
-                                dontRemove=!subscription->DirtyFlag().Process([this__, &subscription]
+                                dontRemove=!subscription->DirtyFlag().Process([this, &subscription]
                                 {
-                                    return this__->ProcessRegistrationState(subscription);
+                                    return this->ProcessRegistrationState(subscription);
                                 });
                             }
                             else
                             {
                                 // Entity state
-                                dontRemove=!subscription->DirtyFlag().Process([this__, &subscription]
+                                dontRemove=!subscription->DirtyFlag().Process([this, &subscription]
                                 {
-                                    return this__->ProcessEntityState(subscription);
+                                    return this->ProcessEntityState(subscription);
                                 });
                             }
                             //dontRemove is true if we got an overflow, and if we did we

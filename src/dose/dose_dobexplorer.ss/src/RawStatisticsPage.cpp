@@ -21,9 +21,6 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-//need this for setResizeMode
-#define QT_DISABLE_DEPRECATED_BEFORE 0x000000
-
 #include "common_header.h"
 #include "RawStatisticsPage.h"
 #include <iostream>
@@ -118,12 +115,12 @@ RawStatisticsPage::RawStatisticsPage(QWidget* /*parent*/)
     setupUi(this);
     connect(localTable, SIGNAL(itemSelectionChanged()), this, SLOT(LocalTableSelectionChanged()));
 
-    localTable->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
-    localTable->verticalHeader()->setResizeMode(QHeaderView::ResizeToContents);
+    localTable->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    localTable->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
     localTable->sortItems(COLUMN_NAME);
 
-    remoteTable->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
-    remoteTable->verticalHeader()->setResizeMode(QHeaderView::ResizeToContents);
+    remoteTable->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    remoteTable->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
     remoteTable->sortItems(COLUMN_NAME);
 
     tableSplitter->setStretchFactor(0,2);

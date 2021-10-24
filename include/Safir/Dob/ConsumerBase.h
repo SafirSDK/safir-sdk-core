@@ -219,7 +219,7 @@ namespace Dob
                                            const Safir::Dob::Typesystem::HandlerId& handlerId) = 0;
 
     private:
-        virtual RevokedRegistrationBase * ToRevokedRegistrationBase() {return this;}
+        RevokedRegistrationBase * ToRevokedRegistrationBase() override {return this;}
     };
 
     /**
@@ -240,7 +240,7 @@ namespace Dob
                                              const Safir::Dob::Typesystem::HandlerId& handlerId) = 0;
 
     private:
-        virtual CompletedRegistrationBase * ToCompletedRegistrationBase() {return this;}
+        CompletedRegistrationBase * ToCompletedRegistrationBase() override {return this;}
     };
 
     /**
@@ -308,7 +308,7 @@ namespace Dob
                                      Safir::Dob::ResponseSenderPtr        responseSender) = 0;
 
     private:
-        virtual EntityRequestBase * ToEntityRequestBase() {return this;}
+        EntityRequestBase * ToEntityRequestBase() override {return this;}
     };
 
     /**
@@ -403,7 +403,7 @@ namespace Dob
 
 
     private:
-        virtual EntityInjectionBase * ToEntityInjectionBase() {return this;}
+         EntityInjectionBase * ToEntityInjectionBase() override {return this;}
     };
 
     /**
@@ -433,7 +433,7 @@ namespace Dob
                                       Safir::Dob::ResponseSenderPtr         responseSender ) = 0;
 
     private:
-        virtual ServiceRequestBase * ToServiceRequestBase() {return this;}
+        ServiceRequestBase * ToServiceRequestBase() override {return this;}
     };
 
 }

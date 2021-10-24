@@ -78,7 +78,7 @@ namespace Internal
         bool HasSubscription(const SubscriptionId&   subscriptionId) const;
 
         typedef std::function<void(const Dob::Typesystem::Int64 key,
-                                     const StateSharedPtr& stateSharedPtr,
+                                   const StateSharedPtr& stateSharedPtr,
                                      bool& exitDispatch)> ForEachStateActionFunc;
 
         // Calls actionFunc for each existing state. Each state is locked during the callback.
@@ -119,7 +119,7 @@ namespace Internal
             Iterator():m_entity(no_state_tag) {}
 
             Iterator(const Iterator&) = default;
-            
+
             Iterator& operator=(const Iterator& other) {
                 m_state = other.m_state;
                 m_stateReferenceHolder = other.m_stateReferenceHolder;

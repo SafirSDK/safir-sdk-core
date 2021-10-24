@@ -28,7 +28,7 @@
 #include <boost/cstdint.hpp>
 #include <jni.h>
 #include <vector>
-#include <boost/thread/once.hpp>
+#include <mutex>
 #include <boost/thread/mutex.hpp>
 
 class ConsumerTable :
@@ -65,22 +65,21 @@ private:
     Table m_table;
 
     /**
-     * This class is here to ensure that only the Instance method can get at the 
-     * instance, so as to be sure that boost call_once is used correctly.
-     * Also makes it easier to grep for singletons in the code, if all 
+     * This class is here to ensure that only the Instance method can get at the
+     * instance, so as to be sure that call_once is used correctly.
+     * Also makes it easier to grep for singletons in the code, if all
      * singletons use the same construction and helper-name.
      */
     struct SingletonHelper
     {
     private:
         friend ConsumerTable& ConsumerTable::Instance();
-        
+
         static ConsumerTable& Instance();
-        static boost::once_flag m_onceFlag;
+        static std::once_flag m_onceFlag;
     };
 
 };
 
 
 #endif
-

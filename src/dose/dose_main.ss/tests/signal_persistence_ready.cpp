@@ -37,7 +37,7 @@ class StopHandler
 public:
     explicit StopHandler(boost::asio::io_service& ioService)
         : m_ioService(ioService) {}
-    virtual void OnStopOrder() {m_ioService.stop();}
+    void OnStopOrder() override {m_ioService.stop();}
 private:
     boost::asio::io_service& m_ioService;
 

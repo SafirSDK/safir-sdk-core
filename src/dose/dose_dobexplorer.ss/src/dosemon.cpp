@@ -333,7 +333,9 @@ void DoseMon::UpdateTreeWidget()
     std::set<QString> localConnectionNames;
     std::set<QString> remoteConnectionNames;
 
-    Connections::Instance().ForEachConnection(boost::bind(&DoseMon::AddConnection,this,_1,boost::ref(localConnectionNames),boost::ref(remoteConnectionNames)));
+    Connections::Instance().ForEachConnection
+        ([this,&localConnectionNames,&remoteConnectionNames](const auto& connection)
+            {AddConnection(connection, localConnectionNames, remoteConnectionNames);});
 
     /*** local connections ***/
     {

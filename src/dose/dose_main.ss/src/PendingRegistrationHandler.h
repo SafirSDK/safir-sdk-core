@@ -106,7 +106,7 @@ namespace Internal
 
         boost::atomic<bool> m_stopped;
 
-        boost::asio::strand m_strand;
+        boost::asio::io_service::strand m_strand;
 
         Distribution& m_distribution;
         const int64_t m_dataTypeIdentifier;

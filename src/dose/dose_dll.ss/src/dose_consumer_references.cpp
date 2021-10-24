@@ -29,6 +29,8 @@
 #include <Safir/Dob/Internal/ServiceTypes.h>
 #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
 
+using namespace std::placeholders;
+
 namespace Safir
 {
 namespace Dob
@@ -63,9 +65,9 @@ namespace Internal
             // Need to insert new entry into the map
             findIt = m_registrationCounterMap.insert(std::make_pair(key, 0)).first;
         }
-        
+
         // Increment counter
-        ++findIt->second;        
+        ++findIt->second;
     }
 
     void ConsumerReferences::DropAllHandlerRegistrationReferences(const Dob::Typesystem::TypeId       typeId,
@@ -172,7 +174,7 @@ namespace Internal
                                    dropReferencesFunc,
                                    MessageSubscription,
                                    m_messageSubscriptionCounters,
-                                   boost::bind(&MessageTypes::HasSubscription,
+                                   std::bind(&MessageTypes::HasSubscription,
                                                &MessageTypes::Instance(),
                                                _1, _2, _3));
     }
@@ -196,7 +198,7 @@ namespace Internal
                                    dropReferencesFunc,
                                    EntitySubscription,
                                    m_entitySubscriptionCounters,
-                                   boost::bind(&EntityTypes::HasEntitySubscription,
+                                   std::bind(&EntityTypes::HasEntitySubscription,
                                                &EntityTypes::Instance(),
                                                _1, _2, _3));
     }
@@ -220,7 +222,7 @@ namespace Internal
                                    dropReferencesFunc,
                                    EntityRegistrationSubscription,
                                    m_entityRegistrationSubscriptionCounters,
-                                   boost::bind(&EntityTypes::HasRegistrationSubscription,
+                                   std::bind(&EntityTypes::HasRegistrationSubscription,
                                                &EntityTypes::Instance(),
                                                _1, _2, _3));
     }
@@ -244,7 +246,7 @@ namespace Internal
                                    dropReferencesFunc,
                                    ServiceRegistrationSubscription,
                                    m_serviceRegistrationSubscriptionCounters,
-                                   boost::bind(&ServiceTypes::HasRegistrationSubscription,
+                                   std::bind(&ServiceTypes::HasRegistrationSubscription,
                                                &ServiceTypes::Instance(),
                                                _1, _2, _3));
     }
@@ -274,7 +276,7 @@ namespace Internal
             // Need to insert the consumer into the map
             findIt = counterMap.insert(std::make_pair(consumer, 0)).first;
         }
-        
+
         // Increment counter
         ++findIt->second;
     }
@@ -313,7 +315,7 @@ namespace Internal
             }
         }
 
-        // Make the callback 
+        // Make the callback
         dropReferencesFunc(consumer, consumerIt->second);
 
         // Now we can erase this consumer counter.

@@ -24,7 +24,7 @@
 
 #include "dose_controller.h"
 
-#include <boost/bind.hpp>
+#include <functional>
 #include <Safir/Dob/AccessDeniedException.h>
 #include <Safir/Dob/Entity.h>
 #include <Safir/Dob/Internal/Initialize.h>
@@ -79,6 +79,7 @@
 #include <iostream>
 
 using namespace std;
+using namespace std::placeholders;
 
 namespace Safir
 {
@@ -254,7 +255,7 @@ namespace Internal
                 std::wostringstream ostr;
                 ostr << "Failed to open connection! The connection name '" << m_connectionName.c_str()
                      << "' is already in use. While opening connection from process with pid = " << Safir::Utilities::ProcessInfo::GetPid();
-                m_consumerReferences.DropAllReferences(boost::bind(&Dispatcher::InvokeDropReferenceCb,
+                m_consumerReferences.DropAllReferences(std::bind(&Dispatcher::InvokeDropReferenceCb,
                                                                    m_dispatcher,
                                                                    _1,
                                                                    _2));
@@ -367,7 +368,7 @@ namespace Internal
 
         // Drop any reference corresponding to a saved consumer (will be saved for
         // garbage collected languages only).
-        m_consumerReferences.DropAllReferences(boost::bind(&Dispatcher::InvokeDropReferenceCb,
+        m_consumerReferences.DropAllReferences(std::bind(&Dispatcher::InvokeDropReferenceCb,
                                                            m_dispatcher,
                                                            _1,
                                                            _2));
@@ -559,7 +560,7 @@ namespace Internal
         // just won't have any references.
         m_consumerReferences.DropAllHandlerRegistrationReferences(typeId,
                                                                   handlerId,
-                                                                  boost::bind(&Dispatcher::InvokeDropReferenceCb,
+                                                                  std::bind(&Dispatcher::InvokeDropReferenceCb,
                                                                               m_dispatcher,
                                                                               _1,
                                                                               _2));
@@ -634,7 +635,7 @@ namespace Internal
         {
             m_consumerReferences.DropMessageSubscriptionReferences(m_connection,
                                                                    messageSubscriber,
-                                                                   boost::bind(&Dispatcher::InvokeDropReferenceCb,
+                                                                   std::bind(&Dispatcher::InvokeDropReferenceCb,
                                                                                m_dispatcher,
                                                                                _1,
                                                                                _2));
@@ -725,7 +726,7 @@ namespace Internal
         {
             m_consumerReferences.DropEntitySubscriptionReferences(m_connection,
                                                                   consumer,
-                                                                  boost::bind(&Dispatcher::InvokeDropReferenceCb,
+                                                                  std::bind(&Dispatcher::InvokeDropReferenceCb,
                                                                               m_dispatcher,
                                                                               _1,
                                                                               _2));
@@ -818,7 +819,7 @@ namespace Internal
             {
                 m_consumerReferences.DropEntityRegistrationSubscriptionReferences(m_connection,
                                                                                   consumer,
-                                                                                  boost::bind(&Dispatcher::InvokeDropReferenceCb,
+                                                                                  std::bind(&Dispatcher::InvokeDropReferenceCb,
                                                                                               m_dispatcher,
                                                                                               _1,
                                                                                               _2));
@@ -837,7 +838,7 @@ namespace Internal
             {
                 m_consumerReferences.DropServiceRegistrationSubscriptionReferences(m_connection,
                                                                                    consumer,
-                                                                                   boost::bind(&Dispatcher::InvokeDropReferenceCb,
+                                                                                   std::bind(&Dispatcher::InvokeDropReferenceCb,
                                                                                                 m_dispatcher,
                                                                                                 _1,
                                                                                                 _2));
@@ -1379,7 +1380,7 @@ namespace Internal
         }
 
         m_connection->ForSpecificRequestInQueue(consumer,
-            boost::bind(&RequestInQueue::AttachResponse,_2,responseId,m_connection->Id(),blob));
+            std::bind(&RequestInQueue::AttachResponse,_2,responseId,m_connection->Id(),blob));
 
         m_connection->SignalOut();
     }
@@ -1679,15 +1680,15 @@ namespace Internal
 
     void Controller::DispatchRequestInQueue(const ConsumerId& consumer, RequestInQueue & queue)
     {
-        queue.DispatchRequests(boost::bind(&Controller::DispatchRequest,this,boost::cref(consumer),_1,_2,_3),
-                               boost::bind(&Connection::SignalOut,m_connection.get().get()));
+        queue.DispatchRequests(std::bind(&Controller::DispatchRequest,this,boost::cref(consumer),_1,_2,_3),
+                               std::bind(&Connection::SignalOut,m_connection.get().get()));
     }
 
 
     void Controller::DispatchRequestInQueues()
     {
         lllout << "Dispatching all RequestInQueues" << std::endl;
-        m_connection->ForEachRequestInQueue(boost::bind(&Controller::DispatchRequestInQueue,this,_1,_2));
+        m_connection->ForEachRequestInQueue(std::bind(&Controller::DispatchRequestInQueue,this,_1,_2));
     }
 
     void Controller::DispatchResponse(const DistributionData & response,
@@ -1701,7 +1702,7 @@ namespace Internal
     void Controller::DispatchResponseInQueue()
     {
         lllout << "Dispatching ResponseInQueue" << std::endl;
-        m_connection->GetRequestOutQueue().DispatchResponses(boost::bind(&Controller::DispatchResponse,this,_1,_2,_3));
+        m_connection->GetRequestOutQueue().DispatchResponses(std::bind(&Controller::DispatchResponse,this,_1,_2,_3));
     }
 
     void Controller::DispatchMessage(const ConsumerId& consumer, const DistributionData& msg, bool& exitDispatch, bool& dontRemove)
@@ -1732,12 +1733,12 @@ namespace Internal
 
     void Controller::DispatchMessageInQueue(const ConsumerId& consumer, MessageQueue& queue)
     {
-        queue.Dispatch(boost::bind(&Controller::DispatchMessage,this,boost::cref(consumer),_1,_2,_3),NULL);
+        queue.Dispatch(std::bind(&Controller::DispatchMessage,this,boost::cref(consumer),_1,_2,_3),NULL);
     }
 
     void Controller::DispatchMessageInQueues()
     {
-        m_connection->ForEachMessageInQueue(boost::bind(&Controller::DispatchMessageInQueue,this,_1,_2));
+        m_connection->ForEachMessageInQueue(std::bind(&Controller::DispatchMessageInQueue,this,_1,_2));
     }
 
     bool ProcessHasBeenDeleted(bool & unreg, bool & reg)
@@ -1771,7 +1772,7 @@ namespace Internal
         {
             // Both last and current state is 'registered', but can it be that there has
             // been a unregister->register?
-            subscription->HasBeenDeletedFlag().Process(boost::bind(ProcessHasBeenDeleted,boost::ref(unreg), boost::ref(reg)));
+            subscription->HasBeenDeletedFlag().Process(std::bind(ProcessHasBeenDeleted,boost::ref(unreg), boost::ref(reg)));
         }
     }
 
@@ -1817,7 +1818,7 @@ namespace Internal
             return;
         }
 
-        subscription->DirtyFlag().Process(boost::bind(&Controller::ProcessRegistrationSubscription,
+        subscription->DirtyFlag().Process(std::bind(&Controller::ProcessRegistrationSubscription,
                                                       this,
                                                       boost::cref(subscription),
                                                       boost::ref(exitDispatch)));
@@ -2127,7 +2128,7 @@ namespace Internal
         {
             case InjectionSubscription:
             {
-                subscription->DirtyFlag().Process(boost::bind(&Controller::ProcessInjectionSubscription,
+                subscription->DirtyFlag().Process(std::bind(&Controller::ProcessInjectionSubscription,
                                                               this,
                                                               boost::cref(subscription),
                                                               boost::ref(exitDispatch),
@@ -2137,7 +2138,7 @@ namespace Internal
 
             case EntitySubscription:
             {
-                subscription->DirtyFlag().Process(boost::bind(&Controller::ProcessEntitySubscription,
+                subscription->DirtyFlag().Process(std::bind(&Controller::ProcessEntitySubscription,
                                                               this,
                                                               boost::cref(subscription),
                                                               boost::ref(exitDispatch),
@@ -2181,7 +2182,7 @@ namespace Internal
     void Controller::DispatchSubscriptions()
     {
         m_connection->GetDirtySubscriptionQueue().Dispatch
-                            (boost::bind(&Controller::DispatchSubscription, this, _1, _2, _3));
+                            (std::bind(&Controller::DispatchSubscription, this, _1, _2, _3));
     }
 
     Controller::InjectionData Controller::CreateInjectionData(const SubscriptionPtr& subscription)
@@ -2717,7 +2718,7 @@ namespace Internal
                                                                        it->handlerId,
                                                                        it->consumer,
                                                                        nbrOfRef,
-                                                                       boost::bind(&Dispatcher::InvokeDropReferenceCb,
+                                                                       std::bind(&Dispatcher::InvokeDropReferenceCb,
                                                                                    m_dispatcher,
                                                                                    _1,
                                                                                    _2));
@@ -2822,8 +2823,10 @@ namespace Internal
 
     void Controller::SimulateOverflows(const bool inQueues, const bool outQueues)
     {
-        m_connection->ForEachMessageInQueue(boost::bind(&MessageQueue::SimulateFull,_2,inQueues));
-        m_connection->ForEachRequestInQueue(boost::bind(&RequestInQueue::SimulateFull,_2,inQueues));
+        m_connection->ForEachMessageInQueue([inQueues](const auto& /*consumer*/, auto& queue)
+                                            {queue.SimulateFull(inQueues);});
+        m_connection->ForEachRequestInQueue([inQueues](const auto& /*consumer*/, auto& queue)
+                                            {queue.SimulateFull(inQueues);});
 
         m_connection->GetMessageOutQueue().SimulateFull(outQueues);
         m_connection->GetRequestOutQueue().SimulateFull(outQueues);

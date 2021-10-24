@@ -37,7 +37,6 @@
 #include <Safir/Dob/Typesystem/Internal/Kernel.h>
 #include "Callbacks.h"
 #include <boost/shared_ptr.hpp>
-#include <boost/bind.hpp>
 #include "ConsumerTable.h"
 #include <boost/current_function.hpp>
 
@@ -106,7 +105,7 @@ const StringHolder GetUtf8(JNIEnv * env, const jstring & jstr)
 {
     jboolean isCopy=false;
     boost::shared_ptr<const char> holder(env->GetStringUTFChars(jstr, &isCopy),
-                                         boost::bind(&JNIEnv::ReleaseStringUTFChars,env,jstr,_1));
+                                         [env,jstr](const char*ptr){env->ReleaseStringUTFChars(jstr,ptr);});
 
     assert(isCopy);
     return holder;

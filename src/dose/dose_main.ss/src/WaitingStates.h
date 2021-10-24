@@ -144,7 +144,7 @@ namespace Internal
         //can avoid unwanted recursion.
         bool m_isPerforming;
 
-        void UnsetPerformingFlag(void *){m_isPerforming = false;}
+        void UnsetPerformingFlag(){m_isPerforming = false;}
     };
 }
 }

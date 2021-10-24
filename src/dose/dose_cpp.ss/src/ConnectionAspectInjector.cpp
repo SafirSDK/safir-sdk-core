@@ -123,7 +123,7 @@ namespace Dob
                                       wantsAllStateChanges,
                                       timestampChangeInfo,
                                       DOSE_LANGUAGE_CPP,
-                                      static_cast<Internal::ConsumerBase* const>(entitySubscriber),
+                                      static_cast<Internal::ConsumerBase*>(entitySubscriber),
                                       success);
         if (!success)
         {

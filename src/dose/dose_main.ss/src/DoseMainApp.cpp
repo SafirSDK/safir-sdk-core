@@ -31,7 +31,6 @@
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
 #include <Safir/Utilities/CrashReporter.h>
-#include <boost/bind.hpp>
 #include <iostream>
 
 namespace Safir
@@ -226,7 +225,7 @@ namespace Internal
 
         m_messageHandler.reset(new MessageHandler(*m_distribution));
 
-        m_requestHandler.reset(new RequestHandler(m_strand.get_io_service(),
+        m_requestHandler.reset(new RequestHandler(m_strand.context(),
                                                   *m_distribution));
 
         m_pendingRegistrationHandler.reset(new PendingRegistrationHandler(m_ioService,

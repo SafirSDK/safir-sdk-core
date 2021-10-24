@@ -21,9 +21,6 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-//need this for setResizeMode
-#define QT_DISABLE_DEPRECATED_BEFORE 0x000000
-
 #include "common_header.h"
 #include "SystemPicturePage.h"
 #include <iostream>
@@ -95,8 +92,8 @@ SystemPicturePage::SystemPicturePage( QWidget* /*parent*/)
 
     setupUi(this);
 
-    systemTable->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
-    systemTable->verticalHeader()->setResizeMode(QHeaderView::ResizeToContents);
+    systemTable->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    systemTable->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
     systemTable->sortItems(COLUMN_NAME);
 
     connect(&m_ioServicePollTimer,SIGNAL(timeout()), this, SLOT(PollIoService()));

@@ -24,7 +24,7 @@
 #pragma once
 #include <vector>
 #include <functional>
-#include <boost/make_shared.hpp>
+#include <Safir/Utilities/Internal/MakeSharedArray.h>
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -70,7 +70,7 @@ namespace Internal
 
         void Start(const std::function<void()>& pdComplete)
         {
-            m_strand.dispatch([=]
+            m_strand.dispatch([this,pdComplete]
             {
                 m_pdComplete=pdComplete;
                 m_running=true;
@@ -88,7 +88,7 @@ namespace Internal
 
         void Stop()
         {
-            m_strand.post([=] //use post to prevent that stop is executed before start
+            m_strand.post([this] //use post to prevent that stop is executed before start
             {
                 m_running=false;
                 m_requests.clear();
@@ -97,7 +97,7 @@ namespace Internal
 
         void RequestPoolDistribution(int64_t nodeId, int64_t nodeTypeId)
         {
-            m_strand.post([=]
+            m_strand.post([this,nodeId,nodeTypeId]
             {
                 m_requests.push_back(PoolDistributionRequestSender<CommunicationT>::PdReq(nodeId, nodeTypeId, false));
                 SendPoolDistributionRequests();
@@ -107,7 +107,7 @@ namespace Internal
         //fromNodeId=0 means all queued requests are finished
         void PoolDistributionFinished(int64_t fromNodeId)
         {
-            m_strand.dispatch([=]
+            m_strand.dispatch([this,fromNodeId]
             {
                 if (fromNodeId==0)
                 {
@@ -161,7 +161,7 @@ namespace Internal
                 return;
             }
 
-            auto req=boost::make_shared<char[]>(sizeof(PoolDistributionInfo));
+            auto req=Safir::Utilities::Internal::MakeSharedArray(sizeof(PoolDistributionInfo));
             (*reinterpret_cast<PoolDistributionInfo*>(req.get()))= PdRequest;
 
             bool unsentRequests=false;
@@ -184,7 +184,7 @@ namespace Internal
             if (unsentRequests)
             {
                 //some requests could not be sent, retry
-                m_strand.post([=]{SendPoolDistributionRequests();}); //a bit aggressive, maybe we should set a timer instead
+                m_strand.post([this]{SendPoolDistributionRequests();}); //a bit aggressive, maybe we should set a timer instead
             }
         }
     };

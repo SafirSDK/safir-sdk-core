@@ -57,7 +57,7 @@ namespace Dob
         DoseC_Destructor(m_ctrl);
     }
 
-//----------------------------
+    //----------------------------
     // Connect
     //----------------------------
     void Connection::Open(const std::wstring& connectionNameCommonPart,
@@ -74,8 +74,8 @@ namespace Dob
                       nameInstancePart.c_str(),
                       context,
                       DOSE_LANGUAGE_CPP,
-                      static_cast<Internal::ConsumerBase* const>(stopHandler),
-                      static_cast<Internal::ConsumerBase* const>(dispatcher),
+                      static_cast<Internal::ConsumerBase*>(stopHandler),
+                      static_cast<Internal::ConsumerBase*>(dispatcher),
                       &Internal::Callbacks::OnDispatch,
                       &Internal::Callbacks::OnStopOrder,
                       &Internal::Callbacks::OnNewEntity,

@@ -47,7 +47,7 @@ namespace Internal
          *
          * The callback will be invoked from the strand.
          */
-        ResponseHandler(boost::asio::strand& strand,
+        ResponseHandler(boost::asio::io_service::strand& strand,
                         Distribution& distribution,
                         const std::function<void(const ConnectionId& connectionId,
                                                  const InternalRequestId requestId)>& responsePostedCallback);
@@ -75,7 +75,7 @@ namespace Internal
          */
         bool SendResponseInternal(const DistributionData& response);
 
-        boost::asio::strand& m_strand;
+        boost::asio::io_service::strand& m_strand;
         Distribution& m_distribution;
         const int64_t m_dataTypeIdentifier;
         std::map<int64_t,int64_t> m_liveNodes;

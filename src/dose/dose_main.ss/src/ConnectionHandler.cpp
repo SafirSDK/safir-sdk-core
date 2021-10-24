@@ -72,18 +72,18 @@ namespace
 
         {
             m_sendQueues.insert(std::make_pair(*nt, SendQueue()));
-            m_communication.SetQueueNotFullCallback([=](int64_t)
+            m_communication.SetQueueNotFullCallback([this](int64_t)
                                                     {
-                                                        m_strand.post([=]
+                                                        m_strand.post([this]
                                                                       {
                                                                           HandleSendQueues();
                                                                       });
                                                     }, *nt);
         }
 
-        m_communication.SetDataReceiver([=](int64_t /*fromNodeId*/, int64_t /*fromNodeType*/, const char *data, size_t /*size*/)
+        m_communication.SetDataReceiver([this](int64_t /*fromNodeId*/, int64_t /*fromNodeType*/, const char *data, size_t /*size*/)
         {
-            m_strand.post([=]
+            m_strand.post([this,data]
             {
                 const DistributionData state=DistributionData::ConstConstructor(new_data_tag, data);
                 DistributionData::DropReference(data);
@@ -111,7 +111,7 @@ namespace
                     m_poolHandler.HandleDisconnect(state.GetSenderId());
                 }
             });
-        }, ConnectionMessageDataTypeId, [=](size_t s){return DistributionData::NewData(s);}, [](const char* data){DistributionData::DropReference(data);});
+        }, ConnectionMessageDataTypeId, [this](size_t s){return DistributionData::NewData(s);}, [](const char* data){DistributionData::DropReference(data);});
 
         //start connect thread
         m_connectEvent=false;
@@ -121,7 +121,7 @@ namespace
 
     void ConnectionHandler::Start()
     {
-        m_strand.dispatch([=]
+        m_strand.dispatch([this]
         {
             auto this_ = this;
             m_connectionThread = boost::thread([this_]() {this_->ConnectionThread();});
@@ -131,7 +131,7 @@ namespace
 
     void ConnectionHandler::Stop()
     {
-        m_strand.post([=]
+        m_strand.post([this]
         {
             m_poolHandler.Stop();
             m_processInfoHandler.Stop();
@@ -149,7 +149,7 @@ namespace
         });
     }
 
-    void ConnectionHandler::SendAll(const std::pair<boost::shared_ptr<const char[]>, size_t>& data)
+    void ConnectionHandler::SendAll(const std::pair<std::shared_ptr<const char[]>, size_t>& data)
     {
         for (auto vt = m_sendQueues.begin(); vt != m_sendQueues.end(); ++vt)
         {

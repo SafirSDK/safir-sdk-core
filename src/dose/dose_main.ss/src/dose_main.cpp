@@ -82,7 +82,7 @@ int main()
 
     //ensure call to CrashReporter::Stop at application exit
     //Start is called in DoseMainApp
-    boost::shared_ptr<void> crGuard(static_cast<void*>(0),
+    std::shared_ptr<void> crGuard(static_cast<void*>(0),
                                     [](void*){Safir::Utilities::CrashReporter::Stop();});
 
     boost::asio::io_service ioService;

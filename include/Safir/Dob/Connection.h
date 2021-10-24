@@ -107,7 +107,7 @@ namespace Dob
          *
          * @return True if the connection is open, otherwise false.
          */
-        virtual bool IsOpen() const;
+        bool IsOpen() const override;
 
         /**
          * When the dispatch event or callback is signalled, the application MUST call
@@ -121,7 +121,7 @@ namespace Dob
     private:
 
         //implementation of pure virtual
-        virtual DotsC_Int32 GetControllerId() const {return m_ctrl;}
+        DotsC_Int32 GetControllerId() const override {return m_ctrl;}
 
         DotsC_Int32 m_ctrl;
 

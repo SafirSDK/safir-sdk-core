@@ -30,11 +30,11 @@ int main(int argc, char *argv[])
     Safir::Utilities::CrashReporter::Start();
 
     //ensure call to Stop at application exit
-    boost::shared_ptr<void> guard(static_cast<void*>(0), 
-                                  boost::bind(Safir::Utilities::CrashReporter::Stop));
+    std::shared_ptr<void> guard(static_cast<void*>(0),
+                                [](void*){Safir::Utilities::CrashReporter::Stop();});
 
     QApplication app(argc, argv);
-    boost::shared_ptr<DoseMon> dialog (new DoseMon());
+    std::shared_ptr<DoseMon> dialog (new DoseMon());
 
     dialog->show();
 

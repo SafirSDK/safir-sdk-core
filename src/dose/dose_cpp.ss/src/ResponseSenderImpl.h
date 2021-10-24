@@ -45,11 +45,11 @@ namespace Internal
 
         virtual ~ResponseSenderImpl();
 
-        virtual void Send(const Safir::Dob::ResponsePtr & response);
+        void Send(const Safir::Dob::ResponsePtr & response) override;
 
-        virtual bool IsDone();
+        bool IsDone() override;
 
-        virtual void Discard();
+        void Discard() override;
 
     private:
         bool m_valid;
