@@ -83,7 +83,7 @@ try:
     #ConfigParser wants a section header so add a dummy one.
     config_str = '[root]\n' + config_str
     config = ConfigParser.ConfigParser()
-    config.readfp(StringIO(config_str))
+    config.read_file(StringIO(config_str))
 
     file_storage_path = os.path.join(config.get('root','lock_file_directory'),"..","persistence")
 

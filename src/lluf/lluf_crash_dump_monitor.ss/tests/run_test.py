@@ -59,7 +59,7 @@ proc = subprocess.Popen((arguments.show_config,"--locations"),
 conf_str = '[root]\n' + proc.communicate()[0]
 
 config = ConfigParser.ConfigParser()
-config.readfp(StringIO(conf_str))
+config.read_file(StringIO(conf_str))
 
 crash_dump_dir = config.get('root','crash_dump_directory')
 

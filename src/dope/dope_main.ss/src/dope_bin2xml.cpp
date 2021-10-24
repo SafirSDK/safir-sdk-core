@@ -44,10 +44,7 @@
 #include <Safir/Dob/Typesystem/ObjectFactory.h>
 #include <Safir/Dob/Typesystem/Serialization.h>
 #include <Safir/Logging/Log.h>
-#include <boost/filesystem/convenience.hpp>
-#include <boost/filesystem/exception.hpp>
-#include <boost/filesystem/fstream.hpp>
-#include <boost/filesystem/operations.hpp>
+#include <boost/filesystem.hpp>
 #include <boost/scoped_array.hpp>
 #include <iostream>
 #include <clocale>
@@ -239,14 +236,14 @@ void ConvertDb()
 
         if (smallBinaryDataColumnSize != SQL_NULL_DATA)
         {
-            const char* const data = reinterpret_cast<const char* const>(smallBinaryDataColumn.get());
+            const char* const data = reinterpret_cast<char*>(smallBinaryDataColumn.get());
             object = Safir::Dob::Typesystem::ObjectFactory::Instance().CreateObject(data);
         }
         else
         {
             if (largeBinaryDataColumnSize != SQL_NULL_DATA)
             {   //some binarypersistent data set
-                const char* const data = reinterpret_cast<const char* const>(largeBinaryDataColumn.get());
+                const char* const data = reinterpret_cast<char*>(largeBinaryDataColumn.get());
                 object = Safir::Dob::Typesystem::ObjectFactory::Instance().CreateObject(data);
             }
         }

@@ -404,7 +404,7 @@ add_subdirectory(douf)
 add_subdirectory(swre)
 add_subdirectory(foreach)
 #TODO laha add_subdirectory(olib)
-#TODO laha add_subdirectory(dope)
+add_subdirectory(dope)
 #TODO laha add_subdirectory(websocket)
 
 #TODO laha add_subdirectory(tests)

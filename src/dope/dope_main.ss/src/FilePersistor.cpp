@@ -27,10 +27,7 @@
 #include <Safir/Dob/Typesystem/Serialization.h>
 #include <Safir/Dob/Typesystem/ObjectFactory.h>
 #include <Safir/Logging/Log.h>
-#include <boost/filesystem/convenience.hpp>
-#include <boost/filesystem/exception.hpp>
-#include <boost/filesystem/fstream.hpp>
-#include <boost/filesystem/operations.hpp>
+#include <boost/filesystem.hpp>
 #include <boost/integer_traits.hpp>
 
 #ifdef _MSC_VER

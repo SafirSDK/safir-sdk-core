@@ -544,7 +544,7 @@ namespace Internal
 
         PendingOwnerships::iterator firstRemoved =
             std::partition(m_pendingOwnerships.begin(),m_pendingOwnerships.end(),
-                           [](const auto& reg){return reg.IsRemoved();});
+                           [](const auto& reg){return !reg.IsRemoved();});
         std::copy(firstRemoved,m_pendingOwnerships.end(),std::back_inserter(prv));
         m_pendingOwnerships.erase(firstRemoved,m_pendingOwnerships.end());
         return prv;
