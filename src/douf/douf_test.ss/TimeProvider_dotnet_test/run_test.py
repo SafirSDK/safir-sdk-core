@@ -38,7 +38,7 @@ for dep in dependencies:
     shutil.copy2(dep,
                  ".")
 
-result = subprocess.call(arguments.test_exe)
+result = subprocess.call(("mono",arguments.test_exe))
 
 print("Result =", result)
 

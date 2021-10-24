@@ -47,7 +47,7 @@ public:
 
 private:
 
-    virtual void OnStopOrder();
+    void OnStopOrder() override;
 
     boost::asio::io_service    m_ioService;
 

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 ###############################################################################
 #
@@ -23,8 +23,7 @@
 # along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import print_function
-import subprocess, os, time, sys, socket
+import subprocess
 
 try:
     import ConfigParser
@@ -40,7 +39,8 @@ except ImportError:
     import socketserver as SocketServer
 
 class SyslogServer(SocketServer.UDPServer):
-    class __Handler(SocketServer.DatagramRequestHandler):
+    """Syslog server class"""
+    class _Handler(SocketServer.DatagramRequestHandler):
 
         def handle(self):
             data = self.request[0].decode("utf-8")
@@ -51,22 +51,22 @@ class SyslogServer(SocketServer.UDPServer):
 
     def __init__(self, safir_show_config):
         #Run the program that writes the ini file configuration to standard output
-        proc = subprocess.Popen((safir_show_config,"--logging"),
+        with subprocess.Popen((safir_show_config,"--logging"),
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.STDOUT,
-                                universal_newlines=True)
+                                universal_newlines=True) as proc:
 
-        output = proc.communicate()[0]
-        if proc.returncode != 0:
-            print("Failed to run safir_show_config. returncode", proc.returncode, "Output:")
-            print(output)
-            raise Exception("Failed to run safir_show_config")
+            output = proc.communicate()[0]
+            if proc.returncode != 0:
+                print("Failed to run safir_show_config. returncode", proc.returncode, "Output:")
+                print(output)
+                raise Exception("Failed to run safir_show_config")
 
         # ConfigParser wants a section header so add a dummy one.
         conf_str = '[root]\n' + output
 
         config = ConfigParser.ConfigParser()
-        config.readfp(StringIO(conf_str))
+        config.read_file(StringIO(conf_str))
 
         send_to_syslog_server = config.getboolean('SystemLog','send_to_syslog_server')
 
@@ -77,13 +77,13 @@ class SyslogServer(SocketServer.UDPServer):
 
         self.syslog_server_address = config.get('SystemLog','syslog_server_address')
         self.syslog_server_port = config.getint('SystemLog','syslog_server_port')
-
+        self.timeout = None
         self.allow_reuse_address = True
 
         SocketServer.UDPServer.__init__(self,
                                         (self.syslog_server_address,
                                          self.syslog_server_port),
-                                        SyslogServer.__Handler)
+                                        SyslogServer._Handler)
 
         #set up some variables that the handler can use
         self.is_timed_out = False
@@ -94,6 +94,7 @@ class SyslogServer(SocketServer.UDPServer):
         self.is_timed_out = True
 
     def get_data(self, timeout):
+        """get data"""
         self.buf = str()
 
         if not self.stopped:

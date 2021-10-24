@@ -92,7 +92,7 @@ QVariant NodeTableModel::data(const QModelIndex &index, int role) const
         {
             nodeInfo = boost::dynamic_pointer_cast<Safir::Dob::NodeInfo>(m_dobConnection.Read(m_nodeInfos.at(index.row())).GetEntity());
         }
-        catch (Safir::Dob::NotFoundException /*ex*/)
+        catch (const Safir::Dob::NotFoundException& /*ex*/)
         {
             return QVariant(); //do nothing, we end up here sometimes when the system is going down
         }
@@ -116,7 +116,7 @@ QVariant NodeTableModel::data(const QModelIndex &index, int role) const
 
         return QVariant();
     }
-    else if (role == Qt::BackgroundColorRole)
+    else if (role == Qt::BackgroundRole)
     {
         Safir::Dob::NodeInfoPtr nodeInfo;
 
@@ -124,7 +124,7 @@ QVariant NodeTableModel::data(const QModelIndex &index, int role) const
         {
             nodeInfo = boost::dynamic_pointer_cast<Safir::Dob::NodeInfo>(m_dobConnection.Read(m_nodeInfos.at(index.row())).GetEntity());
         }
-        catch (Safir::Dob::NotFoundException /*ex*/)
+        catch (const Safir::Dob::NotFoundException& /*ex*/)
         {
             return QVariant(); //do nothing, we end up here sometimes when the system is going down
         }

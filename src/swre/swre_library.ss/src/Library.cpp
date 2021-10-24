@@ -45,7 +45,6 @@
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/ProcessInfo.h>
 #include <Safir/Utilities/Internal/ConfigReader.h>
-#include <boost/bind.hpp>
 #include <Safir/Utilities/CrashReporter.h>
 #include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>
@@ -70,18 +69,18 @@ namespace Internal
 
     const boost::char_separator<wchar_t> separator(L" ");
 
-    boost::once_flag Library::SingletonHelper::m_onceFlag = BOOST_ONCE_INIT;
-    boost::scoped_ptr<Library> Library::SingletonHelper::m_instance;
+    std::once_flag Library::SingletonHelper::m_onceFlag;
 
-    void Library::SingletonHelper::Instantiate()
+    Library& Library::SingletonHelper::Instance()
     {
-        m_instance.reset(new Library());
+        static Library instance;
+        return instance;
     }
 
     Library & Library::Instance()
     {
-        boost::call_once(SingletonHelper::m_onceFlag,boost::bind(SingletonHelper::Instantiate));
-        return *SingletonHelper::m_instance;
+        std::call_once(SingletonHelper::m_onceFlag,[]{SingletonHelper::Instance();});
+        return SingletonHelper::Instance();
     }
 
 
@@ -315,7 +314,7 @@ namespace Internal
                          const std::wstring& str)
     {
         boost::lock_guard<boost::mutex> lock(m_traceBufferLock);
-        std::for_each(str.begin(), str.end(), boost::bind(&Library::TraceInternal,this,prefixId,_1));
+        std::for_each(str.begin(), str.end(), [this, prefixId](const wchar_t c){TraceInternal(prefixId,c);});
     }
 
 

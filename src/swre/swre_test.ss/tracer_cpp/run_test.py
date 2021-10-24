@@ -33,7 +33,7 @@ parser.add_argument("--binary", required=True)
 parser.add_argument("--safir-show-config", required=True)
 
 arguments = parser.parse_args()
-    
+
 sender_path = arguments.binary
 
 syslog = syslog_server.SyslogServer(arguments.safir_show_config)
@@ -76,7 +76,7 @@ if stdout_output.count(u"Razor: 123.1\n") != 3 or syslog_output.count(u"Razor: 1
 
 if stdout_output.count(u"Razor: foobar\n") != 3 or syslog_output.count(u"Razor: foobar\n") != 3:
     fail("foobar")
-    
+
 if stdout_output.count(u"Razor: this is the end\n") != 3 or syslog_output.count(u"Razor: this is the end\n") != 3:
     fail("this is the end")
 
@@ -103,7 +103,7 @@ syslog_output = syslog.get_data(1)
 if stdout_output.count("\n") != 0 or syslog_output.count("\n") != 0:
     fail("empty")
 
-#check that FORCE_LOG all works    
+#check that FORCE_LOG all works
 os.environ["FORCE_LOG"] = "all"
 stdout_output = subprocess.check_output(sender_path).decode("utf-8").replace("\r","")
 syslog_output = syslog.get_data(1)

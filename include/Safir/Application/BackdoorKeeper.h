@@ -89,11 +89,10 @@ public:
 
 private:
     //Disable copying and assignment
-    BackdoorKeeper(const BackdoorKeeper&);
-    BackdoorKeeper& operator=(const BackdoorKeeper&);
+    BackdoorKeeper(const BackdoorKeeper&) = delete;
+    BackdoorKeeper& operator=(const BackdoorKeeper&) = delete;
 
-    // Implementation of message subscriber interface
-    virtual void OnMessage(const Safir::Dob::MessageProxy messageProxy);
+    void OnMessage(const Safir::Dob::MessageProxy messageProxy) override;
 
     void Tokenize(const std::wstring&        str,
                   std::vector<std::wstring>& tokens,

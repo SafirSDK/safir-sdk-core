@@ -41,7 +41,6 @@ for dep in dependencies:
     shutil.copy2(dep,
                  ".")
 
-#-Xfuture gives weird errors on RPi and BBone (both on debian jessie)
 sender_cmd = ("java", "-Xverify:all", "-jar", arguments.jar)
 
 log_server = syslog_server.SyslogServer(arguments.safir_show_config)

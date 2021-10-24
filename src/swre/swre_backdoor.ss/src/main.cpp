@@ -25,7 +25,6 @@
 #include <Safir/Dob/Connection.h>
 #include <Safir/Dob/NotOpenException.h>
 #include <boost/chrono.hpp>
-#include <boost/bind.hpp>
 #include <boost/asio/steady_timer.hpp>
 
 #ifdef _MSC_VER
@@ -53,7 +52,7 @@ class StopHandler
 public:
     explicit StopHandler(boost::asio::io_service& ioService)
         : m_ioService(ioService) {}
-    virtual void OnStopOrder() {m_ioService.stop();}
+    void OnStopOrder() override {m_ioService.stop();}
 private:
     boost::asio::io_service& m_ioService;
 
@@ -62,10 +61,8 @@ private:
 class MessageSender:
     public Safir::Dob::MessageSender
 {
-    void OnNotMessageOverflow(){}
+    void OnNotMessageOverflow() override{}
 };
-
-void dummy() {}
 
 
 void PrintHelpAndExit(const std::string& programName, const boost::program_options::options_description & desc)
@@ -139,7 +136,7 @@ int main(int argc, char* argv[])
         boost::program_options::store(boost::program_options::command_line_parser(argc,argv).
                                       options(cmdline_options).positional(p).run(), vm);
     }
-    catch (boost::program_options::error ex)
+    catch (const boost::program_options::error& ex)
     {
         PrintHelpAndExit(argv[0], desc);
     }
@@ -190,7 +187,7 @@ int main(int argc, char* argv[])
 
     //set a timer
     boost::asio::steady_timer timer(ioService,EXIT_TIMER_DELAY);
-    timer.async_wait(boost::bind(dummy));
+    timer.async_wait([](const boost::system::error_code&){}); //empty workload
 
     //ioService will only run until the timer has timed out, since that is all the work
     //that there is for it.

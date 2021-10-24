@@ -50,13 +50,13 @@ namespace Internal
 
         Safir::Dob::Typesystem::Int64 GetPrefixId() const;
     private:
-        virtual _Tr::int_type uflow();
-        virtual _Tr::int_type underflow();
-        virtual _Tr::int_type overflow(_Tr::int_type c = _Tr::eof());
+        _Tr::int_type uflow() override;
+        _Tr::int_type underflow() override;
+        _Tr::int_type overflow(_Tr::int_type c = _Tr::eof()) override;
 
         // Take care of character sequences
-        virtual std::streamsize xsputn(const wchar_t* s, std::streamsize num);
-        virtual int sync();
+        std::streamsize xsputn(const wchar_t* s, std::streamsize num) override;
+        int sync() override;
 
         void AddPrefix() const;
 

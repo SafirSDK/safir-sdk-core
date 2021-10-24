@@ -89,14 +89,14 @@ namespace Safir
                           const std::wstring& connectionNameInstancePart);
 
                 void OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId     typeId,
-                                           const Safir::Dob::Typesystem::HandlerId& handlerId);
+                                           const Safir::Dob::Typesystem::HandlerId& handlerId) override;
 
                 void OnServiceRequest(const Safir::Dob::ServiceRequestProxy serviceRequestProxy,
-                                      Safir::Dob::ResponseSenderPtr   responseSender);
+                                      Safir::Dob::ResponseSenderPtr   responseSender) override;
 
 
-                void OnResponse(const Safir::Dob::ResponseProxy responseProxy);
-                void OnNotRequestOverflow(void);
+                void OnResponse(const Safir::Dob::ResponseProxy responseProxy) override;
+                void OnNotRequestOverflow(void) override;
 
                 // Overrides Safir::Application::Backdoor, for more information see baseclass
                 void HandleCommand(const std::vector<std::wstring>& cmdTokens);

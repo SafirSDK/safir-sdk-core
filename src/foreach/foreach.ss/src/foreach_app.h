@@ -57,7 +57,7 @@ namespace ForEach
         /** 
         * Called by the stop handler.
         */
-        void OnStopOrder();
+        void OnStopOrder() override;
 
     private:
 

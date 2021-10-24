@@ -8,11 +8,8 @@ ADD_JAR(swre_application_java
   safir_generated-Core-java
   dots_java
   logging_java
-  MANIFEST ${CMAKE_CURRENT_SOURCE_DIR}/Manifest.txt)
+  MANIFEST ${CMAKE_CURRENT_SOURCE_DIR}/Manifest.txt
+  GENERATE_NATIVE_HEADERS swre_application_java_jni_headers)
 
 SAFIR_INSTALL(TARGETS swre_application_java)
 
-SAFIR_JAVAH(JAR swre_application_java
-  CLASS com.saabgroup.safir.application.Library
-  OUTPUT_FILES com_saabgroup_safir_application_Library.h
-  OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/../swre_java_jni)

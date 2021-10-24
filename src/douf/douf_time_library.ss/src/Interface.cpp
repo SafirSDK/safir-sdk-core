@@ -33,9 +33,8 @@
 #include <boost/date_time/time_duration.hpp>
 #include <boost/date_time/time_zone_base.hpp>
 #include <boost/date_time/c_local_time_adjustor.hpp>
-#include <boost/thread/once.hpp>
-#include <boost/bind.hpp>
-#include <boost/function.hpp>
+#include <functional>
+#include <mutex>
 
 #ifdef _MSC_VER
 #pragma warning (pop)
@@ -48,14 +47,14 @@
 #include <Safir/Utilities/Internal/SystemLog.h>
 #include <Safir/Utilities/DynamicLibraryLoader.h>
 
-namespace 
+namespace
 {
     const boost::posix_time::ptime _1_JAN_1970 (boost::gregorian::date(1970,boost::date_time::Jan,1));
 
-    boost::once_flag g_onceFlag = BOOST_ONCE_INIT;
+    std::once_flag g_onceFlag;
 
-    boost::function<double()> GetUtcTime;
-    boost::function<int()> GetLocalTimeOffset;
+    std::function<double()> GetUtcTime;
+    std::function<int()> GetLocalTimeOffset;
 
     bool g_loadFailed = true;
 }
@@ -80,26 +79,26 @@ void LoadLibrary()
 
     Safir::Utilities::DynamicLibraryLoader lib;
 
-    try 
+    try
     {
         lib.Load(libraryName,false);
-        //we don't want to loose the functions when the object gets destroyed, so 
+        //we don't want to loose the functions when the object gets destroyed, so
         //we pass false to the Load fcn.
     }
     catch(const std::logic_error&)
     {
         SEND_SYSTEM_LOG(Critical,
-                        << "Failed to load external time provider library '" 
+                        << "Failed to load external time provider library '"
                         << libraryName.c_str());
         return;
     }
-    
-    lllout << "Library load successful, attempting to load symbols " 
-           << utcTimeFcnName.c_str() 
-           << " and " 
+
+    lllout << "Library load successful, attempting to load symbols "
+           << utcTimeFcnName.c_str()
+           << " and "
            << localTimeOffsetFcnName.c_str() << std::endl;
-    
-    try 
+
+    try
     {
         GetUtcTime = lib.GetFunction<double()>(utcTimeFcnName);
         GetLocalTimeOffset = lib.GetFunction<int()>(localTimeOffsetFcnName);
@@ -121,8 +120,8 @@ void LoadLibrary()
 // **************************************************************
 void DoufTimeC_GetUtcTime(Safir::Dob::Typesystem::Si64::Second & utcTime, bool& success)
 {
-    boost::call_once(g_onceFlag,boost::bind(LoadLibrary));
-    
+    std::call_once(g_onceFlag, []{LoadLibrary();});
+
     if (g_loadFailed)
     {
         success = false;
@@ -148,7 +147,7 @@ void DoufTimeC_GetUtcTime(Safir::Dob::Typesystem::Si64::Second & utcTime, bool& 
 // **************************************************************
 void DoufTimeC_GetLocalTimeOffset(Safir::Dob::Typesystem::Int32& offset, bool& success)
 {
-    boost::call_once(g_onceFlag,boost::bind(LoadLibrary));
+    std::call_once(g_onceFlag, []{LoadLibrary();});
 
     if (g_loadFailed)
     {
@@ -168,7 +167,7 @@ void DoufTimeC_GetLocalTimeOffset(Safir::Dob::Typesystem::Int32& offset, bool& s
         // boost::date_time::c_local_adjustor uses the C-API to adjust a
         // moment given in utc to the same moment in the local time zone.
         typedef boost::date_time::c_local_adjustor<ptime> local_adj;
-        
+
         const ptime utc_now = second_clock::universal_time();
         const ptime now = local_adj::utc_to_local(utc_now);
         const time_duration diff = now - utc_now;

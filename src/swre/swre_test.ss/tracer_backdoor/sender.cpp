@@ -46,7 +46,7 @@ public:
          , m_rb(L"Rymd-B\u00f6rje") //ö
     {}
 
-        void OnStopOrder() {m_ioService.stop();}
+    void OnStopOrder() override {m_ioService.stop();}
 
     void Run()
     {

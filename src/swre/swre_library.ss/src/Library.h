@@ -30,11 +30,9 @@
 #include <Safir/Utilities/Internal/Atomic.h>
 #include <boost/noncopyable.hpp>
 #include <boost/static_assert.hpp>
-#include <boost/scoped_ptr.hpp>
 #include <boost/thread/recursive_mutex.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/locks.hpp>
-#include <boost/thread/once.hpp>
 #include <list>
 #include <queue>
 
@@ -80,7 +78,7 @@ namespace Internal
 
         void TraceString(const PrefixId prefixId,
                          const std::wstring& str);
-        
+
         void TraceFlush();
 
         void SendFatalErrorReport(const std::wstring & errorCode,
@@ -106,10 +104,10 @@ namespace Internal
         ~Library();
 
         static void CrashFunc(const char* const dumpPath);
-  
+
         void GetEnv();
 
-        virtual void OnMessage(const Safir::Dob::MessageProxy messageProxy);
+        virtual void OnMessage(const Safir::Dob::MessageProxy messageProxy) override;
         void HandleCommand(const std::vector<std::wstring>& cmdTokens);
         std::wstring GetHelpText();
 
@@ -127,7 +125,7 @@ namespace Internal
 
         static PrefixState & ToPrefix(const PrefixId prefixId);
         static PrefixId ToPrefixId(PrefixState & prefix);
-        
+
         typedef std::list<PrefixState> Prefixes;
         typedef std::vector<std::wstring> Arguments;
 
@@ -154,9 +152,9 @@ namespace Internal
         bool m_windowsNativeLogging;
 
         /**
-         * This class is here to ensure that only the Instance method can get at the 
-         * instance, so as to be sure that boost call_once is used correctly.
-         * Also makes it easier to grep for singletons in the code, if all 
+         * This class is here to ensure that only the Instance method can get at the
+         * instance, so as to be sure that call_once is used correctly.
+         * Also makes it easier to grep for singletons in the code, if all
          * singletons use the same construction and helper-name.
          */
         struct SingletonHelper
@@ -164,27 +162,12 @@ namespace Internal
         private:
             friend Library& Library::Instance();
 
-            static void Instantiate();
-            static boost::scoped_ptr<Library> m_instance;
-            static boost::once_flag m_onceFlag;
+            static Library& Instance();
+            static std::once_flag m_onceFlag;
         };
-
-        //vs2008 mistakenly gives a warning about not allowing friends to be inline. But that is spurious in this case.        
-#ifdef _MSC_VER
-#pragma warning (push)
-#pragma warning (disable: 4396)
-#endif
-        //lets boost::checked_delete access the destructor
-        friend void boost::checked_delete<>(Library*x);
-
-#ifdef _MSC_VER
-#pragma warning (pop)
-#endif
-
     };
 
 }
 }
 }
 #endif
-

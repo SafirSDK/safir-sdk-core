@@ -68,7 +68,7 @@ signals:
     void ConnectedToDob();
 
 protected:
-    virtual void run()
+    void run() override
     {
         m_con->Open(L"safir_control_gui", QTime::currentTime().toString("hh:mm:ss.zzz").toStdWString(), 0, m_stop, m_disp);
         m_con->Close();
@@ -101,17 +101,17 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-    virtual bool eventFilter(QObject* o, QEvent* e);
+    bool eventFilter(QObject* o, QEvent* e) override;
 
 
     //Dob stuff
-    virtual void OnDoDispatch();
-    virtual void OnStopOrder();
-    virtual void OnNewEntity(const Safir::Dob::EntityProxy entityProxy);
-    virtual void OnUpdatedEntity(const Safir::Dob::EntityProxy entityProxy);
-    virtual void OnDeletedEntity(const Safir::Dob::EntityProxy entityProxy, const bool /*del*/);
-    virtual void OnResponse(const Safir::Dob::ResponseProxy responseProxy);
-    virtual void OnNotRequestOverflow();
+    void OnDoDispatch() override;
+    void OnStopOrder() override;
+    void OnNewEntity(const Safir::Dob::EntityProxy entityProxy) override;
+    void OnUpdatedEntity(const Safir::Dob::EntityProxy entityProxy) override;
+    void OnDeletedEntity(const Safir::Dob::EntityProxy entityProxy, const bool /*del*/) override;
+    void OnResponse(const Safir::Dob::ResponseProxy responseProxy) override;
+    void OnNotRequestOverflow() override;
 
 public slots:
     void customMenuRequested(QPoint pos);

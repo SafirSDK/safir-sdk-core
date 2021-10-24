@@ -518,7 +518,7 @@ namespace ForEach
         }
 
         //make us send the requests once we've completed dispatching.
-        m_ioService.post(boost::bind(&Services::SendQueuedRequests,this));
+        m_ioService.post([this]{SendQueuedRequests();});
     }
 
 

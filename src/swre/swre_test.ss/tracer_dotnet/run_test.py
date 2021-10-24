@@ -43,9 +43,9 @@ for dep in dependencies:
 
 syslog = syslog_server.SyslogServer(arguments.safir_show_config)
 
-o1 = subprocess.check_output(arguments.sender_exe)
-o2 = subprocess.check_output(arguments.sender_exe)
-o3 = subprocess.check_output(arguments.sender_exe)
+o1 = subprocess.check_output(("mono", arguments.sender_exe))
+o2 = subprocess.check_output(("mono", arguments.sender_exe))
+o3 = subprocess.check_output(("mono", arguments.sender_exe))
 
 stdout_output = (o1 + o2 + o3).decode("utf-8").replace("\r","")
 syslog_output = syslog.get_data(1)
