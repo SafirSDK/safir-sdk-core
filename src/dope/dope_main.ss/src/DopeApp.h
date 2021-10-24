@@ -29,7 +29,6 @@
 #include <Safir/Dob/ResponseSender.h>
 #include "PersistenceHandler.h"
 #include <Safir/Application/Tracer.h>
-#include <boost/bind.hpp>
 #include <Safir/Utilities/AsioDispatcher.h>
 
 #if defined _MSC_VER

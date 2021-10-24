@@ -812,7 +812,7 @@ void OdbcPersistor::RestoreAll()
                     }
                     else if (currentSmallDataSize != SQL_NULL_DATA)
                     {
-                        const char * const data = reinterpret_cast<const char * const>(storeBinarySmallData.get());
+                        const char * const data = reinterpret_cast<char *>(storeBinarySmallData.get());
                         m_debug << "Restoring " << entityId << " from binary " <<std::endl;
 
                         Safir::Dob::EntityPtr entity =
@@ -827,7 +827,7 @@ void OdbcPersistor::RestoreAll()
                     {
                         if (currentLargeDataSize != SQL_NULL_DATA)
                         { //some binarypersistent data set
-                            const char * const data = reinterpret_cast<const char * const>(storeBinaryLargeData.get());
+                            const char * const data = reinterpret_cast<char *>(storeBinaryLargeData.get());
                             m_debug << "Restoring " << entityId << " from binary " <<std::endl;
 
                             Safir::Dob::EntityPtr entity =

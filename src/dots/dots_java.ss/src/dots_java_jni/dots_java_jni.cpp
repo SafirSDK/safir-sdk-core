@@ -757,7 +757,7 @@ jstring JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_BinaryToBase64
 {
     char * binary = static_cast<char*>(env->GetDirectBufferAddress(_binary));
     DotsC_Int32 resultSize=0;
-    DotsC_Int32 size = DotsC_CalculateBase64BufferSize(_size);
+    DotsC_Int32 size = std::max(0, DotsC_CalculateBase64BufferSize(_size));
     std::vector<char> buf(size+1); //one extra for '0'
     DotsC_BinaryToBase64(&buf[0], size, binary, _size, resultSize);
     buf.back() = '\0';

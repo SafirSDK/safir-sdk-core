@@ -797,7 +797,7 @@ DotsC_Int32 DotsC_CalculateBase64BufferSize(DotsC_Int32 binarySourceSize)
     const div_t res = div(static_cast<int>(binarySourceSize),3);
     const int numChars = res.quot*4 + (res.rem?4:0);
     const div_t numNewLines = div(numChars, 64); //line length 64
-    return numChars + numNewLines.quot -(numNewLines.rem==0?1:0);
+    return numChars + numNewLines.quot - (numNewLines.rem==0 ? 1 : 0);
 }
 
 void DotsC_BinaryToBase64(char* base64Dest,

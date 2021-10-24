@@ -26,7 +26,6 @@
 
 #include <Safir/Dob/Connection.h>
 #include <Safir/Utilities/Internal/Atomic.h>
-#include <boost/bind.hpp>
 #include <boost/noncopyable.hpp>
 
 #ifdef _MSC_VER
@@ -81,7 +80,7 @@ private:
         if (m_isNotified == 0)
         {
             m_isNotified = 1;
-            m_ioService.post(boost::bind(&Dispatcher::Dispatch,this));
+            m_ioService.post([this]{Dispatch();});
         }
     }
 

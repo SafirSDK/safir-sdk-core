@@ -72,7 +72,7 @@ DopeApp::DopeApp():
         m_dobConnection.Open(L"DOPE", L"0", PERSISTENCE_CONTEXT, this, &m_dispatcher);
         m_debug << "Opened DOB connection"<<std::endl;
     }
-    catch (Safir::Dob::NotOpenException e)
+    catch (const Safir::Dob::NotOpenException& e)
     {
         Safir::Logging::SendSystemLog(Safir::Logging::Critical,
                                       L"Failed to connect to Dob. Maybe Dope is already started on this node.");
@@ -253,7 +253,7 @@ void DopeApp::StartUp(bool restore)
     if (m_thread.get_id() == boost::thread::id())
     {
         // wait for ok to connect on context 0
-        m_thread = boost::thread(boost::bind(&DopeApp::ConnectionThread, this));
+        m_thread = boost::thread([this]{ConnectionThread();});
     }
 }
 
@@ -313,7 +313,7 @@ void DopeApp::ConnectionThread()
                          });
         return;
     }
-    catch (Safir::Dob::NotOpenException e)
+    catch (const Safir::Dob::NotOpenException& e)
     {
         Safir::Logging::SendSystemLog(Safir::Logging::Critical,
                                       L"NotOpenException in ConnectionThread!!!");

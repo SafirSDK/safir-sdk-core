@@ -25,7 +25,6 @@
 #include <Safir/Dob/Connection.h>
 #include <Safir/Dob/NotOpenException.h>
 #include <Safir/Utilities/AsioDispatcher.h>
-#include <boost/bind.hpp>
 #include <boost/lexical_cast.hpp>
 #include <iostream>
 #include <boost/asio/steady_timer.hpp>
@@ -64,7 +63,7 @@ public:
         }
 
         Safir::Application::TracerBackdoor::Start(m_connection);
-        m_timer.async_wait(boost::bind(&App::Timeout, this));
+        m_timer.async_wait([this](const auto& /*error*/){Timeout();});
         m_ioService.run();
 
         Safir::Application::TracerBackdoor::Stop();
@@ -75,7 +74,7 @@ public:
     {
         static int i = 0;
         m_timer.expires_from_now(boost::chrono::milliseconds(10));
-        m_timer.async_wait(boost::bind(&App::Timeout, this));
+        m_timer.async_wait([this](const auto& /*error*/){Timeout();});
         m_razor << "foo" << "bar" << 1234 << std::endl;
         m_rb << "blahonga, " << "blahonga, " << "blahonga" << std::endl;
         std::wcout << "Have logged " << i << " times." << std::endl;

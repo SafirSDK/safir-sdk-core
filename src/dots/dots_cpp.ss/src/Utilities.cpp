@@ -187,7 +187,11 @@ namespace Utilities
     {
         DotsC_Int32 resultSize=0;
         DotsC_Int32 size = DotsC_CalculateBase64BufferSize(sourceSize);
-        std::vector<char> buf(size+1); //one extra for '0'
+        if (size <= 0)
+        {
+            throw SoftwareViolationException(L"Illegal value returned from DotsC_CalculateBase64BufferSize",__WFILE__,__LINE__);
+        }
+        std::vector<char> buf(std::max(0,size)+1); //one extra for '0'
         DotsC_BinaryToBase64(&buf[0], size, binarySource, sourceSize, resultSize);
         buf.back() = '\0';
         return std::string(buf.begin(),buf.end());

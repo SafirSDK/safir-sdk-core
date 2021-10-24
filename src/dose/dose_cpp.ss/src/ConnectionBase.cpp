@@ -67,7 +67,7 @@ namespace Dob
                                     true,  // override registration
                                     false, //not an injectionHandler
                                     DOSE_LANGUAGE_CPP,
-                                    static_cast<Internal::ConsumerBase* const>(entityHandler),
+                                    static_cast<Internal::ConsumerBase*>(entityHandler),
                                     success);
 
         if (!success)
@@ -92,7 +92,7 @@ namespace Dob
                                     true,  // override registration
                                     true, //an injectionHandler
                                     DOSE_LANGUAGE_CPP,
-                                    static_cast<Internal::ConsumerBase* const>(entityHandlerInjection),
+                                    static_cast<Internal::ConsumerBase*>(entityHandlerInjection),
                                     success);
 
         if (!success)
@@ -117,7 +117,7 @@ namespace Dob
                                     false,  // pending registration
                                     true, //an injectionHandler
                                     DOSE_LANGUAGE_CPP,
-                                    static_cast<Internal::ConsumerBase* const>(entityHandlerPending),
+                                    static_cast<Internal::ConsumerBase*>(entityHandlerPending),
                                     success);
 
         if (!success)
@@ -139,7 +139,7 @@ namespace Dob
                                      handlerId.Utf8String().c_str(),
                                      true,  // override registration
                                      DOSE_LANGUAGE_CPP,
-                                     static_cast<Internal::ConsumerBase* const>(serviceHandler),
+                                     static_cast<Internal::ConsumerBase*>(serviceHandler),
                                      success);
 
         if (!success)
@@ -160,7 +160,7 @@ namespace Dob
                                      handlerId.Utf8String().c_str(),
                                      false,  // pending registration
                                      DOSE_LANGUAGE_CPP,
-                                     static_cast<Internal::ConsumerBase* const>(serviceHandlerPending),
+                                     static_cast<Internal::ConsumerBase*>(serviceHandlerPending),
                                      success);
 
         if (!success)
@@ -210,7 +210,7 @@ namespace Dob
                                channelId.Utf8String().c_str(),
                                includeSubclasses,
                                DOSE_LANGUAGE_CPP,
-                               static_cast<Internal::ConsumerBase* const>(messageSubscriber),
+                               static_cast<Internal::ConsumerBase*>(messageSubscriber),
                                success);
         if (!success)
         {
@@ -237,7 +237,7 @@ namespace Dob
                                  channelId.Utf8String().c_str(),
                                  includeSubclasses,
                                  DOSE_LANGUAGE_CPP,
-                                 static_cast<Internal::ConsumerBase* const>(messageSubscriber),
+                                 static_cast<Internal::ConsumerBase*>(messageSubscriber),
                                  success);
         if (!success)
         {
@@ -275,7 +275,7 @@ namespace Dob
                               includeSubclasses,
                               restartSubscription,
                               DOSE_LANGUAGE_CPP,
-                              static_cast<Internal::ConsumerBase* const>(entitySubscriber),
+                              static_cast<Internal::ConsumerBase*>(entitySubscriber),
                               success);
         if (!success)
         {
@@ -299,7 +299,7 @@ namespace Dob
                               false, //includeSubclasses
                               restartSubscription,
                               DOSE_LANGUAGE_CPP,
-                              static_cast<Internal::ConsumerBase* const>(entitySubscriber),
+                              static_cast<Internal::ConsumerBase*>(entitySubscriber),
                               success);
         if (!success)
         {
@@ -328,7 +328,7 @@ namespace Dob
                                 true, //allInstances,
                                 includeSubclasses,
                                 DOSE_LANGUAGE_CPP,
-                                static_cast<Internal::ConsumerBase* const>(entitySubscriber),
+                                static_cast<Internal::ConsumerBase*>(entitySubscriber),
                                 success);
         if (!success)
         {
@@ -348,7 +348,7 @@ namespace Dob
                                 false, //allInstances,
                                 false, //includeSubclasses
                                 DOSE_LANGUAGE_CPP,
-                                static_cast<Internal::ConsumerBase* const>(entitySubscriber),
+                                static_cast<Internal::ConsumerBase*>(entitySubscriber),
                                 success);
         if (!success)
         {
@@ -371,7 +371,7 @@ namespace Dob
                                     includeSubclasses,
                                     restartSubscription,
                                     DOSE_LANGUAGE_CPP,
-                                    static_cast<Internal::ConsumerBase* const>(registrationSubscriber),
+                                    static_cast<Internal::ConsumerBase*>(registrationSubscriber),
                                     success);
         if (!success)
         {
@@ -392,7 +392,7 @@ namespace Dob
                                       handlerId.Utf8String().c_str(),
                                       includeSubclasses,
                                       DOSE_LANGUAGE_CPP,
-                                      static_cast<Internal::ConsumerBase* const>(registrationSubscriber),
+                                      static_cast<Internal::ConsumerBase*>(registrationSubscriber),
                                       success);
         if (!success)
         {
@@ -428,7 +428,7 @@ namespace Dob
                           channelId.GetRawValue(),
                           channelId.Utf8String().c_str(),
                           DOSE_LANGUAGE_CPP,
-                          static_cast<Internal::ConsumerBase* const>(messageSender),
+                          static_cast<Internal::ConsumerBase*>(messageSender),
                           success);
 
         if (!success)
@@ -454,7 +454,7 @@ namespace Dob
                              handlerId.GetRawValue(),
                              handlerId.Utf8String().c_str(),
                              DOSE_LANGUAGE_CPP,
-                             static_cast<Internal::ConsumerBase* const>(requestor),
+                             static_cast<Internal::ConsumerBase*>(requestor),
                              reqId,
                              success);
         if (!success)
@@ -483,7 +483,7 @@ namespace Dob
                             handlerId.GetRawValue(),
                             handlerId.Utf8String().c_str(),
                             DOSE_LANGUAGE_CPP,
-                            static_cast<Internal::ConsumerBase* const>(requestor),
+                            static_cast<Internal::ConsumerBase*>(requestor),
                             reqId,
                             success);
 
@@ -513,7 +513,7 @@ namespace Dob
                             handlerId.GetRawValue(),
                             handlerId.Utf8String().c_str(),
                             DOSE_LANGUAGE_CPP,
-                            static_cast<Internal::ConsumerBase* const>(requestor),
+                            static_cast<Internal::ConsumerBase*>(requestor),
                             reqId,
                             success);
 
@@ -539,7 +539,7 @@ namespace Dob
                             instanceId.GetRawValue(),
                             instanceId.Utf8String().c_str(),
                             DOSE_LANGUAGE_CPP,
-                            static_cast<Internal::ConsumerBase* const>(requestor),
+                            static_cast<Internal::ConsumerBase*>(requestor),
                             reqId,
                             success);
         if (!success)
@@ -560,7 +560,7 @@ namespace Dob
                             entityId.GetInstanceId().GetRawValue(),
                             entityId.GetInstanceId().Utf8String().c_str(),
                             DOSE_LANGUAGE_CPP,
-                            static_cast<Internal::ConsumerBase* const>(requestor),
+                            static_cast<Internal::ConsumerBase*>(requestor),
                             reqId,
                             success);
         if (!success)
