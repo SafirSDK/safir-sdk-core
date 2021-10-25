@@ -49,33 +49,30 @@ public:
     bool IsActive() const;
     const std::string& Address(const int which) const;
     short Port(const int which) const;
-    
+
 private:
 
-
-
-
     bool IsReady(const int which) const;
-    
+
     void HandlePartnerChange(const DoseTest::PartnerPtr & partner, const int instance);
 
-    virtual void OnNewEntity(const Safir::Dob::EntityProxy entityProxy);
-    virtual void OnUpdatedEntity(const Safir::Dob::EntityProxy entityProxy);
-    virtual void OnDeletedEntity(const Safir::Dob::EntityProxy entityProxy,
-                                 const bool                    deletedByOwner);
+    void OnNewEntity(const Safir::Dob::EntityProxy entityProxy) override;
+    void OnUpdatedEntity(const Safir::Dob::EntityProxy entityProxy) override;
+    void OnDeletedEntity(const Safir::Dob::EntityProxy entityProxy,
+                                 const bool                    deletedByOwner) override;
 
-    virtual void OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId     typeId,
-                                       const Safir::Dob::Typesystem::HandlerId& handlerId);
-    virtual void OnCreateRequest(const Safir::Dob::EntityRequestProxy /*entityRequestProxy*/,
-                                 Safir::Dob::ResponseSenderPtr        responseSender)
-    {responseSender->Send(Safir::Dob::ErrorResponse::Create());}
-    
-    virtual void OnUpdateRequest(const Safir::Dob::EntityRequestProxy /*entityRequestProxy*/,
-                                 Safir::Dob::ResponseSenderPtr        responseSender)
+    void OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId     typeId,
+                                       const Safir::Dob::Typesystem::HandlerId& handlerId) override;
+    void OnCreateRequest(const Safir::Dob::EntityRequestProxy /*entityRequestProxy*/,
+                                 Safir::Dob::ResponseSenderPtr        responseSender) override
     {responseSender->Send(Safir::Dob::ErrorResponse::Create());}
 
-    virtual void OnDeleteRequest(const Safir::Dob::EntityRequestProxy /*entityRequestProxy*/,
-                                 Safir::Dob::ResponseSenderPtr        responseSender)
+    void OnUpdateRequest(const Safir::Dob::EntityRequestProxy /*entityRequestProxy*/,
+                                 Safir::Dob::ResponseSenderPtr        responseSender) override
+    {responseSender->Send(Safir::Dob::ErrorResponse::Create());}
+
+    void OnDeleteRequest(const Safir::Dob::EntityRequestProxy /*entityRequestProxy*/,
+                                 Safir::Dob::ResponseSenderPtr        responseSender) override
     {responseSender->Send(Safir::Dob::ErrorResponse::Create());}
 
     struct PartnerInfo
@@ -86,7 +83,7 @@ private:
         bool IsActive() const {return m_active;}
         void SetActive(const bool active) {m_active = active;}
 
-        bool IsReady()const {return IsActive() && m_ready;}
+        bool IsReady() const {return IsActive() && m_ready;}
         void SetReady(const bool ready) {m_ready = ready;}
 
         int         m_incarnation;
@@ -108,4 +105,3 @@ private:
     ActionSender& m_actionSender;
 };
 #endif
-

@@ -35,8 +35,8 @@ public:
     void Start();
 
 protected:
-    virtual void OnResponse(const Safir::Dob::ResponseProxy responseProxy);
-    virtual void OnNotRequestOverflow();
+    void OnResponse(const Safir::Dob::ResponseProxy responseProxy) override;
+    void OnNotRequestOverflow() override;
 
 
 private:

@@ -41,9 +41,7 @@
 class ConnectionOwner :
     public Safir::Dob::StopHandler
 {
-    virtual void OnStopOrder() {exit(0);}
-
-    virtual void OnDoDispatch() {}
+    void OnStopOrder() override {exit(0);}
 };
 
 int main(int argc, char* argv[])
@@ -138,4 +136,3 @@ int main(int argc, char* argv[])
 
     return 0;
 }
-

@@ -37,7 +37,7 @@ public:
 
 private:
     //Message Subscriber
-    virtual void OnMessage(const Safir::Dob::MessageProxy messageProxy);
+    void OnMessage(const Safir::Dob::MessageProxy messageProxy) override;
 
     Safir::Dob::SecondaryConnection m_connection;
 

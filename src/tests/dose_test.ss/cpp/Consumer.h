@@ -61,50 +61,50 @@ private:
     Safir::Dob::Typesystem::Int64 GetTimestamp(const DoseTest::ActionPtr& action);
 
     //Consumer functions
-    virtual void OnMessage(const Safir::Dob::MessageProxy messageProxy);
-    virtual void OnNotMessageOverflow();
+    void OnMessage(const Safir::Dob::MessageProxy messageProxy) override;
+    void OnNotMessageOverflow() override;
 
     // Registration subscriber functions
-    virtual void OnRegistered(const Safir::Dob::Typesystem::TypeId      typeId,
-                              const Safir::Dob::Typesystem::HandlerId&  handlerId);
-    virtual void OnUnregistered(const Safir::Dob::Typesystem::TypeId      typeId,
-                                const Safir::Dob::Typesystem::HandlerId&  handlerId);
+    void OnRegistered(const Safir::Dob::Typesystem::TypeId      typeId,
+                              const Safir::Dob::Typesystem::HandlerId&  handlerId) override;
+    void OnUnregistered(const Safir::Dob::Typesystem::TypeId      typeId,
+                                const Safir::Dob::Typesystem::HandlerId&  handlerId) override;
 
     // Service handler functions
-    virtual void OnServiceRequest(const Safir::Dob::ServiceRequestProxy serviceRequestProxy,
-                                  Safir::Dob::ResponseSenderPtr   responseSender);
+    void OnServiceRequest(const Safir::Dob::ServiceRequestProxy serviceRequestProxy,
+                                  Safir::Dob::ResponseSenderPtr   responseSender) override;
 
     // Service/entity handler functions
-    virtual void OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId     typeId,
-                                       const Safir::Dob::Typesystem::HandlerId& handlerId);
+    void OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId     typeId,
+                                       const Safir::Dob::Typesystem::HandlerId& handlerId) override;
 
     // Service/entity handler pending additional functions
-    virtual void OnCompletedRegistration(const Safir::Dob::Typesystem::TypeId     typeId,
-                                         const Safir::Dob::Typesystem::HandlerId& handlerId);
+    void OnCompletedRegistration(const Safir::Dob::Typesystem::TypeId     typeId,
+                                         const Safir::Dob::Typesystem::HandlerId& handlerId) override;
 
     // Entity subscriber functions
-    void OnNewEntity(const Safir::Dob::EntityProxy entityProxy);
-    void OnUpdatedEntity(const Safir::Dob::EntityProxy entityProxy);
-    void OnDeletedEntity(const Safir::Dob::EntityProxy entityProxy, const bool deleted);
+    void OnNewEntity(const Safir::Dob::EntityProxy entityProxy) override;
+    void OnUpdatedEntity(const Safir::Dob::EntityProxy entityProxy) override;
+    void OnDeletedEntity(const Safir::Dob::EntityProxy entityProxy, const bool deleted) override;
 
     // Entity handler functions
-    void OnCreateRequest(const Safir::Dob::EntityRequestProxy entityProxy, Safir::Dob::ResponseSenderPtr rs);
-    void OnUpdateRequest(const Safir::Dob::EntityRequestProxy entityProxy, Safir::Dob::ResponseSenderPtr rs);
-    void OnDeleteRequest(const Safir::Dob::EntityRequestProxy entityProxy, Safir::Dob::ResponseSenderPtr rs);
+    void OnCreateRequest(const Safir::Dob::EntityRequestProxy entityProxy, Safir::Dob::ResponseSenderPtr rs) override;
+    void OnUpdateRequest(const Safir::Dob::EntityRequestProxy entityProxy, Safir::Dob::ResponseSenderPtr rs) override;
+    void OnDeleteRequest(const Safir::Dob::EntityRequestProxy entityProxy, Safir::Dob::ResponseSenderPtr rs) override;
 
     // Entity handler injected additional functions
-    void OnInjectedNewEntity(const Safir::Dob::InjectedEntityProxy entityProxy);
-    void OnInjectedUpdatedEntity(const Safir::Dob::InjectedEntityProxy entityProxy);
-    void OnInjectedDeletedEntity(const Safir::Dob::InjectedEntityProxy entityProxy);
+    void OnInjectedNewEntity(const Safir::Dob::InjectedEntityProxy entityProxy) override;
+    void OnInjectedUpdatedEntity(const Safir::Dob::InjectedEntityProxy entityProxy) override;
+    void OnInjectedDeletedEntity(const Safir::Dob::InjectedEntityProxy entityProxy) override;
     void OnInitialInjectionsDone(const Safir::Dob::Typesystem::TypeId       typeId,
-                                 const Safir::Dob::Typesystem::HandlerId&   handlerId);
+                                 const Safir::Dob::Typesystem::HandlerId&   handlerId) override;
 
-    void OnResponse(const Safir::Dob::ResponseProxy responseProxy);
-    void OnNotRequestOverflow();
+    void OnResponse(const Safir::Dob::ResponseProxy responseProxy) override;
+    void OnNotRequestOverflow() override;
 
     // Backdoor functions
-    virtual void HandleCommand(const std::vector<std::wstring>& cmdTokens);
-    virtual std::wstring GetHelpText();
+    void HandleCommand(const std::vector<std::wstring>& cmdTokens) override;
+    std::wstring GetHelpText() override;
 
     const std::wstring CallbackId() const;
 
@@ -133,8 +133,8 @@ private:
     class TimestampRequestor:
     public Safir::Dob::Requestor
     {
-        void OnResponse(const Safir::Dob::ResponseProxy /*responseProxy*/) {}
-        void OnNotRequestOverflow() {}
+        void OnResponse(const Safir::Dob::ResponseProxy /*responseProxy*/) override {}
+        void OnNotRequestOverflow() override {}
     };
 
     TimestampRequestor m_timestampRequestor;

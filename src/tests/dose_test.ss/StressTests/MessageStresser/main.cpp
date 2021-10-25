@@ -39,7 +39,7 @@
 
 
 
-class App: 
+class App:
     public Safir::Dob::StopHandler,
     private boost::noncopyable
 {
@@ -66,7 +66,7 @@ public:
         std::wcout << "Started as " << Safir::Dob::ConnectionAspectMisc(connection).GetConnectionName() << std::endl;
 
         if(CommandLine::Instance().Sender()) //We are a sender
-        {       
+        {
             m_sender.Start();
             m_sender.SendSome();
         }
@@ -83,8 +83,8 @@ public:
     }
 
 protected:
- 
-    virtual void OnStopOrder()
+
+    void OnStopOrder() override
     {
         m_ioService.stop();
     }
@@ -139,8 +139,7 @@ int main(int argc, char* argv[])
         std::cin.get();
     }
 
-    
- 
+
+
     return 0;
 }
-

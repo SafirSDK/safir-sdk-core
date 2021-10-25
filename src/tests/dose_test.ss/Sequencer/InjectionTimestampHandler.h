@@ -37,22 +37,22 @@ public:
     InjectionTimestampHandler();
 
 private:
-    virtual void OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId     typeId,
-                                       const Safir::Dob::Typesystem::HandlerId& handlerId);
+    void OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId     typeId,
+                               const Safir::Dob::Typesystem::HandlerId& handlerId) override;
 
-    virtual void OnCreateRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy,
-                                 Safir::Dob::ResponseSenderPtr        responseSender);
+    void OnCreateRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy,
+                         Safir::Dob::ResponseSenderPtr        responseSender) override;
 
-    virtual void OnUpdateRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy,
-                                 Safir::Dob::ResponseSenderPtr        responseSender);
+    void OnUpdateRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy,
+                         Safir::Dob::ResponseSenderPtr        responseSender) override;
 
-    virtual void OnDeleteRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy,
-                                 Safir::Dob::ResponseSenderPtr        responseSender);
+    void OnDeleteRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy,
+                         Safir::Dob::ResponseSenderPtr        responseSender) override;
 
-    virtual void OnInitialInjectionsDone(const Safir::Dob::Typesystem::TypeId typeId,
-                                         const Safir::Dob::Typesystem::HandlerId& handlerId);
+    void OnInitialInjectionsDone(const Safir::Dob::Typesystem::TypeId typeId,
+                                 const Safir::Dob::Typesystem::HandlerId& handlerId) override;
 
-    virtual void OnInjectedNewEntity(const Safir::Dob::InjectedEntityProxy /*injectedEntityProxy*/)
+    void OnInjectedNewEntity(const Safir::Dob::InjectedEntityProxy /*injectedEntityProxy*/) override
     {m_hasInstance = true;}
 
     Safir::Dob::SecondaryConnection m_connection;

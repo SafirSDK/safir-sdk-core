@@ -45,7 +45,7 @@ class StopHandler :
 public:
     explicit StopHandler(boost::asio::io_service& ioService)
         : m_ioService(ioService) {}
-    virtual void OnStopOrder() {m_ioService.stop();}
+    void OnStopOrder() override {m_ioService.stop();}
 private:
     boost::asio::io_service& m_ioService;
 
@@ -79,7 +79,7 @@ public:
         }
 
         m_timer.expires_from_now(boost::posix_time::seconds(1));
-        m_timer.async_wait([=](const boost::system::error_code&){Update();});
+        m_timer.async_wait([this](const boost::system::error_code&){Update();});
     }
 
 private:
@@ -96,26 +96,27 @@ private:
         }
 
         m_timer.expires_from_now(boost::posix_time::milliseconds(10));
-        m_timer.async_wait([=](const boost::system::error_code&){Update();});
+        m_timer.async_wait([this](const boost::system::error_code&){Update();});
     }
-    virtual void OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId,
-        const Safir::Dob::Typesystem::HandlerId&) {}
 
-    virtual void OnCreateRequest(const Safir::Dob::EntityRequestProxy /*entityRequestProxy*/,
-        Safir::Dob::ResponseSenderPtr        /*responseSender*/) {}
+    void OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId,
+        const Safir::Dob::Typesystem::HandlerId&) override {}
 
-    virtual void OnUpdateRequest(const Safir::Dob::EntityRequestProxy /*entityRequestProxy*/,
-        Safir::Dob::ResponseSenderPtr        /*responseSender*/) {}
+    void OnCreateRequest(const Safir::Dob::EntityRequestProxy /*entityRequestProxy*/,
+        Safir::Dob::ResponseSenderPtr        /*responseSender*/) override {}
 
-    virtual void OnDeleteRequest(const Safir::Dob::EntityRequestProxy /*entityRequestProxy*/,
-        Safir::Dob::ResponseSenderPtr        /*responseSender*/) {}
+    void OnUpdateRequest(const Safir::Dob::EntityRequestProxy /*entityRequestProxy*/,
+        Safir::Dob::ResponseSenderPtr        /*responseSender*/) override {}
 
-    virtual void OnInjectedNewEntity(const Safir::Dob::InjectedEntityProxy /*injectedEntityProxy*/)
+    void OnDeleteRequest(const Safir::Dob::EntityRequestProxy /*entityRequestProxy*/,
+        Safir::Dob::ResponseSenderPtr        /*responseSender*/) override {}
+
+    void OnInjectedNewEntity(const Safir::Dob::InjectedEntityProxy /*injectedEntityProxy*/) override
     {
     }
 
-    virtual void OnInitialInjectionsDone(const Safir::Dob::Typesystem::TypeId,
-                                         const Safir::Dob::Typesystem::HandlerId&)
+    void OnInitialInjectionsDone(const Safir::Dob::Typesystem::TypeId,
+                                 const Safir::Dob::Typesystem::HandlerId&) override
     {
 
     }

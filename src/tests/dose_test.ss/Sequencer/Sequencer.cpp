@@ -39,7 +39,6 @@
 #include <iostream>
 #include <sstream>
 #include <time.h>
-#include <boost/bind.hpp>
 #include <Safir/Dob/Typesystem/Members.h>
 #include <Safir/Dob/Typesystem/Serialization.h>
 #include <boost/filesystem/path.hpp>
@@ -119,7 +118,7 @@ Sequencer::Sequencer(const int startTc,
                      boost::asio::io_service& ioService):
     m_ioService(ioService),
     m_actionSender(ioService),
-    m_partnerState(languages,contextId,m_actionSender,boost::bind(&Sequencer::PostTick,this)),
+    m_partnerState(languages,contextId,m_actionSender, std::bind(&Sequencer::PostTick,this)),
     m_currentCaseNo(startTc),
     m_currentActionNo(0),
     m_stopTc(stopTc),
@@ -451,5 +450,5 @@ Sequencer::OnResponse(const Safir::Dob::ResponseProxy responseProxy)
 
 void Sequencer::PostTick()
 {
-    m_ioService.post(boost::bind(&Sequencer::Tick,this));
+    m_ioService.post(std::bind(&Sequencer::Tick,this));
 }

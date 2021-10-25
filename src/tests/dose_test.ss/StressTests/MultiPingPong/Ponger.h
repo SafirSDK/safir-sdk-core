@@ -39,34 +39,27 @@ class Ponger :
 public:
     Ponger();
 
-    //    void Timeout();
-
 private:
 
-    virtual void OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId typeId,
-                                       const Safir::Dob::Typesystem::HandlerId& handlerId);
+    void OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId typeId,
+                                       const Safir::Dob::Typesystem::HandlerId& handlerId) override;
 
-    virtual void OnCreateRequest(const Safir::Dob::EntityRequestProxy ,
-                                 Safir::Dob::ResponseSenderPtr        ) {}
+    void OnCreateRequest(const Safir::Dob::EntityRequestProxy ,
+                                 Safir::Dob::ResponseSenderPtr        ) override {}
 
-    virtual void OnUpdateRequest(const Safir::Dob::EntityRequestProxy ,
-                                 Safir::Dob::ResponseSenderPtr        ) {}
+    void OnUpdateRequest(const Safir::Dob::EntityRequestProxy ,
+                                 Safir::Dob::ResponseSenderPtr        ) override {}
 
-    virtual void OnDeleteRequest(const Safir::Dob::EntityRequestProxy ,
-                                 Safir::Dob::ResponseSenderPtr        ) {}
+    void OnDeleteRequest(const Safir::Dob::EntityRequestProxy ,
+                                 Safir::Dob::ResponseSenderPtr        ) override {}
 
-    virtual void OnNewEntity(const Safir::Dob::EntityProxy entityProxy);
+    void OnNewEntity(const Safir::Dob::EntityProxy entityProxy) override;
 
-    virtual void OnUpdatedEntity(const Safir::Dob::EntityProxy entityProxy);
+    void OnUpdatedEntity(const Safir::Dob::EntityProxy entityProxy) override;
 
-    virtual void OnDeletedEntity(const Safir::Dob::EntityProxy entityProxy,
-                                 const bool                    deletedByOwner);
+    void OnDeletedEntity(const Safir::Dob::EntityProxy entityProxy,
+                                 const bool                    deletedByOwner) override;
 
-    /*    virtual void OnRegistered(const Safir::Dob::Typesystem::TypeId      typeId,
-                              const Safir::Dob::Typesystem::HandlerId&  handlerId);
-
-    virtual void OnUnregistered(const Safir::Dob::Typesystem::TypeId      typeId,
-    const Safir::Dob::Typesystem::HandlerId&  handlerId);*/
 
     void Pong(const Safir::Dob::EntityProxy& entityProxy);
 

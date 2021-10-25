@@ -56,11 +56,6 @@ void Handler::OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId /*typeI
 }
 
 
-void Handler::OnCompletedRegistration(const Safir::Dob::Typesystem::TypeId /*typeId*/, const Safir::Dob::Typesystem::HandlerId& /*handlerId*/)
-{
-    lllog(1) << "Handler::OnCompletedRegistration" <<std::endl;
-}
-
 void Handler::OnInitialInjectionsDone(const Safir::Dob::Typesystem::TypeId /*typeId*/, const Safir::Dob::Typesystem::HandlerId& /*handlerId*/)
 {
     lllog(1) << "Handler::OnInitialInjectionsDone" <<std::endl;

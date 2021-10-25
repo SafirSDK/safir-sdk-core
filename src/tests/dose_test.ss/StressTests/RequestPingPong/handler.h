@@ -27,30 +27,26 @@
 #include <Safir/Dob/Connection.h>
 
 class Handler: 
-  //  public Safir::Dob::EntityHandlerPending, 
     public Safir::Dob::EntityHandlerInjection
 {
 public:
     void Start();
 
 protected:
-    virtual void OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId     typeId,
-        const Safir::Dob::Typesystem::HandlerId& handlerId);
+    void OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId     typeId,
+        const Safir::Dob::Typesystem::HandlerId& handlerId) override;
 
-    virtual void OnCompletedRegistration(const Safir::Dob::Typesystem::TypeId typeId,
-        const Safir::Dob::Typesystem::HandlerId& handlerId);
+    void OnCreateRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy,
+        Safir::Dob::ResponseSenderPtr responseSender) override;
 
-    virtual void OnCreateRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy,
-        Safir::Dob::ResponseSenderPtr responseSender);
+    void OnUpdateRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy,
+        Safir::Dob::ResponseSenderPtr responseSender) override;
 
-    virtual void OnUpdateRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy,
-        Safir::Dob::ResponseSenderPtr responseSender);
+    void OnDeleteRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy,
+        Safir::Dob::ResponseSenderPtr responseSender) override;
 
-    virtual void OnDeleteRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy,
-        Safir::Dob::ResponseSenderPtr responseSender);
-
-    virtual void OnInitialInjectionsDone(const Safir::Dob::Typesystem::TypeId typeId,
-        const Safir::Dob::Typesystem::HandlerId& handlerId);
+    void OnInitialInjectionsDone(const Safir::Dob::Typesystem::TypeId typeId,
+        const Safir::Dob::Typesystem::HandlerId& handlerId) override;
 
 
 private:

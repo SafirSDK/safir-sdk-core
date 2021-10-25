@@ -92,8 +92,8 @@ public:
 
     void FindNextTestcase();
 private:
-    virtual void OnResponse(const Safir::Dob::ResponseProxy responseProxy);
-    virtual void OnNotRequestOverflow() {}
+    virtual void OnResponse(const Safir::Dob::ResponseProxy responseProxy) override;
+    virtual void OnNotRequestOverflow() override {}
 
     void PostTick();
 

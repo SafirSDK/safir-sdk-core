@@ -33,7 +33,6 @@
 #include <Safir/Dob/ErrorResponse.h>
 #include "Consumer.h"
 #include <boost/function.hpp>
-#include <boost/bind.hpp>
 #include "ActionReceiver.h"
 
 #ifdef _MSC_VER
@@ -61,12 +60,12 @@ public:
     {}
 
 private:
-    virtual void OnDoDispatch()
+    void OnDoDispatch() override
     {
         if (m_isNotified == 0)
         {
             m_isNotified = 1;
-            m_ioService.post(boost::bind(&Dispatcher::Dispatch,this));
+            m_ioService.post(std::bind(&Dispatcher::Dispatch,this));
         }
     }
     virtual void Dispatch()
@@ -96,36 +95,36 @@ public:
 
 private:
 
-    virtual void OnStopOrder();
+    void OnStopOrder() override;
 
-    virtual void OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId     typeId,
-                                       const Safir::Dob::Typesystem::HandlerId& handlerId);
+    void OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId     typeId,
+                                       const Safir::Dob::Typesystem::HandlerId& handlerId) override;
 
-    virtual void OnCreateRequest(const Safir::Dob::EntityRequestProxy /*entityRequestProxy*/,
-                                 Safir::Dob::ResponseSenderPtr        responseSender)
+    void OnCreateRequest(const Safir::Dob::EntityRequestProxy /*entityRequestProxy*/,
+                                 Safir::Dob::ResponseSenderPtr        responseSender) override
     {responseSender->Send(Safir::Dob::ErrorResponse::Create());}
 
-    virtual void OnUpdateRequest(const Safir::Dob::EntityRequestProxy /*entityRequestProxy*/,
-                                 Safir::Dob::ResponseSenderPtr        responseSender)
+    void OnUpdateRequest(const Safir::Dob::EntityRequestProxy /*entityRequestProxy*/,
+                                 Safir::Dob::ResponseSenderPtr        responseSender) override
     {responseSender->Send(Safir::Dob::ErrorResponse::Create());}
 
-    virtual void OnDeleteRequest(const Safir::Dob::EntityRequestProxy /*entityRequestProxy*/,
-                                 Safir::Dob::ResponseSenderPtr        responseSender)
+    void OnDeleteRequest(const Safir::Dob::EntityRequestProxy /*entityRequestProxy*/,
+                                 Safir::Dob::ResponseSenderPtr        responseSender) override
     {responseSender->Send(Safir::Dob::ErrorResponse::Create());}
 
-    virtual void OnServiceRequest(const Safir::Dob::ServiceRequestProxy serviceRequestProxy,
-                                  Safir::Dob::ResponseSenderPtr         responseSender);
-    
-    virtual void OnNewEntity(const Safir::Dob::EntityProxy entityProxy)
+    void OnServiceRequest(const Safir::Dob::ServiceRequestProxy serviceRequestProxy,
+                                  Safir::Dob::ResponseSenderPtr         responseSender) override;
+
+    void OnNewEntity(const Safir::Dob::EntityProxy entityProxy) override
     {HandleSequencerState(boost::static_pointer_cast<DoseTest::Sequencer>(entityProxy.GetEntity()));}
- 
-    virtual void OnUpdatedEntity(const Safir::Dob::EntityProxy entityProxy)
+
+    void OnUpdatedEntity(const Safir::Dob::EntityProxy entityProxy) override
     {HandleSequencerState(boost::static_pointer_cast<DoseTest::Sequencer>(entityProxy.GetEntity()));}
-    
+
     //ignore deletes since they may be due to an inhibitoutgoingtraffic on the other side
-    virtual void OnDeletedEntity(const Safir::Dob::EntityProxy,
-                                 const bool) {}
-    
+    void OnDeletedEntity(const Safir::Dob::EntityProxy,
+                                 const bool) override {}
+
 
     void HandleSequencerState(const DoseTest::SequencerPtr& sequencer);
 

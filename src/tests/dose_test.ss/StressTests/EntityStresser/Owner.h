@@ -40,17 +40,17 @@ public:
 
 protected:
 
-    virtual void OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId     /*typeId*/,
-                                       const Safir::Dob::Typesystem::HandlerId& /*handlerId*/) {}
+    void OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId     /*typeId*/,
+                                       const Safir::Dob::Typesystem::HandlerId& /*handlerId*/) override {}
 
-    virtual void OnCreateRequest(const Safir::Dob::EntityRequestProxy /*entityRequestProxy*/,
-                                 Safir::Dob::ResponseSenderPtr        /*responseSender*/) {}
+    void OnCreateRequest(const Safir::Dob::EntityRequestProxy /*entityRequestProxy*/,
+                                 Safir::Dob::ResponseSenderPtr        /*responseSender*/) override {}
 
-    virtual void OnUpdateRequest(const Safir::Dob::EntityRequestProxy /*entityRequestProxy*/,
-                                 Safir::Dob::ResponseSenderPtr        /*responseSender*/) {}
+    void OnUpdateRequest(const Safir::Dob::EntityRequestProxy /*entityRequestProxy*/,
+                                 Safir::Dob::ResponseSenderPtr        /*responseSender*/) override {}
 
-    virtual void OnDeleteRequest(const Safir::Dob::EntityRequestProxy /*entityRequestProxy*/,
-                                 Safir::Dob::ResponseSenderPtr        /*responseSender*/) {}
+    void OnDeleteRequest(const Safir::Dob::EntityRequestProxy /*entityRequestProxy*/,
+                                 Safir::Dob::ResponseSenderPtr        /*responseSender*/) override {}
 
     Safir::Dob::SecondaryConnection m_connection;
 

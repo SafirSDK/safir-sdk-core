@@ -45,7 +45,6 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/condition.hpp>
-#include <boost/bind.hpp>
 
 #ifdef _MSC_VER
   #pragma warning(pop)
@@ -65,8 +64,8 @@ public:
 
     }
 
-    virtual void OnStopOrder() {exit(0);}
-    virtual void OnDoDispatch()
+    void OnStopOrder() override {exit(0);}
+    void OnDoDispatch() override
     {
         {
             boost::lock_guard<boost::mutex> lock(m_mutex);
@@ -87,7 +86,7 @@ public:
         const boost::chrono::milliseconds delay(milliseconds);
 
         boost::unique_lock<boost::mutex> lock(m_mutex);
-        const bool res = m_condition.wait_for(lock,delay,boost::bind(&SimpleDispatcher::DispatchPending,this));
+        const bool res = m_condition.wait_for(lock,delay,std::bind(&SimpleDispatcher::DispatchPending,this));
         m_dispatch = false;
         return res;
     }

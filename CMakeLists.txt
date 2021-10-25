@@ -138,7 +138,7 @@ set(CTEST_FULL_OUTPUT 1)
 ENABLE_TESTING()
 
 add_subdirectory(src)
-#TODO laha add_subdirectory(docs)
+add_subdirectory(docs)
 
 SAFIR_INSTALL_PYTHON(
   SCRIPT build/build.py

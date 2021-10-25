@@ -40,7 +40,7 @@ public:
     void SendSome();
 
 protected:
-    virtual void OnNotMessageOverflow();
+    void OnNotMessageOverflow() override;
 
     Safir::Dob::SecondaryConnection m_connection;
 

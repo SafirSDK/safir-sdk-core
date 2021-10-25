@@ -89,7 +89,7 @@ StatisticsCollection & StatisticsCollection::Instance()
 
 StatisticsCollection::StatisticsCollection()
 {
-    m_thread = boost::thread(boost::bind(&StatisticsCollection::PrintThread,this));
+    m_thread = boost::thread(std::bind(&StatisticsCollection::PrintThread,this));
 }
 
 StatisticsCollection::~StatisticsCollection()

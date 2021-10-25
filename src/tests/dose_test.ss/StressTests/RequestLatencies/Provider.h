@@ -34,11 +34,11 @@ class Provider :
 public:
     Provider();
 private:
-    virtual void OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId     /*typeId*/,
-                                       const Safir::Dob::Typesystem::HandlerId& /*handlerId*/) {}
+    void OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId     /*typeId*/,
+                                       const Safir::Dob::Typesystem::HandlerId& /*handlerId*/) override {}
 
-    virtual void OnServiceRequest(const Safir::Dob::ServiceRequestProxy serviceRequestProxy,
-                                  Safir::Dob::ResponseSenderPtr         responseSender);
+    void OnServiceRequest(const Safir::Dob::ServiceRequestProxy serviceRequestProxy,
+                                  Safir::Dob::ResponseSenderPtr         responseSender) override;
 
     Safir::Dob::SecondaryConnection m_connection;
 

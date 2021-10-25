@@ -45,7 +45,6 @@
 #include <iostream>
 #include <Safir/Dob/OverflowException.h>
 #include <Safir/Dob/Typesystem/Members.h>
-#include <boost/bind.hpp>
 #include <boost/chrono.hpp>
 #include "Logger.h"
 #include <cctype>
@@ -1169,7 +1168,8 @@ void Consumer::ExecuteAction(DoseTest::ActionPtr action)
                 case DoseTest::ActionEnum::ResetCallbackActions:
                     {
                         lout << PREFIX << m_consumerNumber << ": ResetCallbackActions"<<std::endl;
-                        std::for_each(m_callbackActions.begin(),m_callbackActions.end(),boost::bind(&Actions::clear,_1));
+                        std::for_each(m_callbackActions.begin(),m_callbackActions.end(),
+                                      [](auto& actions){actions.clear();});
                     }
                     break;
 

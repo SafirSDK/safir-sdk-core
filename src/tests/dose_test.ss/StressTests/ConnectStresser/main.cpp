@@ -49,8 +49,8 @@ public:
    #pragma warning(disable: 4355)
 #endif
     explicit App(std::wstring name, int attempts, int timeout, int instance, bool useMenu)
-        : m_firstDispatcher(boost::bind(&App::DispatchFirstConnection,this), m_ioService)
-        , m_secondDispatcher(boost::bind(&App::DispatchSecondConnection,this), m_ioService)
+        : m_firstDispatcher(std::bind(&App::DispatchFirstConnection,this), m_ioService)
+        , m_secondDispatcher(std::bind(&App::DispatchSecondConnection,this), m_ioService)
         , m_connectionsFirst(StatisticsCollection::Instance().AddHzCollector(L"Connections on first"))
         , m_failedConnectionsFirst(StatisticsCollection::Instance().AddPercentageCollector(L"Failed connections on first", m_connectionsFirst))
         , m_connectionsSecond(StatisticsCollection::Instance().AddHzCollector(L"Connections on second"))
@@ -169,7 +169,7 @@ public:
 
 protected:
 
-    virtual void OnStopOrder()
+    void OnStopOrder() override
     {
         m_ioService.stop();
     }

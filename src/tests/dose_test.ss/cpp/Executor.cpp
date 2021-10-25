@@ -27,7 +27,6 @@
 
 #include <Safir/Dob/Typesystem/ObjectFactory.h>
 #include <DoseTest/Partner.h>
-#include <boost/bind.hpp>
 #include "Logger.h"
 #include <DoseTest/Dump.h>
 #include <DoseTest/DumpResult.h>
@@ -46,20 +45,7 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/thread.hpp>
 
-#ifdef _MSC_VER
-  #pragma warning(pop)
-#endif
-
-//dosecom_stuff.h includes stuff that includes windows.h crap header file!
-//undef the stupid defines from there.
-#ifdef GetMessage
-#undef GetMessage
-#endif
-
-#ifdef _MSC_VER
-#  pragma warning(push)
-#  pragma warning(disable: 4355)
-#endif
+using namespace std::placeholders;
 
 Executor::Executor(const std::vector<std::string> & commandLine):
     m_identifier(L"cpp"),
@@ -71,9 +57,9 @@ Executor::Executor(const std::vector<std::string> & commandLine):
     m_isDone(false),
     m_isActive(false),
     m_dispatchTestConnection(true),
-    m_testDispatcher(boost::bind(&Executor::DispatchTestConnection,this), m_ioService),
-    m_controlDispatcher(boost::bind(&Executor::DispatchControlConnection,this), m_ioService),
-    m_actionReceiver(m_ioService, boost::bind(&Executor::HandleAction,this,_1),m_instance),
+    m_testDispatcher(std::bind(&Executor::DispatchTestConnection,this), m_ioService),
+    m_controlDispatcher(std::bind(&Executor::DispatchControlConnection,this), m_ioService),
+    m_actionReceiver(m_ioService, std::bind(&Executor::HandleAction,this,_1),m_instance),
     m_callbackActions(Safir::Dob::CallbackId::Size()),
     m_defaultContext(0)
 {
@@ -184,7 +170,7 @@ Executor::ExecuteAction(DoseTest::ActionPtr action)
                 newConsumers.clear();
 
                 std::wcout << "Clearing callback actions" << std::endl;
-                std::for_each(m_callbackActions.begin(),m_callbackActions.end(),boost::bind(&Actions::clear,_1));
+                std::for_each(m_callbackActions.begin(),m_callbackActions.end(),std::bind(&Actions::clear,_1));
             }
             std::wcout << "Reset complete" << std::endl;
         }
@@ -239,7 +225,7 @@ Executor::ExecuteAction(DoseTest::ActionPtr action)
 
     case DoseTest::ActionEnum::ResetCallbackActions:
         {
-            std::for_each(m_callbackActions.begin(),m_callbackActions.end(),boost::bind(&Actions::clear,_1));
+            std::for_each(m_callbackActions.begin(),m_callbackActions.end(),std::bind(&Actions::clear,_1));
         }
         break;
 
@@ -326,7 +312,7 @@ void Executor::DispatchTestConnection()
         try
         {
             ExecuteCallbackActions(Safir::Dob::CallbackId::OnDoDispatch);
-            std::for_each(m_consumers.begin(),m_consumers.end(), boost::bind(&Consumer::ExecuteCallbackActions,_1,Safir::Dob::CallbackId::OnDoDispatch));
+            std::for_each(m_consumers.begin(),m_consumers.end(), std::bind(&Consumer::ExecuteCallbackActions,_1,Safir::Dob::CallbackId::OnDoDispatch));
 
             m_testConnection.Dispatch();
         }

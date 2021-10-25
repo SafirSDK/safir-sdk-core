@@ -36,11 +36,11 @@ public:
 
     void PrintStatistics();
 private:
-    virtual void OnNewEntity(const Safir::Dob::EntityProxy entityProxy)
+    void OnNewEntity(const Safir::Dob::EntityProxy entityProxy) override
     {HandleEntity(entityProxy);}
-    virtual void OnUpdatedEntity(const Safir::Dob::EntityProxy entityProxy)
+    void OnUpdatedEntity(const Safir::Dob::EntityProxy entityProxy) override
     {HandleEntity(entityProxy);}
-    virtual void OnDeletedEntity(const Safir::Dob::EntityProxy, const bool) {}
+    void OnDeletedEntity(const Safir::Dob::EntityProxy, const bool) override {}
 
     void HandleEntity(const Safir::Dob::EntityProxy & entityProxy);
 

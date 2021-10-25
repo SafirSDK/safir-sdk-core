@@ -42,14 +42,15 @@ public:
     {}
 
 private:
-    virtual void OnDoDispatch()
+    void OnDoDispatch() override
     {
         if (m_isNotified == 0)
         {
             m_isNotified = 1;
-            m_ioService.post(boost::bind(&Dispatcher::Dispatch,this));
+            m_ioService.post(std::bind(&Dispatcher::Dispatch,this));
         }
     }
+
     virtual void Dispatch()
     {
         m_isNotified = 0;
@@ -62,4 +63,3 @@ private:
 };
 
 #endif // DISPATCHER_H
-

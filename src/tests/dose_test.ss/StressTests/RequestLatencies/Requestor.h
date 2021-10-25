@@ -40,8 +40,8 @@ public:
 
 protected:
 
-    virtual void OnResponse(const Safir::Dob::ResponseProxy responseProxy);
-    virtual void OnNotRequestOverflow();
+    void OnResponse(const Safir::Dob::ResponseProxy responseProxy) override;
+    void OnNotRequestOverflow() override;
 
     Safir::Dob::SecondaryConnection m_connection;
 

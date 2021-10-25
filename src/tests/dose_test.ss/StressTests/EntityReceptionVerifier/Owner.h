@@ -40,17 +40,17 @@ public:
 
 protected:
 
-    virtual void OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId    ,
-                                       const Safir::Dob::Typesystem::HandlerId& ) {}
+    void OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId    ,
+                                       const Safir::Dob::Typesystem::HandlerId& ) override {}
 
-    virtual void OnCreateRequest(const Safir::Dob::EntityRequestProxy ,
-                                 Safir::Dob::ResponseSenderPtr        ) {}
+    void OnCreateRequest(const Safir::Dob::EntityRequestProxy ,
+                                 Safir::Dob::ResponseSenderPtr        ) override {}
 
-    virtual void OnUpdateRequest(const Safir::Dob::EntityRequestProxy ,
-                                 Safir::Dob::ResponseSenderPtr        ) {}
+    void OnUpdateRequest(const Safir::Dob::EntityRequestProxy ,
+                                 Safir::Dob::ResponseSenderPtr        ) override {}
 
-    virtual void OnDeleteRequest(const Safir::Dob::EntityRequestProxy ,
-                                 Safir::Dob::ResponseSenderPtr        ) {}
+    void OnDeleteRequest(const Safir::Dob::EntityRequestProxy ,
+                                 Safir::Dob::ResponseSenderPtr        ) override {}
 
 
     Safir::Dob::SecondaryConnection m_connection;

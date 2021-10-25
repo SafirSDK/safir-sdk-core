@@ -38,7 +38,7 @@
 
 
 
-class App: 
+class App:
     public Safir::Dob::StopHandler,
     private boost::noncopyable
 {
@@ -49,7 +49,7 @@ public:
 #endif
     explicit App(std::wstring name):
         m_dispatcher(connection,m_ioService),
-        m_sender(CommandLine::Instance().Count(), CommandLine::Instance().Timeout(), boost::bind(&App::FinishedCallback,this))
+        m_sender(CommandLine::Instance().Count(), CommandLine::Instance().Timeout(), std::bind(&App::FinishedCallback,this))
     {
         for(int instance = 0;;++instance)
         {
@@ -92,8 +92,8 @@ public:
     }
 
 protected:
- 
-    virtual void OnStopOrder()
+
+    void OnStopOrder() override
     {
         m_ioService.stop();
     }
@@ -135,8 +135,7 @@ int main(int argc, char* argv[])
         std::cin.get();
     }
 
-    
- 
+
+
     return 0;
 }
-

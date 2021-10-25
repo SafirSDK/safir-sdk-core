@@ -36,10 +36,10 @@ public:
 
 private:
 
-    virtual void OnNewEntity(const Safir::Dob::EntityProxy entityProxy) {HandleEntity(entityProxy);}
-    virtual void OnUpdatedEntity(const Safir::Dob::EntityProxy entityProxy) {HandleEntity(entityProxy);}
-    virtual void OnDeletedEntity(const Safir::Dob::EntityProxy /*entityProxy*/,
-                                 const bool                    /*deletedByOwner*/) {}
+    void OnNewEntity(const Safir::Dob::EntityProxy entityProxy) override {HandleEntity(entityProxy);}
+    void OnUpdatedEntity(const Safir::Dob::EntityProxy entityProxy) override {HandleEntity(entityProxy);}
+    void OnDeletedEntity(const Safir::Dob::EntityProxy /*entityProxy*/,
+                                 const bool                    /*deletedByOwner*/) override {}
 
     void HandleEntity(const Safir::Dob::EntityProxy& entityProxy);
 

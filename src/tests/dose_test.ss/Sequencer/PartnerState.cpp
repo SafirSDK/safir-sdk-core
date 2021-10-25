@@ -24,10 +24,11 @@
 #include "PartnerState.h"
 
 #include <DoseTest/Sequencer.h>
-#include <boost/bind.hpp>
 #include <iostream>
 #include <DoseTest/Action.h>
 #include <Safir/Dob/OverflowException.h>
+
+using namespace std::placeholders;
 
 PartnerState::PartnerState(const Languages & languages,
                            const int contextId,
@@ -76,7 +77,10 @@ short PartnerState::Port(const int which) const
 bool
 PartnerState::IsReady() const
 {
-    return std::find_if(m_partnerInfoTable.begin(),m_partnerInfoTable.end(),!boost::bind(&PartnerInfo::IsReady,_1)) == m_partnerInfoTable.end();
+    return std::find_if(m_partnerInfoTable.begin(),
+                        m_partnerInfoTable.end(),
+                        [](const PartnerInfo& p){return !p.IsReady();})
+        == m_partnerInfoTable.end();
 }
 
 bool
@@ -89,14 +93,17 @@ PartnerState::IsReady(const int which) const
 bool
 PartnerState::IsActive() const
 {
-    return std::find_if(m_partnerInfoTable.begin(),m_partnerInfoTable.end(),!boost::bind(&PartnerInfo::IsActive,_1)) == m_partnerInfoTable.end();
+    return std::find_if(m_partnerInfoTable.begin(),
+                        m_partnerInfoTable.end(),
+                        [](const PartnerInfo& p){return !p.IsActive();})
+        == m_partnerInfoTable.end();
 }
 
 
 void
 PartnerState::Reset()
 {
-    std::for_each(m_partnerInfoTable.begin(),m_partnerInfoTable.end(),boost::bind(&PartnerInfo::SetReady,_1,false));
+    std::for_each(m_partnerInfoTable.begin(),m_partnerInfoTable.end(),std::bind(&PartnerInfo::SetReady,_1,false));
     m_stateChangedCallback();
 
     

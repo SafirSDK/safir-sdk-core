@@ -27,7 +27,6 @@
 
 #include <cstdlib>
 #include <iostream>
-#include <boost/bind.hpp>
 #include <Safir/Dob/Typesystem/Internal/BlobOperations.h>
 #include <Safir/Dob/Typesystem/Serialization.h>
 #include <DoseTest/Action.h>
@@ -59,7 +58,7 @@ public:
 
 
     }
-    
+
     void Open()
     {
         using namespace boost::asio::ip;
@@ -73,7 +72,7 @@ public:
             {
                 m_acceptor.reset
                     (new tcp::acceptor(m_ioService,
-                                       tcp::endpoint(tcp::v4(), 
+                                       tcp::endpoint(tcp::v4(),
                                                      port),
                                        false)); //no reuseaddr
                 //reuseaddr doesnt work on windows. see:
@@ -88,7 +87,7 @@ public:
                 std::wcout << "Failed to accept on port " << port << ": " << error.what() << std::endl;
             }
         }
-        
+
         if (m_acceptor == NULL)
         {
             throw std::logic_error("Failed to open any useful port!");
@@ -96,8 +95,7 @@ public:
 
         m_socket.reset(new tcp::socket(m_ioService));
         m_acceptor->async_accept(*m_socket,
-                                 boost::bind(&ActionReceiver::HandleAccept, this,
-                                             boost::asio::placeholders::error));
+                                 [this](const auto& error){HandleAccept(error);});
     }
 
     void Close()
@@ -122,11 +120,10 @@ private:
     {
         if (!error)
         {
-            m_data.resize(BLOB_HEADER_SIZE); 
-            m_socket->async_receive(boost::asio::buffer(&m_data[0], m_data.size()),
-                                    boost::bind(&ActionReceiver::HandleRead, this,
-                                                boost::asio::placeholders::error,
-                                                boost::asio::placeholders::bytes_transferred));
+            m_data.resize(BLOB_HEADER_SIZE);
+            m_socket->async_receive
+                (boost::asio::buffer(&m_data[0], m_data.size()),
+                 [this](const auto& error, const size_t bytes_transferred){HandleRead(error,bytes_transferred);});
         }
         else if (m_acceptor != NULL) //expect a cancelled error when closing acceptor
         {
@@ -164,7 +161,7 @@ private:
                 (Safir::Dob::Typesystem::Serialization::ToObject(m_data));
 
             std::wcout << "Got action '" << DoseTest::ActionEnum::ToString(action->ActionKind()) << "'" << std::endl;
-            
+
             const bool actionAfterAck = action->ActionKind() == DoseTest::ActionEnum::Sleep;
 
             std::wcout << "Got actionAfterAck = " << actionAfterAck << std::endl;
@@ -186,10 +183,9 @@ private:
             }
 
             //start next receive
-            m_socket->async_receive(boost::asio::buffer(&m_data[0], BLOB_HEADER_SIZE),
-                                    boost::bind(&ActionReceiver::HandleRead, this,
-                                                boost::asio::placeholders::error,
-                                                boost::asio::placeholders::bytes_transferred));
+            m_socket->async_receive
+                (boost::asio::buffer(&m_data[0], BLOB_HEADER_SIZE),
+                 [this](const auto& error, const size_t bytes_transferred){HandleRead(error,bytes_transferred);});
 
             if (actionAfterAck)
             {
@@ -211,7 +207,7 @@ private:
     std::vector<char> m_data;
 
     enum {BLOB_HEADER_SIZE = 16};
-    
+
     short m_port;
     const boost::function<void(const DoseTest::ActionPtr&)> m_actionCallback;
     const int m_instance;
@@ -219,4 +215,3 @@ private:
 
 
 #endif
-

@@ -41,7 +41,7 @@ public:
 protected:
     //void SendMessages(int startfrom);
 
-    void OnNotMessageOverflow();
+    void OnNotMessageOverflow() override;
 
     Safir::Dob::SecondaryConnection m_connection;
 

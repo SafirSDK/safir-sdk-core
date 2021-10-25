@@ -15,8 +15,6 @@ configure_file(Safir.Dob.PersistenceParameters.dou.in
 configure_file(Safir.Dob.NodeParameters.dou.in
   "${CMAKE_CURRENT_SOURCE_DIR}/config/Safir.Dob.NodeParameters.dou" @ONLY)
 
-#TODO LAHA: The above files are needed for dots_kernel tests, which is not great...
-
 ADD_SAFIR_GENERATED_LIBRARY(NAME Core
 
   DOU_FILES

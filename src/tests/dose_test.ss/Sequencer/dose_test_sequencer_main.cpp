@@ -38,7 +38,6 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/chrono.hpp>
 #include <boost/asio.hpp>
-#include <boost/bind.hpp>
 
 #if defined _MSC_VER
   #pragma warning (pop)
@@ -50,7 +49,7 @@ namespace po = boost::program_options;
 
 class StopHandler : public Safir::Dob::StopHandler
 {
-    virtual void OnStopOrder()
+    void OnStopOrder() override
     {
         std::wcout << "Got stop order!" <<std::endl;
         exit(0);
@@ -69,7 +68,7 @@ public:
         , m_ioService(ioService)
     {}
 private:
-    virtual void OnDoDispatch() {m_ioService.post(boost::bind(&Dispatcher::Dispatch,this));}
+    void OnDoDispatch() override {m_ioService.post(std::bind(&Dispatcher::Dispatch,this));}
     void Dispatch(){m_connection.Dispatch();}
 
     Safir::Dob::Connection & m_connection;
