@@ -123,3 +123,10 @@ tmp
 
 CMakeDoxyfile.in
 CMakeDoxygenDefaults.cmake
+
+conan.*
+conanfile.txt
+conaninfo.txt
+conanbuildinfo.txt
+graph_info.json
+/Find*.cmake

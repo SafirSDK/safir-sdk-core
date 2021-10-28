@@ -2,6 +2,34 @@ PROJECT(safir-sdk-core CXX C)
 
 cmake_minimum_required(VERSION 3.20.0)
 
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR})
+list(APPEND CMAKE_PREFIX_PATH ${CMAKE_BINARY_DIR})
+
+if(NOT EXISTS "${CMAKE_BINARY_DIR}/conan.cmake")
+  message(STATUS "Downloading conan.cmake from https://github.com/conan-io/cmake-conan")
+  file(DOWNLOAD "https://raw.githubusercontent.com/conan-io/cmake-conan/v0.16.1/conan.cmake"
+                "${CMAKE_BINARY_DIR}/conan.cmake"
+                EXPECTED_HASH SHA256=396e16d0f5eabdc6a14afddbcfff62a54a7ee75c6da23f32f7a31bc85db23484
+                TLS_VERIFY ON)
+endif()
+
+include(${CMAKE_BINARY_DIR}/conan.cmake)
+
+conan_cmake_configure(REQUIRES
+  breakpad/cci.20210521
+#  websocketpp/0.8.2
+#  rapidjson/cci.20200410
+#  OPTIONS websocketpp:asio=standalone
+  GENERATORS cmake_find_package)
+
+conan_cmake_autodetect(settings)
+
+
+conan_cmake_install(PATH_OR_REFERENCE .
+                    BUILD missing
+                    REMOTE conan-center
+                    SETTINGS ${settings})
+
 #Set up the Safir SDK Core version by parsing version.txt
 #IMPORTANT: THE version.txt FILE NEEDS TO BE UPDATED FOR EVERY RELEASE
 #Remember: any updates that change APIs should update MAJOR, since
