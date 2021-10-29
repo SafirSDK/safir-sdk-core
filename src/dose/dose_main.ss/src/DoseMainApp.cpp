@@ -149,7 +149,7 @@ namespace Internal
         m_signalSet.async_wait(m_strand.wrap([this](const boost::system::error_code& error,
                                                     const int /*signalNumber*/)
                                             {
-                                                if (!!error)
+                                                if (error)
                                                 {
                                                     if (error == boost::asio::error::operation_aborted)
                                                     {
@@ -162,8 +162,9 @@ namespace Internal
                                                                         << "DOSE_MAIN: Got a signals error: " << error);
                                                     }
                                                 }
+
                                                 // dose_main expects to be stopped by safir_control and
-                                                // therefor ignores all "termination" signals
+                                                // therefore ignores all "termination" signals
                                             }));
 
         Safir::Utilities::CrashReporter::RegisterCallback(DumpFunc);
@@ -185,19 +186,37 @@ namespace Internal
         {
             m_cmdReceiver->Stop();
 
-            m_lockMonitor->Stop();
+            if (m_lockMonitor != nullptr)
+            {
+                m_lockMonitor->Stop();
+            }
 
-            m_connectionHandler->Stop();
+            if (m_lockMonitor != nullptr)
+            {
+                m_connectionHandler->Stop();
+            }
 
-            m_distribution->Stop();
+            if (m_distribution != nullptr)
+            {
+                m_distribution->Stop();
+            }
 
-            m_requestHandler->Stop();
+            if (m_requestHandler != nullptr)
+            {
+                m_requestHandler->Stop();
+            }
 
-            m_pendingRegistrationHandler->Stop();
+            if (m_pendingRegistrationHandler != nullptr)
+            {
+                m_pendingRegistrationHandler->Stop();
+            }
 
             m_signalSet.cancel();
 
-            m_memoryMonitor->Stop();
+            if (m_memoryMonitor != nullptr)
+            {
+                m_memoryMonitor->Stop();
+            }
 
             m_work.reset();
         }
