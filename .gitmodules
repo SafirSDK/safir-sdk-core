@@ -6,10 +6,6 @@
     path = src/lluf/lluf_crash_reporter.ss/src/google-breakpad/linux-syscall-support
     url = https://github.com/SafirSDK/linux-syscall-support.git
     ignore = dirty
-[submodule "boost-process"]
-    path = src/control/control.ss/src/boost-process
-    url = https://github.com/SafirSDK/boost-process.git
-    ignore = dirty
 [submodule "git-archive-all"]
     path = build/git-archive-all
     url = https://github.com/SafirSDK/git-archive-all.git

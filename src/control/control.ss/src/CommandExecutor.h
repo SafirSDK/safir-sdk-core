@@ -37,8 +37,7 @@
 #  pragma warning (disable : 4100 4267 4251)
 #endif
 
-#include "boost/process.hpp"
-#include "boost/process/mitigate.hpp"
+#include <boost/process.hpp>
 #include <boost/filesystem.hpp>
 
 #if defined _MSC_VER
@@ -142,10 +141,9 @@ namespace Control
             return;
         }
 
-        boost::system::error_code ec;
-        auto child = boost::process::execute(boost::process::initializers::set_args(argv.first),
-                                             boost::process::initializers::set_on_error(ec));
-        auto exitCode = boost::process::wait_for_exit(child);
+        std::error_code ec;
+        auto child = boost::process::child(argv.first);
+        child.wait(ec);
 
         if (ec)
         {
@@ -156,8 +154,11 @@ namespace Control
         }
         else
         {
+            const auto exitCode = child.exit_code();
+            const auto nativeExitCode = child.native_exit_code();
 
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
+        TODO eh, kolla allt detta
             if (exitCode != 0)
             {
                 std::stringstream os;
@@ -167,33 +168,30 @@ namespace Control
             }
 
 #elif defined(linux) || defined(__linux) || defined(__linux__)
-            if (WIFEXITED(exitCode))
+            if (WIFEXITED(nativeExitCode))
             {
-                auto status = WEXITSTATUS(exitCode);
-
-                if (status != 0)
+                if (exitCode != 0)
                 {
                     std::stringstream os;
-                    os << "CTRL: Command '" << cmdLineStr << "' has exited with status code " << status
+                    os << "CTRL: Command '" << cmdLineStr << "' has exited with status code " << exitCode
                        << " Check parameter " << parameter << " and/or OS configuration";
                     Log(os.str(),logStatus);
                 }
             }
-            else if (WIFSIGNALED(exitCode))
+            else if (WIFSIGNALED(nativeExitCode))
             {
-                auto signal = WTERMSIG(exitCode);
-
                 std::stringstream os;
                 os << "CTRL: Command '" << cmdLineStr << "' has exited due to signal "
-                   << strsignal(signal) << " ("  << signal << ") Check parameter " << parameter
+                   << strsignal(exitCode) << " ("  << exitCode << ") Check parameter " << parameter
                    << " and/or OS configuration";
                 Log(os.str(),logStatus);
             }
             else
             {
                 std::stringstream os;
-                os << "CTRL: Command '" << cmdLineStr << "' has exited with unexpected status code"
-                                        << " Check parameter " << parameter << " and/or OS configuration";
+                os << "CTRL: Command '" << cmdLineStr << "' has exited with unexpected status code ("
+                   << exitCode << ", " <<nativeExitCode
+                   << ") Check parameter " << parameter << " and/or OS configuration";
                 Log(os.str(),logStatus);
             }
 #endif
@@ -205,6 +203,3 @@ namespace Control
 }
 }
 }
-
-
-

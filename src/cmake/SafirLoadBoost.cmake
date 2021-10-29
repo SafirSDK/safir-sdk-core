@@ -22,8 +22,8 @@ find_package(Boost
 
 include_directories(${Boost_INCLUDE_DIRS})
 
-if (Boost_VERSION LESS 105300)
-  MESSAGE(FATAL_ERROR "Boost >= 1.53 required! Sorry!")
+if (Boost_VERSION LESS 107000)
+  MESSAGE(FATAL_ERROR "Boost >= 1.70 required! Sorry!")
 endif()
 
 #Date_time is needed by boost thread on windows, so we monkey-patch that in, rather than adding link dependencies everywhere.

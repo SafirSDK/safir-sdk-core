@@ -49,11 +49,6 @@
 #  pragma warning (pop)
 #endif
 
-#if defined(linux) || defined(__linux) || defined(__linux__)
-#include <unistd.h>
-#endif
-
-
 ControlApp::ControlApp(boost::asio::io_service&         ioService,
                        const boost::filesystem::path&   doseMainPath,
                        const boost::int64_t             id,
@@ -73,11 +68,6 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
     , m_requiredForStart(false)
     , m_incarnationIdStorage(new AlignedStorage())
     , m_incarnationId(reinterpret_cast<boost::atomic<int64_t>&>(*m_incarnationIdStorage))
-#if defined(linux) || defined(__linux) || defined(__linux__)
-    , m_sigchldSet(ioService, SIGCHLD)
-#elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
-    , m_handle(ioService)
-#endif
 {
     m_terminateHandler = Safir::make_unique<TerminateHandler>(ioService,
                                                               m_strand.wrap([this]{StopThisNode();}),
@@ -133,9 +123,9 @@ ControlApp::~ControlApp()
                         << "CTRL: safir_control is shutting down in an uncontrolled manner, killing dose_main!");
 
         // Kill dose_main the hard way
-        boost::system::error_code ec;
-        boost::process::terminate(*m_doseMain, ec);
-        // We don't care about the error code from terminate. We're in panic mode after all.
+        std::error_code ec;
+        m_doseMain->terminate(ec);
+        // We don't care about any error code from terminate. We're in panic mode after all.
 
         m_doseMainRunning = false;
     }
@@ -344,105 +334,49 @@ void ControlApp::Start()
     m_stateHandler.reset(new Control::SystemStateHandler
                          (m_nodeId,
 
-    // Node included callback
-    [this](const Control::Node& node)
-    {
-        m_doseMainCmdSender->InjectNode(node.name,
-                                        node.nodeId,
-                                        node.nodeTypeId,
-                                        node.dataAddress);
+                          // Node included callback
+                          [this](const Control::Node& node)
+                          {
+                              m_doseMainCmdSender->InjectNode(node.name,
+                                                              node.nodeId,
+                                                              node.nodeTypeId,
+                                                              node.dataAddress);
 
-        m_stopHandler->AddNode(node.nodeId, node.nodeTypeId);
-    },
+                              m_stopHandler->AddNode(node.nodeId, node.nodeTypeId);
+                          },
 
-    // Node down callback
-    [this](const int64_t nodeId, const int64_t nodeTypeId)
-    {
-        m_doseMainCmdSender->ExcludeNode(nodeId, nodeTypeId);
+                          // Node down callback
+                          [this](const int64_t nodeId, const int64_t nodeTypeId)
+                          {
+                              m_doseMainCmdSender->ExcludeNode(nodeId, nodeTypeId);
 
-        m_stopHandler->RemoveNode(nodeId);
-    }));
-
-#if defined(linux) || defined(__linux) || defined(__linux__)
-    SetSigchldHandler();
-#endif
+                              m_stopHandler->RemoveNode(nodeId);
+                          }));
 
     // Start dose_main
-    boost::system::error_code ec;
+    std::error_code error;
 
-    m_doseMain.reset(new boost::process::child(boost::process::execute
-                                                (boost::process::initializers::run_exe(m_doseMainPath),
-                                                 boost::process::initializers::set_on_error(ec),
-                                                 boost::process::initializers::inherit_env()
+    m_doseMain = std::make_unique<boost::process::child>
+        (m_doseMainPath,
+         boost::this_process::environment(),
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
-                                                 ,boost::process::initializers::show_window(SW_HIDE)
-#elif defined(linux) || defined(__linux) || defined(__linux__)
-                                                 ,boost::process::initializers::notify_io_service(m_ioService)
+         boost::process::windows::hide,
 #endif
-                                               )));
+         m_ioService,
+         error,
+         boost::process::on_exit=[this](int exitCode, const std::error_code& error)
+             {HandleDoseMainExit(exitCode,error);});
 
-    if (ec)
+    if (error)
     {
         SEND_SYSTEM_LOG(Error,
-                        << "CTRL: Error run_exe: " << ec);
+                        << "CTRL: Error launching dose_main: " << error);
     }
-
-
-#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
-    m_handle.assign(m_doseMain->process_handle());
-
-    m_handle.async_wait(m_strand.wrap([this](const boost::system::error_code&)
-    {
-        DWORD exitCode;
-        auto gotExitCode = ::GetExitCodeProcess(m_handle.native(), &exitCode);
-
-        if (!gotExitCode)
-        {
-            std::ostringstream ostr;
-            ostr << "CTRL: It seems that dose_main has exited but Control"
-                " can't retrieve the exit code. GetExitCodeProcess failed"
-                "with error code "  << ::GetLastError();
-            SEND_SYSTEM_LOG(Critical, << ostr.str().c_str());
-            LogStatus(ostr.str());
-
-        }
-        else if (exitCode == STILL_ACTIVE)
-        {
-            std::ostringstream ostr;
-            ostr << "CTRL: Got an indication that dose_main has exited, however the exit code"
-                " indicates STILL_ALIVE!";
-            SEND_SYSTEM_LOG(Critical, << ostr.str().c_str());
-            LogStatus(ostr.str());
-        }
-        else
-        {
-            lllog(1) << "CTRL: dose_main has exited" << std::endl;
-
-            // dose_main has exited, we can stop our timer that will slay dose_main
-            m_terminationTimer.cancel();
-
-            if (exitCode != 0)
-            {
-                // dose_main has exited unexpectedly
-                std::ostringstream ostr;
-                ostr << "CTRL: dose_main has exited with exit code "  << exitCode;
-                SEND_SYSTEM_LOG(Critical, << ostr.str().c_str());
-                LogStatus(ostr.str());
-            }
-        }
-
-        m_doseMainRunning = false;
-
-        StopControl();
-    }
-    ));
-#endif
 
     m_doseMainCmdSender->Start();
     m_stopHandler->Start();
     m_controlInfoSender->Start();
 }
-
 
 std::pair<Com::ResolvedAddress,Com::ResolvedAddress> ControlApp::ResolveAddresses()
 {
@@ -537,8 +471,8 @@ void ControlApp::StopDoseMain()
                                                       << "... killing it!");
 
                                       // Kill dose_main the hard way
-                                      boost::system::error_code ec;
-                                      boost::process::terminate(*m_doseMain, ec);
+                                      std::error_code ec;
+                                      m_doseMain->terminate(ec);
                                       // We don't care about the error code from terminate. dose_main might
                                       // have exited by itself (which is good) and that will give an error.
                                   });
@@ -640,82 +574,64 @@ void ControlApp::SendControlInfo()
     }
 }
 
-#if defined(linux) || defined(__linux) || defined(__linux__)
-void ControlApp::SetSigchldHandler()
+
+void ControlApp::HandleDoseMainExit(int exitCode, const std::error_code& error)
 {
-    m_sigchldSet.async_wait(m_strand.wrap([this](const boost::system::error_code& error, int /*signalNumber*/)
+    if (error)
     {
-        if (error)
+        std::ostringstream ostr;
+        ostr << "CTRL: Got an error in on_exit: " << error;
+        SEND_SYSTEM_LOG(Critical, << ostr.str().c_str());
+        LogStatus(ostr.str());
+    }
+
+    const auto nativeExitCode = m_doseMain->native_exit_code();
+#if defined(linux) || defined(__linux) || defined(__linux__)
+    if (WIFEXITED(nativeExitCode))
+    {
+        if (exitCode != 0)
         {
-            if (error == boost::asio::error::operation_aborted)
-            {
-                return;
-            }
-            else
-            {
-                std::ostringstream os;
-                os << "Got a signals error (m_sigchldSet): " << error;
-                throw std::logic_error(os.str());
-            }
-        }
-
-        auto doseMainExited = false;
-
-        int statusCode;
-        const pid_t result = ::waitpid(0, &statusCode, WNOHANG | WUNTRACED | WCONTINUED);
-
-        if (result == -1)
-        {
-            throw std::logic_error("Call to waitpid failed!");
-        }
-
-        if (WIFEXITED(statusCode))
-        {
-            doseMainExited = true;
-
-            auto status = WEXITSTATUS(statusCode);
-
-            if (status != 0)
-            {
-                std::ostringstream ostr;
-                ostr << "CTRL: dose_main has exited with status code "  << status;
-
-                SEND_SYSTEM_LOG(Critical, << ostr.str().c_str());
-                LogStatus(ostr.str());
-            }
-        }
-        else if (WIFSTOPPED(statusCode) || WIFCONTINUED(statusCode))
-        {
-            // dose_main is stopped or continued, set up the handler to fetch subsequent signals
-            SetSigchldHandler();
-        }
-        else if (WIFSIGNALED(statusCode))
-        {
-            doseMainExited = true;
-
-            auto signal = WTERMSIG(statusCode);
-
             std::ostringstream ostr;
-            ostr << "CTRL: dose_main has exited due to signal "
-                 << strsignal(signal) << " ("  << signal << ")";
+            ostr << "CTRL: dose_main has exited with status code "  << exitCode;
 
             SEND_SYSTEM_LOG(Critical, << ostr.str().c_str());
             LogStatus(ostr.str());
         }
-        else
-        {
-            throw std::logic_error("Unexpected status code returned from waitpid!");
-        }
+    }
+    else if (WIFSIGNALED(nativeExitCode))
+    {
+        std::ostringstream ostr;
+        ostr << "CTRL: dose_main has exited due to signal "
+             << strsignal(exitCode) << " ("  << exitCode << ")";
 
-        if (doseMainExited)
-        {
-            lllog(1) << "CTRL: dose_main has exited" << std::endl;
+        SEND_SYSTEM_LOG(Critical, << ostr.str().c_str());
+        LogStatus(ostr.str());
+    }
+    else
+    {
+        std::stringstream ostr;
+        ostr << "CTRL: dose_main has exited with unexpected status code ("
+           << exitCode << ", " <<nativeExitCode << ")";
 
-            m_doseMainRunning = false;
-            m_terminationTimer.cancel();
+        SEND_SYSTEM_LOG(Critical, << ostr.str().c_str());
+        LogStatus(ostr.str());
+    }
+#else
+TODO windows stuff....
+    if (exitCode != 0)
+    {
+        std::ostringstream ostr;
+        ostr << "CTRL: dose_main has exited with status code "  << exitCode;
 
-            StopControl();
-        }
-    }));
-}
+        SEND_SYSTEM_LOG(Critical, << ostr.str().c_str());
+        LogStatus(ostr.str());
+    }
 #endif
+
+    lllog(1) << "CTRL: dose_main has exited" << std::endl;
+
+    m_doseMainRunning = false;
+    m_terminationTimer.cancel();
+
+    StopControl();
+}

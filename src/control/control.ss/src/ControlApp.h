@@ -43,8 +43,9 @@
 
 #include <boost/asio.hpp>
 #include <boost/asio/steady_timer.hpp>
-#include "boost/process.hpp"
-#include "boost/process/mitigate.hpp"
+#include <boost/process.hpp>
+#include <boost/process/extend.hpp>
+#include <boost/process/async_system.hpp>
 
 #if defined _MSC_VER
 #  pragma warning (pop)
@@ -90,6 +91,8 @@ private:
 
     void SendControlInfo();
 
+    void HandleDoseMainExit(const int exitCode, const std::error_code& error);
+
     boost::asio::io_service&                    m_ioService;
     bool                                        m_stopped;
     const boost::chrono::steady_clock::time_point m_resolutionStartTime;
@@ -122,13 +125,5 @@ private:
                                    sizeof(boost::atomic<int64_t>)>::type AlignedStorage;
     std::unique_ptr<AlignedStorage>     m_incarnationIdStorage;
     boost::atomic<int64_t>&             m_incarnationId;
-
-#if defined(linux) || defined(__linux) || defined(__linux__)
-    boost::asio::signal_set m_sigchldSet;
-    void SetSigchldHandler();
-#elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
-    boost::asio::windows::object_handle m_handle;
-#endif
-
 };
 
