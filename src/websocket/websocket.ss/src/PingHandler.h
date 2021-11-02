@@ -40,19 +40,19 @@
 class PingHandler : public boost::enable_shared_from_this<PingHandler>
 {
 public:
-    PingHandler(boost::asio::strand& strand, int interval, const boost::function<void()>& sendPing)
+    PingHandler(boost::asio::io_service::strand& strand, int interval, const boost::function<void()>& sendPing)
         :m_running(false)
         ,m_strand(strand)
         ,m_sendPing(sendPing)
         ,m_pingInterval(interval)
         ,m_lastSendTime(boost::chrono::steady_clock::now())
-        ,m_timer(strand.get_io_service())
+        ,m_timer(strand.context())
     {
     }
 
     void Start()
     {
-        m_strand.dispatch([=]
+        m_strand.dispatch([this]
         {
             m_running=true;
             m_timer.expires_from_now(m_pingInterval);

@@ -44,21 +44,21 @@ RemoteClient::RemoteClient(WsServer& server,
     ,m_connectionHandle(connectionHandle)
     ,m_connection(m_server.get_con_from_hdl(connectionHandle))
     ,m_onConnectionClosed(onClose)
-    ,m_dob(m_strand, [=](const std::string& msg){SendToClient(msg);})
-    ,m_pingHandler(boost::make_shared<PingHandler>(m_strand, static_cast<int>(Safir::Websocket::Parameters::PingInterval()), [=]{m_connection->ping("");}))
+    ,m_dob(m_strand, [this](const std::string& msg){SendToClient(msg);})
+    ,m_pingHandler(boost::make_shared<PingHandler>(m_strand, static_cast<int>(Safir::Websocket::Parameters::PingInterval()), [this]{m_connection->ping("");}))
     ,m_enableTypeSystem(Safir::Websocket::Parameters::EnableTypesystemCommands())
 {
-    m_connection->set_close_handler([=](websocketpp::connection_hdl)
+    m_connection->set_close_handler([this](websocketpp::connection_hdl)
     {
-        m_strand.post([=]{OnClose();});
+        m_strand.post([this]{OnClose();});
     });
-    m_connection->set_fail_handler([=](websocketpp::connection_hdl)
+    m_connection->set_fail_handler([this](websocketpp::connection_hdl)
     {
-        m_strand.post([=]{OnError();});
+        m_strand.post([this]{OnError();});
     });
-    m_connection->set_message_handler([=](websocketpp::connection_hdl, WsMessage msg)
+    m_connection->set_message_handler([this](websocketpp::connection_hdl, WsMessage msg)
     {
-        m_strand.post([=]{OnMessage(msg);});
+        m_strand.post([this,msg]{OnMessage(msg);});
     });
 
     m_pingHandler->Start();
@@ -72,7 +72,7 @@ RemoteClient::RemoteClient(WsServer& server,
 void RemoteClient::Close()
 {
     //called from websocket server, usually means we have got a stop order from the DOB
-    m_strand.post([=]
+    m_strand.post([this]
     {
         m_pingHandler->Stop();
         m_dob.Close();
@@ -99,7 +99,7 @@ void RemoteClient::OnClose()
     //since m_onConnectionClosed will destruct this object, we must wrap it in a post to let all
     //already queued events execute first. For example its likely that there is a dispatch waiting
     //that will crash the entire application if it gets executed after this instance is destroyed.
-    m_strand.post([=]{m_onConnectionClosed(this);});
+    m_strand.post([this]{m_onConnectionClosed(this);});
 }
 
 void RemoteClient::OnError()

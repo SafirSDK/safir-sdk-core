@@ -34,10 +34,10 @@ public:
         return p;
     }
 
-    ResSnd(sd::RequestId id) : m_id(id) {}
-    virtual void Send(const Safir::Dob::ResponsePtr&) {}
-    virtual bool IsDone() {return false;}
-    virtual void Discard() {}
+    ResSnd(sd::RequestId id): m_id(id) {}
+    void Send(const Safir::Dob::ResponsePtr&) override {}
+    bool IsDone() override {return false;}
+    void Discard() override {}
     sd::RequestId Id() const {return m_id;}
 private:
     sd::RequestId m_id;

@@ -45,7 +45,7 @@ private:
     typedef WsServer::connection_ptr WsConnection;
     WsServer m_server;
     boost::asio::io_service& m_ioService;
-    boost::asio::strand m_connectionsStrand;
+    boost::asio::io_service::strand m_connectionsStrand;
     std::unique_ptr<boost::asio::io_service::work> m_work;
     std::set<boost::shared_ptr<RemoteClient> > m_connections;
     boost::asio::signal_set m_signals;
@@ -57,7 +57,7 @@ private:
     void OnConnectionOpen(const boost::shared_ptr<RemoteClient>& con);
     void OnConnectionClosed(const RemoteClient* con);
 
-    void OnStopOrder();
+    void OnStopOrder() override;
 
     //debug
     void PrintConnections() const;

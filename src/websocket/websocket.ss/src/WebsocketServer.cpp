@@ -66,7 +66,7 @@ WebsocketServer::WebsocketServer(boost::asio::io_service& ioService)
 
 void WebsocketServer::Run()
 {
-    m_signals.async_wait([=](const boost::system::error_code&, int /*signal*/){Terminate();});
+    m_signals.async_wait([this](const boost::system::error_code&, int /*signal*/){Terminate();});
 
     lllog(5)<<"WS: Wait for DOB to let us open a connection..."<<std::endl;
     m_dobConnection.Open(L"safir_websocket", L"", 0, this, &m_dobDispatcher);
@@ -78,9 +78,9 @@ void WebsocketServer::Run()
     m_server.set_access_channels(websocketpp::log::alevel::none);
     m_server.set_reuse_addr(true);
 
-    m_server.set_open_handler([=](websocketpp::connection_hdl hdl)
+    m_server.set_open_handler([this](websocketpp::connection_hdl hdl)
     {
-        auto con=boost::make_shared<RemoteClient>(m_server, m_ioService, hdl, [=](const RemoteClient* con){OnConnectionClosed(con);});
+        auto con=boost::make_shared<RemoteClient>(m_server, m_ioService, hdl, [this](const RemoteClient* con){OnConnectionClosed(con);});
         OnConnectionOpen(con);
         lllog(5)<<"WS: Server: new connection added: "<<con->ToString().c_str()<<std::endl;
     });
@@ -129,7 +129,7 @@ void WebsocketServer::Terminate()
         m_dobConnection.Close();
     }
 
-    m_connectionsStrand.post([=]
+    m_connectionsStrand.post([this]
     {
         //close all existing connections
         for (auto it = m_connections.begin(); it != m_connections.end(); ++it)
@@ -145,7 +145,7 @@ void WebsocketServer::Terminate()
     shutDownTimer->expires_from_now(boost::chrono::seconds(3));
     shutDownTimer->async_wait([this, shutDownTimer](const boost::system::error_code&)
     {
-        m_connectionsStrand.post([=]{m_server.stop();});
+        m_connectionsStrand.post([this]{m_server.stop();});
     });
 
     lllog(5)<<"WS: all connections closed..."<<std::endl;
@@ -153,7 +153,7 @@ void WebsocketServer::Terminate()
 
 void WebsocketServer::OnConnectionOpen(const boost::shared_ptr<RemoteClient>& con)
 {
-    m_connectionsStrand.post([=]
+    m_connectionsStrand.post([this,con]
     {
         m_connections.insert(con);
         PrintConnections();
@@ -166,7 +166,7 @@ void WebsocketServer::OnConnectionClosed(const RemoteClient* con)
     std::function<bool(const boost::shared_ptr<RemoteClient>&)> pred =
         [con](const boost::shared_ptr<RemoteClient>& p) {return p.get()==con;};
 
-    m_connectionsStrand.post([=]
+    m_connectionsStrand.post([this,pred,con]
     {
         auto it=std::find_if(m_connections.begin(), m_connections.end(), pred);
 

@@ -34,13 +34,14 @@
 #endif
 
 
-DobConnection::DobConnection(boost::asio::strand& strand, boost::function<void(const std::string&)> send)
+DobConnection::DobConnection(boost::asio::io_service::strand& strand, boost::function<void(const std::string&)> send)
     :m_con()
     ,m_dispatcher(m_con, strand)
     ,m_wsSend(send)
     ,m_responseSenderStore(static_cast<size_t>(sd::QueueParameters::QueueRules(0)->RequestInQueueCapacity().IsNull() ? 10
                                                : sd::QueueParameters::QueueRules(0)->RequestInQueueCapacity().GetVal()))
-    ,m_proxyToJson([=](ts::TypeId t){return GetName(t);}, [=](ts::TypeId t, const ts::HandlerId& h){return m_con.GetInstanceIdPolicy(t,h);})
+    ,m_proxyToJson([this](ts::TypeId t){return GetName(t);},
+                   [this](ts::TypeId t, const ts::HandlerId& h){return m_con.GetInstanceIdPolicy(t,h);})
 {
 
 }

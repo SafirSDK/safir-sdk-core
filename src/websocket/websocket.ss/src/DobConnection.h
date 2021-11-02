@@ -59,7 +59,7 @@ class DobConnection :
 {
 public:
 
-    DobConnection(boost::asio::strand& strand, boost::function<void(const std::string&)> send);
+    DobConnection(boost::asio::io_service::strand& strand, boost::function<void(const std::string&)> send);
     sd::Connection& Connection() {return m_con;}
 
     void Open(const std::wstring& name, int context) {m_con.Open(name, L"-ws", context, nullptr, &m_dispatcher);}
@@ -197,37 +197,37 @@ private:
     //DOB events
     //-----------------
     // EntityHandler interface
-    void OnCreateRequest(const sd::EntityRequestProxy entityRequestProxy, sd::ResponseSenderPtr responseSender);
-    void OnUpdateRequest(const sd::EntityRequestProxy entityRequestProxy, sd::ResponseSenderPtr responseSender);
-    void OnDeleteRequest(const sd::EntityRequestProxy entityRequestProxy, sd::ResponseSenderPtr responseSender);
-    void OnRevokedRegistration(const sd::Typesystem::TypeId typeId, const sd::Typesystem::HandlerId &handlerId);
-    void OnCompletedRegistration(const sd::Typesystem::TypeId typeId, const sd::Typesystem::HandlerId& handlerId);
+    void OnCreateRequest(const sd::EntityRequestProxy entityRequestProxy, sd::ResponseSenderPtr responseSender) override;
+    void OnUpdateRequest(const sd::EntityRequestProxy entityRequestProxy, sd::ResponseSenderPtr responseSender) override;
+    void OnDeleteRequest(const sd::EntityRequestProxy entityRequestProxy, sd::ResponseSenderPtr responseSender) override;
+    void OnRevokedRegistration(const sd::Typesystem::TypeId typeId, const sd::Typesystem::HandlerId &handlerId) override;
+    void OnCompletedRegistration(const sd::Typesystem::TypeId typeId, const sd::Typesystem::HandlerId& handlerId) override;
 
     //Injection interface
-    void OnInjectedNewEntity(const sd::InjectedEntityProxy injectedEntityProxy);
-    void OnInjectedUpdatedEntity(const sd::InjectedEntityProxy injectedEntityProxy);
-    void OnInjectedDeletedEntity(const sd::InjectedEntityProxy injectedEntityProxy);
-    void OnInitialInjectionsDone(const sd::Typesystem::TypeId typeId, const sd::Typesystem::HandlerId& handlerId);
+    void OnInjectedNewEntity(const sd::InjectedEntityProxy injectedEntityProxy) override;
+    void OnInjectedUpdatedEntity(const sd::InjectedEntityProxy injectedEntityProxy) override;
+    void OnInjectedDeletedEntity(const sd::InjectedEntityProxy injectedEntityProxy) override;
+    void OnInitialInjectionsDone(const sd::Typesystem::TypeId typeId, const sd::Typesystem::HandlerId& handlerId) override;
 
     //EntitySubscriber interface
-    void OnNewEntity(const sd::EntityProxy entityProxy);
-    void OnUpdatedEntity(const sd::EntityProxy entityProxy);
-    void OnDeletedEntity(const sd::EntityProxy entityProxy, const bool);
+    void OnNewEntity(const sd::EntityProxy entityProxy) override;
+    void OnUpdatedEntity(const sd::EntityProxy entityProxy) override;
+    void OnDeletedEntity(const sd::EntityProxy entityProxy, const bool) override;
 
     //RegistrationSubscriber interface
-    void OnRegistered(const ts::TypeId typeId, const ts::HandlerId&  handlerId);
-    void OnUnregistered(const ts::TypeId typeId, const Safir::Dob::Typesystem::HandlerId&  handlerId);
+    void OnRegistered(const ts::TypeId typeId, const ts::HandlerId&  handlerId) override;
+    void OnUnregistered(const ts::TypeId typeId, const Safir::Dob::Typesystem::HandlerId&  handlerId) override;
 
     //Requestor interface
-    void OnResponse(const sd::ResponseProxy responseProxy);
-    void OnNotRequestOverflow();
+    void OnResponse(const sd::ResponseProxy responseProxy) override;
+    void OnNotRequestOverflow() override;
 
     //MessageSender interface
-    void OnNotMessageOverflow();
+    void OnNotMessageOverflow() override;
 
     //MessageSubscriber interface
-    void OnMessage(const sd::MessageProxy messageProxy);
+    void OnMessage(const sd::MessageProxy messageProxy) override;
 
     //ServiceHandler interface
-    void OnServiceRequest(const Safir::Dob::ServiceRequestProxy serviceRequestProxy, Safir::Dob::ResponseSenderPtr responseSender);
+    void OnServiceRequest(const Safir::Dob::ServiceRequestProxy serviceRequestProxy, Safir::Dob::ResponseSenderPtr responseSender) override;
 };

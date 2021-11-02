@@ -8,6 +8,10 @@ target_link_libraries(safir_websocket PRIVATE
   dose_cpp
   safir_generated-Core-cpp
   dots_internal
-  lluf_utils)
+  lluf_utils
+  RapidJSON::RapidJSON
+  websocketpp::websocketpp)
+
+set_property(TARGET safir_websocket PROPERTY CXX_STANDARD 17)
 
 SAFIR_INSTALL(TARGETS safir_websocket)

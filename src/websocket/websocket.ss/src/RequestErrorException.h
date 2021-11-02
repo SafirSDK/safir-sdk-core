@@ -102,7 +102,7 @@ public:
     {
     }
 
-    virtual const char* what () const throw () {return m_message.c_str();}
+    const char* what () const throw() override {return m_message.c_str();}
 
     int Code() const {return m_code;}
     const std::string& Message() const {return m_message;}

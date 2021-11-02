@@ -15,12 +15,17 @@ endif()
 
 include(${CMAKE_BINARY_DIR}/conan.cmake)
 
-conan_cmake_configure(REQUIRES
-  breakpad/cci.20210521
-#  websocketpp/0.8.2
-#  rapidjson/cci.20200410
-#  OPTIONS websocketpp:asio=standalone
-  GENERATORS cmake_find_package)
+conan_cmake_configure(
+  REQUIRES
+    breakpad/cci.20210521
+    websocketpp/0.8.2@user/stable
+    rapidjson/cci.20200410
+  OPTIONS
+    websocketpp:asio=none
+    websocketpp:openssl=False
+    websocketpp:zlib=False
+  GENERATORS
+    cmake_find_package)
 
 conan_cmake_autodetect(settings)
 
