@@ -1,12 +1,6 @@
 PROJECT(safir-sdk-core CXX C)
 
-#We need a very recent cmake on windows. The reason is that test property
-#and install generator expressions are only supported in cmake 3.
-if(MSVC)
-  cmake_minimum_required(VERSION 3.0.0)
-else()
-  cmake_minimum_required(VERSION 2.8.12)
-endif()
+cmake_minimum_required(VERSION 3.20.0)
 
 #Set up the Safir SDK Core version by parsing version.txt
 #IMPORTANT: THE version.txt FILE NEEDS TO BE UPDATED FOR EVERY RELEASE

@@ -10,7 +10,6 @@ Installing Prerequisites
 ------------------------
 
 Visual Studio 2010 or later (express or paid versions work)
-Subversion
 Boost (>=1.58)
 Python (>= 2.7)
 CMake (>=3.5.0)
@@ -43,16 +42,6 @@ Protobuf
    build a few times to get them to compile, since the project configuration is
    incomplete, and the test projects may not build either. But we don't need them.
 8. Open a command prompt in the vsprojects directory, and run "extract_includes.bat".
-
-Subversion
-~~~~~~~~~~
-You need a subversion command line client. If you've got TortoiseSVN installed it is
-quite likely that you've already got one installed. Open a command prompt and type "svn
-help". If you get some help output you've got one installed.
-
-Otherwise install either TortoiseSVN (http://tortoisesvn.net/downloads.html), remembering
-to select installation of command line tools, or some command-line-only svn client,
-e.g. SlikSVN (http://www.sliksvn.com/en/download).
 
 Boost
 ~~~~~

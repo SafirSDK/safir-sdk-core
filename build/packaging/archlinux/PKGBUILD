@@ -9,7 +9,7 @@ url="http://www.safirsdkcore.com"
 license=('GPL3')
 groups=()
 depends=('boost' 'unixodbc' 'qt5-base' 'cmake' 'python' 'mono' 'java-environment>=6')
-makedepends=('git' 'subversion' 'doxygen' 'graphviz')
+makedepends=('git' 'doxygen' 'graphviz')
 install=install
 source=("$pkgname"::'git+https://github.com/SafirSDK/safir-sdk-core.git'
         'safir-sdk-core.tmpfiles')

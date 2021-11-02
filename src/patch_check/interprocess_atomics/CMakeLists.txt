@@ -1,5 +1,5 @@
 #This bug is fixed in 1.57
-if (Boost_VERSION LESS 105700) #1.57
+if (Boost_VERSION VERSION_LESS 1.57.0) #1.57
   set(atomic_name "boost/interprocess/detail/atomic.hpp")
   find_file(atomic_path "boost/interprocess/detail/atomic.hpp" HINTS ${CMAKE_REQUIRED_INCLUDES})
 
