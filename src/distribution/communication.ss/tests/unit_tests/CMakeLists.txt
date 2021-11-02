@@ -4,22 +4,20 @@ file(GLOB headers *.h)
 file(GLOB sources *.cpp)
 
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
-PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ../../src/CommunicationMessage.proto)
 
-if (MSVC)
-  SET_SOURCE_FILES_PROPERTIES(${PROTO_SRCS} PROPERTIES COMPILE_FLAGS "/wd4127 /wd4244 /wd4267 /wd4018 /wd4512")
-endif()
-
-add_executable(unit_tests ${sources} ${headers} ${PROTO_SRCS} ${PROTO_HDRS} ../../src/MessageQueue.h
+add_executable(unit_tests ${sources} ${headers} ../../src/MessageQueue.h
                 ../../src/DeliveryHandler.h ../../src/DataSender.h
                 ../../src/Node.h ../../src/NodeType.h
                 ../../src/Writer.h ../../src/HeartbeatSender.h
-                ../../src/DataReceiver.h ../../src/Discoverer.h ../../src/Utilities.h)
+                ../../src/DataReceiver.h ../../src/Discoverer.h ../../src/Utilities.h
+                ../../src/CommunicationMessage.proto)
+
+PROTOBUF_GENERATE(TARGET unit_tests APPEND_PATH)
 
 target_link_libraries(unit_tests PRIVATE
   lluf_utils
   lluf_id
-  ${PROTOBUF_LITE_LIBRARIES}
+  protobuf::protobuf
   ${Boost_REGEX_LIBRARY})
 
 ADD_TEST(NAME MessageQueueTest COMMAND unit_tests MessageQueueTest)

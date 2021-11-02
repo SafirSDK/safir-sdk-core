@@ -1,11 +1,8 @@
 PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS
   ../../src/RawStatisticsMessage.proto
   ../../src/SystemStateMessage.proto
-  ../../src/ElectionMessage.proto)
-
-if (MSVC)
-  SET_SOURCE_FILES_PROPERTIES(${PROTO_SRCS} PROPERTIES COMPILE_FLAGS "/wd4127 /wd4244 /wd4267 /wd4018 /wd4512")
-endif()
+  ../../src/ElectionMessage.proto
+  APPEND_PATH)
 
 #Most of the tests in here need the generated protobuf headers
 #and all need the SystemPicture headers
@@ -34,62 +31,67 @@ ADD_EXECUTABLE(Coordinator_test Coordinator_test.cpp ../../src/RawStatistics.cpp
 TARGET_LINK_LIBRARIES(RawStatistics_test PRIVATE
   lluf_utils
   ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
-  ${PROTOBUF_LITE_LIBRARIES})
+  protobuf::protobuf)
 
 TARGET_LINK_LIBRARIES(SystemState_test PRIVATE
   lluf_utils
   ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
-  ${PROTOBUF_LITE_LIBRARIES})
+  protobuf::protobuf)
 
 TARGET_LINK_LIBRARIES(RawPublisherLocal_test PRIVATE
   lluf_utils
-  ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+  ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+  protobuf::protobuf)
 
 TARGET_LINK_LIBRARIES(RawPublisherRemote_test PRIVATE
   communication
   lluf_utils
   lluf_id
   ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
-  ${PROTOBUF_LITE_LIBRARIES})
+  protobuf::protobuf)
 
 TARGET_LINK_LIBRARIES(StatePublisherLocal_test PRIVATE
   lluf_utils
-  ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+  ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+  protobuf::protobuf)
 
 TARGET_LINK_LIBRARIES(StatePublisherRemote_test PRIVATE
   communication
   lluf_utils
   lluf_id
-  ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+  ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+  protobuf::protobuf)
 
 TARGET_LINK_LIBRARIES(LocalSubscriber_test PRIVATE
   lluf_utils
   ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
-  ${PROTOBUF_LITE_LIBRARIES})
+  protobuf::protobuf)
 
 TARGET_LINK_LIBRARIES(RemoteSubscriber_test PRIVATE
   lluf_id
   lluf_utils
-  ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+  ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+  protobuf::protobuf)
 
 TARGET_LINK_LIBRARIES(RawHandler_test PRIVATE
   lluf_utils
   ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
-  ${PROTOBUF_LITE_LIBRARIES})
+  protobuf::protobuf)
 
 TARGET_LINK_LIBRARIES(RawChanges_test PRIVATE
-  ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+  ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+  protobuf::protobuf)
 
 TARGET_LINK_LIBRARIES(ElectionHandler_test PRIVATE
   lluf_utils
   lluf_id
   ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
-  ${PROTOBUF_LITE_LIBRARIES})
+  protobuf::protobuf)
 
 TARGET_LINK_LIBRARIES(Coordinator_test PRIVATE
   lluf_utils
   ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
-  ${PROTOBUF_LITE_LIBRARIES})
+  protobuf::protobuf)
 
 add_test(NAME RawStatistics_test COMMAND RawStatistics_test)
 SET_SAFIR_TEST_PROPERTIES(TEST RawStatistics_test)

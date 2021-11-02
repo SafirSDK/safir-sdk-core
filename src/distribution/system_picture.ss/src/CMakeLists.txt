@@ -5,16 +5,15 @@ SET(sources
   SystemState.cpp
   )
 
-PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS
+
+add_library(system_picture SHARED ${sources} ${headers}
   RawStatisticsMessage.proto
   SystemStateMessage.proto
   ElectionMessage.proto)
 
-if (MSVC)
-  SET_SOURCE_FILES_PROPERTIES(${PROTO_SRCS} PROPERTIES COMPILE_FLAGS "/wd4127 /wd4244 /wd4267 /wd4018 /wd4512")
-endif()
 
-add_library(system_picture SHARED ${sources} ${headers} ${PROTO_SRCS} ${PROTO_HDRS})
+PROTOBUF_GENERATE(TARGET system_picture)
+
 
 #Make the generated protobuf headers available for us to include inside system_picture
 target_include_directories(system_picture PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
@@ -25,7 +24,7 @@ target_include_directories(system_picture PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRE
 TARGET_LINK_LIBRARIES(system_picture PRIVATE
   lluf_utils
   lluf_id
-  ${PROTOBUF_LITE_LIBRARIES}
+  protobuf::protobuf
 
   PUBLIC
   $<BUILD_INTERFACE:communication>)

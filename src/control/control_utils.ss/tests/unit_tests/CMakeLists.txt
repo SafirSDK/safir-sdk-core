@@ -5,11 +5,7 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR} ../../src/include)
 ADD_SUBDIRECTORY(Config_test)
 
 PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS
-  ../../src/DoseMainCommands.proto ../../src/ControlCommands.proto ../../src/ControlInfo.proto)
-
-if (MSVC)
-  SET_SOURCE_FILES_PROPERTIES(${PROTO_SRCS} PROPERTIES COMPILE_FLAGS "/wd4127 /wd4244 /wd4267 /wd4018 /wd4512")
-endif()
+  ../../src/DoseMainCommands.proto ../../src/ControlCommands.proto ../../src/ControlInfo.proto APPEND_PATH)
 
 #Need to define this to not get inconsistent dll linkage on windows.
 #no test is meant to actually link the control_utils library, so we can do this.
@@ -23,19 +19,19 @@ TARGET_LINK_LIBRARIES(DoseMainCmd_test PRIVATE
   control_utils
   lluf_utils
   ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
-  ${PROTOBUF_LITE_LIBRARIES})
+  protobuf::protobuf)
 
 TARGET_LINK_LIBRARIES(ControlCmd_test PRIVATE
   control_utils
   lluf_utils
   ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
-  ${PROTOBUF_LITE_LIBRARIES})
+  protobuf::protobuf)
 
 TARGET_LINK_LIBRARIES(ControlInfo_test PRIVATE
   control_utils
   lluf_utils
   ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
-  ${PROTOBUF_LITE_LIBRARIES})
+  protobuf::protobuf)
 
 ADD_TEST(NAME DoseMainCmd_test COMMAND DoseMainCmd_test)
 SET_SAFIR_TEST_PROPERTIES(TEST DoseMainCmd_test TIMEOUT 240)

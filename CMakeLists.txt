@@ -20,10 +20,14 @@ conan_cmake_configure(
     breakpad/cci.20210521
     websocketpp/0.8.2@user/stable
     rapidjson/cci.20200410
+    protobuf/3.17.1
   OPTIONS
     websocketpp:asio=none
     websocketpp:openssl=False
     websocketpp:zlib=False
+    protobuf:lite=True
+    protobuf:shared=True
+    protobuf:with_zlib=False
   GENERATORS
     cmake_find_package)
 
