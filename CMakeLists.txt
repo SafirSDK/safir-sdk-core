@@ -26,7 +26,7 @@ conan_cmake_configure(
     websocketpp:openssl=False
     websocketpp:zlib=False
     protobuf:lite=True
-    protobuf:shared=True
+    protobuf:shared=False
     protobuf:with_zlib=False
   GENERATORS
     cmake_find_package)
