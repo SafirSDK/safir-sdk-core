@@ -53,7 +53,7 @@ else()
     endif()
     EXECUTE_PROCESS(COMMAND ${MONO_RUNTIME} --version
       OUTPUT_VARIABLE version_output)
-    STRING(REGEX MATCH "Mono JIT compiler version [0-9]+\\.[0-9]+\\.[0-9]+ \\(" version ${version_output})
+    STRING(REGEX MATCH "Mono JIT compiler version [0-9]+\\.[0-9]+\\.[0-9]+(\\.[0-9]+)? \\(" version ${version_output})
     STRING(REPLACE "Mono JIT compiler version " "" version ${version})
     STRING(REPLACE " (" "" version ${version})
     if (version VERSION_LESS "4.0" AND ${version_output} MATCHES "Architecture:.*armel")
