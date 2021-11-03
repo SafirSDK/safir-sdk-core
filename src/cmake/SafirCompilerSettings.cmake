@@ -1,6 +1,6 @@
 #This file sets up some of the compiler flags we want for GCC and MSVC.
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 17)
 
 if (UNIX)
 

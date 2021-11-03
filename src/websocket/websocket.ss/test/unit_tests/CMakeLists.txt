@@ -20,8 +20,5 @@ target_link_libraries(safir_websocket_unittests PRIVATE
     RapidJSON::RapidJSON
     websocketpp::websocketpp)
 
-
-set_property(TARGET safir_websocket_unittests PROPERTY CXX_STANDARD 17)
-
 add_test(NAME WebsocketUnitTests COMMAND safir_websocket_unittests)
 SET_SAFIR_TEST_PROPERTIES(TEST WebsocketUnitTests TIMEOUT 360)

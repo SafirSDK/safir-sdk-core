@@ -12,6 +12,4 @@ target_link_libraries(safir_websocket PRIVATE
   RapidJSON::RapidJSON
   websocketpp::websocketpp)
 
-set_property(TARGET safir_websocket PROPERTY CXX_STANDARD 17)
-
 SAFIR_INSTALL(TARGETS safir_websocket)

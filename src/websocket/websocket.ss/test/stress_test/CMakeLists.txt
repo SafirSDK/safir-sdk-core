@@ -12,7 +12,6 @@ target_link_libraries(safir_websocket_stresstest  PRIVATE
     ${Boost_THREAD_LIBRARY}
     ${Boost_SYSTEM_LIBRARY})
 
-set_property(TARGET safir_websocket_stresstest PROPERTY CXX_STANDARD 17)
 get_property(SAFIR_GENERATED_PATHS GLOBAL PROPERTY SAFIR_GENERATED_PATHS)
 
 ADD_TEST(NAME websocket_stress_test
