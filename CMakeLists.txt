@@ -33,10 +33,14 @@ conan_cmake_configure(
 
 conan_cmake_autodetect(settings)
 
+conan_add_remote(NAME conancenter
+                 INDEX 1
+                 URL https://center.conan.io
+                 VERIFY_SSL True)
 
 conan_cmake_install(PATH_OR_REFERENCE .
                     BUILD missing
-                    REMOTE conan-center
+                    REMOTE conancenter
                     SETTINGS ${settings})
 
 #Set up the Safir SDK Core version by parsing version.txt
