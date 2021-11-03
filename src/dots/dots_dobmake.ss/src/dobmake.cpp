@@ -127,11 +127,16 @@ QString Dobmake::GetDobmakeBatchScript()
 #endif
 
     const QString pathenv = QProcessEnvironment::systemEnvironment().value("PATH");
-    const QStringList paths = pathenv.split(separator,Qt::SkipEmptyParts);
+    const QStringList paths = pathenv.split(separator);
 
     for (QStringList::const_iterator it = paths.begin();
          it != paths.end(); ++it)
     {
+        if (it->isEmpty())
+        {
+            continue;
+        }
+
         QFile f(*it + QDir::separator() + "dobmake-batch" + scriptSuffix);
         if (f.exists())
         {
