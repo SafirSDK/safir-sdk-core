@@ -340,8 +340,6 @@ namespace ToolSupport
     {
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
-            using namespace std::placeholders; //for _1, _2 etc
-            
             MemberDescriptionLocalPtr def=boost::make_shared<MemberDescriptionLocal>();
             try
             {
@@ -361,7 +359,7 @@ namespace ToolSupport
             //check for duplicates
             if (std::find_if(state.lastInsertedClass->members.begin(),
                              state.lastInsertedClass->members.end(),
-                             std::bind(NameComparerPtr<MemberDescriptionLocalPtr>, _1, def->name))
+                             [def](const auto& cls){return NameComparerPtr(cls, def->name);})
                 !=state.lastInsertedClass->members.end())
             {
                 std::ostringstream os;
@@ -694,8 +692,6 @@ namespace ToolSupport
     {
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
-            using namespace std::placeholders; //for _1, _2 etc
-            
             ParameterDescriptionLocalPtr def=boost::make_shared<ParameterDescriptionLocal>();
 
             //Check parameter name
@@ -706,7 +702,7 @@ namespace ToolSupport
                 std::vector<ParameterDescriptionLocalPtr>::const_iterator found =
                     std::find_if(state.lastInsertedClass->ownParameters.begin(),
                                  state.lastInsertedClass->ownParameters.end(),
-                                 std::bind(NameComparerPtr<ParameterDescriptionLocalPtr>, _1, def->name));
+                                 [def](const auto& cls){return NameComparerPtr(cls, def->name);});
                 if (found!=state.lastInsertedClass->ownParameters.end())
                 {
                     std::ostringstream os;
@@ -1016,8 +1012,6 @@ namespace ToolSupport
     {
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
-            using namespace std::placeholders; //for _1, _2 etc
-
             MemberDescriptionLocalPtr def=boost::make_shared<MemberDescriptionLocal>();
 
             try
@@ -1039,7 +1033,7 @@ namespace ToolSupport
 
             if (std::find_if(state.lastInsertedProperty->members.begin(),
                              state.lastInsertedProperty->members.end(),
-                             std::bind(NameComparerPtr<MemberDescriptionLocalPtr>, _1, def->name))!=
+                             [def](const auto& cls){return NameComparerPtr(cls, def->name);}) !=
                 state.lastInsertedProperty->members.end())
             {
                 throw ParseError("Duplicated property member", def->name+" is defined more than one time in property "+state.lastInsertedProperty->name, state.currentPath, 69);
