@@ -20,7 +20,7 @@ else()
 endif()
 
 ADD_TEST(NAME restart_nodes
-  COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py
+  COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py
   --owner $<TARGET_FILE:WaitingStatesOwner>
   --dobexplorer $<TARGET_FILE:dobexplorer>
   --safir-control $<TARGET_FILE:safir_control>

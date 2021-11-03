@@ -9,7 +9,7 @@ ADD_JAR(log_sender_java
   MANIFEST ${CMAKE_CURRENT_SOURCE_DIR}/Manifest.txt)
 
 ADD_TEST(NAME logging_java
-  COMMAND ${PYTHON_EXECUTABLE}
+  COMMAND ${Python3_EXECUTABLE}
   ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py
   --jar $<TARGET_PROPERTY:log_sender_java,JAR_FILE>
   --safir-show-config $<TARGET_FILE:safir_show_config>

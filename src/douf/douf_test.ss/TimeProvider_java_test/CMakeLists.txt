@@ -9,7 +9,7 @@ ADD_JAR(douf_test_java
   MANIFEST ${CMAKE_CURRENT_SOURCE_DIR}/Manifest.txt)
 
 ADD_TEST(NAME TimeProvider_java_test
-  COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py
+  COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py
   --jar $<TARGET_PROPERTY:douf_test_java,JAR_FILE>
   --dependencies $<TARGET_PROPERTY:douf_java,JAR_FILE>,$<TARGET_PROPERTY:dots_java,JAR_FILE>)
 

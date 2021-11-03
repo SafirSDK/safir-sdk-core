@@ -369,9 +369,9 @@ include(SafirLoadJava)
 #
 # Set up Python
 #
-FIND_PACKAGE(PythonInterp)
-if(PYTHON_VERSION_STRING VERSION_LESS "2.7")
-  message(FATAL_ERROR "Need Python version 2.7 or greater. Sorry.")
+FIND_PACKAGE(Python3 COMPONENTS Interpreter)
+if(Python3_VERSION VERSION_LESS "3.2")
+  message(FATAL_ERROR "Need Python version 3.2 or greater. Sorry.")
 endif()
 
 #

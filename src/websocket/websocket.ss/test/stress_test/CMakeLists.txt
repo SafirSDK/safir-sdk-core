@@ -15,7 +15,7 @@ target_link_libraries(safir_websocket_stresstest  PRIVATE
 get_property(SAFIR_GENERATED_PATHS GLOBAL PROPERTY SAFIR_GENERATED_PATHS)
 
 ADD_TEST(NAME websocket_stress_test
-  COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py
+  COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py
   --safir-websocket $<TARGET_FILE:safir_websocket>
   --websocket-stresstest $<TARGET_FILE:safir_websocket_stresstest>
   --safir-control $<TARGET_FILE:safir_control>

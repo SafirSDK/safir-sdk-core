@@ -21,7 +21,7 @@ TARGET_LINK_LIBRARIES (DynamicLibraryLoader_test3 PRIVATE lluf_utils)
 TARGET_LINK_LIBRARIES (DynamicLibraryLoader_test4 PRIVATE lluf_utils)
 
 ADD_TEST(NAME DynamicLibraryLoader
-  COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py
+  COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py
   --test-exe-1 $<TARGET_FILE:DynamicLibraryLoader_test1>
   --test-exe-2 $<TARGET_FILE:DynamicLibraryLoader_test2>
   --test-exe-3 $<TARGET_FILE:DynamicLibraryLoader_test3>

@@ -195,7 +195,7 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
     endif()
   endforeach()
 
-  FIND_PACKAGE(PythonInterp)
+  FIND_PACKAGE(Python3 COMPONENTS Interpreter)
 
   if (SAFIR_EXTERNAL_BUILD)
     #on linux we install the dots_v script without the extension, so we have to mess about a bit here
@@ -211,7 +211,7 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
   endif()
 
   FILE(GLOB dod_files ${dod_directory}*.dod)
-  SET(dots_v_command ${PYTHON_EXECUTABLE} ${dots_v_path})
+  SET(dots_v_command ${Python3_EXECUTABLE} ${dots_v_path})
   SET(dots_v_arguments
     --dod-files ${dod_files}
     --dou-files ${_gen_DOU_FILES}
