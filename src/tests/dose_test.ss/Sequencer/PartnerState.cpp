@@ -103,7 +103,10 @@ PartnerState::IsActive() const
 void
 PartnerState::Reset()
 {
-    std::for_each(m_partnerInfoTable.begin(),m_partnerInfoTable.end(),std::bind(&PartnerInfo::SetReady,_1,false));
+    std::for_each(m_partnerInfoTable.begin(),
+                  m_partnerInfoTable.end(),
+                  [](auto& partner){partner.SetReady(false);});
+
     m_stateChangedCallback();
 
     

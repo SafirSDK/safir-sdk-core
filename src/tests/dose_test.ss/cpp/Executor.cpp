@@ -57,9 +57,9 @@ Executor::Executor(const std::vector<std::string> & commandLine):
     m_isDone(false),
     m_isActive(false),
     m_dispatchTestConnection(true),
-    m_testDispatcher(std::bind(&Executor::DispatchTestConnection,this), m_ioService),
-    m_controlDispatcher(std::bind(&Executor::DispatchControlConnection,this), m_ioService),
-    m_actionReceiver(m_ioService, std::bind(&Executor::HandleAction,this,_1),m_instance),
+    m_testDispatcher([this]{DispatchTestConnection();}, m_ioService),
+    m_controlDispatcher([this]{DispatchControlConnection();}, m_ioService),
+    m_actionReceiver(m_ioService, [this](const auto& action){HandleAction(action);},m_instance),
     m_callbackActions(Safir::Dob::CallbackId::Size()),
     m_defaultContext(0)
 {
@@ -170,7 +170,8 @@ Executor::ExecuteAction(DoseTest::ActionPtr action)
                 newConsumers.clear();
 
                 std::wcout << "Clearing callback actions" << std::endl;
-                std::for_each(m_callbackActions.begin(),m_callbackActions.end(),std::bind(&Actions::clear,_1));
+                std::for_each(m_callbackActions.begin(),m_callbackActions.end(),
+                              [](auto& action){action.clear();});
             }
             std::wcout << "Reset complete" << std::endl;
         }
@@ -225,7 +226,8 @@ Executor::ExecuteAction(DoseTest::ActionPtr action)
 
     case DoseTest::ActionEnum::ResetCallbackActions:
         {
-            std::for_each(m_callbackActions.begin(),m_callbackActions.end(),std::bind(&Actions::clear,_1));
+            std::for_each(m_callbackActions.begin(),m_callbackActions.end(),
+                          [](auto& action){action.clear();});
         }
         break;
 
@@ -312,7 +314,9 @@ void Executor::DispatchTestConnection()
         try
         {
             ExecuteCallbackActions(Safir::Dob::CallbackId::OnDoDispatch);
-            std::for_each(m_consumers.begin(),m_consumers.end(), std::bind(&Consumer::ExecuteCallbackActions,_1,Safir::Dob::CallbackId::OnDoDispatch));
+            std::for_each(m_consumers.begin(),m_consumers.end(),
+                          [](const auto& consumer)
+                          {consumer->ExecuteCallbackActions(Safir::Dob::CallbackId::OnDoDispatch);});
 
             m_testConnection.Dispatch();
         }

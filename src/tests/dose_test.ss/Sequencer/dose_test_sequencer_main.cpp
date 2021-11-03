@@ -68,7 +68,7 @@ public:
         , m_ioService(ioService)
     {}
 private:
-    void OnDoDispatch() override {m_ioService.post(std::bind(&Dispatcher::Dispatch,this));}
+    void OnDoDispatch() override {m_ioService.post([this]{Dispatch();});}
     void Dispatch(){m_connection.Dispatch();}
 
     Safir::Dob::Connection & m_connection;

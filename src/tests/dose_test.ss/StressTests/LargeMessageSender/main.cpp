@@ -49,7 +49,8 @@ public:
 #endif
     explicit App(std::wstring name):
         m_dispatcher(connection,m_ioService),
-        m_sender(CommandLine::Instance().Count(), CommandLine::Instance().Timeout(), std::bind(&App::FinishedCallback,this))
+        m_sender(CommandLine::Instance().Count(), CommandLine::Instance().Timeout(),
+                 [this]{FinishedCallback();})
     {
         for(int instance = 0;;++instance)
         {

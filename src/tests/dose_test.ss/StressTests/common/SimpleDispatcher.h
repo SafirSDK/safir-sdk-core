@@ -86,7 +86,7 @@ public:
         const boost::chrono::milliseconds delay(milliseconds);
 
         boost::unique_lock<boost::mutex> lock(m_mutex);
-        const bool res = m_condition.wait_for(lock,delay,std::bind(&SimpleDispatcher::DispatchPending,this));
+        const bool res = m_condition.wait_for(lock,delay,[this]{return DispatchPending();});
         m_dispatch = false;
         return res;
     }

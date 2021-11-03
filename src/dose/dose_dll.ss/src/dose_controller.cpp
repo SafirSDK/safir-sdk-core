@@ -78,7 +78,6 @@
 
 #include <iostream>
 
-using namespace std;
 using namespace std::placeholders;
 
 namespace Safir
@@ -255,10 +254,8 @@ namespace Internal
                 std::wostringstream ostr;
                 ostr << "Failed to open connection! The connection name '" << m_connectionName.c_str()
                      << "' is already in use. While opening connection from process with pid = " << Safir::Utilities::ProcessInfo::GetPid();
-                m_consumerReferences.DropAllReferences(std::bind(&Dispatcher::InvokeDropReferenceCb,
-                                                                   m_dispatcher,
-                                                                   _1,
-                                                                   _2));
+                m_consumerReferences.DropAllReferences([this](const ConsumerId& consumer, const long refCounter)
+                                                          {m_dispatcher.InvokeDropReferenceCb(consumer,refCounter);});
                 throw Safir::Dob::NotOpenException(ostr.str(), __WFILE__,__LINE__);
             }
             break;
@@ -368,10 +365,8 @@ namespace Internal
 
         // Drop any reference corresponding to a saved consumer (will be saved for
         // garbage collected languages only).
-        m_consumerReferences.DropAllReferences(std::bind(&Dispatcher::InvokeDropReferenceCb,
-                                                           m_dispatcher,
-                                                           _1,
-                                                           _2));
+        m_consumerReferences.DropAllReferences([this](const ConsumerId& consumer, const long refCounter)
+                                                 {m_dispatcher.InvokeDropReferenceCb(consumer,refCounter);});
     }
 
     const char*
@@ -558,12 +553,11 @@ namespace Internal
         // Since UnregisterHandler doesn't have a consumer parameter, we don't know which language
         // we are dealing with. However, it is ok to call the check routine anyway, a non GC language
         // just won't have any references.
-        m_consumerReferences.DropAllHandlerRegistrationReferences(typeId,
-                                                                  handlerId,
-                                                                  std::bind(&Dispatcher::InvokeDropReferenceCb,
-                                                                              m_dispatcher,
-                                                                              _1,
-                                                                              _2));
+        m_consumerReferences.DropAllHandlerRegistrationReferences
+            (typeId,
+             handlerId,
+             [this](const ConsumerId& consumer, const long refCounter)
+               {m_dispatcher.InvokeDropReferenceCb(consumer,refCounter);});
     }
 
     //----------------------------
@@ -633,12 +627,11 @@ namespace Internal
         // For garbage collected languages check if the consumer is used in any message subscription.
         if (g_garbageCollected[messageSubscriber.lang])
         {
-            m_consumerReferences.DropMessageSubscriptionReferences(m_connection,
-                                                                   messageSubscriber,
-                                                                   std::bind(&Dispatcher::InvokeDropReferenceCb,
-                                                                               m_dispatcher,
-                                                                               _1,
-                                                                               _2));
+            m_consumerReferences.DropMessageSubscriptionReferences
+                (m_connection,
+                 messageSubscriber,
+                 [this](const ConsumerId& consumer, const long refCounter)
+                    {m_dispatcher.InvokeDropReferenceCb(consumer,refCounter);});
         }
     }
 
@@ -724,12 +717,11 @@ namespace Internal
         // For garbage collected languages check if the consumer is used in any entity subscription.
         if (g_garbageCollected[consumer.lang])
         {
-            m_consumerReferences.DropEntitySubscriptionReferences(m_connection,
-                                                                  consumer,
-                                                                  std::bind(&Dispatcher::InvokeDropReferenceCb,
-                                                                              m_dispatcher,
-                                                                              _1,
-                                                                              _2));
+            m_consumerReferences.DropEntitySubscriptionReferences
+                (m_connection,
+                 consumer,
+                 [this](const ConsumerId& consumer, const long refCounter)
+                   {m_dispatcher.InvokeDropReferenceCb(consumer,refCounter);});
         }
     }
 
@@ -817,12 +809,11 @@ namespace Internal
             // For garbage collected languages check if the consumer is used in any registration subscription.
             if (g_garbageCollected[consumer.lang])
             {
-                m_consumerReferences.DropEntityRegistrationSubscriptionReferences(m_connection,
-                                                                                  consumer,
-                                                                                  std::bind(&Dispatcher::InvokeDropReferenceCb,
-                                                                                              m_dispatcher,
-                                                                                              _1,
-                                                                                              _2));
+                m_consumerReferences.DropEntityRegistrationSubscriptionReferences
+                    (m_connection,
+                     consumer,
+                     [this](const ConsumerId& consumer, const long refCounter)
+                       {m_dispatcher.InvokeDropReferenceCb(consumer,refCounter);});
             }
         }
         else if (Dob::Typesystem::Operations::IsOfType(typeId, Dob::Service::ClassTypeId))
@@ -836,12 +827,11 @@ namespace Internal
             // For garbage collected languages check if the consumer is used in any registration subscription.
             if (g_garbageCollected[consumer.lang])
             {
-                m_consumerReferences.DropServiceRegistrationSubscriptionReferences(m_connection,
-                                                                                   consumer,
-                                                                                   std::bind(&Dispatcher::InvokeDropReferenceCb,
-                                                                                                m_dispatcher,
-                                                                                                _1,
-                                                                                                _2));
+                m_consumerReferences.DropServiceRegistrationSubscriptionReferences
+                    (m_connection,
+                     consumer,
+                     [this](const ConsumerId& consumer, const long refCounter)
+                     {m_dispatcher.InvokeDropReferenceCb(consumer,refCounter);});
             }
         }
         else
@@ -1379,8 +1369,10 @@ namespace Internal
             throw Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
         }
 
-        m_connection->ForSpecificRequestInQueue(consumer,
-            std::bind(&RequestInQueue::AttachResponse,_2,responseId,m_connection->Id(),blob));
+        m_connection->ForSpecificRequestInQueue
+            (consumer,
+             [this,responseId,blob](const ConsumerId& /*consumer*/, auto& queue)
+             {queue.AttachResponse(responseId,m_connection->Id(),blob);});
 
         m_connection->SignalOut();
     }
@@ -1680,15 +1672,18 @@ namespace Internal
 
     void Controller::DispatchRequestInQueue(const ConsumerId& consumer, RequestInQueue & queue)
     {
-        queue.DispatchRequests(std::bind(&Controller::DispatchRequest,this,boost::cref(consumer),_1,_2,_3),
-                               std::bind(&Connection::SignalOut,m_connection.get().get()));
+        queue.DispatchRequests
+            ([this,&consumer](const DistributionData& request, bool& exitDispatch, bool& postpone)
+               {DispatchRequest(consumer,request,exitDispatch,postpone);},
+             [this]{m_connection->SignalOut();});
     }
 
 
     void Controller::DispatchRequestInQueues()
     {
         lllout << "Dispatching all RequestInQueues" << std::endl;
-        m_connection->ForEachRequestInQueue(std::bind(&Controller::DispatchRequestInQueue,this,_1,_2));
+        m_connection->ForEachRequestInQueue([this](const ConsumerId& consumer, auto& queue)
+                                              {DispatchRequestInQueue(consumer,queue);});
     }
 
     void Controller::DispatchResponse(const DistributionData & response,
@@ -1702,7 +1697,11 @@ namespace Internal
     void Controller::DispatchResponseInQueue()
     {
         lllout << "Dispatching ResponseInQueue" << std::endl;
-        m_connection->GetRequestOutQueue().DispatchResponses(std::bind(&Controller::DispatchResponse,this,_1,_2,_3));
+        m_connection->GetRequestOutQueue().DispatchResponses
+            ([this](const DistributionData& response,
+                    const DistributionData& request,
+                    bool& exitDispatch)
+            {DispatchResponse(response,request,exitDispatch);});
     }
 
     void Controller::DispatchMessage(const ConsumerId& consumer, const DistributionData& msg, bool& exitDispatch, bool& dontRemove)
@@ -1733,12 +1732,15 @@ namespace Internal
 
     void Controller::DispatchMessageInQueue(const ConsumerId& consumer, MessageQueue& queue)
     {
-        queue.Dispatch(std::bind(&Controller::DispatchMessage,this,boost::cref(consumer),_1,_2,_3),NULL);
+        queue.Dispatch([this,&consumer](const DistributionData& msg, bool& exitDispatch, bool& dontRemove)
+                          {DispatchMessage(consumer,msg,exitDispatch,dontRemove);}, nullptr);
     }
 
     void Controller::DispatchMessageInQueues()
     {
-        m_connection->ForEachMessageInQueue(std::bind(&Controller::DispatchMessageInQueue,this,_1,_2));
+        m_connection->ForEachMessageInQueue
+            ([this](const ConsumerId& consumer, auto& queue)
+              {DispatchMessageInQueue(consumer, queue);});
     }
 
     bool ProcessHasBeenDeleted(bool & unreg, bool & reg)
@@ -1772,7 +1774,8 @@ namespace Internal
         {
             // Both last and current state is 'registered', but can it be that there has
             // been a unregister->register?
-            subscription->HasBeenDeletedFlag().Process(std::bind(ProcessHasBeenDeleted,boost::ref(unreg), boost::ref(reg)));
+            subscription->HasBeenDeletedFlag().Process
+                ([&unreg,&reg]{return ProcessHasBeenDeleted(unreg,reg);});
         }
     }
 
@@ -1818,10 +1821,9 @@ namespace Internal
             return;
         }
 
-        subscription->DirtyFlag().Process(std::bind(&Controller::ProcessRegistrationSubscription,
-                                                      this,
-                                                      boost::cref(subscription),
-                                                      boost::ref(exitDispatch)));
+        subscription->DirtyFlag().Process
+            ([this,&subscription,&exitDispatch]
+              {return ProcessRegistrationSubscription(subscription,exitDispatch);});
     }
 
     namespace //anonymous namespace to avoid possible name collisions
@@ -2128,21 +2130,17 @@ namespace Internal
         {
             case InjectionSubscription:
             {
-                subscription->DirtyFlag().Process(std::bind(&Controller::ProcessInjectionSubscription,
-                                                              this,
-                                                              boost::cref(subscription),
-                                                              boost::ref(exitDispatch),
-                                                              boost::ref(dontRemove)));
+                subscription->DirtyFlag().Process
+                    ([this,&subscription,&exitDispatch,&dontRemove]
+                      {return ProcessInjectionSubscription(subscription,exitDispatch,dontRemove);});
             }
             break;
 
             case EntitySubscription:
             {
-                subscription->DirtyFlag().Process(std::bind(&Controller::ProcessEntitySubscription,
-                                                              this,
-                                                              boost::cref(subscription),
-                                                              boost::ref(exitDispatch),
-                                                              boost::ref(dontRemove)));
+                subscription->DirtyFlag().Process
+                    ([this,&subscription,&exitDispatch,&dontRemove]
+                        {return ProcessEntitySubscription(subscription,exitDispatch,dontRemove);});
             }
             break;
 
@@ -2182,7 +2180,8 @@ namespace Internal
     void Controller::DispatchSubscriptions()
     {
         m_connection->GetDirtySubscriptionQueue().Dispatch
-                            (std::bind(&Controller::DispatchSubscription, this, _1, _2, _3));
+            ([this](const SubscriptionPtr& subscription, bool& exitDispatch, bool& dontRemove)
+            {DispatchSubscription(subscription,exitDispatch,dontRemove);});
     }
 
     Controller::InjectionData Controller::CreateInjectionData(const SubscriptionPtr& subscription)
@@ -2714,14 +2713,13 @@ namespace Internal
            // For garbage collected languages the references related to the revoked registration must be dropped.
             if (nbrOfRef > 0)
             {
-                m_consumerReferences.DropHandlerRegistrationReferences(it->typeId,
-                                                                       it->handlerId,
-                                                                       it->consumer,
-                                                                       nbrOfRef,
-                                                                       std::bind(&Dispatcher::InvokeDropReferenceCb,
-                                                                                   m_dispatcher,
-                                                                                   _1,
-                                                                                   _2));
+                m_consumerReferences.DropHandlerRegistrationReferences
+                    (it->typeId,
+                     it->handlerId,
+                     it->consumer,
+                     nbrOfRef,
+                     [this](const ConsumerId& consumer, const long refCounter)
+                       {m_dispatcher.InvokeDropReferenceCb(consumer,refCounter);});
             }
         }
     }

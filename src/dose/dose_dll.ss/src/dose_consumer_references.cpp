@@ -29,8 +29,6 @@
 #include <Safir/Dob/Internal/ServiceTypes.h>
 #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
 
-using namespace std::placeholders;
-
 namespace Safir
 {
 namespace Dob
@@ -174,9 +172,10 @@ namespace Internal
                                    dropReferencesFunc,
                                    MessageSubscription,
                                    m_messageSubscriptionCounters,
-                                   std::bind(&MessageTypes::HasSubscription,
-                                               &MessageTypes::Instance(),
-                                               _1, _2, _3));
+                                   [](const ConnectionPtr& connection,
+                                      const ConsumerId& consumer,
+                                      const Dob::Typesystem::TypeId typeId)
+                                   {return MessageTypes::Instance().HasSubscription(connection,consumer,typeId);});
     }
 
     bool ConsumerReferences::HasMessageSubscriptionReference(const ConsumerId& consumer) const
@@ -198,9 +197,10 @@ namespace Internal
                                    dropReferencesFunc,
                                    EntitySubscription,
                                    m_entitySubscriptionCounters,
-                                   std::bind(&EntityTypes::HasEntitySubscription,
-                                               &EntityTypes::Instance(),
-                                               _1, _2, _3));
+                                   [](const ConnectionPtr& connection,
+                                      const ConsumerId& consumer,
+                                      const Dob::Typesystem::TypeId typeId)
+                                   {return EntityTypes::Instance().HasEntitySubscription(connection,consumer,typeId);});
     }
 
     bool ConsumerReferences::HasEntitySubscriptionReference(const ConsumerId& consumer) const
@@ -222,9 +222,10 @@ namespace Internal
                                    dropReferencesFunc,
                                    EntityRegistrationSubscription,
                                    m_entityRegistrationSubscriptionCounters,
-                                   std::bind(&EntityTypes::HasRegistrationSubscription,
-                                               &EntityTypes::Instance(),
-                                               _1, _2, _3));
+                                   [](const ConnectionPtr& connection,
+                                      const ConsumerId& consumer,
+                                      const Dob::Typesystem::TypeId typeId)
+                                   {return EntityTypes::Instance().HasRegistrationSubscription(connection,consumer,typeId);});
     }
 
     bool ConsumerReferences::HasEntityRegistrationSubscriptionReference(const ConsumerId& consumer) const
@@ -246,9 +247,10 @@ namespace Internal
                                    dropReferencesFunc,
                                    ServiceRegistrationSubscription,
                                    m_serviceRegistrationSubscriptionCounters,
-                                   std::bind(&ServiceTypes::HasRegistrationSubscription,
-                                               &ServiceTypes::Instance(),
-                                               _1, _2, _3));
+                                   [](const ConnectionPtr& connection,
+                                      const ConsumerId& consumer,
+                                      const Dob::Typesystem::TypeId typeId)
+                                   {return ServiceTypes::Instance().HasRegistrationSubscription(connection,consumer,typeId);});
     }
 
     bool ConsumerReferences::HasServiceRegistrationSubscriptionReference(const ConsumerId& consumer) const

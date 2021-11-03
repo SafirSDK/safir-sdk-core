@@ -65,7 +65,7 @@ private:
         if (m_isNotified == 0)
         {
             m_isNotified = 1;
-            m_ioService.post(std::bind(&Dispatcher::Dispatch,this));
+            m_ioService.post([this]{Dispatch();});
         }
     }
     virtual void Dispatch()

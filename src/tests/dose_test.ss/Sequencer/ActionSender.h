@@ -168,7 +168,7 @@ private:
     {
         boost::asio::write(*m_sockets[which], boost::asio::buffer(&binary[0], binary.size()));
 
-        boost::thread timeout(std::bind(ActionSender::Timeout, which));
+        boost::thread timeout([which]{Timeout(which);});
 
         try
         {            

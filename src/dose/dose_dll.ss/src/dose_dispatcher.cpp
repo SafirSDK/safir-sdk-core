@@ -37,8 +37,6 @@
 #include <iostream>
 #include <boost/shared_ptr.hpp>
 
-using namespace std::placeholders;
-
 namespace Safir
 {
 namespace Dob
@@ -164,7 +162,7 @@ namespace Internal
         ConsumerIdSet overflowedConsumers;
         overflowedConsumers.swap(m_overflowedRequestConsumers);
         std::for_each(overflowedConsumers.begin(),overflowedConsumers.end(),
-            std::bind(&Dispatcher::NotRequestOverflowCb,this,_1));
+                      [this](const auto& id){NotRequestOverflowCb(id);});
     }
 
     void Dispatcher::DispatchNotMessageOverflows()
@@ -173,7 +171,7 @@ namespace Internal
         ConsumerIdSet overflowedConsumers;
         overflowedConsumers.swap(m_overflowedMessageConsumers);
         std::for_each(overflowedConsumers.begin(),overflowedConsumers.end(),
-            std::bind(&Dispatcher::NotMessageOverflowCb,this,_1));
+                      [this](const auto& id){NotMessageOverflowCb(id);});
     }
 
     //Stop order

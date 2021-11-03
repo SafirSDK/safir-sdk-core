@@ -84,7 +84,7 @@ namespace Internal
 
         //shared_from_this means that we hold on to a reference to ourselves to ensure that 
         //the object is not destroyed until the thread has ended.
-        m_thread = boost::thread(std::bind(&DispatchThread::Run, shared_from_this()));
+        m_thread = boost::thread([this_ = shared_from_this()]{this_->Run();});
 
         lllout <<"DispatchThread for connection " << m_connectionName.c_str() <<" started. ThreadId = " << m_thread.get_id() << "."<<std::endl;
     }

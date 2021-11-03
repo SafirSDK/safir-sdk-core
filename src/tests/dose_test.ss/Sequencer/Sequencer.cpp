@@ -118,7 +118,7 @@ Sequencer::Sequencer(const int startTc,
                      boost::asio::io_service& ioService):
     m_ioService(ioService),
     m_actionSender(ioService),
-    m_partnerState(languages,contextId,m_actionSender, std::bind(&Sequencer::PostTick,this)),
+    m_partnerState(languages,contextId,m_actionSender, [this]{PostTick();}),
     m_currentCaseNo(startTc),
     m_currentActionNo(0),
     m_stopTc(stopTc),
@@ -450,5 +450,5 @@ Sequencer::OnResponse(const Safir::Dob::ResponseProxy responseProxy)
 
 void Sequencer::PostTick()
 {
-    m_ioService.post(std::bind(&Sequencer::Tick,this));
+    m_ioService.post([this]{Tick();});
 }
