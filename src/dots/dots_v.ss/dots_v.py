@@ -56,7 +56,7 @@ dod_parameter_names = [\
 loglevel = 3
 
 
-class Dou(object):
+class Dou():
     def __init__(self):
         self.type = ""
         self.baseClass = ""
@@ -74,7 +74,7 @@ class Dou(object):
         self.member_name_to_type_lookup = {}
 
 
-class DouMember(object):
+class DouMember():
     def __init__(self, summary, name, type, maxLength, array, arraySize, arraySizeRef, sequence, dictionary_type):
         self.summary = summary
         self.name = name
@@ -87,7 +87,7 @@ class DouMember(object):
         self.dictionary_type = dictionary_type
 
 
-class DouCreateRoutine(object):
+class DouCreateRoutine():
     def __init__(self, summary, name, parameters, values):
         self.summary = summary
         self.name = name
@@ -95,7 +95,7 @@ class DouCreateRoutine(object):
         self.values = values
 
 
-class DouCreateRoutineParameter(object):
+class DouCreateRoutineParameter():
     def __init__(self, summary, name, type, maxLength, arraySize):
         self.summary = summary
         self.name = name
@@ -104,7 +104,7 @@ class DouCreateRoutineParameter(object):
         self.arraySize = arraySize
 
 
-class DouCreateRoutineValue(object):
+class DouCreateRoutineValue():
     def __init__(self, member, member_type, parameter, inline, parameter_index, array, arraySize):
         self.member = member
         self.member_type = member_type
@@ -115,7 +115,7 @@ class DouCreateRoutineValue(object):
         self.arraySize = arraySize
 
 
-class DouParameter(object):
+class DouParameter():
     def __init__(self, summary, name, type, array, dictionary_type):
         self.summary = summary
         self.name = name
@@ -592,7 +592,7 @@ def are_dod_parameters_complete(dod_parameters, dod_parameter_names):
     return 1
 
 
-class DodException(object):
+class DodException():
     def __init__(self, dou_name, generated, dependency):
         self.dou_name = dou_name
         self.generated = generated
@@ -618,7 +618,7 @@ def read_dod_exception(line, dod_exceptions):
     return 0
 
 
-class DodType(object):
+class DodType():
     def __init__(self, dou_name, set_get, uniform_type, generated, dependency, boxed):
         self.dou_name = dou_name
         self.set_get = set_get
@@ -1607,7 +1607,7 @@ def resolve_typesystem_dependencies(unresolved_dependencies):
 
 
 # Faster file reader, buffers all in memory (good since we loop through same file multiple times)
-class FileReader(object):
+class FileReader():
     def __init__(self, filename, preprocess):
         file = codecs.open(filename, "r", encoding="utf-8")
         self.index = 0
@@ -1752,7 +1752,7 @@ def generator_main(gSession, dod_file, dou_filename, gen_src_output_path):
     # end for
 
 
-class GeneratorSession(object):
+class GeneratorSession():
     def __init__(self):
         self.current_section = None
         self.current_generated_filename = None

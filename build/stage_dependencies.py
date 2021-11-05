@@ -82,7 +82,7 @@ def copy_tree(srcdir, dstdir):
             copy_file(srcfname, dstdir)
 
 
-class __WindowsStager(object):
+class __WindowsStager():
     def __init__(self, logger, stage):
         self.logger = logger
 

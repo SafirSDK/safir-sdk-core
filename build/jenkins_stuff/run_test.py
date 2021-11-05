@@ -23,17 +23,18 @@
 # along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-import os, glob, sys, subprocess, re, platform, argparse
-
-#try to import a package that we need for the debian installer
-#this will fail quietly on all other platforms, which is all right.
-try:
-    import apt
-except:
-    pass
+import os
+import glob
+import sys
+import subprocess
+import re
+import platform
+import argparse
+import distro
 
 
 def log(*args, **kwargs):
+    """logging function that flushes"""
     print(*args, **kwargs)
     sys.stdout.flush()
 
@@ -42,7 +43,7 @@ class SetupError(Exception):
     pass
 
 
-class WindowsInstaller(object):
+class WindowsInstaller():
     def __init__(self):
         log("JOB_NAME = ", os.environ.get("JOB_NAME"))
         #This probably won't work if running 32bit python on 64bit windows... but our build/test
@@ -194,8 +195,9 @@ class WindowsInstaller(object):
                 raise SetupError("Found unexpected directory 'include/Safir'")
 
 
-class DebianInstaller(object):
+class DebianInstaller():
     def __init__(self):
+        import apt
         self.packages = ("safir-sdk-core", "safir-sdk-core-tools", "safir-sdk-core-dev", "safir-sdk-core-testsuite")
 
     def __is_installed(self, package_name, cache=None):
@@ -398,7 +400,7 @@ def main():
         if sys.platform == "win32":
             installer = WindowsInstaller()
         elif sys.platform.startswith("linux") and \
-            platform.linux_distribution()[0] in ("debian", "Ubuntu"):
+            distro.linux_distribution()[0] in ("debian", "Ubuntu"):
             installer = DebianInstaller()
         else:
             log("Platform", sys.platform, ",", platform.linux_distribution(), " is not supported by this script")

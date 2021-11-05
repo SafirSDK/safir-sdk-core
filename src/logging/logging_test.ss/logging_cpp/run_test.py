@@ -23,9 +23,12 @@
 # along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-import subprocess, os, time, sys, argparse
+"""Run tests for logging_cpp"""
+import subprocess
+import sys
+import argparse
 import syslog_server
-from safe_print import *
+from safe_print import safe_print
 
 parser = argparse.ArgumentParser("test script for logging")
 parser.add_argument("--sender", required=True)
@@ -46,6 +49,7 @@ stdout_output = (o1 + o2 + o3)
 
 
 def fail(message):
+    """Utility function for printing errors and then exiting"""
     print("Failed! Wrong number of ", message)
     print("STDOUT OUTPUT:")
     safe_print(stdout_output)
@@ -54,28 +58,28 @@ def fail(message):
     sys.exit(1)
 
 
-if syslog_output.count(u"This is an emergency log. Bryn\u00e4s \u00e4r b\u00e4st!\u2620") != 3:
+if syslog_output.count("This is an emergency log. Bryn\u00e4s \u00e4r b\u00e4st!\u2620") != 3:
     fail("Brynas ar bast")
 
-if syslog_output.count(u"This is an alert log") != 3:
+if syslog_output.count("This is an alert log") != 3:
     fail("Alert log")
 
-if syslog_output.count(u"This is a critical log") != 3:
+if syslog_output.count("This is a critical log") != 3:
     fail("Critical log")
 
-if syslog_output.count(u"This is an error log") != 3:
+if syslog_output.count("This is an error log") != 3:
     fail("Error log")
 
-if syslog_output.count(u"This is a warning log") != 3:
+if syslog_output.count("This is a warning log") != 3:
     fail("Warning log")
 
-if syslog_output.count(u"This is a notice log") != 3:
+if syslog_output.count("This is a notice log") != 3:
     fail("Notice log")
 
-if syslog_output.count(u"This is an informational log") != 3:
+if syslog_output.count("This is an informational log") != 3:
     fail("Informational log")
 
-if syslog_output.count(u"This is a debug log") != 3:
+if syslog_output.count("This is a debug log") != 3:
     fail("Debug log")
 
 if len(stdout_output) != 0:

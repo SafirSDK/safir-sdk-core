@@ -23,6 +23,7 @@
 # along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
+"""Logging utility functions"""
 import sys
 
 
@@ -33,3 +34,4 @@ def safe_print(msg):
         print(msg)
     except UnicodeEncodeError:
         print(msg.encode("ascii", errors="replace"))
+    sys.stdout.flush()

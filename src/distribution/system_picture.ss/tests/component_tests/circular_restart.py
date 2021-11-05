@@ -123,7 +123,7 @@ def stop(proc):
         pass
 
 
-class MasterNode(object):
+class MasterNode():
     def __init__(self, args):
         if args.start != 0:
             log("Not launching master node...")
@@ -153,7 +153,7 @@ class MasterNode(object):
             self.returncode = self.node.returncode
 
 
-class SlaveNode(object):
+class SlaveNode():
     def __init__(self, args, number):
         self.number = number
         log("Launching slave node", number)
@@ -180,7 +180,7 @@ class SlaveNode(object):
         self.returncode = self.node.returncode
 
 
-class Slaves(object):
+class Slaves():
     def __init__(self, args):
         self.slaves = [SlaveNode(args, i) for i in range(args.start, args.start + args.nodes)]
         self.ok = None

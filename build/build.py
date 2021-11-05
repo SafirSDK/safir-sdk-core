@@ -23,19 +23,31 @@
 # along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-import os, glob, sys, subprocess, platform, xml.dom.minidom, re, time, shutil, argparse, codecs
+"""Build script for safir-sdk-core. Check the help to get some hints on what it can do."""
+import os
+import glob
+import sys
+import subprocess
+import platform
+import xml.dom.minidom
+import re
+import time
+import shutil
+import argparse
+import codecs
 from xml.sax.saxutils import escape
+import distro
 
 #a few constants
 known_configs = set(["Release", "Debug", "MinSizeRel", "RelWithDebInfo"])
 
 
-#our own exception for "die" fcn
 class FatalError(Exception):
-    pass
+    """our own exception for "die" fcn"""
 
 
 def die(message):
+    """Just raise an exception with a message"""
     raise FatalError(message)
 
 
@@ -47,33 +59,9 @@ def is_64_bit():
     if sys.platform.startswith("linux"):
         return platform.architecture()[0] == "64bit"
     else:
-        PROCESSOR_ARCHITECTURE = os.environ.get("PROCESSOR_ARCHITECTURE")
-        PROCESSOR_ARCHITEW6432 = os.environ.get("PROCESSOR_ARCHITEW6432")
-        return PROCESSOR_ARCHITECTURE == "AMD64" or PROCESSOR_ARCHITEW6432 == "AMD64"
-
-
-def cmake():
-    """Get the name of the cmake executable. Currently only detects the cmake3/cmake difference on
-    centos/rhel 7"""
-    if not hasattr(cmake, "cmake_executable"):
-        try:
-            subprocess.Popen(("cmake3", "--version"), stdout=subprocess.PIPE).communicate()
-            cmake.cmake_executable = "cmake3"
-        except OSError:
-            cmake.cmake_executable = "cmake"
-    return cmake.cmake_executable
-
-
-def ctest():
-    """Get the name of the ctest executable. Currently only detects the ctest3/ctest difference on
-    centos/rhel 7"""
-    if not hasattr(ctest, "ctest_executable"):
-        try:
-            subprocess.Popen(("ctest3", "--version"), stdout=subprocess.PIPE).communicate()
-            ctest.ctest_executable = "ctest3"
-        except OSError:
-            ctest.ctest_executable = "ctest"
-    return ctest.ctest_executable
+        processor_architecture = os.environ.get("PROCESSOR_ARCHITECTURE")
+        processor_architew6432 = os.environ.get("PROCESSOR_ARCHITEW6432")
+        return processor_architecture == "AMD64" or processor_architew6432 == "AMD64"
 
 
 def mkdir(newdir):
@@ -85,8 +73,7 @@ def mkdir(newdir):
     if os.path.isdir(newdir):
         pass
     elif os.path.isfile(newdir):
-        raise OSError("a file with the same name as the desired " \
-                      "dir, '%s', already exists." % newdir)
+        raise OSError(f"a file with the same name as the desired dir, '{newdir}', already exists.")
     else:
         head, tail = os.path.split(newdir)
         if head and not os.path.isdir(head):
@@ -96,14 +83,15 @@ def mkdir(newdir):
 
 
 def remove(path):
+    """Remove a file or directory recursively"""
     if not os.path.exists(path):
         return
     if os.path.isfile(path) or os.path.islink(path):
         try:
             os.remove(path)
             return
-        except Exception as e:
-            die("Failed to remove file " + path + ". Got exception " + str(e))
+        except OSError as exc:
+            die(f"Failed to remove file {path}. Got exception {str(exc)}")
 
     for name in os.listdir(path):
         if os.path.isdir(os.path.join(path, name)):
@@ -111,17 +99,17 @@ def remove(path):
         else:
             try:
                 os.remove(os.path.join(path, name))
-            except Exception as e:
-                die("Failed to remove file " + os.path.join(path, name) + ". Got exception " + str(e))
+            except OSError as exc:
+                die("Failed to remove file " + os.path.join(path, name) + ". Got exception " + str(exc))
 
     try:
         os.rmdir(path)
-    except Exception as e:
-        die("Failed to remove directory " + path + ". Got exception " + str(e))
+    except OSError as exc:
+        die("Failed to remove directory " + path + ". Got exception " + str(exc))
 
 
 def num_cpus():
-    """Detects the number of CPUs on a system. Cribbed from pp."""
+    """Detects the number of CPUs on a system."""
     # Linux, Unix and MacOS:
     if hasattr(os, "sysconf"):
         if "SC_NPROCESSORS_ONLN" in os.sysconf_names:
@@ -138,8 +126,9 @@ def num_cpus():
 
 
 def physical_memory():
+    """Detect physical memory in computer"""
     if sys.platform.startswith("linux"):
-        with open("/proc/meminfo") as a_file:
+        with open("/proc/meminfo", encoding="ascii") as a_file:
             meminfo = a_file.read()
         match = re.search(r"MemTotal:\s*([0-9]*) kB", meminfo)
         return int(match.group(1)) / 1024
@@ -148,9 +137,8 @@ def physical_memory():
 
 
 def num_jobs():
-    #We need to limit ourselves a little bit in how
-    #many parallel jobs we perform. Each job may use
-    #up to 400Mb of memory.
+    """We need to limit ourselves a little bit in how many parallel jobs we perform. Each job may use
+    up to 400Mb of memory."""
     try:
         num = num_cpus() + 1
 
@@ -158,14 +146,15 @@ def num_jobs():
         memory = physical_memory()
         if memory is not None and memory / num < mem_per_job:
             num = max(1, int(memory / mem_per_job))
-    except Exception:
+    except:  # pylint: disable=bare-except
         num = 2
     return num
 
 
 def read_version():
+    """Parse the VERSION.txt file to find out our version"""
     parts = {}
-    with open("VERSION.txt", 'r') as version_file:
+    with open("VERSION.txt", 'r', encoding="ascii") as version_file:
         for line in version_file:
             line = line.strip()
             if len(line) == 0 or line.startswith("#"):
@@ -176,20 +165,28 @@ def read_version():
             parts["MAJOR"] + "." + parts["MINOR"] + "." + parts["PATCH"] + parts["SUFFIX"])
 
 
-class DummyLogger(object):
-    def log(self, data, tag=None):
-        sys.stdout.write(data + "\n")
+class DummyLogger():
+    """A logger that can be used until we know what actual logger should be used.
+    It only logs to stdout"""
+    @staticmethod
+    def log(data, tag=None):
+        """Log some data, to stdout in this case"""
+        sys.stdout.write(f"{(tag+': ') if tag is not None else ''}{data}\n")
         sys.stdout.flush()
 
-    def close(self):
-        pass
+    @staticmethod
+    def close():
+        """Close the logger"""
 
-    def log_output(self, process):
+    @staticmethod
+    def log_output(process):
+        """This logger cant actually do this"""
         raise Exception("DummyLogger doesnt support process output logging. " +
                         "You should investigate why the real logger is not instantiated by now...")
 
 
-class Logger(object):
+class Logger():
+    """The main logger"""
     LogLevel = ("Brief", "Verbose")
     Tags = set(["header", "brief", "normal", "detail", "command_description", "command", "output"])
 
@@ -223,11 +220,13 @@ class Logger(object):
         self.__buildlog.write("<h2>Starting build</h2>\n")
 
     def close(self):
+        """Close the log"""
         self.__buildlog.write("\n<p/>End time (local time): " + time.asctime())
         self.__buildlog.write("\n</body>\n")
         self.__buildlog.close()
 
-    def __print(self, data):
+    @staticmethod
+    def __print(data):
         if sys.version_info[0] < 3:
             data = data.encode("utf-8")
         sys.stdout.write(data)
@@ -239,7 +238,7 @@ class Logger(object):
             die("unknown logging tag")
         #data = data.encode("utf-8")
         if self.__log_level == "Brief":
-            if tag == "header" or tag == "normal" or tag == "brief":
+            if tag in ("header", "normal", "brief"):
                 self.__print(data)
         elif self.__log_level == "Verbose":
             if tag == "brief":
@@ -280,13 +279,16 @@ class Logger(object):
         self.__last_tag = tag
 
     def log(self, data, tag="normal"):
-        if data is None: return
+        """log some data"""
+        if data is None:
+            return
 
         self.__log_stdout(data, tag)
         self.__log_file(data, tag)
 
     def log_output(self, process):
-        output = list()
+        """log the output of a process"""
+        output = []
         while True:
             line = process.stdout.readline()
             if not line:
@@ -312,12 +314,13 @@ def suppress(help_string):
     try:
         if os.path.basename(__file__).startswith("dobmake-batch"):
             return argparse.SUPPRESS
-    except:
+    except OSError:
         pass
     return help_string
 
 
 def add_win32_options(parser):
+    """add windows options to the parser"""
     parser.add_argument("--use-studio",
                         help="The visual studio to use for building, can be '2010', '2012', '2013' or '2015'")
     if is_64_bit():
@@ -334,6 +337,7 @@ def add_win32_options(parser):
 
 
 def add_linux_options(parser):
+    """Add linux opitons to the parser"""
     parser.add_argument("--config",
                         dest="configs",
                         nargs=1,
@@ -343,6 +347,7 @@ def add_linux_options(parser):
 
 
 def parse_command_line():
+    """parse the command line"""
     parser = argparse.ArgumentParser()
     action = parser.add_mutually_exclusive_group()
 
@@ -383,16 +388,25 @@ def parse_command_line():
     if arguments.verbose >= 2:
         os.environ["VERBOSE"] = "1"
 
-    global logger
-    logger = Logger("Brief" if arguments.verbose == 0 else "Verbose")
+    global LOGGER
+    LOGGER = Logger("Brief" if arguments.verbose == 0 else "Verbose")
 
     return arguments
 
 
-class BuilderBase(object):
+class BuilderBase():
+    """Base class for builders"""
     def __init__(self, arguments):
         self.num_jobs = num_jobs()
-        self.cmake_generator = "undefined"
+
+        # Use Ninja for building if available, it is much faster
+        try:
+            subprocess.call(("ninja", "--version"))
+            self.cmake_generator = "Ninja"
+            self.have_ninja = True
+        except NameError:
+            self.cmake_generator = "undefined"
+            self.have_ninja = False
 
         self.total_tests = 0
         self.failed_tests = 0
@@ -406,7 +420,7 @@ class BuilderBase(object):
         self.debug_only = False
         if self.arguments.jenkins:
             if os.environ.get("Config") == "DebugOnly":
-                logger.log("Using Config 'DebugOnly', building everything in Debug only.")
+                LOGGER.log("Using Config 'DebugOnly', building everything in Debug only.")
                 self.configs = ("Debug", )
                 self.debug_only = True
 
@@ -417,6 +431,7 @@ class BuilderBase(object):
             self.install_prefix = self.arguments.install
 
     def build(self):
+        """Build the project"""
         for config in self.configs:
             olddir = os.getcwd()
             mkdir(config)
@@ -431,16 +446,16 @@ class BuilderBase(object):
     def __package(self):
         try:
             import stage_dependencies
-            stage_dependencies.stage_dependencies(logger, self.stagedir)
-        except stage_dependencies.StagingError as e:
-            raise FatalError("Error while copying dependencies to staging area: " + str(e))
+            stage_dependencies.stage_dependencies(LOGGER, self.stagedir)
+        except stage_dependencies.StagingError as exc:
+            raise FatalError("Error while copying dependencies to staging area") from exc
 
-        logger.log("Building installation package", "header")
+        LOGGER.log("Building installation package", "header")
         self.stage_package()
 
     def __configure(self, srcdir, config):
 
-        command = (cmake(), "-G", self.cmake_generator, "-D", "CMAKE_BUILD_TYPE:string=" + config)
+        command = ("cmake", "-G", self.cmake_generator, "-D", "CMAKE_BUILD_TYPE:string=" + config)
 
         if self.install_prefix is not None:
             command += ("-D", "CMAKE_INSTALL_PREFIX=" + self.install_prefix)
@@ -449,37 +464,37 @@ class BuilderBase(object):
         self._run_command(command, "Configure for " + config + " build")
 
     def __build_internal(self, srcdir, config):
-        logger.log(" - in config " + config, "brief")
+        LOGGER.log(" - in config " + config, "brief")
 
         self.__configure(srcdir, config)
 
-        command = (cmake(), "--build", ".", "--") + self.generator_specific_build_cmds()
+        command = ("cmake", "--build", ".", "--") + self.generator_specific_build_cmds()
 
         self._run_command(command, "Build " + config)
         if not self.arguments.skip_tests:
-            logger.log("   + testing", "brief")
+            LOGGER.log("   + testing", "brief")
             self.test()
             translate_results_to_junit(config)
 
         if self.arguments.package:
-            logger.log("   + installing to staging area", "brief")
+            LOGGER.log("   + installing to staging area", "brief")
             self.__stage_install()
         elif self.arguments.install:
             self.__install()
 
     def __stage_install(self):
         for component in ("Runtime", "Tools", "Development", "TestSuite"):
-            command = (cmake(), "-DCOMPONENT=" + component, "-P", "cmake_install.cmake")
+            command = ("cmake", "-DCOMPONENT=" + component, "-P", "cmake_install.cmake")
             env = os.environ.copy()
             env["DESTDIR"] = os.path.join(self.stagedir, component)
             self._run_command(command, "Staged install " + component, env=env)
 
     def __install(self):
-        command = (cmake(), "-P", "cmake_install.cmake")
+        command = ("cmake", "-P", "cmake_install.cmake")
         self._run_command(command, "Installing to " + self.arguments.install)
 
     def stage_package(self):
-        logger.log(" ! Packaging not implemented in this builder !", "brief")
+        LOGGER.log(" ! Packaging not implemented in this builder !", "brief")
 
     def generator_specific_build_cmds(self):
         raise FatalError("generator_specific_build_cmds is not implemented")
@@ -490,7 +505,7 @@ class BuilderBase(object):
             dummyfile = open("DartConfiguration.tcl", "w")
             dummyfile.close()
 
-        output = self._run_command((ctest(), "--output-on-failure", "-T", "Test", "--no-compress-output"),
+        output = self._run_command(("ctest", "--output-on-failure", "-T", "Test", "--no-compress-output"),
                                    "Test",
                                    allow_fail=True)
         self.interpret_test_output(output)
@@ -498,26 +513,26 @@ class BuilderBase(object):
     def _run_command(self, cmd, description, allow_fail=False, env=None):
         """Run a command"""
 
-        logger.log(description, "command_description")
-        logger.log(" ".join(cmd), "command")
+        LOGGER.log(description, "command_description")
+        LOGGER.log(" ".join(cmd), "command")
 
         process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, env=env)
-        output = logger.log_output(process)
+        output = LOGGER.log_output(process)
         if process.returncode != 0:
             if not allow_fail:
                 die("Failed to run '" + " ".join(cmd) + "' in " + os.getcwd())
             else:
-                logger.log("This command failed, but failure of this particular command " +
+                LOGGER.log("This command failed, but failure of this particular command " +
                            "is non-fatal to the build process, so I'm continuing")
 
         return output
 
     def interpret_test_output(self, output):
-        logger.log("Checking test output", "detail")
+        LOGGER.log("Checking test output", "detail")
         match = re.search(r"tests passed, ([0-9]+) tests failed out of ([0-9]+)", output)
         if not match:
             if output.find("No tests were found") == -1:
-                logger.log("Failed to parse test output!")
+                LOGGER.log("Failed to parse test output!")
             return
         self.total_tests += int(match.group(2))
         self.failed_tests += int(match.group(1))
@@ -525,19 +540,13 @@ class BuilderBase(object):
 
 class VisualStudioBuilder(BuilderBase):
     def __init__(self, arguments):
-        super(VisualStudioBuilder, self).__init__(arguments)
+        super().__init__(arguments)
 
         self.install_target = "Install"
         self.used_studio = None
 
-        # Use Ninja for building if available, it is much faster
-        try:
-            subprocess.Popen(("ninja", "--version"), stdout=subprocess.PIPE).communicate()
-            self.cmake_generator = "Ninja"
-            self.have_ninja = True
-        except Exception:
+        if not self.have_ninja:
             self.cmake_generator = "NMake Makefiles"
-            self.have_ninja = False
 
         self.__handle_command_line_arguments()
 
@@ -598,7 +607,7 @@ class VisualStudioBuilder(BuilderBase):
 
     def __run_vcvarsall(self, vcvarsall, arch):
         cmd = '"%s" %s & set' % (vcvarsall, arch)
-        logger.log("Running '" + cmd + "' to extract environment")
+        LOGGER.log("Running '" + cmd + "' to extract environment")
         proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
         output = proc.communicate()[0]
         if proc.returncode != 0:
@@ -621,12 +630,12 @@ class VisualStudioBuilder(BuilderBase):
         ])
         wanted_variables = required_variables | optional_variables  #union
 
-        logger.log("Loading Visual Studio Environment", "header")
+        LOGGER.log("Loading Visual Studio Environment", "header")
         output = self.__run_vcvarsall(vcvarsall, "x86" if self.target_architecture == "x86" else "amd64")
 
         #retry with cross compilation toolset if we're on amd64 and vcvarsall says the toolset is missing
         if self.target_architecture == "x86-64" and output.find("configuration might not be installed") != -1:
-            logger.log("Native toolset appears to be missing, trying cross compilation")
+            LOGGER.log("Native toolset appears to be missing, trying cross compilation")
             output = self.__run_vcvarsall(vcvarsall, "x86_amd64")
 
         found_variables = set()
@@ -641,9 +650,9 @@ class VisualStudioBuilder(BuilderBase):
                 if value.endswith(os.pathsep):
                     value = value[:-1]
                 if os.environ.get(name) is None:
-                    logger.log("Will set '" + name + "' to '" + value + "'", "detail")
+                    LOGGER.log("Will set '" + name + "' to '" + value + "'", "detail")
                 else:
-                    logger.log("Will change '" + name + "' from '" + os.environ.get(name) + "' to '" + value + "'",
+                    LOGGER.log("Will change '" + name + "' from '" + os.environ.get(name) + "' to '" + value + "'",
                                "detail")
                 os.environ[name] = value
                 found_variables.add(name)
@@ -666,21 +675,26 @@ class VisualStudioBuilder(BuilderBase):
 
 class UnixGccBuilder(BuilderBase):
     def __init__(self, arguments):
-        super(UnixGccBuilder, self).__init__(arguments)
+        super().__init__(arguments)
 
         self.install_target = "install"
-        self.cmake_generator = "Unix Makefiles"
+        if not self.have_ninja:
+            self.cmake_generator = "Unix Makefiles"
 
     @staticmethod
     def can_use():
         return sys.platform.startswith("linux")
 
     def generator_specific_build_cmds(self):
-        return ("-j", str(self.num_jobs))
+        if self.have_ninja:
+            return ()
+        else:
+            return ("-j", str(self.num_jobs))
 
 
-#this builder has nothing in common with the other builders, really.
-class DebianPackager(object):
+class DebianPackager():
+    """this builder has nothing in common with the other builders, really. Which is why it does
+       not inherit from BuilderBase..."""
     def __init__(self, arguments):
         self.num_jobs = num_jobs()
 
@@ -694,23 +708,26 @@ class DebianPackager(object):
 
     @staticmethod
     def can_use():
+        """Can be used on debian based distros"""
         return sys.platform.startswith("linux") and \
-            platform.linux_distribution()[0] in ("debian", "Ubuntu")
+            distro.linux_distribution()[0] in ("debian", "Ubuntu")
 
-    def __run(self, cmd, description):
+    @staticmethod
+    def __run(cmd, description):
         """Run a command"""
 
-        logger.log(description, "command_description")
-        logger.log(" ".join(cmd), "command")
+        LOGGER.log(description, "command_description")
+        LOGGER.log(" ".join(cmd), "command")
 
-        process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        output = logger.log_output(process)
-        if process.returncode != 0:
-            die("Failed to run '" + " ".join(cmd) + "' in " + os.getcwd())
+        with subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT) as process:
+            output = LOGGER.log_output(process)
+            if process.returncode != 0:
+                die("Failed to run '" + " ".join(cmd) + "' in " + os.getcwd())
 
         return output
 
     def build(self):
+        """Run the build"""
         version_string = read_version()[1]
         remove("tmp")
         mkdir("tmp")
@@ -732,6 +749,7 @@ class DebianPackager(object):
 
 
 def getText(nodelist):
+    """Get text data out of a xml dom"""
     rc = []
     for node in nodelist:
         if node.nodeType == node.TEXT_NODE:
@@ -740,9 +758,10 @@ def getText(nodelist):
 
 
 def translate_results_to_junit(suite_name):
-    with open(os.path.join("Testing", "TAG"), 'r') as TAGfile:
-        dirname = TAGfile.readline().strip()
-    with open(suite_name + ".junit.xml", "w") as junitfile:
+    """Translate ctest output to junit output"""
+    with open(os.path.join("Testing", "TAG"), 'r', encoding="utf-8") as tag_file:
+        dirname = tag_file.readline().strip()
+    with open(suite_name + ".junit.xml", "w", encoding="utf-8") as junitfile:
         junitfile.write("<?xml version=\"1.0\"?>\n<testsuite>\n")
 
         dom = xml.dom.minidom.parse(os.path.join("Testing", dirname, "Test.xml"))
@@ -751,35 +770,36 @@ def translate_results_to_junit(suite_name):
         for child in testing.childNodes:
             if child.nodeType == xml.dom.Node.ELEMENT_NODE:
                 if child.tagName == "Test":
-                    testName = getText(child.getElementsByTagName("Name")[0].childNodes)
-                    testTarget = os.path.split(getText(child.getElementsByTagName("Path")[0].childNodes))[-1]
-                    testStatus = child.getAttribute("Status")
+                    test_name = getText(child.getElementsByTagName("Name")[0].childNodes)
+                    #test_target = os.path.split(getText(child.getElementsByTagName("Path")[0].childNodes))[-1]
+                    test_status = child.getAttribute("Status")
                     for meas in child.getElementsByTagName("NamedMeasurement"):
                         if meas.getAttribute("name") == "Exit Code":
-                            exitCode = getText(meas.getElementsByTagName("Value")[0].childNodes)
+                            exit_code = getText(meas.getElementsByTagName("Value")[0].childNodes)
                         if meas.getAttribute("name") == "Exit Value":
-                            exitValue = getText(meas.getElementsByTagName("Value")[0].childNodes)
+                            exit_value = getText(meas.getElementsByTagName("Value")[0].childNodes)
                         if meas.getAttribute("name") == "Execution Time":
-                            executionTime = float(getText(meas.getElementsByTagName("Value")[0].childNodes))
+                            execution_time = float(getText(meas.getElementsByTagName("Value")[0].childNodes))
 
                     meas = child.getElementsByTagName("Measurement")[0]
 
-                    junitfile.write("  <testcase name=\"" + testName + "\" classname=\"" + suite_name + "\" time=\"" +
-                                    str(executionTime) + "\">\n")
+                    junitfile.write("  <testcase name=\"" + test_name + "\" classname=\"" + suite_name + "\" time=\"" +
+                                    str(execution_time) + "\">\n")
                     output = escape(getText(meas.getElementsByTagName("Value")[0].childNodes))
-                    if testStatus == "passed":
+                    if test_status == "passed":
                         #success
                         junitfile.write("<system-out>" + output + "\n</system-out>\n")
                     else:
                         #failure
 
-                        junitfile.write("<error message=\"" + exitCode + "(" + exitValue + ")\">" + output +
+                        junitfile.write("<error message=\"" + exit_code + "(" + exit_value + ")\">" + output +
                                         "\n</error>\n")
                     junitfile.write("  </testcase>\n")
         junitfile.write("</testsuite>")
 
 
 def get_builder(arguments):
+    """"Get the correct builder for platform and arguments"""
     if VisualStudioBuilder.can_use():
         return VisualStudioBuilder(arguments)
     elif arguments.package and DebianPackager.can_use():
@@ -791,6 +811,7 @@ def get_builder(arguments):
 
 
 def main():
+    """Woo! Main function"""
     arguments = parse_command_line()
     builder = get_builder(arguments)
 
@@ -802,35 +823,35 @@ def main():
 #### actual code starts here ####
 
 # create a dummy logger that we use until we have the real thing
-logger = DummyLogger()
+LOGGER = DummyLogger()
 
 #reduce process priority (currently only done on unix platforms)
 if hasattr(os, "nice"):
     try:
         if os.nice(0) == 0:
             result = os.nice(10)
-    except Exception as e:
-        logger.log("Failed to set process niceness: " + str(e))
+    except OSError as exception:
+        LOGGER.log("Failed to set process niceness: " + str(exception))
 
 try:
     (tests, failed) = main()
-    logger.log("Result", "header")
-    logger.log("Build completed successfully!")
+    LOGGER.log("Result", "header")
+    LOGGER.log("Build completed successfully!")
     if tests == -1:
         pass
     elif tests == 0:
-        logger.log("No tests were performed")
+        LOGGER.log("No tests were performed")
     elif failed == 0:
-        logger.log("All tests ran successfully!")
+        LOGGER.log("All tests ran successfully!")
     else:
-        logger.log(str(failed) + " tests failed out of " + str(tests) + ".", "brief")
-    result = 0
-except FatalError as e:
-    logger.log("Result", "header")
-    logger.log("Build script failed:")
-    logger.log(str(e), "output")
-    logger.log(str(e), "brief")
-    result = 1
+        LOGGER.log(str(failed) + " tests failed out of " + str(tests) + ".", "brief")
+    RESULT = 0
+except FatalError as exception:
+    LOGGER.log("Result", "header")
+    LOGGER.log("Build script failed:")
+    LOGGER.log(str(exception), "output")
+    LOGGER.log(str(exception), "brief")
+    RESULT = 1
 
-logger.close()
-sys.exit(result)
+LOGGER.close()
+sys.exit(RESULT)
