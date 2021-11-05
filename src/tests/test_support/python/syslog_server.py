@@ -24,23 +24,13 @@
 #
 ###############################################################################
 import subprocess
+from io import StringIO
+import socketserver
+import configparser
 
-try:
-    import ConfigParser
-except ImportError:
-    import configparser as ConfigParser
-try:
-    from StringIO import StringIO
-except ImportError:
-    from io import StringIO
-try:
-    import SocketServer
-except ImportError:
-    import socketserver as SocketServer
-
-class SyslogServer(SocketServer.UDPServer):
+class SyslogServer(socketserver.UDPServer):
     """Syslog server class"""
-    class _Handler(SocketServer.DatagramRequestHandler):
+    class _Handler(socketserver.DatagramRequestHandler):
 
         def handle(self):
             data = self.request[0].decode("utf-8")
@@ -65,7 +55,7 @@ class SyslogServer(SocketServer.UDPServer):
         # ConfigParser wants a section header so add a dummy one.
         conf_str = '[root]\n' + output
 
-        config = ConfigParser.ConfigParser()
+        config = configparser.ConfigParser()
         config.read_file(StringIO(conf_str))
 
         send_to_syslog_server = config.getboolean('SystemLog','send_to_syslog_server')
@@ -80,7 +70,7 @@ class SyslogServer(SocketServer.UDPServer):
         self.timeout = None
         self.allow_reuse_address = True
 
-        SocketServer.UDPServer.__init__(self,
+        socketserver.UDPServer.__init__(self,
                                         (self.syslog_server_address,
                                          self.syslog_server_port),
                                         SyslogServer._Handler)
@@ -115,7 +105,7 @@ class SyslogServer(SocketServer.UDPServer):
 
 if __name__ == "__main__":
     try:
-        server = SyslogServer()
+        server = SyslogServer("safir_show_config") #we assume that it is in the PATH
         print ("Listening to", server.syslog_server_address, server.syslog_server_port)
         server.serve_forever()
     except KeyboardInterrupt:
