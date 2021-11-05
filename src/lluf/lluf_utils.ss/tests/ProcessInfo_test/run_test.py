@@ -31,15 +31,13 @@ if sys.platform == "win32":
 else:
     exe_path = "."
 
-ProcessInfo_test = os.path.join(exe_path,"ProcessInfo_test")
-Sleeper = os.path.join(exe_path,"ProcessInfoSleeper")
+ProcessInfo_test = os.path.join(exe_path, "ProcessInfo_test")
+Sleeper = os.path.join(exe_path, "ProcessInfoSleeper")
 
 #start sleeper
-sleeper = subprocess.Popen((Sleeper,"120"))
+sleeper = subprocess.Popen((Sleeper, "120"))
 
-listener = subprocess.Popen((ProcessInfo_test,
-                             "ProcessInfoSleeper",
-                             str(sleeper.pid)),
+listener = subprocess.Popen((ProcessInfo_test, "ProcessInfoSleeper", str(sleeper.pid)),
                             stdout=subprocess.PIPE,
                             stderr=subprocess.STDOUT,
                             universal_newlines=True)

@@ -44,13 +44,15 @@ o3 = subprocess.check_output(sender_path, stderr=subprocess.STDOUT)
 syslog_output = log_server.get_data(1)
 stdout_output = (o1 + o2 + o3)
 
+
 def fail(message):
-    print("Failed! Wrong number of ",message)
-    print ("STDOUT OUTPUT:")
+    print("Failed! Wrong number of ", message)
+    print("STDOUT OUTPUT:")
     safe_print(stdout_output)
-    print ("SYSLOG OUTPUT:")
+    print("SYSLOG OUTPUT:")
     safe_print(syslog_output)
     sys.exit(1)
+
 
 if syslog_output.count(u"This is an emergency log. Bryn\u00e4s \u00e4r b\u00e4st!\u2620") != 3:
     fail("Brynas ar bast")

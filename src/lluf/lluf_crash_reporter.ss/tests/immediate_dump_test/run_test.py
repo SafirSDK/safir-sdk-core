@@ -31,11 +31,9 @@ if sys.platform == "win32":
 else:
     exe_path = "."
 
-dumper_exe = os.path.join(exe_path,"dumper")
+dumper_exe = os.path.join(exe_path, "dumper")
 
-
-dumper = subprocess.Popen(dumper_exe,
-                          stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+dumper = subprocess.Popen(dumper_exe, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 result = dumper.communicate()[0].decode("ascii")
 
 if result.find("callback") == -1:
@@ -45,12 +43,12 @@ if dumper.returncode != 0:
     print("Dumper program exited with unexpected returncode", dumper.returncode)
     sys.exit(1)
 
-match = re.search(r"dumpPath = '(.*)'",result)
+match = re.search(r"dumpPath = '(.*)'", result)
 if match is None:
     print("Failed to find dumpPath in output")
     print(result)
     sys.exit(1)
-    
+
 dumpPath = match.group(1)
 
 if not os.path.isfile(dumpPath):

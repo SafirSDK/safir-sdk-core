@@ -31,7 +31,7 @@ if sys.platform == "win32":
 else:
     exe_path = "."
 
-ss_test = os.path.join(exe_path,"ss_processes_and_threads_test")
+ss_test = os.path.join(exe_path, "ss_processes_and_threads_test")
 procs = list()
 
 try:
@@ -45,10 +45,12 @@ try:
 
         procs.append(proc)
 except OSError as e:
-    print ("Failed to launch processes. maybe you need to increase ulimit -u, /proc/sys/kernel/threads-max or systemd DefaultTasksMax?")
-    print ("This test runs 25 processes with 50 threads each")
-    print ("Launched", i, "processes")
-    print (e)
+    print(
+        "Failed to launch processes. maybe you need to increase ulimit -u, /proc/sys/kernel/threads-max or systemd DefaultTasksMax?"
+    )
+    print("This test runs 25 processes with 50 threads each")
+    print("Launched", i, "processes")
+    print(e)
     for proc in procs:
         proc.kill()
     sys.exit(1)
@@ -67,7 +69,7 @@ for proc in procs:
 
 for proc in procs:
     if proc.returncode != 0:
-        print("unexpected return code",proc.returncode)
+        print("unexpected return code", proc.returncode)
         for i in range(len(outputs)):
             print("Output from instance (first line has been removed)", i)
             print(outputs[i])
@@ -86,10 +88,9 @@ for output in outputs:
     num_used += int(used_pattern.search(output).group(1))
     num_destroyed += int(destroyed_pattern.search(output).group(1))
 
-print ("num_created:", num_created)
-print ("num_used:", num_used)
-print ("num_destroyed:", num_destroyed)
-
+print("num_created:", num_created)
+print("num_used:", num_used)
+print("num_destroyed:", num_destroyed)
 
 if num_created == 1 and num_used == len(procs) * 50 and num_destroyed == 1:
     print("success")

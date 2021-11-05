@@ -41,16 +41,18 @@ o1 = subprocess.check_output((sender_path, "enable"))
 o2 = subprocess.check_output((sender_path, "enable"))
 o3 = subprocess.check_output((sender_path, "enable"))
 
-stdout_output = (o1 + o2 + o3).decode("utf-8").replace("\r","")
+stdout_output = (o1 + o2 + o3).decode("utf-8").replace("\r", "")
 syslog_output = syslog.get_data(1)
 
+
 def fail(message):
-    print("Failed! Wrong number of",message)
-    print ("STDOUT OUTPUT:")
+    print("Failed! Wrong number of", message)
+    print("STDOUT OUTPUT:")
     safe_print(stdout_output)
-    print ("SYSLOG OUTPUT:")
+    print("SYSLOG OUTPUT:")
     safe_print(syslog_output)
     sys.exit(1)
+
 
 if stdout_output.count("\n") != 36 or syslog_output.count("\n") != 36:
     fail("lines")
@@ -61,7 +63,8 @@ if stdout_output.count(u"Rymd-B@rje: blahonga") != 6 or syslog_output.count(u"Ry
 if stdout_output.count(u"Rymd-B@rje: blahonga\n") != 3 or syslog_output.count(u"Rymd-Börje: blahonga\n") != 3:
     fail("blahonga newlines")
 
-if stdout_output.count(u"Razor: brynanuppafj@ssasponken\n") != 3 or syslog_output.count(u"Razor: brynanuppafjässasponken\n") != 3:
+if stdout_output.count(u"Razor: brynanuppafj@ssasponken\n") != 3 or syslog_output.count(
+        u"Razor: brynanuppafjässasponken\n") != 3:
     fail("brynanuppa")
 
 if stdout_output.count(u"Rymd-B@rje: blahong@a\n") != 3 or syslog_output.count(u"Rymd-Börje: blahong®a\n") != 3:
@@ -79,7 +82,8 @@ if stdout_output.count(u"Razor: foobar\n") != 3 or syslog_output.count(u"Razor: 
 if stdout_output.count(u"Razor: this is the end\n") != 3 or syslog_output.count(u"Razor: this is the end\n") != 3:
     fail("this is the end")
 
-if stdout_output.count(u"Razor: my only friend, the end\n") != 3 or syslog_output.count(u"Razor: my only friend, the end\n") != 3:
+if stdout_output.count(u"Razor: my only friend, the end\n") != 3 or syslog_output.count(
+        u"Razor: my only friend, the end\n") != 3:
     fail("my only friend, the end")
 
 if stdout_output.count(u"the end\nRymd-B@rje: of our elaborate plans\n") != 3:
@@ -94,9 +98,8 @@ if stdout_output.count(u"interrobang: @\n") != 3 or syslog_output.count(u"interr
 if stdout_output.count(u"@reversed\n") != 3 or syslog_output.count(u"\u202ereversed\n") != 3:
     fail("reversed")
 
-
 #check that there is no output when we don't "enable"
-stdout_output = subprocess.check_output(sender_path).decode("utf-8").replace("\r","")
+stdout_output = subprocess.check_output(sender_path).decode("utf-8").replace("\r", "")
 syslog_output = syslog.get_data(1)
 
 if stdout_output.count("\n") != 0 or syslog_output.count("\n") != 0:
@@ -104,7 +107,7 @@ if stdout_output.count("\n") != 0 or syslog_output.count("\n") != 0:
 
 #check that FORCE_LOG all works
 os.environ["FORCE_LOG"] = "all"
-stdout_output = subprocess.check_output(sender_path).decode("utf-8").replace("\r","")
+stdout_output = subprocess.check_output(sender_path).decode("utf-8").replace("\r", "")
 syslog_output = syslog.get_data(1)
 
 if stdout_output.count("\n") != 12 or syslog_output.count("\n") != 12:
@@ -113,7 +116,7 @@ if stdout_output.count("\n") != 12 or syslog_output.count("\n") != 12:
 #check that FORCE_LOG works
 os.environ["FORCE_LOG"] = "Razor"
 #check that there is no output when we don't "enable"
-stdout_output = subprocess.check_output(sender_path).decode("utf-8").replace("\r","")
+stdout_output = subprocess.check_output(sender_path).decode("utf-8").replace("\r", "")
 syslog_output = syslog.get_data(1)
 
 if stdout_output.count("\n") != 6 or syslog_output.count("\n") != 6:

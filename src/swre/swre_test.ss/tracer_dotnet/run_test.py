@@ -37,8 +37,7 @@ arguments = parser.parse_args()
 dependencies = arguments.dependencies.split(",")
 
 for dep in dependencies:
-    shutil.copy2(dep,
-                 ".")
+    shutil.copy2(dep, ".")
 
 syslog = syslog_server.SyslogServer(arguments.safir_show_config)
 
@@ -46,20 +45,22 @@ o1 = subprocess.check_output(("mono", arguments.sender_exe))
 o2 = subprocess.check_output(("mono", arguments.sender_exe))
 o3 = subprocess.check_output(("mono", arguments.sender_exe))
 
-stdout_output = (o1 + o2 + o3).decode("utf-8").replace("\r","")
+stdout_output = (o1 + o2 + o3).decode("utf-8").replace("\r", "")
 syslog_output = syslog.get_data(1)
 
 #fix unexpected locale
-stdout_output = stdout_output.replace("123,1","123.1")
-syslog_output = syslog_output.replace("123,1","123.1")
+stdout_output = stdout_output.replace("123,1", "123.1")
+syslog_output = syslog_output.replace("123,1", "123.1")
+
 
 def fail(message):
-    print("Failed! Wrong number of",message)
-    print ("STDOUT OUTPUT:")
+    print("Failed! Wrong number of", message)
+    print("STDOUT OUTPUT:")
     safe_print(stdout_output)
-    print ("SYSLOG OUTPUT:")
+    print("SYSLOG OUTPUT:")
     safe_print(syslog_output)
     sys.exit(1)
+
 
 if stdout_output.count("\n") != 36 or syslog_output.count("\n") != 36:
     fail("lines")
@@ -70,7 +71,8 @@ if stdout_output.count(u"Rymd-B@rje: blahonga") != 6 or syslog_output.count(u"Ry
 if stdout_output.count(u"Rymd-B@rje: blahonga\n") != 3 or syslog_output.count(u"Rymd-Börje: blahonga\n") != 3:
     fail("blahonga newlines")
 
-if stdout_output.count(u"Razor: brynanuppafj@ssasponken\n") != 3 or syslog_output.count(u"Razor: brynanuppafjässasponken\n") != 3:
+if stdout_output.count(u"Razor: brynanuppafj@ssasponken\n") != 3 or syslog_output.count(
+        u"Razor: brynanuppafjässasponken\n") != 3:
     fail("brynanuppa")
 
 if stdout_output.count(u"Rymd-B@rje: blahong@a\n") != 3 or syslog_output.count(u"Rymd-Börje: blahong®a\n") != 3:
@@ -84,11 +86,12 @@ if stdout_output.count(u"Razor: 123.1\n") != 3 or syslog_output.count(u"Razor: 1
 
 if stdout_output.count(u"Razor: foobar\n") != 3 or syslog_output.count(u"Razor: foobar\n") != 3:
     fail("foobar")
-    
+
 if stdout_output.count(u"Razor: this is the end\n") != 3 or syslog_output.count(u"Razor: this is the end\n") != 3:
     fail("this is the end")
 
-if stdout_output.count(u"Razor: my only friend, the end\n") != 3 or syslog_output.count(u"Razor: my only friend, the end\n") != 3:
+if stdout_output.count(u"Razor: my only friend, the end\n") != 3 or syslog_output.count(
+        u"Razor: my only friend, the end\n") != 3:
     fail("my only friend, the end")
 
 if stdout_output.count(u"the end\nRymd-B@rje: of our elaborate plans\n") != 3:
@@ -102,6 +105,6 @@ if stdout_output.count(u"interrobang: @\n") != 3 or syslog_output.count(u"interr
 
 if stdout_output.count(u"@reversed\n") != 3 or syslog_output.count(u"\u202ereversed\n") != 3:
     fail("reversed")
-    
+
 print("success")
 sys.exit(0)

@@ -26,7 +26,6 @@
 import os, time, sys, argparse
 from testenv import TestEnv, TestEnvStopper
 
-
 parser = argparse.ArgumentParser("test script")
 parser.add_argument("--stoppee", required=True)
 parser.add_argument("--safir-control", required=True)
@@ -41,17 +40,17 @@ stoppee_path = arguments.stoppee
 
 #add all the environment variables. passed on format A=10;B=20
 for pair in arguments.safir_generated_paths.split(";"):
-    (name,value) = pair.split("=")
+    (name, value) = pair.split("=")
     print("Setting environment variable", name, "to", value)
     os.environ[name] = value
 
-env = TestEnv(safir_control = arguments.safir_control,
-              dose_main = arguments.dose_main,
-              dope_main = arguments.dope_main,
-              safir_show_config = arguments.safir_show_config)
+env = TestEnv(safir_control=arguments.safir_control,
+              dose_main=arguments.dose_main,
+              dope_main=arguments.dope_main,
+              safir_show_config=arguments.safir_show_config)
 with TestEnvStopper(env):
     for i in range(50):
-        env.launchProcess("stoppee_" + str(i),stoppee_path)
+        env.launchProcess("stoppee_" + str(i), stoppee_path)
     while True:
         print("checking if all have started yet")
         done = True
@@ -63,7 +62,6 @@ with TestEnvStopper(env):
         if done:
             break
         time.sleep(1)
-
 
 if not env.ReturnCodesOk():
     print("Some process exited with an unexpected value")

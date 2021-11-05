@@ -25,11 +25,11 @@
 ###############################################################################
 import sys
 
+
 def safe_print(msg):
     """A funtion that tries to print msg, but if it gets an
     encoding error it retries after converting msg to ascii"""
     try:
         print(msg)
     except UnicodeEncodeError:
-        print (msg.encode("ascii", errors="replace"))
-
+        print(msg.encode("ascii", errors="replace"))

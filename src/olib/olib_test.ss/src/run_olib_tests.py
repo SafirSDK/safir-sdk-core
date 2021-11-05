@@ -29,7 +29,6 @@ import sys
 print("Not implemented yet!")
 sys.exit(1)
 
-
 # if("$ENV{Driver}" STREQUAL "")
 #   set(ENV{Driver} mimer)
 #   message("'Driver' environment variable is not set, using '$ENV{Driver}'")
@@ -39,7 +38,6 @@ sys.exit(1)
 #   message("Olib currently only has complete support for mimer database")
 #   return()
 # endif()
-
 
 # if("$ENV{DATABASE_NAME}" STREQUAL "")
 #   set(ENV{DATABASE_NAME} SafirDb)

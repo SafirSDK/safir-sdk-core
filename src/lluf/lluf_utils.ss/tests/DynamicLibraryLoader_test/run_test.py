@@ -36,29 +36,26 @@ arguments = parser.parse_args()
 result = subprocess.call(arguments.test_exe_1)
 
 if result != 0:
-    print ("test1 Failure")
+    print("test1 Failure")
     sys.exit(1)
 
 result = subprocess.call(arguments.test_exe_2)
 
-
-if result != -11 and result != 1234: #SIGSEGV and ACCESSVIOL exit codes
-    print ("test2 Failure")
-    print ("Got returncode", result)
+if result != -11 and result != 1234:  #SIGSEGV and ACCESSVIOL exit codes
+    print("test2 Failure")
+    print("Got returncode", result)
     sys.exit(1)
-
 
 result = subprocess.call(arguments.test_exe_3)
 
 if result != 0:
-    print ("test3 Failure")
+    print("test3 Failure")
     sys.exit(1)
-
 
 result = subprocess.call(arguments.test_exe_4)
 
 if result != 0:
-    print ("test4 Failure")
+    print("test4 Failure")
     sys.exit(1)
 
 sys.exit(0)

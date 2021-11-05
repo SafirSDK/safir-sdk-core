@@ -25,9 +25,11 @@
 ###############################################################################
 import subprocess, os, time, sys, signal, argparse
 
+
 def log(*args, **kwargs):
     print(*args, **kwargs)
     sys.stdout.flush()
+
 
 def string_in_output(string, output):
     for line in output:
@@ -35,18 +37,20 @@ def string_in_output(string, output):
             return True
     return False
 
+
 parser = argparse.ArgumentParser("test script")
 parser.add_argument("--safir-control", required=True)
 parser.add_argument("--dose-main", required=True)
 arguments = parser.parse_args()
 
-log("This test program expects to be killed off after about two minutes unless it has finished successfully before then.")
+log("This test program expects to be killed off after about two minutes unless it has finished successfully before then."
+    )
 
-proc = subprocess.Popen([arguments.safir_control, "--dose-main-path" , arguments.dose_main],
-                        stdout = subprocess.PIPE,
-                        stderr = subprocess.STDOUT,
+proc = subprocess.Popen([arguments.safir_control, "--dose-main-path", arguments.dose_main],
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.STDOUT,
                         universal_newlines=True,
-                        creationflags = subprocess.CREATE_NEW_PROCESS_GROUP if sys.platform == "win32" else 0)
+                        creationflags=subprocess.CREATE_NEW_PROCESS_GROUP if sys.platform == "win32" else 0)
 
 #first we read two lines, that should indicate that dose_main got started reasonably well
 lines = list()
@@ -62,14 +66,15 @@ if sys.platform == "win32":
 else:
     proc.terminate()
 
-for i in range (100):
+for i in range(100):
     if proc.poll() is not None:
         break
     time.sleep(0.1)
 if proc.poll() is None:
     try:
         proc.kill()
-        log("Unable to stop Control and/or dose_main! OS resources might be locked, preventing further tests from running.")
+        log("Unable to stop Control and/or dose_main! OS resources might be locked, preventing further tests from running."
+            )
         sys.exit(1)
     except OSError:
         pass
@@ -83,26 +88,24 @@ for i in range(len(lines)):
     if lines[i].startswith("CTRL: Starting system"):
         lines[i] = lines[i][:len("CTRL: Starting system with incarnation id")]
 
-expected_lines = set(["dose_main running...",
-                      "dose_main is waiting for persistence data!",
-                      "CTRL: Starting system with incarnation id",
-                      "DOSE_MAIN: Exiting...",
-                      "CTRL: Exiting..."])
+expected_lines = set([
+    "dose_main running...", "dose_main is waiting for persistence data!", "CTRL: Starting system with incarnation id",
+    "DOSE_MAIN: Exiting...", "CTRL: Exiting..."
+])
 
 if sys.platform == "win32":
     expected_lines.add("CTRL: Got signal 21 ... stop sequence initiated.")
 else:
     expected_lines.add("CTRL: Got signal 15 ... stop sequence initiated.")
 
-
 if set(lines) - expected_lines:
     log("Got unexpected output:")
-    log (set(lines) - expected_lines)
+    log(set(lines) - expected_lines)
     sys.exit(1)
 
 if expected_lines - set(lines):
     log("Missing expected output:")
-    log (expected_lines - set(lines))
+    log(expected_lines - set(lines))
 
 if set(lines) != expected_lines:
     log("something is wrong in the test script...")

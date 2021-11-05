@@ -29,10 +29,12 @@ import argparse
 import time
 from testenv import TestEnv, TestEnvStopper
 
+
 def log(*args, **kwargs):
     """Logging to stdout with flushing"""
     print(*args, **kwargs)
     sys.stdout.flush()
+
 
 parser = argparse.ArgumentParser("test script")
 parser.add_argument("--safir-control", required=True)
@@ -47,19 +49,19 @@ arguments = parser.parse_args()
 
 #add all the environment variables. passed on format A=10;B=20
 for pair in arguments.safir_generated_paths.split(";"):
-    (name,value) = pair.split("=")
+    (name, value) = pair.split("=")
     log("Setting environment variable", name, "to", value)
     os.environ[name] = value
 
-env = TestEnv(safir_control = arguments.safir_control,
-              dose_main = arguments.dose_main,
-              dope_main = arguments.dope_main,
-              safir_show_config = arguments.safir_show_config)
+env = TestEnv(safir_control=arguments.safir_control,
+              dose_main=arguments.dose_main,
+              dope_main=arguments.dope_main,
+              safir_show_config=arguments.safir_show_config)
 with TestEnvStopper(env):
     server = env.launchProcess("safir_websocket", arguments.safir_websocket)
     log("Waiting for safir_websocket to start")
-    env.WaitForOutput("safir_websocket","Running ws server on")
-    client = env.launchProcess("safir_websocket_test_client", arguments.websocket_test_client, collect_output = False)
+    env.WaitForOutput("safir_websocket", "Running ws server on")
+    client = env.launchProcess("safir_websocket_test_client", arguments.websocket_test_client, collect_output=False)
     log("Waiting for test client to exit")
     client.wait()
     log("Waiting for safir_websocket to exit")

@@ -28,7 +28,6 @@ import syslog_server
 from safe_print import *
 from testenv import TestEnv, TestEnvStopper
 
-
 parser = argparse.ArgumentParser("test script")
 parser.add_argument("--sender", required=True)
 parser.add_argument("--backdoor", required=True)
@@ -46,24 +45,25 @@ backdoor = arguments.backdoor
 
 #add all the environment variables. passed on format A=10;B=20
 for pair in arguments.safir_generated_paths.split(";"):
-    (name,value) = pair.split("=")
+    (name, value) = pair.split("=")
     print("Setting environment variable", name, "to", value)
     os.environ[name] = value
 
 #in this test we dont check syslog output at all, we trust that it works, since we've tested
 #that elsewhere.
 
+
 def fail(message, output):
-    print("Failed!",message)
-    print ("OUTPUT:")
+    print("Failed!", message)
+    print("OUTPUT:")
     safe_print(output)
     sys.exit(1)
 
 
-env = TestEnv(safir_control = arguments.safir_control,
-              dose_main = arguments.dose_main,
-              safir_show_config = arguments.safir_show_config,
-              dope_main = arguments.dope_main)
+env = TestEnv(safir_control=arguments.safir_control,
+              dose_main=arguments.dose_main,
+              safir_show_config=arguments.safir_show_config,
+              dope_main=arguments.dope_main)
 with TestEnvStopper(env):
     env.launchProcess("sender", sender_path)
     output = env.WaitForOutput("sender", "Have logged 10 times")
@@ -76,20 +76,18 @@ with TestEnvStopper(env):
     env.WaitForOutput("sender", "foobar")
     #if these outputs don't arrive we'll time out.
 
-
     subprocess.call((backdoor, "all", "off"))
 
     #reset the output so we don't trigger on the output from the start of the test
     env.ResetOutput("sender")
     #this is two of the wcout logs in a row, meaning the tracers are off
-    env.WaitForOutput("sender","times.\nHave")
-
+    env.WaitForOutput("sender", "times.\nHave")
 
 #test turning individual prefix on
-env = TestEnv(safir_control = arguments.safir_control,
-              dose_main = arguments.dose_main,
-              safir_show_config = arguments.safir_show_config,
-              dope_main = arguments.dope_main)
+env = TestEnv(safir_control=arguments.safir_control,
+              dose_main=arguments.dose_main,
+              safir_show_config=arguments.safir_show_config,
+              dope_main=arguments.dope_main)
 with TestEnvStopper(env):
     env.launchProcess("sender", sender_path)
     output = env.WaitForOutput("sender", "Have logged 10 times")
@@ -112,9 +110,7 @@ with TestEnvStopper(env):
 
     #no need to reset, since we did it already.
     #this is two of the wcout logs in a row, meaning the tracers are off
-    env.WaitForOutput("sender","times.\nHave")
-
-
+    env.WaitForOutput("sender", "times.\nHave")
 
 print("success")
 sys.exit(0)

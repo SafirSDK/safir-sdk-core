@@ -31,27 +31,26 @@ if sys.platform == "win32":
 else:
     exe_path = "."
 
-sleeper_exe = os.path.join(exe_path,"crash_reporter_sleeper")
+sleeper_exe = os.path.join(exe_path, "crash_reporter_sleeper")
 
-print ("stdout isatty:", sys.stdout.isatty())
-print ("stderr isatty:", sys.stderr.isatty())
-print ("stdin isatty:", sys.stdin.isatty())
+print("stdout isatty:", sys.stdout.isatty())
+print("stderr isatty:", sys.stderr.isatty())
+print("stdin isatty:", sys.stdin.isatty())
 print()
 sys.stdout.flush()
 errors = 0
- 
-def test_signal(reason, expectCallback = False, expectedReturncode = None):
-    test_signal_internal(reason,expectCallback,expectedReturncode)
+
+
+def test_signal(reason, expectCallback=False, expectedReturncode=None):
+    test_signal_internal(reason, expectCallback, expectedReturncode)
     sys.stdout.flush()
+
 
 def test_signal_internal(reason, expectCallback, expectedReturncode):
     global errors
     print("Testing signal", str(reason) + ":")
     cf = subprocess.CREATE_NEW_PROCESS_GROUP if sys.platform == "win32" else 0
-    sleeper = subprocess.Popen(sleeper_exe,
-                               stdout=subprocess.PIPE, 
-                               stderr=subprocess.STDOUT,
-                               creationflags = cf)
+    sleeper = subprocess.Popen(sleeper_exe, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, creationflags=cf)
     line = sleeper.stdout.readline().decode("ascii")
     if not line.startswith("Started"):
         print("Strange starting line:", line)
@@ -66,15 +65,15 @@ def test_signal_internal(reason, expectCallback, expectedReturncode):
         errors += 1
         return
     if expectCallback:
-        match = re.search(r"dumpPath = '(.*)'",result)
+        match = re.search(r"dumpPath = '(.*)'", result)
         if match is None:
             print("Failed to find dumpPath in output")
             print(result)
             errors += 1
             return
-            
+
         dumpPath = match.group(1)
-        
+
         if not os.path.isfile(dumpPath):
             print("No dumpfile appears to have been generated")
             print("expected to find", dumpPath)
@@ -83,24 +82,20 @@ def test_signal_internal(reason, expectCallback, expectedReturncode):
         os.remove(dumpPath)
 
     if expectedReturncode is None:
-        expectedReturncode = (-reason,)
+        expectedReturncode = (-reason, )
     if sleeper.returncode not in expectedReturncode:
-        print("Sleeper program exited with an unexpected exit code. Got", 
-              sleeper.returncode,
-              "but expected one of",
+        print("Sleeper program exited with an unexpected exit code. Got", sleeper.returncode, "but expected one of",
               expectedReturncode)
         errors += 1
         return
 
-        
-        
 
-if sys.platform == "win32":  
-    test_signal(signal.CTRL_BREAK_EVENT, expectedReturncode = (-1073741510,3221225786))
+if sys.platform == "win32":
+    test_signal(signal.CTRL_BREAK_EVENT, expectedReturncode=(-1073741510, 3221225786))
 else:
     test_signal(signal.SIGHUP)
     test_signal(signal.SIGINT)
-#    test_signal(signal.SIGQUIT) # does not work under jenkins for unknown reason
+    #    test_signal(signal.SIGQUIT) # does not work under jenkins for unknown reason
     test_signal(signal.SIGKILL)
     test_signal(signal.SIGALRM)
     test_signal(signal.SIGTERM)

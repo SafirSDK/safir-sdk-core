@@ -31,18 +31,18 @@ if sys.platform == "win32":
 else:
     exe_path = "."
 
-ProcessMonitor_test2 = os.path.join(exe_path,"ProcessMonitor_test2")
-Sleeper = os.path.join(exe_path,"ProcessMonitorSleeper")
+ProcessMonitor_test2 = os.path.join(exe_path, "ProcessMonitor_test2")
+Sleeper = os.path.join(exe_path, "ProcessMonitorSleeper")
 
 #start a bunch of sleepers
 sleepers = list()
 pids = list()
-for which in range(0,100):
-    proc = subprocess.Popen((Sleeper,"120"))
+for which in range(0, 100):
+    proc = subprocess.Popen((Sleeper, "120"))
     pids.append(str(proc.pid))
     sleepers.append(proc)
 
-listener = subprocess.Popen(list((ProcessMonitor_test2,)) + pids,
+listener = subprocess.Popen(list((ProcessMonitor_test2, )) + pids,
                             stdout=subprocess.PIPE,
                             stderr=subprocess.STDOUT,
                             universal_newlines=True)

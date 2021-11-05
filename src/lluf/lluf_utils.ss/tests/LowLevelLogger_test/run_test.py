@@ -28,6 +28,7 @@ from threading import Thread
 import argparse
 from queue import Queue, Empty
 
+
 def log(*args, **kwargs):
     print(*args, **kwargs)
     sys.stdout.flush()
@@ -38,9 +39,10 @@ def rmdir(directory):
         try:
             shutil.rmtree(directory)
         except OSError:
-            log("Failed to remove directory",directory,", will retry")
+            log("Failed to remove directory", directory, ", will retry")
             time.sleep(0.2)
             shutil.rmtree(directory)
+
 
 def enqueue_output(out, queue):
     while True:
@@ -50,12 +52,16 @@ def enqueue_output(out, queue):
         queue.put(line.rstrip("\n\r"))
     out.close()
 
+
 class LllProc:
-    def __init__(self, wait_for_output = True):
-        self.proc = subprocess.Popen(lll_test, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,universal_newlines=True)
+    def __init__(self, wait_for_output=True):
+        self.proc = subprocess.Popen(lll_test,
+                                     stdout=subprocess.PIPE,
+                                     stderr=subprocess.STDOUT,
+                                     universal_newlines=True)
         self.queue = Queue()
         thread = Thread(target=enqueue_output, args=(self.proc.stdout, self.queue))
-        thread.daemon = True #Thread dies with program, no need to stop explicitly
+        thread.daemon = True  #Thread dies with program, no need to stop explicitly
         thread.start()
         if wait_for_output and not self.wait_output("^Logging at"):
             raise Exception("failed to launch lll_test properly")
@@ -66,7 +72,7 @@ class LllProc:
         future = now + 10
         while time.time() < future:
             try:
-                if pattern.match(self.queue.get(True,0.1)):
+                if pattern.match(self.queue.get(True, 0.1)):
                     return True
             except Empty:
                 pass
@@ -74,7 +80,7 @@ class LllProc:
 
     #returns any output that hasn't already been dequeued
     def output(self):
-        data = list();
+        data = list()
         try:
             while True:
                 data.append(self.queue.get_nowait())
@@ -88,17 +94,18 @@ class LllProc:
             return logfile.read()
 
     #returns true if the logfile matches
-    def logfile_contains(self,regex):
-        pattern = re.compile(regex, flags = re.MULTILINE)
+    def logfile_contains(self, regex):
+        pattern = re.compile(regex, flags=re.MULTILINE)
         return pattern.search(self.logfile())
 
     def kill(self):
         self.proc.kill()
         self.proc.wait()
 
+
 def call_logger_control(args):
-    cmd = (logger_control,) + args
-    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,universal_newlines=True)
+    cmd = (logger_control, ) + args
+    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
     return proc.communicate()[0]
 
 
@@ -107,13 +114,13 @@ if sys.platform == "win32":
     if temp is None:
         temp = os.environ.get("TMP")
     if temp is None:
-        log ("Failed to find temp dir!")
+        log("Failed to find temp dir!")
         sys.exit(1)
     logdir = os.path.join(temp, "safir-sdk-core", "log")
 else:
     logdir = os.path.join("/", "tmp", "safir-sdk-core", "log")
 
-log ("Logdir: ", logdir)
+log("Logdir: ", logdir)
 
 parser = argparse.ArgumentParser("test script")
 parser.add_argument("--test-exe", required=True)
@@ -123,26 +130,27 @@ arguments = parser.parse_args()
 
 lll_test = arguments.test_exe
 
+
 def logfilename(proc):
     if sys.platform == "win32":
         fn = "lll_test.exe-" + str(proc.pid) + ".txt"
     else:
         fn = "lll_test-" + str(proc.pid) + ".txt"
-    return os.path.join(logdir,fn)
+    return os.path.join(logdir, fn)
 
 
 configs_dir = arguments.config_dir
 if not os.path.isdir(configs_dir):
-    log ("arg is not a directory")
+    log("arg is not a directory")
     sys.exit(1)
 
-os.environ["SAFIR_TEST_CONFIG_OVERRIDE"] = os.path.join (configs_dir,"level_0")
-log ("testing level 0")
-log ("Run the program that logs")
+os.environ["SAFIR_TEST_CONFIG_OVERRIDE"] = os.path.join(configs_dir, "level_0")
+log("testing level 0")
+log("Run the program that logs")
 p = LllProc()
 
 p.kill()
-log ("check that we dont have a log file")
+log("check that we dont have a log file")
 try:
     data = p.logfile()
     log("have unexpected logfile")
@@ -150,16 +158,15 @@ try:
 except:
     pass
 
+os.environ["SAFIR_TEST_CONFIG_OVERRIDE"] = os.path.join(configs_dir, "level_1")
 
-os.environ["SAFIR_TEST_CONFIG_OVERRIDE"] = os.path.join (configs_dir,"level_1")
-
-log ("testing level 1")
-log ("Run the program that logs")
+log("testing level 1")
+log("Run the program that logs")
 p = LllProc()
 
 timestamp_regex = r"\[[0-9\.:]*\] "
 p.kill()
-log ("check log file")
+log("check log file")
 if not p.logfile_contains(timestamp_regex + r"1234567890"):
     log("could not find expected output")
     sys.exit(1)
@@ -168,15 +175,14 @@ if p.logfile_contains("Hello") or p.logfile_contains("Goodbye"):
     log("found unexpected output")
     sys.exit(1)
 
+os.environ["SAFIR_TEST_CONFIG_OVERRIDE"] = os.path.join(configs_dir, "level_9")
 
-os.environ["SAFIR_TEST_CONFIG_OVERRIDE"] = os.path.join (configs_dir,"level_9")
-
-log ("testing level 9")
-log ("Run the program that logs")
+log("testing level 9")
+log("Run the program that logs")
 p = LllProc()
 
 p.kill()
-log ("check log file")
+log("check log file")
 if not p.logfile_contains(timestamp_regex + r"1234567890"):
     log("could not find expected output 1")
     sys.exit(1)
@@ -189,36 +195,32 @@ if not p.logfile_contains(timestamp_regex + r"Goodbye cruel world!"):
     log("could not find expected output 3")
     sys.exit(1)
 
+os.environ["SAFIR_TEST_CONFIG_OVERRIDE"] = os.path.join(configs_dir, "no_timestamps")
 
-
-os.environ["SAFIR_TEST_CONFIG_OVERRIDE"] = os.path.join (configs_dir,"no_timestamps")
-
-log ("testing disabled timestamps")
-log ("Run the program that logs")
+log("testing disabled timestamps")
+log("Run the program that logs")
 p = LllProc()
 
 p.kill()
-log ("check log file")
+log("check log file")
 if p.logfile_contains(timestamp_regex):
     log("found unexpected output")
     log(p.logfile())
     sys.exit(1)
 
-os.environ["SAFIR_TEST_CONFIG_OVERRIDE"] = os.path.join (configs_dir,"no_flush")
+os.environ["SAFIR_TEST_CONFIG_OVERRIDE"] = os.path.join(configs_dir, "no_flush")
 
-log ("testing level 1")
-log ("Run the program that logs")
+log("testing level 1")
+log("Run the program that logs")
 p = LllProc()
 
 p.kill()
-log ("check log file")
+log("check log file")
 data = p.logfile()
 if len(data) != 0:
     log("logfile should be empty")
     log(data)
     sys.exit(1)
-
-
 
 log("success")
 sys.exit(0)

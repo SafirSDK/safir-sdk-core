@@ -28,10 +28,10 @@ from io import StringIO
 import socketserver
 import configparser
 
+
 class SyslogServer(socketserver.UDPServer):
     """Syslog server class"""
     class _Handler(socketserver.DatagramRequestHandler):
-
         def handle(self):
             data = self.request[0].decode("utf-8")
             if self.server.buf is None:
@@ -41,10 +41,10 @@ class SyslogServer(socketserver.UDPServer):
 
     def __init__(self, safir_show_config):
         #Run the program that writes the ini file configuration to standard output
-        with subprocess.Popen((safir_show_config,"--logging"),
-                                stdout=subprocess.PIPE,
-                                stderr=subprocess.STDOUT,
-                                universal_newlines=True) as proc:
+        with subprocess.Popen((safir_show_config, "--logging"),
+                              stdout=subprocess.PIPE,
+                              stderr=subprocess.STDOUT,
+                              universal_newlines=True) as proc:
 
             output = proc.communicate()[0]
             if proc.returncode != 0:
@@ -58,21 +58,19 @@ class SyslogServer(socketserver.UDPServer):
         config = configparser.ConfigParser()
         config.read_file(StringIO(conf_str))
 
-        send_to_syslog_server = config.getboolean('SystemLog','send_to_syslog_server')
+        send_to_syslog_server = config.getboolean('SystemLog', 'send_to_syslog_server')
 
         if not send_to_syslog_server:
             print("Safir is not configured to send logs to a syslog_server! Configuration:")
-            print (conf_str)
+            print(conf_str)
             raise Exception("Safir is not configured to send logs to a syslog_server!")
 
-        self.syslog_server_address = config.get('SystemLog','syslog_server_address')
-        self.syslog_server_port = config.getint('SystemLog','syslog_server_port')
+        self.syslog_server_address = config.get('SystemLog', 'syslog_server_address')
+        self.syslog_server_port = config.getint('SystemLog', 'syslog_server_port')
         self.timeout = None
         self.allow_reuse_address = True
 
-        socketserver.UDPServer.__init__(self,
-                                        (self.syslog_server_address,
-                                         self.syslog_server_port),
+        socketserver.UDPServer.__init__(self, (self.syslog_server_address, self.syslog_server_port),
                                         SyslogServer._Handler)
 
         #set up some variables that the handler can use
@@ -95,7 +93,7 @@ class SyslogServer(socketserver.UDPServer):
 
         return self.buf
 
-    def stop(self, timeout = 0.5):
+    def stop(self, timeout=0.5):
         """timeout can be used to collect data for a while before stopping the
         syslog server. Uncollected data will be returned"""
         data = self.get_data(timeout)
@@ -103,10 +101,11 @@ class SyslogServer(socketserver.UDPServer):
         self.stopped = True
         return data
 
+
 if __name__ == "__main__":
     try:
-        server = SyslogServer("safir_show_config") #we assume that it is in the PATH
-        print ("Listening to", server.syslog_server_address, server.syslog_server_port)
+        server = SyslogServer("safir_show_config")  #we assume that it is in the PATH
+        print("Listening to", server.syslog_server_address, server.syslog_server_port)
         server.serve_forever()
     except KeyboardInterrupt:
         pass

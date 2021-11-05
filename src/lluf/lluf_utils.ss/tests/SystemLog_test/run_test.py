@@ -55,21 +55,22 @@ if not config.read(conf_file):
 
 # figure out what (if any) instance string that is expected
 inst_str = r""
-show_safir_instance = config.getboolean('SystemLog','show_safir_instance')
+show_safir_instance = config.getboolean('SystemLog', 'show_safir_instance')
 if show_safir_instance:
-   inst_str = r"\(" + os.getenv("SAFIR_INSTANCE", "0") + r"\) "
+    inst_str = r"\(" + os.getenv("SAFIR_INSTANCE", "0") + r"\) "
 
-syslog_server_address = config.get('SystemLog','syslog_server_address')
-syslog_server_port = config.get('SystemLog','syslog_server_port')
+syslog_server_address = config.get('SystemLog', 'syslog_server_address')
+syslog_server_port = config.get('SystemLog', 'syslog_server_port')
 
 #Start listen to messages sent to the syslog server port
-sock = socket.socket(socket.AF_INET, # Internet
-                     socket.SOCK_DGRAM ) # UDP
+sock = socket.socket(
+    socket.AF_INET,  # Internet
+    socket.SOCK_DGRAM)  # UDP
 sock.settimeout(2)
 sock.bind((syslog_server_address, int(syslog_server_port)))
 
 #Run the program that sends system logs
-proc = subprocess.Popen(system_log_test_path, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,universal_newlines=True)
+proc = subprocess.Popen(system_log_test_path, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
 stdout, stderr = proc.communicate()
 
 if proc.returncode != 0:
@@ -80,8 +81,8 @@ if proc.returncode != 0:
 try:
     log_common_part = r"\D{3} [ |\d]\d \d{2}:\d{2}:\d{2} \S* " + system_log_test_pgm + r"\[\d*\]: "
     for test in range(11):
-        data, addr = sock.recvfrom( 10 * 1024 ) # buffer size is 10 k
-        print ("Received data:", data)
+        data, addr = sock.recvfrom(10 * 1024)  # buffer size is 10 k
+        print("Received data:", data)
         if test == 0:
             pri = r"<9>"
             text = r"This is a log from a singleton constructor"
@@ -119,12 +120,12 @@ try:
         p = re.compile(pri + log_common_part + inst_str + text)
         data = data.decode("utf-8")
         if p.match(data) == None:
-            print ("Unexpected syslog message:", data)
+            print("Unexpected syslog message:", data)
             sys.exit(1)
 
 except:
     print("Exception!")
     sys.exit(1)
 
-print ("Success!")
+print("Success!")
 sys.exit(0)

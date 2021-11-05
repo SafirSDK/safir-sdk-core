@@ -31,7 +31,7 @@ if sys.platform == "win32":
 else:
     exe_path = "."
 
-ss_test = os.path.join(exe_path,"ss_test")
+ss_test = os.path.join(exe_path, "ss_test")
 procs = list()
 
 try:
@@ -45,9 +45,9 @@ try:
 
         procs.append(proc)
 except OSError as e:
-    print ("Failed to launch processes. maybe you need to increase ulimit -u?")
-    print ("This test runs 100 processes.")
-    print (e)
+    print("Failed to launch processes. maybe you need to increase ulimit -u?")
+    print("This test runs 100 processes.")
+    print(e)
     for proc in procs:
         proc.kill()
     sys.exit(1)

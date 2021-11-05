@@ -33,11 +33,14 @@ from io import StringIO
 ## Fix for unicode cross compatibility
 if sys.version < '3':
     import codecs
+
     def u(x):
         return codecs.unicode_escape_decode(x)[0]
 else:
+
     def u(x):
         return x
+
 
 class VException(Exception):
     pass
@@ -51,6 +54,7 @@ dod_parameter_names = [\
         ]
 
 loglevel = 3
+
 
 class Dou(object):
     def __init__(self):
@@ -82,16 +86,16 @@ class DouMember(object):
         self.sequence = sequence
         self.dictionary_type = dictionary_type
 
-class DouCreateRoutine(object):
 
+class DouCreateRoutine(object):
     def __init__(self, summary, name, parameters, values):
         self.summary = summary
         self.name = name
         self.parameters = parameters
         self.values = values
 
-class DouCreateRoutineParameter(object):
 
+class DouCreateRoutineParameter(object):
     def __init__(self, summary, name, type, maxLength, arraySize):
         self.summary = summary
         self.name = name
@@ -99,8 +103,8 @@ class DouCreateRoutineParameter(object):
         self.maxLength = maxLength
         self.arraySize = arraySize
 
-class DouCreateRoutineValue(object):
 
+class DouCreateRoutineValue(object):
     def __init__(self, member, member_type, parameter, inline, parameter_index, array, arraySize):
         self.member = member
         self.member_type = member_type
@@ -110,6 +114,7 @@ class DouCreateRoutineValue(object):
         self.array = array
         self.arraySize = arraySize
 
+
 class DouParameter(object):
     def __init__(self, summary, name, type, array, dictionary_type):
         self.summary = summary
@@ -118,10 +123,11 @@ class DouParameter(object):
         self.array = array
         self.dictionary_type = dictionary_type
 
+
 def readTextPropery(xml_root, element):
     if (element.find("/") != -1):
         # Has subtags, prefix all of them
-        element = element.replace("/", "/{urn:safir-dots-unit}");
+        element = element.replace("/", "/{urn:safir-dots-unit}")
 
     prefixed = "{urn:safir-dots-unit}" + element
     xe = xml_root.find(prefixed)
@@ -130,30 +136,28 @@ def readTextPropery(xml_root, element):
     if xe.text is None: return ""
     return xe.text
 
+
 def dou_uniform_translate(typename):
     typename = typename.title()
-    if typename == "Class" : typename = "Object"
+    if typename == "Class": typename = "Object"
     return typename
 
-def dou_uniform_lookup_add(dou_uniform_lookup_cache,
-                           dou_file_lookup_cache,
-                           dou_xml_lookup_cache,
-                           file,
-                           path):
+
+def dou_uniform_lookup_add(dou_uniform_lookup_cache, dou_file_lookup_cache, dou_xml_lookup_cache, file, path):
     if file in dou_file_lookup_cache:
-        if os.path.join(path,file) == dou_file_lookup_cache[file]:
+        if os.path.join(path, file) == dou_file_lookup_cache[file]:
             #we've already got this dou file
             return
-        print ("Duplicate dou file", os.path.join(path,file), file=sys.stderr)
-        sys.exit(1) #ok to use exit, not called inside multiprocess
+        print("Duplicate dou file", os.path.join(path, file), file=sys.stderr)
+        sys.exit(1)  #ok to use exit, not called inside multiprocess
 
     try:
         dou_xml = ET.parse(os.path.join(path, file))
     except ET.ParseError as e:
-        print (os.path.abspath(os.path.join(path, file)) +
-               ":" + str(e.position[0]) + ":" + str(e.position[1]) +
-               ": error: " + str(e))
-        sys.exit(1) #ok to use exit, not called inside multiprocess
+        print(
+            os.path.abspath(os.path.join(path, file)) + ":" + str(e.position[0]) + ":" + str(e.position[1]) +
+            ": error: " + str(e))
+        sys.exit(1)  #ok to use exit, not called inside multiprocess
 
     xml_root = dou_xml.getroot()
     dou_type = xml_root.tag.split("}")[1]
@@ -164,32 +168,24 @@ def dou_uniform_lookup_add(dou_uniform_lookup_cache,
     dou_xml_lookup_cache[os.path.join(path, file)] = dou_xml
 
 
-def dou_uniform_lookup_init(dou_uniform_lookup_cache,
-                            dou_file_lookup_cache,
-                            dou_xml_lookup_cache,
-                            dependency_paths,
+def dou_uniform_lookup_init(dou_uniform_lookup_cache, dou_file_lookup_cache, dou_xml_lookup_cache, dependency_paths,
                             dou_files):
     for dep in dependency_paths:
-        for path, dirs, files in os.walk(dep): # Walk directory tree
+        for path, dirs, files in os.walk(dep):  # Walk directory tree
             for file in files:
                 if file.endswith(".dou"):
-                    dou_uniform_lookup_add(dou_uniform_lookup_cache,
-                                           dou_file_lookup_cache,
-                                           dou_xml_lookup_cache,
-                                           file,
+                    dou_uniform_lookup_add(dou_uniform_lookup_cache, dou_file_lookup_cache, dou_xml_lookup_cache, file,
                                            path)
     for dou_file in dou_files:
         (path, file) = os.path.split(dou_file)
-        dou_uniform_lookup_add(dou_uniform_lookup_cache,
-                               dou_file_lookup_cache,
-                               dou_xml_lookup_cache,
-                               file,
-                               path)
+        dou_uniform_lookup_add(dou_uniform_lookup_cache, dou_file_lookup_cache, dou_xml_lookup_cache, file, path)
+
 
 def dou_uniform_lookup(gSession, typename):
     if typename in gSession.dou_uniform_lookup_cache: return gSession.dou_uniform_lookup_cache[typename]
     print("** ERROR - Cannot match dou type", typename, file=sys.stderr)
     raise VException("Cannot match dou type")
+
 
 def parse_namespace_file(namespace_prefixes, path, file, file_suffix):
     prefix_file = codecs.open(os.path.join(path, file), "r", encoding="utf-8")
@@ -202,16 +198,21 @@ def parse_namespace_file(namespace_prefixes, path, file, file_suffix):
             if namespace not in namespace_prefixes:
                 namespace_prefixes[namespace] = line.rstrip()
             elif namespace_prefixes[namespace] != line.rstrip():
-                print("Conflicting namespace prefix definition found.", namespace_prefixes[namespace], "is different from", line.rstrip(), file=sys.stderr)
+                print("Conflicting namespace prefix definition found.",
+                      namespace_prefixes[namespace],
+                      "is different from",
+                      line.rstrip(),
+                      file=sys.stderr)
                 raise VException("Conflicting namespace prefix definition found")
         line = prefix_file.readline()
+
 
 # We only need to call this once per dod file (if Namespace prefixes are used)
 # since it does not differ between dou files
 def namespace_prefix_init(gSession):
 
     file_suffix = gSession.dod_parameters['Namespace_Prefix_File_Suffix']
-    if file_suffix == "" : return
+    if file_suffix == "": return
     if len(gSession.namespace_prefixes) != 0 and \
             (gSession.namespace_prefixes["¤¤Namespace_Prefix_File_Suffix¤¤"] == \
             file_suffix):
@@ -222,20 +223,15 @@ def namespace_prefix_init(gSession):
     gSession.namespace_prefixes["¤¤Namespace_Prefix_File_Suffix¤¤"] = file_suffix
 
     for dep in gSession.dependency_paths:
-        for path, dirs, files in os.walk(dep): # Walk directory tree
+        for path, dirs, files in os.walk(dep):  # Walk directory tree
             for file in files:
                 if file.endswith(file_suffix):
-                    parse_namespace_file(gSession.namespace_prefixes,
-                                         path,
-                                         file,
-                                         file_suffix)
+                    parse_namespace_file(gSession.namespace_prefixes, path, file, file_suffix)
     for prefix_file in gSession.namespace_prefix_files:
         if prefix_file.endswith(file_suffix):
-            (path,file) = os.path.split(prefix_file)
-            parse_namespace_file(gSession.namespace_prefixes,
-                                 path,
-                                 file,
-                                 file_suffix)
+            (path, file) = os.path.split(prefix_file)
+            parse_namespace_file(gSession.namespace_prefixes, path, file, file_suffix)
+
 
 def namespace_prefixer(gSession, typename):
     # global namespace_prefixes   Read Only
@@ -257,7 +253,10 @@ def namespace_prefixer(gSession, typename):
     if bestmatch_prefix == "": return typename
     return bestmatch_prefix + "." + typename
 
+
 seek_member_in_base_class_cache = {}
+
+
 def seek_member_in_base_class(gSession, seek_name, baseClass):
     if baseClass is None:
         return None
@@ -292,9 +291,10 @@ def seek_member_in_base_class(gSession, seek_name, baseClass):
     # No match, try next level
     return seek_member_in_base_class(gSession, seek_name, parent)
 
+
 def parse_dou(gSession, dou_xmlfile):
     parsed = Dou()
-    dou_xml = gSession.dou_xml_lookup_cache[dou_xmlfile] #ET.parse(dou_xmlfile)
+    dou_xml = gSession.dou_xml_lookup_cache[dou_xmlfile]  #ET.parse(dou_xmlfile)
     xml_root = dou_xml.getroot()
     parsed.type = xml_root.tag.split("}")[1]
     parsed.name = readTextPropery(xml_root, "name")
@@ -315,7 +315,8 @@ def parse_dou(gSession, dou_xmlfile):
         if parsed.baseClass in gSession.dod_exceptions:
             baseClass = parsed.baseClass
             parsed.baseClass = gSession.dod_exceptions[baseClass].generated
-            parsed.unique_dependencies.append(dependency_formatter(gSession, gSession.dod_exceptions[baseClass].dependency))
+            parsed.unique_dependencies.append(
+                dependency_formatter(gSession, gSession.dod_exceptions[baseClass].dependency))
         elif parsed.baseClass in gSession.dod_types:
             baseClass = parsed.baseClass
             parsed.baseClass = gSession.dod_types[baseClass].generated
@@ -327,7 +328,9 @@ def parse_dou(gSession, dou_xmlfile):
     parsed.summary = summary_formatter(readTextPropery(xml_root, "summary"))
 
     m_type = parsed.name
-    gSession.dod_types[m_type] = DodType(m_type, m_type, dou_uniform_translate(parsed.type), type_formatter(gSession, m_type), dependency_formatter(gSession, m_type), "foobar")
+    gSession.dod_types[m_type] = DodType(m_type, m_type, dou_uniform_translate(parsed.type),
+                                         type_formatter(gSession, m_type), dependency_formatter(gSession, m_type),
+                                         "foobar")
 
     if parsed.type == "property":
         # For unknown reasons, the old dots_v adds a dependency to Object for all property dous
@@ -348,7 +351,7 @@ def parse_dou(gSession, dou_xmlfile):
             m_dictionary = None
             is_dict = m.find("{urn:safir-dots-unit}dictionary")
             if is_dict is not None:
-              m_dictionary = is_dict.attrib["keyType"]
+                m_dictionary = is_dict.attrib["keyType"]
 
             parsed.members.append( DouMember( summary_formatter(readTextPropery(m, "summary")), \
                                         m_name, \
@@ -365,7 +368,8 @@ def parse_dou(gSession, dou_xmlfile):
             if not (m_type in gSession.dod_types):
                 # This is a dou defined object
                 uniform_type = dou_uniform_lookup(gSession, m_type)
-                gSession.dod_types[m_type] = DodType(m_type, m_type, uniform_type, type_formatter(gSession, m_type), dependency_formatter(gSession, m_type), "asdfasdf")
+                gSession.dod_types[m_type] = DodType(m_type, m_type, uniform_type, type_formatter(gSession, m_type),
+                                                     dependency_formatter(gSession, m_type), "asdfasdf")
 
                 parsed.unique_dependencies.append(dependency_formatter(gSession, m_type))
             elif len(gSession.dod_types[m_type].dependency) > 0:
@@ -401,7 +405,9 @@ def parse_dou(gSession, dou_xmlfile):
                                                                 found_member.maxLength, \
                                                                 found_member.arraySize) )
                                 member_name_to_type_lookup[found_member.name] = found_member.type
-                                member_name_to_is_array_lookup[found_member.name] = (found_member.arraySize is not None or found_member.array is not None or found_member.arraySizeRef)
+                                member_name_to_is_array_lookup[found_member.name] = (found_member.arraySize is not None
+                                                                                     or found_member.array is not None
+                                                                                     or found_member.arraySizeRef)
 
                                 if not found_member.type in gSession.dod_types:
                                     gSession.dod_types[found_member.type] = DodType(found_member.type, \
@@ -429,14 +435,16 @@ def parse_dou(gSession, dou_xmlfile):
                             if not (m_type in dod_types):
                                 # This is a dou defined object
                                 uniform_type = dou_uniform_lookup(gSession, m_type)
-                                gSession.dod_types[m_type] = DodType(m_type, m_type, uniform_type, type_formatter(gSession, m_type), dependency_formatter(gSession, m_type), "blahonga")
+                                gSession.dod_types[m_type] = DodType(m_type, m_type, uniform_type,
+                                                                     type_formatter(gSession, m_type),
+                                                                     dependency_formatter(gSession, m_type), "blahonga")
                                 parsed.unique_dependencies.append(dependency_formatter(gSession, m_type))
                             elif len(gSession.dod_types[m_type].dependency) > 0:
                                 parsed.unique_dependencies.append(gSession.dod_types[m_type].dependency)
 
                         if (m_type == "String" or m_arraySize is not None):
-                            parsed.unique_dependencies.append(gSession.dod_types[gSession.dod_parameters["Index_Type"]].dependency)
-
+                            parsed.unique_dependencies.append(
+                                gSession.dod_types[gSession.dod_parameters["Index_Type"]].dependency)
 
                     else:
                         print("** ERROR Unknown CreateRoutineParameter subtag", parameter_tag, file=sys.stderr)
@@ -495,7 +503,7 @@ def parse_dou(gSession, dou_xmlfile):
     values = xml_root.find("{urn:safir-dots-unit}values")
     if values is not None:
         for v in values:
-            parsed.values.append( v.text )
+            parsed.values.append(v.text)
 
     parameters = xml_root.find("{urn:safir-dots-unit}parameters")
     if parameters is not None:
@@ -505,7 +513,7 @@ def parse_dou(gSession, dou_xmlfile):
             is_dict = p.find("{urn:safir-dots-unit}dictionary")
             dict_type = None
             if is_dict is not None:
-              dict_type = is_dict.attrib["keyType"]
+                dict_type = is_dict.attrib["keyType"]
 
             parsed.parameters.append( DouParameter( summary_formatter(readTextPropery(p, "summary")), \
                                         readTextPropery(p, "name"), \
@@ -518,8 +526,8 @@ def parse_dou(gSession, dou_xmlfile):
             if not (m_type in gSession.dod_types):
                 # This is a dou defined object
                 uniform_type = dou_uniform_lookup(gSession, m_type)
-                gSession.dod_types[m_type] = DodType(m_type, m_type, uniform_type, type_formatter(gSession,
-                    m_type), dependency_formatter(gSession, m_type), "fubar")
+                gSession.dod_types[m_type] = DodType(m_type, m_type, uniform_type, type_formatter(gSession, m_type),
+                                                     dependency_formatter(gSession, m_type), "fubar")
                 parsed.unique_dependencies.append(dependency_formatter(gSession, m_type))
             elif len(gSession.dod_types[m_type].dependency) > 0:
                 parsed.unique_dependencies.append(gSession.dod_types[m_type].dependency)
@@ -559,19 +567,22 @@ def parse_dou(gSession, dou_xmlfile):
 
     return parsed
 
+
 def filter_duplicates(seq):
     seen = set()
     seen_add = seen.add
-    return [ x for x in seq if x not in seen and not seen_add(x)]
+    return [x for x in seq if x not in seen and not seen_add(x)]
+
 
 def read_dod_parameter(line, parameter_name, dod_parameters):
     if line.startswith(parameter_name):
         # All parameters are strings with quotes
         dod_parameters[parameter_name] = line.split("\"")[1]
-        if loglevel > 5: print("[DEBUG5]", parameter_name , "is: [" , dod_parameters[parameter_name] , "]")
+        if loglevel > 5: print("[DEBUG5]", parameter_name, "is: [", dod_parameters[parameter_name], "]")
         return 1
 
     return 0
+
 
 def are_dod_parameters_complete(dod_parameters, dod_parameter_names):
     for dp in dod_parameter_names:
@@ -579,6 +590,7 @@ def are_dod_parameters_complete(dod_parameters, dod_parameter_names):
             print("** Missing parameter:", dp, file=sys.stderr)
             return 0
     return 1
+
 
 class DodException(object):
     def __init__(self, dou_name, generated, dependency):
@@ -588,6 +600,7 @@ class DodException(object):
 
     def printme(self):
         return "dou:", self.dou_name, "generated:", self.generated, "dependency:", self.dependency
+
 
 def read_dod_exception(line, dod_exceptions):
     # Format:
@@ -600,9 +613,10 @@ def read_dod_exception(line, dod_exceptions):
 
     parsed_exception = DodException(dou_name, generated, dependency)
     dod_exceptions[parsed_exception.dou_name] = parsed_exception
-    if loglevel > 5: print("[DEBUG5]", parsed_exception.dou_name , "is: [" , parsed_exception.printme() , "]")
+    if loglevel > 5: print("[DEBUG5]", parsed_exception.dou_name, "is: [", parsed_exception.printme(), "]")
 
     return 0
+
 
 class DodType(object):
     def __init__(self, dou_name, set_get, uniform_type, generated, dependency, boxed):
@@ -630,9 +644,10 @@ def read_dod_type(line, dod_types):
 
     parsed_type = DodType(dou_name, set_get, set_get, generated, dependency, boxed)
     dod_types[parsed_type.dou_name] = parsed_type
-    if loglevel > 5: print("[DEBUG5]", parsed_type.dou_name , "is: [" , parsed_type.printme() , "]")
+    if loglevel > 5: print("[DEBUG5]", parsed_type.dou_name, "is: [", parsed_type.printme(), "]")
 
     return 0
+
 
 def underscore_formatter(name, style):
     if style == "Keep": return name
@@ -652,6 +667,7 @@ def underscore_formatter(name, style):
         print("** ERROR, unsupported underscore format", style, file=sys.stderr)
         raise VException("Unsupported underscore format")
 
+
 def case_formatter(name, style):
     # *_Case_Style is one of: "Upper", "Lower", "Camel", "Keep"
     if style == "Keep": return name
@@ -661,11 +677,13 @@ def case_formatter(name, style):
         print("** ERROR, unsupported case format", style, file=sys.stderr)
         raise VException("Unsupported case format")
 
+
 def separator_formatter(gSession, name, style):
     if style != gSession.dod_parameters["Namespace_Separator"]:
         name = name.replace(gSession.dod_parameters["Namespace_Separator"], style)
 
     return name.replace(".", style)
+
 
 def directory_name_formatter(gSession, directory_name):
     directory_name = underscore_formatter(directory_name, gSession.dod_parameters["Filename_Underscore_Style"])
@@ -673,21 +691,25 @@ def directory_name_formatter(gSession, directory_name):
     directory_name = case_formatter(directory_name, gSession.dod_parameters["Namespace_Case_Style"])
     return directory_name
 
+
 def filename_formatter(gSession, filename):
     filename = underscore_formatter(filename, gSession.dod_parameters["Filename_Underscore_Style"])
     filename = separator_formatter(gSession, filename, gSession.dod_parameters["Filename_Separator"])
-    filename = case_formatter(filename, gSession. dod_parameters["Filename_Case_Style"])
+    filename = case_formatter(filename, gSession.dod_parameters["Filename_Case_Style"])
     return filename
+
 
 def member_formatter(gSession, member):
     member = underscore_formatter(member, gSession.dod_parameters["Membername_Underscore_Style"])
     member = case_formatter(member, gSession.dod_parameters["Membername_Case_Style"])
     return member
 
+
 def classname_formatter(gSession, classname):
     classname = underscore_formatter(classname, gSession.dod_parameters["Classname_Underscore_Style"])
     classname = case_formatter(classname, gSession.dod_parameters["Classname_Case_Style"])
     return classname
+
 
 def namespace_formatter(gSession, namespace):
     if namespace is None: return namespace
@@ -697,6 +719,7 @@ def namespace_formatter(gSession, namespace):
     namespace = case_formatter(namespace, gSession.dod_parameters["Namespace_Case_Style"])
     return namespace
 
+
 def type_formatter(gSession, type):
     if type is None: return type
 
@@ -704,12 +727,16 @@ def type_formatter(gSession, type):
         parts = type.split(".")
         classname = parts.pop()
         namespace = namespace_prefixer(gSession, ".".join(parts))
-        return namespace_formatter(gSession, namespace) + gSession.dod_parameters["Namespace_Separator"] + classname_formatter(gSession, classname)
+        return namespace_formatter(gSession,
+                                   namespace) + gSession.dod_parameters["Namespace_Separator"] + classname_formatter(
+                                       gSession, classname)
     elif type.find(gSession.dod_parameters["Namespace_Separator"]) != -1:
         parts = type.split(gSession.dod_parameters["Namespace_Separator"])
         classname = parts.pop()
         namespace = namespace_prefixer(gSession, ".".join(parts))
-        return namespace_formatter(gSession, namespace) + gSession.dod_parameters["Namespace_Separator"] + classname_formatter(gSession, classname)
+        return namespace_formatter(gSession,
+                                   namespace) + gSession.dod_parameters["Namespace_Separator"] + classname_formatter(
+                                       gSession, classname)
     else:
         # No namespace to format
         return classname_formatter(gSession, type)
@@ -718,16 +745,20 @@ def type_formatter(gSession, type):
 def unit_formatter(gSession, unit):
     return dependency_formatter(gSession, unit)
 
+
 def enum_formatter(gSession, enum):
     enum = underscore_formatter(enum, gSession.dod_parameters["Enum_Value_Underscore_Style"])
     enum = case_formatter(enum, gSession.dod_parameters["Enum_Value_Case_Style"])
     return enum
 
+
 def dependency_formatter(gSession, dependency):
     return type_formatter(gSession, dependency).replace(gSession.dod_parameters["Namespace_Separator"], ".")
 
+
 def dependencybase_formatter(gSession, dependency):
     return namespace_formatter(gSession, dependency).replace(gSession.dod_parameters["Namespace_Separator"], ".")
+
 
 def summary_formatter(summary):
     if summary is None: return ""
@@ -745,10 +776,11 @@ def summary_formatter(summary):
             summary_split.pop(0)
         else:
             # First line(s) empty? Kill them!
-            while (len(summary_split) > 0) and (len(summary_split[0].strip()) == 0): summary_split.pop(0)
+            while (len(summary_split) > 0) and (len(summary_split[0].strip()) == 0):
+                summary_split.pop(0)
 
         # trim end of last line
-        if (len(summary_split) > 0) : summary_split[-1] = summary_split[-1].rstrip(" ")
+        if (len(summary_split) > 0): summary_split[-1] = summary_split[-1].rstrip(" ")
 
         # Last line empty? Kill it!
         if (len(summary_split) > 0) and (len(summary_split[-1].strip(" ")) == 0): summary_split.pop()
@@ -756,7 +788,7 @@ def summary_formatter(summary):
         # look for min indentation
         min_strip = 10000
         for s in summary_split:
-            if s.strip() == "": continue # Ignore blank line
+            if s.strip() == "": continue  # Ignore blank line
             this_strip = len(s) - len(s.lstrip(" "))
             if this_strip < min_strip: min_strip = this_strip
 
@@ -771,15 +803,18 @@ def summary_formatter(summary):
 
     return summary
 
+
 def md5_first64(str):
     digest = hashlib.md5(str.encode("utf-8")).hexdigest()
     md5_first64_bytes = digest[:16]
     if sys.byteorder == "little":
-        md5_first64_bytes = digest[14:16] + digest[12:14] + digest[10:12] + digest[8:10] + digest[6:8] + digest[4:6] + digest[2:4] + digest[0:2]
+        md5_first64_bytes = digest[14:16] + digest[12:14] + digest[10:12] + digest[8:10] + digest[6:8] + digest[
+            4:6] + digest[2:4] + digest[0:2]
     first64 = int(md5_first64_bytes, 16)
     # Since the int() function makes a 64-bit unsigned instead of 64-bit signed, we need to convert it
-    if (first64 & (1 << 63)): first64 = (-(1<<63) + (first64 & ((1<<63)-1)))
+    if (first64 & (1 << 63)): first64 = (-(1 << 63) + (first64 & ((1 << 63) - 1)))
     return first64
+
 
 def process_at_variable_lookup(gSession, var, dou, table_line, parent_table_line):
     index = table_line - 1
@@ -794,101 +829,143 @@ def process_at_variable_lookup(gSession, var, dou, table_line, parent_table_line
         if index < 0:
             return dependency_formatter(gSession, u("\u00A4").join(dou.unique_dependencies))
         return dou.unique_dependencies[index]
-    elif var == "DEPENDENCYBASE": return dou.dependency_base[index]
-    elif var == "TABLE_LINE": return table_line
-    elif var == "LIBRARY_NAME": return gSession.library_name
-    elif var == "CLASS": return type_formatter(gSession, dou.classname)
-    elif var == "NAMESPACEV": return namespace_formatter(gSession, dou.namespaces[index])
+    elif var == "DEPENDENCYBASE":
+        return dou.dependency_base[index]
+    elif var == "TABLE_LINE":
+        return table_line
+    elif var == "LIBRARY_NAME":
+        return gSession.library_name
+    elif var == "CLASS":
+        return type_formatter(gSession, dou.classname)
+    elif var == "NAMESPACEV":
+        return namespace_formatter(gSession, dou.namespaces[index])
     elif var == "NAMESPACE":
         if gSession.current_section == "Parent":
             return dependencybase_formatter(gSession, gSession.parent_namespace)
         else:
             return namespace_formatter(gSession, ".".join(dou.namespaces))
-    elif var == "REVNAMESPACE": return namespace_formatter(gSession, dou.namespaces[(len(dou.namespaces) - 1) - index])
-    elif var == "CLASSSUMMARY" : return dou.summary
-    elif var == "BASECLASS" : return dou.baseClass
-    elif var == "CREATEROUTINESUMMARY" : return dou.createRoutines[index].summary
-    elif var == "CREATEROUTINE" : return member_formatter(gSession, dou.createRoutines[index].name)
-    elif var == "CREATEROUTINE'LENGTH" : return get_iterator_length("CREATEROUTINE", dou, 0, 0)
-    elif var == "CREATEPARAMETERTYPE" :
+    elif var == "REVNAMESPACE":
+        return namespace_formatter(gSession, dou.namespaces[(len(dou.namespaces) - 1) - index])
+    elif var == "CLASSSUMMARY":
+        return dou.summary
+    elif var == "BASECLASS":
+        return dou.baseClass
+    elif var == "CREATEROUTINESUMMARY":
+        return dou.createRoutines[index].summary
+    elif var == "CREATEROUTINE":
+        return member_formatter(gSession, dou.createRoutines[index].name)
+    elif var == "CREATEROUTINE'LENGTH":
+        return get_iterator_length("CREATEROUTINE", dou, 0, 0)
+    elif var == "CREATEPARAMETERTYPE":
         return gSession.dod_types[dou.createRoutines[parent_table_line - 1].parameters[index].type].generated
-    elif var == "UNIFORM_CREATEPARAMETERTYPE" :
+    elif var == "UNIFORM_CREATEPARAMETERTYPE":
         return gSession.dod_types[dou.createRoutines[parent_table_line - 1].parameters[index].type].uniform_type
-    elif var == "CREATEPARAMETER" :
+    elif var == "CREATEPARAMETER":
         if parent_table_line == -1:
             # this only occurs when checking for existance and not iterating
             return len(dou.createRoutines[index].parameters) > 0
         else:
             return member_formatter(gSession, dou.createRoutines[parent_table_line - 1].parameters[index].name)
-    elif var == "CREATEPARAMETERISARRAY" : return create_parameter_is_array(dou, table_line, parent_table_line)
-    elif var == "CREATEPARAMETERISLAST" : return create_parameter_is_last(dou, table_line, parent_table_line)
-    elif var == "UNIFORM_CREATEVALUETYPE" :
+    elif var == "CREATEPARAMETERISARRAY":
+        return create_parameter_is_array(dou, table_line, parent_table_line)
+    elif var == "CREATEPARAMETERISLAST":
+        return create_parameter_is_last(dou, table_line, parent_table_line)
+    elif var == "UNIFORM_CREATEVALUETYPE":
         member = dou.createRoutines[parent_table_line - 1].values[index].member
         m_type = dou.member_name_to_type_lookup[member]
         return gSession.dod_types[m_type].uniform_type
-    elif var == "CREATEVALUEPARAMETER" :
+    elif var == "CREATEVALUEPARAMETER":
         p1 = dou.createRoutines[parent_table_line - 1].values[index].parameter
-        return member_formatter(gSession, p1[p1.rfind(".")+1:])
-    elif var == "CREATEVALUEPARAMETERRAW" :
+        return member_formatter(gSession, p1[p1.rfind(".") + 1:])
+    elif var == "CREATEVALUEPARAMETERRAW":
         p1 = dou.createRoutines[parent_table_line - 1].values[index].parameter
-        return p1;
-    elif var == "CREATEVALUEPARAMETERCLASS" :
+        return p1
+    elif var == "CREATEVALUEPARAMETERCLASS":
         p1 = dou.createRoutines[parent_table_line - 1].values[index].parameter
         return type_formatter(gSession, p1[:p1.rfind(".")])
-    elif var == "CREATEVALUEMEMBERTYPE" :
+    elif var == "CREATEVALUEMEMBERTYPE":
         return gSession.dod_types[dou.createRoutines[parent_table_line - 1].values[index].member_type].generated
     elif var == "CREATEVALUEPARAMETERINDEX":
-        return type_formatter(gSession, dou.createRoutines[parent_table_line - 1].values[table_line - 1].parameter_index);
-    elif var == "CREATEVALUE" :
+        return type_formatter(gSession,
+                              dou.createRoutines[parent_table_line - 1].values[table_line - 1].parameter_index)
+    elif var == "CREATEVALUE":
         return member_formatter(gSession, dou.createRoutines[parent_table_line - 1].values[index].member)
-    elif var == "CREATEVALUETYPE" :
+    elif var == "CREATEVALUETYPE":
         member = dou.createRoutines[parent_table_line - 1].values[index].member
         m_type = dou.member_name_to_type_lookup[member]
         return gSession.dod_types[m_type].generated
-    elif var == "CREATEVALUEISARRAY": return create_value_is_array(dou, table_line, parent_table_line)
-    elif var == "MEMBER" : return member_formatter(gSession, dou.members[index].name)
-    elif var == "XMLMEMBER" : return dou.members[index].name
-    elif var == "MEMBER'LENGTH" : return get_iterator_length("MEMBER", dou, 0, 0)
-    elif var == "MEMBERCLASS" : return classname_formatter(gSession, dou.classname)
-    elif var == "MEMBERSUMMARY" : return dou.members[index].summary
-    elif var == "UNIFORM_MEMBERTYPE" : return gSession.dod_types[dou.members[index].type].uniform_type
-    elif var == "MEMBERTYPE" : return gSession.dod_types[dou.members[index].type].generated
-    elif var == "BOXEDTYPE" : return gSession.dod_types[dou.members[index].type].boxed
-    elif var == "MEMBERISSTRING" : return member_is_string(dou, table_line)
-    elif var == "MEMBERISARRAY" : return member_is_array(dou, table_line)
-    elif var == "MEMBERISSEQUENCE" : return member_is_sequence(dou, table_line)
-    elif var == "MEMBERISDICTIONARY" : return member_is_dictionary(dou, table_line)
-    elif var == "MEMBERDICTIONARYTYPE" : return gSession.dod_types[dou.members[table_line - 1].dictionary_type].generated
-    elif var == "UNIFORM_MEMBERDICTIONARYTYPE" : return gSession.dod_types[dou.members[table_line - 1].dictionary_type].uniform_type
-    elif var == "PARAMETER" : return member_formatter(gSession, dou.parameters[index].name)
-    elif var == "PARAMETER'LENGTH" : return get_iterator_length("PARAMETER", dou, 0, 0)
-    elif var == "XMLPARAMETER" : return dou.parameters[index].name
-    elif var == "PARAMETERCLASS" : return namespace_formatter(gSession, dou.classname)
-    elif var == "PARAMETERSUMMARY" : return dou.parameters[index].summary
-    elif var == "UNIFORM_PARAMETERTYPE" : return gSession.dod_types[dou.parameters[index].type].uniform_type
-    elif var == "PARAMETERTYPE" : return gSession.dod_types[dou.parameters[index].type].generated
-    elif var == "PARAMETERISARRAY" : return parameter_is_array(dou, table_line)
-    elif var == "PARAMETERISDICTIONARY" : return parameter_is_dictionary(dou, table_line)
-    elif var == "PARAMETERDICTIONARYTYPE" : return gSession.dod_types[dou.parameters[table_line - 1].dictionary_type].generated
-    elif var == "UNIFORM_PARAMETERDICTIONARYTYPE" : return gSession.dod_types[dou.parameters[table_line - 1].dictionary_type].uniform_type
-    elif var == "TYPEID" :
+    elif var == "CREATEVALUEISARRAY":
+        return create_value_is_array(dou, table_line, parent_table_line)
+    elif var == "MEMBER":
+        return member_formatter(gSession, dou.members[index].name)
+    elif var == "XMLMEMBER":
+        return dou.members[index].name
+    elif var == "MEMBER'LENGTH":
+        return get_iterator_length("MEMBER", dou, 0, 0)
+    elif var == "MEMBERCLASS":
+        return classname_formatter(gSession, dou.classname)
+    elif var == "MEMBERSUMMARY":
+        return dou.members[index].summary
+    elif var == "UNIFORM_MEMBERTYPE":
+        return gSession.dod_types[dou.members[index].type].uniform_type
+    elif var == "MEMBERTYPE":
+        return gSession.dod_types[dou.members[index].type].generated
+    elif var == "BOXEDTYPE":
+        return gSession.dod_types[dou.members[index].type].boxed
+    elif var == "MEMBERISSTRING":
+        return member_is_string(dou, table_line)
+    elif var == "MEMBERISARRAY":
+        return member_is_array(dou, table_line)
+    elif var == "MEMBERISSEQUENCE":
+        return member_is_sequence(dou, table_line)
+    elif var == "MEMBERISDICTIONARY":
+        return member_is_dictionary(dou, table_line)
+    elif var == "MEMBERDICTIONARYTYPE":
+        return gSession.dod_types[dou.members[table_line - 1].dictionary_type].generated
+    elif var == "UNIFORM_MEMBERDICTIONARYTYPE":
+        return gSession.dod_types[dou.members[table_line - 1].dictionary_type].uniform_type
+    elif var == "PARAMETER":
+        return member_formatter(gSession, dou.parameters[index].name)
+    elif var == "PARAMETER'LENGTH":
+        return get_iterator_length("PARAMETER", dou, 0, 0)
+    elif var == "XMLPARAMETER":
+        return dou.parameters[index].name
+    elif var == "PARAMETERCLASS":
+        return namespace_formatter(gSession, dou.classname)
+    elif var == "PARAMETERSUMMARY":
+        return dou.parameters[index].summary
+    elif var == "UNIFORM_PARAMETERTYPE":
+        return gSession.dod_types[dou.parameters[index].type].uniform_type
+    elif var == "PARAMETERTYPE":
+        return gSession.dod_types[dou.parameters[index].type].generated
+    elif var == "PARAMETERISARRAY":
+        return parameter_is_array(dou, table_line)
+    elif var == "PARAMETERISDICTIONARY":
+        return parameter_is_dictionary(dou, table_line)
+    elif var == "PARAMETERDICTIONARYTYPE":
+        return gSession.dod_types[dou.parameters[table_line - 1].dictionary_type].generated
+    elif var == "UNIFORM_PARAMETERDICTIONARYTYPE":
+        return gSession.dod_types[dou.parameters[table_line - 1].dictionary_type].uniform_type
+    elif var == "TYPEID":
         if dou.name == "": return ""
         return str(md5_first64(dou.name))
-    elif var == "CHECKSUM" :
+    elif var == "CHECKSUM":
         if dou.name == "": return ""
         checksum_str = dou.name
         for ev in dou.values:
             checksum_str = checksum_str + "." + ev
         return str(md5_first64(checksum_str))
-    elif var == "ENUMVALUE" :
+    elif var == "ENUMVALUE":
         if index == -2:
             # This happends for single value enums in the cpp-h.dod
             return enum_formatter(gSession, dou.values[0])
         else:
             return enum_formatter(gSession, dou.values[index])
-    elif var == "ENUMVALUE'LENGTH": return get_iterator_length("ENUMVALUE", dou, 0, 0)
+    elif var == "ENUMVALUE'LENGTH":
+        return get_iterator_length("ENUMVALUE", dou, 0, 0)
     print("** ERROR - invalid var lookup,", var, file=sys.stderr)
     raise VException("Invalid var lookup")
+
 
 def get_iterator_length(var, dou, table_line, parent_table_line):
     # if the variable is no iterator return -1
@@ -902,86 +979,123 @@ def get_iterator_length(var, dou, table_line, parent_table_line):
     elif var == "CLASS": return -1
     elif var == "LIBRARY_NAME": return -1
     elif var == "NAMESPACEV" or var == "REVNAMESPACE": return len(dou.namespaces)
-    elif var == "CLASSSUMMARY" : return -1
-    elif var == "BASECLASS" : return -1
+    elif var == "CLASSSUMMARY": return -1
+    elif var == "BASECLASS": return -1
     elif var == "CREATEROUTINE" or var == "CREATEROUTINESUMMARY": return len(dou.createRoutines)
     elif var == "CREATEPARAMETER" or var == "UNIFORM_CREATEPARAMETERTYPE" or var == "CREATEPARAMETERTYPE":
-        if len(dou.createRoutines) == 0 : return 0
+        if len(dou.createRoutines) == 0: return 0
         return len(dou.createRoutines[parent_table_line - 1].parameters)
-    elif var == "CREATEROUTINESUMMARY": return len(dou.createRoutines)
-    elif var == "CREATEVALUE": return len(dou.createRoutines[parent_table_line - 1].values)
-    elif var == "MEMBER" or var == "MEMBERTYPE" or var == "MEMBERCLASS" or var == "UNIFORM_MEMBERTYPE": return len(dou.members)
-    elif var == "PARAMETER" or var == "PARAMETERSUMMARY" : return len(dou.parameters)
-    elif var == "ENUMVALUE" : return len(dou.values)
+    elif var == "CREATEROUTINESUMMARY":
+        return len(dou.createRoutines)
+    elif var == "CREATEVALUE":
+        return len(dou.createRoutines[parent_table_line - 1].values)
+    elif var == "MEMBER" or var == "MEMBERTYPE" or var == "MEMBERCLASS" or var == "UNIFORM_MEMBERTYPE":
+        return len(dou.members)
+    elif var == "PARAMETER" or var == "PARAMETERSUMMARY":
+        return len(dou.parameters)
+    elif var == "ENUMVALUE":
+        return len(dou.values)
 
     print("** ERROR ** - bad iterator: ", var, file=sys.stderr)
     raise VException("Bad iterator")
 
+
 def create_parameter_is_array(dou, table_line, parent_table_line):
     if len(dou.createRoutines) == 0: return trim_false(False)
-    return trim_false(len(dou.createRoutines) > 0 and len(dou.createRoutines[parent_table_line - 1].parameters) > 0 and dou.createRoutines[parent_table_line - 1].parameters[table_line - 1].arraySize is not None)
+    return trim_false(
+        len(dou.createRoutines) > 0 and len(dou.createRoutines[parent_table_line - 1].parameters) > 0
+        and dou.createRoutines[parent_table_line - 1].parameters[table_line - 1].arraySize is not None)
+
 
 def create_parameter_is_last(dou, table_line, parent_table_line):
     if len(dou.createRoutines) == 0: return trim_false(False)
     return trim_false(len(dou.createRoutines[parent_table_line - 1].parameters) == table_line)
 
+
 def create_value_is_array(dou, table_line, parent_table_line):
     if len(dou.createRoutines) == 0: return trim_false(False)
-    if len(dou.createRoutines[parent_table_line - 1].values) == 0 : return trim_false(False)
-    return trim_false(dou.createRoutines[parent_table_line - 1].values[table_line - 1].arraySize is not None or dou.createRoutines[parent_table_line - 1].values[table_line - 1].array is not None)
+    if len(dou.createRoutines[parent_table_line - 1].values) == 0: return trim_false(False)
+    return trim_false(dou.createRoutines[parent_table_line - 1].values[table_line - 1].arraySize is not None
+                      or dou.createRoutines[parent_table_line - 1].values[table_line - 1].array is not None)
+
 
 def create_value_parameter_index(dou, table_line, parent_table_line):
     if len(dou.createRoutines) == 0: return False
-    if len(dou.createRoutines[parent_table_line - 1].values) == 0 : return False
+    if len(dou.createRoutines[parent_table_line - 1].values) == 0: return False
     return dou.createRoutines[parent_table_line - 1].values[table_line - 1].parameter_index is not None
+
 
 def create_value_parameter_inline(dou, table_line, parent_table_line):
     if len(dou.createRoutines) == 0: return False
-    if len(dou.createRoutines[parent_table_line - 1].values) == 0 : return False
+    if len(dou.createRoutines[parent_table_line - 1].values) == 0: return False
     return dou.createRoutines[parent_table_line - 1].values[table_line - 1].inline
+
 
 def parameter_is_array(dou, table_line):
     return trim_false(len(dou.parameters) > 0 and dou.parameters[table_line - 1].array)
 
+
 def parameter_is_dictionary(dou, table_line):
     return trim_false(len(dou.parameters) > 0 and (dou.parameters[table_line - 1].dictionary_type is not None))
 
+
 def member_is_array(dou, table_line):
-    return trim_false(len(dou.members) > 0 and ((dou.members[table_line - 1].arraySize is not None) or (dou.members[table_line - 1].array is not None) or dou.members[table_line - 1].arraySizeRef))
+    return trim_false(
+        len(dou.members) > 0
+        and ((dou.members[table_line - 1].arraySize is not None) or
+             (dou.members[table_line - 1].array is not None) or dou.members[table_line - 1].arraySizeRef))
+
 
 def member_is_sequence(dou, table_line):
     return trim_false(len(dou.members) > 0 and dou.members[table_line - 1].sequence)
 
+
 def member_is_dictionary(dou, table_line):
     return trim_false(len(dou.members) > 0 and (dou.members[table_line - 1].dictionary_type is not None))
+
 
 def member_is_string(dou, table_line):
     return trim_false(len(dou.members) > 0 and dou.members[table_line - 1].type == "String")
 
+
 def trim_false(boolean):
     # The tags-txt.dod requests "IS" values outside IF clauses, and for some
     # reason the old dots_v prints True for True but empty string for False.
-    if not boolean : return ""
+    if not boolean: return ""
     return True
 
+
 def process_at_exist(at_string, dou, table_line, parent_table_line):
-    exist_scrap, var = at_string.split(":",2)
+    exist_scrap, var = at_string.split(":", 2)
 
     if var == "MEMBER": return len(dou.members) > 0
-    elif var == "MEMBERISSTRING" : return member_is_string(dou, table_line)
-    elif var == "MEMBERISARRAY" : return member_is_array(dou, table_line)
-    elif var == "MEMBERISSEQUENCE" : return member_is_sequence(dou, table_line)
-    elif var == "MEMBERISDICTIONARY" : return member_is_dictionary(dou, table_line)
-    elif var == "MEMBERSUMMARY": return len(dou.members) > 0 and dou.members[table_line - 1].summary is not None and len(dou.members[table_line - 1].summary) > 0
-    elif var == "CLASSSUMMARY": return dou.summary is not None and len(dou.summary) > 0
-    elif var == "DEPENDENCY": return len(dou.unique_dependencies) > 0
-    elif var == "PARAMETER": return len(dou.parameters) > 0
-    elif var == "PARAMETERSUMMARY": return len(dou.parameters) > 0 and dou.parameters[table_line - 1].summary is not None and len(dou.parameters[table_line - 1].summary) > 0
-    elif var == "PARAMETERISARRAY" : return parameter_is_array(dou, table_line)
-    elif var == "PARAMETERISSEQUENCE" : return parameter_is_sequence(dou, table_line)
-    elif var == "PARAMETERISDICTIONARY" : return parameter_is_dictionary(dou, table_line)
-    elif var == "CREATEROUTINE": return len(dou.createRoutines) > 0
-    elif var == "CREATEROUTINESUMMARY": return len(dou.createRoutines) > 0 and dou.createRoutines[table_line - 1].summary is not None and len(dou.createRoutines[table_line - 1].summary) > 0
+    elif var == "MEMBERISSTRING": return member_is_string(dou, table_line)
+    elif var == "MEMBERISARRAY": return member_is_array(dou, table_line)
+    elif var == "MEMBERISSEQUENCE": return member_is_sequence(dou, table_line)
+    elif var == "MEMBERISDICTIONARY": return member_is_dictionary(dou, table_line)
+    elif var == "MEMBERSUMMARY":
+        return len(dou.members) > 0 and dou.members[table_line - 1].summary is not None and len(
+            dou.members[table_line - 1].summary) > 0
+    elif var == "CLASSSUMMARY":
+        return dou.summary is not None and len(dou.summary) > 0
+    elif var == "DEPENDENCY":
+        return len(dou.unique_dependencies) > 0
+    elif var == "PARAMETER":
+        return len(dou.parameters) > 0
+    elif var == "PARAMETERSUMMARY":
+        return len(dou.parameters) > 0 and dou.parameters[table_line - 1].summary is not None and len(
+            dou.parameters[table_line - 1].summary) > 0
+    elif var == "PARAMETERISARRAY":
+        return parameter_is_array(dou, table_line)
+    elif var == "PARAMETERISSEQUENCE":
+        return parameter_is_sequence(dou, table_line)
+    elif var == "PARAMETERISDICTIONARY":
+        return parameter_is_dictionary(dou, table_line)
+    elif var == "CREATEROUTINE":
+        return len(dou.createRoutines) > 0
+    elif var == "CREATEROUTINESUMMARY":
+        return len(dou.createRoutines) > 0 and dou.createRoutines[table_line - 1].summary is not None and len(
+            dou.createRoutines[table_line - 1].summary) > 0
     elif var == "CREATEPARAMETER":
         if len(dou.createRoutines) == 0: return False
         if parent_table_line == -1:
@@ -989,21 +1103,27 @@ def process_at_exist(at_string, dou, table_line, parent_table_line):
             return len(dou.createRoutines[table_line - 1].parameters) > 0
         else:
             return len(dou.createRoutines[parent_table_line - 1].parameters) > 0
-    elif var == "CREATEPARAMETERISLAST" : return create_parameter_is_last(dou, table_line, parent_table_line)
-    elif var == "CREATEPARAMETERISARRAY" : return create_parameter_is_array(dou, table_line, parent_table_line)
-    elif var == "CREATEVALUE" :
+    elif var == "CREATEPARAMETERISLAST":
+        return create_parameter_is_last(dou, table_line, parent_table_line)
+    elif var == "CREATEPARAMETERISARRAY":
+        return create_parameter_is_array(dou, table_line, parent_table_line)
+    elif var == "CREATEVALUE":
         if len(dou.createRoutines) == 0: return False
         if parent_table_line == -1:
             # Iterating on createroutine
             return len(dou.createRoutines[table_line - 1].values) > 0
         else:
             return len(dou.createRoutines[parent_table_line - 1].values) > 0
-    elif var == "CREATEVALUEISARRAY": return create_value_is_array(dou, table_line, parent_table_line)
-    elif var == "CREATEVALUEPARAMETERINDEX": return create_value_parameter_index(dou, table_line, parent_table_line)
-    elif var == "CREATEVALUEISINLINE" : return create_value_parameter_inline(dou, table_line, parent_table_line)
+    elif var == "CREATEVALUEISARRAY":
+        return create_value_is_array(dou, table_line, parent_table_line)
+    elif var == "CREATEVALUEPARAMETERINDEX":
+        return create_value_parameter_index(dou, table_line, parent_table_line)
+    elif var == "CREATEVALUEISINLINE":
+        return create_value_parameter_inline(dou, table_line, parent_table_line)
     else:
         print("process_at_exist: Missing", var, file=sys.stderr)
         return False
+
 
 def process_at_line(gSession, line, dou, table_line, parent_table_line, strings_with_quotes):
     pre, at_string, post = extract_at_string(line)
@@ -1012,22 +1132,29 @@ def process_at_line(gSession, line, dou, table_line, parent_table_line, strings_
         post = process_at_line(gSession, post, dou, table_line, parent_table_line, strings_with_quotes)
         processed = process_at_str(gSession, at_string, dou, table_line, parent_table_line, strings_with_quotes)
         if processed is None:
-            if loglevel >= 4: print("** Warning: Lookup of nonexistent variable: ", at_string, table_line, parent_table_line, file=sys.stderr)
+            if loglevel >= 4:
+                print("** Warning: Lookup of nonexistent variable: ",
+                      at_string,
+                      table_line,
+                      parent_table_line,
+                      file=sys.stderr)
             processed = ""
 
         return pre + processed + post
     else:
         return line
 
+
 def extract_at_string(line):
     # substitute string starts with @_ and ends with _@
     start = line.find("@_")
     stop = line.find("_@", start)
 
-    if start != -1 and stop != -1 :
-        return [line[:start], line[start+2:stop], line[stop+2:]]
+    if start != -1 and stop != -1:
+        return [line[:start], line[start + 2:stop], line[stop + 2:]]
     else:
         return ["", "", ""]
+
 
 def safe_at_string_splitter(at_string):
     # Normally the @-string is splitted on colons, but there may be "escaped" colons inside parentheses
@@ -1054,10 +1181,11 @@ def safe_at_string_splitter(at_string):
     splitted.append(part)
     return splitted
 
+
 def process_at_str(gSession, at_string, dou, table_line, parent_table_line, strings_with_quotes):
     result = ""
 
-    if at_string.find("EXIST:") != -1 :
+    if at_string.find("EXIST:") != -1:
         # Check for existance, treat specially
         result = process_at_exist(at_string, dou, table_line, parent_table_line)
     elif at_string.find(":") == -1:
@@ -1082,7 +1210,7 @@ def process_at_str(gSession, at_string, dou, table_line, parent_table_line, stri
 
                 # ensure we only remove leading and last parentheses in case
                 # there are any in the expression
-                ptn = command[command.find("(")+1:-1]
+                ptn = command[command.find("(") + 1:-1]
                 match_result = re.match(ptn, result)
                 result = match_result is not None
 
@@ -1091,11 +1219,11 @@ def process_at_str(gSession, at_string, dou, table_line, parent_table_line, stri
 
                 # ensure we only remove leading and last parentheses in case
                 # there are any in the expression
-                rc1 = command[command.find("(")+1:-1]
+                rc1 = command[command.find("(") + 1:-1]
                 # first replace all escaped slashes with something else (¤)
                 rc1 = rc1.replace("\/", u("\u00A4"))
                 # Then split on the non-espaced slash
-                ptn, repl = rc1.split("/",1)
+                ptn, repl = rc1.split("/", 1)
                 # now put the slashes back, unescaped
                 ptn = ptn.replace(u("\u00A4"), "/")
                 repl = repl.replace(u("\u00A4"), "/")
@@ -1104,11 +1232,11 @@ def process_at_str(gSession, at_string, dou, table_line, parent_table_line, stri
             elif command.startswith("REPLACE_ALL("):
                 # ensure we only remove leading and last parentheses in case
                 # there are any in the expression
-                rc1 = command[command.find("(")+1:-1]
+                rc1 = command[command.find("(") + 1:-1]
                 # first replace all escaped slashes with something else
                 rc1 = rc1.replace("\/", u("\u00A4"))
                 # Then split on the non-espaced slash
-                ptn, repl = rc1.split("/",1)
+                ptn, repl = rc1.split("/", 1)
                 # now put the slashes back, unescaped
                 ptn = ptn.replace(u("\u00A4"), "/")
                 repl = repl.replace(u("\u00A4"), "/")
@@ -1122,6 +1250,7 @@ def process_at_str(gSession, at_string, dou, table_line, parent_table_line, stri
     elif strings_with_quotes and not result.isdigit(): result = '"' + result + '"'
     return result
 
+
 def get_at_string_iterator_length(line, dou, table_line, parent_table_line):
     ## Now handled before calling this function
 
@@ -1133,7 +1262,7 @@ def get_at_string_iterator_length(line, dou, table_line, parent_table_line):
 
     result = ""
 
-    subcommand = line[start+2:stop]
+    subcommand = line[start + 2:stop]
     if subcommand.find(":") == -1:
         # Simple case, only variable lookup
         result = subcommand
@@ -1146,7 +1275,7 @@ def get_at_string_iterator_length(line, dou, table_line, parent_table_line):
     if (len != -1):
         return len
     else:
-        return get_at_string_iterator_length(line[stop+2:], dou, table_line, parent_table_line)
+        return get_at_string_iterator_length(line[stop + 2:], dou, table_line, parent_table_line)
 
 
 def parse_table_clause(gSession, current_line, file, dou, process_table_content, parent_table_line):
@@ -1193,6 +1322,7 @@ def parse_table_clause(gSession, current_line, file, dou, process_table_content,
 
         line = file.get_next_line()
 
+
 def extract_parentheses_strings(line):
     # concatenated if string starts with ( and ends with )
     start = line.find("(")
@@ -1201,19 +1331,20 @@ def extract_parentheses_strings(line):
     logic = ""
     p2 = ""
 
-    if start != -1 and stop != -1 :
-        p1 = line[start+1:stop]
+    if start != -1 and stop != -1:
+        p1 = line[start + 1:stop]
 
-    start2 = line.find("(", stop+1)
+    start2 = line.find("(", stop + 1)
     stop2 = line.find(")", start2)
 
-    if start2 != -1 and stop2 != -1 :
-        p2 = line[start2+1:stop2]
+    if start2 != -1 and stop2 != -1:
+        p2 = line[start2 + 1:stop2]
 
-    if stop != -1 and start2 != -1 :
-        logic = line[stop+1:start2-1].strip()
+    if stop != -1 and start2 != -1:
+        logic = line[stop + 1:start2 - 1].strip()
 
     return [p1, logic, p2]
+
 
 def if_string_subst(line):
     # trim spaces around equal sign to simplfy
@@ -1254,6 +1385,7 @@ def if_string_subst(line):
     line = line.replace('=Safir.Dob.Typesystem.Object', '= "Safir.Dob.Typesystem.Object"')
     return line
 
+
 def evaluate_if_condition(gSession, line, dou, table_line, parent_table_line):
     # substitution to allow python evaluation
     line = if_string_subst(line)
@@ -1261,9 +1393,10 @@ def evaluate_if_condition(gSession, line, dou, table_line, parent_table_line):
     line = process_at_line(gSession, line, dou, table_line, parent_table_line, True)
     # line may start with @@IF@@ or @@ELSIF@@
     start = line.find("IF@@")
-    expression = line[start+4:]
+    expression = line[start + 4:]
     # then let python do the work!
     return eval(expression)
+
 
 def parse_parameters(gSession, line):
     valid_parameter = 0
@@ -1351,6 +1484,7 @@ def parse_if_clause(gSession, current_line, file, dou, process_if_content, table
                 write_to_file(gSession, line)
         # else we skip the line
 
+
 def write_to_file(gSession, s):
     if gSession.current_generated_file is None:
         gSession.current_generated_file = codecs.open(gSession.current_generated_filename, "w", encoding="utf-8")
@@ -1365,7 +1499,7 @@ def write_to_file(gSession, s):
     s = s.replace("\n", os.linesep)
 
     gSession.current_generated_file.write(s)
-    if loglevel >=4 : print(s, end='', file=sys.stderr)
+    if loglevel >= 4: print(s, end='', file=sys.stderr)
 
 
 import multiprocessing
@@ -1378,6 +1512,7 @@ MKDIR_JAVA_RLOCK = multiprocessing.RLock()
 MKDIR_TAGS_RLOCK = multiprocessing.RLock()
 MKDIR_OTHER_RLOCK = multiprocessing.RLock()
 
+
 def find_mkdir_rlock(newdir):
     if newdir.endswith("/cpp") or newdir.find("/cpp/"): return MKDIR_CPP_RLOCK
     elif newdir.endswith("/ada") or newdir.find("/ada/"): return MKDIR_ADA_RLOCK
@@ -1385,7 +1520,6 @@ def find_mkdir_rlock(newdir):
     elif newdir.endswith("/java") or newdir.find("/java/"): return MKDIR_JAVA_RLOCK
     elif newdir.endswith("/tags") or newdir.find("/tags/"): return MKDIR_TAGS_RLOCK
     return MKDIR_OTHER_RLOCK
-
 
 
 def mkdir(gSession, newdir):
@@ -1408,7 +1542,6 @@ def mkdir(gSession, newdir):
             if tail:
                 os.mkdir(newdir)
 
-
     if os.path.isdir(newdir): return
 
     if gSession is None:
@@ -1417,31 +1550,33 @@ def mkdir(gSession, newdir):
         with gSession.mkdir_rlock:
             mkdir_internal(newdir)
 
+
 def get_dou_directories():
     #we cache the output so that we only run the safir_show_config command once.
     #here we check for cached data
-    if hasattr(get_dou_directories,"cache"):
+    if hasattr(get_dou_directories, "cache"):
         return get_dou_directories.cache
 
     proc = subprocess.Popen(("safir_show_config", "--dou-install-dirs"),
-                            stdout = subprocess.PIPE,
-                            stderr = subprocess.PIPE,
-                            universal_newlines = True)
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE,
+                            universal_newlines=True)
     output = proc.communicate()
     if proc.returncode != 0:
-        print ("Failed to run safir_show_config. \nStdout:\n",output[0],"\nStderr:\n",output[1],sep='')
-        sys.exit(1) #ok to use exit, not called inside multiprocess
+        print("Failed to run safir_show_config. \nStdout:\n", output[0], "\nStderr:\n", output[1], sep='')
+        sys.exit(1)  #ok to use exit, not called inside multiprocess
     if len(output[1]) != 0:
-        print ("Spurious output from safir_show_config. \nStdout:\n",output[0],"\nStderr:\n",output[1],sep='')
+        print("Spurious output from safir_show_config. \nStdout:\n", output[0], "\nStderr:\n", output[1], sep='')
         sys.exit(1)  #ok to use exit, not called inside multiprocess
     dou_directories = list()
     for line in output[0].splitlines():
-        (module,path) = line.split("=")
-        dou_directories.append((module,path))
+        (module, path) = line.split("=")
+        dou_directories.append((module, path))
 
     #cache the data
-    get_dou_directories.cache=dou_directories
+    get_dou_directories.cache = dou_directories
     return dou_directories
+
 
 def resolve_typesystem_dependencies(unresolved_dependencies):
     result = list()
@@ -1453,22 +1588,23 @@ def resolve_typesystem_dependencies(unresolved_dependencies):
 
     for dependency in unresolved_dependencies:
         pair = dependency.split("=")
-        if len(pair) == 1: #an unresolved dependency
-            matches = [path for (module,path) in get_dou_directories() if module == pair[0]]
+        if len(pair) == 1:  #an unresolved dependency
+            matches = [path for (module, path) in get_dou_directories() if module == pair[0]]
             if len(matches) == 1:
                 result.append(matches[0])
             else:
-                print("Failed to resolve dependency",pair[0])
+                print("Failed to resolve dependency", pair[0])
                 if len(matches) == 0:
-                    print ("Found no matching modules")
+                    print("Found no matching modules")
                 else:
-                    print ("Found multiple matching modules:", matches)
+                    print("Found multiple matching modules:", matches)
         elif len(pair) == 2:
             result.append(pair[1])
         else:
             print("Syntax error for dependencies argument!", dependency, file=sys.stderr)
             sys.exit(1)  #ok to use exit, not called inside multiprocess
     return result
+
 
 # Faster file reader, buffers all in memory (good since we loop through same file multiple times)
 class FileReader(object):
@@ -1480,7 +1616,7 @@ class FileReader(object):
         file.close()
 
         # preprocess
-        if preprocess :
+        if preprocess:
             eol_string = ""
             for i in range(len(self.lines)):
                 # Replace the files EOL with plain \n. This is converted to native EOL style when we write the output files
@@ -1513,9 +1649,10 @@ class FileReader(object):
     def get_next_line(self):
         if self.index < len(self.lines):
             self.index += 1
-            if loglevel >= 5: print(self.lines[self.index-1], end='')
-            return self.lines[self.index-1]
+            if loglevel >= 5: print(self.lines[self.index - 1], end='')
+            return self.lines[self.index - 1]
         return ""
+
 
 def parse_dod(gSession, dod_file, dou):
     while 1:
@@ -1526,6 +1663,7 @@ def parse_dod(gSession, dod_file, dou):
         if line.startswith("@@IF@@"): parse_if_clause(gSession, line, dod_file, dou, 1, -1, -1)
 
         # Skip everything else at this top level
+
 
 def dod_init(gSession, dod_filename):
     gSession.dod_parameters.clear()
@@ -1542,6 +1680,7 @@ def dod_init(gSession, dod_filename):
 
     dod_file.seek(0)
     return dod_file
+
 
 def generator_main(gSession, dod_file, dou_filename, gen_src_output_path):
     parent_namespaces_completed = []
@@ -1568,7 +1707,8 @@ def generator_main(gSession, dod_file, dou_filename, gen_src_output_path):
 
                 empty_dou = Dou()
                 output_path = gen_src_output_path + gSession.dod_parameters["Output_Directory"]
-                parent_name = filename_formatter(gSession, gSession.parent_namespace) + gSession.dod_parameters["File_Suffix"]
+                parent_name = filename_formatter(gSession,
+                                                 gSession.parent_namespace) + gSession.dod_parameters["File_Suffix"]
                 gSession.current_generated_filename = os.path.join(output_path, parent_name)
                 mkdir(gSession, output_path)
 
@@ -1582,7 +1722,7 @@ def generator_main(gSession, dod_file, dou_filename, gen_src_output_path):
 
                 parent_namespaces_completed.append(gSession.parent_namespace)
 
-        else: #Code
+        else:  #Code
             output_path = gen_src_output_path + gSession.dod_parameters["Output_Directory"]
 
             # Namespace prefix files? (for java)
@@ -1595,7 +1735,9 @@ def generator_main(gSession, dod_file, dou_filename, gen_src_output_path):
                 output_path += directory_name_formatter(gSession, namespaces)
                 filename = filename_formatter(gSession, dou.classname) + gSession.dod_parameters["File_Suffix"]
             else:
-                filename = filename_formatter(gSession, namespaces) + gSession.dod_parameters["Filename_Separator"] + filename_formatter(gSession, dou.classname) + gSession.dod_parameters["File_Suffix"]
+                filename = filename_formatter(
+                    gSession, namespaces) + gSession.dod_parameters["Filename_Separator"] + filename_formatter(
+                        gSession, dou.classname) + gSession.dod_parameters["File_Suffix"]
 
             mkdir(gSession, output_path)
             gSession.current_generated_filename = os.path.join(output_path, filename)
@@ -1608,6 +1750,7 @@ def generator_main(gSession, dod_file, dou_filename, gen_src_output_path):
                 gSession.current_generated_file = None
 
     # end for
+
 
 class GeneratorSession(object):
     def __init__(self):
@@ -1627,15 +1770,9 @@ class GeneratorSession(object):
         self.namespace_prefix_files = None
         self.library_name = None
 
-def dod_thread_main(dod_filename,
-                    dou_files,
-                    gen_src_output_path,
-                    show_files,
-                    dou_uniform_lookup_cache,
-                    dou_file_lookup_cache,
-                    dou_xml_lookup_cache,
-                    dependency_paths,
-                    namespace_prefix_files,
+
+def dod_thread_main(dod_filename, dou_files, gen_src_output_path, show_files, dou_uniform_lookup_cache,
+                    dou_file_lookup_cache, dou_xml_lookup_cache, dependency_paths, namespace_prefix_files,
                     library_name):
     t1 = os.times()[4]
     global loglevel
@@ -1659,7 +1796,8 @@ def dod_thread_main(dod_filename,
         generator_main(gSession, dod_file, dou_file, gen_src_output_path)
 
     t2 = os.times()[4]
-    if loglevel >=4: print(".dod process duration", t2-t1, os.path.split(dod_filename)[1])
+    if loglevel >= 4: print(".dod process duration", t2 - t1, os.path.split(dod_filename)[1])
+
 
 def main():
     global loglevel
@@ -1674,17 +1812,14 @@ def main():
 
     arguments = None
 
-    parser = argparse.ArgumentParser(fromfile_prefix_chars = "@",
+    parser = argparse.ArgumentParser(fromfile_prefix_chars="@",
                                      description="Source code generator tool for Safir SDK Core. Processes "
-                                                 ".dou files into source code for all supported languages. "
-                                                 "Files are generated in language specific subdirectories "
-                                                 "of root path of processed dou files.\n"
-                                                 "Use @<file name> to read arguments from a file.")
+                                     ".dou files into source code for all supported languages. "
+                                     "Files are generated in language specific subdirectories "
+                                     "of root path of processed dou files.\n"
+                                     "Use @<file name> to read arguments from a file.")
 
-    parser.add_argument('--dou-files',
-                        metavar='DOU_FILE(S)',
-                        nargs="*",
-                        help='.dou file(s) to process.')
+    parser.add_argument('--dou-files', metavar='DOU_FILE(S)', nargs="*", help='.dou file(s) to process.')
     parser.add_argument('--namespace-mappings',
                         metavar='NAMESPACE_MAPPING(S)',
                         nargs="*",
@@ -1703,17 +1838,19 @@ def main():
                         metavar='LIBRARY_NAME',
                         required=True,
                         help="Name of the generated library/module being built")
-    parser.add_argument('--output-path',
-                        metavar='OUTPUT_PATH',
-                        required=False,
-                        default='',
-                        help='Directory where the generated file structure starts. Defaults to current working directory.')
+    parser.add_argument(
+        '--output-path',
+        metavar='OUTPUT_PATH',
+        required=False,
+        default='',
+        help='Directory where the generated file structure starts. Defaults to current working directory.')
     parser.add_argument('--show-files',
                         required=False,
                         default=False,
                         action='store_true',
                         help='Prints out the dod and dou filenames for each parsing')
-    parser.add_argument('-v', '--verbose',
+    parser.add_argument('-v',
+                        '--verbose',
                         required=False,
                         default=False,
                         action='store_true',
@@ -1757,23 +1894,18 @@ def main():
         dou_uniform_lookup_cache = shared_mem_manager.dict()
         dou_file_lookup_cache = shared_mem_manager.dict()
         dou_xml_lookup_cache = shared_mem_manager.dict()
-        dou_uniform_lookup_init(dou_uniform_lookup_cache, dou_file_lookup_cache, dou_xml_lookup_cache, dependency_paths, dou_files)
+        dou_uniform_lookup_init(dou_uniform_lookup_cache, dou_file_lookup_cache, dou_xml_lookup_cache, dependency_paths,
+                                dou_files)
 
-        pool = multiprocessing.Pool() # Defaults number of worker processes to number of CPUs
+        pool = multiprocessing.Pool()  # Defaults number of worker processes to number of CPUs
 
         results = list()
         for dod_filename in dod_files:
-            results.append(pool.apply_async(dod_thread_main,
-                                            args = (dod_filename,
-                                                    dou_files,
-                                                    gen_src_output_path,
-                                                    arguments.show_files,
-                                                    dou_uniform_lookup_cache,
-                                                    dou_file_lookup_cache,
-                                                    dou_xml_lookup_cache,
-                                                    dependency_paths,
-                                                    namespace_prefix_files,
-                                                    arguments.library_name)))
+            results.append(
+                pool.apply_async(dod_thread_main,
+                                 args=(dod_filename, dou_files, gen_src_output_path, arguments.show_files,
+                                       dou_uniform_lookup_cache, dou_file_lookup_cache, dou_xml_lookup_cache,
+                                       dependency_paths, namespace_prefix_files, arguments.library_name)))
 
         pool.close()
         pool.join()
@@ -1787,14 +1919,18 @@ def main():
         dou_uniform_lookup_cache = {}
         dou_file_lookup_cache = {}
         dou_xml_lookup_cache = {}
-        dou_uniform_lookup_init(dou_uniform_lookup_cache, dou_file_lookup_cache, dou_xml_lookup_cache, dependency_paths, dou_files)
+        dou_uniform_lookup_init(dou_uniform_lookup_cache, dou_file_lookup_cache, dou_xml_lookup_cache, dependency_paths,
+                                dou_files)
 
         try:
             for dod_filename in dod_files:
-                dod_thread_main(dod_filename, dou_files, gen_src_output_path, arguments.show_files, dou_uniform_lookup_cache, dou_file_lookup_cache, dou_xml_lookup_cache, dependency_paths, namespace_prefix_files, arguments.library_name)
+                dod_thread_main(dod_filename, dou_files, gen_src_output_path, arguments.show_files,
+                                dou_uniform_lookup_cache, dou_file_lookup_cache, dou_xml_lookup_cache, dependency_paths,
+                                namespace_prefix_files, arguments.library_name)
         except VException:
             return 1
     return 0
+
 
 if __name__ == "__main__":
     sys.exit(main())

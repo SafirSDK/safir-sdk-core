@@ -37,8 +37,7 @@ arguments = parser.parse_args()
 dependencies = arguments.dependencies.split(",")
 
 for dep in dependencies:
-    shutil.copy2(dep,
-                 ".")
+    shutil.copy2(dep, ".")
 
 syslog = syslog_server.SyslogServer(arguments.safir_show_config)
 
@@ -50,15 +49,17 @@ stdout_output = o1 + o2 + o3
 syslog_output = syslog.get_data(1)
 
 #fix unexpected locale
-syslog_output = syslog_output.replace("123,1","123.1")
+syslog_output = syslog_output.replace("123,1", "123.1")
+
 
 def fail(message):
-    print("Failed! Wrong number of",message)
-    print ("STDOUT OUTPUT:")
+    print("Failed! Wrong number of", message)
+    print("STDOUT OUTPUT:")
     safe_print(stdout_output)
-    print ("SYSLOG OUTPUT:")
+    print("SYSLOG OUTPUT:")
     safe_print(syslog_output)
     sys.exit(1)
+
 
 if syslog_output.count("\n") != 24:
     fail("lines")

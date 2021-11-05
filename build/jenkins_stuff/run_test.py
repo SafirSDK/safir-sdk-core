@@ -32,12 +32,15 @@ try:
 except:
     pass
 
+
 def log(*args, **kwargs):
     print(*args, **kwargs)
     sys.stdout.flush()
 
+
 class SetupError(Exception):
     pass
+
 
 class WindowsInstaller(object):
     def __init__(self):
@@ -45,20 +48,20 @@ class WindowsInstaller(object):
         #This probably won't work if running 32bit python on 64bit windows... but our build/test
         #machines dont use that config, so we're okay
         if os.environ["JOB_NAME"].find("32on64") != -1:
-            self.installpath = os.path.join(os.environ["ProgramFiles(x86)"],"Safir SDK Core")
+            self.installpath = os.path.join(os.environ["ProgramFiles(x86)"], "Safir SDK Core")
         else:
-            self.installpath = os.path.join(os.environ["ProgramFiles"],"Safir SDK Core")
+            self.installpath = os.path.join(os.environ["ProgramFiles"], "Safir SDK Core")
 
         installer = glob.glob("SafirSDKCore*.exe")
         if len(installer) != 1:
-            raise SetupError("Unexpected number of installers: "+ str(installer))
+            raise SetupError("Unexpected number of installers: " + str(installer))
         self.installer = installer[0]
         self.uninstaller = None
 
     def can_uninstall(self):
         #we can't use self.installpath, since it may not be installed there if it was
         #left over from previous installation
-        ip = os.path.join(os.environ["ProgramFiles"],"Safir SDK Core")
+        ip = os.path.join(os.environ["ProgramFiles"], "Safir SDK Core")
         uninstaller = os.path.join(ip, "Uninstall.exe")
         installed = os.path.isfile(uninstaller) and len(os.listdir(ip)) > 1
 
@@ -68,7 +71,7 @@ class WindowsInstaller(object):
             if installed:
                 self.uninstaller = uninstaller
         else:
-            ip86 = os.path.join(pf86,"Safir SDK Core")
+            ip86 = os.path.join(pf86, "Safir SDK Core")
             uninstaller86 = os.path.join(ip86, "Uninstall.exe")
             installed86 = os.path.isfile(uninstaller86) and len(os.listdir(ip86)) > 1
 
@@ -85,19 +88,19 @@ class WindowsInstaller(object):
         if not self.can_uninstall():
             raise SetupError("No uninstaller found!")
 
-        log ("Running uninstaller:", self.uninstaller)
+        log("Running uninstaller:", self.uninstaller)
         #The _? argument requires that we concatenate the command like this instead of using a tuple
         result = subprocess.call((self.uninstaller + " /S _?=" + self.installpath))
         if result != 0:
             raise SetupError("Uninstaller failed (" + str(result) + ")!")
 
-        if os.path.isdir(os.path.join(self.installpath,"dou")):
-            raise SetupError("Installer dir still exists after uninstallation! Contents:\n"
-                             + str(os.listdir(self.installpath)))
+        if os.path.isdir(os.path.join(self.installpath, "dou")):
+            raise SetupError("Installer dir still exists after uninstallation! Contents:\n" +
+                             str(os.listdir(self.installpath)))
         return True
 
     def install(self, development, testsuite):
-        log ("Running installer:", self.installer)
+        log("Running installer:", self.installer)
 
         cmd = [self.installer, "/S"]
 
@@ -132,11 +135,7 @@ class WindowsInstaller(object):
         elif width == "64":
             arch = "x64"
 
-        debugcrt_path = os.path.join("c:",
-                                     os.sep,
-                                     "debug-runtimes",
-                                     "vs" + vs_version,
-                                     arch)
+        debugcrt_path = os.path.join("c:", os.sep, "debug-runtimes", "vs" + vs_version, arch)
 
         log("Adding", debugcrt_path, "to the PATH")
 
@@ -145,34 +144,33 @@ class WindowsInstaller(object):
 
         os.environ["PATH"] += os.pathsep + debugcrt_path
 
-
     def check_installation(self):
         if not os.path.isdir(self.installpath):
             raise SetupError("Installation directory does not exist!")
         listdir = os.listdir(self.installpath)
         if len(listdir) < 2:
             raise SetupError("Unexpected number of directories in installation directory: " + str(listdir))
-        if all (dir in listdir for k in ("bin", "installer_utils", "include", "lib")):
+        if all(dir in listdir for k in ("bin", "installer_utils", "include", "lib")):
             raise SetupError("Could not find some expected directory in installation directory: " + str(listdir))
 
         #Check that bin directory is in path
-        pathed = os.path.join(self.installpath,"installer_utils","pathed")
+        pathed = os.path.join(self.installpath, "installer_utils", "pathed")
 
-        proc = subprocess.Popen((pathed,"/machine"),
-                                stdout = subprocess.PIPE,
-                                stderr = subprocess.STDOUT,
-                                universal_newlines = True)
+        proc = subprocess.Popen((pathed, "/machine"),
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.STDOUT,
+                                universal_newlines=True)
 
         output = proc.communicate()[0]
-        binpath = os.path.join(self.installpath,"bin")
+        binpath = os.path.join(self.installpath, "bin")
         if output.find(binpath) == -1:
             raise SetupError("bin directory does not appear to have been added to PATH:\n" + output)
-        if os.environ["PATH"].find(os.path.join("Safir SDK Core","bin")) != -1:
-            raise SetupError("bin directory seems to have been added to PATH before installation!:\n"
-                             + os.environ["PATH"])
+        if os.environ["PATH"].find(os.path.join("Safir SDK Core", "bin")) != -1:
+            raise SetupError("bin directory seems to have been added to PATH before installation!:\n" +
+                             os.environ["PATH"])
         if os.environ.get("BOOST_ROOT") is not None and os.environ["BOOST_ROOT"].find("Safir SDK Core") != -1:
-            raise SetupError("BOOST_ROOT environment variable seems to have been assigned before installation!:\n"
-                             + os.environ["BOOST_ROOT"])
+            raise SetupError("BOOST_ROOT environment variable seems to have been assigned before installation!:\n" +
+                             os.environ["BOOST_ROOT"])
 
         os.environ["PATH"] += os.pathsep + binpath
         os.environ["BOOST_ROOT"] = self.installpath
@@ -180,26 +178,27 @@ class WindowsInstaller(object):
         self.__setup_debug_runtime()
 
         log("Running safir_show_config to test that exes can be run")
-        proc = subprocess.Popen(("safir_show_config","--locations", "--typesystem", "--logging"),
-                                stdout = subprocess.PIPE,
-                                stderr = subprocess.STDOUT,
-                                universal_newlines = True)
+        proc = subprocess.Popen(("safir_show_config", "--locations", "--typesystem", "--logging"),
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.STDOUT,
+                                universal_newlines=True)
         output = proc.communicate()[0]
         if proc.returncode != 0:
-            raise SetupError("Failed to run safir_show_config. returncode = "
-                             + str(proc.returncode) + "\nOutput:\n" + output)
+            raise SetupError("Failed to run safir_show_config. returncode = " + str(proc.returncode) + "\nOutput:\n" +
+                             output)
 
         if not self.development_installed:
-            if os.path.isdir(os.path.join(self.installpath,"include","boost")):
+            if os.path.isdir(os.path.join(self.installpath, "include", "boost")):
                 raise SetupError("Found unexpected directory 'include/boost'")
-            if os.path.isdir(os.path.join(self.installpath,"include","Safir")):
+            if os.path.isdir(os.path.join(self.installpath, "include", "Safir")):
                 raise SetupError("Found unexpected directory 'include/Safir'")
+
 
 class DebianInstaller(object):
     def __init__(self):
         self.packages = ("safir-sdk-core", "safir-sdk-core-tools", "safir-sdk-core-dev", "safir-sdk-core-testsuite")
 
-    def __is_installed(self, package_name, cache = None):
+    def __is_installed(self, package_name, cache=None):
         if cache is None:
             cache = apt.cache.Cache()
 
@@ -211,99 +210,105 @@ class DebianInstaller(object):
         for pkg in self.packages:
             if self.__is_installed(pkg, cache):
                 return True
-        return False;
+        return False
 
     def uninstall(self):
         if not self.can_uninstall():
             raise SetupError("Cannot uninstall! Packages are not installed!")
 
-        log ("Uninstalling packages: ")
+        log("Uninstalling packages: ")
 
         cmd = ["sudo", "--non-interactive", "apt-get", "--yes", "purge"]
         for pkg in self.packages:
             if self.__is_installed(pkg):
-                log (" ", pkg)
+                log(" ", pkg)
                 cmd.append(pkg)
 
-
-        proc = subprocess.Popen(cmd,
-                                stdout = subprocess.PIPE,
-                                stderr = subprocess.STDOUT)
+        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         output = proc.communicate()[0]
         if proc.returncode != 0:
-            raise SetupError("Failed to run apt-get purge. returncode = "
-                             + str(proc.returncode) + "\nOutput:\n" + output)
-
+            raise SetupError("Failed to run apt-get purge. returncode = " + str(proc.returncode) + "\nOutput:\n" +
+                             output)
 
     def install(self, development, testsuite):
         runtime = glob.glob("safir-sdk-core_*.deb")
         if len(runtime) != 1:
-            raise SetupError("Unexpected number of runtime packages: "+ str(runtime))
+            raise SetupError("Unexpected number of runtime packages: " + str(runtime))
 
         tools = glob.glob("safir-sdk-core-tools*.deb")
         if len(tools) != 1:
-            raise SetupError("Unexpected number of tools packages: "+ str(tools))
+            raise SetupError("Unexpected number of tools packages: " + str(tools))
 
-        packages = [runtime[0],tools[0]]
+        packages = [runtime[0], tools[0]]
 
         if development:
             pkg = glob.glob("safir-sdk-core-dev_*.deb")
             if len(pkg) != 1:
-                raise SetupError("Unexpected number of development packages: "+ str(pkg))
+                raise SetupError("Unexpected number of development packages: " + str(pkg))
             packages.append(pkg[0])
 
         if testsuite:
             pkg = glob.glob("safir-sdk-core-testsuite_*.deb")
             if len(pkg) != 1:
-                raise SetupError("Unexpected number of testsuite packages: "+ str(pkg))
+                raise SetupError("Unexpected number of testsuite packages: " + str(pkg))
             packages.append(pkg[0])
 
-        log ("Installing packages", packages)
+        log("Installing packages", packages)
 
         proc = subprocess.Popen(["sudo", "dpkg", "--install"] + packages,
-                                stdout = subprocess.PIPE,
-                                stderr = subprocess.STDOUT)
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.STDOUT)
         output = proc.communicate()[0]
         if proc.returncode != 0:
-            raise SetupError("Failed to run dpkg --install. returncode = "
-                             + str(proc.returncode) + "\nOutput:\n" + output)
-
+            raise SetupError("Failed to run dpkg --install. returncode = " + str(proc.returncode) + "\nOutput:\n" +
+                             output)
 
     def check_installation(self):
         log("Running safir_show_config to test that exes can be run")
-        proc = subprocess.Popen(("safir_show_config","--locations", "--typesystem", "--logging"),
-                                stdout = subprocess.PIPE,
-                                stderr = subprocess.STDOUT,
-                                universal_newlines = True)
+        proc = subprocess.Popen(("safir_show_config", "--locations", "--typesystem", "--logging"),
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.STDOUT,
+                                universal_newlines=True)
         output = proc.communicate()[0]
         if proc.returncode != 0:
-            raise SetupError("Failed to run safir_show_config. returncode = "
-                             + str(proc.returncode) + "\nOutput:\n" + output)
+            raise SetupError("Failed to run safir_show_config. returncode = " + str(proc.returncode) + "\nOutput:\n" +
+                             output)
+
 
 def run_test_suite(kind):
     log("Launching test suite")
-    arguments = ["--jenkins",]
+    arguments = [
+        "--jenkins",
+    ]
     if os.environ["JOB_NAME"].find("32on64") != -1:
-        arguments += ("--no-java",)
+        arguments += ("--no-java", )
     if kind == "multinode":
-        arguments += ("--multinode",)
+        arguments += ("--multinode", )
     if kind == "multicomputer":
-        arguments += ("--multicomputer",)
+        arguments += ("--multicomputer", )
     if sys.platform == "win32":
-        result = subprocess.call(["run_dose_tests.py",] + arguments, shell = True)
+        result = subprocess.call([
+            "run_dose_tests.py",
+        ] + arguments, shell=True)
     else:
-        result = subprocess.call(["run_dose_tests",] + arguments)
+        result = subprocess.call([
+            "run_dose_tests",
+        ] + arguments)
 
     if result != 0:
         raise SetupError("Test suite failed. Returncode = " + str(result))
+
 
 def run_test_slave():
     log("Launching Multinode test slave")
     arguments = ["--jenkins", "--slave"]
-    result = subprocess.call(["run_dose_tests",] + arguments)
+    result = subprocess.call([
+        "run_dose_tests",
+    ] + arguments)
 
     if result != 0:
         raise SetupError("Test suite failed. Returncode = " + str(result))
+
 
 def run_database_tests():
     log("Running Dope tests")
@@ -311,68 +316,80 @@ def run_database_tests():
         hostname = "ms-sql-server\\SQLEXPRESS"
     else:
         hostname = "databases"
-    args = ["--driver", os.environ["Driver"],
-            "--hostname", hostname,
-            "--database", os.environ.get("label").replace("-","")]
+    args = [
+        "--driver", os.environ["Driver"], "--hostname", hostname, "--database",
+        os.environ.get("label").replace("-", "")
+    ]
     if sys.platform == "win32":
-        dope_result = subprocess.call(["run_dope_odbc_backend_test.py",] + args, shell = True)
+        dope_result = subprocess.call([
+            "run_dope_odbc_backend_test.py",
+        ] + args, shell=True)
     else:
-        dope_result = subprocess.call(["run_dope_odbc_backend_test",] + args)
+        dope_result = subprocess.call([
+            "run_dope_odbc_backend_test",
+        ] + args)
 
     log("Dope tests result:", dope_result)
 
     if dope_result != 0:
         raise Exception("Database tests failed")
 
+
 def build_examples():
     olddir = os.getcwd()
-    dirs = (("examples" , None),
-            ("src/dots/dots_dobmake.ss/tests/tree" , None),
-            ("src/dots/dots_dobmake.ss/tests/many_dous" , None),
-            ("src/dots/dots_dobmake.ss/tests/separate_dirs/dous_1" , os.path.join(olddir, "inst")))
+    dirs = (("examples", None), ("src/dots/dots_dobmake.ss/tests/tree", None),
+            ("src/dots/dots_dobmake.ss/tests/many_dous", None), ("src/dots/dots_dobmake.ss/tests/separate_dirs/dous_1",
+                                                                 os.path.join(olddir, "inst")))
     #We don't test the dous_2 and dous_3 builds, since it is just too fiddly to get automated.
 
     for (builddir, installdir) in dirs:
         os.chdir(builddir)
 
         if sys.platform == "win32":
-            cmd = ["dobmake-batch.py",]
+            cmd = [
+                "dobmake-batch.py",
+            ]
         else:
-            cmd = ["dobmake-batch",]
+            cmd = [
+                "dobmake-batch",
+            ]
 
-        cmd +=  ("--jenkins", "--skip-tests")
+        cmd += ("--jenkins", "--skip-tests")
         if installdir is not None:
             cmd += ("--install", installdir)
         if os.environ["JOB_NAME"].find("32on64") != -1:
-            cmd += ("--32-bit",)
+            cmd += ("--32-bit", )
             #the 64 bit build machines do not have 32bit Qt installed,
             #so we skip qt stuff, i.e. VehicleMmiCppQt.
             os.environ["SAFIR_SKIP_QT"] = "True"
 
-        log ("Running command ", " ".join(cmd))
-        result = subprocess.call(cmd,
-                                 shell = sys.platform == "win32")
+        log("Running command ", " ".join(cmd))
+        result = subprocess.call(cmd, shell=sys.platform == "win32")
         if result != 0:
             raise SetupError("Build examples failed. Returncode = " + str(result))
 
         os.chdir(olddir)
 
+
 def parse_command_line():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--skip-install", action="store_true",
-                        help="Skip the install step. Useful for running this script when "
-                             + " you've already installed Safir SDK Core")
+    parser.add_argument("--skip-install",
+                        action="store_true",
+                        help="Skip the install step. Useful for running this script when " +
+                        " you've already installed Safir SDK Core")
 
-    parser.add_argument("--test", "-t",
-                        choices=["standalone-tests","multinode-tests","multicomputer-tests","build-examples","database"],
-                        help="Which test to perform")
+    parser.add_argument(
+        "--test",
+        "-t",
+        choices=["standalone-tests", "multinode-tests", "multicomputer-tests", "build-examples", "database"],
+        help="Which test to perform")
 
-    parser.add_argument("--slave", action = "store_true",
-                        help = "Be a multinode test slave")
+    parser.add_argument("--slave", action="store_true", help="Be a multinode test slave")
 
     arguments = parser.parse_args()
 
     return arguments
+
 
 def main():
     args = parse_command_line()
@@ -384,7 +401,7 @@ def main():
             platform.linux_distribution()[0] in ("debian", "Ubuntu"):
             installer = DebianInstaller()
         else:
-            log ("Platform", sys.platform, ",", platform.linux_distribution()," is not supported by this script")
+            log("Platform", sys.platform, ",", platform.linux_distribution(), " is not supported by this script")
             return 1
 
         if installer.can_uninstall():
@@ -397,7 +414,7 @@ def main():
             development = args.test == "build-examples"
             testsuite = args.test != "build-examples"
 
-            installer.install(development,testsuite)
+            installer.install(development, testsuite)
             installer.check_installation()
 
         if args.test == "standalone-tests":
@@ -414,18 +431,19 @@ def main():
             run_test_slave()
 
     except SetupError as e:
-        log ("Error: " + str(e))
+        log("Error: " + str(e))
         return 1
     except Exception as e:
-        log ("Caught exception: " + str(e))
+        log("Caught exception: " + str(e))
         return 1
     finally:
         if not args.skip_install:
             try:
                 installer.uninstall()
             except SetupError as e:
-                log ("Error: " + str(e))
+                log("Error: " + str(e))
                 return 1
     return 0
+
 
 sys.exit(main())

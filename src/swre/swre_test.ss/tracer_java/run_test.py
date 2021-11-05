@@ -37,8 +37,7 @@ arguments = parser.parse_args()
 dependencies = arguments.dependencies.split(",")
 
 for dep in dependencies:
-    shutil.copy2(dep,
-                 ".")
+    shutil.copy2(dep, ".")
 
 sender_cmd = ("java", "-jar", arguments.jar)
 
@@ -54,16 +53,18 @@ encoding = "utf-8"
 if bytearray(o1)[0] != ord('R') or bytearray(o1)[1] != ord('y'):
     encoding = "utf-16"
 
-stdout_output = (o1 + o2 + o3).decode(encoding).replace("\r","")
+stdout_output = (o1 + o2 + o3).decode(encoding).replace("\r", "")
 syslog_output = syslog.get_data(1)
 
+
 def fail(message):
-    print("Failed! Wrong number of",message)
-    print ("STDOUT OUTPUT:")
+    print("Failed! Wrong number of", message)
+    print("STDOUT OUTPUT:")
     safe_print(stdout_output)
-    print ("SYSLOG OUTPUT:")
+    print("SYSLOG OUTPUT:")
     safe_print(syslog_output)
     sys.exit(1)
+
 
 if stdout_output.count("\n") != 36 or syslog_output.count("\n") != 36:
     fail("lines")
@@ -74,7 +75,8 @@ if stdout_output.count(u"Rymd-B@rje: blahonga") != 6 or syslog_output.count(u"Ry
 if stdout_output.count(u"Rymd-B@rje: blahonga\n") != 3 or syslog_output.count(u"Rymd-Börje: blahonga\n") != 3:
     fail("blahonga newlines")
 
-if stdout_output.count(u"Razor: brynanuppafj@ssasponken\n") != 3 or syslog_output.count(u"Razor: brynanuppafjässasponken\n") != 3:
+if stdout_output.count(u"Razor: brynanuppafj@ssasponken\n") != 3 or syslog_output.count(
+        u"Razor: brynanuppafjässasponken\n") != 3:
     fail("brynanuppa")
 
 if stdout_output.count(u"Rymd-B@rje: blahong@a\n") != 3 or syslog_output.count(u"Rymd-Börje: blahong®a\n") != 3:
@@ -88,11 +90,12 @@ if stdout_output.count(u"Razor: 123.1\n") != 3 or syslog_output.count(u"Razor: 1
 
 if stdout_output.count(u"Razor: foobar\n") != 3 or syslog_output.count(u"Razor: foobar\n") != 3:
     fail("foobar")
-    
+
 if stdout_output.count(u"Razor: this is the end\n") != 3 or syslog_output.count(u"Razor: this is the end\n") != 3:
     fail("this is the end")
 
-if stdout_output.count(u"Razor: my only friend, the end\n") != 3 or syslog_output.count(u"Razor: my only friend, the end\n") != 3:
+if stdout_output.count(u"Razor: my only friend, the end\n") != 3 or syslog_output.count(
+        u"Razor: my only friend, the end\n") != 3:
     fail("my only friend, the end")
 
 if stdout_output.count(u"the end\nRymd-B@rje: of our elaborate plans\n") != 3:

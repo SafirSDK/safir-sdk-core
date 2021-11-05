@@ -37,8 +37,7 @@ arguments = parser.parse_args()
 dependencies = arguments.dependencies.split(",")
 
 for dep in dependencies:
-    shutil.copy2(dep,
-                 ".")
+    shutil.copy2(dep, ".")
 
 sender_cmd = ("java", "-jar", arguments.jar)
 
@@ -52,15 +51,17 @@ stdout_output = o1 + o2 + o3
 syslog_output = syslog.get_data(1)
 
 #java sometimes outputs some stuff
-stdout_output =re.sub(r"Picked up _JAVA_OPTIONS: .*\n", "", stdout_output)
+stdout_output = re.sub(r"Picked up _JAVA_OPTIONS: .*\n", "", stdout_output)
+
 
 def fail(message):
-    print("Failed! Wrong number of",message)
-    print ("STDOUT OUTPUT:")
+    print("Failed! Wrong number of", message)
+    print("STDOUT OUTPUT:")
     safe_print(stdout_output)
-    print ("SYSLOG OUTPUT:")
+    print("SYSLOG OUTPUT:")
     safe_print(syslog_output)
     sys.exit(1)
+
 
 if syslog_output.count("\n") != 24:
     fail("lines")

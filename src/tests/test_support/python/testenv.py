@@ -28,6 +28,7 @@ import syslog_server
 from threading import Thread
 from queue import Queue, Empty
 
+
 def enqueue_output(out, queue):
     while True:
         line = out.readline()
@@ -40,6 +41,7 @@ def enqueue_output(out, queue):
 def log(*args, **kwargs):
     print(*args, **kwargs)
     sys.stdout.flush()
+
 
 class TestEnvStopper:
     def __init__(self, env):
@@ -62,15 +64,24 @@ class TestEnv:
 
     If the exes are in the PATH, its okay to just use exe names.
     """
-    def __init__(self, safir_control, dose_main, dope_main, safir_show_config, start_syslog_server = True, ignore_control_cmd = False, wait_for_persistence = True):
+    def __init__(self,
+                 safir_control,
+                 dose_main,
+                 dope_main,
+                 safir_show_config,
+                 start_syslog_server=True,
+                 ignore_control_cmd=False,
+                 wait_for_persistence=True):
         self.__procs = dict()
         self.__creationflags = 0
         if sys.platform == "win32":
-            self.__creationflags= subprocess.CREATE_NEW_PROCESS_GROUP
-        self.safir_control = self.launchProcess("safir_control", (safir_control, "--dose-main-path", dose_main, "--ignore-control-cmd", str(ignore_control_cmd)))
+            self.__creationflags = subprocess.CREATE_NEW_PROCESS_GROUP
+        self.safir_control = self.launchProcess(
+            "safir_control",
+            (safir_control, "--dose-main-path", dose_main, "--ignore-control-cmd", str(ignore_control_cmd)))
         self.dope = dope_main is not None
         if self.dope:
-            self.launchProcess("dope_main", (dope_main,))
+            self.launchProcess("dope_main", (dope_main, ))
 
         self.start_syslog_server = start_syslog_server
         if self.start_syslog_server == True:
@@ -84,7 +95,7 @@ class TestEnv:
         start_time = time.time()
         log("Waiting for safir_control to be ready")
 
-        phrase="persistence data is ready"
+        phrase = "persistence data is ready"
 
         while True:
             time.sleep(0.2)
@@ -92,10 +103,8 @@ class TestEnv:
                 log(" dose_main seems to be ready")
                 break
             if self.safir_control.poll() is not None:
-                raise Exception(" safir_control terminated!\n" +
-                                "----- Output so far ----\n" +
-                                self.Output("safir_control") +
-                                "\n---------------------")
+                raise Exception(" safir_control terminated!\n" + "----- Output so far ----\n" +
+                                self.Output("safir_control") + "\n---------------------")
             if time.time() - start_time > 90:
                 start_time = time.time()
                 log("safir_control and/or dose_main seems slow to start. Here is some output:")
@@ -110,20 +119,20 @@ class TestEnv:
                 log("----------------------------")
                 log("Will keep waiting")
 
-    def launchProcess(self, name, cmd, collect_output = True):
+    def launchProcess(self, name, cmd, collect_output=True):
         log("Launching", name)
         proc = subprocess.Popen(cmd,
-                                stdout = subprocess.PIPE if collect_output else None,
-                                stderr = subprocess.STDOUT if collect_output else None,
-                                creationflags = self.__creationflags,
-                                universal_newlines = True)
+                                stdout=subprocess.PIPE if collect_output else None,
+                                stderr=subprocess.STDOUT if collect_output else None,
+                                creationflags=self.__creationflags,
+                                universal_newlines=True)
         queue = Queue()
         if collect_output:
             thread = Thread(target=enqueue_output, args=(proc.stdout, queue))
-            thread.daemon = True #Thread dies with program, no need to stop explicitly
+            thread.daemon = True  #Thread dies with program, no need to stop explicitly
             thread.start()
 
-        self.__procs[name] = (proc,queue,list())
+        self.__procs[name] = (proc, queue, list())
         return proc
 
     def __kill(self, name, proc, timeout):
@@ -136,7 +145,7 @@ class TestEnv:
             else:
                 proc.terminate()
             #let it have a minute to die...
-            for _ in range (timeout * 10):
+            for _ in range(timeout * 10):
                 if proc.poll() is not None:
                     log("   Terminate successful")
                     return
@@ -150,16 +159,16 @@ class TestEnv:
 
     def killprocs(self):
         log("Terminating all processes")
-        self.__kill("safir_control", self.safir_control, timeout = 120)
+        self.__kill("safir_control", self.safir_control, timeout=120)
 
         polls = 0
-        for name, (proc,queue,output) in self.__procs.items():
+        for name, (proc, queue, output) in self.__procs.items():
             while polls < 600 and proc.poll() is None:
                 time.sleep(0.1)
                 polls += 1
 
             if proc.returncode is None:
-                self.__kill(name,proc, timeout = 30)
+                self.__kill(name, proc, timeout=30)
 
             if proc.returncode != 0:
                 log("--", name, "returncode is", proc.returncode, " -----")
@@ -175,8 +184,8 @@ class TestEnv:
         self.syslog_output.append(data)
         return "".join(self.syslog_output)
 
-    def Output(self,name):
-        (proc,queue,output) = self.__procs[name]
+    def Output(self, name):
+        (proc, queue, output) = self.__procs[name]
         try:
             while True:
                 output.append(queue.get_nowait())
@@ -190,38 +199,37 @@ class TestEnv:
             #log(output)
             if output.find(expected_output) != -1:
                 return output
-            if not self.ProcessDied(): #reversed return value
+            if not self.ProcessDied():  #reversed return value
                 raise Exception("A process died")
             time.sleep(1)
 
-
     def ResetOutput(self, name):
-        (proc,queue,output) = self.__procs[name]
-        del output[:] #clear the list
+        (proc, queue, output) = self.__procs[name]
+        del output[:]  #clear the list
 
     def ReturnCodesOk(self):
         ok = True
-        for name, (proc,queue,output) in self.__procs.items():
+        for name, (proc, queue, output) in self.__procs.items():
             if proc.returncode != 0:
-                log (" - Process", name, "exited with code", proc.returncode)
-                log (" - Output:\n", self.Output(name))
+                log(" - Process", name, "exited with code", proc.returncode)
+                log(" - Output:\n", self.Output(name))
                 ok = False
         return ok
 
     def ProcessDied(self):
         ok = True
-        for name, (proc,queue,output) in self.__procs.items():
+        for name, (proc, queue, output) in self.__procs.items():
             ret = proc.poll()
             if ret is not None and ret != 0:
-                log (" - Process", name, "exited with code", proc.returncode)
-                log (" - Output:\n", self.Output(name))
+                log(" - Process", name, "exited with code", proc.returncode)
+                log(" - Output:\n", self.Output(name))
                 ok = False
         return ok
 
-    def WaitForProcess(self,name):
+    def WaitForProcess(self, name):
         proc = self.__procs.get(name)
         return proc[0].wait()
-    
+
     def SafirControlRunning(self):
         proc = self.__procs.get("safir_control")
 

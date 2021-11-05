@@ -31,6 +31,7 @@ ignore_directories = (".git", ".svn", ".hg", "boost", "rapidjson", "websocketpp"
 #glob patterns for files to not check for tabs
 ignore_files = ("*.xcf", "*.xsl", "*.bmp", "*.ico", "*.eap", "*.png", "Makefile", "rules", "*.snk", "*.dia", "*.resx")
 
+
 def log(*args, **kwargs):
     print(*args, **kwargs)
     sys.stdout.flush()
@@ -39,15 +40,16 @@ def log(*args, **kwargs):
 def check_tabs(filename):
     try:
         #log("checking file", filename)
-        with open(filename,"r") as f:
+        with open(filename, "r") as f:
             for line in f:
                 if "\t" in line:
-                    log (" !!!", filename, "contains a tab!!!")
+                    log(" !!!", filename, "contains a tab!!!")
                     return False
     except UnicodeDecodeError:
         log(" !!! UnicodeDecodeError while reading", filename)
         return False
     return True
+
 
 def main():
     ok = True
@@ -59,12 +61,13 @@ def main():
         for fname in fileList:
             check = True
             for ig in ignore_files:
-                if fnmatch.fnmatch(fname,ig):
+                if fnmatch.fnmatch(fname, ig):
                     check = False
-                    break;
+                    break
             if check:
-                ok = check_tabs(os.path.join(dirName,fname)) and ok
+                ok = check_tabs(os.path.join(dirName, fname)) and ok
     return 0 if ok else 1
+
 
 if __name__ == "__main__":
     sys.exit(main())

@@ -29,15 +29,20 @@ import shutil
 import re
 import argparse
 
+
 def run_test(test_case):
-    proc = subprocess.Popen((test_path, test_case), stdout=subprocess.PIPE, stderr=subprocess.STDOUT,universal_newlines=True)
+    proc = subprocess.Popen((test_path, test_case),
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.STDOUT,
+                            universal_newlines=True)
     stdout, stderr = proc.communicate()
 
     if proc.returncode != 0:
         print("Test failed!")
-        print (stdout)
+        print(stdout)
         sys.exit(1)
-    
+
+
 parser = argparse.ArgumentParser()
 parser.add_argument("test_conf_dir", help="Test configuration directory")
 args = parser.parse_args()
@@ -48,13 +53,13 @@ if sys.platform == "win32":
 else:
     exe_path = "."
 
-test_pgm = "Config_test"  
+test_pgm = "Config_test"
 test_path = os.path.join(exe_path, test_pgm)
 
 os.environ["SAFIR_TEST_CONFIG_OVERRIDE"] = args.test_conf_dir
 
 os.environ["DOU_TEST_DIR"] = os.path.join(args.test_conf_dir, "tc1")
-run_test("tc1")    
+run_test("tc1")
 
 os.environ["DOU_TEST_DIR"] = os.path.join(args.test_conf_dir, "tc2")
 run_test("tc2")
@@ -65,5 +70,5 @@ run_test("tc3")
 os.environ["DOU_TEST_DIR"] = os.path.join(args.test_conf_dir, "tc4")
 run_test("tc4")
 
-print ("Success!")
+print("Success!")
 sys.exit(0)

@@ -26,10 +26,12 @@
 import os, shutil, stat, subprocess, sys, re, filecmp
 from optparse import OptionParser
 
+
 class StagingError(Exception):
     pass
 
-def copy_file(name,destDir):
+
+def copy_file(name, destDir):
     if not os.path.isfile(name):
         raise StagingError(name + " is not a file!")
     if not os.path.isdir(destDir):
@@ -38,13 +40,15 @@ def copy_file(name,destDir):
         #the way this copy is meant to work is to copy the file contents
         #and copy the create and modification dates but *NOT* any other
         #metadata, such as permissions or ACLs.
-        destpath = os.path.join(destDir,os.path.split(name)[-1]) #full path
+        destpath = os.path.join(destDir, os.path.split(name)[-1])  #full path
         shutil.copy(name, destpath)
         stat = os.stat(name)
-        os.utime(destpath, (stat.st_atime, stat.st_mtime)) #copy create and modify times correctly
+        os.utime(destpath, (stat.st_atime, stat.st_mtime))  #copy create and modify times correctly
     except:
-        if not filecmp.cmp(name,os.path.join(destDir,os.path.split(name)[-1])):
-            logError("Caught exception while copying " + name + " to " + destDir + "/. Maybe the destination file or directory is read-only?")
+        if not filecmp.cmp(name, os.path.join(destDir, os.path.split(name)[-1])):
+            logError("Caught exception while copying " + name + " to " + destDir +
+                     "/. Maybe the destination file or directory is read-only?")
+
 
 def mkdir(newdir):
     """works the way a good mkdir should :)
@@ -64,6 +68,7 @@ def mkdir(newdir):
         if tail:
             os.mkdir(newdir)
 
+
 def copy_tree(srcdir, dstdir):
     # dstdir must exist first
     srcnames = os.listdir(srcdir)
@@ -76,6 +81,7 @@ def copy_tree(srcdir, dstdir):
             mkdir(dstdir)
             copy_file(srcfname, dstdir)
 
+
 class __WindowsStager(object):
     def __init__(self, logger, stage):
         self.logger = logger
@@ -86,13 +92,13 @@ class __WindowsStager(object):
 
     def __copy_dll(self, name):
         for path in os.environ.get("PATH").split(os.pathsep):
-            fn = os.path.join(path,name)
+            fn = os.path.join(path, name)
             if os.path.isfile(fn):
                 copy_file(fn, self.DLL_DESTINATION)
                 return
-        raise StagingError("Could not find "+ name)
+        raise StagingError("Could not find " + name)
 
-    def __copy_exe(self,name):
+    def __copy_exe(self, name):
         self.__copy_dll(name)
 
     def __copy_boost(self):
@@ -105,19 +111,20 @@ class __WindowsStager(object):
             raise StagingError("Failed to find boost installation")
 
         # find lib dir
-        boost_lib_dir = os.path.join(boost_dir, "lib");
+        boost_lib_dir = os.path.join(boost_dir, "lib")
         if not os.path.isdir(boost_lib_dir):
             raise StagingError("Failed to find boost lib dir")
 
-        boost_libraries = ("atomic",
-                           "chrono", #we don't need this ourselves, but users may?
-                           "date_time",
-                           "filesystem",
-                           "program_options",
-                           "regex",
-                           "system",
-                           "thread",
-                           "timer")
+        boost_libraries = (
+            "atomic",
+            "chrono",  #we don't need this ourselves, but users may?
+            "date_time",
+            "filesystem",
+            "program_options",
+            "regex",
+            "system",
+            "thread",
+            "timer")
 
         self.__copy_boost_libs(boost_lib_dir, boost_libraries)
         self.__copy_boost_dlls(boost_lib_dir, boost_libraries)
@@ -144,7 +151,7 @@ class __WindowsStager(object):
         if not os.path.isdir(dir):
             raise StagingError(dir + " is not a directory")
 
-        dst = os.path.join(self.HEADER_DESTINATION,os.path.split(dir)[-1])
+        dst = os.path.join(self.HEADER_DESTINATION, os.path.split(dir)[-1])
         copy_tree(dir, dst)
 
     def __copy_boost_libs(self, dir, libraries):
@@ -153,8 +160,7 @@ class __WindowsStager(object):
         for file in dirlist:
             match = file_name_filter.match(file)
             if match is not None and match.group(1) in libraries:
-                copy_file(os.path.join(dir,file), self.LIB_DESTINATION)
-
+                copy_file(os.path.join(dir, file), self.LIB_DESTINATION)
 
     def __copy_boost_dlls(self, dir, libraries):
         file_name_filter = re.compile(r"boost_(.*)-vc.*-mt-.*\.dll")
@@ -162,7 +168,7 @@ class __WindowsStager(object):
         for file in dirlist:
             match = file_name_filter.match(file)
             if match is not None and match.group(1) in libraries:
-                copy_file(os.path.join(dir,file), self.DLL_DESTINATION)
+                copy_file(os.path.join(dir, file), self.DLL_DESTINATION)
 
     def __copy_qt_dlls(self, dir):
         """
@@ -172,32 +178,34 @@ class __WindowsStager(object):
         all others are for qt5.
         """
 
-        names = ("Qt5Core.dll",
-                 "Qt5Widgets.dll",
-                 "Qt5Gui.dll",
-                 "LibGLESv2.dll",
-                 "LibEGL.dll",
-                 "icudt51.dll",
-                 "icudt53.dll",
-                 "icuin51.dll",
-                 "icuin53.dll",
-                 "icuuc51.dll",
-                 "icuuc53.dll",
-                 "QtCore4.dll",  #for qt4
-                 "QtGui4.dll")  #for qt4
+        names = (
+            "Qt5Core.dll",
+            "Qt5Widgets.dll",
+            "Qt5Gui.dll",
+            "LibGLESv2.dll",
+            "LibEGL.dll",
+            "icudt51.dll",
+            "icudt53.dll",
+            "icuin51.dll",
+            "icuin53.dll",
+            "icuuc51.dll",
+            "icuuc53.dll",
+            "QtCore4.dll",  #for qt4
+            "QtGui4.dll")  #for qt4
 
         for file in names:
             path = os.path.join(dir, "bin", file)
             if os.path.isfile(path):
-                self.logger.log (" Copying " + file, "detail")
+                self.logger.log(" Copying " + file, "detail")
                 copy_file(path, self.DLL_DESTINATION)
 
         qwindows = os.path.join(dir, "plugins", "platforms", "qwindows.dll")
         if os.path.isfile(qwindows):
-            self.logger.log (" Copying qwindows.dll", "detail")
+            self.logger.log(" Copying qwindows.dll", "detail")
             platforms = os.path.join(self.DLL_DESTINATION, "platforms")
             mkdir(platforms)
             copy_file(qwindows, platforms)
+
 
 def stage_dependencies(logger, stage):
     """
@@ -205,7 +213,7 @@ def stage_dependencies(logger, stage):
     """
     logger.log("Copying Safir SDK Core binary dependencies to staging area", "header")
     if sys.platform == "win32":
-        stager = __WindowsStager(logger,stage)
+        stager = __WindowsStager(logger, stage)
         stager.run()
 
     else:

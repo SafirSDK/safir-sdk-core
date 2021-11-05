@@ -31,12 +31,11 @@ if sys.platform == "win32":
 else:
     exe_path = "."
 
-crasher_exe = os.path.join(exe_path,"crasher")
+crasher_exe = os.path.join(exe_path, "crasher")
 
 
 def run_crasher(reason):
-    crasher = subprocess.Popen((crasher_exe,reason),
-                               stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    crasher = subprocess.Popen((crasher_exe, reason), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     result = crasher.communicate()[0].decode("ascii")
     print("Testing signal", reason)
     if result.find("callback") == -1:
@@ -46,12 +45,12 @@ def run_crasher(reason):
         print("Crasher program exited successfully (it is meant to crash!), exit code = ", crasher.returncode)
         sys.exit(1)
 
-    match = re.search(r"dumpPath = '(.*)'",result)
+    match = re.search(r"dumpPath = '(.*)'", result)
     if match is None:
         print("Failed to find dumpPath in output")
         print(result)
         sys.exit(1)
-    
+
     dumpPath = match.group(1)
 
     if not os.path.isfile(dumpPath):
@@ -59,6 +58,7 @@ def run_crasher(reason):
         print("expected to find", dumpPath)
         sys.exit(1)
     os.remove(dumpPath)
+
 
 run_crasher("SIGSEGV")
 run_crasher("SIGFPE")

@@ -34,8 +34,7 @@ arguments = parser.parse_args()
 dependencies = arguments.dependencies.split(",")
 
 for dep in dependencies:
-    shutil.copy2(dep,
-                 ".")
+    shutil.copy2(dep, ".")
 
 result = subprocess.call(("java", "-jar", arguments.jar))
 

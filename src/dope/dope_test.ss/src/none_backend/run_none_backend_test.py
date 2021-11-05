@@ -26,9 +26,11 @@
 import subprocess, os, time, sys, shutil, glob, argparse, re
 from testenv import TestEnv, TestEnvStopper
 
+
 def log(data):
     print(data)
     sys.stdout.flush()
+
 
 env = None
 
@@ -43,14 +45,11 @@ try:
 
     arguments = parser.parse_args()
 
-
     #add all the environment variables. passed on format A=10;B=20
     for pair in arguments.safir_generated_paths.split(";"):
-        (name,value) = pair.split("=")
+        (name, value) = pair.split("=")
         print("Setting environment variable", name, "to", value)
         os.environ[name] = value
-
-
     """
     log("Find out how many entities entity_owner will set")
     num_str = subprocess.check_output((arguments.entity_owner,"num"), universal_newlines=True)
@@ -60,12 +59,9 @@ try:
     """
 
     log("Set a bunch of entities")
-    env = TestEnv(arguments.safir_control,
-                         arguments.dose_main,
-                         arguments.dope_main,
-                         arguments.safir_show_config)
+    env = TestEnv(arguments.safir_control, arguments.dose_main, arguments.dope_main, arguments.safir_show_config)
     with TestEnvStopper(env):
-        env.launchProcess("entity_owner", (arguments.entity_owner,"set")).wait()
+        env.launchProcess("entity_owner", (arguments.entity_owner, "set")).wait()
         env.WaitForOutput("entity_owner", "Exiting")
 
     syslog_output = env.Syslog()
@@ -78,12 +74,9 @@ try:
         sys.exit(1)
 
     log("See if dope loads them at startup")
-    env = TestEnv(arguments.safir_control,
-                  arguments.dose_main,
-                  arguments.dope_main,
-                  arguments.safir_show_config)
+    env = TestEnv(arguments.safir_control, arguments.dose_main, arguments.dope_main, arguments.safir_show_config)
     with TestEnvStopper(env):
-        env.launchProcess("entity_owner", (arguments.entity_owner,"accept")).wait()
+        env.launchProcess("entity_owner", (arguments.entity_owner, "accept")).wait()
 
     syslog_output = env.Syslog()
     if len(syslog_output) != 0:

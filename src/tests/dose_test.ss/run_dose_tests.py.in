@@ -34,9 +34,11 @@ try:
 except ImportError:
     import urllib
 
+
 def log(*args, **kwargs):
     print(*args, **kwargs)
     sys.stdout.flush()
+
 
 def rmdir(directory):
     if os.path.exists(directory):
@@ -46,6 +48,7 @@ def rmdir(directory):
             log("Failed to remove directory, will retry")
             time.sleep(0.2)
             shutil.rmtree(directory)
+
 
 def mkdir(newdir):
     """works the way a good mkdir should :)
@@ -65,48 +68,78 @@ def mkdir(newdir):
         if tail:
             os.mkdir(newdir)
 
+
 class Parameters:
     def __init__(self):
         import tempfile
 
         parser = OptionParser()
-        parser.add_option("--jenkins", action="store_true",dest="jenkins",default=False,
+        parser.add_option("--jenkins",
+                          action="store_true",
+                          dest="jenkins",
+                          default=False,
                           help="Set up the needed environment variables for a Jenkins automated build," +
                           "and respect the langX matrix variables")
-        parser.add_option("--multinode", action="store_true",dest="multinode",default=False,
+        parser.add_option("--multinode",
+                          action="store_true",
+                          dest="multinode",
+                          default=False,
                           help="Run multinode tests instead of standalone tests. Both nodes are run on this computer.")
-        parser.add_option("--multicomputer", action="store_true",dest="multicomputer",default=False,
+        parser.add_option("--multicomputer",
+                          action="store_true",
+                          dest="multicomputer",
+                          default=False,
                           help="Run multicomputer tests instead of standalone tests.")
-        parser.add_option("--autostart-slave", action="store_true", dest="autostart_slave",default=False,
+        parser.add_option("--autostart-slave",
+                          action="store_true",
+                          dest="autostart_slave",
+                          default=False,
                           help="Automatically start a multicomputer slave (Server_1) through jenkins." +
                           "This is only applicable when using --multicomputer, and is implied when using --jenkins")
-        parser.add_option("--slave", action="store_true",dest="slave",default=False,
-                          help="Be a multicomputer slave")
-        parser.add_option("--run-until-failure", action="store_true",dest="run_until_failure",default=False,
+        parser.add_option("--slave", action="store_true", dest="slave", default=False, help="Be a multicomputer slave")
+        parser.add_option("--run-until-failure",
+                          action="store_true",
+                          dest="run_until_failure",
+                          default=False,
                           help="Run the given test range until one or more tests fail. Only test output for the last "
                           "(failed) run will be saved.")
-        parser.add_option("--no-syslog", action="store_false",dest="check_syslog",default=True,
+        parser.add_option("--no-syslog",
+                          action="store_false",
+                          dest="check_syslog",
+                          default=True,
                           help="Do not check syslog output")
-        parser.add_option("--no-java", action="store_true",dest="no_java",default=False,
+        parser.add_option("--no-java",
+                          action="store_true",
+                          dest="no_java",
+                          default=False,
                           help="Do not run java partners")
-        parser.add_option("--no-dotnet", action="store_true",dest="no_dotnet",default=False,
+        parser.add_option("--no-dotnet",
+                          action="store_true",
+                          dest="no_dotnet",
+                          default=False,
                           help="Do not run dotnet partners")
-        parser.add_option("--lang0", action="store",dest="lang0",default="cpp",
+        parser.add_option("--lang0",
+                          action="store",
+                          dest="lang0",
+                          default="cpp",
                           help="Which partner 0 to run. [default: %default]. "
                           "If --jenkins is specified the Languages environment variable will override this.")
-        parser.add_option("--lang1", action="store",dest="lang1",default="cpp",
+        parser.add_option("--lang1",
+                          action="store",
+                          dest="lang1",
+                          default="cpp",
                           help="Which partner 1 to run. [default: %default]. "
                           "If --jenkins is specified the Languages environment variable will override this.")
-        parser.add_option("--lang2", action="store",dest="lang2",default="cpp",
+        parser.add_option("--lang2",
+                          action="store",
+                          dest="lang2",
+                          default="cpp",
                           help="Which partner 2 to run. [default: %default]. "
                           "If --jenkins is specified the Languages environment variable will override this.")
-        parser.add_option("--single-testcase", action="store",
-                          help="Run only a single testcase.")
-        parser.add_option("--first-testcase", action="store",
-                          help="Sets the first testcase to be run.")
-        parser.add_option("--last-testcase", action="store",
-                          help="Sets the last testcase to be run.")
-        (options,args) = parser.parse_args()
+        parser.add_option("--single-testcase", action="store", help="Run only a single testcase.")
+        parser.add_option("--first-testcase", action="store", help="Sets the first testcase to be run.")
+        parser.add_option("--last-testcase", action="store", help="Sets the last testcase to be run.")
+        (options, args) = parser.parse_args()
 
         self.lang0 = options.lang0
         self.lang1 = options.lang1
@@ -129,7 +162,8 @@ class Parameters:
             log("Don't specify both --slave and --multinode")
             sys.exit(1)
 
-        if (options.single_testcase is not None) and ((options.last_testcase is not None) or (options.first_testcase is not None)):
+        if (options.single_testcase is not None) and ((options.last_testcase is not None) or
+                                                      (options.first_testcase is not None)):
             log("Don't specify both --single-testcase and either --first-testcase or --last-testcase")
             sys.exit(1)
 
@@ -137,7 +171,7 @@ class Parameters:
 
         if options.jenkins:
             #Get env variables if they're set
-            langs= os.environ.get("Languages")
+            langs = os.environ.get("Languages")
             if langs is not None:
                 splitlangs = langs.split("-")
                 if len(splitlangs) != 3:
@@ -147,7 +181,7 @@ class Parameters:
                 self.lang2 = splitlangs[2]
 
         #This relies on the fact that we're installed in the bin directory on both linux and windows.
-        install_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)),"..")
+        install_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..")
 
         #Get the default dou directory and set it as an environment variable that can be
         #picked up by the typesystem.ini that belongs to the test suite.
@@ -183,24 +217,18 @@ class Parameters:
                         log("Could not resolve %TEMP% or %TMP")
                         sys.exit(1)
 
-
-
         #Set up to use our own test configuration
-        os.environ["SAFIR_TEST_CONFIG_OVERRIDE"] = os.path.join(self.test_data_directory,
-                                                                "dose",
-                                                                "test_config",
-                                                                config)
+        os.environ["SAFIR_TEST_CONFIG_OVERRIDE"] = os.path.join(self.test_data_directory, "dose", "test_config", config)
 
-        jar_install_path = os.path.join(install_dir,
-                                        "@SAFIR_INSTALL_DESTINATION_JAR@")
+        jar_install_path = os.path.join(install_dir, "@SAFIR_INSTALL_DESTINATION_JAR@")
 
-        self.safir_control_cmd = ("safir_control",)
+        self.safir_control_cmd = ("safir_control", )
 
-        self.dope_main_cmd = ("dope_main",)
-        self.foreach_cmd = ("foreach",)
+        self.dope_main_cmd = ("dope_main", )
+        self.foreach_cmd = ("foreach", )
 
-        self.dose_test_cpp_cmd = ("dose_test_cpp",)
-        self.dose_test_dotnet_cmd = ("dose_test_dotnet",)
+        self.dose_test_cpp_cmd = ("dose_test_cpp", )
+        self.dose_test_dotnet_cmd = ("dose_test_dotnet", )
 
         #-Xfuture gives weird errors on RPi and BBone (both on debian jessie)
         self.dose_test_java_cmd = ("java",) + \
@@ -208,16 +236,19 @@ class Parameters:
                                   ("-jar", os.path.join(jar_install_path,"dose_test_java.jar"))
 
         self.testcases_path = os.path.join(self.test_data_directory, "dose", "testcases")
-        self.dose_test_sequencer_cmd = ("dose_test_sequencer",
-                                        "-d",
-                                        self.testcases_path,
-                                        #"--context", "-1", #random context
-                                        "-l", self.lang0, self.lang1, self.lang2)
+        self.dose_test_sequencer_cmd = (
+            "dose_test_sequencer",
+            "-d",
+            self.testcases_path,
+            #"--context", "-1", #random context
+            "-l",
+            self.lang0,
+            self.lang1,
+            self.lang2)
 
         self.single_testcase = options.single_testcase
         if options.single_testcase is not None:
-            self.dose_test_sequencer_cmd += ("--first", options.single_testcase,
-                                             "--last", options.single_testcase)
+            self.dose_test_sequencer_cmd += ("--first", options.single_testcase, "--last", options.single_testcase)
 
         self.first_testcase = options.first_testcase
         self.last_testcase = options.last_testcase
@@ -229,15 +260,13 @@ class Parameters:
             self.dose_test_sequencer_cmd += ("--last", options.last_testcase)
 
         if self.multinode or self.multicomputer:
-            self.dose_test_sequencer_cmd += ("--multinode",)
+            self.dose_test_sequencer_cmd += ("--multinode", )
 
-        self.expected_output_path = os.path.join(self.test_data_directory,
-                                                 "dose",
+        self.expected_output_path = os.path.join(self.test_data_directory, "dose",
                                                  "output_standalone" if self.standalone else "output_multinode")
 
         #this is needed for multicomputer tests
         self.tempdir = tempfile.mkdtemp(prefix="dose_test_backup")
-
 
 
 class Results:
@@ -246,34 +275,33 @@ class Results:
         self.num_tc_performed = 0
 
     def write_test_result(self, expr, name, output):
-        with open(name + ".junit.xml","w") as junitfile:
+        with open(name + ".junit.xml", "w") as junitfile:
             log("Test", name, " success:", expr)
-            junitfile.write("<?xml version=\"1.0\"?>\n<testsuite>\n  <testcase name=\"" + name + "\" classname=\"dose_test\"")
+            junitfile.write("<?xml version=\"1.0\"?>\n<testsuite>\n  <testcase name=\"" + name +
+                            "\" classname=\"dose_test\"")
             if expr:
                 """success"""
                 junitfile.write("/>\n")
             else:
                 """failure"""
-                log(" -",name, "failed!")
+                log(" -", name, "failed!")
                 self.num_tc_failed += 1
-                junitfile.write(">\n    <error message=\"Failed\">" +
-                                output +
-                                "\n</error>\n  </testcase>\n")
+                junitfile.write(">\n    <error message=\"Failed\">" + output + "\n</error>\n  </testcase>\n")
             junitfile.write("</testsuite>")
         return expr
 
-    def split(self,data):
+    def split(self, data):
         result = dict()
         split_data = data.split("==========================================================================\n")
         for chunk in split_data:
             if len(chunk) == 0:
                 continue
             chunk_lines = chunk.splitlines(True)
-            number = int(chunk_lines[0].replace("TESTCASE ",""))
+            number = int(chunk_lines[0].replace("TESTCASE ", ""))
             result[number] = chunk_lines
         return result
 
-    def create_tc_dict(self,parameters):
+    def create_tc_dict(self, parameters):
         testfilenames = os.listdir(parameters.testcases_path)
         testcases = dict()
         pattern = re.compile("([0-9]*)-(.*).xml")
@@ -283,8 +311,7 @@ class Results:
                 testcases[int(match.group(1))] = match.group(1) + "-" + match.group(2)
         return testcases
 
-
-    def write_diff(self,tcname, diff0, diff1, diff2):
+    def write_diff(self, tcname, diff0, diff1, diff2):
         res = len(diff0) == 0 and len(diff1) == 0 and len(diff2) == 0
         output = ""
         if not res:
@@ -308,8 +335,7 @@ class Results:
             return False
         return True
 
-
-    def check_output(self,parameters):
+    def check_output(self, parameters):
         log("** Parsing test output")
         resdir = glob.glob("run-*")
         if len(resdir) == 0:
@@ -323,100 +349,97 @@ class Results:
 
         tcnames = self.create_tc_dict(parameters)
 
-        output = list((None,None,None))
-        expected_output = list((None,None,None))
+        output = list((None, None, None))
+        expected_output = list((None, None, None))
 
         for partner in range(3):
             filename = "partner" + str(partner) + ".txt"
-            with open(os.path.join(resdir,filename)) as file:
+            with open(os.path.join(resdir, filename)) as file:
                 output[partner] = self.split(file.read())
-            with open(os.path.join(parameters.expected_output_path,filename)) as file:
+            with open(os.path.join(parameters.expected_output_path, filename)) as file:
                 expected_output[partner] = self.split(file.read())
 
         tcnos = list(set(expected_output[0].keys()))
         tcnos = [tc for tc in tcnos if self.tc_included(tc, parameters)]
         tcnos.sort()
         if parameters.single_testcase is None:
-            self.write_test_result(len (set(tcnos) - set(output[0].keys())) == 0,
-                                   "all_tests_performed",
-                                   "The following tests appear to not have been run: "+
-                                   str(sorted(list(set(tcnos) - set(output[0].keys())))))
-        self.write_test_result(len (set(output[0].keys())- set(tcnos)) == 0,
-                               "all_tests_have_expected_results",
-                               "The following tests appear to not to be listed in expected outputs: "+
-                               str(sorted(list(set(output[0].keys())- set(tcnos)))))
+            self.write_test_result(
+                len(set(tcnos) - set(output[0].keys())) == 0, "all_tests_performed",
+                "The following tests appear to not have been run: " +
+                str(sorted(list(set(tcnos) - set(output[0].keys())))))
+        self.write_test_result(
+            len(set(output[0].keys()) - set(tcnos)) == 0, "all_tests_have_expected_results",
+            "The following tests appear to not to be listed in expected outputs: " +
+            str(sorted(list(set(output[0].keys()) - set(tcnos)))))
 
         for tc in tcnos:
             if tc not in output[0]:
-                self.write_test_result(False,
-                                       tcnames[tc],
-                                       "Test does not appear to have been run")
+                self.write_test_result(False, tcnames[tc], "Test does not appear to have been run")
                 continue
-            diff0 = list(difflib.unified_diff(expected_output[0][tc],output[0][tc]))
-            diff1 = list(difflib.unified_diff(expected_output[1][tc],output[1][tc]))
-            diff2 = list(difflib.unified_diff(expected_output[2][tc],output[2][tc]))
+            diff0 = list(difflib.unified_diff(expected_output[0][tc], output[0][tc]))
+            diff1 = list(difflib.unified_diff(expected_output[1][tc], output[1][tc]))
+            diff2 = list(difflib.unified_diff(expected_output[2][tc], output[2][tc]))
             self.write_diff(tcnames[tc], diff0, diff1, diff2)
             self.num_tc_performed += 1
 
 
-def preexec(): # Don't forward signals.
+def preexec():  # Don't forward signals.
     os.setpgrp()
+
 
 class Runner:
     def __init__(self):
         self.procs = dict()
         self.syslog = None
 
-    def __launchProcess(self, name, cmd, stdoutToFile = True):
+    def __launchProcess(self, name, cmd, stdoutToFile=True):
         if stdoutToFile:
-            output = open(name + ".output.txt","w")
+            output = open(name + ".output.txt", "w")
         else:
             output = None
 
         if sys.platform == "win32":
             proc = subprocess.Popen(cmd,
-                                    stdout = output,
-                                    stderr = subprocess.STDOUT,
-                                    creationflags = subprocess.CREATE_NEW_PROCESS_GROUP)
+                                    stdout=output,
+                                    stderr=subprocess.STDOUT,
+                                    creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
         else:
-            proc = subprocess.Popen(cmd,
-                                    stdout = output,
-                                    stderr = subprocess.STDOUT,
-                                    preexec_fn = preexec)
+            proc = subprocess.Popen(cmd, stdout=output, stderr=subprocess.STDOUT, preexec_fn=preexec)
 
-        self.procs[name] = (proc,output)
+        self.procs[name] = (proc, output)
         return proc
 
-    def initialize(self,parameters):
-        sys.path.append(os.path.join(parameters.test_data_directory,"python"))
+    def initialize(self, parameters):
+        sys.path.append(os.path.join(parameters.test_data_directory, "python"))
         if parameters.check_syslog:
             #load and start syslog server
             log("Starting syslog server")
             from syslog_server import SyslogServer
-            self.syslog = SyslogServer("safir_show_config") #This should be in the PATH here, so no need to give full path
+            self.syslog = SyslogServer(
+                "safir_show_config")  #This should be in the PATH here, so no need to give full path
 
         if parameters.standalone:
-            partners = (0,1,2)
+            partners = (0, 1, 2)
         elif parameters.multinode or parameters.multicomputer:
-            partners = (0,1)
-        else: #slave
+            partners = (0, 1)
+        else:  #slave
             os.environ["SAFIR_INSTANCE"] = "1"
-            partners = (2,)
+            partners = (2, )
 
         log("** Starting safir_control and partners", str(partners))
-        self.safir_control = self.__launchProcess("safir_control.0",
-                                                  parameters.safir_control_cmd +
-                                                  ("--force-id", ("888888" if parameters.slave else "999999")))
+        self.safir_control = self.__launchProcess(
+            "safir_control.0",
+            parameters.safir_control_cmd + ("--force-id", ("888888" if parameters.slave else "999999")))
 
         self.__launchProcess("dope_main.0", parameters.dope_main_cmd)
         self.__launchProcess("foreach.0", parameters.foreach_cmd)
 
         for i in partners:
-            self.__launchProcess("dose_test_cpp." + str(i), parameters.dose_test_cpp_cmd + (str(i),))
+            self.__launchProcess("dose_test_cpp." + str(i), parameters.dose_test_cpp_cmd + (str(i), ))
             if not parameters.no_dotnet:
-                self.__launchProcess("dose_test_dotnet." + str(i), parameters.dose_test_dotnet_cmd + (str(i),))
+                self.__launchProcess("dose_test_dotnet." + str(i), parameters.dose_test_dotnet_cmd + (str(i), ))
             if not parameters.no_java:
-                self.__launchProcess("dose_test_java." + str(i), parameters.dose_test_java_cmd + (str(i),))
+                self.__launchProcess("dose_test_java." + str(i), parameters.dose_test_java_cmd + (str(i), ))
 
         #start second node
         if parameters.multinode:
@@ -428,24 +451,24 @@ class Runner:
             self.__launchProcess("dope_main.1", parameters.dope_main_cmd)
             self.__launchProcess("foreach.1", parameters.foreach_cmd)
 
-            self.__launchProcess("dose_test_cpp.2", parameters.dose_test_cpp_cmd + ("2",))
+            self.__launchProcess("dose_test_cpp.2", parameters.dose_test_cpp_cmd + ("2", ))
             if not parameters.no_dotnet:
-                self.__launchProcess("dose_test_dotnet.2", parameters.dose_test_dotnet_cmd + ("2",))
+                self.__launchProcess("dose_test_dotnet.2", parameters.dose_test_dotnet_cmd + ("2", ))
             if not parameters.no_java:
-                self.__launchProcess("dose_test_java.2", parameters.dose_test_java_cmd + ("2",))
+                self.__launchProcess("dose_test_java.2", parameters.dose_test_java_cmd + ("2", ))
 
         if "SAFIR_INSTANCE" in os.environ:
-            del os.environ["SAFIR_INSTANCE"] #unset the environment after we've launched the processes.
+            del os.environ["SAFIR_INSTANCE"]  #unset the environment after we've launched the processes.
 
     #By default processes have 10 seconds to shut down nicely.
-    def __kill(self, name, proc, timeout = 10):
+    def __kill(self, name, proc, timeout=10):
         try:
             if sys.platform == "win32":
                 #can't send CTRL_C_EVENT to processes started with subprocess, unfortunately
                 proc.send_signal(signal.CTRL_BREAK_EVENT)
             else:
                 proc.terminate()
-            for i in range (timeout * 10):
+            for i in range(timeout * 10):
                 if proc.poll() is not None:
                     return
                 time.sleep(0.1)
@@ -457,23 +480,22 @@ class Runner:
             pass
 
     def killprocs(self, results):
-        self.__kill("safir_control", self.safir_control,120) #We give safir_control some extra time to stop
-        if hasattr(self,"safir_control_1"):
-            self.__kill("safir_control", self.safir_control_1,120) #We give safir_control some extra time to stop
+        self.__kill("safir_control", self.safir_control, 120)  #We give safir_control some extra time to stop
+        if hasattr(self, "safir_control_1"):
+            self.__kill("safir_control", self.safir_control_1, 120)  #We give safir_control some extra time to stop
 
         #Processes have up to 20 seconds to exit from the stop order
         future = time.time() + 20
-        for name, (proc,output) in self.procs.items():
+        for name, (proc, output) in self.procs.items():
             while time.time() < future:
                 if proc.poll() is not None:
                     break
                 time.sleep(0.1)
             if proc.poll() is None:
-                self.__kill(name,proc)
+                self.__kill(name, proc)
                 proc.wait()
 
-            results.write_test_result(proc.returncode == 0,
-                                      name + ".returncode",
+            results.write_test_result(proc.returncode == 0, name + ".returncode",
                                       "Process exited with return code " + str(proc.returncode) + ", expected 0")
             if proc.returncode != 0:
                 log("", name, "exited with returncode", proc.returncode)
@@ -483,24 +505,22 @@ class Runner:
         if self.syslog is not None:
             #check that syslog output is empty
             log("Checking syslog contents")
-            syslog_data = self.syslog.get_data(10) # wait for 10 seconds to collect any output
-            results.write_test_result(len(syslog_data) == 0,
-                                      "syslog_output",
-                                      "syslog is not empty:\n" + quoteattr(syslog_data))
+            syslog_data = self.syslog.get_data(10)  # wait for 10 seconds to collect any output
+            results.write_test_result(
+                len(syslog_data) == 0, "syslog_output", "syslog is not empty:\n" + quoteattr(syslog_data))
 
-    def run_sequencer(self,parameters):
+    def run_sequencer(self, parameters):
         log("** Running test sequencer with languages set to", parameters.lang0, parameters.lang1, parameters.lang2)
         log("---- Output from dose_test_sequencer: ----")
-        sequencer = self.__launchProcess("dose_test_sequencer",
-                                         parameters.dose_test_sequencer_cmd,
-                                         stdoutToFile = False)
+        sequencer = self.__launchProcess("dose_test_sequencer", parameters.dose_test_sequencer_cmd, stdoutToFile=False)
         sequencer.wait()
         log("------------------------------------------")
 
     def wait_for_safir_control(self):
         self.safir_control.wait()
-        if hasattr(self,"safir_control_1"):
+        if hasattr(self, "safir_control_1"):
             self.safir_control_1.wait()
+
 
 class JenkinsInterface:
     def __init__(self, parameters):
@@ -514,7 +534,7 @@ class JenkinsInterface:
         if self.server is None:
             log("No JENKINS_USER found")
             sys.exit(1)
-        log("Using jenkins server",self.server)
+        log("Using jenkins server", self.server)
 
         self.log_level = os.environ.get("JENKINS_CLI_LOGGING")
         if self.log_level is None:
@@ -522,10 +542,10 @@ class JenkinsInterface:
 
         cliurl = self.server + "/jnlpJars/jenkins-cli.jar"
         #log "will download jenkins-cli.jar using url", cliurl
-        self.clijar = os.path.join(parameters.tempdir,"jenkins-cli.jar")
-        urllib.urlretrieve(cliurl,self.clijar)
+        self.clijar = os.path.join(parameters.tempdir, "jenkins-cli.jar")
+        urllib.urlretrieve(cliurl, self.clijar)
 
-    def __run_command(self,cmd,inp = None):
+    def __run_command(self, cmd, inp=None):
         args = list()
 
         #on some slaves java 7 is the default java, so we use environment variable to find java 8, which
@@ -534,7 +554,7 @@ class JenkinsInterface:
         if java is None:
             java = "java"
 
-        args += (java,"-jar",self.clijar,"-s",self.server,"-logger",self.log_level,"-ssh","-user",self.user)
+        args += (java, "-jar", self.clijar, "-s", self.server, "-logger", self.log_level, "-ssh", "-user", self.user)
 
         if sys.platform == "win32":
             args += ("-i", "c:\\.ssh\\id_rsa")
@@ -544,9 +564,9 @@ class JenkinsInterface:
             args += cmd
 
         proc = subprocess.Popen(args,
-                                stdout = subprocess.PIPE,
-                                stderr = subprocess.STDOUT,
-                                stdin = None if inp is None else subprocess.PIPE)
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.STDOUT,
+                                stdin=None if inp is None else subprocess.PIPE)
         res = proc.communicate(inp)
         if proc.returncode == 0:
             return res[0]
@@ -554,8 +574,8 @@ class JenkinsInterface:
             log(res[0])
             raise Exception("Failed to run jenkins command", str(args))
 
-    def __run_groovy(self,script):
-        return self.__run_command(("groovy","="),script)
+    def __run_groovy(self, script):
+        return self.__run_command(("groovy", "="), script)
 
     def help(self):
         return self.__run_command("groovy")
@@ -569,21 +589,21 @@ class JenkinsInterface:
         jobs = output.splitlines()
         return jobs
 
-    def __to_bool(self,output, on_error):
+    def __to_bool(self, output, on_error):
         output = output.strip()
         if output not in ("true", "false"):
-            log ("Unexpected boolean value: '{0}' was not found in {1}. Treating as {2}".format(output, ("true","false"), on_error))
+            log("Unexpected boolean value: '{0}' was not found in {1}. Treating as {2}".format(
+                output, ("true", "false"), on_error))
             return on_error
         return output == "true"
 
-
-    def is_building(self,job,on_error):
+    def is_building(self, job, on_error):
         script = """
                  import hudson.model.*
                  item = Hudson.instance.getItem("JOB_NAME")
                  println(item.isBuilding())
                  """
-        script = script.replace("JOB_NAME",job)
+        script = script.replace("JOB_NAME", job)
         output = self.__run_groovy(script)
         return self.__to_bool(output, on_error)
 
@@ -595,21 +615,21 @@ class JenkinsInterface:
         output = self.__run_groovy(script)
         return self.__to_bool(output, True)
 
-    def wait_for_job(self,job,duration=None):
+    def wait_for_job(self, job, duration=None):
         if duration is None:
-            while self.is_building(job,True):
+            while self.is_building(job, True):
                 time.sleep(1.0)
         else:
             future = time.time() + duration
-            while time.time() < future and self.is_building(job,True):
+            while time.time() < future and self.is_building(job, True):
                 time.sleep(1.0)
 
-    def build(self,job):
-        self.__run_command(("build",job))
-        while not self.is_building(job,False):
+    def build(self, job):
+        self.__run_command(("build", job))
+        while not self.is_building(job, False):
             time.sleep(1.0)
 
-    def cancel_job(self,job):
+    def cancel_job(self, job):
         script = """
                  import hudson.model.*
                  item = Hudson.instance.getItem("JOB_NAME")
@@ -619,10 +639,10 @@ class JenkinsInterface:
                    executor.interrupt()
                  }
                  """
-        script = script.replace("JOB_NAME",job)
+        script = script.replace("JOB_NAME", job)
         self.__run_groovy(script)
 
-    def get_console_output(self,job):
+    def get_console_output(self, job):
         script = """
                  import hudson.model.*
                  item = Hudson.instance.getItem("JOB_NAME")
@@ -633,11 +653,10 @@ class JenkinsInterface:
                  println(build.getLog())
                  println ("end log")
                  """
-        script = script.replace("JOB_NAME",job)
+        script = script.replace("JOB_NAME", job)
         log(self.__run_groovy(script))
 
-
-    def terminate_safir_control(self,job):
+    def terminate_safir_control(self, job):
         """Send a SIGTERM to dose main, to let the slave script end nicely"""
         script = """
                  import hudson.model.*
@@ -650,12 +669,12 @@ class JenkinsInterface:
                    RemotingDiagnostics.executeGroovy("println \\"killall safir_control\\".execute().text", computer.getChannel())
                  }
                  """
-        script = script.replace("JOB_NAME",job)
+        script = script.replace("JOB_NAME", job)
         self.__run_groovy(script)
 
 
 class JenkinsController:
-    def __init__(self,parameters):
+    def __init__(self, parameters):
         self.interface = JenkinsInterface(parameters)
         self.job_name = "multinode-test-slave-1"
         auth = self.interface.who_am_i()
@@ -680,7 +699,7 @@ class JenkinsController:
         try:
             log(" * Stopping slave")
             self.interface.terminate_safir_control(self.job_name)
-            self.interface.wait_for_job(self.job_name,60)
+            self.interface.wait_for_job(self.job_name, 60)
             self.interface.cancel_job(self.job_name)
             self.interface.wait_for_job(self.job_name)
         except:
@@ -729,12 +748,10 @@ def main():
             if results.num_tc_failed == 0:
                 log("== All tests were successful!!")
             else:
-                log("!!",results.num_tc_failed, "testcases appear to have failed!")
+                log("!!", results.num_tc_failed, "testcases appear to have failed!")
 
-            if (results.num_tc_performed<20 and
-                parameters.single_testcase is None and
-                parameters.first_testcase is None and
-                parameters.last_testcase is None):
+            if (results.num_tc_performed < 20 and parameters.single_testcase is None
+                    and parameters.first_testcase is None and parameters.last_testcase is None):
                 log("!! Less than 20 testcases seem to have been performed, this is a sign of trouble!")
                 return 1
 

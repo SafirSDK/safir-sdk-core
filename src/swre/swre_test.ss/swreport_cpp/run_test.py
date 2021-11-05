@@ -44,13 +44,15 @@ o3 = subprocess.check_output(sender_path, stderr=subprocess.STDOUT)
 stdout_output = o1 + o2 + o3
 syslog_output = syslog.get_data(1)
 
+
 def fail(message):
-    print("Failed! Wrong number of",message)
-    print ("STDOUT OUTPUT:")
+    print("Failed! Wrong number of", message)
+    print("STDOUT OUTPUT:")
     safe_print(stdout_output)
-    print ("SYSLOG OUTPUT:")
+    print("SYSLOG OUTPUT:")
     safe_print(syslog_output)
     sys.exit(1)
+
 
 if syslog_output.count("\n") != 24:
     fail("lines")
@@ -78,7 +80,6 @@ if syslog_output.count(u"SendProgramInfoReport") != 3:
 
 if syslog_output.count(u"brynanuppafjässasponken|Don't know\u203d|Testing funny characters") != 3:
     fail("brynanuppa")
-
 
 if len(stdout_output) != 0:
     fail("Unexpected output on stdout")

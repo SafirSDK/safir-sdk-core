@@ -26,9 +26,11 @@
 from __future__ import print_function
 import sys, os, shutil, xml.dom.minidom, glob, time, subprocess, re, platform
 
+
 def log(*args, **kwargs):
     print(*args, **kwargs)
     sys.stdout.flush()
+
 
 def is_64_bit():
     """Detecting this is a lot more complex than it should be.
@@ -42,8 +44,10 @@ def is_64_bit():
         PROCESSOR_ARCHITEW6432 = os.environ.get("PROCESSOR_ARCHITEW6432")
         return PROCESSOR_ARCHITECTURE == "AMD64" or PROCESSOR_ARCHITEW6432 == "AMD64"
 
+
 def is_windows():
     return sys.platform == "win32"
+
 
 class Parameters:
     def __init__(self):
@@ -51,14 +55,21 @@ class Parameters:
         import tempfile
 
         parser = OptionParser()
-        parser.add_option("--driver", action="store",type="choice",choices=("mimer","mysql","postgres","ms-sql"),dest="driver",default=False,
+        parser.add_option("--driver",
+                          action="store",
+                          type="choice",
+                          choices=("mimer", "mysql", "postgres", "ms-sql"),
+                          dest="driver",
+                          default=False,
                           help="Database engine to test against")
-        parser.add_option("--hostname", action="store",dest="hostname",default="localhost",
+        parser.add_option("--hostname",
+                          action="store",
+                          dest="hostname",
+                          default="localhost",
                           help="Hostname of the database server")
-        parser.add_option("--database", action="store",dest="database",
-                          help="Database to connect to")
+        parser.add_option("--database", action="store", dest="database", help="Database to connect to")
 
-        (options,args) = parser.parse_args()
+        (options, args) = parser.parse_args()
 
         if not options.driver:
             log("Need --driver argument")
@@ -99,24 +110,25 @@ class Parameters:
 
         self.connection_string += "Database={database};Uid=dopeuser;Pwd=dopeuser"
 
-        self.connection_string = self.connection_string.format(driver = driver,
-                                                               hostname = options.hostname,
-                                                               database = options.database)
+        self.connection_string = self.connection_string.format(driver=driver,
+                                                               hostname=options.hostname,
+                                                               database=options.database)
 
         log("Using connection string", self.connection_string)
         os.environ["DOPE_TEST_ODBC_CONNECT_STRING"] = self.connection_string
 
         os.environ["DOPE_TEST_XML_DATA_COLUMN_IS_UTF8"] = str(not is_windows())
 
+
 run_sql_pattern = re.compile(r"Got ([0-9]+) rows.")
 
-def run_sql(parameters,statement):
-    process = subprocess.Popen(("run_sql",
-                                "--connection-string", parameters.connection_string,
-                                "--statement", statement),
-                               stdout=subprocess.PIPE,
-                               stderr=subprocess.STDOUT,
-                               universal_newlines=True)
+
+def run_sql(parameters, statement):
+    process = subprocess.Popen(
+        ("run_sql", "--connection-string", parameters.connection_string, "--statement", statement),
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        universal_newlines=True)
     output = process.communicate()[0]
     if process.returncode != 0:
         log("Unexpected return code when running statement:", statement)
@@ -130,48 +142,52 @@ def run_sql(parameters,statement):
         log(output)
         sys.exit(1)
 
+
 def count_rows(parameters):
-    return run_sql(parameters,"select typeid from PersistentEntity")
+    return run_sql(parameters, "select typeid from PersistentEntity")
+
 
 def count_big(parameters):
-    return run_sql(parameters,"select typeid from PersistentEntity where binarydata is not null")
+    return run_sql(parameters, "select typeid from PersistentEntity where binarydata is not null")
+
 
 def count_small(parameters):
-    return run_sql(parameters,"select typeid from PersistentEntity where binarysmalldata is not null")
+    return run_sql(parameters, "select typeid from PersistentEntity where binarysmalldata is not null")
+
 
 def delete_all_rows(parameters):
-    return run_sql(parameters,"delete from PersistentEntity")
+    return run_sql(parameters, "delete from PersistentEntity")
+
 
 def count_xml(parameters):
-    return run_sql(parameters,"select typeid from PersistentEntity where xmldata is not null")
+    return run_sql(parameters, "select typeid from PersistentEntity where xmldata is not null")
+
 
 def count_binares(parameters):
-    return run_sql(parameters,"select typeid from PersistentEntity where binarydata is not null or binarysmalldata is not null")
+    return run_sql(parameters,
+                   "select typeid from PersistentEntity where binarydata is not null or binarysmalldata is not null")
+
 
 def delete_binary(parameters):
-    return run_sql(parameters,"update PersistentEntity set binarydata=null,binarysmalldata=null")
+    return run_sql(parameters, "update PersistentEntity set binarydata=null,binarysmalldata=null")
+
 
 #This relies on the fact that we're installed in the bin directory on both linux and windows.
-install_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)),"..")
+install_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..")
 
-dose_main_path = os.path.join(install_dir,"bin","dose_main" + (".exe" if is_windows() else ""))
+dose_main_path = os.path.join(install_dir, "bin", "dose_main" + (".exe" if is_windows() else ""))
 #Get the default dou directory and set it as an environment variable that can be
 #picked up by the typesystem.ini that belongs to the test suite.
 #Note: The last part of this path is set by cmake during configuration/installation.
 os.environ["SAFIR_TEST_SUITE_DOU_DIRECTORY"] = os.path.join(install_dir, "@SAFIR_INSTALL_DESTINATION_DOU_BASE@")
 
-
 #Note: Last half of path is set by cmake during configuration/installation.
 test_data_directory = os.path.join(install_dir, "@SAFIR_INSTALL_DESTINATION_TEST_DATA@")
 
 #Set up to use our own test configuration
-os.environ["SAFIR_TEST_CONFIG_OVERRIDE"] = os.path.join(test_data_directory,
-                                                        "dope",
-                                                        "test_config")
+os.environ["SAFIR_TEST_CONFIG_OVERRIDE"] = os.path.join(test_data_directory, "dope", "test_config")
 
-sys.path.append(os.path.join(install_dir,
-                             "@SAFIR_INSTALL_DESTINATION_TEST_DATA@",
-                             "python"))
+sys.path.append(os.path.join(install_dir, "@SAFIR_INSTALL_DESTINATION_TEST_DATA@", "python"))
 
 from testenv import TestEnv, TestEnvStopper
 
@@ -183,16 +199,16 @@ try:
     log("== Clear the db")
     delete_all_rows(parameters)
 
-    log ("== Find out how many entities entity_owner will set")
-    num_str = subprocess.check_output(("entity_owner","num"), universal_newlines=True)
-    NUM_SMALL = int(re.search(r"NUM_SMALL = ([0-9]+)",num_str).group(1))
-    NUM_BIG = int(re.search(r"NUM_BIG = ([0-9]+)",num_str).group(1))
-    log ("NUM_SMALL = " + str(NUM_SMALL) + " and NUM_BIG = " + str(NUM_BIG))
+    log("== Find out how many entities entity_owner will set")
+    num_str = subprocess.check_output(("entity_owner", "num"), universal_newlines=True)
+    NUM_SMALL = int(re.search(r"NUM_SMALL = ([0-9]+)", num_str).group(1))
+    NUM_BIG = int(re.search(r"NUM_BIG = ([0-9]+)", num_str).group(1))
+    log("NUM_SMALL = " + str(NUM_SMALL) + " and NUM_BIG = " + str(NUM_BIG))
 
     log("== Set a bunch of entities")
     env = TestEnv("safir_control", dose_main_path, "dope_main", "safir_show_config")
     with TestEnvStopper(env):
-        env.launchProcess("entity_owner", ("entity_owner","set")).wait()
+        env.launchProcess("entity_owner", ("entity_owner", "set")).wait()
         log("waiting for", NUM_BIG + NUM_SMALL, "entities in db")
         while count_rows(parameters) != NUM_BIG + NUM_SMALL:
             time.sleep(1)
@@ -209,7 +225,7 @@ try:
     log("== See if dope loads them at startup")
     env = TestEnv("safir_control", dose_main_path, "dope_main", "safir_show_config")
     with TestEnvStopper(env):
-        env.launchProcess("entity_owner", ("entity_owner","accept")).wait()
+        env.launchProcess("entity_owner", ("entity_owner", "accept")).wait()
 
     syslog_output = env.Syslog()
     if len(syslog_output) != 0:
@@ -245,7 +261,6 @@ try:
         log("could not find the right number of entries in the big column in the database")
         sys.exit(1)
 
-
     if count_xml(parameters) != 0:
         log("Unexpected xml data found!")
         sys.exit(1)
@@ -269,7 +284,7 @@ try:
 
     env = TestEnv("safir_control", dose_main_path, "dope_main", "safir_show_config")
     with TestEnvStopper(env):
-        env.launchProcess("entity_owner", ("entity_owner","accept")).wait()
+        env.launchProcess("entity_owner", ("entity_owner", "accept")).wait()
 
     syslog_output = env.Syslog()
     if len(syslog_output) != 0:
@@ -316,9 +331,9 @@ try:
             delete_binary(parameters)
             time.sleep(1)
 
-        env.launchProcess("entity_owner", ("entity_owner","update")).wait()
+        env.launchProcess("entity_owner", ("entity_owner", "update")).wait()
 
-        log("waiting for", NUM_BIG + NUM_SMALL,  "entities in db")
+        log("waiting for", NUM_BIG + NUM_SMALL, "entities in db")
         while count_binares(parameters) != NUM_BIG + NUM_SMALL:
             time.sleep(1)
 
@@ -334,7 +349,7 @@ try:
     log("== Load them again and check output")
     env = TestEnv("safir_control", dose_main_path, "dope_main", "safir_show_config")
     with TestEnvStopper(env):
-        env.launchProcess("entity_owner", ("entity_owner","accept")).wait()
+        env.launchProcess("entity_owner", ("entity_owner", "accept")).wait()
 
     syslog_output = env.Syslog()
     if len(syslog_output) != 0:

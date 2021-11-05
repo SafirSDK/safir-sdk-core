@@ -37,13 +37,13 @@ arguments = parser.parse_args()
 
 config_dir = arguments.config_dir
 if not os.path.isdir(config_dir):
-    print ("arg is not a directory")
+    print("arg is not a directory")
     sys.exit(1)
 
 os.environ["SAFIR_TEST_CONFIG_OVERRIDE"] = config_dir
 
 #Run the program that writes the ini file configuration to standard output
-proc = subprocess.Popen((arguments.show_config,"--locations"),
+proc = subprocess.Popen((arguments.show_config, "--locations"),
                         stdout=subprocess.PIPE,
                         stderr=subprocess.STDOUT,
                         universal_newlines=True)
@@ -53,7 +53,7 @@ conf_str = '[root]\n' + proc.communicate()[0]
 config = configparser.ConfigParser()
 config.read_file(StringIO(conf_str))
 
-crash_dump_dir = config.get('root','crash_dump_directory')
+crash_dump_dir = config.get('root', 'crash_dump_directory')
 
 # Make a fresh empty crash dump dir ...
 if os.path.exists(crash_dump_dir):
@@ -86,19 +86,21 @@ proc.communicate()
 # the dump monitor always deletes 10 extra files leaving us with 15 files in this case.
 remaining_dump_files = os.listdir(crash_dump_dir)
 
-shutil.rmtree(crash_dump_dir) # we don't need the dump file directory anymore
+shutil.rmtree(crash_dump_dir)  # we don't need the dump file directory anymore
 
 if len(remaining_dump_files) != 15:
     print("Expected 15 remaining dump files but there are ", len(remaining_dump_files))
     sys.exit(1)
 
+
 def get_num(str):
     return int(''.join(ele for ele in str if ele.isdigit()))
+
 
 # Check that the newest files (this is the files that have the lowest numbers) are left
 for file in remaining_dump_files:
     n = get_num(file)
-    print ("n:", n)
+    print("n:", n)
     if n < 1 or n > 15:
         print("It seems that not the oldest dump files have been removed!")
         sys.exit(1)

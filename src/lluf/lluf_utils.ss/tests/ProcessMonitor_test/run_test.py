@@ -30,25 +30,24 @@ import subprocess, os, time, sys, random
 #wait for sleepers to exit
 #check output of listener
 
-
 if sys.platform == "win32":
     config_type = os.environ.get("CMAKE_CONFIG_TYPE")
     exe_path = config_type if config_type else ""
 else:
     exe_path = "."
 
-ProcessMonitor_test = os.path.join(exe_path,"ProcessMonitor_test")
-Sleeper = os.path.join(exe_path,"ProcessMonitorSleeper")
+ProcessMonitor_test = os.path.join(exe_path, "ProcessMonitor_test")
+Sleeper = os.path.join(exe_path, "ProcessMonitorSleeper")
 
 #start a bunch of sleepers
 sleepers = list()
 pids = list()
-for which in range(0,100):
-    proc = subprocess.Popen((Sleeper,str(random.random() + 0.5)))
+for which in range(0, 100):
+    proc = subprocess.Popen((Sleeper, str(random.random() + 0.5)))
     pids.append(str(proc.pid))
     sleepers.append(proc)
 
-listener = subprocess.Popen(list((ProcessMonitor_test,))+ pids,
+listener = subprocess.Popen(list((ProcessMonitor_test, )) + pids,
                             stdout=subprocess.PIPE,
                             stderr=subprocess.STDOUT,
                             universal_newlines=True)
@@ -66,11 +65,11 @@ for sleeper in sleepers:
         errors += 1
 
 if result.count("Process with pid") != len(sleepers):
-    print("Wrong number of terminated processes! Expected", len(sleepers),"got",result.count("Process with pid"))
+    print("Wrong number of terminated processes! Expected", len(sleepers), "got", result.count("Process with pid"))
     errors += 1
 
 if listener.returncode != 0:
-    print("Unexpected return code from listener:",listener.returncode)
+    print("Unexpected return code from listener:", listener.returncode)
     errors += 1
 
 if errors == 0:
