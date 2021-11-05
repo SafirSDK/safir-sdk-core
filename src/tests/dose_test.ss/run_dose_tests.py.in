@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 ###############################################################################
 #
@@ -23,16 +23,21 @@
 # along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import print_function
-import sys, subprocess, os, shutil, difflib, time, glob, re, traceback, signal, platform
+import sys
+import subprocess
+import os
+import shutil
+import difflib
+import time
+import glob
+import re
+import traceback
+import signal
+import platform
 from xml.sax.saxutils import escape, quoteattr
-
-from optparse import OptionParser
-
-try:
-    import urllib.request as urllib
-except ImportError:
-    import urllib
+import argparse
+import urllib.request
+import tempfile
 
 
 def log(*args, **kwargs):
@@ -71,75 +76,73 @@ def mkdir(newdir):
 
 class Parameters:
     def __init__(self):
-        import tempfile
-
-        parser = OptionParser()
-        parser.add_option("--jenkins",
+        parser = argparse.ArgumentParser()
+        parser.add_argument("--jenkins",
                           action="store_true",
                           dest="jenkins",
                           default=False,
                           help="Set up the needed environment variables for a Jenkins automated build," +
                           "and respect the langX matrix variables")
-        parser.add_option("--multinode",
+        parser.add_argument("--multinode",
                           action="store_true",
                           dest="multinode",
                           default=False,
                           help="Run multinode tests instead of standalone tests. Both nodes are run on this computer.")
-        parser.add_option("--multicomputer",
+        parser.add_argument("--multicomputer",
                           action="store_true",
                           dest="multicomputer",
                           default=False,
                           help="Run multicomputer tests instead of standalone tests.")
-        parser.add_option("--autostart-slave",
+        parser.add_argument("--autostart-slave",
                           action="store_true",
                           dest="autostart_slave",
                           default=False,
                           help="Automatically start a multicomputer slave (Server_1) through jenkins." +
                           "This is only applicable when using --multicomputer, and is implied when using --jenkins")
-        parser.add_option("--slave", action="store_true", dest="slave", default=False, help="Be a multicomputer slave")
-        parser.add_option("--run-until-failure",
+        parser.add_argument("--slave", action="store_true", dest="slave", default=False, help="Be a multicomputer slave")
+        parser.add_argument("--run-until-failure",
                           action="store_true",
                           dest="run_until_failure",
                           default=False,
                           help="Run the given test range until one or more tests fail. Only test output for the last "
                           "(failed) run will be saved.")
-        parser.add_option("--no-syslog",
+        parser.add_argument("--no-syslog",
                           action="store_false",
                           dest="check_syslog",
                           default=True,
                           help="Do not check syslog output")
-        parser.add_option("--no-java",
+        parser.add_argument("--no-java",
                           action="store_true",
                           dest="no_java",
                           default=False,
                           help="Do not run java partners")
-        parser.add_option("--no-dotnet",
+        parser.add_argument("--no-dotnet",
                           action="store_true",
                           dest="no_dotnet",
                           default=False,
                           help="Do not run dotnet partners")
-        parser.add_option("--lang0",
+        parser.add_argument("--lang0",
                           action="store",
                           dest="lang0",
                           default="cpp",
                           help="Which partner 0 to run. [default: %default]. "
                           "If --jenkins is specified the Languages environment variable will override this.")
-        parser.add_option("--lang1",
+        parser.add_argument("--lang1",
                           action="store",
                           dest="lang1",
                           default="cpp",
                           help="Which partner 1 to run. [default: %default]. "
                           "If --jenkins is specified the Languages environment variable will override this.")
-        parser.add_option("--lang2",
+        parser.add_argument("--lang2",
                           action="store",
                           dest="lang2",
                           default="cpp",
                           help="Which partner 2 to run. [default: %default]. "
                           "If --jenkins is specified the Languages environment variable will override this.")
-        parser.add_option("--single-testcase", action="store", help="Run only a single testcase.")
-        parser.add_option("--first-testcase", action="store", help="Sets the first testcase to be run.")
-        parser.add_option("--last-testcase", action="store", help="Sets the last testcase to be run.")
-        (options, args) = parser.parse_args()
+        parser.add_argument("--single-testcase", action="store", help="Run only a single testcase.")
+        parser.add_argument("--first-testcase", action="store", help="Sets the first testcase to be run.")
+        parser.add_argument("--last-testcase", action="store", help="Sets the last testcase to be run.")
+        options = parser.parse_args()
 
         self.lang0 = options.lang0
         self.lang1 = options.lang1
@@ -543,7 +546,7 @@ class JenkinsInterface:
         cliurl = self.server + "/jnlpJars/jenkins-cli.jar"
         #log "will download jenkins-cli.jar using url", cliurl
         self.clijar = os.path.join(parameters.tempdir, "jenkins-cli.jar")
-        urllib.urlretrieve(cliurl, self.clijar)
+        urllib.request.urlretrieve(cliurl, self.clijar)
 
     def __run_command(self, cmd, inp=None):
         args = list()
