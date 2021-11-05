@@ -1,15 +1,34 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-######################################################################
+###############################################################################
+#
+# Copyright Saab AB, 2011-2014 (http://safirsdkcore.com)
+#
 # Created by: Joel Ottosson / joot
 #
-# Converts xml serialized objects in the old format into the new.
+"""Converts xml serialized objects in the old format into the new."""
 #
-######################################################################
-
-import os, sys, getopt
+###############################################################################
+#
+# This file is part of Safir SDK Core.
+#
+# Safir SDK Core is free software: you can redistribute it and/or modify
+# it under the terms of version 3 of the GNU General Public License as
+# published by the Free Software Foundation.
+#
+# Safir SDK Core is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
+#
+###############################################################################
+import os
+import sys
+import getopt
 import xml.etree.ElementTree as ET
-import xml.dom.minidom
 
 convert_mode=""
 recursive=False
@@ -34,16 +53,16 @@ def print_help():
     print("-o <directory> : output directory, place converted files here. (Mandatory)")
     print("-v : verbose")
     print("--no-array-conversion : don't convert arrays to new format.")
-    
+
 def parse_commandline(argv):
     """Parse commandline"""
-    global convert_mode    
+    global convert_mode
     global recursive
     global output_dir
     global input_path
     global verbose
     global no_array_conv
-    
+
     try:
         opts, args = getopt.getopt(argv,"hrvf:d:o:", ["no-array-conversion"])
     except getopt.GetoptError:
@@ -51,7 +70,7 @@ def parse_commandline(argv):
         print_help()
         sys.exit(1)
 
-    for opt, arg in opts:        
+    for opt, arg in opts:
         if opt=='-h':
             print_help()
             sys.exit(0)
@@ -69,7 +88,7 @@ def parse_commandline(argv):
             verbose=True
         elif opt=='--no-array-conversion':
             no_array_conv=True
-            
+
     if output_dir=="" or not os.path.isdir(output_dir):
         print("Output directory missing.")
         print_help()
@@ -79,18 +98,19 @@ def parse_commandline(argv):
         print("Must specify either -f <file> or -d <directory>")
         print_help()
         sys.exit(1)
-        
+
     if convert_mode=='file' and not os.path.isfile(input_path):
         print('File does not exist!')
         sys.exit(1)
     elif convert_mode=='dir' and not os.path.isdir(input_path):
         print('Directory does not exist!')
         sys.exit(1)
-        
+
     if recursive and convert_mode=="file":
         print("Recursive flag -f has no effect when converting singel file")
-        
-    output("Mode="+convert_mode+" input="+input_path+", output="+output_dir+", recursive="+str(recursive))
+
+    output("Mode=" + convert_mode + " input=" + input_path +
+           ", output="+output_dir+", recursive="+str(recursive))
 
 def output(msg):
     if verbose:
@@ -104,7 +124,7 @@ def set_current_namespace(tag):
         current_namespace=tag[0:tag.find('}')+1]
         defns=current_namespace[1:len(current_namespace)-1]
         ET.register_namespace('', defns)
- 
+
 def ns(tag):
     return current_namespace+tag
 
@@ -113,7 +133,7 @@ def to_path(l):
     for s in l[1:]:
         result=result+"/"+ns(s)
     return result
-    
+
 def indent(elem, level=0):
     """ pretty print xml """
     i = os.linesep + level*"  "
@@ -135,7 +155,7 @@ def convert_array(src, dest, member_name):
     if array_elements.find(ns('arrayElement'))==None:
         #empty array
         return
-        
+
     member_element=ET.SubElement(dest, member_name)
     index=0
     for arr_el in array_elements.findall(ns('arrayElement')):
@@ -146,7 +166,7 @@ def convert_array(src, dest, member_name):
             member_element[-1].attrib['index']=str(index)
         index=index+1
 
-def convert_member_item(src, dest, member_name):    
+def convert_member_item(src, dest, member_name):
     """ convert a member or array item """
     #1. <value> ---> <mem>value</mem>
     #2. <entityId> ---> <memEid> <name>Entity</name> <instanceId>3</instanceId> </memEid>
@@ -200,14 +220,14 @@ def convert_object(tree, root_name, base_type):
     type_name=tree.find(ns('name')).text.strip()
     if root_name=='':
         root_name=type_name
-            
+
     obj=ET.Element(root_name)
-    
+
     if type_name!=base_type:
         obj.attrib['type']=type_name
 
     members=tree.find(ns('members'))
-    if members!=None:        
+    if members!=None:
         for member in members.findall(ns('member')):
             member_name=member.find(ns('name')).text.strip()
             if member.find(ns('arrayElements'))!=None:
@@ -236,35 +256,35 @@ def traverse_xml(tree, base_type):
 def convert_objects(tree):
     """Converts all old format objects in a xml tree"""
     root = tree.getroot()
-    set_current_namespace(root.tag)    
+    set_current_namespace(root.tag)
     changed=False
-    
+
     #Handle parameters first since we have a chance to reduce the use of type-attributes for parameters
-    if root.tag==ns('class'):        
+    if root.tag==ns('class'):
         for par in root.findall(to_path(["parameters", "parameter"])):
             par_name=par.find(ns("name")).text.strip()
-            type_name=par.find(ns("type")).text.strip()            
+            type_name=par.find(ns("type")).text.strip()
             if traverse_xml(par, type_name):
                 changed=True
-    #handle other objects, can be plain serialized objects or in dom-files        
+    #handle other objects, can be plain serialized objects or in dom-files
     if root.tag==ns('object'):
         root=convert_object(root, '', '')
         tree._setroot(root)
         changed=True
     elif traverse_xml(root, ''):
         changed=True
-    
+
     return changed
 
 
 def convert_create_routines(tree):
     """Converts all old format create routines in a xml tree"""
     root = tree.getroot()
-    set_current_namespace(root.tag)    
+    set_current_namespace(root.tag)
     changed=False
-    
+
     #Handle parameters first since we have a chance to reduce the use of type-attributes for parameters
-    if root.tag==ns('class'):        
+    if root.tag==ns('class'):
         for cr in root.findall(to_path(["createRoutines", "createRoutine", "values", "value", "parameter"])):
             if cr.find(ns("name"))==None:
                 cr_name_element=ET.SubElement(cr, "name")
@@ -272,14 +292,14 @@ def convert_create_routines(tree):
                 cr.text=""
                 changed=True
     return changed
-    
+
 def convert_parameter_arrays(tree):
     """Converts all old format arrays in a xml tree"""
     if no_array_conv:
         return False
-    
+
     root = tree.getroot()
-    set_current_namespace(root.tag)    
+    set_current_namespace(root.tag)
     changed=False
     for arrayElements in root.findall(".//"+ns("arrayElements")):
         index=0
@@ -311,7 +331,7 @@ def convert_file(file_path, out_dir):
     output('Handle file '+file_path)
 
     out_path=create_outfile(file_path, out_dir)
-        
+
     global current_file
     global number_of_converted
     global number_of_unchanged
@@ -326,42 +346,45 @@ def convert_file(file_path, out_dir):
         number_of_failed=number_of_failed+1
         os.remove(out_path)
         return
-    
+
     #Convert old format createRoutines
     converted_create_routines=convert_create_routines(tree)
-    
+
     #Convert old format objects
     converted_objects=convert_objects(tree)
 
     #Convert old format arrays, i.e arrayElements
     converted_arrays=convert_parameter_arrays(tree)
-    
-    if  converted_objects or converted_arrays or converted_create_routines:        
+
+    if  converted_objects or converted_arrays or converted_create_routines:
         #save new file tree.write
         root = tree.getroot()
         set_current_namespace(root.tag)
-        if converted_objects: output('                - Converted objects')
-        if converted_arrays: output('                - Converted arrays')
-        if converted_create_routines: output('                - Converted create routines')
-        indent(root)        
-        
-        #Since tree.write will add a unix lineending after <?xml version...?> we do this step manually instead.
-        #tree.write(new_file, encoding='utf-8', xml_declaration=True, default_namespace=None, method='xml')
+        if converted_objects:
+            output('                - Converted objects')
+        if converted_arrays:
+            output('                - Converted arrays')
+        if converted_create_routines:
+            output('                - Converted create routines')
+        indent(root)
+
+        #Since tree.write will add a unix lineending after <?xml version...?> we do this
+        #step manually instead.
         xml_str='<?xml version="1.0" encoding="utf-8" ?>'+os.linesep+ET.tostring(root, encoding='utf-8', method='xml')
         xml_str = xml_str.replace('\n\n', '\n')
-        
+
         outfile=open(out_path, 'wb')
-        outfile.seek(0)                
+        outfile.seek(0)
         outfile.write(xml_str)
         outfile.truncate()
         outfile.close()
-        
+
         number_of_converted=number_of_converted+1
     else:
         os.remove(out_path)
         number_of_unchanged=number_of_unchanged+1
         output('                - No changes')
- 
+
 def convert_dir(path, out_dir):
     """Traverse a directory and convert every file."""
     output('Handle directory '+path)
@@ -374,14 +397,14 @@ def convert_dir(path, out_dir):
                 try:
                     os.makedirs(od)
                 except:
-                    pass 
+                    pass
                 convert_dir(os.path.join(root, d), od)
-                
+
                 if not os.listdir(od):
                     #empty folder, remove it again
                     os.rmdir(od)
         break
-    
+
 def main(argv):
     """Main program"""
     parse_commandline(argv)
@@ -402,4 +425,3 @@ def main(argv):
 #------------------------------------------------
 if __name__ == "__main__":
     main(sys.argv[1:])
-    

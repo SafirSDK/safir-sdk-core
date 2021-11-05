@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 ###############################################################################
 #
@@ -23,19 +23,12 @@
 # along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-
-# Prepared for Python 3
-from __future__ import print_function
 import sys, os, re, hashlib, subprocess
 import xml.etree.ElementTree as ET
 from glob import glob
 import codecs
 import argparse
-
-try:
-    from StringIO import StringIO
-except ImportError:
-    from io import StringIO
+from io import StringIO
 
 ## Fix for unicode cross compatibility
 if sys.version < '3':

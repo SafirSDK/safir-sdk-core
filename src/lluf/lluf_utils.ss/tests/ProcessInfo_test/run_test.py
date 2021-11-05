@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 ###############################################################################
 #
@@ -23,7 +23,6 @@
 # along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import print_function
 import subprocess, os, time, sys
 
 if sys.platform == "win32":
@@ -31,7 +30,7 @@ if sys.platform == "win32":
     exe_path = config_type if config_type else ""
 else:
     exe_path = "."
-    
+
 ProcessInfo_test = os.path.join(exe_path,"ProcessInfo_test")
 Sleeper = os.path.join(exe_path,"ProcessInfoSleeper")
 
@@ -41,7 +40,7 @@ sleeper = subprocess.Popen((Sleeper,"120"))
 listener = subprocess.Popen((ProcessInfo_test,
                              "ProcessInfoSleeper",
                              str(sleeper.pid)),
-                            stdout=subprocess.PIPE, 
+                            stdout=subprocess.PIPE,
                             stderr=subprocess.STDOUT,
                             universal_newlines=True)
 result = listener.communicate()[0]

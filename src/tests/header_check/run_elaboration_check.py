@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 ###############################################################################
 #
@@ -23,16 +23,10 @@
 # along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import print_function
 import subprocess, os, time, sys, shutil, re
 from threading import Thread
 import argparse
-try:
-    # 3.x name
-    from queue import Queue, Empty
-except ImportError:
-    # 2.x name
-    from Queue import Queue, Empty
+from queue import Queue, Empty
 
 def log(*args, **kwargs):
     print(*args, **kwargs)

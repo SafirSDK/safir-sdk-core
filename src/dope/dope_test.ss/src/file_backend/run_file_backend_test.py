@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 ###############################################################################
 #
@@ -23,18 +23,11 @@
 # along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import print_function
 import subprocess, os, time, sys, shutil, glob, argparse, re
 from testenv import TestEnv, TestEnvStopper
 
-try:
-    import ConfigParser
-except ImportError:
-    import configparser as ConfigParser
-try:
-    from StringIO import StringIO
-except ImportError:
-    from io import StringIO
+import configparser
+from io import StringIO
 
 
 def log(data):
@@ -82,7 +75,7 @@ try:
     config_str = subprocess.check_output((arguments.safir_show_config, "--locations"),universal_newlines=True)
     #ConfigParser wants a section header so add a dummy one.
     config_str = '[root]\n' + config_str
-    config = ConfigParser.ConfigParser()
+    config = configparser.ConfigParser()
     config.read_file(StringIO(config_str))
 
     file_storage_path = os.path.join(config.get('root','lock_file_directory'),"..","persistence")

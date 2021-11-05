@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 ###############################################################################
 #
@@ -23,7 +23,6 @@
 # along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import print_function
 import os, glob, sys, subprocess, re, platform, argparse
 
 #try to import a package that we need for the debian installer

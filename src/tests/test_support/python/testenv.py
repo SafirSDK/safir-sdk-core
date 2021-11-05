@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 ###############################################################################
 #
@@ -23,18 +23,10 @@
 # along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import print_function
 import subprocess, sys, time, signal
 import syslog_server
 from threading import Thread
-
-try:
-    # 3.x name
-    from queue import Queue, Empty
-except ImportError:
-    #pylint: disable=E0401
-    # 2.x name
-    from Queue import Queue, Empty
+from queue import Queue, Empty
 
 def enqueue_output(out, queue):
     while True:

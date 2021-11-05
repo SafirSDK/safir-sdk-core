@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 ###############################################################################
 #
@@ -23,18 +23,10 @@
 # along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import print_function
 import subprocess, os, time, sys, shutil
 import argparse
-
-try:
-    import ConfigParser
-except ImportError:
-    import configparser as ConfigParser
-try:
-    from StringIO import StringIO
-except ImportError:
-    from io import StringIO
+import configparser
+from io import StringIO
 
 parser = argparse.ArgumentParser("test script")
 parser.add_argument("--show-config", required=True)
@@ -58,7 +50,7 @@ proc = subprocess.Popen((arguments.show_config,"--locations"),
 # ConfigParser wants a section header so add a dummy one.
 conf_str = '[root]\n' + proc.communicate()[0]
 
-config = ConfigParser.ConfigParser()
+config = configparser.ConfigParser()
 config.read_file(StringIO(conf_str))
 
 crash_dump_dir = config.get('root','crash_dump_directory')
