@@ -483,7 +483,8 @@ class Runner:
             pass
 
     def killprocs(self, results):
-        self.__kill("safir_control", self.safir_control, 120)  #We give safir_control some extra time to stop
+        if hasattr(self, "safir_control"):
+            self.__kill("safir_control", self.safir_control, 120)  #We give safir_control some extra time to stop
         if hasattr(self, "safir_control_1"):
             self.__kill("safir_control", self.safir_control_1, 120)  #We give safir_control some extra time to stop
 
