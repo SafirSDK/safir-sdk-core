@@ -86,15 +86,9 @@ if (MSVC)
             debug "${SAFIR_SDK_CORE_LIBRARIES_DIR}/${lib}d.lib"
             optimized "${SAFIR_SDK_CORE_LIBRARIES_DIR}/${lib}.lib")
   endforeach()
-
-  set (SAFIR_SDK_CORE_OLIB_LIBRARIES
-            debug "${SAFIR_SDK_CORE_LIBRARIES_DIR}/olibd.lib"
-            optimized "${SAFIR_SDK_CORE_LIBRARIES_DIR}/olib.lib")
-
 else()
   include("${SAFIR_SDK_CORE_CMAKE_DIR}/SafirSDKCore.cmake")
   set(SAFIR_SDK_CORE_LIBRARIES ${libraries})
-  set(SAFIR_SDK_CORE_OLIB_LIBRARIES olib)
 endif()
 unset(libraries)
 

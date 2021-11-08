@@ -165,7 +165,6 @@ STRIP_FROM_INC_PATH    = @CMAKE_CURRENT_SOURCE_DIR@/../../include \
                          @CMAKE_CURRENT_BINARY_DIR@/../../src/douf/douf_dou.ss/gen/cpp/include \
                          @CMAKE_CURRENT_BINARY_DIR@/../../src/dose/dose_dou.ss/gen/cpp/include \
                          @CMAKE_CURRENT_BINARY_DIR@/../../src/swre/swre_dou.ss/gen/cpp/include \
-                         @CMAKE_CURRENT_BINARY_DIR@/../../src/olib/olib_dou.ss/gen/cpp/include \
                          @CMAKE_CURRENT_BINARY_DIR@/../../src/foreach/foreach_dou.ss/gen/cpp/include
 
 # If the SHORT_NAMES tag is set to YES, doxygen will generate much shorter (but
