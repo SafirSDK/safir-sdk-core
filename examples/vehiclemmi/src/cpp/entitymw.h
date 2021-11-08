@@ -48,44 +48,44 @@
 
 namespace VehicleMmiCppQt
 {
-    /** 
-    * Implements main window that contains a vehicle table and buttons to create, 
+    /**
+    * Implements main window that contains a vehicle table and buttons to create,
     * update and delete vehicles. It also contains a button to calculate speed
-    * by using a service and a button to retrieve category information from a database. 
-    * The vehicle table changes are handled by class EntityTableHandler that receives 
+    * by using a service and a button to retrieve category information from a database.
+    * The vehicle table changes are handled by class EntityTableHandler that receives
     * a pointer to the table in the constructor.
    */
-        
-    class EntityMw : 
-        public QMainWindow, 
+
+    class EntityMw :
+        public QMainWindow,
         // Allows this class to receive response on sent requests
         public Safir::Dob::Requestor
     {
         Q_OBJECT
 
     public:
-        /** 
+        /**
         * Create table and dialogs. Attach to Dob.
         */
-        EntityMw(QWidget *parent = 0, Qt::WindowFlags flags = 0);
-        
-        /** 
+        EntityMw(QWidget *parent = 0, Qt::WindowFlags flags = Qt::WindowFlags());
+
+        /**
         * Detach from Dob.
         */
         ~EntityMw();
 
-        /** 
-        * Overrides Safir.Dob.Requestor. Called by the Dob 
+        /**
+        * Overrides Safir.Dob.Requestor. Called by the Dob
         * when a response is received on a sent request
         */
-        virtual void OnResponse(const Safir::Dob::ResponseProxy responseProxy);
-        
-        /** 
-        * Overrides Safir.Dob.Requestor. Called by the Dob 
-        * to indicate that it is meningful to make a retry 
+        virtual void OnResponse(const Safir::Dob::ResponseProxy responseProxy) override;
+
+        /**
+        * Overrides Safir.Dob.Requestor. Called by the Dob
+        * to indicate that it is meningful to make a retry
         * after an overflow situation
         */
-        virtual void OnNotRequestOverflow();
+        virtual void OnNotRequestOverflow() override;
 
     private:
         Ui::EntityMwClass ui;

@@ -42,34 +42,34 @@
 
 namespace VehicleMmiCppQt
 {
-    /** 
-    * Implements class that subscribes for VehicleMsg and shows a dialog 
+    /**
+    * Implements class that subscribes for VehicleMsg and shows a dialog
     * with the text received the message.
     */
-    class MessageDialog : 
-        public QDialog, 
+    class MessageDialog :
+        public QDialog,
         // Allows this class to subscribe for messages
         public Safir::Dob::MessageSubscriber
     {
         Q_OBJECT
 
     public:
-        /** 
+        /**
         * Attach to Dob and subscribe for VehicleMsg.
         */
         MessageDialog(QWidget *parent = 0);
 
-        /** 
+        /**
         * Detach from Dob.
         */
         ~MessageDialog();
-        
-        /** 
-         * Overrides Safir::Dob::MessageSubscriber. Called by the Dob 
+
+        /**
+         * Overrides Safir::Dob::MessageSubscriber. Called by the Dob
          * when a message is sent that is subscribed for.
          */
-        void OnMessage(const Safir::Dob::MessageProxy messageProxy);
- 
+        void OnMessage(const Safir::Dob::MessageProxy messageProxy) override;
+
     private:
         void Show();    // Show dialog
 

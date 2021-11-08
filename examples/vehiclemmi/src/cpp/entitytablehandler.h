@@ -55,9 +55,9 @@ namespace VehicleMmiCppQt
 
         /**
         *  Attach to Dob.
-        */  
+        */
         EntityTableHandler(QTableWidget* pTable, const Safir::Dob::Typesystem::TypeId& rcClassTypeId);
-        
+
         /**
         *  Destructor
         */
@@ -65,60 +65,60 @@ namespace VehicleMmiCppQt
 
         /**
         *  Setup vehicle table and subscribe for Vehicle entity changes.
-        */      
+        */
         void Init();
 
         /**
         * Returns object id for last selected row in vehicle table.
-        */      
+        */
         Safir::Dob::Typesystem::EntityId GetSelectedEntityId();
 
         /**
         * Returns number of rows that are selected in vehicle table.
-        */      
+        */
         int GetNrOfSelectedRows();
 
         /**
-        * Overrides Safir::Dob::EntityTableHandler. Called by Dob when a new 
+        * Overrides Safir::Dob::EntityTableHandler. Called by Dob when a new
         * entity is available.
         */
-        virtual void OnNewEntity(const Safir::Dob::EntityProxy entityProxy);
-    
+        virtual void OnNewEntity(const Safir::Dob::EntityProxy entityProxy) override;
+
         /**
-        * Overrides Safir::Dob::EntityTableHandler. Called by Dob when an entity 
+        * Overrides Safir::Dob::EntityTableHandler. Called by Dob when an entity
         * is updated.
         */
-        virtual void OnUpdatedEntity(const Safir::Dob::EntityProxy entityProxy);
+        virtual void OnUpdatedEntity(const Safir::Dob::EntityProxy entityProxy) override;
 
         /**
         * Overrides Safir::Dob::EntityTableHandler. Called when an entity is removed.
         */
-        virtual void OnDeletedEntity(const Safir::Dob::EntityProxy entityProxy, const bool deprecated);
+        virtual void OnDeletedEntity(const Safir::Dob::EntityProxy entityProxy, const bool deprecated) override;
 
     private:
         /**
         * Internal method to handle a new entity
         */
         void OnNewEntityInternal(const Safir::Dob::EntityProxy &entityProxy);
-        
+
         /**
         * Internal method to handle an updated entity
         */
         void OnUpdatedEntityInternal(const Safir::Dob::EntityProxy &entityProxy);
-        
+
         /**
         * Internal method to handle a deleted entity
         */
         void OnDeletedEntityInternal(const Safir::Dob::EntityProxy &entityProxy);
 
     protected:
-        
+
         // Methods to create and update vehicle entities in table.
         QTableWidgetItem* CreateRow(int row);
         void UpdateRow(int row, Safir::Dob::EntityPtr entity);
 
         // Map definitions to bind a Dob object id to a row id in vehicle table.
-        // Used when sending entity requests and receiving entity data.  
+        // Used when sending entity requests and receiving entity data.
         typedef std::map<Safir::Dob::Typesystem::EntityId,QTableWidgetItem*> EntityIdToItemMap;
         typedef std::map<QTableWidgetItem*,Safir::Dob::Typesystem::EntityId> ItemToObjectIdMap;
 

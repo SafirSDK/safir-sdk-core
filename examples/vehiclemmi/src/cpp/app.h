@@ -82,7 +82,7 @@ namespace VehicleMmiCppQt
         /**
         * Called by the stop handler to terminate application.
         */
-        void OnStopOrder();
+        void OnStopOrder() override;
 
     private:
         // Primary connection for Dob calls

@@ -53,29 +53,29 @@ namespace VehicleAppCpp
          */
         void OnCreateRequest(
             const Safir::Dob::EntityRequestProxy entityRequestProxy,
-            Safir::Dob::ResponseSenderPtr responseSender);
+            Safir::Dob::ResponseSenderPtr responseSender) override;
 
         void OnUpdateRequest(
             const Safir::Dob::EntityRequestProxy entityRequestProxy,
-            Safir::Dob::ResponseSenderPtr responseSender);
+            Safir::Dob::ResponseSenderPtr responseSender) override;
 
         void OnDeleteRequest(
             const Safir::Dob::EntityRequestProxy entityRequestProxy,
-            Safir::Dob::ResponseSenderPtr responseSender);
+            Safir::Dob::ResponseSenderPtr responseSender) override;
 
         void OnRevokedRegistration(
             const Safir::Dob::Typesystem::TypeId typeId,
-            const Safir::Dob::Typesystem::HandlerId& handlerId);
+            const Safir::Dob::Typesystem::HandlerId& handlerId) override;
 
         void OnInjectedNewEntity(
-            const Safir::Dob::InjectedEntityProxy injectedEntityProxy);
+            const Safir::Dob::InjectedEntityProxy injectedEntityProxy) override;
 
         void OnInjectedDeletedEntity(
-            const Safir::Dob::InjectedEntityProxy injectedEntityProxy);
+            const Safir::Dob::InjectedEntityProxy injectedEntityProxy) override;
 
         void OnInitialInjectionsDone(
             const Safir::Dob::Typesystem::TypeId typeId,
-            const Safir::Dob::Typesystem::HandlerId& handlerId);
+            const Safir::Dob::Typesystem::HandlerId& handlerId) override;
 
     private:
         // This class uses this secondary connection for DOB calls.

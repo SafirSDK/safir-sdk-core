@@ -107,7 +107,7 @@ namespace VehicleMmiCppQt
                 // Send service request
                 m_secDobConnection.ServiceRequest(req, Safir::Dob::Typesystem::HandlerId(), this);
             }
-            catch(Safir::Dob::OverflowException)
+            catch (const Safir::Dob::OverflowException&)
             {
                 ui.lineEditStatusBar->setText("Overflow when sending, please wait!");
             }
@@ -232,7 +232,7 @@ namespace VehicleMmiCppQt
                 // Send service request
                 m_secDobConnection.ServiceRequest(req, Safir::Dob::Typesystem::HandlerId(), this);
             }
-            catch(Safir::Dob::OverflowException)
+            catch (const Safir::Dob::OverflowException&)
             {
                 ui.lineEditStatusBar->setText("Overflow when sending, please wait!");
             }

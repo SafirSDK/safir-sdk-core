@@ -79,7 +79,7 @@ namespace VehicleMmiCppQt
         * (defined in App file) and should be filtered, (i.e. stopped);
         * otherwise it return false
         */
-        virtual bool eventFilter(QObject* pObject,QEvent* pEvent);
+        virtual bool eventFilter(QObject* pObject,QEvent* pEvent) override;
 
         /*
         * Overrides Safir::Dob::Dispatcher, called by Dob to indicate
@@ -88,7 +88,7 @@ namespace VehicleMmiCppQt
         * Post event QT4_Dob_EVENT_TYPE to do the thread switch between
         * Dob and this application.
         */
-        void OnDoDispatch();
+        void OnDoDispatch() override;
 
         // Member variables
         Safir::Dob::Connection& m_connection;

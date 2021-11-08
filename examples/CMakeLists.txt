@@ -1,6 +1,8 @@
-cmake_minimum_required(VERSION 2.8.12)
-
 PROJECT(safir_sdk_core_examples CXX)
+
+cmake_minimum_required(VERSION 3.16.0)
+
+set(CMAKE_CXX_STANDARD 17)
 
 find_package(SafirSDKCore REQUIRED)
 
@@ -25,7 +27,7 @@ endif()
 
 if (UNIX)
    #set up use of threads and turn on more warnings
-   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -Wall -Wextra -Wpedantic")
+   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -Wall -Wextra -Wpedantic -Wsuggest-override -Werror=suggest-override")
 endif ()
 
 
@@ -36,5 +38,4 @@ include(${SAFIR_SDK_CORE_JAVA_SETTINGS})
 set (CSHARP_LIBRARY_PATHS "${SAFIR_SDK_CORE_CSHARP_LIBRARY_PATH}")
 
 add_subdirectory(vehicleapp/src)
-add_subdirectory(vehicledb/src)
 add_subdirectory(vehiclemmi/src)

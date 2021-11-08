@@ -134,7 +134,7 @@ namespace VehicleMmiCppQt
                 m_secDobConnection.DeleteRequest(entityId, this);
                 statusBar()->showMessage("OK"); 
             }
-            catch(Safir::Dob::OverflowException)
+            catch(const Safir::Dob::OverflowException&)
             {
                 statusBar()->showMessage("Overflow when sending, please wait!"); 
             }
@@ -194,7 +194,7 @@ namespace VehicleMmiCppQt
                         m_secDobConnection.ServiceRequest(req, Safir::Dob::Typesystem::HandlerId(), this);
                         statusBar()->showMessage("OK"); 
                     }
-                    catch(Safir::Dob::OverflowException)
+                    catch(const Safir::Dob::OverflowException&)
                     {
                         statusBar()->showMessage("Overflow when sending, please wait!"); 
                     }

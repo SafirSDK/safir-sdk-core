@@ -71,7 +71,7 @@ namespace VehicleAppCpp
         /**
          * Called by the stop handler.
          */
-        void OnStopOrder();
+        void OnStopOrder() override;
 
     private:
         // Primary connection for Dob calls

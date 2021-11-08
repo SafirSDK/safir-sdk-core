@@ -42,12 +42,12 @@
 
 namespace VehicleMmiCppQt
 {
-    /** 
+    /**
     * Implements dialog to present detailed information of a vehicle.
     * The dialog sends create and update requests for vehicles.
     */
-    class EntityDialog : 
-        public QDialog,         
+    class EntityDialog :
+        public QDialog,
         // Allows this class to receive response on sent requests
         public Safir::Dob::Requestor
     {
@@ -63,7 +63,7 @@ namespace VehicleMmiCppQt
         * Detach Dob connection.
         */
         ~EntityDialog();
-        
+
         /**
         * Opens dialog to create a new vehicle vehicle.
         */
@@ -74,26 +74,26 @@ namespace VehicleMmiCppQt
         */
         void UpdateVehicle(Safir::Dob::Typesystem::EntityId objId);
 
-        /** 
-         * Overrides Safir.Dob.Requestor. Called by the Dob 
+        /**
+         * Overrides Safir.Dob.Requestor. Called by the Dob
          * when a response is received on a sent request.
          */
-        virtual void OnResponse(const Safir::Dob::ResponseProxy responseProxy);
+        virtual void OnResponse(const Safir::Dob::ResponseProxy responseProxy) override;
 
-        /** 
-         * Overrides Safir.Dob.Requestor. Called by the Dob 
-         * to indicate that it is meningful to make a retry 
+        /**
+         * Overrides Safir.Dob.Requestor. Called by the Dob
+         * to indicate that it is meningful to make a retry
          * after an overflow situation
          */
-        virtual void OnNotRequestOverflow();
+        virtual void OnNotRequestOverflow() override;
 
-        
+
     private:
         void ClearAllControls();    // Empties all controls in this dialog
         void Show();                // Show this dialog
 
         EntityTableHandler* m_pEntityTableHandler;
-         
+
         Safir::Dob::SecondaryConnection m_secDobConnection;
         Safir::Dob::Typesystem::EntityId m_vehicleObjectId;
 

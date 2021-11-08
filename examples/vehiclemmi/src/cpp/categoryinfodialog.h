@@ -74,14 +74,14 @@ namespace VehicleMmiCppQt
          * Overrides Safir.Dob.Requestor. Called by the Dob 
          * when a response is received on a sent request.
          */
-        virtual void OnResponse(const Safir::Dob::ResponseProxy responseProxy);
+        virtual void OnResponse(const Safir::Dob::ResponseProxy responseProxy) override;
 
         /** 
          * Overrides Safir.Dob.Requestor. Called by the Dob 
          * to indicate that it is meningful to make a retry 
          * after an overflow situation
          */
-        virtual void OnNotRequestOverflow();
+        virtual void OnNotRequestOverflow() override;
 
     private:
         void ClearAllControls();    // Empties all controls in this dialog

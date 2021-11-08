@@ -43,13 +43,13 @@
 
 namespace VehicleMmiCppQt
 {
-    /** 
+    /**
     * Implements dialog to use service CalculateSpeedDifference.
-    * The dialog sends a service request and receives the 
+    * The dialog sends a service request and receives the
     * service response.
     */
-    class ServiceDialog : 
-        public QDialog, 
+    class ServiceDialog :
+        public QDialog,
         // Allows this class to receive response on sent requests
         public Safir::Dob::Requestor
     {
@@ -58,23 +58,23 @@ namespace VehicleMmiCppQt
     public:
         ServiceDialog(QWidget *parent = 0);
         ~ServiceDialog();
-        
+
         /**
         * Open dialog to send CalculateSpeedDifference service request
         */
         void Open(Safir::Dob::Typesystem::EntityId objId);
 
         /**
-        * Overrides Safir.Dob.Requestor. Called when a response is 
+        * Overrides Safir.Dob.Requestor. Called when a response is
         * received on a sent request
         */
-        virtual void OnResponse(const Safir::Dob::ResponseProxy responseProxy);
+        virtual void OnResponse(const Safir::Dob::ResponseProxy responseProxy) override;
 
         /**
-        * Overrides Safir.Dob.Requestor. Called to indicate that it 
+        * Overrides Safir.Dob.Requestor. Called to indicate that it
         * is meningful to make a retry after an overflow situation
         */
-        virtual void OnNotRequestOverflow();
+        virtual void OnNotRequestOverflow() override;
 
     private:
         void Show(); // Show this dialog

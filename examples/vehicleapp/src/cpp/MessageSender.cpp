@@ -63,7 +63,7 @@ namespace VehicleAppCpp
         {
             m_connection.Send(msg, Safir::Dob::Typesystem::ChannelId(), this);
         }
-        catch (Safir::Dob::OverflowException)
+        catch (const Safir::Dob::OverflowException&)
         {
             // Do nothing OnNotMessageOverflow() will be called when 
             // overflow situation solved.

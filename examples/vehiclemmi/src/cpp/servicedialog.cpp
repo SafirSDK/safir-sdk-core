@@ -32,7 +32,7 @@ namespace VehicleMmiCppQt
 {
 
     ServiceDialog::ServiceDialog(QWidget *parent)
-        : QDialog(parent, Qt::WindowTitleHint|Qt::WindowSystemMenuHint) // Remove help button        
+        : QDialog(parent, Qt::WindowTitleHint|Qt::WindowSystemMenuHint) // Remove help button
     {
         ui.setupUi(this);
         m_secDobConnection.Attach();
@@ -109,10 +109,10 @@ namespace VehicleMmiCppQt
             // Create service request
             Capabilities::CalculateSpeedDifferencePtr req = Capabilities::CalculateSpeedDifference::Create();
 
-            // Set service request values 
-            /*const Capabilities::CalculateSpeedDifferencePtr calcSpeedRefPtr = 
+            // Set service request values
+            /*const Capabilities::CalculateSpeedDifferencePtr calcSpeedRefPtr =
                 boost::static_pointer_cast<Capabilities::CalculateSpeedDifference>(m_secDobConnection.Read(m_pVehicle).GetEntityId()));*/
-                        
+
             req->ObjectWithSpeed().SetPtr(boost::static_pointer_cast<Safir::Dob::Entity>(m_pVehicle));
             req->Speed().SetVal(ui.lineEditNewSpeed->text().toFloat());
 
@@ -121,7 +121,7 @@ namespace VehicleMmiCppQt
                 // Send service request
                 m_secDobConnection.ServiceRequest(req, Safir::Dob::Typesystem::HandlerId(), this);
             }
-            catch(Safir::Dob::OverflowException)
+            catch (const Safir::Dob::OverflowException&)
             {
                 ui.lineEditStatusBar->setText("Overflow when sending, please wait!");
             }
@@ -135,30 +135,30 @@ namespace VehicleMmiCppQt
         {
             Capabilities::CalculateSpeedDifferenceResponsePtr response = Capabilities::CalculateSpeedDifferenceResponse::Create();
             response = boost::static_pointer_cast<Capabilities::CalculateSpeedDifferenceResponse>(responseProxy.GetResponse());
-           
+
             if(!response->SpeedDifference().IsNull())
             {
                 float speed = response->SpeedDifference().GetVal();
                 QString qstrSpeed("");
                 qstrSpeed.setNum(speed);
-                ui.lineEditSpeedDiff->setText(qstrSpeed);              
-                ui.lineEditStatusBar->setText("OK"); 
+                ui.lineEditSpeedDiff->setText(qstrSpeed);
+                ui.lineEditStatusBar->setText("OK");
             }
             else
-            {      
-                ui.lineEditStatusBar->setText("Could not calculate speed - speed difference has no value.");    
+            {
+                ui.lineEditStatusBar->setText("Could not calculate speed - speed difference has no value.");
             }
         }
         else
         {
             ui.lineEditStatusBar->setText("Error");
-        }    
+        }
     }
 
 
     void ServiceDialog::OnNotRequestOverflow()
     {
-        // No automatic resending is made. 
+        // No automatic resending is made.
        ui.lineEditStatusBar->setText("Overflow situation solved. Make request again!");
     }
 

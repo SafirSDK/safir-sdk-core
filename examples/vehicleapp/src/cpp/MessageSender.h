@@ -61,7 +61,7 @@ namespace VehicleAppCpp
         /** 
          * Methods derived from Safir::Dob::MessageSender.
          */
-        void OnNotMessageOverflow();
+        void OnNotMessageOverflow() override;
 
         /** 
          * Sends a message.

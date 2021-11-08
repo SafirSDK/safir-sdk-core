@@ -55,11 +55,11 @@ namespace VehicleAppCpp
          */
         void OnServiceRequest(
             const Safir::Dob::ServiceRequestProxy serviceRequestProxy,
-            Safir::Dob::ResponseSenderPtr responseSender);
+            Safir::Dob::ResponseSenderPtr responseSender) override;
 
         void OnRevokedRegistration(
             const Safir::Dob::Typesystem::TypeId typeId,
-            const Safir::Dob::Typesystem::HandlerId& handlerId);
+            const Safir::Dob::Typesystem::HandlerId& handlerId) override;
 
     private:
         // This class uses this secondary connection for Dob calls.
