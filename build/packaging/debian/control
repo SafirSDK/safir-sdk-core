@@ -3,11 +3,11 @@ Maintainer: Lars Hagström <lars@foldspace.nu>
 Section: libs
 Priority: optional
 Standards-Version: 3.9.7
-Build-Depends: debhelper (>= 9), cmake (>= 2.8.12), python (>= 2.7.0), default-jdk, asciidoc, cli-common-dev (>= 0.5.7), libboost-all-dev, unixodbc-dev, protobuf-compiler, libprotobuf-dev, doxygen, graphviz, qtbase5-dev
+Build-Depends: debhelper (>= 9), cmake (>= 3.16), python3 (>= 3.8.0), default-jdk, asciidoc, cli-common-dev (>= 0.5.7), libboost-all-dev, unixodbc-dev, doxygen, graphviz, qtbase5-dev
 
 Package: safir-sdk-core
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, ${cli:Depends}, python (>= 2.7.0)
+Depends: ${shlibs:Depends}, ${misc:Depends}, ${cli:Depends}, python3 (>= 3.8.0)
 Suggests: openjdk-jre, openjdk-jre-headless, mono-runtime
 Description: Distributed real-time system framework
  Safir SDK Core is a middleware and platform for creation of
@@ -35,7 +35,7 @@ Description: Safir SDK Core debugging tools
 Package: safir-sdk-core-dev
 Architecture: any
 Section: libdevel
-Depends: ${shlibs:Depends}, ${misc:Depends}, python (>= 2.7.0), unixodbc-dev, libboost-all-dev, safir-sdk-core (= ${binary:Version})
+Depends: ${shlibs:Depends}, ${misc:Depends}, python3 (>= 3.8.0), unixodbc-dev, libboost-all-dev, safir-sdk-core (= ${binary:Version})
 Description: Safir SDK Core development files
  Safir SDK Core is a middleware and platform for creation of
  distributed soft real-time systems. It is Scalable, Reliable,
@@ -49,7 +49,7 @@ Description: Safir SDK Core development files
 Package: safir-sdk-core-testsuite
 Architecture: any
 Section: libdevel
-Depends: ${shlibs:Depends}, ${misc:Depends}, ${cli:Depends}, python (>= 2.7.0),
+Depends: ${shlibs:Depends}, ${misc:Depends}, ${cli:Depends}, python3 (>= 3.8.0),
          safir-sdk-core(= ${binary:Version}), safir-sdk-core-tools (= ${binary:Version})
 Description: Safir SDK Core test suite
  Safir SDK Core is a middleware and platform for creation of
