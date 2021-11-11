@@ -3,13 +3,13 @@
 #which is default on windows.
 SET(CMAKE_DEBUG_POSTFIX "")
 
-find_package(breakpad)
+find_package(sentry-breakpad)
 
 add_library(lluf_crash_reporter SHARED CrashReporter.cpp)
 
 TARGET_LINK_LIBRARIES(lluf_crash_reporter PRIVATE
   lluf_config
-  breakpad::client
+  sentry-breakpad::sentry-breakpad
   ${Boost_FILESYSTEM_LIBRARY}
   ${Boost_THREAD_LIBRARY}
   ${Boost_SYSTEM_LIBRARY})

@@ -17,7 +17,7 @@ include(${CMAKE_BINARY_DIR}/conan.cmake)
 
 conan_cmake_configure(
   REQUIRES
-    breakpad/cci.20210521
+    sentry-breakpad/0.4.12
     websocketpp/0.8.2@user/stable
     rapidjson/cci.20200410
     protobuf/3.17.1
