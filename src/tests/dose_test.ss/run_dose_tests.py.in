@@ -125,19 +125,19 @@ class Parameters:
                           action="store",
                           dest="lang0",
                           default="cpp",
-                          help="Which partner 0 to run. [default: %default]. "
+                          help="Which partner 0 to run."
                           "If --jenkins is specified the Languages environment variable will override this.")
         parser.add_argument("--lang1",
                           action="store",
                           dest="lang1",
                           default="cpp",
-                          help="Which partner 1 to run. [default: %default]. "
+                          help="Which partner 1 to run."
                           "If --jenkins is specified the Languages environment variable will override this.")
         parser.add_argument("--lang2",
                           action="store",
                           dest="lang2",
                           default="cpp",
-                          help="Which partner 2 to run. [default: %default]. "
+                          help="Which partner 2 to run."
                           "If --jenkins is specified the Languages environment variable will override this.")
         parser.add_argument("--single-testcase", action="store", help="Run only a single testcase.")
         parser.add_argument("--first-testcase", action="store", help="Sets the first testcase to be run.")
