@@ -5,9 +5,11 @@ set(proto_files DoseMainCommands.proto ControlCommands.proto ControlInfo.proto)
 
 ADD_LIBRARY(control_utils SHARED ${sources} ${headers} ${proto_files})
 
-PROTOBUF_GENERATE(TARGET control_utils)
-#Make the generated protobuf headers available for us to include inside control_utils
-target_include_directories(control_utils PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+PROTOBUF_GENERATE(TARGET control_utils OUT_VAR generated_files)
+
+if (MSVC)
+  SET_SOURCE_FILES_PROPERTIES(${generated_files} PROPERTIES COMPILE_FLAGS "/wd4127 /wd4244 /wd4267")
+endif()
 
 #Make our INTERNAL headers available to other parts of Core.
 target_include_directories(control_utils PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)

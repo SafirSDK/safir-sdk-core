@@ -12,7 +12,12 @@ add_executable(unit_tests ${sources} ${headers} ../../src/MessageQueue.h
                 ../../src/DataReceiver.h ../../src/Discoverer.h ../../src/Utilities.h
                 ../../src/CommunicationMessage.proto)
 
-PROTOBUF_GENERATE(TARGET unit_tests APPEND_PATH)
+PROTOBUF_GENERATE(TARGET unit_tests APPEND_PATH OUT_VAR generated_files)
+
+if (MSVC)
+  SET_SOURCE_FILES_PROPERTIES(${generated_files} PROPERTIES COMPILE_FLAGS "/wd4127 /wd4244 /wd4267")
+endif()
+
 
 target_link_libraries(unit_tests PRIVATE
   lluf_utils

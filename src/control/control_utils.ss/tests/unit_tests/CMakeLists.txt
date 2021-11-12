@@ -7,6 +7,11 @@ ADD_SUBDIRECTORY(Config_test)
 PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS
   ../../src/DoseMainCommands.proto ../../src/ControlCommands.proto ../../src/ControlInfo.proto APPEND_PATH)
 
+if (MSVC)
+  SET_SOURCE_FILES_PROPERTIES(${PROTO_SRCS} PROPERTIES COMPILE_FLAGS "/wd4127 /wd4244 /wd4267")
+endif()
+
+
 #Need to define this to not get inconsistent dll linkage on windows.
 #no test is meant to actually link the control_utils library, so we can do this.
 add_definitions(-Dcontrol_utils_EXPORTS)

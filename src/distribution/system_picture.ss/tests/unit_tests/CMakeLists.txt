@@ -4,6 +4,10 @@ PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS
   ../../src/ElectionMessage.proto
   APPEND_PATH)
 
+if (MSVC)
+  SET_SOURCE_FILES_PROPERTIES(${PROTO_SRCS} PROPERTIES COMPILE_FLAGS "/wd4127 /wd4244 /wd4267")
+endif()
+
 #Most of the tests in here need the generated protobuf headers
 #and all need the SystemPicture headers
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR} ../../src/include)

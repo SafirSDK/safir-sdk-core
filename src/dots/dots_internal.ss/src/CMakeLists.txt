@@ -3,10 +3,11 @@ FILE(GLOB sources *.cpp)
 
 ADD_LIBRARY(dots_internal SHARED ${sources} ${headers} AnyObject.proto)
 
-PROTOBUF_GENERATE(TARGET dots_internal)
+PROTOBUF_GENERATE(TARGET dots_internal OUT_VAR generated_files)
 
-#Make the generated protobuf headers available for us to include inside control_utils
-target_include_directories(dots_internal PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+if (MSVC)
+  SET_SOURCE_FILES_PROPERTIES(${generated_files} PROPERTIES COMPILE_FLAGS "/wd4127 /wd4244 /wd4267")
+endif()
 
 TARGET_LINK_LIBRARIES(dots_internal PRIVATE
   lluf_utils
