@@ -96,12 +96,12 @@ private:
             params << "--32-bit";
         }
 
-#if _MSC_VER == 1600
-        params << "--use-studio" << "2010";
-#elif _MSC_VER == 1700
-        params << "--use-studio" << "2012";
-#elif _MSC_VER == 1800
-        params << "--use-studio" << "2013";
+#if _MSC_VER >= 1930
+        params << "--use-studio" << "2022";
+#elif _MSC_VER >= 1920
+        params << "--use-studio" << "2019";
+#elif _MSC_VER >= 1910
+        params << "--use-studio" << "2017";
 #elif _MSC_VER == 1900
         params << "--use-studio" << "2015";
 #elif defined(_MSC_VER)
