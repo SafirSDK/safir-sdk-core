@@ -1,7 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2006-2013 (http://safirsdkcore.com)
-* 
+*
 * Created by: Lars Hagström / stlrha
 *
 *******************************************************************************
@@ -27,13 +27,13 @@
 
 #include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
-#include <boost/unordered_map.hpp>
+#include <unordered_map>
 #include <Safir/Dob/Typesystem/Defs.h>
 #include <Safir/Dob/Typesystem/Exceptions.h>
 #include <mutex>
 
 #ifdef _MSC_VER
-#pragma warning(push) 
+#pragma warning(push)
 #pragma warning(disable: 4275)
 #endif
 
@@ -130,22 +130,13 @@ namespace Typesystem
         ObjectFactory();
         ~ObjectFactory();
 
-#ifdef _MSC_VER
-#pragma warning (push)
-#pragma warning (disable: 4251) // warning C4251: 'Safir::Dob::Typesystem::ObjectFactory::m_CallbackMap' : class 'stdext::hash_map<_Kty,_Ty>' needs to have dll-interface to be used by clients of class 'Safir::Dob::Typesystem::ObjectFactory'
-#endif
-
-        typedef boost::unordered_map<TypeId,CreateObjectCallback> CallbackMap;
+        typedef std::unordered_map<TypeId,CreateObjectCallback> CallbackMap;
         CallbackMap m_CallbackMap;
 
-#ifdef _MSC_VER
-#pragma warning (pop)
-#endif
-
         /**
-         * This class is here to ensure that only the Instance method can get at the 
+         * This class is here to ensure that only the Instance method can get at the
          * instance, so as to be sure that boost call_once is used correctly.
-         * Also makes it easier to grep for singletons in the code, if all 
+         * Also makes it easier to grep for singletons in the code, if all
          * singletons use the same construction and helper-name.
          */
         struct SingletonHelper
@@ -166,4 +157,3 @@ namespace Typesystem
 #endif
 
 #endif
-

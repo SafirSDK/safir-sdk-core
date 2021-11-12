@@ -134,7 +134,7 @@ namespace Internal
 
         typedef std::deque<PendingRequest> PendingRequestsQueue;
 
-        typedef boost::unordered_map<int64_t, PendingRequestsQueue> PendingRequestTable;
+        typedef std::unordered_map<int64_t, PendingRequestsQueue> PendingRequestTable;
 
         boost::asio::io_service&            m_ioService;
         boost::asio::io_service::strand     m_strand;
@@ -150,7 +150,7 @@ namespace Internal
                            boost::hash<std::pair<int64_t, InternalRequestId>>> m_outReqTimers;
 
         boost::chrono::milliseconds GetTimeout(const Safir::Dob::Typesystem::TypeId typeId) const;
-        typedef boost::unordered_map<Typesystem::TypeId, Typesystem::Si64::Second> TimeoutTable;
+        typedef std::unordered_map<Typesystem::TypeId, Typesystem::Si64::Second> TimeoutTable;
         mutable TimeoutTable m_timeoutTable;
 
         BlockingHandlers m_blockingHandler;

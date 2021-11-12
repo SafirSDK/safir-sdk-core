@@ -1,7 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2007-2013 (http://safirsdkcore.com)
-* 
+*
 * Created by: Lars Hagström / stlrha
 *
 *******************************************************************************
@@ -26,7 +26,7 @@
 #define __DOTS_LIBRARY_EXCEPTIONS_H__
 
 #include <boost/noncopyable.hpp>
-#include <boost/unordered_map.hpp>
+#include <unordered_map>
 #include <mutex>
 #include <Safir/Dob/Typesystem/Defs.h>
 #include <Safir/Dob/Typesystem/Exceptions.h>
@@ -255,13 +255,13 @@ namespace Typesystem
 
         void Set(const Internal::CommonExceptionBase & exception);
 
-        typedef boost::unordered_map<TypeId, ThrowExceptionCallback> CallbackMap;
+        typedef std::unordered_map<TypeId, ThrowExceptionCallback> CallbackMap;
         CallbackMap m_CallbackMap;
 
         /**
-         * This class is here to ensure that only the Instance method can get at the 
+         * This class is here to ensure that only the Instance method can get at the
          * instance, so as to be sure that boost call_once is used correctly.
-         * Also makes it easier to grep for singletons in the code, if all 
+         * Also makes it easier to grep for singletons in the code, if all
          * singletons use the same construction and helper-name.
          */
         struct SingletonHelper
@@ -282,5 +282,3 @@ namespace Typesystem
 #endif
 
 #endif
-
-

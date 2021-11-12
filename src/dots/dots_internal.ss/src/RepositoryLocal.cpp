@@ -37,7 +37,7 @@ namespace ToolSupport
 {
     ParameterDescriptionLocal* RepositoryLocal::GetParameterLocal(const std::string& qualifiedName)
     {
-        boost::unordered_map<std::string, ParameterDescriptionLocal*>::const_iterator it=m_parameters.find(qualifiedName);
+        std::unordered_map<std::string, ParameterDescriptionLocal*>::const_iterator it=m_parameters.find(qualifiedName);
         if (it!=m_parameters.end())
         {
             return it->second;

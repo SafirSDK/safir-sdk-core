@@ -535,9 +535,9 @@ namespace ToolSupport
     }
 
     template <class Key, class Val>
-    Val* GetPtr(const boost::unordered_map< Key, boost::shared_ptr<Val> >& m, Key key)
+    Val* GetPtr(const std::unordered_map< Key, boost::shared_ptr<Val> >& m, Key key)
     {
-        typename boost::unordered_map< Key, boost::shared_ptr<Val> >::const_iterator it=m.find(key);
+        typename std::unordered_map< Key, boost::shared_ptr<Val> >::const_iterator it=m.find(key);
         if (it!=m.end())
         {
             return it->second.get();
@@ -556,7 +556,7 @@ namespace ToolSupport
     }
 
     template <class Descr>
-    void SetupBaseClass(boost::unordered_map< DotsC_TypeId, boost::shared_ptr<Descr> >& m,
+    void SetupBaseClass(std::unordered_map< DotsC_TypeId, boost::shared_ptr<Descr> >& m,
                         std::set<DotsC_TypeId>& endConditions,
                         Descr* d,
                         const std::function<void(Descr*, Descr*)>& setBase,
@@ -946,14 +946,14 @@ namespace ToolSupport
         endConditions.insert(softwareViolationException->typeId);
         endConditions.insert(configurationErrorException->typeId);
         std::function<void(ExceptionDescriptionLocal*, ExceptionDescriptionLocal*)> setExeptBaseFun(SetExceptionBase);
-        for (boost::unordered_map<DotsC_TypeId, ExceptionDescriptionLocalPtr>::iterator it=state.repository->m_exceptions.begin(); it!=state.repository->m_exceptions.end(); ++it)
+        for (std::unordered_map<DotsC_TypeId, ExceptionDescriptionLocalPtr>::iterator it=state.repository->m_exceptions.begin(); it!=state.repository->m_exceptions.end(); ++it)
         {
             int recLevel=0;
             SetupBaseClass(state.repository->m_exceptions, endConditions, it->second.get(), setExeptBaseFun, recLevel);
         }
 
         //Property members
-        for (boost::unordered_map<DotsC_TypeId, PropertyDescriptionLocalPtr>::iterator it=state.repository->m_properties.begin(); it!=state.repository->m_properties.end(); ++it)
+        for (std::unordered_map<DotsC_TypeId, PropertyDescriptionLocalPtr>::iterator it=state.repository->m_properties.begin(); it!=state.repository->m_properties.end(); ++it)
         {
             SetupMemberTypes(it->second, state.repository);
         }
@@ -964,7 +964,7 @@ namespace ToolSupport
         std::function<void(ClassDescriptionLocal*, ClassDescriptionLocal*)> setClassBaseFun(SetClassBase);
         endConditions.clear();
         endConditions.insert(obj->typeId);
-        for (boost::unordered_map<DotsC_TypeId, ClassDescriptionLocalPtr>::iterator it=state.repository->m_classes.begin(); it!=state.repository->m_classes.end(); ++it)
+        for (std::unordered_map<DotsC_TypeId, ClassDescriptionLocalPtr>::iterator it=state.repository->m_classes.begin(); it!=state.repository->m_classes.end(); ++it)
         {
             //Set base class
             int recLevel=0;
@@ -1444,7 +1444,7 @@ namespace ToolSupport
 
     void DouCompletionAlgorithm::CalculateEnumChecksums(const ParseState& state)
     {
-        for (boost::unordered_map<DotsC_TypeId, EnumDescriptionLocalPtr>::iterator it=state.repository->m_enums.begin();
+        for (std::unordered_map<DotsC_TypeId, EnumDescriptionLocalPtr>::iterator it=state.repository->m_enums.begin();
              it!=state.repository->m_enums.end(); ++it)
         {
             EnumDescriptionLocalPtr& ed=it->second;
@@ -1461,7 +1461,7 @@ namespace ToolSupport
     void DouCompletionAlgorithm::VerifyParameterKeys(const ParseState& state)
     {
         //loop through all parameters and verify all TypeId, EntityId, and Enum
-        for (boost::unordered_map<std::string, ParameterDescriptionLocal*>::iterator parIt=state.repository->m_parameters.begin();
+        for (std::unordered_map<std::string, ParameterDescriptionLocal*>::iterator parIt=state.repository->m_parameters.begin();
              parIt!=state.repository->m_parameters.end(); ++parIt)
         {
             ParameterDescriptionLocal* pd=parIt->second;
@@ -1474,7 +1474,7 @@ namespace ToolSupport
     void DouCompletionAlgorithm::VerifyParameterValues(const ParseState& state)
     {
         //loop through all parameters and verify all TypeId, EntityId, and Enum
-        for (boost::unordered_map<std::string, ParameterDescriptionLocal*>::iterator parIt=state.repository->m_parameters.begin();
+        for (std::unordered_map<std::string, ParameterDescriptionLocal*>::iterator parIt=state.repository->m_parameters.begin();
              parIt!=state.repository->m_parameters.end(); ++parIt)
         {
             ParameterDescriptionLocal* pd=parIt->second;

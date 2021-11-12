@@ -37,8 +37,7 @@
 #include <Safir/Dob/Internal/EntityTypes.h>
 #include <Safir/Dob/ConnectionQueueId.h>
 #include <Safir/Dob/CallbackId.h>
-#include <boost/unordered_map.hpp>
-#include <map>
+#include <unordered_map>
 #include "Postponer.h"
 
 namespace Safir
@@ -429,7 +428,7 @@ namespace Internal
 
         RequestIds m_requestIds;
 
-        typedef boost::unordered_map<Typesystem::Int32, Internal::EntityTypes::EntityIterator> EntityIteratorTable;
+        typedef std::unordered_map<Typesystem::Int32, Internal::EntityTypes::EntityIterator> EntityIteratorTable;
 
         EntityIteratorTable m_entityIterators;
 

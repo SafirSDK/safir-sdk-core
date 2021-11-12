@@ -23,7 +23,7 @@
 ******************************************************************************/
 #pragma once
 
-#include <boost/unordered_map.hpp>
+#include <unordered_map>
 #include <Safir/Dob/Defs.h>
 #include "JsonRpcId.h"
 
@@ -51,5 +51,5 @@ public:
     size_t Count() const {return m_map.size();}
 
 private:
-    boost::unordered_map<Safir::Dob::RequestId, JsonRpcId> m_map;
+    std::unordered_map<Safir::Dob::RequestId, JsonRpcId> m_map;
 };

@@ -28,7 +28,7 @@
 #include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
-#include <boost/unordered_map.hpp>
+#include <unordered_map>
 #include <Safir/Dob/Typesystem/ToolSupport/TypeUtilities.h>
 #include <Safir/Dob/Typesystem/ToolSupport/Internal/BasicTypeOperations.h>
 
@@ -499,25 +499,25 @@ namespace ToolSupport
         friend class DomCompletionAlgorithm;
 
         //Type containers
-        boost::unordered_map<DotsC_TypeId, EnumDescriptionLocalPtr> m_enums;
-        boost::unordered_map<DotsC_TypeId, ClassDescriptionLocalPtr> m_classes;
-        boost::unordered_map<DotsC_TypeId, PropertyDescriptionLocalPtr> m_properties;
-        boost::unordered_map<DotsC_TypeId, ExceptionDescriptionLocalPtr> m_exceptions;
-        boost::unordered_map<std::string, ParameterDescriptionLocal*> m_parameters;
+        std::unordered_map<DotsC_TypeId, EnumDescriptionLocalPtr> m_enums;
+        std::unordered_map<DotsC_TypeId, ClassDescriptionLocalPtr> m_classes;
+        std::unordered_map<DotsC_TypeId, PropertyDescriptionLocalPtr> m_properties;
+        std::unordered_map<DotsC_TypeId, ExceptionDescriptionLocalPtr> m_exceptions;
+        std::unordered_map<std::string, ParameterDescriptionLocal*> m_parameters;
 
         template <class Key, class Val>
-        static void GetKeys(const boost::unordered_map<Key, Val>& m, std::set<Key>& keys)
+        static void GetKeys(const std::unordered_map<Key, Val>& m, std::set<Key>& keys)
         {
-            for (typename boost::unordered_map<Key, Val>::const_iterator it=m.begin(); it!=m.end(); ++it)
+            for (typename std::unordered_map<Key, Val>::const_iterator it=m.begin(); it!=m.end(); ++it)
             {
                 keys.insert(it->first);
             }
         }
 
         template <class Key, class Val>
-        static Val* GetPtr(const boost::unordered_map< Key, boost::shared_ptr<Val> >& m, Key key)
+        static Val* GetPtr(const std::unordered_map< Key, boost::shared_ptr<Val> >& m, Key key)
         {
-            typename boost::unordered_map< Key, boost::shared_ptr<Val> >::const_iterator it=m.find(key);
+            typename std::unordered_map< Key, boost::shared_ptr<Val> >::const_iterator it=m.find(key);
             if (it!=m.end())
             {
                 return it->second.get();

@@ -25,7 +25,7 @@
 
 #include <memory>
 #include <atomic>
-#include <boost/unordered_map.hpp>
+#include <unordered_map>
 #include <functional>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
@@ -249,7 +249,7 @@ namespace Com
             }
         };
 
-        typedef boost::unordered_map<int64_t, DataReceiver>  ReceiverMap;
+        typedef std::unordered_map<int64_t, DataReceiver>  ReceiverMap;
 
         struct RecvData
         {
