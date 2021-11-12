@@ -22,9 +22,9 @@ conan_cmake_configure(
     rapidjson/cci.20200410
     protobuf/3.17.1
   OPTIONS
-    websocketpp:asio=none
-    websocketpp:openssl=False
-    websocketpp:zlib=False
+    websocketpp:asio=False
+    websocketpp:with_openssl=False
+    websocketpp:with_zlib=False
     protobuf:lite=True
     protobuf:shared=False
     protobuf:with_zlib=False
