@@ -358,9 +358,11 @@ void ControlApp::Start()
 
     m_doseMain = std::make_unique<boost::process::child>
         (m_doseMainPath,
-         boost::this_process::environment(),
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
+         boost::this_process::wenvironment(),
          boost::process::windows::hide,
+#else
+         boost::this_process::environment(),
 #endif
          m_ioService,
          error,
