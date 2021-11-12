@@ -27,15 +27,14 @@
 #include <boost/lexical_cast.hpp>
 
 #ifdef _MSC_VER
-#pragma warning (push)
-#pragma warning (disable: 4244)
-#pragma warning (disable: 4127)
+#  pragma warning (push)
+#  pragma warning (disable: 4127)
 #endif
 
 #include "RawStatisticsMessage.pb.h"
 
 #ifdef _MSC_VER
-#pragma warning (pop)
+#  pragma warning (pop)
 #endif
 
 #define BOOST_TEST_MODULE MyTest

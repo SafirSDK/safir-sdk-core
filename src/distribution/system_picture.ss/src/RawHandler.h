@@ -39,16 +39,14 @@
 #include <unordered_map>
 #include <set>
 #include <memory>
+#include <boost/asio.hpp>
 
 #ifdef _MSC_VER
 #  pragma warning (push)
-#  pragma warning (disable: 4244)
 #  pragma warning (disable: 4127)
-#  pragma warning (disable: 4267)
 #endif
 
 #include "RawStatisticsMessage.pb.h"
-#include <boost/asio.hpp>
 
 #ifdef _MSC_VER
 #pragma warning (pop)

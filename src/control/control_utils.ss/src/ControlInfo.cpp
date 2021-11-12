@@ -25,7 +25,17 @@
 #include <Safir/Utilities/Internal/IpcPublisher.h>
 #include <Safir/Utilities/Internal/IpcSubscriber.h>
 #include <Safir/Utilities/Internal/MakeUnique.h>
+
+#ifdef _MSC_VER
+#  pragma warning (push)
+#  pragma warning (disable: 4127)
+#endif
+
 #include "ControlInfo.pb.h"
+
+#ifdef _MSC_VER
+#  pragma warning (pop)
+#endif
 
 namespace Safir
 {

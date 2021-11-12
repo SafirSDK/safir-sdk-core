@@ -25,15 +25,14 @@
 #include <Safir/Dob/Internal/RawStatistics.h>
 
 #ifdef _MSC_VER
-#pragma warning (push)
-#pragma warning (disable: 4244)
-#pragma warning (disable: 4127)
+#  pragma warning (push)
+#  pragma warning (disable: 4127)
 #endif
 
 #include "RawStatisticsMessage.pb.h"
 
 #ifdef _MSC_VER
-#pragma warning (pop)
+#  pragma warning (pop)
 #endif
 
 #include "../../src/LocalSubscriber.h"
