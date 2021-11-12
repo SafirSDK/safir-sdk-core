@@ -34,6 +34,7 @@
 #pragma warning (disable: 4244)
 #pragma warning (disable: 4245)
 #pragma warning (disable: 4127)
+#pragma warning (disable: 4701)
 #endif
 
 #include <boost/crc.hpp>
