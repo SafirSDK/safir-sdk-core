@@ -23,7 +23,15 @@
 # along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-import sys, subprocess, os, shutil, difflib, argparse, re, platform
+import sys
+import subprocess
+import os
+import shutil
+import difflib
+import argparse
+import re
+import platform
+
 from syslog_server import SyslogServer
 
 parser = argparse.ArgumentParser("test script")
@@ -62,7 +70,10 @@ if arguments.language == "cpp":
 elif arguments.language == "java":
     command = ("java", "-jar", arguments.jar)
 elif arguments.language == "dotnet":
-    command = ("mono", arguments.binary)
+    if platform.system() == "Windows":
+        command = (arguments.binary,)
+    else:
+        command = ("mono", arguments.binary)
 else:
     print("Not implemented")
     sys.exit(1)

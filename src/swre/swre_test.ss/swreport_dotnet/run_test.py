@@ -23,9 +23,13 @@
 # along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-import subprocess, os, time, sys, signal, shutil, argparse
+import subprocess
+import sys
+import shutil
+import argparse
+import platform
 import syslog_server
-from safe_print import *
+from safe_print import safe_print
 
 parser = argparse.ArgumentParser("test script for logging")
 parser.add_argument("--safir-show-config", required=True)
@@ -41,9 +45,15 @@ for dep in dependencies:
 
 syslog = syslog_server.SyslogServer(arguments.safir_show_config)
 
-o1 = subprocess.check_output(("mono", arguments.sender_exe), stderr=subprocess.STDOUT)
-o2 = subprocess.check_output(("mono", arguments.sender_exe), stderr=subprocess.STDOUT)
-o3 = subprocess.check_output(("mono", arguments.sender_exe), stderr=subprocess.STDOUT)
+if platform.system() == "Windows":
+    exe = (arguments.sender_exe,)
+else:
+    exe = ("mono", arguments.sender_exe)
+
+
+o1 = subprocess.check_output(exe, stderr=subprocess.STDOUT)
+o2 = subprocess.check_output(exe, stderr=subprocess.STDOUT)
+o3 = subprocess.check_output(exe, stderr=subprocess.STDOUT)
 
 stdout_output = o1 + o2 + o3
 syslog_output = syslog.get_data(1)

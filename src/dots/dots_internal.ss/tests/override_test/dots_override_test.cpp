@@ -82,7 +82,7 @@ int main(int argc, char* argv[])
     while (expIt!=expectedToBeParsed.end())
     {
         std::string parsed = *parsedIt;
-        std::replace(parsed.begin(), parsed.end(), L'\\', L'/');
+        std::replace(parsed.begin(), parsed.end(), '\\', '/');
         if (parsed.find(*expIt) == std::string::npos)
         {
             std::cout << *expIt << " does not match " << parsed << std::endl;

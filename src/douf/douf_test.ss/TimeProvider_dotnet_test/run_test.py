@@ -23,7 +23,11 @@
 # along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-import subprocess, sys, os, shutil, time, argparse
+import subprocess
+import sys
+import shutil
+import argparse
+import platform
 
 parser = argparse.ArgumentParser("test script")
 parser.add_argument("--test-exe", required=True)
@@ -36,7 +40,12 @@ dependencies = arguments.dependencies.split(",")
 for dep in dependencies:
     shutil.copy2(dep, ".")
 
-result = subprocess.call(("mono", arguments.test_exe))
+if platform.system() == "Windows":
+    exe = (arguments.test_exe,)
+else:
+    exe = ("mono", arguments.test_exe)
+
+result = subprocess.call(exe)
 
 print("Result =", result)
 
