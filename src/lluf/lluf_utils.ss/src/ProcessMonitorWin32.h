@@ -24,7 +24,8 @@
 #pragma once
 
 #include <Safir/Utilities/ProcessMonitor.h>
-#include <boost/bind.hpp>
+#include <functional>
+#include <map>
 
 #ifdef _MSC_VER
 #  pragma warning (push)
@@ -47,19 +48,19 @@ namespace Utilities
     {
     public:
         explicit ProcessMonitorImpl(boost::asio::io_service& ioService,
-                                    const boost::function<void(const pid_t pid)>& callback,
+                                    const std::function<void(const pid_t pid)>& callback,
                                     const boost::chrono::steady_clock::duration& pollPeriod);
 
         void Stop();
 
         void StartMonitorPid(const pid_t pid)
         {
-            m_strand.dispatch(boost::bind(&ProcessMonitorImpl::StartMonitorPidInternal,this,pid));
+            m_strand.dispatch([this,pid]{StartMonitorPidInternal(pid);});
         }
 
         void StopMonitorPid(const pid_t pid)
         {
-            m_strand.dispatch(boost::bind(&ProcessMonitorImpl::StopMonitorPidInternal,this,pid));
+		    m_strand.dispatch([this,pid]{StopMonitorPidInternal(pid);});
         }
     private:
         void StopInternal();
@@ -69,10 +70,10 @@ namespace Utilities
 
         struct Process; //forward decl
 
-        void HandleEvent(const boost::shared_ptr<Process>& process, const boost::system::error_code& error);
+        void HandleEvent(const std::shared_ptr<Process>& process, const boost::system::error_code& error);
 
         // Client callback
-        boost::function<void(const pid_t pid)> m_callback;
+        std::function<void(const pid_t pid)> m_callback;
 
         boost::asio::io_service& m_ioService;
         boost::atomic<bool> m_stopped;
@@ -87,7 +88,7 @@ namespace Utilities
             boost::asio::windows::object_handle handle;
             const pid_t pid;
         };
-        typedef std::map<pid_t, boost::shared_ptr<Process> > ProcessTable;
+        typedef std::map<pid_t, std::shared_ptr<Process> > ProcessTable;
 
         ProcessTable m_processes;
     };

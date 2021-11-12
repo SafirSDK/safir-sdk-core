@@ -30,8 +30,8 @@ namespace Safir
 namespace Utilities
 {
     ProcessMonitorImpl::ProcessMonitorImpl(boost::asio::io_service& ioService,
-                                             const boost::function<void(const pid_t pid)>& callback,
-                                             const boost::chrono::steady_clock::duration& /*pollPeriod*/)
+                                           const std::function<void(const pid_t pid)>& callback,
+                                           const boost::chrono::steady_clock::duration& /*pollPeriod*/)
         : m_callback(callback)
         , m_ioService(ioService)
         , m_stopped(false)
@@ -45,7 +45,7 @@ namespace Utilities
         const bool was_stopped = m_stopped.exchange(true);
         if (!was_stopped)
         {
-            m_strand.dispatch(boost::bind(&ProcessMonitorImpl::StopInternal,this));
+            m_strand.dispatch([this]{StopInternal();});
         }
     }
 
@@ -75,13 +75,13 @@ namespace Utilities
         //if we can't get a handle to the process we assume that it is dead.
         if (process == NULL)
         {
-            m_ioService.post(boost::bind(m_callback,pid));
+            m_ioService.post([this,pid]{m_callback(pid);});
             return;
         }
 
-        boost::shared_ptr<Process> proc(new Process(m_ioService, process, pid));
+        std::shared_ptr<Process> proc(new Process(m_ioService, process, pid));
         m_processes.insert(std::make_pair(pid, proc));
-        proc->handle.async_wait(m_strand.wrap(boost::bind(&ProcessMonitorImpl::HandleEvent, this, proc, _1)));
+        proc->handle.async_wait(m_strand.wrap([this,proc](const boost::system::error_code& error){HandleEvent(proc,error);}));
 
     }
 
@@ -101,7 +101,7 @@ namespace Utilities
     }
 
 
-    void ProcessMonitorImpl::HandleEvent(const boost::shared_ptr<Process>& process,
+    void ProcessMonitorImpl::HandleEvent(const std::shared_ptr<Process>& process,
                                          const boost::system::error_code& error)
     {
         if (error)
@@ -110,7 +110,7 @@ namespace Utilities
         }
 
         m_processes.erase(process->pid);
-        m_ioService.post(boost::bind(m_callback,process->pid));
+        m_ioService.post([this,pid = process->pid]{m_callback(pid);});
     }
 }
 }
