@@ -61,7 +61,7 @@ namespace ToolSupport
      *      Object      => pair<const char* data, DostC_Int32 size> (a valid blob pointer and blob size)
      */
     template <class RepositoryT, class Traits=Safir::Dob::Typesystem::ToolSupport::TypeRepositoryTraits<RepositoryT> >
-    class BlobReader : private boost::noncopyable
+    class BlobReader
     {
     public:
         typedef typename Traits::RepositoryType RepositoryType;
@@ -102,6 +102,9 @@ namespace ToolSupport
             ,m_memberIndex(-1)
         {
         }
+
+        BlobReader(const BlobReader&) = delete;
+        BlobReader& operator=(const BlobReader&) = delete;
 
         /**
          * @brief Get the size of the blob.

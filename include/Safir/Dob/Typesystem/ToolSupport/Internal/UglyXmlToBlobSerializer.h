@@ -27,12 +27,10 @@
 #include <string>
 #include <vector>
 #include <sstream>
-#include <boost/noncopyable.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/iostreams/stream.hpp>
 #include <boost/iostreams/device/array.hpp>
-#include <boost/container/map.hpp> //this is only here to avoid a GCC 6 / Boost 1.62 error.
 #include <Safir/Utilities/Internal/Id.h>
 #include <Safir/Dob/Typesystem/ToolSupport/TypeRepository.h>
 #include <Safir/Dob/Typesystem/ToolSupport/BlobWriter.h>
@@ -49,7 +47,7 @@ namespace ToolSupport
 namespace Internal
 {
     template <class RepT, class Traits=Safir::Dob::Typesystem::ToolSupport::TypeRepositoryTraits<RepT> >
-    class UglyXmlToBlobSerializer : private boost::noncopyable
+    class UglyXmlToBlobSerializer
     {
     public:
         typedef typename Traits::RepositoryType RepositoryType;
@@ -62,6 +60,9 @@ namespace Internal
             :m_repository(repository)
         {
         }
+
+        UglyXmlToBlobSerializer(const UglyXmlToBlobSerializer&) = delete;
+        UglyXmlToBlobSerializer& operator=(const UglyXmlToBlobSerializer&) = delete;
 
         void operator()(const char* xml, std::vector<char>& blob) const
         {

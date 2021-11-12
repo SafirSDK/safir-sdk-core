@@ -44,13 +44,15 @@ class Consumer:
     public Safir::Dob::ServiceHandler,
     public Safir::Dob::ServiceHandlerPending,
     public Safir::Dob::Requestor,
-    public Safir::Application::Backdoor,
-    private boost::noncopyable
+    public Safir::Application::Backdoor
 {
 public:
     Consumer(const int consumerNumber,
              const std::wstring & connectionName,
              const std::wstring & instance);
+
+    Consumer(const Consumer&) = delete;
+    Consumer& operator=(const Consumer&) = delete;
 
     void ExecuteAction(DoseTest::ActionPtr action);
     void AddCallbackAction(DoseTest::ActionPtr action);

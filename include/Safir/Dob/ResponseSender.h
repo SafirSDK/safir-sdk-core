@@ -21,28 +21,20 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifndef _SAFIR_DOB_RESPONSESENDER_H
-#define _SAFIR_DOB_RESPONSESENDER_H
+#pragma once
 
 #include <Safir/Dob/DoseCppExportDefs.h>
 #include <boost/shared_ptr.hpp>
-#include <boost/noncopyable.hpp>
 #include <Safir/Dob/Response.h>
 
 namespace Safir
 {
 namespace Dob
 {
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable: 4275)
-#endif
-
-
     /**
      * Class used for responding to received requests.
      *
-     * The purpose of this class is to allow responses to be sent either from 
+     * The purpose of this class is to allow responses to be sent either from
      * within the request callback, or at a later time (in which case you have
      * to keep the responseSender you received in the callback "for later").
      *
@@ -50,19 +42,27 @@ namespace Dob
      * or the response will not be delivered to the requestor (who will have
      * received a timeout response instead).
      */
-    class DOSE_CPP_API ResponseSender:
-        private boost::noncopyable
+    class DOSE_CPP_API ResponseSender
     {
     public:
+        /**
+         * Default constructor.
+         */
+        ResponseSender() = default;
+
+        // noncopyable
+        ResponseSender(const ResponseSender&) = delete;
+        ResponseSender& operator=(const ResponseSender&) = delete;
+
         /**
          * Destructor.
          *
          * Will check that the ResponseSender has been used, and if it
          * hasn't an error will be reported (a PanicLog!).
-         * 
+         *
          * Not using a ResponseSender is considered a programming error.
          */
-       virtual ~ResponseSender() {}
+        virtual ~ResponseSender() = default;
 
         /**
          * Sends a response for the request that this instance was obtained with.
@@ -97,9 +97,6 @@ namespace Dob
         virtual void Discard() = 0;
 
     };
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
 
     //-------------------------------
     // Smart pointer to ResponseSender
@@ -107,5 +104,3 @@ namespace Dob
     typedef boost::shared_ptr<ResponseSender> ResponseSenderPtr;
 }
 }
-
-#endif

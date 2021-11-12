@@ -33,7 +33,6 @@
 #include <vector>
 #include <sstream>
 #include <stdexcept>
-#include <boost/noncopyable.hpp>
 #include <boost/algorithm/string/replace.hpp>
 #include <Safir/Dob/Typesystem/ToolSupport/TypeRepository.h>
 #include <Safir/Dob/Typesystem/ToolSupport/BlobReader.h>
@@ -52,7 +51,7 @@ namespace ToolSupport
 namespace Internal
 {
     template <class RepT, class Traits=Safir::Dob::Typesystem::ToolSupport::TypeRepositoryTraits<RepT> >
-    class BlobToJsonSerializer : private boost::noncopyable
+    class BlobToJsonSerializer
     {
     public:
         typedef typename Traits::RepositoryType RepositoryType;
@@ -65,6 +64,9 @@ namespace Internal
             :m_repository(repository)
         {
         }
+
+        BlobToJsonSerializer(const BlobToJsonSerializer&) = delete;
+        BlobToJsonSerializer& operator=(const BlobToJsonSerializer&) = delete;
 
         void operator()(const char* blob, std::ostream& os) const
         {

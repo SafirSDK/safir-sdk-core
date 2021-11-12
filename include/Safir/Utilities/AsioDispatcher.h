@@ -25,7 +25,6 @@
 
 #include <Safir/Dob/Connection.h>
 #include <Safir/Utilities/Internal/Atomic.h>
-#include <boost/noncopyable.hpp>
 #include <boost/atomic.hpp>
 
 #ifdef _MSC_VER
@@ -49,7 +48,6 @@ namespace Utilities
      */
     class AsioDispatcher
         : public Safir::Dob::Dispatcher
-        , private boost::noncopyable
     {
     public:
        /**
@@ -89,6 +87,9 @@ namespace Utilities
         {
 
         }
+
+        AsioDispatcher(const AsioDispatcher&) = delete;
+        AsioDispatcher& operator=(const AsioDispatcher&) = delete;
 
         /**
          * Get the strand that the dispatcher uses.

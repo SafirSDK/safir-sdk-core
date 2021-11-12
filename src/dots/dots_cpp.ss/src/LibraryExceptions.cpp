@@ -45,6 +45,13 @@ namespace Typesystem
         return instance;
     }
 
+    class LibraryExceptions::Impl
+    {
+    public:
+        typedef std::unordered_map<TypeId, ThrowExceptionCallback> CallbackMap;
+        CallbackMap m_CallbackMap;
+    };
+
     // -----------------------------------------------------------
     LibraryExceptions & LibraryExceptions::Instance()
     {
@@ -54,6 +61,7 @@ namespace Typesystem
 
     // -----------------------------------------------------------
     LibraryExceptions::LibraryExceptions()
+        : m_impl(new Impl)
     {
 
     }
@@ -61,7 +69,12 @@ namespace Typesystem
     // -----------------------------------------------------------
     LibraryExceptions::~LibraryExceptions()
     {
+        delete m_impl;
+    }
 
+    bool LibraryExceptions::RegisterException(const TypeId exceptionId, ThrowExceptionCallback throwFunction)
+    {
+        return m_impl->m_CallbackMap.insert(Impl::CallbackMap::value_type(exceptionId,throwFunction)).second;
     }
 
     // -----------------------------------------------------------
@@ -208,8 +221,8 @@ namespace Typesystem
         else
         {
             const std::wstring description = Utilities::ToWstring(desc);
-            CallbackMap::const_iterator it = m_CallbackMap.find(exceptionId);
-            if (it == m_CallbackMap.end())
+            Impl::CallbackMap::const_iterator it = m_impl->m_CallbackMap.find(exceptionId);
+            if (it == m_impl->m_CallbackMap.end())
             {
                 std::wostringstream ostr;
                 ostr << "LibraryExceptions::Throw was called with an exception that was not registered in the exception-factory!" << std::endl

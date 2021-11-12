@@ -22,20 +22,13 @@
 *
 ******************************************************************************/
 
-#ifndef __DOTS_LIBRARY_EXCEPTIONS_H__
-#define __DOTS_LIBRARY_EXCEPTIONS_H__
+#pragma once
 
-#include <boost/noncopyable.hpp>
 #include <unordered_map>
 #include <mutex>
 #include <Safir/Dob/Typesystem/Defs.h>
 #include <Safir/Dob/Typesystem/Exceptions.h>
 
-#ifdef _MSC_VER
-#pragma warning (push)
-#pragma warning (disable: 4251) // warning C4251: 'Safir::Dob::Typesystem::LibraryExceptions::m_CallbackMap' : class 'stdext::hash_map<_Kty,_Ty>' needs to have dll-interface to be used by clients of class 'Safir::Dob::Typesystem::LibraryExceptions'
-#pragma warning (disable: 4275) // warning C4275: non dll-interface class 'boost::noncopyable_::noncopyable' used as base for dll-interface class 'Safir::Dob::Typesystem::LibraryExceptions'
-#endif
 
 #define CATCH_LIBRARY_EXCEPTIONS_AND_RUN(statement) \
     catch (const Safir::Dob::Typesystem::FundamentalException & exc) \
@@ -67,8 +60,7 @@ namespace Typesystem
     /**
      * Contains methods used when passing exceptions across language boundaries.
      */
-    class DOTS_CPP_API LibraryExceptions:
-        private boost::noncopyable
+    class DOTS_CPP_API LibraryExceptions
     {
     public:
         /**
@@ -230,8 +222,7 @@ namespace Typesystem
          * @param exceptionId [in] - The TypeId of the exception that should be thrown using throwFunction.
          * @param throwFunction [in] - The function to call to throw the exception.
          */
-        bool RegisterException(const TypeId exceptionId, ThrowExceptionCallback throwFunction)
-        {return m_CallbackMap.insert(CallbackMap::value_type(exceptionId,throwFunction)).second;}
+        bool RegisterException(const TypeId exceptionId, ThrowExceptionCallback throwFunction);
 
         /** @} */
 
@@ -251,13 +242,14 @@ namespace Typesystem
     private:
         LibraryExceptions();
         ~LibraryExceptions();
-
+        LibraryExceptions(const LibraryExceptions&) = delete;
+        LibraryExceptions& operator=(const LibraryExceptions&) = delete;
 
         void Set(const Internal::CommonExceptionBase & exception);
 
-        typedef std::unordered_map<TypeId, ThrowExceptionCallback> CallbackMap;
-        CallbackMap m_CallbackMap;
+        class Impl;
 
+        Impl* m_impl;
         /**
          * This class is here to ensure that only the Instance method can get at the
          * instance, so as to be sure that boost call_once is used correctly.
@@ -276,9 +268,3 @@ namespace Typesystem
 }
 }
 }
-
-#ifdef _MSC_VER
-#pragma warning (pop)
-#endif
-
-#endif

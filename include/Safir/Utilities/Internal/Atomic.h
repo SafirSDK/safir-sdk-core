@@ -22,11 +22,9 @@
 *
 ******************************************************************************/
 
-#ifndef __LLUF_ATOMIC_H__
-#define __LLUF_ATOMIC_H__
+#pragma once
 
 #include <boost/cstdint.hpp>
-#include <boost/noncopyable.hpp>
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -45,8 +43,7 @@ namespace Utilities
 {
 namespace Internal
 {
-    class AtomicUint32:
-        private boost::noncopyable
+    class AtomicUint32
     {
     public:
         AtomicUint32()
@@ -59,6 +56,8 @@ namespace Internal
             m_value.store(initialValue);
         }
 
+        AtomicUint32(const AtomicUint32&) = delete;
+        AtomicUint32& operator=(const AtomicUint32&) = delete;
 
         //atomic write
         inline void operator=(const boost::uint32_t value)
@@ -107,5 +106,5 @@ namespace Internal
 }
 }
 
-#endif
+
 

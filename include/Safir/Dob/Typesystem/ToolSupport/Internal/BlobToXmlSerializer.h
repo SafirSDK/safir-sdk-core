@@ -28,7 +28,6 @@
 #include <vector>
 #include <sstream>
 #include <stdexcept>
-#include <boost/noncopyable.hpp>
 #include <Safir/Dob/Typesystem/ToolSupport/TypeRepository.h>
 #include <Safir/Dob/Typesystem/ToolSupport/BlobReader.h>
 #include <Safir/Dob/Typesystem/ToolSupport/Internal/SerializationUtils.h>
@@ -44,7 +43,7 @@ namespace ToolSupport
 namespace Internal
 {
     template <class RepT, class Traits=Safir::Dob::Typesystem::ToolSupport::TypeRepositoryTraits<RepT> >
-    class BlobToXmlSerializer : private boost::noncopyable
+    class BlobToXmlSerializer
     {
     public:
         typedef typename Traits::RepositoryType RepositoryType;
@@ -57,6 +56,9 @@ namespace Internal
             :m_repository(repository)
         {
         }
+
+        BlobToXmlSerializer(const BlobToXmlSerializer&) = delete;
+        BlobToXmlSerializer& operator=(const BlobToXmlSerializer&) = delete;
 
         void operator()(const char* blob, std::ostream& os) const
         {

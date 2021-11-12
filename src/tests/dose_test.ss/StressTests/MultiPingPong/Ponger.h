@@ -32,12 +32,13 @@
 
 class Ponger :
     public Safir::Dob::EntityHandler,
-    public Safir::Dob::EntitySubscriber,
-    //    public Safir::Dob::RegistrationSubscriber,
-    private boost::noncopyable
+    public Safir::Dob::EntitySubscriber
 {
 public:
     Ponger();
+
+    Ponger(const Ponger&) = delete;
+    Ponger& operator=(const Ponger&) = delete;
 
 private:
 

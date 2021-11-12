@@ -38,7 +38,6 @@
 #pragma warning( disable : 4715 )
 #endif
 
-#include <boost/noncopyable.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/iostreams/stream.hpp>
@@ -59,7 +58,7 @@ namespace ToolSupport
 namespace Internal
 {
     template <class RepT, class Traits=Safir::Dob::Typesystem::ToolSupport::TypeRepositoryTraits<RepT> >
-    class JsonToBlobSerializer : private boost::noncopyable
+    class JsonToBlobSerializer
     {
     public:
         typedef typename Traits::RepositoryType RepositoryType;
@@ -71,6 +70,9 @@ namespace Internal
             :m_repository(repository)
         {
         }
+
+        JsonToBlobSerializer(const JsonToBlobSerializer&) = delete;
+        JsonToBlobSerializer& operator=(const JsonToBlobSerializer&) = delete;
 
         void operator()(const char* json, std::vector<char>& blob) const
         {

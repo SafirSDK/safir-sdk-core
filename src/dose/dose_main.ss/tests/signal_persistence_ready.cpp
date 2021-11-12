@@ -32,12 +32,14 @@
 
 class StopHandler
     : public Safir::Dob::StopHandler
-    , private boost::noncopyable
 {
 public:
     explicit StopHandler(boost::asio::io_service& ioService)
         : m_ioService(ioService) {}
     void OnStopOrder() override {m_ioService.stop();}
+
+    StopHandler(const StopHandler&) = delete;
+    StopHandler& operator=(const StopHandler&) = delete;
 private:
     boost::asio::io_service& m_ioService;
 
@@ -45,13 +47,15 @@ private:
 
 class Requestor
     : public Safir::Dob::Requestor
-    , private boost::noncopyable
 {
 public:
-    // From Safir::Dob::Requestor
+    Requestor() = default;
+
     void OnResponse(const Safir::Dob::ResponseProxy /*responseProxy*/) override {}
     void OnNotRequestOverflow() override {}
 
+    Requestor(const Requestor&) = delete;
+    Requestor& operator=(const Requestor&) = delete;
 };
 
 int main()

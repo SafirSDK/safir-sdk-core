@@ -23,7 +23,6 @@
 ******************************************************************************/
 #pragma once
 
-#include <boost/noncopyable.hpp>
 #include <Safir/Dob/Typesystem/Defs.h>
 #include <Safir/Dob/Typesystem/EntityId.h>
 #include <Safir/Dob/Typesystem/ValueContainers.h>
@@ -717,21 +716,19 @@ namespace Internal
                         KeyValueMode mode);
     };
 
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable: 4275)
-#endif
-
     /**********************************************************************
      *
      *  Helper class for reading change flags
      *
      **********************************************************************/
-    class DOTS_CPP_API BlobReadHelper : private boost::noncopyable
+    class DOTS_CPP_API BlobReadHelper
     {
     public:
         explicit BlobReadHelper(const char* blob);
         ~BlobReadHelper();
+
+        BlobReadHelper(const BlobReadHelper&) = delete;
+        BlobReadHelper& operator=(const BlobReadHelper&) = delete;
 
         bool IsChangedRecursive(const Dob::Typesystem::MemberIndex member) const;
     private:
@@ -744,11 +741,14 @@ namespace Internal
      *  Helper class for writing change flags and diff blobs
      *
      **********************************************************************/
-    class DOTS_CPP_API BlobWriteHelper : private boost::noncopyable
+    class DOTS_CPP_API BlobWriteHelper
     {
     public:
         explicit BlobWriteHelper(const char* blob);
         ~BlobWriteHelper();
+
+        BlobWriteHelper(const BlobWriteHelper&) = delete;
+        BlobWriteHelper& operator=(const BlobWriteHelper&) = delete;
 
         CollectionType GetCollectionType(const Dob::Typesystem::MemberIndex member);
 
@@ -774,10 +774,6 @@ namespace Internal
         DotsC_Int64 m_handle;
         const DotsC_TypeId m_typeId;
     };
-
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
 
 }
 }

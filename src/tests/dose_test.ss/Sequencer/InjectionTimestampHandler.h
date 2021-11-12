@@ -30,11 +30,13 @@
 
 
 class InjectionTimestampHandler:
-    public Safir::Dob::EntityHandlerInjection,
-    private boost::noncopyable
+    public Safir::Dob::EntityHandlerInjection
 {
 public:
     InjectionTimestampHandler();
+
+    InjectionTimestampHandler(const InjectionTimestampHandler&) = delete;
+    InjectionTimestampHandler& operator=(const InjectionTimestampHandler&) = delete;
 
 private:
     void OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId     typeId,

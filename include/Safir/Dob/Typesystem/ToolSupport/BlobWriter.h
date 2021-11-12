@@ -59,7 +59,7 @@ namespace ToolSupport
      *
      */
     template <class RepositoryT, class Traits=Safir::Dob::Typesystem::ToolSupport::TypeRepositoryTraits<RepositoryT> >
-    class BlobWriter : private boost::noncopyable
+    class BlobWriter
     {
     public:
         typedef BlobWriter<RepositoryT, Traits> BlobWriterType;
@@ -100,6 +100,9 @@ namespace ToolSupport
             ,m_blob(Internal::BlobUtils::BlobAccess::GetBlob<BlobReader<RepositoryT, Traits> >(reader))
         {
         }
+
+        BlobWriter(const BlobWriter&) = delete;
+        BlobWriter& operator=(const BlobWriter&) = delete;
 
         /**
          * @brief Get the type id of this BlobWriter.
