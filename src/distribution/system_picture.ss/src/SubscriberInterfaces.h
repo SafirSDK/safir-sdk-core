@@ -37,13 +37,15 @@ namespace SP
     /**
      * Interface to an object that allows or subscriptions to raw statistics objects.
      *
-     * This interface is not intended for users to implement. Instead use the SystemPicture 
+     * This interface is not intended for users to implement. Instead use the SystemPicture
      * class to obtain an instance of a class that implements this interface.
      */
     class RawStatisticsSubscriber
     {
     public:
         typedef RawStatistics DataWrapper;
+
+        virtual ~RawStatisticsSubscriber() = default;
 
         virtual void Start(const std::function<void (const RawStatistics& data)>& dataCallback) = 0;
 
@@ -53,13 +55,15 @@ namespace SP
     /**
      * Interface to an object that allows or subscriptions to system state objects.
      *
-     * This interface is not intended for users to implement. Instead use the SystemPicture 
+     * This interface is not intended for users to implement. Instead use the SystemPicture
      * class to obtain an instance of a class that implements this interface.
      */
     class SystemStateSubscriber
     {
     public:
         typedef SystemState DataWrapper;
+
+        virtual ~SystemStateSubscriber() = default;
 
         /** Start a subscription to system states. */
         virtual void Start(const std::function<void (const SystemState& data)>& dataCallback) = 0;
@@ -73,5 +77,3 @@ namespace SP
 }
 }
 }
-
-
