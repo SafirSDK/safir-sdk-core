@@ -22,20 +22,12 @@
 *
 ******************************************************************************/
 
-#ifndef __DOTS_OBJECT_FACTORY_H__
-#define __DOTS_OBJECT_FACTORY_H__
+#pragma once
 
-#include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
-#include <unordered_map>
 #include <Safir/Dob/Typesystem/Defs.h>
 #include <Safir/Dob/Typesystem/Exceptions.h>
 #include <mutex>
-
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable: 4275)
-#endif
 
 namespace Safir
 {
@@ -57,7 +49,6 @@ namespace Typesystem
      * call the Create routine of the class itself directly).
      */
     class DOTS_CPP_API ObjectFactory
-        : private boost::noncopyable
     {
     public:
         /**
@@ -129,9 +120,12 @@ namespace Typesystem
     private:
         ObjectFactory();
         ~ObjectFactory();
+        ObjectFactory(const ObjectFactory&) = delete;
+        ObjectFactory& operator=(const ObjectFactory&) = delete;
 
-        typedef std::unordered_map<TypeId,CreateObjectCallback> CallbackMap;
-        CallbackMap m_CallbackMap;
+        class Impl;
+
+        Impl* m_impl;
 
         /**
          * This class is here to ensure that only the Instance method can get at the
@@ -152,8 +146,4 @@ namespace Typesystem
 }
 }
 
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
 
-#endif

@@ -116,6 +116,14 @@ namespace Typesystem
         return instance;
     }
 
+    class ObjectFactory::Impl
+    {
+    public:
+        typedef std::unordered_map<TypeId,CreateObjectCallback> CallbackMap;
+        CallbackMap m_CallbackMap;
+    };
+
+
     ObjectFactory & ObjectFactory::Instance()
     {
         std::call_once(SingletonHelper::m_onceFlag,[]{SingletonHelper::Instance();});
@@ -123,13 +131,14 @@ namespace Typesystem
     }
 
     ObjectFactory::ObjectFactory()
+        : m_impl(new Impl)
     {
 
     }
 
     ObjectFactory::~ObjectFactory()
     {
-
+        delete m_impl;
     }
 
 
@@ -141,8 +150,8 @@ namespace Typesystem
             throw SoftwareViolationException(L"Cannot create object from NULL blob!",__WFILE__,__LINE__);
         }
         const TypeId typeId = DotsC_GetTypeId(blob);
-        CallbackMap::const_iterator it = m_CallbackMap.find(typeId);
-        if (it == m_CallbackMap.end())
+        Impl::CallbackMap::const_iterator it = m_impl->m_CallbackMap.find(typeId);
+        if (it == m_impl->m_CallbackMap.end())
         {
             std::wostringstream ostr;
             ostr << "There is no such type registered in the ObjectFactory: ";
@@ -167,8 +176,8 @@ namespace Typesystem
     ObjectPtr
     ObjectFactory::CreateObject(const TypeId typeId) const
     {
-        CallbackMap::const_iterator it = m_CallbackMap.find(typeId);
-        if (it == m_CallbackMap.end())
+        Impl::CallbackMap::const_iterator it = m_impl->m_CallbackMap.find(typeId);
+        if (it == m_impl->m_CallbackMap.end())
         {
             std::wostringstream ostr;
             ostr << "There is no such type registered in the ObjectFactory: ";
@@ -190,7 +199,7 @@ namespace Typesystem
     bool
     ObjectFactory::RegisterClass(const TypeId typeId, CreateObjectCallback createFunction)
     {
-        return m_CallbackMap.insert(CallbackMap::value_type(typeId,createFunction)).second;
+        return m_impl->m_CallbackMap.insert(Impl::CallbackMap::value_type(typeId,createFunction)).second;
     }
 }
 }
