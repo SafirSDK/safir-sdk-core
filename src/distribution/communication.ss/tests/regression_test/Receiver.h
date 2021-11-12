@@ -24,6 +24,7 @@
 #pragma once
 
 #include <queue>
+#include <map>
 #include "Utilities.h"
 
 namespace Com = Safir::Dob::Internal::Com;

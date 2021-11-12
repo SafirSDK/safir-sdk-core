@@ -32,7 +32,9 @@
 #include <boost/interprocess/sync/scoped_lock.hpp>
 #include <boost/interprocess/sync/sharable_lock.hpp>
 #include <iostream>
+#include <mutex>
 #include <set>
+#include <map>
 
 /* A tip to anyone trying to understand this code:
  * Read up on the boost interprocess file locks, and understand their
