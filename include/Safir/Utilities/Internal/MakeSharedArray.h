@@ -32,7 +32,7 @@ namespace Internal
 {
     static inline std::shared_ptr<char[]> MakeSharedArray(const size_t size)
     {
-#if (_MSC_VER >= 1927) || (__GNUC__ && __cpp_lib_shared_ptr_arrays >= 201707L)
+#if (_MSC_VER >= 1930) || (__GNUC__ && __cpp_lib_shared_ptr_arrays >= 201707L)
         return std::make_shared<char[]>(size);
 #else
         return std::shared_ptr<char[]>(new char[size]);
