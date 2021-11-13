@@ -36,6 +36,10 @@
 #include <boost/regex.hpp>
 #include <boost/atomic.hpp>
 
+#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
+#include <boost/process/windows.hpp>
+#endif
+
 //disable warnings in boost
 #if defined _MSC_VER
 #  pragma warning (push)

@@ -157,7 +157,7 @@ namespace Control
             auto data = std::unique_ptr<char[]>(new char[size]);
             info.SerializeWithCachedSizesToArray
                 (reinterpret_cast<google::protobuf::uint8*>(data.get()));
-            m_ipcPublisher.Send(std::move(data), size);
+            m_ipcPublisher.Send(std::move(data), static_cast<uint32_t>(size));
         }
 
     };
