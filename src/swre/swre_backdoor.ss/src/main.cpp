@@ -136,7 +136,7 @@ int main(int argc, char* argv[])
         boost::program_options::store(boost::program_options::command_line_parser(argc,argv).
                                       options(cmdline_options).positional(p).run(), vm);
     }
-    catch (const boost::program_options::error& ex)
+    catch (const boost::program_options::error&)
     {
         PrintHelpAndExit(argv[0], desc);
     }

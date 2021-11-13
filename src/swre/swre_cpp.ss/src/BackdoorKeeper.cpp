@@ -30,6 +30,9 @@
 #include <Safir/Dob/ThisNodeParameters.h>
 #include <Safir/Dob/ConnectionAspectMisc.h>
 
+#ifdef GetMessage
+#undef GetMessage
+#endif
 
 const Safir::Dob::Typesystem::TypeId PI_CMD_TYPE_ID = Safir::Application::BackdoorCommand::ClassTypeId;
 const Safir::Dob::Typesystem::ChannelId PI_CMD_CHANNEL_ID = Safir::Dob::Typesystem::ChannelId();

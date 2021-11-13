@@ -72,7 +72,7 @@ DopeApp::DopeApp():
         m_dobConnection.Open(L"DOPE", L"0", PERSISTENCE_CONTEXT, this, &m_dispatcher);
         m_debug << "Opened DOB connection"<<std::endl;
     }
-    catch (const Safir::Dob::NotOpenException& e)
+    catch (const Safir::Dob::NotOpenException&)
     {
         Safir::Logging::SendSystemLog(Safir::Logging::Critical,
                                       L"Failed to connect to Dob. Maybe Dope is already started on this node.");
@@ -313,7 +313,7 @@ void DopeApp::ConnectionThread()
                          });
         return;
     }
-    catch (const Safir::Dob::NotOpenException& e)
+    catch (const Safir::Dob::NotOpenException&)
     {
         Safir::Logging::SendSystemLog(Safir::Logging::Critical,
                                       L"NotOpenException in ConnectionThread!!!");

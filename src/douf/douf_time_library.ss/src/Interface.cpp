@@ -171,7 +171,7 @@ void DoufTimeC_GetLocalTimeOffset(Safir::Dob::Typesystem::Int32& offset, bool& s
         const ptime utc_now = second_clock::universal_time();
         const ptime now = local_adj::utc_to_local(utc_now);
         const time_duration diff = now - utc_now;
-        offset = diff.total_seconds();
+        offset = static_cast<Safir::Dob::Typesystem::Int32>(diff.total_seconds());
     }
 
     success = true;

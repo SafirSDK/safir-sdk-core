@@ -51,6 +51,10 @@
 #include <iomanip>
 #include <iostream>
 
+#ifdef GetMessage
+#undef GetMessage
+#endif
+
 namespace Safir
 {
 namespace SwReports

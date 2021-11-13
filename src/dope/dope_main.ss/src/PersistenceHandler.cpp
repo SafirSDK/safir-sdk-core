@@ -138,7 +138,7 @@ void PersistenceHandler::Start(bool restore)
         m_dobConnection.Open(L"DOPE_SUBSCRIBE", L"0", PERSISTENCE_CONTEXT, nullptr, &m_dispatcher);
         m_debug << "Opened DOB connection DOPE_SUBSCRIBE"<<std::endl;
     }
-    catch (const Safir::Dob::NotOpenException& e)
+    catch (const Safir::Dob::NotOpenException&)
     {
         Safir::Logging::SendSystemLog(Safir::Logging::Critical,
                                       L"PersistenceHandler failed to connect to Dob, Maybe Dope is already running?");
