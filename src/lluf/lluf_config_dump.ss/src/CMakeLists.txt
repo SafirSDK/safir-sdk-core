@@ -34,8 +34,8 @@ TARGET_INCLUDE_DIRECTORIES(safir_show_config PRIVATE ${CMAKE_CURRENT_BINARY_DIR}
 
 TARGET_LINK_LIBRARIES(safir_show_config PRIVATE
   lluf_config
-  ${Boost_PROGRAM_OPTIONS_LIBRARY}
-  ${Boost_FILESYSTEM_LIBRARY}
-  ${Boost_SYSTEM_LIBRARY})
+  Boost::program_options
+  Boost::filesystem
+  Boost::system)
 
 SAFIR_INSTALL(TARGETS safir_show_config)

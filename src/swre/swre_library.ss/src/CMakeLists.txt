@@ -16,7 +16,7 @@ TARGET_LINK_LIBRARIES(swre_library PRIVATE
   lluf_utils
   lluf_crash_reporter
   lluf_config
-  ${Boost_REGEX_LIBRARY}
+  Boost::regex
 )
 
 SAFIR_INSTALL(TARGETS swre_library)

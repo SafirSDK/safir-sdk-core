@@ -4,7 +4,7 @@ TARGET_LINK_LIBRARIES(crash_dump_monitor
   PRIVATE
   lluf_config
   lluf_utils
-  ${Boost_FILESYSTEM_LIBRARY}
-  ${Boost_PROGRAM_OPTIONS_LIBRARY})
+  Boost::filesystem
+  Boost::program_options)
 
 SAFIR_INSTALL(TARGETS crash_dump_monitor)

@@ -10,15 +10,15 @@ TARGET_LINK_LIBRARIES(Distribution_test PRIVATE
   communication
   system_picture
   control_utils
-  ${Boost_SYSTEM_LIBRARY}
-  ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+  Boost::system
+  Boost::unit_test_framework)
 
 TARGET_LINK_LIBRARIES(PoolHandler_test PRIVATE
   communication
-  ${Boost_ATOMIC_LIBRARY}
-  ${Boost_SYSTEM_LIBRARY}
-  ${Boost_THREAD_LIBRARY}
-  ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+  Boost::atomic
+  Boost::system
+  Boost::thread
+  Boost::unit_test_framework)
 
 
 ADD_TEST(NAME Distribution_test COMMAND Distribution_test)

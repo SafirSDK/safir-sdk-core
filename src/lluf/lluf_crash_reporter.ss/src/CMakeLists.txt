@@ -10,8 +10,8 @@ add_library(lluf_crash_reporter SHARED CrashReporter.cpp)
 TARGET_LINK_LIBRARIES(lluf_crash_reporter PRIVATE
   lluf_config
   sentry-breakpad::sentry-breakpad
-  ${Boost_FILESYSTEM_LIBRARY}
-  ${Boost_THREAD_LIBRARY}
-  ${Boost_SYSTEM_LIBRARY})
+  Boost::filesystem
+  Boost::thread
+  Boost::system)
 
 SAFIR_INSTALL(TARGETS lluf_crash_reporter)

@@ -20,18 +20,18 @@ TARGET_LINK_LIBRARIES(dope_main PRIVATE
   swre_interface_cpp
   dose_cpp
   logging_cpp
-  ${Boost_ATOMIC_LIBRARY}
-  ${Boost_FILESYSTEM_LIBRARY}
+  Boost::atomic
+  Boost::filesystem
   ${SAFIR_ODBC_LIBRARIES})
 
 TARGET_LINK_LIBRARIES(dope_bin2xml PRIVATE
   safir_generated-Core-cpp
-  ${Boost_FILESYSTEM_LIBRARY}
-  ${Boost_PROGRAM_OPTIONS_LIBRARY}
+  Boost::filesystem
+  Boost::program_options
   ${SAFIR_ODBC_LIBRARIES})
 
 TARGET_LINK_LIBRARIES(run_sql PRIVATE
-  ${Boost_PROGRAM_OPTIONS_LIBRARY}
+  Boost::program_options
   ${SAFIR_ODBC_LIBRARIES})
 
 SAFIR_INSTALL(TARGETS dope_main dope_bin2xml)

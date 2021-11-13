@@ -5,13 +5,13 @@ add_executable(repository_compare repository_compare.cpp
 
 TARGET_LINK_LIBRARIES(multiple_accesses PRIVATE
   dots_kernel
-  ${Boost_THREAD_LIBRARY}
-  ${Boost_SYSTEM_LIBRARY})
+  Boost::thread
+  Boost::system)
 
 TARGET_LINK_LIBRARIES(multiple_serialization PRIVATE
   dots_kernel
-  ${Boost_THREAD_LIBRARY}
-  ${Boost_SYSTEM_LIBRARY})
+  Boost::thread
+  Boost::system)
 
 TARGET_LINK_LIBRARIES(repository_compare PRIVATE
   lluf_utils

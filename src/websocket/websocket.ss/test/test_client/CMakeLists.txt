@@ -7,10 +7,9 @@ add_executable(safir_websocket_testclient
 target_link_libraries(safir_websocket_testclient  PRIVATE
     RapidJSON::RapidJSON
     websocketpp::websocketpp
-    ${Boost_PROGRAM_OPTIONS_LIBRARY}
-    ${Boost_RANDOM_LIBRARY}
-    ${Boost_THREAD_LIBRARY}
-    ${Boost_SYSTEM_LIBRARY})
+    Boost::program_options
+    Boost::thread
+    Boost::system)
 
 get_property(SAFIR_GENERATED_PATHS GLOBAL PROPERTY SAFIR_GENERATED_PATHS)
 

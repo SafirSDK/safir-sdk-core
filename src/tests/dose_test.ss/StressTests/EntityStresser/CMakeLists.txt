@@ -7,6 +7,6 @@ TARGET_LINK_LIBRARIES(EntityStresser PRIVATE
   dose_cpp
   safir_generated-DoseTest-cpp
   lluf_utils
-  ${Boost_PROGRAM_OPTIONS_LIBRARY})
+  Boost::program_options)
 
 SAFIR_INSTALL(TARGETS EntityStresser COMPONENT TestSuite)

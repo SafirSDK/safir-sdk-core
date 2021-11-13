@@ -9,8 +9,8 @@ ADD_EXECUTABLE(dots_test_cpp ${sources})
 
 TARGET_LINK_LIBRARIES(dots_test_cpp PRIVATE
   safir_generated-DotsTest-cpp
-  ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
-  ${Boost_FILESYSTEM_LIBRARY}
+  Boost::unit_test_framework
+  Boost::filesystem
   )
 
 ADD_DEPENDENCIES(dots_test_cpp safir_generated-DotsTestExtra-cpp)

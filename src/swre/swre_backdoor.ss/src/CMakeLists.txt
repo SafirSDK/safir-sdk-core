@@ -2,7 +2,7 @@ ADD_EXECUTABLE(bd main.cpp)
 
 TARGET_LINK_LIBRARIES(bd PRIVATE
   dose_cpp
-  ${Boost_ATOMIC_LIBRARY}
-  ${Boost_PROGRAM_OPTIONS_LIBRARY})
+  Boost::atomic
+  Boost::program_options)
 
 SAFIR_INSTALL(TARGETS bd COMPONENT Tools)

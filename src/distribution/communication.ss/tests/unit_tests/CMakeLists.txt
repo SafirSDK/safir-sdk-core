@@ -23,7 +23,7 @@ target_link_libraries(unit_tests PRIVATE
   lluf_utils
   lluf_id
   protobuf::protobuf
-  ${Boost_REGEX_LIBRARY})
+  Boost::regex)
 
 ADD_TEST(NAME MessageQueueTest COMMAND unit_tests MessageQueueTest)
 SET_SAFIR_TEST_PROPERTIES(TEST MessageQueueTest TIMEOUT 360)

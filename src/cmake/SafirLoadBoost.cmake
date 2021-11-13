@@ -1,9 +1,4 @@
 
-#Date_time and random is required on windows, even though we build header-only...
-if (MSVC)
-  set (BOOST_REQUIRED_ON_WINDOWS date_time random)
-endif()
-
 set(Boost_NO_BOOST_CMAKE ON)
 set(Boost_USE_MULTITHREADED ON)
 
@@ -17,7 +12,6 @@ find_package(Boost
   thread
   system
   unit_test_framework
-  ${BOOST_REQUIRED_ON_WINDOWS}
   REQUIRED)
 
 include_directories(${Boost_INCLUDE_DIRS})
@@ -25,15 +19,6 @@ include_directories(${Boost_INCLUDE_DIRS})
 if (Boost_VERSION VERSION_LESS 1.70.0)
   MESSAGE(FATAL_ERROR "Boost >= 1.70 required! Found ${Boost_VERSION}")
 endif()
-
-#Date_time is needed by boost thread on windows, so we monkey-patch that in, rather than adding link dependencies everywhere.
-if (MSVC)
-  set (Boost_THREAD_LIBRARY ${Boost_DATE_TIME_LIBRARY} ${Boost_THREAD_LIBRARY})
-endif()
-
-#make sure all linking is explicit as to what parts of boost it needs, so we clear the variable
-#that "contains all".
-SET(Boost_LIBRARIES "DONT_USE_Boost_LIBRARIES_VARIABLE")
 
 #Boost Asio strands can share the same implementation instance which means that hanging or long running operations can potentially block
 #other strands. This symbol will make the first 193 strands unique and therefor in practice avoid any shared instances. 

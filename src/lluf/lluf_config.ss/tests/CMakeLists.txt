@@ -9,8 +9,8 @@ ADD_EXECUTABLE(ConfigHelper_test ConfigHelper_test.cpp)
 
 TARGET_LINK_LIBRARIES (read_parameter_test PRIVATE lluf_config)
 TARGET_LINK_LIBRARIES (ConfigHelper_test PRIVATE lluf_config
-  ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
-  ${Boost_SYSTEM_LIBRARY}
+  Boost::unit_test_framework
+  Boost::system
   )
 
 ADD_TEST(NAME display_test_env COMMAND display_env)

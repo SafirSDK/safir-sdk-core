@@ -34,7 +34,7 @@ add_executable(system_picture_listener system_picture_listener.cpp)
 target_link_libraries(system_picture_listener PRIVATE
   system_picture
   lluf_utils
-  ${Boost_PROGRAM_OPTIONS_LIBRARY})
+  Boost::program_options)
 
 SAFIR_INSTALL(TARGETS system_picture)
 SAFIR_INSTALL(TARGETS system_picture_listener COMPONENT Development)

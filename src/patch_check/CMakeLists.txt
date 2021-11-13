@@ -1,6 +1,6 @@
 set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} 
-  ${Boost_SYSTEM_LIBRARY}
-  ${Boost_THREAD_LIBRARY})
+  Boost::system
+  Boost::thread)
 
 add_subdirectory(container_destroyers)
 add_subdirectory(tmp_dir_helpers)

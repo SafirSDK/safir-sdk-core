@@ -7,4 +7,4 @@ ADD_SUBDIRECTORY(component_tests)
 ADD_EXECUTABLE(signal_persistence_ready signal_persistence_ready.cpp)
 TARGET_LINK_LIBRARIES(signal_persistence_ready PRIVATE
   dose_cpp
-  ${Boost_ATOMIC_LIBRARY})
+  Boost::atomic)

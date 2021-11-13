@@ -7,6 +7,6 @@ TARGET_LINK_LIBRARIES(foreach PRIVATE
   swre_interface_cpp
   dose_cpp
   logging_cpp
-  ${Boost_ATOMIC_LIBRARY})
+  Boost::atomic)
 
 SAFIR_INSTALL(TARGETS foreach)

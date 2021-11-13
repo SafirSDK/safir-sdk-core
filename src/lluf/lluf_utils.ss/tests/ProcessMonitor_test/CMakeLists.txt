@@ -18,8 +18,8 @@ endif()
 
 TARGET_LINK_LIBRARIES (ProcessMonitor_test3 PRIVATE
   lluf_utils
-  ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
-  ${Boost_FILESYSTEM_LIBRARY})
+  Boost::unit_test_framework
+  Boost::filesystem)
 
 TARGET_LINK_LIBRARIES (ProcessMonitor_test PRIVATE
   lluf_utils)
@@ -28,8 +28,8 @@ TARGET_LINK_LIBRARIES (ProcessMonitor_test2 PRIVATE
   lluf_utils)
 
 TARGET_LINK_LIBRARIES (ProcessMonitorSleeper PRIVATE
-  ${Boost_THREAD_LIBRARY}
-  ${Boost_SYSTEM_LIBRARY})
+  Boost::thread
+  Boost::system)
 
 ADD_TEST(NAME ProcessMonitor_unittest COMMAND ProcessMonitor_test3 --catch_system_error=no)
 ADD_TEST(NAME ProcessMonitor_monitor COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py)

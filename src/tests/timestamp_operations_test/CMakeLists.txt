@@ -15,7 +15,7 @@ if (TEST_AGAINST_CORE_5)
     swre_interface_cpp
     dose_internal
     dose_cpp dots_generated-Safir-cpp dots_generated-DoseTest-cpp dots_cpp ${Boost_LIBRARIES}
-    ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+    Boost::unit_test_framework)
 else()
 
   ADD_EXECUTABLE(timestamp_operations_test timestamp_operations_test.cpp)
@@ -23,7 +23,7 @@ else()
   TARGET_LINK_LIBRARIES(timestamp_operations_test PRIVATE
     dose_internal
     safir_generated-DoseTest-cpp
-    ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+    Boost::unit_test_framework)
 
   ADD_TEST(NAME timestamp_operations_test COMMAND timestamp_operations_test)
 

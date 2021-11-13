@@ -7,8 +7,8 @@ add_library(lluf_startup_synchronizer SHARED StartupSynchronizer.cpp)
 
 TARGET_LINK_LIBRARIES(lluf_startup_synchronizer PRIVATE
   lluf_config
-  ${Boost_FILESYSTEM_LIBRARY}
-  ${Boost_THREAD_LIBRARY}
-  ${Boost_SYSTEM_LIBRARY})
+  Boost::filesystem
+  Boost::thread
+  Boost::system)
 
 SAFIR_INSTALL(TARGETS lluf_startup_synchronizer)

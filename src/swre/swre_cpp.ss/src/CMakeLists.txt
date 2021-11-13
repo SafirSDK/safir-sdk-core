@@ -3,7 +3,7 @@ ADD_LIBRARY(swre_interface_cpp SHARED BackdoorKeeper.cpp CrashReporter.cpp SwRep
 TARGET_LINK_LIBRARIES(swre_interface_cpp PRIVATE
   swre_library
   logging_cpp
-  ${Boost_REGEX_LIBRARY}
+  Boost::regex
 
   PUBLIC
   dose_cpp

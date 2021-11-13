@@ -10,7 +10,7 @@ TARGET_LINK_LIBRARIES(dose_internal PRIVATE
   lluf_id
   lluf_utils
   lluf_startup_synchronizer
-  ${Boost_REGEX_LIBRARY}
+  Boost::regex
 
   PUBLIC
   $<BUILD_INTERFACE:safir_generated-Core-cpp>)
@@ -24,13 +24,13 @@ TARGET_LINK_LIBRARIES(dose_internal PRIVATE
 if (MSVC)
   TARGET_LINK_LIBRARIES(dose_internal PRIVATE
     PUBLIC
-    ${Boost_THREAD_LIBRARY}
-    ${Boost_SYSTEM_LIBRARY})
+    Boost::thread
+    Boost::system)
 else()
   TARGET_LINK_LIBRARIES(dose_internal PRIVATE
     PUBLIC
-    "$<BUILD_INTERFACE:${Boost_THREAD_LIBRARY}>"
-    "$<BUILD_INTERFACE:${Boost_SYSTEM_LIBRARY}>")
+    "$<BUILD_INTERFACE:Boost::thread>"
+    "$<BUILD_INTERFACE:Boost::system>")
 endif()
 
 if (UNIX)

@@ -26,17 +26,17 @@ if (MSVC)
   TARGET_LINK_LIBRARIES(lluf_utils PRIVATE
     PUBLIC
     $<BUILD_INTERFACE:lluf_config>
-    ${Boost_FILESYSTEM_LIBRARY}
-    ${Boost_THREAD_LIBRARY}
-    ${Boost_SYSTEM_LIBRARY})
+    Boost::filesystem
+    Boost::thread
+    Boost::system)
 else()
   TARGET_LINK_LIBRARIES(lluf_utils PRIVATE
     PUBLIC
     $<BUILD_INTERFACE:lluf_config>
-    "$<BUILD_INTERFACE:${Boost_ATOMIC_LIBRARY}>"
-    "$<BUILD_INTERFACE:${Boost_FILESYSTEM_LIBRARY}>"
-    "$<BUILD_INTERFACE:${Boost_THREAD_LIBRARY}>"
-    "$<BUILD_INTERFACE:${Boost_SYSTEM_LIBRARY}>")
+    "$<BUILD_INTERFACE:Boost::atomic>"
+    "$<BUILD_INTERFACE:Boost::filesystem>"
+    "$<BUILD_INTERFACE:Boost::thread>"
+    "$<BUILD_INTERFACE:Boost::system>")
 endif()
 
 if (WIN32)

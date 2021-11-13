@@ -20,7 +20,7 @@ TARGET_LINK_LIBRARIES(communication PRIVATE
   lluf_id
   lluf_utils
   protobuf::protobuf
-  ${Boost_REGEX_LIBRARY})
+  Boost::regex)
 
 SAFIR_INSTALL(TARGETS communication)
 

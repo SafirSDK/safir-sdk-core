@@ -8,7 +8,7 @@ TARGET_LINK_LIBRARIES(safir_control PRIVATE
   control_utils
   lluf_utils
   lluf_crash_reporter
-  ${Boost_FILESYSTEM_LIBRARY}
-  ${Boost_PROGRAM_OPTIONS_LIBRARY})
+  Boost::filesystem
+  Boost::program_options)
 
 SAFIR_INSTALL(TARGETS safir_control)

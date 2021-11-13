@@ -6,7 +6,7 @@ TARGET_LINK_LIBRARIES(douf_time_cpp PRIVATE
 
 #Needed on windows
 if (MSVC)
-  TARGET_LINK_LIBRARIES(douf_time_cpp PRIVATE ${Boost_DATE_TIME_LIBRARY})
+  TARGET_LINK_LIBRARIES(douf_time_cpp PRIVATE Boost::date_time)
 endif()
 
 SAFIR_INSTALL(TARGETS douf_time_cpp)

@@ -21,6 +21,6 @@ TARGET_LINK_LIBRARIES(dose_main PRIVATE
   control_utils
   lluf_utils
   lluf_crash_reporter
-  ${Boost_REGEX_LIBRARY})
+  Boost::regex)
 
 SAFIR_INSTALL(TARGETS dose_main)

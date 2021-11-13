@@ -23,19 +23,19 @@ ADD_EXECUTABLE(ControlInfo_test ControlInfo_test.cpp ../../src/ControlInfo.cpp $
 TARGET_LINK_LIBRARIES(DoseMainCmd_test PRIVATE
   control_utils
   lluf_utils
-  ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+  Boost::unit_test_framework
   protobuf::protobuf)
 
 TARGET_LINK_LIBRARIES(ControlCmd_test PRIVATE
   control_utils
   lluf_utils
-  ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+  Boost::unit_test_framework
   protobuf::protobuf)
 
 TARGET_LINK_LIBRARIES(ControlInfo_test PRIVATE
   control_utils
   lluf_utils
-  ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+  Boost::unit_test_framework
   protobuf::protobuf)
 
 ADD_TEST(NAME DoseMainCmd_test COMMAND DoseMainCmd_test)

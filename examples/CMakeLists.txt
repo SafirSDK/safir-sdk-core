@@ -13,8 +13,8 @@ include_directories(${SAFIR_SDK_CORE_INCLUDE_DIRS})
 
 #we also need boost
 FIND_PACKAGE(Boost REQUIRED)
-include_directories(${Boost_INCLUDE_DIRS})
-link_directories(${Boost_LIBRARY_DIRS})
+#include_directories(${Boost_INCLUDE_DIRS})
+#link_directories(${Boost_LIBRARY_DIRS})
 
 #use dynamic linking with boost
 ADD_DEFINITIONS(-DBOOST_ALL_DYN_LINK)
