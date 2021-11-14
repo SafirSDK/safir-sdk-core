@@ -26,12 +26,23 @@ endif()
 
 include(${CMAKE_BINARY_DIR}/conan.cmake)
 
+if (MSVC)
+  set (CONAN_EXTRA_REQUIREMENTS boost/1.77.0)
+  set (CONAN_EXTRA_OPTIONS
+         boost:shared=True
+	     boost:without_wave=True
+	     boost:without_serialization=True
+	     boost:without_python=True
+	     boost:without_graph=True)
+endif()
+
 conan_cmake_configure(
   REQUIRES
     sentry-breakpad/0.4.12
     websocketpp/0.8.2
     rapidjson/cci.20200410
     protobuf/3.17.1
+	${CONAN_EXTRA_REQUIREMENTS}
   OPTIONS
     websocketpp:asio=False
     websocketpp:with_openssl=False
@@ -39,6 +50,7 @@ conan_cmake_configure(
     protobuf:lite=True
     protobuf:shared=False
     protobuf:with_zlib=False
+	${CONAN_EXTRA_OPTIONS}
   GENERATORS
     cmake_find_package)
 
