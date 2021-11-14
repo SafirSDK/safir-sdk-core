@@ -158,7 +158,6 @@ namespace Control
             const auto nativeExitCode = child.native_exit_code();
 
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
-        TODO eh, kolla allt detta
             if (exitCode != 0)
             {
                 std::stringstream os;

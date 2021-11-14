@@ -622,8 +622,7 @@ void ControlApp::HandleDoseMainExit(int exitCode, const std::error_code& error)
         SEND_SYSTEM_LOG(Critical, << ostr.str().c_str());
         LogStatus(ostr.str());
     }
-#else
-TODO windows stuff....
+#elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
     if (exitCode != 0)
     {
         std::ostringstream ostr;
@@ -632,6 +631,8 @@ TODO windows stuff....
         SEND_SYSTEM_LOG(Critical, << ostr.str().c_str());
         LogStatus(ostr.str());
     }
+#else
+	#error "Control does not support this platform yet"
 #endif
 
     lllog(1) << "CTRL: dose_main has exited" << std::endl;
