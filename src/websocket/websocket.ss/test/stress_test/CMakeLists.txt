@@ -9,6 +9,7 @@ target_link_libraries(safir_websocket_stresstest  PRIVATE
     websocketpp::websocketpp
     Boost::program_options
     Boost::thread
+    Boost::random
     Boost::system)
 
 get_property(SAFIR_GENERATED_PATHS GLOBAL PROPERTY SAFIR_GENERATED_PATHS)

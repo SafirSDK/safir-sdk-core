@@ -11,6 +11,7 @@ find_package(Boost
   filesystem
   thread
   system
+  random
   unit_test_framework
   REQUIRED)
 
