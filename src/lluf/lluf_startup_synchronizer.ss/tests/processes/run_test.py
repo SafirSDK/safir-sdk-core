@@ -23,12 +23,12 @@
 # along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-import subprocess, os, time, sys
+import subprocess
+import os
+import sys
 
-if sys.platform == "win32":
-    config_type = os.environ.get("CMAKE_CONFIG_TYPE")
-    exe_path = config_type if config_type else ""
-else:
+exe_path = os.environ.get("CMAKE_RUNTIME_OUTPUT_DIRECTORY")
+if exe_path is None:
     exe_path = "."
 
 ss_test = os.path.join(exe_path, "ss_test")

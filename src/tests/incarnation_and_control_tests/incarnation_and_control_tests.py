@@ -107,10 +107,10 @@ def readconnectedNodeId(safir_instance, nodeName):
 
     matchList = re.findall(r"(?:\sE\s|\s\s\s)" + nodeName + r".+id = (\S+),", output)
 
-    if len(matchList) is 0:
+    if len(matchList) == 0:
         print("Did not find NodeID: for node with name " + nodeName)
 
-    if len(matchList) is 0:
+    if len(matchList) == 0:
         return ""
     else:
         return str(matchList[0])
@@ -193,15 +193,8 @@ parser.add_argument("--dope_main", required=True)
 parser.add_argument("--system_picture_listener", required=True)
 parser.add_argument("--safir_control_cli", required=True)
 parser.add_argument("--safir-show-config", required=True)
-parser.add_argument("--safir-generated-paths", required=True)
 
 arguments = parser.parse_args()
-
-#add all the environment variables. passed on format A=10;B=20
-for pair in arguments.safir_generated_paths.split(";"):
-    (name, value) = pair.split("=")
-    print("Setting environment variable", name, "to", value)
-    os.environ[name] = value
 
 envs = dict()
 

@@ -31,14 +31,8 @@ import platform
 
 parser = argparse.ArgumentParser("test script")
 parser.add_argument("--test-exe", required=True)
-parser.add_argument("--dependencies", required=True)
 
 arguments = parser.parse_args()
-
-dependencies = arguments.dependencies.split(",")
-
-for dep in dependencies:
-    shutil.copy2(dep, ".")
 
 if platform.system() == "Windows":
     exe = (arguments.test_exe,)

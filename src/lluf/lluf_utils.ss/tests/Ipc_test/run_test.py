@@ -26,12 +26,9 @@
 from inspect import currentframe
 import subprocess, os, time, sys, datetime
 
-if sys.platform == "win32":
-    config_type = os.environ.get("CMAKE_CONFIG_TYPE")
-    exe_path = config_type if config_type else ""
-else:
+exe_path = os.environ.get("CMAKE_RUNTIME_OUTPUT_DIRECTORY")
+if exe_path is None:
     exe_path = "."
-
 
 def log(*args, **kwargs):
     print(datetime.datetime.now().isoformat(), ":", *args, **kwargs)

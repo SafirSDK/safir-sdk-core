@@ -27,14 +27,8 @@ import subprocess, sys, os, shutil, time, argparse, platform
 
 parser = argparse.ArgumentParser("test script")
 parser.add_argument("--jar", required=True)
-parser.add_argument("--dependencies", required=True)
 
 arguments = parser.parse_args()
-
-dependencies = arguments.dependencies.split(",")
-
-for dep in dependencies:
-    shutil.copy2(dep, ".")
 
 result = subprocess.call(("java", "-jar", arguments.jar))
 

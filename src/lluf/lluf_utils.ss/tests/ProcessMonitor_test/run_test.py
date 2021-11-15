@@ -30,10 +30,8 @@ import subprocess, os, time, sys, random
 #wait for sleepers to exit
 #check output of listener
 
-if sys.platform == "win32":
-    config_type = os.environ.get("CMAKE_CONFIG_TYPE")
-    exe_path = config_type if config_type else ""
-else:
+exe_path = os.environ.get("CMAKE_RUNTIME_OUTPUT_DIRECTORY")
+if exe_path is None:
     exe_path = "."
 
 ProcessMonitor_test = os.path.join(exe_path, "ProcessMonitor_test")

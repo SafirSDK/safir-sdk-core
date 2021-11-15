@@ -4,13 +4,12 @@ ADD_SUBDIRECTORY(java)
 
 get_property(SAFIR_GENERATED_PATHS GLOBAL PROPERTY SAFIR_GENERATED_PATHS)
 
-ADD_TEST(NAME dots_cpp 
+ADD_TEST(NAME dots_cpp
   COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py
   --show-safir-config $<TARGET_FILE:safir_show_config>
   --language cpp
   --binary $<TARGET_FILE:dots_test_cpp>
-  --output ${CMAKE_CURRENT_SOURCE_DIR}/output.txt
-  --safir-generated-paths "${SAFIR_GENERATED_PATHS}")
+  --output ${CMAKE_CURRENT_SOURCE_DIR}/output.txt)
 
 
 SET_SAFIR_TEST_PROPERTIES(TEST dots_cpp
@@ -19,13 +18,11 @@ SET_SAFIR_TEST_PROPERTIES(TEST dots_cpp
 
 if (CSHARP_FOUND)
   ADD_TEST(NAME dots_dotnet
-    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py 
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py
     --show-safir-config $<TARGET_FILE:safir_show_config>
     --language dotnet
     --binary $<TARGET_PROPERTY:dots_test_dotnet,ASSEMBLY_FILE>
-    --dependencies $<TARGET_PROPERTY:Safir.Logging,ASSEMBLY_FILE>,$<TARGET_PROPERTY:Safir.Dob.Typesystem,ASSEMBLY_FILE>,$<TARGET_PROPERTY:safir_generated-DotsTest-dotnet,ASSEMBLY_FILE>
     --output ${CMAKE_CURRENT_SOURCE_DIR}/output.txt
-    --safir-generated-paths "${SAFIR_GENERATED_PATHS}"
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/dotnet)
 
   SET_SAFIR_TEST_PROPERTIES(TEST dots_dotnet
@@ -38,9 +35,7 @@ if (Java_FOUND)
     --show-safir-config $<TARGET_FILE:safir_show_config>
     --language java
     --jar $<TARGET_PROPERTY:dots_test_java,JAR_FILE>
-    --dependencies $<TARGET_PROPERTY:safir_generated-DotsTest-java,JAR_FILE>,$<TARGET_PROPERTY:dots_java,JAR_FILE>
     --output ${CMAKE_CURRENT_SOURCE_DIR}/output.txt
-    --safir-generated-paths "${SAFIR_GENERATED_PATHS}"
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/java)
 
   SET_SAFIR_TEST_PROPERTIES(TEST dots_java

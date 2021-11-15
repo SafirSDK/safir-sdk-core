@@ -26,7 +26,6 @@
 import os
 import sys
 import argparse
-import time
 from testenv import TestEnv, TestEnvStopper
 
 
@@ -43,15 +42,8 @@ parser.add_argument("--dope_main", required=True)
 parser.add_argument("--safir-websocket", required=True)
 parser.add_argument("--websocket-test-client", required=True)
 parser.add_argument("--safir-show-config", required=True)
-parser.add_argument("--safir-generated-paths", required=True)
 
 arguments = parser.parse_args()
-
-#add all the environment variables. passed on format A=10;B=20
-for pair in arguments.safir_generated_paths.split(";"):
-    (name, value) = pair.split("=")
-    log("Setting environment variable", name, "to", value)
-    os.environ[name] = value
 
 env = TestEnv(safir_control=arguments.safir_control,
               dose_main=arguments.dose_main,

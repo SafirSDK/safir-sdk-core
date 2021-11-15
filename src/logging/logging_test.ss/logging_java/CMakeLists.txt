@@ -12,7 +12,6 @@ ADD_TEST(NAME logging_java
   COMMAND ${Python3_EXECUTABLE}
   ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py
   --jar $<TARGET_PROPERTY:log_sender_java,JAR_FILE>
-  --safir-show-config $<TARGET_FILE:safir_show_config>
-  --dependencies $<TARGET_PROPERTY:logging_java,JAR_FILE>)
+  --safir-show-config $<TARGET_FILE:safir_show_config>)
 
 SET_SAFIR_TEST_PROPERTIES(TEST logging_java)

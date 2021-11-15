@@ -41,15 +41,9 @@ try:
     parser.add_argument("--dose-main", required=True)
     parser.add_argument("--dope-main", required=True)
     parser.add_argument("--entity-owner", required=True)
-    parser.add_argument("--safir-generated-paths", required=True)
 
     arguments = parser.parse_args()
 
-    #add all the environment variables. passed on format A=10;B=20
-    for pair in arguments.safir_generated_paths.split(";"):
-        (name, value) = pair.split("=")
-        print("Setting environment variable", name, "to", value)
-        os.environ[name] = value
     """
     log("Find out how many entities entity_owner will set")
     num_str = subprocess.check_output((arguments.entity_owner,"num"), universal_newlines=True)

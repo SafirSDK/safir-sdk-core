@@ -21,7 +21,7 @@ ADD_TEST(NAME websocket_stress_test
   --dose_main $<TARGET_FILE:dose_main>
   --dope_main $<TARGET_FILE:dope_main>
   --safir-show-config $<TARGET_FILE:safir_show_config>
-  --safir-generated-paths "${SAFIR_GENERATED_PATHS}")
+  )
 
 #uses the same config files as component tests
 SET_SAFIR_TEST_PROPERTIES(TEST websocket_stress_test

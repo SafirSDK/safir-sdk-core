@@ -202,15 +202,6 @@ else()
   set(PATH_SEPARATOR ";")
 endif()
 
-#We need to collect all library paths so that tests on windows (where there is no rpath equivalent)
-#and java and dotnet tests on both platforms can find libraries.
-#we also collect paths to make header check test linking work
-if (MSVC)
-  set_property(GLOBAL PROPERTY SAFIR_LIBRARY_PATH "$ENV{PATH}")
-else()
-  set_property(GLOBAL PROPERTY SAFIR_LIBRARY_PATH "$ENV{LD_LIBRARY_PATH}")
-endif()
-
 #
 # This is an "overload" of the builtin ADD_LIBRARY function. The
 # purpose is threefold:
@@ -233,23 +224,6 @@ function(add_library NAME)
 
     #and get out of here, the rest of this function is only for our own targets
     return()
-  endif()
-
-  if (CMAKE_VERSION VERSION_LESS "3.0.0")
-    if (WIN32)
-      file(TO_NATIVE_PATH "${CMAKE_CURRENT_BINARY_DIR}" dir_to_add)
-    else()
-      set(dir_to_add "${CMAKE_CURRENT_BINARY_DIR}")
-    endif()
-  else()
-    set (dir_to_add "$<TARGET_FILE_DIR:${NAME}>")
-  endif()
-  get_property(SAFIR_LIBRARY_PATH GLOBAL PROPERTY SAFIR_LIBRARY_PATH)
-
-  if (NOT SAFIR_LIBRARY_PATH)
-    set_property(GLOBAL PROPERTY SAFIR_LIBRARY_PATH "${dir_to_add}")
-  else()
-    set_property(GLOBAL PROPERTY SAFIR_LIBRARY_PATH "${dir_to_add}${PATH_SEPARATOR}${SAFIR_LIBRARY_PATH}")
   endif()
 
   if (WIN32)
@@ -309,15 +283,11 @@ function (SET_SAFIR_TEST_PROPERTIES)
   set (pypath "$ENV{PYTHONPATH}${PATH_SEPARATOR}${safir-sdk-core_SOURCE_DIR}/src/tests/test_support/python")
   string(REGEX REPLACE "^${PATH_SEPARATOR}+" "" pypath ${pypath}) # remove any leading path separators
 
-  #Add the library path to the environment
-  get_property(SAFIR_LIBRARY_PATH GLOBAL PROPERTY SAFIR_LIBRARY_PATH)
-  if (MSVC)
-    STRING(REPLACE "\;" ";" SAFIR_LIBRARY_PATH "${SAFIR_LIBRARY_PATH}")
-    STRING(REPLACE ";" "\\;" SAFIR_LIBRARY_PATH "${SAFIR_LIBRARY_PATH}")
-    set(PATH_ENVIRONMENT "PATH=${SAFIR_LIBRARY_PATH}")
-  else()
-    set(PATH_ENVIRONMENT "LD_LIBRARY_PATH=${SAFIR_LIBRARY_PATH}")
-  endif()
+ if (MSVC)
+   set(PATH_ENVIRONMENT "PATH=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}")
+ else()
+   set(PATH_ENVIRONMENT "LD_LIBRARY_PATH=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}")
+ endif()
 
   SET_PROPERTY(TEST ${PROP_TEST}
     PROPERTY ENVIRONMENT
@@ -325,6 +295,10 @@ function (SET_SAFIR_TEST_PROPERTIES)
     "SAFIR_SOURCE_ROOT=${safir-sdk-core_SOURCE_DIR}/"
     "CMAKE_CURRENT_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}"
     "CMAKE_CURRENT_BINARY_DIR=${CMAKE_CURRENT_BINARY_DIR}"
+    "CMAKE_RUNTIME_OUTPUT_DIRECTORY=${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
+    "CMAKE_LIBRARY_OUTPUT_DIRECTORY=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}"
+    "CMAKE_CSHARP_OUTPUT_DIRECTORY=${CMAKE_CSHARP_OUTPUT_DIRECTORY}"
+    "CMAKE_JAVA_OUTPUT_DIRECTORY=${CMAKE_JAVA_OUTPUT_DIRECTORY}"
     "PYTHONPATH=${pypath}"
     "${PATH_ENVIRONMENT}"
     ${PROP_ENVIRONMENT})

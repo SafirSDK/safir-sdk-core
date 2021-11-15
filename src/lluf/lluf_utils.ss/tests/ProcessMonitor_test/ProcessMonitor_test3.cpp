@@ -117,6 +117,13 @@ struct Fixture
 
     pid_t LaunchSleeper(const double duration)
     {
+        std::string path = ".";
+        auto env = getenv("CMAKE_RUNTIME_OUTPUT_DIRECTORY");
+        if (env != nullptr)
+        {
+            path = env;
+            std::wcout << path.c_str() << std::endl;
+        }
 #ifdef PROCMON_LINUX
         const pid_t pid = fork();
         switch (pid)
@@ -124,7 +131,10 @@ struct Fixture
         case -1:
             throw std::logic_error(std::string("fork failed: ") + strerror(errno));
         case 0:
-            execl("./ProcessMonitorSleeper", "ProcessMonitorSleeper", boost::lexical_cast<std::string>(duration).c_str(), NULL);
+            execl((path + "/ProcessMonitorSleeper").c_str(),
+                  "ProcessMonitorSleeper",
+                  boost::lexical_cast<std::string>(duration).c_str(),
+                  nullptr);
             throw std::logic_error(std::string("execl failed: ") + strerror(errno));
         default:
             sleepers.insert(pid);
@@ -133,7 +143,12 @@ struct Fixture
 #else
         STARTUPINFOA info={sizeof(info)};
         PROCESS_INFORMATION processInfo;
-        if (::CreateProcessA(NULL, (LPSTR)(".\\ProcessMonitorSleeper.exe " + boost::lexical_cast<std::string>(duration)).c_str(), NULL, NULL, TRUE, 0, NULL, NULL, &info, &processInfo))
+        if (::CreateProcessA(NULL,
+                             (LPSTR)((path + "\\ProcessMonitorSleeper.exe " +
+                                     boost::lexical_cast<std::string>(duration)).c_str(),
+                             NULL,
+                             NULL,
+                             TRUE, 0, NULL, NULL, &info, &processInfo))
         {
             ::CloseHandle(processInfo.hThread);
             sleepers.insert(std::make_pair(processInfo.dwProcessId,processInfo.hProcess));

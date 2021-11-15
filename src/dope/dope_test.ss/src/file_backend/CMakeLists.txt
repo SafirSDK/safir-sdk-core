@@ -7,8 +7,7 @@ ADD_TEST(NAME dope_file_backend_test
   --dose-main $<TARGET_FILE:dose_main>
   --dope-main $<TARGET_FILE:dope_main>
   --entity-owner $<TARGET_FILE:entity_owner>
-  --dope-bin2xml $<TARGET_FILE:dope_bin2xml>
-  --safir-generated-paths "${SAFIR_GENERATED_PATHS}")
+  --dope-bin2xml $<TARGET_FILE:dope_bin2xml>)
 
 
 #Long timeouts are needed on slow machines.

@@ -26,7 +26,6 @@
 """Run tests for logging_dotnet"""
 import subprocess
 import sys
-import shutil
 import argparse
 import platform
 import syslog_server
@@ -35,14 +34,8 @@ from safe_print import safe_print
 parser = argparse.ArgumentParser("test script for logging")
 parser.add_argument("--safir-show-config", required=True)
 parser.add_argument("--sender-exe", required=True)
-parser.add_argument("--dependencies", required=True)
 
 arguments = parser.parse_args()
-
-dependencies = arguments.dependencies.split(",")
-
-for dep in dependencies:
-    shutil.copy2(dep, ".")
 
 log_server = syslog_server.SyslogServer(arguments.safir_show_config)
 

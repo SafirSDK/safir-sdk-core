@@ -62,15 +62,8 @@ def parse_arguments():
     parser.add_argument("--dose_main", required=True)
     parser.add_argument("--dope_main", required=True)
     parser.add_argument("--safir-show-config", required=True)
-    parser.add_argument("--safir-generated-paths", required=True)
     parser.add_argument("--clients", type=int, default=10)
     arguments = parser.parse_args()
-
-    #add all the environment variables. passed on format A=10;B=20
-    for pair in arguments.safir_generated_paths.split(";"):
-        (name, value) = pair.split("=")
-        print("Setting environment variable", name, "to", value)
-        os.environ[name] = value
 
     return arguments
 

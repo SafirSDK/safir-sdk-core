@@ -47,10 +47,8 @@ parser = argparse.ArgumentParser()
 parser.add_argument("test_conf_dir", help="Test configuration directory")
 args = parser.parse_args()
 
-if sys.platform == "win32":
-    config_type = os.environ.get("CMAKE_CONFIG_TYPE")
-    exe_path = config_type if config_type else ""
-else:
+exe_path = os.environ.get("CMAKE_RUNTIME_OUTPUT_DIRECTORY")
+if exe_path is None:
     exe_path = "."
 
 test_pgm = "Config_test"

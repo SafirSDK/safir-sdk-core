@@ -21,7 +21,7 @@ ADD_TEST(NAME websocket_component_test
   --dose_main $<TARGET_FILE:dose_main>
   --dope_main $<TARGET_FILE:dope_main>
   --safir-show-config $<TARGET_FILE:safir_show_config>
-  --safir-generated-paths "${SAFIR_GENERATED_PATHS}")
+  )
 
 SET_SAFIR_TEST_PROPERTIES(TEST websocket_component_test
   TIMEOUT 600

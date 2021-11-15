@@ -5,7 +5,6 @@ target_link_libraries(WaitingStatesOwner
   dose_cpp
   safir_generated-DoseTest-cpp)
 
-
 get_property(SAFIR_GENERATED_PATHS GLOBAL PROPERTY SAFIR_GENERATED_PATHS)
 
 if (MSVC)
@@ -27,7 +26,6 @@ ADD_TEST(NAME restart_nodes
   --dose_main $<TARGET_FILE:dose_main>
   --dope_main $<TARGET_FILE:dope_main>
   --safir-show-config $<TARGET_FILE:safir_show_config>
-  --safir-generated-paths "${SAFIR_GENERATED_PATHS}"
   --clients ${num_clients})
 
 SET_SAFIR_TEST_PROPERTIES(TEST restart_nodes

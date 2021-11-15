@@ -9,7 +9,7 @@ ADD_TEST(NAME Incarnation_And_Control_Tests
   --system_picture_listener $<TARGET_FILE:system_picture_listener>
   --safir_control_cli $<TARGET_FILE:safir_control_cli>
   --safir-show-config $<TARGET_FILE:safir_show_config>
-  --safir-generated-paths "${SAFIR_GENERATED_PATHS}")
+  )
 
 SET_SAFIR_TEST_PROPERTIES(TEST Incarnation_And_Control_Tests
   TIMEOUT 1200

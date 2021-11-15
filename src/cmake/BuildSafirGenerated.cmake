@@ -409,18 +409,6 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
       DOTNET_BUILT True)
 
   endif()
-
-  ############
-
-  #
-  # Remember paths to all generated libraries, for use by tests
-  # use get_property to get hold of the value (like below)
-  #
-  get_property(SAFIR_GENERATED_PATHS GLOBAL PROPERTY SAFIR_GENERATED_PATHS)
-
-  set_property(GLOBAL PROPERTY SAFIR_GENERATED_PATHS
-    ${SAFIR_GENERATED_PATHS} "SAFIR_GENERATED_${_gen_NAME}_DIR=$<TARGET_FILE_DIR:safir_generated-${_gen_NAME}-cpp>")
-  ##############
 ENDFUNCTION()
 
 # Documentation for this function can be found in SafirSDKCoreConfig.cmake

@@ -108,6 +108,7 @@ buildlog.html
 *.bak
 *.pyc
 bin
+lib
 *.tmp
 *-build
 build-*

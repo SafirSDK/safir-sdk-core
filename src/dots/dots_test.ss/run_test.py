@@ -38,35 +38,19 @@ parser = argparse.ArgumentParser("test script")
 parser.add_argument("--show-safir-config", required=True)
 parser.add_argument("--language", required=True)
 parser.add_argument("--output", required=True)
-parser.add_argument("--safir-generated-paths", required=True)
 
 #cpp and dotnet
 parser.add_argument("--binary")
-
-#for java and dotnet
-parser.add_argument("--dependencies")
 
 #for java
 parser.add_argument("--jar")
 
 arguments = parser.parse_args()
 
-#add all the environment variables. passed on format A=10;B=20
-for pair in arguments.safir_generated_paths.split(";"):
-    (name, value) = pair.split("=")
-    print("Setting environment variable", name, "to", value)
-    os.environ[name] = value
-
 syslog = SyslogServer(arguments.show_safir_config)
 
-if arguments.dependencies is not None:
-    dependencies = arguments.dependencies.split(",")
-
-    for dep in dependencies:
-        shutil.copy2(dep, ".")
-
 if arguments.language == "cpp":
-    command = (arguments.binary, "--detect_memory_leaks=0")
+    command = (arguments.binary,)
 elif arguments.language == "java":
     command = ("java", "-jar", arguments.jar)
 elif arguments.language == "dotnet":

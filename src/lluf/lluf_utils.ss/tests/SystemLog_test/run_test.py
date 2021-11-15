@@ -23,10 +23,13 @@
 # along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-import subprocess, os, time, sys
+import subprocess
+import os
+import time
+import sys
+
 import configparser as ConfigParser
 import socket
-import shutil
 import re
 import argparse
 
@@ -34,10 +37,8 @@ parser = argparse.ArgumentParser()
 parser.add_argument("test_conf_dir", help="Test configuration directory")
 args = parser.parse_args()
 
-if sys.platform == "win32":
-    config_type = os.environ.get("CMAKE_CONFIG_TYPE")
-    exe_path = config_type if config_type else ""
-else:
+exe_path = os.environ.get("CMAKE_RUNTIME_OUTPUT_DIRECTORY")
+if exe_path is None:
     exe_path = "."
 
 system_log_test_pgm = "SystemLog_test"

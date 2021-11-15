@@ -20,6 +20,15 @@ if (Java_Development_FOUND AND Java_Runtime_FOUND)
 
     INCLUDE(UseJava)
 
+    function(add_jar NAME)
+        list(FIND ARGN "OUTPUT_DIR" has_output)
+        if (NOT has_output EQUAL -1)
+          message(FATAL_ERROR "add_jar of ${NAME} has OUTPUT_DIR set, which I kinda don't like")
+        endif()
+
+        _add_jar(${NAME} ${ARGN} OUTPUT_DIR ${CMAKE_JAVA_OUTPUT_DIRECTORY})
+      endfunction()
+
     SET(CMAKE_JAVA_COMPILE_FLAGS -encoding UTF-8 -Xlint:unchecked -Xlint:deprecation)
   else()
     SET(Java_FOUND Java-NOTFOUND)

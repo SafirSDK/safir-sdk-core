@@ -25,10 +25,8 @@
 ###############################################################################
 import subprocess, os, time, sys, re, signal
 
-if sys.platform == "win32":
-    config_type = os.environ.get("CMAKE_CONFIG_TYPE")
-    exe_path = config_type if config_type else ""
-else:
+exe_path = os.environ.get("CMAKE_RUNTIME_OUTPUT_DIRECTORY")
+if exe_path is None:
     exe_path = "."
 
 sleeper_exe = os.path.join(exe_path, "crash_reporter_sleeper")
