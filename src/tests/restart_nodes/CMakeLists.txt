@@ -5,8 +5,6 @@ target_link_libraries(WaitingStatesOwner
   dose_cpp
   safir_generated-DoseTest-cpp)
 
-get_property(SAFIR_GENERATED_PATHS GLOBAL PROPERTY SAFIR_GENERATED_PATHS)
-
 if (MSVC)
   if ((CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo") OR
       (CMAKE_BUILD_TYPE STREQUAL "Release"))

@@ -4,8 +4,6 @@ target_link_libraries(tracer_backdoor_sender PRIVATE
   swre_interface_cpp
   Boost::atomic)
 
-get_property(SAFIR_GENERATED_PATHS GLOBAL PROPERTY SAFIR_GENERATED_PATHS)
-
 ADD_TEST(NAME tracer_backdoor
   COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py
   --sender $<TARGET_FILE:tracer_backdoor_sender>

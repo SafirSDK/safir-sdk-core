@@ -1,5 +1,3 @@
-get_property(SAFIR_GENERATED_PATHS GLOBAL PROPERTY SAFIR_GENERATED_PATHS)
-
 ADD_TEST(NAME Incarnation_And_Control_Tests
   COMMAND ${Python3_EXECUTABLE}
   ${CMAKE_CURRENT_SOURCE_DIR}/incarnation_and_control_tests.py

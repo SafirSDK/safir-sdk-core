@@ -1,5 +1,3 @@
-get_property(SAFIR_GENERATED_PATHS GLOBAL PROPERTY SAFIR_GENERATED_PATHS)
-
 ADD_TEST(NAME dope_file_backend_test 
   COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_file_backend_test.py
   --safir-show-config $<TARGET_FILE:safir_show_config>
