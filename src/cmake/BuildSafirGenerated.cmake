@@ -407,8 +407,9 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
     #remember that we built dotnet
     set_target_properties(${_gen_NAME}-dou PROPERTIES
       DOTNET_BUILT True)
-
   endif()
+  
+  ############
 ENDFUNCTION()
 
 # Documentation for this function can be found in SafirSDKCoreConfig.cmake

@@ -145,7 +145,7 @@ struct Fixture
         PROCESS_INFORMATION processInfo;
         if (::CreateProcessA(NULL,
                              (LPSTR)((path + "\\ProcessMonitorSleeper.exe " +
-                                     boost::lexical_cast<std::string>(duration)).c_str(),
+                                     boost::lexical_cast<std::string>(duration)).c_str()),
                              NULL,
                              NULL,
                              TRUE, 0, NULL, NULL, &info, &processInfo))

@@ -50,7 +50,7 @@ arguments = parser.parse_args()
 syslog = SyslogServer(arguments.show_safir_config)
 
 if arguments.language == "cpp":
-    command = (arguments.binary,)
+    command = (arguments.binary, "--detect_memory_leaks=0") #disable boost.test memory leak check which detects spurious leak.
 elif arguments.language == "java":
     command = ("java", "-jar", arguments.jar)
 elif arguments.language == "dotnet":

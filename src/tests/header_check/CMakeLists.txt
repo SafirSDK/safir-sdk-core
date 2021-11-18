@@ -45,8 +45,7 @@ foreach(header ${headers})
 endforeach()
 
 if (WIN32)
-  get_property(SAFIR_HEADER_CHECK_LINK_PATH GLOBAL PROPERTY SAFIR_HEADER_CHECK_LINK_PATH)
-  link_directories(${SAFIR_HEADER_CHECK_LINK_PATH})
+  link_directories(${CMAKE_ARCHIVE_OUTPUT_DIRECTORY})
 endif()
 
 add_executable(check_correct_public_headers main.cpp ${sources})

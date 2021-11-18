@@ -131,3 +131,4 @@ conaninfo.txt
 conanbuildinfo.txt
 graph_info.json
 /Find*.cmake
+conan_imports_manifest.txt
