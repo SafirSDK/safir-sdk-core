@@ -192,18 +192,6 @@ public class InjectedEntityProxy {
         }
     }
 
-
-    protected void finalize() throws java.lang.Throwable {
-        try
-        {
-            dispose();
-        }
-        finally
-        {
-            super.finalize();
-        }
-    }
-
     private void checkNotDisposed()
     {
         if (disposed)
@@ -211,7 +199,6 @@ public class InjectedEntityProxy {
             throw new com.saabgroup.safir.dob.typesystem.SoftwareViolationException("Attempt to use an InjectedEntityProxy that is disposed! Please do not use an InjectedEntityProxy outside the onInjected*Entity callbacks!");
         }
     }
-
 
     private boolean disposed = false;
 

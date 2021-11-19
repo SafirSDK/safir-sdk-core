@@ -1,7 +1,7 @@
 // -*- coding: utf-8 -*-
 /******************************************************************************
 *
-* Copyright Saab AB, 2007-2013 (http://safirsdkcore.com)
+* Copyright Saab AB, 2007-2013, 20221 (http://safirsdkcore.com)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -37,8 +37,8 @@ package com.saabgroup.safir.dob;
  * received a timeout response instead).
  *
  * Not using a ResponseSender is considered a programming error, if it not
- * used a log will be emitted when the object is being finalized.
- * Since the finalizer is called by the Garbage Collector this may happen 
+ * used a log will be emitted when the object is being garbage collected.
+ * Since the this check is called by the Garbage Collector this may happen 
  * "long after" you've dropped your reference to the response sender.
  */
 public class ResponseSender
@@ -47,7 +47,10 @@ public class ResponseSender
                    com.saabgroup.safir.dob.internal.ConsumerBase consumer,
                    int responseId)
     {
-        m_valid=true;
+        m_state = new State();
+        m_cleanable = ResourceHelper.register(this,m_state);
+
+        m_state.valid=true;
         m_ctrl = ctrl;
         m_consumer = consumer;
         m_responseId = responseId;
@@ -66,7 +69,7 @@ public class ResponseSender
     public void send(Response response)
     {
 
-        if (!m_valid)
+        if (!m_state.valid)
         {
             throw new AccessDeniedException("ResponseSender object has already been used once.");
         }
@@ -86,7 +89,7 @@ public class ResponseSender
             com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
         }
 
-        m_valid = false;
+        m_state.valid = false;
     }
 
     /**
@@ -96,54 +99,53 @@ public class ResponseSender
      *         (instance is consumed), otherwise false.
      */
     public boolean isDone() {
-        return !m_valid;
+        return !m_state.valid;
     }
 
     /**
      * Discard this ResponseSender.
      *
      * Calling this function means that you forfeit your chance to send a response
-     * to the request. It will disable the checks in the finalizer.
+     * to the request. It will disable the checks in the cleanup.
      *
      * The typical case when you must discard the ResponseSender is when calling
      * Postpone with redispatchCurrent set to True. In this case you will get
      * the request again together with a new ResponseSender.
      */
     public void discard() {
-        if (!m_valid) {
+        if (!m_state.valid) {
             throw new com.saabgroup.safir.dob.typesystem.SoftwareViolationException
                 ("ResponseSender object has already been used once.");
         }
-        m_valid = false;
+        m_state.valid = false;
     }
 
 
-    /**
-     * Finalizer
-     *
-     * Will check that the ResponseSender has been used, and if it hasn't a log will be emitted.
-     * Since the destructor is called by the Garbage Collector this may happen 
-     * "long after" you've dropped your reference to the response sender.
-     *
-     * Not using a ResponseSender is considered a programming error.
-     */
-    protected void finalize() throws java.lang.Throwable
-    {
-        try {
-            if (m_valid) {
+    private static class State implements Runnable {
+        public boolean valid;
+
+        /**
+         * Clean up code
+         *
+         * Will check that the ResponseSender has been used, and if it hasn't a log will be emitted.
+         * Since the cleanup is called by the Garbage Collector this may happen
+         * "long after" you've dropped your reference to the response sender.
+         *
+         * Not using a ResponseSender is considered a programming error.
+         */
+        public void run() {
+            if (valid) {
                 com.saabgroup.safir.Logging.sendSystemLog
                     (com.saabgroup.safir.Logging.Severity.CRITICAL,
                      "Programming Error! A ResponseSender was discarded without having been used!");
             }
         }
-        finally {
-            super.finalize();
-        }
     }
 
-    private boolean m_valid;
-    private int m_ctrl;
-    private com.saabgroup.safir.dob.internal.ConsumerBase m_consumer;
-    private int m_responseId;
+    private final int m_ctrl;
+    private final com.saabgroup.safir.dob.internal.ConsumerBase m_consumer;
+    private final int m_responseId;
+    private final State m_state;
+    private final java.lang.ref.Cleaner.Cleanable m_cleanable;
 
 }

@@ -24,7 +24,7 @@
 ******************************************************************************/
 package com.saabgroup.safir.dob;
 
-import com.saabgroup.safir.dob.internal.*;
+import com.saabgroup.safir.dob.internal.ConsumerBase;
 
 /**
  * Java interface to dose_dll.

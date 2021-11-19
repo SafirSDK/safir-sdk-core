@@ -1,7 +1,7 @@
 // -*- coding: utf-8 -*-
 /******************************************************************************
 *
-* Copyright Saab AB, 2009-2013 (http://safirsdkcore.com)
+* Copyright Saab AB, 2009-2013, 2021 (http://safirsdkcore.com)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -28,14 +28,17 @@ package com.saabgroup.safir.dob;
  * An iterator that can be used to traverse entity instances.
  */
 public class EntityIterator
-    implements java.util.Iterator<EntityProxy> {
+    implements java.util.Iterator<EntityProxy>, AutoCloseable {
     /** Iterator constructor is internal to dose_java, since only
      * Connections (and SecondaryConnections) can instantiate them.
      */
     EntityIterator(int ctrl,
                    long typeId,
                    boolean includeSubclasses){
-        m_ctrl = ctrl;
+        m_state = new State();
+        m_cleanable = ResourceHelper.register(this,m_state);
+
+        m_state.ctrl = ctrl;
 
         int [] iteratorId = new int [1];
         boolean [] success = new boolean [1];
@@ -44,9 +47,9 @@ public class EntityIterator
                                        typeId,
                                        includeSubclasses,
                                        iteratorId,
-                                       m_end,
+                                       m_state.end,
                                        success);
-        m_iteratorId = iteratorId[0];
+        m_state.iteratorId = iteratorId[0];
 
         if (!success[0])
         {
@@ -61,12 +64,12 @@ public class EntityIterator
     @Override
     public boolean hasNext() {
         checkNotDisposed();
-        if (m_moveToNext) {
+        if (m_state.moveToNext) {
             moveToNext();
-            m_moveToNext = false;
+            m_state.moveToNext = false;
         }
 
-        return !m_end[0];
+        return !m_state.end[0];
     }
 
     /**
@@ -75,22 +78,22 @@ public class EntityIterator
     @Override
     public EntityProxy next() {
         checkNotDisposed();
-        if (m_moveToNext) {
+        if (m_state.moveToNext) {
             moveToNext();
         }
         //next time we will want to move on.
-        m_moveToNext = true;
+        m_state.moveToNext = true;
 
         //have we gone beyond the end of the instances?
-        if (m_end[0]) {
+        if (m_state.end[0]) {
             throw new java.util.NoSuchElementException("There are no more instances to iterate over! Have you used hasNext correctly?");
         }
 
         java.nio.ByteBuffer [] entityBlob = new java.nio.ByteBuffer[1];
         java.nio.ByteBuffer [] entityState = new java.nio.ByteBuffer[1];
         boolean [] success = new boolean [1];
-        Interface.EntityIteratorDereference(m_ctrl,
-                                            m_iteratorId,
+        Interface.EntityIteratorDereference(m_state.ctrl,
+                                            m_state.iteratorId,
                                             entityBlob,
                                             entityState,
                                             success);
@@ -100,12 +103,12 @@ public class EntityIterator
             com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
         }
 
-        if (m_current != null) {
-            throw new com.saabgroup.safir.dob.typesystem.SoftwareViolationException("Internal error in EntityIterator.next()! m_current was not null");
+        if (m_state.current != null) {
+            throw new com.saabgroup.safir.dob.typesystem.SoftwareViolationException("Internal error in EntityIterator.next()! m_state.current was not null");
         }
 
-        m_current = new EntityProxy(entityBlob[0].asReadOnlyBuffer(),entityState[0].asReadOnlyBuffer(),null,null,true,false);
-        return m_current;
+        m_state.current = new EntityProxy(entityBlob[0].asReadOnlyBuffer(),entityState[0].asReadOnlyBuffer(),null,null,true,false);
+        return m_state.current;
     }
 
 
@@ -118,15 +121,15 @@ public class EntityIterator
     }
 
     private void moveToNext() {
-        if (m_current != null) {
-            m_current.dispose();
-            m_current = null;
+        if (m_state.current != null) {
+            m_state.current.dispose();
+            m_state.current = null;
         }
 
         boolean [] success = new boolean [1];
-        Interface.EntityIteratorIncrement(m_ctrl,
-                                          m_iteratorId,
-                                          m_end,
+        Interface.EntityIteratorIncrement(m_state.ctrl,
+                                          m_state.iteratorId,
+                                          m_state.end,
                                           success);
         if (!success[0])
         {
@@ -139,52 +142,64 @@ public class EntityIterator
      * Release resources held by this iterator.
      */
     public void dispose() {
-        if (!m_disposed) {
-            m_disposed = true;
-
-            if (m_current != null) {
-                m_current.dispose();
-            }
-
-            Interface.EntityIteratorDestroy(m_ctrl,m_iteratorId);
-        }
+        m_state.dispose();
     }
 
     @Override
-    protected void finalize() throws Throwable {
-        try {
-            if (!m_disposed) {
-                dispose();
-                
-                com.saabgroup.safir.Logging.sendSystemLog
-                    (com.saabgroup.safir.Logging.Severity.CRITICAL,
-                     "Programming Error! An EntityIterator was not disposed correctly when the finalizer was called!" + 
-                     "See the ConnectionBase#getEntityIterator(...).");
-            }
-        }
-        catch (Exception exc) {
-            com.saabgroup.safir.Logging.sendSystemLog
-                (com.saabgroup.safir.Logging.Severity.CRITICAL,
-                 "EntityIterator.finalize: Caught exception: " + exc);
-        }
-        finally {
-            super.finalize();
-        }
+    public void close() {
+        m_state.dispose();
     }
 
     private void checkNotDisposed()
     {
-        if (m_disposed)
+        if (m_state.disposed)
         {
             throw new com.saabgroup.safir.dob.typesystem.SoftwareViolationException("Attempt to use an EntityIterator that is disposed!");
         }
     }
 
+    private static class State implements Runnable {
+        public boolean disposed = false;
+        public int ctrl;
+        public int iteratorId;
+        public boolean [] end = new boolean[1];
+        public boolean moveToNext = false;
+        public EntityProxy current = null;
 
-    private int m_ctrl;
-    private int m_iteratorId;
-    private boolean [] m_end = new boolean[1];
-    private boolean m_moveToNext = false;
-    private EntityProxy m_current = null;
-    private boolean m_disposed = false;
+        public void dispose() {
+            if (!disposed) {
+                disposed = true;
+
+                if (current != null) {
+                    current.dispose();
+                }
+
+                Interface.EntityIteratorDestroy(ctrl, iteratorId);
+            }
+        }
+
+        /**
+         * Clean up code
+         */
+        public void run() {
+            try {
+                if (!disposed) {
+                    dispose();
+
+                    com.saabgroup.safir.Logging.sendSystemLog
+                        (com.saabgroup.safir.Logging.Severity.CRITICAL,
+                         "Programming Error! An EntityIterator was not disposed correctly when cleanup was called!" +
+                         "See the ConnectionBase#getEntityIterator(...).");
+                }
+            }
+            catch (Exception exc) {
+                com.saabgroup.safir.Logging.sendSystemLog
+                    (com.saabgroup.safir.Logging.Severity.CRITICAL,
+                     "EntityIterator.State.run: Caught exception: " + exc);
+            }
+        }
+    }
+
+    private final State m_state;
+    private final java.lang.ref.Cleaner.Cleanable m_cleanable;
 }

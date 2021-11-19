@@ -1,7 +1,7 @@
 // -*- coding: utf-8 -*-
 /******************************************************************************
 *
-* Copyright Saab AB, 2007-2013 (http://safirsdkcore.com)
+* Copyright Saab AB, 2007-2013, 2021 (http://safirsdkcore.com)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -39,11 +39,11 @@ public class PreviousEntityProxy {
      */
     public long getTypeId() {
         checkNotDisposed();
-        if (m_currentBlob == null)
+        if (m_state.currentBlob == null)
         {
             long [] typeId = new long[1];
             boolean [] success = new boolean [1];
-            Interface.GetTypeId(m_currentState, typeId, success);
+            Interface.GetTypeId(m_state.currentState, typeId, success);
 
             if (!success[0]) {
                 com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
@@ -53,7 +53,7 @@ public class PreviousEntityProxy {
         }
         else
         {
-            return com.saabgroup.safir.dob.typesystem.BlobOperations.getTypeId(m_currentBlob);
+            return com.saabgroup.safir.dob.typesystem.BlobOperations.getTypeId(m_state.currentBlob);
         }
     }
 
@@ -68,7 +68,7 @@ public class PreviousEntityProxy {
         checkNotDisposed();
         long [] instanceId = new long [1];
         boolean [] success = new boolean [1];
-        Interface.GetInstanceId(m_currentState, instanceId, success);
+        Interface.GetInstanceId(m_state.currentState, instanceId, success);
 
         if (!success[0]) {
             com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
@@ -100,12 +100,12 @@ public class PreviousEntityProxy {
      */
     public Entity getEntity() {
         checkNotDisposed();
-        if (m_previousBlob == null)
+        if (m_state.previousBlob == null)
         {
             throw new com.saabgroup.safir.dob.typesystem.SoftwareViolationException("Not possible to use call Entity on this PreviousEntityProxy of entity "
                                                                                     + getEntityId());
         }
-        return (Entity)com.saabgroup.safir.dob.typesystem.ObjectFactory.getInstance().createObject(m_previousBlob);
+        return (Entity)com.saabgroup.safir.dob.typesystem.ObjectFactory.getInstance().createObject(m_state.previousBlob);
     }
 
     /**
@@ -118,24 +118,24 @@ public class PreviousEntityProxy {
      */
     public Entity getEntityWithChangeInfo(){
         checkNotDisposed();
-        if (m_previousBlob == null)
+        if (m_state.previousBlob == null)
         {
             throw new com.saabgroup.safir.dob.typesystem.SoftwareViolationException("Not possible to use call Entity on this PreviousEntityProxy of entity "
                                                                                     + getEntityId());
         }
-        if (m_previousBlobWithChangeInfo == null)
+        if (m_state.previousBlobWithChangeInfo == null)
         {
             boolean [] success = new boolean [1];
             java.nio.ByteBuffer [] previousBlobWithChangeInfo  = new java.nio.ByteBuffer[1];
             java.nio.ByteBuffer [] blobDeleter  = new java.nio.ByteBuffer[1];
 
-            java.nio.ByteBuffer previous = m_previousState;
+            java.nio.ByteBuffer previous = m_state.previousState;
             if (previous == null){
                 //this will cause a null to be sent down.
                 previous = java.nio.ByteBuffer.allocate(0);;
             }
 
-            java.nio.ByteBuffer current = m_currentState;
+            java.nio.ByteBuffer current = m_state.currentState;
             if (current == null){
                 //this will cause a null to be sent down.
                 current = java.nio.ByteBuffer.allocate(0);;
@@ -144,21 +144,21 @@ public class PreviousEntityProxy {
             Interface.Diff(previous,
                            current,
                            false, //wantCurrent
-                           m_timestampDiff,
+                           m_state.timestampDiff,
                            previousBlobWithChangeInfo,
                            blobDeleter,
                            success);
             if (!success[0]) {
-                m_previousBlobWithChangeInfo = null;
-                m_blobDeleter = null;
+                m_state.previousBlobWithChangeInfo = null;
+                m_state.blobDeleter = null;
                 com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
                 com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
             }
 
-            m_previousBlobWithChangeInfo = previousBlobWithChangeInfo[0];
-            m_blobDeleter = blobDeleter[0];
+            m_state.previousBlobWithChangeInfo = previousBlobWithChangeInfo[0];
+            m_state.blobDeleter = blobDeleter[0];
         }
-        return (Entity)com.saabgroup.safir.dob.typesystem.ObjectFactory.getInstance().createObject(m_previousBlobWithChangeInfo);
+        return (Entity)com.saabgroup.safir.dob.typesystem.ObjectFactory.getInstance().createObject(m_state.previousBlobWithChangeInfo);
     }
 
     /**
@@ -172,7 +172,7 @@ public class PreviousEntityProxy {
         checkNotDisposed();
         long [] handlerId = new long[1];
         boolean [] success = new boolean [1];
-        Interface.GetHandlerId(m_previousState, handlerId, success);
+        Interface.GetHandlerId(m_state.previousState, handlerId, success);
 
         if (!success[0]) {
             com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
@@ -193,7 +193,7 @@ public class PreviousEntityProxy {
         java.nio.ByteBuffer [] blob = new java.nio.ByteBuffer[1];
         java.nio.ByteBuffer [] blobDeleter = new java.nio.ByteBuffer[1];
         boolean [] success = new boolean [1];
-        Interface.GetConnectionInfo(m_previousState, blob, blobDeleter, success);
+        Interface.GetConnectionInfo(m_state.previousState, blob, blobDeleter, success);
 
         if (!success[0]) {
             com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
@@ -228,12 +228,12 @@ public class PreviousEntityProxy {
      */
     public java.nio.ByteBuffer getBlob() {
         checkNotDisposed();
-        if (m_previousBlob == null)
+        if (m_state.previousBlob == null)
         {
             throw new com.saabgroup.safir.dob.typesystem.SoftwareViolationException("Not possible to do Blob on proxies from OnDeletedEntity (entity = " +
                                                                                     getEntityId());
         }
-        return m_previousBlob;
+        return m_state.previousBlob;
     }
 
     /**
@@ -248,24 +248,24 @@ public class PreviousEntityProxy {
      */
     public java.nio.ByteBuffer getBlobWithChangeInfo() {
         checkNotDisposed();
-        if (m_previousBlob == null)
+        if (m_state.previousBlob == null)
         {
             throw new com.saabgroup.safir.dob.typesystem.SoftwareViolationException("Not possible to do BlobWithChangeInfo on proxies from OnDeletedEntity (entity = " +
                                                                                     getEntityId());
         }
-        if (m_previousBlobWithChangeInfo == null)
+        if (m_state.previousBlobWithChangeInfo == null)
         {
             boolean [] success = new boolean [1];
             java.nio.ByteBuffer [] previousBlobWithChangeInfo  = new java.nio.ByteBuffer[1];
             java.nio.ByteBuffer [] blobDeleter  = new java.nio.ByteBuffer[1];
 
-            java.nio.ByteBuffer previous = m_previousState;
+            java.nio.ByteBuffer previous = m_state.previousState;
             if (previous == null){
                 //this will cause a null to be sent down.
                 previous = java.nio.ByteBuffer.allocate(0);;
             }
 
-            java.nio.ByteBuffer current = m_currentState;
+            java.nio.ByteBuffer current = m_state.currentState;
             if (current == null){
                 //this will cause a null to be sent down.
                 current = java.nio.ByteBuffer.allocate(0);;
@@ -274,22 +274,22 @@ public class PreviousEntityProxy {
             Interface.Diff(previous,
                            current,
                            false, //wantCurrent
-                           m_timestampDiff,
+                           m_state.timestampDiff,
                            previousBlobWithChangeInfo,
                            blobDeleter,
                            success);
 
             if (!success[0]) {
-                m_previousBlobWithChangeInfo = null;
-                m_blobDeleter = null;
+                m_state.previousBlobWithChangeInfo = null;
+                m_state.blobDeleter = null;
                 com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
                 com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
             }
 
-            m_previousBlobWithChangeInfo = previousBlobWithChangeInfo[0];
-            m_blobDeleter = blobDeleter[0];
+            m_state.previousBlobWithChangeInfo = previousBlobWithChangeInfo[0];
+            m_state.blobDeleter = blobDeleter[0];
         }
-        return m_previousBlobWithChangeInfo;
+        return m_state.previousBlobWithChangeInfo;
     }
 
     //
@@ -324,7 +324,7 @@ public class PreviousEntityProxy {
         checkNotDisposed();
         long [] timestamp = new long[1];
         boolean [] success = new boolean [1];
-        Interface.GetTopTimestamp(m_previousState, timestamp, success);
+        Interface.GetTopTimestamp(m_state.previousState, timestamp, success);
         if (!success[0]) {
             com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
             com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
@@ -345,7 +345,7 @@ public class PreviousEntityProxy {
         checkNotDisposed();
         long [] timestamp = new long [1];
         boolean [] success = new boolean [1];
-        Interface.GetMemberTimestamp(m_previousState, member, timestamp, success);
+        Interface.GetMemberTimestamp(m_state.previousState, member, timestamp, success);
 
         if (!success[0]) {
             com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
@@ -367,11 +367,8 @@ public class PreviousEntityProxy {
                         java.nio.ByteBuffer previousState,
                         boolean timestampDiff)
     {
-        m_currentBlob = currentBlob;
-        m_currentState = currentState;
-        m_previousBlob = previousBlob;
-        m_previousState = previousState;
-        m_timestampDiff = timestampDiff;
+        m_state = new State(currentBlob,currentState,previousBlob,previousState,timestampDiff);
+        m_cleanable = ResourceHelper.register(this,m_state);
     }
 
     /**
@@ -379,51 +376,61 @@ public class PreviousEntityProxy {
      */
     public void dispose()
     {
-        if (!disposed)
-        {
-            disposed = true;
-            if (m_blobDeleter != null)
-            {
-                Interface.InvokeDeleter(m_blobDeleter,m_previousBlobWithChangeInfo);
-            }
-        }
-    }
-
-
-    protected void finalize() throws java.lang.Throwable {
-        try
-        {
-            dispose();
-        }
-        catch (Exception exc)
-        {
-            com.saabgroup.safir.Logging.sendSystemLog
-                (com.saabgroup.safir.Logging.Severity.CRITICAL,
-                 "PreviousEntityProxy.finalize: Caught exception: " + exc);
-        }
-        finally
-        {
-            super.finalize();
-        }
+        m_cleanable.clean();
     }
 
     private void checkNotDisposed()
     {
-        if (disposed)
+        if (m_state.disposed)
         {
-            throw new com.saabgroup.safir.dob.typesystem.SoftwareViolationException("Attempt to use a PreviousEntityProxy that is disposed!");
+            throw new com.saabgroup.safir.dob.typesystem.SoftwareViolationException
+                ("Attempt to use a PreviousEntityProxy that is disposed!");
         }
     }
 
-    private boolean disposed = false;
 
-    private final java.nio.ByteBuffer m_currentBlob;
-    private final java.nio.ByteBuffer m_currentState;
-    private final java.nio.ByteBuffer m_previousBlob;
-    private final java.nio.ByteBuffer m_previousState;
-    private java.nio.ByteBuffer m_previousBlobWithChangeInfo = null;
+    private static class State implements Runnable {
+        private boolean disposed = false;
 
-    private java.nio.ByteBuffer m_blobDeleter = null;
-    private final boolean m_timestampDiff;
+        private final java.nio.ByteBuffer currentBlob;
+        private final java.nio.ByteBuffer currentState;
+        private final java.nio.ByteBuffer previousBlob;
+        private final java.nio.ByteBuffer previousState;
+
+        private java.nio.ByteBuffer previousBlobWithChangeInfo = null;
+        private java.nio.ByteBuffer blobDeleter = null;
+
+        private final boolean timestampDiff;
+
+        public State(java.nio.ByteBuffer currentBlob_,
+                     java.nio.ByteBuffer currentState_,
+                     java.nio.ByteBuffer previousBlob_,
+                     java.nio.ByteBuffer previousState_,
+                     boolean timestampDiff_)
+        {
+            currentBlob = currentBlob_;
+            currentState = currentState_;
+            previousBlob = previousBlob_;
+            previousState = previousState_;
+            timestampDiff = timestampDiff_;
+        }
+
+        //-------------------
+        //Clean up code
+        //-------------------
+        public void run() {
+            if (!disposed)
+            {
+                disposed = true;
+                if (blobDeleter != null)
+                {
+                    Interface.InvokeDeleter(blobDeleter,previousBlobWithChangeInfo);
+                }
+            }
+        }
+    }
+
+    private final State m_state;
+    private final java.lang.ref.Cleaner.Cleanable m_cleanable;
 }
 

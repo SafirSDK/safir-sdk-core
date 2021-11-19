@@ -250,17 +250,6 @@ public class ResponseProxy {
         }
     }
 
-    protected void finalize() throws java.lang.Throwable {
-        try
-        {
-            dispose();
-        }
-        finally
-        {
-            super.finalize();
-        }
-    }
-
     private void checkNotDisposed()
     {
         if (disposed)

@@ -1,7 +1,7 @@
 // -*- coding: utf-8 -*-
 /******************************************************************************
 *
-* Copyright Saab AB, 2007-2013 (http://safirsdkcore.com)
+* Copyright Saab AB, 2007-2013, 2021 (http://safirsdkcore.com)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -25,19 +25,23 @@
 
 package com.saabgroup.safir.dob;
 
-
 /**
  * A connection to the DOB.
  *
  * This class represents a "real" (as opposed to SecondaryConnection) connection to the dob.
  * Each DOB application must have at least one connection. Connections are not thread safe.
  */
-public final class Connection extends ConnectionBase
+public final class Connection
+    extends ConnectionBase
+    implements AutoCloseable
 {
     /** Constructor.
      */
     public Connection()
     {
+        m_state = new State();
+        m_cleanable = ResourceHelper.register(this,m_state);
+
         int [] ctrl = new int[1];
         boolean [] success = new boolean [1];
         Interface.Constructor(ctrl, success);
@@ -46,7 +50,7 @@ public final class Connection extends ConnectionBase
             com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
             com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
         }
-        m_ctrl = ctrl[0];
+        m_state.ctrl = ctrl[0];
     }
     /**
      * Open a connection to the DOB.
@@ -93,14 +97,13 @@ public final class Connection extends ConnectionBase
         }
 
         boolean [] success = new boolean [1];
-        Interface.Connect(m_ctrl,
+        Interface.Connect(m_state.ctrl,
                           connectionNameCommonPart,
                           connectionNameInstancePart,
                           context,
                           stopHandler,
                           dispatcher,
                           success);
-
         if (!success[0])
         {
             com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
@@ -118,16 +121,10 @@ public final class Connection extends ConnectionBase
      * Note that all connections that were set up using Attach will also be closed after
      * a call to this method.
      */
+    @Override
     public void close()
     {
-        boolean [] success = new boolean [1];
-        Interface.Disconnect(m_ctrl, success);
-
-
-        if (!success[0]) {
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
-        }
+        m_state.close();
     }
 
     /**
@@ -139,7 +136,7 @@ public final class Connection extends ConnectionBase
     {
         boolean [] isConn = new boolean [1];
         boolean [] success = new boolean [1];
-        Interface.IsConnected(m_ctrl, isConn, success);
+        Interface.IsConnected(m_state.ctrl, isConn, success);
 
         if (!success[0]) {
             com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
@@ -158,7 +155,7 @@ public final class Connection extends ConnectionBase
     public void dispatch()
     {
         boolean [] success = new boolean [1];
-        Interface.Dispatch(m_ctrl, success);
+        Interface.Dispatch(m_state.ctrl, success);
         if (!success[0]) {
             com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
             com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
@@ -172,18 +169,26 @@ public final class Connection extends ConnectionBase
     //-------------------------------------
 
     int getControllerId() {
-        return m_ctrl;
+        return m_state.ctrl;
     }
 
-    private int m_ctrl = -1;
 
-    //-------------------
-    //Clean up code
-    //-------------------
-    protected void finalize() throws java.lang.Throwable
-    {
-        try
-        {
+    private static class State implements Runnable {
+        public int ctrl = -1;
+
+        public void close() {
+            boolean [] success = new boolean [1];
+            Interface.Disconnect(ctrl, success);
+
+            if (!success[0]) {
+                com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
+                com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+            }
+        }
+        //-------------------
+        //Clean up code
+        //-------------------
+        public void run() {
             try
             {
                 close();
@@ -192,13 +197,14 @@ public final class Connection extends ConnectionBase
             {
                 com.saabgroup.safir.Logging.sendSystemLog
                     (com.saabgroup.safir.Logging.Severity.CRITICAL,
-                     "Connection.finalize: Caught exception: " + exc);
+                     "Connection.State.run: Caught exception: " + exc);
             }
-            Interface.Destructor(getControllerId());
-        }
-        finally
-        {
-            super.finalize();
+
+            Interface.Destructor(ctrl);
         }
     }
+
+    private final State m_state;
+    private final java.lang.ref.Cleaner.Cleanable m_cleanable;
+
 }

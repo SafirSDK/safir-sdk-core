@@ -585,6 +585,7 @@ class Executor implements
         public static AtomicInteger instanceCount = new AtomicInteger();
 
         public Dispatcher(Synchronizer synchronizer) {
+            m_cleanable = ResourceHelper.register(this,() -> instanceCount.decrementAndGet());
             instanceCount.incrementAndGet();
             m_synchronizer = synchronizer;
         }
@@ -601,15 +602,7 @@ class Executor implements
         }
 
         private final Synchronizer m_synchronizer;
-
-        protected void finalize() throws java.lang.Throwable {
-            try {
-                instanceCount.decrementAndGet();
-            }
-            finally {
-                super.finalize();
-            }
-        }
+        private final java.lang.ref.Cleaner.Cleanable m_cleanable;
     }
 
     //
@@ -619,17 +612,11 @@ class Executor implements
 
         public static AtomicInteger instanceCount = new AtomicInteger();
 
-        public StopHandler() {
-            instanceCount.incrementAndGet();
-        }
+        private final java.lang.ref.Cleaner.Cleanable m_cleanable;
 
-        protected void finalize() throws java.lang.Throwable {
-            try {
-                instanceCount.decrementAndGet();
-            }
-            finally {
-                super.finalize();
-            }
+        public StopHandler() {
+            m_cleanable = ResourceHelper.register(this,() -> instanceCount.decrementAndGet());
+            instanceCount.incrementAndGet();
         }
 
         //

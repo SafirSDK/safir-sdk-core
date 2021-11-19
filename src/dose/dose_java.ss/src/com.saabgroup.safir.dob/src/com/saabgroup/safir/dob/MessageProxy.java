@@ -145,22 +145,11 @@ public class MessageProxy {
     }
 
     /**
-     *
+     * Drop the references into Dob shared memory that the proxy holds.
      */
     public void dispose() {
         if (!disposed) {
             disposed = true;
-        }
-    }
-
-    protected void finalize() throws java.lang.Throwable {
-        try
-        {
-            dispose();
-        }
-        finally
-        {
-            super.finalize();
         }
     }
 

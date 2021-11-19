@@ -45,6 +45,8 @@ class Consumer implements
                     String connectionName,
                     String instance)
     {
+        m_cleanable = ResourceHelper.register(this,() -> instanceCount.decrementAndGet());
+
         instanceCount.incrementAndGet();
 
         m_consumerNumber = consumerNumber;
@@ -58,14 +60,6 @@ class Consumer implements
         m_connection.attach(connectionName,instance);
     }
 
-    protected void finalize() throws java.lang.Throwable {
-        try {
-            instanceCount.decrementAndGet();
-        }
-        finally {
-            super.finalize();
-        }
-    }
 
     static boolean needBinaryCheck(com.saabgroup.safir.dob.typesystem.Object obj)
     {
@@ -500,8 +494,8 @@ class Consumer implements
                                                       + "Iterating over entities of type "
                                                       + com.saabgroup.safir.dob.typesystem.Operations.getName(action.typeId().getVal())
                                                       + ":");
-                            com.saabgroup.safir.dob.EntityIterator iterator = m_connection.getEntityIterator(action.typeId().getVal(),action.includeSubclasses().getVal());
-                            try {
+                            try (com.saabgroup.safir.dob.EntityIterator iterator =
+                                 m_connection.getEntityIterator(action.typeId().getVal(),action.includeSubclasses().getVal())) {
                                 while(iterator.hasNext()) {
                                     com.saabgroup.safir.dob.EntityProxy entityProxy = iterator.next();
                                     Logger.instance().println("  EntityId  = " + entityProxy.getEntityId() + ":\n"
@@ -512,9 +506,6 @@ class Consumer implements
 
                                 }
                                 Logger.instance().println();
-                            }
-                            finally {
-                                iterator.dispose();
                             }
                         }
                         break;
@@ -1383,10 +1374,7 @@ class Consumer implements
 
     TimestampRequestor m_timestampRequestor = new TimestampRequestor();
 
-
-
-
-
+    private final java.lang.ref.Cleaner.Cleanable m_cleanable;
 }
 
 
