@@ -22,10 +22,10 @@
 package com.saabgroup.safir.samples.vehicleappjava;
 
 /**
- * Interface for the main loop to which methods can be set to be executed in 
+ * Interface for the main loop to which methods can be set to be executed in
  * the main loops thread
  */
-public interface IMainLoop {
+public interface IMainLoop extends AutoCloseable{
 
     /**
      * Callback interface for the MainLoop
@@ -36,41 +36,42 @@ public interface IMainLoop {
          */
         public void onInvoke();
     }
-    
+
     /**
      * Starts the main loop
      */
     public void start();
-    
+
     /**
      * Starts the main loop with callback method
-     * 
+     *
      * @param callback The callback interface
      */
     public void start(Callback initMethod);
-    
+
     /**
      * Check if the main loop is started
-     * 
+     *
      * @return true if the main loop is started otherwise false
      */
     public boolean isStarted();
-    
+
     /**
      * Stops the main loop.
      */
     public void stop();
-    
+
     /**
      * Add method to be executed in the MainLoop Thread
-     * 
+     *
      * @param callback The method to be executed
      */
     public void invokeLater(Callback callback);
-    
+
     /**
      * Release resources allocated by the main loop.
      */
-    public void dispose();
-    
+    @Override
+    public void close();
+
 }

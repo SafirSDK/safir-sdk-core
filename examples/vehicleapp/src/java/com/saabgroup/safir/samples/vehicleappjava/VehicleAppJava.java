@@ -30,33 +30,33 @@ public class VehicleAppJava implements StopHandler {
      * The main loop.
      */
     private IMainLoop mainLoop;
-    
+
     /**
      * Primary DOB connection.
      */
     private Connection dobConnection;
-    
+
     /**
      * The DOB dispatcher
      */
     private DobDispatcher dobDispatcher;
-    
+
     /**
      *  Object handlers.
      */
     VehicleEntityHandler entityHandler;
     VehicleServiceHandler serviceHandler;
-    
+
     public VehicleAppJava() {
 
         dobConnection = new Connection();
         mainLoop = new MainLoop();
-        dobDispatcher = new DobDispatcher(dobConnection, mainLoop); 
-        
+        dobDispatcher = new DobDispatcher(dobConnection, mainLoop);
+
         entityHandler = new VehicleEntityHandler();
         serviceHandler = new VehicleServiceHandler();
     }
-    
+
     /**
      * Start this application.
      */
@@ -64,15 +64,15 @@ public class VehicleAppJava implements StopHandler {
     {
         // Open DOB connection
         dobDispatcher.open("VehicleAppJava", "0", 0, this);
-        
+
         entityHandler.init();
         serviceHandler.init();
         VehicleMessageSender.getInstance().init();
-        
+
         // Start the one and only thread.
         mainLoop.start();
     }
-    
+
     /**
      * @param args
      */
