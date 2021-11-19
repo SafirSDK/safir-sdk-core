@@ -425,13 +425,3 @@ INSTALL(FILES
   "${CMAKE_CURRENT_BINARY_DIR}/cmake/SafirSDKCoreConfig.cmake"
   DESTINATION ${SAFIR_INSTALL_DESTINATION_CMAKE}
   COMPONENT Development)
-
-INSTALL(FILES
-  cmake/UseJavaWithManifest/README.txt
-  cmake/UseJavaWithManifest/Copyright.txt
-  cmake/UseJavaWithManifest/CMakeParseArguments.cmake
-  cmake/UseJavaWithManifest/UseJava.cmake
-  cmake/UseJavaWithManifest/UseJavaSymlinks.cmake
-  cmake/UseJavaWithManifest/UseJavaClassFilelist.cmake
-  DESTINATION ${SAFIR_INSTALL_DESTINATION_CMAKE}/UseJavaWithManifest
-  COMPONENT Development)
