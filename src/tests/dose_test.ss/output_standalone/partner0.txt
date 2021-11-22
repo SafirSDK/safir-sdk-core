@@ -5573,6 +5573,97 @@ Consumer 0: Got a backdoor HandleCommand callback. Command tokens:
 test-command 3 
 --------- Test  -----------
 ==========================================================================
+TESTCASE 1200
+Description: Test that all refrences are dropped when performing a message unsubscribe (GC languages).
+Expectation: Partner 0 Consumer 0 receives one message. No log that indicates remaining consumers.
+--------- Setup -----------
+Consumer 0: OnMessage:
+  Type       = DoseTest.GlobalMessage
+  ChannelId  = 537387129595163164
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;1</ConnectionName></Safir.Dob.ConnectionInfo>
+  ChannelId  = 537387129595163164
+  Message    = <?xml version="1.0" encoding="utf-8"?><DoseTest.GlobalMessage><Info xml:space="preserve">Global Message</Info></DoseTest.GlobalMessage>
+
+
+--------- Test  -----------
+==========================================================================
+TESTCASE 1201
+Description: Test that all refrences are dropped when unregister an entity handler (GC languages).
+Expectation: Partner 0, consumer 0 receives a request. No log that indicates remaining consumers.
+--------- Setup -----------
+Consumer 0: OnCreateRequest (Requestor decides instance id): 
+  Entity     = (DoseTest.GlobalEntity, 0)
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;1</ConnectionName></Safir.Dob.ConnectionInfo>
+  Handler    = -3982043473239149465
+  HandlerStr = -3982043473239149465
+  Request    = <?xml version="1.0" encoding="utf-8"?><DoseTest.GlobalEntity><Info xml:space="preserve">qwerty</Info></DoseTest.GlobalEntity>
+
+--------- Test  -----------
+==========================================================================
+TESTCASE 1202
+Description: Test that all refrences are dropped when unregister a service (GC languages).
+Expectation: Partner 0, consumer 0 receives a request. No log that indicates remaining consumers.
+--------- Setup -----------
+Consumer 0: OnServiceRequest: 
+  Type       = DoseTest.GlobalService
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;1</ConnectionName></Safir.Dob.ConnectionInfo>
+  Handler    = -3982043473239149465
+  HandlerStr = -3982043473239149465
+  Request    = <?xml version="1.0" encoding="utf-8"?><DoseTest.GlobalService></DoseTest.GlobalService>
+
+--------- Test  -----------
+==========================================================================
+TESTCASE 1203
+Description: Test that all refrences are dropped when unregister an injection entity handler (GC languages).
+Expectation: Partner 0, consumer 0 receives two OnInitialInjectonsDone and a create request. No log that indicates remaining consumers.
+--------- Setup -----------
+Consumer 0: OnInitialInjectionsDone:
+  Type      = DoseTest.SynchronousVolatileEntity
+  HandlerId = HANDLER_0
+
+Consumer 0: OnInitialInjectionsDone:
+  Type      = DoseTest.SynchronousVolatileEntity
+  HandlerId = HANDLER_1
+
+Consumer 0: OnCreateRequest (Requestor decides instance id): 
+  Entity     = (DoseTest.SynchronousVolatileEntity, 0)
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;1</ConnectionName></Safir.Dob.ConnectionInfo>
+  Handler    = -3982043473239149465
+  HandlerStr = -3982043473239149465
+  Request    = <?xml version="1.0" encoding="utf-8"?><DoseTest.SynchronousVolatileEntity><Info xml:space="preserve">qwerty</Info></DoseTest.SynchronousVolatileEntity>
+
+--------- Test  -----------
+==========================================================================
+TESTCASE 1210
+Description: Test that all references are dropped when performing an entity unsubscription (GC languages).
+Expectation: Partner 0 Consumer0 receives an OnNewEntity. No log that indicates remaining consumers.
+--------- Setup -----------
+Consumer 0: OnNewEntity:
+  EntityId  = (DoseTest.GlobalEntity, 1)
+  Owner     = DEFAULT_HANDLER
+  OwnerConn = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;1</ConnectionName></Safir.Dob.ConnectionInfo>
+  OwnerStr  = DEFAULT_HANDLER
+  Entity    = <?xml version="1.0" encoding="utf-8"?><DoseTest.GlobalEntity><Info xml:space="preserve">ytrewq</Info></DoseTest.GlobalEntity>
+  Changed top-level members: 
+    Info
+    MoreInfo
+
+--------- Test  -----------
+==========================================================================
+TESTCASE 1211
+Description: Test that all references are dropped when closing the connection (consumers are garbage collected). The test will be a NOP for non GC languages.
+Expectation: No log that indicates remaining consumers.
+--------- Setup -----------
+Consumer 0: OnInitialInjectionsDone:
+  Type      = DoseTest.SynchronousVolatileEntity
+  HandlerId = HANDLER_0
+
+Consumer 0: OnRegistered:
+  Type      = DoseTest.GlobalService
+  HandlerId = HANDLER_0
+
+--------- Test  -----------
+==========================================================================
 TESTCASE 9999
 Description: Empty Test case
 Expectation: Nothing

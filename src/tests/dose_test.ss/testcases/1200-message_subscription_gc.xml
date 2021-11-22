@@ -112,21 +112,6 @@
             <members>
               <member>
                 <name>Partner</name>
-                <value>0</value>
-              </member>
-              <member>
-                <name>ActionKind</name>
-                <value>DoseTest.ActionEnum.RunGarbageCollector</value>
-              </member>
-            </members>
-          </object>
-        </arrayElement>
-        <arrayElement>
-          <object>
-            <name>DoseTest.Action</name>
-            <members>
-              <member>
-                <name>Partner</name>
                 <value>1</value>
               </member>
               <member>
@@ -199,6 +184,21 @@
               <member>
                 <name>Partner</name>
                 <value>0</value>
+              </member>
+              <member>
+                <name>ActionKind</name>
+                <value>DoseTest.ActionEnum.CheckReferences</value>
+              </member>
+            </members>
+          </object>
+        </arrayElement>
+        <arrayElement>
+          <object>
+            <name>DoseTest.Action</name>
+            <members>
+              <member>
+                <name>Partner</name>
+                <value>1</value>
               </member>
               <member>
                 <name>ActionKind</name>

@@ -2200,6 +2200,63 @@ Expectation: Partner 0 shall receive command "test-command 1" and "test-command 
 --------- Setup -----------
 --------- Test  -----------
 ==========================================================================
+TESTCASE 1200
+Description: Test that all refrences are dropped when performing a message unsubscribe (GC languages).
+Expectation: Partner 0 Consumer 0 receives one message. No log that indicates remaining consumers.
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 1201
+Description: Test that all refrences are dropped when unregister an entity handler (GC languages).
+Expectation: Partner 0, consumer 0 receives a request. No log that indicates remaining consumers.
+--------- Setup -----------
+Consumer 1: OnResponse:
+  Type       = DoseTest.SuccessfulCreate
+  IsSuccess  = true
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
+  Response   = <?xml version="1.0" encoding="utf-8"?><DoseTest.SuccessfulCreate><Info xml:space="preserve">AutoResponse</Info></DoseTest.SuccessfulCreate>
+  Request    = <?xml version="1.0" encoding="utf-8"?><DoseTest.GlobalEntity><Info xml:space="preserve">qwerty</Info></DoseTest.GlobalEntity>
+
+--------- Test  -----------
+==========================================================================
+TESTCASE 1202
+Description: Test that all refrences are dropped when unregister a service (GC languages).
+Expectation: Partner 0, consumer 0 receives a request. No log that indicates remaining consumers.
+--------- Setup -----------
+Consumer 1: OnResponse:
+  Type       = DoseTest.SuccessfulService
+  IsSuccess  = true
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
+  Response   = <?xml version="1.0" encoding="utf-8"?><DoseTest.SuccessfulService><Info xml:space="preserve">AutoResponse</Info></DoseTest.SuccessfulService>
+  Request    = <?xml version="1.0" encoding="utf-8"?><DoseTest.GlobalService></DoseTest.GlobalService>
+
+--------- Test  -----------
+==========================================================================
+TESTCASE 1203
+Description: Test that all refrences are dropped when unregister an injection entity handler (GC languages).
+Expectation: Partner 0, consumer 0 receives two OnInitialInjectonsDone and a create request. No log that indicates remaining consumers.
+--------- Setup -----------
+Consumer 1: OnResponse:
+  Type       = DoseTest.SuccessfulCreate
+  IsSuccess  = true
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
+  Response   = <?xml version="1.0" encoding="utf-8"?><DoseTest.SuccessfulCreate><Info xml:space="preserve">AutoResponse</Info></DoseTest.SuccessfulCreate>
+  Request    = <?xml version="1.0" encoding="utf-8"?><DoseTest.SynchronousVolatileEntity><Info xml:space="preserve">qwerty</Info></DoseTest.SynchronousVolatileEntity>
+
+--------- Test  -----------
+==========================================================================
+TESTCASE 1210
+Description: Test that all references are dropped when performing an entity unsubscription (GC languages).
+Expectation: Partner 0 Consumer0 receives an OnNewEntity. No log that indicates remaining consumers.
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 1211
+Description: Test that all references are dropped when closing the connection (consumers are garbage collected). The test will be a NOP for non GC languages.
+Expectation: No log that indicates remaining consumers.
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
 TESTCASE 9999
 Description: Empty Test case
 Expectation: Nothing

@@ -187,6 +187,26 @@
         </arrayElement>
       </arrayElements>
     </member>
+    <member>
+      <name>TestActions</name>
+      <arrayElements>
+        <arrayElement>
+          <object>
+            <name>DoseTest.Action</name>
+            <members>
+              <member>
+                <name>Partner</name>
+                <value>1</value>
+              </member>
+              <member>
+                <name>ActionKind</name>
+                <value>DoseTest.ActionEnum.CheckReferences</value>
+              </member>
+            </members>
+          </object>
+        </arrayElement>
+      </arrayElements>
+    </member>
   </members>
 </object>
 
