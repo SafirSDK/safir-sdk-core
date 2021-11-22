@@ -45,9 +45,11 @@ class Consumer implements
                     String connectionName,
                     String instance)
     {
-        m_cleanable = ResourceHelper.register(this,() -> instanceCount.decrementAndGet());
+        m_cleanable = ResourceHelper.register(this,() -> {
+                instanceCount.decrementAndGet();
+            });
 
-        instanceCount.incrementAndGet();
+       instanceCount.incrementAndGet();
 
         m_consumerNumber = consumerNumber;
         m_connectionName = connectionName;

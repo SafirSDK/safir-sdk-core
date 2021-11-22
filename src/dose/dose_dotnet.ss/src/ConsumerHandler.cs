@@ -78,11 +78,13 @@ namespace Safir.Dob
             if (!m_consumerTable.TryGetValue(consumer, out reference))
             {
                 reference = new Reference(GCHandle.Alloc(consumer));
+                //Console.Out.WriteLine("  Adding consumer {0}", GCHandle.ToIntPtr(reference.handle).ToString());
                 m_consumerTable.Add(consumer, reference);
+                //Console.Out.WriteLine("  ConsumerTable is now {0} entries long", m_consumerTable.Count);
             }
             ++reference.references;
+            //Console.Out.WriteLine("  Incremented consumer {0} to {1}", GCHandle.ToIntPtr(reference.handle).ToString(), reference.references);
             return GCHandle.ToIntPtr(reference.handle);
-            //return System.IntPtr.Zero;
         }
 
         //needs locking since it reads and writes the consumer table
@@ -100,10 +102,13 @@ namespace Safir.Dob
                 return;
             }
             --reference.references;
+            //Console.Out.WriteLine("  Decremented consumer {0} to {1}", GCHandle.ToIntPtr(reference.handle).ToString(), reference.references);
             if (reference.references == 0)
             {
+                //Console.Out.WriteLine("  Removing consumer {0}", GCHandle.ToIntPtr(reference.handle).ToString());
                 m_consumerTable.Remove(consumer);
                 reference.handle.Free();
+                //Console.Out.WriteLine("  ConsumerTable is now {0} entries long", m_consumerTable.Count);
             }
         }
 

@@ -54,8 +54,6 @@ namespace dose_test_dotnet
             }
 
             m_controlDispatcher = new ControlDispatcher(m_controlDispatchEvent);
-            m_testDispatcher = new Dispatcher(m_testDispatchEvent);
-            m_testStopHandler = new StopHandler();
             m_actionReceiver = new ActionReceiver(m_instance, m_dataReceivedEvent);
         }
 
@@ -110,9 +108,9 @@ namespace dose_test_dotnet
                             try
                             {
                                 ExecuteCallbackActions(Safir.Dob.CallbackId.Enumeration.OnDoDispatch);
-                                foreach (Consumer consumer in m_consumers)
+                                for(int i = 0; i < 3; ++i)
                                 {
-                                    consumer.ExecuteCallbackActions(Safir.Dob.CallbackId.Enumeration.OnDoDispatch);
+                                    m_consumers[i].ExecuteCallbackActions(Safir.Dob.CallbackId.Enumeration.OnDoDispatch);
                                 }
 
                                 m_testConnection.Dispatch();
@@ -263,19 +261,8 @@ namespace dose_test_dotnet
                     {
                         m_testConnection.Close();
 
-                        Dispatcher oldDispatcher = m_testDispatcher;  //keep this for a while, so we get a new dispatcher address.
                         m_testDispatcher = new Dispatcher(m_testDispatchEvent);
-                        if (oldDispatcher != null) //add a check to avoid a warning from mono
-                        {
-                            oldDispatcher = null;
-                        }
-
-                        StopHandler oldStopHandler = m_testStopHandler;  //keep this for a while, so we get a new stopHandler address.
                         m_testStopHandler = new StopHandler();
-                        if (oldStopHandler != null)
-                        {
-                            oldStopHandler = null;
-                        }
 
                         m_testConnection.Open(m_testConnectionName, m_instanceString, m_defaultContext, null, m_testDispatcher);
                         using (Safir.Dob.EntityProxy ep = m_controlConnection.Read(m_partnerEntityId))
@@ -317,17 +304,21 @@ namespace dose_test_dotnet
                     {
                         if (m_consumers != null)
                         {
+                            for (int i = 0; i < 3; ++i)
+                            {
+                                m_consumers[i] = null;
+                            }
                             m_consumers = null;
                         }
 
-                        System.GC.Collect();
+                        System.GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced);
                         System.GC.WaitForPendingFinalizers();
 
                         // After releasing the executor's references and a garabage collection, there should be no
                         // Consumer instances
                         if (Consumer.instanceCount != 0)
                         {
-                            Logger.Instance.WriteLine("Expected 0 consumer instances, but there is " + Consumer.instanceCount);
+                            Logger.Instance.WriteLine("CHECK_REFERENCES: Expected 0 consumer instances, but found " + Consumer.instanceCount);
                         }
 
                         // restore consumers
@@ -346,6 +337,10 @@ namespace dose_test_dotnet
 
                         if (m_consumers != null)
                         {
+                            for (int i = 0; i < 3; ++i)
+                            {
+                                m_consumers[i] = null;
+                            }
                             m_consumers = null;
                         }
 
@@ -359,22 +354,22 @@ namespace dose_test_dotnet
                             m_testStopHandler = null;
                         }
 
-                        System.GC.Collect();
+                        System.GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced);
                         System.GC.WaitForPendingFinalizers();
 
                         // After releasing the executor's references and a garabage collection, there should be no
                         // Consumer instances and no Dispatcher instances
                         if (Consumer.instanceCount != 0)
                         {
-                            Logger.Instance.WriteLine("Expected 0 consumer instances, but there is " + Consumer.instanceCount);
+                            Logger.Instance.WriteLine("CLOSE_AND_CHECK_REFERENCES: Expected 0 consumer instances, but found " + Consumer.instanceCount);
                         }
                         if (Dispatcher.instanceCount != 0)
                         {
-                            Logger.Instance.WriteLine("Expected 0 dispatcher instances, but there is " + Dispatcher.instanceCount);
+                            Logger.Instance.WriteLine("CLOSE_AND_CHECK_REFERENCES: Expected 0 dispatcher instances, but found " + Dispatcher.instanceCount);
                         }
                         if (StopHandler.instanceCount != 0)
                         {
-                            Logger.Instance.WriteLine("Expected 0 stopHandler instances, but there is " + StopHandler.instanceCount);
+                            Logger.Instance.WriteLine("CLOSE_AND_CHECK_REFERENCES: Expected 0 stopHandler instances, but found " + StopHandler.instanceCount);
                         }
 
                         // Restore dispatcher
@@ -605,7 +600,6 @@ namespace dose_test_dotnet
             public Dispatcher(System.Threading.AutoResetEvent theEvent)
             {
                 Interlocked.Increment(ref instanceCount);
-
                 m_event = theEvent;
             }
 

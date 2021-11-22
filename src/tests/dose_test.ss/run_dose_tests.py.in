@@ -506,7 +506,7 @@ class Runner:
         if self.syslog is not None:
             #check that syslog output is empty
             log("Checking syslog contents")
-            syslog_data = self.syslog.get_data(10)  # wait for 10 seconds to collect any output
+            syslog_data = self.syslog.get_data(3)  # wait for 3 seconds to collect any output
             results.write_test_result(
                 len(syslog_data) == 0, "syslog_output", "syslog is not empty:\n" + quoteattr(syslog_data))
 

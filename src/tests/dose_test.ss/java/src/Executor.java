@@ -75,8 +75,7 @@ class Executor implements
     private void runInternal() throws InterruptedException {
         // Seems that subsequent garbage collections will execute faster after the first one so we start with
         // a GC here.
-        System.gc();
-        System.runFinalization();
+        runGC();
 
         m_controlConnection.open(m_controlConnectionName, m_instanceString, 0, this, m_controlDispatcher);
 
@@ -220,13 +219,12 @@ class Executor implements
                         m_consumers = null;
                     }
 
-                    System.gc();
-                    System.runFinalization();
+                    runGC();
 
                     // After releasing the executor's references and a garabage collection, there should be no
                     // Consumer instances
                     if (Consumer.instanceCount.get() != 0) {
-                        Logger.instance().println("Expected 0 consumer instances, but there is " + Consumer.instanceCount);
+                        Logger.instance().println("CHECK_REFERENCES: Expected 0 consumer instances, but found " + Consumer.instanceCount);
                     }
 
                     // restore consumers
@@ -253,20 +251,18 @@ class Executor implements
                         m_testStopHandler = null;
                     }
 
-                    System.gc();
-                    System.runFinalization();
-
-
+                    runGC();
+                    
                     // After releasing the executor's references and a garabage collection, there should be no
                     // Consumer instances and no Dispatcher instances
                     if (Consumer.instanceCount.get() != 0) {
-                        Logger.instance().println("Expected 0 consumer instances, but there is " + Consumer.instanceCount);
+                        Logger.instance().println("CLOSE_AND_CHECK_REFERENCES: Expected 0 consumer instances, but found " + Consumer.instanceCount);
                     }
                     if (Dispatcher.instanceCount.get() != 0) {
-                        Logger.instance().println("Expected 0 dispatcher instances, but there is " + Dispatcher.instanceCount);
+                        Logger.instance().println("CLOSE_AND_CHECK_REFERENCES: Expected 0 dispatcher instances, but found " + Dispatcher.instanceCount);
                     }
                     if (StopHandler.instanceCount.get() != 0) {
-                        Logger.instance().println("Expected 0 stopHandler instances, but there is " + StopHandler.instanceCount);
+                        Logger.instance().println("CLOSE_AND_CHECK_REFERENCES: Expected 0 stopHandler instances, but found " + StopHandler.instanceCount);
                     }
 
                     // Restore dispatcher
@@ -287,8 +283,7 @@ class Executor implements
 
             case RUN_GARBAGE_COLLECTOR:
                 if (m_isActive) {
-                    System.gc();
-                    System.runFinalization();
+                    runGC();
                 }
                 break;
 
@@ -781,6 +776,18 @@ class Executor implements
         private ReceiverThread m_receiverThread;
         private class Handled {public boolean handled;}
         private Handled m_handled = new Handled();
+    }
+
+    static void runGC()
+    {
+        //See https://android.googlesource.com/platform/libcore/+/master/support/src/test/java/libcore/java/lang/ref/FinalizationTester.java
+        try {
+            Runtime.getRuntime().gc();
+            Thread.sleep(100);
+            System.runFinalization();
+        }
+        catch (InterruptedException e) {
+        }
     }
     //
     // Data members
