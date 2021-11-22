@@ -59,14 +59,14 @@ jobject ConsumerTable::AddReference(JNIEnv * env, const jobject consumer)
         if (env->IsSameObject(it->doseConsumer, consumer))
         {
             ++(it->references);
-            //std::wcout << "Increasing refcount of consumer 0x" << std::hex << (void*)it->doseConsumer << " to " << std::dec << it->references << std::endl;
+            //std::wcout << " - Increasing refcount of consumer 0x" << std::hex << (void*)it->doseConsumer << " to " << std::dec << it->references << std::endl;
             return it->doseConsumer;
         }
     }
     jobject doseConsumer = env->NewGlobalRef(consumer);
-    //std::wcout << "Adding consumer 0x" << std::hex << (void*)doseConsumer << std::endl;
+    //std::wcout << " - Adding consumer 0x" << std::hex << (void*)doseConsumer << std::endl;
     m_table.push_back(Entry(doseConsumer));
-    //std::wcout << "ConsumerTable is now " << std::dec << m_table.size() << " entries long" << std::endl;
+    //std::wcout << " - ConsumerTable is now " << std::dec << m_table.size() << " entries long" << std::endl;
     return doseConsumer;
 }
 
@@ -79,7 +79,7 @@ jobject ConsumerTable::GetReference(JNIEnv * env, const jobject consumer)
     {
         if (env->IsSameObject(it->doseConsumer, consumer))
         {
-            //std::wcout << "Getting consumer 0x" << std::hex << (void*)it->doseConsumer << std::endl;
+            //std::wcout << " - Getting consumer 0x" << std::hex << (void*)it->doseConsumer << std::endl;
             return it->doseConsumer;
         }
     }
@@ -102,7 +102,7 @@ void ConsumerTable::DropReference(JNIEnv * env, const jobject doseConsumer, int 
         if (env->IsSameObject(it->doseConsumer, doseConsumer))
         {
             it->references -= noReferences;
-            //std::wcout << "Dropping consumer 0x" << std::hex << (void*)doseConsumer << " to " << std::dec << it->references << std::endl;
+            //std::wcout << " - Dropping consumer 0x" << std::hex << (void*)doseConsumer << " to " << std::dec << it->references << std::endl;
             if (it->references < 0)
             {
                 std::wcerr << "References got to below 0!" << std::endl;
@@ -111,8 +111,9 @@ void ConsumerTable::DropReference(JNIEnv * env, const jobject doseConsumer, int 
             }
             if (it->references == 0)
             {
+                env->DeleteGlobalRef(it->doseConsumer);
                 m_table.erase((++it).base()); //see Effective STL item 28.
-                //std::wcout << "ConsumerTable is now " << std::dec << m_table.size() << " entries long" << std::endl;
+                //std::wcout << " - ConsumerTable is now " << std::dec << m_table.size() << " entries long" << std::endl;
             }
             return;
         }
