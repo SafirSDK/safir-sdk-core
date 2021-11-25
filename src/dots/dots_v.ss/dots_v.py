@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 ###############################################################################
 #
@@ -23,21 +23,25 @@
 # along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-import sys, os, re, hashlib, subprocess
+from __future__ import print_function
+import sys
+import os
+import re
+import hashlib
+import subprocess
+
 import xml.etree.ElementTree as ET
-from glob import glob
 import codecs
 import argparse
-from io import StringIO
 
 ## Fix for unicode cross compatibility
 if sys.version < '3':
+    print("WARNING: Python 2.x support is deprecated and will not be supported by Safir SDK Core 6.5")
     import codecs
 
     def u(x):
         return codecs.unicode_escape_decode(x)[0]
 else:
-
     def u(x):
         return x
 

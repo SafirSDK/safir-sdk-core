@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 ###############################################################################
 #
@@ -24,6 +24,7 @@
 #
 ###############################################################################
 """Build script for safir-sdk-core. Check the help to get some hints on what it can do."""
+from __future__ import print_function
 import os
 import glob
 import sys
@@ -36,7 +37,15 @@ import shutil
 import argparse
 import codecs
 from xml.sax.saxutils import escape
-import distro
+from distutils.spawn import find_executable
+
+try:
+    from distro import linux_distribution
+except:
+    from platform import linux_distribution
+
+if sys.version < '3':
+    print("WARNING: Python 2.x support is deprecated and will not be supported by Safir SDK Core 6.5")
 
 #a few constants
 known_configs = set(["Release", "Debug", "MinSizeRel", "RelWithDebInfo"])
@@ -73,7 +82,7 @@ def mkdir(newdir):
     if os.path.isdir(newdir):
         pass
     elif os.path.isfile(newdir):
-        raise OSError(f"a file with the same name as the desired dir, '{newdir}', already exists.")
+        raise OSError("a file with the same name as the desired dir, '{}', already exists.".format(newdir))
     else:
         head, tail = os.path.split(newdir)
         if head and not os.path.isdir(head):
@@ -91,7 +100,7 @@ def remove(path):
             os.remove(path)
             return
         except OSError as exc:
-            die(f"Failed to remove file {path}. Got exception {str(exc)}")
+            die("Failed to remove file {}. Got exception {}".format(path,str(exc)))
 
     for name in os.listdir(path):
         if os.path.isdir(os.path.join(path, name)):
@@ -128,8 +137,8 @@ def num_cpus():
 def physical_memory():
     """Detect physical memory in computer"""
     if sys.platform.startswith("linux"):
-        with open("/proc/meminfo", encoding="ascii") as a_file:
-            meminfo = a_file.read()
+        with open("/proc/meminfo", "rb") as a_file:
+            meminfo = a_file.read().decode("ascii")
         match = re.search(r"MemTotal:\s*([0-9]*) kB", meminfo)
         return int(match.group(1)) / 1024
     else:
@@ -154,7 +163,7 @@ def num_jobs():
 def read_version():
     """Parse the VERSION.txt file to find out our version"""
     parts = {}
-    with open("VERSION.txt", 'r', encoding="ascii") as version_file:
+    with open("VERSION.txt", 'r') as version_file:
         for line in version_file:
             line = line.strip()
             if len(line) == 0 or line.startswith("#"):
@@ -171,7 +180,7 @@ class DummyLogger():
     @staticmethod
     def log(data, tag=None):
         """Log some data, to stdout in this case"""
-        sys.stdout.write(f"{(tag+': ') if tag is not None else ''}{data}\n")
+        sys.stdout.write("{}{}\n".format((tag+': ') if tag is not None else '',data))
         sys.stdout.flush()
 
     @staticmethod
@@ -196,7 +205,7 @@ class Logger():
         self.__log_level = level
         self.__last_tag = None
 
-        self.__buildlog = codecs.open("buildlog.html", mode="w", encoding="utf-8")
+        self.__buildlog = codecs.open("buildlog.html", mode="w")
         self.__buildlog.write("<html><head>"
                               "<script type=\"text/javascript\">"
                               "function refreshPage () {"
@@ -394,17 +403,17 @@ def parse_command_line():
     return arguments
 
 
-class BuilderBase():
+class BuilderBase(object):
     """Base class for builders"""
     def __init__(self, arguments):
         self.num_jobs = num_jobs()
 
         # Use Ninja for building if available, it is much faster
         try:
-            subprocess.call(("ninja", "--version"))
+            subprocess.check_output(("ninja", "--version"))
             self.cmake_generator = "Ninja"
             self.have_ninja = True
-        except NameError:
+        except OSError:
             self.cmake_generator = "undefined"
             self.have_ninja = False
 
@@ -448,7 +457,7 @@ class BuilderBase():
             import stage_dependencies
             stage_dependencies.stage_dependencies(LOGGER, self.stagedir)
         except stage_dependencies.StagingError as exc:
-            raise FatalError("Error while copying dependencies to staging area") from exc
+            raise FatalError("Error while copying dependencies to staging area" + exc)
 
         LOGGER.log("Building installation package", "header")
         self.stage_package()
@@ -540,7 +549,7 @@ class BuilderBase():
 
 class VisualStudioBuilder(BuilderBase):
     def __init__(self, arguments):
-        super().__init__(arguments)
+        super(VisualStudioBuilder, self).__init__(arguments)
 
         self.install_target = "Install"
         self.used_studio = None
@@ -675,7 +684,7 @@ class VisualStudioBuilder(BuilderBase):
 
 class UnixGccBuilder(BuilderBase):
     def __init__(self, arguments):
-        super().__init__(arguments)
+        super(UnixGccBuilder,self).__init__(arguments)
 
         self.install_target = "install"
         if not self.have_ninja:
@@ -710,7 +719,7 @@ class DebianPackager():
     def can_use():
         """Can be used on debian based distros"""
         return sys.platform.startswith("linux") and \
-            distro.linux_distribution()[0] in ("debian", "Ubuntu")
+            linux_distribution()[0] in ("Debian GNU/Linux", "Ubuntu")
 
     @staticmethod
     def __run(cmd, description):
@@ -761,9 +770,9 @@ def getText(nodelist):
 
 def translate_results_to_junit(suite_name):
     """Translate ctest output to junit output"""
-    with open(os.path.join("Testing", "TAG"), 'r', encoding="utf-8") as tag_file:
-        dirname = tag_file.readline().strip()
-    with open(suite_name + ".junit.xml", "w", encoding="utf-8") as junitfile:
+    with open(os.path.join("Testing", "TAG"), 'rb') as tag_file:
+        dirname = tag_file.readline().decode("utf-8").strip()
+    with open(suite_name + ".junit.xml", "w") as junitfile:
         junitfile.write("<?xml version=\"1.0\"?>\n<testsuite>\n")
 
         dom = xml.dom.minidom.parse(os.path.join("Testing", dirname, "Test.xml"))
