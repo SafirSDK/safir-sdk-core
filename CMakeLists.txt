@@ -171,6 +171,7 @@ INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/SafirSdkCoreVersion.h
 
 set(CTEST_FULL_OUTPUT 1)
 ENABLE_TESTING()
+configure_file(CTestCustom.cmake . COPYONLY)
 
 add_subdirectory(src)
 add_subdirectory(docs)
