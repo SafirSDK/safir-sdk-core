@@ -714,6 +714,8 @@ class DebianPackager():
         self.arguments = arguments
         if len(self.arguments.configs) != 1:
             die("DebianPackager can only build one config")
+        if find_executable("conan") is None:
+            die("Could not find conan executable")
 
     @staticmethod
     def can_use():
@@ -749,15 +751,12 @@ class DebianPackager():
         os.chdir("safir-sdk-core_" + version_string)
         shutil.copytree(os.path.join("build", "packaging", "debian"), "debian")
         self.__run(("debuild",
-                    "--set-envvar", "DEB_BUILD_OPTIONS=parallel="+ str(self.num_jobs) + \
-                        " config=" + self.arguments.configs[0],
-                    "--prepend-path",
-                    "/usr/lib/ccache/",
+                    "--prepend-path", os.path.dirname(find_executable("conan")),
+                    "--set-envvar", "DEB_BUILD_OPTIONS=config=" + self.arguments.configs[0],
                     "-us", "-uc"),
                     "building packages")
         os.chdir(glob.glob("obj-*")[0])
         translate_results_to_junit("debhelper")
-
 
 def getText(nodelist):
     """Get text data out of a xml dom"""

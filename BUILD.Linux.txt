@@ -21,9 +21,9 @@ Installing Prerequisites
 ------------------------
 To install all build dependencies "in one go" run the following from the command line:
 
-  sudo apt-get install build-essential g++ cmake default-jdk asciidoc cli-common-dev \
-       libboost-all-dev unixodbc-dev doxygen graphviz qt5-default devscripts debhelper \
-       fakeroot
+  sudo apt-get install python3 python3-pip python-is-python3 python3-distro build-essential \
+       g++ cmake default-jdk asciidoc cli-common-dev libboost-all-dev unixodbc-dev doxygen \
+       graphviz qtbase5-dev devscripts debhelper fakeroot
 
 The last three packages - devscripts, debhelper and fakeroot - are used for debian
 package creation.
