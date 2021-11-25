@@ -2,12 +2,12 @@ Source: safir-sdk-core
 Maintainer: Lars Hagström <lars@foldspace.nu>
 Section: libs
 Priority: optional
-Standards-Version: 3.9.7
+Standards-Version: 4.5.0
 Build-Depends: debhelper (>= 9), cmake (>= 3.16), python3 (>= 3.8.0), default-jdk, asciidoc, cli-common-dev (>= 0.5.7), libboost-all-dev, unixodbc-dev, doxygen, graphviz, qtbase5-dev
 
 Package: safir-sdk-core
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, ${cli:Depends}, python3 (>= 3.8.0)
+Depends: ${shlibs:Depends}, ${misc:Depends}, ${cli:Depends}, python3 (>= 3.8.0), lsb-base (>=3.0)
 Suggests: openjdk-jre, openjdk-jre-headless, mono-runtime
 Description: Distributed real-time system framework
  Safir SDK Core is a middleware and platform for creation of
@@ -64,7 +64,7 @@ Description: Safir SDK Core test suite
 Package: safir-sdk-core-dbg
 Architecture: any
 Section: debug
-Priority: extra
+Priority: optional
 Depends: safir-sdk-core (= ${binary:Version}), ${misc:Depends}
 Description: debugging symbols for safir-sdk-core
  Safir SDK Core is a middleware and platform for creation of

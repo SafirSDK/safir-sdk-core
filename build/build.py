@@ -365,6 +365,11 @@ def parse_command_line():
                         default=False,
                         help=suppress("Build everything and package the results for the current platform."))
 
+    action.add_argument("--package-noclean",
+                        action="store_true",
+                        default=False,
+                        help=suppress("Same as --package, but attempt to continue from previous build"))
+
     action.add_argument("--install",
                         metavar="PATH",
                         help="Build the source in the current directory and install it to "
@@ -396,6 +401,9 @@ def parse_command_line():
         arguments.verbose += 1
     if arguments.verbose >= 2:
         os.environ["VERBOSE"] = "1"
+
+    if arguments.package_noclean:
+        arguments.package = True
 
     global LOGGER
     LOGGER = Logger("Brief" if arguments.verbose == 0 else "Verbose")
@@ -717,6 +725,8 @@ class DebianPackager():
         if find_executable("conan") is None:
             die("Could not find conan executable")
 
+        self.noclean = arguments.package_noclean and os.path.exists("tmp")
+
     @staticmethod
     def can_use():
         """Can be used on debian based distros"""
@@ -740,20 +750,25 @@ class DebianPackager():
     def build(self):
         """Run the build"""
         version_string = read_version()[1]
-        remove("tmp")
-        mkdir("tmp")
-        self.__run(("git", "archive",
-                    "--prefix", "safir-sdk-core_" + version_string + "/",
-                    "-o", "tmp/safir-sdk-core_" + version_string + ".orig.tar.gz",
-                    "HEAD"), "creating tar archive")
+        if not self.noclean:
+            remove("tmp")
+            mkdir("tmp")
+            self.__run(("git", "archive",
+                        "--prefix", "safir-sdk-core_" + version_string + "/",
+                        "-o", "tmp/safir-sdk-core_" + version_string + ".orig.tar.gz",
+                        "HEAD"), "creating tar archive")
         os.chdir("tmp")
-        self.__run(("/bin/tar", "xvfz", "safir-sdk-core_" + version_string + ".orig.tar.gz"), "extracting archive")
+        if not self.noclean:
+            self.__run(("/bin/tar", "xvfz",
+                        "safir-sdk-core_" + version_string + ".orig.tar.gz"),
+                       "extracting archive")
         os.chdir("safir-sdk-core_" + version_string)
-        shutil.copytree(os.path.join("build", "packaging", "debian"), "debian")
+        if not self.noclean:
+            shutil.copytree(os.path.join("build", "packaging", "debian"), "debian")
         self.__run(("debuild",
                     "--prepend-path", os.path.dirname(find_executable("conan")),
                     "--set-envvar", "DEB_BUILD_OPTIONS=config=" + self.arguments.configs[0],
-                    "-us", "-uc"),
+                    "-us", "-uc", "-nc"),
                     "building packages")
         os.chdir(glob.glob("obj-*")[0])
         translate_results_to_junit("debhelper")
