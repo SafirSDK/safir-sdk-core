@@ -1,3 +1,8 @@
+#if dobexplorer is not built we cant run this test.
+if (NOT TARGET dobexplorer)
+  return()
+endif()
+
 add_executable(WaitingStatesOwner Owner.cpp)
 
 target_link_libraries(WaitingStatesOwner
