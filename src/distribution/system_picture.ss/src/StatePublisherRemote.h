@@ -81,7 +81,7 @@ namespace SP
                 throw std::logic_error("Unexpected error in StatePublisherRemote::Publish");
             }
 
-            m_coordinator.PerformOnStateMessage([this](const std::shared_ptr<char[]>& data, const size_t size)
+            m_coordinator.PerformOnStateMessage([this](const Safir::Utilities::Internal::SharedCharArray& data, const size_t size)
             {
                 lllog(8) << "Publishing system state to other nodes" << std::endl;
 

@@ -243,7 +243,12 @@ namespace Com
         IncludeNodeInternal(id);
     }
 
-    bool CommunicationImpl::Send(int64_t nodeId, int64_t nodeTypeId, const std::shared_ptr<const char[]>& data, size_t size, int64_t dataTypeIdentifier, bool deliveryGuarantee)
+    bool CommunicationImpl::Send(int64_t nodeId,
+                                 int64_t nodeTypeId,
+                                 const Safir::Utilities::Internal::SharedConstCharArray& data,
+                                 size_t size,
+                                 int64_t dataTypeIdentifier,
+                                 bool deliveryGuarantee)
     {
         if (deliveryGuarantee)
         {

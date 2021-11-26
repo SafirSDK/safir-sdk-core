@@ -210,7 +210,7 @@ namespace
 
     bool Communication::Send(int64_t nodeId,
                              int64_t nodeTypeId,
-                             const std::shared_ptr<const char[]>& data,
+                             const Safir::Utilities::Internal::SharedConstCharArray& data,
                              size_t size,
                              int64_t dataTypeIdentifier,
                              bool deliveryGuarantee)

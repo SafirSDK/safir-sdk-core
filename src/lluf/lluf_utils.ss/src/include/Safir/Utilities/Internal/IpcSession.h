@@ -29,6 +29,7 @@
 #include <cstdint>
 #include <memory>
 #include <functional>
+#include <Safir/Utilities/Internal/SharedCharArray.h>
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -50,13 +51,13 @@ namespace Internal
 
     struct Msg
     {
-        Msg(std::shared_ptr<char[]> data_,  uint32_t size_ )
+        Msg(Safir::Utilities::Internal::SharedCharArray data_,  uint32_t size_ )
             : data(data_)
             , size(size_)
         {
         }
 
-        std::shared_ptr<char[]>   data;
+        Safir::Utilities::Internal::SharedCharArray   data;
         uint32_t                    size;
     };
 
@@ -88,7 +89,7 @@ namespace Internal
             }
         }
 
-        void Send(std::shared_ptr<char[]> msg, uint32_t msgSize)
+        void Send(Safir::Utilities::Internal::SharedCharArray msg, uint32_t msgSize)
         {
             bool writeInProgress = !m_msgQueue.empty();
             m_msgQueue.push_back(Msg(msg, msgSize));

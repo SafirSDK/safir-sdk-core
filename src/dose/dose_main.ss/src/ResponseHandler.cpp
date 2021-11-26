@@ -168,7 +168,7 @@ namespace Internal
        //Response to another node
        lllout << "Sending the response to node " << toConnection.m_node << std::endl;
 
-       std::shared_ptr<const char[]> responseP(response.GetReference(),
+       Safir::Utilities::Internal::SharedConstCharArray responseP(response.GetReference(),
                                                  [](const char* data)
                                                  {
                                                      DistributionData::DropReference(data);

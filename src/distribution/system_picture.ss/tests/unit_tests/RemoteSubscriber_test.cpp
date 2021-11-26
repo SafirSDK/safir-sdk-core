@@ -63,7 +63,7 @@ class Handler
 {
 public:
     void NewRemoteStatistics(const int64_t from,
-                             const std::shared_ptr<const char[]>& data,
+                             const Safir::Utilities::Internal::SharedConstCharArray& data,
                              const size_t size)
     {
         ++updates;
@@ -81,7 +81,7 @@ BOOST_AUTO_TEST_CASE( send_one )
     RemoteSubscriber<::Com, ::Handler> subscriber(c, "foo", h);
 
     const size_t size = 10;
-    auto data = std::shared_ptr<char[]>(new char[size]);
+    auto data = Safir::Utilities::Internal::SharedCharArray(new char[size]);
     strcpy(data.get(), "123456789");
     char* dataCopy = allocator(size);
     memcpy(dataCopy,data.get(),size);

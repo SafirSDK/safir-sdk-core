@@ -67,7 +67,7 @@ class Communication
 public:
     bool Send(int64_t nodeId,
               int64_t nodeTypeId,
-              const std::shared_ptr<char[]>& data,
+              const Safir::Utilities::Internal::SharedCharArray& data,
               size_t size,
               int64_t /*dataTypeIdentifier*/,
               bool acked)

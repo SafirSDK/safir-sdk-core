@@ -99,8 +99,8 @@ namespace Internal
 
         void CheckResponseStatus();
 
-        std::pair<std::shared_ptr<const char[]>, size_t> CreateRequest() const;
-        std::pair<std::shared_ptr<const char[]>, size_t> CreateResponse() const;
+        std::pair<Safir::Utilities::Internal::SharedConstCharArray, size_t> CreateRequest() const;
+        std::pair<Safir::Utilities::Internal::SharedConstCharArray, size_t> CreateResponse() const;
 
 
         boost::asio::io_service::strand         m_strand;

@@ -44,6 +44,7 @@
 #include <boost/asio/steady_timer.hpp>
 #include <boost/lexical_cast.hpp>
 #include <Safir/Dob/Internal/Communication.h>
+#include <Safir/Utilities/Internal/SharedCharArray.h>
 #include <boost/chrono.hpp>
 
 namespace Com = Safir::Dob::Internal::Com;
@@ -66,9 +67,9 @@ namespace Utilities
         return checksum==crc.checksum();
     }
 
-    inline std::shared_ptr<char[]> CreateMsg(uint64_t value, size_t size)
+    inline Safir::Utilities::Internal::SharedCharArray CreateMsg(uint64_t value, size_t size)
     {
-        auto data=std::shared_ptr<char[]>(new char[size]);
+        auto data=Safir::Utilities::Internal::SharedCharArray(new char[size]);
         (*reinterpret_cast<uint64_t*>(data.get()))=value;
         SetCRC(data.get(), size);
         return data;

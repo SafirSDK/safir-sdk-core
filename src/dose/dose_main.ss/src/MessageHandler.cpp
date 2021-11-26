@@ -132,7 +132,7 @@ namespace Internal
             return;
         }
 
-        std::shared_ptr<const char[]> msgP(msg.GetReference(),
+        Safir::Utilities::Internal::SharedConstCharArray msgP(msg.GetReference(),
                                            [](const char* data)
                                            {
                                                DistributionData::DropReference(data);

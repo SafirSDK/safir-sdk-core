@@ -549,7 +549,7 @@ namespace
             return true;
         }
 
-        auto data = std::shared_ptr<const char[]> (request.GetReference(),
+        auto data = Safir::Utilities::Internal::SharedConstCharArray (request.GetReference(),
                                                      [](const char* data)
                                                      {
                                                          DistributionData::DropReference(data);

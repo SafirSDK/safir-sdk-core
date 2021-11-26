@@ -29,7 +29,7 @@
 #include <functional>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
-#include <Safir/Utilities/Internal/MakeSharedArray.h>
+#include <Safir/Utilities/Internal/SharedCharArray.h>
 #include "Parameters.h"
 #include "Message.h"
 #include "MessageQueue.h"
@@ -811,7 +811,7 @@ namespace Com
             WriterType::SendTo(ackPtr, ni.endpoint);
         }
 
-        inline std::shared_ptr<char[]> MakePtr(const char* data, size_t size)
+        inline Safir::Utilities::Internal::SharedCharArray MakePtr(const char* data, size_t size)
         {
             auto ptr=Safir::Utilities::Internal::MakeSharedArray(size);
             memcpy(ptr.get(), data, size);

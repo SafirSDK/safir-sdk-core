@@ -191,7 +191,7 @@ struct Fixture
 
             auto msg = GetProtobuf(true);
             const size_t size = msg->ByteSizeLong();
-            auto data = std::shared_ptr<char[]>(new char[size]);
+            auto data = Safir::Utilities::Internal::SharedCharArray(new char[size]);
             msg->SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(data.get()));
             rh->NewRemoteStatistics(11,data,size);
         }
@@ -610,7 +610,7 @@ BOOST_AUTO_TEST_CASE( raw_changed_callback )
 
     auto msg = GetProtobuf(true);
     const size_t size = msg->ByteSizeLong();
-    auto data = std::shared_ptr<char[]>(new char[size]);
+    auto data = Safir::Utilities::Internal::SharedCharArray(new char[size]);
     msg->SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(data.get()));
     rh->NewRemoteStatistics(11,data,size);
 
@@ -654,7 +654,7 @@ BOOST_AUTO_TEST_CASE( no_incarnations_discard )
 
     auto msg = GetProtobuf(false);
     const size_t size = msg->ByteSizeLong();
-    auto data = std::shared_ptr<char[]>(new char[size]);
+    auto data = Safir::Utilities::Internal::SharedCharArray(new char[size]);
     msg->SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(data.get()));
     rh->NewRemoteStatistics(11,data,size);
 
@@ -733,7 +733,7 @@ BOOST_AUTO_TEST_CASE( join_system_callback)
 
     auto msg = GetProtobuf(true);
     const size_t size = msg->ByteSizeLong();
-    auto data = std::shared_ptr<char[]>(new char[size]);
+    auto data = Safir::Utilities::Internal::SharedCharArray(new char[size]);
     msg->SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(data.get()));
     rh->NewRemoteStatistics(11,data,size);
 
@@ -773,7 +773,7 @@ BOOST_AUTO_TEST_CASE( join_system_forbid)
 
     auto msg = GetProtobuf(true);
     const size_t size = msg->ByteSizeLong();
-    auto data = std::shared_ptr<char[]>(new char[size]);
+    auto data = Safir::Utilities::Internal::SharedCharArray(new char[size]);
     msg->SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(data.get()));
 
     rh->NewRemoteStatistics(11,data,size);
@@ -980,7 +980,7 @@ BOOST_AUTO_TEST_CASE( perform_on_all )
 
     auto msg = GetProtobuf(true);
     const size_t size = msg->ByteSizeLong();
-    auto data = std::shared_ptr<char[]>(new char[size]);
+    auto data = Safir::Utilities::Internal::SharedCharArray(new char[size]);
     msg->SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(data.get()));
     rh->NewRemoteStatistics(11,data,size);
 
@@ -1006,7 +1006,7 @@ BOOST_AUTO_TEST_CASE( perform_on_my )
 
     auto msg = GetProtobuf(false);
     const size_t size = msg->ByteSizeLong();
-    auto data = std::shared_ptr<char[]>(new char[size]);
+    auto data = Safir::Utilities::Internal::SharedCharArray(new char[size]);
     msg->SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(data.get()));
     rh->NewRemoteStatistics(11,data,size);
 

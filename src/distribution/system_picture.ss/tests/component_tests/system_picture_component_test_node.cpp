@@ -553,7 +553,7 @@ private:
     void Send(const std::string& message)
     {
         const size_t size = message.size();
-        const std::shared_ptr<char[]> data(new char[size]);
+        const Safir::Utilities::Internal::SharedCharArray data(new char[size]);
         memcpy(data.get(), &message[0], size);
         //send the data to both node types.
 
@@ -707,7 +707,7 @@ public:
                                             const char* data_,
                                             const size_t size)
         {
-            const std::shared_ptr<const char[]> data(data_);
+            const Safir::Utilities::Internal::SharedConstCharArray data(data_);
             if (size != 10000)
             {
                 throw std::logic_error("Received incorrectly sized data!");
@@ -769,7 +769,7 @@ private:
         }
 
         const size_t size = 10000;
-        const std::shared_ptr<char[]> data(new char[size]);
+        const Safir::Utilities::Internal::SharedCharArray data(new char[size]);
         memset(data.get(), 3, size);
         //send the data to both node types.
         m_communication->Send(0,1,data,size,1000100222,true);

@@ -109,9 +109,9 @@ namespace Internal
         std::vector<std::unique_ptr<SubcriptionConnection>> m_connections;
         boost::atomic<bool> m_dispatcherNotified;
 
-        static inline std::shared_ptr<const char[]> ToPtr(const DistributionData& d)
+        static inline Safir::Utilities::Internal::SharedConstCharArray ToPtr(const DistributionData& d)
         {
-            std::shared_ptr<const char[]> p(d.GetReference(), [](const char* ptr){DistributionData::DropReference(ptr);});
+            Safir::Utilities::Internal::SharedConstCharArray p(d.GetReference(), [](const char* ptr){DistributionData::DropReference(ptr);});
             return p;
         }
 

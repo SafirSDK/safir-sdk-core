@@ -60,7 +60,7 @@ public:
     {
         sendAction = [this](int64_t /*nodeId*/,
                             int64_t /*nodeTypeId*/,
-                            const std::shared_ptr<const char[]>& /*data*/,
+                            const Safir::Utilities::Internal::SharedConstCharArray& /*data*/,
                             size_t /*size*/,
                             int64_t /*dataTypeIdentifier*/,
                             bool /*deliveryGuarantee*/) -> bool
@@ -80,11 +80,11 @@ public:
 
     SetDataReceiverCalls setDataReceiverCalls;
 
-    std::function<bool(int64_t, int64_t, const std::shared_ptr<const char[]>&, size_t, int64_t, bool)> sendAction;
+    std::function<bool(int64_t, int64_t, const Safir::Utilities::Internal::SharedConstCharArray&, size_t, int64_t, bool)> sendAction;
 
     bool Send(int64_t nodeId,
               int64_t nodeTypeId,
-              const std::shared_ptr<const char[]>& data,
+              const Safir::Utilities::Internal::SharedConstCharArray& data,
               size_t size,
               int64_t dataTypeIdentifier,
               bool deliveryGuarantee)
@@ -92,7 +92,7 @@ public:
        return sendAction(nodeId, nodeTypeId, data, size, dataTypeIdentifier, deliveryGuarantee);
     }
 
-    typedef std::vector<boost::tuple<int64_t, int64_t, std::shared_ptr<const char[]>, size_t, int64_t, bool> > SendCalls;
+    typedef std::vector<boost::tuple<int64_t, int64_t, Safir::Utilities::Internal::SharedConstCharArray, size_t, int64_t, bool> > SendCalls;
 
     SendCalls sendCalls;
     bool sendReturnValue;
@@ -253,7 +253,7 @@ BOOST_AUTO_TEST_CASE( stop_external_node )
 
     communication.sendAction = [this](int64_t nodeId,
                                       int64_t nodeTypeId,
-                                      const std::shared_ptr<const char[]>& data,
+                                      const Safir::Utilities::Internal::SharedConstCharArray& data,
                                       size_t size,
                                       int64_t dataTypeIdentifier,
                                       bool deliveryGuarantee) -> bool
@@ -289,7 +289,7 @@ BOOST_AUTO_TEST_CASE( stop_non_existing_external_node )
     auto nbrOfSend = 0;
     communication.sendAction = [this, &nbrOfSend](int64_t /*nodeId*/,
                                                   int64_t /*nodeTypeId*/,
-                                                  const std::shared_ptr<const char[]>& /*data*/,
+                                                  const Safir::Utilities::Internal::SharedConstCharArray& /*data*/,
                                                   size_t /*size*/,
                                                   int64_t /*dataTypeIdentifier*/,
                                                   bool /*deliveryGuarantee*/) -> bool
@@ -319,7 +319,7 @@ BOOST_AUTO_TEST_CASE( shutdown_external_node_resending )
     auto nbrOfSend = 0;
     communication.sendAction = [this, &nbrOfSend](int64_t nodeId,
                                                   int64_t nodeTypeId,
-                                                  const std::shared_ptr<const char[]>& data,
+                                                  const Safir::Utilities::Internal::SharedConstCharArray& data,
                                                   size_t size,
                                                   int64_t dataTypeIdentifier,
                                                   bool deliveryGuarantee) -> bool
@@ -363,7 +363,7 @@ BOOST_AUTO_TEST_CASE( stop_own_node )
     auto nbrOfSend = 0;
     communication.sendAction = [this, &nbrOfSend](int64_t nodeId,
                                                   int64_t nodeTypeId,
-                                                  const std::shared_ptr<const char[]>& /*data*/,
+                                                  const Safir::Utilities::Internal::SharedConstCharArray& /*data*/,
                                                   size_t /*size*/,
                                                   int64_t dataTypeIdentifier,
                                                   bool deliveryGuarantee) -> bool
@@ -400,7 +400,7 @@ BOOST_AUTO_TEST_CASE( stop_own_node_while_pending_extrnal_node_stops  )
     auto nbrOfSend = 0;
     communication.sendAction = [this, &nbrOfSend](int64_t nodeId,
                                                   int64_t nodeTypeId,
-                                                  const std::shared_ptr<const char[]>& data,
+                                                  const Safir::Utilities::Internal::SharedConstCharArray& data,
                                                   size_t size,
                                                   int64_t dataTypeIdentifier,
                                                   bool deliveryGuarantee) -> bool
@@ -448,7 +448,7 @@ BOOST_AUTO_TEST_CASE( stop_system )
                                &nbrOfSentStopOrders]
                                (int64_t nodeId,
                                 int64_t nodeTypeId,
-                                const std::shared_ptr<const char[]>& data,
+                                const Safir::Utilities::Internal::SharedConstCharArray& data,
                                 size_t size,
                                 int64_t dataTypeIdentifier,
                                 bool deliveryGuarantee) -> bool
@@ -513,7 +513,7 @@ BOOST_AUTO_TEST_CASE( stop_system_external_nodes_unresponsive )
                                &nbrOfSentStopOrders]
                                (int64_t nodeId,
                                 int64_t nodeTypeId,
-                                const std::shared_ptr<const char[]>& data,
+                                const Safir::Utilities::Internal::SharedConstCharArray& data,
                                 size_t size,
                                 int64_t dataTypeIdentifier,
                                 bool deliveryGuarantee) -> bool
@@ -620,7 +620,7 @@ BOOST_AUTO_TEST_CASE( system_stop_cmd_while_in_system_stop_mode )
                                &nbrOfSentStopOrders]
                                (int64_t /*nodeId*/,
                                 int64_t /*nodeTypeId*/,
-                                const std::shared_ptr<const char[]>& /*data*/,
+                                const Safir::Utilities::Internal::SharedConstCharArray& /*data*/,
                                 size_t /*size*/,
                                 int64_t dataTypeIdentifier,
                                 bool /*deliveryGuarantee*/) -> bool
@@ -680,7 +680,7 @@ BOOST_AUTO_TEST_CASE( ignored_system_stop_cmd_while_in_system_stop_mode )
                                &nbrOfSentStopOrders]
                                (int64_t /*nodeId*/,
                                 int64_t /*nodeTypeId*/,
-                                const std::shared_ptr<const char[]>& /*data*/,
+                                const Safir::Utilities::Internal::SharedConstCharArray& /*data*/,
                                 size_t /*size*/,
                                 int64_t dataTypeIdentifier,
                                 bool /*deliveryGuarantee*/) -> bool

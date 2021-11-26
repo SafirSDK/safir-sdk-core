@@ -402,7 +402,7 @@ namespace Internal
         }
     }
 
-    std::pair<std::shared_ptr<const char[]>, size_t> PersistHandler::CreateRequest() const
+    std::pair<Safir::Utilities::Internal::SharedConstCharArray, size_t> PersistHandler::CreateRequest() const
     {
         DistributionData request
                 (have_persistence_data_request_tag,
@@ -410,7 +410,7 @@ namespace Internal
                               0,     //use context 0 for this request
                               -1));  //dummy identifier since it is a dose_main only thing.
 
-        return std::make_pair(std::shared_ptr<const char[]> (request.GetReference(),
+        return std::make_pair(Safir::Utilities::Internal::SharedConstCharArray (request.GetReference(),
                                                 [](const char* data)
                                                 {
                                                     DistributionData::DropReference(data);
@@ -418,7 +418,7 @@ namespace Internal
                               request.Size());
     }
 
-    std::pair<std::shared_ptr<const char[]>, size_t> PersistHandler::CreateResponse() const
+    std::pair<Safir::Utilities::Internal::SharedConstCharArray, size_t> PersistHandler::CreateResponse() const
     {
         DistributionData response
                 (have_persistence_data_response_tag,
@@ -427,7 +427,7 @@ namespace Internal
                               -1),  //dummy identifier since it is a dose_main only thing.
                  m_persistentDataReady);
 
-        return std::make_pair(std::shared_ptr<const char[]> (response.GetReference(),
+        return std::make_pair(Safir::Utilities::Internal::SharedConstCharArray (response.GetReference(),
                                                 [](const char* data)
                                                 {
                                                     DistributionData::DropReference(data);

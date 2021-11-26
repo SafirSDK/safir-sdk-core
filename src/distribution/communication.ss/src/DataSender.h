@@ -29,7 +29,7 @@
 #include <functional>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
-#include <Safir/Utilities/Internal/MakeSharedArray.h>
+#include <Safir/Utilities/Internal/SharedCharArray.h>
 #include "Node.h"
 #include "MessageQueue.h"
 #include "Parameters.h"
@@ -161,7 +161,7 @@ namespace Com
         }
 
         //Add message to send queue. Message will be retranmitted unitl all receivers have acked. Returns false if queue is full.
-        bool AddToSendQueue(int64_t toId, const std::shared_ptr<const char[]>& msg, size_t size, int64_t dataTypeIdentifier)
+        bool AddToSendQueue(int64_t toId, const Safir::Utilities::Internal::SharedConstCharArray& msg, size_t size, int64_t dataTypeIdentifier)
         {
             if (size==0 || !msg)
             {
@@ -602,7 +602,7 @@ namespace Com
                 }
             }
 
-            std::shared_ptr<char[]> noData;
+            Safir::Utilities::Internal::SharedCharArray noData;
             UserDataPtr ud=std::make_shared<UserData>(m_nodeId, 0, AckRequestType, noData, 0);
 
             //Send ackRequests for SingleReceiver channel

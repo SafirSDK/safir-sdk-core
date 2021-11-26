@@ -597,7 +597,7 @@ BOOST_AUTO_TEST_CASE( propagate_state_from_other )
     auto state = GetStateWithOneNode();
 
     const size_t size = state.ByteSizeLong();
-    auto data = std::shared_ptr<char[]>(new char[size]);
+    auto data = Safir::Utilities::Internal::SharedCharArray(new char[size]);
     state.SerializeWithCachedSizesToArray
         (reinterpret_cast<google::protobuf::uint8*>(data.get()));
 
@@ -656,7 +656,7 @@ BOOST_AUTO_TEST_CASE( remote_from_other_with_dead )
     auto state = GetStateWithTwoNodes();
 
     const size_t size = state.ByteSizeLong();
-    auto data = std::shared_ptr<char[]>(new char[size]);
+    auto data = Safir::Utilities::Internal::SharedCharArray(new char[size]);
     state.SerializeWithCachedSizesToArray
         (reinterpret_cast<google::protobuf::uint8*>(data.get()));
 

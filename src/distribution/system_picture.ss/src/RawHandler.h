@@ -29,6 +29,7 @@
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
 #include <Safir/Utilities/Internal/MakeUnique.h>
+#include <Safir/Utilities/Internal/SharedCharArray.h>
 #include "MessageWrapperCreators.h"
 #include "RawChanges.h"
 #include "AsioLatencyMonitor.h"
@@ -251,7 +252,7 @@ namespace SP
                               });
         }
 
-        void NewRemoteStatistics(const int64_t from, const std::shared_ptr<const char[]>& data, const size_t size)
+        void NewRemoteStatistics(const int64_t from, const Safir::Utilities::Internal::SharedConstCharArray& data, const size_t size)
         {
             m_strand.dispatch([this,from,data,size]
             {

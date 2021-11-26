@@ -68,9 +68,9 @@ namespace Com = Safir::Dob::Internal::Com;
 
 void Wait(int millis) {boost::this_thread::sleep_for(boost::chrono::milliseconds(millis));}
 
-std::shared_ptr<char[]> MakeShared(const std::string& str)
+Safir::Utilities::Internal::SharedCharArray MakeShared(const std::string& str)
 {
-    std::shared_ptr<char[]> ptr(new char[str.length()]);
+    Safir::Utilities::Internal::SharedCharArray ptr(new char[str.length()]);
     memcpy(ptr.get(), str.c_str(), str.length());
     return ptr;
 }

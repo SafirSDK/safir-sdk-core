@@ -192,7 +192,7 @@ namespace SP
 
         //new incoming system state from elected coordinator
         void NewRemoteStatistics(const int64_t from,
-                                 const std::shared_ptr<const char[]>& data,
+                                 const Safir::Utilities::Internal::SharedConstCharArray& data,
                                  const size_t size)
         {
             m_strand.dispatch([this,from,data,size]

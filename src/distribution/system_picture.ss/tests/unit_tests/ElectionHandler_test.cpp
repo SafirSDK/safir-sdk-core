@@ -85,11 +85,11 @@ public:
 
     bool SendTo(const int64_t nodeId,
                 const int64_t sender,
-                const std::shared_ptr<const char[]>& data,
+                const Safir::Utilities::Internal::SharedConstCharArray& data,
                 const size_t size);
 
     bool SendAll(const int64_t sender,
-                 const std::shared_ptr<const char[]>& data,
+                 const Safir::Utilities::Internal::SharedConstCharArray& data,
                  const size_t size);
 
     void EnableOverflows() {m_overflows = true;}
@@ -151,7 +151,7 @@ public:
 
     bool Send(const int64_t nodeId,
               const int64_t nodeTypeId,
-              const std::shared_ptr<const char[]>& data,
+              const Safir::Utilities::Internal::SharedConstCharArray& data,
               const size_t size,
               const int64_t /*dataTypeIdentifier*/,
               const bool ack)
@@ -197,7 +197,7 @@ public:
 
 bool Connector::SendTo(const int64_t nodeId,
                        const int64_t sender,
-                       const std::shared_ptr<const char[]>& data,
+                       const Safir::Utilities::Internal::SharedConstCharArray& data,
                        const size_t size)
 {
     if (!DeliverMessage())
@@ -232,7 +232,7 @@ bool Connector::SendTo(const int64_t nodeId,
 
 
 bool Connector::SendAll(const int64_t sender,
-                        const std::shared_ptr<const char[]>& data,
+                        const Safir::Utilities::Internal::SharedConstCharArray& data,
                         const size_t size)
 {
     if (!DeliverMessage())

@@ -28,6 +28,7 @@
 #include <bitset>
 #include <boost/cstdint.hpp>
 #include "Parameters.h"
+#include <Safir/Utilities/Internal/SharedCharArray.h>
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -219,7 +220,7 @@ namespace Com
     struct UserData
     {
         MessageHeader header; //message header
-        std::shared_ptr<const char[]> message; //This is to prevent  destruction of data before all fragments are sent
+        Safir::Utilities::Internal::SharedConstCharArray message; //This is to prevent  destruction of data before all fragments are sent
         const char* fragment; //This is what is sent in this UserData. If not fragmented these will be the same as payload and payloadSize
         Receivers receivers; //Set of receivers, can be filled with a receiver list, or if MultiReceiverSendMethod it will be filled when its sent
         boost::chrono::steady_clock::time_point sendTime; //timestamp when this messages was last transmitted so we know when it's time to make retransmit
@@ -228,7 +229,7 @@ namespace Com
         UserData(const int64_t senderId,
                  const int64_t receiverId,
                  const int64_t dataType,
-                 const std::shared_ptr<const char[]>& message_,
+                 const Safir::Utilities::Internal::SharedConstCharArray& message_,
                  size_t messageSize)
             :header(senderId, receiverId, dataType, MultiReceiverSendMethod, Acked, 0, messageSize, messageSize, 1, 0, 0)
             ,message(message_)
@@ -240,7 +241,7 @@ namespace Com
         UserData(const int64_t senderId,
                  const int64_t receiverId,
                  const int64_t dataType,
-                 const std::shared_ptr<const char[]>& message_,
+                 const Safir::Utilities::Internal::SharedConstCharArray& message_,
                  size_t messageSize,
                  const char* fragment_,
                  size_t fragmentSize)

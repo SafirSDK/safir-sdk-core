@@ -26,7 +26,7 @@
 #include <Safir/Utilities/Internal/Id.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
-#include <Safir/Utilities/Internal/MakeSharedArray.h>
+#include <Safir/Utilities/Internal/SharedCharArray.h>
 #include <Safir/Dob/Internal/SystemPictureDefs.h>
 #include <Safir/Dob/Internal/RawStatistics.h>
 #include <boost/noncopyable.hpp>
@@ -98,7 +98,7 @@ namespace SP
                                                  const char* const data,
                                                  const size_t size)
                                           {
-                                              GotData(from, nodeTypeId, std::shared_ptr<const char[]>(data), size);
+                                              GotData(from, nodeTypeId, Safir::Utilities::Internal::SharedConstCharArray(data), size);
                                           },
                                           m_receiverId,
                                           [](size_t size){return new char[size];},
@@ -352,7 +352,7 @@ namespace SP
         //not in strand
         void GotData(const int64_t from,
                      const int64_t nodeTypeId,
-                     const std::shared_ptr<const char[]>& data,
+                     const Safir::Utilities::Internal::SharedConstCharArray& data,
                      size_t size)
         {
             ElectionMessage message;
@@ -476,7 +476,7 @@ namespace SP
                     aliveMsg.set_election_id(it->second.second);
 
                     const auto size = aliveMsg.ByteSizeLong();
-                    std::shared_ptr<char[]> data = Safir::Utilities::Internal::MakeSharedArray(size);
+                    Safir::Utilities::Internal::SharedCharArray data = Safir::Utilities::Internal::MakeSharedArray(size);
                     aliveMsg.SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(data.get()));
 
                     const bool sent = m_communication.Send(it->first,
@@ -506,7 +506,7 @@ namespace SP
                     victoryMsg.set_election_id(m_currentElectionId);
 
                     const auto size = victoryMsg.ByteSizeLong();
-                    std::shared_ptr<char[]> data = Safir::Utilities::Internal::MakeSharedArray(size);
+                    Safir::Utilities::Internal::SharedCharArray data = Safir::Utilities::Internal::MakeSharedArray(size);
                     victoryMsg.SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(data.get()));
 
                     const bool sent = m_communication.Send(0, *it, std::move(data), size, m_receiverId, true);
@@ -531,7 +531,7 @@ namespace SP
                     message.set_election_id(m_currentElectionId);
 
                     const auto size = message.ByteSizeLong();
-                    std::shared_ptr<char[]> data = Safir::Utilities::Internal::MakeSharedArray(size);
+                    Safir::Utilities::Internal::SharedCharArray data = Safir::Utilities::Internal::MakeSharedArray(size);
                     message.SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(data.get()));
 
                     const bool sent = m_communication.Send(0, *it, std::move(data), size, m_receiverId, true);

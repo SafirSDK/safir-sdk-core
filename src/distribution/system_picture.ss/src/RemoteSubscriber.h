@@ -25,6 +25,7 @@
 
 #include <Safir/Utilities/Internal/Id.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
+#include <Safir/Utilities/Internal/SharedCharArray.h>
 #include <cstring>
 
 namespace Safir
@@ -49,7 +50,7 @@ namespace SP
                                                  const char* const data,
                                                  const size_t size)
                                           {
-                                              GotData(from,std::shared_ptr<const char[]>(data),size);
+                                              GotData(from,Safir::Utilities::Internal::SharedConstCharArray(data),size);
                                           },
                                           LlufId_Generate64(receiverId),
                                           [](size_t size){return new char[size];},
@@ -58,7 +59,7 @@ namespace SP
 
     private:
         void GotData(const int64_t from,
-                     const std::shared_ptr<const char[]>& data,
+                     const Safir::Utilities::Internal::SharedConstCharArray& data,
                      const size_t size)
         {
             m_receiver.NewRemoteStatistics(from, data, size);

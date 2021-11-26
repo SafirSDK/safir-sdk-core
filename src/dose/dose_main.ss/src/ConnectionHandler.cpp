@@ -149,7 +149,7 @@ namespace
         });
     }
 
-    void ConnectionHandler::SendAll(const std::pair<std::shared_ptr<const char[]>, size_t>& data)
+    void ConnectionHandler::SendAll(const std::pair<Safir::Utilities::Internal::SharedConstCharArray, size_t>& data)
     {
         for (auto vt = m_sendQueues.begin(); vt != m_sendQueues.end(); ++vt)
         {

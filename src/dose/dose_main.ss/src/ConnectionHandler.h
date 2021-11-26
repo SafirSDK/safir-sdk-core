@@ -72,7 +72,7 @@ namespace Internal
         boost::asio::io_service::strand m_strand;
         Com::Communication&             m_communication;
         std::function<void(const ConnectionPtr& connection, bool disconnecting)> m_onAppEvent;
-        typedef std::queue< std::pair< std::shared_ptr<const char[]>, size_t> > SendQueue;//vector of pair<data, size>
+        typedef std::queue< std::pair<Safir::Utilities::Internal::SharedConstCharArray, size_t>> SendQueue;//vector of pair<data, size>
         std::unordered_map<int64_t, SendQueue> m_sendQueues; //<nodeType, SendQueue>
         boost::thread m_connectionThread;
 
@@ -83,7 +83,7 @@ namespace Internal
         PoolHandler m_poolHandler;
         ProcessInfoHandler m_processInfoHandler;
 
-        void SendAll(const std::pair<std::shared_ptr<const char[]>, size_t>& data);
+        void SendAll(const std::pair<Safir::Utilities::Internal::SharedConstCharArray, size_t>& data);
         void HandleSendQueues();
 
         void ConnectionThread();
@@ -93,19 +93,19 @@ namespace Internal
         void HandleDisconnect(const ConnectionPtr& connection);
         void HandleConnectionOutEvent(const ConnectionPtr& connection, std::vector<ConnectionPtr>& deadConnections);
 
-        static inline std::pair<std::shared_ptr<const char[]>, size_t> ConnectDataPtr(const Safir::Dob::Internal::ConnectionId& id,
+        static inline std::pair<Safir::Utilities::Internal::SharedConstCharArray, size_t> ConnectDataPtr(const Safir::Dob::Internal::ConnectionId& id,
                                                                                         const char* nameWithoutCounter,
                                                                                         Typesystem::Int32 counter)
         {
             DistributionData d(connect_message_tag, id, nameWithoutCounter, counter);
-            std::shared_ptr<const char[]> p(d.GetReference(), [=](const char* ptr){DistributionData::DropReference(ptr);});
+            Safir::Utilities::Internal::SharedConstCharArray p(d.GetReference(), [=](const char* ptr){DistributionData::DropReference(ptr);});
             return std::make_pair(std::move(p), d.Size());
         }
 
-        static inline std::pair<std::shared_ptr<const char[]>, size_t> DisconnectDataPtr(const Safir::Dob::Internal::ConnectionId& id)
+        static inline std::pair<Safir::Utilities::Internal::SharedConstCharArray, size_t> DisconnectDataPtr(const Safir::Dob::Internal::ConnectionId& id)
         {
             DistributionData d(disconnect_message_tag, id);
-            std::shared_ptr<const char[]> p(d.GetReference(), [=](const char* ptr){DistributionData::DropReference(ptr);});
+            Safir::Utilities::Internal::SharedConstCharArray p(d.GetReference(), [=](const char* ptr){DistributionData::DropReference(ptr);});
             return std::make_pair(std::move(p), d.Size());
         }
     };

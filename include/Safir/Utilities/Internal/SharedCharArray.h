@@ -23,6 +23,7 @@
 ******************************************************************************/
 #pragma once
 #include <memory>
+#include <boost/shared_ptr.hpp>
 
 namespace Safir
 {
@@ -30,12 +31,22 @@ namespace Utilities
 {
 namespace Internal
 {
-    static inline std::shared_ptr<char[]> MakeSharedArray(const size_t size)
+    //Visual Studio 2015 shared_ptr cannot handle char arrays, so we use boost::shared_ptr instead
+    //there. Hopefully this can be removed when we drop VS2015 support.
+#if (_MSC_VER == 1900)
+    typedef boost::shared_ptr<char[]> SharedCharArray;
+    typedef boost::shared_ptr<const char[]> SharedConstCharArray;
+#else
+    typedef std::shared_ptr<char[]> SharedCharArray;
+    typedef std::shared_ptr<const char[]> SharedConstCharArray;
+#endif
+
+    static inline SharedCharArray MakeSharedArray(const size_t size)
     {
 #if (_MSC_VER >= 1930) || (__GNUC__ && __cpp_lib_shared_ptr_arrays >= 201707L)
         return std::make_shared<char[]>(size);
 #else
-        return std::shared_ptr<char[]>(new char[size]);
+        return SharedCharArray(new char[size]);
 #endif
     }
 }

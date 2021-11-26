@@ -273,7 +273,7 @@ namespace Internal
                              findIt->second->lastRequestTimestamp,
                              findIt->first);
 
-        std::shared_ptr<const char[]> msgP(msg.GetReference(),
+        Safir::Utilities::Internal::SharedConstCharArray msgP(msg.GetReference(),
                                              [](const char* data)
                                              {
                                                  DistributionData::DropReference(data);
@@ -422,7 +422,7 @@ namespace Internal
                 }
 
                 lllout << "Sending response " << std::boolalpha << msg.GetPendingResponse() << std::endl;
-                std::shared_ptr<const char[]> respP(resp.GetReference(),
+                Safir::Utilities::Internal::SharedConstCharArray respP(resp.GetReference(),
                                                       [](const char* data)
                                                       {
                                                           DistributionData::DropReference(data);

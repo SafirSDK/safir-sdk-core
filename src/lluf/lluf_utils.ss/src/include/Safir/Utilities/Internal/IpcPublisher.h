@@ -145,7 +145,7 @@ namespace Internal
 
             auto selfHandle(this->shared_from_this());
 
-            std::shared_ptr<char[]> msgSharedPtr(std::move(msg));
+            Safir::Utilities::Internal::SharedCharArray msgSharedPtr(std::move(msg));
 
             m_strand.dispatch(
                         [this, selfHandle, msgSharedPtr, msgSize]()

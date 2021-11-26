@@ -137,7 +137,7 @@ namespace SP
                                                        const size_t size)
             {
                 //we need to move the data into a shared_ptr
-                std::shared_ptr<char[]> data(std::move(d));
+                Safir::Utilities::Internal::SharedCharArray data(std::move(d));
                 std::set<int64_t> overflowNodes;
 
                 for (auto id = toNodeTypes.cbegin(); id != toNodeTypes.cend(); ++id)

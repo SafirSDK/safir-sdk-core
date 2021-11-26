@@ -24,7 +24,7 @@
 #pragma once
 #include <vector>
 #include <functional>
-#include <Safir/Utilities/Internal/MakeSharedArray.h>
+#include <Safir/Utilities/Internal/SharedCharArray.h>
 
 #ifdef _MSC_VER
 #pragma warning (push)

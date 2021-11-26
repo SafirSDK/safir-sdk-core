@@ -364,7 +364,7 @@ namespace Com
         void SendMessageTo(const CommunicationMessage& cm, const boost::asio::ip::udp::endpoint& toEndpoint)
         {
             const auto size=cm.ByteSizeLong();
-            std::shared_ptr<char[]> payload(new char[size]);
+            Safir::Utilities::Internal::SharedCharArray payload = Safir::Utilities::Internal::MakeSharedArray(size);
             google::protobuf::uint8* buf=reinterpret_cast<google::protobuf::uint8*>(const_cast<char*>(payload.get()));
             cm.SerializeWithCachedSizesToArray(buf);
             UserDataPtr ud(new UserData(m_me.nodeId, 0, ControlDataType, payload, static_cast<size_t>(size)));

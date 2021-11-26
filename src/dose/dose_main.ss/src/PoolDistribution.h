@@ -33,7 +33,7 @@
 #include <Safir/Dob/Connection.h>
 #include <Safir/Dob/ConnectionAspectMisc.h>
 #include <Safir/Dob/ConnectionAspectInjector.h>
-#include <Safir/Utilities/Internal/MakeSharedArray.h>
+#include <Safir/Utilities/Internal/SharedCharArray.h>
 
 namespace Safir
 {
@@ -135,7 +135,7 @@ namespace Internal
             while (CanSend() && !m_connections.empty())
             {
                 const DistributionData& d=m_connections.front();
-                std::shared_ptr<const char[]> p(d.GetReference(), [=](const char* ptr){DistributionData::DropReference(ptr);});
+                Safir::Utilities::Internal::SharedConstCharArray p(d.GetReference(), [=](const char* ptr){DistributionData::DropReference(ptr);});
 
                 if (m_distribution.GetCommunication().Send(m_nodeId, m_nodeType, p, d.Size(), ConnectionMessageDataTypeId, true))
                 {
@@ -385,9 +385,9 @@ namespace Internal
             }));
         }
 
-        static inline std::shared_ptr<const char[]> ToPtr(const DistributionData& d)
+        static inline Safir::Utilities::Internal::SharedConstCharArray ToPtr(const DistributionData& d)
         {
-            std::shared_ptr<const char[]> p(d.GetReference(), [](const char* ptr){DistributionData::DropReference(ptr);});
+            Safir::Utilities::Internal::SharedConstCharArray p(d.GetReference(), [](const char* ptr){DistributionData::DropReference(ptr);});
             return p;
         }
 
