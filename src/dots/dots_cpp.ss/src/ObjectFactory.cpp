@@ -31,6 +31,7 @@
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
 #include <sstream>
+#include <unordered_map>
 
 namespace Safir
 {

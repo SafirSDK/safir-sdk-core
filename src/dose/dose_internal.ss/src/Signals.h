@@ -24,7 +24,7 @@
 
 #pragma once
 
-#include <map>
+#include <unordered_map>
 #include <Safir/Dob/Internal/Semaphore.h>
 #include <boost/noncopyable.hpp>
 #include <boost/thread/mutex.hpp>
