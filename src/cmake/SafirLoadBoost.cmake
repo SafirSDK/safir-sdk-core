@@ -1,5 +1,3 @@
-
-set(Boost_NO_BOOST_CMAKE ON)
 set(Boost_USE_MULTITHREADED ON)
 
 find_package(Boost
