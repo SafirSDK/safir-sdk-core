@@ -39,8 +39,11 @@ if (MSVC)
    ADD_DEFINITIONS(/wd4503) #decorated name length exceeded
    ADD_DEFINITIONS(/wd4512) #assignment operator could not be generated
 
-   if (MSVC_VERSION EQUAL 1600)
-     ADD_DEFINITIONS(/wd4481) #nonstandard extension used, removed due to vs2010 not having full c++11 support
+   #Disable some warnings from Visual Studio 2015, since we're close to deprecating support for that compiler.
+   if (MSVC_VERSION EQUAL 1900)
+     ADD_DEFINITIONS(/wd4714) #marked as __forceinline not inlined
+     ADD_DEFINITIONS(/wd4913) #user defined binary operator ',' exists but no overload could convert all operands, default built-in binary operator ',' used
+     ADD_DEFINITIONS(/wd4800) #forcing value to bool 'true' or 'false' (performance warning)
    endif()
 
    # increase warning level
@@ -53,7 +56,7 @@ if (MSVC)
    ENDIF()
 
    #generated libraries sometimes get very large, so we need to use bigobj compiler flag
-   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /bigobj")
+   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /bigobj /WX")
 
    #enable auto-inlining for RelWithDebInfo builds
    set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} /Ob2")
