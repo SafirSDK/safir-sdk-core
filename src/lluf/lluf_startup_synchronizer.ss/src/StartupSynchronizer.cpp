@@ -27,14 +27,26 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/convenience.hpp>
 #include <boost/filesystem/fstream.hpp>
-#include <boost/interprocess/sync/named_semaphore.hpp>
-#include <boost/interprocess/sync/file_lock.hpp>
-#include <boost/interprocess/sync/scoped_lock.hpp>
-#include <boost/interprocess/sync/sharable_lock.hpp>
 #include <iostream>
 #include <mutex>
 #include <set>
 #include <map>
+
+
+#ifdef _MSC_VER
+#  pragma warning(push)
+#  pragma warning (disable: 4189)
+#endif
+ 
+#include <boost/interprocess/sync/named_semaphore.hpp>
+#include <boost/interprocess/sync/file_lock.hpp>
+#include <boost/interprocess/sync/scoped_lock.hpp>
+#include <boost/interprocess/sync/sharable_lock.hpp>
+
+#ifdef _MSC_VER
+#  pragma warning(pop)
+#endif
+
 
 /* A tip to anyone trying to understand this code:
  * Read up on the boost interprocess file locks, and understand their

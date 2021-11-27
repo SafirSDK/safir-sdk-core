@@ -24,14 +24,24 @@
 #ifndef __DOTS_KERNEL_REPOSITORY_H__
 #define __DOTS_KERNEL_REPOSITORY_H__
 
+#include <Safir/Dob/Typesystem/ToolSupport/TypeParser.h>
+#include <Safir/Dob/Typesystem/ToolSupport/TypeUtilities.h>
+
+#ifdef _MSC_VER
+#  pragma warning(push)
+#  pragma warning (disable: 4189)
+#endif
+
 #include <boost/interprocess/containers/vector.hpp>
 #include <boost/interprocess/containers/string.hpp>
 #include <boost/interprocess/managed_shared_memory.hpp>
 #include <boost/interprocess/containers/map.hpp>
 #include <boost/interprocess/smart_ptr/shared_ptr.hpp>
 #include <boost/interprocess/offset_ptr.hpp>
-#include <Safir/Dob/Typesystem/ToolSupport/TypeParser.h>
-#include <Safir/Dob/Typesystem/ToolSupport/TypeUtilities.h>
+
+#ifdef _MSC_VER
+#  pragma warning(pop)
+#endif
 
 using namespace Safir::Dob::Typesystem::ToolSupport;
 

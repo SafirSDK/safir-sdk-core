@@ -23,10 +23,22 @@
 ******************************************************************************/
 #pragma once
 
-#include <boost/regex.hpp>
 #include <boost/lexical_cast.hpp>
-    #include <boost/asio.hpp>
-    #include <boost/asio/ip/udp.hpp>
+#include <boost/asio.hpp>
+#include <boost/asio/ip/udp.hpp>
+
+
+#ifdef _MSC_VER
+#  pragma warning(push)
+#  pragma warning (disable: 4005)
+#endif
+
+#include <boost/regex.hpp>
+
+#ifdef _MSC_VER
+#  pragma warning(pop)
+#endif
+
 
 #ifdef _MSC_VER
     #pragma warning (push)
