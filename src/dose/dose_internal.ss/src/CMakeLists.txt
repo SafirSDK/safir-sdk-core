@@ -19,19 +19,11 @@ TARGET_LINK_LIBRARIES(dose_internal PRIVATE
 #only make them public for the Core tree build, not for the exported cmake
 #configuration. This allows for other parts of core to include dose_internal things
 #without having to add thread and system to their link dependencies.
-#The reason for having different code on windows and Linux is a bug in cmake, which
-#makes the correct code (which is in the Linux branch) not work on Windows.
-if (MSVC)
-  TARGET_LINK_LIBRARIES(dose_internal PRIVATE
-    PUBLIC
+
+TARGET_LINK_LIBRARIES(dose_internal PRIVATE
+  PUBLIC
     Boost::thread
     Boost::system)
-else()
-  TARGET_LINK_LIBRARIES(dose_internal PRIVATE
-    PUBLIC
-    "$<BUILD_INTERFACE:Boost::thread>"
-    "$<BUILD_INTERFACE:Boost::system>")
-endif()
 
 if (UNIX)
   TARGET_LINK_LIBRARIES(dose_internal PRIVATE rt)
