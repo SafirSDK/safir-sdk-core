@@ -61,35 +61,41 @@ pipeline {
                     stage('Build and Unit Test') {
                         steps {
                             script {
-                                if (isUnix()) {
-                                    sh """
-                                       export PATH=$PATH:/home/jenkins/.local/bin
-                                       build/build.py --jenkins --package
-                                    """
-                                }
-                                else {
-                                    bat 'build/build.py --jenkins --package'
-                                }
+                                sh label:  "Running build script.",
+                                   script: """
+                                           export PATH=$PATH:/home/jenkins/.local/bin
+                                           build/build.py --jenkins --package
+                                           """
                             }
                         }
                     }
                     stage('Archive') {
                         steps {
                             script {
-                                sh label: "Moving artifacts to ${PLATFORM}-${ARCH}-${BUILD_TYPE}",
-                                script: """mkdir ${PLATFORM}-${ARCH}-${BUILD_TYPE}
-                                       mv tmp/*.deb ${PLATFORM}-${ARCH}-${BUILD_TYPE}
-                                """
+                                sh label: "Moving artifacts to ${PLATFORM}-${ARCH}-${BUILD_TYPE}.",
+                                   script: """
+                                           mkdir ${PLATFORM}-${ARCH}-${BUILD_TYPE}
+                                           mv tmp/*.deb ${PLATFORM}-${ARCH}-${BUILD_TYPE}
+                                           """
 
                                 archiveArtifacts artifacts: '**/*.deb', fingerprint: true
                             }
                         }
-                    }/*
+                    }
                     stage('Analyze') {
                         steps {
-                            recordIssues sourceCodeEncoding: 'UTF-8', skipBlames: true, skipPublishingChecks: true, tools: [cmake(id:'${PLATFORM}-${ARCH}-${BUILD_TYPE}'), gcc(id:'${PLATFORM}-${ARCH}-${BUILD_TYPE}'), java(id:'${PLATFORM}-${ARCH}-${BUILD_TYPE}'), msBuild(id:'${PLATFORM}-${ARCH}-${BUILD_TYPE}'), doxygen(id:'${PLATFORM}-${ARCH}-${BUILD_TYPE}')]
+                            recordIssues(sourceCodeEncoding: 'UTF-8',
+                                         skipBlames: true,
+                                         skipPublishingChecks: true,
+                                         healthy: 1,
+                                         unhealthy:10,
+                                         tools: [cmake(id:"${PLATFORM}-${ARCH}-${BUILD_TYPE}_cmake"),
+                                                 gcc(id:"${PLATFORM}-${ARCH}-${BUILD_TYPE}_gcc"),
+                                                 java(id:"${PLATFORM}-${ARCH}-${BUILD_TYPE}_java"),
+                                                 doxygen(id:"${PLATFORM}-${ARCH}-${BUILD_TYPE}_doxygen")
+                                                ])
                         }
-                    }*/
+                    }
 
                 }
                 post {
