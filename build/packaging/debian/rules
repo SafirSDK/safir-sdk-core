@@ -50,11 +50,6 @@ override_dh_auto_test:
 	cd obj-$(DEB_BUILD_GNU_TYPE) && /usr/bin/ctest --output-on-failure -T Test --no-compress-output
 
 
-#workaround for bug in cli-common-dev.
-override_dh_clideps:
-	pwd|grep -q " " && echo "Skipping dh_clideps since there is a space in pwd" || dh_clideps
-
-
 #make debug symbols go in separate package
 override_dh_strip:
 	dh_strip --dbg-package=safir-sdk-core-dbg
