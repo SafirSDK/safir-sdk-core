@@ -28,18 +28,27 @@ endif()
 
 include(${CMAKE_BINARY_DIR}/conan.cmake)
 
+set(CONAN_PROTOBUF_VERSION "3.17.1")
+
 if (MSVC)
-  set (CONAN_EXTRA_REQUIREMENTS boost/1.77.0)
+  set (CONAN_EXTRA_REQUIREMENTS boost/1.76.0)
 
   set (CONAN_EXTRA_OPTIONS
     boost:shared=True
     boost:without_wave=True
+    boost:without_fiber=True
+    boost:without_context=True
+    boost:without_coroutine=True
     boost:without_serialization=True
     boost:without_python=True
     boost:without_graph=True
+    boost:without_math=True
+    boost:without_json=True
     boost:bzip2=False
     boost:zlib=False
     )
+	
+  set(CONAN_PROTOBUF_VERSION "[<3.15]")
 
   set (CONAN_IMPORTS_WINDOWS
     IMPORTS
@@ -48,8 +57,8 @@ if (MSVC)
       #"include, *.hpp -> ./include"
     )
 
-  set (CONAN_SETTINGS_WINDOWS
-    compiler.toolset=v142)
+  #set (CONAN_SETTINGS_WINDOWS
+  #  compiler.toolset=v140)
 endif()
 
 conan_cmake_configure(
@@ -57,7 +66,7 @@ conan_cmake_configure(
     sentry-breakpad/0.4.12
     websocketpp/0.8.2
     rapidjson/cci.20200410
-    protobuf/3.17.1
+    protobuf/${CONAN_PROTOBUF_VERSION}
     ${CONAN_EXTRA_REQUIREMENTS}
 
   OPTIONS
