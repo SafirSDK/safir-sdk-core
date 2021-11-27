@@ -37,7 +37,7 @@
 #  pragma warning (disable : 4100 4267 4251)
 #endif
 
-#include <boost/process.hpp>
+#include <boost/process/child.hpp>
 #include <boost/filesystem.hpp>
 
 #if defined _MSC_VER

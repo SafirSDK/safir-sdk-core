@@ -43,9 +43,7 @@
 
 #include <boost/asio.hpp>
 #include <boost/asio/steady_timer.hpp>
-#include <boost/process.hpp>
-#include <boost/process/extend.hpp>
-#include <boost/process/async_system.hpp>
+#include <boost/process/child.hpp>
 
 #if defined _MSC_VER
 #  pragma warning (pop)

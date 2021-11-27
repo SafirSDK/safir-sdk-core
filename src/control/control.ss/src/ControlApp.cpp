@@ -47,6 +47,9 @@
 #endif
 
 #include <boost/filesystem.hpp>
+#include <boost/process/environment.hpp>
+#include <boost/process/env.hpp>
+#include <boost/process/async.hpp>
 #include <boost/thread.hpp>
 
 #if defined _MSC_VER

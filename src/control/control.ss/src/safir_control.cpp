@@ -41,6 +41,7 @@
 #include <boost/program_options.hpp>
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
+#include <boost/process/search_path.hpp>
 
 #if defined _MSC_VER
 #  pragma warning (pop)
