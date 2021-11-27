@@ -21,18 +21,24 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifndef __DOBEXPLORER_COMMON_HEADER_H__
-#define __DOBEXPLORER_COMMON_HEADER_H__
+#pragma once
 
 #ifdef _MSC_VER
+#pragma warning (disable: 4251)
+
 #pragma warning(push)
 #pragma warning (disable: 4127)
 #pragma warning (disable: 4244)
 #endif
 
-#include <QtGui>
-#include <QtCore/qstring.h>
-#include <QtWidgets>
+#include <QObject>
+#include <QDateTime>
+#include <QPaintEvent>
+#include <QPainter>
+#include <QPainterPath>
+#include <QFrame>
+#include <QTimer>
+#include <QMessageBox>
 
 #ifdef _MSC_VER
 #pragma warning(pop)
@@ -40,4 +46,4 @@
 #pragma warning (disable: 4355)
 #endif
 
-#endif
+
