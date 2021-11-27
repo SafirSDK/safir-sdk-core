@@ -63,20 +63,10 @@ set(CMAKE_REQUIRED_DEFINITIONS
   -DBOOST_CHRONO_HEADER_ONLY
   -DBOOST_DATE_TIME_NO_LIB)
 
-if(MSVC)
-   #We have a weird issue which causes a buffer overrun error when using Visual Studio 2013
-   #and Boost 1.55 in 64 bit and release builds.
-   #Don't know if this is a bug in our code or in the compiler or in boost.
-   #The workaround below disables some optimizations and all inlining in release builds
-   #which appears to resolve the problem.
-   if(MSVC_VERSION EQUAL 1800 AND Boost_VERSION EQUAL 105500 AND CMAKE_SIZEOF_VOID_P EQUAL 8)
-     STRING(REGEX REPLACE "/Ob1" "/Ob0" CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
-     STRING(REGEX REPLACE "/O2" "/O1" CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
-     STRING(REGEX REPLACE "/Ob1" "/Ob0" CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
-     STRING(REGEX REPLACE "/O2" "/O1" CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
-   endif()
+#Visual Studio 2015 breaks something in boost asio when combined with boost process and variadic templates
+if (MSVC_VERSION EQUAL 1900 AND Boost_VERSION VERSION_EQUAL 1.76.0)
+  add_definitions(-DBOOST_ASIO_DISABLE_VARIADIC_TEMPLATES)
 endif()
-
 
 #Set up our patched include files
 set (SAFIR_BOOST_PATCHES_PATH "${safir-sdk-core_SOURCE_DIR}/src/boost_patches/${Boost_LIB_VERSION}")
