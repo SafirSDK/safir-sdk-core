@@ -53,19 +53,19 @@ IF (NOT CSHARP_FOUND)
 ENDIF ()
 
 
-#On Windows we want to ensure that we target version 4.6.2 of the .NET framework, so we
+#On Windows we want to ensure that we target version 4.6.1 of the .NET framework, so we
 #point it out specifically. On Linux it doesnt matter so much, since we target whatever
 #is in the distro repos.
 #This code below could in the future be improved to be more general, but this works for now.
 if (WIN32)
-  set (DOTNET_FRAMEWORK_LIBPATH "C:/Program Files (x86)/Reference Assemblies/Microsoft/Framework/.NETFramework/v4.6.2/")
+  set (DOTNET_FRAMEWORK_LIBPATH "C:/Program Files (x86)/Reference Assemblies/Microsoft/Framework/.NETFramework/v4.6.1/")
   if (NOT IS_DIRECTORY "${DOTNET_FRAMEWORK_LIBPATH}")
-    set (DOTNET_FRAMEWORK_LIBPATH "C:/Program Files/Reference Assemblies/Microsoft/Framework/.NETFramework/v4.6.2/")
+    set (DOTNET_FRAMEWORK_LIBPATH "C:/Program Files/Reference Assemblies/Microsoft/Framework/.NETFramework/v4.6.1/")
   endif()
   if (IS_DIRECTORY "${DOTNET_FRAMEWORK_LIBPATH}")
     message(STATUS "Using .NET Framework assemblies in ${DOTNET_FRAMEWORK_LIBPATH}")
   else()
-    message(FATAL_ERROR "Could not find the .NET 4.6.2 assemblies")
+    message(FATAL_ERROR "Could not find the .NET 4.6.1 assemblies")
   endif()
 
   SET(CSHARP_COMPILER_FRAMEWORK_ARGUMENTS "-nostdlib
