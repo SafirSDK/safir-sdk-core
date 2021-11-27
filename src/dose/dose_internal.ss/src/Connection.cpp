@@ -39,17 +39,17 @@
 #include <Safir/Dob/Typesystem/Operations.h>
 #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
-#include <boost/regex.hpp>
 
 #ifdef _MSC_VER
-  #pragma warning(push)
-  #pragma warning(disable: 4702)
+#  pragma warning(push)
+#  pragma warning(disable: 4702 4005)
 #endif
 
+#include <boost/regex.hpp>
 #include <boost/lexical_cast.hpp>
 
 #ifdef _MSC_VER
-  #pragma warning(pop)
+#  pragma warning(pop)
 #endif
 
 using namespace std::placeholders;

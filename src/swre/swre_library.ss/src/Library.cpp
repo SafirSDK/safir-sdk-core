@@ -27,15 +27,6 @@
 #include <Safir/Dob/Typesystem/Exceptions.h>
 #include <Safir/Application/BackdoorCommand.h>
 
-#if _MSC_VER
-#pragma warning(push)
-#pragma warning (disable: 4702)
-#endif
-#include <boost/lexical_cast.hpp>
-#if _MSC_VER
-#pragma warning(pop)
-#endif
-
 #include <Safir/Dob/ConnectionAspectMisc.h>
 #include <Safir/Dob/NodeParameters.h>
 #include <Safir/Dob/OverflowException.h>
@@ -46,13 +37,26 @@
 #include <Safir/Utilities/ProcessInfo.h>
 #include <Safir/Utilities/Internal/ConfigReader.h>
 #include <Safir/Utilities/CrashReporter.h>
-#include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>
 #include <iomanip>
 #include <iostream>
 
+#ifdef _MSC_VER
+  #pragma warning(push)
+  #pragma warning(disable: 4702 4005)
+#endif
+
+#include <boost/regex.hpp>
+#include <boost/lexical_cast.hpp>
+
+#ifdef _MSC_VER
+  #pragma warning(pop)
+#endif
+
+
+
 #ifdef GetMessage
-#undef GetMessage
+#  undef GetMessage
 #endif
 
 namespace Safir

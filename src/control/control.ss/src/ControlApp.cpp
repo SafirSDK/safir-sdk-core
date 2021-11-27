@@ -33,7 +33,6 @@
 #include <Safir/Utilities/Internal/Id.h>
 #include <iostream>
 #include <map>
-#include <boost/regex.hpp>
 #include <boost/atomic.hpp>
 
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
@@ -43,9 +42,10 @@
 //disable warnings in boost
 #if defined _MSC_VER
 #  pragma warning (push)
-#  pragma warning (disable : 4100 4267 4251)
+#  pragma warning (disable : 4100 4267 4251 4005)
 #endif
 
+#include <boost/regex.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/process/environment.hpp>
 #include <boost/process/env.hpp>

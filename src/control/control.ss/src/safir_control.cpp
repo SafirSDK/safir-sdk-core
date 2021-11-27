@@ -29,15 +29,15 @@
 #include <Safir/Utilities/Internal/SystemLog.h>
 #include <Safir/Utilities/Internal/Id.h>
 #include <iostream>
-#include <boost/regex.hpp>
 #include <boost/atomic.hpp>
 
 //disable warnings in boost
 #if defined _MSC_VER
 #  pragma warning (push)
-#  pragma warning (disable : 4100 4267 4251 4913)
+#  pragma warning (disable : 4100 4267 4251 4913 4005)
 #endif
 
+#include <boost/regex.hpp>
 #include <boost/program_options.hpp>
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>

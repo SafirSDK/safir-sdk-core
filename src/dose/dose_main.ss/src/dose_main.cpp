@@ -26,11 +26,23 @@
 #include <Safir/Utilities/Internal/SystemLog.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/CrashReporter.h>
-#include <boost/regex.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/asio.hpp>
 #include <boost/atomic.hpp>
 #include <boost/filesystem/fstream.hpp>
+
+
+#ifdef _MSC_VER
+#  pragma warning(push)
+#  pragma warning(disable: 4005)
+#endif
+
+#include <boost/regex.hpp>
+
+#ifdef _MSC_VER
+#  pragma warning(pop)
+#endif
+
 
 //This is a sanity check to make sure we've taken down all the threads in dose_main
 //before exiting. It is only implemented in Linux at the moment, which is okay since it

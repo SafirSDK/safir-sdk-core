@@ -22,7 +22,6 @@
 *
 ******************************************************************************/
 #include "Safir/Application/BackdoorKeeper.h"
-#include <boost/regex.hpp>
 
 #include <Safir/Application/BackdoorCommand.h>
 #include <Safir/Logging/Log.h>
@@ -30,8 +29,22 @@
 #include <Safir/Dob/ThisNodeParameters.h>
 #include <Safir/Dob/ConnectionAspectMisc.h>
 
+
+#ifdef _MSC_VER
+#  pragma warning(push)
+#  pragma warning(disable: 4005)
+#endif
+
+#include <boost/regex.hpp>
+#include <boost/lexical_cast.hpp>
+
+#ifdef _MSC_VER
+#  pragma warning(pop)
+#endif
+
+
 #ifdef GetMessage
-#undef GetMessage
+#  undef GetMessage
 #endif
 
 const Safir::Dob::Typesystem::TypeId PI_CMD_TYPE_ID = Safir::Application::BackdoorCommand::ClassTypeId;

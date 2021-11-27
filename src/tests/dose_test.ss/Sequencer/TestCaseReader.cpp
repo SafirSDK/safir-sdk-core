@@ -23,23 +23,23 @@
 ******************************************************************************/
 
 #include "TestCaseReader.h"
-#include <boost/regex.hpp>
 #include <boost/filesystem.hpp>
 #include <Safir/Dob/Typesystem/Serialization.h>
 #include <Safir/Dob/Typesystem/Utilities.h>
 #include <iostream>
 
-
 #ifdef _MSC_VER
   #pragma warning(push)
-  #pragma warning(disable: 4702)
+  #pragma warning(disable: 4702 4005)
 #endif
 
+#include <boost/regex.hpp>
 #include <boost/lexical_cast.hpp>
 
 #ifdef _MSC_VER
   #pragma warning(pop)
 #endif
+
 
 
 //static member initialization
