@@ -29,7 +29,7 @@
 #include <boost/date_time/c_local_time_adjustor.hpp>
 #include <iomanip>
 #include <time.h>
-#include <boost/math/special_functions/round.hpp>
+#include <cmath>
 
 void SetTZ(const std::string& value)
 {
@@ -53,9 +53,7 @@ boost::posix_time::time_duration get_utc_offset()
             boost::posix_time::microsec_clock::universal_time();
         
         const double seconds = offset.total_microseconds() / 1.0e6;
-        const long rounded = static_cast<long>(boost::math::round(seconds));
-
-        //        std::wcout << "test: "<< offset << " (" << rounded << ")" << std::endl;
+        const long rounded = std::lround(seconds);
 
         //try until we get an even number of minutes
         //(the problem is that the two calls to get the time above
