@@ -56,7 +56,7 @@ if (MSVC)
    ENDIF()
 
    #generated libraries sometimes get very large, so we need to use bigobj compiler flag
-   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /bigobj /WX")
+   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /bigobj")
 
    #enable auto-inlining for RelWithDebInfo builds
    set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} /Ob2")
