@@ -39,10 +39,15 @@ import codecs
 from xml.sax.saxutils import escape
 from distutils.spawn import find_executable
 
+#Make linux_distribution available from some suitable package, falling back to returning that we don't know.
 try:
     from distro import linux_distribution
 except:
-    from platform import linux_distribution
+    try:
+        from platform import linux_distribution
+    except:
+        def linux_distribution():
+            return ("unknown",)
 
 if sys.version < '3':
     print("WARNING: Python 2.x support is deprecated and will not be supported by Safir SDK Core 6.5")
