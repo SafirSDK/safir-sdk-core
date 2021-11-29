@@ -434,6 +434,5 @@ namespace Utilities
         m_impl->Start(synchronized);
     }
 
-
 }
 }
