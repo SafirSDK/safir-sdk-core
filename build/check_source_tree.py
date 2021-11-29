@@ -23,10 +23,13 @@
 # along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-import sys, os, fnmatch
+import sys
+import os
+import fnmatch
 
 #exact matches
-ignore_directories = (".git", ".svn", ".hg", "boost", "rapidjson", "websocketpp")
+ignore_directories = (".git", ".svn", ".hg", "boost", "rapidjson",
+                      "websocketpp", "RelWithDebInfo", "Release", "Debug", "bin")
 
 #glob patterns for files to not check for tabs
 ignore_files = ("*.xcf", "*.xsl", "*.bmp", "*.ico", "*.eap", "*.png", "Makefile", "rules", "*.snk", "*.dia", "*.resx")
@@ -40,10 +43,12 @@ def log(*args, **kwargs):
 def check_tabs(filename):
     try:
         #log("checking file", filename)
+        count = 0
         with open(filename, "r") as f:
             for line in f:
+                count += 1
                 if "\t" in line:
-                    log(" !!!", filename, "contains a tab!!!")
+                    log(f"{os.path.abspath(filename)}:{count}:0 error: Tab character on line")
                     return False
     except UnicodeDecodeError:
         log(" !!! UnicodeDecodeError while reading", filename)
