@@ -57,7 +57,16 @@ pipeline {
                             }
                         }
                     }
-
+                    stage('Check source tree') {
+                        steps {
+                            script {
+                                sh label:  "Running check_source_tree.py.",
+                                   script: """
+                                           build/check_source_tree.py
+                                           """
+                            }
+                        }
+                    }
                     stage('Build and Unit Test') {
                         steps {
                             script {
