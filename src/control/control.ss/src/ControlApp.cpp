@@ -632,7 +632,7 @@ void ControlApp::HandleDoseMainExit(int exitCode, const std::error_code& error)
         LogStatus(ostr.str());
     }
 #else
-	#error "Control does not support this platform yet"
+    #error "Control does not support this platform yet"
 #endif
 
     lllog(1) << "CTRL: dose_main has exited" << std::endl;

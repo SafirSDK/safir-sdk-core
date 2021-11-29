@@ -60,7 +60,7 @@ namespace Utilities
 
         void StopMonitorPid(const pid_t pid)
         {
-		    m_strand.dispatch([this,pid]{StopMonitorPidInternal(pid);});
+            m_strand.dispatch([this,pid]{StopMonitorPidInternal(pid);});
         }
     private:
         void StopInternal();
