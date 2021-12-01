@@ -58,8 +58,14 @@ if (MSVC)
    #generated libraries sometimes get very large, so we need to use bigobj compiler flag
    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /bigobj")
 
-   #enable auto-inlining for RelWithDebInfo builds
-   set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} /Ob2")
+   #enable auto-inlining for RelWithDebInfo builds 
+   IF(CMAKE_CXX_FLAGS_RELWITHDEBINFO MATCHES "/Ob[0-4]")
+     STRING(REGEX REPLACE "/Ob[0-4]" "/Ob2"
+       CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
+   ELSE()
+     SET(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} /Ob2")
+   ENDIF()
+
 
    #Set linker flag /OPT:REF (eliminates functions and/or data that are never referenced)
    #reduces size of executable to approx the same size as in Release mode.
