@@ -172,10 +172,7 @@ class __WindowsStager():
 
     def __copy_qt_dlls(self, dir):
         """
-        Try to copy a bunch of qt files. This is a mismash of qt4 and qt5 stuff,
-        but since QTDIR should only contain one qt version, this should work.
-        The stuff that is marked as for qt4 are the ones that are needed for Qt4,
-        all others are for qt5.
+        Try to copy a bunch of qt files.
         """
 
         names = (
@@ -189,9 +186,7 @@ class __WindowsStager():
             "icuin51.dll",
             "icuin53.dll",
             "icuuc51.dll",
-            "icuuc53.dll",
-            "QtCore4.dll",  #for qt4
-            "QtGui4.dll")  #for qt4
+            "icuuc53.dll")
 
         for file in names:
             path = os.path.join(dir, "bin", file)
