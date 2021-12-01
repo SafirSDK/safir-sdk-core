@@ -35,6 +35,7 @@ if (MSVC)
 
   set (CONAN_EXTRA_OPTIONS
     boost:shared=True
+    boost:layout=versioned
     boost:without_wave=True
     boost:without_fiber=True
     boost:without_context=True
@@ -52,9 +53,9 @@ if (MSVC)
 
   set (CONAN_IMPORTS_WINDOWS
     IMPORTS
-      "bin, *.dll -> ./bin"
-      "lib, *.lib -> ./lib"
-      #"include, *.hpp -> ./include"
+      "bin, *.dll -> ./bin @ root_package=boost"
+      "lib, *.lib -> ./lib @ root_package=boost"
+      "include, *.hpp -> ./include @ root_package=boost"
     )
 
   #set (CONAN_SETTINGS_WINDOWS
