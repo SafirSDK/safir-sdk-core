@@ -103,32 +103,23 @@ class __WindowsStager():
 
     def __copy_boost(self):
         self.logger.log("Copying boost stuff", "detail")
-        boost_dir = os.environ.get("BOOST_ROOT")
-        #Try some other directory
-        if boost_dir is None and os.path.isdir(os.path.join("C:", os.sep, "boost")):
-            boost_dir = os.path.join("C:", os.sep, "boost")
-        if boost_dir is None:
-            raise StagingError("Failed to find boost installation")
+        headers_copied = False
+        for dir in ["Debug", "RelWithDebInfo", "MinSizeRel", "Release"]:
+            src_dir = os.path.abspath(os.path.join(".",dir))
+            if not os.path.isdir(src_dir):
+                continue
+            lib_dir = os.path.join(src_dir, "lib")
+            dll_dir = os.path.join(src_dir, "bin")
+            include_dir = os.path.join(src_dir, "include")
 
-        # find lib dir
-        boost_lib_dir = os.path.join(boost_dir, "lib")
-        if not os.path.isdir(boost_lib_dir):
-            raise StagingError("Failed to find boost lib dir")
-
-        boost_libraries = (
-            "atomic",
-            "chrono",  #we don't need this ourselves, but users may?
-            "date_time",
-            "filesystem",
-            "program_options",
-            "regex",
-            "system",
-            "thread",
-            "timer")
-
-        self.__copy_boost_libs(boost_lib_dir, boost_libraries)
-        self.__copy_boost_dlls(boost_lib_dir, boost_libraries)
-        self.__copy_header_dir(os.path.join(boost_dir, "boost"))
+            if not os.path.isdir(lib_dir) or not os.path.isdir(dll_dir) or not os.path.isdir(include_dir):
+                raise StagingError("Failed to find one of the boost dirs")
+        
+            self.__copy_boost_libs(lib_dir)
+            self.__copy_boost_dlls(dll_dir)
+            if not headers_copied:
+                self.__copy_boost_headers(include_dir)
+                headers_copied = True
 
     def __copy_qt(self):
         self.logger.log("Copying the Qt runtime", "detail")
@@ -139,8 +130,17 @@ class __WindowsStager():
             self.__copy_qt_dlls(qt_dir)
 
     def __copy_ninja(self):
-        self.logger.log("Copying ninja.exe")
-        self.__copy_exe("ninja.exe")
+        self.logger.log("Checking if ninja.exe is a chocolatey shim")
+        result = subprocess.run(("ninja.exe", "--shimgen-help"), encoding="utf-8", stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        if re.search("This is a shim", result.stdout) is not None:
+            match = re.search("Target: '(.*)'$", result.stdout, re.MULTILINE)
+            if match is None:
+                raise StagingError("Failed to parse ninja shim info!")
+            self.logger.log(f" - Copying shimmed ninja.exe from {match.group(1)}")
+            copy_file(match.group(1), self.DLL_DESTINATION)
+        else:
+            self.logger.log(" - Copying non-shimmed ninja.exe")
+            self.__copy_exe("ninja.exe")
 
     def run(self):
         self.__copy_boost()
@@ -154,20 +154,32 @@ class __WindowsStager():
         dst = os.path.join(self.HEADER_DESTINATION, os.path.split(dir)[-1])
         copy_tree(dir, dst)
 
-    def __copy_boost_libs(self, dir, libraries):
+    def __copy_boost_headers(self, dir):
+        path_name_filter = re.compile(r"boost-[0-9_]*")
+        dirlist = os.listdir(dir)
+        for path in dirlist:
+            match = path_name_filter.match(path)
+            if match is not None and os.path.isdir(os.path.join(dir, path, "boost")):
+                self.logger.log(f" -  {path}/boost")
+                self.__copy_header_dir(os.path.join(dir, path, "boost"))
+
+
+    def __copy_boost_libs(self, dir):
         file_name_filter = re.compile(r"boost_(.*)-vc.*-mt-.*\.lib")
         dirlist = os.listdir(dir)
         for file in dirlist:
             match = file_name_filter.match(file)
-            if match is not None and match.group(1) in libraries:
+            if match is not None:
+                self.logger.log(f" -  {file}")
                 copy_file(os.path.join(dir, file), self.LIB_DESTINATION)
 
-    def __copy_boost_dlls(self, dir, libraries):
+    def __copy_boost_dlls(self, dir):
         file_name_filter = re.compile(r"boost_(.*)-vc.*-mt-.*\.dll")
         dirlist = os.listdir(dir)
         for file in dirlist:
             match = file_name_filter.match(file)
-            if match is not None and match.group(1) in libraries:
+            if match is not None:
+                self.logger.log(f" -  {file}")
                 copy_file(os.path.join(dir, file), self.DLL_DESTINATION)
 
     def __copy_qt_dlls(self, dir):
