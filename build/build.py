@@ -436,7 +436,7 @@ class BuilderBase(object):
 
         self.debug_only = False
         if self.arguments.jenkins:
-            if os.environ.get("Config") == "DebugOnly":
+            if os.environ.get("BUILD_TYPE") == "DebugOnly":
                 LOGGER.log("Using Config 'DebugOnly', building everything in Debug only.")
                 self.configs = ("Debug", )
                 self.debug_only = True

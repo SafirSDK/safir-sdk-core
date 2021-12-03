@@ -4,15 +4,15 @@ pipeline {
         stage('Build') {
             matrix {
                 agent {
-                    label "${PLATFORM}-${ARCH}-build"
+                    label "${BUILD_PLATFORM}-${BUILD_ARCH}-build"
                 }
                 axes {
                     axis {
-                        name 'PLATFORM'
+                        name 'BUILD_PLATFORM'
                         values 'ubuntu-focal', 'debian-bullseye' //, 'msvc2015', 'msvc2019', 'msvc2022'
                     }
                     axis {
-                        name 'ARCH'
+                        name 'BUILD_ARCH'
                         values 'x86', 'amd64'
                     }
                     axis {
@@ -23,11 +23,11 @@ pipeline {
                 excludes {
                     exclude {
                         axis { //ubuntu does no longer support 32 bit builds
-                            name 'PLATFORM'
+                            name 'BUILD_PLATFORM'
                             values 'ubuntu-focal'
                         }
                         axis {
-                            name 'ARCH'
+                            name 'BUILD_ARCH'
                             values 'x86'
                         }
                     }
@@ -81,10 +81,10 @@ pipeline {
                     stage('Archive') {
                         steps {
                             script {
-                                sh label: "Moving artifacts to ${PLATFORM}-${ARCH}-${BUILD_TYPE}.",
+                                sh label: "Moving artifacts to ${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}.",
                                    script: """
-                                           mkdir ${PLATFORM}-${ARCH}-${BUILD_TYPE}
-                                           mv tmp/*.deb ${PLATFORM}-${ARCH}-${BUILD_TYPE}
+                                           mkdir ${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}
+                                           mv tmp/*.deb ${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}
                                            """
 
                                 archiveArtifacts artifacts: '**/*.deb', fingerprint: true
@@ -98,10 +98,10 @@ pipeline {
                                          skipPublishingChecks: true,
                                          healthy: 1,
                                          unhealthy:10,
-                                         tools: [cmake(id:"${PLATFORM}-${ARCH}-${BUILD_TYPE}_cmake"),
-                                                 gcc(id:"${PLATFORM}-${ARCH}-${BUILD_TYPE}_gcc"),
-                                                 java(id:"${PLATFORM}-${ARCH}-${BUILD_TYPE}_java"),
-                                                 doxygen(id:"${PLATFORM}-${ARCH}-${BUILD_TYPE}_doxygen")
+                                         tools: [cmake(id:"${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}_cmake"),
+                                                 gcc(id:"${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}_gcc"),
+                                                 java(id:"${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}_java"),
+                                                 doxygen(id:"${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}_doxygen")
                                                 ])
                         }
                     }
