@@ -51,17 +51,17 @@ if (MSVC)
     boost:zlib=False
     )
 
-  set(CONAN_PROTOBUF_VERSION "[<3.15]")
-
+  #Visual Studio 2015 does not appear to be able to compile newer protobuf versions.
+  if (MSVC_VERSION EQUAL 1900)
+    set(CONAN_PROTOBUF_VERSION "[<3.15]")
+  endif()
+  
   set (CONAN_IMPORTS_WINDOWS
     IMPORTS
       "bin, *.dll -> ./bin @ root_package=boost"
       "lib, *.lib -> ./lib @ root_package=boost"
       "include, *.hpp -> ./include @ root_package=boost"
     )
-
-  #set (CONAN_SETTINGS_WINDOWS
-  #  compiler.toolset=v140)
 endif()
 
 conan_cmake_configure(
