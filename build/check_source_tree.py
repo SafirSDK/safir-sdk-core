@@ -44,14 +44,14 @@ def check_tabs(filename):
     try:
         #log("checking file", filename)
         count = 0
-        with open(filename, "r") as f:
+        with open(filename, "r", encoding="utf-8") as f:
             for line in f:
                 count += 1
                 if "\t" in line:
                     log(f"{os.path.abspath(filename)}:{count}:0 error: Tab character on line")
                     return False
-    except UnicodeDecodeError:
-        log(" !!! UnicodeDecodeError while reading", filename)
+    except UnicodeDecodeError as e:
+        log(f" !!! UnicodeDecodeError ({str(e)}) while reading '{filename}'.")
         return False
     return True
 
