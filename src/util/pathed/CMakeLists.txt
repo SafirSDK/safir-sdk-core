@@ -1,5 +1,5 @@
 #This tool is only useful on windows.
-if (NOT WIN32)
+if (NOT WIN32 OR NOT CSHARP_FOUND)
   return()
 endif()
 
