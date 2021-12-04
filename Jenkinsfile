@@ -60,21 +60,37 @@ pipeline {
                     stage('Check source tree') {
                         steps {
                             script {
-                                sh label:  "Running check_source_tree.py.",
-                                   script: """
-                                           build/check_source_tree.py
-                                           """
+                                if (isUnix()) {
+                                    sh label:  "Running check_source_tree.py.",
+                                       script: """
+                                               build/check_source_tree.py
+                                               """
+                                }
+                                else {
+                                    bat label:  "Running check_source_tree.py.",
+                                        script: """
+                                                build\\check_source_tree.py
+                                                """
+                                }
                             }
                         }
                     }
                     stage('Build and Unit Test') {
                         steps {
                             script {
-                                sh label:  "Running build script.",
-                                   script: """
-                                           export PATH=$PATH:/home/jenkins/.local/bin
-                                           build/build.py --jenkins --package
-                                           """
+                                if (isUnix()) {
+                                    sh label:  "Running build script.",
+                                       script: """
+                                               export PATH=$PATH:/home/jenkins/.local/bin
+                                               build/build.py --jenkins --package
+                                               """
+                                }
+                                else {
+                                    bat label:  "Running build script.",
+                                        script: """
+                                                build\\build.py --jenkins --package
+                                                """
+                                }
                             }
                         }
                     }
