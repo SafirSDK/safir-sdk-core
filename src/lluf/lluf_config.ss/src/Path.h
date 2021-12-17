@@ -35,6 +35,7 @@
 #define LLUF_CONFIG_READER_USE_WINDOWS
 #  include <windows.h>
 #  include <Shlobj.h>
+#  include <comdef.h>
 #else
 #  error You need to implement ConfigReader for this platform!
 #endif

@@ -23,6 +23,8 @@
 ******************************************************************************/
 #include "../src/ConfigReaderImpl.h"
 #include <iostream>
+#include <codecvt>
+#include <locale>
 
 namespace
 {
@@ -75,17 +77,23 @@ namespace
     {
         char path[MAX_PATH];
 
-        if(SUCCEEDED(SHGetFolderPathA(NULL,
-                                     csidl|CSIDL_FLAG_CREATE,
-                                     NULL,
-                                     0,
-                                     path)))
+        HRESULT result = SHGetFolderPathA(NULL,
+                                          csidl|CSIDL_FLAG_CREATE,
+                                          NULL,
+                                          0,
+                                          path);
+        if(SUCCEEDED(result))
         {
             return path;
         }
         else
         {
-            throw std::logic_error("Call to SHGetFolderPath failed!");
+            _com_error error(result);
+            const std::string errorText =
+                std::wstring_convert<std::codecvt_utf8<wchar_t>>().to_bytes(error.ErrorMessage());
+            std::ostringstream ostr;
+            ostr << "Call to SHGetFolderPath (" << csidl << ") failed: " << errorText;
+            throw std::logic_error(ostr.str());
         }
     }
 #endif
