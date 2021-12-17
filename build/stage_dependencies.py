@@ -121,14 +121,6 @@ class __WindowsStager():
                 self.__copy_boost_headers(include_dir)
                 headers_copied = True
 
-    def __copy_qt(self):
-        self.logger.log("Copying the Qt runtime", "detail")
-        qt_dir = os.environ.get("QTDIR")
-        if qt_dir is None:
-            raise StagingError("QTDIR is not set! Cannot find Qt dlls!")
-        else:
-            self.__copy_qt_dlls(qt_dir)
-
     def __copy_ninja(self):
         self.logger.log("Checking if ninja.exe is a chocolatey shim")
         result = subprocess.run(("ninja.exe", "--shimgen-help"), encoding="utf-8", stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
@@ -144,7 +136,6 @@ class __WindowsStager():
 
     def run(self):
         self.__copy_boost()
-        self.__copy_qt()
         self.__copy_ninja()
 
     def __copy_header_dir(self, dir):
@@ -181,38 +172,6 @@ class __WindowsStager():
             if match is not None:
                 self.logger.log(f" -  {file}")
                 copy_file(os.path.join(dir, file), self.DLL_DESTINATION)
-
-    def __copy_qt_dlls(self, dir):
-        """
-        Try to copy a bunch of qt files.
-        """
-
-        names = (
-            "Qt5Core.dll",
-            "Qt5Widgets.dll",
-            "Qt5Gui.dll",
-            "LibGLESv2.dll",
-            "LibEGL.dll",
-            "icudt51.dll",
-            "icudt53.dll",
-            "icuin51.dll",
-            "icuin53.dll",
-            "icuuc51.dll",
-            "icuuc53.dll")
-
-        for file in names:
-            path = os.path.join(dir, "bin", file)
-            if os.path.isfile(path):
-                self.logger.log(" Copying " + file, "detail")
-                copy_file(path, self.DLL_DESTINATION)
-
-        qwindows = os.path.join(dir, "plugins", "platforms", "qwindows.dll")
-        if os.path.isfile(qwindows):
-            self.logger.log(" Copying qwindows.dll", "detail")
-            platforms = os.path.join(self.DLL_DESTINATION, "platforms")
-            mkdir(platforms)
-            copy_file(qwindows, platforms)
-
 
 def stage_dependencies(logger, stage):
     """
