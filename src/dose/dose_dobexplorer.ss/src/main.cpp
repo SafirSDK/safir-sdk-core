@@ -25,6 +25,11 @@
 #include "dosemon.h"
 #include <Safir/Utilities/CrashReporter.h>
 
+#ifdef SAFIR_LINK_QT_STATICALLY
+#include <QtPlugin>
+Q_IMPORT_PLUGIN (QWindowsIntegrationPlugin);
+#endif
+
 int main(int argc, char *argv[])
 {
     Safir::Utilities::CrashReporter::Start();

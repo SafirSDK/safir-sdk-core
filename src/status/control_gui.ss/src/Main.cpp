@@ -36,6 +36,11 @@
 #pragma warning (pop)
 #endif
 
+#ifdef SAFIR_LINK_QT_STATICALLY
+#include <QtPlugin>
+Q_IMPORT_PLUGIN (QWindowsIntegrationPlugin);
+#endif
+
 
 int main(int argc, char *argv[])
 {

@@ -39,8 +39,6 @@ conan_cmake_run(CONANFILE conanfile.py
                 ${CONAN_SETTINGS_WINDOWS}
                 BUILD missing)
 
-set (Qt5_DIR $ENV{QTDIR})
-
 #Set up the Safir SDK Core version by parsing version.txt
 #IMPORTANT: THE version.txt FILE NEEDS TO BE UPDATED FOR EVERY RELEASE
 #Remember: any updates that change APIs should update MAJOR, since

@@ -40,6 +40,22 @@ endif()
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 find_package(Qt5 COMPONENTS Core Widgets)
 
+if (MSVC)
+  # On Windows we build qt in Conan and link statically
+  target_link_libraries(Qt5::Widgets
+    INTERFACE
+    Qt5::QWindowsIntegrationPlugin
+    debug Qt5FontDatabaseSupportd
+    debug Qt5EventDispatcherSupportd
+    debug Qt5ThemeSupportd
+    debug Qt5WindowsUIAutomationSupportd
+    optimized Qt5FontDatabaseSupport
+    optimized Qt5EventDispatcherSupport
+    optimized Qt5ThemeSupport
+    optimized Qt5WindowsUIAutomationSupport)
+
+  add_definitions(-DSAFIR_LINK_QT_STATICALLY)
+endif()
 
 #
 # Install a target to the proper place. This function tries to put all parts
