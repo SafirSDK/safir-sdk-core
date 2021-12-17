@@ -30,74 +30,16 @@ endif()
 
 include(${CMAKE_BINARY_DIR}/conan.cmake)
 
-set(CONAN_PROTOBUF_VERSION "3.17.1")
-
 if (MSVC)
-  set (CONAN_EXTRA_REQUIREMENTS boost/1.76.0)
-
-  set (CONAN_EXTRA_OPTIONS
-    boost:shared=True
-    boost:layout=versioned
-    boost:without_wave=True
-    boost:without_fiber=True
-    boost:without_context=True
-    boost:without_coroutine=True
-    boost:without_serialization=True
-    boost:without_python=True
-    boost:without_graph=True
-    boost:without_math=True
-    boost:without_json=True
-    boost:bzip2=False
-    boost:zlib=False
-    )
-
-  #Visual Studio 2015 does not appear to be able to compile newer protobuf versions.
-  if (MSVC_VERSION EQUAL 1900)
-    set(CONAN_PROTOBUF_VERSION "[<3.15]")
-  endif()
-  
-  set (CONAN_IMPORTS_WINDOWS
-    IMPORTS
-      "bin, *.dll -> ./bin @ root_package=boost"
-      "lib, *.lib -> ./lib @ root_package=boost"
-      "include, *.hpp -> ./include @ root_package=boost"
-    )
+  set (CONAN_SETTINGS_WINDOWS compiler.toolset=v${MSVC_TOOLSET_VERSION})
 endif()
 
-conan_cmake_configure(
-  REQUIRES
-    sentry-breakpad/0.4.12
-    websocketpp/0.8.2
-    rapidjson/cci.20200410
-    protobuf/${CONAN_PROTOBUF_VERSION}
-    ${CONAN_EXTRA_REQUIREMENTS}
+conan_cmake_run(CONANFILE conanfile.py
+                BASIC_SETUP CMAKE_TARGETS
+                ${CONAN_SETTINGS_WINDOWS}
+                BUILD missing)
 
-  OPTIONS
-    websocketpp:asio=False
-    websocketpp:with_openssl=False
-    websocketpp:with_zlib=False
-    protobuf:lite=True
-    protobuf:shared=False
-    protobuf:with_zlib=False
-    ${CONAN_EXTRA_OPTIONS}
-
-  ${CONAN_IMPORTS_WINDOWS}
-
-  GENERATORS
-    cmake_find_package
-  )
-
-conan_cmake_autodetect(settings)
-
-conan_add_remote(NAME conancenter
-                 INDEX 1
-                 URL https://center.conan.io
-                 VERIFY_SSL True)
-
-conan_cmake_install(PATH_OR_REFERENCE .
-                    BUILD missing
-                    REMOTE conancenter
-                    SETTINGS ${settings} ${CONAN_SETTINGS_WINDOWS})
+set (Qt5_DIR $ENV{QTDIR})
 
 #Set up the Safir SDK Core version by parsing version.txt
 #IMPORTANT: THE version.txt FILE NEEDS TO BE UPDATED FOR EVERY RELEASE

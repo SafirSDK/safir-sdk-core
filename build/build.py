@@ -37,7 +37,32 @@ import shutil
 import argparse
 import codecs
 from xml.sax.saxutils import escape
-from distutils.spawn import find_executable
+
+from os.path import join, isfile, isdir
+import itertools
+
+try:
+    from shutil import which
+except:
+    from distutils.spawn import find_executable as which
+
+if platform.system() == 'Windows':
+    try:
+        import winreg
+    except:
+        import _winreg as winreg
+    from os import environ
+else:
+    # Mock winreg and environ so the module can be imported on this platform.
+
+    class winreg:
+        HKEY_USERS = None
+        HKEY_CURRENT_USER = None
+        HKEY_LOCAL_MACHINE = None
+        HKEY_CLASSES_ROOT = None
+
+    environ = {}
+
 
 #Make linux_distribution available from some suitable package, falling back to returning that we don't know.
 try:
@@ -336,13 +361,13 @@ def suppress(help_string):
 def add_win32_options(parser):
     """add windows options to the parser"""
     parser.add_argument("--use-studio",
-                        help="The visual studio to use for building, can be '2010', '2012', '2013' or '2015'")
-    if is_64_bit():
-        parser.add_argument("--32-bit",
-                            action="store_true",
-                            dest="build_32_bit",
-                            default=False,
-                            help="Build a 32 bit system even though this machine is 64 bit.")
+                        default="any",
+                        help="The visual studio to use for building",
+                        choices=["any","vs2015","vs2019","vs2022"])
+    parser.add_argument("--arch",
+                        default="amd64" if is_64_bit() else "x86",
+                        choices=["x86","amd64"],
+                        help="Architecture to build. Note that you may not be able to run tests if you cross-compile to an arch you can't run.")
     parser.add_argument("--configs",
                         default=("Debug", "RelWithDebInfo"),
                         nargs='*',
@@ -362,7 +387,7 @@ def add_linux_options(parser):
 
 def parse_command_line():
     """parse the command line"""
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     action = parser.add_mutually_exclusive_group()
 
     action.add_argument("--package",
@@ -422,11 +447,10 @@ class BuilderBase(object):
         self.num_jobs = num_jobs()
 
         # Use Ninja for building if available, it is much faster
-        try:
-            subprocess.check_output(("ninja", "--version"))
+        if which("ninja") is not None:
             self.cmake_generator = "Ninja"
             self.have_ninja = True
-        except OSError:
+        else:
             self.cmake_generator = "undefined"
             self.have_ninja = False
 
@@ -570,21 +594,11 @@ class VisualStudioBuilder(BuilderBase):
         if not self.have_ninja:
             self.cmake_generator = "NMake Makefiles"
 
-        self.__handle_command_line_arguments()
-
         self.__setup_build_environment()
 
     @staticmethod
     def can_use():
         return sys.platform == "win32"
-
-    def __handle_command_line_arguments(self):
-        self.use_studio = self.arguments.use_studio
-
-        if not is_64_bit() or self.arguments.build_32_bit:
-            self.target_architecture = "x86"
-        else:
-            self.target_architecture = "x86-64"
 
     def generator_specific_build_cmds(self):
         if self.have_ninja:
@@ -592,43 +606,101 @@ class VisualStudioBuilder(BuilderBase):
         else:
             return ("/nologo", )
 
-    def __find_vcvarsall(self):
-        install_dirs = {
-            "VS140COMNTOOLS": "2015",
-            "VS120COMNTOOLS": "2013",
-            "VS110COMNTOOLS": "2012",
-            "VS100COMNTOOLS": "2010"
-        }
+    @staticmethod
+    def __msvc14_find_vc2015():
+        try:
+            key = winreg.OpenKey(
+                winreg.HKEY_LOCAL_MACHINE,
+                r"Software\Microsoft\VisualStudio\SxS\VC7",
+                0,
+                winreg.KEY_READ | winreg.KEY_WOW64_32KEY
+            )
+        except OSError:
+            return None
 
-        # If use_studio is specified we change the list to only contain that vs.
-        if self.use_studio is not None:
-            found = False
-            for d, ver in install_dirs.items():
-                if self.use_studio == ver:
-                    install_dirs = {d: ver}
-                    found = True
+        best_version = 0
+        best_dir = None
+        with key:
+            for i in itertools.count():
+                try:
+                    v, vc_dir, vt = winreg.EnumValue(key, i)
+                except OSError:
                     break
-            if not found:
-                die("The version of visual studio that you asked for is not supported.")
+                if v and vt == winreg.REG_SZ and isdir(vc_dir):
+                    try:
+                        version = int(float(v))
+                    except (ValueError, TypeError):
+                        continue
+                    if version >= 14 and version > best_version:
+                        best_version, best_dir = version, vc_dir
+        return best_dir
 
-        if len(install_dirs) < 1:
-            die("Internal error in __find_vcvarsall(...)")
+    @staticmethod
+    def __msvc14_find_vc2017():
+        root = environ.get("ProgramFiles(x86)") or environ.get("ProgramFiles")
+        if not root:
+            return None
 
-        for install_dir, version in install_dirs.items():
-            env = os.environ.get(install_dir)
-            if env is not None:
-                self.used_studio = version
-                break
-        if env is None:
-            die("Failed to find Visual Studio install dir, " + "checked the following environment variables: " +
-                str(install_dirs))
-        res = os.path.join(env, os.pardir, os.pardir, "VC", "vcvarsall.bat")
-        if not os.path.isfile(res):
-            die("No such file: " + res)
-        return res
+        try:
+            path = subprocess.check_output([
+                join(root, "Microsoft Visual Studio", "Installer", "vswhere.exe"),
+                "-latest",
+                "-prerelease",
+                "-requiresAny",
+                "-requires", "Microsoft.VisualStudio.Component.VC.Tools.x86.x64",
+                "-requires", "Microsoft.VisualStudio.Workload.WDExpress",
+                "-property", "installationPath",
+                "-products", "*",
+            ]).decode(encoding="mbcs", errors="strict").strip()
+        except (subprocess.CalledProcessError, OSError, UnicodeDecodeError):
+            return None
 
-    def __run_vcvarsall(self, vcvarsall, arch):
-        cmd = '"%s" %s & set' % (vcvarsall, arch)
+        path = join(path, "VC", "Auxiliary", "Build")
+        if isdir(path):
+            return path
+
+        return None
+
+    @staticmethod
+    def __find_vcvarsall():
+        best_dir = VisualStudioBuilder.__msvc14_find_vc2017()
+        version = "new"
+        LOGGER.log("__msvc14_find_vc2017() result: " + str(best_dir))
+        if not best_dir:
+            best_dir = VisualStudioBuilder.__msvc14_find_vc2015()
+            version = "old"
+            LOGGER.log("__msvc14_find_vc2015() result: " + str(best_dir))
+
+        if not best_dir:
+            return None, None
+
+        vcvarsall = join(best_dir, "vcvarsall.bat")
+        if not isfile(vcvarsall):
+            return None, None
+
+        return vcvarsall,version
+
+
+    def __run_vcvarsall(self, vcvarsall, version):
+
+
+        if version == "old":
+            if self.arguments.use_studio not in  ("any", "vs2015"):
+                die("Could only find vs2015")
+            cmd = '"{}" {} & set'.format(vcvarsall, self.arguments.arch)
+        else:
+            if self.arguments.use_studio == "vs2015":
+                vcver = "14.0"
+            elif self.arguments.use_studio == "vs2017":
+                vcver = "14.1"
+            elif self.arguments.use_studio == "vs2019":
+                vcver = "14.2"
+            elif self.arguments.use_studio == "vs2022":
+                vcver = "14.3"
+            else:
+                vcver = ""
+            cmd = '"{}" {} -vcvars_ver={} & set'.format(vcvarsall, self.arguments.arch, vcver)
+
         LOGGER.log("Running '" + cmd + "' to extract environment")
         proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
         output = proc.communicate()[0]
@@ -643,7 +715,7 @@ class VisualStudioBuilder(BuilderBase):
         distutils2 msvc9compiler.py
         """
 
-        vcvarsall = self.__find_vcvarsall()
+        vcvarsall, version = self.__find_vcvarsall()
 
         #use uppercase only in this variable!
         required_variables = set(["LIB", "LIBPATH", "PATH", "INCLUDE", "VSINSTALLDIR"])
@@ -653,12 +725,7 @@ class VisualStudioBuilder(BuilderBase):
         wanted_variables = required_variables | optional_variables  #union
 
         LOGGER.log("Loading Visual Studio Environment", "header")
-        output = self.__run_vcvarsall(vcvarsall, "x86" if self.target_architecture == "x86" else "amd64")
-
-        #retry with cross compilation toolset if we're on amd64 and vcvarsall says the toolset is missing
-        if self.target_architecture == "x86-64" and output.find("configuration might not be installed") != -1:
-            LOGGER.log("Native toolset appears to be missing, trying cross compilation")
-            output = self.__run_vcvarsall(vcvarsall, "x86_amd64")
+        output = self.__run_vcvarsall(vcvarsall, version)
 
         found_variables = set()
 
@@ -682,9 +749,57 @@ class VisualStudioBuilder(BuilderBase):
         if len(required_variables - found_variables) != 0:
             die("Failed to find all expected variables in vcvarsall.bat")
 
+        self.__run_conan_install()
+
+    def __run_conan_install(self):
+        """There is something that makes the conan step in cmake not work when not run
+           explicitly like this before build. On Windows, of course..."""
+        if not os.path.exists("conanfile.py"):
+            return
+
+        if self.arguments.use_studio == "vs2015":
+            compiler_version = 14
+            compiler_toolset = "v140"
+        elif self.arguments.use_studio == "vs2017":
+            compiler_version = 15
+            compiler_toolset = "v141"
+        elif self.arguments.use_studio == "vs2019":
+            compiler_version = 16
+            compiler_toolset = "v142"
+        elif self.arguments.use_studio == "vs2022":
+            compiler_version = 17
+            compiler_toolset = "v143"
+        else:
+            die("Unsupported Visual Studio version")
+
+        arch = self.arguments.arch
+        if self.arguments.arch == "amd64":
+            arch = "x86_64"
+
+        for config in self.arguments.configs:
+            if config in ("Debug", "RelWithDebInfo"):
+                compiler_runtime = "MDd"
+            else:
+                compiler_runtime = "MD"
+            self._run_command(("conan", "install", "conanfile.py",
+                               "-s", "arch={}".format(arch),
+                               "-s", "build_type=Debug",
+                               "-s", "compiler=Visual Studio",
+                               "-s", "compiler.version={}".format(compiler_version),
+                               "-s", "compiler.runtime={}".format(compiler_runtime),
+                               "-s", "compiler.toolset={}".format(compiler_toolset),
+                               "-g=cmake",
+                               "--build=missing"),
+                              "Running conan explicitly before build")
+
+
     def stage_package(self):
         version_tuple, version_string = read_version()
-        command = ("makensis", "/DARCH=" + self.target_architecture, "/DSTUDIO=" + self.used_studio,
+        arch = self.arguments.arch
+        if self.arguments.arch == "amd64":
+            arch = "x86-64"
+
+        command = ("makensis", "/DARCH=" + arch, "/DSTUDIO=" + self.used_studio,
                    "/DVERSION=" + version_string)
 
         if self.debug_only:
@@ -727,7 +842,7 @@ class DebianPackager():
         self.arguments = arguments
         if len(self.arguments.configs) != 1:
             die("DebianPackager can only build one config")
-        if find_executable("conan") is None:
+        if which("conan") is None:
             die("Could not find conan executable")
 
         self.noclean = arguments.package_noclean and os.path.exists("tmp")

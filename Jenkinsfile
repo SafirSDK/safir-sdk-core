@@ -9,7 +9,7 @@ pipeline {
                 axes {
                     axis {
                         name 'BUILD_PLATFORM'
-                        values 'ubuntu-focal', 'debian-bullseye' //, 'msvc2015', 'msvc2019', 'msvc2022'
+                        values 'ubuntu-focal', 'debian-bullseye', 'vs2015' //, 'vs2019'
                     }
                     axis {
                         name 'BUILD_ARCH'
@@ -22,9 +22,9 @@ pipeline {
                 }
                 excludes {
                     exclude {
-                        axis { //ubuntu does no longer support 32 bit builds
+                        axis { //ubuntu does no longer support 32 bit builds, and we haven't fixed windows x86 yet
                             name 'BUILD_PLATFORM'
-                            values 'ubuntu-focal'
+                            values 'ubuntu-focal', "vs2015"
                         }
                         axis {
                             name 'BUILD_ARCH'
@@ -33,18 +33,6 @@ pipeline {
                     }
                 }
                 stages {
-                    stage('Install prerequisites') {
-                        steps {
-                            script {
-                                if (isUnix()) {
-                                    sh 'pip install conan'
-                                }
-                                else {
-                                    bat 'pip install conan'
-                                }
-                            }
-                        }
-                    }
                     stage('Clean') {
                         steps {
                             script {
@@ -88,7 +76,7 @@ pipeline {
                                 else {
                                     bat label:  "Running build script.",
                                         script: """
-                                                build\\build.py --jenkins --package
+                                                build\\build.py --jenkins --package --use-studio ${BUILD_PLATFORM}
                                                 """
                                 }
                             }
@@ -97,13 +85,24 @@ pipeline {
                     stage('Archive') {
                         steps {
                             script {
-                                sh label: "Moving artifacts to ${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}.",
-                                   script: """
-                                           mkdir ${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}
-                                           mv tmp/*.deb ${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}
-                                           """
+                                if (isUnix()) {
+                                    sh label: "Moving artifacts to ${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}.",
+                                       script: """
+                                               mkdir ${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}
+                                               mv tmp/*.deb ${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}
+                                               """
 
-                                archiveArtifacts artifacts: '**/*.deb', fingerprint: true
+                                    archiveArtifacts artifacts: '**/*.deb', fingerprint: true
+                                }
+                                else {
+                                    bat label: "Moving artifacts to ${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}.",
+                                        script: """
+                                                md ${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}
+                                                mv build\\packaging\\windows\\*.exe ${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}
+                                                """
+
+                                    archiveArtifacts artifacts: '**/*.exe', fingerprint: true
+                                }
                             }
                         }
                     }
@@ -117,7 +116,8 @@ pipeline {
                                          tools: [cmake(id:"${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}_cmake"),
                                                  gcc(id:"${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}_gcc"),
                                                  java(id:"${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}_java"),
-                                                 doxygen(id:"${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}_doxygen")
+                                                 doxygen(id:"${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}_doxygen"),
+                                                 MSBuild(id:"${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}_doxygen")
                                                 ])
                         }
                     }
