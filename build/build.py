@@ -361,9 +361,8 @@ def suppress(help_string):
 def add_win32_options(parser):
     """add windows options to the parser"""
     parser.add_argument("--use-studio",
-                        default="any",
                         help="The visual studio to use for building",
-                        choices=["any","vs2015","vs2019","vs2022"])
+                        choices=["vs2015","vs2017", "vs2019","vs2022"])
     parser.add_argument("--arch",
                         default="amd64" if is_64_bit() else "x86",
                         choices=["x86","amd64"],
@@ -589,7 +588,6 @@ class VisualStudioBuilder(BuilderBase):
         super(VisualStudioBuilder, self).__init__(arguments)
 
         self.install_target = "Install"
-        self.used_studio = None
 
         if not self.have_ninja:
             self.cmake_generator = "NMake Makefiles"
@@ -697,8 +695,6 @@ class VisualStudioBuilder(BuilderBase):
                 vcver = "14.2"
             elif self.arguments.use_studio == "vs2022":
                 vcver = "14.3"
-            else:
-                vcver = ""
             cmd = '"{}" {} -vcvars_ver={} & set'.format(vcvarsall, self.arguments.arch, vcver)
 
         LOGGER.log("Running '" + cmd + "' to extract environment")
@@ -799,7 +795,7 @@ class VisualStudioBuilder(BuilderBase):
         if self.arguments.arch == "amd64":
             arch = "x86-64"
 
-        command = ("makensis", "/DARCH=" + arch, "/DSTUDIO=" + self.used_studio,
+        command = ("makensis", "/DARCH=" + arch, "/DSTUDIO=" + self.arguments.use_studio.replace("vs",""),
                    "/DVERSION=" + version_string)
 
         if self.debug_only:
@@ -886,7 +882,7 @@ class DebianPackager():
         if not self.noclean:
             shutil.copytree(os.path.join("build", "packaging", "debian"), "debian")
         self.__run(("debuild",
-                    "--prepend-path", os.path.dirname(find_executable("conan")),
+                    "--prepend-path", os.path.dirname(which("conan")),
                     "--set-envvar", "DEB_BUILD_OPTIONS=config=" + self.arguments.configs[0],
                     "-us", "-uc", "-nc"),
                     "building packages")
