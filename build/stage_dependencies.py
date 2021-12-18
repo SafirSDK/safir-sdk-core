@@ -89,6 +89,9 @@ class __WindowsStager():
         self.LIB_DESTINATION = os.path.join(stage, "Development", "Program Files", "safir-sdk-core", "lib")
         self.DLL_DESTINATION = os.path.join(stage, "Runtime", "Program Files", "safir-sdk-core", "bin")
         self.HEADER_DESTINATION = os.path.join(stage, "Development", "Program Files", "safir-sdk-core", "include")
+        mkdir(self.LIB_DESTINATION)
+        mkdir(self.DLL_DESTINATION)
+        mkdir(self.HEADER_DESTINATION)
 
     def __copy_dll(self, name):
         for path in os.environ.get("PATH").split(os.pathsep):
