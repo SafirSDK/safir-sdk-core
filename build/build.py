@@ -235,7 +235,7 @@ class Logger():
         self.__log_level = level
         self.__last_tag = None
 
-        self.__buildlog = codecs.open("buildlog.html", mode="w")
+        self.__buildlog = codecs.open("buildlog.html", mode="w", encoding="utf-8", errors="replace")
         self.__buildlog.write("<html><head>"
                               "<script type=\"text/javascript\">"
                               "function refreshPage () {"
@@ -275,7 +275,6 @@ class Logger():
     def __log_stdout(self, data, tag):
         if tag not in Logger.Tags:
             die("unknown logging tag")
-        #data = data.encode("utf-8")
         if self.__log_level == "Brief":
             if tag in ("header", "normal", "brief"):
                 self.__print(data)
@@ -333,7 +332,7 @@ class Logger():
             if not line:
                 break
             #CMake does some strange thing with a carriage return alone on a line, which we get rid of like this.
-            line = line.decode("utf8").rstrip("\r")
+            line = line.decode("utf8", errors="replace").rstrip("\r")
             if len(line) != 0:
                 line = line.rstrip()
                 self.log(line, "output")
