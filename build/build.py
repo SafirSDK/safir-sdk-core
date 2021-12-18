@@ -772,7 +772,7 @@ class VisualStudioBuilder(BuilderBase):
             arch = "x86_64"
 
         for config in self.arguments.configs:
-            if config in ("Debug", "RelWithDebInfo"):
+            if config == "Debug":
                 compiler_runtime = "MDd"
             else:
                 compiler_runtime = "MD"
