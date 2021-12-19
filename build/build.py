@@ -778,7 +778,7 @@ class VisualStudioBuilder(BuilderBase):
                 compiler_runtime = "MD"
             self._run_command(("conan", "install", "conanfile.py",
                                "-s", "arch={}".format(arch),
-                               "-s", "build_type=Debug",
+                               "-s", "build_type={}".format(config),
                                "-s", "compiler=Visual Studio",
                                "-s", "compiler.version={}".format(compiler_version),
                                "-s", "compiler.runtime={}".format(compiler_runtime),
