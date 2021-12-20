@@ -86,12 +86,16 @@ class __WindowsStager():
     def __init__(self, logger, stage):
         self.logger = logger
 
-        self.LIB_DESTINATION = os.path.join(stage, "Development", "Program Files", "safir-sdk-core", "lib")
-        self.DLL_DESTINATION = os.path.join(stage, "Runtime", "Program Files", "safir-sdk-core", "bin")
-        self.HEADER_DESTINATION = os.path.join(stage, "Development", "Program Files", "safir-sdk-core", "include")
-        mkdir(self.LIB_DESTINATION)
-        mkdir(self.DLL_DESTINATION)
-        mkdir(self.HEADER_DESTINATION)
+        if os.path.isdir(os.path.join(stage,"Runtime", "Program Files (x86)")):
+            program_files = "Program Files (x86)"
+        elif os.path.isdir(os.path.join(stage,"Runtime", "Program Files")):
+            program_files = "Program Files"
+        else:
+            raise StagingError("Could not work out whether to stage to x86 program files")
+
+        self.LIB_DESTINATION = os.path.join(stage, "Development", program_files, "safir-sdk-core", "lib")
+        self.DLL_DESTINATION = os.path.join(stage, "Runtime", program_files, "safir-sdk-core", "bin")
+        self.HEADER_DESTINATION = os.path.join(stage, "Development", program_files, "safir-sdk-core", "include")
 
     def __copy_dll(self, name):
         for path in os.environ.get("PATH").split(os.pathsep):

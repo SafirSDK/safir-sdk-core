@@ -790,6 +790,13 @@ class VisualStudioBuilder(BuilderBase):
 
     def stage_package(self):
         version_tuple, version_string = read_version()
+
+        #If we're cross compiling we need to rename directories a bit.
+        if is_64_bit() and self.arguments.arch == "x86":
+            for base in ["Runtime", "Development", "Tools", "TestSuite"]:
+                os.rename(os.path.join(self.stagedir,base,"Program Files (x86)"), os.path.join(self.stagedir,base,"Program Files"))
+
+        #Convert arch string to nsis format
         arch = self.arguments.arch
         if self.arguments.arch == "amd64":
             arch = "x86-64"
