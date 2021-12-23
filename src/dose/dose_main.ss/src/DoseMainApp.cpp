@@ -159,7 +159,7 @@ namespace Internal
                                                     else
                                                     {
                                                        SEND_SYSTEM_LOG(Error,
-                                                                        << "DOSE_MAIN: Got a signals error: " << error);
+                                                                        << "DOSE_MAIN: Got a signals error: " << error.to_string().c_str());
                                                     }
                                                 }
 

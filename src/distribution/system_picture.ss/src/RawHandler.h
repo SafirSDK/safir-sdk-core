@@ -139,7 +139,7 @@ namespace SP
                                                            if (!!error) //fix for vs2012 warning
                                                            {
                                                                SEND_SYSTEM_LOG(Alert,
-                                                                               << "Unexpected error in CheckDeadNodes: " << error);
+                                                                               << "Unexpected error in CheckDeadNodes: " << error.to_string().c_str());
                                                                throw std::logic_error("Unexpected error in CheckDeadNodes");
                                                            }
 

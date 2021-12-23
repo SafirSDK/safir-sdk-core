@@ -127,7 +127,7 @@ private:
         }
         else if (m_acceptor != NULL) //expect a cancelled error when closing acceptor
         {
-            std::wcout << "Error in HandleAccept: " << error << std::endl;
+            std::wcout << "Error in HandleAccept: " << error.to_string().c_str() << std::endl;
             //            throw std::logic_error("Error in HandleAccept!");
         }
 
@@ -152,7 +152,7 @@ private:
             }
             catch (const boost::system::system_error&)
             {
-                std::wcout << "Error in HandleRead receive: " << error << std::endl;
+                std::wcout << "Error in HandleRead receive: " << error.to_string().c_str() << std::endl;
                 Close();
             }
 
@@ -195,7 +195,7 @@ private:
         }
         else
         {
-            std::wcout << "Error in HandleRead: " << error << std::endl;
+            std::wcout << "Error in HandleRead: " << error.to_string().c_str() << std::endl;
             Close();
         }
     }

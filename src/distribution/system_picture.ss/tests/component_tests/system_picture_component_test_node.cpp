@@ -848,7 +848,7 @@ int main(int argc, char * argv[])
                              {
                                  if (!!error && work != nullptr) //fix for ws2012 warning
                                  {
-                                     log << "Got a signals error: " << error << std::endl;
+                                     log << "Got a signals error: " << error.to_string().c_str() << std::endl;
                                  }
                                  work.reset();
                              });

@@ -80,7 +80,7 @@ namespace SP
             if (error)
             {
                 SEND_SYSTEM_LOG(Alert,
-                                << "Unexpected error in RawPublisherLocal::Publish: " << error);
+                                << "Unexpected error in RawPublisherLocal::Publish: " << error.to_string().c_str());
                 throw std::logic_error("Unexpected error in RawPublisherLocal::Publish");
             }
 

@@ -52,7 +52,7 @@ int main()
                                                                 }
                                                                 else
                                                                 {
-                                                                    std::wcout << "Asio error " << error << std::endl;
+                                                                    std::wcout << "Asio error " << error.to_string().c_str() << std::endl;
                                                                     exit(2);
                                                                 }
                                                             });

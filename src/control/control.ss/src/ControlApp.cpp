@@ -379,7 +379,7 @@ void ControlApp::Start()
     if (error)
     {
         SEND_SYSTEM_LOG(Error,
-                        << "CTRL: Error launching dose_main: " << error);
+                        << "CTRL: Error launching dose_main: " << error.message().c_str());
     }
 
     m_doseMainCmdSender->Start();

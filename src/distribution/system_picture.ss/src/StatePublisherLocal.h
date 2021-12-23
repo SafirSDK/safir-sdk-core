@@ -75,7 +75,7 @@ namespace SP
             if (error)
             {
                 SEND_SYSTEM_LOG(Alert,
-                                << "Unexpected error in StatePublisherLocal::Publish: " << error);
+                                << "Unexpected error in StatePublisherLocal::Publish: " << error.to_string().c_str());
                 throw std::logic_error("Unexpected error in StatePublisherLocal::Publish");
             }
 
