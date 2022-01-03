@@ -149,15 +149,15 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    boost::asio::io_service ioService;
-    boost::asio::io_service::strand strand(ioService);
+    boost::asio::io_context ioContext;
+    boost::asio::io_context::strand strand(ioContext);
 
-    std::shared_ptr<boost::asio::io_service::work> work (new boost::asio::io_service::work(ioService));
+    auto work = boost::asio::make_work_guard(ioContext);
 
     boost::thread_group threads;
     for (int i = 0; i < 1; ++i)
     {
-        threads.create_thread([&ioService](){ioService.run();});
+        threads.create_thread([&ioContext](){ioContext.run();});
     }
 
 
@@ -167,9 +167,9 @@ int main(int argc, char* argv[])
     bool done = false;
 
     auto subPtr = std::make_shared<Safir::Utilities::Internal::IpcSubscriberImpl<SubscriberTestPolicy>>(
-                    ioService,
+                    ioContext,
                     po.endpointName,
-                    strand.wrap([&nbrOfMsg, &cond, &mut, &done, po](const char* msg, size_t size)
+                    boost::asio::bind_executor(strand, [&nbrOfMsg, &cond, &mut, &done, po](const char* msg, size_t size)
                     {
                         if (done)
                         {

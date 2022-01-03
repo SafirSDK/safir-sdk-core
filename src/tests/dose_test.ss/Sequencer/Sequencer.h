@@ -87,7 +87,7 @@ public:
               const bool multinode,
               const bool noTimeout,
               const int contextId,
-              boost::asio::io_service& ioService);
+              boost::asio::io_context& ioContext);
 
 
     void FindNextTestcase();
@@ -109,7 +109,7 @@ private:
     void GetTestResults();
 
 
-    boost::asio::io_service& m_ioService;
+    boost::asio::io_context& m_ioContext;
     Safir::Dob::SecondaryConnection m_connection;
 
     ActionSender m_actionSender;

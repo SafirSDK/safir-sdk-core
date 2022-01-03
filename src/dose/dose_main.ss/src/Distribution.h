@@ -73,7 +73,7 @@ namespace Internal
     {
     public:
 
-        DistributionBasic(boost::asio::io_service&  ioService,
+        DistributionBasic(boost::asio::io_context&  ioContext,
                           const std::string&        ownNodeName,
                           int64_t                   ownNodeId,
                           int64_t                   ownNodeTypeId,
@@ -120,7 +120,7 @@ namespace Internal
             }
 
             m_communication.reset(new CommunicationT(Com::dataModeTag,
-                                                     ioService,
+                                                     ioContext,
                                                      ownNodeName,
                                                      ownNodeId,
                                                      ownNodeTypeId,
@@ -129,7 +129,7 @@ namespace Internal
                                                      m_config.fragmentSize));
 
             m_sp.reset(new SystemPictureT(SP::slave_tag,
-                                          ioService,
+                                          ioContext,
                                           *m_communication,
                                           ownNodeName,
                                           ownNodeId,

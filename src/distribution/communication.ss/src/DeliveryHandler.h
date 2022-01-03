@@ -65,7 +65,7 @@ namespace Com
     class DeliveryHandlerBasic : private WriterType
     {
     public:
-        DeliveryHandlerBasic(boost::asio::io_service::strand& receiveStrand, int64_t myNodeId, int ipVersion, int slidingWindowSize)
+        DeliveryHandlerBasic(boost::asio::io_context::strand& receiveStrand, int64_t myNodeId, int ipVersion, int slidingWindowSize)
             :WriterType(receiveStrand.context(), ipVersion)
             ,m_running(false)
             ,m_myId(myNodeId)
@@ -95,7 +95,7 @@ namespace Com
 
         void Start()
         {
-            m_receiveStrand.dispatch([this]
+            boost::asio::dispatch(m_receiveStrand,[this]
             {
                 m_running=true;
             });
@@ -103,7 +103,7 @@ namespace Com
 
         void Stop()
         {
-            m_receiveStrand.dispatch([this]
+            boost::asio::dispatch(m_receiveStrand,[this]
             {
                 m_running=false;
             });
@@ -363,8 +363,8 @@ namespace Com
         bool m_running;
         const int64_t m_myId;
         const size_t m_slidingWindowSize;
-        boost::asio::io_service::strand& m_receiveStrand; //for sending acks, same strand as all public methods are supposed to be called from
-        boost::asio::io_service::strand m_deliverStrand; //for delivering data to application
+        boost::asio::io_context::strand& m_receiveStrand; //for sending acks, same strand as all public methods are supposed to be called from
+        boost::asio::io_context::strand m_deliverStrand; //for delivering data to application
         std::atomic<unsigned int> m_numberOfUndeliveredMessages;
 
         NodeInfoMap m_nodes;
@@ -732,7 +732,7 @@ namespace Com
                         auto dataType=rd.dataType;
 
                         m_numberOfUndeliveredMessages++;
-                        m_deliverStrand.post([this,dataType,fromId, fromNodeType,dataPtr,dataSize]
+                        boost::asio::post(m_deliverStrand,[this,dataType,fromId, fromNodeType,dataPtr,dataSize]
                         {
                             auto recvIt=m_receivers.find(dataType); //m_receivers shall be safe to use inside m_deliverStrand since it is not supposed to be modified after start
                             if (recvIt!=m_receivers.end())

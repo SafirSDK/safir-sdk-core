@@ -53,8 +53,8 @@ namespace Utilities
 {
 namespace ForEach
 {
-    Services::Services(boost::asio::io_service& ioService) :
-        m_ioService(ioService),
+    Services::Services(boost::asio::io_context& ioContext) :
+        m_ioContext(ioContext),
         m_debug(L"Services")
     {
         //m_debug.Enable(true);
@@ -518,7 +518,7 @@ namespace ForEach
         }
 
         //make us send the requests once we've completed dispatching.
-        m_ioService.post([this]{SendQueuedRequests();});
+        boost::asio::post(m_ioContext,[this]{SendQueuedRequests();});
     }
 
 

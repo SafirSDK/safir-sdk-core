@@ -63,7 +63,7 @@ namespace SP
         : private boost::noncopyable
     {
     public:
-        ElectionHandlerBasic(boost::asio::io_service& ioService,
+        ElectionHandlerBasic(boost::asio::io_context& ioContext,
                              CommunicationT& communication,
                              const int64_t id,
                              const std::map<int64_t, NodeType>& nodeTypes,
@@ -72,7 +72,7 @@ namespace SP
                              const std::function<void(const int64_t nodeId,
                                                       const int64_t electionId)>& electionCompleteCallback,
                              const std::function<void(const int64_t incarnationId)>& formSystemCallback)
-            : m_strand (ioService)
+            : m_strand (ioContext)
             , m_stopped(false)
             , m_communication(communication)
             , m_receiverId(LlufId_Generate64(receiverId))
@@ -83,11 +83,11 @@ namespace SP
             , m_electionTimeout(CalculateElectionTimeout(nodeTypes))
             , m_electedStorage(new AlignedStorage())
             , m_elected(reinterpret_cast<std::atomic<int64_t>&>(*m_electedStorage))
-            , m_electionTimer(ioService)
+            , m_electionTimer(ioContext)
             , m_electionInProgress(false)
             , m_currentElectionId(0)
-            , m_generateIncarnationIdTimer(ioService)
-            , m_sendMessageTimer(ioService)
+            , m_generateIncarnationIdTimer(ioContext)
+            , m_sendMessageTimer(ioContext)
             , m_electionCompleteCallback(electionCompleteCallback)
             , m_formSystemCallback(formSystemCallback)
         {
@@ -107,8 +107,8 @@ namespace SP
             lllog(3) << "SP: AloneTimeout will be " << boost::chrono::duration_cast<boost::chrono::milliseconds>(m_aloneTimeout) << std::endl;
             lllog(3) << "SP: ElectionTimeout will be " << boost::chrono::duration_cast<boost::chrono::milliseconds>(m_electionTimeout) << std::endl;
             m_electionInProgress = true;
-            m_electionTimer.expires_from_now(m_aloneTimeout);
-            m_electionTimer.async_wait(m_strand.wrap([this](const boost::system::error_code& error)
+            m_electionTimer.expires_after(m_aloneTimeout);
+            m_electionTimer.async_wait(boost::asio::bind_executor(m_strand,[this](const boost::system::error_code& error)
                                                      {
                                                          if (!error && !m_stopped)
                                                          {
@@ -123,7 +123,7 @@ namespace SP
 
         void Stop()
         {
-            m_strand.dispatch([this]
+            boost::asio::dispatch(m_strand,[this]
                               {
                                   m_pendingAlives.clear();
                                   m_pendingVictories.clear();
@@ -138,7 +138,7 @@ namespace SP
 
         void NodesChanged(const RawStatistics& statistics, std::shared_ptr<void> completionSignaller)
         {
-            m_strand.dispatch([this, statistics, completionSignaller]
+            boost::asio::dispatch(m_strand,[this, statistics, completionSignaller]
                               {
                                   lllog(5) << "SP: ElectionHandler got new RawStatistics" << std::endl;
                                   m_lastStatistics = std::move(statistics);
@@ -149,7 +149,7 @@ namespace SP
         /** This can be used to force an election outside of node changes.*/
         void ForceElection()
         {
-            m_strand.dispatch([this]
+            boost::asio::dispatch(m_strand,[this]
                               {
                                   lllog(5) << "SP: ElectionHandler is forcing an election" << std::endl;
                                   StartElection();
@@ -244,9 +244,9 @@ namespace SP
             //The number 4 is dependent on how Communication handles sending discovery information.
             //It sends discovery information every 3*electionTimeout, so we want to wait a little bit
             //longer than that.
-            m_electionTimer.expires_from_now(4*m_electionTimeout);
+            m_electionTimer.expires_after(4*m_electionTimeout);
             m_electionInProgress = true;
-            m_electionTimer.async_wait(m_strand.wrap([this](const boost::system::error_code& error)
+            m_electionTimer.async_wait(boost::asio::bind_executor(m_strand,[this](const boost::system::error_code& error)
             {
                 if (!!error || m_stopped || !m_electionInProgress)
                 {
@@ -303,9 +303,9 @@ namespace SP
                 SendPendingElectionMessages();
 
                 m_electionInProgress = true;
-                m_electionTimer.expires_from_now(m_electionTimeout);
+                m_electionTimer.expires_after(m_electionTimeout);
 
-                m_electionTimer.async_wait(m_strand.wrap([this](const boost::system::error_code& error){ElectionTimeout(error);}));
+                m_electionTimer.async_wait(boost::asio::bind_executor(m_strand,[this](const boost::system::error_code& error){ElectionTimeout(error);}));
             }));
         }
 
@@ -329,10 +329,10 @@ namespace SP
 
                 if (m_lastStatistics.IncarnationId() == 0)
                 {
-                    m_generateIncarnationIdTimer.expires_from_now(m_aloneTimeout);
+                    m_generateIncarnationIdTimer.expires_after(m_aloneTimeout);
 
                     m_generateIncarnationIdTimer.async_wait
-                        (m_strand.wrap([this](const boost::system::error_code& error)
+                        (boost::asio::bind_executor(m_strand,[this](const boost::system::error_code& error)
                     {
                         if (!!error || m_stopped)
                         {
@@ -363,7 +363,7 @@ namespace SP
                      << message.election_id()
                      << ") from " << from << std::endl;
 
-            m_strand.dispatch([this,message, from, nodeTypeId]
+            boost::asio::dispatch(m_strand,[this,message, from, nodeTypeId]
             {
                 bool found = false;
                 for (int i = 0; i < m_lastStatistics.Size(); ++i)
@@ -552,8 +552,8 @@ namespace SP
             //Handle retry
             if (!m_pendingAlives.empty() || !m_pendingVictories.empty() || !m_pendingInquiries.empty())
             {
-                m_sendMessageTimer.expires_from_now(boost::chrono::milliseconds(10));
-                m_sendMessageTimer.async_wait(m_strand.wrap([this](const boost::system::error_code& error)
+                m_sendMessageTimer.expires_after(boost::chrono::milliseconds(10));
+                m_sendMessageTimer.async_wait(boost::asio::bind_executor(m_strand,[this](const boost::system::error_code& error)
                                                             {
                                                                 if (!error && !m_stopped)
                                                                 {
@@ -564,7 +564,7 @@ namespace SP
         }
 
 
-        mutable boost::asio::io_service::strand m_strand;
+        mutable boost::asio::io_context::strand m_strand;
         bool m_stopped;
         CommunicationT& m_communication;
         const uint64_t m_receiverId;

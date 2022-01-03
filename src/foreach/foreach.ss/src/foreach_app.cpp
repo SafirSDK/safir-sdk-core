@@ -55,7 +55,7 @@ namespace ForEach
         const Safir::Dob::Typesystem::Int32 numContexts = Safir::Dob::NodeParameters::NumberOfContexts();
         for (int context = 0; context < numContexts; ++context)
         {
-            m_context.push_back(boost::shared_ptr<ContextData>(new ContextData(m_ioService)));
+            m_context.push_back(boost::shared_ptr<ContextData>(new ContextData(m_ioContext)));
         }
     }
 
@@ -100,8 +100,8 @@ namespace ForEach
                                                boost::lexical_cast<std::wstring>(inst));
         }
 
-        boost::asio::io_service::work keepRunning(m_ioService);
-        m_ioService.run();
+        auto keepRunning = boost::asio::make_work_guard(m_ioContext);
+        m_ioContext.run();
 
         for (ContextVector::reverse_iterator it = m_context.rbegin();
              it != m_context.rend(); ++it)
@@ -116,7 +116,7 @@ namespace ForEach
     void ForEachApp::OnStopOrder()
     {
         Safir::Application::TracerBackdoor::Stop();
-        m_ioService.stop();
+        m_ioContext.stop();
     }
 }
 }

@@ -59,7 +59,7 @@ namespace Internal
         private boost::noncopyable
     {
     public:
-        ConnectionHandler(boost::asio::io_service& ioService,
+        ConnectionHandler(boost::asio::io_context& ioContext,
                           Distribution& distribution,
                           const std::function<void(const ConnectionPtr& connection, bool disconnecting)>& onAppEvent,
                           const std::function<void(int64_t)>& checkPendingReg,
@@ -69,7 +69,7 @@ namespace Internal
         void Stop();
 
     private:
-        boost::asio::io_service::strand m_strand;
+        boost::asio::io_context::strand m_strand;
         Com::Communication&             m_communication;
         std::function<void(const ConnectionPtr& connection, bool disconnecting)> m_onAppEvent;
         typedef std::queue< std::pair<Safir::Utilities::Internal::SharedConstCharArray, size_t>> SendQueue;//vector of pair<data, size>

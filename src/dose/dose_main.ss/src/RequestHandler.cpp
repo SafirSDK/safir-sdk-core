@@ -85,10 +85,10 @@ namespace
 
 }
 
-    RequestHandler::RequestHandler(boost::asio::io_service& ioService,
+    RequestHandler::RequestHandler(boost::asio::io_context& ioContext,
                                    Distribution&            distribution)
-        : m_ioService(ioService),
-          m_strand(ioService),
+        : m_ioContext(ioContext),
+          m_strand(ioContext),
           m_distribution(distribution),
           m_communication(distribution.GetCommunication()),
           m_dataTypeIdentifier(LlufId_Generate64("RequestHandler")),
@@ -105,7 +105,7 @@ namespace
 
         m_distribution.SubscribeNodeEvents(
                     // Executed when a 'node included' cb is received
-                    m_strand.wrap([this](const std::string& /*nodeName*/,
+                    boost::asio::bind_executor(m_strand,[this](const std::string& /*nodeName*/,
                                          const int64_t nodeId,
                                          const int64_t nodeTypeId,
                                          const std::string& /*dataAddress*/)
@@ -117,7 +117,7 @@ namespace
                         }
                     }),
                     // Executed when a 'node excluded' cb is received
-                    m_strand.wrap([this](const int64_t nodeId,
+                    boost::asio::bind_executor(m_strand,[this](const int64_t nodeId,
                                          const int64_t /*nodeTypeId*/)
                     {
                         m_liveNodes.erase(nodeId);
@@ -125,7 +125,7 @@ namespace
 
         m_communication.SetQueueNotFullCallback(
                     // Executed when Communication indicates 'queue not full'
-                    m_strand.wrap([this] (int64_t /*nodeTypeId*/)
+                    boost::asio::bind_executor(m_strand,[this] (int64_t /*nodeTypeId*/)
                     {
                         // Retry all connections that are waiting for Communication
                         ReleaseAllBlocked(m_communicationVirtualConnectionId);
@@ -134,7 +134,7 @@ namespace
 
         m_communication.SetDataReceiver(
                     // Executed when a request message is received from external node
-                    m_strand.wrap([this]
+                    boost::asio::bind_executor(m_strand,[this]
                                   (int64_t fromNodeId,
                                    int64_t fromNodeType,
                                    const char* data,
@@ -149,7 +149,7 @@ namespace
 
     void RequestHandler::HandleRequests(const ConnectionPtr& connection)
     {
-        m_strand.dispatch([this, connection] ()
+        boost::asio::dispatch(m_strand,[this, connection] ()
         {
             // First, try to distribute responses for this connection
             m_responseHandler->DistributeResponses(connection);
@@ -168,7 +168,7 @@ namespace
 
     void RequestHandler::HandleDisconnect(const ConnectionPtr& deletedConnection)
     {
-        m_strand.dispatch([this, deletedConnection] ()
+        boost::asio::dispatch(m_strand,[this, deletedConnection] ()
         {
             auto this_ = this; //fixes for vs 2010 issues with lambda
             auto& deletedConnection_ = deletedConnection;
@@ -202,7 +202,7 @@ namespace
 
     void RequestHandler::Stop()
     {
-        m_strand.post([this]()
+        boost::asio::post(m_strand,[this]()
                       {
                           // Clear structures that hold timers
                           m_outReqTimers.clear();
@@ -421,9 +421,9 @@ namespace
             skipList.insert(receiver.connection->Id());
         }
 
-        auto timer = Safir::make_unique<boost::asio::steady_timer>(m_ioService);
+        auto timer = Safir::make_unique<boost::asio::steady_timer>(m_ioContext);
 
-        timer->expires_from_now(GetTimeout(request.GetTypeId()));
+        timer->expires_after(GetTimeout(request.GetTypeId()));
 
         StartOutReqTimer(sender, request, *timer);
 
@@ -440,7 +440,7 @@ namespace
         auto typeId = request.GetTypeId();
         auto handlerId = request.GetHandlerId();
 
-        timer.async_wait(m_strand.wrap([this, senderId, reqId, typeId, handlerId]
+        timer.async_wait(boost::asio::bind_executor(m_strand,[this, senderId, reqId, typeId, handlerId]
                                        (const boost::system::error_code& error)
         {
             // This is the lambda that is executed when a request in the sender node has expired.
@@ -767,7 +767,7 @@ namespace
                 return;
             }
 
-            timerIt->second->expires_from_now(boost::chrono::milliseconds(500));
+            timerIt->second->expires_after(boost::chrono::milliseconds(500));
 
             StartOutReqTimer(fromConnection, request, *timerIt->second);
         }
@@ -777,13 +777,13 @@ namespace
     {
         lllog(7) << "DOSE_MAIN: AddPendingRequest for app " << blockingConn <<std::endl;
 
-        auto timer = Safir::make_unique<boost::asio::steady_timer>(m_ioService);
+        auto timer = Safir::make_unique<boost::asio::steady_timer>(m_ioContext);
 
         auto reqId = request.GetRequestId();
 
-        timer->expires_from_now(GetTimeout(request.GetTypeId()));
+        timer->expires_after(GetTimeout(request.GetTypeId()));
 
-        timer->async_wait(m_strand.wrap([this, blockingConn, reqId]
+        timer->async_wait(boost::asio::bind_executor(m_strand,[this, blockingConn, reqId]
                                         (const boost::system::error_code& error)
         {
             // This is the lambda that is executed when a pending external request has expired

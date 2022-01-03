@@ -25,7 +25,7 @@
 
 #include <Safir/Dob/Internal/ControlUtilsExportDefs.h>
 #include <string>
-#include <boost/asio/io_service.hpp>
+#include <boost/asio/io_context.hpp>
 
 namespace Safir
 {
@@ -58,7 +58,7 @@ namespace Control
 
         typedef std::function<void(CommandAction cmdAction, int64_t nodeId)> CmdCb;
 
-        ControlCmdReceiver(boost::asio::io_service& ioService,
+        ControlCmdReceiver(boost::asio::io_context& ioContext,
                            const CmdCb&             cmdCb);
 
         ControlCmdReceiver(const ControlCmdReceiver&) = delete;
@@ -83,7 +83,7 @@ namespace Control
     class CONTROL_UTILS_API ControlCmdSender
     {
     public:
-        ControlCmdSender(boost::asio::io_service&      ioService,
+        ControlCmdSender(boost::asio::io_context&      ioContext,
                          const std::function<void()>   controlConnectedCb);
 
         ControlCmdSender(const ControlCmdSender&) = delete;

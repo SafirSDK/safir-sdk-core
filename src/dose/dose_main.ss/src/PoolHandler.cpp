@@ -40,7 +40,7 @@ namespace Dob
 {
 namespace Internal
 {
-    PoolHandler::PoolHandler(boost::asio::io_service::strand& strand,
+    PoolHandler::PoolHandler(boost::asio::io_context::strand& strand,
                              Distribution& distribution,
                              const std::function<void(int64_t)>& checkPendingReg,
                              const std::function<void(const std::string& str)>& logStatus)
@@ -70,7 +70,7 @@ namespace Internal
 
         auto injectNode=[this](const std::string&, int64_t id, int64_t nt, const std::string&)
         {
-            m_strand.dispatch([this,id,nt]
+            boost::asio::dispatch(m_strand,[this,id,nt]
             {
                 if (m_nodes.insert(std::make_pair(id, nt)).second)
                 {
@@ -85,7 +85,7 @@ namespace Internal
 
         auto excludeNode=[this](int64_t id, int64_t)
         {
-            m_strand.post([this,id]
+            boost::asio::post(m_strand,[this,id]
             {
                 if (m_nodes.erase(id)>0)
                 {
@@ -141,7 +141,7 @@ namespace Internal
 
     void PoolHandler::OnPersistenceReady()
     {
-        m_strand.dispatch([this]
+        boost::asio::dispatch(m_strand,[this]
         {
             if (m_persistenceReady)
             {
@@ -166,7 +166,7 @@ namespace Internal
 
     void PoolHandler::Start()
     {
-        m_strand.post([this]
+        boost::asio::post(m_strand,[this]
         {
             m_persistHandler->Start();
 
@@ -174,7 +174,7 @@ namespace Internal
             RunWaitingStatesSanityCheckTimer();
 
             //request pool distributions
-            m_poolDistributionRequests.Start(m_strand.wrap([this]
+            m_poolDistributionRequests.Start(boost::asio::bind_executor(m_strand,[this]
             {
                 m_poolDistributionComplete=true;
                 SignalPdComplete();
@@ -190,7 +190,7 @@ namespace Internal
 
     void PoolHandler::Stop()
     {
-        m_strand.post([this]
+        boost::asio::post(m_strand,[this]
         {
             if (m_nodeInfoHandler != nullptr)
             {
@@ -218,7 +218,7 @@ namespace Internal
 
     void PoolHandler::HandleConnect(const ConnectionId& connId)
     {
-        m_strand.post([this, connId]
+        boost::asio::post(m_strand,[this, connId]
         {
             m_waitingStates.PerformStatesWaitingForConnection(connId,
                                                               [this](const DistributionData& state,
@@ -243,7 +243,7 @@ namespace Internal
 
     void PoolHandler::HandleDisconnect(const ConnectionId& connId)
     {
-        m_strand.post([this, connId]
+        boost::asio::post(m_strand,[this, connId]
         {
             m_waitingStates.Disconnect(connId);
         });
@@ -254,7 +254,7 @@ namespace Internal
         const PoolDistributionInfo pdInfo=*reinterpret_cast<const PoolDistributionInfo*>(data);
         delete[] data;
 
-        m_strand.dispatch([this,pdInfo,fromNodeType,fromNodeId]
+        boost::asio::dispatch(m_strand,[this,pdInfo,fromNodeType,fromNodeId]
         {
             switch (pdInfo)
             {
@@ -290,7 +290,7 @@ namespace Internal
 
     void PoolHandler::OnRegistrationState(int64_t fromNodeId, int64_t fromNodeType, const char* data, size_t /*size*/)
     {
-        m_strand.post([this,data,fromNodeId,fromNodeType]
+        boost::asio::post(m_strand,[this,data,fromNodeId,fromNodeType]
         {
             const auto state=DistributionData::ConstConstructor(new_data_tag, data);
             DistributionData::DropReference(data);
@@ -308,7 +308,7 @@ namespace Internal
 
     void PoolHandler::OnEntityState(int64_t fromNodeId, int64_t fromNodeType, const char* data, size_t /*size*/)
     {
-        m_strand.post([this,data,fromNodeId,fromNodeType]
+        boost::asio::post(m_strand,[this,data,fromNodeId,fromNodeType]
         {
             const auto state=DistributionData::ConstConstructor(new_data_tag, data);
             DistributionData::DropReference(data);
@@ -341,8 +341,8 @@ namespace Internal
     {
         Safir::Dob::Internal::EndStates::Instance().HandleTimeout();
 
-        m_endStatesTimer.expires_from_now(boost::chrono::seconds(60));
-        m_endStatesTimer.async_wait(m_strand.wrap([this](const boost::system::error_code& error)
+        m_endStatesTimer.expires_after(boost::chrono::seconds(60));
+        m_endStatesTimer.async_wait(boost::asio::bind_executor(m_strand,[this](const boost::system::error_code& error)
         {
             if (!error)
             {
@@ -356,8 +356,8 @@ namespace Internal
         m_waitingStates.SanityCheck();
 
         /* We run this timer fairly infrequently, to reduce false warnings */
-        m_waitingStatesSanityTimer.expires_from_now(boost::chrono::minutes(6));
-        m_waitingStatesSanityTimer.async_wait(m_strand.wrap([this](const boost::system::error_code& error)
+        m_waitingStatesSanityTimer.expires_after(boost::chrono::minutes(6));
+        m_waitingStatesSanityTimer.async_wait(boost::asio::bind_executor(m_strand,[this](const boost::system::error_code& error)
         {
             if (!error)
             {

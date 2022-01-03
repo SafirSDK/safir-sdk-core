@@ -32,9 +32,9 @@ class App
 {
 public:
     App()
-        : m_ioService()
-        , m_work (new boost::asio::io_service::work(m_ioService))
-        , m_dispatcher(m_connection, m_ioService) {}
+        : m_ioContext()
+        , m_work (boost::asio::make_work_guard(m_ioContext))
+        , m_dispatcher(m_connection, m_ioContext) {}
 
     void OnStopOrder() override {m_work.reset();}
     void Run()
@@ -53,13 +53,13 @@ public:
         }
 
         std::wcout << "Connected sucessfully" << std::endl;
-        m_ioService.run();
+        m_ioContext.run();
 
         m_connection.Close();
     }
 private:
-    boost::asio::io_service m_ioService;
-    std::unique_ptr<boost::asio::io_service::work> m_work;
+    boost::asio::io_context m_ioContext;
+    boost::asio::executor_work_guard<boost::asio::io_context::executor_type> m_work;
     Safir::Dob::Connection m_connection;
     Safir::Utilities::AsioDispatcher m_dispatcher;
 };

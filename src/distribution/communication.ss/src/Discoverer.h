@@ -60,11 +60,11 @@ namespace Com
 #pragma warning (push)
 #pragma warning (disable: 4355)
 #endif
-        DiscovererBasic(boost::asio::io_service& ioService,
+        DiscovererBasic(boost::asio::io_context& ioContext,
                         const Node& me,
                         int fragmentSize,
                         const std::function<void(const Node&)>& onNewNode)
-            :WriterType(ioService, Resolver::Protocol(me.unicastAddress))
+            :WriterType(ioContext, Resolver::Protocol(me.unicastAddress))
             ,m_running(false)
             ,m_fragmentSize(static_cast<size_t>(fragmentSize))
             ,m_numberOfNodesPerNodeInfoMsg(static_cast<int>((m_fragmentSize-NodeInfoFixedSize)/NodeInfoPerNodeSize))
@@ -73,10 +73,10 @@ namespace Com
             ,m_reportedNodes()
             ,m_incompletedNodes()
             ,m_excludedNodes()
-            ,m_strand(ioService)
+            ,m_strand(ioContext)
             ,m_me(me)
             ,m_onNewNode(onNewNode)
-            ,m_timer(ioService)
+            ,m_timer(ioContext)
             ,m_random(1000, 3000)
         {
         }
@@ -86,17 +86,17 @@ namespace Com
 
         void Start() SAFIR_GCC_VISIBILITY_BUG_WORKAROUND
         {
-            m_strand.dispatch([this]
+            boost::asio::dispatch(m_strand,[this]
             {
                 m_running=true;
-                m_timer.expires_from_now(boost::chrono::milliseconds(m_random.Get()));
-                m_timer.async_wait(m_strand.wrap([this](const boost::system::error_code& error){OnTimeout(error);}));
+                m_timer.expires_after(boost::chrono::milliseconds(m_random.Get()));
+                m_timer.async_wait(boost::asio::bind_executor(m_strand,[this](const boost::system::error_code& error){OnTimeout(error);}));
             });
         }
 
         void Stop()
         {
-            m_strand.dispatch([this]
+            boost::asio::dispatch(m_strand,[this]
             {
                 m_running=false;
                 m_timer.cancel();
@@ -105,7 +105,7 @@ namespace Com
 
         void AddSeeds(const std::vector<std::string>& seeds)
         {
-            m_strand.dispatch([this,seeds]
+            boost::asio::dispatch(m_strand,[this,seeds]
             {
                 for (auto seed = seeds.cbegin(); seed != seeds.cend(); ++seed)
                 {
@@ -118,7 +118,7 @@ namespace Com
         {
             lllog(DiscovererLogLevel)<<L"COM["<<m_me.nodeId<<L"]: Received discover from "<<msg.from().name().c_str()<<L" ["<<msg.from().node_id()<<L"]"<<std::endl;
 
-            m_strand.dispatch([this,msg]
+            boost::asio::dispatch(m_strand,[this,msg]
             {
                 if (!m_running)
                 {
@@ -154,7 +154,7 @@ namespace Com
         {
             lllog(DiscovererLogLevel)<<L"COM["<<m_me.nodeId<<L"]: Received node info from "<<(msg.has_sent_from_node() ? msg.sent_from_node().name().c_str() : "<NotPresent>")<<", numNodes="<<msg.nodes().size()<<std::endl;
 
-            m_strand.dispatch([this,msg]
+            boost::asio::dispatch(m_strand,[this,msg]
             {
                 if (!m_running)
                 {
@@ -213,7 +213,7 @@ namespace Com
 
         void ExcludeNode(int64_t nodeId)
         {
-            m_strand.dispatch([this,nodeId]
+            boost::asio::dispatch(m_strand,[this,nodeId]
             {
                 m_excludedNodes.insert(nodeId);
                 m_reportedNodes.erase(nodeId);
@@ -251,7 +251,7 @@ namespace Com
         NodeMap m_reportedNodes; //nodes only heard about from others, never talked to
         std::map<int64_t, std::vector<bool> > m_incompletedNodes; //talked to but still haven't received all node info from this node
         std::set<int64_t> m_excludedNodes;
-        boost::asio::io_service::strand m_strand;
+        boost::asio::io_context::strand m_strand;
         Node m_me;
         std::function<void(const Node&)> m_onNewNode;
         boost::asio::steady_timer m_timer;
@@ -511,8 +511,8 @@ namespace Com
                 SendDiscover();
 
                 //restart timer
-                m_timer.expires_from_now(boost::chrono::milliseconds(m_random.Get()));
-                m_timer.async_wait(m_strand.wrap([this](const boost::system::error_code& error){OnTimeout(error);}));
+                m_timer.expires_after(boost::chrono::milliseconds(m_random.Get()));
+                m_timer.async_wait(boost::asio::bind_executor(m_strand,[this](const boost::system::error_code& error){OnTimeout(error);}));
             }
         }
     };

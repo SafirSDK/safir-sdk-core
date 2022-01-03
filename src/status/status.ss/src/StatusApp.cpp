@@ -30,10 +30,10 @@ namespace Control
 {
 
 StatusApp::StatusApp()
-    : m_ioService()
-    , m_dispatcher(m_connection, m_ioService)
-    , m_statusEntityHandler(m_ioService)
-    , m_commandRequestHandler(m_ioService)
+    : m_ioContext()
+    , m_dispatcher(m_connection, m_ioContext)
+    , m_statusEntityHandler(m_ioContext)
+    , m_commandRequestHandler(m_ioContext)
 {
     m_connection.Open(L"safir_control_status",  // Note the name. We want this to be handled as a normal connection.
                           L"main",
@@ -57,9 +57,10 @@ void StatusApp::OnStopOrder()
 
 void StatusApp::Run()
 {
-    m_work.reset(new boost::asio::io_service::work(m_ioService));
+    m_work = std::make_unique<boost::asio::executor_work_guard<boost::asio::io_context::executor_type>>
+        (boost::asio::make_work_guard(m_ioContext));
 
-    m_ioService.run();
+    m_ioContext.run();
 
     m_connection.Close();
 }

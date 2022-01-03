@@ -43,11 +43,11 @@ class StopHandler :
     public Safir::Dob::StopHandler
 {
 public:
-    explicit StopHandler(boost::asio::io_service& ioService)
-        : m_ioService(ioService) {}
-    void OnStopOrder() override {m_ioService.stop();}
+    explicit StopHandler(boost::asio::io_context& ioContext)
+        : m_ioContext(ioContext) {}
+    void OnStopOrder() override {m_ioContext.stop();}
 private:
-    boost::asio::io_service& m_ioService;
+    boost::asio::io_context& m_ioContext;
 
 };
 
@@ -55,9 +55,9 @@ class EntityOwner
     : public Safir::Dob::EntityHandlerInjection
 {
 public:
-    explicit EntityOwner(boost::asio::io_service& ioService)
-        : m_ioService(ioService)
-        , m_timer(ioService)
+    explicit EntityOwner(boost::asio::io_context& ioContext)
+        : m_ioContext(ioContext)
+        , m_timer(ioContext)
         , m_handler(Safir::Dob::Typesystem::InstanceId::GenerateRandom().GetRawValue())
     {
         using namespace Safir::Dob;
@@ -122,7 +122,7 @@ private:
     }
 
     Safir::Dob::SecondaryConnection m_connection;
-    boost::asio::io_service& m_ioService;
+    boost::asio::io_context& m_ioContext;
     boost::asio::deadline_timer m_timer;
     std::vector<Safir::Dob::Typesystem::InstanceId> m_instances;
 
@@ -143,22 +143,22 @@ int main()
         const std::wstring nameCommonPart = L"C++";
         const std::wstring nameInstancePart = Safir::Dob::Typesystem::InstanceId::GenerateRandom().ToString();
 
-        boost::asio::io_service ioService;
+        boost::asio::io_context ioContext;
 
-        StopHandler stopHandler(ioService);
+        StopHandler stopHandler(ioContext);
 
         Safir::Dob::Connection connection;
 
-        Safir::Utilities::AsioDispatcher dispatcher(connection,ioService);
+        Safir::Utilities::AsioDispatcher dispatcher(connection,ioContext);
 
         connection.Open(nameCommonPart,
                         nameInstancePart,
                         0, // Context
                         &stopHandler,
                         &dispatcher);
-        EntityOwner owner(ioService);
-        boost::asio::io_service::work keepRunning(ioService);
-        ioService.run();
+        EntityOwner owner(ioContext);
+        auto keepRunning = boost::asio::make_work_guard(ioContext);
+        ioContext.run();
 
         connection.Close();
     }

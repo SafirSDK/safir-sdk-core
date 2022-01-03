@@ -56,13 +56,13 @@ namespace SP
     public:
         typedef std::function<void (const typename SubscriberInterfaceT::DataWrapper& data)> DataCallback;
 
-        LocalSubscriber(boost::asio::io_service& ioService,
+        LocalSubscriber(boost::asio::io_context& ioContext,
                         const char* const name)
-            : m_strand(ioService)
+            : m_strand(ioContext)
             , m_name (name)
         {
 
-            m_subscriber.reset(new IpcSubscriberT(ioService,
+            m_subscriber.reset(new IpcSubscriberT(ioContext,
                                                   m_name,
                                                   [this](const char* const data, size_t size){DataReceived(data,size);}));
         }
@@ -75,7 +75,7 @@ namespace SP
 
         void AddSubscriber(const DataCallback& dataCallback)
         {
-            m_strand.dispatch([this, dataCallback]
+            boost::asio::dispatch(m_strand,[this, dataCallback]
             {
                 lllog(9) << "SP: AddSubscriber" << std::endl;
                 const bool needConnect = m_dataCallbacks.empty();
@@ -92,7 +92,7 @@ namespace SP
 
         void Stop() override
         {
-            m_strand.dispatch([this]
+            boost::asio::dispatch(m_strand,[this]
                               {
                                   m_subscriber->Disconnect();
                                   m_dataCallbacks.clear();
@@ -115,7 +115,7 @@ namespace SP
             }
 
             const auto wrapped = WrapperCreatorT::Create(std::move(msg));
-            m_strand.dispatch([this,wrapped]
+            boost::asio::dispatch(m_strand,[this,wrapped]
             {
                 for (auto cb = m_dataCallbacks.cbegin(); cb != m_dataCallbacks.cend(); ++cb)
                 {
@@ -126,7 +126,7 @@ namespace SP
 
         //Order/sync is guaranteed by IpcSubscribers delivery order guarantee.
 
-        boost::asio::io_service::strand m_strand;
+        boost::asio::io_context::strand m_strand;
         const std::string m_name;
 
         std::vector<DataCallback> m_dataCallbacks;

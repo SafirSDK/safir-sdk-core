@@ -58,7 +58,7 @@ public:
      * @param ignorePersistenceProperties: should only be set to true if implementing "no
      * persistence" backend
      */
-    PersistenceHandler(boost::asio::io_service& ioService,
+    PersistenceHandler(boost::asio::io_context& ioContext,
                        const bool ignorePersistenceProperties);
 
     /** Destructor */

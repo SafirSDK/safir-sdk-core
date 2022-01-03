@@ -62,7 +62,7 @@ namespace Com
     class DataReceiverType : private ReaderType
     {
     public:
-        DataReceiverType(boost::asio::io_service::strand& receiveStrand,
+        DataReceiverType(boost::asio::io_context::strand& receiveStrand,
                          const std::string& unicastAddress,
                          const std::string& multicastAddress,
                          const std::function<bool(const char*, size_t, bool multicast)>& onRecv,
@@ -109,7 +109,7 @@ namespace Com
 
         void Start()
         {
-            m_strand.dispatch([this]
+            boost::asio::dispatch(m_strand,[this]
             {
                 m_running=true;
                 AsyncReceive(m_bufferUnicast, m_socket.get());
@@ -122,7 +122,7 @@ namespace Com
 
         void Stop()
         {
-            m_strand.dispatch([this]
+            boost::asio::dispatch(m_strand,[this]
             {
                 m_running=false;
                 m_timer.cancel();
@@ -141,7 +141,7 @@ namespace Com
 #ifndef SAFIR_TEST
     private:
 #endif
-        boost::asio::io_service::strand& m_strand;
+        boost::asio::io_context::strand& m_strand;
         boost::asio::steady_timer m_timer;
         std::function<bool(const char*, size_t, bool multicast)> m_onRecv;
         std::function<bool(void)> m_isReceiverReady;
@@ -157,7 +157,7 @@ namespace Com
             ReaderType::AsyncReceive(buf,
                                      Parameters::ReceiveBufferSize,
                                      socket,
-                                     m_strand.wrap([this,buf,socket](const boost::system::error_code& error, size_t bytesRecv)
+                                     boost::asio::bind_executor(m_strand,[this,buf,socket](const boost::system::error_code& error, size_t bytesRecv)
                                      {
                                          HandleReceive(error, bytesRecv, buf, socket);
                                      }));
@@ -243,8 +243,8 @@ namespace Com
 
         void SetWakeUpTimer(char* buf, boost::asio::ip::udp::socket* socket)
         {
-            m_timer.expires_from_now(boost::chrono::milliseconds(10));
-            m_timer.async_wait(m_strand.wrap([this,buf,socket](const boost::system::error_code& error){WakeUpAfterSleep(error, buf, socket);}));
+            m_timer.expires_after(boost::chrono::milliseconds(10));
+            m_timer.async_wait(boost::asio::bind_executor(m_strand,[this,buf,socket](const boost::system::error_code& error){WakeUpAfterSleep(error, buf, socket);}));
         }
 
         void WakeUpAfterSleep(const boost::system::error_code& /*error*/, char* buf, boost::asio::ip::udp::socket* socket)

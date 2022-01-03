@@ -23,7 +23,7 @@
 ******************************************************************************/
 #pragma once
 
-#include <boost/asio/io_service.hpp>
+#include <boost/asio/io_context.hpp>
 #include <boost/noncopyable.hpp>
 #include <Safir/Dob/Internal/RawStatistics.h>
 #include <Safir/Dob/Internal/SystemState.h>
@@ -81,7 +81,7 @@ namespace SP
          *                           use the given incarnation id.
          */
         SystemPicture(master_tag_t,
-                      boost::asio::io_service& ioService,
+                      boost::asio::io_context& ioContext,
                       Com::Communication& communication,
                       const std::string& name,
                       const int64_t id,
@@ -98,7 +98,7 @@ namespace SP
          * This is meant to be used in the dose_main executable.
          */
         SystemPicture(slave_tag_t,
-                      boost::asio::io_service& ioService,
+                      boost::asio::io_context& ioContext,
                       Com::Communication& communication,
                       const std::string& name,
                       const int64_t id,
@@ -111,7 +111,7 @@ namespace SP
          * to the system picture information, such as dobexplorer.
          */
         SystemPicture(subscriber_tag_t,
-                      boost::asio::io_service& ioService);
+                      boost::asio::io_context& ioContext);
 
         /** Destructor. */
         ~SystemPicture();

@@ -69,7 +69,7 @@ namespace SP
         : private boost::noncopyable
     {
     public:
-        CoordinatorBasic(boost::asio::io_service& ioService,
+        CoordinatorBasic(boost::asio::io_context& ioContext,
                          CommunicationT& communication,
                          const std::string& name,
                          const int64_t id,
@@ -80,7 +80,7 @@ namespace SP
                          const boost::chrono::steady_clock::duration& aloneTimeout,
                          const char* const receiverId,
                          RawHandlerT& rawHandler)
-            : m_strand (ioService)
+            : m_strand (ioContext)
             , m_communication(communication)
             , m_lastStatisticsDirty(true)
             , m_name(name)
@@ -93,7 +93,7 @@ namespace SP
             , m_failedStateUpdates(0)
         {
 
-            m_electionHandler.reset(new ElectionHandlerT(ioService,
+            m_electionHandler.reset(new ElectionHandlerT(ioContext,
                                                          communication,
                                                          id,
                                                          nodeTypes,
@@ -119,7 +119,7 @@ namespace SP
 
             m_stateMessage.set_elected_id(0); //our state message is not valid until we have a real id set.
 
-            rawHandler.AddRawChangedCallback(m_strand.wrap([this](const RawStatistics& statistics,
+            rawHandler.AddRawChangedCallback(boost::asio::bind_executor(m_strand,[this](const RawStatistics& statistics,
                                                                   const RawChanges flags,
                                                                   std::shared_ptr<void> completionSignaller)
             {
@@ -148,7 +148,7 @@ namespace SP
 
         void SetStateChangedCallback(const std::function<void(const SystemStateMessage& data)>& callback)
         {
-            m_strand.dispatch([this,callback]
+            boost::asio::dispatch(m_strand,[this,callback]
                               {
                                   m_stateChangedCallback = callback;
                               });
@@ -161,7 +161,7 @@ namespace SP
                                    const size_t size)> & fn,
                                    const bool onlyOwnState)
         {
-            m_strand.dispatch([this,fn,onlyOwnState]
+            boost::asio::dispatch(m_strand,[this,fn,onlyOwnState]
             {
                 lllog(8) << "Coordinator::PerformOnStateMessage:" << std::endl;
                 if (onlyOwnState)
@@ -195,7 +195,7 @@ namespace SP
                                  const Safir::Utilities::Internal::SharedConstCharArray& data,
                                  const size_t size)
         {
-            m_strand.dispatch([this,from,data,size]
+            boost::asio::dispatch(m_strand,[this,from,data,size]
             {
                 if (!m_electionHandler->IsElected(from))
                 {
@@ -816,7 +816,7 @@ namespace SP
         }
 
 
-        mutable boost::asio::io_service::strand m_strand;
+        mutable boost::asio::io_context::strand m_strand;
         CommunicationT& m_communication;
 
         std::unique_ptr<ElectionHandlerT> m_electionHandler;

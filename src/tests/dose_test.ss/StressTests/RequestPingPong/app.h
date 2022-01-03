@@ -42,7 +42,7 @@ private:
     void OnStopOrder() override;
     void PrintHelp();
 
-    boost::asio::io_service m_ioService;
+    boost::asio::io_context m_ioContext;
     Safir::Dob::Connection m_Connection;
     Safir::Utilities::AsioDispatcher   m_dispatch;
     Requestor m_requestor;

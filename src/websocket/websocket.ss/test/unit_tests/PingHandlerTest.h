@@ -32,20 +32,20 @@ class PingHandlerTest
 {
 public:
     PingHandlerTest()
-        :m_work(new boost::asio::io_service::work(m_ioService))
-        ,m_strand(m_ioService)
+        :m_work(new boost::asio::io_context::work(m_ioContext))
+        ,m_strand(m_ioContext)
         ,m_pingHandler(new PingHandler(m_strand, interval, [this]{OnPing();}))
     {
-        m_ioService.dispatch([this]{m_pingHandler->Start();});
+        m_ioContext.dispatch([this]{m_pingHandler->Start();});
         m_pingTime=boost::chrono::steady_clock::now();
-        m_ioService.run();
+        m_ioContext.run();
     }
 
 private:
     static const int interval=1;
-    boost::asio::io_service m_ioService;
-    boost::shared_ptr<boost::asio::io_service::work> m_work;
-    boost::asio::io_service::strand m_strand;
+    boost::asio::io_context m_ioContext;
+    boost::shared_ptr<boost::asio::io_context::work> m_work;
+    boost::asio::io_context::strand m_strand;
     boost::chrono::steady_clock::time_point m_pingTime;
     boost::shared_ptr<PingHandler> m_pingHandler;
 

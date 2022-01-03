@@ -37,8 +37,8 @@ public:
     /**
      * Constructor
      */
-    explicit NonePersistor(boost::asio::io_service& ioService)
-        : PersistenceHandler(ioService, true)
+    explicit NonePersistor(boost::asio::io_context& ioContext)
+        : PersistenceHandler(ioContext, true)
     {
 
     }

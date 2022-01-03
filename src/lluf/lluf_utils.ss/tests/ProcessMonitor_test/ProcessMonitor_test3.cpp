@@ -22,6 +22,7 @@
 *
 ******************************************************************************/
 #include <Safir/Utilities/ProcessMonitor.h>
+#include <Safir/Utilities/Internal/MakeUnique.h>
 #include <boost/lexical_cast.hpp>
 #include <vector>
 #include <set>
@@ -60,7 +61,7 @@
 struct Fixture
 {
     Fixture()
-        : monitor(ioService,
+        : monitor(ioContext,
                   [this](const pid_t pid){TerminatedCb(pid);},
                   boost::chrono::milliseconds(20)) //high polling rate to speed up tests.
     {
@@ -94,8 +95,9 @@ struct Fixture
 
     void RunIoService()
     {
-        work.reset(new boost::asio::io_service::work(ioService));
-        thread = boost::thread([this]{ioService.run();});
+        work = Safir::make_unique<boost::asio::executor_work_guard<boost::asio::io_context::executor_type>>
+            (boost::asio::make_work_guard(ioContext));
+        thread = boost::thread([this]{ioContext.run();});
     }
 
     void Stop()
@@ -203,8 +205,8 @@ struct Fixture
         }
 #endif
     }
-    boost::shared_ptr<boost::asio::io_service::work> work;
-    boost::asio::io_service ioService;
+    std::unique_ptr<boost::asio::executor_work_guard<boost::asio::io_context::executor_type>> work;
+    boost::asio::io_context ioContext;
     boost::thread thread;
 
     Safir::Utilities::ProcessMonitor monitor;

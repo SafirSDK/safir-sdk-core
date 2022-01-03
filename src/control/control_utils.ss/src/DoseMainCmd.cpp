@@ -53,7 +53,7 @@ namespace Control
     {
     public:
 
-        Impl(boost::asio::io_service&       ioService,
+        Impl(boost::asio::io_context&       ioContext,
              const IncludeNodeCmdCb&        startDoseMainCb,
              const IncludeNodeCmdCb&        injectNodeCb,
              const ExcludeNodeCmdCb&        excludeNodeCb,
@@ -65,7 +65,7 @@ namespace Control
               m_stoppedNodeIndicationCb(stoppedNodeIndicationCb),
               m_stopDoseMainCb(stopDoseMainCb)
         {
-            m_ipcSubscriber.reset( new Safir::Utilities::Internal::IpcSubscriber(ioService,
+            m_ipcSubscriber.reset( new Safir::Utilities::Internal::IpcSubscriber(ioContext,
                                                                                  doseMainCmdChannel,
                                                                                  [this](const char* data, size_t size)
                                                                                  {
@@ -151,13 +151,13 @@ namespace Control
         }
     };
 
-    DoseMainCmdReceiver::DoseMainCmdReceiver(boost::asio::io_service&       ioService,
+    DoseMainCmdReceiver::DoseMainCmdReceiver(boost::asio::io_context&       ioContext,
                                              const IncludeNodeCmdCb&        startDoseMainCb,
                                              const IncludeNodeCmdCb&        injectNodeCb,
                                              const ExcludeNodeCmdCb&        excludeNodeCb,
                                              const StoppedNodeIndicationCb& stoppedNodeIndicationCb,
                                              const StopDoseMainCb&          stopDoseMainCb)
-        : m_impl(Safir::make_unique<Impl>(ioService,
+        : m_impl(Safir::make_unique<Impl>(ioContext,
                                           startDoseMainCb,
                                           injectNodeCb,
                                           excludeNodeCb,
@@ -181,9 +181,9 @@ namespace Control
     {
     public:
 
-        Impl(boost::asio::io_service&       ioService,
+        Impl(boost::asio::io_context&       ioContext,
              const std::function<void()>    doseMainConnectedCb)
-            : m_ipcPublisher(ioService, doseMainCmdChannel, doseMainConnectedCb, NULL)
+            : m_ipcPublisher(ioContext, doseMainCmdChannel, doseMainConnectedCb, NULL)
         {
         }
 
@@ -278,9 +278,9 @@ namespace Control
 
     };
 
-    DoseMainCmdSender::DoseMainCmdSender(boost::asio::io_service&       ioService,
+    DoseMainCmdSender::DoseMainCmdSender(boost::asio::io_context&       ioContext,
                                          const std::function<void()>    doseMainConnectedCb)
-        : m_impl(Safir::make_unique<Impl>(ioService, doseMainConnectedCb))
+        : m_impl(Safir::make_unique<Impl>(ioContext, doseMainConnectedCb))
     {
     }
 

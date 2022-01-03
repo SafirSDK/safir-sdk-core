@@ -36,7 +36,7 @@
 #endif
 
 #include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/asio/io_service.hpp>
+#include <boost/asio/io_context.hpp>
 #include <boost/asio/ip/udp.hpp>
 #include <boost/asio/ip/host_name.hpp>
 
@@ -132,7 +132,7 @@ private:
 
                 m_syslogServerEndpoint =
                         boost::asio::ip::udp::endpoint
-                            (boost::asio::ip::address::from_string
+                            (boost::asio::ip::make_address
                                 (configReader.Logging().get<std::string>("SystemLog.syslog_server_address")),
                                  configReader.Logging().get<unsigned short>("SystemLog.syslog_server_port"));
             }
@@ -364,7 +364,7 @@ private:
     bool                            m_replaceNewlines;
     bool                            m_includeSafirInstance;
     boost::asio::ip::udp::endpoint  m_syslogServerEndpoint;
-    boost::asio::io_service         m_service;
+    boost::asio::io_context         m_service;
     boost::asio::ip::udp::socket    m_sock;
     std::mutex                    m_lock;
 

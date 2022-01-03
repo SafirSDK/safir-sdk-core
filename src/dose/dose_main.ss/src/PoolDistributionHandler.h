@@ -54,7 +54,7 @@ namespace Internal
     class PoolDistributionHandler
     {
     public:
-        PoolDistributionHandler(boost::asio::io_service& io, DistributionT& distribution)
+        PoolDistributionHandler(boost::asio::io_context& io, DistributionT& distribution)
             :m_strand(io)
             ,m_distribution(distribution)
             ,m_running(false)
@@ -68,7 +68,7 @@ namespace Internal
         //make sure that start is not called before persistent data is ready
         void Start()
         {
-            m_strand.dispatch([this]
+            boost::asio::dispatch(m_strand,[this]
             {
                 if (!m_running) //dont call start if its already started
                 {
@@ -81,7 +81,7 @@ namespace Internal
 
         void Stop()
         {
-            m_strand.post([this]
+            boost::asio::post(m_strand,[this]
             {
                 m_running=false;
                 if (!m_pendingPoolDistributions.empty())
@@ -93,7 +93,7 @@ namespace Internal
 
         void SetHaveNothing()
         {
-            m_strand.dispatch([this]
+            boost::asio::dispatch(m_strand,[this]
             {
                 if (m_running)
                     return; //not allowed if we are started
@@ -110,7 +110,7 @@ namespace Internal
         //Called when a new pdRequest is received. Will result in a pd to the node with specified id.
         void AddPoolDistribution(int64_t nodeId, int64_t nodeTypeId) SAFIR_GCC_VISIBILITY_BUG_WORKAROUND
         {
-            m_strand.dispatch([this, nodeId, nodeTypeId]
+            boost::asio::dispatch(m_strand,[this, nodeId, nodeTypeId]
             {
                 if (m_haveNothing)
                 {
@@ -129,7 +129,7 @@ namespace Internal
                     {
                         //since this code is called from the m_pendingPoolDistributions.front object, we must
                         //post before we can pop_front
-                        m_strand.post([this]
+                        boost::asio::post(m_strand,[this]
                         {
                             m_pendingPoolDistributions.pop_front();
                             StartNextPoolDistribution();
@@ -148,7 +148,7 @@ namespace Internal
 
         void RemovePoolDistribution(int64_t nodeId)
         {
-            m_strand.post([this, nodeId]
+            boost::asio::post(m_strand,[this, nodeId]
             {
                 if (m_pendingPoolDistributions.empty())
                 {
@@ -171,7 +171,7 @@ namespace Internal
 #ifndef SAFIR_TEST
     private:
 #endif
-        boost::asio::io_service::strand m_strand;
+        boost::asio::io_context::strand m_strand;
         DistributionT& m_distribution;
         bool m_running;
         bool m_haveNothing;
@@ -194,7 +194,7 @@ namespace Internal
 
             if (!m_distribution.GetCommunication().Send(nodeId, nodeType, msg, sizeof(PoolDistributionInfo), PoolDistributionInfoDataTypeId, true))
             {
-                m_strand.post([this,nodeId,nodeType]{SendHaveNothing(nodeId, nodeType);});
+                boost::asio::post(m_strand,[this,nodeId,nodeType]{SendHaveNothing(nodeId, nodeType);});
             }
         }
     };

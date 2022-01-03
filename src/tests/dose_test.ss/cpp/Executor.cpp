@@ -57,9 +57,9 @@ Executor::Executor(const std::vector<std::string> & commandLine):
     m_isDone(false),
     m_isActive(false),
     m_dispatchTestConnection(true),
-    m_testDispatcher([this]{DispatchTestConnection();}, m_ioService),
-    m_controlDispatcher([this]{DispatchControlConnection();}, m_ioService),
-    m_actionReceiver(m_ioService, [this](const auto& action){HandleAction(action);},m_instance),
+    m_testDispatcher([this]{DispatchTestConnection();}, m_ioContext),
+    m_controlDispatcher([this]{DispatchControlConnection();}, m_ioContext),
+    m_actionReceiver(m_ioContext, [this](const auto& action){HandleAction(action);},m_instance),
     m_callbackActions(Safir::Dob::CallbackId::Size()),
     m_defaultContext(0)
 {
@@ -76,7 +76,7 @@ void Executor::OnStopOrder()
     lout << "Got stop order" << std::endl;
     ExecuteCallbackActions(Safir::Dob::CallbackId::OnStopOrder);
     m_isDone = true;
-    m_ioService.stop();
+    m_ioContext.stop();
 }
 
 void Executor::HandleAction(DoseTest::ActionPtr action)
@@ -339,8 +339,8 @@ Executor::Run()
 {
     std::wcout << m_identifier << ":" <<  m_instance << " Started" <<std::endl;
 
-    boost::asio::io_service::work keepRunning(m_ioService);
-    m_ioService.run();
+    auto keepRunning = boost::asio::make_work_guard(m_ioContext);
+    m_ioContext.run();
 
     m_testConnection.Close();
     m_controlConnection.Close();

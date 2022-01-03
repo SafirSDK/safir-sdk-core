@@ -28,7 +28,7 @@
 namespace VehicleAppCpp
 {
     App::App()
-        : m_dispatch(m_connection,m_ioService)
+        : m_dispatch(m_connection,m_ioContext)
     {
     }
 
@@ -44,16 +44,16 @@ namespace VehicleAppCpp
 
         // Start the asio io-service loop in order to receive DOB callbacks
         // for example OnCreateRequest in EntityOwner.
-        // We also need to define some dummy work in order for the io_service
+        // We also need to define some dummy work in order for the io_context
         // to keep running until we tell it to stop.
-        boost::asio::io_service::work keepRunning(m_ioService);
-        m_ioService.run();
+        boost::asio::io_context::work keepRunning(m_ioContext);
+        m_ioContext.run();
 
         return 0;
     }
 
     void App::OnStopOrder()
     {
-        m_ioService.stop();
+        m_ioContext.stop();
     }
 }

@@ -121,7 +121,7 @@ SET_SAFIR_TEST_PROPERTIES(TEST LocalSubscriber_test)
 add_test(NAME RemoteSubscriber_test COMMAND RemoteSubscriber_test)
 SET_SAFIR_TEST_PROPERTIES(TEST RemoteSubscriber_test)
 
-add_test(NAME RawHandler_test COMMAND RawHandler_test)
+add_test(NAME RawHandler_test COMMAND RawHandler_test -l all -x no)
 SET_SAFIR_TEST_PROPERTIES(TEST RawHandler_test)
 
 add_test(NAME RawChanges_test COMMAND RawChanges_test)

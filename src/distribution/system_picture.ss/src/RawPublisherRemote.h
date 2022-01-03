@@ -41,14 +41,14 @@ namespace SP
     class RawPublisherRemoteBasic
     {
     public:
-        RawPublisherRemoteBasic(boost::asio::io_service& ioService,
+        RawPublisherRemoteBasic(boost::asio::io_context& ioContext,
                                 CommunicationT& communication,
                                 const std::map<int64_t, NodeType>& nodeTypes,
                                 const char* const senderId,
                                 RawHandlerT& rawHandler,
                                 const boost::chrono::steady_clock::duration& period)
-            : m_strand(ioService)
-            , m_timer(ioService)
+            : m_strand(ioContext)
+            , m_timer(ioContext)
             , m_stopped(false)
             , m_communication(communication)
             , m_senderId(LlufId_Generate64(senderId))
@@ -60,7 +60,7 @@ namespace SP
 
             SchedulePublishTimer(period, m_allNodeTypes);
 
-            rawHandler.AddRawChangedCallback(m_strand.wrap([this](const RawStatistics&,
+            rawHandler.AddRawChangedCallback(boost::asio::bind_executor(m_strand,[this](const RawStatistics&,
                                                                   const RawChanges flags,
                                                                   std::shared_ptr<void> /*completionSignaller*/)
             {
@@ -76,7 +76,7 @@ namespace SP
             const bool was_stopped = m_stopped.exchange(true);
             if (!was_stopped)
             {
-                m_strand.dispatch([this]
+                boost::asio::dispatch(m_strand,[this]
                                   {
                                       m_timer.cancel();
                                   });
@@ -107,8 +107,8 @@ namespace SP
             }
 
             m_timer.cancel();
-            m_timer.expires_from_now(delay);
-            m_timer.async_wait(m_strand.wrap([this, toNodeTypes](const boost::system::error_code& error)
+            m_timer.expires_after(delay);
+            m_timer.async_wait(boost::asio::bind_executor(m_strand,[this, toNodeTypes](const boost::system::error_code& error)
             {
                 if (!error)
                 {
@@ -158,7 +158,7 @@ namespace SP
             });
         }
 
-        boost::asio::io_service::strand m_strand;
+        boost::asio::io_context::strand m_strand;
         boost::asio::steady_timer m_timer;
         std::atomic<bool> m_stopped;
         CommunicationT& m_communication;

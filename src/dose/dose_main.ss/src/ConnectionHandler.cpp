@@ -42,16 +42,16 @@ namespace
     static const int64_t ConnectionMessageDataTypeId=4477521173098643793; //DoseMain.ConnectionMessage
 }
 
-    ConnectionHandler::ConnectionHandler(boost::asio::io_service& ioService,
+    ConnectionHandler::ConnectionHandler(boost::asio::io_context& ioContext,
                                          Distribution& distribution,
                                          const std::function<void(const ConnectionPtr& connection, bool disconnecting)>& onAppEvent,
                                          const std::function<void(int64_t)>& checkPendingReg,
                                          const std::function<void(const std::string& str)>& logStatus)
-        : m_strand(ioService),
+        : m_strand(ioContext),
           m_communication(distribution.GetCommunication()),
           m_onAppEvent(onAppEvent),
           m_poolHandler(m_strand, distribution, checkPendingReg, logStatus),
-          m_processInfoHandler(ioService, distribution)
+          m_processInfoHandler(ioContext, distribution)
     {
         distribution.SubscribeNodeEvents(
             [](const std::string&, int64_t /*id*/, int64_t /*nt*/, const std::string&)
@@ -74,7 +74,7 @@ namespace
             m_sendQueues.insert(std::make_pair(*nt, SendQueue()));
             m_communication.SetQueueNotFullCallback([this](int64_t)
                                                     {
-                                                        m_strand.post([this]
+                                                        boost::asio::post(m_strand,[this]
                                                                       {
                                                                           HandleSendQueues();
                                                                       });
@@ -83,7 +83,7 @@ namespace
 
         m_communication.SetDataReceiver([this](int64_t /*fromNodeId*/, int64_t /*fromNodeType*/, const char *data, size_t /*size*/)
         {
-            m_strand.post([this,data]
+            boost::asio::post(m_strand,[this,data]
             {
                 const DistributionData state=DistributionData::ConstConstructor(new_data_tag, data);
                 DistributionData::DropReference(data);
@@ -121,7 +121,7 @@ namespace
 
     void ConnectionHandler::Start()
     {
-        m_strand.dispatch([this]
+        boost::asio::dispatch(m_strand,[this]
         {
             auto this_ = this;
             m_connectionThread = boost::thread([this_]() {this_->ConnectionThread();});
@@ -131,7 +131,7 @@ namespace
 
     void ConnectionHandler::Stop()
     {
-        m_strand.post([this]
+        boost::asio::post(m_strand,[this]
         {
             m_poolHandler.Stop();
             m_processInfoHandler.Stop();
@@ -208,7 +208,7 @@ namespace
                 {
                     lllog(9) << "ConnectionThread - NOTIFY "<< std::endl;
                     m_handleEventsNotified=true;
-                    m_strand.post([this]{HandleEvents();});
+                    boost::asio::post(m_strand,[this]{HandleEvents();});
                 }
             }
         }

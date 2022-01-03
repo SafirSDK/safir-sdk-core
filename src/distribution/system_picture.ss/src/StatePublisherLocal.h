@@ -45,14 +45,14 @@ namespace SP
     class StatePublisherLocalBasic
     {
     public:
-        StatePublisherLocalBasic(boost::asio::io_service& ioService,
+        StatePublisherLocalBasic(boost::asio::io_context& ioContext,
                                  CoordinatorT& coordinator,
                                  const char* const name,
                                  const boost::chrono::steady_clock::duration& period)
             : m_coordinator(coordinator)
-            , m_publisher(ioService, name, NULL, NULL)
+            , m_publisher(ioContext, name, NULL, NULL)
         {
-            m_publishTimer.reset(new Safir::Utilities::Internal::AsioPeriodicTimer(ioService,
+            m_publishTimer.reset(new Safir::Utilities::Internal::AsioPeriodicTimer(ioContext,
                                                                                    period,
                                                                                    [this](const boost::system::error_code& error)
                                                                                    {

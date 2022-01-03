@@ -53,6 +53,22 @@
 #pragma warning (pop)
 #endif
 
+
+namespace {
+    template <typename F>
+    decltype(auto) wrap(boost::asio::io_context::strand& strand, F&& callback) {
+        return boost::asio::bind_executor
+            (strand,
+             [strand_ptr=&strand, callback = std::move(callback)](auto&&... args) mutable {
+                 boost::asio::dispatch(*strand_ptr,
+                                       [callback = std::move(callback),
+                                        args_tuple = std::make_tuple(std::forward<decltype(args)>(args)...)]() mutable {
+                                           return std::apply(std::move(callback), std::move(args_tuple));
+                                       });
+             });
+    }
+}
+
 namespace Safir
 {
 namespace Dob
@@ -101,7 +117,7 @@ namespace SP
         typedef std::unordered_map<int64_t, NodeInfo> NodeTable;
 
     public:
-        RawHandlerBasic(boost::asio::io_service& ioService,
+        RawHandlerBasic(boost::asio::io_context& ioContext,
                         CommunicationT& communication,
                         const std::string& name,
                         const int64_t id,
@@ -113,11 +129,11 @@ namespace SP
                         const std::function<bool (const int64_t incarnationId)>& validateJoinSystemCallback,
                         const std::function<bool (const int64_t incarnationId)>& validateFormSystemCallback)
         SAFIR_GCC_VISIBILITY_BUG_WORKAROUND
-            : m_ioService(ioService)
+            : m_ioContext(ioContext)
             , m_communication(communication)
             , m_id(id)
             , m_nodeTypes(nodeTypes)
-            , m_strand(ioService)
+            , m_strand(ioContext)
             , m_latencyMonitor("SpRawHandler",CalculateLatencyWarningThreshold(nodeTypes),m_strand)
             , m_checkDeadNodesTimer()
             , m_master(master)
@@ -127,9 +143,9 @@ namespace SP
         {
 
             m_checkDeadNodesTimer.reset(new Safir::Utilities::Internal::AsioPeriodicTimer
-                                        (ioService,
+                                        (ioContext,
                                          CalculateDeadCheckPeriod(nodeTypes),
-                                         m_strand.wrap([this](const boost::system::error_code& error)
+                                         wrap(m_strand,[this](const boost::system::error_code& error)
                                                        {
                                                            if (m_stopped)
                                                            {
@@ -163,16 +179,16 @@ namespace SP
                                                     const std::string& dataAddress,
                                                     const bool multicast)
             {
-                m_strand.dispatch([this,name,id,nodeTypeId,controlAddress,dataAddress,multicast]
+                boost::asio::dispatch(m_strand,[this,name,id,nodeTypeId,controlAddress,dataAddress,multicast]
                 {
                     NewNode(name,id,nodeTypeId,controlAddress,dataAddress,multicast);
                 });
             });
 
-            communication.SetGotReceiveFromCallback(m_strand.wrap([this](int64_t id, bool multicast, bool duplicate)
+            communication.SetGotReceiveFromCallback(wrap(m_strand,[this](int64_t id, bool multicast, bool duplicate)
             {GotReceive(id,multicast,duplicate);}));
 
-            communication.SetRetransmitToCallback(m_strand.wrap([this](int64_t id, size_t tc)
+            communication.SetRetransmitToCallback(wrap(m_strand,[this](int64_t id, size_t tc)
             {Retransmit(id, tc);}));
 
             m_checkDeadNodesTimer->Start();
@@ -186,7 +202,7 @@ namespace SP
             {
                 m_latencyMonitor.Stop();
 
-                m_strand.dispatch([this]
+                boost::asio::dispatch(m_strand,[this]
                                   {
                                       m_checkDeadNodesTimer->Stop();
                                   });
@@ -197,7 +213,7 @@ namespace SP
         void PerformOnMyStatisticsMessage(const std::function<void(std::unique_ptr<char[]> data,
                                                                           const size_t size)> & fn) const
         {
-            m_strand.dispatch([this,fn]
+            boost::asio::dispatch(m_strand,[this,fn]
             {
                 //With newer protobuf (>= 2.5.0) we can be clever
                 //we just get the remote statistics out of the way before serializing a
@@ -242,7 +258,7 @@ namespace SP
         void PerformOnAllStatisticsMessage(const std::function<void(std::unique_ptr<char []> data,
                                                                     const size_t size)> & fn) const
         {
-            m_strand.dispatch([this,fn]
+            boost::asio::dispatch(m_strand,[this,fn]
                               {
                                   const size_t size = m_allStatisticsMessage.ByteSizeLong();
                                   auto data = std::unique_ptr<char[]>(new char[size]);
@@ -254,7 +270,7 @@ namespace SP
 
         void NewRemoteStatistics(const int64_t from, const Safir::Utilities::Internal::SharedConstCharArray& data, const size_t size)
         {
-            m_strand.dispatch([this,from,data,size]
+            boost::asio::dispatch(m_strand,[this,from,data,size]
             {
                 lllog(9) << "SP: NewRemoteStatistics for node " << from << std::endl;
                 auto findIt = m_nodeTable.find(from);
@@ -434,7 +450,7 @@ namespace SP
                 throw std::logic_error("Only Master should be able to receive DataChannelStatistics");
             }
 
-            m_strand.dispatch([this,data]
+            boost::asio::dispatch(m_strand,[this,data]
             {
                 lllog(9) << "SP: NewDataChannelStatistics" << std::endl;
 
@@ -491,7 +507,7 @@ namespace SP
          */
         void AddRawChangedCallback(const StatisticsCallback& callback)
         {
-            m_strand.dispatch([this, callback]
+            boost::asio::dispatch(m_strand,[this, callback]
                               {
                                   m_rawChangedCallbacks.push_back(callback);
                               });
@@ -504,7 +520,7 @@ namespace SP
         void ExcludeNode(const int64_t id)
         {
             m_communication.ExcludeNode(id);
-            m_strand.dispatch([this, id]
+            boost::asio::dispatch(m_strand,[this, id]
                               {
                                   auto findIt = m_nodeTable.find(id);
 
@@ -530,7 +546,7 @@ namespace SP
          */
         void RecentlyDeadNodes(std::vector<int64_t> nodeIds)
         {
-            m_strand.dispatch([this, nodeIds]
+            boost::asio::dispatch(m_strand,[this, nodeIds]
                               {
                                   bool changed = false;
 
@@ -554,7 +570,7 @@ namespace SP
 
         void SetElectionId(const int64_t /*nodeId*/, const int64_t electionId)
         {
-            m_strand.dispatch([this, electionId]
+            boost::asio::dispatch(m_strand,[this, electionId]
                               {
                                   lllog(7) << "SP: Election Id " << electionId
                                            << " set in RawHandler." << std::endl;
@@ -567,7 +583,7 @@ namespace SP
 
         void FormSystem(const int64_t incarnationId)
         {
-            m_strand.dispatch([this, incarnationId]
+            boost::asio::dispatch(m_strand,[this, incarnationId]
                               {
                                   if (m_allStatisticsMessage.has_incarnation_id())
                                   {
@@ -709,7 +725,7 @@ namespace SP
             //notify our users of the new node, and when they've returned we can
             //let it in.
             PostRawChangedCallback(RawChanges(RawChanges::NODES_CHANGED),
-                                   m_strand.wrap([this,name,id,newNode]
+                                   wrap(m_strand,[this,name,id,newNode]
                   {
                       if (!newNode->is_dead())
                       {
@@ -992,7 +1008,7 @@ namespace SP
                     //we've just modified the table that we're looping through, so
                     //we can't continue the loop. Post another call to this function
                     //and break out of the loop.
-                    m_strand.post([this]{CheckDeadNodes();});
+                    boost::asio::post(m_strand,[this]{CheckDeadNodes();});
 
                     break;
                 }
@@ -1032,17 +1048,17 @@ namespace SP
             for (auto it = m_rawChangedCallbacks.cbegin(); it != m_rawChangedCallbacks.cend(); ++it)
             {
                 auto cb = *it;
-                m_strand.post([cb,copy,flags,completionCaller]{cb(copy,flags,completionCaller);});
+                boost::asio::post(m_strand,[cb,copy,flags,completionCaller]{cb(copy,flags,completionCaller);});
             }
         }
 
 
-        boost::asio::io_service& m_ioService;
+        boost::asio::io_context& m_ioContext;
         CommunicationT& m_communication;
 
         const int64_t m_id;
         const std::map<int64_t, NodeType> m_nodeTypes;
-        mutable boost::asio::io_service::strand m_strand;
+        mutable boost::asio::io_context::strand m_strand;
         AsioLatencyMonitor m_latencyMonitor;
 
         std::unique_ptr<Safir::Utilities::Internal::AsioPeriodicTimer> m_checkDeadNodesTimer;

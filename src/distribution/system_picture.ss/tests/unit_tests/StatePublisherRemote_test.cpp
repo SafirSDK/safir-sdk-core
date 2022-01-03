@@ -30,7 +30,7 @@
 
 using namespace Safir::Dob::Internal::SP;
 
-boost::asio::io_service gIoService;
+boost::asio::io_context gIoService;
 
 
 int numPerform = 0;

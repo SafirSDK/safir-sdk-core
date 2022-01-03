@@ -44,12 +44,12 @@ namespace Dob
 namespace Internal
 {
 
-    PersistHandler::PersistHandler(boost::asio::io_service& ioService,
+    PersistHandler::PersistHandler(boost::asio::io_context& ioContext,
                                    Distribution& distribution,
                                    const std::function<void(const std::string& str)>& logStatus,
                                    const std::function<void()>& persistentDataReadyCb,
                                    const std::function<void()>& persistentDataAllowedCb)
-        : m_strand(ioService),
+        : m_strand(ioContext),
           m_logStatus(logStatus),
           m_systemFormed(false),
           m_distribution(distribution),
@@ -59,7 +59,7 @@ namespace Internal
           m_persistentDataAllowed(false),
           m_dataTypeIdentifier(LlufId_Generate64("Safir.Dob.HavePersistenceData"))
     {
-        m_strand.dispatch([this, logStatus, persistentDataReadyCb, persistentDataAllowedCb]()
+        boost::asio::dispatch(m_strand,[this, logStatus, persistentDataReadyCb, persistentDataAllowedCb]()
         {
             m_persistentDataReadyCb.push_back(persistentDataReadyCb);
             m_persistentDataAllowedCb.push_back(persistentDataAllowedCb);
@@ -90,7 +90,7 @@ namespace Internal
         {
             auto this_ = this; //fix for vs2010 issues with lambdas
 
-            m_strand.post([this_, nodeId, nodeTypeId]
+            boost::asio::post(m_strand,[this_, nodeId, nodeTypeId]
                           {
                               if (this_->m_systemFormed || this_->m_persistentDataReady)
                               {
@@ -106,7 +106,7 @@ namespace Internal
         {
              auto this_ = this;
 
-            m_strand.post([this_, nodeId, nodeTypeId]
+            boost::asio::post(m_strand,[this_, nodeId, nodeTypeId]
                           {
                               if (this_->m_persistentDataReady)
                               {
@@ -121,14 +121,14 @@ namespace Internal
 
         });
 
-        m_communication.SetQueueNotFullCallback(m_strand.wrap([this]
+        m_communication.SetQueueNotFullCallback(boost::asio::bind_executor(m_strand,[this]
                                                               (int64_t /*nodeTypeId*/)
                                                 {
                                                     Resend();
                                                 }),
                                                 0); // All node types
 
-        m_communication.SetDataReceiver(m_strand.wrap([this]
+        m_communication.SetDataReceiver(boost::asio::bind_executor(m_strand,[this]
                                                       (int64_t fromNodeId,
                                                        int64_t fromNodeType,
                                                        const char* data,
@@ -144,7 +144,7 @@ namespace Internal
 
     void PersistHandler::Start()
     {
-        m_strand.post([this]
+        boost::asio::post(m_strand,[this]
                       {
                           m_systemFormed = true;
 
@@ -164,7 +164,7 @@ namespace Internal
 
     void PersistHandler::Stop()
     {
-        m_strand.post([this]
+        boost::asio::post(m_strand,[this]
                       {
                         m_connection.Close();
                       });
@@ -172,7 +172,7 @@ namespace Internal
 
     void PersistHandler::SetPersistentDataReady()
     {
-        m_strand.dispatch([this] ()
+        boost::asio::dispatch(m_strand,[this] ()
         {
             if (m_persistentDataReady)
             {
@@ -201,7 +201,7 @@ namespace Internal
             //We could be inside a Dob callback, so we need
             //to post the call to Close, or else we might be
             //killing the connection that is dispatching...
-            m_strand.post([this_]
+            boost::asio::post(m_strand,[this_]
                           {
                               // We don't need the connection now
                               this_->m_connection.Close();

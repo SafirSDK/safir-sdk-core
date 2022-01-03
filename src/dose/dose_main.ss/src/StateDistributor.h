@@ -55,7 +55,7 @@ namespace Internal
     public:
         StateDistributor(int64_t nodeType,
                          Distribution& distribution,
-                         boost::asio::io_service::strand& strand,
+                         boost::asio::io_context::strand& strand,
                          const std::function<void(int64_t)>& checkPendingReg)
             :m_nodeType(nodeType)
             ,m_distribution(distribution)
@@ -73,12 +73,12 @@ namespace Internal
 
         void Start()
         {
-            m_strand.dispatch([this]{SubscribeStates();});
+            boost::asio::dispatch(m_strand,[this]{SubscribeStates();});
         }
 
         void Stop()
         {
-            m_strand.dispatch([this]
+            boost::asio::dispatch(m_strand,[this]
             {
                 for (auto context=0; context<Safir::Dob::NodeParameters::NumberOfContexts(); ++context)
                 {
@@ -89,7 +89,7 @@ namespace Internal
 
         void CheckForPending(Typesystem::TypeId typeId)
         {
-            m_strand.dispatch([this,typeId]
+            boost::asio::dispatch(m_strand,[this,typeId]
             {
                 m_checkPendingReg(typeId);
             });
@@ -104,7 +104,7 @@ namespace Internal
 
         int64_t m_nodeType;
         DistributionT& m_distribution;
-        boost::asio::io_service::strand& m_strand;
+        boost::asio::io_context::strand& m_strand;
         std::function<void(int64_t)> m_checkPendingReg;
         std::vector<std::unique_ptr<SubcriptionConnection>> m_connections;
         boost::atomic<bool> m_dispatcherNotified;
@@ -121,7 +121,7 @@ namespace Internal
             if (!m_dispatcherNotified)
             {
                 m_dispatcherNotified=true;
-                m_strand.dispatch([this]
+                boost::asio::dispatch(m_strand,[this]
                 {
                     m_dispatcherNotified=false;
 

@@ -55,11 +55,11 @@ class ActionSender
 {
     typedef boost::shared_ptr<boost::asio::ip::tcp::socket> SocketPtr;
 public:
-    explicit ActionSender(boost::asio::io_service& ioService)
+    explicit ActionSender(boost::asio::io_context& ioContext)
     {
         for (int i = 0; i < 3; ++i)
         {
-            m_sockets.push_back(SocketPtr(new boost::asio::ip::tcp::socket(ioService)));
+            m_sockets.push_back(SocketPtr(new boost::asio::ip::tcp::socket(ioContext)));
         }
     }
 
@@ -129,9 +129,9 @@ private:
             {
                 std::wcout << "Connecting to " << address.c_str() << ":" << port << std::endl;
                 //Set up address
-                const boost::asio::ip::address addr = 
-                    boost::asio::ip::address::from_string(address);
-                
+                const boost::asio::ip::address addr =
+                    boost::asio::ip::make_address(address);
+
                 const boost::asio::ip::tcp::endpoint endpoint(addr, port);
                 socket->connect(endpoint);
 
@@ -171,7 +171,7 @@ private:
         boost::thread timeout([which]{Timeout(which);});
 
         try
-        {            
+        {
             //        std::wcout << "Sent action to " << which << ", waiting for ok" << std::endl;
             char reply[3];
             boost::asio::read(*m_sockets[which],
@@ -236,5 +236,3 @@ private:
 };
 
 #endif
-
-

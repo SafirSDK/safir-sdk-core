@@ -60,7 +60,7 @@ namespace Internal
     class PoolDistributionRequestSender
     {
     public:
-        PoolDistributionRequestSender(boost::asio::io_service& io,
+        PoolDistributionRequestSender(boost::asio::io_context& io,
                                   CommunicationT& communication)
             :m_running(false)
             ,m_strand(io)
@@ -70,7 +70,7 @@ namespace Internal
 
         void Start(const std::function<void()>& pdComplete)
         {
-            m_strand.dispatch([this,pdComplete]
+            boost::asio::dispatch(m_strand,[this,pdComplete]
             {
                 m_pdComplete=pdComplete;
                 m_running=true;
@@ -88,7 +88,7 @@ namespace Internal
 
         void Stop()
         {
-            m_strand.post([this] //use post to prevent that stop is executed before start
+            boost::asio::post(m_strand,[this] //use post to prevent that stop is executed before start
             {
                 m_running=false;
                 m_requests.clear();
@@ -97,7 +97,7 @@ namespace Internal
 
         void RequestPoolDistribution(int64_t nodeId, int64_t nodeTypeId)
         {
-            m_strand.post([this,nodeId,nodeTypeId]
+            boost::asio::post(m_strand,[this,nodeId,nodeTypeId]
             {
                 m_requests.push_back(PoolDistributionRequestSender<CommunicationT>::PdReq(nodeId, nodeTypeId, false));
                 SendPoolDistributionRequests();
@@ -107,7 +107,7 @@ namespace Internal
         //fromNodeId=0 means all queued requests are finished
         void PoolDistributionFinished(int64_t fromNodeId)
         {
-            m_strand.dispatch([this,fromNodeId]
+            boost::asio::dispatch(m_strand,[this,fromNodeId]
             {
                 if (fromNodeId==0)
                 {
@@ -149,7 +149,7 @@ namespace Internal
 
         bool m_running;
 
-        boost::asio::io_service::strand m_strand;
+        boost::asio::io_context::strand m_strand;
         CommunicationT& m_communication;
         std::function<void()> m_pdComplete; //signal pdComplete after all our pdRequests has reported pdComplete
         std::vector<PdReq> m_requests;
@@ -184,7 +184,7 @@ namespace Internal
             if (unsentRequests)
             {
                 //some requests could not be sent, retry
-                m_strand.post([this]{SendPoolDistributionRequests();}); //a bit aggressive, maybe we should set a timer instead
+                boost::asio::post(m_strand,[this]{SendPoolDistributionRequests();}); //a bit aggressive, maybe we should set a timer instead
             }
         }
     };

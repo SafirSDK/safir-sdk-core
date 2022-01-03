@@ -104,7 +104,7 @@ public:
                 ("nsend", boost::program_options::value<uint64_t>(), "Number of messages to send to every other node, default unlimited")
                 ("nrecv", boost::program_options::value<uint64_t>(), "Number of messages to receive from all otherl nodes (accumulated), default unlimited")
                 ("size", boost::program_options::value<size_t>(), "Size of data packets, default is 1000 bytes")
-                ("thread-count", boost::program_options::value<unsigned int>(), "Number of threads to run io_service, default is 2 threads")
+                ("thread-count", boost::program_options::value<unsigned int>(), "Number of threads to run io_context, default is 2 threads")
                 ("unacked", "Send unacked messages");
         boost::program_options::variables_map vm;
         boost::program_options::store(boost::program_options::parse_command_line(argc, argv, desc), vm);
@@ -459,8 +459,8 @@ int main(int argc, char * argv[])
 
     std::ostringstream name;
     name<<"Test_"<<cmd.unicastAddress;
-    boost::asio::io_service ioService;
-    auto work=std::make_shared<boost::asio::io_service::work>(ioService);
+    boost::asio::io_context ioContext;
+    auto work=boost::asio::make_work_guard(ioContext);
     int numberOfDiscoveredNodes=0;
     boost::barrier startBarrier(2);
     Semaphore stopCondition(cmd.accumulatedRecv ? 1 : cmd.await, false); //if accumulated only one node will report finished, the one posting the last message.
@@ -489,7 +489,7 @@ int main(int argc, char * argv[])
     int64_t myId=LlufId_GenerateRandom64();
     int64_t myNodeTypeId=nodeTypes.Get(cmd.nodeType).id;
     com.reset(new Safir::Dob::Internal::Com::Communication(Safir::Dob::Internal::Com::controlModeTag,
-                                                           ioService,
+                                                           ioContext,
                                                            name.str(),
                                                            myId,
                                                            myNodeTypeId,
@@ -521,7 +521,7 @@ int main(int argc, char * argv[])
     boost::thread_group threads;
     for (unsigned int i=0; i<cmd.threadCount; ++i)
     {
-        threads.create_thread([&]{ioService.run();});
+        threads.create_thread([&]{ioContext.run();});
     }
 
     if (cmd.seeds.size()>0)
@@ -619,7 +619,7 @@ int main(int argc, char * argv[])
     sp->PrintRecvCount();
     std::cout<<"---------------------------------------------------------"<<std::endl;
     boost::this_thread::sleep_for(boost::chrono::milliseconds(2000)); //allow 1 sec for retransmissions
-    ioService.stop();
+    ioContext.stop();
     threads.join_all();
 
     return 0;

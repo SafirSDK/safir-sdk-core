@@ -31,13 +31,13 @@ int main()
 {
     try
     {
-        boost::asio::io_service ioService;
+        boost::asio::io_context ioContext;
 
         int countdown = 10;
 
         std::function<void()> stopCb;
 
-        Safir::Utilities::Internal::AsioPeriodicTimer timer(ioService,
+        Safir::Utilities::Internal::AsioPeriodicTimer timer(ioContext,
                                                             boost::chrono::milliseconds(10),
                                                             [&](const boost::system::error_code& error)
                                                             {
@@ -59,7 +59,7 @@ int main()
 
         stopCb = [&timer]{timer.Stop();};
         timer.Start();
-        ioService.run();
+        ioContext.run();
 
         if (countdown == 0)
         {

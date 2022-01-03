@@ -34,7 +34,7 @@ namespace Dob
 {
 namespace Internal
 {
-    ResponseHandler::ResponseHandler(boost::asio::io_service::strand& strand,
+    ResponseHandler::ResponseHandler(boost::asio::io_context::strand& strand,
                                      Distribution& distribution,
                                      const std::function<void(const ConnectionId& connectionId,
                                                               const InternalRequestId requestId)>& responsePostedCallback)
@@ -43,8 +43,8 @@ namespace Internal
         , m_dataTypeIdentifier(LlufId_Generate64("ResponseHandler"))
         , m_responsePostedCallback(responsePostedCallback)
     {
-        //ioService is started after our constructor, so we do not need to be reentrant.
-        distribution.SubscribeNodeEvents(m_strand.wrap([this](const std::string& /*nodeName*/,
+        //ioContext is started after our constructor, so we do not need to be reentrant.
+        distribution.SubscribeNodeEvents(boost::asio::bind_executor(m_strand,[this](const std::string& /*nodeName*/,
                                                               const int64_t nodeId,
                                                               const int64_t nodeTypeId,
                                                               const std::string& /*dataAddress*/)
@@ -54,12 +54,12 @@ namespace Internal
                                                                m_liveNodes.insert(std::make_pair(nodeId,nodeTypeId));
                                                            }
                                                        }),
-                                         m_strand.wrap([this](const int64_t nodeId,
+                                         boost::asio::bind_executor(m_strand,[this](const int64_t nodeId,
                                                               const int64_t /*nodeTypeId*/)
                                                        {
                                                            m_liveNodes.erase(nodeId);
                                                        }));
-        m_distribution.GetCommunication().SetDataReceiver(m_strand.wrap([this] (const int64_t /*fromNodeId*/,
+        m_distribution.GetCommunication().SetDataReceiver(boost::asio::bind_executor(m_strand,[this] (const int64_t /*fromNodeId*/,
                                                                                 int64_t /*fromNodeType*/,
                                                                                 const char* data,
                                                                                 size_t /*size*/)
@@ -78,7 +78,7 @@ namespace Internal
         for (auto nodeTypeId = m_distribution.GetNodeTypeIds().cbegin(); nodeTypeId != m_distribution.GetNodeTypeIds().cend(); ++nodeTypeId)
         {
             m_distribution.GetCommunication().SetQueueNotFullCallback
-                (m_strand.wrap([this](const int64_t /*nodeTypeId*/)
+                (boost::asio::bind_executor(m_strand,[this](const int64_t /*nodeTypeId*/)
                                {
                                    const auto pending = std::move(m_waitingConnections);
                                    for (auto conn = pending.cbegin(); conn != pending.cend(); ++conn)
@@ -98,7 +98,7 @@ namespace Internal
 
     void ResponseHandler::DistributeResponses(const ConnectionPtr& sender)
     {
-        m_strand.dispatch([this, sender]
+        boost::asio::dispatch(m_strand,[this, sender]
         {
             const auto senderId = sender->Id();
 

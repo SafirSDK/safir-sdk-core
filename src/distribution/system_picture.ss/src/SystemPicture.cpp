@@ -81,7 +81,7 @@ namespace SP
          * Construct a master SystemPicture.
          */
         Impl(master_tag_t,
-             boost::asio::io_service& ioService,
+             boost::asio::io_context& ioContext,
              Com::Communication& communication,
              const std::string& name,
              const int64_t id,
@@ -90,7 +90,7 @@ namespace SP
              const boost::chrono::steady_clock::duration& aloneTimeout,
              const std::function<bool (const int64_t incarnationId)>& validateJoinSystemCallback,
              const std::function<bool (const int64_t incarnationId)>& validateFormSystemCallback)
-            : m_rawHandler(Safir::make_unique<RawHandler>(ioService,
+            : m_rawHandler(Safir::make_unique<RawHandler>(ioContext,
                                                           communication,
                                                           name,
                                                           id,
@@ -101,15 +101,15 @@ namespace SP
                                                           true,
                                                           validateJoinSystemCallback,
                                                           validateFormSystemCallback))
-            , m_rawPublisherLocal(Safir::make_unique<RawPublisherLocal>(ioService,
+            , m_rawPublisherLocal(Safir::make_unique<RawPublisherLocal>(ioContext,
                                                                         *m_rawHandler,
                                                                         MASTER_LOCAL_RAW_NAME,
                                                                         boost::chrono::seconds(1),
                                                                         true))
             , m_rawSubscriberLocal(Safir::make_unique<LocalSubscriber<Safir::Utilities::Internal::IpcSubscriber,
                                                                       RawStatisticsSubscriber,
-                                                                      RawStatisticsCreator>>(ioService, SLAVE_LOCAL_RAW_NAME))
-            , m_rawPublisherRemote(Safir::make_unique<RawPublisherRemote>(ioService,
+                                                                      RawStatisticsCreator>>(ioContext, SLAVE_LOCAL_RAW_NAME))
+            , m_rawPublisherRemote(Safir::make_unique<RawPublisherRemote>(ioContext,
                                                                           communication,
                                                                           nodeTypes,
                                                                           MASTER_REMOTE_RAW_NAME,
@@ -119,7 +119,7 @@ namespace SP
                                     (communication,
                                      MASTER_REMOTE_RAW_NAME,
                                      *m_rawHandler))
-            , m_coordinator(Safir::make_unique<Coordinator>(ioService,
+            , m_coordinator(Safir::make_unique<Coordinator>(ioContext,
                                                             communication,
                                                             name,
                                                             id,
@@ -130,13 +130,13 @@ namespace SP
                                                             aloneTimeout,
                                                             MASTER_REMOTE_ELECTION_NAME,
                                                             *m_rawHandler))
-            , m_statePublisherLocal(Safir::make_unique<StatePublisherLocal>(ioService,
+            , m_statePublisherLocal(Safir::make_unique<StatePublisherLocal>(ioContext,
                                                                             *m_coordinator,
                                                                             MASTER_LOCAL_STATE_NAME,
                                                                             boost::chrono::seconds(1)))
-            , m_stateSubscriberLocal(Safir::make_unique<StateSubscriberMaster>(ioService,
+            , m_stateSubscriberLocal(Safir::make_unique<StateSubscriberMaster>(ioContext,
                                                                                *m_coordinator))
-            , m_statePublisherRemote(Safir::make_unique<StatePublisherRemote>(ioService,
+            , m_statePublisherRemote(Safir::make_unique<StatePublisherRemote>(ioContext,
                                                                               communication,
                                                                               nodeTypes,
                                                                               MASTER_REMOTE_STATE_NAME,
@@ -161,13 +161,13 @@ namespace SP
          * Construct a slave SystemPicture.
          */
         explicit Impl(slave_tag_t,
-                      boost::asio::io_service& ioService,
+                      boost::asio::io_context& ioContext,
                       Com::Communication& communication,
                       const std::string& name,
                       const int64_t id,
                       const int64_t nodeTypeId,
                       const std::map<int64_t, NodeType>& nodeTypes)
-            : m_rawHandler(Safir::make_unique<RawHandler>(ioService,
+            : m_rawHandler(Safir::make_unique<RawHandler>(ioContext,
                                                           communication,
                                                           name,
                                                           id,
@@ -178,7 +178,7 @@ namespace SP
                                                           false,
                                                           std::function<bool (const int64_t)>(),
                                                           std::function<bool (const int64_t)>())) //NULL function pointers to make vs2010 happy
-            , m_rawPublisherLocal(Safir::make_unique<RawPublisherLocal>(ioService,
+            , m_rawPublisherLocal(Safir::make_unique<RawPublisherLocal>(ioContext,
                                                                         *m_rawHandler,
                                                                         SLAVE_LOCAL_RAW_NAME,
                                                                         boost::chrono::seconds(1),
@@ -187,7 +187,7 @@ namespace SP
         {
             auto stateSubscriberLocal = Safir::make_unique<LocalSubscriber<Safir::Utilities::Internal::IpcSubscriber,
                                                                            SystemStateSubscriber,
-                                                                           SystemStateCreator>>(ioService,
+                                                                           SystemStateCreator>>(ioContext,
                                                                                                 MASTER_LOCAL_STATE_NAME);
 
             stateSubscriberLocal->AddSubscriber([&](const SystemState& ss)
@@ -215,14 +215,14 @@ namespace SP
          * Construct a subscriber SystemPicture.
          */
         explicit Impl(subscriber_tag_t,
-                      boost::asio::io_service& ioService)
+                      boost::asio::io_context& ioContext)
             : m_rawSubscriberLocal(Safir::make_unique<LocalSubscriber<Safir::Utilities::Internal::IpcSubscriber,
                                                                       RawStatisticsSubscriber,
-                                                                      RawStatisticsCreator>>(ioService,
+                                                                      RawStatisticsCreator>>(ioContext,
                                                                                              MASTER_LOCAL_RAW_NAME))
             , m_stateSubscriberLocal(Safir::make_unique<LocalSubscriber<Safir::Utilities::Internal::IpcSubscriber,
                                                                         SystemStateSubscriber,
-                                                                        SystemStateCreator>>(ioService,
+                                                                        SystemStateCreator>>(ioContext,
                                                                                              MASTER_LOCAL_STATE_NAME))
             , m_stopped(false)
         {
@@ -348,7 +348,7 @@ namespace SP
     };
 
     SystemPicture::SystemPicture(master_tag_t,
-                                 boost::asio::io_service& ioService,
+                                 boost::asio::io_context& ioContext,
                                  Com::Communication& communication,
                                  const std::string& name,
                                  const int64_t id,
@@ -358,7 +358,7 @@ namespace SP
                                  const std::function<bool (const int64_t incarnationId)>& validateJoinSystemCallback,
                                  const std::function<bool (const int64_t incarnationId)>& validateFormSystemCallback)
         : m_impl(Safir::make_unique<Impl>(master_tag,
-                                          ioService,
+                                          ioContext,
                                           communication,
                                           name,
                                           id,
@@ -372,14 +372,14 @@ namespace SP
     }
 
     SystemPicture::SystemPicture(slave_tag_t,
-                                 boost::asio::io_service& ioService,
+                                 boost::asio::io_context& ioContext,
                                  Com::Communication& communication,
                                  const std::string& name,
                                  const int64_t id,
                                  const int64_t nodeTypeId,
                                  const std::map<int64_t, NodeType>& nodeTypes)
         : m_impl(Safir::make_unique<Impl>(slave_tag,
-                                          ioService,
+                                          ioContext,
                                           communication,
                                           name,
                                           id,
@@ -390,9 +390,9 @@ namespace SP
     }
 
     SystemPicture::SystemPicture(subscriber_tag_t,
-                                 boost::asio::io_service& ioService)
+                                 boost::asio::io_context& ioContext)
         : m_impl(Safir::make_unique<Impl>(subscriber_tag,
-                                          ioService))
+                                          ioContext))
     {
 
     }

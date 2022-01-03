@@ -84,8 +84,8 @@ private:
 
 BOOST_AUTO_TEST_CASE( PoolDistributionRequestSenderTest )
 {
-    boost::asio::io_service io;
-    auto work=boost::make_shared<boost::asio::io_service::work>(io);
+    boost::asio::io_context io;
+    auto work = boost::asio::make_work_guard(io);
 
     boost::thread_group threads;
     for (int i = 0; i < 2; ++i)
@@ -107,7 +107,7 @@ BOOST_AUTO_TEST_CASE( PoolDistributionRequestSenderTest )
     pdr.PoolDistributionFinished(2);
     pdr.PoolDistributionFinished(3);
 
-    pdr.m_strand.post([&]
+    boost::asio::post(pdr.m_strand,[&]
     {
         BOOST_CHECK(com.requests.find(1)!=com.requests.end());
         BOOST_CHECK(com.requests.find(2)!=com.requests.end());
@@ -125,7 +125,7 @@ class Pd
 {
 public:
     Pd(int64_t nodeId, int64_t nodeType,
-       boost::asio::io_service::strand&,
+       boost::asio::io_context::strand&,
        Distribution&,
        const std::function<void(int64_t)>& completionHandler)
         :m_nodeId(nodeId)
@@ -170,8 +170,8 @@ BOOST_AUTO_TEST_CASE( PoolDistributionHandlerTest )
         Pd::PoolDistributions[id].second(id);
     };
 
-    boost::asio::io_service io;
-    auto work=boost::make_shared<boost::asio::io_service::work>(io);
+    boost::asio::io_context io;
+    auto work=boost::asio::make_work_guard(io);
 
     boost::thread_group threads;
     for (int i = 0; i < 2; ++i)
@@ -195,7 +195,7 @@ BOOST_AUTO_TEST_CASE( PoolDistributionHandlerTest )
         hasRun=false;
     };
 
-    pdh.m_strand.post([&]
+    boost::asio::post(pdh.m_strand,[&]
     {
         dump();
         BOOST_CHECK(Pd::PoolDistributions[1].first==true);
@@ -209,7 +209,7 @@ BOOST_AUTO_TEST_CASE( PoolDistributionHandlerTest )
 
     WaitUntilReady();  //make sure the above post is executed before we add next
 
-    pdh.m_strand.post([&]
+    boost::asio::post(pdh.m_strand,[&]
     {
         BOOST_CHECK_EQUAL(pdh.m_pendingPoolDistributions.size(), 1u);
         dump();
@@ -222,7 +222,7 @@ BOOST_AUTO_TEST_CASE( PoolDistributionHandlerTest )
 
     WaitUntilReady();
 
-    pdh.m_strand.post([&]
+    boost::asio::post(pdh.m_strand,[&]
     {
         BOOST_CHECK_EQUAL(pdh.m_pendingPoolDistributions.size(), 0u);
         pdh.AddPoolDistribution(3, 1);
@@ -231,7 +231,7 @@ BOOST_AUTO_TEST_CASE( PoolDistributionHandlerTest )
 
     WaitUntilReady();
 
-    pdh.m_strand.post([&]
+    boost::asio::post(pdh.m_strand,[&]
     {
         dump();
         BOOST_CHECK(Pd::PoolDistributions[3].first==true);
@@ -243,7 +243,7 @@ BOOST_AUTO_TEST_CASE( PoolDistributionHandlerTest )
 
     WaitUntilReady();
 
-    pdh.m_strand.post([&]
+    boost::asio::post(pdh.m_strand,[&]
     {
         dump();
         BOOST_CHECK_EQUAL(pdh.m_pendingPoolDistributions.size(), 0u);

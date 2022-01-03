@@ -121,19 +121,19 @@ int main(int argc, char * argv[])
     Cmd cmd(argc, argv);
     if (cmd.help) return 0; //only show help
 
-    boost::asio::io_service ioService;
-    std::shared_ptr<boost::asio::io_service::work> work(new boost::asio::io_service::work(ioService));
+    boost::asio::io_context ioContext;
+    auto work = boost::asio::make_work_guard(ioContext);
 
-    boost::asio::steady_timer timeOutTimer(ioService);
-    timeOutTimer.expires_from_now(boost::chrono::seconds(cmd.timeOut));
+    boost::asio::steady_timer timeOutTimer(ioContext);
+    timeOutTimer.expires_after(boost::chrono::seconds(cmd.timeOut));
 
     // We start the sender and a timeout timer. If the sender is connected to the subscriber we send our action and cancel
     // the timer. Thus the timer will always expire, so in the callback for the timer we stop our worker and thus lets
-    // the ioService finish. If the timer is not canceled we take it as a failure since we have then timedout.
+    // the ioContext finish. If the timer is not canceled we take it as a failure since we have then timedout.
 
     std::unique_ptr<Safir::Dob::Internal::Control::ControlCmdSender> senderPtr;
 
-    senderPtr.reset(new Safir::Dob::Internal::Control::ControlCmdSender(ioService,
+    senderPtr.reset(new Safir::Dob::Internal::Control::ControlCmdSender(ioContext,
                                                            [&cmd, &senderPtr, &timeOutTimer]()
                                                            {
                                                                 if (cmd.nodeCmd)
@@ -164,7 +164,7 @@ int main(int argc, char * argv[])
                                   });
 
     senderPtr->Start();
-    ioService.run();
+    ioContext.run();
 
     return success ? 0 : 1;
 }

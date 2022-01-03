@@ -53,7 +53,7 @@ namespace Internal
     {
     public:
         // Constructor and Destructor
-        ProcessInfoHandler(boost::asio::io_service& ioService,
+        ProcessInfoHandler(boost::asio::io_context& ioContext,
                            const Distribution& distribution);
 
         void Stop();
@@ -76,7 +76,7 @@ namespace Internal
 
         void AddOwnConnection();
 
-        boost::asio::io_service::strand m_strand;
+        boost::asio::io_context::strand m_strand;
         Safir::Dob::Connection m_connection;
         Utilities::AsioDispatcher m_dispatcher;
         boost::atomic<bool> m_stopped;

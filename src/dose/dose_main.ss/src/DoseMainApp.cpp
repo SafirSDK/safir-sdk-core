@@ -80,18 +80,18 @@ namespace Internal
         }
 #endif
     }
-    DoseMainApp::DoseMainApp(boost::asio::io_service& ioService):
+    DoseMainApp::DoseMainApp(boost::asio::io_context& ioContext):
         m_stopped(false),
-        m_ioService(ioService),
-        m_strand(ioService),
-        m_wcoutStrand(ioService),
-        m_work(new boost::asio::io_service::work(ioService)),
+        m_ioContext(ioContext),
+        m_strand(ioContext),
+        m_wcoutStrand(ioContext),
+        m_work(boost::asio::make_work_guard(ioContext)),
         m_nodeId(0),
         m_distribution(),
-        m_signalSet(ioService)
+        m_signalSet(ioContext)
     {
-        m_cmdReceiver.reset(new Control::DoseMainCmdReceiver( ioService,
-                                                              m_strand.wrap([this](const std::string& nodeName,
+        m_cmdReceiver.reset(new Control::DoseMainCmdReceiver( ioContext,
+                                                              boost::asio::bind_executor(m_strand,[this](const std::string& nodeName,
                                                                                    int64_t nodeId,
                                                                                    int64_t nodeTypeId,
                                                                                    const std::string& dataAddress)
@@ -101,7 +101,7 @@ namespace Internal
                                                                                       nodeTypeId,
                                                                                       dataAddress);
                                                                             }),
-                                                              m_strand.wrap([this](const std::string& nodeName,
+                                                              boost::asio::bind_executor(m_strand,[this](const std::string& nodeName,
                                                                                    int64_t nodeId,
                                                                                    int64_t nodeTypeId,
                                                                                    const std::string& dataAddress)
@@ -111,15 +111,15 @@ namespace Internal
                                                                                            nodeTypeId,
                                                                                            dataAddress);
                                                                             }),
-                                                              m_strand.wrap([this](int64_t nodeId, int64_t nodeTypeId)
+                                                              boost::asio::bind_executor(m_strand,[this](int64_t nodeId, int64_t nodeTypeId)
                                                                             {
                                                                                 ExcludeNode(nodeId, nodeTypeId);
                                                                             }),
-                                                              m_strand.wrap([this](int64_t nodeId)
+                                                              boost::asio::bind_executor(m_strand,[this](int64_t nodeId)
                                                                             {
                                                                                 StoppedNodeIndication(nodeId);
                                                                             }),
-                                                              m_strand.wrap([this]()
+                                                              boost::asio::bind_executor(m_strand,[this]()
                                                                             {
                                                                                 lllog(1) << "DOSE_MAIN: Got Stop command from control"<< std::endl;
                                                                                 Stop();
@@ -134,7 +134,7 @@ namespace Internal
         //We install a ConsoleCtrlHandler to handle presses of the Close button
         //on the console window. This is a little different from handling signals
         //since there is no way to ignore it...
-        ConsoleCtrlHandlerFcn = m_strand.wrap([this]()
+        ConsoleCtrlHandlerFcn = boost::asio::bind_executor(m_strand,[this]()
         {
             lllog(1) << "DOSE_MAIN: Got console Close button Stop"<< std::endl;
             Stop();
@@ -146,7 +146,7 @@ namespace Internal
         m_signalSet.add(SIGTERM);
 #endif
 
-        m_signalSet.async_wait(m_strand.wrap([this](const boost::system::error_code& error,
+        m_signalSet.async_wait(boost::asio::bind_executor(m_strand,[this](const boost::system::error_code& error,
                                                     const int /*signalNumber*/)
                                             {
                                                 if (error)
@@ -230,9 +230,9 @@ namespace Internal
     {
         m_nodeId = nodeId;
 
-        m_memoryMonitor.reset(new MemoryMonitor(m_ioService));
+        m_memoryMonitor.reset(new MemoryMonitor(m_ioContext));
 
-        m_distribution.reset(new Distribution(m_ioService,
+        m_distribution.reset(new Distribution(m_ioContext,
                                               nodeName,
                                               nodeId,
                                               nodeTypeId,
@@ -247,10 +247,10 @@ namespace Internal
         m_requestHandler.reset(new RequestHandler(m_strand.context(),
                                                   *m_distribution));
 
-        m_pendingRegistrationHandler.reset(new PendingRegistrationHandler(m_ioService,
+        m_pendingRegistrationHandler.reset(new PendingRegistrationHandler(m_ioContext,
                                                                           *m_distribution));
 
-        m_connectionHandler.reset(new ConnectionHandler(m_ioService,
+        m_connectionHandler.reset(new ConnectionHandler(m_ioContext,
                                                         *m_distribution,
                                                         [this](const ConnectionPtr& connection, bool disconnecting){OnAppEvent(connection, disconnecting);},
                                                         [this](int64_t tid){m_pendingRegistrationHandler->CheckForPending(tid);},
@@ -343,7 +343,7 @@ namespace Internal
     void DoseMainApp::LogStatus(const std::string& str)
     {
         lllog(1) << str.c_str() << std::endl;
-        m_wcoutStrand.dispatch([str]
+        boost::asio::dispatch(m_wcoutStrand,[str]
                                {
                                    std::wcout << str.c_str() << std::endl;
                                });

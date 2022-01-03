@@ -30,7 +30,7 @@
 
 using namespace Safir::Dob::Internal::SP;
 
-boost::asio::io_service gIoService;
+boost::asio::io_context gIoService;
 
 
 int numPerform = 0;
@@ -64,7 +64,7 @@ public:
 class Publisher
 {
 public:
-    Publisher(boost::asio::io_service&, const std::string&, void*,void*)
+    Publisher(boost::asio::io_context&, const std::string&, void*,void*)
     {
 
     }

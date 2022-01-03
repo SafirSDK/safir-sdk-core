@@ -115,10 +115,10 @@ int main(int argc, char * argv[])
     }
     else
     {
-        boost::asio::io_service ioService;
-        Safir::Dob::Internal::Com::Resolver resolver(ioService, cmd.verbose);
+        boost::asio::io_context ioContext;
+        Safir::Dob::Internal::Com::Resolver resolver(ioContext, cmd.verbose);
 
-        ioService.post([&]
+        boost::asio::post(ioContext,[&]
         {
             try
             {
@@ -129,7 +129,7 @@ int main(int argc, char * argv[])
             {
                 std::wcout<<e.what()<<std::endl;
             }});
-        ioService.run();
+        ioContext.run();
     }
 
     return 0;

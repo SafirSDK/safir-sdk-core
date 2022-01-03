@@ -101,7 +101,7 @@ BOOST_AUTO_TEST_CASE( send_ten )
 {
     Handler h;
     Communication communication;
-    boost::asio::io_service ioService;
+    boost::asio::io_context ioContext;
 
     std::vector<boost::chrono::steady_clock::duration> retryTimeouts;
     retryTimeouts.push_back(boost::chrono::seconds(1));
@@ -112,10 +112,10 @@ BOOST_AUTO_TEST_CASE( send_ten )
     nodeTypes.insert(std::make_pair(20, NodeType(20,"tupp",true,boost::chrono::seconds(1),22,retryTimeouts)));
 
     RawPublisherRemoteBasic<::Handler, ::Communication> publisher
-        (ioService,communication,nodeTypes,"foo",h,boost::chrono::milliseconds(10));
+        (ioContext,communication,nodeTypes,"foo",h,boost::chrono::milliseconds(10));
 
     h.stopCall = [&]{publisher.Stop();};
-    ioService.run();
+    ioContext.run();
 
     BOOST_CHECK(numPerform == 10);
     BOOST_CHECK(numSend10 == 5);
@@ -132,7 +132,7 @@ BOOST_AUTO_TEST_CASE( callbacks )
     std::wcout << "testing callbacks" << std::endl;
     Handler h;
     Communication communication;
-    boost::asio::io_service ioService;
+    boost::asio::io_context ioContext;
 
     std::vector<boost::chrono::steady_clock::duration> retryTimeouts;
     retryTimeouts.push_back(boost::chrono::seconds(1));
@@ -143,7 +143,7 @@ BOOST_AUTO_TEST_CASE( callbacks )
     nodeTypes.insert(std::make_pair(20, NodeType(20,"tupp",true,boost::chrono::seconds(1),22,retryTimeouts)));
 
     RawPublisherRemoteBasic<::Handler, ::Communication> publisher
-        (ioService,communication,nodeTypes,"foo",h,boost::chrono::hours(10));
+        (ioContext,communication,nodeTypes,"foo",h,boost::chrono::hours(10));
 
     h.stopCall = [&]{publisher.Stop();};
     std::shared_ptr<void> cs;
@@ -160,7 +160,7 @@ BOOST_AUTO_TEST_CASE( callbacks )
     cb(RawStatistics(), RawChanges(RawChanges::NODES_CHANGED), cs);
     cb(RawStatistics(), RawChanges(RawChanges::METADATA_CHANGED), cs);
 
-    ioService.run();
+    ioContext.run();
 
     BOOST_CHECK_EQUAL(numPerform, 10);
     BOOST_CHECK_EQUAL(numSend10, 10);

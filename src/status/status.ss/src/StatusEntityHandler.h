@@ -43,7 +43,7 @@ namespace Control
         private boost::noncopyable
     {
     public:
-        StatusEntityHandler(boost::asio::io_service &ioService);
+        StatusEntityHandler(boost::asio::io_context &ioContext);
 
         void Start();
         void Stop();

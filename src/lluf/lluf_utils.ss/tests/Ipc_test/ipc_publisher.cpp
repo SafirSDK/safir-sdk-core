@@ -166,20 +166,20 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    boost::asio::io_service ioService;
-    boost::asio::io_service::strand strand(ioService);
+    boost::asio::io_context ioContext;
+    boost::asio::io_context::strand strand(ioContext);
 
-    std::shared_ptr<boost::asio::io_service::work> work (new boost::asio::io_service::work(ioService));
+    auto work = boost::asio::make_work_guard(ioContext);
 
-    auto pubPtr = std::make_shared<IpcPublisher>(ioService,
+    auto pubPtr = std::make_shared<IpcPublisher>(ioContext,
                                                    po.endpointName,
-                                                   strand.wrap([](){std::wcout <<  "A Subscriber connected!" << std::endl;}),
-                                                   strand.wrap([](){std::wcout <<  "A Subscriber disconnected!" << std::endl;}));
+                                                   boost::asio::bind_executor(strand,[](){std::wcout <<  "A Subscriber connected!" << std::endl;}),
+                                                   boost::asio::bind_executor(strand,[](){std::wcout <<  "A Subscriber disconnected!" << std::endl;}));
 
     boost::thread_group threads;
     for (int i = 0; i < 9; ++i)
     {
-        threads.create_thread([&ioService](){ioService.run();});
+        threads.create_thread([&ioContext](){ioContext.run();});
     }
 
     if (po.cmdFromStdin)

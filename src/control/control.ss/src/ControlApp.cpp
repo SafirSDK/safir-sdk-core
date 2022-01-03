@@ -56,19 +56,19 @@
 #  pragma warning (pop)
 #endif
 
-ControlApp::ControlApp(boost::asio::io_service&         ioService,
+ControlApp::ControlApp(boost::asio::io_context&         ioContext,
                        const boost::filesystem::path&   doseMainPath,
                        const boost::int64_t             id,
                        const bool                       ignoreControlCmd)
-    : m_ioService(ioService)
+    : m_ioContext(ioContext)
     , m_stopped(false)
     , m_resolutionStartTime(boost::chrono::steady_clock::now())
-    , m_strand(ioService)
-    , m_wcoutStrand(ioService)
+    , m_strand(ioContext)
+    , m_wcoutStrand(ioContext)
     , m_doseMainPath(doseMainPath)
     , m_ignoreControlCmd(ignoreControlCmd)
-    , m_startTimer(ioService)
-    , m_terminationTimer(ioService)
+    , m_startTimer(ioContext)
+    , m_terminationTimer(ioContext)
     , m_incarnationBlackListHandler(m_conf.incarnationBlacklistFileName)
     , m_controlInfoReceiverReady(false)
     , m_doseMainRunning(false)
@@ -76,8 +76,8 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
     , m_incarnationIdStorage(new AlignedStorage())
     , m_incarnationId(reinterpret_cast<boost::atomic<int64_t>&>(*m_incarnationIdStorage))
 {
-    m_terminateHandler = Safir::make_unique<TerminateHandler>(ioService,
-                                                              m_strand.wrap([this]{StopThisNode();}),
+    m_terminateHandler = Safir::make_unique<TerminateHandler>(ioContext,
+                                                              boost::asio::bind_executor(m_strand,[this]{StopThisNode();}),
                                                               [this](const std::string& str){LogStatus(str);});
 
     for (auto it = m_conf.nodeTypesParam.cbegin(); it < m_conf.nodeTypesParam.cend(); ++it)
@@ -112,12 +112,12 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
 
     new (m_incarnationIdStorage.get()) boost::atomic<uint64_t>(0);
 
-    // Make some work to stop io_service from exiting.
-    m_work = Safir::make_unique<boost::asio::io_service::work>(ioService);
+    // Make some work to stop io_context from exiting.
+    m_work = std::make_unique<boost::asio::executor_work_guard<boost::asio::io_context::executor_type>>(boost::asio::make_work_guard(ioContext));
 
     //Call the Start method, which will retry itself if need be (e.g. the local interface
     //addresses cannot be resolved).
-    m_strand.post([this]{Start();});
+    boost::asio::post(m_strand,[this]{Start();});
 }
 
 ControlApp::~ControlApp()
@@ -143,7 +143,7 @@ ControlApp::~ControlApp()
 void ControlApp::LogStatus(const std::string& str)
 {
     lllog(1) << str.c_str() << std::endl;
-    m_wcoutStrand.dispatch([str]
+    boost::asio::dispatch(m_wcoutStrand,[str]
                            {
                                std::wcout << str.c_str() << std::endl;
                            });
@@ -178,7 +178,7 @@ void ControlApp::Start()
                                                         nt->retryTimeout));
     }
     m_communication.reset(new Com::Communication(Com::controlModeTag,
-                                                 m_ioService,
+                                                 m_ioContext,
                                                  m_conf.thisNodeParam.name,
                                                  m_nodeId,
                                                  m_conf.thisNodeParam.nodeTypeId,
@@ -220,7 +220,7 @@ void ControlApp::Start()
     // if more elaborated things have to be done in the callback code, it might be
     // necessary to turn this into ordinary asynchronous calls.
     m_sp.reset(new SP::SystemPicture(SP::master_tag,
-                                     m_ioService,
+                                     m_ioContext,
                                      *m_communication,
                                      m_conf.thisNodeParam.name,
                                      m_nodeId,
@@ -237,7 +237,7 @@ void ControlApp::Start()
 
                                              auto this_ = this;
 
-                                             m_strand.post([this_]{this_->SendControlInfo();});
+                                             boost::asio::post(m_strand,[this_]{this_->SendControlInfo();});
 
                                              std::ostringstream os;
                                              os << "CTRL: Joined system with incarnation id " << incarnationId;
@@ -262,7 +262,7 @@ void ControlApp::Start()
 
                                              auto this_ = this;
 
-                                             m_strand.post([this_]{this_->SendControlInfo();});
+                                             boost::asio::post(m_strand,[this_]{this_->SendControlInfo();});
 
                                              std::ostringstream os;
                                              os << "CTRL: Starting system with incarnation id " << incarnationId;
@@ -281,7 +281,7 @@ void ControlApp::Start()
                                      }));
 
     m_doseMainCmdSender.reset(new Control::DoseMainCmdSender
-                              (m_ioService,
+                              (m_ioContext,
                                // This is what we do when dose_main is ready to receive commands
                                [this]()
                                {
@@ -302,7 +302,7 @@ void ControlApp::Start()
                                    m_communication->Start();
                                 }));
 
-    m_stopHandler.reset(new Control::StopHandler(m_ioService,
+    m_stopHandler.reset(new Control::StopHandler(m_ioContext,
                                                  *m_communication,
                                                  *m_sp,
                                                  *m_doseMainCmdSender,
@@ -330,9 +330,9 @@ void ControlApp::Start()
 
 
     m_controlInfoSender.reset(new Control::ControlInfoSender
-                              (m_ioService,
+                              (m_ioContext,
                                // This is what we do when a receiver is ready
-                               m_strand.wrap([this]()
+                               boost::asio::bind_executor(m_strand,[this]()
                                              {
                                                  m_controlInfoReceiverReady = true;
                                                  SendControlInfo();
@@ -371,7 +371,7 @@ void ControlApp::Start()
 #else
          boost::this_process::environment(),
 #endif
-         m_ioService,
+         m_ioContext,
          error,
          boost::process::on_exit=[this](int exitCode, const std::error_code& error)
              {HandleDoseMainExit(exitCode,error);});
@@ -448,8 +448,8 @@ std::pair<Com::ResolvedAddress,Com::ResolvedAddress> ControlApp::ResolveAddresse
             }
 
             //ok, set up the retry timer
-            m_startTimer.expires_from_now(boost::chrono::seconds(1));
-            m_startTimer.async_wait(m_strand.wrap([this](const boost::system::error_code& error)
+            m_startTimer.expires_after(boost::chrono::seconds(1));
+            m_startTimer.async_wait(boost::asio::bind_executor(m_strand,[this](const boost::system::error_code& error)
                                                   {
                                                       if (!error && !m_stopped)
                                                       {
@@ -465,7 +465,7 @@ std::pair<Com::ResolvedAddress,Com::ResolvedAddress> ControlApp::ResolveAddresse
 void ControlApp::StopDoseMain()
 {
     // Set up a timer that will kill dose_main the hard way if it doesn't stop within a reasonable time.
-    m_terminationTimer.expires_from_now(boost::chrono::seconds(10));
+    m_terminationTimer.expires_after(boost::chrono::seconds(10));
 
     m_terminationTimer.async_wait([this]
                                   (const boost::system::error_code& error)

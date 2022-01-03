@@ -235,7 +235,7 @@ class Common
 public:
     Common(const std::int64_t id)
         : m_success(true)
-        , m_work(new boost::asio::io_service::work(m_ioService))
+        , m_work(boost::asio::make_work_guard(m_ioContext))
         , m_id(id)
     {
         std::vector<int> retryTimeout20;
@@ -301,12 +301,12 @@ public:
             {
                 try
                 {
-                    m_ioService.run();
+                    m_ioContext.run();
                     return;
                 }
                 catch (const std::exception & exc)
                 {
-                    log << "Caught 'std::exception' exception from io_service.run(): "
+                    log << "Caught 'std::exception' exception from io_context.run(): "
                                << "  '" << exc.what() << "'." << std::endl;
                 }
                 m_success.exchange(false);
@@ -327,16 +327,16 @@ protected:
 
     bool SuccessCommon() const
     {
-        return m_work == nullptr && m_success;
+        return !m_work.owns_work() && m_success;
     }
 
     virtual ~Common() {}
     std::atomic<bool> m_success;
     boost::thread_group m_threads;
 
-    boost::asio::io_service m_ioService;
-    //make some work to stop io_service from exiting.
-    std::unique_ptr<boost::asio::io_service::work> m_work;
+    boost::asio::io_context m_ioContext;
+    //make some work to stop io_context from exiting.
+    boost::asio::executor_work_guard<boost::asio::io_context::executor_type> m_work;
 
     const std::int64_t m_id;
     std::vector<Safir::Dob::Internal::Com::NodeTypeDefinition> m_commNodeTypes;
@@ -356,14 +356,14 @@ public:
                      const std::int64_t id,
                      const std::function<void(bool restart)>& stopFcn)
         : Common(id)
-        , m_strand(m_ioService)
+        , m_strand(m_ioContext)
         , m_options(options)
         , m_stopFcn(stopFcn)
         , m_joinCalls(0)
     {
         m_communication.reset(new Safir::Dob::Internal::Com::Communication
                               (Safir::Dob::Internal::Com::controlModeTag,
-                               m_ioService,
+                               m_ioContext,
                                options.name,
                                m_id,
                                options.nodeType,
@@ -378,7 +378,7 @@ public:
 
         m_systemPicture.reset(new Safir::Dob::Internal::SP::SystemPicture
                               (Safir::Dob::Internal::SP::master_tag,
-                               m_ioService,
+                               m_ioContext,
                                *m_communication,
                                options.name,
                                m_id,
@@ -432,7 +432,7 @@ protected:
         return true;
     }
 
-    boost::asio::io_service::strand m_strand;
+    boost::asio::io_context::strand m_strand;
 
     const ProgramOptions m_options;
     const std::function<void(bool restart)> m_stopFcn;
@@ -456,7 +456,7 @@ public:
         , m_waitToDie(0)
     {
         // Start subscription to system state changes from SP
-        m_systemPicture->StartStateSubscription(m_strand.wrap([this](const Safir::Dob::Internal::SP::SystemState& data)
+        m_systemPicture->StartStateSubscription(boost::asio::bind_executor(m_strand,[this](const Safir::Dob::Internal::SP::SystemState& data)
                                                               {NewState(data);}));
 
     }
@@ -585,7 +585,7 @@ public:
         , m_stop(false)
     {
         // Start subscription to system state changes from SP
-        m_systemPicture->StartStateSubscription(m_strand.wrap([this](const Safir::Dob::Internal::SP::SystemState& data)
+        m_systemPicture->StartStateSubscription(boost::asio::bind_executor(m_strand,[this](const Safir::Dob::Internal::SP::SystemState& data)
         {
             log << "Got new state:\n" << data << std::endl;
             m_lastState = data;
@@ -595,7 +595,7 @@ public:
             }
         }));
 
-        m_communication->SetDataReceiver(m_strand.wrap([this](const int64_t fromNodeId,
+        m_communication->SetDataReceiver(boost::asio::bind_executor(m_strand,[this](const int64_t fromNodeId,
                                                               const int64_t fromNodeType,
                                                               const char* data,
                                                               const size_t size)
@@ -671,8 +671,8 @@ class Main: public Common
 public:
     explicit Main(const ProgramOptions& options, const std::int64_t id)
         : Common(id)
-        , m_strand(m_ioService)
-        , m_sendTimer(m_ioService)
+        , m_strand(m_ioContext)
+        , m_sendTimer(m_ioContext)
         , m_timerStopped(false)
         , m_receivedBytes(0)
     {
@@ -684,7 +684,7 @@ public:
 
         m_communication.reset(new Safir::Dob::Internal::Com::Communication
                               (Safir::Dob::Internal::Com::dataModeTag,
-                               m_ioService,
+                               m_ioContext,
                                options.name,
                                m_id,
                                options.nodeType,
@@ -695,14 +695,14 @@ public:
 
         m_systemPicture.reset(new Safir::Dob::Internal::SP::SystemPicture
                               (Safir::Dob::Internal::SP::slave_tag,
-                               m_ioService,
+                               m_ioContext,
                                *m_communication,
                                options.name,
                                m_id,
                                options.nodeType,
                                m_spNodeTypes));
 
-        m_communication->SetDataReceiver(m_strand.wrap([this](const int64_t /*fromNodeId*/,
+        m_communication->SetDataReceiver(boost::asio::bind_executor(m_strand,[this](const int64_t /*fromNodeId*/,
                                             const int64_t /*fromNodeType*/,
                                             const char* data_,
                                             const size_t size)
@@ -726,10 +726,10 @@ public:
                                          [](const char * data){delete[] data;});
 
 
-        m_sendTimer.expires_from_now(boost::chrono::milliseconds(1000));
+        m_sendTimer.expires_after(boost::chrono::milliseconds(1000));
         m_sendTimer.async_wait([this](const boost::system::error_code& error){Send(error);});
 
-        m_systemPicture->StartStateSubscription(m_strand.wrap([this](const Safir::Dob::Internal::SP::SystemState& data)
+        m_systemPicture->StartStateSubscription(boost::asio::bind_executor(m_strand,[this](const Safir::Dob::Internal::SP::SystemState& data)
         {
             InjectNodes(data);
         }));
@@ -774,7 +774,7 @@ private:
         //send the data to both node types.
         m_communication->Send(0,1,data,size,1000100222,true);
         m_communication->Send(0,2,data,size,1000100222,true);
-        m_sendTimer.expires_from_now(boost::chrono::milliseconds(1000));
+        m_sendTimer.expires_after(boost::chrono::milliseconds(1000));
         m_sendTimer.async_wait([this](const boost::system::error_code& error){Send(error);});
     }
 
@@ -801,7 +801,7 @@ private:
         }
     }
 
-    boost::asio::io_service::strand m_strand;
+    boost::asio::io_context::strand m_strand;
     std::set<int64_t> m_injectedNodes;
 
     boost::asio::steady_timer m_sendTimer;
@@ -827,10 +827,10 @@ int main(int argc, char * argv[])
             return 1;
         }
 
-        boost::asio::io_service ioService;
-        boost::asio::io_service::strand strand(ioService);
-        auto work = Safir::make_unique<boost::asio::io_service::work>(ioService);
-        boost::asio::signal_set signalSet(ioService);
+        boost::asio::io_context ioContext;
+        boost::asio::io_context::strand strand(ioContext);
+        auto work = boost::asio::make_work_guard(ioContext);
+        boost::asio::signal_set signalSet(ioContext);
 
 #if defined (_WIN32)
         signalSet.add(SIGABRT);
@@ -846,7 +846,7 @@ int main(int argc, char * argv[])
         signalSet.async_wait([&work](const boost::system::error_code& error,
                                      const int /*signal_number*/)
                              {
-                                 if (!!error && work != nullptr) //fix for ws2012 warning
+                                 if (error && work.owns_work())
                                  {
                                      log << "Got a signals error: " << error.to_string().c_str() << std::endl;
                                  }
@@ -890,11 +890,11 @@ int main(int argc, char * argv[])
 
                 if (options.master)
                 {
-                    control.reset(new ControlMaster(options, id, strand.wrap(stopFunc)));
+                    control.reset(new ControlMaster(options, id, boost::asio::bind_executor(strand,stopFunc)));
                 }
                 else
                 {
-                    control.reset(new ControlSlave(options, id, strand.wrap(stopFunc)));
+                    control.reset(new ControlSlave(options, id, boost::asio::bind_executor(strand,stopFunc)));
                 }
                 main.reset(new Main(options, id));
 
@@ -906,7 +906,7 @@ int main(int argc, char * argv[])
                 log << "Going to reset work and cancel the signalSet" << std::endl;
                 work.reset();
                 signalSet.cancel();
-                log << "Done. ioService should stop running now" << std::endl;
+                log << "Done. ioContext should stop running now" << std::endl;
             }
         };
 
@@ -914,11 +914,11 @@ int main(int argc, char * argv[])
 
         if (options.master)
         {
-            control.reset(new ControlMaster(options,id, strand.wrap(stopFunc)));
+            control.reset(new ControlMaster(options,id, boost::asio::bind_executor(strand,stopFunc)));
         }
         else
         {
-            control.reset(new ControlSlave(options, id, strand.wrap(stopFunc)));
+            control.reset(new ControlSlave(options, id, boost::asio::bind_executor(strand,stopFunc)));
         }
         main.reset(new Main(options, id));
 
@@ -928,7 +928,7 @@ int main(int argc, char * argv[])
         main->Start();
 
 
-        ioService.run();
+        ioContext.run();
 
         if (control != nullptr)
         {

@@ -43,7 +43,7 @@
 
 void callback(const pid_t pid);
 
-boost::asio::io_service gIoService;
+boost::asio::io_context gIoService;
 Safir::Utilities::ProcessMonitor monitor(gIoService, callback, boost::chrono::milliseconds(50));
 
 boost::mutex mtx;
@@ -75,7 +75,7 @@ int main(int argc, char** argv)
 
     std::wcout << "Starting thread" << std::endl;
 
-    boost::shared_ptr<boost::asio::io_service::work> work(new boost::asio::io_service::work(gIoService));
+    auto work = boost::asio::make_work_guard(gIoService);
     boost::thread thread([]{gIoService.run();});
 
     std::wcout << "Adding pids to monitor" << std::endl;
@@ -86,7 +86,7 @@ int main(int argc, char** argv)
     }
     work.reset();
 
-    std::wcout << "Running io_service" << std::endl;
+    std::wcout << "Running io_context" << std::endl;
     gIoService.run();
     std::wcout << "Joining thread" << std::endl;
     thread.join();

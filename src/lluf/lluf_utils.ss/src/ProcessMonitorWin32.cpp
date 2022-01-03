@@ -29,13 +29,13 @@ namespace Safir
 {
 namespace Utilities
 {
-    ProcessMonitorImpl::ProcessMonitorImpl(boost::asio::io_service& ioService,
+    ProcessMonitorImpl::ProcessMonitorImpl(boost::asio::io_context& ioContext,
                                            const std::function<void(const pid_t pid)>& callback,
                                            const boost::chrono::steady_clock::duration& /*pollPeriod*/)
         : m_callback(callback)
-        , m_ioService(ioService)
+        , m_ioContext(ioContext)
         , m_stopped(false)
-        , m_strand(ioService)
+        , m_strand(ioContext)
     {
 
     }
@@ -45,7 +45,7 @@ namespace Utilities
         const bool was_stopped = m_stopped.exchange(true);
         if (!was_stopped)
         {
-            m_strand.dispatch([this]{StopInternal();});
+            boost::asio::dispatch(m_strand,[this]{StopInternal();});
         }
     }
 
@@ -75,13 +75,13 @@ namespace Utilities
         //if we can't get a handle to the process we assume that it is dead.
         if (process == NULL)
         {
-            m_ioService.post([this,pid]{m_callback(pid);});
+            boost::asio::post(m_ioContext,[this,pid]{m_callback(pid);});
             return;
         }
 
-        std::shared_ptr<Process> proc(new Process(m_ioService, process, pid));
+        std::shared_ptr<Process> proc(new Process(m_ioContext, process, pid));
         m_processes.insert(std::make_pair(pid, proc));
-        proc->handle.async_wait(m_strand.wrap([this,proc](const boost::system::error_code& error){HandleEvent(proc,error);}));
+        proc->handle.async_wait(boost::asio::bind_executor(m_strand,[this,proc](const boost::system::error_code& error){HandleEvent(proc,error);}));
 
     }
 
@@ -110,7 +110,7 @@ namespace Utilities
         }
 
         m_processes.erase(process->pid);
-        m_ioService.post([this,pid = process->pid]{m_callback(pid);});
+        boost::asio::post(m_ioContext,[this,pid = process->pid]{m_callback(pid);});
     }
 }
 }

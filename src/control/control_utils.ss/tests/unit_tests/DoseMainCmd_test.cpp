@@ -45,11 +45,11 @@ using namespace Safir::Dob::Internal::Control;
 
 BOOST_AUTO_TEST_CASE( send_commands )
 {
-    boost::asio::io_service pubIoService;
-    boost::asio::io_service subIoService;
+    boost::asio::io_context pubIoService;
+    boost::asio::io_context subIoService;
 
-    std::shared_ptr<boost::asio::io_service::work> pubWork (new boost::asio::io_service::work(pubIoService));
-    std::shared_ptr<boost::asio::io_service::work> subWork (new boost::asio::io_service::work(subIoService));
+    auto pubWork = boost::asio::make_work_guard(pubIoService);
+    auto subWork = boost::asio::make_work_guard(subIoService);
 
     boost::thread_group threads;
     threads.create_thread([&pubIoService](){pubIoService.run();});

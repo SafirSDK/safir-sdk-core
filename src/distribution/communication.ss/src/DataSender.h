@@ -74,7 +74,7 @@ namespace Com
     class DataSenderBasic : private WriterType
     {
     public:
-        DataSenderBasic(boost::asio::io_service& ioService,
+        DataSenderBasic(boost::asio::io_context& ioContext,
                         uint8_t deliveryGuarantee,
                         int64_t nodeTypeId,
                         int64_t nodeId,
@@ -85,8 +85,8 @@ namespace Com
                         int ackRequestThreshold,
                         const std::vector<int>& retryTimeout,
                         int fragmentSize)
-            :WriterType(ioService, ipVersion, localIf, multicastAddress)
-            ,m_strand(ioService)
+            :WriterType(ioContext, ipVersion, localIf, multicastAddress)
+            ,m_strand(ioContext)
             ,m_deliveryGuarantee(deliveryGuarantee)
             ,m_nodeTypeId(nodeTypeId)
             ,m_nodeId(nodeId)
@@ -99,8 +99,8 @@ namespace Com
             ,m_nodes()
             ,m_lastSentMultiReceiverSeqNo(0)
             ,m_lastAckRequestMultiReceiver(0)
-            ,m_resendTimer(ioService)
-            ,m_pingTimer(ioService)
+            ,m_resendTimer(ioContext)
+            ,m_pingTimer(ioContext)
             ,m_retransmitNotification()
             ,m_queueNotFullNotification()
             ,m_queueNotFullNotificationLimit(Parameters::SendQueueSize/2)
@@ -114,18 +114,18 @@ namespace Com
         //Set notifier called every time something is retransmitted
         void SetRetransmitCallback(const RetransmitTo& callback)
         {
-            m_strand.dispatch([this,callback]{m_retransmitNotification=callback;});
+            boost::asio::dispatch(m_strand,[this,callback]{m_retransmitNotification=callback;});
         }
 
         void SetNotFullCallback(const QueueNotFull& callback)
         {
-            m_strand.dispatch([this,callback]{m_queueNotFullNotification.push_back(callback);});
+            boost::asio::dispatch(m_strand,[this,callback]{m_queueNotFullNotification.push_back(callback);});
         }
 
         //Start writer component
         void Start()
         {
-            m_strand.dispatch([this]
+            boost::asio::dispatch(m_strand,[this]
             {
                 m_running=true;
                 //start retransmit timer
@@ -146,7 +146,7 @@ namespace Com
         //Stop
         void Stop()
         {
-            m_strand.dispatch([this]
+            boost::asio::dispatch(m_strand,[this]
             {
                 m_running=false;
                 if (m_deliveryGuarantee==Acked)
@@ -188,7 +188,7 @@ namespace Com
             }
 
             //The actual work where the data is inserted in the queue must be done inside the strand.
-            m_strand.post([this,toId,totalNumberOfFragments,numberOfFullFragments,msg,size,restSize,dataTypeIdentifier]
+            boost::asio::post(m_strand,[this,toId,totalNumberOfFragments,numberOfFullFragments,msg,size,restSize,dataTypeIdentifier]
             {
                 uint8_t sendMethod;
                 uint64_t* sequenceSerie=GetSequenceSerieIfExist(toId, sendMethod);
@@ -242,7 +242,7 @@ namespace Com
             //Called from readStrand
 
             //Will only check ack against sent messages. If an ack is received for a message that is still unsent, that ack will be ignored.
-            m_strand.dispatch([this,ack]
+            boost::asio::dispatch(m_strand,[this,ack]
             {
                 if (Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().LogLevel()==9)
                 {
@@ -302,7 +302,7 @@ namespace Com
         //Add a node.
         void AddNode(int64_t id, const std::string& address)
         {
-            m_strand.dispatch([this,id,address]
+            boost::asio::dispatch(m_strand,[this,id,address]
             {
                 if (m_nodes.find(id)!=m_nodes.end())
                 {
@@ -323,7 +323,7 @@ namespace Com
         //Make node included or excluded. If excluded it is also removed.
         void IncludeNode(int64_t id)
         {
-            m_strand.post([this,id]
+            boost::asio::post(m_strand,[this,id]
             {
                 const auto it=m_nodes.find(id);
                 if (it!=m_nodes.end())
@@ -351,7 +351,7 @@ namespace Com
         //Make node included or excluded. If excluded it is also removed.
         void RemoveNode(int64_t id)
         {
-            m_strand.post([this,id]
+            boost::asio::post(m_strand,[this,id]
             {
                 m_nodes.erase(id);
                 RemoveExcludedReceivers();
@@ -379,7 +379,7 @@ namespace Com
             uint64_t welcome;
         };
 
-        boost::asio::io_service::strand m_strand;
+        boost::asio::io_context::strand m_strand;
         const uint8_t m_deliveryGuarantee;
         const int64_t m_nodeTypeId;
         const int64_t m_nodeId;
@@ -575,8 +575,8 @@ namespace Com
             RemoveCompletedMessages();
 
             //Restart timer
-            m_resendTimer.expires_from_now(timerInterval);
-            m_resendTimer.async_wait(m_strand.wrap([this](const boost::system::error_code& /*error*/){RetransmitUnackedMessages();}));
+            m_resendTimer.expires_after(timerInterval);
+            m_resendTimer.async_wait(boost::asio::bind_executor(m_strand,[this](const boost::system::error_code& /*error*/){RetransmitUnackedMessages();}));
         }
 
         void SendAckRequests()
@@ -690,8 +690,8 @@ namespace Com
             }
 
             //Restart timer
-            m_pingTimer.expires_from_now(boost::chrono::milliseconds(Parameters::SendPingThreshold));
-            m_pingTimer.async_wait(m_strand.wrap([this](const boost::system::error_code& /*error*/){Ping();}));
+            m_pingTimer.expires_after(boost::chrono::milliseconds(Parameters::SendPingThreshold));
+            m_pingTimer.async_wait(boost::asio::bind_executor(m_strand,[this](const boost::system::error_code& /*error*/){Ping();}));
         }
 
         void RemoveExcludedReceivers()
@@ -765,7 +765,7 @@ namespace Com
             if (m_sendQueue.has_unhandled())
             {
                 //this can only happen if messages have been moved from the extension part of sendQueue
-                m_strand.post([this]{HandleSendQueue();});
+                boost::asio::post(m_strand,[this]{HandleSendQueue();});
             }
         }
 
@@ -801,7 +801,7 @@ namespace Com
                 m_notifyQueueNotFull=false; //very important that this flag is set before the notification call since a new overflow may occur after notification.
                 if (!m_queueNotFullNotification.empty())
                 {
-                     m_strand.context().post([this]
+                    boost::asio::post(m_strand.context(),[this]
                      {
                          for (auto callback = m_queueNotFullNotification.cbegin(); callback != m_queueNotFullNotification.cend(); ++callback)
                          {

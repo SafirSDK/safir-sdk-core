@@ -71,7 +71,7 @@ namespace Internal
     public:
         Session(const std::string&                  name,
                 const StreamPtr&                    streamPtr,
-                boost::asio::io_service::strand&    strand,
+                boost::asio::io_context::strand&    strand,
                 std::function<void()>             sessionClosedCb)
             : m_name(name),
               m_streamPtr(streamPtr),
@@ -123,7 +123,7 @@ namespace Internal
 
             boost::asio::async_write(*m_streamPtr,
                                      buffers,
-                                     m_strand.wrap(
+                                     boost::asio::bind_executor(m_strand,
                 [this, selfHandle](boost::system::error_code ec, size_t /*length*/)
                 {
                     if (!ec)
@@ -154,7 +154,7 @@ namespace Internal
         const std::string                   m_name;
         StreamPtr                           m_streamPtr;
         std::deque<Msg>                     m_msgQueue;
-        boost::asio::io_service::strand&    m_strand;
+        boost::asio::io_context::strand&    m_strand;
         std::function<void()>               m_sessionClosedCb;
     };
 

@@ -85,7 +85,7 @@ namespace
 
 SystemPicturePage::SystemPicturePage( QWidget* /*parent*/)
     : m_systemPicture(Safir::Dob::Internal::SP::subscriber_tag,
-                      m_ioService)
+                      m_ioContext)
 {
     m_systemPicture.StartStateSubscription([this](const Safir::Dob::Internal::SP::SystemState& state)
                                            {UpdatedState(state);});
@@ -96,8 +96,8 @@ SystemPicturePage::SystemPicturePage( QWidget* /*parent*/)
     systemTable->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
     systemTable->sortItems(COLUMN_NAME);
 
-    connect(&m_ioServicePollTimer,SIGNAL(timeout()), this, SLOT(PollIoService()));
-    m_ioServicePollTimer.start(100);
+    connect(&m_ioContextPollTimer,SIGNAL(timeout()), this, SLOT(PollIoService()));
+    m_ioContextPollTimer.start(100);
     PollIoService();
 }
 
@@ -107,8 +107,8 @@ void SystemPicturePage::closeEvent(QCloseEvent* event)
     m_systemPicture.Stop();
 
     //run the ioservice until all SystemPicture stuff is completed.
-    m_ioService.reset();
-    m_ioService.run();
+    m_ioContext.restart();
+    m_ioContext.run();
 
     event->accept();
 }
@@ -216,6 +216,6 @@ void SystemPicturePage::UpdateSystemTable(const Safir::Dob::Internal::SP::System
 
 void SystemPicturePage::PollIoService()
 {
-    m_ioService.poll_one();
-    m_ioService.reset();
+    m_ioContext.poll_one();
+    m_ioContext.restart();
 }

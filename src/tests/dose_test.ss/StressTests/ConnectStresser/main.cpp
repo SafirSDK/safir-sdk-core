@@ -49,8 +49,8 @@ public:
    #pragma warning(disable: 4355)
 #endif
     explicit App(std::wstring name, int attempts, int timeout, int instance, bool useMenu)
-        : m_firstDispatcher([this]{DispatchFirstConnection();}, m_ioService)
-        , m_secondDispatcher([this]{DispatchSecondConnection();}, m_ioService)
+        : m_firstDispatcher([this]{DispatchFirstConnection();}, m_ioContext)
+        , m_secondDispatcher([this]{DispatchSecondConnection();}, m_ioContext)
         , m_connectionsFirst(StatisticsCollection::Instance().AddHzCollector(L"Connections on first"))
         , m_failedConnectionsFirst(StatisticsCollection::Instance().AddPercentageCollector(L"Failed connections on first", m_connectionsFirst))
         , m_connectionsSecond(StatisticsCollection::Instance().AddHzCollector(L"Connections on second"))
@@ -77,7 +77,7 @@ public:
             }
         }
 
-        m_ioService.stop();
+        m_ioContext.stop();
     }
 #ifdef _MSC_VER
    #pragma warning(pop)
@@ -163,15 +163,15 @@ public:
 
     void Run()
     {
-        boost::asio::io_service::work keepRunning(m_ioService);
-        m_ioService.run();
+        auto keepRunning = boost::asio::make_work_guard(m_ioContext);
+        m_ioContext.run();
     }
 
 protected:
 
     void OnStopOrder() override
     {
-        m_ioService.stop();
+        m_ioContext.stop();
     }
 
 
@@ -209,7 +209,7 @@ private:
         }
     }
 
-    boost::asio::io_service                    m_ioService;
+    boost::asio::io_context                    m_ioContext;
     Dispatcher                                 m_firstDispatcher;
     Dispatcher                                 m_secondDispatcher;
     Safir::Dob::Connection                     m_firstConnection;

@@ -40,15 +40,15 @@
 
 namespace ws = Safir::Websocket;
 
-WebsocketServer::WebsocketServer(boost::asio::io_service& ioService)
+WebsocketServer::WebsocketServer(boost::asio::io_context& ioContext)
     :m_server()
-    ,m_ioService(ioService)
-    ,m_connectionsStrand(m_ioService)
-    ,m_work(new boost::asio::io_service::work(m_ioService))
+    ,m_ioContext(ioContext)
+    ,m_connectionsStrand(m_ioContext)
+    ,m_work(new boost::asio::io_context::work(m_ioContext))
     ,m_connections()
-    ,m_signals(m_ioService)
+    ,m_signals(m_ioContext)
     ,m_dobConnection()
-    ,m_dobDispatcher(m_dobConnection, m_ioService)
+    ,m_dobDispatcher(m_dobConnection, m_ioContext)
 {
     m_server.clear_access_channels(websocketpp::log::alevel::all);
     m_server.clear_error_channels(websocketpp::log::alevel::all);
@@ -72,7 +72,7 @@ void WebsocketServer::Run()
     m_dobConnection.Open(L"safir_websocket", L"", 0, this, &m_dobDispatcher);
 
     // Initialize ASIO
-    m_server.init_asio(&m_ioService);
+    m_server.init_asio(&m_ioContext);
 
     //try to disable all logging from websocketpp, seems like info is still logging
     m_server.set_access_channels(websocketpp::log::alevel::none);
@@ -80,7 +80,7 @@ void WebsocketServer::Run()
 
     m_server.set_open_handler([this](websocketpp::connection_hdl hdl)
     {
-        auto con=boost::make_shared<RemoteClient>(m_server, m_ioService, hdl, [this](const RemoteClient* con){OnConnectionClosed(con);});
+        auto con=boost::make_shared<RemoteClient>(m_server, m_ioContext, hdl, [this](const RemoteClient* con){OnConnectionClosed(con);});
         OnConnectionOpen(con);
         lllog(5)<<"WS: Server: new connection added: "<<con->ToString().c_str()<<std::endl;
     });
@@ -141,8 +141,8 @@ void WebsocketServer::Terminate()
     m_work.reset();
 
     //give a couple of seconds to send pending messages and nice shutdown messages
-    boost::shared_ptr<boost::asio::steady_timer> shutDownTimer=boost::make_shared<boost::asio::steady_timer>(m_ioService);
-    shutDownTimer->expires_from_now(boost::chrono::seconds(3));
+    boost::shared_ptr<boost::asio::steady_timer> shutDownTimer=boost::make_shared<boost::asio::steady_timer>(m_ioContext);
+    shutDownTimer->expires_after(boost::chrono::seconds(3));
     shutDownTimer->async_wait([this, shutDownTimer](const boost::system::error_code&)
     {
         m_connectionsStrand.post([this]{m_server.stop();});

@@ -50,11 +50,11 @@ class StopHandler
     , private boost::noncopyable
 {
 public:
-    explicit StopHandler(boost::asio::io_service& ioService)
-        : m_ioService(ioService) {}
-    void OnStopOrder() override {m_ioService.stop();}
+    explicit StopHandler(boost::asio::io_context& ioContext)
+        : m_ioContext(ioContext) {}
+    void OnStopOrder() override {m_ioContext.stop();}
 private:
-    boost::asio::io_service& m_ioService;
+    boost::asio::io_context& m_ioContext;
 
 };
 
@@ -79,10 +79,10 @@ void PrintHelpAndExit(const std::string& programName, const boost::program_optio
 
 int main(int argc, char* argv[])
 {
-    boost::asio::io_service ioService;
+    boost::asio::io_context ioContext;
     Safir::Dob::Connection connection;
-    Safir::Utilities::AsioDispatcher dispatcher(connection, ioService);
-    StopHandler stopHandler(ioService);
+    Safir::Utilities::AsioDispatcher dispatcher(connection, ioContext);
+    StopHandler stopHandler(ioContext);
     MessageSender messageSender;
 
     int inst = 0;
@@ -186,12 +186,12 @@ int main(int argc, char* argv[])
     connection.Send(commandMsg, Safir::Dob::Typesystem::ChannelId(), &messageSender);
 
     //set a timer
-    boost::asio::steady_timer timer(ioService,EXIT_TIMER_DELAY);
+    boost::asio::steady_timer timer(ioContext,EXIT_TIMER_DELAY);
     timer.async_wait([](const boost::system::error_code&){}); //empty workload
 
-    //ioService will only run until the timer has timed out, since that is all the work
+    //ioContext will only run until the timer has timed out, since that is all the work
     //that there is for it.
-    ioService.run();
+    ioContext.run();
 
     return 0;
 }

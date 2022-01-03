@@ -34,8 +34,8 @@ public:
     static void Run()
     {
         std::cout<<"SendDiscoverToSeed started"<<std::endl;
-        boost::asio::io_service io;
-        auto work=std::make_shared<boost::asio::io_service::work>(io);
+        boost::asio::io_context io;
+        auto work = boost::asio::make_work_guard(io);
         boost::thread_group threads;
         for (int i = 0; i < 9; ++i)
         {
@@ -114,9 +114,9 @@ public:
 
         //Wait for HandleReceivedNodeInfo to be executed
         std::atomic<int> fence(0);
-        n0.m_strand.post([&]{++fence;});
-        n1.m_strand.post([&]{++fence;});
-        n2.m_strand.post([&]{++fence;});
+        boost::asio::post(n0.m_strand,[&]{++fence;});
+        boost::asio::post(n1.m_strand,[&]{++fence;});
+        boost::asio::post(n2.m_strand,[&]{++fence;});
         while(fence<3)
         {
             Wait(1000);
@@ -266,8 +266,8 @@ public:
     {
         std::cout<<"HandleDiscover started"<<std::endl;
 
-        boost::asio::io_service io;
-        auto work=std::make_shared<boost::asio::io_service::work>(io);
+        boost::asio::io_context io;
+        auto work = boost::asio::make_work_guard(io);
         boost::thread_group threads;
         for (int i = 0; i < 9; ++i)
         {
@@ -358,7 +358,7 @@ public:
 
         {
             boost::mutex::scoped_lock lock(mutex);
-            discoverState.clear(); //this step is important because discoverState has references to the io_service in this scope.
+            discoverState.clear(); //this step is important because discoverState has references to the io_context in this scope.
         }
 
         std::cout<<"HandleDiscover tests passed"<<std::endl;
@@ -447,7 +447,7 @@ private:
 
         Info() {}
 
-        Info(int64_t id, boost::asio::io_service& io)
+        Info(int64_t id, boost::asio::io_context& io)
         {
             discover.reset(new HandleDiscover::Discoverer(io, HandleDiscover::CreateNode(id), 1500, [=](const Com::Node& n){HandleDiscover::OnNewNode(id, n);}));
         }

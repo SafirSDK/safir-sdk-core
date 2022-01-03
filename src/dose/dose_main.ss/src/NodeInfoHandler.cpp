@@ -35,12 +35,12 @@ namespace Dob
 {
 namespace Internal
 {
-    NodeInfoHandler::NodeInfoHandler(boost::asio::io_service& ioService,
+    NodeInfoHandler::NodeInfoHandler(boost::asio::io_context& ioContext,
                                      const Distribution& distribution)
-        : m_dispatcher(m_connection, ioService),
+        : m_dispatcher(m_connection, ioContext),
           m_distribution(distribution)
     {
-        m_dispatcher.Strand().post([this]
+        boost::asio::post(m_dispatcher.Strand(),[this]
         {
             m_connection.Open(L"DoseMain",  // Note the name. We want this to be handled as a normal connection.
                               L"NodeInfoHandler",
@@ -74,7 +74,7 @@ namespace Internal
 
     void NodeInfoHandler::Stop()
     {
-        m_dispatcher.Strand().dispatch([this]
+        boost::asio::dispatch(m_dispatcher.Strand(),[this]
         {
             m_connection.Close();
         });

@@ -78,7 +78,7 @@ namespace Control
         typedef std::function<void()> RebootCb;
         typedef std::function<void()> StopSystemCb;
 
-        StopHandlerBasic(boost::asio::io_service&   ioService,
+        StopHandlerBasic(boost::asio::io_context&   ioContext,
                          Communication&             communication,
                          SP&                        sp,
                          DoseMainCmdSender&         doseMainCmdSender,
@@ -88,7 +88,7 @@ namespace Control
                          const RebootCb             rebootCb,
                          const StopSystemCb         stopSystemCb,
                          bool                       ignoreCmd)
-            : m_strand(ioService),
+            : m_strand(ioContext),
               m_communication(communication),
               m_sp(sp),
               m_doseMainCmdSender(doseMainCmdSender),
@@ -100,8 +100,8 @@ namespace Control
               m_ignoreCmd(ignoreCmd),
               m_stopOrderMsgTypeId(LlufId_Generate64("Safir.Dob.Control.StopOrderMsgTypeId")),
               m_stopNotificationMsgTypeId(LlufId_Generate64("Safir.Dob.Control.StopNotificationMsgTypeId")),
-              m_sendTimer(ioService),
-              m_stopTimer(ioService),
+              m_sendTimer(ioContext),
+              m_stopTimer(ioContext),
               m_localNodeStopInProgress(false),
               m_localNodeStopCmdAction(STOP),
               m_systemStop(false)
@@ -118,8 +118,8 @@ namespace Control
             }
 
             // Set up callbacks to receive stop commands locally via IPC
-            m_controlCmdReceiver.reset(new ControlCmdReceiver(ioService,
-                                                              m_strand.wrap(
+            m_controlCmdReceiver.reset(new ControlCmdReceiver(ioContext,
+                                                              boost::asio::bind_executor(m_strand,
                                                               [this](Control::CommandAction cmdAction, int64_t nodeId)
                                                               {
                                                                   if (nodeId != 0)
@@ -144,7 +144,7 @@ namespace Control
                                                               })));
 
             // Set up callback to receive stop commands via control channel from an external node.
-            communication.SetDataReceiver(m_strand.wrap(
+            communication.SetDataReceiver(boost::asio::bind_executor(m_strand,
                                          [this](const int64_t from,
                                                 const int64_t /*nodeTypeId*/,
                                                 const char* const data,
@@ -158,7 +158,7 @@ namespace Control
                                          [](const char * data){delete[] data;});
 
             // Set up callback to receive stop notifications via control channel from an external node.
-            communication.SetDataReceiver(m_strand.wrap(
+            communication.SetDataReceiver(boost::asio::bind_executor(m_strand,
                                           [this](const int64_t from,
                                                  const int64_t /*nodeTypeId*/,
                                                  const char* const /*data*/,
@@ -174,7 +174,7 @@ namespace Control
         ~StopHandlerBasic()
         {
             // This is about the last thing that happens when a node is stopped. When this destructor is
-            // executed we know that the ioService is empty and therefor this is a good place to make
+            // executed we know that the ioContext is empty and therefor this is a good place to make
             // a shutdown or reboot.
             switch (m_localNodeStopCmdAction)
             {
@@ -205,7 +205,7 @@ namespace Control
 
         void Stop()
         {
-            m_strand.post([this]()
+            boost::asio::post(m_strand,[this]()
                           {
                               m_controlCmdReceiver->Stop();
                               m_sendTimer.cancel();
@@ -217,7 +217,7 @@ namespace Control
 
         void AddNode(const int64_t nodeId, const int64_t nodeTypeId)
         {
-            m_strand.post([this, nodeId, nodeTypeId]()
+            boost::asio::post(m_strand,[this, nodeId, nodeTypeId]()
                           {
                               if (nodeId == m_communication.Id())
                               {
@@ -242,7 +242,7 @@ namespace Control
 
         void RemoveNode(const int64_t nodeId)
         {
-            m_strand.post([this, nodeId]()
+            boost::asio::post(m_strand,[this, nodeId]()
                           {
                               m_nodeTable.erase(nodeId);
                           });
@@ -250,7 +250,7 @@ namespace Control
 
     private:
 
-        boost::asio::io_service::strand m_strand;
+        boost::asio::io_context::strand m_strand;
 
         Communication&       m_communication;
         SP&                  m_sp;
@@ -313,8 +313,8 @@ namespace Control
 
             // Wait a short while and then send the notification again, just in case.
 
-            m_stopTimer.expires_from_now(boost::chrono::milliseconds(300));
-            m_stopTimer.async_wait(m_strand.wrap([this](const boost::system::error_code& error)
+            m_stopTimer.expires_after(boost::chrono::milliseconds(300));
+            m_stopTimer.async_wait(boost::asio::bind_executor(m_strand,[this](const boost::system::error_code& error)
                                                  {
                                                      if (error == boost::asio::error::operation_aborted)
                                                      {
@@ -376,8 +376,8 @@ namespace Control
                 nodeIt->second.maxStopTime = now + m_nodeTypeTable[nodeIt->second.nodeTypeId];
             }
 
-            m_sendTimer.expires_from_now(boost::chrono::seconds(0));
-            m_sendTimer.async_wait(m_strand.wrap([this](const boost::system::error_code& error)
+            m_sendTimer.expires_after(boost::chrono::seconds(0));
+            m_sendTimer.async_wait(boost::asio::bind_executor(m_strand,[this](const boost::system::error_code& error)
                                                  {
                                                      if (error == boost::asio::error::operation_aborted)
                                                      {
@@ -409,8 +409,8 @@ namespace Control
             nodeIt->second.maxStopTime = boost::chrono::steady_clock::now() +
                                          m_nodeTypeTable[nodeIt->second.nodeTypeId];
 
-            m_sendTimer.expires_from_now(boost::chrono::seconds(0));
-            m_sendTimer.async_wait(m_strand.wrap([this](const boost::system::error_code& error)
+            m_sendTimer.expires_after(boost::chrono::seconds(0));
+            m_sendTimer.async_wait(boost::asio::bind_executor(m_strand,[this](const boost::system::error_code& error)
                                                  {
                                                      if (error == boost::asio::error::operation_aborted)
                                                      {
@@ -485,8 +485,8 @@ namespace Control
                                          true); // delivery guarantee
                 }
 
-                m_sendTimer.expires_from_now(boost::chrono::seconds(1));
-                m_sendTimer.async_wait(m_strand.wrap([this](const boost::system::error_code& error)
+                m_sendTimer.expires_after(boost::chrono::seconds(1));
+                m_sendTimer.async_wait(boost::asio::bind_executor(m_strand,[this](const boost::system::error_code& error)
                                                      {
                                                          if (error == boost::asio::error::operation_aborted)
                                                          {

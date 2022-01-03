@@ -183,8 +183,8 @@ FilePersistor::GetFilePath(const FilePersistor::EntityIdAndHandlerId& entityAndH
 
 
 //-------------------------------------------------------
-FilePersistor::FilePersistor(boost::asio::io_service& ioService) :
-    PersistenceHandler(ioService, false),
+FilePersistor::FilePersistor(boost::asio::io_context& ioContext) :
+    PersistenceHandler(ioContext, false),
     m_storagePath(GetStorageDirectory()),
     m_debug(L"FilePersistor")
 {

@@ -24,7 +24,7 @@
 #pragma once
 
 #include <Safir/Dob/Internal/ControlUtilsExportDefs.h>
-#include <boost/asio/io_service.hpp>
+#include <boost/asio/io_context.hpp>
 #include <string>
 
 namespace Safir
@@ -62,7 +62,7 @@ namespace Control
 
         typedef std::function<void()> StopDoseMainCb;
 
-        DoseMainCmdReceiver(boost::asio::io_service&        ioService,
+        DoseMainCmdReceiver(boost::asio::io_context&        ioContext,
                             const IncludeNodeCmdCb&         startDoseMainCb,
                             const IncludeNodeCmdCb&         injectNodeCb,
                             const ExcludeNodeCmdCb&         excludeNodeCb,
@@ -89,7 +89,7 @@ namespace Control
     {
     public:
 
-        DoseMainCmdSender(boost::asio::io_service&      ioService,
+        DoseMainCmdSender(boost::asio::io_context&      ioContext,
                           const std::function<void()>   doseMainConnectedCb);
 
         DoseMainCmdSender(const DoseMainCmdSender&) = delete;

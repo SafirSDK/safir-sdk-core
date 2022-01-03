@@ -47,7 +47,7 @@ namespace Internal
     public:
         explicit AsioLatencyMonitor(const std::string& identifier,
                                     const boost::chrono::steady_clock::duration& warningThreshold,
-                                    boost::asio::io_service::strand& strand)
+                                    boost::asio::io_context::strand& strand)
             : m_identifier(identifier)
             , m_tolerance(warningThreshold)
             , m_strand(strand)
@@ -60,7 +60,7 @@ namespace Internal
         void Stop()
         {
             m_stop = true;
-            m_strand.post([this]()
+            boost::asio::post(m_strand,[this]()
                           {
                               m_timer.cancel();
                           });
@@ -74,7 +74,7 @@ namespace Internal
                 return;
             }
 
-            m_timer.expires_from_now(boost::chrono::seconds(1));
+            m_timer.expires_after(boost::chrono::seconds(1));
             m_timer.async_wait([this](const boost::system::error_code& error)
                                {
                                    if (error || m_stop)
@@ -83,7 +83,7 @@ namespace Internal
                                    }
 
                                    const auto latency = boost::chrono::duration_cast<boost::chrono::milliseconds>
-                                       (boost::chrono::steady_clock::now() - m_timer.expires_at());
+                                       (boost::chrono::steady_clock::now() - m_timer.expiry());
 
                                    if (latency > m_tolerance)
                                    {
@@ -100,7 +100,7 @@ namespace Internal
 
         const std::string m_identifier;
         const boost::chrono::steady_clock::duration m_tolerance;
-        boost::asio::io_service::strand& m_strand;
+        boost::asio::io_context::strand& m_strand;
         boost::asio::steady_timer m_timer;
 
         std::atomic<bool> m_stop;

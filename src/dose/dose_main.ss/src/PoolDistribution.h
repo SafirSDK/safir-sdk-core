@@ -54,7 +54,7 @@ namespace Internal
     public:
         PoolDistribution(int64_t nodeId,
                          int64_t nodeType,
-                         boost::asio::io_service::strand& strand,
+                         boost::asio::io_context::strand& strand,
                          DistributionT& distribution,
                          const std::function<void(int64_t)>& completionHandler)
             :m_nodeId(nodeId)
@@ -69,7 +69,7 @@ namespace Internal
 
         void Run() SAFIR_GCC_VISIBILITY_BUG_WORKAROUND
         {
-            m_strand.dispatch([this]
+            boost::asio::dispatch(m_strand,[this]
             {
                 if (m_running)
                     return;
@@ -99,7 +99,7 @@ namespace Internal
 
         void Cancel()
         {
-            m_strand.dispatch([this]
+            boost::asio::dispatch(m_strand,[this]
             {
                 m_running=false;
             });
@@ -116,7 +116,7 @@ namespace Internal
 
         const int64_t m_nodeId;
         const int64_t m_nodeType;
-        boost::asio::io_service::strand& m_strand;
+        boost::asio::io_context::strand& m_strand;
         boost::asio::steady_timer m_timer;
         DistributionT& m_distribution;
         std::function<void(int64_t)> m_completionHandler;
@@ -149,7 +149,7 @@ namespace Internal
 
             if (m_connections.empty())
             {
-                m_strand.post([this]
+                boost::asio::post(m_strand,[this]
                 {
                     SendStates(0);
                 });
@@ -169,7 +169,7 @@ namespace Internal
 
             if (context>=Safir::Dob::NodeParameters::NumberOfContexts())
             {
-                m_strand.post([this]{SendPdComplete();});
+                boost::asio::post(m_strand,[this]{SendPdComplete();});
                 return;
             }
 
@@ -249,7 +249,7 @@ namespace Internal
             }
             else //continue with next context
             {
-                m_strand.dispatch([this,context]{SendStates(context+1);});
+                boost::asio::dispatch(m_strand,[this,context]{SendStates(context+1);});
             }
         }
 
@@ -377,8 +377,8 @@ namespace Internal
             if (!m_running)
                 return;
 
-            m_timer.expires_from_now(boost::chrono::milliseconds(10));
-            m_timer.async_wait(m_strand.wrap([this,completionHandler](const boost::system::error_code&)
+            m_timer.expires_after(boost::chrono::milliseconds(10));
+            m_timer.async_wait(boost::asio::bind_executor(m_strand,[this,completionHandler](const boost::system::error_code&)
             {
                 if (m_running)
                     completionHandler();

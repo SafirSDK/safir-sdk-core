@@ -98,7 +98,7 @@ private:
     void StartUp(bool restore);
     void Start(bool restore);
 
-    boost::asio::io_service m_ioService;
+    boost::asio::io_context m_ioContext;
 
     Safir::Utilities::AsioDispatcher m_dispatcher;
     Safir::Dob::Connection m_dobConnection;

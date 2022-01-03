@@ -208,32 +208,32 @@ int main(int argc, char * argv[])
         // Locate dose_main binary
         const boost::filesystem::path doseMainPath = FindDoseMain(options.doseMainPath);
 
-        boost::asio::io_service ioService;
+        boost::asio::io_context ioContext;
 
         Safir::Utilities::CrashReporter::RegisterCallback(DumpFunc);
         Safir::Utilities::CrashReporter::Start();
 
 
-        auto controlApp = Safir::make_unique<ControlApp>(ioService, doseMainPath, options.id, options.ignoreControlCmd);
+        auto controlApp = Safir::make_unique<ControlApp>(ioContext, doseMainPath, options.id, options.ignoreControlCmd);
 
-        const auto run = [&ioService,&controlApp,&success]
+        const auto run = [&ioContext,&controlApp,&success]
         {
             try
             {
-                ioService.run();
+                ioContext.run();
                 return;
             }
             catch (const std::exception & exc)
             {
                 SEND_SYSTEM_LOG(Alert,
-                            << "CTRL: Caught 'std::exception' exception from io_service.run(): "
+                            << "CTRL: Caught 'std::exception' exception from io_context.run(): "
                                 << "  '" << exc.what() << "'.");
                 success.exchange(false);
             }
             catch (...)
             {
                 SEND_SYSTEM_LOG(Alert,
-                                << "CTRL: Caught '...' exception from io_service.run().");
+                                << "CTRL: Caught '...' exception from io_context.run().");
                 success.exchange(false);
             }
 
@@ -245,7 +245,7 @@ int main(int argc, char * argv[])
 #elif defined(linux) || defined(__linux) || defined(__linux__)
         //We can only run one thread on Linux. Boost.asio does not play well with
         //multithreading and fork on Linux. For more info see
-        //http://www.boost.org/doc/libs/1_61_0/doc/html/boost_asio/reference/io_service/notify_fork.html
+        //http://www.boost.org/doc/libs/1_61_0/doc/html/boost_asio/reference/io_context/notify_fork.html
         //If control ever needs to be multithreaded a possible solution could be to have
         //it fork a child process before it spawns the threads. This child process could
         //then be responsible for the forking.  There is an example of this here:
@@ -266,8 +266,8 @@ int main(int argc, char * argv[])
         if (!success)
         {
             controlApp->Stop();
-            ioService.reset();
-            ioService.run();
+            ioContext.restart();
+            ioContext.run();
         }
 
         controlApp.reset();

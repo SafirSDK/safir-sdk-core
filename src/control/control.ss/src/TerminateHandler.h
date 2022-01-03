@@ -46,11 +46,11 @@
 class TerminateHandler
 {
 public:
-    TerminateHandler(boost::asio::io_service& ioService,
+    TerminateHandler(boost::asio::io_context& ioContext,
                      std::function<void()> stopCallback,
                      const std::function<void(const std::string& str)>& logStatus)
-        : m_strand(ioService)
-        , m_signalSet(ioService)
+        : m_strand(ioContext)
+        , m_signalSet(ioContext)
     {
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
         m_signalSet.add(SIGABRT);
@@ -75,7 +75,7 @@ public:
         m_signalSet.add(SIGTERM);
 #endif
 
-        m_signalSet.async_wait(m_strand.wrap([this, stopCallback, logStatus]
+        m_signalSet.async_wait(boost::asio::bind_executor(m_strand,[this, stopCallback, logStatus]
                                              (const boost::system::error_code& error,
                                               const int signalNumber)
         {
@@ -102,7 +102,7 @@ public:
 
     void Stop()
     {
-        m_strand.dispatch([this]{m_signalSet.cancel();});
+        boost::asio::dispatch(m_strand,[this]{m_signalSet.cancel();});
     }
 
 private:
@@ -145,6 +145,6 @@ private:
 #endif
 
 
-    boost::asio::io_service::strand m_strand;
+    boost::asio::io_context::strand m_strand;
     boost::asio::signal_set m_signalSet;
 };
