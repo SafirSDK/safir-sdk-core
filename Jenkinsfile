@@ -98,7 +98,7 @@ pipeline {
                                     bat label: "Moving artifacts to ${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}.",
                                         script: """
                                                 md ${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}
-                                                mv build\\packaging\\windows\\*.exe ${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}
+                                                move build\\packaging\\windows\\*.exe ${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}
                                                 """
 
                                     archiveArtifacts artifacts: '**/*.exe', fingerprint: true
