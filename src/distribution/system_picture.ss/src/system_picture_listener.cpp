@@ -177,7 +177,7 @@ int main(int argc, char * argv[])
     signals.async_wait([&stopFcn](const boost::system::error_code& error,
                            const int /*signal_number*/)
                        {
-                           if (!!error) //vs2012 workaround
+                           if (error)
                            {
                                return;
                            }

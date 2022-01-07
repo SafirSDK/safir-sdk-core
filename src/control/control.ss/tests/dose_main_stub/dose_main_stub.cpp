@@ -146,7 +146,7 @@ int main(int /*argc*/, char * /*argv*/[])
                    return;
                }
 
-               if (!!error) //workaround for vs2012 warning
+               if (error)
                {
                    lllog(3) << "DOSE_MAIN: OnTimeout error!" << std::endl;
                }
@@ -291,7 +291,7 @@ int main(int /*argc*/, char * /*argv*/[])
                          {
                              lllog(1) << "DOSE_MAIN: got signal " << signalNumber  << std::endl;
 
-                             if (!!error) //fix for vs2012 warning
+                             if (error)
                              {
                                  if (error == boost::asio::error::operation_aborted)
                                  {

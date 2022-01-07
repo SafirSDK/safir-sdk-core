@@ -79,7 +79,7 @@ public:
                                              (const boost::system::error_code& error,
                                               const int signalNumber)
         {
-            if (!!error) //fix for vs2012 warning
+            if (error)
             {
                 if (error == boost::asio::error::operation_aborted)
                 {

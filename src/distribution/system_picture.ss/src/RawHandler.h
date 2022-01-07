@@ -136,7 +136,7 @@ namespace SP
                                                                return;
                                                            }
 
-                                                           if (!!error) //fix for vs2012 warning
+                                                           if (error)
                                                            {
                                                                SEND_SYSTEM_LOG(Alert,
                                                                                << "Unexpected error in CheckDeadNodes: " << error);

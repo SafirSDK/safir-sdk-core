@@ -846,7 +846,7 @@ int main(int argc, char * argv[])
         signalSet.async_wait([&work](const boost::system::error_code& error,
                                      const int /*signal_number*/)
                              {
-                                 if (!!error && work != nullptr) //fix for ws2012 warning
+                                 if (error && work != nullptr)
                                  {
                                      log << "Got a signals error: " << error << std::endl;
                                  }

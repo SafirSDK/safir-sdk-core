@@ -60,13 +60,12 @@ namespace SP
             coordinator.SetStateChangedCallback([this](const SystemStateMessage& data)
                                                 {
                                                     const auto dataCopy = SystemStateCreator::Create(Safir::make_unique<SystemStateMessage>(data));
-                                                    auto this_ = this; //vs2010 workaround
 
-                                                    m_strand.post([this_, dataCopy]
+                                                    m_strand.post([this, dataCopy]
                                                                   {
-                                                                      if (this_->m_dataCallback != nullptr)
+                                                                      if (m_dataCallback != nullptr)
                                                                       {
-                                                                          this_->m_dataCallback(dataCopy);
+                                                                          m_dataCallback(dataCopy);
                                                                       }
                                                                   });
                                                 });

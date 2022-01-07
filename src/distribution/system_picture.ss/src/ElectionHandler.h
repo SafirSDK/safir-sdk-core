@@ -248,7 +248,7 @@ namespace SP
             m_electionInProgress = true;
             m_electionTimer.async_wait(m_strand.wrap([this](const boost::system::error_code& error)
             {
-                if (!!error || m_stopped || !m_electionInProgress)
+                if (error || m_stopped || !m_electionInProgress)
                 {
                     return;
                 }
@@ -334,7 +334,7 @@ namespace SP
                     m_generateIncarnationIdTimer.async_wait
                         (m_strand.wrap([this](const boost::system::error_code& error)
                     {
-                        if (!!error || m_stopped)
+                        if (error || m_stopped)
                         {
                             return;
                         }
