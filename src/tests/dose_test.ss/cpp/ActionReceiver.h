@@ -43,6 +43,21 @@
 #endif
 
 
+namespace boost
+{
+namespace system
+{
+    //Since this is an overload for a boost class we need to put it in the boost namespace.
+    static inline std::wostream& operator<<(std::wostream& out, const boost::system::error_code& error)
+    {
+        std::ostringstream tmp;
+        tmp << error;
+        return out << tmp.str().c_str();
+    }
+
+}
+}
+
 class ActionReceiver
 {
     typedef boost::shared_ptr<boost::asio::ip::tcp::socket> SocketPtr;

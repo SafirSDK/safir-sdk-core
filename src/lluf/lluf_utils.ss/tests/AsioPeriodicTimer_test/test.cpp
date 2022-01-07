@@ -22,7 +22,9 @@
 *
 ******************************************************************************/
 #include "../../src/include/Safir/Utilities/Internal/AsioPeriodicTimer.h"
+#include "../../src/include/Safir/Utilities/Internal/StringUtils.h"
 #include <iostream>
+
 
 //Note: This test does not actually check that the timer is at all correct in timing.
 //All it does is check that it will repeat cyclically. Timing is difficult to test

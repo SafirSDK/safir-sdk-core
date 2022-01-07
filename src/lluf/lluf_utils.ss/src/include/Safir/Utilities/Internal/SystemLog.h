@@ -25,6 +25,7 @@
 #define __LLUF_SYSTEMLOG_H__
 
 #include <Safir/Utilities/Internal/UtilsExportDefs.h>
+#include <Safir/Utilities/Internal/StringUtils.h>
 #include <string>
 #include <sstream>
 
