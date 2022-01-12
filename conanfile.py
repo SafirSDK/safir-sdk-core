@@ -102,4 +102,5 @@ class SafirSdkCoreConan(ConanFile):
             self.requires("qt/5.15.2")
             if self.settings.compiler.version == 14:
                 protobuf_version = "[<3.15]"
+                self.options["b2"].toolset = "vc14"
         self.requires(f"protobuf/{protobuf_version}")

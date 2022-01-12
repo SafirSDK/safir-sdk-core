@@ -266,11 +266,15 @@ class Logger():
 
     @staticmethod
     def __print(data):
-        if sys.version_info[0] < 3:
-            data = data.encode("utf-8")
-        sys.stdout.write(data)
-        sys.stdout.write("\n")
-        sys.stdout.flush()
+        try:
+            if sys.version_info[0] < 3:
+                data = data.encode("utf-8", errors="replace")
+            sys.stdout.write(data)
+            sys.stdout.write("\n")
+            sys.stdout.flush()
+        except UnicodeEncodeError:
+            sys.stdout.write("Failed to decode something in data to be printed. Sorry.\n")
+            sys.stdout.flush()
 
     def __log_stdout(self, data, tag):
         if tag not in Logger.Tags:

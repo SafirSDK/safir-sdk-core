@@ -9,7 +9,7 @@ pipeline {
                 axes {
                     axis {
                         name 'BUILD_PLATFORM'
-                        values 'ubuntu-focal', 'debian-bullseye', 'vs2015' //, 'vs2019'
+                        values 'ubuntu-focal', 'debian-bullseye', 'vs2015', 'vs2019'
                     }
                     axis {
                         name 'BUILD_ARCH'
@@ -24,7 +24,7 @@ pipeline {
                     exclude {
                         axis { //ubuntu does no longer support 32 bit builds, and we haven't fixed windows x86 yet
                             name 'BUILD_PLATFORM'
-                            values 'ubuntu-focal', "vs2015"
+                            values 'ubuntu-focal'
                         }
                         axis {
                             name 'BUILD_ARCH'
@@ -76,7 +76,7 @@ pipeline {
                                 else {
                                     bat label:  "Running build script.",
                                         script: """
-                                                build\\build.py --jenkins --package --use-studio ${BUILD_PLATFORM}
+                                                build\\build.py --jenkins --package --use-studio ${BUILD_PLATFORM} --arch ${BUILD_ARCH}
                                                 """
                                 }
                             }
