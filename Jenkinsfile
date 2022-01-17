@@ -108,17 +108,32 @@ pipeline {
                     }
                     stage('Analyze') {
                         steps {
-                            recordIssues(sourceCodeEncoding: 'UTF-8',
-                                         skipBlames: true,
-                                         skipPublishingChecks: true,
-                                         healthy: 1,
-                                         unhealthy:10,
-                                         tools: [cmake(id:"${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}_cmake"),
-                                                 gcc(id:"${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}_gcc"),
-                                                 java(id:"${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}_java"),
-                                                 doxygen(id:"${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}_doxygen"),
-                                                 msBuild(id:"${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}_msbuild")
-                                                ])
+                            script {
+                                if (isUnix()) {
+                                    recordIssues(sourceCodeEncoding: 'UTF-8',
+                                                 skipBlames: true,
+                                                 skipPublishingChecks: true,
+                                                 healthy: 1,
+                                                 unhealthy:10,
+                                                 tools: [cmake(id:"${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}_cmake"),
+                                                         gcc(id:"${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}_gcc"),
+                                                         java(id:"${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}_java"),
+                                                         doxygen(id:"${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}_doxygen"),
+                                                        ])
+                                }
+                                else {
+                                    recordIssues(sourceCodeEncoding: 'UTF-8',
+                                                 skipBlames: true,
+                                                 skipPublishingChecks: true,
+                                                 healthy: 1,
+                                                 unhealthy:10,
+                                                 tools: [cmake(id:"${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}_cmake"),
+                                                         java(id:"${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}_java"),
+                                                         doxygen(id:"${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}_doxygen"),
+                                                         msBuild(id:"${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}_msbuild")
+                                                        ])
+                                }
+                            }
                         }
                     }
 
