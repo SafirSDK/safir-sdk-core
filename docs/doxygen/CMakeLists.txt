@@ -19,7 +19,7 @@ add_custom_command(
   OUTPUT documentation_generated
   COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
   COMMAND ${CMAKE_COMMAND} -E touch documentation_generated
-  DEPENDS ${headers}
+  DEPENDS ${headers} Doxyfile.in
   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
   COMMENT "Generating API documentation with Doxygen")
 
