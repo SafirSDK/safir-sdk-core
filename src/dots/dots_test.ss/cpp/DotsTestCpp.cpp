@@ -220,6 +220,13 @@ void Header(const std::wstring & label)
     std::wcout<<L"====================================================="<<std::endl;
 }
 
+//Disable an incorrect warning for VS2015. See more info here:
+//https://stackoverflow.com/questions/34013930/error-c4592-symbol-will-be-dynamically-initialized-vs2015-1-static-const-std
+#if _MSC_VER == 1900
+#pragma warning (push)
+#pragma warning (disable:4592)
+#endif
+
 static DotsTest::MemberTypesPtr MT1;
 static DotsTest::MemberTypesPtr MT2;
 static DotsTest::MemberArraysPtr MA1;
@@ -229,6 +236,11 @@ static DotsTest::MemberItemsPtr MI;
 static DotsTest::MemberItemsArrayPtr MIA;
 static DotsTest::EmptyObjectPtr EO;
 static DotsTest::AnotherEmptyObjectPtr AEO;
+
+#if _MSC_VER == 1900
+#pragma warning (pop)
+#endif
+
 
 void Test_Has_Property()
 {
