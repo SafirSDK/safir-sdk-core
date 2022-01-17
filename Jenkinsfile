@@ -117,7 +117,7 @@ pipeline {
                                                  gcc(id:"${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}_gcc"),
                                                  java(id:"${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}_java"),
                                                  doxygen(id:"${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}_doxygen"),
-                                                 MSBuild(id:"${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}_doxygen")
+                                                 msBuild(id:"${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}_msbuild")
                                                 ])
                         }
                     }
