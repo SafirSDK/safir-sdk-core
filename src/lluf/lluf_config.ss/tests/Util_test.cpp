@@ -67,6 +67,7 @@ namespace
     void TestCSIDLExpand(const int csidl, const std::string& variableName)
     {
         using namespace Safir::Utilities::Internal;
+        std::wcout << "test expand " << variableName.c_str() << std::endl;
         const std::string expected = "asdf" + GetCSIDL(csidl) + "foobar";
         if (ExpandSpecial("asdf@{" + variableName + "}foobar") != expected)
         {
@@ -86,7 +87,7 @@ int main()
             if (GetEnv("PATH").empty())
             {
                 return 1;
-            } 
+            }
 
             try
             {
@@ -104,7 +105,7 @@ int main()
             if (GetEnv("PATH", std::nothrow).empty())
             {
                 return 1;
-            } 
+            }
 
             try
             {
@@ -122,7 +123,7 @@ int main()
             if (GetFolderPathFromCSIDL(CSIDL_LOCAL_APPDATA).str().empty())
             {
                 return 1;
-            } 
+            }
 
             try
             {
@@ -181,7 +182,7 @@ int main()
                 std::wcout << expected.c_str() << std::endl;
                 return 1;
             }
-            
+
             std::wcout << "expand SAFIR_INSTANCE" << std::endl;
 
             SetEnv("SAFIR_INSTANCE", "");
@@ -217,11 +218,11 @@ int main()
             {
                 return 1;
             }
-            
+
             SetEnv("SOME_NUMBER", "0");
             SetEnv("FOO_BAR_01222", "blahonga");
-            
-            if (ExpandEnvironment("uu$(PATH)iiii$(FOO_BAR_$(SOME_NUMBER)1222)ooo") != 
+
+            if (ExpandEnvironment("uu$(PATH)iiii$(FOO_BAR_$(SOME_NUMBER)1222)ooo") !=
                 "uu" + GetEnv("PATH") + "iiiiblahongaooo")
             {
                 return 1;
@@ -237,7 +238,7 @@ int main()
             {
                 return 1;
             }
-            
+
             SetEnv("SAFIR_INSTANCE", "0");
             if (GetSafirInstanceSuffix() != "_0")
             {
@@ -270,5 +271,3 @@ int main()
     std::wcout << "success" << std::endl;
     return 0;
 }
-
-
