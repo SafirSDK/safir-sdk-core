@@ -191,3 +191,14 @@ INSTALL(FILES COPYING.txt
   DESTINATION ${SAFIR_INSTALL_DESTINATION_DOC}
   RENAME LICENSE.txt
   COMPONENT Runtime)
+
+
+set(ignore_me
+  "Some of our build methods pass along extra variables to cmake, which causes warnings."
+  "Add them below to get rid of the warning."
+  ${CMAKE_EXPORT_NO_PACKAGE_REGISTRY}
+  ${CMAKE_INSTALL_LIBDIR}
+  ${CMAKE_INSTALL_LOCALSTATEDIR}
+  ${CMAKE_INSTALL_SYSCONFDIR}
+  ${CMAKE_AUTOGEN_VERBOSE}
+  )
