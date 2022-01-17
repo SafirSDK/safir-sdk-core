@@ -448,13 +448,9 @@ class BuilderBase(object):
     def __init__(self, arguments):
         self.num_jobs = num_jobs()
 
-        # Use Ninja for building if available, it is much faster
-        if which("ninja") is not None:
-            self.cmake_generator = "Ninja"
-            self.have_ninja = True
-        else:
-            self.cmake_generator = "undefined"
-            self.have_ninja = False
+        # We want Ninja for building
+        if which("ninja") is None:
+            die("Need ninja to build!")
 
         self.total_tests = 0
         self.failed_tests = 0
@@ -503,7 +499,7 @@ class BuilderBase(object):
 
     def __configure(self, srcdir, config):
 
-        command = ("cmake", "-G", self.cmake_generator, "-D", "CMAKE_BUILD_TYPE:string=" + config)
+        command = ("cmake", "-G", "Ninja", "-D", "CMAKE_BUILD_TYPE:string=" + config)
 
         if self.install_prefix is not None:
             command += ("-D", "CMAKE_INSTALL_PREFIX=" + self.install_prefix)
@@ -516,7 +512,7 @@ class BuilderBase(object):
 
         self.__configure(srcdir, config)
 
-        command = ("cmake", "--build", ".", "--") + self.generator_specific_build_cmds()
+        command = ("cmake", "--build", ".")
 
         self._run_command(command, "Build " + config)
         if not self.arguments.skip_tests:
@@ -543,9 +539,6 @@ class BuilderBase(object):
 
     def stage_package(self):
         LOGGER.log(" ! Packaging not implemented in this builder !", "brief")
-
-    def generator_specific_build_cmds(self):
-        raise FatalError("generator_specific_build_cmds is not implemented")
 
     def test(self):
         """run ctest in current directory"""
@@ -592,20 +585,11 @@ class VisualStudioBuilder(BuilderBase):
 
         self.install_target = "Install"
 
-        if not self.have_ninja:
-            self.cmake_generator = "NMake Makefiles"
-
         self.__setup_build_environment()
 
     @staticmethod
     def can_use():
         return sys.platform == "win32"
-
-    def generator_specific_build_cmds(self):
-        if self.have_ninja:
-            return ()  #empty tuple
-        else:
-            return ("/nologo", )
 
     @staticmethod
     def __msvc14_find_vc2015():
@@ -758,18 +742,21 @@ class VisualStudioBuilder(BuilderBase):
 
         if self.arguments.use_studio == "vs2015":
             compiler_version = 14
-            compiler_toolset = "v140"
         elif self.arguments.use_studio == "vs2017":
             compiler_version = 15
-            compiler_toolset = "v141"
         elif self.arguments.use_studio == "vs2019":
             compiler_version = 16
-            compiler_toolset = "v142"
         elif self.arguments.use_studio == "vs2022":
             compiler_version = 17
-            compiler_toolset = "v143"
         else:
             die("Unsupported Visual Studio version")
+
+        LOGGER.log("Setting environment variable 'VisualStudioVersion' to '{}', to encourage conan packages to build correctly."
+                   .format(compiler_version))
+        os.environ["VisualStudioVersion"] = str(compiler_version)
+
+        LOGGER.log("Setting environment variable 'CONAN_CMAKE_GENERATOR' to 'Ninja', to encourage conan packages to build correctly.")
+        os.environ["CONAN_CMAKE_GENERATOR"] = "Ninja"
 
         arch = self.arguments.arch
         if self.arguments.arch == "amd64":
@@ -786,14 +773,13 @@ class VisualStudioBuilder(BuilderBase):
                                "-s", "compiler=Visual Studio",
                                "-s", "compiler.version={}".format(compiler_version),
                                "-s", "compiler.runtime={}".format(compiler_runtime),
-                               "-s", "compiler.toolset={}".format(compiler_toolset),
                                "-g=cmake",
                                "--build=missing"),
                               "Running conan explicitly before build")
 
 
     def stage_package(self):
-        version_tuple, version_string = read_version()
+        _, version_string = read_version()
 
         #If we're cross compiling we need to rename directories a bit.
         if is_64_bit() and self.arguments.arch == "x86":
@@ -821,19 +807,10 @@ class UnixGccBuilder(BuilderBase):
         super(UnixGccBuilder,self).__init__(arguments)
 
         self.install_target = "install"
-        if not self.have_ninja:
-            self.cmake_generator = "Unix Makefiles"
 
     @staticmethod
     def can_use():
         return sys.platform.startswith("linux")
-
-    def generator_specific_build_cmds(self):
-        if self.have_ninja:
-            return ()
-        else:
-            return ("-j", str(self.num_jobs))
-
 
 class DebianPackager():
     """this builder has nothing in common with the other builders, really. Which is why it does
