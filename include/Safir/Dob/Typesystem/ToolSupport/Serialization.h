@@ -35,6 +35,14 @@
 #include <Safir/Dob/Typesystem/ToolSupport/Internal/JsonToBlobSerializer.h>
 #include <Safir/Dob/Typesystem/ToolSupport/Internal/RepositoryToStringHelper.h>
 
+//There is a bug in some oldish versions of doxygen that causes spurious warnings to be issued.
+//This renaming stops doxygen from thinking that Base64ToBinary in Typesystem::Utilities and the
+//one in this file are the same function. Which of course they're not...
+//This thing and related cmakery can probably be removed when we drop support for Ubuntu 20.04.
+#ifdef DOXYGEN_BUG_WORKAROUND
+#define Base64ToBinary Base64ToBinary_
+#endif
+
 namespace Safir
 {
 namespace Dob
@@ -164,5 +172,9 @@ namespace ToolSupport
 }
 }
 } //end namespace Safir::Dob::Typesystem::ToolSupport
+
+#ifdef DOXYGEN_BUG_WORKAROUND
+#undefef Base64ToBinary
+#endif
 
 #endif

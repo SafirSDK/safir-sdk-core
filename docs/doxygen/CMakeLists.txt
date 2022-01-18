@@ -1,4 +1,4 @@
-find_package(Doxygen)
+find_package(Doxygen OPTIONAL_COMPONENTS dot)
 
 if (NOT DOXYGEN_FOUND)
   message(STATUS "Failed to find the Doxygen tools, will not build Doxygen documentation")
@@ -9,6 +9,10 @@ if (ENV{VERBOSE})
   set(CMAKE_DOXYGEN_QUIET "NO")
 else()
   set(CMAKE_DOXYGEN_QUIET "YES")
+endif()
+
+if (DOXYGEN_VERSION VERSION_EQUAL "1.8.17")
+  set(DOXYGEN_WORKAROUNDS "DOXYGEN_BUG_WORKAROUND=1")
 endif()
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY)

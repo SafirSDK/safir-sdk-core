@@ -229,12 +229,12 @@ GENERATE_PERLMOD       = NO
 # Configuration options related to the preprocessor
 #---------------------------------------------------------------------------
 ENABLE_PREPROCESSING   = YES
-MACRO_EXPANSION        = NO
+MACRO_EXPANSION        = YES
 EXPAND_ONLY_PREDEF     = NO
 SEARCH_INCLUDES        = YES
 INCLUDE_PATH           =
 INCLUDE_FILE_PATTERNS  =
-PREDEFINED             =
+PREDEFINED             = @DOXYGEN_WORKAROUNDS@
 EXPAND_AS_DEFINED      =
 SKIP_FUNCTION_MACROS   = YES
 #---------------------------------------------------------------------------
