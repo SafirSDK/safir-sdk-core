@@ -589,7 +589,7 @@ class VisualStudioBuilder(BuilderBase):
 
         #Disable msvc leak detection in boost test unit tests. This detects loads of spurious memory
         #leaks, which makes it useless.
-        os.environ["BOOST_TEST_DETECT_MEMORY_LEAK"] = 0
+        os.environ["BOOST_TEST_DETECT_MEMORY_LEAK"] = "0"
     @staticmethod
     def can_use():
         return sys.platform == "win32"
