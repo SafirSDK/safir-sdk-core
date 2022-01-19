@@ -3448,7 +3448,7 @@ The system design in terms of redundancy might also affect the choosen severity 
 |=========================================================================
 |RFC 3164 Severity Level |RFC 3164 Description
 
-|Emergency               |System is unusable .
+|Emergency               |System is unusable.
 |Alert                   |Action must be taken immediately.
 |Critical                |Critical conditions.
 |Error                   |Error conditions.
@@ -4442,6 +4442,10 @@ What happened to the +Safir.Dob.PersistenceParameters.TextColumnsAreUtf8+ parame
 This had to do with messy ODBC Unicode support. We have tried to make a solution that
 should work without parametrization. If you really need the parameter, please let us
 know!
+
+What happened to Olib and the Safir.Databases namespace?::
+The Safir ODBC database interface was deprecated and then removed. Please use some other way
+of interacting with databases.
 
 == Appendix D: Building from source
 Since Safir SDK Core is released under an Open Source license (as described in <<licenses>>) you are able to download and build the source code from scratch. Instructions for building is included in the source distribution of Safir SDK Core obtained from http://safirsdkcore.com/[].

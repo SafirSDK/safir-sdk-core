@@ -2,6 +2,13 @@
 This file is included into the main SUG document, and is located under header level "=="
 ///////
 
+.Note
+************************************
+This section mentions _VehicleDb_ several times. This application has in fact been
+removed, since Safir SDK Core no longer contains an ODBC wrapper. This section in the
+documentation has not been reworked, though.
+************************************
+
 Along with the Safir SDK Core you should have received some example applications that show how to create a small application that will give you a starting point for your own applications. This appendix explains what these example applications intend to do, and why they were designed the way they were. These examples are also used in the Safir SDK training courses, so if you've attended one of them you will be in familiar territory.
 
 The example applications form a very small and simple Safir system. They may execute on one single node or be spread out on different nodes.
