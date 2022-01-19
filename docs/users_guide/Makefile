@@ -25,7 +25,7 @@ all: users_guide.pdf users_guide.html
 
 vpath %.dia images
 %.png: %.dia
-	dia --export=$@ -t png-libart $<
+	dia --export=$@ -t png $<
 
 %.eps: %.dia
 	dia --export=$@ -t eps $<
