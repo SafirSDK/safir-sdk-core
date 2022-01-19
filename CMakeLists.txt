@@ -114,7 +114,7 @@ MESSAGE(STATUS "CMAKE_INSTALL_PREFIX = ${CMAKE_INSTALL_PREFIX}")
 if (WIN32 AND
     CMAKE_SIZEOF_VOID_P MATCHES "8" AND
     CMAKE_INSTALL_PREFIX MATCHES "Program Files \\(x86\\)")
-  MESSAGE(WARNING "Incorrectly set CMAKE_INSTALL_PREFIX. Contains 'Program Files (x86)' even though we're building"
+  MESSAGE(STATUS "Incorrectly set CMAKE_INSTALL_PREFIX. Contains 'Program Files (x86)' even though we're building"
     "in 64 bit mode (according to CMAKE_SIZEOF_VOID_P). Will remove ' (x86)' from CMAKE_INSTALL_PREFIX.")
   STRING(REPLACE " (x86)" "" CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
 endif()
