@@ -697,8 +697,7 @@ class VisualStudioBuilder(BuilderBase):
     def __setup_build_environment(self):
         """
         Find vcvarsall.bat and load the relevant environment variables from it.  This function
-        is inspired (but not copied, for licensing reasons) by the one in python
-        distutils2 msvc9compiler.py
+        is inspired (but not copied, for licensing reasons) by the one in python's setuptools.
         """
 
         vcvarsall, version = self.__find_vcvarsall()
@@ -737,6 +736,18 @@ class VisualStudioBuilder(BuilderBase):
 
         self.__run_conan_install()
 
+        #we also need to put the java 32 bit vm first in the path, if we're running an x86 build
+        if self.arguments.arch == "x86":
+            for path in os.environ["PATH"].split(";"):
+                candidate = os.path.join(path,"java.exe")
+                if os.path.exists(candidate):
+                    res = subprocess.check_output((candidate,"-XshowSettings:properties","-version"),
+                                                  stderr=subprocess.STDOUT).decode(encoding="mbcs",
+                                                                                   errors="replace").strip()
+                    if "sun.arch.data.model = 32" in res:
+                        LOGGER.log("Will add '" + path + "' to beginning of PATH", "detail")
+                        os.environ["PATH"] = path + ";" + os.environ["PATH"]
+                        break
     def __run_conan_install(self):
         """There is something that makes the conan step in cmake not work when not run
            explicitly like this before build. On Windows, of course..."""
