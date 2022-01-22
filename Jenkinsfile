@@ -92,7 +92,7 @@ pipeline {
                                                mv tmp/*.deb ${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}
                                                """
 
-                                    archiveArtifacts artifacts: '**/*.deb', fingerprint: true
+                                    archiveArtifacts artifacts: "${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}/*.deb", fingerprint: true
                                 }
                                 else {
                                     bat label: "Moving artifacts to ${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}.",
@@ -101,7 +101,7 @@ pipeline {
                                                 move build\\packaging\\windows\\*.exe ${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}
                                                 """
 
-                                    archiveArtifacts artifacts: '**/*.exe', fingerprint: true
+                                    archiveArtifacts artifacts: "${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}/*.exe", fingerprint: true
                                 }
                             }
                         }
