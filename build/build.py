@@ -887,9 +887,12 @@ class DebianPackager():
         os.chdir("safir-sdk-core_" + version_string)
         if not self.noclean:
             shutil.copytree(os.path.join("build", "packaging", "debian"), "debian")
+        options = "config=" + self.arguments.configs[0]
+        if self.arguments.configs[0] == "Debug":
+            options += " noopt"
         self.__run(("debuild",
                     "--prepend-path", os.path.dirname(which("conan")),
-                    "--set-envvar", "DEB_BUILD_OPTIONS=config=" + self.arguments.configs[0],
+                    "--set-envvar", "DEB_BUILD_OPTIONS=" + options,
                     "-us", "-uc", "-nc"),
                     "building packages")
         os.chdir(glob.glob("obj-*")[0])
