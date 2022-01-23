@@ -844,6 +844,11 @@ class DebianPackager():
 
         self.noclean = arguments.package_noclean and os.path.exists("tmp")
 
+        if self.arguments.jenkins:
+            if os.environ.get("BUILD_TYPE") == "DebugOnly":
+                LOGGER.log("Using Config 'DebugOnly', building everything in Debug only.")
+                self.arguments.configs = ("Debug", )
+
     @staticmethod
     def can_use():
         """Can be used on debian based distros"""
