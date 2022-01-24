@@ -22,7 +22,7 @@ pipeline {
                 }
                 excludes {
                     exclude {
-                        axis { //ubuntu does no longer support 32 bit builds, and we haven't fixed windows x86 yet
+                        axis { //ubuntu does no longer support 32 bit builds
                             name 'BUILD_PLATFORM'
                             values 'ubuntu-focal'
                         }
@@ -150,6 +150,84 @@ pipeline {
                     always {
                         junit keepLongStdio: true, skipPublishingChecks: true, testResults: '**/*.junit.xml'
                         cleanWs()
+                    }
+                }
+            }
+        }
+
+        stage('Test') {
+            matrix {
+                agent {
+                    label "${BUILD_PLATFORM}-${BUILD_ARCH}-test"
+                }
+                axes {
+                    axis {
+                        name 'BUILD_PLATFORM'
+                        //values 'ubuntu-focal', 'debian-bullseye', 'vs2015', 'vs2019'
+                        values 'ubuntu-focal', 'debian-bullseye'
+                    }
+                    axis {
+                        name 'BUILD_ARCH'
+                        values 'x86', 'amd64'
+                    }
+                    axis {
+                        name 'BUILD_TYPE'
+                        values 'DebugOnly', 'RelWithDebInfo'
+                    }
+                    axis {
+                        name 'Languages'
+                        values 'cpp-cpp-cpp', 'dotnet-java-cpp', 'java-cpp-dotnet', 'cpp-dotnet-java'
+                    }
+                    axis {
+                        name 'TEST_KIND'
+                        values 'multinode-tests', 'standalone-tests'
+                    }
+
+
+                }
+                excludes {
+                    exclude {
+                        axis { //ubuntu does no longer support 32 bit builds
+                            name 'BUILD_PLATFORM'
+                            values 'ubuntu-focal'
+                        }
+                        axis {
+                            name 'BUILD_ARCH'
+                            values 'x86'
+                        }
+                    }
+                }
+                stages {
+                    stage('Run Tests') {
+                        steps {
+                            script {
+                                if (isUnix()) {
+                                    sh 'git clean -fxd'
+                                }
+                                else {
+                                    bat 'git clean -fxd'
+                                }
+                            }
+
+                            copyArtifacts filter: "${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}/*",
+                                          flatten: true,
+                                          fingerprintArtifacts: true,
+                                          projectName: '${JOB_NAME}',
+                                          selector: specific('${BUILD_NUMBER}')
+
+                            script {
+                                //languages are picked up from environment variable
+                                if (isUnix()) {
+                                    sh 'build/jenkins_stuff/run_test.py --test ${TEST_KIND}'
+                                }
+                                else {
+                                    bat 'build/jenkins_stuff/run_test.py --test ${TEST_KIND}'
+                                }
+                            }
+
+                            archiveArtifacts artifacts: '**/*.output.txt'
+                            junit keepLongStdio: true, skipPublishingChecks: true, testResults: '**/*.junit.xml'
+                        }
                     }
                 }
             }

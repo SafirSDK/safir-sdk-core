@@ -890,13 +890,16 @@ class DebianPackager():
         options = "config=" + self.arguments.configs[0]
         if self.arguments.configs[0] == "Debug":
             options += " noopt"
+        if self.arguments.skip_tests:
+            options += " nocheck"
         self.__run(("debuild",
                     "--prepend-path", os.path.dirname(which("conan")),
                     "--set-envvar", "DEB_BUILD_OPTIONS=" + options,
                     "-us", "-uc", "-nc"),
                     "building packages")
         os.chdir(glob.glob("obj-*")[0])
-        translate_results_to_junit("debhelper")
+        if not self.arguments.skip_tests:
+            translate_results_to_junit("debhelper")
 
 def getText(nodelist):
     """Get text data out of a xml dom"""

@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 ###############################################################################
 #
@@ -30,8 +30,21 @@ import subprocess
 import re
 import platform
 import argparse
-import distro
 
+try:
+    import apt
+except:
+    pass
+
+#Make linux_distribution available from some suitable package, falling back to returning that we don't know.
+try:
+    from distro import linux_distribution
+except:
+    try:
+        from platform import linux_distribution
+    except:
+        def linux_distribution():
+            return ("unknown",)
 
 def log(*args, **kwargs):
     """logging function that flushes"""
@@ -197,7 +210,6 @@ class WindowsInstaller():
 
 class DebianInstaller():
     def __init__(self):
-        import apt
         self.packages = ("safir-sdk-core", "safir-sdk-core-tools", "safir-sdk-core-dev", "safir-sdk-core-testsuite")
 
     def __is_installed(self, package_name, cache=None):
@@ -263,7 +275,7 @@ class DebianInstaller():
         output = proc.communicate()[0]
         if proc.returncode != 0:
             raise SetupError("Failed to run dpkg --install. returncode = " + str(proc.returncode) + "\nOutput:\n" +
-                             output)
+                             output.decode("utf-8"))
 
     def check_installation(self):
         log("Running safir_show_config to test that exes can be run")
@@ -400,10 +412,10 @@ def main():
         if sys.platform == "win32":
             installer = WindowsInstaller()
         elif sys.platform.startswith("linux") and \
-            distro.linux_distribution()[0] in ("debian", "Ubuntu"):
+             linux_distribution()[0] in  ("Debian GNU/Linux", "Ubuntu"):
             installer = DebianInstaller()
         else:
-            log("Platform", sys.platform, ",", platform.linux_distribution(), " is not supported by this script")
+            log("Platform", sys.platform, ",", linux_distribution(), " is not supported by this script")
             return 1
 
         if installer.can_uninstall():
