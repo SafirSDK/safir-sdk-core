@@ -15,15 +15,12 @@ override_dh_auto_configure:
 	dh_auto_configure -- -DCMAKE_BUILD_TYPE:STRING=$(CMAKE_BUILD_TYPE)
 
 %:
-	dh $@ --parallel --with=cli
+	dh $@ --buildsystem=cmake+ninja --with=cli
 
 override_dh_auto_install: install_runtime install_tools install_development install_testsuite
 
 install_runtime: export DESTDIR=$(shell pwd)/debian/safir-sdk-core
 install_runtime:
-	pwd
-	ls -l
-	env
 	#run cmake install
 	cd obj-$(DEB_BUILD_GNU_TYPE) && /usr/bin/cmake -DCOMPONENT=Runtime -P cmake_install.cmake
 
