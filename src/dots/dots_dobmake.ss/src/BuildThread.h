@@ -93,17 +93,17 @@ private:
 
         if (m_force32Bit)
         {
-            params << "--32-bit";
+            params << "--arch" << "x86";
         }
 
 #if _MSC_VER >= 1930
-        params << "--use-studio" << "2022";
+        params << "--use-studio" << "vs2022";
 #elif _MSC_VER >= 1920
-        params << "--use-studio" << "2019";
+        params << "--use-studio" << "vs2019";
 #elif _MSC_VER >= 1910
-        params << "--use-studio" << "2017";
+        params << "--use-studio" << "vs2017";
 #elif _MSC_VER == 1900
-        params << "--use-studio" << "2015";
+        params << "--use-studio" << "vs2015";
 #elif defined(_MSC_VER)
 #  error "Unknown version of Visual Studio. Dobmake won't stand for it!"
 #endif
