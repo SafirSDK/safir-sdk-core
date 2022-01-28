@@ -217,11 +217,19 @@ pipeline {
 
                             script {
                                 //languages are picked up from environment variable
+                                //we also need to move the folders, or jenkins will merge them all
                                 if (isUnix()) {
-                                    sh 'build/jenkins_stuff/run_test.py --test ${TEST_KIND}'
+                                    sh script: """
+                                               build/jenkins_stuff/run_test.py --test ${TEST_KIND}
+                                               mv dose_test_output ${TEST_KIND}-${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}
+                                               """
+
                                 }
                                 else {
-                                    bat 'build/jenkins_stuff/run_test.py --test ${TEST_KIND}'
+                                    sh bat: """
+                                            build/jenkins_stuff/run_test.py --test ${TEST_KIND}'
+                                            move dose_test_output ${TEST_KIND}-${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}
+                                            """
                                 }
                             }
 
