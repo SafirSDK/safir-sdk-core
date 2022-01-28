@@ -132,7 +132,7 @@ class WindowsInstaller():
 
     def __setup_debug_runtime(self):
         #we get out of here immediately if we're not running debug.
-        if os.environ.get("Config") != "DebugOnly":
+        if os.environ.get("BUILD_TYPE") != "DebugOnly":
             return
 
         #build machines should have debug runtime on them

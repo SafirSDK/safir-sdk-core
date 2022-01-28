@@ -163,8 +163,7 @@ pipeline {
                 axes {
                     axis {
                         name 'BUILD_PLATFORM'
-                        //values 'ubuntu-focal', 'debian-bullseye', 'vs2015', 'vs2019'
-                        values 'ubuntu-focal', 'debian-bullseye'
+                        values 'ubuntu-focal', 'debian-bullseye', 'vs2015', 'vs2019'
                     }
                     axis {
                         name 'BUILD_ARCH'
@@ -182,14 +181,23 @@ pipeline {
                         name 'TEST_KIND'
                         values 'multinode-tests', 'standalone-tests'
                     }
-
-
                 }
                 excludes {
                     exclude {
                         axis { //ubuntu does no longer support 32 bit builds
                             name 'BUILD_PLATFORM'
                             values 'ubuntu-focal'
+                        }
+                        axis {
+                            name 'BUILD_ARCH'
+                            values 'x86'
+                        }
+                    }
+                    exclude { //TODO fix x86 tests on windows (needs 32 bit windows?)
+                        //TODO: 32on64?
+                        axis {
+                            name 'BUILD_PLATFORM'
+                            values 'vs2015', 'vs2019'
                         }
                         axis {
                             name 'BUILD_ARCH'
@@ -223,13 +231,12 @@ pipeline {
                                                build/jenkins_stuff/run_test.py --test ${TEST_KIND}
                                                mv dose_test_output ${TEST_KIND}-${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}
                                                """
-
                                 }
                                 else {
-                                    sh bat: """
-                                            build/jenkins_stuff/run_test.py --test ${TEST_KIND}'
-                                            move dose_test_output ${TEST_KIND}-${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}
-                                            """
+                                    bat script: """
+                                                python build/jenkins_stuff/run_test.py --test ${TEST_KIND}
+                                                move dose_test_output ${TEST_KIND}-${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}
+                                                """
                                 }
                             }
 
