@@ -51,14 +51,6 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
     include(${SAFIR_SDK_CORE_CMAKE_DIR}/PrecompiledHeader.cmake)
     include(${SAFIR_SDK_CORE_DOTNET_SETTINGS})
     include(${SAFIR_SDK_CORE_JAVA_SETTINGS})
-    #We need boost headers.
-    set(Boost_FIND_QUIETLY True)
-    find_package(Boost COMPONENTS system thread REQUIRED)
-    include_directories(${Boost_INCLUDE_DIRS})
-    link_directories(${Boost_LIBRARY_DIRS})
-
-    #use dynamic linking with boost
-    ADD_DEFINITIONS(-DBOOST_ALL_DYN_LINK)
 
     #Debug dlls on windows need d suffix
     if (MSVC)

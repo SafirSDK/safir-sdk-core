@@ -247,5 +247,71 @@ pipeline {
                 }
             }
         }
+
+        stage('Build examples') {
+            matrix {
+                agent {
+                    label "${BUILD_PLATFORM}-${BUILD_ARCH}-build"
+                }
+                axes {
+                    axis {
+                        name 'BUILD_PLATFORM'
+                        values 'ubuntu-focal', 'debian-bullseye' //, 'vs2015', 'vs2019'
+                    }
+                    axis {
+                        name 'BUILD_ARCH'
+                        values 'x86', 'amd64'
+                    }
+                    axis {
+                        name 'BUILD_TYPE'
+                        values 'DebugOnly', 'RelWithDebInfo'
+                    }
+                }
+                excludes {
+                    exclude {
+                        axis { //ubuntu does no longer support 32 bit builds
+                            name 'BUILD_PLATFORM'
+                            values 'ubuntu-focal'
+                        }
+                        axis {
+                            name 'BUILD_ARCH'
+                            values 'x86'
+                        }
+                    }
+                }
+                stages {
+                    stage('Build') {
+                        steps {
+                            script {
+                                if (isUnix()) {
+                                    sh 'git clean -fxd'
+                                }
+                                else {
+                                    bat 'git clean -fxd'
+                                }
+                            }
+
+                            copyArtifacts filter: "${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}/*",
+                                          flatten: true,
+                                          fingerprintArtifacts: true,
+                                          projectName: '${JOB_NAME}',
+                                          selector: specific('${BUILD_NUMBER}')
+                            script {
+                                if (isUnix()) {
+                                    sh script: """
+                                               build/jenkins_stuff/run_test.py --test build-examples
+                                               """
+                                }
+                                else {
+                                    bat script: """
+                                                python build/jenkins_stuff/run_test.py --test build-examples
+                                                """
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }

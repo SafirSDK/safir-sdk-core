@@ -4,6 +4,7 @@ cmake_minimum_required(VERSION 3.16.0)
 
 set(CMAKE_CXX_STANDARD 17)
 
+
 find_package(SafirSDKCore REQUIRED)
 
 add_subdirectory(dou_files)
@@ -11,13 +12,9 @@ add_subdirectory(dou_files)
 #the code below needs to be able to include the Safir SDK Core headers
 include_directories(${SAFIR_SDK_CORE_INCLUDE_DIRS})
 
-#we also need boost
-FIND_PACKAGE(Boost REQUIRED)
-#include_directories(${Boost_INCLUDE_DIRS})
-#link_directories(${Boost_LIBRARY_DIRS})
-
 #use dynamic linking with boost
 ADD_DEFINITIONS(-DBOOST_ALL_DYN_LINK)
+
 
 if (MSVC)
   ADD_DEFINITIONS(-D_WINSOCK_DEPRECATED_NO_WARNINGS)

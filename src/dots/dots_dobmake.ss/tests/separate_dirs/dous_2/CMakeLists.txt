@@ -1,4 +1,6 @@
-cmake_minimum_required(VERSION 2.8.12)
+project(dobmake_test_separate_dirs_2 CXX)
+
+cmake_minimum_required(VERSION 3.11)
 
 find_package(SafirSDKCore REQUIRED)
 
