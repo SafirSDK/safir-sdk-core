@@ -33,7 +33,7 @@
 #include <Safir/Utilities/Internal/Id.h>
 #include <iostream>
 #include <map>
-#include <boost/atomic.hpp>
+#include <atomic>
 
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
 #include <boost/process/windows.hpp>
@@ -74,7 +74,7 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
     , m_doseMainRunning(false)
     , m_requiredForStart(false)
     , m_incarnationIdStorage(new AlignedStorage())
-    , m_incarnationId(reinterpret_cast<boost::atomic<int64_t>&>(*m_incarnationIdStorage))
+    , m_incarnationId(reinterpret_cast<std::atomic<int64_t>&>(*m_incarnationIdStorage))
 {
     m_terminateHandler = Safir::make_unique<TerminateHandler>(ioService,
                                                               m_strand.wrap([this]{StopThisNode();}),
@@ -110,7 +110,7 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
         m_nodeId = id;
     }
 
-    new (m_incarnationIdStorage.get()) boost::atomic<uint64_t>(0);
+    new (m_incarnationIdStorage.get()) std::atomic<uint64_t>(0);
 
     // Make some work to stop io_service from exiting.
     m_work = Safir::make_unique<boost::asio::io_service::work>(ioService);

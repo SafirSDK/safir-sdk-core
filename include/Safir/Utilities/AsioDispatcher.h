@@ -25,7 +25,6 @@
 
 #include <Safir/Dob/Connection.h>
 #include <Safir/Utilities/Internal/Atomic.h>
-#include <boost/atomic.hpp>
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -127,7 +126,7 @@ namespace Utilities
 
         const Safir::Dob::Connection&                      m_connection;
         boost::shared_ptr<boost::asio::io_service::strand> m_strand;
-        boost::atomic_flag                                 m_isNotified;
+        std::atomic_flag                                   m_isNotified;
     };
 
 

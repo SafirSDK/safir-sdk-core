@@ -26,6 +26,7 @@
 #include <Safir/Utilities/ProcessMonitor.h>
 #include <functional>
 #include <map>
+#include <atomic>
 
 #ifdef _MSC_VER
 #  pragma warning (push)
@@ -34,7 +35,6 @@
 #endif
 
 #include <boost/asio.hpp>
-#include <boost/atomic.hpp>
 
 #ifdef _MSC_VER
 #  pragma warning (pop)
@@ -76,7 +76,7 @@ namespace Utilities
         std::function<void(const pid_t pid)> m_callback;
 
         boost::asio::io_service& m_ioService;
-        boost::atomic<bool> m_stopped;
+        std::atomic<bool> m_stopped;
         boost::asio::io_service::strand m_strand;
 
         struct Process

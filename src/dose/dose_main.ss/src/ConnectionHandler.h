@@ -76,9 +76,9 @@ namespace Internal
         std::unordered_map<int64_t, SendQueue> m_sendQueues; //<nodeType, SendQueue>
         boost::thread m_connectionThread;
 
-        boost::atomic<bool> m_connectEvent;
-        boost::atomic<bool> m_connectionOutEvent;
-        boost::atomic<bool> m_handleEventsNotified;
+        std::atomic<bool> m_connectEvent;
+        std::atomic<bool> m_connectionOutEvent;
+        std::atomic<bool> m_handleEventsNotified;
 
         PoolHandler m_poolHandler;
         ProcessInfoHandler m_processInfoHandler;

@@ -28,8 +28,8 @@
 #include <Safir/Utilities/CrashReporter.h>
 #include <boost/lexical_cast.hpp>
 #include <boost/asio.hpp>
-#include <boost/atomic.hpp>
 #include <boost/filesystem/fstream.hpp>
+#include <atomic>
 
 
 #ifdef _MSC_VER
@@ -99,7 +99,7 @@ int main()
 
     boost::asio::io_service ioService;
 
-    boost::atomic<bool> success(true);
+    std::atomic<bool> success(true);
 
     try
     {

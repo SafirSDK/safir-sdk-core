@@ -25,17 +25,7 @@
 #pragma once
 
 #include <boost/cstdint.hpp>
-
-#ifdef _MSC_VER
-#pragma warning (push)
-#pragma warning (disable:4100)
-#endif
-
-#include <boost/atomic.hpp>
-
-#ifdef _MSC_VER
-#pragma warning (pop)
-#endif
+#include <atomic>
 
 namespace Safir
 {
@@ -100,7 +90,7 @@ namespace Internal
         }
 
     private:
-        boost::atomic<boost::uint32_t> m_value;
+        std::atomic<boost::uint32_t> m_value;
     };
 }
 }

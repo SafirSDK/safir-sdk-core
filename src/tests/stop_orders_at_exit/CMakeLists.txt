@@ -1,8 +1,7 @@
 add_executable(stoppee stoppee.cpp)
 
 target_link_libraries(stoppee PRIVATE
-  dose_cpp
-  Boost::atomic)
+  dose_cpp)
 
 ADD_TEST(NAME stop_orders_at_exit
   COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py

@@ -27,7 +27,7 @@
 #include <Safir/Utilities/AsioDispatcher.h>
 #include <Safir/Dob/Internal/Connections.h>
 #include <Safir/Utilities/ProcessMonitor.h>
-#include <boost/atomic.hpp>
+#include <atomic>
 #include "Distribution.h"
 
 namespace Safir
@@ -79,7 +79,7 @@ namespace Internal
         boost::asio::io_service::strand m_strand;
         Safir::Dob::Connection m_connection;
         Utilities::AsioDispatcher m_dispatcher;
-        boost::atomic<bool> m_stopped;
+        std::atomic<bool> m_stopped;
 
         std::unique_ptr<Safir::Utilities::ProcessMonitor> m_processMonitor;
     };

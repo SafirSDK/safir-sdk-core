@@ -27,7 +27,7 @@
 #include <Safir/Dob/Internal/ConnectionId.h>
 #include <map>
 #include <set>
-#include <boost/atomic.hpp>
+#include <atomic>
 #include "Distribution.h"
 
 #ifdef _MSC_VER
@@ -104,7 +104,7 @@ namespace Internal
         };
         typedef std::map<long,std::unique_ptr<PendingRegistrationInfo>> PendingRegistrations;
 
-        boost::atomic<bool> m_stopped;
+        std::atomic<bool> m_stopped;
 
         boost::asio::io_service::strand m_strand;
 

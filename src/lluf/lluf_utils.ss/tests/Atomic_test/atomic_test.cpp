@@ -25,17 +25,14 @@
 #include <stdlib.h>
 #include <boost/static_assert.hpp>
 #include <boost/type_traits.hpp>
-#include <boost/atomic.hpp>
+#include <atomic>
 
 
 namespace
 {
-    //Check that boost::atomic<[u]int32_t> is lock free
-    BOOST_STATIC_ASSERT(BOOST_ATOMIC_INT_LOCK_FREE == 2); //int and unsigned int are always lock free
-    BOOST_STATIC_ASSERT(BOOST_ATOMIC_LONG_LOCK_FREE == 2); //long and unsigned long are always lock free
+    BOOST_STATIC_ASSERT(std::atomic<boost::uint32_t>::is_always_lock_free);
 
-    //now we need to check that boost::uint32_t actually maps to either of the above types
-    BOOST_STATIC_ASSERT((boost::is_same<boost::uint32_t, unsigned int>::value || boost::is_same<boost::uint32_t, unsigned long>::value));
+    BOOST_STATIC_ASSERT(boost::is_same<boost::uint32_t, std::uint32_t>::value);
 
     //these checks may have to be adjusted when/if we port to a platform with different sizes.
 }

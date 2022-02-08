@@ -28,7 +28,7 @@
 #include <set>
 #include <Safir/Dob/Internal/InternalFwd.h>
 #include <Safir/Dob/Internal/StateDeleter.h>
-#include <boost/atomic.hpp>
+#include <atomic>
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -66,7 +66,7 @@ private:
 
     QTimer m_updateTimer;
     boost::thread m_doseInternalInitializer;
-    boost::atomic<bool> m_doseInternalInitialized;
+    std::atomic<bool> m_doseInternalInitialized;
     bool m_entitiesAdded;
 };
 

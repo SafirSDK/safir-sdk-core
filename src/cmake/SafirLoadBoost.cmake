@@ -2,7 +2,6 @@ set(Boost_USE_MULTITHREADED ON)
 
 find_package(Boost
   COMPONENTS
-  atomic
   regex
   timer
   program_options

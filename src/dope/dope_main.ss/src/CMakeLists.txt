@@ -20,7 +20,6 @@ TARGET_LINK_LIBRARIES(dope_main PRIVATE
   swre_interface_cpp
   dose_cpp
   logging_cpp
-  Boost::atomic
   Boost::filesystem
   ${SAFIR_ODBC_LIBRARIES})
 

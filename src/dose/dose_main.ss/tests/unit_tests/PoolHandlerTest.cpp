@@ -23,7 +23,7 @@
 ******************************************************************************/
 #include <set>
 #include <iostream>
-#include <boost/atomic.hpp>
+#include <atomic>
 #include <boost/make_shared.hpp>
 #include "../../src/PoolDistributionRequestSender.h"
 #include "../../src/PoolDistributionHandler.h"
@@ -186,7 +186,7 @@ BOOST_AUTO_TEST_CASE( PoolDistributionHandlerTest )
     pdh.AddPoolDistribution(1, 1);
     pdh.AddPoolDistribution(2, 1);
 
-    boost::atomic<bool> hasRun;
+    std::atomic<bool> hasRun;
     hasRun=false;
     auto WaitUntilReady=[&]
     {

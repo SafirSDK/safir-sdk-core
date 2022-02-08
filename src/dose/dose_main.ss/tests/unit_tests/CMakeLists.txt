@@ -15,7 +15,6 @@ TARGET_LINK_LIBRARIES(Distribution_test PRIVATE
 
 TARGET_LINK_LIBRARIES(PoolHandler_test PRIVATE
   communication
-  Boost::atomic
   Boost::system
   Boost::thread
   Boost::unit_test_framework)

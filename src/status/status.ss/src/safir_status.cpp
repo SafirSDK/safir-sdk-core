@@ -34,7 +34,7 @@ int main(int /*argc*/, char* [] /*argv*/)
     boost::shared_ptr<void> crGuard(static_cast<void*>(0),
                                     [](void*){Safir::Utilities::CrashReporter::Stop();});
 
-    boost::atomic<bool> success(true);
+    std::atomic<bool> success(true);
     try
     {
         Safir::Utilities::CrashReporter::Start();

@@ -88,7 +88,7 @@ namespace Internal
 
         void HandleEvents();
 
-        boost::atomic<bool> m_stopped;
+        std::atomic<bool> m_stopped;
         boost::asio::io_service& m_ioService;
 
         boost::asio::io_service::strand m_strand;

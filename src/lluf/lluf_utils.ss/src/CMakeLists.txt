@@ -33,7 +33,6 @@ else()
   TARGET_LINK_LIBRARIES(lluf_utils PRIVATE
     PUBLIC
     $<BUILD_INTERFACE:lluf_config>
-    "$<BUILD_INTERFACE:Boost::atomic>"
     "$<BUILD_INTERFACE:Boost::filesystem>"
     "$<BUILD_INTERFACE:Boost::thread>"
     "$<BUILD_INTERFACE:Boost::system>")

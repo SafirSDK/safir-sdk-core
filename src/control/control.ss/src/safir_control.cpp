@@ -29,7 +29,7 @@
 #include <Safir/Utilities/Internal/SystemLog.h>
 #include <Safir/Utilities/Internal/Id.h>
 #include <iostream>
-#include <boost/atomic.hpp>
+#include <atomic>
 
 //disable warnings in boost
 #if defined _MSC_VER
@@ -192,7 +192,7 @@ int main(int argc, char * argv[])
     std::shared_ptr<void> crGuard(static_cast<void*>(0),
                                     [](void*){Safir::Utilities::CrashReporter::Stop();});
 
-    boost::atomic<bool> success(true);
+    std::atomic<bool> success(true);
 
     try
     {

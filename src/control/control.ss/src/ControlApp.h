@@ -32,7 +32,7 @@
 #include <Safir/Dob/Internal/ControlInfo.h>
 #include <Safir/Dob/Internal/DoseMainCmd.h>
 #include <Safir/Dob/Internal/ControlConfig.h>
-#include <boost/atomic.hpp>
+#include <atomic>
 #include <boost/aligned_storage.hpp>
 
 //disable warnings in boost
@@ -119,9 +119,9 @@ private:
 
     // 64 bit atomic needs to be aligned on 64 bit boundary even on 32 bit systems,
     // so we need to use alignment magic.
-    typedef boost::aligned_storage<sizeof(boost::atomic<int64_t>),
-                                   sizeof(boost::atomic<int64_t>)>::type AlignedStorage;
+    typedef boost::aligned_storage<sizeof(std::atomic<int64_t>),
+                                   sizeof(std::atomic<int64_t>)>::type AlignedStorage;
     std::unique_ptr<AlignedStorage>     m_incarnationIdStorage;
-    boost::atomic<int64_t>&             m_incarnationId;
+    std::atomic<int64_t>&             m_incarnationId;
 };
 

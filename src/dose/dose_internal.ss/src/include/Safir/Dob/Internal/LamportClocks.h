@@ -27,7 +27,7 @@
 #include <iosfwd>
 #include <Safir/Dob/Internal/InternalExportDefs.h>
 #include <Safir/Dob/Internal/SharedMemoryObject.h>
-#include <boost/atomic.hpp>
+#include <atomic>
 #include <memory>
 
 namespace Safir
@@ -103,7 +103,7 @@ namespace Internal
         const LamportTimestamp GetNewTimestamp();
 
     private:
-        boost::atomic<uint32_t> m_currentClock;
+        std::atomic<uint32_t> m_currentClock;
         const int64_t m_nodeId;
     };
 

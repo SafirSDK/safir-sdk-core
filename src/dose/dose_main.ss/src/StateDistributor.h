@@ -22,7 +22,7 @@
 *
 ******************************************************************************/
 #pragma once
-#include <boost/atomic.hpp>
+#include <atomic>
 #include <boost/lexical_cast.hpp>
 #include <boost/asio.hpp>
 #include <Safir/Dob/Connection.h>
@@ -107,7 +107,7 @@ namespace Internal
         boost::asio::io_service::strand& m_strand;
         std::function<void(int64_t)> m_checkPendingReg;
         std::vector<std::unique_ptr<SubcriptionConnection>> m_connections;
-        boost::atomic<bool> m_dispatcherNotified;
+        std::atomic<bool> m_dispatcherNotified;
 
         static inline Safir::Utilities::Internal::SharedConstCharArray ToPtr(const DistributionData& d)
         {
