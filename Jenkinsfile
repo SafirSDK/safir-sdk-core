@@ -193,17 +193,6 @@ pipeline {
                             values 'x86'
                         }
                     }
-                    exclude { //TODO fix x86 tests on windows (needs 32 bit windows?)
-                        //TODO: 32on64?
-                        axis {
-                            name 'BUILD_PLATFORM'
-                            values 'vs2015', 'vs2019'
-                        }
-                        axis {
-                            name 'BUILD_ARCH'
-                            values 'x86'
-                        }
-                    }
                 }
                 stages {
                     stage('Run Tests') {
