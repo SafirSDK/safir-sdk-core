@@ -20,23 +20,13 @@ target_include_directories(lluf_utils PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_S
 #only make them public for the Core tree build, not for the exported cmake
 #configuration. This allows for other parts of core to include e.g. LowLevelLogger
 #without having to add thread and system to their link dependencies.
-#The reason for having different code on windows and Linux is a bug in cmake, which
-#makes the correct code (which is in the Linux branch) not work on Windows.
-if (MSVC)
-  TARGET_LINK_LIBRARIES(lluf_utils PRIVATE
-    PUBLIC
-    $<BUILD_INTERFACE:lluf_config>
-    Boost::filesystem
-    Boost::thread
-    Boost::system)
-else()
-  TARGET_LINK_LIBRARIES(lluf_utils PRIVATE
-    PUBLIC
-    $<BUILD_INTERFACE:lluf_config>
-    "$<BUILD_INTERFACE:Boost::filesystem>"
-    "$<BUILD_INTERFACE:Boost::thread>"
-    "$<BUILD_INTERFACE:Boost::system>")
-endif()
+
+TARGET_LINK_LIBRARIES(lluf_utils PRIVATE
+  PUBLIC
+  $<BUILD_INTERFACE:lluf_config>
+  $<BUILD_INTERFACE:Boost::filesystem>
+  $<BUILD_INTERFACE:Boost::thread>
+  $<BUILD_INTERFACE:Boost::system>)
 
 if (WIN32)
   TARGET_LINK_LIBRARIES(lluf_utils PRIVATE lluf_startup_synchronizer psapi)
