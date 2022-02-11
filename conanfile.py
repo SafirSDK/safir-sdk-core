@@ -93,12 +93,12 @@ class SafirSdkCoreConan(ConanFile):
             self.copy("*.hpp", src="include", dst="./include", root_package="boost")
 
     def requirements(self):
-        self.requires("sentry-breakpad/0.4.12")
+        self.requires("sentry-breakpad/0.4.14")
         self.requires("websocketpp/0.8.2")
-        self.requires("rapidjson/cci.20200410")
-        protobuf_version = "3.17.1"
+        self.requires("rapidjson/cci.20211112")
+        protobuf_version = "3.19.2"
         if self.settings.os == "Windows":
-            self.requires("boost/1.77.0")
+            self.requires("boost/1.78.0")
             self.requires("qt/5.15.2")
             if self.settings.compiler.version == 14:
                 protobuf_version = "[<3.15]"
