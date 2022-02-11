@@ -2,14 +2,15 @@ Linux Build Instructions
 ========================
 
 We provide pre-built packages for certain linux distributions:
-   Ubuntu 14.04 x86
-   Ubuntu 14.04 amd64
+   Ubuntu 20.04 amd64
+   Debian 11 Bullseye x86
+   Debian 11 Bullseye amd64
 
 If you're using one of these platforms you should probably download the pre-built package
-from http://safirsdkcore.com. If you're using Arch Linux there is a package in the AUR.
+from http://safirsdkcore.com.
 
 Safir SDK Core currently contains packaging instructions for Debian-based distributions,
-i.e. to build a deb package. In a future release we will add support for building RPMs.
+i.e. to build a deb package. In a future release we may add support for building RPMs.
 
 This document describes how to build a deb package for your Debian-based distribution.
 
@@ -27,6 +28,11 @@ To install all build dependencies "in one go" run the following from the command
 
 The last three packages - devscripts, debhelper and fakeroot - are used for debian
 package creation.
+
+Then you need to install conan, which is a C++ package manager we use for some third party
+dependencies:
+
+  pip3 install conan
 
 If you're building for another Debian-based distribution you may have to adjust some
 package names.
