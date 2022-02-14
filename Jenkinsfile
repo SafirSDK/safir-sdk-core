@@ -69,6 +69,7 @@ pipeline {
                                 if (isUnix()) {
                                     sh label:  "Running build script.",
                                        script: """
+                                               pip3 install --upgrade conan
                                                export PATH=$PATH:/home/jenkins/.local/bin
                                                build/build.py --jenkins --package
                                                """
@@ -76,6 +77,7 @@ pipeline {
                                 else {
                                     bat label:  "Running build script.",
                                         script: """
+                                                pip3 install --upgrade conan
                                                 build\\build.py --jenkins --package --use-studio ${BUILD_PLATFORM} --arch ${BUILD_ARCH}
                                                 """
                                 }
