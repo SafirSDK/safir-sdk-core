@@ -157,6 +157,23 @@ pipeline {
             }
         }
 
+        stage('Render documentation') {
+            agent { label 'debian-bullseye-amd64-build' }
+            steps {
+                script {
+                    sh label:  "Run Asciidoc to generate users guide and requirements specification.",
+                       script: """
+                               cd docs/users_guide
+                               make -j2 all
+                               cd ../requirements
+                               make -j2 all
+                               """
+                }
+
+                archiveArtifacts artifacts: '**/*.pdf, docs/users_guide/users_guide.html, docs/users_guide/images/*.png', fingerprint: true
+            }
+        }
+
         stage('Test') {
             matrix {
                 agent {
