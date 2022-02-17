@@ -85,22 +85,22 @@ pipeline {
                         steps {
                             script {
                                 if (isUnix()) {
-                                    sh label: "Moving artifacts to ${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}.",
+                                    sh label: "Moving artifacts to build-${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}.",
                                        script: """
-                                               mkdir ${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}
-                                               mv tmp/*.deb ${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}
+                                               mkdir build-${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}
+                                               mv tmp/*.deb build-${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}
                                                """
 
-                                    archiveArtifacts artifacts: "${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}/*.deb", fingerprint: true
+                                    archiveArtifacts artifacts: "build-${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}/*.deb", fingerprint: true
                                 }
                                 else {
-                                    bat label: "Moving artifacts to ${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}.",
+                                    bat label: "Moving artifacts to build-${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}.",
                                         script: """
-                                                md ${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}
-                                                move build\\packaging\\windows\\*.exe ${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}
+                                                md build-${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}
+                                                move build\\packaging\\windows\\*.exe build-${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}
                                                 """
 
-                                    archiveArtifacts artifacts: "${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}/*.exe", fingerprint: true
+                                    archiveArtifacts artifacts: "build-${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}/*.exe", fingerprint: true
                                 }
                             }
                         }
@@ -164,10 +164,16 @@ pipeline {
                                make -j2 all
                                cd ../requirements
                                make -j2 all
+                               cd ../..
+                               mkdir -p rendered_docs/images
+                               cp docs/users_guide/users_guide.pdf rendered_docs/
+                               cp docs/users_guide/users_guide.html rendered_docs/
+                               cp docs/users_guide/images/*.png rendered_docs/images
+                               cp docs/requirements/requirements_specification.pdf rendered_docs/
                                """
                 }
 
-                archiveArtifacts artifacts: '**/*.pdf, docs/users_guide/users_guide.html, docs/users_guide/images/*.png', fingerprint: true
+                archiveArtifacts artifacts: 'rendered_docs/*', fingerprint: true
             }
         }
 
