@@ -58,19 +58,20 @@ class SetupError(Exception):
 
 class WindowsInstaller():
     def __init__(self):
-        log("JOB_NAME = ", os.environ.get("JOB_NAME"))
-        #This probably won't work if running 32bit python on 64bit windows... but our build/test
-        #machines dont use that config, so we're okay
-        if os.environ["JOB_NAME"].find("32on64") != -1:
-            self.installpath = os.path.join(os.environ["ProgramFiles(x86)"], "Safir SDK Core")
-        else:
-            self.installpath = os.path.join(os.environ["ProgramFiles"], "Safir SDK Core")
 
         installer = glob.glob("SafirSDKCore*.exe")
         if len(installer) != 1:
             raise SetupError("Unexpected number of installers: " + str(installer))
         self.installer = installer[0]
         self.uninstaller = None
+
+        if self.installer.find("32bit") != -1:
+            self.installpath = os.path.join(os.environ["ProgramFiles(x86)"], "Safir SDK Core")
+        else:
+            self.installpath = os.path.join(os.environ["ProgramFiles"], "Safir SDK Core")
+
+        log("Found installer = ", self.installer)
+        log("Using installpath = ", self.installpath)
 
     def can_uninstall(self):
         #we can't use self.installpath, since it may not be installed there if it was
@@ -109,8 +110,13 @@ class WindowsInstaller():
             raise SetupError("Uninstaller failed (" + str(result) + ")!")
 
         if os.path.isdir(os.path.join(self.installpath, "dou")):
-            raise SetupError("Installer dir still exists after uninstallation! Contents:\n" +
+            raise SetupError("Installer dir " + self.installpath + " still exists after uninstallation! Contents:\n" +
                              str(os.listdir(self.installpath)))
+        uninstallerdir = os.path.dirname(self.uninstaller)
+        if os.path.isdir(os.path.join(uninstallerdir, "dou")):
+            raise SetupError("Uninstaller dir " + uninstallerdir + " still exists after uninstallation! Contents:\n" +
+                             str(os.listdir(uninstallerdir)))
+
         return True
 
     def install(self, development, testsuite):
