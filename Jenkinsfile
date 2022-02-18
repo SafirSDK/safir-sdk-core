@@ -228,7 +228,7 @@ pipeline {
                                 }
                             }
 
-                            copyArtifacts filter: "${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}/*",
+                            copyArtifacts filter: "build-${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}/*",
                                           flatten: true,
                                           fingerprintArtifacts: true,
                                           projectName: '${JOB_NAME}',
@@ -302,7 +302,7 @@ pipeline {
                                 }
                             }
 
-                            copyArtifacts filter: "${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}/*",
+                            copyArtifacts filter: "build-${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}/*",
                                           flatten: true,
                                           fingerprintArtifacts: true,
                                           projectName: '${JOB_NAME}',
