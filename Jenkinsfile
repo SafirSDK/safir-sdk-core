@@ -173,7 +173,7 @@ pipeline {
                                """
                 }
 
-                archiveArtifacts artifacts: 'rendered_docs/*', fingerprint: true
+                archiveArtifacts artifacts: 'rendered_docs/*, rendered_docs/images/*', fingerprint: true
             }
         }
 
