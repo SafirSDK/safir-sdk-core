@@ -62,13 +62,3 @@ set(CMAKE_REQUIRED_DEFINITIONS
   -DBOOST_CHRONO_HEADER_ONLY
   -DBOOST_DATE_TIME_NO_LIB)
 
-#Visual Studio 2015 breaks something in boost asio when combined with boost process and variadic templates
-if (MSVC_VERSION EQUAL 1900 AND Boost_VERSION VERSION_EQUAL 1.76.0)
-  add_definitions(-DBOOST_ASIO_DISABLE_VARIADIC_TEMPLATES)
-endif()
-
-#Set up our patched include files
-set (SAFIR_BOOST_PATCHES_PATH "${safir-sdk-core_SOURCE_DIR}/src/boost_patches/${Boost_LIB_VERSION}")
-message(STATUS "Setting up Boost patches at ${SAFIR_BOOST_PATCHES_PATH}")
-include_directories(BEFORE SYSTEM "${SAFIR_BOOST_PATCHES_PATH}")
-set(CMAKE_REQUIRED_INCLUDES BEFORE SYSTEM "${SAFIR_BOOST_PATCHES_PATH}" ${CMAKE_REQUIRED_INCLUDES})
