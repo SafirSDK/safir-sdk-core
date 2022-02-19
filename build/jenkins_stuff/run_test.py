@@ -65,7 +65,7 @@ class WindowsInstaller():
         self.installer = installer[0]
         self.uninstaller = None
 
-        if self.installer.find("32bit") != -1:
+        if self.installer.find("32bit") != -1 and os.environ.get("ProgramFiles(x86)") is not None:
             self.installpath = os.path.join(os.environ["ProgramFiles(x86)"], "Safir SDK Core")
         else:
             self.installpath = os.path.join(os.environ["ProgramFiles"], "Safir SDK Core")
@@ -375,13 +375,13 @@ def build_examples():
             ]
 
         cmd += ("--jenkins", "--skip-tests")
+
+        if sys.platform == "win32":
+            cmd += ("--use-studio", os.environ["BUILD_PLATFORM"])
+            cmd += ("--arch", os.environ["BUILD_ARCH"])
+
         if installdir is not None:
             cmd += ("--install", installdir)
-        if os.environ["JOB_NAME"].find("32on64") != -1:
-            cmd += ("--32-bit", )
-            #the 64 bit build machines do not have 32bit Qt installed,
-            #so we skip qt stuff, i.e. VehicleMmiCppQt.
-            os.environ["SAFIR_SKIP_QT"] = "True"
 
         log("Running command ", " ".join(cmd))
         result = subprocess.call(cmd, shell=sys.platform == "win32")
