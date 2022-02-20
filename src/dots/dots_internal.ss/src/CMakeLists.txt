@@ -18,7 +18,6 @@ TARGET_LINK_LIBRARIES(dots_internal PRIVATE
   lluf_config
   Boost::filesystem
   Boost::thread
-  Boost::system
 )
 
 SAFIR_INSTALL(TARGETS dots_internal)

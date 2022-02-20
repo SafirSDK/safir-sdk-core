@@ -5,7 +5,6 @@ ADD_EXECUTABLE(regression_test ${sources} ${headers})
 
 TARGET_LINK_LIBRARIES(regression_test PRIVATE
   communication
-  Boost::thread
-  Boost::system)
+  Boost::thread)
 
 SAFIR_INSTALL(TARGETS regression_test COMPONENT TestSuite)

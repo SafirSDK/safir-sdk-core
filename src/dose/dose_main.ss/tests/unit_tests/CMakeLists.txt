@@ -10,12 +10,10 @@ TARGET_LINK_LIBRARIES(Distribution_test PRIVATE
   communication
   system_picture
   control_utils
-  Boost::system
   Boost::unit_test_framework)
 
 TARGET_LINK_LIBRARIES(PoolHandler_test PRIVATE
   communication
-  Boost::system
   Boost::thread
   Boost::unit_test_framework)
 

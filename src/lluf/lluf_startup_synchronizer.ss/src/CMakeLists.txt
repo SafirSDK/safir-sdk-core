@@ -9,6 +9,6 @@ TARGET_LINK_LIBRARIES(lluf_startup_synchronizer PRIVATE
   lluf_config
   Boost::filesystem
   Boost::thread
-  Boost::system)
+  )
 
 SAFIR_INSTALL(TARGETS lluf_startup_synchronizer)

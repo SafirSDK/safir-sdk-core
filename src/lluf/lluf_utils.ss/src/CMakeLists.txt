@@ -25,8 +25,7 @@ TARGET_LINK_LIBRARIES(lluf_utils PRIVATE
   PUBLIC
   $<BUILD_INTERFACE:lluf_config>
   $<BUILD_INTERFACE:Boost::filesystem>
-  $<BUILD_INTERFACE:Boost::thread>
-  $<BUILD_INTERFACE:Boost::system>)
+  $<BUILD_INTERFACE:Boost::thread>)
 
 if (WIN32)
   TARGET_LINK_LIBRARIES(lluf_utils PRIVATE lluf_startup_synchronizer psapi)

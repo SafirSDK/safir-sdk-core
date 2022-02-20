@@ -28,8 +28,7 @@ TARGET_LINK_LIBRARIES (ProcessMonitor_test2 PRIVATE
   lluf_utils)
 
 TARGET_LINK_LIBRARIES (ProcessMonitorSleeper PRIVATE
-  Boost::thread
-  Boost::system)
+  Boost::thread)
 
 ADD_TEST(NAME ProcessMonitor_unittest COMMAND ProcessMonitor_test3 --catch_system_error=no)
 ADD_TEST(NAME ProcessMonitor_monitor COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py)

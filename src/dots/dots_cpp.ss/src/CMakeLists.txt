@@ -14,6 +14,5 @@ TARGET_LINK_LIBRARIES(dots_cpp PRIVATE
 
   PUBLIC
   Boost::thread
-  Boost::system
 )
 SAFIR_INSTALL(TARGETS dots_cpp)

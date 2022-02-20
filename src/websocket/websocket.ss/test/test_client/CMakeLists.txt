@@ -10,7 +10,7 @@ target_link_libraries(safir_websocket_testclient  PRIVATE
     Boost::program_options
     Boost::thread
     Boost::random
-    Boost::system)
+    )
 
 ADD_TEST(NAME websocket_component_test
   COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py

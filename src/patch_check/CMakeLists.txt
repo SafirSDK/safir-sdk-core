@@ -1,5 +1,4 @@
 set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} 
-  Boost::system
   Boost::thread)
 
 add_subdirectory(container_destroyers)

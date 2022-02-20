@@ -4,7 +4,6 @@ TARGET_LINK_LIBRARIES(communication_test PRIVATE
   communication
   lluf_id
   Boost::program_options
-  Boost::thread
-  Boost::system)
+  Boost::thread)
 
 SAFIR_INSTALL(TARGETS communication_test COMPONENT TestSuite)

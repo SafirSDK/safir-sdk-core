@@ -12,6 +12,6 @@ TARGET_LINK_LIBRARIES(lluf_crash_reporter PRIVATE
   sentry-breakpad::sentry-breakpad
   Boost::filesystem
   Boost::thread
-  Boost::system)
+  )
 
 SAFIR_INSTALL(TARGETS lluf_crash_reporter)

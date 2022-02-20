@@ -36,6 +36,6 @@ TARGET_LINK_LIBRARIES(safir_show_config PRIVATE
   lluf_config
   Boost::program_options
   Boost::filesystem
-  Boost::system)
+  )
 
 SAFIR_INSTALL(TARGETS safir_show_config)

@@ -16,7 +16,6 @@ TARGET_LINK_LIBRARIES(dose_java_jni PRIVATE
   dose_dll
   dots_kernel
   Boost::thread
-  Boost::system
   dose_java_jni_headers)
 
 SAFIR_INSTALL(TARGETS dose_java_jni JNI)
