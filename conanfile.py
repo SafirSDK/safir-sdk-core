@@ -90,7 +90,7 @@ class SafirSdkCoreConan(ConanFile):
         if self.settings.os == "Windows":
             self.copy("*.dll", src="bin", dst="./bin", root_package="boost")
             self.copy("*.lib", src="lib", dst="./lib", root_package="boost")
-            self.copy("*.hpp", src="include", dst="./include", root_package="boost")
+            self.copy("*", src="include", dst="./include", root_package="boost")
 
     def requirements(self):
         self.requires("sentry-breakpad/0.4.14")
