@@ -789,7 +789,7 @@ class VisualStudioBuilder(BuilderBase):
                                "-s", "compiler.runtime={}".format(compiler_runtime),
                                "-g=cmake",
                                "--build=missing"),
-                              "Running conan explicitly before build")
+                              "Running conan explicitly before build for " + config)
 
 
     def stage_package(self):
