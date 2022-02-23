@@ -594,8 +594,8 @@ void ControlApp::HandleDoseMainExit(int exitCode, const std::error_code& error)
         LogStatus(ostr.str());
     }
 
-    const auto nativeExitCode = m_doseMain->native_exit_code();
 #if defined(linux) || defined(__linux) || defined(__linux__)
+    const auto nativeExitCode = m_doseMain->native_exit_code();
     if (WIFEXITED(nativeExitCode))
     {
         if (exitCode != 0)

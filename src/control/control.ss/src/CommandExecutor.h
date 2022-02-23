@@ -155,7 +155,6 @@ namespace Control
         else
         {
             const auto exitCode = child.exit_code();
-            const auto nativeExitCode = child.native_exit_code();
 
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
             if (exitCode != 0)
@@ -167,6 +166,8 @@ namespace Control
             }
 
 #elif defined(linux) || defined(__linux) || defined(__linux__)
+            const auto nativeExitCode = child.native_exit_code();
+
             if (WIFEXITED(nativeExitCode))
             {
                 if (exitCode != 0)
