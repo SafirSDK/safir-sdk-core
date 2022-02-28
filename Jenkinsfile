@@ -9,7 +9,7 @@ pipeline {
                 axes {
                     axis {
                         name 'BUILD_PLATFORM'
-                        values 'ubuntu-focal', 'debian-bullseye', 'vs2015', 'vs2019'
+                        values 'ubuntu-focal', 'debian-bullseye', 'vs2015', 'vs2017', 'vs2019'
                     }
                     axis {
                         name 'BUILD_ARCH'
@@ -185,7 +185,7 @@ pipeline {
                 axes {
                     axis {
                         name 'BUILD_PLATFORM'
-                        values 'ubuntu-focal', 'debian-bullseye', 'vs2015', 'vs2019'
+                        values 'ubuntu-focal', 'debian-bullseye', 'vs2015', 'vs2017', 'vs2019'
                     }
                     axis {
                         name 'BUILD_ARCH'
@@ -267,7 +267,7 @@ pipeline {
                 axes {
                     axis {
                         name 'BUILD_PLATFORM'
-                        values 'ubuntu-focal', 'debian-bullseye', 'vs2015', 'vs2019'
+                        values 'ubuntu-focal', 'debian-bullseye', 'vs2015', 'vs2017', 'vs2019'
                     }
                     axis {
                         name 'BUILD_ARCH'
