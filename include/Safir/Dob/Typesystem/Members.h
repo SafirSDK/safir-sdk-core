@@ -121,7 +121,7 @@ namespace Members
      *                             If memberType is something else the value is -1.
      * @param stringLength [out] - If memberType is string and the type is a class (not property) then
      *                             this is the length of the string.
-     * @param collectionType [out] - The member collection type, can be singel value, array, sequence or dictionary.
+     * @param collectionType [out] - The member collection type, can be single value, array, sequence or dictionary.
      * @param arrayLength [out] - Maximum capacity of array if the member collection type is an array
      *                            (1 if not an array). Not applicable if type id is a property.
      * @throws IllegalValueException There is no such type defined or there is no such member
@@ -135,7 +135,7 @@ namespace Members
                               Dob::Typesystem::TypeId & memberTypeId,
                               Dob::Typesystem::TypeId & keyTypeId,
                               Dob::Typesystem::Int32 & stringLength,
-                              CollectionType & collectionType,
+                              Dob::Typesystem::CollectionType & collectionType,
                               Dob::Typesystem::Int32 & arrayLength);
 
     /**
