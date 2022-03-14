@@ -364,12 +364,15 @@ def suppress(help_string):
 def add_win32_options(parser):
     """add windows options to the parser"""
     parser.add_argument("--use-studio",
-                        help="The visual studio to use for building",
-                        choices=["vs2015","vs2017", "vs2019","vs2022"])
+                        help="The visual studio to use for building (vs2015, vs2017, vs2019, vs2022)",
+                        action="store")
     parser.add_argument("--arch",
                         default="amd64" if is_64_bit() else "x86",
                         choices=["x86","amd64"],
                         help="Architecture to build. Note that you may not be able to run tests if you cross-compile to an arch you can't run.")
+    parser.add_argument("--32-bit",
+                        action="store_true",
+                        help=argparse.SUPPRESS)
     parser.add_argument("--configs",
                         default=("Debug", "RelWithDebInfo"),
                         nargs='*',
@@ -433,9 +436,18 @@ def parse_command_line():
         arguments.verbose += 1
     if arguments.verbose >= 2:
         os.environ["VERBOSE"] = "1"
-
     if arguments.package_noclean:
         arguments.package = True
+
+    #Fix backward compatibility options for windows
+    if sys.platform == "win32":
+        if vars(arguments)["32_bit"]:
+            arguments.arch = "x86"
+
+        if arguments.use_studio == "2015":
+            arguments.use_studio = "vs" + arguments.use_studio
+        if arguments.use_studio not in ["vs2015", "vs2017", "vs2019", "vs2022"]:
+            die("Unknown studio version")
 
     global LOGGER
     LOGGER = Logger("Brief" if arguments.verbose == 0 else "Verbose")
