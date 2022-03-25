@@ -87,6 +87,7 @@ class SafirSdkCoreConan(ConanFile):
                        }
 
     def imports(self):
+        self.copy("license*", dst="licenses", folder=True, ignore_case=True, keep_path=False)
         if self.settings.os == "Windows":
             self.copy("*.dll", src="bin", dst="./bin", root_package="boost")
             self.copy("*.lib", src="lib", dst="./lib", root_package="boost")

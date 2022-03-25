@@ -194,6 +194,14 @@ INSTALL(FILES COPYING.txt
   RENAME LICENSE.txt
   COMPONENT Runtime)
 
+INSTALL(FILES build/packaging/debian/copyright
+  DESTINATION ${SAFIR_INSTALL_DESTINATION_DOC}
+  RENAME third_party_licenses.txt
+  COMPONENT Runtime)
+
+INSTALL(DIRECTORY licenses/
+  DESTINATION ${SAFIR_INSTALL_DESTINATION_DOC}/more_third_party_licenses
+  COMPONENT Runtime)
 
 set(ignore_me
   "Some of our build methods pass along extra variables to cmake, which causes warnings."

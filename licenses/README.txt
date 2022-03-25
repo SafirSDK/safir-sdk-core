@@ -1,0 +1,1 @@
+This directory contains the third party licenses that apply to the conan packages that Safir SDK Core uses. These are in addition to the licenses specified in the LICENSE.txt and third_party_licenses.txt files.

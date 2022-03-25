@@ -1,0 +1,5 @@
+#This directory is expected to just contain files copied from conan packages. So we ignore all files in here, except the readme and this file.
+
+*
+!README.txt
+!.gitignore
