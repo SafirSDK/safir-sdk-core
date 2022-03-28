@@ -89,6 +89,7 @@ class SafirSdkCoreConan(ConanFile):
     def imports(self):
         self.copy("license*", dst="licenses", folder=True, ignore_case=True, keep_path=False)
         if self.settings.os == "Windows":
+            self.copy("*.exe", src="bin", dst="./bin", root_package="ninja")
             self.copy("*.dll", src="bin", dst="./bin", root_package="boost")
             self.copy("*.lib", src="lib", dst="./lib", root_package="boost")
             self.copy("*", src="include", dst="./include", root_package="boost")
@@ -101,6 +102,7 @@ class SafirSdkCoreConan(ConanFile):
         if self.settings.os == "Windows":
             self.requires("boost/1.78.0")
             self.requires("qt/5.15.2")
+            self.requires("ninja/1.10.2")
             if self.settings.compiler.version == 14:
                 protobuf_version = "[<3.15]"
                 self.options["b2"].toolset = "vc14"

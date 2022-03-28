@@ -121,29 +121,15 @@ class __WindowsStager():
 
             if not os.path.isdir(lib_dir) or not os.path.isdir(dll_dir) or not os.path.isdir(include_dir):
                 raise StagingError("Failed to find one of the boost dirs")
-        
+
             self.__copy_boost_libs(lib_dir)
             self.__copy_boost_dlls(dll_dir)
             if not headers_copied:
                 self.__copy_boost_headers(include_dir)
                 headers_copied = True
 
-    def __copy_ninja(self):
-        self.logger.log("Checking if ninja.exe is a chocolatey shim")
-        result = subprocess.run(("ninja.exe", "--shimgen-help"), encoding="utf-8", stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        if re.search("This is a shim", result.stdout) is not None:
-            match = re.search("Target: '(.*)'$", result.stdout, re.MULTILINE)
-            if match is None:
-                raise StagingError("Failed to parse ninja shim info!")
-            self.logger.log(f" - Copying shimmed ninja.exe from {match.group(1)}")
-            copy_file(match.group(1), self.DLL_DESTINATION)
-        else:
-            self.logger.log(" - Copying non-shimmed ninja.exe")
-            self.__copy_exe("ninja.exe")
-
     def run(self):
         self.__copy_boost()
-        self.__copy_ninja()
 
     def __copy_header_dir(self, dir):
         if not os.path.isdir(dir):

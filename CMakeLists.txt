@@ -203,6 +203,12 @@ INSTALL(DIRECTORY licenses/
   DESTINATION ${SAFIR_INSTALL_DESTINATION_DOC}/more_third_party_licenses
   COMPONENT Runtime)
 
+if (WIN32)
+  INSTALL(FILES bin/ninja.exe
+    DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN}
+    COMPONENT Development)
+endif()
+
 set(ignore_me
   "Some of our build methods pass along extra variables to cmake, which causes warnings."
   "Add them below to get rid of the warning."
