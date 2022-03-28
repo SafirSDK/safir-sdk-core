@@ -500,12 +500,6 @@ class BuilderBase(object):
             self.__package()
 
     def __package(self):
-        try:
-            import stage_dependencies
-            stage_dependencies.stage_dependencies(LOGGER, self.stagedir)
-        except stage_dependencies.StagingError as exc:
-            raise FatalError("Error while copying dependencies to staging area" + exc)
-
         LOGGER.log("Building installation package", "header")
         self.stage_package()
 
