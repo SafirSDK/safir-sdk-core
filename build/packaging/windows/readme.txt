@@ -18,7 +18,7 @@ Licensing
 ---------
 
 Safir SDK Core is available under GNU GPL v3 (GNU General Public License) - a copy of
-which can be found in COPYING.txt - or under a commercial license from Saab AB.
+which can be found in LICENSE.txt - or under a commercial license from Saab AB.
 
 The GPL license means that you are free to try out or modify the software to your hearts
 content and create your own applications on top of it. But you are not allowed to
@@ -28,6 +28,11 @@ works) without releasing your code under the GPL license too.
 If you want to distribute proprietary binaries you need to obtain a commercial license
 from Saab AB (contact information can be found at http://www.saabgroup.com).
 
+Safir SDK Core uses a number of third party libraries, the licenses of which you can find
+in the file third_party_licenses.txt and the directory more_third_party_licenses.  In
+short there are no surprises there, nothing that should affect your ability to use Safir
+SDK Core under either the GPLv3 license or the commercial license.
+
 Prerequisites
 -------------
 
@@ -36,8 +41,8 @@ that you need to have installed on your machine.
 
 For developing Safir SDK Core applications you need:
 
- * Python 2.7 or later (https://www.python.org/downloads/)
- * CMake 3.0 or later (http://www.cmake.org/download/)
+ * Python 3.0 or later (https://www.python.org/downloads/)
+ * CMake 3.16 or later (http://www.cmake.org/download/)
  * Microsoft Visual Studio
  * Microsoft .NET Framework 4.5 or later
 
@@ -47,8 +52,8 @@ SDK Core) you need:
  * Microsoft Visual C++ Redistributable (http://support.microsoft.com/kb/2019667).
  * Microsoft .NET Framework 4.5 or later
 
-Note that the version of Visual Studio has to match the build of Safir SDK Core that you
-install. So, if you're using Visual Studio 2013, make sure you're using the VS2013 build
+Note that the version of Visual Studio should match the build of Safir SDK Core that you
+install. So, if you're using Visual Studio 2022, make sure you're using the VS2022 build
 of Safir SDK Core.
 
 Documentation
@@ -67,10 +72,11 @@ internally and that is used in our interfaces:
 
  * Boost C++ Libraries (http://www.boost.org) - All headers and a subset of the Boost
    libraries are bundled.
- * Qt runtime (http://www.qt.io) - used by dobmake and dobexplorer.
  * Ninja (https://github.com/martine/ninja/releases) - Build system that can run in
    parallel.
 
-License terms for these can be found at their respective web sites, but in short there
-are no surprises there, nothing that should affect your ability to use Safir SDK Core
-under either the GPLv3 license or the commercial license.
+License terms for these can be found in the file third_party_licenses.txt and the
+directory more_third_party_licenses, but in short there are no surprises there, nothing
+that should affect your ability to use Safir SDK Core under either the GPLv3 license or
+the commercial license.
+
