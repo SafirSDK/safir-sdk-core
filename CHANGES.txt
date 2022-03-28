@@ -6,8 +6,8 @@ This release does not introduce any new features or provide any fixes to issues.
 newer compilers and newer versions of third party libraries. Also, internally we have moved to using conan for our
 third party dependencies.
 
-Safir SDK Core now officially builds on Visual Studio 2015, 2017 and 2019 with Boost 1.78, and with the GCC and Boost
-versions included in Ubuntu 20.04 and Debian 11 Bullseye.
+Safir SDK Core now officially builds on Visual Studio 2015, 2017, 2019 and 2022 with Boost 1.78, and with the GCC and
+Boost versions included in Ubuntu 20.04 and Debian 11 Bullseye.
 
 There are quite a few changes made because of these upgrades, but hopefully all should be backwards compatible.
 If you run into problems, please let us know and we help you out or provide fixes.
