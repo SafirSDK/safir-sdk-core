@@ -201,7 +201,8 @@ INSTALL(FILES build/packaging/debian/copyright
 
 INSTALL(DIRECTORY licenses/
   DESTINATION ${SAFIR_INSTALL_DESTINATION_DOC}/more_third_party_licenses
-  COMPONENT Runtime)
+  COMPONENT Runtime
+  PATTERN .gitignore EXCLUDE)
 
 if (WIN32)
   INSTALL(FILES bin/ninja.exe
