@@ -134,9 +134,9 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
   #set up java namespace prefixing rules
   foreach (file ${_gen_NAMESPACE_MAPPINGS})
     get_filename_component(filename ${file} NAME)
-    string (REGEX REPLACE "([a-zA-Z\\.0-9]*)-java\\.namespace\\.txt" "\\1" namespace ${filename})
+    string (REGEX REPLACE "([a-zA-Z\\.0-9_]*)-java\\.namespace\\.txt" "\\1" namespace ${filename})
 
-    file(STRINGS ${file} prefix REGEX "^[a-zA-Z0-9\\.]+$") #read the line we want from the file
+    file(STRINGS ${file} prefix REGEX "^[a-zA-Z0-9\\._]+$") #read the line we want from the file
     set (java_namespace_keys ${java_namespace_keys} ${namespace})
     set (java_namespace_${namespace}_replacement ${prefix}.${namespace})
   endforeach()
@@ -154,8 +154,8 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
     set (cpp_files ${cpp_files} gen/cpp/${base_name}.cpp)
     set (dotnet_files ${dotnet_files} "${CMAKE_CURRENT_BINARY_DIR}/gen/dotnet/${base_name}.cs")
 
-    string (REGEX REPLACE "^([a-zA-Z\\.0-9]*)\\.[a-zA-Z0-9_]+$" "\\1" namespace ${base_name})
-    string (REGEX REPLACE "^[a-zA-Z\\.0-9]*\\.([a-zA-Z0-9_]+)$" "\\1" java_base_name ${base_name})
+    string (REGEX REPLACE "^([a-zA-Z\\.0-9_]*)\\.[a-zA-Z0-9_]+$" "\\1" namespace ${base_name})
+    string (REGEX REPLACE "^[a-zA-Z\\.0-9_]*\\.([a-zA-Z0-9_]+)$" "\\1" java_base_name ${base_name})
 
     #perform prefix insertion
     foreach(key ${java_namespace_keys})
