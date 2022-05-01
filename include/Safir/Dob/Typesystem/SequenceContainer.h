@@ -47,7 +47,7 @@ namespace Typesystem
      * have change flags.
      */
     template <class T>
-    class SequenceContainerBase : public ContainerBase
+    class SequenceContainer : public ContainerBase
     {
     public:
 
@@ -60,7 +60,7 @@ namespace Typesystem
          *
          * Construct a container that is not changed and not null.
          */
-        SequenceContainerBase()
+        SequenceContainer()
             :ContainerBase()
             ,m_values()
         {
@@ -126,7 +126,7 @@ namespace Typesystem
          * @param index [in] - Index of the value to get.
          * @return Const reference to a value.
          */
-        const ContainedType& operator [](size_t index) const
+        const ContainedType& operator [](const size_t index) const
         {
             return m_values[index];
         }
@@ -137,7 +137,7 @@ namespace Typesystem
          * @return Const reference to a value.
          * @throws std::out_of_range exception if index is not in range
          */
-        const ContainedType& at(size_t index) const
+        const ContainedType& at(const size_t index) const
         {
             return m_values.at(index);
         }
@@ -158,7 +158,7 @@ namespace Typesystem
          * @param index [in] - Index of the value to set.
          * @param val [in] - Value to set.
          */
-        void SetVal(size_t index, const ContainedType& val)
+        void SetVal(const size_t index, const ContainedType& val)
         {
             m_bIsChanged=true;
             m_values[index]=val;
@@ -169,7 +169,7 @@ namespace Typesystem
          * @param index [in] - Index of the value to get.
          * @return Const reference to a value.
          */
-        const ContainedType& GetVal(size_t index) const
+        const ContainedType& GetVal(const size_t index) const
         {
             return m_values[index];
         }
@@ -179,7 +179,7 @@ namespace Typesystem
          * @param index [in] - Index of the new value.
          * @param value [in] - Value to insert.
          */
-        void InsertAt(size_t index, const ContainedType& value)
+        void InsertAt(const size_t index, const ContainedType& value)
         {
             m_bIsChanged=true;
             m_values.insert(m_values.begin()+index, value);
@@ -189,7 +189,7 @@ namespace Typesystem
          * @brief EraseAt - Erase a value at specified index. The sequence will shrink.
          * @param index [in] - Index of the value to be removed.
          */
-        void EraseAt(size_t index)
+        void EraseAt(const size_t index)
         {
             m_bIsChanged=true;
             m_values.erase(m_values.begin()+index);
@@ -209,8 +209,8 @@ namespace Typesystem
                     throw SoftwareViolationException(L"Invalid call to Copy, containers are not of same type",__WFILE__,__LINE__);
                 }
 
-                const SequenceContainerBase<ContainedType>& other=
-                    static_cast<const SequenceContainerBase<ContainedType>& >(that);
+                const SequenceContainer<ContainedType>& other=
+                    static_cast<const SequenceContainer<ContainedType>& >(that);
 
                 m_bIsChanged=other.m_bIsChanged;
                 m_values.clear();
@@ -238,17 +238,306 @@ namespace Typesystem
         StorageType m_values;
     };
 
-    template <class T>
-    class SequenceContainer : public SequenceContainerBase<T>
+    class EnumerationSequenceContainerBase : public ContainerBase
     {
-        typedef SequenceContainerBase<T> Base;
     public:
+        /**
+         * Default Constructor.
+         *
+         * Construct a container that is not changed and not null.
+         */
+        EnumerationSequenceContainerBase()
+            : ContainerBase()
+        {
+        }
 
-        //Override of inherited method. Parent comment describes this behaviour too..
-        bool IsChanged() const override {return Base::m_bIsChanged;}
+        bool IsNull() const override {return empty();}
 
-        //Override of inherited method. Parent comment describes this behaviour too..
-        void SetChanged(const bool changed) override {Base::m_bIsChanged = changed;}
+        void SetNull() override
+        {
+            clear();
+        }
+
+
+        /**
+         * @brief size - Get the size of the sequence, i.e number of contained values.
+         * @return The number of values in the sequence.
+         */
+        virtual size_t size() const = 0;
+
+        /**
+         * @brief empty - Check if sequence is empty.
+         * @return True if sequence is empty, else false.
+         */
+        virtual bool empty() const = 0;
+
+        /**
+         * @brief clear - Clear the sequence, i.e remove all values. After a call to clear
+         * the sequence will be empty but not automatically set to null.
+         */
+        virtual void clear() = 0;
+
+        /**
+         * @brief PushBackOrdinal - Insert a new ordinal value last in the sequence. If the sequence was null
+         * before it will no longer be null after this call..
+         * @param val [in] - Value to be inserted.
+         */
+        virtual void PushBackOrdinal(const EnumerationValue val) = 0;
+
+        /**
+         * @brief SetVal - Update a specific value. Will not add new values.
+         * @param index [in] - Index of the value to set.
+         * @param val [in] - Value to set.
+         */
+        virtual void SetOrdinal(const size_t index, const EnumerationValue val) = 0;
+
+        /**
+         * @brief GetVal - Get const reference to the value with specified index.
+         * @param index [in] - Index of the value to get.
+         * @return Const reference to a value.
+         */
+        virtual EnumerationValue GetOrdinal(const size_t index) const = 0;
+
+        /**
+         * @brief InsertOrdinalAt - Insert a new ordinal value at specified index. The sequence size will grow.
+         * @param index [in] - Index of the new value.
+         * @param value [in] - Value to insert.
+         */
+        virtual void InsertOrdinalAt(const size_t index, EnumerationValue value) = 0;
+
+        /**
+         * @brief EraseAt - Erase a value at specified index. The sequence will shrink.
+         * @param index [in] - Index of the value to be removed.
+         */
+        virtual void EraseAt(const size_t index) = 0;
+
+    };
+
+    template <class T>
+    class EnumerationSequenceContainer : public EnumerationSequenceContainerBase
+    {
+    public:
+        typedef typename T::Enumeration ContainedType;
+        typedef boost::container::vector<typename T::Enumeration> StorageType;  //we use boost version instead of std because we want to be able to use vector<bool> without warnings and errors.
+        typedef typename StorageType::const_iterator const_iterator;
+
+        /**
+         * Default Constructor.
+         *
+         * Construct a container that is not changed and not null.
+         */
+        EnumerationSequenceContainer()
+            :EnumerationSequenceContainerBase()
+            ,m_values()
+        {
+        }
+
+        /**
+         * @brief size - Get the size of the sequence, i.e number of contained values.
+         * @return The number of values in the sequence.
+         */
+        size_t size() const override {return m_values.size();}
+
+        /**
+         * @brief empty - Check if sequence is empty.
+         * @return True if sequence is empty, else false.
+         */
+        bool empty() const override {return m_values.empty();}
+
+        /**
+         * @brief front - Get a const reference to the first value in the sequence.
+         * @return Reference to first value.
+         */
+        ContainedType front() const {return m_values.front();}
+
+        /**
+         * @brief back - Get a const reference to the last value in the sequence.
+         * @return Reference to last value.
+         */
+        ContainedType back() const {return m_values.back();}
+
+        /**
+         * @brief begin - Get const_iterator pointing to the first element in the sequence.
+         * @return const_iterator.
+         */
+        const_iterator begin() const {return m_values.begin();}
+
+        /**
+         * @brief end - Get const_iterator pointing past the last element in the sequence.
+         * @return const_iterator.
+         */
+        const_iterator end() const {return m_values.end();}
+
+        /**
+         * @brief clear - Clear the sequence, i.e remove all values. After a call to clear
+         * the sequence will be empty but not automatically set to null.
+         */
+        void clear() override
+        {
+            m_bIsChanged=true;
+            m_values.clear();
+        }
+
+        /**
+         * @brief operator [] - Get const reference to the value with specified index.
+         * Note that no checks are made to see whether index is inside range.
+         * @param index [in] - Index of the value to get.
+         * @return Const reference to a value.
+         */
+        ContainedType operator [](const size_t index) const
+        {
+            T::CheckForMismatch();
+            return m_values[index];
+        }
+
+        /**
+         * @brief operator [] - Get const reference to the value with specified index.
+         * @param index [in] - Index of the value to get.
+         * @return Const reference to a value.
+         * @throws std::out_of_range exception if index is not in range
+         */
+        ContainedType at(const size_t index) const
+        {
+            T::CheckForMismatch();
+            return m_values.at(index);
+        }
+
+        /**
+         * @brief push_back - Insert a new value last in the sequence. If the sequence was null
+         * before it will no longer be null after a call to push_back.
+         * @param val [in] - Value to be inserted.
+         */
+        void push_back(const ContainedType val)
+        {
+            T::CheckForMismatch();
+            PushBackOrdinal(val);
+        }
+        /**
+         * @brief PushBackOrdinal - Insert a new ordinal value last in the sequence. If the sequence was null
+         * before it will no longer be null after this call..
+         * @param val [in] - Value to be inserted.
+         */
+        void PushBackOrdinal(const EnumerationValue val) override
+        {
+            if (val < T::FirstOrdinal() || val > T::LastOrdinal())
+            {
+                throw Safir::Dob::Typesystem::IllegalValueException(L"The enumerated type DotsTest.TestEnum does not have such a value",__WFILE__,__LINE__);
+            }
+            m_bIsChanged=true;
+            m_values.push_back(static_cast<ContainedType>(val));
+        }
+
+
+        /**
+         * @brief SetVal - Update a specific value. Will not add new values.
+         * @param index [in] - Index of the value to set.
+         * @param val [in] - Value to set.
+         */
+        void SetVal(const size_t index, const ContainedType val)
+        {
+            T::CheckForMismatch();
+            SetOrdinal(index, val);
+        }
+
+        /**
+         * @brief GetVal - Get const reference to the value with specified index.
+         * @param index [in] - Index of the value to get.
+         * @return Const reference to a value.
+         */
+        ContainedType GetVal(const size_t index) const
+        {
+            T::CheckForMismatch();
+            return m_values[index];
+        }
+
+        /**
+         * @brief SetVal - Update a specific value. Will not add new values.
+         * @param index [in] - Index of the value to set.
+         * @param val [in] - Value to set.
+         */
+        void SetOrdinal(const size_t index, const EnumerationValue val) override
+        {
+            if (val < T::FirstOrdinal() || val > T::LastOrdinal())
+            {
+                throw Safir::Dob::Typesystem::IllegalValueException(L"The enumerated type DotsTest.TestEnum does not have such a value",__WFILE__,__LINE__);
+            }
+
+            m_bIsChanged=true;
+            m_values[index]=static_cast<ContainedType>(val);
+        }
+
+        /**
+         * @brief GetVal - Get const reference to the value with specified index.
+         * @param index [in] - Index of the value to get.
+         * @return Const reference to a value.
+         */
+        EnumerationValue GetOrdinal(const size_t index) const override
+        {
+            return m_values[index];
+        }
+
+        /**
+         * @brief InsertAt - Insert a new value at specified index. The sequence size will grow.
+         * @param index [in] - Index of the new value.
+         * @param value [in] - Value to insert.
+         */
+        void InsertAt(const size_t index, ContainedType value)
+        {
+            T::CheckForMismatch();
+            InsertOrdinalAt(index, value);
+        }
+
+        /**
+         * @brief InsertAt - Insert a new value at specified index. The sequence size will grow.
+         * @param index [in] - Index of the new value.
+         * @param value [in] - Value to insert.
+         */
+        void InsertOrdinalAt(const size_t index, EnumerationValue value) override
+        {
+            if (value < T::FirstOrdinal() || value > T::LastOrdinal())
+            {
+                throw Safir::Dob::Typesystem::IllegalValueException(L"The enumerated type DotsTest.TestEnum does not have such a value",__WFILE__,__LINE__);
+            }
+
+            m_bIsChanged=true;
+            m_values.insert(m_values.begin()+index, static_cast<ContainedType>(value));
+        }
+
+        /**
+         * @brief EraseAt - Erase a value at specified index. The sequence will shrink.
+         * @param index [in] - Index of the value to be removed.
+         */
+        void EraseAt(const size_t index) override
+        {
+            m_bIsChanged=true;
+            m_values.erase(m_values.begin()+index);
+        }
+
+        /**
+         * @brief Copy - Copy all the members from "that" into "this". Types must be the same for this to work!
+         * @param that [in] - The object to copy into this.
+         * @throws SoftwareViolationException If the types are not of the same kind.
+         */
+        void Copy(const ContainerBase& that) override
+        {
+            if (this != &that)
+            {
+                if (typeid(*this) != typeid(that))
+                {
+                    throw SoftwareViolationException(L"Invalid call to Copy, containers are not of same type",__WFILE__,__LINE__);
+                }
+
+                const auto& other=
+                    static_cast<const EnumerationSequenceContainer<T>& >(that);
+
+                m_bIsChanged = other.m_bIsChanged;
+                m_values = other.m_values;
+                m_values.clear();
+            }
+        }
+
+    private:
+        StorageType m_values;
     };
 
 
@@ -331,10 +620,10 @@ namespace Typesystem
 
     template <class T>
     class GenericObjectSequenceContainer
-        : public SequenceContainerBase<boost::shared_ptr<T> >
+        : public SequenceContainer<boost::shared_ptr<T> >
         , public GenericObjectSequenceContainerBase
     {
-        typedef SequenceContainerBase<boost::shared_ptr<T> > Base;
+        typedef SequenceContainer<boost::shared_ptr<T> > Base;
     public:
 
         //Override of inherited method. Parent comment describes this behaviour too..

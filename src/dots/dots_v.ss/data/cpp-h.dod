@@ -720,7 +720,7 @@ namespace @_NAMESPACEV_@
         };
 
         typedef Safir::Dob::Typesystem::ArrayContainer<EnumerationContainer> EnumerationContainerArray;
-        typedef Safir::Dob::Typesystem::SequenceContainer<Enumeration> EnumerationSequenceContainer;
+        typedef Safir::Dob::Typesystem::EnumerationSequenceContainer<@_CLASS_@> EnumerationSequenceContainer;
 
     };
     static inline bool operator==(const @_CLASS_@::Enumeration first, const @_CLASS_@::EnumerationContainer second)
