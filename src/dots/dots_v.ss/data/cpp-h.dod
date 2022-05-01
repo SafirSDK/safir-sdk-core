@@ -123,8 +123,7 @@ Type:Watt64:Float64:"Safir::Dob::Typesystem::Si64::Watt":"Safir/Dob/Typesystem/V
 @@--
 @@-- HEADER
 @@--
-#ifndef @_UPPER:REPLACE_ALL(\./_):UNIT_@_H_INCLUDED
-#define @_UPPER:REPLACE_ALL(\./_):UNIT_@_H_INCLUDED
+#pragma once
 
 @@IF@@ @_UNITTYPE_@=property
 @@--
@@ -806,5 +805,4 @@ namespace @_NAMESPACEV_@
 } // @_REVNAMESPACE_@
 @@END_TABLE@@
 
-#endif
 @@END_IF@@
