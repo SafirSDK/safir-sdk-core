@@ -532,7 +532,6 @@ namespace Typesystem
 
                 m_bIsChanged = other.m_bIsChanged;
                 m_values = other.m_values;
-                m_values.clear();
             }
         }
 
