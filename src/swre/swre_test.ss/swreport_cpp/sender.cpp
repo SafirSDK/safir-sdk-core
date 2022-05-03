@@ -30,6 +30,7 @@
 
 int main()
 {
+#ifndef SAFIR_NO_DEPRECATED
     Safir::SwReports::SendFatalErrorReport(L"FatalError",
                                            L"here",
                                            L"Testing SendFatalErrorReport");
@@ -37,7 +38,7 @@ int main()
     Safir::SwReports::SendErrorReport(L"Error",
                                       L"there",
                                       L"Testing SendErrorReport");
-    
+
     Safir::SwReports::SendResourceReport(L"ResourceReport",
                                          false,
                                          L"Testing SendResourceReport");
@@ -56,12 +57,10 @@ int main()
     Safir::SwReports::SendErrorReport(L"brynanuppafj\u00e4ssasponken", //ä
                                       L"Don't know\u203d", //interrobang
                                       L"Testing\nfunny characters");
-    
+
 
     Safir::SwReports::SendProgramInfoReport(L"Finished!");
 
-
+#endif
     return 0;
 }
-
-
