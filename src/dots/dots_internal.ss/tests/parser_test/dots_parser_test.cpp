@@ -173,7 +173,7 @@ bool RunSingleTest(const TestCase& test)
     //prelusive part of ParseError.Label if an error is expected to occur.    
     try
     {
-        boost::shared_ptr<const Safir::Dob::Typesystem::ToolSupport::TypeRepository> rep=Safir::Dob::Typesystem::ToolSupport::ParseTypeDefinitions(test.path);
+        std::shared_ptr<const Safir::Dob::Typesystem::ToolSupport::TypeRepository> rep=Safir::Dob::Typesystem::ToolSupport::ParseTypeDefinitions(test.path);
         if (PrintRepository)
         {
             Safir::Dob::Typesystem::ToolSupport::RepositoryToString(rep.get(), true, std::cout);
@@ -270,7 +270,7 @@ void ParseDir(const boost::filesystem::path& dir)
     boost::timer timer;
     try
     {
-        boost::shared_ptr<const Safir::Dob::Typesystem::ToolSupport::TypeRepository> rep=Safir::Dob::Typesystem::ToolSupport::ParseTypeDefinitions(dir);
+        std::shared_ptr<const Safir::Dob::Typesystem::ToolSupport::TypeRepository> rep=Safir::Dob::Typesystem::ToolSupport::ParseTypeDefinitions(dir);
         //Safir::Dob::Typesystem::ToolSupport::RepositoryToString(rep.get(), std::cout);
         std::cout<<"Parsed successfully! NumTypes="<<(rep->GetNumberOfClasses()+rep->GetNumberOfEnums()+rep->GetNumberOfExceptions()+rep->GetNumberOfProperties())<<std::endl;
     }

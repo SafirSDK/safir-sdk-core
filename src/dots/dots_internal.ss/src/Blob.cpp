@@ -48,7 +48,7 @@ namespace Internal
     Blob::Blob(boost::int64_t typeId, int numberOfMembers)
         :m_blobSize(0)
         ,m_typeId(typeId)
-        ,m_object(boost::make_shared<AnyObject>())
+        ,m_object(std::make_shared<AnyObject>())
     {
         for (int i=0; i<numberOfMembers; ++i)
         {
@@ -59,7 +59,7 @@ namespace Internal
     Blob::Blob(const char* blob)
         :m_blobSize(Blob::GetSize(blob))
         ,m_typeId(Blob::GetTypeId(blob))
-        ,m_object(boost::make_shared<AnyObject>())
+        ,m_object(std::make_shared<AnyObject>())
     {
         bool ok=m_object->ParseFromArray(static_cast<const void*>(blob+HeaderSize), m_blobSize-HeaderSize);
         if (!ok)

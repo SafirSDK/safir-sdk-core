@@ -35,7 +35,7 @@ struct CompareTestCase
 };
 typedef  std::set<TestCase, CompareTestCase> TestSet;
 
-typedef boost::shared_ptr<const Safir::Dob::Typesystem::ToolSupport::TypeRepository> RepositoryPtr;
+typedef std::shared_ptr<const Safir::Dob::Typesystem::ToolSupport::TypeRepository> RepositoryPtr;
 const ClassDescription* GetClassByName(const RepositoryPtr& rep, const std::string& name);
 bool TestInfoFromPath(const boost::filesystem::path& p, TestCase& test);
 

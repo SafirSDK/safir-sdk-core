@@ -24,6 +24,7 @@
 #include <Safir/Utilities/DynamicLibraryLoader.h>
 #include <iostream>
 #include <csignal>
+#include <functional>
 
 //We want the process to exit with a known exit code when dying by SIGSEGV
 #if defined (_WIN32) || defined (_WIN64)
@@ -44,7 +45,7 @@ int main()
 
     try
     {
-        boost::function<double(int,long,float,double)> fun;
+        std::function<double(int,long,float,double)> fun;
         {
             std::wcout << "About to load library" << std::endl;
             Safir::Utilities::DynamicLibraryLoader lib;

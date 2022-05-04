@@ -65,7 +65,7 @@ namespace Internal
 
     const Dob::ResponsePtr ResponseProxyImpl::GetResponse() const
     {
-        return boost::static_pointer_cast<Safir::Dob::Response>
+        return std::static_pointer_cast<Safir::Dob::Response>
             (Safir::Dob::Typesystem::ObjectFactory::Instance().CreateObject(m_responseBlob));
     }
 
@@ -84,7 +84,7 @@ namespace Internal
 
         boost::shared_ptr<char> autoDeleter(blob,blobDeleter);
 
-        ConnectionInfoPtr connInfo = boost::static_pointer_cast<ConnectionInfo>
+        ConnectionInfoPtr connInfo = std::static_pointer_cast<ConnectionInfo>
             (Typesystem::ObjectFactory::Instance().CreateObject(blob));
 
         return connInfo;

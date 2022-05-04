@@ -27,7 +27,7 @@
 
 #include <Safir/Dob/Typesystem/Defs.h>
 #include <string>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace Safir
 {
@@ -39,10 +39,10 @@ namespace Typesystem
     class Object;
 
     /** A smart pointer to an Object. */
-    typedef boost::shared_ptr<Object> ObjectPtr;
+    typedef std::shared_ptr<Object> ObjectPtr;
 
     /** A smart pointer to a const Object. */
-    typedef boost::shared_ptr<const Object> ObjectConstPtr;
+    typedef std::shared_ptr<const Object> ObjectConstPtr;
 
     /**
      * Utility functions for users of the DOB type system.

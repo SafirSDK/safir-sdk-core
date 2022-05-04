@@ -111,7 +111,7 @@ namespace ForEach
         bool errorMessageSent = false;
 
         /* to store data about this request */
-        boost::shared_ptr<RequestSpecificData> requestSpecificData(new RequestSpecificData);
+        std::shared_ptr<RequestSpecificData> requestSpecificData(new RequestSpecificData);
 
         // Prepare error response
         Safir::Dob::ResponseErrorInfoPtr error = Safir::Dob::ResponseErrorInfo::Create();
@@ -134,7 +134,7 @@ namespace ForEach
 
             // Cast to wanted service.
             const Safir::Utilities::ForEach::DeleteRequestPtr deleteService =
-                boost::static_pointer_cast<Safir::Utilities::ForEach::DeleteRequest>(service);
+                std::static_pointer_cast<Safir::Utilities::ForEach::DeleteRequest>(service);
 
             m_debug << "Delete request" << std::endl;
 
@@ -227,7 +227,7 @@ namespace ForEach
             *****************************************************************************************/
 
             const Safir::Utilities::ForEach::DeleteAllRequestPtr deleteAllService =
-                boost::static_pointer_cast<Safir::Utilities::ForEach::DeleteAllRequest>(service);
+                std::static_pointer_cast<Safir::Utilities::ForEach::DeleteAllRequest>(service);
 
 
             m_debug << "DeleteAll request" << std::endl;
@@ -353,7 +353,7 @@ namespace ForEach
 
 
             const Safir::Utilities::ForEach::UpdateRequestPtr updateService =
-                boost::static_pointer_cast<Safir::Utilities::ForEach::UpdateRequest>(service);
+                std::static_pointer_cast<Safir::Utilities::ForEach::UpdateRequest>(service);
 
 
             m_debug << "Update request";
@@ -658,7 +658,7 @@ namespace ForEach
                     m_debug << "Got " << data->NumberOfResponses() << " number of responses so far." <<
                         " Expecting " << data->NumberOfObjects() << std::endl;
 
-                    Safir::Dob::SuccessResponsePtr tmp = boost::dynamic_pointer_cast<Safir::Dob::SuccessResponse>(responseProxy.GetResponse());
+                    Safir::Dob::SuccessResponsePtr tmp = std::dynamic_pointer_cast<Safir::Dob::SuccessResponse>(responseProxy.GetResponse());
                     if (tmp != NULL)
                     {
                         m_debug << "classified as a successresponse" << std::endl;

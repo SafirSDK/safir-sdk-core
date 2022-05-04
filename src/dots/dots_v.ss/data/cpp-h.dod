@@ -298,8 +298,8 @@ namespace @_NAMESPACEV_@
 @@END_TABLE@@
 
     class @_CLASS_@; //forward declaration
-    typedef boost::shared_ptr<@_CLASS_@> @_CLASS_@Ptr;
-    typedef boost::shared_ptr<const @_CLASS_@> @_CLASS_@ConstPtr;
+    typedef std::shared_ptr<@_CLASS_@> @_CLASS_@Ptr;
+    typedef std::shared_ptr<const @_CLASS_@> @_CLASS_@ConstPtr;
 
     typedef Safir::Dob::Typesystem::ObjectContainerImpl<@_CLASS_@> @_CLASS_@Container;
     typedef Safir::Dob::Typesystem::ArrayContainer<@_CLASS_@Container> @_CLASS_@ContainerArray;

@@ -25,7 +25,7 @@
 #ifndef __DOTS_OBJECT_H__
 #define __DOTS_OBJECT_H__
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <Safir/Dob/Typesystem/Defs.h>
 #include <Safir/Dob/Typesystem/ContainerBase.h>
 #include <Safir/Dob/Typesystem/EntityId.h>
@@ -41,10 +41,10 @@ namespace Typesystem
     class Object; //forward declaration for typedef below
 
     /** A smart pointer to an Object. */
-    typedef boost::shared_ptr<Object> ObjectPtr;
+    typedef std::shared_ptr<Object> ObjectPtr;
 
     /** A smart pointer to a const Object. */
-    typedef boost::shared_ptr<const Object> ObjectConstPtr;
+    typedef std::shared_ptr<const Object> ObjectConstPtr;
 
     /**
      * The base class for all DOB objects.
@@ -70,7 +70,7 @@ namespace Typesystem
          * Create a copy of the object.
          *
          * Will create a copy of the object on the heap and return a smart pointer to it.
-         * Use boost::static_pointer_cast or boost::dynamic_pointer_cast to cast it
+         * Use std::static_pointer_cast or std::dynamic_pointer_cast to cast it
          * to the pointer type that you're after.
          *
          * @return A smart pointer to the copy of the object.

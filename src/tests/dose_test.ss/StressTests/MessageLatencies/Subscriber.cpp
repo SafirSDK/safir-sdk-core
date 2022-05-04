@@ -55,7 +55,7 @@ Subscriber::Subscriber():
 void Subscriber::OnMessage(Safir::Dob::MessageProxy messageProxy)
 {
     DoseStressTest::RootMessagePtr rootMsg =
-        boost::static_pointer_cast<DoseStressTest::RootMessage>(messageProxy.GetMessage());
+        std::static_pointer_cast<DoseStressTest::RootMessage>(messageProxy.GetMessage());
 
     switch (rootMsg->GetTypeId())
     {

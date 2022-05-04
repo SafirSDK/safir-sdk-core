@@ -54,7 +54,7 @@ namespace Internal
     const Dob::MessagePtr
     MessageProxyImpl::GetMessage() const
     {
-        return boost::static_pointer_cast<Safir::Dob::Message>
+        return std::static_pointer_cast<Safir::Dob::Message>
             (Safir::Dob::Typesystem::ObjectFactory::Instance().CreateObject(m_messageBlob));
     }
 
@@ -74,7 +74,7 @@ namespace Internal
 
         boost::shared_ptr<char> autoDeleter(blob,blobDeleter);
 
-        ConnectionInfoPtr connInfo = boost::static_pointer_cast<ConnectionInfo>
+        ConnectionInfoPtr connInfo = std::static_pointer_cast<ConnectionInfo>
             (Typesystem::ObjectFactory::Instance().CreateObject(blob));
 
         return connInfo;

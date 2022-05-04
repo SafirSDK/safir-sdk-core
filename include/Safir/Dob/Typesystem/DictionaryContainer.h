@@ -27,7 +27,7 @@
 #include <Safir/Dob/Typesystem/Exceptions.h>
 #include <Safir/Dob/Typesystem/ObjectContainer.h>
 #include <Safir/Dob/Typesystem/Utilities.h>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <map>
 #include <stdexcept>
 #include <typeinfo>
@@ -334,9 +334,9 @@ namespace Typesystem
             static void SetVal(const V& v, C& c) {c.SetVal(v);}
         };
 
-        template <class V, class C> struct InsertHelper< boost::shared_ptr<V>, C >
+        template <class V, class C> struct InsertHelper< std::shared_ptr<V>, C >
         {
-            static void SetVal(const boost::shared_ptr<V>& v, C& c) {c.SetPtr(v);}
+            static void SetVal(const std::shared_ptr<V>& v, C& c) {c.SetPtr(v);}
         };
 
         static DictionaryContainer<KeyT,ValT>& Cast(ContainerBase& base)

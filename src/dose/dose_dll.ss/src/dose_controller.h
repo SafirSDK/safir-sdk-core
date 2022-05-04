@@ -397,7 +397,7 @@ namespace Internal
         std::string m_connectionNameCommonPart;
         std::string m_connectionNameInstancePart;
 
-        typedef boost::shared_ptr<DispatchThread> DispatchThreadPtr;
+        typedef std::shared_ptr<DispatchThread> DispatchThreadPtr;
         typedef std::map<DispatchThreadPtr, int> DispatchThreadPtrStopCountMap;
 
         DispatchThreadPtr  m_dispatchThread;
@@ -440,8 +440,8 @@ namespace Internal
 
     };
 
-    typedef boost::shared_ptr<Controller> ControllerPtr;
-    typedef boost::shared_ptr<const Controller> ControllerConstPtr;
+    typedef std::shared_ptr<Controller> ControllerPtr;
+    typedef std::shared_ptr<const Controller> ControllerConstPtr;
 }
 }
 }

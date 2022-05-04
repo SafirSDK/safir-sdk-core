@@ -142,7 +142,7 @@ private:
     TimestampRequestor m_timestampRequestor;
 };
 
-typedef boost::shared_ptr<Consumer> ConsumerPtr;
+typedef std::shared_ptr<Consumer> ConsumerPtr;
 
 #endif
 

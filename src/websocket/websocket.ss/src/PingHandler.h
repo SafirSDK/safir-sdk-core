@@ -28,7 +28,6 @@
 #pragma warning (disable: 4267)
 #endif
 
-#include <boost/enable_shared_from_this.hpp>
 #include <boost/function.hpp>
 #include <boost/asio.hpp>
 #include <boost/asio/steady_timer.hpp>
@@ -37,7 +36,7 @@
 #pragma warning (pop)
 #endif
 
-class PingHandler : public boost::enable_shared_from_this<PingHandler>
+class PingHandler : public std::enable_shared_from_this<PingHandler>
 {
 public:
     PingHandler(boost::asio::io_service::strand& strand, int interval, const boost::function<void()>& sendPing)

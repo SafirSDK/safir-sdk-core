@@ -172,7 +172,7 @@ private:
             }
 
             DoseTest::ActionPtr action =
-                boost::static_pointer_cast<DoseTest::Action>
+                std::static_pointer_cast<DoseTest::Action>
                 (Safir::Dob::Typesystem::Serialization::ToObject(m_data));
 
             std::wcout << "Got action '" << DoseTest::ActionEnum::ToString(action->ActionKind()) << "'" << std::endl;

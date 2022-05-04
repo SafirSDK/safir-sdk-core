@@ -26,7 +26,7 @@
 #define _SAFIR_DOB_DEFS_H
 
 #include <Safir/Dob/Typesystem/Defs.h>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace Safir
 {

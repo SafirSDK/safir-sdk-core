@@ -75,7 +75,7 @@ namespace Internal
         boost::interprocess::permissions perms;
         perms.set_unrestricted();
 
-        boost::shared_ptr<boost::interprocess::managed_shared_memory> shmem
+        std::shared_ptr<boost::interprocess::managed_shared_memory> shmem
             (new boost::interprocess::managed_shared_memory
              (boost::interprocess::create_only,
               SHARED_MEMORY_NAME,

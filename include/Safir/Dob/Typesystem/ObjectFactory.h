@@ -24,7 +24,7 @@
 
 #pragma once
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <Safir/Dob/Typesystem/Defs.h>
 #include <Safir/Dob/Typesystem/Exceptions.h>
 #include <mutex>
@@ -39,7 +39,7 @@ namespace Typesystem
     class Object;
 
     /** A smart pointer to an Object. */
-    typedef boost::shared_ptr<Object> ObjectPtr;
+    typedef std::shared_ptr<Object> ObjectPtr;
 
     /**
      * This class is an object factory for all automatically generated DOB classes.
@@ -65,7 +65,7 @@ namespace Typesystem
          * appropriate callback to create an object of the desired type.
          *
          * @param typeId [in] - The TypeId of the object to create.
-         * @return A boost::shared_ptr to the object.
+         * @return A std::shared_ptr to the object.
          * @exception IllegalValueException If the type couldn't be found in the ObjectFactory.
         */
         ObjectPtr CreateObject(const TypeId typeId) const;
@@ -109,7 +109,7 @@ namespace Typesystem
          * appropriate callback to create the object.
          *
          * @param blob [in] - The blob to deserialize.
-         * @return A boost::shared_ptr to the object.
+         * @return A std::shared_ptr to the object.
          * @exception IllegalValueException If the type represented by the blob isn't found
          *                                   in the ObjectFactory.
         */

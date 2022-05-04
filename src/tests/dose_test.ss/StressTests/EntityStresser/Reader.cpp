@@ -79,7 +79,7 @@ void Reader::Read()
         return;
     }
     DoseStressTest::RootEntityPtr rootEnt =
-        boost::static_pointer_cast<DoseStressTest::RootEntity>(m_connection.Read(m_entityId).GetEntity());
+        std::static_pointer_cast<DoseStressTest::RootEntity>(m_connection.Read(m_entityId).GetEntity());
 
     switch (rootEnt->GetTypeId())
     {

@@ -131,7 +131,7 @@ namespace Internal
                 else
                 {
                     //we have an instance for the pid, add the connection to it.
-                    ProcessInfoPtr processInfo = boost::static_pointer_cast<ProcessInfo>
+                    ProcessInfoPtr processInfo = std::static_pointer_cast<ProcessInfo>
                         (m_connection.Read(eid).GetEntity());
                     processInfo->ConnectionNames().push_back
                         (Typesystem::Utilities::ToWstring(connection->NameWithCounter()));
@@ -189,7 +189,7 @@ namespace Internal
             {
                 bool processInfoUpdated = false;
 
-                auto processInfo = boost::static_pointer_cast<ProcessInfo>(m_connection.Read(eid).GetEntity());
+                auto processInfo = std::static_pointer_cast<ProcessInfo>(m_connection.Read(eid).GetEntity());
 
                 for (size_t i = 0; i < processInfo->ConnectionNames().size(); ++i)
                 {
@@ -261,7 +261,7 @@ namespace Internal
     {
         if (m_connection.IsCreated(entityRequestProxy.GetEntityId()))
         {
-            ProcessInfoPtr procInfo = boost::static_pointer_cast<ProcessInfo>
+            ProcessInfoPtr procInfo = std::static_pointer_cast<ProcessInfo>
                 (m_connection.Read(entityRequestProxy.GetEntityId()).GetEntity());
 
             for (auto name = procInfo->ConnectionNames().begin(); name != procInfo->ConnectionNames().end(); ++name)

@@ -47,14 +47,14 @@ private:
     boost::asio::io_service& m_ioService;
     boost::asio::io_service::strand m_connectionsStrand;
     std::unique_ptr<boost::asio::io_service::work> m_work;
-    std::set<boost::shared_ptr<RemoteClient> > m_connections;
+    std::set<std::shared_ptr<RemoteClient> > m_connections;
     boost::asio::signal_set m_signals;
 
     //own DOB connection
     sd::Connection m_dobConnection;
     Safir::Utilities::AsioDispatcher m_dobDispatcher;
 
-    void OnConnectionOpen(const boost::shared_ptr<RemoteClient>& con);
+    void OnConnectionOpen(const std::shared_ptr<RemoteClient>& con);
     void OnConnectionClosed(const RemoteClient* con);
 
     void OnStopOrder() override;

@@ -28,9 +28,9 @@
 class ResSnd : public sd::ResponseSender
 {
 public:
-    static boost::shared_ptr<ResSnd> Create(sd::RequestId id)
+    static std::shared_ptr<ResSnd> Create(sd::RequestId id)
     {
-        auto p=boost::shared_ptr<ResSnd>(new ResSnd(id));
+        auto p=std::shared_ptr<ResSnd>(new ResSnd(id));
         return p;
     }
 
@@ -62,11 +62,11 @@ inline void ResponseSenderStoreTest()
     CHECK(rs.Count()==2);
 
     s=rs.Get(1);
-    CHECK(boost::dynamic_pointer_cast<ResSnd>(s)->Id()==1);
+    CHECK(std::dynamic_pointer_cast<ResSnd>(s)->Id()==1);
     CHECK(rs.Count()==1);
 
     s=rs.Get(2);
-    CHECK(boost::dynamic_pointer_cast<ResSnd>(s)->Id()==2);
+    CHECK(std::dynamic_pointer_cast<ResSnd>(s)->Id()==2);
     CHECK(rs.Count()==0);
 
     id=rs.Add(ResSnd::Create(3));
@@ -83,11 +83,11 @@ inline void ResponseSenderStoreTest()
     CHECK(rs.Count()==2);
 
     s=rs.Get(4);
-    CHECK(boost::dynamic_pointer_cast<ResSnd>(s)->Id()==4);
+    CHECK(std::dynamic_pointer_cast<ResSnd>(s)->Id()==4);
     CHECK(rs.Count()==1);
 
     s=rs.Get(5);
-    CHECK(boost::dynamic_pointer_cast<ResSnd>(s)->Id()==5);
+    CHECK(std::dynamic_pointer_cast<ResSnd>(s)->Id()==5);
     CHECK(rs.Count()==0);
 
     id=rs.Add(ResSnd::Create(6));
@@ -108,11 +108,11 @@ inline void ResponseSenderStoreTest()
     CHECK(rs.Count()==2);
 
     s=rs.Get(8);
-    CHECK(boost::dynamic_pointer_cast<ResSnd>(s)->Id()==8);
+    CHECK(std::dynamic_pointer_cast<ResSnd>(s)->Id()==8);
     CHECK(rs.Count()==1);
 
     s=rs.Get(9);
-    CHECK(boost::dynamic_pointer_cast<ResSnd>(s)->Id()==9);
+    CHECK(std::dynamic_pointer_cast<ResSnd>(s)->Id()==9);
     CHECK(rs.Count()==0);
 
     s=rs.Get(10);

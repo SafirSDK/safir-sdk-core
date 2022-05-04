@@ -109,7 +109,7 @@ void BackdoorKeeper::OnMessage(const Safir::Dob::MessageProxy messageProxy)
         const Safir::Dob::MessagePtr message = messageProxy.GetMessage();
 
         const Safir::Application::BackdoorCommandPtr cmd =
-                boost::dynamic_pointer_cast<Safir::Application::BackdoorCommand>(message);
+                std::dynamic_pointer_cast<Safir::Application::BackdoorCommand>(message);
 
         if (cmd == NULL)
         {

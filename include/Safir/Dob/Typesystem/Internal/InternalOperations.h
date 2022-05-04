@@ -25,7 +25,7 @@
 #ifndef _dots_dob_internal_h
 #define _dots_dob_internal_h
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <Safir/Dob/Typesystem/Defs.h>
 
 namespace Safir
@@ -35,7 +35,7 @@ namespace Dob
 namespace Typesystem
 {
     class Object;
-    typedef boost::shared_ptr<Object> ObjectPtr;
+    typedef std::shared_ptr<Object> ObjectPtr;
 
 namespace Internal
 {
@@ -75,7 +75,7 @@ namespace Internal
      * It uses the ObjectFactory to accomplish this.
      *
      * @param [in] json - The json to convert.
-     * @return A boost::shared_ptr to the new object
+     * @return A std::shared_ptr to the new object
      * @exception IllegalValueException If there is something wrong with the JSON or if the type
      *                                  represented by the serialization isn't found
      *                                  in the ObjectFactory.

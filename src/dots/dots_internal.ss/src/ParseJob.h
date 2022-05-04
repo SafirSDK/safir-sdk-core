@@ -46,10 +46,10 @@ namespace ToolSupport
     {
     public:        
         ParseJob(const std::vector<boost::filesystem::path>& roots);
-        boost::shared_ptr<TypeRepository> GetResult() {return m_result;}
+        std::shared_ptr<TypeRepository> GetResult() {return m_result;}
 
     private:
-        boost::shared_ptr<RepositoryLocal> m_result;
+        std::shared_ptr<RepositoryLocal> m_result;
     };
 }
 }

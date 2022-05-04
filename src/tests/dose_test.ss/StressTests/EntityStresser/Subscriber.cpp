@@ -53,7 +53,7 @@ Subscriber::Subscriber():
 void Subscriber::HandleEntity(const Safir::Dob::EntityProxy& entityProxy)
 {
     DoseStressTest::RootEntityPtr rootEnt =
-        boost::static_pointer_cast<DoseStressTest::RootEntity>(entityProxy.GetEntity());
+        std::static_pointer_cast<DoseStressTest::RootEntity>(entityProxy.GetEntity());
 
     switch (rootEnt->GetTypeId())
     {

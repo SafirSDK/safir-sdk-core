@@ -75,7 +75,7 @@ namespace ToolSupport
         const ElementParserBase* m_parent;
     };
 
-    typedef boost::shared_ptr<ElementParserBase> ElementParserBasePtr;
+    typedef std::shared_ptr<ElementParserBase> ElementParserBasePtr;
     typedef std::vector<ElementParserBasePtr> ElementParserBaseVector;
 
     //----------------------------------------------------------------------------
@@ -88,7 +88,7 @@ namespace ToolSupport
         typedef typename boost::mpl::at< ElementTypeVector, boost::mpl::int_<Index> >::type type;
         void operator()(ElementParserBase* current, ElementParserBaseVector& subElements)
         {
-            ElementParserBasePtr subEl(boost::make_shared<type>(current));
+            ElementParserBasePtr subEl(std::make_shared<type>(current));
             subElements.push_back(subEl);
             ElementInstantiator< ElementTypeVector, Index-1 >()(current, subElements);
         }
@@ -143,13 +143,13 @@ namespace ToolSupport
 
             if (A::MatchElementName(name))
             {
-                m_parser=boost::make_shared<A>(Parent());
+                m_parser=std::make_shared<A>(Parent());
                 m_parser->Match(name, state); //necessary if m_parser is another Choice since the static version can't instatiate m_parser.
                 return true;
             }
             else if (B::MatchElementName(name))
             {
-                m_parser=boost::make_shared<B>(Parent());
+                m_parser=std::make_shared<B>(Parent());
                 m_parser->Match(name, state); //necessary if m_parser is another Choice since the static version can't instatiate m_parser.
                 return true;
             }

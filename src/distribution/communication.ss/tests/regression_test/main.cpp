@@ -41,7 +41,7 @@ void ControlChannelTest(int executionTime)
     srand(static_cast<unsigned int>(time(0)));
 
     boost::asio::io_service ioService;
-    auto work=boost::make_shared<boost::asio::io_service::work>(ioService);
+    auto work=std::make_shared<boost::asio::io_service::work>(ioService);
 
     boost::thread_group threads;
     for (unsigned int i=0; i<10; ++i)
@@ -99,7 +99,7 @@ void DataChannelTest(int executionTime)
     srand(static_cast<unsigned int>(time(0)));
 
     boost::asio::io_service ioService;
-    auto work=boost::make_shared<boost::asio::io_service::work>(ioService);
+    auto work=std::make_shared<boost::asio::io_service::work>(ioService);
 
     boost::thread_group threads;
     for (unsigned int i=0; i<10; ++i)

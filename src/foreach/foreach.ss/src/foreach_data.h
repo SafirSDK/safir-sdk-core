@@ -40,7 +40,7 @@ namespace Safir
         namespace ForEach
         {
             class RequestSpecificData;
-            typedef boost::shared_ptr<RequestSpecificData> RequestSpecificDataPtr;
+            typedef std::shared_ptr<RequestSpecificData> RequestSpecificDataPtr;
 
             struct TransactionTableEntry 
             {

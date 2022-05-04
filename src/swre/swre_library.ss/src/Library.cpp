@@ -357,7 +357,7 @@ namespace Internal
             const boost::wregex::flag_type regExpFlags = boost::regex::perl | boost::regex::icase;
 
             const Safir::Application::BackdoorCommandConstPtr cmd =
-                boost::static_pointer_cast<Safir::Application::BackdoorCommand>(message);
+                std::static_pointer_cast<Safir::Application::BackdoorCommand>(message);
 
             if (!cmd->NodeName().IsNull())
             {

@@ -799,7 +799,7 @@ void OdbcPersistor::RestoreAll()
                         const Safir::Dob::Typesystem::ObjectPtr object =
                             Safir::Dob::Typesystem::Serialization::ToObject(xml);
                         const Safir::Dob::EntityPtr entity =
-                            boost::dynamic_pointer_cast<Safir::Dob::Entity>(object);
+                            std::dynamic_pointer_cast<Safir::Dob::Entity>(object);
                         m_debug << "Successfully deserialized" <<std::endl;
 
                         injector.InitialSet(entity, entityId.GetInstanceId(), handler);
@@ -816,7 +816,7 @@ void OdbcPersistor::RestoreAll()
                         m_debug << "Restoring " << entityId << " from binary " <<std::endl;
 
                         Safir::Dob::EntityPtr entity =
-                            boost::dynamic_pointer_cast<Safir::Dob::Entity>
+                            std::dynamic_pointer_cast<Safir::Dob::Entity>
                             (Safir::Dob::Typesystem::ObjectFactory::Instance().CreateObject(data));
                         m_debug << "Successfully deserialized" <<std::endl;
 
@@ -831,7 +831,7 @@ void OdbcPersistor::RestoreAll()
                             m_debug << "Restoring " << entityId << " from binary " <<std::endl;
 
                             Safir::Dob::EntityPtr entity =
-                                boost::dynamic_pointer_cast<Safir::Dob::Entity>
+                                std::dynamic_pointer_cast<Safir::Dob::Entity>
                                 (Safir::Dob::Typesystem::ObjectFactory::Instance().CreateObject(data));
                             m_debug << "Successfully deserialized" <<std::endl;
 

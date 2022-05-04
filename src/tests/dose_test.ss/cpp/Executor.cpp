@@ -142,7 +142,7 @@ Executor::ExecuteAction(DoseTest::ActionPtr action)
                 std::wcout << "Open completed" << std::endl;
 
                 DoseTest::PartnerPtr partner =
-                    boost::static_pointer_cast<DoseTest::Partner>
+                    std::static_pointer_cast<DoseTest::Partner>
                     (m_controlConnection.Read(m_partnerEntityId).GetEntity());
                 if (partner->Incarnation().IsNull())
                 {
@@ -158,7 +158,7 @@ Executor::ExecuteAction(DoseTest::ActionPtr action)
                                                Safir::Dob::Typesystem::HandlerId(m_instance));
 
                 std::wcout << "Creating new consumers" << std::endl;
-                std::vector<boost::shared_ptr<Consumer> > newConsumers;
+                std::vector<ConsumerPtr> newConsumers;
                 for (int i = 0; i < 3; ++i)
                 {
                     newConsumers.push_back(ConsumerPtr(new Consumer(i,m_testConnectionName,m_instanceString)));
@@ -392,7 +392,7 @@ void Executor::HandleSequencerState(const DoseTest::SequencerPtr& sequencer)
             {
                 try
                 {
-                    partner->Address() = boost::static_pointer_cast<NodeInfo>
+                    partner->Address() = std::static_pointer_cast<NodeInfo>
                                          (m_controlConnection.Read(EntityId(NodeInfo::ClassTypeId,
                                                                             InstanceId(nodeId))).
                                           GetEntity())->IpAddress();

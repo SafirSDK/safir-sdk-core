@@ -321,7 +321,7 @@ void Test_Create_Routines()
 //    std::cout<<"Kodd: "<<xmlStr<<std::endl;
 
 //    Safir::Dob::Typesystem::ObjectPtr op=Safir::Dob::Typesystem::ObjectFactory::Instance().CreateObject(tmp);
-//    DotsTest::TestItemPtr tp=boost::dynamic_pointer_cast<DotsTest::TestItem>(op);
+//    DotsTest::TestItemPtr tp=std::dynamic_pointer_cast<DotsTest::TestItem>(op);
 //    if (tp->MyInt().IsNull())
 //        std::cout<<"MYINT null"<<std::endl;
 //    else
@@ -10206,7 +10206,7 @@ void TestSequences()
     std::wcout<<xml<<std::endl;
 
     std::wcout<<L"------ From Xml -----"<<std::endl;
-    DotsTest::MemberSequencesPtr fromXml=boost::dynamic_pointer_cast<DotsTest::MemberSequences>(ts::Serialization::ToObject(xml));
+    DotsTest::MemberSequencesPtr fromXml=std::dynamic_pointer_cast<DotsTest::MemberSequences>(ts::Serialization::ToObject(xml));
     PrintSequences(fromXml);
 
 
@@ -10215,7 +10215,7 @@ void TestSequences()
     std::wcout<<json<<std::endl;
 
     std::wcout<<L"------ From Json -----"<<std::endl;
-    DotsTest::MemberSequencesPtr fromJson=boost::dynamic_pointer_cast<DotsTest::MemberSequences>(ts::Serialization::ToObjectFromJson(json));
+    DotsTest::MemberSequencesPtr fromJson=std::dynamic_pointer_cast<DotsTest::MemberSequences>(ts::Serialization::ToObjectFromJson(json));
     PrintSequences(fromJson);
 }
 
@@ -10455,7 +10455,7 @@ void TestDictionaries()
     std::wcout<<xml<<std::endl;
 
     std::wcout<<L"------ From Xml -----"<<std::endl;
-    DotsTest::MemberDictionariesPtr fromXml=boost::dynamic_pointer_cast<DotsTest::MemberDictionaries>(ts::Serialization::ToObject(xml));
+    DotsTest::MemberDictionariesPtr fromXml=std::dynamic_pointer_cast<DotsTest::MemberDictionaries>(ts::Serialization::ToObject(xml));
     PrintDictionaries(fromXml);
 
 
@@ -10464,7 +10464,7 @@ void TestDictionaries()
     std::wcout<<json<<std::endl;
 
     std::wcout<<L"------ From Json -----"<<std::endl;
-    DotsTest::MemberDictionariesPtr fromJson=boost::dynamic_pointer_cast<DotsTest::MemberDictionaries>(ts::Serialization::ToObjectFromJson(json));
+    DotsTest::MemberDictionariesPtr fromJson=std::dynamic_pointer_cast<DotsTest::MemberDictionaries>(ts::Serialization::ToObjectFromJson(json));
     PrintDictionaries(fromJson);
 }
 
@@ -10485,7 +10485,7 @@ void Test_SequenceDiff()
     boost::shared_ptr<char> blobHolder(helper.ToBlob(),
                                        Safir::Dob::Typesystem::Internal::BlobOperations::Delete);
 
-    DotsTest::MemberSequencesPtr ms = boost::static_pointer_cast<DotsTest::MemberSequences>
+    DotsTest::MemberSequencesPtr ms = std::static_pointer_cast<DotsTest::MemberSequences>
         (Safir::Dob::Typesystem::ObjectFactory::Instance().CreateObject(blobHolder.get()));
 
     Check (ms->TestClassMember().IsChanged());
@@ -10606,7 +10606,7 @@ void run_serialization_checks(const T& before,
     BinarySerialization bin;
     Serialization::ToBinary(before,bin);
 
-    T after = boost::static_pointer_cast<typename T::element_type>(ObjectFactory::Instance().CreateObject(&bin[0]));
+    T after = std::static_pointer_cast<typename T::element_type>(ObjectFactory::Instance().CreateObject(&bin[0]));
     BOOST_TEST_MESSAGE("-- AFTER --");
     checks(after);
 }
@@ -10908,7 +10908,7 @@ BOOST_AUTO_TEST_CASE(MergeChanges_Objects)
     from->TestClassMember()->MyInt() = 10;
     from->TestClassMember().SetChangedHere(false);
     from->ObjectMember() = TestItem::Create();
-    boost::static_pointer_cast<TestItem>(from->ObjectMember().GetPtr())->MyInt() = 20;
+    std::static_pointer_cast<TestItem>(from->ObjectMember().GetPtr())->MyInt() = 20;
     from->ObjectMember().SetChangedHere(false);
 
     ts::Utilities::MergeChanges(into,from);
@@ -10917,7 +10917,7 @@ BOOST_AUTO_TEST_CASE(MergeChanges_Objects)
     BOOST_CHECK(into->TestClassMember()->MyInt().IsChanged());
     BOOST_CHECK(into->TestClassMember().IsChanged());
     BOOST_CHECK(into->TestClassMember().IsChangedHere());
-    BOOST_CHECK_EQUAL(boost::dynamic_pointer_cast<TestItem>(into->ObjectMember().GetPtr())->MyInt(),20);
+    BOOST_CHECK_EQUAL(std::dynamic_pointer_cast<TestItem>(into->ObjectMember().GetPtr())->MyInt(),20);
 }
 
 BOOST_AUTO_TEST_CASE(MergeChanges_Objects_BothHaveData)
@@ -10928,11 +10928,11 @@ BOOST_AUTO_TEST_CASE(MergeChanges_Objects_BothHaveData)
     from->ObjectMember() = TestItem::Create();
     from->SetChanged(false);
 
-    auto into = boost::static_pointer_cast<MemberTypes>(from->Clone());
+    auto into = std::static_pointer_cast<MemberTypes>(from->Clone());
 
     from->TestClassMember()->MyInt() = 10;
     from->TestClassMember().SetChangedHere(false);
-    boost::static_pointer_cast<TestItem>(from->ObjectMember().GetPtr())->MyInt() = 20;
+    std::static_pointer_cast<TestItem>(from->ObjectMember().GetPtr())->MyInt() = 20;
     from->ObjectMember().SetChangedHere(false);
 
     ts::Utilities::MergeChanges(into,from);
@@ -10941,7 +10941,7 @@ BOOST_AUTO_TEST_CASE(MergeChanges_Objects_BothHaveData)
     BOOST_CHECK(into->TestClassMember()->MyInt().IsChanged());
     BOOST_CHECK(into->TestClassMember().IsChanged());
     BOOST_CHECK(!into->TestClassMember().IsChangedHere());
-    BOOST_CHECK_EQUAL(boost::dynamic_pointer_cast<TestItem>(into->ObjectMember().GetPtr())->MyInt(),20);
+    BOOST_CHECK_EQUAL(std::dynamic_pointer_cast<TestItem>(into->ObjectMember().GetPtr())->MyInt(),20);
     BOOST_CHECK(!into->ObjectMember().IsChangedHere());
 }
 

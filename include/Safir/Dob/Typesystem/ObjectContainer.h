@@ -190,7 +190,7 @@ namespace Typesystem
     {
     public:
         /** Typedef for the contained smart pointer. */
-        typedef boost::shared_ptr<T> T_Ptr;
+        typedef std::shared_ptr<T> T_Ptr;
         typedef T_Ptr ContainedType;
 
         /**
@@ -213,7 +213,7 @@ namespace Typesystem
         {
             if (!other.IsNull())
             {
-                m_pObject = boost::dynamic_pointer_cast<T>(other.m_pObject->Clone());
+                m_pObject = std::dynamic_pointer_cast<T>(other.m_pObject->Clone());
                 if (m_pObject == NULL)
                 {
                     throw IncompatibleTypesException(L"The types are not compatible!",__WFILE__,__LINE__);
@@ -237,7 +237,7 @@ namespace Typesystem
             }
             else
             {
-                m_pObject = boost::dynamic_pointer_cast<T>(other.m_pObject->Clone());
+                m_pObject = std::dynamic_pointer_cast<T>(other.m_pObject->Clone());
                 if (m_pObject == NULL)
                 {
                     throw IncompatibleTypesException(L"The types are not compatible!",__WFILE__,__LINE__);
@@ -264,7 +264,7 @@ namespace Typesystem
         void SetPtr(const ObjectPtr & ptr) override
         {
             m_bIsChanged = true;
-            m_pObject = boost::dynamic_pointer_cast<T>(ptr);
+            m_pObject = std::dynamic_pointer_cast<T>(ptr);
             if (m_pObject == NULL)
             {
                 throw IncompatibleTypesException(L"The types are not compatible!",__WFILE__,__LINE__);
@@ -352,17 +352,17 @@ namespace Typesystem
 
         /** @} */
 
-        const ObjectPtr GetObjectPointer() const override {return boost::static_pointer_cast<Object>(m_pObject);}
+        const ObjectPtr GetObjectPointer() const override {return std::static_pointer_cast<Object>(m_pObject);}
         void SetObjectPointer(const ObjectPtr ptr) override
         {
 #ifndef NDEBUG
-            m_pObject = boost::dynamic_pointer_cast<T>(ptr);
+            m_pObject = std::dynamic_pointer_cast<T>(ptr);
             if(m_pObject == NULL)
             {
                 throw SoftwareViolationException(L"Failed to cast object pointer to expected type",__WFILE__,__LINE__);
             }
 #else
-            m_pObject = boost::static_pointer_cast<T>(ptr);
+            m_pObject = std::static_pointer_cast<T>(ptr);
 #endif
         }
         void ResetObjectPointer() override {m_pObject.reset();}
@@ -381,7 +381,7 @@ namespace Typesystem
     {
     public:
         /** Typedef for the contained smart pointer. */
-        typedef boost::shared_ptr<Object> T_Ptr;
+        typedef std::shared_ptr<Object> T_Ptr;
         typedef T_Ptr ContainedType;
 
         /**
@@ -518,7 +518,7 @@ namespace Typesystem
         {if (IsNull()) throw NullException(L"Object is null",__WFILE__,__LINE__); return m_pObject->GetMember(member,index);}
 
     private:
-        const ObjectPtr GetObjectPointer() const override {return boost::static_pointer_cast<Object>(m_pObject);}
+        const ObjectPtr GetObjectPointer() const override {return std::static_pointer_cast<Object>(m_pObject);}
         void SetObjectPointer(const ObjectPtr ptr) override
         {
             m_pObject = ptr;

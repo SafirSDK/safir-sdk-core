@@ -106,7 +106,7 @@ namespace Internal
             throw Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
         }
 
-        return boost::static_pointer_cast<Safir::Dob::Entity>
+        return std::static_pointer_cast<Safir::Dob::Entity>
             (Safir::Dob::Typesystem::ObjectFactory::Instance().CreateObject(m_currentBlob));
     }
 
@@ -134,7 +134,7 @@ namespace Internal
 
             m_currentBlobWithChangeInfo.reset(diffBlob,deleter);
         }
-        return boost::static_pointer_cast<Safir::Dob::Entity>
+        return std::static_pointer_cast<Safir::Dob::Entity>
             (Safir::Dob::Typesystem::ObjectFactory::Instance().CreateObject(m_currentBlobWithChangeInfo.get()));
     }
 
@@ -167,7 +167,7 @@ namespace Internal
 
         boost::shared_ptr<char> autoDeleter(blob,blobDeleter);
 
-        ConnectionInfoPtr connInfo = boost::static_pointer_cast<ConnectionInfo>
+        ConnectionInfoPtr connInfo = std::static_pointer_cast<ConnectionInfo>
             (Typesystem::ObjectFactory::Instance().CreateObject(blob));
 
         return connInfo;

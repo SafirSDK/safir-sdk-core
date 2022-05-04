@@ -90,7 +90,7 @@ QVariant NodeTableModel::data(const QModelIndex &index, int role) const
 
         try
         {
-            nodeInfo = boost::dynamic_pointer_cast<Safir::Dob::NodeInfo>(m_dobConnection.Read(m_nodeInfos.at(index.row())).GetEntity());
+            nodeInfo = std::dynamic_pointer_cast<Safir::Dob::NodeInfo>(m_dobConnection.Read(m_nodeInfos.at(index.row())).GetEntity());
         }
         catch (const Safir::Dob::NotFoundException& /*ex*/)
         {
@@ -122,7 +122,7 @@ QVariant NodeTableModel::data(const QModelIndex &index, int role) const
 
         try
         {
-            nodeInfo = boost::dynamic_pointer_cast<Safir::Dob::NodeInfo>(m_dobConnection.Read(m_nodeInfos.at(index.row())).GetEntity());
+            nodeInfo = std::dynamic_pointer_cast<Safir::Dob::NodeInfo>(m_dobConnection.Read(m_nodeInfos.at(index.row())).GetEntity());
         }
         catch (const Safir::Dob::NotFoundException& /*ex*/)
         {

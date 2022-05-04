@@ -55,7 +55,7 @@ namespace Internal
 {
     //forward declaration
     class Controller;
-    typedef boost::shared_ptr<Controller> ControllerPtr;
+    typedef std::shared_ptr<Controller> ControllerPtr;
 
 
     class ControllerTable

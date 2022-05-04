@@ -267,7 +267,7 @@ namespace Internal
 
 
         ENSURE(m_dispatchThread == NULL, << "DispatchThread was non-NULL when Connect was called!");
-        m_dispatchThread.reset(new DispatchThread(m_connection->Id(), m_connectionName, dispatcher, onDispatchCb));
+        m_dispatchThread = std::make_shared<DispatchThread>(m_connection->Id(), m_connectionName, dispatcher, onDispatchCb);;
 
         m_dispatchThread->Start();
 

@@ -23,7 +23,6 @@
 ******************************************************************************/
 #pragma once
 #include <memory>
-#include <boost/shared_ptr.hpp>
 
 namespace Safir
 {

@@ -46,7 +46,7 @@ private:
     boost::filesystem::path m_douDir;
     boost::filesystem::path m_srcDir;
     boost::filesystem::path m_outDir;
-    boost::shared_ptr<const Safir::Dob::Typesystem::ToolSupport::TypeRepository> m_rep;
+    std::shared_ptr<const Safir::Dob::Typesystem::ToolSupport::TypeRepository> m_rep;
 
     void FindTags(const std::string& str, std::vector< std::pair<size_t, size_t> >& objects)
     {

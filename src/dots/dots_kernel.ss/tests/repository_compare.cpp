@@ -25,7 +25,7 @@ int main(int argc, char* argv[])
     paths.push_back(path);
 
     std::ostringstream lom;
-    boost::shared_ptr<const Safir::Dob::Typesystem::ToolSupport::TypeRepository> local=Safir::Dob::Typesystem::ToolSupport::ParseTypeDefinitions(path);
+    std::shared_ptr<const Safir::Dob::Typesystem::ToolSupport::TypeRepository> local=Safir::Dob::Typesystem::ToolSupport::ParseTypeDefinitions(path);
 
     if (local->GetNumberOfClasses() <= 1) //object is predefined
     {

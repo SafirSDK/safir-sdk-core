@@ -57,7 +57,7 @@ namespace ToolSupport
             size_t referencingIndex; //referencing parameter index if applicable
             Reference() {}
             Reference(const ClassDescriptionLocalPtr& cl,
-                      const boost::shared_ptr<SubItem>& sub,
+                      const std::shared_ptr<SubItem>& sub,
                       size_t ix)
                 :referencingClass(cl.get())
                 ,referencingItem(sub.get())
@@ -76,7 +76,7 @@ namespace ToolSupport
 
             ParameterReference() {}
             ParameterReference(const ClassDescriptionLocalPtr& referencingClass,
-                               const boost::shared_ptr<ReferencedSubItem>& referencingSubItem,
+                               const std::shared_ptr<ReferencedSubItem>& referencingSubItem,
                                size_t referencingIndex,
                                const std::string& paramName,
                                const std::string& paramKey)
@@ -94,14 +94,14 @@ namespace ToolSupport
         {            
             Reference<ParameterDescriptionLocal> referee;
             boost::property_tree::ptree* obj;
-            boost::shared_ptr<boost::property_tree::ptree> propertyTree; //prevent from destruction
+            std::shared_ptr<boost::property_tree::ptree> propertyTree; //prevent from destruction
             bool deprecatedXmlFormat;
             ObjectParameter(){}
             ObjectParameter(const ClassDescriptionLocalPtr& class_,
                             const ParameterDescriptionLocalPtr& param,
                             size_t paramArrayIndex,
                             boost::property_tree::ptree* obj_,
-                            const boost::shared_ptr<boost::property_tree::ptree>& pt)
+                            const std::shared_ptr<boost::property_tree::ptree>& pt)
                 :referee(class_, param, paramArrayIndex)
                 ,obj(obj_)
                 ,propertyTree(pt)
@@ -114,8 +114,8 @@ namespace ToolSupport
         // Fields
         //-------------------------------------------------------------------------
         mutable std::string currentPath; //current full path filename
-        boost::shared_ptr<boost::property_tree::ptree> propertyTree; //the currently parsed propertyTree
-        boost::shared_ptr<RepositoryLocal> repository;
+        std::shared_ptr<boost::property_tree::ptree> propertyTree; //the currently parsed propertyTree
+        std::shared_ptr<RepositoryLocal> repository;
 
         //Pointers to quickly access the unit we are currently parsing.
         ClassDescriptionLocalPtr lastInsertedClass;
@@ -137,12 +137,12 @@ namespace ToolSupport
         //----------------------------------------------------------------------------------
         //Constructor
         //----------------------------------------------------------------------------------
-        ParseState(const boost::shared_ptr<RepositoryLocal>& rep)
+        ParseState(const std::shared_ptr<RepositoryLocal>& rep)
             :repository(rep)
         {
         }
     };
-    typedef boost::shared_ptr<ParseState> ParseStatePtr; //Ptr to ParseState
+    typedef std::shared_ptr<ParseState> ParseStatePtr; //Ptr to ParseState
 }
 }
 }

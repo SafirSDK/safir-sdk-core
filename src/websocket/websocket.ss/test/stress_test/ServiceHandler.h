@@ -36,7 +36,6 @@
 #pragma warning(disable: 4244)
 #endif
 
-#include <boost/make_shared.hpp>
 #include <boost/thread.hpp>
 #include <boost/function.hpp>
 #include <websocketpp/config/asio_no_tls_client.hpp>
@@ -80,7 +79,7 @@ public:
         }
         m_client.connect(m_con);
 
-        m_runner=boost::make_shared<boost::thread>([=]{m_client.run();});
+        m_runner=std::make_shared<boost::thread>([=]{m_client.run();});
     }
 
     void Stop()
@@ -94,7 +93,7 @@ private:
     client m_client;
     client::connection_ptr m_con;
     boost::int64_t m_numHandledRequests;
-    boost::shared_ptr<boost::thread> m_runner;
+    std::shared_ptr<boost::thread> m_runner;
 
     void OnOpen(websocketpp::connection_hdl /*hdl*/)
     {

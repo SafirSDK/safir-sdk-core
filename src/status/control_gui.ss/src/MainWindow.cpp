@@ -159,7 +159,7 @@ void MainWindow::OnNewEntity(const Safir::Dob::EntityProxy entityProxy)
     case Safir::Control::Status::ClassTypeId:
     {
         Safir::Control::StatusPtr status
-                = boost::dynamic_pointer_cast<Safir::Control::Status>(entityProxy.GetEntity());
+                = std::dynamic_pointer_cast<Safir::Control::Status>(entityProxy.GetEntity());
 
         if (status)
         {
@@ -178,7 +178,7 @@ void MainWindow::OnUpdatedEntity(const Safir::Dob::EntityProxy entityProxy)
     case Safir::Control::Status::ClassTypeId:
     {
         Safir::Control::StatusPtr status
-                = boost::dynamic_pointer_cast<Safir::Control::Status>(entityProxy.GetEntity());
+                = std::dynamic_pointer_cast<Safir::Control::Status>(entityProxy.GetEntity());
 
         if (status)
         {

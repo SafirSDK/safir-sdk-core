@@ -67,7 +67,7 @@ public:
         }
 
         //responseSender not found, return nullPtr
-        boost::shared_ptr<sd::ResponseSender> nullSender;
+        std::shared_ptr<sd::ResponseSender> nullSender;
         return nullSender;
     }
 

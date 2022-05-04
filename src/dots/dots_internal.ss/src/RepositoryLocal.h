@@ -94,7 +94,7 @@ namespace ToolSupport
     typedef std::vector<MemberValue> MemberValueVector;
 
     class ClassDescriptionLocal;
-    typedef boost::shared_ptr<ClassDescriptionLocal> ClassDescriptionLocalPtr;
+    typedef std::shared_ptr<ClassDescriptionLocal> ClassDescriptionLocalPtr;
 
     class MemberDescriptionLocal : public MemberDescription
     {
@@ -130,7 +130,7 @@ namespace ToolSupport
         DotsC_TypeId typeId; //TypeId belonging to the type of this member. Only valid if memberType is object or enum.
         DotsC_TypeId keyTypeId; //TypeId belonging to the type of this member. Only valid if memberType is object or enum.
     };
-    typedef boost::shared_ptr<MemberDescriptionLocal> MemberDescriptionLocalPtr;
+    typedef std::shared_ptr<MemberDescriptionLocal> MemberDescriptionLocalPtr;
 
     class PropertyDescriptionLocal : public PropertyDescription
     {
@@ -155,7 +155,7 @@ namespace ToolSupport
         std::string name;
         std::vector<MemberDescriptionLocalPtr> members;
     };
-    typedef boost::shared_ptr<PropertyDescriptionLocal> PropertyDescriptionLocalPtr;
+    typedef std::shared_ptr<PropertyDescriptionLocal> PropertyDescriptionLocalPtr;
 
     class ExceptionDescriptionLocal : public ExceptionDescription
     {
@@ -180,7 +180,7 @@ namespace ToolSupport
         std::string baseClass;
         const ExceptionDescriptionLocal* base;
     };
-    typedef boost::shared_ptr<ExceptionDescriptionLocal> ExceptionDescriptionLocalPtr;
+    typedef std::shared_ptr<ExceptionDescriptionLocal> ExceptionDescriptionLocalPtr;
 
     class ParameterDescriptionLocal : public ParameterDescription
     {
@@ -306,7 +306,7 @@ namespace ToolSupport
         DotsC_TypeId typeId; //TypeId belonging to the value of this parameter. Only valid if parameter is object or enum.
         DotsC_TypeId keyTypeId; //TypeId belonging to the key. Only valid if key is enumeration.
     };
-    typedef boost::shared_ptr<ParameterDescriptionLocal> ParameterDescriptionLocalPtr;
+    typedef std::shared_ptr<ParameterDescriptionLocal> ParameterDescriptionLocalPtr;
 
     class EnumDescriptionLocal : public EnumDescription
     {
@@ -334,7 +334,7 @@ namespace ToolSupport
 
         DotsC_TypeId checksum;
     };
-    typedef boost::shared_ptr<EnumDescriptionLocal> EnumDescriptionLocalPtr;
+    typedef std::shared_ptr<EnumDescriptionLocal> EnumDescriptionLocalPtr;
 
     class MemberMappingLocal : public MemberMappingDescription
     {
@@ -356,7 +356,7 @@ namespace ToolSupport
         int paramIndex;
         std::vector< std::pair<DotsC_MemberIndex, DotsC_Int32> > memberRef;
     };
-    typedef boost::shared_ptr<MemberMappingLocal> MemberMappingLocalPtr;
+    typedef std::shared_ptr<MemberMappingLocal> MemberMappingLocalPtr;
 
     class PropertyMappingDescriptionLocal : public PropertyMappingDescription
     {
@@ -379,7 +379,7 @@ namespace ToolSupport
         ClassDescriptionLocal* class_;
         std::vector<MemberMappingLocalPtr> memberMappings;
     };
-    typedef boost::shared_ptr<PropertyMappingDescriptionLocal> PropertyMappingDescriptionLocalPtr;
+    typedef std::shared_ptr<PropertyMappingDescriptionLocal> PropertyMappingDescriptionLocalPtr;
 
     class CreateRoutineDescriptionLocal : public CreateRoutineDescription
     {
@@ -410,7 +410,7 @@ namespace ToolSupport
         ClassDescriptionLocal* parent;
         std::string signature;
     };
-    typedef boost::shared_ptr<CreateRoutineDescriptionLocal> CreateRoutineDescriptionLocalPtr;
+    typedef std::shared_ptr<CreateRoutineDescriptionLocal> CreateRoutineDescriptionLocalPtr;
 
     class ClassDescriptionLocal : public ClassDescription
     {
@@ -515,9 +515,9 @@ namespace ToolSupport
         }
 
         template <class Key, class Val>
-        static Val* GetPtr(const std::unordered_map< Key, boost::shared_ptr<Val> >& m, Key key)
+        static Val* GetPtr(const std::unordered_map< Key, std::shared_ptr<Val> >& m, Key key)
         {
-            typename std::unordered_map< Key, boost::shared_ptr<Val> >::const_iterator it=m.find(key);
+            typename std::unordered_map< Key, std::shared_ptr<Val> >::const_iterator it=m.find(key);
             if (it!=m.end())
             {
                 return it->second.get();

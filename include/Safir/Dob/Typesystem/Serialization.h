@@ -25,7 +25,7 @@
 #ifndef __DOTS_SERIALIZATION_H__
 #define __DOTS_SERIALIZATION_H__
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <Safir/Dob/Typesystem/Defs.h>
 #include <Safir/Dob/Typesystem/Exceptions.h>
 
@@ -39,7 +39,7 @@ namespace Typesystem
     class Object;
 
     /** A smart pointer to an Object. */
-    typedef boost::shared_ptr<Object> ObjectPtr;
+    typedef std::shared_ptr<Object> ObjectPtr;
 
     /**
     * Functions for serializing objects to binary, XML and JSON forms.
@@ -72,7 +72,7 @@ namespace Typesystem
          * It uses the ObjectFactory to accomplish this.
          *
          * @param [in] xml - The xml to convert.
-         * @return A boost::shared_ptr to the new object
+         * @return A std::shared_ptr to the new object
          * @exception IllegalValueException If there is something wrong with the XML or if the type
          *                                  represented by the serialization isn't found
          *                                  in the ObjectFactory.
@@ -86,7 +86,7 @@ namespace Typesystem
          * It uses the ObjectFactory to accomplish this.
          *
          * @param [in] json - The json to convert.
-         * @return A boost::shared_ptr to the new object
+         * @return A std::shared_ptr to the new object
          * @exception IllegalValueException If there is something wrong with the JSON or if the type
          *                                  represented by the serialization isn't found
          *                                  in the ObjectFactory.
@@ -147,7 +147,7 @@ namespace Typesystem
          * pass it to the ObjectFactory instead.
          *
          * @param [in] binary - The binary serialization to deserialize.
-         * @return A boost::shared_ptr to the new object
+         * @return A std::shared_ptr to the new object
          * @exception IllegalValueException If the type represented by the serialization isn't found
          *                                   in the ObjectFactory.
          */

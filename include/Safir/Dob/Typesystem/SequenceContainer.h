@@ -259,9 +259,9 @@ namespace Typesystem
             static U Copy(const U& val) {return val;}
         };
 
-        template <class U> struct SequenceCopyHelper< boost::shared_ptr<U> >
+        template <class U> struct SequenceCopyHelper< std::shared_ptr<U> >
         {
-            static boost::shared_ptr<U> Copy(const boost::shared_ptr<U> & val) {return boost::static_pointer_cast<U>(val->Clone());}
+            static std::shared_ptr<U> Copy(const std::shared_ptr<U> & val) {return std::static_pointer_cast<U>(val->Clone());}
         };
 
         StorageType m_values;
@@ -700,13 +700,13 @@ namespace Typesystem
 
     template <class T>
     class GenericObjectSequenceContainer
-        : public SequenceContainer<boost::shared_ptr<T> >
+        : public SequenceContainer<std::shared_ptr<T> >
         , public GenericObjectSequenceContainerBase
     {
-        typedef SequenceContainer<boost::shared_ptr<T> > Base;
+        typedef SequenceContainer<std::shared_ptr<T> > Base;
     public:
         /** Typedef for the contained smart pointer. */
-        typedef boost::shared_ptr<T> T_Ptr;
+        typedef std::shared_ptr<T> T_Ptr;
 
         bool IsChanged() const override
         {
@@ -775,7 +775,7 @@ namespace Typesystem
          * @return Const reference to a value.
          * @throws std::out_of_range exception if index is not in range
          */
-        boost::shared_ptr<const T> GetPtr(const size_t index) const
+        std::shared_ptr<const T> GetPtr(const size_t index) const
         {
             return Base::at(index);
         }
@@ -799,7 +799,7 @@ namespace Typesystem
 
         void SetObjectPointer(const size_t index, const ObjectPtr& ptr) override
         {
-            const auto tptr = boost::dynamic_pointer_cast<T>(ptr);
+            const auto tptr = std::dynamic_pointer_cast<T>(ptr);
             if (tptr == nullptr)
             {
                 throw SoftwareViolationException(L"Invalid call to SetPtr, incompatible types!", __WFILE__,__LINE__);
@@ -809,7 +809,7 @@ namespace Typesystem
 
         void PushBackObjectPointer(const ObjectPtr& ptr) override
         {
-            const auto tptr = boost::dynamic_pointer_cast<T>(ptr);
+            const auto tptr = std::dynamic_pointer_cast<T>(ptr);
             if (tptr == nullptr)
             {
                 throw SoftwareViolationException(L"Invalid call to PushBackObjectPointer, incompatible types!", __WFILE__,__LINE__);

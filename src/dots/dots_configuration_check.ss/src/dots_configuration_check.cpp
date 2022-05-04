@@ -227,7 +227,7 @@ private:
 class CheckConfigurationLocal
 {
 public:
-    typedef boost::shared_ptr<const Safir::Dob::Typesystem::ToolSupport::TypeRepository> RepPtr;
+    typedef std::shared_ptr<const Safir::Dob::Typesystem::ToolSupport::TypeRepository> RepPtr;
     static void Run(const CmdLine& cmd)
     {
         RepPtr rep;

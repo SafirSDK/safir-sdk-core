@@ -41,7 +41,7 @@ namespace sup = Safir::Dob::Typesystem::ToolSupport;
 
 using namespace Safir::Websocket::Typesystem;
 
-typedef boost::shared_ptr<const Safir::Dob::Typesystem::ToolSupport::TypeRepository> Repository;
+typedef std::shared_ptr<const Safir::Dob::Typesystem::ToolSupport::TypeRepository> Repository;
 
 namespace Typesystem
 {

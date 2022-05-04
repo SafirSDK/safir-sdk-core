@@ -70,6 +70,6 @@ Subscriber::Subscriber():
 void Subscriber::HandleEntity(const Safir::Dob::EntityProxy& entityProxy)
 {
     DoseStressTest::EntityWithAckPtr rootEnt =
-        boost::static_pointer_cast<DoseStressTest::EntityWithAck>(entityProxy.GetEntity());
+        std::static_pointer_cast<DoseStressTest::EntityWithAck>(entityProxy.GetEntity());
     m_received[rootEnt->SequenceNumber()] = true;
 }

@@ -84,7 +84,7 @@ namespace Internal
     const Dob::EntityPtr EntityRequestProxyImpl::GetRequest() const
     {
         ENSURE(m_requestBlob != NULL, << "Not possible to GetRequest on DeleteRequests!");
-        return boost::static_pointer_cast<Safir::Dob::Entity>
+        return std::static_pointer_cast<Safir::Dob::Entity>
             (Safir::Dob::Typesystem::ObjectFactory::Instance().CreateObject(m_requestBlob));
     }
 
@@ -103,7 +103,7 @@ namespace Internal
 
         boost::shared_ptr<char> autoDeleter(blob,blobDeleter);
 
-        ConnectionInfoPtr connInfo = boost::static_pointer_cast<ConnectionInfo>
+        ConnectionInfoPtr connInfo = std::static_pointer_cast<ConnectionInfo>
             (Typesystem::ObjectFactory::Instance().CreateObject(blob));
 
         return connInfo;

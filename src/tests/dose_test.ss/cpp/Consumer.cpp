@@ -138,24 +138,24 @@ const std::wstring CheckBinaryMember(const Safir::Dob::Typesystem::ObjectPtr & o
 {
     if (object->GetTypeId() == DoseTest::ComplexGlobalMessage::ClassTypeId)
     {
-        CheckBinaryMemberInternal(boost::static_pointer_cast<DoseTest::ComplexGlobalMessage>(object)->
+        CheckBinaryMemberInternal(std::static_pointer_cast<DoseTest::ComplexGlobalMessage>(object)->
                                     BinaryMember().GetContainer());
     }
     else if (object->GetTypeId() == DoseTest::ComplexGlobalEntity::ClassTypeId)
     {
-        CheckBinaryMemberInternal(boost::static_pointer_cast<DoseTest::ComplexGlobalEntity>(object)->
+        CheckBinaryMemberInternal(std::static_pointer_cast<DoseTest::ComplexGlobalEntity>(object)->
                                     BinaryMember().GetContainer());
 
         //in the entity we use the binary array as well
         for (int i = 0; i < DoseTest::ComplexGlobalEntity::BinaryArrayMemberArraySize(); ++i)
         {
-            CheckBinaryMemberInternal(boost::static_pointer_cast<DoseTest::ComplexGlobalEntity>(object)->
+            CheckBinaryMemberInternal(std::static_pointer_cast<DoseTest::ComplexGlobalEntity>(object)->
                                         BinaryArrayMember()[i]);
         }
     }
     else if (object->GetTypeId() == DoseTest::ComplexGlobalService::ClassTypeId)
     {
-        CheckBinaryMemberInternal(boost::static_pointer_cast<DoseTest::ComplexGlobalService>(object)->
+        CheckBinaryMemberInternal(std::static_pointer_cast<DoseTest::ComplexGlobalService>(object)->
                                     BinaryMember().GetContainer());
     }
 
@@ -174,7 +174,7 @@ void Consumer::OnMessage(const Safir::Dob::MessageProxy messageProxy)
     m_connection.ExitDispatch();
     ExecuteCallbackActions(Safir::Dob::CallbackId::OnMessage);
 
-    DoseTest::RootMessagePtr msg = boost::dynamic_pointer_cast<DoseTest::RootMessage>(messageProxy.GetMessage());
+    DoseTest::RootMessagePtr msg = std::dynamic_pointer_cast<DoseTest::RootMessage>(messageProxy.GetMessage());
 
     std::wstring xml;
     if (NeedBinaryCheck(msg))
@@ -471,7 +471,7 @@ void Consumer::OnServiceRequest(const Safir::Dob::ServiceRequestProxy serviceReq
     m_responseSender = responseSender;
     ExecuteCallbackActions(Safir::Dob::CallbackId::OnServiceRequest);
 
-    DoseTest::RootServicePtr svc = boost::dynamic_pointer_cast<DoseTest::RootService>(serviceRequestProxy.GetRequest());
+    DoseTest::RootServicePtr svc = std::dynamic_pointer_cast<DoseTest::RootService>(serviceRequestProxy.GetRequest());
 
     std::wstring xml;
     if (NeedBinaryCheck(svc))
@@ -511,7 +511,7 @@ Consumer::OnCreateRequest(const Safir::Dob::EntityRequestProxy entityProxy,
     m_responseSenderDiscarded = false;
     ExecuteCallbackActions(Safir::Dob::CallbackId::OnCreateRequest);
 
-    DoseTest::RootEntityPtr req = boost::dynamic_pointer_cast<DoseTest::RootEntity>(entityProxy.GetRequest());
+    DoseTest::RootEntityPtr req = std::dynamic_pointer_cast<DoseTest::RootEntity>(entityProxy.GetRequest());
 
     std::wstring xml;
     if (NeedBinaryCheck(req))
@@ -593,7 +593,7 @@ Consumer::OnUpdateRequest(const Safir::Dob::EntityRequestProxy entityProxy,
     m_responseSenderDiscarded = false;
     ExecuteCallbackActions(Safir::Dob::CallbackId::OnUpdateRequest);
 
-    DoseTest::RootEntityPtr req = boost::dynamic_pointer_cast<DoseTest::RootEntity>(entityProxy.GetRequest());
+    DoseTest::RootEntityPtr req = std::dynamic_pointer_cast<DoseTest::RootEntity>(entityProxy.GetRequest());
 
     std::wstring xml;
     if (NeedBinaryCheck(req))
@@ -741,7 +741,7 @@ Safir::Dob::Typesystem::Int64 Consumer::GetTimestamp(const DoseTest::ActionPtr& 
     const Safir::Dob::Typesystem::Int64 delta = action->TimestampDelta();
     const Safir::Dob::EntityProxy ep = m_connection.Read(entityId);
 
-    DoseTest::LastInjectionTimestampPtr ent = boost::static_pointer_cast<DoseTest::LastInjectionTimestamp>(ep.GetEntity());
+    DoseTest::LastInjectionTimestampPtr ent = std::static_pointer_cast<DoseTest::LastInjectionTimestamp>(ep.GetEntity());
 
     const Safir::Dob::Typesystem::Int64 newVal = ent->Timestamp() + delta;
 
@@ -770,7 +770,7 @@ void Consumer::ExecuteAction(DoseTest::ActionPtr action)
                 {
                 case DoseTest::ActionEnum::SendResponse:
                     {
-                        Safir::Dob::ResponsePtr ptr=boost::static_pointer_cast<Safir::Dob::Response>(action->Object().GetPtr());
+                        Safir::Dob::ResponsePtr ptr=std::static_pointer_cast<Safir::Dob::Response>(action->Object().GetPtr());
                         m_responseSender->Send(ptr);
                     }
                     break;
@@ -930,7 +930,7 @@ void Consumer::ExecuteAction(DoseTest::ActionPtr action)
                     break;
                 case DoseTest::ActionEnum::SendMessage:
                     {
-                        m_connection.Send(boost::static_pointer_cast<Safir::Dob::Message>(action->Object().GetPtr()),
+                        m_connection.Send(std::static_pointer_cast<Safir::Dob::Message>(action->Object().GetPtr()),
                                           action->Channel(),
                                           this);
                     }
@@ -938,7 +938,7 @@ void Consumer::ExecuteAction(DoseTest::ActionPtr action)
                 case DoseTest::ActionEnum::ServiceRequest:
                     {
                         m_latestRequestId = m_connection.ServiceRequest
-                            (boost::static_pointer_cast<Safir::Dob::Service>(action->Object().GetPtr()),
+                            (std::static_pointer_cast<Safir::Dob::Service>(action->Object().GetPtr()),
                              action->Handler(),
                              this);
                     }
@@ -949,7 +949,7 @@ void Consumer::ExecuteAction(DoseTest::ActionPtr action)
                         if (!action->Instance().IsNull())
                         {
                             m_latestRequestId = m_connection.CreateRequest
-                                (boost::static_pointer_cast<Safir::Dob::Entity>(action->Object().GetPtr()),
+                                (std::static_pointer_cast<Safir::Dob::Entity>(action->Object().GetPtr()),
                                  action->Instance(),
                                  action->Handler(),
                                  this);
@@ -957,7 +957,7 @@ void Consumer::ExecuteAction(DoseTest::ActionPtr action)
                         else
                         {
                             m_latestRequestId = m_connection.CreateRequest
-                                (boost::static_pointer_cast<Safir::Dob::Entity>(action->Object().GetPtr()),
+                                (std::static_pointer_cast<Safir::Dob::Entity>(action->Object().GetPtr()),
                                  action->Handler(),
                                  this);
                         }
@@ -966,7 +966,7 @@ void Consumer::ExecuteAction(DoseTest::ActionPtr action)
                 case DoseTest::ActionEnum::UpdateRequest:
                     {
                         m_latestRequestId = m_connection.UpdateRequest
-                            (boost::static_pointer_cast<Safir::Dob::Entity>(action->Object().GetPtr()),
+                            (std::static_pointer_cast<Safir::Dob::Entity>(action->Object().GetPtr()),
                              action->Instance(),
                              this);
                     }
@@ -978,7 +978,7 @@ void Consumer::ExecuteAction(DoseTest::ActionPtr action)
                     break;
                 case DoseTest::ActionEnum::SetAll:
                     {
-                        m_connection.SetAll(boost::static_pointer_cast<Safir::Dob::Entity>(action->Object().GetPtr()),
+                        m_connection.SetAll(std::static_pointer_cast<Safir::Dob::Entity>(action->Object().GetPtr()),
                                             action->Instance(),
                                             action->Handler());
                     }
@@ -986,14 +986,14 @@ void Consumer::ExecuteAction(DoseTest::ActionPtr action)
                 case DoseTest::ActionEnum::InitialSet:
                     {
                         Safir::Dob::ConnectionAspectInjector(m_connection).InitialSet
-                            (boost::static_pointer_cast<Safir::Dob::Entity>(action->Object().GetPtr()),
+                            (std::static_pointer_cast<Safir::Dob::Entity>(action->Object().GetPtr()),
                              action->Instance(),
                              action->Handler());
                     }
                     break;
                 case DoseTest::ActionEnum::SetChanges:
                     {
-                        m_connection.SetChanges(boost::static_pointer_cast<Safir::Dob::Entity>(action->Object().GetPtr()),
+                        m_connection.SetChanges(std::static_pointer_cast<Safir::Dob::Entity>(action->Object().GetPtr()),
                                                 action->Instance(),
                                                 action->Handler());
                     }
@@ -1001,7 +1001,7 @@ void Consumer::ExecuteAction(DoseTest::ActionPtr action)
                 case DoseTest::ActionEnum::InjectChanges:
                     {
                         Safir::Dob::ConnectionAspectInjector(m_connection).InjectChanges
-                            (boost::static_pointer_cast<Safir::Dob::Entity>(action->Object().GetPtr()),
+                            (std::static_pointer_cast<Safir::Dob::Entity>(action->Object().GetPtr()),
                              action->Instance(),
                              GetTimestamp(action),
                              action->Handler());

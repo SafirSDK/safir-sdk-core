@@ -30,7 +30,6 @@
 #include <Safir/Dob/Internal/ConsumerId.h>
 
 #include <boost/noncopyable.hpp>
-#include <boost/enable_shared_from_this.hpp>
 
 #if defined _MSC_VER
   #pragma warning (push)
@@ -55,7 +54,7 @@ namespace Internal
      * destroy the object.
      */
     class DispatchThread:
-        public boost::enable_shared_from_this<DispatchThread>,
+        public std::enable_shared_from_this<DispatchThread>,
         private boost::noncopyable
     {
     public:

@@ -53,7 +53,7 @@ void Requestor::OnResponse(const Safir::Dob::ResponseProxy responseProxy)
 
         if (Safir::Dob::Typesystem::Operations::IsOfType(responseProxy.GetTypeId(), Safir::Dob::EntityIdResponse::ClassTypeId))
         {
-            Safir::Dob::EntityIdResponsePtr entityResponse = boost::static_pointer_cast<Safir::Dob::EntityIdResponse>(responseProxy.GetResponse());
+            Safir::Dob::EntityIdResponsePtr entityResponse = std::static_pointer_cast<Safir::Dob::EntityIdResponse>(responseProxy.GetResponse());
             // Create response, send delete
             try
             {

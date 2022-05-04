@@ -24,7 +24,6 @@
 #include <set>
 #include <iostream>
 #include <atomic>
-#include <boost/make_shared.hpp>
 #include "../../src/PoolDistributionRequestSender.h"
 #include "../../src/PoolDistributionHandler.h"
 
@@ -85,7 +84,7 @@ private:
 BOOST_AUTO_TEST_CASE( PoolDistributionRequestSenderTest )
 {
     boost::asio::io_service io;
-    auto work=boost::make_shared<boost::asio::io_service::work>(io);
+    auto work=std::make_shared<boost::asio::io_service::work>(io);
 
     boost::thread_group threads;
     for (int i = 0; i < 2; ++i)
@@ -171,7 +170,7 @@ BOOST_AUTO_TEST_CASE( PoolDistributionHandlerTest )
     };
 
     boost::asio::io_service io;
-    auto work=boost::make_shared<boost::asio::io_service::work>(io);
+    auto work=std::make_shared<boost::asio::io_service::work>(io);
 
     boost::thread_group threads;
     for (int i = 0; i < 2; ++i)

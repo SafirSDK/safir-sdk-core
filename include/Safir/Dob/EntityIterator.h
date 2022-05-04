@@ -91,7 +91,7 @@ namespace Dob
         long m_ctrl;
         Safir::Dob::Typesystem::Int32 m_iteratorId;
 
-        mutable boost::shared_ptr<EntityProxy> m_dereferenced;
+        mutable std::shared_ptr<EntityProxy> m_dereferenced;
     };
 }
 }

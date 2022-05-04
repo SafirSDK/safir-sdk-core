@@ -47,7 +47,7 @@ void Provider::OnServiceRequest(const Safir::Dob::ServiceRequestProxy serviceReq
                                 Safir::Dob::ResponseSenderPtr         responseSender)
 {
     DoseStressTest::ServicePtr svc =
-        boost::static_pointer_cast<DoseStressTest::Service>(serviceRequestProxy.GetRequest());
+        std::static_pointer_cast<DoseStressTest::Service>(serviceRequestProxy.GetRequest());
 
     switch (svc->GetTypeId())
     {

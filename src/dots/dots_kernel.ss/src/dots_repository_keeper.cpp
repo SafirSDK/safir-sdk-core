@@ -129,7 +129,7 @@ namespace Internal
         //-------------------------------------------------
         //Parse dou and dom files into local repository
         //-------------------------------------------------
-        boost::shared_ptr<const Safir::Dob::Typesystem::ToolSupport::TypeRepository> localRepository;
+        std::shared_ptr<const Safir::Dob::Typesystem::ToolSupport::TypeRepository> localRepository;
         try
         {
             localRepository=Safir::Dob::Typesystem::ToolSupport::ParseTypeDefinitions(m_paths);

@@ -535,9 +535,9 @@ namespace ToolSupport
     }
 
     template <class Key, class Val>
-    Val* GetPtr(const std::unordered_map< Key, boost::shared_ptr<Val> >& m, Key key)
+    Val* GetPtr(const std::unordered_map< Key, std::shared_ptr<Val> >& m, Key key)
     {
-        typename std::unordered_map< Key, boost::shared_ptr<Val> >::const_iterator it=m.find(key);
+        typename std::unordered_map< Key, std::shared_ptr<Val> >::const_iterator it=m.find(key);
         if (it!=m.end())
         {
             return it->second.get();
@@ -556,7 +556,7 @@ namespace ToolSupport
     }
 
     template <class Descr>
-    void SetupBaseClass(std::unordered_map< DotsC_TypeId, boost::shared_ptr<Descr> >& m,
+    void SetupBaseClass(std::unordered_map< DotsC_TypeId, std::shared_ptr<Descr> >& m,
                         std::set<DotsC_TypeId>& endConditions,
                         Descr* d,
                         const std::function<void(Descr*, Descr*)>& setBase,
@@ -592,7 +592,7 @@ namespace ToolSupport
     }
 
     template <class Descr>
-    void SetupMemberTypes(boost::shared_ptr<Descr>& d, const boost::shared_ptr<RepositoryLocal>& repository)
+    void SetupMemberTypes(std::shared_ptr<Descr>& d, const std::shared_ptr<RepositoryLocal>& repository)
     {
         for (std::vector<MemberDescriptionLocalPtr>::iterator memberIt=d->members.begin(); memberIt!=d->members.end(); ++memberIt)
         {
@@ -872,60 +872,60 @@ namespace ToolSupport
     void DouCompletionAlgorithm::operator()(const ParseState& state)
     {
         //Add predefined types
-        ClassDescriptionLocalPtr obj=boost::make_shared<ClassDescriptionLocal>();
+        ClassDescriptionLocalPtr obj=std::make_shared<ClassDescriptionLocal>();
         obj->name=BasicTypeOperations::PredefindedClassNames::ObjectName();
         obj->typeId=LlufId_Generate64(obj->name.c_str());
         obj->base=NULL;
         state.repository->InsertClass(obj);
 
-        ExceptionDescriptionLocalPtr exceptionBase=boost::make_shared<ExceptionDescriptionLocal>();
+        ExceptionDescriptionLocalPtr exceptionBase=std::make_shared<ExceptionDescriptionLocal>();
         exceptionBase->name=BasicTypeOperations::PredefindedClassNames::ExceptionName();
         exceptionBase->typeId=LlufId_Generate64(exceptionBase->name.c_str());
         exceptionBase->base=NULL;
         state.repository->InsertException(exceptionBase);
 
-        ExceptionDescriptionLocalPtr fundamentalException=boost::make_shared<ExceptionDescriptionLocal>();
+        ExceptionDescriptionLocalPtr fundamentalException=std::make_shared<ExceptionDescriptionLocal>();
         fundamentalException->name=BasicTypeOperations::PredefindedClassNames::FundamentalExceptionName();
         fundamentalException->typeId=LlufId_Generate64(fundamentalException->name.c_str());
         fundamentalException->base=NULL;
         state.repository->InsertException(fundamentalException);
 
-        ExceptionDescriptionLocalPtr nullException=boost::make_shared<ExceptionDescriptionLocal>();
+        ExceptionDescriptionLocalPtr nullException=std::make_shared<ExceptionDescriptionLocal>();
         nullException->name=BasicTypeOperations::PredefindedClassNames::NullExceptionName();
         nullException->typeId=LlufId_Generate64(nullException->name.c_str());
         nullException->baseClass=BasicTypeOperations::PredefindedClassNames::FundamentalExceptionName();
         nullException->base=fundamentalException.get();
         state.repository->InsertException(nullException);
 
-        ExceptionDescriptionLocalPtr incompatibleTypesException=boost::make_shared<ExceptionDescriptionLocal>();
+        ExceptionDescriptionLocalPtr incompatibleTypesException=std::make_shared<ExceptionDescriptionLocal>();
         incompatibleTypesException->name=BasicTypeOperations::PredefindedClassNames::IncompatibleTypesExceptionName();
         incompatibleTypesException->typeId=LlufId_Generate64(incompatibleTypesException->name.c_str());
         incompatibleTypesException->baseClass=BasicTypeOperations::PredefindedClassNames::FundamentalExceptionName();
         incompatibleTypesException->base=fundamentalException.get();
         state.repository->InsertException(incompatibleTypesException);
 
-        ExceptionDescriptionLocalPtr readOnlyException=boost::make_shared<ExceptionDescriptionLocal>();
+        ExceptionDescriptionLocalPtr readOnlyException=std::make_shared<ExceptionDescriptionLocal>();
         readOnlyException->name=BasicTypeOperations::PredefindedClassNames::ReadOnlyExceptionName();
         readOnlyException->typeId=LlufId_Generate64(readOnlyException->name.c_str());
         readOnlyException->baseClass=BasicTypeOperations::PredefindedClassNames::FundamentalExceptionName();
         readOnlyException->base=fundamentalException.get();
         state.repository->InsertException(readOnlyException);
 
-        ExceptionDescriptionLocalPtr illegalValueException=boost::make_shared<ExceptionDescriptionLocal>();
+        ExceptionDescriptionLocalPtr illegalValueException=std::make_shared<ExceptionDescriptionLocal>();
         illegalValueException->name=BasicTypeOperations::PredefindedClassNames::IllegalValueExceptionName();
         illegalValueException->typeId=LlufId_Generate64(illegalValueException->name.c_str());
         illegalValueException->baseClass=BasicTypeOperations::PredefindedClassNames::FundamentalExceptionName();
         illegalValueException->base=fundamentalException.get();
         state.repository->InsertException(illegalValueException);
 
-        ExceptionDescriptionLocalPtr softwareViolationException=boost::make_shared<ExceptionDescriptionLocal>();
+        ExceptionDescriptionLocalPtr softwareViolationException=std::make_shared<ExceptionDescriptionLocal>();
         softwareViolationException->name=BasicTypeOperations::PredefindedClassNames::SoftwareViolationExceptionName();
         softwareViolationException->typeId=LlufId_Generate64(softwareViolationException->name.c_str());
         softwareViolationException->baseClass=BasicTypeOperations::PredefindedClassNames::FundamentalExceptionName();
         softwareViolationException->base=fundamentalException.get();
         state.repository->InsertException(softwareViolationException);
 
-        ExceptionDescriptionLocalPtr configurationErrorException=boost::make_shared<ExceptionDescriptionLocal>();
+        ExceptionDescriptionLocalPtr configurationErrorException=std::make_shared<ExceptionDescriptionLocal>();
         configurationErrorException->name=BasicTypeOperations::PredefindedClassNames::ConfigurationErrorExceptionName();
         configurationErrorException->typeId=LlufId_Generate64(configurationErrorException->name.c_str());
         configurationErrorException->baseClass=BasicTypeOperations::PredefindedClassNames::FundamentalExceptionName();

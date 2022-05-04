@@ -63,7 +63,7 @@ namespace Control
         Safir::Dob::ResponsePtr response;
 
         Safir::Control::CommandPtr command
-                = boost::dynamic_pointer_cast<Safir::Control::Command>(serviceRequestProxy.GetRequest());
+                = std::dynamic_pointer_cast<Safir::Control::Command>(serviceRequestProxy.GetRequest());
 
         if (m_connectedToIPC == false)
         {

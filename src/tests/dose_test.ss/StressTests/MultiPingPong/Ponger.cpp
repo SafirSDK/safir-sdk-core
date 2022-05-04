@@ -94,7 +94,7 @@ void Ponger::Pong(const Safir::Dob::EntityProxy& entityProxy)
         findIt = m_pingPongTable.insert(std::make_pair(instance,Safir::Dob::Typesystem::InstanceId::GenerateRandom())).first;
     }
 
-    m_entity->Number() = boost::static_pointer_cast<DoseStressTest::Ping>(entityProxy.GetEntity())->Number();
+    m_entity->Number() = std::static_pointer_cast<DoseStressTest::Ping>(entityProxy.GetEntity())->Number();
     m_entity->WhichPing() = instance;
 
     m_connection.SetAll(m_entity,findIt->second,m_handler);

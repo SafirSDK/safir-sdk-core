@@ -79,7 +79,7 @@ private:
     WsConnection m_connection;
     std::function<void(const RemoteClient*)> m_onConnectionClosed;
     DobConnection m_dob;
-    boost::shared_ptr<PingHandler> m_pingHandler;
+    std::shared_ptr<PingHandler> m_pingHandler;
     bool m_enableTypeSystem;
 
     inline void SendToClient(const std::string& msg)
@@ -137,12 +137,12 @@ private:
     inline std::string Str(const std::wstring& s) const {return ts::Utilities::ToUtf8(s);}
 
     template <class T>
-    boost::shared_ptr<T> ToObject(const std::string& json) const
+    std::shared_ptr<T> ToObject(const std::string& json) const
     {
         try
         {
             auto obj=ts::Internal::ToObjectFromJson(json);
-            auto ptr=boost::dynamic_pointer_cast<T>(obj);
+            auto ptr=std::dynamic_pointer_cast<T>(obj);
             if (ptr)
             {
                 return ptr;

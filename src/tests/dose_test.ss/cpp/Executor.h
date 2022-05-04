@@ -116,10 +116,10 @@ private:
                                   Safir::Dob::ResponseSenderPtr         responseSender) override;
 
     void OnNewEntity(const Safir::Dob::EntityProxy entityProxy) override
-    {HandleSequencerState(boost::static_pointer_cast<DoseTest::Sequencer>(entityProxy.GetEntity()));}
+    {HandleSequencerState(std::static_pointer_cast<DoseTest::Sequencer>(entityProxy.GetEntity()));}
 
     void OnUpdatedEntity(const Safir::Dob::EntityProxy entityProxy) override
-    {HandleSequencerState(boost::static_pointer_cast<DoseTest::Sequencer>(entityProxy.GetEntity()));}
+    {HandleSequencerState(std::static_pointer_cast<DoseTest::Sequencer>(entityProxy.GetEntity()));}
 
     //ignore deletes since they may be due to an inhibitoutgoingtraffic on the other side
     void OnDeletedEntity(const Safir::Dob::EntityProxy,
@@ -150,7 +150,7 @@ private:
     bool m_isDone;
     bool m_isActive;
 
-    std::vector<boost::shared_ptr<Consumer> > m_consumers;
+    std::vector<std::shared_ptr<Consumer> > m_consumers;
 
     Safir::Dob::Connection m_controlConnection;
     Safir::Dob::Connection m_testConnection;
@@ -168,6 +168,6 @@ private:
     int m_defaultContext;
 };
 
-typedef boost::shared_ptr<Executor> ExecutorPtr;
+typedef std::shared_ptr<Executor> ExecutorPtr;
 
 #endif

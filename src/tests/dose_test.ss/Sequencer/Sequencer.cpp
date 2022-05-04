@@ -84,20 +84,20 @@ namespace
     {
         if (object->GetTypeId() == DoseTest::ComplexGlobalMessage::ClassTypeId)
         {
-            FillBinaryMemberInternal(boost::static_pointer_cast<DoseTest::ComplexGlobalMessage>(object)->BinaryMember().GetContainer());
+            FillBinaryMemberInternal(std::static_pointer_cast<DoseTest::ComplexGlobalMessage>(object)->BinaryMember().GetContainer());
         }
         else if (object->GetTypeId() == DoseTest::ComplexGlobalEntity::ClassTypeId)
         {
-            FillBinaryMemberInternal(boost::static_pointer_cast<DoseTest::ComplexGlobalEntity>(object)->BinaryMember().GetContainer());
+            FillBinaryMemberInternal(std::static_pointer_cast<DoseTest::ComplexGlobalEntity>(object)->BinaryMember().GetContainer());
             //in the entity we use the binary array as well
             for (int i = 0; i < DoseTest::ComplexGlobalEntity::BinaryArrayMemberArraySize(); ++i)
             {
-                FillBinaryMemberInternal(boost::static_pointer_cast<DoseTest::ComplexGlobalEntity>(object)->BinaryArrayMember()[i]);
+                FillBinaryMemberInternal(std::static_pointer_cast<DoseTest::ComplexGlobalEntity>(object)->BinaryArrayMember()[i]);
             }
         }
         else if (object->GetTypeId() == DoseTest::ComplexGlobalService::ClassTypeId)
         {
-            FillBinaryMemberInternal(boost::static_pointer_cast<DoseTest::ComplexGlobalService>(object)->BinaryMember().GetContainer());
+            FillBinaryMemberInternal(std::static_pointer_cast<DoseTest::ComplexGlobalService>(object)->BinaryMember().GetContainer());
         }
     }
 
@@ -426,7 +426,7 @@ Sequencer::OnResponse(const Safir::Dob::ResponseProxy responseProxy)
         << ".txt";
     boost::filesystem::wofstream file(directory / filename.str());
 
-    DoseTest::DumpResultPtr result = boost::dynamic_pointer_cast<DoseTest::DumpResult>(responseProxy.GetResponse());
+    DoseTest::DumpResultPtr result = std::dynamic_pointer_cast<DoseTest::DumpResult>(responseProxy.GetResponse());
 
     if (result == NULL)
     {

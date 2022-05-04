@@ -97,7 +97,7 @@ TestCaseReader::TestCaseReader(const boost::filesystem::path & testCaseDir)
             //std::wcout << "Read xml (" << xml.str().size() << " bytes) '" << xml.str().c_str() << "'" << std::endl;
             try
             {
-                m_testCases[tc] = boost::dynamic_pointer_cast<DoseTest::Items::TestCase>
+                m_testCases[tc] = std::dynamic_pointer_cast<DoseTest::Items::TestCase>
                     (Safir::Dob::Typesystem::Serialization::ToObject(Safir::Dob::Typesystem::Utilities::ToWstring(xml.str())));
             }
             catch (const std::exception & exc)
@@ -128,6 +128,6 @@ TestCaseReader::GetTestCase(const int which)
     }
     else
     {
-        return boost::static_pointer_cast<DoseTest::Items::TestCase>(m_testCases[which]->Clone());
+        return std::static_pointer_cast<DoseTest::Items::TestCase>(m_testCases[which]->Clone());
     }
 }

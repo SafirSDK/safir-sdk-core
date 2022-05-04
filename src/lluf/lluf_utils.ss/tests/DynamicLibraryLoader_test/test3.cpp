@@ -23,24 +23,25 @@
 ******************************************************************************/
 #include <Safir/Utilities/DynamicLibraryLoader.h>
 #include <iostream>
+#include <functional>
 
 int main()
 {
     try
     {
-        boost::function<double(int,long,float,double)> fun;
+        std::function<double(int,long,float,double)> fun;
         {
             Safir::Utilities::DynamicLibraryLoader lib;
             lib.Load("test_library",false);
             fun = lib.GetFunction<double(int,long,float,double)>("TestFunction");
-            
+
             if (fun(1,2L,3.1F,4.5) != 1 + 2L + 3.1F + 4.5)
             {
                 std::wcout << "The loaded function seems to work incorrectly" << std::endl;
                 return 1;
             }
         }
-        
+
         if (fun(1,2L,3.1F,4.5) != 1 + 2L + 3.1F + 4.5)
         {
             std::wcout << "The loaded function seems to work incorrectly" << std::endl;
@@ -55,4 +56,3 @@ int main()
     }
     return 0;
 }
-

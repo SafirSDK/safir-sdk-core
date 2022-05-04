@@ -32,14 +32,14 @@ namespace Typesystem
 {
 namespace ToolSupport
 {
-    boost::shared_ptr<const TypeRepository> ParseTypeDefinitions(const boost::filesystem::path& root)
+    std::shared_ptr<const TypeRepository> ParseTypeDefinitions(const boost::filesystem::path& root)
     {
         std::vector<boost::filesystem::path> roots;
         roots.push_back(root);
         return ParseTypeDefinitions(roots);
     }
 
-    boost::shared_ptr<const TypeRepository> ParseTypeDefinitions(const std::vector<boost::filesystem::path>& roots)
+    std::shared_ptr<const TypeRepository> ParseTypeDefinitions(const std::vector<boost::filesystem::path>& roots)
     {
         for (size_t i=0; i<roots.size(); ++i)
         {

@@ -92,7 +92,7 @@ namespace Internal
     InjectedEntityProxyImpl::GetInjection() const
     {
         ENSURE(m_injectionBlob != NULL, << "Not possible to do GetInjection on InjectDeletes!");
-        return boost::static_pointer_cast<Safir::Dob::Entity>
+        return std::static_pointer_cast<Safir::Dob::Entity>
             (Safir::Dob::Typesystem::ObjectFactory::Instance().CreateObject(m_injectionBlob));
     }
 
@@ -107,7 +107,7 @@ namespace Internal
     InjectedEntityProxyImpl::GetCurrent() const
     {
         ENSURE(m_currentBlob != NULL, << "Not possible to do GetCurrent on InjectNews!");
-        return boost::static_pointer_cast<Safir::Dob::Entity>
+        return std::static_pointer_cast<Safir::Dob::Entity>
             (Safir::Dob::Typesystem::ObjectFactory::Instance().CreateObject(m_currentBlob));
     }
 }

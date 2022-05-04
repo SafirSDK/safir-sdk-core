@@ -76,12 +76,12 @@ namespace ToolSupport
     void CreateTopLevelDefinition(boost::property_tree::ptree& pt,
                                   const std::string& currentPath,
                                   const std::string& elementName,
-                                  const std::function< bool(const boost::shared_ptr<Descr>&) >& insert,
-                                  boost::shared_ptr<Descr>& lastInserted)
+                                  const std::function< bool(const std::shared_ptr<Descr>&) >& insert,
+                                  std::shared_ptr<Descr>& lastInserted)
     {
         try
         {
-            boost::shared_ptr<Descr> val=boost::make_shared<Descr>();
+            std::shared_ptr<Descr> val=std::make_shared<Descr>();
             val->fileName=currentPath;
             val->name=pt.get<std::string>(elementName);
             val->typeId=LlufId_Generate64(val->name.c_str());
@@ -340,7 +340,7 @@ namespace ToolSupport
     {
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
-            MemberDescriptionLocalPtr def=boost::make_shared<MemberDescriptionLocal>();
+            MemberDescriptionLocalPtr def=std::make_shared<MemberDescriptionLocal>();
             try
             {
                  def->name=pt.get<std::string>(Elements::MemberName::Name());
@@ -391,7 +391,7 @@ namespace ToolSupport
     {
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
-            CreateRoutineDescriptionLocalPtr def=boost::make_shared<CreateRoutineDescriptionLocal>(state.lastInsertedClass.get());
+            CreateRoutineDescriptionLocalPtr def=std::make_shared<CreateRoutineDescriptionLocal>(state.lastInsertedClass.get());
             try
             {
                 def->name=pt.get<std::string>(Elements::CreateRoutineName::Name());
@@ -534,7 +534,7 @@ namespace ToolSupport
             memVal.second.first=paramName.str();
             memVal.second.second=0;
 
-            ParameterDescriptionLocalPtr par=boost::make_shared<ParameterDescriptionLocal>();
+            ParameterDescriptionLocalPtr par=std::make_shared<ParameterDescriptionLocal>();
             par->qualifiedName=paramName.str();
             par->name=par->qualifiedName;
             par->classTypeId=state.lastInsertedClass->GetTypeId();
@@ -593,7 +593,7 @@ namespace ToolSupport
                 throw ParseError("Incomplete EntityId XML", "Failed to expand environment variable '"+std::string(envVar.what())+"' in CreateRoutine "+def->GetName()+" member "+memVal.first, state.currentPath, 140);
             }
 
-            ParameterDescriptionLocalPtr par=boost::make_shared<ParameterDescriptionLocal>();
+            ParameterDescriptionLocalPtr par=std::make_shared<ParameterDescriptionLocal>();
             par->qualifiedName=paramName.str();
             par->name=par->qualifiedName;
             par->classTypeId=state.lastInsertedClass->GetTypeId();
@@ -620,7 +620,7 @@ namespace ToolSupport
             memVal.second.first=paramName.str();
             memVal.second.second=0;
 
-            ParameterDescriptionLocalPtr par=boost::make_shared<ParameterDescriptionLocal>();
+            ParameterDescriptionLocalPtr par=std::make_shared<ParameterDescriptionLocal>();
             par->qualifiedName=paramName.str();
             par->name=par->qualifiedName;
             par->classTypeId=state.lastInsertedClass->GetTypeId();
@@ -660,7 +660,7 @@ namespace ToolSupport
             memVal.second.first=paramName.str();
             memVal.second.second=0;
 
-            ParameterDescriptionLocalPtr par=boost::make_shared<ParameterDescriptionLocal>();
+            ParameterDescriptionLocalPtr par=std::make_shared<ParameterDescriptionLocal>();
             par->qualifiedName=paramName.str();
             par->name=par->qualifiedName;
             par->classTypeId=state.lastInsertedClass->GetTypeId();
@@ -692,7 +692,7 @@ namespace ToolSupport
     {
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
-            ParameterDescriptionLocalPtr def=boost::make_shared<ParameterDescriptionLocal>();
+            ParameterDescriptionLocalPtr def=std::make_shared<ParameterDescriptionLocal>();
 
             //Check parameter name
             try
@@ -1012,7 +1012,7 @@ namespace ToolSupport
     {
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
-            MemberDescriptionLocalPtr def=boost::make_shared<MemberDescriptionLocal>();
+            MemberDescriptionLocalPtr def=std::make_shared<MemberDescriptionLocal>();
 
             try
             {
@@ -1221,7 +1221,7 @@ namespace ToolSupport
         const PropertyDescriptionLocal* pd=state.lastInsertedPropertyMapping->property;
         const MemberDescriptionLocal* propMem=pd->members[state.lastInsertedMemberMapping->propertyMemberIndex].get();
 
-        ParameterDescriptionLocalPtr param=boost::make_shared<ParameterDescriptionLocal>();
+        ParameterDescriptionLocalPtr param=std::make_shared<ParameterDescriptionLocal>();
         std::ostringstream paramName;
         //MyPropNamespace.MyProperty.PropMember@MyClassNamespace.MyClass#pm
         paramName<<pd->GetName()<<"."<<propMem->GetName()<<"@"<<state.lastInsertedPropertyMapping->class_->GetName();
@@ -1855,7 +1855,7 @@ namespace ToolSupport
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
             const PropertyDescriptionLocal* pd=state.lastInsertedPropertyMapping->property;
-            MemberMappingLocalPtr md=boost::make_shared<MemberMappingLocal>();
+            MemberMappingLocalPtr md=std::make_shared<MemberMappingLocal>();
             md->kind=MappedToNull;
             bool inlineParam=false;
             DotsC_CollectionType collectionType=SingleValueCollectionType;
@@ -1969,7 +1969,7 @@ namespace ToolSupport
     {
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
-            PropertyMappingDescriptionLocalPtr def=boost::make_shared<PropertyMappingDescriptionLocal>();
+            PropertyMappingDescriptionLocalPtr def=std::make_shared<PropertyMappingDescriptionLocal>();
             state.notInsertedPropertyMappings.push_back(def);
             state.lastInsertedPropertyMapping=def;
             def->fileName=state.currentPath;

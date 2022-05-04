@@ -24,8 +24,6 @@
 #ifndef __DYNAMIC_LIBRARY_LOADER_H__
 #define __DYNAMIC_LIBRARY_LOADER_H__
 
-#include <boost/shared_ptr.hpp>
-#include <boost/function.hpp>
 #include <string>
 #include <Safir/Utilities/Internal/VisibilityHelpers.h>
 
@@ -102,18 +100,18 @@ namespace Utilities
          *
          * Attempt to load the specified function and return it as a function
          * pointer with the specified signature.
-         * The return type is a raw function pointer rather than a boost::function
+         * The return type is a raw function pointer rather than a std::function
          * object since otherwise things get very messy if you have to specify
          * calling convention.
-         * But it easy to put the result into a boost function object.
+         * But it easy to put the result into a function object.
          * For example:
-         * boost::function<double(int,int)> func =
+         * std::function<double(int,int)> func =
          *     lib.GetFunction<double(int,int)>("myfunc")
          * And with specified calling convention on ms visual c++:
-         * boost::function<double(int,int)> func =
+         * std::function<double(int,int)> func =
          *     lib.GetFunction<double __stdcall (int,int)>("myfunc")
          * And with specified calling convention on gcc:
-         * boost::function<double(int,int)> func =
+         * std::function<double(int,int)> func =
          *     lib.GetFunction<double __attribute__(stdcall) (int,int)>("myfunc")
          *
          * @param [in] functionName Name of the function to load
@@ -125,19 +123,13 @@ namespace Utilities
             return reinterpret_cast<T*>(GetFunctionInternal(functionName));
         }
     private:
+        DynamicLibraryLoader(const DynamicLibraryLoader&) = delete;
+        DynamicLibraryLoader& operator=(const DynamicLibraryLoader&) = delete;
+
         void * GetFunctionInternal(const std::string& functionName);
 
-#ifdef _MSC_VER
-#pragma warning (push)
-#pragma warning (disable: 4251)
-#endif
-
         class Impl;
-        boost::shared_ptr<Impl> m_impl;
-
-#ifdef _MSC_VER
-#pragma warning (pop)
-#endif
+        Impl* m_impl;
 
         bool m_unloadOnDestruction;
     };

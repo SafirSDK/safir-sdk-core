@@ -14,7 +14,7 @@
 
 #include <boost/circular_buffer.hpp>
 
-void GetFiles(const boost::shared_ptr<const Safir::Dob::Typesystem::ToolSupport::TypeRepository>& rep,
+void GetFiles(const std::shared_ptr<const Safir::Dob::Typesystem::ToolSupport::TypeRepository>& rep,
               std::set<std::string>& parsedFiles);
 void TestFailed(std::set<std::string>& parsedFiles);
 
@@ -53,7 +53,7 @@ int main(int argc, char* argv[])
     std::set<std::string> parsedFiles;
     try
     {
-        boost::shared_ptr<const Safir::Dob::Typesystem::ToolSupport::TypeRepository> rep=Safir::Dob::Typesystem::ToolSupport::ParseTypeDefinitions(roots);
+        std::shared_ptr<const Safir::Dob::Typesystem::ToolSupport::TypeRepository> rep=Safir::Dob::Typesystem::ToolSupport::ParseTypeDefinitions(roots);
         GetFiles(rep, parsedFiles);
     }
     catch (const Safir::Dob::Typesystem::ToolSupport::ParseError& err)
@@ -111,7 +111,7 @@ std::string FileName(const T& t)
 }
 
 //get files parsed
-void GetFiles(const boost::shared_ptr<const Safir::Dob::Typesystem::ToolSupport::TypeRepository>& rep,
+void GetFiles(const std::shared_ptr<const Safir::Dob::Typesystem::ToolSupport::TypeRepository>& rep,
               std::set<std::string>& parsedFiles)
 {
     std::set<DotsC_TypeId> types;

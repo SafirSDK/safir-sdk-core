@@ -90,13 +90,13 @@ namespace ToolSupport
         template <class ParserT, class CompletionAlg>
         struct ParseWorker
         {
-            void operator()(const boost::shared_ptr<RepositoryLocal>& repository, const std::map<boost::filesystem::path, boost::filesystem::path>& paths)
+            void operator()(const std::shared_ptr<RepositoryLocal>& repository, const std::map<boost::filesystem::path, boost::filesystem::path>& paths)
             {
                 ParseState state(repository);
 
                 for (std::map<boost::filesystem::path, boost::filesystem::path>::const_iterator pathIt=paths.begin(); pathIt!=paths.end(); ++pathIt)
                 {
-                    boost::shared_ptr<boost::property_tree::ptree> pt=boost::make_shared<boost::property_tree::ptree>();
+                    std::shared_ptr<boost::property_tree::ptree> pt=std::make_shared<boost::property_tree::ptree>();
                     try
                     {
                         boost::property_tree::read_xml(pathIt->second.string(), *pt, boost::property_tree::xml_parser::no_comments);
@@ -139,7 +139,7 @@ namespace ToolSupport
     }
 
     ParseJob::ParseJob(const std::vector<boost::filesystem::path>& roots)
-        :m_result(boost::make_shared<RepositoryLocal>())
+        :m_result(std::make_shared<RepositoryLocal>())
     {
         std::map<boost::filesystem::path, boost::filesystem::path> douFiles;
         std::map<boost::filesystem::path, boost::filesystem::path> domFiles;

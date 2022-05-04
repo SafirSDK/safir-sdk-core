@@ -25,8 +25,7 @@
 #define __DOTS_INTERNAL_BLOB_H__
 
 #include <boost/cstdint.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/make_shared.hpp>
+#include <memory>
 #include <Safir/Dob/Typesystem/LanguageInterfaceDefs.h>
 #include <Safir/Dob/Typesystem/ToolSupport/ParseError.h>
 
@@ -154,7 +153,7 @@ namespace Internal
 #pragma warning (push)
 #pragma warning (disable: 4251)
 #endif
-        boost::shared_ptr<AnyObject> m_object;
+        std::shared_ptr<AnyObject> m_object;
 #ifdef _MSC_VER
 #pragma warning (pop)
 #endif

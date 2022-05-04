@@ -298,7 +298,7 @@ FilePersistor::RestoreBinary(const boost::filesystem::path & path) const
     boost::filesystem::ifstream file(path, std::ios::in | std::ios::binary);
     file.read(&bin[0],fileSize);
 
-    return boost::dynamic_pointer_cast<Safir::Dob::Entity>(Safir::Dob::Typesystem::Serialization::ToObject(bin));
+    return std::dynamic_pointer_cast<Safir::Dob::Entity>(Safir::Dob::Typesystem::Serialization::ToObject(bin));
 }
 
 
@@ -331,7 +331,7 @@ FilePersistor::RestoreXml(const boost::filesystem::path & path) const
     Safir::Dob::EntityPtr entityPtr;
     try
     {
-        entityPtr = boost::dynamic_pointer_cast<Safir::Dob::Entity>
+        entityPtr = std::dynamic_pointer_cast<Safir::Dob::Entity>
             (Safir::Dob::Typesystem::Serialization::ToObject(xml));
     }
     catch(const Safir::Dob::Typesystem::IllegalValueException &)

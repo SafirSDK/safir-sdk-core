@@ -93,7 +93,7 @@ void Pinger::Ping(const Safir::Dob::Typesystem::InstanceId& instance)
 
 void Pinger::HandlePong(const Safir::Dob::EntityProxy& entityProxy)
 {
-    DoseStressTest::PongPtr pong = boost::static_pointer_cast<DoseStressTest::Pong>(entityProxy.GetEntity());
+    DoseStressTest::PongPtr pong = std::static_pointer_cast<DoseStressTest::Pong>(entityProxy.GetEntity());
     PingPongTable::iterator findIt = m_pingPongTable.find(pong->WhichPing().GetVal());
     if (findIt != m_pingPongTable.end())
     {

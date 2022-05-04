@@ -427,7 +427,7 @@ BOOST_AUTO_TEST_CASE(Merge_Simple)
     const auto res = TimestampOperations::Merge(dd1,dd2);
 
     BOOST_CHECK(res.second);
-    auto after = boost::static_pointer_cast<InjectableEntity4>
+    auto after = std::static_pointer_cast<InjectableEntity4>
         (ObjectFactory::Instance().CreateObject(res.first.GetBlob()));
     BOOST_CHECK(after->IsChanged());
     BOOST_CHECK(after->Int32Member().IsChanged());
@@ -477,7 +477,7 @@ BOOST_AUTO_TEST_CASE(Merge_Items)
     const auto res = TimestampOperations::Merge(dd1,dd2);
 
     BOOST_CHECK(res.second);
-    auto after = boost::static_pointer_cast<InjectableEntity4>
+    auto after = std::static_pointer_cast<InjectableEntity4>
         (ObjectFactory::Instance().CreateObject(res.first.GetBlob()));
 
     BOOST_CHECK_EQUAL(res.first.GetTopTimestamp(),1000);
@@ -522,7 +522,7 @@ BOOST_AUTO_TEST_CASE(Merge_SimpleArrays)
     const auto res = TimestampOperations::Merge(dd1,dd2);
 
     BOOST_CHECK(res.second);
-    auto after = boost::static_pointer_cast<InjectableEntity4>
+    auto after = std::static_pointer_cast<InjectableEntity4>
         (ObjectFactory::Instance().CreateObject(res.first.GetBlob()));
     BOOST_CHECK(after->IsChanged());
     BOOST_CHECK(!after->Int32Member().IsChanged());
@@ -553,7 +553,7 @@ BOOST_AUTO_TEST_CASE(Merge_SimpleNewCollections)
     const auto res = TimestampOperations::Merge(dd1,dd2);
 
     BOOST_CHECK(res.second);
-    auto after = boost::static_pointer_cast<InjectableEntity4>
+    auto after = std::static_pointer_cast<InjectableEntity4>
         (ObjectFactory::Instance().CreateObject(res.first.GetBlob()));
     BOOST_CHECK(after->IsChanged());
     BOOST_CHECK(!after->Int32Member().IsChanged());
@@ -593,7 +593,7 @@ BOOST_AUTO_TEST_CASE(Merge_ObjectArrays)
     const auto res = TimestampOperations::Merge(dd1,dd2);
 
     BOOST_CHECK(res.second);
-    auto after = boost::static_pointer_cast<InjectableEntity4>
+    auto after = std::static_pointer_cast<InjectableEntity4>
         (ObjectFactory::Instance().CreateObject(res.first.GetBlob()));
 
     BOOST_CHECK_EQUAL(res.first.GetTopTimestamp(),1000);
@@ -649,7 +649,7 @@ BOOST_AUTO_TEST_CASE(Merge_ObjectSequence)
     const auto res = TimestampOperations::Merge(dd1,dd2);
 
     BOOST_CHECK(res.second);
-    auto after = boost::static_pointer_cast<InjectableEntity4>
+    auto after = std::static_pointer_cast<InjectableEntity4>
         (ObjectFactory::Instance().CreateObject(res.first.GetBlob()));
 
     BOOST_CHECK_EQUAL(res.first.GetTopTimestamp(),1000);
@@ -710,7 +710,7 @@ BOOST_AUTO_TEST_CASE(Merge_ObjectDictionary)
     const auto res = TimestampOperations::Merge(dd1,dd2);
 
     BOOST_CHECK(res.second);
-    auto after = boost::static_pointer_cast<InjectableEntity4>
+    auto after = std::static_pointer_cast<InjectableEntity4>
         (ObjectFactory::Instance().CreateObject(res.first.GetBlob()));
 
     BOOST_CHECK_EQUAL(res.first.GetTopTimestamp(),1000);
@@ -760,7 +760,7 @@ InjectableEntity4Ptr CallSetChangeFlags(const DistributionData& dd1,
          Safir::Dob::Typesystem::Internal::Delete);
     TimestampOperations::SetChangeFlags(dd1,dd2,blobHolder.get());
 
-    auto after = boost::static_pointer_cast<InjectableEntity4>
+    auto after = std::static_pointer_cast<InjectableEntity4>
         (ObjectFactory::Instance().CreateObject(blobHolder.get()));
 #else
     BlobWriteHelper helper(dd2.GetBlob());
@@ -770,7 +770,7 @@ InjectableEntity4Ptr CallSetChangeFlags(const DistributionData& dd1,
         (helper.ToBlob(),
          Safir::Dob::Typesystem::Internal::BlobOperations::Delete);
 
-    auto after = boost::static_pointer_cast<InjectableEntity4>
+    auto after = std::static_pointer_cast<InjectableEntity4>
         (ObjectFactory::Instance().CreateObject(blobHolder.get()));
 
 #endif

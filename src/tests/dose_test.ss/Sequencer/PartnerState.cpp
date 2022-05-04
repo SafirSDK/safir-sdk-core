@@ -159,13 +159,13 @@ PartnerState::HandlePartnerChange(const DoseTest::PartnerPtr & partner, const in
 
 void PartnerState::OnNewEntity(const Safir::Dob::EntityProxy entityProxy)
 {
-    HandlePartnerChange(boost::static_pointer_cast<DoseTest::Partner>(entityProxy.GetEntityWithChangeInfo()),
+    HandlePartnerChange(std::static_pointer_cast<DoseTest::Partner>(entityProxy.GetEntityWithChangeInfo()),
                         static_cast<int>(entityProxy.GetInstanceId().GetRawValue()));
 }
 
 void PartnerState::OnUpdatedEntity(const Safir::Dob::EntityProxy entityProxy)
 {
-    HandlePartnerChange(boost::static_pointer_cast<DoseTest::Partner>(entityProxy.GetEntityWithChangeInfo()),
+    HandlePartnerChange(std::static_pointer_cast<DoseTest::Partner>(entityProxy.GetEntityWithChangeInfo()),
                         static_cast<int>(entityProxy.GetInstanceId().GetRawValue()));
 }
 

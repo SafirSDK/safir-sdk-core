@@ -24,7 +24,7 @@
 #pragma once
 
 #include <Safir/Dob/DoseCppExportDefs.h>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <Safir/Dob/Response.h>
 
 namespace Safir
@@ -101,6 +101,6 @@ namespace Dob
     //-------------------------------
     // Smart pointer to ResponseSender
     //-------------------------------
-    typedef boost::shared_ptr<ResponseSender> ResponseSenderPtr;
+    typedef std::shared_ptr<ResponseSender> ResponseSenderPtr;
 }
 }

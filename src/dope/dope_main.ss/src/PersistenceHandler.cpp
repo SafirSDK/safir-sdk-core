@@ -489,7 +489,7 @@ PersistenceHandler::OnResponse(const Safir::Dob::ResponseProxy responseProxy)
         return;
     }
 
-    const auto error = boost::dynamic_pointer_cast<Safir::Dob::ErrorResponse>(responseProxy.GetResponse());
+    const auto error = std::dynamic_pointer_cast<Safir::Dob::ErrorResponse>(responseProxy.GetResponse());
     if (error != nullptr && error->Code() == Safir::Dob::ResponseGeneralErrorCodes::SafirNotRegistered())
     {
         //This is probably due to the dose_main having got persistence from somewhere else, and

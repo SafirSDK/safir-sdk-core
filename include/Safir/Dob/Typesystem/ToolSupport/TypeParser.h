@@ -25,7 +25,7 @@
 #define __DOTS_INTERNAL_TYPE_PARSER_H__
 
 #include <boost/filesystem.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <Safir/Dob/Typesystem/ToolSupport/Internal/InternalExportDefs.h>
 #include <Safir/Dob/Typesystem/ToolSupport/ParseError.h>
 #include <Safir/Dob/Typesystem/ToolSupport/TypeRepository.h>
@@ -53,7 +53,7 @@ namespace ToolSupport
      * @return TypeRepository containing all types, i.e classes, exceptions, enums, properties and property mappings.
      * @throws Safir::Dob::Typesystem::Parser:ParseError The dou- or dom- files at the specified path contains errors.
      */
-    DOTS_INTERNAL_API boost::shared_ptr<const TypeRepository> ParseTypeDefinitions(const boost::filesystem::path& root);
+    DOTS_INTERNAL_API std::shared_ptr<const TypeRepository> ParseTypeDefinitions(const boost::filesystem::path& root);
 
     /**
      * Will validate and parse a complete set of dou- and dom-files. If no error occurs, the
@@ -66,7 +66,7 @@ namespace ToolSupport
      * @return TypeRepository containing all types, i.e classes, exceptions, enums, properties and property mappings.
      * @throws Safir::Dob::Typesystem::Parser:ParseError The dou- or dom- files at the specified path contains errors.
      */
-    DOTS_INTERNAL_API boost::shared_ptr<const TypeRepository> ParseTypeDefinitions(const std::vector<boost::filesystem::path>& roots);
+    DOTS_INTERNAL_API std::shared_ptr<const TypeRepository> ParseTypeDefinitions(const std::vector<boost::filesystem::path>& roots);
 
 
 #ifdef _MSC_VER

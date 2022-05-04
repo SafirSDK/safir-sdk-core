@@ -35,7 +35,6 @@
 #endif
 
 #include <boost/lexical_cast.hpp>
-#include <boost/make_shared.hpp>
 #include <boost/asio.hpp>
 #include "ServiceHandler.h"
 #include "ServiceUser.h"
@@ -72,9 +71,9 @@ public:
     }
 
 private:
-    typedef boost::shared_ptr<ServiceUser> ServiceUserPtr;
+    typedef std::shared_ptr<ServiceUser> ServiceUserPtr;
     boost::asio::io_service m_ioService;
-    boost::shared_ptr<boost::asio::io_service::work> m_work;
+    std::shared_ptr<boost::asio::io_service::work> m_work;
     ServiceHandler m_handler;
     std::map<int, ServiceUserPtr> m_users;
 
@@ -102,7 +101,7 @@ private:
         {
             if (fail)
             {
-                m_users[id]=boost::make_shared<ServiceUser>(id, m_requestsPerUser, [=](int id, bool fail){UserDone(id, fail);});
+                m_users[id]=std::make_shared<ServiceUser>(id, m_requestsPerUser, [=](int id, bool fail){UserDone(id, fail);});
                 m_users[id]->Run();
                 return;
             }
@@ -139,7 +138,7 @@ private:
         {
             std::cout<<"TestManager: Start user number "<<m_userCount<<std::endl;
         }
-         m_users[m_userCount]=boost::make_shared<ServiceUser>(m_userCount, m_requestsPerUser, [=](int id, bool fail){UserDone(id, fail);});
+         m_users[m_userCount]=std::make_shared<ServiceUser>(m_userCount, m_requestsPerUser, [=](int id, bool fail){UserDone(id, fail);});
          m_users[m_userCount]->Run();
     }
 

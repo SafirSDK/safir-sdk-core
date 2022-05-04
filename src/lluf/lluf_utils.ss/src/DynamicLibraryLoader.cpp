@@ -171,6 +171,7 @@ namespace Utilities
         {
             Unload();
         }
+        delete m_impl;
     }
 
     void DynamicLibraryLoader::Load(const std::string& libraryName,

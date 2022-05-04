@@ -98,7 +98,7 @@ public:
         for (EntityIterator it = m_connection.GetEntityIterator(DopeTest::SmallEntity::ClassTypeId,false);
              it != EntityIterator(); ++it)
         {
-            DopeTest::SmallEntityPtr ent = boost::static_pointer_cast<DopeTest::SmallEntity>(it->GetEntity());
+            DopeTest::SmallEntityPtr ent = std::static_pointer_cast<DopeTest::SmallEntity>(it->GetEntity());
             ent->Name() = L"name is changed\n\u00e4\u203d."; //newline, ä, interrobang
             m_connection.SetChanges(ent,
                                     it->GetInstanceId(),
@@ -128,7 +128,7 @@ public:
         for (EntityIterator it = m_connection.GetEntityIterator(DopeTest::BigEntity::ClassTypeId,false);
              it != EntityIterator(); ++it)
         {
-            DopeTest::BigEntityPtr ent = boost::static_pointer_cast<DopeTest::BigEntity>(it->GetEntity());
+            DopeTest::BigEntityPtr ent = std::static_pointer_cast<DopeTest::BigEntity>(it->GetEntity());
             ent->Number()[0].SetVal(99999999);
             m_connection.SetChanges(ent,
                                     it->GetInstanceId(),
@@ -159,7 +159,7 @@ private:
                    << xml
                    << std::endl;
 
-        const auto small = boost::dynamic_pointer_cast<DopeTest::SmallEntity>(injectedEntityProxy.GetInjection());
+        const auto small = std::dynamic_pointer_cast<DopeTest::SmallEntity>(injectedEntityProxy.GetInjection());
         if (small != nullptr)
         {
             if (small->Name() == L"testelitest\n\u00e4\u203d." ||

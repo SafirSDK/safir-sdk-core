@@ -33,7 +33,7 @@ public:
         std::wcout<<"AckedDataSenderTest started"<<std::endl;
 
         boost::asio::io_service io;
-        auto work=boost::make_shared<boost::asio::io_service::work>(io);
+        auto work=std::make_shared<boost::asio::io_service::work>(io);
         boost::thread_group threads;
         for (int i = 0; i < 9; ++i)
         {
@@ -384,7 +384,7 @@ public:
         std::wcout<<"UnackedDataSenderTest started"<<std::endl;
 
         boost::asio::io_service io;
-        auto work=boost::make_shared<boost::asio::io_service::work>(io);
+        auto work=std::make_shared<boost::asio::io_service::work>(io);
         boost::thread_group threads;
         for (int i = 0; i < 9; ++i)
         {
@@ -525,7 +525,7 @@ public:
         std::wcout<<"SmallWindowSenderTest started"<<std::endl;
 
         boost::asio::io_service io;
-        auto work=boost::make_shared<boost::asio::io_service::work>(io);
+        auto work=std::make_shared<boost::asio::io_service::work>(io);
         boost::thread_group threads;
         for (int i = 0; i < 9; ++i)
         {
@@ -849,7 +849,7 @@ public:
         std::wcout<<"RetransmissionTest started"<<std::endl;
 
         boost::asio::io_service io;
-        auto work=boost::make_shared<boost::asio::io_service::work>(io);
+        auto work=std::make_shared<boost::asio::io_service::work>(io);
         boost::thread_group threads;
         for (int i = 0; i < 9; ++i)
         {

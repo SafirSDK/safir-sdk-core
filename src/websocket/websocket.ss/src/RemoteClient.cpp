@@ -45,7 +45,7 @@ RemoteClient::RemoteClient(WsServer& server,
     ,m_connection(m_server.get_con_from_hdl(connectionHandle))
     ,m_onConnectionClosed(onClose)
     ,m_dob(m_strand, [this](const std::string& msg){SendToClient(msg);})
-    ,m_pingHandler(boost::make_shared<PingHandler>(m_strand, static_cast<int>(Safir::Websocket::Parameters::PingInterval()), [this]{m_connection->ping("");}))
+    ,m_pingHandler(std::make_shared<PingHandler>(m_strand, static_cast<int>(Safir::Websocket::Parameters::PingInterval()), [this]{m_connection->ping("");}))
     ,m_enableTypeSystem(Safir::Websocket::Parameters::EnableTypesystemCommands())
 {
     m_connection->set_close_handler([this](websocketpp::connection_hdl)
