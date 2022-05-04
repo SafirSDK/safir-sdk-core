@@ -329,7 +329,7 @@ namespace Internal
     void Library::CrashFunc(const char* const dumpPath)
     {
         std::wostringstream ostr;
-        ostr << "An application has crashed! A dump was generated to:\n"
+        ostr << "An application has crashed or is executing in an undefined state! A dump was generated to:\n"
              << dumpPath;
         Safir::Logging::SendSystemLog(Safir::Logging::Alert,
                                       ostr.str());
