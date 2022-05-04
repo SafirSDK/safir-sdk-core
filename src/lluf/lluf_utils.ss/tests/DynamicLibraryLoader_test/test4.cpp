@@ -32,7 +32,15 @@ int main()
     {
         Safir::Utilities::DynamicLibraryLoader lib;
 #if defined(linux) || defined(__linux) || defined(__linux__)
-        lib.Load("rt",true); //librt library
+        //There is no library that is available on all linux platforms, that we know. librt.so is available on some at least...
+        try
+        {
+            lib.Load("rt",true); //librt library
+        }
+        catch (const std::logic_error&)
+        {
+            return 0;
+        }
         const pthread_t result = lib.GetFunction<pthread_t()>("pthread_self")();
 
         if (result == 0)
