@@ -50,7 +50,7 @@ public class VehicleServiceHandler implements com.saabgroup.safir.dob.ServiceHan
     {
         connection = new SecondaryConnection();
     }
-    
+
     /**
      * Initiates this class. Creates a secondary DOB connection and registers as handler.
      */
@@ -58,11 +58,11 @@ public class VehicleServiceHandler implements com.saabgroup.safir.dob.ServiceHan
         connection.attach();
         // Register as service handler.
         connection.registerServiceHandler(
-            capabilities.CalculateSpeedDifference.ClassTypeId,
+            com.saabgroup.capabilities.CalculateSpeedDifference.ClassTypeId,
             new com.saabgroup.safir.dob.typesystem.HandlerId(),
             this);
     }
-    
+
     @Override
     public void onRevokedRegistration(long typeId, HandlerId handlerId) {
         // No longer registered for given type.
@@ -78,12 +78,12 @@ public class VehicleServiceHandler implements com.saabgroup.safir.dob.ServiceHan
         float speed, speedProperty, speedDiff;
         boolean bOk = false, bPropertyOk = true;
         com.saabgroup.safir.dob.Entity ent;
-        capabilities.CalculateSpeedDifferenceResponse serviceResponse =
-            new capabilities.CalculateSpeedDifferenceResponse();
+        com.saabgroup.capabilities.CalculateSpeedDifferenceResponse serviceResponse =
+            new com.saabgroup.capabilities.CalculateSpeedDifferenceResponse();
 
         // Cast to known type, the CalculateSpeedDiff service.
-        capabilities.CalculateSpeedDifference receivedService =
-            (capabilities.CalculateSpeedDifference)serviceRequestProxy.getRequest();
+        com.saabgroup.capabilities.CalculateSpeedDifference receivedService =
+            (com.saabgroup.capabilities.CalculateSpeedDifference)serviceRequestProxy.getRequest();
 
         if(!receivedService.objectWithSpeed().isNull() ||
             !receivedService.speed().isNull())
@@ -96,13 +96,13 @@ public class VehicleServiceHandler implements com.saabgroup.safir.dob.ServiceHan
             // ObjectWithSpeed member. Be sure to check the mapping first.
             // Note, that this is just an example of how to use properties
             // and it has nothing to do with the service mechanism.
-            if(capabilities.SpeedObjectProperty.hasProperty(ent))
+            if(com.saabgroup.capabilities.SpeedObjectProperty.hasProperty(ent))
             {
                 // Check Speed property.
-                if(!capabilities.SpeedObjectProperty.isNullSpeedMember(ent))
+                if(!com.saabgroup.capabilities.SpeedObjectProperty.isNullSpeedMember(ent))
                 {
                     // Retrieve the value from the entity by using the property.
-                    speedProperty = capabilities.SpeedObjectProperty.getSpeedMember(ent);
+                    speedProperty = com.saabgroup.capabilities.SpeedObjectProperty.getSpeedMember(ent);
                     speedDiff = speedProperty - speed;
                     serviceResponse.speedDifference().setVal(speedDiff);
                     bOk = true;
@@ -133,7 +133,7 @@ public class VehicleServiceHandler implements com.saabgroup.safir.dob.ServiceHan
             // The error to be inserted in the error list.
             ResponseErrorInfo error = new ResponseErrorInfo();
 
-            error.member().setVal(capabilities.CalculateSpeedDifference.getObjectWithSpeedMemberIndex());
+            error.member().setVal(com.saabgroup.capabilities.CalculateSpeedDifference.getObjectWithSpeedMemberIndex());
             error.code().setVal(ResponseGeneralErrorCodes.getSafirReqErr());
 
             // Insert error in list.

@@ -106,7 +106,7 @@ ADD_SAFIR_GENERATED_LIBRARY(NAME Core
 
   NAMESPACE_MAPPINGS
 
-  config/Safir-java.namespace.txt
+  data/Safir-java.namespace.txt
 )
 
 INSTALL_SAFIR_GENERATED_LIBRARY(TARGETS Core)

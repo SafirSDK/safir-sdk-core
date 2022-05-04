@@ -32,31 +32,31 @@ public class VehicleMessageSender implements com.saabgroup.safir.dob.MessageSend
 
      // This class uses this secondary connection for Dob calls.
     private SecondaryConnection connection;
-    
+
     // Private constructor prevents instantiation from other classes
-    private VehicleMessageSender() { 
+    private VehicleMessageSender() {
         connection = new SecondaryConnection();
     }
 
     /**
-    * SingletonHolder is loaded on the first execution of Singleton.getInstance() 
+    * SingletonHolder is loaded on the first execution of Singleton.getInstance()
     * or the first access to SingletonHolder.instance, not before.
     */
-    private static class SingletonHolder { 
+    private static class SingletonHolder {
         public static final VehicleMessageSender instance = new VehicleMessageSender();
     }
 
     public static VehicleMessageSender getInstance() {
         return SingletonHolder.instance;
     }
-    
+
     /**
      * Initiates this class. Creates a secondary Dob connection.
      */
     public void init() {
         connection.attach();
     }
-    
+
     /*
      * (non-Javadoc)
      * @see com.saabgroup.safir.dob.MessageSender#onNotMessageOverflow()
@@ -70,9 +70,9 @@ public class VehicleMessageSender implements com.saabgroup.safir.dob.MessageSend
     void sendMaxNofVehicleMsg() {
         // This is just a test to see how you create messages.
         // This is not part of the design pattern.
-        capabilities.vehicles.VehicleMsg msg =
-            new capabilities.vehicles.VehicleMsg();
-        
+        com.saabgroup.capabilities.vehicles.VehicleMsg msg =
+            new com.saabgroup.capabilities.vehicles.VehicleMsg();
+
         msg.messageText().setVal("Number of vehicles reached defined limit.");
 
         try
@@ -81,7 +81,7 @@ public class VehicleMessageSender implements com.saabgroup.safir.dob.MessageSend
         }
         catch (com.saabgroup.safir.dob.OverflowException e)
         {
-            // Do nothing OnNotMessageOverflow() will be called when 
+            // Do nothing OnNotMessageOverflow() will be called when
             // overflow situation solved.
         }
     }

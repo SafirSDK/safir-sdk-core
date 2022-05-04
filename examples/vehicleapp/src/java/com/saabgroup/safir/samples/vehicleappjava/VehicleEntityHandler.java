@@ -35,21 +35,21 @@ public class VehicleEntityHandler implements com.saabgroup.safir.dob.EntityHandl
 
     // Object counter.
     private int numberOfCreatedVehicles;
-    
+
     public VehicleEntityHandler() {
         connection = new com.saabgroup.safir.dob.SecondaryConnection();
         numberOfCreatedVehicles = 0;
     }
-    
+
     /**
      * Initiates this class. Creates a secondary Dob connection and registers as handler.
      */
     public void init() {
         connection.attach();
-        
+
         // Register as vehicle entity handler.
         connection.registerEntityHandlerInjection(
-            capabilities.vehicles.Vehicle.ClassTypeId,
+            com.saabgroup.capabilities.vehicles.Vehicle.ClassTypeId,
             new com.saabgroup.safir.dob.typesystem.HandlerId(),
             com.saabgroup.safir.dob.InstanceIdPolicy.HANDLER_DECIDES_INSTANCE_ID,
             this);
@@ -96,9 +96,9 @@ public class VehicleEntityHandler implements com.saabgroup.safir.dob.EntityHandl
     public void onInjectedNewEntity(com.saabgroup.safir.dob.InjectedEntityProxy arg0) {
         // The default implementation will automatically accept the object.
         numberOfCreatedVehicles++;
-        // Send notification message when the number of created vehicles 
+        // Send notification message when the number of created vehicles
         // has reached the limit.
-        if(numberOfCreatedVehicles == capabilities.vehicles.VehicleParameters.getVehicleLimit()) {
+        if(numberOfCreatedVehicles == com.saabgroup.capabilities.vehicles.VehicleParameters.getVehicleLimit()) {
             VehicleMessageSender.getInstance().sendMaxNofVehicleMsg();
         }
     }
@@ -117,27 +117,27 @@ public class VehicleEntityHandler implements com.saabgroup.safir.dob.EntityHandl
      * @see com.saabgroup.safir.dob.EntityRequestBase#onCreateRequest(com.saabgroup.safir.dob.EntityRequestProxy, com.saabgroup.safir.dob.ResponseSender)
      */
     @Override
-    public void onCreateRequest(com.saabgroup.safir.dob.EntityRequestProxy entityRequestProxy, 
+    public void onCreateRequest(com.saabgroup.safir.dob.EntityRequestProxy entityRequestProxy,
             com.saabgroup.safir.dob.ResponseSender responseSender) {
         boolean bOk = false;
         com.saabgroup.safir.dob.typesystem.InstanceId instanceId;
         com.saabgroup.safir.dob.typesystem.EntityId entityId = new com.saabgroup.safir.dob.typesystem.EntityId();
-        
+
         // Cast to known type, the vehicle entity.
-        capabilities.vehicles.Vehicle vehicle =
-            (capabilities.vehicles.Vehicle)entityRequestProxy.getRequest();
-        
+        com.saabgroup.capabilities.vehicles.Vehicle vehicle =
+            (com.saabgroup.capabilities.vehicles.Vehicle)entityRequestProxy.getRequest();
+
         // Identification is a mandatory member.
         if (!vehicle.identification().isNull())
         {
             // Generate instance number from unique value.
-            instanceId = 
+            instanceId =
                 new com.saabgroup.safir.dob.typesystem.InstanceId(vehicle.identification().getVal());
-            
+
             // Check if entity with given value already exist.
-            entityId.setTypeId(capabilities.vehicles.Vehicle.ClassTypeId);
+            entityId.setTypeId(com.saabgroup.capabilities.vehicles.Vehicle.ClassTypeId);
             entityId.setInstanceId(instanceId);
-            
+
             if(!connection.isCreated(entityId))
             {
                 // Store object in the Dob.
@@ -146,7 +146,7 @@ public class VehicleEntityHandler implements com.saabgroup.safir.dob.EntityHandl
                 numberOfCreatedVehicles++;
             }
         }
-        
+
         if (bOk)
         {
             // Inform requestor about the instance.
@@ -154,10 +154,10 @@ public class VehicleEntityHandler implements com.saabgroup.safir.dob.EntityHandl
                 new com.saabgroup.safir.dob.EntityIdResponse();
             entIdResponse.assigned().setVal(entityId);
             responseSender.send(entIdResponse);
-            
-            // Send notification message when the number of created vehicles 
+
+            // Send notification message when the number of created vehicles
             // has reached the limit.
-            if(numberOfCreatedVehicles == capabilities.vehicles.VehicleParameters.getVehicleLimit())
+            if(numberOfCreatedVehicles == com.saabgroup.capabilities.vehicles.VehicleParameters.getVehicleLimit())
                 VehicleMessageSender.getInstance().sendMaxNofVehicleMsg();
         }
         else
@@ -173,7 +173,7 @@ public class VehicleEntityHandler implements com.saabgroup.safir.dob.EntityHandl
      * @see com.saabgroup.safir.dob.EntityRequestBase#onDeleteRequest(com.saabgroup.safir.dob.EntityRequestProxy, com.saabgroup.safir.dob.ResponseSender)
      */
     @Override
-    public void onDeleteRequest(com.saabgroup.safir.dob.EntityRequestProxy entityRequestProxy, 
+    public void onDeleteRequest(com.saabgroup.safir.dob.EntityRequestProxy entityRequestProxy,
             com.saabgroup.safir.dob.ResponseSender responseSender) {
         if(connection.isCreated(entityRequestProxy.getEntityId()))
         {
@@ -190,14 +190,14 @@ public class VehicleEntityHandler implements com.saabgroup.safir.dob.EntityHandl
      * @see com.saabgroup.safir.dob.EntityRequestBase#onUpdateRequest(com.saabgroup.safir.dob.EntityRequestProxy, com.saabgroup.safir.dob.ResponseSender)
      */
     @Override
-    public void onUpdateRequest(com.saabgroup.safir.dob.EntityRequestProxy entityRequestProxy, 
+    public void onUpdateRequest(com.saabgroup.safir.dob.EntityRequestProxy entityRequestProxy,
             com.saabgroup.safir.dob.ResponseSender responseSender) {
         boolean bOk = false;
 
         // Cast to known type, the vehicle entity.
-        capabilities.vehicles.Vehicle receivedVehicle =
-            (capabilities.vehicles.Vehicle)entityRequestProxy.getRequest();
-        
+        com.saabgroup.capabilities.vehicles.Vehicle receivedVehicle =
+            (com.saabgroup.capabilities.vehicles.Vehicle)entityRequestProxy.getRequest();
+
         if (connection.isCreated(entityRequestProxy.getEntityId()))
         {
             // Don't allow the identification to be updated.
@@ -211,7 +211,7 @@ public class VehicleEntityHandler implements com.saabgroup.safir.dob.EntityHandl
                 bOk = true;
             }
         }
-        
+
         if (bOk)
         {
             responseSender.send(new com.saabgroup.safir.dob.SuccessResponse());

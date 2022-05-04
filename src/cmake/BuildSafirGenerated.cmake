@@ -131,6 +131,37 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
   set_property(TARGET ${_gen_NAME}-dou PROPERTY
     SOURCE_FILES ${_gen_DOU_FILES} ${_gen_DOM_FILES} ${_gen_NAMESPACE_MAPPINGS})
 
+  #find all java namespace files (get them from our dependencies)
+  foreach(DEP ${ALL_DEPENDENCIES})
+    if ("${DEP}" STREQUAL "")
+      continue()
+    endif()
+    if (TARGET ${DEP}-dou)
+      get_target_property(dou_dir ${DEP}-dou DOU_DIR)
+      if ("${dou_dir}" STREQUAL "dou_dir-NOTFOUND")
+        continue()
+      endif()
+    else()
+      if (NOT SAFIR_EXTERNAL_BUILD)
+        message(FATAL_ERROR "External dependencies in Core build tree is not allowed!")
+      endif()
+      execute_process(COMMAND safir_show_config --module-install-dir ${DEP}
+                      RESULT_VARIABLE dou_dir_res
+                      OUTPUT_VARIABLE dou_dir
+                      ERROR_VARIABLE dou_dir)
+      if (dou_dir_res EQUAL 0)
+        string(STRIP ${dou_dir} dou_dir)
+        file(TO_CMAKE_PATH ${dou_dir} dou_dir)
+      else()
+        message(FATAL_ERROR "Failed to resolve external dependency ${DEP} in typesystem.ini. "
+          "Error(${dou_dir_res}):\n${dou_dir}")
+      endif()
+    endif()
+
+    FILE(GLOB_RECURSE mapping_files ${dou_dir}/*.namespace.txt)
+    LIST(APPEND _gen_NAMESPACE_MAPPINGS ${mapping_files})
+  endforeach()
+
   #set up java namespace prefixing rules
   foreach (file ${_gen_NAMESPACE_MAPPINGS})
     get_filename_component(filename ${file} NAME)

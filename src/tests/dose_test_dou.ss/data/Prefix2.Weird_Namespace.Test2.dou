@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <name>Prefix2.Weird_Namespace.Test2</name>
+    <baseClass>Prefix1.Test1.Weird_Name</baseClass>
+    <members>
+        <member>
+            <name>Mem</name>
+            <type>Prefix1.Test1.Weird_Name</type>
+        </member>
+    </members>
+</class>

@@ -210,8 +210,8 @@ class WindowsInstaller():
         if not self.development_installed:
             if os.path.isdir(os.path.join(self.installpath, "include", "boost")):
                 raise SetupError("Found unexpected directory 'include/boost'")
-            if os.path.isdir(os.path.join(self.installpath, "include", "Safir")):
-                raise SetupError("Found unexpected directory 'include/Safir'")
+            if os.path.isdir(os.path.join(self.installpath, "include", "Safir", "Dob")):
+                raise SetupError("Found unexpected directory 'include/Safir/Dob'")
 
 
 class DebianInstaller():

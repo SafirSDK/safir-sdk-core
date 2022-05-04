@@ -21,7 +21,7 @@ ADD_SAFIR_GENERATED_LIBRARY(NAME Example DEPENDENCIES Core
    data/Capabilities.Vehicles.Vehicle-Capabilities.SpeedObjectProperty.dom
 
   NAMESPACE_MAPPINGS
-   data/Safir-java.namespace.txt
+   Capabilities-java.namespace.txt
 )
 
 #The paths here are relative, so they will be put in the corresponding folders under
