@@ -25,7 +25,7 @@
 #ifndef __DOTS_HANDLER_ID_H__
 #define __DOTS_HANDLER_ID_H__
 
-#include <boost/functional/hash.hpp>
+#include <functional>
 #include <Safir/Dob/Typesystem/Defs.h>
 #include <Safir/Dob/Typesystem/Utilities.h>
 #include <Safir/Dob/Typesystem/Exceptions.h>
@@ -222,7 +222,7 @@ namespace Typesystem
 
     //Make it possible to use HandlerId as key in a dictionaries.
     inline std::size_t hash_value(const Safir::Dob::Typesystem::HandlerId& val)
-    {return boost::hash<Int64>()(val.GetRawValue());}
+    {return std::hash<HandlerId::UnderlyingType>()(val.GetRawValue());}
 }
 }
 }

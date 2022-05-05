@@ -25,7 +25,7 @@
 #ifndef __DOTS_ENTITY_ID_H__
 #define __DOTS_ENTITY_ID_H__
 
-#include <boost/functional/hash.hpp>
+#include <functional>
 #include <Safir/Dob/Typesystem/Defs.h>
 #include <Safir/Dob/Typesystem/InstanceId.h>
 
@@ -175,13 +175,19 @@ namespace Typesystem
     static inline std::wostream & operator << (std::wostream & out, const EntityId & entityId)
     {return out << entityId.ToString();}
 
+    template <class T>
+    static inline void hash_combine(std::size_t& seed, const T& v)
+    {
+        std::hash<T> hasher;
+        seed ^= hasher(v) + 0x9e3779b9 + (seed<<6) + (seed>>2);
+    }
+
     //Make it possible to use EntityId as key in a dictionaries.
     inline std::size_t hash_value(const Safir::Dob::Typesystem::EntityId& eid)
     {
-        size_t seed;
-        boost::hash_combine(seed, boost::hash_value(eid.GetTypeId()));
-        boost::hash_combine(seed, boost::hash_value(eid.GetInstanceId().GetRawValue()));
-        return seed;
+        size_t result = std::hash<Dob::Typesystem::TypeId>()(eid.GetTypeId());
+        hash_combine(result, std::hash<InstanceId::UnderlyingType>()(eid.GetInstanceId().GetRawValue()));
+        return result;
     }
 }
 }
