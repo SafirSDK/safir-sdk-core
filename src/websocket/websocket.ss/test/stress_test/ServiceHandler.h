@@ -92,7 +92,7 @@ private:
     boost::function<void()> m_isRegistered;
     client m_client;
     client::connection_ptr m_con;
-    boost::int64_t m_numHandledRequests;
+    std::int64_t m_numHandledRequests;
     std::shared_ptr<boost::thread> m_runner;
 
     void OnOpen(websocketpp::connection_hdl /*hdl*/)

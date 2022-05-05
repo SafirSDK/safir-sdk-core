@@ -237,7 +237,7 @@ Executor::ExecuteAction(DoseTest::ActionPtr action)
             {
                 std::wcout << "Sleeping " << action->SleepDuration() << " seconds"<<std::endl;
                 boost::this_thread::sleep_for(boost::chrono::microseconds
-                                          (static_cast<boost::int64_t>(action->SleepDuration() * 1e6)));
+                                          (static_cast<std::int64_t>(action->SleepDuration() * 1e6)));
             }
         }
         break;

@@ -97,7 +97,7 @@ namespace Internal
         connectionOut = false;
         Signals::Instance().WaitForConnectOrOut();
         //get the events
-        const boost::uint32_t oldconnectSignal = m_connectSignal.compare_exchange(0, 1);
+        const std::uint32_t oldconnectSignal = m_connectSignal.compare_exchange(0, 1);
 
         if (oldconnectSignal != 0)
         {

@@ -31,7 +31,7 @@
 
 void Subscriber::PrintStatistics()
 {
-    const boost::int64_t missed = std::count(m_received.begin(),m_received.end(),false);
+    const std::int64_t missed = std::count(m_received.begin(),m_received.end(),false);
     std::wcout << "Received "
                << CommandLine::Instance().NumSets() - missed
                << " entity creates/updates, missed "
@@ -48,7 +48,7 @@ void Subscriber::PrintStatistics()
         {
             if (!(*it))
             {
-                std::wcout << (boost::int64_t)std::distance(m_received.begin(),it) << " ";
+                std::wcout << (std::int64_t)std::distance(m_received.begin(),it) << " ";
             }
         }
         std::wcout << std::endl;

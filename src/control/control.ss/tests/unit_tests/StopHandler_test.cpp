@@ -162,7 +162,7 @@ public:
 
     struct NodeType
     {
-        NodeType(const boost::int64_t id_,
+        NodeType(const std::int64_t id_,
                  const int heartbeatInterval_,
                  const int maxLostHeartbeats_)
 
@@ -172,7 +172,7 @@ public:
 
         {}
 
-        boost::int64_t id;
+        std::int64_t id;
         int heartbeatInterval;
         int maxLostHeartbeats;
     };

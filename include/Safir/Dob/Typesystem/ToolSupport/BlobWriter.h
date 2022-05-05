@@ -605,7 +605,7 @@ namespace ToolSupport
             assert(m_memberDescription->GetMemberType()==ObjectMemberType);
             std::vector<char> bin(static_cast<size_t>(val.CalculateBlobSize()));
             val.CopyRawBlob(&bin[0]);
-            m_blob.SetValueBinary(m_memberIndex, m_valueIndex, &bin[0], static_cast<boost::int32_t>(bin.size()));
+            m_blob.SetValueBinary(m_memberIndex, m_valueIndex, &bin[0], static_cast<std::int32_t>(bin.size()));
         }
 
         bool Diff(const Internal::Blob& other, const MemberDescriptionType* md, int memberIndex, int myValueIndex, int otherValueIndex)
@@ -658,8 +658,8 @@ namespace ToolSupport
 
                 case ObjectMemberType:
                     {
-                        std::pair<const char*, boost::int32_t> meInner=m_blob.GetValueBinary(memberIndex, myValueIndex);
-                        std::pair<const char*, boost::int32_t> otherInner=other.GetValueBinary(memberIndex, otherValueIndex);
+                        std::pair<const char*, std::int32_t> meInner=m_blob.GetValueBinary(memberIndex, myValueIndex);
+                        std::pair<const char*, std::int32_t> otherInner=other.GetValueBinary(memberIndex, otherValueIndex);
                         if (meInner.second!=otherInner.second || memcmp(meInner.first, otherInner.first, static_cast<size_t>(meInner.second))!=0)
                         {
                             //not binary equal, something is probably different
@@ -680,8 +680,8 @@ namespace ToolSupport
 
                 case BinaryMemberType:
                     {
-                        std::pair<const char*, boost::int32_t> a=m_blob.GetValueBinary(memberIndex, myValueIndex);
-                        std::pair<const char*, boost::int32_t> b=other.GetValueBinary(memberIndex, otherValueIndex);
+                        std::pair<const char*, std::int32_t> a=m_blob.GetValueBinary(memberIndex, myValueIndex);
+                        std::pair<const char*, std::int32_t> b=other.GetValueBinary(memberIndex, otherValueIndex);
                         return a.second!=b.second || memcmp(a.first, b.first, static_cast<size_t>(a.second))!=0;
                     }
                     break;

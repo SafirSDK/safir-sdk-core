@@ -24,7 +24,7 @@
 
 #pragma once
 
-#include <boost/cstdint.hpp>
+#include <cstdint>
 #include <atomic>
 
 namespace Safir
@@ -41,7 +41,7 @@ namespace Internal
             m_value.store(0);
         }
 
-        explicit AtomicUint32(const boost::uint32_t initialValue)
+        explicit AtomicUint32(const std::uint32_t initialValue)
         {
             m_value.store(initialValue);
         }
@@ -50,47 +50,47 @@ namespace Internal
         AtomicUint32& operator=(const AtomicUint32&) = delete;
 
         //atomic write
-        inline void operator=(const boost::uint32_t value)
+        inline void operator=(const std::uint32_t value)
         {
             m_value.store(value);
         }
 
         //atomic post increment
-        inline boost::uint32_t operator++(int)
+        inline std::uint32_t operator++(int)
         {
             return m_value++;
         }
 
         //atomic post decrement
-        inline boost::uint32_t operator--(int)
+        inline std::uint32_t operator--(int)
         {
             return m_value--;
         }
 
-        inline boost::uint32_t value() const
+        inline std::uint32_t value() const
         {
             return m_value.load();
         }
 
-        inline boost::uint32_t compare_exchange(const boost::uint32_t with, boost::uint32_t cmp)
+        inline std::uint32_t compare_exchange(const std::uint32_t with, std::uint32_t cmp)
         {
 
             m_value.compare_exchange_strong(cmp, with);
             return cmp;
         }
 
-        inline bool operator ==(const boost::uint32_t other) const
+        inline bool operator ==(const std::uint32_t other) const
         {
             return value() == other;
         }
 
-        inline bool operator !=(const boost::uint32_t other) const
+        inline bool operator !=(const std::uint32_t other) const
         {
             return value() != other;
         }
 
     private:
-        std::atomic<boost::uint32_t> m_value;
+        std::atomic<std::uint32_t> m_value;
     };
 }
 }

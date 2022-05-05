@@ -344,8 +344,8 @@ namespace Internal
 
         //Get parameter values - depending on actual type of the parameter
         //For entityId use GetInt64Value for typeId and GetHashedValue for instanceId
-        boost::int32_t GetInt32Value(int index) const {return m_values[static_cast<size_t>(index)].val.int32;}
-        boost::int64_t GetInt64Value(int index) const {return m_values[static_cast<size_t>(index)].val.int64;}
+        std::int32_t GetInt32Value(int index) const {return m_values[static_cast<size_t>(index)].val.int32;}
+        std::int64_t GetInt64Value(int index) const {return m_values[static_cast<size_t>(index)].val.int64;}
         float GetFloat32Value(int index) const {return m_values[static_cast<size_t>(index)].val.float32;}
         double GetFloat64Value(int index) const {return m_values[static_cast<size_t>(index)].val.float64;}
         bool GetBoolValue(int index) const {return m_values[static_cast<size_t>(index)].val.boolean;}

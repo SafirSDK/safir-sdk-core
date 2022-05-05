@@ -349,7 +349,7 @@ namespace ToolSupport
                     size_t sep=val.find(", ");
                     result.val.int64=LlufId_Generate64(val.substr(0, sep).c_str());
                     result.val.str=val.substr(sep+2);
-                    if (classic_string_cast<boost::int64_t>(result.val.str,result.val.hash))
+                    if (classic_string_cast<std::int64_t>(result.val.str,result.val.hash))
                     {
                         result.val.str.clear();
                     }
@@ -369,7 +369,7 @@ namespace ToolSupport
             case ChannelIdMemberType:
             case HandlerIdMemberType:
                 {
-                    if (classic_string_cast<boost::int64_t>(val, result.val.hash))
+                    if (classic_string_cast<std::int64_t>(val, result.val.hash))
                     {
                         result.val.str.clear();
                     }
@@ -600,7 +600,7 @@ namespace ToolSupport
             //that the type actually is an enum, in that case we also have to change the memberType to EnumerationMemberType
             if ((*memberIt)->memberType==ObjectMemberType)
             {
-                boost::int64_t id=LlufId_Generate64((*memberIt)->typeName.c_str());
+                std::int64_t id=LlufId_Generate64((*memberIt)->typeName.c_str());
                 const ClassDescription* cd=repository->GetClass(id);
                 if (cd)
                 {

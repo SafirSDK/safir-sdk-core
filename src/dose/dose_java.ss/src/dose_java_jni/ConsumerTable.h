@@ -25,7 +25,7 @@
 #define __DOSE_JAVA_CONSUMER_TABLE_H__
 
 #include <boost/noncopyable.hpp>
-#include <boost/cstdint.hpp>
+#include <cstdint>
 #include <jni.h>
 #include <vector>
 #include <mutex>
@@ -56,7 +56,7 @@ private:
             references(1){}
 
         jobject doseConsumer;
-        boost::int32_t references;
+        std::int32_t references;
     };
 
 

@@ -139,7 +139,7 @@ public:
                  value<std::string>(&doseMainPath)->default_value(""),
                  "Absolute or relative path to dose_main executable. If not defined PATH will be used.")
                 ("force-id",
-                 value<boost::int64_t>(&id)->default_value(0, ""),
+                 value<std::int64_t>(&id)->default_value(0, ""),
                  "Override the automatically generated node id. WARNING This parameter is for debugging/testing"
                  "purposes only.")
                 ("ignore-control-cmd",
@@ -171,7 +171,7 @@ public:
     }
     bool parseOk;
     std::string doseMainPath;
-    boost::int64_t id;
+    std::int64_t id;
     bool ignoreControlCmd;
 
 private:

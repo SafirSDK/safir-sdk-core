@@ -177,7 +177,7 @@ public:
         }
     }
 
-    void SendResponse(const sd::ResponsePtr& response, boost::uint64_t id)
+    void SendResponse(const sd::ResponsePtr& response, std::uint64_t id)
     {
         auto responseSender=m_responseSenderStore.Get(id);
         if (responseSender)

@@ -231,7 +231,7 @@ void Sequencer::ExecuteCurrentAction()
     {
         std::wcout << " - Sleeping " << m_currentAction->SleepDuration() << " seconds"<<std::endl;
         boost::this_thread::sleep_for(boost::chrono::microseconds
-                                  (static_cast<boost::int64_t>(m_currentAction->SleepDuration() * 1e6)));
+                                  (static_cast<std::int64_t>(m_currentAction->SleepDuration() * 1e6)));
     }
     else
     {

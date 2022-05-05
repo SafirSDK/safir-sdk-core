@@ -26,7 +26,7 @@
 #include <Safir/Utilities/Internal/StringEncoding.h>
 #include <iostream>
 
-void LoggingC_SendSystemLog(const boost::int32_t severity,
+void LoggingC_SendSystemLog(const std::int32_t severity,
                             const char * const   message)
 {
     try

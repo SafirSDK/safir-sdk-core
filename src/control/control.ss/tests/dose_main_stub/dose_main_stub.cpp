@@ -102,7 +102,7 @@ int main(int /*argc*/, char * /*argv*/[])
     // Create and populate structures that are needed when creating the Communication and
     // SP instances.
     std::vector<Com::NodeTypeDefinition> commNodeTypes;
-    std::map<boost::int64_t, SP::NodeType> spNodeTypes;
+    std::map<std::int64_t, SP::NodeType> spNodeTypes;
 
 
     for (auto nt = config.nodeTypesParam.cbegin(); nt != config.nodeTypesParam.cend(); ++nt)

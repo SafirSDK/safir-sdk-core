@@ -31,17 +31,17 @@
 namespace
 {
 #if !defined (_MSC_VER) || _MSC_VER > 1900
-    BOOST_STATIC_ASSERT(std::atomic<boost::uint32_t>::is_always_lock_free);
+    BOOST_STATIC_ASSERT(std::atomic<std::uint32_t>::is_always_lock_free);
 #endif
-    BOOST_STATIC_ASSERT(sizeof(std::atomic<boost::uint32_t>) == sizeof(boost::uint32_t));
-    BOOST_STATIC_ASSERT(boost::is_same<boost::uint32_t, std::uint32_t>::value);
+    BOOST_STATIC_ASSERT(sizeof(std::atomic<std::uint32_t>) == sizeof(std::uint32_t));
+    BOOST_STATIC_ASSERT(boost::is_same<std::uint32_t, std::uint32_t>::value);
 
     //Check that boost::atomic<[u]int32_t> is lock free
     BOOST_STATIC_ASSERT(ATOMIC_INT_LOCK_FREE == 2); //int and unsigned int are always lock free
     BOOST_STATIC_ASSERT(ATOMIC_LONG_LOCK_FREE == 2); //long and unsigned long are always lock free
 
-    //now we need to check that boost::uint32_t actually maps to either of the above types
-    BOOST_STATIC_ASSERT((boost::is_same<boost::uint32_t, unsigned int>::value || boost::is_same<boost::uint32_t, unsigned long>::value));
+    //now we need to check that std::uint32_t actually maps to either of the above types
+    BOOST_STATIC_ASSERT((boost::is_same<std::uint32_t, unsigned int>::value || boost::is_same<std::uint32_t, unsigned long>::value));
 
     //these checks may have to be adjusted when/if we port to a platform with different sizes.
 }
@@ -57,7 +57,7 @@ void check(const bool expr)
 int main()
 {
     {
-        check(std::atomic<boost::uint32_t>().is_lock_free());
+        check(std::atomic<std::uint32_t>().is_lock_free());
 
         Safir::Utilities::Internal::AtomicUint32 atomic;
         check(atomic.value() == 0);

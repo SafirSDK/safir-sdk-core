@@ -33,7 +33,7 @@
 #endif
 #define LOGGING_LIBRARY_LOCAL SAFIR_HELPER_DLL_LOCAL
 
-#include <boost/cstdint.hpp>
+#include <cstdint>
 
 extern "C"
 {
@@ -48,7 +48,7 @@ extern "C"
      * @param [in] severity Severity according to RFC 3164.
      * @param [in] message Log text.
      */
-    LOGGING_LIBRARY_API void LoggingC_SendSystemLog(const boost::int32_t severity,
+    LOGGING_LIBRARY_API void LoggingC_SendSystemLog(const std::int32_t severity,
                                                     const char * const   logMsg);
 }
 

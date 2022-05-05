@@ -220,7 +220,7 @@ namespace Internal
             {
                 for (int i=0; i<pd->GetNumberOfValues(); ++i)
                 {
-                    std::pair<boost::int64_t, const char*> hashed=pd->GetHashedValue(i);
+                    std::pair<std::int64_t, const char*> hashed=pd->GetHashedValue(i);
                     if (hashed.second==NULL)
                     {
                         hashed.second="";
@@ -248,7 +248,7 @@ namespace Internal
             {
                 for (int i=0; i<pd->GetNumberOfValues(); ++i)
                 {
-                    std::pair<boost::int64_t, const char*> hashed=pd->GetHashedValue(i);
+                    std::pair<std::int64_t, const char*> hashed=pd->GetHashedValue(i);
                     if (hashed.second==NULL)
                     {
                         hashed.second="";
@@ -402,7 +402,7 @@ namespace Internal
                 {
                     for (int i=0; i<pd->GetNumberOfValues(); ++i)
                     {
-                        std::pair<boost::int64_t, const char*> hashed=pd->GetHashedKey(i);
+                        std::pair<std::int64_t, const char*> hashed=pd->GetHashedKey(i);
                         if (hashed.second==NULL)
                         {
                             hashed.second="";
@@ -429,7 +429,7 @@ namespace Internal
                 {
                     for (int i=0; i<pd->GetNumberOfValues(); ++i)
                     {
-                        std::pair<boost::int64_t, const char*> hashed=pd->GetHashedKey(i);
+                        std::pair<std::int64_t, const char*> hashed=pd->GetHashedKey(i);
                         if (hashed.second==NULL)
                         {
                             hashed.second="";

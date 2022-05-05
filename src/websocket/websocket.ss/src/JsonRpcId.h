@@ -25,25 +25,25 @@
 
 #include <iostream>
 #include <string>
-#include <boost/cstdint.hpp>
+#include <cstdint>
 
 class JsonRpcId
 {
 public:
     JsonRpcId() : m_type(0) {}
-    JsonRpcId(boost::int64_t id) : m_type(1), m_i(id) {}
+    JsonRpcId(std::int64_t id) : m_type(1), m_i(id) {}
     JsonRpcId(const std::string& id) : m_type(2), m_s(id) {}
 
     bool IsNull() const {return m_type==0;}
     bool HasInt() const {return m_type==1;}
     bool HasStr() const {return m_type==2;}
 
-    boost::int64_t Int() const {return m_i;}
+    std::int64_t Int() const {return m_i;}
     const std::string& String() const {return m_s;}
 
 private:
     int m_type; //0=null, 1=int, 2=str
-    boost::int64_t m_i;
+    std::int64_t m_i;
     std::string m_s;
 };
 

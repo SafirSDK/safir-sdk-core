@@ -49,7 +49,7 @@ namespace Internal
     void DistributionData::CheckSizes()
     {
         BOOST_STATIC_ASSERT(sizeof(bool) == 1);
-        BOOST_STATIC_ASSERT(sizeof(VersionNumber) == sizeof(boost::uint16_t));
+        BOOST_STATIC_ASSERT(sizeof(VersionNumber) == sizeof(std::uint16_t));
         BOOST_STATIC_ASSERT(sizeof(ResponseId) == 4);
         BOOST_STATIC_ASSERT(sizeof(LamportTimestamp) == 16);
         BOOST_STATIC_ASSERT(sizeof(InternalRequestId) == 4);
@@ -130,7 +130,7 @@ namespace Internal
         BOOST_STATIC_ASSERT(sizeof(ResponseHeader) == 60);
 
 
-        BOOST_STATIC_ASSERT(sizeof (unsigned int) == sizeof(boost::uint32_t));
+        BOOST_STATIC_ASSERT(sizeof (unsigned int) == sizeof(std::uint32_t));
 
         BOOST_STATIC_ASSERT(sizeof(Safir::Utilities::Internal::AtomicUint32) == 4);
     }
@@ -148,7 +148,7 @@ namespace Internal
             if (random_generator == NULL)
             {
                 random_generator = new boost::ranlux64_3();
-                random_generator->seed(static_cast<boost::uint32_t>(time(NULL)));
+                random_generator->seed(static_cast<std::uint32_t>(time(NULL)));
             }
         }
         static boost::mutex use_lock;

@@ -81,7 +81,7 @@ private:
     int m_numSimultanousUsers;
     int m_requestsPerUser;
 
-    boost::int64_t m_totalNumRequests;
+    std::int64_t m_totalNumRequests;
     int m_userCount;
 
     void HandlerSetupReady()

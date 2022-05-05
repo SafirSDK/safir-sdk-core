@@ -24,7 +24,7 @@
 #include <Safir/Logging/Log.h>
 #include <Safir/Logging/Internal/Interface.h>
 #include <Safir/Utilities/Internal/StringEncoding.h>
-#include <boost/cstdint.hpp>
+#include <cstdint>
 
 namespace Safir 
 { 
@@ -36,7 +36,7 @@ namespace Logging
     void SendSystemLog(const Severity       severity,
                        const std::wstring&  message)
     {
-        LoggingC_SendSystemLog(static_cast<boost::int32_t>(severity), ToUtf8(message).c_str());
+        LoggingC_SendSystemLog(static_cast<std::int32_t>(severity), ToUtf8(message).c_str());
     }
 }
 }

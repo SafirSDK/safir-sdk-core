@@ -26,7 +26,7 @@
 #include <boost/chrono.hpp>
 #include <set>
 #include <bitset>
-#include <boost/cstdint.hpp>
+#include <cstdint>
 #include "Parameters.h"
 #include <Safir/Utilities/Internal/SharedCharArray.h>
 

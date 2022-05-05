@@ -633,7 +633,7 @@ namespace Internal
             Typesystem::Int64           m_instanceId;
             LamportTimestamp            m_creationTime;
             VersionNumber               m_version;
-            boost::uint16_t             m_padding1;
+            std::uint16_t             m_padding1;
             EntityStateKind             m_kind;
             bool                        m_explicitlyDeleted;
             bool                        m_sourceIsPermanentStore;

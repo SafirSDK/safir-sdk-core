@@ -73,14 +73,14 @@ namespace Internal
         }
 
     private:
-        static inline boost::uint16_t max() {return std::numeric_limits<boost::uint16_t>::max();}
+        static inline std::uint16_t max() {return std::numeric_limits<std::uint16_t>::max();}
 
         friend std::wostream & operator << (std::wostream & out, const VersionNumber & version)
         {
             return out << version.m_counter;
         }
 
-        boost::uint16_t m_counter;
+        std::uint16_t m_counter;
     };
 /*
     static inline std::wostream & operator << (std::wostream & out, const VersionNumber & version)

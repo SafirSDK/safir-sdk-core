@@ -73,7 +73,7 @@ public:
 struct NodeType
 {
     std::string name;
-    boost::int64_t id;
+    std::int64_t id;
     bool isLight;
     std::set<std::string> talksTo;
     std::string multicastAddressControl;

@@ -23,6 +23,7 @@
 ******************************************************************************/
 #pragma once
 
+#include <memory>
 #include <Safir/Dob/Connection.h>
 #include <Safir/Utilities/Internal/Atomic.h>
 
@@ -125,7 +126,7 @@ namespace Utilities
         }
 
         const Safir::Dob::Connection&                      m_connection;
-        boost::shared_ptr<boost::asio::io_service::strand> m_strand;
+        std::shared_ptr<boost::asio::io_service::strand>   m_strand;
         std::atomic_flag                                   m_isNotified;
     };
 

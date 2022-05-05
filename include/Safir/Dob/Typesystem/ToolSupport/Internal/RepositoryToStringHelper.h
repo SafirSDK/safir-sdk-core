@@ -78,8 +78,8 @@ namespace Internal
         void DumpMappingDescription(const PropertyMappingDescriptionType* c, bool inherited, std::ostream& os) const;
         void DumpCreateRoutineDescription(const CreateRoutineDescriptionType* c, std::ostream& os) const;
 
-        void TypeIdToString(boost::int64_t tid, std::ostream& os) const;
-        void HashedValToString(const std::pair<boost::int64_t, const char*>& hv, std::ostream& os) const;
+        void TypeIdToString(std::int64_t tid, std::ostream& os) const;
+        void HashedValToString(const std::pair<std::int64_t, const char*>& hv, std::ostream& os) const;
     };
 
     template <class RepT, class Traits>
@@ -114,7 +114,7 @@ namespace Internal
     }
 
     template <class RepT, class Traits>
-    void ToStringHelper<RepT, Traits>::TypeIdToString(boost::int64_t tid, std::ostream& os) const
+    void ToStringHelper<RepT, Traits>::TypeIdToString(std::int64_t tid, std::ostream& os) const
     {
         const char* name=BasicTypeOperations::TypeIdToTypeName(m_rep, tid);
         if (name)
@@ -128,7 +128,7 @@ namespace Internal
     }
 
     template <class RepT, class Traits>
-    void ToStringHelper<RepT, Traits>::HashedValToString(const std::pair<boost::int64_t, const char*>& hv, std::ostream& os) const
+    void ToStringHelper<RepT, Traits>::HashedValToString(const std::pair<std::int64_t, const char*>& hv, std::ostream& os) const
     {
         os<<hv.first;
         if (hv.second)

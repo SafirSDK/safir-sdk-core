@@ -33,7 +33,7 @@ namespace Dob
 namespace Internal
 {
     MessageQueue::MessageQueue(const size_t capacity):
-        m_capacity(static_cast<boost::uint32_t>(capacity)),
+        m_capacity(static_cast<std::uint32_t>(capacity)),
         m_size(0),
         m_noPushed(0),
         m_noOverflows(0),

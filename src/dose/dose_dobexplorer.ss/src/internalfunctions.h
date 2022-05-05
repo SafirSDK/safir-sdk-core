@@ -66,11 +66,11 @@ namespace Safir
             bool simple;
 
             //OUT PARAMETERS
-            boost::uint64_t numStates;
-            boost::uint64_t downgraded;
-            boost::uint64_t realStates;
-            boost::uint64_t ghostStates;
-            boost::uint64_t injectionStates;
+            std::uint64_t numStates;
+            std::uint64_t downgraded;
+            std::uint64_t realStates;
+            std::uint64_t ghostStates;
+            std::uint64_t injectionStates;
 
             //TEMPORARIES
             Safir::Dob::Typesystem::Int64 instanceId;

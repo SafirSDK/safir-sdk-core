@@ -186,7 +186,7 @@ public:
         for (int i=0; i<NumberOfNodeTypes; ++i)
         {
             std::string name = "nt"+boost::lexical_cast<std::string>(i);
-            boost::int64_t id=LlufId_Generate64(name.c_str());
+            std::int64_t id=LlufId_Generate64(name.c_str());
             std::vector<int> retryTimeout;
             retryTimeout.push_back(40);
             int heartbeatInterval=1000+500*i;

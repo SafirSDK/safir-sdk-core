@@ -89,7 +89,7 @@ namespace Internal
             // Create and populate structures that are needed when creating the Communication and
             // SP instances.
             std::vector<Com::NodeTypeDefinition> commNodeTypes;
-            std::map<boost::int64_t, typename SP::NodeType> spNodeTypes;
+            std::map<std::int64_t, typename SP::NodeType> spNodeTypes;
 
 
             for (auto nt = m_config.nodeTypesParam.cbegin(); nt != m_config.nodeTypesParam.cend(); ++nt)

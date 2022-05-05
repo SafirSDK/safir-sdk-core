@@ -58,7 +58,7 @@ namespace Internal
          */
         void Set(const SetFunction& setFunc)
         {
-            const boost::uint32_t oldVal = m_flag.compare_exchange(1,0);
+            const std::uint32_t oldVal = m_flag.compare_exchange(1,0);
             if (oldVal == 0) //if we changed it to 1 affected the flag
             {
                 setFunc();
@@ -80,12 +80,12 @@ namespace Internal
          */
         bool Process(const ProcessFunction& processFunc) const
         {
-            const boost::uint32_t oldVal = m_flag.compare_exchange(0,1);
+            const std::uint32_t oldVal = m_flag.compare_exchange(0,1);
             if (oldVal == 1)
             {
                 if (!processFunc())
                 {
-                    const boost::uint32_t setAgain = m_flag.compare_exchange(1,0);
+                    const std::uint32_t setAgain = m_flag.compare_exchange(1,0);
                     return setAgain != 0;
                 }
             }

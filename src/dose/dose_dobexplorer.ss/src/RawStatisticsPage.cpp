@@ -92,9 +92,9 @@ namespace
     }
 
 
-    std::map<boost::int64_t, int> GetAllIds(const Safir::Dob::Internal::SP::RawStatistics& statistics)
+    std::map<std::int64_t, int> GetAllIds(const Safir::Dob::Internal::SP::RawStatistics& statistics)
     {
-        std::map<boost::int64_t,int> ids;
+        std::map<std::int64_t,int> ids;
         const int size = statistics.Size();
         for (int i = 0; i < size; ++i)
         {

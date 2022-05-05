@@ -59,8 +59,8 @@ namespace Internal
 {
     typedef std::vector<std::string> StringVector;
 
-    typedef boost::uint32_t Offset;
-    typedef boost::uint32_t Size;
+    typedef std::uint32_t Offset;
+    typedef std::uint32_t Size;
     typedef DotsC_Int32 EnumInternal;
     typedef DotsC_Int64 ChannelId;
     typedef DotsC_Int64 HandlerId;

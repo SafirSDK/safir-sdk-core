@@ -24,13 +24,13 @@
 #ifndef __DOTS_LANGUAGE_INTERFACE_DEFS_H__
 #define __DOTS_LANGUAGE_INTERFACE_DEFS_H__
 
-#include <boost/cstdint.hpp>
+#include <cstdint>
 
 //--------------------------------------------------
 // Base types
 //--------------------------------------------------
-typedef boost::int32_t DotsC_Int32;
-typedef boost::int64_t DotsC_Int64;
+typedef std::int32_t DotsC_Int32;
+typedef std::int64_t DotsC_Int64;
 typedef float          DotsC_Float32;
 typedef double         DotsC_Float64;
 

@@ -54,7 +54,7 @@ public:
         return os.str();
     }
 
-    static std::string Int(const JsonRpcId& id, boost::int64_t result)
+    static std::string Int(const JsonRpcId& id, std::int64_t result)
     {
         std::ostringstream os;
         os<<"{"<<SAFIR_WS_STR("jsonrpc","2.0")<<","<<SAFIR_WS_NUM("result", result)<<","<<id<<"}";

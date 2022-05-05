@@ -127,9 +127,9 @@ private:
         const ptime epoch(boost::gregorian::date(2008,1,1));
         const ptime now = microsec_clock::universal_time();
         const time_duration diff = now - epoch;
-        const boost::uint32_t my_seed =
-            (static_cast<boost::uint32_t>(diff.total_microseconds()) * Safir::Utilities::ProcessInfo::GetPid())
-            % std::numeric_limits<boost::uint32_t>::max();
+        const std::uint32_t my_seed =
+            (static_cast<std::uint32_t>(diff.total_microseconds()) * Safir::Utilities::ProcessInfo::GetPid())
+            % std::numeric_limits<std::uint32_t>::max();
         m_randomGenerator.seed(my_seed);
     }
 

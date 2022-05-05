@@ -38,7 +38,7 @@ public:
     {
     }
 
-    boost::uint64_t Add(const sd::ResponseSenderPtr& responseSender)
+    std::uint64_t Add(const sd::ResponseSenderPtr& responseSender)
     {
         //if we have to many response senders, it must mean that the remote client has not responded.
         //in that case dose has already sent a timeout-response so we can safely remove the ResponseSender
@@ -54,7 +54,7 @@ public:
         return m_id;
     }
 
-    sd::ResponseSenderPtr Get(boost::uint64_t reqId)
+    sd::ResponseSenderPtr Get(std::uint64_t reqId)
     {
         for (auto it=m_store.begin(); it!=m_store.end(); ++it)
         {
@@ -75,6 +75,6 @@ public:
 
 private:
     size_t m_queueSize;
-    boost::uint64_t m_id;
-    std::vector< std::pair<boost::uint64_t, sd::ResponseSenderPtr> >  m_store;
+    std::uint64_t m_id;
+    std::vector< std::pair<std::uint64_t, sd::ResponseSenderPtr> >  m_store;
 };

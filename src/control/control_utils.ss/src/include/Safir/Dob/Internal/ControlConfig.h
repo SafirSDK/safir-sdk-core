@@ -66,7 +66,7 @@ namespace Control
         {}
 
         const std::string name;
-        const boost::int64_t id;
+        const std::int64_t id;
         const std::string multicastAddressControl;
         const std::string multicastAddressData;
         const int heartbeatInterval;
@@ -100,7 +100,7 @@ namespace Control
         std::vector<std::string> seeds;
         std::string name;
         std::string nodeType;
-        boost::int64_t nodeTypeId;
+        std::int64_t nodeTypeId;
     };
 
     // This class reads configuration parameters and make some sanity checks for parameters needed by Control.

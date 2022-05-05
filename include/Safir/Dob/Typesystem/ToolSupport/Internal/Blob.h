@@ -24,7 +24,7 @@
 #ifndef __DOTS_INTERNAL_BLOB_H__
 #define __DOTS_INTERNAL_BLOB_H__
 
-#include <boost/cstdint.hpp>
+#include <cstdint>
 #include <memory>
 #include <Safir/Dob/Typesystem/LanguageInterfaceDefs.h>
 #include <Safir/Dob/Typesystem/ToolSupport/ParseError.h>
@@ -47,23 +47,23 @@ namespace Internal
     class DOTS_INTERNAL_API Blob
     {
     public:
-        static boost::int32_t GetSize(const char* blob);
-        static boost::int64_t GetTypeId(const char* blob);
+        static std::int32_t GetSize(const char* blob);
+        static std::int64_t GetTypeId(const char* blob);
 
         //create new empty blob of specific type and initiates all members with null and unchanged
-        Blob(boost::int64_t typeId, int numberOfMembers);
+        Blob(std::int64_t typeId, int numberOfMembers);
 
         //create blob object by deserialize a raw blob
         Blob(const char* blob);
 
         //calculate the blob size
-        boost::int32_t CalculateBlobSize();
+        std::int32_t CalculateBlobSize();
 
         //get known size of blob, does not calculate
-        boost::int32_t Size() const {return m_blobSize;}
+        std::int32_t Size() const {return m_blobSize;}
 
         //get typeId of blob
-        boost::int64_t TypeId() const {return m_typeId;}
+        std::int64_t TypeId() const {return m_typeId;}
 
         //serialize current content to destBlob
         void Serialize(char* destBlob);
@@ -99,20 +99,20 @@ namespace Internal
         void ValueStatus(int member, int index, bool& isNull, bool& isChanged) const;
 
         //get keys, undefined behaviour if IsNull=true
-        boost::int32_t GetKeyInt32(int member, int index) const;
-        boost::int64_t GetKeyInt64(int member, int index) const;
-        boost::int64_t GetKeyHash(int member, int index) const;
+        std::int32_t GetKeyInt32(int member, int index) const;
+        std::int64_t GetKeyInt64(int member, int index) const;
+        std::int64_t GetKeyHash(int member, int index) const;
         const char* GetKeyString(int member, int index) const;
 
         //get value
-        boost::int32_t GetValueInt32(int member, int index) const;
-        boost::int64_t GetValueInt64(int member, int index) const;
+        std::int32_t GetValueInt32(int member, int index) const;
+        std::int64_t GetValueInt64(int member, int index) const;
         float GetValueFloat32(int member, int index) const;
         double GetValueFloat64(int member, int index) const;
         bool GetValueBool(int member, int index) const;
-        boost::int64_t GetValueHash(int member, int index) const;
+        std::int64_t GetValueHash(int member, int index) const;
         const char* GetValueString(int member, int index) const;
-        std::pair<const char*, boost::int32_t> GetValueBinary(int member, int index) const;
+        std::pair<const char*, std::int32_t> GetValueBinary(int member, int index) const;
 
         //----------------------------------------
         // Write
@@ -128,26 +128,26 @@ namespace Internal
         void SetChangedHere(int member, int index, bool isChanged);
 
         //set key for last added value
-        void SetKeyInt32(int member, int index, boost::int32_t val);
-        void SetKeyInt64(int member, int index, boost::int64_t val);
-        void SetKeyHash(int member, int index, boost::int64_t val);
+        void SetKeyInt32(int member, int index, std::int32_t val);
+        void SetKeyInt64(int member, int index, std::int64_t val);
+        void SetKeyHash(int member, int index, std::int64_t val);
         void SetKeyString(int member, int index, const char* val);
 
         //set value for last added value, after a value have been set IsNull=false
-        void SetValueInt32(int member, int index, boost::int32_t val);
-        void SetValueInt64(int member, int index, boost::int64_t val);
+        void SetValueInt32(int member, int index, std::int32_t val);
+        void SetValueInt64(int member, int index, std::int64_t val);
         void SetValueFloat32(int member, int index, float val);
         void SetValueFloat64(int member, int index, double val);
         void SetValueBool(int member, int index, bool val);
-        void SetValueHash(int member, int index, boost::int64_t val);
+        void SetValueHash(int member, int index, std::int64_t val);
         void SetValueString(int member, int index, const char* val);
-        void SetValueBinary(int member, int index, const char* val, boost::int32_t size);
+        void SetValueBinary(int member, int index, const char* val, std::int32_t size);
 
     private:
-        static const size_t HeaderSize=sizeof(boost::int32_t)+sizeof(boost::int64_t);
+        static const size_t HeaderSize=sizeof(std::int32_t)+sizeof(std::int64_t);
 
-        boost::int32_t m_blobSize;
-        boost::int64_t m_typeId;
+        std::int32_t m_blobSize;
+        std::int64_t m_typeId;
 
 #ifdef _MSC_VER
 #pragma warning (push)

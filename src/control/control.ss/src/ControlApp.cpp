@@ -58,7 +58,7 @@
 
 ControlApp::ControlApp(boost::asio::io_service&         ioService,
                        const boost::filesystem::path&   doseMainPath,
-                       const boost::int64_t             id,
+                       const std::int64_t             id,
                        const bool                       ignoreControlCmd)
     : m_ioService(ioService)
     , m_stopped(false)
@@ -95,7 +95,7 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
         {
             // Generate a positive node id if the node is of a type that is allowed to form as system, or
             // a negative node id if the node is of a type that is NOT allowd to form a system.
-            boost::int64_t nodeId = LlufId_GenerateRandom64();
+            std::int64_t nodeId = LlufId_GenerateRandom64();
 
             if ((m_requiredForStart && nodeId > 0) || (!m_requiredForStart && nodeId < 0))
             {
@@ -194,7 +194,7 @@ void ControlApp::Start()
 
     // Initiate SystemPicture
 
-    std::map<boost::int64_t, SP::NodeType> spNodeTypes;
+    std::map<std::int64_t, SP::NodeType> spNodeTypes;
 
     for (auto nt = m_conf.nodeTypesParam.cbegin(); nt != m_conf.nodeTypesParam.cend(); ++nt)
     {
