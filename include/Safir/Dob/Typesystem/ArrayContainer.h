@@ -28,7 +28,7 @@
 #include <Safir/Dob/Typesystem/ValueContainers.h>
 #include <Safir/Dob/Typesystem/ObjectContainer.h>
 #include <Safir/Dob/Typesystem/Exceptions.h>
-
+#include <algorithm>
 namespace Safir
 {
 namespace Dob
