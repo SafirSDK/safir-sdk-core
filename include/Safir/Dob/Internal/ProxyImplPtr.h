@@ -22,11 +22,10 @@
 *
 ******************************************************************************/
 
-#ifndef _SAFIR_DOB_PROXY_IMPL_PTR_H
-#define _SAFIR_DOB_PROXY_IMPL_PTR_H
+#pragma once
 
 #include <Safir/Dob/Typesystem/Exceptions.h>
-#include <boost/checked_delete.hpp>
+#include <type_traits>
 
 namespace Safir
 {
@@ -34,6 +33,15 @@ namespace Dob
 {
 namespace Internal
 {
+    // A copy of boost::checked_delete
+    template<class T> inline void checked_delete(T * x)
+    {
+        // intentionally complex - simplification causes regressions
+        typedef char type_must_be_complete[ sizeof(T)? 1: -1 ];
+        (void) sizeof(type_must_be_complete);
+        delete x;
+    }
+
     // Class that provides a smart pointer that can be copied just once. It has
     // std::auto_ptr semantics so don't use the original object after copying.
     template <class ImplT>
@@ -43,17 +51,16 @@ namespace Internal
         explicit ProxyImplPtr(ImplT* pImpl) :
             m_pImpl(pImpl),
             m_copyCounter(0),
-            m_deleterFunc(boost::checked_delete)
+            m_deleterFunc(checked_delete<ImplT>)
         {
-            //The following bit comes from boost::checked_delete. It may not
-            //be needed here any longer, since we use checked_delete as our deleter
-            //function.
-            //The reason for it is to ensure that the type is complete when this constructor
-            //is called.
-            //The same reason applies to the deleter function. We cannot call delete directly
-            //in the destructor, since at that point (in the apps) the type is not complete, and
-            //it isnt meant to be!
-            // intentionally complex - simplification causes regressions
+            // This is all stuff that is meant to disallow usage of this type with an incomplete type
+
+            static_assert(!std::is_void<ImplT>::value,
+                          "can't delete pointer to incomplete type");
+            static_assert(sizeof(ImplT)>0,
+                          "can't delete pointer to incomplete type");
+
+
             typedef char type_must_be_complete[ sizeof(ImplT)? 1: -1 ];
             (void) sizeof(type_must_be_complete);
         }
@@ -123,4 +130,4 @@ namespace Internal
 }
 }
 
-#endif
+
