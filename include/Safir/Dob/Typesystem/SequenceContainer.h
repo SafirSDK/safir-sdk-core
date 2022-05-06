@@ -29,7 +29,7 @@
 #include <Safir/Dob/Typesystem/HandlerId.h>
 #include <Safir/Dob/Typesystem/Object.h>
 #include <Safir/Dob/Typesystem/Utilities.h>
-#include <boost/container/vector.hpp>
+#include <deque>
 #include <stdexcept>
 #include <typeinfo>
 #include <vector>
@@ -54,7 +54,7 @@ namespace Typesystem
     public:
 
         typedef T ContainedType;
-        typedef boost::container::vector<T> StorageType;  //we use boost version instead of std because we want to be able to use vector<bool> without warnings and errors.
+        typedef std::deque<T> StorageType; //we use std::deque instead of std::vector, to avoid std::vector<bool> specialization
         typedef typename StorageType::const_iterator const_iterator;
 
         /**
@@ -245,7 +245,6 @@ namespace Typesystem
 
                 m_bIsChanged=other.m_bIsChanged;
                 m_values.clear();
-                m_values.reserve(other.m_values.size());
                 for (typename StorageType::const_iterator it=other.m_values.begin(); it!=other.m_values.end(); ++it)
                 {
                     m_values.push_back(SequenceCopyHelper<ContainedType>::Copy(*it));
@@ -363,7 +362,7 @@ namespace Typesystem
     {
     public:
         typedef typename T::Enumeration ContainedType;
-        typedef boost::container::vector<typename T::Enumeration> StorageType;  //we use boost version instead of std because we want to be able to use vector<bool> without warnings and errors.
+        typedef std::deque<ContainedType> StorageType; //we use std::deque instead of std::vector, to avoid std::vector<bool> specialization
         typedef typename StorageType::const_iterator const_iterator;
 
         /**
@@ -425,7 +424,7 @@ namespace Typesystem
          * @param index [in] - Index of the value to get.
          * @return The value at the index.
          */
-        ContainedType operator [](const size_t index) const
+        ContainedType operator[](const size_t index) const
         {
             T::CheckForMismatch();
             return m_values[index];
