@@ -22,7 +22,12 @@
 *
 ******************************************************************************/
 #pragma once
-#include <memory>
+
+#if (_MSC_VER == 1900)
+#  include <boost/shared_ptr.hpp>
+#else
+#  include <memory>
+#endif
 
 namespace Safir
 {
