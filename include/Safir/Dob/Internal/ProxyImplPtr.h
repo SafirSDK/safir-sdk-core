@@ -33,7 +33,7 @@ namespace Dob
 {
 namespace Internal
 {
-    // A copy of boost::checked_delete
+    // A copy of boost checked_delete
     template<class T> inline void checked_delete(T * x)
     {
         // intentionally complex - simplification causes regressions
