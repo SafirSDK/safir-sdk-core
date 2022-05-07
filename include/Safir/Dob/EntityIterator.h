@@ -21,12 +21,10 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
+#pragma once
 
-#ifndef _SAFIR_DOB_ENTITYITERATOR_H
-#define _SAFIR_DOB_ENTITYITERATOR_H
-
-#include <Safir/Dob/DoseCppExportDefs.h>
 #include <Safir/Dob/EntityProxy.h>
+#include <Safir/Dob/Internal/EntityIteratorImpl.h>
 #include <Safir/Dob/Typesystem/Exceptions.h>
 #include <Safir/Dob/Typesystem/Defs.h>
 #include <boost/iterator/iterator_facade.hpp>
@@ -44,22 +42,23 @@ namespace Dob
              EntityIterator,
              const EntityProxy,
              boost::single_pass_traversal_tag
-        >
+        >,
+        private Internal::EntityIteratorImpl
     {
     public:
         /** Constructs an "end" iterator
          */
-        DOSE_CPP_API EntityIterator();
+        EntityIterator() = default;
 
         /** Copy Constructor. */
-        DOSE_CPP_API EntityIterator(const EntityIterator & other);
+        EntityIterator(const EntityIterator & other) = default;
 
         /** Destructor.
          */
-        DOSE_CPP_API ~EntityIterator();
+        ~EntityIterator() = default;
 
         /** Copy assignment operator.*/
-        DOSE_CPP_API EntityIterator & operator=(const EntityIterator& other);
+        EntityIterator & operator=(const EntityIterator& other) = default;
 
         /**
          * The preincrement operator.
@@ -78,22 +77,15 @@ namespace Dob
 
         //Disable postincrement iterator
         //Use preincrement, i.e. ++it, instead.
-        const EntityIterator operator++(int);
+        const EntityIterator operator++(int) = delete;
 
-        DOSE_CPP_API EntityIterator(const long ctrl,
-                                    const Typesystem::TypeId typeId,
-                                    const bool includeSubclasses);
+        EntityIterator(const long ctrl,
+                       const Typesystem::TypeId typeId,
+                       const bool includeSubclasses)
+            : EntityIteratorImpl(ctrl,typeId,includeSubclasses)
+        {
 
-        DOSE_CPP_API const EntityProxy& dereference() const;
-        DOSE_CPP_API void increment();
-        DOSE_CPP_API bool equal(const EntityIterator& other) const;
-
-        long m_ctrl;
-        Safir::Dob::Typesystem::Int32 m_iteratorId;
-
-        mutable std::shared_ptr<EntityProxy> m_dereferenced;
+        }
     };
 }
 }
-
-#endif

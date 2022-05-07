@@ -21,7 +21,7 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#include <Safir/Dob/EntityIterator.h>
+#include <Safir/Dob/Internal/EntityIteratorImpl.h>
 
 #include <Safir/Dob/Typesystem/LibraryExceptions.h>
 #include <Safir/Dob/Internal/Interface.h>
@@ -31,16 +31,18 @@ namespace Safir
 {
 namespace Dob
 {
-    EntityIterator::EntityIterator():
+namespace Internal
+{
+    EntityIteratorImpl::EntityIteratorImpl():
         m_ctrl(-1),
         m_iteratorId(-1)
     {
 
     }
 
-    EntityIterator::EntityIterator(const long ctrl,
-                                   const Typesystem::TypeId typeId,
-                                   const bool includeSubclasses):
+    EntityIteratorImpl::EntityIteratorImpl(const long ctrl,
+                                           const Typesystem::TypeId typeId,
+                                           const bool includeSubclasses):
         m_ctrl(ctrl),
         m_iteratorId(-1)
     {
@@ -55,12 +57,12 @@ namespace Dob
 
         if (end)
         {
-            *this = EntityIterator();
+            *this = EntityIteratorImpl();
         }
     }
 
 
-    EntityIterator::EntityIterator(const EntityIterator & other):
+    EntityIteratorImpl::EntityIteratorImpl(const EntityIteratorImpl & other):
         m_ctrl(other.m_ctrl),
         m_iteratorId(-1)
     {
@@ -76,7 +78,7 @@ namespace Dob
         }
     }
 
-    EntityIterator::~EntityIterator()
+    EntityIteratorImpl::~EntityIteratorImpl()
     {
         if (m_iteratorId != -1)
         {
@@ -85,7 +87,7 @@ namespace Dob
         }
     }
 
-    EntityIterator & EntityIterator::operator=(const EntityIterator& other)
+    EntityIteratorImpl & EntityIteratorImpl::operator=(const EntityIteratorImpl& other)
     {
         m_dereferenced.reset();
 
@@ -109,7 +111,7 @@ namespace Dob
     }
 
 
-    const EntityProxy& EntityIterator::dereference() const
+    const EntityProxy& EntityIteratorImpl::dereference() const
     {
         if (m_iteratorId == -1)
         {
@@ -139,7 +141,7 @@ namespace Dob
         return *m_dereferenced;
     }
 
-    void EntityIterator::increment()
+    void EntityIteratorImpl::increment()
     {
         if (m_iteratorId == -1)
         {
@@ -159,11 +161,11 @@ namespace Dob
 
         if (end)
         {
-            *this = EntityIterator();
+            *this = EntityIteratorImpl();
         }
     }
 
-    bool EntityIterator::equal(const EntityIterator& other) const
+    bool EntityIteratorImpl::equal(const EntityIteratorImpl& other) const
     {
         if (m_iteratorId == -1 && other.m_iteratorId == -1)
         {
@@ -190,5 +192,6 @@ namespace Dob
         return equal;
     }
 
+}
 }
 }
