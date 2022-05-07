@@ -24,6 +24,8 @@
 #ifndef __DOUF_ACE_TIME_CONVERTER_H
 #define __DOUF_ACE_TIME_CONVERTER_H
 
+#ifndef SAFIR_NO_DEPRECATED
+
 #include <ace/Time_Value.h>
 #include <Safir/Dob/Typesystem/Defs.h>
 #include <Safir/Time/TimeProvider.h>
@@ -48,6 +50,9 @@ namespace Time
 
     /**
      * The AceTimeConverter class provides functions to convert to/from ACE time.
+     *
+     * @deprecated This class will be removed from Safir SDK Core eventually, make your
+     *             own copy of it if you need it.
      */
     class AceTimeConverter
     {
@@ -135,4 +140,5 @@ namespace Time
 } // namespace Time
 } // namespace Safir
 
+#endif
 #endif //__DOUF_ACE_TIME_CONVERTER_H
