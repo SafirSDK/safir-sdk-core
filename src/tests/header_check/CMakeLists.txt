@@ -11,8 +11,6 @@ FILE(GLOB_RECURSE headers
 
 set(EXCLUDE_LIST
   AutoLink\\.h       #Special file, but manually checked to not include windows.h
-  AceTimeConverter\\.h #these are kind of meant to
-  AceDispatcher\\.h    # include ace, which includes windows.h...
   AsioDispatcher\\.h   #includes asio.hpp, which appears to include windows.h
 
   /Typesystem/ToolSupport #property_tree appears to have some windows.h stuff in it
