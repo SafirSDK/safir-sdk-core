@@ -21,8 +21,7 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifndef __DOUF_TIME_H
-#define __DOUF_TIME_H
+#pragma once
 
 #include <Safir/Utilities/Internal/VisibilityHelpers.h>
 
@@ -44,6 +43,8 @@
 #endif
 
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/date_time/gregorian/greg_date.hpp>
+#include <boost/date_time/time_duration.hpp>
 
 //and enable the warnings again
 #if defined _MSC_VER
@@ -58,7 +59,7 @@ namespace Time
     /**
      * The Time class contains functions to operate on time.
      */
-    class DOUF_TIME_CPP_API TimeProvider
+    class TimeProvider
     {
     public:
 
@@ -67,7 +68,7 @@ namespace Time
          *
          * @return Seconds and fraction since jan 1 1970 00:00
          */
-        static Safir::Dob::Typesystem::Si64::Second GetUtcTime();
+        static DOUF_TIME_CPP_API Safir::Dob::Typesystem::Si64::Second GetUtcTime();
 
         /**
          * Convert from UTC to local time
@@ -75,7 +76,11 @@ namespace Time
          * @param [in] utcTime - The time in UTC
          * @return The local time
          */
-        static boost::posix_time::ptime ToLocalTime(const Safir::Dob::Typesystem::Si64::Second utcTime);
+        static boost::posix_time::ptime ToLocalTime(const Safir::Dob::Typesystem::Si64::Second utcTime)
+        {
+            return ToPtime(utcTime + GetLocalTimeOffset());
+        }
+
 
         /**
          * Convert local time to UTC time
@@ -83,7 +88,14 @@ namespace Time
          * @param [in] localTime - The local time
          * @return Seconds and fraction since jan 1 1970 00:00
          */
-        static Safir::Dob::Typesystem::Si64::Second ToUtcTime(const boost::posix_time::ptime & localTime);
+        static Safir::Dob::Typesystem::Si64::Second ToUtcTime(const boost::posix_time::ptime & localTime)
+        {
+            boost::posix_time::time_duration duration = localTime - FIRST_JAN_1970;
+            Dob::Typesystem::Int64 seconds = duration.total_seconds();
+            Dob::Typesystem::Float64 fraction = duration.fractional_seconds() / pow(10.0,duration.num_fractional_digits());
+
+            return seconds + fraction - GetLocalTimeOffset();
+        }
 
         /**
          * Get specified UTC time in boost::posix_time::ptime representation
@@ -91,7 +103,24 @@ namespace Time
          * @param [in] utcTime - The UTC time
          * @return The UTC time stored in a boost::posix_time::ptime object
          */
-        static boost::posix_time::ptime ToPtime(const Safir::Dob::Typesystem::Si64::Second utcTime);
+        static boost::posix_time::ptime ToPtime(const Safir::Dob::Typesystem::Si64::Second utcTime)
+        {
+            Dob::Typesystem::Int64 sec;
+            Dob::Typesystem::Float64 fraction;
+
+            sec = (Dob::Typesystem::Int64)utcTime;
+            fraction = utcTime - sec;
+
+            long long hour    = sec/3600;
+            long long minutes = (sec - hour*3600)/60;
+            long long seconds = sec - hour*3600 - minutes*60;
+
+            // Return the duration since 1970-Jan-01
+            boost::posix_time::time_duration duration((long)hour, (long)minutes, (long)seconds,
+                                                      Dob::Typesystem::Int64(fraction * pow(10.0,boost::posix_time::time_duration::num_fractional_digits()) + 0.5));
+
+            return FIRST_JAN_1970 + duration;
+        }
 
         /**
          * Convert specified UTC time to a Double
@@ -99,10 +128,20 @@ namespace Time
          * @param [in] utcTime - The UTC time
          * @return Seconds and fraction since jan 1 1970 00:00
          */
-        static Safir::Dob::Typesystem::Si64::Second ToDouble(const boost::posix_time::ptime & utcTime);
+        static Safir::Dob::Typesystem::Si64::Second ToDouble(const boost::posix_time::ptime & utcTime)
+        {
+            boost::posix_time::time_duration d = utcTime - FIRST_JAN_1970;
+            return(double)d.ticks() / d.ticks_per_second();
+        }
+
+    private:
+        static constexpr boost::posix_time::ptime FIRST_JAN_1970 =
+            boost::posix_time::ptime(boost::gregorian::date(1970,boost::date_time::Jan,1));
+
+        static DOUF_TIME_CPP_API Safir::Dob::Typesystem::Int32 GetLocalTimeOffset();
     };
 
 } // namespace Time
 } // namespace Safir
 
-#endif //__DOUF_TIME_H
+
