@@ -55,7 +55,6 @@ namespace Safir
 {
 namespace Time
 {
-
     /**
      * The Time class contains functions to operate on time.
      */
@@ -90,7 +89,7 @@ namespace Time
          */
         static Safir::Dob::Typesystem::Si64::Second ToUtcTime(const boost::posix_time::ptime & localTime)
         {
-            boost::posix_time::time_duration duration = localTime - FIRST_JAN_1970;
+            boost::posix_time::time_duration duration = localTime - Epoch();
             Dob::Typesystem::Int64 seconds = duration.total_seconds();
             Dob::Typesystem::Float64 fraction = duration.fractional_seconds() / pow(10.0,duration.num_fractional_digits());
 
@@ -119,7 +118,7 @@ namespace Time
             boost::posix_time::time_duration duration((long)hour, (long)minutes, (long)seconds,
                                                       Dob::Typesystem::Int64(fraction * pow(10.0,boost::posix_time::time_duration::num_fractional_digits()) + 0.5));
 
-            return FIRST_JAN_1970 + duration;
+            return Epoch() + duration;
         }
 
         /**
@@ -130,13 +129,21 @@ namespace Time
          */
         static Safir::Dob::Typesystem::Si64::Second ToDouble(const boost::posix_time::ptime & utcTime)
         {
-            boost::posix_time::time_duration d = utcTime - FIRST_JAN_1970;
+            boost::posix_time::time_duration d = utcTime - Epoch();
             return(double)d.ticks() / d.ticks_per_second();
         }
 
     private:
-        static constexpr boost::posix_time::ptime FIRST_JAN_1970 =
-            boost::posix_time::ptime(boost::gregorian::date(1970,boost::date_time::Jan,1));
+        /**
+         * Get the epoch for all the calculations, in boost::posix_time format.
+         *
+         * This is not a class constant, since there is no easy way to initialize a static
+         * constant in a thread-safe way.
+         */
+        static inline boost::posix_time::ptime Epoch()
+        {
+            return boost::posix_time::ptime(boost::gregorian::date(1970,boost::date_time::Jan,1));
+        }
 
         static DOUF_TIME_CPP_API Safir::Dob::Typesystem::Int32 GetLocalTimeOffset();
     };
