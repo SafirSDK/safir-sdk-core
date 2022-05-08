@@ -22,7 +22,7 @@
 *
 ******************************************************************************/
 #include <iostream>
-#include <Safir/Utilities/Internal/ConfigReader.h>
+#include <Safir/Utilities/Internal/Expansion.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
 #include "dots_repository_keeper.h"

@@ -38,7 +38,7 @@
 #include <boost/archive/iterators/transform_width.hpp>
 #include <boost/archive/iterators/insert_linebreaks.hpp>
 #include <boost/archive/iterators/remove_whitespace.hpp>
-#include <Safir/Utilities/Internal/ConfigReader.h>
+#include <Safir/Utilities/Internal/Expansion.h>
 #include <Safir/Dob/Typesystem/ToolSupport/TypeUtilities.h>
 #include <Safir/Dob/Typesystem/ToolSupport/ParseError.h>
 #include <Safir/Dob/Typesystem/ToolSupport/Internal/classic_string_cast.h>

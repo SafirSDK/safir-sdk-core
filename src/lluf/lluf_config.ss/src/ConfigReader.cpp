@@ -22,6 +22,7 @@
 *
 ******************************************************************************/
 #include <Safir/Utilities/Internal/ConfigReader.h>
+#include <Safir/Utilities/Internal/Expansion.h>
 #include <iostream>
 #include "ConfigReaderImpl.h"
 #include "Path.h"

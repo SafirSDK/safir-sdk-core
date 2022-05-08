@@ -48,7 +48,7 @@
 
 #endif
 
-#include <Safir/Utilities/Internal/ConfigReader.h>
+#include <Safir/Utilities/Internal/Expansion.h>
 #include <boost/interprocess/sync/interprocess_semaphore.hpp>
 #include <boost/noncopyable.hpp>
 

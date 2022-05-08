@@ -23,6 +23,7 @@
 ******************************************************************************/
 #include <Safir/Utilities/StartupSynchronizer.h>
 #include <Safir/Utilities/Internal/ConfigReader.h>
+#include <Safir/Utilities/Internal/Expansion.h>
 #include <thread>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/convenience.hpp>

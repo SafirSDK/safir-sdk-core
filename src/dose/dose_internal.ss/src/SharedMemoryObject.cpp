@@ -24,7 +24,7 @@
 
 #include <Safir/Dob/Internal/SharedMemoryObject.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
-#include <Safir/Utilities/Internal/ConfigReader.h>
+#include <Safir/Utilities/Internal/Expansion.h>
 #include <Safir/Dob/NodeParameters.h>
 
 namespace //anonymous namespace for internal stuff

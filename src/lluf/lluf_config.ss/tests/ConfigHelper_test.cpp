@@ -22,6 +22,7 @@
 *
 ******************************************************************************/
 #include <Safir/Utilities/Internal/ConfigReader.h>
+#include <Safir/Utilities/Internal/Expansion.h>
 #include <boost/filesystem/path.hpp>
 #include <iostream>
 #define BOOST_TEST_MODULE ConfigHelperTest

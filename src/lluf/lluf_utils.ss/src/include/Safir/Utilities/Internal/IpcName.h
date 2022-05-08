@@ -25,6 +25,7 @@
 #define __LLUF_IPC_NAME_H__
 
 #include <Safir/Utilities/Internal/ConfigReader.h>
+#include <Safir/Utilities/Internal/Expansion.h>
 #include <boost/filesystem.hpp>
 
 namespace Safir

@@ -1,3 +1,4 @@
+INCLUDE_DIRECTORIES(../src/include)
 
 ADD_EXECUTABLE(display_env display_env.cpp)
 ADD_EXECUTABLE(read_parameter_test read_parameter_test.cpp)

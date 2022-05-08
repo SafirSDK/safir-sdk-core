@@ -24,6 +24,7 @@
 #include <Safir/Utilities/Internal/SystemLog.h>
 #include <Safir/Utilities/ProcessInfo.h>
 #include <Safir/Utilities/Internal/ConfigReader.h>
+#include <Safir/Utilities/Internal/Expansion.h>
 #include <Safir/Utilities/Internal/StringEncoding.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <boost/algorithm/string/replace.hpp>
