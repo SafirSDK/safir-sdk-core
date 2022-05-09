@@ -70,13 +70,14 @@ Bundled Software
 The Safir SDK Core windows installer comes with some bundled software, that is used
 internally and that is used in our interfaces:
 
- * Boost C++ Libraries (http://www.boost.org) - All headers and a subset of the Boost
-   libraries are bundled.
  * Ninja (https://github.com/martine/ninja/releases) - Build system that can run in
    parallel.
 
-License terms for these can be found in the file third_party_licenses.txt and the
-directory more_third_party_licenses, but in short there are no surprises there, nothing
-that should affect your ability to use Safir SDK Core under either the GPLv3 license or
-the commercial license.
+There are additional libraries that we use internally, that are not exposed through
+our interfaces. Some of these are Boost, RapidJSON, Qt, etc.
+
+License terms for all third party software can be found in the file
+third_party_licenses.txt and the directory more_third_party_licenses, but in short there
+are no surprises there, nothing that should affect your ability to use Safir SDK Core
+under either the GPLv3 license or the commercial license.
 

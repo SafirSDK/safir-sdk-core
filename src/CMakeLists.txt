@@ -1,33 +1,6 @@
 include(SafirCompilerSettings)
 include(SafirLoadBoost)
 
-#On windows we install boost as well. It is built by conan and copied into our
-#lib/bin/include directories in conanfile.py
-if (WIN32)
-  FILE(GLOB boost_header_dir "${CMAKE_BINARY_DIR}/include/boost-*")
-  LIST(LENGTH boost_header_dir num_boost_header_dirs)
-  if (NOT num_boost_header_dirs EQUAL 1)
-    message(FATAL_ERROR "Unexpected number of boost header directories ${num_boost_header_dir}: ${boost_header_dir}")
-  endif()
-
-  INSTALL(DIRECTORY ${boost_header_dir}/boost
-    DESTINATION ${SAFIR_INSTALL_DESTINATION_INCLUDE}/
-    COMPONENT Development)
-
-  INSTALL(DIRECTORY ${CMAKE_BINARY_DIR}/lib/
-    DESTINATION ${SAFIR_INSTALL_DESTINATION_LIB}/
-    COMPONENT Development
-    FILES_MATCHING PATTERN "boost_*-vc*-mt-*.lib")
-
-  INSTALL(DIRECTORY ${CMAKE_BINARY_DIR}/bin/
-    DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN}/
-    COMPONENT Runtime
-    FILES_MATCHING PATTERN "boost_*-vc*-mt-*.dll")
-
-  unset(boost_header_dir)
-  unset(num_boost_header_dir)
-endif()
-
 if (MSVC)
   SET(CMAKE_DEBUG_POSTFIX "d")
 endif()
