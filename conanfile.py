@@ -15,7 +15,7 @@ class SafirSdkCoreConan(ConanFile):
 
                        # All the options below are only used on Windows
                        "boost:shared": False,
-                       "boost:layout":"versioned",
+                       "boost:layout":"system",
                        "boost:without_wave": True,
                        "boost:without_fiber": True,
                        "boost:without_context": True,
@@ -30,8 +30,8 @@ class SafirSdkCoreConan(ConanFile):
                        "boost:without_mpi": True,
                        "boost:without_json": True,
                        "boost:without_type_erasure": True,
-                       "boost:bzip2": True,
-                       "boost:zlib": True,
+                       "boost:bzip2": False,
+                       "boost:zlib": False,
 
                        "qt:shared": False,
                        "qt:commercial": False,
@@ -97,7 +97,7 @@ class SafirSdkCoreConan(ConanFile):
         self.requires("rapidjson/cci.20211112")
         protobuf_version = "3.19.2"
         if self.settings.os == "Windows":
-            self.requires("boost/1.78.0")
+            self.requires("boost/1.79.0")
             self.requires("qt/5.15.2")
             self.requires("ninja/1.10.2")
             if self.settings.compiler.version == 14:
