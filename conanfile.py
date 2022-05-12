@@ -14,7 +14,7 @@ class SafirSdkCoreConan(ConanFile):
                        "protobuf:with_zlib":False,
 
                        # All the options below are only used on Windows
-                       "boost:shared": True,
+                       "boost:shared": False,
                        "boost:layout":"versioned",
                        "boost:without_wave": True,
                        "boost:without_fiber": True,
