@@ -11,8 +11,6 @@ TARGET_LINK_LIBRARIES(dots_cpp PRIVATE
   lluf_utils
   dots_kernel
   lluf_crash_reporter
-
-  PUBLIC
   Boost::thread
 )
 SAFIR_INSTALL(TARGETS dots_cpp)

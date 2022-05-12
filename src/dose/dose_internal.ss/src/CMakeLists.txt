@@ -22,7 +22,7 @@ TARGET_LINK_LIBRARIES(dose_internal PRIVATE
 
 TARGET_LINK_LIBRARIES(dose_internal PRIVATE
   PUBLIC
-    Boost::thread)
+  $<BUILD_INTERFACE:Boost::thread>)
 
 if (UNIX)
   TARGET_LINK_LIBRARIES(dose_internal PRIVATE rt)

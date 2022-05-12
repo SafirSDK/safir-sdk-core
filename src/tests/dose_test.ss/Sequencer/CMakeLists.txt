@@ -8,6 +8,7 @@ TARGET_LINK_LIBRARIES(dose_test_sequencer PRIVATE
   safir_generated-DoseTest-cpp
   Boost::regex
   Boost::filesystem
+  Boost::thread
   Boost::program_options)
 
 SAFIR_INSTALL(TARGETS dose_test_sequencer COMPONENT TestSuite)

@@ -21,6 +21,7 @@ TARGET_LINK_LIBRARIES(dope_main PRIVATE
   dose_cpp
   logging_cpp
   Boost::filesystem
+  Boost::thread
   ${SAFIR_ODBC_LIBRARIES})
 
 TARGET_LINK_LIBRARIES(dope_bin2xml PRIVATE
