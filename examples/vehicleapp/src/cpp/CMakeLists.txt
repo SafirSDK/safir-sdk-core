@@ -1,3 +1,8 @@
+if (NOT Boost_FOUND)
+  message(STATUS "Boost not found, will not build the VehicleAppCpp example application, since it currently requires the Boost headers.")
+  return()
+endif()
+
 ADD_EXECUTABLE(VehicleAppCpp
   App.h App.cpp
   EntityHandler.h EntityHandler.cpp

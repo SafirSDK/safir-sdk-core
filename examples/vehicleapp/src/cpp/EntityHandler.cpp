@@ -117,12 +117,12 @@ namespace VehicleAppCpp
 
         //StartRemoveInSolution
         //const Capabilities::Vehicles::VehiclePtr vehicle =
-        //    boost::static_pointer_cast<Capabilities::Vehicles::Vehicle>(entityRequestProxy.GetRequest());
+        //    std::static_pointer_cast<Capabilities::Vehicles::Vehicle>(entityRequestProxy.GetRequest());
         //StopRemoveInSolution
 
         //StartRemoveInExercise
         const Capabilities::Vehicles::VehiclePtr vehicle =
-            boost::static_pointer_cast<Capabilities::Vehicles::Vehicle>(entityRequestProxy.GetRequest());
+            std::static_pointer_cast<Capabilities::Vehicles::Vehicle>(entityRequestProxy.GetRequest());
 
         // Identification is a mandatory member.
         if (!vehicle -> Identification().IsNull())
@@ -179,12 +179,12 @@ namespace VehicleAppCpp
 
         //StartRemoveInSolution
         //const Capabilities::Vehicles::VehiclePtr receivedVehicle =
-        //    boost::static_pointer_cast<Capabilities::Vehicles::Vehicle>(entityRequestProxy.GetRequest());
+        //    std::static_pointer_cast<Capabilities::Vehicles::Vehicle>(entityRequestProxy.GetRequest());
         //StopRemoveInSolution
 
         //StartRemoveInExercise
         const Capabilities::Vehicles::VehiclePtr receivedVehicle =
-            boost::static_pointer_cast<Capabilities::Vehicles::Vehicle>(entityRequestProxy.GetRequest());
+            std::static_pointer_cast<Capabilities::Vehicles::Vehicle>(entityRequestProxy.GetRequest());
 
         if (m_connection.IsCreated(entityRequestProxy.GetEntityId()))
         {

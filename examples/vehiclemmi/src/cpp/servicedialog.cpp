@@ -70,7 +70,7 @@ namespace VehicleMmiCppQt
 
         // Get data from Dob and fill dialog
          m_pVehicle =
-            boost::static_pointer_cast<Capabilities::Vehicles::Vehicle>(m_secDobConnection.Read(entityId).GetEntity());
+            std::static_pointer_cast<Capabilities::Vehicles::Vehicle>(m_secDobConnection.Read(entityId).GetEntity());
 
         if(!m_pVehicle->Identification().IsNull() )
         {
@@ -111,9 +111,9 @@ namespace VehicleMmiCppQt
 
             // Set service request values
             /*const Capabilities::CalculateSpeedDifferencePtr calcSpeedRefPtr =
-                boost::static_pointer_cast<Capabilities::CalculateSpeedDifference>(m_secDobConnection.Read(m_pVehicle).GetEntityId()));*/
+                std::static_pointer_cast<Capabilities::CalculateSpeedDifference>(m_secDobConnection.Read(m_pVehicle).GetEntityId()));*/
 
-            req->ObjectWithSpeed().SetPtr(boost::static_pointer_cast<Safir::Dob::Entity>(m_pVehicle));
+            req->ObjectWithSpeed().SetPtr(std::static_pointer_cast<Safir::Dob::Entity>(m_pVehicle));
             req->Speed().SetVal(ui.lineEditNewSpeed->text().toFloat());
 
             try
@@ -134,7 +134,7 @@ namespace VehicleMmiCppQt
         if (responseProxy.GetRequestTypeId() == Capabilities::CalculateSpeedDifference::ClassTypeId)
         {
             Capabilities::CalculateSpeedDifferenceResponsePtr response = Capabilities::CalculateSpeedDifferenceResponse::Create();
-            response = boost::static_pointer_cast<Capabilities::CalculateSpeedDifferenceResponse>(responseProxy.GetResponse());
+            response = std::static_pointer_cast<Capabilities::CalculateSpeedDifferenceResponse>(responseProxy.GetResponse());
 
             if(!response->SpeedDifference().IsNull())
             {

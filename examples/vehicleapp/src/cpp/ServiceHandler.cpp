@@ -86,7 +86,7 @@ namespace VehicleAppCpp
 
         //StartRemoveInSolution
         //const Capabilities::CalculateSpeedDifferencePtr receivedService =
-        //    boost::static_pointer_cast<Capabilities::CalculateSpeedDifference>(serviceRequestProxy.GetRequest());
+        //    std::static_pointer_cast<Capabilities::CalculateSpeedDifference>(serviceRequestProxy.GetRequest());
         //StopRemoveInSolution
 
         //StartRemoveInExercise
@@ -94,7 +94,7 @@ namespace VehicleAppCpp
                         Capabilities::CalculateSpeedDifferenceResponse::Create();
 
         const Capabilities::CalculateSpeedDifferencePtr receivedService =
-            boost::static_pointer_cast<Capabilities::CalculateSpeedDifference>(serviceRequestProxy.GetRequest());
+            std::static_pointer_cast<Capabilities::CalculateSpeedDifference>(serviceRequestProxy.GetRequest());
 
         if(!receivedService -> ObjectWithSpeed().IsNull() || !receivedService -> Speed().IsNull())
         {

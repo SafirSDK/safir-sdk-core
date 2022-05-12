@@ -106,7 +106,7 @@ namespace VehicleMmiCppQt
 
         // Get data from Dob and fill dialog
         Capabilities::Vehicles::VehiclePtr pVehicle =
-            boost::static_pointer_cast<Capabilities::Vehicles::Vehicle>(m_secDobConnection.Read(entityId).GetEntity());
+            std::static_pointer_cast<Capabilities::Vehicles::Vehicle>(m_secDobConnection.Read(entityId).GetEntity());
 
         if(!pVehicle->Identification().IsNull() )
         {
@@ -153,7 +153,7 @@ namespace VehicleMmiCppQt
     
     void EntityDialog::OnResponse(const Safir::Dob::ResponseProxy responseProxy)
     {
-        Safir::Dob::SuccessResponsePtr success = boost::dynamic_pointer_cast<Safir::Dob::SuccessResponse>(responseProxy.GetResponse());
+        Safir::Dob::SuccessResponsePtr success = std::dynamic_pointer_cast<Safir::Dob::SuccessResponse>(responseProxy.GetResponse());
         if(success)
         {
             if(m_clickedOKButton)

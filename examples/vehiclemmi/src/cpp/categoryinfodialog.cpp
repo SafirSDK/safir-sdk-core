@@ -79,7 +79,7 @@ namespace VehicleMmiCppQt
 
         // Get data (if any) from Dob and fill dialog
 
-        Capabilities::Vehicles::VehiclePtr pVehicle = boost::static_pointer_cast<Capabilities::Vehicles::Vehicle>(m_secDobConnection.Read(entityId).GetEntity());
+        Capabilities::Vehicles::VehiclePtr pVehicle = std::static_pointer_cast<Capabilities::Vehicles::Vehicle>(m_secDobConnection.Read(entityId).GetEntity());
         Capabilities::Vehicles::VehicleCategoryInfoPtr pVehicleCatInfo = Capabilities::Vehicles::VehicleCategoryInfo::Create();
 
         if(!pVehicle->VehicleCategory().IsNull())
@@ -119,7 +119,7 @@ namespace VehicleMmiCppQt
 
     void CategoryInfoDialog::OnResponse(const Safir::Dob::ResponseProxy responseProxy)
     {
-        Safir::Dob::SuccessResponsePtr success = boost::dynamic_pointer_cast<Safir::Dob::SuccessResponse>(responseProxy.GetResponse());
+        Safir::Dob::SuccessResponsePtr success = std::dynamic_pointer_cast<Safir::Dob::SuccessResponse>(responseProxy.GetResponse());
 
         if(responseProxy.GetRequestTypeId() == Capabilities::Vehicles::GetVehicleCategoryService::ClassTypeId)
         {
@@ -127,7 +127,7 @@ namespace VehicleMmiCppQt
             {
                 Capabilities::Vehicles::GetVehicleCategoryResponsePtr response = Capabilities::Vehicles::GetVehicleCategoryResponse::Create();
 
-                response = boost::static_pointer_cast<Capabilities::Vehicles::GetVehicleCategoryResponse>(responseProxy.GetResponse());
+                response = std::static_pointer_cast<Capabilities::Vehicles::GetVehicleCategoryResponse>(responseProxy.GetResponse());
 
                 if(!response->VehicleCategoryInfo().IsNull())
                 {
@@ -189,7 +189,7 @@ namespace VehicleMmiCppQt
 
         /*const*/Capabilities::Vehicles::SetVehicleCategoryServicePtr req = Capabilities::Vehicles::SetVehicleCategoryService::Create();
 
-        req->VehicleCategoryInfo().SetPtr(boost::static_pointer_cast<Capabilities::Vehicles::VehicleCategoryInfo>(m_pVehicleCatInfo));
+        req->VehicleCategoryInfo().SetPtr(std::static_pointer_cast<Capabilities::Vehicles::VehicleCategoryInfo>(m_pVehicleCatInfo));
         /*bool isModified = false;
         if(ui.lineEditSpeed->isModified())
         {

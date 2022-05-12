@@ -65,7 +65,7 @@ namespace VehicleMmiCppQt
     void MessageDialog::OnMessage(const Safir::Dob::MessageProxy messageProxy)
     {
         Capabilities::Vehicles::VehicleMsgPtr msg = 
-            boost::static_pointer_cast<Capabilities::Vehicles::VehicleMsg>(messageProxy.GetMessage());
+            std::static_pointer_cast<Capabilities::Vehicles::VehicleMsg>(messageProxy.GetMessage());
 
         if (!msg->MessageText().IsNull())
         {

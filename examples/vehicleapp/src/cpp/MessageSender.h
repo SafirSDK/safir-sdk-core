@@ -25,45 +25,45 @@
 #ifndef __MESSAGE_SENDER_H
 #define __MESSAGE_SENDER_H
 
-#include <boost/noncopyable.hpp>
-#include <Safir/Dob/Connection.h> 
+#include <Safir/Dob/Connection.h>
 
 namespace VehicleAppCpp
 {
-    /** 
+    /**
      * Defines a message to be sent. This class sends
      * the message.
      */
     class MessageSender :
         // Allows this class to send a message.
-        public Safir::Dob::MessageSender,
-        // Make this class a singleton. The reason is because
-        // it's used from several classes in this application. 
-        private boost::noncopyable
+        public Safir::Dob::MessageSender
     {
     public:
 
         MessageSender();
 
-        /** 
+        //Prevent copying
+        MessageSender(const MessageSender&) = delete;
+        MessageSender& operator=(const MessageSender&) = delete;
+
+        /**
          * Returns the one and only instance to this singleton class.
          *
          * @return The instance.
          */
         static MessageSender& Instance();
 
-        /** 
+        /**
          * Initiates this class. Creates a secondary Dob
          * connection.
          */
         void Init();
 
-        /** 
+        /**
          * Methods derived from Safir::Dob::MessageSender.
          */
         void OnNotMessageOverflow() override;
 
-        /** 
+        /**
          * Sends a message.
          */
          void SendMaxNofVehicleMsg();

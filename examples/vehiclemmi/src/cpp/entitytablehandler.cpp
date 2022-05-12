@@ -160,7 +160,7 @@ namespace VehicleMmiCppQt
     void EntityTableHandler::UpdateRow(int row, Safir::Dob::EntityPtr entity)
     {
         const Capabilities::Vehicles::VehiclePtr pVehiclePtr 
-            = boost::static_pointer_cast<Capabilities::Vehicles::Vehicle>(entity);
+            = std::static_pointer_cast<Capabilities::Vehicles::Vehicle>(entity);
 
         // Name
         if(pVehiclePtr->Identification().IsChanged())

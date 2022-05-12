@@ -70,7 +70,7 @@ namespace VehicleMmiCppQt
 
     void EntityMw::OnResponse(const Safir::Dob::ResponseProxy responseProxy)
     {
-        Safir::Dob::SuccessResponsePtr success = boost::dynamic_pointer_cast<Safir::Dob::SuccessResponse>(responseProxy.GetResponse());
+        Safir::Dob::SuccessResponsePtr success = std::dynamic_pointer_cast<Safir::Dob::SuccessResponse>(responseProxy.GetResponse());
         
         if(responseProxy.GetRequestTypeId() == Capabilities::Vehicles::DeleteVehicleCategoryService::ClassTypeId)
         {
@@ -181,7 +181,7 @@ namespace VehicleMmiCppQt
         
         if(entityId.GetTypeId() != 0)
         {
-            Capabilities::Vehicles::VehiclePtr pVehicle = boost::static_pointer_cast<Capabilities::Vehicles::Vehicle>(m_secDobConnection.Read(entityId).GetEntity());
+            Capabilities::Vehicles::VehiclePtr pVehicle = std::static_pointer_cast<Capabilities::Vehicles::Vehicle>(m_secDobConnection.Read(entityId).GetEntity());
             if(pVehicle)
             {
                 if(!pVehicle->VehicleCategory().IsNull())
