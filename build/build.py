@@ -234,7 +234,8 @@ class Logger():
             die("Bad log level")
         self.__log_level = level
         self.__last_tag = None
-
+        if hasattr(sys.stdout, "reconfigure"):
+            sys.stdout.reconfigure(encoding="utf-8", errors="replace")
         self.__buildlog = codecs.open("buildlog.html", mode="w", encoding="utf-8", errors="replace")
         self.__buildlog.write("<html><head>"
                               "<script type=\"text/javascript\">"
