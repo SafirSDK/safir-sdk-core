@@ -8,7 +8,8 @@ add_executable(WaitingStatesOwner Owner.cpp)
 target_link_libraries(WaitingStatesOwner
   PRIVATE
   dose_cpp
-  safir_generated-DoseTest-cpp)
+  safir_generated-DoseTest-cpp
+  Boost::thread)
 
 if (MSVC)
   if ((CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo") OR
