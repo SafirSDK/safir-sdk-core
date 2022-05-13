@@ -102,11 +102,4 @@ class SafirSdkCoreConan(ConanFile):
             self.requires("ninja/1.10.2")
             if self.settings.compiler.version == 14:
                 protobuf_version = "[<3.15]"
-                self.options["b2"].toolset = "vc14"
-            elif self.settings.compiler.version == 15:
-                self.options["b2"].toolset = "vc141"
-            elif self.settings.compiler.version == 16:
-                self.options["b2"].toolset = "vc142"
-            elif self.settings.compiler.version == 17:
-                self.options["b2"].toolset = "vc143"
         self.requires(f"protobuf/{protobuf_version}")
