@@ -16,6 +16,10 @@ class SafirSdkCoreConan(ConanFile):
                        # All the options below are only used on Windows
                        "boost:shared": False,
                        "boost:layout":"versioned",
+                       "boost:error_code_header_only":True,
+                       "boost:system_no_deprecated":True,
+                       "boost:filesystem_no_deprecated":True,
+                       "boost:magic_autolink":False,
                        "boost:without_wave": True,
                        "boost:without_fiber": True,
                        "boost:without_context": True,

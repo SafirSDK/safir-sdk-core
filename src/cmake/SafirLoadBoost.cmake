@@ -4,7 +4,7 @@ if (UNIX)
   #use dynamic linking with boost
   ADD_DEFINITIONS(-DBOOST_ALL_DYN_LINK)
 else()
-  set(Boost_USE_STATIC_LIBS   ON)
+  set(Boost_USE_STATIC_LIBS ON)
 endif()
 
 find_package(Boost
@@ -44,6 +44,9 @@ ADD_DEFINITIONS(-DBOOST_THREAD_DONT_USE_DATETIME)
 
 #Make Boost.Chrono header-only
 ADD_DEFINITIONS(-DBOOST_CHRONO_HEADER_ONLY)
+
+#Make error code header only
+ADD_DEFINITIONS(-DBOOST_ERROR_CODE_HEADER_ONLY)
 
 #use Boost.Chrono v2
 ADD_DEFINITIONS(-DBOOST_CHRONO_VERSION=2)
