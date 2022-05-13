@@ -30,6 +30,7 @@
 #endif
 
 #include <boost/program_options.hpp>
+#include <boost/filesystem/fstream.hpp>
 
 #ifdef _MSC_VER
 #pragma warning(pop)

@@ -28,6 +28,7 @@
 #include <Safir/Dob/Typesystem/ObjectFactory.h>
 #include <Safir/Logging/Log.h>
 #include <boost/filesystem.hpp>
+#include <boost/filesystem/fstream.hpp>
 #include <boost/integer_traits.hpp>
 
 #ifdef _MSC_VER
