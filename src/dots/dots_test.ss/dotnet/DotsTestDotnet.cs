@@ -9591,9 +9591,39 @@ namespace Misc
             Test_BlobChangeFlags_member_sequences();
             Test_BlobChangeFlags_member_sequences_2();
             Test_BlobChangeFlags_member_dictionaries();
+            Test_EnumerationSequenceReflection();
             Test_ObjectSequenceReflection();
         }
 
+        public void Test_EnumerationSequenceReflection()
+        {
+            var seq = new MemberSequences();
+            seq.EnumerationMember.Add(TestEnum.Enumeration.MyFirst);
+            seq.EnumerationMember.Add(TestEnum.Enumeration.MySecond);
+
+
+            {
+                EnumerationSequenceContainerBase b = seq.EnumerationMember;
+                Check(b.Count == 2);
+                Check(b.GetOrdinal(0) == (int)TestEnum.Enumeration.MyFirst);
+                Check(b.GetOrdinal(1) == (int)TestEnum.Enumeration.MySecond);
+
+                b.SetOrdinal(0, 1);
+                b.AddOrdinal(0);
+            }
+
+            Check(seq.EnumerationMember.Count == 3);
+            Check(seq.EnumerationMember[0] == TestEnum.Enumeration.MySecond);
+            Check(seq.EnumerationMember[1] == TestEnum.Enumeration.MySecond);
+            Check(seq.EnumerationMember[2] == TestEnum.Enumeration.MyFirst);
+
+            {
+                EnumerationSequenceContainerBase b = seq.EnumerationMember;
+                b.Clear();
+                Check(seq.EnumerationMember.Count == 0);
+            }
+        }
+        
         public void Test_ObjectSequenceReflection()
         {
             var seq = new MemberSequences();
@@ -9616,7 +9646,20 @@ namespace Misc
                     Check(((Int32Container)o.GetMember(TestItem.MyIntMemberIndex,0)).Val == 10*i);
                     ++i;
                 }
+
+                ((Int32Container)b[1].GetMember(TestItem.MyIntMemberIndex,0)).Val = 30;
+                var item1 = new TestItem();
+                var item3 = new TestItem();
+                item1.MyInt.Val = 400;
+                item3.MyInt.Val = 500;
+                b.Add(item3);
+                b[0] = item1;
             }
+
+            Check(seq.TestClassMember.Count == 3);
+            Check(seq.TestClassMember[0].MyInt == 400);
+            Check(seq.TestClassMember[1].MyInt == 30);
+            Check(seq.TestClassMember[2].MyInt == 500);
         }
     }
 

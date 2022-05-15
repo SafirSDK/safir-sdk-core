@@ -41,7 +41,9 @@ namespace Dob
 namespace Typesystem
 {
     /**
-     * Container class for sequences of values. A sequence is a collection of values that can dynamically
+     * Container class for sequences of values.
+     *
+     * A sequence is a collection of values that can dynamically
      * grow or shrink in size. The whole container has a change flag that will automatically
      * be set when values are added, removed or changed. Values in a sequence cannot be null and does not
      * have individual change flags.
@@ -314,6 +316,7 @@ namespace Typesystem
          * If the sequence was null before it will no longer be null after this call.
          *
          * @param val [in] - Value to be inserted.
+         * @throws IllegalValueException if the value is not in the enumeration.
          */
         virtual void PushBackOrdinal(const EnumerationValue val) = 0;
 
@@ -323,6 +326,7 @@ namespace Typesystem
          * @param index [in] - Index of the value to set.
          * @param val [in] - Value to set.
          * @throws std::out_of_range exception if index is not in range
+         * @throws IllegalValueException if the value is not in the enumeration.
          */
         virtual void SetOrdinal(const size_t index, const EnumerationValue val) = 0;
 
@@ -340,6 +344,7 @@ namespace Typesystem
          *
          * @param index [in] - Index of the new value.
          * @param value [in] - Value to insert.
+         * @throws IllegalValueException if the value is not in the enumeration.
          */
         virtual void InsertOrdinalAt(const size_t index, EnumerationValue value) = 0;
 

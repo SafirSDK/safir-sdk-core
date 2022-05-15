@@ -1545,7 +1545,7 @@ namespace @_NAMESPACE_@
         /// <summary>
         /// Container for sequence members of type @_CLASS_@
         /// </summary>
-        public class EnumerationSequenceContainer : Safir.Dob.Typesystem.ValueSequenceContainer<Enumeration> {}
+        public class EnumerationSequenceContainer : Safir.Dob.Typesystem.EnumerationSequenceContainer<Enumeration> {}
     }
 
 @@ELSIF@@ @_UNITTYPE_@=exception

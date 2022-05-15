@@ -11653,6 +11653,33 @@ BOOST_AUTO_TEST_CASE(MergeChanges_ObjectSequences_IntoNonEmpty_5)
 
 BOOST_AUTO_TEST_SUITE_END()
 
+BOOST_AUTO_TEST_CASE(EnumerationSequenceReflection)
+{
+    MemberSequencesPtr seq = MemberSequences::Create();
+    seq->EnumerationMember().push_back(DotsTest::TestEnum::MyFirst);
+    seq->EnumerationMember().push_back(DotsTest::TestEnum::MySecond);
+
+    {
+        EnumerationSequenceContainerBase& base = seq->EnumerationMember();
+        BOOST_CHECK_EQUAL(base.size(), 2U);
+        BOOST_CHECK_EQUAL(base.GetOrdinal(0), DotsTest::TestEnum::MyFirst);
+        BOOST_CHECK_EQUAL(base.GetOrdinal(1), DotsTest::TestEnum::MySecond);
+
+        base.SetOrdinal(0, 1);
+        base.PushBackOrdinal(0);
+    }
+
+    BOOST_CHECK_EQUAL(seq->EnumerationMember().size(), 3U);
+    BOOST_CHECK_EQUAL(seq->EnumerationMember()[0], DotsTest::TestEnum::MySecond);
+    BOOST_CHECK_EQUAL(seq->EnumerationMember().GetVal(1), DotsTest::TestEnum::MySecond);
+    BOOST_CHECK_EQUAL(seq->EnumerationMember()[2], DotsTest::TestEnum::MyFirst);
+
+    {
+        EnumerationSequenceContainerBase& base = seq->EnumerationMember();
+        base.clear();
+        BOOST_CHECK_EQUAL(seq->EnumerationMember().size(), 0U);
+    }
+}
 
 BOOST_AUTO_TEST_CASE(ObjectSequenceReflection)
 {

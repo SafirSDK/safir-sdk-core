@@ -30,15 +30,12 @@ using System.Text;
 namespace Safir.Dob.Typesystem
 {
     /// <summary>
-    /// Container for base types.
-    ///
+    /// Container class for sequences of values.
     /// <para/>
-    /// This class holds a value of the template argument type and a null flag.
-    /// The operations that modify the value update the null flag and the change flag
-    /// (which is inherited from ContainerBase).
-    ///
-    /// <para/>
-    /// This container is intended for the simple types of the DOB typesystem.
+    /// A sequence is a collection of values that can dynamically grow or shrink in
+    /// size. The whole container has a change flag that will automatically be set when
+    /// values are added, removed or changed. Values in a sequence cannot be null and
+    /// does not have individual change flags.
     /// </summary>
     /// <typeparam name="T">The type to contain.</typeparam>
     public abstract class SequenceContainer<T> : ContainerBase, IList<T>
@@ -46,31 +43,31 @@ namespace Safir.Dob.Typesystem
         /// <summary>
         /// Default constructor
         /// <para/>
-        /// Creates a null and not changed container.
+        /// Creates an empty/null and not changed sequence container.
         /// </summary>
         public SequenceContainer(): base()
         {
         }
 
-        #region IList implementation
 
-        /// <Docs>To be added.</Docs>
-        /// <para>Determines the index of a specific item in the current instance.</para>
         /// <summary>
-        /// Indexs the of.
+        /// Returns the index of a particular item, if it is in the sequence.
+        /// Returns -1 if the item isn't in the sequence.
         /// </summary>
-        /// <returns>The of.</returns>
-        /// <param name="item">Item.</param>
+        /// <param name="item">Value to look for</param>
         public int IndexOf (T item)
         {
             return m_values.IndexOf (item);
         }
 
         /// <summary>
-        /// Insert the specified index and item.
+        /// Inserts value into the sequence at position index.
+        /// index must be non-negative and less than or equal to the 
+        /// number of elements in the sequence.  If index equals the number
+        /// of items in the sequence, then value is appended to the end.
         /// </summary>
-        /// <param name="index">Index.</param>
-        /// <param name="item">Item.</param>
+        /// <param name="index">Index to insert at.</param>
+        /// <param name="item">Value to insert.</param>
         public void Insert (int index, T item)
         {
             m_bIsChanged = true;
@@ -78,9 +75,9 @@ namespace Safir.Dob.Typesystem
         }
 
         /// <summary>
-        /// Removes at index.
+        /// Removes the item at position index.
         /// </summary>
-        /// <param name="index">Index.</param>
+        /// <param name="index">Index of value to remove.</param>
         public void RemoveAt (int index)
         {
             m_bIsChanged = true;
@@ -90,7 +87,7 @@ namespace Safir.Dob.Typesystem
         /// <summary>
         /// Gets or sets the value at the specified index.
         /// </summary>
-        /// <param name="index">Index.</param>
+        /// <param name="index">Index in sequence to get or set.</param>
         public T this [int index] {
             get {
                 return m_values [index];
@@ -101,18 +98,10 @@ namespace Safir.Dob.Typesystem
             }
         }
 
-        #endregion
-
-        #region ICollection implementation
-
-        /// <Docs>The item to add to the current collection.</Docs>
-        /// <para>Adds an item to the current collection.</para>
-        /// <remarks>To be added.</remarks>
-        /// <exception cref="System.NotSupportedException">The current collection is read-only.</exception>
         /// <summary>
-        /// Add the specified item.
+        /// Add a value last in the sequence.
         /// </summary>
-        /// <param name="item">Item.</param>
+        /// <param name="item">Value to add</param>
         public void Add (T item)
         {
             m_bIsChanged = true;
@@ -120,7 +109,7 @@ namespace Safir.Dob.Typesystem
         }
 
         /// <summary>
-        /// Clear this instance.
+        /// Remove all values from this instance.
         /// </summary>
         public void Clear ()
         {
@@ -128,34 +117,31 @@ namespace Safir.Dob.Typesystem
             m_values.Clear ();
         }
 
-        /// <Docs>The object to locate in the current collection.</Docs>
-        /// <para>Determines whether the current collection contains a specific value.</para>
         /// <summary>
-        /// Contains the specified item.
+        /// Determine whether the sequence contains a specific value.
         /// </summary>
-        /// <param name="item">Item.</param>
+        /// <param name="item">Value to look for.</param>
         public bool Contains (T item)
         {
             return m_values.Contains (item);
         }
 
         /// <summary>
-        /// Copies to.
+        /// Copies the elements of the sequence into an Array, starting at a particular index.
         /// </summary>
-        /// <param name="array">Array.</param>
-        /// <param name="arrayIndex">Array index.</param>
+        /// <param name="array">The one-dimensional Array that is the destination of the
+        /// elements copied from the sequence. The Array must have zero-based indexing</param>
+        /// <param name="arrayIndex">The zero-based index in array at which copying begins.</param>
         public void CopyTo (T[] array, int arrayIndex)
         {
             m_bIsChanged = true;
             m_values.CopyTo (array, arrayIndex);
         }
 
-        /// <Docs>The item to remove from the current collection.</Docs>
-        /// <para>Removes the first occurrence of an item from the current collection.</para>
         /// <summary>
-        /// Remove the specified item.
+        /// Removes the first occurrence of a specific object from the sequence.
         /// </summary>
-        /// <param name="item">Item.</param>
+        /// <param name="item">Value to remove from the sequence.</param>
         public bool Remove (T item)
         {
             bool removed=m_values.Remove (item);
@@ -165,9 +151,8 @@ namespace Safir.Dob.Typesystem
         }
 
         /// <summary>
-        /// Gets the count.
+        /// Gets the number of elements contained in the sequence.
         /// </summary>
-        /// <value>The count.</value>
         public int Count {
             get {
                 return m_values.Count;
@@ -175,21 +160,16 @@ namespace Safir.Dob.Typesystem
         }
 
         /// <summary>
-        /// Gets a value indicating whether this instance is read only.
+        /// Determine whether this instance is read only. Dob sequences are never read only.
         /// </summary>
-        /// <value><c>true</c> if this instance is read only; otherwise, <c>false</c>.</value>
         public bool IsReadOnly {
             get {
                 return false;
             }
         }
 
-        #endregion
-
-        #region IEnumerable implementation
-
         /// <summary>
-        /// Gets the enumerator.
+        /// Gets an enumerator that can be used to iterate through the sequence.
         /// </summary>
         /// <returns>The enumerator.</returns>
         public IEnumerator<T> GetEnumerator ()
@@ -197,12 +177,8 @@ namespace Safir.Dob.Typesystem
             return m_values.GetEnumerator ();
         }
 
-        #endregion
-
-        #region IEnumerable implementation
-
         /// <summary>
-        /// Gets the enumerator.
+        /// Gets an enumerator that can be used to iterate through the sequence.
         /// </summary>
         /// <returns>The enumerator.</returns>
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator ()
@@ -210,12 +186,8 @@ namespace Safir.Dob.Typesystem
             return (m_values as IEnumerable<T>).GetEnumerator ();
         }
 
-        #endregion
-
-        #region implemented abstract members of ContainerBase
-
         /// <summary>
-        /// Is the container set to null?
+        /// Is the container set to null. Null is the same as empty.
         /// </summary>
         /// <returns>True if the container is set to null.</returns>
         public override bool IsNull ()
@@ -224,19 +196,17 @@ namespace Safir.Dob.Typesystem
         }
 
         /// <summary>
-        /// Set the container to null.
+        /// Set the container to null. Same as clearing the contents of the sequence.
         /// </summary>
         public override void SetNull ()
         {
             Clear();
         }
 
-        #endregion
-
         /// <summary>
         /// Copy.
         /// </summary>
-        /// <param name="other">ContainerBase</param>
+        /// <param name="other">Other SequenceContainer</param>
         public override void Copy(ContainerBase other)
         {
             ShallowCopy(other);
@@ -255,6 +225,138 @@ namespace Safir.Dob.Typesystem
         /// The internal list holding the values.
         /// </summary>
         private List<T> m_values = new List<T> ();
+    }
+
+    /// <summary>
+    /// Base class for containers for sequences of enumeration values. It allows for
+    /// reflection on enumeration values, using ordinal values.
+    /// </summary>
+    public interface EnumerationSequenceContainerBase
+    {
+        /// <summary>
+        /// Gets the number of elements contained in the sequence.
+        /// </summary>
+        int Count
+        {
+            get;
+        }
+
+        /// <summary>
+        /// Get the ordinal value of the value at the specified index.
+        /// </summary>
+        /// <param name="index">Index of value to get</param>
+        int GetOrdinal(int index);
+
+        /// <summary>
+        /// Update a specific value, using ordinal value. Will not add new values to the sequence.
+        /// </summary>
+        /// <param name="index">The index of the value to change</param>
+        /// <param name="value">Value to change to.</param>
+        /// <exception cref="Safir.Dob.Typesystem.IllegalValueException">If the value is not in the enumeration.</exception>
+        void SetOrdinal(int index, int value);
+
+        /// <summary>
+        /// Insert a new ordinal value last in the sequence.
+        /// <para/>
+        /// If the sequence was null before it will no longer be null after this call.
+        /// </summary>
+        /// <exception cref="Safir.Dob.Typesystem.IllegalValueException">If the value is not in the enumeration.</exception>
+        void AddOrdinal (int item);
+
+        /// <summary>
+        /// Removes the item at position index.
+        /// </summary>
+        /// <param name="index">Index of value to remove.</param>
+        void RemoveAt (int index);
+
+        /// <summary>
+        /// Remove all values from this instance.
+        /// </summary>
+        void Clear();
+
+        /// <summary>
+        /// Set the container to null. Same as clearing the contents of the sequence.
+        /// </summary>
+        void SetNull();
+
+        /// <summary>
+        /// Is the container set to null. Null is the same as empty.
+        /// </summary>
+        /// <returns>True if the container is set to null.</returns>
+        bool IsNull();
+
+        /// <summary>
+        /// Is the change flag set on the container?
+        /// </summary>
+        /// <returns> True if the containers change flag is set.</returns>
+        bool IsChanged();
+
+        /// <summary>
+        /// Set the containers change flag.
+        /// <para/>
+        /// It should be fairly unusual for an application to have to use this
+        /// operation. There is nothing dangerous about it, but are you sure this
+        /// is the operation you were after?
+        /// <para/>
+        /// The change flag is how receivers of objects can work out what the
+        /// sender really wanted done on the object.
+        /// </summary>
+        /// <param name="changed">The value to set the change flag(s) to.</param>
+        void SetChanged (bool changed);
+    };
+
+    /// <summary>
+    /// Container for sequences of enumeration values.
+    /// </summary>
+    public abstract class EnumerationSequenceContainer<TEnum>
+        : SequenceContainer<TEnum>
+        , EnumerationSequenceContainerBase
+    {
+        /// <summary>
+        /// Get the ordinal value of the value at the specified index.
+        /// </summary>
+        /// <param name="index">Index of value to get</param>
+        public int GetOrdinal(int index)
+        {
+            return ToInt(base[index]);
+        }
+
+        /// <summary>
+        /// Update a specific value, using ordinal value. Will not add new values to the sequence.
+        /// </summary>
+        /// <param name="index">The index of the value to change</param>
+        /// <param name="value">Value to change to.</param>
+        /// <exception cref="Safir.Dob.Typesystem.IllegalValueException">If the value is not in the enumeration.</exception>
+        public void SetOrdinal(int index, int value)
+        {
+            base[index] = ToEnum(value);
+        }
+
+        /// <summary>
+        /// Insert a new ordinal value last in the sequence.
+        /// <para/>
+        /// If the sequence was null before it will no longer be null after this call.
+        /// </summary>
+        /// <exception cref="Safir.Dob.Typesystem.IllegalValueException">If the value is not in the enumeration.</exception>
+        public void AddOrdinal (int value)
+        {
+            base.Add(ToEnum(value));
+        }
+        
+        private static int ToInt(TEnum value)
+        {
+            return (int)(object)value;
+        }
+
+        private static TEnum ToEnum(int value)
+        {
+            if (!System.Enum.IsDefined(typeof(TEnum), value))
+            {
+                throw new Safir.Dob.Typesystem.IllegalValueException("Value is not in the enumeration range");
+            }
+            return (TEnum)(object)value;
+        }
+
     }
 
     /// <summary>
@@ -286,6 +388,8 @@ namespace Safir.Dob.Typesystem
         /// </summary>
         void Merge(GenericObjectSequenceContainerBase other);
     }
+
+
     /// <summary>
     /// Generic SequenceContainer for Objects.
     ///
