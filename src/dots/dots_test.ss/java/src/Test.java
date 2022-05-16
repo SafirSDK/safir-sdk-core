@@ -9502,7 +9502,21 @@ public class Test {
                     check(((Int32Container)o.getMember(TestItem.getMyIntMemberIndex(),0)).getVal() == 10*i);
                     ++i;
                 }
+
+
+                ((Int32Container)((com.saabgroup.safir.dob.typesystem.Object)b.get(1)).getMember(TestItem.getMyIntMemberIndex(),0)).setVal(30);
+                var item1 = new TestItem();
+                var item3 = new TestItem();
+                item1.myInt().setVal(400);
+                item3.myInt().setVal(500);
+                b.add(item3);
+                b.set(0, item1);
             }
+
+            check(seq.testClassMember().size() == 3);
+            check(seq.testClassMember().get(0).myInt().getVal() == 400);
+            check(seq.testClassMember().get(1).myInt().getVal() == 30);
+            check(seq.testClassMember().get(2).myInt().getVal() == 500);
         }
     }
 
