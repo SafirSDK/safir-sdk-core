@@ -25,7 +25,6 @@
 
 #include <memory>
 #include <Safir/Dob/Connection.h>
-#include <Safir/Utilities/Internal/Atomic.h>
 
 #ifdef _MSC_VER
 #pragma warning (push)

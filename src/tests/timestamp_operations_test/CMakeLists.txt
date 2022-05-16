@@ -22,6 +22,7 @@ else()
 
   TARGET_LINK_LIBRARIES(timestamp_operations_test PRIVATE
     dose_internal
+    lluf_utils
     safir_generated-DoseTest-cpp
     Boost::unit_test_framework)
 
