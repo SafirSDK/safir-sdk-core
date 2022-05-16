@@ -32,7 +32,7 @@
 
 #include <string>
 #include <Safir/Dob/Typesystem/Defs.h>
-#include <boost/static_assert.hpp>
+
 namespace Safir
 {
 namespace Dob

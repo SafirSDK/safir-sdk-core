@@ -252,7 +252,7 @@ namespace Typesystem
         Impl* m_impl;
         /**
          * This class is here to ensure that only the Instance method can get at the
-         * instance, so as to be sure that boost call_once is used correctly.
+         * instance, so as to be sure that std call_once is used correctly.
          * Also makes it easier to grep for singletons in the code, if all
          * singletons use the same construction and helper-name.
          */
