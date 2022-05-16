@@ -45,6 +45,5 @@ extends SequenceContainer<T>  {
     @Override
     public ValueSequenceContainer<T> clone() {
         return new ValueSequenceContainer<T>(this);
-    } 
-
+    }
 }

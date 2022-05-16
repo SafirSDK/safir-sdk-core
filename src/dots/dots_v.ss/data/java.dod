@@ -1599,8 +1599,16 @@ public enum @_CLASS_@
     /**
      * Sequence for @_CLASS_@
      */
+    @SuppressWarnings("unchecked")
     static public class SequenceContainer
-        extends com.saabgroup.safir.dob.typesystem.ValueSequenceContainer<@_CLASS_@> {
+        extends com.saabgroup.safir.dob.typesystem.EnumerationSequenceContainer<@_CLASS_@> {
+        SequenceContainer() {
+@@TABLE@@
+@@IF@@ @_TABLE_LINE_@=1
+            super((Class<@_CLASS_@>)@_ENUMVALUE_@.getClass());
+@@END_IF@@
+@@END_TABLE@@
+        }
     }
 
 

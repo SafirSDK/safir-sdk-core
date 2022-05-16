@@ -9472,7 +9472,37 @@ public class Test {
 
         public void Test_Misc()
         {
+            Test_EnumerationSequenceReflection();
             Test_ObjectSequenceReflection();
+        }
+
+        private void Test_EnumerationSequenceReflection()
+        {
+            var seq = new MemberSequences();
+            seq.enumerationMember().add(TestEnum.MY_FIRST);
+            seq.enumerationMember().add(TestEnum.MY_SECOND);
+
+            {
+                EnumerationSequenceContainerBase b = seq.enumerationMember();
+                check(b.size() == 2);
+                check(b.getOrdinal(0) == TestEnum.MY_FIRST.ordinal());
+                check(b.getOrdinal(1) == TestEnum.MY_SECOND.ordinal());
+
+                b.setOrdinal(0, 1);
+                b.addOrdinal(0);
+            }
+
+            check(seq.enumerationMember().size() == 3);
+            check(seq.enumerationMember().get(0) == TestEnum.MY_SECOND);
+            check(seq.enumerationMember().get(1) == TestEnum.MY_SECOND);
+            check(seq.enumerationMember().get(2) == TestEnum.MY_FIRST);
+
+            {
+                EnumerationSequenceContainerBase b = seq.enumerationMember();
+                b.clear();
+                check(seq.enumerationMember().size() == 0);
+            }
+
         }
 
         @SuppressWarnings("unchecked")

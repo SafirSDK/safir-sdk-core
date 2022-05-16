@@ -301,7 +301,7 @@ namespace Safir.Dob.Typesystem
         /// The change flag is how receivers of objects can work out what the
         /// sender really wanted done on the object.
         /// </summary>
-        /// <param name="changed">The value to set the change flag(s) to.</param>
+        /// <param name="changed">The value to set the change flag to.</param>
         void SetChanged (bool changed);
     };
 

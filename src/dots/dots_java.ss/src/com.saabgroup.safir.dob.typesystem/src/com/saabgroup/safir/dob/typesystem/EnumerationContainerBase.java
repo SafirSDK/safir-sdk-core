@@ -104,7 +104,7 @@ public abstract class EnumerationContainerBase<E extends Enum<E>>
 
         if (value < 0 || value >= getNumValues())
         {
-            throw new IllegalValueException("Value " + value + " is not in the valid range for DotsTest.TestEnum");
+            throw new IllegalValueException("Value " + value + " is not in the valid range");
         }
         m_bIsNull = false;
         m_isChanged = true;
