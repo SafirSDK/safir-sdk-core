@@ -33,23 +33,26 @@ namespace Dob
 {
 namespace Internal
 {
-    class DOSE_CPP_API EntityIteratorImpl
+    /**
+     * This is a class to help implement the entity iterator. The reason for this class
+     * to be separate from EntityIterator is so that we can have the shared library
+     * interface not contain any boost references.
+     */
+    class EntityIteratorImpl
     {
     public:
-        EntityIteratorImpl();
-        EntityIteratorImpl(const long ctrl,
-                           const Typesystem::TypeId typeId,
-                           const bool includeSubclasses);
+        DOSE_CPP_API EntityIteratorImpl();
+        DOSE_CPP_API EntityIteratorImpl(const long ctrl,
+                                        const Typesystem::TypeId typeId,
+                                        const bool includeSubclasses);
 
-        EntityIteratorImpl(const EntityIteratorImpl & other);
-        ~EntityIteratorImpl();
-        EntityIteratorImpl & operator=(const EntityIteratorImpl& other);
+        DOSE_CPP_API EntityIteratorImpl(const EntityIteratorImpl & other);
+        DOSE_CPP_API ~EntityIteratorImpl();
+        DOSE_CPP_API EntityIteratorImpl & operator=(const EntityIteratorImpl& other);
 
-
-
-        const EntityProxy& dereference() const;
-        void increment();
-        bool equal(const EntityIteratorImpl& other) const;
+        DOSE_CPP_API const EntityProxy& dereference() const;
+        DOSE_CPP_API void increment();
+        DOSE_CPP_API bool equal(const EntityIteratorImpl& other) const;
 
     private:
         long m_ctrl;
