@@ -14,8 +14,6 @@ set(EXCLUDE_LIST
   AsioDispatcher\\.h   #includes asio.hpp, which appears to include windows.h
 
   /Typesystem/ToolSupport #property_tree appears to have some windows.h stuff in it
-
-  boost-[0-9_]*/ #We don't want to check the boost headers we get from conan on windows.
   )
 
 foreach(header ${headers})
