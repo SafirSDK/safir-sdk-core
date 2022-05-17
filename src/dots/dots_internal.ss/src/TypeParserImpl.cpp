@@ -21,7 +21,7 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#include <Safir/Dob/Typesystem/ToolSupport/TypeParser.h>
+#include <Safir/Dob/Typesystem/ToolSupport/Internal/TypeParserImpl.h>
 #include "ParseJob.h"
 
 namespace Safir
@@ -32,27 +32,26 @@ namespace Typesystem
 {
 namespace ToolSupport
 {
-    std::shared_ptr<const TypeRepository> ParseTypeDefinitions(const boost::filesystem::path& root)
+namespace Internal
+{
+    std::shared_ptr<const TypeRepository> ParseTypeDefinitionsImpl(const std::vector<std::string>& sroots)
     {
         std::vector<boost::filesystem::path> roots;
-        roots.push_back(root);
-        return ParseTypeDefinitions(roots);
-    }
-
-    std::shared_ptr<const TypeRepository> ParseTypeDefinitions(const std::vector<boost::filesystem::path>& roots)
-    {
-        for (size_t i=0; i<roots.size(); ++i)
+        for (const auto& sroot: sroots)
         {
+            const boost::filesystem::path root(sroot);
             //Check paths are valid directories. We dont care about duplicates, that will only result in overriding with same file
-            if (!boost::filesystem::exists(roots[i]) || !boost::filesystem::is_directory(roots[i]))
+            if (!boost::filesystem::exists(root) || !boost::filesystem::is_directory(root))
             {
-                throw ParseError("Invalid directory path", "The specified root directory does not exist.", roots[i].string(), 8);
+                throw ParseError("Invalid directory path", "The specified root directory does not exist.", sroot, 8);
             }
+            roots.push_back(root);
         }
 
         ParseJob job(roots);
         return job.GetResult();
     }
+}
 }
 }
 }
