@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2008-2013 (http://safirsdkcore.com)
+* Copyright Saab AB, 2008-2013,2022 (http://safirsdkcore.com)
 *
 * Created by: Petter Lönnstedt / stpeln
 *
@@ -28,7 +28,11 @@
 namespace VehicleAppCpp
 {
     App::App()
+#ifdef VEHICLEAPP_USE_BOOST
         : m_dispatch(m_connection,m_ioService)
+#else
+        : m_dispatch(m_connection)
+#endif
     {
     }
 
@@ -42,18 +46,26 @@ namespace VehicleAppCpp
         //StopRemoveInExercise
         MessageSender::Instance().Init();
 
+#ifdef VEHICLEAPP_USE_BOOST
         // Start the asio io-service loop in order to receive DOB callbacks
         // for example OnCreateRequest in EntityOwner.
         // We also need to define some dummy work in order for the io_service
         // to keep running until we tell it to stop.
         boost::asio::io_service::work keepRunning(m_ioService);
         m_ioService.run();
-
+#else
+        m_dispatch.Run();
+#endif
+        m_connection.Close();
         return 0;
     }
 
     void App::OnStopOrder()
     {
+#ifdef VEHICLEAPP_USE_BOOST
         m_ioService.stop();
+#else
+        m_dispatch.Stop();
+#endif
     }
 }

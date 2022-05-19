@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2008-2013 (http://safirsdkcore.com)
+* Copyright Saab AB, 2008-2013,2022 (http://safirsdkcore.com)
 *
 * Created by: Petter Lönnstedt / stpeln
 *
@@ -22,10 +22,14 @@
 *
 ******************************************************************************/
 
-#ifndef __APP_H
-#define __APP_H
+#pragma once
 
+#ifdef VEHICLEAPP_USE_BOOST
 #include <Safir/Utilities/AsioDispatcher.h>
+#else
+#include <mutex>
+#include <condition_variable>
+#endif
 
 #include "EntityHandler.h"
 #include "ServiceHandler.h"
@@ -77,6 +81,7 @@ namespace VehicleAppCpp
         // Primary connection for Dob calls
         Safir::Dob::Connection m_connection;
 
+#ifdef VEHICLEAPP_USE_BOOST
         // This application is event driven. It's triggered by events
         // received in the main event loop.
         // The main event loop for this application is implemented by
@@ -88,11 +93,69 @@ namespace VehicleAppCpp
         // Dob interface methods, for example OnCreateRequest call in EntityOwner.
         boost::asio::io_service m_ioService;
         Safir::Utilities::AsioDispatcher   m_dispatch;
+#else
+        // The StdDispatcherLoop class is a very basic replacement for Boost.Asio io_service
+        // All this does is to switch to the main thread and do dispatching there when an
+        // OnDoDispatch callback is received. Read more about dispatching in the User's Guide.
+        // This class is probably not really useful for you, it is only here to allow compilation
+        // of this example even when Boost is not installed. Prefer solving this problem using
+        // whatever framework you are using for your event loops.
+        class StdDispatcherLoop
+            : public Safir::Dob::Dispatcher
+        {
+        public:
+            explicit StdDispatcherLoop(const Safir::Dob::Connection& connection) : m_connection(connection) {}
 
+            void Run()
+            {
+                for(;;)
+                {
+                    std::unique_lock lk(m_mutex);
+                    m_cv.wait(lk);
+
+                    if (m_dispatchPending)
+                    {
+                        m_dispatchPending = false;
+                        m_connection.Dispatch();
+                    }
+
+                    if (m_stopPending)
+                    {
+                        return;
+                    }
+
+                }
+            }
+
+            void Stop()
+            {
+                //OnStopOrder happens in the main thread, so no need for mutex
+                m_stopPending = true;
+            }
+
+            void OnDoDispatch() override
+            {
+                {
+                    std::lock_guard lk(m_mutex);
+                    m_dispatchPending = true;
+                }
+                m_cv.notify_one();
+            }
+
+        private:
+            const Safir::Dob::Connection& m_connection;
+            bool m_dispatchPending = false;
+            bool m_stopPending = false;
+            std::mutex m_mutex;
+            std::condition_variable m_cv;
+        };
+
+        StdDispatcherLoop m_dispatch;
+#endif
         // DOB object handlers.
         EntityHandler entityHandler;
         ServiceHandler serviceHandler;
 
     };
 }
-#endif
+

@@ -22,8 +22,7 @@
 *
 ******************************************************************************/
 
-#ifndef __MESSAGE_SENDER_H
-#define __MESSAGE_SENDER_H
+#pragma once
 
 #include <Safir/Dob/Connection.h>
 
@@ -73,4 +72,4 @@ namespace VehicleAppCpp
         Safir::Dob::SecondaryConnection m_connection;
     };
 }
-#endif
+

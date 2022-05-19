@@ -21,9 +21,7 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-
-#ifndef __ENTITY_HANDLER_H
-#define __ENTITY_HANDLER_H
+#pragma once
 
 #include <Safir/Dob/Connection.h> 
 
@@ -82,4 +80,4 @@ namespace VehicleAppCpp
         Safir::Dob::SecondaryConnection m_connection;
     };
 }
-#endif
+

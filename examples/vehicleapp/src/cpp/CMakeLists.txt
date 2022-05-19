@@ -1,6 +1,8 @@
-if (NOT Boost_FOUND)
-  message(STATUS "Boost not found, will not build the VehicleAppCpp example application, since it currently requires the Boost headers.")
-  return()
+if (Boost_FOUND)
+  add_definitions(-DVEHICLEAPP_USE_BOOST)
+else()
+  message(STATUS "Boost not found, will use alternative implementation")
+  add_definitions(-DSAFIR_NO_BOOST)
 endif()
 
 ADD_EXECUTABLE(VehicleAppCpp

@@ -29,7 +29,6 @@
 #include <Safir/Dob/Defs.h>
 #include <Safir/Dob/DoseCppExportDefs.h>
 #include <Safir/Dob/Entity.h>
-#include <Safir/Dob/EntityIterator.h>
 #include <Safir/Dob/EntityProxy.h>
 #include <Safir/Dob/Message.h>
 #include <Safir/Dob/Response.h>
@@ -39,10 +38,17 @@
 #include <Safir/Dob/Typesystem/Defs.h>
 #include <Safir/Dob/Typesystem/EntityId.h>
 
+#ifndef SAFIR_NO_BOOST
+#include <Safir/Dob/EntityIterator.h>
+#endif
+
 namespace Safir
 {
 namespace Dob
 {
+    //forward declaration
+    class EntityIterator;
+
     /**
      * Common base class for connections to the DOB.
      *
@@ -53,12 +59,12 @@ namespace Dob
     {
     public:
 
-        /** 
+        /**
          * Constructor
          */
         ConnectionBase();
 
-        /** 
+        /**
          * Destructor.
          */
         virtual ~ConnectionBase();
@@ -776,7 +782,7 @@ namespace Dob
         * @param [in] typeId       The type of the class the handler is registered for.
         * @param [in] handlerId    Get instanceIdPolicy for this handler.
         * @return instanceIdPolicy Specifies if the handler expects instance ids in create requests to be
-        *                          assigned by the requestor or if the handler assigns them by itself.        
+        *                          assigned by the requestor or if the handler assigns them by itself.
         *
         * @throws Safir::Dob::NotFoundException The given handlerId has not registered the given class.
         */

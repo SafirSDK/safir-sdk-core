@@ -4,8 +4,52 @@ cmake_minimum_required(VERSION 3.16.0)
 
 set(CMAKE_CXX_STANDARD 17)
 
-find_package(SafirSDKCore REQUIRED)
+#
+# !! If you are trying to compile the examples, please read this !!
+#
+# Background: The example apps have an optional dependency on Boost.
+#
+# If you're trying to compile the examples and have Boost installed the examples
+# should find boost and use it for VehicleAppCpp.
+#
+# If you don't have Boost installed VehicleAppCpp will use an alternative method
+# of achieving the same thing.
+#
+# When we build these examples through Jenkins - as a check that the SDK has been
+# properly built and can actually be used to compile applications on top of - we need to
+# get hold of a reasonable copy of Boost. In fact we want an old Boost, so that we can
+# verify that the user can use whatever version of Boost they like. To get hold of Boost
+# we use Conan. For more information on conan, visit https://conan.io.
+#
+
+if (DEFINED ENV{JENKINS_HOME} OR SAFIR_EXAMPLES_USE_CONAN)
+  if(NOT EXISTS "${CMAKE_BINARY_DIR}/conan.cmake")
+    message(STATUS "Downloading conan.cmake from https://github.com/conan-io/cmake-conan")
+    file(DOWNLOAD "https://raw.githubusercontent.com/conan-io/cmake-conan/0.17.0/conan.cmake"
+                  "${CMAKE_BINARY_DIR}/conan.cmake"
+                  EXPECTED_HASH SHA256=3bef79da16c2e031dc429e1dac87a08b9226418b300ce004cc125a82687baeef
+                  TLS_VERIFY ON)
+  endif()
+
+  include(${CMAKE_BINARY_DIR}/conan.cmake)
+
+  conan_cmake_configure(REQUIRES boost/1.70.0
+                        OPTIONS boost:header_only=True
+                        GENERATORS cmake_find_package)
+
+  conan_cmake_autodetect(settings)
+
+  conan_cmake_install(PATH_OR_REFERENCE .
+                      BUILD missing
+                      REMOTE conancenter
+                      SETTINGS ${settings})
+endif()
+
+ADD_DEFINITIONS(-DBOOST_ALL_DYN_LINK)
+
 find_package(Boost)
+
+find_package(SafirSDKCore REQUIRED)
 
 add_subdirectory(dou_files)
 

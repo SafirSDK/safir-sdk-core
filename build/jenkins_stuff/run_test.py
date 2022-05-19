@@ -188,12 +188,8 @@ class WindowsInstaller():
         if os.environ["PATH"].find(os.path.join("Safir SDK Core", "bin")) != -1:
             raise SetupError("bin directory seems to have been added to PATH before installation!:\n" +
                              os.environ["PATH"])
-        if os.environ.get("BOOST_ROOT") is not None and os.environ["BOOST_ROOT"].find("Safir SDK Core") != -1:
-            raise SetupError("BOOST_ROOT environment variable seems to have been assigned before installation!:\n" +
-                             os.environ["BOOST_ROOT"])
 
         os.environ["PATH"] += os.pathsep + binpath
-        os.environ["BOOST_ROOT"] = self.installpath
 
         self.__setup_debug_runtime()
 
@@ -208,11 +204,8 @@ class WindowsInstaller():
                              output.decode("utf-8"))
 
         if not self.development_installed:
-            if os.path.isdir(os.path.join(self.installpath, "include", "boost")):
-                raise SetupError("Found unexpected directory 'include/boost'")
             if os.path.isdir(os.path.join(self.installpath, "include", "Safir", "Dob")):
                 raise SetupError("Found unexpected directory 'include/Safir/Dob'")
-
 
 class DebianInstaller():
     def __init__(self):
