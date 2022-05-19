@@ -1,16 +1,33 @@
 -----------------------------------------------------------------------------------------------------------------------
-2022-02-28 version 6.4.0 Beta 2
+2022-05-19 version 6.4.0
 -----------------------------------------------------------------------------------------------------------------------
 
-This release does not introduce any new features or provide any fixes to issues. Instead it provides support for
-newer compilers and newer versions of third party libraries. Also, internally we have moved to using conan for our
-third party dependencies.
+This release does not introduce any new features. Instead it provides support for newer
+compilers and newer versions of third party libraries. Also, internally we have moved to
+using conan for our third party dependencies. There are a few minor bugs that have been
+fixed too. Also Olib (or Safir.Databases), which has been deprecated for a long time, has
+now been removed.
 
-Safir SDK Core now officially builds on Visual Studio 2015, 2017, 2019 and 2022 with Boost 1.78, and with the GCC and
-Boost versions included in Ubuntu 20.04 and Debian 11 Bullseye.
+Safir SDK Core now officially builds on Visual Studio 2015, 2017, 2019 and 2022 with
+Boost 1.78, and with the GCC and Boost versions included in Ubuntu 20.04 and Debian 11
+Bullseye.
 
-There are quite a few changes made because of these upgrades, but hopefully all should be backwards compatible.
-If you run into problems, please let us know and we help you out or provide fixes.
+There are quite a few changes made because of these upgrades, but hopefully all should be
+backwards compatible.  If you run into problems, please let us know and we help you out
+or provide fixes.
+
+This release fixes the following issue (see http://safirsdkcore.com for details):
+
+#365 Update to newer Boost
+#369 Link Qt statically on Windows, to reduce risk of customers getting DLL hell
+#339 Remove Olib
+#366 Support newer OS:es and compilers
+#310 Improve java namespace checks in dobmake
+#371 Namespaces with an underscore in them make BuildSafirGenerated confused
+#372 BuildSafirGenerated does not parse dependent java namespace files correctly
+#368 Update all third party libraries
+#367 Use conan for handling all third party dependencies
+#364 Improve reflection interface for Sequences
 
 -----------------------------------------------------------------------------------------------------------------------
 2017-12-10 version 6.3.12
