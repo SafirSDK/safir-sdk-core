@@ -110,7 +110,7 @@ namespace VehicleAppCpp
             {
                 for(;;)
                 {
-                    std::unique_lock lk(m_mutex);
+                    std::unique_lock<std::mutex> lk(m_mutex);
                     m_cv.wait(lk);
 
                     if (m_dispatchPending)
@@ -136,7 +136,7 @@ namespace VehicleAppCpp
             void OnDoDispatch() override
             {
                 {
-                    std::lock_guard lk(m_mutex);
+                    std::lock_guard<std::mutex> lk(m_mutex);
                     m_dispatchPending = true;
                 }
                 m_cv.notify_one();
