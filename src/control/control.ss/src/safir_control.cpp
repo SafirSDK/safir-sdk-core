@@ -240,18 +240,7 @@ int main(int argc, char * argv[])
             controlApp->Stop();
         };
 
-#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
-        auto nbrOfThreads = 4;
-#elif defined(linux) || defined(__linux) || defined(__linux__)
-        //We can only run one thread on Linux. Boost.asio does not play well with
-        //multithreading and fork on Linux. For more info see
-        //http://www.boost.org/doc/libs/1_61_0/doc/html/boost_asio/reference/io_service/notify_fork.html
-        //If control ever needs to be multithreaded a possible solution could be to have
-        //it fork a child process before it spawns the threads. This child process could
-        //then be responsible for the forking.  There is an example of this here:
-        //https://stackoverflow.com/questions/21529540/how-do-i-handle-fork-correctly-with-boostasio-in-a-multithreaded-program
-        auto nbrOfThreads = 0;
-#endif
+        const auto nbrOfThreads = 4;
 
         boost::thread_group threads;
         for (auto i = 0; i < nbrOfThreads-1; ++i)
