@@ -1,8 +1,45 @@
+/* Calling isUnix() in multiple places in the scripts make the output very ugly, so we make our own
+   version of the function. */
+def betterIsUnix() {
+    return env.SystemRoot == null
+}
+
+def runCommand(Map map) {
+    def command = map.command
+    if (betterIsUnix()) {
+        if (map.linux_arguments != null)
+            command = command + " " + map.linux_arguments
+        sh (script: command, label: "Running (through sh) " + command)
+    }
+    else {
+        command = command.replaceAll("/","\\\\")
+        if (map.windows_arguments != null)
+            command = command + " " + map.windows_arguments
+        bat (script: command, label: "Running (through bat) " + command)
+    }
+}
+
+def runPython(Map map) {
+    map.command = "python " + map.command
+    runCommand(map)
+}
+
 pipeline {
+    parameters {
+        choice(name: 'PLATFORM_FILTER',
+               choices: ['all', 'ubuntu-focal', 'ubuntu-jammy', 'debian-bullseye', 'vs2015', 'vs2017', 'vs2019', 'vs2022'],
+               description: 'Run on specific platform')
+    }
     agent none
     stages {
         stage('Build') {
             matrix {
+                when {
+                    anyOf {
+                        expression { params.PLATFORM_FILTER == 'all' }
+                        expression { params.PLATFORM_FILTER == env.BUILD_PLATFORM }
+                    }
+                }
                 agent {
                     label "${BUILD_PLATFORM}-${BUILD_ARCH}-build"
                 }
@@ -33,58 +70,18 @@ pipeline {
                     }
                 }
                 stages {
-                    stage('Clean') {
-                        steps {
-                            script {
-                                if (isUnix()) {
-                                    sh 'git clean -fxd'
-                                }
-                                else {
-                                    bat 'git clean -fxd'
-                                }
-                            }
-                        }
-                    }
-                    stage('Check source tree') {
-                        steps {
-                            script {
-                                if (isUnix()) {
-                                    sh label:  "Running check_source_tree.py.",
-                                       script: """
-                                               build/check_source_tree.py
-                                               """
-                                }
-                                else {
-                                    bat label:  "Running check_source_tree.py.",
-                                        script: """
-                                                build\\check_source_tree.py
-                                                """
-                                }
-                            }
-                        }
-                    }
                     stage('Build and Unit Test') {
                         steps {
-                            script {
-                                if (isUnix()) {
-                                    sh label:  "Running build script.",
-                                       script: """
-                                               build/build.py --jenkins --package
-                                               """
-                                }
-                                else {
-                                    bat label:  "Running build script.",
-                                        script: """
-                                                build\\build.py --jenkins --package --use-studio ${BUILD_PLATFORM} --arch ${BUILD_ARCH}
-                                                """
-                                }
-                            }
+                            runCommand (command: "git clean -fxd")
+                            runPython (command: "build/check_source_tree.py")
+                            runCommand (command: "build/build.py --jenkins --package",
+                                        windows_arguments: "--use-studio ${BUILD_PLATFORM} --arch ${BUILD_ARCH}")
                         }
                     }
-                    stage('Archive') {
+                    stage('Archive and analyze') {
                         steps {
                             script {
-                                if (isUnix()) {
+                                if (betterIsUnix()) {
                                     sh label: "Moving artifacts to build-${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}.",
                                        script: """
                                                mkdir build-${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}
@@ -102,13 +99,8 @@ pipeline {
 
                                     archiveArtifacts artifacts: "build-${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}/*.exe", fingerprint: true
                                 }
-                            }
-                        }
-                    }
-                    stage('Analyze') {
-                        steps {
-                            script {
-                                if (isUnix()) {
+
+                                if (betterIsUnix()) {
                                     recordIssues(sourceCodeEncoding: 'UTF-8',
                                                  skipBlames: true,
                                                  skipPublishingChecks: true,
@@ -179,6 +171,12 @@ pipeline {
 
         stage('Test') {
             matrix {
+                when {
+                    anyOf {
+                        expression { params.PLATFORM_FILTER == 'all' }
+                        expression { params.PLATFORM_FILTER == env.BUILD_PLATFORM }
+                    }
+                }
                 agent {
                     label "${BUILD_PLATFORM}-${BUILD_ARCH}-test"
                 }
@@ -219,14 +217,7 @@ pipeline {
                 stages {
                     stage('Run Tests') {
                         steps {
-                            script {
-                                if (isUnix()) {
-                                    sh 'git clean -fxd'
-                                }
-                                else {
-                                    bat 'git clean -fxd'
-                                }
-                            }
+                            runCommand(command: "git clean -fxd")
 
                             copyArtifacts filter: "build-${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}/*",
                                           flatten: true,
@@ -234,22 +225,11 @@ pipeline {
                                           projectName: '${JOB_NAME}',
                                           selector: specific('${BUILD_NUMBER}')
 
-                            script {
-                                //languages are picked up from environment variable
-                                //we also need to move the folders, or jenkins will merge them all
-                                if (isUnix()) {
-                                    sh script: """
-                                               build/jenkins_stuff/run_test.py --test ${TEST_KIND}
-                                               mv dose_test_output ${TEST_KIND}-${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}
-                                               """
-                                }
-                                else {
-                                    bat script: """
-                                                python build/jenkins_stuff/run_test.py --test ${TEST_KIND}
-                                                move dose_test_output ${TEST_KIND}-${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}
-                                                """
-                                }
-                            }
+                            //languages are picked up from environment variable
+                            runPython (command: "build/jenkins_stuff/run_test.py --test ${TEST_KIND}")
+
+                            //we also need to move the folders, or jenkins will merge them all
+                            fileOperations([fileRenameOperation(destination: '${TEST_KIND}-${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}', source: 'dose_test_output')])
 
                             archiveArtifacts artifacts: '**/*.output.txt'
                             junit keepLongStdio: true, skipPublishingChecks: true, testResults: '**/*.junit.xml'
@@ -261,6 +241,12 @@ pipeline {
 
         stage('Build examples') {
             matrix {
+                when {
+                    anyOf {
+                        expression { params.PLATFORM_FILTER == 'all' }
+                        expression { params.PLATFORM_FILTER == env.BUILD_PLATFORM }
+                    }
+                }
                 agent {
                     label "${BUILD_PLATFORM}-${BUILD_ARCH}-build"
                 }
@@ -293,32 +279,14 @@ pipeline {
                 stages {
                     stage('Build') {
                         steps {
-                            script {
-                                if (isUnix()) {
-                                    sh 'git clean -fxd'
-                                }
-                                else {
-                                    bat 'git clean -fxd'
-                                }
-                            }
+                            runCommand(command: "git clean -fxd")
 
                             copyArtifacts filter: "build-${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}/*",
                                           flatten: true,
                                           fingerprintArtifacts: true,
                                           projectName: '${JOB_NAME}',
                                           selector: specific('${BUILD_NUMBER}')
-                            script {
-                                if (isUnix()) {
-                                    sh script: """
-                                               build/jenkins_stuff/run_test.py --test build-examples
-                                               """
-                                }
-                                else {
-                                    bat script: """
-                                                python build/jenkins_stuff/run_test.py --test build-examples
-                                                """
-                                }
-                            }
+                            runPython (command: "build/jenkins_stuff/run_test.py --test build-examples")
                         }
                     }
                 }
