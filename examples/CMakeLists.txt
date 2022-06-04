@@ -65,6 +65,7 @@ endif()
 if (UNIX)
    #set up use of threads and turn on more warnings
    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -Wall -Wextra -Wpedantic -Wsuggest-override -Werror=suggest-override")
+   SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--warn-common,--fatal-warnings")
 endif ()
 
 
