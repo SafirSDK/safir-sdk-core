@@ -74,7 +74,7 @@ namespace Internal
             if (!distribution.IsLocal(Dob::ProcessInfo::ClassTypeId))
             {
                 throw Dob::Typesystem::ConfigurationErrorException
-                    (L"Entity ProcessInfo must have DistributionChannelProperty (or Override) set to Local",__WFILE__,__LINE__);
+                    (L"Entity ProcessInfo must be configured to be Local",__WFILE__,__LINE__);
             }
 
             // Register ProcessInfo class
