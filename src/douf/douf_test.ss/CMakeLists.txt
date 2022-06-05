@@ -1,3 +1,4 @@
+add_subdirectory(AceTimeConverter_test)
 add_subdirectory(ExternalTimeProvider_test)
 add_subdirectory(TimeProvider_cpp_test)
 add_subdirectory(TimeProvider_dotnet_test)
