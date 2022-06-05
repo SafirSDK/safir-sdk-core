@@ -7,6 +7,7 @@ add_definitions(-DDOSE_NO_LOCK_CHECKING)
 
 TARGET_LINK_LIBRARIES(signals_test PRIVATE
   lluf_utils
+  lluf_startup_synchronizer
   safir_generated-Core-cpp)
 
 ADD_TEST(NAME Signals COMMAND signals_test)

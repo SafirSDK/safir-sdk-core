@@ -9,19 +9,11 @@ target_include_directories(dose_internal PUBLIC $<BUILD_INTERFACE:${CMAKE_CURREN
 TARGET_LINK_LIBRARIES(dose_internal PRIVATE
   lluf_id
   lluf_utils
-  lluf_startup_synchronizer
   Boost::regex
 
   PUBLIC
-  $<BUILD_INTERFACE:safir_generated-Core-cpp>)
-
-#These libraries are used in our internal headers, not in the public headers so we
-#only make them public for the Core tree build, not for the exported cmake
-#configuration. This allows for other parts of core to include dose_internal things
-#without having to add thread and system to their link dependencies.
-
-TARGET_LINK_LIBRARIES(dose_internal PRIVATE
-  PUBLIC
+  $<BUILD_INTERFACE:lluf_startup_synchronizer>
+  $<BUILD_INTERFACE:safir_generated-Core-cpp>
   $<BUILD_INTERFACE:Boost::thread>)
 
 if (UNIX)

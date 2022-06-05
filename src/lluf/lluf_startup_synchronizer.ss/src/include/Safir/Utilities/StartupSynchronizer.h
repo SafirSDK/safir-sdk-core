@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2007-2013 (http://safirsdkcore.com)
+* Copyright Saab AB, 2007-2013,2022 (http://safirsdkcore.com)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -21,8 +21,7 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifndef __LLUF_STARTUP_SYNCHRONIZER_H__
-#define __LLUF_STARTUP_SYNCHRONIZER_H__
+#pragma once
 
 #include <Safir/Utilities/Internal/VisibilityHelpers.h>
 
@@ -30,9 +29,6 @@
 #  define LLUF_STARTUP_SYNCHRONIZER_API SAFIR_HELPER_DLL_EXPORT
 #else
 #  define LLUF_STARTUP_SYNCHRONIZER_API SAFIR_HELPER_DLL_IMPORT
-#  define SAFIR_LIBRARY_NAME "lluf_startup_synchronizer"
-#  define SAFIR_NO_DEBUG_LIBRARY_SUFFIX
-#  include <Safir/Utilities/Internal/AutoLink.h>
 #endif
 #define LLUF_STARTUP_SYNCHRONIZER_LOCAL SAFIR_HELPER_DLL_LOCAL
 
@@ -140,19 +136,9 @@ namespace Utilities
         StartupSynchronizer(const StartupSynchronizer&) = delete;
         StartupSynchronizer& operator=(const StartupSynchronizer&) = delete;
 
-#ifdef _MSC_VER
-#pragma warning (push)
-#pragma warning (disable: 4251)
-#endif
-
         std::shared_ptr<StartupSynchronizerImpl> m_impl;
 
-#ifdef _MSC_VER
-#pragma warning (pop)
-#endif
-
         Synchronized* m_synchronized;
-
     };
 
 }
@@ -161,7 +147,4 @@ namespace Utilities
 
 #ifdef _MSC_VER
 #pragma warning (pop)
-#endif
-
-
 #endif

@@ -2,8 +2,6 @@
 #so we never want the "d" suffix on debug builds, which is default on windows.
 SET(CMAKE_DEBUG_POSTFIX "")
 
-FILE(GLOB_RECURSE headers *.h)
-
 ADD_LIBRARY(logging_library SHARED Interface.cpp include/Safir/Logging/Internal/Interface.h)
 
 #Make our INTERNAL headers available to other parts of Core.
