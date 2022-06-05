@@ -60,12 +60,12 @@ namespace
         try
         {
             const std::string temp = reader.Typesystem().get<std::string>(moduleName + ".dependencies");
-            std::set<std::string> splitDeps;
+            std::vector<std::string> splitDeps;
             boost::split(splitDeps,
                          temp,
                          boost::is_any_of(","));
 
-            for (std::set<std::string>::iterator it = splitDeps.begin();
+            for (std::vector<std::string>::iterator it = splitDeps.begin();
                  it != splitDeps.end(); ++it)
             {
                 //ignore empties
