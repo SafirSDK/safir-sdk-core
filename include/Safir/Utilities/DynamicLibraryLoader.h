@@ -36,6 +36,7 @@
 #endif
 #define LLUF_UTILS_LOCAL SAFIR_HELPER_DLL_LOCAL
 
+#ifndef SAFIR_NO_DEPRECATED
 
 namespace Safir
 {
@@ -45,6 +46,8 @@ namespace Utilities
      * This class provides a simple wrapper around dynamic loading
      * functionality of the operating system. E.g. dlopen/dlsym
      * of *nix and LoadLibrary/GetProcAddress of Win32.
+     *
+     * @deprecated This class lacks functionality and flexibility. A more competent alternative would be Boost.DLL.
      */
     class LLUF_UTILS_API DynamicLibraryLoader
     {
@@ -136,5 +139,7 @@ namespace Utilities
 }
 }
 
+
+#endif
 
 #endif
