@@ -3,6 +3,7 @@ ADD_EXECUTABLE(system_picture_component_test_node system_picture_component_test_
 TARGET_LINK_LIBRARIES(system_picture_component_test_node PRIVATE
   system_picture
   lluf_crash_reporter
+  lluf_internal
   lluf_utils
   lluf_id
   Boost::program_options)

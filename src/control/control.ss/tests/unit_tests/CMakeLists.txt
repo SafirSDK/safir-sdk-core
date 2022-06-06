@@ -9,11 +9,11 @@ TARGET_LINK_LIBRARIES(SystemStateHandler_test PRIVATE
 TARGET_LINK_LIBRARIES(StopHandler_test PRIVATE
   system_picture
   control_utils
-  lluf_utils
+  lluf_internal
   Boost::unit_test_framework)
 
 TARGET_LINK_LIBRARIES(IncarnationBlackListHandler_test PRIVATE
-    lluf_utils
+    lluf_internal
     Boost::filesystem
     Boost::unit_test_framework)
 

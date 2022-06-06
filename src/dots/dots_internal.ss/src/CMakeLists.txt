@@ -10,7 +10,7 @@ if (MSVC)
 endif()
 
 TARGET_LINK_LIBRARIES(dots_internal PRIVATE
-  lluf_utils
+  lluf_internal
   protobuf::protobuf
 
   PUBLIC

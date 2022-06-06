@@ -19,6 +19,7 @@ TARGET_LINK_LIBRARIES(dose_main PRIVATE
   communication
   system_picture
   control_utils
+  lluf_internal
   lluf_utils
   lluf_crash_reporter
   Boost::regex)

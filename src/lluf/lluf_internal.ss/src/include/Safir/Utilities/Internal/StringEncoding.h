@@ -21,17 +21,11 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifndef __LLUF_SYSTEMLOG_H__
-#define __LLUF_SYSTEMLOG_H__
+#ifndef __LLUF_STRING_ENCODING_H__
+#define __LLUF_STRING_ENCODING_H__
 
-#include <Safir/Utilities/Internal/UtilsExportDefs.h>
-#include <Safir/Utilities/Internal/StringUtils.h>
 #include <string>
-#include <sstream>
-
-
-#define SEND_SYSTEM_LOG(severity, comment) \
-    {std::wostringstream ostr_123; ostr_123 comment; Safir::Utilities::Internal::Log::Send(Safir::Utilities::Internal::Log::severity, ostr_123.str());}
+#include <Safir/Utilities/Internal/UtilsExportDefs.h>
 
 namespace Safir
 {
@@ -39,34 +33,26 @@ namespace Utilities
 {
 namespace Internal
 {
-namespace Log
-{
-    enum Severity
-    {
-        Emergency = 0,
-        Alert,
-        Critical,
-        Error,
-        Warning,
-        Notice,
-        Informational,
-        Debug
-    };
 
     /**
-    * Service for sending log messages to the native system logging mechanism.
-    *
-    * The service takes a severity and an arbitrary string.
-    * The severity levels conforms to the ones used by the well known syslog format as specified
-    * in http://www.ietf.org/rfc/rfc3164.txt.
-    *
-    * @param [in] severity Severity according to RFC 3164.
-    * @param [in] text Log text.
-    *
-    */
-    LLUF_UTILS_API void Send(const Severity severity, const std::wstring& text);
+     * Convert a UTF16-encoded std::wstring to UTF8-encoded std::string.
+     *
+     * Note: Only UTF-16 BMP characters are supported
+     *
+     * @param wstr [in] - The wstring in UTF16 format to convert.
+     * @return - The string in UTF8 format.
+     */
+    LLUF_INTERNAL_API const std::string ToUtf8(const std::wstring& wstr);
 
-}
+    /**
+     * Convert a UTF8-encoded std::string to a UTF16-encoded std::wstring
+     *
+     * Note: Only UTF-16 BMP characters are supported
+     *
+     * @param str [in] - The string in UTF8 format to convert.
+     * @return - The string in UTF16 format.
+     */
+    LLUF_INTERNAL_API const std::wstring ToUtf16(const std::string& str);
 }
 }
 }

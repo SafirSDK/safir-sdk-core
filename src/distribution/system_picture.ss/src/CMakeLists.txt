@@ -22,7 +22,7 @@ endif()
 target_include_directories(system_picture PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
 
 TARGET_LINK_LIBRARIES(system_picture PRIVATE
-  lluf_utils
+  lluf_internal
   lluf_id
   protobuf::protobuf
 
@@ -33,7 +33,7 @@ add_executable(system_picture_listener system_picture_listener.cpp)
 
 target_link_libraries(system_picture_listener PRIVATE
   system_picture
-  lluf_utils
+  lluf_internal
   Boost::program_options)
 
 SAFIR_INSTALL(TARGETS system_picture)

@@ -47,7 +47,7 @@ endif()
 add_executable(check_correct_public_headers main.cpp ${sources})
 
 target_link_libraries(check_correct_public_headers PRIVATE
-  lluf_utils
+  lluf_internal
   safir_generated-Core-cpp)
 
 add_dependencies(check_correct_public_headers logging_cpp dots_cpp dose_cpp douf_time_cpp swre_interface_cpp)

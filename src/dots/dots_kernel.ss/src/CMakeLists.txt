@@ -11,7 +11,7 @@ target_include_directories(dots_kernel PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_
 
 TARGET_LINK_LIBRARIES(dots_kernel PRIVATE
   dots_internal
-  lluf_utils
+  lluf_internal
   lluf_startup_synchronizer)
 
 if (UNIX)

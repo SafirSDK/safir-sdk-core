@@ -47,7 +47,6 @@
 #  include <boost/algorithm/string.hpp>
 #  include <boost/algorithm/string/split.hpp>
 #  include <boost/chrono.hpp>
-#  include <Safir/Utilities/Internal/StringEncoding.h>
 
 #  pragma warning (push)
 #  pragma warning (disable: 4100)

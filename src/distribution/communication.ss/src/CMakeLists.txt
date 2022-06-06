@@ -18,7 +18,7 @@ target_include_directories(communication PUBLIC $<BUILD_INTERFACE:${CMAKE_CURREN
 
 TARGET_LINK_LIBRARIES(communication PRIVATE
   lluf_id
-  lluf_utils
+  lluf_internal
   protobuf::protobuf
   Boost::regex)
 

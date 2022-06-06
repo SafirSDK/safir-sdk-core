@@ -13,6 +13,7 @@ target_include_directories(swre_library PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT
 TARGET_LINK_LIBRARIES(swre_library PRIVATE
   dose_cpp
   logging_cpp
+  lluf_internal
   lluf_utils
   lluf_crash_reporter
   lluf_config

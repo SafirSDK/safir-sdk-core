@@ -4,7 +4,7 @@ FILE(GLOB sources *.cpp)
 ADD_LIBRARY(dose_cpp SHARED ${sources} ${headers})
 
 TARGET_LINK_LIBRARIES(dose_cpp PRIVATE
-  lluf_utils
+  lluf_internal
   dose_dll
 
   PUBLIC

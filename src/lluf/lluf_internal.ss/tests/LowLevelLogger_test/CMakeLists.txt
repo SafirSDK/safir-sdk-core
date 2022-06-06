@@ -1,7 +1,7 @@
 ADD_EXECUTABLE(lll_test lll_test.cpp)
 
 TARGET_LINK_LIBRARIES(lll_test PRIVATE
-  lluf_utils)
+  lluf_internal)
 
 ADD_TEST(NAME LowLevelLogger
   COMMAND ${Python3_EXECUTABLE}

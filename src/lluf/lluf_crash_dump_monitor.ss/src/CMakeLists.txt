@@ -4,6 +4,7 @@ TARGET_LINK_LIBRARIES(crash_dump_monitor
   PRIVATE
   lluf_config
   lluf_utils
+  lluf_internal
   Boost::filesystem
   Boost::program_options)
 

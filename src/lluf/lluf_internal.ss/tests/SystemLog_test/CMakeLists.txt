@@ -2,7 +2,7 @@ FILE(GLOB sources *.cpp)
 
 ADD_EXECUTABLE(SystemLog_test ${sources})
 
-TARGET_LINK_LIBRARIES(SystemLog_test PRIVATE lluf_utils)
+TARGET_LINK_LIBRARIES(SystemLog_test PRIVATE lluf_internal)
 
 ADD_TEST(NAME SystemLog_0
   COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py ${CMAKE_CURRENT_SOURCE_DIR}/testconf/syslog_logging_0)

@@ -8,7 +8,7 @@ target_link_libraries(safir_websocket PRIVATE
   dose_cpp
   safir_generated-Core-cpp
   dots_internal
-  lluf_utils
+  lluf_internal
   RapidJSON::RapidJSON
   websocketpp::websocketpp)
 

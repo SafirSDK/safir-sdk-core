@@ -3,7 +3,7 @@ ADD_EXECUTABLE(communication_test communication_test.cpp)
 TARGET_LINK_LIBRARIES(communication_test PRIVATE
   communication
   lluf_id
-  lluf_utils
+  lluf_internal
   Boost::program_options
   Boost::thread)
 

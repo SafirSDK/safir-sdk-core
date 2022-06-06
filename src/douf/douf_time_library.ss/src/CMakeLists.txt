@@ -17,6 +17,7 @@ target_include_directories(douf_time_library PUBLIC $<BUILD_INTERFACE:${CMAKE_CU
 
 TARGET_LINK_LIBRARIES(douf_time_library PRIVATE
   safir_generated-Core-cpp
+  lluf_internal
   lluf_utils)
 
 SAFIR_INSTALL(TARGETS douf_time_library)

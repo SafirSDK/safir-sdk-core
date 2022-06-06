@@ -15,7 +15,7 @@ endif()
 target_include_directories(control_utils PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
 
 TARGET_LINK_LIBRARIES(control_utils PRIVATE
-  lluf_utils
+  lluf_internal
   protobuf::protobuf
 
   PUBLIC

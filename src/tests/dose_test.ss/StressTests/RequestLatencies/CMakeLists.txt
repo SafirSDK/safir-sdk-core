@@ -6,7 +6,7 @@ ADD_EXECUTABLE(RequestLatencies ${sources} ${headers})
 TARGET_LINK_LIBRARIES(RequestLatencies PRIVATE
   dose_cpp
   safir_generated-DoseTest-cpp
-  lluf_utils
+  lluf_internal
   Boost::program_options)
 
 SAFIR_INSTALL(TARGETS RequestLatencies COMPONENT TestSuite)

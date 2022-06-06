@@ -6,7 +6,7 @@ target_include_directories(signals_test PRIVATE ../../src/include)
 add_definitions(-DDOSE_NO_LOCK_CHECKING)
 
 TARGET_LINK_LIBRARIES(signals_test PRIVATE
-  lluf_utils
+  lluf_internal
   lluf_startup_synchronizer
   safir_generated-Core-cpp)
 

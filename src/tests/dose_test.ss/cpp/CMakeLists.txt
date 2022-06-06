@@ -7,7 +7,7 @@ ADD_EXECUTABLE(dose_test_cpp ${sources} ${headers})
 TARGET_LINK_LIBRARIES(dose_test_cpp PRIVATE
   swre_interface_cpp
   dose_cpp
-  lluf_utils
+  lluf_internal
   safir_generated-DoseTest-cpp
   Boost::thread)
 

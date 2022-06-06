@@ -36,7 +36,7 @@ namespace Utilities
 {
     class ProcessMonitorImpl;
 
-    class LLUF_UTILS_API ProcessMonitor
+    class LLUF_INTERNAL_API ProcessMonitor
     {
     public:
         /**

@@ -12,7 +12,7 @@ TARGET_LINK_LIBRARIES(multiple_serialization PRIVATE
   Boost::thread)
 
 TARGET_LINK_LIBRARIES(repository_compare PRIVATE
-  lluf_utils
+  lluf_internal
   dots_internal)
 
 if (NOT MSVC)

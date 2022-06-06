@@ -18,7 +18,7 @@ ADD_EXECUTABLE(safir_control_gui WIN32 ${sources} ${ui_headers} ${moc_sources} $
 
 TARGET_LINK_LIBRARIES(safir_control_gui PRIVATE
     dose_cpp
-    lluf_utils
+    lluf_internal
     lluf_crash_reporter
     Qt5::Widgets)
 

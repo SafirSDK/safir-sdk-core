@@ -12,20 +12,20 @@ ADD_EXECUTABLE(ProcessMonitorSleeper Sleeper.cpp)
 
 if(MSVC)
     set_target_properties(ProcessMonitor_test3 PROPERTIES
-    COMPILE_DEFINITIONS "_lluf_utils_export_defs_h;lluf_utils_EXPORTS")
+    COMPILE_DEFINITIONS "_lluf_internal_export_defs_h;lluf_internal_EXPORTS")
 endif()
 
 
 TARGET_LINK_LIBRARIES (ProcessMonitor_test3 PRIVATE
-  lluf_utils
+  lluf_internal
   Boost::unit_test_framework
   Boost::filesystem)
 
 TARGET_LINK_LIBRARIES (ProcessMonitor_test PRIVATE
-  lluf_utils)
+  lluf_internal)
 
 TARGET_LINK_LIBRARIES (ProcessMonitor_test2 PRIVATE
-  lluf_utils)
+  lluf_internal)
 
 TARGET_LINK_LIBRARIES (ProcessMonitorSleeper PRIVATE
   Boost::thread)

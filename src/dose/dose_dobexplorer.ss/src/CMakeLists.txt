@@ -23,7 +23,7 @@ ADD_EXECUTABLE(dobexplorer WIN32 ${sources} ${ui_headers} ${moc_sources} ${heade
 TARGET_LINK_LIBRARIES(dobexplorer PRIVATE
   dose_internal
   system_picture
-  lluf_utils
+  lluf_internal
   lluf_crash_reporter
   Qt5::Widgets)
 

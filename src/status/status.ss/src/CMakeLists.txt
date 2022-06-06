@@ -9,7 +9,7 @@ ADD_EXECUTABLE(safir_status ${sources} ${headers})
 TARGET_LINK_LIBRARIES(safir_status PRIVATE
   control_utils
   dose_cpp
-  lluf_utils
+  lluf_internal
   lluf_crash_reporter)
 
 SAFIR_INSTALL(TARGETS safir_status)

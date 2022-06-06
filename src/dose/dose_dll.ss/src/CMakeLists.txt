@@ -11,6 +11,7 @@ ADD_LIBRARY(dose_dll SHARED ${sources} ${headers})
 target_include_directories(dose_dll PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
 
 TARGET_LINK_LIBRARIES(dose_dll PRIVATE
+  lluf_internal
   lluf_utils
   dose_internal)
 

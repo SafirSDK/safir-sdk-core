@@ -5,7 +5,7 @@ ADD_EXECUTABLE(ConnectStresser ${sources} ${headers})
 
 TARGET_LINK_LIBRARIES(ConnectStresser PRIVATE
   dose_cpp
-  lluf_utils
+  lluf_internal
   Boost::program_options)
 
 SAFIR_INSTALL(TARGETS ConnectStresser COMPONENT TestSuite)

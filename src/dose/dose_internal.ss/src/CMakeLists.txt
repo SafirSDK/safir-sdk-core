@@ -8,6 +8,7 @@ target_include_directories(dose_internal PUBLIC $<BUILD_INTERFACE:${CMAKE_CURREN
 
 TARGET_LINK_LIBRARIES(dose_internal PRIVATE
   lluf_id
+  lluf_internal
   lluf_utils
   Boost::regex
 

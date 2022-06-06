@@ -6,7 +6,7 @@ ADD_EXECUTABLE(RequestStresser ${sources} ${headers})
 TARGET_LINK_LIBRARIES(RequestStresser PRIVATE
   dose_cpp
   safir_generated-DoseTest-cpp
-  lluf_utils
+  lluf_internal
   Boost::program_options)
 
 

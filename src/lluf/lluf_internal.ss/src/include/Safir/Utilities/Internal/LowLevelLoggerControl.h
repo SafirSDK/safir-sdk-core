@@ -38,7 +38,7 @@ namespace Internal
 #pragma warning(disable: 4275)
 #pragma warning (disable: 4251)
 #endif
-    class LLUF_UTILS_API LowLevelLoggerControl:
+    class LLUF_INTERNAL_API LowLevelLoggerControl:
         private boost::noncopyable
     {
     public:

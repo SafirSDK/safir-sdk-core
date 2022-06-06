@@ -63,7 +63,7 @@ namespace Internal
 #pragma warning(disable: 4275)
 #pragma warning(disable: 4251)
 #endif
-        class LLUF_UTILS_API LowLevelLogger :
+        class LLUF_INTERNAL_API LowLevelLogger :
             public std::wostream
         {
         public:

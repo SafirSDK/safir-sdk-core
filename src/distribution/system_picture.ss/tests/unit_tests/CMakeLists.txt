@@ -33,52 +33,52 @@ ADD_EXECUTABLE(Coordinator_test Coordinator_test.cpp ../../src/RawStatistics.cpp
 
 
 TARGET_LINK_LIBRARIES(RawStatistics_test PRIVATE
-  lluf_utils
+  lluf_internal
   Boost::unit_test_framework
   protobuf::protobuf)
 
 TARGET_LINK_LIBRARIES(SystemState_test PRIVATE
-  lluf_utils
+  lluf_internal
   Boost::unit_test_framework
   protobuf::protobuf)
 
 TARGET_LINK_LIBRARIES(RawPublisherLocal_test PRIVATE
-  lluf_utils
+  lluf_internal
   Boost::unit_test_framework
   protobuf::protobuf)
 
 TARGET_LINK_LIBRARIES(RawPublisherRemote_test PRIVATE
   communication
-  lluf_utils
+  lluf_internal
   lluf_id
   Boost::unit_test_framework
   protobuf::protobuf)
 
 TARGET_LINK_LIBRARIES(StatePublisherLocal_test PRIVATE
-  lluf_utils
+  lluf_internal
   Boost::unit_test_framework
   protobuf::protobuf)
 
 TARGET_LINK_LIBRARIES(StatePublisherRemote_test PRIVATE
   communication
-  lluf_utils
+  lluf_internal
   lluf_id
   Boost::unit_test_framework
   protobuf::protobuf)
 
 TARGET_LINK_LIBRARIES(LocalSubscriber_test PRIVATE
-  lluf_utils
+  lluf_internal
   Boost::unit_test_framework
   protobuf::protobuf)
 
 TARGET_LINK_LIBRARIES(RemoteSubscriber_test PRIVATE
   lluf_id
-  lluf_utils
+  lluf_internal
   Boost::unit_test_framework
   protobuf::protobuf)
 
 TARGET_LINK_LIBRARIES(RawHandler_test PRIVATE
-  lluf_utils
+  lluf_internal
   Boost::unit_test_framework
   protobuf::protobuf)
 
@@ -87,13 +87,13 @@ TARGET_LINK_LIBRARIES(RawChanges_test PRIVATE
   protobuf::protobuf)
 
 TARGET_LINK_LIBRARIES(ElectionHandler_test PRIVATE
-  lluf_utils
+  lluf_internal
   lluf_id
   Boost::unit_test_framework
   protobuf::protobuf)
 
 TARGET_LINK_LIBRARIES(Coordinator_test PRIVATE
-  lluf_utils
+  lluf_internal
   Boost::unit_test_framework
   protobuf::protobuf)
 

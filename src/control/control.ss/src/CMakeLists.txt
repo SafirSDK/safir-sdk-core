@@ -6,7 +6,7 @@ ADD_EXECUTABLE(safir_control ${sources} ${headers})
 TARGET_LINK_LIBRARIES(safir_control PRIVATE
   system_picture
   control_utils
-  lluf_utils
+  lluf_internal
   lluf_crash_reporter
   Boost::filesystem
   Boost::program_options)

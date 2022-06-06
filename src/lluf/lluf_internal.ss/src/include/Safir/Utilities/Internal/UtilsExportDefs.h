@@ -21,16 +21,15 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifndef _lluf_utils_export_defs_h
-#define _lluf_utils_export_defs_h
+#pragma once
 
 #include <Safir/Utilities/Internal/VisibilityHelpers.h>
 
-#ifdef lluf_utils_EXPORTS
-#  define LLUF_UTILS_API SAFIR_HELPER_DLL_EXPORT
+#ifdef lluf_internal_EXPORTS
+#  define LLUF_INTERNAL_API SAFIR_HELPER_DLL_EXPORT
 #else
-#  define LLUF_UTILS_API SAFIR_HELPER_DLL_IMPORT
+#  define LLUF_INTERNAL_API SAFIR_HELPER_DLL_IMPORT
 #endif
-#define LLUF_UTILS_LOCAL SAFIR_HELPER_DLL_LOCAL
+#define LLUF_INTERNAL_LOCAL SAFIR_HELPER_DLL_LOCAL
 
-#endif
+

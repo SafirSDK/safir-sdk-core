@@ -20,7 +20,7 @@ endif()
 
 
 target_link_libraries(unit_tests PRIVATE
-  lluf_utils
+  lluf_internal
   lluf_id
   protobuf::protobuf
   Boost::regex)
