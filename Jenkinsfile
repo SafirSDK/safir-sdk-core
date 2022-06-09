@@ -229,7 +229,7 @@ pipeline {
                             runPython (command: "build/jenkins_stuff/run_test.py --test ${TEST_KIND}")
 
                             //we also need to move the folders, or jenkins will merge them all
-                            fileOperations([fileRenameOperation(destination: '${TEST_KIND}-${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}', source: 'dose_test_output')])
+                            fileOperations([fileRenameOperation(destination: "${TEST_KIND}-${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}", source: "dose_test_output")])
 
                             archiveArtifacts artifacts: '**/*.output.txt'
                             junit keepLongStdio: true, skipPublishingChecks: true, testResults: '**/*.junit.xml'
@@ -284,8 +284,8 @@ pipeline {
                             copyArtifacts filter: "build-${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}/*",
                                           flatten: true,
                                           fingerprintArtifacts: true,
-                                          projectName: '${JOB_NAME}',
-                                          selector: specific('${BUILD_NUMBER}')
+                                          projectName: "${JOB_NAME}",
+                                          selector: specific("${BUILD_NUMBER}")
                             runPython (command: "build/jenkins_stuff/run_test.py --test build-examples")
                         }
                     }
