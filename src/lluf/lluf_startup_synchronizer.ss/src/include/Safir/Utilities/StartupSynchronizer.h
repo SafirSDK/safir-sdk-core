@@ -136,7 +136,14 @@ namespace Utilities
         StartupSynchronizer(const StartupSynchronizer&) = delete;
         StartupSynchronizer& operator=(const StartupSynchronizer&) = delete;
 
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4251)
+#endif
         std::shared_ptr<StartupSynchronizerImpl> m_impl;
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
 
         Synchronized* m_synchronized;
     };
