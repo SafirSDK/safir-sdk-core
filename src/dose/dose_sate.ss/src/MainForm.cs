@@ -980,13 +980,6 @@ namespace Sate
         [STAThread]
         private static void Main()
         {
-            if (IsMono())
-            {
-                Console.WriteLine("Disabling Mono Gtk+ Color detection. Please ignore the following line.");
-                Environment.SetEnvironmentVariable("DESKTOP_SESSION", "KDE");
-                Thread.Sleep(1000);
-            }
-
             System.Windows.Forms.Application.Run(Instance);
         }
 
