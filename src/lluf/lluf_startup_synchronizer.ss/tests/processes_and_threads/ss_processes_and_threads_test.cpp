@@ -97,7 +97,7 @@ int main()
     boost::thread_group threads;
     for(int i = 0; i < num; ++i)
     {
-        boost::packaged_task<int> pt(boost::bind(threadFun,boost::ref(barrier1),boost::ref(barrier2),boost::ref(barrier3)));
+        boost::packaged_task<int> pt([&barrier1,&barrier2,&barrier3]{return threadFun(barrier1, barrier2, barrier3);});
         futures.push_back(boost::shared_future<int>(pt.get_future()));
         threads.add_thread(new boost::thread(boost::move(pt)));
     }

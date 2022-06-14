@@ -24,7 +24,9 @@
 #pragma once
 
 #include <Safir/Dob/Typesystem/LanguageInterfaceDefs.h>
+#include <mutex>
 #include <map>
+
 //disable warnings in boost
 #if defined _MSC_VER
   #pragma warning (push)
@@ -32,8 +34,6 @@
   #pragma warning (disable: 4100)
 #endif
 
-#include <boost/thread/mutex.hpp>
-#include <boost/thread/locks.hpp>
 #include <boost/thread.hpp>
 
 //and enable the warnings again
@@ -92,11 +92,11 @@ namespace Internal
 
         mutable ThreadExceptionTable m_threadExceptionTable;
 
-        mutable boost::mutex m_lock;
+        mutable std::mutex m_lock;
 
         /**
          * This class is here to ensure that only the Instance method can get at the 
-         * instance, so as to be sure that boost call_once is used correctly.
+         * instance, so as to be sure that std call_once is used correctly.
          * Also makes it easier to grep for singletons in the code, if all 
          * singletons use the same construction and helper-name.
          */
@@ -106,7 +106,7 @@ namespace Internal
             friend ExceptionKeeper& ExceptionKeeper::Instance();
 
             static ExceptionKeeper& Instance();
-            static boost::once_flag m_onceFlag;
+            static std::once_flag m_onceFlag;
         };
     };
 }

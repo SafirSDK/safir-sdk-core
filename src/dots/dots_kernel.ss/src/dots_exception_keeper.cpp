@@ -36,7 +36,7 @@ namespace Typesystem
 {
 namespace Internal
 {
-    boost::once_flag ExceptionKeeper::SingletonHelper::m_onceFlag = BOOST_ONCE_INIT;
+    std::once_flag ExceptionKeeper::SingletonHelper::m_onceFlag;
 
     ExceptionKeeper & ExceptionKeeper::SingletonHelper::Instance()
     {
@@ -46,7 +46,7 @@ namespace Internal
 
     ExceptionKeeper & ExceptionKeeper::Instance()
     {
-        boost::call_once(SingletonHelper::m_onceFlag,boost::bind(SingletonHelper::Instance));
+        std::call_once(SingletonHelper::m_onceFlag,[]{SingletonHelper::Instance();});
         return SingletonHelper::Instance();
     }
 
@@ -64,7 +64,7 @@ namespace Internal
     ExceptionKeeper::ExceptionData &
     ExceptionKeeper::GetDataForCurrentThread() const
     {
-        boost::lock_guard<boost::mutex> lck(m_lock);
+        std::lock_guard<std::mutex> lck(m_lock);
         const boost::thread::id threadId = boost::this_thread::get_id();
         ThreadExceptionTable::iterator it = m_threadExceptionTable.find(threadId);
         if (it == m_threadExceptionTable.end()) //not found
