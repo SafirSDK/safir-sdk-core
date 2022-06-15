@@ -23,9 +23,11 @@
 ******************************************************************************/
 
 #include "About.h"
+#include <Safir/Utilities/Internal/Expansion.h>
 
 About::About(QWidget* parent):
     QWidget(parent)
 {
     setupUi(this); // this sets up GUI
+    safirInstance->setText(QString::number(Safir::Utilities::Internal::Expansion::GetSafirInstance()));
 }
