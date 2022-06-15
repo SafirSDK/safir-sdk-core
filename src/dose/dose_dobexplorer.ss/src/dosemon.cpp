@@ -47,10 +47,10 @@ namespace
 
     void SortChildrenRecursive(QTreeWidgetItem* item)
     {
+        item->sortChildren(0, Qt::AscendingOrder);
         for (int i = 0; i < item->childCount(); ++i)
         {
             SortChildrenRecursive(item->child(i));
-            item->child(i)->sortChildren(0,Qt::AscendingOrder);
         }
     }
 }
