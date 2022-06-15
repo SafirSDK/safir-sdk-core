@@ -32,6 +32,20 @@ namespace Safir.Dob
     public sealed class ConnectionAspectMisc : ConnectionAspectBase
     {
         /// <summary>
+        /// Get the current Safir instance, i.e reads the environment variable SAFIR_INSTANCE.
+        /// </summary>
+        public static int GetSafirInstance()
+        {
+            int instance = 0;
+            var env = System.Environment.GetEnvironmentVariable("SAFIR_INSTANCE");            
+            if (env != null && int.TryParse(env, out instance))
+            {
+                return instance;
+            }
+            return 0;
+        }
+
+        /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="connection">The connection that you want to operate through</param>

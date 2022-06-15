@@ -268,8 +268,12 @@ namespace Sate
 
 
         private void OnLocateInClassExplorer_Click(object sender, EventArgs e)
-        {
-            ExplorerPanel.Instance.LocateClass(((Object) Tag).GetTypeId());
+        {            
+            var objInfo = Tag as ObjectInfo;
+            var typeId = objInfo.Obj.GetTypeId();
+            var entityInfo = objInfo as EntityInfo;
+            var instanceId = entityInfo?.GetInstanceId().RawValue;
+            ExplorerPanel.Instance.LocateInInheritanceTree(typeId, instanceId);
         }
 
         private void OnResetAllChangeFlags_Click(object sender, EventArgs e)

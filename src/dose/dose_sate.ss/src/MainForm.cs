@@ -106,6 +106,8 @@ namespace Sate
         private ToolStripMenuItem scenarioPlayrecordToolStripMenuItem;
         private ToolStripMenuItem settingsToolStripMenuItem;
         private StatusBar statusBar;
+        private StatusBarPanel connectionStatusPanel;
+        private StatusBarPanel safirInstancePanel;
         private TabControl tabControl;
         private ToolStripMenuItem timestampToolStripMenuItem;
         private ToolStripMenuItem toolsToolStripMenuItem;
@@ -339,7 +341,17 @@ namespace Sate
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
             base.OnFormClosing(e);
-            Disconnect();
+            if (IsConnected)
+            {
+                Disconnect();
+            }
+            else if (IsMono()) 
+            {
+                // Mono and not connected, then we have a running background thread that is trying to connect.
+                // It seems that Mono is not able to kill the background thread as it is hanging stuck in unmanaged code.
+                // This will at least kill the application and all of its threads.
+                System.Diagnostics.Process.GetCurrentProcess().Kill();
+            }
         }
 
         //Event handler for close all tabs context menu
@@ -478,6 +490,8 @@ namespace Sate
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.imageList = new System.Windows.Forms.ImageList(this.components);
             this.statusBar = new System.Windows.Forms.StatusBar();
+            this.connectionStatusPanel = new StatusBarPanel();
+            this.safirInstancePanel = new StatusBarPanel();
             this.bottomSplitter = new System.Windows.Forms.Splitter();
             this.bottomPanel = new System.Windows.Forms.Panel();
             this.bottomFillPanel = new System.Windows.Forms.Panel();
@@ -515,20 +529,20 @@ namespace Sate
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.runGarbageCollectorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem3 = new System.Windows.Forms.ToolStripSeparator();
+            this.externalApplicationsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.settingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripSeparator();
             this.aboutSATEToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.externalApplicationsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.bottomPanel.SuspendLayout();
             this.fillPanel.SuspendLayout();
             this.fillfillpanel.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
-            //
+            // 
             // imageList
-            //
+            // 
             this.imageList.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imageList.ImageStream")));
             this.imageList.TransparentColor = System.Drawing.Color.Transparent;
             this.imageList.Images.SetKeyName(0, "");
@@ -538,102 +552,111 @@ namespace Sate
             this.imageList.Images.SetKeyName(4, "");
             this.imageList.Images.SetKeyName(5, "");
             this.imageList.Images.SetKeyName(6, "");
-            //
+            // 
             // statusBar
-            //
+            // 
+            this.connectionStatusPanel.AutoSize = StatusBarPanelAutoSize.Spring;
+            this.connectionStatusPanel.Text = "Not connected!";
+            this.connectionStatusPanel.BorderStyle = StatusBarPanelBorderStyle.None;
+            this.connectionStatusPanel.Alignment = HorizontalAlignment.Left;
+            this.safirInstancePanel.BorderStyle = StatusBarPanelBorderStyle.None;
+            this.safirInstancePanel.Alignment = HorizontalAlignment.Right;
+            this.safirInstancePanel.Width = 150;
+            this.safirInstancePanel.Text = "Safir instance: " + Safir.Dob.ConnectionAspectMisc.GetSafirInstance().ToString();
             this.statusBar.Location = new System.Drawing.Point(0, 744);
             this.statusBar.Name = "statusBar";
             this.statusBar.Size = new System.Drawing.Size(1160, 22);
             this.statusBar.TabIndex = 3;
-            this.statusBar.Text = "Not connected!";
-            //
+            this.statusBar.ShowPanels = true;
+            this.statusBar.Panels.AddRange(new [] { this.connectionStatusPanel, this.safirInstancePanel });
+            // 
             // bottomSplitter
-            //
+            // 
             this.bottomSplitter.BackColor = System.Drawing.SystemColors.Control;
             this.bottomSplitter.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.bottomSplitter.Location = new System.Drawing.Point(188, 621);
+            this.bottomSplitter.Location = new System.Drawing.Point(249, 621);
             this.bottomSplitter.MinSize = 50;
             this.bottomSplitter.Name = "bottomSplitter";
-            this.bottomSplitter.Size = new System.Drawing.Size(972, 3);
+            this.bottomSplitter.Size = new System.Drawing.Size(911, 3);
             this.bottomSplitter.TabIndex = 3;
             this.bottomSplitter.TabStop = false;
-            //
+            // 
             // bottomPanel
-            //
+            // 
             this.bottomPanel.BackColor = System.Drawing.SystemColors.Control;
             this.bottomPanel.Controls.Add(this.bottomFillPanel);
             this.bottomPanel.Controls.Add(this.bottomRightSplitter);
             this.bottomPanel.Controls.Add(this.bottomRightPanel);
             this.bottomPanel.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.bottomPanel.Location = new System.Drawing.Point(188, 624);
+            this.bottomPanel.Location = new System.Drawing.Point(249, 624);
             this.bottomPanel.Name = "bottomPanel";
-            this.bottomPanel.Size = new System.Drawing.Size(972, 120);
+            this.bottomPanel.Size = new System.Drawing.Size(911, 120);
             this.bottomPanel.TabIndex = 2;
-            //
+            // 
             // bottomFillPanel
-            //
+            // 
             this.bottomFillPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.bottomFillPanel.Location = new System.Drawing.Point(0, 0);
             this.bottomFillPanel.Name = "bottomFillPanel";
-            this.bottomFillPanel.Size = new System.Drawing.Size(576, 120);
+            this.bottomFillPanel.Size = new System.Drawing.Size(515, 120);
             this.bottomFillPanel.TabIndex = 2;
-            //
+            // 
             // bottomRightSplitter
-            //
+            // 
             this.bottomRightSplitter.Dock = System.Windows.Forms.DockStyle.Right;
-            this.bottomRightSplitter.Location = new System.Drawing.Point(576, 0);
+            this.bottomRightSplitter.Location = new System.Drawing.Point(515, 0);
             this.bottomRightSplitter.Name = "bottomRightSplitter";
             this.bottomRightSplitter.Size = new System.Drawing.Size(3, 120);
             this.bottomRightSplitter.TabIndex = 1;
             this.bottomRightSplitter.TabStop = false;
-            //
+            // 
             // bottomRightPanel
-            //
+            // 
             this.bottomRightPanel.Dock = System.Windows.Forms.DockStyle.Right;
-            this.bottomRightPanel.Location = new System.Drawing.Point(579, 0);
+            this.bottomRightPanel.Location = new System.Drawing.Point(518, 0);
             this.bottomRightPanel.Name = "bottomRightPanel";
             this.bottomRightPanel.Size = new System.Drawing.Size(393, 120);
             this.bottomRightPanel.TabIndex = 0;
-            //
+            // 
             // leftSplitter
-            //
+            // 
             this.leftSplitter.BackColor = System.Drawing.SystemColors.Control;
-            this.leftSplitter.Location = new System.Drawing.Point(185, 24);
+            this.leftSplitter.Location = new System.Drawing.Point(246, 24);
             this.leftSplitter.MinSize = 185;
             this.leftSplitter.Name = "leftSplitter";
             this.leftSplitter.Size = new System.Drawing.Size(3, 720);
             this.leftSplitter.TabIndex = 1;
             this.leftSplitter.TabStop = false;
-            //
+            // 
             // leftPanel
-            //
+            // 
             this.leftPanel.BackColor = System.Drawing.SystemColors.Control;
             this.leftPanel.Dock = System.Windows.Forms.DockStyle.Left;
             this.leftPanel.Location = new System.Drawing.Point(0, 24);
             this.leftPanel.Name = "leftPanel";
-            this.leftPanel.Size = new System.Drawing.Size(185, 720);
+            this.leftPanel.Size = new System.Drawing.Size(246, 720);
             this.leftPanel.TabIndex = 0;
-            //
+            // 
             // fillPanel
-            //
+            // 
             this.fillPanel.Controls.Add(this.fillfillpanel);
             this.fillPanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.fillPanel.Location = new System.Drawing.Point(188, 24);
+            this.fillPanel.Location = new System.Drawing.Point(249, 24);
             this.fillPanel.Name = "fillPanel";
-            this.fillPanel.Size = new System.Drawing.Size(972, 597);
+            this.fillPanel.Size = new System.Drawing.Size(911, 597);
             this.fillPanel.TabIndex = 4;
-            //
+            // 
             // fillfillpanel
-            //
+            // 
             this.fillfillpanel.Controls.Add(this.tabControl);
             this.fillfillpanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.fillfillpanel.Location = new System.Drawing.Point(0, 0);
             this.fillfillpanel.Name = "fillfillpanel";
-            this.fillfillpanel.Size = new System.Drawing.Size(972, 597);
+            this.fillfillpanel.Size = new System.Drawing.Size(911, 597);
             this.fillfillpanel.TabIndex = 1;
-            //
+            // 
             // tabControl
-            //
+            // 
             this.tabControl.Appearance = System.Windows.Forms.TabAppearance.FlatButtons;
             this.tabControl.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControl.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -641,12 +664,12 @@ namespace Sate
             this.tabControl.Location = new System.Drawing.Point(0, 0);
             this.tabControl.Name = "tabControl";
             this.tabControl.SelectedIndex = 0;
-            this.tabControl.Size = new System.Drawing.Size(972, 597);
+            this.tabControl.Size = new System.Drawing.Size(911, 597);
             this.tabControl.TabIndex = 0;
             this.tabControl.SelectedIndexChanged += new System.EventHandler(this.tabControl_selectedIndexChanged);
-            //
+            // 
             // menuStrip1
-            //
+            // 
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.connectionToolStripMenuItem,
             this.viewToolStripMenuItem,
@@ -657,9 +680,9 @@ namespace Sate
             this.menuStrip1.Size = new System.Drawing.Size(1160, 24);
             this.menuStrip1.TabIndex = 5;
             this.menuStrip1.Text = "menuStrip1";
-            //
+            // 
             // connectionToolStripMenuItem
-            //
+            // 
             this.connectionToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.connectToolStripMenuItem,
             this.connectWithContextToolStripMenuItem,
@@ -674,107 +697,107 @@ namespace Sate
             this.connectionToolStripMenuItem.Name = "connectionToolStripMenuItem";
             this.connectionToolStripMenuItem.Size = new System.Drawing.Size(81, 20);
             this.connectionToolStripMenuItem.Text = "Connection";
-            //
+            // 
             // connectToolStripMenuItem
-            //
+            // 
             this.connectToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("connectToolStripMenuItem.Image")));
             this.connectToolStripMenuItem.Name = "connectToolStripMenuItem";
-            this.connectToolStripMenuItem.Size = new System.Drawing.Size(196, 22);
+            this.connectToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
             this.connectToolStripMenuItem.Text = "Connect";
             this.connectToolStripMenuItem.Click += new System.EventHandler(this.connectmenuItem_Click);
-            //
+            // 
             // connectWithContextToolStripMenuItem
-            //
+            // 
             this.connectWithContextToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("connectWithContextToolStripMenuItem.Image")));
             this.connectWithContextToolStripMenuItem.Name = "connectWithContextToolStripMenuItem";
-            this.connectWithContextToolStripMenuItem.Size = new System.Drawing.Size(196, 22);
+            this.connectWithContextToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
             this.connectWithContextToolStripMenuItem.Text = "Connect with context...";
             this.connectWithContextToolStripMenuItem.Click += new System.EventHandler(this.connectWithContextToolStripMenuItem_Click);
-            //
+            // 
             // disconnectToolStripMenuItem
-            //
+            // 
             this.disconnectToolStripMenuItem.Enabled = false;
             this.disconnectToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("disconnectToolStripMenuItem.Image")));
             this.disconnectToolStripMenuItem.Name = "disconnectToolStripMenuItem";
-            this.disconnectToolStripMenuItem.Size = new System.Drawing.Size(196, 22);
+            this.disconnectToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
             this.disconnectToolStripMenuItem.Text = "Disconnect";
             this.disconnectToolStripMenuItem.Click += new System.EventHandler(this.disconnectmenuItem_Click);
-            //
+            // 
             // toolStripMenuItem1
-            //
+            // 
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(193, 6);
-            //
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(194, 6);
+            // 
             // openToolStripMenuItem
-            //
+            // 
             this.openToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.opendoufileToolStripMenuItem,
             this.openscenarioToolStripMenuItem,
             this.openserializedObjectToolStripMenuItem});
             this.openToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("openToolStripMenuItem.Image")));
             this.openToolStripMenuItem.Name = "openToolStripMenuItem";
-            this.openToolStripMenuItem.Size = new System.Drawing.Size(196, 22);
+            this.openToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
             this.openToolStripMenuItem.Text = "Open";
-            //
+            // 
             // opendoufileToolStripMenuItem
-            //
+            // 
             this.opendoufileToolStripMenuItem.Name = "opendoufileToolStripMenuItem";
             this.opendoufileToolStripMenuItem.Size = new System.Drawing.Size(168, 22);
             this.opendoufileToolStripMenuItem.Text = "Dou file...";
             this.opendoufileToolStripMenuItem.Click += new System.EventHandler(this.opendoufileToolStripMenuItem_Click);
-            //
+            // 
             // openscenarioToolStripMenuItem
-            //
+            // 
             this.openscenarioToolStripMenuItem.Name = "openscenarioToolStripMenuItem";
             this.openscenarioToolStripMenuItem.Size = new System.Drawing.Size(168, 22);
             this.openscenarioToolStripMenuItem.Text = "Scenario file...";
             this.openscenarioToolStripMenuItem.Click += new System.EventHandler(this.openscenarioToolStripMenuItem_Click);
-            //
+            // 
             // openserializedObjectToolStripMenuItem
-            //
+            // 
             this.openserializedObjectToolStripMenuItem.Name = "openserializedObjectToolStripMenuItem";
             this.openserializedObjectToolStripMenuItem.Size = new System.Drawing.Size(168, 22);
             this.openserializedObjectToolStripMenuItem.Text = "Serialized object...";
             this.openserializedObjectToolStripMenuItem.Click += new System.EventHandler(this.openserializedObjectToolStripMenuItem_Click);
-            //
+            // 
             // saveToolStripMenuItem
-            //
+            // 
             this.saveToolStripMenuItem.Enabled = false;
             this.saveToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("saveToolStripMenuItem.Image")));
             this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-            this.saveToolStripMenuItem.Size = new System.Drawing.Size(196, 22);
+            this.saveToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
             this.saveToolStripMenuItem.Text = "Save...";
             this.saveToolStripMenuItem.Click += new System.EventHandler(this.saveToolStripMenuItem_Click);
-            //
+            // 
             // findToolStripMenuItem
-            //
+            // 
             this.findToolStripMenuItem.Enabled = false;
             this.findToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("findToolStripMenuItem.Image")));
             this.findToolStripMenuItem.Name = "findToolStripMenuItem";
-            this.findToolStripMenuItem.Size = new System.Drawing.Size(196, 22);
+            this.findToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
             this.findToolStripMenuItem.Text = "Find...";
             this.findToolStripMenuItem.Click += new System.EventHandler(this.findToolStripMenuItem_Click);
-            //
+            // 
             // rescentFilesToolStripMenuItem
-            //
+            // 
             this.rescentFilesToolStripMenuItem.Name = "rescentFilesToolStripMenuItem";
-            this.rescentFilesToolStripMenuItem.Size = new System.Drawing.Size(196, 22);
+            this.rescentFilesToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
             this.rescentFilesToolStripMenuItem.Text = "Recent files";
-            //
+            // 
             // toolStripMenuItem4
-            //
+            // 
             this.toolStripMenuItem4.Name = "toolStripMenuItem4";
-            this.toolStripMenuItem4.Size = new System.Drawing.Size(193, 6);
-            //
+            this.toolStripMenuItem4.Size = new System.Drawing.Size(194, 6);
+            // 
             // exitToolStripMenuItem
-            //
+            // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(196, 22);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
             this.exitToolStripMenuItem.Text = "Exit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
-            //
+            // 
             // viewToolStripMenuItem
-            //
+            // 
             this.viewToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.classExplorerToolStripMenuItem,
             this.inboxToolStripMenuItem,
@@ -782,36 +805,36 @@ namespace Sate
             this.viewToolStripMenuItem.Name = "viewToolStripMenuItem";
             this.viewToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
             this.viewToolStripMenuItem.Text = "View";
-            //
+            // 
             // classExplorerToolStripMenuItem
-            //
+            // 
             this.classExplorerToolStripMenuItem.Checked = true;
             this.classExplorerToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.classExplorerToolStripMenuItem.Name = "classExplorerToolStripMenuItem";
-            this.classExplorerToolStripMenuItem.Size = new System.Drawing.Size(146, 22);
+            this.classExplorerToolStripMenuItem.Size = new System.Drawing.Size(147, 22);
             this.classExplorerToolStripMenuItem.Text = "Class Explorer";
             this.classExplorerToolStripMenuItem.Click += new System.EventHandler(this.classExplorermenuItem_Click);
-            //
+            // 
             // inboxToolStripMenuItem
-            //
+            // 
             this.inboxToolStripMenuItem.Checked = true;
             this.inboxToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.inboxToolStripMenuItem.Name = "inboxToolStripMenuItem";
-            this.inboxToolStripMenuItem.Size = new System.Drawing.Size(146, 22);
+            this.inboxToolStripMenuItem.Size = new System.Drawing.Size(147, 22);
             this.inboxToolStripMenuItem.Text = "Inbox";
             this.inboxToolStripMenuItem.Click += new System.EventHandler(this.subrespmenuItem_Click);
-            //
+            // 
             // outputToolStripMenuItem
-            //
+            // 
             this.outputToolStripMenuItem.Checked = true;
             this.outputToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.outputToolStripMenuItem.Name = "outputToolStripMenuItem";
-            this.outputToolStripMenuItem.Size = new System.Drawing.Size(146, 22);
+            this.outputToolStripMenuItem.Size = new System.Drawing.Size(147, 22);
             this.outputToolStripMenuItem.Text = "Output";
             this.outputToolStripMenuItem.Click += new System.EventHandler(this.eventlogmenuItem_Click);
-            //
+            // 
             // toolsToolStripMenuItem
-            //
+            // 
             this.toolsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.calculatorsToolStripMenuItem,
             this.scenarioPlayrecordToolStripMenuItem,
@@ -821,68 +844,75 @@ namespace Sate
             this.externalApplicationsToolStripMenuItem,
             this.settingsToolStripMenuItem});
             this.toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
-            this.toolsToolStripMenuItem.Size = new System.Drawing.Size(48, 20);
+            this.toolsToolStripMenuItem.Size = new System.Drawing.Size(46, 20);
             this.toolsToolStripMenuItem.Text = "Tools";
-            //
+            // 
             // calculatorsToolStripMenuItem
-            //
+            // 
             this.calculatorsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.typeIdToolStripMenuItem,
             this.timestampToolStripMenuItem});
             this.calculatorsToolStripMenuItem.Image = global::Sate.Resources.TYPEIDCALC;
             this.calculatorsToolStripMenuItem.Name = "calculatorsToolStripMenuItem";
-            this.calculatorsToolStripMenuItem.Size = new System.Drawing.Size(193, 22);
+            this.calculatorsToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
             this.calculatorsToolStripMenuItem.Text = "Calculators";
-            //
+            // 
             // typeIdToolStripMenuItem
-            //
+            // 
             this.typeIdToolStripMenuItem.Name = "typeIdToolStripMenuItem";
-            this.typeIdToolStripMenuItem.Size = new System.Drawing.Size(134, 22);
+            this.typeIdToolStripMenuItem.Size = new System.Drawing.Size(133, 22);
             this.typeIdToolStripMenuItem.Text = "TypeId";
             this.typeIdToolStripMenuItem.Click += new System.EventHandler(this.typeIdToolStripMenuItem_Click);
-            //
+            // 
             // timestampToolStripMenuItem
-            //
+            // 
             this.timestampToolStripMenuItem.Name = "timestampToolStripMenuItem";
-            this.timestampToolStripMenuItem.Size = new System.Drawing.Size(134, 22);
+            this.timestampToolStripMenuItem.Size = new System.Drawing.Size(133, 22);
             this.timestampToolStripMenuItem.Text = "Timestamp";
             this.timestampToolStripMenuItem.Click += new System.EventHandler(this.timestampToolStripMenuItem_Click);
-            //
+            // 
             // scenarioPlayrecordToolStripMenuItem
-            //
+            // 
             this.scenarioPlayrecordToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("scenarioPlayrecordToolStripMenuItem.Image")));
             this.scenarioPlayrecordToolStripMenuItem.Name = "scenarioPlayrecordToolStripMenuItem";
-            this.scenarioPlayrecordToolStripMenuItem.Size = new System.Drawing.Size(193, 22);
+            this.scenarioPlayrecordToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
             this.scenarioPlayrecordToolStripMenuItem.Text = "Scenario play/record...";
             this.scenarioPlayrecordToolStripMenuItem.Click += new System.EventHandler(this.scenariomenuItem_Click);
-            //
+            // 
             // toolStripSeparator1
-            //
+            // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(190, 6);
-            //
+            this.toolStripSeparator1.Size = new System.Drawing.Size(191, 6);
+            // 
             // runGarbageCollectorToolStripMenuItem
-            //
+            // 
             this.runGarbageCollectorToolStripMenuItem.Name = "runGarbageCollectorToolStripMenuItem";
-            this.runGarbageCollectorToolStripMenuItem.Size = new System.Drawing.Size(193, 22);
+            this.runGarbageCollectorToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
             this.runGarbageCollectorToolStripMenuItem.Text = "Run Garbage Collector";
             this.runGarbageCollectorToolStripMenuItem.Click += new System.EventHandler(this.runGarbageCollectorToolStripMenuItem_Click);
-            //
+            // 
             // toolStripMenuItem3
-            //
+            // 
             this.toolStripMenuItem3.Name = "toolStripMenuItem3";
-            this.toolStripMenuItem3.Size = new System.Drawing.Size(190, 6);
-            //
+            this.toolStripMenuItem3.Size = new System.Drawing.Size(191, 6);
+            // 
+            // externalApplicationsToolStripMenuItem
+            // 
+            this.externalApplicationsToolStripMenuItem.Name = "externalApplicationsToolStripMenuItem";
+            this.externalApplicationsToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
+            this.externalApplicationsToolStripMenuItem.Text = "External Applications...";
+            this.externalApplicationsToolStripMenuItem.Click += new System.EventHandler(this.externalApplicationsToolStripMenuItem_Click);
+            // 
             // settingsToolStripMenuItem
-            //
+            // 
             this.settingsToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("settingsToolStripMenuItem.Image")));
             this.settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
-            this.settingsToolStripMenuItem.Size = new System.Drawing.Size(193, 22);
+            this.settingsToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
             this.settingsToolStripMenuItem.Text = "Settings...";
             this.settingsToolStripMenuItem.Click += new System.EventHandler(this.settingsmenuItem_Click);
-            //
+            // 
             // helpToolStripMenuItem
-            //
+            // 
             this.helpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.helpToolStripMenuItem1,
             this.toolStripMenuItem2,
@@ -890,36 +920,29 @@ namespace Sate
             this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
             this.helpToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
             this.helpToolStripMenuItem.Text = "Help";
-            //
+            // 
             // helpToolStripMenuItem1
-            //
+            // 
             this.helpToolStripMenuItem1.Image = ((System.Drawing.Image)(resources.GetObject("helpToolStripMenuItem1.Image")));
             this.helpToolStripMenuItem1.Name = "helpToolStripMenuItem1";
-            this.helpToolStripMenuItem1.Size = new System.Drawing.Size(146, 22);
+            this.helpToolStripMenuItem1.Size = new System.Drawing.Size(144, 22);
             this.helpToolStripMenuItem1.Text = "Help...";
-            //
+            // 
             // toolStripMenuItem2
-            //
+            // 
             this.toolStripMenuItem2.Name = "toolStripMenuItem2";
-            this.toolStripMenuItem2.Size = new System.Drawing.Size(143, 6);
-            //
+            this.toolStripMenuItem2.Size = new System.Drawing.Size(141, 6);
+            // 
             // aboutSATEToolStripMenuItem
-            //
+            // 
             this.aboutSATEToolStripMenuItem.Image = global::Sate.Resources.sate_logo;
             this.aboutSATEToolStripMenuItem.Name = "aboutSATEToolStripMenuItem";
-            this.aboutSATEToolStripMenuItem.Size = new System.Drawing.Size(146, 22);
+            this.aboutSATEToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
             this.aboutSATEToolStripMenuItem.Text = "About SATE...";
             this.aboutSATEToolStripMenuItem.Click += new System.EventHandler(this.aboutmenuItem_Click);
-            //
-            // externalApplicationsToolStripMenuItem
-            //
-            this.externalApplicationsToolStripMenuItem.Name = "externalApplicationsToolStripMenuItem";
-            this.externalApplicationsToolStripMenuItem.Size = new System.Drawing.Size(193, 22);
-            this.externalApplicationsToolStripMenuItem.Text = "External Applications...";
-            this.externalApplicationsToolStripMenuItem.Click += new System.EventHandler(this.externalApplicationsToolStripMenuItem_Click);
-            //
+            // 
             // MainForm
-            //
+            // 
             this.BackColor = System.Drawing.SystemColors.ControlDark;
             this.ClientSize = new System.Drawing.Size(1160, 766);
             this.Controls.Add(this.fillPanel);
@@ -1061,7 +1084,7 @@ namespace Sate
 
             // get connection name
             var doseAspectMisc = new ConnectionAspectMisc(Dose);
-            statusBar.Text = "Connected as " + doseAspectMisc.GetConnectionName();
+            connectionStatusPanel.Text = "Connected as " + doseAspectMisc.GetConnectionName();
 
             OutputPanel.Instance.LogEvent("success!", true);
 
@@ -1110,6 +1133,7 @@ namespace Sate
         //-------------------------------------------------
         //Organizes the windows (panels)
         //-------------------------------------------------
+        
         private void AutoOrganize()
         {
             //-----------------------------------------
@@ -1280,7 +1304,7 @@ namespace Sate
         public void Connect(bool startThread, int context)
         {
             //Start thread that hangs on connect
-            statusBar.Text = "Trying to connect...";
+            connectionStatusPanel.Text = "Trying to connect...";
             OutputPanel.Instance.LogEvent("- Connecting to DOSE using context " + context + "...", false);
             connectContext = context;
             if (startThread)
@@ -1312,7 +1336,7 @@ namespace Sate
             connectToolStripMenuItem.Enabled = true;
             connectWithContextToolStripMenuItem.Enabled = true;
             OutputPanel.Instance.LogEvent("- Disconnected from DOSE.", true);
-            statusBar.Text = "Disconnected!";
+            connectionStatusPanel.Text = "Disconnected!";
             Cursor = Cursors.Default;
         }
 

@@ -73,6 +73,9 @@ namespace Sate
         private readonly MenuItem _unsubscribeRegistrationMenuItem;
         private readonly MenuItem _viewDouFileMenuItem;
         private readonly MenuItem _openInExternalMenuItem;
+        private readonly MenuItem _locateInNsTreeMenuItem;
+        private readonly MenuItem _locateInInheritanceTreeMenuItem;
+
         private Hashtable _clTypeIdHt;
         private IContainer components;
         private ImageList _defaultImagesList;
@@ -82,6 +85,12 @@ namespace Sate
         private Hashtable _nsHt;
         private Hashtable _nsTypeIdHt;
         private Panel _toppanel;
+
+        private DobUnit _clHierarchyRootComplete;
+        private DobUnit _clHierarchyRootFiltered;
+
+        private List<SateTreeNode> _nsHierarchyRootComplete = new List<SateTreeNode>();
+        private List<SateTreeNode> _nsHierarchyRootFiltered = new List<SateTreeNode>();
 
 
         private ExplorerPanel()
@@ -116,6 +125,8 @@ namespace Sate
             _changeImageMenuItem = new MenuItem("Change image...");
             _dobUnitInfoMenuItem = new MenuItem("View details...");
             _viewDouFileMenuItem = new MenuItem("View dou-file...");
+            _locateInNsTreeMenuItem = new MenuItem("Locate in namespace tree");
+            _locateInInheritanceTreeMenuItem = new MenuItem("Locate in inheritance tree");
 
             _openInExternalMenuItem = new MenuItem("Open in external program");
             UpdateExternalProgramsSubmenu();
@@ -140,6 +151,8 @@ namespace Sate
             _changeImageMenuItem.Click += changeImageMenuItem_Click;
             _dobUnitInfoMenuItem.Click += dobUnitInfoMenuItem_Click;
             _viewDouFileMenuItem.Click += viewDouFileMenuItem_Click;
+            _locateInNsTreeMenuItem.Click += locateInNamespaceTree_Click;
+            _locateInInheritanceTreeMenuItem.Click += locateInInheritanceTree_Click;
 
             var contextMenu = new ContextMenu(new[]
             {
@@ -161,7 +174,9 @@ namespace Sate
                 _dobUnitInfoMenuItem,
                 _viewDouFileMenuItem,
                 _openInExternalMenuItem,
-                _changeImageMenuItem
+                _changeImageMenuItem,
+                _locateInInheritanceTreeMenuItem,
+                _locateInNsTreeMenuItem
             });
 
             contextMenu.Popup += contextMenu_Popup;
@@ -194,12 +209,19 @@ namespace Sate
             _tabInheritance.Controls.Add(_treeViewClassHierarchy);
             _tabNamespace.Controls.Add(_treeViewNsHierarchy);
             _fillpanel.Controls.Add(_tabControl);
+
             _tabControl.TabPages.AddRange(new[] { _tabInheritance, _tabNamespace });
             if (Settings.Sate.DefaultExplorerView)
                 _tabControl.SelectedIndex = 0;
             else
                 _tabControl.SelectedIndex = 1;
             _tabControl.SelectedIndex = 0;
+
+            //Filter
+            var filterControl = new FilterControl();
+            filterControl.FilterChanged += OnFilterChanged;
+            filterControl.Dock = DockStyle.Top;
+            _fillpanel.Controls.Add(filterControl);
 
             //TitleBar
             var titleLabel = new PanelLabelControl("Explorer");
@@ -210,7 +232,125 @@ namespace Sate
 
             ResumeLayout(false);
         }
-        
+
+        private void OnFilterChanged(string filter)
+        {
+            var f = filter.Trim().ToLower();
+            FilterClassHierarchyTree(f);
+            FilterNamespaceHierarchyTree(f);
+        }
+
+        private void FilterClassHierarchyTree(string filter)
+        {
+            if (string.IsNullOrWhiteSpace(filter) || filter.Length < 3)
+            {
+                if (_clHierarchyRootFiltered != _clHierarchyRootComplete)
+                {
+                    _treeViewClassHierarchy.BeginUpdate();
+                    _treeViewClassHierarchy.Nodes.Clear();
+                    _clHierarchyRootFiltered = _clHierarchyRootComplete;
+                    _treeViewClassHierarchy.Nodes.Add(_clHierarchyRootFiltered);
+                    _treeViewClassHierarchy.EndUpdate();
+                }
+
+                return;
+            }
+
+            SetNodeFilterFlag(_clHierarchyRootComplete, filter);
+
+            if (_clHierarchyRootComplete.FilterFlag == SateTreeNode.FilterState.NoMatch)
+            {
+                // No filter matches
+                _clHierarchyRootFiltered = null;
+                _treeViewClassHierarchy.Nodes.Clear();
+                return;
+            }
+
+            _treeViewClassHierarchy.BeginUpdate();
+            _treeViewClassHierarchy.Nodes.Clear();
+            _clHierarchyRootFiltered = _clHierarchyRootComplete.Copy() as DobUnit;
+            ApplyFilterFlags(_clHierarchyRootComplete, _clHierarchyRootFiltered);
+            _treeViewClassHierarchy.Nodes.Add(_clHierarchyRootFiltered);
+            _treeViewClassHierarchy.ExpandAll();
+            _treeViewClassHierarchy.EndUpdate();
+        }
+
+        private void FilterNamespaceHierarchyTree(string filter)
+        {
+            if (string.IsNullOrWhiteSpace(filter) || filter.Length < 3)
+            {
+                if (_nsHierarchyRootFiltered != _nsHierarchyRootComplete)
+                {
+                    _treeViewNsHierarchy.BeginUpdate();
+                    _treeViewNsHierarchy.Nodes.Clear();
+                    _nsHierarchyRootFiltered = _nsHierarchyRootComplete;
+                    _treeViewNsHierarchy.Nodes.AddRange(_nsHierarchyRootFiltered.ToArray());
+                    _treeViewNsHierarchy.EndUpdate();
+                }
+
+                return;
+            }
+
+            _treeViewNsHierarchy.BeginUpdate();
+            _nsHierarchyRootFiltered = new List<SateTreeNode>();
+
+            foreach (SateTreeNode node in _nsHierarchyRootComplete)
+            {
+                SetNodeFilterFlag(node, filter);
+                if (node.FilterFlag != SateTreeNode.FilterState.NoMatch)
+                {
+                    var copy = node.Copy() as SateTreeNode;
+                    ApplyFilterFlags(node, copy);
+                    _nsHierarchyRootFiltered.Add(copy);
+                }
+            }
+
+            _treeViewNsHierarchy.Nodes.Clear();
+            _treeViewNsHierarchy.Nodes.AddRange(_nsHierarchyRootFiltered.ToArray());
+            _treeViewNsHierarchy.ExpandAll();
+            _treeViewNsHierarchy.EndUpdate();
+
+        }
+
+        private void SetNodeFilterFlag(SateTreeNode node, string filter)
+        {
+            node.FilterFlag = node.Text.ToLower().Contains(filter) ? SateTreeNode.FilterState.Match : SateTreeNode.FilterState.NoMatch;
+            if (node.FilterFlag == SateTreeNode.FilterState.Match)
+            {
+                SateTreeNode parent = node.Parent as SateTreeNode;
+                while (parent != null && parent.FilterFlag == SateTreeNode.FilterState.NoMatch)
+                {
+                    parent.FilterFlag = SateTreeNode.FilterState.Include;
+                    parent = parent.Parent as SateTreeNode;
+                }
+            }
+            else if (node is ObjectNode)
+            {
+                node.FilterFlag = SateTreeNode.FilterState.Include;
+            }
+
+            foreach (SateTreeNode child in node.Nodes)
+            {
+                SetNodeFilterFlag(child, filter);
+            }
+        }
+
+        private void ApplyFilterFlags(SateTreeNode originalNode, SateTreeNode filterNode)
+        {
+            foreach (SateTreeNode org in originalNode.Nodes)
+            {
+                if (org.FilterFlag != SateTreeNode.FilterState.NoMatch)
+                {
+                    var copy = org.Copy();
+                    if (org.FilterFlag == SateTreeNode.FilterState.Match)
+                    {
+                        copy.BackColor = Color.Yellow;
+                    }
+                    filterNode.Nodes.Add(copy);
+                    ApplyFilterFlags(org, copy);
+                }
+            }
+        }
 
         public static ExplorerPanel Instance
         {
@@ -310,7 +450,7 @@ namespace Sate
             base.Dispose(disposing);
         }
 
-        #region Windows Form Designer generated code
+        #region Windows Form Designer generated code0
 
         /// <summary>
         ///     Required method for Designer support - do not modify
@@ -447,7 +587,15 @@ namespace Sate
                 }
             }
 
-            _treeViewClassHierarchy.Nodes.Add(objNode);
+            _clHierarchyRootComplete = objNode;
+            _clHierarchyRootFiltered = objNode;
+            _treeViewClassHierarchy.Nodes.Add(_clHierarchyRootFiltered);
+
+            foreach (SateTreeNode node in _treeViewNsHierarchy.Nodes)
+            {
+                _nsHierarchyRootComplete.Add(node);
+            }
+            _nsHierarchyRootFiltered = _nsHierarchyRootComplete;
 
             _treeViewClassHierarchy.Sort();
             _treeViewNsHierarchy.Sort();
@@ -1253,6 +1401,7 @@ namespace Sate
             _openMenuItem.Visible = false;
             _registerMenuItem.Visible = false; //reg
             _registerOptionsMenuItem.Visible = false; //reg_inst
+
             _unregisterMenuItem.Visible = false; //unreg
             _separator1MenuItem.Visible = false; //sep
             _subscribeMenuItem.Visible = false; //sub
@@ -1269,21 +1418,21 @@ namespace Sate
             _viewDouFileMenuItem.Visible = false; //view
             _openInExternalMenuItem.Visible = false; //external
             _changeImageMenuItem.Visible = true; //image
+            _locateInInheritanceTreeMenuItem.Visible = false;
+            _locateInNsTreeMenuItem.Visible = false;
 
             var node = GetSelectedNode();
-
-            long typeId;
-            if (node is DobUnit)
-            {
-                typeId = ((DobUnit) node).TypeId;
-                _viewDouFileMenuItem.Visible = true;
-                _openInExternalMenuItem.Visible = true;
-                _openMenuItem.Visible = true;
-            }
-            else
+            if (!(node is DobUnit))
             {
                 return;
             }
+
+            long typeId = ((DobUnit)node).TypeId;
+            _viewDouFileMenuItem.Visible = true;
+            _openInExternalMenuItem.Visible = true;
+            _openMenuItem.Visible = true;
+            _locateInInheritanceTreeMenuItem.Visible = _tabControl.SelectedIndex == 1;
+            _locateInNsTreeMenuItem.Visible = _tabControl.SelectedIndex == 0;
 
             // No .dou file exists for Safir.Dob.Typesystem.Object
             if (typeId == Object.ClassTypeId)
@@ -1542,6 +1691,18 @@ namespace Sate
             }
         }
 
+        private void locateInNamespaceTree_Click(object sender, EventArgs e)
+        {
+            var node = (DobUnit)GetSelectedNode();
+            LocateInNamespaceTree(node.TypeId, node.EntityId?.InstanceId.RawValue);
+        }
+
+        private void locateInInheritanceTree_Click(object sender, EventArgs e)
+        {
+            var node = (DobUnit)GetSelectedNode();
+            LocateInInheritanceTree(node.TypeId, node.EntityId?.InstanceId.RawValue);
+        }
+
         //------------------------------------------------------
         // Change icons in treeView
         //------------------------------------------------------
@@ -1782,13 +1943,48 @@ namespace Sate
             nnode.SelectedImageIndex = nnode.ImageIndex;
         }
 
-        public void LocateClass(long typeId)
+        public void LocateInInheritanceTree(long typeId, long? instanceId)
         {
             _tabControl.SelectedIndex = 0;
             _treeViewClassHierarchy.Focus();
-            _treeViewClassHierarchy.SelectedNode = (ClassNode) _clTypeIdHt[typeId];
+            var classNode = (ClassNode)_clTypeIdHt[typeId];
+
+            if (instanceId.HasValue)
+            {
+                foreach (ObjectNode objNode in classNode.Nodes)
+                {
+                    if (objNode != null && objNode.EntityId.InstanceId.RawValue == instanceId)
+                    {
+                        _treeViewClassHierarchy.SelectedNode = objNode;
+                        return;
+                    }
+                }
+            }
+
+            _treeViewClassHierarchy.SelectedNode = classNode;
         }
 
+        public void LocateInNamespaceTree(long typeId, long? instanceId)
+        {
+            _tabControl.SelectedIndex = 1;
+            _treeViewNsHierarchy.Focus();
+            
+            var classNode = (ClassNode)_nsTypeIdHt[typeId];
+
+            if (instanceId.HasValue)
+            {
+                foreach (ObjectNode objNode in classNode.Nodes)
+                {
+                    if (objNode != null && objNode.EntityId.InstanceId.RawValue == instanceId)
+                    {
+                        _treeViewNsHierarchy.SelectedNode = objNode;
+                        return;
+                    }
+                }
+            }
+
+            _treeViewNsHierarchy.SelectedNode = classNode;
+        }
 
         //--- Register ---
         public void RegisterEntity(RegInfo regInfo)
@@ -1870,7 +2066,15 @@ namespace Sate
             }
         }
 
-        private class NamespaceNode : TreeNode
+        private abstract class SateTreeNode : TreeNode
+        {
+            public enum FilterState { NoMatch, Include, Match };
+            public FilterState FilterFlag { get; set; } = FilterState.NoMatch;
+
+            public abstract SateTreeNode Copy();
+        }
+
+        private class NamespaceNode : SateTreeNode
         {
             public readonly string FullName;
 
@@ -1881,15 +2085,27 @@ namespace Sate
                 ImageIndex = _imageHandler.NamespaceImageIndex;
                 SelectedImageIndex = ImageIndex;
             }
+
+            private NamespaceNode(NamespaceNode n)
+            {
+                FullName = n.FullName;
+                Text = n.Text;
+                ImageIndex = n.ImageIndex;
+                SelectedImageIndex = n.SelectedImageIndex;
+            }
+
+            public override SateTreeNode Copy()
+            {
+                return new NamespaceNode(this);
+            }
         }
 
 
-        private class DobUnit : TreeNode
+        private abstract class DobUnit : SateTreeNode
         {
             public EntityId EntityId;
             public HandlerId HandlerId;
             public TreeViewImageHandler.ImageType ImageType = TreeViewImageHandler.ImageType.Default;
-
             public long TypeId;
         }
 
@@ -1906,6 +2122,20 @@ namespace Sate
                 ImageIndex = _imageHandler.GetImageIndex(typeId, TreeViewImageHandler.ImageType.Default);
                 SelectedImageIndex = ImageIndex;
             }
+
+            private ClassNode(ClassNode n)
+            {
+                TypeId = n.TypeId;
+                DobType = n.DobType;
+                Text = n.Text;
+                ImageIndex = n.ImageIndex;
+                SelectedImageIndex = n.SelectedImageIndex;
+            }
+
+            public override SateTreeNode Copy()
+            {
+                return new ClassNode(this);
+            }
         }
 
         private class ObjectNode : DobUnit
@@ -1917,6 +2147,20 @@ namespace Sate
                 ImageIndex = _imageHandler.GetImageIndex(entityId, TreeViewImageHandler.ImageType.Default);
                 SelectedImageIndex = ImageIndex;
                 Text = entityId.InstanceId.ToString();
+            }
+
+            private ObjectNode(ObjectNode n)
+            {
+                TypeId = n.TypeId;
+                EntityId = n.EntityId;
+                ImageIndex = n.ImageIndex;
+                SelectedImageIndex = n.SelectedImageIndex;
+                Text = n.Text;
+            }
+
+            public override SateTreeNode Copy()
+            {
+                return new ObjectNode(this);
             }
         }
 
