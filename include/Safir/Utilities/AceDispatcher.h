@@ -28,7 +28,7 @@
 
 #include <boost/noncopyable.hpp>
 #include <Safir/Dob/Connection.h>
-#include <Safir/Utilities/Internal/Atomic.h>
+#include <atomic>
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -67,7 +67,7 @@ namespace Utilities
         AceDispatcher(const Safir::Dob::Connection & connection):
             ACE_Event_Handler(ACE_Reactor::instance()),
             m_connection(connection),
-            m_isNotified(0){}
+            m_isNotified(){}
 
        /**
         * Constructor.
@@ -80,7 +80,7 @@ namespace Utilities
                       ACE_Reactor * reactor):
             ACE_Event_Handler(reactor),
             m_connection(connection),
-            m_isNotified(0){}
+            m_isNotified(){}
 
     private:
 
@@ -88,9 +88,9 @@ namespace Utilities
         * handle_exception performs dispatch on the connection.
         * Overrides ACE_Event_Handler.
         */
-        virtual int handle_exception(ACE_HANDLE)
+        int handle_exception(ACE_HANDLE) override
         {
-            m_isNotified = 0;
+            m_isNotified.clear();
             m_connection.Dispatch();
             return 0;
         }
@@ -99,18 +99,17 @@ namespace Utilities
          * OnDoDispatch notifies the dob connection thread that it's time to perform a dispatch.
          * Overrides Safir::Dob::Dispatcher.
          */
-        virtual void OnDoDispatch()
+        void OnDoDispatch() override
         {
-            if (m_isNotified == 0)
+            if (!m_isNotified.test_and_set())
             {
-                m_isNotified = 1;
                 reactor()->notify(this);
             }
         }
 
 
         const Safir::Dob::Connection&      m_connection;
-        Safir::Utilities::Internal::AtomicUint32 m_isNotified;
+        std::atomic_flag                   m_isNotified;
 };
 
 } // namespace Utilities
