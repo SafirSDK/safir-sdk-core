@@ -24,6 +24,8 @@
 
 #pragma once
 
+#ifndef SAFIR_NO_DEPRECATED
+
 #include <cstdint>
 #include <atomic>
 
@@ -96,5 +98,4 @@ namespace Internal
 }
 }
 
-
-
+#endif
