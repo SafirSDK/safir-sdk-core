@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2008-2013 (http://safirsdkcore.com)
+* Copyright Saab AB, 2008-2013,2022 (http://safirsdkcore.com)
 *
 * Created by: Joel Ottosson / stjoot
 *
@@ -33,6 +33,7 @@
 #include <Safir/Dob/Internal/SubscriptionOptions.h>
 #include <Safir/Dob/Internal/Connections.h>
 #include <Safir/Dob/Internal/InjectionKindTable.h>
+#include <Safir/Dob/Internal/SharedMemoryObject.h>
 #include <Safir/Dob/Internal/TimestampOperations.h>
 #include <Safir/Dob/ConnectionInfo.h>
 #include <boost/current_function.hpp>
@@ -1410,3 +1411,20 @@ void DoseC_SimulateOverflows(const DotsC_Int32 ctrl,
     }
     CATCH_LIBRARY_EXCEPTIONS;
 }
+
+void DoseC_GetSharedMemoryUsage(DotsC_Int64& usage,
+                                bool& success)
+{
+    lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
+    success = false;
+    try
+    {
+        const auto& shmem = SharedMemoryObject::GetSharedMemory();
+        usage = static_cast<DotsC_Int64>(shmem.get_size() -
+                                         shmem.get_free_memory());
+        success = true;
+    }
+    CATCH_LIBRARY_EXCEPTIONS;
+}
+
+

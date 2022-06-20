@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2007-2013 (http://safirsdkcore.com)
+* Copyright Saab AB, 2007-2013, 2022 (http://safirsdkcore.com)
 *
 * Created by: Anders Widén / stawi
 *
@@ -22,8 +22,7 @@
 *
 ******************************************************************************/
 
-#ifndef _SAFIR_DOB_CONNECTION_ASPECT_MISC_H
-#define _SAFIR_DOB_CONNECTION_ASPECT_MISC_H
+#pragma once
 
 #include <Safir/Dob/DoseCppExportDefs.h>
 #include <Safir/Dob/ConnectionAspectBase.h>
@@ -161,9 +160,27 @@ namespace Dob
          void SimulateOverflows(const bool inQueues, const bool outQueues) const;
 
         /** @} */
+
+        /**
+         * @name Shared Memory statistics
+         */
+        /** @{ */
+
+         /**
+         * Get the number of currently used bytes in the shared memory.
+         *
+         * The size of the shared memory is defined by the parameter
+         * Safir.Dob.NodeParameters.SharedMemorySize, which is defined in megabytes (1024*1024 bytes).
+         *
+         * Calling this function does not require the underlying Connection to have been opened.
+         *
+         * @return The amount of shared memory used, in bytes.
+         */
+         Typesystem::Int64 GetSharedMemoryUsage() const;
+        /** @} */
+
     };
 
 }
 }
 
-#endif

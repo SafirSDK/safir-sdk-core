@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2008-2013 (http://safirsdkcore.com)
+* Copyright Saab AB, 2008-2013, 2022 (http://safirsdkcore.com)
 *
 * Created by: Anders Widén / stawi
 *
@@ -150,5 +150,16 @@ namespace Dob
         }
     }
 
+    Typesystem::Int64 ConnectionAspectMisc::GetSharedMemoryUsage() const
+    {
+        Safir::Dob::Typesystem::Int64 size;
+        bool success;
+        DoseC_GetSharedMemoryUsage(size, success);
+        if (!success)
+        {
+            Typesystem::LibraryExceptions::Instance().Throw();
+        }
+        return size;
+    }
 }
 }

@@ -718,12 +718,17 @@ namespace Safir.Dob
         internal static extern void DoseC_GetNodeId(out System.Int64 nodeId,
                                                     out byte success);
 
-        //DoseC_SetAlwaysOverflowFlag
+        //DoseC_SimulateOverflows
         [DllImport(DOSE_DLL_NAME, CallingConvention = CallingConvention.Cdecl)]
         internal static extern void DoseC_SimulateOverflows(System.Int32 ctrl,
                                                             byte inQueues,
                                                             byte outQueues,
                                                             out byte success);
+
+        //DoseC_GetSharedMemoryUsage
+        [DllImport(DOSE_DLL_NAME, CallingConvention = CallingConvention.Cdecl)]
+        internal static extern void DoseC_GetSharedMemoryUsage(out System.Int64 usage,
+                                                               out byte success);
 
 
         #endregion

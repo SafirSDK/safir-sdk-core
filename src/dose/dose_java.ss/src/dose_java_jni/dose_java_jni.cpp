@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2009-2013 (http://safirsdkcore.com)
+* Copyright Saab AB, 2009-2013, 2022 (http://safirsdkcore.com)
 *
 * Created by: Lars Hagstrom / stlrha
 *
@@ -1710,4 +1710,22 @@ void JNICALL Java_com_saabgroup_safir_dob_Interface_GetNodeId
     DoseC_GetNodeId(nodeId,success);
     SetJArray(env,_success,success);
     SetJArray(env,_nodeId,nodeId);
+}
+
+/*
+ * Class:     com_saabgroup_safir_dob_Interface
+ * Method:    GetSharedMemoryUsage
+ * Signature: ([J[Z)V
+ */
+JNIEXPORT void JNICALL Java_com_saabgroup_safir_dob_Interface_GetSharedMemoryUsage
+  (JNIEnv * env,
+   jclass,
+   jlongArray _usage,
+   jbooleanArray _success)
+{
+    bool success;
+    DotsC_Int64 usage;
+    DoseC_GetSharedMemoryUsage(usage,success);
+    SetJArray(env,_success,success);
+    SetJArray(env,_usage,usage);
 }

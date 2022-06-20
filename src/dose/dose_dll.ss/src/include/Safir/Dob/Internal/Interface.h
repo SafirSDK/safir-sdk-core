@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2007-2013 (http://safirsdkcore.com)
+* Copyright Saab AB, 2007-2013,2022 (http://safirsdkcore.com)
 *
 * Created by: Joel Ottosson / stjoot
 *
@@ -21,8 +21,7 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifndef _dose_interface_h
-#define _dose_interface_h
+#pragma once
 
 #include <Safir/Utilities/Internal/VisibilityHelpers.h>
 
@@ -662,9 +661,10 @@ extern "C"
                                               const bool outQueues,
                                               bool& success);
 
+    DOSE_DLL_API void DoseC_GetSharedMemoryUsage(DotsC_Int64& usage,
+                                                 bool& success);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif //_dose_h

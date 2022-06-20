@@ -1,7 +1,7 @@
 // -*- coding: utf-8 -*-
 /******************************************************************************
 *
-* Copyright Saab AB, 2008-2013 (http://safirsdkcore.com)
+* Copyright Saab AB, 2008-2013, 2022 (http://safirsdkcore.com)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -241,5 +241,31 @@ public class ConnectionAspectMisc
         }
     }
 
+    //
+    // Shared Memory statistics
+    //
+
+    /**
+     * Get the number of currently used bytes in the shared memory.
+     *
+     * The size of the shared memory is defined by the parameter
+     * Safir.Dob.NodeParameters.SharedMemorySize, which is defined in megabytes (1024*1024 bytes).
+     *
+     * Calling this function does not require the underlying Connection to have been opened.
+     *
+     * @return The amount of shared memory used, in bytes.
+     */
+    public long getSharedMemoryUsage()
+    {
+        boolean [] success = new boolean [1];
+        long [] usage = new long [1];
+        Interface.GetSharedMemoryUsage(usage,
+                                       success);
+        if (!success[0]) {
+            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
+            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+        }
+        return usage[0];
+    }
 }
 

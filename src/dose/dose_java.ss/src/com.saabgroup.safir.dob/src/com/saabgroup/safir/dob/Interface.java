@@ -463,4 +463,9 @@ final class Interface {
     //dose_java_jni GetNodeId
     static native void GetNodeId(long[] nodeId,
                                  boolean[] success);
+
+    //dose_java_jni GetSharedMemoryUsage
+    static native void GetSharedMemoryUsage(long[] usage,
+                                            boolean[] success);
+
 }

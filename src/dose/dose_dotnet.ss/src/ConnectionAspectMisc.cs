@@ -1,6 +1,6 @@
 /* ****************************************************************************
 *
-* Copyright Saab AB, 2008-2013 (http://safirsdkcore.com)
+* Copyright Saab AB, 2008-2013, 2022 (http://safirsdkcore.com)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -37,12 +37,16 @@ namespace Safir.Dob
         public static int GetSafirInstance()
         {
             int instance = 0;
-            var env = System.Environment.GetEnvironmentVariable("SAFIR_INSTANCE");            
-            if (env != null && int.TryParse(env, out instance))
+            var env = System.Environment.GetEnvironmentVariable("SAFIR_INSTANCE");
+            if (env == null)
+            {
+                return 0;
+            }
+            if (int.TryParse(env, out instance))
             {
                 return instance;
             }
-            return 0;
+            throw new System.Exception("SAFIR_INSTANCE is not set to a number");
         }
 
         /// <summary>
@@ -229,6 +233,33 @@ namespace Safir.Dob
             {
                 Safir.Dob.Typesystem.LibraryExceptions.Instance.Throw();
             }
+        }
+
+        #endregion
+
+        #region Shared Memory statistics
+        
+        /// <summary>
+        /// Get the number of currently used bytes in the shared memory.
+        /// <para/>
+        /// The size of the shared memory is defined by the parameter
+        /// Safir.Dob.NodeParameters.SharedMemorySize, which is defined in megabytes (1024*1024 bytes).
+        /// <para/>
+        /// Calling this function does not require the underlying Connection to have been opened.
+        /// </summary>
+        /// <returns>The amount of shared memory used, in bytes.</returns>
+        public System.Int64 GetSharedMemoryUsage()
+        {
+            System.Int64 usage;
+            byte success;
+            Interface.DoseC_GetSharedMemoryUsage(out usage,
+                                                 out success);
+            if (!Interface.BoolOf(success))
+            {
+                Safir.Dob.Typesystem.LibraryExceptions.Instance.Throw();
+            }
+
+            return usage;
         }
 
         #endregion

@@ -1,8 +1,8 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2007-2013 (http://safirsdkcore.com)
+* Copyright Saab AB, 2022 (http://safirsdkcore.com)
 *
-* Created by: Anders Widén / stawi
+* Created by: Lars Hagström / lars@foldspace.nu
 *
 *******************************************************************************
 *
@@ -22,39 +22,19 @@
 *
 ******************************************************************************/
 
-#pragma once
+#define BOOST_TEST_MODULE GetSharedMemorySizeTest
+#include <boost/test/unit_test.hpp>
 
-#include <Safir/Dob/ConnectionBase.h>
-#include <Safir/Dob/DoseCppExportDefs.h>
+#include <Safir/Dob/Connection.h>
+#include <Safir/Dob/ConnectionAspectMisc.h>
 
-namespace Safir
+using namespace Safir::Dob;
+
+
+BOOST_AUTO_TEST_CASE( usage_test )
 {
-namespace Dob
-{
-    /**
-     * Base class for all aspects
-     */
-    class DOSE_CPP_API ConnectionAspectBase
-    {
-    protected:
-
-        /** 
-         * Constructor.
-         *
-         * @param [in] connection The connection to operate through.
-         */
-        ConnectionAspectBase(const ConnectionBase& connection):m_ctrl(connection.GetControllerId()) {}
-
-        /** Destructor.
-         */
-        virtual ~ConnectionAspectBase() {}
-
-        /** Get the id of the controller. */
-        long GetControllerId() const {return m_ctrl;}
-
-    private:
-        long m_ctrl;
-    };
+    Connection conn;
+    ConnectionAspectMisc misc(conn);
+    //expect at least 100 bytes allocated from the shared memory
+    BOOST_CHECK_GE(misc.GetSharedMemoryUsage(), 100);
 }
-}
-

@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2006-2013 (http://safirsdkcore.com)
+* Copyright Saab AB, 2006-2013, 2022 (http://safirsdkcore.com)
 * 
 * Created by: Henrik Sundberg / sthesu
 *
@@ -46,6 +46,17 @@ namespace dose_test_dotnet
             finally
             {
                 Safir.Application.CrashReporter.Stop();
+            }
+
+            System.Console.WriteLine("Performing extra checks");
+            {
+                //Check shared memory usage. And expect more than 100 bytes used.
+                var usage = new Safir.Dob.ConnectionAspectMisc(new Safir.Dob.Connection()).GetSharedMemoryUsage();;
+                if (usage < 100)
+                {
+                    System.Console.WriteLine("GetSharedMemoryUsage returned unexpected value.");
+                    return 1;
+                }
             }
 
             System.Console.WriteLine("Exiting");

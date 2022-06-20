@@ -1,7 +1,7 @@
 // -*- coding: utf-8 -*-
 /******************************************************************************
 *
-* Copyright Saab AB, 2006-2013 (http://safirsdkcore.com)
+* Copyright Saab AB, 2006-2013, 2022 (http://safirsdkcore.com)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -37,6 +37,17 @@ public class Program
         }
         catch (InterruptedException exc) {
         }
+
+            Logger.instance().println("Performing extra checks");
+            {
+                //Check shared memory usage. And expect more than 100 bytes used.
+                long usage = new com.saabgroup.safir.dob.ConnectionAspectMisc(new com.saabgroup.safir.dob.Connection()).getSharedMemoryUsage();;
+                if (usage < 100)
+                {
+                    Logger.instance().println("getSharedMemoryUsage returned unexpected value.");
+                    System.exit(1);
+                }
+            }
 
         Logger.instance().println("Exiting");
         //        System.exit(0);
