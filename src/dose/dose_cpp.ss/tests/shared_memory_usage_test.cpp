@@ -35,6 +35,6 @@ BOOST_AUTO_TEST_CASE( usage_test )
 {
     Connection conn;
     ConnectionAspectMisc misc(conn);
-    //expect at least 100 bytes allocated from the shared memory
-    BOOST_CHECK_GE(misc.GetSharedMemoryUsage(), 100);
+    //expect at least 50 bytes allocated from the shared memory
+    BOOST_CHECK_GE(misc.GetSharedMemoryUsage(), 50);
 }
