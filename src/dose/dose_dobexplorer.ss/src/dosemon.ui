@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>741</width>
-    <height>394</height>
+    <width>1184</width>
+    <height>682</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,75 +15,88 @@
   </property>
   <property name="windowIcon">
    <iconset>
-    <normaloff>dobexplorer.png</normaloff>dobexplorer.png</iconset>
+    <normaloff>../../../../../../.designer/backup/dobexplorer.png</normaloff>../../../../../../.designer/backup/dobexplorer.png</iconset>
   </property>
-  <layout class="QHBoxLayout">
+  <layout class="QHBoxLayout" name="horizontalLayout">
    <item>
     <widget class="QSplitter" name="splitter">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
-     <widget class="QTreeWidget" name="treeWidget">
-      <property name="rootIsDecorated">
-       <bool>true</bool>
-      </property>
-      <column>
-       <property name="text">
-        <string>Inspect</string>
-       </property>
-      </column>
-      <item>
-       <property name="text">
-        <string>About</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>Memory</string>
-       </property>
-       <property name="toolTip">
-        <string>Show shared memory statistics.</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>Connections</string>
-       </property>
-       <property name="toolTip">
-        <string>Show information about local Dob connections.</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>Entities</string>
-       </property>
-       <property name="toolTip">
-        <string>Show internal information about entities and their instances.</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>Entity Statistics</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>Remote Connections</string>
-       </property>
-       <property name="toolTip">
-        <string>Show information about Dob connections on other nodes.</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>System Picture</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>Raw Node Statistics</string>
-       </property>
-      </item>
+     <widget class="QWidget" name="verticalLayoutWidget">
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <item>
+        <widget class="QLineEdit" name="filterEdit">
+         <property name="clearButtonEnabled">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QTreeWidget" name="treeWidget">
+         <property name="rootIsDecorated">
+          <bool>true</bool>
+         </property>
+         <column>
+          <property name="text">
+           <string>Inspect</string>
+          </property>
+         </column>
+         <item>
+          <property name="text">
+           <string>About</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Memory</string>
+          </property>
+          <property name="toolTip">
+           <string>Show shared memory statistics.</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Connections</string>
+          </property>
+          <property name="toolTip">
+           <string>Show information about local Dob connections.</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Entities</string>
+          </property>
+          <property name="toolTip">
+           <string>Show internal information about entities and their instances.</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Entity Statistics</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Remote Connections</string>
+          </property>
+          <property name="toolTip">
+           <string>Show information about Dob connections on other nodes.</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>System Picture</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Raw Node Statistics</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+      </layout>
      </widget>
      <widget class="QTabWidget" name="tabWidget">
       <property name="layoutDirection">

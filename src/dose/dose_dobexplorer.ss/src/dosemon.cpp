@@ -88,6 +88,12 @@ DoseMon::DoseMon(QWidget * /*parent*/)
             this,
             SLOT(TreeItemActivated(QTreeWidgetItem*, int)));
 
+    // Too much lag if we just rely on the updateTimer for filtering.
+    connect(filterEdit,
+            SIGNAL(textChanged(const QString &)),
+            this,
+            SLOT(FilterChanged(const QString&)));
+
     connect(&m_updateTimer,SIGNAL(timeout()), this, SLOT(UpdateTreeWidget()));
     m_updateTimer.start(1000);
     UpdateTreeWidget();
@@ -301,6 +307,11 @@ void DoseMon::AddConnection(const Safir::Dob::Internal::Connection & connection,
     }
 }
 
+void DoseMon::FilterChanged(const QString &text)
+{
+    ApplyFilter(text, treeWidget->invisibleRootItem());    
+}
+
 void DoseMon::UpdateTreeWidget()
 {
     if (!m_doseInternalInitialized)
@@ -395,5 +406,47 @@ void DoseMon::UpdateTreeWidget()
 
     connectionItem->sortChildren(0, Qt::AscendingOrder);
     remoteConnectionItem->sortChildren(0, Qt::AscendingOrder);
+
+    ApplyFilter(filterEdit->text(), treeWidget->invisibleRootItem());
 }
 
+void DoseMon::ApplyFilter(const QString& filter, QTreeWidgetItem* item)
+{
+    static const QBrush defaultBackground;
+    item->setBackground(0, defaultBackground);
+    item->setHidden(false);
+    
+    // require at least 3 characters before filter is applied
+    if (filter.count() > 2)
+    {
+        auto filterHit = item->text(0).contains(filter, Qt::CaseInsensitive);
+        if (filterHit)
+        {
+            item->setBackground(0, Qt::yellow);
+            ExpandParents(item); // Make item visible in tree by expanding all parent nodes.
+        }
+        else
+        {
+            // hide leaves that are not filter hits
+            auto isLeaf = item->type() == EntityWidgetType || item->type() == ConnectionWidgetType;
+            item->setHidden(isLeaf);
+
+        }
+    }
+    
+    for (int i = 0; i < item->childCount(); i++)
+    {
+        QTreeWidgetItem *child = item->child(i);
+        ApplyFilter(filter, child);
+    }
+}
+
+void DoseMon::ExpandParents(QTreeWidgetItem *item)
+{
+    auto parent = item->parent();
+    while (parent != nullptr)
+    {
+        parent->setExpanded(true);
+        parent = parent->parent();
+    }
+}

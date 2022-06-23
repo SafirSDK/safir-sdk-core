@@ -55,6 +55,7 @@ Debug/
 Release/
 RelWithDebInfo/
 ipch/
+**/.vscode/
 
 
 #CTest / Unit test stuff

@@ -55,6 +55,7 @@ public slots:
 
     void CloseTab(int index);
     void UpdateTreeWidget();
+    void FilterChanged(const QString &text);
 
 private:
     void closeEvent(QCloseEvent* event) override;
@@ -63,6 +64,8 @@ private:
                        std::set<QString>& remoteConnectionNames);
     bool ActivateTab(const QString& name);
     void AddEntitesToTreeWidget();
+    void ApplyFilter(const QString& filter, QTreeWidgetItem* item);
+    void ExpandParents(QTreeWidgetItem* item);
 
     QTimer m_updateTimer;
     boost::thread m_doseInternalInitializer;
