@@ -229,43 +229,50 @@ namespace Sate
 
         private void listView_DoubleClick(object sender, EventArgs e)
         {
-            listView.SelectedItems[0].ImageIndex = 1;
-
-            if (listView.SelectedItems[0].Tag is MessageInfo)
+            if (listView.SelectedItems.Count == 0)
             {
-                var msgInfo = (MessageInfo) listView.SelectedItems[0].Tag;
+                return;
+            }
+
+            var item = listView.SelectedItems[0];
+            item.ImageIndex = 1;
+
+            if (item.Tag is MessageInfo)
+            {
+                var msgInfo = (MessageInfo) item.Tag;
                 MainForm.Instance.AddTabPage(new ObjectEditTabPage(msgInfo));
             }
-            else if (listView.SelectedItems[0].Tag is ServiceHandlerInfo)
+            else if (item.Tag is ServiceHandlerInfo)
             {
-                var srvInfo = (ServiceHandlerInfo) listView.SelectedItems[0].Tag;
+                var srvInfo = (ServiceHandlerInfo) item.Tag;
                 MainForm.Instance.AddTabPage(new ObjectEditTabPage(srvInfo));
             }
-            else if (listView.SelectedItems[0].Tag is ResponseInfo)
+            else if (item.Tag is ResponseInfo)
             {
-                var replyInfo = (ResponseInfo) listView.SelectedItems[0].Tag;
+                var replyInfo = (ResponseInfo) item.Tag;
                 MainForm.Instance.AddTabPage(new ObjectEditTabPage(replyInfo));
             }
-            else if (listView.SelectedItems[0].Tag is EntityInfo)
+            else if (item.Tag is EntityInfo)
             {
-                var entityInfo = (EntityInfo) listView.SelectedItems[0].Tag;
+                var entityInfo = (EntityInfo) item.Tag;
                 MainForm.Instance.AddTabPage(new ObjectEditTabPage(entityInfo));
             }
-            else if (listView.SelectedItems[0].Tag is Object)
+            else if (item.Tag is Object)
             {
-                var objInfo = (ObjectInfo) listView.SelectedItems[0].Tag;
+                var objInfo = (ObjectInfo) item.Tag;
                 MainForm.Instance.AddTabPage(new ObjectEditTabPage(objInfo));
             }
 #if STSYLI
-            else if (listView.SelectedItems[0].Tag is Safir.Dob.Typesystem.ObjectId)
+            else if (item.Tag is Safir.Dob.Typesystem.ObjectId)
             {
                 try
                 {
-                    MainForm.Instance.Dose.Read((Safir.Dob.Typesystem.ObjectId)listView.SelectedItems[0].Tag);
+                    MainForm.Instance.Dose.Read((Safir.Dob.Typesystem.ObjectId)item.Tag);
                 }
                 catch { }
             }
 #endif
+            
             // also invalidate children
             Invalidate(true);
         }

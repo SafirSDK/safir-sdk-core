@@ -121,6 +121,9 @@ namespace Sate
         private ToolStripMenuItem externalApplicationsToolStripMenuItem;
         private readonly Connection _dose = new Connection();
 
+        // Handle dispatch in the case the tempo is to high to keep up with and at the same time maintain a responsive GUI.
+        private System.Windows.Forms.Timer dispatchTimer = new System.Windows.Forms.Timer();
+        private ulong dispatchCounter = 0;
 
         private MainForm()
         {
@@ -128,6 +131,10 @@ namespace Sate
             // Required for Windows Form Designer support
             //
             InitializeComponent();
+
+            dispatchTimer.Interval = 150;
+            dispatchTimer.Tick += OnDispatchTimer;
+            dispatchTimer.Stop();
 
             fillPanelLabel.BackColor = SystemColors.Control;
             fillPanelLabel.ForeColor = Color.Black;
@@ -221,17 +228,35 @@ namespace Sate
 
         public void OnDoDispatch()
         {
+            dispatchCounter++;
             try
             {
-                if (!Settings.Sate.NoDispatch && !IsDisposed)
+                // if the dispatch timer is already running, wait for it to elapse and do nothing
+                if (!Settings.Sate.NoDispatch && !IsDisposed && !dispatchTimer.Enabled)
                 {
-                    // BeginInvoke will force a non-blocking thread switch!
-                    BeginInvoke(callDispatch);
+                    Invoke((MethodInvoker) delegate {dispatchTimer.Start();});
                 }
             }
             catch (ObjectDisposedException e)
             {
                 Console.WriteLine("Caught exception in Dispatch: " + e);
+            }
+        }
+
+        public void OnDispatchTimer(object myObject, EventArgs myEventArgs)
+        {
+            var prevCount = dispatchCounter;
+            if (!Settings.Sate.NoDispatch && !IsDisposed)
+            {
+                Dose.Dispatch();
+            }
+
+            dispatchTimer.Stop();
+            if (prevCount < dispatchCounter)
+            {
+                // If we get here, dispatchThread has made a callback while the timer was already running. In that case we restart timer.
+                // If dispatchThread already started the timer again after the Stop above, then this call to Start has no effect.
+                dispatchTimer.Start();
             }
         }
 
@@ -330,6 +355,7 @@ namespace Sate
 
         public void OnStopOrder()
         {
+            dispatchTimer.Stop();
             OutputPanel.Instance.LogEvent("- Received stop order, disconnecting...", true);
             System.Windows.Forms.Application.Exit();
         }
@@ -340,6 +366,7 @@ namespace Sate
 
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
+            dispatchTimer.Stop();
             base.OnFormClosing(e);
             if (IsConnected)
             {
@@ -1121,6 +1148,8 @@ namespace Sate
             {
                 ExplorerPanel.Instance.SubscribeRegistration(id);
             }
+
+            // dispatchTimer.Start(); // we do an automatic dispatch every 2 second
         }
 
         //-------------------------------------------------
