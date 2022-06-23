@@ -1,4 +1,46 @@
 -----------------------------------------------------------------------------------------------------------------------
+2022-06-23 version 7.0.0
+-----------------------------------------------------------------------------------------------------------------------
+
+This releases major change is to remove all link dependencies on Boost in the public
+interfaces. For example all uses of boost::shared_ptr have been replaced with
+std::shared_ptr, and instead of boost::once we use std::once. In a few places the
+interfaces still use boost functionality, but those uses are only in the header parts of
+the interfaces. What this means is that you as a user of Safir SDK Core can use whatever
+reasonably recent version of Boost you like, regardless of what version is used
+internally in Core. You are no longer forced to use the version we use or provide.
+
+Other than that this release contains some updates to the debugging tools, Sate and
+Dobexplorer, as well as a new tool safir_tool_launcher:
+ * Sate - Tree views have a filter function, and a new menu choice to find the same item
+   in the "other" tree view.
+ * Some improvements in Sate performance
+ * Dobexplorer tree view has a filter function, and the entities are sorted in the tree
+   view.
+ * safir_tool_launcher - a simple tool for launching Sate or Dobexplorer against custom
+   SAFIR_INSTANCE values.
+ * Both Dobexplorer and Sate now display what SAFIR_INSTANCE they are using.
+
+Here is a complete list of issues fixed by this release (see http://safirsdkcore.com for details):
+
+#370 Remove Boost from all public shared library interfaces
+#377 Create a Debug Tool Launcher, with options for setting SAFIR_INSTANCE in the ui
+#375 Make it easier to find things in the tree in dobexplorer
+#379 Improve SATE tree view
+#374 Improve SATE performance
+#384 Display current SAFIR_INSTANCE in Dobexplorer
+#383 Display current SAFIR_INSTANCE in Sate
+#388 Add an API for getting shared memory usage data
+#387 Make AceDispatcher not use Atomic.h, which will be moved soon
+#386 Dobexplorer entities are not sorted correctly
+#385 Not possible to exit Sate when launched against unused SAFIR_INSTANCE
+#382 Split lluf_utils dll into one public and one internal dll
+#381 Mark DynamicLibraryLoader as deprecated
+#380 Remove StartupSynchronizer from our public interfaces
+#373 Create Ubuntu 22.04 builds
+#360 Communication does not like being single threaded, like in safir_control bug
+
+-----------------------------------------------------------------------------------------------------------------------
 2022-05-19 version 6.4.0
 -----------------------------------------------------------------------------------------------------------------------
 
