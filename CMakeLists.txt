@@ -213,6 +213,7 @@ set(ignore_me
   "Some of our build methods pass along extra variables to cmake, which causes warnings."
   "Add them below to get rid of the warning."
   ${CMAKE_EXPORT_NO_PACKAGE_REGISTRY}
+  ${CMAKE_FIND_PACKAGE_NO_PACKAGE_REGISTRY}
   ${CMAKE_INSTALL_LIBDIR}
   ${CMAKE_INSTALL_LOCALSTATEDIR}
   ${CMAKE_INSTALL_SYSCONFDIR}
