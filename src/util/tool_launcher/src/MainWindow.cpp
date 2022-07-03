@@ -37,7 +37,6 @@
 
 #include "ui_MainWindow.h"
 #include <QPushButton>
-#include <QProcess>
 #include <QTimer>
 #include <QShortcut>
 #include <QScrollBar>
