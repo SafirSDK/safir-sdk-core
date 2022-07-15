@@ -744,17 +744,23 @@ class VisualStudioBuilder(BuilderBase):
         self.__run_conan_install()
 
         #we also need to put the java 32 bit vm first in the path, if we're running an x86 build
-        if self.arguments.arch == "x86":
+        dont_build_java = os.getenv("SAFIR_DONT_BUILD_JAVA", 'False').lower() in ('true', '1', 't')
+        if not dont_build_java and self.arguments.arch == "x86":
             for path in os.environ["PATH"].split(";"):
                 candidate = os.path.join(path,"java.exe")
                 if os.path.exists(candidate):
-                    res = subprocess.check_output((candidate,"-XshowSettings:properties","-version"),
-                                                  stderr=subprocess.STDOUT).decode(encoding="mbcs",
-                                                                                   errors="replace").strip()
-                    if "sun.arch.data.model = 32" in res:
-                        LOGGER.log("Will add '" + path + "' to beginning of PATH", "detail")
-                        os.environ["PATH"] = path + ";" + os.environ["PATH"]
-                        break
+                    try:
+                        res = subprocess.check_output((candidate,"-XshowSettings:properties","-version"),
+                                                      stderr=subprocess.STDOUT).decode(encoding="mbcs",
+                                                                                       errors="replace").strip()
+                        if "sun.arch.data.model = 32" in res:
+                            LOGGER.log("Will add '" + path + "' to beginning of PATH", "detail")
+                            os.environ["PATH"] = path + ";" + os.environ["PATH"]
+                            break
+                    except subprocess.SubprocessError as e:
+                        LOGGER.log("Failed to check whether JDK os 32 or 64 bit, Java part of the build may not " +
+                                   "work. Consider setting environment variable SAFIR_DONT_BUILD_JAVA to 1 to " +
+                                   "avoid building java interfaces altogether.")
     def __run_conan_install(self):
         """There is something that makes the conan step in cmake not work when not run
            explicitly like this before build. On Windows, of course..."""
