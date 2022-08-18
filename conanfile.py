@@ -19,6 +19,7 @@ class SafirSdkCoreConan(ConanFile):
                        "boost:error_code_header_only":True,
                        "boost:system_no_deprecated":True,
                        "boost:filesystem_no_deprecated":True,
+                       "boost:filesystem_version":3,
                        "boost:magic_autolink":False,
                        "boost:without_wave": True,
                        "boost:without_fiber": True,
