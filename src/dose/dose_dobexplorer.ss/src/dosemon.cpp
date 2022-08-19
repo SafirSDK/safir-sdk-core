@@ -221,7 +221,7 @@ void DoseMon::CloseTab(int index)
 }
 
 
-void DoseMon::AddEntitesToTreeWidget()
+void DoseMon::AddEntitiesToTreeWidget()
 {
     if (!m_doseInternalInitialized || m_entitiesAdded)
     {
@@ -320,7 +320,7 @@ void DoseMon::UpdateTreeWidget()
     }
 
 
-    AddEntitesToTreeWidget();
+    AddEntitiesToTreeWidget();
 
     using namespace Safir::Dob::Internal;
 

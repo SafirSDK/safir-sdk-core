@@ -63,7 +63,7 @@ private:
                        std::set<QString>& localConnectionNames,
                        std::set<QString>& remoteConnectionNames);
     bool ActivateTab(const QString& name);
-    void AddEntitesToTreeWidget();
+    void AddEntitiesToTreeWidget();
     void ApplyFilter(const QString& filter, QTreeWidgetItem* item);
     void ExpandParents(QTreeWidgetItem* item);
 
