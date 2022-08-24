@@ -447,6 +447,7 @@ void DoseMon::ExpandParents(QTreeWidgetItem *item)
     while (parent != nullptr)
     {
         parent->setExpanded(true);
+        parent->setHidden(false);
         parent = parent->parent();
     }
 }
