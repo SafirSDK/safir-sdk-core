@@ -11,6 +11,7 @@ find_package(Boost
   COMPONENTS
   regex
   timer
+  date_time
   program_options
   filesystem
   thread
@@ -51,9 +52,6 @@ ADD_DEFINITIONS(-DBOOST_ERROR_CODE_HEADER_ONLY)
 #use Boost.Chrono v2
 ADD_DEFINITIONS(-DBOOST_CHRONO_VERSION=2)
 
-#Make sure we only use the header-only part of Boost.DateTime
-ADD_DEFINITIONS(-DBOOST_DATE_TIME_NO_LIB)
-
 #The xml parsing uses Boost.Spirit, which we may be using from
 #multiple threads at the same time
 ADD_DEFINITIONS(-DBOOST_SPIRIT_THREADSAFE)
@@ -65,8 +63,7 @@ set(CMAKE_REQUIRED_DEFINITIONS
   -DBOOST_SYSTEM_NO_DEPRECATED
   -DBOOST_ASIO_DISABLE_STD_CHRONO
   -DBOOST_THREAD_DONT_USE_DATETIME
-  -DBOOST_CHRONO_HEADER_ONLY
-  -DBOOST_DATE_TIME_NO_LIB)
+  -DBOOST_CHRONO_HEADER_ONLY)
 
 if (UNIX)
   LIST(APPEND CMAKE_REQUIRED_DEFINITIONS -DBOOST_ALL_DYN_LINK)
