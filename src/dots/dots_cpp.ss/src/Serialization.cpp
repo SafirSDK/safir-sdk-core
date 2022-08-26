@@ -1,7 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2006-2013 (http://safirsdkcore.com)
-* 
+*
 * Created by: Lars Hagström / stlrha
 *
 *******************************************************************************
@@ -21,7 +21,6 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-
 #include <Safir/Dob/Typesystem/Serialization.h>
 #include <Safir/Dob/Typesystem/Operations.h>
 #include <Safir/Dob/Typesystem/Utilities.h>
@@ -37,9 +36,9 @@ namespace Safir
 namespace Dob
 {
 namespace Typesystem
-{   
+{
     const std::wstring
-    Serialization::ToXml(const Dob::Typesystem::ObjectPtr object)
+    Serialization::ToXml(const Dob::Typesystem::ObjectConstPtr& object)
     {
         if (object == NULL)
         {
@@ -52,7 +51,7 @@ namespace Typesystem
     }
 
     const std::wstring
-    Serialization::ToJson(const Dob::Typesystem::ObjectPtr object)
+    Serialization::ToJson(const Dob::Typesystem::ObjectConstPtr& object)
     {
         if (object == NULL)
         {
@@ -64,20 +63,20 @@ namespace Typesystem
         return ToJson(bin);
     }
 
-    const std::wstring 
-    Serialization::ToXml(const BinarySerialization & bin)
+    const std::wstring
+    Serialization::ToXml(const BinarySerialization& bin)
     {
         return ToXml(&bin[0]);
     }
 
     const std::wstring
-    Serialization::ToJson(const BinarySerialization & bin)
+    Serialization::ToJson(const BinarySerialization& bin)
     {
         return ToJson(&bin[0]);
     }
 
 
-    const std::wstring 
+    const std::wstring
     Serialization::ToXml(const char * const blob)
     {
         int BUF_SIZE = 100000;
@@ -119,12 +118,12 @@ namespace Typesystem
                                                 json8.begin() + resultSize - 1)); //remove null.
     }
 
-    Dob::Typesystem::ObjectPtr 
-    Serialization::ToObject(const std::wstring & xml)
+    Dob::Typesystem::ObjectPtr
+    Serialization::ToObject(const std::wstring& xml)
     {
         char * blob;
         std::string xml8 = Utilities::ToUtf8(xml);
-        
+
         std::vector<char> xml8v(xml8.size() +1);
         xml8v.assign(xml8.begin(),xml8.end());
         xml8v.push_back(0); //null termination
@@ -140,7 +139,7 @@ namespace Typesystem
     }
 
     Dob::Typesystem::ObjectPtr
-    Serialization::ToObjectFromJson(const std::wstring & json)
+    Serialization::ToObjectFromJson(const std::wstring& json)
     {
         char * blob;
         std::string json8 = Utilities::ToUtf8(json);
@@ -159,8 +158,8 @@ namespace Typesystem
         return p;
     }
 
-    void 
-    Serialization::ToBinary(const Dob::Typesystem::ObjectPtr object, BinarySerialization & binary)
+    void
+    Serialization::ToBinary(const Dob::Typesystem::ObjectConstPtr& object, BinarySerialization& binary)
     {
         if (object == NULL)
         {
@@ -176,8 +175,8 @@ namespace Typesystem
         DotsC_DeleteBlobWriter(handle);
     }
 
-    Dob::Typesystem::ObjectPtr 
-    Serialization::ToObject(const BinarySerialization & data)
+    Dob::Typesystem::ObjectPtr
+    Serialization::ToObject(const BinarySerialization& data)
     {
         return ObjectFactory::Instance().CreateObject(&data[0]);
     }
@@ -185,5 +184,3 @@ namespace Typesystem
 }
 }
 }
-
-

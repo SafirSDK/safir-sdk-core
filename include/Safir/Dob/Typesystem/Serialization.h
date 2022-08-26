@@ -40,6 +40,7 @@ namespace Typesystem
 
     /** A smart pointer to an Object. */
     typedef std::shared_ptr<Object> ObjectPtr;
+    typedef std::shared_ptr<const Object> ObjectConstPtr;
 
     /**
     * Functions for serializing objects to binary, XML and JSON forms.
@@ -54,7 +55,7 @@ namespace Typesystem
          * @return The xml serialization
          * @exception IllegalValueException - There is something wrong with the object.
          */
-        static const std::wstring ToXml(const Dob::Typesystem::ObjectPtr object);
+        static const std::wstring ToXml(const Dob::Typesystem::ObjectConstPtr& object);
 
         /**
          * Serialize an object to JSON.
@@ -63,7 +64,7 @@ namespace Typesystem
          * @return The json serialization
          * @exception IllegalValueException - There is something wrong with the object.
          */
-        static const std::wstring ToJson(const Dob::Typesystem::ObjectPtr object);
+        static const std::wstring ToJson(const Dob::Typesystem::ObjectConstPtr& object);
 
         /**
          * Deserialize an XML serialization.
@@ -77,7 +78,7 @@ namespace Typesystem
          *                                  represented by the serialization isn't found
          *                                  in the ObjectFactory.
          */
-        static Dob::Typesystem::ObjectPtr ToObject(const std::wstring & xml);
+        static Dob::Typesystem::ObjectPtr ToObject(const std::wstring& xml);
 
         /**
          * Deserialize an JSON serialization.
@@ -91,7 +92,7 @@ namespace Typesystem
          *                                  represented by the serialization isn't found
          *                                  in the ObjectFactory.
          */
-        static Dob::Typesystem::ObjectPtr ToObjectFromJson(const std::wstring & json);
+        static Dob::Typesystem::ObjectPtr ToObjectFromJson(const std::wstring& json);
 
         /**
          * Convert a binary serialization to XML.
@@ -99,7 +100,7 @@ namespace Typesystem
          * @param [in] bin - the binary serialization to convert to xml.
          * @return The xml of the binary serialization.
          */
-        static const std::wstring ToXml(const BinarySerialization & bin);
+        static const std::wstring ToXml(const BinarySerialization& bin);
 
         /**
          * Convert a binary serialization to JSON.
@@ -107,7 +108,7 @@ namespace Typesystem
          * @param [in] bin - the binary serialization to convert to json.
          * @return The json of the binary serialization.
          */
-        static const std::wstring ToJson(const BinarySerialization & bin);
+        static const std::wstring ToJson(const BinarySerialization& bin);
 
         /**
          * Convert a blob to XML.
@@ -130,13 +131,13 @@ namespace Typesystem
          *
          * The serialization is put into a variable of type BinarySerialization, which
          * is of type std::vector<char>. If you need to get hold of a "raw" C-pointer to the data
-         * use &binary[0]. See Effective STL Item 16 for more info.
+         * use&binary[0]. See Effective STL Item 16 for more info.
          *
          * @param [in] object - The object to serialize
          * @param [out] binary - The destination of the serialization
          * @exception IllegalValueException - There is something wrong with the object.
          */
-        static void ToBinary(const Dob::Typesystem::ObjectPtr object, Dob::Typesystem::BinarySerialization & binary);
+        static void ToBinary(const Dob::Typesystem::ObjectConstPtr& object, Dob::Typesystem::BinarySerialization& binary);
 
 
         /**
@@ -151,7 +152,7 @@ namespace Typesystem
          * @exception IllegalValueException If the type represented by the serialization isn't found
          *                                   in the ObjectFactory.
          */
-        static Dob::Typesystem::ObjectPtr ToObject(const Dob::Typesystem::BinarySerialization & binary);
+        static Dob::Typesystem::ObjectPtr ToObject(const Dob::Typesystem::BinarySerialization& binary);
 
     };
 }
