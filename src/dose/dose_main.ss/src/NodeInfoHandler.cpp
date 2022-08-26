@@ -85,7 +85,7 @@ namespace Internal
                                                 const Safir::Dob::Typesystem::HandlerId& /*handlerId*/)
     {
         SEND_SYSTEM_LOG(Error,
-                        << "Someone overregistered Safir::Dob::NodeStatus, so I'm not "
+                        << "Someone overregistered Safir::Dob::NodeInfo, so I'm not "
                         << "going to be able to update this entity any longer!");
     }
 
@@ -95,7 +95,7 @@ namespace Internal
     {
         responseSender->Send(Safir::Dob::ErrorResponse::CreateErrorResponse
                              (Safir::Dob::ResponseGeneralErrorCodes::SafirReqErr(),
-             L"It is not possible to send create requests on Safir::Dob::NodeStatus"));
+             L"It is not possible to send create requests on Safir::Dob::NodeInfo"));
     }
 
     void NodeInfoHandler::OnUpdateRequest(const Safir::Dob::EntityRequestProxy /*entityRequestProxy*/,
@@ -103,7 +103,7 @@ namespace Internal
     {
         responseSender->Send(Safir::Dob::ErrorResponse::CreateErrorResponse
                              (Safir::Dob::ResponseGeneralErrorCodes::SafirReqErr(),
-                              L"It is not possible to send update requests on Safir::Dob::NodeStatus"));
+                              L"It is not possible to send update requests on Safir::Dob::NodeInfo"));
     }
 
     void NodeInfoHandler::OnDeleteRequest(const Safir::Dob::EntityRequestProxy /*entityRequestProxy*/,
@@ -111,7 +111,7 @@ namespace Internal
     {
         responseSender->Send(Safir::Dob::ErrorResponse::CreateErrorResponse
                              (Safir::Dob::ResponseGeneralErrorCodes::SafirReqErr(),
-                              L"It is not possible to send delete requests on Safir::Dob::NodeStatus"));
+                              L"It is not possible to send delete requests on Safir::Dob::NodeInfo"));
     }
 }
 }
