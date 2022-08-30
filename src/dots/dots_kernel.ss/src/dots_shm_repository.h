@@ -367,25 +367,25 @@ namespace Internal
         }
 
         //keys
-        virtual const char* GetStringKey(int index) const
+        const char* GetStringKey(int index) const
         {
             return m_values[static_cast<size_t>(index)].stringKey.c_str();
         }
-        virtual DotsC_Int32 GetInt32Key(int index) const
+        DotsC_Int32 GetInt32Key(int index) const
         {
             return m_values[static_cast<size_t>(index)].key.int32;
         }
-        virtual DotsC_Int64 GetInt64Key(int index) const
+        DotsC_Int64 GetInt64Key(int index) const
         {
             return m_values[static_cast<size_t>(index)].key.int64;
         }
-        virtual std::pair<DotsC_Int64, const char*> GetHashedKey(int index) const
+        std::pair<DotsC_Int64, const char*> GetHashedKey(int index) const
         {
             const ValueDefinitionShm& v=m_values[static_cast<size_t>(index)];
             return std::make_pair(v.key.hash, v.stringKey.empty() ? NULL : v.stringKey.c_str());
         }
 
-        virtual int GetIndexByUnifiedKey(DotsC_Int64 unifiedKey) const
+        int GetIndexByUnifiedKey(DotsC_Int64 unifiedKey) const
         {
             MapShm<int>::Type::const_iterator it=m_unifiedKeyToIndex.find(unifiedKey);
             if (it!=m_unifiedKeyToIndex.end())

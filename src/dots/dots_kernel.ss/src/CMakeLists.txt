@@ -2,7 +2,15 @@
 #so we never want the "d" suffix on debug builds, which is default on windows.
 SET(CMAKE_DEBUG_POSTFIX "")
 
-FILE(GLOB sources *.cpp)
+SET(sources 
+dots_exception_keeper.h
+dots_init_helper.h
+dots_repository_keeper.h
+dots_shm_repository.h
+dots_exception_keeper.cpp
+dots_kernel.cpp
+dots_repository_keeper.cpp
+dots_shm_repository.cpp)
 
 ADD_LIBRARY(dots_kernel SHARED ${sources})
 
