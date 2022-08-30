@@ -3,7 +3,7 @@
   <Description xml:space="preserve">Inject update and inject delete for an existing entity</Description>
   <Expectation xml:space="preserve">partner 0/consumer 0 receives one OnInitialInjectionsDone, one OnInjectedNewEntity, one OnInjectedUpdatedEntity and one OnInjectedDeletedEntity. P1 and P2 reads the entity before and after each injection.</Expectation>
   <TestCaseSetupActions>
-    <DoseTest.Action index="0">
+    <DoseTest.Action>
       <ActionKind>RegisterEntityHandlerInjection</ActionKind>
       <Partner>0</Partner>
       <Consumer>0</Consumer>
@@ -13,7 +13,7 @@
     </DoseTest.Action>
   </TestCaseSetupActions>
   <TestActions>
-    <DoseTest.Action index="0">
+    <DoseTest.Action>
       <ActionKind>InjectChanges</ActionKind>
       <Partner>1</Partner>
       <Consumer>1</Consumer>
@@ -24,7 +24,11 @@
       </Object>
       <TimestampDelta>10</TimestampDelta>
     </DoseTest.Action>
-    <DoseTest.Action index="1">
+    <DoseTest.Action>
+      <ActionKind>Sleep</ActionKind>
+      <SleepDuration>1</SleepDuration>
+    </DoseTest.Action>
+    <DoseTest.Action>
       <ActionKind>Read</ActionKind>
       <Partner>1</Partner>
       <Consumer>0</Consumer>
@@ -33,7 +37,7 @@
         <instanceId>654321</instanceId>
       </EntityId>
     </DoseTest.Action>
-    <DoseTest.Action index="2">
+    <DoseTest.Action>
       <ActionKind>Read</ActionKind>
       <Partner>2</Partner>
       <Consumer>0</Consumer>
@@ -42,7 +46,7 @@
         <instanceId>654321</instanceId>
       </EntityId>
     </DoseTest.Action>
-    <DoseTest.Action index="3">
+    <DoseTest.Action>
       <ActionKind>InjectChanges</ActionKind>
       <Partner>1</Partner>
       <Consumer>1</Consumer>
@@ -53,7 +57,11 @@
       </Object>
       <TimestampDelta>20</TimestampDelta>
     </DoseTest.Action>
-    <DoseTest.Action index="4">
+    <DoseTest.Action>
+      <ActionKind>Sleep</ActionKind>
+      <SleepDuration>1</SleepDuration>
+    </DoseTest.Action>
+    <DoseTest.Action>
       <ActionKind>Read</ActionKind>
       <Partner>1</Partner>
       <Consumer>0</Consumer>
@@ -62,7 +70,7 @@
         <instanceId>654321</instanceId>
       </EntityId>
     </DoseTest.Action>
-    <DoseTest.Action index="5">
+    <DoseTest.Action>
       <ActionKind>Read</ActionKind>
       <Partner>2</Partner>
       <Consumer>0</Consumer>
@@ -71,7 +79,7 @@
         <instanceId>654321</instanceId>
       </EntityId>
     </DoseTest.Action>
-    <DoseTest.Action index="6">
+    <DoseTest.Action>
       <ActionKind>InjectDelete</ActionKind>
       <Partner>1</Partner>
       <Consumer>1</Consumer>
@@ -82,7 +90,11 @@
       </EntityId>
       <TimestampDelta>30</TimestampDelta>
     </DoseTest.Action>
-    <DoseTest.Action index="7">
+    <DoseTest.Action>
+      <ActionKind>Sleep</ActionKind>
+      <SleepDuration>1</SleepDuration>
+    </DoseTest.Action>
+    <DoseTest.Action>
       <ActionKind>Read</ActionKind>
       <Partner>1</Partner>
       <Consumer>0</Consumer>
@@ -91,7 +103,7 @@
         <instanceId>654321</instanceId>
       </EntityId>
     </DoseTest.Action>
-    <DoseTest.Action index="8">
+    <DoseTest.Action>
       <ActionKind>Read</ActionKind>
       <Partner>2</Partner>
       <Consumer>0</Consumer>
