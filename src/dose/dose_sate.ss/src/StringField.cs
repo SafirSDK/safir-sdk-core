@@ -9,8 +9,9 @@ namespace Sate
 
         public StringField(ObjectInfo objInfo, int member, string name, CollectionType ct, int arraySize, int maxLength)
         {
+            Tag = objInfo;
             this.maxLength = maxLength;
-            Init(objInfo, member, "String", name, ct, arraySize);
+            Init(member, "String", name, ct, arraySize);
         }
 
         protected override Control CreateValueControl()
@@ -131,12 +132,11 @@ namespace Sate
             else if (collectionType == CollectionType.SequenceCollectionType)
             {
                 SetSequenceChanged(false);
-                var tmp = (ObjectInfo) Tag;
-                var cont = (StringSequenceContainer) tmp.Obj.GetMember(member, 0);
+                var cont = (StringSequenceContainer) ObjInfo.Obj.GetMember(member, 0);
 
                 if (cont.Count != fieldValueControl.Count)
                 {
-                    Init(tmp, member, typeName, memberName, collectionType, 1);
+                    Init(member, typeName, memberName, collectionType, 1);
                     parentObjectEditPanel.ExpandCollapse(member);
                     SetSequenceChanged(true);
                     return;

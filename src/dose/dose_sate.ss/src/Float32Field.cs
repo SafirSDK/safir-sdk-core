@@ -123,12 +123,11 @@ namespace Sate
             else if (collectionType == CollectionType.SequenceCollectionType)
             {
                 SetSequenceChanged(false);
-                var tmp = (ObjectInfo) Tag;
-                var cont = (Float32SequenceContainer) tmp.Obj.GetMember(member, 0);
+                var cont = (Float32SequenceContainer) ObjInfo.Obj.GetMember(member, 0);
 
                 if (cont.Count != fieldValueControl.Count)
                 {
-                    Init(tmp, member, typeName, memberName, collectionType, 1);
+                    Init(member, typeName, memberName, collectionType, 1);
                     parentObjectEditPanel.ExpandCollapse(member);
                     SetSequenceChanged(true);
                     return;

@@ -10,6 +10,7 @@ namespace Sate
 
         public EnumField(ObjectInfo objInfo, int member, long enumTypeId, string name, CollectionType ct, int arraySize)
         {
+            Tag = objInfo;
             var noEnumValues = Operations.GetNumberOfEnumerationValues(enumTypeId);
             enumValueNames = new string[noEnumValues];
             for (var ev = 0; ev < noEnumValues; ev++)
@@ -18,7 +19,7 @@ namespace Sate
             }
 
             var enumName = Operations.GetName(enumTypeId);
-            Init(objInfo, member, enumName, name, ct, arraySize);
+            Init(member, enumName, name, ct, arraySize);
         }
 
         protected override Control CreateValueControl()
@@ -151,13 +152,12 @@ namespace Sate
             {
                 SetSequenceChanged(false);
 
-                var tmp = (ObjectInfo) Tag;
-                var container = tmp.Obj.GetMember(member, 0);
+                var container = ObjInfo.Obj.GetMember(member, 0);
                 var containerType = container.GetType();
 
                 if ((int) containerType.GetProperty("Count").GetValue(container, null) != fieldValueControl.Count)
                 {
-                    Init(tmp, member, typeName, memberName, collectionType, 1);
+                    Init(member, typeName, memberName, collectionType, 1);
                     parentObjectEditPanel.ExpandCollapse(member);
                     SetSequenceChanged(true);
                     return;

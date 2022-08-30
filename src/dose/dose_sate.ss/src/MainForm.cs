@@ -879,7 +879,7 @@ namespace Sate
             this.calculatorsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.typeIdToolStripMenuItem,
             this.timestampToolStripMenuItem});
-            this.calculatorsToolStripMenuItem.Image = global::Sate.Resources.TYPEIDCALC;
+            // this.calculatorsToolStripMenuItem.Image = global::Sate.Resources.TYPEIDCALC;
             this.calculatorsToolStripMenuItem.Name = "calculatorsToolStripMenuItem";
             this.calculatorsToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
             this.calculatorsToolStripMenuItem.Text = "Calculators";
@@ -962,7 +962,7 @@ namespace Sate
             // 
             // aboutSATEToolStripMenuItem
             // 
-            this.aboutSATEToolStripMenuItem.Image = global::Sate.Resources.sate_logo;
+            // this.aboutSATEToolStripMenuItem.Image = global::Sate.Resources.sate_logo;
             this.aboutSATEToolStripMenuItem.Name = "aboutSATEToolStripMenuItem";
             this.aboutSATEToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
             this.aboutSATEToolStripMenuItem.Text = "About SATE...";
