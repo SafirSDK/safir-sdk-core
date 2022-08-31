@@ -357,6 +357,16 @@ def parse_dou(gSession, dou_xmlfile):
             if is_dict is not None:
                 m_dictionary = is_dict.attrib["keyType"]
 
+                if not (m_dictionary in gSession.dod_types):
+                    # This is a dou defined object
+                    uniform_type = dou_uniform_lookup(gSession, m_dictionary)
+                    gSession.dod_types[m_dictionary] = DodType(m_dictionary, m_dictionary, uniform_type, type_formatter(gSession, m_dictionary),
+                                                        dependency_formatter(gSession, m_dictionary), "asdfasdf")
+
+                    parsed.unique_dependencies.append(dependency_formatter(gSession, m_dictionary))
+                elif len(gSession.dod_types[m_dictionary].dependency) > 0:
+                    parsed.unique_dependencies.append(gSession.dod_types[m_dictionary].dependency)
+
             parsed.members.append( DouMember( summary_formatter(readTextPropery(m, "summary")), \
                                         m_name, \
                                         m_type, \
