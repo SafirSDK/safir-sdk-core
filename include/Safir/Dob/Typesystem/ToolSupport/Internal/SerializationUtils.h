@@ -100,6 +100,12 @@ namespace SerializationUtils
         return boost::trim_copy_if(s, boost::is_any_of("\r\n\t "));
     }
 
+    inline std::vector<std::string> Split(const std::string& s)
+    {
+        std::vector<std::string> tokens;
+        return boost::split(tokens, s, boost::is_any_of("\r\n\t "));
+    }
+
     inline std::string ExpandEnvironmentVariables(const std::string& str)
     {
         std::string result = Safir::Utilities::Internal::Expansion::ExpandSpecial(str);
@@ -416,7 +422,7 @@ namespace SerializationUtils
                                 DotsC_MemberIndex memIx,
                                 DotsC_Int32 arrIx,
                                 const std::string& parameterName,
-                                int parameterIndex,
+                                const std::string& parameterKey,
                                 const KeyT& key,
                                 WriterT& writer)
     {
@@ -429,6 +435,121 @@ namespace SerializationUtils
             std::ostringstream os;
             os<<"The parameter '"<<parameterName<<"' does not exist. Specified as valueRef in member "<<md->GetName();
             throw ParseError("Serialization error", os.str(), "", 120);
+        }
+
+        int parameterIndex = 0;
+        if (param->GetCollectionType() == DictionaryCollectionType)
+        {
+            if (parameterKey.empty())
+            {
+                std::ostringstream os;
+                os<<"The parameter '"<<parameterName<<"' is a dictionary but no key is provided. Use attribute valueRefIndex to specify the key. Specified as valueRef in member "<<md->GetName();
+                throw ParseError("Serialization error", os.str(), "", 1200);
+            }
+            /*
+            TODO:
+            Hantera keyTypes
+            Testfall för alla keyTypes
+            Testa genererad kod med olika typer
+            Hantera när GetIndexByUnifiedKey ej hittar nyckel
+            */
+
+            const auto keyType = param->GetKeyType();
+            DotsC_Int64 unifiedKey = -1;
+            switch (keyType)
+            {
+            case Int32MemberType:
+            case Int64MemberType:
+            {
+                try
+                {
+                    unifiedKey = TypeUtilities::ToUnifiedDictionaryKey(boost::lexical_cast<DotsC_Int64>(parameterKey));
+                }
+                catch (const boost::bad_lexical_cast&)
+                {
+                    std::ostringstream os;
+                    os<<"The specified key '" << parameterKey << "' for parameter " << parameterName << " can not be interpreted as keyType " << BasicTypeOperations::MemberTypeToString(keyType) << ". Specified as valueRef in member " << md->GetName();
+                    throw ParseError("Serialization error", os.str(), "", 1200);
+                }
+            }
+                break;
+
+            case InstanceIdMemberType:
+            case ChannelIdMemberType:
+            case HandlerIdMemberType:
+            {
+                const auto hash = StringToHash(parameterKey);
+                unifiedKey = TypeUtilities::ToUnifiedDictionaryKey(hash.first);
+            }
+                break;
+
+            case TypeIdMemberType:
+            {
+                const auto typeId = StringToTypeId(parameterKey);
+                unifiedKey = TypeUtilities::ToUnifiedDictionaryKey(typeId);
+            }
+                break;
+
+            case EntityIdMemberType:
+            {
+                const auto tokens = Split(parameterKey);
+                if (tokens.size() != 2)
+                {
+                    std::ostringstream os;
+                    os<<"The specified key '" << parameterKey << "' for parameter " << parameterName << " can not be interpreted as an EntityId on the form  valueRefIndex=\"TypeId InstanceId\". Specified as valueRef in member " << md->GetName();
+                    throw ParseError("Serialization error", os.str(), "", 1200);
+                }
+
+                const auto eid = StringToEntityId(tokens[0], tokens[1]);
+                unifiedKey = TypeUtilities::ToUnifiedDictionaryKey(eid.first);
+            }
+                break;
+
+            case EnumerationMemberType:
+            {
+                const typename WriterT::EnumDescriptionType* ed = repository->GetEnum(param->GetKeyTypeId());
+                DotsC_EnumerationValue enumVal = TypeUtilities::GetIndexOfEnumValue(ed, parameterKey);
+                unifiedKey = TypeUtilities::ToUnifiedDictionaryKey(enumVal);
+            }
+                break;
+
+            default: // string key type
+            {
+                unifiedKey = TypeUtilities::ToUnifiedDictionaryKey(parameterKey);
+            }
+                break;            
+            }
+
+            parameterIndex = param->GetIndexByUnifiedKey(unifiedKey);
+
+            if (parameterIndex < 0)
+            {
+                std::ostringstream os;
+                os<<"The specified key '" << parameterKey << "' for parameter " << parameterName << " does not exist. Specified as valueRef in member " << md->GetName();
+                throw ParseError("Serialization error", os.str(), "", 1200);
+            }
+        }
+        else if (param->GetCollectionType() == ArrayCollectionType || param->GetCollectionType() == SequenceCollectionType)
+        {
+            try
+            {
+                parameterIndex=boost::lexical_cast<int>(parameterKey);
+            }
+            catch (const boost::bad_lexical_cast&)
+            {
+                std::ostringstream os;
+                os<<"The parameter '"<<parameterName<<"' specifies an invalid index. Specified as valueRef in member "<<md->GetName();
+                throw ParseError("Serialization error", os.str(), "", 1200);
+            }
+        }
+        else if (param->GetCollectionType() == SingleValueCollectionType)
+        {
+            if (!parameterKey.empty())
+            {
+                std::ostringstream os;
+                os<<"The parameter '"<<parameterName<<"' is not a collection type and hence it should not have an index or key value. Specified as valueRef in member "<<md->GetName();
+                throw ParseError("Serialization error", os.str(), "", 1201);
+            }
         }
 
         if (parameterIndex>=param->GetNumberOfValues())

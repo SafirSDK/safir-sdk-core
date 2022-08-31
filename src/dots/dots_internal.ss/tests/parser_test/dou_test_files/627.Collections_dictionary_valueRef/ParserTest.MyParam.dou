@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="utf-8"?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <name>ParserTest.MyParam</name>
+    <baseClass>Safir.Dob.Entity</baseClass>
+    <parameters>
+        <parameter>
+            <name>DictStringKey</name>
+            <type>Int32</type>
+            <dictionary keyType="String">
+                <entry>
+                    <key>Kalle</key>
+                    <value>111</value>
+                </entry>
+                <entry>
+                    <key>Pelle</key>
+                    <value>222</value>
+                </entry>
+                <entry>
+                    <key>Svarre</key>
+                    <value>333</value>
+                </entry>
+            </dictionary>
+        </parameter>
+
+        <parameter>
+            <name>DictInt32Key</name>
+            <type>Int32</type>
+            <dictionary keyType="Int32">
+                <entry>
+                    <key>22222</key>
+                    <value>2</value>
+                </entry>
+                <entry>
+                    <key>11111</key>
+                    <value>1</value>
+                </entry>
+                <entry>
+                    <key>33333</key>
+                    <value>3</value>
+                </entry>
+            </dictionary>
+        </parameter>
+
+        <parameter>
+            <name>DictInt64Key</name>
+            <type>Int32</type>
+            <dictionary keyType="Int64">
+                <entry>
+                    <key>111111111111111</key>
+                    <value>1</value>
+                </entry>
+                <entry>
+                    <key>222222222222222</key>
+                    <value>2</value>
+                </entry>
+            </dictionary>
+        </parameter>
+
+        <parameter>
+            <name>DictTypeIdKey</name>
+            <type>Int32</type>
+            <dictionary keyType="TypeId">
+                <entry>
+                    <key>ParserTest.MyEntity</key>
+                    <value>1</value>
+                </entry>
+                <entry>
+                    <key>ParserTest.MyParam</key>
+                    <value>123</value>
+                </entry>
+            </dictionary>
+        </parameter>
+
+        <parameter>
+            <name>DictInstanceIdKey</name>
+            <type>Int32</type>
+            <dictionary keyType="InstanceId">
+                <entry>
+                    <key>inst1</key>
+                    <value>1</value>
+                </entry>
+                <entry>
+                    <key>123</key>
+                    <value>123000</value>
+                </entry>
+            </dictionary>
+        </parameter>
+
+        <parameter>
+            <name>DictChannelIdKey</name>
+            <type>Int32</type>
+            <dictionary keyType="ChannelId">
+                <entry>
+                    <key>channel1</key>
+                    <value>456</value>
+                </entry>
+                <entry>
+                    <key>456</key>
+                    <value>456000</value>
+                </entry>
+            </dictionary>
+        </parameter>
+
+        <parameter>
+            <name>DictHandlerlIdKey</name>
+            <type>Int32</type>
+            <dictionary keyType="HandlerId">
+                <entry>
+                    <key>handler1</key>
+                    <value>789</value>
+                </entry>
+                <entry>
+                    <key>789</key>
+                    <value>789000</value>
+                </entry>
+            </dictionary>
+        </parameter>
+
+        <parameter>
+            <name>DictEntityIdKey</name>
+            <type>Int32</type>
+            <dictionary keyType="EntityId">
+                <entry>
+                    <key>
+                        <name>ParserTest.MyEntity</name>
+                        <instanceId>inst1</instanceId>
+                    </key>
+                    <value>222</value>
+                </entry>
+                <entry>
+                    <key>
+                        <name>ParserTest.MyEntity</name>
+                        <instanceId>2</instanceId>
+                    </key>
+                    <value>333</value>
+                </entry>
+                <entry>
+                    <key>
+                        <name>ParserTest.MyParam</name>
+                        <instanceId>inst1</instanceId>
+                    </key>
+                    <value>444</value>
+                </entry>
+                <entry>
+                    <key>
+                        <name>ParserTest.MyParam</name>
+                        <instanceId>inst2</instanceId>
+                    </key>
+                    <value>555</value>
+                </entry>
+            </dictionary>
+        </parameter>
+
+        <parameter>
+            <name>DictWeekdayKey</name>
+            <type>Int32</type>
+            <dictionary keyType="ParserTest.Weekdays">
+                <entry>
+                    <key>Wednesday</key>
+                    <value>10</value>
+                </entry>
+                <entry>
+                    <key>Friday</key>
+                    <value>20</value>
+                </entry>
+            </dictionary>
+        </parameter>
+
+        <parameter>
+            <name>ObjParam</name>
+            <type>ParserTest.MyEntity</type>
+            <ParserTest.MyEntity>
+                <Int32Seq>
+                    <value valueRef="ParserTest.MyParam.DictStringKey"  valueRefIndex="Svarre"></value> <!-- 333 -->
+                    <value valueRef="ParserTest.MyParam.DictInt32Key"  valueRefIndex="22222"></value> <!-- 2 -->
+                    <value valueRef="ParserTest.MyParam.DictInt64Key"  valueRefIndex="111111111111111"></value> <!-- 1 -->
+                    <value valueRef="ParserTest.MyParam.DictTypeIdKey"  valueRefIndex="ParserTest.MyParam"></value> <!-- 123 -->
+                    <value valueRef="ParserTest.MyParam.DictTypeIdKey"  valueRefIndex="ParserTest.MyEntity"></value> <!-- 1 -->
+                    <value valueRef="ParserTest.MyParam.DictTypeIdKey"  valueRefIndex="9136526753678145655"></value> <!-- 123 -->
+                    <value valueRef="ParserTest.MyParam.DictInstanceIdKey"  valueRefIndex="123"></value> <!-- 123000 -->
+                    <value valueRef="ParserTest.MyParam.DictInstanceIdKey"  valueRefIndex="inst1"></value> <!-- 1 -->
+                    <value valueRef="ParserTest.MyParam.DictChannelIdKey"  valueRefIndex="channel1"></value> <!-- 456 -->
+                    <value valueRef="ParserTest.MyParam.DictChannelIdKey"  valueRefIndex="456"></value> <!-- 456000 -->
+                    <value valueRef="ParserTest.MyParam.DictHandlerlIdKey"  valueRefIndex="handler1"></value> <!-- 789 -->
+                    <value valueRef="ParserTest.MyParam.DictHandlerlIdKey"  valueRefIndex="789"></value> <!-- 789000 -->
+                    <value valueRef="ParserTest.MyParam.DictEntityIdKey"  valueRefIndex="ParserTest.MyEntity inst1"></value> <!-- 222 -->
+                    <value valueRef="ParserTest.MyParam.DictEntityIdKey"  valueRefIndex="ParserTest.MyEntity 2"></value> <!-- 333 -->
+                    <value valueRef="ParserTest.MyParam.DictEntityIdKey"  valueRefIndex="ParserTest.MyParam inst2"></value> <!-- 555 -->
+                    <value valueRef="ParserTest.MyParam.DictEntityIdKey"  valueRefIndex="9136526753678145655 4966151048536940943"></value> <!-- 444 -->
+                    <value valueRef="ParserTest.MyParam.DictWeekdayKey"  valueRefIndex="Friday"></value> <!-- 20 -->
+                    <value valueRef="ParserTest.MyParam.DictWeekdayKey"  valueRefIndex="Wednesday"></value> <!-- 10 -->
+                </Int32Seq>
+            </ParserTest.MyEntity>
+        </parameter>
+    </parameters>
+
+</class>

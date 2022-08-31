@@ -27,10 +27,8 @@ import os
 import sys
 import getopt
 
-
 err = []
 tests = set([])
-
 
 def collect_tests(path):
     global tests
@@ -43,7 +41,6 @@ def collect_tests(path):
             except:
                 pass
 
-
 def inspect_line(line):
     global err
     if 'throw ParseError' in line:
@@ -52,18 +49,17 @@ def inspect_line(line):
         num = int(line[startIx:endIx].strip())
         err.append(num)
 
-
 def inspect_file(file):
-    f = open(file)
-    line_number = 1
-    for line in f:
-        try:
-            inspect_line(line)
-        except:
-            print('At ' + file + '(' + str(line_number) + '): ' + line)
-        line_number = line_number + 1
-    f.close()
-
+    if file.endswith('.h') or file.endswith('.cpp'):
+        f = open(file)
+        line_number = 1
+        for line in f:
+            try:
+                inspect_line(line)
+            except:
+                print('At ' + file + '(' + str(line_number) + '): ' + line)
+            line_number = line_number + 1
+        f.close()
 
 def main(argv):
     """Main program"""
@@ -85,14 +81,13 @@ def main(argv):
     for i in err:
         msg = str(i)
         if i in tests:
-            msg = msg + ' t'
+            msg = msg + ' tested'
         if last == i:
-            msg = msg + ' d'
+            msg = msg + ' duplicated'
         if i > last + 1:
-            msg = msg + ' h'
+            msg = msg + ' gap'
         last = i
         print(msg)
-
 
 #------------------------------------------------
 # If this is the main module, start the program

@@ -433,10 +433,12 @@ namespace Internal
                        BlobWriter<RepositoryType>& writer) const
         {
             boost::optional<std::string> valueRef=memberContent.get_optional<std::string>("<xmlattr>.valueRef");
-            int valueRefIndex=memberContent.get<int>("<xmlattr>.valueRefIndex", 0);
+            
             if (valueRef)
             {
+                std::string valueRefIndex=memberContent.get<std::string>("<xmlattr>.valueRefIndex", "");
                 SerializationUtils::Trim(*valueRef);
+                SerializationUtils::Trim(valueRefIndex);
 
                 if (memberContent.size()>1 || !memberContent.data().empty())
                 {
@@ -492,7 +494,6 @@ namespace Internal
             {
                 SerializationUtils::SetMemberValue(m_repository, md, memIx, arrIx, memberContent, key, writer);
             }
-
         }
     };
 }
