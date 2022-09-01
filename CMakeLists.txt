@@ -1,6 +1,9 @@
-PROJECT(safir-sdk-core CXX C)
-
 cmake_minimum_required(VERSION 3.16.0)
+
+#Don't add /W3 to MSVC compilation flags. We set warning levels ourselves
+cmake_policy(SET CMP0092 NEW)
+
+PROJECT(safir-sdk-core CXX C)
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
