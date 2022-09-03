@@ -1,6 +1,6 @@
 set(ui MainWindow.ui)
 
-set(sources Main.cpp MainWindow.cpp)
+set(sources Main.cpp MainWindow.cpp tool_launcher.rc)
 
 set(widget_headers MainWindow.h)
 

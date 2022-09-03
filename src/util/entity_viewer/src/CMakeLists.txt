@@ -1,6 +1,6 @@
 set(ui EntityViewerMainWindow.ui)
 
-set(sources ColumnInfo.cpp  EntityModel.cpp  EntityView.cpp  EntityViewerApplication.cpp  main.cpp EntityViewerMainWindow.cpp)
+set(sources ColumnInfo.cpp  EntityModel.cpp  EntityView.cpp  EntityViewerApplication.cpp  main.cpp EntityViewerMainWindow.cpp entityviewer.rc)
 
 set(widget_headers ColumnInfo.h  EntityModel.h  EntityViewerApplication.h  EntityView.h EntityViewerMainWindow.h)
 

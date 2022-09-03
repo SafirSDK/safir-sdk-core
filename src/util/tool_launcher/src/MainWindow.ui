@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>Safir Debug Tool Launcher</string>
   </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>tool_launcher.png</normaloff>tool_launcher.png</iconset>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout_3" stretch="0,100,0,0">
     <item>
