@@ -60,6 +60,8 @@ public:
 private slots:
     void OnLaunchSatePressed();
     void OnLaunchDobExplorerPressed();
+    void OnLaunchEntityViewerPressed();
+    void OnLaunchControlGuiPressed();
     void OnShowOutputToggled(const bool checked);
 private:
     static void AppendText(QPlainTextEdit* textEdit, const QString& string);

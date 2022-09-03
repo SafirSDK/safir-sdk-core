@@ -59,6 +59,8 @@ MainWindow::MainWindow()
 
     connect(m_ui->launchSateButton, &QPushButton::pressed, this, &MainWindow::OnLaunchSatePressed);
     connect(m_ui->launchDobExplorerButton, &QPushButton::pressed, this, &MainWindow::OnLaunchDobExplorerPressed);
+    connect(m_ui->launchEntityViewerButton, &QPushButton::pressed, this, &MainWindow::OnLaunchEntityViewerPressed);
+    connect(m_ui->launchControlGuiButton, &QPushButton::pressed, this, &MainWindow::OnLaunchControlGuiPressed);
     connect(m_ui->showOutputButton, &QAbstractButton::toggled, this, &MainWindow::OnShowOutputToggled);
 
     auto* timer = new QTimer(this);
@@ -193,6 +195,16 @@ void MainWindow::OnLaunchSatePressed()
 void MainWindow::OnLaunchDobExplorerPressed()
 {
     LaunchProgram("dobexplorer");
+}
+
+void MainWindow::OnLaunchEntityViewerPressed()
+{
+    LaunchProgram("safir_entity_viewer");
+}
+
+void MainWindow::OnLaunchControlGuiPressed()
+{
+    LaunchProgram("safir_control_gui");
 }
 
 void MainWindow::OnShowOutputToggled(const bool checked)

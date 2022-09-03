@@ -16,7 +16,7 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout_3" stretch="0,100,0,0">
     <item>
-     <layout class="QGridLayout" name="gridLayout" columnstretch="0,0,0,1">
+     <layout class="QGridLayout" name="gridLayout" columnstretch="0,0,0,0,0">
       <item row="0" column="0" alignment="Qt::AlignBottom">
        <widget class="QLabel" name="label">
         <property name="toolTip">
@@ -24,40 +24,6 @@
         </property>
         <property name="text">
          <string>Safir Instance:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="3" rowspan="2">
-       <spacer name="horizontalSpacer">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>0</width>
-          <height>0</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item row="0" column="1" rowspan="2">
-       <widget class="Line" name="line">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="2">
-       <widget class="QPushButton" name="launchSateButton">
-        <property name="text">
-         <string>Launch SATE...</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QSpinBox" name="safirInstanceSpin">
-        <property name="maximum">
-         <number>999999999</number>
         </property>
        </widget>
       </item>
@@ -74,10 +40,58 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="2" alignment="Qt::AlignRight">
+      <item row="0" column="4" rowspan="2">
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item row="1" column="0">
+       <widget class="QSpinBox" name="safirInstanceSpin">
+        <property name="maximum">
+         <number>999999999</number>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="QPushButton" name="launchSateButton">
+        <property name="text">
+         <string>Launch SATE...</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="3">
+       <widget class="QPushButton" name="launchControlGuiButton">
+        <property name="text">
+         <string>Launch ControlGui...</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="3">
+       <widget class="QPushButton" name="launchEntityViewerButton">
+        <property name="text">
+         <string>Launch EntityViewer...</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="3">
        <widget class="QCheckBox" name="showOutputButton">
         <property name="text">
          <string>Show output</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1" rowspan="3">
+       <widget class="Line" name="line">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
         </property>
        </widget>
       </item>
