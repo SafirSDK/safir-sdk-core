@@ -97,12 +97,12 @@ class SafirSdkCoreConan(ConanFile):
             self.copy("*.exe", src="bin", dst="./bin", root_package="ninja")
 
     def requirements(self):
-        self.requires("sentry-breakpad/0.4.17")
+        self.requires("sentry-breakpad/0.5.0")
         self.requires("websocketpp/0.8.2")
         self.requires("rapidjson/cci.20211112")
-        protobuf_version = "3.21.1"
+        protobuf_version = "3.21.4"
         if self.settings.os == "Windows":
-            self.requires("qt/5.15.4")
+            self.requires("qt/5.15.5")
             self.requires("ninja/1.11.0")
             self.requires("boost/1.79.0")
 
