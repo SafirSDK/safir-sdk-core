@@ -499,11 +499,18 @@ Section /o "Tools" SecTools
   #Start menu items
   #
 
+  CreateShortCut "${StartMenuDir}\ToolLauncher.lnk" \
+                 "$INSTDIR\bin\safir_tool_launcher.exe" "" "" "" SW_SHOWNORMAL "" "Launch development tools on any SAFIR_INSTANCE"
+
   CreateShortCut "${StartMenuDir}\Sate.lnk" \
                  "$INSTDIR\bin\sate.exe" "" "" "" SW_SHOWNORMAL "" "Safir Application Tester"
 
+  CreateShortCut "${StartMenuDir}\EntityViewer.lnk" \
+                 "$INSTDIR\bin\safir_entity_viewer.exe" "" "" "" SW_SHOWNORMAL "" "Show entity instances in table form"
+
   CreateShortCut "${StartMenuDir}\Dobexplorer.lnk" \
                  "$INSTDIR\bin\dobexplorer.exe" "" "" "" SW_SHOWNORMAL "" "Explore the Dob internals"
+
 
 SectionEnd
 
