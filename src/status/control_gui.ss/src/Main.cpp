@@ -36,14 +36,18 @@
 #pragma warning (pop)
 #endif
 
-#ifdef SAFIR_LINK_QT_STATICALLY
+#if defined (SAFIR_LINK_QT_STATICALLY) && defined (_MSC_VER)
 #include <QtPlugin>
 Q_IMPORT_PLUGIN (QWindowsIntegrationPlugin);
+Q_IMPORT_PLUGIN (QWindowsVistaStylePlugin);
 #endif
-
 
 int main(int argc, char *argv[])
 {
+#if defined (_MSC_VER)
+    QApplication::setStyle("windowsvista");
+#endif
+
     QApplication a(argc, argv);
     MainWindow w;
     w.show();

@@ -25,9 +25,10 @@
 #include "dosemon.h"
 #include <Safir/Utilities/CrashReporter.h>
 
-#ifdef SAFIR_LINK_QT_STATICALLY
+#if defined (SAFIR_LINK_QT_STATICALLY) && defined (_MSC_VER)
 #include <QtPlugin>
 Q_IMPORT_PLUGIN (QWindowsIntegrationPlugin);
+Q_IMPORT_PLUGIN (QWindowsVistaStylePlugin);
 #endif
 
 int main(int argc, char *argv[])
@@ -37,6 +38,10 @@ int main(int argc, char *argv[])
     //ensure call to Stop at application exit
     std::shared_ptr<void> guard(static_cast<void*>(0),
                                 [](void*){Safir::Utilities::CrashReporter::Stop();});
+
+#if defined (_MSC_VER)
+    QApplication::setStyle("windowsvista");
+#endif
 
     QApplication app(argc, argv);
     std::shared_ptr<DoseMon> dialog (new DoseMon());

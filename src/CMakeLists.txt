@@ -44,6 +44,7 @@ if (MSVC)
   target_link_libraries(Qt5::Widgets
     INTERFACE
     Qt5::QWindowsIntegrationPlugin
+    Qt5::QWindowsVistaStylePlugin
     debug Qt5FontDatabaseSupportd
     debug Qt5EventDispatcherSupportd
     debug Qt5ThemeSupportd
