@@ -367,7 +367,7 @@ def build_examples():
                 "dobmake-batch",
             ]
 
-        cmd += ("--jenkins", "--skip-tests")
+        cmd += ("--verbose", "--jenkins", "--skip-tests")
 
         if sys.platform == "win32":
             cmd += ("--use-studio", os.environ["BUILD_PLATFORM"])
