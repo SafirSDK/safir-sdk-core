@@ -102,6 +102,13 @@ DoseMon::DoseMon(QWidget * /*parent*/)
 
 void DoseMon::closeEvent(QCloseEvent* event)
 {
+    //If the connect is still pending we need to kill the program very forcefully, since there is no way
+    //to interrupt the connection call.
+    if (m_doseInternalInitializer != boost::thread() && !m_doseInternalInitialized)
+    {
+        std::quick_exit(0);
+    }
+
     if (m_doseInternalInitializer != boost::thread())
     {
         m_doseInternalInitializer.interrupt();
@@ -309,7 +316,7 @@ void DoseMon::AddConnection(const Safir::Dob::Internal::Connection & connection,
 
 void DoseMon::FilterChanged(const QString &text)
 {
-    ApplyFilter(text, treeWidget->invisibleRootItem());    
+    ApplyFilter(text, treeWidget->invisibleRootItem());
 }
 
 void DoseMon::UpdateTreeWidget()
@@ -415,7 +422,7 @@ void DoseMon::ApplyFilter(const QString& filter, QTreeWidgetItem* item)
     static const QBrush defaultBackground;
     item->setBackground(0, defaultBackground);
     item->setHidden(false);
-    
+
     // require at least 3 characters before filter is applied
     if (filter.count() > 2)
     {
@@ -433,7 +440,7 @@ void DoseMon::ApplyFilter(const QString& filter, QTreeWidgetItem* item)
 
         }
     }
-    
+
     for (int i = 0; i < item->childCount(); i++)
     {
         QTreeWidgetItem *child = item->child(i);
