@@ -49,7 +49,7 @@ class SafirSdkCoreConan(ConanFile):
                        "qt:with_freetype": False,
                        "qt:with_harfbuzz": False,
                        "qt:with_libjpeg": False,
-                       "qt:with_libpng": False,
+                       "qt:with_libpng": True,
                        "qt:with_sqlite3": False,
                        "qt:with_mysql": False,
                        "qt:with_pq": False,
