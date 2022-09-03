@@ -1037,7 +1037,7 @@ namespace Sate
         {
             var container = ObjInfo.Obj.GetMember(member, 0);
             var containerType = container.GetType();
-            var method = containerType.GetMethod("Add", new[] {key.GetType()});
+            var method = containerType.GetMethod("Add", new[] {containerType.GetGenericArguments()[0]});
             method.Invoke(container, new[] {key});
         }
 
