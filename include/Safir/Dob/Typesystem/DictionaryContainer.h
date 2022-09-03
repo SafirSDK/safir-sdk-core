@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2004-2015 (http://safirsdkcore.com)
+* Copyright Saab AB, 2004-2015, 2022 (http://safirsdkcore.com)
 *
 * Created by: Joel Ottosson / joot
 *
@@ -77,6 +77,70 @@ namespace Typesystem
             m_bIsChanged = changed;
         }
 
+        /**
+         * Get the size of the dictionary, i.e number of contained keys.
+         *
+         * @return The number of values in the dictionary.
+         */
+        virtual size_t size() const = 0;
+
+        /**
+         * Check if dictionary is empty.
+         *
+         * @return True if dictionary is empty, else false.
+         */
+        virtual bool empty() const = 0;
+
+        /**
+         * @name Reflection part.
+         * These methods allow applications to manipulate the members of objects
+         * without having been compiled against it.
+         * There should be no reason for most applications to use these methods.
+         */
+        /** @{ */
+
+        /**
+         * Get the key at a particular position in the dictionary.
+         *
+         * Note that the order of keys in the dictionary is not guaranteed.
+         * This is not a particularly "cheap" way of accessing the contents of a
+         * dictionary. Much better to use the iterators in the implementing class.
+         *
+         * This function needs to be called like this: dict.GetKeyAt<Int32>(10).
+         * If the dictionary does not have KeyT as its key type the behaviour is undefined.
+         *
+         * For enumeration values, use EnumerationValue as the type, and you will get the
+         * ordinal value.
+         *
+         * @param index an index between 0 and size().
+         * @return The key at a position in the dictionary.
+         */
+        template<class KeyT>
+        const KeyT& GetKeyAt(const size_t index) const
+        {
+            return *static_cast<const KeyT*>(GetKeyAtInternal(index));
+        }
+
+        /**
+         * Get the container of the value at a particular position in the dictionary.
+         *
+         * Note that the order of keys in the dictionary is not guaranteed.
+         * This is not a particularly "cheap" way of accessing the contents of a
+         * dictionary. Much better to use the iterators in the implementing class.
+         *
+         * @param index an index between 0 and size().
+         * @return The container at a position in the dictionary.
+         */
+        virtual ContainerBase& GetValueContainerAt(const size_t index) = 0;
+
+        /** Const version of GetValueContainerAt() */
+        virtual const ContainerBase& GetValueContainerAt(const size_t index) const = 0;
+
+        /** @} */
+
+    protected:
+        virtual const void* GetKeyAtInternal(const size_t index) const = 0;
+
     private:
         friend void Utilities::MergeChanges(ObjectPtr into, const ObjectConstPtr& from);
 
@@ -112,8 +176,8 @@ namespace Typesystem
          * Construct a container that is not changed and not null.
          */
         DictionaryContainer()
-            :DictionaryContainerBase()
-            ,m_values()
+            : DictionaryContainerBase()
+            , m_values()
         {
         }
 
@@ -133,9 +197,9 @@ namespace Typesystem
         iterator find(const KeyType& key) {return m_values.find(key);}
         const_iterator find(const KeyType& key) const {return m_values.find(key);}
 
-        size_t size() const {return m_values.size();}
+        size_t size() const override {return m_values.size();}
 
-        bool empty() const {return m_values.empty();}
+        bool empty() const override {return m_values.empty();}
 
         size_t count(const KeyType& key) const {return m_values.count(key);}
 
@@ -180,7 +244,7 @@ namespace Typesystem
         }
 
         /**
-         * @brief IsChanged - Check if the sequence has changed.
+         * @brief IsChanged - Check if the dictionary has changed.
          * @return True if changed, else false.
          */
         bool IsChanged() const override
@@ -200,8 +264,8 @@ namespace Typesystem
         }
 
         /**
-         * @brief SetChanged - Set the change state of the sequence.
-         * @param changed [in] - If true, the sequence is set to changed, it is set to not changed.
+         * @brief SetChanged - Set the change state of the dictionary.
+         * @param changed [in] - If true, the dictionary is set to changed, it is set to not changed.
          */
         void SetChanged(const bool changed) override
         {
@@ -214,8 +278,8 @@ namespace Typesystem
 
 
         /**
-         * @brief clear - Clear the sequence, i.e remove all values. After a call to clear
-         * the sequence will be empty but not automatically set to null.
+         * @brief clear - Clear the dictionary, i.e remove all keys/values. After a call to clear
+         * the dictionary will be empty and hence it will be null too.
          */
         void clear()
         {
@@ -266,6 +330,30 @@ namespace Typesystem
             }
         }
 
+        /**
+         * @name Reflection part.
+         * These methods allow applications to manipulate the members of objects
+         * without having been compiled against it.
+         * There should be no reason for most applications to use these methods.
+         */
+        /** @{ */
+        const ContainerBase& GetValueContainerAt(const size_t index) const override
+        {
+            return const_cast<DictionaryContainer*>(this)->GetValueContainerAt(index);
+        }
+
+        ContainerBase& GetValueContainerAt(const size_t index) override
+        {
+            if (index >= size())
+            {
+                throw SoftwareViolationException
+                    (L"DictionaryContainer::GetKey: Index outside range!", __WFILE__, __LINE__);
+            }
+            return std::next(m_values.begin(),index)->second;
+        }
+        /** @} */
+
+        
     private:
 
         void Merge(const DictionaryContainerBase& that) override
@@ -326,6 +414,17 @@ namespace Typesystem
                 }
             }
         }
+
+        const void* GetKeyAtInternal(const size_t index) const override
+        {
+            if (index >= size())
+            {
+                throw SoftwareViolationException
+                    (L"DictionaryContainer::GetKeyAt: Index outside range!", __WFILE__, __LINE__);
+            }
+            return &(std::next(m_values.begin(),index)->first);
+        }
+
 
         std::map<KeyT, ValT> m_values;
 

@@ -11753,3 +11753,56 @@ BOOST_AUTO_TEST_CASE(ObjectSequenceReflectionDeprecated)
     }
 }
 #endif
+
+BOOST_AUTO_TEST_CASE(DictionaryReflection)
+{
+    MemberDictionariesPtr dict = MemberDictionaries::Create();
+    dict->Int64ItemMember().Insert(1,TestItem::Create());
+    dict->Int64ItemMember().at(1)->MyInt() = 10;
+    dict->Int64ItemMember().at(1)->MyString() = L"one";
+    dict->Int64ItemMember().Insert(2,TestItem::Create());
+    dict->Int64ItemMember().at(2)->MyInt() = 20;
+    dict->Int64ItemMember().at(2)->MyString() = L"two";
+
+    dict->EnumItemMember().Insert(TestEnum::MyFirst,TestItem::Create());
+    dict->EnumItemMember().at(TestEnum::MyFirst)->MyInt() = 10;
+    dict->EnumItemMember().at(TestEnum::MyFirst)->MyString() = L"one";
+    dict->EnumItemMember().Insert(TestEnum::MySecond,TestItem::Create());
+    dict->EnumItemMember().at(TestEnum::MySecond)->MyInt() = 20;
+    dict->EnumItemMember().at(TestEnum::MySecond)->MyString() = L"two";
+
+    {
+        DictionaryContainerBase& base = dict->Int64ItemMember();
+        BOOST_CHECK_EQUAL(base.size(), 2U);
+        BOOST_CHECK_EQUAL(base.GetKeyAt<Int64>(0), 1);
+        BOOST_CHECK_EQUAL(base.GetKeyAt<Int64>(1), 2);
+        auto* container = dynamic_cast<TestItemContainer*>(&base.GetValueContainerAt(0));
+        BOOST_CHECK_NE(container, nullptr);
+        BOOST_CHECK_EQUAL(container->IsNull(), false);
+        BOOST_CHECK_EQUAL(container->GetPtr()->MyInt(), 10);
+        BOOST_CHECK_EQUAL(container->GetPtr()->MyString(), L"one");
+        container = dynamic_cast<TestItemContainer*>(&base.GetValueContainerAt(1));
+        BOOST_CHECK_NE(container, nullptr);
+        BOOST_CHECK_EQUAL(container->IsNull(), false);
+        BOOST_CHECK_EQUAL(container->GetPtr()->MyInt(), 20);
+        BOOST_CHECK_EQUAL(container->GetPtr()->MyString(), L"two");
+
+    }
+
+    {
+        DictionaryContainerBase& base = dict->EnumItemMember();
+        BOOST_CHECK_EQUAL(base.size(), 2U);
+        BOOST_CHECK_EQUAL(base.GetKeyAt<Int32>(0), 0);
+        BOOST_CHECK_EQUAL(base.GetKeyAt<Int32>(1), 1);
+        auto* container = dynamic_cast<TestItemContainer*>(&base.GetValueContainerAt(0));
+        BOOST_CHECK_NE(container, nullptr);
+        BOOST_CHECK_EQUAL(container->IsNull(), false);
+        BOOST_CHECK_EQUAL(container->GetPtr()->MyInt(), 10);
+        BOOST_CHECK_EQUAL(container->GetPtr()->MyString(), L"one");
+        container = dynamic_cast<TestItemContainer*>(&base.GetValueContainerAt(1));
+        BOOST_CHECK_NE(container, nullptr);
+        BOOST_CHECK_EQUAL(container->IsNull(), false);
+        BOOST_CHECK_EQUAL(container->GetPtr()->MyInt(), 20);
+        BOOST_CHECK_EQUAL(container->GetPtr()->MyString(), L"two");
+    }
+}
