@@ -521,6 +521,9 @@ class BuilderBase(object):
 
         command = ("cmake", "--build", ".")
 
+        if self.arguments.verbose >= 2:
+            command += ("-v",)
+
         self._run_command(command, "Build " + config)
         if not self.arguments.skip_tests:
             LOGGER.log("   + testing", "brief")
