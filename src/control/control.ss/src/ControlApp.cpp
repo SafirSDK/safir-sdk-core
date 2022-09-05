@@ -58,13 +58,14 @@
 
 ControlApp::ControlApp(boost::asio::io_service&         ioService,
                        const boost::filesystem::path&   doseMainPath,
-                       const std::int64_t             id,
+                       const std::int64_t               id,
                        const bool                       ignoreControlCmd)
     : m_ioService(ioService)
     , m_stopped(false)
     , m_resolutionStartTime(boost::chrono::steady_clock::now())
     , m_strand(ioService)
     , m_wcoutStrand(ioService)
+    , m_nodeId(id != 0 ? id : LlufId_GenerateRandom64())
     , m_doseMainPath(doseMainPath)
     , m_ignoreControlCmd(ignoreControlCmd)
     , m_startTimer(ioService)
@@ -87,27 +88,6 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
             m_requiredForStart = it->requiredForStart;
             break;
         }
-    }
-
-    if (id == 0)
-    {
-        for (;;)
-        {
-            // Generate a positive node id if the node is of a type that is allowed to form as system, or
-            // a negative node id if the node is of a type that is NOT allowd to form a system.
-            std::int64_t nodeId = LlufId_GenerateRandom64();
-
-            if ((m_requiredForStart && nodeId > 0) || (!m_requiredForStart && nodeId < 0))
-            {
-                m_nodeId = nodeId;
-                break;
-            }
-        }
-    }
-    else
-    {
-
-        m_nodeId = id;
     }
 
     new (m_incarnationIdStorage.get()) std::atomic<uint64_t>(0);

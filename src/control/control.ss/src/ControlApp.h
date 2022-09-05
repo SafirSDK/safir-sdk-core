@@ -97,7 +97,7 @@ private:
     boost::asio::io_service::strand             m_strand;
     boost::asio::io_service::strand             m_wcoutStrand;
     std::unique_ptr<TerminateHandler>           m_terminateHandler;
-    int64_t                                     m_nodeId;
+    const int64_t                               m_nodeId;
     const boost::filesystem::path               m_doseMainPath;
     const bool                                  m_ignoreControlCmd;
     boost::asio::steady_timer                   m_startTimer;
