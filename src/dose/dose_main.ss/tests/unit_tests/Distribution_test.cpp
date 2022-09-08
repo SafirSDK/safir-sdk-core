@@ -74,8 +74,7 @@ struct NodeType
 {
     std::string name;
     std::int64_t id;
-    bool isLight;
-    std::set<std::string> talksTo;
+    bool isLightNode;
     std::string multicastAddressControl;
     std::string multicastAddressData;
     int heartbeatInterval;
@@ -83,8 +82,6 @@ struct NodeType
     int slidingWindowSize;
     int ackRequestThreshold;
     std::vector<int> retryTimeout;
-    std::vector<std::string> wantedTypes;
-    std::vector<std::string> unwantedTypes;
 };
 
 class Config

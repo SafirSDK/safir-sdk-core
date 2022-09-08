@@ -601,10 +601,7 @@ namespace SP
 
             for (auto node = nodeTypes.cbegin(); node != nodeTypes.cend(); ++node)
             {
-                if (!node->second.isLight)
-                {
-                    result = std::min(result,node->second.heartbeatInterval);
-                }
+                result = std::min(result,node->second.heartbeatInterval);
             }
 
             return result + result / 10;
@@ -617,10 +614,7 @@ namespace SP
 
             for (auto node = nodeTypes.cbegin(); node != nodeTypes.cend(); ++node)
             {
-                if (!node->second.isLight)
-                {
-                    result = std::min(result,node->second.deadTimeout);
-                }
+                result = std::min(result,node->second.deadTimeout);
             }
 
             return result / 2;

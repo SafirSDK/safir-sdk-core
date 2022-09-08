@@ -89,7 +89,6 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
             break;
         }
     }
-
     new (m_incarnationIdStorage.get()) std::atomic<uint64_t>(0);
 
     // Make some work to stop io_service from exiting.
@@ -187,7 +186,7 @@ void ControlApp::Start()
         spNodeTypes.insert(std::make_pair(nt->id,
                                           SP::NodeType(nt->id,
                                                        nt->name,
-                                                       false,
+                                                       nt->isLightNode,
                                                        boost::chrono::milliseconds(nt->heartbeatInterval),
                                                        nt->maxLostHeartbeats,
                                                        retryTimeouts)));

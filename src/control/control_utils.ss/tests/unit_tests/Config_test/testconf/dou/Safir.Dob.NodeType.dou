@@ -54,5 +54,11 @@
             <name>RequiredForStart</name>
             <type>Boolean</type>
         </member>
+        <member>
+            <summary>If true this node type is of a special kind with special rules. See
+                     user's guide for more info.</summary>
+            <name>IsLightNode</name>
+            <type>Boolean</type>
+        </member>
     </members>
 </class>

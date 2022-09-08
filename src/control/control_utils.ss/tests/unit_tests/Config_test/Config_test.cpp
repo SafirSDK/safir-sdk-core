@@ -50,11 +50,7 @@ int main(int argc, char* argv[])
 
         // Check first index which is Server
         CHECK(conf.nodeTypesParam[0].name == "Server");
-        // CHECK(conf.nodeTypesParam[0].isLight == false);
-        // CHECK(conf.nodeTypesParam[0].talksTo.size() == 3);
-        // CHECK(conf.nodeTypesParam[0].talksTo.find("Server") != conf.nodeTypesParam[0].talksTo.end());
-        // CHECK(conf.nodeTypesParam[0].talksTo.find("Client") != conf.nodeTypesParam[0].talksTo.end());
-        // CHECK(conf.nodeTypesParam[0].talksTo.find("RemoteClient") != conf.nodeTypesParam[0].talksTo.end());
+        CHECK(conf.nodeTypesParam[0].isLightNode == false);
         CHECK(conf.nodeTypesParam[0].multicastAddressControl == "192.0.0.1:9500");
         CHECK(conf.nodeTypesParam[0].multicastAddressData == "192.0.0.1:9501");
         CHECK(conf.nodeTypesParam[0].heartbeatInterval == 1000);
@@ -62,15 +58,10 @@ int main(int argc, char* argv[])
         CHECK(conf.nodeTypesParam[0].slidingWindowSize == 20);
         CHECK(conf.nodeTypesParam[0].retryTimeout.front() == 200);
         CHECK(conf.nodeTypesParam[0].requiredForStart == true);
-        // CHECK(conf.nodeTypesParam[0].wantedTypes.size() == 1);
-        // CHECK(conf.nodeTypesParam[0].wantedTypes[0] == ".*");
-        // CHECK(conf.nodeTypesParam[0].unwantedTypes.size() == 0);
 
         // Check second index which is Client
         CHECK(conf.nodeTypesParam[1].name == "Client");
-        // CHECK(conf.nodeTypesParam[1].isLight == true);
-        // CHECK(conf.nodeTypesParam[1].talksTo.size() == 1);
-        // CHECK(conf.nodeTypesParam[1].talksTo.find("Server") != conf.nodeTypesParam[1].talksTo.end());
+        CHECK(conf.nodeTypesParam[1].isLightNode == true);
         CHECK(conf.nodeTypesParam[1].multicastAddressControl == "");
         CHECK(conf.nodeTypesParam[1].multicastAddressData == "");
         CHECK(conf.nodeTypesParam[1].heartbeatInterval == 5000);
@@ -78,15 +69,10 @@ int main(int argc, char* argv[])
         CHECK(conf.nodeTypesParam[1].slidingWindowSize == 20);
         CHECK(conf.nodeTypesParam[1].retryTimeout.front() == 2000);
         CHECK(conf.nodeTypesParam[1].requiredForStart == false);
-        // CHECK(conf.nodeTypesParam[1].wantedTypes.size() == 1);
-        // CHECK(conf.nodeTypesParam[1].wantedTypes[0] == ".*");
-        // CHECK(conf.nodeTypesParam[1].unwantedTypes.size() == 0);
 
         // Check third index which is RemoteClient
         CHECK(conf.nodeTypesParam[2].name == "RemoteClient");
-        // CHECK(conf.nodeTypesParam[2].isLight == true);
-        // CHECK(conf.nodeTypesParam[2].talksTo.size() == 1);
-        // CHECK(conf.nodeTypesParam[2].talksTo.find("Server") != conf.nodeTypesParam[2].talksTo.end());
+        CHECK(conf.nodeTypesParam[2].isLightNode == true);
         CHECK(conf.nodeTypesParam[2].multicastAddressControl == "");
         CHECK(conf.nodeTypesParam[2].multicastAddressData == "");
         CHECK(conf.nodeTypesParam[2].heartbeatInterval == 30000);
@@ -94,10 +80,6 @@ int main(int argc, char* argv[])
         CHECK(conf.nodeTypesParam[2].slidingWindowSize == 20);
         CHECK(conf.nodeTypesParam[2].retryTimeout.front() == 5000);
         CHECK(conf.nodeTypesParam[2].requiredForStart == false);
-        // CHECK(conf.nodeTypesParam[2].wantedTypes.size() == 1);
-        // CHECK(conf.nodeTypesParam[2].wantedTypes[0] == "Capabilities\\.Vehicles\\.");
-        // CHECK(conf.nodeTypesParam[2].unwantedTypes.size() == 1);
-        // CHECK(conf.nodeTypesParam[2].unwantedTypes[0] == "Capabilities\\.Vehicles\\.Ambulance.*");
 
         // Check ThisNode parameters
         CHECK(conf.thisNodeParam.controlAddress == "0.0.0.0:30000");
@@ -113,29 +95,17 @@ int main(int argc, char* argv[])
     }
     else if (test == "tc2")
     {
-    //     try
-    //     {
-    //         ctrl::Config conf;
-    //
-    //         LOGERROR("Expected an exception!");
-    //     }
-    //     catch (const std::exception& e)
-    //     {
-    //        CHECK(std::string(e.what()).find("IsLight is mandatory") != std::string::npos)
-    //     }
-    }
-    else if (test == "tc3")
-    {
-        // try
-        // {
-        //     ctrl::Config conf;
-
-        //     LOGERROR("Expected an exception!");
-        // }
-        // catch (const std::exception& e)
-        // {
-        //    CHECK(std::string(e.what()).find("WantedTypes can only be .* for non Light nodes!") != std::string::npos)
-        // }
+        /*
+        try
+        {
+            ctrl::Config conf;
+    
+            LOGERROR("Expected an exception!");
+        }
+        catch (const std::exception& e)
+        {
+           CHECK(std::string(e.what()).find("IsLight is mandatory") != std::string::npos)
+           }*/
     }
     else if (test == "tc4")
     {

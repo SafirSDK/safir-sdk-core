@@ -164,7 +164,7 @@ namespace SP
 
             for (auto it = nodeTypes.cbegin(); it != nodeTypes.cend(); ++it)
             {
-                if (!it->second.isLight)
+                if (!it->second.isLightNode)
                 {
                     res.insert(it->first);
                 }
@@ -189,7 +189,7 @@ namespace SP
 
             for (auto nt = nodeTypes.cbegin(); nt != nodeTypes.cend(); ++nt)
             {
-                if (!nt->second.isLight)
+                if (!nt->second.isLightNode)
                 {
                     max = std::max(max,nt->second.heartbeatInterval * nt->second.maxLostHeartbeats * 2);
                 }
@@ -206,7 +206,7 @@ namespace SP
 
             for (auto nt = nodeTypes.cbegin(); nt != nodeTypes.cend(); ++nt)
             {
-                if (!nt->second.isLight)
+                if (!nt->second.isLightNode)
                 {
                     max = std::max(max,nt->second.retryTimeout.at(0) * nt->second.maxLostHeartbeats);
                 }

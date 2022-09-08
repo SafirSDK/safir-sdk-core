@@ -49,10 +49,16 @@
             <sequence/>
         </member>
         <member>
-            <summary> If true, a node of this type can start a system of its owAckRequestLimitn. A node with a node
+            <summary> If true, a node of this type can start a system of its own. A node with a node
                       type where this parameter is set to false will never start a system of its own, it
                       just waits for a system to join.</summary>
             <name>RequiredForStart</name>
+            <type>Boolean</type>
+        </member>
+        <member>
+            <summary>If true this node type is of a special kind with special rules. See
+                     user's guide for more info.</summary>
+            <name>IsLightNode</name>
             <type>Boolean</type>
         </member>
     </members>

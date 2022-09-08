@@ -51,7 +51,8 @@ namespace Control
                  const int slidingWindowSize_,
                  const int ackRequestThreshold_,
                  const std::vector<int>& retryTimeout_,
-                 const bool requiredForStart_)
+                 const bool requiredForStart_,
+                 const bool isLightNode_)
 
             : name(name_),
               id(LlufId_Generate64(name_.c_str())),
@@ -62,7 +63,8 @@ namespace Control
               slidingWindowSize(slidingWindowSize_),
               ackRequestThreshold(ackRequestThreshold_),
               retryTimeout(retryTimeout_),
-              requiredForStart(requiredForStart_)
+              requiredForStart(requiredForStart_),
+              isLightNode(isLightNode_)
         {}
 
         const std::string name;
@@ -75,6 +77,7 @@ namespace Control
         const int ackRequestThreshold;
         const std::vector<int> retryTimeout;
         const bool requiredForStart;
+        const bool isLightNode;
     };
 
     struct ThisNode
@@ -247,6 +250,15 @@ namespace Control
 
                 auto requiredForStart = nt->RequiredForStart();
 
+                // IsLightNode
+                auto isLightNode = !nt->IsLightNode().IsNull() && nt->IsLightNode();
+
+                if (isLightNode && requiredForStart)
+                {
+                    throw std::logic_error("Parameter error: "
+                                           "Node type " + nodeTypeName +
+                                           ": RequiredForStart and IsLightNode cannot both be true.");
+                }
                 nodeTypesParam.push_back(NodeType(nodeTypeName,
                                                   multicastAddressControl,
                                                   multicastAddressData,
@@ -255,7 +267,8 @@ namespace Control
                                                   slidingWindowsSize,
                                                   ackRequestThreshold,
                                                   retryTimeout,
-                                                  requiredForStart));
+                                                  requiredForStart,
+                                                  isLightNode));
 
             }
 
@@ -327,7 +340,7 @@ namespace Control
             aloneTimeout = boost::chrono::milliseconds(static_cast<int64_t>(Safir::Dob::NodeParameters::NewSystemFormationTimeout() * 1000));
 
             fragmentSize = Safir::Dob::NodeParameters::FragmentSize();
-            
+
         }
 
         std::vector<NodeType> nodeTypesParam;
@@ -341,5 +354,3 @@ namespace Control
 }
 }
 }
-
-

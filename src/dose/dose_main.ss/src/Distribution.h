@@ -113,7 +113,7 @@ namespace Internal
                 spNodeTypes.insert(std::make_pair(nt->id,
                                                   SP::NodeType(nt->id,
                                                                nt->name,
-                                                               false,
+                                                               nt->isLightNode,
                                                                boost::chrono::milliseconds(nt->heartbeatInterval),
                                                                nt->maxLostHeartbeats,
                                                                retryTimeouts)));
