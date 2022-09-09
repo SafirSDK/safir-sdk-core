@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2013-2015 (http://safirsdkcore.com)
+* Copyright Saab AB, 2013-2022 (http://safirsdkcore.com)
 *
 * Created by: Joel Ottosson / joel.ottosson@consoden.se
 *
@@ -76,7 +76,7 @@ namespace
 
         //create node type map
         NodeTypeMap nodeTypeMap;
-        for ( auto nt = nodeTypes.cbegin(); nt != nodeTypes.cend(); ++nt)
+        for (auto nt = nodeTypes.cbegin(); nt != nodeTypes.cend(); ++nt)
         {
             if (nt->id==0)
             {
@@ -99,6 +99,7 @@ namespace
                                                          nt->slidingWindowSize,
                                                          nt->ackRequestThreshold,
                                                          fragmentSize,
+                                                         nt->isLightNode,
                                                          nt->retryTimeout));
             nodeTypeMap.insert(NodeTypeMap::value_type(nt->id, ptr));
         }

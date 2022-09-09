@@ -150,6 +150,7 @@ void ControlApp::Start()
                                                         nt->name,
                                                         nt->multicastAddressControl,
                                                         nt->multicastAddressData,
+                                                        nt->isLightNode,
                                                         nt->heartbeatInterval,
                                                         nt->maxLostHeartbeats,
                                                         nt->slidingWindowSize,

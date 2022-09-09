@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2014 (http://safirsdkcore.com)
+* Copyright Saab AB, 2022 (http://safirsdkcore.com)
 *
 * Created by: Anders Widén / anders.widen@consoden.se
 *
@@ -111,6 +111,7 @@ int main(int /*argc*/, char * /*argv*/[])
                                                          nt->name,
                                                          nt->multicastAddressControl,
                                                          nt->multicastAddressData,
+                                                         nt->isLightNode,
                                                          nt->heartbeatInterval,
                                                          nt->maxLostHeartbeats,
                                                          nt->slidingWindowSize,

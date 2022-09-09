@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2013-2015 (http://safirsdkcore.com)
+* Copyright Saab AB, 2013-2022 (http://safirsdkcore.com)
 *
 * Created by: Joel Ottosson / joel.ottosson@consoden.se
 *
@@ -201,9 +201,9 @@ public:
                 dataMulticastAddress=std::string("224.90.90.241:")+boost::lexical_cast<std::string>(12000+i);
             }
 
-            Safir::Dob::Internal::Com::NodeTypeDefinition n(id, name, controlMulticastAddress,dataMulticastAddress,
+            Safir::Dob::Internal::Com::NodeTypeDefinition n(id, name, controlMulticastAddress,dataMulticastAddress, false,
                                                             heartbeatInterval, maxLostHeartbeats,
-                                                            slidingWindowSize, ackRequestThreshold,retryTimeout);
+                                                            slidingWindowSize, ackRequestThreshold, retryTimeout);
             m_nodeTypes.insert(std::make_pair(n.id, n));
         }
     }

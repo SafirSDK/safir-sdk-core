@@ -62,6 +62,7 @@ namespace Com
                  int slidingWindowSize,
                  int ackRequestThreshold,
                  int fragmentSize,
+                 bool isLightNode,
                  const std::vector<int>& retryTimeout)
             :m_id(id)
             ,m_name(name)
@@ -73,6 +74,7 @@ namespace Com
             ,m_ackRequestThreshold(ackRequestThreshold)
             ,m_retryTimeout(retryTimeout)
             ,m_useMulticast(useMulticast)
+            ,m_isLightNode(isLightNode)
             ,m_heartbeatSender(ioService, id, thisNodeId, m_ipVersion, localIf, McAddr(m_multicastAddress, m_useMulticast), heartbeatInterval)
             ,m_ackedDataSender(ioService, Acked, m_id, thisNodeId, m_ipVersion, localIf, McAddr(m_multicastAddress, m_useMulticast), slidingWindowSize, ackRequestThreshold, retryTimeout, fragmentSize)
             ,m_unackedDataSender(ioService, Unacked, m_id, thisNodeId, m_ipVersion, localIf, McAddr(m_multicastAddress, m_useMulticast), slidingWindowSize, ackRequestThreshold, retryTimeout, fragmentSize)
@@ -88,6 +90,7 @@ namespace Com
         int MaxLostHeartbeats() const {return m_maxLostHeartbeats;}
         int SlidingWindowSize() const {return m_slidingWindowSize;}
         int AckRequestThreshold() const {return m_ackRequestThreshold;}
+        bool IsLightNode() const {return m_isLightNode;}
         const std::vector<int>& RetryTimeout() const {return m_retryTimeout;}
 
         HeartbeatSender& GetHeartbeatSender() {return m_heartbeatSender;}
@@ -110,6 +113,7 @@ namespace Com
         const int m_ackRequestThreshold;
         const std::vector<int> m_retryTimeout;  //time to wait before retransmitting unacked data
         const bool m_useMulticast;
+        const bool m_isLightNode;
 
         HeartbeatSender m_heartbeatSender;
         DataSender m_ackedDataSender;

@@ -38,8 +38,8 @@ Receiver::Receiver(Com::ControlModeTag tag, boost::asio::io_service& ioService, 
                std::vector<int> retryTimeout;
                retryTimeout.push_back(10);
                std::vector<Com::NodeTypeDefinition> n;
-               n.push_back(Com::NodeTypeDefinition(10, "nt10", "", "", 1000, 10, 20, 10, retryTimeout));
-               n.push_back(Com::NodeTypeDefinition(11, "nt11", "224.90.90.241:12000", "224.90.90.241:13000", 1000, 10, 20, 10, retryTimeout));
+               n.push_back(Com::NodeTypeDefinition(10, "nt10", "", "", false, 1000, 10, 20, 10, retryTimeout));
+               n.push_back(Com::NodeTypeDefinition(11, "nt11", "224.90.90.241:12000", "224.90.90.241:13000", false, 1000, 10, 20, 10, retryTimeout));
                return n;
            }(),
            1450)
@@ -78,8 +78,8 @@ Receiver::Receiver(Com::DataModeTag tag, boost::asio::io_service& ioService, int
                 std::vector<int> retryTimeout;
                 retryTimeout.push_back(10);
                 std::vector<Com::NodeTypeDefinition> n;
-                n.push_back(Com::NodeTypeDefinition(10, "nt10", "", "", 1000, 10, 20, 10, retryTimeout));
-                n.push_back(Com::NodeTypeDefinition(11, "nt11", "224.90.90.241:12000", "224.90.90.241:13000", 1000, 10, 20, 10, retryTimeout));
+                n.push_back(Com::NodeTypeDefinition(10, "nt10", "", "", false, 1000, 10, 20, 10, retryTimeout));
+                n.push_back(Com::NodeTypeDefinition(11, "nt11", "224.90.90.241:12000", "224.90.90.241:13000", false, 1000, 10, 20, 10, retryTimeout));
                 return n;
            }(),
            1450)

@@ -250,6 +250,7 @@ public:
                                    "NodeTypeA",
                                    "", //no multicast
                                    "", //no multicast
+                                   false,
                                    1000,
                                    15,
                                    20,
@@ -270,6 +271,7 @@ public:
                                    "NodeTypeB",
                                    "224.123.45.67:10000",
                                    "224.123.45.67:10001",
+                                   false,
                                    2000,
                                    8,
                                    20,

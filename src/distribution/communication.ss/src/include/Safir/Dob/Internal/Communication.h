@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2013-2015 (http://safirsdkcore.com)
+* Copyright Saab AB, 2013-2022 (http://safirsdkcore.com)
 *
 * Created by: Joel Ottosson / joel.ottosson@consoden.se
 *
@@ -48,6 +48,7 @@ namespace Com
                             const std::string& name_,
                             const std::string& controlMulticastAddress_,
                             const std::string& dataMulticastAddress_,
+                            bool isLightNode_,
                             int heartbeatInterval_,
                             int maxLostHeartbeats_,
                             int slidingWindowSize_,
@@ -57,6 +58,7 @@ namespace Com
                             ,name(name_)
                             ,controlMulticastAddress(controlMulticastAddress_)
                             ,dataMulticastAddress(dataMulticastAddress_)
+                            ,isLightNode(isLightNode_)
                             ,heartbeatInterval(heartbeatInterval_)
                             ,maxLostHeartbeats(maxLostHeartbeats_)
                             ,slidingWindowSize(slidingWindowSize_)
@@ -69,6 +71,7 @@ namespace Com
         std::string name;                       //unique readable name
         std::string controlMulticastAddress;    //multicast address including port number, 'address:port' empty string if not multicast enabled
         std::string dataMulticastAddress;       //multicast address including port number, 'address:port' empty string if not multicast enabled
+        bool isLightNode;                       //are nodes of this node type light nodes
         int heartbeatInterval;                  //time between heartbeats (milliseconds)
         int maxLostHeartbeats;                  //max lost heartbeats before exclusion
         int slidingWindowSize;                  //maximum outstanding messages at the same time
