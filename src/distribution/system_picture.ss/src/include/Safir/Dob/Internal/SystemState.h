@@ -78,6 +78,11 @@ namespace SP
         int64_t ElectionId() const;
 
         /**
+         * Does this state represent a single detached light node?
+         */
+        bool IsDetached() const;
+
+        /**
          * Get the number of nodes in the system state.
          *
          * The methods below expect an index that is in the range 0 to Size() - 1. Indexing

@@ -48,7 +48,7 @@ namespace SP
                       std::wostream& out)
     {
         out << "--------------------------------------------\n";
-        out << "Election Id: " << msg.election_id();
+        out << "Election Id: " << msg.election_id() << (msg.is_detached()? " Detached!":"");
         for (int i = 0; i < msg.node_info_size(); ++i)
         {
             const auto& node = msg.node_info(i);
@@ -81,6 +81,11 @@ namespace SP
         int64_t ElectionId() const
         {
             return m_message->election_id();
+        }
+
+        bool IsDetached() const
+        {
+            return m_message->is_detached();
         }
 
         int Size() const
@@ -146,6 +151,7 @@ namespace SP
 
     int64_t SystemState::ElectedId() const {CheckValid(); return m_impl->ElectedId(); }
     int64_t SystemState::ElectionId() const {CheckValid(); return m_impl->ElectionId();}
+    bool SystemState::IsDetached() const {CheckValid(); return m_impl->IsDetached();}
 
     int SystemState::Size() const
     {

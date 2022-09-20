@@ -23,6 +23,7 @@
 ******************************************************************************/
 #include <Safir/Dob/Internal/RawStatistics.h>
 #include <boost/noncopyable.hpp>
+#include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include "MessageWrapperCreators.h"
 #include <stdexcept>
 
@@ -221,6 +222,11 @@ namespace SP
             return m_message.node_info(index).is_dead();
         }
 
+        bool IsResurrecting(const int index) const
+        {
+            return m_message.node_info(index).is_resurrecting();
+        }
+
         uint32_t ControlReceiveCount(const int index) const
         {
             return m_message.node_info(index).control_receive_count();
@@ -249,6 +255,20 @@ namespace SP
         uint32_t DataRetransmitCount(const int index) const
         {
             return m_message.node_info(index).data_retransmit_count();
+        }
+
+        bool IsEveryoneElseDead() const
+        {
+            for(const auto& ni: m_message.node_info())
+            {
+                if (!ni.is_dead() && Id() != ni.id())
+                {
+                    lllog(4) << "SP: IsEveryoneElseDead: Node " << ni.id() << " is not dead" << std::endl;
+                    return false;
+                }
+            }
+            lllog(4) << "SP: IsEveryoneElseDead: Yes, everyone is dead!" << std::endl;
+            return true;
         }
 
 
@@ -317,12 +337,15 @@ namespace SP
     const std::string& RawStatistics::DataAddress(const int index) const {return m_impl->DataAddress(index);}
 
     bool RawStatistics::IsDead(const int index) const {return m_impl->IsDead(index);}
+    bool RawStatistics::IsResurrecting(const int index) const {return m_impl->IsResurrecting(index);}
     uint32_t RawStatistics::ControlReceiveCount(const int index) const {return m_impl->ControlReceiveCount(index);}
     uint32_t RawStatistics::ControlDuplicateCount(const int index) const {return m_impl->ControlDuplicateCount(index);}
     uint32_t RawStatistics::ControlRetransmitCount(const int index) const {return m_impl->ControlRetransmitCount(index);}
     uint32_t RawStatistics::DataReceiveCount(const int index) const {return m_impl->DataReceiveCount(index);}
     uint32_t RawStatistics::DataDuplicateCount(const int index) const {return m_impl->DataDuplicateCount(index);}
     uint32_t RawStatistics::DataRetransmitCount(const int index) const {return m_impl->DataRetransmitCount(index);}
+
+    bool RawStatistics::IsEveryoneElseDead() const {return m_impl->IsEveryoneElseDead();}
 
     bool RawStatistics::HasRemoteStatistics(const int index) const {return m_impl->HasRemoteStatistics(index);}
     RawStatistics RawStatistics::RemoteStatistics(const int index) const {return m_impl->RemoteStatistics(index);}

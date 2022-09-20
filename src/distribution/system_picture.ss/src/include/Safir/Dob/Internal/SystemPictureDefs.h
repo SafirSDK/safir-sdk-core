@@ -65,7 +65,7 @@ namespace SP
 
         const int64_t id;                                                //node type id
         const std::string name;                                          //readable name
-        const bool isLightNode;                                              //is the node a light node
+        const bool isLightNode;                                          //is the node a light node
         const boost::chrono::steady_clock::duration heartbeatInterval;   //time between heartbeats
         const int maxLostHeartbeats;                                     //number of heartbeats that can be lost before node is considered dead
         const std::vector<boost::chrono::steady_clock::duration> retryTimeout;        //time to wait for replies.

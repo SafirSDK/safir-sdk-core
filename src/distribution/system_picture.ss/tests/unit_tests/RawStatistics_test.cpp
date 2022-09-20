@@ -71,6 +71,7 @@ std::unique_ptr<RawStatisticsMessage> GetProtobuf(bool empty,bool recursive)
         node->set_control_address(iAsStr + ":fobar!");
         node->set_data_address(iAsStr + ":flopp");
         node->set_is_dead(i%2==0);
+        node->set_is_resurrecting(i%3==0);
         node->set_control_receive_count(i + 1000);
         node->set_control_duplicate_count(i + 2000);
         node->set_control_retransmit_count(100 + i);
@@ -101,6 +102,7 @@ std::unique_ptr<RawStatisticsMessage> GetProtobuf(bool empty,bool recursive)
                 rnode->set_control_address(iAsStr + ":fobar!" + jAsStr);
                 rnode->set_data_address(iAsStr + ":flopp" + jAsStr);
                 rnode->set_is_dead((i + j)%2==0);
+                rnode->set_is_resurrecting((i + j)%3==0);
                 rnode->set_control_receive_count(i*j + 1000);
                 rnode->set_control_duplicate_count(i*j + 2000);
                 rnode->set_control_retransmit_count(100 + i*j);
@@ -167,6 +169,7 @@ BOOST_AUTO_TEST_CASE( test_one_level )
         BOOST_CHECK(r.ControlAddress(i) == boost::lexical_cast<std::string>(i) + ":fobar!");
         BOOST_CHECK(r.DataAddress(i) == boost::lexical_cast<std::string>(i) + ":flopp");
         BOOST_CHECK(r.IsDead(i) == (i%2==0));
+        BOOST_CHECK(r.IsResurrecting(i) == (i%3==0));
         BOOST_CHECK(r.ControlReceiveCount(i) == static_cast<uint32_t>(i + 1000));
         BOOST_CHECK(r.ControlDuplicateCount(i) == static_cast<uint32_t>(i + 2000));
         BOOST_CHECK(r.ControlRetransmitCount(i) == static_cast<uint32_t>(100 + i));
@@ -213,6 +216,7 @@ BOOST_AUTO_TEST_CASE( test_two_levels )
             BOOST_CHECK(remote.ControlAddress(j) == iAsStr + ":fobar!" + jAsStr);
             BOOST_CHECK(remote.DataAddress(j) == iAsStr + ":flopp" + jAsStr);
             BOOST_CHECK(remote.IsDead(j) == ((i+j)%2==0));
+            BOOST_CHECK(remote.IsResurrecting(j) == ((i+j)%3==0));
             BOOST_CHECK(remote.ControlReceiveCount(j) == static_cast<uint32_t>(i*j + 1000));
             BOOST_CHECK(remote.ControlDuplicateCount(j) == static_cast<uint32_t>(i*j + 2000));
             BOOST_CHECK(remote.ControlRetransmitCount(j) == static_cast<uint32_t>(100 + i*j));

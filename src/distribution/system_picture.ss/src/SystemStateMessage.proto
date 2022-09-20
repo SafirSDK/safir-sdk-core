@@ -1,8 +1,8 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2015 (http://safirsdkcore.com/)
+* Copyright Saab AB, 2014, 2015 (http://safirsdkcore.com/)
 *
-* Created by: Joel Ottosson / joel.ottosson@consoden.se
+* Created by: Lars Hagström / lars.hagstrom@consoden.se
 *
 *******************************************************************************
 *
@@ -45,6 +45,9 @@ message SystemStateMessage
 
     //which, if any, election_id was sent out by the elected coordinator in his VICTORY message
     required sfixed64 election_id = 2;
+
+    //Does this state represent a single detached lightnode?
+    required bool is_detached = 4;
 
     repeated NodeInfo node_info = 3;
 }

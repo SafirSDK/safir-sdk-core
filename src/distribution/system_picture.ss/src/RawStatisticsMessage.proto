@@ -38,6 +38,7 @@ message RawStatisticsMessage
         required string data_address = 5; //The address and port of the node's data socket
 
         required bool is_dead = 6;
+        required bool is_resurrecting = 14;
         required uint32 control_receive_count = 7;
         required uint32 control_duplicate_count = 8;
         required uint32 control_retransmit_count = 9;
@@ -48,7 +49,8 @@ message RawStatisticsMessage
         //if this message is a node-local SP to SP message (e.g. between control and dose_main and dobexplorer)
         //it will contain all the node statistics received from other nodes.
         optional RawStatisticsMessage remote_statistics = 13;
-    }
+
+        }
 
     //information about myself
     required string name = 1;

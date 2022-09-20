@@ -86,6 +86,7 @@ namespace SP
             , m_name(name)
             , m_id(id)
             , m_nodeTypeId(nodeTypeId)
+            , m_nodeTypes(nodeTypes)
             , m_controlAddress(controlAddress)
             , m_dataAddress(dataAddress)
             , m_ownElectionId(0)
@@ -96,6 +97,7 @@ namespace SP
             m_electionHandler.reset(new ElectionHandlerT(ioService,
                                                          communication,
                                                          id,
+                                                         nodeTypeId,
                                                          nodeTypes,
                                                          aloneTimeout,
                                                          receiverId,
@@ -118,6 +120,7 @@ namespace SP
                                                          }));
 
             m_stateMessage.set_elected_id(0); //our state message is not valid until we have a real id set.
+            m_stateMessage.set_is_detached(false);
 
             rawHandler.AddRawChangedCallback(m_strand.wrap([this](const RawStatistics& statistics,
                                                                   const RawChanges flags,
@@ -224,6 +227,12 @@ namespace SP
                     throw std::logic_error("Incorrect ElectionIds!");
                 }
 
+                if (m_stateMessage.is_detached())
+                {
+                    SEND_SYSTEM_LOG(Alert,
+                                    << "Got a State message from " << from << " which claims to be a detached node");
+                    throw std::logic_error("Got detached StateMessage!");
+                }
                 //Getting a system state that we're marked as dead in signifies that
                 //there is a bug in Communication, where an ExcludeNode has not worked
                 //or a bug in UpdateMyState where a node has been marked as dead but
@@ -306,8 +315,9 @@ namespace SP
             return nodes;
         }
 
-        /** Get all node ids that any node thinks is dead */
+        /** Get all node ids that any normal node thinks is dead */
         static std::map<int64_t, std::pair<RawStatistics,int>> GetDeadNodes(const RawStatistics& statistics,
+                                                                            const std::map<int64_t, NodeType>& nodeTypes,
                                                                             const int64_t ownId)
         {
             std::map<int64_t, std::pair<RawStatistics,int>> deadNodes;
@@ -318,7 +328,10 @@ namespace SP
                     deadNodes.insert(std::make_pair(statistics.Id(i), std::make_pair(statistics,i)));
                 }
 
-                if (statistics.HasRemoteStatistics(i))
+                const bool isLightNode = nodeTypes.at(statistics.NodeTypeId(i)).isLightNode;
+
+                //We don't trust lightnodes to know about deadness
+                if (statistics.HasRemoteStatistics(i) && !isLightNode)
                 {
                     const auto remote = statistics.RemoteStatistics(i);
                     for (int j = 0; j < remote.Size(); ++j)
@@ -345,7 +358,7 @@ namespace SP
         bool SystemStable() const
         {
             //get all node ids that we've heard about so far
-            std::set<int64_t> knownNodes; 
+            std::set<int64_t> knownNodes;
             knownNodes.insert(m_id); //include ourselves...
 
             for (int i = 0; i < m_lastStatistics.Size(); ++i)
@@ -445,15 +458,15 @@ namespace SP
 
         bool ExcludeNodes(const std::map<int64_t, std::pair<RawStatistics,int>>& deadNodes) const
         {
-            //Exclude nodes that we think are alive but someone else thinks are dead
-            //(the ExcludeNode will cause RawHandler to post another RawChangedEvent)
+            //Exclude nodes that we think are alive but some other normal node thinks is
+            //dead (the ExcludeNode will cause RawHandler to post another RawChangedEvent)
             bool changes = false;
             for (int i = 0; i < m_lastStatistics.Size(); ++i)
             {
                 if (!m_lastStatistics.IsDead(i) &&
                     deadNodes.find(m_lastStatistics.Id(i)) != deadNodes.end())
                 {
-                    lllog (4) << "SP: Someone thinks that node " << m_lastStatistics.Name(i).c_str()
+                    lllog (4) << "SP: thinks that node " << m_lastStatistics.Name(i).c_str()
                               << " with id " << m_lastStatistics.Id(i)
                               << " is dead, so I'll exclude him."
                               << std::endl;
@@ -498,9 +511,9 @@ namespace SP
             lllog(9) << "SP: Passed all checks, looking for dead nodes that "
                      << "I need to exclude before updating my state\n";
 
-            //get all nodes that anyone thinks are dead in a table
+            //get all nodes that any normal node thinks is dead in a table
             //(we will be removing nodes from this table as we handle them below)
-            auto deadNodes = GetDeadNodes(m_lastStatistics, m_id);
+            auto deadNodes = GetDeadNodes(m_lastStatistics, m_nodeTypes, m_id);
 
             //Exclude nodes that we think are alive but someone else thinks are dead
             //(code in ExcludeNodes will cause RawHandler to post another RawChangedEvent,
@@ -530,6 +543,13 @@ namespace SP
 
             m_stateMessage.set_elected_id(m_id);
             m_stateMessage.set_election_id(m_ownElectionId);
+
+            // if we're becoming detached we need to clear out all the nodes from state
+            if (!m_stateMessage.is_detached() && m_electionHandler->IsDetached())
+            {
+                m_stateMessage.clear_node_info();
+            }
+            m_stateMessage.set_is_detached(m_electionHandler->IsDetached());
 
             lllog(9) << "SP: Looking at last state\n";
 
@@ -603,7 +623,7 @@ namespace SP
             {
                 std::set<int64_t> died;
                 //handle nodes that have died since last state
-                
+
                 for (auto lln = lastLiveNodes.cbegin(); lln != lastLiveNodes.cend(); ++lln)
                 {
                     const auto findIt = deadNodes.find(lln->first);
@@ -648,7 +668,6 @@ namespace SP
                 {
                     continue;
                 }
-
                 const auto remote = m_lastStatistics.RemoteStatistics(i);
 
                 auto lln = lastLiveNodes;
@@ -657,7 +676,24 @@ namespace SP
                     lln.erase(remote.Id(j));
                 }
 
-                //if remote has seen all live nodes lln should be empty
+                //For light nodes we don't expect them to have seen other light nodes.
+                if (m_nodeTypes.at(m_lastStatistics.NodeTypeId(i)).isLightNode)
+                {
+                    auto llnIt = lln.begin();
+                    while(llnIt != lln.end())
+                    {
+                        if (m_nodeTypes.at(llnIt->second->node_type_id()).isLightNode)
+                        {
+                            llnIt = lln.erase(llnIt);
+                        }
+                        else
+                        {
+                            ++llnIt;
+                        }
+                    }
+                }
+
+                //if remote has seen all live normal nodes lln should be empty
                 //(doesnt matter if they're dead, since that has already been handled)
                 if (lln.empty())
                 {
@@ -678,6 +714,12 @@ namespace SP
                     continue;
                 }
 
+                //We don't care about what light nodes think of the world
+                if (m_nodeTypes.at(m_lastStatistics.NodeTypeId(i)).isLightNode)
+                {
+                    continue;
+                }
+
                 const auto remote = m_lastStatistics.RemoteStatistics(i);
 
                 auto seen = newNodes;
@@ -693,7 +735,6 @@ namespace SP
                 {
                     lllog(9) << "SP:   Node " << m_lastStatistics.Id(i) << " cannot see node "
                              << *notSeen << ", so we cannot add it to system state yet\n";
-
                     newNodes.erase(*notSeen);
                 }
             }
@@ -704,6 +745,12 @@ namespace SP
                 //skip nodes that are dead or that are not new
                 if (m_lastStatistics.IsDead(i) ||
                     newNodes.find(m_lastStatistics.Id(i)) == newNodes.end())
+                {
+                    continue;
+                }
+
+                //We don't care about what light nodes think of the world
+                if (m_nodeTypes.at(m_lastStatistics.NodeTypeId(i)).isLightNode)
                 {
                     continue;
                 }
@@ -725,7 +772,6 @@ namespace SP
                 {
                     lllog(9) << "SP:   Node " << m_lastStatistics.Id(i) << " cannot see node "
                              << *notSeen << ", so we cannot add it to system state yet\n";
-
                     newNodes.erase(*notSeen);
                 }
             }
@@ -798,6 +844,13 @@ namespace SP
                 }
             }
 
+            if (m_stateMessage.is_detached() && m_stateMessage.node_info_size() != 1)
+            {
+                lllog(1) << "SP: A detached SystemState message should only have one node in it:\n"
+                         << m_stateMessage << std::endl;
+                throw std::logic_error("A detached SystemState message should only have one node in it");
+            }
+
             lllog(9) << "SP: A new SystemState has been produced\n";
             if (logState)
             {
@@ -831,6 +884,7 @@ namespace SP
         const std::string m_name;
         const int64_t m_id;
         const int64_t m_nodeTypeId;
+        const std::map<int64_t, NodeType> m_nodeTypes;
         const std::string m_controlAddress;
         const std::string m_dataAddress;
         int64_t m_ownElectionId;

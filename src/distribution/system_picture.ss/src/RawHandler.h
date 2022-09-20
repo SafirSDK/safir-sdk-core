@@ -116,6 +116,7 @@ namespace SP
             : m_ioService(ioService)
             , m_communication(communication)
             , m_id(id)
+            , m_isLightNode(nodeTypes.at(nodeTypeId).isLightNode)
             , m_nodeTypes(nodeTypes)
             , m_strand(ioService)
             , m_latencyMonitor("SpRawHandler",CalculateLatencyWarningThreshold(nodeTypes),m_strand)
@@ -195,7 +196,7 @@ namespace SP
 
 
         void PerformOnMyStatisticsMessage(const std::function<void(std::unique_ptr<char[]> data,
-                                                                          const size_t size)> & fn) const
+                                                                   const size_t size)> & fn) const
         {
             m_strand.dispatch([this,fn]
             {
@@ -378,7 +379,7 @@ namespace SP
 
                 if (changes != 0)
                 {
-                    PostRawChangedCallback(RawChanges(changes), NULL);
+                    PostRawChangedCallback(RawChanges(changes), nullptr);
                 }
             });
         }
@@ -478,7 +479,7 @@ namespace SP
 
                 if (changes != 0)
                 {
-                    PostRawChangedCallback(changes, NULL);
+                    PostRawChangedCallback(changes, nullptr);
                 }
             });
         }
@@ -516,8 +517,79 @@ namespace SP
                                   if (!findIt->second.nodeInfo->is_dead())
                                   {
                                       findIt->second.nodeInfo->set_is_dead(true);
-                                      PostRawChangedCallback(RawChanges::NODES_CHANGED, NULL);
+                                      PostRawChangedCallback(RawChanges::NODES_CHANGED, nullptr);
                                   }
+                              });
+        }
+
+        /**
+         * Resurrect a light node that was marked as dead and wants to come back to life
+         **/
+        void ResurrectNode(const int64_t id)
+        {
+            m_strand.dispatch([this, id]
+                              {
+                                  auto findIt = m_nodeTable.find(id);
+
+                                  if (findIt == m_nodeTable.end())
+                                  {
+                                      throw std::logic_error("ResurrectNode on unknown node!");
+                                  }
+
+                                  if (!findIt->second.nodeInfo->is_dead())
+                                  {
+                                      throw std::logic_error("ResurrectNode on not dead node!");
+                                  }
+
+                                  if (!findIt->second.nodeInfo->is_resurrecting())
+                                  {
+                                      throw std::logic_error("ResurrectNode on not resurrecting node!");
+                                  }
+
+                                  m_communication.IncludeNode(id);
+                                  findIt->second.nodeInfo->set_is_dead(false);
+                                  findIt->second.nodeInfo->set_is_resurrecting(false);
+
+                                  findIt->second.nodeInfo->set_control_receive_count(0);
+                                  findIt->second.nodeInfo->set_control_duplicate_count(0);
+                                  findIt->second.nodeInfo->set_control_retransmit_count(0);
+                                  findIt->second.nodeInfo->set_data_receive_count(0);
+                                  findIt->second.nodeInfo->set_data_duplicate_count(0);
+                                  findIt->second.nodeInfo->set_data_retransmit_count(0);
+
+                                  PostRawChangedCallback(RawChanges::NODES_CHANGED, nullptr);
+                              });
+        }
+
+        /**
+         * Tell the RawHandler that this light node should forget everything about other nodes
+         * since it is no longer connected to anything.
+         *
+         * This will fail on non-light nodes or of some node is alive.
+         */
+        void SetNodeIsDetached()
+        {
+            if (!m_isLightNode)
+            {
+                throw std::logic_error("SP: SetNodeIsDetached was called on a non-light node!");
+            }
+
+            m_strand.dispatch([this]
+                              {
+                                  for (const auto& node: m_nodeTable)
+                                  {
+                                      if (!node.second.nodeInfo->is_dead())
+                                      {
+                                          throw std::logic_error("SP: SetNodeIsDetached was called when"
+                                                                 "there was a node that is alive!");
+                                      }
+                                  }
+
+                                  m_nodeTable.clear();
+                                  m_allStatisticsMessage.clear_node_info();
+                                  m_allStatisticsMessage.clear_more_dead_nodes();
+                                  m_allStatisticsMessage.clear_incarnation_id();
+                                  PostRawChangedCallback(RawChanges::NODES_CHANGED, nullptr);
                               });
         }
 
@@ -547,7 +619,7 @@ namespace SP
 
                                   if (changed)
                                   {
-                                      PostRawChangedCallback(RawChanges::NODES_CHANGED, NULL);
+                                      PostRawChangedCallback(RawChanges::NODES_CHANGED, nullptr);
                                   }
                               });
         }
@@ -561,7 +633,7 @@ namespace SP
 
                                   m_allStatisticsMessage.set_election_id(electionId);
 
-                                  PostRawChangedCallback(RawChanges(RawChanges::METADATA_CHANGED), NULL);
+                                  PostRawChangedCallback(RawChanges(RawChanges::METADATA_CHANGED), nullptr);
                               });
         }
 
@@ -575,13 +647,13 @@ namespace SP
                                   }
 
                                   const auto formSystem = m_validateFormSystemCallback == nullptr ||
-                                                    m_validateFormSystemCallback(incarnationId);
+                                                          m_validateFormSystemCallback(incarnationId);
 
                                   if (formSystem)
                                   {
                                       m_allStatisticsMessage.set_incarnation_id(incarnationId);
 
-                                      PostRawChangedCallback(RawChanges(RawChanges::METADATA_CHANGED), NULL);
+                                      PostRawChangedCallback(RawChanges(RawChanges::METADATA_CHANGED), nullptr);
 
                                       lllog(1) << "SP: Incarnation Id " << incarnationId
                                                << " set in RawHandler." << std::endl;
@@ -665,58 +737,80 @@ namespace SP
                 throw std::logic_error("Got a new node that has the same id as me!");
             }
 
-            const auto newNode = this->m_allStatisticsMessage.add_node_info();
-            const auto insertResult = this->m_nodeTable.insert(std::make_pair(id,NodeInfo(newNode,multicast)));
-
-            if (!insertResult.second)
-            {
-                throw std::logic_error("Got a new node that I already had");
-            }
-
-            if (m_nodeTypes.find(nodeTypeId) == m_nodeTypes.end())
+            const auto nodeTypeIt = m_nodeTypes.find(nodeTypeId);
+            if (nodeTypeIt == m_nodeTypes.end())
             {
                 throw std::logic_error("Got a new node with a node type id that I dont know about!");
             }
 
-            //last receive times are set by NodeInfo constructor
-
-            newNode->set_name(name);
-            newNode->set_id(id);
-            newNode->set_node_type_id(nodeTypeId);
-            newNode->set_control_address(controlAddress);
-            newNode->set_data_address(dataAddress);
-
-            newNode->set_is_dead(false);
-            newNode->set_control_receive_count(0);
-            newNode->set_control_duplicate_count(0);
-            newNode->set_control_retransmit_count(0);
-            newNode->set_data_receive_count(0);
-            newNode->set_data_duplicate_count(0);
-            newNode->set_data_retransmit_count(0);
-
-            if (m_moreDeadNodes.find(id) != m_moreDeadNodes.end())
+            if(nodeTypeIt->second.isLightNode && m_isLightNode)
             {
-                m_communication.ExcludeNode(id);
-                newNode->set_is_dead(true);
+                throw std::logic_error("I am a light node and got told about another light node!");
             }
 
-            //notify our users of the new node, and when they've returned we can
-            //let it in.
-            PostRawChangedCallback(RawChanges(RawChanges::NODES_CHANGED),
-                                   m_strand.wrap([this,name,id,newNode]
-                  {
-                      if (!newNode->is_dead())
-                      {
-                          lllog(4) << "SP: Calling IncludeNode for "
-                                   << name.c_str() << "(" << id << ")" << std::endl;
-                          m_communication.IncludeNode(id);
-                      }
-                      else
-                      {
-                          lllog(4) << "SP: Not calling IncludeNode for "
-                                   << name.c_str() << "(" << id << ") since it has been marked as dead." << std::endl;
-                      }
-                  }));
+            const auto nodeIt = m_nodeTable.find(id);
+            if (nodeTypeIt->second.isLightNode && nodeIt != m_nodeTable.end())
+            {
+                if (!nodeIt->second.nodeInfo->is_dead())
+                {
+                    throw std::logic_error("Got a new node for a light node that is not dead!");
+                }
+
+                nodeIt->second.nodeInfo->set_is_resurrecting(true);
+
+                PostRawChangedCallback(RawChanges(RawChanges::NODES_CHANGED), nullptr);
+            }
+            else
+            {
+                const auto newNode = m_allStatisticsMessage.add_node_info();
+                const auto insertResult = m_nodeTable.insert(std::make_pair(id,NodeInfo(newNode,multicast)));
+
+                if (!insertResult.second)
+                {
+                    throw std::logic_error("Got a new node that I already had");
+                }
+
+                //last receive times are set by NodeInfo constructor
+
+                newNode->set_name(name);
+                newNode->set_id(id);
+                newNode->set_node_type_id(nodeTypeId);
+                newNode->set_control_address(controlAddress);
+                newNode->set_data_address(dataAddress);
+
+                newNode->set_is_dead(false);
+                newNode->set_is_resurrecting(false);
+                newNode->set_control_receive_count(0);
+                newNode->set_control_duplicate_count(0);
+                newNode->set_control_retransmit_count(0);
+                newNode->set_data_receive_count(0);
+                newNode->set_data_duplicate_count(0);
+                newNode->set_data_retransmit_count(0);
+
+                if (m_moreDeadNodes.find(id) != m_moreDeadNodes.end())
+                {
+                    m_communication.ExcludeNode(id);
+                    newNode->set_is_dead(true);
+                }
+
+                //notify our users of the new node, and when they've returned we can
+                //let it in.
+                PostRawChangedCallback(RawChanges(RawChanges::NODES_CHANGED),
+                                       m_strand.wrap([this,name,id,newNode]
+                                       {
+                                           if (!newNode->is_dead())
+                                           {
+                                               lllog(4) << "SP: Calling IncludeNode for "
+                                                        << name.c_str() << "(" << id << ")" << std::endl;
+                                               m_communication.IncludeNode(id);
+                                           }
+                                           else
+                                           {
+                                               lllog(4) << "SP: Not calling IncludeNode for "
+                                                        << name.c_str() << "(" << id << ") since it has been marked as dead." << std::endl;
+                                           }
+                                       }));
+            }
         }
 
         //Must be called in strand!
@@ -994,7 +1088,7 @@ namespace SP
 
             if (somethingChanged)
             {
-                PostRawChangedCallback(RawChanges(RawChanges::NODES_CHANGED), NULL);
+                PostRawChangedCallback(RawChanges(RawChanges::NODES_CHANGED), nullptr);
             }
         }
 
@@ -1035,6 +1129,7 @@ namespace SP
         CommunicationT& m_communication;
 
         const int64_t m_id;
+        const bool m_isLightNode;
         const std::map<int64_t, NodeType> m_nodeTypes;
         mutable boost::asio::io_service::strand m_strand;
         AsioLatencyMonitor m_latencyMonitor;

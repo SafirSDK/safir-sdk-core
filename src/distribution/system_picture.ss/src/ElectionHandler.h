@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2013 (http://safirsdkcore.com)
+* Copyright Saab AB, 2013, 2022 (http://safirsdkcore.com)
 *
 * Created by: Lars Hagström / lars.hagstrom@consoden.se
 *
@@ -66,6 +66,7 @@ namespace SP
         ElectionHandlerBasic(boost::asio::io_service& ioService,
                              CommunicationT& communication,
                              const int64_t id,
+                             const int64_t nodeTypeId,
                              const std::map<int64_t, NodeType>& nodeTypes,
                              const boost::chrono::steady_clock::duration& aloneTimeout,
                              const char* const receiverId,
@@ -77,6 +78,7 @@ namespace SP
             , m_communication(communication)
             , m_receiverId(LlufId_Generate64(receiverId))
             , m_id(id)
+            , m_isLightNode(nodeTypes.at(nodeTypeId).isLightNode)
             , m_nodeTypes(nodeTypes)
             , m_nonLightNodeTypes(GetNonLightNodeTypes(nodeTypes))
             , m_aloneTimeout(CalculateAloneTimeout(nodeTypes, aloneTimeout))
@@ -120,6 +122,7 @@ namespace SP
 
         bool IsElected() const {return m_id == m_elected;}
         bool IsElected(const int64_t nodeId) const {return nodeId == m_elected;}
+        bool IsDetached() const {return m_isLightNode && m_elected == m_id;}
 
         void Stop()
         {
@@ -138,6 +141,23 @@ namespace SP
 
         void NodesChanged(const RawStatistics& statistics, std::shared_ptr<void> completionSignaller)
         {
+            if (statistics.Id() != m_id)
+            {
+                throw std::logic_error("Got RawStatistics from some other node!");
+            }
+
+            //check that we can't see any other light nodes (this is a sanity check)
+            if (m_isLightNode && statistics.Valid())
+            {
+                for (int i = 0; i < statistics.Size(); ++i)
+                {
+                    if (m_id != statistics.Id(i) && m_nodeTypes.at(statistics.NodeTypeId(i)).isLightNode)
+                    {
+                        throw std::logic_error("SP: It looks like I can see another light node!");
+                    }
+                }
+            }
+
             m_strand.dispatch([this, statistics, completionSignaller]
                               {
                                   lllog(5) << "SP: ElectionHandler got new RawStatistics" << std::endl;
@@ -252,8 +272,15 @@ namespace SP
                 {
                     return;
                 }
-                lllog(4) << "SP: Checking if I should start election" << std::endl;
 
+                if (m_isLightNode && m_lastStatistics.Valid() && m_lastStatistics.IsEveryoneElseDead())
+                {
+                    lllog(4) << "SP: I am a light node, and everyone else is gone, so I shall get myself elected anyway." << std::endl;
+                    m_lastStatistics = RawStatistics();
+                }
+
+                lllog(4) << "SP: Checking if I should start election" << std::endl;
+                
                 if (!m_lastStatistics.Valid())
                 {
                     lllog(4) << "SP: Haven't heard from any other nodes, electing myself!" << std::endl;
@@ -265,6 +292,11 @@ namespace SP
                     //1. We are of a node type that is not allowed to form a system
                     //2. A RAW happens to be received before our incarnation id is set.
                     m_formSystemCallback(LlufId_GenerateRandom64());
+                    return;
+                }
+                else if (m_isLightNode)
+                {
+                    lllog(4) << "SP: I am a light node, not starting any elections" << std::endl;
                     return;
                 }
                 else
@@ -297,6 +329,7 @@ namespace SP
 
 
                 lllog(4) << "SP: Starting election" << std::endl;
+
                 m_currentElectionId = LlufId_GenerateRandom64();
 
                 m_pendingInquiries = m_nonLightNodeTypes;
@@ -401,7 +434,7 @@ namespace SP
                     {
                         //if we got an inquiry from someone smaller than us we send an alive
                         //and start a new election
-                        if (from < m_id)
+                        if (from < m_id && !m_isLightNode)
                         {
                             lllog(5) << "SP: Got an inquiry from someone smaller than us, sending alive and starting election" << std::endl;
                             m_pendingAlives[from] = std::make_pair(nodeTypeId, message.election_id());
@@ -415,7 +448,7 @@ namespace SP
                 case ALIVE:
                     {
                         //if we got an alive from someone bigger than us we abandon the election
-                        if (from > m_id &&
+                        if (from > m_id && !m_isLightNode &&
                             message.election_id() == m_currentElectionId)
                         {
                             lllog(5) << "SP: Got alive from someone bigger than me ("
@@ -430,7 +463,7 @@ namespace SP
 
                 case VICTORY:
                     {
-                        if (from > m_id)
+                        if (from > m_id || m_isLightNode)
                         {
                             lllog(4) << "SP: New controller elected: " << from << std::endl;
                             //graciously accept their victory
@@ -570,6 +603,7 @@ namespace SP
         const uint64_t m_receiverId;
 
         const int64_t m_id;
+        const bool m_isLightNode;
         const std::map<int64_t, NodeType> m_nodeTypes;
         const std::set<int64_t> m_nonLightNodeTypes;
 
