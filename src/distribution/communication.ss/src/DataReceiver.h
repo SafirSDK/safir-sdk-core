@@ -31,6 +31,7 @@
 #include "Parameters.h"
 #include "Message.h"
 #include "Node.h"
+#include "Resolver.h"
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -62,7 +63,7 @@ namespace Com
     class DataReceiverType : private ReaderType
     {
     public:
-        DataReceiverType(boost::asio::io_service::strand& receiveStrand,
+        DataReceiverType(boost::asio::io_context::strand& receiveStrand,
                          const std::string& unicastAddress,
                          const std::string& multicastAddress,
                          const std::function<bool(const char*, size_t, bool multicast)>& onRecv,
@@ -73,34 +74,19 @@ namespace Com
             ,m_isReceiverReady(isReceiverIsReady)
             ,m_running(false)
         {
-            auto unicastEndpoint=Resolver::StringToEndpoint(unicastAddress);
-
-            m_socket.reset(new boost::asio::ip::udp::socket(m_strand.context()));
-            m_socket->open(unicastEndpoint.protocol());
-            m_socket->set_option(boost::asio::ip::udp::socket::reuse_address(true));
-            m_socket->bind(unicastEndpoint);
-            m_socket->set_option(boost::asio::socket_base::receive_buffer_size(Parameters::SocketBufferSize));
-
+            m_unicastEndpoint = Resolver::StringToEndpoint(unicastAddress);
             if (!multicastAddress.empty())
             {
-                //using multicast
-                auto mcEndpoint=Resolver::StringToEndpoint(multicastAddress);
-
-                if (mcEndpoint.protocol()!=unicastEndpoint.protocol())
+                m_multicastEndpoint = Resolver::StringToEndpoint(multicastAddress);
+                if (m_multicastEndpoint.protocol() != m_unicastEndpoint.protocol())
                 {
                     throw std::logic_error("Unicast address and multicast address is not in same format (IPv4 and IPv6)");
                 }
-                m_multicastSocket.reset(new boost::asio::ip::udp::socket(m_strand.context()));
-                m_multicastSocket->open(mcEndpoint.protocol());
-                m_multicastSocket->set_option(boost::asio::ip::udp::socket::reuse_address(true));
-                m_multicastSocket->set_option(boost::asio::ip::multicast::enable_loopback(true));
-
-                //to join mcGroup with specific interface, the address must be a IPv4. Bug report https://svn.boost.org/trac/boost/ticket/3247
-                m_multicastSocket->bind(boost::asio::ip::udp::endpoint(boost::asio::ip::address_v4::any(), mcEndpoint.port())); //bind to all interfaces and the multicast port
-                m_multicastSocket->set_option(boost::asio::ip::multicast::join_group(mcEndpoint.address().to_v4(), unicastEndpoint.address().to_v4())); //join group on specific interface
-                m_multicastSocket->set_option(boost::asio::socket_base::receive_buffer_size(Parameters::SocketBufferSize));
+                if (!m_multicastEndpoint.address().is_multicast())
+                {
+                    throw std::logic_error("Given multicast address does not specify a valid multicast address");
+                }
             }
-
         }
 
         //make noncopyable
@@ -109,12 +95,28 @@ namespace Com
 
         void Start()
         {
-            m_strand.dispatch([this]
+            boost::asio::post(m_strand, [this]
             {
                 m_running=true;
+
+                m_socket.reset(new boost::asio::ip::udp::socket(m_strand.context()));
+                m_socket->open(m_unicastEndpoint.protocol());
+                m_socket->set_option(boost::asio::ip::udp::socket::reuse_address(true));
+                m_socket->bind(m_unicastEndpoint);
+                m_socket->set_option(boost::asio::socket_base::receive_buffer_size(Parameters::SocketBufferSize));
                 AsyncReceive(m_bufferUnicast, m_socket.get());
-                if (m_multicastSocket)
+
+                if (!m_multicastEndpoint.address().is_unspecified())
                 {
+                    m_multicastSocket.reset(new boost::asio::ip::udp::socket(m_strand.context()));
+                    m_multicastSocket->open(m_multicastEndpoint.protocol());
+                    m_multicastSocket->set_option(boost::asio::ip::udp::socket::reuse_address(true));
+                    m_multicastSocket->set_option(boost::asio::ip::multicast::enable_loopback(true));
+
+                    //to join mcGroup with specific interface, the address must be a IPv4. Bug report https://svn.boost.org/trac/boost/ticket/3247
+                    m_multicastSocket->bind(boost::asio::ip::udp::endpoint(boost::asio::ip::address_v4::any(), m_multicastEndpoint.port())); //bind to all interfaces and the multicast port
+                    m_multicastSocket->set_option(boost::asio::ip::multicast::join_group(m_multicastEndpoint.address().to_v4(), m_unicastEndpoint.address().to_v4())); //join group on specific interface
+                    m_multicastSocket->set_option(boost::asio::socket_base::receive_buffer_size(Parameters::SocketBufferSize));
                     AsyncReceive(m_bufferMulticast, m_multicastSocket.get());
                 }
             });
@@ -122,18 +124,20 @@ namespace Com
 
         void Stop()
         {
-            m_strand.dispatch([this]
+            boost::asio::post(m_strand, [this]
             {
                 m_running=false;
                 m_timer.cancel();
 
-                if (m_socket->is_open())
+                if (m_socket && m_socket->is_open())
                 {
                     m_socket->close();
+                    m_socket.reset();
                 }
                 if (m_multicastSocket && m_multicastSocket->is_open())
                 {
                     m_multicastSocket->close();
+                    m_multicastSocket.reset();
                 }
             });
         }
@@ -141,12 +145,14 @@ namespace Com
 #ifndef SAFIR_TEST
     private:
 #endif
-        boost::asio::io_service::strand& m_strand;
+        boost::asio::io_context::strand& m_strand;
         boost::asio::steady_timer m_timer;
         std::function<bool(const char*, size_t, bool multicast)> m_onRecv;
         std::function<bool(void)> m_isReceiverReady;
         std::shared_ptr<boost::asio::ip::udp::socket> m_socket;
         std::shared_ptr<boost::asio::ip::udp::socket> m_multicastSocket;
+        boost::asio::ip::udp::endpoint m_unicastEndpoint;
+        boost::asio::ip::udp::endpoint m_multicastEndpoint;
         bool m_running;
 
         char m_bufferUnicast[Parameters::ReceiveBufferSize];
@@ -157,7 +163,7 @@ namespace Com
             ReaderType::AsyncReceive(buf,
                                      Parameters::ReceiveBufferSize,
                                      socket,
-                                     m_strand.wrap([this,buf,socket](const boost::system::error_code& error, size_t bytesRecv)
+                                     boost::asio::bind_executor(m_strand, [this,buf,socket](const boost::system::error_code& error, size_t bytesRecv)
                                      {
                                          HandleReceive(error, bytesRecv, buf, socket);
                                      }));
@@ -243,8 +249,8 @@ namespace Com
 
         void SetWakeUpTimer(char* buf, boost::asio::ip::udp::socket* socket)
         {
-            m_timer.expires_from_now(boost::chrono::milliseconds(10));
-            m_timer.async_wait(m_strand.wrap([this,buf,socket](const boost::system::error_code& error){WakeUpAfterSleep(error, buf, socket);}));
+            m_timer.expires_after(boost::chrono::milliseconds(10));
+            m_timer.async_wait(boost::asio::bind_executor(m_strand, [this,buf,socket](const boost::system::error_code& error){WakeUpAfterSleep(error, buf, socket);}));
         }
 
         void WakeUpAfterSleep(const boost::system::error_code& /*error*/, char* buf, boost::asio::ip::udp::socket* socket)

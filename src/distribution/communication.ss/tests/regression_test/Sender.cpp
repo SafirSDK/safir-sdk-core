@@ -23,22 +23,22 @@
 ******************************************************************************/
 #include "Sender.h"
 
-Sender::Sender(Com::ControlModeTag tag, boost::asio::io_service& ioService, int64_t nodeId, int64_t nodeType)
-    :Receiver(tag, ioService, nodeId, nodeType)
-    ,m_timerSend(ioService)
+Sender::Sender(Com::ControlModeTag tag, boost::asio::io_context& ioContext, int64_t nodeId, int64_t nodeType)
+    :Receiver(tag, ioContext, nodeId, nodeType)
+    ,m_timerSend(ioContext)
     ,m_msgCount(0)
 {
-    m_timerSend.expires_from_now(boost::chrono::milliseconds(10));
-    m_timerSend.async_wait(m_strand.wrap([this](const boost::system::error_code& /*error*/){if (m_running) Send();}));
+    m_timerSend.expires_after(boost::chrono::milliseconds(10));
+    m_timerSend.async_wait(boost::asio::bind_executor(m_strand, [this](const boost::system::error_code& /*error*/){if (m_running) Send();}));
 }
 
-Sender::Sender(Com::DataModeTag tag, boost::asio::io_service& ioService, int64_t nodeId, int64_t nodeType)
-    :Receiver(tag, ioService, nodeId, nodeType)
-    ,m_timerSend(ioService)
+Sender::Sender(Com::DataModeTag tag, boost::asio::io_context& ioContext, int64_t nodeId, int64_t nodeType)
+    :Receiver(tag, ioContext, nodeId, nodeType)
+    ,m_timerSend(ioContext)
     ,m_msgCount(0)
 {
-    m_timerSend.expires_from_now(boost::chrono::milliseconds(3000));
-    m_timerSend.async_wait(m_strand.wrap([this](const boost::system::error_code& error){if (!error) Send();}));
+    m_timerSend.expires_after(boost::chrono::milliseconds(3000));
+    m_timerSend.async_wait(boost::asio::bind_executor(m_strand, [this](const boost::system::error_code& error){if (!error) Send();}));
 }
 
 void Sender::Stop()
@@ -78,6 +78,6 @@ void Sender::Send()
         }
     }
 
-    m_timerSend.expires_from_now(boost::chrono::milliseconds(10));
-    m_timerSend.async_wait(m_strand.wrap([this](const boost::system::error_code& error){if (!error) Send();}));
+    m_timerSend.expires_after(boost::chrono::milliseconds(10));
+    m_timerSend.async_wait(boost::asio::bind_executor(m_strand, [this](const boost::system::error_code& error){if (!error) Send();}));
 }

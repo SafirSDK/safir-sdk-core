@@ -23,6 +23,7 @@
 ******************************************************************************/
 #pragma once
 
+#include <iostream>
 #include <boost/lexical_cast.hpp>
 #include <boost/asio.hpp>
 #include <boost/asio/ip/udp.hpp>
@@ -77,7 +78,7 @@ namespace Com
          *
          * @param io [in] - Reference to io_service, needed to make dns lookups.
          */
-        Resolver(boost::asio::io_service& io, bool verbose=false)
+        Resolver(boost::asio::io_context& io, bool verbose=false)
             :m_resolver(io)
             ,m_verbose(verbose)
         {
@@ -200,13 +201,13 @@ namespace Com
             }
 
             boost::system::error_code ec;
-            boost::asio::ip::address_v4::from_string(addr, ec);
+            boost::asio::ip::make_address_v4(addr, ec);
             if (!ec) //ip v4 address
             {
                 return 4;
             }
 
-            boost::asio::ip::address_v6::from_string(addr, ec);
+            boost::asio::ip::make_address_v6(addr, ec);
             if (!ec) //ip v6 address
             {
                 return 6;
@@ -328,17 +329,16 @@ namespace Com
         std::vector<std::string> DnsLookup(const std::string& hostName, int protocol) const
         {
             std::vector<std::string> result;
-            boost::asio::ip::udp::resolver::query query(hostName, "");
             boost::system::error_code ec;
-            auto it=m_resolver.resolve(query, ec);
+            auto results=m_resolver.resolve(hostName, "", ec);
             if (ec)
             {
                 throw std::logic_error(std::string("COM: DnsLookup failed. Host not found ")+hostName);
             }
 
-            while(it!=boost::asio::ip::udp::resolver::iterator())
+            for(const auto& res: results)
             {
-                auto addr=(it++)->endpoint().address();
+                auto addr=res.endpoint().address();
 
                 if (protocol==4 || protocol==46)
                 {
@@ -364,13 +364,13 @@ namespace Com
         static boost::asio::ip::udp::endpoint CreateEndpoint(const std::string& ip, unsigned short port)
         {
             boost::system::error_code ec;
-            boost::asio::ip::address_v4 a4=boost::asio::ip::address_v4::from_string(ip, ec);
+            boost::asio::ip::address_v4 a4=boost::asio::ip::make_address_v4(ip, ec);
             if (!ec) //ip v4 address
             {
                 return boost::asio::ip::udp::endpoint(a4, port);
             }
 
-            boost::asio::ip::address_v6 a6=boost::asio::ip::address_v6::from_string(ip, ec);
+            boost::asio::ip::address_v6 a6=boost::asio::ip::make_address_v6(ip, ec);
             if (!ec) //ip v6 address
             {
                 return boost::asio::ip::udp::endpoint(a6, port);

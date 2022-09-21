@@ -49,14 +49,14 @@ public:
     {
         std::cout<<"DataReceiverTest started"<<std::endl;
 
-        boost::asio::io_service io;
-        auto work=std::make_shared<boost::asio::io_service::work>(io);
+        boost::asio::io_context io;
+        auto work = boost::asio::make_work_guard(io);
         boost::thread_group threads;
         for (int i = 0; i < 9; ++i)
         {
             threads.create_thread([&]{io.run();});
         }
-        boost::asio::io_service::strand strand(io);
+        boost::asio::io_context::strand strand(io);
 
         //--------------------------
         // Setup
@@ -272,7 +272,8 @@ private:
             CHECK(bufSize>=sizeof(int)+sizeof(uint32_t)); //int and checksum
             bool unicast=(socket->local_endpoint().port()==10000);
             std::queue<int>* sendQueue=unicast ? &sentUnicast : &sentMulticast;
-            receiver->m_strand.context().post([&, sendQueue, buf, completionHandler]
+
+            boost::asio::post(receiver->m_strand.context(), [&, sendQueue, buf, completionHandler]
             {
                 bool received=false;
 

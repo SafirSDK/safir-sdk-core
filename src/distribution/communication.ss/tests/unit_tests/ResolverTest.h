@@ -31,8 +31,8 @@ public:
     static void Run()
     {
         std::wcout<<"ResolverTest started"<<std::endl;
-        boost::asio::io_service io;
-        auto work=std::make_shared<boost::asio::io_service::work>(io);
+        boost::asio::io_context io;
+        auto work=boost::asio::make_work_guard(io);
 
         boost::thread_group threads;
         for (int i = 0; i < 9; ++i)

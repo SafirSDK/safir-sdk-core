@@ -33,8 +33,8 @@ class Receiver
 {
 public:
 
-    Receiver(Com::ControlModeTag tag, boost::asio::io_service& ioService, int64_t nodeId, int64_t nodeType);
-    Receiver(Com::DataModeTag tag, boost::asio::io_service& ioService, int64_t nodeId, int64_t nodeType);
+    Receiver(Com::ControlModeTag tag, boost::asio::io_context& ioContext, int64_t nodeId, int64_t nodeType);
+    Receiver(Com::DataModeTag tag, boost::asio::io_context& ioContext, int64_t nodeId, int64_t nodeType);
 
     void InjectNode(int64_t nodeId, int64_t nodeType);
     void Seed(int64_t nodeId);
@@ -43,7 +43,7 @@ public:
 
 protected:
     boost::asio::steady_timer m_timerInclude;
-    boost::asio::io_service::strand m_strand;
+    boost::asio::io_context::strand m_strand;
     Com::Communication m_com;
 
     std::queue<int64_t> m_newNodes;

@@ -58,16 +58,16 @@ namespace Com
     class HeartbeatSenderBasic : private WriterType
     {
     public:
-        HeartbeatSenderBasic(boost::asio::io_service& ioService,
+        HeartbeatSenderBasic(boost::asio::io_context& ioContext,
                              int64_t nodeTypeId,
                              int64_t myNodeId,
                              int ipVersion,
                              const std::string& localIf,
                              const std::string& multicast,
                              int heartbeatInterval)
-            :WriterType(ioService, ipVersion, localIf, multicast)
-            ,m_strand(ioService)
-            ,m_heartbeatTimer(ioService)
+            :WriterType(ioContext, ipVersion, localIf, multicast)
+            ,m_strand(ioContext)
+            ,m_heartbeatTimer(ioContext)
             ,m_heartbeat(new Heartbeat(myNodeId))
             ,m_interval(heartbeatInterval)
             ,m_nodes()
@@ -79,17 +79,17 @@ namespace Com
 
         void Start() SAFIR_GCC_VISIBILITY_BUG_WORKAROUND
         {
-            m_strand.dispatch([this]
+            boost::asio::dispatch(m_strand, [this]
             {
                 m_running=true;
-                m_heartbeatTimer.expires_from_now(boost::chrono::milliseconds(m_interval));
-                m_heartbeatTimer.async_wait(m_strand.wrap([this](const boost::system::error_code&){OnTimeout();}));
+                m_heartbeatTimer.expires_after(boost::chrono::milliseconds(m_interval));
+                m_heartbeatTimer.async_wait(boost::asio::bind_executor(m_strand, [this](const boost::system::error_code&){OnTimeout();}));
             });
         }
 
         void Stop()
         {
-            m_strand.dispatch([this]
+            boost::asio::dispatch(m_strand, [this]
             {
                 m_running=false;
                 m_heartbeatTimer.cancel();
@@ -99,7 +99,7 @@ namespace Com
         //Add a node and starts sending heartbeats
         void AddNode(int64_t id, const std::string address)
         {
-            m_strand.dispatch([this,id,address]
+            boost::asio::dispatch(m_strand, [this, id, address]
             {
                 if (m_nodes.find(id)!=m_nodes.end())
                 {
@@ -114,14 +114,14 @@ namespace Com
 
         void RemoveNode(int64_t id)
         {
-            m_strand.dispatch([this,id]
+            boost::asio::dispatch(m_strand, [this,id]
             {
                 m_nodes.erase(id);
             });
         }
 
     private:
-        boost::asio::io_service::strand m_strand;
+        boost::asio::io_context::strand m_strand;
         boost::asio::steady_timer m_heartbeatTimer;
         std::shared_ptr<Heartbeat> m_heartbeat;
         int m_interval;
@@ -154,8 +154,8 @@ namespace Com
                     }
                 }
 
-                m_heartbeatTimer.expires_from_now(boost::chrono::milliseconds(m_interval));
-                m_heartbeatTimer.async_wait(m_strand.wrap([this](const boost::system::error_code&){OnTimeout();}));
+                m_heartbeatTimer.expires_after(boost::chrono::milliseconds(m_interval));
+                m_heartbeatTimer.async_wait(boost::asio::bind_executor(m_strand, [this](const boost::system::error_code&){OnTimeout();}));
             }
         }
     };

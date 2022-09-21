@@ -32,8 +32,8 @@ public:
     {
         std::cout<<"HeartBeatSender started"<<std::endl;
         const int Interval=1000;
-        boost::asio::io_service io;
-        auto work=std::make_shared<boost::asio::io_service::work>(io);
+        boost::asio::io_context io;
+        auto work=boost::asio::make_work_guard(io);
 
         boost::thread_group threads;
         for (int i = 0; i < 9; ++i)

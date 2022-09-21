@@ -49,7 +49,7 @@ namespace Com
     class NodeType
     {
     public:
-        NodeType(boost::asio::io_service& ioService,
+        NodeType(boost::asio::io_context& ioContext,
                  int64_t thisNodeId,
                  const std::string& localIf,
                  bool useMulticast,
@@ -75,9 +75,9 @@ namespace Com
             ,m_retryTimeout(retryTimeout)
             ,m_useMulticast(useMulticast)
             ,m_isLightNode(isLightNode)
-            ,m_heartbeatSender(ioService, id, thisNodeId, m_ipVersion, localIf, McAddr(m_multicastAddress, m_useMulticast), heartbeatInterval)
-            ,m_ackedDataSender(ioService, Acked, m_id, thisNodeId, m_ipVersion, localIf, McAddr(m_multicastAddress, m_useMulticast), slidingWindowSize, ackRequestThreshold, retryTimeout, fragmentSize)
-            ,m_unackedDataSender(ioService, Unacked, m_id, thisNodeId, m_ipVersion, localIf, McAddr(m_multicastAddress, m_useMulticast), slidingWindowSize, ackRequestThreshold, retryTimeout, fragmentSize)
+            ,m_heartbeatSender(ioContext, id, thisNodeId, m_ipVersion, localIf, McAddr(m_multicastAddress, m_useMulticast), heartbeatInterval)
+            ,m_ackedDataSender(ioContext, Acked, m_id, thisNodeId, m_ipVersion, localIf, McAddr(m_multicastAddress, m_useMulticast), slidingWindowSize, ackRequestThreshold, retryTimeout, fragmentSize)
+            ,m_unackedDataSender(ioContext, Unacked, m_id, thisNodeId, m_ipVersion, localIf, McAddr(m_multicastAddress, m_useMulticast), slidingWindowSize, ackRequestThreshold, retryTimeout, fragmentSize)
         {
         }
 

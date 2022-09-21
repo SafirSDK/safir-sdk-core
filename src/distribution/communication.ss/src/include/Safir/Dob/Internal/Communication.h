@@ -26,7 +26,7 @@
 #include <cstdint>
 #include <vector>
 #include <functional>
-#include <boost/asio/io_service.hpp>
+#include <boost/asio/io_context.hpp>
 #include <Safir/Dob/Internal/CommunicationExportDefs.h>
 #include <Safir/Utilities/Internal/SharedCharArray.h>
 #include <memory>
@@ -137,7 +137,7 @@ namespace Com
         /**
          * @brief Communication - Creates an instance of Communication in control mode. It will run the discover mechanism after calling start.
          * @param controlModeTag [in] - Tag that specifies that this instance will be used in control mode.
-         * @param ioService [in] - Pointer to an io_service that will be used as engine.
+         * @param ioContext [in] - Reference to an io_context that will be used as engine.
          * @param nodeName [in] - Name of this node.
          * @param nodeId [in] - Unique id of this node. Note that 0 (zero) is not a valid id.
          * @param nodeTypeId [in] - The node type of this node.
@@ -147,7 +147,7 @@ namespace Com
          * @param fragmentSize [in] - Network fragment size.
          */
         Communication(ControlModeTag,
-                      boost::asio::io_service& ioService,
+                      boost::asio::io_context& ioContext,
                       const std::string& nodeName,
                       int64_t nodeId, //0 is not a valid id.
                       int64_t nodeTypeId,
@@ -159,7 +159,7 @@ namespace Com
         /**
          * @brief Communication - Creates an instance of Communication in data mode. Will not run discover and nodes must be added manually.
          * @param dataModeTag [in] - Tag that specifies that this instance will be used in data mode.
-         * @param ioService [in] - Pointer to an io_service that will be used as engine.
+         * @param ioContext [in] - Reference to an io_context that will be used as engine.
          * @param nodeName [in] - Name of this node.
          * @param nodeId [in] - Unique id of this node. Note that 0 (zero) is not a valid id.
          * @param nodeTypeId [in] - The node type of this node.
@@ -168,7 +168,7 @@ namespace Com
          * @param fragmentSize [in] - Network fragment size.
          */
         Communication(DataModeTag,
-                      boost::asio::io_service& ioService,
+                      boost::asio::io_context& ioContext,
                       const std::string& nodeName,
                       int64_t nodeId, //0 is not a valid id.
                       int64_t nodeTypeId,

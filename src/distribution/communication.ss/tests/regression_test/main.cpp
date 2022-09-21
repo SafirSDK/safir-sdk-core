@@ -40,24 +40,24 @@ void ControlChannelTest(int executionTime)
     std::cout<<"===== Control channel test ====="<<std::endl;
     srand(static_cast<unsigned int>(time(0)));
 
-    boost::asio::io_service ioService;
-    auto work=std::make_shared<boost::asio::io_service::work>(ioService);
+    boost::asio::io_context ioContext;
+    auto work=boost::asio::make_work_guard(ioContext);
 
     boost::thread_group threads;
     for (unsigned int i=0; i<10; ++i)
     {
-        threads.create_thread([&]{ioService.run();});
+        threads.create_thread([&]{ioContext.run();});
     }
 
     //unicast nodeType
-    //Sender su1(Com::controlModeTag, ioService, 1, 0);
-    //Receiver ru3(Com::controlModeTag, ioService, 3, 0);
-    //Receiver ru4(Com::controlModeTag, ioService, 4, 0);
+    //Sender su1(Com::controlModeTag, ioContext, 1, 0);
+    //Receiver ru3(Com::controlModeTag, ioContext, 3, 0);
+    //Receiver ru4(Com::controlModeTag, ioContext, 4, 0);
 
     //multicast nodeType
-    Sender sm2(Com::controlModeTag, ioService, 2, 11);
-    Receiver rm5(Com::controlModeTag, ioService, 5, 11);
-    Receiver rm6(Com::controlModeTag, ioService, 6, 11);
+    Sender sm2(Com::controlModeTag, ioContext, 2, 11);
+    Receiver rm5(Com::controlModeTag, ioContext, 5, 11);
+    Receiver rm6(Com::controlModeTag, ioContext, 6, 11);
 
 
     //su1.Seed(2);
@@ -98,24 +98,24 @@ void DataChannelTest(int executionTime)
 
     srand(static_cast<unsigned int>(time(0)));
 
-    boost::asio::io_service ioService;
-    auto work=std::make_shared<boost::asio::io_service::work>(ioService);
+    boost::asio::io_context ioContext;
+    auto work=boost::asio::make_work_guard(ioContext);
 
     boost::thread_group threads;
     for (unsigned int i=0; i<10; ++i)
     {
-        threads.create_thread([&]{ioService.run();});
+        threads.create_thread([&]{ioContext.run();});
     }
 
     //unicast nodeType
-    //Sender su1(Com::controlModeTag, ioService, 1, 0);
-    //Receiver ru3(Com::controlModeTag, ioService, 3, 0);
-    //Receiver ru4(Com::controlModeTag, ioService, 4, 0);
+    //Sender su1(Com::controlModeTag, ioContext, 1, 0);
+    //Receiver ru3(Com::controlModeTag, ioContext, 3, 0);
+    //Receiver ru4(Com::controlModeTag, ioContext, 4, 0);
 
     //multicast nodeType
-    Sender sm2(Com::dataModeTag, ioService, 2, 10);
-    Receiver rm5(Com::dataModeTag, ioService, 5, 10);
-    Receiver rm6(Com::dataModeTag, ioService, 6, 10);
+    Sender sm2(Com::dataModeTag, ioContext, 2, 10);
+    Receiver rm5(Com::dataModeTag, ioContext, 5, 10);
+    Receiver rm6(Com::dataModeTag, ioContext, 6, 10);
 
     //su1.Seed(2);
     sm2.InjectNode(5, 10);

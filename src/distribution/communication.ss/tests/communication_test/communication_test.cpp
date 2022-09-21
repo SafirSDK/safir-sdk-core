@@ -179,29 +179,30 @@ public:
 class NodeTypes
 {
 public:
-    static const int NumberOfNodeTypes = 3;
+    static const int NumberOfNodeTypes = 4;
+
 
     NodeTypes()
     {
+        std::vector<std::string> names {"su", "sm", "cu", "cm"};
         for (int i=0; i<NumberOfNodeTypes; ++i)
         {
-            std::string name = "nt"+boost::lexical_cast<std::string>(i);
-            std::int64_t id=LlufId_Generate64(name.c_str());
-            std::vector<int> retryTimeout;
-            retryTimeout.push_back(40);
+            std::int64_t id=LlufId_Generate64(names[i].c_str());
+            std::vector<int> retryTimeout { 40 };
             int heartbeatInterval=1000+500*i;
             int maxLostHeartbeats=10;
             int slidingWindowSize=20;
             int ackRequestThreshold=10;
+            bool isLightNode = i >1;
             std::string controlMulticastAddress = "";
             std::string dataMulticastAddress = "";
-            if (i>0)
+            if (i % 2 > 0)
             {
                 controlMulticastAddress=std::string("224.90.90.241:")+boost::lexical_cast<std::string>(11000+i);
                 dataMulticastAddress=std::string("224.90.90.241:")+boost::lexical_cast<std::string>(12000+i);
             }
 
-            Safir::Dob::Internal::Com::NodeTypeDefinition n(id, name, controlMulticastAddress,dataMulticastAddress, false,
+            Safir::Dob::Internal::Com::NodeTypeDefinition n(id, names[i], controlMulticastAddress, dataMulticastAddress, isLightNode,
                                                             heartbeatInterval, maxLostHeartbeats,
                                                             slidingWindowSize, ackRequestThreshold, retryTimeout);
             m_nodeTypes.insert(std::make_pair(n.id, n));
@@ -459,8 +460,8 @@ int main(int argc, char * argv[])
 
     std::ostringstream name;
     name<<"Test_"<<cmd.unicastAddress;
-    boost::asio::io_service ioService;
-    auto work=std::make_shared<boost::asio::io_service::work>(ioService);
+    boost::asio::io_context ioContext;
+    auto work=boost::asio::make_work_guard(ioContext);
     int numberOfDiscoveredNodes=0;
     boost::barrier startBarrier(2);
     Semaphore stopCondition(cmd.accumulatedRecv ? 1 : cmd.await, false); //if accumulated only one node will report finished, the one posting the last message.
@@ -489,7 +490,7 @@ int main(int argc, char * argv[])
     int64_t myId=LlufId_GenerateRandom64();
     int64_t myNodeTypeId=nodeTypes.Get(cmd.nodeType).id;
     com.reset(new Safir::Dob::Internal::Com::Communication(Safir::Dob::Internal::Com::controlModeTag,
-                                                           ioService,
+                                                           ioContext,
                                                            name.str(),
                                                            myId,
                                                            myNodeTypeId,
@@ -521,7 +522,7 @@ int main(int argc, char * argv[])
     boost::thread_group threads;
     for (unsigned int i=0; i<cmd.threadCount; ++i)
     {
-        threads.create_thread([&]{ioService.run();});
+        threads.create_thread([&]{ioContext.run();});
     }
 
     if (cmd.seeds.size()>0)
@@ -619,7 +620,7 @@ int main(int argc, char * argv[])
     sp->PrintRecvCount();
     std::cout<<"---------------------------------------------------------"<<std::endl;
     boost::this_thread::sleep_for(boost::chrono::milliseconds(2000)); //allow 1 sec for retransmissions
-    ioService.stop();
+    ioContext.stop();
     threads.join_all();
 
     return 0;

@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2013-2015 (http://safirsdkcore.com)
+* Copyright Saab AB, 2013-2022 (http://safirsdkcore.com)
 *
 * Created by: Joel Ottosson / joel.ottosson@consoden.se
 *
@@ -37,11 +37,28 @@ namespace Internal
 {
 namespace Com
 {
+
+namespace
+{
+    std::set<int64_t> LightNodeTypes(const NodeTypeMap& nodeTypes)
+    {
+        std::set<int64_t> ids;
+        for (const auto& kv : nodeTypes)
+        {
+            if (kv.second->IsLightNode())
+            {
+                ids.insert(kv.first);
+            }
+        }
+        return ids;
+    }
+}
+
 #ifdef _MSC_VER
 #pragma warning (push)
 #pragma warning (disable: 4355)
 #endif
-    CommunicationImpl::CommunicationImpl(boost::asio::io_service& ioService,
+    CommunicationImpl::CommunicationImpl(boost::asio::io_context& ioContext,
                                          const std::string& nodeName,
                                          int64_t nodeId, //0 is not a valid id.
                                          int64_t nodeTypeId,
@@ -51,15 +68,15 @@ namespace Com
                                          const NodeTypeMap& nodeTypes,
                                          int fragmentSize)
         :m_disableProtobufLogs()
-        ,m_ioService(ioService)
-        ,m_receiveStrand(ioService)
+        ,m_ioContext(ioContext)
+        ,m_receiveStrand(ioContext)
         ,m_me(nodeName, nodeId, nodeTypeId, controlAddress, dataAddress, isControlInstance)
         ,m_protocol(Resolver::Protocol(m_me.unicastAddress))
         ,m_isControlInstance(isControlInstance)
         ,m_nodeTypes(nodeTypes)
         ,m_onNewNode()
         ,m_gotRecvFrom()
-        ,m_discoverer(m_ioService, m_me, fragmentSize, [this](const Node& n){OnNewNode(n);})
+        ,m_discoverer(m_ioContext, m_me, fragmentSize, LightNodeTypes(nodeTypes), [this](const Node& n){OnNewNode(n);})
         ,m_deliveryHandler(m_receiveStrand, m_me.nodeId, m_protocol, m_nodeTypes[nodeTypeId]->SlidingWindowSize())
         ,m_reader(m_receiveStrand, m_me.unicastAddress, m_nodeTypes[nodeTypeId]->MulticastAddress(),
                   [this](const char* d, size_t s, const bool mc){return OnRecv(d,s,mc);},
@@ -100,7 +117,7 @@ namespace Com
 
     void CommunicationImpl::SetGotReceiveFromCallback(const GotReceiveFrom& callback)
     {
-        m_receiveStrand.dispatch([this,callback]
+        boost::asio::dispatch(m_receiveStrand, [this, callback]
         {
             m_gotRecvFrom=callback;
             m_deliveryHandler.SetGotRecvCallback(callback);
@@ -117,8 +134,10 @@ namespace Com
 
     void CommunicationImpl::SetDataReceiver(const ReceiveData& callback, int64_t dataTypeIdentifier, const Allocator& allocator, const DeAllocator& deallocator)
     {
-        m_receiveStrand.post([this,callback,dataTypeIdentifier,allocator,deallocator]
-        {m_deliveryHandler.SetReceiver(callback, dataTypeIdentifier, allocator, deallocator);});
+        boost::asio::post(m_receiveStrand, [this, callback, dataTypeIdentifier, allocator, deallocator]
+        {
+            m_deliveryHandler.SetReceiver(callback, dataTypeIdentifier, allocator, deallocator);
+        });
     }
 
     void CommunicationImpl::SetQueueNotFullCallback(const QueueNotFull& callback, int64_t nodeTypeId)
@@ -199,14 +218,14 @@ namespace Com
 
         //We do post (not dispatch) here to be sure the AddNode job will be executed before IncludeNode. Otherwize we
         //risk losing a node.
-        m_receiveStrand.post([this,id]{m_deliveryHandler.IncludeNode(id);});
+        boost::asio::post(m_receiveStrand, [this, id]{m_deliveryHandler.IncludeNode(id);});
     }
 
     void CommunicationImpl::ExcludeNode(int64_t id)
     {
         lllog(6)<<L"COM: ExcludeNode "<<id<<std::endl;
 
-        m_receiveStrand.post([this,id]
+        boost::asio::post(m_receiveStrand, [this, id]
         {
             lllog(6)<<L"COM: Execute ExcludeNode id="<<id<<std::endl;
             auto node=m_deliveryHandler.GetNode(id);
@@ -238,7 +257,7 @@ namespace Com
 
         lllog(6)<<L"COM: Inject node '"<<name.c_str()<<L"' ["<<id<<L"]"<<std::endl;
 
-        Node node(name, id, nodeTypeId, "", Resolver(m_ioService).ResolveRemoteEndpoint(dataAddress, m_protocol), false);
+        Node node(name, id, nodeTypeId, "", Resolver(m_ioContext).ResolveRemoteEndpoint(dataAddress, m_protocol), false);
         OnNewNode(node);
         IncludeNodeInternal(id);
     }
@@ -275,7 +294,7 @@ namespace Com
         {
             try
             {
-                auto rs=Resolver(m_ioService).ResolveRemoteEndpoint(*seed, m_protocol);
+                auto rs=Resolver(m_ioContext).ResolveRemoteEndpoint(*seed, m_protocol);
                 resolvedSeeds.push_back(rs);
             }
             catch(const std::logic_error& badSeed)
@@ -297,7 +316,7 @@ namespace Com
         nodeType.GetAckedDataSender().AddNode(node.nodeId, node.unicastAddress);
         nodeType.GetUnackedDataSender().AddNode(node.nodeId, node.unicastAddress);
         nodeType.GetHeartbeatSender().AddNode(node.nodeId, node.unicastAddress);
-        m_receiveStrand.dispatch([this, node]{m_deliveryHandler.AddNode(node);});
+        boost::asio::dispatch(m_receiveStrand, [this, node]{m_deliveryHandler.AddNode(node);});
 
         //callback to host application
         m_onNewNode(node.name,

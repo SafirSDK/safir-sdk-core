@@ -48,7 +48,7 @@ namespace Com
 namespace
 {
     std::unique_ptr<CommunicationImpl> Init(bool isControlInstance,
-                                            boost::asio::io_service& ioService,
+                                            boost::asio::io_context& ioContext,
                                             const std::string& nodeName,
                                             int64_t nodeId, //0 is not a valid id.
                                             int64_t nodeTypeId,
@@ -58,7 +58,7 @@ namespace
                                             int fragmentSize)
     {
         //find address of local interface to use
-        Resolver resolver(ioService);
+        Resolver resolver(ioContext);
 
         const auto localIf=(isControlInstance ? controlAddress : dataAddress);
 
@@ -86,7 +86,7 @@ namespace
             const std::string& mc=isControlInstance ? nt->controlMulticastAddress : nt->dataMulticastAddress;
             bool useMulticast=(thisNodeIsMulticastEnabled && !mc.empty());
             auto ptr= std::shared_ptr<Safir::Dob::Internal::Com::NodeType>
-                (new Safir::Dob::Internal::Com::NodeType(ioService,
+                (new Safir::Dob::Internal::Com::NodeType(ioContext,
                                                          nodeId,
                                                          localIf,
                                                          useMulticast,
@@ -105,7 +105,7 @@ namespace
         }
 
         //create impl object
-        return std::unique_ptr<CommunicationImpl>(new CommunicationImpl(ioService, nodeName, nodeId, nodeTypeId, controlAddress, dataAddress, isControlInstance, nodeTypeMap, fragmentSize));
+        return std::unique_ptr<CommunicationImpl>(new CommunicationImpl(ioContext, nodeName, nodeId, nodeTypeId, controlAddress, dataAddress, isControlInstance, nodeTypeMap, fragmentSize));
     }
 }
 
@@ -124,7 +124,7 @@ namespace
     }
 
     Communication::Communication(ControlModeTag,
-                                 boost::asio::io_service& ioService,
+                                 boost::asio::io_context& ioContext,
                                  const std::string& nodeName,
                                  int64_t nodeId, //0 is not a valid id.
                                  int64_t nodeTypeId,
@@ -132,20 +132,20 @@ namespace
                                  const ResolvedAddress& dataAddress,
                                  const std::vector<NodeTypeDefinition>& nodeTypes,
                                  int fragmentSize)
-        :m_impl(Init(true, ioService, nodeName, nodeId, nodeTypeId, controlAddress.Address(), dataAddress.Address(), nodeTypes, fragmentSize))
+        :m_impl(Init(true, ioContext, nodeName, nodeId, nodeTypeId, controlAddress.Address(), dataAddress.Address(), nodeTypes, fragmentSize))
     {
     }
 
 
     Communication::Communication(DataModeTag,
-                                 boost::asio::io_service& ioService,
+                                 boost::asio::io_context& ioContext,
                                  const std::string& nodeName,
                                  int64_t nodeId, //0 is not a valid id.
                                  int64_t nodeTypeId,
                                  const ResolvedAddress& dataAddress,
                                  const std::vector<NodeTypeDefinition>& nodeTypes,
                                  int fragmentSize)
-        :m_impl(Init(false, ioService, nodeName, nodeId, nodeTypeId, "", dataAddress.Address(), nodeTypes, fragmentSize))
+        :m_impl(Init(false, ioContext, nodeName, nodeId, nodeTypeId, "", dataAddress.Address(), nodeTypes, fragmentSize))
     {
     }
 

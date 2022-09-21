@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2013-2015 (http://safirsdkcore.com)
+* Copyright Saab AB, 2013-2022 (http://safirsdkcore.com)
 *
 * Created by: Joel Ottosson / joel.ottosson@consoden.se
 *
@@ -60,7 +60,7 @@ namespace Com
     class CommunicationImpl
     {
     public:
-        CommunicationImpl(boost::asio::io_service& ioService,
+        CommunicationImpl(boost::asio::io_context& ioContext,
                           const std::string& nodeName,
                           int64_t nodeId, //0 is not a valid id.
                           int64_t nodeTypeId,
@@ -107,8 +107,8 @@ namespace Com
 
     private:
         ::google::protobuf::LogSilencer m_disableProtobufLogs;
-        boost::asio::io_service& m_ioService;
-        boost::asio::io_service::strand m_receiveStrand;
+        boost::asio::io_context& m_ioContext;
+        boost::asio::io_context::strand m_receiveStrand;
         Node m_me;
         int m_protocol;
         bool m_isControlInstance;

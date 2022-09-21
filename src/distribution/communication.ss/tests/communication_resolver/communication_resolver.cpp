@@ -115,21 +115,22 @@ int main(int argc, char * argv[])
     }
     else
     {
-        boost::asio::io_service ioService;
-        Safir::Dob::Internal::Com::Resolver resolver(ioService, cmd.verbose);
+        boost::asio::io_context ioContext;
+        Safir::Dob::Internal::Com::Resolver resolver(ioContext, cmd.verbose);
 
-        ioService.post([&]
+        boost::asio::post(ioContext, [&]
         {
             try
             {
                 std::wcout<<"Resolved "<<cmd.expr<<" to: "<<
-                    RemovePort(resolver.ResolveRemoteEndpoint(cmd.expr+":10000", 4))<<std::endl;
+                            RemovePort(resolver.ResolveRemoteEndpoint(cmd.expr+":10000", 4))<<std::endl;
             }
             catch (const std::logic_error& e)
             {
                 std::wcout<<e.what()<<std::endl;
-            }});
-        ioService.run();
+            }
+        });
+        ioContext.run();
     }
 
     return 0;

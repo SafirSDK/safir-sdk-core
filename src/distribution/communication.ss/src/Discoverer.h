@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2013-2015 (http://safirsdkcore.com)
+* Copyright Saab AB, 2013-2022 (http://safirsdkcore.com)
 *
 * Created by: Joel Ottosson / joel.ottosson@consoden.se
 *
@@ -26,11 +26,15 @@
 #include <set>
 #include <functional>
 #include <boost/random.hpp>
+#include <boost/asio.hpp>
+#include <Safir/Utilities/Internal/SystemLog.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/Id.h>
 #include "Parameters.h"
 #include "Node.h"
 #include "Message.h"
+#include "Resolver.h"
+#include "Writer.h"
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -60,52 +64,62 @@ namespace Com
 #pragma warning (push)
 #pragma warning (disable: 4355)
 #endif
-        DiscovererBasic(boost::asio::io_service& ioService,
+        DiscovererBasic(boost::asio::io_context& ioContext,
                         const Node& me,
                         int fragmentSize,
+                        const std::set<int64_t>& lightNodeTypes,
                         const std::function<void(const Node&)>& onNewNode)
-            :WriterType(ioService, Resolver::Protocol(me.unicastAddress))
+            :WriterType(ioContext, Resolver::Protocol(me.unicastAddress))
             ,m_running(false)
             ,m_fragmentSize(static_cast<size_t>(fragmentSize))
             ,m_numberOfNodesPerNodeInfoMsg(static_cast<int>((m_fragmentSize-NodeInfoFixedSize)/NodeInfoPerNodeSize))
+            ,m_lightNodeTypes(lightNodeTypes)
             ,m_seeds()
             ,m_nodes()
             ,m_reportedNodes()
             ,m_incompletedNodes()
             ,m_excludedNodes()
-            ,m_strand(ioService)
+            ,m_strand(ioContext)
             ,m_me(me)
+            ,m_thisNodeIsLightNode(IsLightNode(me.nodeTypeId))
             ,m_onNewNode(onNewNode)
-            ,m_timer(ioService)
+            ,m_timer(ioContext)
             ,m_random(1000, 3000)
         {
         }
+
 #ifdef _MSC_VER
 #pragma warning (pop)
 #endif
 
         void Start() SAFIR_GCC_VISIBILITY_BUG_WORKAROUND
         {
-            m_strand.dispatch([this]
+            boost::asio::dispatch(m_strand, [this]
             {
                 m_running=true;
-                m_timer.expires_from_now(boost::chrono::milliseconds(m_random.Get()));
-                m_timer.async_wait(m_strand.wrap([this](const boost::system::error_code& error){OnTimeout(error);}));
+                m_timer.expires_after(boost::chrono::milliseconds(m_random.Get()));
+                m_timer.async_wait(boost::asio::bind_executor(m_strand, [this](const boost::system::error_code& error){OnTimeout(error);}));
             });
         }
 
         void Stop()
         {
-            m_strand.dispatch([this]
+            boost::asio::dispatch(m_strand, [this]
             {
                 m_running=false;
                 m_timer.cancel();
+
+                m_reportedNodes.clear();
+                m_incompletedNodes.clear();
+                m_seeds.clear();
+                m_nodes.clear();
+
             });
         }
 
         void AddSeeds(const std::vector<std::string>& seeds)
         {
-            m_strand.dispatch([this,seeds]
+            boost::asio::dispatch(m_strand, [this, seeds]
             {
                 for (auto seed = seeds.cbegin(); seed != seeds.cend(); ++seed)
                 {
@@ -116,9 +130,20 @@ namespace Com
 
         void HandleReceivedDiscover(const CommunicationMessage_Discover& msg)
         {
-            lllog(DiscovererLogLevel)<<L"COM["<<m_me.nodeId<<L"]: Received discover from "<<msg.from().name().c_str()<<L" ["<<msg.from().node_id()<<L"]"<<std::endl;
+            if (m_thisNodeIsLightNode && IsLightNode(msg.from().node_type_id()))
+            {
+                std::ostringstream os;
+                os << "COM["<< m_me.nodeId << "]: Received discover from " << msg.from().name() << " ["<<msg.from().node_id()<< "]. Should not happen since both are light nodes! Might be a configuration error, don't use lightNodes as seeds.";
+                lllog(DiscovererLogLevel) << os.str().c_str() << std::endl;
+                SEND_SYSTEM_LOG(Error, << os.str().c_str());
+                throw std::logic_error(os.str());
+            }
+            else
+            {
+                lllog(DiscovererLogLevel)<<L"COM["<<m_me.nodeId<<L"]: Received discover from "<<msg.from().name().c_str()<<L" ["<<msg.from().node_id()<<L"]"<<std::endl;
+            }
 
-            m_strand.dispatch([this,msg]
+            boost::asio::dispatch(m_strand, [this, msg]
             {
                 if (!m_running)
                 {
@@ -146,7 +171,7 @@ namespace Com
                     UpdateIncompleteNodes(msg.from().node_id(), 0, 0);  //setting numberOfPackets=0 indicates that we still havent got a nodeInfo, just a discover
                 }
 
-                SendNodeInfo(msg.from().node_id(), msg.sent_to_id(), Resolver::StringToEndpoint(msg.from().control_address()));
+                SendNodeInfo(msg.from().node_id(), IsLightNode(msg.from().node_type_id()), msg.sent_to_id(), Resolver::StringToEndpoint(msg.from().control_address()));
             });
         }
 
@@ -154,7 +179,7 @@ namespace Com
         {
             lllog(DiscovererLogLevel)<<L"COM["<<m_me.nodeId<<L"]: Received node info from "<<(msg.has_sent_from_node() ? msg.sent_from_node().name().c_str() : "<NotPresent>")<<", numNodes="<<msg.nodes().size()<<std::endl;
 
-            m_strand.dispatch([this,msg]
+            boost::asio::dispatch(m_strand, [this, msg]
             {
                 if (!m_running)
                 {
@@ -213,18 +238,26 @@ namespace Com
 
         void ExcludeNode(int64_t nodeId)
         {
-            m_strand.dispatch([this,nodeId]
+            boost::asio::dispatch(m_strand, [this, nodeId]
             {
-                m_excludedNodes.insert(nodeId);
                 m_reportedNodes.erase(nodeId);
                 m_incompletedNodes.erase(nodeId);
 
                 auto it=m_nodes.find(nodeId);
                 if (it!=m_nodes.end())
                 {
-                    if (it->second.isSeed) //if node is a seed, keep the address
+                    if (!m_thisNodeIsLightNode && !IsLightNode(it->second.nodeTypeId))
                     {
-                        AddSeed(it->second.controlAddress);
+                        // Light nodes dont add other nodes to exclude list since they might rejoin the same system again.
+                        // We only add non-lightNodes to the exclude list, since lightNodes are allowed to rejoin later.
+                        // Also, since using a lightNode as seed is considered an error but is not guaranteed to be detected, we only keep the address of seeds that are not lightNodes.
+                        m_excludedNodes.insert(nodeId);
+                        if (it->second.isSeed)
+                        {
+                            // If the node is a seed, we keep the address. The node can be restarted and then join again with the same ip address
+                            // but with another nodeId.
+                            AddSeed(it->second.controlAddress);
+                        }
                     }
                     m_nodes.erase(it);
                 }
@@ -234,7 +267,7 @@ namespace Com
 #ifndef SAFIR_TEST
     private:
 #endif
-        static const int DiscovererLogLevel=2;        
+        static const int DiscovererLogLevel=2;
 
         //Constant defining how many nodes that can be sent in a singel NodeInfo message without risking that fragmentSize is exceeded.
         //The stuff in CommunicationMessage+NodeInfo is less than 30 bytes plus sent_from_node, and each individual Node (also sent_from_node) is less than 100 bytes.
@@ -245,22 +278,30 @@ namespace Com
         bool m_running;
         const size_t m_fragmentSize;
         const int m_numberOfNodesPerNodeInfoMsg;
+        std::set<int64_t> m_lightNodeTypes;
 
         NodeMap m_seeds; //id generated from ip:port
         NodeMap m_nodes; //known nodes
         NodeMap m_reportedNodes; //nodes only heard about from others, never talked to
         std::map<int64_t, std::vector<bool> > m_incompletedNodes; //talked to but still haven't received all node info from this node
         std::set<int64_t> m_excludedNodes;
-        boost::asio::io_service::strand m_strand;
+        boost::asio::io_context::strand m_strand;
         Node m_me;
+        bool m_thisNodeIsLightNode;
         std::function<void(const Node&)> m_onNewNode;
         boost::asio::steady_timer m_timer;
         Utilities::Random m_random;
 
         bool IsExcluded(int64_t id) const {return m_excludedNodes.find(id)!=m_excludedNodes.cend();}
+        bool IsLightNode(int64_t nodeType) const {return m_lightNodeTypes.find(nodeType)!=m_lightNodeTypes.cend();}
 
         void SendDiscover()
         {
+            if (m_seeds.empty() && m_reportedNodes.empty() && m_incompletedNodes.empty())
+            {
+                return; // No receivers of discover messages.
+            }
+
             //Compose a DiscoverMessage
             CommunicationMessage cm;
             cm.mutable_discover()->mutable_from()->set_node_id(m_me.nodeId);
@@ -294,9 +335,8 @@ namespace Com
             }
         }
 
-        void SendNodeInfo(int64_t toId, int64_t fromId, const boost::asio::ip::udp::endpoint& toEndpoint)
+        void SendNodeInfo(int64_t toId, bool receiverIsLightNode, int64_t fromId, const boost::asio::ip::udp::endpoint& toEndpoint)
         {
-            //This method must always be called from within writeStrand
             const int totalNumberOfNodes=static_cast<int>(m_seeds.size()+m_nodes.size());
             const int numberOfPackets=totalNumberOfNodes/m_numberOfNodesPerNodeInfoMsg+(totalNumberOfNodes%m_numberOfNodesPerNodeInfoMsg>0 ? 1 : 0);
 
@@ -306,7 +346,7 @@ namespace Com
             cm.mutable_node_info()->set_sent_to_id(toId);
             cm.mutable_node_info()->set_number_of_packets(numberOfPackets);
 
-            //Add myself
+            //Add myself - if this node is a lightNode it will be the only information sent.
             CommunicationMessage_Node* me=cm.mutable_node_info()->mutable_sent_from_node();
             me->set_name(m_me.name);
             me->set_node_id(m_me.nodeId);
@@ -315,43 +355,53 @@ namespace Com
             me->set_node_type_id(m_me.nodeTypeId);
 
             int packetNumber=0;
-            //Add seeds
-            for (auto seedIt=m_seeds.cbegin(); seedIt!=m_seeds.cend(); ++seedIt)
+
+            if (!m_thisNodeIsLightNode) // If this node is a light node we dont send any information about other nodes. Only include ourselves.
             {
-                CommunicationMessage_Node* ptr=cm.mutable_node_info()->mutable_nodes()->Add();
-                ptr->set_name(seedIt->second.name);
-                ptr->set_node_id(0);
-                ptr->set_control_address(seedIt->second.controlAddress);
-                if (cm.node_info().nodes().size()==m_numberOfNodesPerNodeInfoMsg)
+                //Add seeds
+                for (auto seedIt=m_seeds.cbegin(); seedIt!=m_seeds.cend(); ++seedIt)
                 {
-                    cm.mutable_node_info()->set_packet_number(packetNumber);
-                    SendMessageTo(cm, toEndpoint);
-                    cm.mutable_node_info()->mutable_nodes()->Clear(); //clear nodes and continue fill up the same message
-                    ++packetNumber;
+                    CommunicationMessage_Node* ptr=cm.mutable_node_info()->mutable_nodes()->Add();
+                    ptr->set_name(seedIt->second.name);
+                    ptr->set_node_id(0);
+                    ptr->set_control_address(seedIt->second.controlAddress);
+                    if (cm.node_info().nodes().size()==m_numberOfNodesPerNodeInfoMsg)
+                    {
+                        cm.mutable_node_info()->set_packet_number(packetNumber);
+                        SendMessageTo(cm, toEndpoint);
+                        cm.mutable_node_info()->mutable_nodes()->Clear(); //clear nodes and continue fill up the same message
+                        ++packetNumber;
+                    }
+                }
+
+                // Add all other nodes we have talked to and is not excluded. We dont send nodes that only have been reported, i.e we dont spread rumors
+                // If the receiver is a lightNode we exclude other lightNodes from the NodeInfo result.
+                for (auto nodeIt=m_nodes.cbegin(); nodeIt!=m_nodes.cend(); ++nodeIt)
+                {
+                    const Node& node=nodeIt->second;
+                    if (receiverIsLightNode && IsLightNode(node.nodeTypeId))
+                    {
+                        continue; // Dont send NodeInfo about lightNodes to a lightNode.
+                    }
+                    CommunicationMessage_Node* ptr=cm.mutable_node_info()->mutable_nodes()->Add();
+                    ptr->set_name(node.name);
+                    ptr->set_node_id(node.nodeId);
+                    ptr->set_node_type_id(node.nodeTypeId);
+                    ptr->set_control_address(node.controlAddress);
+                    ptr->set_data_address(node.dataAddress);
+
+                    if (cm.node_info().nodes().size()==m_numberOfNodesPerNodeInfoMsg)
+                    {
+                        cm.mutable_node_info()->set_packet_number(packetNumber);
+                        SendMessageTo(cm, toEndpoint);
+                        cm.mutable_node_info()->mutable_nodes()->Clear(); //clear nodes and continue fill up the same message
+                        ++packetNumber;
+                    }
                 }
             }
 
-            //Add all other nodes we have talked to and is not excluded. We dont send nodes that only have been reported, i.e we dont spread rumors
-            for (auto nodeIt=m_nodes.cbegin(); nodeIt!=m_nodes.cend(); ++nodeIt)
-            {
-                const Node& node=nodeIt->second;
-                CommunicationMessage_Node* ptr=cm.mutable_node_info()->mutable_nodes()->Add();
-                ptr->set_name(node.name);
-                ptr->set_node_id(node.nodeId);
-                ptr->set_node_type_id(node.nodeTypeId);
-                ptr->set_control_address(node.controlAddress);
-                ptr->set_data_address(node.dataAddress);
-
-                if (cm.node_info().nodes().size()==m_numberOfNodesPerNodeInfoMsg)
-                {
-                    cm.mutable_node_info()->set_packet_number(packetNumber);
-                    SendMessageTo(cm, toEndpoint);
-                    cm.mutable_node_info()->mutable_nodes()->Clear(); //clear nodes and continue fill up the same message
-                    ++packetNumber;
-                }
-            }
-
-            if (cm.node_info().nodes().size()>0)
+            // If no package has been sent or if the current package contains nodes that is not sent, then send the message.
+            if (packetNumber == 0 || cm.node_info().nodes().size()>0)
             {
                 cm.mutable_node_info()->set_packet_number(packetNumber);
                 SendMessageTo(cm, toEndpoint);
@@ -511,8 +561,8 @@ namespace Com
                 SendDiscover();
 
                 //restart timer
-                m_timer.expires_from_now(boost::chrono::milliseconds(m_random.Get()));
-                m_timer.async_wait(m_strand.wrap([this](const boost::system::error_code& error){OnTimeout(error);}));
+                m_timer.expires_after(boost::chrono::milliseconds(m_random.Get()));
+                m_timer.async_wait(boost::asio::bind_executor(m_strand, [this](const boost::system::error_code& error){OnTimeout(error);}));
             }
         }
     };

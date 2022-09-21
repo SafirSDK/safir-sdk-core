@@ -65,7 +65,7 @@ namespace Com
     class DeliveryHandlerBasic : private WriterType
     {
     public:
-        DeliveryHandlerBasic(boost::asio::io_service::strand& receiveStrand, int64_t myNodeId, int ipVersion, int slidingWindowSize)
+        DeliveryHandlerBasic(boost::asio::io_context::strand& receiveStrand, int64_t myNodeId, int ipVersion, int slidingWindowSize)
             :WriterType(receiveStrand.context(), ipVersion)
             ,m_running(false)
             ,m_myId(myNodeId)
@@ -95,19 +95,28 @@ namespace Com
 
         void Start()
         {
-            m_receiveStrand.dispatch([this]
+            boost::asio::post(m_receiveStrand, [this]
             {
+                m_numberOfUndeliveredMessages=0;
                 m_running=true;
             });
         }
 
         void Stop()
         {
-            m_receiveStrand.dispatch([this]
+            boost::asio::post(m_receiveStrand, [this]
             {
                 m_running=false;
-            });
 
+                for (auto n : m_nodes)
+                {
+                    ClearChannel(n.second.ackedMultiReceiverChannel);
+                    ClearChannel(n.second.ackedSingleReceiverChannel);
+                    ClearChannel(n.second.unackedMultiReceiverChannel);
+                    ClearChannel(n.second.unackedSingleReceiverChannel);
+                }
+                m_nodes.clear();
+            });
         }
 
         //Received data to be delivered up to the application. Everythin must be called from readStrand.
@@ -124,6 +133,11 @@ namespace Com
         //Handle received data and deliver to application if possible and sends ack back to sender.
         void ReceivedApplicationData(const MessageHeader* header, const char* payload, bool multicast)
         {
+            if (!m_running)
+            {
+                return;
+            }
+
             //Always called from readStrand
             auto senderIt=m_nodes.find(header->commonHeader.senderId);
 
@@ -157,6 +171,11 @@ namespace Com
 
         void ReceivedAckRequest(const MessageHeader* header, bool multicast)
         {
+            if (!m_running)
+            {
+                return;
+            }
+
             //Always called from readStrand
             lllog(8)<<L"COM: Received AckRequest from "<<header->commonHeader.senderId<<" "<<SendMethodToString(header->sendMethod).c_str()<<std::endl;
             auto senderIt=m_nodes.find(header->commonHeader.senderId);
@@ -174,6 +193,11 @@ namespace Com
         //Add a node
         void AddNode(const Node& node)
         {
+            if (!m_running)
+            {
+                return;
+            }
+
             if (GetNode(node.nodeId)!=nullptr)
             {
                 std::ostringstream os;
@@ -188,6 +212,11 @@ namespace Com
         //Make node included. If excluded it is also removed.
         void IncludeNode(int64_t id)
         {
+            if (!m_running)
+            {
+                return;
+            }
+
             lllog(6)<<L"COM: DeliveryHandler IncludeNode id="<<id<<std::endl;
             const auto it=m_nodes.find(id);
             if (it==m_nodes.end())
@@ -201,6 +230,11 @@ namespace Com
         //Make node included or excluded. If excluded it is also removed.
         void RemoveNode(int64_t id)
         {
+            if (!m_running)
+            {
+                return;
+            }
+
             auto it=m_nodes.find(id);
 
             if (it!=m_nodes.end())
@@ -363,8 +397,8 @@ namespace Com
         bool m_running;
         const int64_t m_myId;
         const size_t m_slidingWindowSize;
-        boost::asio::io_service::strand& m_receiveStrand; //for sending acks, same strand as all public methods are supposed to be called from
-        boost::asio::io_service::strand m_deliverStrand; //for delivering data to application
+        boost::asio::io_context::strand& m_receiveStrand; //for sending acks, same strand as all public methods are supposed to be called from
+        boost::asio::io_context::strand m_deliverStrand; //for delivering data to application
         std::atomic<unsigned int> m_numberOfUndeliveredMessages;
 
         NodeInfoMap m_nodes;
@@ -732,7 +766,7 @@ namespace Com
                         auto dataType=rd.dataType;
 
                         m_numberOfUndeliveredMessages++;
-                        m_deliverStrand.post([this,dataType,fromId, fromNodeType,dataPtr,dataSize]
+                        boost::asio::post(m_deliverStrand, [this,dataType,fromId, fromNodeType,dataPtr,dataSize]
                         {
                             auto recvIt=m_receivers.find(dataType); //m_receivers shall be safe to use inside m_deliverStrand since it is not supposed to be modified after start
                             if (recvIt!=m_receivers.end())

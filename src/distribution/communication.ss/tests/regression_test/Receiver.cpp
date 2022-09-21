@@ -23,11 +23,11 @@
 ******************************************************************************/
 #include "Receiver.h"
 
-Receiver::Receiver(Com::ControlModeTag tag, boost::asio::io_service& ioService, int64_t nodeId, int64_t nodeType)
-    :m_timerInclude(ioService)
-    ,m_strand(ioService)
+Receiver::Receiver(Com::ControlModeTag tag, boost::asio::io_context& ioContext, int64_t nodeId, int64_t nodeType)
+    :m_timerInclude(ioContext)
+    ,m_strand(ioContext)
     ,m_com(tag,
-           ioService,
+           ioContext,
            std::string("Node_")+boost::lexical_cast<std::string>(nodeId),
            nodeId,
            nodeType,
@@ -45,8 +45,8 @@ Receiver::Receiver(Com::ControlModeTag tag, boost::asio::io_service& ioService, 
            1450)
     ,m_running(true)
 {
-    m_timerInclude.expires_from_now(boost::chrono::milliseconds(1000));
-    m_timerInclude.async_wait(m_strand.wrap([this](const boost::system::error_code& /*error*/)
+    m_timerInclude.expires_after(boost::chrono::milliseconds(1000));
+    m_timerInclude.async_wait(boost::asio::bind_executor(m_strand, [this](const boost::system::error_code& /*error*/)
                                               {if (m_running) IncludeNode();}));
 
     m_com.SetDataReceiver([this](int64_t fromNodeId, int64_t fromNodeType, const char* data, size_t size)
@@ -64,11 +64,11 @@ Receiver::Receiver(Com::ControlModeTag tag, boost::asio::io_service& ioService, 
     m_com.Start();
 }
 
-Receiver::Receiver(Com::DataModeTag tag, boost::asio::io_service& ioService, int64_t nodeId, int64_t nodeType)
-    :m_timerInclude(ioService)
-    ,m_strand(ioService)
+Receiver::Receiver(Com::DataModeTag tag, boost::asio::io_context& ioContext, int64_t nodeId, int64_t nodeType)
+    :m_timerInclude(ioContext)
+    ,m_strand(ioContext)
     ,m_com(tag,
-           ioService,
+           ioContext,
            std::string("Node_")+boost::lexical_cast<std::string>(nodeId),
            nodeId,
            nodeType,
@@ -85,8 +85,8 @@ Receiver::Receiver(Com::DataModeTag tag, boost::asio::io_service& ioService, int
            1450)
     ,m_running(true)
 {
-    m_timerInclude.expires_from_now(boost::chrono::milliseconds(1000));
-    m_timerInclude.async_wait(m_strand.wrap([this](const boost::system::error_code& error){if (!error) IncludeNode();}));
+    m_timerInclude.expires_after(boost::chrono::milliseconds(1000));
+    m_timerInclude.async_wait(boost::asio::bind_executor(m_strand, [this](const boost::system::error_code& error){if (!error) IncludeNode();}));
 
     m_com.SetDataReceiver([this](int64_t fromNodeId, int64_t fromNodeType, const char* data, size_t size)
                            {ReceiveData(fromNodeId,fromNodeType,data,size);},
@@ -145,7 +145,7 @@ void Receiver::NewNode(const std::string& /*name*/, int64_t nodeId, int64_t /*no
     }
     else //sender
     {
-        m_strand.dispatch([this,nodeId]{m_newNodes.push(nodeId);});
+        boost::asio::dispatch(m_strand, [this,nodeId]{m_newNodes.push(nodeId);});
     }
 }
 
@@ -160,8 +160,8 @@ void Receiver::IncludeNode()
         m_com.IncludeNode(nodeId);
     }
 
-    m_timerInclude.expires_from_now(boost::chrono::milliseconds(4000));
-    m_timerInclude.async_wait(m_strand.wrap([this](const boost::system::error_code& error)
+    m_timerInclude.expires_after(boost::chrono::milliseconds(4000));
+    m_timerInclude.async_wait(boost::asio::bind_executor(m_strand, [this](const boost::system::error_code& error)
     {
         if (!error)
             IncludeNode();

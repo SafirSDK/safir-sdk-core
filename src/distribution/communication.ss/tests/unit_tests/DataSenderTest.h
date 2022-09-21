@@ -32,8 +32,8 @@ public:
     {
         std::wcout<<"AckedDataSenderTest started"<<std::endl;
 
-        boost::asio::io_service io;
-        auto work=std::make_shared<boost::asio::io_service::work>(io);
+        boost::asio::io_context io;
+        auto work=boost::asio::make_work_guard(io);
         boost::thread_group threads;
         for (int i = 0; i < 9; ++i)
         {
@@ -52,7 +52,7 @@ public:
         std::atomic<unsigned int> go(0);
         auto WaitUntilReady=[&]
         {
-            sender.m_strand.post([&]{go=1;});
+            boost::asio::post(sender.m_strand, [&]{go=1;});
 
             while(go==0)
                 Wait(20);
@@ -118,7 +118,7 @@ public:
         sender.IncludeNode(3);
 
         //Check that welcome messages have been posted
-        sender.m_strand.post([&]
+        boost::asio::post(sender.m_strand, [&]
         {
             CHECK(sender.m_nodes.size()==2);
             CHECK(sender.m_nodes.find(2)->second.systemNode==true);
@@ -132,19 +132,19 @@ public:
         TRACELINE
         sender.HandleAck(Ack(2, 1, 2, Com::MultiReceiverSendMethod));  //Ack(sender, receiver, seqNo, sendMethod)
         sender.HandleAck(Ack(3, 1, 2, Com::MultiReceiverSendMethod));  //Ack(sender, receiver, seqNo, sendMethod)
-        sender.m_strand.post([&]
+        boost::asio::post(sender.m_strand, [&]
         {
             CHECKMSG(sender.SendQueueSize()==0, sender.SendQueueSize());
         });
 
         TRACELINE
-        sender.m_strand.post([&]{CHECK(sender.m_nodes.size()==2);});
+        boost::asio::post(sender.m_strand, [&]{CHECK(sender.m_nodes.size()==2);});
 
         TRACELINE
         sender.AddNode(4, "127.0.0.1:4");
         sender.AddNode(5, "127.0.0.1:5");
 
-        sender.m_strand.post([&]
+        boost::asio::post(sender.m_strand, [&]
         {
             CHECK(sender.m_nodes.size()==4);
             CHECK(sender.m_nodes.find(2)->second.systemNode==true);
@@ -160,7 +160,7 @@ public:
         sender.RemoveNode(4);
         sender.RemoveNode(5);
 
-        sender.m_strand.post([&]{CHECK(sender.m_nodes.size()==2);});
+        boost::asio::post(sender.m_strand, [&]{CHECK(sender.m_nodes.size()==2);});
 
         TRACELINE
         //add messages, seq: 3,4,5
@@ -170,7 +170,7 @@ public:
 
 
         TRACELINE
-        sender.m_strand.post([&]
+        boost::asio::post(sender.m_strand, [&]
         {
             boost::mutex::scoped_lock lock(mutex);
             CHECK(sent.size()>0);
@@ -186,13 +186,13 @@ public:
 
         //Ack all messages
         sender.HandleAck(Ack(2, 1, 3, Com::MultiReceiverSendMethod));  //Ack(sender, receiver, seqNo, sendMethod)
-        sender.m_strand.post([&]{CHECKMSG(sender.SendQueueSize()==3, sender.SendQueueSize());});
+        boost::asio::post(sender.m_strand, [&]{CHECKMSG(sender.SendQueueSize()==3, sender.SendQueueSize());});
         WaitUntilReady();
         sender.HandleAck(Ack(3, 1, 5, Com::MultiReceiverSendMethod));
-        sender.m_strand.post([&]{CHECKMSG(sender.SendQueueSize()==2, sender.SendQueueSize());});
+        boost::asio::post(sender.m_strand, [&]{CHECKMSG(sender.SendQueueSize()==2, sender.SendQueueSize());});
         WaitUntilReady();
         sender.HandleAck(Ack(2, 1, 5, Com::MultiReceiverSendMethod));
-        sender.m_strand.post([&]{CHECKMSG(sender.SendQueueSize()==0, sender.SendQueueSize());});
+        boost::asio::post(sender.m_strand, [&]{CHECKMSG(sender.SendQueueSize()==0, sender.SendQueueSize());});
         WaitUntilReady();
 
         TRACELINE
@@ -205,7 +205,7 @@ public:
         }
 
         TRACELINE
-        sender.m_strand.post([&]
+        boost::asio::post(sender.m_strand, [&]
         {
             std::wcout<<"--- SendQueue with fragmented message ---"<<std::endl;
             std::wcout<<sender.SendQueueToString().c_str()<<std::endl;
@@ -222,8 +222,8 @@ public:
             auto ack=Ack(2, 1, 14, Com::MultiReceiverSendMethod);
             ack.missing[4]=1;  //index for seq 10 is calculated Ack.Seq-10, i.e 14-10=4
             sender.HandleAck(ack);
-            sender.m_strand.post([&]{std::wcout<<"R2 ack all but seq 10"<<std::endl; std::wcout<<sender.SendQueueToString().c_str()<<std::endl; });
-            sender.m_strand.post([&]{CHECKMSG(sender.SendQueueSize()==9, sender.SendQueueSize());});
+            boost::asio::post(sender.m_strand, [&]{std::wcout<<"R2 ack all but seq 10"<<std::endl; std::wcout<<sender.SendQueueToString().c_str()<<std::endl; });
+            boost::asio::post(sender.m_strand, [&]{CHECKMSG(sender.SendQueueSize()==9, sender.SendQueueSize());});
         }
         // now send queue looks like this:
         // ------------------------------------------------------------------------------------------------------------------------------
@@ -234,8 +234,8 @@ public:
             auto ack=Ack(3, 1, 14, Com::MultiReceiverSendMethod);
             ack.missing[2]=1;  //index for seq 12 is calculated Ack.Seq-12, i.e 14-12=2
             sender.HandleAck(ack);
-            sender.m_strand.post([&]{std::wcout<<"R3 ack all but seq 12"<<std::endl; std::wcout<<sender.SendQueueToString().c_str()<<std::endl;});
-            sender.m_strand.post([&]{CHECKMSG(sender.SendQueueSize()==5, sender.SendQueueSize());});
+            boost::asio::post(sender.m_strand, [&]{std::wcout<<"R3 ack all but seq 12"<<std::endl; std::wcout<<sender.SendQueueToString().c_str()<<std::endl;});
+            boost::asio::post(sender.m_strand, [&]{CHECKMSG(sender.SendQueueSize()==5, sender.SendQueueSize());});
         }
         // now send queue looks like this:
         // --------------------------------------------------------
@@ -245,8 +245,8 @@ public:
         TRACELINE
         //R2 ack seq 10
         sender.HandleAck(Ack(2, 1, 10, Com::MultiReceiverSendMethod));
-        sender.m_strand.post([&]{std::wcout<<"R2 ack seq 10"<<std::endl; std::wcout<<sender.SendQueueToString().c_str()<<std::endl;});
-        sender.m_strand.post([&]{CHECKMSG(sender.SendQueueSize()==3, sender.SendQueueSize());});
+        boost::asio::post(sender.m_strand, [&]{std::wcout<<"R2 ack seq 10"<<std::endl; std::wcout<<sender.SendQueueToString().c_str()<<std::endl;});
+        boost::asio::post(sender.m_strand, [&]{CHECKMSG(sender.SendQueueSize()==3, sender.SendQueueSize());});
         // now send queue looks like this:
         // ---------------------------------
         // | seq 12 (R3) | seq 13 | seq 14 |
@@ -258,10 +258,10 @@ public:
         std::wcout<<"*****Continue"<<std::endl;
 
         sender.HandleAck(Ack(3, 1, 12, Com::MultiReceiverSendMethod));
-        sender.m_strand.post([&]{std::wcout<<"R3 ack seq 12"<<std::endl; std::wcout<<sender.SendQueueToString().c_str()<<std::endl;});
+        boost::asio::post(sender.m_strand, [&]{std::wcout<<"R3 ack seq 12"<<std::endl; std::wcout<<sender.SendQueueToString().c_str()<<std::endl;});
 
         //now send queue is empty, when 12 is acked also 13 and 14 are removed since they are already acked
-        sender.m_strand.post([&]{CHECKMSG(sender.SendQueueSize()==0, sender.SendQueueSize());});
+        boost::asio::post(sender.m_strand, [&]{CHECKMSG(sender.SendQueueSize()==0, sender.SendQueueSize());});
 
         TRACELINE
 
@@ -297,7 +297,7 @@ public:
         CHECK(gotQueueNotFull2);
 
         TRACELINE
-        sender.m_strand.post([&]
+        boost::asio::post(sender.m_strand, [&]
         {
             sender.Stop();
             work.reset();
@@ -383,8 +383,8 @@ public:
     {
         std::wcout<<"UnackedDataSenderTest started"<<std::endl;
 
-        boost::asio::io_service io;
-        auto work=std::make_shared<boost::asio::io_service::work>(io);
+        boost::asio::io_context io;
+        auto work=boost::asio::make_work_guard(io);
         boost::thread_group threads;
         for (int i = 0; i < 9; ++i)
         {
@@ -403,7 +403,7 @@ public:
         std::atomic<unsigned int> go(0);
         auto WaitUntilReady=[&]
         {
-            sender.m_strand.post([&]{go=1;});
+            boost::asio::post(sender.m_strand, [&]{go=1;});
 
             while(go==0)
                 Wait(20);
@@ -417,13 +417,13 @@ public:
         sender.IncludeNode(3);
 
         TRACELINE
-        sender.m_strand.post([&]{CHECK(sender.m_nodes.size()==2);});
+        boost::asio::post(sender.m_strand, [&]{CHECK(sender.m_nodes.size()==2);});
 
         TRACELINE
         sender.AddNode(4, "127.0.0.1:4");
         sender.AddNode(5, "127.0.0.1:5");
 
-        sender.m_strand.post([&]
+        boost::asio::post(sender.m_strand, [&]
         {
             CHECK(sender.m_nodes.size()==4);
             CHECK(sender.m_nodes.find(2)->second.systemNode==true);
@@ -439,7 +439,7 @@ public:
         sender.RemoveNode(4);
         sender.RemoveNode(5);
 
-        sender.m_strand.post([&]{CHECK(sender.m_nodes.size()==2);});
+        boost::asio::post(sender.m_strand, [&]{CHECK(sender.m_nodes.size()==2);});
 
         TRACELINE
         sender.AddToSendQueue(0, MakeShared("1"), 1, 1);
@@ -447,7 +447,7 @@ public:
         sender.AddToSendQueue(0, MakeShared("3"), 1, 1);
 
         TRACELINE
-        sender.m_strand.post([&]
+        boost::asio::post(sender.m_strand, [&]
         {
             boost::mutex::scoped_lock lock(mutex);
             CHECK(sent.size()>0);
@@ -457,7 +457,7 @@ public:
         });
 
 
-        sender.m_strand.post([&]
+        boost::asio::post(sender.m_strand, [&]
         {
             boost::mutex::scoped_lock lock(mutex);
             CHECKMSG(sender.m_sendQueue.size()==0, sender.m_sendQueue.size());
@@ -465,7 +465,7 @@ public:
         });
 
         TRACELINE
-        sender.m_strand.post([&]
+        boost::asio::post(sender.m_strand, [&]
         {
             sender.Stop();
             work.reset();
@@ -524,8 +524,8 @@ public:
     {
         std::wcout<<"SmallWindowSenderTest started"<<std::endl;
 
-        boost::asio::io_service io;
-        auto work=std::make_shared<boost::asio::io_service::work>(io);
+        boost::asio::io_context io;
+        auto work=boost::asio::make_work_guard(io);
         boost::thread_group threads;
         for (int i = 0; i < 9; ++i)
         {
@@ -545,7 +545,7 @@ public:
         std::atomic<unsigned int> go(0);
         auto WaitUntilReady=[&]
         {
-            sender.m_strand.post([&]{go=1;});
+            boost::asio::post(sender.m_strand, [&]{go=1;});
 
             while(go==0)
                 Wait(20);
@@ -601,7 +601,7 @@ public:
         TRACELINE
 
         //Check that welcome messages have been posted
-        sender.m_strand.post([&]
+        boost::asio::post(sender.m_strand, [&]
         {
             CHECK(sender.m_nodes.size()==2);
             CHECK(sender.m_nodes.find(2)->second.systemNode==true);
@@ -628,7 +628,7 @@ public:
         sender.HandleAck(Ack(2, 1, 2, Com::MultiReceiverSendMethod));  //Ack(sender, receiver, seqNo, sendMethod)
         sender.HandleAck(Ack(3, 1, 2, Com::MultiReceiverSendMethod));  //Ack(sender, receiver, seqNo, sendMethod)
 
-        sender.m_strand.post([&]
+        boost::asio::post(sender.m_strand, [&]
         {
             //all messages should now have been removed
             CHECKMSG(sender.SendQueueSize()==0, sender.SendQueueSize());
@@ -637,13 +637,13 @@ public:
         WaitUntilReady();
 
         TRACELINE
-        sender.m_strand.post([&]{CHECK(sender.m_nodes.size()==2);});
+        boost::asio::post(sender.m_strand, [&]{CHECK(sender.m_nodes.size()==2);});
 
         TRACELINE
         sender.AddNode(4, "127.0.0.1:4");
         sender.AddNode(5, "127.0.0.1:5");
 
-        sender.m_strand.post([&]
+        boost::asio::post(sender.m_strand, [&]
         {
             CHECK(sender.m_nodes.size()==4);
             CHECK(sender.m_nodes.find(2)->second.systemNode==true);
@@ -659,7 +659,7 @@ public:
         sender.RemoveNode(4);
         sender.RemoveNode(5);
 
-        sender.m_strand.post([&]{CHECK(sender.m_nodes.size()==2);});
+        boost::asio::post(sender.m_strand, [&]{CHECK(sender.m_nodes.size()==2);});
 
         WaitUntilReady();
         CHECK(sender.m_sendQueue.empty());
@@ -672,7 +672,7 @@ public:
 
 
         TRACELINE
-        sender.m_strand.post([&]
+        boost::asio::post(sender.m_strand, [&]
         {
             boost::mutex::scoped_lock lock(mutex);
             CHECK(sent.size()==1);
@@ -683,22 +683,22 @@ public:
         TRACELINE
         WaitUntilReady();
         sender.HandleAck(Ack(2, 1, 3, Com::MultiReceiverSendMethod));  //Ack(sender, receiver, seqNo, sendMethod)
-        sender.m_strand.post([&]{CHECKMSG(sender.SendQueueSize()==3, sender.SendQueueSize());});
+        boost::asio::post(sender.m_strand, [&]{CHECKMSG(sender.SendQueueSize()==3, sender.SendQueueSize());});
         WaitUntilReady();
         WaitUntilReady();
         sender.HandleAck(Ack(3, 1, 3, Com::MultiReceiverSendMethod)); //Ack(sender, receiver, seqNo, sendMethod)
-        sender.m_strand.post([&]{std::wcout<<sender.SendQueueToString().c_str()<<std::endl;});
-        sender.m_strand.post([&]{CHECKMSG(sender.SendQueueSize()==2, sender.SendQueueSize());});
+        boost::asio::post(sender.m_strand, [&]{std::wcout<<sender.SendQueueToString().c_str()<<std::endl;});
+        boost::asio::post(sender.m_strand, [&]{CHECKMSG(sender.SendQueueSize()==2, sender.SendQueueSize());});
         WaitUntilReady();
-        sender.m_strand.post([&]{std::wcout<<sender.SendQueueToString().c_str()<<std::endl;});
+        boost::asio::post(sender.m_strand, [&]{std::wcout<<sender.SendQueueToString().c_str()<<std::endl;});
         WaitUntilReady();
         sender.HandleAck(Ack(2, 1, 4, Com::MultiReceiverSendMethod));
         sender.HandleAck(Ack(3, 1, 4, Com::MultiReceiverSendMethod));
-        sender.m_strand.post([&]{CHECKMSG(sender.SendQueueSize()==1, sender.SendQueueSize());});
+        boost::asio::post(sender.m_strand, [&]{CHECKMSG(sender.SendQueueSize()==1, sender.SendQueueSize());});
         WaitUntilReady();
         sender.HandleAck(Ack(2, 1, 5, Com::MultiReceiverSendMethod));
         sender.HandleAck(Ack(3, 1, 5, Com::MultiReceiverSendMethod));
-        sender.m_strand.post([&]{CHECKMSG(sender.SendQueueSize()==0, sender.SendQueueSize());});
+        boost::asio::post(sender.m_strand, [&]{CHECKMSG(sender.SendQueueSize()==0, sender.SendQueueSize());});
         WaitUntilReady();
 
         TRACELINE
@@ -711,7 +711,7 @@ public:
         }
 
         TRACELINE
-        sender.m_strand.post([&]
+        boost::asio::post(sender.m_strand, [&]
         {
             std::wcout<<"--- SendQueue with fragmented message ---"<<std::endl;
             std::wcout<<sender.SendQueueToString().c_str()<<std::endl;
@@ -728,19 +728,19 @@ public:
 
         std::wcout<<"*****Wait for resending 6 to R2,R3"<<std::endl;
         Wait(1600);
-        sender.m_strand.post([&]
+        boost::asio::post(sender.m_strand, [&]
         {
             CHECK(sender.m_sendQueue[0]->transmitCount==2);
         });
         WaitUntilReady();
         Wait(1000);
-        sender.m_strand.post([&]
+        boost::asio::post(sender.m_strand, [&]
         {
             CHECK(sender.m_sendQueue[0]->transmitCount==2);
         });
         WaitUntilReady();
         Wait(2000);
-        sender.m_strand.post([&]
+        boost::asio::post(sender.m_strand, [&]
         {
             CHECK(sender.m_sendQueue[0]->transmitCount==3);
             for (size_t i=0; i<9; ++i)
@@ -758,10 +758,10 @@ public:
             WaitUntilReady();
         }
 
-        sender.m_strand.post([&]{CHECKMSG(sender.SendQueueSize()==0, sender.SendQueueSize());});
+        boost::asio::post(sender.m_strand, [&]{CHECKMSG(sender.SendQueueSize()==0, sender.SendQueueSize());});
 
         TRACELINE
-        sender.m_strand.post([&]
+        boost::asio::post(sender.m_strand, [&]
         {
             sender.Stop();
             work.reset();
@@ -848,8 +848,8 @@ public:
     {
         std::wcout<<"RetransmissionTest started"<<std::endl;
 
-        boost::asio::io_service io;
-        auto work=std::make_shared<boost::asio::io_service::work>(io);
+        boost::asio::io_context io;
+        auto work=boost::asio::make_work_guard(io);
         boost::thread_group threads;
         for (int i = 0; i < 9; ++i)
         {
@@ -868,7 +868,7 @@ public:
         std::atomic<unsigned int> go(0);
         auto WaitUntilReady=[&]
         {
-            sender.m_strand.post([&]{go=1;});
+            boost::asio::post(sender.m_strand, [&]{go=1;});
 
             while(go==0)
                 Wait(20);
@@ -895,7 +895,7 @@ public:
         TRACELINE
 
         //Check that welcome messages have been posted
-        sender.m_strand.post([&]
+        boost::asio::post(sender.m_strand, [&]
         {
             CHECK(sender.m_nodes.size()==2);
             CHECK(sender.m_nodes.find(2)->second.systemNode==true);
@@ -917,7 +917,7 @@ public:
         TRACELINE
         WaitUntilReady();
 
-        sender.m_strand.post([&]
+        boost::asio::post(sender.m_strand, [&]
         {
             //all messages should now have been removed
             CHECK(sender.m_sendQueue.empty());
@@ -937,7 +937,7 @@ public:
         // Test retransmission when sending multireceiver
         sender.AddToSendQueue(0, MakeShared("1"), 1, 1); //toId, data, size, dataType
         Wait(800);
-        sender.m_strand.post([&]
+        boost::asio::post(sender.m_strand, [&]
         {
             boost::mutex::scoped_lock lock(mutex);
             CHECK(sender.m_sendQueue.size()==1);
@@ -962,7 +962,7 @@ public:
 
         //node 2 will ack the only message in sendQueue (seq=3)
         sender.HandleAck(Ack(2, 1, 3, Com::MultiReceiverSendMethod));  //Ack(sender, receiver, seqNo, sendMethod)
-        sender.m_strand.post([&]
+        boost::asio::post(sender.m_strand, [&]
         {
             CHECKMSG(sender.SendQueueSize()==1, sender.SendQueueSize());
             CHECK(sender.m_sendQueue[0]->receivers.size()==1);
@@ -976,7 +976,7 @@ public:
 
         //wait for 2 more resends to node 3
         Wait(1000);
-        sender.m_strand.post([&]
+        boost::asio::post(sender.m_strand, [&]
         {
             boost::mutex::scoped_lock lock(mutex);
             CHECK(sender.m_sendQueue.size()==1);
@@ -1000,14 +1000,14 @@ public:
 
         //node 3 will ack the only message in sendQueue (seq=3)
         sender.HandleAck(Ack(3, 1, 3, Com::MultiReceiverSendMethod)); //Ack(sender, receiver, seqNo, sendMethod)
-        sender.m_strand.post([&]{CHECKMSG(sender.SendQueueSize()==0, sender.SendQueueSize());});
+        boost::asio::post(sender.m_strand, [&]{CHECKMSG(sender.SendQueueSize()==0, sender.SendQueueSize());});
         WaitUntilReady();
 
         TRACELINE
 
         //no more retransmission expected
         Wait(800);
-        sender.m_strand.post([&]
+        boost::asio::post(sender.m_strand, [&]
         {
             boost::mutex::scoped_lock lock(mutex);
             CHECK(sender.m_sendQueue.empty());
@@ -1023,7 +1023,7 @@ public:
         Wait(2000);
 
         TRACELINE
-        sender.m_strand.post([&]
+        boost::asio::post(sender.m_strand, [&]
         {
             boost::mutex::scoped_lock lock(mutex);
             CHECK(sender.m_sendQueue.size()==1);
@@ -1042,12 +1042,12 @@ public:
         sender.HandleAck(Ack(2, 1, 4, Com::MultiReceiverSendMethod));  //Ack(sender, receiver, seqNo, sendMethod)
         sender.HandleAck(Ack(3, 1, 4, Com::MultiReceiverSendMethod));  //Ack(sender, receiver, seqNo, sendMethod)
 
-        sender.m_strand.post([&]{CHECKMSG(sender.SendQueueSize()==0, sender.SendQueueSize());});
+        boost::asio::post(sender.m_strand, [&]{CHECKMSG(sender.SendQueueSize()==0, sender.SendQueueSize());});
         WaitUntilReady();
 
         //finished
         TRACELINE
-        sender.m_strand.post([&]
+        boost::asio::post(sender.m_strand, [&]
         {
             sender.Stop();
             work.reset();

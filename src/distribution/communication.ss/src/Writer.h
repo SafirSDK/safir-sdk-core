@@ -239,8 +239,8 @@ namespace Com
     public:
         typedef std::shared_ptr<T> Ptr;
 
-        Writer(boost::asio::io_service& ioService, int protocol)
-            :m_socket(ioService,  Resolver::Protocol(protocol))
+        Writer(boost::asio::io_context& ioContext, int protocol)
+            :m_socket(ioContext,  Resolver::Protocol(protocol))
             ,m_multicastEndpoint()
             ,m_multicastEnabled(false)
         {
@@ -248,11 +248,11 @@ namespace Com
             m_socket.set_option(boost::asio::socket_base::send_buffer_size(Parameters::SocketBufferSize));
         }
 
-        Writer(boost::asio::io_service& ioService,
+        Writer(boost::asio::io_context& ioContext,
                int protocol,
                const std::string& localIf,
                const std::string& multicastAddress)
-            :m_socket(ioService, Resolver::Protocol(protocol))
+            :m_socket(ioContext, Resolver::Protocol(protocol))
             ,m_multicastEndpoint()
             ,m_multicastEnabled(!multicastAddress.empty())
         {
