@@ -22,12 +22,20 @@ if(CCACHE_FOUND)
   set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
 endif(CCACHE_FOUND)
 
+set(expected_conan_cmake_hash 5cdb3042632da3efff558924eecefd580a0e786863a857ca097c3d1d43df5dcd)
+if(EXISTS "${CMAKE_BINARY_DIR}/conan.cmake")
+  file(SHA256 "${CMAKE_BINARY_DIR}/conan.cmake" conan_cmake_hash)
+  if (NOT conan_cmake_hash STREQUAL expected_conan_cmake_hash)
+    message(WARNING "Invalid version of conan.cmake found. Will attempt to download a proper one")
+    file (REMOVE "${CMAKE_BINARY_DIR}/conan.cmake")
+  endif()
+endif()
 
 if(NOT EXISTS "${CMAKE_BINARY_DIR}/conan.cmake")
   message(STATUS "Downloading conan.cmake from https://github.com/conan-io/cmake-conan")
-  file(DOWNLOAD "https://raw.githubusercontent.com/conan-io/cmake-conan/0.17.0/conan.cmake"
+  file(DOWNLOAD "https://raw.githubusercontent.com/conan-io/cmake-conan/0.18.1/conan.cmake"
                 "${CMAKE_BINARY_DIR}/conan.cmake"
-                EXPECTED_HASH SHA256=3bef79da16c2e031dc429e1dac87a08b9226418b300ce004cc125a82687baeef
+                EXPECTED_HASH SHA256=${expected_conan_cmake_hash}
                 TLS_VERIFY ON)
 endif()
 
