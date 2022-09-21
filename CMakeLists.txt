@@ -48,7 +48,6 @@ endif()
 conan_cmake_run(CONANFILE conanfile.py
                 BASIC_SETUP CMAKE_TARGETS
                 ${CONAN_SETTINGS_WINDOWS}
-                UPDATE
                 BUILD missing)
 
 #Set up the Safir SDK Core version by parsing version.txt
