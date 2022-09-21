@@ -1,6 +1,7 @@
 ADD_SUBDIRECTORY(Ipc_test)
 ADD_SUBDIRECTORY(Atomic_test)
 ADD_SUBDIRECTORY(AsioPeriodicTimer_test)
+ADD_SUBDIRECTORY(AsioStrandWrap_test)
 ADD_SUBDIRECTORY(LowLevelLogger_test)
 ADD_SUBDIRECTORY(ProcessMonitor_test)
 ADD_SUBDIRECTORY(SystemLog_test)
