@@ -48,7 +48,7 @@
 !define env_hklm 'HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment"'
 
 ;Set a compressor that gives us very good ratios
-SetCompressor /SOLID lzma
+SetCompressor lzma
 
 ;;We want at least .NET framework 4:
 !define MIN_FRA_MAJOR "4"
