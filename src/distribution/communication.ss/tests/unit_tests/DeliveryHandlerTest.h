@@ -50,13 +50,14 @@ public:
         {
             threads.create_thread([&]{io.run();});
         }
-        boost::asio::io_context::strand strand(io);
 
-        Com::DeliveryHandlerBasic<DeliveryHandlerTest::TestWriter> dh(strand, 1, 4, 20);
+        auto receiveStrand = boost::asio::make_strand(io);
+
+        Com::DeliveryHandlerBasic<DeliveryHandlerTest::TestWriter> dh(io, 1, 4, 20);
 
         dh.SetGotRecvCallback([](int64_t fromNodeId, bool isMulticast, bool isDuplicate)
                               {GotReceiveFrom(fromNodeId,isMulticast, isDuplicate);});
-        
+
         dh.SetReceiver([](int64_t fromNodeId, int64_t fromNodeType, const char* data, size_t size)
                         {OnRecv(fromNodeId,fromNodeType, data, size);},
                        0,
@@ -109,7 +110,7 @@ public:
 
         TRACELINE
 
-        boost::asio::post(dh.m_receiveStrand, [&]{SetReady();});
+        boost::asio::post(receiveStrand, [&]{SetReady();});
         WaitUntilReady();
         boost::asio::post(dh.m_deliverStrand, [&]{SetReady();});
         WaitUntilReady();
@@ -138,7 +139,7 @@ public:
             dh.ReceivedApplicationData(&header, reinterpret_cast<const char*>(&welcomeNodeId), false);
         }
 
-        boost::asio::post(dh.m_receiveStrand, [&]{SetReady();});
+        boost::asio::post(receiveStrand, [&]{SetReady();});
         WaitUntilReady();
         boost::asio::post(dh.m_deliverStrand, [&]{SetReady();});
         WaitUntilReady();
@@ -166,7 +167,7 @@ public:
 
         TRACELINE
 
-        boost::asio::post(dh.m_receiveStrand, [&]{SetReady();});
+        boost::asio::post(receiveStrand, [&]{SetReady();});
         WaitUntilReady();
         boost::asio::post(dh.m_deliverStrand, [&]{SetReady();});
         WaitUntilReady();
@@ -199,7 +200,7 @@ public:
             }
         }
 
-        boost::asio::post(dh.m_receiveStrand, [&]{SetReady();});
+        boost::asio::post(receiveStrand, [&]{SetReady();});
         WaitUntilReady();
         boost::asio::post(dh.m_deliverStrand, [&]{SetReady();});
         WaitUntilReady();
@@ -224,7 +225,7 @@ public:
             header.ackNow=1;
             dh.ReceivedApplicationData(&header, payload, false);
         }
-        boost::asio::post(dh.m_receiveStrand, [&]{SetReady();});
+        boost::asio::post(receiveStrand, [&]{SetReady();});
         WaitUntilReady();
 
         for (int64_t id=2; id<=4; ++id)
@@ -259,7 +260,7 @@ public:
             header.ackNow=1;
             dh.ReceivedApplicationData(&header, payload, false);
         }
-        boost::asio::post(dh.m_receiveStrand, [&]{SetReady();});
+        boost::asio::post(receiveStrand, [&]{SetReady();});
         WaitUntilReady();
         CHECKMSG(numberOfReceivedPings==3, numberOfReceivedPings);
         for (int64_t id=2; id<=4; ++id)
@@ -283,7 +284,7 @@ public:
             dh.ReceivedApplicationData(&header, payload, false);
         }
 
-        boost::asio::post(dh.m_receiveStrand, [&]{SetReady();});
+        boost::asio::post(receiveStrand, [&]{SetReady();});
         WaitUntilReady();
         boost::asio::post(dh.m_deliverStrand, [&]{SetReady();});
         WaitUntilReady();
@@ -318,7 +319,7 @@ public:
             }
         }
 
-        boost::asio::post(dh.m_receiveStrand, [&]{SetReady();});
+        boost::asio::post(receiveStrand, [&]{SetReady();});
         WaitUntilReady();
         boost::asio::post(dh.m_deliverStrand, [&]{SetReady();});
         WaitUntilReady();
@@ -356,7 +357,7 @@ public:
             }
         }
 
-        boost::asio::post(dh.m_receiveStrand, [&]{SetReady();});
+        boost::asio::post(receiveStrand, [&]{SetReady();});
         WaitUntilReady();
         boost::asio::post(dh.m_deliverStrand, [&]{SetReady();});
         WaitUntilReady();
@@ -386,7 +387,7 @@ public:
             dh.ReceivedApplicationData(&header, payload, false);
         }
 
-        boost::asio::post(dh.m_receiveStrand, [&]{SetReady();});
+        boost::asio::post(receiveStrand, [&]{SetReady();});
         WaitUntilReady();
         boost::asio::post(dh.m_deliverStrand, [&]{SetReady();});
         WaitUntilReady();

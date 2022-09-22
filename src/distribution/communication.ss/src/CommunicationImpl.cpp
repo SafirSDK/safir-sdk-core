@@ -77,7 +77,7 @@ namespace
         ,m_onNewNode()
         ,m_gotRecvFrom()
         ,m_discoverer(m_ioContext, m_me, fragmentSize, LightNodeTypes(nodeTypes), [this](const Node& n){OnNewNode(n);})
-        ,m_deliveryHandler(m_receiveStrand, m_me.nodeId, m_protocol, m_nodeTypes[nodeTypeId]->SlidingWindowSize())
+        ,m_deliveryHandler(ioContext, m_me.nodeId, m_protocol, m_nodeTypes[nodeTypeId]->SlidingWindowSize())
         ,m_reader(m_receiveStrand, m_me.unicastAddress, m_nodeTypes[nodeTypeId]->MulticastAddress(),
                   [this](const char* d, size_t s, const bool mc){return OnRecv(d,s,mc);},
                   [this](){return m_deliveryHandler.NumberOfUndeliveredMessages()<Parameters::MaxNumberOfUndelivered;})
@@ -163,7 +163,7 @@ namespace
 
     void CommunicationImpl::Start()
     {
-        m_deliveryHandler.Start();
+        m_deliveryHandler.Start(); // It should be safe to call start from outside m_receiveStrand
         m_reader.Start();
         for (auto vt = m_nodeTypes.cbegin(); vt != m_nodeTypes.cend(); ++vt)
         {
@@ -178,8 +178,9 @@ namespace
 
     void CommunicationImpl::Stop()
     {
+        boost::asio::dispatch(m_receiveStrand, [this]{m_deliveryHandler.Stop();});
         m_reader.Stop();
-        m_deliveryHandler.Stop();
+
         for (auto vt = m_nodeTypes.cbegin(); vt != m_nodeTypes.cend(); ++vt)
         {
             vt->second->GetHeartbeatSender().Stop();

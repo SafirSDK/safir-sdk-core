@@ -163,10 +163,10 @@ namespace Com
             ReaderType::AsyncReceive(buf,
                                      Parameters::ReceiveBufferSize,
                                      socket,
-                                     boost::asio::bind_executor(m_strand, [this,buf,socket](const boost::system::error_code& error, size_t bytesRecv)
+                                     [this, buf, socket](const boost::system::error_code& error, size_t bytesRecv)
                                      {
-                                         HandleReceive(error, bytesRecv, buf, socket);
-                                     }));
+                                        boost::asio::dispatch(m_strand, [=]{HandleReceive(error, bytesRecv, buf, socket);});
+                                     });
         }
 
         bool ValidCrc(const char* buf, size_t size)

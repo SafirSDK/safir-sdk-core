@@ -32,15 +32,6 @@ public:
     {
         std::cout<<"AllocatorTest started"<<std::endl;
 
-        std::atomic<unsigned int> go(0);
-        auto SetReady=[&]{go=1;};
-        auto WaitUntilReady=[&]
-        {
-            while(go==0)
-                Wait(20);
-            go=0;
-        };
-
         boost::asio::io_context io;
         auto work=boost::asio::make_work_guard(io);
 
@@ -49,9 +40,8 @@ public:
         {
             threads.create_thread([&]{io.run();});
         }
-        boost::asio::io_context::strand strand(io);
 
-        Com::DeliveryHandlerBasic<AllocatorTest::TestWriter> dh(strand, 1, 4, 20);
+        Com::DeliveryHandlerBasic<AllocatorTest::TestWriter> dh(io, 1, 4, 20);
 
         dh.SetGotRecvCallback([](int64_t fromNodeId, bool isMulticast, bool isDuplicate)
                               {GotReceiveFrom(fromNodeId,isMulticast,isDuplicate);});
@@ -71,6 +61,16 @@ public:
                             std::cout<<"Dealloc: "<<numAllocs<<std::endl;
                             delete[] data;
                         });
+
+        std::atomic<unsigned int> deliveredFlag(0);
+        auto WaitForDeliver=[&]
+        {
+            boost::asio::post(dh.m_deliverStrand, [&]{ deliveredFlag = 1; });
+            while(deliveredFlag == 0)
+                Wait(20);
+            deliveredFlag = 0;
+        };
+
         dh.Start();
 
         TRACELINE
@@ -104,13 +104,6 @@ public:
         }
 
         TRACELINE
-
-        boost::asio::post(dh.m_receiveStrand, [&]{SetReady();});
-        WaitUntilReady();
-        boost::asio::post(dh.m_deliverStrand, [&]{SetReady();});
-        WaitUntilReady();
-
-        TRACELINE
         for (int64_t id=2; id<=4; ++id)
         {
             CHECK(received[id]==0);
@@ -134,11 +127,12 @@ public:
             dh.ReceivedApplicationData(&header, reinterpret_cast<const char*>(&welcomeNodeId), false);
         }
 
-        boost::asio::post(dh.m_receiveStrand, [&]{SetReady();});
-        WaitUntilReady();
-        boost::asio::post(dh.m_deliverStrand, [&]{SetReady();});
-        WaitUntilReady();
+        TRACELINE
+        WaitForDeliver();
+        TRACELINE
 
+
+        TRACELINE
         CHECK(dh.m_nodes.find(2)->second.ackedMultiReceiverChannel.welcome==10);
         CHECK(dh.m_nodes.find(3)->second.ackedMultiReceiverChannel.welcome==10);
         CHECK(dh.m_nodes.find(4)->second.ackedMultiReceiverChannel.welcome==10);
@@ -161,12 +155,7 @@ public:
         }
 
         TRACELINE
-
-        boost::asio::post(dh.m_receiveStrand, [&]{SetReady();});
-        WaitUntilReady();
-        boost::asio::post(dh.m_deliverStrand, [&]{SetReady();});
-        WaitUntilReady();
-
+        WaitForDeliver();
         TRACELINE
         for (int64_t id=2; id<=4; ++id)
         {
@@ -195,10 +184,7 @@ public:
             }
         }
 
-        boost::asio::post(dh.m_receiveStrand, [&]{SetReady();});
-        WaitUntilReady();
-        boost::asio::post(dh.m_deliverStrand, [&]{SetReady();});
-        WaitUntilReady();
+        WaitForDeliver();
 
         TRACELINE
         for (int64_t id=2; id<=4; ++id)
@@ -221,10 +207,7 @@ public:
             dh.ReceivedApplicationData(&header, payload, false);
         }
 
-        boost::asio::post(dh.m_receiveStrand, [&]{SetReady();});
-        WaitUntilReady();
-        boost::asio::post(dh.m_deliverStrand, [&]{SetReady();});
-        WaitUntilReady();
+        WaitForDeliver();
 
         TRACELINE
         for (int64_t id=2; id<=4; ++id)
@@ -256,10 +239,7 @@ public:
             }
         }
 
-        boost::asio::post(dh.m_receiveStrand, [&]{SetReady();});
-        WaitUntilReady();
-        boost::asio::post(dh.m_deliverStrand, [&]{SetReady();});
-        WaitUntilReady();
+        WaitForDeliver();
 
         TRACELINE
         for (int64_t id=2; id<=4; ++id)
@@ -294,10 +274,7 @@ public:
             }
         }
 
-        boost::asio::post(dh.m_receiveStrand, [&]{SetReady();});
-        WaitUntilReady();
-        boost::asio::post(dh.m_deliverStrand, [&]{SetReady();});
-        WaitUntilReady();
+        WaitForDeliver();
 
         TRACELINE
         for (int64_t id=2; id<=4; ++id)
@@ -324,10 +301,7 @@ public:
             dh.ReceivedApplicationData(&header, payload, false);
         }
 
-        boost::asio::post(dh.m_receiveStrand, [&]{SetReady();});
-        WaitUntilReady();
-        boost::asio::post(dh.m_deliverStrand, [&]{SetReady();});
-        WaitUntilReady();
+        WaitForDeliver();
 
         TRACELINE
         DumpNodeInfo(dh);
@@ -392,10 +366,8 @@ public:
             }
         }
 
-        boost::asio::post(dh.m_receiveStrand, [&]{SetReady();});
-        WaitUntilReady();
-        boost::asio::post(dh.m_deliverStrand, [&]{SetReady();});
-        WaitUntilReady();
+        WaitForDeliver();
+
 
         //3 nodes have got two incomplete fragmented message
         CHECKMSG(numAllocs==6, "Expected 6 allocs. Actual: "<<numAllocs);
@@ -404,10 +376,7 @@ public:
         dh.RemoveNode(3);
         dh.RemoveNode(4);
 
-        boost::asio::post(dh.m_receiveStrand, [&]{SetReady();});
-        WaitUntilReady();
-        boost::asio::post(dh.m_deliverStrand, [&]{SetReady();});
-        WaitUntilReady();
+        WaitForDeliver();
 
         CHECKMSG(numAllocs==0, "Expected 0 allocs. Actual: "<<numAllocs);
 

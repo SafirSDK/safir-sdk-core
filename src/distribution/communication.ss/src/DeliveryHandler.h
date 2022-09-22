@@ -61,17 +61,20 @@ namespace Com
     typedef std::function<void(int64_t fromNodeId, int64_t fromNodeType, const char* data, size_t size)> ReceiveData;
     typedef std::function<void(int64_t fromNodeId, bool isMulticast, bool isDuplicate)> GotReceiveFrom;
 
+    //***************************************************************************************************************
+    // Handles incoming data, and is responsible for delivering messages in correct order to the client.
+    // Important! All public methods must be called from the same strand (the m_receiveStrand in CommunicationImpl).
+    //***************************************************************************************************************
     template <class WriterType>
     class DeliveryHandlerBasic : private WriterType
     {
     public:
-        DeliveryHandlerBasic(boost::asio::io_context::strand& receiveStrand, int64_t myNodeId, int ipVersion, int slidingWindowSize)
-            :WriterType(receiveStrand.context(), ipVersion)
+        DeliveryHandlerBasic(boost::asio::io_context& io, int64_t myNodeId, int ipVersion, int slidingWindowSize)
+            :WriterType(io, ipVersion)
             ,m_running(false)
             ,m_myId(myNodeId)
             ,m_slidingWindowSize(static_cast<size_t>(slidingWindowSize))
-            ,m_receiveStrand(receiveStrand)
-            ,m_deliverStrand(receiveStrand.context())
+            ,m_deliverStrand(io)
             ,m_nodes()
             ,m_receivers()
             ,m_gotRecvFrom()
@@ -95,31 +98,25 @@ namespace Com
 
         void Start()
         {
-            boost::asio::post(m_receiveStrand, [this]
-            {
-                m_numberOfUndeliveredMessages=0;
-                m_running=true;
-            });
+            m_numberOfUndeliveredMessages=0;
+            m_running=true;
         }
 
         void Stop()
         {
-            boost::asio::post(m_receiveStrand, [this]
-            {
-                m_running=false;
+            m_running=false;
 
-                for (auto n : m_nodes)
-                {
-                    ClearChannel(n.second.ackedMultiReceiverChannel);
-                    ClearChannel(n.second.ackedSingleReceiverChannel);
-                    ClearChannel(n.second.unackedMultiReceiverChannel);
-                    ClearChannel(n.second.unackedSingleReceiverChannel);
-                }
-                m_nodes.clear();
-            });
+            for (auto n : m_nodes)
+            {
+                ClearChannel(n.second.ackedMultiReceiverChannel);
+                ClearChannel(n.second.ackedSingleReceiverChannel);
+                ClearChannel(n.second.unackedMultiReceiverChannel);
+                ClearChannel(n.second.unackedSingleReceiverChannel);
+            }
+            m_nodes.clear();
         }
 
-        //Received data to be delivered up to the application. Everythin must be called from readStrand.
+        // Received data to be delivered up to the application.
         void SetGotRecvCallback(const GotReceiveFrom& callback)
         {
             m_gotRecvFrom=callback;
@@ -130,7 +127,7 @@ namespace Com
             m_receivers.insert(std::make_pair(dataTypeIdentifier, DataReceiver(allocator, deallocator, callback)));
         }
 
-        //Handle received data and deliver to application if possible and sends ack back to sender.
+        // Handle received data and deliver to application if possible and sends ack back to sender.
         void ReceivedApplicationData(const MessageHeader* header, const char* payload, bool multicast)
         {
             if (!m_running)
@@ -245,7 +242,7 @@ namespace Com
                 ClearChannel(it->second.unackedMultiReceiverChannel);
                 ClearChannel(it->second.unackedSingleReceiverChannel);
             }
-            
+
             m_nodes.erase(id);
         }
 
@@ -397,7 +394,6 @@ namespace Com
         bool m_running;
         const int64_t m_myId;
         const size_t m_slidingWindowSize;
-        boost::asio::io_context::strand& m_receiveStrand; //for sending acks, same strand as all public methods are supposed to be called from
         boost::asio::io_context::strand m_deliverStrand; //for delivering data to application
         std::atomic<unsigned int> m_numberOfUndeliveredMessages;
 
