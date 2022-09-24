@@ -94,7 +94,7 @@ namespace Com
 
         void Start() SAFIR_GCC_VISIBILITY_BUG_WORKAROUND
         {
-            boost::asio::dispatch(m_strand, [this]
+            boost::asio::post(m_strand, [this]
             {
                 m_running=true;
                 m_timer.expires_after(boost::chrono::milliseconds(m_random.Get()));
@@ -104,7 +104,7 @@ namespace Com
 
         void Stop()
         {
-            boost::asio::dispatch(m_strand, [this]
+            boost::asio::post(m_strand, [this]
             {
                 m_running=false;
                 m_timer.cancel();

@@ -194,11 +194,6 @@ namespace Com
             //The actual work where the data is inserted in the queue must be done inside the strand.
             boost::asio::post(m_strand, [this,toId,totalNumberOfFragments,numberOfFullFragments,msg,size,restSize,dataTypeIdentifier]
             {
-                if (!m_running)
-                {
-                    return;
-                }
-
                 uint8_t sendMethod;
                 uint64_t* sequenceSerie=GetSequenceSerieIfExist(toId, sendMethod);
                 if (sequenceSerie==nullptr)
@@ -318,11 +313,6 @@ namespace Com
         {
             boost::asio::dispatch(m_strand, [this, id, address]
             {
-                if (!m_running)
-                {
-                    return;
-                }
-
                 if (m_nodes.find(id)!=m_nodes.end())
                 {
                     std::ostringstream os;
@@ -344,11 +334,6 @@ namespace Com
         {
             boost::asio::post(m_strand, [this, id]
             {
-                if (!m_running)
-                {
-                    return;
-                }
-
                 const auto it=m_nodes.find(id);
                 if (it!=m_nodes.end())
                 {
@@ -377,11 +362,6 @@ namespace Com
         {
             boost::asio::post(m_strand, [this, id]
             {
-                if (!m_running)
-                {
-                    return;
-                }
-
                 m_nodes.erase(id);
                 RemoveExcludedReceivers();
                 RemoveCompletedMessages();

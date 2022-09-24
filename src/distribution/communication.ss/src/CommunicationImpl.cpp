@@ -163,6 +163,7 @@ namespace
 
     void CommunicationImpl::Start()
     {
+        lllog(1)<<L"COM: Start "<<m_me.name.c_str()<<std::endl;
         m_deliveryHandler.Start(); // It should be safe to call start from outside m_receiveStrand
         m_reader.Start();
         for (auto vt = m_nodeTypes.cbegin(); vt != m_nodeTypes.cend(); ++vt)
@@ -178,6 +179,7 @@ namespace
 
     void CommunicationImpl::Stop()
     {
+        lllog(1)<<L"COM: Stop "<<m_me.name.c_str()<<std::endl;
         boost::asio::dispatch(m_receiveStrand, [this]{m_deliveryHandler.Stop();});
         m_reader.Stop();
 

@@ -190,11 +190,6 @@ namespace Com
         //Add a node
         void AddNode(const Node& node)
         {
-            if (!m_running)
-            {
-                return;
-            }
-
             if (GetNode(node.nodeId)!=nullptr)
             {
                 std::ostringstream os;
@@ -209,11 +204,6 @@ namespace Com
         //Make node included. If excluded it is also removed.
         void IncludeNode(int64_t id)
         {
-            if (!m_running)
-            {
-                return;
-            }
-
             lllog(6)<<L"COM: DeliveryHandler IncludeNode id="<<id<<std::endl;
             const auto it=m_nodes.find(id);
             if (it==m_nodes.end())
@@ -227,11 +217,6 @@ namespace Com
         //Make node included or excluded. If excluded it is also removed.
         void RemoveNode(int64_t id)
         {
-            if (!m_running)
-            {
-                return;
-            }
-
             auto it=m_nodes.find(id);
 
             if (it!=m_nodes.end())

@@ -97,7 +97,7 @@ public:
         desc.add_options()
                 ("help,h", "Produce help message")
                 ("addr,a", boost::program_options::value<std::string>(), "Unicast address on format 'address:port'")
-                ("node-type,t", boost::program_options::value<std::string>(), "Node type nt0(unicast only), nt1 or nt2, defaults to nt0'.")
+                ("node-type,t", boost::program_options::value<std::string>(), "Node type su, sm (server uni/multicas), lu, lm (lightNode uni/multicast). Default su.")
                 ("await,w", boost::program_options::value<int>(), "Wait for specified number of other nodes before start sending data")
                 ("seed,s", boost::program_options::value< std::vector<std::string> >()->multitoken(), "Seed addresses on format 'address:port'")
                 ("nmsg,n", boost::program_options::value<uint64_t>(), "Number of messages to send and receive to and from each other node.")
@@ -184,7 +184,7 @@ public:
 
     NodeTypes()
     {
-        std::vector<std::string> names {"su", "sm", "cu", "cm"};
+        std::vector<std::string> names {"su", "sm", "lu", "lm"};
         for (int i=0; i<NumberOfNodeTypes; ++i)
         {
             std::int64_t id=LlufId_Generate64(names[i].c_str());
@@ -216,7 +216,7 @@ public:
 
     const Safir::Dob::Internal::Com::NodeTypeDefinition& Get(const std::string& name) const
     {
-        return m_nodeTypes.find(LlufId_Generate64(name.c_str()))->second;
+        return m_nodeTypes.find(LlufId_Generate64(name.empty() ? "su" : name.c_str()))->second;
     }
 
     const std::map<int64_t, Safir::Dob::Internal::Com::NodeTypeDefinition>& Map() const
