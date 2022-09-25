@@ -744,7 +744,7 @@ class VisualStudioBuilder(BuilderBase):
         if len(required_variables - found_variables) != 0:
             die("Failed to find all expected variables in vcvarsall.bat")
 
-        self.__run_conan_install()
+        self.__conan_tweaks()
 
         #we also need to put the java 32 bit vm first in the path, if we're running an x86 build
         dont_build_java = os.getenv("SAFIR_DONT_BUILD_JAVA", 'False').lower() in ('true', '1', 't')
@@ -764,9 +764,8 @@ class VisualStudioBuilder(BuilderBase):
                         LOGGER.log("Failed to check whether JDK os 32 or 64 bit, Java part of the build may not " +
                                    "work. Consider setting environment variable SAFIR_DONT_BUILD_JAVA to 1 to " +
                                    "avoid building java interfaces altogether.")
-    def __run_conan_install(self):
-        """There is something that makes the conan step in cmake not work when not run
-           explicitly like this before build. On Windows, of course..."""
+    def __conan_tweaks(self):
+        """Conan on windows is troublesome, to say the least..."""
         if not os.path.exists("conanfile.py"):
             return
 
@@ -787,25 +786,6 @@ class VisualStudioBuilder(BuilderBase):
 
         LOGGER.log("Setting environment variable 'CONAN_CMAKE_GENERATOR' to 'Ninja', to encourage conan packages to build correctly.")
         os.environ["CONAN_CMAKE_GENERATOR"] = "Ninja"
-
-        arch = self.arguments.arch
-        if self.arguments.arch == "amd64":
-            arch = "x86_64"
-
-        for config in self.arguments.configs:
-            if config == "Debug":
-                compiler_runtime = "MDd"
-            else:
-                compiler_runtime = "MD"
-            self._run_command(("conan", "install", "--update", "conanfile.py",
-                               "-s", "arch={}".format(arch),
-                               "-s", "build_type={}".format(config),
-                               "-s", "compiler=Visual Studio",
-                               "-s", "compiler.version={}".format(compiler_version),
-                               "-s", "compiler.runtime={}".format(compiler_runtime),
-                               "-g=cmake",
-                               "--build=missing"),
-                              "Running conan explicitly before build for " + config)
 
 
     def stage_package(self):

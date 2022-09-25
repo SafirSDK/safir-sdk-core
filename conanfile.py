@@ -94,7 +94,7 @@ class SafirSdkCoreConan(ConanFile):
     def imports(self):
         self.copy("license*", dst="licenses", folder=True, ignore_case=True, keep_path=False)
         if self.settings.os == "Windows":
-            self.copy("*.exe", src="bin", dst="./bin", root_package="ninja")
+            self.copy("*.exe", src="bin", dst="bin", root_package="ninja")
 
     def requirements(self):
         self.requires("sentry-breakpad/0.5.0")

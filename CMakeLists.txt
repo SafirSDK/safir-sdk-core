@@ -41,13 +41,9 @@ endif()
 
 include(${CMAKE_BINARY_DIR}/conan.cmake)
 
-if (MSVC)
-  set (CONAN_SETTINGS_WINDOWS compiler.toolset=v${MSVC_TOOLSET_VERSION})
-endif()
 
 conan_cmake_run(CONANFILE conanfile.py
                 BASIC_SETUP CMAKE_TARGETS
-                ${CONAN_SETTINGS_WINDOWS}
                 BUILD missing)
 
 #Set up the Safir SDK Core version by parsing version.txt
@@ -214,7 +210,7 @@ INSTALL(DIRECTORY licenses/
   PATTERN .gitignore EXCLUDE)
 
 if (WIN32)
-  INSTALL(FILES bin/ninja.exe
+  INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/bin/ninja.exe
     DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN}
     COMPONENT Development)
 endif()
