@@ -30,6 +30,7 @@
 #include <functional>
 #include <boost/system/error_code.hpp>
 #include <Safir/Utilities/Internal/IpcName.h>
+#include <Safir/Utilities/Internal/AsioStrandWrap.h>
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -56,7 +57,7 @@ namespace Internal
         typedef std::function<void(StreamPtr)>                        StreamCreatedCallback;
 
         // The Acceptor class uses shared_from_this so remember to always access it via a shared pointer.
-        Win32Acceptor(boost::asio::io_service::strand& strand,
+        Win32Acceptor(boost::asio::io_context::strand& strand,
                       const std::string&               name,
                       const StreamCreatedCallback&     onStreamCreated)
             : m_strand(strand),
@@ -96,7 +97,7 @@ namespace Internal
         {
             auto selfHandle(this->shared_from_this());
 
-            m_strand.dispatch(
+            boost::asio::dispatch(m_strand,
                         [this, selfHandle]()
                         {
                             DWORD openMode = PIPE_ACCESS_OUTBOUND |     // outbound for publisher
@@ -140,7 +141,7 @@ namespace Internal
                             // Construct an overlapped_ptr object with a handler that is called when a subscriber has connected,
                             // that is, when the overlapped ConnectNamedPipe call has completed.
                             boost::asio::windows::overlapped_ptr overlappedPtr(m_strand.context(),
-                                                                               m_strand.wrap(
+                                                                               Safir::Utilities::Internal::WrapInStrand(m_strand,
                                 [=](const boost::system::error_code ec, std::size_t)
                                 {
                                     if (!IsStarted())
@@ -208,7 +209,7 @@ namespace Internal
                         });
         }
 
-        boost::asio::io_service::strand&                        m_strand;
+        boost::asio::io_context::strand&                        m_strand;
         std::string                                             m_pipeName;
         const StreamCreatedCallback                             m_callback;
         std::shared_ptr<boost::asio::windows::stream_handle>    m_currentConnectHandle;

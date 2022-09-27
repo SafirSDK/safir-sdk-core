@@ -29,6 +29,7 @@
 
 #include <Safir/Utilities/Internal/IpcPublisher.h>
 #include <Safir/Utilities/Internal/StringEncoding.h>
+#include <Safir/Utilities/Internal/AsioStrandWrap.h>
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
@@ -166,20 +167,19 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    boost::asio::io_service ioService;
-    boost::asio::io_service::strand strand(ioService);
+    boost::asio::io_context io;
+    boost::asio::io_context::strand strand(io);
+    auto work = boost::asio::make_work_guard(io);
 
-    std::shared_ptr<boost::asio::io_service::work> work (new boost::asio::io_service::work(ioService));
-
-    auto pubPtr = std::make_shared<IpcPublisher>(ioService,
+    auto pubPtr = std::make_shared<IpcPublisher>(io,
                                                    po.endpointName,
-                                                   strand.wrap([](){std::wcout <<  "A Subscriber connected!" << std::endl;}),
-                                                   strand.wrap([](){std::wcout <<  "A Subscriber disconnected!" << std::endl;}));
+                                                   Safir::Utilities::Internal::WrapInStrand(strand, []{std::wcout <<  "A Subscriber connected!" << std::endl;}),
+                                                   Safir::Utilities::Internal::WrapInStrand(strand, []{std::wcout <<  "A Subscriber disconnected!" << std::endl;}));
 
     boost::thread_group threads;
     for (int i = 0; i < 9; ++i)
     {
-        threads.create_thread([&ioService](){ioService.run();});
+        threads.create_thread([&io](){io.run();});
     }
 
     if (po.cmdFromStdin)

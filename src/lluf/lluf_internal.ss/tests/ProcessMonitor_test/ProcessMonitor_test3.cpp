@@ -60,7 +60,9 @@
 struct Fixture
 {
     Fixture()
-        : monitor(ioService,
+        : io()
+        , work(boost::asio::make_work_guard(io))
+        , monitor(io,
                   [this](const pid_t pid){TerminatedCb(pid);},
                   boost::chrono::milliseconds(20)) //high polling rate to speed up tests.
     {
@@ -92,10 +94,9 @@ struct Fixture
 #endif
     }
 
-    void RunIoService()
+    void RunIoContext()
     {
-        work.reset(new boost::asio::io_service::work(ioService));
-        thread = boost::thread([this]{ioService.run();});
+        thread = boost::thread([this]{io.run();});
     }
 
     void Stop()
@@ -203,8 +204,8 @@ struct Fixture
         }
 #endif
     }
-    boost::shared_ptr<boost::asio::io_service::work> work;
-    boost::asio::io_service ioService;
+    boost::asio::io_context io;
+    boost::asio::executor_work_guard<boost::asio::io_context::executor_type> work;
     boost::thread thread;
 
     Safir::Utilities::ProcessMonitor monitor;
@@ -229,14 +230,14 @@ BOOST_FIXTURE_TEST_SUITE( s, Fixture )
 
 BOOST_AUTO_TEST_CASE(create_destroy)
 {
-    RunIoService();
+    RunIoContext();
     Stop();
     BOOST_CHECK(TerminatedPids().empty());
 }
 
 BOOST_AUTO_TEST_CASE(stop_unknown)
 {
-    RunIoService();
+    RunIoContext();
     monitor.StopMonitorPid(100);
     work.reset();
     boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
@@ -246,7 +247,7 @@ BOOST_AUTO_TEST_CASE(stop_unknown)
 
 BOOST_AUTO_TEST_CASE(monitor_0)
 {
-    RunIoService();
+    RunIoContext();
     monitor.StartMonitorPid(0);
     while(TerminatedPids().empty())
     {
@@ -260,7 +261,7 @@ BOOST_AUTO_TEST_CASE(monitor_0)
 
 BOOST_AUTO_TEST_CASE(monitor_0_twice)
 {
-    RunIoService();
+    RunIoContext();
     monitor.StartMonitorPid(0);
     monitor.StartMonitorPid(0);
     while(TerminatedPids().empty())
@@ -280,7 +281,7 @@ BOOST_AUTO_TEST_CASE(monitor_0_twice)
 
 BOOST_AUTO_TEST_CASE(monitor_self)
 {
-    RunIoService();
+    RunIoContext();
     monitor.StartMonitorPid(getpid());
     monitor.StopMonitorPid(getpid());
 
@@ -292,7 +293,7 @@ BOOST_AUTO_TEST_CASE(monitor_self)
 
 BOOST_AUTO_TEST_CASE(monitor_self_twice)
 {
-    RunIoService();
+    RunIoContext();
     monitor.StartMonitorPid(getpid());
     monitor.StartMonitorPid(getpid());
     monitor.StopMonitorPid(getpid());
@@ -306,7 +307,7 @@ BOOST_AUTO_TEST_CASE(monitor_self_twice)
 
 BOOST_AUTO_TEST_CASE(monitor_self_and_0)
 {
-    RunIoService();
+    RunIoContext();
     monitor.StartMonitorPid(getpid());
     monitor.StopMonitorPid(getpid());
     monitor.StartMonitorPid(0);
@@ -323,7 +324,7 @@ BOOST_AUTO_TEST_CASE(monitor_self_and_0)
 
 BOOST_AUTO_TEST_CASE(monitor_sleeper)
 {
-    RunIoService();
+    RunIoContext();
     const pid_t pid = LaunchSleeper(0.5);
     monitor.StartMonitorPid(pid);
 
@@ -342,7 +343,7 @@ BOOST_AUTO_TEST_CASE(monitor_sleeper)
 
 BOOST_AUTO_TEST_CASE(stop_monitor)
 {
-    RunIoService();
+    RunIoContext();
     const pid_t pid = LaunchSleeper(0.5);
     monitor.StartMonitorPid(pid);
     monitor.StopMonitorPid(pid);
@@ -358,7 +359,7 @@ BOOST_AUTO_TEST_CASE(stop_monitor)
 
 BOOST_AUTO_TEST_CASE(many_sleepers)
 {
-    RunIoService();
+    RunIoContext();
 
     std::set<pid_t> pids;
     BOOST_TEST_MESSAGE("Launching sleepers");

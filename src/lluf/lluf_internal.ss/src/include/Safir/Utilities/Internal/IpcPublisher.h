@@ -66,12 +66,12 @@ namespace Internal
     {
     public:
 
-        IpcPublisherImpl(boost::asio::io_service&       ioService,
+        IpcPublisherImpl(boost::asio::io_context&       io,
                          const std::string&             name,
                          const std::function<void()>    subscriberConnectedCb,
                          const std::function<void()>    subscriberDisconnectedCb)
             : m_running(false),
-              m_strand(ioService),
+              m_strand(io),
               m_acceptor(),
               m_sessions(),
               m_subscriberConnectedCb(subscriberConnectedCb),
@@ -102,7 +102,7 @@ namespace Internal
 
             auto selfHandle(this->shared_from_this());
 
-            m_strand.dispatch(
+            boost::asio::dispatch(m_strand,
                         [this, selfHandle]()
                         {
                             if (m_acceptor->IsStarted())
@@ -126,7 +126,7 @@ namespace Internal
 
             auto selfHandle(this->shared_from_this());
 
-            m_strand.post(
+            boost::asio::post(m_strand,
                          [this, selfHandle]()
                          {
                              m_sessions.clear();
@@ -147,7 +147,7 @@ namespace Internal
 
             Safir::Utilities::Internal::SharedCharArray msgSharedPtr(std::move(msg));
 
-            m_strand.dispatch(
+            boost::asio::dispatch(m_strand,
                         [this, selfHandle, msgSharedPtr, msgSize]()
                         {
                             for (auto it = m_sessions.begin(); it != m_sessions.end(); /* it incremented in loop */)
@@ -186,7 +186,7 @@ namespace Internal
         typedef std::shared_ptr<Acceptor> AcceptorPtr;
 
         std::atomic<bool>                   m_running;
-        boost::asio::io_service::strand     m_strand;
+        boost::asio::io_context::strand     m_strand;
         AcceptorPtr                         m_acceptor;
         std::set<SessionPtr>                m_sessions;
         std::function<void()>               m_subscriberConnectedCb;
@@ -220,7 +220,7 @@ namespace Internal
         /**
          * Constructor
          *
-         * @param ioService [in] - io_service that will be used as engine.
+         * @param io [in] - io_context that will be used as engine.
          * @param name [in] - Ipc identification.
          * @param subscriberConnectedCb [in] - Called when a subscriber connects.
          *                                     Provide a nullptr if no calback is wanted.
@@ -229,11 +229,11 @@ namespace Internal
          *                                        Note that detection of a disconnected subscriber is done only
          *                                        when the publisher is sending.
          */
-        IpcPublisher(boost::asio::io_service&       ioService,
+        IpcPublisher(boost::asio::io_context&       io,
                      const std::string&             name,
                      const std::function<void()>    subscriberConnectedCb,
                      const std::function<void()>    subscriberDisconnectedCb)
-            : m_pimpl(std::make_shared<IpcPubImpl>(ioService,
+            : m_pimpl(std::make_shared<IpcPubImpl>(io,
                                                      name,
                                                      subscriberConnectedCb,
                                                      subscriberDisconnectedCb))

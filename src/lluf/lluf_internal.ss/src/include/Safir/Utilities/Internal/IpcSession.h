@@ -30,6 +30,7 @@
 #include <memory>
 #include <functional>
 #include <Safir/Utilities/Internal/SharedCharArray.h>
+#include <Safir/Utilities/Internal/AsioStrandWrap.h>
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -71,7 +72,7 @@ namespace Internal
     public:
         Session(const std::string&                  name,
                 const StreamPtr&                    streamPtr,
-                boost::asio::io_service::strand&    strand,
+                boost::asio::io_context::strand&    strand,
                 std::function<void()>             sessionClosedCb)
             : m_name(name),
               m_streamPtr(streamPtr),
@@ -121,40 +122,38 @@ namespace Internal
             buffers.push_back(boost::asio::const_buffer(&msg.size, sizeof(msg.size))); // header
             buffers.push_back(boost::asio::const_buffer(msg.data.get(), msg.size));    // msg data
 
-            boost::asio::async_write(*m_streamPtr,
-                                     buffers,
-                                     m_strand.wrap(
-                [this, selfHandle](boost::system::error_code ec, size_t /*length*/)
+            boost::asio::async_write(*m_streamPtr, buffers,
+                Safir::Utilities::Internal::WrapInStrand(m_strand, [this, selfHandle](boost::system::error_code ec, size_t /*length*/)
+            {
+                if (!ec)
                 {
-                    if (!ec)
+                    m_msgQueue.pop_front();
+                    if (!m_msgQueue.empty())
                     {
-                        m_msgQueue.pop_front();
-                        if (!m_msgQueue.empty())
-                        {
-                            Write();
-                        }
+                        Write();
                     }
-                    else
+                }
+                else
+                {
+                    if (!m_streamPtr->is_open())
                     {
-                        if (!m_streamPtr->is_open())
-                        {
-                            return;
-                        }
-
-                        m_streamPtr->close();
-
-                        if (m_sessionClosedCb != nullptr)
-                        {
-                            m_sessionClosedCb();
-                        }
+                        return;
                     }
-                }));
+
+                    m_streamPtr->close();
+
+                    if (m_sessionClosedCb != nullptr)
+                    {
+                        m_sessionClosedCb();
+                    }
+                }
+            }));
         }
 
         const std::string                   m_name;
         StreamPtr                           m_streamPtr;
         std::deque<Msg>                     m_msgQueue;
-        boost::asio::io_service::strand&    m_strand;
+        boost::asio::io_context::strand&    m_strand;
         std::function<void()>               m_sessionClosedCb;
     };
 

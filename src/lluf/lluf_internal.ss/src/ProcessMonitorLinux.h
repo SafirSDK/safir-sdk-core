@@ -24,7 +24,6 @@
 #pragma once
 
 #include <boost/asio.hpp>
-#include <boost/asio/io_service.hpp>
 #include <boost/asio/steady_timer.hpp>
 #include <functional>
 #include <atomic>
@@ -37,7 +36,7 @@ namespace Utilities
     class ProcessMonitorImpl
     {
     public:
-        ProcessMonitorImpl(boost::asio::io_service& ioService,
+        ProcessMonitorImpl(boost::asio::io_context& io,
                            const std::function<void(const pid_t pid)>& callback,
                            const boost::chrono::steady_clock::duration& pollPeriod);
 
@@ -45,12 +44,12 @@ namespace Utilities
 
         void StartMonitorPid(const pid_t pid)
         {
-            boost::asio::dispatch(m_strand,[this,pid]{StartMonitorPidInternal(pid);});
+            boost::asio::dispatch(m_strand, [this,pid]{StartMonitorPidInternal(pid);});
         }
 
         void StopMonitorPid(const pid_t pid)
         {
-            boost::asio::dispatch(m_strand,[this,pid]{StopMonitorPidInternal(pid);});
+            boost::asio::dispatch(m_strand, [this,pid]{StopMonitorPidInternal(pid);});
         }
 
     private:
@@ -62,8 +61,8 @@ namespace Utilities
         // Client callback
         std::function<void(const pid_t pid)> m_callback;
 
-        boost::asio::io_service& m_ioService;
-        boost::asio::io_service::strand m_strand;
+        boost::asio::io_context& m_io;
+        boost::asio::io_context::strand m_strand;
         std::atomic<bool> m_stopped;
 
         const boost::chrono::steady_clock::duration m_pollPeriod;

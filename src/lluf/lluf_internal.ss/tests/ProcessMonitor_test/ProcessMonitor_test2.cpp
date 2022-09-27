@@ -61,16 +61,16 @@ int main(int argc, char** argv)
         }
     }
 
-    boost::asio::io_service ioService;
+    boost::asio::io_context io;
 
-    Safir::Utilities::ProcessMonitor monitor(ioService, callback, boost::chrono::milliseconds(50));
+    Safir::Utilities::ProcessMonitor monitor(io, callback, boost::chrono::milliseconds(50));
 
     for(std::set<pid_t>::iterator it = pids.begin(); it != pids.end(); ++it)
     {
         monitor.StartMonitorPid(*it);
     }
 
-    boost::thread thread([&ioService]{ioService.run();});
+    boost::thread thread([&io]{io.run();});
 
     boost::this_thread::sleep_for(boost::chrono::milliseconds(200));
 
@@ -82,7 +82,7 @@ int main(int argc, char** argv)
     boost::this_thread::sleep_for(boost::chrono::milliseconds(1000));
 
     monitor.Stop();
-    ioService.run();
+    io.run();
     thread.join();
 
     return 0;

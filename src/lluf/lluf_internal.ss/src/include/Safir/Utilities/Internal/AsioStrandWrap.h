@@ -37,21 +37,20 @@ template <class StrandType, class Callback>
 class StrandWrappedCallback
 {
 public:
-    StrandWrappedCallback(StrandType& strand, const Callback& callback)
+    StrandWrappedCallback(StrandType* strand, Callback&& callback)
         :m_strand(strand)
-        ,m_callback(callback) {}
+        ,m_callback(std::move(callback)) {}
 
     template <class... Args>
     void operator()(Args... a)
     {
-        boost::asio::dispatch(m_strand, [=]{m_callback(a...);});
+        boost::asio::dispatch(*m_strand, [cb = std::move(m_callback), a...]{cb(a...);});
     }
 
 private:
-    StrandType& m_strand;
+    StrandType* m_strand;
     Callback m_callback;
 };
-
 
 /**
  * @brief WrapInStrand - Creates an object that wraps a callback with return type void in a strand (dispatch).
@@ -60,9 +59,9 @@ private:
  * @return A function object that can be stored in a std::function.
  */
 template <class StrandType, class Callback>
-StrandWrappedCallback<StrandType, Callback> WrapInStrand(StrandType& strand, Callback callback)
+decltype(auto) WrapInStrand(StrandType& strand, Callback&& callback)
 {
-    StrandWrappedCallback<StrandType, Callback> wc(strand, callback);
+    StrandWrappedCallback<StrandType, Callback> wc(&strand, std::move(callback));
     return wc;
 }
 

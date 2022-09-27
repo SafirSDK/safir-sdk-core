@@ -49,7 +49,7 @@ int main()
         threads.create_thread([&]{io.run();});
     }
 
-    auto strand1 = boost::asio::make_strand(io);
+    auto strand1 = boost::asio::io_context::strand(io);
     auto strand2 = boost::asio::make_strand(io);
 
     std::vector<bool> result;

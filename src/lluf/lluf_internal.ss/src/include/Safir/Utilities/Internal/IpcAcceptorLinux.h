@@ -34,6 +34,7 @@
 
 #include <Safir/Utilities/Internal/ConfigReader.h>
 #include <Safir/Utilities/Internal/IpcName.h>
+#include <Safir/Utilities/Internal/AsioStrandWrap.h>
 
 
 namespace Safir
@@ -51,7 +52,7 @@ namespace Internal
         typedef std::function<void(StreamPtr)>                                StreamCreatedCallback;
 
         // The Acceptor class uses shared_from_this so remember to always access it via a shared pointer.
-        LinuxAcceptor(boost::asio::io_service::strand& strand,
+        LinuxAcceptor(boost::asio::io_context::strand& strand,
                       const std::string&               name,
                       const StreamCreatedCallback&     onStreamCreated)
             : m_strand(strand),
@@ -100,8 +101,7 @@ namespace Internal
             auto streamPtr =
                     std::make_shared<boost::asio::local::stream_protocol::socket>(m_strand.context());
 
-            m_acceptor.async_accept(*streamPtr,
-                                    m_strand.wrap(
+            m_acceptor.async_accept(*streamPtr, Safir::Utilities::Internal::WrapInStrand(m_strand,
                                         [this, selfHandle, streamPtr](boost::system::error_code ec)
             {
                 if (!ec)
@@ -124,7 +124,7 @@ namespace Internal
             }));
         }
 
-        boost::asio::io_service::strand&                    m_strand;
+        boost::asio::io_context::strand&                    m_strand;
         std::string                                         m_ipcPath;
         const StreamCreatedCallback                         m_callback;
         boost::asio::local::stream_protocol::endpoint       m_endpoint;

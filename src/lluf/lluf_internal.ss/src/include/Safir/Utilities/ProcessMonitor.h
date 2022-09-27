@@ -26,7 +26,7 @@
 
 #include <Safir/Utilities/Internal/UtilsExportDefs.h>
 #include <Safir/Utilities/ProcessInfo.h>
-#include <boost/asio/io_service.hpp>
+#include <boost/asio.hpp>
 #include <functional>
 #include <memory>
 
@@ -42,12 +42,12 @@ namespace Utilities
         /**
          * Constructor.
          *
-         * @param [in] ioService The io_service that will be used for monitoring processes.
+         * @param [in] io The io_context that will be used for monitoring processes.
          * @param [in] callback Callback that will be invoked when a process terminates.
          * @param [in] pollPeriod On some platforms polling may be used for process detection,
          *                        instead of events. This should be set to something like 1 second.
          */
-        ProcessMonitor(boost::asio::io_service& ioService,
+        ProcessMonitor(boost::asio::io_context& io,
                        const std::function<void(const pid_t pid)>& callback,
                        const boost::chrono::steady_clock::duration& pollPeriod);
 

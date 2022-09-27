@@ -37,7 +37,7 @@
 #endif
 
 #include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/asio/io_service.hpp>
+#include <boost/asio.hpp>
 #include <boost/asio/ip/udp.hpp>
 #include <boost/asio/ip/host_name.hpp>
 
@@ -102,8 +102,8 @@ private:
           m_sendToSyslogServer(false),
           m_includeSafirInstance(false),
           m_syslogServerEndpoint(),
-          m_service(),
-          m_sock(m_service),
+          m_io(),
+          m_sock(m_io),
           m_lock()
     {
             boost::algorithm::replace_last(m_processName, ".exe", "");
@@ -131,11 +131,9 @@ private:
                 m_sock.open(boost::asio::ip::udp::v4());
                 m_sock.bind(boost::asio::ip::udp::endpoint(boost::asio::ip::udp::v4(), 0));
 
-                m_syslogServerEndpoint =
-                        boost::asio::ip::udp::endpoint
-                            (boost::asio::ip::address::from_string
-                                (configReader.Logging().get<std::string>("SystemLog.syslog_server_address")),
-                                 configReader.Logging().get<unsigned short>("SystemLog.syslog_server_port"));
+                auto ipAddr = boost::asio::ip::make_address(configReader.Logging().get<std::string>("SystemLog.syslog_server_address"));
+                auto port = configReader.Logging().get<unsigned short>("SystemLog.syslog_server_port");
+                m_syslogServerEndpoint = boost::asio::ip::udp::endpoint(ipAddr, port);
             }
     }
 
@@ -365,7 +363,7 @@ private:
     bool                            m_replaceNewlines;
     bool                            m_includeSafirInstance;
     boost::asio::ip::udp::endpoint  m_syslogServerEndpoint;
-    boost::asio::io_service         m_service;
+    boost::asio::io_context         m_io;
     boost::asio::ip::udp::socket    m_sock;
     std::mutex                    m_lock;
 

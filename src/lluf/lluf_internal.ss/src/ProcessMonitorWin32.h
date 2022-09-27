@@ -47,7 +47,7 @@ namespace Utilities
     class ProcessMonitorImpl
     {
     public:
-        explicit ProcessMonitorImpl(boost::asio::io_service& ioService,
+        explicit ProcessMonitorImpl(boost::asio::io_context& io,
                                     const std::function<void(const pid_t pid)>& callback,
                                     const boost::chrono::steady_clock::duration& pollPeriod);
 
@@ -55,12 +55,12 @@ namespace Utilities
 
         void StartMonitorPid(const pid_t pid)
         {
-            m_strand.dispatch([this,pid]{StartMonitorPidInternal(pid);});
+            boost::asio::dispatch(m_strand, [this,pid]{StartMonitorPidInternal(pid);});
         }
 
         void StopMonitorPid(const pid_t pid)
         {
-            m_strand.dispatch([this,pid]{StopMonitorPidInternal(pid);});
+            boost::asio::dispatch(m_strand, [this,pid]{StopMonitorPidInternal(pid);});
         }
     private:
         void StopInternal();
@@ -75,14 +75,14 @@ namespace Utilities
         // Client callback
         std::function<void(const pid_t pid)> m_callback;
 
-        boost::asio::io_service& m_ioService;
+        boost::asio::io_context& m_io;
         std::atomic<bool> m_stopped;
-        boost::asio::io_service::strand m_strand;
+        boost::asio::io_context::strand m_strand;
 
         struct Process
         {
-            Process(boost::asio::io_service& ioService, HANDLE process, const pid_t pid_)
-                : handle(ioService, process)
+            Process(boost::asio::io_context& io, HANDLE process, const pid_t pid_)
+                : handle(io, process)
                 , pid(pid_)
             {}
             boost::asio::windows::object_handle handle;

@@ -31,6 +31,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/system/error_code.hpp>
 #include <Safir/Utilities/Internal/AsioPeriodicTimer.h>
+#include <Safir/Utilities/Internal/AsioStrandWrap.h>
 #include <Safir/Utilities/Internal/IpcName.h>
 
 #ifdef _MSC_VER
@@ -65,12 +66,12 @@ namespace Internal
 
     public:
 
-        IpcSubscriberImpl(boost::asio::io_service&  ioService,
+        IpcSubscriberImpl(boost::asio::io_context&  io,
                           const std::string&        name,
                           const RecvDataCallback&   onRecvData)
-            : m_strand(ioService),
-              m_stream(ioService),
-              m_connectRetryTimer(ioService),
+            : m_strand(io),
+              m_stream(io),
+              m_connectRetryTimer(io),
               m_streamId(GetIpcStreamId(name)),
               m_callback(onRecvData),
               m_msgSize(0),
@@ -104,7 +105,7 @@ namespace Internal
 
             auto selfHandle(this->shared_from_this());
 
-            m_strand.dispatch([this, selfHandle]()
+            boost::asio::dispatch(m_strand, [this, selfHandle]()
                               {
                                   if (m_stream.is_open())
                                   {
@@ -140,7 +141,7 @@ namespace Internal
         {
             auto selfHandle(this->shared_from_this());
 
-            m_strand.dispatch(
+            boost::asio::dispatch(m_strand,
                         [this, selfHandle]()
                         {
                             if (m_stream.is_open() || !m_connected)
@@ -219,7 +220,7 @@ namespace Internal
 
             boost::asio::async_read(m_stream,
                                     boost::asio::buffer(&m_msgSize, sizeof(m_msgSize)),
-                                    m_strand.wrap(
+                                    Safir::Utilities::Internal::WrapInStrand(m_strand,
                                         [this, selfHandle](boost::system::error_code ec, size_t /*length*/)
                                         {
                                             if (!m_connected)
@@ -262,7 +263,7 @@ namespace Internal
 
             boost::asio::async_read(m_stream,
                                     boost::asio::buffer(m_msgRecvBuffer.data(), m_msgSize),
-                                    m_strand.wrap(
+                                    Safir::Utilities::Internal::WrapInStrand(m_strand,
                                         [this, selfHandle](boost::system::error_code ec, size_t /*length*/)
                                         {
                                             if (!m_connected)
@@ -299,14 +300,14 @@ namespace Internal
 
             m_connectRetryTimer.expires_from_now(boost::posix_time::seconds(1));
 
-            m_connectRetryTimer.async_wait(m_strand.wrap(
+            m_connectRetryTimer.async_wait(boost::asio::bind_executor(m_strand,
                         [this, selfHandle](const boost::system::error_code&)
                         {
                             ConnectInternal();
                         }));
         }
 
-        boost::asio::io_service::strand                                     m_strand;
+        boost::asio::io_context::strand                                     m_strand;
     #if defined(linux) || defined(__linux) || defined(__linux__)
          boost::asio::local::stream_protocol::socket                        m_stream;
     #elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
@@ -349,14 +350,14 @@ namespace Internal
          * not make any assumptions about the buffer content after returning
          * from the callback.
          *
-         * @param ioService [in] - io_service that will be used as engine.
+         * @param io [in] - io_contex that will be used as engine.
          * @param name [in] - Ipc identification.
          * @param onRecvData [in] - Callback that will be called when a message is received.
          */
-        IpcSubscriber(boost::asio::io_service&     ioService,
+        IpcSubscriber(boost::asio::io_context&     io,
                       const std::string&           name,
                       const RecvDataCallback&      onRecvData)
-            : m_pimpl(std::make_shared<IpcSubscriberImpl<IpcSubscriberNoTest>>(ioService, name, onRecvData))
+            : m_pimpl(std::make_shared<IpcSubscriberImpl<IpcSubscriberNoTest>>(io, name, onRecvData))
         {
         }
 

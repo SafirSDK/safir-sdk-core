@@ -56,11 +56,11 @@ namespace Internal
     class AsioPeriodicTimer
     {
     public:
-        AsioPeriodicTimer(boost::asio::io_service& ioService,
+        AsioPeriodicTimer(boost::asio::io_context& io,
                           const boost::chrono::steady_clock::duration& period,
                           const std::function<void(const boost::system::error_code& error)>& handler)
-            : m_strand(ioService)
-            , m_timer(ioService)
+            : m_strand(io)
+            , m_timer(io)
             , m_period(period)
             , m_handler(handler)
             , m_started(false)
@@ -77,9 +77,9 @@ namespace Internal
             const bool was_started = m_started.exchange(true);
             if (!was_started)
             {
-                m_strand.dispatch([this]
+                boost::asio::dispatch(m_strand, [this]
                                   {
-                                      m_timer.expires_from_now(m_period);
+                                      m_timer.expires_after(m_period);
                                       ScheduleTimer();
                                   });
             }
@@ -94,7 +94,7 @@ namespace Internal
             const bool was_started = m_started.exchange(false);
             if (was_started)
             {
-                m_strand.dispatch([this]
+                boost::asio::dispatch(m_strand, [this]
                                   {
                                       m_timer.cancel();
                                   });
@@ -117,7 +117,7 @@ namespace Internal
             //that does not drift when handler calls take a long time.
             if (!error)
             {
-                m_timer.expires_from_now(m_period);
+                m_timer.expires_after(m_period);
             }
 
             m_handler(error);
@@ -130,13 +130,13 @@ namespace Internal
 
         void ScheduleTimer()
         {
-            m_timer.async_wait(m_strand.wrap([this](const boost::system::error_code& error)
+            m_timer.async_wait(boost::asio::bind_executor(m_strand, [this](const boost::system::error_code& error)
                                              {
                                                  Timeout(error);
                                              }));
         }
 
-        boost::asio::io_service::strand m_strand;
+        boost::asio::io_context::strand m_strand;
         boost::asio::steady_timer m_timer;
         const boost::chrono::steady_clock::duration m_period;
         const std::function<void(const boost::system::error_code& error)> m_handler;
