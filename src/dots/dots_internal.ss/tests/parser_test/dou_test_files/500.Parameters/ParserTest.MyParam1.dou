@@ -18,7 +18,7 @@
             <type>String</type>
             <value>Its more fun to compute</value>
         </parameter>
-        
+
         <parameter>
             <name>StringSpecialParam</name>
             <type>String</type>
@@ -30,20 +30,20 @@
             <name>Tid</name>
             <type>TypeId</type>
             <value>Safir.Dob.Entity</value>
-        </parameter>    
+        </parameter>
 
         <parameter>
             <name>Iid</name>
             <type>InstanceId</type>
             <value>123</value>
         </parameter>
-        
+
         <parameter>
             <name>Hid</name>
             <type>HandlerId</type>
             <value>MoneyHandler</value>
         </parameter>
-        
+
         <parameter>
             <name>Cid</name>
             <type>ChannelId</type>
@@ -67,20 +67,20 @@
             <type>Float64</type>
             <value>32.3</value>
         </parameter>
-        
+
         <parameter>
          <summary>Weather Feature Type</summary>
          <name>MyBigValue</name>
          <type>Int64</type>
          <value>9000006300000000010</value>
       </parameter>
-      
+
       <parameter>
             <name>Color</name>
             <type>ParserTest.MyColorEnum</type>
             <value>ParserTest.MyColorEnum.Grey</value>
         </parameter>
-        
+
         <parameter>
             <name>Color2</name>
             <type>ParserTest.MyColorEnum</type>
@@ -110,7 +110,7 @@
                 </MyInt>
             </Test.MyClass2>
         </parameter>
-        
+
         <parameter>
             <name>IntArray</name>
             <type>Int32</type>
@@ -140,7 +140,7 @@
                     <value>8</value>
                 </arrayElement>
 
-            </arrayElements>            
+            </arrayElements>
         </parameter>
 
         <parameter>
@@ -156,9 +156,9 @@
                 <arrayElement>
                     <value>White</value>
                 </arrayElement>
-            </arrayElements>            
+            </arrayElements>
         </parameter>
-        
+
         <parameter>
             <name>NewEnumArray</name>
             <type>ParserTest.MyColorEnum</type>
@@ -169,7 +169,34 @@
                     <index>1</index>
                 </valueRef>
                 <value>White</value>
-            </array>            
+            </array>
+        </parameter>
+
+        <parameter>
+            <name>MyEntityArrayUglyXml</name>
+            <type>ParserTest.MyEntity</type>
+            <arrayElements>
+                <arrayElement>
+                    <object>
+                        <name>ParserTest.MyEntity</name>
+                        <members>
+                            <member>
+                                <name>Int32Val</name>
+                                <valueRef>
+                                    <name>ParserTest.Params.Int32ParamArray</name>
+                                    <index>1</index>
+                                </valueRef>
+                            </member>
+                            <member>
+                                <name>StringVal</name>
+                                <valueRef>
+                                    <name>ParserTest.Params.StringVal</name>
+                                </valueRef>
+                            </member>
+                        </members>
+                    </object>
+                </arrayElement>
+            </arrayElements>
         </parameter>
 
     </parameters>

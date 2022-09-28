@@ -40,6 +40,8 @@ public class Test {
         Locale.setDefault(new Locale("en", "US"));
 
         test_Has_Property();
+        test_PropertyMappingKind();
+        test_Property_GetParameterReference();
         test_GetName();
         test_GetNumberOfMembers();
         test_GetNumberOfParameters();
@@ -154,6 +156,45 @@ public class Test {
         System.out.println("AnotherEmptyObject - MemberTypesProperty: " + MemberTypesProperty.hasProperty(AEO));
         System.out.println("AnotherEmptyObject - MemberArraysProperty: " + MemberArraysProperty.hasProperty(AEO));
     }
+
+    private static String mappingKindStr(PropertyMappingKind k)
+    {
+        switch (k)
+        {
+        case MAPPED_TO_NULL: return "MappedToNull";
+        case MAPPED_TO_MEMBER: return "MappedToMember";
+        case MAPPED_TO_PARAMETER: return "MappedToParameter";
+        }
+        return "";
+    }
+
+    private static void test_PropertyMappingKind()
+    {
+        Header("Property Mapping Kind");
+        System.out.println("EmptyObject: " + mappingKindStr(Properties.getMappingKind(EmptyObject.ClassTypeId, MemberTypesProperty.ClassTypeId, 0)));
+        System.out.println("AnotherEmptyObject: " + mappingKindStr(Properties.getMappingKind(AnotherEmptyObject.ClassTypeId, MemberTypesProperty.ClassTypeId, 0)));
+        System.out.println("MemberItems: " + mappingKindStr(Properties.getMappingKind(MemberItems.ClassTypeId, MemberTypesProperty.ClassTypeId, 0)));
+    }
+
+    private static void test_Property_GetParameterReference()
+    {
+        Header("Property Get Parameter Reference");
+
+        var p = Properties.getParameterReference(EmptyObject.ClassTypeId, MemberTypesProperty.ClassTypeId, 6, 0);
+        System.out.println("EmptyObject: " + Parameters.getString((long)p[0], (int)p[1], (int)p[2]));
+        p = Properties.getParameterReference(AnotherEmptyObject.ClassTypeId, MemberTypesProperty.ClassTypeId, 9, 0);
+        System.out.println("AnotherEmptyObject: " + Parameters.getTypeId((long)p[0], (int)p[1], (int)p[2]));
+
+        try
+        {
+            Properties.getParameterReference(MemberItems.ClassTypeId, MemberTypesProperty.ClassTypeId, 0, 0);
+        }
+        catch (IllegalValueException exc)
+        {
+            System.out.println("Not mapped to parameter");
+        }
+    }
+
 
     private static void test_GetName() {
         Header("Get Name");

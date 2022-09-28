@@ -37,6 +37,19 @@ namespace Dob
 namespace Typesystem
 {
 
+    Dob::Typesystem::PropertyMappingKind Properties::GetMappingKind(const Dob::Typesystem::TypeId classId,
+                                                                    const Dob::Typesystem::TypeId propertyId,
+                                                                    const Dob::Typesystem::MemberIndex propertyMember)
+    {
+        Dob::Typesystem::PropertyMappingKind mappingKind;
+        if (DotsC_GetPropertyMappingKind(classId, propertyId, propertyMember, mappingKind))
+        {
+            return mappingKind;
+        }
+
+        throw IllegalValueException(L"That object is not mapped to that property!",__WFILE__,__LINE__);
+    }
+
     Int32
     Properties::GetArraySize (const TypeId classId,
                               const TypeId propertyId,
@@ -152,30 +165,13 @@ namespace Typesystem
         }
     }
 
-    DotsC_PropertyMappingKind
-    GetPropertyMappingKind(const Dob::Typesystem::TypeId typeId,
-                           const Dob::Typesystem::TypeId propertyId,
-                           const Dob::Typesystem::MemberIndex member)
-    {
-        DotsC_PropertyMappingKind kind;
-        if (DotsC_GetPropertyMappingKind(typeId,
-                                     propertyId,
-                                     member,
-                                     kind))
-        {
-            return kind;
-        }
-
-        throw IllegalValueException(L"That object is not mapped to that property!",__WFILE__,__LINE__);
-    }
-
     void
     Properties::SetNull(Dob::Typesystem::ObjectPtr object,
                         const Dob::Typesystem::TypeId propertyId,
                         const Dob::Typesystem::MemberIndex member,
                         const Dob::Typesystem::ArrayIndex index)
     {
-        switch(GetPropertyMappingKind(object->GetTypeId(),propertyId,member))
+        switch(GetMappingKind(object->GetTypeId(),propertyId,member))
         {
         case MappedToNull:
             {
@@ -232,7 +228,7 @@ namespace Typesystem
                        const Dob::Typesystem::MemberIndex member,
                        const Dob::Typesystem::ArrayIndex index)
     {
-        switch(GetPropertyMappingKind(object->GetTypeId(),propertyId,member))
+        switch(GetMappingKind(object->GetTypeId(),propertyId,member))
         {
         case MappedToNull:
             {
@@ -290,7 +286,7 @@ namespace Typesystem
                           const Dob::Typesystem::MemberIndex member,
                           const Dob::Typesystem::ArrayIndex index)
     {
-        switch(GetPropertyMappingKind(object->GetTypeId(),propertyId,member))
+        switch(GetMappingKind(object->GetTypeId(),propertyId,member))
         {
         case MappedToNull:
             {
@@ -352,7 +348,7 @@ namespace Typesystem
                            const Dob::Typesystem::MemberIndex member,
                            const Dob::Typesystem::ArrayIndex index)
     {
-        switch(GetPropertyMappingKind(object->GetTypeId(),propertyId,member))
+        switch(GetMappingKind(object->GetTypeId(),propertyId,member))
         {
         case MappedToNull:
             {
@@ -414,7 +410,7 @@ namespace Typesystem
                     const Dob::Typesystem::MemberIndex member,
                     const Dob::Typesystem::ArrayIndex index)
     {
-        switch(GetPropertyMappingKind(object->GetTypeId(),propertyId,member))
+        switch(GetMappingKind(object->GetTypeId(),propertyId,member))
         {
         case MappedToNull:
             {
@@ -473,7 +469,7 @@ namespace Typesystem
                     const Dob::Typesystem::MemberIndex member,
                     const Dob::Typesystem::ArrayIndex index)
     {
-        switch(GetPropertyMappingKind(object->GetTypeId(),propertyId,member))
+        switch(GetMappingKind(object->GetTypeId(),propertyId,member))
         {
         case MappedToNull:
             {
@@ -538,7 +534,7 @@ namespace Typesystem
                         const Dob::Typesystem::MemberIndex member,
                         const Dob::Typesystem::ArrayIndex index)
     {
-        switch(GetPropertyMappingKind(object->GetTypeId(),propertyId,member))
+        switch(GetMappingKind(object->GetTypeId(),propertyId,member))
         {
         case MappedToNull:
             {
@@ -595,7 +591,7 @@ namespace Typesystem
                         const Dob::Typesystem::MemberIndex member,
                         const Dob::Typesystem::ArrayIndex index)
     {
-        switch(GetPropertyMappingKind(object->GetTypeId(),propertyId,member))
+        switch(GetMappingKind(object->GetTypeId(),propertyId,member))
         {
         case MappedToNull:
             {
@@ -659,7 +655,7 @@ namespace Typesystem
                     const Dob::Typesystem::MemberIndex member,
                     const Dob::Typesystem::ArrayIndex index)
     {
-        switch(GetPropertyMappingKind(object->GetTypeId(),propertyId,member))
+        switch(GetMappingKind(object->GetTypeId(),propertyId,member))
         {
         case MappedToNull:
             {
@@ -717,7 +713,7 @@ namespace Typesystem
                     const Dob::Typesystem::MemberIndex member,
                     const Dob::Typesystem::ArrayIndex index)
     {
-        switch(GetPropertyMappingKind(object->GetTypeId(),propertyId,member))
+        switch(GetMappingKind(object->GetTypeId(),propertyId,member))
         {
         case MappedToNull:
             {
@@ -781,7 +777,7 @@ namespace Typesystem
                     const Dob::Typesystem::MemberIndex member,
                     const Dob::Typesystem::ArrayIndex index)
     {
-        switch(GetPropertyMappingKind(object->GetTypeId(),propertyId,member))
+        switch(GetMappingKind(object->GetTypeId(),propertyId,member))
         {
         case MappedToNull:
             {
@@ -839,7 +835,7 @@ namespace Typesystem
                     const Dob::Typesystem::MemberIndex member,
                     const Dob::Typesystem::ArrayIndex index)
     {
-        switch(GetPropertyMappingKind(object->GetTypeId(),propertyId,member))
+        switch(GetMappingKind(object->GetTypeId(),propertyId,member))
         {
         case MappedToNull:
             {
@@ -905,7 +901,7 @@ namespace Typesystem
                     const Dob::Typesystem::MemberIndex member,
                     const Dob::Typesystem::ArrayIndex index)
     {
-        switch(GetPropertyMappingKind(object->GetTypeId(),propertyId,member))
+        switch(GetMappingKind(object->GetTypeId(),propertyId,member))
         {
         case MappedToNull:
             {
@@ -963,7 +959,7 @@ namespace Typesystem
                     const Dob::Typesystem::MemberIndex member,
                     const Dob::Typesystem::ArrayIndex index)
     {
-        switch(GetPropertyMappingKind(object->GetTypeId(),propertyId,member))
+        switch(GetMappingKind(object->GetTypeId(),propertyId,member))
         {
         case MappedToNull:
             {
@@ -1027,7 +1023,7 @@ namespace Typesystem
                     const Dob::Typesystem::MemberIndex member,
                     const Dob::Typesystem::ArrayIndex index)
     {
-        switch(GetPropertyMappingKind(object->GetTypeId(),propertyId,member))
+        switch(GetMappingKind(object->GetTypeId(),propertyId,member))
         {
         case MappedToNull:
             {
@@ -1085,7 +1081,7 @@ namespace Typesystem
                     const Dob::Typesystem::MemberIndex member,
                     const Dob::Typesystem::ArrayIndex index)
     {
-        switch(GetPropertyMappingKind(object->GetTypeId(),propertyId,member))
+        switch(GetMappingKind(object->GetTypeId(),propertyId,member))
         {
         case MappedToNull:
             {
@@ -1150,7 +1146,7 @@ namespace Typesystem
                     const Dob::Typesystem::MemberIndex member,
                     const Dob::Typesystem::ArrayIndex index)
     {
-        switch(GetPropertyMappingKind(object->GetTypeId(),propertyId,member))
+        switch(GetMappingKind(object->GetTypeId(),propertyId,member))
         {
         case MappedToNull:
             {
@@ -1208,7 +1204,7 @@ namespace Typesystem
                     const Dob::Typesystem::MemberIndex member,
                     const Dob::Typesystem::ArrayIndex index)
     {
-        switch(GetPropertyMappingKind(object->GetTypeId(),propertyId,member))
+        switch(GetMappingKind(object->GetTypeId(),propertyId,member))
         {
         case MappedToNull:
             {
@@ -1285,7 +1281,7 @@ namespace Typesystem
                     const Dob::Typesystem::MemberIndex member,
                     const Dob::Typesystem::ArrayIndex index)
     {
-        switch(GetPropertyMappingKind(object->GetTypeId(),propertyId,member))
+        switch(GetMappingKind(object->GetTypeId(),propertyId,member))
         {
         case MappedToNull:
             {
@@ -1343,7 +1339,7 @@ namespace Typesystem
                     const Dob::Typesystem::MemberIndex member,
                     const Dob::Typesystem::ArrayIndex index)
     {
-        switch(GetPropertyMappingKind(object->GetTypeId(),propertyId,member))
+        switch(GetMappingKind(object->GetTypeId(),propertyId,member))
         {
         case MappedToNull:
             {
@@ -1419,7 +1415,7 @@ namespace Typesystem
                     const Dob::Typesystem::MemberIndex member,
                     const Dob::Typesystem::ArrayIndex index)
     {
-        switch(GetPropertyMappingKind(object->GetTypeId(),propertyId,member))
+        switch(GetMappingKind(object->GetTypeId(),propertyId,member))
         {
         case MappedToNull:
             {
@@ -1477,7 +1473,7 @@ namespace Typesystem
                     const Dob::Typesystem::MemberIndex member,
                     const Dob::Typesystem::ArrayIndex index)
     {
-        switch(GetPropertyMappingKind(object->GetTypeId(),propertyId,member))
+        switch(GetMappingKind(object->GetTypeId(),propertyId,member))
         {
         case MappedToNull:
             {
@@ -1554,7 +1550,7 @@ namespace Typesystem
                     const Dob::Typesystem::MemberIndex member,
                     const Dob::Typesystem::ArrayIndex index)
     {
-        switch(GetPropertyMappingKind(object->GetTypeId(),propertyId,member))
+        switch(GetMappingKind(object->GetTypeId(),propertyId,member))
         {
         case MappedToNull:
             {
@@ -1612,7 +1608,7 @@ namespace Typesystem
                     const Dob::Typesystem::MemberIndex member,
                     const Dob::Typesystem::ArrayIndex index)
     {
-        switch(GetPropertyMappingKind(object->GetTypeId(),propertyId,member))
+        switch(GetMappingKind(object->GetTypeId(),propertyId,member))
         {
         case MappedToNull:
             {
@@ -1690,7 +1686,7 @@ namespace Typesystem
                     const Dob::Typesystem::MemberIndex member,
                     const Dob::Typesystem::ArrayIndex index)
     {
-        switch(GetPropertyMappingKind(object->GetTypeId(),propertyId,member))
+        switch(GetMappingKind(object->GetTypeId(),propertyId,member))
         {
         case MappedToNull:
             {
@@ -1748,7 +1744,7 @@ namespace Typesystem
                     const Dob::Typesystem::MemberIndex member,
                     const Dob::Typesystem::ArrayIndex index)
     {
-        switch(GetPropertyMappingKind(object->GetTypeId(),propertyId,member))
+        switch(GetMappingKind(object->GetTypeId(),propertyId,member))
         {
         case MappedToNull:
             {
@@ -1816,7 +1812,7 @@ namespace Typesystem
                     const Dob::Typesystem::MemberIndex member,
                     const Dob::Typesystem::ArrayIndex index)
     {
-        switch(GetPropertyMappingKind(object->GetTypeId(),propertyId,member))
+        switch(GetMappingKind(object->GetTypeId(),propertyId,member))
         {
         case MappedToNull:
             {
@@ -1874,7 +1870,7 @@ namespace Typesystem
                     const Dob::Typesystem::MemberIndex member,
                     const Dob::Typesystem::ArrayIndex index)
     {
-        switch(GetPropertyMappingKind(object->GetTypeId(),propertyId,member))
+        switch(GetMappingKind(object->GetTypeId(),propertyId,member))
         {
         case MappedToNull:
             {
@@ -1949,7 +1945,7 @@ namespace Typesystem
                         const Dob::Typesystem::MemberIndex member,
                         const Dob::Typesystem::ArrayIndex index)
     {
-        switch(GetPropertyMappingKind(object->GetTypeId(),propertyId,member))
+        switch(GetMappingKind(object->GetTypeId(),propertyId,member))
         {
         case MappedToNull:
             {
@@ -2007,7 +2003,7 @@ namespace Typesystem
                         const Dob::Typesystem::MemberIndex member,
                         const Dob::Typesystem::ArrayIndex index)
     {
-        switch(GetPropertyMappingKind(object->GetTypeId(),propertyId,member))
+        switch(GetMappingKind(object->GetTypeId(),propertyId,member))
         {
         case MappedToNull:
             {
@@ -2068,6 +2064,22 @@ namespace Typesystem
             }
             break;
         }
+    }
+
+    void Properties::GetParameterReference(const Dob::Typesystem::TypeId classId,
+                                          const Dob::Typesystem::TypeId propertyId,
+                                          const Dob::Typesystem::MemberIndex propertyMember,
+                                          const Dob::Typesystem::ArrayIndex propertyIndex,
+                                          Dob::Typesystem::TypeId& parameterTypeId,
+                                          Dob::Typesystem::ParameterIndex& parameterIndex,
+                                          Dob::Typesystem::ArrayIndex& parameterArrayIndex)
+    {
+        if (GetMappingKind(classId, propertyId, propertyMember) != MappedToParameter)
+        {
+            throw IllegalValueException(L"That object is not mapped to a parameter!",__WFILE__,__LINE__);
+        }
+
+        DotsC_GetPropertyParameterReference(classId, propertyId, propertyMember, propertyIndex, parameterTypeId, parameterIndex, parameterArrayIndex);
     }
 
 }

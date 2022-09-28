@@ -1,12 +1,12 @@
 set(ui About.ui connectionstats.ui dosemon.ui entitystats.ui
-  memgraph.ui numberOfEntities.ui RawStatisticsPage.ui SystemPicturePage.ui)
+  memgraph.ui numberOfEntities.ui RawStatisticsPage.ui SystemPicturePage.ui registrations.ui)
 
 set(sources About.cpp connectionstats.cpp dosemon.cpp
   entitystats.cpp graphwidget.cpp internalfunctions.cpp main.cpp
-  memgraph.cpp numberofentities.cpp RawStatisticsPage.cpp SystemPicturePage.cpp)
+  memgraph.cpp numberofentities.cpp RawStatisticsPage.cpp SystemPicturePage.cpp registrations.cpp)
 
 set(widget_headers About.h connectionstats.h dosemon.h entitystats.h
-  graphwidget.h memgraph.h numberofentities.h RawStatisticsPage.h SystemPicturePage.h)
+  graphwidget.h memgraph.h numberofentities.h RawStatisticsPage.h SystemPicturePage.h registrations.h)
 
 set(headers internalfunctions.h common_header.h)
 

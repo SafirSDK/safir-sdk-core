@@ -383,6 +383,12 @@ namespace Internal
         }
     }
 
+    const RegistrationVector Connection::GetRegisteredHandlers() const
+    {
+        ScopedConnectionLock lck(m_lock);
+        return GetRegistrations(m_registrations);
+    }
+
     void Connection::AddRevokedRegistration(const Typesystem::TypeId              typeId,
                                             const Dob::Typesystem::HandlerId&     handlerId,
                                             const ConsumerId&                     consumer)

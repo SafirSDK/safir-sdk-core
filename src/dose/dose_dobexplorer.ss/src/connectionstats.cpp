@@ -184,7 +184,7 @@ ConnectionStats::ConnectionStats(QWidget* /*parent*/,  const QString& connection
     connect(&m_timer, SIGNAL(timeout()), this, SLOT(UpdateStatistics()));
     m_timer.start(3000);
 
-    UpdateStatistics(true);
+    UpdateStatistics(true);    
 }
 
 
@@ -346,7 +346,6 @@ void ConnectionStats::UpdateStatistics(const bool ignoreVisible)
     {
         missingConnectionLabel->show();
     }
-
 }
 
 void ConnectionStats::ProcessConnection(const Safir::Dob::Internal::ConnectionPtr& connection, Stat& stat, bool& exist)

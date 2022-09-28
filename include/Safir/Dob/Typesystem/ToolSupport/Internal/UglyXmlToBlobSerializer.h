@@ -258,8 +258,8 @@ namespace Internal
                 try
                 {
                     boost::property_tree::ptree& refPt=memberContent.get_child("valueRef");
-                    std::pair<std::string, int> paramInfo=GetParameterNameAndIndex(md, arrIx, refPt);
-                    SerializationUtils::SetMemberFromParameter(m_repository, md, memIx, arrIx, paramInfo.first, boost::lexical_cast<std::string>(paramInfo.second), 0, writer);
+                    std::pair<std::string, std::string> paramInfo=GetParameterNameAndIndex(md, arrIx, refPt);
+                    SerializationUtils::SetMemberFromParameter(m_repository, md, memIx, arrIx, paramInfo.first, paramInfo.second, 0, writer);
                 }
                 catch (const boost::property_tree::ptree_error&)
                 {
@@ -271,18 +271,13 @@ namespace Internal
             }
         }
 
-        std::pair<std::string, int> GetParameterNameAndIndex(const MemberDescriptionType* md, DotsC_Int32 arrIx, boost::property_tree::ptree& memberContent) const
+        std::pair<std::string, std::string> GetParameterNameAndIndex(const MemberDescriptionType* md, DotsC_Int32 arrIx, boost::property_tree::ptree& memberContent) const
         {
             try
             {
-                std::pair<std::string, int> param=std::make_pair(memberContent.get<std::string>("name"), 0);
+                std::pair<std::string, std::string> param=std::make_pair(memberContent.get<std::string>("name"), memberContent.get<std::string>("index", ""));
                 SerializationUtils::Trim(param.first);
-                boost::optional<std::string> index=memberContent.get_optional<std::string>("index");
-                if (index)
-                {
-                    SerializationUtils::Trim(*index);
-                    param.second=boost::lexical_cast<int>(*index);
-                }
+                SerializationUtils::Trim(param.second);
                 return param;
             }
             catch (...)

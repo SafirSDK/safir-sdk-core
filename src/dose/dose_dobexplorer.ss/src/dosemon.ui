@@ -76,6 +76,11 @@
          </item>
          <item>
           <property name="text">
+           <string>Registrations</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
            <string>Entities</string>
           </property>
           <property name="toolTip">

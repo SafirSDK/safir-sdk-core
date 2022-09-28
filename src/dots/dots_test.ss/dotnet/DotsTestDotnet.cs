@@ -40,6 +40,8 @@ class DotsTestDotnet
         System.Threading.Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("en-US");
 
         Test_Has_Property();
+        Test_PropertyMappingKind();
+        Test_Property_GetParameterReference();
         Test_GetName();
         Test_GetNumberOfMembers();
         Test_GetNumberOfParameters();
@@ -206,6 +208,49 @@ class DotsTestDotnet
         Console.WriteLine("AnotherEmptyObject - MemberTypesProperty: " + DotsTest.MemberTypesProperty.HasProperty(AEO).ToString().ToLower());
         Console.WriteLine("AnotherEmptyObject - MemberArraysProperty: " + DotsTest.MemberArraysProperty.HasProperty(AEO).ToString().ToLower());
     }
+
+    private static string MappingKindStr(Safir.Dob.Typesystem.PropertyMappingKind k)
+    {
+        switch (k)
+        {
+        case Safir.Dob.Typesystem.PropertyMappingKind.MappedToNull: return "MappedToNull";
+        case Safir.Dob.Typesystem.PropertyMappingKind.MappedToMember: return "MappedToMember";
+        case Safir.Dob.Typesystem.PropertyMappingKind.MappedToParameter: return "MappedToParameter";
+        }
+        return "";
+    }
+
+    private static void Test_PropertyMappingKind()
+    {
+        Header("Property Mapping Kind");
+        Console.WriteLine("EmptyObject: " + MappingKindStr(Safir.Dob.Typesystem.Properties.GetMappingKind(DotsTest.EmptyObject.ClassTypeId, DotsTest.MemberTypesProperty.ClassTypeId, 0)));
+        Console.WriteLine("AnotherEmptyObject: "   + MappingKindStr(Safir.Dob.Typesystem.Properties.GetMappingKind(DotsTest.AnotherEmptyObject.ClassTypeId, DotsTest.MemberTypesProperty.ClassTypeId, 0)));
+        Console.WriteLine("MemberItems: " + MappingKindStr(Safir.Dob.Typesystem.Properties.GetMappingKind(DotsTest.MemberItems.ClassTypeId, DotsTest.MemberTypesProperty.ClassTypeId, 0)));
+    }
+
+    private static void Test_Property_GetParameterReference()
+    {
+        Header("Property Get Parameter Reference");
+
+        long paramTid;
+        int paramIx;
+        int paramArrIx;
+
+        Safir.Dob.Typesystem.Properties.GetParameterReference(DotsTest.EmptyObject.ClassTypeId, DotsTest.MemberTypesProperty.ClassTypeId, 6, 0, out paramTid, out paramIx, out paramArrIx);
+        Console.WriteLine("EmptyObject: " + Safir.Dob.Typesystem.Parameters.GetString(paramTid, paramIx, paramArrIx));
+        Safir.Dob.Typesystem.Properties.GetParameterReference(DotsTest.AnotherEmptyObject.ClassTypeId, DotsTest.MemberTypesProperty.ClassTypeId, 9, 0, out paramTid, out paramIx, out paramArrIx);
+        Console.WriteLine("AnotherEmptyObject: " + Safir.Dob.Typesystem.Parameters.GetTypeId(paramTid, paramIx, paramArrIx));
+
+        try
+        {
+            Safir.Dob.Typesystem.Properties.GetParameterReference(DotsTest.MemberItems.ClassTypeId, DotsTest.MemberTypesProperty.ClassTypeId, 0, 0, out paramTid, out paramIx, out paramArrIx);
+        }
+        catch (Safir.Dob.Typesystem.IllegalValueException)
+        {
+            Console.WriteLine("Not mapped to parameter");
+        }
+    }
+
     private static void Test_GetName()
     {
         Header("Get Name");
@@ -10591,6 +10636,22 @@ namespace Misc
             new ObjectSequences_IntoNonEmpty_4();
             new ObjectSequences_IntoNonEmpty_5();
         }
+
+    private static string Mapping(Safir.Dob.Typesystem.CollectionType ct)
+    {
+        switch (ct) {
+        case Safir.Dob.Typesystem.CollectionType.ArrayCollectionType:
+            return "Array";
+        case Safir.Dob.Typesystem.CollectionType.DictionaryCollectionType:
+            return "Dictionary";
+        case Safir.Dob.Typesystem.CollectionType.SequenceCollectionType:
+            return "Sequence";
+        case Safir.Dob.Typesystem.CollectionType.SingleValueCollectionType:
+            return "Single";
+        default:
+            return "Unknown";
+        }
+    }
     }
 
 }

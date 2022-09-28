@@ -37,6 +37,27 @@ namespace Safir.Dob.Typesystem
     public class Properties
     {
         /// <summary>
+        /// Get the information of how a property member is mapped for a class.
+        /// </summary>
+        /// <param name="classId">Type id of a class that supports the specified property.</param>
+        /// <param name="propertyId">Type id of the property</param>
+        /// <param name="propertyMember">Index of the property member.</param>
+        /// <returns>The PropertyMappingKind.</returns>
+        /// <exception cref="IllegalValueException">There is no such type or member defined.</exception>
+        public static PropertyMappingKind GetMappingKind(System.Int64 classId,
+                                                         System.Int64 propertyId,
+                                                         System.Int32 propertyMember)
+        {
+            PropertyMappingKind kind;
+            byte okByte=Internal.Kernel.DotsC_GetPropertyMappingKind (classId, propertyId, propertyMember, out kind);
+            if (Internal.InternalOperations.BoolOf (okByte)) {
+                return kind;
+            }
+
+            throw new IllegalValueException("That object is not mapped to that property!");
+        }
+
+        /// <summary>
         /// Get the array size of a property member.
         /// </summary>
         /// <param name="classId">Type id of a class that supports the specified property.</param>
@@ -74,15 +95,15 @@ namespace Safir.Dob.Typesystem
                                    System.Int32 member,
                                    System.Int32 index)
         {
-            switch(GetPropertyMappingKind(obj.GetTypeId(),propertyId,member))
+            switch(GetMappingKind(obj.GetTypeId(),propertyId,member))
             {
-            case Internal.DotsC_PropertyMappingKind.MappedToNull:
+            case PropertyMappingKind.MappedToNull:
                 return;
 
-            case Internal.DotsC_PropertyMappingKind.MappedToParameter:
+            case PropertyMappingKind.MappedToParameter:
                 throw new ReadOnlyException("Property member is mapped to parameter");
 
-            case Internal.DotsC_PropertyMappingKind.MappedToMember:
+            case PropertyMappingKind.MappedToMember:
             {
                 System.Int32[] classMemberRef = GetClassMemberReference(obj.GetTypeId(),
                                                                         propertyId,
@@ -126,15 +147,15 @@ namespace Safir.Dob.Typesystem
                                   System.Int32 member,
                                   System.Int32 index)
         {
-            switch (GetPropertyMappingKind(obj.GetTypeId(), propertyId, member))
+            switch (GetMappingKind(obj.GetTypeId(), propertyId, member))
             {
-            case Internal.DotsC_PropertyMappingKind.MappedToNull:
+            case PropertyMappingKind.MappedToNull:
                 return true;
 
-            case Internal.DotsC_PropertyMappingKind.MappedToParameter:
+            case PropertyMappingKind.MappedToParameter:
                 return false;
 
-            case Internal.DotsC_PropertyMappingKind.MappedToMember:
+            case PropertyMappingKind.MappedToMember:
             {
                 System.Int32[] classMemberRef = GetClassMemberReference(obj.GetTypeId(),
                                                                         propertyId,
@@ -178,15 +199,15 @@ namespace Safir.Dob.Typesystem
                                      System.Int32 member,
                                      System.Int32 index)
         {
-            switch (GetPropertyMappingKind(obj.GetTypeId(), propertyId, member))
+            switch (GetMappingKind(obj.GetTypeId(), propertyId, member))
             {
-            case Internal.DotsC_PropertyMappingKind.MappedToNull:
+            case PropertyMappingKind.MappedToNull:
                 return false;
 
-            case Internal.DotsC_PropertyMappingKind.MappedToParameter:
+            case PropertyMappingKind.MappedToParameter:
                 return false;
 
-            case Internal.DotsC_PropertyMappingKind.MappedToMember:
+            case PropertyMappingKind.MappedToMember:
             {
                 System.Int32[] classMemberRef = GetClassMemberReference(obj.GetTypeId(),
                                                                         propertyId,
@@ -238,15 +259,15 @@ namespace Safir.Dob.Typesystem
                                       System.Int32 member,
                                       System.Int32 index)
         {
-            switch (GetPropertyMappingKind(obj.GetTypeId(), propertyId, member))
+            switch (GetMappingKind(obj.GetTypeId(), propertyId, member))
             {
-            case Internal.DotsC_PropertyMappingKind.MappedToNull:
+            case PropertyMappingKind.MappedToNull:
                 return true;
 
-            case Internal.DotsC_PropertyMappingKind.MappedToParameter:
+            case PropertyMappingKind.MappedToParameter:
                 return true;
 
-            case Internal.DotsC_PropertyMappingKind.MappedToMember:
+            case PropertyMappingKind.MappedToMember:
             {
                 System.Int32[] classMemberRef = GetClassMemberReference(obj.GetTypeId(),
                                                                         propertyId,
@@ -298,15 +319,15 @@ namespace Safir.Dob.Typesystem
                         System.Int32 member,
                         System.Int32 index)
         {
-            switch(GetPropertyMappingKind(obj.GetTypeId(),propertyId,member))
+            switch(GetMappingKind(obj.GetTypeId(),propertyId,member))
             {
-            case Internal.DotsC_PropertyMappingKind.MappedToNull:
+            case PropertyMappingKind.MappedToNull:
                 throw new ReadOnlyException("Property member is mapped to null");
 
-            case Internal.DotsC_PropertyMappingKind.MappedToParameter:
+            case PropertyMappingKind.MappedToParameter:
                 throw new ReadOnlyException("Property member is mapped to parameter");
 
-            case Internal.DotsC_PropertyMappingKind.MappedToMember:
+            case PropertyMappingKind.MappedToMember:
             {
                 System.Int32[] classMemberRef = GetClassMemberReference(obj.GetTypeId(),
                                                                         propertyId,
@@ -352,12 +373,12 @@ namespace Safir.Dob.Typesystem
                         System.Int32 index)
         {
             val = true;
-            switch(GetPropertyMappingKind(obj.GetTypeId(),propertyId,member))
+            switch(GetMappingKind(obj.GetTypeId(),propertyId,member))
             {
-            case Internal.DotsC_PropertyMappingKind.MappedToNull:
+            case PropertyMappingKind.MappedToNull:
                 throw new NullException("Property member is mapped to null");
 
-            case Internal.DotsC_PropertyMappingKind.MappedToParameter:
+            case PropertyMappingKind.MappedToParameter:
                 {
                     Int64 paramClassTypeId;
                     Int32 paramIndex;
@@ -370,7 +391,7 @@ namespace Safir.Dob.Typesystem
                 }
                 break;
 
-            case Internal.DotsC_PropertyMappingKind.MappedToMember:
+            case PropertyMappingKind.MappedToMember:
                 System.Int32[] classMemberRef = GetClassMemberReference(obj.GetTypeId(),
                                                                         propertyId,
                                                                         member);
@@ -414,15 +435,15 @@ namespace Safir.Dob.Typesystem
                             System.Int32 member,
                             System.Int32 index)
         {
-            switch(GetPropertyMappingKind(obj.GetTypeId(),propertyId,member))
+            switch(GetMappingKind(obj.GetTypeId(),propertyId,member))
             {
-            case Internal.DotsC_PropertyMappingKind.MappedToNull:
+            case PropertyMappingKind.MappedToNull:
                 throw new ReadOnlyException("Property member is mapped to null");
 
-            case Internal.DotsC_PropertyMappingKind.MappedToParameter:
+            case PropertyMappingKind.MappedToParameter:
                 throw new ReadOnlyException("Property member is mapped to parameter");
 
-            case Internal.DotsC_PropertyMappingKind.MappedToMember:
+            case PropertyMappingKind.MappedToMember:
             {
                 System.Int32[] classMemberRef = GetClassMemberReference(obj.GetTypeId(),
                                                                         propertyId,
@@ -470,12 +491,12 @@ namespace Safir.Dob.Typesystem
                             System.Int32 index)
         {
             val = 0;
-            switch(GetPropertyMappingKind(obj.GetTypeId(),propertyId,member))
+            switch(GetMappingKind(obj.GetTypeId(),propertyId,member))
             {
-            case Internal.DotsC_PropertyMappingKind.MappedToNull:
+            case PropertyMappingKind.MappedToNull:
                 throw new NullException("Property member is mapped to null");
 
-            case Internal.DotsC_PropertyMappingKind.MappedToParameter:
+            case PropertyMappingKind.MappedToParameter:
             {
                 Int64 paramClassTypeId;
                 Int32 paramIndex;
@@ -485,7 +506,7 @@ namespace Safir.Dob.Typesystem
             }
             break;
 
-            case Internal.DotsC_PropertyMappingKind.MappedToMember:
+            case PropertyMappingKind.MappedToMember:
             {
                 System.Int32[] classMemberRef = GetClassMemberReference(obj.GetTypeId(),
                                                                         propertyId,
@@ -531,15 +552,15 @@ namespace Safir.Dob.Typesystem
                         System.Int32 member,
                         System.Int32 index)
         {
-            switch(GetPropertyMappingKind(obj.GetTypeId(),propertyId,member))
+            switch(GetMappingKind(obj.GetTypeId(),propertyId,member))
             {
-            case Internal.DotsC_PropertyMappingKind.MappedToNull:
+            case PropertyMappingKind.MappedToNull:
                 throw new ReadOnlyException("Property member is mapped to null");
 
-            case Internal.DotsC_PropertyMappingKind.MappedToParameter:
+            case PropertyMappingKind.MappedToParameter:
                 throw new ReadOnlyException("Property member is mapped to parameter");
 
-            case Internal.DotsC_PropertyMappingKind.MappedToMember:
+            case PropertyMappingKind.MappedToMember:
             {
                 System.Int32[] classMemberRef = GetClassMemberReference(obj.GetTypeId(),
                                                                         propertyId,
@@ -587,12 +608,12 @@ namespace Safir.Dob.Typesystem
                  System.Int32 index)
         {
             val = 0;
-            switch(GetPropertyMappingKind(obj.GetTypeId(),propertyId,member))
+            switch(GetMappingKind(obj.GetTypeId(),propertyId,member))
             {
-            case Internal.DotsC_PropertyMappingKind.MappedToNull:
+            case PropertyMappingKind.MappedToNull:
                 throw new NullException("Property member is mapped to null");
 
-            case Internal.DotsC_PropertyMappingKind.MappedToParameter:
+            case PropertyMappingKind.MappedToParameter:
             {
                 Int64 paramClassTypeId;
                 Int32 paramIndex;
@@ -602,7 +623,7 @@ namespace Safir.Dob.Typesystem
             }
             break;
 
-            case Internal.DotsC_PropertyMappingKind.MappedToMember:
+            case PropertyMappingKind.MappedToMember:
             {
                 System.Int32[] classMemberRef = GetClassMemberReference(obj.GetTypeId(),
                                                                         propertyId,
@@ -648,15 +669,15 @@ namespace Safir.Dob.Typesystem
                        System.Int32 member,
                        System.Int32 index)
         {
-            switch(GetPropertyMappingKind(obj.GetTypeId(),propertyId,member))
+            switch(GetMappingKind(obj.GetTypeId(),propertyId,member))
             {
-            case Internal.DotsC_PropertyMappingKind.MappedToNull:
+            case PropertyMappingKind.MappedToNull:
                 throw new ReadOnlyException("Property member is mapped to null");
 
-            case Internal.DotsC_PropertyMappingKind.MappedToParameter:
+            case PropertyMappingKind.MappedToParameter:
                 throw new ReadOnlyException("Property member is mapped to parameter");
 
-            case Internal.DotsC_PropertyMappingKind.MappedToMember:
+            case PropertyMappingKind.MappedToMember:
             {
                 System.Int32[] classMemberRef = GetClassMemberReference(obj.GetTypeId(),
                                                                         propertyId,
@@ -704,12 +725,12 @@ namespace Safir.Dob.Typesystem
                  System.Int32 index)
         {
             val = 0;
-            switch(GetPropertyMappingKind(obj.GetTypeId(),propertyId,member))
+            switch(GetMappingKind(obj.GetTypeId(),propertyId,member))
             {
-            case Internal.DotsC_PropertyMappingKind.MappedToNull:
+            case PropertyMappingKind.MappedToNull:
                 throw new NullException("Property member is mapped to null");
 
-            case Internal.DotsC_PropertyMappingKind.MappedToParameter:
+            case PropertyMappingKind.MappedToParameter:
             {
                 Int64 paramClassTypeId;
                 Int32 paramIndex;
@@ -719,7 +740,7 @@ namespace Safir.Dob.Typesystem
             }
             break;
 
-            case Internal.DotsC_PropertyMappingKind.MappedToMember:
+            case PropertyMappingKind.MappedToMember:
             {
                 System.Int32[] classMemberRef = GetClassMemberReference(obj.GetTypeId(),
                                                                         propertyId,
@@ -765,15 +786,15 @@ namespace Safir.Dob.Typesystem
                                System.Int32 member,
                                System.Int32 index)
         {
-            switch(GetPropertyMappingKind(obj.GetTypeId(),propertyId,member))
+            switch(GetMappingKind(obj.GetTypeId(),propertyId,member))
             {
-            case Internal.DotsC_PropertyMappingKind.MappedToNull:
+            case PropertyMappingKind.MappedToNull:
                 throw new ReadOnlyException("Property member is mapped to null");
 
-            case Internal.DotsC_PropertyMappingKind.MappedToParameter:
+            case PropertyMappingKind.MappedToParameter:
                 throw new ReadOnlyException("Property member is mapped to parameter");
 
-            case Internal.DotsC_PropertyMappingKind.MappedToMember:
+            case PropertyMappingKind.MappedToMember:
             {
                 System.Int32[] classMemberRef = GetClassMemberReference(obj.GetTypeId(),
                                                                         propertyId,
@@ -821,12 +842,12 @@ namespace Safir.Dob.Typesystem
                        System.Int32 index)
         {
             val = 0;
-            switch(GetPropertyMappingKind(obj.GetTypeId(),propertyId,member))
+            switch(GetMappingKind(obj.GetTypeId(),propertyId,member))
             {
-            case Internal.DotsC_PropertyMappingKind.MappedToNull:
+            case PropertyMappingKind.MappedToNull:
                 throw new NullException("Property member is mapped to null");
 
-            case Internal.DotsC_PropertyMappingKind.MappedToParameter:
+            case PropertyMappingKind.MappedToParameter:
             {
                 Int64 paramClassTypeId;
                 Int32 paramIndex;
@@ -836,7 +857,7 @@ namespace Safir.Dob.Typesystem
             }
             break;
 
-            case Internal.DotsC_PropertyMappingKind.MappedToMember:
+            case PropertyMappingKind.MappedToMember:
             {
                 System.Int32[] classMemberRef = GetClassMemberReference(obj.GetTypeId(),
                                                                         propertyId,
@@ -882,15 +903,15 @@ namespace Safir.Dob.Typesystem
                                System.Int32 member,
                                System.Int32 index)
         {
-            switch(GetPropertyMappingKind(obj.GetTypeId(),propertyId,member))
+            switch(GetMappingKind(obj.GetTypeId(),propertyId,member))
             {
-            case Internal.DotsC_PropertyMappingKind.MappedToNull:
+            case PropertyMappingKind.MappedToNull:
                 throw new ReadOnlyException("Property member is mapped to null");
 
-            case Internal.DotsC_PropertyMappingKind.MappedToParameter:
+            case PropertyMappingKind.MappedToParameter:
                 throw new ReadOnlyException("Property member is mapped to parameter");
 
-            case Internal.DotsC_PropertyMappingKind.MappedToMember:
+            case PropertyMappingKind.MappedToMember:
             {
                 System.Int32[] classMemberRef = GetClassMemberReference(obj.GetTypeId(),
                                                                         propertyId,
@@ -938,12 +959,12 @@ namespace Safir.Dob.Typesystem
                                System.Int32 index)
         {
             val = 0;
-            switch(GetPropertyMappingKind(obj.GetTypeId(),propertyId,member))
+            switch(GetMappingKind(obj.GetTypeId(),propertyId,member))
             {
-            case Internal.DotsC_PropertyMappingKind.MappedToNull:
+            case PropertyMappingKind.MappedToNull:
                 throw new NullException("Property member is mapped to null");
 
-            case Internal.DotsC_PropertyMappingKind.MappedToParameter:
+            case PropertyMappingKind.MappedToParameter:
             {
                 Int64 paramClassTypeId;
                 Int32 paramIndex;
@@ -953,7 +974,7 @@ namespace Safir.Dob.Typesystem
             }
             break;
 
-            case Internal.DotsC_PropertyMappingKind.MappedToMember:
+            case PropertyMappingKind.MappedToMember:
             {
                 System.Int32[] classMemberRef = GetClassMemberReference(obj.GetTypeId(),
                                                                         propertyId,
@@ -999,15 +1020,15 @@ namespace Safir.Dob.Typesystem
                                System.Int32 member,
                                System.Int32 index)
         {
-            switch(GetPropertyMappingKind(obj.GetTypeId(),propertyId,member))
+            switch(GetMappingKind(obj.GetTypeId(),propertyId,member))
             {
-            case Internal.DotsC_PropertyMappingKind.MappedToNull:
+            case PropertyMappingKind.MappedToNull:
                 throw new ReadOnlyException("Property member is mapped to null");
 
-            case Internal.DotsC_PropertyMappingKind.MappedToParameter:
+            case PropertyMappingKind.MappedToParameter:
                 throw new ReadOnlyException("Property member is mapped to parameter");
 
-            case Internal.DotsC_PropertyMappingKind.MappedToMember:
+            case PropertyMappingKind.MappedToMember:
             {
                 System.Int32[] classMemberRef = GetClassMemberReference(obj.GetTypeId(),
                                                                         propertyId,
@@ -1055,12 +1076,12 @@ namespace Safir.Dob.Typesystem
                                System.Int32 index)
         {
             val = null;
-            switch(GetPropertyMappingKind(obj.GetTypeId(),propertyId,member))
+            switch(GetMappingKind(obj.GetTypeId(),propertyId,member))
             {
-            case Internal.DotsC_PropertyMappingKind.MappedToNull:
+            case PropertyMappingKind.MappedToNull:
                 throw new NullException("Property member is mapped to null");
 
-            case Internal.DotsC_PropertyMappingKind.MappedToParameter:
+            case PropertyMappingKind.MappedToParameter:
             {
                 Int64 hashVal;
                 System.IntPtr strVal;
@@ -1077,7 +1098,7 @@ namespace Safir.Dob.Typesystem
             }
             break;
 
-            case Internal.DotsC_PropertyMappingKind.MappedToMember:
+            case PropertyMappingKind.MappedToMember:
             {
                 System.Int32[] classMemberRef = GetClassMemberReference(obj.GetTypeId(),
                                                                         propertyId,
@@ -1123,15 +1144,15 @@ namespace Safir.Dob.Typesystem
                                System.Int32 member,
                                System.Int32 index)
         {
-            switch(GetPropertyMappingKind(obj.GetTypeId(),propertyId,member))
+            switch(GetMappingKind(obj.GetTypeId(),propertyId,member))
             {
-            case Internal.DotsC_PropertyMappingKind.MappedToNull:
+            case PropertyMappingKind.MappedToNull:
                 throw new ReadOnlyException("Property member is mapped to null");
 
-            case Internal.DotsC_PropertyMappingKind.MappedToParameter:
+            case PropertyMappingKind.MappedToParameter:
                 throw new ReadOnlyException("Property member is mapped to parameter");
 
-            case Internal.DotsC_PropertyMappingKind.MappedToMember:
+            case PropertyMappingKind.MappedToMember:
             {
                 System.Int32[] classMemberRef = GetClassMemberReference(obj.GetTypeId(),
                                                                         propertyId,
@@ -1179,12 +1200,12 @@ namespace Safir.Dob.Typesystem
                                System.Int32 index)
         {
             val = null;
-            switch(GetPropertyMappingKind(obj.GetTypeId(),propertyId,member))
+            switch(GetMappingKind(obj.GetTypeId(),propertyId,member))
             {
-            case Internal.DotsC_PropertyMappingKind.MappedToNull:
+            case PropertyMappingKind.MappedToNull:
                 throw new NullException("Property member is mapped to null");
 
-            case Internal.DotsC_PropertyMappingKind.MappedToParameter:
+            case PropertyMappingKind.MappedToParameter:
             {
                 Internal.DotsC_EntityId eid;
                 System.IntPtr instanceIdStr;
@@ -1202,7 +1223,7 @@ namespace Safir.Dob.Typesystem
             }
             break;
 
-            case Internal.DotsC_PropertyMappingKind.MappedToMember:
+            case PropertyMappingKind.MappedToMember:
             {
                 System.Int32[] classMemberRef = GetClassMemberReference(obj.GetTypeId(),
                                                                         propertyId,
@@ -1249,15 +1270,15 @@ namespace Safir.Dob.Typesystem
                                System.Int32 member,
                                System.Int32 index)
         {
-            switch (GetPropertyMappingKind(obj.GetTypeId(), propertyId, member))
+            switch (GetMappingKind(obj.GetTypeId(), propertyId, member))
             {
-                case Internal.DotsC_PropertyMappingKind.MappedToNull:
+                case PropertyMappingKind.MappedToNull:
                     throw new ReadOnlyException("Property member is mapped to null");
 
-                case Internal.DotsC_PropertyMappingKind.MappedToParameter:
+                case PropertyMappingKind.MappedToParameter:
                     throw new ReadOnlyException("Property member is mapped to parameter");
 
-                case Internal.DotsC_PropertyMappingKind.MappedToMember:
+                case PropertyMappingKind.MappedToMember:
                     {
                         System.Int32[] classMemberRef = GetClassMemberReference(obj.GetTypeId(),
                                                                                 propertyId,
@@ -1305,12 +1326,12 @@ namespace Safir.Dob.Typesystem
                                System.Int32 index)
         {
             val = null;
-            switch (GetPropertyMappingKind(obj.GetTypeId(), propertyId, member))
+            switch (GetMappingKind(obj.GetTypeId(), propertyId, member))
             {
-                case Internal.DotsC_PropertyMappingKind.MappedToNull:
+                case PropertyMappingKind.MappedToNull:
                     throw new NullException("Property member is mapped to null");
 
-                case Internal.DotsC_PropertyMappingKind.MappedToParameter:
+                case PropertyMappingKind.MappedToParameter:
                     {
                         Int64 hashVal;
                         System.IntPtr strVal;
@@ -1325,7 +1346,7 @@ namespace Safir.Dob.Typesystem
                     }
                     break;
 
-                case Internal.DotsC_PropertyMappingKind.MappedToMember:
+                case PropertyMappingKind.MappedToMember:
                     {
                         System.Int32[] classMemberRef = GetClassMemberReference(obj.GetTypeId(),
                                                                                 propertyId,
@@ -1371,15 +1392,15 @@ namespace Safir.Dob.Typesystem
                                System.Int32 member,
                                System.Int32 index)
         {
-            switch (GetPropertyMappingKind(obj.GetTypeId(), propertyId, member))
+            switch (GetMappingKind(obj.GetTypeId(), propertyId, member))
             {
-                case Internal.DotsC_PropertyMappingKind.MappedToNull:
+                case PropertyMappingKind.MappedToNull:
                     throw new ReadOnlyException("Property member is mapped to null");
 
-                case Internal.DotsC_PropertyMappingKind.MappedToParameter:
+                case PropertyMappingKind.MappedToParameter:
                     throw new ReadOnlyException("Property member is mapped to parameter");
 
-                case Internal.DotsC_PropertyMappingKind.MappedToMember:
+                case PropertyMappingKind.MappedToMember:
                     {
                         System.Int32[] classMemberRef = GetClassMemberReference(obj.GetTypeId(),
                                                                                 propertyId,
@@ -1427,12 +1448,12 @@ namespace Safir.Dob.Typesystem
                                System.Int32 index)
         {
             val = null;
-            switch (GetPropertyMappingKind(obj.GetTypeId(), propertyId, member))
+            switch (GetMappingKind(obj.GetTypeId(), propertyId, member))
             {
-                case Internal.DotsC_PropertyMappingKind.MappedToNull:
+                case PropertyMappingKind.MappedToNull:
                     throw new NullException("Property member is mapped to null");
 
-                case Internal.DotsC_PropertyMappingKind.MappedToParameter:
+                case PropertyMappingKind.MappedToParameter:
                     {
                         Int64 hashVal;
                         System.IntPtr strVal;
@@ -1448,7 +1469,7 @@ namespace Safir.Dob.Typesystem
                     }
                     break;
 
-                case Internal.DotsC_PropertyMappingKind.MappedToMember:
+                case PropertyMappingKind.MappedToMember:
                     {
                         System.Int32[] classMemberRef = GetClassMemberReference(obj.GetTypeId(),
                                                                                 propertyId,
@@ -1494,15 +1515,15 @@ namespace Safir.Dob.Typesystem
                        System.Int32 member,
                        System.Int32 index)
         {
-            switch(GetPropertyMappingKind(obj.GetTypeId(),propertyId,member))
+            switch(GetMappingKind(obj.GetTypeId(),propertyId,member))
             {
-            case Internal.DotsC_PropertyMappingKind.MappedToNull:
+            case PropertyMappingKind.MappedToNull:
                 throw new ReadOnlyException("Property member is mapped to null");
 
-            case Internal.DotsC_PropertyMappingKind.MappedToParameter:
+            case PropertyMappingKind.MappedToParameter:
                 throw new ReadOnlyException("Property member is mapped to parameter");
 
-            case Internal.DotsC_PropertyMappingKind.MappedToMember:
+            case PropertyMappingKind.MappedToMember:
             {
                 System.Int32[] classMemberRef = GetClassMemberReference(obj.GetTypeId(),
                                                                         propertyId,
@@ -1550,12 +1571,12 @@ namespace Safir.Dob.Typesystem
                        System.Int32 index)
         {
             val = null;
-            switch(GetPropertyMappingKind(obj.GetTypeId(),propertyId,member))
+            switch(GetMappingKind(obj.GetTypeId(),propertyId,member))
             {
-            case Internal.DotsC_PropertyMappingKind.MappedToNull:
+            case PropertyMappingKind.MappedToNull:
                 throw new NullException("Property member is mapped to null");
 
-            case Internal.DotsC_PropertyMappingKind.MappedToParameter:
+            case PropertyMappingKind.MappedToParameter:
             {
                 System.IntPtr str;
 
@@ -1569,7 +1590,7 @@ namespace Safir.Dob.Typesystem
             }
             break;
 
-            case Internal.DotsC_PropertyMappingKind.MappedToMember:
+            case PropertyMappingKind.MappedToMember:
             {
                 System.Int32[] classMemberRef = GetClassMemberReference(obj.GetTypeId(),
                                                                         propertyId,
@@ -1616,15 +1637,15 @@ namespace Safir.Dob.Typesystem
                        System.Int32 member,
                        System.Int32 index)
         {
-            switch(GetPropertyMappingKind(obj.GetTypeId(),propertyId,member))
+            switch(GetMappingKind(obj.GetTypeId(),propertyId,member))
             {
-            case Internal.DotsC_PropertyMappingKind.MappedToNull:
+            case PropertyMappingKind.MappedToNull:
                 throw new ReadOnlyException("Property member is mapped to null");
 
-            case Internal.DotsC_PropertyMappingKind.MappedToParameter:
+            case PropertyMappingKind.MappedToParameter:
                 throw new ReadOnlyException("Property member is mapped to parameter");
 
-            case Internal.DotsC_PropertyMappingKind.MappedToMember:
+            case PropertyMappingKind.MappedToMember:
             {
                 System.Int32[] classMemberRef = GetClassMemberReference(obj.GetTypeId(),
                                                                         propertyId,
@@ -1673,12 +1694,12 @@ namespace Safir.Dob.Typesystem
                        System.Int32 index)
         {
             val = null;
-            switch(GetPropertyMappingKind(obj.GetTypeId(),propertyId,member))
+            switch(GetMappingKind(obj.GetTypeId(),propertyId,member))
             {
-            case Internal.DotsC_PropertyMappingKind.MappedToNull:
+            case PropertyMappingKind.MappedToNull:
                 throw new NullException("Property member is mapped to null");
 
-            case Internal.DotsC_PropertyMappingKind.MappedToParameter:
+            case PropertyMappingKind.MappedToParameter:
             {
                 System.IntPtr blob;
 
@@ -1693,7 +1714,7 @@ namespace Safir.Dob.Typesystem
             }
             break;
 
-            case Internal.DotsC_PropertyMappingKind.MappedToMember:
+            case PropertyMappingKind.MappedToMember:
             {
                 System.Int32[] classMemberRef = GetClassMemberReference(obj.GetTypeId(),
                                                                         propertyId,
@@ -1746,15 +1767,15 @@ namespace Safir.Dob.Typesystem
                                System.Int32 member,
                                System.Int32 index)
         {
-            switch (GetPropertyMappingKind(obj.GetTypeId(), propertyId, member))
+            switch (GetMappingKind(obj.GetTypeId(), propertyId, member))
             {
-                case Internal.DotsC_PropertyMappingKind.MappedToNull:
+                case PropertyMappingKind.MappedToNull:
                     throw new ReadOnlyException("Property member is mapped to null");
 
-                case Internal.DotsC_PropertyMappingKind.MappedToParameter:
+                case PropertyMappingKind.MappedToParameter:
                     throw new ReadOnlyException("Property member is mapped to parameter");
 
-                case Internal.DotsC_PropertyMappingKind.MappedToMember:
+                case PropertyMappingKind.MappedToMember:
                     {
                         System.Int32[] classMemberRef = GetClassMemberReference(obj.GetTypeId(),
                                                                                 propertyId,
@@ -1802,12 +1823,12 @@ namespace Safir.Dob.Typesystem
                                System.Int32 index)
         {
             val = null;
-            switch (GetPropertyMappingKind(obj.GetTypeId(), propertyId, member))
+            switch (GetMappingKind(obj.GetTypeId(), propertyId, member))
             {
-                case Internal.DotsC_PropertyMappingKind.MappedToNull:
+                case PropertyMappingKind.MappedToNull:
                     throw new NullException("Property member is mapped to null");
 
-                case Internal.DotsC_PropertyMappingKind.MappedToParameter:
+                case PropertyMappingKind.MappedToParameter:
                     {
                         System.IntPtr bin;
                         int size;
@@ -1822,7 +1843,7 @@ namespace Safir.Dob.Typesystem
                     }
                     break;
 
-                case Internal.DotsC_PropertyMappingKind.MappedToMember:
+                case PropertyMappingKind.MappedToMember:
                     {
                         System.Int32[] classMemberRef = GetClassMemberReference(obj.GetTypeId(),
                                                                         propertyId,
@@ -1853,6 +1874,35 @@ namespace Safir.Dob.Typesystem
             }
         }
 
+        /// <summary>
+        /// Get information needed to read the value of a property that is mapped to a parameter without the need of an ObjectPtr.
+        /// This method is only allowed to be called if mappingKind is 'MappedToParameter'.
+        /// </summary>
+        /// <param name="classId">Type id of a class that supports the specified property.</param>
+        /// <param name="propertyId">Type id of the property.</param>
+        /// <param name="propertyMember">Index of the property member.</param>
+        /// <param name="propertyIndex">Array index of the property.</param>
+        /// <param name="parameterTypeId">Mapped parameter type id.</param>
+        /// <param name="parameterIndex">Mapped parameter member index.</param>
+        /// <param name="parameterArrayIndex">Mapped parameter array index.</param>
+        /// <exception cref="IllegalValueException">If no mapping exists or not mapped to a parameter.</exception>
+        public static void GetParameterReference(System.Int64 classId,
+                                          System.Int64 propertyId,
+                                          System.Int32 propertyMember,
+                                          System.Int32 propertyIndex,
+                                          out System.Int64 parameterTypeId,
+                                          out System.Int32 parameterIndex,
+                                          out System.Int32 parameterArrayIndex)
+        {
+            if (GetMappingKind(classId, propertyId, propertyMember) != PropertyMappingKind.MappedToParameter)
+            {
+                throw new IllegalValueException("That property member is not mapped to a parameter!");
+            }
+
+            Internal.Kernel.DotsC_GetPropertyParameterReference(classId, propertyId, propertyMember, propertyIndex, out parameterTypeId, out parameterIndex, out parameterArrayIndex);
+        }
+
+
         #endregion
 
         #region Private methods
@@ -1876,20 +1926,6 @@ namespace Safir.Dob.Typesystem
             }
             return cmr;
         }
-
-        private static Internal.DotsC_PropertyMappingKind GetPropertyMappingKind(System.Int64 typeId,
-                                                                                 System.Int64 propertyId,
-                                                                                 System.Int32 member)
-        {
-            Internal.DotsC_PropertyMappingKind kind;
-            byte okByte=Internal.Kernel.DotsC_GetPropertyMappingKind (typeId, propertyId, member, out kind);
-            if (Internal.InternalOperations.BoolOf (okByte)) {
-                return kind;
-            }
-
-            throw new IllegalValueException("That obj is not mapped to that property!");
-        }
-
 
         //if container == null then a parent was null
         private static void DereferenceClassMemberReference(Object obj,

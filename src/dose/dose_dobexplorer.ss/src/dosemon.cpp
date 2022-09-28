@@ -32,6 +32,7 @@
 #include "SystemPicturePage.h"
 #include "numberofentities.h"
 #include "RawStatisticsPage.h"
+#include "registrations.h"
 #include <Safir/Dob/Internal/Initialize.h>
 #include <Safir/Dob/Typesystem/Operations.h>
 #include <Safir/Dob/Typesystem/Utilities.h>
@@ -173,6 +174,17 @@ void DoseMon::TreeItemActivated ( QTreeWidgetItem * item, int /*column*/ )
     else if (item->text(0) == "System Picture")
     {
         newTab = tabWidget->addTab(new SystemPicturePage(this),"System Picture");
+    }
+    else if (item->text(0) == "Registrations")
+    {
+        if (m_doseInternalInitialized)
+        {
+            newTab = tabWidget->addTab(new Registrations(this),"Registrations");
+        }
+        else
+        {
+            QMessageBox::information(this,"Not initialized","dose_internal not yet initialized, cannot open.");
+        }
     }
     else if (item->text(0) == "Entity Statistics")
     {

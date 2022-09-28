@@ -278,6 +278,13 @@ namespace Typesystem
     typedef DotsC_MemberType MemberType;
 
     /**
+     * An enumeration of the possible ways a property value can be defined.
+     *
+     * A property value can be either mapped to a class member or mapped to a parameter, or it can be null.
+     */
+    typedef DotsC_PropertyMappingKind PropertyMappingKind;
+
+    /**
      * An enumeration of all possible collection types of an object member.
      *
      * The values of this enumeration is defined in the file Safir/Dob/Typesystem/LanguageInterfaceDefs.h.

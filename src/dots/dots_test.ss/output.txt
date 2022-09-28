@@ -20,6 +20,24 @@ AnotherEmptyObject - MemberArraysProperty: true
 
 
 =====================================================
+Testing: Property Mapping Kind
+=====================================================
+EmptyObject: MappedToParameter
+AnotherEmptyObject: MappedToParameter
+MemberItems: MappedToMember
+
+
+
+=====================================================
+Testing: Property Get Parameter Reference
+=====================================================
+EmptyObject: abcdABCD
+AnotherEmptyObject: 6091706122362893070
+Not mapped to parameter
+
+
+
+=====================================================
 Testing: Get Name
 =====================================================
 MemberTypes          - DotsTest.MemberTypes

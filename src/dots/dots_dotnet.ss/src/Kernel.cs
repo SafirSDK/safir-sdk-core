@@ -226,7 +226,7 @@ namespace Safir.Dob.Typesystem.Internal
         internal static extern byte DotsC_GetPropertyMappingKind(System.Int64 classTypeId,
                                                                  System.Int64 propertyTypeId,
                                                                  System.Int32 propertyMember,
-                                                                   out DotsC_PropertyMappingKind mappingKind);
+                                                                 out PropertyMappingKind mappingKind);
 
         //GetClassMemberReference
         [DllImport(DOTS_KERNEL_NAME, CallingConvention = CallingConvention.Cdecl)]

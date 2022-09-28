@@ -596,7 +596,11 @@ jint JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetPropertyMappingKi
   (JNIEnv *, jclass, jlong _classTypeId, jlong _propertyTypeId, jint _propertyMember)
 {
     DotsC_PropertyMappingKind mappingKind;
-    DotsC_GetPropertyMappingKind(_classTypeId, _propertyTypeId, _propertyMember, mappingKind);
+    bool ok = DotsC_GetPropertyMappingKind(_classTypeId, _propertyTypeId, _propertyMember, mappingKind);
+    if (!ok)
+    {
+        return -1;
+    }
     return static_cast<jint>(mappingKind);
 }
 

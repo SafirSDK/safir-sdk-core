@@ -36,6 +36,27 @@ import com.saabgroup.safir.dob.typesystem.Object;
 public class Properties {
 
     /**
+     * Get the information of how a property member is mapped for a class.
+     *
+     * @param classId [in] -  type id of a class that supports the specified property.
+     * @param propertyId [in] - type id of the property
+     * @param propertyMember [in] - index of the property member.
+     * @return The property mapping kind.
+     * @throws IllegalValueException There is no such type or member defined.
+     */
+    public static PropertyMappingKind getMappingKind(long classId,
+                                                     long propertyId,
+                                                     int propertyMember)
+    {
+        int result = Kernel.GetPropertyMappingKind(classId, propertyId, propertyMember);
+        if (result<0) {
+            throw new IllegalValueException("That object is not mapped to that property!");
+        }
+
+        return PropertyMappingKind.values()[result];
+    }
+
+    /**
      * Get the array size of a property member.
      *
      * @param classId [in] -  type id of a class that supports the specified property.
@@ -73,15 +94,15 @@ public class Properties {
                                int member,
                                int index)
     {
-        switch(getPropertyMappingKind(obj.getTypeId(),propertyId,member))
+        switch(getMappingKind(obj.getTypeId(),propertyId,member))
         {
-        case MappedToNull:
+        case MAPPED_TO_NULL:
             return;
 
-        case MappedToParameter:
+        case MAPPED_TO_PARAMETER:
             throw new ReadOnlyException("Property member is mapped to parameter");
 
-        case MappedToMember:
+        case MAPPED_TO_MEMBER:
             {
                 int[] classMemberRef = getClassMemberReference(obj.getTypeId(),
                                                                propertyId,
@@ -128,15 +149,15 @@ public class Properties {
                                  int member,
                                  int index)
     {
-        switch (getPropertyMappingKind(obj.getTypeId(), propertyId, member))
+        switch (getMappingKind(obj.getTypeId(), propertyId, member))
         {
-        case MappedToNull:
+        case MAPPED_TO_NULL:
             return true;
 
-        case MappedToParameter:
+        case MAPPED_TO_PARAMETER:
             return false;
 
-        case MappedToMember:
+        case MAPPED_TO_MEMBER:
             {
                 int[] classMemberRef = getClassMemberReference(obj.getTypeId(),
                                                                propertyId,
@@ -183,15 +204,15 @@ public class Properties {
                                     int member,
                                     int index)
     {
-        switch (getPropertyMappingKind(obj.getTypeId(), propertyId, member))
+        switch (getMappingKind(obj.getTypeId(), propertyId, member))
         {
-        case MappedToNull:
+        case MAPPED_TO_NULL:
             return false;
 
-        case MappedToParameter:
+        case MAPPED_TO_PARAMETER:
             return false;
 
-        case MappedToMember:
+        case MAPPED_TO_MEMBER:
             {
                 int[] classMemberRef = getClassMemberReference(obj.getTypeId(),
                                                                propertyId,
@@ -251,15 +272,15 @@ public class Properties {
                                      int member,
                                      int index)
     {
-        switch (getPropertyMappingKind(obj.getTypeId(), propertyId, member))
+        switch (getMappingKind(obj.getTypeId(), propertyId, member))
         {
-        case MappedToNull:
+        case MAPPED_TO_NULL:
             return true;
 
-        case MappedToParameter:
+        case MAPPED_TO_PARAMETER:
             return true;
 
-        case MappedToMember:
+        case MAPPED_TO_MEMBER:
             {
                 int[] classMemberRef = getClassMemberReference(obj.getTypeId(),
                                                                propertyId,
@@ -310,15 +331,15 @@ public class Properties {
                            int member,
                            int index)
     {
-        switch(getPropertyMappingKind(obj.getTypeId(),propertyId,member))
+        switch(getMappingKind(obj.getTypeId(),propertyId,member))
         {
-        case MappedToNull:
+        case MAPPED_TO_NULL:
             throw new ReadOnlyException("Property member is mapped to null");
 
-        case MappedToParameter:
+        case MAPPED_TO_PARAMETER:
             throw new ReadOnlyException("Property member is mapped to parameter");
 
-        case MappedToMember:
+        case MAPPED_TO_MEMBER:
             {
                 int[] classMemberRef = getClassMemberReference(obj.getTypeId(),
                                                                propertyId,
@@ -368,12 +389,12 @@ public class Properties {
                                      int member,
                                      int index)
     {
-        switch(getPropertyMappingKind(obj.getTypeId(),propertyId,member))
+        switch(getMappingKind(obj.getTypeId(),propertyId,member))
         {
-        case MappedToNull:
+        case MAPPED_TO_NULL:
             throw new NullException("Property member is mapped to null");
 
-        case MappedToParameter:
+        case MAPPED_TO_PARAMETER:
             {
                 long[] paramClassTypeId=new long[1];
                 int[] paramIndex=new int[1];
@@ -386,7 +407,7 @@ public class Properties {
                 return val[0];
             }
 
-        case MappedToMember:
+        case MAPPED_TO_MEMBER:
             int[] classMemberRef = getClassMemberReference(obj.getTypeId(),
                                                            propertyId,
                                                            member);
@@ -432,15 +453,15 @@ public class Properties {
                                int member,
                                int index)
     {
-        switch(getPropertyMappingKind(obj.getTypeId(),propertyId,member))
+        switch(getMappingKind(obj.getTypeId(),propertyId,member))
         {
-        case MappedToNull:
+        case MAPPED_TO_NULL:
             throw new ReadOnlyException("Property member is mapped to null");
 
-        case MappedToParameter:
+        case MAPPED_TO_PARAMETER:
             throw new ReadOnlyException("Property member is mapped to parameter");
 
-        case MappedToMember:
+        case MAPPED_TO_MEMBER:
             {
                 int[] classMemberRef = getClassMemberReference(obj.getTypeId(),
                                                                propertyId,
@@ -490,12 +511,12 @@ public class Properties {
                               int member,
                               int index)
     {
-        switch(getPropertyMappingKind(obj.getTypeId(),propertyId,member))
+        switch(getMappingKind(obj.getTypeId(),propertyId,member))
         {
-        case MappedToNull:
+        case MAPPED_TO_NULL:
             throw new NullException("Property member is mapped to null");
 
-        case MappedToParameter:
+        case MAPPED_TO_PARAMETER:
             {
                 long[] paramClassTypeId=new long[1];
                 int[] paramIndex=new int[1];
@@ -508,7 +529,7 @@ public class Properties {
                 return val[0];
             }
 
-        case MappedToMember:
+        case MAPPED_TO_MEMBER:
             {
                 int[] classMemberRef = getClassMemberReference(obj.getTypeId(),
                                                                propertyId,
@@ -557,15 +578,15 @@ public class Properties {
                            int member,
                            int index)
     {
-        switch(getPropertyMappingKind(obj.getTypeId(),propertyId,member))
+        switch(getMappingKind(obj.getTypeId(),propertyId,member))
         {
-        case MappedToNull:
+        case MAPPED_TO_NULL:
             throw new ReadOnlyException("Property member is mapped to null");
 
-        case MappedToParameter:
+        case MAPPED_TO_PARAMETER:
             throw new ReadOnlyException("Property member is mapped to parameter");
 
-        case MappedToMember:
+        case MAPPED_TO_MEMBER:
             {
                 int[] classMemberRef = getClassMemberReference(obj.getTypeId(),
                                                                propertyId,
@@ -616,12 +637,12 @@ public class Properties {
                                int member,
                                int index)
     {
-        switch(getPropertyMappingKind(obj.getTypeId(),propertyId,member))
+        switch(getMappingKind(obj.getTypeId(),propertyId,member))
         {
-        case MappedToNull:
+        case MAPPED_TO_NULL:
             throw new NullException("Property member is mapped to null");
 
-        case MappedToParameter:
+        case MAPPED_TO_PARAMETER:
             {
                 long[] paramClassTypeId=new long[1];
                 int[] paramIndex=new int[1];
@@ -634,7 +655,7 @@ public class Properties {
                 return val[0];
             }
 
-        case MappedToMember:
+        case MAPPED_TO_MEMBER:
             {
                 int[] classMemberRef = getClassMemberReference(obj.getTypeId(),
                                                                propertyId,
@@ -683,15 +704,15 @@ public class Properties {
                            int member,
                            int index)
     {
-        switch(getPropertyMappingKind(obj.getTypeId(),propertyId,member))
+        switch(getMappingKind(obj.getTypeId(),propertyId,member))
         {
-        case MappedToNull:
+        case MAPPED_TO_NULL:
             throw new ReadOnlyException("Property member is mapped to null");
 
-        case MappedToParameter:
+        case MAPPED_TO_PARAMETER:
             throw new ReadOnlyException("Property member is mapped to parameter");
 
-        case MappedToMember:
+        case MAPPED_TO_MEMBER:
             {
                 int[] classMemberRef = getClassMemberReference(obj.getTypeId(),
                                                                propertyId,
@@ -741,12 +762,12 @@ public class Properties {
                                 int member,
                                 int index)
     {
-        switch(getPropertyMappingKind(obj.getTypeId(),propertyId,member))
+        switch(getMappingKind(obj.getTypeId(),propertyId,member))
         {
-        case MappedToNull:
+        case MAPPED_TO_NULL:
             throw new NullException("Property member is mapped to null");
 
-        case MappedToParameter:
+        case MAPPED_TO_PARAMETER:
             {
                 long[] paramClassTypeId=new long[1];
                 int[] paramIndex=new int[1];
@@ -758,7 +779,7 @@ public class Properties {
                 return val[0];
             }
 
-        case MappedToMember:
+        case MAPPED_TO_MEMBER:
             {
                 int[] classMemberRef = getClassMemberReference(obj.getTypeId(),
                                                                propertyId,
@@ -806,15 +827,15 @@ public class Properties {
                            int member,
                            int index)
     {
-        switch(getPropertyMappingKind(obj.getTypeId(),propertyId,member))
+        switch(getMappingKind(obj.getTypeId(),propertyId,member))
         {
-        case MappedToNull:
+        case MAPPED_TO_NULL:
             throw new ReadOnlyException("Property member is mapped to null");
 
-        case MappedToParameter:
+        case MAPPED_TO_PARAMETER:
             throw new ReadOnlyException("Property member is mapped to parameter");
 
-        case MappedToMember:
+        case MAPPED_TO_MEMBER:
             {
                 int[] classMemberRef = getClassMemberReference(obj.getTypeId(),
                                                                propertyId,
@@ -865,12 +886,12 @@ public class Properties {
                                    int member,
                                    int index)
     {
-        switch(getPropertyMappingKind(obj.getTypeId(),propertyId,member))
+        switch(getMappingKind(obj.getTypeId(),propertyId,member))
         {
-        case MappedToNull:
+        case MAPPED_TO_NULL:
             throw new NullException("Property member is mapped to null");
 
-        case MappedToParameter:
+        case MAPPED_TO_PARAMETER:
             {
                 long[] paramClassTypeId=new long[1];
                 int[] paramIndex=new int[1];
@@ -883,7 +904,7 @@ public class Properties {
                 return val[0];
             }
 
-        case MappedToMember:
+        case MAPPED_TO_MEMBER:
             {
                 int[] classMemberRef = getClassMemberReference(obj.getTypeId(),
                                                                propertyId,
@@ -931,15 +952,15 @@ public class Properties {
                            int member,
                            int index)
     {
-        switch(getPropertyMappingKind(obj.getTypeId(),propertyId,member))
+        switch(getMappingKind(obj.getTypeId(),propertyId,member))
         {
-        case MappedToNull:
+        case MAPPED_TO_NULL:
             throw new ReadOnlyException("Property member is mapped to null");
 
-        case MappedToParameter:
+        case MAPPED_TO_PARAMETER:
             throw new ReadOnlyException("Property member is mapped to parameter");
 
-        case MappedToMember:
+        case MAPPED_TO_MEMBER:
             {
                 int[] classMemberRef = getClassMemberReference(obj.getTypeId(),
                                                                propertyId,
@@ -990,12 +1011,12 @@ public class Properties {
                                     int member,
                                     int index)
     {
-        switch(getPropertyMappingKind(obj.getTypeId(),propertyId,member))
+        switch(getMappingKind(obj.getTypeId(),propertyId,member))
         {
-        case MappedToNull:
+        case MAPPED_TO_NULL:
             throw new NullException("Property member is mapped to null");
 
-        case MappedToParameter:
+        case MAPPED_TO_PARAMETER:
             {
                 long[] paramClassTypeId=new long[1];
                 int[] paramIndex=new int[1];
@@ -1008,7 +1029,7 @@ public class Properties {
                 return val[0];
             }
 
-        case MappedToMember:
+        case MAPPED_TO_MEMBER:
             {
                 int[] classMemberRef = getClassMemberReference(obj.getTypeId(),
                                                                propertyId,
@@ -1056,15 +1077,15 @@ public class Properties {
                            int member,
                            int index)
     {
-        switch(getPropertyMappingKind(obj.getTypeId(),propertyId,member))
+        switch(getMappingKind(obj.getTypeId(),propertyId,member))
         {
-        case MappedToNull:
+        case MAPPED_TO_NULL:
             throw new ReadOnlyException("Property member is mapped to null");
 
-        case MappedToParameter:
+        case MAPPED_TO_PARAMETER:
             throw new ReadOnlyException("Property member is mapped to parameter");
 
-        case MappedToMember:
+        case MAPPED_TO_MEMBER:
             {
                 int[] classMemberRef = getClassMemberReference(obj.getTypeId(),
                                                                propertyId,
@@ -1115,12 +1136,12 @@ public class Properties {
                                            int member,
                                            int index)
     {
-        switch(getPropertyMappingKind(obj.getTypeId(),propertyId,member))
+        switch(getMappingKind(obj.getTypeId(),propertyId,member))
         {
-        case MappedToNull:
+        case MAPPED_TO_NULL:
             throw new NullException("Property member is mapped to null");
 
-        case MappedToParameter:
+        case MAPPED_TO_PARAMETER:
             {
                 long[] paramClassTypeId=new long[1];
                 int[] paramIndex=new int[1];
@@ -1137,7 +1158,7 @@ public class Properties {
                     return new InstanceId(val[0]);
             }
 
-        case MappedToMember:
+        case MAPPED_TO_MEMBER:
             {
                 int[] classMemberRef = getClassMemberReference(obj.getTypeId(),
                                                                propertyId,
@@ -1208,15 +1229,15 @@ public class Properties {
                            int member,
                            int index)
     {
-        switch(getPropertyMappingKind(obj.getTypeId(),propertyId,member))
+        switch(getMappingKind(obj.getTypeId(),propertyId,member))
         {
-        case MappedToNull:
+        case MAPPED_TO_NULL:
             throw new ReadOnlyException("Property member is mapped to null");
 
-        case MappedToParameter:
+        case MAPPED_TO_PARAMETER:
             throw new ReadOnlyException("Property member is mapped to parameter");
 
-        case MappedToMember:
+        case MAPPED_TO_MEMBER:
             {
                 int[] classMemberRef = getClassMemberReference(obj.getTypeId(),
                                                                propertyId,
@@ -1267,12 +1288,12 @@ public class Properties {
                                        int member,
                                        int index)
     {
-        switch(getPropertyMappingKind(obj.getTypeId(),propertyId,member))
+        switch(getMappingKind(obj.getTypeId(),propertyId,member))
         {
-        case MappedToNull:
+        case MAPPED_TO_NULL:
             throw new NullException("Property member is mapped to null");
 
-        case MappedToParameter:
+        case MAPPED_TO_PARAMETER:
             {
                 long[] paramClassTypeId=new long[1];
                 int[] paramIndex=new int[1];
@@ -1290,7 +1311,7 @@ public class Properties {
                     return new EntityId(typeId[0], new InstanceId(inst[0]));
             }
 
-        case MappedToMember:
+        case MAPPED_TO_MEMBER:
             {
                 int[] classMemberRef = getClassMemberReference(obj.getTypeId(),
                                                                propertyId,
@@ -1338,15 +1359,15 @@ public class Properties {
                            int member,
                            int index)
     {
-        switch (getPropertyMappingKind(obj.getTypeId(), propertyId, member))
+        switch (getMappingKind(obj.getTypeId(), propertyId, member))
         {
-        case MappedToNull:
+        case MAPPED_TO_NULL:
             throw new ReadOnlyException("Property member is mapped to null");
 
-        case MappedToParameter:
+        case MAPPED_TO_PARAMETER:
             throw new ReadOnlyException("Property member is mapped to parameter");
 
-        case MappedToMember:
+        case MAPPED_TO_MEMBER:
             {
                 int[] classMemberRef = getClassMemberReference(obj.getTypeId(),
                                                                propertyId,
@@ -1397,12 +1418,12 @@ public class Properties {
                                          int member,
                                          int index)
     {
-        switch (getPropertyMappingKind(obj.getTypeId(), propertyId, member))
+        switch (getMappingKind(obj.getTypeId(), propertyId, member))
         {
-        case MappedToNull:
+        case MAPPED_TO_NULL:
             throw new NullException("Property member is mapped to null");
 
-        case MappedToParameter:
+        case MAPPED_TO_PARAMETER:
             {
                 long[] paramClassTypeId=new long[1];
                 int[] paramIndex=new int[1];
@@ -1419,7 +1440,7 @@ public class Properties {
                     return new ChannelId(val[0]);
             }
 
-        case MappedToMember:
+        case MAPPED_TO_MEMBER:
             {
                 int[] classMemberRef = getClassMemberReference(obj.getTypeId(),
                                                                propertyId,
@@ -1467,15 +1488,15 @@ public class Properties {
                            int member,
                            int index)
     {
-        switch (getPropertyMappingKind(obj.getTypeId(), propertyId, member))
+        switch (getMappingKind(obj.getTypeId(), propertyId, member))
         {
-        case MappedToNull:
+        case MAPPED_TO_NULL:
             throw new ReadOnlyException("Property member is mapped to null");
 
-        case MappedToParameter:
+        case MAPPED_TO_PARAMETER:
             throw new ReadOnlyException("Property member is mapped to parameter");
 
-        case MappedToMember:
+        case MAPPED_TO_MEMBER:
             {
                 int[] classMemberRef = getClassMemberReference(obj.getTypeId(),
                                                                propertyId,
@@ -1526,12 +1547,12 @@ public class Properties {
                                          int member,
                                          int index)
     {
-        switch (getPropertyMappingKind(obj.getTypeId(), propertyId, member))
+        switch (getMappingKind(obj.getTypeId(), propertyId, member))
         {
-        case MappedToNull:
+        case MAPPED_TO_NULL:
             throw new NullException("Property member is mapped to null");
 
-        case MappedToParameter:
+        case MAPPED_TO_PARAMETER:
             {
                 long[] paramClassTypeId=new long[1];
                 int[] paramIndex=new int[1];
@@ -1548,7 +1569,7 @@ public class Properties {
                     return new HandlerId(val[0]);
             }
 
-        case MappedToMember:
+        case MAPPED_TO_MEMBER:
             {
                 int[] classMemberRef = getClassMemberReference(obj.getTypeId(),
                                                                propertyId,
@@ -1597,15 +1618,15 @@ public class Properties {
                            int member,
                            int index)
     {
-        switch(getPropertyMappingKind(obj.getTypeId(),propertyId,member))
+        switch(getMappingKind(obj.getTypeId(),propertyId,member))
         {
-        case MappedToNull:
+        case MAPPED_TO_NULL:
             throw new ReadOnlyException("Property member is mapped to null");
 
-        case MappedToParameter:
+        case MAPPED_TO_PARAMETER:
             throw new ReadOnlyException("Property member is mapped to parameter");
 
-        case MappedToMember:
+        case MAPPED_TO_MEMBER:
             {
                 int[] classMemberRef = getClassMemberReference(obj.getTypeId(),
                                                                propertyId,
@@ -1656,12 +1677,12 @@ public class Properties {
                                    int member,
                                    int index)
     {
-        switch(getPropertyMappingKind(obj.getTypeId(),propertyId,member))
+        switch(getMappingKind(obj.getTypeId(),propertyId,member))
         {
-        case MappedToNull:
+        case MAPPED_TO_NULL:
             throw new NullException("Property member is mapped to null");
 
-        case MappedToParameter:
+        case MAPPED_TO_PARAMETER:
             {
                 long[] paramClassTypeId=new long[1];
                 int[] paramIndex=new int[1];
@@ -1673,7 +1694,7 @@ public class Properties {
                 return val[0];
             }
 
-        case MappedToMember:
+        case MAPPED_TO_MEMBER:
             {
                 int[] classMemberRef = getClassMemberReference(obj.getTypeId(),
                                                                propertyId,
@@ -1721,15 +1742,15 @@ public class Properties {
                            int member,
                            int index)
     {
-        switch(getPropertyMappingKind(obj.getTypeId(),propertyId,member))
+        switch(getMappingKind(obj.getTypeId(),propertyId,member))
         {
-        case MappedToNull:
+        case MAPPED_TO_NULL:
             throw new ReadOnlyException("Property member is mapped to null");
 
-        case MappedToParameter:
+        case MAPPED_TO_PARAMETER:
             throw new ReadOnlyException("Property member is mapped to parameter");
 
-        case MappedToMember:
+        case MAPPED_TO_MEMBER:
             {
                 int[] classMemberRef = getClassMemberReference(obj.getTypeId(),
                                                                propertyId,
@@ -1781,12 +1802,12 @@ public class Properties {
                                    int member,
                                    int index)
     {
-        switch(getPropertyMappingKind(obj.getTypeId(),propertyId,member))
+        switch(getMappingKind(obj.getTypeId(),propertyId,member))
         {
-        case MappedToNull:
+        case MAPPED_TO_NULL:
             throw new NullException("Property member is mapped to null");
 
-        case MappedToParameter:
+        case MAPPED_TO_PARAMETER:
             {
                 long[] paramClassTypeId=new long[1];
                 int[] paramIndex=new int[1];
@@ -1801,7 +1822,7 @@ public class Properties {
                 return result;
             }
 
-        case MappedToMember:
+        case MAPPED_TO_MEMBER:
             {
                 int[] classMemberRef = getClassMemberReference(obj.getTypeId(),
                                                                propertyId,
@@ -1856,15 +1877,15 @@ public class Properties {
                            int member,
                            int index)
     {
-        switch (getPropertyMappingKind(obj.getTypeId(), propertyId, member))
+        switch (getMappingKind(obj.getTypeId(), propertyId, member))
         {
-        case MappedToNull:
+        case MAPPED_TO_NULL:
             throw new ReadOnlyException("Property member is mapped to null");
 
-        case MappedToParameter:
+        case MAPPED_TO_PARAMETER:
             throw new ReadOnlyException("Property member is mapped to parameter");
 
-        case MappedToMember:
+        case MAPPED_TO_MEMBER:
             {
                 int[] classMemberRef = getClassMemberReference(obj.getTypeId(),
                                                                propertyId,
@@ -1914,12 +1935,12 @@ public class Properties {
                                    int member,
                                    int index)
     {
-        switch (getPropertyMappingKind(obj.getTypeId(), propertyId, member))
+        switch (getMappingKind(obj.getTypeId(), propertyId, member))
         {
-        case MappedToNull:
+        case MAPPED_TO_NULL:
             throw new NullException("Property member is mapped to null");
 
-        case MappedToParameter:
+        case MAPPED_TO_PARAMETER:
             {
                 long[] paramClassTypeId=new long[1];
                 int[] paramIndex=new int[1];
@@ -1935,7 +1956,7 @@ public class Properties {
                 return result;
             }
 
-        case MappedToMember:
+        case MAPPED_TO_MEMBER:
             {
                 int[] classMemberRef = getClassMemberReference(obj.getTypeId(),
                                                                propertyId,
@@ -1967,6 +1988,37 @@ public class Properties {
         throw new SoftwareViolationException("Reached end of getBinary! Internal Error");
     }
 
+    /**
+     * Get information needed to read the value of a property that is mapped to a parameter without the need of an ObjectPtr.
+     * This method is only allowed to be called if mappingKind is 'MAPPED_TO_PARAMETER'.
+     *
+     * @param classId Type id of a class that supports the specified property.
+     * @param propertyId Type id of the property.
+     * @param propertyMember Index of the property member.
+     * @param propertyIndex Array index of the property.
+     *
+     * @return The parameter referencs as an array [parameterTypeId, parameterIndex, parameterArrayIndex]
+     *
+     * @throws IllegalValueException The member is inaccessible. Some "parent" item is null.
+     */
+    public static Number[] getParameterReference(long classId,
+                                             long propertyId,
+                                             int propertyMember,
+                                             int propertyIndex)
+    {
+        if (getMappingKind(classId, propertyId, propertyMember) != PropertyMappingKind.MAPPED_TO_PARAMETER)
+        {
+            throw new IllegalValueException("That property member is not mapped to a parameter!");
+        }
+
+        long[] paramClassTypeId=new long[1];
+        int[] paramIndex=new int[1];
+        int[] valueIndex=new int[1];
+        Kernel.GetPropertyParameterReference(classId, propertyId, propertyMember, propertyIndex, paramClassTypeId, paramIndex, valueIndex);
+
+        return new Number[]{paramClassTypeId[0], paramIndex[0], valueIndex[0]};
+    }
+
 
     private static int[] getClassMemberReference(long typeId,
                                                  long propertyId,
@@ -1985,22 +2037,6 @@ public class Properties {
         ints.get(result);
         return result;
     }
-
-    private static Kernel.DotsC_PropertyMappingKind getPropertyMappingKind(long typeId,
-                                                                           long propertyId,
-                                                                           int member)
-    {
-        int kind=Kernel.GetPropertyMappingKind(typeId,
-                                      propertyId,
-                                      member);
-
-        if (kind<0){
-            throw new IllegalValueException("That obj is not mapped to that property!");
-        }
-
-        return Kernel.DotsC_PropertyMappingKind.values()[kind];
-    }
-
 
     //if container[0] == null then a parent was null
     private static void dereferenceClassMemberReference(com.saabgroup.safir.dob.typesystem.Object obj,

@@ -49,6 +49,7 @@
 #include <Safir/Dob/Typesystem/Parameters.h>
 #include <Safir/Dob/Typesystem/Internal/BlobOperations.h>
 #include <Safir/Dob/Typesystem/Members.h>
+#include <Safir/Dob/Typesystem/Properties.h>
 #include <Safir/Dob/Typesystem/Internal/InternalOperations.h>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/filesystem/operations.hpp>
@@ -72,6 +73,17 @@ std::wstring CollectionTypeStr(Safir::Dob::Typesystem::CollectionType ct)
     case ArrayCollectionType: return L"Array";
     case SequenceCollectionType: return L"Sequence";
     case DictionaryCollectionType: return L"Dictionary";
+    }
+    return L"";
+}
+
+std::wstring MappingKindStr(Safir::Dob::Typesystem::PropertyMappingKind k)
+{
+    switch (k)
+    {
+    case MappedToNull: return L"MappedToNull";
+    case MappedToMember: return L"MappedToMember";
+    case MappedToParameter: return L"MappedToParameter";
     }
     return L"";
 }
@@ -257,6 +269,37 @@ void Test_Has_Property()
     std::wcout<<"EmptyObject - MemberArraysProperty: "<<DotsTest::MemberArraysProperty::HasProperty(EO)<<std::endl;
     std::wcout<<"AnotherEmptyObject - MemberTypesProperty: "<<DotsTest::MemberTypesProperty::HasProperty(AEO)<<std::endl;
     std::wcout<<"AnotherEmptyObject - MemberArraysProperty: "<<DotsTest::MemberArraysProperty::HasProperty(AEO)<<std::endl;
+}
+
+void Test_PropertyMappingKind()
+{
+    Header(L"Property Mapping Kind");
+    std::wcout << L"EmptyObject: " << MappingKindStr(Safir::Dob::Typesystem::Properties::GetMappingKind(DotsTest::EmptyObject::ClassTypeId, DotsTest::MemberTypesProperty::ClassTypeId, 0)) << std::endl;
+    std::wcout << L"AnotherEmptyObject: " << MappingKindStr(Safir::Dob::Typesystem::Properties::GetMappingKind(DotsTest::AnotherEmptyObject::ClassTypeId, DotsTest::MemberTypesProperty::ClassTypeId, 0)) << std::endl;
+    std::wcout << L"MemberItems: " << MappingKindStr(Safir::Dob::Typesystem::Properties::GetMappingKind(DotsTest::MemberItems::ClassTypeId, DotsTest::MemberTypesProperty::ClassTypeId, 0)) << std::endl;
+}
+
+void Test_Property_GetParameterReference()
+{
+    Header(L"Property Get Parameter Reference");
+
+    Safir::Dob::Typesystem::TypeId paramTid;
+    Safir::Dob::Typesystem::ParameterIndex paramIx;
+    Safir::Dob::Typesystem::ArrayIndex paramArrIx;
+
+    Safir::Dob::Typesystem::Properties::GetParameterReference(DotsTest::EmptyObject::ClassTypeId, DotsTest::MemberTypesProperty::ClassTypeId, 6, 0, paramTid, paramIx, paramArrIx);
+    std::wcout << L"EmptyObject: " << Safir::Dob::Typesystem::Parameters::GetString(paramTid, paramIx, paramArrIx) << std::endl;
+    Safir::Dob::Typesystem::Properties::GetParameterReference(DotsTest::AnotherEmptyObject::ClassTypeId, DotsTest::MemberTypesProperty::ClassTypeId, 9, 0, paramTid, paramIx, paramArrIx);
+    std::wcout << L"AnotherEmptyObject: " << Safir::Dob::Typesystem::Parameters::GetTypeId(paramTid, paramIx, paramArrIx) << std::endl;
+
+    try
+    {
+        Safir::Dob::Typesystem::Properties::GetParameterReference(DotsTest::MemberItems::ClassTypeId, DotsTest::MemberTypesProperty::ClassTypeId, 0, 0, paramTid, paramIx, paramArrIx);
+    }
+    catch (const Safir::Dob::Typesystem::IllegalValueException& ex)
+    {
+        std::wcout << L"Not mapped to parameter" << std::endl;
+    }
 }
 
 void Test_GetName()
@@ -10512,6 +10555,8 @@ BOOST_AUTO_TEST_CASE (old_style_tests)
     {
         Test_SequenceDiff();
         Test_Has_Property();
+        Test_PropertyMappingKind();
+        Test_Property_GetParameterReference();
         Test_GetName();
         Test_GetNumberOfMembers();
         Test_GetNumberOfParameters();

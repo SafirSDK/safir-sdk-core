@@ -32,12 +32,6 @@ import java.nio.ByteBuffer;
  * The dots Kernel class is the raw interface to the C-world.
  */
 public final class Kernel {
-    /** dots_kernel enum */
-    static public enum DotsC_PropertyMappingKind {
-        MappedToNull,
-        MappedToMember,
-        MappedToParameter
-    }   
 
     static {
         //load the jni dll

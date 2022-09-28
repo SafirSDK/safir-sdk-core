@@ -189,6 +189,21 @@ namespace Safir.Dob.Typesystem
     }
 
     /// <summary>
+    /// The possible ways a property value can be defined.
+    /// </summary>
+    public enum PropertyMappingKind
+    {
+        /// <summary>Property member is mapped to null.</summary>
+        MappedToNull = 0,
+
+        /// <summary>Property member is mapped to a class member.</summary>
+        MappedToMember,
+
+        /// <summary>Property member is mapped to a parameter.</summary>
+        MappedToParameter
+    }
+
+    /// <summary>
     /// Types of collections that a member can be.
     /// </summary>
     public enum CollectionType

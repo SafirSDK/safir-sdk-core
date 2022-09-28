@@ -51,11 +51,24 @@ namespace Typesystem
     public:
 
         /**
+         * Get the information of how a property member is mapped for a class.
+         *
+         * @param classId [in] -  Type id of a class that supports the specified property.
+         * @param propertyId [in] - Type id of the property
+         * @param propertyMember [in] - Index of the property member.
+         * @return The PropertyMappingKind.
+         * @throws IllegalValueException If no mapping exists.
+         */
+        static Dob::Typesystem::PropertyMappingKind GetMappingKind(const Dob::Typesystem::TypeId classId,
+                                                                   const Dob::Typesystem::TypeId propertyId,
+                                                                   const Dob::Typesystem::MemberIndex propertyMember);
+
+        /**
          * Get the array size of a property member.
          *
-         * @param classId [in] -  type id of a class that supports the specified property.
-         * @param propertyId [in] - type id of the property
-         * @param propertyMember [in] - index of the property member.
+         * @param classId [in] -  Type id of a class that supports the specified property.
+         * @param propertyId [in] - Type id of the property.
+         * @param propertyMember [in] - Index of the property member.
          * @return The array size of the property member.
          * @throws IllegalValueException There is no such type or member defined.
          */
@@ -572,8 +585,26 @@ namespace Typesystem
                         const Dob::Typesystem::ArrayIndex index);
 
 
-
-
+        /**
+         * Get information needed to read the value of a property that is mapped to a parameter without the need of an ObjectPtr.
+         * This method is only allowed to be called if mappingKind is 'MappedToParameter'.
+         *
+         * @param classId [in] - Type id of a class that supports the specified property.
+         * @param propertyId [in] - Type id of the property.
+         * @param propertyMember [in] - Index of the property member.
+         * @param propertyIndex [in] - Array index of the property.
+         * @param parameterTypeId [out] - Mapped parameter type id.
+         * @param parameterIndex [out] - Mapped parameter member index.
+         * @param parameterArrayIndex [out] - Mapped parameter array index.
+         * @throws IllegalValueException If no mapping exists or not mapped to a parameter.
+         */
+        static void GetParameterReference(const Dob::Typesystem::TypeId classId,
+                                          const Dob::Typesystem::TypeId propertyId,
+                                          const Dob::Typesystem::MemberIndex propertyMember,
+                                          const Dob::Typesystem::ArrayIndex propertyIndex,
+                                          Dob::Typesystem::TypeId& parameterTypeId,
+                                          Dob::Typesystem::ParameterIndex& parameterIndex,
+                                          Dob::Typesystem::ArrayIndex& parameterArrayIndex);
 
     private:
         static  void DereferenceClassMemberReference(Dob::Typesystem::Object & object,

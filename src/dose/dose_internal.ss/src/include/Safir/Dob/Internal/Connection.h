@@ -126,6 +126,9 @@ namespace Internal
         void RemoveRegistration(const Typesystem::TypeId              typeId,
                                 const Dob::Typesystem::HandlerId&     handlerId);
 
+        // Get a copy of current registered handlers handlers.
+        const RegistrationVector GetRegisteredHandlers() const;
+
         //---------- Injection handler registration  ----------
         // The Add- and Remove methods are needed to imlement the OnInitialInjectionDone-functionality
         void AddEmptyInitialInjection(const Typesystem::TypeId              typeId,

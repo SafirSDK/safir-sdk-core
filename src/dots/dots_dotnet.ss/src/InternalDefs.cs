@@ -48,11 +48,4 @@ namespace Safir.Dob.Typesystem.Internal
         public System.Int64 TypeId;
         public System.Int64 InstanceId;
     };
-
-    internal enum DotsC_PropertyMappingKind
-    {
-        MappedToNull,
-        MappedToMember,
-        MappedToParameter,
-    }
 }
