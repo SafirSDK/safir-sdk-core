@@ -72,7 +72,7 @@ namespace Com
             ,m_interval(heartbeatInterval)
             ,m_nodes()
             ,m_running(false)
-            ,m_logPrefix(GenerateLogPrefix(nodeTypeId))
+            ,m_logPrefix(GenerateLogPrefix(myNodeId, nodeTypeId))
         {
             
         }
@@ -93,6 +93,7 @@ namespace Com
             {
                 m_running=false;
                 m_heartbeatTimer.cancel();
+                m_nodes.clear();
             });
         }
 
@@ -129,10 +130,10 @@ namespace Com
         bool m_running;
         const std::string m_logPrefix;
 
-        static std::string GenerateLogPrefix( int64_t nodeTypeId)
+        static std::string GenerateLogPrefix(int64_t nodeId, int64_t nodeTypeId)
         {
             std::ostringstream os;
-            os<<"COM: (HeartbeatSender nodeType "<<nodeTypeId<<") - ";
+            os<<"COM["<<nodeId<<"]: (HeartbeatSender nodeType "<<nodeTypeId<<") - ";
             return os.str();
         }
 

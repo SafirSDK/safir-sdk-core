@@ -63,7 +63,8 @@ namespace Com
     class DataReceiverType : private ReaderType
     {
     public:
-        DataReceiverType(boost::asio::io_context::strand& receiveStrand,
+        DataReceiverType(int64_t nodeId,
+                         boost::asio::io_context::strand& receiveStrand,
                          const std::string& unicastAddress,
                          const std::string& multicastAddress,
                          const std::function<bool(const char*, size_t, bool multicast)>& onRecv,
@@ -73,6 +74,7 @@ namespace Com
             ,m_onRecv(onRecv)
             ,m_isReceiverReady(isReceiverIsReady)
             ,m_running(false)
+            ,m_logPrefix("COM["+std::to_string(nodeId)+"]: ")
         {
             m_unicastEndpoint = Resolver::StringToEndpoint(unicastAddress);
             if (!multicastAddress.empty())
@@ -154,6 +156,7 @@ namespace Com
         boost::asio::ip::udp::endpoint m_unicastEndpoint;
         boost::asio::ip::udp::endpoint m_multicastEndpoint;
         bool m_running;
+        std::string m_logPrefix;
 
         char m_bufferUnicast[Parameters::ReceiveBufferSize];
         char m_bufferMulticast[Parameters::ReceiveBufferSize];
@@ -186,10 +189,16 @@ namespace Com
             }
 
             //if an error occured, log the error and stop
+            if (error == boost::asio::error::operation_aborted)
+            {
+                // This happens when socket is closed by the Stop-method, and is a normal case.
+                lllog(7)<<m_logPrefix.c_str()<<L"Socket has been closed. Read operation aborted."<<std::endl;
+                return;
+            }
             if (error)
             {
-                std::cout<<"Read failed, error "<<error.message().c_str()<<std::endl;
-                SEND_SYSTEM_LOG(Error, <<"Read failed, error "<<error.message().c_str());
+                std::cout<<m_logPrefix.c_str()<<"Read failed, error "<<error.message().c_str()<<std::endl;
+                SEND_SYSTEM_LOG(Error, <<m_logPrefix.c_str()<<L"Read failed, error "<<error.message().c_str());
                 return;
             }
 
@@ -207,7 +216,7 @@ namespace Com
                 //received message with invalid checksum. Throw away the message and then continue as normal.
                 std::ostringstream os;
 
-                os<<"COM: Received message with bad CRC, size="<<bytesRecv<<". Throw away and continue."<<std::endl;
+                os<<m_logPrefix.c_str()<<"Received message with bad CRC, size="<<bytesRecv<<". Throw away and continue."<<std::endl;
 
                 if (bytesRecv>CommonHeaderSize)
                 {
@@ -242,7 +251,7 @@ namespace Com
             else
             {
                 // we must wait for a while before delivering more messages
-                lllog(7)<<"COM: Reader has to wait for application to handle delivered messages"<<std::endl;
+                lllog(7)<<m_logPrefix.c_str()<<L"Reader has to wait for application to handle delivered messages"<<std::endl;
                 SetWakeUpTimer(buf, socket);
             }
         }
@@ -262,12 +271,12 @@ namespace Com
 
             if (m_isReceiverReady())
             {
-                lllog(7)<<"COM: Reader wakes up from sleep and starts receiving again"<<std::endl;
+                lllog(7)<<m_logPrefix.c_str()<<L"Reader wakes up from sleep and starts receiving again"<<std::endl;
                 AsyncReceive(buf, socket);
             }
             else
             {
-                lllog(7)<<"COM: Reader wakes up but must go back to sleep until application is ready"<<std::endl;
+                lllog(7)<<m_logPrefix.c_str()<<L"Reader wakes up but must go back to sleep until application is ready"<<std::endl;
                 SetWakeUpTimer(buf, socket);
             }
         }

@@ -123,6 +123,8 @@ namespace Com
         DeliveryHandler m_deliveryHandler;
         DataReceiver m_reader;
 
+        std::string m_logPrefix;
+
         //returns true if it is ok to call OnRecv again, false if flooded with received messages
         bool OnRecv(const char* data, size_t size, bool multicast);
         void OnNewNode(const Node& node);

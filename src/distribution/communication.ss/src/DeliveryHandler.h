@@ -78,6 +78,7 @@ namespace Com
             ,m_nodes()
             ,m_receivers()
             ,m_gotRecvFrom()
+            ,m_logPrefix("COM["+std::to_string(myNodeId)+"]: ")
         {
             m_numberOfUndeliveredMessages=0;
 
@@ -119,7 +120,13 @@ namespace Com
         // Received data to be delivered up to the application.
         void SetGotRecvCallback(const GotReceiveFrom& callback)
         {
-            m_gotRecvFrom=callback;
+            m_gotRecvFrom = [this, callback](int64_t fromNodeId, bool isMulticast, bool isDuplicate)
+            {
+                if(m_running)
+                {
+                    callback(fromNodeId, isMulticast, isDuplicate);
+                }
+            };
         }
 
         void SetReceiver(const ReceiveData& callback, int64_t dataTypeIdentifier, const Allocator& allocator, const DeAllocator& deallocator)
@@ -140,13 +147,12 @@ namespace Com
 
             if (senderIt==m_nodes.end() || !senderIt->second.node.systemNode)
             {
-                lllog(4)<<L"COM: Received data from unknown node or a non system node with id="<<header->commonHeader.senderId<<std::endl;
+                lllog(4)<<m_logPrefix.c_str()<<L"Received data from unknown node or a non system node with id="<<header->commonHeader.senderId<<std::endl;
                 return;
             }
 
-            lllog(8)<<L"COM: Received AppData from "<<header->commonHeader.senderId<<" "<<
+            lllog(8)<<m_logPrefix.c_str()<<L"Received AppData from "<<header->commonHeader.senderId<<" "<<
                       SendMethodToString(header->sendMethod).c_str()<<", seq: "<<header->sequenceNumber<<std::endl;
-            //m_gotRecvFrom(header->commonHeader.senderId, multicast); //report that we are receiving intact data from the node
 
             bool ackNow=false;
             if (header->deliveryGuarantee==Acked)
@@ -174,12 +180,12 @@ namespace Com
             }
 
             //Always called from readStrand
-            lllog(8)<<L"COM: Received AckRequest from "<<header->commonHeader.senderId<<" "<<SendMethodToString(header->sendMethod).c_str()<<std::endl;
+            lllog(8)<<m_logPrefix.c_str()<<L"Received AckRequest from "<<header->commonHeader.senderId<<" "<<SendMethodToString(header->sendMethod).c_str()<<std::endl;
             auto senderIt=m_nodes.find(header->commonHeader.senderId);
 
             if (senderIt==m_nodes.end() || !senderIt->second.node.systemNode)
             {
-                lllog(4)<<L"COM: Received ackRequest from unknown node or a non system node with id="<<header->commonHeader.senderId<<std::endl;
+                lllog(4)<<m_logPrefix.c_str()<<L"Received ackRequest from unknown node or a non system node with id="<<header->commonHeader.senderId<<std::endl;
                 return;
             }
 
@@ -204,7 +210,7 @@ namespace Com
         //Make node included. If excluded it is also removed.
         void IncludeNode(int64_t id)
         {
-            lllog(6)<<L"COM: DeliveryHandler IncludeNode id="<<id<<std::endl;
+            lllog(6)<<m_logPrefix.c_str()<<L"DeliveryHandler IncludeNode id="<<id<<std::endl;
             const auto it=m_nodes.find(id);
             if (it==m_nodes.end())
             {
@@ -221,7 +227,7 @@ namespace Com
 
             if (it!=m_nodes.end())
             {
-                lllog(8) << L"COM: DeliveryHandler got RemoveNode, will now deallocate used memory then remove the node " <<it->second.node.name.c_str()<< std::endl;
+                lllog(8) <<m_logPrefix.c_str()<<L"DeliveryHandler got RemoveNode, will now deallocate used memory then remove the node " <<it->second.node.name.c_str()<< std::endl;
                 ClearChannel(it->second.ackedMultiReceiverChannel);
                 ClearChannel(it->second.ackedSingleReceiverChannel);
                 ClearChannel(it->second.unackedMultiReceiverChannel);
@@ -376,7 +382,7 @@ namespace Com
         };
         typedef std::map<int64_t, NodeInfo> NodeInfoMap;
 
-        bool m_running;
+        std::atomic<bool> m_running;
         const int64_t m_myId;
         const size_t m_slidingWindowSize;
         boost::asio::io_context::strand m_deliverStrand; //for delivering data to application
@@ -385,6 +391,8 @@ namespace Com
         NodeInfoMap m_nodes;
         ReceiverMap m_receivers;
         GotReceiveFrom m_gotRecvFrom;
+
+        std::string m_logPrefix;
 
         //loop through all RecvData in a channel and deallocate any allocated memory. Reset each RecvData in the channel.
         void ClearChannel(Channel& ch)
@@ -427,7 +435,7 @@ namespace Com
                 if (recvData.sequenceNumber==header->sequenceNumber)
                 {
                     //duplicate, just throw away
-                    lllog(8)<<L"COM: Recv duplicated message ahead. Seq: "<<header->sequenceNumber<<std::endl;
+                    lllog(8)<<m_logPrefix.c_str()<<L"Recv duplicated message ahead. Seq: "<<header->sequenceNumber<<std::endl;
                     return;
                 }
                 else
@@ -506,7 +514,7 @@ namespace Com
 
         void HandleUnackedMessage(const MessageHeader* header, bool multicast, const char* payload, NodeInfo& ni)
         {
-            lllog(8)<<L"COM: recvUnacked from: "<<ni.node.nodeId<<L", sendMethod: "<<
+            lllog(8)<<m_logPrefix.c_str()<<L"RecvUnacked from: "<<ni.node.nodeId<<L", sendMethod: "<<
                       SendMethodToString(header->sendMethod).c_str()<<
                       L", seq: "<<header->sequenceNumber<<std::endl;
 
@@ -525,7 +533,7 @@ namespace Com
                 //reset receive queue, since theres nothing old we want to keep any longer
                 //we need to deallocate the data since it has not been delivered to the subscriber
 
-                lllog(8) << L"COM: Recv unacked message with seqNo gap (i.e messages have been lost), received seqNo " << header->sequenceNumber << std::endl;
+                lllog(8) << m_logPrefix.c_str()<<L"Recv unacked message with seqNo gap (i.e messages have been lost), received seqNo " << header->sequenceNumber << std::endl;
 
                 //deallocate memory, use first slot to be sure to only do it once
                 if (ch.queue[0].data!=nullptr)
@@ -565,7 +573,7 @@ namespace Com
             }
             else
             {
-                lllog(8)<<L"COM: Recv unacked message too old seqNo, received seqNo "<<header->sequenceNumber<<L", expected "<<ch.lastInSequence+1<<std::endl;
+                lllog(8)<<m_logPrefix.c_str()<<L"Recv unacked message too old seqNo, received seqNo "<<header->sequenceNumber<<L", expected "<<ch.lastInSequence+1<<std::endl;
                 m_gotRecvFrom(header->commonHeader.senderId, multicast, true); //duplicated message
             }
         }
@@ -580,7 +588,7 @@ namespace Com
             {
                 if (ch.welcome==UINT64_MAX)
                 {
-                    lllog(8)<<L"COM: Got welcome from node "<<header->commonHeader.senderId<<
+                    lllog(8)<<m_logPrefix.c_str()<<L"Got welcome from node "<<header->commonHeader.senderId<<
                               L", seq: "<<header->sequenceNumber<<", "<<SendMethodToString(header->sendMethod).c_str()<<std::endl;
 
                     ch.welcome=header->sequenceNumber;
@@ -590,14 +598,14 @@ namespace Com
                 else if (header->sequenceNumber==ch.welcome)
                 {
                     //duplicated welcome
-                    lllog(8)<<L"COM: Got duplicated welcome from node "<<header->commonHeader.senderId<<
+                    lllog(8)<<m_logPrefix.c_str()<<L"Got duplicated welcome from node "<<header->commonHeader.senderId<<
                               L", seq: "<<header->sequenceNumber<<", "<<SendMethodToString(header->sendMethod).c_str()<<std::endl;
                 }
                 else
                 {
                     //should not happen, logical error. Got new welcome from same node.
                     std::ostringstream os;
-                    os<<"COM ["<<m_myId<<"]: Logical error, got new welcome from node "<<header->commonHeader.senderId<<
+                    os<<m_logPrefix.c_str()<<"Logical error, got new welcome from node "<<header->commonHeader.senderId<<
                         ", seq: "<<header->sequenceNumber<<", "<<SendMethodToString(header->sendMethod)<<
                         ". Already receive welcome from that node, old value was: "<<ch.welcome;
                     SEND_SYSTEM_LOG(Error, <<os.str().c_str());
@@ -609,7 +617,7 @@ namespace Com
             {
                 //welcome message not for this node. we have to check if we
                 std::wostringstream os;
-                os<<L"COM ["<<m_myId<<L"]: Welcome not for us. From "<<header->commonHeader.senderId<<L" to "<<
+                os<<m_logPrefix.c_str()<<L"Welcome not for us. From "<<header->commonHeader.senderId<<L" to "<<
                     nodeThatIsWelcome<<L", seq: "<<header->sequenceNumber;
 
                 if (ch.welcome<=header->sequenceNumber)
@@ -637,7 +645,7 @@ namespace Com
                 HandleWelcome(header, payload, ni);
             }
 
-            lllog(8)<<L"COM: HandleAckedMessage from: "<<header->commonHeader.senderId<<L", sendMethod: "<<
+            lllog(8)<<m_logPrefix.c_str()<<L"HandleAckedMessage from: "<<header->commonHeader.senderId<<L", sendMethod: "<<
                       SendMethodToString(header->sendMethod).c_str()<<
                       L", seq: "<<header->sequenceNumber<<std::endl;
 
@@ -646,14 +654,14 @@ namespace Com
             if (header->sequenceNumber<ch.welcome)
             {
                 //this message was sent before we got a welcome message, i.e not for us
-                lllog(5)<<"Acked msg seq: "<<header->sequenceNumber<<" from: "<<header->commonHeader.senderId<<", was sent before we got welcome. I will not ack."<<std::endl;
+                lllog(5)<<m_logPrefix.c_str()<<L"Acked msg seq: "<<header->sequenceNumber<<" from: "<<header->commonHeader.senderId<<L", was sent before we got welcome. I will not ack."<<std::endl;
                 m_gotRecvFrom(header->commonHeader.senderId, multicast, false);
                 return false; //dont send ack
             }
             else if (header->sequenceNumber<=ch.lastInSequence)
             {
                 //duplicated message, we must always ack this since it is possible that an ack is lost and the sender has started to resend.
-                lllog(8)<<L"COM: Recv duplicated message in order. Seq: "<<header->sequenceNumber<<L" from node "<<ni.node.name.c_str()<<std::endl;
+                lllog(8)<<m_logPrefix.c_str()<<L"Recv duplicated message in order. Seq: "<<header->sequenceNumber<<L" from node "<<ni.node.name.c_str()<<std::endl;
                 m_gotRecvFrom(header->commonHeader.senderId, multicast, true);
                 return true;
             }
@@ -680,7 +688,7 @@ namespace Com
                 //message that we dont think we have got at all.
                 //All the code here just produce helpfull logs.
                 std::ostringstream os;
-                os<<"COM: I must be dead, the others are moving forward without me!!! Node "<<m_myId<<" received message from node "<<header->commonHeader.senderId<<
+                os<<m_logPrefix.c_str()<<"I must be dead, the others are moving forward without me!!! Node "<<m_myId<<" received message from node "<<header->commonHeader.senderId<<
                     " that is too far ahead which means that we have lost a message. "<<
                     SendMethodToString(header->sendMethod)<<", seq: "<<header->sequenceNumber<<"\n     RecvQueue - lastInSeq: "<<ch.lastInSequence<<
                     ", biggestSeq: "<<ch.biggestSequence<<", welcome: "<<ch.welcome<<
@@ -752,7 +760,10 @@ namespace Com
                             auto recvIt=m_receivers.find(dataType); //m_receivers shall be safe to use inside m_deliverStrand since it is not supposed to be modified after start
                             if (recvIt!=m_receivers.end())
                             {
-                                recvIt->second.onRecv(fromId, fromNodeType, dataPtr, dataSize);
+                                if (m_running)
+                                {
+                                    recvIt->second.onRecv(fromId, fromNodeType, dataPtr, dataSize);
+                                }
                             }
                             else
                             {
@@ -802,7 +813,7 @@ namespace Com
             }
         }
 
-        inline void SendAck(NodeInfo& ni, const MessageHeader* header)
+        void SendAck(NodeInfo& ni, const MessageHeader* header)
         {
             Channel& ch=ni.GetChannel(header);
             auto ackPtr=std::make_shared<Ack>(m_myId, header->commonHeader.senderId, ch.biggestSequence, header->sendMethod);
@@ -822,7 +833,7 @@ namespace Com
                 }
             }
 
-            lllog(9)<<L"COM: SendAck "<<ackPtr->ToString().c_str()<<std::endl;
+            lllog(9)<<m_logPrefix.c_str()<<L"SendAck "<<ackPtr->ToString().c_str()<<std::endl;
             WriterType::SendTo(ackPtr, ni.endpoint);
         }
 

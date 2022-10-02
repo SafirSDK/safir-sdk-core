@@ -65,7 +65,7 @@ public:
 
 
         receiver.reset(new TestDataReceiver
-                       (strand,
+                       (1, strand,
                         "127.0.0.1:10000",
                         "239.192.1.1:11000",
                         [](const char* data, size_t size, bool /*multicast*/){return Recv(data,size);},

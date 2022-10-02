@@ -2,7 +2,7 @@
 *
 * Copyright Saab AB, 2013-2022 (http://safirsdkcore.com)
 *
-* Created by: Joel Ottosson / joel.ottosson@consoden.se
+* Created by: Joel Ottosson / joel.ottosson@gmail.com
 *
 *******************************************************************************
 *
@@ -78,24 +78,25 @@ namespace
         ,m_gotRecvFrom()
         ,m_discoverer(m_ioContext, m_me, fragmentSize, LightNodeTypes(nodeTypes), [this](const Node& n){OnNewNode(n);})
         ,m_deliveryHandler(ioContext, m_me.nodeId, m_protocol, m_nodeTypes[nodeTypeId]->SlidingWindowSize())
-        ,m_reader(m_receiveStrand, m_me.unicastAddress, m_nodeTypes[nodeTypeId]->MulticastAddress(),
+        ,m_reader(nodeId, m_receiveStrand, m_me.unicastAddress, m_nodeTypes[nodeTypeId]->MulticastAddress(),
                   [this](const char* d, size_t s, const bool mc){return OnRecv(d,s,mc);},
                   [this](){return m_deliveryHandler.NumberOfUndeliveredMessages()<Parameters::MaxNumberOfUndelivered;})
+        ,m_logPrefix("COM["+std::to_string(nodeId)+"]: ")
     {
         if (nodeId==0)
         {
             throw std::invalid_argument("Safir.Communication ctor: Id=0 is reserved for internal usage and is not valid. You should consider using a random generated id.");
         }
         auto myNodeType=m_nodeTypes[nodeTypeId];
-        lllog(1)<<L"COM: -------------------------------------------------"<<std::endl;
-        lllog(1)<<L"COM: Communication initiated"<<std::endl;
-        lllog(1)<<L"COM:     id:    "<<m_me.nodeId<<std::endl;
-        lllog(1)<<L"COM:     name:    "<<m_me.name.c_str()<<std::endl;
-        lllog(1)<<L"COM:     data address: "<<m_me.dataAddress.c_str()<<std::endl;
-        lllog(1)<<L"COM:     control address: "<<m_me.controlAddress.c_str()<<std::endl;
-        lllog(1)<<L"COM:     multicast: "<<myNodeType->MulticastAddress().c_str()<<std::endl;
-        lllog(1)<<L"COM:     using multicast: "<<std::boolalpha<<myNodeType->UseMulticast()<<std::dec<<std::endl;
-        lllog(1)<<L"COM: -------------------------------------------------"<<std::endl;
+        lllog(1)<<m_logPrefix.c_str()<<L"-------------------------------------------------"<<std::endl;
+        lllog(1)<<m_logPrefix.c_str()<<L"Communication initiated"<<std::endl;
+        lllog(1)<<m_logPrefix.c_str()<<L"    id:    "<<m_me.nodeId<<std::endl;
+        lllog(1)<<m_logPrefix.c_str()<<L"    name:    "<<m_me.name.c_str()<<std::endl;
+        lllog(1)<<m_logPrefix.c_str()<<L"    data address: "<<m_me.dataAddress.c_str()<<std::endl;
+        lllog(1)<<m_logPrefix.c_str()<<L"    control address: "<<m_me.controlAddress.c_str()<<std::endl;
+        lllog(1)<<m_logPrefix.c_str()<<L"    multicast: "<<myNodeType->MulticastAddress().c_str()<<std::endl;
+        lllog(1)<<m_logPrefix.c_str()<<L"    using multicast: "<<std::boolalpha<<myNodeType->UseMulticast()<<std::dec<<std::endl;
+        lllog(1)<<m_logPrefix.c_str()<<L"-------------------------------------------------"<<std::endl;
 
 #ifdef COM_USE_UNRELIABLE_SEND_POLICY
         lllog(1)<<L"*** COM_USE_UNRELIABLE_SEND_POLICY IS DEFINED ***"<<std::endl;
@@ -163,8 +164,8 @@ namespace
 
     void CommunicationImpl::Start()
     {
-        lllog(1)<<L"COM: Start "<<m_me.name.c_str()<<std::endl;
-        m_deliveryHandler.Start(); // It should be safe to call start from outside m_receiveStrand
+        lllog(1)<<m_logPrefix.c_str()<<L"Start "<<m_me.name.c_str()<<std::endl;
+        boost::asio::post(m_receiveStrand, [this]{m_deliveryHandler.Start();});
         m_reader.Start();
         for (auto vt = m_nodeTypes.cbegin(); vt != m_nodeTypes.cend(); ++vt)
         {
@@ -179,8 +180,8 @@ namespace
 
     void CommunicationImpl::Stop()
     {
-        lllog(1)<<L"COM: Stop "<<m_me.name.c_str()<<std::endl;
-        boost::asio::dispatch(m_receiveStrand, [this]{m_deliveryHandler.Stop();});
+        lllog(1)<<m_logPrefix.c_str()<<L"Stop "<<m_me.name.c_str()<<std::endl;
+        boost::asio::post(m_receiveStrand, [this]{m_deliveryHandler.Stop();});
         m_reader.Stop();
 
         for (auto vt = m_nodeTypes.cbegin(); vt != m_nodeTypes.cend(); ++vt)
@@ -196,7 +197,7 @@ namespace
 
     void CommunicationImpl::IncludeNode(int64_t id)
     {
-        lllog(6)<<L"COM: IncludeNode "<<id<<std::endl;
+        lllog(6)<<m_logPrefix.c_str()<<L"IncludeNode "<<id<<std::endl;
         if (!m_isControlInstance)
         {
             std::logic_error("COM: InclueNode was called on instance running in DataMode.");
@@ -226,16 +227,16 @@ namespace
 
     void CommunicationImpl::ExcludeNode(int64_t id)
     {
-        lllog(6)<<L"COM: ExcludeNode "<<id<<std::endl;
+        lllog(6)<<m_logPrefix.c_str()<<L"ExcludeNode "<<id<<std::endl;
 
         boost::asio::post(m_receiveStrand, [this, id]
         {
-            lllog(6)<<L"COM: Execute ExcludeNode id="<<id<<std::endl;
+            lllog(6)<<m_logPrefix.c_str()<<L"Execute ExcludeNode id="<<id<<std::endl;
             auto node=m_deliveryHandler.GetNode(id);
 
             if (node==nullptr)
             {
-                lllog(6)<<L"COM: Exclude unknown node, call will be ignored."<<std::endl;
+                lllog(6)<<m_logPrefix.c_str()<<L"Exclude unknown node, call will be ignored."<<std::endl;
                 return;
             }
 
@@ -258,7 +259,7 @@ namespace
             throw std::logic_error("COM: InjectNode was called on instance running in ControlMode.");
         }
 
-        lllog(6)<<L"COM: Inject node '"<<name.c_str()<<L"' ["<<id<<L"]"<<std::endl;
+        lllog(6)<<m_logPrefix.c_str()<<L"Inject node '"<<name.c_str()<<L"' ["<<id<<L"]"<<std::endl;
 
         Node node(name, id, nodeTypeId, "", Resolver(m_ioContext).ResolveRemoteEndpoint(dataAddress, m_protocol), false);
         OnNewNode(node);
@@ -302,7 +303,7 @@ namespace
             }
             catch(const std::logic_error& badSeed)
             {
-                lllog(2)<<"COM: InjectSeeds injecting a seed that could not be resolved to a valid ip_address and port. Seed: "
+                lllog(2)<<m_logPrefix.c_str()<<L"InjectSeeds injecting a seed that could not be resolved to a valid ip_address and port. Seed: "
                           <<seed->c_str()<<". "<<badSeed.what()<<std::endl;
 
             }
@@ -313,7 +314,7 @@ namespace
 
     void CommunicationImpl::OnNewNode(const Node& node)
     {
-        lllog(6)<<L"COM: New node '"<<node.name.c_str()<<L"' ["<<node.nodeId<<L"]"<<std::endl;
+        lllog(6)<<m_logPrefix.c_str()<<L"New node '"<<node.name.c_str()<<L"' ["<<node.nodeId<<L"]"<<std::endl;
 
         auto& nodeType=GetNodeType(node.nodeTypeId);
         nodeType.GetAckedDataSender().AddNode(node.nodeId, node.unicastAddress);
@@ -333,17 +334,19 @@ namespace
     //returns true if it is ok to call OnRecv again, false if flooded with received messages
     bool CommunicationImpl::OnRecv(const char* data, size_t size, bool multicast)
     {
-        //Always called from readStrand
+        //Always called from receiveStrand
 
         if (size<CommonHeaderSize)
         {
-            lllog(4)<<L"COM: Received corrupt data"<<std::endl;
+            lllog(4)<<m_logPrefix.c_str()<<L"Received corrupt data"<<std::endl;
             return true; //corrupt message, return true means it is ok to receive another message
         }
 
         const CommonHeader* commonHeader=reinterpret_cast<const CommonHeader*>(data);
+
         if (commonHeader->receiverId!=0 && commonHeader->receiverId!=m_me.nodeId)
         {
+            lllog(2)<<m_logPrefix.c_str()<<L"Received message from "<<commonHeader->senderId<<" that was not for me, dataType="<<commonHeader->dataType<<std::endl;
             return true; //received message that is not for me. Can happen if node has been restarted with same ip-addr but different nodeId
         }
 
@@ -360,7 +363,7 @@ namespace
             if (senderNode!=nullptr && senderNode->systemNode)
             {
                 m_gotRecvFrom(commonHeader->senderId, multicast, false);
-                lllog(9)<<"COM: Heartbeat from "<<commonHeader->senderId<<std::endl;
+                lllog(9)<<m_logPrefix.c_str()<<L"Heartbeat from "<<commonHeader->senderId<<std::endl;
             }
         }
         break;
@@ -381,7 +384,7 @@ namespace
         {
             if (size<MessageHeaderSize)
             {
-                lllog(4)<<L"COM: Received corrupt AckRequest"<<std::endl;
+                lllog(4)<<m_logPrefix.c_str()<<L"Received corrupt AckRequest"<<std::endl;
                 return true; //corrupt message, return true means it is ok to receive another message
             }
             const MessageHeader* ackReq=reinterpret_cast<const MessageHeader*>(data);
@@ -393,7 +396,7 @@ namespace
         {
             if (size<MessageHeaderSize)
             {
-                lllog(4)<<L"COM: Received corrupt ControlData"<<std::endl;
+                lllog(4)<<m_logPrefix.c_str()<<L"Received corrupt ControlData"<<std::endl;
                 return true; //corrupt message, return true means it is ok to receive another message
             }
             const MessageHeader* msgHeader=reinterpret_cast<const MessageHeader*>(data);
@@ -407,7 +410,7 @@ namespace
             //Application data
             if (size<MessageHeaderSize)
             {
-                lllog(4)<<L"COM: Received corrupt ApplicationData"<<std::endl;
+                lllog(4)<<m_logPrefix.c_str()<<L"Received corrupt ApplicationData"<<std::endl;
                 return true; //corrupt message, return true means it is ok to receive another message
             }
             const MessageHeader* msgHeader=reinterpret_cast<const MessageHeader*>(data);
@@ -430,7 +433,7 @@ namespace
         bool parsedOk=cm.ParseFromArray(static_cast<const void*>(payload), static_cast<int>(header->fragmentContentSize));
         if (!parsedOk)
         {
-            lllog(4)<<L"COM: Received message with valid header but corrupt data."<<std::endl;
+            lllog(4)<<m_logPrefix.c_str()<<L"Received message with valid header but corrupt data."<<std::endl;
             return;
         }
 

@@ -105,7 +105,7 @@ namespace Com
             ,m_queueNotFullNotification()
             ,m_queueNotFullNotificationLimit(Parameters::SendQueueSize/2)
             ,m_sendAckRequestForMsgIndex()
-            ,m_logPrefix(GenerateLogPrefix(deliveryGuarantee,nodeTypeId))
+            ,m_logPrefix(GenerateLogPrefix(nodeId,deliveryGuarantee,nodeTypeId))
         {
             m_sendQueueSize=0;
             m_notifyQueueNotFull=false;
@@ -161,6 +161,9 @@ namespace Com
                 m_sendQueueSize=0;
                 m_notifyQueueNotFull=false;
                 m_sendQueue.clear_queue();
+                m_nodes.clear();
+                RemoveExcludedReceivers();
+                RemoveCompletedMessages();
             });
         }
 
@@ -412,10 +415,10 @@ namespace Com
         std::vector<size_t> m_sendAckRequestForMsgIndex;
         const std::string m_logPrefix;
 
-        static std::string GenerateLogPrefix(uint8_t deliveryGuarantee, int64_t nodeTypeId)
+        static std::string GenerateLogPrefix(int64_t nodeId, uint8_t deliveryGuarantee, int64_t nodeTypeId)
         {
            std::ostringstream os;
-           os<<"COM: ("<<DeliveryGuaranteeToString(deliveryGuarantee)<<"DataSender nodeType "<<nodeTypeId<<") - ";
+           os<<"COM["<<nodeId<<"]: ("<<DeliveryGuaranteeToString(deliveryGuarantee)<<"DataSender nodeType "<<nodeTypeId<<") - ";
            return os.str();
         }
 

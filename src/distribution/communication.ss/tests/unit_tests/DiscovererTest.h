@@ -475,9 +475,9 @@ public:
             threads.create_thread([&]{io.run();});
         }
 
-        //----------------------
-        // Test
-        //----------------------
+        //------------------------------------------------------------
+        // Test - NodeType 2 and 3 are lightNodes, 1 is ordinary node
+        //------------------------------------------------------------
         {
             boost::mutex::scoped_lock lock(mutex);
             discoverState.insert(std::make_pair(10000, Info(10000, 1, io)));
@@ -497,7 +497,7 @@ public:
             discoverState[10003].discover->Start();
         }
 
-        //Wait unti node 1000 and 1001 have found each other
+        //Wait until node 1000 and 1001 have found each other
         bool passed = false;
         for (int i=0; i<250; ++i)
         {
@@ -653,14 +653,33 @@ public:
 
         CHECK(passed);
 
-
-        // Reset communication by first clearing seeds and then excluding all nodes
+        // Remove all nodes excep 10002 that is a lightNode. Make sure it is still trying to discover the seed 10000
+        for (auto id : std::vector<int64_t>{10000, 10001, 10003, 10004})
         {
             boost::mutex::scoped_lock lock(mutex);
-            // discoverState[10002].discover->ClearSeeds();
+            discoverState[id].discover->Stop();
+            discoverState[10002].discover->ExcludeNode(id);
+            discoverState[10002].newNodes.erase(id);
+            discoverState[10002].sentDiscoverTo.erase(id);
+            discoverState[10002].sentNodeInfoTo.erase(id);
+        }
+
+        Wait(3100);
+
+        discoverState.erase(10000);
+        discoverState.erase(10001);
+        discoverState.erase(10003);
+        discoverState.erase(10004);
+
+        Wait(3100);
+        {
+            boost::mutex::scoped_lock lock(mutex);
+            auto node10002SendDiscoversTo10000 = discoverState[10002].sentDiscoverTo.find(10000) != discoverState[10002].sentDiscoverTo.end();
+            CHECK(node10002SendDiscoversTo10000);
         }
 
 
+        //------------------------ END
 
         //Stop all discoverers
         {
@@ -750,7 +769,11 @@ private:
                 discoverState[val->header.commonHeader.senderId].sentNodeInfoTo.insert(to.port());
             }
 
-            discoverState[static_cast<int64_t>(to.port())].recvQueue.push(cm);
+            auto receiver = discoverState.find(static_cast<int64_t>(to.port()));
+            if (receiver != discoverState.end())
+            {
+                receiver->second.recvQueue.push(cm);
+            }
         }
     };
     typedef Com::Writer<Com::UserData, TestSendPolicy> TestWriter;
@@ -811,8 +834,8 @@ struct DiscovererTest
 {
     static void Run()
     {
-        DiscoverToSeed::Run();
-        HandleDiscover::Run();
+//        DiscoverToSeed::Run();
+//        HandleDiscover::Run();
         DiscoverWithLightNodes::Run();
     }
 };

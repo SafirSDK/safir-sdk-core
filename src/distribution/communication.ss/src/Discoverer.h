@@ -252,12 +252,12 @@ namespace Com
                         // We only add non-lightNodes to the exclude list, since lightNodes are allowed to rejoin later.
                         // Also, since using a lightNode as seed is considered an error but is not guaranteed to be detected, we only keep the address of seeds that are not lightNodes.
                         m_excludedNodes.insert(nodeId);
-                        if (it->second.isSeed)
-                        {
-                            // If the node is a seed, we keep the address. The node can be restarted and then join again with the same ip address
-                            // but with another nodeId.
-                            AddSeed(it->second.controlAddress);
-                        }
+                    }
+                    if (it->second.isSeed)
+                    {
+                        // If the node is a seed, we keep the address. The node can be restarted and then join again with the same ip address
+                        // but with another nodeId.
+                        AddSeed(it->second.controlAddress);
                     }
                     m_nodes.erase(it);
                 }
@@ -504,7 +504,7 @@ namespace Com
 
         void AddNewNode(const CommunicationMessage_Node& node, bool isSeed)
         {
-            lllog(4)<<L"COM: Discoverer talked to new node "<<node.name().c_str()<<L" ["<<node.node_id()<<L"]"<<std::endl;
+            lllog(4)<<L"COM["<<m_me.nodeId<<L"]: Discoverer talked to new node "<<node.name().c_str()<<L" ["<<node.node_id()<<L"]"<<std::endl;
             //insert in node map
             Node n(node.name(), node.node_id(), node.node_type_id(), node.control_address(), node.data_address(), true);
             n.isSeed=isSeed;
