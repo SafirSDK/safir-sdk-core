@@ -115,6 +115,9 @@ namespace SP
         /** Print the contents of the object to the output stream. */
         void Print(std::wostream& out) const;
 
+        /** Print the contents of the object to the output stream in json format. */
+        std::wstring ToJson() const;
+
     private:
         friend class SystemStateCreator;
 

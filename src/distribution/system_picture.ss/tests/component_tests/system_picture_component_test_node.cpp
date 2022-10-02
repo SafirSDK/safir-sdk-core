@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2012 (http://safirsdkcore.com)
+* Copyright Saab AB, 2012,2014,2022 (http://safirsdkcore.com)
 *
 * Created by: Lars Hagström / lars.hagstrom@consoden.se
 *
@@ -63,6 +63,21 @@ std::string nowString()
     return to_simple_string(td);
 }
 
+const size_t DATA_SIZE = 3200;
+
+Safir::Utilities::Internal::SharedCharArray createData()
+{
+    const Safir::Utilities::Internal::SharedCharArray data(new char[DATA_SIZE]);
+    for (size_t i = 0; i < DATA_SIZE; ++i)
+    {
+        data[i] = static_cast<char>(i % 10);
+    }
+    return data;
+}
+
+
+Safir::Utilities::Internal::SharedCharArray DATA = createData();
+
 //This is a magic unlocker that has the strange behaviour of having a bool
 //operator that always returns false. It is for the use in preprocessor
 //magic only.
@@ -85,7 +100,8 @@ private:
 };
 boost::recursive_mutex Magic::wcout_lock; //static instance
 
-#define log if(Magic lck_asdf = Magic::Lock()) ; else std::wcout << "[" << nowString()<< "] "
+#define logout if(Magic lck_asdf = Magic::Lock()) ; else std::wcout << "[" << nowString()<< "] "
+#define logerr if(Magic lck_asdf = Magic::Lock()) ; else std::wcerr << "[" << nowString()<< "] "
 
 std::int64_t GenerateId()
 {
@@ -118,32 +134,25 @@ public:
     ProgramOptions(int argc, char* argv[])
         : parseOk(false)
     {
+        bool useMulticast = false;
+        bool isLightNode = false;
+
         using namespace boost::program_options;
         options_description options("Options");
         options.add_options()
             ("help,h", "show help message")
-            ("master",
-             "Is the node a master. If not specified the node will be a slave")
-            ("only-control",
-             "Don't start the dose_main part of the node")
-            ("address",
-             value<std::string>(&address)->default_value("127.0.0.1"),
-             "Address and port of the control channel")
+            ("id",
+             value<int64_t>(&nodeId)->required(),
+             "nodeId for this node. Between 1 and 999")
             ("seed",
-             value<std::string>(&seed),
-             "Seed address. Just ip address, no port.")
-            ("number",
-             value<int>(&number),
-             "On slave nodes: the number identifying the slave. On master node: means nothing")
-            ("number-of-nodes",
-             value<int>(&numberOfNodes),
-             "number of nodes in test run. Mandatory")
-            ("revolutions",
-             value<int>(&revolutions)->default_value(1),
-             "Number of revolutions to perform. Only valid on master")
-            ("node-type",
-             value<int64_t>(&nodeType),
-             "Node type to use. 1 or 2 are valid values. 1 is without multicast and 2 is with multicast.");
+             value<int>(&seed)->default_value(-1),
+             "Seed node.")
+            ("use-multicast",
+             bool_switch(&useMulticast),
+             "Whether to use multicast communication or not")
+            ("light",
+             bool_switch(&isLightNode),
+             "Whether to be a lightnode or not");
 
         variables_map vm;
 
@@ -166,59 +175,44 @@ public:
             return;
         }
 
-        master = vm.count("master") != 0;
-        start_main = vm.count("only-control") == 0;
-
-        if (vm.count("number-of-nodes") == 0 ||
-            vm.count("node-type") == 0)
+        if (nodeId < 1 || nodeId > 999)
         {
             ShowHelp(options);
             return;
         }
 
+        nodeType = (useMulticast ? 2 : 1) + (isLightNode ? 10 : 0); //
 
-        if (master)
-        {
-            name = "master";
-            controlAddress = address + ":33999";
-            dataAddress = address + ":43999";
-        }
-        else
-        {
-            std::ostringstream ss;
-            ss << std::setw(3) << std::setfill('0') << number;
-            name = "slave_" + ss.str();
-            controlAddress = address + ":33" + ss.str();
-            dataAddress = address + ":43" + ss.str();
-        }
+        std::ostringstream ss;
+        ss << std::setw(3) << std::setfill('0') << nodeId;
+        name = "node_" + ss.str();
+        address = "127.0.0.1";
+        controlAddress = address + ":33" + ss.str();
+        dataAddress = address + ":43" + ss.str();
+
         parseOk = true;
     }
     bool parseOk;
 
+    int64_t nodeId;
     std::string name;
+    std::string address;
     std::string controlAddress;
     std::string dataAddress;
-    bool master;
-    bool start_main;
-    std::string seed;
-    int number;
-    int numberOfNodes;
+    int seed;
     int revolutions;
-    //bool checkIncarnation;
     int64_t nodeType;
 private:
-    std::string address;
 
     static void ShowHelp(const boost::program_options::options_description& desc)
     {
-        log << std::boolalpha
+        logerr << std::boolalpha
                    << "Usage: control_stub [OPTIONS]\n"
                    << desc << "\n"
                    << std::endl;
     }
 
 };
-
 
 std::vector<boost::chrono::steady_clock::duration> ToChronoDurations(const std::vector<int>& ms)
 {
@@ -247,20 +241,20 @@ public:
 
         m_commNodeTypes.push_back(Safir::Dob::Internal::Com::NodeTypeDefinition
                                   (1,
-                                   "NodeTypeA",
+                                   "NormalUnicast",
                                    "", //no multicast
                                    "", //no multicast
                                    false,
-                                   1000,
-                                   15,
-                                   20,
-                                   10,
+                                   1000, //heartbeatInterval
+                                   15, //maxLostHeartbeats
+                                   20, //slidingwindowsize
+                                   10, //ackrequestThreshold
                                    retryTimeout20));
 
         m_spNodeTypes.insert(std::make_pair(1,
                                             Safir::Dob::Internal::SP::NodeType
                                             (1,
-                                             "NodeTypeA",
+                                             "NormalUnicast",
                                              false,
                                              boost::chrono::milliseconds(1000),
                                              15,
@@ -268,7 +262,7 @@ public:
 
         m_commNodeTypes.push_back(Safir::Dob::Internal::Com::NodeTypeDefinition
                                   (2,
-                                   "NodeTypeB",
+                                   "NormalMulticast",
                                    "224.123.45.67:10000",
                                    "224.123.45.67:10001",
                                    false,
@@ -281,12 +275,54 @@ public:
         m_spNodeTypes.insert(std::make_pair(2,
                                             Safir::Dob::Internal::SP::NodeType
                                             (2,
-                                             "NodeTypeB",
+                                             "NormalMulticast",
                                              false,
                                              boost::chrono::milliseconds(2000),
                                              8,
                                              ToChronoDurations(retryTimeout20))));
-    }
+
+            m_commNodeTypes.push_back(Safir::Dob::Internal::Com::NodeTypeDefinition
+                                  (11,
+                                   "LightUnicast",
+                                   "", //no multicast
+                                   "", //no multicast
+                                   true,
+                                   1000,
+                                   15,
+                                   20,
+                                   10,
+                                   retryTimeout20));
+
+        m_spNodeTypes.insert(std::make_pair(11,
+                                            Safir::Dob::Internal::SP::NodeType
+                                            (11,
+                                             "LightUnicast",
+                                             true,
+                                             boost::chrono::milliseconds(1000),
+                                             15,
+                                             ToChronoDurations(retryTimeout20))));
+
+        m_commNodeTypes.push_back(Safir::Dob::Internal::Com::NodeTypeDefinition
+                                  (12,
+                                   "LightMulticast",
+                                   "224.123.45.67:10000",
+                                   "224.123.45.67:10001",
+                                   true,
+                                   2000,
+                                   8,
+                                   20,
+                                   10,
+                                   retryTimeout50));
+
+        m_spNodeTypes.insert(std::make_pair(12,
+                                            Safir::Dob::Internal::SP::NodeType
+                                            (12,
+                                             "LightMulticast",
+                                             true,
+                                             boost::chrono::milliseconds(2000),
+                                             8,
+                                             ToChronoDurations(retryTimeout20))));
+}
 
     void Start()
     {
@@ -297,7 +333,8 @@ public:
 
         m_communication->Start();
 
-        for (int i = 0; i < 2; ++i)
+        //run ioservice in four threads, to increase likelyhood of detecting threading bugs
+        for (int i = 0; i < 4; ++i)
         {
             m_threads.create_thread([this]
             {
@@ -308,11 +345,12 @@ public:
                 }
                 catch (const std::exception & exc)
                 {
-                    log << "Caught 'std::exception' exception from io_service.run(): "
+                    logerr << "Caught 'std::exception' exception from io_service.run(): "
                                << "  '" << exc.what() << "'." << std::endl;
+                    exit(1);
                 }
                 m_success.exchange(false);
-                log << "Thread exiting due to failure" << std::endl;
+                logerr << "Thread exiting due to failure" << std::endl;
             });
         }
     }
@@ -332,7 +370,7 @@ protected:
         return m_work == nullptr && m_success;
     }
 
-    virtual ~Common() {}
+    virtual ~Common() = default;
     std::atomic<bool> m_success;
     boost::thread_group m_threads;
 
@@ -343,7 +381,6 @@ protected:
     const std::int64_t m_id;
     std::vector<Safir::Dob::Internal::Com::NodeTypeDefinition> m_commNodeTypes;
     std::map<int64_t, Safir::Dob::Internal::SP::NodeType> m_spNodeTypes;
-
 
     std::unique_ptr<Safir::Dob::Internal::Com::Communication> m_communication;
     std::unique_ptr<Safir::Dob::Internal::SP::SystemPicture> m_systemPicture;
@@ -356,10 +393,9 @@ class Control: public Common
 public:
     explicit Control(const ProgramOptions& options,
                      const std::int64_t id,
-                     const std::function<void(bool restart)>& stopFcn)
+                     const std::function<void()>& stopFcn)
         : Common(id)
         , m_strand(m_ioService)
-        , m_options(options)
         , m_stopFcn(stopFcn)
         , m_joinCalls(0)
     {
@@ -374,9 +410,12 @@ public:
                                m_commNodeTypes,
                                1450));
 
-        std::vector<std::string> seeds;
-        seeds.push_back(options.seed + ":33999");
-        m_communication->InjectSeeds(seeds);
+        if (options.seed != -1)
+        {
+            std::ostringstream ss;
+            ss << options.address << ":33" << std::setw(3) << std::setfill('0') << options.seed;
+            m_communication->InjectSeeds({ss.str()});
+        }
 
         m_systemPicture.reset(new Safir::Dob::Internal::SP::SystemPicture
                               (Safir::Dob::Internal::SP::master_tag,
@@ -386,47 +425,37 @@ public:
                                m_id,
                                options.nodeType,
                                m_spNodeTypes,
-                               boost::chrono::seconds(0), //use auto aloneTimeout
+                               boost::chrono::seconds(10), //don't use auto aloneTimeout
                                [this](const int64_t id)
                                {return CheckJoinSystem(id);},
                                [this](const int64_t id)
                                {return CheckFormSystem(id);}));
+
+        // Start subscription to system state changes from SP
+        m_systemPicture->StartStateSubscription(m_strand.wrap([this](const Safir::Dob::Internal::SP::SystemState& data)
+                                                              {NewState(data);}));
+
     }
 
     void Stop()
     {
         StopCommon();
     }
-    virtual bool Success() const = 0;
+    bool Success() const
+    {
+        return SuccessCommon() && m_joinCalls <= 1;
+    }
 protected:
 
     bool CheckJoinSystem(const int64_t id)
     {
+        logerr << "Got join callback for " << id << std::endl;
         ++m_joinCalls;
         if (m_joinCalls > 1)
         {
             throw std::logic_error("Expect only one call to CheckJoinSystem");
         }
-
-        log << "Checking incarnation id " << id << std::endl;
-
-        if (m_lastIncarnation == 0)
-        {
-            log << "Have no previous incarnation, setting last and returning true" << std::endl;
-            m_lastIncarnation = id;
-            return true;
-        }
-        else if (m_lastIncarnation == id)
-        {
-            return true;
-        }
-        else
-        {
-            throw std::logic_error("Incarnation mismatch! Expected "
-                                   + boost::lexical_cast<std::string>(m_lastIncarnation)
-                                   + ", got "
-                                   + boost::lexical_cast<std::string>(id));
-        }
+        return true;
     }
 
     bool CheckFormSystem(const int64_t /*incarnationId*/)
@@ -434,239 +463,18 @@ protected:
         return true;
     }
 
-    boost::asio::io_service::strand m_strand;
-
-    const ProgramOptions m_options;
-    const std::function<void(bool restart)> m_stopFcn;
-    static int64_t m_lastIncarnation;
-    int m_joinCalls;
-};
-int64_t Control::m_lastIncarnation = 0;
-
-class ControlMaster: public Control
-{
-public:
-    explicit ControlMaster(const ProgramOptions& options,
-                           const std::int64_t id,
-                           const std::function<void(bool restart)>& stopFcn)
-        : Control(options, id, stopFcn)
-        , m_revolutions(0)
-        , m_waitAWhile(0)
-        , m_allSlavesStarted(false)
-        , m_nextToDie(0)
-        , m_waitForExit(false)
-        , m_waitToDie(0)
-    {
-        // Start subscription to system state changes from SP
-        m_systemPicture->StartStateSubscription(m_strand.wrap([this](const Safir::Dob::Internal::SP::SystemState& data)
-                                                              {NewState(data);}));
-
-    }
-
-    bool Success() const override
-    {
-        return SuccessCommon();
-    }
-private:
     void NewState(const Safir::Dob::Internal::SP::SystemState& data)
     {
-        log << "Got new state:\n" << data << std::endl;
+        logout << data.ToJson() << std::endl;
 
-        if (m_waitAWhile > 0)
-        {
-            --m_waitAWhile;
-            return;
-        }
-        int nodes = 0;
-        for (int i = 0; i < data.Size(); ++i)
-        {
-            //don't count dead nodes or ourselves
-            if (!data.IsDead(i) && data.Id(i) != m_id)
-            {
-                ++nodes;
-            }
-        }
-        if (nodes == m_options.numberOfNodes && !m_allSlavesStarted)
-        {
-            m_allSlavesStarted = true;
-            log << "All slaves are up"  << std::endl;
-            m_waitAWhile = 10;
-            return;
-        }
-        if (m_waitForExit)
-        {
-            if (nodes == 0)
-            {
-                log << "All slaves have died, as expected" << std::endl;
-                m_stopFcn(false);
-            }
-            return;
-        }
-        if (m_allSlavesStarted && m_waitToDie == 0)
-        {
-            if (m_revolutions >= m_options.revolutions && !m_waitForExit)
-            {
-                log << "Finished our revolutions, will tell all slaves to exit"  << std::endl;
-
-                //Sleep a short while, so that the last main gets a chance to receive some data.
-                //This could probably be done in a more elgant way, but this was easy :-)
-                boost::this_thread::sleep_for(boost::chrono::milliseconds(5000));
-
-                Send("exit");
-                m_waitForExit = true;
-            }
-            else
-            {
-                log << "Will tell slave " << m_nextToDie << " to restart"  << std::endl;
-                Send("restart " + boost::lexical_cast<std::string>(m_nextToDie));
-                std::ostringstream ss;
-                ss << "slave_"<<std::setw(3) << std::setfill('0') << m_nextToDie;
-
-                for (int i = 0; i < data.Size(); ++i)
-                {
-                    //find id of node to wait for
-                    if (!data.IsDead(i) && data.Name(i) == ss.str())
-                    {
-                        m_waitToDie = data.Id(i);
-                    }
-                }
-            }
-        }
-        if (m_waitToDie != 0)
-        {
-            for (int i = 0; i < data.Size(); ++i)
-            {
-                if (data.IsDead(i) && data.Id(i) == m_waitToDie)
-                {
-                    log << "Slave " << m_nextToDie
-                        << " died, just as expected, will wait for it to come back" << std::endl;
-                    m_allSlavesStarted = false;
-                    m_waitToDie = 0;
-                    ++m_nextToDie;
-                    if (m_nextToDie >= m_options.numberOfNodes)
-                    {
-                        m_nextToDie = 0;
-                        ++m_revolutions;
-                    }
-                }
-            }
-        }
     }
-    void Send(const std::string& message)
-    {
-        const size_t size = message.size();
-        const Safir::Utilities::Internal::SharedCharArray data(new char[size]);
-        memcpy(data.get(), &message[0], size);
-        //send the data to both node types.
 
-        while(!m_communication->Send(0,1,data,size,1000100444,true))
-        {
-            //retry
-        }
+    boost::asio::io_service::strand m_strand;
 
-        while(!m_communication->Send(0,2,data,size,1000100444,true))
-        {
-            //retry
-        }
-    }
-    int m_revolutions;
-    int m_waitAWhile;
-    bool m_allSlavesStarted;
-    int m_nextToDie;
-    bool m_waitForExit;
-    std::int64_t m_waitToDie;
+    const std::function<void()> m_stopFcn;
+    int m_joinCalls;
 };
 
-class ControlSlave: public Control
-{
-public:
-    explicit ControlSlave(const ProgramOptions& options,
-                          const std::int64_t id,
-                          const std::function<void(bool restart)>& stopFcn)
-        : Control(options, id, stopFcn)
-        , m_stop(false)
-    {
-        // Start subscription to system state changes from SP
-        m_systemPicture->StartStateSubscription(m_strand.wrap([this](const Safir::Dob::Internal::SP::SystemState& data)
-        {
-            log << "Got new state:\n" << data << std::endl;
-            m_lastState = data;
-            if (m_stop)
-            {
-                Stop(m_restart);
-            }
-        }));
-
-        m_communication->SetDataReceiver(m_strand.wrap([this](const int64_t fromNodeId,
-                                                              const int64_t fromNodeType,
-                                                              const char* data,
-                                                              const size_t size)
-                                                       {DataReceived(fromNodeId,fromNodeType,data,size);}),
-                                         1000100444,
-                                         [](size_t size){return new char[size];},
-                                         [](const char * data){delete[] data;});
-
-
-    }
-
-    bool Success() const override
-    {
-        //including the master and excluding ourselves there should be 10 nodes.
-        int nodes = 0;
-        for (int i = 0; i < m_lastState.Size(); ++i)
-        {
-            //don't count dead nodes or ourselves
-            if (!m_lastState.IsDead(i) && m_lastState.Id(i) != m_id)
-            {
-                ++nodes;
-            }
-        }
-        if (nodes != m_options.numberOfNodes)
-        {
-            log << "Slave did not see all nodes before exiting" << std::endl;
-            return false;
-        }
-        return SuccessCommon();
-    }
-private:
-    void Stop(bool restart)
-    {
-        //naive size check
-        if (m_lastState.Size() >= m_options.numberOfNodes)
-        {
-            m_stopFcn(restart);
-        }
-        else
-        {
-            log << "Delaying stop, since we've not seen enough nodes yet" << std::endl;
-            m_stop = true;
-            m_restart = restart;
-        }
-    }
-
-    void DataReceived(const int64_t /*fromNodeId*/,
-                      const int64_t /*fromNodeType*/,
-                      const char* data,
-                      const size_t size)
-    {
-        const std::string message(data, data+size);
-        log << "Got message: " << message << std::endl;
-        if (message == "restart " + boost::lexical_cast<std::string>(m_options.number))
-        {
-            log << "Oooh, that means me!" << std::endl;
-            Stop(true);
-        }
-        else if (message == "exit")
-        {
-            log << "Time to die!" << std::endl;
-            Stop(false);
-        }
-    }
-
-    Safir::Dob::Internal::SP::SystemState m_lastState;
-    int m_stop;
-    bool m_restart;
-};
 
 class Main: public Common
 {
@@ -678,10 +486,6 @@ public:
         , m_timerStopped(false)
         , m_receivedBytes(0)
     {
-        if (!options.start_main)
-        {
-            return;
-        }
         m_injectedNodes.insert(id);//consider ourselves already injected
 
         m_communication.reset(new Safir::Dob::Internal::Com::Communication
@@ -705,18 +509,17 @@ public:
                                m_spNodeTypes));
 
         m_communication->SetDataReceiver(m_strand.wrap([this](const int64_t /*fromNodeId*/,
-                                            const int64_t /*fromNodeType*/,
-                                            const char* data_,
-                                            const size_t size)
+                                                              const int64_t /*fromNodeType*/,
+                                                              const char* data,
+                                                              const size_t size)
         {
-            const Safir::Utilities::Internal::SharedConstCharArray data(data_);
-            if (size != 10000)
+            if (size != DATA_SIZE)
             {
                 throw std::logic_error("Received incorrectly sized data!");
             }
             for (size_t i = 0; i < size; ++i)
             {
-                if (data[i] != 3)
+                if (data[i] != static_cast<char>(i % 10))
                 {
                     throw std::logic_error("Received corrupt data!");
                 }
@@ -728,38 +531,30 @@ public:
                                          [](const char * data){delete[] data;});
 
 
-        m_sendTimer.expires_from_now(boost::chrono::milliseconds(1000));
+        m_sendTimer.expires_from_now(boost::chrono::milliseconds(50));
         m_sendTimer.async_wait([this](const boost::system::error_code& error){Send(error);});
 
         m_systemPicture->StartStateSubscription(m_strand.wrap([this](const Safir::Dob::Internal::SP::SystemState& data)
         {
-            InjectNodes(data);
+            HandleNodes(data);
         }));
 
     }
 
     void Stop()
     {
-        if (m_communication == nullptr)
-        {
-            return;
-        }
         m_sendTimer.cancel();
         m_timerStopped = true;
         StopCommon();
 
         if (m_receivedBytes == 0)
         {
-            log << "Main has received no data!" << std::endl;
+            logerr << "Main has received no data!" << std::endl;
         }
     }
 
     bool Success() const
     {
-        if (m_communication == nullptr)
-        {
-            return true;
-        }
         return SuccessCommon() && m_receivedBytes != 0;
     }
 private:
@@ -770,36 +565,50 @@ private:
             return;
         }
 
-        const size_t size = 10000;
-        const Safir::Utilities::Internal::SharedCharArray data(new char[size]);
-        memset(data.get(), 3, size);
-        //send the data to both node types.
-        m_communication->Send(0,1,data,size,1000100222,true);
-        m_communication->Send(0,2,data,size,1000100222,true);
-        m_sendTimer.expires_from_now(boost::chrono::milliseconds(1000));
+        //send the data to all node types.
+        m_communication->Send(0, 1, DATA, DATA_SIZE, 1000100222,true);
+        m_communication->Send(0, 2, DATA, DATA_SIZE, 1000100222,true);
+        m_communication->Send(0, 11, DATA, DATA_SIZE, 1000100222,true);
+        m_sendTimer.expires_from_now(boost::chrono::milliseconds(100));
         m_sendTimer.async_wait([this](const boost::system::error_code& error){Send(error);});
     }
 
-    void InjectNodes(const Safir::Dob::Internal::SP::SystemState& data)
+    void HandleNodes(const Safir::Dob::Internal::SP::SystemState& data)
     {
         for (int i = 0; i < data.Size(); ++i)
         {
-            //don't inject dead or already injected nodes
-            if (data.IsDead(i) || m_injectedNodes.find(data.Id(i)) != m_injectedNodes.end())
+            const auto id = data.Id(i);
+            if (id == m_id)
             {
                 continue;
             }
 
-            log << "Injecting node " << data.Name(i) << "(" << data.Id(i)
-                     << ") of type " << data.NodeTypeId(i)
-                     << " with address " << data.DataAddress(i) << std::endl;
+            const bool injected = m_injectedNodes.find(id) != m_injectedNodes.end();
+            if (data.IsDead(i) && injected)
+            {
+                logerr << "Main: Excluding node " << data.Name(i) << "(" << id << ")";
+                m_systemPicture->ExcludeNode(id);
+                m_injectedNodes.erase(id);
+            }
+            else if (!data.IsDead(i) && injected)
+            {
+                logerr << "Main: Resurrecting node " << data.Name(i) << "(" << id << ")";
+                m_systemPicture->ResurrectNode(id);
+                m_injectedNodes.erase(id);
+            }
+            else if (!data.IsDead(i) && injected)
+            {
+                logerr << "Main: Injecting node " << data.Name(i) << "(" << data.Id(i)
+                       << ") of type " << data.NodeTypeId(i)
+                       << " with address " << data.DataAddress(i) << std::endl;
 
-            m_communication->InjectNode(data.Name(i),
-                                        data.Id(i),
-                                        data.NodeTypeId(i),
-                                        data.DataAddress(i));
+                m_communication->InjectNode(data.Name(i),
+                                            id,
+                                            data.NodeTypeId(i),
+                                            data.DataAddress(i));
 
-            m_injectedNodes.insert(data.Id(i));
+                m_injectedNodes.insert(id);
+            }
         }
     }
 
@@ -811,10 +620,9 @@ private:
     uint64_t m_receivedBytes;
 };
 
-
 int main(int argc, char * argv[])
 {
-    log << "Pid: " << Safir::Utilities::ProcessInfo::GetPid() << std::endl;
+    logerr << "Pid: " << Safir::Utilities::ProcessInfo::GetPid() << std::endl;
 
     try
     {
@@ -828,6 +636,8 @@ int main(int argc, char * argv[])
         {
             return 1;
         }
+
+        logerr << "Starting node " << options.name << " as node type " << options.nodeType << std::endl;
 
         boost::asio::io_service ioService;
         boost::asio::io_service::strand strand(ioService);
@@ -850,7 +660,7 @@ int main(int argc, char * argv[])
                              {
                                  if (error && work != nullptr)
                                  {
-                                     log << "Got a signals error: " << error << std::endl;
+                                     logerr << "Got a signals error: " << error << std::endl;
                                  }
                                  work.reset();
                              });
@@ -859,8 +669,8 @@ int main(int argc, char * argv[])
         std::unique_ptr<Control> control;
         std::unique_ptr<Main> main;
 
-        std::function<void(bool restart)> stopFunc;
-        stopFunc = [&](const bool restart)
+        std::function<void()> stopFunc;
+        stopFunc = [&]()
         {
             if (control == nullptr || main == nullptr)
             {
@@ -872,11 +682,11 @@ int main(int argc, char * argv[])
 
             if (!control->Success())
             {
-                log << "Control failed!" << std::endl;
+                logerr << "Control failed!" << std::endl;
             }
             if (!main->Success())
             {
-                log << "Main failed!" << std::endl;
+                logerr << "Main failed!" << std::endl;
             }
 
             if (!control->Success() || !main->Success())
@@ -886,45 +696,19 @@ int main(int argc, char * argv[])
             control.reset();
             main.reset();
 
-            if (restart)
-            {
-                const auto id = GenerateId();
-
-                if (options.master)
-                {
-                    control.reset(new ControlMaster(options, id, strand.wrap(stopFunc)));
-                }
-                else
-                {
-                    control.reset(new ControlSlave(options, id, strand.wrap(stopFunc)));
-                }
-                main.reset(new Main(options, id));
-
-                control->Start();
-                main->Start();
-            }
-            else
-            {
-                log << "Going to reset work and cancel the signalSet" << std::endl;
-                work.reset();
-                signalSet.cancel();
-                log << "Done. ioService should stop running now" << std::endl;
-            }
+            logerr << "Going to reset work and cancel the signalSet" << std::endl;
+            work.reset();
+            signalSet.cancel();
+            logerr << "Done. ioService should stop running now" << std::endl;
         };
 
-        const auto id = GenerateId();
+        const auto id = options.nodeId;
 
-        if (options.master)
-        {
-            control.reset(new ControlMaster(options,id, strand.wrap(stopFunc)));
-        }
-        else
-        {
-            control.reset(new ControlSlave(options, id, strand.wrap(stopFunc)));
-        }
+        control.reset(new Control(options, id, strand.wrap(stopFunc)));
+
         main.reset(new Main(options, id));
 
-        log << "Starting Control and Main" << std::endl;
+        logerr << "Starting Control and Main" << std::endl;
 
         control->Start();
         main->Start();
@@ -945,9 +729,9 @@ int main(int argc, char * argv[])
     }
     catch(std::exception& e)
     {
-        log << "Caught exception: " << e.what() << std::endl;
+        logerr << "Caught exception: " << e.what() << std::endl;
         return 1;
     }
-    log << "Exiting..." << std::endl;
+    logerr << "Exiting..." << std::endl;
     return 0;
 }

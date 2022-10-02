@@ -126,7 +126,7 @@ namespace SP
                 return;
             }
 
-            lllog(8) << "Publishing raw statistics to other nodes" << std::endl;
+            lllog(8) << "SP: Publishing raw statistics to other nodes" << std::endl;
 
             //start by scheduling next timer to send to all nodes.
             //this will be cancelled if we need to do a resend due to overflow below.
@@ -145,7 +145,7 @@ namespace SP
                     const bool sent = m_communication.Send(0, *id, data, size, m_senderId, true);
                     if (!sent)
                     {
-                        lllog(7) << "RawPublisherRemote: Overflow when sending to node type "
+                        lllog(7) << "SP: RawPublisherRemote: Overflow when sending to node type "
                                  << m_nodeTypes.find(*id)->second.name.c_str() << std::endl;
                         overflowNodes.insert(*id);
                     }

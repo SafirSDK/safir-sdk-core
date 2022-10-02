@@ -8,14 +8,10 @@ TARGET_LINK_LIBRARIES(system_picture_component_test_node PRIVATE
   lluf_id
   Boost::program_options)
 
-SAFIR_INSTALL(TARGETS system_picture_component_test_node COMPONENT TestSuite)
+ADD_TEST(NAME system_picture_component_test
+  COMMAND ${Python3_EXECUTABLE}
+  ${CMAKE_CURRENT_SOURCE_DIR}/run_system_picture_component_test.py
+     --exe $<TARGET_FILE:system_picture_component_test_node>)
 
-SAFIR_INSTALL_PYTHON(SCRIPT circular_restart.py
-  COMPONENT TestSuite)
+SET_SAFIR_TEST_PROPERTIES(TEST system_picture_component_test TIMEOUT 700)
 
-INSTALL(
-  DIRECTORY
-    config
-  DESTINATION ${SAFIR_INSTALL_DESTINATION_TEST_DATA}/system_picture
-  COMPONENT TestSuite
-  )

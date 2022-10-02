@@ -138,7 +138,6 @@ namespace SP
          */
         void StartStateSubscription(const std::function<void (const SystemState& data)>& dataCallback);
 
-
         /**
          * Exclude a node from the system.
          *
@@ -146,6 +145,15 @@ namespace SP
          * This function will also call Communications ExcludeNode function.
          */
         void ExcludeNode(const int64_t id);
+
+        /**
+         * Resurrect a lightnode that has been marked as dead.
+         *
+         * Calling this function will allow a lightnode that has previously
+         * been marked as dead to be resurrected.
+         * This function will also call Communications InjectNode function.
+         */
+        void ResurrectNode(const int64_t id);
     private:
         class Impl;
 

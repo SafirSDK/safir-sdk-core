@@ -6,6 +6,7 @@ if ($ENV{SAFIR_SKIP_SLOW_TESTS})
     DiscovererTest
     ElectionHandler_test
     ElectionHandler_test_with_overflows
+    RawHandler_test
     LamportClocks
     dope_file_backend_test
     dope_none_backend_test
@@ -15,5 +16,6 @@ if ($ENV{SAFIR_SKIP_SLOW_TESTS})
     websocket_component_test
     websocket_stress_test
     Incarnation_And_Control_Tests
+    system_picture_component_test
     )
 endif()

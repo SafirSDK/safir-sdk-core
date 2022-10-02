@@ -84,7 +84,7 @@ namespace SP
                 throw std::logic_error("Unexpected error in RawPublisherLocal::Publish");
             }
 
-            lllog(8) << "Publishing raw statistics over ipc" << std::endl;
+            lllog(8) << "SP: Publishing raw statistics over ipc" << std::endl;
 
             const auto sender = [this](std::unique_ptr<char[]> data,
                                        const size_t size)

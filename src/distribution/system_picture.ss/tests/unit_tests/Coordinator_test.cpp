@@ -607,6 +607,16 @@ public:
         deadNodes.insert(nodeId);
     }
 
+    void ResurrectNode(int64_t nodeId)
+    {
+        deadNodes.erase(nodeId);
+    }
+
+    void SetNodeIsDetached()
+    {
+
+    }
+
     StatisticsCallback rawCb;
 
     int64_t electedId = 0;

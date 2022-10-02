@@ -128,11 +128,36 @@ namespace SP
             PrintMessage(*m_message, out);
         }
 
+        std::wstring ToJson() const
+        {
+            std::wostringstream out;
+            out <<  "{\"election_id\": " << m_message->election_id()
+                << ", \"elected_id\": " << m_message->elected_id()
+                << ", \"is_detached\": " << std::boolalpha << m_message->is_detached()
+                << ", \"nodes\": [";
+            for (int i = 0; i < m_message->node_info_size(); ++i)
+            {
+                const auto& node = m_message->node_info(i);
+                out << (i==0?"{":",{") <<
+                    "\"name\": \"" << node.name().c_str() << "\", "
+                    "\"is_dead\": " << std::boolalpha << node.is_dead() << ", "
+                    "\"id\": " << node.id() << ", "
+                    "\"node_type_id\": " << node.node_type_id() << "}";
+            }
+            out << "]}";
+
+            return out.str();
+        }
+
     private:
         friend class SystemStateCreator;
 
         static SystemState Create(std::unique_ptr<SystemStateMessage> message)
         {
+            std::sort(message->mutable_node_info()->begin(),
+                      message->mutable_node_info()->end(),
+                      [](const SystemStateMessage_NodeInfo& first,
+                         const SystemStateMessage_NodeInfo& second){return first.id() < second.id();});
             return SystemState(std::make_shared<Impl>(std::move(message)));
         }
 
@@ -173,6 +198,7 @@ namespace SP
     bool SystemState::IsDead(const int index) const {CheckValid(); return m_impl->IsDead(index);}
 
     void SystemState::Print(std::wostream& out) const {CheckValid(); m_impl->Print(out);}
+    std::wstring SystemState::ToJson() const {CheckValid(); return m_impl->ToJson();}
 
     SystemState SystemStateCreator::Create(std::unique_ptr<SystemStateMessage> message)
     {

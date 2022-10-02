@@ -85,7 +85,12 @@ disable=raw-checker-failed,
         suppressed-message,
         useless-suppression,
         deprecated-pragma,
-        use-symbolic-message-instead
+        use-symbolic-message-instead,
+        no-else-return,
+        no-else-continue,
+        no-else-break
+
+
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option
@@ -122,15 +127,13 @@ score=yes
 [REFACTORING]
 
 # Maximum number of nested blocks for function / method body
-max-nested-blocks=5
+max-nested-blocks=10
 
 # Complete name of functions that never returns. When checking for
 # inconsistent-return-statements if a never returning function is called then
 # it will be considered as an explicit return statement and no message will be
 # printed.
 never-returning-functions=sys.exit,argparse.parse_error
-
-no-else-return=no
 
 [BASIC]
 
@@ -491,7 +494,7 @@ max-attributes=15
 max-bool-expr=5
 
 # Maximum number of branch for function / method body.
-max-branches=12
+max-branches=20
 
 # Maximum number of locals for function / method body.
 max-locals=15

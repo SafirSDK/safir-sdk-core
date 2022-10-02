@@ -80,7 +80,8 @@ namespace SP
             , m_id(id)
             , m_isLightNode(nodeTypes.at(nodeTypeId).isLightNode)
             , m_nodeTypes(nodeTypes)
-            , m_nonLightNodeTypes(GetNonLightNodeTypes(nodeTypes))
+            , m_allNodeTypeIds(GetAllNodeTypeIds(nodeTypes))
+            , m_nonLightNodeTypeIds(GetNonLightNodeTypeIds(nodeTypes))
             , m_aloneTimeout(CalculateAloneTimeout(nodeTypes, aloneTimeout))
             , m_electionTimeout(CalculateElectionTimeout(nodeTypes))
             , m_electedStorage(new AlignedStorage())
@@ -178,7 +179,7 @@ namespace SP
     private:
 
         /** Returns the subset of nodeTypes that doesn't have the LightNode flag  */
-        static std::set<int64_t> GetNonLightNodeTypes(const std::map<int64_t, NodeType>& nodeTypes)
+        static std::set<int64_t> GetNonLightNodeTypeIds(const std::map<int64_t, NodeType>& nodeTypes)
         {
             std::set<int64_t> res;
 
@@ -188,6 +189,18 @@ namespace SP
                 {
                     res.insert(it->first);
                 }
+            }
+            return res;
+        }
+
+        /** Returns the node type ids for all node types */
+        static std::set<int64_t> GetAllNodeTypeIds(const std::map<int64_t, NodeType>& nodeTypes)
+        {
+            std::set<int64_t> res;
+
+            for (auto it = nodeTypes.cbegin(); it != nodeTypes.cend(); ++it)
+            {
+                    res.insert(it->first);
             }
             return res;
         }
@@ -332,7 +345,7 @@ namespace SP
 
                 m_currentElectionId = LlufId_GenerateRandom64();
 
-                m_pendingInquiries = m_nonLightNodeTypes;
+                m_pendingInquiries = m_nonLightNodeTypeIds;
                 SendPendingElectionMessages();
 
                 m_electionInProgress = true;
@@ -355,7 +368,7 @@ namespace SP
 
                 m_elected = m_id;
 
-                m_pendingVictories = m_nonLightNodeTypes;
+                m_pendingVictories = m_allNodeTypeIds;
                 SendPendingElectionMessages();
 
                 m_electionCompleteCallback(m_elected, m_currentElectionId);
@@ -605,7 +618,8 @@ namespace SP
         const int64_t m_id;
         const bool m_isLightNode;
         const std::map<int64_t, NodeType> m_nodeTypes;
-        const std::set<int64_t> m_nonLightNodeTypes;
+        const std::set<int64_t> m_allNodeTypeIds;
+        const std::set<int64_t> m_nonLightNodeTypeIds;
 
         const boost::chrono::steady_clock::duration m_aloneTimeout;
         const boost::chrono::steady_clock::duration m_electionTimeout;

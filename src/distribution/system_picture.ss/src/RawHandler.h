@@ -303,6 +303,10 @@ namespace SP
                                      << " and validation passed, let's use it!" << std::endl;
                             m_allStatisticsMessage.set_incarnation_id(node.nodeInfo->remote_statistics().incarnation_id());
 
+                            if (m_isLightNode)
+                            {
+                                m_allStatisticsMessage.set_election_id(node.nodeInfo->remote_statistics().election_id());
+                            }
                             changes |= RawChanges::METADATA_CHANGED;
                         }
                         else
@@ -336,7 +340,7 @@ namespace SP
                 }
                 else if (!node.nodeInfo->remote_statistics().has_incarnation_id())
                 {
-                    lllog(6) << "SP: Remote node has no incarnation discarding remote data." << std::endl;
+                    lllog(6) << "SP: Remote node has no incarnation, discarding remote data." << std::endl;
                     node.nodeInfo->clear_remote_statistics();
                 }
 
@@ -527,6 +531,10 @@ namespace SP
          **/
         void ResurrectNode(const int64_t id)
         {
+            if (id == m_id)
+            {
+                throw std::logic_error("ResurrectNode on own node!");
+            }
             m_strand.dispatch([this, id]
                               {
                                   auto findIt = m_nodeTable.find(id);

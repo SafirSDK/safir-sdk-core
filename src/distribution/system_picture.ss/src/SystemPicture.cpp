@@ -326,6 +326,16 @@ namespace SP
             m_rawHandler->ExcludeNode(id);
         }
 
+        void ResurrectNode(const int64_t id)
+        {
+            if (m_coordinator != nullptr)
+            {
+                throw std::logic_error("ResurrectNode is not available in this SystemPicture instance");
+            }
+
+            m_rawHandler->ResurrectNode(id);
+        }
+
 
     private:
         std::unique_ptr<RawHandler> m_rawHandler;
@@ -420,6 +430,11 @@ namespace SP
     void SystemPicture::ExcludeNode(const int64_t id)
     {
         m_impl->ExcludeNode(id);
+    }
+
+    void SystemPicture::ResurrectNode(const int64_t id)
+    {
+        m_impl->ResurrectNode(id);
     }
 }
 }

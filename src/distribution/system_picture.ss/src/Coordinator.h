@@ -26,6 +26,7 @@
 #include <Safir/Dob/Internal/RawStatistics.h>
 #include <Safir/Dob/Internal/SystemPictureDefs.h>
 #include <boost/noncopyable.hpp>
+#include <boost/range/algorithm/set_algorithm.hpp>
 #include <Safir/Utilities/Internal/SystemLog.h>
 #include <limits>
 #include <map>
@@ -273,10 +274,10 @@ namespace SP
                 //received NewNode for, i.e. is in m_lastStatistics top level.
                 for (int i = 0; i < m_lastStatistics.Size(); ++i)
                 {
+                    const bool deadInState = deadNodes.find(m_lastStatistics.Id(i)) != deadNodes.end();
                     //if we haven't marked the node as dead and electee doesnt think the node
                     //is part of the system we want to exclude the node
-                    if (!m_lastStatistics.IsDead(i) &&
-                        deadNodes.find(m_lastStatistics.Id(i)) != deadNodes.end())
+                    if (!m_lastStatistics.IsDead(i) && deadInState)
                     {
                         lllog (4) << "SP: Elected coordinator thinks that node "
                                   << m_lastStatistics.Name(i).c_str()
@@ -284,6 +285,17 @@ namespace SP
                                   << " is dead, so I'll mark him as dead." << std::endl;
 
                         m_rawHandler.ExcludeNode(m_lastStatistics.Id(i));
+                    }
+
+                    //we resurrect nodes that the coordinator thinks are alive
+                    if (!deadInState && m_lastStatistics.IsDead(i) && m_lastStatistics.IsResurrecting(i))
+                    {
+                        lllog (4) << "SP: Elected coordinator thinks that node "
+                                  << m_lastStatistics.Name(i).c_str()
+                                  << " with id " << m_lastStatistics.Id(i)
+                                  << " is alive, and I think it is resurrecting, so I'll resurrect it."
+                                  << std::endl;
+                        m_rawHandler.ResurrectNode(m_lastStatistics.Id(i));
                     }
                 }
 
@@ -304,28 +316,33 @@ namespace SP
     private:
         static std::set<int64_t> GetDeadNodes(const SystemStateMessage& state)
         {
-            std::set<int64_t> nodes;
+            std::set<int64_t> dead;
             for (int i = 0; i < state.node_info_size(); ++i)
             {
                 if (state.node_info(i).is_dead())
                 {
-                    nodes.insert(state.node_info(i).id());
+                    dead.insert(state.node_info(i).id());
                 }
             }
-            return nodes;
+            return dead;
         }
 
-        /** Get all node ids that any normal node thinks is dead */
+        /** Get all node ids that any normal node thinks is dead, and noone thinks is resurrecting */
         static std::map<int64_t, std::pair<RawStatistics,int>> GetDeadNodes(const RawStatistics& statistics,
                                                                             const std::map<int64_t, NodeType>& nodeTypes,
                                                                             const int64_t ownId)
         {
             std::map<int64_t, std::pair<RawStatistics,int>> deadNodes;
+            std::set<int64_t> resurrecting;
             for (int i = 0; i < statistics.Size(); ++i)
             {
                 if (statistics.IsDead(i))
                 {
                     deadNodes.insert(std::make_pair(statistics.Id(i), std::make_pair(statistics,i)));
+                }
+                if (statistics.IsResurrecting(i))
+                {
+                    resurrecting.insert(statistics.Id(i));
                 }
 
                 const bool isLightNode = nodeTypes.at(statistics.NodeTypeId(i)).isLightNode;
@@ -346,8 +363,17 @@ namespace SP
                         {
                             deadNodes.insert(std::make_pair(remote.Id(j), std::make_pair(remote,j)));
                         }
+                        if (remote.IsResurrecting(j))
+                        {
+                            resurrecting.insert(remote.Id(j));
+                        }
+
                     }
                 }
+            }
+            for (const auto undead: resurrecting)
+            {
+                deadNodes.erase(undead);
             }
             return deadNodes;
         }
@@ -460,17 +486,46 @@ namespace SP
         {
             //Exclude nodes that we think are alive but some other normal node thinks is
             //dead (the ExcludeNode will cause RawHandler to post another RawChangedEvent)
+            //Note: resurrecting nodes are still marked as dead, so this will not exclude those.
             bool changes = false;
             for (int i = 0; i < m_lastStatistics.Size(); ++i)
             {
                 if (!m_lastStatistics.IsDead(i) &&
                     deadNodes.find(m_lastStatistics.Id(i)) != deadNodes.end())
                 {
-                    lllog (4) << "SP: thinks that node " << m_lastStatistics.Name(i).c_str()
+                    lllog (4) << "SP: Someone thinks that node " << m_lastStatistics.Name(i).c_str()
                               << " with id " << m_lastStatistics.Id(i)
                               << " is dead, so I'll exclude him."
                               << std::endl;
                     m_rawHandler.ExcludeNode(m_lastStatistics.Id(i));
+                    changes = true;
+                }
+            }
+
+            return changes;
+        }
+
+        bool ResurrectNodes()
+        {
+            //Resurrect nodes that are dead but coming back to life.
+            //.The ResurrectNode will cause RawHandler to post another RawChangedEvent.
+            bool changes = false;
+            for (int i = 0; i < m_lastStatistics.Size(); ++i)
+            {
+                if (m_lastStatistics.IsResurrecting(i))
+                {
+                    lllog (4) << "SP: Resurrecting node " << m_lastStatistics.Name(i).c_str()
+                              << " with id " << m_lastStatistics.Id(i)
+                              << std::endl;
+                    m_rawHandler.ResurrectNode(m_lastStatistics.Id(i));
+                    for (auto& nodeInfo: *m_stateMessage.mutable_node_info())
+                    {
+                        if (nodeInfo.id() == m_lastStatistics.Id(i))
+                        {
+                            nodeInfo.set_is_dead(false);
+                        }
+                    }
+
                     changes = true;
                 }
             }
@@ -529,6 +584,17 @@ namespace SP
                 return false;
             }
 
+            const bool nodesWereResurrected = ResurrectNodes();
+
+            if (nodesWereResurrected)
+            {
+                lllog(9) << "SP: At least one node was resurrected, returning\n"
+                         << "SP: UpdateMyState will be called again very soon, "
+                         << "which will generate a new state" << std::endl;
+                return false;
+            }
+
+
             lllog(9) << "SP: Updating my state.\n";
             const bool logState = Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().LogLevel() >= 9;
             if (logState)
@@ -547,7 +613,9 @@ namespace SP
             // if we're becoming detached we need to clear out all the nodes from state
             if (!m_stateMessage.is_detached() && m_electionHandler->IsDetached())
             {
+                lllog(8) << "Becoming detached, clearing node info from state" <<std::endl;
                 m_stateMessage.clear_node_info();
+                m_rawHandler.SetNodeIsDetached();
             }
             m_stateMessage.set_is_detached(m_electionHandler->IsDetached());
 
@@ -798,54 +866,56 @@ namespace SP
                 node->set_is_dead(false);
             }
 
-
-            //and we add all nodes that remain in deadNodes
-            for (auto dn = deadNodes.cbegin(); dn != deadNodes.cend(); ++dn)
+            if (!m_stateMessage.is_detached())
             {
-                const auto& remote = dn->second.first;
-                const int index = dn->second.second;
-
-                lllog(9) << "SP: Adding dead node " << remote.Name(index).c_str()
-                         << " (" << remote.Id(index) << ")\n";
-
-                auto node = m_stateMessage.add_node_info();
-                node->set_name(remote.Name(index));
-                node->set_id(remote.Id(index));
-                node->set_node_type_id(remote.NodeTypeId(index));
-                node->set_control_address(remote.ControlAddress(index));
-                node->set_data_address(remote.DataAddress(index));
-                node->set_is_dead(true);
-            }
-
-            //Last of all we have to add the nodes that are in more_dead_nodes that we
-            //haven't already added
-            std::set<int64_t> addedDeadNodes;
-            for (int i = 0; i < m_stateMessage.node_info_size(); ++i)
-            {
-                if (m_stateMessage.node_info(i).is_dead())
+                //and we add all nodes that remain in deadNodes
+                for (auto dn = deadNodes.cbegin(); dn != deadNodes.cend(); ++dn)
                 {
-                    addedDeadNodes.insert(m_stateMessage.node_info(i).id());
-                }
-            }
+                    const auto& remote = dn->second.first;
+                    const int index = dn->second.second;
 
-            for (int i = 0; i < m_lastStatistics.MoreDeadNodesSize(); ++i)
-            {
-                if (addedDeadNodes.find(m_lastStatistics.MoreDeadNodes(i)) == addedDeadNodes.end())
-                {
-                    lllog(9) << "SP: Adding dead node " << m_lastStatistics.MoreDeadNodes(i)
-                             << " from more_dead_nodes\n";
+                    lllog(9) << "SP: Adding dead node " << remote.Name(index).c_str()
+                             << " (" << remote.Id(index) << ")\n";
+
                     auto node = m_stateMessage.add_node_info();
-                    node->set_name("<unknown>");
-                    node->set_id(m_lastStatistics.MoreDeadNodes(i));
-                    node->set_node_type_id(0);
-                    node->set_control_address("");
-                    node->set_data_address("");
+                    node->set_name(remote.Name(index));
+                    node->set_id(remote.Id(index));
+                    node->set_node_type_id(remote.NodeTypeId(index));
+                    node->set_control_address(remote.ControlAddress(index));
+                    node->set_data_address(remote.DataAddress(index));
                     node->set_is_dead(true);
                 }
-            }
 
+                //Last of all we have to add the nodes that are in more_dead_nodes that we
+                //haven't already added
+                std::set<int64_t> addedDeadNodes;
+                for (int i = 0; i < m_stateMessage.node_info_size(); ++i)
+                {
+                    if (m_stateMessage.node_info(i).is_dead())
+                    {
+                        addedDeadNodes.insert(m_stateMessage.node_info(i).id());
+                    }
+                }
+
+                for (int i = 0; i < m_lastStatistics.MoreDeadNodesSize(); ++i)
+                {
+                    if (addedDeadNodes.find(m_lastStatistics.MoreDeadNodes(i)) == addedDeadNodes.end())
+                    {
+                        lllog(9) << "SP: Adding dead node " << m_lastStatistics.MoreDeadNodes(i)
+                                 << " from more_dead_nodes\n";
+                        auto node = m_stateMessage.add_node_info();
+                        node->set_name("<unknown>");
+                        node->set_id(m_lastStatistics.MoreDeadNodes(i));
+                        node->set_node_type_id(0);
+                        node->set_control_address("");
+                        node->set_data_address("");
+                        node->set_is_dead(true);
+                    }
+                }
+            }
             if (m_stateMessage.is_detached() && m_stateMessage.node_info_size() != 1)
             {
+                SEND_SYSTEM_LOG(Alert, << "Internal error: A detached SystemState message should only have one node in it.");
                 lllog(1) << "SP: A detached SystemState message should only have one node in it:\n"
                          << m_stateMessage << std::endl;
                 throw std::logic_error("A detached SystemState message should only have one node in it");
