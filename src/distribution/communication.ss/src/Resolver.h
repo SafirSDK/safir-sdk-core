@@ -483,6 +483,7 @@ namespace Com
                 int fd=socket((protocol==6 ? AF_INET6 : AF_INET), SOCK_DGRAM, 0);
                 if (ioctl(fd, SIOCGIFADDR, &ifr)==-1)
                 {
+                    close(fd);
                     return "";
                 }
                 close(fd);
