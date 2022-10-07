@@ -102,7 +102,12 @@ namespace Com
                 throw std::logic_error(std::string("COM: Resolver.ResolveLocalEndpoint could not separate ip and port: "+expr));
             }
 
-            const auto ip=GetIPAddressBestMatch(ipExpr,verbose);
+            auto ip=GetIPAddressBestMatch(ipExpr,verbose);
+            if (ip.empty())
+            {
+                // one more try, with verbose flag
+                ip=GetIPAddressBestMatch(ipExpr, true);
+            }
             if (ip.empty())
             {
                 return "";
@@ -302,7 +307,8 @@ namespace Com
 
             if (verbose)
             {
-                std::wcout<<"Own interface addresses available:"<<std::endl;
+                std::wcout<<L"Resolver is trying to resolve expression: "<< expr.c_str()<<std::endl;
+                std::wcout<<L"Own interface addresses available:"<<std::endl;
                 for (auto a = adapters.cbegin(); a != adapters.cend(); ++a)
                 {
                     std::wcout<<"  "<<a->ipAddress.c_str()<<std::endl;
@@ -316,12 +322,21 @@ namespace Com
             {
                 if (ai->name == expr || ai->ipAddress==expr)
                 {
+                    if (verbose)
+                    {
+                        std::wcout<<L"Found exact match: "<<ai->ipAddress.c_str()<<std::endl;
+                    }
                     return ai->ipAddress;
                 }
                 addresses.push_back(ai->ipAddress);
             }
 
-            return FindBestMatch(expr,addresses,verbose);
+            auto bestMatch = FindBestMatch(expr,addresses,verbose);
+            if (verbose)
+            {
+                std::wcout<<L"Best match: "<<bestMatch.c_str()<<std::endl;
+            }
+            return bestMatch;
         }
 
         //Make dns lookup and return list of all ip addresses that support specified protocol

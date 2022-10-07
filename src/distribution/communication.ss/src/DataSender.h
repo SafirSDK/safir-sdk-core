@@ -127,6 +127,10 @@ namespace Com
         {
             boost::asio::post(m_strand, [this]
             {
+                lllog(9)<<m_logPrefix.c_str()<<"Start DataSender"<<std::endl;
+                m_lastSentMultiReceiverSeqNo = 0;
+                m_lastAckRequestMultiReceiver = 0;
+
                 m_running=true;
                 //start retransmit timer
                 if (m_deliveryGuarantee==Acked)
@@ -148,6 +152,7 @@ namespace Com
         {
             boost::asio::post(m_strand, [this]
             {
+                lllog(9)<<m_logPrefix.c_str()<<"Stop DataSender"<<std::endl;
                 m_running=false;
                 if (m_deliveryGuarantee==Acked)
                 {
@@ -162,6 +167,7 @@ namespace Com
                 m_notifyQueueNotFull=false;
                 m_sendQueue.clear_queue();
                 m_nodes.clear();
+                m_sendAckRequestForMsgIndex.clear();
                 RemoveExcludedReceivers();
                 RemoveCompletedMessages();
             });
@@ -197,6 +203,11 @@ namespace Com
             //The actual work where the data is inserted in the queue must be done inside the strand.
             boost::asio::post(m_strand, [this,toId,totalNumberOfFragments,numberOfFullFragments,msg,size,restSize,dataTypeIdentifier]
             {
+                if (!m_running)
+                {
+                    return;
+                }
+
                 uint8_t sendMethod;
                 uint64_t* sequenceSerie=GetSequenceSerieIfExist(toId, sendMethod);
                 if (sequenceSerie==nullptr)
@@ -249,17 +260,14 @@ namespace Com
             //Called from readStrand
 
             //Will only check ack against sent messages. If an ack is received for a message that is still unsent, that ack will be ignored.
-            boost::asio::dispatch(m_strand, [this, ack]
+            boost::asio::post(m_strand, [this, ack]
             {
                 if (!m_running)
                 {
                     return;
                 }
 
-                if (Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().LogLevel()==9)
-                {
-                    lllog(9)<<m_logPrefix.c_str()<<"HandleAck "<<ack.ToString().c_str()<<std::endl;
-                }
+                lllog(9)<<m_logPrefix.c_str()<<"HandleAck "<<ack.ToString().c_str()<<std::endl;
 
                 //Update queue
                 for (size_t i=0; i<m_sendQueue.first_unhandled_index(); ++i)
@@ -314,12 +322,13 @@ namespace Com
         //Add a node.
         void AddNode(int64_t id, const std::string& address)
         {
-            boost::asio::dispatch(m_strand, [this, id, address]
+            boost::asio::post(m_strand, [this, id, address]
             {
                 if (m_nodes.find(id)!=m_nodes.end())
                 {
                     std::ostringstream os;
                     os<<m_logPrefix.c_str()<<"Duplicated call to DataSender.AddNode with same nodeId! NodeId: "<<id<<", address: "<<address;
+                    lllog(1)<<os.str().c_str()<<std::endl;
                     throw std::logic_error(os.str());
                 }
 
@@ -399,7 +408,7 @@ namespace Com
         const size_t m_ackRequestThreshold;
         MessageQueue<UserDataPtr> m_sendQueue;
         std::atomic<unsigned int> m_sendQueueSize;
-        bool m_running;
+        std::atomic<bool> m_running;
         const std::vector<int> m_retryTimeout;
         const size_t m_fragmentDataSize; //size of a fragments data part, excluding header size.
         std::map<int64_t, NodeInfo> m_nodes;
@@ -424,7 +433,7 @@ namespace Com
 
         void PostWelcome(int64_t nodeId)
         {
-            auto& ni=m_nodes[nodeId];
+            auto& ni=m_nodes.at(nodeId);
             ++m_lastSentMultiReceiverSeqNo;
             ni.welcome=m_lastSentMultiReceiverSeqNo;
 
@@ -588,7 +597,14 @@ namespace Com
 
             //Restart timer
             m_resendTimer.expires_after(timerInterval);
-            m_resendTimer.async_wait(boost::asio::bind_executor(m_strand, [this](const boost::system::error_code& /*error*/){RetransmitUnackedMessages();}));
+            m_resendTimer.async_wait(boost::asio::bind_executor(m_strand, [this](const boost::system::error_code& error)
+            {
+                if (error == boost::asio::error::operation_aborted)
+                {
+                    return;
+                }
+                RetransmitUnackedMessages();
+            }));
         }
 
         void SendAckRequests()

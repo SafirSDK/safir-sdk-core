@@ -87,14 +87,14 @@ int main(int /*argc*/, char * /*argv*/[])
 
     bool running = true;
 
-    boost::asio::io_service ioService;
+    boost::asio::io_context io;
 
-    boost::asio::steady_timer timer(ioService);
+    boost::asio::steady_timer timer(io);
 
-    boost::asio::signal_set signalSet(ioService);
+    boost::asio::signal_set signalSet(io);
 
     // Make some work to stop io_service from exiting.
-    auto work = Safir::make_unique<boost::asio::io_service::work>(ioService);
+    auto work = boost::asio::make_work_guard(io);
 
     // Map so that we can use the node name in printouts
     std::map<int64_t, std::string> nodeNameMap;
@@ -166,17 +166,17 @@ int main(int /*argc*/, char * /*argv*/[])
                                        12345,
                                        true);
                }
-               timer.expires_from_now(boost::chrono::milliseconds(2000));
+               timer.expires_after(boost::chrono::milliseconds(2000));
                timer.async_wait(onTimeout);
             };
 
     std::unique_ptr<Control::DoseMainCmdReceiver> doseMainCmdReceiver;
 
     doseMainCmdReceiver.reset(new Control::DoseMainCmdReceiver
-                        (ioService,
+                        (io,
 
                          // Action when SetOwnNode command is received
-                         [&communication, &sp, &ioService, &commNodeTypes,
+                         [&communication, &sp, &io, &commNodeTypes,
                           &spNodeTypes, &timer, &onTimeout, &nodeNameMap]
                          (const std::string& nodeName,
                           int64_t nodeId,
@@ -185,7 +185,7 @@ int main(int /*argc*/, char * /*argv*/[])
                          {
                              // Create the communication instance...
                              communication.reset(new Com::Communication(Com::dataModeTag,
-                                                                        ioService,
+                                                                        io,
                                                                         nodeName,
                                                                         nodeId,
                                                                         nodeTypeId,
@@ -194,7 +194,7 @@ int main(int /*argc*/, char * /*argv*/[])
                                                                         1450));
                              // ... and the System Picture instance
                              sp.reset(new SP::SystemPicture(SP::slave_tag,
-                                                            ioService,
+                                                            io,
                                                             *communication,
                                                             nodeName,
                                                             nodeId,
@@ -227,7 +227,7 @@ int main(int /*argc*/, char * /*argv*/[])
                              communication->Start();
 
                              // Start cyclic sending of messages
-                             timer.expires_from_now(boost::chrono::milliseconds(2000));
+                             timer.expires_after(boost::chrono::milliseconds(2000));
                              timer.async_wait(onTimeout);
                          },
 
@@ -269,7 +269,13 @@ int main(int /*argc*/, char * /*argv*/[])
                             doseMainCmdReceiver->Stop();
                             work.reset();
                             running = false;
+                        },
+
+                        // Action when Detached command is received
+                        []()
+                        {
                         }
+
                         ));
 
     // Start reception of commands
@@ -318,10 +324,10 @@ int main(int /*argc*/, char * /*argv*/[])
     boost::thread_group threads;
     for (int i = 0; i < 9; ++i)
     {
-        threads.create_thread([&ioService]{ioService.run();});
+        threads.create_thread([&io]{io.run();});
     }
 
-    ioService.run();
+    io.run();
 
     threads.join_all();
 

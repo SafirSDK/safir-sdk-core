@@ -29,7 +29,7 @@ if (MSVC)
    add_compile_definitions(_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS)
    add_compile_definitions(_WINSOCK_DEPRECATED_NO_WARNINGS)
    add_compile_definitions(_UNICODE UNICODE)
-   add_compile_definitions(_WIN32_WINNT=0x0501)
+   add_compile_definitions(_WIN32_WINNT=0x0600)
    add_compile_definitions(WIN32_LEAN_AND_MEAN)
 
    add_compile_options(/wd4503) #decorated name length exceeded

@@ -288,6 +288,7 @@ namespace Com
         boost::asio::ip::udp::endpoint m_multicastEndpoint;
         bool m_multicastEnabled;
     };
+
 }
 }
 }

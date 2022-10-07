@@ -171,6 +171,7 @@ namespace
         {
             vt->second->GetHeartbeatSender().Start();
             vt->second->GetAckedDataSender().Start();
+            vt->second->GetUnackedDataSender().Start();
         }
         if (m_isControlInstance)
         {
@@ -181,13 +182,14 @@ namespace
     void CommunicationImpl::Stop()
     {
         lllog(1)<<m_logPrefix.c_str()<<L"Stop "<<m_me.name.c_str()<<std::endl;
-        boost::asio::post(m_receiveStrand, [this]{m_deliveryHandler.Stop();});
+        m_deliveryHandler.Stop(m_receiveStrand);
         m_reader.Stop();
 
         for (auto vt = m_nodeTypes.cbegin(); vt != m_nodeTypes.cend(); ++vt)
         {
             vt->second->GetHeartbeatSender().Stop();
             vt->second->GetAckedDataSender().Stop();
+            vt->second->GetUnackedDataSender().Stop();
         }
         if (m_isControlInstance)
         {
@@ -320,7 +322,7 @@ namespace
         nodeType.GetAckedDataSender().AddNode(node.nodeId, node.unicastAddress);
         nodeType.GetUnackedDataSender().AddNode(node.nodeId, node.unicastAddress);
         nodeType.GetHeartbeatSender().AddNode(node.nodeId, node.unicastAddress);
-        boost::asio::dispatch(m_receiveStrand, [this, node]{m_deliveryHandler.AddNode(node);});
+        boost::asio::post(m_receiveStrand, [this, node]{m_deliveryHandler.AddNode(node);});
 
         //callback to host application
         m_onNewNode(node.name,

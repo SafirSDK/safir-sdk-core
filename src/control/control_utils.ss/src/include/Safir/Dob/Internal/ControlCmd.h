@@ -58,7 +58,7 @@ namespace Control
 
         typedef std::function<void(CommandAction cmdAction, int64_t nodeId)> CmdCb;
 
-        ControlCmdReceiver(boost::asio::io_service& ioService,
+        ControlCmdReceiver(boost::asio::io_context& io,
                            const CmdCb&             cmdCb);
 
         ControlCmdReceiver(const ControlCmdReceiver&) = delete;
@@ -83,7 +83,7 @@ namespace Control
     class CONTROL_UTILS_API ControlCmdSender
     {
     public:
-        ControlCmdSender(boost::asio::io_service&      ioService,
+        ControlCmdSender(boost::asio::io_context&      io,
                          const std::function<void()>   controlConnectedCb);
 
         ControlCmdSender(const ControlCmdSender&) = delete;

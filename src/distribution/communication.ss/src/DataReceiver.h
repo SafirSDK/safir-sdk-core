@@ -74,7 +74,7 @@ namespace Com
             ,m_onRecv(onRecv)
             ,m_isReceiverReady(isReceiverIsReady)
             ,m_running(false)
-            ,m_logPrefix("COM["+std::to_string(nodeId)+"]: ")
+            ,m_logPrefix("COM["+std::to_string(nodeId)+"]: DataReceiver - ")
         {
             m_unicastEndpoint = Resolver::StringToEndpoint(unicastAddress);
             if (!multicastAddress.empty())
@@ -130,14 +130,17 @@ namespace Com
             {
                 m_running=false;
                 m_timer.cancel();
+                ++m_runCount;
 
                 if (m_socket && m_socket->is_open())
                 {
+                    m_socket->cancel();
                     m_socket->close();
                     m_socket.reset();
                 }
                 if (m_multicastSocket && m_multicastSocket->is_open())
                 {
+                    m_multicastSocket->cancel();
                     m_multicastSocket->close();
                     m_multicastSocket.reset();
                 }
@@ -157,6 +160,7 @@ namespace Com
         boost::asio::ip::udp::endpoint m_multicastEndpoint;
         bool m_running;
         std::string m_logPrefix;
+        unsigned int m_runCount = 0;
 
         char m_bufferUnicast[Parameters::ReceiveBufferSize];
         char m_bufferMulticast[Parameters::ReceiveBufferSize];
@@ -167,9 +171,36 @@ namespace Com
                                      Parameters::ReceiveBufferSize,
                                      socket,
                                      [this, buf, socket](const boost::system::error_code& error, size_t bytesRecv)
-                                     {
-                                        boost::asio::dispatch(m_strand, [=]{HandleReceive(error, bytesRecv, buf, socket);});
-                                     });
+            {
+                //if an error occured, log the error and stop
+                if (error == boost::asio::error::operation_aborted)
+                {
+                    // This happens when socket is closed by the Stop-method, and is a normal case.
+                    lllog(7)<<m_logPrefix.c_str()<<L"Socket has been closed. Read operation aborted."<<std::endl;
+                    return;
+                }
+                if (error)
+                {
+                    std::cout<<m_logPrefix.c_str()<<"Read failed, error "<<error.message().c_str()<<std::endl;
+                    SEND_SYSTEM_LOG(Error, <<m_logPrefix.c_str()<<L"Read failed, error "<<error.message().c_str());
+                    return;
+                }
+
+                auto runCount = m_runCount; // make copy
+                boost::asio::post(m_strand, [this, runCount, bytesRecv, buf, socket]
+                {
+                    if (runCount == m_runCount)
+                    {
+                        HandleReceive(bytesRecv, buf, socket);
+                    }
+                    else
+                    {
+                        lllog(7)<<m_logPrefix.c_str()<<L"Data is old, it was read before restarting DataReader. Throw away! RunCount is now "
+                               <<m_runCount<<L", read at " <<runCount<<std::endl;
+                    }
+
+                });
+            });
         }
 
         bool ValidCrc(const char* buf, size_t size)
@@ -180,7 +211,7 @@ namespace Com
             return checksum==crc.checksum();
         }
 
-        void HandleReceive(const boost::system::error_code& error, size_t bytesRecv, char* buf, boost::asio::ip::udp::socket* socket)
+        void HandleReceive(size_t bytesRecv, char* buf, boost::asio::ip::udp::socket* socket)
         {
             //if we have got at stop-order just return and dont start a new read
             if (!m_running)
@@ -188,25 +219,10 @@ namespace Com
                 return;
             }
 
-            //if an error occured, log the error and stop
-            if (error == boost::asio::error::operation_aborted)
-            {
-                // This happens when socket is closed by the Stop-method, and is a normal case.
-                lllog(7)<<m_logPrefix.c_str()<<L"Socket has been closed. Read operation aborted."<<std::endl;
-                return;
-            }
-            if (error)
-            {
-                std::cout<<m_logPrefix.c_str()<<"Read failed, error "<<error.message().c_str()<<std::endl;
-                SEND_SYSTEM_LOG(Error, <<m_logPrefix.c_str()<<L"Read failed, error "<<error.message().c_str());
-                return;
-            }
-
             bool receiverReady=true;
 
             if (ValidCrc(buf, bytesRecv))
             {
-                assert(socket == m_multicastSocket.get() || socket == m_socket.get());
                 const bool multicast = socket == m_multicastSocket.get();
                 //received message with correct checksum
                 receiverReady=m_onRecv(buf, bytesRecv-sizeof(uint32_t), multicast); //Remove the crc from size. Will return true if it is ready to handle a new message immediately
@@ -237,9 +253,13 @@ namespace Com
                     }
                 }
 
-                std::cout<<os.str()<<std::endl;
                 lllog(7)<<os.str().c_str()<<std::endl;
 
+#ifndef SAFIR_TEST
+                // CRC error can occur but is most likely an programming error.
+                // In test mode we throw an exception.
+                throw std::logic_error(os.str());
+#endif
                 receiverReady=m_isReceiverReady(); //explicitly ask if receiver is ready to handle incoming data
             }
 

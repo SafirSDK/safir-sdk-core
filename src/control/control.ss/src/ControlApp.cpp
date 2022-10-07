@@ -29,6 +29,7 @@
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
 #include <Safir/Utilities/Internal/MakeUnique.h>
+#include <Safir/Utilities/Internal/AsioStrandWrap.h>
 #include <Safir/Utilities/CrashReporter.h>
 #include <Safir/Utilities/Internal/Id.h>
 #include <iostream>
@@ -56,20 +57,21 @@
 #  pragma warning (pop)
 #endif
 
-ControlApp::ControlApp(boost::asio::io_service&         ioService,
+ControlApp::ControlApp(boost::asio::io_context&         io,
                        const boost::filesystem::path&   doseMainPath,
                        const std::int64_t               id,
                        const bool                       ignoreControlCmd)
-    : m_ioService(ioService)
+    : m_io(io)
+    , m_work(boost::asio::make_work_guard(io))
     , m_stopped(false)
     , m_resolutionStartTime(boost::chrono::steady_clock::now())
-    , m_strand(ioService)
-    , m_wcoutStrand(ioService)
+    , m_strand(io)
+    , m_wcoutStrand(io)
     , m_nodeId(id != 0 ? id : LlufId_GenerateRandom64())
     , m_doseMainPath(doseMainPath)
     , m_ignoreControlCmd(ignoreControlCmd)
-    , m_startTimer(ioService)
-    , m_terminationTimer(ioService)
+    , m_startTimer(io)
+    , m_terminationTimer(io)
     , m_incarnationBlackListHandler(m_conf.incarnationBlacklistFileName)
     , m_controlInfoReceiverReady(false)
     , m_doseMainRunning(false)
@@ -77,8 +79,8 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
     , m_incarnationIdStorage(new AlignedStorage())
     , m_incarnationId(reinterpret_cast<std::atomic<int64_t>&>(*m_incarnationIdStorage))
 {
-    m_terminateHandler = Safir::make_unique<TerminateHandler>(ioService,
-                                                              m_strand.wrap([this]{StopThisNode();}),
+    m_terminateHandler = Safir::make_unique<TerminateHandler>(io,
+                                                              Safir::Utilities::Internal::WrapInStrand(m_strand, [this]{StopThisNode();}),
                                                               [this](const std::string& str){LogStatus(str);});
 
     for (auto it = m_conf.nodeTypesParam.cbegin(); it < m_conf.nodeTypesParam.cend(); ++it)
@@ -86,17 +88,15 @@ ControlApp::ControlApp(boost::asio::io_service&         ioService,
         if (m_conf.thisNodeParam.nodeTypeId == it->id)
         {
             m_requiredForStart = it->requiredForStart;
+            m_isLightNode = it->isLightNode;
             break;
         }
     }
     new (m_incarnationIdStorage.get()) std::atomic<uint64_t>(0);
 
-    // Make some work to stop io_service from exiting.
-    m_work = Safir::make_unique<boost::asio::io_service::work>(ioService);
-
     //Call the Start method, which will retry itself if need be (e.g. the local interface
     //addresses cannot be resolved).
-    m_strand.post([this]{Start();});
+    boost::asio::post(m_strand, [this]{Start();});
 }
 
 ControlApp::~ControlApp()
@@ -122,7 +122,7 @@ ControlApp::~ControlApp()
 void ControlApp::LogStatus(const std::string& str)
 {
     lllog(1) << str.c_str() << std::endl;
-    m_wcoutStrand.dispatch([str]
+    boost::asio::dispatch(m_wcoutStrand, [str]
                            {
                                std::wcout << str.c_str() << std::endl;
                            });
@@ -158,7 +158,7 @@ void ControlApp::Start()
                                                         nt->retryTimeout));
     }
     m_communication.reset(new Com::Communication(Com::controlModeTag,
-                                                 m_ioService,
+                                                 m_io,
                                                  m_conf.thisNodeParam.name,
                                                  m_nodeId,
                                                  m_conf.thisNodeParam.nodeTypeId,
@@ -200,7 +200,7 @@ void ControlApp::Start()
     // if more elaborated things have to be done in the callback code, it might be
     // necessary to turn this into ordinary asynchronous calls.
     m_sp.reset(new SP::SystemPicture(SP::master_tag,
-                                     m_ioService,
+                                     m_io,
                                      *m_communication,
                                      m_conf.thisNodeParam.name,
                                      m_nodeId,
@@ -217,10 +217,11 @@ void ControlApp::Start()
 
                                              auto this_ = this;
 
-                                             m_strand.post([this_]{this_->SendControlInfo();});
+                                             boost::asio::post(m_strand, [this_]{this_->SendControlInfo();});
 
                                              std::ostringstream os;
-                                             os << "CTRL: Joined system with incarnation id " << incarnationId;
+                                             os << "CTRL: Joined system with incarnation id " << incarnationId << std::endl;
+                                             os << "CTRL: This node has id " << m_nodeId;
                                              LogStatus(os.str());
 
                                              return true;
@@ -236,16 +237,17 @@ void ControlApp::Start()
                                      [this](const int64_t incarnationId) -> bool
                                      {
                                          // Check if this node is of a type that is allowed to form systems
-                                         if (m_requiredForStart)
+                                         if (m_requiredForStart && !m_isLightNode)
                                          {
                                              m_incarnationId = incarnationId;
 
                                              auto this_ = this;
 
-                                             m_strand.post([this_]{this_->SendControlInfo();});
+                                             boost::asio::post(m_strand, [this_]{this_->SendControlInfo();});
 
                                              std::ostringstream os;
-                                             os << "CTRL: Starting system with incarnation id " << incarnationId;
+                                             os << "CTRL: Starting system with incarnation id " << incarnationId << std::endl;
+                                             os << "CTRL: This node has id " << m_nodeId;
                                              LogStatus(os.str());
 
                                              return true;
@@ -261,7 +263,7 @@ void ControlApp::Start()
                                      }));
 
     m_doseMainCmdSender.reset(new Control::DoseMainCmdSender
-                              (m_ioService,
+                              (m_io,
                                // This is what we do when dose_main is ready to receive commands
                                [this]()
                                {
@@ -282,7 +284,7 @@ void ControlApp::Start()
                                    m_communication->Start();
                                 }));
 
-    m_stopHandler.reset(new Control::StopHandler(m_ioService,
+    m_stopHandler.reset(new Control::StopHandler(m_io,
                                                  *m_communication,
                                                  *m_sp,
                                                  *m_doseMainCmdSender,
@@ -310,16 +312,16 @@ void ControlApp::Start()
 
 
     m_controlInfoSender.reset(new Control::ControlInfoSender
-                              (m_ioService,
+                              (m_io,
                                // This is what we do when a receiver is ready
-                               m_strand.wrap([this]()
+                               Safir::Utilities::Internal::WrapInStrand(m_strand, [this]()
                                              {
                                                  m_controlInfoReceiverReady = true;
                                                  SendControlInfo();
                                              })));
 
     m_stateHandler.reset(new Control::SystemStateHandler
-                         (m_nodeId,
+                         (m_nodeId, m_isLightNode,
 
                           // Node included callback
                           [this](const Control::Node& node)
@@ -338,7 +340,14 @@ void ControlApp::Start()
                               m_doseMainCmdSender->ExcludeNode(nodeId, nodeTypeId);
 
                               m_stopHandler->RemoveNode(nodeId);
-                          }));
+                          },
+
+                        // Detached callback
+                        [this]()
+                        {
+                            // LogStatus("CTRL: This node is now in detached mode");
+                            m_doseMainCmdSender->Detached();
+                        }));
 
     // Start dose_main
     std::error_code error;
@@ -348,7 +357,7 @@ void ControlApp::Start()
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
          boost::process::windows::hide,
 #endif
-         m_ioService,
+         m_io,
          error,
          boost::process::on_exit=[this](int exitCode, const std::error_code& error)
              {HandleDoseMainExit(exitCode,error);});
@@ -425,8 +434,8 @@ std::pair<Com::ResolvedAddress,Com::ResolvedAddress> ControlApp::ResolveAddresse
             }
 
             //ok, set up the retry timer
-            m_startTimer.expires_from_now(boost::chrono::seconds(1));
-            m_startTimer.async_wait(m_strand.wrap([this](const boost::system::error_code& error)
+            m_startTimer.expires_after(boost::chrono::seconds(1));
+            m_startTimer.async_wait(boost::asio::bind_executor(m_strand, [this](const boost::system::error_code& error)
                                                   {
                                                       if (!error && !m_stopped)
                                                       {
@@ -442,7 +451,7 @@ std::pair<Com::ResolvedAddress,Com::ResolvedAddress> ControlApp::ResolveAddresse
 void ControlApp::StopDoseMain()
 {
     // Set up a timer that will kill dose_main the hard way if it doesn't stop within a reasonable time.
-    m_terminationTimer.expires_from_now(boost::chrono::seconds(10));
+    m_terminationTimer.expires_after(boost::chrono::seconds(10));
 
     m_terminationTimer.async_wait([this]
                                   (const boost::system::error_code& error)

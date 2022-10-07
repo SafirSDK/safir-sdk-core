@@ -58,7 +58,7 @@ namespace Control = Safir::Dob::Internal::Control;
 class ControlApp
 {
 public:
-    ControlApp(boost::asio::io_service&         ioService,
+    ControlApp(boost::asio::io_context&         io,
                const boost::filesystem::path&   doseMainPath,
                const int64_t                    id,
                const bool                       ignoreControlCmd);
@@ -91,11 +91,12 @@ private:
 
     void HandleDoseMainExit(const int exitCode, const std::error_code& error);
 
-    boost::asio::io_service&                    m_ioService;
+    boost::asio::io_context&                    m_io;
+    boost::asio::executor_work_guard<boost::asio::io_context::executor_type> m_work;
     bool                                        m_stopped;
     const boost::chrono::steady_clock::time_point m_resolutionStartTime;
-    boost::asio::io_service::strand             m_strand;
-    boost::asio::io_service::strand             m_wcoutStrand;
+    boost::asio::io_context::strand             m_strand;
+    boost::asio::io_context::strand             m_wcoutStrand;
     std::unique_ptr<TerminateHandler>           m_terminateHandler;
     const int64_t                               m_nodeId;
     const boost::filesystem::path               m_doseMainPath;
@@ -107,8 +108,8 @@ private:
     bool                                        m_controlInfoReceiverReady;
     bool                                        m_doseMainRunning;
     bool                                        m_requiredForStart;
+    bool                                        m_isLightNode;
 
-    std::unique_ptr<boost::asio::io_service::work>  m_work;
     std::unique_ptr<Com::Communication>             m_communication;
     std::unique_ptr<SP::SystemPicture>              m_sp;
     std::unique_ptr<Control::StopHandler>           m_stopHandler;

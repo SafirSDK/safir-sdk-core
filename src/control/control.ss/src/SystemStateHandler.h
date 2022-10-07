@@ -85,13 +85,20 @@ namespace Control
 
         typedef std::function<void(const int64_t nodeId, const int64_t nodeTypeId)> NodeDownCb;
 
+        typedef std::function<void()> DetachedCb;
+
         SystemStateHandlerBasic(const int64_t                    ownNodeId,
+                                const bool                       isLightNode,
                                 const NodeIncludedCb&            nodeIncludedCb,
-                                const NodeDownCb&                nodeDownCb)
+                                const NodeDownCb&                nodeDownCb,
+                                const DetachedCb&                detachedCb)
             : m_ownNodeId(ownNodeId),
+              m_isLightNode(isLightNode),
+              m_isDetached(false),
               m_systemState(),
               m_nodeIncludedCb(nodeIncludedCb),
-              m_nodeDownCb(nodeDownCb)
+              m_nodeDownCb(nodeDownCb),
+              m_detachedCb(detachedCb)
         {
         }
 
@@ -115,6 +122,19 @@ namespace Control
                 throw std::logic_error(os.str());
             }
 
+            if (newState.IsDetached())
+            {
+                if (!m_isDetached)
+                {
+                    m_isDetached = true;
+                    m_systemState.clear();
+                    m_detachedCb();
+                }
+
+                return;
+            }
+
+            m_isDetached = false;
             auto ownNodeIncluded = false;
 
             std::set<int64_t> existingNodeIds;
@@ -191,13 +211,15 @@ namespace Control
         }
 
     private:
+        const int64_t   m_ownNodeId;
+        const bool      m_isLightNode;
 
-        int64_t                 m_ownNodeId;
-
-        std::unordered_map<int64_t, Node> m_systemState;
+        bool                                m_isDetached;
+        std::unordered_map<int64_t, Node>   m_systemState;
 
         NodeIncludedCb          m_nodeIncludedCb;
         NodeDownCb              m_nodeDownCb;
+        DetachedCb              m_detachedCb;
 
     };
 

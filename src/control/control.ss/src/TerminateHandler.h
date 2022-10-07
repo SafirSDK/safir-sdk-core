@@ -25,6 +25,7 @@
 
 #include <Safir/Utilities/Internal/SystemLog.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
+#include <Safir/Utilities/Internal/AsioStrandWrap.h>
 
 #if defined _MSC_VER
 #  pragma warning (push)
@@ -46,11 +47,11 @@
 class TerminateHandler
 {
 public:
-    TerminateHandler(boost::asio::io_service& ioService,
+    TerminateHandler(boost::asio::io_context& io,
                      std::function<void()> stopCallback,
                      const std::function<void(const std::string& str)>& logStatus)
-        : m_strand(ioService)
-        , m_signalSet(ioService)
+        : m_strand(io)
+        , m_signalSet(io)
     {
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
         m_signalSet.add(SIGABRT);
@@ -75,7 +76,7 @@ public:
         m_signalSet.add(SIGTERM);
 #endif
 
-        m_signalSet.async_wait(m_strand.wrap([stopCallback, logStatus]
+        m_signalSet.async_wait(Safir::Utilities::Internal::WrapInStrand(m_strand, [stopCallback, logStatus]
                                              (const boost::system::error_code& error,
                                               const int signalNumber)
         {
@@ -102,7 +103,7 @@ public:
 
     void Stop()
     {
-        m_strand.dispatch([this]{m_signalSet.cancel();});
+        boost::asio::dispatch(m_strand, [this]{m_signalSet.cancel();});
     }
 
 private:
@@ -145,6 +146,6 @@ private:
 #endif
 
 
-    boost::asio::io_service::strand m_strand;
+    boost::asio::io_context::strand m_strand;
     boost::asio::signal_set m_signalSet;
 };

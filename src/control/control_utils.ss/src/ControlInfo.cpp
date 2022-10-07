@@ -53,11 +53,11 @@ namespace Control
     {
     public:
 
-        Impl(boost::asio::io_service&    ioService,
+        Impl(boost::asio::io_context&    io,
              const InfoCb&               infoCb)
             : m_infoCb(infoCb)
         {
-            m_ipcSubscriber.reset( new Safir::Utilities::Internal::IpcSubscriber(ioService,
+            m_ipcSubscriber.reset( new Safir::Utilities::Internal::IpcSubscriber(io,
                                                                                  controlInfoChannel,
                                                                                  [this](const char* data, size_t size)
                                                                                  {
@@ -96,9 +96,9 @@ namespace Control
         }
     };
 
-    ControlInfoReceiver::ControlInfoReceiver(boost::asio::io_service&     ioService,
+    ControlInfoReceiver::ControlInfoReceiver(boost::asio::io_context&     io,
                                              const InfoCb&                infoCb)
-        : m_impl(Safir::make_unique<Impl>(ioService,
+        : m_impl(Safir::make_unique<Impl>(io,
                                           infoCb))
     {
     }
@@ -117,9 +117,9 @@ namespace Control
     class ControlInfoSender::Impl
     {
     public:
-        Impl(boost::asio::io_service&       ioService,
+        Impl(boost::asio::io_context&       io,
              const std::function<void()>    receiverConnectedCb)
-            : m_ipcPublisher(ioService, controlInfoChannel, receiverConnectedCb, NULL)
+            : m_ipcPublisher(io, controlInfoChannel, receiverConnectedCb, NULL)
         {
         }
 
@@ -162,9 +162,9 @@ namespace Control
 
     };
 
-    ControlInfoSender::ControlInfoSender(boost::asio::io_service&       ioService,
+    ControlInfoSender::ControlInfoSender(boost::asio::io_context&       io,
                                          const std::function<void()>    receiverConnectedCb)
-        : m_impl(Safir::make_unique<Impl>(ioService, receiverConnectedCb))
+        : m_impl(Safir::make_unique<Impl>(io, receiverConnectedCb))
     {
     }
 

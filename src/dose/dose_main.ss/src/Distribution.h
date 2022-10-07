@@ -79,6 +79,7 @@ namespace Internal
                           int64_t                   ownNodeTypeId,
                           const std::string&        ownDataAddress)
             : m_nodeId(ownNodeId),
+              m_isLightNode(false),
               m_communication(),
               m_sp(),
               m_config(),
@@ -94,6 +95,10 @@ namespace Internal
 
             for (auto nt = m_config.nodeTypesParam.cbegin(); nt != m_config.nodeTypesParam.cend(); ++nt)
             {
+                if (nt->id == ownNodeTypeId)
+                {
+                    m_isLightNode = nt->isLightNode;
+                }
                 commNodeTypes.push_back(Com::NodeTypeDefinition(nt->id,
                                          nt->name,
                                          nt->multicastAddressControl,
@@ -225,6 +230,11 @@ namespace Internal
             return std::binary_search(m_localTypes.begin(), m_localTypes.end(), tid);
         }
 
+        bool IsLightNode() const
+        {
+            return m_isLightNode;
+        }
+
     private:
         static bool ReadDistributionScopeProperty(const Safir::Dob::Typesystem::TypeId typeId)
         {
@@ -317,6 +327,7 @@ namespace Internal
         }
 
         const int64_t m_nodeId;
+        bool m_isLightNode;
         std::unique_ptr<CommunicationT> m_communication;
         std::unique_ptr<SystemPictureT> m_sp;
         const ConfigT m_config;

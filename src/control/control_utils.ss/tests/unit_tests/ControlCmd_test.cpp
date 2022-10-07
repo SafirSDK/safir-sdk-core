@@ -45,21 +45,21 @@ using namespace Safir::Dob::Internal::Control;
 
 BOOST_AUTO_TEST_CASE( send_commands )
 {
-    boost::asio::io_service pubIoService;
-    boost::asio::io_service subIoService;
+    boost::asio::io_context pubIoContext;
+    boost::asio::io_context subIoContext;
 
-    std::shared_ptr<boost::asio::io_service::work> pubWork (new boost::asio::io_service::work(pubIoService));
-    std::shared_ptr<boost::asio::io_service::work> subWork (new boost::asio::io_service::work(subIoService));
+    auto pubWork = boost::asio::make_work_guard(pubIoContext);
+    auto subWork = boost::asio::make_work_guard(subIoContext);
 
     boost::thread_group threads;
-    threads.create_thread([&pubIoService](){pubIoService.run();});
-    threads.create_thread([&subIoService](){subIoService.run();});
+    threads.create_thread([&pubIoContext](){pubIoContext.run();});
+    threads.create_thread([&subIoContext](){subIoContext.run();});
 
     bool nodeCmdReceived = false;
 
     std::unique_ptr<ControlCmdSender> cmdSender;
 
-    cmdSender.reset(new ControlCmdSender (pubIoService,
+    cmdSender.reset(new ControlCmdSender (pubIoContext,
 
                                            [&cmdSender]()
                                            {
@@ -75,7 +75,7 @@ BOOST_AUTO_TEST_CASE( send_commands )
 
     std::unique_ptr<ControlCmdReceiver> cmdReceiver;
 
-    cmdReceiver.reset(new ControlCmdReceiver(subIoService,
+    cmdReceiver.reset(new ControlCmdReceiver(subIoContext,
 
                                     // cmd callback
                                     [&cmdSender, &cmdReceiver, &pubWork, &subWork, &nodeCmdReceived]

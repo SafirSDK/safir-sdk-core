@@ -45,15 +45,15 @@ using namespace Safir::Dob::Internal::Control;
 
 BOOST_AUTO_TEST_CASE( send_commands )
 {
-    boost::asio::io_service pubIoService;
-    boost::asio::io_service subIoService;
+    boost::asio::io_context pubIoContext;
+    boost::asio::io_context subIoContext;
 
-    std::shared_ptr<boost::asio::io_service::work> pubWork (new boost::asio::io_service::work(pubIoService));
-    std::shared_ptr<boost::asio::io_service::work> subWork (new boost::asio::io_service::work(subIoService));
+    auto pubWork = boost::asio::make_work_guard(pubIoContext);
+    auto subWork = boost::asio::make_work_guard(subIoContext);
 
     boost::thread_group threads;
-    threads.create_thread([&pubIoService](){pubIoService.run();});
-    threads.create_thread([&subIoService](){subIoService.run();});
+    threads.create_thread([&pubIoContext](){pubIoContext.run();});
+    threads.create_thread([&subIoContext](){subIoContext.run();});
 
     bool setOwnNodeCmdReceived = false;
     bool injectNodeCmdReceived = false;
@@ -62,7 +62,7 @@ BOOST_AUTO_TEST_CASE( send_commands )
 
     std::unique_ptr<DoseMainCmdSender> cmdSender;
 
-    cmdSender.reset(new DoseMainCmdSender (pubIoService,
+    cmdSender.reset(new DoseMainCmdSender (pubIoContext,
 
                                            [&cmdSender]()
                                            {
@@ -90,7 +90,7 @@ BOOST_AUTO_TEST_CASE( send_commands )
 
     std::unique_ptr<DoseMainCmdReceiver> cmdReceiver;
 
-    cmdReceiver.reset(new DoseMainCmdReceiver(subIoService,
+    cmdReceiver.reset(new DoseMainCmdReceiver(subIoContext,
 
                                     // Inject own node callback
                                     [&setOwnNodeCmdReceived](const std::string& nodeName,
@@ -153,6 +153,11 @@ BOOST_AUTO_TEST_CASE( send_commands )
                                         cmdReceiver->Stop();
                                         pubWork.reset();
                                         subWork.reset();
+                                    },
+
+                                    // Detached node
+                                    []()
+                                    {
                                     }
 
                                     ));

@@ -87,10 +87,12 @@ for i in range(len(lines)):
     # Remove incarnation id
     if lines[i].startswith("CTRL: Starting system"):
         lines[i] = lines[i][:len("CTRL: Starting system with incarnation id")]
+    if lines[i].startswith("CTRL: This node has id"):
+        lines[i] = "CTRL: This node has id"
 
 expected_lines = set([
     "dose_main running...", "dose_main is waiting for persistence data!", "CTRL: Starting system with incarnation id",
-    "DOSE_MAIN: Exiting...", "CTRL: Exiting..."
+    "CTRL: This node has id", "DOSE_MAIN: Exiting...", "CTRL: Exiting..."
 ])
 
 if sys.platform == "win32":

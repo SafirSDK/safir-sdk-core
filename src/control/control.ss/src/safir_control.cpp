@@ -208,19 +208,19 @@ int main(int argc, char * argv[])
         // Locate dose_main binary
         const boost::filesystem::path doseMainPath = FindDoseMain(options.doseMainPath);
 
-        boost::asio::io_service ioService;
+        boost::asio::io_context io;
 
         Safir::Utilities::CrashReporter::RegisterCallback(DumpFunc);
         Safir::Utilities::CrashReporter::Start();
 
 
-        auto controlApp = Safir::make_unique<ControlApp>(ioService, doseMainPath, options.id, options.ignoreControlCmd);
+        auto controlApp = Safir::make_unique<ControlApp>(io, doseMainPath, options.id, options.ignoreControlCmd);
 
-        const auto run = [&ioService,&controlApp,&success]
+        const auto run = [&io,&controlApp, &success]
         {
             try
             {
-                ioService.run();
+                io.run();
                 return;
             }
             catch (const std::exception & exc)
@@ -255,8 +255,8 @@ int main(int argc, char * argv[])
         if (!success)
         {
             controlApp->Stop();
-            ioService.reset();
-            ioService.run();
+            io.restart();
+            io.run();
         }
 
         controlApp.reset();

@@ -115,12 +115,12 @@ namespace
     {
     public:
 
-        Impl(boost::asio::io_service&    ioService,
+        Impl(boost::asio::io_context&    io,
              const CmdCb&                cmdCb)
             : m_cmdCb(cmdCb)
 
         {
-            m_ipcSubscriber.reset(new Safir::Utilities::Internal::IpcSubscriber(ioService,
+            m_ipcSubscriber.reset(new Safir::Utilities::Internal::IpcSubscriber(io,
                                                                                 controlCmdChannel,
                                                                                 [this](const char* data, size_t size)
                                                                                 {
@@ -159,9 +159,9 @@ namespace
         }
     };
 
-    ControlCmdReceiver::ControlCmdReceiver(boost::asio::io_service&     ioService,
+    ControlCmdReceiver::ControlCmdReceiver(boost::asio::io_context&     io,
                                            const CmdCb&                 cmdCb)
-        : m_impl(Safir::make_unique<Impl>(ioService,
+        : m_impl(Safir::make_unique<Impl>(io,
                                           cmdCb))
     {
     }
@@ -181,9 +181,9 @@ namespace
     {
     public:
 
-        Impl(boost::asio::io_service&       ioService,
+        Impl(boost::asio::io_context&       io,
              const std::function<void()>    controlConnectedCb)
-            : m_ipcPublisher(ioService, controlCmdChannel, controlConnectedCb, NULL)
+            : m_ipcPublisher(io, controlCmdChannel, controlConnectedCb, NULL)
         {
         }
 
@@ -214,9 +214,9 @@ namespace
         Safir::Utilities::Internal::IpcPublisher m_ipcPublisher;
     };
 
-    ControlCmdSender::ControlCmdSender(boost::asio::io_service&       ioService,
+    ControlCmdSender::ControlCmdSender(boost::asio::io_context&       io,
                                        const std::function<void()>    controlConnectedCb)
-        : m_impl(Safir::make_unique<Impl>(ioService, controlConnectedCb))
+        : m_impl(Safir::make_unique<Impl>(io, controlConnectedCb))
     {
     }
 

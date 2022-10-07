@@ -25,7 +25,7 @@
 
 #include <Safir/Dob/Internal/ControlUtilsExportDefs.h>
 #include <string>
-#include <boost/asio/io_service.hpp>
+#include <boost/asio.hpp>
 
 namespace Safir
 {
@@ -51,7 +51,7 @@ namespace Control
 
         typedef std::function<void(int64_t incarnationId , int64_t nodeId)> InfoCb;
 
-        ControlInfoReceiver(boost::asio::io_service& ioService,
+        ControlInfoReceiver(boost::asio::io_context& io,
                             const InfoCb&            infoCb);
 
 
@@ -78,7 +78,7 @@ namespace Control
     {
     public:
 
-        ControlInfoSender(boost::asio::io_service&      ioService,
+        ControlInfoSender(boost::asio::io_context&      io,
                           const std::function<void()>   receiverConnectedCb);
 
         ControlInfoSender(const ControlInfoSender&) = delete;

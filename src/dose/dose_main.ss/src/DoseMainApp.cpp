@@ -123,7 +123,11 @@ namespace Internal
                                                                             {
                                                                                 lllog(1) << "DOSE_MAIN: Got Stop command from control"<< std::endl;
                                                                                 Stop();
-                                                                            })) );
+                                                                            }),
+                                                              m_strand.wrap([this]()
+                                                                            {
+                                                                                lllog(1) << "DOSE_MAIN: Got Detached command from control"<< std::endl;
+                                                                            })));
 
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
         m_signalSet.add(SIGABRT);

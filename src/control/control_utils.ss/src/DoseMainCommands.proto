@@ -35,6 +35,7 @@ message DoseMainCmd {
       EXCLUDE_NODE = 2;
       STOPPED_NODE_INDICATION = 3;
       STOP_DOSE_MAIN = 4;
+      DETACHED = 5;
     }
         
    // Fields

@@ -47,8 +47,9 @@ class Sender
 {
 public:
 
-    Sender(int64_t nodeId)
+    Sender(int64_t nodeId, int64_t nodeTypeId, const std::vector<Com::NodeTypeDefinition>& nodeTypes)
         :m_io()
+        ,m_nodeTypeId(nodeTypeId)
         ,m_work(boost::asio::make_work_guard(m_io))
         ,m_sendTimer(m_io)
         ,m_com(Com::controlModeTag,
@@ -58,7 +59,7 @@ public:
                m_nodeTypeId,
                Com::ResolvedAddress(std::string("127.0.0.1:1000")+std::to_string(nodeId)),
                Com::ResolvedAddress(std::string("127.0.0.1:1100")+std::to_string(nodeId)),
-    {Com::NodeTypeDefinition(m_nodeTypeId, "nt10", "", "", false, 1000, 10, 20, 10, {100})},
+               nodeTypes,
                1450)
         ,m_threads()
     {
@@ -78,12 +79,17 @@ public:
 
         m_com.SetRetransmitToCallback([this](int64_t toNodeId, size_t tc){OnRetransmitTo(toNodeId, tc);});
 
-        m_com.SetQueueNotFullCallback([this](int64_t nodeTypeId){OnQueueNotFull(nodeTypeId);}, m_nodeTypeId);
+        for (const auto& nt : nodeTypes)
+        {
+            m_com.SetQueueNotFullCallback([this](int64_t nodeTypeId){OnQueueNotFull(nodeTypeId);}, nt.id);
+        }
+
     }
 
-    void Start()
+    void Start(int64_t sendToNodeType)
     {
-        std::cout << m_com.Name() << ": started" << std::endl;
+        m_running = true;
+        m_sendToNodeType = sendToNodeType;
         m_com.Start();
         m_sendTimer.expires_after(boost::chrono::milliseconds(25));
         m_sendTimer.async_wait([this](const boost::system::error_code& ec){OnSendTimer(ec);});
@@ -91,27 +97,33 @@ public:
 
     void Stop()
     {
-        std::cout << m_com.Name() << ": stopping...";
+        m_running = false;
         m_sendTimer.cancel();
         m_com.Stop();
         m_work.reset();
         m_io.restart();
         m_threads.join_all();
-        std::cout << m_com.Name() << " done!" << std::endl;
+    }
+
+    void Exclude(int64_t nodeId)
+    {
+        m_com.ExcludeNode(nodeId);
     }
 
 private:
-    const int64_t m_nodeTypeId = 10;
     boost::asio::io_context m_io;
+    int64_t m_nodeTypeId;
     boost::asio::executor_work_guard<boost::asio::io_context::executor_type> m_work;
     boost::asio::steady_timer m_sendTimer;
     Com::Communication m_com;
     boost::thread_group m_threads;
+    bool m_running = false;
+    int64_t m_sendToNodeType = 11;
     uint64_t m_sendCounter = 0;
 
-    void OnNewNode(const std::string& name, int64_t nodeId, int64_t /*nodeTypeId*/, const std::string& /*controlAddress*/, const std::string& /*dataAddress*/, bool /*multicast*/)
+
+    void OnNewNode(const std::string& /*name*/, int64_t nodeId, int64_t /*nodeTypeId*/, const std::string& /*controlAddress*/, const std::string& /*dataAddress*/, bool /*multicast*/)
     {
-        std::cout << m_com.Name() << ": OnNewNode " << name << std::endl;
         m_com.IncludeNode(nodeId);
     }
 
@@ -133,20 +145,20 @@ private:
 
     void OnSendTimer(const boost::system::error_code& ec)
     {
-        if (ec == boost::asio::error::operation_aborted) // this is needed to handle the timer.cancel
+        if (ec == boost::asio::error::operation_aborted || !m_running) // this is needed to handle the timer.cancel
         {
             return;
         }
 
-        if (m_com.NumberOfQueuedMessages(m_nodeTypeId) < m_com.SendQueueCapacity(m_nodeTypeId))
+        if (m_com.NumberOfQueuedMessages(m_sendToNodeType) < m_com.SendQueueCapacity(m_sendToNodeType))
         {
             size_t size = 20;
             auto data=Safir::Utilities::Internal::MakeSharedArray(size);
             (*reinterpret_cast<uint64_t*>(data.get()))=m_sendCounter++;
-            m_com.Send(0, m_nodeTypeId, data, size, 0, true);
+            m_com.Send(0, m_sendToNodeType, data, size, 123, true);
         }
 
-        m_sendTimer.expires_after(boost::chrono::milliseconds(10));
+        m_sendTimer.expires_after(boost::chrono::milliseconds(5));
         m_sendTimer.async_wait([this](const boost::system::error_code& ec){OnSendTimer(ec);});
     }
 

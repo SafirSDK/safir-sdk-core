@@ -834,8 +834,8 @@ struct DiscovererTest
 {
     static void Run()
     {
-//        DiscoverToSeed::Run();
-//        HandleDiscover::Run();
+        DiscoverToSeed::Run();
+        HandleDiscover::Run();
         DiscoverWithLightNodes::Run();
     }
 };

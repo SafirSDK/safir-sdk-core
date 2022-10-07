@@ -117,6 +117,12 @@ namespace Com
             m_nodes.clear();
         }
 
+        void Stop(boost::asio::io_context::strand& strand)
+        {
+            m_running=false;
+            boost::asio::post(strand, [this]{Stop();});
+        }
+
         // Received data to be delivered up to the application.
         void SetGotRecvCallback(const GotReceiveFrom& callback)
         {
@@ -550,7 +556,6 @@ namespace Com
                     }
 
                     recvIt->second.dealloc(ch.queue[0].data);
-                    //ch.queue[0].Dealloc(recvIt->second.dealloc);
                 }
 
                 //clear the queue and be ready for a new message
@@ -763,6 +768,10 @@ namespace Com
                                 if (m_running)
                                 {
                                     recvIt->second.onRecv(fromId, fromNodeType, dataPtr, dataSize);
+                                }
+                                else
+                                {
+                                    recvIt->second.dealloc(dataPtr);
                                 }
                             }
                             else

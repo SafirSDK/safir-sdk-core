@@ -126,7 +126,7 @@ class ControlCmdReceiver
 {
 public:
 
-    ControlCmdReceiver(boost::asio::io_service& /*ioService*/,
+    ControlCmdReceiver(boost::asio::io_context& /*ioService*/,
                        const ControlCmdCb&      cmdCb)
     {
         controlCmdCallback = cmdCb;
@@ -195,7 +195,7 @@ struct Fixture
         controlConfig.nodeTypesParam.push_back(ControlConfig::NodeType(2222, 700, 5));
         controlConfig.nodeTypesParam.push_back(ControlConfig::NodeType(3333, 20000, 5));
 
-        stopHandler.reset(new StopHandler(ioService,
+        stopHandler.reset(new StopHandler(io,
                                           communication,
                                           sp,
                                           doseMainCmdSender,
@@ -214,7 +214,7 @@ struct Fixture
 
     typedef Control::StopHandlerBasic<Communication, SP, ControlCmdReceiver, DoseMainCmdSender, ControlConfig> StopHandler;
 
-    boost::asio::io_service ioService;
+    boost::asio::io_context io;
 
     unsigned int stopSafirNodeCb;
     unsigned int shutdownCb;
@@ -228,15 +228,15 @@ struct Fixture
 
     void RunIoService(int numThreads = 1)
     {
-        ioService.reset();
+        io.restart();
 
         boost::thread_group threads;
         for (int i = 0; i < numThreads - 1; ++i)
         {
-            threads.create_thread([this]{ioService.run();});
+            threads.create_thread([this]{io.run();});
         }
 
-        ioService.run();
+        io.run();
         threads.join_all();
     }
 
@@ -249,7 +249,7 @@ BOOST_AUTO_TEST_CASE( stop_external_node )
 {
     stopHandler->Start();
     stopHandler->AddNode(1234, 1111);
-    ioService.post([](){controlCmdCallback(Control::STOP, 1234);});
+    boost::asio::post(io, [](){controlCmdCallback(Control::STOP, 1234);});
 
     communication.sendAction = [this](int64_t nodeId,
                                       int64_t nodeTypeId,
@@ -284,7 +284,7 @@ BOOST_AUTO_TEST_CASE( stop_non_existing_external_node )
 {
     stopHandler->Start();
     stopHandler->AddNode(1234, 1111);
-    ioService.post([](){controlCmdCallback(Control::STOP, 5678);});
+    boost::asio::post(io, [](){controlCmdCallback(Control::STOP, 5678);});
 
     auto nbrOfSend = 0;
     communication.sendAction = [&nbrOfSend](int64_t /*nodeId*/,
@@ -314,7 +314,7 @@ BOOST_AUTO_TEST_CASE( shutdown_external_node_resending )
     stopHandler->Start();
     stopHandler->AddNode(1234, 1111);
     stopHandler->AddNode(5678, 2222);
-    ioService.post([](){controlCmdCallback(Control::SHUTDOWN, 5678);});
+    boost::asio::post(io, [](){controlCmdCallback(Control::SHUTDOWN, 5678);});
 
     auto nbrOfSend = 0;
     communication.sendAction = [this, &nbrOfSend](int64_t nodeId,
@@ -358,7 +358,7 @@ BOOST_AUTO_TEST_CASE( stop_own_node )
     stopHandler->Start();
     stopHandler->AddNode(1234, 1111);
     stopHandler->AddNode(5678, 2222);
-    ioService.post([](){controlCmdCallback(Control::STOP, 9999);});
+    boost::asio::post(io, [](){controlCmdCallback(Control::STOP, 9999);});
 
     auto nbrOfSend = 0;
     communication.sendAction = [this, &nbrOfSend](int64_t nodeId,
@@ -394,8 +394,8 @@ BOOST_AUTO_TEST_CASE( stop_own_node_while_pending_extrnal_node_stops  )
 
     stopHandler->Start();
     stopHandler->AddNode(1234, 1111);
-    ioService.post([](){controlCmdCallback(Control::STOP, 1234);});  // stop external node
-    ioService.post([](){controlCmdCallback(Control::STOP, 9999);});  // stop own node
+    boost::asio::post(io, [](){controlCmdCallback(Control::STOP, 1234);});  // stop external node
+    boost::asio::post(io, [](){controlCmdCallback(Control::STOP, 9999);});  // stop own node
 
     auto nbrOfSend = 0;
     communication.sendAction = [this, &nbrOfSend](int64_t nodeId,
@@ -438,7 +438,7 @@ BOOST_AUTO_TEST_CASE( stop_system )
     stopHandler->Start();
     stopHandler->AddNode(1234, 1111);
     stopHandler->AddNode(5678, 2222);
-    ioService.post([](){controlCmdCallback(Control::STOP, 0);});
+    boost::asio::post(io, [](){controlCmdCallback(Control::STOP, 0);});
 
     auto nbrOfSentStopNotifications = 0;
     auto nbrOfSentStopOrders = 0;
@@ -503,7 +503,7 @@ BOOST_AUTO_TEST_CASE( stop_system_external_nodes_unresponsive )
     stopHandler->Start();
     stopHandler->AddNode(1234, 1111);
     stopHandler->AddNode(5678, 2222);
-    ioService.post([](){controlCmdCallback(Control::STOP, 0);});
+    boost::asio::post(io, [](){controlCmdCallback(Control::STOP, 0);});
 
     auto nbrOfSentStopNotifications = 0;
     auto nbrOfSentStopOrders = 0;
@@ -559,7 +559,7 @@ BOOST_AUTO_TEST_CASE( receive_node_stop_cmd )
 {
     stopHandler->Start();
 
-    ioService.post([this]()
+    boost::asio::post(io, [this]()
                    {
                        BOOST_CHECK(communication.setDataReceiverCalls.size() == 2);
 
@@ -583,7 +583,7 @@ BOOST_AUTO_TEST_CASE( receive_system_stop_cmd )
 {
     stopHandler->Start();
 
-    ioService.post([this]()
+    boost::asio::post(io, [this]()
                    {
                        BOOST_CHECK(communication.setDataReceiverCalls.size() == 2);
 
@@ -610,7 +610,7 @@ BOOST_AUTO_TEST_CASE( system_stop_cmd_while_in_system_stop_mode )
     stopHandler->Start();
     stopHandler->AddNode(1234, 1111);
     stopHandler->AddNode(5678, 2222);
-    ioService.post([](){controlCmdCallback(Control::STOP, 0);});
+    boost::asio::post(io, [](){controlCmdCallback(Control::STOP, 0);});
 
     auto nbrOfSentStopNotifications = 0;
     auto nbrOfSentStopOrders = 0;
@@ -634,7 +634,7 @@ BOOST_AUTO_TEST_CASE( system_stop_cmd_while_in_system_stop_mode )
                 auto this_ = this; //fix for vs2010 issues with lambdas
 
                 // System stop from node with higher node id ...should NOT be ignored
-                ioService.post([this_]
+                boost::asio::post(io, [this_]
                                {
                                    auto stopOrder = Control::SerializeCmd(Control::STOP, 0);
                                    this_->communication.setDataReceiverCalls[0].first(9999999999, 1111, stopOrder.first.get(), stopOrder.second);
@@ -670,7 +670,7 @@ BOOST_AUTO_TEST_CASE( ignored_system_stop_cmd_while_in_system_stop_mode )
     stopHandler->Start();
     stopHandler->AddNode(1234, 1111);
     stopHandler->AddNode(5678, 2222);
-    ioService.post([](){controlCmdCallback(Control::STOP, 0);});
+    boost::asio::post(io, [](){controlCmdCallback(Control::STOP, 0);});
 
     auto nbrOfSentStopNotifications = 0;
     auto nbrOfSentStopOrders = 0;
@@ -693,7 +693,7 @@ BOOST_AUTO_TEST_CASE( ignored_system_stop_cmd_while_in_system_stop_mode )
             {
                 auto this_ = this; //fix for vs2010 issues with lambdas
 
-                ioService.post([this_]
+                boost::asio::post(io, [this_]
                                {
                                    auto stopOrder = Control::SerializeCmd(Control::STOP, 0);
                                    // System stop from node with lower node id ...should be ignored
@@ -733,7 +733,7 @@ BOOST_AUTO_TEST_CASE( receive_stop_notification )
 {
     stopHandler->Start();
 
-    ioService.post([this]()
+    boost::asio::post(io, [this]()
                    {
                        BOOST_CHECK(communication.setDataReceiverCalls.size() == 2);
 

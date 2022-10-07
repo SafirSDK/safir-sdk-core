@@ -1,3 +1,5 @@
+add_definitions(-DSAFIR_TEST)
+
 FILE(GLOB headers *.h)
 FILE(GLOB sources *.cpp)
 
@@ -9,5 +11,5 @@ TARGET_LINK_LIBRARIES(communication_reset_test PRIVATE
   Boost::unit_test_framework
   Boost::thread)
 
-ADD_TEST(NAME CommunicationResetTest COMMAND communication_reset_test)
-SET_SAFIR_TEST_PROPERTIES(TEST CommunicationResetTest TIMEOUT 180)
+ADD_TEST(NAME Communication_ResetTest COMMAND communication_reset_test)
+SET_SAFIR_TEST_PROPERTIES(TEST Communication_ResetTest TIMEOUT 180)

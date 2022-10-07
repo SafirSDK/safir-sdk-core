@@ -79,7 +79,7 @@ namespace Com
 
         void Start() SAFIR_GCC_VISIBILITY_BUG_WORKAROUND
         {
-            boost::asio::dispatch(m_strand, [this]
+            boost::asio::post(m_strand, [this]
             {
                 m_running=true;
                 m_heartbeatTimer.expires_after(boost::chrono::milliseconds(m_interval));
@@ -89,7 +89,7 @@ namespace Com
 
         void Stop()
         {
-            boost::asio::dispatch(m_strand, [this]
+            boost::asio::post(m_strand, [this]
             {
                 m_running=false;
                 m_heartbeatTimer.cancel();
@@ -100,7 +100,7 @@ namespace Com
         //Add a node and starts sending heartbeats
         void AddNode(int64_t id, const std::string address)
         {
-            boost::asio::dispatch(m_strand, [this, id, address]
+            boost::asio::post(m_strand, [this, id, address]
             {
                 if (m_nodes.find(id)!=m_nodes.end())
                 {
@@ -115,7 +115,7 @@ namespace Com
 
         void RemoveNode(int64_t id)
         {
-            boost::asio::dispatch(m_strand, [this,id]
+            boost::asio::post(m_strand, [this,id]
             {
                 m_nodes.erase(id);
             });

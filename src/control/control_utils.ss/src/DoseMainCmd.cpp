@@ -53,19 +53,21 @@ namespace Control
     {
     public:
 
-        Impl(boost::asio::io_service&       ioService,
+        Impl(boost::asio::io_context&       io,
              const IncludeNodeCmdCb&        startDoseMainCb,
              const IncludeNodeCmdCb&        injectNodeCb,
              const ExcludeNodeCmdCb&        excludeNodeCb,
              const StoppedNodeIndicationCb& stoppedNodeIndicationCb,
-             const StopDoseMainCb&          stopDoseMainCb)
+             const StopDoseMainCb&          stopDoseMainCb,
+             const DetachedCb&              detachedCb)
             : m_startDoseMainCb(startDoseMainCb),
               m_injectNodeCb(injectNodeCb),
               m_excludeNodeCb(excludeNodeCb),
               m_stoppedNodeIndicationCb(stoppedNodeIndicationCb),
-              m_stopDoseMainCb(stopDoseMainCb)
+              m_stopDoseMainCb(stopDoseMainCb),
+              m_detachedDb(detachedCb)
         {
-            m_ipcSubscriber.reset( new Safir::Utilities::Internal::IpcSubscriber(ioService,
+            m_ipcSubscriber.reset( new Safir::Utilities::Internal::IpcSubscriber(io,
                                                                                  doseMainCmdChannel,
                                                                                  [this](const char* data, size_t size)
                                                                                  {
@@ -96,6 +98,7 @@ namespace Control
         ExcludeNodeCmdCb        m_excludeNodeCb;
         StoppedNodeIndicationCb m_stoppedNodeIndicationCb;
         StopDoseMainCb          m_stopDoseMainCb;
+        DetachedCb              m_detachedDb;
 
         void RecvDataCb(const char* data, size_t size)
         {
@@ -142,6 +145,12 @@ namespace Control
                 }
                 break;
 
+                case DoseMainCmd_CmdType_DETACHED:
+                {
+                    m_detachedDb();
+                }
+                break;
+
                 default:
                 {
                     throw std::logic_error("Received unknown doseMain command!");
@@ -151,18 +160,20 @@ namespace Control
         }
     };
 
-    DoseMainCmdReceiver::DoseMainCmdReceiver(boost::asio::io_service&       ioService,
+    DoseMainCmdReceiver::DoseMainCmdReceiver(boost::asio::io_context&       io,
                                              const IncludeNodeCmdCb&        startDoseMainCb,
                                              const IncludeNodeCmdCb&        injectNodeCb,
                                              const ExcludeNodeCmdCb&        excludeNodeCb,
                                              const StoppedNodeIndicationCb& stoppedNodeIndicationCb,
-                                             const StopDoseMainCb&          stopDoseMainCb)
-        : m_impl(Safir::make_unique<Impl>(ioService,
+                                             const StopDoseMainCb&          stopDoseMainCb,
+                                             const DetachedCb&              detachedCb)
+        : m_impl(Safir::make_unique<Impl>(io,
                                           startDoseMainCb,
                                           injectNodeCb,
                                           excludeNodeCb,
                                           stoppedNodeIndicationCb,
-                                          stopDoseMainCb))
+                                          stopDoseMainCb,
+                                          detachedCb))
     {
     }
 
@@ -181,9 +192,9 @@ namespace Control
     {
     public:
 
-        Impl(boost::asio::io_service&       ioService,
+        Impl(boost::asio::io_context&       io,
              const std::function<void()>    doseMainConnectedCb)
-            : m_ipcPublisher(ioService, doseMainCmdChannel, doseMainConnectedCb, NULL)
+            : m_ipcPublisher(io, doseMainCmdChannel, doseMainConnectedCb, NULL)
         {
         }
 
@@ -263,6 +274,13 @@ namespace Control
             Send(doseMainCmd);
         }
 
+        void Detached()
+        {
+            DoseMainCmd doseMainCmd;
+            doseMainCmd.set_cmd_type(DoseMainCmd::DETACHED);
+            Send(doseMainCmd);
+        }
+
     private:
 
         Safir::Utilities::Internal::IpcPublisher m_ipcPublisher;
@@ -278,9 +296,9 @@ namespace Control
 
     };
 
-    DoseMainCmdSender::DoseMainCmdSender(boost::asio::io_service&       ioService,
+    DoseMainCmdSender::DoseMainCmdSender(boost::asio::io_context&       io,
                                          const std::function<void()>    doseMainConnectedCb)
-        : m_impl(Safir::make_unique<Impl>(ioService, doseMainConnectedCb))
+        : m_impl(Safir::make_unique<Impl>(io, doseMainConnectedCb))
     {
     }
 
@@ -329,6 +347,11 @@ namespace Control
     void DoseMainCmdSender::StopDoseMain()
     {
         m_impl->StopDoseMain();
+    }
+
+    void DoseMainCmdSender::Detached()
+    {
+        m_impl->Detached();
     }
 
 
