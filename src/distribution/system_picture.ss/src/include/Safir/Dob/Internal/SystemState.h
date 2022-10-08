@@ -62,10 +62,15 @@ namespace SP
          * Default constructor.
          *
          * This constructor will create an "invalid" object, where the only guarantee
-         * is that Size() will return 0. All other member functions yield undefined behavior.
+         * is that Size() will return 0 and IsValid returns false. All other member functions yield undefined behavior.
          */
         SystemState();
 
+        /**
+         * Is the object valid. Will only return true for default constructed objects.
+         */
+        bool IsValid() const;
+        
         /**
          * Get the node id of the elected node.
          */

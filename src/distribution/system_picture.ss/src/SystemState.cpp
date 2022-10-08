@@ -154,6 +154,10 @@ namespace SP
 
         static SystemState Create(std::unique_ptr<SystemStateMessage> message)
         {
+            if (message == nullptr)
+            {
+                throw std::logic_error("Cannot create a SystemState from a nullptr");
+            }
             std::sort(message->mutable_node_info()->begin(),
                       message->mutable_node_info()->end(),
                       [](const SystemStateMessage_NodeInfo& first,
@@ -166,9 +170,14 @@ namespace SP
 
     SystemState::SystemState() {}
 
+    bool SystemState::IsValid() const
+    {
+        return m_impl != nullptr;
+    }
+
     void SystemState::CheckValid() const
     {
-        if (m_impl == nullptr)
+        if (!IsValid())
         {
             throw std::logic_error("Invalid use of default constructed SystemState object");
         }

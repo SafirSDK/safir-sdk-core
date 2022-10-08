@@ -135,7 +135,6 @@ public:
         : parseOk(false)
     {
         bool useMulticast = false;
-        bool isLightNode = false;
 
         using namespace boost::program_options;
         options_description options("Options");
@@ -199,6 +198,7 @@ public:
     std::string address;
     std::string controlAddress;
     std::string dataAddress;
+    bool isLightNode = false;
     int seed;
     int revolutions;
     int64_t nodeType;
@@ -227,10 +227,11 @@ std::vector<boost::chrono::steady_clock::duration> ToChronoDurations(const std::
 class Common
 {
 public:
-    Common(const std::int64_t id)
+    Common(const std::int64_t id, const std::string& logPrefix)
         : m_success(true)
         , m_work(new boost::asio::io_service::work(m_ioService))
         , m_id(id)
+        , m_logPrefix(logPrefix)
     {
         std::vector<int> retryTimeout20;
         retryTimeout20.push_back(20);
@@ -281,7 +282,7 @@ public:
                                              8,
                                              ToChronoDurations(retryTimeout20))));
 
-            m_commNodeTypes.push_back(Safir::Dob::Internal::Com::NodeTypeDefinition
+        m_commNodeTypes.push_back(Safir::Dob::Internal::Com::NodeTypeDefinition
                                   (11,
                                    "LightUnicast",
                                    "", //no multicast
@@ -322,7 +323,7 @@ public:
                                              boost::chrono::milliseconds(2000),
                                              8,
                                              ToChronoDurations(retryTimeout20))));
-}
+    }
 
     void Start()
     {
@@ -345,12 +346,12 @@ public:
                 }
                 catch (const std::exception & exc)
                 {
-                    logerr << "Caught 'std::exception' exception from io_service.run(): "
+                    logerr << m_logPrefix << ": Caught 'std::exception' exception from io_service.run(): "
                                << "  '" << exc.what() << "'." << std::endl;
                     exit(1);
                 }
                 m_success.exchange(false);
-                logerr << "Thread exiting due to failure" << std::endl;
+                logerr << m_logPrefix << ": Thread exiting due to failure" << std::endl;
             });
         }
     }
@@ -379,6 +380,7 @@ protected:
     std::unique_ptr<boost::asio::io_service::work> m_work;
 
     const std::int64_t m_id;
+    const std::string m_logPrefix;
     std::vector<Safir::Dob::Internal::Com::NodeTypeDefinition> m_commNodeTypes;
     std::map<int64_t, Safir::Dob::Internal::SP::NodeType> m_spNodeTypes;
 
@@ -394,7 +396,7 @@ public:
     explicit Control(const ProgramOptions& options,
                      const std::int64_t id,
                      const std::function<void()>& stopFcn)
-        : Common(id)
+        : Common(id, "Control")
         , m_strand(m_ioService)
         , m_stopFcn(stopFcn)
         , m_joinCalls(0)
@@ -466,7 +468,6 @@ protected:
     void NewState(const Safir::Dob::Internal::SP::SystemState& data)
     {
         logout << data.ToJson() << std::endl;
-
     }
 
     boost::asio::io_service::strand m_strand;
@@ -480,14 +481,12 @@ class Main: public Common
 {
 public:
     explicit Main(const ProgramOptions& options, const std::int64_t id)
-        : Common(id)
+        : Common(id, "Main")
+        , m_isLightNode(options.isLightNode)
         , m_strand(m_ioService)
         , m_sendTimer(m_ioService)
         , m_timerStopped(false)
-        , m_receivedBytes(0)
     {
-        m_injectedNodes.insert(id);//consider ourselves already injected
-
         m_communication.reset(new Safir::Dob::Internal::Com::Communication
                               (Safir::Dob::Internal::Com::dataModeTag,
                                m_ioService,
@@ -508,7 +507,7 @@ public:
                                options.nodeType,
                                m_spNodeTypes));
 
-        m_communication->SetDataReceiver(m_strand.wrap([this](const int64_t /*fromNodeId*/,
+        m_communication->SetDataReceiver(m_strand.wrap([this](const int64_t fromNodeId,
                                                               const int64_t /*fromNodeType*/,
                                                               const char* data,
                                                               const size_t size)
@@ -524,7 +523,7 @@ public:
                     throw std::logic_error("Received corrupt data!");
                 }
             }
-            m_receivedBytes += size;
+            m_expectDataFrom.erase(fromNodeId);
         }),
                                          1000100222,
                                          [](size_t size){return new char[size];},
@@ -536,7 +535,7 @@ public:
 
         m_systemPicture->StartStateSubscription(m_strand.wrap([this](const Safir::Dob::Internal::SP::SystemState& data)
         {
-            HandleNodes(data);
+            HandleState(data);
         }));
 
     }
@@ -547,17 +546,27 @@ public:
         m_timerStopped = true;
         StopCommon();
 
-        if (m_receivedBytes == 0)
-        {
-            logerr << "Main has received no data!" << std::endl;
-        }
+        CheckNoExpectedData();
     }
 
     bool Success() const
     {
-        return SuccessCommon() && m_receivedBytes != 0;
+        return SuccessCommon() && m_timerStopped && m_expectDataFrom.empty();
     }
 private:
+    void CheckNoExpectedData()
+    {
+        if (m_expectDataFrom.empty())
+        {
+            return;
+        }
+        for (const auto node: m_expectDataFrom)
+        {
+            logerr << "Expected data from " << node << std::endl;
+        }
+        throw std::logic_error("Not all expected data was received");
+    }
+
     void Send(const boost::system::error_code& error)
     {
         if (error || m_timerStopped)
@@ -566,58 +575,100 @@ private:
         }
 
         //send the data to all node types.
-        m_communication->Send(0, 1, DATA, DATA_SIZE, 1000100222,true);
-        m_communication->Send(0, 2, DATA, DATA_SIZE, 1000100222,true);
-        m_communication->Send(0, 11, DATA, DATA_SIZE, 1000100222,true);
+        m_communication->Send(0, 1, DATA, DATA_SIZE, 1000100222, true);
+        m_communication->Send(0, 2, DATA, DATA_SIZE, 1000100222, true);
+        m_communication->Send(0, 11, DATA, DATA_SIZE, 1000100222, true);
+        m_communication->Send(0, 12, DATA, DATA_SIZE, 1000100222, true);
         m_sendTimer.expires_from_now(boost::chrono::milliseconds(100));
         m_sendTimer.async_wait([this](const boost::system::error_code& error){Send(error);});
     }
 
-    void HandleNodes(const Safir::Dob::Internal::SP::SystemState& data)
+    void HandleState(const Safir::Dob::Internal::SP::SystemState& state)
     {
-        for (int i = 0; i < data.Size(); ++i)
+        logerr << "Main:" << state.ToJson() << std::endl;
+
+        if (m_lastState.IsValid() && !m_lastState.IsDetached() && state.IsDetached())
         {
-            const auto id = data.Id(i);
+            logerr << "Main: Looks like I became detached. Excluding all nodes that were in my last state!" << std::endl;
+            for (int i = 0; i < m_lastState.Size(); ++i)
+            {
+                //skip self, though
+                if (m_lastState.Id(i) == m_id)
+                {
+                    continue;
+                }
+                logerr << "Main:   Calling ExcludeNode for node " << m_lastState.Id(i) << std::endl;
+                m_systemPicture->ExcludeNode(m_lastState.Id(i));
+            }
+
+            m_expectDataFrom.clear();
+            m_injectedNodes.clear();
+        }
+
+        std::set<int64_t> deadInLastState;
+        for (int i = 0; i < m_lastState.Size(); ++i)
+        {
+            if (m_lastState.IsDead(i))
+            {
+                deadInLastState.insert(m_lastState.Id(i));
+            }
+        }
+
+        for (int i = 0; i < state.Size(); ++i)
+        {
+            const auto id = state.Id(i);
             if (id == m_id)
             {
                 continue;
             }
 
-            const bool injected = m_injectedNodes.find(id) != m_injectedNodes.end();
-            if (data.IsDead(i) && injected)
+            if (m_isLightNode && (state.NodeTypeId(i) == 11 || state.NodeTypeId(i) == 12))
             {
-                logerr << "Main: Excluding node " << data.Name(i) << "(" << id << ")";
-                m_systemPicture->ExcludeNode(id);
-                m_injectedNodes.erase(id);
+                logerr << "Main: Ignoring lightnode " << id << " since I am a lightnode" << std::endl;
+                continue;
             }
-            else if (!data.IsDead(i) && injected)
-            {
-                logerr << "Main: Resurrecting node " << data.Name(i) << "(" << id << ")";
-                m_systemPicture->ResurrectNode(id);
-                m_injectedNodes.erase(id);
-            }
-            else if (!data.IsDead(i) && injected)
-            {
-                logerr << "Main: Injecting node " << data.Name(i) << "(" << data.Id(i)
-                       << ") of type " << data.NodeTypeId(i)
-                       << " with address " << data.DataAddress(i) << std::endl;
 
-                m_communication->InjectNode(data.Name(i),
+            const bool injected = m_injectedNodes.find(id) != m_injectedNodes.end();
+            const bool wasDead = deadInLastState.find(id) != deadInLastState.end();
+
+            if (!state.IsDead(i) && !injected)
+            {
+                logerr << "Main: Injecting node " << state.Name(i) << "(" << state.Id(i)
+                       << ") of type " << state.NodeTypeId(i)
+                       << " with address " << state.DataAddress(i) << std::endl;
+
+                m_expectDataFrom.insert(id);
+                m_communication->InjectNode(state.Name(i),
                                             id,
-                                            data.NodeTypeId(i),
-                                            data.DataAddress(i));
+                                            state.NodeTypeId(i),
+                                            state.DataAddress(i));
 
                 m_injectedNodes.insert(id);
             }
+            else if (state.IsDead(i) && injected && !wasDead)
+            {
+                logerr << "Main: Excluding node " << state.Name(i) << "(" << id << ")" << std::endl;
+                m_systemPicture->ExcludeNode(id);
+                CheckNoExpectedData();
+            }
+            else if (!state.IsDead(i) && injected && wasDead)
+            {
+                logerr << "Main: Resurrecting node " << state.Name(i) << "(" << id << ")" << std::endl;
+                m_expectDataFrom.insert(id);
+                m_systemPicture->ResurrectNode(id);
+            }
         }
+
+        m_lastState = state;
     }
 
+    const bool m_isLightNode;
     boost::asio::io_service::strand m_strand;
     std::set<int64_t> m_injectedNodes;
-
     boost::asio::steady_timer m_sendTimer;
     std::atomic<bool> m_timerStopped;
-    uint64_t m_receivedBytes;
+    std::set<int64_t> m_expectDataFrom;
+    Safir::Dob::Internal::SP::SystemState m_lastState;
 };
 
 int main(int argc, char * argv[])
@@ -712,7 +763,6 @@ int main(int argc, char * argv[])
 
         control->Start();
         main->Start();
-
 
         ioService.run();
 

@@ -82,6 +82,10 @@ namespace
             if (node.is_dead())
             {
                 out << "]";
+                if (node.is_resurrecting())
+                {
+                    out << "R";
+                }
             }
             else
             {

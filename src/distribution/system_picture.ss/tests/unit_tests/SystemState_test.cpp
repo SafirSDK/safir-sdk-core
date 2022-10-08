@@ -73,16 +73,25 @@ std::unique_ptr<SystemStateMessage> GetProtobuf(bool empty)
 
 }
 
+BOOST_AUTO_TEST_CASE( test_default )
+{
+    const auto r = SystemState();
+    BOOST_CHECK(r.Size() == 0);
+    BOOST_CHECK(!r.IsValid());
+}
+
 BOOST_AUTO_TEST_CASE( test_empty )
 {
     const auto r = SystemStateCreator::Create(GetProtobuf(true));
     BOOST_CHECK(r.Size() == 0);
+    BOOST_CHECK(r.IsValid());
 }
 
 
 BOOST_AUTO_TEST_CASE( test_not_empty )
 {
     const auto r = SystemStateCreator::Create(GetProtobuf(false));
+    BOOST_CHECK(r.IsValid());
     BOOST_CHECK(r.ElectedId() == 100);
     BOOST_CHECK(r.ElectionId() == 1001);
     BOOST_CHECK(r.IsDetached());

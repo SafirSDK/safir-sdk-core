@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2012 (http://safirsdkcore.com)
+* Copyright Saab AB, 2012, 2022 (http://safirsdkcore.com)
 *
 * Created by: Lars Hagström / lars.hagstrom@consoden.se
 *
@@ -465,10 +465,24 @@ namespace SP
                     }
                     NodeInfo& node = findIt->second; //alias the iterator
 
+                    //Check if there are any nodes that data channel thinks is dead, but that control
+                    //may just have resurrected.
+                    if (data.IsDead(i) && !node.nodeInfo->is_dead() && node.nodeInfo->data_receive_count() == 0
+                        && node.nodeInfo->control_receive_count() < 10000)
+                    {
+                        lllog(4) << "We're probably int the process of resurrecting node " << data.Id(i)
+                                 << ", so we'll ignore that data channel thinks it is dead." << std::endl;
+                        continue;
+                    }
+
                     //Check if data channel is dead and control channel is not.
                     //In that case we want to kill our own channel.
                     if (data.IsDead(i) && !node.nodeInfo->is_dead())
                     {
+                        const auto copy = RawStatisticsCreator::Create
+                            (Safir::make_unique<RawStatisticsMessage>(m_allStatisticsMessage));
+
+                        lllog(4) << "Gonna exclude a node that data channel thinks is dead:\n"<< data << "\n" << copy << std::endl;
                         node.nodeInfo->set_is_dead(true);
                         m_communication.ExcludeNode(data.Id(i));
                         changes |= RawChanges::NODES_CHANGED;
@@ -508,20 +522,35 @@ namespace SP
          **/
         void ExcludeNode(const int64_t id)
         {
+            if (id == m_id)
+            {
+                throw std::logic_error("ExcludeNode on own node!");
+            }
+            lllog(4) << "SP: ExcludeNode " << id << std::endl;
             m_communication.ExcludeNode(id);
             m_strand.dispatch([this, id]
                               {
-                                  auto findIt = m_nodeTable.find(id);
-
-                                  if (findIt == m_nodeTable.end())
+                                  if (m_isLightNode && !m_master)
                                   {
-                                      throw std::logic_error("ExcludeNode on unknown node");
-                                  }
-
-                                  if (!findIt->second.nodeInfo->is_dead())
-                                  {
-                                      findIt->second.nodeInfo->set_is_dead(true);
+                                      lllog(4) << "SP: ExcludeNode: Am a lightnode and in data connection, "
+                                               << "so removing node " << id << " from tables" << std::endl;
+                                      m_nodeTable.erase(id);
                                       PostRawChangedCallback(RawChanges::NODES_CHANGED, nullptr);
+                                  }
+                                  else
+                                  {
+                                      auto findIt = m_nodeTable.find(id);
+
+                                      if (findIt == m_nodeTable.end())
+                                      {
+                                          throw std::logic_error("ExcludeNode on unknown node");
+                                      }
+
+                                      if (!findIt->second.nodeInfo->is_dead())
+                                      {
+                                          findIt->second.nodeInfo->set_is_dead(true);
+                                          PostRawChangedCallback(RawChanges::NODES_CHANGED, nullptr);
+                                      }
                                   }
                               });
         }
@@ -535,8 +564,15 @@ namespace SP
             {
                 throw std::logic_error("ResurrectNode on own node!");
             }
+
+            if (m_isLightNode)
+            {
+                throw std::logic_error("ResurrectNode on a lightnode makes no sense!");
+            }
+
             m_strand.dispatch([this, id]
                               {
+                                  lllog(4) << "SP: ResurrectNode: Resurrecting node " << id << std::endl;
                                   auto findIt = m_nodeTable.find(id);
 
                                   if (findIt == m_nodeTable.end())
@@ -549,12 +585,22 @@ namespace SP
                                       throw std::logic_error("ResurrectNode on not dead node!");
                                   }
 
-                                  if (!findIt->second.nodeInfo->is_resurrecting())
+                                  if (!findIt->second.nodeInfo->is_resurrecting() && m_master)
                                   {
-                                      throw std::logic_error("ResurrectNode on not resurrecting node!");
+                                      throw std::logic_error("ResurrectNode on not resurrecting node on master!");
                                   }
 
-                                  m_communication.IncludeNode(id);
+                                  if (m_master)
+                                  {
+                                      m_communication.IncludeNode(id);
+                                  }
+                                  else
+                                  {
+                                      m_communication.InjectNode(findIt->second.nodeInfo->name(),
+                                                                 id,
+                                                                 findIt->second.nodeInfo->node_type_id(),
+                                                                 findIt->second.nodeInfo->data_address());
+                                  }
                                   findIt->second.nodeInfo->set_is_dead(false);
                                   findIt->second.nodeInfo->set_is_resurrecting(false);
 
@@ -573,7 +619,7 @@ namespace SP
          * Tell the RawHandler that this light node should forget everything about other nodes
          * since it is no longer connected to anything.
          *
-         * This will fail on non-light nodes or of some node is alive.
+         * This will fail on non-light nodes or if some node is alive.
          */
         void SetNodeIsDetached()
         {
@@ -592,7 +638,7 @@ namespace SP
                                                                  "there was a node that is alive!");
                                       }
                                   }
-
+                                  lllog(4) << "SP: SetNodeIsDetached: Clearing node tables" << std::endl;
                                   m_nodeTable.clear();
                                   m_allStatisticsMessage.clear_node_info();
                                   m_allStatisticsMessage.clear_more_dead_nodes();
@@ -765,18 +811,33 @@ namespace SP
                 }
 
                 nodeIt->second.nodeInfo->set_is_resurrecting(true);
+                lllog(4) << "SP: New node '" << name.c_str() << "' ("
+                         << id << ") is resurrecting" << std::endl;
 
                 PostRawChangedCallback(RawChanges(RawChanges::NODES_CHANGED), nullptr);
             }
             else
             {
-                const auto newNode = m_allStatisticsMessage.add_node_info();
-                const auto insertResult = m_nodeTable.insert(std::make_pair(id,NodeInfo(newNode,multicast)));
-
-                if (!insertResult.second)
+                const auto alreadyInThere = m_nodeTable.find(id);
+                if (alreadyInThere != m_nodeTable.end())
                 {
+                    lllog(1) << "SP: Got a new node " << name.c_str() << " that I already had" << std::endl;
+
+                    if (m_isLightNode && !alreadyInThere->second.nodeInfo->is_dead())
+                    {
+                        lllog(1) << "SP: And I am a lightnode and that node is not dead! Strange!" << std::endl;
+                    }
+                    else if (m_isLightNode)
+                    {
+                        lllog(1) << "SP: And I am a lightnode that is not detached and that node should be ignored."
+                                 << std::endl;
+                        return;
+                    }
                     throw std::logic_error("Got a new node that I already had");
                 }
+
+                const auto newNode = m_allStatisticsMessage.add_node_info();
+                m_nodeTable.insert(std::make_pair(id,NodeInfo(newNode,multicast)));
 
                 //last receive times are set by NodeInfo constructor
 
@@ -797,8 +858,14 @@ namespace SP
 
                 if (m_moreDeadNodes.find(id) != m_moreDeadNodes.end())
                 {
-                    m_communication.ExcludeNode(id);
+                    lllog(1) << "SP: This node was found in moreDeadNodes, so marking it as dead" << std::endl;
+                    if (!m_isLightNode)
+                    {
+                        lllog(1) << "SP: ... and excluding it, since I am not a lightnode" << std::endl;
+                        m_communication.ExcludeNode(id);
+                    }
                     newNode->set_is_dead(true);
+
                 }
 
                 //notify our users of the new node, and when they've returned we can
@@ -901,16 +968,17 @@ namespace SP
             {
                 node.nodeInfo->set_control_retransmit_count(node.nodeInfo->control_retransmit_count() + 1);
 
-                //we want to do this seldom, since there is a bit of work in here
-                //so we only do these checks on the second retransmit...
-                if (transmitCount > 1 && node.multicast)
+                //we want to do this seldom, since there is a bit of work in here so we
+                //only do these checks after something has been retransmitted many times.
+                if (transmitCount > 10)
                 {
                     //if we have a great number of retransmits it means that either we
                     //have one-sided communication or that the other node has excluded
                     //us, but is still sending heartbeats to us (can happen in multicast
-                    //scenarios). So we exclude the node.  However, during startup we can
-                    //get a lot of retransmits while nodes are getting connected.
-                    if (node.nodeInfo->control_receive_count() > 0)
+                    //and some lightnode scenarios). So we exclude the node.  However,
+                    //during startup we can get a lot of retransmits while nodes are
+                    //getting connected.
+                    if (node.nodeInfo->control_receive_count() > 20)
                     {
                         if (transmitCount >= 20)
                         {

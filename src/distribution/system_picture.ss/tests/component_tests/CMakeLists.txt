@@ -13,5 +13,5 @@ ADD_TEST(NAME system_picture_component_test
   ${CMAKE_CURRENT_SOURCE_DIR}/run_system_picture_component_test.py
      --exe $<TARGET_FILE:system_picture_component_test_node>)
 
-SET_SAFIR_TEST_PROPERTIES(TEST system_picture_component_test TIMEOUT 700)
+SET_SAFIR_TEST_PROPERTIES(TEST system_picture_component_test TIMEOUT 1500)
 
