@@ -613,9 +613,11 @@ namespace SP
             // if we're becoming detached we need to clear out all the nodes from state
             if (!m_stateMessage.is_detached() && m_electionHandler->IsDetached())
             {
-                lllog(8) << "Becoming detached, clearing node info from state" <<std::endl;
+                lllog(8) << "SP: Becoming detached, clearing node info from state" <<std::endl;
                 m_stateMessage.clear_node_info();
                 m_rawHandler.SetNodeIsDetached();
+                m_stateMessage.set_is_detached(true);
+                return false;
             }
             m_stateMessage.set_is_detached(m_electionHandler->IsDetached());
 

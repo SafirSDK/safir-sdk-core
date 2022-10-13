@@ -286,14 +286,17 @@ namespace SP
                     return;
                 }
 
-                if (m_isLightNode && m_lastStatistics.Valid() && m_lastStatistics.IsEveryoneElseDead())
+                if (m_isLightNode &&
+                    m_lastStatistics.Valid() &&
+                    m_lastStatistics.IsEveryoneElseDead() &&
+                    m_lastStatistics.Size() != 0)
                 {
                     lllog(4) << "SP: I am a light node, and everyone else is gone, so I shall get myself elected anyway." << std::endl;
                     m_lastStatistics = RawStatistics();
                 }
 
                 lllog(4) << "SP: Checking if I should start election" << std::endl;
-                
+
                 if (!m_lastStatistics.Valid())
                 {
                     lllog(4) << "SP: Haven't heard from any other nodes, electing myself!" << std::endl;
@@ -674,4 +677,3 @@ namespace SP
 }
 }
 }
-

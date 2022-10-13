@@ -128,9 +128,9 @@ namespace SP
             PrintMessage(*m_message, out);
         }
 
-        std::wstring ToJson() const
+        std::string ToJson() const
         {
-            std::wostringstream out;
+            std::ostringstream out;
             out <<  "{\"election_id\": " << m_message->election_id()
                 << ", \"elected_id\": " << m_message->elected_id()
                 << ", \"is_detached\": " << std::boolalpha << m_message->is_detached()
@@ -207,7 +207,7 @@ namespace SP
     bool SystemState::IsDead(const int index) const {CheckValid(); return m_impl->IsDead(index);}
 
     void SystemState::Print(std::wostream& out) const {CheckValid(); m_impl->Print(out);}
-    std::wstring SystemState::ToJson() const {CheckValid(); return m_impl->ToJson();}
+    std::string SystemState::ToJson() const {CheckValid(); return m_impl->ToJson();}
 
     SystemState SystemStateCreator::Create(std::unique_ptr<SystemStateMessage> message)
     {

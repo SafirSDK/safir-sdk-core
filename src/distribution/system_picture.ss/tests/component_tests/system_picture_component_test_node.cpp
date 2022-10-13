@@ -55,14 +55,6 @@
 #  pragma warning (disable : 4505)
 #endif
 
-std::string nowString()
-{
-    using namespace boost::posix_time;
-    using namespace boost;
-    const time_duration td = microsec_clock::universal_time().time_of_day();
-    return to_simple_string(td);
-}
-
 const size_t DATA_SIZE = 3200;
 
 Safir::Utilities::Internal::SharedCharArray createData()
@@ -100,8 +92,8 @@ private:
 };
 boost::recursive_mutex Magic::wcout_lock; //static instance
 
-#define logout if(Magic lck_asdf = Magic::Lock()) ; else std::wcout << "[" << nowString()<< "] "
-#define logerr if(Magic lck_asdf = Magic::Lock()) ; else std::wcerr << "[" << nowString()<< "] "
+#define logout if(Magic lck_asdf = Magic::Lock()) ; else std::cout
+#define logerr if(Magic lck_asdf = Magic::Lock()) ; else std::cerr
 
 std::int64_t GenerateId()
 {
@@ -114,19 +106,6 @@ std::int64_t GenerateId()
         }
     }
 }
-
-std::wostream& operator<<(std::wostream& out, const std::string& str)
-{
-    return out << str.c_str();
-}
-
-std::wostream& operator<<(std::wostream& out, const boost::program_options::options_description& opt)
-{
-    std::ostringstream ostr;
-    ostr << opt;
-    return out << ostr.str().c_str();
-}
-
 
 class ProgramOptions
 {
@@ -231,7 +210,7 @@ public:
         : m_success(true)
         , m_work(new boost::asio::io_service::work(m_ioService))
         , m_id(id)
-        , m_logPrefix(logPrefix)
+        , m_logPrefix(logPrefix + ": ")
     {
         std::vector<int> retryTimeout20;
         retryTimeout20.push_back(20);
@@ -246,8 +225,8 @@ public:
                                    "", //no multicast
                                    "", //no multicast
                                    false,
-                                   1000, //heartbeatInterval
-                                   15, //maxLostHeartbeats
+                                   500, //heartbeatInterval
+                                   10, //maxLostHeartbeats
                                    20, //slidingwindowsize
                                    10, //ackrequestThreshold
                                    retryTimeout20));
@@ -258,7 +237,7 @@ public:
                                              "NormalUnicast",
                                              false,
                                              boost::chrono::milliseconds(1000),
-                                             15,
+                                             10,
                                              ToChronoDurations(retryTimeout20))));
 
         m_commNodeTypes.push_back(Safir::Dob::Internal::Com::NodeTypeDefinition
@@ -267,8 +246,8 @@ public:
                                    "224.123.45.67:10000",
                                    "224.123.45.67:10001",
                                    false,
-                                   2000,
-                                   8,
+                                   500,
+                                   10,
                                    20,
                                    10,
                                    retryTimeout50));
@@ -279,7 +258,7 @@ public:
                                              "NormalMulticast",
                                              false,
                                              boost::chrono::milliseconds(2000),
-                                             8,
+                                             10,
                                              ToChronoDurations(retryTimeout20))));
 
         m_commNodeTypes.push_back(Safir::Dob::Internal::Com::NodeTypeDefinition
@@ -288,8 +267,8 @@ public:
                                    "", //no multicast
                                    "", //no multicast
                                    true,
-                                   1000,
-                                   15,
+                                   500,
+                                   10,
                                    20,
                                    10,
                                    retryTimeout20));
@@ -300,17 +279,17 @@ public:
                                              "LightUnicast",
                                              true,
                                              boost::chrono::milliseconds(1000),
-                                             15,
+                                             10,
                                              ToChronoDurations(retryTimeout20))));
 
         m_commNodeTypes.push_back(Safir::Dob::Internal::Com::NodeTypeDefinition
                                   (12,
                                    "LightMulticast",
-                                   "224.123.45.67:10000",
-                                   "224.123.45.67:10001",
+                                   "224.123.45.67:10002",
+                                   "224.123.45.67:10003",
                                    true,
-                                   2000,
-                                   8,
+                                   500,
+                                   10,
                                    20,
                                    10,
                                    retryTimeout50));
@@ -346,12 +325,14 @@ public:
                 }
                 catch (const std::exception & exc)
                 {
-                    logerr << m_logPrefix << ": Caught 'std::exception' exception from io_service.run(): "
+                    {
+                        logerr << m_logPrefix << "Caught 'std::exception' exception from io_service.run(): "
                                << "  '" << exc.what() << "'." << std::endl;
+                    }
                     exit(1);
                 }
                 m_success.exchange(false);
-                logerr << m_logPrefix << ": Thread exiting due to failure" << std::endl;
+                logerr << m_logPrefix << "Thread exiting due to failure" << std::endl;
             });
         }
     }
@@ -399,7 +380,6 @@ public:
         : Common(id, "Control")
         , m_strand(m_ioService)
         , m_stopFcn(stopFcn)
-        , m_joinCalls(0)
     {
         m_communication.reset(new Safir::Dob::Internal::Com::Communication
                               (Safir::Dob::Internal::Com::controlModeTag,
@@ -445,23 +425,19 @@ public:
     }
     bool Success() const
     {
-        return SuccessCommon() && m_joinCalls <= 1;
+        return SuccessCommon();
     }
 protected:
 
-    bool CheckJoinSystem(const int64_t id)
+    bool CheckJoinSystem(const int64_t incarnationId)
     {
-        logerr << "Got join callback for " << id << std::endl;
-        ++m_joinCalls;
-        if (m_joinCalls > 1)
-        {
-            throw std::logic_error("Expect only one call to CheckJoinSystem");
-        }
+        logout << "{\"join\": " << incarnationId << "}" << std::endl;
         return true;
     }
 
-    bool CheckFormSystem(const int64_t /*incarnationId*/)
+    bool CheckFormSystem(const int64_t incarnationId)
     {
+        logout << "{\"form\": " << incarnationId << "}" << std::endl;
         return true;
     }
 
@@ -473,7 +449,6 @@ protected:
     boost::asio::io_service::strand m_strand;
 
     const std::function<void()> m_stopFcn;
-    int m_joinCalls;
 };
 
 
@@ -520,6 +495,20 @@ public:
             {
                 if (data[i] != static_cast<char>(i % 10))
                 {
+                    logerr << "Incorrect data in packet from node " << fromNodeId
+                           <<". Byte "<< i <<" had unexpected value 0x" << std::hex
+                           << static_cast<int>(data[i])
+                           << " instead of 0x" << i % 10 << std::endl;
+                    std::ostringstream o1;
+                    std::ostringstream o2;
+                    for (size_t j = std::max(0,static_cast<int>(i)-8); j < std::min(size, i+8); ++j)
+                    {
+                        o1 << " 0x" << std::setfill('0') << std::setw(2) << static_cast<int>(data[j]);
+                        o2 << " 0x" << std::setfill('0') << std::setw(2) << static_cast<int>(j %10);
+                    }
+                    logerr << "Expected " << o2.str() << std::endl;
+                    logerr << "Got      " << o1.str() << std::endl;
+                    
                     throw std::logic_error("Received corrupt data!");
                 }
             }
@@ -530,7 +519,7 @@ public:
                                          [](const char * data){delete[] data;});
 
 
-        m_sendTimer.expires_from_now(boost::chrono::milliseconds(50));
+        m_sendTimer.expires_from_now(boost::chrono::milliseconds(20));
         m_sendTimer.async_wait([this](const boost::system::error_code& error){Send(error);});
 
         m_systemPicture->StartStateSubscription(m_strand.wrap([this](const Safir::Dob::Internal::SP::SystemState& data)
@@ -579,17 +568,17 @@ private:
         m_communication->Send(0, 2, DATA, DATA_SIZE, 1000100222, true);
         m_communication->Send(0, 11, DATA, DATA_SIZE, 1000100222, true);
         m_communication->Send(0, 12, DATA, DATA_SIZE, 1000100222, true);
-        m_sendTimer.expires_from_now(boost::chrono::milliseconds(100));
+        m_sendTimer.expires_from_now(boost::chrono::milliseconds(20));
         m_sendTimer.async_wait([this](const boost::system::error_code& error){Send(error);});
     }
 
     void HandleState(const Safir::Dob::Internal::SP::SystemState& state)
     {
-        logerr << "Main:" << state.ToJson() << std::endl;
+        logerr << m_logPrefix << state.ToJson() << std::endl;
 
         if (m_lastState.IsValid() && !m_lastState.IsDetached() && state.IsDetached())
         {
-            logerr << "Main: Looks like I became detached. Excluding all nodes that were in my last state!" << std::endl;
+            logerr << m_logPrefix << "Looks like I became detached. Excluding all nodes that were in my last state!" << std::endl;
             for (int i = 0; i < m_lastState.Size(); ++i)
             {
                 //skip self, though
@@ -597,7 +586,7 @@ private:
                 {
                     continue;
                 }
-                logerr << "Main:   Calling ExcludeNode for node " << m_lastState.Id(i) << std::endl;
+                logerr << m_logPrefix << " Calling ExcludeNode for node " << m_lastState.Id(i) << std::endl;
                 m_systemPicture->ExcludeNode(m_lastState.Id(i));
             }
 
@@ -624,7 +613,7 @@ private:
 
             if (m_isLightNode && (state.NodeTypeId(i) == 11 || state.NodeTypeId(i) == 12))
             {
-                logerr << "Main: Ignoring lightnode " << id << " since I am a lightnode" << std::endl;
+                logerr << m_logPrefix << "Ignoring lightnode " << id << " since I am a lightnode" << std::endl;
                 continue;
             }
 
@@ -633,7 +622,7 @@ private:
 
             if (!state.IsDead(i) && !injected)
             {
-                logerr << "Main: Injecting node " << state.Name(i) << "(" << state.Id(i)
+                logerr << m_logPrefix << "Injecting node " << state.Name(i) << "(" << state.Id(i)
                        << ") of type " << state.NodeTypeId(i)
                        << " with address " << state.DataAddress(i) << std::endl;
 
@@ -647,7 +636,7 @@ private:
             }
             else if (state.IsDead(i) && injected && !wasDead)
             {
-                logerr << "Main: Excluding node " << state.Name(i) << "(" << id << ")" << std::endl;
+                logerr << m_logPrefix << "Excluding node " << state.Name(i) << "(" << id << ")" << std::endl;
                 m_systemPicture->ExcludeNode(id);
                 CheckNoExpectedData();
             }

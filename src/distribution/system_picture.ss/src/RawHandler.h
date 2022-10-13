@@ -126,27 +126,32 @@ namespace SP
             , m_validateFormSystemCallback(validateFormSystemCallback)
             , m_stopped(false)
         {
-
-            m_checkDeadNodesTimer.reset(new Safir::Utilities::Internal::AsioPeriodicTimer
-                                        (ioService,
-                                         CalculateDeadCheckPeriod(nodeTypes),
-                                         m_strand.wrap([this](const boost::system::error_code& error)
-                                                       {
-                                                           if (m_stopped)
+            //data channel on are not allowed to mark themselves as dead.
+            //That has to come from "above", since otherwise we may miss a fast
+            //detach/reattach change for lightnodes.
+            if (m_master)
+            {
+                m_checkDeadNodesTimer.reset(new Safir::Utilities::Internal::AsioPeriodicTimer
+                                            (ioService,
+                                             CalculateDeadCheckPeriod(nodeTypes),
+                                             m_strand.wrap([this](const boost::system::error_code& error)
                                                            {
-                                                               return;
-                                                           }
+                                                               if (m_stopped)
+                                                               {
+                                                                   return;
+                                                               }
 
-                                                           if (error)
-                                                           {
-                                                               SEND_SYSTEM_LOG(Alert,
-                                                                               << "Unexpected error in CheckDeadNodes: " << error);
-                                                               throw std::logic_error("Unexpected error in CheckDeadNodes");
-                                                           }
+                                                               if (error)
+                                                               {
+                                                                   SEND_SYSTEM_LOG(Alert,
+                                                                                   << "Unexpected error in CheckDeadNodes: " << error);
+                                                                   throw std::logic_error("Unexpected error in CheckDeadNodes");
+                                                               }
 
-                                                           CheckDeadNodes();
-                                                       })));
-
+                                                               CheckDeadNodes();
+                                                           })));
+                m_checkDeadNodesTimer->Start();
+            }
 
             //set up some info about ourselves in our message
             m_allStatisticsMessage.set_name(name);
@@ -175,8 +180,6 @@ namespace SP
 
             communication.SetRetransmitToCallback(m_strand.wrap([this](int64_t id, size_t tc)
             {Retransmit(id, tc);}));
-
-            m_checkDeadNodesTimer->Start();
         }
 
 
@@ -187,10 +190,13 @@ namespace SP
             {
                 m_latencyMonitor.Stop();
 
-                m_strand.dispatch([this]
-                                  {
-                                      m_checkDeadNodesTimer->Stop();
-                                  });
+                if (m_checkDeadNodesTimer != nullptr)
+                {
+                    m_strand.dispatch([this]
+                    {
+                        m_checkDeadNodesTimer->Stop();
+                    });
+                }
             }
         }
 
@@ -630,6 +636,12 @@ namespace SP
 
             m_strand.dispatch([this]
                               {
+                                  if (m_nodeTable.empty() && m_allStatisticsMessage.more_dead_nodes_size() == 0)
+                                  {
+                                      lllog(4) << "SP: SetNodeIsDetached: Nothing to do." << std::endl;
+                                      return;
+                                  }
+
                                   for (const auto& node: m_nodeTable)
                                   {
                                       if (!node.second.nodeInfo->is_dead())
@@ -693,10 +705,13 @@ namespace SP
 
         void FormSystem(const int64_t incarnationId)
         {
+            lllog(4) << "SP: FormSystem " << incarnationId << std::endl;
             m_strand.dispatch([this, incarnationId]
                               {
                                   if (m_allStatisticsMessage.has_incarnation_id())
                                   {
+                                      lllog(8) << "SP: Already have an incarnation_id "
+                                               << m_allStatisticsMessage.incarnation_id() << std::endl;
                                       return;
                                   }
 
@@ -873,7 +888,12 @@ namespace SP
                 PostRawChangedCallback(RawChanges(RawChanges::NODES_CHANGED),
                                        m_strand.wrap([this,name,id,newNode]
                                        {
-                                           if (!newNode->is_dead())
+                                           if (!m_master)
+                                           {
+                                               lllog(4) << "SP: Not calling IncludeNode for "
+                                                        << name.c_str() << "(" << id << ") since we're not the master" << std::endl;
+                                           }
+                                           else if (!newNode->is_dead())
                                            {
                                                lllog(4) << "SP: Calling IncludeNode for "
                                                         << name.c_str() << "(" << id << ")" << std::endl;
@@ -952,7 +972,12 @@ namespace SP
 
             const auto findIt = m_nodeTable.find(id);
 
-            if (findIt == m_nodeTable.end())
+            if (m_isLightNode && findIt == m_nodeTable.end())
+            {
+                lllog(9) << "SP: Retransmit to unknown node on lightnode, ignoring." <<  std::endl;
+                return;
+            }
+            else if (findIt == m_nodeTable.end())
             {
                 throw std::logic_error("Retransmit to unknown node");
             }
