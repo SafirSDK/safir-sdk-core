@@ -202,7 +202,7 @@ namespace
         lllog(6)<<m_logPrefix.c_str()<<L"IncludeNode "<<id<<std::endl;
         if (!m_isControlInstance)
         {
-            std::logic_error("COM: InclueNode was called on instance running in DataMode.");
+            throw std::logic_error("COM: InclueNode was called on instance running in DataMode.");
         }
 
         IncludeNodeInternal(id);
