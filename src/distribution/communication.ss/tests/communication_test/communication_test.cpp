@@ -83,7 +83,7 @@ class Cmd
 public:
     Cmd(int argc, char * argv[])
         :unicastAddress()
-        ,nodeType("nt0")
+        ,nodeType("su")
         ,await(0)
         ,seeds()
         ,nsend(0)
@@ -235,6 +235,20 @@ public:
         return v;
     }
 
+    static std::string DisplayName(const std::string& nodeTypeName)
+    {
+        if (nodeTypeName == "su")
+            return "server_unicast";
+        if (nodeTypeName == "sm")
+            return "server_multicast";
+        if (nodeTypeName == "lu")
+            return "lightnode_unicast";
+        if (nodeTypeName == "lm")
+            return "lightnode_multicast";
+
+        throw std::logic_error("Unknown nodeType");
+    }
+
 private:
     std::map<int64_t, Safir::Dob::Internal::Com::NodeTypeDefinition> m_nodeTypes;
 
@@ -296,11 +310,26 @@ inline bool ValidCRC(const char* ptr, size_t size)
     return checksum==crc.checksum();
 }
 
-inline Safir::Utilities::Internal::SharedCharArray CreateMessage(uint64_t val, size_t size)
-{
+inline Safir::Utilities::Internal::SharedCharArray CreateMessage(uint64_t counter, size_t size)
+{    
+    //          +-------------------+------------------------------------+---------------+
+    // Message: | counter (8 bytes) | dummy 0,1,2,3,4,5,6,7,8,9,0,1,2... | crc (4 bytes) |
+    //          +-------------------+------------------------------------+---------------+
+    assert(size > 12);
     auto msg=Safir::Utilities::Internal::MakeSharedArray(size);
-    memset(msg.get(), 0, size);
-    (*reinterpret_cast<uint64_t*>(msg.get()))=val;
+
+    // set counter
+    (*reinterpret_cast<uint64_t*>(msg.get()))=counter;
+
+    // set dummy data
+    char val = 0;
+    for (auto i = sizeof(uint64_t); i < size - sizeof(uint32_t); ++i)
+    {
+        msg.get()[i] = val;
+        val = (val + 1) % 10;
+    }
+
+    // set crc
     SetCRC(msg.get(), size);
     return msg;
 }
@@ -504,7 +533,7 @@ int main(int argc, char * argv[])
     std::cout<<"-- Id:        "<<com->Id()<<std::endl;
     std::cout<<"-- CtrlAddr:  "<<com->ControlAddress()<<std::endl;
     std::cout<<"-- DataAddr:  "<<com->DataAddress()<<std::endl;
-    std::cout<<"-- Node type: "<<cmd.nodeType<<std::endl;
+    std::cout<<"-- Node type: "<<cmd.nodeType<<" ("<<NodeTypes::DisplayName(cmd.nodeType)<<")"<<std::endl;
     std::cout<<"----------------------------------------------------------------------------"<<std::endl;
 
     com->SetDataReceiver([=](int64_t fromNode, int64_t /*fromNodeType*/, const char* msg, size_t size){sp->OnRecv(fromNode, msg, size);}, 123, Allocate, DeAllocate);

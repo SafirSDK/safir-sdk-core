@@ -97,13 +97,20 @@ public:
         m_threads.join_all();
     }
 
-    void DetachAndRestart(const std::string& newSeed, int64_t newExpectedSender)
-    {        
+    void Reset(const std::string& newSeed, int64_t newExpectedSender)
+    {
+        std::cout << "Reset" << std::endl;
         m_numRecvFrom[newExpectedSender] = 0;
-        m_com.Stop();
+        m_com.Reset();
         m_expectedSenderId = newExpectedSender;
-        m_com.Start();
-        m_com.InjectSeeds({newSeed});
+        m_com.InjectSeeds({ newSeed });
+        {
+            boost::mutex::scoped_lock lock(m_mutex);
+            for (auto& kv : m_numRecvFrom)
+            {
+                kv.second = 0;
+            }
+        }
     }
 
     unsigned int GetRecvCount(int64_t fromNodeId)
@@ -134,6 +141,7 @@ private:
             std::cout << m_com.Name() << ": OnNewNode " << name << " but expected node " << m_expectedSenderId << std::endl;
             return;
         }
+        std::cout << m_com.Name() << ": OnNewNode " << name << std::endl;
         m_com.IncludeNode(nodeId);
     }
 

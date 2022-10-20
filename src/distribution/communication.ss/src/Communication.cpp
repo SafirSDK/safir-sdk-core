@@ -189,6 +189,11 @@ namespace
         m_impl->Stop();
     }
 
+    void Communication::Reset()
+    {
+        m_impl->Reset();
+    }
+
     void Communication::InjectSeeds(const std::vector<std::string>& seeds)
     {
         m_impl->InjectSeeds(seeds);

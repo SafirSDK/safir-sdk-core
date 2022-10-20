@@ -654,6 +654,7 @@ public:
         CHECK(passed);
 
         // Remove all nodes excep 10002 that is a lightNode. Make sure it is still trying to discover the seed 10000
+        discoverState[10002].discover->m_lightNodesExcludeTimeLimit = 1; // decrease time limit to one sec
         for (auto id : std::vector<int64_t>{10000, 10001, 10003, 10004})
         {
             boost::mutex::scoped_lock lock(mutex);
@@ -677,7 +678,6 @@ public:
             auto node10002SendDiscoversTo10000 = discoverState[10002].sentDiscoverTo.find(10000) != discoverState[10002].sentDiscoverTo.end();
             CHECK(node10002SendDiscoversTo10000);
         }
-
 
         //------------------------ END
 
@@ -828,7 +828,280 @@ boost::mutex DiscoverWithLightNodes::mutex;
 std::map<int64_t, DiscoverWithLightNodes::Info> DiscoverWithLightNodes::discoverState;
 
 
+class DiscoverExcludeNodes
+{
+public:
+    static void Run()
+    {
+        std::wcout<<"DiscoverExcludeNodes started"<<std::endl;
 
+        boost::asio::io_context io;
+        auto work=boost::asio::make_work_guard(io);
+        boost::thread_group threads;
+        for (int i = 0; i < 9; ++i)
+        {
+            threads.create_thread([&]{io.run();});
+        }
+
+        //------------------------------------------------------------
+        // Test - NodeType 2 and 3 are lightNodes, 1 is ordinary node
+        //------------------------------------------------------------
+        {
+            boost::mutex::scoped_lock lock(mutex);
+            discoverState.insert(std::make_pair(10000, Info(10000, 1, io)));
+            discoverState.insert(std::make_pair(10001, Info(10001, 1, io)));
+            discoverState.insert(std::make_pair(10002, Info(10002, 2, io)));
+            discoverState.insert(std::make_pair(10003, Info(10003, 3, io)));
+            discoverState[10000].discover->m_lightNodesExcludeTimeLimit = 10;
+            discoverState[10001].discover->m_lightNodesExcludeTimeLimit = 10;
+            discoverState[10002].discover->m_lightNodesExcludeTimeLimit = 10;
+            discoverState[10003].discover->m_lightNodesExcludeTimeLimit = 10;
+        }
+
+        {
+            boost::mutex::scoped_lock lock(mutex);
+            discoverState[10001].discover->AddSeeds({"127.0.0.1:10000"});
+            discoverState[10002].discover->AddSeeds({"127.0.0.1:10000"});
+            discoverState[10003].discover->AddSeeds({"127.0.0.1:10000"});
+            discoverState[10000].discover->Start();
+            discoverState[10001].discover->Start();
+            discoverState[10002].discover->Start();
+            discoverState[10003].discover->Start();
+        }
+
+        //Wait until node 1000 and 1001 have found each other
+        bool passed = false;
+        for (int i=0; i<250; ++i)
+        {
+            Deliver();
+            {
+                boost::mutex::scoped_lock lock(mutex);
+                if (discoverState[10000].newNodes == std::set<int64_t>{10001, 10002, 10003} &&
+                    discoverState[10000].sentDiscoverTo == std::set<int64_t>{10001, 10002, 10003} &&
+                    discoverState[10000].sentNodeInfoTo == std::set<int64_t>{10001, 10002, 10003} &&
+
+                    discoverState[10001].newNodes == std::set<int64_t>{10000, 10002, 10003} &&
+                    discoverState[10001].sentDiscoverTo == std::set<int64_t>{10000, 10002, 10003} &&
+                    discoverState[10001].sentNodeInfoTo == std::set<int64_t>{10000, 10002, 10003} &&
+
+                    discoverState[10002].newNodes == std::set<int64_t>{10000, 10001} &&
+                    discoverState[10002].sentDiscoverTo == std::set<int64_t>{10000, 10001} &&
+                    discoverState[10002].sentNodeInfoTo == std::set<int64_t>{10000, 10001} &&
+
+                    discoverState[10003].newNodes == std::set<int64_t>{10000, 10001} &&
+                    discoverState[10003].sentDiscoverTo == std::set<int64_t>{10000, 10001} &&
+                    discoverState[10003].sentNodeInfoTo == std::set<int64_t>{10000, 10001})
+                {
+                    passed = true;
+                    break;
+                }
+            }
+            Wait(100);
+        }
+
+        if (!passed)
+        {
+            DumpInfo();
+        }
+        CHECK(passed);
+
+        // Clear stats
+        {
+            boost::mutex::scoped_lock lock(mutex);
+            for (auto& ds : discoverState)
+            {
+                auto& state = ds.second;
+                state.newNodes.clear();
+                state.sentDiscoverTo.clear();
+                state.sentNodeInfoTo.clear();
+            }
+        }
+
+        // Normal node excludes Normal node -> Excluded forever
+        discoverState[10000].discover->ExcludeNode(10001);
+        Wait(2000);
+        {
+            CHECK(discoverState[10000].discover->m_seeds.size() == 0);
+            CHECK(discoverState[10000].discover->m_excludedNodes.find(10001) != discoverState[10000].discover->m_excludedNodes.end());
+            CHECK(discoverState[10000].discover->m_excludedNodes.find(10001)->second.first.has_value() == false);
+        }
+
+
+        // Normal node excludes LightNode -> Allowed to come back immediately
+        discoverState[10000].discover->ExcludeNode(10003);
+        Wait(2000);
+        {
+            CHECK(discoverState[10000].discover->m_seeds.size() == 0);
+            CHECK(discoverState[10000].discover->m_excludedNodes.find(10003) == discoverState[10000].discover->m_excludedNodes.end());
+        }
+
+        // LightNode excludes Normal -> Time limited exclusion.
+        discoverState[10002].discover->ExcludeNode(10000);
+        Wait(2000);
+        {
+            CHECK(discoverState[10002].discover->m_seeds.size() == 0);
+            CHECK(discoverState[10002].discover->m_excludedNodes.find(10000) != discoverState[10002].discover->m_excludedNodes.end());
+            CHECK(discoverState[10002].discover->m_excludedNodes.find(10000)->second.first.has_value());
+            CHECK(discoverState[10002].discover->m_excludedNodes.find(10000)->second.second == "127.0.0.1:10000");
+            CHECK(discoverState[10002].sentDiscoverTo.empty());
+        }
+
+        std::wcout << L"DiscoverExcludeNodes - Wait for time limited exclusions to elapse..." << std::endl;
+        Wait(13000);
+        {
+            CHECK(discoverState[10002].discover->m_seeds.size() == 1);
+            CHECK(discoverState[10002].discover->m_seeds.begin()->second.controlAddress == "127.0.0.1:10000");
+            CHECK(discoverState[10002].discover->m_excludedNodes.find(10000) == discoverState[10002].discover->m_excludedNodes.end());
+            CHECK(discoverState[10002].sentDiscoverTo == std::set<int64_t>{10000});
+        }
+
+        //------------------------ END
+
+        //Stop all discoverers
+        {
+            boost::mutex::scoped_lock lock(mutex);
+            for (auto kv : discoverState)
+            {
+                kv.second.discover->Stop();
+            }
+        }
+
+        //-----------
+        // shutdown
+        //-----------
+        work.reset();
+        threads.join_all();
+
+        {
+            boost::mutex::scoped_lock lock(mutex);
+            discoverState.clear(); //this step is important because discoverState has references to the io_service in this scope.
+        }
+
+        std::wcout<<"DiscoverExcludeNodes tests passed"<<std::endl;
+    }
+
+private:
+    static boost::mutex mutex;
+
+    static Com::Node CreateNode(int64_t nodeId, int64_t nodeType)
+    {
+        return Com::Node(std::string("discoverer_")+boost::lexical_cast<std::string>(nodeId), nodeId, nodeType, std::string("127.0.0.1:")+boost::lexical_cast<std::string>(nodeId), "", true);
+    }
+
+    static void OnNewNode(int64_t toId, const Com::Node& node)
+    {
+        boost::mutex::scoped_lock lock(mutex);
+        discoverState[toId].newNodes.insert(node.nodeId);
+    }
+
+    static void DumpInfo()
+    {
+        boost::mutex::scoped_lock lock(mutex);
+        std::wcout<<"------ Info ------"<<std::endl;
+
+        for (auto vt = discoverState.cbegin(); vt != discoverState.cend(); ++vt)
+        {
+            std::wcout<<"Id: "<<vt->first<<std::endl;
+            std::wcout<<"Nodes: ";
+
+            for (auto id = vt->second.newNodes.cbegin(); id != vt->second.newNodes.cend(); ++id)
+            {
+                std::wcout<<*id<<", ";
+            }
+            std::wcout<<std::endl;
+
+            std::wcout<<"DiscoverTo: ";
+            for (auto id = vt->second.sentDiscoverTo.cbegin(); id != vt->second.sentDiscoverTo.cend(); ++id)
+            {
+                std::wcout<<*id<<", ";
+            }
+            std::wcout<<std::endl;
+
+            std::wcout<<"NodeInfoTo: ";
+            for (auto id = vt->second.sentNodeInfoTo.cbegin(); id != vt->second.sentNodeInfoTo.cend(); ++id)
+            {
+                std::wcout<<*id<<", ";
+            }
+            std::wcout<<std::endl<<std::endl;
+        }
+        std::wcout<<"------------------\n"<<std::endl;
+    }
+
+    struct TestSendPolicy
+    {
+        void Send(const Com::UserDataPtr val,
+                  boost::asio::ip::udp::socket& /*socket*/,
+                  const boost::asio::ip::udp::endpoint& to)
+        {
+            boost::mutex::scoped_lock lock(mutex);
+            Com::CommunicationMessage cm;
+            cm.ParseFromArray(val->message.get(), static_cast<int>(val->header.totalContentSize));
+            if (cm.has_discover())
+            {
+                discoverState[val->header.commonHeader.senderId].sentDiscoverTo.insert(to.port());
+            }
+            else if (cm.has_node_info())
+            {
+                discoverState[val->header.commonHeader.senderId].sentNodeInfoTo.insert(to.port());
+            }
+
+            auto receiver = discoverState.find(static_cast<int64_t>(to.port()));
+            if (receiver != discoverState.end())
+            {
+                receiver->second.recvQueue.push(cm);
+            }
+        }
+    };
+    typedef Com::Writer<Com::UserData, TestSendPolicy> TestWriter;
+    typedef Com::DiscovererBasic<TestWriter> Discoverer;
+
+    struct Info
+    {
+        std::set<int64_t> newNodes;
+        std::set<int64_t> sentDiscoverTo;
+        std::set<int64_t> sentNodeInfoTo;
+        std::queue<Com::CommunicationMessage> recvQueue;
+        std::shared_ptr<DiscoverExcludeNodes::Discoverer> discover;
+
+        Info() {}
+
+        Info(int64_t nodeId, int64_t nodeType, boost::asio::io_context& io)
+        {
+            discover.reset(new DiscoverExcludeNodes::Discoverer(io, DiscoverExcludeNodes::CreateNode(nodeId, nodeType), 1500, std::set<int64_t>{2, 3}, [=](const Com::Node& n){DiscoverExcludeNodes::OnNewNode(nodeId, n);}));
+        }
+    };
+    static std::map<int64_t, DiscoverExcludeNodes::Info> discoverState;
+
+    static void Deliver()
+    {
+        boost::mutex::scoped_lock lock(mutex);
+        for (auto vt = discoverState.cbegin(); vt != discoverState.cend(); ++vt)
+        {
+            auto& dp=vt->second.discover;
+            DiscoverExcludeNodes::Deliver(*dp, vt->first);
+        }
+    }
+
+    static void Deliver(Discoverer& discoverer, int64_t id)
+    {
+        while (!discoverState[id].recvQueue.empty())
+        {
+            auto& cm=discoverState[id].recvQueue.front();
+            if (cm.has_discover())
+            {
+                discoverer.HandleReceivedDiscover(cm.discover());
+            }
+            if (cm.has_node_info())
+            {
+                discoverer.HandleReceivedNodeInfo(cm.node_info());
+            }
+            discoverState[id].recvQueue.pop();
+        }
+    }
+
+};
+boost::mutex DiscoverExcludeNodes::mutex;
+std::map<int64_t, DiscoverExcludeNodes::Info> DiscoverExcludeNodes::discoverState;
 
 struct DiscovererTest
 {
@@ -837,5 +1110,6 @@ struct DiscovererTest
         DiscoverToSeed::Run();
         HandleDiscover::Run();
         DiscoverWithLightNodes::Run();
+        DiscoverExcludeNodes::Run();
     }
 };

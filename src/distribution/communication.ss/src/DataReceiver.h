@@ -154,8 +154,8 @@ namespace Com
         boost::asio::steady_timer m_timer;
         std::function<bool(const char*, size_t, bool multicast)> m_onRecv;
         std::function<bool(void)> m_isReceiverReady;
-        std::shared_ptr<boost::asio::ip::udp::socket> m_socket;
-        std::shared_ptr<boost::asio::ip::udp::socket> m_multicastSocket;
+        std::unique_ptr<boost::asio::ip::udp::socket> m_socket;
+        std::unique_ptr<boost::asio::ip::udp::socket> m_multicastSocket;
         boost::asio::ip::udp::endpoint m_unicastEndpoint;
         boost::asio::ip::udp::endpoint m_multicastEndpoint;
         bool m_running;

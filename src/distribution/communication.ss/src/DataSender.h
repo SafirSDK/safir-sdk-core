@@ -201,7 +201,7 @@ namespace Com
             }
 
             //The actual work where the data is inserted in the queue must be done inside the strand.
-            boost::asio::post(m_strand, [this,toId,totalNumberOfFragments,numberOfFullFragments,msg,size,restSize,dataTypeIdentifier]
+            boost::asio::post(m_strand, [this, toId, totalNumberOfFragments, numberOfFullFragments, msg, size, restSize, dataTypeIdentifier]
             {
                 if (!m_running)
                 {

@@ -86,6 +86,7 @@ namespace Com
 
         void Start();
         void Stop();
+        void Reset();
 
         void IncludeNode(int64_t nodeId);
         void ExcludeNode(int64_t nodeId);

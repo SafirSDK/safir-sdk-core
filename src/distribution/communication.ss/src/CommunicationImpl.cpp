@@ -182,7 +182,7 @@ namespace
     void CommunicationImpl::Stop()
     {
         lllog(1)<<m_logPrefix.c_str()<<L"Stop "<<m_me.name.c_str()<<std::endl;
-        m_deliveryHandler.Stop(m_receiveStrand);
+        boost::asio::post(m_receiveStrand, [this] {m_deliveryHandler.Stop(); });
         m_reader.Stop();
 
         for (auto vt = m_nodeTypes.cbegin(); vt != m_nodeTypes.cend(); ++vt)
@@ -197,12 +197,38 @@ namespace
         }
     }
 
+    void CommunicationImpl::Reset()
+    {
+        lllog(1) << m_logPrefix.c_str() << L"Reset " << m_me.name.c_str() << std::endl;
+        boost::asio::post(m_receiveStrand, [this]
+            {
+                m_deliveryHandler.Stop();
+                m_deliveryHandler.Start();
+            });
+
+        for (auto vt = m_nodeTypes.cbegin(); vt != m_nodeTypes.cend(); ++vt)
+        {
+            vt->second->GetHeartbeatSender().Stop();
+            vt->second->GetAckedDataSender().Stop();
+            vt->second->GetUnackedDataSender().Stop();
+
+            vt->second->GetHeartbeatSender().Start();
+            vt->second->GetAckedDataSender().Start();
+            vt->second->GetUnackedDataSender().Start();
+        }
+        if (m_isControlInstance)
+        {
+            m_discoverer.Stop();
+            m_discoverer.Start();
+        }
+    }
+
     void CommunicationImpl::IncludeNode(int64_t id)
     {
         lllog(6)<<m_logPrefix.c_str()<<L"IncludeNode "<<id<<std::endl;
         if (!m_isControlInstance)
         {
-            throw std::logic_error("COM: InclueNode was called on instance running in DataMode.");
+            throw std::logic_error("COM: IncludeNode was called on instance running in DataMode.");
         }
 
         IncludeNodeInternal(id);
@@ -238,7 +264,7 @@ namespace
 
             if (node==nullptr)
             {
-                lllog(6)<<m_logPrefix.c_str()<<L"Exclude unknown node, call will be ignored."<<std::endl;
+                lllog(6)<<m_logPrefix.c_str()<<L"Exclude unknown node, call will be ignored. nodeId="<<id<<std::endl;
                 return;
             }
 

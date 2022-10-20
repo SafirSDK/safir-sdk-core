@@ -27,6 +27,7 @@
 #include <functional>
 #include <boost/random.hpp>
 #include <boost/asio.hpp>
+#include <boost/optional.hpp>
 #include <Safir/Utilities/Internal/SystemLog.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/Id.h>
@@ -110,6 +111,7 @@ namespace Com
                 m_running=false;
                 m_timer.cancel();
 
+                m_excludedNodes.clear();
                 m_reportedNodes.clear();
                 m_incompletedNodes.clear();
                 m_seeds.clear();
@@ -247,19 +249,31 @@ namespace Com
                 auto it=m_nodes.find(nodeId);
                 if (it!=m_nodes.end())
                 {
-                    if (!m_thisNodeIsLightNode && !IsLightNode(it->second.nodeTypeId))
+                    if (m_thisNodeIsLightNode) // I am a lightNode
                     {
-                        // Light nodes dont add other nodes to exclude list since they might rejoin the same system again.
-                        // We only add non-lightNodes to the exclude list, since lightNodes are allowed to rejoin later.
-                        // Also, since using a lightNode as seed is considered an error but is not guaranteed to be detected, we only keep the address of seeds that are not lightNodes.
-                        m_excludedNodes.insert(nodeId);
+                        // Exclude other (always non-lightnodes) for a limited time.
+                        ExcludeUntil timeLimit = boost::chrono::steady_clock::now() + boost::chrono::seconds(m_lightNodesExcludeTimeLimit);
+                        m_excludedNodes.insert({nodeId, std::make_pair(timeLimit, it->second.isSeed ? it->second.controlAddress : "")});
+                        lllog(DiscovererLogLevel) << m_logPrefix.c_str() << L"Exclude node for " << m_lightNodesExcludeTimeLimit << L" seconds, nodeId: " << nodeId <<std::endl;
                     }
-                    if (it->second.isSeed)
+                    else // I am NOT a lightNode.
                     {
-                        // If the node is a seed, we keep the address. The node can be restarted and then join again with the same ip address
-                        // but with another nodeId.
-                        AddSeed(it->second.controlAddress);
+                        // If the other node is NOT a lightNode, then exclude it forever.
+                        // If the other node is a ligthNode we don't exlude it at all, just allow it to come back.
+                        if (!IsLightNode(it->second.nodeTypeId))
+                        {
+                            m_excludedNodes.insert({nodeId, std::make_pair(boost::none, "")});
+                            lllog(DiscovererLogLevel) << m_logPrefix.c_str() << L"Exclude node forever, nodeId: " << nodeId <<std::endl;
+                        }
+
+                        if (it->second.isSeed)
+                        {
+                            // If the node is a seed, we keep the address. The node can be restarted and then join again with the same ip address
+                            // but with another nodeId.
+                            AddSeed(it->second.controlAddress);
+                        }
                     }
+
                     m_nodes.erase(it);
                 }
             });
@@ -285,7 +299,11 @@ namespace Com
         NodeMap m_nodes; //known nodes
         NodeMap m_reportedNodes; //nodes only heard about from others, never talked to
         std::map<int64_t, std::vector<bool> > m_incompletedNodes; //talked to but still haven't received all node info from this node
-        std::set<int64_t> m_excludedNodes;
+
+        int m_lightNodesExcludeTimeLimit = 60; // seconds
+        typedef boost::optional<boost::chrono::steady_clock::time_point> ExcludeUntil;
+        std::map<int64_t, std::pair<ExcludeUntil /*timeLimitedUntil*/, std::string /*seedIp*/>> m_excludedNodes;
+
         boost::asio::io_context::strand m_strand;
         Node m_me;
         bool m_thisNodeIsLightNode;
@@ -551,6 +569,29 @@ namespace Com
             return false;
         }
 
+        void CheckTimeLimitedExclusions()
+        {
+            for (auto it = std::cbegin(m_excludedNodes); it != std::cend(m_excludedNodes);)
+            {
+                if (it->second.first.has_value() && it->second.first.value() < boost::chrono::steady_clock::now())
+                {
+                    // time limit has elapsed
+                    if (!it->second.second.empty())
+                    {
+                        // the excluded node has a seed address
+                        AddSeed(it->second.second);
+                    }
+                    it = m_excludedNodes.erase(it++);
+                    lllog(DiscovererLogLevel) << m_logPrefix.c_str() << L"Node " << it->first << L" is no longer excluded." << std::endl;
+                }
+                else
+                {
+                    ++it;
+                }
+            }
+
+        }
+
         void OnTimeout(const boost::system::error_code& error)
         {
             if (!m_running)
@@ -560,6 +601,7 @@ namespace Com
 
             if (!error)
             {
+                CheckTimeLimitedExclusions();
                 SendDiscover();
 
                 //restart timer

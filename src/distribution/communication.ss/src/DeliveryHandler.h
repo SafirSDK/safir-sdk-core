@@ -117,12 +117,6 @@ namespace Com
             m_nodes.clear();
         }
 
-        void Stop(boost::asio::io_context::strand& strand)
-        {
-            m_running=false;
-            boost::asio::post(strand, [this]{Stop();});
-        }
-
         // Received data to be delivered up to the application.
         void SetGotRecvCallback(const GotReceiveFrom& callback)
         {
@@ -764,15 +758,12 @@ namespace Com
                         {
                             auto recvIt=m_receivers.find(dataType); //m_receivers shall be safe to use inside m_deliverStrand since it is not supposed to be modified after start
                             if (recvIt!=m_receivers.end())
-                            {
+                            {                                
                                 if (m_running)
                                 {
                                     recvIt->second.onRecv(fromId, fromNodeType, dataPtr, dataSize);
                                 }
-                                else
-                                {
-                                    recvIt->second.dealloc(dataPtr);
-                                }
+                                // If we are not running Stop must have been called and data will be cleaned up, hence no dealloc here.
                             }
                             else
                             {

@@ -243,6 +243,7 @@ namespace Com
 
         /**
          * Start communication, no callbacks can be setup after started.
+         * It is not allowed to call start more than one time.
          */
         void Start();
 
@@ -250,6 +251,12 @@ namespace Com
          * Stop communication. Communication will finish ongoing jobs and close all connections.
          */
         void Stop();
+
+        /**
+         * Reset all information about included/injected nodes and seeds, but keep all callbacks, nodeTypes and other parameters.
+         * If created with ControlModeTag, new seeds must be injected to actively start discovering other nodes.
+         */
+        void Reset();
 
         //Only unicast addresses.
         /**
