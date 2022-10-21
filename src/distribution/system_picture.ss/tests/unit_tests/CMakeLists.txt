@@ -15,6 +15,7 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR} ../../src/include)
 #Need to define this to not get inconsistent dll linkage on windows.
 #no test is meant to actually link the system_picture library, so we can do this.
 add_definitions(-Dsystem_picture_EXPORTS)
+add_definitions(-DSAFIR_DISABLE_CHECK_STRAND)
 
 ADD_EXECUTABLE(RawStatistics_test RawStatistics_test.cpp ../../src/RawStatistics.cpp ${PROTO_SRCS} ${PROTO_HDRS})
 ADD_EXECUTABLE(SystemState_test SystemState_test.cpp ../../src/SystemState.cpp ${PROTO_SRCS} ${PROTO_HDRS})

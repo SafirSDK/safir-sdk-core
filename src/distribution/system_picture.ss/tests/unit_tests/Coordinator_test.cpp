@@ -628,7 +628,7 @@ public:
 class ElectionHandlerStub
 {
 public:
-    ElectionHandlerStub(boost::asio::io_service& /*ioService*/,
+    ElectionHandlerStub(boost::asio::io_service::strand& /*strand*/,
                         CommunicationStub& /*communication*/,
                         const int64_t id_,
                         const int64_t /*nodeTypeId_*/,
@@ -654,7 +654,7 @@ public:
         return electedId == node;
     }
 
-    bool IsDetached()
+    bool IsElectionDetached()
     {
         return isDetached;
     }
@@ -695,7 +695,8 @@ template <int64_t ownNodeType>
 struct Fixture
 {
     Fixture()
-        : coordinator(ioService,
+        : strand(ioService)
+        , coordinator(strand,
                       comm,
                       "myself",
                       1000,
@@ -751,6 +752,7 @@ struct Fixture
 
 
     boost::asio::io_service ioService;
+    boost::asio::io_service::strand strand;
     CommunicationStub comm;
     RawHandlerStub rh;
 

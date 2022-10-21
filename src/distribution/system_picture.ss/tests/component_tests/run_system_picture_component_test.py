@@ -49,6 +49,8 @@ def enqueue_output(out, logger, queue):
             data.pop("election_id", None)
             queue.put(data)
         logger.info(line)
+    if queue is not None:
+        queue.put(None)
     out.close()
 
 
@@ -95,20 +97,25 @@ def zipdir(archive_name, path):
 
 
 class Node():
-    def __init__(self, args, node_id, light_node, multicast, seed = None):
+    def __init__(self, args, node_id, light_node, multicast, seeds = None):
         self.args = args
         self.node_id = node_id
         self.light_node = light_node
         self.multicast = multicast
         self.returncode = None
-        self.seed = seed
+        self.seeds = seeds
+        self.ignore_returncode = False #can be used to ignore expected bad returncodes
         command = [ args.exe,  "--id", str(node_id) ]
         if self.multicast:
             command.append("--use-multicast")
         if self.light_node:
             command.append("--light")
-        if self.seed is not None:
-            command += ("--seed", str(seed))
+        if self.seeds is not None:
+            command.append("--seeds")
+            if isinstance(self.seeds,int):
+                command.append(str(self.seeds))
+            else:
+                command += map(str, self.seeds)
         #if args.address is not None:
         #    command += ("--address", address)
         #if seed is not None:
@@ -157,9 +164,13 @@ class Node():
     def __compare_states(state,expected):
         return state == expected
 
-    def wait_for_form(self):
+    def wait_for_form(self, allowed_states = []):
+        allowed_states = [json.loads(x) for x in allowed_states]
         try:
-            data = self.queue.get()
+            while True:
+                data = self.queue.get()
+                if data not in allowed_states:
+                    break
             if data["form"] == 0:
                 raise Failure("Unexpected 0 incarnation")
             return data["form"]
@@ -167,40 +178,44 @@ class Node():
             log(f"Node {self.node_id} expected a form statement, but got \n{data}")
         raise Failure("Got unexpected state")
 
-    def wait_for_join(self, incarnation_id, allowed_states = []):
-        allowed_states = [json.loads(x) for x in allowed_states]
+    def wait_for_join(self, incarnation_id, allow_detached_states = False):
         try:
             while True:
                 data = self.queue.get()
-                if data not in allowed_states:
+                if allow_detached_states and "is_detached" in data and data["is_detached"] == True:
+                    self.states.append(data)
+                else:
                     break
-                self.states.append(data)
 
             if data["join"] == 0:
                 raise Failure("Unexpected 0 incarnation")
-            if data["join"] == incarnation_id:
-                return
+            if incarnation_id is None or data["join"] == incarnation_id:
+                return data["join"]
             log(f"Node {self.node_id} expected a join to incarnation {incarnation_id}, but got \n{data}")
             raise Failure("Got unexpected incarnation_id")
         except KeyError:
             log(f"Node {self.node_id} expected a join statement, but got \n{data}")
         raise Failure("Got unexpected state")
 
-    def wait_for_join_or_form(self):
-        data = self.queue.get()
+    def wait_for_join_or_form(self, allowed_states = []):
+        allowed_states = [json.loads(x) for x in allowed_states]
+        while True:
+            data = self.queue.get()
+            if data not in allowed_states:
+                break
         if "form" in data or "join" in data:
             return data
         else:
             log(f"Node {self.node_id} expected a form or join statement, but got \n{data}")
             raise Failure("Got unexpected state")
 
-    def wait_for_states(self, expected_states, last_state_repeats = 3):
+    def wait_for_states(self, expected_states, last_state_repeats = 6):
         """
         Wait until all states have been seen, in order.
         expected_states can be a string or a collection of strings.
         """
         unchecked_states = self.states.copy()
-
+        log(f"  Node {self.node_id} waiting for states")
         #make expected_states into a list we can manipulate
         if isinstance(expected_states,str):
             expected_states = [expected_states,]
@@ -231,7 +246,8 @@ class Node():
 
             while True:
                 state = self.queue.get()
-                self.states.append(state)
+                if state is not None:
+                    self.states.append(state)
                 if Node.__compare_states(state, expected):
                     found = True
                     if len(expected_states) == 0:
@@ -253,6 +269,8 @@ class Node():
             self.close()
         while not self.queue.empty():
             state = self.queue.get()
+            if state is None:
+                break
             self.states.append(state)
 
         unchecked_states = self.states.copy()
@@ -304,14 +322,19 @@ class Node():
         self.stderr_thread = None
         self.logging_handler.close()
         self.logger.removeHandler(self.logging_handler)
-        if self.proc.returncode != 0:
+        if self.proc.returncode != 0 and not self.ignore_returncode:
             log(f"Node {self.node_id} exited with error code", self.proc.returncode)
         self.returncode = self.proc.returncode
 
 def form_system(nodes):
     states = []
+    if not any(not node.light_node for node in nodes):
+        raise Failure("Need at least one normal node in form_system")
     for node in nodes:
-        states.append(node.wait_for_join_or_form())
+        state = node.wait_for_join_or_form()
+        if "form" in state and node.light_node:
+            raise Failure("Light node tried to form system")
+        states.append(state)
     forms = 0
     incarnation = 0
     for state in states:
@@ -322,7 +345,7 @@ def form_system(nodes):
                 raise Failure("Unexpected 0 incarnation")
 
     if forms != 1:
-        raise Failure("Did not get a form state")
+        raise Failure(f"Got {forms} form statements")
     for state in states:
         if "join" in state:
             if state["join"] != incarnation:
@@ -348,7 +371,7 @@ def test_one_light(args):
 
 def test_two_normal(args):
     with closing(Node(args,1,light_node = False, multicast = False)) as node1,\
-         closing(Node(args,2,light_node = False, multicast = False, seed = 1)) as node2:
+         closing(Node(args,2,light_node = False, multicast = False, seeds = 1)) as node2:
         state = '''{"elected_id": 2, "is_detached": false, "nodes": [{"name": "node_001", "is_dead": false, "id": 1, "node_type_id": 1},
                                                                      {"name": "node_002", "is_dead": false, "id": 2, "node_type_id": 1}]}'''
         form_system((node1,node2))
@@ -360,7 +383,7 @@ def test_two_normal(args):
 
 def test_two_normal_multicast(args):
     with closing(Node(args,1,light_node = False, multicast = True)) as node1,\
-         closing(Node(args,2,light_node = False, multicast = True, seed = 1)) as node2:
+         closing(Node(args,2,light_node = False, multicast = True, seeds = 1)) as node2:
         state = '''{"elected_id": 2, "is_detached": false, "nodes": [{"name": "node_001", "is_dead": false, "id": 1, "node_type_id": 2},
                                                                      {"name": "node_002", "is_dead": false, "id": 2, "node_type_id": 2}]}'''
         form_system((node1,node2))
@@ -372,7 +395,7 @@ def test_two_normal_multicast(args):
 
 def test_two_normal_then_start_third(args):
     with closing(Node(args,1,light_node = False, multicast = False)) as node1,\
-         closing(Node(args,2,light_node = False, multicast = False, seed = 1)) as node2:
+         closing(Node(args,2,light_node = False, multicast = False, seeds = 1)) as node2:
 
         state1 = '''{"elected_id": 2, "is_detached": false, "nodes": [{"name": "node_001", "is_dead": false, "id": 1, "node_type_id": 1},
                                                                       {"name": "node_002", "is_dead": false, "id": 2, "node_type_id": 1}]}'''
@@ -383,7 +406,7 @@ def test_two_normal_then_start_third(args):
         node1.wait_for_states(state1)
         node2.wait_for_states(state1)
 
-        with closing(Node(args,3,light_node = False, multicast = False, seed = 2)) as node3:
+        with closing(Node(args,3,light_node = False, multicast = False, seeds = 2)) as node3:
             node3.wait_for_join(incarnation)
             node1.wait_for_states((state1,state2))
             node2.wait_for_states((state1,state2))
@@ -395,7 +418,7 @@ def test_two_normal_then_start_third(args):
 
 def test_two_normal_restart_elected(args):
     with closing(Node(args,1,light_node = False, multicast = False)) as node1,\
-         closing(Node(args,2,light_node = False, multicast = False, seed = 1)) as node2a:
+         closing(Node(args,2,light_node = False, multicast = False, seeds = 1)) as node2a:
         state1 = '''{"elected_id": 2, "is_detached": false, "nodes": [{"name": "node_001", "is_dead": false, "id": 1, "node_type_id": 1},
                                                                                     {"name": "node_002", "is_dead": false, "id": 2, "node_type_id": 1}]}'''
         state2 = '''{"elected_id": 1, "is_detached": false, "nodes": [{"name": "node_001", "is_dead": false, "id": 1, "node_type_id": 1},
@@ -408,7 +431,7 @@ def test_two_normal_restart_elected(args):
         node2a.wait_for_states(state1, 1)
         node2a.close_and_check(state1)
         node1.wait_for_states((state1,state2))
-        with closing(Node(args,2,light_node = False, multicast = False, seed = 1)) as node2b:
+        with closing(Node(args,2,light_node = False, multicast = False, seeds = 1)) as node2b:
             incarnation2 = node2b.wait_for_form()
             if incarnation == incarnation2:
                 raise Failure("unexpecedly got same incarnation")
@@ -420,8 +443,8 @@ def test_two_normal_restart_elected(args):
 
 def test_three_normal_kill_elected(args):
     with closing(Node(args,1,light_node = False, multicast = False)) as node1,\
-         closing(Node(args,2,light_node = False, multicast = False, seed = 1)) as node2,\
-         closing(Node(args,3,light_node = False, multicast = False, seed = 1)) as node3:
+         closing(Node(args,2,light_node = False, multicast = False, seeds = 1)) as node2,\
+         closing(Node(args,3,light_node = False, multicast = False, seeds = 1)) as node3:
 
         state1 = '''{"elected_id": 3, "is_detached": false, "nodes": [{"name": "node_001", "is_dead": false, "id": 1, "node_type_id": 1},
                                                                       {"name": "node_002", "is_dead": false, "id": 2, "node_type_id": 1},
@@ -472,7 +495,7 @@ def test_two_light_multicast(args):
 
 def test_one_normal_one_light(args):
     with closing(Node(args,1,light_node = False, multicast = False)) as node1,\
-         closing(Node(args,2,light_node = True, multicast = False, seed = 1)) as node2:
+         closing(Node(args,2,light_node = True, multicast = False, seeds = 1)) as node2:
         state = '''{"elected_id": 1, "is_detached": false, "nodes": [{"name": "node_001", "is_dead": false, "id": 1, "node_type_id": 1},
                                                                                     {"name": "node_002", "is_dead": false, "id": 2, "node_type_id": 11}]}'''
         form_system((node1,node2))
@@ -484,7 +507,7 @@ def test_one_normal_one_light(args):
 
 def test_one_normal_one_light_multicast(args):
     with closing(Node(args,1,light_node = False, multicast = True)) as node1,\
-         closing(Node(args,2,light_node = True, multicast = True, seed = 1)) as node2:
+         closing(Node(args,2,light_node = True, multicast = True, seeds = 1)) as node2:
         state = '''{"elected_id": 1, "is_detached": false, "nodes": [{"name": "node_001", "is_dead": false, "id": 1, "node_type_id": 2},
                                                                      {"name": "node_002", "is_dead": false, "id": 2, "node_type_id": 12}]}'''
         form_system((node1,node2))
@@ -502,7 +525,7 @@ def test_one_normal_then_one_light(args):
                                                                       {"name": "node_002", "is_dead": false, "id": 2, "node_type_id": 11}]}'''
 
         node1.wait_for_states(state1)
-        with closing(Node(args,2,light_node = True, multicast = False, seed = 1)) as node2:
+        with closing(Node(args,2,light_node = True, multicast = False, seeds = 1)) as node2:
             node2.wait_for_join(incarnation)
             node1.wait_for_states((state1,state2))
             node2.wait_for_states(state2)
@@ -511,15 +534,18 @@ def test_one_normal_then_one_light(args):
     return node1.returncode == 0 and node2.returncode == 0
 
 def test_one_light_then_one_normal(args):
-    with closing(Node(args,1,light_node = True, multicast = False, seed = 2)) as node1:
+    with closing(Node(args,1,light_node = True, multicast = False, seeds = 2)) as node1:
         state1 = '{"elected_id": 1, "is_detached": true, "nodes": [{"name": "node_001", "is_dead": false, "id": 1, "node_type_id": 11}]}'
         state2 = '''{"elected_id": 2, "is_detached": false, "nodes": [{"name": "node_001", "is_dead": false, "id": 1, "node_type_id": 11},
                                                                       {"name": "node_002", "is_dead": false, "id": 2, "node_type_id": 1}]}'''
 
-        incarnation = node1.wait_for_form()
+        inc1 = node1.wait_for_form()
         node1.wait_for_states(state1)
         with closing(Node(args,2,light_node = False, multicast = False)) as node2:
-            node2.wait_for_join(incarnation)
+            inc2 = node2.wait_for_form()
+            node1.wait_for_join(inc2, allow_detached_states = True)
+            if inc1 == inc2:
+                raise Failure("unexpected incarnation")
             node1.wait_for_states((state1,state2))
             node2.wait_for_states(state2)
             node1.close_and_check((state1,state2))
@@ -528,7 +554,7 @@ def test_one_light_then_one_normal(args):
 
 def test_one_normal_one_light_kill_normal(args):
     with closing(Node(args,1,light_node = False, multicast = False)) as node1,\
-         closing(Node(args,2,light_node = True, multicast = False, seed = 1)) as node2:
+         closing(Node(args,2,light_node = True, multicast = False, seeds = 1)) as node2:
         state1 = '''{"elected_id": 1, "is_detached": false, "nodes": [{"name": "node_001", "is_dead": false, "id": 1, "node_type_id": 1},
                                                                       {"name": "node_002", "is_dead": false, "id": 2, "node_type_id": 11}]}'''
         state2 = '{"elected_id": 2, "is_detached": true, "nodes": [{"name": "node_002", "is_dead": false, "id": 2, "node_type_id": 11}]}'
@@ -536,7 +562,7 @@ def test_one_normal_one_light_kill_normal(args):
         node1.wait_for_states(state1)
         node2.wait_for_states(state1)
         node1.close()
-        inc2 = node2.wait_for_form()
+        inc2 = node2.wait_for_form(allowed_states = (state1,))
         if inc1 == inc2:
             raise Failure("unexpected incarnation")
         node2.wait_for_states((state1,state2))
@@ -546,55 +572,64 @@ def test_one_normal_one_light_kill_normal(args):
 
 def test_one_normal_one_light_restart_normal(args):
     with closing(Node(args,1,light_node = False, multicast = False)) as node1a,\
-         closing(Node(args,2,light_node = True, multicast = False, seed = 1)) as node2:
+         closing(Node(args,2,light_node = True, multicast = False, seeds = 1)) as node2:
         state1 = '''{"elected_id": 1, "is_detached": false, "nodes": [{"name": "node_001", "is_dead": false, "id": 1, "node_type_id": 1},
                                                                                     {"name": "node_002", "is_dead": false, "id": 2, "node_type_id": 11}]}'''
         state2 = '{"elected_id": 2, "is_detached": true, "nodes": [{"name": "node_002", "is_dead": false, "id": 2, "node_type_id": 11}]}'
-        inc1 = node1a.wait_for_form()
-        node2.wait_for_join(inc1)
+        state3 = '''{"elected_id": 1, "is_detached": false, "nodes": [{"name": "node_001", "is_dead": false, "id": 1, "node_type_id": 1}]}'''
+        inc1 = form_system((node1a, node2))
         node2.wait_for_states(state1)
         node1a.wait_for_states(state1)
         node1a.close()
-        inc2 = node2.wait_for_form()
+        inc2 = node2.wait_for_form(allowed_states = (state1,))
         if inc1 == inc2:
             raise Failure("unexpected incarnation")
         node2.wait_for_states((state1,state2))
         node1a.close_and_check(state1)
         with closing(Node(args,1,light_node = False, multicast = False)) as node1b:
-            node1b.wait_for_join(inc2)
+            inc3 = node1b.wait_for_form()
+            node2.wait_for_join(inc3, allow_detached_states = True)
+            if inc3 in (inc1, inc2):
+                raise Failure("unexpected incarnation")
             node2.wait_for_states((state1,state2,state1))
-            node1b.wait_for_states(state1)
+            node1b.wait_for_states((state3,state1))
+            node2.close_and_check((state1,state2,state1))
+            node1b.close_and_check((state3,state1))
 
     return node1a.returncode == 0 and node1b.returncode == 0 and node2.returncode == 0
 
 def test_one_normal_one_light_restart_normal_multicast(args):
     with closing(Node(args,1,light_node = False, multicast = True)) as node1a,\
-         closing(Node(args,2,light_node = True, multicast = True, seed = 1)) as node2:
+         closing(Node(args,2,light_node = True, multicast = True, seeds = 1)) as node2:
         state1 = '''{"elected_id": 1, "is_detached": false, "nodes": [{"name": "node_001", "is_dead": false, "id": 1, "node_type_id": 2},
                                                                                     {"name": "node_002", "is_dead": false, "id": 2, "node_type_id": 12}]}'''
         state2 = '{"elected_id": 2, "is_detached": true, "nodes": [{"name": "node_002", "is_dead": false, "id": 2, "node_type_id": 12}]}'
+        state3 = '''{"elected_id": 1, "is_detached": false, "nodes": [{"name": "node_001", "is_dead": false, "id": 1, "node_type_id": 2}]}'''
         inc1 = node1a.wait_for_form()
         node2.wait_for_join(inc1)
         node2.wait_for_states(state1)
         node1a.wait_for_states(state1)
         node1a.close()
-        inc2 = node2.wait_for_form()
+        inc2 = node2.wait_for_form(allowed_states = (state1,))
         if inc1 == inc2:
             raise Failure("unexpected incarnation")
         node2.wait_for_states((state1,state2))
         node1a.close_and_check(state1)
         with closing(Node(args,1,light_node = False, multicast = True)) as node1b:
-            node1b.wait_for_join(inc2)
+            inc3 = node1b.wait_for_form()
+            node2.wait_for_join(inc3, allow_detached_states = True)
+            if inc3 in (inc1, inc2):
+                raise Failure("unexpected incarnation")
             node2.wait_for_states((state1,state2,state1))
-            node1b.wait_for_states(state1)
+            node1b.wait_for_states((state3,state1))
             node2.close_and_check((state1,state2,state1))
-            node1b.close_and_check(state1)
+            node1b.close_and_check((state3,state1))
     return node1a.returncode == 0 and node1b.returncode == 0 and node2.returncode == 0
 
 
 def test_one_normal_one_light_kill_light(args):
     with closing(Node(args,1,light_node = False, multicast = False)) as node1,\
-         closing(Node(args,2,light_node = True, multicast = False, seed = 1)) as node2:
+         closing(Node(args,2,light_node = True, multicast = False, seeds = 1)) as node2:
         state1 = '''{"elected_id": 1, "is_detached": false, "nodes": [{"name": "node_001", "is_dead": false, "id": 1, "node_type_id": 1},
                                                                       {"name": "node_002", "is_dead": false, "id": 2, "node_type_id": 11}]}'''
         state2 = '''{"elected_id": 1, "is_detached": false, "nodes": [{"name": "node_001", "is_dead": false, "id": 1, "node_type_id": 1},
@@ -609,7 +644,7 @@ def test_one_normal_one_light_kill_light(args):
 
 def test_one_normal_one_light_restart_light(args):
     with closing(Node(args,1,light_node = False, multicast = False)) as node1,\
-         closing(Node(args,2,light_node = True, multicast = False, seed = 1)) as node2a:
+         closing(Node(args,2,light_node = True, multicast = False, seeds = 1)) as node2a:
         state1 = '''{"elected_id": 1, "is_detached": false, "nodes": [{"name": "node_001", "is_dead": false, "id": 1, "node_type_id": 1},
                                                                       {"name": "node_002", "is_dead": false, "id": 2, "node_type_id": 11}]}'''
         state2 = '''{"elected_id": 1, "is_detached": false, "nodes": [{"name": "node_001", "is_dead": false, "id": 1, "node_type_id": 1},
@@ -619,7 +654,7 @@ def test_one_normal_one_light_restart_light(args):
         node2a.wait_for_states(state1)
         node2a.close_and_check(state1)
         node1.wait_for_states((state1,state2))
-        with closing(Node(args,2,light_node = True, multicast = False, seed = 1)) as node2b:
+        with closing(Node(args,2,light_node = True, multicast = False, seeds = 1)) as node2b:
             node2b.wait_for_join(inc)
             node1.wait_for_states((state1, state2, state1))
             node2b.wait_for_states(state1)
@@ -629,8 +664,8 @@ def test_one_normal_one_light_restart_light(args):
 
 def test_two_normal_one_light_kill_light(args):
     with closing(Node(args,1,light_node = False, multicast = False)) as node1,\
-         closing(Node(args,2,light_node = False, multicast = False, seed = 1)) as node2,\
-         closing(Node(args,3,light_node = True, multicast = False, seed = 1)) as node3:
+         closing(Node(args,2,light_node = False, multicast = False, seeds = 1)) as node2,\
+         closing(Node(args,3,light_node = True, multicast = False, seeds = 1)) as node3:
         state1 = '''{"elected_id": 2, "is_detached": false, "nodes": [{"name": "node_001", "is_dead": false, "id": 1, "node_type_id": 1},
                                                                       {"name": "node_002", "is_dead": false, "id": 2, "node_type_id": 1},
                                                                       {"name": "node_003", "is_dead": false, "id": 3, "node_type_id": 11}]}'''
@@ -650,8 +685,8 @@ def test_two_normal_one_light_kill_light(args):
 
 def test_two_normal_one_light_restart_light(args):
     with closing(Node(args,1,light_node = False, multicast = False)) as node1,\
-         closing(Node(args,2,light_node = False, multicast = False, seed = 1)) as node2,\
-         closing(Node(args,3,light_node = True, multicast = False, seed = 1)) as node3a:
+         closing(Node(args,2,light_node = False, multicast = False, seeds = 1)) as node2,\
+         closing(Node(args,3,light_node = True, multicast = False, seeds = 1)) as node3a:
         state1 = '''{"elected_id": 2, "is_detached": false, "nodes": [{"name": "node_001", "is_dead": false, "id": 1, "node_type_id": 1},
                                                                       {"name": "node_002", "is_dead": false, "id": 2, "node_type_id": 1},
                                                                       {"name": "node_003", "is_dead": false, "id": 3, "node_type_id": 11}]}'''
@@ -665,7 +700,7 @@ def test_two_normal_one_light_restart_light(args):
         node3a.close_and_check(state1)
         node1.wait_for_states((state1,state2))
         node2.wait_for_states((state1,state2))
-        with closing(Node(args,3,light_node = True, multicast = False, seed = 1)) as node3b:
+        with closing(Node(args,3,light_node = True, multicast = False, seeds = 1)) as node3b:
             node3b.wait_for_join(inc)
             node1.wait_for_states((state1,state2,state1))
             node2.wait_for_states((state1,state2,state1))
@@ -677,9 +712,9 @@ def test_two_normal_one_light_restart_light(args):
     return node1.returncode == 0 and node2.returncode == 0 and node3a.returncode == 0 and node3b.returncode == 0
 
 def test_two_normal_one_light_kill_normal(args):
-    with closing(Node(args,1,light_node = False, multicast = False, seed = 2)) as node1,\
-         closing(Node(args,2,light_node = False, multicast = False, seed = 1)) as node2,\
-         closing(Node(args,3,light_node = True, multicast = False, seed = 2)) as node3:
+    with closing(Node(args,1,light_node = False, multicast = False, seeds = 2)) as node1,\
+         closing(Node(args,2,light_node = False, multicast = False, seeds = 1)) as node2,\
+         closing(Node(args,3,light_node = True, multicast = False, seeds = 2)) as node3:
         state1 = '''{"elected_id": 2, "is_detached": false, "nodes": [{"name": "node_001", "is_dead": false, "id": 1, "node_type_id": 1},
                                                                       {"name": "node_002", "is_dead": false, "id": 2, "node_type_id": 1},
                                                                       {"name": "node_003", "is_dead": false, "id": 3, "node_type_id": 11}]}'''
@@ -698,9 +733,9 @@ def test_two_normal_one_light_kill_normal(args):
     return node1.returncode == 0 and node2.returncode == 0 and node3.returncode == 0
 
 def test_two_normal_one_light_kill_elected(args):
-    with closing(Node(args,1,light_node = False, multicast = False, seed = 2)) as node1,\
-         closing(Node(args,2,light_node = False, multicast = False, seed = 1)) as node2,\
-         closing(Node(args,3,light_node = True, multicast = False, seed = 2)) as node3:
+    with closing(Node(args,1,light_node = False, multicast = False, seeds = 2)) as node1,\
+         closing(Node(args,2,light_node = False, multicast = False, seeds = 1)) as node2,\
+         closing(Node(args,3,light_node = True, multicast = False, seeds = 2)) as node3:
         state1 = '''{"elected_id": 2, "is_detached": false, "nodes": [{"name": "node_001", "is_dead": false, "id": 1, "node_type_id": 1},
                                                                       {"name": "node_002", "is_dead": false, "id": 2, "node_type_id": 1},
                                                                       {"name": "node_003", "is_dead": false, "id": 3, "node_type_id": 11}]}'''
@@ -719,9 +754,9 @@ def test_two_normal_one_light_kill_elected(args):
     return node1.returncode == 0 and node2.returncode == 0 and node3.returncode == 0
 
 def test_two_normal_one_light_restart_elected(args):
-    with closing(Node(args,1,light_node = False, multicast = False, seed = 2)) as node1,\
-         closing(Node(args,2,light_node = False, multicast = False, seed = 1)) as node2a,\
-         closing(Node(args,3,light_node = True, multicast = False, seed = 2)) as node3:
+    with closing(Node(args,1,light_node = False, multicast = False, seeds = 2)) as node1,\
+         closing(Node(args,2,light_node = False, multicast = False, seeds = 1)) as node2a,\
+         closing(Node(args,3,light_node = True, multicast = False, seeds = 2)) as node3:
         state1 = '''{"elected_id": 2, "is_detached": false, "nodes": [{"name": "node_001", "is_dead": false, "id": 1, "node_type_id": 1},
                                                                       {"name": "node_002", "is_dead": false, "id": 2, "node_type_id": 1},
                                                                       {"name": "node_003", "is_dead": false, "id": 3, "node_type_id": 11}]}'''
@@ -729,10 +764,14 @@ def test_two_normal_one_light_restart_elected(args):
                                                                       {"name": "node_002", "is_dead": true, "id": 2, "node_type_id": 1},
                                                                       {"name": "node_003", "is_dead": false, "id": 3, "node_type_id": 11}]}'''
         state3a = '''{"elected_id": 2, "is_detached": false, "nodes": [{"name": "node_001", "is_dead": true, "id": 1, "node_type_id": 1},
+                                                                       {"name": "node_002", "is_dead": false, "id": 2, "node_type_id": 1}]}'''
+        state3b = '''{"elected_id": 2, "is_detached": false, "nodes": [{"name": "node_002", "is_dead": false, "id": 2, "node_type_id": 1}]}'''
+        state4a = '''{"elected_id": 2, "is_detached": false, "nodes": [{"name": "node_001", "is_dead": true, "id": 1, "node_type_id": 1},
                                                                        {"name": "node_002", "is_dead": false, "id": 2, "node_type_id": 1},
                                                                        {"name": "node_003", "is_dead": true, "id": 3, "node_type_id": 11}]}'''
-        state3b = '''{"elected_id": 2, "is_detached": false, "nodes": [{"name": "node_002", "is_dead": false, "id": 2, "node_type_id": 1},
+        state4b = '''{"elected_id": 2, "is_detached": false, "nodes": [{"name": "node_002", "is_dead": false, "id": 2, "node_type_id": 1},
                                                                        {"name": "node_003", "is_dead": true, "id": 3, "node_type_id": 11}]}'''
+
         inc1 = form_system((node1,node2a,node3))
         node1.wait_for_states(state1)
         node2a.wait_for_states(state1)
@@ -740,30 +779,30 @@ def test_two_normal_one_light_restart_elected(args):
         node2a.close_and_check(state1)
         node1.wait_for_states((state1,state2))
         node3.wait_for_states((state1,state2))
-        with closing(Node(args,2,light_node = False, multicast = False, seed = 1)) as node2b:
+        with closing(Node(args,2,light_node = False, multicast = False, seeds = 1)) as node2b:
             inc2 = node2b.wait_for_form()
             if inc1 == inc2:
                 raise Failure("unexpected incarnation")
             log("  This testcase produces some spurious output since it checks for two possible outcomes")
             log("  So ignore any lines below talking about incorrect states unless the test fails.")
             try:
-                node2b.wait_for_states(state3a)
-                state3_actual = state3a
+                state34_actual = (state3a, state4a)
+                node2b.wait_for_states(state34_actual)
             except Failure:
-                node2b.wait_for_states(state3b)
-                state3_actual = state3b
-            node1.wait_for_states((state1,state2), last_state_repeats = 20)
-            node3.wait_for_states((state1,state2), last_state_repeats = 20)
+                state34_actual = (state3b, state4b)
+                node2b.wait_for_states(state34_actual)
+            node1.wait_for_states((state1,state2), last_state_repeats = 40)
+            node3.wait_for_states((state1,state2), last_state_repeats = 40)
             node1.close_and_check((state1,state2))
             node3.close_and_check((state1,state2))
-            node2b.close_and_check(state3_actual)
+            node2b.close_and_check(state34_actual)
     return node1.returncode == 0 and node2a.returncode == 0 and node2b.returncode == 0 and node3.returncode == 0
 
 def test_two_normal_two_light(args):
-    with closing(Node(args,1,light_node = False, multicast = False, seed = 2)) as node1, \
-         closing(Node(args,2,light_node = False, multicast = False, seed = 1)) as node2, \
-         closing(Node(args,3,light_node = True, multicast = False, seed = 1)) as node3, \
-         closing(Node(args,4,light_node = True, multicast = False, seed = 1)) as node4:
+    with closing(Node(args,1,light_node = False, multicast = False, seeds = 2)) as node1, \
+         closing(Node(args,2,light_node = False, multicast = False, seeds = 1)) as node2, \
+         closing(Node(args,3,light_node = True, multicast = False, seeds = 1)) as node3, \
+         closing(Node(args,4,light_node = True, multicast = False, seeds = 1)) as node4:
         state1 = '''{"elected_id": 2, "is_detached": false, "nodes": [{"name": "node_001", "is_dead": false, "id": 1, "node_type_id": 1},
                                                                       {"name": "node_002", "is_dead": false, "id": 2, "node_type_id": 1},
                                                                       {"name": "node_003", "is_dead": false, "id": 3, "node_type_id": 11},
@@ -780,10 +819,10 @@ def test_two_normal_two_light(args):
     return node1.returncode == 0 and node2.returncode == 0 and node3.returncode == 0 and node4.returncode == 0
 
 def test_two_normal_two_light_multicast(args):
-    with closing(Node(args,1,light_node = False, multicast = True, seed = 2)) as node1, \
-         closing(Node(args,2,light_node = False, multicast = True, seed = 1)) as node2, \
-         closing(Node(args,3,light_node = True, multicast = True, seed = 1)) as node3, \
-         closing(Node(args,4,light_node = True, multicast = True, seed = 1)) as node4:
+    with closing(Node(args,1,light_node = False, multicast = True, seeds = 2)) as node1, \
+         closing(Node(args,2,light_node = False, multicast = True, seeds = 1)) as node2, \
+         closing(Node(args,3,light_node = True, multicast = True, seeds = 1)) as node3, \
+         closing(Node(args,4,light_node = True, multicast = True, seeds = 1)) as node4:
         state1 = '''{"elected_id": 2, "is_detached": false, "nodes": [{"name": "node_001", "is_dead": false, "id": 1, "node_type_id": 2},
                                                                       {"name": "node_002", "is_dead": false, "id": 2, "node_type_id": 2},
                                                                       {"name": "node_003", "is_dead": false, "id": 3, "node_type_id": 12},
@@ -801,10 +840,10 @@ def test_two_normal_two_light_multicast(args):
     return node1.returncode == 0 and node2.returncode == 0 and node3.returncode == 0 and node4.returncode == 0
 
 def test_two_normal_two_light_kill_light(args):
-    with closing(Node(args,1,light_node = False, multicast = False, seed = 2)) as node1, \
-         closing(Node(args,2,light_node = False, multicast = False, seed = 1)) as node2, \
-         closing(Node(args,3,light_node = True, multicast = False, seed = 1)) as node3, \
-         closing(Node(args,4,light_node = True, multicast = False, seed = 1)) as node4:
+    with closing(Node(args,1,light_node = False, multicast = False, seeds = 2)) as node1, \
+         closing(Node(args,2,light_node = False, multicast = False, seeds = 1)) as node2, \
+         closing(Node(args,3,light_node = True, multicast = False, seeds = 1)) as node3, \
+         closing(Node(args,4,light_node = True, multicast = False, seeds = 1)) as node4:
         state1 = '''{"elected_id": 2, "is_detached": false, "nodes": [{"name": "node_001", "is_dead": false, "id": 1, "node_type_id": 1},
                                                                       {"name": "node_002", "is_dead": false, "id": 2, "node_type_id": 1},
                                                                       {"name": "node_003", "is_dead": false, "id": 3, "node_type_id": 11},
@@ -830,10 +869,10 @@ def test_two_normal_two_light_kill_light(args):
     return node1.returncode == 0 and node2.returncode == 0 and node3.returncode == 0 and node4.returncode == 0
 
 def test_two_normal_two_light_restart_light(args):
-    with closing(Node(args,1,light_node = False, multicast = False, seed = 2)) as node1, \
-         closing(Node(args,2,light_node = False, multicast = False, seed = 1)) as node2, \
-         closing(Node(args,3,light_node = True, multicast = False, seed = 1)) as node3a, \
-         closing(Node(args,4,light_node = True, multicast = False, seed = 1)) as node4:
+    with closing(Node(args,1,light_node = False, multicast = False, seeds = 2)) as node1, \
+         closing(Node(args,2,light_node = False, multicast = False, seeds = 1)) as node2, \
+         closing(Node(args,3,light_node = True, multicast = False, seeds = 1)) as node3a, \
+         closing(Node(args,4,light_node = True, multicast = False, seeds = 1)) as node4:
         state1 = '''{"elected_id": 2, "is_detached": false, "nodes": [{"name": "node_001", "is_dead": false, "id": 1, "node_type_id": 1},
                                                                       {"name": "node_002", "is_dead": false, "id": 2, "node_type_id": 1},
                                                                       {"name": "node_003", "is_dead": false, "id": 3, "node_type_id": 11},
@@ -851,12 +890,12 @@ def test_two_normal_two_light_restart_light(args):
         node1.wait_for_states((state1,state2))
         node2.wait_for_states((state1,state2))
         node4.wait_for_states((state1,state2))
-        with closing(Node(args,3,light_node = True, multicast = False, seed = 1)) as node3b:
+        with closing(Node(args,3,light_node = True, multicast = False, seeds = 1)) as node3b:
             node3b.wait_for_join(inc)
             node3b.wait_for_states(state1)
-            node1.wait_for_states((state1,state2,state1),last_state_repeats = 10)
-            node2.wait_for_states((state1,state2,state1),last_state_repeats = 10)
-            node4.wait_for_states((state1,state2,state1),last_state_repeats = 10)
+            node1.wait_for_states((state1,state2,state1),last_state_repeats = 20)
+            node2.wait_for_states((state1,state2,state1),last_state_repeats = 20)
+            node4.wait_for_states((state1,state2,state1),last_state_repeats = 20)
             node3b.close_and_check(state1)
             node1.close_and_check((state1,state2,state1))
             node2.close_and_check((state1,state2,state1))
@@ -865,10 +904,10 @@ def test_two_normal_two_light_restart_light(args):
         and node3b.returncode == 0 and node4.returncode == 0
 
 def test_two_normal_two_light_restart_light_multicast(args):
-    with closing(Node(args,1,light_node = False, multicast = True, seed = 2)) as node1, \
-         closing(Node(args,2,light_node = False, multicast = True, seed = 1)) as node2, \
-         closing(Node(args,3,light_node = True, multicast = True, seed = 1)) as node3a, \
-         closing(Node(args,4,light_node = True, multicast = True, seed = 1)) as node4:
+    with closing(Node(args,1,light_node = False, multicast = True, seeds = 2)) as node1, \
+         closing(Node(args,2,light_node = False, multicast = True, seeds = 1)) as node2, \
+         closing(Node(args,3,light_node = True, multicast = True, seeds = 1)) as node3a, \
+         closing(Node(args,4,light_node = True, multicast = True, seeds = 1)) as node4:
         state1 = '''{"elected_id": 2, "is_detached": false, "nodes": [{"name": "node_001", "is_dead": false, "id": 1, "node_type_id": 2},
                                                                       {"name": "node_002", "is_dead": false, "id": 2, "node_type_id": 2},
                                                                       {"name": "node_003", "is_dead": false, "id": 3, "node_type_id": 12},
@@ -887,12 +926,12 @@ def test_two_normal_two_light_restart_light_multicast(args):
         node1.wait_for_states((state1,state2))
         node2.wait_for_states((state1,state2))
         node4.wait_for_states((state1,state2))
-        with closing(Node(args,3,light_node = True, multicast = True, seed = 1)) as node3b:
+        with closing(Node(args,3,light_node = True, multicast = True, seeds = 1)) as node3b:
             node3b.wait_for_join(inc)
             node3b.wait_for_states(state1)
-            node1.wait_for_states((state1,state2,state1),last_state_repeats = 10)
-            node2.wait_for_states((state1,state2,state1),last_state_repeats = 10)
-            node4.wait_for_states((state1,state2,state1),last_state_repeats = 10)
+            node1.wait_for_states((state1,state2,state1),last_state_repeats = 20)
+            node2.wait_for_states((state1,state2,state1),last_state_repeats = 20)
+            node4.wait_for_states((state1,state2,state1),last_state_repeats = 20)
             node3b.close_and_check(state1)
             node1.close_and_check((state1,state2,state1))
             node2.close_and_check((state1,state2,state1))
@@ -901,10 +940,10 @@ def test_two_normal_two_light_restart_light_multicast(args):
         and node3b.returncode == 0 and node4.returncode == 0
 
 def test_two_normal_two_light_kill_elected(args):
-    with closing(Node(args,1,light_node = False, multicast = False, seed = 2)) as node1, \
-         closing(Node(args,2,light_node = False, multicast = False, seed = 1)) as node2, \
-         closing(Node(args,3,light_node = True, multicast = False, seed = 1)) as node3, \
-         closing(Node(args,4,light_node = True, multicast = False, seed = 1)) as node4:
+    with closing(Node(args,1,light_node = False, multicast = False, seeds = 2)) as node1, \
+         closing(Node(args,2,light_node = False, multicast = False, seeds = 1)) as node2, \
+         closing(Node(args,3,light_node = True, multicast = False, seeds = 1)) as node3, \
+         closing(Node(args,4,light_node = True, multicast = False, seeds = 1)) as node4:
         state1 = '''{"elected_id": 2, "is_detached": false, "nodes": [{"name": "node_001", "is_dead": false, "id": 1, "node_type_id": 1},
                                                                       {"name": "node_002", "is_dead": false, "id": 2, "node_type_id": 1},
                                                                       {"name": "node_003", "is_dead": false, "id": 3, "node_type_id": 11},
@@ -925,10 +964,10 @@ def test_two_normal_two_light_kill_elected(args):
     return node1.returncode == 0 and node2.returncode == 0 and node3.returncode == 0 and node4.returncode == 0
 
 def test_two_normal_two_light_restart_elected(args):
-    with closing(Node(args,1,light_node = False, multicast = False, seed = 2)) as node1, \
-         closing(Node(args,2,light_node = False, multicast = False, seed = 1)) as node2a, \
-         closing(Node(args,3,light_node = True, multicast = False, seed = 2)) as node3, \
-         closing(Node(args,4,light_node = True, multicast = False, seed = 2)) as node4:
+    with closing(Node(args,1,light_node = False, multicast = False, seeds = 2)) as node1, \
+         closing(Node(args,2,light_node = False, multicast = False, seeds = 1)) as node2a, \
+         closing(Node(args,3,light_node = True, multicast = False, seeds = 2)) as node3, \
+         closing(Node(args,4,light_node = True, multicast = False, seeds = 2)) as node4:
         state1 = '''{"elected_id": 2, "is_detached": false, "nodes": [{"name": "node_001", "is_dead": false, "id": 1, "node_type_id": 1},
                                                                       {"name": "node_002", "is_dead": false, "id": 2, "node_type_id": 1},
                                                                       {"name": "node_003", "is_dead": false, "id": 3, "node_type_id": 11},
@@ -938,10 +977,13 @@ def test_two_normal_two_light_restart_elected(args):
                                                                       {"name": "node_003", "is_dead": false, "id": 3, "node_type_id": 11},
                                                                       {"name": "node_004", "is_dead": false, "id": 4, "node_type_id": 11}]}'''
         state3a = '''{"elected_id": 2, "is_detached": false, "nodes": [{"name": "node_001", "is_dead": true, "id": 1, "node_type_id": 1},
+                                                                       {"name": "node_002", "is_dead": false, "id": 2, "node_type_id": 1}]}'''
+        state3b = '''{"elected_id": 2, "is_detached": false, "nodes": [{"name": "node_002", "is_dead": false, "id": 2, "node_type_id": 1}]}'''
+        state4a = '''{"elected_id": 2, "is_detached": false, "nodes": [{"name": "node_001", "is_dead": true, "id": 1, "node_type_id": 1},
                                                                        {"name": "node_002", "is_dead": false, "id": 2, "node_type_id": 1},
                                                                        {"name": "node_003", "is_dead": true, "id": 3, "node_type_id": 11},
                                                                        {"name": "node_004", "is_dead": true, "id": 4, "node_type_id": 11}]}'''
-        state3b = '''{"elected_id": 2, "is_detached": false, "nodes": [{"name": "node_002", "is_dead": false, "id": 2, "node_type_id": 1},
+        state4b = '''{"elected_id": 2, "is_detached": false, "nodes": [{"name": "node_002", "is_dead": false, "id": 2, "node_type_id": 1},
                                                                        {"name": "node_003", "is_dead": true, "id": 3, "node_type_id": 11},
                                                                        {"name": "node_004", "is_dead": true, "id": 4, "node_type_id": 11}]}'''
         inc1 = form_system((node1,node2a,node3,node4))
@@ -953,34 +995,34 @@ def test_two_normal_two_light_restart_elected(args):
         node1.wait_for_states((state1,state2))
         node3.wait_for_states((state1,state2))
         node4.wait_for_states((state1,state2))
-        with closing(Node(args,2,light_node = False, multicast = False, seed = 1)) as node2b:
+        with closing(Node(args,2,light_node = False, multicast = False, seeds = 1)) as node2b:
             inc2 = node2b.wait_for_form()
             if inc1 == inc2:
                 raise Failure("unexpected incarnation")
-            #node2b will produce one of two possible states, it is a bit random, but both are correct
             log("  This testcase produces some spurious output since it checks for two possible outcomes")
             log("  So ignore any lines below talking about incorrect states unless the test fails.")
             try:
-                node2b.wait_for_states(state3a, last_state_repeats = 10)
-                state3_actual = state3a
+                node2b.wait_for_states((state3a,state4a), last_state_repeats = 20)
+                actual34=(state3a,state4a)
             except Failure:
-                node2b.wait_for_states(state3b, last_state_repeats = 10)
-                state3_actual = state3b
-            node1.wait_for_states((state1,state2), last_state_repeats = 40)
-            node3.wait_for_states((state1,state2), last_state_repeats = 40)
-            node4.wait_for_states((state1,state2), last_state_repeats = 40)
+                node2b.wait_for_states((state3b,state4b), last_state_repeats = 20)
+                actual34=(state3b,state4b)
+            node1.wait_for_states((state1,state2), last_state_repeats = 80)
+            node3.wait_for_states((state1,state2), last_state_repeats = 80)
+            node4.wait_for_states((state1,state2), last_state_repeats = 80)
             node1.close_and_check((state1,state2))
             node3.close_and_check((state1,state2))
             node4.close_and_check((state1,state2))
-            node2b.close_and_check(state3_actual)
+            node2b.close_and_check(actual34)
     return node1.returncode == 0 and node2a.returncode == 0 and node2b.returncode == 0 \
         and node3.returncode == 0 and node4.returncode == 0
 
+
 def test_two_normal_two_light_restart_elected_multicast(args):
-    with closing(Node(args,1,light_node = False, multicast = True, seed = 2)) as node1, \
-         closing(Node(args,2,light_node = False, multicast = True, seed = 1)) as node2a, \
-         closing(Node(args,3,light_node = True, multicast = True, seed = 2)) as node3, \
-         closing(Node(args,4,light_node = True, multicast = True, seed = 2)) as node4:
+    with closing(Node(args,1,light_node = False, multicast = True, seeds = 2)) as node1, \
+         closing(Node(args,2,light_node = False, multicast = True, seeds = 1)) as node2a, \
+         closing(Node(args,3,light_node = True, multicast = True, seeds = 2)) as node3, \
+         closing(Node(args,4,light_node = True, multicast = True, seeds = 2)) as node4:
         state1 = '''{"elected_id": 2, "is_detached": false, "nodes": [{"name": "node_001", "is_dead": false, "id": 1, "node_type_id": 2},
                                                                       {"name": "node_002", "is_dead": false, "id": 2, "node_type_id": 2},
                                                                       {"name": "node_003", "is_dead": false, "id": 3, "node_type_id": 12},
@@ -990,10 +1032,13 @@ def test_two_normal_two_light_restart_elected_multicast(args):
                                                                       {"name": "node_003", "is_dead": false, "id": 3, "node_type_id": 12},
                                                                       {"name": "node_004", "is_dead": false, "id": 4, "node_type_id": 12}]}'''
         state3a = '''{"elected_id": 2, "is_detached": false, "nodes": [{"name": "node_001", "is_dead": true, "id": 1, "node_type_id": 2},
+                                                                       {"name": "node_002", "is_dead": false, "id": 2, "node_type_id": 2}]}'''
+        state3b = '''{"elected_id": 2, "is_detached": false, "nodes": [{"name": "node_002", "is_dead": false, "id": 2, "node_type_id": 2}]}'''
+        state4a = '''{"elected_id": 2, "is_detached": false, "nodes": [{"name": "node_001", "is_dead": true, "id": 1, "node_type_id": 2},
                                                                        {"name": "node_002", "is_dead": false, "id": 2, "node_type_id": 2},
                                                                        {"name": "node_003", "is_dead": true, "id": 3, "node_type_id": 12},
                                                                        {"name": "node_004", "is_dead": true, "id": 4, "node_type_id": 12}]}'''
-        state3b = '''{"elected_id": 2, "is_detached": false, "nodes": [{"name": "node_002", "is_dead": false, "id": 2, "node_type_id": 2},
+        state4b = '''{"elected_id": 2, "is_detached": false, "nodes": [{"name": "node_002", "is_dead": false, "id": 2, "node_type_id": 2},
                                                                        {"name": "node_003", "is_dead": true, "id": 3, "node_type_id": 12},
                                                                        {"name": "node_004", "is_dead": true, "id": 4, "node_type_id": 12}]}'''
         inc1 = form_system((node1,node2a,node3,node4))
@@ -1005,38 +1050,37 @@ def test_two_normal_two_light_restart_elected_multicast(args):
         node1.wait_for_states((state1,state2))
         node3.wait_for_states((state1,state2))
         node4.wait_for_states((state1,state2))
-        with closing(Node(args,2,light_node = False, multicast = True, seed = 1)) as node2b:
+        with closing(Node(args,2,light_node = False, multicast = True, seeds = 1)) as node2b:
             inc2 = node2b.wait_for_form()
             if inc1 == inc2:
                 raise Failure("unexpected incarnation")
-            #node2b will produce one of two possible states, it is a bit random, but both are correct
             log("  This testcase produces some spurious output since it checks for two possible outcomes")
             log("  So ignore any lines below talking about incorrect states unless the test fails.")
             try:
-                node2b.wait_for_states(state3a, last_state_repeats = 10)
-                state3_actual = state3a
+                node2b.wait_for_states((state3a,state4a), last_state_repeats = 20)
+                actual34=(state3a,state4a)
             except Failure:
-                node2b.wait_for_states(state3b, last_state_repeats = 10)
-                state3_actual = state3b
-            node1.wait_for_states((state1,state2), last_state_repeats = 40)
-            node3.wait_for_states((state1,state2), last_state_repeats = 40)
-            node4.wait_for_states((state1,state2), last_state_repeats = 40)
+                node2b.wait_for_states((state3b,state4b), last_state_repeats = 20)
+                actual34=(state3b,state4b)
+            node1.wait_for_states((state1,state2), last_state_repeats = 80)
+            node3.wait_for_states((state1,state2), last_state_repeats = 80)
+            node4.wait_for_states((state1,state2), last_state_repeats = 80)
             node1.close_and_check((state1,state2))
             node3.close_and_check((state1,state2))
             node4.close_and_check((state1,state2))
-            node2b.close_and_check(state3_actual)
+            node2b.close_and_check(actual34)
     return node1.returncode == 0 and node2a.returncode == 0 and node2b.returncode == 0 \
         and node3.returncode == 0 and node4.returncode == 0
 
 def test_four_normal_four_light_mixedcast(args):
-    with closing(Node(args,1,light_node = False, multicast = False, seed = 2)) as node1, \
-         closing(Node(args,2,light_node = False, multicast = True, seed = 1)) as node2, \
-         closing(Node(args,3,light_node = True, multicast = False, seed = 1)) as node3, \
-         closing(Node(args,4,light_node = True, multicast = True, seed = 1)) as node4, \
-         closing(Node(args,5,light_node = False, multicast = False, seed = 2)) as node5, \
-         closing(Node(args,6,light_node = False, multicast = True, seed = 1)) as node6, \
-         closing(Node(args,7,light_node = True, multicast = False, seed = 1)) as node7, \
-         closing(Node(args,8,light_node = True, multicast = True, seed = 1)) as node8:
+    with closing(Node(args,1,light_node = False, multicast = False, seeds = 2)) as node1, \
+         closing(Node(args,2,light_node = False, multicast = True, seeds = 1)) as node2, \
+         closing(Node(args,3,light_node = True, multicast = False, seeds = 1)) as node3, \
+         closing(Node(args,4,light_node = True, multicast = True, seeds = 1)) as node4, \
+         closing(Node(args,5,light_node = False, multicast = False, seeds = 2)) as node5, \
+         closing(Node(args,6,light_node = False, multicast = True, seeds = 1)) as node6, \
+         closing(Node(args,7,light_node = True, multicast = False, seeds = 1)) as node7, \
+         closing(Node(args,8,light_node = True, multicast = True, seeds = 1)) as node8:
         state1 = '''{"elected_id": 6, "is_detached": false, "nodes": [{"name": "node_001", "is_dead": false, "id": 1, "node_type_id": 1},
                                                                       {"name": "node_002", "is_dead": false, "id": 2, "node_type_id": 2},
                                                                       {"name": "node_003", "is_dead": false, "id": 3, "node_type_id": 11},
@@ -1064,6 +1108,99 @@ def test_four_normal_four_light_mixedcast(args):
         node8.close_and_check(state1)
     return node1.returncode == 0 and node2.returncode == 0 and node3.returncode == 0 and node4.returncode == 0 \
         and node5.returncode == 0 and node6.returncode == 0 and node7.returncode == 0 and node8.returncode == 0
+
+def test_move_lightnode_to_other_new_node(args):
+    with closing(Node(args,1,light_node = False, multicast = False)) as node1,\
+         closing(Node(args,2,light_node = True, multicast = False, seeds = (1,3))) as node2:
+        state1 = '''{"elected_id": 1, "is_detached": false, "nodes": [{"name": "node_001", "is_dead": false, "id": 1, "node_type_id": 1},
+                                                                      {"name": "node_002", "is_dead": false, "id": 2, "node_type_id": 11}]}'''
+        state2 = '{"elected_id": 2, "is_detached": true, "nodes": [{"name": "node_002", "is_dead": false, "id": 2, "node_type_id": 11}]}'
+        state3 = '''{"elected_id": 3, "is_detached": false, "nodes": [{"name": "node_002", "is_dead": false, "id": 2, "node_type_id": 11},
+                                                                      {"name": "node_003", "is_dead": false, "id": 3, "node_type_id": 1}]}'''
+        inc1 = form_system((node1,node2))
+        node1.wait_for_states(state1)
+        node2.wait_for_states(state1)
+
+        node1.close_and_check(state1)
+        inc2 = node2.wait_for_form(allowed_states = (state1,))
+        if inc1 == inc2:
+            raise Failure("unexpected incarnation")
+        with closing(Node(args,3,light_node = False, multicast = False)) as node3:
+            inc3 = node3.wait_for_form()
+            node2.wait_for_join(inc3, allow_detached_states = True)
+            if inc3 in (inc1, inc2):
+                raise Failure("unexpected incarnation")
+            node3.wait_for_states(state3)
+            node2.wait_for_states((state1,state2,state3))
+            node3.close_and_check(state3)
+            node2.close_and_check((state1,state2,state3))
+
+    return node1.returncode == 0 and node2.returncode == 0 and node3.returncode == 0
+
+def test_move_lightnode_to_other_new_node_fast(args):
+    with closing(Node(args,1,light_node = False, multicast = False)) as node1,\
+         closing(Node(args,2,light_node = True, multicast = False, seeds = (1,3))) as node2:
+        state1 = '''{"elected_id": 1, "is_detached": false, "nodes": [{"name": "node_001", "is_dead": false, "id": 1, "node_type_id": 1},
+                                                                      {"name": "node_002", "is_dead": false, "id": 2, "node_type_id": 11}]}'''
+        state2 = '{"elected_id": 2, "is_detached": true, "nodes": [{"name": "node_002", "is_dead": false, "id": 2, "node_type_id": 11}]}'
+        state3 = '''{"elected_id": 3, "is_detached": false, "nodes": [{"name": "node_002", "is_dead": true, "id": 2, "node_type_id": 11},
+                                                                      {"name": "node_003", "is_dead": false, "id": 3, "node_type_id": 1}]}'''
+        state4 = '''{"elected_id": 3, "is_detached": false, "nodes": [{"name": "node_002", "is_dead": false, "id": 2, "node_type_id": 11},
+                                                                      {"name": "node_003", "is_dead": false, "id": 3, "node_type_id": 1}]}'''
+        inc1 = form_system((node1,node2))
+        node1.wait_for_states(state1)
+        node2.wait_for_states(state1)
+
+        node1.close_and_check(state1)
+        with closing(Node(args,3,light_node = False, multicast = False)) as node3:
+            inc2 = node3.wait_for_form()
+            inc3 = node2.wait_for_form()
+            if inc3 in (inc1, inc2) or inc2 in (inc1, inc3):
+                raise Failure("unexpected incarnation")
+            node2.wait_for_join(inc2, allow_detached_states = True)
+            node3.wait_for_states((state3,state4), last_state_repeats = 80)
+            node2.wait_for_states((state1,state2,state4))
+            node3.close_and_check((state3,state4))
+            node2.close_and_check((state1,state2,state4))
+    return node1.returncode == 0 and node2.returncode == 0 and node3.returncode == 0
+
+def test_two_normal_one_light_weird_seed (args):
+    with closing(Node(args,1,light_node = False, multicast = False)) as node1,\
+         closing(Node(args,2,light_node = False, multicast = False)) as node2,\
+         closing(Node(args,3,light_node = True, multicast = False, seeds = (1,2))) as node3:
+        inc1 = node1.wait_for_form()
+        inc2 = node2.wait_for_form()
+        inc3 = node3.wait_for_join(None)
+        if inc3 == inc1:
+            state1 = '''{"elected_id": 1, "is_detached": false, "nodes": [{"name": "node_001", "is_dead": false, "id": 1, "node_type_id": 1},
+                                                                         {"name": "<unknown>", "is_dead": true, "id": 2, "node_type_id": 0},
+                                                                         {"name": "node_003", "is_dead": false, "id": 3, "node_type_id": 11}]}'''
+            state2 = '''{"elected_id": 2, "is_detached": false, "nodes": [{"name": "node_002", "is_dead": false, "id": 2, "node_type_id": 1},
+                                                                          {"name": "node_003", "is_dead": true, "id": 3, "node_type_id": 11}]}'''
+            node2.wait_for_states(state2, last_state_repeats = 40)
+            node1.wait_for_states(state1)
+            node3.wait_for_states(state1)
+            node3.close_and_check(state1)
+            node1.close_and_check(state1)
+            node2.ignore_returncode = True
+            node2.close_and_check(state2)
+            return node1.returncode == 0 and node3.returncode == 0
+        elif inc3 == inc2:
+            state1 = '''{"elected_id": 2, "is_detached": false, "nodes": [{"name": "<unknown>", "is_dead": true, "id": 1, "node_type_id": 0},
+                                                                         {"name": "node_002", "is_dead": false, "id": 2, "node_type_id": 1},
+                                                                         {"name": "node_003", "is_dead": false, "id": 3, "node_type_id": 11}]}'''
+            state2 = '''{"elected_id": 1, "is_detached": false, "nodes": [{"name": "node_001", "is_dead": false, "id": 1, "node_type_id": 1},
+                                                                          {"name": "node_003", "is_dead": true, "id": 3, "node_type_id": 11}]}'''
+            node1.wait_for_states(state2, last_state_repeats = 40)
+            node2.wait_for_states(state1)
+            node3.wait_for_states(state1)
+            node3.close_and_check(state1)
+            node2.close_and_check(state1)
+            node1.ignore_returncode = True
+            node1.close_and_check(state2)
+            return node2.returncode == 0 and node3.returncode == 0
+        else:
+            raise Failure("unexpected incarnation")
 
 
 TEST_CASES = ("one_normal",
@@ -1098,7 +1235,10 @@ TEST_CASES = ("one_normal",
               "two_normal_two_light_restart_elected",
               "two_normal_two_light_restart_elected_multicast",
               "four_normal_four_light_mixedcast",
-              #quick detach reattach!
+              "move_lightnode_to_other_new_node",
+              "move_lightnode_to_other_new_node_fast",
+              "two_normal_one_light_weird_seed",
+              #pull cable and let them fall apart and then reattach
               )
 
 def parse_arguments():

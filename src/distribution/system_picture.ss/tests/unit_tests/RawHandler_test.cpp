@@ -145,12 +145,13 @@ template <int64_t ownNodeType>
 struct Fixture
 {
     Fixture()
-        : formSystemDeniesBeforeOk(0),
-          formSystemCallsBeforeJoin(10000)
+        : strand(ioService)
+        , formSystemDeniesBeforeOk(0)
+        , formSystemCallsBeforeJoin(10000)
     {
-        rh.reset(new RawHandlerBasic<::Communication>(ioService,comm,"plopp",10,ownNodeType,"asdfasdf","qwerty",
+        rh.reset(new RawHandlerBasic<::Communication>(strand,comm,"plopp",10,ownNodeType,"asdfasdf","qwerty",
                                                       GetNodeTypes(), true,
-                                                      [this](const int64_t id)
+                                                      [this](const int64_t id, const bool /*incarnationIdChanged*/)
                                                       {return ValidateJoinSystem(id);},
                                                       [this](const int64_t id)
                                                       {return ValidateFormSystem(id);}));
@@ -230,6 +231,7 @@ struct Fixture
 
     Communication comm;
     boost::asio::io_service ioService;
+    boost::asio::io_service::strand strand;
 
     std::unique_ptr<RawHandlerBasic<::Communication>> rh;
 

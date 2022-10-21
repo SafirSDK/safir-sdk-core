@@ -72,8 +72,8 @@ namespace SP
     class RawStatistics;
 
     typedef std::function<void(const RawStatistics& statistics,
-                                 const RawChanges& flags,
-                                 std::shared_ptr<void> completionSignaller)> StatisticsCallback;
+                               const RawChanges& flags,
+                               std::shared_ptr<void> completionSignaller)> StatisticsCallback;
 
     template<class CommunicationT>
     class RawHandlerBasic
@@ -101,7 +101,7 @@ namespace SP
         typedef std::unordered_map<int64_t, NodeInfo> NodeTable;
 
     public:
-        RawHandlerBasic(boost::asio::io_service& ioService,
+        RawHandlerBasic(boost::asio::io_service::strand& strand,
                         CommunicationT& communication,
                         const std::string& name,
                         const int64_t id,
@@ -110,15 +110,15 @@ namespace SP
                         const std::string& dataAddress,
                         const std::map<int64_t, NodeType>& nodeTypes,
                         const bool master,
-                        const std::function<bool (const int64_t incarnationId)>& validateJoinSystemCallback,
+                        const std::function<bool (const int64_t incarnationId,
+                                                  const bool incarnationIdChanged)>& validateJoinSystemCallback,
                         const std::function<bool (const int64_t incarnationId)>& validateFormSystemCallback)
         SAFIR_GCC_VISIBILITY_BUG_WORKAROUND
-            : m_ioService(ioService)
+            : m_strand(strand)
             , m_communication(communication)
             , m_id(id)
             , m_isLightNode(nodeTypes.at(nodeTypeId).isLightNode)
             , m_nodeTypes(nodeTypes)
-            , m_strand(ioService)
             , m_latencyMonitor("SpRawHandler",CalculateLatencyWarningThreshold(nodeTypes),m_strand)
             , m_checkDeadNodesTimer()
             , m_master(master)
@@ -132,7 +132,7 @@ namespace SP
             if (m_master)
             {
                 m_checkDeadNodesTimer.reset(new Safir::Utilities::Internal::AsioPeriodicTimer
-                                            (ioService,
+                                            (m_strand.context(),
                                              CalculateDeadCheckPeriod(nodeTypes),
                                              m_strand.wrap([this](const boost::system::error_code& error)
                                                            {
@@ -294,13 +294,20 @@ namespace SP
 
                 int changes = 0;
 
+                const bool remoteIsLightNode = m_nodeTypes.at(node.nodeInfo->node_type_id()).isLightNode;
+                
                 if (!m_allStatisticsMessage.has_incarnation_id())
                 {
                     lllog(6) << "SP: This node does not have an incarnation id" << std::endl;
-                    if (node.nodeInfo->remote_statistics().has_incarnation_id())
+                    if (node.nodeInfo->remote_statistics().has_incarnation_id() &&
+                        !remoteIsLightNode)
                     {
-                        const bool join = m_validateJoinSystemCallback == nullptr ||
-                            m_validateJoinSystemCallback(node.nodeInfo->remote_statistics().incarnation_id());
+                        if (m_validateJoinSystemCallback == nullptr)
+                        {
+                            throw std::logic_error("No validateJoinSystemCallback set in RawHandler!");
+                        }
+                        const bool join = m_validateJoinSystemCallback(node.nodeInfo->remote_statistics().incarnation_id(),
+                                                                       false);
 
                         if (join)
                         {
@@ -330,19 +337,67 @@ namespace SP
                     }
                     else
                     {
-                        lllog(6) << "SP: Remote node does not have incarnation either, discarding remote data" << std::endl;
+                        lllog(6) << "SP: Remote node does not have incarnation either, or is a lightnode, discarding remote data" << std::endl;
                         node.nodeInfo->clear_remote_statistics();
                     }
                 }
-                else if (node.nodeInfo->remote_statistics().has_incarnation_id() &&
+                else if (m_isLightNode &&
+                         node.nodeInfo->remote_statistics().has_incarnation_id() &&
                          node.nodeInfo->remote_statistics().incarnation_id() != m_allStatisticsMessage.incarnation_id())
                 {
-                    lllog(6) << "SP: Remote node has different incarnation from us, excluding node." << std::endl;
+                    if (m_validateJoinSystemCallback == nullptr)
+                    {
+                        throw std::logic_error("No validateJoinSystemCallback set in RawHandler!");
+                    }
+
+                    lllog(6) << "SP: Remote node has different incarnation from us, but we may be detached. So will try to join!" << std::endl;
+                    const bool join = m_validateJoinSystemCallback(node.nodeInfo->remote_statistics().incarnation_id(),
+                                                                   true);
+
+                    if (join)
+                    {
+                        lllog(1) << "SP: Remote RAW contains incarnation id "
+                                 << node.nodeInfo->remote_statistics().incarnation_id()
+                                 << " and validation passed, let's use it!" << std::endl;
+                        m_allStatisticsMessage.set_incarnation_id(node.nodeInfo->remote_statistics().incarnation_id());
+                        m_allStatisticsMessage.set_election_id(node.nodeInfo->remote_statistics().election_id());
+
+                        changes |= RawChanges::METADATA_CHANGED;
+                    }
+                    else
+                    {
+                        lllog(1) << "SP: Remote RAW contains incarnation id "
+                                 << node.nodeInfo->remote_statistics().incarnation_id()
+                                 << " but validation did not pass. Marking remote dead and excluding!" << std::endl;
+
+                        node.nodeInfo->set_is_dead(true);
+                        node.nodeInfo->clear_remote_statistics();
+                        m_communication.ExcludeNode(from);
+
+                        changes |= RawChanges::NODES_CHANGED;
+                    }
+                }
+                else if (!m_isLightNode &&
+                         !remoteIsLightNode &&
+                         node.nodeInfo->remote_statistics().has_incarnation_id() &&
+                         node.nodeInfo->remote_statistics().incarnation_id() != m_allStatisticsMessage.incarnation_id())
+                {
+                    lllog(6) << "SP: Remote node has different incarnation from us, and we're not "
+                             << "a detached lightnode, excluding node." << std::endl;
+
                     node.nodeInfo->set_is_dead(true);
                     node.nodeInfo->clear_remote_statistics();
                     m_communication.ExcludeNode(from);
 
                     changes |= RawChanges::NODES_CHANGED;
+                }
+                else if (!m_isLightNode &&
+                         remoteIsLightNode &&
+                         node.nodeInfo->remote_statistics().has_incarnation_id() &&
+                         node.nodeInfo->remote_statistics().incarnation_id() != m_allStatisticsMessage.incarnation_id())
+                {
+                    lllog(6) << "SP: Remote has different incarnation from us, but is a lightnode, discarding remote data." << std::endl;
+                    node.nodeInfo->clear_remote_statistics();
                 }
                 else if (!node.nodeInfo->remote_statistics().has_incarnation_id())
                 {
@@ -617,6 +672,8 @@ namespace SP
                                   findIt->second.nodeInfo->set_data_duplicate_count(0);
                                   findIt->second.nodeInfo->set_data_retransmit_count(0);
 
+                                  m_moreDeadNodes.erase(id);
+
                                   PostRawChangedCallback(RawChanges::NODES_CHANGED, nullptr);
                               });
         }
@@ -833,12 +890,11 @@ namespace SP
             }
             else
             {
-                const auto alreadyInThere = m_nodeTable.find(id);
-                if (alreadyInThere != m_nodeTable.end())
+                if (nodeIt != m_nodeTable.end())
                 {
                     lllog(1) << "SP: Got a new node " << name.c_str() << " that I already had" << std::endl;
 
-                    if (m_isLightNode && !alreadyInThere->second.nodeInfo->is_dead())
+                    if (m_isLightNode && !nodeIt->second.nodeInfo->is_dead())
                     {
                         lllog(1) << "SP: And I am a lightnode and that node is not dead! Strange!" << std::endl;
                     }
@@ -968,7 +1024,7 @@ namespace SP
         //Must be called in strand!
         void Retransmit(int64_t id, size_t transmitCount)
         {
-            lllog(9) << "SP: Retransmit to node with id " << id <<  std::endl;
+            lllog(9) << "SP: Retransmit to node with id " << id << ", transmitCount = " << transmitCount << std::endl;
 
             const auto findIt = m_nodeTable.find(id);
 
@@ -1197,7 +1253,7 @@ namespace SP
 
 
         /**
-         * Post a copy of the data on the ioservice
+         * Post a copy of the data on the strand
          *
          * must be called in strand, completionHandler can be 0
          */
@@ -1226,13 +1282,12 @@ namespace SP
         }
 
 
-        boost::asio::io_service& m_ioService;
+        boost::asio::io_service::strand& m_strand;
         CommunicationT& m_communication;
 
         const int64_t m_id;
         const bool m_isLightNode;
         const std::map<int64_t, NodeType> m_nodeTypes;
-        mutable boost::asio::io_service::strand m_strand;
         AsioLatencyMonitor m_latencyMonitor;
 
         std::unique_ptr<Safir::Utilities::Internal::AsioPeriodicTimer> m_checkDeadNodesTimer;
@@ -1245,7 +1300,8 @@ namespace SP
         std::vector<StatisticsCallback> m_rawChangedCallbacks;
 
         const bool m_master; //true if running in SystemPicture master instance
-        const std::function<bool (const int64_t incarnationId)> m_validateJoinSystemCallback;
+        const std::function<bool (const int64_t incarnationId,
+                                  const bool incarnationIdChanged)> m_validateJoinSystemCallback;
         const std::function<bool (const int64_t incarnationId)> m_validateFormSystemCallback;
 
         std::atomic<bool> m_stopped;

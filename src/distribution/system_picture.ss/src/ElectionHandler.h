@@ -63,7 +63,7 @@ namespace SP
         : private boost::noncopyable
     {
     public:
-        ElectionHandlerBasic(boost::asio::io_service& ioService,
+        ElectionHandlerBasic(boost::asio::io_service::strand& strand,
                              CommunicationT& communication,
                              const int64_t id,
                              const int64_t nodeTypeId,
@@ -73,7 +73,7 @@ namespace SP
                              const std::function<void(const int64_t nodeId,
                                                       const int64_t electionId)>& electionCompleteCallback,
                              const std::function<void(const int64_t incarnationId)>& formSystemCallback)
-            : m_strand (ioService)
+            : m_strand (strand)
             , m_stopped(false)
             , m_communication(communication)
             , m_receiverId(LlufId_Generate64(receiverId))
@@ -84,18 +84,15 @@ namespace SP
             , m_nonLightNodeTypeIds(GetNonLightNodeTypeIds(nodeTypes))
             , m_aloneTimeout(CalculateAloneTimeout(nodeTypes, aloneTimeout))
             , m_electionTimeout(CalculateElectionTimeout(nodeTypes))
-            , m_electedStorage(new AlignedStorage())
-            , m_elected(reinterpret_cast<std::atomic<int64_t>&>(*m_electedStorage))
-            , m_electionTimer(ioService)
+            , m_elected(std::numeric_limits<int64_t>::min())
+            , m_electionTimer(strand.context())
             , m_electionInProgress(false)
             , m_currentElectionId(0)
-            , m_generateIncarnationIdTimer(ioService)
-            , m_sendMessageTimer(ioService)
+            , m_generateIncarnationIdTimer(strand.context())
+            , m_sendMessageTimer(strand.context())
             , m_electionCompleteCallback(electionCompleteCallback)
             , m_formSystemCallback(formSystemCallback)
         {
-            new (m_electedStorage.get()) std::atomic<uint64_t>(std::numeric_limits<int64_t>::min());
-
             communication.SetDataReceiver([this](const int64_t from,
                                                  const int64_t nodeTypeId,
                                                  const char* const data,
@@ -121,9 +118,15 @@ namespace SP
         }
 
 
-        bool IsElected() const {return m_id == m_elected;}
-        bool IsElected(const int64_t nodeId) const {return nodeId == m_elected;}
-        bool IsDetached() const {return m_isLightNode && m_elected == m_id;}
+        bool IsElected() const {CheckStrand(); return m_id == m_elected;}
+        bool IsElected(const int64_t nodeId) const {CheckStrand(); return nodeId == m_elected;}
+
+        /**
+         * Find out if the election is detached or not. This is not actually always the same as whether the
+         * state is detached or not. Ask the Coordinator about that. At state transitions this value may
+         * be different from the Coordinator value.
+        */
+        bool IsElectionDetached() const {CheckStrand(); return m_isLightNode && m_elected == m_id;}
 
         void Stop()
         {
@@ -264,6 +267,8 @@ namespace SP
         //must be called in strand
         void StartElection()
         {
+            CheckStrand();
+
             if (m_stopped)
             {
                 return;
@@ -288,8 +293,7 @@ namespace SP
 
                 if (m_isLightNode &&
                     m_lastStatistics.Valid() &&
-                    m_lastStatistics.IsEveryoneElseDead() &&
-                    m_lastStatistics.Size() != 0)
+                    m_lastStatistics.IsEveryoneElseDead())
                 {
                     lllog(4) << "SP: I am a light node, and everyone else is gone, so I shall get myself elected anyway." << std::endl;
                     m_lastStatistics = RawStatistics();
@@ -362,6 +366,8 @@ namespace SP
         //must be called in strand
         void ElectionTimeout(const boost::system::error_code& error)
         {
+            CheckStrand();
+
             if (!error && !m_stopped && m_electionInProgress)
             {
                 m_electionInProgress = false;
@@ -512,6 +518,8 @@ namespace SP
         //must be called in strand
         void SendPendingElectionMessages()
         {
+            CheckStrand();
+
             m_sendMessageTimer.cancel();
 
             { //ALIVE
@@ -612,8 +620,18 @@ namespace SP
             }
         }
 
+        void CheckStrand() const
+        {
+#if (!defined NDEBUG && !defined SAFIR_DISABLE_CHECK_STRAND)
+            if (!m_strand.running_in_this_thread())
+            {
+                throw std::logic_error("Function must be must be called from the strand!");
+            }
+#endif
+        }
 
-        mutable boost::asio::io_service::strand m_strand;
+
+        boost::asio::io_service::strand& m_strand;
         bool m_stopped;
         CommunicationT& m_communication;
         const uint64_t m_receiverId;
@@ -629,14 +647,10 @@ namespace SP
 
         RawStatistics m_lastStatistics;
 
-        //64 bit atomic needs to be aligned on 64 bit boundary even on 32 bit systems,
-        //so we need to use alignment magic.
-        typedef std::aligned_storage<sizeof(std::atomic<int64_t>),sizeof(std::atomic<int64_t>)>::type AlignedStorage;
-        std::unique_ptr<AlignedStorage> m_electedStorage;
-        std::atomic<int64_t>& m_elected;
+        int64_t m_elected;
         boost::asio::steady_timer m_electionTimer;
         bool m_electionInProgress;
-        std::atomic<int64_t> m_currentElectionId;
+        int64_t m_currentElectionId;
 
         boost::asio::steady_timer m_generateIncarnationIdTimer;
 

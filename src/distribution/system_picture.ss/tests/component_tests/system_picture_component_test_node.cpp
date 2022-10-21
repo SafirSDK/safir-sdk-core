@@ -122,9 +122,9 @@ public:
             ("id",
              value<int64_t>(&nodeId)->required(),
              "nodeId for this node. Between 1 and 999")
-            ("seed",
-             value<int>(&seed)->default_value(-1),
-             "Seed node.")
+            ("seeds",
+             value(&seeds)->multitoken(),
+             "Seed nodes.")
             ("use-multicast",
              bool_switch(&useMulticast),
              "Whether to use multicast communication or not")
@@ -178,7 +178,7 @@ public:
     std::string controlAddress;
     std::string dataAddress;
     bool isLightNode = false;
-    int seed;
+    std::vector<int> seeds;
     int revolutions;
     int64_t nodeType;
 private:
@@ -314,7 +314,7 @@ public:
         m_communication->Start();
 
         //run ioservice in four threads, to increase likelyhood of detecting threading bugs
-        for (int i = 0; i < 4; ++i)
+        for (int i = 0; i < 1; ++i)
         {
             m_threads.create_thread([this]
             {
@@ -392,11 +392,16 @@ public:
                                m_commNodeTypes,
                                1450));
 
-        if (options.seed != -1)
+        std::vector<std::string> seeds;
+        for (const auto seed: options.seeds)
         {
             std::ostringstream ss;
-            ss << options.address << ":33" << std::setw(3) << std::setfill('0') << options.seed;
-            m_communication->InjectSeeds({ss.str()});
+            ss << options.address << ":33" << std::setw(3) << std::setfill('0') << seed;
+            seeds.push_back(ss.str());
+        }
+        if (!seeds.empty())
+        {
+            m_communication->InjectSeeds(seeds);
         }
 
         m_systemPicture.reset(new Safir::Dob::Internal::SP::SystemPicture
@@ -574,6 +579,7 @@ private:
 
     void HandleState(const Safir::Dob::Internal::SP::SystemState& state)
     {
+        //logout << state.ToJson() << std::endl;
         logerr << m_logPrefix << state.ToJson() << std::endl;
 
         if (m_lastState.IsValid() && !m_lastState.IsDetached() && state.IsDetached())

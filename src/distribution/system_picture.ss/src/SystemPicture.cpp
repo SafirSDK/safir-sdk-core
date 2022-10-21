@@ -90,7 +90,8 @@ namespace SP
              const boost::chrono::steady_clock::duration& aloneTimeout,
              const std::function<bool (const int64_t incarnationId)>& validateJoinSystemCallback,
              const std::function<bool (const int64_t incarnationId)>& validateFormSystemCallback)
-            : m_rawHandler(Safir::make_unique<RawHandler>(ioService,
+            : m_strand(ioService)
+            , m_rawHandler(Safir::make_unique<RawHandler>(m_strand,
                                                           communication,
                                                           name,
                                                           id,
@@ -99,7 +100,26 @@ namespace SP
                                                           communication.DataAddress(),
                                                           nodeTypes,
                                                           true,
-                                                          validateJoinSystemCallback,
+                                                          [this, validateJoinSystemCallback](const int64_t incarnationId,
+                                                                                             const bool incarnationIdChanged)
+                                                          {
+                                                              const auto detached = m_coordinator->IsDetached();
+                                                              lllog(6) << "SP: validateJoinSystemCallback incarnationIdChanged = "
+                                                                       << std::boolalpha << incarnationIdChanged << ", detached = "
+                                                                       << detached << std::endl;
+                                                              if (detached && incarnationIdChanged)
+                                                              {
+                                                                  return validateJoinSystemCallback(incarnationId);
+                                                              }
+                                                              else if (incarnationIdChanged)
+                                                              {
+                                                                  return false;
+                                                              }
+                                                              else
+                                                              {
+                                                                  return validateJoinSystemCallback(incarnationId);
+                                                              }
+                                                          },
                                                           validateFormSystemCallback))
             , m_rawPublisherLocal(Safir::make_unique<RawPublisherLocal>(ioService,
                                                                         *m_rawHandler,
@@ -119,7 +139,7 @@ namespace SP
                                     (communication,
                                      MASTER_REMOTE_RAW_NAME,
                                      *m_rawHandler))
-            , m_coordinator(Safir::make_unique<Coordinator>(ioService,
+            , m_coordinator(Safir::make_unique<Coordinator>(m_strand,
                                                             communication,
                                                             name,
                                                             id,
@@ -148,6 +168,11 @@ namespace SP
                                        *m_coordinator))
             , m_stopped(false)
         {
+            if (validateJoinSystemCallback == nullptr)
+            {
+                throw std::logic_error("No validateJoinSystemCallback set in SystemPicture!");
+            }
+
             //when we're in master mode we set up a subscription to raw data from the slave
             m_rawSubscriberLocal->Start([this](const RawStatistics& data)
             {
@@ -167,7 +192,8 @@ namespace SP
                       const int64_t id,
                       const int64_t nodeTypeId,
                       const std::map<int64_t, NodeType>& nodeTypes)
-            : m_rawHandler(Safir::make_unique<RawHandler>(ioService,
+            : m_strand(ioService)
+            , m_rawHandler(Safir::make_unique<RawHandler>(m_strand,
                                                           communication,
                                                           name,
                                                           id,
@@ -176,8 +202,8 @@ namespace SP
                                                           communication.DataAddress(),
                                                           nodeTypes,
                                                           false,
-                                                          std::function<bool (const int64_t)>(),
-                                                          std::function<bool (const int64_t)>())) //NULL function pointers to make vs2010 happy
+                                                          nullptr,
+                                                          nullptr))
             , m_rawPublisherLocal(Safir::make_unique<RawPublisherLocal>(ioService,
                                                                         *m_rawHandler,
                                                                         SLAVE_LOCAL_RAW_NAME,
@@ -216,7 +242,8 @@ namespace SP
          */
         explicit Impl(subscriber_tag_t,
                       boost::asio::io_service& ioService)
-            : m_rawSubscriberLocal(Safir::make_unique<LocalSubscriber<Safir::Utilities::Internal::IpcSubscriber,
+            : m_strand(ioService)
+            , m_rawSubscriberLocal(Safir::make_unique<LocalSubscriber<Safir::Utilities::Internal::IpcSubscriber,
                                                                       RawStatisticsSubscriber,
                                                                       RawStatisticsCreator>>(ioService,
                                                                                              MASTER_LOCAL_RAW_NAME))
@@ -338,6 +365,7 @@ namespace SP
 
 
     private:
+        boost::asio::io_service::strand m_strand;
         std::unique_ptr<RawHandler> m_rawHandler;
 
         std::unique_ptr<RawPublisherLocal> m_rawPublisherLocal;

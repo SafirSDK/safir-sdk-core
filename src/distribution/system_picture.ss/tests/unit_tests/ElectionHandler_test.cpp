@@ -273,6 +273,7 @@ struct Node
 {
     Node(boost::asio::io_service& ioService, const int64_t id_, const int64_t nodeTypeId_)
         : id(id_)
+        , strand(ioService)
         , nodeTypeId(nodeTypeId_)
         , comm(ioService,id)
         , electedNode(0)
@@ -280,7 +281,7 @@ struct Node
         , incarnationId(0)
         , removed(false)
     {
-        eh.reset(new ElectionHandlerBasic<Communication>(ioService,
+        eh.reset(new ElectionHandlerBasic<Communication>(strand,
                                                          comm,
                                                          id_,
                                                          nodeTypeId_,
@@ -337,6 +338,8 @@ struct Node
     }
 
     const int64_t id;
+    boost::asio::io_service::strand strand;
+
     int64_t nodeTypeId;
     Communication comm;
     std::unique_ptr<ElectionHandlerBasic<Communication>> eh;
@@ -406,7 +409,7 @@ struct Fixture
 
         for (auto node = nodes.cbegin(); node != nodes.cend(); ++node)
         {
-            if ((*node)->removed || (*node)->eh->IsDetached())
+            if ((*node)->removed || (*node)->eh->IsElectionDetached())
             {
                 continue;
             }
@@ -519,12 +522,12 @@ BOOST_AUTO_TEST_CASE( start_stop )
 BOOST_AUTO_TEST_CASE( elect_self )
 {
     BOOST_CHECK(!nodes.at(0)->eh->IsElected());
-    BOOST_CHECK(!nodes.at(0)->eh->IsDetached());
+    BOOST_CHECK(!nodes.at(0)->eh->IsElectionDetached());
     RunIoService();
     BOOST_CHECK(nodes.at(0)->eh->IsElected());
     BOOST_CHECK(nodes.at(0)->eh->IsElected(10));
     BOOST_CHECK(!nodes.at(0)->eh->IsElected(20));
-    BOOST_CHECK(!nodes.at(0)->eh->IsDetached());
+    BOOST_CHECK(!nodes.at(0)->eh->IsElectionDetached());
     BOOST_CHECK_NE(nodes.at(0)->incarnationId,0);
 }
 
@@ -533,14 +536,14 @@ BOOST_AUTO_TEST_CASE( two_nodes )
     AddNode();
     SendNodesChanged(true);
     BOOST_CHECK(!nodes.at(0)->eh->IsElected());
-    BOOST_CHECK(!nodes.at(0)->eh->IsDetached());
+    BOOST_CHECK(!nodes.at(0)->eh->IsElectionDetached());
     BOOST_CHECK(!nodes.at(1)->eh->IsElected());
-    BOOST_CHECK(!nodes.at(1)->eh->IsDetached());
+    BOOST_CHECK(!nodes.at(1)->eh->IsElectionDetached());
     RunIoService();
     BOOST_CHECK(!nodes.at(0)->eh->IsElected());
-    BOOST_CHECK(!nodes.at(0)->eh->IsDetached());
+    BOOST_CHECK(!nodes.at(0)->eh->IsElectionDetached());
     BOOST_CHECK(nodes.at(1)->eh->IsElected());
-    BOOST_CHECK(!nodes.at(1)->eh->IsDetached());
+    BOOST_CHECK(!nodes.at(1)->eh->IsElectionDetached());
     BOOST_CHECK_EQUAL(nodes.at(0)->incarnationId, 0);
     BOOST_CHECK_EQUAL(nodes.at(1)->incarnationId, 0);
 }
@@ -550,14 +553,14 @@ BOOST_AUTO_TEST_CASE( two_nodes_other_light )
     AddLightNode();
     SendNodesChanged(true);
     BOOST_CHECK(!nodes.at(0)->eh->IsElected());
-    BOOST_CHECK(!nodes.at(0)->eh->IsDetached());
+    BOOST_CHECK(!nodes.at(0)->eh->IsElectionDetached());
     BOOST_CHECK(!nodes.at(1)->eh->IsElected());
-    BOOST_CHECK(!nodes.at(1)->eh->IsDetached());
+    BOOST_CHECK(!nodes.at(1)->eh->IsElectionDetached());
     RunIoService();
     BOOST_CHECK(nodes.at(0)->eh->IsElected());
-    BOOST_CHECK(!nodes.at(0)->eh->IsDetached());
+    BOOST_CHECK(!nodes.at(0)->eh->IsElectionDetached());
     BOOST_CHECK(!nodes.at(1)->eh->IsElected());
-    BOOST_CHECK(!nodes.at(1)->eh->IsDetached());
+    BOOST_CHECK(!nodes.at(1)->eh->IsElectionDetached());
     BOOST_CHECK_EQUAL(nodes.at(0)->incarnationId, 0);
     BOOST_CHECK_EQUAL(nodes.at(1)->incarnationId, 0);
 }
@@ -849,13 +852,13 @@ BOOST_AUTO_TEST_CASE( remove_during_election_some_light )
     threads.join_all();
 
     SAFE_BOOST_CHECK(!nodes.at(0)->eh->IsElected());
-    SAFE_BOOST_CHECK(!nodes.at(0)->eh->IsDetached());
+    SAFE_BOOST_CHECK(!nodes.at(0)->eh->IsElectionDetached());
     SAFE_BOOST_CHECK(!nodes.at(1)->eh->IsElected());
-    SAFE_BOOST_CHECK(!nodes.at(1)->eh->IsDetached());
+    SAFE_BOOST_CHECK(!nodes.at(1)->eh->IsElectionDetached());
     SAFE_BOOST_CHECK(nodes.at(2)->eh->IsElected());
-    SAFE_BOOST_CHECK(!nodes.at(2)->eh->IsDetached());
+    SAFE_BOOST_CHECK(!nodes.at(2)->eh->IsElectionDetached());
     SAFE_BOOST_CHECK(!nodes.at(3)->eh->IsElected());
-    SAFE_BOOST_CHECK(!nodes.at(3)->eh->IsDetached());
+    SAFE_BOOST_CHECK(!nodes.at(3)->eh->IsElectionDetached());
     SAFE_BOOST_CHECK(nodes.at(0)->eh->IsElected(12));
     SAFE_BOOST_CHECK(nodes.at(1)->eh->IsElected(12));
     SAFE_BOOST_CHECK(nodes.at(2)->eh->IsElected(12));
@@ -871,12 +874,12 @@ BOOST_FIXTURE_TEST_SUITE( self_is_light, Fixture<15> )
 BOOST_AUTO_TEST_CASE( elect_self )
 {
     BOOST_CHECK(!nodes.at(0)->eh->IsElected());
-    BOOST_CHECK(!nodes.at(0)->eh->IsDetached());
+    BOOST_CHECK(!nodes.at(0)->eh->IsElectionDetached());
     RunIoService();
     BOOST_CHECK(nodes.at(0)->eh->IsElected());
     BOOST_CHECK(nodes.at(0)->eh->IsElected(10));
     BOOST_CHECK(!nodes.at(0)->eh->IsElected(20));
-    BOOST_CHECK(nodes.at(0)->eh->IsDetached());
+    BOOST_CHECK(nodes.at(0)->eh->IsElectionDetached());
     BOOST_CHECK_NE(nodes.at(0)->incarnationId,0);
 }
 
@@ -886,14 +889,14 @@ BOOST_AUTO_TEST_CASE( two_nodes )
     AddNode();
     SendNodesChanged(true);
     BOOST_CHECK(!nodes.at(0)->eh->IsElected());
-    BOOST_CHECK(!nodes.at(0)->eh->IsDetached());
+    BOOST_CHECK(!nodes.at(0)->eh->IsElectionDetached());
     BOOST_CHECK(!nodes.at(1)->eh->IsElected());
-    BOOST_CHECK(!nodes.at(1)->eh->IsDetached());
+    BOOST_CHECK(!nodes.at(1)->eh->IsElectionDetached());
     RunIoService();
     BOOST_CHECK(!nodes.at(0)->eh->IsElected());
-    BOOST_CHECK(!nodes.at(0)->eh->IsDetached());
+    BOOST_CHECK(!nodes.at(0)->eh->IsElectionDetached());
     BOOST_CHECK(nodes.at(1)->eh->IsElected());
-    BOOST_CHECK(!nodes.at(1)->eh->IsDetached());
+    BOOST_CHECK(!nodes.at(1)->eh->IsElectionDetached());
     BOOST_CHECK_EQUAL(nodes.at(0)->incarnationId, 0);
     BOOST_CHECK_EQUAL(nodes.at(1)->incarnationId, 0);
 }
@@ -903,14 +906,14 @@ BOOST_AUTO_TEST_CASE( two_nodes_no_incarnation )
     AddNode();
     SendNodesChanged(false);
     BOOST_CHECK(!nodes.at(0)->eh->IsElected());
-    BOOST_CHECK(!nodes.at(0)->eh->IsDetached());
+    BOOST_CHECK(!nodes.at(0)->eh->IsElectionDetached());
     BOOST_CHECK(!nodes.at(1)->eh->IsElected());
-    BOOST_CHECK(!nodes.at(1)->eh->IsDetached());
+    BOOST_CHECK(!nodes.at(1)->eh->IsElectionDetached());
     RunIoService();
     BOOST_CHECK(!nodes.at(0)->eh->IsElected());
-    BOOST_CHECK(!nodes.at(0)->eh->IsDetached());
+    BOOST_CHECK(!nodes.at(0)->eh->IsElectionDetached());
     BOOST_CHECK(nodes.at(1)->eh->IsElected());
-    BOOST_CHECK(!nodes.at(1)->eh->IsDetached());
+    BOOST_CHECK(!nodes.at(1)->eh->IsElectionDetached());
     BOOST_CHECK_NE(nodes.at(1)->incarnationId, 0);
     BOOST_CHECK_EQUAL(nodes.at(0)->incarnationId, 0);
 }
@@ -920,14 +923,14 @@ BOOST_AUTO_TEST_CASE( make_node_detached )
     AddNode();
     SendNodesChanged(true);
     BOOST_CHECK(!nodes.at(0)->eh->IsElected());
-    BOOST_CHECK(!nodes.at(0)->eh->IsDetached());
+    BOOST_CHECK(!nodes.at(0)->eh->IsElectionDetached());
     BOOST_CHECK(!nodes.at(1)->eh->IsElected());
-    BOOST_CHECK(!nodes.at(1)->eh->IsDetached());
+    BOOST_CHECK(!nodes.at(1)->eh->IsElectionDetached());
     RunIoService();
     BOOST_CHECK(!nodes.at(0)->eh->IsElected());
-    BOOST_CHECK(!nodes.at(0)->eh->IsDetached());
+    BOOST_CHECK(!nodes.at(0)->eh->IsElectionDetached());
     BOOST_CHECK(nodes.at(1)->eh->IsElected());
-    BOOST_CHECK(!nodes.at(1)->eh->IsDetached());
+    BOOST_CHECK(!nodes.at(1)->eh->IsElectionDetached());
     BOOST_CHECK_EQUAL(nodes.at(0)->incarnationId, 0);
     BOOST_CHECK_EQUAL(nodes.at(1)->incarnationId, 0);
 
@@ -936,7 +939,7 @@ BOOST_AUTO_TEST_CASE( make_node_detached )
     RunIoService();
 
     BOOST_CHECK(nodes.at(0)->eh->IsElected());
-    BOOST_CHECK(nodes.at(0)->eh->IsDetached());
+    BOOST_CHECK(nodes.at(0)->eh->IsElectionDetached());
 }
 
 BOOST_AUTO_TEST_CASE( reattach )
@@ -949,15 +952,15 @@ BOOST_AUTO_TEST_CASE( reattach )
     RunIoService();
 
     BOOST_CHECK(nodes.at(0)->eh->IsElected());
-    BOOST_CHECK(nodes.at(0)->eh->IsDetached());
+    BOOST_CHECK(nodes.at(0)->eh->IsElectionDetached());
 
     AddNode();
     SendNodesChanged(true);
     RunIoService();
     BOOST_CHECK(!nodes.at(0)->eh->IsElected());
-    BOOST_CHECK(!nodes.at(0)->eh->IsDetached());
+    BOOST_CHECK(!nodes.at(0)->eh->IsElectionDetached());
     BOOST_CHECK(nodes.at(2)->eh->IsElected());
-    BOOST_CHECK(!nodes.at(2)->eh->IsDetached());
+    BOOST_CHECK(!nodes.at(2)->eh->IsElectionDetached());
 }
 
 BOOST_AUTO_TEST_CASE( two_light_nodes )
@@ -966,18 +969,18 @@ BOOST_AUTO_TEST_CASE( two_light_nodes )
     AddLightNode();
     SendNodesChanged(true);
     BOOST_CHECK(!nodes.at(0)->eh->IsElected());
-    BOOST_CHECK(!nodes.at(0)->eh->IsDetached());
+    BOOST_CHECK(!nodes.at(0)->eh->IsElectionDetached());
     BOOST_CHECK(!nodes.at(1)->eh->IsElected());
-    BOOST_CHECK(!nodes.at(1)->eh->IsDetached());
+    BOOST_CHECK(!nodes.at(1)->eh->IsElectionDetached());
     BOOST_CHECK(!nodes.at(2)->eh->IsElected());
-    BOOST_CHECK(!nodes.at(2)->eh->IsDetached());
+    BOOST_CHECK(!nodes.at(2)->eh->IsElectionDetached());
     RunIoService();
     BOOST_CHECK(!nodes.at(0)->eh->IsElected());
-    BOOST_CHECK(!nodes.at(0)->eh->IsDetached());
+    BOOST_CHECK(!nodes.at(0)->eh->IsElectionDetached());
     BOOST_CHECK(nodes.at(1)->eh->IsElected());
-    BOOST_CHECK(!nodes.at(1)->eh->IsDetached());
+    BOOST_CHECK(!nodes.at(1)->eh->IsElectionDetached());
     BOOST_CHECK(!nodes.at(2)->eh->IsElected());
-    BOOST_CHECK(!nodes.at(2)->eh->IsDetached());
+    BOOST_CHECK(!nodes.at(2)->eh->IsElectionDetached());
     BOOST_CHECK_EQUAL(nodes.at(0)->incarnationId, 0);
     BOOST_CHECK_EQUAL(nodes.at(1)->incarnationId, 0);
     BOOST_CHECK_EQUAL(nodes.at(2)->incarnationId, 0);
@@ -990,19 +993,19 @@ BOOST_AUTO_TEST_CASE( two_nodes_kill_normal )
     SendNodesChanged(true);
     RunIoService();
     BOOST_CHECK(!nodes.at(0)->eh->IsElected());
-    BOOST_CHECK(!nodes.at(0)->eh->IsDetached());
+    BOOST_CHECK(!nodes.at(0)->eh->IsElectionDetached());
     BOOST_CHECK(nodes.at(1)->eh->IsElected());
-    BOOST_CHECK(!nodes.at(1)->eh->IsDetached());
+    BOOST_CHECK(!nodes.at(1)->eh->IsElectionDetached());
     BOOST_CHECK(!nodes.at(2)->eh->IsElected());
-    BOOST_CHECK(!nodes.at(2)->eh->IsDetached());
+    BOOST_CHECK(!nodes.at(2)->eh->IsElectionDetached());
 
     RemoveNode(1);
     SendNodesChanged(true);
     RunIoService();
     BOOST_CHECK(nodes.at(0)->eh->IsElected());
-    BOOST_CHECK(nodes.at(0)->eh->IsDetached());
+    BOOST_CHECK(nodes.at(0)->eh->IsElectionDetached());
     BOOST_CHECK(nodes.at(2)->eh->IsElected());
-    BOOST_CHECK(nodes.at(2)->eh->IsDetached());
+    BOOST_CHECK(nodes.at(2)->eh->IsElectionDetached());
 
 }
 
@@ -1017,19 +1020,19 @@ BOOST_AUTO_TEST_CASE( reattach_two )
     SendNodesChanged(true);
     RunIoService();
     BOOST_CHECK(nodes.at(0)->eh->IsElected());
-    BOOST_CHECK(nodes.at(0)->eh->IsDetached());
+    BOOST_CHECK(nodes.at(0)->eh->IsElectionDetached());
     BOOST_CHECK(nodes.at(2)->eh->IsElected());
-    BOOST_CHECK(nodes.at(2)->eh->IsDetached());
+    BOOST_CHECK(nodes.at(2)->eh->IsElectionDetached());
 
     AddNode();
     SendNodesChanged(true);
     RunIoService();
     BOOST_CHECK(!nodes.at(0)->eh->IsElected());
-    BOOST_CHECK(!nodes.at(0)->eh->IsDetached());
+    BOOST_CHECK(!nodes.at(0)->eh->IsElectionDetached());
     BOOST_CHECK(!nodes.at(2)->eh->IsElected());
-    BOOST_CHECK(!nodes.at(2)->eh->IsDetached());
+    BOOST_CHECK(!nodes.at(2)->eh->IsElectionDetached());
     BOOST_CHECK(nodes.at(3)->eh->IsElected());
-    BOOST_CHECK(!nodes.at(3)->eh->IsDetached());
+    BOOST_CHECK(!nodes.at(3)->eh->IsElectionDetached());
 }
 
 BOOST_AUTO_TEST_CASE( two_normal_two_light )
@@ -1040,13 +1043,13 @@ BOOST_AUTO_TEST_CASE( two_normal_two_light )
     SendNodesChanged(true);
     RunIoService();
     BOOST_CHECK(!nodes.at(0)->eh->IsElected());
-    BOOST_CHECK(!nodes.at(0)->eh->IsDetached());
+    BOOST_CHECK(!nodes.at(0)->eh->IsElectionDetached());
     BOOST_CHECK(!nodes.at(1)->eh->IsElected());
-    BOOST_CHECK(!nodes.at(1)->eh->IsDetached());
+    BOOST_CHECK(!nodes.at(1)->eh->IsElectionDetached());
     BOOST_CHECK(nodes.at(2)->eh->IsElected());
-    BOOST_CHECK(!nodes.at(2)->eh->IsDetached());
+    BOOST_CHECK(!nodes.at(2)->eh->IsElectionDetached());
     BOOST_CHECK(!nodes.at(3)->eh->IsElected());
-    BOOST_CHECK(!nodes.at(3)->eh->IsDetached());
+    BOOST_CHECK(!nodes.at(3)->eh->IsElectionDetached());
     BOOST_CHECK(nodes.at(0)->eh->IsElected(12));
     BOOST_CHECK(nodes.at(1)->eh->IsElected(12));
     BOOST_CHECK(nodes.at(2)->eh->IsElected(12));
@@ -1056,11 +1059,11 @@ BOOST_AUTO_TEST_CASE( two_normal_two_light )
     SendNodesChanged(true);
     RunIoService();
     BOOST_CHECK(!nodes.at(0)->eh->IsElected());
-    BOOST_CHECK(!nodes.at(0)->eh->IsDetached());
+    BOOST_CHECK(!nodes.at(0)->eh->IsElectionDetached());
     BOOST_CHECK(nodes.at(1)->eh->IsElected());
-    BOOST_CHECK(!nodes.at(1)->eh->IsDetached());
+    BOOST_CHECK(!nodes.at(1)->eh->IsElectionDetached());
     BOOST_CHECK(!nodes.at(3)->eh->IsElected());
-    BOOST_CHECK(!nodes.at(3)->eh->IsDetached());
+    BOOST_CHECK(!nodes.at(3)->eh->IsElectionDetached());
     BOOST_CHECK(nodes.at(0)->eh->IsElected(11));
     BOOST_CHECK(nodes.at(1)->eh->IsElected(11));
     BOOST_CHECK(nodes.at(3)->eh->IsElected(11));

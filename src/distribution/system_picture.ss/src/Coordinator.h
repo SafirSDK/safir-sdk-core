@@ -70,7 +70,7 @@ namespace SP
         : private boost::noncopyable
     {
     public:
-        CoordinatorBasic(boost::asio::io_service& ioService,
+        CoordinatorBasic(boost::asio::io_service::strand& strand,
                          CommunicationT& communication,
                          const std::string& name,
                          const int64_t id,
@@ -81,7 +81,7 @@ namespace SP
                          const boost::chrono::steady_clock::duration& aloneTimeout,
                          const char* const receiverId,
                          RawHandlerT& rawHandler)
-            : m_strand (ioService)
+            : m_strand (strand)
             , m_communication(communication)
             , m_lastStatisticsDirty(true)
             , m_name(name)
@@ -95,7 +95,7 @@ namespace SP
             , m_failedStateUpdates(0)
         {
 
-            m_electionHandler.reset(new ElectionHandlerT(ioService,
+            m_electionHandler.reset(new ElectionHandlerT(m_strand,
                                                          communication,
                                                          id,
                                                          nodeTypeId,
@@ -150,6 +150,18 @@ namespace SP
             }));
         }
 
+        /**
+         * Find out if the current state is detached or not.
+         *
+         * Must be called from within the strand!
+         */
+        bool IsDetached() const
+        {
+            CheckStrand();
+
+            return m_stateMessage.is_detached();
+        }
+
         void SetStateChangedCallback(const std::function<void(const SystemStateMessage& data)>& callback)
         {
             m_strand.dispatch([this,callback]
@@ -167,25 +179,31 @@ namespace SP
         {
             m_strand.dispatch([this,fn,onlyOwnState]
             {
-                lllog(8) << "Coordinator::PerformOnStateMessage:" << std::endl;
+                lllog(8) << "SP: Coordinator::PerformOnStateMessage:" << std::endl;
                 if (onlyOwnState)
                 {
                     const bool okToSend = UpdateMyState();
 
                     if (!okToSend)
                     {
-                        lllog(8) << " - Not sending: System State not ok to send!" << std::endl;
+                        lllog(8) << "SP:  - Not sending: System State not ok to send!" << std::endl;
                         return;
                     }
                 }
 
                 if (m_stateMessage.elected_id() == 0)
                 {
-                    lllog(8) << " - Not sending: System State contains no elected node!" << std::endl;
+                    lllog(8) << "SP:  - Not sending: System State contains no elected node!" << std::endl;
                     return;
                 }
 
-                lllog(8) << " - Ok to send!" << std::endl;
+                if (m_stateMessage.node_info_size() == 0)
+                {
+                    lllog(8) << "SP:  - Not sending: System State contains no nodes!" << std::endl;
+                    return;
+                }
+
+                lllog(8) << "SP:  - Ok to send!\n" << m_stateMessage << std::endl;
                 const size_t size = m_stateMessage.ByteSizeLong();
                 auto data = std::unique_ptr<char[]>(new char[size]);
                 m_stateMessage.SerializeWithCachedSizesToArray
@@ -383,6 +401,8 @@ namespace SP
         //must be called in strand
         bool SystemStable() const
         {
+            CheckStrand();
+
             //get all node ids that we've heard about so far
             std::set<int64_t> knownNodes;
             knownNodes.insert(m_id); //include ourselves...
@@ -428,6 +448,8 @@ namespace SP
 
         bool CheckPrerequisites() const
         {
+            CheckStrand();
+
             if (!m_lastStatisticsDirty)
             {
                 lllog(9) << "SP: Last statistics is not dirty, no need to update." << std::endl;
@@ -484,6 +506,8 @@ namespace SP
 
         bool ExcludeNodes(const std::map<int64_t, std::pair<RawStatistics,int>>& deadNodes) const
         {
+            CheckStrand();
+
             //Exclude nodes that we think are alive but some other normal node thinks is
             //dead (the ExcludeNode will cause RawHandler to post another RawChangedEvent)
             //Note: resurrecting nodes are still marked as dead, so this will not exclude those.
@@ -507,24 +531,23 @@ namespace SP
 
         bool ResurrectNodes()
         {
-            //Resurrect nodes that are dead but coming back to life.
-            //.The ResurrectNode will cause RawHandler to post another RawChangedEvent.
+            CheckStrand();
+
+            //Perform the first part of resurrection. The call to RawHandler will
+            //make it so that we cannot pass CheckPrerequisites until we have received
+            //a raw data from the new node. So nodes have to be marked as dead until
+            //we pass CheckPrereqs, and then they can be marked as alive again. And until
+            //then we store them in m_resurrectingNodes
             bool changes = false;
             for (int i = 0; i < m_lastStatistics.Size(); ++i)
             {
                 if (m_lastStatistics.IsResurrecting(i))
                 {
-                    lllog (4) << "SP: Resurrecting node " << m_lastStatistics.Name(i).c_str()
+                    lllog (4) << "SP: Want to resurrect node " << m_lastStatistics.Name(i).c_str()
                               << " with id " << m_lastStatistics.Id(i)
                               << std::endl;
                     m_rawHandler.ResurrectNode(m_lastStatistics.Id(i));
-                    for (auto& nodeInfo: *m_stateMessage.mutable_node_info())
-                    {
-                        if (nodeInfo.id() == m_lastStatistics.Id(i))
-                        {
-                            nodeInfo.set_is_dead(false);
-                        }
-                    }
+                    m_resurrectingNodes.insert(m_lastStatistics.Id(i));
 
                     changes = true;
                 }
@@ -537,6 +560,8 @@ namespace SP
         //must be called in strand
         bool UpdateMyState()
         {
+            CheckStrand();
+
             //This function attempts to not flush the logger until the end of the function
             lllog(9) << "SP: Entering UpdateMyState\n";
 
@@ -589,8 +614,9 @@ namespace SP
             if (nodesWereResurrected)
             {
                 lllog(9) << "SP: At least one node was resurrected, returning\n"
-                         << "SP: UpdateMyState will be called again very soon, "
-                         << "which will generate a new state" << std::endl;
+                         << "SP: UpdateMyState will be called again, and once we have received a new "
+                         << "remote statistics from the resurrected node we will be able to generate "
+                         << "a new state" << std::endl;
                 return false;
             }
 
@@ -611,15 +637,35 @@ namespace SP
             m_stateMessage.set_election_id(m_ownElectionId);
 
             // if we're becoming detached we need to clear out all the nodes from state
-            if (!m_stateMessage.is_detached() && m_electionHandler->IsDetached())
+            if (!IsDetached() && m_electionHandler->IsElectionDetached())
             {
-                lllog(8) << "SP: Becoming detached, clearing node info from state" <<std::endl;
+                lllog(6) << "SP: Becoming detached, clearing node info from state" <<std::endl;
                 m_stateMessage.clear_node_info();
                 m_rawHandler.SetNodeIsDetached();
                 m_stateMessage.set_is_detached(true);
                 return false;
             }
-            m_stateMessage.set_is_detached(m_electionHandler->IsDetached());
+            else if (IsDetached() && !m_electionHandler->IsElectionDetached())
+            {
+                lllog(6) << "SP: Becoming attached" <<std::endl;
+                m_stateMessage.set_is_detached(false);
+            }
+
+            //Finish resurrecting any nodes in m_resurrectingNodes.
+            //For us to get here all the resurrecting nodes must have sent a rawstatistics
+            //(this is something Checkprereqs guarantees).
+            for (const auto id: m_resurrectingNodes)
+            {
+                for (auto& node: *m_stateMessage.mutable_node_info())
+                {
+                    if (node.id() == id)
+                    {
+                        lllog(4) << "SP: Finished resurrecting node " << node.id() << std::endl;;
+                        node.set_is_dead(false);
+                    }
+                }
+            }
+            m_resurrectingNodes.clear();
 
             lllog(9) << "SP: Looking at last state\n";
 
@@ -940,8 +986,18 @@ namespace SP
             return true;
         }
 
+        void CheckStrand() const
+        {
+#if (!defined NDEBUG && !defined SAFIR_DISABLE_CHECK_STRAND)
+            if (!m_strand.running_in_this_thread())
+            {
+                throw std::logic_error("Function must be called from the strand!");
+            }
+#endif
+        }
 
-        mutable boost::asio::io_service::strand m_strand;
+
+        boost::asio::io_service::strand& m_strand;
         CommunicationT& m_communication;
 
         std::unique_ptr<ElectionHandlerT> m_electionHandler;
@@ -952,7 +1008,8 @@ namespace SP
         std::function<void(const SystemStateMessage& data)> m_stateChangedCallback;
 
         SystemStateMessage m_stateMessage;
-
+        std::atomic<bool> m_isDetached;
+        std::set<int64_t> m_resurrectingNodes;
         const std::string m_name;
         const int64_t m_id;
         const int64_t m_nodeTypeId;
