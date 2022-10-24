@@ -38,19 +38,25 @@ class Failure(Exception):
 
 #pylint: disable=line-too-long
 
-def enqueue_output(out, logger, queue):
+def enqueue_output(out, logger, ctrl_queue, main_queue):
     while True:
         line = out.readline()
         if not line:
             break
         line = line.rstrip("\n\r")
-        if queue is not None:
-            data = json.loads(line)
+        if ctrl_queue is not None and line.startswith("ctrl: "):
+            data = json.loads(line[6:])
             data.pop("election_id", None)
-            queue.put(data)
+            ctrl_queue.put(data)
+        if main_queue is not None and line.startswith("main: "):
+            data = json.loads(line[6:])
+            data.pop("election_id", None)
+            main_queue.put(data)
         logger.info(line)
-    if queue is not None:
-        queue.put(None)
+    if ctrl_queue is not None:
+        ctrl_queue.put(None)
+    if main_queue is not None:
+        main_queue.put(None)
     out.close()
 
 
@@ -131,7 +137,8 @@ class Node():
         self.logger.setLevel(logging.INFO)
         self.logger.addHandler(self.logging_handler)
 
-        self.states = []
+        self.ctrl_states = []
+        self.main_states = []
         log(f"  Launching {' '.join(command)}")
         self.proc = subprocess.Popen(command,
                                      stdout=subprocess.PIPE,
@@ -140,25 +147,12 @@ class Node():
                                      preexec_fn=None if sys.platform == "win32" else os.setsid,
                                      creationflags=subprocess.CREATE_NEW_PROCESS_GROUP if sys.platform == "win32" else 0,
                                      universal_newlines=True)
-        self.queue = Queue()
-        self.stdout_thread = Thread(target=enqueue_output, args=(self.proc.stdout, self.logger, self.queue))
-        self.stderr_thread = Thread(target=enqueue_output, args=(self.proc.stderr, self.logger, None))
+        self.main_queue = Queue()
+        self.ctrl_queue = Queue()
+        self.stdout_thread = Thread(target=enqueue_output, args=(self.proc.stdout, self.logger, self.ctrl_queue, self.main_queue))
+        self.stderr_thread = Thread(target=enqueue_output, args=(self.proc.stderr, self.logger, None, None))
         self.stdout_thread.start()
         self.stderr_thread.start()
-
-    # def output(self):
-    #     try:
-    #         while True:
-    #             (label, data) = self.queue.get_nowait()
-    #             if label == "out":
-    #                 self.states.append(json.loads(re.sub(r"\[[0-9:\.]*\] ", "", data)))
-    #             self.output_file.write(data)
-    #             self.output_file.write("\n")
-    #             self.output_file.flush()
-    #             self.output_list.append(data)
-    #     except Empty:
-    #         pass
-    #     return "\n".join(self.output_list) + "\n"
 
     @staticmethod
     def __compare_states(state,expected):
@@ -168,7 +162,7 @@ class Node():
         allowed_states = [json.loads(x) for x in allowed_states]
         try:
             while True:
-                data = self.queue.get()
+                data = self.ctrl_queue.get()
                 if data not in allowed_states:
                     break
             if data["form"] == 0:
@@ -181,9 +175,9 @@ class Node():
     def wait_for_join(self, incarnation_id, allow_detached_states = False):
         try:
             while True:
-                data = self.queue.get()
+                data = self.ctrl_queue.get()
                 if allow_detached_states and "is_detached" in data and data["is_detached"] == True:
-                    self.states.append(data)
+                    self.ctrl_states.append(data)
                 else:
                     break
 
@@ -200,8 +194,10 @@ class Node():
     def wait_for_join_or_form(self, allowed_states = []):
         allowed_states = [json.loads(x) for x in allowed_states]
         while True:
-            data = self.queue.get()
-            if data not in allowed_states:
+            data = self.ctrl_queue.get()
+            if data in allowed_states:
+                self.ctrl_states.append(data)
+            else:
                 break
         if "form" in data or "join" in data:
             return data
@@ -209,13 +205,19 @@ class Node():
             log(f"Node {self.node_id} expected a form or join statement, but got \n{data}")
             raise Failure("Got unexpected state")
 
-    def wait_for_states(self, expected_states, last_state_repeats = 6):
+    def wait_for_states(self, expected_states, last_state_repeats = 3):
+        log(f"  Node {self.node_id} waiting for states on ctrl")
+        Node.__wait_for_states_internal(self.node_id, self.ctrl_queue, self.ctrl_states, expected_states, last_state_repeats)
+        log(f"  Node {self.node_id} waiting for states on main")
+        Node.__wait_for_states_internal(self.node_id, self.main_queue, self.main_states, expected_states, last_state_repeats)
+
+    @staticmethod
+    def __wait_for_states_internal(node_id, queue, states, expected_states, last_state_repeats):
         """
         Wait until all states have been seen, in order.
         expected_states can be a string or a collection of strings.
         """
-        unchecked_states = self.states.copy()
-        log(f"  Node {self.node_id} waiting for states")
+        unchecked_states = states.copy()
         #make expected_states into a list we can manipulate
         if isinstance(expected_states,str):
             expected_states = [expected_states,]
@@ -241,13 +243,13 @@ class Node():
             if found and mismatch:
                 continue
             elif mismatch:
-                log(f"Node {self.node_id} expected state \n{expected}, but got \n{state}")
+                log(f"Node {node_id} expected state \n{expected}, but got \n{state}")
                 raise Failure("Got unexpected state")
 
             while True:
-                state = self.queue.get()
+                state = queue.get()
                 if state is not None:
-                    self.states.append(state)
+                    states.append(state)
                 if Node.__compare_states(state, expected):
                     found = True
                     if len(expected_states) == 0:
@@ -261,19 +263,23 @@ class Node():
                 if found and mismatch:
                     break
                 elif mismatch:
-                    log(f"Node {self.node_id} expected state \n{expected}, but got \n{state}")
+                    log(f"Node {node_id} expected state \n{expected}, but got \n{state}")
                     raise Failure("Got unexpected state")
 
     def close_and_check(self, expected_states):
+        self.__close_and_check_internal(self.ctrl_queue, self.ctrl_states, expected_states)
+        self.__close_and_check_internal(self.main_queue, self.main_states, expected_states)
+
+    def __close_and_check_internal(self, queue, states, expected_states):
         if self.stderr_thread is not None:
             self.close()
-        while not self.queue.empty():
-            state = self.queue.get()
+        while not queue.empty():
+            state = queue.get()
             if state is None:
                 break
-            self.states.append(state)
+            states.append(state)
 
-        unchecked_states = self.states.copy()
+        unchecked_states = states.copy()
 
         #make expected_states into a list we can manipulate
         if isinstance(expected_states,str):
@@ -732,6 +738,7 @@ def test_two_normal_one_light_kill_normal(args):
         node3.close_and_check((state1,state2))
     return node1.returncode == 0 and node2.returncode == 0 and node3.returncode == 0
 
+
 def test_two_normal_one_light_kill_elected(args):
     with closing(Node(args,1,light_node = False, multicast = False, seeds = 2)) as node1,\
          closing(Node(args,2,light_node = False, multicast = False, seeds = 1)) as node2,\
@@ -791,8 +798,8 @@ def test_two_normal_one_light_restart_elected(args):
             except Failure:
                 state34_actual = (state3b, state4b)
                 node2b.wait_for_states(state34_actual)
-            node1.wait_for_states((state1,state2), last_state_repeats = 40)
-            node3.wait_for_states((state1,state2), last_state_repeats = 40)
+            node1.wait_for_states((state1,state2), last_state_repeats = 20)
+            node3.wait_for_states((state1,state2), last_state_repeats = 20)
             node1.close_and_check((state1,state2))
             node3.close_and_check((state1,state2))
             node2b.close_and_check(state34_actual)
@@ -893,9 +900,9 @@ def test_two_normal_two_light_restart_light(args):
         with closing(Node(args,3,light_node = True, multicast = False, seeds = 1)) as node3b:
             node3b.wait_for_join(inc)
             node3b.wait_for_states(state1)
-            node1.wait_for_states((state1,state2,state1),last_state_repeats = 20)
-            node2.wait_for_states((state1,state2,state1),last_state_repeats = 20)
-            node4.wait_for_states((state1,state2,state1),last_state_repeats = 20)
+            node1.wait_for_states((state1,state2,state1),last_state_repeats = 10)
+            node2.wait_for_states((state1,state2,state1),last_state_repeats = 10)
+            node4.wait_for_states((state1,state2,state1),last_state_repeats = 10)
             node3b.close_and_check(state1)
             node1.close_and_check((state1,state2,state1))
             node2.close_and_check((state1,state2,state1))
@@ -929,9 +936,9 @@ def test_two_normal_two_light_restart_light_multicast(args):
         with closing(Node(args,3,light_node = True, multicast = True, seeds = 1)) as node3b:
             node3b.wait_for_join(inc)
             node3b.wait_for_states(state1)
-            node1.wait_for_states((state1,state2,state1),last_state_repeats = 20)
-            node2.wait_for_states((state1,state2,state1),last_state_repeats = 20)
-            node4.wait_for_states((state1,state2,state1),last_state_repeats = 20)
+            node1.wait_for_states((state1,state2,state1),last_state_repeats = 10)
+            node2.wait_for_states((state1,state2,state1),last_state_repeats = 10)
+            node4.wait_for_states((state1,state2,state1),last_state_repeats = 10)
             node3b.close_and_check(state1)
             node1.close_and_check((state1,state2,state1))
             node2.close_and_check((state1,state2,state1))
@@ -1002,14 +1009,14 @@ def test_two_normal_two_light_restart_elected(args):
             log("  This testcase produces some spurious output since it checks for two possible outcomes")
             log("  So ignore any lines below talking about incorrect states unless the test fails.")
             try:
-                node2b.wait_for_states((state3a,state4a), last_state_repeats = 20)
+                node2b.wait_for_states((state3a,state4a), last_state_repeats = 10)
                 actual34=(state3a,state4a)
             except Failure:
-                node2b.wait_for_states((state3b,state4b), last_state_repeats = 20)
+                node2b.wait_for_states((state3b,state4b), last_state_repeats = 10)
                 actual34=(state3b,state4b)
-            node1.wait_for_states((state1,state2), last_state_repeats = 80)
-            node3.wait_for_states((state1,state2), last_state_repeats = 80)
-            node4.wait_for_states((state1,state2), last_state_repeats = 80)
+            node1.wait_for_states((state1,state2), last_state_repeats = 40)
+            node3.wait_for_states((state1,state2), last_state_repeats = 40)
+            node4.wait_for_states((state1,state2), last_state_repeats = 40)
             node1.close_and_check((state1,state2))
             node3.close_and_check((state1,state2))
             node4.close_and_check((state1,state2))
@@ -1057,14 +1064,14 @@ def test_two_normal_two_light_restart_elected_multicast(args):
             log("  This testcase produces some spurious output since it checks for two possible outcomes")
             log("  So ignore any lines below talking about incorrect states unless the test fails.")
             try:
-                node2b.wait_for_states((state3a,state4a), last_state_repeats = 20)
+                node2b.wait_for_states((state3a,state4a), last_state_repeats = 10)
                 actual34=(state3a,state4a)
             except Failure:
-                node2b.wait_for_states((state3b,state4b), last_state_repeats = 20)
+                node2b.wait_for_states((state3b,state4b), last_state_repeats = 10)
                 actual34=(state3b,state4b)
-            node1.wait_for_states((state1,state2), last_state_repeats = 80)
-            node3.wait_for_states((state1,state2), last_state_repeats = 80)
-            node4.wait_for_states((state1,state2), last_state_repeats = 80)
+            node1.wait_for_states((state1,state2), last_state_repeats = 40)
+            node3.wait_for_states((state1,state2), last_state_repeats = 40)
+            node4.wait_for_states((state1,state2), last_state_repeats = 40)
             node1.close_and_check((state1,state2))
             node3.close_and_check((state1,state2))
             node4.close_and_check((state1,state2))
@@ -1158,7 +1165,7 @@ def test_move_lightnode_to_other_new_node_fast(args):
             if inc3 in (inc1, inc2) or inc2 in (inc1, inc3):
                 raise Failure("unexpected incarnation")
             node2.wait_for_join(inc2, allow_detached_states = True)
-            node3.wait_for_states((state3,state4), last_state_repeats = 80)
+            node3.wait_for_states((state3,state4), last_state_repeats = 40)
             node2.wait_for_states((state1,state2,state4))
             node3.close_and_check((state3,state4))
             node2.close_and_check((state1,state2,state4))
@@ -1177,7 +1184,7 @@ def test_two_normal_one_light_weird_seed (args):
                                                                          {"name": "node_003", "is_dead": false, "id": 3, "node_type_id": 11}]}'''
             state2 = '''{"elected_id": 2, "is_detached": false, "nodes": [{"name": "node_002", "is_dead": false, "id": 2, "node_type_id": 1},
                                                                           {"name": "node_003", "is_dead": true, "id": 3, "node_type_id": 11}]}'''
-            node2.wait_for_states(state2, last_state_repeats = 40)
+            node2.wait_for_states(state2, last_state_repeats = 20)
             node1.wait_for_states(state1)
             node3.wait_for_states(state1)
             node3.close_and_check(state1)
@@ -1191,7 +1198,7 @@ def test_two_normal_one_light_weird_seed (args):
                                                                          {"name": "node_003", "is_dead": false, "id": 3, "node_type_id": 11}]}'''
             state2 = '''{"elected_id": 1, "is_detached": false, "nodes": [{"name": "node_001", "is_dead": false, "id": 1, "node_type_id": 1},
                                                                           {"name": "node_003", "is_dead": true, "id": 3, "node_type_id": 11}]}'''
-            node1.wait_for_states(state2, last_state_repeats = 40)
+            node1.wait_for_states(state2, last_state_repeats = 20)
             node2.wait_for_states(state1)
             node3.wait_for_states(state1)
             node3.close_and_check(state1)
@@ -1202,6 +1209,45 @@ def test_two_normal_one_light_weird_seed (args):
         else:
             raise Failure("unexpected incarnation")
 
+def test_move_lightnode_to_other_system_fast(args):
+    with closing(Node(args,1,light_node = False, multicast = False)) as node1,\
+         closing(Node(args,2,light_node = False, multicast = False, seeds = 1)) as node2,\
+         closing(Node(args,3,light_node = False, multicast = False)) as node3,\
+         closing(Node(args,5,light_node = True, multicast = False, seeds = (1,4))) as node5:
+        state1 = '''{"elected_id": 2, "is_detached": false, "nodes": [{"name": "node_001", "is_dead": false, "id": 1, "node_type_id": 1},
+                                                                      {"name": "node_002", "is_dead": false, "id": 2, "node_type_id": 1},
+                                                                      {"name": "node_005", "is_dead": false, "id": 5, "node_type_id": 11}]}'''
+        state2 = '{"elected_id": 3, "is_detached": false, "nodes": [{"name": "node_003", "is_dead": false, "id": 3, "node_type_id": 1}]}'
+        state3 = '{"elected_id": 5, "is_detached": true, "nodes": [{"name": "node_005", "is_dead": false, "id": 5, "node_type_id": 11}]}'
+        state4 = '''{"elected_id": 4, "is_detached": false, "nodes": [{"name": "node_003", "is_dead": false, "id": 3, "node_type_id": 1},
+                                                                      {"name": "node_004", "is_dead": false, "id": 4, "node_type_id": 1},
+                                                                      {"name": "node_005", "is_dead": true, "id": 5, "node_type_id": 11}]}'''
+        state5 = '''{"elected_id": 4, "is_detached": false, "nodes": [{"name": "node_003", "is_dead": false, "id": 3, "node_type_id": 1},
+                                                                      {"name": "node_004", "is_dead": false, "id": 4, "node_type_id": 1},
+                                                                      {"name": "node_005", "is_dead": false, "id": 5, "node_type_id": 11}]}'''
+
+        inc1 = form_system((node1,node2,node5))
+        inc2 = node3.wait_for_form()
+        node1.wait_for_states(state1)
+        node2.wait_for_states(state1)
+        node5.wait_for_states(state1)
+        node3.wait_for_states(state2)
+
+        node1.close_and_check(state1)
+        node2.close_and_check(state1)
+        with closing(Node(args,4,light_node = False, multicast = False, seeds = 3)) as node4:
+            node4.wait_for_join(inc2)
+            inc3 = node5.wait_for_form(allowed_states = (state1,))
+            node5.wait_for_join(inc2, allow_detached_states = True)
+            if inc3 in (inc1, inc2) or inc2 in (inc1, inc3):
+                raise Failure("unexpected incarnation")
+            node3.wait_for_states((state2, state4, state5), last_state_repeats = 30)
+            node4.wait_for_states((state4, state5), last_state_repeats = 30)
+            node5.wait_for_states((state1, state3, state5), last_state_repeats = 30)
+            node3.close_and_check((state2, state4, state5))
+            node4.close_and_check((state4, state5))
+            node5.close_and_check((state1, state3, state5))
+        return node1.returncode == 0 and node2.returncode == 0 and node3.returncode == 0 and node5.returncode == 0
 
 TEST_CASES = ("one_normal",
               "one_light",
@@ -1238,6 +1284,7 @@ TEST_CASES = ("one_normal",
               "move_lightnode_to_other_new_node",
               "move_lightnode_to_other_new_node_fast",
               "two_normal_one_light_weird_seed",
+              "move_lightnode_to_other_system_fast",
               #pull cable and let them fall apart and then reattach
               )
 

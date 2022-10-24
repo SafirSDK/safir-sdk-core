@@ -436,19 +436,19 @@ protected:
 
     bool CheckJoinSystem(const int64_t incarnationId)
     {
-        logout << "{\"join\": " << incarnationId << "}" << std::endl;
+        logout << "ctrl: " << "{\"join\": " << incarnationId << "}" << std::endl;
         return true;
     }
 
     bool CheckFormSystem(const int64_t incarnationId)
     {
-        logout << "{\"form\": " << incarnationId << "}" << std::endl;
+        logout << "ctrl: " << "{\"form\": " << incarnationId << "}" << std::endl;
         return true;
     }
 
     void NewState(const Safir::Dob::Internal::SP::SystemState& data)
     {
-        logout << data.ToJson() << std::endl;
+        logout << "ctrl: " << data.ToJson() << std::endl;
     }
 
     boost::asio::io_service::strand m_strand;
@@ -579,8 +579,8 @@ private:
 
     void HandleState(const Safir::Dob::Internal::SP::SystemState& state)
     {
-        //logout << state.ToJson() << std::endl;
-        logerr << m_logPrefix << state.ToJson() << std::endl;
+        //Log state in json for script to interpret
+        logout << "main: " << state.ToJson() << std::endl;
 
         if (m_lastState.IsValid() && !m_lastState.IsDetached() && state.IsDetached())
         {
