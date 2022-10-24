@@ -279,6 +279,14 @@ namespace Com
             });
         }
 
+        // This value is used when this node is a lightnode and it excludes a normal node. Then the normal node are not allowed to come back for the given number of seconds
+        // For normal nodes, this has no effect.
+        void SetExcludeNodeTimeLimit(unsigned int seconds)
+        {
+            boost::asio::post(m_strand, [this, seconds] { m_lightNodesExcludeTimeLimit = seconds; });
+        }
+
+
 #ifndef SAFIR_TEST
     private:
 #endif
@@ -300,7 +308,7 @@ namespace Com
         NodeMap m_reportedNodes; //nodes only heard about from others, never talked to
         std::map<int64_t, std::vector<bool> > m_incompletedNodes; //talked to but still haven't received all node info from this node
 
-        int m_lightNodesExcludeTimeLimit = 60; // seconds
+        unsigned int m_lightNodesExcludeTimeLimit = 30; // seconds
         typedef boost::optional<boost::chrono::steady_clock::time_point> ExcludeUntil;
         std::map<int64_t, std::pair<ExcludeUntil /*timeLimitedUntil*/, std::string /*seedIp*/>> m_excludedNodes;
 

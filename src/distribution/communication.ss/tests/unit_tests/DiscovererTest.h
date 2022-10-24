@@ -654,7 +654,7 @@ public:
         CHECK(passed);
 
         // Remove all nodes excep 10002 that is a lightNode. Make sure it is still trying to discover the seed 10000
-        discoverState[10002].discover->m_lightNodesExcludeTimeLimit = 1; // decrease time limit to one sec
+        discoverState[10002].discover->SetExcludeNodeTimeLimit(1); // decrease time limit to one sec
         for (auto id : std::vector<int64_t>{10000, 10001, 10003, 10004})
         {
             boost::mutex::scoped_lock lock(mutex);
@@ -852,10 +852,10 @@ public:
             discoverState.insert(std::make_pair(10001, Info(10001, 1, io)));
             discoverState.insert(std::make_pair(10002, Info(10002, 2, io)));
             discoverState.insert(std::make_pair(10003, Info(10003, 3, io)));
-            discoverState[10000].discover->m_lightNodesExcludeTimeLimit = 10;
-            discoverState[10001].discover->m_lightNodesExcludeTimeLimit = 10;
-            discoverState[10002].discover->m_lightNodesExcludeTimeLimit = 10;
-            discoverState[10003].discover->m_lightNodesExcludeTimeLimit = 10;
+            discoverState[10000].discover->SetExcludeNodeTimeLimit(10);
+            discoverState[10001].discover->SetExcludeNodeTimeLimit(10);
+            discoverState[10002].discover->SetExcludeNodeTimeLimit(10);
+            discoverState[10003].discover->SetExcludeNodeTimeLimit(10);
         }
 
         {

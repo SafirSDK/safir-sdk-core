@@ -279,14 +279,7 @@ namespace Com
         void IncludeNode(int64_t nodeId);
 
         /**
-         * Exclude a system node. After a node has been excluded it can never be included  again.
-         *
-         * @param nodeId [in] - Id of the node to exclude.
-         */
-        void ExcludeNode(int64_t nodeId);
-
-        /**
-         * Tell communication that a node exist and is part of the system.
+         * Tell communication that a node exist and is part of the system. This method must not be called before Start.
          * Only allowed if created with DataModeTag.
          * @param name [in] - Name of the node.
          * @param id [in] - Id of the node.
@@ -294,6 +287,22 @@ namespace Com
          * @param dataAddress [in] - Ip address for the unicast data channel to the node. On the form ip:port
          */
         void InjectNode(const std::string& name, int64_t id, int64_t nodeTypeId, const std::string& dataAddress);
+
+        /**
+         * Exclude a system node. After a node has been excluded it can never be included  again.
+         *
+         * @param nodeId [in] - Id of the node to exclude.
+         */
+        void ExcludeNode(int64_t nodeId);
+
+        /**
+         * This is a special method that onlya has effect when this node is a light nodes.
+         * When a lightnode excludes a normal node, it is guaranteed that the excluded node will not be reported again  on the NewNodeCallback
+         * for the given number of seconds. If the normal nodes ip is a seed address, the discovering of new nodes on that address will also be
+         * delayed for the given time limit.
+         * @param seconds - Node exclusion time limit for normal nodes.
+         */
+        void SetExcludeNodeTimeLimit(unsigned int seconds);
 
         /**
          * Send data to system nodes. Can either send to a specific node or to all nodes within a node type.

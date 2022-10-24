@@ -89,8 +89,10 @@ namespace Com
         void Reset();
 
         void IncludeNode(int64_t nodeId);
-        void ExcludeNode(int64_t nodeId);
         void InjectNode(const std::string& name, int64_t id, int64_t nodeTypeId, const std::string& dataAddress);
+        void ExcludeNode(int64_t nodeId);
+        void SetExcludeNodeTimeLimit(unsigned int seconds);
+
 
         bool Send(int64_t nodeId,
                   int64_t nodeTypeId,

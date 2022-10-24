@@ -280,6 +280,11 @@ namespace
         });
     }
 
+    void CommunicationImpl::SetExcludeNodeTimeLimit(unsigned int seconds)
+    {
+        m_discoverer.SetExcludeNodeTimeLimit(seconds);
+    }
+
     void CommunicationImpl::InjectNode(const std::string& name, int64_t id, int64_t nodeTypeId, const std::string& dataAddress)
     {
         if (m_isControlInstance)

@@ -209,6 +209,11 @@ namespace
         m_impl->ExcludeNode(nodeId);
     }
 
+    void Communication::SetExcludeNodeTimeLimit(unsigned int seconds)
+    {
+        m_impl->SetExcludeNodeTimeLimit(seconds);
+    }
+
     void Communication::InjectNode(const std::string& name, int64_t id, int64_t nodeTypeId, const std::string& dataAddress)
     {
         m_impl->InjectNode(name, id, nodeTypeId, dataAddress);
