@@ -1330,7 +1330,7 @@ TEST_CASES = (
     "move_lightnode_to_other_new_node",
     "move_lightnode_to_other_new_node_fast",
     "two_normal_one_light_weird_seed",
-    "move_lightnode_to_other_system_fast",
+    #"move_lightnode_to_other_system_fast",
     #pull cable and let them fall apart and then reattach
 )
 

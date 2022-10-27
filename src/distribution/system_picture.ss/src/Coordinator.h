@@ -94,7 +94,6 @@ namespace SP
             , m_rawHandler(rawHandler)
             , m_failedStateUpdates(0)
         {
-
             m_electionHandler.reset(new ElectionHandlerT(m_strand,
                                                          communication,
                                                          id,

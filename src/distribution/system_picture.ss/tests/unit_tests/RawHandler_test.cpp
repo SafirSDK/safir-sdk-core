@@ -77,6 +77,10 @@ public:
         includedNodes.insert(nodeId);
     }
 
+    void SetExcludeNodeTimeLimit(int)
+    {
+    }
+
     void InjectNode(const std::string& /*nodeName*/,
                     int64_t /*nodeId*/,
                     int64_t /*nodeTypeId*/,

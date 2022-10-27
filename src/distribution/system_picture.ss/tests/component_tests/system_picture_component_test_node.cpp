@@ -235,10 +235,10 @@ public:
                                             Safir::Dob::Internal::SP::NodeType
                                             (1,
                                              "NormalUnicast",
-                                             false,
-                                             boost::chrono::milliseconds(1000),
-                                             10,
-                                             ToChronoDurations(retryTimeout20))));
+                                             false, //isLightNode
+                                             boost::chrono::milliseconds(500), //heartbeatInterval
+                                             10, //maxLostHeartbeats
+                                             ToChronoDurations(retryTimeout20)))); //retryTimeout
 
         m_commNodeTypes.push_back(Safir::Dob::Internal::Com::NodeTypeDefinition
                                   (2,
@@ -257,7 +257,7 @@ public:
                                             (2,
                                              "NormalMulticast",
                                              false,
-                                             boost::chrono::milliseconds(2000),
+                                             boost::chrono::milliseconds(500),
                                              10,
                                              ToChronoDurations(retryTimeout20))));
 
@@ -278,7 +278,7 @@ public:
                                             (11,
                                              "LightUnicast",
                                              true,
-                                             boost::chrono::milliseconds(1000),
+                                             boost::chrono::milliseconds(500),
                                              10,
                                              ToChronoDurations(retryTimeout20))));
 
@@ -289,7 +289,7 @@ public:
                                    "224.123.45.67:10003",
                                    true,
                                    500,
-                                   10,
+                                   8,
                                    20,
                                    10,
                                    retryTimeout50));
@@ -299,7 +299,7 @@ public:
                                             (12,
                                              "LightMulticast",
                                              true,
-                                             boost::chrono::milliseconds(2000),
+                                             boost::chrono::milliseconds(500),
                                              8,
                                              ToChronoDurations(retryTimeout20))));
     }

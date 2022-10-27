@@ -151,6 +151,8 @@ namespace SP
                                                                CheckDeadNodes();
                                                            })));
                 m_checkDeadNodesTimer->Start();
+
+                m_communication.SetExcludeNodeTimeLimit(CalculateExcludeNodeTimeLimit(nodeTypes));
             }
 
             //set up some info about ourselves in our message
@@ -295,7 +297,7 @@ namespace SP
                 int changes = 0;
 
                 const bool remoteIsLightNode = m_nodeTypes.at(node.nodeInfo->node_type_id()).isLightNode;
-                
+
                 if (!m_allStatisticsMessage.has_incarnation_id())
                 {
                     lllog(6) << "SP: This node does not have an incarnation id" << std::endl;
@@ -816,6 +818,22 @@ namespace SP
             }
 
             return result / 2;
+        }
+
+        static int CalculateExcludeNodeTimeLimit(const std::map<int64_t,NodeType>& nodeTypes)
+        {
+            boost::chrono::steady_clock::duration result = boost::chrono::seconds(1);
+
+            for (auto node = nodeTypes.cbegin(); node != nodeTypes.cend(); ++node)
+            {
+                result = std::max(result,node->second.deadTimeout);
+            }
+
+            // Multiplied by 2 because of increased tolerance toward new nodes, and another two to wait
+            // twice the other nodes timeout.
+            const int seconds = (boost::chrono::duration_cast<boost::chrono::milliseconds>(result).count()*4)/1000;
+            lllog(1) << "SP: CalculateExcludeNodeTimeLimit " << seconds << " seconds" << std::endl;
+            return seconds;
         }
 
         //must be called in strand
