@@ -852,10 +852,10 @@ public:
             discoverState.insert(std::make_pair(10001, Info(10001, 1, io)));
             discoverState.insert(std::make_pair(10002, Info(10002, 2, io)));
             discoverState.insert(std::make_pair(10003, Info(10003, 3, io)));
-            discoverState[10000].discover->SetExcludeNodeTimeLimit(10);
-            discoverState[10001].discover->SetExcludeNodeTimeLimit(10);
-            discoverState[10002].discover->SetExcludeNodeTimeLimit(10);
-            discoverState[10003].discover->SetExcludeNodeTimeLimit(10);
+            discoverState[10000].discover->m_lightNodesExcludeTimeLimit = 10;
+            discoverState[10001].discover->m_lightNodesExcludeTimeLimit = 10;
+            discoverState[10002].discover->m_lightNodesExcludeTimeLimit = 10;
+            discoverState[10003].discover->m_lightNodesExcludeTimeLimit = 10;
         }
 
         {
@@ -976,6 +976,61 @@ public:
             boost::mutex::scoped_lock lock(mutex);
             discoverState.clear(); //this step is important because discoverState has references to the io_service in this scope.
         }
+
+        // Last test to verify the cyclic CheckTimeLimitedExclusions
+        std::wcout << "Test the CheckTimeLimitedExclusions" << std::endl;
+        Info state(10002, 2, io);
+
+        // remove first two from exclude list and put back seeds
+        state.discover->m_excludedNodes[1] = {boost::chrono::steady_clock::now() - boost::chrono::seconds(2), "127.0.0.1:1"};
+        state.discover->m_excludedNodes[2] = {boost::chrono::steady_clock::now() - boost::chrono::seconds(2), "127.0.0.1:2"};
+        state.discover->m_excludedNodes[3] = {boost::chrono::steady_clock::now() + boost::chrono::seconds(2), "127.0.0.1:3"};
+        state.discover->CheckTimeLimitedExclusions();
+        CHECK(state.discover->m_excludedNodes.size() == 1);
+        CHECK(state.discover->m_excludedNodes.find(3) != state.discover->m_excludedNodes.end());
+        CHECK(state.discover->m_seeds.size() == 2);
+        CHECK(state.discover->m_seeds.find(LlufId_Generate64("127.0.0.1:1")) != state.discover->m_seeds.end());
+        CHECK(state.discover->m_seeds.find(LlufId_Generate64("127.0.0.1:2")) != state.discover->m_seeds.end());
+
+        state.discover->m_excludedNodes.clear();
+        state.discover->m_seeds.clear();
+
+        // remove none from exclude list
+        state.discover->m_excludedNodes[1] = {boost::none, ""};
+        state.discover->m_excludedNodes[2] = {boost::none, ""};
+        state.discover->m_excludedNodes[3] = {boost::chrono::steady_clock::now() + boost::chrono::seconds(2), "127.0.0.1:3"};
+        state.discover->CheckTimeLimitedExclusions();
+        CHECK(state.discover->m_excludedNodes.size() == 3);
+        CHECK(state.discover->m_seeds.size() == 0);
+
+        state.discover->m_excludedNodes.clear();
+        state.discover->m_seeds.clear();
+
+        // remove last, no seed
+        state.discover->m_excludedNodes[1] = {boost::chrono::steady_clock::now() + boost::chrono::seconds(20), "127.0.0.1:1"};
+        state.discover->m_excludedNodes[2] = {boost::none, ""};
+        state.discover->m_excludedNodes[3] = {boost::chrono::steady_clock::now() - boost::chrono::seconds(2), "127.0.0.1:3"};
+        state.discover->CheckTimeLimitedExclusions();
+        CHECK(state.discover->m_excludedNodes.size() == 2);
+        CHECK(state.discover->m_excludedNodes.find(1) != state.discover->m_excludedNodes.end());
+        CHECK(state.discover->m_excludedNodes.find(2) != state.discover->m_excludedNodes.end());
+        CHECK(state.discover->m_seeds.size() == 1);
+        CHECK(state.discover->m_seeds.find(LlufId_Generate64("127.0.0.1:3")) != state.discover->m_seeds.end());
+
+        state.discover->m_excludedNodes.clear();
+        state.discover->m_seeds.clear();
+
+        // remove all - one seed
+        state.discover->m_excludedNodes[1] = {boost::chrono::steady_clock::now() - boost::chrono::seconds(2), ""};
+        state.discover->m_excludedNodes[2] = {boost::chrono::steady_clock::now() - boost::chrono::seconds(2), ""};
+        state.discover->m_excludedNodes[3] = {boost::chrono::steady_clock::now() - boost::chrono::seconds(2), "127.0.0.1:3"};
+        state.discover->CheckTimeLimitedExclusions();
+        CHECK(state.discover->m_excludedNodes.size() == 0);
+        CHECK(state.discover->m_seeds.size() == 1);
+        CHECK(state.discover->m_seeds.find(LlufId_Generate64("127.0.0.1:3")) != state.discover->m_seeds.end());
+
+        state.discover->m_excludedNodes.clear();
+        state.discover->m_seeds.clear();
 
         std::wcout<<"DiscoverExcludeNodes tests passed"<<std::endl;
     }

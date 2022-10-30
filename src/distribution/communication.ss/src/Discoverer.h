@@ -589,8 +589,8 @@ namespace Com
                         // the excluded node has a seed address
                         AddSeed(it->second.second);
                     }
-                    it = m_excludedNodes.erase(it++);
                     lllog(DiscovererLogLevel) << m_logPrefix.c_str() << L"Node " << it->first << L" is no longer excluded." << std::endl;
+                    it = m_excludedNodes.erase(it);
                 }
                 else
                 {
