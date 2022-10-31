@@ -161,7 +161,7 @@ void Registrations::ApplyFilter()
 void Registrations::UpdateGui()
 {
     ui->tableWidget->setSortingEnabled(false);
-    ui->tableWidget->setRowCount(m_regdataFiltered.size());
+    ui->tableWidget->setRowCount(static_cast<int>(m_regdataFiltered.size()));
     int row = 0;
     for (const auto& r : m_regdataFiltered)
     {

@@ -296,7 +296,7 @@ void Test_Property_GetParameterReference()
     {
         Safir::Dob::Typesystem::Properties::GetParameterReference(DotsTest::MemberItems::ClassTypeId, DotsTest::MemberTypesProperty::ClassTypeId, 0, 0, paramTid, paramIx, paramArrIx);
     }
-    catch (const Safir::Dob::Typesystem::IllegalValueException& ex)
+    catch (const Safir::Dob::Typesystem::IllegalValueException&)
     {
         std::wcout << L"Not mapped to parameter" << std::endl;
     }
