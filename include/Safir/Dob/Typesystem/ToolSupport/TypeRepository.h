@@ -49,6 +49,9 @@ namespace ToolSupport
     class PropertyDescription
     {
     public:
+        /** Destructor */
+        virtual ~PropertyDescription() = default;
+
         /**
          * @brief Get dou file path as a string.
          * @return Path to file.
@@ -100,6 +103,9 @@ namespace ToolSupport
     class ExceptionDescription
     {
     public:
+        /** Destructor */
+        virtual ~ExceptionDescription() = default;
+
         /**
          * @brief Get dou file path as a string.
          * @return Path to file.
@@ -137,6 +143,9 @@ namespace ToolSupport
     class ParameterDescription
     {
     public:
+        /** Destructor */
+        virtual ~ParameterDescription() = default;
+
         /**
          * @brief Get a summary about this parameter.
          * @return Summary.
@@ -321,6 +330,9 @@ namespace ToolSupport
     class EnumDescription
     {
     public:
+        /** Destructor */
+        virtual ~EnumDescription() = default;
+
         /**
          * @brief Get dou file path as a string.
          * @return Path to file.
@@ -378,6 +390,9 @@ namespace ToolSupport
     class MemberDescription
     {
     public:
+        /** Destructor */
+        virtual ~MemberDescription() = default;
+
         /**
          * @brief Get a summary about this member.
          * @return Summary.
@@ -442,6 +457,9 @@ namespace ToolSupport
     class MemberMappingDescription
     {
     public:
+        /** Destructor */
+        virtual ~MemberMappingDescription() = default;
+
         /**
          * @brief Get type of property member mapping. A member can be mapped to NULL, to a class member or to a parameter.
          * @return Type of mapping.
@@ -479,6 +497,9 @@ namespace ToolSupport
     class PropertyMappingDescription
     {
     public:
+        /** Destructor */
+        virtual ~PropertyMappingDescription() = default;
+
         /**
          * @brief Get dou file path as a string.
          * @return Path to file.
@@ -517,6 +538,9 @@ namespace ToolSupport
     class CreateRoutineDescription
     {
     public:
+        /** Destructor */
+        virtual ~CreateRoutineDescription() = default;
+
         /**
          * @brief Get a summary about this create routine.
          * @return Summary.
@@ -569,6 +593,9 @@ namespace ToolSupport
     class ClassDescription
     {
     public:
+        /** Destructor */
+        virtual ~ClassDescription() = default;
+
         /**
          * @brief Get dou file path as a string.
          * @return Path to file.
@@ -703,6 +730,9 @@ namespace ToolSupport
     class TypeRepository
     {
     public:
+
+        /** Destructor */
+        virtual ~TypeRepository() = default;
 
         //-----------------
         // Enumerations

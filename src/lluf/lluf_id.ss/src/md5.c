@@ -37,6 +37,8 @@
   <ghost@aladdin.com>.  Other authors are noted in the change history
   that follows (in reverse chronological order):
 
+  2022-10-32 lars@foldspace.nu Replaced pointer arithmetic that caused clang
+    warnings with cast to uintptr_t.
   2002-04-13 lpd Clarified derivation from RFC 1321; now handles byte order
     either statically or dynamically; added missing #include <string.h>
     in library.
@@ -53,6 +55,7 @@
 
 #include "md5.h"
 #include <string.h>
+#include <stdint.h>
 
 #undef BYTE_ORDER   /* 1 = big-endian, -1 = little-endian, 0 = unknown */
 #ifdef ARCH_IS_BIG_ENDIAN
@@ -161,7 +164,7 @@ md5_process(md5_state_t *pms, const md5_byte_t *data /*[64]*/)
          * On little-endian machines, we can process properly aligned
          * data without copying it.
          */
-        if (!((data - (const md5_byte_t *)0) & 3)) {
+        if (!(((uintptr_t)data) & 3)) {
         /* data are properly aligned */
         X = (const md5_word_t *)data;
         } else {

@@ -146,7 +146,7 @@ namespace Internal
         m_signalSet.add(SIGTERM);
 #endif
 
-        m_signalSet.async_wait(m_strand.wrap([this](const boost::system::error_code& error,
+        m_signalSet.async_wait(m_strand.wrap([](const boost::system::error_code& error,
                                                     const int /*signalNumber*/)
                                             {
                                                 if (error)

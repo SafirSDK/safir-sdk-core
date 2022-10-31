@@ -219,7 +219,7 @@ namespace Internal
             }
 
             bool overflow=false;
-            conPtr->GetDirtySubscriptionQueue().Dispatch([this, conPtr, context, &overflow](const SubscriptionPtr& subscription, bool& exitDispatch, bool& dontRemove)
+            conPtr->GetDirtySubscriptionQueue().Dispatch([this, conPtr, &overflow](const SubscriptionPtr& subscription, bool& exitDispatch, bool& dontRemove)
             {
 
                 auto this_ = this; //fix for vs 2010 lamba issues

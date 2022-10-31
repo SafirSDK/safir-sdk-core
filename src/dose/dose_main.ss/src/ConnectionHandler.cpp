@@ -111,7 +111,7 @@ namespace
                     m_poolHandler.HandleDisconnect(state.GetSenderId());
                 }
             });
-        }, ConnectionMessageDataTypeId, [this](size_t s){return DistributionData::NewData(s);}, [](const char* data){DistributionData::DropReference(data);});
+        }, ConnectionMessageDataTypeId, [](size_t s){return DistributionData::NewData(s);}, [](const char* data){DistributionData::DropReference(data);});
 
         //start connect thread
         m_connectEvent=false;

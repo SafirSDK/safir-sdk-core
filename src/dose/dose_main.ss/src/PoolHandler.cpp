@@ -63,7 +63,7 @@ namespace Internal
                                                   {
                                                       OnPersistenceReady();
                                                   },
-                                                  [this] // persistentDataAllowedCb
+                                                  [] // persistentDataAllowedCb
                                                   {
                                                       Connections::Instance().AllowConnect(-1);
                                                   }));
@@ -106,7 +106,7 @@ namespace Internal
                                                               OnPoolDistributionInfo(fromNodeId, fromNodeType, data, size);
                                                           },
                                                           PoolDistributionInfoDataTypeId,
-                                                          [this](size_t s){return new char[s];},
+                                                          [](size_t s){return new char[s];},
                                                           [](const char* data){ delete[] data;});
 
         //set data receiver for registration states
@@ -115,7 +115,7 @@ namespace Internal
                                                               OnRegistrationState(fromNodeId, fromNodeType, data, size);
                                                           },
                                                           RegistrationStateDataTypeId,
-                                                          [this](size_t s){return DistributionData::NewData(s);},
+                                                          [](size_t s){return DistributionData::NewData(s);},
                                                           [](const char* data){DistributionData::DropReference(data);});
 
         //set data receiver for entity states
@@ -124,7 +124,7 @@ namespace Internal
                                                               OnEntityState(fromNodeId, fromNodeType, data, size);
                                                           },
                                                           EntityStateDataTypeId,
-                                                          [this](size_t s){return DistributionData::NewData(s);},
+                                                          [](size_t s){return DistributionData::NewData(s);},
                                                           [](const char* data){DistributionData::DropReference(data);});
 
         //create one StateDistributor per nodeType

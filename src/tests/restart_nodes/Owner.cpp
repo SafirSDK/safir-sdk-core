@@ -56,8 +56,7 @@ class EntityOwner
 {
 public:
     explicit EntityOwner(boost::asio::io_service& ioService)
-        : m_ioService(ioService)
-        , m_timer(ioService)
+        : m_timer(ioService)
         , m_handler(Safir::Dob::Typesystem::InstanceId::GenerateRandom().GetRawValue())
     {
         using namespace Safir::Dob;
@@ -122,7 +121,6 @@ private:
     }
 
     Safir::Dob::SecondaryConnection m_connection;
-    boost::asio::io_service& m_ioService;
     boost::asio::deadline_timer m_timer;
     std::vector<Safir::Dob::Typesystem::InstanceId> m_instances;
 

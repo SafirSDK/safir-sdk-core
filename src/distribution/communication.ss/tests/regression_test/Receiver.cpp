@@ -52,8 +52,8 @@ Receiver::Receiver(Com::ControlModeTag tag, boost::asio::io_service& ioService, 
     m_com.SetDataReceiver([this](int64_t fromNodeId, int64_t fromNodeType, const char* data, size_t size)
                            {ReceiveData(fromNodeId,fromNodeType,data,size);},
                           0,
-                          [this](size_t s){return new char[s];},
-                          [this](const char * data){delete[] data;});
+                          [](size_t s){return new char[s];},
+                          [](const char * data){delete[] data;});
     m_com.SetGotReceiveFromCallback([this](int64_t fromNodeId, bool isMulticast, bool isDuplicate)
                                      {GotReceiveFrom(fromNodeId,isMulticast,isDuplicate);});
     m_com.SetNewNodeCallback([this](const std::string& name, int64_t nodeId, int64_t nodeTypeId, const std::string& controlAddress, const std::string& dataAddress, bool multicast)
@@ -91,8 +91,8 @@ Receiver::Receiver(Com::DataModeTag tag, boost::asio::io_service& ioService, int
     m_com.SetDataReceiver([this](int64_t fromNodeId, int64_t fromNodeType, const char* data, size_t size)
                            {ReceiveData(fromNodeId,fromNodeType,data,size);},
                           0,
-                          [this](size_t s){return new char[s];},
-                          [this](const char * data){delete[] data;});
+                          [](size_t s){return new char[s];},
+                          [](const char * data){delete[] data;});
     m_com.SetGotReceiveFromCallback([this](int64_t fromNodeId, bool isMulticast, bool isDuplicate)
                                      {GotReceiveFrom(fromNodeId,isMulticast,isDuplicate);});
     m_com.SetNewNodeCallback([this](const std::string& name, int64_t nodeId, int64_t nodeTypeId, const std::string& controlAddress, const std::string& dataAddress, bool multicast)

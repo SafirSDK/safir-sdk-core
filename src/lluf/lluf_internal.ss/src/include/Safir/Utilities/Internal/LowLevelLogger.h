@@ -81,7 +81,7 @@ namespace Internal
             {
             public:
                 explicit Magic(std::recursive_mutex& mutex):
-                    m_lock(&mutex,[this](std::recursive_mutex* mutex){mutex->unlock();})
+                    m_lock(&mutex,[](std::recursive_mutex* mutex){mutex->unlock();})
                 {
                 }
 

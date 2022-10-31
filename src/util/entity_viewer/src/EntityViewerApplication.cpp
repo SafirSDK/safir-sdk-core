@@ -67,5 +67,5 @@ void EntityViewerApplication::OnDoDispatch()
 
 void EntityViewerApplication::OnStopOrder()
 {
-    QMetaObject::invokeMethod(this, [this]{quit();});
+    QMetaObject::invokeMethod(this, []{quit();});
 }

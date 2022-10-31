@@ -607,7 +607,7 @@ namespace
         bool success;
         receiver.connection->ForSpecificRequestInQueue
             (receiver.consumer,
-             [this, request, &success](const ConsumerId& /*consumer*/, RequestInQueue& queue)
+             [request, &success](const ConsumerId& /*consumer*/, RequestInQueue& queue)
              {
                  success = queue.PushRequest(request);
                  lllog(8) << "DOSE_MAIN: Pushing request (id = " << request.GetRequestId()

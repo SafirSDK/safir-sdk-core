@@ -29,6 +29,7 @@
 #include <Safir/Dob/Internal/SharedMemoryObject.h>
 #include <atomic>
 #include <memory>
+#include <boost/core/ignore_unused.hpp>
 
 namespace Safir
 {
@@ -73,7 +74,7 @@ namespace Internal
             : m_clock(clock)
             , m_nodeId(nodeId)
         {
-
+            boost::ignore_unused(m_padding);
         }
 
         uint32_t GetClock() const { return m_clock;}

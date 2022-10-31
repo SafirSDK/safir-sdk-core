@@ -42,6 +42,8 @@ namespace Typesystem
 
         explicit ContainerProxy(T& container):m_container(container){}
 
+        ContainerProxy(const ContainerProxy& other) = default;
+
         ContainerProxy& operator=(const ContainerProxy& other)
         {
             if (other.IsNull())

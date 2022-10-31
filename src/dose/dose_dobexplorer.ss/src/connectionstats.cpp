@@ -201,7 +201,7 @@ void ConnectionStats::UpdateStatistics(const bool ignoreVisible)
 
     Safir::Dob::Internal::Connections::Instance().ForSpecificConnection
         (m_connectionId,
-         [this,&stat,&connectionExists](const auto& connectionPtr)
+         [&stat,&connectionExists](const auto& connectionPtr)
             {ProcessConnection(connectionPtr,stat,connectionExists);});
 
     if (connectionExists)

@@ -101,13 +101,21 @@ namespace Typesystem
             }
         }
     protected:
+
+         /**
+         * Copy constructor.
+         *
+         * @param other [in] - The object to copy.
+         */
+        constexpr EnumerationContainerBase(const EnumerationContainerBase& other) = default;
+
          /**
          * Copy assignment operator.
          *
          * @param other [in] - The object to copy.
          * @return A reference to this.
          */
-        EnumerationContainerBase& operator=(const EnumerationContainerBase & other) = default;
+        EnumerationContainerBase& operator=(const EnumerationContainerBase& other) = default;
 
         /**
          * The null flag for the enumeration container.

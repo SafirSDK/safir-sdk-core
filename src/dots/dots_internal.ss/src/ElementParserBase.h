@@ -55,6 +55,7 @@ namespace ToolSupport
     public:
         explicit ElementParserBase() : m_parent(NULL) {}
         explicit ElementParserBase(const ElementParserBase* parent) : m_parent(parent) {}
+        virtual ~ElementParserBase() = default;
         virtual bool Match(const std::string& name, ParseState& state) const=0;
         virtual const std::string& Name() const=0;
         virtual void Parse(boost::property_tree::ptree& pt, ParseState& state)=0;

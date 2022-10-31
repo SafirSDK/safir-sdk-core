@@ -13,7 +13,7 @@ if (UNIX)
   add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-fvisibility-inlines-hidden>)
   add_compile_options($<$<COMPILE_LANGUAGE:C>:-Bsymbolic>)
 
-  add_link_options(-Wl,--exclude-libs=ALL -Wl,--warn-common -Wl,--fatal-warnings -pthread)
+  add_link_options(-Wl,--exclude-libs=ALL -Wl,--warn-common -Wl,--fatal-warnings -pthread -latomic)
 
   #make sure we get the correct posix version
   add_compile_definitions(_POSIX_C_SOURCE=200809L)

@@ -58,7 +58,7 @@ public:
           id(9999)
 
     {
-        sendAction = [this](int64_t /*nodeId*/,
+        sendAction = [](int64_t /*nodeId*/,
                             int64_t /*nodeTypeId*/,
                             const Safir::Utilities::Internal::SharedConstCharArray& /*data*/,
                             size_t /*size*/,
@@ -249,7 +249,7 @@ BOOST_AUTO_TEST_CASE( stop_external_node )
 {
     stopHandler->Start();
     stopHandler->AddNode(1234, 1111);
-    ioService.post([this](){controlCmdCallback(Control::STOP, 1234);});
+    ioService.post([](){controlCmdCallback(Control::STOP, 1234);});
 
     communication.sendAction = [this](int64_t nodeId,
                                       int64_t nodeTypeId,
@@ -284,15 +284,15 @@ BOOST_AUTO_TEST_CASE( stop_non_existing_external_node )
 {
     stopHandler->Start();
     stopHandler->AddNode(1234, 1111);
-    ioService.post([this](){controlCmdCallback(Control::STOP, 5678);});
+    ioService.post([](){controlCmdCallback(Control::STOP, 5678);});
 
     auto nbrOfSend = 0;
-    communication.sendAction = [this, &nbrOfSend](int64_t /*nodeId*/,
-                                                  int64_t /*nodeTypeId*/,
-                                                  const Safir::Utilities::Internal::SharedConstCharArray& /*data*/,
-                                                  size_t /*size*/,
-                                                  int64_t /*dataTypeIdentifier*/,
-                                                  bool /*deliveryGuarantee*/) -> bool
+    communication.sendAction = [&nbrOfSend](int64_t /*nodeId*/,
+                                            int64_t /*nodeTypeId*/,
+                                            const Safir::Utilities::Internal::SharedConstCharArray& /*data*/,
+                                            size_t /*size*/,
+                                            int64_t /*dataTypeIdentifier*/,
+                                            bool /*deliveryGuarantee*/) -> bool
     {
         ++nbrOfSend;
         return true;
@@ -314,7 +314,7 @@ BOOST_AUTO_TEST_CASE( shutdown_external_node_resending )
     stopHandler->Start();
     stopHandler->AddNode(1234, 1111);
     stopHandler->AddNode(5678, 2222);
-    ioService.post([this](){controlCmdCallback(Control::SHUTDOWN, 5678);});
+    ioService.post([](){controlCmdCallback(Control::SHUTDOWN, 5678);});
 
     auto nbrOfSend = 0;
     communication.sendAction = [this, &nbrOfSend](int64_t nodeId,
@@ -358,7 +358,7 @@ BOOST_AUTO_TEST_CASE( stop_own_node )
     stopHandler->Start();
     stopHandler->AddNode(1234, 1111);
     stopHandler->AddNode(5678, 2222);
-    ioService.post([this](){controlCmdCallback(Control::STOP, 9999);});
+    ioService.post([](){controlCmdCallback(Control::STOP, 9999);});
 
     auto nbrOfSend = 0;
     communication.sendAction = [this, &nbrOfSend](int64_t nodeId,
@@ -394,8 +394,8 @@ BOOST_AUTO_TEST_CASE( stop_own_node_while_pending_extrnal_node_stops  )
 
     stopHandler->Start();
     stopHandler->AddNode(1234, 1111);
-    ioService.post([this](){controlCmdCallback(Control::STOP, 1234);});  // stop external node
-    ioService.post([this](){controlCmdCallback(Control::STOP, 9999);});  // stop own node
+    ioService.post([](){controlCmdCallback(Control::STOP, 1234);});  // stop external node
+    ioService.post([](){controlCmdCallback(Control::STOP, 9999);});  // stop own node
 
     auto nbrOfSend = 0;
     communication.sendAction = [this, &nbrOfSend](int64_t nodeId,
@@ -438,7 +438,7 @@ BOOST_AUTO_TEST_CASE( stop_system )
     stopHandler->Start();
     stopHandler->AddNode(1234, 1111);
     stopHandler->AddNode(5678, 2222);
-    ioService.post([this](){controlCmdCallback(Control::STOP, 0);});
+    ioService.post([](){controlCmdCallback(Control::STOP, 0);});
 
     auto nbrOfSentStopNotifications = 0;
     auto nbrOfSentStopOrders = 0;
@@ -503,7 +503,7 @@ BOOST_AUTO_TEST_CASE( stop_system_external_nodes_unresponsive )
     stopHandler->Start();
     stopHandler->AddNode(1234, 1111);
     stopHandler->AddNode(5678, 2222);
-    ioService.post([this](){controlCmdCallback(Control::STOP, 0);});
+    ioService.post([](){controlCmdCallback(Control::STOP, 0);});
 
     auto nbrOfSentStopNotifications = 0;
     auto nbrOfSentStopOrders = 0;
@@ -610,7 +610,7 @@ BOOST_AUTO_TEST_CASE( system_stop_cmd_while_in_system_stop_mode )
     stopHandler->Start();
     stopHandler->AddNode(1234, 1111);
     stopHandler->AddNode(5678, 2222);
-    ioService.post([this](){controlCmdCallback(Control::STOP, 0);});
+    ioService.post([](){controlCmdCallback(Control::STOP, 0);});
 
     auto nbrOfSentStopNotifications = 0;
     auto nbrOfSentStopOrders = 0;
@@ -670,7 +670,7 @@ BOOST_AUTO_TEST_CASE( ignored_system_stop_cmd_while_in_system_stop_mode )
     stopHandler->Start();
     stopHandler->AddNode(1234, 1111);
     stopHandler->AddNode(5678, 2222);
-    ioService.post([this](){controlCmdCallback(Control::STOP, 0);});
+    ioService.post([](){controlCmdCallback(Control::STOP, 0);});
 
     auto nbrOfSentStopNotifications = 0;
     auto nbrOfSentStopOrders = 0;

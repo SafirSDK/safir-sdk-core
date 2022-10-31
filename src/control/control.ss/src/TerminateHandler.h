@@ -75,7 +75,7 @@ public:
         m_signalSet.add(SIGTERM);
 #endif
 
-        m_signalSet.async_wait(m_strand.wrap([this, stopCallback, logStatus]
+        m_signalSet.async_wait(m_strand.wrap([stopCallback, logStatus]
                                              (const boost::system::error_code& error,
                                               const int signalNumber)
         {
