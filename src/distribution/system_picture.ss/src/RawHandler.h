@@ -831,7 +831,8 @@ namespace SP
 
             // Multiplied by 2 because of increased tolerance toward new nodes, and another two to wait
             // twice the other nodes timeout.
-            const int seconds = (boost::chrono::duration_cast<boost::chrono::milliseconds>(result).count()*4)/1000;
+            const int seconds = static_cast<int>
+                ((boost::chrono::duration_cast<boost::chrono::milliseconds>(result).count()*4)/1000);
             lllog(1) << "SP: CalculateExcludeNodeTimeLimit " << seconds << " seconds" << std::endl;
             return seconds;
         }

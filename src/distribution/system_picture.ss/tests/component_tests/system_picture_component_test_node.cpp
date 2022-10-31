@@ -331,8 +331,8 @@ public:
                     }
                     exit(1);
                 }
-                m_success.exchange(false);
-                logerr << m_logPrefix << "Thread exiting due to failure" << std::endl;
+                //m_success.exchange(false);
+                //logerr << m_logPrefix << "Thread exiting due to failure" << std::endl;
             });
         }
     }
