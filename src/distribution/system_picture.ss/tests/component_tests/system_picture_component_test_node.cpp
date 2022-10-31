@@ -80,7 +80,7 @@ public:
     {
         return false;
     }
-    static const Magic Lock() {wcout_lock.lock(); return Magic(wcout_lock);}
+    static const Magic Lock() {cout_lock.lock(); return Magic(cout_lock);}
 private:
     explicit Magic(boost::recursive_mutex& mutex):
         m_lock(&mutex,boost::mem_fn(&boost::recursive_mutex::unlock))
@@ -88,24 +88,13 @@ private:
     }
 
     std::shared_ptr<boost::recursive_mutex> m_lock;
-    static boost::recursive_mutex wcout_lock;
+    static boost::recursive_mutex cout_lock;
 };
-boost::recursive_mutex Magic::wcout_lock; //static instance
+boost::recursive_mutex Magic::cout_lock; //static instance
 
 #define logout if(Magic lck_asdf = Magic::Lock()) ; else std::cout
 #define logerr if(Magic lck_asdf = Magic::Lock()) ; else std::cerr
 
-std::int64_t GenerateId()
-{
-    for(;;)
-    {
-        auto id = LlufId_GenerateRandom64();
-        if (id > 0)
-        {
-            return id;
-        }
-    }
-}
 
 class ProgramOptions
 {
@@ -130,7 +119,11 @@ public:
              "Whether to use multicast communication or not")
             ("light",
              bool_switch(&isLightNode),
-             "Whether to be a lightnode or not");
+             "Whether to be a lightnode or not")
+            ("only-control",
+             bool_switch(&onlyControl),
+             "If used then the main/data channel part of the tests will not be run");
+
 
         variables_map vm;
 
@@ -178,6 +171,7 @@ public:
     std::string controlAddress;
     std::string dataAddress;
     bool isLightNode = false;
+    bool onlyControl = false;
     std::vector<int> seeds;
     int revolutions;
     int64_t nodeType;
@@ -329,7 +323,7 @@ public:
                         logerr << m_logPrefix << "Caught 'std::exception' exception from io_service.run(): "
                                << "  '" << exc.what() << "'." << std::endl;
                     }
-                    exit(1);
+                    quick_exit(1);
                 }
                 //m_success.exchange(false);
                 //logerr << m_logPrefix << "Thread exiting due to failure" << std::endl;
@@ -757,7 +751,10 @@ int main(int argc, char * argv[])
         logerr << "Starting Control and Main" << std::endl;
 
         control->Start();
-        main->Start();
+        if (!options.onlyControl)
+        {
+            main->Start();
+        }
 
         ioService.run();
 

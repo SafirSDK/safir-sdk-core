@@ -125,6 +125,8 @@ class Node():
                 command.append(str(self.seeds))
             else:
                 command += map(str, self.seeds)
+        if self.args.only_control:
+            command.append("--only-control")
         #if args.address is not None:
         #    command += ("--address", address)
         #if seed is not None:
@@ -214,9 +216,10 @@ class Node():
         log(f"  Node {self.node_id} waiting for states on ctrl")
         Node.__wait_for_states_internal(self.node_id, self.ctrl_queue, self.ctrl_states, expected_states,
                                         last_state_repeats)
-        log(f"  Node {self.node_id} waiting for states on main")
-        Node.__wait_for_states_internal(self.node_id, self.main_queue, self.main_states, expected_states,
-                                        last_state_repeats)
+        if not self.args.only_control:
+            log(f"  Node {self.node_id} waiting for states on main")
+            Node.__wait_for_states_internal(self.node_id, self.main_queue, self.main_states, expected_states,
+                                            last_state_repeats)
 
     @staticmethod
     def __wait_for_states_internal(node_id, queue, states, expected_states, last_state_repeats):
@@ -277,7 +280,8 @@ class Node():
 
     def close_and_check(self, expected_states):
         self.__close_and_check_internal(self.ctrl_queue, self.ctrl_states, expected_states)
-        self.__close_and_check_internal(self.main_queue, self.main_states, expected_states)
+        if not self.args.only_control:
+            self.__close_and_check_internal(self.main_queue, self.main_states, expected_states)
 
     def __close_and_check_internal(self, queue, states, expected_states):
         if self.stderr_thread is not None:
@@ -1203,7 +1207,7 @@ def test_move_lightnode_to_other_new_node_fast(args):
         node1.close_and_check(state1)
         with closing(Node(args, 3, light_node=False, multicast=False)) as node3:
             inc2 = node3.wait_for_form()
-            inc3 = node2.wait_for_form()
+            inc3 = node2.wait_for_form(allowed_states=(state1,))
             if inc3 in (inc1, inc2) or inc2 in (inc1, inc3):
                 raise Failure("unexpected incarnation")
             node2.wait_for_join(inc2, allow_detached_states=True)
@@ -1343,6 +1347,10 @@ def parse_arguments():
                         default="all",
                         choices=("all", ) + TEST_CASES,
                         help="Test case to run. The default, 'all' will run them all.")
+    parser.add_argument("--only-control",
+                        action="store_true",
+                        default=False,
+                        help="Don't run the main/data channel parts of the tests")
     parser.add_argument("--zip-results",
                         action="store_true",
                         default=False,

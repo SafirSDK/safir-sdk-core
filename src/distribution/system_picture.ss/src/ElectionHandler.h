@@ -128,6 +128,8 @@ namespace SP
         */
         bool IsElectionDetached() const {CheckStrand(); return m_isLightNode && m_elected == m_id;}
 
+        bool IsLightNode() const {return m_isLightNode;}
+
         void Stop()
         {
             m_strand.dispatch([this]
@@ -274,6 +276,69 @@ namespace SP
                 return;
             }
 
+            if (m_isLightNode &&
+                m_lastStatistics.Valid() &&
+                m_lastStatistics.IsEveryoneElseDead())
+            {
+                lllog(4) << "SP: I am a light node, and everyone else is gone, so I shall get myself elected anyway." << std::endl;
+                m_lastStatistics = RawStatistics();
+            }
+
+            lllog(4) << "SP: Checking if I should start election" << std::endl;
+
+            if (!m_lastStatistics.Valid())
+            {
+                lllog(4) << "SP: Haven't heard from any other nodes, electing myself!" << std::endl;
+                m_elected = m_id;
+                m_currentElectionId = LlufId_GenerateRandom64();
+                m_electionCompleteCallback(m_elected, m_currentElectionId);
+
+                //Note that we may not end up with this incarnationId.
+                //1. We are of a node type that is not allowed to form a system
+                //2. A RAW happens to be received before our incarnation id is set.
+                m_formSystemCallback(LlufId_GenerateRandom64());
+                return;
+            }
+            else if (m_isLightNode)
+            {
+                lllog(4) << "SP: I am a light node, not starting any elections" << std::endl;
+                if (m_currentElectionId != m_lastStatistics.ElectionId())
+                {
+                    lllog(4) << "SP: ElectionId changed, though, so gonna apply it" << std::endl;
+                    m_currentElectionId = m_lastStatistics.ElectionId();
+                    m_elected = std::numeric_limits<int64_t>::min();
+                    m_electionCompleteCallback(m_elected, m_currentElectionId);
+                }
+                return;
+            }
+            else
+            {
+                for (int i = 0; i < m_lastStatistics.Size(); ++i)
+                {
+                    lllog(7) << "SP:   know of node " << m_lastStatistics.Id(i)
+                             << (m_lastStatistics.IsDead(i) ? " which is dead" : "") << std::endl;
+
+                    if (m_lastStatistics.Id(i) == m_elected && !m_lastStatistics.IsDead(i))
+                    {
+                        // Note: the last two conditions below changes the behaviour
+                        // of SystemPicture in a rather surprising way. For example
+                        // it causes the unit tests to take a lot longer.
+                        // This is rather surprising, since the extra check seems reasonable
+                        // to me...  All it adds is that we need the remote node to
+                        // have seen the same election as we did, otherwise we may be
+                        // in a situation where a reelection is needed.
+                        if (m_elected > m_id &&
+                            m_lastStatistics.HasRemoteStatistics(i) &&
+                            m_lastStatistics.RemoteStatistics(i).ElectionId() == m_lastStatistics.ElectionId())
+                        {
+                            lllog(4) << "SP: Found elected node with higher id than me, "
+                                     << "not starting election!" << std::endl;
+                            return;
+                        }
+                    }
+                }
+            }
+                
             //cancel any other pending elections
             m_electionTimer.cancel();
 
@@ -291,61 +356,7 @@ namespace SP
                     return;
                 }
 
-                if (m_isLightNode &&
-                    m_lastStatistics.Valid() &&
-                    m_lastStatistics.IsEveryoneElseDead())
-                {
-                    lllog(4) << "SP: I am a light node, and everyone else is gone, so I shall get myself elected anyway." << std::endl;
-                    m_lastStatistics = RawStatistics();
-                }
 
-                lllog(4) << "SP: Checking if I should start election" << std::endl;
-
-                if (!m_lastStatistics.Valid())
-                {
-                    lllog(4) << "SP: Haven't heard from any other nodes, electing myself!" << std::endl;
-                    m_elected = m_id;
-                    m_currentElectionId = LlufId_GenerateRandom64();
-                    m_electionCompleteCallback(m_elected, m_currentElectionId);
-
-                    //Note that we may not end up with this incarnationId.
-                    //1. We are of a node type that is not allowed to form a system
-                    //2. A RAW happens to be received before our incarnation id is set.
-                    m_formSystemCallback(LlufId_GenerateRandom64());
-                    return;
-                }
-                else if (m_isLightNode)
-                {
-                    lllog(4) << "SP: I am a light node, not starting any elections" << std::endl;
-                    return;
-                }
-                else
-                {
-                    for (int i = 0; i < m_lastStatistics.Size(); ++i)
-                    {
-                        lllog(7) << "SP:   know of node " << m_lastStatistics.Id(i)
-                                 << (m_lastStatistics.IsDead(i) ? " which is dead" : "") << std::endl;
-
-                        if (m_lastStatistics.Id(i) == m_elected && !m_lastStatistics.IsDead(i))
-                        {
-                            // Note: the last two conditions below changes the behaviour
-                            // of SystemPicture in a rather surprising way. For example
-                            // it causes the unit tests to take a lot longer.
-                            // This is rather surprising, since the extra check seems reasonable
-                            // to me...  All it adds is that we need the remote node to
-                            // have seen the same election as we did, otherwise we may be
-                            // in a situation where a reelection is needed.
-                            if (m_elected > m_id &&
-                                m_lastStatistics.HasRemoteStatistics(i) &&
-                                m_lastStatistics.RemoteStatistics(i).ElectionId() == m_lastStatistics.ElectionId())
-                            {
-                                lllog(4) << "SP: Found elected node with higher id than me, "
-                                         << "not starting election!" << std::endl;
-                                return;
-                            }
-                        }
-                    }
-                }
 
 
                 lllog(4) << "SP: Starting election" << std::endl;

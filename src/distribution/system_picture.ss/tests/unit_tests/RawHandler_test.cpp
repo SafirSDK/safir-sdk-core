@@ -248,15 +248,14 @@ struct Fixture
 
 void CheckStatisticsCommon(const RawStatistics& statistics,
                            const int externalNodes,
-                           const std::map<std::int64_t,std::int64_t>& nodeTypes = {},
-                           const int64_t electionId = 0)
+                           const std::map<std::int64_t,std::int64_t>& nodeTypes = {})
 {
     BOOST_CHECK_EQUAL(statistics.Name(), "plopp");
     BOOST_CHECK_EQUAL(statistics.Id(), 10);
     BOOST_CHECK(statistics.NodeTypeId() == 10 || statistics.NodeTypeId() == 15 );
     BOOST_CHECK_EQUAL(statistics.ControlAddress(), "asdfasdf");
     BOOST_CHECK_EQUAL(statistics.DataAddress(), "qwerty");
-    BOOST_CHECK_EQUAL(statistics.ElectionId(), electionId);
+    BOOST_CHECK_EQUAL(statistics.ElectionId(), 0);
     BOOST_REQUIRE_EQUAL(statistics.Size(), externalNodes);
 
     for (int i = 0; i < externalNodes; ++i)
@@ -1545,13 +1544,13 @@ BOOST_AUTO_TEST_CASE( join_and_rejoin_system_callback)
                                    }
                                    else if (cbCalls == 2)
                                    {
-                                       CheckStatisticsCommon(statistics, 1, {}, 91);
+                                       CheckStatisticsCommon(statistics, 1);
                                        BOOST_CHECK(flags.MetadataChanged());
                                        BOOST_CHECK_EQUAL(statistics.IncarnationId(),12345);
                                    }
                                    else if (cbCalls == 3)
                                    {
-                                       CheckStatisticsCommon(statistics, 1, {}, 91);
+                                       CheckStatisticsCommon(statistics, 1);
                                        BOOST_CHECK(flags.NodesChanged());
                                        BOOST_CHECK(!flags.MetadataChanged());
                                        BOOST_CHECK_EQUAL(statistics.IncarnationId(),12345);
@@ -1559,7 +1558,7 @@ BOOST_AUTO_TEST_CASE( join_and_rejoin_system_callback)
                                    }
                                    else if (cbCalls == 4)
                                    {
-                                       CheckStatisticsCommon(statistics, 0, {}, 91);
+                                       CheckStatisticsCommon(statistics, 0);
                                        BOOST_CHECK(flags.NodesChanged());
                                        BOOST_CHECK(!flags.MetadataChanged());
                                        BOOST_CHECK_EQUAL(statistics.IncarnationId(),0);
@@ -1567,21 +1566,21 @@ BOOST_AUTO_TEST_CASE( join_and_rejoin_system_callback)
                                    }
                                    else if (cbCalls == 5)
                                    {
-                                       CheckStatisticsCommon(statistics, 1, {}, 91);
+                                       CheckStatisticsCommon(statistics, 1);
                                        BOOST_CHECK(flags.NodesChanged());
                                        BOOST_CHECK(!flags.MetadataChanged());
                                        BOOST_CHECK_EQUAL(statistics.IncarnationId(),0);
                                    }
                                    else if (cbCalls == 6)
                                    {
-                                       CheckStatisticsCommon(statistics, 1, {}, 91);
+                                       CheckStatisticsCommon(statistics, 1);
                                        BOOST_CHECK(!flags.NodesChanged());
                                        BOOST_CHECK(flags.MetadataChanged());
                                        BOOST_CHECK_EQUAL(statistics.IncarnationId(),67890);
                                    }
                                    else if (cbCalls == 7)
                                    {
-                                       CheckStatisticsCommon(statistics, 1, {}, 91);
+                                       CheckStatisticsCommon(statistics, 1);
                                        BOOST_CHECK(flags.NodesChanged());
                                        BOOST_CHECK(!flags.MetadataChanged());
                                        BOOST_CHECK_EQUAL(statistics.IncarnationId(),67890);

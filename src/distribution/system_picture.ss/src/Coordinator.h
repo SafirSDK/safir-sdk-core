@@ -261,7 +261,17 @@ namespace SP
                     if (m_stateMessage.node_info(i).id() == m_id)
                     {
                         foundSelf = true;
-                        if (m_stateMessage.node_info(i).is_dead())
+                        const bool isDead = m_stateMessage.node_info(i).is_dead();
+                        if (isDead && m_electionHandler->IsLightNode())
+                        {
+                            lllog (4) << "SP: This state says that we are dead, hopefully "
+                                      << "that is from before we were resurrected, so ignoring it"<< std::endl;
+                            //This state may contain information about us before we were resurrected, so we ignore it.
+                            //This is done by setting the state to an invalid mode.
+                            m_stateMessage.set_election_id(0);
+                            return;
+                        }
+                        else if (isDead && !m_electionHandler->IsLightNode())
                         {
                             SEND_SYSTEM_LOG(Alert,
                                             << "Got a SystemState in which I am dead!");

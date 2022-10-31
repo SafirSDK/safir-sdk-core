@@ -263,7 +263,7 @@ namespace SP
 
         void NewRemoteStatistics(const int64_t from, const Safir::Utilities::Internal::SharedConstCharArray& data, const size_t size)
         {
-            m_strand.dispatch([this,from,data,size]
+            m_strand.post([this,from,data,size]
             {
                 lllog(9) << "SP: NewRemoteStatistics for node " << from << std::endl;
                 auto findIt = m_nodeTable.find(from);
@@ -318,10 +318,6 @@ namespace SP
                                      << " and validation passed, let's use it!" << std::endl;
                             m_allStatisticsMessage.set_incarnation_id(node.nodeInfo->remote_statistics().incarnation_id());
 
-                            if (m_isLightNode)
-                            {
-                                m_allStatisticsMessage.set_election_id(node.nodeInfo->remote_statistics().election_id());
-                            }
                             changes |= RawChanges::METADATA_CHANGED;
                         }
                         else
@@ -362,7 +358,6 @@ namespace SP
                                  << node.nodeInfo->remote_statistics().incarnation_id()
                                  << " and validation passed, let's use it!" << std::endl;
                         m_allStatisticsMessage.set_incarnation_id(node.nodeInfo->remote_statistics().incarnation_id());
-                        m_allStatisticsMessage.set_election_id(node.nodeInfo->remote_statistics().election_id());
 
                         changes |= RawChanges::METADATA_CHANGED;
                     }
@@ -465,7 +460,7 @@ namespace SP
             else
             {
                 //bad id.
-                lllog(1) << "Bad election id ("
+                lllog(1) << "SP: Bad election id ("
                          << node.nodeInfo->remote_statistics().election_id()
                          << ") from node " << node.nodeInfo->name().c_str() << "("
                          << node.nodeInfo->id() << ")." << std::endl;
@@ -481,7 +476,7 @@ namespace SP
                     ++node.numBadElectionIds;
                     if (node.numBadElectionIds >= 3)
                     {
-                        lllog(1) << "Have detected 3 bad election ids ("
+                        lllog(1) << "SP: Have detected 3 bad election ids ("
                                  << node.nodeInfo->remote_statistics().election_id()
                                  << ") from node " << node.nodeInfo->name().c_str() << "("
                                  << node.nodeInfo->id() << ")! Forcing election." << std::endl;
@@ -765,32 +760,32 @@ namespace SP
         void FormSystem(const int64_t incarnationId)
         {
             lllog(4) << "SP: FormSystem " << incarnationId << std::endl;
-            m_strand.dispatch([this, incarnationId]
+            m_strand.post([this, incarnationId]
+                          {
+                              if (m_allStatisticsMessage.has_incarnation_id())
                               {
-                                  if (m_allStatisticsMessage.has_incarnation_id())
-                                  {
-                                      lllog(8) << "SP: Already have an incarnation_id "
-                                               << m_allStatisticsMessage.incarnation_id() << std::endl;
-                                      return;
-                                  }
+                                  lllog(8) << "SP: Already have an incarnation_id "
+                                           << m_allStatisticsMessage.incarnation_id() << std::endl;
+                                  return;
+                              }
 
-                                  const auto formSystem = m_validateFormSystemCallback == nullptr ||
-                                                          m_validateFormSystemCallback(incarnationId);
+                              const auto formSystem = m_validateFormSystemCallback == nullptr ||
+                                                      m_validateFormSystemCallback(incarnationId);
 
-                                  if (formSystem)
-                                  {
-                                      m_allStatisticsMessage.set_incarnation_id(incarnationId);
+                              if (formSystem)
+                              {
+                                  m_allStatisticsMessage.set_incarnation_id(incarnationId);
 
-                                      PostRawChangedCallback(RawChanges(RawChanges::METADATA_CHANGED), nullptr);
+                                  PostRawChangedCallback(RawChanges(RawChanges::METADATA_CHANGED), nullptr);
 
-                                      lllog(1) << "SP: Incarnation Id " << incarnationId
-                                               << " set in RawHandler." << std::endl;
-                                  }
-                                  else
-                                  {
-                                      lllog(8) << "SP: Not allowed to form new system" << std::endl;
-                                  }
-                              });
+                                  lllog(1) << "SP: Incarnation Id " << incarnationId
+                                           << " set in RawHandler." << std::endl;
+                              }
+                              else
+                              {
+                                  lllog(8) << "SP: Not allowed to form new system" << std::endl;
+                              }
+                          });
         }
 
     private:
@@ -847,7 +842,7 @@ namespace SP
 
             if (id == m_id)
             {
-                lllog(4) << "SP: Someone else thinks that I am dead! I guess that is goodbye, then!" << std::endl;
+                lllog(4) << "SP: Not adding myself to MoreDeadNodes!" << std::endl;
                 return false;
             }
 

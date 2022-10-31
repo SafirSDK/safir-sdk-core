@@ -654,11 +654,15 @@ public:
         return electedId == node;
     }
 
-    bool IsElectionDetached()
+    bool IsElectionDetached() const
     {
         return isDetached;
     }
 
+    bool IsLightNode() const
+    {
+        throw std::logic_error("Not implemented");
+    }
 
     void NodesChanged(RawStatistics /*statistics*/, std::shared_ptr<void> /*completionSignaller*/)
     {
