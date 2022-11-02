@@ -47,7 +47,8 @@ namespace
                                          const std::function<void(const ConnectionPtr& connection, bool disconnecting)>& onAppEvent,
                                          const std::function<void(int64_t)>& checkPendingReg,
                                          const std::function<void(const std::string& str)>& logStatus)
-        : m_strand(ioService),
+        : m_started(false),
+          m_strand(ioService),
           m_communication(distribution.GetCommunication()),
           m_onAppEvent(onAppEvent),
           m_poolHandler(m_strand, distribution, checkPendingReg, logStatus),
@@ -123,8 +124,12 @@ namespace
     {
         m_strand.dispatch([this]
         {
-            auto this_ = this;
-            m_connectionThread = boost::thread([this_]() {this_->ConnectionThread();});
+            if (m_started)
+            {
+                return;
+            }
+            m_started = true;
+            m_connectionThread = boost::thread([this]() {ConnectionThread();});
             m_poolHandler.Start();
         });
     }
@@ -133,6 +138,7 @@ namespace
     {
         m_strand.post([this]
         {
+            m_started = false;
             m_poolHandler.Stop();
             m_processInfoHandler.Stop();
 

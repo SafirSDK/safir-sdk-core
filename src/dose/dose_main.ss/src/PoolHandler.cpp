@@ -49,12 +49,14 @@ namespace Internal
         ,m_distribution(distribution)
         ,m_log(logStatus)
         ,m_poolDistributor(m_strand.context(), m_distribution)
-        ,m_poolDistributionRequests(m_strand.context(), m_distribution.GetCommunication())
+        ,m_poolDistributionRequests(m_strand.context(), m_distribution)
         ,m_waitingStatesSanityTimer(m_strand.context())
         ,m_persistenceReady(false)
         ,m_poolDistributionComplete(false)
         ,m_pdCompleteSignaled(false)
-        ,m_numReceivedPdComplete(0)
+        ,m_numReceivedPdCompleteFromNormalNodes(0)
+        ,m_detached(false)
+        ,m_running(false)
     {
         m_persistHandler.reset(new PersistHandler(m_strand.context(),
                                                   distribution,
@@ -70,11 +72,16 @@ namespace Internal
 
         auto injectNode=[this](const std::string&, int64_t id, int64_t nt, const std::string&)
         {
-            m_strand.dispatch([this,id,nt]
+            m_strand.dispatch([this, id, nt]
             {
                 if (m_nodes.insert(std::make_pair(id, nt)).second)
                 {
-                    if (!m_poolDistributionComplete || !m_persistenceReady)
+                    if (m_distribution.IsLightNode(nt))
+                    {
+                        // Always request pool from light nodes. They might have limited types created in detached mode.
+                        m_poolDistributionRequests.RequestPoolDistribution(id, nt);
+                    }
+                    else if (!m_poolDistributionComplete || !m_persistenceReady)
                     {
                         m_poolDistributionComplete=false;
                         m_poolDistributionRequests.RequestPoolDistribution(id, nt);
@@ -85,7 +92,7 @@ namespace Internal
 
         auto excludeNode=[this](int64_t id, int64_t)
         {
-            m_strand.post([this,id]
+            m_strand.post([this, id]
             {
                 if (m_nodes.erase(id)>0)
                 {
@@ -97,8 +104,37 @@ namespace Internal
             });
         };
 
+        auto detached = [this](bool isDetached)
+        {
+            m_strand.post([this] {Start();}); // It is possible that detach is called before system is started.
+            m_strand.post([this, isDetached]
+            {
+                lllog(5)<< L"DoseMain.PoolHandler set detached to " << std::boolalpha << isDetached << std::endl;
+                // reset flags
+                m_persistenceReady = false;
+                m_poolDistributionComplete = isDetached; // If in detached mode then we are not expecting to get a PD from anyone else.
+                m_pdCompleteSignaled = false;
+                m_numReceivedPdCompleteFromNormalNodes = 0;
+                m_persistHandler->Reset();
+                m_detached = isDetached;
+
+                // If the node is detached from the start, nodeInfoHandler is not created here.
+                if (m_nodeInfoHandler)
+                {
+                    m_nodeInfoHandler->SetNodeState(m_detached ? Safir::Dob::NodeState::Detached : Safir::Dob::NodeState::Attaching); // Update detached flag in NodeInfo
+                }
+
+                if (m_detached)
+                {
+                    // This will trigger the chain OnPersistenDataReady->SignalPDComplete
+                    m_persistHandler->SetPersistentDataReady();
+                }
+            });
+        };
+
         //subscribe for included and excluded nodes
         distribution.SubscribeNodeEvents(injectNode, excludeNode);
+        distribution.SubscribeDetachedChanged(detached);
 
         //set data receiver for pool distribution information
         m_distribution.GetCommunication().SetDataReceiver([this](int64_t fromNodeId, int64_t fromNodeType, const char *data, size_t size)
@@ -148,19 +184,19 @@ namespace Internal
                 return; //already got this event
             }
 
-            if (m_numReceivedPdComplete==0) //got persistence from Dope
+
+            if (m_numReceivedPdCompleteFromNormalNodes == 0) //got persistence from Dope
             {
-                //clear all, we dont care anymore for other nodes pools
-                m_poolDistributionRequests.PoolDistributionFinished(0);
+                // Clear all PDs from non light nodes. We still need to get light nodes pools since they can have limited types created in detached mode.
+                m_poolDistributionRequests.ClearNonLightNodesPoolDistributions();
             }
-            else //got persistence from other node
+            else if (!m_distribution.IsLightNode())// Normal node that got persistence from other node does not have anything to send.
             {
-                //tell poolDistributor that until we are started, we have no pool or persistence to provide
+                // Tell poolDistributor that until we are started, we have no pool or persistence to provide.
                 m_poolDistributor.SetHaveNothing();
             }
             m_persistenceReady=true;
             SignalPdComplete();
-
         });
     }
 
@@ -168,6 +204,12 @@ namespace Internal
     {
         m_strand.post([this]
         {
+            if (m_running)
+            {
+                return;
+            }
+            m_running = true;
+
             m_persistHandler->Start();
 
             RunEndStatesTimer();
@@ -192,6 +234,12 @@ namespace Internal
     {
         m_strand.post([this]
         {
+            if (!m_running)
+            {
+                return;
+            }
+            m_running = false;
+
             if (m_nodeInfoHandler != nullptr)
             {
                 m_nodeInfoHandler->Stop();
@@ -254,7 +302,7 @@ namespace Internal
         const PoolDistributionInfo pdInfo=*reinterpret_cast<const PoolDistributionInfo*>(data);
         delete[] data;
 
-        m_strand.dispatch([this,pdInfo,fromNodeType,fromNodeId]
+        m_strand.dispatch([this, pdInfo, fromNodeType, fromNodeId]
         {
             switch (pdInfo)
             {
@@ -269,8 +317,12 @@ namespace Internal
             case PdComplete:
                 {
                     lllog(5)<<"PoolHandler: got PdComplete from "<<fromNodeId<<std::endl;
-                    ++m_numReceivedPdComplete;
-                    m_persistHandler->SetPersistentDataReady(); //persistence is ready as soon as we have received one pdComplete
+                    if (!m_distribution.IsLightNode(fromNodeType))
+                    {
+                        //persistence is ready as soon as we have received one pdComplete from a non-lightNode
+                        ++m_numReceivedPdCompleteFromNormalNodes;
+                        m_persistHandler->SetPersistentDataReady();
+                    }
                     m_poolDistributionRequests.PoolDistributionFinished(fromNodeId);
                 }
                 break;
@@ -333,7 +385,20 @@ namespace Internal
             m_poolDistributor.Start();
             Connections::Instance().AllowConnect(-1);
             Connections::Instance().AllowConnect(0);
-            m_nodeInfoHandler.reset(new NodeInfoHandler(m_strand.context(), m_distribution));
+
+            // Normal for normal nodes, Detached/Attached for lightnodes.
+            auto state = m_distribution.IsLightNode() ? (m_detached ? Safir::Dob::NodeState::Detached : Safir::Dob::NodeState::Attached) : Safir::Dob::NodeState::Normal;
+
+            // nodeInfoHandler is created when SignalPdComplete is called, but lightNodes can get PDComplete many times if node is
+            // toggling attached/detached and will in that case already have been created
+            if (m_nodeInfoHandler)
+            {
+                m_nodeInfoHandler->SetNodeState(state);
+            }
+            else
+            {
+                m_nodeInfoHandler.reset(new NodeInfoHandler(m_strand.context(), m_distribution, state));
+            }
         }
     }
 

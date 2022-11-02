@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<enumeration xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <summary>Enumerates the states a started node can have.</summary>
+    <name>Safir.Dob.NodeState</name>
+    <values>
+    <!-- Normal node running -->
+        <value>Normal</value>
+        
+        <!-- Light node states -->
+        <value>Detached</value>
+        <value>Attaching</value>
+        <value>Attached</value>
+    </values>
+</enumeration>

@@ -25,6 +25,8 @@
 #include <deque>
 #include <functional>
 #include <Safir/Utilities/Internal/VisibilityHelpers.h>
+#include <Safir/Utilities/Internal/SharedCharArray.h>
+#include "PoolDistributionRequestSender.h"
 
 #ifdef _MSC_VER
 #pragma warning (push)

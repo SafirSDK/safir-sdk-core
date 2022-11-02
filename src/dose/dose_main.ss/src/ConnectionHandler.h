@@ -69,6 +69,7 @@ namespace Internal
         void Stop();
 
     private:
+        bool m_started;
         boost::asio::io_service::strand m_strand;
         Com::Communication&             m_communication;
         std::function<void(const ConnectionPtr& connection, bool disconnecting)> m_onAppEvent;

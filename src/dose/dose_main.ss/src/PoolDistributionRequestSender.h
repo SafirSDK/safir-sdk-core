@@ -56,15 +56,15 @@ namespace Internal
     /// Responsible for sending poolDistributionRequests to all nodes at start-up.
     /// When all poolDistributions are received, this class calls the pdComplete callback.
     ///
-    template <class CommunicationT>
+    template <class DistributionT>
     class PoolDistributionRequestSender
     {
     public:
         PoolDistributionRequestSender(boost::asio::io_service& io,
-                                  CommunicationT& communication)
+                                  DistributionT& distribution)
             :m_running(false)
             ,m_strand(io)
-            ,m_communication(communication)
+            ,m_distribution(distribution)
         {
         }
 
@@ -74,14 +74,12 @@ namespace Internal
             {
                 m_pdComplete=pdComplete;
                 m_running=true;
-                if (m_requests.empty())
+                if (IsAllNormalNodesCompleted())
                 {
                     m_pdComplete();
                 }
-                else
-                {
-                    SendPoolDistributionRequests();
-                }
+
+                SendPoolDistributionRequests();
             });
 
         }
@@ -99,8 +97,31 @@ namespace Internal
         {
             m_strand.post([this,nodeId,nodeTypeId]
             {
-                m_requests.push_back(PoolDistributionRequestSender<CommunicationT>::PdReq(nodeId, nodeTypeId, false));
+                m_requests.push_back(PoolDistributionRequestSender<DistributionT>::PdReq(nodeId, nodeTypeId, false));
                 SendPoolDistributionRequests();
+            });
+        }
+
+        void ClearNonLightNodesPoolDistributions()
+        {
+            m_strand.dispatch([this]
+            {
+                for (auto it = std::cbegin(m_requests); it != std::cend(m_requests);)
+                {
+                    if (!m_distribution.IsLightNode(it->nodeType))
+                    {
+                        it = m_requests.erase(it);
+                    }
+                    else
+                    {
+                        ++it;
+                    }
+                }
+
+                if (IsAllNormalNodesCompleted())
+                {
+                    m_pdComplete();
+                }
             });
         }
 
@@ -115,18 +136,18 @@ namespace Internal
                 }
                 else
                 {
-                    auto& fromNodeId_ = fromNodeId;
-                    auto it=std::find_if(m_requests.begin(), m_requests.end(), [fromNodeId_](const PdReq& r){return r.nodeId==fromNodeId_;});
+                    auto it=std::find_if(m_requests.begin(), m_requests.end(), [fromNodeId](const PdReq& r){return r.nodeId==fromNodeId;});
                     if (it!=m_requests.end())
                     {
                         m_requests.erase(it);
                     }
                 }
 
-                if (m_requests.empty())
+                if (IsAllNormalNodesCompleted())
                 {
                     m_pdComplete();
                 }
+
             });
         }
 
@@ -150,13 +171,14 @@ namespace Internal
         bool m_running;
 
         boost::asio::io_service::strand m_strand;
-        CommunicationT& m_communication;
+        DistributionT& m_distribution;
+
         std::function<void()> m_pdComplete; //signal pdComplete after all our pdRequests has reported pdComplete
         std::vector<PdReq> m_requests;
 
         void SendPoolDistributionRequests()
         {
-            if (!m_running)
+            if (!m_running || m_requests.empty())
             {
                 return;
             }
@@ -170,7 +192,7 @@ namespace Internal
             {
                 if (!r->sent)
                 {
-                    if (m_communication.Send(r->nodeId, r->nodeType, req, sizeof(PoolDistributionInfo), PoolDistributionInfoDataTypeId, true))
+                    if (m_distribution.GetCommunication().Send(r->nodeId, r->nodeType, req, sizeof(PoolDistributionInfo), PoolDistributionInfoDataTypeId, true))
                     {
                         r->sent=true;
                     }
@@ -186,6 +208,12 @@ namespace Internal
                 //some requests could not be sent, retry
                 m_strand.post([this]{SendPoolDistributionRequests();}); //a bit aggressive, maybe we should set a timer instead
             }
+        }
+
+        bool IsAllNormalNodesCompleted() const
+        {
+            auto it = std::find_if(std::cbegin(m_requests), std::cend(m_requests), [this](const PdReq& r){return !m_distribution.IsLightNode(r.nodeType);});
+            return it == std::cend(m_requests);
         }
     };
 }

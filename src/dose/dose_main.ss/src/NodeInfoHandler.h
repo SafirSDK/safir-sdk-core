@@ -25,6 +25,7 @@
 
 #include <Safir/Dob/Connection.h>
 #include <Safir/Utilities/AsioDispatcher.h>
+#include <Safir/Dob/NodeState.h>
 #include <boost/noncopyable.hpp>
 #include <boost/asio.hpp>
 #include "Distribution.h"
@@ -46,9 +47,12 @@ namespace Internal
     {
     public:
         NodeInfoHandler(boost::asio::io_service& ioService,
-                        const Distribution& distribution);
+                        const Distribution& distribution,
+                        Safir::Dob::NodeState::Enumeration initialState);
 
         void Stop();
+
+        void SetNodeState(Safir::Dob::NodeState::Enumeration state);
     private:
         void OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId    typeId,
                                    const Safir::Dob::Typesystem::HandlerId& handlerId) override;

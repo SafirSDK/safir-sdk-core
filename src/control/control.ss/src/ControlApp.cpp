@@ -83,15 +83,20 @@ ControlApp::ControlApp(boost::asio::io_context&         io,
                                                               Safir::Utilities::Internal::WrapInStrand(m_strand, [this]{StopThisNode();}),
                                                               [this](const std::string& str){LogStatus(str);});
 
-    for (auto it = m_conf.nodeTypesParam.cbegin(); it < m_conf.nodeTypesParam.cend(); ++it)
+    for (const auto& nt : m_conf.nodeTypesParam)
     {
-        if (m_conf.thisNodeParam.nodeTypeId == it->id)
+        if (nt.isLightNode)
         {
-            m_requiredForStart = it->requiredForStart;
-            m_isLightNode = it->isLightNode;
-            break;
+            m_lightNodeTypeIds.insert(nt.id);
+        }
+
+        if (m_conf.thisNodeParam.nodeTypeId == nt.id)
+        {
+            m_requiredForStart = nt.requiredForStart;
+            m_isLightNode = nt.isLightNode;
         }
     }
+
     new (m_incarnationIdStorage.get()) std::atomic<uint64_t>(0);
 
     //Call the Start method, which will retry itself if need be (e.g. the local interface
@@ -123,9 +128,9 @@ void ControlApp::LogStatus(const std::string& str)
 {
     lllog(1) << str.c_str() << std::endl;
     boost::asio::dispatch(m_wcoutStrand, [str]
-                           {
-                               std::wcout << str.c_str() << std::endl;
-                           });
+    {
+        std::wcout << str.c_str() << std::endl;
+    });
 }
 
 
@@ -207,82 +212,98 @@ void ControlApp::Start()
                                      m_conf.thisNodeParam.nodeTypeId,
                                      std::move(spNodeTypes),
                                      m_conf.aloneTimeout,
-                                     // Join system callback
-                                     [this](const int64_t incarnationId) -> bool
-                                     {
-                                         if (m_incarnationId == 0 &&
-                                             m_incarnationBlackListHandler.ValidateIncarnationId(incarnationId))
-                                         {
-                                             m_incarnationId = incarnationId;
 
-                                             auto this_ = this;
+    // --- Join system callback ---
+    [this](const int64_t incarnationId) -> bool
+    {
+        if (incarnationId == m_incarnationId)
+        {
+            lllog(1) << "CTRL: Join system called with same incarnationId that we are already part of, " << incarnationId << std::endl;
+            throw std::logic_error("CTRL: Join system called with same incarnationId that we are already part of");
+        }
+        if (m_incarnationBlackListHandler.ValidateIncarnationId(incarnationId))
+        {
+            m_stateHandler->SetDetached(false); // Doesn't matter if we are a lightNode or not, we are not in detached mode after a join.
+            m_incarnationId = incarnationId;
+            boost::asio::post(m_strand, [this]{SendControlInfo();});
 
-                                             boost::asio::post(m_strand, [this_]{this_->SendControlInfo();});
+            std::ostringstream os;
+            os << "CTRL: Joined system with incarnation id " << incarnationId << std::endl;
+            os << "CTRL: This node has id " << m_nodeId;
+            LogStatus(os.str());
 
-                                             std::ostringstream os;
-                                             os << "CTRL: Joined system with incarnation id " << incarnationId << std::endl;
-                                             os << "CTRL: This node has id " << m_nodeId;
-                                             LogStatus(os.str());
+            return true;
+        }
+        else
+        {
+            lllog(1) << "CTRL: Not ok to join incarnation " << incarnationId << std::endl;
+            return false;
+        }
+    },
+    // --- Form system callback ---
+    [this](const int64_t incarnationId) -> bool
+    {
+        if (incarnationId == m_incarnationId)
+        {
+            lllog(1) << "CTRL: Form system called with same incarnationId that we are already part of, " << incarnationId << std::endl;
+            throw std::logic_error("CTRL: Form system called with same incarnationId that we are already part of");
+        }
 
-                                             return true;
-                                         }
-                                         else
-                                         {
-                                             lllog(1) << "CTRL: Not ok to join incarnation " << incarnationId << std::endl;
+        // Lightnode getting formSystemCb, means detached mode
+        if (m_isLightNode)
+        {
+            // Lightnode in detached mode
+            m_incarnationId = incarnationId;
+            m_stateHandler->SetDetached(true);
+            m_doseMainCmdSender->Detached();
+            boost::asio::post(m_strand, [this]{ SendControlInfo(); });
+            std::ostringstream os;
+            os << "CTRL: Light node in detached mode is forming a system on its own with incarnation id " << incarnationId << std::endl;
+            os << "CTRL: This node has id " << m_nodeId;
+            LogStatus(os.str());
+            return true;
+        }
 
-                                             return false;
-                                         }
-                                     },
-                                     // Form system callback
-                                     [this](const int64_t incarnationId) -> bool
-                                     {
-                                         // Check if this node is of a type that is allowed to form systems
-                                         if (m_requiredForStart && !m_isLightNode)
-                                         {
-                                             m_incarnationId = incarnationId;
+        // Normal node, check if this node is of a type that is allowed to form systems
+        if (m_requiredForStart)
+        {
+            m_incarnationId = incarnationId;
+            boost::asio::post(m_strand, [this]{SendControlInfo();});
+            std::ostringstream os;
+            os << "CTRL: Starting system with incarnation id " << incarnationId << std::endl;
+            os << "CTRL: This node has id " << m_nodeId;
+            LogStatus(os.str());
+            return true;
+        }
 
-                                             auto this_ = this;
 
-                                             boost::asio::post(m_strand, [this_]{this_->SendControlInfo();});
+        // Node is not allowed to form a system
+        LogStatus("CTRL: Waiting for system start");
+        return false;
 
-                                             std::ostringstream os;
-                                             os << "CTRL: Starting system with incarnation id " << incarnationId << std::endl;
-                                             os << "CTRL: This node has id " << m_nodeId;
-                                             LogStatus(os.str());
-
-                                             return true;
-                                         }
-                                         else
-                                         {
-                                             std::ostringstream os;
-                                             os << "CTRL: Waiting for system start";
-                                             LogStatus(os.str());
-
-                                             return false;
-                                         }
-                                     }));
+    }));
 
     m_doseMainCmdSender.reset(new Control::DoseMainCmdSender
                               (m_io,
                                // This is what we do when dose_main is ready to receive commands
                                [this]()
-                               {
-                                   m_doseMainRunning = true;
+    {
+        m_doseMainRunning = true;
 
-                                   m_doseMainCmdSender->StartDoseMain(m_conf.thisNodeParam.name,
-                                                                      m_nodeId,
-                                                                      m_conf.thisNodeParam.nodeTypeId,
-                                                                      m_conf.thisNodeParam.dataAddress);
+        m_doseMainCmdSender->StartDoseMain(m_conf.thisNodeParam.name,
+                                           m_nodeId,
+                                           m_conf.thisNodeParam.nodeTypeId,
+                                           m_conf.thisNodeParam.dataAddress);
 
-                                   auto this_ = this;
-                                   m_sp->StartStateSubscription
-                                           ([this_](const SP::SystemState& newState)
-                                   {
-                                       this_->m_stateHandler->SetNewState(newState);
-                                   });
+        auto this_ = this;
+        m_sp->StartStateSubscription
+                ([this_](const SP::SystemState& newState)
+        {
+            this_->m_stateHandler->SetNewState(newState);
+        });
 
-                                   m_communication->Start();
-                                }));
+        m_communication->Start();
+    }));
 
     m_stopHandler.reset(new Control::StopHandler(m_io,
                                                  *m_communication,
@@ -290,77 +311,71 @@ void ControlApp::Start()
                                                  *m_doseMainCmdSender,
                                                  m_conf,
                                                  [this]()
-                                                 {
-                                                     StopThisNode();
-                                                 },
-                                                 [this]()
-                                                 {
-                                                     Shutdown();
-                                                 },
-                                                 [this]()
-                                                 {
-                                                     Reboot();
-                                                 },
-                                                 [this]()
-                                                 {
-                                                     if (m_incarnationId != 0)
-                                                     {
-                                                         m_incarnationBlackListHandler.AddIncarnationId(m_incarnationId);
-                                                     }
-                                                 },
-                                                 m_ignoreControlCmd));
+    {
+        StopThisNode();
+    },
+    [this]()
+    {
+        Shutdown();
+    },
+    [this]()
+    {
+        Reboot();
+    },
+    [this]()
+    {
+        if (m_incarnationId != 0)
+        {
+            m_incarnationBlackListHandler.AddIncarnationId(m_incarnationId);
+        }
+    },
+    m_ignoreControlCmd));
 
 
     m_controlInfoSender.reset(new Control::ControlInfoSender
                               (m_io,
                                // This is what we do when a receiver is ready
                                Safir::Utilities::Internal::WrapInStrand(m_strand, [this]()
-                                             {
-                                                 m_controlInfoReceiverReady = true;
-                                                 SendControlInfo();
-                                             })));
+    {
+        m_controlInfoReceiverReady = true;
+        SendControlInfo();
+    })));
 
-    m_stateHandler.reset(new Control::SystemStateHandler
-                         (m_nodeId, m_isLightNode,
+    m_stateHandler.reset(new Control::SystemStateHandler(m_nodeId,
+    // --- Node included callback ---
+    [this](const Control::Node& node)
+    {
+        if (m_nodeId != node.nodeId && m_isLightNode && IsLightNode(node.nodeTypeId))
+        {
+            return; // LightNodes don't interact
+        }
+        m_doseMainCmdSender->InjectNode(node.name,
+                                        node.nodeId,
+                                        node.nodeTypeId,
+                                        node.dataAddress);
 
-                          // Node included callback
-                          [this](const Control::Node& node)
-                          {
-                              m_doseMainCmdSender->InjectNode(node.name,
-                                                              node.nodeId,
-                                                              node.nodeTypeId,
-                                                              node.dataAddress);
+        m_stopHandler->AddNode(node.nodeId, node.nodeTypeId);
+    },
 
-                              m_stopHandler->AddNode(node.nodeId, node.nodeTypeId);
-                          },
-
-                          // Node down callback
-                          [this](const int64_t nodeId, const int64_t nodeTypeId)
-                          {
-                              m_doseMainCmdSender->ExcludeNode(nodeId, nodeTypeId);
-
-                              m_stopHandler->RemoveNode(nodeId);
-                          },
-
-                        // Detached callback
-                        [this]()
-                        {
-                            // LogStatus("CTRL: This node is now in detached mode");
-                            m_doseMainCmdSender->Detached();
-                        }));
+    // --- Node down callback ---
+    [this](const int64_t nodeId, const int64_t nodeTypeId)
+    {
+        m_doseMainCmdSender->ExcludeNode(nodeId, nodeTypeId);
+        m_stopHandler->RemoveNode(nodeId);
+    }));
 
     // Start dose_main
     std::error_code error;
 
     m_doseMain = std::make_unique<boost::process::child>
-        (m_doseMainPath,
-#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
-         boost::process::windows::hide,
-#endif
-         m_io,
-         error,
-         boost::process::on_exit=[this](int exitCode, const std::error_code& error)
-             {HandleDoseMainExit(exitCode,error);});
+            (m_doseMainPath,
+         #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
+             boost::process::windows::hide,
+         #endif
+             m_io,
+             error,
+             boost::process::on_exit=[this](int exitCode, const std::error_code& error)
+    {HandleDoseMainExit(exitCode,error);});
 
     if (error)
     {
@@ -436,12 +451,12 @@ std::pair<Com::ResolvedAddress,Com::ResolvedAddress> ControlApp::ResolveAddresse
             //ok, set up the retry timer
             m_startTimer.expires_after(boost::chrono::seconds(1));
             m_startTimer.async_wait(boost::asio::bind_executor(m_strand, [this](const boost::system::error_code& error)
-                                                  {
-                                                      if (!error && !m_stopped)
-                                                      {
-                                                          Start();
-                                                      }
-                                                  }));
+            {
+                if (!error && !m_stopped)
+                {
+                    Start();
+                }
+            }));
         }
     }
 
@@ -455,22 +470,22 @@ void ControlApp::StopDoseMain()
 
     m_terminationTimer.async_wait([this]
                                   (const boost::system::error_code& error)
-                                  {
-                                      if (error == boost::asio::error::operation_aborted)
-                                      {
-                                          return;
-                                      }
+    {
+        if (error == boost::asio::error::operation_aborted)
+        {
+            return;
+        }
 
-                                      SEND_SYSTEM_LOG(Critical,
-                                                      << "CTRL: Can't stop dose_main in a controlled fashion"
-                                                      << "... killing it!");
+        SEND_SYSTEM_LOG(Critical,
+                        << "CTRL: Can't stop dose_main in a controlled fashion"
+                        << "... killing it!");
 
-                                      // Kill dose_main the hard way
-                                      std::error_code ec;
-                                      m_doseMain->terminate(ec);
-                                      // We don't care about the error code from terminate. dose_main might
-                                      // have exited by itself (which is good) and that will give an error.
-                                  });
+        // Kill dose_main the hard way
+        std::error_code ec;
+        m_doseMain->terminate(ec);
+        // We don't care about the error code from terminate. dose_main might
+        // have exited by itself (which is good) and that will give an error.
+    });
 
     // Send stop order to dose_main
     m_doseMainCmdSender->StopDoseMain();
@@ -606,7 +621,7 @@ void ControlApp::HandleDoseMainExit(int exitCode, const std::error_code& error)
     {
         std::stringstream ostr;
         ostr << "CTRL: dose_main has exited with unexpected status code ("
-           << exitCode << ", " <<nativeExitCode << ")";
+             << exitCode << ", " <<nativeExitCode << ")";
 
         SEND_SYSTEM_LOG(Critical, << ostr.str().c_str());
         LogStatus(ostr.str());
@@ -621,7 +636,7 @@ void ControlApp::HandleDoseMainExit(int exitCode, const std::error_code& error)
         LogStatus(ostr.str());
     }
 #else
-    #error "Control does not support this platform yet"
+#error "Control does not support this platform yet"
 #endif
 
     lllog(1) << "CTRL: dose_main has exited" << std::endl;

@@ -110,6 +110,7 @@ namespace Com
 
     private:
         ::google::protobuf::LogSilencer m_disableProtobufLogs;
+        std::atomic<bool> m_running;
         boost::asio::io_context& m_ioContext;
         boost::asio::io_context::strand m_receiveStrand;
         Node m_me;

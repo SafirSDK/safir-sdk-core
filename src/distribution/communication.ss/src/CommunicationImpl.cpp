@@ -68,6 +68,7 @@ namespace
                                          const NodeTypeMap& nodeTypes,
                                          int fragmentSize)
         :m_disableProtobufLogs()
+        ,m_running(false)
         ,m_ioContext(ioContext)
         ,m_receiveStrand(ioContext)
         ,m_me(nodeName, nodeId, nodeTypeId, controlAddress, dataAddress, isControlInstance)
@@ -164,6 +165,7 @@ namespace
 
     void CommunicationImpl::Start()
     {
+        m_running = true;
         lllog(1)<<m_logPrefix.c_str()<<L"Start "<<m_me.name.c_str()<<std::endl;
         boost::asio::post(m_receiveStrand, [this]{m_deliveryHandler.Start();});
         m_reader.Start();
@@ -181,6 +183,7 @@ namespace
 
     void CommunicationImpl::Stop()
     {
+        m_running = false;
         lllog(1)<<m_logPrefix.c_str()<<L"Stop "<<m_me.name.c_str()<<std::endl;
         boost::asio::post(m_receiveStrand, [this] {m_deliveryHandler.Stop(); });
         m_reader.Stop();
@@ -199,6 +202,11 @@ namespace
 
     void CommunicationImpl::Reset()
     {
+        if (!m_running)
+        {
+            Start();
+            return;
+        }
         lllog(1) << m_logPrefix.c_str() << L"Reset " << m_me.name.c_str() << std::endl;
         boost::asio::post(m_receiveStrand, [this]
             {

@@ -134,7 +134,6 @@ BOOST_AUTO_TEST_CASE( callback_order )
     auto nodeDownCbCounter = 0;
 
     TestSystemStateHandler ssh(99999,
-                               false,
                              [&ownNodeIncludedCbCounter, &nodeIncludedCbCounter]
                              (const Node& node)
                              {
@@ -154,10 +153,6 @@ BOOST_AUTO_TEST_CASE( callback_order )
                              (const int64_t /*nodeId*/, int64_t /*nodetypeId*/)
                              {
                                 ++nodeDownCbCounter;
-                             },
-                             []()
-                             {
-                                // detachedCb
                              });
 
 
@@ -185,7 +180,6 @@ BOOST_AUTO_TEST_CASE( add_delete_node )
     int64_t latestDownNodeTypeId;
 
     TestSystemStateHandler ssh(99999,
-                               false,
                              [&ownNodeIncludedCbCounter,
                               &latestOwnNode,
                               &nodeIncludedCbCounter,
@@ -209,11 +203,7 @@ BOOST_AUTO_TEST_CASE( add_delete_node )
                                 latestDownNodeId = nodeId;
                                 latestDownNodeTypeId = nodeTypeId;
                                 ++nodeDownCbCounter;
-                             },
-                            []()
-                            {
-                                //detachedCb
-                            });
+                             });
 
 
     SystemState ss;

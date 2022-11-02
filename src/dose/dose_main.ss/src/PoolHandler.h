@@ -62,7 +62,7 @@ namespace Internal
     private:
         typedef PoolDistribution<Distribution> PoolDistributionType;
         typedef PoolDistributionHandler<Distribution, PoolDistributionType> PoolDistributionHandlerType;
-        typedef PoolDistributionRequestSender<Com::Communication> PoolDistributionRequestSenderType;
+        typedef PoolDistributionRequestSender<Distribution> PoolDistributionRequestSenderType;
         typedef StateDistributor<Distribution> StateDistributorType;
 
         boost::asio::io_service::strand& m_strand;
@@ -82,11 +82,13 @@ namespace Internal
         bool m_persistenceReady;
         bool m_poolDistributionComplete;
         bool m_pdCompleteSignaled;
-        int m_numReceivedPdComplete;
+        int m_numReceivedPdCompleteFromNormalNodes;
 
         //The NodeInfoHandler can not be started until we have pd complete
         //so the PoolHandler has to own it.
         std::unique_ptr<NodeInfoHandler> m_nodeInfoHandler;
+        bool m_detached;
+        bool m_running;
 
         void SignalPdComplete();
         void RunEndStatesTimer();

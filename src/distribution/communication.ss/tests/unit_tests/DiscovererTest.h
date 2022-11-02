@@ -569,7 +569,7 @@ public:
 
         // let node discovering run for a while
         passed = false;
-        for (int i=0; i<100; ++i)
+        for (int i=0; i<200; ++i)
         {
             Deliver();
             {

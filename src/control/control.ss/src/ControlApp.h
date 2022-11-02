@@ -110,6 +110,8 @@ private:
     bool                                        m_requiredForStart;
     bool                                        m_isLightNode;
 
+
+
     std::unique_ptr<Com::Communication>             m_communication;
     std::unique_ptr<SP::SystemPicture>              m_sp;
     std::unique_ptr<Control::StopHandler>           m_stopHandler;
@@ -121,8 +123,14 @@ private:
     // 64 bit atomic needs to be aligned on 64 bit boundary even on 32 bit systems,
     // so we need to use alignment magic.
     typedef boost::aligned_storage<sizeof(std::atomic<int64_t>),
-                                   sizeof(std::atomic<int64_t>)>::type AlignedStorage;
+    sizeof(std::atomic<int64_t>)>::type AlignedStorage;
     std::unique_ptr<AlignedStorage>     m_incarnationIdStorage;
     std::atomic<int64_t>&             m_incarnationId;
-};
 
+    std::set<int64_t> m_lightNodeTypeIds;
+    bool IsLightNode(int64_t nodeTypeId) const
+    {
+        return m_lightNodeTypeIds.find(nodeTypeId) != std::end(m_lightNodeTypeIds);
+    }
+
+};

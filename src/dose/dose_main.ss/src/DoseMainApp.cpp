@@ -91,6 +91,8 @@ namespace Internal
         m_signalSet(ioService)
     {
         m_cmdReceiver.reset(new Control::DoseMainCmdReceiver( ioService,
+
+                                                              // StartDoseMain
                                                               m_strand.wrap([this](const std::string& nodeName,
                                                                                    int64_t nodeId,
                                                                                    int64_t nodeTypeId,
@@ -101,6 +103,8 @@ namespace Internal
                                                                                       nodeTypeId,
                                                                                       dataAddress);
                                                                             }),
+
+                                                              // InjectNode
                                                               m_strand.wrap([this](const std::string& nodeName,
                                                                                    int64_t nodeId,
                                                                                    int64_t nodeTypeId,
@@ -111,22 +115,31 @@ namespace Internal
                                                                                            nodeTypeId,
                                                                                            dataAddress);
                                                                             }),
+
+                                                              // ExcludeNode
                                                               m_strand.wrap([this](int64_t nodeId, int64_t nodeTypeId)
                                                                             {
                                                                                 ExcludeNode(nodeId, nodeTypeId);
                                                                             }),
+
+                                                              // StoppedNodeIndication
                                                               m_strand.wrap([this](int64_t nodeId)
                                                                             {
                                                                                 StoppedNodeIndication(nodeId);
                                                                             }),
+
+                                                              // StopDoseMain
                                                               m_strand.wrap([this]()
                                                                             {
                                                                                 lllog(1) << "DOSE_MAIN: Got Stop command from control"<< std::endl;
                                                                                 Stop();
                                                                             }),
+
+                                                              // Detached
                                                               m_strand.wrap([this]()
                                                                             {
                                                                                 lllog(1) << "DOSE_MAIN: Got Detached command from control"<< std::endl;
+                                                                                Detached();
                                                                             })));
 
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
@@ -260,7 +273,7 @@ namespace Internal
                                                         [this](int64_t tid){m_pendingRegistrationHandler->CheckForPending(tid);},
                                                         [this](const std::string& str){LogStatus(str);}));
 
-
+        m_distribution->Start();
     }
 
     void DoseMainApp::InjectNode(const std::string& nodeName,
@@ -268,6 +281,14 @@ namespace Internal
                                  int64_t nodeTypeId,
                                  const std::string& dataAddress)
     {
+        if (m_distribution->IsLightNode() && m_detached)
+        {
+            // A detached lightnode that gets an includeNode is no longer detached.
+            m_detached = false;
+            m_distribution->SetDetached(false); // Will notify subscribers that we are no longer in detached mode.
+            LogStatus("dose_main is no longer running in detached mode!");
+        }
+
         lllog(1) << "DOSE_MAIN: InjectNode cmd received."<<
                   " NodeName=" << nodeName.c_str() <<
                   " NodeId=" <<  nodeId <<
@@ -280,11 +301,8 @@ namespace Internal
         {
             lllog(1) << "DOSE_MAIN: Own node injected, starting distribution components!" << std::endl;
 
-            // Own node has been included in the system state, now its time to start
-            // the distribution mechanism.
-            m_distribution->Start();
+            // Own node has been included in the system state, start connectionHandler and indirectly the poolHandler
             m_connectionHandler->Start();
-
             LogStatus("dose_main running...");
         }
         else
@@ -317,6 +335,20 @@ namespace Internal
                     " NodeId=" <<  nodeId << std::endl;
 
         m_distribution->StoppedNodeIndication(nodeId);
+    }
+
+    void DoseMainApp::Detached()
+    {
+        ENSURE (m_distribution->IsLightNode(), << "DoseMain: Detached called for non-lightNode! NodeId=" << m_nodeId);
+        if (m_detached)
+        {
+            return; // We are already in detached mode.
+        }
+
+        m_connectionHandler->Start();
+        m_detached = true;
+        m_distribution->SetDetached(true); // Will exclude all nodes and notify subscribers.
+        LogStatus("dose_main is now running in detached mode!");
     }
 
     void DoseMainApp::OnAppEvent(const ConnectionPtr & connection, bool disconnecting)

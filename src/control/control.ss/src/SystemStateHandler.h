@@ -85,25 +85,26 @@ namespace Control
 
         typedef std::function<void(const int64_t nodeId, const int64_t nodeTypeId)> NodeDownCb;
 
-        typedef std::function<void()> DetachedCb;
-
         SystemStateHandlerBasic(const int64_t                    ownNodeId,
-                                const bool                       isLightNode,
                                 const NodeIncludedCb&            nodeIncludedCb,
-                                const NodeDownCb&                nodeDownCb,
-                                const DetachedCb&                detachedCb)
+                                const NodeDownCb&                nodeDownCb)
             : m_ownNodeId(ownNodeId),
-              m_isLightNode(isLightNode),
-              m_isDetached(false),
               m_systemState(),
+              m_detached(false),
               m_nodeIncludedCb(nodeIncludedCb),
-              m_nodeDownCb(nodeDownCb),
-              m_detachedCb(detachedCb)
+              m_nodeDownCb(nodeDownCb)
         {
         }
 
         void SetNewState(const SystemState& newState)
-        {
+        {            
+            if (newState.IsDetached())
+            {
+                // We will always get a formSystem-callback when a lightNode becomes detached.
+                // All detach handling is done in ControlApp formSystem.
+                return;
+            }
+
             // First, check that own node is part of the system state.
             auto ownNodeFound = false;
 
@@ -122,19 +123,6 @@ namespace Control
                 throw std::logic_error(os.str());
             }
 
-            if (newState.IsDetached())
-            {
-                if (!m_isDetached)
-                {
-                    m_isDetached = true;
-                    m_systemState.clear();
-                    m_detachedCb();
-                }
-
-                return;
-            }
-
-            m_isDetached = false;
             auto ownNodeIncluded = false;
 
             std::set<int64_t> existingNodeIds;
@@ -210,17 +198,27 @@ namespace Control
             }
         }
 
+        void SetDetached(bool detached)
+        {
+            m_detached = detached;
+            if (m_detached)
+            {
+                m_systemState.clear();
+            }
+        }
+
+        bool IsDetached() const
+        {
+            return m_detached;
+        }
+
     private:
         const int64_t   m_ownNodeId;
-        const bool      m_isLightNode;
-
-        bool                                m_isDetached;
         std::unordered_map<int64_t, Node>   m_systemState;
+        bool m_detached;
 
         NodeIncludedCb          m_nodeIncludedCb;
         NodeDownCb              m_nodeDownCb;
-        DetachedCb              m_detachedCb;
-
     };
 
     typedef SystemStateHandlerBasic<Safir::Dob::Internal::SP::SystemState> SystemStateHandler;

@@ -66,7 +66,6 @@ public:
 class Distribution
 {
 public:
-
     Communication& GetCommunication()
     {
         return m_communication;
@@ -75,6 +74,16 @@ public:
     const Communication& GetCommunication() const
     {
         return m_communication;
+    }
+
+    bool IsLightNode() const
+    {
+        return false;
+    }
+
+    bool IsLightNode(int64_t)
+    {
+        return false;
     }
 
 private:
@@ -92,8 +101,9 @@ BOOST_AUTO_TEST_CASE( PoolDistributionRequestSenderTest )
         threads.create_thread([&]{io.run();});
     }
 
-    Communication com;
-    PoolDistributionRequestSender<Communication> pdr(io, com);
+    Distribution distribution;
+    PoolDistributionRequestSender<Distribution> pdr(io, distribution);
+    auto& com = distribution.GetCommunication();
 
     pdr.RequestPoolDistribution(1, 1);
     pdr.RequestPoolDistribution(2, 1);

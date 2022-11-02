@@ -79,6 +79,8 @@ namespace Internal
 
         void StoppedNodeIndication(int64_t nodeId);
 
+        void Detached();
+
         void LogStatus(const std::string& str);
 
         void HandleIncomingData(const DistributionData & data, const bool isAckedData);
@@ -97,6 +99,7 @@ namespace Internal
 
         int64_t m_nodeId;
         std::unique_ptr<Distribution> m_distribution;
+        bool m_detached = false;
 
         std::unique_ptr<Control::DoseMainCmdReceiver> m_cmdReceiver;
 

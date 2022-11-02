@@ -65,6 +65,9 @@ namespace Internal
     typedef std::function<void(int64_t nodeId,
                                int64_t nodeTypeId)> OnExcludeNode;
 
+    typedef std::function<void(bool isDetached)> OnDetachedStateChanged;
+
+
     // Class that encapsulates the Communication and System Picture instances
     //
     template <typename CommunicationT, typename SystemPictureT, typename ConfigT>
@@ -72,21 +75,26 @@ namespace Internal
         : private boost::noncopyable
     {
     public:
-
         DistributionBasic(boost::asio::io_service&  ioService,
                           const std::string&        ownNodeName,
                           int64_t                   ownNodeId,
                           int64_t                   ownNodeTypeId,
                           const std::string&        ownDataAddress)
             : m_nodeId(ownNodeId),
-              m_isLightNode(false),
               m_communication(),
               m_sp(),
               m_config(),
+              m_injectCallbacks(),
+              m_excludeCallbacks(),
+              m_detachedCallbacks(),
+              m_liveNodes(),
               m_localTypes(CalculateLocalTypes()),
               m_nodeTypeIds(CalculateNodeTypeIds(m_config)),
+              m_lightNodeTypeIds(CalculateLightNodeTypeIds(m_config)),
               m_started(false)
         {
+            m_isLightNode = IsLightNode(ownNodeTypeId);
+
             // Create and populate structures that are needed when creating the Communication and
             // SP instances.
             std::vector<Com::NodeTypeDefinition> commNodeTypes;
@@ -95,10 +103,6 @@ namespace Internal
 
             for (auto nt = m_config.nodeTypesParam.cbegin(); nt != m_config.nodeTypesParam.cend(); ++nt)
             {
-                if (nt->id == ownNodeTypeId)
-                {
-                    m_isLightNode = nt->isLightNode;
-                }
                 commNodeTypes.push_back(Com::NodeTypeDefinition(nt->id,
                                          nt->name,
                                          nt->multicastAddressControl,
@@ -159,13 +163,19 @@ namespace Internal
             m_started = false;
         }
 
-        //subscribe for new injected nodes and excluded nodes.
+        // Subscribe for new injected nodes and excluded nodes.
         void SubscribeNodeEvents(const OnInjectNode& onInjectNode, const OnExcludeNode& onExcludeNode)
         {
             ENSURE(!m_started, << "SubscribeNodeEvents must be called before Start!");
-
             m_injectCallbacks.push_back(onInjectNode);
             m_excludeCallbacks.push_back(onExcludeNode);
+        }
+
+        // Subscribe for lightnode detache state changes.
+        void SubscribeDetachedChanged(const OnDetachedStateChanged& onDetachedChanged)
+        {
+            ENSURE(!m_started, << "SubscribeDetachedChanged must be called before Start!");
+            m_detachedCallbacks.push_back(onDetachedChanged);
         }
 
         // Inject an external node
@@ -174,30 +184,53 @@ namespace Internal
                         int64_t            nodeTypeId,
                         const std::string& dataAddress)
         {
+            ENSURE(m_started, << "InjectNode before Communication has been started!");
+            m_liveNodes.insert({nodeId, nodeTypeId});
             m_communication->InjectNode(nodeName,
                                         nodeId,
                                         nodeTypeId,
                                         dataAddress);
 
-            for (auto cb = m_injectCallbacks.cbegin(); cb != m_injectCallbacks.cend(); ++cb)
+            for (const auto& cb : m_injectCallbacks)
             {
-                (*cb)(nodeName, nodeId, nodeTypeId, dataAddress);
+                cb(nodeName, nodeId, nodeTypeId, dataAddress);
             }
         }
 
         void ExcludeNode(int64_t nodeId, int64_t nodeTypeId)
         {
-            for (auto cb = m_excludeCallbacks.cbegin(); cb != m_excludeCallbacks.cend(); ++cb)
+            m_liveNodes.erase(nodeId);
+            m_sp->ExcludeNode(nodeId);
+            for (const auto& cb : m_excludeCallbacks)
             {
-                (*cb)(nodeId, nodeTypeId);
+                cb(nodeId, nodeTypeId);
             }
         }
 
         void StoppedNodeIndication(int64_t nodeId)
         {
-            m_sp->ExcludeNode(nodeId);
+            auto nodeTypeId = m_liveNodes.at(nodeId);
+            ExcludeNode(nodeId, nodeTypeId);
         }
 
+        void SetDetached(bool isDetached)
+        {
+            if (isDetached)
+            {
+                // If we toggle to detached mode, first exclude all remote nodes.
+                auto nodesCopy = m_liveNodes;
+                for (const auto& kv : nodesCopy)
+                {
+                    ExcludeNode(kv.first, kv.second);
+                }
+            }
+
+            // Notify subscribers.
+            for (const auto& cb : m_detachedCallbacks)
+            {
+                cb(isDetached);
+            }
+        }
 
         CommunicationT& GetCommunication()
         {
@@ -230,9 +263,16 @@ namespace Internal
             return std::binary_search(m_localTypes.begin(), m_localTypes.end(), tid);
         }
 
+        // Is this node a light node
         bool IsLightNode() const
         {
             return m_isLightNode;
+        }
+
+        // Check if specific nodeType is lightNode
+        bool IsLightNode(int64_t nodeTypeId) const
+        {
+            return m_lightNodeTypeIds.find(nodeTypeId) != std::end(m_lightNodeTypeIds);
         }
 
     private:
@@ -326,13 +366,30 @@ namespace Internal
             return nodeTypeIds;
         }
 
+        static std::set<int64_t> CalculateLightNodeTypeIds(const ConfigT& config)
+        {
+            std::set<int64_t> lightNodeTypeIds;
+
+            for (const auto& nt : config.nodeTypesParam)
+            {
+                if (nt.isLightNode)
+                {
+                    lightNodeTypeIds.insert(nt.id);
+                }
+            }
+
+            return lightNodeTypeIds;
+        }
+
         const int64_t m_nodeId;
-        bool m_isLightNode;
+        bool m_isLightNode; // Is this node a lightNode
         std::unique_ptr<CommunicationT> m_communication;
         std::unique_ptr<SystemPictureT> m_sp;
         const ConfigT m_config;
         std::vector<OnInjectNode> m_injectCallbacks;
         std::vector<OnExcludeNode> m_excludeCallbacks;
+        std::vector<OnDetachedStateChanged> m_detachedCallbacks;
+        std::map<int64_t,int64_t> m_liveNodes;
 
         //this is a sorted vector of typeids that are local
         //it is a vector rather than a set since it is likely to be small and
@@ -343,6 +400,9 @@ namespace Internal
         //it is a vector rather than a set since it is likely to be small and
         //we're going to loop over it frequently.
         const std::vector<int64_t> m_nodeTypeIds;
+
+        // Set of all nodeTypeIds that are lightNodes.
+        const std::set<int64_t> m_lightNodeTypeIds;
 
         bool m_started;
     };

@@ -36,11 +36,12 @@ namespace Dob
 namespace Internal
 {
     NodeInfoHandler::NodeInfoHandler(boost::asio::io_service& ioService,
-                                     const Distribution& distribution)
+                                     const Distribution& distribution,
+                                     Safir::Dob::NodeState::Enumeration initialState)
         : m_dispatcher(m_connection, ioService),
           m_distribution(distribution)
     {
-        m_dispatcher.Strand().post([this]
+        m_dispatcher.Strand().post([this, initialState]
         {
             m_connection.Open(L"DoseMain",  // Note the name. We want this to be handled as a normal connection.
                               L"NodeInfoHandler",
@@ -63,8 +64,8 @@ namespace Internal
             const auto address = m_distribution.GetCommunication().DataAddress();
             const auto ip = address.substr(0,address.find_last_of(":"));
             ni->IpAddress().SetVal(Safir::Dob::Typesystem::Utilities::ToWstring(ip));
-
             ni->NodeType().SetVal(ThisNodeParameters::NodeType());
+            ni->State().SetVal(initialState);
 
             m_connection.SetAll(ni,
                                 Typesystem::InstanceId(m_distribution.GetNodeId()),
@@ -80,6 +81,21 @@ namespace Internal
         });
     }
 
+
+    void NodeInfoHandler::SetNodeState(Safir::Dob::NodeState::Enumeration state)
+    {
+        m_dispatcher.Strand().post([this, state]
+        {
+            if (m_distribution.IsLightNode())
+            {
+                Dob::NodeInfoPtr ni = Dob::NodeInfo::Create();
+                ni->State().SetVal(state);
+                m_connection.SetChanges(ni,
+                                        Typesystem::InstanceId(m_distribution.GetNodeId()),
+                                        Typesystem::HandlerId(m_distribution.GetNodeId()));
+            }
+        });
+    }
 
     void NodeInfoHandler::OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId    /*typeId*/,
                                                 const Safir::Dob::Typesystem::HandlerId& /*handlerId*/)

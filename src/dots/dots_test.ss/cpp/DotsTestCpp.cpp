@@ -342,43 +342,6 @@ void Test_GetNumberOfParameters()
 
 void Test_Create_Routines()
 {
-////    DotsTest::TestItemPtr tip=DotsTest::TestItem::Create();
-////    tip->MyInt()=666;
-
-////    DotsTest::MemberTypesPtr x=DotsTest::MemberTypes::Create();
-////    x->Int32Member()=123;
-////    x->TestClassMember().SetPtr(tip);
-
-//    //Safir::Dob::Typesystem::ParameterIndex testclassparameterParameterIndex=Safir::Dob::Typesystem::Parameters::GetIndex(DotsTest::ParameterTypes::ClassTypeId, L"TestClassParameter");
-
-//    const char * tmp=NULL;
-//    DotsC_GetObjectParameter(DotsTest::ParameterTypes::ClassTypeId, 20, 0, tmp);
-//    DotsC_TypeId xx=DotsC_GetTypeId(tmp);
-//    std::cout<<xx<<std::endl;
-//    std::cout<<"T="<<DotsC_GetTypeName(xx)<<std::endl;
-
-//    char xml[10000];
-//    int resSize;
-//    DotsC_BlobToXml(xml, tmp, 10000, resSize);
-//    std::string xmlStr(xml, resSize);
-//    std::cout<<"Kodd: "<<xmlStr<<std::endl;
-
-//    Safir::Dob::Typesystem::ObjectPtr op=Safir::Dob::Typesystem::ObjectFactory::Instance().CreateObject(tmp);
-//    DotsTest::TestItemPtr tp=std::dynamic_pointer_cast<DotsTest::TestItem>(op);
-//    if (tp->MyInt().IsNull())
-//        std::cout<<"MYINT null"<<std::endl;
-//    else
-//        std::cout<<"MYINT "<<tp->MyInt().GetVal()<<std::endl;
-
-//    //Safir::Dob::Typesystem::ObjectPtr op=Safir::Dob::Typesystem::Parameters::GetObject(DotsTest::ParameterTypes::ClassTypeId, testclassparameterParameterIndex, 0);
-
-//    std::wcout<< "JOOT_XML  : " << Safir::Dob::Typesystem::Serialization::ToXml(op)<<std::endl;
-//    std::wcout<< "JOOT_JSON : " << Safir::Dob::Typesystem::Serialization::ToJson(op)<<std::endl;
-////    std::wcout<< "JOOT_XML  : " << Safir::Dob::Typesystem::Serialization::ToXml(DotsTest::ParameterTypes::TestClassParameter())<<std::endl;
-////    std::wcout<< "JOOT_JSON : " << Safir::Dob::Typesystem::Serialization::ToJson(DotsTest::ParameterTypes::TestClassParameter())<<std::endl;
-////    return;
-
-
     Header(L"Create routines (Types)");
     std::wcout<< "Create_ParameterTypes: " <<
         Safir::Dob::Typesystem::Serialization::ToXml(DotsTest::MemberTypes::CreateParameterTypes

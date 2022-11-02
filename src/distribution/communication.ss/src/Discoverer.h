@@ -189,6 +189,15 @@ namespace Com
                     return;
                 }
 
+                if (m_thisNodeIsLightNode && IsLightNode(msg.sent_from_node().node_type_id()))
+                {
+                    std::ostringstream os;
+                    os << m_logPrefix.c_str() << "Received NodeInfo from " << msg.sent_from_node().name() << " ["<<msg.sent_from_node().node_id()<< "]. Should not happen since both are light nodes! Might be a configuration error, don't use lightNodes as seeds.";
+                    lllog(DiscovererLogLevel) << os.str().c_str() << std::endl;
+                    SEND_SYSTEM_LOG(Error, << os.str().c_str());
+                    throw std::logic_error(os.str());
+                }
+
                 //handle info about the sender
                 if (IsExcluded(msg.sent_from_node().node_id()))
                 {

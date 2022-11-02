@@ -255,11 +255,6 @@ namespace Com
 
                 lllog(7)<<os.str().c_str()<<std::endl;
 
-#ifndef SAFIR_TEST
-                // CRC error can occur but is most likely an programming error.
-                // In test mode we throw an exception.
-                throw std::logic_error(os.str());
-#endif
                 receiverReady=m_isReceiverReady(); //explicitly ask if receiver is ready to handle incoming data
             }
 

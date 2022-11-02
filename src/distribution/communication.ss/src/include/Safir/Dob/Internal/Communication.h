@@ -255,6 +255,7 @@ namespace Com
         /**
          * Reset all information about included/injected nodes and seeds, but keep all callbacks, nodeTypes and other parameters.
          * If created with ControlModeTag, new seeds must be injected to actively start discovering other nodes.
+         * Calling Reset before Start will have the same effect as calling the Start method.
          */
         void Reset();
 

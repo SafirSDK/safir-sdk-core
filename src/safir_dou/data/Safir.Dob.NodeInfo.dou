@@ -22,5 +22,13 @@
             <type>String</type>
             <maxLengthRef><name>Safir.Dob.NodeParameters.MaxNodeNameLength</name></maxLengthRef>
         </member>
+        <member>
+            <summary>
+                This is the current state of the node. For non light nodes this will be 'Normal'.
+                For light nodes this can be Detached, Attaching, Attached.
+            </summary>
+            <name>State</name>
+            <type>Safir.Dob.NodeState</type>
+        </member>
     </members>
 </class>

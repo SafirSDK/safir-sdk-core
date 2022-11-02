@@ -77,6 +77,9 @@ namespace Internal
 
         void Stop();
 
+        // Used by light nodes when toggling detached mode.
+        void Reset();
+
         void SetPersistentDataReady();
 
     private:

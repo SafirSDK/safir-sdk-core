@@ -74,12 +74,15 @@ namespace Internal
 
             logStatus("dose_main is waiting for persistence data!");
 
-            m_connection.Open(L"dose_main", L"persist_handler", 0, nullptr, &m_dispatcher);
-
-            m_connection.RegisterServiceHandler
-                (Dob::PersistentDataReady::ClassTypeId,
-                 Typesystem::HandlerId(),
-                 this);
+            if (!m_distribution.IsLightNode())
+            {
+                // Dope will never run on a lightNode anyway, so only open dobConn if we are not a lightNode
+                m_connection.Open(L"dose_main", L"persist_handler", 0, nullptr, &m_dispatcher);
+                m_connection.RegisterServiceHandler
+                    (Dob::PersistentDataReady::ClassTypeId,
+                     Typesystem::HandlerId(),
+                     this);
+            }
         });
 
         m_distribution.SubscribeNodeEvents([this]
@@ -88,34 +91,30 @@ namespace Internal
                                             int64_t                nodeTypeId,
                                            const std::string&     /*dataAddress*/)
         {
-            auto this_ = this; //fix for vs2010 issues with lambdas
-
-            m_strand.post([this_, nodeId, nodeTypeId]
+            m_strand.post([this, nodeId, nodeTypeId]
                           {
-                              if (this_->m_systemFormed || this_->m_persistentDataReady)
+                              if (m_systemFormed || m_persistentDataReady)
                               {
                                   return;
                               }
 
-                              this_->m_nodes.insert(std::make_pair(nodeId, nodeTypeId));
+                              m_nodes.insert(std::make_pair(nodeId, nodeTypeId));
                           });
         },
                                            [this]
                                            (int64_t   nodeId,
                                             int64_t   nodeTypeId)
         {
-             auto this_ = this;
-
-            m_strand.post([this_, nodeId, nodeTypeId]
+            m_strand.post([this, nodeId, nodeTypeId]
                           {
-                              if (this_->m_persistentDataReady)
+                              if (this->m_persistentDataReady)
                               {
                                   return;
                               }
 
-                              this_->m_nodes.erase(std::make_pair(nodeId, nodeTypeId));
+                              m_nodes.erase(std::make_pair(nodeId, nodeTypeId));
 
-                            this_->CheckResponseStatus();
+                            CheckResponseStatus();
                           });
 
 
@@ -164,10 +163,26 @@ namespace Internal
 
     void PersistHandler::Stop()
     {
+        if (!m_distribution.IsLightNode())
+        {
+            m_strand.post([this]
+                          {
+                            m_connection.Close();
+                          });
+        }
+    }
+
+    void PersistHandler::Reset()
+    {
         m_strand.post([this]
-                      {
-                        m_connection.Close();
-                      });
+        {
+            m_systemFormed = true;
+            m_persistentDataReady = false;
+            m_persistentDataAllowed = false;
+            m_nodes.clear();
+            m_unsentRequests.clear();
+            m_unsentResponses.clear();
+        });
     }
 
     void PersistHandler::SetPersistentDataReady()
@@ -196,16 +211,18 @@ namespace Internal
                 (*cb)();
             }
 
-            auto this_ = this; //fix for vs2010 issues with lambdas
-
             //We could be inside a Dob callback, so we need
             //to post the call to Close, or else we might be
             //killing the connection that is dispatching...
-            m_strand.post([this_]
-                          {
-                              // We don't need the connection now
-                              this_->m_connection.Close();
-                          });
+
+            if (!m_distribution.IsLightNode())
+            {
+                m_strand.post([this]
+                              {
+                                  // We don't need the connection now
+                                  m_connection.Close();
+                              });
+            }
         });
 
     }
@@ -420,12 +437,13 @@ namespace Internal
 
     std::pair<Safir::Utilities::Internal::SharedConstCharArray, size_t> PersistHandler::CreateResponse() const
     {
+        bool responseValue = m_distribution.IsLightNode() ? false : m_persistentDataReady; // If we are a lightNode, always respond HaveNoPersistence
         DistributionData response
                 (have_persistence_data_response_tag,
                  ConnectionId(m_communication.Id(),
                               0,    //use context 0 for this response
                               -1),  //dummy identifier since it is a dose_main only thing.
-                 m_persistentDataReady);
+                 responseValue);
 
         return std::make_pair(Safir::Utilities::Internal::SharedConstCharArray (response.GetReference(),
                                                 [](const char* data)
