@@ -671,6 +671,9 @@ namespace SP
 
                                   m_moreDeadNodes.erase(id);
 
+                                  findIt->second.lastUcReceiveTime = boost::chrono::steady_clock::now();
+                                  findIt->second.lastMcReceiveTime = boost::chrono::steady_clock::now();
+
                                   PostRawChangedCallback(RawChanges::NODES_CHANGED, nullptr);
                               });
         }
@@ -899,6 +902,9 @@ namespace SP
                 nodeIt->second.nodeInfo->set_is_resurrecting(true);
                 lllog(4) << "SP: New node '" << name.c_str() << "' ("
                          << id << ") is resurrecting" << std::endl;
+
+                nodeIt->second.lastUcReceiveTime = boost::chrono::steady_clock::now();
+                nodeIt->second.lastMcReceiveTime = boost::chrono::steady_clock::now();
 
                 PostRawChangedCallback(RawChanges(RawChanges::NODES_CHANGED), nullptr);
             }

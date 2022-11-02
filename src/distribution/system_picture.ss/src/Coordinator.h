@@ -196,6 +196,12 @@ namespace SP
                     return;
                 }
 
+                if (m_stateMessage.election_id() == 0)
+                {
+                    lllog(8) << "SP: - Not sending: System State contains no election id." << std::endl;
+                    return;
+                }
+
                 if (m_stateMessage.node_info_size() == 0)
                 {
                     lllog(8) << "SP:  - Not sending: System State contains no nodes!" << std::endl;
@@ -435,6 +441,13 @@ namespace SP
                 {
                     //ignore nodes that the remote node believe are dead
                     if (remote.IsDead(j))
+                    {
+                        continue;
+                    }
+
+                    //ignore lightnodes if we're a lightnode
+                    if (m_electionHandler->IsLightNode() &&
+                        m_nodeTypes.at(remote.NodeTypeId(j)).isLightNode)
                     {
                         continue;
                     }

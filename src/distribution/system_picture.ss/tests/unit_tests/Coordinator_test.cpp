@@ -661,7 +661,7 @@ public:
 
     bool IsLightNode() const
     {
-        throw std::logic_error("Not implemented");
+        return isLightNode;
     }
 
     void NodesChanged(RawStatistics /*statistics*/, std::shared_ptr<void> /*completionSignaller*/)
@@ -682,7 +682,7 @@ public:
     const int64_t id;
     int64_t electedId = 0;
     bool isDetached = false;
-
+    bool isLightNode = false;
     bool stopped = false;
     bool nodesChangedCalled = false;
 
@@ -1486,6 +1486,7 @@ BOOST_FIXTURE_TEST_SUITE( self_is_light, Fixture<15> )
 BOOST_AUTO_TEST_CASE( detached_lightnode )
 {
     //check that a detached lightnode produces a correct state
+    ElectionHandlerStub::lastInstance->isLightNode = true;
     ElectionHandlerStub::lastInstance->electedId = 1000;
     ElectionHandlerStub::lastInstance->isDetached = true;
     ElectionHandlerStub::lastInstance->electionCompleteCallback(1000,100);
@@ -1521,6 +1522,7 @@ BOOST_AUTO_TEST_CASE( detached_lightnode )
 
 BOOST_AUTO_TEST_CASE( detach_and_reattach )
 {
+    ElectionHandlerStub::lastInstance->isLightNode = true;
     ElectionHandlerStub::lastInstance->electedId = 1001;
     ElectionHandlerStub::lastInstance->electionCompleteCallback(1001,100);
     rh.rawCb(GetRawWithOneNodeAndRemoteRaw({15,10}),RawChanges(RawChanges::NODES_CHANGED),cs);
