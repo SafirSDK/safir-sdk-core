@@ -199,18 +199,24 @@ namespace Internal
 
         void ExcludeNode(int64_t nodeId, int64_t nodeTypeId)
         {
-            m_liveNodes.erase(nodeId);
-            m_sp->ExcludeNode(nodeId);
-            for (const auto& cb : m_excludeCallbacks)
+            if (m_liveNodes.erase(nodeId) > 0)
             {
-                cb(nodeId, nodeTypeId);
+                m_sp->ExcludeNode(nodeId);
+                for (const auto& cb : m_excludeCallbacks)
+                {
+                    cb(nodeId, nodeTypeId);
+                }
             }
         }
 
         void StoppedNodeIndication(int64_t nodeId)
         {
-            auto nodeTypeId = m_liveNodes.at(nodeId);
-            ExcludeNode(nodeId, nodeTypeId);
+            // check that the node has not already been deleted
+            auto it = m_liveNodes.find(nodeId);
+            if (it != std::end(m_liveNodes))
+            {
+                ExcludeNode(nodeId, it->second);
+            }
         }
 
         void SetDetached(bool isDetached)

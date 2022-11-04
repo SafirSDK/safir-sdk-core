@@ -327,11 +327,12 @@ namespace Internal
                     " NodeTypeId=" << nodeTypeId << std::endl;
 
         m_distribution->ExcludeNode(nodeId, nodeTypeId);
+        lllog(1)<< L"DOSE_MAIN: ExcludeNode cmd end" << std::endl;
     }
 
     void DoseMainApp::StoppedNodeIndication(int64_t nodeId)
     {
-        lllog(1) << "DOSE_MAIN: ExcludeNode cmd received."<<
+        lllog(1) << "DOSE_MAIN: StoppedNodeIndication cmd received."<<
                     " NodeId=" <<  nodeId << std::endl;
 
         m_distribution->StoppedNodeIndication(nodeId);
