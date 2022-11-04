@@ -85,10 +85,14 @@ namespace Control
 
         typedef std::function<void(const int64_t nodeId, const int64_t nodeTypeId)> NodeDownCb;
 
-        SystemStateHandlerBasic(const int64_t                    ownNodeId,
-                                const NodeIncludedCb&            nodeIncludedCb,
-                                const NodeDownCb&                nodeDownCb)
+        SystemStateHandlerBasic(const int64_t ownNodeId,
+                                const bool isLightNode,
+                                const std::set<int64_t>& lightNodeTypeIds,
+                                const NodeIncludedCb& nodeIncludedCb,
+                                const NodeDownCb& nodeDownCb)
             : m_ownNodeId(ownNodeId),
+              m_isLightNode(isLightNode),
+              m_lightNodeTypeIds(lightNodeTypeIds),
               m_systemState(),
               m_detached(false),
               m_nodeIncludedCb(nodeIncludedCb),
@@ -97,11 +101,12 @@ namespace Control
         }
 
         void SetNewState(const SystemState& newState)
-        {            
-            if (newState.IsDetached())
+        {
+            if (m_detached || newState.IsDetached())
             {
                 // We will always get a formSystem-callback when a lightNode becomes detached.
                 // All detach handling is done in ControlApp formSystem.
+                // In detached mode we don't accept new states, first we want a form/join system.
                 return;
             }
 
@@ -130,6 +135,11 @@ namespace Control
             for (int ix = 0; ix < newState.Size(); ++ix)
             {
                 auto nodeId = newState.Id(ix);
+
+                if (m_isLightNode && m_ownNodeId != nodeId && IsLightNode(newState.NodeTypeId(ix)))
+                {
+                    continue; // LightNodes don't interact, ignore lightNodes if this node is also a lightNode.
+                }
 
                 existingNodeIds.insert(nodeId);
 
@@ -214,11 +224,18 @@ namespace Control
 
     private:
         const int64_t   m_ownNodeId;
-        std::unordered_map<int64_t, Node>   m_systemState;
+        const bool m_isLightNode;
+        std::set<int64_t> m_lightNodeTypeIds;
+        std::unordered_map<int64_t /*nodeId*/, Node>   m_systemState;
         bool m_detached;
 
         NodeIncludedCb          m_nodeIncludedCb;
         NodeDownCb              m_nodeDownCb;
+
+        bool IsLightNode(int64_t nodeTypeId) const
+        {
+            return m_lightNodeTypeIds.find(nodeTypeId) != std::end(m_lightNodeTypeIds);
+        }
     };
 
     typedef SystemStateHandlerBasic<Safir::Dob::Internal::SP::SystemState> SystemStateHandler;

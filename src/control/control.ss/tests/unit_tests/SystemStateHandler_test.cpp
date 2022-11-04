@@ -60,10 +60,11 @@ public:
     };
 
     std::vector<Node> nodes;
+    bool detached = false;
 
     bool IsDetached() const
     {
-        return false;
+        return detached;
     }
 
     int Size() const
@@ -133,7 +134,7 @@ BOOST_AUTO_TEST_CASE( callback_order )
     auto nodeIncludedCbCounter = 0;
     auto nodeDownCbCounter = 0;
 
-    TestSystemStateHandler ssh(99999,
+    TestSystemStateHandler ssh(99999, false, {},
                              [&ownNodeIncludedCbCounter, &nodeIncludedCbCounter]
                              (const Node& node)
                              {
@@ -168,6 +169,7 @@ BOOST_AUTO_TEST_CASE( callback_order )
     BOOST_CHECK(nodeDownCbCounter == 0);
 }
 
+
 BOOST_AUTO_TEST_CASE( add_delete_node )
 {
     auto ownNodeIncludedCbCounter = 0;
@@ -179,7 +181,7 @@ BOOST_AUTO_TEST_CASE( add_delete_node )
     int64_t latestDownNodeId;
     int64_t latestDownNodeTypeId;
 
-    TestSystemStateHandler ssh(99999,
+    TestSystemStateHandler ssh(99999, false, {},
                              [&ownNodeIncludedCbCounter,
                               &latestOwnNode,
                               &nodeIncludedCbCounter,
@@ -235,4 +237,110 @@ BOOST_AUTO_TEST_CASE( add_delete_node )
     BOOST_CHECK(latestDownNodeId == 11111);
     BOOST_CHECK(latestDownNodeTypeId == 1010);
 
+}
+
+BOOST_AUTO_TEST_CASE( detach_node )
+{
+    std::vector<int64_t> includedNodes;
+    std::vector<int64_t> excludedNodes;
+
+    TestSystemStateHandler ssh(99999, false, {},
+    [&includedNodes](const Node& node)
+    {
+        includedNodes.push_back(node.nodeId);
+    },
+    [&excludedNodes](const int64_t nodeId, int64_t /*nodetypeId*/)
+    {
+        excludedNodes.push_back(nodeId);
+    });
+
+    SystemState ss;
+    ss.nodes.push_back(n1);
+    ss.nodes.push_back(n2);
+    ss.nodes.push_back(ownNode);
+    ssh.SetNewState(ss);
+
+    BOOST_CHECK(includedNodes.size() == 3);
+    BOOST_CHECK(excludedNodes.size() == 0);
+
+    ssh.SetNewState(ss);
+
+    BOOST_CHECK(includedNodes.size() == 3);
+    BOOST_CHECK(excludedNodes.size() == 0);
+
+    includedNodes.clear();
+    ssh.SetDetached(true);
+
+    BOOST_CHECK(includedNodes.size() == 0);
+    BOOST_CHECK(excludedNodes.size() == 0);
+    BOOST_CHECK(ssh.IsDetached());
+
+    ssh.SetNewState(ss);
+    BOOST_CHECK(includedNodes.size() == 0);
+    BOOST_CHECK(excludedNodes.size() == 0);
+    BOOST_CHECK(ssh.IsDetached());
+
+    ssh.SetDetached(false);
+    ssh.SetNewState(ss);
+    BOOST_CHECK(includedNodes.size() == 3);
+    BOOST_CHECK(excludedNodes.size() == 0);
+    BOOST_CHECK(!ssh.IsDetached());
+}
+
+BOOST_AUTO_TEST_CASE( ignore_detached_state )
+{
+    std::vector<int64_t> includedNodes;
+    std::vector<int64_t> excludedNodes;
+
+    TestSystemStateHandler ssh(99999, true, {},
+    [&includedNodes](const Node& node)
+    {
+        includedNodes.push_back(node.nodeId);
+    },
+    [&excludedNodes](const int64_t nodeId, int64_t /*nodetypeId*/)
+    {
+        excludedNodes.push_back(nodeId);
+    });
+
+    SystemState ss;
+    ss.detached = true;
+    ss.nodes.push_back(n1);
+    ss.nodes.push_back(n2);
+    ss.nodes.push_back(ownNode);
+    ssh.SetNewState(ss);
+
+    BOOST_CHECK(includedNodes.size() == 0);
+    BOOST_CHECK(excludedNodes.size() == 0);
+}
+
+BOOST_AUTO_TEST_CASE( light_node_ignore_other_lightnodes )
+{
+    std::vector<int64_t> includedNodes;
+    std::vector<int64_t> excludedNodes;
+
+    TestSystemStateHandler ssh(99999, true, {9090, 2020},
+    [&includedNodes](const Node& node)
+    {
+        includedNodes.push_back(node.nodeId);
+    },
+    [&excludedNodes](const int64_t nodeId, int64_t /*nodetypeId*/)
+    {
+        excludedNodes.push_back(nodeId);
+    });
+
+    SystemState ss;
+    ss.nodes.push_back(n1); //lightnode
+    ss.nodes.push_back(n2);
+    ss.nodes.push_back(ownNode); //lightnode
+    ssh.SetNewState(ss);
+
+    BOOST_CHECK(includedNodes.size() == 2);
+    BOOST_CHECK(excludedNodes.size() == 0);
+
+    ss.nodes.clear();
+    ss.nodes.push_back(ownNode);
+
+    ssh.SetNewState(ss);
+    BOOST_CHECK(includedNodes.size() == 2);
+    BOOST_CHECK(excludedNodes.size() == 1);
 }

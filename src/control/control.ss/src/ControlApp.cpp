@@ -75,27 +75,12 @@ ControlApp::ControlApp(boost::asio::io_context&         io,
     , m_incarnationBlackListHandler(m_conf.incarnationBlacklistFileName)
     , m_controlInfoReceiverReady(false)
     , m_doseMainRunning(false)
-    , m_requiredForStart(false)
     , m_incarnationIdStorage(new AlignedStorage())
     , m_incarnationId(reinterpret_cast<std::atomic<int64_t>&>(*m_incarnationIdStorage))
 {
     m_terminateHandler = Safir::make_unique<TerminateHandler>(io,
                                                               Safir::Utilities::Internal::WrapInStrand(m_strand, [this]{StopThisNode();}),
                                                               [this](const std::string& str){LogStatus(str);});
-
-    for (const auto& nt : m_conf.nodeTypesParam)
-    {
-        if (nt.isLightNode)
-        {
-            m_lightNodeTypeIds.insert(nt.id);
-        }
-
-        if (m_conf.thisNodeParam.nodeTypeId == nt.id)
-        {
-            m_requiredForStart = nt.requiredForStart;
-            m_isLightNode = nt.isLightNode;
-        }
-    }
 
     new (m_incarnationIdStorage.get()) std::atomic<uint64_t>(0);
 
@@ -146,22 +131,54 @@ void ControlApp::Start()
         return;
     }
 
-    // Initiate Communication
+    // Read NodeType configuration
+    std::set<int64_t> lightNodeTypeIds;
     std::vector<Com::NodeTypeDefinition> commNodeTypes;
-
-    for (auto nt = m_conf.nodeTypesParam.cbegin(); nt != m_conf.nodeTypesParam.cend(); ++nt)
+    std::map<std::int64_t, SP::NodeType> spNodeTypes;
+    bool requiredForStart = false;
+    bool isLightNode = false;
+    for (const auto& nt : m_conf.nodeTypesParam)
     {
-        commNodeTypes.push_back(Com::NodeTypeDefinition(nt->id,
-                                                        nt->name,
-                                                        nt->multicastAddressControl,
-                                                        nt->multicastAddressData,
-                                                        nt->isLightNode,
-                                                        nt->heartbeatInterval,
-                                                        nt->maxLostHeartbeats,
-                                                        nt->slidingWindowSize,
-                                                        nt->ackRequestThreshold,
-                                                        nt->retryTimeout));
+        if (nt.isLightNode)
+        {
+            lightNodeTypeIds.insert(nt.id);
+        }
+
+        if (m_conf.thisNodeParam.nodeTypeId == nt.id)
+        {
+            requiredForStart = nt.requiredForStart;
+            isLightNode = nt.isLightNode;
+        }
+
+        // communication stuff
+        commNodeTypes.push_back(Com::NodeTypeDefinition(nt.id,
+                                                        nt.name,
+                                                        nt.multicastAddressControl,
+                                                        nt.multicastAddressData,
+                                                        nt.isLightNode,
+                                                        nt.heartbeatInterval,
+                                                        nt.maxLostHeartbeats,
+                                                        nt.slidingWindowSize,
+                                                        nt.ackRequestThreshold,
+                                                        nt.retryTimeout));
+
+        // system picture stuff
+        std::vector<boost::chrono::steady_clock::duration> retryTimeouts;
+        for (auto rt : nt.retryTimeout)
+        {
+            retryTimeouts.push_back(boost::chrono::milliseconds(rt));
+        }
+
+        spNodeTypes.insert(std::make_pair(nt.id,
+                                          SP::NodeType(nt.id,
+                                                       nt.name,
+                                                       nt.isLightNode,
+                                                       boost::chrono::milliseconds(nt.heartbeatInterval),
+                                                       nt.maxLostHeartbeats,
+                                                       retryTimeouts)));
     }
+
+    // Initiate Communication
     m_communication.reset(new Com::Communication(Com::controlModeTag,
                                                  m_io,
                                                  m_conf.thisNodeParam.name,
@@ -178,26 +195,6 @@ void ControlApp::Start()
     }
 
     // Initiate SystemPicture
-
-    std::map<std::int64_t, SP::NodeType> spNodeTypes;
-
-    for (auto nt = m_conf.nodeTypesParam.cbegin(); nt != m_conf.nodeTypesParam.cend(); ++nt)
-    {
-        std::vector<boost::chrono::steady_clock::duration> retryTimeouts;
-        for (auto rt = nt->retryTimeout.cbegin(); rt != nt->retryTimeout.cend(); ++rt)
-        {
-            retryTimeouts.push_back(boost::chrono::milliseconds(*rt));
-        }
-
-        spNodeTypes.insert(std::make_pair(nt->id,
-                                          SP::NodeType(nt->id,
-                                                       nt->name,
-                                                       nt->isLightNode,
-                                                       boost::chrono::milliseconds(nt->heartbeatInterval),
-                                                       nt->maxLostHeartbeats,
-                                                       retryTimeouts)));
-    }
-
 
     // Note that the two callbacks that are called by SP are synchronous and return a
     // value. This means that the operations can't be protected by the strand and
@@ -241,7 +238,7 @@ void ControlApp::Start()
         }
     },
     // --- Form system callback ---
-    [this](const int64_t incarnationId) -> bool
+    [this, isLightNode, requiredForStart](const int64_t incarnationId) -> bool
     {
         if (incarnationId == m_incarnationId)
         {
@@ -250,7 +247,7 @@ void ControlApp::Start()
         }
 
         // Lightnode getting formSystemCb, means detached mode
-        if (m_isLightNode)
+        if (isLightNode)
         {
             // Lightnode in detached mode
             m_incarnationId = incarnationId;
@@ -265,7 +262,7 @@ void ControlApp::Start()
         }
 
         // Normal node, check if this node is of a type that is allowed to form systems
-        if (m_requiredForStart)
+        if (requiredForStart)
         {
             m_incarnationId = incarnationId;
             boost::asio::post(m_strand, [this]{SendControlInfo();});
@@ -341,14 +338,10 @@ void ControlApp::Start()
         SendControlInfo();
     })));
 
-    m_stateHandler.reset(new Control::SystemStateHandler(m_nodeId,
+    m_stateHandler.reset(new Control::SystemStateHandler(m_nodeId, isLightNode, lightNodeTypeIds,
     // --- Node included callback ---
     [this](const Control::Node& node)
     {
-        if (m_nodeId != node.nodeId && m_isLightNode && IsLightNode(node.nodeTypeId))
-        {
-            return; // LightNodes don't interact
-        }
         m_doseMainCmdSender->InjectNode(node.name,
                                         node.nodeId,
                                         node.nodeTypeId,

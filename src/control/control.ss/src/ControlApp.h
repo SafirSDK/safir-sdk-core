@@ -107,10 +107,6 @@ private:
     Control::IncarnationBlacklistHandler        m_incarnationBlackListHandler;
     bool                                        m_controlInfoReceiverReady;
     bool                                        m_doseMainRunning;
-    bool                                        m_requiredForStart;
-    bool                                        m_isLightNode;
-
-
 
     std::unique_ptr<Com::Communication>             m_communication;
     std::unique_ptr<SP::SystemPicture>              m_sp;
@@ -126,11 +122,4 @@ private:
     sizeof(std::atomic<int64_t>)>::type AlignedStorage;
     std::unique_ptr<AlignedStorage>     m_incarnationIdStorage;
     std::atomic<int64_t>&             m_incarnationId;
-
-    std::set<int64_t> m_lightNodeTypeIds;
-    bool IsLightNode(int64_t nodeTypeId) const
-    {
-        return m_lightNodeTypeIds.find(nodeTypeId) != std::end(m_lightNodeTypeIds);
-    }
-
 };
