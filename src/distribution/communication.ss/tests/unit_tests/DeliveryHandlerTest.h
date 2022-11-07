@@ -51,8 +51,6 @@ public:
             threads.create_thread([&]{io.run();});
         }
 
-        auto receiveStrand = boost::asio::make_strand(io);
-
         Com::DeliveryHandlerBasic<DeliveryHandlerTest::TestWriter> dh(io, 1, 4, 20);
 
         dh.SetGotRecvCallback([](int64_t fromNodeId, bool isMulticast, bool isDuplicate)
@@ -110,8 +108,6 @@ public:
 
         TRACELINE
 
-        boost::asio::post(receiveStrand, [&]{SetReady();});
-        WaitUntilReady();
         boost::asio::post(dh.m_deliverStrand, [&]{SetReady();});
         WaitUntilReady();
 
@@ -139,8 +135,6 @@ public:
             dh.ReceivedApplicationData(&header, reinterpret_cast<const char*>(&welcomeNodeId), false);
         }
 
-        boost::asio::post(receiveStrand, [&]{SetReady();});
-        WaitUntilReady();
         boost::asio::post(dh.m_deliverStrand, [&]{SetReady();});
         WaitUntilReady();
 
@@ -167,8 +161,6 @@ public:
 
         TRACELINE
 
-        boost::asio::post(receiveStrand, [&]{SetReady();});
-        WaitUntilReady();
         boost::asio::post(dh.m_deliverStrand, [&]{SetReady();});
         WaitUntilReady();
 
@@ -200,8 +192,6 @@ public:
             }
         }
 
-        boost::asio::post(receiveStrand, [&]{SetReady();});
-        WaitUntilReady();
         boost::asio::post(dh.m_deliverStrand, [&]{SetReady();});
         WaitUntilReady();
 
@@ -212,9 +202,9 @@ public:
             CHECKMSG(acked[id]==15, acked[id]);
         }
 
-        std::cout<<"========================="<<std::endl;
-        std::cout<<"Ping messages"<<std::endl;
-        std::cout<<"========================="<<std::endl;
+        std::wcout<<L"========================="<<std::endl;
+        std::wcout<<L"Ping messages"<<std::endl;
+        std::wcout<<L"========================="<<std::endl;
         // Test acked Ping messages, should not be handed over to application but still generate a gotRecv callback.
         gotRecv=0;
         for (int64_t id=2; id<=4; ++id)
@@ -225,7 +215,7 @@ public:
             header.ackNow=1;
             dh.ReceivedApplicationData(&header, payload, false);
         }
-        boost::asio::post(receiveStrand, [&]{SetReady();});
+        boost::asio::post(dh.m_deliverStrand, [&]{SetReady();});
         WaitUntilReady();
 
         for (int64_t id=2; id<=4; ++id)
@@ -260,8 +250,10 @@ public:
             header.ackNow=1;
             dh.ReceivedApplicationData(&header, payload, false);
         }
-        boost::asio::post(receiveStrand, [&]{SetReady();});
+
+        boost::asio::post(dh.m_deliverStrand, [&]{SetReady();});
         WaitUntilReady();
+
         CHECKMSG(numberOfReceivedPings==3, numberOfReceivedPings);
         for (int64_t id=2; id<=4; ++id)
         {
@@ -284,8 +276,6 @@ public:
             dh.ReceivedApplicationData(&header, payload, false);
         }
 
-        boost::asio::post(receiveStrand, [&]{SetReady();});
-        WaitUntilReady();
         boost::asio::post(dh.m_deliverStrand, [&]{SetReady();});
         WaitUntilReady();
 
@@ -298,9 +288,9 @@ public:
 
         DumpNodeInfo(dh);
 
-        std::cout<<"========================="<<std::endl;
-        std::cout<<"Unacked fragmented"<<std::endl;
-        std::cout<<"========================="<<std::endl;
+        std::wcout<<L"========================="<<std::endl;
+        std::wcout<<L"Unacked fragmented"<<std::endl;
+        std::wcout<<L"========================="<<std::endl;
         //Send fragmented message
         for (int frag=0; frag<4; ++frag)
         {
@@ -319,8 +309,6 @@ public:
             }
         }
 
-        boost::asio::post(receiveStrand, [&]{SetReady();});
-        WaitUntilReady();
         boost::asio::post(dh.m_deliverStrand, [&]{SetReady();});
         WaitUntilReady();
 
@@ -337,9 +325,9 @@ public:
         DumpReceived();
         TRACELINE
 
-        std::cout<<"========================="<<std::endl;
-        std::cout<<"Unacked missed fragment"<<std::endl;
-        std::cout<<"========================="<<std::endl;
+        std::wcout<<L"========================="<<std::endl;
+        std::wcout<<L"Unacked missed fragment"<<std::endl;
+        std::wcout<<L"========================="<<std::endl;
         //Send one fragment in the middle, the entire message is supposed to be ignored
         //and expected seqNo should be the start of the next message.
         {
@@ -357,8 +345,6 @@ public:
             }
         }
 
-        boost::asio::post(receiveStrand, [&]{SetReady();});
-        WaitUntilReady();
         boost::asio::post(dh.m_deliverStrand, [&]{SetReady();});
         WaitUntilReady();
 
@@ -375,9 +361,9 @@ public:
         DumpReceived();
         TRACELINE
 
-        std::cout<<"========================="<<std::endl;
-        std::cout<<"Unacked one non-fragmented"<<std::endl;
-        std::cout<<"========================="<<std::endl;
+        std::wcout<<L"========================="<<std::endl;
+        std::wcout<<L"Unacked one non-fragmented"<<std::endl;
+        std::wcout<<L"========================="<<std::endl;
         //Send one non-fragmented message to each node
         for (int64_t id=2; id<=4; ++id)
         {
@@ -387,8 +373,6 @@ public:
             dh.ReceivedApplicationData(&header, payload, false);
         }
 
-        boost::asio::post(receiveStrand, [&]{SetReady();});
-        WaitUntilReady();
         boost::asio::post(dh.m_deliverStrand, [&]{SetReady();});
         WaitUntilReady();
 
@@ -406,9 +390,9 @@ public:
 
         TRACELINE
 
-        std::cout<<"========================="<<std::endl;
-        std::cout<<"Duplicated messages"<<std::endl;
-        std::cout<<"========================="<<std::endl;
+        std::wcout<<L"========================="<<std::endl;
+        std::wcout<<L"Duplicated messages"<<std::endl;
+        std::wcout<<L"========================="<<std::endl;
         CHECK(duplicates==0);
         //Send one duplicated message to each node
         for (int64_t id=2; id<=4; ++id)
@@ -440,7 +424,7 @@ private:
                   const boost::asio::ip::udp::endpoint& to)
         {
             //send ack
-            std::cout<<"Send Ack to port "<<to.port()<<" with seq "<<ack->sequenceNumber<<std::endl;
+            std::wcout<<L"Send Ack to port "<<to.port()<<L" with seq "<<ack->sequenceNumber<<std::endl;
             acked[ack->commonHeader.receiverId]=ack->sequenceNumber;
         }
     };
@@ -472,7 +456,7 @@ private:
     {
         for (auto vt = received.cbegin(); vt != received.cend(); ++vt)
         {
-            std::cout<<"node_"<<vt->first<<": received="<<vt->second<<", acked="<<acked[vt->first]<<std::endl;
+            std::wcout<<L"node_"<<vt->first<<L": received="<<vt->second<<L", acked="<<acked[vt->first]<<std::endl;
         }
     }
 
@@ -481,11 +465,11 @@ private:
         for (auto vt = dh.m_nodes.begin(); vt != dh.m_nodes.end(); ++vt)
         {
             Com::DeliveryHandlerBasic<DeliveryHandlerTest::TestWriter>::NodeInfo& ni=vt->second;
-            std::cout<<"Node: "<<ni.node.name<<std::endl;
-            std::cout<<"    Channel: unacked_singel, lastInSeq: "<<ni.unackedSingleReceiverChannel.lastInSequence<<", biggestSeq: "<<ni.unackedSingleReceiverChannel.biggestSequence<<std::endl;
-            std::cout<<"    Channel: unacked_multi, lastInSeq: "<<ni.unackedMultiReceiverChannel.lastInSequence<<", biggestSeq: "<<ni.unackedMultiReceiverChannel.biggestSequence<<std::endl;
-            std::cout<<"    Channel: acked_single, lastInSeq: "<<ni.ackedSingleReceiverChannel.lastInSequence<<", biggestSeq: "<<ni.ackedSingleReceiverChannel.biggestSequence<<std::endl;
-            std::cout<<"    Channel: acked_multi, lastInSeq: "<<ni.ackedMultiReceiverChannel.lastInSequence<<", biggestSeq: "<<ni.ackedMultiReceiverChannel.biggestSequence<<std::endl;
+            std::wcout<<L"Node: "<<ni.node.name.c_str()<<std::endl;
+            std::wcout<<L"    Channel: unacked_singel, lastInSeq: "<<ni.unackedSingleReceiverChannel.lastInSequence<<", biggestSeq: "<<ni.unackedSingleReceiverChannel.biggestSequence<<std::endl;
+            std::wcout<<L"    Channel: unacked_multi, lastInSeq: "<<ni.unackedMultiReceiverChannel.lastInSequence<<", biggestSeq: "<<ni.unackedMultiReceiverChannel.biggestSequence<<std::endl;
+            std::wcout<<L"    Channel: acked_single, lastInSeq: "<<ni.ackedSingleReceiverChannel.lastInSequence<<", biggestSeq: "<<ni.ackedSingleReceiverChannel.biggestSequence<<std::endl;
+            std::wcout<<L"    Channel: acked_multi, lastInSeq: "<<ni.ackedMultiReceiverChannel.lastInSequence<<", biggestSeq: "<<ni.ackedMultiReceiverChannel.biggestSequence<<std::endl;
         }
     }
 };
