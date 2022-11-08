@@ -4,11 +4,6 @@
 #include <wchar.h>
 #include <sstream>
 #include <Safir/Dob/Internal/Connections.h>
-#include <Safir/Dob/Typesystem/Operations.h>
-#include <Safir/Dob/Typesystem/Properties.h>
-#include <Safir/Dob/Typesystem/Parameters.h>
-#include <Safir/Dob/DistributionScopeProperty.h>
-#include <Safir/Dob/DistributionScopeOverrideProperty.h>
 
 namespace
 {
@@ -34,7 +29,7 @@ namespace
     }
 
     template<typename RegT>
-    std::shared_ptr<Registrations::RegData> ToRegData(const Safir::Dob::Internal::ConnectionPtr& connectionPtr, const RegT& regInfo, const std::vector<int64_t> localTypes)
+    std::shared_ptr<Registrations::RegData> ToRegData(const Safir::Dob::Internal::ConnectionPtr& connectionPtr, const RegT& regInfo, const Safir::Dob::Typesystem::Internal::DistributionScopeReader& distributionScopeReader)
     {
         auto r = std::make_shared<Registrations::RegData>();
         r->connectionName = connectionPtr->NameWithCounter();
@@ -43,55 +38,12 @@ namespace
         r->handler = Handler(regInfo.handlerId.GetRawString(), regInfo.handlerId.GetRawValue());
         r->context = connectionPtr->Id().m_contextId;
         r->pending = false;
-        r->local = std::binary_search(begin(localTypes), end(localTypes), regInfo.typeId);
+        r->scope = distributionScopeReader.GetDistributionScope(regInfo.typeId);
 
         std::ostringstream os;
         os << r->connectionName.toStdString() << " " << r->typeName.toStdString() << " " << r->typeId << " " << r->handler.toStdString();
         r->content = os.str().c_str();
         return r;
-    }
-
-    static std::vector<Safir::Dob::Typesystem::TypeId> CalculateLocalTypes()
-    {
-        bool isInherited, hasProperty;
-        DotsC_TypeId paramTypeId;
-        DotsC_ParameterIndex paramId;
-        DotsC_Int32 paramIndex;
-
-        std::vector<Safir::Dob::Typesystem::TypeId> localTypes;
-        for (auto typeId : Safir::Dob::Typesystem::Operations::GetAllTypeIds())
-        {
-
-            Safir::Dob::Typesystem::Operations::HasProperty(typeId,
-                                                     Safir::Dob::DistributionScopeOverrideProperty::ClassTypeId,
-                                                     hasProperty,
-                                                     isInherited);
-
-            if (hasProperty && !isInherited)
-            {
-                Safir::Dob::Typesystem::Properties::GetParameterReference(typeId, Safir::Dob::DistributionScopeOverrideProperty::ClassTypeId, 0, 0, paramTypeId, paramId, paramIndex);
-                auto distributionScope = static_cast<Safir::Dob::DistributionScope::Enumeration>(Safir::Dob::Typesystem::Parameters::GetEnumeration(paramTypeId, paramId, paramIndex));
-
-                if (distributionScope == Safir::Dob::DistributionScope::Local)
-                {
-                    localTypes.push_back(typeId);
-                }
-            }
-            else if (Safir::Dob::Typesystem::Operations::HasProperty(typeId, Safir::Dob::DistributionScopeProperty::ClassTypeId))
-            {
-                Safir::Dob::Typesystem::Properties::GetParameterReference(typeId, Safir::Dob::DistributionScopeProperty::ClassTypeId, 0, 0, paramTypeId, paramId, paramIndex);
-                auto distributionScope = static_cast<Safir::Dob::DistributionScope::Enumeration>(Safir::Dob::Typesystem::Parameters::GetEnumeration(paramTypeId, paramId, paramIndex));
-
-                if (distributionScope == Safir::Dob::DistributionScope::Local)
-                {
-                    localTypes.push_back(typeId);
-                }
-            }
-        }
-
-        std::sort(localTypes.begin(),localTypes.end());
-        localTypes.shrink_to_fit();
-        return localTypes;
     }
 }
 
@@ -100,7 +52,7 @@ Registrations::Registrations(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::registrations),
     m_timer(this),
-    m_localTypes(CalculateLocalTypes())
+    m_distributionScopeReader()
 {
     ui->setupUi(this);
 
@@ -165,12 +117,13 @@ void Registrations::UpdateGui()
     int row = 0;
     for (const auto& r : m_regdataFiltered)
     {
+        QString scope = r->scope != Safir::Dob::DistributionScope::Global ? QString::fromWCharArray(Safir::Dob::DistributionScope::ToString(r->scope).c_str()) : "";
         ui->tableWidget->setItem(row, 0, TableItem(r->typeName));
         ui->tableWidget->setItem(row, 1, TableItem(r->handler));
         ui->tableWidget->setItem(row, 2, TableItem(r->connectionName));
         ui->tableWidget->setItem(row, 3, TableItem(QString::number(r->context), true));
         ui->tableWidget->setItem(row, 4, TableItem(r->pending ? "Pending" : "", true));
-        ui->tableWidget->setItem(row, 5, TableItem(r->local ? "Local" : "", true));
+        ui->tableWidget->setItem(row, 5, TableItem(scope, true));
         ++row;
     }
     ui->tableWidget->setSortingEnabled(true);
@@ -184,7 +137,7 @@ void Registrations::UpdateRegistartionData()
         // Active registrations
         for (const auto& regInfo : connectionPtr->GetRegisteredHandlers())
         {
-            auto r = ToRegData(connectionPtr, regInfo, m_localTypes);
+            auto r = ToRegData(connectionPtr, regInfo, m_distributionScopeReader);
             m_regdata.push_back(r);
         }
 
@@ -193,7 +146,7 @@ void Registrations::UpdateRegistartionData()
         {
             if (!pendingReg.accepted && !pendingReg.remove)
             {
-                auto r = ToRegData(connectionPtr, pendingReg, m_localTypes);
+                auto r = ToRegData(connectionPtr, pendingReg, m_distributionScopeReader);
                 r->pending = true;
                 m_regdata.push_back(r);
             }

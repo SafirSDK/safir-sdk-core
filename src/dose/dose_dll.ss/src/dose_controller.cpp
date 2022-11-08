@@ -65,7 +65,6 @@
 #include <Safir/Dob/Typesystem/Serialization.h>
 
 #include <assert.h>
-#include <boost/shared_ptr.hpp>
 
 #ifdef _MSC_VER
   #pragma warning(push)
@@ -78,14 +77,27 @@
 
 #include <iostream>
 
-using namespace std::placeholders;
-
 namespace Safir
 {
 namespace Dob
 {
 namespace Internal
 {
+namespace
+{
+    bool IsLightNode()
+    {
+        for (auto i = 0; i < Safir::Dob::NodeParameters::NodeTypesArraySize(); ++i)
+        {
+            const auto& nt = Safir::Dob::NodeParameters::NodeTypes(i);
+            if (!nt->Name().IsNull() && nt->Name().GetVal() == Safir::Dob::ThisNodeParameters::NodeType())
+            {
+                return !nt->IsLightNode().IsNull() && nt->IsLightNode().GetVal();
+            }
+        }
+        return false;
+    }
+}
     Controller::Controller()
         : m_isConnected(false),
           m_connection(NULL),
@@ -95,7 +107,8 @@ namespace Internal
           m_contextId(0),
           m_exitDispatch(false),
           m_originalInjectionState(no_state_tag),
-          m_consumerReferences()
+          m_consumerReferences(),
+          m_isLightNode(IsLightNode())
     {
     }
 
@@ -435,6 +448,12 @@ namespace Internal
 
         if (overrideRegistration)
         {
+            if (m_isLightNode && m_distributionScopeReader.IsGlobal(typeId))
+            {
+                std::wostringstream ostr;
+                ostr << "Not allowed to register global types on a light node. typeId = " << Typesystem::Operations::GetName(typeId) << ")";
+                throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
+            }
             ServiceTypes::Instance().Register(m_connection,
                                                typeId,
                                                handlerId,
@@ -443,6 +462,18 @@ namespace Internal
         }
         else
         {
+            if (m_isLightNode)
+            {
+                std::wostringstream ostr;
+                ostr << "Not allowed to do pending registrations on light nodes. typeId = " << Typesystem::Operations::GetName(typeId) << ")";
+                throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
+            }
+            if (m_distributionScopeReader.IsLimited(typeId))
+            {
+                std::wostringstream ostr;
+                ostr << "Not allowed to do pending registrations for limited types. typeId = " << Typesystem::Operations::GetName(typeId) << ")";
+                throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
+            }
             m_connection->AddPendingRegistration(PendingRegistration(typeId, handlerId, consumer));
             m_connection->SignalOut();
         }
@@ -489,6 +520,29 @@ namespace Internal
 
         if (overrideRegistration)
         {
+            if (m_isLightNode)
+            {
+                if (m_distributionScopeReader.IsGlobal(typeId))
+                {
+                    std::wostringstream ostr;
+                    ostr << "Not allowed to register global types on a light node. typeId = " << Typesystem::Operations::GetName(typeId) << ")";
+                    throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
+                }
+                if (isInjectionHandler)
+                {
+                    std::wostringstream ostr;
+                    ostr << "Not allowed to register injection handlers on a light node. typeId = " << Typesystem::Operations::GetName(typeId) << ")";
+                    throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
+                }
+            }
+            if (isInjectionHandler && m_distributionScopeReader.IsLimited(typeId))
+            {
+                std::wostringstream ostr;
+                ostr << "Not allowed to register injection handlers for limited types. typeId = " << Typesystem::Operations::GetName(typeId) << ")";
+                throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
+            }
+
+
             EntityTypes::Instance().Register(m_connection,
                                              typeId,
                                              handlerId,
@@ -499,6 +553,19 @@ namespace Internal
         }
         else
         {
+            if (m_isLightNode)
+            {
+                std::wostringstream ostr;
+                ostr << "Not allowed to do pending registrations on light nodes. typeId = " << Typesystem::Operations::GetName(typeId) << ")";
+                throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
+            }
+            if (m_distributionScopeReader.IsLimited(typeId))
+            {
+                std::wostringstream ostr;
+                ostr << "Not allowed to do pending registrations for limited types. typeId = " << Typesystem::Operations::GetName(typeId) << ")";
+                throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
+            }
+
             m_connection->AddPendingRegistration(PendingRegistration(typeId, handlerId, instanceIdPolicy, isInjectionHandler, consumer));
             m_connection->SignalOut();
         }

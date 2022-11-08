@@ -34,6 +34,8 @@
 #include <Safir/Dob/ConnectionAspectMisc.h>
 #include <Safir/Dob/ConnectionAspectInjector.h>
 #include <Safir/Utilities/Internal/SharedCharArray.h>
+#include <Safir/Utilities/Internal/LowLevelLogger.h>
+#include <Safir/Dob/NodeParameters.h>
 
 namespace Safir
 {
@@ -59,6 +61,7 @@ namespace Internal
                          const std::function<void(int64_t)>& completionHandler)
             :m_nodeId(nodeId)
             ,m_nodeType(nodeType)
+            ,m_receiverIsLightNode(distribution.IsLightNode(nodeType))
             ,m_strand(strand)
             ,m_timer(strand.context())
             ,m_distribution(distribution)
@@ -116,6 +119,7 @@ namespace Internal
 
         const int64_t m_nodeId;
         const int64_t m_nodeType;
+        const bool m_receiverIsLightNode;
         boost::asio::io_service::strand& m_strand;
         boost::asio::steady_timer m_timer;
         DistributionT& m_distribution;
@@ -178,7 +182,7 @@ namespace Internal
                 m_dobConnection.Close();
             }
 
-            m_dobConnection.Open(L"dose_pool_distribution",L"pool_distribution"+boost::lexical_cast<std::wstring>(m_distribution.GetNodeId()), context, NULL, this);
+            m_dobConnection.Open(L"dose_pool_distribution", L"pool_distribution"+boost::lexical_cast<std::wstring>(m_distribution.GetNodeId()), context, NULL, this);
 
             m_dobConnection.SubscribeRegistration(Entity::ClassTypeId,
                                                   Typesystem::HandlerId::ALL_HANDLERS,
@@ -221,8 +225,6 @@ namespace Internal
             bool overflow=false;
             conPtr->GetDirtySubscriptionQueue().Dispatch([this, conPtr, &overflow](const SubscriptionPtr& subscription, bool& exitDispatch, bool& dontRemove)
             {
-
-                auto this_ = this; //fix for vs 2010 lamba issues
                 dontRemove=false;
                 DistributionData realState = subscription->GetState()->GetRealState();
                 if (!realState.IsNoState() && !m_distribution.IsLocal(realState.GetTypeId()))
@@ -230,12 +232,12 @@ namespace Internal
                     if (realState.GetType()==DistributionData::RegistrationState)
                     {
                         // Registration state
-                        dontRemove=!subscription->DirtyFlag().Process([this_, &subscription]{return this_->ProcessRegistrationState(subscription);});
+                        dontRemove=!subscription->DirtyFlag().Process([this, &subscription]{return ProcessRegistrationState(subscription);});
                     }
                     else
                     {
                         // Entity state
-                        dontRemove=!subscription->DirtyFlag().Process([this_, &subscription]{return this_->ProcessEntityState(subscription);});
+                        dontRemove=!subscription->DirtyFlag().Process([this, &subscription]{return ProcessEntityState(subscription);});
                     }
                 }
                 //dontRemove is true if we got an overflow, and if we did we dont want to keep sending anything to communication.
@@ -292,7 +294,9 @@ namespace Internal
             {
                 const DistributionData currentState = subscription->GetCurrentRealState();
 
-                if (!currentState.IsNoState())
+                auto lightNodesAndNotRealState = (m_distribution.IsLightNode() || m_receiverIsLightNode) && currentState.GetEntityStateKind() != DistributionData::Real;
+                auto dontSendState = currentState.IsNoState() || lightNodesAndNotRealState;
+                if (!dontSendState)
                 {
                     //Send all states owned by someone on this node
                     //send all ghosts (the owner node is probably down...)
@@ -315,7 +319,7 @@ namespace Internal
             }
 
             //injection state
-            if (subscription->GetLastInjectionState().IsNoState())
+            if (subscription->GetLastInjectionState().IsNoState() && !m_distribution.IsLightNode() && !m_receiverIsLightNode)
             {
                 const DistributionData currentState = subscription->GetCurrentInjectionState();
 

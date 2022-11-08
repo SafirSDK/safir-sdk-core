@@ -55,7 +55,7 @@
        </column>
        <column>
         <property name="text">
-         <string>Local</string>
+         <string>Scope</string>
         </property>
        </column>
       </widget>

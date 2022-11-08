@@ -1,6 +1,7 @@
 #ifndef REGISTRATIONS_H
 #define REGISTRATIONS_H
 
+#include <Safir/Dob/Typesystem/Internal/DistributionScopeReader.h>
 #include <QTimer>
 #include <QWidget>
 #include <vector>
@@ -26,7 +27,7 @@ public:
         QString connectionName;
         int context;
         bool pending;
-        bool local;
+        Safir::Dob::DistributionScope::Enumeration scope;
         QString content;
     };
 
@@ -47,7 +48,7 @@ private:
     // Apply filter text
     void ApplyFilter();
 
-    std::vector<int64_t> m_localTypes;
+    Safir::Dob::Typesystem::Internal::DistributionScopeReader m_distributionScopeReader;
     std::vector<std::shared_ptr<RegData>> m_regdata;
     std::vector<std::shared_ptr<RegData>> m_regdataFiltered;
 };
