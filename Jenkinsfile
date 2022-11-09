@@ -85,53 +85,72 @@ pipeline {
                                     sh label: "Moving artifacts to build-${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}.",
                                        script: """
                                                mkdir build-${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}
+                                               mv buildlog.html build-${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}
                                                mv tmp/*.deb build-${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}
                                                """
 
-                                    archiveArtifacts artifacts: "build-${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}/*.deb", fingerprint: true
+                                    archiveArtifacts artifacts: "**/buildlog.html, build-${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}/*.deb", fingerprint: true
                                 }
                                 else {
                                     bat label: "Moving artifacts to build-${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}.",
                                         script: """
                                                 md build-${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}
+                                                move buildlog.html build-${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}
                                                 move build\\packaging\\windows\\*.exe build-${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}
                                                 """
 
-                                    archiveArtifacts artifacts: "build-${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}/*.exe", fingerprint: true
+                                    archiveArtifacts artifacts: "**/buildlog.html, build-${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}/*.exe", fingerprint: true
                                 }
 
+                                def cmake = scanForIssues (
+                                    tool: cmake(pattern:"**/buildlog.html",
+                                                id:"cmake_${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}",
+                                                name:"CMake ${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}"),
+                                    sourceCodeEncoding: 'UTF-8'
+                                )
+                                def java = scanForIssues (
+                                    tool: java(pattern:"**/buildlog.html",
+                                               id:"java_${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}",
+                                               name:"Java ${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}"),
+                                    sourceCodeEncoding: 'UTF-8'
+                                )
+                                def doxygen = scanForIssues (
+                                    tool: doxygen(pattern:"**/buildlog.html",
+                                                  id:"doxygen_${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}",
+                                                  name:"Doxygen ${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}"),
+                                    sourceCodeEncoding: 'UTF-8'
+                                )
+
+                                issueList = [cmake, java, doxygen]
+
                                 if (betterIsUnix()) {
-                                    recordIssues(sourceCodeEncoding: 'UTF-8',
-                                                 skipBlames: true,
-                                                 skipPublishingChecks: true,
-                                                 healthy: 1,
-                                                 unhealthy:10,
-                                                 tools: [cmake(id:"${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}_cmake",
-                                                               name:"CMake ${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}"),
-                                                         gcc(id:"${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}_gcc",
-                                                             name:"GCC ${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}"),
-                                                         java(id:"${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}_java",
-                                                              name:"Java ${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}"),
-                                                         doxygen(id:"${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}_doxygen",
-                                                                 name:"Doxygen ${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}"),
-                                                        ])
+                                    def gcc = scanForIssues (
+                                        tool: gcc(pattern:"**/buildlog.html",
+                                                  id:"gcc_${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}",
+                                                  name:"GCC ${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}"),
+                                        sourceCodeEncoding: 'UTF-8'
+                                    )
+                                    issueList.add(0,gcc)
                                 }
                                 else {
-                                    recordIssues(sourceCodeEncoding: 'UTF-8',
-                                                 skipBlames: true,
-                                                 skipPublishingChecks: true,
-                                                 healthy: 1,
-                                                 unhealthy:10,
-                                                 tools: [cmake(id:"${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}_cmake",
-                                                               name:"CMake ${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}"),
-                                                         java(id:"${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}_java",
-                                                              name:"Java ${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}"),
-                                                         doxygen(id:"${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}_doxygen",
-                                                                 name:"Doxygen ${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}"),
-                                                         msBuild(id:"${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}_msbuild",
-                                                                 name:"MSBuild ${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}")
-                                                        ])
+                                    msbuild = scanForIssues (
+                                        tool: msBuild(pattern:"**/buildlog.html",
+                                                      id:"msbuild_${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}",
+                                                      name:"MSBuild ${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}"),
+                                        sourceCodeEncoding: 'UTF-8'
+                                    )
+                                    issueList.add(0,msbuild)
                                 }
+
+                                publishIssues (
+                                    issues: issueList,
+                                    sourceCodeEncoding: 'UTF-8',
+                                    id: "warnings_${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}",
+                                    name: "Warnings for ${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}",
+                                    skipPublishingChecks: true,
+                                    qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]],
+                                    trendChartType: 'AGGREGATION_ONLY'
+                                )
                             }
                         }
                     }
