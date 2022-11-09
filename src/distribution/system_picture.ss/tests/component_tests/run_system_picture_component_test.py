@@ -1272,14 +1272,33 @@ def test_two_normal_two_light_restart_elected_multicast(args):
             inc2 = node2b.wait_for_form()
             if inc1 == inc2:
                 raise Failure("unexpected incarnation")
-            log("  This testcase produces some spurious output since it checks for two possible outcomes")
+            log("  This testcase produces some spurious output since it checks for multiple possible outcomes")
             log("  So ignore any lines below talking about incorrect states unless the test fails.")
+            actual34 = None
             try:
                 node2b.wait_for_states((state3a, state4a), last_state_repeats=10)
                 actual34 = (state3a, state4a)
             except Failure:
-                node2b.wait_for_states((state3b, state4b), last_state_repeats=10)
-                actual34 = (state3b, state4b)
+                pass
+            if actual34 is None:
+                try:
+                    node2b.wait_for_states((state3b, state4b), last_state_repeats=10)
+                    actual34 = (state3b, state4b)
+                except Failure:
+                    pass
+            if actual34 is None:
+                try:
+                    node2b.wait_for_states(state4a, last_state_repeats=10)
+                    actual34 = (state4a,)
+                except Failure:
+                    pass
+            if actual34 is None:
+                try:
+                    node2b.wait_for_states(state4b, last_state_repeats=10)
+                    actual34 = (state4b,)
+                except Failure:
+                    pass
+
             node1.wait_for_states((state1, state2), last_state_repeats=40)
             node3.wait_for_states((state1, state2), last_state_repeats=40)
             node4.wait_for_states((state1, state2), last_state_repeats=40)
