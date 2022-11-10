@@ -34,7 +34,7 @@ PartnerState::PartnerState(const Languages & languages,
                            const int contextId,
                            ActionSender& actionSender,
                            const boost::function<void()>& stateChangedCallback):
-    m_partnerInfoTable(3),
+    m_partnerInfoTable(5),
     m_languages(languages),
     m_stateChangedCallback(stateChangedCallback),
     m_actionSender(actionSender)
@@ -46,15 +46,16 @@ PartnerState::PartnerState(const Languages & languages,
                                        Safir::Dob::InstanceIdPolicy::HandlerDecidesInstanceId,
                                        this);
     DoseTest::SequencerPtr seq = DoseTest::Sequencer::Create();
-    seq->Partners()[0].SetVal(Safir::Dob::Typesystem::Utilities::ToWstring(languages[0]));
-    seq->Partners()[1].SetVal(Safir::Dob::Typesystem::Utilities::ToWstring(languages[1]));
-    seq->Partners()[2].SetVal(Safir::Dob::Typesystem::Utilities::ToWstring(languages[2]));
+    for (int i = 0; i < 5; ++i)
+    {
+        seq->Partners()[i].SetVal(Safir::Dob::Typesystem::Utilities::ToWstring(languages[i]));
+    }
     seq->Context() = contextId;
     m_connection.SetAll(seq,
                         Safir::Dob::Typesystem::InstanceId(),
                         Safir::Dob::Typesystem::HandlerId());
 
-    for (int which = 0; which < 3; ++which)
+    for (int which = 0; which < 5; ++which)
     {
         m_partnerInfoTable.at(which).m_incarnation = -1;
     }
@@ -109,10 +110,10 @@ PartnerState::Reset()
 
     m_stateChangedCallback();
 
-    
+
     DoseTest::ActionPtr reset = DoseTest::Action::Create();
     reset->ActionKind().SetVal(DoseTest::ActionEnum::Reset);
-    
+
     m_actionSender.Send(reset);
     //    m_actionSender.Send(reset,Safir::Dob::Typesystem::ChannelId(1));
     //m_actionSender.Send(reset,Safir::Dob::Typesystem::ChannelId(2));
@@ -129,7 +130,7 @@ PartnerState::HandlePartnerChange(const DoseTest::PartnerPtr & partner, const in
         {
             thePartner.SetActive(true);
             std::wcout << "Partner " << instance << " is activated!" << std::endl;
-            
+
             thePartner.m_address = Safir::Dob::Typesystem::Utilities::ToUtf8(partner->Address());
             thePartner.m_port = static_cast<short>(partner->Port());
 
@@ -189,5 +190,3 @@ void PartnerState::OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId,
 {
     throw std::logic_error("Someone revoked my registrations!!! Don't like that!");
 }
-
-

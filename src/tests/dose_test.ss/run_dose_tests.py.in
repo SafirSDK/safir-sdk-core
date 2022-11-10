@@ -139,6 +139,18 @@ class Parameters:
                           default="cpp",
                           help="Which partner 2 to run."
                           "If --jenkins is specified the Languages environment variable will override this.")
+        parser.add_argument("--lang3",
+                          action="store",
+                          dest="lang3",
+                          default="cpp",
+                          help="Which partner 3 to run."
+                          "If --jenkins is specified the Languages environment variable will override this.")
+        parser.add_argument("--lang4",
+                          action="store",
+                          dest="lang4",
+                          default="cpp",
+                          help="Which partner 4 to run."
+                          "If --jenkins is specified the Languages environment variable will override this.")
         parser.add_argument("--single-testcase", action="store", help="Run only a single testcase.")
         parser.add_argument("--first-testcase", action="store", help="Sets the first testcase to be run.")
         parser.add_argument("--last-testcase", action="store", help="Sets the last testcase to be run.")
@@ -147,6 +159,8 @@ class Parameters:
         self.lang0 = options.lang0
         self.lang1 = options.lang1
         self.lang2 = options.lang2
+        self.lang3 = options.lang3
+        self.lang4 = options.lang4
 
         self.multinode = options.multinode
         self.multicomputer = options.multicomputer
@@ -177,11 +191,13 @@ class Parameters:
             langs = os.environ.get("Languages")
             if langs is not None:
                 splitlangs = langs.split("-")
-                if len(splitlangs) != 3:
+                if len(splitlangs) != 5:
                     raise Exception("Invalid format of Languages environment variable: " + langs)
                 self.lang0 = splitlangs[0]
                 self.lang1 = splitlangs[1]
                 self.lang2 = splitlangs[2]
+                self.lang3 = splitlangs[3]
+                self.lang4 = splitlangs[4]
 
         #This relies on the fact that we're installed in the bin directory on both linux and windows.
         install_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..")
@@ -244,7 +260,9 @@ class Parameters:
             "-l",
             self.lang0,
             self.lang1,
-            self.lang2)
+            self.lang2,
+            self.lang3,
+            self.lang4)
 
         self.single_testcase = options.single_testcase
         if options.single_testcase is not None:
@@ -311,8 +329,8 @@ class Results:
                 testcases[int(match.group(1))] = match.group(1) + "-" + match.group(2)
         return testcases
 
-    def write_diff(self, tcname, diff0, diff1, diff2):
-        res = len(diff0) == 0 and len(diff1) == 0 and len(diff2) == 0
+    def write_diff(self, tcname, diff0, diff1, diff2, diff3, diff4):
+        res = len(diff0) == 0 and len(diff1) == 0 and len(diff2) == 0 and len(diff3) == 0 and len(diff4) == 0
         output = ""
         if not res:
             output += "(A line with a '-' in front means that it is missing, and one with a '+' in front means that it has been added, compared to the expected result.)\n\n"
@@ -322,6 +340,10 @@ class Results:
                 output += "Partner 1 diff:\n" + escape("".join(diff1)) + "\n\n"
             if len(diff2) != 0:
                 output += "Partner 2 diff:\n" + escape("".join(diff2)) + "\n\n"
+            if len(diff3) != 0:
+                output += "Partner 3 diff:\n" + escape("".join(diff3)) + "\n\n"
+            if len(diff4) != 0:
+                output += "Partner 4 diff:\n" + escape("".join(diff4)) + "\n\n"
 
         self.write_test_result(res, tcname, output)
         return res
@@ -349,10 +371,10 @@ class Results:
 
         tcnames = self.create_tc_dict(parameters)
 
-        output = list((None, None, None))
-        expected_output = list((None, None, None))
+        output = list(({}, {}, {}, {}, {}))
+        expected_output = list(({}, {}, {}, {}, {}))
 
-        for partner in range(3):
+        for partner in range(5):
             filename = "partner" + str(partner) + ".txt"
             with open(os.path.join(resdir, filename)) as file:
                 output[partner] = self.split(file.read())
@@ -379,7 +401,9 @@ class Results:
             diff0 = list(difflib.unified_diff(expected_output[0][tc], output[0][tc]))
             diff1 = list(difflib.unified_diff(expected_output[1][tc], output[1][tc]))
             diff2 = list(difflib.unified_diff(expected_output[2][tc], output[2][tc]))
-            self.write_diff(tcnames[tc], diff0, diff1, diff2)
+            diff3 = list(difflib.unified_diff(expected_output[3][tc], output[3][tc]))
+            diff4 = list(difflib.unified_diff(expected_output[4][tc], output[4][tc]))
+            self.write_diff(tcnames[tc], diff0, diff1, diff2, diff3, diff4)
             self.num_tc_performed += 1
 
 
@@ -419,7 +443,7 @@ class Runner:
                 "safir_show_config")  #This should be in the PATH here, so no need to give full path
 
         if parameters.standalone:
-            partners = (0, 1, 2)
+            partners = (0, 1, 2, 3, 4)
         elif parameters.multinode or parameters.multicomputer:
             partners = (0, 1)
         else:  #slave
@@ -444,7 +468,7 @@ class Runner:
         #start second node
         if parameters.multinode:
             os.environ["SAFIR_INSTANCE"] = "1"
-            log(" + starting slave node")
+            log(" + starting slave node Server_1")
             self.safir_control_1 = self.__launchProcess("safir_control.1",
                                                         parameters.safir_control_cmd + ("--force-id", "888888"))
 
@@ -456,6 +480,34 @@ class Runner:
                 self.__launchProcess("dose_test_dotnet.2", parameters.dose_test_dotnet_cmd + ("2", ))
             if not parameters.no_java:
                 self.__launchProcess("dose_test_java.2", parameters.dose_test_java_cmd + ("2", ))
+
+            os.environ["SAFIR_INSTANCE"] = "2"
+            log(" + starting slave node Client_0")
+            self.safir_control_2 = self.__launchProcess("safir_control.2",
+                                                        parameters.safir_control_cmd + ("--force-id", "77777"))
+
+            self.__launchProcess("foreach.2", parameters.foreach_cmd)
+
+            self.__launchProcess("dose_test_cpp.3", parameters.dose_test_cpp_cmd + ("3", ))
+            if not parameters.no_dotnet:
+                self.__launchProcess("dose_test_dotnet.3", parameters.dose_test_dotnet_cmd + ("3", ))
+            if not parameters.no_java:
+                self.__launchProcess("dose_test_java.3", parameters.dose_test_java_cmd + ("3", ))
+
+            os.environ["SAFIR_INSTANCE"] = "3"
+            log(" + starting slave node Client_1")
+            self.safir_control_3 = self.__launchProcess("safir_control.3",
+                                                        parameters.safir_control_cmd + ("--force-id", "66666"))
+
+            self.__launchProcess("foreach.3", parameters.foreach_cmd)
+
+            self.__launchProcess("dose_test_cpp.4", parameters.dose_test_cpp_cmd + ("4", ))
+            if not parameters.no_dotnet:
+                self.__launchProcess("dose_test_dotnet.4", parameters.dose_test_dotnet_cmd + ("4", ))
+            if not parameters.no_java:
+                self.__launchProcess("dose_test_java.4", parameters.dose_test_java_cmd + ("4", ))
+            #you can use a line like this to launch sate in the "current" safir_instance.
+            #self.__launchProcess("sate.0", ("sate",))
 
         if "SAFIR_INSTANCE" in os.environ:
             del os.environ["SAFIR_INSTANCE"]  #unset the environment after we've launched the processes.
@@ -484,6 +536,10 @@ class Runner:
             self.__kill("safir_control", self.safir_control, 120)  #We give safir_control some extra time to stop
         if hasattr(self, "safir_control_1"):
             self.__kill("safir_control", self.safir_control_1, 120)  #We give safir_control some extra time to stop
+        if hasattr(self, "safir_control_2"):
+            self.__kill("safir_control", self.safir_control_2, 120)  #We give safir_control some extra time to stop
+        if hasattr(self, "safir_control_3"):
+            self.__kill("safir_control", self.safir_control_3, 120)  #We give safir_control some extra time to stop
 
         #Processes have up to 20 seconds to exit from the stop order
         future = time.time() + 20
@@ -511,7 +567,7 @@ class Runner:
                 len(syslog_data) == 0, "syslog_output", "syslog is not empty:\n" + quoteattr(syslog_data))
 
     def run_sequencer(self, parameters):
-        log("** Running test sequencer with languages set to", parameters.lang0, parameters.lang1, parameters.lang2)
+        log("** Running test sequencer with languages set to", parameters.lang0, parameters.lang1, parameters.lang2, parameters.lang3, parameters.lang4)
         log("---- Output from dose_test_sequencer: ----")
         sequencer = self.__launchProcess("dose_test_sequencer", parameters.dose_test_sequencer_cmd, stdoutToFile=False)
         sequencer.wait()
@@ -521,6 +577,10 @@ class Runner:
         self.safir_control.wait()
         if hasattr(self, "safir_control_1"):
             self.safir_control_1.wait()
+        if hasattr(self, "safir_control_2"):
+            self.safir_control_2.wait()
+        if hasattr(self, "safir_control_3"):
+            self.safir_control_3.wait()
 
 
 class JenkinsInterface:

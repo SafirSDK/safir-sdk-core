@@ -6,7 +6,7 @@
     <member>
       <summary>The language of the partners that should be active in this test run</summary>
       <name>Partners</name>
-      <arraySize>3</arraySize>
+      <arraySize>5</arraySize>
       <type>String</type>
       <maxLength>10</maxLength>
     </member>

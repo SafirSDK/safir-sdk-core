@@ -57,7 +57,7 @@ class ActionSender
 public:
     explicit ActionSender(boost::asio::io_service& ioService)
     {
-        for (int i = 0; i < 3; ++i)
+        for (int i = 0; i < 5; ++i)
         {
             m_sockets.push_back(SocketPtr(new boost::asio::ip::tcp::socket(ioService)));
         }
@@ -65,22 +65,15 @@ public:
 
     void Open(const std::string& address0, const short port0,
               const std::string& address1, const short port1,
-              const std::string& address2, const short port2)
+              const std::string& address2, const short port2,
+              const std::string& address3, const short port3,
+              const std::string& address4, const short port4)
     {
-        if ((address0 == address1 && port0 == port1) ||
-            (address0 == address2 && port0 == port2) ||
-            (address2 == address1 && port2 == port1))
-        {
-            std::wcout << "Some partners claim to have the same address:port, which seems very unlikely to be correct:\n"
-                       << "  " << address0.c_str() << ":" << port0 << "\n"
-                       << "  " << address1.c_str() << ":" << port1 << "\n"
-                       << "  " << address2.c_str() << ":" << port2 << std::endl;
-            throw std::logic_error("Some partners claim to have the same address:port, which seems very unlikely to be correct");
-        }
-
         ConnectSocket(m_sockets[0],address0,port0);
         ConnectSocket(m_sockets[1],address1,port1);
         ConnectSocket(m_sockets[2],address2,port2);
+        ConnectSocket(m_sockets[3],address3,port3);
+        ConnectSocket(m_sockets[4],address4,port4);
     }
 
     void Close()
@@ -88,6 +81,8 @@ public:
         m_sockets[0]->close();
         m_sockets[1]->close();
         m_sockets[2]->close();
+        m_sockets[3]->close();
+        m_sockets[4]->close();
     }
 
     void Send(const DoseTest::ActionPtr& msg, const int which)
@@ -107,6 +102,8 @@ public:
             SendInternal(binary,0);
             SendInternal(binary,1);
             SendInternal(binary,2);
+            SendInternal(binary,3);
+            SendInternal(binary,4);
         }
         else
         {
@@ -129,9 +126,9 @@ private:
             {
                 std::wcout << "Connecting to " << address.c_str() << ":" << port << std::endl;
                 //Set up address
-                const boost::asio::ip::address addr = 
+                const boost::asio::ip::address addr =
                     boost::asio::ip::address::from_string(address);
-                
+
                 const boost::asio::ip::tcp::endpoint endpoint(addr, port);
                 socket->connect(endpoint);
 
@@ -171,7 +168,7 @@ private:
         boost::thread timeout([which]{Timeout(which);});
 
         try
-        {            
+        {
             //        std::wcout << "Sent action to " << which << ", waiting for ok" << std::endl;
             char reply[3];
             boost::asio::read(*m_sockets[which],
@@ -236,5 +233,3 @@ private:
 };
 
 #endif
-
-

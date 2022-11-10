@@ -214,7 +214,9 @@ pipeline {
                     }
                     axis {
                         name 'Languages'
-                        values 'cpp-cpp-cpp', 'dotnet-java-cpp', 'java-cpp-dotnet', 'cpp-dotnet-java'
+                        values 'cpp-cpp-cpp-cpp-cpp',
+                               'dotnet-java-cpp-dotnet-java',
+                               'java-cpp-dotnet-java-cpp'
                     }
                     axis {
                         name 'TEST_KIND'

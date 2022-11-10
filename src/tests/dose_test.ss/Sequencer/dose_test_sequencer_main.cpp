@@ -114,7 +114,7 @@ const CommandLineResults & HandleCommandLine(int argc, char* argv[])
         desc.add_options()
             ("help,h", "show help message")
             ("testcase-directory,d",po::value<std::string>(&results.testcaseDirectory),"directory that contains the test cases")
-            ("languages,l", po::value<std::vector<std::string> >(&results.languages)->multitoken()->default_value(Languages(3,"cpp"),"cpp cpp cpp"), "choose languages to run, e.g.\n--languages cpp dotnet java")
+            ("languages,l", po::value<std::vector<std::string> >(&results.languages)->multitoken()->default_value(Languages(5,"cpp"),"cpp cpp cpp cpp cpp"), "choose languages to run, e.g.\n--languages cpp dotnet java cpp dotnet")
             ("first", po::value<int>(&results.first)->default_value(0), "first testcase")
             ("last", po::value<int>(&results.last)->default_value(9999), "last testcase")
             ("no-timeout", "Do not time out and exit if a partner does not respond for a long time")
@@ -143,9 +143,9 @@ const CommandLineResults & HandleCommandLine(int argc, char* argv[])
         results.noTimeout = vm.count("no-timeout") != 0;
         results.multinode = vm.count("multinode") != 0;
 
-        if (results.languages.size() != 3)
+        if (results.languages.size() != 5)
         {
-            std::wcout << "Need 3 languages"<<std::endl;
+            std::wcout << "Need 5 languages"<<std::endl;
             exit(0);
         }
 

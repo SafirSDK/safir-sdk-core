@@ -267,7 +267,9 @@ void Sequencer::Tick()
                        << "Maybe a partner crashed? "
                        << "(" << m_languages.at(0).c_str() << ","
                        <<        m_languages.at(1).c_str() << ","
-                       <<        m_languages.at(2).c_str() << ")"
+                       <<        m_languages.at(2).c_str() << ","
+                       <<        m_languages.at(3).c_str() << ","
+                       <<        m_languages.at(4).c_str() << ")"
                        << std::endl
                        << "Exiting." << std::endl;
             exit(1);
@@ -290,7 +292,9 @@ void Sequencer::Tick()
                 SetState(SequencerStates::ResetPartners);
                 m_actionSender.Open(m_partnerState.Address(0),m_partnerState.Port(0),
                                     m_partnerState.Address(1),m_partnerState.Port(1),
-                                    m_partnerState.Address(2),m_partnerState.Port(2));
+                                    m_partnerState.Address(2),m_partnerState.Port(2),
+                                    m_partnerState.Address(3),m_partnerState.Port(3),
+                                    m_partnerState.Address(4),m_partnerState.Port(4));
             }
         }
         break;
@@ -394,7 +398,7 @@ Sequencer::GetTestResults()
     assert(!m_isDumpRequested);
 
     DoseTest::DumpPtr request = DoseTest::Dump::Create();
-    for (int i = 0; i < 3; ++i)
+    for (int i = 0; i < 5; ++i)
     {
         const Safir::Dob::RequestId reqId = m_connection.ServiceRequest(request,
             Safir::Dob::Typesystem::HandlerId(i),this);

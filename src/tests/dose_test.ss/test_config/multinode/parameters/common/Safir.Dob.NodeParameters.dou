@@ -115,6 +115,22 @@
           </Safir.Dob.NodeType>
         </arrayElement>
 
+        <arrayElement>
+          <Safir.Dob.NodeType type="Safir.Dob.NodeType">
+            <Name>Client</Name>
+            <HeartbeatInterval>0.7</HeartbeatInterval>
+            <MaxLostHeartbeats>7</MaxLostHeartbeats>
+            <SlidingWindowsSize>20</SlidingWindowsSize>
+            <AckRequestThreshold>10</AckRequestThreshold>
+            <RetryTimeout>
+                <Second64>0.02</Second64>
+                <Second64>0.08</Second64>
+            </RetryTimeout>
+            <RequiredForStart>False</RequiredForStart>
+            <IsLightNode>True</IsLightNode>
+          </Safir.Dob.NodeType>
+        </arrayElement>
+
       </arrayElements>
     </parameter>
 
