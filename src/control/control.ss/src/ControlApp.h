@@ -98,12 +98,13 @@ private:
     boost::asio::io_context::strand             m_strand;
     boost::asio::io_context::strand             m_wcoutStrand;
     std::unique_ptr<TerminateHandler>           m_terminateHandler;
+    const Control::Config                       m_conf;
+    const bool                                  m_requiredForStart;
     const int64_t                               m_nodeId;
     const boost::filesystem::path               m_doseMainPath;
     const bool                                  m_ignoreControlCmd;
     boost::asio::steady_timer                   m_startTimer;
     boost::asio::steady_timer                   m_terminationTimer;
-    const Control::Config                       m_conf;
     Control::IncarnationBlacklistHandler        m_incarnationBlackListHandler;
     bool                                        m_controlInfoReceiverReady;
     bool                                        m_doseMainRunning;

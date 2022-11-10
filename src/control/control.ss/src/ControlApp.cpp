@@ -57,6 +57,43 @@
 #  pragma warning (pop)
 #endif
 
+namespace
+{
+    int64_t GenerateNodeId(const int64_t forcedId, const bool requiredForStart)
+    {
+        if (forcedId != 0)
+        {
+            return forcedId;
+        }
+
+        for (;;)
+        {
+            // Generate a positive node id if the node is of a type that is allowed to form as system, or
+            // a negative node id if the node is of a type that is NOT allowd to form a system.
+            // This will cause SystemPicture to always prefer nodes with RequiredForStart set to be
+            // Coordinator.
+            const std::int64_t nodeId = LlufId_GenerateRandom64();
+
+            if ((requiredForStart && nodeId > 0) || (!requiredForStart && nodeId < 0))
+            {
+                return nodeId;
+            }
+        }
+    }
+
+    bool GetRequiredForStart(const Control::Config& conf)
+    {
+        for (auto it = conf.nodeTypesParam.cbegin(); it < conf.nodeTypesParam.cend(); ++it)
+        {
+            if (conf.thisNodeParam.nodeTypeId == it->id)
+            {
+                return it->requiredForStart;
+            }
+        }
+        return false;
+    }
+}
+
 ControlApp::ControlApp(boost::asio::io_context&         io,
                        const boost::filesystem::path&   doseMainPath,
                        const std::int64_t               id,
@@ -67,7 +104,8 @@ ControlApp::ControlApp(boost::asio::io_context&         io,
     , m_resolutionStartTime(boost::chrono::steady_clock::now())
     , m_strand(io)
     , m_wcoutStrand(io)
-    , m_nodeId(id != 0 ? id : LlufId_GenerateRandom64())
+    , m_requiredForStart(GetRequiredForStart(m_conf))
+    , m_nodeId(GenerateNodeId(id, m_requiredForStart))
     , m_doseMainPath(doseMainPath)
     , m_ignoreControlCmd(ignoreControlCmd)
     , m_startTimer(io)
@@ -135,7 +173,6 @@ void ControlApp::Start()
     std::set<int64_t> lightNodeTypeIds;
     std::vector<Com::NodeTypeDefinition> commNodeTypes;
     std::map<std::int64_t, SP::NodeType> spNodeTypes;
-    bool requiredForStart = false;
     bool isLightNode = false;
     for (const auto& nt : m_conf.nodeTypesParam)
     {
@@ -146,7 +183,6 @@ void ControlApp::Start()
 
         if (m_conf.thisNodeParam.nodeTypeId == nt.id)
         {
-            requiredForStart = nt.requiredForStart;
             isLightNode = nt.isLightNode;
         }
 
@@ -238,7 +274,7 @@ void ControlApp::Start()
         }
     },
     // --- Form system callback ---
-    [this, isLightNode, requiredForStart](const int64_t incarnationId) -> bool
+    [this, isLightNode](const int64_t incarnationId) -> bool
     {
         if (incarnationId == m_incarnationId)
         {
@@ -262,7 +298,7 @@ void ControlApp::Start()
         }
 
         // Normal node, check if this node is of a type that is allowed to form systems
-        if (requiredForStart)
+        if (m_requiredForStart)
         {
             m_incarnationId = incarnationId;
             boost::asio::post(m_strand, [this]{SendControlInfo();});
