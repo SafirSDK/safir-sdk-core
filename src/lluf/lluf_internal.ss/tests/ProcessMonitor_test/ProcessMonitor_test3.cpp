@@ -363,7 +363,7 @@ BOOST_AUTO_TEST_CASE(many_sleepers)
 
     std::set<pid_t> pids;
     BOOST_TEST_MESSAGE("Launching sleepers");
-    for (int i = 0; i < 100; ++i)
+    for (int i = 0; i < 30; ++i)
     {
         const pid_t pid = LaunchSleeper(0.3);
         pids.insert(pid);
@@ -371,13 +371,13 @@ BOOST_AUTO_TEST_CASE(many_sleepers)
     }
 
     BOOST_TEST_MESSAGE("Waiting for exit");
-    for (int i = 0; i < 100; ++i)
+    for (int i = 0; i < 30; ++i)
     {
         WaitAny();
     }
 
     BOOST_TEST_MESSAGE("Waiting for term");
-    while(TerminatedPids().size() != 100)
+    while(TerminatedPids().size() != 30)
     {
         boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
     }
@@ -387,7 +387,7 @@ BOOST_AUTO_TEST_CASE(many_sleepers)
 
     BOOST_TEST_MESSAGE("Checking result");
     const std::vector<pid_t> terminated = TerminatedPids();
-    BOOST_CHECK_EQUAL(terminated.size(), 100U);
+    BOOST_CHECK_EQUAL(terminated.size(), 30U);
     for (std::vector<pid_t>::const_iterator it = terminated.begin();
          it != terminated.end(); ++it)
     {
