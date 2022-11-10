@@ -22,6 +22,8 @@
 *
 ******************************************************************************/
 #pragma once
+#include <cstddef>
+#include <atomic>
 
 namespace Safir
 {
@@ -51,6 +53,9 @@ namespace Com
 
         //If no acked data has been sent for this time, the system will send a ping message to all other nodes.
         static const int SendPingThreshold = 7000; //millisec
+
+        //Simulate network up/down. Global variable that must be initiated one time at startup.
+        extern std::atomic<bool> NetworkEnabled;
     }
 }
 }

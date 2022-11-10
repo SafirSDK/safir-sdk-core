@@ -30,11 +30,13 @@
 #include "ResolverTest.h"
 #include "CommunicationAllocatorTest.h"
 
+std::atomic<bool> Safir::Dob::Internal::Com::Parameters::NetworkEnabled;
 //**********************************
 // Main - run all tests
 //**********************************
 int main(int argc, char* argv[])
 {
+    Safir::Dob::Internal::Com::Parameters::NetworkEnabled = true;
     boost::chrono::steady_clock::now();
     try
     {

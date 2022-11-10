@@ -42,12 +42,12 @@
 
 inline std::shared_ptr<int> Int(int i) {return std::make_shared<int>(i);}
 
-class DataReceiverTest
+class DataReceiverTester
 {
 public:
     static void Run()
     {
-        std::cout<<"DataReceiverTest started"<<std::endl;
+        std::cout<<"DataReceiverTester started"<<std::endl;
 
         boost::asio::io_context io;
         auto work = boost::asio::make_work_guard(io);
@@ -251,7 +251,7 @@ public:
         threads.join_all();
         receiver.reset(); //make sure the DataReceiver is destructed before the io_service and the mutex
         TRACELINE
-        std::cout<<"DataReceiverTest tests passed"<<std::endl;
+        std::cout<<"DataReceiverTester tests passed"<<std::endl;
     }
 
 private:
@@ -344,10 +344,199 @@ private:
     }
 };
 
-boost::mutex DataReceiverTest::mutex;
-std::queue<int> DataReceiverTest::received;
-std::queue<int> DataReceiverTest::sentUnicast;
-std::queue<int> DataReceiverTest::sentMulticast;
-bool DataReceiverTest::running=true;
-bool DataReceiverTest::isReady=true;
-std::unique_ptr<DataReceiverTest::TestDataReceiver> DataReceiverTest::receiver;
+boost::mutex DataReceiverTester::mutex;
+std::queue<int> DataReceiverTester::received;
+std::queue<int> DataReceiverTester::sentUnicast;
+std::queue<int> DataReceiverTester::sentMulticast;
+bool DataReceiverTester::running=true;
+bool DataReceiverTester::isReady=true;
+std::unique_ptr<DataReceiverTester::TestDataReceiver> DataReceiverTester::receiver;
+
+//------------------------------------
+// Test simulation of network up/down
+//------------------------------------
+class DataReceiverSimulateNetworkUpDownTest
+{
+public:
+    DataReceiverSimulateNetworkUpDownTest()
+        :work(boost::asio::make_work_guard(io))
+        ,ep(boost::asio::ip::make_address("127.0.0.1"), 10123)
+        ,recvSocket(io, ep.protocol())
+        ,senderSocket(io, ep.protocol())
+
+    {
+        senderSocket.set_option(boost::asio::ip::udp::socket::reuse_address(true));
+        recvSocket.set_option(boost::asio::ip::udp::socket::reuse_address(true));
+        recvSocket.bind(ep);
+    }
+
+    void Run()
+    {
+        std::wcout<<"DataReceiverSimulateNetworkUpDownTest started"<<std::endl;
+        boost::thread_group threads;
+        for (int i = 0; i < 1; ++i)
+        {
+            threads.create_thread([&]{io.run();});
+        }
+
+        // start the SocketReader that we are going to test
+        Read();
+
+        Wait(1000);
+
+        std::string m0 = "a";
+        std::string m1 = "b";
+        senderSocket.send_to(boost::asio::buffer(m0), ep);
+        Wait(100);
+        senderSocket.send_to(boost::asio::buffer(m1), ep);
+
+        TRACELINE;
+        Expect({"a", "b"});
+
+        TRACELINE;
+        // simulate network down
+        Safir::Dob::Internal::Com::Parameters::NetworkEnabled = false;
+
+        // One more message is also expected to arrive since the socket is already an an async_receive.
+        // This should not be a problem since heartbeats are sent frequently and then the DataReceiver will notice that
+        // we have entered the simulated network-down-mode.
+        std::string expected = "expected";
+        std::string notExpected = "not expected";
+        senderSocket.send_to(boost::asio::buffer(expected), ep);
+        Wait(100);
+        senderSocket.send_to(boost::asio::buffer(notExpected), ep);
+        senderSocket.send_to(boost::asio::buffer(notExpected), ep);
+        senderSocket.send_to(boost::asio::buffer(notExpected), ep);
+        Wait(100);
+        senderSocket.send_to(boost::asio::buffer(notExpected), ep);
+        senderSocket.send_to(boost::asio::buffer(notExpected), ep);
+        senderSocket.send_to(boost::asio::buffer(notExpected), ep);
+
+        TRACELINE;
+        Expect({"a", "b", "expected"});
+
+        Wait(500);
+        Safir::Dob::Internal::Com::Parameters::NetworkEnabled = true;
+        std::string m2 = "c";
+        std::string m3 = "d";
+        senderSocket.send_to(boost::asio::buffer(m2), ep);
+        Wait(100);
+        senderSocket.send_to(boost::asio::buffer(m3), ep);
+
+        TRACELINE;
+        Expect({"a", "b", "expected", "c", "d"});
+
+        TRACELINE;
+        // end program
+        senderSocket.close();
+        recvSocket.close();
+        work.reset();
+        threads.join_all();
+        std::wcout<<"DataReceiverSimulateNetworkUpDownTest tests passed"<<std::endl;
+    }
+
+private:
+    boost::mutex mutex;
+    char buf[1024];
+    std::vector<std::string> recvMessages;
+    boost::asio::io_context io;
+    boost::asio::executor_work_guard<boost::asio::io_context::executor_type> work;
+    boost::asio::ip::udp::endpoint ep;
+    boost::asio::ip::udp::socket recvSocket;
+    boost::asio::ip::udp::socket senderSocket;
+
+    Safir::Dob::Internal::Com::SocketReader reader;
+
+    void Read()
+    {
+        reader.AsyncReceive(buf, 1024, &recvSocket, [this](const boost::system::error_code& ec, size_t size){HandleRecv(ec, size);});
+    }
+
+    void HandleRecv(const boost::system::error_code& ec, size_t size)
+    {
+        if (ec)
+        {
+            return;
+        }
+
+        std::string val(buf, buf + size);
+        {
+            boost::mutex::scoped_lock lock(mutex);
+            recvMessages.push_back(val);
+        }
+
+        Read();
+    }
+
+    void Expect(const std::vector<std::string>& expected)
+    {
+        int totalWait = 0;
+
+        // Wait for at most 20 sec for all data to arrive
+        while (totalWait < 20000)
+        {
+            Wait(500);
+            totalWait+=500;
+            {
+                boost::mutex::scoped_lock lock(mutex);
+                if (recvMessages.size() >= expected.size())
+                {
+                    break;
+                }
+
+            }
+        }
+
+        // Check that data is the expected
+        {
+            boost::mutex::scoped_lock lock(mutex);
+            if (recvMessages.size() != expected.size())
+            {
+                std::wcout << L"*** ERROR ***" << std::endl;
+                Dump(expected, recvMessages);
+            }
+            CHECKMSG(recvMessages.size() == expected.size(), recvMessages.size());
+
+            for (size_t i = 0; i < expected.size(); ++i)
+            {
+                if (recvMessages[i] != expected[i])
+                {
+                    std::wcout << L"*** ERROR ***" << std::endl;
+                    Dump(expected, recvMessages);
+                }
+                CHECK(recvMessages[i] == expected[i]);
+            }
+        }
+    }
+
+    void Dump(const std::vector<std::string>& e, const std::vector<std::string>& r) const
+    {
+        std::wcout << L"--- Expected:" << std::endl;
+        int index = 0;
+        for (const auto& m : e)
+        {
+            std::wcout << L"    " << (index++) << L". " << m.c_str() << std::endl;
+        }
+
+        std::wcout << L"--- Received:" << std::endl;
+        index = 0;
+        for (const auto& m : r)
+        {
+            std::wcout << L"    " << (index++) << L". " << m.c_str() << std::endl;
+        }
+    }
+
+};
+
+
+//--------------------------------
+// Start DataReceiverTest tests
+//--------------------------------
+struct DataReceiverTest
+{
+    static void Run()
+    {
+        DataReceiverTester::Run();
+        DataReceiverSimulateNetworkUpDownTest().Run();
+    }
+};

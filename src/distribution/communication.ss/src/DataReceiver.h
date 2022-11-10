@@ -231,30 +231,13 @@ namespace Com
             {
                 //received message with invalid checksum. Throw away the message and then continue as normal.
                 std::ostringstream os;
-
                 os<<m_logPrefix.c_str()<<"Received message with bad CRC, size="<<bytesRecv<<". Throw away and continue."<<std::endl;
-
                 if (bytesRecv>CommonHeaderSize)
                 {
-                    const CommonHeader* commonHeader=reinterpret_cast<const CommonHeader*>(buf);                    
-
-                    if (commonHeader->dataType==123) //used by communication_test
-                    {
-                        const MessageHeader* messageHeader=reinterpret_cast<const MessageHeader*>(buf);
-                        os<<"     If trying to parse despite CRC error: "<<messageHeader->ToString()<<std::endl;
-                        if (bytesRecv>MessageHeaderSize)
-                        {
-                            os<<Hexdump(buf, MessageHeaderSize, bytesRecv)<<std::endl;
-                        }
-                    }
-                    else
-                    {
-                        os<<"     If trying to parse despite CRC error: "<<commonHeader->ToString()<<std::endl;
-                    }
+                    const CommonHeader* commonHeader=reinterpret_cast<const CommonHeader*>(buf);
+                    os<<"     If trying to parse despite CRC error: "<<commonHeader->ToString()<<std::endl;
                 }
-
                 lllog(7)<<os.str().c_str()<<std::endl;
-
                 receiverReady=m_isReceiverReady(); //explicitly ask if receiver is ready to handle incoming data
             }
 
@@ -297,14 +280,45 @@ namespace Com
         }
     };
 
-    struct SocketReader
+    class SocketReader
     {
+    public:
         void AsyncReceive(char* buf,
                           size_t bufSize,
                           boost::asio::ip::udp::socket* socket,
                           const std::function< void(const boost::system::error_code&, size_t) >& completionHandler)
         {
-            socket->async_receive(boost::asio::buffer(buf, bufSize), completionHandler);
+
+            if (Parameters::NetworkEnabled)
+            {
+                socket->async_receive(boost::asio::buffer(buf, bufSize), completionHandler);
+            }
+            else
+            {
+                SimulateSilence(buf, bufSize, socket, completionHandler);
+            }
+        }
+
+    private:
+
+        void SimulateSilence(char* buf,
+                             size_t bufSize,
+                             boost::asio::ip::udp::socket* socket,
+                             const std::function< void(const boost::system::error_code&, size_t) >& completionHandler)
+        {
+            socket->async_receive(boost::asio::buffer(buf, bufSize),
+                                  [this, buf, bufSize, socket, completionHandler](const boost::system::error_code& ec, size_t s)
+            {
+                if (Parameters::NetworkEnabled || ec)
+                {
+                    completionHandler(ec, s);
+                }
+                else
+                {
+                    SimulateSilence(buf, bufSize, socket, completionHandler);
+                }
+            });
+
         }
     };
 

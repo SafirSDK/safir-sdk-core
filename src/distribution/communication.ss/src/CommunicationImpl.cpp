@@ -25,6 +25,7 @@
 #include <boost/lexical_cast.hpp>
 #include <Safir/Utilities/Internal/Id.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
+#include <Safir/Utilities/Internal/Expansion.h>
 #include "Parameters.h"
 #include "CommunicationImpl.h"
 #include "Message.h"
@@ -37,6 +38,9 @@ namespace Internal
 {
 namespace Com
 {
+
+// Initiate the extern global parameters in Parameters.h
+namespace Parameters {std::atomic<bool> NetworkEnabled;}
 
 namespace
 {
@@ -84,6 +88,9 @@ namespace
                   [this](){return m_deliveryHandler.NumberOfUndeliveredMessages()<Parameters::MaxNumberOfUndelivered;})
         ,m_logPrefix("COM["+std::to_string(nodeId)+"]: ")
     {
+        Parameters::NetworkEnabled = true;
+        auto safirInstance = Safir::Utilities::Internal::Expansion::GetSafirInstance();
+
         if (nodeId==0)
         {
             throw std::invalid_argument("Safir.Communication ctor: Id=0 is reserved for internal usage and is not valid. You should consider using a random generated id.");
@@ -91,18 +98,21 @@ namespace
         auto myNodeType=m_nodeTypes[nodeTypeId];
         lllog(1)<<m_logPrefix.c_str()<<L"-------------------------------------------------"<<std::endl;
         lllog(1)<<m_logPrefix.c_str()<<L"Communication initiated"<<std::endl;
-        lllog(1)<<m_logPrefix.c_str()<<L"    id:    "<<m_me.nodeId<<std::endl;
-        lllog(1)<<m_logPrefix.c_str()<<L"    name:    "<<m_me.name.c_str()<<std::endl;
-        lllog(1)<<m_logPrefix.c_str()<<L"    data address: "<<m_me.dataAddress.c_str()<<std::endl;
+        lllog(1)<<m_logPrefix.c_str()<<L"    Safir instance:  "<<safirInstance<<std::endl;
+        lllog(1)<<m_logPrefix.c_str()<<L"    node id:         "<<m_me.nodeId<<std::endl;
+        lllog(1)<<m_logPrefix.c_str()<<L"    name:            "<<m_me.name.c_str()<<std::endl;
+        lllog(1)<<m_logPrefix.c_str()<<L"    data address:    "<<m_me.dataAddress.c_str()<<std::endl;
         lllog(1)<<m_logPrefix.c_str()<<L"    control address: "<<m_me.controlAddress.c_str()<<std::endl;
-        lllog(1)<<m_logPrefix.c_str()<<L"    multicast: "<<myNodeType->MulticastAddress().c_str()<<std::endl;
+        lllog(1)<<m_logPrefix.c_str()<<L"    multicast:       "<<myNodeType->MulticastAddress().c_str()<<std::endl;
         lllog(1)<<m_logPrefix.c_str()<<L"    using multicast: "<<std::boolalpha<<myNodeType->UseMulticast()<<std::dec<<std::endl;
         lllog(1)<<m_logPrefix.c_str()<<L"-------------------------------------------------"<<std::endl;
 
-#ifdef COM_USE_UNRELIABLE_SEND_POLICY
-        lllog(1)<<L"*** COM_USE_UNRELIABLE_SEND_POLICY IS DEFINED ***"<<std::endl;
-        std::wcout<<L"*** COM_USE_UNRELIABLE_SEND_POLICY IS DEFINED ***"<<std::endl;
-#endif
+        auto enableDebug = getenv("SAFIR_COM_NETWORK_SIMULATION");
+        if (enableDebug != nullptr)
+        {
+            lllog(1)<<m_logPrefix.c_str()<<L"Env SAFIR_COM_NETWORK_SIMULATION is set. Enable possibility to simulate an unavailable network."<<std::endl;
+            m_debugServer = std::make_unique<DebugCommandServer>(m_ioContext, safirInstance, m_logPrefix);
+        }
     }
 #ifdef _MSC_VER
 #pragma warning (pop)
@@ -185,6 +195,10 @@ namespace
     {
         m_running = false;
         lllog(1)<<m_logPrefix.c_str()<<L"Stop "<<m_me.name.c_str()<<std::endl;
+        if (m_debugServer)
+        {
+            m_debugServer->Stop();
+        }
         boost::asio::post(m_receiveStrand, [this] {m_deliveryHandler.Stop(); });
         m_reader.Stop();
 

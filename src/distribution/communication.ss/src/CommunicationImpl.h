@@ -35,6 +35,7 @@
 #include "DataSender.h"
 #include "HeartbeatSender.h"
 #include "Resolver.h"
+#include "DebugCommandServer.h"
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -128,6 +129,8 @@ namespace Com
         DataReceiver m_reader;
 
         std::string m_logPrefix;
+
+        std::unique_ptr<DebugCommandServer> m_debugServer;
 
         //returns true if it is ok to call OnRecv again, false if flooded with received messages
         bool OnRecv(const char* data, size_t size, bool multicast);

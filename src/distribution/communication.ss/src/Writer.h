@@ -29,6 +29,7 @@
 #include <Safir/Utilities/Internal/SystemLog.h>
 #include "Message.h"
 #include "Resolver.h"
+#include "Parameters.h"
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -49,7 +50,6 @@ namespace Internal
 {
 namespace Com
 {
-
 //#define COM_USE_UNRELIABLE_SEND_POLICY //Only uncomment during test.
 #ifndef COM_USE_UNRELIABLE_SEND_POLICY
     //------------------------------------------------------------
@@ -275,7 +275,10 @@ namespace Com
 
         void SendTo(const Ptr& val, const boost::asio::ip::udp::endpoint& to)
         {
-            SendPolicy::Send(val, m_socket, to);
+            if (Parameters::NetworkEnabled)
+            {
+                SendPolicy::Send(val, m_socket, to);
+            }
         }
 
         void SendMulticast(const Ptr& val)

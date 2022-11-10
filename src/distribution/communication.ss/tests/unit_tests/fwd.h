@@ -43,6 +43,7 @@
 #  pragma warning (pop)
 #endif
 
+#include "../../src/Parameters.h"
 #include "../../src/MessageQueue.h"
 #include "../../src/Node.h"
 #include "../../src/DeliveryHandler.h"

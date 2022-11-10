@@ -1124,6 +1124,80 @@ boost::mutex RetransmissionTest::mutex;
 std::vector< std::shared_ptr<Com::UserData> > RetransmissionTest::sent;
 std::vector< std::pair<int64_t, size_t> > RetransmissionTest::retransmit;
 
+//------------------------------------
+// Test simulation of network up/down
+//------------------------------------
+class DataSenderSimulateNetworkUpDownTest
+{
+public:
+    static void Run()
+    {
+        std::wcout<<"DataSenderSimulateNetworkUpDownTest started"<<std::endl;
+
+        boost::asio::io_context io;
+        auto work=boost::asio::make_work_guard(io);
+        boost::thread_group threads;
+        for (int i = 0; i < 1; ++i)
+        {
+            threads.create_thread([&]{io.run();});
+        }
+
+        TestWriter writer(io, 4);
+        boost::asio::ip::udp::endpoint ep(boost::asio::ip::make_address("127.0.0.1"), 10000);
+
+        CHECK(sent.size() == 0);
+        auto m0 = std::make_shared<std::string>("0");
+        auto m1 = std::make_shared<std::string>("1");
+        writer.SendTo(m0, ep);
+        writer.SendTo(m1, ep);
+        CHECK(sent.size() == 2);
+        CHECK(sent.at(0) == "0");
+        CHECK(sent.at(1) == "1");
+
+        Safir::Dob::Internal::Com::Parameters::NetworkEnabled = false;
+
+        auto m2 = std::make_shared<std::string>("2");
+        auto m3 = std::make_shared<std::string>("3");
+        writer.SendTo(m2, ep);
+        writer.SendTo(m3, ep);
+        CHECK(sent.size() == 2);
+        CHECK(sent.at(0) == "0");
+        CHECK(sent.at(1) == "1");
+
+        Safir::Dob::Internal::Com::Parameters::NetworkEnabled = true;
+
+        writer.SendTo(m2, ep);
+        writer.SendTo(m3, ep);
+        CHECK(sent.size() == 4);
+        CHECK(sent.at(0) == "0");
+        CHECK(sent.at(1) == "1");
+        CHECK(sent.at(2) == "2");
+        CHECK(sent.at(3) == "3");
+
+        work.reset();
+        threads.join_all();
+        std::wcout<<"DataSenderSimulateNetworkUpDownTest tests passed"<<std::endl;
+    }
+
+private:
+
+    static std::vector<std::string> sent;
+
+    struct TestSendPolicy
+    {
+        void Send(const std::shared_ptr<std::string>& val,
+                  boost::asio::ip::udp::socket& /*socket*/,
+                  const boost::asio::ip::udp::endpoint& /*to*/)
+        {
+            sent.push_back(*val);
+        }
+    };
+
+    typedef Com::Writer<std::string, DataSenderSimulateNetworkUpDownTest::TestSendPolicy> TestWriter;
+};
+
+std::vector<std::string> DataSenderSimulateNetworkUpDownTest::sent;
+
 //-----------------------
 // Start Sender tests
 //-----------------------
@@ -1135,5 +1209,6 @@ struct DataSenderTest
         SmallWindowSenderTest::Run();
         RetransmissionTest::Run();
         UnackedDataSenderTest::Run();
+        DataSenderSimulateNetworkUpDownTest::Run();
     }
 };
