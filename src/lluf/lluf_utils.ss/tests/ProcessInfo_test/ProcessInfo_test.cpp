@@ -45,7 +45,9 @@ int main(int argc, char** argv)
     }
 
     Safir::Utilities::ProcessInfo pi(pid);
-    if (pi.GetProcessName() != name && pi.GetProcessName() != name + ".exe")
+    if (pi.GetProcessName() != name &&
+        pi.GetProcessName() != name + ".exe" &&
+        pi.GetProcessName() != boost::lexical_cast<std::string>(pid))
     {
         std::wcout << "Not ok! GetProcessName for pid " << pid << " returned '"
                    << pi.GetProcessName().c_str() << "'" << std::endl;

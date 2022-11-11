@@ -124,7 +124,7 @@ namespace Utilities
 #if defined(linux) || defined(__linux) || defined(__linux__)
         const std::vector<std::string> cmdline = GetCommandLine(m_pid);
 
-        if (cmdline.size() == 0)
+        if (cmdline.empty() || cmdline[0].empty())
         {
             return boost::lexical_cast<std::string>(m_pid);
         }
