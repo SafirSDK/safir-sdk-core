@@ -1562,6 +1562,28 @@ Consumer 0: OnUnregistered:
   HandlerId = DEFAULT_HANDLER
 
 ==========================================================================
+TESTCASE 2008
+Description: Test of sending and subscribing of global messages
+Expectation: Consumer 0 recieves a global message
+--------- Setup -----------
+--------- Test  -----------
+Consumer 0: OnMessage:
+  Type       = DoseTest.GlobalMessage
+  ChannelId  = DEFAULT_CHANNEL
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>888888</NodeId><ConnectionName xml:space="preserve">Server_1.888888;0;partner_test_connection;2</ConnectionName></Safir.Dob.ConnectionInfo>
+  ChannelId  = DEFAULT_CHANNEL
+  Message    = <?xml version="1.0" encoding="utf-8"?><DoseTest.GlobalMessage><Info xml:space="preserve">Global Message</Info></DoseTest.GlobalMessage>
+
+
+Consumer 0: OnMessage:
+  Type       = DoseTest.GlobalMessage
+  ChannelId  = DEFAULT_CHANNEL
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>66666</NodeId><ConnectionName xml:space="preserve">Client_1.66666;0;partner_test_connection;4</ConnectionName></Safir.Dob.ConnectionInfo>
+  ChannelId  = DEFAULT_CHANNEL
+  Message    = <?xml version="1.0" encoding="utf-8"?><DoseTest.GlobalMessage><Info xml:space="preserve">Global Message</Info></DoseTest.GlobalMessage>
+
+
+==========================================================================
 TESTCASE 9999
 Description: Empty Test case
 Expectation: Nothing

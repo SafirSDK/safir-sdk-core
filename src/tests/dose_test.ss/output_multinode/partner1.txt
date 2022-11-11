@@ -2323,6 +2323,12 @@ Expectation: All nodes should receive registration and set.
 --------- Setup -----------
 --------- Test  -----------
 ==========================================================================
+TESTCASE 2008
+Description: Test of sending and subscribing of global messages
+Expectation: Consumer 0 recieves a global message
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
 TESTCASE 9999
 Description: Empty Test case
 Expectation: Nothing
