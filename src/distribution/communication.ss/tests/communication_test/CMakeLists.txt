@@ -6,8 +6,8 @@ TARGET_LINK_LIBRARIES(communication_test PRIVATE
   lluf_internal
   Boost::program_options
   Boost::thread)
-  
+
 configure_file(communication_network.py
-  "${CMAKE_CURRENT_BINARY_DIR}/communication_network.py" USE_SOURCE_PERMISSIONS)
+  "${CMAKE_CURRENT_BINARY_DIR}/communication_network.py")
 
 SAFIR_INSTALL(TARGETS communication_test COMPONENT TestSuite)
