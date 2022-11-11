@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<DoseTest.Items.TestCase>
+  <Description xml:space="preserve">Register a limited entity on a lightnode (partner 4). Send create requests from some nodes.</Description>
+  <Expectation xml:space="preserve">Other normal nodes and self should be able to send request, but not other light.</Expectation>
+  <TestCaseSetupActions>
+    <DoseTest.Action>
+      <ActionKind>SendResponse</ActionKind>
+      <Partner>4</Partner>
+      <Consumer>2</Consumer>
+      <ActionCallback>OnCreateRequest</ActionCallback>
+      <Consumer>0</Consumer>
+      <Object type="DoseTest.Success">
+        <Info xml:space="preserve">Succesful response</Info>
+      </Object>
+    </DoseTest.Action>
+    <DoseTest.Action>
+      <ActionKind>RegisterEntityHandler</ActionKind>
+      <Partner>4</Partner>
+      <Consumer>2</Consumer>
+      <TypeId>DoseTest.LimitedEntity</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
+    </DoseTest.Action>
+  </TestCaseSetupActions>
+  <TestActions>
+    <DoseTest.Action>
+      <ActionKind>CreateRequest</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <Instance>9876540</Instance>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <Object type="DoseTest.LimitedEntity">
+        <Info xml:space="preserve">Created 0</Info>
+      </Object>
+    </DoseTest.Action>
+    <DoseTest.Action>
+      <ActionKind>CreateRequest</ActionKind>
+      <Partner>2</Partner>
+      <Consumer>0</Consumer>
+      <Instance>9876542</Instance>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <Object type="DoseTest.LimitedEntity">
+        <Info xml:space="preserve">Created 2</Info>
+      </Object>
+    </DoseTest.Action>
+    <DoseTest.Action>
+      <ActionKind>CreateRequest</ActionKind>
+      <Partner>3</Partner>
+      <Consumer>0</Consumer>
+      <Instance>9876543</Instance>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <Object type="DoseTest.LimitedEntity">
+        <Info xml:space="preserve">Created 3</Info>
+      </Object>
+    </DoseTest.Action>
+    <DoseTest.Action>
+      <ActionKind>CreateRequest</ActionKind>
+      <Partner>4</Partner>
+      <Consumer>0</Consumer>
+      <Instance>9876544</Instance>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <Object type="DoseTest.LimitedEntity">
+        <Info xml:space="preserve">Created 4</Info>
+      </Object>
+    </DoseTest.Action>
+  </TestActions>
+</DoseTest.Items.TestCase>

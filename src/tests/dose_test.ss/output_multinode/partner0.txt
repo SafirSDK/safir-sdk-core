@@ -5720,6 +5720,59 @@ Consumer 0: OnRegistered:
   HandlerId = DEFAULT_HANDLER
 
 ==========================================================================
+TESTCASE 2005
+Description: Test of sending create request from lightnode to global entity
+Expectation: Partner 4 receives a success response and the entity should be set on p3 and p4
+--------- Setup -----------
+--------- Test  -----------
+Consumer 0: OnCreateRequest (Requestor decides instance id): 
+  Entity     = (DoseTest.GlobalEntity, 987654)
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>66666</NodeId><ConnectionName xml:space="preserve">Client_1.66666;0;partner_test_connection;4</ConnectionName></Safir.Dob.ConnectionInfo>
+  Handler    = DEFAULT_HANDLER
+  HandlerStr = DEFAULT_HANDLER
+  Request    = <?xml version="1.0" encoding="utf-8"?><DoseTest.GlobalEntity><Info xml:space="preserve">Created</Info></DoseTest.GlobalEntity>
+
+==========================================================================
+TESTCASE 2006
+Description: Register a limited entity on a lightnode (partner 4). Send create requests from some nodes.
+Expectation: Other normal nodes and self should be able to send request, but not other light.
+--------- Setup -----------
+--------- Test  -----------
+Consumer 0: OnResponse:
+  Type       = DoseTest.SuccessfulCreate
+  IsSuccess  = true
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>66666</NodeId><ConnectionName xml:space="preserve">Client_1.66666;0;partner_test_connection;4</ConnectionName></Safir.Dob.ConnectionInfo>
+  Response   = <?xml version="1.0" encoding="utf-8"?><DoseTest.SuccessfulCreate><Info xml:space="preserve">AutoResponse</Info></DoseTest.SuccessfulCreate>
+  Request    = <?xml version="1.0" encoding="utf-8"?><DoseTest.LimitedEntity><Info xml:space="preserve">Created 0</Info></DoseTest.LimitedEntity>
+
+==========================================================================
+TESTCASE 2007
+Description: Register a limited entity on a normal node
+Expectation: All nodes should receive registration and set.
+--------- Setup -----------
+--------- Test  -----------
+Consumer 0: OnRegistered:
+  Type      = DoseTest.LimitedEntity
+  HandlerId = DEFAULT_HANDLER
+
+Consumer 0: OnNewEntity:
+  EntityId  = (DoseTest.LimitedEntity, 0)
+  Owner     = DEFAULT_HANDLER
+  OwnerConn = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">Server_0.999999;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
+  OwnerStr  = DEFAULT_HANDLER
+  Entity    = <?xml version="1.0" encoding="utf-8"?><DoseTest.LimitedEntity><Info xml:space="preserve">Some Data</Info></DoseTest.LimitedEntity>
+  Changed top-level members: 
+    Info
+    MoreInfo
+
+Consumer 0: OnDeletedEntity:
+  EntityId       = (DoseTest.LimitedEntity, 0)
+  deletedByOwner = true
+  Owner          = DEFAULT_HANDLER
+  OwnerStr  = DEFAULT_HANDLER
+  Previous  = <?xml version="1.0" encoding="utf-8"?><DoseTest.LimitedEntity><Info xml:space="preserve">Some Data</Info></DoseTest.LimitedEntity>
+
+==========================================================================
 TESTCASE 9999
 Description: Empty Test case
 Expectation: Nothing

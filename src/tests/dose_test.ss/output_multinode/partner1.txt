@@ -2305,6 +2305,24 @@ Expectation: Other normal nodes should receive registration and set, but not oth
 --------- Setup -----------
 --------- Test  -----------
 ==========================================================================
+TESTCASE 2005
+Description: Test of sending create request from lightnode to global entity
+Expectation: Partner 4 receives a success response and the entity should be set on p3 and p4
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 2006
+Description: Register a limited entity on a lightnode (partner 4). Send create requests from some nodes.
+Expectation: Other normal nodes and self should be able to send request, but not other light.
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 2007
+Description: Register a limited entity on a normal node
+Expectation: All nodes should receive registration and set.
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
 TESTCASE 9999
 Description: Empty Test case
 Expectation: Nothing

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<DoseTest.Items.TestCase>
+  <Description xml:space="preserve">Test of sending create request from lightnode to global entity</Description>
+  <Expectation xml:space="preserve">Partner 4 receives a success response and the entity should be set on p3 and p4</Expectation>
+  <TestCaseSetupActions>
+    <DoseTest.Action>
+      <ActionKind>SendResponse</ActionKind>
+      <Partner>0</Partner>
+      <ActionCallback>OnCreateRequest</ActionCallback>
+      <Consumer>0</Consumer>
+      <Object type="DoseTest.Success">
+        <Info xml:space="preserve">Succesful response</Info>
+      </Object>
+    </DoseTest.Action>
+    <DoseTest.Action>
+      <ActionKind>RegisterEntityHandler</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.GlobalEntity</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
+    </DoseTest.Action>
+  </TestCaseSetupActions>
+  <TestActions>
+    <DoseTest.Action>
+      <ActionKind>CreateRequest</ActionKind>
+      <Partner>4</Partner>
+      <Consumer>0</Consumer>
+      <Instance>987654</Instance>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <Object type="DoseTest.GlobalEntity">
+        <Info xml:space="preserve">Created</Info>
+      </Object>
+    </DoseTest.Action>
+    <DoseTest.Action>
+      <ActionKind>Sleep</ActionKind>
+      <SleepDuration>2</SleepDuration>
+    </DoseTest.Action>
+    <DoseTest.Action>
+      <ActionKind>Read</ActionKind>
+      <Partner>4</Partner>
+      <Consumer>1</Consumer>
+      <EntityId>
+        <name>DoseTest.GlobalEntity</name>
+        <instanceId>987654</instanceId>
+      </EntityId>
+    </DoseTest.Action>
+    <DoseTest.Action>
+      <ActionKind>Read</ActionKind>
+      <Partner>3</Partner>
+      <Consumer>1</Consumer>
+      <EntityId>
+        <name>DoseTest.GlobalEntity</name>
+        <instanceId>987654</instanceId>
+      </EntityId>
+    </DoseTest.Action>
+  </TestActions>
+</DoseTest.Items.TestCase>
