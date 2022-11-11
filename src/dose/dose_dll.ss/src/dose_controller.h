@@ -439,7 +439,7 @@ namespace Internal
         /*             // For test purposes */
         /*             void DumpDirtySub(std::vector<DirtySub>& ds); */
 
-        bool m_isLightNode;
+        const bool m_isLightNode;
         Safir::Dob::Typesystem::Internal::DistributionScopeReader m_distributionScopeReader;
 
     };

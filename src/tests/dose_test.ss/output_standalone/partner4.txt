@@ -1387,6 +1387,125 @@ Expectation: No log that indicates remaining consumers.
 --------- Setup -----------
 --------- Test  -----------
 ==========================================================================
+TESTCASE 2000
+Description: Register a local entity on a lightnode (partner 4)
+Expectation: No other node should receive registration, but of course local should
+--------- Setup -----------
+--------- Test  -----------
+Consumer 0: OnRegistered:
+  Type      = DoseTest.LocalEntity
+  HandlerId = DEFAULT_HANDLER
+
+Consumer 0: OnNewEntity:
+  EntityId  = (DoseTest.LocalEntity, 0)
+  Owner     = DEFAULT_HANDLER
+  OwnerConn = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;4</ConnectionName></Safir.Dob.ConnectionInfo>
+  OwnerStr  = DEFAULT_HANDLER
+  Entity    = <?xml version="1.0" encoding="utf-8"?><DoseTest.LocalEntity><Info xml:space="preserve">Some Data</Info></DoseTest.LocalEntity>
+  Changed top-level members: 
+    Info
+    MoreInfo
+
+Consumer 0: OnDeletedEntity:
+  EntityId       = (DoseTest.LocalEntity, 0)
+  deletedByOwner = true
+  Owner          = DEFAULT_HANDLER
+  OwnerStr  = DEFAULT_HANDLER
+  Previous  = <?xml version="1.0" encoding="utf-8"?><DoseTest.LocalEntity><Info xml:space="preserve">Some Data</Info></DoseTest.LocalEntity>
+
+==========================================================================
+TESTCASE 2001
+Description: Register a limited entity on a lightnode (partner 4)
+Expectation: Other normal nodes should receive registration and set, but not other light.
+--------- Setup -----------
+--------- Test  -----------
+Consumer 0: OnRegistered:
+  Type      = DoseTest.LimitedEntity
+  HandlerId = DEFAULT_HANDLER
+
+Consumer 0: OnNewEntity:
+  EntityId  = (DoseTest.LimitedEntity, 0)
+  Owner     = DEFAULT_HANDLER
+  OwnerConn = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;4</ConnectionName></Safir.Dob.ConnectionInfo>
+  OwnerStr  = DEFAULT_HANDLER
+  Entity    = <?xml version="1.0" encoding="utf-8"?><DoseTest.LimitedEntity><Info xml:space="preserve">Some Data</Info></DoseTest.LimitedEntity>
+  Changed top-level members: 
+    Info
+    MoreInfo
+
+Consumer 0: OnDeletedEntity:
+  EntityId       = (DoseTest.LimitedEntity, 0)
+  deletedByOwner = true
+  Owner          = DEFAULT_HANDLER
+  OwnerStr  = DEFAULT_HANDLER
+  Previous  = <?xml version="1.0" encoding="utf-8"?><DoseTest.LimitedEntity><Info xml:space="preserve">Some Data</Info></DoseTest.LimitedEntity>
+
+==========================================================================
+TESTCASE 2002
+Description: Try to register things on a lightnode (partner 4) that should not be possible to register
+Expectation: Registrations should fail and noone should be told about them.
+--------- Setup -----------
+--------- Test  -----------
+Consumer 0: OnRegistered:
+  Type      = DoseTest.GlobalEntity
+  HandlerId = RegisterEntityHandler-DoseTest.GlobalEntity
+
+Consumer 2: OnCompletedRegistration:
+  Type      = DoseTest.GlobalEntity
+  HandlerId = RegisterEntityHandlerPending-DoseTest.GlobalEntity
+
+Consumer 0: OnRegistered:
+  Type      = DoseTest.GlobalEntity
+  HandlerId = RegisterEntityHandlerPending-DoseTest.GlobalEntity
+
+Consumer 2: OnInitialInjectionsDone:
+  Type      = DoseTest.GlobalEntity
+  HandlerId = RegisterEntityHandlerPending-DoseTest.GlobalEntity
+
+Consumer 2: OnCompletedRegistration:
+  Type      = DoseTest.LocalEntity
+  HandlerId = RegisterEntityHandlerPending-DoseTest.LocalEntity
+
+Consumer 0: OnRegistered:
+  Type      = DoseTest.LocalEntity
+  HandlerId = RegisterEntityHandlerPending-DoseTest.LocalEntity
+
+Consumer 2: OnInitialInjectionsDone:
+  Type      = DoseTest.LocalEntity
+  HandlerId = RegisterEntityHandlerPending-DoseTest.LocalEntity
+
+Caught FundamentalException in ExecuteAction: Safir.Dob.Typesystem.SoftwareViolationException
+Consumer 0: OnRegistered:
+  Type      = DoseTest.InjectableEntity
+  HandlerId = RegisterEntityHandlerInjection-DoseTest.InjectableEntity
+
+Consumer 2: OnInitialInjectionsDone:
+  Type      = DoseTest.InjectableEntity
+  HandlerId = RegisterEntityHandlerInjection-DoseTest.InjectableEntity
+
+Caught FundamentalException in ExecuteAction: Safir.Dob.Typesystem.SoftwareViolationException
+Consumer 0: OnRegistered:
+  Type      = DoseTest.GlobalService
+  HandlerId = RegisterServiceHandler-DoseTest.GlobalService
+
+Consumer 2: OnCompletedRegistration:
+  Type      = DoseTest.GlobalService
+  HandlerId = RegisterServiceHandlerPending-DoseTest.GlobalService
+
+Consumer 0: OnRegistered:
+  Type      = DoseTest.GlobalService
+  HandlerId = RegisterServiceHandlerPending-DoseTest.GlobalService
+
+Consumer 2: OnCompletedRegistration:
+  Type      = DoseTest.LocalService
+  HandlerId = RegisterServiceHandlerPending-DoseTest.LocalService
+
+Consumer 0: OnRegistered:
+  Type      = DoseTest.LocalService
+  HandlerId = RegisterServiceHandlerPending-DoseTest.LocalService
+
+Caught FundamentalException in ExecuteAction: Safir.Dob.Typesystem.SoftwareViolationException
+==========================================================================
 TESTCASE 9999
 Description: Empty Test case
 Expectation: Nothing

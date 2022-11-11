@@ -2364,6 +2364,45 @@ Expectation: No log that indicates remaining consumers.
 --------- Setup -----------
 --------- Test  -----------
 ==========================================================================
+TESTCASE 2000
+Description: Register a local entity on a lightnode (partner 4)
+Expectation: No other node should receive registration, but of course local should
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 2001
+Description: Register a limited entity on a lightnode (partner 4)
+Expectation: Other normal nodes should receive registration and set, but not other light.
+--------- Setup -----------
+--------- Test  -----------
+Consumer 0: OnRegistered:
+  Type      = DoseTest.LimitedEntity
+  HandlerId = DEFAULT_HANDLER
+
+Consumer 0: OnNewEntity:
+  EntityId  = (DoseTest.LimitedEntity, 0)
+  Owner     = DEFAULT_HANDLER
+  OwnerConn = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>66666</NodeId><ConnectionName xml:space="preserve">Client_1.66666;0;partner_test_connection;4</ConnectionName></Safir.Dob.ConnectionInfo>
+  OwnerStr  = DEFAULT_HANDLER
+  Entity    = <?xml version="1.0" encoding="utf-8"?><DoseTest.LimitedEntity><Info xml:space="preserve">Some Data</Info></DoseTest.LimitedEntity>
+  Changed top-level members: 
+    Info
+    MoreInfo
+
+Consumer 0: OnDeletedEntity:
+  EntityId       = (DoseTest.LimitedEntity, 0)
+  deletedByOwner = true
+  Owner          = DEFAULT_HANDLER
+  OwnerStr  = DEFAULT_HANDLER
+  Previous  = <?xml version="1.0" encoding="utf-8"?><DoseTest.LimitedEntity><Info xml:space="preserve">Some Data</Info></DoseTest.LimitedEntity>
+
+==========================================================================
+TESTCASE 2002
+Description: Try to register things on a lightnode (partner 4) that should not be possible to register
+Expectation: Registrations should fail and noone should be told about them.
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
 TESTCASE 9999
 Description: Empty Test case
 Expectation: Nothing

@@ -2275,6 +2275,24 @@ Expectation: No log that indicates remaining consumers.
 --------- Setup -----------
 --------- Test  -----------
 ==========================================================================
+TESTCASE 2000
+Description: Register a local entity on a lightnode (partner 4)
+Expectation: No other node should receive registration, but of course local should
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 2001
+Description: Register a limited entity on a lightnode (partner 4)
+Expectation: Other normal nodes should receive registration and set, but not other light.
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 2002
+Description: Try to register things on a lightnode (partner 4) that should not be possible to register
+Expectation: Registrations should fail and noone should be told about them.
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
 TESTCASE 9999
 Description: Empty Test case
 Expectation: Nothing
