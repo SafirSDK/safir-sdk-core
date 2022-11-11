@@ -1457,6 +1457,26 @@ Caught FundamentalException in ExecuteAction: Safir.Dob.Typesystem.SoftwareViola
 Caught FundamentalException in ExecuteAction: Safir.Dob.Typesystem.SoftwareViolationException
 Caught FundamentalException in ExecuteAction: Safir.Dob.Typesystem.SoftwareViolationException
 ==========================================================================
+TESTCASE 2003
+Description: Register a local service on a lightnode (partner 4)
+Expectation: No other node should receive registration, but of course local should
+--------- Setup -----------
+--------- Test  -----------
+Consumer 0: OnRegistered:
+  Type      = DoseTest.LocalService
+  HandlerId = DEFAULT_HANDLER
+
+==========================================================================
+TESTCASE 2004
+Description: Register a limited service on a lightnode (partner 4)
+Expectation: Other normal nodes should receive registration and set, but not other light.
+--------- Setup -----------
+--------- Test  -----------
+Consumer 0: OnRegistered:
+  Type      = DoseTest.LimitedService
+  HandlerId = DEFAULT_HANDLER
+
+==========================================================================
 TESTCASE 9999
 Description: Empty Test case
 Expectation: Nothing

@@ -2293,6 +2293,18 @@ Expectation: Registrations should fail and noone should be told about them.
 --------- Setup -----------
 --------- Test  -----------
 ==========================================================================
+TESTCASE 2003
+Description: Register a local service on a lightnode (partner 4)
+Expectation: No other node should receive registration, but of course local should
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 2004
+Description: Register a limited service on a lightnode (partner 4)
+Expectation: Other normal nodes should receive registration and set, but not other light.
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
 TESTCASE 9999
 Description: Empty Test case
 Expectation: Nothing

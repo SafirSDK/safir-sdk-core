@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<DoseTest.Items.TestCase>
+  <Description xml:space="preserve">Register a local service on a lightnode (partner 4)</Description>
+  <Expectation xml:space="preserve">No other node should receive registration, but of course local should</Expectation>
+  <TestCaseSetupActions>
+    <DoseTest.Action>
+      <ActionKind>SubscribeRegistration</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.LocalService</TypeId>
+      <Handler>ALL_HANDLERS</Handler>
+      <IncludeSubclasses>true</IncludeSubclasses>
+      <RestartSubscription>false</RestartSubscription>
+    </DoseTest.Action>
+    <DoseTest.Action>
+      <ActionKind>SubscribeRegistration</ActionKind>
+      <Partner>2</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.LocalService</TypeId>
+      <Handler>ALL_HANDLERS</Handler>
+      <IncludeSubclasses>true</IncludeSubclasses>
+      <RestartSubscription>false</RestartSubscription>
+    </DoseTest.Action>
+    <DoseTest.Action>
+      <ActionKind>SubscribeRegistration</ActionKind>
+      <Partner>3</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.LocalService</TypeId>
+      <Handler>ALL_HANDLERS</Handler>
+      <IncludeSubclasses>true</IncludeSubclasses>
+      <RestartSubscription>false</RestartSubscription>
+    </DoseTest.Action>
+    <DoseTest.Action>
+      <ActionKind>SubscribeRegistration</ActionKind>
+      <Partner>4</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.LocalService</TypeId>
+      <Handler>ALL_HANDLERS</Handler>
+      <IncludeSubclasses>true</IncludeSubclasses>
+      <RestartSubscription>false</RestartSubscription>
+    </DoseTest.Action>
+
+  </TestCaseSetupActions>
+  <TestActions>
+    <DoseTest.Action>
+      <ActionKind>RegisterServiceHandler</ActionKind>
+      <Partner>4</Partner>
+      <Consumer>2</Consumer>
+      <TypeId>DoseTest.LocalService</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
+    </DoseTest.Action>
+  </TestActions>
+</DoseTest.Items.TestCase>
