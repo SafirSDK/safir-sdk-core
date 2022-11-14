@@ -242,7 +242,8 @@ namespace Internal
         {
             for (auto node = m_liveNodes.cbegin(); node != m_liveNodes.cend(); ++node)
             {
-                if (reg.acceptedNodes.find(node->first) == reg.acceptedNodes.end())
+                if (reg.acceptedNodes.find(node->first) == reg.acceptedNodes.end() &&
+                    !m_distribution.IsLightNode(node->second))
                 {
                     gotAll = false;
                     lllout << "Request " << requestId << " needs accept from node " << node->first << std::endl;
@@ -286,7 +287,7 @@ namespace Internal
 
         lllout << "Sending Smt_Action_PendingRegistrationRequest requestId = " << requestId
                << ", type = " << Dob::Typesystem::Operations::GetName(findIt->second->typeId)
-               << std::setprecision(20) << "timestamp = " << findIt->second->lastRequestTimestamp << std::endl;
+               << std::setprecision(20) << " timestamp = " << findIt->second->lastRequestTimestamp << std::endl;
 
         DistributionData msg(pending_registration_request_tag,
                              findIt->second->connectionId,
@@ -302,12 +303,17 @@ namespace Internal
                                              });
 
         bool success = true;
-        // Send message to all node types
-        for (auto nodeType = m_distribution.GetNodeTypeIds().cbegin(); nodeType != m_distribution.GetNodeTypeIds().cend(); ++nodeType)
+        // Send message to all normal node types
+        for (const auto nodeType: m_distribution.GetNodeTypeIds())
         {
+            if (m_distribution.IsLightNode(nodeType))
+            {
+                continue;
+            }
+
             success = success &&
                 m_distribution.GetCommunication().Send(0,  // All nodes of the type
-                                                       *nodeType,
+                                                       nodeType,
                                                        msgP,
                                                        msg.Size(),
                                                        m_dataTypeIdentifier,
