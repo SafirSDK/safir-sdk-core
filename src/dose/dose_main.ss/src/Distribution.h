@@ -275,6 +275,11 @@ namespace Internal
         // Check if specific nodeType is lightNode
         bool IsLightNode(int64_t nodeTypeId) const
         {
+#ifndef NDEBUG
+            //Just a sanity check to see that we haven't mixed up our ids...
+            ENSURE(std::find(m_nodeTypeIds.begin(), m_nodeTypeIds.end(), nodeTypeId) != std::end(m_nodeTypeIds),
+                   << "Value " << nodeTypeId << " passed to IsLightNode does not appear to be a node type id.");
+#endif
             return m_lightNodeTypeIds.find(nodeTypeId) != std::end(m_lightNodeTypeIds);
         }
 

@@ -55,6 +55,28 @@ namespace Internal
             }
         }
 
+        bool IsRegisteredLocally(const Dob::Typesystem::TypeId typeId,
+                                 const Dob::Typesystem::HandlerId& handlerId,
+                                 const ContextId contextId)
+        {
+            ConnectionConsumerPair registerer;
+            if (Safir::Dob::Typesystem::Operations::IsOfType(typeId,Safir::Dob::Service::ClassTypeId))
+            {
+                registerer = ServiceTypes::Instance().GetRegisterer(typeId,handlerId, contextId);
+            }
+            else
+            {
+                registerer = EntityTypes::Instance().GetRegisterer(typeId, handlerId, contextId);
+            }
+
+            if (registerer.connection == nullptr)
+            {
+                return false;
+            }
+
+            return registerer.connection->IsLocal();
+        }
+
         bool IsPendingAccepted(const Dob::Typesystem::TypeId typeId,
                                const Typesystem::HandlerId& handlerId,
                                const ContextId contextId)
@@ -408,7 +430,7 @@ namespace Internal
                 }
 
                 //check that it is not registered on this machine
-                if (IsRegistered(typeId, handlerId, contextId))
+                if (IsRegisteredLocally(typeId, handlerId, contextId))
                 {
                     lllout << "No, that type/handler is registered on my machine!" <<std::endl;
                     resp.SetPendingResponse(false);

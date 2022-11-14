@@ -91,7 +91,11 @@ struct NodeType
 class Config
 {
 public:
-
+    Config()
+    {
+        nodeTypesParam.push_back({"test",878787,false,"","",10,10,10,10,{10}});
+    }
+    
     std::vector<NodeType> nodeTypesParam;
     int fragmentSize;
 };
