@@ -762,6 +762,9 @@ void Consumer::ExecuteAction(DoseTest::ActionPtr action)
         const boost::chrono::steady_clock::time_point actionStartTime = boost::chrono::steady_clock::now();
         unsigned long repeats = 0;
 
+        std::wcout << "Consumer performing action '"
+                   << DoseTest::ActionEnum::ToString(action->ActionKind()) << "'" << std::endl;
+
         do //while repeat
         {
             try
@@ -839,6 +842,7 @@ void Consumer::ExecuteAction(DoseTest::ActionPtr action)
                     break;
                 case DoseTest::ActionEnum::UnregisterHandler:
                     {
+                        std::wcout << "Calling UnregisterHandler" << std::endl;
                         m_connection.UnregisterHandler(action->TypeId(),
                                                        action->Handler());
 
@@ -1237,5 +1241,10 @@ void Consumer::ExecuteAction(DoseTest::ActionPtr action)
     {
         lout << "Caught FundamentalException in ExecuteAction: " << exc.GetName() << std::endl;
         std::wcout << "Exception info: " << exc.GetExceptionInfo() << std::endl;
+    }
+    catch (...)
+    {
+        std::wcout << "Caught ... exception in ExecuteAction" << std::endl;
+        throw;
     }
 }

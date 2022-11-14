@@ -3,7 +3,7 @@
   <Description xml:space="preserve">Testing of pending registration of global service handler on one node</Description>
   <Expectation xml:space="preserve">Global Service should be Registered (cons 1), Unregistered (cons 1), Completed (cons 0) and Registered (cons 1)</Expectation>
   <TestCaseSetupActions>
-    <DoseTest.Action index="0">
+    <DoseTest.Action>
       <ActionKind>SubscribeRegistration</ActionKind>
       <Partner>0</Partner>
       <Consumer>1</Consumer>
@@ -14,38 +14,36 @@
     </DoseTest.Action>
   </TestCaseSetupActions>
   <TestActions>
-    <DoseTest.Action index="0">
+    <DoseTest.Action>
       <ActionKind>RegisterServiceHandler</ActionKind>
       <Partner>1</Partner>
       <Consumer>0</Consumer>
       <TypeId>DoseTest.GlobalService</TypeId>
       <Handler>DEFAULT_HANDLER</Handler>
     </DoseTest.Action>
-    <DoseTest.Action index="1">
+    <DoseTest.Action>
       <ActionKind>RegisterServiceHandlerPending</ActionKind>
       <Partner>0</Partner>
       <Consumer>0</Consumer>
       <TypeId>DoseTest.GlobalService</TypeId>
       <Handler>DEFAULT_HANDLER</Handler>
     </DoseTest.Action>
-    <DoseTest.Action index="2">
+
+    <DoseTest.Action>
+      <ActionKind>UnsubscribeRegistration</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>1</Consumer>
+      <ActionCallback>OnRegistered</ActionCallback>
+      <TypeId>DoseTest.GlobalService</TypeId>
+      <Handler>ALL_HANDLERS</Handler>
+      <IncludeSubclasses>true</IncludeSubclasses>
+    </DoseTest.Action>
+    <DoseTest.Action>
       <ActionKind>UnregisterHandler</ActionKind>
       <Partner>1</Partner>
       <Consumer>1</Consumer>
       <TypeId>DoseTest.GlobalService</TypeId>
       <Handler>DEFAULT_HANDLER</Handler>
-    </DoseTest.Action>
-    <DoseTest.Action index="3">
-      <ActionKind>Sleep</ActionKind>
-      <SleepDuration>1</SleepDuration>
-    </DoseTest.Action>
-    <DoseTest.Action index="4">
-      <ActionKind>UnsubscribeRegistration</ActionKind>
-      <Partner>0</Partner>
-      <Consumer>1</Consumer>
-      <TypeId>DoseTest.GlobalService</TypeId>
-      <Handler>ALL_HANDLERS</Handler>
-      <IncludeSubclasses>true</IncludeSubclasses>
     </DoseTest.Action>
   </TestActions>
 </DoseTest.Items.TestCase>

@@ -134,6 +134,8 @@ namespace Internal
 
         CheckLocks();
 
+        lllog(9) << "Invoking OnResponseCb" << std::endl;
+
         m_callbacks[consumer.lang].m_onResponseCb(response.GetRequestId().GetCounter(),
                                                   response.GetBlob(),
                                                   responseRefHolder.get(),
@@ -202,6 +204,8 @@ namespace Internal
 
         CheckLocks();
 
+        lllog(9) << "Invoking OnMessageCb" << std::endl;
+
         m_callbacks[consumer.lang].m_onMessageCb(message.GetBlob(),
                                                  refHolder.get(),
                                                  consumer.consumer,
@@ -226,6 +230,8 @@ namespace Internal
         bool success;
 
         CheckLocks();
+
+        lllog(9) << "Invoking OnRegisteredCb" << std::endl;
 
         m_callbacks[consumer.lang].m_onRegisteredCb(typeId,
                                                     handlerId.GetRawValue(),
@@ -252,6 +258,8 @@ namespace Internal
 
         CheckLocks();
 
+        lllog(9) << "Invoking OnUnregisteredCb" << std::endl;
+
         m_callbacks[consumer.lang].m_onUnregisteredCb(typeId,
                                                       handlerId.GetRawValue(),
                                                       handlerId.Utf8String().c_str(),
@@ -276,6 +284,8 @@ namespace Internal
         bool success;
 
         CheckLocks();
+
+        lllog(9) << "Invoking OnRevokedRegistrationCb" << std::endl;
 
         m_callbacks[consumer.lang].m_onRevokedRegistrationCb(typeId,
                                                              handlerId.GetRawValue(),
@@ -302,6 +312,8 @@ namespace Internal
         bool success;
 
         CheckLocks();
+
+        lllog(9) << "Invoking OnCompletedRegistrationCb" << std::endl;
 
         m_callbacks[consumer.lang].m_onCompletedRegistrationCb(typeId,
                                                               handlerId.GetRawValue(),
@@ -333,6 +345,8 @@ namespace Internal
 
         CheckLocks();
 
+        lllog(9) << "Invoking OnServiceRequestCb" << std::endl;
+
         m_callbacks[consumer.lang].m_onServiceRequestCb(request.GetBlob(),
                                                         refHolder.get(),
                                                         ctrl,
@@ -361,6 +375,8 @@ namespace Internal
         boost::shared_ptr<const char> refHolder (request.GetReference(), &DistributionData::DropReference);
 
         CheckLocks();
+
+        lllog(9) << "Invoking OnCreatRequestCb" << std::endl;
 
         m_callbacks[consumer.lang].m_onCreateRequestCb(request.GetBlob(),
                                                        refHolder.get(),
@@ -391,6 +407,8 @@ namespace Internal
 
         CheckLocks();
 
+        lllog(9) << "Invoking OnUpdateRequestCb" << std::endl;
+
         m_callbacks[consumer.lang].m_onUpdateRequestCb(request.GetBlob(),
                                                        refHolder.get(),
                                                        ctrl,
@@ -420,6 +438,8 @@ namespace Internal
 
         CheckLocks();
 
+        lllog(9) << "Invoking OnDeleteRequestCb" << std::endl;
+
         m_callbacks[consumer.lang].m_onDeleteRequestCb(refHolder.get(),
                                                        ctrl,
                                                        request.GetResponseId().GetCounter(),
@@ -448,6 +468,8 @@ namespace Internal
         boost::shared_ptr<const char> refHolder (currentState.GetReference(), &DistributionData::DropReference);
 
         CheckLocks();
+
+        lllog(9) << "Invoking OnNewEntityCb" << std::endl;
 
         m_callbacks[consumer.lang].m_onNewEntityCb(currentState.GetBlob(),
                                                    refHolder.get(),
@@ -480,6 +502,8 @@ namespace Internal
         boost::shared_ptr<const char> lastHolder (lastState.GetReference(), &DistributionData::DropReference);
 
         CheckLocks();
+
+        lllog(9) << "Invoking OnUpdatedEntityCb" << std::endl;
 
         m_callbacks[consumer.lang].m_onUpdatedEntityCb(currentState.GetBlob(),
                                                        currentHolder.get(),
@@ -514,6 +538,8 @@ namespace Internal
 
         CheckLocks();
 
+        lllog(9) << "Invoking OnDeletedEntityCb" << std::endl;
+
         m_callbacks[consumer.lang].m_onDeletedEntityCb(currentHolder.get(),
                                                        lastState.GetBlob(),
                                                        lastHolder.get(),
@@ -547,6 +573,8 @@ namespace Internal
 
         CheckLocks();
 
+        lllog(9) << "Invoking OnInjectedNewEntityCb" << std::endl;
+
         m_callbacks[consumer.lang].m_onInjectedNewEntityCb(blobHolder.get(),
                                                            refHolder.get(),
                                                            consumer.consumer,
@@ -574,6 +602,8 @@ namespace Internal
         boost::shared_ptr<const char> currentHolder (currentState.GetReference(), &DistributionData::DropReference);
 
         CheckLocks();
+
+        lllog(9) << "Invoking OnInjectedUpdatedEntityCb" << std::endl;
 
         m_callbacks[consumer.lang].m_onInjectedUpdatedEntityCb(injectionState.GetBlob(),
                                                                injectionHolder.get(),
@@ -605,6 +635,8 @@ namespace Internal
 
         CheckLocks();
 
+        lllog(9) << "Invoking OnInjectedDeletedEntityCb" << std::endl;
+
         m_callbacks[consumer.lang].m_onInjectedDeletedEntityCb(injectionHolder.get(),
                                                                currentState.GetBlob(),
                                                                currentHolder.get(),
@@ -632,6 +664,8 @@ namespace Internal
 
         CheckLocks();
 
+        lllog(9) << "Invoking OnInitialInjectionsDoneCb" << std::endl;
+
         m_callbacks[consumer.lang].m_onInitialInjectionsDoneCb(typeId,
                                                                handlerId.GetRawValue(),
                                                                handlerId.Utf8String().c_str(),
@@ -656,6 +690,8 @@ namespace Internal
         bool success;
 
         CheckLocks();
+
+        lllog(9) << "Invoking OnDropReferenceCb" << std::endl;
 
         m_callbacks[consumer.lang].m_onDropReferenceCb(consumer.consumer,
                                                        refCounter,
@@ -683,6 +719,8 @@ namespace Internal
 
         CheckLocks();
 
+        lllog(9) << "Invoking OnNotRequestOverflowCb" << std::endl;
+
         m_callbacks[consumer.lang].m_onNotRequestOverflowCb(consumer.consumer, success);
         if (!success)
         {
@@ -696,6 +734,8 @@ namespace Internal
         bool success;
 
         CheckLocks();
+
+        lllog(9) << "Invoking OnNotMessageOverflowCb" << std::endl;
 
         m_callbacks[consumer.lang].m_onNotMessageOverflowCb(consumer.consumer, success);
         if (!success)
