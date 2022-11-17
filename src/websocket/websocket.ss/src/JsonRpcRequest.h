@@ -177,10 +177,8 @@ private:
 
     inline void ValidateInternal() const
     {
-        if (!m_doc.HasMember("jsonrpc"))
-            throw RequestErrorException(JsonRpcErrorCodes::InvalidRequest, "Missing jsonrpc version.");
-
-        if (m_doc["jsonrpc"]!="2.0")
+        // Not sure if 'jsonrpc' field is mandatory, but if it exists it must be set to verston 2.0
+        if (m_doc.HasMember("jsonrpc") && m_doc["jsonrpc"]!="2.0")
             throw RequestErrorException(JsonRpcErrorCodes::InvalidRequest, "JSON-RPC version is not supported.");
 
         //If this is actually a response and not a request, validate as response instead.

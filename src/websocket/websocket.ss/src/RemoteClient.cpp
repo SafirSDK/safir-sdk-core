@@ -292,11 +292,6 @@ void RemoteClient::WsDispatch(const JsonRpcRequest& req)
         RequestErrorException err(JsonRpcErrorCodes::SafirOverflow, e.what());
         SendToClient(JsonRpcResponse::Error(req.Id(), err.Code(), err.Message(), err.Data()));
     }
-    catch (const Safir::Dob::NotFoundException& e)
-    {
-        RequestErrorException err(JsonRpcErrorCodes::SafirNotFound, e.what());
-        SendToClient(JsonRpcResponse::Error(req.Id(), err.Code(), err.Message(), err.Data()));
-    }
     catch (const Safir::Dob::AccessDeniedException& e)
     {
         RequestErrorException err(JsonRpcErrorCodes::SafirAccessDenied, e.what());
@@ -307,7 +302,27 @@ void RemoteClient::WsDispatch(const JsonRpcRequest& req)
         RequestErrorException err(JsonRpcErrorCodes::SafirGhostExists, e.what());
         SendToClient(JsonRpcResponse::Error(req.Id(), err.Code(), err.Message(), err.Data()));
     }
-    catch (const Safir::Dob::Typesystem::Exception& e)
+    catch (const Safir::Dob::NotFoundException& e)
+    {
+        RequestErrorException err(JsonRpcErrorCodes::SafirNotFound, e.what());
+        SendToClient(JsonRpcResponse::Error(req.Id(), err.Code(), err.Message(), err.Data()));
+    }
+    catch (const Safir::Dob::Typesystem::IllegalValueException& e)
+    {
+        RequestErrorException err(JsonRpcErrorCodes::SafirIllegalValue, e.what());
+        SendToClient(JsonRpcResponse::Error(req.Id(), err.Code(), err.Message(), err.Data()));
+    }
+    catch (const Safir::Dob::Typesystem::SoftwareViolationException& e)
+    {
+        RequestErrorException err(JsonRpcErrorCodes::SafirSoftwareViolation, e.what());
+        SendToClient(JsonRpcResponse::Error(req.Id(), err.Code(), err.Message(), err.Data()));
+    }
+    catch (const Safir::Dob::Typesystem::ReadOnlyException& e)
+    {
+        RequestErrorException err(JsonRpcErrorCodes::SafirReadOnly, e.what());
+        SendToClient(JsonRpcResponse::Error(req.Id(), err.Code(), err.Message(), err.Data()));
+    }
+    catch (const Safir::Dob::Typesystem::Internal::CommonExceptionBase& e)
     {
         RequestErrorException err(JsonRpcErrorCodes::SafirUnexpectedException, e.what());
         auto error=JsonRpcResponse::Error(req.Id(), err.Code(), err.Message(), err.Data());

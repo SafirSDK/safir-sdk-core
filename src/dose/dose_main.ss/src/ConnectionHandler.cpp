@@ -52,20 +52,16 @@ namespace
           m_communication(distribution.GetCommunication()),
           m_onAppEvent(onAppEvent),
           m_poolHandler(m_strand, distribution, checkPendingReg, logStatus),
-          m_processInfoHandler(ioService, distribution)
+          m_processInfoHandler(ioService)
     {
         distribution.SubscribeNodeEvents(
-            [](const std::string&, int64_t /*id*/, int64_t /*nt*/, const std::string&)
+            [](const std::string& /*nodeName*/, int64_t /*nodeId*/, int64_t /*nt*/, const std::string& /*dataAddr*/)
             {
                 Connections::Instance().ForEachConnectionPtr([=](const ConnectionPtr& con){con->SignalIn();});
             },
-            [](int64_t id, int64_t)
+            [](int64_t nodeId, int64_t /*nt*/)
             {
-                Connections::Instance().RemoveConnectionFromNode(id, [=](const ConnectionPtr& con)
-                {
-                    if (!con->IsLocal())
-                        con->SetNodeDown();
-                });
+                Connections::Instance().RemoveConnectionFromNode(nodeId);
             }
         );
 

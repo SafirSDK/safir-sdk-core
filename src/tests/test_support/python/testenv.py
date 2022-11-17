@@ -71,14 +71,22 @@ class TestEnv:
                  safir_show_config,
                  start_syslog_server=True,
                  ignore_control_cmd=False,
-                 wait_for_persistence=True):
+                 wait_for_persistence=True,
+                 force_node_id=None):
         self.__procs = dict()
         self.__creationflags = 0
         if sys.platform == "win32":
             self.__creationflags = subprocess.CREATE_NEW_PROCESS_GROUP
-        self.safir_control = self.launchProcess(
-            "safir_control",
-            (safir_control, "--dose-main-path", dose_main, "--ignore-control-cmd", str(ignore_control_cmd)))
+
+        if force_node_id is None:
+            self.safir_control = self.launchProcess(
+                "safir_control",
+                (safir_control, "--dose-main-path", dose_main, "--ignore-control-cmd", str(ignore_control_cmd)))
+        else:
+            self.safir_control = self.launchProcess(
+                "safir_control",
+                (safir_control, "--dose-main-path", dose_main, "--ignore-control-cmd", str(ignore_control_cmd), "--force-id", str(force_node_id)))
+
         self.dope = dope_main is not None
         if self.dope:
             self.launchProcess("dope_main", (dope_main, ))

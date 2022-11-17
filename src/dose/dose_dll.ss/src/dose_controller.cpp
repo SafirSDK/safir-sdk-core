@@ -63,6 +63,7 @@
 #include <Safir/Dob/ErrorResponse.h>
 #include <Safir/Dob/ResponseGeneralErrorCodes.h>
 #include <Safir/Dob/Typesystem/Serialization.h>
+#include <Safir/Dob/Internal/DistributionScopeReader.h>
 
 #include <assert.h>
 
@@ -448,7 +449,8 @@ namespace
 
         if (overrideRegistration)
         {
-            if (m_isLightNode && m_distributionScopeReader.IsGlobal(typeId))
+
+            if (m_isLightNode && DistributionScopeReader::Instance().IsGlobal(typeId))
             {
                 std::wostringstream ostr;
                 ostr << "Not allowed to register global types on a light node. typeId = " << Typesystem::Operations::GetName(typeId) << ")";
@@ -468,7 +470,7 @@ namespace
                 ostr << "Not allowed to do pending registrations on light nodes. typeId = " << Typesystem::Operations::GetName(typeId) << ")";
                 throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
             }
-            if (m_distributionScopeReader.IsLimited(typeId))
+            if (DistributionScopeReader::Instance().IsLimited(typeId))
             {
                 std::wostringstream ostr;
                 ostr << "Not allowed to do pending registrations for limited types. typeId = " << Typesystem::Operations::GetName(typeId) << ")";
@@ -522,7 +524,7 @@ namespace
         {
             if (m_isLightNode)
             {
-                if (m_distributionScopeReader.IsGlobal(typeId))
+                if (DistributionScopeReader::Instance().IsGlobal(typeId))
                 {
                     std::wostringstream ostr;
                     ostr << "Not allowed to register global types on a light node. typeId = " << Typesystem::Operations::GetName(typeId) << ")";
@@ -535,7 +537,7 @@ namespace
                     throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
                 }
             }
-            if (isInjectionHandler && m_distributionScopeReader.IsLimited(typeId))
+            if (isInjectionHandler && DistributionScopeReader::Instance().IsLimited(typeId))
             {
                 std::wostringstream ostr;
                 ostr << "Not allowed to register injection handlers for limited types. typeId = " << Typesystem::Operations::GetName(typeId) << ")";
@@ -559,7 +561,7 @@ namespace
                 ostr << "Not allowed to do pending registrations on light nodes. typeId = " << Typesystem::Operations::GetName(typeId) << ")";
                 throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
             }
-            if (m_distributionScopeReader.IsLimited(typeId))
+            if (DistributionScopeReader::Instance().IsLimited(typeId))
             {
                 std::wostringstream ostr;
                 ostr << "Not allowed to do pending registrations for limited types. typeId = " << Typesystem::Operations::GetName(typeId) << ")";

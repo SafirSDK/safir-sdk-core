@@ -175,7 +175,7 @@ namespace Internal
         bool IsPendingAccepted(const Typesystem::TypeId typeId, const Typesystem::HandlerId & handlerId, const ContextId contextId) const;
 
         // Removes connection(s) from specified node.
-        void RemoveConnectionFromNode(const int64_t node, const std::function<void(const ConnectionPtr & connection)> & connectionFunc);
+        void RemoveConnectionFromNode(const int64_t nodeId);
 
         //A reader lock on the connection vector will be taken during the looping and the callback!
         void ForEachConnection(const std::function<void(const Connection & connection)> & connectionFunc) const;

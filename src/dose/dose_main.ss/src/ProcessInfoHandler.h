@@ -28,7 +28,6 @@
 #include <Safir/Dob/Internal/Connections.h>
 #include <Safir/Utilities/ProcessMonitor.h>
 #include <atomic>
-#include "Distribution.h"
 
 namespace Safir
 {
@@ -53,8 +52,7 @@ namespace Internal
     {
     public:
         // Constructor and Destructor
-        ProcessInfoHandler(boost::asio::io_service& ioService,
-                           const Distribution& distribution);
+        ProcessInfoHandler(boost::asio::io_service& ioService);
 
         void Stop();
 

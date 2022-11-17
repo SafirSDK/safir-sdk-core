@@ -32,8 +32,7 @@
 #include <Safir/Dob/ConnectionAspectInjector.h>
 #include <Safir/Dob/Internal/DistributionData.h>
 #include <Safir/Dob/NodeParameters.h>
-
-
+#include <Safir/Dob/Internal/DistributionScopeReader.h>
 
 namespace Safir
 {
@@ -214,7 +213,7 @@ namespace Internal
                 {
                     //if sender is not local node or object is local we just ignore it.
                     if (currentState.GetSenderId().m_node!=m_distribution.GetCommunication().Id() ||
-                        m_distribution.IsLocal(currentState.GetTypeId()))
+                        DistributionScopeReader::Instance().IsLocal(currentState.GetTypeId()))
                     {
                         subscription->SetLastRealState(currentState);
                     }
@@ -243,7 +242,7 @@ namespace Internal
                 {
                     //if sender is not local node or object is local we just ignore it.
                     if (currentState.GetSenderId().m_node!=m_distribution.GetCommunication().Id() ||
-                        m_distribution.IsLocal(currentState.GetTypeId()))
+                        DistributionScopeReader::Instance().IsLocal(currentState.GetTypeId()))
                     {
                         subscription->SetLastInjectionState(currentState);
                     }
@@ -283,7 +282,7 @@ namespace Internal
             }
 
             //dont send local objects
-            if (m_distribution.IsLocal(currentState.GetTypeId()))
+            if (DistributionScopeReader::Instance().IsLocal(currentState.GetTypeId()))
             {
                 return true;
             }

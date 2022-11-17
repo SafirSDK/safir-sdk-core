@@ -68,6 +68,10 @@ namespace Internal
          * E.g. calling every minute causes states to be kept for at least one minute but for a maximum of two minutes.
          */
         void HandleTimeout();
+
+        // This is to be used by lightnodes that are re-attaching a system. EndStates from the former system
+        // will prevent the PD to sync pools correctly.
+        void ClearAllEndstates();
     private:
         //Locking Policy: Just lock when using the m_states table.
         typedef Safir::Dob::Internal::LeveledLock<boost::interprocess::interprocess_mutex,

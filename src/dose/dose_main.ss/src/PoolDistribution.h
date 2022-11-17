@@ -36,6 +36,7 @@
 #include <Safir/Utilities/Internal/SharedCharArray.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Dob/NodeParameters.h>
+#include <Safir/Dob/Internal/DistributionScopeReader.h>
 
 namespace Safir
 {
@@ -77,7 +78,7 @@ namespace Internal
                 if (m_running)
                     return;
 
-                lllog(5)<<"Start PoolDistribution to "<<m_nodeId<<std::endl;
+                lllog(5)<<"PoolHandler: Start PoolDistribution to "<<m_nodeId<<std::endl;
 
                 m_running=true;
                 //collect all connections on this node
@@ -227,7 +228,7 @@ namespace Internal
             {
                 dontRemove=false;
                 DistributionData realState = subscription->GetState()->GetRealState();
-                if (!realState.IsNoState() && !m_distribution.IsLocal(realState.GetTypeId()))
+                if (!realState.IsNoState() && !DistributionScopeReader::Instance().IsLocal(realState.GetTypeId()))
                 {
                     if (realState.GetType()==DistributionData::RegistrationState)
                     {
@@ -269,7 +270,7 @@ namespace Internal
 
             if (m_distribution.GetCommunication().Send(m_nodeId, m_nodeType, req, sizeof(PoolDistributionInfo), PoolDistributionInfoDataTypeId, true))
             {
-                lllog(5)<<"Completed PoolDistribution to "<<m_nodeId<<std::endl;
+                lllog(5)<<"PoolHandler: Completed PoolDistribution to "<<m_nodeId<<std::endl;
                 m_completionHandler(m_nodeId);
             }
             else
@@ -294,9 +295,30 @@ namespace Internal
             {
                 const DistributionData currentState = subscription->GetCurrentRealState();
 
-                auto lightNodesAndNotRealState = (m_distribution.IsLightNode() || m_receiverIsLightNode) && currentState.GetEntityStateKind() != DistributionData::Real;
-                auto dontSendState = currentState.IsNoState() || lightNodesAndNotRealState;
-                if (!dontSendState)
+                if (m_distribution.IsLightNode() || m_receiverIsLightNode) // dealing with light nodes
+                {
+                    //Send all states owned by someone on this node
+                    //It is a real state, not ghost or other junk
+                    //It is an existing state, not a deleted state
+                    if (currentState.GetSenderId().m_node==m_distribution.GetCommunication().Id() &&
+                        currentState.GetEntityStateKind() == DistributionData::Real &&
+                            currentState.HasBlob())
+                    {
+                        if (!CanSend() || !m_distribution.GetCommunication().Send(m_nodeId, m_nodeType, ToPtr(currentState), currentState.Size(), EntityStateDataTypeId, true))
+                        {
+                            success=false;
+                        }
+                        else
+                        {
+                            lllog(5)<<L"PoolHandler: Send state"<<currentState.Image()<<std::endl;
+                        }
+                    }
+                    else
+                    {
+                        lllog(5)<<L"PoolHandler: Dont send state"<<currentState.Image()<<std::endl;
+                    }
+                }
+                else // sender and receiver are normal nodes
                 {
                     //Send all states owned by someone on this node
                     //send all ghosts (the owner node is probably down...)

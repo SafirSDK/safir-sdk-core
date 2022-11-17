@@ -186,13 +186,4 @@ BOOST_AUTO_TEST_CASE( node_detached )
     BOOST_CHECK(detachedSub2);
 }
 
-BOOST_AUTO_TEST_CASE( local_types_test )
-{
-    BOOST_CHECK(!distribution.IsLocal(Safir::Dob::Typesystem::Object::ClassTypeId));
-    BOOST_CHECK(distribution.IsLocal(Safir::Dob::ProcessInfo::ClassTypeId));
-    BOOST_CHECK(!distribution.IsLocal(Safir::Dob::NodeInfo::ClassTypeId));
-    BOOST_CHECK(distribution.IsLocal(Safir::Dob::PersistentDataReady::ClassTypeId));
-}
-
-
 BOOST_AUTO_TEST_SUITE_END()

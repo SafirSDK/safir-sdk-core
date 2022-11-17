@@ -41,7 +41,10 @@ namespace JsonRpcErrorCodes
     static const int SafirAccessDenied          = 102;
     static const int SafirGhostExists           = 103;
     static const int SafirNotFound              = 104;
-    static const int SafirUnexpectedException   = 105;
+    static const int SafirIllegalValue          = 105;
+    static const int SafirSoftwareViolation     = 106;
+    static const int SafirReadOnly              = 107;
+    static const int SafirUnexpectedException   = 108;
 
     static std::string CodeToString(int code)
     {
@@ -69,6 +72,12 @@ namespace JsonRpcErrorCodes
             return "Ghost exists";
         case SafirNotFound:
             return "Not found";
+        case SafirIllegalValue:
+            return "Illegal value";
+        case SafirSoftwareViolation:
+            return "Software violation";
+        case SafirReadOnly:
+            return "Read only";
         case SafirUnexpectedException:
             return "Unexpected Safir exception";
         default:

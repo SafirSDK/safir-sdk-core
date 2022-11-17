@@ -540,7 +540,7 @@ namespace Internal
         }
     }
 
-    void Connections::RemoveConnectionFromNode(const int64_t node, const std::function<void(const ConnectionPtr & connection)> & connectionFunc)
+    void Connections::RemoveConnectionFromNode(const int64_t nodeId)
     {
         std::vector<ConnectionPtr> removeConnections;
 
@@ -555,7 +555,7 @@ namespace Internal
                 ConnectionTable::const_iterator removeIt = it;
                 ++it;
 
-                if(removeIt->first.m_node == node)
+                if(removeIt->first.m_node == nodeId)
                 {
                     removeConnections.push_back(removeIt->second);
                     if (removeIt->second->IsLocal())
@@ -574,13 +574,14 @@ namespace Internal
             ++it)
         {
             ConnectionPtr removeConnection = (*it);
-
-            connectionFunc(removeConnection);
+            if (!removeConnection->IsLocal())
+            {
+                removeConnection->SetNodeDown();
+            }
 
             removeConnection->Cleanup();
         }
     }
-
 
     void Connections::ForEachConnection(const std::function<void(const Connection & connection)> & connectionFunc) const
     {

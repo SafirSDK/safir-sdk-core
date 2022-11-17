@@ -25,6 +25,7 @@
 #include <Safir/Dob/Internal/EndStates.h>
 #include <Safir/Dob/Internal/StateContainer.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
+#include <Safir/Dob/Internal/DistributionScopeReader.h>
 #include <vector>
 
 namespace Safir
@@ -60,6 +61,11 @@ namespace Internal
 
     void EndStates::Add(const StateSharedPtr& state)
     {
+        if (DistributionScopeReader::Instance().IsLimited(state->GetRealState().GetTypeId()))
+        {
+            return; // Don't save limitedTypes in EndStates since they actually are allowed to come back again.
+        }
+
         ScopedEndStatesLock lck(m_lock);
 
         const std::pair<StateTable::iterator,bool> insertResult =
@@ -97,6 +103,15 @@ namespace Internal
         ++m_lastTimestamp;
 
     }  // and here we drop the shared pointers (without holding the EndStatesLock)
+
+    void EndStates::ClearAllEndstates()
+    {
+        StateTable tmp;
+        {
+            ScopedEndStatesLock lck(m_lock);
+            m_states.swap(tmp);
+        }
+    }
 }
 }
 }

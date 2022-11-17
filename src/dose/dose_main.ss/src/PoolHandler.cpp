@@ -31,6 +31,7 @@
 #include <Safir/Dob/Internal/ServiceTypes.h>
 #include <Safir/Dob/Internal/EntityTypes.h>
 #include <Safir/Dob/Internal/EndStates.h>
+#include <Safir/Dob/Internal/DistributionScopeReader.h>
 
 #include "PoolHandler.h"
 
@@ -106,7 +107,7 @@ namespace Internal
 
         auto detached = [this](bool isDetached)
         {
-            m_strand.post([this] {Start();}); // It is possible that detach is called before system is started.
+            Start(); // It is possible that detach is called before system is started.
             m_strand.post([this, isDetached]
             {
                 lllog(5)<< L"DoseMain.PoolHandler set detached to " << std::boolalpha << isDetached << std::endl;
@@ -124,10 +125,16 @@ namespace Internal
                     m_nodeInfoHandler->SetNodeState(m_detached ? Safir::Dob::NodeState::Detached : Safir::Dob::NodeState::Attaching); // Update detached flag in NodeInfo
                 }
 
-                if (m_detached)
+                if (m_detached) // We have become detached
                 {
                     // This will trigger the chain OnPersistenDataReady->SignalPDComplete
                     m_persistHandler->SetPersistentDataReady();
+                }
+                else // We have joined a system and are attaching
+                {
+                    // When a lightNode attach to a System it can not keep EndStates since they
+                    // will prevent pooldistribution of Entities that previously existed on this node.
+                    EndStates::Instance().ClearAllEndstates();
                 }
             });
         };
@@ -183,7 +190,6 @@ namespace Internal
             {
                 return; //already got this event
             }
-
 
             if (m_numReceivedPdCompleteFromNormalNodes == 0) //got persistence from Dope
             {
@@ -347,7 +353,7 @@ namespace Internal
             const auto state=DistributionData::ConstConstructor(new_data_tag, data);
             DistributionData::DropReference(data);
 
-            ENSURE(!m_distribution.IsLocal(state.GetTypeId()),
+            ENSURE(!DistributionScopeReader::Instance().IsLocal(state.GetTypeId()),
                    << "Received Local RegistrationState of type " << state.GetTypeId()
                    << " from node " << fromNodeId << ", system configuration is bad!");
 
@@ -368,7 +374,7 @@ namespace Internal
             ENSURE (state.GetType() == DistributionData::EntityState, <<
                     "PoolHandler::OnEntityState received DistributionData that is not a EntityState!");
 
-            ENSURE(!m_distribution.IsLocal(state.GetTypeId()),
+            ENSURE(!DistributionScopeReader::Instance().IsLocal(state.GetTypeId()),
                    << "Received Local EntityState of type " << state.GetTypeId()
                    << " from node " << fromNodeId << ", system configuration is bad!");
 
@@ -380,7 +386,6 @@ namespace Internal
     {
         if (m_persistenceReady && m_poolDistributionComplete && !m_pdCompleteSignaled)
         {
-            lllog(1)<<"PD complete"<<std::endl;
             m_pdCompleteSignaled=true;
             m_poolDistributor.Start();
             Connections::Instance().AllowConnect(-1);
@@ -472,7 +477,7 @@ namespace Internal
             }
             else
             {
-                lllog(9) << "RemoteSetRegistrationState not successful, adding to waiting states" << std::endl;
+                lllog(9) << "PoolHandler: RemoteSetRegistrationState not successful, adding to waiting states" << std::endl;
                 m_waitingStates.Add(state, fromNodeType);
             }
         }
@@ -518,7 +523,7 @@ namespace Internal
                                                                          state);
                 if (result == RemoteSetNeedRegistration)
                 {
-                    lllog(9) << "RemoteSetRealEntityState (missing reg) not successful,"
+                    lllog(9) << "PoolHandler: RemoteSetRealEntityState (missing reg) not successful,"
                              << " adding to waiting states" << std::endl;
                     m_waitingStates.Add(state, fromNodeType);
                 }
@@ -549,7 +554,7 @@ namespace Internal
 
                     if (result == RemoteSetNeedRegistration || result == RemoteSetNeedConnection)
                     {
-                        lllog(9) << "RemoteSetRealEntityState (result = " << result << ") not successful,"
+                        lllog(9) << "PoolHandler: RemoteSetRealEntityState (result = " << result << ") not successful,"
                                  << " adding to waiting states" << std::endl;
 
                         m_waitingStates.Add(state, fromNodeType);
@@ -564,7 +569,7 @@ namespace Internal
 
                     if (result == RemoteSetNeedRegistration)
                     {
-                        lllog(9) << "RemoteSetRealEntityState (missing reg) not successful,"
+                        lllog(9) << "PoolHandler: RemoteSetRealEntityState (missing reg) not successful,"
                                  << " adding to waiting states" << std::endl;
                         m_waitingStates.Add(state, fromNodeType);
                     }

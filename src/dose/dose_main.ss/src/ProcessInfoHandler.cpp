@@ -37,6 +37,7 @@
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/ProcessInfo.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
+#include <Safir/Dob/Internal/DistributionScopeReader.h>
 
 namespace Safir
 {
@@ -45,8 +46,7 @@ namespace Dob
 namespace Internal
 {
 
-    ProcessInfoHandler::ProcessInfoHandler(boost::asio::io_service& ioService,
-                                           const Distribution& distribution)
+    ProcessInfoHandler::ProcessInfoHandler(boost::asio::io_service& ioService)
         : m_strand(ioService)
         , m_dispatcher(m_connection, m_strand)
         , m_stopped(false)
@@ -67,11 +67,11 @@ namespace Internal
                                                                        },
                                                                        boost::chrono::seconds(1)));
 
-        m_strand.dispatch([this,&distribution]
+        m_strand.dispatch([this]
         {
             m_connection.Open(L"dose_main",L"ProcessInfoHandler",0,nullptr,&m_dispatcher);
 
-            if (!distribution.IsLocal(Dob::ProcessInfo::ClassTypeId))
+            if (!DistributionScopeReader::Instance().IsLocal(Dob::ProcessInfo::ClassTypeId))
             {
                 throw Dob::Typesystem::ConfigurationErrorException
                     (L"Entity ProcessInfo must be configured to be Local",__WFILE__,__LINE__);

@@ -25,6 +25,7 @@
 #include <vector>
 #include <functional>
 #include <Safir/Utilities/Internal/SharedCharArray.h>
+#include <Safir/Utilities/Internal/LowLevelLogger.h>
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -95,8 +96,9 @@ namespace Internal
 
         void RequestPoolDistribution(int64_t nodeId, int64_t nodeTypeId)
         {
-            m_strand.post([this,nodeId,nodeTypeId]
+            m_strand.post([this, nodeId, nodeTypeId]
             {
+                lllog(5)<<"PoolHandler: Request pooldistribution from "<< nodeId <<std::endl;
                 m_requests.push_back(PoolDistributionRequestSender<DistributionT>::PdReq(nodeId, nodeTypeId, false));
                 SendPoolDistributionRequests();
             });
@@ -130,6 +132,7 @@ namespace Internal
         {
             m_strand.dispatch([this,fromNodeId]
             {
+                lllog(5)<<"PoolHandler: PoolDistributionFinished from "<< fromNodeId <<std::endl;
                 if (fromNodeId==0)
                 {
                     m_requests.clear();

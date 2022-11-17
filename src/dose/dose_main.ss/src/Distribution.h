@@ -28,7 +28,6 @@
 #include <Safir/Dob/Internal/SystemPicture.h>
 #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
-#include <Safir/Dob/Typesystem/Internal/DistributionScopeReader.h>
 #include <boost/chrono.hpp>
 #include <boost/noncopyable.hpp>
 #include <functional>
@@ -85,7 +84,6 @@ namespace Internal
               m_excludeCallbacks(),
               m_detachedCallbacks(),
               m_liveNodes(),
-              m_distributionScopeReader(),
               m_nodeTypeIds(CalculateNodeTypeIds(m_config)),
               m_lightNodeTypeIds(CalculateLightNodeTypeIds(m_config)),
               m_started(false)
@@ -260,12 +258,6 @@ namespace Internal
             return m_nodeTypeIds;
         }
 
-        //Check if type is local. If false is returned it is global...
-        bool IsLocal(Safir::Dob::Typesystem::TypeId tid) const
-        {
-            return m_distributionScopeReader.IsLocal(tid);
-        }
-
         // Is this node a light node
         bool IsLightNode() const
         {
@@ -322,8 +314,6 @@ namespace Internal
         std::vector<OnExcludeNode> m_excludeCallbacks;
         std::vector<OnDetachedStateChanged> m_detachedCallbacks;
         std::map<int64_t,int64_t> m_liveNodes;
-
-        const Safir::Dob::Typesystem::Internal::DistributionScopeReader m_distributionScopeReader;
 
         //this is a sorted vector of node type ids
         //it is a vector rather than a set since it is likely to be small and

@@ -37,7 +37,6 @@
 #include <Safir/Dob/Internal/EntityTypes.h>
 #include <Safir/Dob/ConnectionQueueId.h>
 #include <Safir/Dob/CallbackId.h>
-#include <Safir/Dob/Typesystem/Internal/DistributionScopeReader.h>
 #include <unordered_map>
 #include "Postponer.h"
 
@@ -439,9 +438,7 @@ namespace Internal
         /*             // For test purposes */
         /*             void DumpDirtySub(std::vector<DirtySub>& ds); */
 
-        const bool m_isLightNode;
-        Safir::Dob::Typesystem::Internal::DistributionScopeReader m_distributionScopeReader;
-
+        const bool m_isLightNode;        
     };
 
     typedef std::shared_ptr<Controller> ControllerPtr;

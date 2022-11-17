@@ -52,7 +52,7 @@ Returns::
 
 Example::
 ----------------------------
---> {"jsonrpc": "2.0", "method": "deleteAllInstances", "params": {"typeId": "_DouType": "Test.MyEntity"}, "id": 123}
+--> {"jsonrpc": "2.0", "method": "deleteAllInstances", "params": {"typeId": "Test.MyEntity"}, "id": 123}
 <-- {"jsonrpc": "2.0", "result": "OK", "id": 123}
 ----------------------------
 
@@ -68,7 +68,7 @@ Returns::
 
 Example::
 ----------------------------
---> {"jsonrpc": "2.0", "method": "deleteEntity", "params": {"typeId": "_DouType": "Test.MyEntity", "instanceId": 1}, "id": 123}
+--> {"jsonrpc": "2.0", "method": "deleteEntity", "params": {"typeId": "Test.MyEntity", "instanceId": 1}, "id": 123}
 <-- {"jsonrpc": "2.0", "result": "OK", "id": 123}
 ----------------------------
 
@@ -702,6 +702,9 @@ Error codes::
  * `SafirAccessDenied (102)` - Trying to modify an entity without ownership.
  * `SafirGhostExists (103)` - Trying to modify an entity when there is a ghost instance that hasn't been injected.
  * `SafirNotFound (104)` - Calling read or getInstanceIdPolicy on non-existing instance.
+ * `SafirIllegalValue (105)` - A parameter was invalid.
+ * `SafirSoftwareViolation (106)` - There is a programming error somewhere. For example trying register a global type on a light node.
+ * `SafirReadOnly (107)` - Trying to set a read-only value.
  
  Example::
 ----------------------------

@@ -32,6 +32,7 @@
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Dob/ThisNodeParameters.h>
 #include <Safir/Utilities/Internal/MakeUnique.h>
+#include <Safir/Dob/Internal/DistributionScopeReader.h>
 
 namespace Safir
 {
@@ -238,7 +239,7 @@ namespace Internal
         PendingRegistrationInfo & reg = *findIt->second;
         bool gotAll = true;
 
-        if (!m_distribution.IsLocal(findIt->second->typeId))
+        if (!DistributionScopeReader::Instance().IsLocal(findIt->second->typeId))
         {
             for (auto node = m_liveNodes.cbegin(); node != m_liveNodes.cend(); ++node)
             {

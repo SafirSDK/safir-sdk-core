@@ -33,6 +33,7 @@
 #include <Safir/Dob/Internal/Connection.h>
 #include <Safir/Dob/Internal/MessageTypes.h>
 #include <Safir/Dob/NodeParameters.h>
+#include <Safir/Dob/Internal/DistributionScopeReader.h>
 
 namespace Safir
 {
@@ -44,7 +45,7 @@ namespace Internal
         : m_distribution(distribution),
           m_dataTypeIdentifier(LlufId_Generate64("MessageHandler"))
     {
-        m_distribution.GetCommunication().SetDataReceiver([this]
+        m_distribution.GetCommunication().SetDataReceiver([]
                                                           (const int64_t fromNodeId,
                                                            int64_t /*fromNodeType*/,
                                                            const char* data,
@@ -55,7 +56,7 @@ namespace Internal
 
                                                               DistributionData::DropReference(data);
 
-                                                              ENSURE(!m_distribution.IsLocal(msg.GetTypeId()),
+                                                              ENSURE(!DistributionScopeReader::Instance().IsLocal(msg.GetTypeId()),
                                                                      << "Received Local Message of type "
                                                                      << msg.GetTypeId()
                                                                      << " from node " << fromNodeId
@@ -126,7 +127,7 @@ namespace Internal
 
     void MessageHandler::Send(const DistributionData& msg)
     {
-        if (m_distribution.IsLocal(msg.GetTypeId()) ||
+        if (DistributionScopeReader::Instance().IsLocal(msg.GetTypeId()) ||
             Safir::Dob::NodeParameters::LocalContexts(msg.GetSenderId().m_contextId) == true)
         {
             return;
