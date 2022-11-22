@@ -292,7 +292,11 @@ namespace Com
         // For normal nodes, this has no effect.
         void SetExcludeNodeTimeLimit(unsigned int seconds)
         {
-            boost::asio::post(m_strand, [this, seconds] { m_lightNodesExcludeTimeLimit = seconds; });
+            boost::asio::post(m_strand, [this, seconds]
+            {
+                lllog(DiscovererLogLevel) << m_logPrefix.c_str() << L"SetExcludeNodeTimeLimit: " << seconds << L" sec " <<std::endl;
+                m_lightNodesExcludeTimeLimit = seconds;
+            });
         }
 
 

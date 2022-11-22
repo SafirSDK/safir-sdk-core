@@ -25,6 +25,7 @@
 
 #include <string>
 #include <sstream>
+#include <algorithm>
 #include "JsonRpcId.h"
 #include "JsonHelpers.h"
 
@@ -33,13 +34,18 @@ class JsonRpcResponse
 public:
     static std::string Error(const JsonRpcId& id, int code, const std::string& message, const std::string& data)
     {
+        std::string m = message;
+        m.erase(std::remove(m.begin(), m.end(), '\n'), m.cend());
+
         std::ostringstream os;
         os<<"{"<<SAFIR_WS_STR("jsonrpc","2.0")<<","
-            <<SAFIR_WS_QUOTE("error")<<":{"<<SAFIR_WS_NUM("code", code)<<","<<SAFIR_WS_STR("message", message);
+            <<SAFIR_WS_QUOTE("error")<<":{"<<SAFIR_WS_NUM("code", code)<<","<<SAFIR_WS_STR("message", m);
 
         if (!data.empty())
         {
-            os<<","<<SAFIR_WS_STR("data", data);
+            std::string d = data;
+            d.erase(std::remove(d.begin(), d.end(), '\n'), d.cend());
+            os<<","<<SAFIR_WS_STR("data", d);
         }
 
         os<<"},"<<id<<"}";

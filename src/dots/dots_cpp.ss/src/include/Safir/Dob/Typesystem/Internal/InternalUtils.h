@@ -32,7 +32,7 @@
 
 //Usage: ENSURE(foo == 10, << "foo had wrong value: " << foo);
 #define ENSURE(expr, comment) \
-    if (Safir::Dob::Typesystem::Internal::EnsureHelper(expr)); else {std::wostringstream magic1234ostr; magic1234ostr comment; Safir::Dob::Typesystem::Internal::EnsureFailed(magic1234ostr.str());}
+    if (Safir::Dob::Typesystem::Internal::EnsureHelper(expr)); else {std::wostringstream magic1234ostr; magic1234ostr comment; Safir::Dob::Typesystem::Internal::EnsureFailed(magic1234ostr.str(), __FILE__, __LINE__);}
 
 namespace Safir
 {
@@ -42,7 +42,7 @@ namespace Typesystem
 {
 namespace Internal
 {
-    void DOTS_CPP_API EnsureFailed (const std::wstring & str);
+    void DOTS_CPP_API EnsureFailed (const std::wstring & str, const char* file, int line);
 
     static inline bool EnsureHelper(const bool expr)
     {

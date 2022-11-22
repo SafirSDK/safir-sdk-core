@@ -38,7 +38,7 @@ namespace Typesystem
 {
 namespace Internal
 {
-    void EnsureFailed (const std::wstring & str)
+    void EnsureFailed (const std::wstring & str, const char* file, int line)
     {
         Safir::Utilities::Internal::Log::Send(Safir::Utilities::Internal::Log::Critical,
                                               L"ENSURE failed: " + str);
@@ -51,7 +51,9 @@ namespace Internal
                                                   L"ENSURE failed to generate a dump! It looks like CrashReporter is not started.");
         }
 
-        throw SoftwareViolationException(str, __WFILE__,__LINE__);
+        std::wostringstream wfile;
+        wfile << file;
+        throw SoftwareViolationException(str, wfile.str(), line);
     }
 }
 }

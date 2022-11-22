@@ -571,6 +571,7 @@ namespace Internal
         // DEBUG
         //--------------------------------
         const std::wstring Image() const;  // Returns a string representation of msg
+        bool HasData() const;
 
 
     private:

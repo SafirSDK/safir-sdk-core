@@ -36,6 +36,7 @@
 #include <Safir/Dob/Internal/ContextSharedTable.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
+#include <Safir/Dob/Internal/DistributionScopeReader.h>
 
 using namespace std::placeholders;
 
@@ -1247,8 +1248,11 @@ namespace Internal
                 statePtr->SetConnection(ConnectionPtr());  // No connection since its a delete state
                 statePtr->SetConsumer(ConsumerId(NULL, static_cast<short>(0))); //dummy consumer
 
-                // The released end state must be saved "a while".
-                EndStates::Instance().Add(statePtr);
+                // The released end state must be saved "a while" if it is not a LimitedType
+                if (!DistributionScopeReader::Instance().IsLimited(m_typeId))
+                {
+                    EndStates::Instance().Add(statePtr);
+                }
             }
         }
     }
@@ -1535,8 +1539,11 @@ namespace Internal
         statePtr->SetConsumer(ConsumerId(NULL, static_cast<short>(0))); //dummy consumer
         statePtr->SetRealState(remoteEntity);
 
-        // This is an end state so it must be saved "a while".
-        EndStates::Instance().Add(statePtr);
+        // The released end state must be saved "a while" if it is not a LimitedType
+        if (!DistributionScopeReader::Instance().IsLimited(m_typeId))
+        {
+            EndStates::Instance().Add(statePtr);
+        }
     }
 
     void EntityType::RemoteSetRealEntityStateInternal(const ConnectionPtr&           connection,
@@ -1864,8 +1871,11 @@ namespace Internal
         {
             // There is no unhandled injection state.
 
-            // The released end state must be saved "a while".
-            EndStates::Instance().Add(statePtr);
+            // The released end state must be saved "a while" if it is not a LimitedType
+            if (!DistributionScopeReader::Instance().IsLimited(m_typeId))
+            {
+                EndStates::Instance().Add(statePtr);
+            }
         }
         else
         {

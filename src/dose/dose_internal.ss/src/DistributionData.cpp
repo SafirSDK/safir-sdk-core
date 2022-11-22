@@ -196,6 +196,7 @@ namespace Internal
     DistributionData::ConnectHeader &
     DistributionData::GetConnectHeader()
     {
+        ENSURE(m_data, << "Trying to GetConnectHeader from a NULL DistributionData!");
         ENSURE(GetType() == Action_Connect, << "GetConnectHeader called on DistributionData that was not a Action_Connect (type = " << GetType() << ")");
 
         return *AnyPtrCast<ConnectHeader>(GetData());
@@ -204,6 +205,7 @@ namespace Internal
     DistributionData::MessageHeader &
     DistributionData::GetMessageHeader()
     {
+        ENSURE(m_data, << "Trying to GetMessageHeader from a NULL DistributionData!");
         ENSURE(GetType() == Message, << "GetMessageHeader called on DistributionData that was not a Message (type = " << GetType() << ")");
 
         return *AnyPtrCast<MessageHeader>(GetData());
@@ -212,9 +214,9 @@ namespace Internal
     DistributionData::StateHeader&
     DistributionData::GetStateHeader()
     {
+        ENSURE(m_data, << "Cannot get state header from a NoState object");
         ENSURE(GetType() == RegistrationState ||
                GetType() == EntityState, << "GetStateHeader called on DistributionData that was not a Registration state or Entity state(type = " << GetType() << ")");
-        ENSURE(m_data, << "Cannot get state header from a NoState object");
 
         return *AnyPtrCast<StateHeader>(GetData());
     }
@@ -222,8 +224,8 @@ namespace Internal
     DistributionData::RegistrationStateHeader&
     DistributionData::GetRegistrationStateHeader()
     {
-        ENSURE(GetType() == RegistrationState, << "GetRegistrationStateHeader called on DistributionData that was not a Registration state (type = " << GetType() << ")");
         ENSURE(m_data, << "Cannot get state header from a NoState object");
+        ENSURE(GetType() == RegistrationState, << "GetRegistrationStateHeader called on DistributionData that was not a Registration state (type = " << GetType() << ")");
 
         return *AnyPtrCast<RegistrationStateHeader>(GetData());
     }
@@ -231,8 +233,8 @@ namespace Internal
     DistributionData::EntityStateHeader&
     DistributionData::GetEntityStateHeader()
     {
-        ENSURE(GetType() == EntityState, << "GetEntityStateHeader called on DistributionData that was not an Entity state (type = " << GetType() << ")");
         ENSURE(m_data, << "Cannot get state header from a NoState object");
+        ENSURE(GetType() == EntityState, << "GetEntityStateHeader called on DistributionData that was not an Entity state (type = " << GetType() << ")");
 
         return *AnyPtrCast<EntityStateHeader>(GetData());
     }
@@ -805,6 +807,8 @@ namespace Internal
     Typesystem::TypeId
     DistributionData::GetTypeId() const
     {
+        ENSURE(m_data, << "Cannot GetTypeId for a NULL DistributionData!");
+
         switch (GetType())
         {
         case Request_EntityDelete:
@@ -845,6 +849,8 @@ namespace Internal
 
     const Typesystem::HandlerId DistributionData::GetHandlerId() const
     {
+        ENSURE(m_data, << "Cannot GetHandlerId for a NULL DistributionData!");
+
         switch (GetType())
         {
         case Action_PendingRegistrationRequest:
@@ -882,6 +888,7 @@ namespace Internal
 
     void DistributionData::SetHandlerId(const Typesystem::HandlerId& handlerId)
     {
+        ENSURE(m_data, << "Cannot SetHandlerId for a NULL DistributionData!");
         switch (GetType())
         {
         case EntityState:
@@ -900,6 +907,7 @@ namespace Internal
 
     const Typesystem::InstanceId DistributionData::GetInstanceId() const
     {
+        ENSURE(m_data, << "Cannot GetInstanceId for a NULL DistributionData!");
         switch (GetType())
         {
         case Request_EntityCreate:
@@ -934,6 +942,7 @@ namespace Internal
 
     bool DistributionData::HasInstanceId() const
     {
+        ENSURE(m_data, << "Cannot HasInstanceId for a NULL DistributionData!");
         switch (GetType())
         {
         case Request_EntityCreate:
@@ -955,6 +964,7 @@ namespace Internal
 
     const char* DistributionData::GetConnectionName() const
     {
+        ENSURE(m_data, << "Cannot GetConnectionName for a NULL DistributionData!");
         ENSURE(GetType() == Action_Connect, << "GetConnectionName is only valid for Connect messages");
         return GetData() + sizeof(ConnectHeader);
     }
@@ -962,6 +972,7 @@ namespace Internal
     const InternalRequestId
     DistributionData::GetRequestId() const
     {
+        ENSURE(m_data, << "Cannot GetRequestId for a NULL DistributionData!");
         if (GetType() == Response)
         {
             return GetResponseHeader().m_requestId;
@@ -982,6 +993,7 @@ namespace Internal
     const char*
     DistributionData::GetBlob() const
     {
+        ENSURE(m_data, << "Cannot GetBlob for a NULL DistributionData!");
         switch (GetType())
         {
         case EntityState:
@@ -1196,6 +1208,13 @@ namespace Internal
                    << "IsNoState: DistributionData is not an entity or registration state (type = " << GetType() << ")");
             return false;
         }
+    }
+
+    bool DistributionData::HasData() const
+    {
+        if (m_data)
+            return true;
+        return false;
     }
 
 

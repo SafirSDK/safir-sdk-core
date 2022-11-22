@@ -29,6 +29,7 @@
 #include <Safir/Dob/Internal/InjectionKindTable.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
+#include <Safir/Dob/Internal/DistributionScopeReader.h>
 #include <Safir/Dob/Entity.h>
 #include <Safir/Dob/Service.h>
 
@@ -278,8 +279,12 @@ namespace Internal
                 // the state container to this state.
                 statePtr->SetReleased(true);
 
-                // The released end state must be saved "a while".
-                EndStates::Instance().Add(statePtr);
+                // The released end state must be saved "a while" if it is not a LimitedType
+                if (!DistributionScopeReader::Instance().IsLimited(m_typeId))
+                {
+                    EndStates::Instance().Add(statePtr);
+                }
+
             }
             break;
 
@@ -346,8 +351,11 @@ namespace Internal
                     // the state container to this state.
                     statePtr->SetReleased(true);
 
-                    // The released end state must be saved "a while".
-                    EndStates::Instance().Add(statePtr);
+                    // The released end state must be saved "a while" if it is not a LimitedType
+                    if (!DistributionScopeReader::Instance().IsLimited(m_typeId))
+                    {
+                        EndStates::Instance().Add(statePtr);
+                    }
                 }
                 break;
 
@@ -687,8 +695,11 @@ namespace Internal
 
         statePtr->SetRealState(newRealState);
 
-        // This is an end state so it must be saved "a while".
-        EndStates::Instance().Add(statePtr);
+        // The released end state must be saved "a while" if it is not a LimitedType
+        if (!DistributionScopeReader::Instance().IsLimited(m_typeId))
+        {
+            EndStates::Instance().Add(statePtr);
+        }
     }
 
     void HandlerRegistrations::UpdateGhost(const StateSharedPtr&                statePtr,
