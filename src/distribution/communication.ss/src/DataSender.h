@@ -450,7 +450,7 @@ namespace Com
             userData->receivers.insert(nodeId);
             m_sendQueue.enqueue(userData);
 
-            lllog(8)<<m_logPrefix.c_str()<<"Welcome posted from "<<m_nodeId<<L" to "<<nodeId<<", seq: "<<ni.welcome<<std::endl;
+            lllog(6)<<m_logPrefix.c_str()<<"Welcome posted from "<<m_nodeId<<L" to "<<nodeId<<", seq: "<<ni.welcome<<std::endl;
             HandleSendQueue();
         }
 
@@ -768,7 +768,7 @@ namespace Com
                         //message has not been acked by everyone
                         for (auto r = ud->receivers.cbegin(); r != ud->receivers.cend(); ++r)
                         {
-                            lllog(8)<<m_logPrefix.c_str()<<"Cant remove seq: "<<ud->header.sequenceNumber<<", left: "<<*r<<std::endl;
+                            lllog(9)<<m_logPrefix.c_str()<<"Cant remove seq: "<<ud->header.sequenceNumber<<", left: "<<*r<<std::endl;
                         }
                         break;
                     }
@@ -780,7 +780,7 @@ namespace Com
                 //to avoid race conditions we can't just set m_sendQueueSize=0 here but instead decrease it with the actual number of items removed.
                 auto numberOfRemoved=m_sendQueue.clear_queue();
                 m_sendQueueSize -= static_cast<unsigned int>(numberOfRemoved);
-                lllog(8)<<m_logPrefix.c_str()<<"No receivers left, clear sendQueue, numberOfRemoved: "<<numberOfRemoved<<std::endl;
+                lllog(9)<<m_logPrefix.c_str()<<"No receivers left, clear sendQueue, numberOfRemoved: "<<numberOfRemoved<<std::endl;
             }
 
             //if queue has been full and is now below threshold, notify user

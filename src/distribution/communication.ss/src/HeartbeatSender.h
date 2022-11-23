@@ -143,14 +143,14 @@ namespace Com
             {
                 if (WriterType::IsMulticastEnabled())
                 {
-                    lllog(8)<<m_logPrefix.c_str()<<"Send Heartbeat multicast"<<std::endl;
+                    lllog(9)<<m_logPrefix.c_str()<<"Send Heartbeat multicast"<<std::endl;
                     WriterType::SendMulticast(m_heartbeat);
                 }
                 else
                 {
                     for (auto vt = m_nodes.cbegin(); vt != m_nodes.cend(); ++vt)
                     {
-                        lllog(8)<<m_logPrefix.c_str()<<"Send Heartbeat to "<<vt->first<<std::endl;
+                        lllog(9)<<m_logPrefix.c_str()<<"Send Heartbeat to "<<vt->first<<std::endl;
                         WriterType::SendTo(m_heartbeat, vt->second);
                     }
                 }

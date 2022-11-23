@@ -25,32 +25,46 @@
 ###############################################################################
 import os, sys, argparse, socket, glob
 import asyncio, json, websockets
+from contextlib import contextmanager
 from testenv import TestEnv, TestEnvStopper, log
 
 failed_tests = set()
-def set_failed(test):
-    global failed_tests
-    failed_tests.add(test)
-
 # ===================================================================
 # Helpers
 # ===================================================================
-# Launch a Safir node.
-def launch_node(args, safir_instance, node_id):    
-    os.environ["SAFIR_COM_NETWORK_SIMULATION"] = "True" # Enable network simulation
-    os.environ["SAFIR_INSTANCE"] = str(safir_instance)
-    print("Launching node", str(safir_instance))
-    env = TestEnv(args.safir_control,
-                  args.dose_main,
-                  args.dope_main if safir_instance == 1 else None,
-                  args.safir_show_config,
-                  start_syslog_server=True if safir_instance == 1 else False,
-                  ignore_control_cmd=True if safir_instance == 1 else False,
-                  wait_for_persistence=True,
-                  force_node_id=node_id)
-    
-    env.launchProcess("safir_websocket", args.safir_websocket)
-    return env
+@contextmanager
+def test_case(name):
+    global failed_tests
+    try:
+        log("--- Run", name)
+        yield
+    except Exception as e:
+        failed_tests.add(name)
+        log(e)
+        log("--- Test failed: " + name)
+    finally:
+        log("--- Test passed: " + name)
+
+@contextmanager
+def launch_node(args, safir_instance, node_id):
+    try:
+        os.environ["SAFIR_COM_NETWORK_SIMULATION"] = "True" # Enable network simulation
+        os.environ["SAFIR_INSTANCE"] = str(safir_instance)
+        print("Launching node", str(safir_instance))
+        env = TestEnv(args.safir_control,
+                    args.dose_main,
+                    args.dope_main if safir_instance == 1 else None,
+                    args.safir_show_config,
+                    start_syslog_server=True if safir_instance == 1 else False,
+                    ignore_control_cmd=True if safir_instance == 1 else False,
+                    wait_for_persistence=True,
+                    force_node_id=node_id)
+        
+        env.launchProcess("safir_websocket", args.safir_websocket)
+        yield env
+    finally:
+        log("kill node" + str(node_id))
+        env.killprocs()
 
 # Simulate network up/down
 def set_network_state(state, safir_instance):
@@ -78,11 +92,11 @@ def dou_type(msg):
     if "typeId" in p:
         return p["typeId"]
     if "entity" in p:
-        return p["entity"]["_DouType"];
+        return p["entity"]["_DouType"]
     if "message" in p:
-        return p["message"]["_DouType"];
+        return p["message"]["_DouType"]
     if "request" in p:
-        return p["request"]["_DouType"];
+        return p["request"]["_DouType"]
 
 def instance_id(msg):
     return msg["params"]["instanceId"]
@@ -127,7 +141,7 @@ def pools_equal(safir_app1, safir_app2):
     reg = dict_to_sorted_list(safir_app1.registrations) == dict_to_sorted_list(safir_app2.registrations)
     return ent and reg
 
-async def correct_pool_detached_node(app):
+async def check_pool_detached_node(app):
     ok = False
     limited_type = "DoseTest.LimitedEntity" if app.safir_instance == 3 else "DoseTest.LimitedEntity2"
     expected_reg = [limited_type + ":DEFAULT_HANDLER", "DoseTest.LimitedService:app" + str(app.node_id), "Safir.Dob.NodeInfo:" + str(app.node_id)]
@@ -144,16 +158,17 @@ async def correct_pool_detached_node(app):
         await asyncio.sleep(5)
 
     if not ok:
-        log("*** ERROR: Incorrect pool on light node " + str(app.node_id)) + ", safir_instance: " + str(app.safir_instance)
+        log("*** ERROR: Incorrect pool on light node " + str(app.node_id) + ", safir_instance: " + str(app.safir_instance))
         print("  Expected registrations:")
         for i in expected_reg: print("    " + i)
         print("  Expected entities:")
         for i in expected_ent: print("    " + i)
         app.dump_pool()
 
-    return ok
+    if not ok:
+        raise AssertionError("Incorrect pool")    
 
-async def correct_pools_connected_nodes(*apps):
+async def check_pools_connected_nodes(*apps):
     ok = True
     expected_global_reg = list()
     expected_global_ent = list()
@@ -191,10 +206,12 @@ async def correct_pools_connected_nodes(*apps):
                 expected_ent.extend([limited_type + ":1", "Safir.Dob.NodeInfo:" + str(app.node_id)])
                 expected_reg.append("DoseTest.LimitedService:app" + str(app.node_id))
 
+            expected_reg.sort()
+            expected_ent.sort()
             if not (contains_exact(expected_reg, app.registrations) and contains_exact(expected_ent, app.entities)):
                 ok = False
                 if check == max_tries - 1:
-                    log("*** ERROR: Incorrect pool on node " + str(app.node_id)) + ", safir_instance: " + str(app.safir_instance)
+                    log("*** ERROR: Incorrect pool on node " + str(app.node_id) + ", safir_instance: " + str(app.safir_instance))
                     print("  Expected registrations:")
                     for i in expected_reg: print("    " + i)
                     print("  Expected entities:")
@@ -207,12 +224,15 @@ async def correct_pools_connected_nodes(*apps):
         log("--- Extended wait for PD to finish")
         await asyncio.sleep(5)
 
-    return ok
+    if not ok:
+        raise AssertionError("Incorrect pool")    
 
-# ==============================================================================
-# Simple Safir application.
+# ==============================================================================================
+# Simple Safir application. The constructor will connect to the DOB and subscribe for all 
+# entites and all registrations and will also register two handlers and create an entitiy instance.
+# It sill start a running task that handles send and receive to the Dob. Stop will end the task
 # Safir_instance:  1,2 = normal node,  3,4 = light node
-# ==============================================================================
+# ==============================================================================================
 class SafirApp:
     def __init__(self, safir_instance, node_id):
         self.safir_instance = safir_instance
@@ -220,30 +240,54 @@ class SafirApp:
         self.sendQueue = asyncio.Queue()
         self.entities = dict()
         self.registrations = dict()
-
-    async def run(self):
-        uri = "ws://localhost:1000" + str(self.safir_instance)
-        connectTry = 0
-        while connectTry <  5: # make 5 efforts to connect, total 15 sec
-            try:
-                async with websockets.connect(uri) as ws:
-                    connectTry = 10 
-                    self.ws = ws
-                    await self._setup_dob()
-                    await asyncio.gather(self._reader(), self._sender())
-            except ConnectionRefusedError:
-                connectTry = connectTry +1
-                await asyncio.sleep(3)
-            
-        if connectTry == 5:
-            print("Failed to connect to websocket")
+        self.stopped = False
+        self.task = asyncio.create_task(self._run())
 
     async def stop(self):
-        await self.sendQueue.put(None)
-        await self.sendQueue.join()
+        if not self.stopped:
+            await self.sendQueue.put(None)
+            await self.sendQueue.join()
+            await self.task
+            self.stopped = True
 
     async def send(self, msg):
         await self.sendQueue.put(msg)
+
+    async def wait_for_node_state(self, state, timeout=60):
+        nodeInfo = "Safir.Dob.NodeInfo:" + str(self.node_id)
+        t = 0
+        while t < timeout:
+            t = t + 3
+            await asyncio.sleep(3)
+            if state in self.entities.get(nodeInfo):
+                return
+
+        raise AssertionError("app" + str(self.node_id) +" did not get NodeInfo.State='" + state +"' within " + str(timeout) + " seconds.")
+
+    def dump_pool(self):
+        print("=== Node: " + str(self.node_id) + ", safir_instance: " + str(self.safir_instance) + " ===")
+        print("  Registrations:")
+        for val in dict_to_sorted_list(self.registrations):
+            print("    " + val)            
+        print("  Entities:")
+        for val in dict_to_sorted_list(self.entities):
+            print("    " + val)
+        log("--------------")
+
+    async def _run(self):
+        uri = "ws://localhost:1000" + str(self.safir_instance)
+        for connectTry in range(5): # make 5 efforts to connect, total 15 sec
+            try:
+                async with websockets.connect(uri) as ws:
+                    self.ws = ws
+                    await self._setup_dob()
+                    await asyncio.gather(self._reader(), self._sender())
+                    break;
+            except ConnectionRefusedError:
+                await asyncio.sleep(3)
+                if connectTry == 4:
+                    log("*** Failed to connect!")
+                    raise
 
     async def _reader(self):
         async for message in self.ws:
@@ -298,359 +342,222 @@ class SafirApp:
         await self.send('{"method": "setEntity", "params": {"entity": {"_DouType": "' + entity_type + '", "Info": "Hello"}, "instanceId": 1}, "id": 6}')
         await self.send('{"method": "registerServiceHandler", "params": {"typeId": "' + service_type + '", "handlerId": "' + app_name + '"}, "id": 7}')
 
-    def dump_pool(self):
-        print("=== Node: " + str(self.node_id) + ", safir_instance: " + str(self.safir_instance) + " ===")
-        print("  Registrations:")
-        for val in dict_to_sorted_list(self.registrations):
-            print("    " + val)            
-        print("  Entities:")
-        for val in dict_to_sorted_list(self.entities):
-            print("    " + val)
-        log("--------------")
-
 # ===================================================================
 # Test cases
 # ===================================================================
 async def one_normal_one_light_detach_reattach_light(args):
-    test_name =  "one_normal_one_light_detach_reattach_light"
-    log("--- Run", test_name)
-    node1 = launch_node(args, safir_instance=1, node_id=1)
-    node3 = launch_node(args, safir_instance=3, node_id=3) 
-    app1 = SafirApp(safir_instance=1, node_id=1)
-    app3 = SafirApp(safir_instance=3, node_id=3)
+    with test_case("one_normal_one_light_detach_reattach_light"),\
+        launch_node(args, safir_instance=1, node_id=1) as node1,\
+        launch_node(args, safir_instance=3, node_id=3) as node3:
     
-    # Test steps
-    async def test_sequence():
+        app1 = SafirApp(safir_instance=1, node_id=1)
+        app3 = SafirApp(safir_instance=3, node_id=3)
+
         # let the system run for a while to complete PD
         await asyncio.sleep(5)
 
-        if not await correct_pools_connected_nodes(app1, app3):
-            set_failed(test_name)
+        await check_pools_connected_nodes(app1, app3)
 
         # Disable network on lightnode and wait for it to be Detached
         set_network_state(False, safir_instance=3) 
-        while "Detached" not in app3.entities.get("Safir.Dob.NodeInfo:3"):
-            await asyncio.sleep(2)
+        await app3.wait_for_node_state("Detached")
         log("--- node3 is now detached")
 
-        if not (await correct_pools_connected_nodes(app1) and await correct_pool_detached_node(app3)):
-            set_failed(test_name)
+        await check_pools_connected_nodes(app1)
+        await check_pool_detached_node(app3)
 
         # Enable network on lightnode and wait for it to be Attached
         set_network_state(True, safir_instance=3) 
-        while "Attached" not in app3.entities.get("Safir.Dob.NodeInfo:3"):
-            await asyncio.sleep(2)
+        await app3.wait_for_node_state("Attached")
         log("--- node3 is now attached again")
 
         # let the system run for a while to complete PD
         await asyncio.sleep(5)
+        await check_pools_connected_nodes(app1, app3)
 
-        if not await correct_pools_connected_nodes(app1, app3):
-            set_failed(test_name)
-
-        await app1.stop()
-        await app3.stop()
-
-    # Run the test_sequence
-    await asyncio.gather(app1.run(), app3.run(), test_sequence());
-
-    # Close nodes
-    node1.killprocs()
-    node3.killprocs()
+        await asyncio.gather(app1.stop(), app3.stop())
 
 async def one_normal_two_light_detach_reattach_one_light(args):
-    test_name =  "one_normal_two_light_detach_reattach_one_light"
-    log("--- Run", test_name)
-    node1 = launch_node(args, safir_instance=1, node_id=1)
-    node3 = launch_node(args, safir_instance=3, node_id=3)
-    node4 = launch_node(args, safir_instance=4, node_id=4)
-    app1 = SafirApp(safir_instance=1, node_id=1)
-    app3 = SafirApp(safir_instance=3, node_id=3)
-    app4 = SafirApp(safir_instance=4, node_id=4)
+    with test_case("one_normal_two_light_detach_reattach_one_light"),\
+        launch_node(args, safir_instance=1, node_id=1) as node1,\
+        launch_node(args, safir_instance=3, node_id=3) as node3,\
+        launch_node(args, safir_instance=4, node_id=4) as node4:
     
-    # Test steps
-    async def test_sequence():
-        # let the system run for a while to complete PD
-        await asyncio.sleep(5)
-
-        if not await correct_pools_connected_nodes(app1, app3, app4):
-            set_failed(test_name)
-
-        # Disable network on lightnode and wait for it to be Detached
-        set_network_state(False, safir_instance=3) 
-        while "Detached" not in app3.entities.get("Safir.Dob.NodeInfo:3"):
-            await asyncio.sleep(2)
-        log("--- node3 is now detached")
-
-        if not await correct_pools_connected_nodes(app1, app4):
-            set_failed(test_name)
-        if not await correct_pool_detached_node(app3):
-            set_failed(test_name)
-
-        # Enable network on lightnode and wait for it to be Attached
-        set_network_state(True, safir_instance=3) 
-        while "Attached" not in app3.entities.get("Safir.Dob.NodeInfo:3"):
-            await asyncio.sleep(2)
-        log("--- node3 is now attached again")
+        app1 = SafirApp(safir_instance=1, node_id=1)
+        app3 = SafirApp(safir_instance=3, node_id=3)
+        app4 = SafirApp(safir_instance=4, node_id=4)
         
         # let the system run for a while to complete PD
         await asyncio.sleep(5)
 
-        if not await correct_pools_connected_nodes(app1, app3, app4):
-            set_failed(test_name)
+        await check_pools_connected_nodes(app1, app3, app4)
 
-        await app1.stop()
-        await app3.stop()
-        await app4.stop()
+        # Disable network on lightnode and wait for it to be Detached
+        set_network_state(False, safir_instance=3) 
+        await app3.wait_for_node_state("Detached")
+        log("--- node3 is now detached")
 
-    # Run the test_sequence
-    await asyncio.gather(app1.run(), app3.run(), app4.run(), test_sequence());
+        await check_pools_connected_nodes(app1, app4)
+        await check_pool_detached_node(app3)
 
-    # Close nodes
-    node1.killprocs()
-    node3.killprocs()
-    node4.killprocs()
-
-async def one_normal_two_light_restart_normal(args):
-    test_name =  "one_normal_two_light_restart_normal"
-    log("--- Run", test_name)
-    node1 = launch_node(args, safir_instance=1, node_id=1)
-    node3 = launch_node(args, safir_instance=3, node_id=3)
-    node4 = launch_node(args, safir_instance=4, node_id=4)
-    app1 = SafirApp(safir_instance=1, node_id=1)
-    app3 = SafirApp(safir_instance=3, node_id=3)
-    app4 = SafirApp(safir_instance=4, node_id=4)
-    
-    # Test steps
-    async def test_sequence():
+        # Enable network on lightnode and wait for it to be Attached
+        set_network_state(True, safir_instance=3) 
+        await app3.wait_for_node_state("Attached")
+        log("--- node3 is now attached again")
+        
         # let the system run for a while to complete PD
         await asyncio.sleep(5)
+        await check_pools_connected_nodes(app1, app3, app4)
 
-        if not await correct_pools_connected_nodes(app1, app3, app4):
-            set_failed(test_name)
+        await asyncio.gather(app1.stop(), app3.stop(), app4.stop())
+    
+async def one_normal_two_light_restart_normal(args):
+    with test_case("one_normal_two_light_restart_normal"),\
+        launch_node(args, safir_instance=1, node_id=1) as node1,\
+        launch_node(args, safir_instance=3, node_id=3) as node3,\
+        launch_node(args, safir_instance=4, node_id=4) as node4:
+    
+        app1 = SafirApp(safir_instance=1, node_id=1)
+        app3 = SafirApp(safir_instance=3, node_id=3)
+        app4 = SafirApp(safir_instance=4, node_id=4)
+        
+        # let the system run for a while to complete PD
+        await asyncio.sleep(5)
+        await check_pools_connected_nodes(app1, app3, app4)
         
         # restart node 1
         log("--- Stop node 1")
         await app1.stop()
-        node1.killprocs()        
-        node11 = launch_node(args, safir_instance=1, node_id=11) # use safir_instace 1 again to start dope
-        app11 = SafirApp(safir_instance=1, node_id=11)
-        app11_task = asyncio.create_task(app11.run())
-        log("--- Node 1 has been restarted, now with new node_id 11")
+        node1.killprocs()
 
-        # let the system run for a while to complete PD
-        await asyncio.sleep(5)
+        with launch_node(args, safir_instance=1, node_id=11) as node11:
+            app11 = SafirApp(safir_instance=1, node_id=11)
+            log("--- Node 1 has been restarted, now with new node_id 11")
 
-        while "Attached" not in app3.entities.get("Safir.Dob.NodeInfo:3") and "Attached" not in app4.entities.get("Safir.Dob.NodeInfo:4"):
-            await asyncio.sleep(2)
+            # let the system run for a while to complete PD
+            await asyncio.sleep(5)
+            await asyncio.gather(app3.wait_for_node_state("Attached"), app4.wait_for_node_state("Attached"))
+            
+            await check_pools_connected_nodes(app11, app3, app4)
 
-        if not await correct_pools_connected_nodes(app11, app3, app4):
-            set_failed(test_name)
-
-        await app11.stop()
-        await app3.stop()
-        await app4.stop()
-
-        # kill the restarted node
-        await app11_task
-        node11.killprocs()
-
-    # Run the test_sequence
-    await asyncio.gather(app1.run(), app3.run(), app4.run(), test_sequence());
-
-    # Close nodes
-    node3.killprocs()
-    node4.killprocs()
-
+            await asyncio.gather(app11.stop(), app3.stop(), app4.stop())
+   
 
 async def two_normal_two_light_detach_reattach_both_light(args):
-    test_name =  "two_normal_two_light_detach_reattach_both_light"
-    log("--- Run", test_name)
-    node1 = launch_node(args, safir_instance=1, node_id=1)
-    node2 = launch_node(args, safir_instance=2, node_id=2)
-    node3 = launch_node(args, safir_instance=3, node_id=3)
-    node4 = launch_node(args, safir_instance=4, node_id=4)
-    app1 = SafirApp(safir_instance=1, node_id=1)
-    app2 = SafirApp(safir_instance=2, node_id=2)
-    app3 = SafirApp(safir_instance=3, node_id=3)
-    app4 = SafirApp(safir_instance=4, node_id=4)
+    with test_case("two_normal_two_light_detach_reattach_both_light"),\
+        launch_node(args, safir_instance=1, node_id=1) as node1,\
+        launch_node(args, safir_instance=2, node_id=2) as node2,\
+        launch_node(args, safir_instance=3, node_id=3) as node3,\
+        launch_node(args, safir_instance=4, node_id=4) as node4:
+    
+        app1 = SafirApp(safir_instance=1, node_id=1)
+        app2 = SafirApp(safir_instance=2, node_id=2)
+        app3 = SafirApp(safir_instance=3, node_id=3)
+        app4 = SafirApp(safir_instance=4, node_id=4)
 
-    async def test_sequence():
         # let the system run for a while to complete PD
         await asyncio.sleep(5)
 
-        if not await correct_pools_connected_nodes(app1, app2, app3, app4):
-            set_failed(test_name)
+        await check_pools_connected_nodes(app1, app2, app3, app4)
 
         # Disable network on lightnodes and wait for them to be Detached
         set_network_state(False, safir_instance=3) 
         set_network_state(False, safir_instance=4) 
-        while "Detached" not in app3.entities.get("Safir.Dob.NodeInfo:3") and "Detached" not in app4.entities.get("Safir.Dob.NodeInfo:4"):
-            await asyncio.sleep(2)
+        await asyncio.gather(app3.wait_for_node_state("Detached"), app4.wait_for_node_state("Detached"))
         log("--- node 3 and node 4 are now detached")
 
-        if not (await correct_pools_connected_nodes(app1, app2) and
-            await correct_pool_detached_node(app3) and
-            await correct_pool_detached_node(app4)):
-            set_failed(test_name)
+        await check_pools_connected_nodes(app1, app2)
+        await check_pool_detached_node(app3)
+        await check_pool_detached_node(app4)
 
         # Enable network again and wait for nodes to become attached
         set_network_state(True, safir_instance=3) 
         set_network_state(True, safir_instance=4) 
-        while "Attached" not in app3.entities.get("Safir.Dob.NodeInfo:3") and "Attached" not in app4.entities.get("Safir.Dob.NodeInfo:4"):
-            await asyncio.sleep(2)
+        await asyncio.gather(app3.wait_for_node_state("Attached"), app4.wait_for_node_state("Attached"))
         log("--- node 3 and node 4 are now attached again")
 
         # let the system run for a while to complete PD
         await asyncio.sleep(5)
-
-        if not await correct_pools_connected_nodes(app1, app2, app3, app4):
-            set_failed(test_name)
-
-        await app1.stop()
-        await app2.stop()
-        await app3.stop()
-        await app4.stop()
-
-    # Run the test_sequence
-    await asyncio.gather(app1.run(), app2.run(), app3.run(), app4.run(), test_sequence());
-
-    # Close nodes
-    node1.killprocs()
-    node2.killprocs()
-    node3.killprocs()
-    node4.killprocs()
+        await check_pools_connected_nodes(app1, app2, app3, app4)
+        
+        await asyncio.gather(app1.stop(), app2.stop(), app3.stop(), app4.stop())
 
 async def two_normal_two_light_restart_one_normal(args):
-    test_name =  "two_normal_two_light_restart_one_normal"
-    log("--- Run", test_name)
-    node1 = launch_node(args, safir_instance=1, node_id=1)
-    node2 = launch_node(args, safir_instance=2, node_id=2)
-    node3 = launch_node(args, safir_instance=3, node_id=3)
-    node4 = launch_node(args, safir_instance=4, node_id=4)
-    app1 = SafirApp(safir_instance=1, node_id=1)
-    app2 = SafirApp(safir_instance=2, node_id=2)
-    app3 = SafirApp(safir_instance=3, node_id=3)
-    app4 = SafirApp(safir_instance=4, node_id=4)
+    with test_case("two_normal_two_light_restart_one_normal"),\
+        launch_node(args, safir_instance=1, node_id=1) as node1,\
+        launch_node(args, safir_instance=2, node_id=2) as node2,\
+        launch_node(args, safir_instance=3, node_id=3) as node3,\
+        launch_node(args, safir_instance=4, node_id=4) as node4:
 
-    async def test_sequence():
+        app1 = SafirApp(safir_instance=1, node_id=1)
+        app2 = SafirApp(safir_instance=2, node_id=2)
+        app3 = SafirApp(safir_instance=3, node_id=3)
+        app4 = SafirApp(safir_instance=4, node_id=4)
+
         # let the system run for a while to complete PD
         await asyncio.sleep(5)
-
-        if not await correct_pools_connected_nodes(app1, app2, app3, app4):
-            set_failed(test_name)
+        await check_pools_connected_nodes(app1, app2, app3, app4)
 
         # restart node 2
         log("--- Stop node 2")
         await app2.stop()
-        node2.killprocs()        
-        node22 = launch_node(args, safir_instance=2, node_id=22) # use safir_instace 1 again to start dope
-        app22 = SafirApp(safir_instance=2, node_id=22)
-        app22_task = asyncio.create_task(app22.run())
-        log("--- Node 2 has been restarted, now with new node_id 22")
-
-        # let the system run for a while to complete PD
-        await asyncio.sleep(5)
-
-        if not await correct_pools_connected_nodes(app1, app22, app3, app4):
-            set_failed(test_name)
-        
-        await app1.stop()
-        await app22.stop()
-        await app3.stop()
-        await app4.stop()
-        
-
-        # kill the restarted node
-        # kill the restarted node
-        await app22_task
-        node22.killprocs()
-
-    # Run the test_sequence
-    await asyncio.gather(app1.run(), app2.run(), app3.run(), app4.run(), test_sequence());
-
-    # Close nodes
-    node1.killprocs()
-    node3.killprocs()
-    node4.killprocs()
+        node2.killprocs()    
+        with launch_node(args, safir_instance=2, node_id=22) as node22:
+            app22 = SafirApp(safir_instance=2, node_id=22)
+            log("--- Node 2 has been restarted, now with new node_id 22")
+            # let the system run for a while to complete PD
+            await asyncio.sleep(5)
+            await check_pools_connected_nodes(app1, app22, app3, app4)
+            
+            await asyncio.gather(app1.stop(), app22.stop(), app3.stop(), app4.stop())
 
 async def two_normal_two_light_restart_both_normal(args):
-    test_name =  "two_normal_two_light_restart_both_normal"
-    log("--- Run", test_name)
-    node1 = launch_node(args, safir_instance=1, node_id=1)
-    node2 = launch_node(args, safir_instance=2, node_id=2)
-    node3 = launch_node(args, safir_instance=3, node_id=3)
-    node4 = launch_node(args, safir_instance=4, node_id=4)
-    app1 = SafirApp(safir_instance=1, node_id=1)
-    app2 = SafirApp(safir_instance=2, node_id=2)
-    app3 = SafirApp(safir_instance=3, node_id=3)
-    app4 = SafirApp(safir_instance=4, node_id=4)
+    with test_case("two_normal_two_light_restart_both_normal"),\
+        launch_node(args, safir_instance=1, node_id=1) as node1,\
+        launch_node(args, safir_instance=2, node_id=2) as node2,\
+        launch_node(args, safir_instance=3, node_id=3) as node3,\
+        launch_node(args, safir_instance=4, node_id=4) as node4:
+        app1 = SafirApp(safir_instance=1, node_id=1)
+        app2 = SafirApp(safir_instance=2, node_id=2)
+        app3 = SafirApp(safir_instance=3, node_id=3)
+        app4 = SafirApp(safir_instance=4, node_id=4)
 
-    async def test_sequence():
         # let the system run for a while to complete PD
         await asyncio.sleep(5)
-
-        if not await correct_pools_connected_nodes(app1, app2, app3, app4):
-            set_failed(test_name)
+        await check_pools_connected_nodes(app1, app2, app3, app4)
 
         # restart node 1 and 2
-        log("--- Stop node 1")
+        log("--- Restart node 1 and 2")
         await app1.stop()
         await app2.stop()
         node1.killprocs()
         node2.killprocs()
-        node11 = launch_node(args, safir_instance=1, node_id=11)
-        node22 = launch_node(args, safir_instance=2, node_id=22)
-        app11 = SafirApp(safir_instance=1, node_id=11)
-        app22 = SafirApp(safir_instance=2, node_id=22)
-        app11_task = asyncio.create_task(app11.run())
-        app22_task = asyncio.create_task(app22.run())
-        log("--- Node 1 and 2 has been restarted, now with new node_id 11 and 22")
 
-        # let the system run for a while to complete PD
-        await asyncio.sleep(5)
-
-        if not await correct_pools_connected_nodes(app11, app22, app3, app4):
-            set_failed(test_name)
-        
-        await app11.stop()
-        await app22.stop()
-        await app3.stop()
-        await app4.stop()
-        
-
-        # kill the restarted node
-        # kill the restarted node
-        await app11_task
-        await app22_task
-        node11.killprocs()
-        node22.killprocs()
-
-    # Run the test_sequence
-    await asyncio.gather(app1.run(), app2.run(), app3.run(), app4.run(), test_sequence());
-
-    # Close nodes
-    node3.killprocs()
-    node4.killprocs()
+        with launch_node(args, safir_instance=1, node_id=11) as node1,\
+            launch_node(args, safir_instance=2, node_id=22) as node2:
+            app11 = SafirApp(safir_instance=1, node_id=11)
+            app22 = SafirApp(safir_instance=2, node_id=22)
+            log("--- Node 1 and 2 has been restarted, now with new node_id 11 and 22")
+            # let the system run for a while to complete PD
+            await asyncio.sleep(5)
+            await check_pools_connected_nodes(app11, app22, app3, app4)
+            
+            await asyncio.gather(app11.stop(), app22.stop(), app3.stop(), app4.stop())
 
 async def two_normal_two_light_toggle_network_many_times_on_both_light(args):
-    test_name =  "two_normal_two_light_toggle_network_many_times_on_both_light"
-    log("--- Run", test_name)
-    node1 = launch_node(args, safir_instance=1, node_id=1)
-    node2 = launch_node(args, safir_instance=2, node_id=2)
-    node3 = launch_node(args, safir_instance=3, node_id=3)
-    node4 = launch_node(args, safir_instance=4, node_id=4)
-    app1 = SafirApp(safir_instance=1, node_id=1)
-    app2 = SafirApp(safir_instance=2, node_id=2)
-    app3 = SafirApp(safir_instance=3, node_id=3)
-    app4 = SafirApp(safir_instance=4, node_id=4)
+    with test_case("two_normal_two_light_toggle_network_many_times_on_both_light"),\
+        launch_node(args, safir_instance=1, node_id=1) as node1,\
+        launch_node(args, safir_instance=2, node_id=2) as node2,\
+        launch_node(args, safir_instance=3, node_id=3) as node3,\
+        launch_node(args, safir_instance=4, node_id=4) as node4:
+        app1 = SafirApp(safir_instance=1, node_id=1)
+        app2 = SafirApp(safir_instance=2, node_id=2)
+        app3 = SafirApp(safir_instance=3, node_id=3)
+        app4 = SafirApp(safir_instance=4, node_id=4)
 
-    async def test_sequence():
         # let the system run for a while to complete PD
         await asyncio.sleep(5)
-
-        if not await correct_pools_connected_nodes(app1, app2, app3, app4):
-            set_failed(test_name)
+        await check_pools_connected_nodes(app1, app2, app3, app4)
 
         # Toggle network 10 times and end with disabled network
         for toggle in range(10):
@@ -659,15 +566,16 @@ async def two_normal_two_light_toggle_network_many_times_on_both_light(args):
             set_network_state(network_state, safir_instance=4)
             await asyncio.sleep(2)
 
-        while "Detached" not in app3.entities.get("Safir.Dob.NodeInfo:3") and "Detached" not in app4.entities.get("Safir.Dob.NodeInfo:4"):
-            await asyncio.sleep(2)
+        # Give extra time to reach correct state
+        await asyncio.gather(app3.wait_for_node_state("Detached", timeout=120),
+                            app4.wait_for_node_state("Detached", timeout=120))
         log("--- node 3 and node 4 are now detached")
 
         # Give some time for PD
-        if not (await correct_pools_connected_nodes(app1, app2) and
-            await correct_pool_detached_node(app3) and
-            await correct_pool_detached_node(app4)):
-            set_failed(test_name)
+        await asyncio.sleep(5)
+        await check_pools_connected_nodes(app1, app2)
+        await check_pool_detached_node(app3)
+        await check_pool_detached_node(app4)
 
         # Toggle network 10 times and end with enabled network
         for toggle in range(10):
@@ -676,31 +584,17 @@ async def two_normal_two_light_toggle_network_many_times_on_both_light(args):
             set_network_state(network_state, safir_instance=4)
             await asyncio.sleep(2)
 
-        while "Attached" not in app3.entities.get("Safir.Dob.NodeInfo:3") and "Detached" not in app4.entities.get("Safir.Dob.NodeInfo:4"):
-            await asyncio.sleep(2)
+        # Give extra time to reach correct state
+        await asyncio.gather(app3.wait_for_node_state("Attached", timeout=120),
+                            app4.wait_for_node_state("Attached", timeout=120))
         log("--- node 3 and node 4 are now attached")
         
         # Give some time for PD
         await asyncio.sleep(5)
-        if not await correct_pools_connected_nodes(app1, app2, app3, app4):            
-            set_failed(test_name)
+        await check_pools_connected_nodes(app1, app2, app3, app4)
         
-        if not await correct_pools_connected_nodes(app1, app2, app3, app4):
-            set_failed(test_name)
-
-        await app1.stop()
-        await app2.stop()
-        await app3.stop()
-        await app4.stop()
-
-    # Run the test_sequence
-    await asyncio.gather(app1.run(), app2.run(), app3.run(), app4.run(), test_sequence());
-
-    # Close nodes
-    node1.killprocs()
-    node2.killprocs()
-    node3.killprocs()
-    node4.killprocs()
+        # Run the test_sequence
+        await asyncio.gather(app1.stop(), app2.stop(), app3.stop(), app4.stop())
 
 # ===========================================
 # main
@@ -711,19 +605,38 @@ async def main(args):
     await one_normal_two_light_restart_normal(args)
     await two_normal_two_light_detach_reattach_both_light(args)
     await two_normal_two_light_restart_one_normal(args)
-    # await two_normal_two_light_restart_both_normal(args)
+    await two_normal_two_light_restart_both_normal(args)
     await two_normal_two_light_toggle_network_many_times_on_both_light(args)
 
-    #---- Repeat one test and stop on failure. Clear log after each run
+    #---- Some code for repeating tests and clearing local log folder after each run
     # for i in range(10):
-    #     files = glob.glob("/home/joel/dev/log/*")
-    #     for f in files:
-    #         os.remove(f)
+    #     for f in glob.glob("/home/joel/dev/log/*"): os.remove(f)
+    #     await one_normal_one_light_detach_reattach_light(args)
+    #     if len(failed_tests) > 0: return
 
+    #     for f in glob.glob("/home/joel/dev/log/*"): os.remove(f)
+    #     await one_normal_two_light_detach_reattach_one_light(args)
+    #     if len(failed_tests) > 0: return
+
+    #     for f in glob.glob("/home/joel/dev/log/*"): os.remove(f)
+    #     await one_normal_two_light_restart_normal(args)
+    #     if len(failed_tests) > 0: return
+
+    #     for f in glob.glob("/home/joel/dev/log/*"): os.remove(f)
+    #     await two_normal_two_light_detach_reattach_both_light(args)
+    #     if len(failed_tests) > 0: return
+
+    #     for f in glob.glob("/home/joel/dev/log/*"): os.remove(f)
+    #     await two_normal_two_light_restart_one_normal(args)
+    #     if len(failed_tests) > 0: return
+
+    #     for f in glob.glob("/home/joel/dev/log/*"): os.remove(f)
     #     await two_normal_two_light_restart_both_normal(args)
-    #     if len(failed_tests) > 0:
-    #         return
+    #     if len(failed_tests) > 0: return
 
+    #     for f in glob.glob("/home/joel/dev/log/*"): os.remove(f)
+    #     await two_normal_two_light_toggle_network_many_times_on_both_light(args)
+    #     if len(failed_tests) > 0: return
 
 if __name__ == "__main__":
     asyncio.run(main(parse_arguments()))
