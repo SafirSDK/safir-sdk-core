@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <name>ParserTest.MyParam</name>
+    <baseClass>Object</baseClass>
+    <parameters>
+        <parameter>
+            <name>MyEntityParam</name>
+            <type>ParserTest.MyEntity</type>
+            <ParserTest.MyEntity>
+                <Int32Seq>
+                   Here should not be anything
+                   <value>1</value>
+                </Int32Seq>
+            </ParserTest.MyEntity>
+        </parameter>
+    </parameters>
+</class>

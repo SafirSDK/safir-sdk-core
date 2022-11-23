@@ -156,6 +156,14 @@ namespace Internal
 
                 case ArrayCollectionType:
                     {
+                        if (SerializationUtils::TrimCopy(memIt->second.data()).size() > 0)
+                        {
+                            std::ostringstream os;
+                            os<<"Failed to serialize array member '"<<cd->GetName()<<"."<<md->GetName()<<" from xml to binary. " << std::endl;
+                            os<<"The array element is not supposed to have any data, only subelements are allowed. Found data: '" << SerializationUtils::TrimCopy(memIt->second.data()).c_str()<<"'";
+                            throw ParseError("XmlToBinary serialization error", os.str(), "", 217);
+                        }
+
                         //array, then the inner propertyTree contains array element and the array elements contains the content
                         //i.e <myIntArray><Int32 index=0>1</Int32><Int32 index=5>2</Int32></myIntArray>
                         int arrayIndex=0;
@@ -211,6 +219,13 @@ namespace Internal
 
                 case SequenceCollectionType:
                     {
+                        if (SerializationUtils::TrimCopy(memIt->second.data()).size() > 0)
+                        {
+                            std::ostringstream os;
+                            os<<"Failed to serialize sequence member '"<<cd->GetName()<<"."<<md->GetName()<<" from xml to binary. " << std::endl;
+                            os<<"The sequence element is not supposed to have any data, only subelements are allowed. Found data: '" << SerializationUtils::TrimCopy(memIt->second.data()).c_str()<<"'";
+                            throw ParseError("XmlToBinary serialization error", os.str(), "", 215);
+                        }
                         int count=0;
                         for (boost::property_tree::ptree::iterator seqIt=memIt->second.begin(); seqIt!=memIt->second.end(); ++seqIt)
                         {
@@ -237,6 +252,13 @@ namespace Internal
 
                 case DictionaryCollectionType:
                     {
+                        if (SerializationUtils::TrimCopy(memIt->second.data()).size() > 0)
+                        {
+                            std::ostringstream os;
+                            os<<"Failed to serialize dictionary member '"<<cd->GetName()<<"."<<md->GetName()<<" from xml to binary. " << std::endl;
+                            os<<"The dictionary element is not supposed to have any data, only entry-elements are allowed. Found data: '" << SerializationUtils::TrimCopy(memIt->second.data()).c_str()<<"'";
+                            throw ParseError("XmlToBinary serialization error", os.str(), "", 216);
+                        }
                         int entryCount=0;
                         for (boost::property_tree::ptree::iterator entryIt=memIt->second.begin(); entryIt!=memIt->second.end(); ++entryIt)
                         {
