@@ -1,0 +1,29 @@
+SAFIR_TOOL_LAUNCHER(1)
+======================
+:doctype: manpage
+
+
+NAME
+----
+safir_tool_launcher - A tool for launching Safir SDK Core debugging tools connected to any local node instance.
+
+
+SYNOPSIS
+--------
+*safir_tool_launcher*
+
+DESCRIPTION
+-----------
+See the user's guide for more information about the safir_tool_launcher.
+
+
+RESOURCES
+---------
+Web site: <http://www.safirsdkcore.com/>
+
+
+COPYING
+-------
+Copyright \(C) 2022 Saab AB. Free use of this software is granted under
+the terms of the GNU General Public License Version 3 (GPL-3).
+
