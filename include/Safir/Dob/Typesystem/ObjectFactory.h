@@ -117,6 +117,13 @@ namespace Typesystem
 
         /** @} */
 
+
+        /**
+         * @brief GetRegisteredTypes - Get types wich have been registered in the ObjectFactory. Intended for debug and diagnostics.
+         * @return A vector of all registered type ids.
+         */
+        std::vector<TypeId> GetRegisteredTypes() const;
+
     private:
         ObjectFactory();
         ~ObjectFactory();

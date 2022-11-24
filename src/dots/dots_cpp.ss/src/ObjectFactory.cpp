@@ -33,6 +33,8 @@
 #include <sstream>
 #include <unordered_map>
 
+#include <iostream>
+
 namespace Safir
 {
 namespace Dob
@@ -201,6 +203,16 @@ namespace Typesystem
     ObjectFactory::RegisterClass(const TypeId typeId, CreateObjectCallback createFunction)
     {
         return m_impl->m_CallbackMap.insert(Impl::CallbackMap::value_type(typeId,createFunction)).second;
+    }
+
+    std::vector<TypeId> ObjectFactory::GetRegisteredTypes() const
+    {
+        std::vector<TypeId> typeIds;
+        for (const auto& kv : m_impl->m_CallbackMap)
+        {
+            typeIds.push_back(kv.first);
+        }
+        return typeIds;
     }
 }
 }

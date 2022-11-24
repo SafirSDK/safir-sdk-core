@@ -22,7 +22,9 @@
 *
 ******************************************************************************/
 #include <iostream>
+#include <boost/range/algorithm.hpp>
 #include <boost/program_options.hpp>
+#include <Safir/Dob/Typesystem/ObjectFactory.h>
 #include <Safir/Dob/Typesystem/Internal/Kernel.h>
 #include <Safir/Dob/Typesystem/ToolSupport/TypeParser.h>
 #include <Safir/Dob/Typesystem/ToolSupport/Serialization.h>
@@ -41,6 +43,7 @@ public:
         ,typeName()
         ,paths()
         ,typeIdLookup()
+        ,compareGenerated(false)
     {
         boost::program_options::options_description desc("Command line options");
         desc.add_options()
@@ -49,7 +52,8 @@ public:
                 ("details,d", "Output a full information about the entire type system")
                 ("type,t", boost::program_options::value<std::string>(), "Output info about a specific type")
                 ("path,p", boost::program_options::value< std::vector<std::string> >()->multitoken(), "Parse specified path(s) into a local memory type repository. If same type exists in more than one path, the latter wins.")
-                ("type-id",boost::program_options::value<std::string>(), "If argument is a string the typeId is calculated. If argument is a numeric typeId or part of a typeId, the matching type name(s) are looked up." );
+                ("compare-generated", "Check that dou-files are correct and also find any missmatch between the dou-files and the types found in the generated libraries. This option will use the dou-files and generated libraries found by the current configuration. Can't be combined with any other flags.")
+                ("type-id",boost::program_options::value<std::string>(), "If argument is a string the typeId is calculated. If argument is a numeric typeId or part of a typeId, the matching type name(s) are looked up." );        
 
         boost::program_options::variables_map vm;
         boost::program_options::store(boost::program_options::parse_command_line(argc, argv, desc), vm);
@@ -76,6 +80,16 @@ public:
         {
             typeIdLookup=vm["type-id"].as<std::string>();
         }
+
+        if (vm.count("compare-generated"))
+        {
+            if (summary || details || !typeName.empty() || !paths.empty())
+            {
+                std::cout << "The option '-compare-generated' can't be combined with other options!" << std::endl;
+                exit(1);
+            }
+            compareGenerated = true;
+        }
     }
 
     bool summary;
@@ -83,6 +97,7 @@ public:
     std::string typeName;
     std::vector<std::string> paths;
     std::string typeIdLookup;
+    bool compareGenerated;
 };
 
 void TypeIdLookup(const std::string& typeIdString, const std::map<std::string, DotsC_TypeId>& typeTable)
@@ -153,6 +168,10 @@ public:
         {
             TypeIdLookup(cmd.typeIdLookup);
         }
+        else if (cmd.compareGenerated)
+        {
+            CompareGenerated();
+        }
         else
         {
             SimpleCheck();
@@ -177,7 +196,6 @@ private:
         else
         {
             std::cout<<"Type system loaded, was already created."<<std::endl;
-
         }
         std::cout<<"Number of classes:     "<<DotsC_NumberOfClasses()<<std::endl;
         std::cout<<"Number of enums:       "<<DotsC_NumberOfEnumerations()<<std::endl;
@@ -221,6 +239,68 @@ private:
             typeTable.insert(std::make_pair(typeName, *it));
         }
         ::TypeIdLookup(typeIdString, typeTable);
+    }
+
+    static void CompareGenerated()
+    {
+        std::cout<<"Checking configuration..."<<std::endl;
+        auto numberOfTypes = DotsC_NumberOfTypeIds();
+        std::cout<<"Dou and dom files are correct."<<std::endl;
+
+        std::vector<DotsC_TypeId> douTypes(numberOfTypes);
+        int dummySize;
+        DotsC_GetAllTypeIds(&douTypes[0], numberOfTypes, dummySize);
+        std::sort(std::begin(douTypes), std::end(douTypes));
+        assert(dummySize == numberOfTypes);
+
+        // filter out all classes (exclude properties, enums, exception), since only classes are registered in ObjectFactory
+        std::vector<DotsC_TypeId> douClasses;
+        for (auto t : douTypes)
+        {
+            if (DotsC_IsClass(t))
+            {
+                douClasses.push_back(t);
+            }
+        }
+
+        auto generatedTypes = Safir::Dob::Typesystem::ObjectFactory::Instance().GetRegisteredTypes();
+        std::sort(std::begin(generatedTypes), std::end(generatedTypes));
+
+        std::vector<DotsC_TypeId> notInGenerated, notInDou;
+        boost::range::set_difference(douClasses, generatedTypes, std::back_inserter(notInGenerated));
+        boost::range::set_difference(generatedTypes, douClasses, std::back_inserter(notInDou));
+
+        if (!notInGenerated.empty())
+        {
+            std::cout << "Types missing in the generated libraries:" << std::endl;
+            for (auto t : notInGenerated)
+            {
+                if (DotsC_IsClass(t)) // Only classes are registered in ObjectFactory
+                {
+                    std::string typeName=DotsC_GetTypeName(t);
+                    std::string file = DotsC_GetDouFilePath(t);
+                    std::cout << "    " << typeName << " (" << file << ")" << std::endl;
+                }
+            }
+        }
+
+        if (!notInDou.empty())
+        {
+            std::cout << "Types found in generated libraries but not in the dou/dom files. Can only show typeId since name is not known." << std::endl;
+            for (auto t : notInDou)
+            {
+                std::cout << "    " << t << std::endl;
+            }
+        }
+
+        if (notInDou.empty() && notInGenerated.empty())
+        {
+            std::cout<<"Generated libraries and dou/dom-files match"<<std::endl;
+            std::cout<<"Success!"<<std::endl;
+            return;
+        }
+
+        exit(1); // diff between dou/dom and generated libs
     }
 };
 
