@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 ###############################################################################
 #
@@ -883,16 +883,28 @@ class DebianPackager():
         os.chdir("safir-sdk-core_" + version_string)
         if not self.noclean:
             shutil.copytree(os.path.join("build", "packaging", "debian"), "debian")
+        command = ["debuild",
+                    "--prepend-path", os.path.dirname(which("conan"))]
+
+        #set up some build options.
         options = "config=" + self.arguments.configs[0]
         if self.arguments.configs[0] == "Debug":
             options += " noopt"
         if self.arguments.skip_tests:
             options += " nocheck"
-        self.__run(("debuild",
-                    "--prepend-path", os.path.dirname(which("conan")),
-                    "--set-envvar", "DEB_BUILD_OPTIONS=" + options,
-                    "-us", "-uc", "-nc"),
-                    "building packages")
+        command += ("--set-envvar", "DEB_BUILD_OPTIONS=" + options)
+
+        #Pass along a few select environment variables to debuild, since by default no environment
+        #is passed over to the build process by debuild.
+        for var in ("CONAN_LOG_RUN_TO_FILE", "CONAN_LOG_RUN_TO_OUTPUT", "SAFIR_SKIP_SLOW_TESTS"):
+            val = os.environ.get(var)
+            if val is not None:
+                command += ("--set-envvar", var + "=" + val)
+
+        command += ["-us", "-uc", "-nc"]
+
+        self.__run(command,
+                   "building packages")
         os.chdir(glob.glob("obj-*")[0])
         if not self.arguments.skip_tests:
             translate_results_to_junit("debhelper")
@@ -961,6 +973,9 @@ def get_builder(arguments):
 
 def main():
     """Woo! Main function"""
+    os.environ["CONAN_LOG_RUN_TO_OUTPUT"] = "0"
+    os.environ["CONAN_LOG_RUN_TO_FILE"] = "1"
+
     arguments = parse_command_line()
     builder = get_builder(arguments)
 
