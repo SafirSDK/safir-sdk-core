@@ -1,2 +1,5 @@
 #package is not meant for inclusion in debian at this time
 safir-sdk-core-dbg: new-package-should-close-itp-bug
+
+#weird error report about bad elf headers
+safir-sdk-core-dbg: elf-error *usr/lib/debug/.build-id/*

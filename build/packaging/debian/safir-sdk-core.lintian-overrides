@@ -9,3 +9,12 @@ safir-sdk-core: package-name-doesnt-match-sonames *
 
 #we have an extra license file, but so what?
 safir-sdk-core: extra-license-file
+
+#jni links to shared objects need to be in the runtime
+safir-sdk-core: lacks-unversioned-link-to-shared-library *jni*
+
+#safir_generated links to shared objects need to be in the runtime, since they are loaded by that name
+safir-sdk-core: lacks-unversioned-link-to-shared-library *safir_generated*
+
+#we get weird warnings about manpages on ubuntu jammy, they don't actually appear to be a problem, though.
+safir-sdk-core: groff-message *command exited with status 1: /usr/libexec/man-db/zsoelim | /usr/libexec/man-db/manconv*

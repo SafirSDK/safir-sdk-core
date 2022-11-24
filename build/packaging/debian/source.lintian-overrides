@@ -1,11 +1,6 @@
 #We use the same control file for many debian-based distros.
 safir-sdk-core: newer-standards-version
 
-#google-breakpad contains a test object file that has no source
-safir-sdk-core: source-is-missing src/lluf/lluf_crash_reporter.ss/src/google-breakpad/breakpad/src/tools/solaris/dump_syms/testdata/dump_syms_regtest.o
-
 #The copyright text for websocketpp contains an old link (which still works, btw).
 safir-sdk-core: obsolete-url-in-packaging debian/copyright http://code.google.com/archive/p/smallsha1/)
 
-#Invalid warning. That is a source file!
-safir-sdk-core: source-is-missing src/websocket/websocket.ss/dependencies/rapidjson/bin/types/paragraphs.json
