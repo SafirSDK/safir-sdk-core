@@ -41,9 +41,9 @@ def test_case(name):
     except Exception as e:
         failed_tests.add(name)
         log(e)
-        log("--- Test failed: " + name)
+        log("*** Test failed: " + name)
     finally:
-        log("--- Test passed: " + name)
+        log("--- Done: " + name)
 
 @contextmanager
 def launch_node(args, safir_instance, node_id):
@@ -143,18 +143,21 @@ def pools_equal(safir_app1, safir_app2):
 
 async def check_pool_detached_node(app):
     ok = False
-    limited_type = "DoseTest.LimitedEntity" if app.safir_instance == 3 else "DoseTest.LimitedEntity2"
-    expected_reg = [limited_type + ":DEFAULT_HANDLER", "DoseTest.LimitedService:app" + str(app.node_id), "Safir.Dob.NodeInfo:" + str(app.node_id)]
-    expected_ent = [limited_type + ":1", "Safir.Dob.NodeInfo:" + str(app.node_id)]
+    limited_type = "DoseTest.LimitedEntity:" if app.safir_instance == 3 else "DoseTest.LimitedEntity2:"
+    expected_reg = [limited_type + "DEFAULT_HANDLER", "DoseTest.LimitedService:app" + str(app.node_id), "Safir.Dob.NodeInfo:" + str(app.node_id)]
     expected_reg.sort()
+
+    expected_ent = ["Safir.Dob.NodeInfo:" + str(app.node_id)]
+    for instance in range(1, app.number_of_entities + 1):
+        expected_ent.append(limited_type + str(instance))
     expected_ent.sort()
     
-    max_tries = 5
+    max_tries = 10
     for check in range(max_tries):
         if contains_exact(expected_reg, app.registrations) and contains_exact(expected_ent, app.entities):
             ok = True
             break
-        log("--- Extended wait for PD to finish")
+        log("--- Extended wait for PD to finish, wait time " + str((check + 1)*5) + " sec")
         await asyncio.sleep(5)
 
     if not ok:
@@ -176,21 +179,23 @@ async def check_pools_connected_nodes(*apps):
     expected_limited_ent = list()
     for app in apps:
         if app.safir_instance < 3: # normal node
-            global_type = "DoseTest.GlobalEntity" if app.safir_instance == 1 else "DoseTest.GlobalEntity2"
-            expected_global_reg.append(global_type + ":DEFAULT_HANDLER")
-            expected_global_ent.append(global_type + ":1")
+            global_type = "DoseTest.GlobalEntity:" if app.safir_instance == 1 else "DoseTest.GlobalEntity2:"
+            expected_global_reg.append(global_type + "DEFAULT_HANDLER")
             expected_global_reg.append("Safir.Dob.NodeInfo:" + str(app.node_id)) #NodeInfo is actually a limited type, but when registered on a normal node, limited types are visible to all nodes
-            expected_global_ent.append("Safir.Dob.NodeInfo:" + str(app.node_id))
             expected_global_reg.append("DoseTest.GlobalService:app" + str(app.node_id))
+            expected_global_ent.append("Safir.Dob.NodeInfo:" + str(app.node_id))
+            for instance in range(1, app.number_of_entities + 1):
+                expected_global_ent.append(global_type + str(instance))
         else: # light node
-            limited_type =  "DoseTest.LimitedEntity" if app.safir_instance == 3 else "DoseTest.LimitedEntity2"
-            expected_limited_reg.append(limited_type + ":DEFAULT_HANDLER")
-            expected_limited_ent.append(limited_type + ":1")
+            limited_type =  "DoseTest.LimitedEntity:" if app.safir_instance == 3 else "DoseTest.LimitedEntity2:"
+            expected_limited_reg.append(limited_type + "DEFAULT_HANDLER")
             expected_limited_reg.append("Safir.Dob.NodeInfo:" + str(app.node_id))
-            expected_limited_ent.append("Safir.Dob.NodeInfo:" + str(app.node_id))
             expected_limited_reg.append("DoseTest.LimitedService:app" + str(app.node_id))
+            expected_limited_ent.append("Safir.Dob.NodeInfo:" + str(app.node_id))
+            for instance in range(1, app.number_of_entities + 1):
+                expected_limited_ent.append(limited_type + str(instance))
 
-    max_tries = 5
+    max_tries = 10
     for check in range(max_tries):
         ok = True
         for app in apps:
@@ -201,10 +206,12 @@ async def check_pools_connected_nodes(*apps):
                 expected_reg.extend(expected_limited_reg)
                 expected_ent.extend(expected_limited_ent)
             else: # light node
-                limited_type =  "DoseTest.LimitedEntity" if app.safir_instance == 3 else "DoseTest.LimitedEntity2"
-                expected_reg.extend([limited_type + ":DEFAULT_HANDLER", "Safir.Dob.NodeInfo:" + str(app.node_id)])
-                expected_ent.extend([limited_type + ":1", "Safir.Dob.NodeInfo:" + str(app.node_id)])
+                limited_type =  "DoseTest.LimitedEntity:" if app.safir_instance == 3 else "DoseTest.LimitedEntity2:"
+                expected_reg.extend([limited_type + "DEFAULT_HANDLER", "Safir.Dob.NodeInfo:" + str(app.node_id)])
                 expected_reg.append("DoseTest.LimitedService:app" + str(app.node_id))
+                expected_ent.append("Safir.Dob.NodeInfo:" + str(app.node_id))
+                for instance in range(1, app.number_of_entities + 1):
+                    expected_ent.append(limited_type + str(instance))
 
             expected_reg.sort()
             expected_ent.sort()
@@ -221,7 +228,7 @@ async def check_pools_connected_nodes(*apps):
         if ok:
             break
 
-        log("--- Extended wait for PD to finish")
+        log("--- Extended wait for PD to finish, wait time " + str((check + 1)*5) + " sec")
         await asyncio.sleep(5)
 
     if not ok:
@@ -230,13 +237,14 @@ async def check_pools_connected_nodes(*apps):
 # ==============================================================================================
 # Simple Safir application. The constructor will connect to the DOB and subscribe for all 
 # entites and all registrations and will also register two handlers and create an entitiy instance.
-# It sill start a running task that handles send and receive to the Dob. Stop will end the task
+# It will start a running task that handles send and receive to the Dob. Stop will end the task
 # Safir_instance:  1,2 = normal node,  3,4 = light node
 # ==============================================================================================
 class SafirApp:
-    def __init__(self, safir_instance, node_id):
+    def __init__(self, safir_instance, node_id, num_entities=3):
         self.safir_instance = safir_instance
         self.node_id = node_id
+        self.number_of_entities = num_entities
         self.sendQueue = asyncio.Queue()
         self.entities = dict()
         self.registrations = dict()
@@ -280,8 +288,8 @@ class SafirApp:
             try:
                 async with websockets.connect(uri) as ws:
                     self.ws = ws
-                    await self._setup_dob()
-                    await asyncio.gather(self._reader(), self._sender())
+                    # await self._setup_dob()
+                    await asyncio.gather(self._reader(), self._sender(), self._setup_dob())
                     break;
             except ConnectionRefusedError:
                 await asyncio.sleep(3)
@@ -336,11 +344,13 @@ class SafirApp:
 
         await self.send('{"method": "open", "params": {"connectionName": "' + app_name + '"}, "id": 1}')
         await self.send('{"method": "registerEntityHandler", "params": {"typeId": "' + entity_type + '"}, "id": 2}')
-        await self.send('{"method": "subscribeEntity", "params": {"typeId": "Safir.Dob.Entity"}, "id": 3}')
-        await self.send('{"method": "subscribeRegistration", "params": {"typeId": "Safir.Dob.Entity"}, "id": 4}')
-        await self.send('{"method": "subscribeRegistration", "params": {"typeId": "Safir.Dob.Service"}, "id": 5}')
-        await self.send('{"method": "setEntity", "params": {"entity": {"_DouType": "' + entity_type + '", "Info": "Hello"}, "instanceId": 1}, "id": 6}')
-        await self.send('{"method": "registerServiceHandler", "params": {"typeId": "' + service_type + '", "handlerId": "' + app_name + '"}, "id": 7}')
+        await self.send('{"method": "registerServiceHandler", "params": {"typeId": "' + service_type + '", "handlerId": "' + app_name + '"}, "id": 3}')
+        await self.send('{"method": "subscribeEntity", "params": {"typeId": "Safir.Dob.Entity"}, "id": 4}')
+        await self.send('{"method": "subscribeRegistration", "params": {"typeId": "Safir.Dob.Entity"}, "id": 5}')
+        await self.send('{"method": "subscribeRegistration", "params": {"typeId": "Safir.Dob.Service"}, "id": 6}')
+        for instance in range(1, self.number_of_entities + 1):
+            await self.send('{"method": "setEntity", "params": {"entity": {"_DouType": "' + entity_type + '", "Info": "Hello ' + str(instance) + '"}, "instanceId": ' + str(instance) + '}, "id": ' + str(instance + 6) + '}')
+        
 
 # ===================================================================
 # Test cases
@@ -454,6 +464,45 @@ async def two_normal_two_light_detach_reattach_both_light(args):
         app2 = SafirApp(safir_instance=2, node_id=2)
         app3 = SafirApp(safir_instance=3, node_id=3)
         app4 = SafirApp(safir_instance=4, node_id=4)
+
+        # let the system run for a while to complete PD
+        await asyncio.sleep(5)
+
+        await check_pools_connected_nodes(app1, app2, app3, app4)
+
+        # Disable network on lightnodes and wait for them to be Detached
+        set_network_state(False, safir_instance=3) 
+        set_network_state(False, safir_instance=4) 
+        await asyncio.gather(app3.wait_for_node_state("Detached"), app4.wait_for_node_state("Detached"))
+        log("--- node 3 and node 4 are now detached")
+
+        await check_pools_connected_nodes(app1, app2)
+        await check_pool_detached_node(app3)
+        await check_pool_detached_node(app4)
+
+        # Enable network again and wait for nodes to become attached
+        set_network_state(True, safir_instance=3) 
+        set_network_state(True, safir_instance=4) 
+        await asyncio.gather(app3.wait_for_node_state("Attached"), app4.wait_for_node_state("Attached"))
+        log("--- node 3 and node 4 are now attached again")
+
+        # let the system run for a while to complete PD
+        await asyncio.sleep(5)
+        await check_pools_connected_nodes(app1, app2, app3, app4)
+        
+        await asyncio.gather(app1.stop(), app2.stop(), app3.stop(), app4.stop())
+
+async def two_normal_two_light_detach_reattach_both_light_big_pool(args):
+    with test_case("two_normal_two_light_detach_reattach_both_light_big_pool"),\
+        launch_node(args, safir_instance=1, node_id=1) as node1,\
+        launch_node(args, safir_instance=2, node_id=2) as node2,\
+        launch_node(args, safir_instance=3, node_id=3) as node3,\
+        launch_node(args, safir_instance=4, node_id=4) as node4:
+    
+        app1 = SafirApp(safir_instance=1, node_id=1, num_entities=7000)
+        app2 = SafirApp(safir_instance=2, node_id=2, num_entities=7000)
+        app3 = SafirApp(safir_instance=3, node_id=3, num_entities=1000)
+        app4 = SafirApp(safir_instance=4, node_id=4, num_entities=1000)
 
         # let the system run for a while to complete PD
         await asyncio.sleep(5)
@@ -604,6 +653,7 @@ async def main(args):
     await one_normal_two_light_detach_reattach_one_light(args)
     await one_normal_two_light_restart_normal(args)
     await two_normal_two_light_detach_reattach_both_light(args)
+    await two_normal_two_light_detach_reattach_both_light_big_pool(args)
     await two_normal_two_light_restart_one_normal(args)
     await two_normal_two_light_restart_both_normal(args)
     await two_normal_two_light_toggle_network_many_times_on_both_light(args)
