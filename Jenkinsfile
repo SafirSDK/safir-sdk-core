@@ -24,13 +24,168 @@ def runPython(Map map) {
     runCommand(map)
 }
 
+
+def clean_check_and_build(platform, arch) {
+    runCommand (command: "git clean -fxd")
+    runPython (command: "build/check_source_tree.py")
+    runPython (command: "build/build.py --jenkins --package",
+                windows_arguments: "--use-studio ${platform} --arch ${arch}")
+}
+
+def archive_and_analyze(platform, arch, buildType){
+    def buildIdentifier = "${platform}-${arch}-${buildType}"
+    if (betterIsUnix()) {
+        sh label: "Moving artifacts to build-${buildIdentifier}.",
+           script: """
+                   mkdir build-${buildIdentifier}
+                   mv buildlog.html build-${buildIdentifier}
+                   mv tmp/*.deb build-${buildIdentifier}
+                   """
+
+        archiveArtifacts artifacts: "**/buildlog.html, build-${buildIdentifier}/*.deb", fingerprint: true
+    }
+    else {
+        bat label: "Moving artifacts to build-${buildIdentifier}.",
+            script: """
+                    md build-${buildIdentifier}
+                    move buildlog.html build-${buildIdentifier}
+                    move build\\packaging\\windows\\*.exe build-${buildIdentifier}
+                    """
+
+        archiveArtifacts artifacts: "**/buildlog.html, build-${buildIdentifier}/*.exe", fingerprint: true
+    }
+
+    def cmake = scanForIssues (
+        tool: cmake(pattern:"**/buildlog.html",
+                    id:"cmake_${buildIdentifier}",
+                    name:"CMake ${buildIdentifier}"),
+        sourceCodeEncoding: 'UTF-8'
+    )
+    def java = scanForIssues (
+        tool: java(pattern:"**/buildlog.html",
+                   id:"java_${buildIdentifier}",
+                   name:"Java ${buildIdentifier}"),
+        sourceCodeEncoding: 'UTF-8'
+    )
+    def doxygen = scanForIssues (
+        tool: doxygen(pattern:"**/buildlog.html",
+                      id:"doxygen_${buildIdentifier}",
+                      name:"Doxygen ${buildIdentifier}"),
+        sourceCodeEncoding: 'UTF-8'
+    )
+
+    issueList = [cmake, java, doxygen]
+
+    if (betterIsUnix()) {
+        def gcc = scanForIssues (
+            tool: gcc(pattern:"**/buildlog.html",
+                      id:"gcc_${buildIdentifier}",
+                      name:"GCC ${buildIdentifier}"),
+            sourceCodeEncoding: 'UTF-8'
+        )
+        issueList.add(0,gcc)
+
+        //This script has to be inserted into jenkins configuration. See comment at very bottom of this file
+        def lintian = scanForIssues (
+            tool: groovyScript(parserId: "lintian",
+                               pattern:"**/buildlog.html",
+                               id:"lintian_${buildIdentifier}",
+                               name:"lintian ${buildIdentifier}"),
+            sourceCodeEncoding: 'UTF-8'
+        )
+        issueList.add(lintian)
+    }
+    else {
+        msbuild = scanForIssues (
+            tool: msBuild(pattern:"**/buildlog.html",
+                          id:"msbuild_${buildIdentifier}",
+                          name:"MSBuild ${buildIdentifier}"),
+            sourceCodeEncoding: 'UTF-8'
+        )
+        issueList.add(0,msbuild)
+    }
+
+    publishIssues (
+        issues: issueList,
+        sourceCodeEncoding: 'UTF-8',
+        id: "warnings_${buildIdentifier}",
+        name: "Warnings for ${buildIdentifier}",
+        skipPublishingChecks: true,
+        qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]],
+        trendChartType: 'AGGREGATION_ONLY'
+    )
+}
+
+
+def render_documentation() {
+    sh label:  "Run Asciidoc to generate users guide and requirements specification.",
+       script: """
+               cd docs/users_guide
+               make -j2 all
+               cd ../requirements
+               make -j2 all
+               cd ../..
+               mkdir -p rendered_docs/images
+               cp docs/users_guide/users_guide.pdf rendered_docs/
+               cp docs/users_guide/users_guide.html rendered_docs/
+               cp docs/users_guide/images/*.png rendered_docs/images
+               cp docs/requirements/requirements_specification.pdf rendered_docs/
+               """
+    archiveArtifacts artifacts: 'rendered_docs/*, rendered_docs/images/*', fingerprint: true
+}
+
+def run_test_suite(platform, arch, buildType, sourceJob, sourceBuildNumber, testType){
+    def buildIdentifier = "${platform}-${arch}-${buildType}"
+    catchError {
+        runCommand(command: "git clean -fxd")
+
+        copyArtifacts filter: "build-${buildIdentifier}/*",
+                      flatten: true,
+                      fingerprintArtifacts: true,
+                      projectName: "${sourceJob}",
+                      selector: specific("${sourceBuildNumber}")
+
+        //languages are picked up from environment variable
+        runPython (command: "build/jenkins_stuff/run_test.py --test ${testType}")
+    }
+
+    //we also need to move the folders, or jenkins will merge them all
+    fileOperations([fileRenameOperation(destination: "${testType}-${buildIdentifier}", source: "dose_test_output")])
+
+    archiveArtifacts artifacts: '**/*.output.txt'
+    junit keepLongStdio: true, skipPublishingChecks: true, testResults: '**/*.junit.xml'
+}
+
+
+def build_examples(platform, arch, buildType, sourceJob, sourceBuildNumber){
+    def buildIdentifier = "${platform}-${arch}-${buildType}"
+    runCommand(command: "git clean -fxd")
+
+    copyArtifacts filter: "build-${buildIdentifier}/*",
+                  flatten: true,
+                  fingerprintArtifacts: true,
+                  projectName: "${sourceJob}",
+                  selector: specific("${sourceBuildNumber}")
+
+    runPython (command: "build/jenkins_stuff/run_test.py --test build-examples")
+}
+
 pipeline {
     parameters {
         choice(name: 'PLATFORM_FILTER',
-               choices: ['all', 'ubuntu-focal', 'ubuntu-jammy', 'debian-bullseye', 'vs2015', 'vs2017', 'vs2019', 'vs2022'],
+               choices: ['all', 'ubuntu-focal', 'ubuntu-jammy', 'debian-bullseye', 'vs2015', 'vs2022'], /* TODO 'vs2017', 'vs2019',*/
                description: 'Run on specific platform')
+
+        booleanParam(name: 'SKIP_SLOW_TESTS',
+                     defaultValue: false,
+                     description: 'Skip slow tests?')
+
     }
     agent none
+    environment {
+        SAFIR_SKIP_SLOW_TESTS = "${SKIP_SLOW_TESTS}"
+    }
+
     stages {
         stage('Build') {
             matrix {
@@ -70,90 +225,14 @@ pipeline {
                     }
                 }
                 stages {
-                    stage('Build and Unit Test') {
-                        steps {
-                            runCommand (command: "git clean -fxd")
-                            runPython (command: "build/check_source_tree.py")
-                            runCommand (command: "build/build.py --jenkins --package",
-                                        windows_arguments: "--use-studio ${BUILD_PLATFORM} --arch ${BUILD_ARCH}")
-                        }
-                    }
-                    stage('Archive and analyze') {
-                        steps {
-                            script {
-                                if (betterIsUnix()) {
-                                    sh label: "Moving artifacts to build-${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}.",
-                                       script: """
-                                               mkdir build-${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}
-                                               mv buildlog.html build-${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}
-                                               mv tmp/*.deb build-${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}
-                                               """
-
-                                    archiveArtifacts artifacts: "**/buildlog.html, build-${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}/*.deb", fingerprint: true
-                                }
-                                else {
-                                    bat label: "Moving artifacts to build-${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}.",
-                                        script: """
-                                                md build-${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}
-                                                move buildlog.html build-${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}
-                                                move build\\packaging\\windows\\*.exe build-${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}
-                                                """
-
-                                    archiveArtifacts artifacts: "**/buildlog.html, build-${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}/*.exe", fingerprint: true
-                                }
-
-                                def cmake = scanForIssues (
-                                    tool: cmake(pattern:"**/buildlog.html",
-                                                id:"cmake_${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}",
-                                                name:"CMake ${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}"),
-                                    sourceCodeEncoding: 'UTF-8'
-                                )
-                                def java = scanForIssues (
-                                    tool: java(pattern:"**/buildlog.html",
-                                               id:"java_${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}",
-                                               name:"Java ${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}"),
-                                    sourceCodeEncoding: 'UTF-8'
-                                )
-                                def doxygen = scanForIssues (
-                                    tool: doxygen(pattern:"**/buildlog.html",
-                                                  id:"doxygen_${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}",
-                                                  name:"Doxygen ${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}"),
-                                    sourceCodeEncoding: 'UTF-8'
-                                )
-
-                                issueList = [cmake, java, doxygen]
-
-                                if (betterIsUnix()) {
-                                    def gcc = scanForIssues (
-                                        tool: gcc(pattern:"**/buildlog.html",
-                                                  id:"gcc_${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}",
-                                                  name:"GCC ${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}"),
-                                        sourceCodeEncoding: 'UTF-8'
-                                    )
-                                    issueList.add(0,gcc)
-                                }
-                                else {
-                                    msbuild = scanForIssues (
-                                        tool: msBuild(pattern:"**/buildlog.html",
-                                                      id:"msbuild_${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}",
-                                                      name:"MSBuild ${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}"),
-                                        sourceCodeEncoding: 'UTF-8'
-                                    )
-                                    issueList.add(0,msbuild)
-                                }
-
-                                publishIssues (
-                                    issues: issueList,
-                                    sourceCodeEncoding: 'UTF-8',
-                                    id: "warnings_${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}",
-                                    name: "Warnings for ${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}",
-                                    skipPublishingChecks: true,
-                                    qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]],
-                                    trendChartType: 'AGGREGATION_ONLY'
-                                )
-                            }
-                        }
-                    }
+                    stage('Build and Unit Test') { steps { script {
+                        //clean, source_check and build the code
+                        clean_check_and_build(BUILD_PLATFORM, BUILD_ARCH)
+                    }}}
+                    stage('Archive and Analyze') { steps { script {
+                        //archive artifacts and check for warnings
+                        archive_and_analyze(BUILD_PLATFORM, BUILD_ARCH, BUILD_TYPE)
+                    }}}
 
                 }
                 post {
@@ -167,28 +246,12 @@ pipeline {
 
         stage('Render documentation') {
             agent { label 'debian-bullseye-amd64-build' }
-            steps {
-                script {
-                    sh label:  "Run Asciidoc to generate users guide and requirements specification.",
-                       script: """
-                               cd docs/users_guide
-                               make -j2 all
-                               cd ../requirements
-                               make -j2 all
-                               cd ../..
-                               mkdir -p rendered_docs/images
-                               cp docs/users_guide/users_guide.pdf rendered_docs/
-                               cp docs/users_guide/users_guide.html rendered_docs/
-                               cp docs/users_guide/images/*.png rendered_docs/images
-                               cp docs/requirements/requirements_specification.pdf rendered_docs/
-                               """
-                }
-
-                archiveArtifacts artifacts: 'rendered_docs/*, rendered_docs/images/*', fingerprint: true
-            }
+            steps { script {
+                render_documentation()
+            }}
         }
 
-        stage('Test') {
+        stage('Test suite') {
             matrix {
                 when {
                     anyOf {
@@ -218,10 +281,6 @@ pipeline {
                                'dotnet-java-cpp-dotnet-java',
                                'java-cpp-dotnet-java-cpp'
                     }
-                    axis {
-                        name 'TEST_KIND'
-                        values 'multinode-tests', 'standalone-tests'
-                    }
                 }
                 excludes {
                     exclude {
@@ -236,26 +295,12 @@ pipeline {
                     }
                 }
                 stages {
-                    stage('Run Tests') {
-                        steps {
-                            runCommand(command: "git clean -fxd")
-
-                            copyArtifacts filter: "build-${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}/*",
-                                          flatten: true,
-                                          fingerprintArtifacts: true,
-                                          projectName: '${JOB_NAME}',
-                                          selector: specific('${BUILD_NUMBER}')
-
-                            //languages are picked up from environment variable
-                            runPython (command: "build/jenkins_stuff/run_test.py --test ${TEST_KIND}")
-
-                            //we also need to move the folders, or jenkins will merge them all
-                            fileOperations([fileRenameOperation(destination: "${TEST_KIND}-${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}", source: "dose_test_output")])
-
-                            archiveArtifacts artifacts: '**/*.output.txt'
-                            junit keepLongStdio: true, skipPublishingChecks: true, testResults: '**/*.junit.xml'
-                        }
-                    }
+                    stage('Standalone Tests') { steps { script {
+                        run_test_suite(BUILD_PLATFORM, BUILD_ARCH, BUILD_TYPE, JOB_NAME, BUILD_NUMBER, "standalone-tests")
+                    }}}
+                    stage('Multinode Tests') { steps { script {
+                        run_test_suite(BUILD_PLATFORM, BUILD_ARCH, BUILD_TYPE, JOB_NAME, BUILD_NUMBER, "multinode-tests")
+                    }}}
                 }
             }
         }
@@ -298,26 +343,47 @@ pipeline {
                     }
                 }
                 stages {
-                    stage('Build') {
-                        steps {
-                            runCommand(command: "git clean -fxd")
-
-                            copyArtifacts filter: "build-${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}/*",
-                                          flatten: true,
-                                          fingerprintArtifacts: true,
-                                          projectName: "${JOB_NAME}",
-                                          selector: specific("${BUILD_NUMBER}")
-                            runPython (command: "build/jenkins_stuff/run_test.py --test build-examples")
-                        }
-                    }
+                    stage('Build') { steps { script {
+                        build_examples (BUILD_PLATFORM, BUILD_ARCH, BUILD_TYPE, JOB_NAME, BUILD_NUMBER)
+                    }}}
                 }
             }
         }
     }
-
     options {
         buildDiscarder(logRotator(numToKeepStr: '30',
                                   artifactNumToKeepStr: '10'))
     }
 
 }
+
+
+/*
+
+name: lintian
+id: lintian
+
+regular expression:
+^(E|W): ([a-z-]*): ([a-z-]*) (.*)
+
+Mapping script:
+import edu.hm.hafner.analysis.Severity
+
+def severity
+if (matcher.group(1) == "W")
+    severity = Severity.WARNING_NORMAL
+else
+    severity = Severity.ERROR
+
+builder.setFileName(matcher.group(2))
+        .setSeverity(severity)
+        .setCategory(matcher.group(3))
+        .setMessage(matcher.group(4))
+
+return builder.buildOptional();
+
+example log message:
+W: safir-sdk-core-tools: no-manual-page usr/bin/safir_entity_viewer
+
+
+*/
