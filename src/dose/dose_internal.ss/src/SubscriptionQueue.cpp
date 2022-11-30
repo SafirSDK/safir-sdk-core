@@ -98,8 +98,13 @@ namespace Internal
 
     void SubscriptionQueue::clear(void)
     {
-        ScopedSubscriptionQueueLock lck(m_lock);
-        m_queue.clear();
+        // We can't just clear the queue with the lock taken, since the queue contains
+        // lots of stuff that might also get deleted and take other locks.
+        Queue tmp; // The content in this queue will get deleted when it goes out of scope.
+        {
+            ScopedSubscriptionQueueLock lck(m_lock);
+            m_queue.swap(tmp);
+        }
     }
 
 }
