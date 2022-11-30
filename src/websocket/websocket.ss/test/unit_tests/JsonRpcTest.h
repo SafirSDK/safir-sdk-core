@@ -226,7 +226,7 @@ inline void JsonRpcTest()
             CHECK(true); // if jsonrpc is optional
             // CHECK(false); // if mandatory "jsonrpc": "2.0"
         }
-        catch (const RequestErrorException& e)
+        catch (const RequestErrorException&)
         {
             // CHECK(e.Code()==JsonRpcErrorCodes::InvalidRequest); // if mandatory
             CHECK(false);  // if jsonrpc is optional
