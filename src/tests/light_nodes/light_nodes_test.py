@@ -696,10 +696,10 @@ async def main(args):
     # await two_normal_two_light_toggle_network_many_times_on_both_light(args)  # fails sometimes
 
     #---- Some code for repeating a test and clearing local log folder after each run
-    for i in range(25):
-        # for f in glob.glob("/home/joel/dev/log/*"): os.remove(f)
-        # await one_normal_one_light_detach_reattach_light(args)
-        # if len(failed_tests) > 0: return
+    # for i in range(25):
+    #     for f in glob.glob("/home/joel/dev/log/*"): os.remove(f)
+    #     await one_normal_one_light_detach_reattach_light(args)
+    #     if len(failed_tests) > 0: return
 
 if __name__ == "__main__":
     asyncio.run(main(parse_arguments()))
