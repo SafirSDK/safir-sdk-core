@@ -378,6 +378,7 @@ void ControlApp::Start()
     // --- Node included callback ---
     [this](const Control::Node& node)
     {
+        lllog(6) << L"CTRL: NodeUp '" << node.name.c_str() << "', nodeId=" << node.nodeId << std::endl;
         m_doseMainCmdSender->InjectNode(node.name,
                                         node.nodeId,
                                         node.nodeTypeId,
@@ -389,6 +390,7 @@ void ControlApp::Start()
     // --- Node down callback ---
     [this](const int64_t nodeId, const int64_t nodeTypeId)
     {
+        lllog(6) << L"CTRL: NodeDown nodeId=" << nodeId << std::endl;
         m_doseMainCmdSender->ExcludeNode(nodeId, nodeTypeId);
         m_stopHandler->RemoveNode(nodeId);
     }));

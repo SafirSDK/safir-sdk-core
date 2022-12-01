@@ -26,7 +26,6 @@
 #include <string>
 #include <vector>
 #include <sstream>
-#include <boost/algorithm/string.hpp>
 #include <Safir/Dob/Connection.h>
 #include <Safir/Dob/Typesystem/HandlerId.h>
 #include <Safir/Dob/Typesystem/ChannelId.h>
@@ -109,8 +108,8 @@ class ProxyToJson
 public:
     enum EntityRequestType {CreateReqType, UpdateReqType, DeleteReqType};
 
-    ProxyToJson(const boost::function< std::string(ts::TypeId) >& typeIdToName,
-                const boost::function< sd::InstanceIdPolicy::Enumeration(ts::TypeId, const ts::HandlerId&) >& getInstIdPolicy)
+    ProxyToJson(const std::function< std::string(ts::TypeId) >& typeIdToName,
+                const std::function< sd::InstanceIdPolicy::Enumeration(ts::TypeId, const ts::HandlerId&) >& getInstIdPolicy)
         :m_typeIdToName(typeIdToName)
         ,m_getInstIdPolicy(getInstIdPolicy)
     {
@@ -193,6 +192,6 @@ public:
     }
 
 private:
-    boost::function< std::string(ts::TypeId) > m_typeIdToName;
-    boost::function< sd::InstanceIdPolicy::Enumeration(ts::TypeId, const ts::HandlerId&) > m_getInstIdPolicy;
+    std::function< std::string(ts::TypeId) > m_typeIdToName;
+    std::function< sd::InstanceIdPolicy::Enumeration(ts::TypeId, const ts::HandlerId&) > m_getInstIdPolicy;
 };

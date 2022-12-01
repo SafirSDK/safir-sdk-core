@@ -67,13 +67,13 @@ namespace IpAddressHelper
         }
 
         boost::system::error_code ec;
-        boost::asio::ip::address_v4 a4=boost::asio::ip::address_v4::from_string(ip, ec);
+        auto a4 = boost::asio::ip::make_address_v4(ip, ec);
         if (!ec) //ip v4 address
         {
             return boost::asio::ip::tcp::endpoint(a4, port);
         }
 
-        boost::asio::ip::address_v6 a6=boost::asio::ip::address_v6::from_string(ip, ec);
+        auto a6 = boost::asio::ip::make_address_v6(ip, ec);
         if (!ec) //ip v6 address
         {
             return boost::asio::ip::tcp::endpoint(a6, port);

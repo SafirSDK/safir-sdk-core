@@ -111,7 +111,7 @@ namespace
         if (enableDebug != nullptr)
         {
             lllog(1)<<m_logPrefix.c_str()<<L"Env SAFIR_COM_NETWORK_SIMULATION is set. Enable possibility to simulate an unavailable network."<<std::endl;
-            m_debugServer = std::make_unique<DebugCommandServer>(m_ioContext, safirInstance, m_logPrefix);
+            m_debugServer = std::make_unique<DebugCommandServer>(m_ioContext, safirInstance, nodeId, m_logPrefix);
         }
     }
 #ifdef _MSC_VER

@@ -58,7 +58,6 @@ namespace Typesystem
         Repository CreateRepository()
         {
             std::vector<boost::filesystem::path> directories;
-            //directories.push_back("/home/joot/Dropbox/dev/DotsParser/dots_generated_conv");
             Safir::Utilities::Internal::ConfigReader reader;
 
             //get all dou directory strings

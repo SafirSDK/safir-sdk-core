@@ -36,21 +36,21 @@ failed_tests = set()
 def test_case(name):
     global failed_tests
     try:
-        log("--- Run", name)
+        log("=== Start: " + name + " ===")
         yield
     except Exception as e:
         failed_tests.add(name)
         log(e)
         log("*** Test failed: " + name)
     finally:
-        log("--- Done: " + name)
+        log("--- Finished: " + name + " ---")
 
 @contextmanager
 def launch_node(args, safir_instance, node_id):
     try:
         os.environ["SAFIR_COM_NETWORK_SIMULATION"] = "True" # Enable network simulation
         os.environ["SAFIR_INSTANCE"] = str(safir_instance)
-        print("Launching node", str(safir_instance))
+        print("--- Launching node", str(node_id))
         env = TestEnv(args.safir_control,
                     args.dose_main,
                     args.dope_main if safir_instance == 1 else None,
@@ -63,7 +63,7 @@ def launch_node(args, safir_instance, node_id):
         env.launchProcess("safir_websocket", args.safir_websocket)
         yield env
     finally:
-        log("kill node" + str(node_id))
+        log("--- kill node" + str(node_id))
         env.killprocs()
 
 # Simulate network up/down
@@ -288,7 +288,6 @@ class SafirApp:
             try:
                 async with websockets.connect(uri) as ws:
                     self.ws = ws
-                    # await self._setup_dob()
                     await asyncio.gather(self._reader(), self._sender(), self._setup_dob())
                     break;
             except ConnectionRefusedError:
@@ -386,6 +385,43 @@ async def one_normal_one_light_detach_reattach_light(args):
         await check_pools_connected_nodes(app1, app3)
 
         await asyncio.gather(app1.stop(), app3.stop())
+
+async def one_normal_one_light_restart_light(args):
+    with test_case("one_normal_one_light_restart_light"),\
+        launch_node(args, safir_instance=1, node_id=1) as node1:
+        app1 = SafirApp(safir_instance=1, node_id=1)
+
+        # Normal node 1 is up and running, now launch lightnode 3        
+        with launch_node(args, safir_instance=3, node_id=3) as node3:
+            app3 = SafirApp(safir_instance=3, node_id=3)
+
+            # let the system run for a while to complete PD
+            await asyncio.sleep(5)
+
+            # Check that lightnode becomes Attached, and that the pools are correct
+            await app3.wait_for_node_state("Attached")
+            log("--- node3 is now attached")
+            await check_pools_connected_nodes(app1, app3)
+            await app3.stop()
+
+        # node3 has been switched off, wait for node1 to notice that it is gone
+        await asyncio.sleep(5)
+        await check_pools_connected_nodes(app1)
+
+        # Now start another lightnode, same safir_instance but a new nodeId
+        with launch_node(args, safir_instance=3, node_id=33) as node33:
+            app33 = SafirApp(safir_instance=3, node_id=33)
+
+            # let the system run for a while to complete PD
+            await asyncio.sleep(5)
+
+            # Check that lightnode becomes Attached, and that the pools are correct
+            await app33.wait_for_node_state("Attached")
+            log("--- node33 is now attached")
+            await check_pools_connected_nodes(app1, app33)
+            await app33.stop()
+
+        await app1.stop()
 
 async def one_normal_two_light_detach_reattach_one_light(args):
     with test_case("one_normal_two_light_detach_reattach_one_light"),\
@@ -650,6 +686,7 @@ async def two_normal_two_light_toggle_network_many_times_on_both_light(args):
 # ===========================================
 async def main(args):
     await one_normal_one_light_detach_reattach_light(args)
+    # await one_normal_one_light_restart_light(args)
     await one_normal_two_light_detach_reattach_one_light(args)
     await one_normal_two_light_restart_normal(args)
     await two_normal_two_light_detach_reattach_both_light(args)
@@ -658,32 +695,8 @@ async def main(args):
     await two_normal_two_light_restart_both_normal(args)
     await two_normal_two_light_toggle_network_many_times_on_both_light(args)
 
-    #---- Some code for repeating tests and clearing local log folder after each run
-    # for i in range(10):
-    #     for f in glob.glob("/home/joel/dev/log/*"): os.remove(f)
-    #     await one_normal_one_light_detach_reattach_light(args)
-    #     if len(failed_tests) > 0: return
-
-    #     for f in glob.glob("/home/joel/dev/log/*"): os.remove(f)
-    #     await one_normal_two_light_detach_reattach_one_light(args)
-    #     if len(failed_tests) > 0: return
-
-    #     for f in glob.glob("/home/joel/dev/log/*"): os.remove(f)
-    #     await one_normal_two_light_restart_normal(args)
-    #     if len(failed_tests) > 0: return
-
-    #     for f in glob.glob("/home/joel/dev/log/*"): os.remove(f)
-    #     await two_normal_two_light_detach_reattach_both_light(args)
-    #     if len(failed_tests) > 0: return
-
-    #     for f in glob.glob("/home/joel/dev/log/*"): os.remove(f)
-    #     await two_normal_two_light_restart_one_normal(args)
-    #     if len(failed_tests) > 0: return
-
-    #     for f in glob.glob("/home/joel/dev/log/*"): os.remove(f)
-    #     await two_normal_two_light_restart_both_normal(args)
-    #     if len(failed_tests) > 0: return
-
+    #---- Some code for repeating a test and clearing local log folder after each run
+    # for i in range(25):
     #     for f in glob.glob("/home/joel/dev/log/*"): os.remove(f)
     #     await two_normal_two_light_toggle_network_many_times_on_both_light(args)
     #     if len(failed_tests) > 0: return

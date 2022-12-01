@@ -24,7 +24,6 @@
 #pragma once
 
 #include <functional>
-#include <boost/optional.hpp>
 #include <Safir/Dob/Connection.h>
 #include <Safir/Utilities/AsioDispatcher.h>
 #include <Safir/Dob/Typesystem/Internal/InternalOperations.h>
@@ -64,7 +63,7 @@ public:
     typedef websocketpp::server<websocketpp::config::asio>::message_ptr WsMessage;
 
     RemoteClient(WsServer& server,
-                 boost::asio::io_service& ioService,
+                 boost::asio::io_context& io,
                  websocketpp::connection_hdl& connectionHandle,
                  std::function<void(const RemoteClient*)> onClose);
 
@@ -74,7 +73,7 @@ public:
 
 private:
     WsServer& m_server;
-    boost::asio::io_service::strand m_strand;
+    boost::asio::io_context::strand m_strand;
     websocketpp::connection_hdl m_connectionHandle;
     WsConnection m_connection;
     std::function<void(const RemoteClient*)> m_onConnectionClosed;

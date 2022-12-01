@@ -36,11 +36,11 @@
 #endif
 
 RemoteClient::RemoteClient(WsServer& server,
-                           boost::asio::io_service& ioService,
+                           boost::asio::io_context& io,
                            websocketpp::connection_hdl& connectionHandle,
                            std::function<void(const RemoteClient*)> onClose)
     :m_server(server)
-    ,m_strand(ioService)
+    ,m_strand(io)
     ,m_connectionHandle(connectionHandle)
     ,m_connection(m_server.get_con_from_hdl(connectionHandle))
     ,m_onConnectionClosed(onClose)
@@ -50,15 +50,15 @@ RemoteClient::RemoteClient(WsServer& server,
 {
     m_connection->set_close_handler([this](websocketpp::connection_hdl)
     {
-        m_strand.post([this]{OnClose();});
+        boost::asio::post(m_strand, [this]{OnClose();});
     });
     m_connection->set_fail_handler([this](websocketpp::connection_hdl)
     {
-        m_strand.post([this]{OnError();});
+        boost::asio::post(m_strand, [this]{OnError();});
     });
     m_connection->set_message_handler([this](websocketpp::connection_hdl, WsMessage msg)
     {
-        m_strand.post([this,msg]{OnMessage(msg);});
+        boost::asio::post(m_strand, [this,msg]{OnMessage(msg);});
     });
 
     m_pingHandler->Start();
@@ -72,7 +72,7 @@ RemoteClient::RemoteClient(WsServer& server,
 void RemoteClient::Close()
 {
     //called from websocket server, usually means we have got a stop order from the DOB
-    m_strand.post([this]
+    boost::asio::post(m_strand, [this]
     {
         m_pingHandler->Stop();
         m_dob.Close();
@@ -99,7 +99,7 @@ void RemoteClient::OnClose()
     //since m_onConnectionClosed will destruct this object, we must wrap it in a post to let all
     //already queued events execute first. For example its likely that there is a dispatch waiting
     //that will crash the entire application if it gets executed after this instance is destroyed.
-    m_strand.post([this]{m_onConnectionClosed(this);});
+    boost::asio::post(m_strand, [this]{m_onConnectionClosed(this);});
 }
 
 void RemoteClient::OnError()

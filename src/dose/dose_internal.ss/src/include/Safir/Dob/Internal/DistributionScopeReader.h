@@ -25,6 +25,7 @@
 
 #include <Safir/Dob/Internal/InternalExportDefs.h>
 #include <Safir/Dob/Typesystem/Internal/DistributionScopeReader.h>
+#include <mutex>
 
 namespace Safir
 {
@@ -36,9 +37,22 @@ namespace Internal
      * @brief Keeps a singleton of the real class DistributionScopeReader to avoid having to
      * instantiate the class multiple times.
      */
-    struct DOSE_INTERNAL_API DistributionScopeReader
+    class DOSE_INTERNAL_API DistributionScopeReader
     {
+    public:
         static const Safir::Dob::Typesystem::Internal::DistributionScopeReader& Instance();
+
+    private:
+        DistributionScopeReader() = delete;
+
+        struct SingletonHelper
+        {
+        private:
+            friend const Safir::Dob::Typesystem::Internal::DistributionScopeReader& DistributionScopeReader::Instance();
+
+            static const Safir::Dob::Typesystem::Internal::DistributionScopeReader& Instance();
+            static std::once_flag m_onceFlag;
+        };
     };
 }
 }

@@ -53,9 +53,10 @@ namespace Com
     class DebugCommandServer
     {
     public:
-        DebugCommandServer(boost::asio::io_context& io, unsigned int safirInst, const std::string& logPrefix)
+        DebugCommandServer(boost::asio::io_context& io, unsigned int safirInst, int64_t nodeId, const std::string& logPrefix)
             :m_socket(io)
             ,m_safirInst(std::to_string(safirInst))
+            ,m_nodeId(std::to_string(nodeId))
             ,m_logPrefix(logPrefix)
         {
             auto endpoint = Resolver::StringToEndpoint("239.6.6.6:16666");
@@ -83,6 +84,7 @@ namespace Com
         std::array<char, 1024> m_buf;
         boost::asio::ip::udp::socket m_socket;
         std::string m_safirInst;
+        std::string m_nodeId;
         std::string m_logPrefix;
 
         void AsyncReceive()
@@ -129,7 +131,7 @@ namespace Com
 
             for (const auto& t : tokens)
             {
-                if (t == m_safirInst)
+                if (t == m_safirInst || t == m_nodeId)
                 {
                     return tokens[0] == "up" ? 1 : (tokens[0] == "down" ? 0 : -1);
                 }

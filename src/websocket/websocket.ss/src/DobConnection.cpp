@@ -34,7 +34,7 @@
 #endif
 
 
-DobConnection::DobConnection(boost::asio::io_service::strand& strand, boost::function<void(const std::string&)> send)
+DobConnection::DobConnection(boost::asio::io_context::strand& strand, std::function<void(const std::string&)> send)
     :m_con()
     ,m_dispatcher(m_con, strand)
     ,m_wsSend(send)

@@ -26,7 +26,6 @@
 #include <string>
 #include <vector>
 #include <functional>
-#include <boost/optional.hpp>
 #include <Safir/Dob/Connection.h>
 #include <Safir/Utilities/AsioDispatcher.h>
 #include <Safir/Dob/Typesystem/Serialization.h>
@@ -59,7 +58,7 @@ class DobConnection :
 {
 public:
 
-    DobConnection(boost::asio::io_service::strand& strand, boost::function<void(const std::string&)> send);
+    DobConnection(boost::asio::io_context::strand& strand, std::function<void(const std::string&)> send);
     sd::Connection& Connection() {return m_con;}
 
     void Open(const std::wstring& name, int context) {m_con.Open(name, L"-ws", context, nullptr, &m_dispatcher);}
@@ -189,7 +188,7 @@ public:
 private:
     sd::Connection m_con;
     Safir::Utilities::AsioDispatcher m_dispatcher;
-    boost::function<void(const std::string&)> m_wsSend;
+    std::function<void(const std::string&)> m_wsSend;
     RequestIdMapper m_reqIdMapper;
     ResponseSenderStore m_responseSenderStore;
     ProxyToJson m_proxyToJson;

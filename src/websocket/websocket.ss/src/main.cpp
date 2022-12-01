@@ -45,14 +45,14 @@ int main(int /*argc*/, const char** /*argv*/)
 
     lllog(5)<<"safir_websocket started"<<std::endl;
 
-    boost::asio::io_service ioService;
-    WebsocketServer ws(ioService);
-    ioService.post([&]{ws.Run();});
+    boost::asio::io_context io;
+    WebsocketServer ws(io);
+    boost::asio::post(io, [&ws]{ws.Run();});
     boost::thread_group threads;
     auto numberOfThreads=std::max(static_cast<unsigned int>(3), boost::thread::hardware_concurrency());
     for (unsigned int i=0; i<numberOfThreads; ++i)
     {
-        threads.create_thread([&]{ioService.run();});
+        threads.create_thread([&]{io.run();});
     }
 
     threads.join_all();

@@ -39,7 +39,7 @@
 class PingHandler : public std::enable_shared_from_this<PingHandler>
 {
 public:
-    PingHandler(boost::asio::io_service::strand& strand, int interval, const boost::function<void()>& sendPing)
+    PingHandler(boost::asio::io_context::strand& strand, int interval, const boost::function<void()>& sendPing)
         :m_running(false)
         ,m_strand(strand)
         ,m_sendPing(sendPing)
@@ -51,12 +51,12 @@ public:
 
     void Start()
     {
-        m_strand.dispatch([this]
+        boost::asio::dispatch(m_strand, [this]
         {
             m_running=true;
-            m_timer.expires_from_now(m_pingInterval);
+            m_timer.expires_after(m_pingInterval);
             auto self(shared_from_this());
-            m_timer.async_wait(m_strand.wrap([self](const boost::system::error_code&){self->OnTimeout();}));
+            m_timer.async_wait(boost::asio::bind_executor(m_strand, [self](const boost::system::error_code&){self->OnTimeout();}));
         });
     }
 
@@ -78,7 +78,7 @@ public:
 
 private:
     bool m_running;
-    boost::asio::io_service::strand& m_strand;
+    boost::asio::io_context::strand& m_strand;
     boost::function<void()> m_sendPing;
     boost::chrono::seconds m_pingInterval;
     boost::chrono::steady_clock::time_point m_lastSendTime;
@@ -93,15 +93,17 @@ private:
             {
                 m_sendPing();
                 m_lastSendTime=boost::chrono::steady_clock::now();
-                m_timer.expires_from_now(m_pingInterval);
+                m_timer.expires_after(m_pingInterval);
+
+
             }
             else
             {
-                m_timer.expires_from_now(m_pingInterval-durationSinceSend);
+                m_timer.expires_after(m_pingInterval-durationSinceSend);
             }
 
             auto self(shared_from_this());
-            m_timer.async_wait(m_strand.wrap([self](const boost::system::error_code&){self->OnTimeout();}));
+            m_timer.async_wait(boost::asio::bind_executor(m_strand, [self](const boost::system::error_code&){self->OnTimeout();}));
         }
     }
 };

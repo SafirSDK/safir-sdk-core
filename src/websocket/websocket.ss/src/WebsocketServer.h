@@ -35,7 +35,7 @@
 class WebsocketServer : public sd::StopHandler
 {
 public:
-    WebsocketServer(boost::asio::io_service& ioService);
+    WebsocketServer(boost::asio::io_context& io);
 
     void Run();
     void Terminate();
@@ -44,9 +44,9 @@ private:
     typedef websocketpp::server<websocketpp::config::asio> WsServer;
     typedef WsServer::connection_ptr WsConnection;
     WsServer m_server;
-    boost::asio::io_service& m_ioService;
-    boost::asio::io_service::strand m_connectionsStrand;
-    std::unique_ptr<boost::asio::io_service::work> m_work;
+    boost::asio::io_context& m_io;
+    boost::asio::io_context::strand m_connectionsStrand;
+    boost::asio::executor_work_guard<boost::asio::io_context::executor_type> m_work;
     std::set<std::shared_ptr<RemoteClient> > m_connections;
     boost::asio::signal_set m_signals;
 

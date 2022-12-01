@@ -29,10 +29,18 @@ namespace Dob
 {
 namespace Internal
 {
+    std::once_flag DistributionScopeReader::SingletonHelper::m_onceFlag;
+
+    const Safir::Dob::Typesystem::Internal::DistributionScopeReader& DistributionScopeReader::SingletonHelper::Instance()
+    {
+        static Safir::Dob::Typesystem::Internal::DistributionScopeReader instance;
+        return instance;
+    }
+
     const Safir::Dob::Typesystem::Internal::DistributionScopeReader& DistributionScopeReader::Instance()
     {
-        static Safir::Dob::Typesystem::Internal::DistributionScopeReader reader;
-        return reader;
+        std::call_once(SingletonHelper::m_onceFlag,[]{SingletonHelper::Instance();});
+        return SingletonHelper::Instance();
     }
 }
 }

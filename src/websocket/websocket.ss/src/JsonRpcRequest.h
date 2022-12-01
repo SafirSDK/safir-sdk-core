@@ -22,7 +22,6 @@
 *
 ******************************************************************************/
 #pragma once
-#include <boost/optional.hpp>
 #include <Safir/Dob/Typesystem/Defs.h>
 #include <Safir/Dob/InstanceIdPolicy.h>
 #include <Safir/Dob/Typesystem/ToolSupport/TypeUtilities.h>

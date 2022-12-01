@@ -22,7 +22,6 @@
 *
 ******************************************************************************/
 #include <signal.h>
-#include <boost/make_shared.hpp>
 #include <Safir/Websocket/Parameters.h>
 #include "WebsocketServer.h"
 #include "IpAddressHelper.h"
@@ -40,15 +39,15 @@
 
 namespace ws = Safir::Websocket;
 
-WebsocketServer::WebsocketServer(boost::asio::io_service& ioService)
+WebsocketServer::WebsocketServer(boost::asio::io_context& io)
     :m_server()
-    ,m_ioService(ioService)
-    ,m_connectionsStrand(m_ioService)
-    ,m_work(new boost::asio::io_service::work(m_ioService))
+    ,m_io(io)
+    ,m_connectionsStrand(m_io)
+    ,m_work(boost::asio::make_work_guard(m_io))
     ,m_connections()
-    ,m_signals(m_ioService)
+    ,m_signals(m_io)
     ,m_dobConnection()
-    ,m_dobDispatcher(m_dobConnection, m_ioService)
+    ,m_dobDispatcher(m_dobConnection, m_io)
 {
     m_server.clear_access_channels(websocketpp::log::alevel::all);
     m_server.clear_error_channels(websocketpp::log::alevel::all);
@@ -72,7 +71,7 @@ void WebsocketServer::Run()
     m_dobConnection.Open(L"safir_websocket", L"", 0, this, &m_dobDispatcher);
 
     // Initialize ASIO
-    m_server.init_asio(&m_ioService);
+    m_server.init_asio(&m_io);
 
     //try to disable all logging from websocketpp, seems like info is still logging
     m_server.set_access_channels(websocketpp::log::alevel::none);
@@ -80,7 +79,7 @@ void WebsocketServer::Run()
 
     m_server.set_open_handler([this](websocketpp::connection_hdl hdl)
     {
-        auto con=std::make_shared<RemoteClient>(m_server, m_ioService, hdl, [this](const RemoteClient* con){OnConnectionClosed(con);});
+        auto con=std::make_shared<RemoteClient>(m_server, m_io, hdl, [this](const RemoteClient* con){OnConnectionClosed(con);});
         OnConnectionOpen(con);
         lllog(5)<<"WS: Server: new connection added: "<<con->ToString().c_str()<<std::endl;
     });
@@ -129,7 +128,7 @@ void WebsocketServer::Terminate()
         m_dobConnection.Close();
     }
 
-    m_connectionsStrand.post([this]
+    boost::asio::post(m_connectionsStrand, [this]
     {
         //close all existing connections
         for (auto it = m_connections.begin(); it != m_connections.end(); ++it)
@@ -141,11 +140,11 @@ void WebsocketServer::Terminate()
     m_work.reset();
 
     //give a couple of seconds to send pending messages and nice shutdown messages
-    std::shared_ptr<boost::asio::steady_timer> shutDownTimer=std::make_shared<boost::asio::steady_timer>(m_ioService);
-    shutDownTimer->expires_from_now(boost::chrono::seconds(3));
+    std::shared_ptr<boost::asio::steady_timer> shutDownTimer=std::make_shared<boost::asio::steady_timer>(m_io);
+    shutDownTimer->expires_after(boost::chrono::seconds(3));
     shutDownTimer->async_wait([this, shutDownTimer](const boost::system::error_code&)
     {
-        m_connectionsStrand.post([this]{m_server.stop();});
+        boost::asio::post(m_connectionsStrand, [this]{m_server.stop();});
     });
 
     lllog(5)<<"WS: all connections closed..."<<std::endl;
@@ -153,7 +152,7 @@ void WebsocketServer::Terminate()
 
 void WebsocketServer::OnConnectionOpen(const std::shared_ptr<RemoteClient>& con)
 {
-    m_connectionsStrand.post([this,con]
+    boost::asio::post(m_connectionsStrand, [this, con]
     {
         m_connections.insert(con);
         PrintConnections();
@@ -166,7 +165,7 @@ void WebsocketServer::OnConnectionClosed(const RemoteClient* con)
     std::function<bool(const std::shared_ptr<RemoteClient>&)> pred =
         [con](const std::shared_ptr<RemoteClient>& p) {return p.get()==con;};
 
-    m_connectionsStrand.post([this,pred,con]
+    boost::asio::post(m_connectionsStrand, [this, pred, con]
     {
         auto it=std::find_if(m_connections.begin(), m_connections.end(), pred);
 
