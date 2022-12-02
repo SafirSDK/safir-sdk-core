@@ -698,9 +698,9 @@ async def two_normal_two_light_toggle_network_many_times_on_both_light(args):
 # main
 # ===========================================
 async def main(args):
-    # await one_normal_one_light_detach_reattach_light(args)                      # ok
-    # await one_normal_two_light_detach_reattach_one_light(args)                  # ok
-    # await one_normal_two_light_restart_normal(args)                             # ok
+    await one_normal_one_light_detach_reattach_light(args)                      # ok
+    await one_normal_two_light_detach_reattach_one_light(args)                  # ok
+    await one_normal_two_light_restart_normal(args)                             # ok
     await two_normal_two_light_restart_one_normal(args)                         # ok
     
     # await two_normal_two_light_detach_reattach_both_light(args)               # fails sometimes
