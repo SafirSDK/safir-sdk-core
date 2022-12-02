@@ -15,7 +15,7 @@
       </summary>
       <name>ServerEndpoint</name>
       <type>String</type>
-      <value>:10001</value>
+      <value>:16671</value>
     </parameter>
 
     <!-- Interval at which messges with the ping opcode is sent to clients to keep connection open -->

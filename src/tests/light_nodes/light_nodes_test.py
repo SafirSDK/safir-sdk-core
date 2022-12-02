@@ -157,8 +157,8 @@ async def check_pool_detached_node(app):
         if contains_exact(expected_reg, app.registrations) and contains_exact(expected_ent, app.entities):
             ok = True
             break
-        log("--- Extended wait for PD to finish, wait time " + str((check + 1)*5) + " sec")
-        await asyncio.sleep(5)
+        log("--- Extended wait for PD to finish, wait time " + str((check + 1)*10) + " sec")
+        await asyncio.sleep(10)
 
     if not ok:
         log("*** ERROR: Incorrect pool on light node " + str(app.node_id) + ", safir_instance: " + str(app.safir_instance))
@@ -228,8 +228,8 @@ async def check_pools_connected_nodes(*apps):
         if ok:
             break
 
-        log("--- Extended wait for PD to finish, wait time " + str((check + 1)*5) + " sec")
-        await asyncio.sleep(5)
+        log("--- Extended wait for PD to finish, wait time " + str((check + 1)*10) + " sec")
+        await asyncio.sleep(10)
 
     if not ok:
         raise AssertionError("Incorrect pool")    
@@ -283,17 +283,27 @@ class SafirApp:
         log("--------------")
 
     async def _run(self):
-        uri = "ws://localhost:1000" + str(self.safir_instance)
-        for connectTry in range(5): # make 5 efforts to connect, total 15 sec
+        # 1667 - 16671 16672 16673 16674
+        uri = "ws://localhost:1667" + str(self.safir_instance)
+        for connectTry in range(10):
             try:
                 async with websockets.connect(uri) as ws:
                     self.ws = ws
                     await asyncio.gather(self._reader(), self._sender(), self._setup_dob())
                     break;
-            except ConnectionRefusedError:
-                await asyncio.sleep(3)
-                if connectTry == 4:
-                    log("*** Failed to connect!")
+            except ConnectionRefusedError as e:
+                log("--- Got ConnectionRefusedError to " + uri + ". Will retry to connect in 5 sec.")
+                await asyncio.sleep(5)
+                if connectTry == 9:
+                    log("*** Failed to connect, ConnectionRefusedError!")
+                    log(e)
+                    raise
+            except Exception as e:
+                log("--- Got Exception when connecting to " + uri + ". Will retry to connect in 5 sec.")
+                await asyncio.sleep(5)
+                if connectTry == 9:
+                    log("*** Failed to connect, Exception!")
+                    log(e)
                     raise
 
     async def _reader(self):
@@ -313,8 +323,11 @@ class SafirApp:
                 elif callback == "onUnregistered":
                     handler = dou_type(msg) + ":" + str(handler_id(msg))
                     self.registrations.pop(handler, None)
+                elif "result" in msg and msg["result"] != "OK":
+                    result_id = msg["id"] if "id" in msg else "None"
+                    log("--- node_" + str(self.node_id) + " received result " + msg["result"] + " with id=" + str(result_id))
                 elif "error" in msg:
-                    log("*** Received error response from safir_websocket:", message)
+                    log("*** node_ " + str(self.node_id) + " received error response from safir_websocket:", message)
                     continue
             except json.JSONDecodeError:
                 log("JSONDecodeError", message) # indicates error in safir_websocket
@@ -685,20 +698,21 @@ async def two_normal_two_light_toggle_network_many_times_on_both_light(args):
 # main
 # ===========================================
 async def main(args):
-    await one_normal_one_light_detach_reattach_light(args)                      # ok
-    # await one_normal_one_light_restart_light(args)                            # fails always
-    await one_normal_two_light_detach_reattach_one_light(args)                  # ok
-    await one_normal_two_light_restart_normal(args)                             # ok
+    # await one_normal_one_light_detach_reattach_light(args)                      # ok
+    # await one_normal_two_light_detach_reattach_one_light(args)                  # ok
+    # await one_normal_two_light_restart_normal(args)                             # ok
+    await two_normal_two_light_restart_one_normal(args)                         # ok
+    
     # await two_normal_two_light_detach_reattach_both_light(args)               # fails sometimes
     # await two_normal_two_light_detach_reattach_both_light_big_pool(args)      # fails sometimes
-    await two_normal_two_light_restart_one_normal(args)                         # ok
     # await two_normal_two_light_restart_both_normal(args)                      # fails sometimes
     # await two_normal_two_light_toggle_network_many_times_on_both_light(args)  # fails sometimes
+    # await one_normal_one_light_restart_light(args)                            # fails always
 
     #---- Some code for repeating a test and clearing local log folder after each run
     # for i in range(25):
     #     for f in glob.glob("/home/joel/dev/log/*"): os.remove(f)
-    #     await one_normal_one_light_detach_reattach_light(args)
+    #     await two_normal_two_light_restart_both_normal(args)
     #     if len(failed_tests) > 0: return
 
 if __name__ == "__main__":
