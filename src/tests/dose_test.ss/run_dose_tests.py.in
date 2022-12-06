@@ -39,6 +39,10 @@ import argparse
 import urllib.request
 import tempfile
 
+NODE_IDS = {"server-0" : "999999",
+            "server-1" : "888888",
+            "client-0" : "77777",
+            "client-1" : "66666"}
 
 def log(*args, **kwargs):
     print(*args, **kwargs)
@@ -93,13 +97,13 @@ class Parameters:
                           dest="multicomputer",
                           default=False,
                           help="Run multicomputer tests instead of standalone tests.")
-        parser.add_argument("--autostart-slave",
-                          action="store_true",
-                          dest="autostart_slave",
-                          default=False,
-                          help="Automatically start a multicomputer slave (Server_1) through jenkins." +
-                          "This is only applicable when using --multicomputer, and is implied when using --jenkins")
-        parser.add_argument("--slave", action="store_true", dest="slave", default=False, help="Be a multicomputer slave")
+        parser.add_argument("--slave",
+                            choices=["server-1", "client-0", "client-1"],
+                            help="Be a multicomputer slave of the specified type")
+        parser.add_argument("--stop-slaves",
+                            action="store_true",
+                            default=False,
+                            help="Send a safir_control command to all slave nodes after multicomputer test is complete.")
         parser.add_argument("--run-until-failure",
                           action="store_true",
                           dest="run_until_failure",
@@ -171,10 +175,8 @@ class Parameters:
         self.no_java = options.no_java
         self.no_dotnet = options.no_dotnet
         self.run_until_failure = options.run_until_failure
+        self.stop_slaves = options.stop_slaves
 
-        if options.autostart_slave and not self.multicomputer:
-            log("--autostart-slave can only be used together with --multicomputer")
-            sys.exit(1)
         if options.slave and options.multicomputer:
             log("Don't specify both --slave and --multinode")
             sys.exit(1)
@@ -183,8 +185,6 @@ class Parameters:
                                                       (options.first_testcase is not None)):
             log("Don't specify both --single-testcase and either --first-testcase or --last-testcase")
             sys.exit(1)
-
-        self.autostart_jenkins_slave = options.autostart_slave or (options.jenkins and self.multicomputer)
 
         if options.jenkins:
             #Get env variables if they're set
@@ -416,7 +416,9 @@ class Runner:
         self.procs = dict()
         self.syslog = None
 
+
     def __launchProcess(self, name, cmd, stdoutToFile=True):
+        log(f"Launching process {name} using command line {' '.join(cmd)}")
         if stdoutToFile:
             output = open(name + ".output.txt", "w")
         else:
@@ -446,16 +448,24 @@ class Runner:
             partners = (0, 1, 2, 3, 4)
         elif parameters.multinode or parameters.multicomputer:
             partners = (0, 1)
-        else:  #slave
+        elif parameters.slave == "server-1":
             os.environ["SAFIR_INSTANCE"] = "1"
             partners = (2, )
+        elif parameters.slave == "client-0":
+            os.environ["SAFIR_INSTANCE"] = "2"
+            partners = (3, )
+        elif parameters.slave == "client-1":
+            os.environ["SAFIR_INSTANCE"] = "3"
+            partners = (4, )
 
         log("** Starting safir_control and partners", str(partners))
         self.safir_control = self.__launchProcess(
             "safir_control.0",
-            parameters.safir_control_cmd + ("--force-id", ("888888" if parameters.slave else "999999")))
+            parameters.safir_control_cmd + ("--force-id",
+                                            NODE_IDS["server-0" if parameters.slave is None else parameters.slave]))
 
-        self.__launchProcess("dope_main.0", parameters.dope_main_cmd)
+        if parameters.slave is None or parameters.slave == "server-1":
+            self.__launchProcess("dope_main.0", parameters.dope_main_cmd)
         self.__launchProcess("foreach.0", parameters.foreach_cmd)
 
         for i in partners:
@@ -470,7 +480,8 @@ class Runner:
             os.environ["SAFIR_INSTANCE"] = "1"
             log(" + starting slave node Server_1")
             self.safir_control_1 = self.__launchProcess("safir_control.1",
-                                                        parameters.safir_control_cmd + ("--force-id", "888888"))
+                                                        parameters.safir_control_cmd + ("--force-id",
+                                                                                        NODE_IDS["server-1"]))
 
             self.__launchProcess("dope_main.1", parameters.dope_main_cmd)
             self.__launchProcess("foreach.1", parameters.foreach_cmd)
@@ -484,7 +495,8 @@ class Runner:
             os.environ["SAFIR_INSTANCE"] = "2"
             log(" + starting slave node Client_0")
             self.safir_control_2 = self.__launchProcess("safir_control.2",
-                                                        parameters.safir_control_cmd + ("--force-id", "77777"))
+                                                        parameters.safir_control_cmd + ("--force-id",
+                                                                                        NODE_IDS["client-0"]))
 
             self.__launchProcess("foreach.2", parameters.foreach_cmd)
 
@@ -497,8 +509,8 @@ class Runner:
             os.environ["SAFIR_INSTANCE"] = "3"
             log(" + starting slave node Client_1")
             self.safir_control_3 = self.__launchProcess("safir_control.3",
-                                                        parameters.safir_control_cmd + ("--force-id", "66666"))
-
+                                                        parameters.safir_control_cmd + ("--force-id",
+                                                                                        NODE_IDS["client-1"]))
             self.__launchProcess("foreach.3", parameters.foreach_cmd)
 
             self.__launchProcess("dose_test_cpp.4", parameters.dose_test_cpp_cmd + ("4", ))
@@ -582,191 +594,6 @@ class Runner:
         if hasattr(self, "safir_control_3"):
             self.safir_control_3.wait()
 
-
-class JenkinsInterface:
-    def __init__(self, parameters):
-        self.server = os.environ.get("JENKINS_URL_OVERRIDE")
-        if self.server is None:
-            self.server = os.environ.get("JENKINS_URL")
-            if self.server is None:
-                log("No JENKINS_URL found")
-                sys.exit(1)
-        self.user = os.environ.get("JENKINS_USER")
-        if self.server is None:
-            log("No JENKINS_USER found")
-            sys.exit(1)
-        log("Using jenkins server", self.server)
-
-        self.log_level = os.environ.get("JENKINS_CLI_LOGGING")
-        if self.log_level is None:
-            self.log_level = "OFF"
-
-        cliurl = self.server + "/jnlpJars/jenkins-cli.jar"
-        #log "will download jenkins-cli.jar using url", cliurl
-        self.clijar = os.path.join(parameters.tempdir, "jenkins-cli.jar")
-        urllib.request.urlretrieve(cliurl, self.clijar)
-
-    def __run_command(self, cmd, inp=None):
-        args = list()
-
-        #on some slaves java 7 is the default java, so we use environment variable to find java 8, which
-        #jenkins needs.
-        java = os.environ.get("JAVA_8_PATH")
-        if java is None:
-            java = "java"
-
-        args += (java, "-jar", self.clijar, "-s", self.server, "-logger", self.log_level, "-ssh", "-user", self.user)
-
-        if sys.platform == "win32":
-            args += ("-i", "c:\\.ssh\\id_rsa")
-        if type(cmd) is str:
-            args.append(cmd)
-        else:
-            args += cmd
-
-        proc = subprocess.Popen(args,
-                                stdout=subprocess.PIPE,
-                                stderr=subprocess.STDOUT,
-                                stdin=None if inp is None else subprocess.PIPE)
-        res = proc.communicate(inp)
-        if proc.returncode == 0:
-            return res[0]
-        else:
-            log(res[0])
-            raise Exception("Failed to run jenkins command", str(args))
-
-    def __run_groovy(self, script):
-        return self.__run_command(("groovy", "="), script)
-
-    def help(self):
-        return self.__run_command("groovy")
-
-    def who_am_i(self):
-        return self.__run_command("who-am-i")
-
-    def list_jobs(self):
-        output = self.__run_groovy("import hudson.model.*\n" +
-                                   "for(item in Hudson.instance.items) {println(item.name)}")
-        jobs = output.splitlines()
-        return jobs
-
-    def __to_bool(self, output, on_error):
-        output = output.strip()
-        if output not in ("true", "false"):
-            log("Unexpected boolean value: '{0}' was not found in {1}. Treating as {2}".format(
-                output, ("true", "false"), on_error))
-            return on_error
-        return output == "true"
-
-    def is_building(self, job, on_error):
-        script = """
-                 import hudson.model.*
-                 item = Hudson.instance.getItem("JOB_NAME")
-                 println(item.isBuilding())
-                 """
-        script = script.replace("JOB_NAME", job)
-        output = self.__run_groovy(script)
-        return self.__to_bool(output, on_error)
-
-    def is_restarting(self):
-        script = """
-                 import hudson.model.*
-                 println(Hudson.instance.isQuietingDown())
-                 """
-        output = self.__run_groovy(script)
-        return self.__to_bool(output, True)
-
-    def wait_for_job(self, job, duration=None):
-        if duration is None:
-            while self.is_building(job, True):
-                time.sleep(1.0)
-        else:
-            future = time.time() + duration
-            while time.time() < future and self.is_building(job, True):
-                time.sleep(1.0)
-
-    def build(self, job):
-        self.__run_command(("build", job))
-        while not self.is_building(job, False):
-            time.sleep(1.0)
-
-    def cancel_job(self, job):
-        script = """
-                 import hudson.model.*
-                 item = Hudson.instance.getItem("JOB_NAME")
-                 executor = item.getLastBuild().getExecutor()
-                 if (executor != null)
-                 {
-                   executor.interrupt()
-                 }
-                 """
-        script = script.replace("JOB_NAME", job)
-        self.__run_groovy(script)
-
-    def get_console_output(self, job):
-        script = """
-                 import hudson.model.*
-                 item = Hudson.instance.getItem("JOB_NAME")
-                 build = item.getLastBuild()
-                 text = build.getLogText()
-                 println ("text length " + text.length())
-                 //build.getLogText().writeLogTo(0, System.out)
-                 println(build.getLog())
-                 println ("end log")
-                 """
-        script = script.replace("JOB_NAME", job)
-        log(self.__run_groovy(script))
-
-    def terminate_safir_control(self, job):
-        """Send a SIGTERM to dose main, to let the slave script end nicely"""
-        script = """
-                 import hudson.model.*
-                 import hudson.util.*
-                 item = Hudson.instance.getItem("JOB_NAME")
-                 executor = item.getLastBuild().getExecutor()
-                 if (executor != null)
-                 {
-                   computer = executor.getOwner()
-                   RemotingDiagnostics.executeGroovy("println \\"killall safir_control\\".execute().text", computer.getChannel())
-                 }
-                 """
-        script = script.replace("JOB_NAME", job)
-        self.__run_groovy(script)
-
-
-class JenkinsController:
-    def __init__(self, parameters):
-        self.interface = JenkinsInterface(parameters)
-        self.job_name = "multinode-test-slave-1"
-        auth = self.interface.who_am_i()
-        if auth.find("authenticated") == -1:
-            log("Failed to authenticate using ssh keys, please check that keys are set up correctly")
-            log(auth)
-            sys.exit(1)
-
-    def is_restarting(self):
-        if self.interface.is_restarting():
-            log(" !! Jenkins is restarting")
-            return True
-        else:
-            return False
-
-    def start_slave(self):
-        log(" * Starting slave")
-        self.interface.wait_for_job(self.job_name)
-        self.interface.build(self.job_name)
-
-    def stop_slave(self):
-        try:
-            log(" * Stopping slave")
-            self.interface.terminate_safir_control(self.job_name)
-            self.interface.wait_for_job(self.job_name, 60)
-            self.interface.cancel_job(self.job_name)
-            self.interface.wait_for_job(self.job_name)
-        except:
-            log("Failed to stop slave!")
-
-
 def main():
     start_dir = os.getcwd()
     parameters = Parameters()
@@ -776,13 +603,6 @@ def main():
         rmdir("dose_test_output")
         mkdir("dose_test_output")
         os.chdir("dose_test_output")
-
-        if parameters.autostart_jenkins_slave:
-            jenkinsController = JenkinsController(parameters)
-            if jenkinsController.is_restarting():
-                log("Jenkins is restarting, exiting quickly...")
-                return 1
-            jenkinsController.start_slave()
 
         runner = Runner()
         results = Results()
@@ -799,9 +619,11 @@ def main():
             log("exception occurred!")
             traceback.print_exc()
 
+        if parameters.multicomputer and parameters.stop_slaves:
+            for node in ("server-1", "client-0", "client-1"):
+                subprocess.call(["safir_control_cli", "-n", NODE_IDS[node], "-a", "STOP"])
+
         runner.killprocs(results)
-        if parameters.autostart_jenkins_slave:
-            jenkinsController.stop_slave()
 
         if completed:
             results.check_output(parameters)
@@ -821,7 +643,4 @@ def main():
 
     return 0
 
-
-result = main()
-
-sys.exit(result)
+sys.exit(main())

@@ -134,18 +134,23 @@ def render_documentation() {
     archiveArtifacts artifacts: 'rendered_docs/*, rendered_docs/images/*', fingerprint: true
 }
 
+def clean_and_copy_artifacts(platform, arch, buildType, sourceJob, sourceBuildNumber){
+    def buildIdentifier = "${platform}-${arch}-${buildType}"
+    runCommand(command: "git clean -fxd")
+
+    copyArtifacts filter: "build-${buildIdentifier}/*",
+                  flatten: true,
+                  fingerprintArtifacts: true,
+                  projectName: "${sourceJob}",
+                  selector: specific("${sourceBuildNumber}")
+}
+
 def run_test_suite(platform, arch, buildType, sourceJob, sourceBuildNumber, testType){
     def buildIdentifier = "${platform}-${arch}-${buildType}"
     catchError {
-        runCommand(command: "git clean -fxd")
-
-        copyArtifacts filter: "build-${buildIdentifier}/*",
-                      flatten: true,
-                      fingerprintArtifacts: true,
-                      projectName: "${sourceJob}",
-                      selector: specific("${sourceBuildNumber}")
-
         //languages are picked up from environment variable
+        //and for the multicomputer tests the artifacts to copy are inferred from environment too,
+        //in run_test.py (in start_slave())
         runPython (command: "build/jenkins_stuff/run_test.py --test ${testType}")
     }
 
@@ -157,16 +162,7 @@ def run_test_suite(platform, arch, buildType, sourceJob, sourceBuildNumber, test
 }
 
 
-def build_examples(platform, arch, buildType, sourceJob, sourceBuildNumber){
-    def buildIdentifier = "${platform}-${arch}-${buildType}"
-    runCommand(command: "git clean -fxd")
-
-    copyArtifacts filter: "build-${buildIdentifier}/*",
-                  flatten: true,
-                  fingerprintArtifacts: true,
-                  projectName: "${sourceJob}",
-                  selector: specific("${sourceBuildNumber}")
-
+def build_examples(){
     runPython (command: "build/jenkins_stuff/run_test.py --test build-examples")
 }
 
@@ -174,11 +170,11 @@ pipeline {
     parameters {
         choice(name: 'PLATFORM_FILTER',
                choices: ['all', 'ubuntu-focal', 'ubuntu-jammy', 'debian-bullseye', 'vs2015', 'vs2022'], /* TODO 'vs2017', 'vs2019',*/
-               description: 'Run on specific platform')
+               description: "Run on specific platform. Note that multicomputer tests will only run if 'all' or 'debian-bullseye' is selected.")
 
         booleanParam(name: 'SKIP_SLOW_TESTS',
                      defaultValue: false,
-                     description: 'Skip slow tests?')
+                     description: 'If this is true, all unit tests that take "a long time" will be skipped. The system test suite will still be run.')
 
     }
     agent none
@@ -277,9 +273,9 @@ pipeline {
                     }
                     axis {
                         name 'Languages'
-                        values 'cpp-cpp-cpp-cpp-cpp',
-                               'dotnet-java-cpp-dotnet-java',
-                               'java-cpp-dotnet-java-cpp'
+                        values 'dotnet-java-cpp-dotnet-java',
+                               'java-cpp-dotnet-java-cpp',
+                               'cpp-cpp-cpp-cpp-cpp'
                     }
                 }
                 excludes {
@@ -296,12 +292,38 @@ pipeline {
                 }
                 stages {
                     stage('Standalone Tests') { steps { script {
+                        clean_and_copy_artifacts(BUILD_PLATFORM, BUILD_ARCH, BUILD_TYPE, JOB_NAME, BUILD_NUMBER)
                         run_test_suite(BUILD_PLATFORM, BUILD_ARCH, BUILD_TYPE, JOB_NAME, BUILD_NUMBER, "standalone-tests")
                     }}}
                     stage('Multinode Tests') { steps { script {
+                        //artifacts are left over from previous stage
                         run_test_suite(BUILD_PLATFORM, BUILD_ARCH, BUILD_TYPE, JOB_NAME, BUILD_NUMBER, "multinode-tests")
                     }}}
+                    stage('Multicomputer Tests') {
+                        when { allOf {
+                            expression {Languages == "cpp-cpp-cpp-cpp-cpp"}
+                            anyOf {
+                                //The multicomputer test slave uses the debian-bullseye-x86 release build,
+                                //so we can't run unless they are part of the build
+                                expression {params.PLATFORM_FILTER == 'all'}
+                                expression {params.PLATFORM_FILTER == 'debian-bullseye'}
+                            }
+                        }}
+                        options {
+                            lock( 'multicomputer-test-slaves' )
+                        }
+                        steps { script {
+                            //artifacts are left over from previous stage
+                            run_test_suite(BUILD_PLATFORM, BUILD_ARCH, BUILD_TYPE, JOB_NAME, BUILD_NUMBER, "multicomputer-tests")
+                    }}}
+
                 }
+                post {
+                    always {
+                        cleanWs()
+                    }
+                }
+
             }
         }
 
@@ -344,9 +366,16 @@ pipeline {
                 }
                 stages {
                     stage('Build') { steps { script {
-                        build_examples (BUILD_PLATFORM, BUILD_ARCH, BUILD_TYPE, JOB_NAME, BUILD_NUMBER)
+                        clean_and_copy_artifacts(BUILD_PLATFORM, BUILD_ARCH, BUILD_TYPE, JOB_NAME, BUILD_NUMBER)
+                        build_examples ()
                     }}}
                 }
+                post {
+                    always {
+                        cleanWs()
+                    }
+                }
+
             }
         }
     }

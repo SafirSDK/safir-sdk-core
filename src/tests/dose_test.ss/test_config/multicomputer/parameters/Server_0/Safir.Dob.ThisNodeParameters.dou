@@ -4,18 +4,21 @@
     <name>Safir.Dob.ThisNodeParameters</name>
     <baseClass>Safir.Dob.Parametrization</baseClass>
     <parameters>
+      <!-- The weird patterns below are to match the proper addresses on two different test networks:
+           192.168.x.y and 10.68.x.y. This is just how our test systems are set up. -->
+      
         <parameter>
             <summary>Address and port of the control channel</summary>
             <name>ControlAddress</name>
             <type>String</type>
-            <value>192.*.*.*:30000</value>
+            <value>1*.*68.*.*:30000</value>
         </parameter>
 
         <parameter>
             <summary>Address and port of the data channel</summary>
             <name>DataAddress</name>
             <type>String</type>
-            <value>192.*.*.*:40000</value>
+            <value>1*.*68.*.*:40000</value>
         </parameter>
 
         <parameter>
@@ -23,7 +26,7 @@
             <name>Seeds</name>
             <type>String</type>
             <array>
-              <value>multinode-test-slave-1:30000</value>
+              <value>core-multicomputer-test-server-1-slave:30000</value>
             </array>
         </parameter>
 

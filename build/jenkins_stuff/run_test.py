@@ -30,6 +30,11 @@ import subprocess
 import re
 import platform
 import argparse
+import signal
+import tempfile
+import urllib.request
+import time
+import socket
 
 try:
     import apt
@@ -51,6 +56,24 @@ def log(*args, **kwargs):
     print(*args, **kwargs)
     sys.stdout.flush()
 
+def nice_call(*popenargs, timeout=None, **kwargs):
+    """
+    Like subprocess.call(), but give the child process time to
+    clean up and communicate if a KeyboardInterrupt is raised.
+    """
+    with subprocess.Popen(*popenargs, **kwargs) as p:
+        try:
+            return p.wait(timeout=timeout)
+        except KeyboardInterrupt:
+            if not timeout:
+                timeout = 0.5
+            # Wait again, now that the child has received SIGINT, too.
+            p.wait(timeout=timeout)
+            raise
+        except:
+            p.kill()
+            p.wait()
+            raise
 
 class SetupError(Exception):
     pass
@@ -105,7 +128,7 @@ class WindowsInstaller():
 
         log("Running uninstaller:", self.uninstaller)
         #The _? argument requires that we concatenate the command like this instead of using a tuple
-        result = subprocess.call((self.uninstaller + " /S _?=" + self.installpath))
+        result = nice_call((self.uninstaller + " /S _?=" + self.installpath))
         if result != 0:
             raise SetupError("Uninstaller failed (" + str(result) + ")!")
 
@@ -129,7 +152,7 @@ class WindowsInstaller():
         if testsuite:
             cmd.append("/TESTSUITE")
 
-        result = subprocess.call(cmd)
+        result = nice_call(cmd)
 
         if result != 0:
             raise SetupError("Installer failed (" + str(result) + ")!")
@@ -287,40 +310,240 @@ class DebianInstaller():
             raise SetupError("Failed to run safir_show_config. returncode = " + str(proc.returncode) + "\nOutput:\n" +
                              output.decode("utf-8"))
 
+class JenkinsInterface:
+    def __init__(self):
+        self.server = os.environ.get("JENKINS_URL_OVERRIDE")
+        if self.server is None:
+            self.server = os.environ.get("JENKINS_URL")
+            if self.server is None:
+                log("No JENKINS_URL found")
+                sys.exit(1)
+        self.user = os.environ.get("JENKINS_USER")
+        if self.user is None:
+            log("No JENKINS_USER found, defaulting to 'jenkins'")
+            self.user = "jenkins"
+        log("Using jenkins server", self.server)
+        log("Using jenkins user", self.user)
+
+        self.log_level = os.environ.get("JENKINS_CLI_LOGGING")
+        if self.log_level is None:
+            self.log_level = "OFF"
+
+        cliurl = self.server + "/jnlpJars/jenkins-cli.jar"
+        self.tempdir = tempfile.TemporaryDirectory()
+        #log "will download jenkins-cli.jar using url", cliurl
+        self.clijar = os.path.join(self.tempdir.name, "jenkins-cli.jar")
+        urllib.request.urlretrieve(cliurl, self.clijar)
+
+    def __run_command(self, cmd, inp=None, name=None):
+        args = list()
+
+        args += ("java", "-jar", self.clijar, "-s", self.server, "-logger", self.log_level, "-ssh", "-user", self.user)
+
+        if type(cmd) is str:
+            args.append(cmd)
+        else:
+            args += cmd
+
+        if name is None:
+            log(f"Running command {' '.join(args)}")
+        else:
+            log(f"Running {name}")
+
+        if inp is not None:
+            inp = inp.encode("utf-8")
+
+        proc = subprocess.Popen(args,
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.STDOUT,
+                                stdin=None if inp is None else subprocess.PIPE)
+        res = proc.communicate(inp)
+        if proc.returncode == 0:
+            return res[0].decode("utf-8")
+        else:
+            log(res[0].decode("utf-8"))
+            raise Exception(f"Failed to run jenkins command '{' '.join(args)}'")
+
+    def __run_groovy(self, name, script):
+        return self.__run_command(("groovy", "=", name), inp=script)
+
+    def help(self):
+        return self.__run_command("help")
+
+    def who_am_i(self):
+        return self.__run_command("who-am-i")
+
+    def list_jobs(self):
+        output = self.__run_groovy("list_jobs",
+                                   "import hudson.model.*\n" +
+                                   "for(item in Hudson.instance.items) {println(item.name)}")
+        jobs = output.splitlines()
+        return jobs
+
+    def __to_bool(self, output, on_error):
+        output = output.strip()
+        if output not in ("true", "false"):
+            log("Unexpected boolean value: '{0}' was not found in {1}. Treating as {2}".format(
+                output, ("true", "false"), on_error))
+            return on_error
+        return output == "true"
+
+    def is_building(self, job, on_error):
+        script = """
+                 import hudson.model.*
+                 item = Hudson.instance.getItemByFullName("JOB_NAME")
+                 println(item.isBuilding())
+                 """
+        script = script.replace("JOB_NAME", job)
+        output = self.__run_groovy("is_building", script)
+        return self.__to_bool(output, on_error)
+
+    def is_restarting(self):
+        script = """
+                 import hudson.model.*
+                 println(Hudson.instance.isQuietingDown())
+                 """
+        output = self.__run_groovy("is_restarting", script)
+        return self.__to_bool(output, True)
+
+    def wait_for_job(self, job, duration=None):
+        if duration is None:
+            while self.is_building(job, True):
+                time.sleep(1.0)
+        else:
+            future = time.time() + duration
+            while time.time() < future and self.is_building(job, True):
+                time.sleep(1.0)
+
+    def build(self, job, parameters = None):
+        command = ("build", job)
+        if parameters is not None:
+            for key,value in parameters.items():
+                command += ("-p", f"{key}={value}")
+        self.__run_command(command)
+        while not self.is_building(job, False):
+            time.sleep(1.0)
+
+    def cancel_job(self, job):
+        script = """
+                 import hudson.model.*
+                 item = Hudson.instance.getItemByFullName("JOB_NAME")
+                 executor = item.getLastBuild().getExecutor()
+                 if (executor != null)
+                 {
+                   executor.interrupt()
+                 }
+                 """
+        script = script.replace("JOB_NAME", job)
+        self.__run_groovy("cancel_job", script)
+
+    def get_console_output(self, job):
+        script = """
+                 import hudson.model.*
+                 item = Hudson.instance.getItemByFullName("JOB_NAME")
+                 build = item.getLastBuild()
+                 text = build.getLogText()
+                 println ("text length " + text.length())
+                 //build.getLogText().writeLogTo(0, System.out)
+                 println(build.getLog())
+                 println ("end log")
+                 """
+        script = script.replace("JOB_NAME", job)
+        log(self.__run_groovy("get_console_output",script))
+
+class JenkinsController:
+    def __init__(self, slave_role):
+        self.interface = JenkinsInterface()
+        self.slave_role = slave_role
+        self.job_name = "multicomputer-test-slaves/multicomputer-test-" + slave_role
+        auth = self.interface.who_am_i()
+        if auth.find("authenticated") == -1:
+            log("Failed to authenticate using ssh keys, please check that keys are set up correctly")
+            log(auth)
+            sys.exit(1)
+
+    def is_restarting(self):
+        if self.interface.is_restarting():
+            log(" !! Jenkins is restarting")
+            return True
+        else:
+            return False
+
+    def start_slave(self):
+        log(" * Starting slave")
+        self.interface.wait_for_job(self.job_name)
+        # Get the build number and the job name for the slave to copy artifacts from
+        # from Jenkins environment variables
+        parameters = {"SOURCE_PROJECT" : os.environ.get("JOB_NAME"),
+                      "SOURCE_BUILD_NUMBER" : os.environ.get("BUILD_NUMBER"),
+                      "SLAVE_ROLE": self.slave_role}
+        self.interface.build(self.job_name, parameters)
+
+    def stop_slave(self):
+        try:
+            self.interface.wait_for_job(self.job_name, 60)
+            self.interface.cancel_job(self.job_name)
+            self.interface.wait_for_job(self.job_name)
+        except Exception as exc:
+            log("Failed to stop slave!", exc)
+
+    def close(self):
+        self.stop_slave()
 
 def run_test_suite(kind):
     log("Launching test suite")
     arguments = [
         "--jenkins",
     ]
-    if os.environ["JOB_NAME"].find("32on64") != -1:
-        arguments += ("--no-java", )
-    if kind == "multinode":
-        arguments += ("--multinode", )
-    if kind == "multicomputer":
-        arguments += ("--multicomputer", )
-    if sys.platform == "win32":
-        result = subprocess.call([
-            "run_dose_tests.py",
-        ] + arguments, shell=True)
-    else:
-        result = subprocess.call([
-            "run_dose_tests",
-        ] + arguments)
+    try:
+        server_1 = None
+        client_0 = None
+        client_1 = None
+
+        if os.environ["JOB_NAME"].find("32on64") != -1:
+            arguments += ("--no-java", )
+        if kind == "multinode":
+            arguments += ("--multinode", )
+        if kind == "multicomputer":
+            server_1 = JenkinsController("server-1")
+            client_0 = JenkinsController("client-0")
+            client_1 = JenkinsController("client-1")
+            if server_1.is_restarting():
+                log("Jenkins is restarting, exiting quickly...")
+                return
+            server_1.start_slave()
+            client_0.start_slave()
+            client_1.start_slave()
+            arguments += ("--multicomputer", "--stop-slaves")
+
+        log(f"Launching test suite with arguments {arguments}")
+        if sys.platform == "win32":
+            result = nice_call([
+                "run_dose_tests.py",
+            ] + arguments, shell=True)
+        else:
+            result = nice_call([
+                "run_dose_tests",
+            ] + arguments)
+    finally:
+        if server_1 is not None:
+            server_1.close()
+        if client_0 is not None:
+            client_0.close()
+        if client_1 is not None:
+            client_1.close()
 
     if result != 0:
         raise SetupError("Test suite failed. Returncode = " + str(result))
 
 
-def run_test_slave():
-    log("Launching Multinode test slave")
-    arguments = ["--jenkins", "--slave"]
-    result = subprocess.call([
-        "run_dose_tests",
-    ] + arguments)
+def run_test_slave(slave_type):
+    command = ["run_dose_tests", "--jenkins", "--slave", slave_type]
+    log(f"Launching Multinode test slave using command {' '.join(command)}")
+    result = nice_call(command)
 
     if result != 0:
-        raise SetupError("Test suite failed. Returncode = " + str(result))
+        raise SetupError(f"Test suite failed ({slave_type}). Returncode = {str(result)}")
 
 
 def run_database_tests():
@@ -334,11 +557,11 @@ def run_database_tests():
         os.environ.get("label").replace("-", "")
     ]
     if sys.platform == "win32":
-        dope_result = subprocess.call([
+        dope_result = nice_call([
             "run_dope_odbc_backend_test.py",
         ] + args, shell=True)
     else:
-        dope_result = subprocess.call([
+        dope_result = nice_call([
             "run_dope_odbc_backend_test",
         ] + args)
 
@@ -377,7 +600,7 @@ def build_examples():
             cmd += ("--install", installdir)
 
         log("Running command ", " ".join(cmd))
-        result = subprocess.call(cmd, shell=sys.platform == "win32")
+        result = nice_call(cmd, shell=sys.platform == "win32")
         if result != 0:
             raise SetupError("Build examples failed. Returncode = " + str(result))
 
@@ -397,7 +620,9 @@ def parse_command_line():
         choices=["standalone-tests", "multinode-tests", "multicomputer-tests", "build-examples", "database"],
         help="Which test to perform")
 
-    parser.add_argument("--slave", action="store_true", help="Be a multinode test slave")
+    parser.add_argument("--slave",
+                        choices=["server-1", "client-0", "client-1"],
+                        help="Be a multicomputer test slave of the specified type")
 
     arguments = parser.parse_args()
 
@@ -405,8 +630,11 @@ def parse_command_line():
 
 
 def main():
+    signal.signal(signal.SIGINT, signal.default_int_handler)
+    signal.signal(signal.SIGTERM, signal.default_int_handler)
     args = parse_command_line()
-
+    log(f"Running on '{socket.gethostname()}'")
+    result = 0
     if not args.skip_install:
         if sys.platform == "win32":
             installer = WindowsInstaller()
@@ -441,22 +669,25 @@ def main():
         elif args.test == "database":
             run_database_tests()
         elif args.slave:
-            run_test_slave()
+            run_test_slave(args.slave)
 
     except SetupError as e:
         log("Error: " + str(e))
-        return 1
+        result = 1
+    except KeyboardInterrupt:
+        log("Got a signal to stop!")
+        result = 1
     except Exception as e:
         log("Caught exception: " + str(e))
-        return 1
+        result = 1
     finally:
         if not args.skip_install:
             try:
                 installer.uninstall()
             except SetupError as e:
                 log("Error: " + str(e))
-                return 1
-    return 0
+                result = 1
+    return result
 
 
 sys.exit(main())

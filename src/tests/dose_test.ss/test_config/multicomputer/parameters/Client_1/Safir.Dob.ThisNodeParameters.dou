@@ -25,21 +25,23 @@
             <summary>Address and port of seed nodes control channel</summary>
             <name>Seeds</name>
             <type>String</type>
-            <array/>
+            <array>
+              <value>core-multicomputer-test-server-1-slave:30000</value>
+            </array>
         </parameter>
 
         <parameter>
             <summary>A nice name for this node</summary>
             <name>Name</name>
             <type>String</type>
-            <value>Server_1</value>
+            <value>Client_1</value>
         </parameter>
 
         <parameter>
             <summary>Node type for this node</summary>
             <name>NodeType</name>
             <type>String</type>
-            <value>Server</value>
+            <value>Client</value>
         </parameter>
 
     </parameters>

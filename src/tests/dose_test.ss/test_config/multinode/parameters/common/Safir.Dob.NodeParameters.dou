@@ -86,7 +86,7 @@
       <type>Second64</type>
       <value>0</value>
     </parameter>
-    
+
     <parameter>
       <summary>Network fragment size. Messages larger than this value will be splitted up in fragmenst.</summary>
       <name>FragmentSize</name>
