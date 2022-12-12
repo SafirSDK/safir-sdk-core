@@ -230,11 +230,19 @@ namespace SP
                                     << "SystemPicture (in node " << m_id
                                     << ") got a new system state (from node "
                                     << from << ") from a node that is not elected. Discarding.");
+
+                    if (IsDetached())
+                    {
+                        lllog(4) << "Am lightnode, forcing election to see if that helps" << std::endl;
+                        m_electionHandler->ForceElection();
+                    }
+
                     return;
                 }
 
                 //if we did not have a valid election_id before this is the very first
-                //SS we have received.
+                //SS we have received. But this is really only valid for non-lightnodes. So only use this
+                //value on non-lightnodes
                 const bool firstMessage = m_stateMessage.election_id() == 0;
 
                 lllog (7) << "SP: Got new SystemState from node " << from << std::endl;
@@ -288,7 +296,7 @@ namespace SP
 
                 if (!foundSelf)
                 {
-                    if (!firstMessage)
+                    if (!firstMessage  && !m_electionHandler->IsLightNode())
                     {
                         SEND_SYSTEM_LOG(Alert,
                                         << "I've disappeared from SystemState! Very bad!");

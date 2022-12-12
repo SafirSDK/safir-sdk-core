@@ -166,6 +166,7 @@ class Node():
         return state == expected
 
     def wait_for_form(self, allowed_states=[]):
+        log(f"  Node {self.node_id} waiting for form")
         allowed_states = [json.loads(x) for x in allowed_states]
         try:
             while True:
@@ -180,6 +181,7 @@ class Node():
         raise Failure("Got unexpected state")
 
     def wait_for_join(self, incarnation_id, allow_detached_states=False):
+        log(f"  Node {self.node_id} waiting for join")
         try:
             while True:
                 data = self.ctrl_queue.get()
@@ -213,9 +215,15 @@ class Node():
             raise Failure("Got unexpected state")
 
     def wait_for_states(self, expected_states, last_state_repeats=3):
+        self.wait_for_states_ctrl(expected_states, last_state_repeats)
+        self.wait_for_states_main(expected_states, last_state_repeats)
+
+    def wait_for_states_ctrl(self, expected_states, last_state_repeats=3):
         log(f"  Node {self.node_id} waiting for states on ctrl")
         Node.__wait_for_states_internal(self.node_id, self.ctrl_queue, self.ctrl_states, expected_states,
                                         last_state_repeats)
+
+    def wait_for_states_main(self, expected_states, last_state_repeats=3):
         if not self.args.only_control:
             log(f"  Node {self.node_id} waiting for states on main")
             Node.__wait_for_states_internal(self.node_id, self.main_queue, self.main_states, expected_states,
@@ -279,7 +287,12 @@ class Node():
                     raise Failure("Got unexpected state")
 
     def close_and_check(self, expected_states):
+        self.close_and_check_ctrl(expected_states)
+        self.close_and_check_main(expected_states)
+
+    def close_and_check_ctrl(self, expected_states):
         self.__close_and_check_internal(self.ctrl_queue, self.ctrl_states, expected_states)
+    def close_and_check_main(self, expected_states):
         if not self.args.only_control:
             self.__close_and_check_internal(self.main_queue, self.main_states, expected_states)
 
@@ -699,6 +712,50 @@ def test_one_normal_one_light_restart_light(args):
             node1.close_and_check((state1, state2, state1))
             node2b.close_and_check(state1)
     return node1.returncode == 0 and node2a.returncode == 0 and node2b.returncode == 0
+
+
+def test_one_normal_one_light_kill_light_start_new_light(args):
+    with closing(Node(args,1,light_node = False, multicast = False)) as node1,\
+         closing(Node(args,2,light_node = True, multicast = False, seeds = 1)) as node2:
+        state1 = '''{"elected_id": 1, "is_detached": false, "nodes": [{"name": "node_001", "is_dead": false, "id": 1, "node_type_id": 1},
+                                                                      {"name": "node_002", "is_dead": false, "id": 2, "node_type_id": 11}]}'''
+        state2 = '''{"elected_id": 1, "is_detached": false, "nodes": [{"name": "node_001", "is_dead": false, "id": 1, "node_type_id": 1},
+                                                                      {"name": "node_002", "is_dead": true, "id": 2, "node_type_id": 11}]}'''
+        state3 = '''{"elected_id": 1, "is_detached": false, "nodes": [{"name": "node_001", "is_dead": false, "id": 1, "node_type_id": 1},
+                                                                      {"name": "node_002", "is_dead": true, "id": 2, "node_type_id": 11},
+                                                                      {"name": "node_003", "is_dead": false, "id": 3, "node_type_id": 11}]}'''
+        inc = form_system((node1, node2))
+        node1.wait_for_states(state1)
+        node2.wait_for_states(state1)
+        node2.close_and_check(state1)
+        node1.wait_for_states((state1, state2))
+        with closing(Node(args, 3, light_node=True, multicast=False, seeds=1)) as node3:
+            node3.wait_for_join(inc)
+            node3.wait_for_states(state3)
+            node1.wait_for_states((state1,state2,state3))
+            node3.close_and_check(state3)
+            node1.close_and_check((state1, state2,state3))
+    return node1.returncode == 0 and node2.returncode == 0 and node3.returncode == 0
+
+def test_one_normal_one_light_kill_light_start_new_light_fast(args):
+    with closing(Node(args,1,light_node = False, multicast = False)) as node1,\
+         closing(Node(args,2,light_node = True, multicast = False, seeds = 1)) as node2:
+        state1 = '''{"elected_id": 1, "is_detached": false, "nodes": [{"name": "node_001", "is_dead": false, "id": 1, "node_type_id": 1},
+                                                                      {"name": "node_002", "is_dead": false, "id": 2, "node_type_id": 11}]}'''
+        state2 = '''{"elected_id": 1, "is_detached": false, "nodes": [{"name": "node_001", "is_dead": false, "id": 1, "node_type_id": 1},
+                                                                      {"name": "node_002", "is_dead": true, "id": 2, "node_type_id": 11},
+                                                                      {"name": "node_003", "is_dead": false, "id": 3, "node_type_id": 11}]}'''
+        inc = form_system((node1, node2))
+        node1.wait_for_states(state1)
+        node2.wait_for_states(state1)
+        node2.close_and_check(state1)
+        with closing(Node(args, 3, light_node=True, multicast=False, seeds=1)) as node3:
+            node3.wait_for_join(inc)
+            node1.wait_for_states((state1, state2))
+            node3.wait_for_states(state2)
+            node3.close_and_check(state2)
+            node1.close_and_check((state1, state2))
+    return node1.returncode == 0 and node2.returncode == 0 and node3.returncode == 0
 
 def test_one_normal_two_light_kill_normal(args):
     with closing(Node(args,1,light_node = False, multicast = False)) as node1,\
@@ -1328,7 +1385,7 @@ def test_four_normal_four_light_mixedcast(args):
                                                                       {"name": "node_007", "is_dead": false, "id": 7, "node_type_id": 11},
                                                                       {"name": "node_008", "is_dead": false, "id": 8, "node_type_id": 12}]}'''
         form_system((node1, node2, node3, node4, node5, node6, node7, node8))
-        node1.wait_for_states(state1)
+        node1.wait_for_states(state1, last_state_repeats=30)
         node2.wait_for_states(state1)
         node3.wait_for_states(state1)
         node4.wait_for_states(state1)
@@ -1443,6 +1500,69 @@ def test_two_normal_one_light_weird_seed(args):
         else:
             raise Failure("unexpected incarnation")
 
+def test_move_lightnode_to_other_system(args):
+    with closing(Node(args,1,light_node = False, multicast = False)) as node1,\
+         closing(Node(args,2,light_node = False, multicast = False, seeds = 1)) as node2,\
+         closing(Node(args,3,light_node = False, multicast = False)) as node3,\
+         closing(Node(args,5,light_node = True, multicast = False, seeds = (1,4))) as node5:
+        state1 = '''{"elected_id": 2, "is_detached": false, "nodes": [{"name": "node_001", "is_dead": false, "id": 1, "node_type_id": 1},
+                                                                      {"name": "node_002", "is_dead": false, "id": 2, "node_type_id": 1},
+                                                                      {"name": "node_005", "is_dead": false, "id": 5, "node_type_id": 11}]}'''
+        state2 = '{"elected_id": 3, "is_detached": false, "nodes": [{"name": "node_003", "is_dead": false, "id": 3, "node_type_id": 1}]}'
+        state3 = '{"elected_id": 5, "is_detached": true, "nodes": [{"name": "node_005", "is_dead": false, "id": 5, "node_type_id": 11}]}'
+        state4 = '''{"elected_id": 4, "is_detached": false, "nodes": [{"name": "node_003", "is_dead": false, "id": 3, "node_type_id": 1},
+                                                                      {"name": "node_004", "is_dead": false, "id": 4, "node_type_id": 1}]}'''
+        state5 = '''{"elected_id": 4, "is_detached": false, "nodes": [{"name": "node_003", "is_dead": false, "id": 3, "node_type_id": 1},
+                                                                      {"name": "node_004", "is_dead": false, "id": 4, "node_type_id": 1},
+                                                                      {"name": "node_005", "is_dead": false, "id": 5, "node_type_id": 11}]}'''
+
+        inc1 = form_system((node1, node2, node5))
+        inc2 = node3.wait_for_form()
+        node1.wait_for_states(state1)
+        node2.wait_for_states(state1)
+        node5.wait_for_states(state1)
+        node3.wait_for_states(state2)
+
+        node1.close_and_check(state1)
+        node2.close_and_check(state1)
+        inc3 = node5.wait_for_form(allowed_states=(state1, ))
+        with closing(Node(args, 4, light_node=False, multicast=False, seeds=3)) as node4:
+            node4.wait_for_join(inc2)
+            node5.wait_for_join(inc2, allow_detached_states = True)
+            if inc3 in (inc1, inc2) or inc2 in (inc1, inc3):
+                raise Failure("unexpected incarnation")
+            node5.wait_for_states((state1, state3, state5), last_state_repeats=30)
+            try:
+                node3_actual_ctrl = (state2, state5)
+                node3.wait_for_states_ctrl(node3_actual_ctrl, last_state_repeats=30)
+            except Failure:
+                node3_actual_ctrl = (state2, state4, state5)
+                node3.wait_for_states_ctrl(node3_actual_ctrl, last_state_repeats=30)
+            try:
+                node4_actual_ctrl = state5
+                node4.wait_for_states_ctrl(node4_actual_ctrl, last_state_repeats=30)
+            except Failure:
+                node4_actual_ctrl = (state4, state5)
+                node4.wait_for_states_ctrl(node4_actual_ctrl, last_state_repeats=30)
+            try:
+                node3_actual_main = (state2, state5)
+                node3.wait_for_states_main(node3_actual_main, last_state_repeats=30)
+            except Failure:
+                node3_actual_main = (state2, state4, state5)
+                node3.wait_for_states_main(node3_actual_main, last_state_repeats=30)
+            try:
+                node4_actual_main = state5
+                node4.wait_for_states_main(node4_actual_main, last_state_repeats=30)
+            except Failure:
+                node4_actual_main = (state4, state5)
+                node4.wait_for_states_main(node4_actual_main, last_state_repeats=30)
+            node3.close_and_check_ctrl(node3_actual_ctrl)
+            node3.close_and_check_main(node3_actual_main)
+            node4.close_and_check_ctrl(node4_actual_ctrl)
+            node4.close_and_check_main(node4_actual_main)
+            node5.close_and_check((state1, state3, state5))
+        return node1.returncode == 0 and node2.returncode == 0 and node3.returncode == 0 and \
+            node4.returncode == 0 and node5.returncode == 0
 
 def test_move_lightnode_to_other_system_fast(args):
     with closing(Node(args,1,light_node = False, multicast = False)) as node1,\
@@ -1454,9 +1574,11 @@ def test_move_lightnode_to_other_system_fast(args):
                                                                       {"name": "node_005", "is_dead": false, "id": 5, "node_type_id": 11}]}'''
         state2 = '{"elected_id": 3, "is_detached": false, "nodes": [{"name": "node_003", "is_dead": false, "id": 3, "node_type_id": 1}]}'
         state3 = '{"elected_id": 5, "is_detached": true, "nodes": [{"name": "node_005", "is_dead": false, "id": 5, "node_type_id": 11}]}'
-        state4 = '''{"elected_id": 4, "is_detached": false, "nodes": [{"name": "node_003", "is_dead": false, "id": 3, "node_type_id": 1},
+        state4a = '''{"elected_id": 4, "is_detached": false, "nodes": [{"name": "node_003", "is_dead": false, "id": 3, "node_type_id": 1},
                                                                       {"name": "node_004", "is_dead": false, "id": 4, "node_type_id": 1},
                                                                       {"name": "node_005", "is_dead": true, "id": 5, "node_type_id": 11}]}'''
+        state4b = '''{"elected_id": 4, "is_detached": false, "nodes": [{"name": "node_003", "is_dead": false, "id": 3, "node_type_id": 1},
+                                                                      {"name": "node_004", "is_dead": false, "id": 4, "node_type_id": 1}]}'''
         state5 = '''{"elected_id": 4, "is_detached": false, "nodes": [{"name": "node_003", "is_dead": false, "id": 3, "node_type_id": 1},
                                                                       {"name": "node_004", "is_dead": false, "id": 4, "node_type_id": 1},
                                                                       {"name": "node_005", "is_dead": false, "id": 5, "node_type_id": 11}]}'''
@@ -1476,15 +1598,29 @@ def test_move_lightnode_to_other_system_fast(args):
             node5.wait_for_join(inc2, allow_detached_states=True)
             if inc3 in (inc1, inc2) or inc2 in (inc1, inc3):
                 raise Failure("unexpected incarnation")
-            node3.wait_for_states((state2, state4, state5), last_state_repeats=30)
-            node4.wait_for_states((state4, state5), last_state_repeats=30)
-            node5.wait_for_states((state1, state3, state5), last_state_repeats=30)
-            node3.close_and_check((state2, state4, state5))
-            node4.close_and_check((state4, state5))
-            node5.close_and_check((state1, state3, state5))
-        return node1.returncode == 0 and node2.returncode == 0 and node3.returncode == 0 and node5.returncode == 0
-
-
+            try:
+                inc4 = node5.wait_for_form(allowed_states=(state1,))
+                node5.wait_for_states((state1,state3), last_state_repeats = 30)
+                node3.wait_for_states((state2, state4b), last_state_repeats=30)
+                node4.wait_for_states(state4b, last_state_repeats=30)
+                node5.close_and_check((state1,state3))
+                node3.close_and_check((state2, state4b))
+                node4.close_and_check(state4b)
+            except Failure:
+                node5.wait_for_states((state1, state3, state5), last_state_repeats=30)
+                try:
+                    node3.wait_for_states((state2, state4a, state5), last_state_repeats=30)
+                    node4.wait_for_states((state4a, state5), last_state_repeats=30)
+                    node3.close_and_check((state2, state4a, state5))
+                    node4.close_and_check((state4a, state5))
+                    node5.close_and_check((state1, state3, state5))
+                except Failure:
+                    node3.wait_for_states((state2, state4b, state5), last_state_repeats=30)
+                    node4.wait_for_states((state4b, state5), last_state_repeats=30)
+                    node3.close_and_check((state2, state4b, state5))
+                    node4.close_and_check((state4b, state5))
+                    node5.close_and_check((state1, state3, state5))
+        return node1.returncode == 0 and node2.returncode == 0 and node3.returncode == 0 and node4.returncode == 0 and node5.returncode == 0
 TEST_CASES = (
     "one_normal",
     "one_light",
@@ -1504,6 +1640,8 @@ TEST_CASES = (
     "one_normal_one_light_restart_normal_multicast",
     "one_normal_one_light_kill_light",
     "one_normal_one_light_restart_light",
+    "one_normal_one_light_kill_light_start_new_light",
+    "one_normal_one_light_kill_light_start_new_light_fast",
     "one_normal_two_light_kill_normal",
     "one_normal_two_light_restart_normal",
     "one_normal_two_light_restart_normal_multicast",
@@ -1524,6 +1662,7 @@ TEST_CASES = (
     "move_lightnode_to_other_new_node",
     "move_lightnode_to_other_new_node_fast",
     "two_normal_one_light_weird_seed",
+    "move_lightnode_to_other_system",
     #"move_lightnode_to_other_system_fast",
     #pull cable and let them fall apart and then reattach
 )

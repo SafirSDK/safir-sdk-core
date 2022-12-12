@@ -302,12 +302,10 @@ namespace SP
             else if (m_isLightNode)
             {
                 lllog(4) << "SP: I am a light node, not starting any elections" << std::endl;
+
                 if (m_currentElectionId != m_lastStatistics.ElectionId())
                 {
-                    lllog(4) << "SP: ElectionId changed, though, so gonna apply it" << std::endl;
-                    m_currentElectionId = m_lastStatistics.ElectionId();
-                    m_elected = std::numeric_limits<int64_t>::min();
-                    m_electionCompleteCallback(m_elected, m_currentElectionId);
+                    lllog(4) << "SP: FYI, I have a different election id than what others have. Not doing anything about that, though." << std::endl;
                 }
                 return;
             }
@@ -338,7 +336,7 @@ namespace SP
                     }
                 }
             }
-                
+
             //cancel any other pending elections
             m_electionTimer.cancel();
 
