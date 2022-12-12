@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-    <summary>Defines the node number of this node. This file must be different in all nodes.</summary>
+    <summary>Defines the settings for this particular node. Like NodeType, Name and address information. Will probably be different for all nodes.</summary>
     <name>Safir.Dob.ThisNodeParameters</name>
     <baseClass>Safir.Dob.Parametrization</baseClass>
     <parameters>
