@@ -58,6 +58,11 @@
          <string>Scope</string>
         </property>
        </column>
+       <column>
+        <property name="text">
+         <string>Detached</string>
+        </property>
+       </column>
       </widget>
      </item>
     </layout>

@@ -583,6 +583,56 @@ namespace Internal
         }
     }
 
+    void Connections::DetachConnectionsFromNode(const int64_t nodeId)
+    {
+        std::vector<ConnectionPtr> detachConnections;
+
+        // Remove from m_connections and store in removeConnections
+        {
+            boost::interprocess::scoped_lock<ConnectionsTableLock> lck(m_connectionTablesLock);
+            for (auto& con : m_connections)
+            {
+                if (con.first.m_node == nodeId)
+                {
+                    detachConnections.push_back(con.second);
+                }
+            }
+        }
+
+        for (auto& con : detachConnections)
+        {
+            con->SetDetached();
+        }
+    }
+
+    void Connections::RemoveDetachedConnections()
+    {
+        std::vector<ConnectionPtr> removeConnections;
+
+        // Remove from m_connections and store in removeConnections
+        {
+            boost::interprocess::scoped_lock<ConnectionsTableLock> lck(m_connectionTablesLock);
+            for (auto it = std::begin(m_connections); it != std::end(m_connections);)
+            {
+                if (it->second->IsDetached())
+                {
+                    removeConnections.push_back(it->second);
+                    it = m_connections.erase(it);
+                }
+                else
+                {
+                    ++it;
+                }
+            }
+        }
+
+        for (auto& con : removeConnections)
+        {
+            con->Cleanup();
+        }
+
+    }
+
     void Connections::ForEachConnection(const std::function<void(const Connection & connection)> & connectionFunc) const
     {
         boost::interprocess::scoped_lock<ConnectionsTableLock> lck(m_connectionTablesLock);

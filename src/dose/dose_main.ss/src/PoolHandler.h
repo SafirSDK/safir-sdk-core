@@ -59,6 +59,8 @@ namespace Internal
         void HandleConnect(const ConnectionId& connId);
         void HandleDisconnect(const ConnectionId& connId);
 
+        void OnToggleDetach(bool detach);
+
     private:
         typedef PoolDistribution<Distribution> PoolDistributionType;
         typedef PoolDistributionHandler<Distribution, PoolDistributionType> PoolDistributionHandlerType;

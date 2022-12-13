@@ -123,6 +123,11 @@ void Safir::Dob::Internal::StatisticsCollector(Safir::Dob::Internal::State& stat
 
         ostr << "Instance: " << arguments.instanceId << std::endl;
 
+        if (state.IsDetached())
+        {
+            ostr << "Detached state!" << std::endl;
+        }
+
         if (!realState.IsNoState())
         {
             ostr << "RealState: " << realState.Image();

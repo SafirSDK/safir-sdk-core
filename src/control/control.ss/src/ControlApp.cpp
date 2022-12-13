@@ -32,6 +32,7 @@
 #include <Safir/Utilities/Internal/AsioStrandWrap.h>
 #include <Safir/Utilities/CrashReporter.h>
 #include <Safir/Utilities/Internal/Id.h>
+#include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
 #include <iostream>
 #include <map>
 #include <atomic>
@@ -247,73 +248,99 @@ void ControlApp::Start()
                                      m_conf.aloneTimeout,
 
     // --- Join system callback ---
-    [this](const int64_t incarnationId) -> bool
+    [this, isLightNode](const int64_t incarnationId) -> bool
     {
-        if (incarnationId == m_incarnationId)
-        {
-            lllog(1) << "CTRL: Join system called with same incarnationId that we are already part of, " << incarnationId << std::endl;
-            throw std::logic_error("CTRL: Join system called with same incarnationId that we are already part of");
-        }
-        if (m_incarnationBlackListHandler.ValidateIncarnationId(incarnationId))
-        {
-            m_stateHandler->SetDetached(false); // Doesn't matter if we are a lightNode or not, we are not in detached mode after a join.
-            m_incarnationId = incarnationId;
-            boost::asio::post(m_strand, [this]{SendControlInfo();});
+        ENSURE(incarnationId != m_incarnationId, << "CTRL: Join system called with same incarnationId that we are already part of, " << incarnationId);
+        ENSURE(isLightNode || m_nodePristine, << "CTRL: Join/Form system callback should not occur more than once for non light node");
 
-            std::ostringstream os;
-            os << "CTRL: Joined system with incarnation id " << incarnationId << std::endl;
-            os << "CTRL: This node has id " << m_nodeId;
-            LogStatus(os.str());
-
-            return true;
-        }
-        else
+        if (!m_incarnationBlackListHandler.ValidateIncarnationId(incarnationId))
         {
             lllog(1) << "CTRL: Not ok to join incarnation " << incarnationId << std::endl;
             return false;
         }
+
+        if (m_nodePristine)
+        {
+            m_doseMainCmdSender->NodeStateChanged(Control::NodeState::JoinedSystem);
+            m_nodePristine = false;
+        }
+
+        if (isLightNode)
+        {
+            m_stateHandler->SetDetached(false); // We are not in detached mode after a join.
+            if (m_detachedFromIncarnationId == incarnationId)
+            {
+                m_doseMainCmdSender->NodeStateChanged(Control::NodeState::AttachedSameSystem);
+                std::ostringstream os;
+                os << "CTRL: Attached to the same system again as we have been detached from for a while. InncarnationId=" << incarnationId << std::endl;
+                os << "CTRL: This node has id " << m_nodeId;
+                LogStatus(os.str());
+            }
+            else
+            {
+                m_doseMainCmdSender->NodeStateChanged(Control::NodeState::AttachedNewSystem);
+                std::ostringstream os;
+                os << "CTRL: Attached to a new system that we have not seen before. InncarnationId=" << incarnationId << std::endl;
+                os << "CTRL: This node has id " << m_nodeId;
+                LogStatus(os.str());
+            }
+        }
+        else // normal node
+        {
+            std::ostringstream os;
+            os << "CTRL: Joined system with incarnation id " << incarnationId << std::endl;
+            os << "CTRL: This node has id " << m_nodeId;
+            LogStatus(os.str());
+        }
+
+        m_incarnationId = incarnationId;
+        boost::asio::post(m_strand, [this]{SendControlInfo();});
+        return true;
     },
     // --- Form system callback ---
     [this, isLightNode](const int64_t incarnationId) -> bool
     {
-        if (incarnationId == m_incarnationId)
+        ENSURE(incarnationId != m_incarnationId, << "CTRL: Form system called with same incarnationId that we are already part of, " << incarnationId);
+        ENSURE(isLightNode || m_nodePristine, << "CTRL: Join/Form system callback should not occur more than once for non light node");
+
+        if (!isLightNode && !m_requiredForStart)
         {
-            lllog(1) << "CTRL: Form system called with same incarnationId that we are already part of, " << incarnationId << std::endl;
-            throw std::logic_error("CTRL: Form system called with same incarnationId that we are already part of");
+            // Node is not allowed to form a system
+            LogStatus("CTRL: Waiting for system start");
+            return false;
+        }
+
+        if (m_nodePristine)
+        {
+            // One time even light nodes must call Form or Join since it start things in dose_main
+            m_doseMainCmdSender->NodeStateChanged(Control::NodeState::FormedSystem);
+            m_nodePristine = false;
         }
 
         // Lightnode getting formSystemCb, means detached mode
         if (isLightNode)
         {
             // Lightnode in detached mode
-            m_incarnationId = incarnationId;
-            m_stateHandler->SetDetached(true);
-            m_doseMainCmdSender->Detached();
-            boost::asio::post(m_strand, [this]{ SendControlInfo(); });
+            m_detachedFromIncarnationId = m_incarnationId; // save old incarnation so we can determine if next attach is AttachNewSystem or AttachSameSystem
+            m_stateHandler->SetDetached(true);            
+            m_doseMainCmdSender->NodeStateChanged(Control::NodeState::DetachedFromSystem);
             std::ostringstream os;
             os << "CTRL: Light node in detached mode is forming a system on its own with incarnation id " << incarnationId << std::endl;
             os << "CTRL: This node has id " << m_nodeId;
             LogStatus(os.str());
-            return true;
         }
-
-        // Normal node, check if this node is of a type that is allowed to form systems
-        if (m_requiredForStart)
+        else
         {
-            m_incarnationId = incarnationId;
-            boost::asio::post(m_strand, [this]{SendControlInfo();});
+            m_nodePristine = false;
             std::ostringstream os;
             os << "CTRL: Starting system with incarnation id " << incarnationId << std::endl;
             os << "CTRL: This node has id " << m_nodeId;
             LogStatus(os.str());
-            return true;
         }
 
-
-        // Node is not allowed to form a system
-        LogStatus("CTRL: Waiting for system start");
-        return false;
-
+        m_incarnationId = incarnationId;
+        boost::asio::post(m_strand, [this]{ SendControlInfo(); });
+        return true;
     }));
 
     m_doseMainCmdSender.reset(new Control::DoseMainCmdSender

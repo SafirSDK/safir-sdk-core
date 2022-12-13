@@ -82,5 +82,11 @@
             <type>String</type>
             <value>SafirFormatErr</value>
         </parameter>
+        <parameter>
+            <summary>Request is sent from a detached light node</summary>
+            <name>SafirDetachedState</name>
+            <type>String</type>
+            <value>SafirDetachedState</value>
+        </parameter>
     </parameters>
 </class>

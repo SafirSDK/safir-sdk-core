@@ -3,6 +3,7 @@
   <name>Safir.Dob.NodeParameters</name>
   <baseClass>Safir.Dob.Parametrization</baseClass>
   <parameters>
+
     <parameter>
       <summary>Specifies the Id of the System/System installation.</summary>
       <name>SystemId</name>
@@ -37,13 +38,13 @@
       <summary>Min time (seconds) before an apparently hanging dose_main thread causes a termination of the dose_main program.</summary>
       <name>DoseMainThreadWatchdogTimeout</name>
       <type>Int32</type>
-      <value>180</value>
+      <value>60</value>
     </parameter>
     <parameter>
       <summary>The number of contexts in the system. (The context numbering starts from 0.)</summary>
       <name>NumberOfContexts</name>
       <type>Int32</type>
-      <value>2</value>
+      <value>1</value>
     </parameter>
     <parameter>
       <summary>Specifies for every context wether or not it is a local context. The array length must correspond to the NumberOfContexts parameter above.</summary>
@@ -53,16 +54,13 @@
         <arrayElement>
           <value>False</value>
         </arrayElement>
-        <arrayElement>
-          <value>False</value>
-        </arrayElement>
       </arrayElements>
     </parameter>
     <parameter>
       <summary>Full filename where the system stores the incarnation blacklist. Use forward slashes as directory separator!</summary>
       <name>IncarnationBlacklistFilename</name>
       <type>String</type>
-      <value>@{TEMP}/system-incarnation-blacklist.txt</value>
+      <value>@{TEMP}/safir-sdk-core/system-incarnation-blacklist.txt</value>
     </parameter>
     <parameter>
       <summary>
@@ -73,7 +71,7 @@
       </summary>
       <name>LocalInterfaceTimeout</name>
       <type>Second64</type>
-      <value>60.0</value>
+      <value>90.0</value>
     </parameter>
 
     <parameter>
@@ -84,9 +82,9 @@
       </summary>
       <name>NewSystemFormationTimeout</name>
       <type>Second64</type>
-      <value>0</value>
+      <value>456</value>
     </parameter>
-
+    
     <parameter>
       <summary>Network fragment size. Messages larger than this value will be splitted up in fragmenst.</summary>
       <name>FragmentSize</name>
@@ -98,13 +96,13 @@
       <summary>Defines the different node types in the system.</summary>
       <name>NodeTypes</name>
       <type>Safir.Dob.NodeType</type>
-      <arrayElements>
-
-        <arrayElement>
+      <array>
           <Safir.Dob.NodeType type="Safir.Dob.NodeType">
             <Name>Server</Name>
-            <HeartbeatInterval>0.7</HeartbeatInterval>
-            <MaxLostHeartbeats>7</MaxLostHeartbeats>
+            <MulticastAddressControl>192.0.0.1:9500</MulticastAddressControl>
+            <MulticastAddressData>192.0.0.1:9501</MulticastAddressData>
+            <HeartbeatInterval>1.0</HeartbeatInterval>
+            <MaxLostHeartbeats>5</MaxLostHeartbeats>
             <SlidingWindowsSize>20</SlidingWindowsSize>
             <AckRequestThreshold>10</AckRequestThreshold>
             <RetryTimeout>
@@ -112,27 +110,9 @@
                 <Second64>0.08</Second64>
             </RetryTimeout>
             <RequiredForStart>True</RequiredForStart>
-          </Safir.Dob.NodeType>
-        </arrayElement>
-
-        <arrayElement>
-          <Safir.Dob.NodeType type="Safir.Dob.NodeType">
-            <Name>Client</Name>
-            <HeartbeatInterval>0.7</HeartbeatInterval>
-            <MaxLostHeartbeats>7</MaxLostHeartbeats>
-            <SlidingWindowsSize>20</SlidingWindowsSize>
-            <AckRequestThreshold>10</AckRequestThreshold>
-            <RetryTimeout>
-                <Second64>0.02</Second64>
-                <Second64>0.08</Second64>
-            </RetryTimeout>
-            <RequiredForStart>False</RequiredForStart>
             <IsLightNode>True</IsLightNode>
-            <KeepStateWhileDetached>False</KeepStateWhileDetached>
           </Safir.Dob.NodeType>
-        </arrayElement>
-
-      </arrayElements>
+      </array>
     </parameter>
 
   </parameters>

@@ -52,18 +52,42 @@ namespace
           m_communication(distribution.GetCommunication()),
           m_onAppEvent(onAppEvent),
           m_poolHandler(m_strand, distribution, checkPendingReg, logStatus),
-          m_processInfoHandler(ioService)
+          m_processInfoHandler(ioService),
+          m_keepStateWhileDetached(distribution.GetNodeTypeConfiguration().GetThisNodeType().keepStateWhileDetached)
     {
         distribution.SubscribeNodeEvents(
+            // InjectNode
             [](const std::string& /*nodeName*/, int64_t /*nodeId*/, int64_t /*nt*/, const std::string& /*dataAddr*/)
             {
                 Connections::Instance().ForEachConnectionPtr([=](const ConnectionPtr& con){con->SignalIn();});
             },
-            [](int64_t nodeId, int64_t /*nt*/)
+            // ExcludeNode
+            [keepState = m_keepStateWhileDetached, &distribution](int64_t nodeId, int64_t /*nt*/)
             {
-                Connections::Instance().RemoveConnectionFromNode(nodeId);
+                if (distribution.IsDetached() && keepState)
+                {
+                    Connections::Instance().DetachConnectionsFromNode(nodeId);
+                }
+                else
+                {
+                    Connections::Instance().RemoveConnectionFromNode(nodeId);
+                }
             }
         );
+
+        distribution.SubscribeAttachedDetached([this](bool /*sameSystem*/)
+        {
+            // When implementing smart-sync, we shall only RemoveDetachedConnections if sameSystem=false.
+            if (m_keepStateWhileDetached)
+            {
+                Connections::Instance().RemoveDetachedConnections();
+            }
+            m_poolHandler.OnToggleDetach(false);
+        },
+        [this]()
+        {
+            m_poolHandler.OnToggleDetach(true);
+        });
 
         for (auto nt = distribution.GetNodeTypeIds().cbegin(); nt != distribution.GetNodeTypeIds().cend(); ++nt)
 

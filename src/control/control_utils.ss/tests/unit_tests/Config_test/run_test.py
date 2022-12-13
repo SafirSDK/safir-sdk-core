@@ -38,7 +38,7 @@ def run_test(test_case):
     stdout, stderr = proc.communicate()
 
     if proc.returncode != 0:
-        print("Test failed!")
+        print("Test failed! " + test_case)
         print(stdout)
         sys.exit(1)
 
@@ -62,8 +62,14 @@ run_test("tc1")
 os.environ["DOU_TEST_DIR"] = os.path.join(args.test_conf_dir, "tc2")
 run_test("tc2")
 
+os.environ["DOU_TEST_DIR"] = os.path.join(args.test_conf_dir, "tc3")
+run_test("tc3")
+
 os.environ["DOU_TEST_DIR"] = os.path.join(args.test_conf_dir, "tc4")
 run_test("tc4")
+
+os.environ["DOU_TEST_DIR"] = os.path.join(args.test_conf_dir, "tc5")
+run_test("tc5")
 
 print("Success!")
 sys.exit(0)

@@ -71,6 +71,8 @@ namespace Internal
         void UnregisterAll(const ConnectionPtr&     connection,
                            const bool               explicitUnregister);
 
+        void DetachAll(const ConnectionPtr& connection);
+
         /** New registration state from external node */
         void RemoteSetRegistrationState(const ConnectionPtr& connection,
                                         const DistributionData& registrationState);

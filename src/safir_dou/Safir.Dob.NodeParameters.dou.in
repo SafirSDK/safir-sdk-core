@@ -117,7 +117,6 @@
             <Second64>0.08</Second64>
           </RetryTimeout>
           <RequiredForStart>True</RequiredForStart>
-          <IsLightNode>False</IsLightNode>
         </Safir.Dob.NodeType>
 
         <Safir.Dob.NodeType>
@@ -132,8 +131,8 @@
             <Second64>0.02</Second64>
             <Second64>0.08</Second64>
           </RetryTimeout>
-          <RequiredForStart>False</RequiredForStart>
           <IsLightNode>True</IsLightNode>
+          <KeepStateWhileDetached>True</KeepStateWhileDetached>
         </Safir.Dob.NodeType>
       </array>
     </parameter>

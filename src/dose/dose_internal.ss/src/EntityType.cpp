@@ -144,6 +144,13 @@ namespace Internal
         CleanGhosts(Dob::Typesystem::HandlerId::ALL_HANDLERS, context);
     }
 
+    void EntityType::DetachAll(const ConnectionPtr& connection)
+    {
+        const ContextId context = connection->Id().m_contextId;
+        ScopedTypeLock lck(m_typeLocks[context]);
+        m_handlerRegistrations[context].DetachAll(connection);
+    }
+
     void EntityType::RemoteSetRegistrationState(const ConnectionPtr& connection,
                                                 const DistributionData& registrationState)
     {
@@ -1563,10 +1570,9 @@ namespace Internal
 
         DistributionData localEntity = statePtr->GetRealState();
 
-        if (!localEntity.IsNoState())
+        if (!localEntity.IsNoState() && !statePtr->IsDetached())
         {
             // There is an existing entity state
-
             if (remoteEntity.GetRegistrationTime() < localEntity.GetRegistrationTime())
             {
                 lllog(3) << "Skipping remote entity state since the existing local entity state "
@@ -1659,6 +1665,7 @@ namespace Internal
         }
 
         // If we got this far everything is ok. Set the remote state.
+        statePtr->SetDetached(false);
         statePtr->SetConnection(connection);
         statePtr->SetConsumer(ConsumerId(NULL, static_cast<short>(0))); //dummy consumer for remote entities
         statePtr->SetRealState(remoteEntity);

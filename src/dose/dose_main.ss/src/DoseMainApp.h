@@ -79,7 +79,7 @@ namespace Internal
 
         void StoppedNodeIndication(int64_t nodeId);
 
-        void Detached();
+        void NodeStateChanged(Control::NodeState nodeState);
 
         void LogStatus(const std::string& str);
 
@@ -99,7 +99,6 @@ namespace Internal
 
         int64_t m_nodeId;
         std::unique_ptr<Distribution> m_distribution;
-        bool m_detached = false;
 
         std::unique_ptr<Control::DoseMainCmdReceiver> m_cmdReceiver;
 

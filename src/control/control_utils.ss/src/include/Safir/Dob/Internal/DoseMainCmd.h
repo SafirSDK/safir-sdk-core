@@ -42,6 +42,9 @@ namespace Control
 #pragma warning (disable: 4251)
 #endif
 
+    enum class NodeState {FormedSystem, JoinedSystem, DetachedFromSystem, AttachedNewSystem, AttachedSameSystem};
+    CONTROL_UTILS_API std::string NodeStateToString(NodeState nodeState);
+
     /**
      * Class to be used by dose_main to receive commands from Control
      */
@@ -62,7 +65,7 @@ namespace Control
 
         typedef std::function<void()> StopDoseMainCb;
 
-        typedef std::function<void()> DetachedCb;
+        typedef std::function<void(NodeState nodeState)> NodeStateChangedCb;
 
         DoseMainCmdReceiver(boost::asio::io_context&        io,
                             const IncludeNodeCmdCb&         startDoseMainCb,
@@ -70,7 +73,7 @@ namespace Control
                             const ExcludeNodeCmdCb&         excludeNodeCb,
                             const StoppedNodeIndicationCb&  stoppedNodeIndicationCb,
                             const StopDoseMainCb&           stopDoseMainCb,
-                            const DetachedCb&               detachedCb);
+                            const NodeStateChangedCb&       nodeStateChangedCb);
 
         // Start command reception
         void Start();
@@ -122,7 +125,7 @@ namespace Control
 
         void StopDoseMain();
 
-        void Detached();
+        void NodeStateChanged(NodeState nodeState);
 
     private:
         class Impl;

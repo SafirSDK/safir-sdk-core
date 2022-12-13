@@ -84,6 +84,8 @@ namespace Internal
         PoolHandler m_poolHandler;
         ProcessInfoHandler m_processInfoHandler;
 
+        const bool m_keepStateWhileDetached;
+
         void SendAll(const std::pair<Safir::Utilities::Internal::SharedConstCharArray, size_t>& data);
         void HandleSendQueues();
 

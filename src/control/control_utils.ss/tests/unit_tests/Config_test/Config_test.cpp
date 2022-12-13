@@ -46,11 +46,10 @@ int main(int argc, char* argv[])
     {
         ctrl::Config conf;
 
-        CHECK(conf.nodeTypesParam.size() == 3);
+        CHECK(conf.nodeTypesParam.size() == 4);
 
         // Check first index which is Server
         CHECK(conf.nodeTypesParam[0].name == "Server");
-        CHECK(conf.nodeTypesParam[0].isLightNode == false);
         CHECK(conf.nodeTypesParam[0].multicastAddressControl == "192.0.0.1:9500");
         CHECK(conf.nodeTypesParam[0].multicastAddressData == "192.0.0.1:9501");
         CHECK(conf.nodeTypesParam[0].heartbeatInterval == 1000);
@@ -58,28 +57,43 @@ int main(int argc, char* argv[])
         CHECK(conf.nodeTypesParam[0].slidingWindowSize == 20);
         CHECK(conf.nodeTypesParam[0].retryTimeout.front() == 200);
         CHECK(conf.nodeTypesParam[0].requiredForStart == true);
+        CHECK(conf.nodeTypesParam[0].isLightNode == false);
+        CHECK(conf.nodeTypesParam[0].keepStateWhileDetached == false);
 
-        // Check second index which is Client
-        CHECK(conf.nodeTypesParam[1].name == "Client");
-        CHECK(conf.nodeTypesParam[1].isLightNode == true);
+        CHECK(conf.nodeTypesParam[1].name == "Server2");
         CHECK(conf.nodeTypesParam[1].multicastAddressControl == "");
         CHECK(conf.nodeTypesParam[1].multicastAddressData == "");
-        CHECK(conf.nodeTypesParam[1].heartbeatInterval == 5000);
+        CHECK(conf.nodeTypesParam[1].heartbeatInterval == 1000);
         CHECK(conf.nodeTypesParam[1].maxLostHeartbeats == 5);
         CHECK(conf.nodeTypesParam[1].slidingWindowSize == 20);
-        CHECK(conf.nodeTypesParam[1].retryTimeout.front() == 2000);
+        CHECK(conf.nodeTypesParam[1].retryTimeout.front() == 200);
         CHECK(conf.nodeTypesParam[1].requiredForStart == false);
+        CHECK(conf.nodeTypesParam[1].isLightNode == false);
+        CHECK(conf.nodeTypesParam[1].keepStateWhileDetached == false);
 
-        // Check third index which is RemoteClient
-        CHECK(conf.nodeTypesParam[2].name == "RemoteClient");
-        CHECK(conf.nodeTypesParam[2].isLightNode == true);
+        // Check second index which is Client
+        CHECK(conf.nodeTypesParam[2].name == "Client");
         CHECK(conf.nodeTypesParam[2].multicastAddressControl == "");
         CHECK(conf.nodeTypesParam[2].multicastAddressData == "");
-        CHECK(conf.nodeTypesParam[2].heartbeatInterval == 30000);
+        CHECK(conf.nodeTypesParam[2].heartbeatInterval == 5000);
         CHECK(conf.nodeTypesParam[2].maxLostHeartbeats == 5);
         CHECK(conf.nodeTypesParam[2].slidingWindowSize == 20);
-        CHECK(conf.nodeTypesParam[2].retryTimeout.front() == 5000);
+        CHECK(conf.nodeTypesParam[2].retryTimeout.front() == 2000);
         CHECK(conf.nodeTypesParam[2].requiredForStart == false);
+        CHECK(conf.nodeTypesParam[2].isLightNode == true);
+        CHECK(conf.nodeTypesParam[2].keepStateWhileDetached == true);
+
+        // Check third index which is RemoteClient
+        CHECK(conf.nodeTypesParam[3].name == "RemoteClient");
+        CHECK(conf.nodeTypesParam[3].multicastAddressControl == "");
+        CHECK(conf.nodeTypesParam[3].multicastAddressData == "");
+        CHECK(conf.nodeTypesParam[3].heartbeatInterval == 30000);
+        CHECK(conf.nodeTypesParam[3].maxLostHeartbeats == 5);
+        CHECK(conf.nodeTypesParam[3].slidingWindowSize == 20);
+        CHECK(conf.nodeTypesParam[3].retryTimeout.front() == 5000);
+        CHECK(conf.nodeTypesParam[3].requiredForStart == false);
+        CHECK(conf.nodeTypesParam[3].isLightNode == true);
+        CHECK(conf.nodeTypesParam[3].keepStateWhileDetached == false);
 
         // Check ThisNode parameters
         CHECK(conf.thisNodeParam.controlAddress == "0.0.0.0:30000");
@@ -92,20 +106,32 @@ int main(int argc, char* argv[])
 
         CHECK(conf.aloneTimeout == boost::chrono::seconds(123));
         CHECK(conf.localInterfaceTimeout == boost::chrono::seconds(33));
+
+        CHECK(&conf.GetThisNodeType() == &conf.nodeTypesParam[0]);
     }
     else if (test == "tc2")
     {
-        /*
         try
         {
             ctrl::Config conf;
-    
             LOGERROR("Expected an exception!");
         }
         catch (const std::exception& e)
         {
-           CHECK(std::string(e.what()).find("IsLight is mandatory") != std::string::npos)
-           }*/
+           CHECK(std::string(e.what()).find("RequiredForStart is mandatory") != std::string::npos)
+        }
+    }
+    else if (test == "tc3")
+    {
+        try
+        {
+            ctrl::Config conf;
+            LOGERROR("Expected an exception!");
+        }
+        catch (const std::exception& e)
+        {
+           CHECK(std::string(e.what()).find("RequiredForStart and IsLightNode cannot both be true") != std::string::npos)
+        }
     }
     else if (test == "tc4")
     {
@@ -120,6 +146,18 @@ int main(int argc, char* argv[])
             std::cout << e.what() << std::endl;
 
            CHECK(std::string(e.what()).find("Duplicated ip addresses") != std::string::npos)
+        }
+    }
+    else if (test == "tc5")
+    {
+        try
+        {
+            ctrl::Config conf;
+            LOGERROR("Expected an exception!");
+        }
+        catch (const std::exception& e)
+        {
+           CHECK(std::string(e.what()).find("KeepStateWhileDetached is mandatory") != std::string::npos)
         }
     }
     else

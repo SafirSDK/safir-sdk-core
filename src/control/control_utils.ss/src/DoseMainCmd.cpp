@@ -45,8 +45,13 @@ namespace Dob
 namespace Internal
 {
 namespace Control
-{    
+{
     const std::string doseMainCmdChannel("DOSE_MAIN_CMD");
+
+    std::string NodeStateToString(NodeState nodeState)
+    {
+        return DoseMainCmd_NodeStateType_Name(static_cast<DoseMainCmd_NodeStateType>(nodeState));
+    }
 
     // Receiver impl
     class DoseMainCmdReceiver::Impl
@@ -59,13 +64,13 @@ namespace Control
              const ExcludeNodeCmdCb&        excludeNodeCb,
              const StoppedNodeIndicationCb& stoppedNodeIndicationCb,
              const StopDoseMainCb&          stopDoseMainCb,
-             const DetachedCb&              detachedCb)
+             const NodeStateChangedCb&      nodeStateChangedCb)
             : m_startDoseMainCb(startDoseMainCb),
               m_injectNodeCb(injectNodeCb),
               m_excludeNodeCb(excludeNodeCb),
               m_stoppedNodeIndicationCb(stoppedNodeIndicationCb),
               m_stopDoseMainCb(stopDoseMainCb),
-              m_detachedDb(detachedCb)
+              m_nodeStateChangedCb(nodeStateChangedCb)
         {
             m_ipcSubscriber.reset( new Safir::Utilities::Internal::IpcSubscriber(io,
                                                                                  doseMainCmdChannel,
@@ -98,7 +103,7 @@ namespace Control
         ExcludeNodeCmdCb        m_excludeNodeCb;
         StoppedNodeIndicationCb m_stoppedNodeIndicationCb;
         StopDoseMainCb          m_stopDoseMainCb;
-        DetachedCb              m_detachedDb;
+        NodeStateChangedCb      m_nodeStateChangedCb;
 
         void RecvDataCb(const char* data, size_t size)
         {
@@ -145,9 +150,10 @@ namespace Control
                 }
                 break;
 
-                case DoseMainCmd_CmdType_DETACHED:
+                case doseMainCmd.NODE_STATE:
                 {
-                    m_detachedDb();
+                    auto nodeState = static_cast<NodeState>(doseMainCmd.node_state());
+                    m_nodeStateChangedCb(nodeState);
                 }
                 break;
 
@@ -166,14 +172,14 @@ namespace Control
                                              const ExcludeNodeCmdCb&        excludeNodeCb,
                                              const StoppedNodeIndicationCb& stoppedNodeIndicationCb,
                                              const StopDoseMainCb&          stopDoseMainCb,
-                                             const DetachedCb&              detachedCb)
+                                             const NodeStateChangedCb&      nodeStateChangedCb)
         : m_impl(Safir::make_unique<Impl>(io,
                                           startDoseMainCb,
                                           injectNodeCb,
                                           excludeNodeCb,
                                           stoppedNodeIndicationCb,
                                           stopDoseMainCb,
-                                          detachedCb))
+                                          nodeStateChangedCb))
     {
     }
 
@@ -274,10 +280,11 @@ namespace Control
             Send(doseMainCmd);
         }
 
-        void Detached()
+        void NodeStateChanged(NodeState nodeState)
         {
             DoseMainCmd doseMainCmd;
-            doseMainCmd.set_cmd_type(DoseMainCmd::DETACHED);
+            doseMainCmd.set_cmd_type(DoseMainCmd::NODE_STATE);
+            doseMainCmd.set_node_state(static_cast<DoseMainCmd_NodeStateType>(nodeState));
             Send(doseMainCmd);
         }
 
@@ -349,9 +356,9 @@ namespace Control
         m_impl->StopDoseMain();
     }
 
-    void DoseMainCmdSender::Detached()
+    void DoseMainCmdSender::NodeStateChanged(NodeState nodeState)
     {
-        m_impl->Detached();
+        m_impl->NodeStateChanged(nodeState);
     }
 
 

@@ -87,6 +87,9 @@ namespace Internal
         bool IsReleased() const { return m_released != 0; }
         void SetReleased(bool released) { m_released = released ? 1 : 0; }
 
+        bool IsDetached() const {return m_detached != 0;}
+        void SetDetached(bool detached) { m_detached = detached ? 1 : 0; }
+
         // Make all subscription pointers held by this state weak.
         void ReleaseSubscribers();
 
@@ -116,6 +119,7 @@ namespace Internal
         StateHolder                             m_injectionState;
 
         Safir::Utilities::Internal::AtomicUint32 m_released;
+        Safir::Utilities::Internal::AtomicUint32 m_detached;
 
         typedef PairContainers<SubscriptionId, UpgradeableSubscriptionPtr>::map Subscriptions;
 

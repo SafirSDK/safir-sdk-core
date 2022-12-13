@@ -108,6 +108,7 @@ private:
     Control::IncarnationBlacklistHandler        m_incarnationBlackListHandler;
     bool                                        m_controlInfoReceiverReady;
     bool                                        m_doseMainRunning;
+    bool                                        m_nodePristine = true; // True until first time being part of a system
 
     std::unique_ptr<Com::Communication>             m_communication;
     std::unique_ptr<SP::SystemPicture>              m_sp;
@@ -123,4 +124,5 @@ private:
     sizeof(std::atomic<int64_t>)>::type AlignedStorage;
     std::unique_ptr<AlignedStorage>     m_incarnationIdStorage;
     std::atomic<int64_t>&             m_incarnationId;
+    int64_t m_detachedFromIncarnationId = 0; // This will hold the last systemId a detached lightnode has been attached to.
 };

@@ -390,6 +390,42 @@ namespace Internal
              false);  // no need to include already released states
     }
 
+    void HandlerRegistrations::DetachAll(const ConnectionPtr& connection)
+    {
+        m_registrations.ForEachState([this, &connection](const auto, const StateSharedPtr& regState, bool&)
+        {
+            if (regState->GetConnection()->Id() == connection->Id())
+            {
+                regState->SetDetached(true);
+            }
+
+            if (m_entityContainerPtr != NULL)
+            {
+                auto handlerId = regState->GetRealState().GetHandlerId();
+                m_entityContainerPtr->ForEachState([connection, handlerId](const auto, const StateSharedPtr& entityState, bool&)
+                {
+                    // RevokeEntity(stateSharedPtr,connection,handlerId,currentRegisterTime,exitDispatch);
+                    if (entityState->GetConnection() == NULL || connection->Id() != entityState->GetConnection()->Id())
+                    {
+                        // This connection is not the owner.
+                        return;
+                    }
+
+                    if (handlerId != Dob::Typesystem::HandlerId::ALL_HANDLERS &&
+                        entityState->GetRealState().GetHandlerId() != handlerId)
+                    {
+                        // Not for this handler.
+                        return;
+                    }
+
+                    entityState->SetDetached(true);
+                }, false);
+
+            }
+
+        }, false);
+    }
+
     void HandlerRegistrations::UnregisterAllInternal(const ConnectionPtr&           connection,
                                                      const bool                     explicitUnregister,
                                                      const StateSharedPtr&          statePtr,

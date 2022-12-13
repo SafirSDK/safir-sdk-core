@@ -176,6 +176,9 @@ namespace Internal
 
         // Removes connection(s) from specified node.
         void RemoveConnectionFromNode(const int64_t nodeId);
+        void DetachConnectionsFromNode(const int64_t nodeId);
+        void RemoveDetachedConnections();
+
 
         //A reader lock on the connection vector will be taken during the looping and the callback!
         void ForEachConnection(const std::function<void(const Connection & connection)> & connectionFunc) const;

@@ -268,6 +268,22 @@ namespace
                     handled = true;
                     return;
                 }
+                if (receiver.connection->IsDetached())
+                {
+                    // No registered handler, generate an automatic response.
+                    std::wostringstream ostr;
+                    ostr << "This node is in detached state. The handler " << request.GetHandlerId() << " is not available."
+                         << Typesystem::Operations::GetName(request.GetTypeId()) << "!";
+
+                    Dob::ErrorResponsePtr errorResponse = Dob::ErrorResponse::CreateErrorResponse
+                        (Dob::ResponseGeneralErrorCodes::SafirDetachedState(),
+                         ostr.str());
+
+                    SendAutoResponse(errorResponse, request.GetRequestId(), sender);
+
+                    handled = true;
+                    return;
+                }
             }
             break;
 
@@ -322,6 +338,22 @@ namespace
                     handled = true;
                     return;
                 }
+                if (receiver.connection->IsDetached())
+                {
+                    // No registered handler, generate an automatic response.
+                    std::wostringstream ostr;
+                    ostr << "This node is in detached state. The handler " << request.GetHandlerId() << " is not available."
+                         << Typesystem::Operations::GetName(request.GetTypeId()) << "!";
+
+                    Dob::ErrorResponsePtr errorResponse = Dob::ErrorResponse::CreateErrorResponse
+                        (Dob::ResponseGeneralErrorCodes::SafirDetachedState(),
+                         ostr.str());
+
+                    SendAutoResponse(errorResponse, request.GetRequestId(), sender);
+
+                    handled = true;
+                    return;
+                }
             }
             break;
 
@@ -344,6 +376,22 @@ namespace
 
                     Dob::ErrorResponsePtr errorResponse = Dob::ErrorResponse::CreateErrorResponse
                         (Dob::ResponseGeneralErrorCodes::SafirNotRegistered(),
+                         ostr.str());
+
+                    SendAutoResponse(errorResponse, request.GetRequestId(), sender);
+
+                    handled = true;
+                    return;
+                }
+                if (receiver.connection->IsDetached())
+                {
+                    // No registered handler, generate an automatic response.
+                    std::wostringstream ostr;
+                    ostr << "This node is in detached state. The handler " << request.GetHandlerId() << " is not available."
+                         << Typesystem::Operations::GetName(request.GetTypeId()) << "!";
+
+                    Dob::ErrorResponsePtr errorResponse = Dob::ErrorResponse::CreateErrorResponse
+                        (Dob::ResponseGeneralErrorCodes::SafirDetachedState(),
                          ostr.str());
 
                     SendAutoResponse(errorResponse, request.GetRequestId(), sender);

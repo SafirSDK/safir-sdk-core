@@ -85,6 +85,7 @@ namespace Internal
         m_stopOrderPending(0),
         m_died(0),
         m_nodeDown(0),
+        m_detached(0),
         m_isLocal(local)
     {
         const std::wstring wNameWithCounter = Typesystem::Utilities::ToWstring(name) + L"#" + boost::lexical_cast<std::wstring>(counter);
@@ -136,6 +137,23 @@ namespace Internal
     bool Connection::IsLocal() const
     {
         return m_isLocal;
+    }
+
+    void Connection::SetDetached()
+    {
+        m_detached = 1;
+        for (const auto& reg : m_registrations)
+        {
+            const Typesystem::TypeId& typeId = reg.first.first;
+            if (Dob::Typesystem::Operations::IsOfType(typeId, Dob::Entity::ClassTypeId))
+            {
+                EntityTypes::Instance().DetachAll(shared_from_this(), typeId);
+            }
+            else if (Dob::Typesystem::Operations::IsOfType(typeId, Dob::Service::ClassTypeId))
+            {
+                ServiceTypes::Instance().DetachAll(shared_from_this(), typeId);
+            }
+        }
     }
 
     void Connection::Cleanup()

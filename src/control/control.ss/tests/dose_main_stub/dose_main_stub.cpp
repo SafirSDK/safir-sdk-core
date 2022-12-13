@@ -271,8 +271,8 @@ int main(int /*argc*/, char * /*argv*/[])
                             running = false;
                         },
 
-                        // Action when Detached command is received
-                        []()
+                        // Action when NodeState command is received
+                        [](Safir::Dob::Internal::Control::NodeState)
                         {
                         }
 

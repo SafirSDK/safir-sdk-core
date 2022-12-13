@@ -33,7 +33,7 @@
             <type>Int32</type>
         </member>
         <member>
-            <summary>Size of the sliding window when communicating with this node.</summary>
+            <summary>Size of the sliding window when communicating with this node. Maximum allowed value is 20.</summary>
             <name>SlidingWindowsSize</name>
             <type>Int32</type>
         </member>
@@ -49,15 +49,22 @@
             <sequence/>
         </member>
         <member>
-            <summary>If True, at least one node of this type is required for the system to start. Nodes with a node
-                     type where this parameter is set to False will wait until a required node is started.</summary>
+            <summary>If true, a node of this type can start a system of its own. A node with a node type where this parameter is set to false will never start a system of its own, it just waits for a system to join.
+                     This parameter is mandatory if node is not a light node, i.e IsLightNode=False. If this node is a light node, then RequiredForStart is optional but is not allowed to be True.</summary>
             <name>RequiredForStart</name>
             <type>Boolean</type>
         </member>
         <member>
-            <summary>If true this node type is of a special kind with special rules. See
-                     user's guide for more info.</summary>
+            <summary>If true this node type is a light node. See user's guide for more info about light nodes. This parameter has default value False.
+                     IsLightNode and RequiredForStart cannot both be True.</summary>
             <name>IsLightNode</name>
+            <type>Boolean</type>
+        </member>
+        <member>
+            <summary>If this value is set to True, all entities and registrations from other nodes are kept when a light node is getting detached. When the light node attaches again to a system the state will be synced with the rest of the system.
+                     If this value is set to False, all entites and registrations from other nodes are automatically deleted when a light node is getting detached.  
+                     This value is mandatory if the node is a light node, i.e IsLightNode=True. If not a light node this value must not be set.</summary>
+            <name>KeepStateWhileDetached</name>
             <type>Boolean</type>
         </member>
     </members>

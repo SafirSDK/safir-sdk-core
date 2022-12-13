@@ -28,6 +28,7 @@ public:
         int context;
         bool pending;
         Safir::Dob::DistributionScope::Enumeration scope;
+        bool detached;
         QString content;
     };
 

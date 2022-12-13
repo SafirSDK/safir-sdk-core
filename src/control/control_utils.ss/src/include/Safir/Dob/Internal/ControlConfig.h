@@ -52,7 +52,8 @@ namespace Control
                  const int ackRequestThreshold_,
                  const std::vector<int>& retryTimeout_,
                  const bool requiredForStart_,
-                 const bool isLightNode_)
+                 const bool isLightNode_,
+                 const bool keepStateWhileDetached_)
 
             : name(name_),
               id(LlufId_Generate64(name_.c_str())),
@@ -64,7 +65,8 @@ namespace Control
               ackRequestThreshold(ackRequestThreshold_),
               retryTimeout(retryTimeout_),
               requiredForStart(requiredForStart_),
-              isLightNode(isLightNode_)
+              isLightNode(isLightNode_),
+              keepStateWhileDetached(keepStateWhileDetached_)
         {}
 
         const std::string name;
@@ -78,6 +80,7 @@ namespace Control
         const std::vector<int> retryTimeout;
         const bool requiredForStart;
         const bool isLightNode;
+        const bool keepStateWhileDetached;
     };
 
     struct ThisNode
@@ -242,23 +245,34 @@ namespace Control
                 }
 
                 // RequiredForStart
-                if (nt->RequiredForStart().IsNull())
-                {
-                    throw std::logic_error("Parameter error: "
-                                           "Node type " + nodeTypeName + ": RequiredForStart is mandatory");
-                }
-
-                auto requiredForStart = nt->RequiredForStart();
+                auto requiredForStart = !nt->RequiredForStart().IsNull() && nt->RequiredForStart();
 
                 // IsLightNode
                 auto isLightNode = !nt->IsLightNode().IsNull() && nt->IsLightNode();
 
-                if (isLightNode && requiredForStart)
+                // KeepStateWhileDetached
+                auto keepStateWhileDetached = !nt->KeepStateWhileDetached().IsNull() && nt->KeepStateWhileDetached();
+
+                if (isLightNode)
                 {
-                    throw std::logic_error("Parameter error: "
-                                           "Node type " + nodeTypeName +
-                                           ": RequiredForStart and IsLightNode cannot both be true.");
+                    if (requiredForStart)
+                    {
+                        throw std::logic_error("Parameter error: Node type " + nodeTypeName + ": RequiredForStart and IsLightNode cannot both be true.");
+                    }
+                    if (nt->KeepStateWhileDetached().IsNull())
+                    {
+                        throw std::logic_error("Parameter error: Node type " + nodeTypeName + ": KeepStateWhileDetached is mandatory.");
+                    }
                 }
+                else
+                {
+                    if (nt->RequiredForStart().IsNull())
+                    {
+                        throw std::logic_error("Parameter error: Node type " + nodeTypeName + ": RequiredForStart is mandatory.");
+                    }
+
+                }
+
                 nodeTypesParam.push_back(NodeType(nodeTypeName,
                                                   multicastAddressControl,
                                                   multicastAddressData,
@@ -268,7 +282,8 @@ namespace Control
                                                   ackRequestThreshold,
                                                   retryTimeout,
                                                   requiredForStart,
-                                                  isLightNode));
+                                                  isLightNode,
+                                                  keepStateWhileDetached));
 
             }
 
@@ -332,8 +347,7 @@ namespace Control
 
             if (!nodeTypeValid)
             {
-                throw std::logic_error("Parameter error: " +
-                                       thisNodeParam.name + " is not a valid node type!");
+                throw std::logic_error("Parameter error: " + thisNodeParam.name + " is not a valid node type!");
             }
 
             localInterfaceTimeout = boost::chrono::milliseconds(static_cast<int64_t>(Safir::Dob::NodeParameters::LocalInterfaceTimeout() * 1000));
@@ -341,6 +355,18 @@ namespace Control
 
             fragmentSize = Safir::Dob::NodeParameters::FragmentSize();
 
+        }
+
+        const NodeType& GetThisNodeType() const
+        {
+            for (const auto& nt : nodeTypesParam)
+            {
+                if (nt.id == thisNodeParam.nodeTypeId)
+                {
+                    return nt;
+                }
+            }
+            throw std::logic_error("NodeType specified in ThisNodeParameters is missing!");
         }
 
         std::vector<NodeType> nodeTypesParam;

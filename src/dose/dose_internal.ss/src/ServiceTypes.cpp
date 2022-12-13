@@ -104,6 +104,11 @@ namespace Internal
         GetType(typeId).UnregisterAll(connection, explicitUnregister);
     }
 
+    void ServiceTypes::DetachAll(const ConnectionPtr& connection, const Dob::Typesystem::TypeId typeId)
+    {
+        GetType(typeId).DetachAll(connection);
+    }
+
     bool ServiceTypes::RemoteSetRegistrationState(const ConnectionPtr& connection,
                                                   const DistributionData& registrationState)
     {

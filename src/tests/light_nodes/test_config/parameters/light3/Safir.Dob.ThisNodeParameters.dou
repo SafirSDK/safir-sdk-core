@@ -14,7 +14,7 @@
             <summary>Node type for this node</summary>
             <name>NodeType</name>
             <type>String</type>
-            <value>Client</value>
+            <value>ClientClearState</value>
         </parameter>
 
         <parameter>

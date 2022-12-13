@@ -162,8 +162,8 @@ BOOST_AUTO_TEST_CASE( node_detached )
                                      {
                                          excluded.push_back(nodeId);
                                      });
-    distribution.SubscribeDetachedChanged([&](bool isDetached) { detached = isDetached; });
-    distribution.SubscribeDetachedChanged([&](bool isDetached) { detachedSub2 = isDetached; });
+    distribution.SubscribeAttachedDetached([&](bool) { detached = false; }, [&]() { detached = true; });
+    distribution.SubscribeAttachedDetached([&](bool) { detachedSub2 = false; }, [&]() { detachedSub2 = true; });
 
 
     distribution.Start();
@@ -177,7 +177,7 @@ BOOST_AUTO_TEST_CASE( node_detached )
     BOOST_CHECK(!detached);
     BOOST_CHECK(!detachedSub2);
 
-    distribution.SetDetached(true);
+    distribution.SetDetached();
 
     BOOST_CHECK(excluded.size() == 2);
     BOOST_CHECK(excluded[0]==10);

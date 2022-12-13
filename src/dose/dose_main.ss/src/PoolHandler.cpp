@@ -105,43 +105,8 @@ namespace Internal
             });
         };
 
-        auto detached = [this](bool isDetached)
-        {
-            Start(); // It is possible that detach is called before system is started.
-            m_strand.post([this, isDetached]
-            {
-                lllog(5)<< L"DoseMain.PoolHandler set detached to " << std::boolalpha << isDetached << std::endl;
-                // reset flags
-                m_persistenceReady = false;
-                m_poolDistributionComplete = isDetached; // If in detached mode then we are not expecting to get a PD from anyone else.
-                m_pdCompleteSignaled = false;
-                m_numReceivedPdCompleteFromNormalNodes = 0;
-                m_persistHandler->Reset();
-                m_detached = isDetached;
-
-                // If the node is detached from the start, nodeInfoHandler is not created here.
-                if (m_nodeInfoHandler)
-                {
-                    m_nodeInfoHandler->SetNodeState(m_detached ? Safir::Dob::NodeState::Detached : Safir::Dob::NodeState::Attaching); // Update detached flag in NodeInfo
-                }
-
-                if (m_detached) // We have become detached
-                {
-                    // This will trigger the chain OnPersistenDataReady->SignalPDComplete
-                    m_persistHandler->SetPersistentDataReady();
-                }
-                else // We have joined a system and are attaching
-                {
-                    // When a lightNode attach to a System it can not keep EndStates since they
-                    // will prevent pooldistribution of Entities that previously existed on this node.
-                    EndStates::Instance().ClearAllEndstates();
-                }
-            });
-        };
-
         //subscribe for included and excluded nodes
         distribution.SubscribeNodeEvents(injectNode, excludeNode);
-        distribution.SubscribeDetachedChanged(detached);
 
         //set data receiver for pool distribution information
         m_distribution.GetCommunication().SetDataReceiver([this](int64_t fromNodeId, int64_t fromNodeType, const char *data, size_t size)
@@ -179,6 +144,36 @@ namespace Internal
                                                                                    m_strand,
                                                                                    checkPendingReg));
             m_stateDistributors.insert(std::make_pair(nt->id, std::move(sd)));
+        }
+    }
+
+    void PoolHandler::OnToggleDetach(bool detach)
+    {
+        lllog(5)<< L"DoseMain.PoolHandler set detached to " << std::boolalpha << detach << std::endl;
+        // reset flags
+        m_persistenceReady = false;
+        m_poolDistributionComplete = detach; // If in detached mode then we are not expecting to get a PD from anyone else.
+        m_pdCompleteSignaled = false;
+        m_numReceivedPdCompleteFromNormalNodes = 0;
+        m_persistHandler->Reset();
+        m_detached = detach;
+
+        // If the node is detached from the start, nodeInfoHandler is not created here.
+        if (m_nodeInfoHandler)
+        {
+            m_nodeInfoHandler->SetNodeState(m_detached ? Safir::Dob::NodeState::Detached : Safir::Dob::NodeState::Attaching); // Update detached flag in NodeInfo
+        }
+
+        if (m_detached) // We have become detached
+        {
+            // This will trigger the chain OnPersistenDataReady->SignalPDComplete
+            m_persistHandler->SetPersistentDataReady();
+        }
+        else // We have joined a system and are attaching
+        {
+            // When a lightNode attach to a System it can not keep EndStates since they
+            // will prevent pooldistribution of Entities that previously existed on this node.
+            EndStates::Instance().ClearAllEndstates();
         }
     }
 

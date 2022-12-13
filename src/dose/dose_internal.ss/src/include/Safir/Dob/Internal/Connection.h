@@ -218,6 +218,9 @@ namespace Internal
         void SetNodeDown() {m_nodeDown = 1;}
         bool NodeIsDown() const {return m_nodeDown != 0;}
 
+        bool IsDetached() const {return m_detached != 0;}
+        void SetDetached();
+
         size_t QueueCapacity(const ConnectionQueueId::Enumeration queue) const
         {return m_queueCapacities[queue];}
 
@@ -274,8 +277,8 @@ namespace Internal
 
         Safir::Utilities::Internal::AtomicUint32 m_stopOrderPending;
         Safir::Utilities::Internal::AtomicUint32 m_died;
-
         Safir::Utilities::Internal::AtomicUint32 m_nodeDown;
+        Safir::Utilities::Internal::AtomicUint32 m_detached;
 
         const bool m_isLocal;
 

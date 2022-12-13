@@ -39,9 +39,11 @@ namespace
         r->context = connectionPtr->Id().m_contextId;
         r->pending = false;
         r->scope = distributionScopeReader.GetDistributionScope(regInfo.typeId);
+        r->detached = connectionPtr->IsDetached();
 
         std::ostringstream os;
-        os << r->connectionName.toStdString() << " " << r->typeName.toStdString() << " " << r->typeId << " " << r->handler.toStdString();
+        os << r->connectionName.toStdString() << " " << r->typeName.toStdString() << " " << r->typeId << " "
+                   << r->handler.toStdString() << (r->pending ? " pending" : "") << (r->detached ? " detached" : "");
         r->content = os.str().c_str();
         return r;
     }
@@ -114,6 +116,17 @@ void Registrations::UpdateGui()
 {
     ui->tableWidget->setSortingEnabled(false);
     ui->tableWidget->setRowCount(static_cast<int>(m_regdataFiltered.size()));
+
+    auto hasDetached = std::find_if(begin(m_regdata), end(m_regdata), [](const auto& r){return r->detached;}) != end(m_regdata);
+    if (hasDetached)
+    {
+        ui->tableWidget->showColumn(6);
+    }
+    else
+    {
+        ui->tableWidget->hideColumn(6);
+    }
+
     int row = 0;
     for (const auto& r : m_regdataFiltered)
     {
@@ -122,8 +135,9 @@ void Registrations::UpdateGui()
         ui->tableWidget->setItem(row, 1, TableItem(r->handler));
         ui->tableWidget->setItem(row, 2, TableItem(r->connectionName));
         ui->tableWidget->setItem(row, 3, TableItem(QString::number(r->context), true));
-        ui->tableWidget->setItem(row, 4, TableItem(r->pending ? "Pending" : "", true));
+        ui->tableWidget->setItem(row, 4, TableItem(r->pending ? QString::fromUtf8("\u2713") : "", true)); // 2713 is the utf-8 code for 'Check Mark'
         ui->tableWidget->setItem(row, 5, TableItem(scope, true));
+        ui->tableWidget->setItem(row, 6, TableItem(r->detached ? QString::fromUtf8("\u2713") : "", true));
         ++row;
     }
     ui->tableWidget->setSortingEnabled(true);

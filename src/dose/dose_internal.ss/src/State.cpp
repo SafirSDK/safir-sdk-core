@@ -33,7 +33,8 @@ namespace Dob
 namespace Internal
 {
     State::State()
-        : m_released(1)
+        : m_released(1),
+          m_detached(0)
     {
     }
 

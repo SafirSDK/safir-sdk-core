@@ -46,7 +46,6 @@
 
 #pragma warning (pop)
 #endif
-
 namespace Safir
 {
 namespace Dob
@@ -62,6 +61,9 @@ namespace Internal
                                int64_t nodeTypeId)> OnExcludeNode;
 
     typedef std::function<void(bool isDetached)> OnDetachedStateChanged;
+
+    typedef std::function<void()> OnDetached;
+    typedef std::function<void(bool sameSystem)> OnAttached;
 
 
     // Class that encapsulates the Communication and System Picture instances
@@ -83,9 +85,11 @@ namespace Internal
               m_injectCallbacks(),
               m_excludeCallbacks(),
               m_detachedCallbacks(),
+              m_attachedCallbacks(),
               m_liveNodes(),
               m_nodeTypeIds(CalculateNodeTypeIds(m_config)),
               m_lightNodeTypeIds(CalculateLightNodeTypeIds(m_config)),
+              m_detached(false),
               m_started(false)
         {
             m_isLightNode = IsLightNode(ownNodeTypeId);
@@ -161,16 +165,15 @@ namespace Internal
         // Subscribe for new injected nodes and excluded nodes.
         void SubscribeNodeEvents(const OnInjectNode& onInjectNode, const OnExcludeNode& onExcludeNode)
         {
-            ENSURE(!m_started, << "SubscribeNodeEvents must be called before Start!");
             m_injectCallbacks.push_back(onInjectNode);
             m_excludeCallbacks.push_back(onExcludeNode);
         }
 
         // Subscribe for lightnode detache state changes.
-        void SubscribeDetachedChanged(const OnDetachedStateChanged& onDetachedChanged)
+        void SubscribeAttachedDetached(const OnAttached& onAttached, const OnDetached& onDetached)
         {
-            ENSURE(!m_started, << "SubscribeDetachedChanged must be called before Start!");
-            m_detachedCallbacks.push_back(onDetachedChanged);
+            m_attachedCallbacks.push_back(onAttached);
+            m_detachedCallbacks.push_back(onDetached);
         }
 
         // Inject an external node
@@ -214,22 +217,47 @@ namespace Internal
             }
         }
 
-        void SetDetached(bool isDetached)
+        bool IsDetached() const
         {
-            if (isDetached)
+            return m_detached;
+        }
+
+        void SetAttached(bool sameSystem)
+        {
+            if (!m_detached)
             {
-                // If we toggle to detached mode, first exclude all remote nodes.
-                auto nodesCopy = m_liveNodes;
-                for (const auto& kv : nodesCopy)
-                {
-                    ExcludeNode(kv.first, kv.second);
-                }
+                return; // already attached
             }
+
+            m_detached = false;
+
+            // Notify subscribers.
+            for (const auto& cb : m_attachedCallbacks)
+            {
+                cb(sameSystem);
+            }
+        }
+
+        void SetDetached()
+        {
+            if (m_detached)
+            {
+                return; // already detached
+            }
+
+            m_detached = true;
 
             // Notify subscribers.
             for (const auto& cb : m_detachedCallbacks)
             {
-                cb(isDetached);
+                cb();
+            }
+
+            // If we toggle to detached mode, first exclude all remote nodes.
+            auto nodesCopy = m_liveNodes;
+            for (const auto& kv : nodesCopy)
+            {
+                ExcludeNode(kv.first, kv.second);
             }
         }
 
@@ -312,7 +340,8 @@ namespace Internal
         const ConfigT m_config;
         std::vector<OnInjectNode> m_injectCallbacks;
         std::vector<OnExcludeNode> m_excludeCallbacks;
-        std::vector<OnDetachedStateChanged> m_detachedCallbacks;
+        std::vector<OnDetached> m_detachedCallbacks;
+        std::vector<OnAttached> m_attachedCallbacks;
         std::map<int64_t,int64_t> m_liveNodes;
 
         //this is a sorted vector of node type ids
@@ -323,6 +352,7 @@ namespace Internal
         // Set of all nodeTypeIds that are lightNodes.
         const std::set<int64_t> m_lightNodeTypeIds;
 
+        bool m_detached;
         bool m_started;
     };
 

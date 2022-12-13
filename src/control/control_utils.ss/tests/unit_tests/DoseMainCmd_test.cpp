@@ -155,8 +155,8 @@ BOOST_AUTO_TEST_CASE( send_commands )
                                         subWork.reset();
                                     },
 
-                                    // Detached node
-                                    []()
+                                    // Node state changed
+                                    [](NodeState)
                                     {
                                     }
 

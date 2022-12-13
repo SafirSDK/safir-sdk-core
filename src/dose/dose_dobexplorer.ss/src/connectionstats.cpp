@@ -70,6 +70,7 @@ struct Stat
     std::vector<ReqQStat>       reqInQStat;
     MsgQStat                    msgOutQStat;
     std::vector<MsgQStat>       msgInQStat;
+    bool detached;
 
 };
 namespace Safir
@@ -206,7 +207,15 @@ void ConnectionStats::UpdateStatistics(const bool ignoreVisible)
 
     if (connectionExists)
     {
-        missingConnectionLabel->hide();
+        if (stat.detached)
+        {
+            missingConnectionLabel->setText("Connection is detached!");
+            missingConnectionLabel->show();
+        }
+        else
+        {
+            missingConnectionLabel->hide();
+        }
 
         // Request out queue
         reqOutQTableWidget->item(0,0)->setText(boost::lexical_cast<std::string>(stat.reqOutQStat.noPushedRequests).c_str());
@@ -344,6 +353,7 @@ void ConnectionStats::UpdateStatistics(const bool ignoreVisible)
     }
     else
     {
+        missingConnectionLabel->setText("Connection has been closed or the application has terminated!");
         missingConnectionLabel->show();
     }
 }
@@ -351,6 +361,8 @@ void ConnectionStats::UpdateStatistics(const bool ignoreVisible)
 void ConnectionStats::ProcessConnection(const Safir::Dob::Internal::ConnectionPtr& connection, Stat& stat, bool& exist)
 {
     exist = true;
+
+    stat.detached = connection->IsDetached();
 
     Safir::Dob::Internal::RequestOutQueue& reqOutQ = connection->GetRequestOutQueue();
     StatisticsCollector(reqOutQ, &stat.reqOutQStat);

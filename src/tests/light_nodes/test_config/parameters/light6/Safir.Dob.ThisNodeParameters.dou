@@ -7,28 +7,28 @@
             <summary>A nice name for this node</summary>
             <name>Name</name>
             <type>String</type>
-            <value>LightFour</value>
+            <value>LightSix</value>
         </parameter>
 
         <parameter>
             <summary>Node type for this node</summary>
             <name>NodeType</name>
             <type>String</type>
-            <value>ClientClearState</value>
+            <value>ClientKeepState</value>
         </parameter>
 
         <parameter>
             <summary>Address and port of the control channel</summary>
             <name>ControlAddress</name>
             <type>String</type>
-            <value>127.0.0.1:30004</value>
+            <value>127.0.0.1:30006</value>
         </parameter>
 
         <parameter>
             <summary>Address and port of the data channel</summary>
             <name>DataAddress</name>
             <type>String</type>
-            <value>127.0.0.1:40004</value>
+            <value>127.0.0.1:40006</value>
         </parameter>
 
         <parameter>

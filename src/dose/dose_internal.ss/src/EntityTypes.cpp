@@ -111,6 +111,11 @@ namespace Internal
         GetType(typeId).UnregisterAll(connection, explicitUnregister);
     }
 
+    void EntityTypes::DetachAll(const ConnectionPtr& connection, const Dob::Typesystem::TypeId typeId)
+    {
+        GetType(typeId).DetachAll(connection);
+    }
+
     bool EntityTypes::RemoteSetRegistrationState(const ConnectionPtr& connection,
                                                  const DistributionData& registrationState)
     {

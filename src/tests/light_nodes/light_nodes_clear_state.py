@@ -157,7 +157,8 @@ async def check_pool_detached_node(app):
         if contains_exact(expected_reg, app.registrations) and contains_exact(expected_ent, app.entities):
             ok = True
             break
-        log("--- Extended wait for PD to finish, wait time " + str((check + 1)*10) + " sec")
+        if check > 2:
+            log("--- Extended wait for PD to finish, wait time " + str((check + 1)*10) + " sec")
         await asyncio.sleep(10)
 
     if not ok:
@@ -228,7 +229,8 @@ async def check_pools_connected_nodes(*apps):
         if ok:
             break
 
-        log("--- Extended wait for PD to finish, wait time " + str((check + 1)*10) + " sec")
+        if check > 2:
+            log("--- Extended wait for PD to finish, wait time " + str((check + 1)*10) + " sec")
         await asyncio.sleep(10)
 
     if not ok:
@@ -283,26 +285,24 @@ class SafirApp:
         log("--------------")
 
     async def _run(self):
-        # 1667 - 16671 16672 16673 16674
         uri = "ws://localhost:1667" + str(self.safir_instance)
         for connectTry in range(10):
             try:
                 async with websockets.connect(uri) as ws:
                     self.ws = ws
+                    log("Node " + str(self.node_id) + " is connected to the DOB")
                     await asyncio.gather(self._reader(), self._sender(), self._setup_dob())
                     break;
             except ConnectionRefusedError as e:
-                log("--- Got ConnectionRefusedError to " + uri + ". Will retry to connect in 5 sec.")
                 await asyncio.sleep(5)
                 if connectTry == 9:
-                    log("*** Failed to connect, ConnectionRefusedError!")
+                    log("*** Failed to connect, ConnectionRefusedError! uri= " + uri)
                     log(e)
                     raise
             except Exception as e:
-                log("--- Got Exception when connecting to " + uri + ". Will retry to connect in 5 sec.")
                 await asyncio.sleep(5)
                 if connectTry == 9:
-                    log("*** Failed to connect, Exception!")
+                    log("*** Failed to connect, Exception! uri= " + uri)
                     log(e)
                     raise
 
@@ -702,12 +702,12 @@ async def main(args):
     await one_normal_two_light_detach_reattach_one_light(args)                  # ok
     await one_normal_two_light_restart_normal(args)                             # ok
     await two_normal_two_light_restart_one_normal(args)                         # ok
+    await one_normal_one_light_restart_light(args)                              # ok
     
     # await two_normal_two_light_detach_reattach_both_light(args)               # fails sometimes
     # await two_normal_two_light_detach_reattach_both_light_big_pool(args)      # fails sometimes
     # await two_normal_two_light_restart_both_normal(args)                      # fails sometimes
     # await two_normal_two_light_toggle_network_many_times_on_both_light(args)  # fails sometimes
-    # await one_normal_one_light_restart_light(args)                            # fails always
 
     #---- Some code for repeating a test and clearing local log folder after each run
     # for i in range(25):

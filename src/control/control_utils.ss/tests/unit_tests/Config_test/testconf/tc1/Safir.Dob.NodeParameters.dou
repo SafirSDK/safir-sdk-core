@@ -115,6 +115,23 @@
 
         <arrayElement>
           <Safir.Dob.NodeType>
+            <Name>Server2</Name>
+            <MulticastAddressControl></MulticastAddressControl>
+            <MulticastAddressData></MulticastAddressData>
+            <HeartbeatInterval>1.0</HeartbeatInterval>
+            <MaxLostHeartbeats>5</MaxLostHeartbeats>
+            <SlidingWindowsSize>20</SlidingWindowsSize>
+            <AckRequestThreshold>10</AckRequestThreshold>
+            <RetryTimeout>
+                <Second64>0.2</Second64>
+            </RetryTimeout>
+            <RequiredForStart>False</RequiredForStart>
+            <IsLightNode>False</IsLightNode>
+          </Safir.Dob.NodeType>
+        </arrayElement>
+
+        <arrayElement>
+          <Safir.Dob.NodeType>
             <Name>Client</Name>
             <MulticastAddressControl></MulticastAddressControl>
             <MulticastAddressData></MulticastAddressData>
@@ -127,6 +144,7 @@
             </RetryTimeout>
             <RequiredForStart>False</RequiredForStart>
             <IsLightNode>True</IsLightNode>
+            <KeepStateWhileDetached>True</KeepStateWhileDetached>
           </Safir.Dob.NodeType>
         </arrayElement>
 
@@ -139,9 +157,9 @@
             <AckRequestThreshold>10</AckRequestThreshold>
             <RetryTimeout>
                 <Second64>5.0</Second64>
-            </RetryTimeout>
-            <RequiredForStart>False</RequiredForStart>
+            </RetryTimeout>            
             <IsLightNode>True</IsLightNode>
+            <KeepStateWhileDetached>False</KeepStateWhileDetached>
           </Safir.Dob.NodeType>
         </arrayElement>
 

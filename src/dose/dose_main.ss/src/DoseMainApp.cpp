@@ -135,11 +135,11 @@ namespace Internal
                                                                                 Stop();
                                                                             }),
 
-                                                              // Detached
-                                                              m_strand.wrap([this]()
+                                                              // NodeStateChanged
+                                                              m_strand.wrap([this](Safir::Dob::Internal::Control::NodeState nodeState)
                                                                             {
-                                                                                lllog(1) << "DOSE_MAIN: Got Detached command from control"<< std::endl;
-                                                                                Detached();
+                                                                                lllog(1) << "DOSE_MAIN: Got NodeStateChanged command from control, state=" << Control::NodeStateToString(nodeState).c_str() << std::endl;
+                                                                                NodeStateChanged(nodeState);
                                                                             })));
 
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
@@ -276,58 +276,72 @@ namespace Internal
         m_distribution->Start();
     }
 
+    void DoseMainApp::NodeStateChanged(Control::NodeState nodeState)
+    {
+        switch (nodeState)
+        {
+            case Control::NodeState::FormedSystem:
+            case Control::NodeState::JoinedSystem:
+            {
+                m_connectionHandler->Start();
+                LogStatus("dose_main running...");
+            }
+                break;
+
+            case Control::NodeState::AttachedNewSystem:
+            {
+                ENSURE (m_distribution->IsLightNode(), << "DoseMain: AttachedNewSystem called for non-lightNode! NodeId=" << m_nodeId);
+                m_distribution->SetAttached(false); // Will notify subscribers that we are no longer in detached mode.
+            }
+                break;
+
+            case Control::NodeState::AttachedSameSystem:
+            {
+                ENSURE (m_distribution->IsLightNode(), << "DoseMain: AttachedSameSystem called for non-lightNode! NodeId=" << m_nodeId);
+                m_distribution->SetAttached(true); // Will notify subscribers that we are no longer in detached mode.
+            }
+                break;
+
+            case Control::NodeState::DetachedFromSystem:
+            {
+                ENSURE (m_distribution->IsLightNode(), << "DoseMain: DetachedFromSystem called for non-lightNode! NodeId=" << m_nodeId);
+                m_distribution->SetDetached(); // Will exclude all nodes and notify subscribers.
+                LogStatus("dose_main is now running in detached mode!");
+            }
+                break;
+        }
+    }
+
     void DoseMainApp::InjectNode(const std::string& nodeName,
                                  int64_t nodeId,
                                  int64_t nodeTypeId,
                                  const std::string& dataAddress)
     {
-        if (m_distribution->IsLightNode() && m_detached)
+        ENSURE (m_distribution != nullptr, << "InjectNode cmd received before StartDoseMain cmd!");
+        if (m_distribution->GetCommunication().Id() == nodeId)
         {
-            // A detached lightnode that gets an includeNode is no longer detached.
-            m_detached = false;
-            m_distribution->SetDetached(false); // Will notify subscribers that we are no longer in detached mode.
-            LogStatus("dose_main is no longer running in detached mode!");
+            return;
         }
 
-        lllog(1) << "DOSE_MAIN: InjectNode cmd received."<<
+        lllog(1) << "DOSE_MAIN: InjectNode."<<
                   " NodeName=" << nodeName.c_str() <<
                   " NodeId=" <<  nodeId <<
                   " NodeTypeId=" << nodeTypeId <<
                   " DataAddress=" << dataAddress.c_str() << std::endl;
 
-        ENSURE (m_distribution != nullptr, << "InjectNode cmd received before StartDoseMain cmd!");
-
-        if (m_distribution->GetCommunication().Id() == nodeId)
-        {
-            lllog(1) << "DOSE_MAIN: Own node injected, starting distribution components!" << std::endl;
-
-            // Own node has been included in the system state, start connectionHandler and indirectly the poolHandler
-            m_connectionHandler->Start();
-            LogStatus("dose_main running...");
-        }
-        else
-        {
-            lllog(1) << "DOSE_MAIN: Injecting Node."<<
-                      " NodeName=" << nodeName.c_str() <<
-                      " NodeId=" <<  nodeId <<
-                      " NodeTypeId=" << nodeTypeId <<
-                      " DataAddress=" << dataAddress.c_str() << std::endl;
-
-            m_distribution->InjectNode(nodeName,
-                                       nodeId,
-                                       nodeTypeId,
-                                       dataAddress);
-        }
+        m_distribution->InjectNode(nodeName,
+                                   nodeId,
+                                   nodeTypeId,
+                                   dataAddress);
     }
 
     void DoseMainApp::ExcludeNode(int64_t nodeId, int64_t nodeTypeId)
     {
-        lllog(1) << "DOSE_MAIN: ExcludeNode cmd received."<<
+        lllog(1) << "DOSE_MAIN: ExcludeNode. "<<
                     " NodeId=" <<  nodeId <<
                     " NodeTypeId=" << nodeTypeId << std::endl;
 
         m_distribution->ExcludeNode(nodeId, nodeTypeId);
-        lllog(1)<< L"DOSE_MAIN: ExcludeNode cmd end" << std::endl;
     }
 
     void DoseMainApp::StoppedNodeIndication(int64_t nodeId)
@@ -336,20 +350,6 @@ namespace Internal
                     " NodeId=" <<  nodeId << std::endl;
 
         m_distribution->StoppedNodeIndication(nodeId);
-    }
-
-    void DoseMainApp::Detached()
-    {
-        ENSURE (m_distribution->IsLightNode(), << "DoseMain: Detached called for non-lightNode! NodeId=" << m_nodeId);
-        if (m_detached)
-        {
-            return; // We are already in detached mode.
-        }
-
-        m_connectionHandler->Start();
-        m_detached = true;
-        m_distribution->SetDetached(true); // Will exclude all nodes and notify subscribers.
-        LogStatus("dose_main is now running in detached mode!");
     }
 
     void DoseMainApp::OnAppEvent(const ConnectionPtr & connection, bool disconnecting)
@@ -380,12 +380,8 @@ namespace Internal
     void DoseMainApp::LogStatus(const std::string& str)
     {
         lllog(1) << str.c_str() << std::endl;
-        m_wcoutStrand.dispatch([str]
-                               {
-                                   std::wcout << str.c_str() << std::endl;
-                               });
+        m_wcoutStrand.dispatch([str]{std::wcout << str.c_str() << std::endl;});
     }
-
 }
 }
 }
