@@ -71,5 +71,21 @@ run_test("tc4")
 os.environ["DOU_TEST_DIR"] = os.path.join(args.test_conf_dir, "tc5")
 run_test("tc5")
 
+os.environ["DOU_TEST_DIR"] = os.path.join(args.test_conf_dir, "tc6")
+run_test("tc6")
+
+os.environ["DOU_TEST_DIR"] = os.path.join(args.test_conf_dir, "tc7")
+run_test("tc7")
+
+os.environ["DOU_TEST_DIR"] = os.path.join(args.test_conf_dir, "tc8")
+run_test("tc8")
+
+os.environ["DOU_TEST_DIR"] = os.path.join(args.test_conf_dir, "tc9")
+run_test("tc9")
+
+os.environ["DOU_TEST_DIR"] = os.path.join(args.test_conf_dir, "tc10")
+run_test("tc10")
+
+
 print("Success!")
 sys.exit(0)

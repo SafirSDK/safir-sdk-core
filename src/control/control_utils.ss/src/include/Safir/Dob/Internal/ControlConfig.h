@@ -187,10 +187,10 @@ namespace Control
                 }
 
                 // HeartbeatInterval
-                if (nt->HeartbeatInterval().IsNull())
+                if (nt->HeartbeatInterval().IsNull() || nt->HeartbeatInterval().GetVal() <= 0)
                 {
                     throw std::logic_error("Parameter error: "
-                                           "Node type " + nodeTypeName + ": HeartbeatInterval is mandatory");
+                                           "Node type " + nodeTypeName + ": HeartbeatInterval is mandatory and must be greater than 0");
                 }
 
                 auto heartbeatInterval = nt->HeartbeatInterval();
@@ -205,10 +205,10 @@ namespace Control
                 auto maxLostHeartbeats = nt->MaxLostHeartbeats();
 
                 // SlidingWindowsSize
-                if (nt->SlidingWindowsSize().IsNull())
+                if (nt->SlidingWindowsSize().IsNull() || nt->SlidingWindowsSize() <= 0)
                 {
                     throw std::logic_error("Parameter error: "
-                                           "Node type " + nodeTypeName + ": SlidingWindowsSize is mandatory");
+                                           "Node type " + nodeTypeName + ": SlidingWindowsSize is mandatory and must be greater than 0");
                 }
                 if (nt->SlidingWindowsSize()>20)
                 {
@@ -219,10 +219,10 @@ namespace Control
                 auto slidingWindowsSize = nt->SlidingWindowsSize();
 
                 // AckRequestThreshold
-                if (nt->AckRequestThreshold().IsNull())
+                if (nt->AckRequestThreshold().IsNull() || nt->AckRequestThreshold().GetVal() <= 0)
                 {
                     throw std::logic_error("Parameter error: "
-                                           "Node type " + nodeTypeName + ": AckRequestThreshold is mandatory");
+                                           "Node type " + nodeTypeName + ": AckRequestThreshold is mandatory and must be greater than 0");
                 }
                 auto ackRequestThreshold = nt->AckRequestThreshold();
                 if (ackRequestThreshold>slidingWindowsSize)
@@ -232,15 +232,21 @@ namespace Control
                 }
 
                 // RetryTimeout
-                if (nt->RetryTimeout().IsNull())
+                if (nt->RetryTimeout().IsNull() || nt->RetryTimeout().empty())
                 {
                     throw std::logic_error("Parameter error: "
-                                           "Node type " + nodeTypeName + ": RetryTimeout is mandatory");
+                                           "Node type " + nodeTypeName + ": RetryTimeout is mandatory and must contain at least one value");
                 }
 
                 std::vector<int> retryTimeout;
                 for (size_t index=0; index<nt->RetryTimeout().size(); ++index)
                 {
+                    auto retryMillisec = static_cast<int>(nt->RetryTimeout()[index] * 1000);
+                    if (retryMillisec <= 0)
+                    {
+                        throw std::logic_error("Parameter error: "
+                                               "Node type " + nodeTypeName + ": RetryTimeout values must all be greater than 0");
+                    }
                     retryTimeout.push_back(static_cast<int>(nt->RetryTimeout()[index] * 1000));
                 }
 

@@ -160,6 +160,67 @@ int main(int argc, char* argv[])
            CHECK(std::string(e.what()).find("KeepStateWhileDetached is mandatory") != std::string::npos)
         }
     }
+    else if (test == "tc6")
+    {
+        try
+        {
+            ctrl::Config conf;
+            LOGERROR("Expected an exception!");
+        }
+        catch (const std::exception& e)
+        {
+           CHECK(std::string(e.what()).find("HeartbeatInterval") != std::string::npos)
+        }
+    }
+    else if (test == "tc7")
+    {
+        try
+        {
+            ctrl::Config conf;
+            LOGERROR("Expected an exception!");
+        }
+        catch (const std::exception& e)
+        {
+           CHECK(std::string(e.what()).find("SlidingWindowsSize") != std::string::npos)
+        }
+    }
+    else if (test == "tc8")
+    {
+        try
+        {
+            ctrl::Config conf;
+            LOGERROR("Expected an exception!");
+        }
+        catch (const std::exception& e)
+        {
+           CHECK(std::string(e.what()).find("AckRequestThreshold") != std::string::npos)
+        }
+    }
+    else if (test == "tc9")
+    {
+        try
+        {
+            ctrl::Config conf;
+            LOGERROR("Expected an exception!");
+        }
+        catch (const std::exception& e)
+        {
+           CHECK(std::string(e.what()).find("RetryTimeout is mandatory") != std::string::npos)
+        }
+    }
+    else if (test == "tc10")
+    {
+        try
+        {
+            ctrl::Config conf;
+            LOGERROR("Expected an exception!");
+        }
+        catch (const std::exception& e)
+        {
+           CHECK(std::string(e.what()).find("RetryTimeout values must all be greater than 0") != std::string::npos)
+        }
+    }
+
     else
     {
         std::cout << "Valid test case args are: Normal" << std::endl;

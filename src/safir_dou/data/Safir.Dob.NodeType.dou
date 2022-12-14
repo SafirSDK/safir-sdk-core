@@ -11,13 +11,15 @@
             <maxLengthRef><name>Safir.Dob.NodeParameters.MaxNodeNameLength</name></maxLengthRef>
         </member>
         <member>
-            <summary>Multicast address and port used for the control channel for nodes of this type. An empty string or null for this or MulticastAddressData indicates that nodes of this type can't be reached via multicast.</summary>
+            <summary>Multicast address and port used for the control channel for nodes of this type. An empty string or null for this or MulticastAddressData
+                     indicates that nodes of this type can't be reached via multicast.</summary>
             <name>MulticastAddressControl</name>
             <type>String</type>
             <maxLength>500</maxLength>
         </member>
         <member>
-            <summary>Multicast address and port used for the control channel for nodes of this type. An empty string or null for this or MulticastAddressControl indicates that nodes of this type can't be reached via multicast.</summary>
+            <summary>Multicast address and port used for the control channel for nodes of this type. An empty string or null for this or MulticastAddressControl
+                     indicates that nodes of this type can't be reached via multicast.</summary>
             <name>MulticastAddressData</name>
             <type>String</type>
             <maxLength>500</maxLength>
@@ -43,14 +45,16 @@
             <type>Int32</type>
         </member>
         <member>
-            <summary>Time to wait for Ack before retrying transmission to this node. First resend will use first timeout, second the secont and so on. Last one is used until the end.</summary>
+            <summary>Time to wait for Ack before retrying transmission to this node. First resend will use first timeout, second the second timeout and so on.
+                     Last one is used until the end.</summary>
             <name>RetryTimeout</name>
             <type>Second64</type>
             <sequence/>
         </member>
         <member>
-            <summary>If true, a node of this type can start a system of its own. A node with a node type where this parameter is set to false will never start a system of its own, it just waits for a system to join.
-                     This parameter is mandatory if node is not a light node, i.e IsLightNode=False. If this node is a light node, then RequiredForStart is optional but is not allowed to be True.</summary>
+            <summary>If true, a node of this type can start a system of its own. A node with a node type where this parameter is set to false will never start a system of its own,
+                     it just waits for a system to join. This parameter is mandatory if node is not a light node, i.e IsLightNode=False.
+                     If this node is a light node, then RequiredForStart is optional but is not allowed to be True.</summary>
             <name>RequiredForStart</name>
             <type>Boolean</type>
         </member>
@@ -61,7 +65,8 @@
             <type>Boolean</type>
         </member>
         <member>
-            <summary>If this value is set to True, all entities and registrations from other nodes are kept when a light node is getting detached. When the light node attaches again to a system the state will be synced with the rest of the system.
+            <summary>If this value is set to True, all entities and registrations from other nodes are kept when a light node is getting detached.
+                     When the light node attaches again to a system the state will be synced with the rest of the system.
                      If this value is set to False, all entites and registrations from other nodes are automatically deleted when a light node is getting detached.  
                      This value is mandatory if the node is a light node, i.e IsLightNode=True. If not a light node this value must not be set.</summary>
             <name>KeepStateWhileDetached</name>

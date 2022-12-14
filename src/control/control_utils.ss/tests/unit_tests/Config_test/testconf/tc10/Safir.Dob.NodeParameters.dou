@@ -1,0 +1,118 @@
+<class xmlns="urn:safir-dots-unit">
+  <summary>Contains paramaters for all nodes in the system.</summary>
+  <name>Safir.Dob.NodeParameters</name>
+  <baseClass>Safir.Dob.Parametrization</baseClass>
+  <parameters>
+
+    <parameter>
+      <summary>Specifies the Id of the System/System installation.</summary>
+      <name>SystemId</name>
+      <type>InstanceId</type>
+      <value>StandAlone</value>
+    </parameter>
+    <parameter>
+      <summary>Specifies the amount of shared memory to allocate for the Dob distribution (in megabytes)</summary>
+      <name>SharedMemorySize</name>
+      <type>Int32</type>
+      <value>100</value>
+    </parameter>
+    <parameter>
+      <summary>This controls how many connections the local Dob instance can handle.</summary>
+      <name>MaxNumberOfConnections</name>
+      <type>Int32</type>
+      <value>1000</value>
+    </parameter>
+    <parameter>
+      <summary>Maximum string length of a node name and node type name.</summary>
+      <name>MaxNodeNameLength</name>
+      <type>Int32</type>
+      <value>256</value>
+    </parameter>
+    <parameter>
+      <summary>Determines if an unrecoverable error, typically an abondoned locked shared memory lock, causes a termination of dose_main. Consider setting this parameter to false when running dose_main under a debugger</summary>
+      <name>TerminateDoseMainWhenUnrecoverableError</name>
+      <type>Boolean</type>
+      <value>True</value>
+    </parameter>
+    <parameter>
+      <summary>Min time (seconds) before an apparently hanging dose_main thread causes a termination of the dose_main program.</summary>
+      <name>DoseMainThreadWatchdogTimeout</name>
+      <type>Int32</type>
+      <value>60</value>
+    </parameter>
+    <parameter>
+      <summary>The number of contexts in the system. (The context numbering starts from 0.)</summary>
+      <name>NumberOfContexts</name>
+      <type>Int32</type>
+      <value>1</value>
+    </parameter>
+    <parameter>
+      <summary>Specifies for every context wether or not it is a local context. The array length must correspond to the NumberOfContexts parameter above.</summary>
+      <name>LocalContexts</name>
+      <type>Boolean</type>
+      <arrayElements>
+        <arrayElement>
+          <value>False</value>
+        </arrayElement>
+      </arrayElements>
+    </parameter>
+    <parameter>
+      <summary>Full filename where the system stores the incarnation blacklist. Use forward slashes as directory separator!</summary>
+      <name>IncarnationBlacklistFilename</name>
+      <type>String</type>
+      <value>@{TEMP}/safir-sdk-core/system-incarnation-blacklist.txt</value>
+    </parameter>
+    <parameter>
+      <summary>
+        How long to wait for the local interfaces becoming available before
+        giving up. I.e. if ControlAddress or DataAddress (as specified above)
+        have not become available before this timeout expires safir_control will
+        exit with an error.
+      </summary>
+      <name>LocalInterfaceTimeout</name>
+      <type>Second64</type>
+      <value>90.0</value>
+    </parameter>
+
+    <parameter>
+      <summary>
+        How long to wait at startup to find other nodes before forming a new system.
+        If this is 0 an automatic timeout will be calculated, the maximum value of
+        MaxLostHeartbeats*HeartbeatInterval*2 for all node types.
+      </summary>
+      <name>NewSystemFormationTimeout</name>
+      <type>Second64</type>
+      <value>456</value>
+    </parameter>
+    
+    <parameter>
+      <summary>Network fragment size. Messages larger than this value will be splitted up in fragmenst.</summary>
+      <name>FragmentSize</name>
+      <type>Int32</type>
+      <value>1450</value>
+    </parameter>
+
+    <parameter>
+      <summary>Defines the different node types in the system.</summary>
+      <name>NodeTypes</name>
+      <type>Safir.Dob.NodeType</type>
+      <array>
+        <Safir.Dob.NodeType>
+            <Name>Server</Name>
+            <MulticastAddressControl>192.0.0.1:9500</MulticastAddressControl>
+            <MulticastAddressData>192.0.0.1:9501</MulticastAddressData>
+            <HeartbeatInterval>1</HeartbeatInterval>
+            <MaxLostHeartbeats>5</MaxLostHeartbeats>
+            <SlidingWindowsSize>2</SlidingWindowsSize>
+            <AckRequestThreshold>1</AckRequestThreshold>
+            <RetryTimeout>
+                <Second64>0.02</Second64>
+                <Second64>0.0</Second64>
+            </RetryTimeout>
+            <RequiredForStart>True</RequiredForStart>
+        </Safir.Dob.NodeType>
+      </array>
+    </parameter>
+
+  </parameters>
+</class>
