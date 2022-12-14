@@ -88,6 +88,8 @@ void MainWindow::OnConnected()
 
     proxyModel->setSourceModel(m_nodeTableModel);
     ui->nodeTableView->setModel(proxyModel);
+    ui->nodeTableView->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    ui->nodeTableView->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
 
     ui->nodeTableView->setColumnHidden(NODE_ID_COLUMN, false);
 

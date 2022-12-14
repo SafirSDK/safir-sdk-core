@@ -297,8 +297,8 @@ namespace Com
         void ExcludeNode(int64_t nodeId);
 
         /**
-         * This is a special method that onlya has effect when this node is a light nodes.
-         * When a lightnode excludes a normal node, it is guaranteed that the excluded node will not be reported again  on the NewNodeCallback
+         * This is a special method that only has effect when this node is a light node.
+         * When a lightnode excludes a normal node, it is guaranteed that the excluded node will not be reported again on the NewNodeCallback
          * for the given number of seconds. If the normal nodes ip is a seed address, the discovering of new nodes on that address will also be
          * delayed for the given time limit.
          * @param seconds - Node exclusion time limit for normal nodes.

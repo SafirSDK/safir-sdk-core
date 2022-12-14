@@ -24,8 +24,7 @@
 
 #include "NodeTableModel.h"
 #include "Safir/Dob/NotFoundException.h"
-
-
+#include <Safir/Dob/NodeParameters.h>
 
 NodeTableModel::NodeTableModel(QObject *parent)
     : QAbstractTableModel(parent)
@@ -33,6 +32,16 @@ NodeTableModel::NodeTableModel(QObject *parent)
     m_dobConnection.Attach();
 
     m_dobConnection.SubscribeEntity(Safir::Dob::NodeInfo::ClassTypeId, this );
+
+    for (auto i = 0; i < Safir::Dob::NodeParameters::NodeTypesArraySize(); ++i)
+    {
+        const auto& nt = Safir::Dob::NodeParameters::NodeTypes(i);
+
+        if (!nt->IsLightNode().IsNull() && nt->IsLightNode().GetVal() == true)
+        {
+            m_lightNodeTypeNames.insert(Safir::Dob::NodeParameters::NodeTypes(i)->Name().GetVal());
+        }
+    }
 }
 
 
@@ -71,6 +80,9 @@ QVariant NodeTableModel::headerData(int section,
     case NODE_ID_COLUMN:
         return QString("Node id");
         break;
+    case NODE_STATE:
+        return QString("State");
+        break;
     default:
         break;
     }
@@ -105,11 +117,15 @@ QVariant NodeTableModel::data(const QModelIndex &index, int role) const
             return QString::fromStdWString(nodeInfo->IpAddress().GetVal());
             break;
         case TYPE_COLUMN:
-            return QString::fromStdWString(nodeInfo->NodeType().GetVal());
+            return m_lightNodeTypeNames.find(nodeInfo->NodeType().GetVal()) != m_lightNodeTypeNames.end() ?
+                        QString::fromStdWString(nodeInfo->NodeType().GetVal()) + QString::fromUtf8("  \u24c1 ") :
+                        QString::fromStdWString(nodeInfo->NodeType().GetVal());
             break;
         case NODE_ID_COLUMN:
             return (qint64) m_nodeInfos.at(index.row()).GetInstanceId().GetRawValue();
             break;
+        case NODE_STATE:
+            return QString::fromStdWString(Safir::Dob::NodeState::ToString(nodeInfo->State().GetVal()));
         default:
             break;
         }

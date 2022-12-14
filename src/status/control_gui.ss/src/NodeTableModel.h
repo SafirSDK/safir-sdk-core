@@ -27,7 +27,7 @@
 
 #include <Safir/Dob/SecondaryConnection.h>
 #include <Safir/Dob/NodeInfo.h>
-#include <list>
+#include <set>
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -43,11 +43,12 @@
 #pragma warning (pop)
 #endif
 
-#define NO_COLUMNS 4
+#define NO_COLUMNS 5
 #define NAME_COLUMN 0
 #define IP_COLUMN 1
 #define TYPE_COLUMN 2
 #define NODE_ID_COLUMN 3
+#define NODE_STATE 4
 
 class NodeTableModel : public QAbstractTableModel,
                       public Safir::Dob::EntitySubscriber
@@ -77,6 +78,7 @@ private:
     Safir::Dob::SecondaryConnection m_dobConnection;
     std::vector<Safir::Dob::Typesystem::EntityId> m_nodeInfos;
     int64_t m_ownNodeId;
+    std::set<std::wstring> m_lightNodeTypeNames;
 };
 
 #endif // NODETABLEMODEL_H
