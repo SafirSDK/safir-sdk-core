@@ -4,6 +4,7 @@ ADD_EXECUTABLE(IncarnationBlackListHandler_test IncarnationBlackListHandler_test
 
 TARGET_LINK_LIBRARIES(SystemStateHandler_test PRIVATE
   system_picture
+  lluf_internal
   Boost::unit_test_framework)
 
 TARGET_LINK_LIBRARIES(StopHandler_test PRIVATE

@@ -238,9 +238,9 @@ async def check_pools_connected_nodes(*apps):
 
 # ==============================================================================================
 # Simple Safir application. The constructor will connect to the DOB and subscribe for all 
-# entites and all registrations and will also register two handlers and create an entitiy instance.
+# entites and all registrations and will also register two handlers and create some entities.
 # It will start a running task that handles send and receive to the Dob. Stop will end the task
-# Safir_instance:  1,2 = normal node,  3,4 = light node
+# Safir_instance:  1,2 = normal node,  3,4 = lightnode clear state,  5,6 = lightnodes keep state
 # ==============================================================================================
 class SafirApp:
     def __init__(self, safir_instance, node_id, num_entities=3):

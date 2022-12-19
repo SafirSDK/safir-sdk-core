@@ -102,6 +102,10 @@ public:
         return nodes[index].dataAddress;
     }
 
+    std::string ToJson() const
+    {
+        return "";
+    }
 
 };
 

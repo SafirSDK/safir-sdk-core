@@ -24,6 +24,7 @@
 #pragma once
 
 #include <Safir/Dob/Internal/SystemState.h>
+#include <Safir/Utilities/Internal/LowLevelLogger.h>
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -102,6 +103,7 @@ namespace Control
 
         void SetNewState(const SystemState& newState)
         {
+            lllog(8) << L"CTRL: Got SystemState from SP:\n" << newState.ToJson().c_str() << std::endl;
             if (m_detached || newState.IsDetached())
             {
                 // We will always get a formSystem-callback when a lightNode becomes detached.

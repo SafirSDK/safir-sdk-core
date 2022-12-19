@@ -141,12 +141,19 @@ def pools_equal(safir_app1, safir_app2):
     reg = dict_to_sorted_list(safir_app1.registrations) == dict_to_sorted_list(safir_app2.registrations)
     return ent and reg
 
-async def check_pools(expected_ent, *apps, ):
+async def check_pool(app, expected_registrations, expected_entities):
     def _check():
-        for app in apps:
-            for id, content in expected_ent:
-                if content not in app.entities.get(id):
-                    return False
+        if len(expected_registrations) != len(app.registrations): return False
+        for id, content in expected_registrations:
+            if app.registrations.get(id) is None:
+                return False
+
+        if len(expected_entities) != len(app.entities): return False
+        for id, content in expected_entities:
+            ent = app.entities.get(id)
+            if ent is None: return False
+            if content not in ent: return False
+
         return True
     
     max_tries = 5
@@ -156,14 +163,20 @@ async def check_pools(expected_ent, *apps, ):
         else:
             if check > 2: log("--- Extended wait for PD to finish, wait time " + str((check + 1)*10) + " sec")
             await asyncio.sleep(10)
-    
+
+    log("*** ERROR: Incorrect pool on node " + str(app.node_id) + ", safir_instance: " + str(app.safir_instance))
+    print("  Expected registrations:")
+    for t, v in expected_registrations: print("    " + t + " - " + str(v))
+    print("  Expected entities:")
+    for t, v in expected_entities: print("    " + t + " - " + str(v))
+    app.dump_pool()
     raise AssertionError("Incorrect pool")    
 
 # ==============================================================================================
 # Simple Safir application. The constructor will connect to the DOB and subscribe for all 
-# entites and all registrations and will also register two handlers and create an entitiy instance.
+# entites and all registrations.
 # It will start a running task that handles send and receive to the Dob. Stop will end the task
-# Safir_instance:  1,2 = normal node,  3,4 = light node
+# Safir_instance:  1,2 = normal node,  3,4 = lightnode clear state,  5,6 = lightnodes keep state
 # ==============================================================================================
 class SafirApp:
     def __init__(self, safir_instance, node_id, num_entities=3):
@@ -174,6 +187,7 @@ class SafirApp:
         self.entities = dict()
         self.registrations = dict()
         self.stopped = False
+        self._setup_dob()
         self.task = asyncio.create_task(self._run())
 
     async def stop(self):
@@ -195,6 +209,8 @@ class SafirApp:
             if state in self.entities.get(nodeInfo):
                 return
 
+        log("*** wait_for_node_state timed out, dump pool")
+        self.dump_pool()
         raise AssertionError("app" + str(self.node_id) +" did not get NodeInfo.State='" + state +"' within " + str(timeout) + " seconds.")
 
     def dump_pool(self):
@@ -213,8 +229,8 @@ class SafirApp:
             try:
                 async with websockets.connect(uri) as ws:
                     self.ws = ws
-                    log("Node " + str(self.node_id) + " is connected to the DOB")
-                    await asyncio.gather(self._reader(), self._sender(), self._setup_dob())
+                    log("--- Node " + str(self.node_id) + " is connected to the DOB")
+                    await asyncio.gather(self._reader(), self._sender())
                     break;
             except ConnectionRefusedError as e:
                 await asyncio.sleep(5)
@@ -266,59 +282,66 @@ class SafirApp:
                 await self.ws.close()
                 return
 
-    async def _setup_dob(self):
+    def _setup_dob(self):
         app_name = "app" + str(self.node_id)
-        entity_type = ""
-        service_type = ""
-        if (self.safir_instance < 3): # normal node
-            entity_type = "DoseTest.GlobalEntity" if self.safir_instance == 1 else "DoseTest.GlobalEntity2"
-            service_type = "DoseTest.GlobalService"
-        else: # light node
-            entity_type =  "DoseTest.LimitedEntity" if self.safir_instance in [3, 5] else "DoseTest.LimitedEntity2"
-            service_type = "DoseTest.LimitedService"
-
-        await self.send('{"method": "open", "params": {"connectionName": "' + app_name + '"}, "id": 1}')
-        await self.send('{"method": "registerEntityHandler", "params": {"typeId": "' + entity_type + '"}, "id": 2}')
-        await self.send('{"method": "registerServiceHandler", "params": {"typeId": "' + service_type + '", "handlerId": "' + app_name + '"}, "id": 3}')
-        await self.send('{"method": "subscribeEntity", "params": {"typeId": "Safir.Dob.Entity"}, "id": 4}')
-        await self.send('{"method": "subscribeRegistration", "params": {"typeId": "Safir.Dob.Entity"}, "id": 5}')
-        await self.send('{"method": "subscribeRegistration", "params": {"typeId": "Safir.Dob.Service"}, "id": 6}')
-        for instance in range(1, self.number_of_entities + 1):
-            await self.send('{"method": "setEntity", "params": {"entity": {"_DouType": "' + entity_type + '", "Info": "version0"}, "instanceId": ' + str(instance) + '}, "id": ' + str(instance + 6) + '}')
-        
+        self.sendQueue.put_nowait('{"method": "open", "params": {"connectionName": "' + app_name + '"}, "id": 1}')
+        self.sendQueue.put_nowait('{"method": "subscribeEntity", "params": {"typeId": "Safir.Dob.Entity"}, "id": 2}')
+        self.sendQueue.put_nowait('{"method": "subscribeRegistration", "params": {"typeId": "Safir.Dob.Entity"}, "id": 3}')
+        self.sendQueue.put_nowait('{"method": "subscribeRegistration", "params": {"typeId": "Safir.Dob.Service"}, "id": 4}')
 
 # ===================================================================
 # Test cases
 # ===================================================================
-async def one_normal_one_light_detach_reattach_light(args):
-    with test_case("one_normal_one_light_detach_reattach_light"),\
+async def one_normal_one_light_detach_reattach_light_changed_entities(args):
+    with test_case("one_normal_one_light_detach_reattach_light_changed_entities"),\
         launch_node(args, safir_instance=1, node_id=1) as node1,\
         launch_node(args, safir_instance=5, node_id=5) as node5:
     
         app1 = SafirApp(safir_instance=1, node_id=1)
         app5 = SafirApp(safir_instance=5, node_id=5)
 
+        await app1.send('{"method": "registerEntityHandler", "params": {"typeId": "DoseTest.GlobalEntity"}, "id": 5}')
+        await app1.send('{"method": "setEntity", "params": {"entity": {"_DouType": "DoseTest.GlobalEntity", "Info": "version0"}, "instanceId": 1}, "id": 6}')
+        await app1.send('{"method": "setEntity", "params": {"entity": {"_DouType": "DoseTest.GlobalEntity", "Info": "version0"}, "instanceId": 2}, "id": 7}')
+        await app1.send('{"method": "setEntity", "params": {"entity": {"_DouType": "DoseTest.GlobalEntity", "Info": "version0"}, "instanceId": 3}, "id": 8}')
+        initialRegGlobal = [("Safir.Dob.NodeInfo:1", "Registered"), ("DoseTest.GlobalEntity:DEFAULT_HANDLER", "Registered")]
+        initialEntGlobal = [("Safir.Dob.NodeInfo:1", "_"), ("DoseTest.GlobalEntity:1", "version0"), ("DoseTest.GlobalEntity:2", "version0"), ("DoseTest.GlobalEntity:3", "version0")]
+
+        await app5.send('{"method": "registerEntityHandler", "params": {"typeId": "DoseTest.LimitedEntity"}, "id": 5}')
+        await app5.send('{"method": "setEntity", "params": {"entity": {"_DouType": "DoseTest.LimitedEntity", "Info": "version0"}, "instanceId": 1}, "id": 6}')
+        await app5.send('{"method": "setEntity", "params": {"entity": {"_DouType": "DoseTest.LimitedEntity", "Info": "version0"}, "instanceId": 2}, "id": 7}')
+        await app5.send('{"method": "setEntity", "params": {"entity": {"_DouType": "DoseTest.LimitedEntity", "Info": "version0"}, "instanceId": 3}, "id": 8}')
+        initialRegLimited = [("Safir.Dob.NodeInfo:5", "Registered"), ("DoseTest.LimitedEntity:DEFAULT_HANDLER", "Registered")]
+        initialEntLimited = [("Safir.Dob.NodeInfo:5", "_"), ("DoseTest.LimitedEntity:1", "version0"), ("DoseTest.LimitedEntity:2", "version0"), ("DoseTest.LimitedEntity:3", "version0")]
+
         # let the system run for a while to complete PD
         await asyncio.sleep(5)
         await app5.wait_for_node_state("Attached")
         log("--- node5 is now attached")        
-
-        entities = [("DoseTest.GlobalEntity:1", "version0"), ("DoseTest.GlobalEntity:2", "version0"), ("DoseTest.GlobalEntity:3", "version0")]
-        await check_pools(entities, app1, app5)
+        
+        await check_pool(app1, initialRegGlobal + initialRegLimited, initialEntGlobal + initialEntLimited)
+        await check_pool(app5, initialRegGlobal + initialRegLimited, initialEntGlobal + initialEntLimited)
 
         # Disable network on lightnode and wait for it to be Detached
         set_network_state(False, safir_instance=5) 
         await app5.wait_for_node_state("Detached")
         log("--- node5 is now detached")
 
-        await app1.send('{"method": "setEntity", "params": {"entity": {"_DouType": "DoseTest.GlobalEntity", "Info": "version1"}, "instanceId": 2}, "id": 10}')
-        await app1.send('{"method": "setEntity", "params": {"entity": {"_DouType": "DoseTest.GlobalEntity", "Info": "version1"}, "instanceId": 3}, "id": 11}')
-        updated = [("DoseTest.GlobalEntity:1", "version0"), ("DoseTest.GlobalEntity:2", "version1"), ("DoseTest.GlobalEntity:3", "version1")]
+        # Do some changes on bothe nodes while they are detached
+        await app1.send('{"method": "deleteEntity", "params": {"typeId": "DoseTest.GlobalEntity", "instanceId": 2}, "id": 9}') # delete
+        await app1.send('{"method": "setEntity", "params": {"entity": {"_DouType": "DoseTest.GlobalEntity", "Info": "version1"}, "instanceId": 3}, "id": 10}') # update
+        await app1.send('{"method": "setEntity", "params": {"entity": {"_DouType": "DoseTest.GlobalEntity", "Info": "version0"}, "instanceId": 4}, "id": 11}') # new
+        changedEntGlobal = [("Safir.Dob.NodeInfo:1", "_"), ("DoseTest.GlobalEntity:1", "version0"), ("DoseTest.GlobalEntity:3", "version1"), ("DoseTest.GlobalEntity:4", "version0")]
+
+        await app5.send('{"method": "deleteEntity", "params": {"typeId": "DoseTest.LimitedEntity", "instanceId": 2}, "id": 9}') # delete
+        await app5.send('{"method": "setEntity", "params": {"entity": {"_DouType": "DoseTest.LimitedEntity", "Info": "version1"}, "instanceId": 3}, "id": 10}') # update
+        await app5.send('{"method": "setEntity", "params": {"entity": {"_DouType": "DoseTest.LimitedEntity", "Info": "version0"}, "instanceId": 4}, "id": 11}') # new
+        changedEntLimited = [("Safir.Dob.NodeInfo:5", "_"), ("DoseTest.LimitedEntity:1", "version0"), ("DoseTest.LimitedEntity:3", "version1"), ("DoseTest.LimitedEntity:4", "version0")]
 
         # let the system run for a while to complete PD
         await asyncio.sleep(5)
-        await check_pools(updated, app1)
-        await check_pools(entities, app5)
+        await check_pool(app1, initialRegGlobal, changedEntGlobal)
+        await check_pool(app5, initialRegGlobal + initialRegLimited, initialEntGlobal + changedEntLimited)
 
         # Enable network on lightnode and wait for it to be Attached
         set_network_state(True, safir_instance=5) 
@@ -327,15 +350,203 @@ async def one_normal_one_light_detach_reattach_light(args):
 
         # let the system run for a while to complete PD
         await asyncio.sleep(5)
-        await check_pools(updated, app1, app5)
+        await check_pool(app1, initialRegGlobal + initialRegLimited, changedEntGlobal + changedEntLimited)
+        await check_pool(app5, initialRegGlobal + initialRegLimited, changedEntGlobal + changedEntLimited)
 
         await asyncio.gather(app1.stop(), app5.stop())
+
+async def one_normal_one_light_detach_reattach_light_changed_registrations(args):
+    with test_case("one_normal_one_light_detach_reattach_light_changed_registrations"),\
+        launch_node(args, safir_instance=1, node_id=1) as node1,\
+        launch_node(args, safir_instance=5, node_id=5) as node5:
+    
+        app1 = SafirApp(safir_instance=1, node_id=1)
+        app5 = SafirApp(safir_instance=5, node_id=5)
+
+        await app1.send('{"method": "registerEntityHandler", "params": {"typeId": "DoseTest.GlobalEntity"}, "id": 5}')
+        await app1.send('{"method": "registerServiceHandler", "params": {"typeId": "DoseTest.GlobalService", "handlerId": "app1"}, "id": 6}')
+        initialRegGlobal = [("Safir.Dob.NodeInfo:1", "Registered"), ("DoseTest.GlobalEntity:DEFAULT_HANDLER", "Registered"), ("DoseTest.GlobalService:app1", "Registered")]
+        initialEntGlobal = [("Safir.Dob.NodeInfo:1", "_")]
+
+        await app5.send('{"method": "registerEntityHandler", "params": {"typeId": "DoseTest.LimitedEntity"}, "id": 5}')
+        await app5.send('{"method": "registerServiceHandler", "params": {"typeId": "DoseTest.LimitedService", "handlerId": "app5"}, "id": 6}')
+        initialRegLimited = [("Safir.Dob.NodeInfo:5", "Registered"), ("DoseTest.LimitedEntity:DEFAULT_HANDLER", "Registered"), ("DoseTest.LimitedService:app5", "Registered")]
+        initialEntLimited = [("Safir.Dob.NodeInfo:5", "_")]
+
+        # let the system run for a while to complete PD
+        await asyncio.sleep(5)
+        await app5.wait_for_node_state("Attached")
+        log("--- node5 is now attached")        
+        await check_pool(app1, initialRegGlobal + initialRegLimited, initialEntGlobal + initialEntLimited)
+        await check_pool(app5, initialRegGlobal + initialRegLimited, initialEntGlobal + initialEntLimited)
+
+        # Disable network on lightnode and wait for it to be Detached
+        set_network_state(False, safir_instance=5) 
+        await app5.wait_for_node_state("Detached")
+        log("--- node5 is now detached")
+
+        # Do some changes on bothe nodes while they are detached
+        await app1.send('{"method": "unregisterHandler", "params": {"typeId": "DoseTest.GlobalService"}, "id": 7}')
+        await app1.send('{"method": "registerEntityHandler", "params": {"typeId": "DoseTest.GlobalEntity2"}, "id": 8}')
+        await app1.send('{"method": "registerServiceHandler", "params": {"typeId": "DoseTest.GlobalService", "handlerId": "updatedApp1"}, "id": 9}')
+        changedRegGlobal = [("Safir.Dob.NodeInfo:1", "Registered"), ("DoseTest.GlobalEntity:DEFAULT_HANDLER", "Registered"), ("DoseTest.GlobalEntity2:DEFAULT_HANDLER", "Registered"), ("DoseTest.GlobalService:updatedApp1", "Registered")]
+
+        await app5.send('{"method": "unregisterHandler", "params": {"typeId": "DoseTest.LimitedService"}, "id": 7}')
+        await app5.send('{"method": "registerEntityHandler", "params": {"typeId": "DoseTest.LimitedEntity2"}, "id": 8}')
+        await app5.send('{"method": "registerServiceHandler", "params": {"typeId": "DoseTest.LimitedService", "handlerId": "updatedApp5"}, "id": 9}')
+        changedRegLimited = [("Safir.Dob.NodeInfo:5", "Registered"), ("DoseTest.LimitedEntity:DEFAULT_HANDLER", "Registered"), ("DoseTest.LimitedEntity2:DEFAULT_HANDLER", "Registered"), ("DoseTest.LimitedService:updatedApp5", "Registered")]
+
+        # let the system run for a while to complete PD
+        await asyncio.sleep(5)
+        await check_pool(app1, changedRegGlobal, initialEntGlobal)
+        await check_pool(app5, initialRegGlobal + changedRegLimited, initialEntGlobal + initialEntLimited)
+
+        # Enable network on lightnode and wait for it to be Attached
+        set_network_state(True, safir_instance=5) 
+        await app5.wait_for_node_state("Attached")
+        log("--- node5 is now attached again")
+
+        # let the system run for a while to complete PD
+        await asyncio.sleep(5)
+        await check_pool(app1, changedRegGlobal + changedRegLimited, initialEntGlobal + initialEntLimited)
+        await check_pool(app5, changedRegGlobal + changedRegLimited, initialEntGlobal + initialEntLimited)
+
+        await asyncio.gather(app1.stop(), app5.stop())
+
+async def one_normal_one_light_detach_reattach_light_big_pool(args):
+    with test_case("one_normal_one_light_detach_reattach_light_big_pool"),\
+        launch_node(args, safir_instance=1, node_id=1) as node1,\
+        launch_node(args, safir_instance=5, node_id=5) as node5:
+    
+        app1 = SafirApp(safir_instance=1, node_id=1)
+        app5 = SafirApp(safir_instance=5, node_id=5)
+
+        await app1.send('{"method": "registerEntityHandler", "params": {"typeId": "DoseTest.GlobalEntity"}, "id": 5}')
+        await app1.send('{"method": "registerServiceHandler", "params": {"typeId": "DoseTest.GlobalService", "handlerId": "app1"}, "id": 6}')
+        initialRegGlobal = [("Safir.Dob.NodeInfo:1", "Registered"), ("DoseTest.GlobalEntity:DEFAULT_HANDLER", "Registered"), ("DoseTest.GlobalService:app1", "Registered")]
+        initialEntGlobal = [("Safir.Dob.NodeInfo:1", "_")]
+
+        await app5.send('{"method": "registerEntityHandler", "params": {"typeId": "DoseTest.LimitedEntity"}, "id": 5}')
+        await app5.send('{"method": "registerServiceHandler", "params": {"typeId": "DoseTest.LimitedService", "handlerId": "app5"}, "id": 6}')
+        initialRegLimited = [("Safir.Dob.NodeInfo:5", "Registered"), ("DoseTest.LimitedEntity:DEFAULT_HANDLER", "Registered"), ("DoseTest.LimitedService:app5", "Registered")]
+        initialEntLimited = [("Safir.Dob.NodeInfo:5", "_")]
+
+        # Create 8000 global entities
+        for i in range(8000):
+            await app1.send('{"method": "setEntity", "params": {"entity": {"_DouType": "DoseTest.GlobalEntity", "Info": "version0"}, "instanceId": ' + str(i + 1) + '}, "id": ' + str(i + 6) +'}')
+            initialEntGlobal.append(("DoseTest.GlobalEntity:" + str(i + 1), "version0"))
+
+        # Create 2000 limited entities
+        for i in range(2000):
+            await app5.send('{"method": "setEntity", "params": {"entity": {"_DouType": "DoseTest.LimitedEntity", "Info": "version0"}, "instanceId": ' + str(i + 1) + '}, "id": ' + str(i + 6) +'}')
+            initialEntLimited.append(("DoseTest.LimitedEntity:" + str(i + 1), "version0"))
+
+        # let the system run for a while to complete PD
+        await asyncio.sleep(5)
+        await app5.wait_for_node_state("Attached")
+        log("--- node5 is now attached")        
+        await check_pool(app1, initialRegGlobal + initialRegLimited, initialEntGlobal + initialEntLimited)
+        await check_pool(app5, initialRegGlobal + initialRegLimited, initialEntGlobal + initialEntLimited)
+
+        # Disable network on lightnode and wait for it to be Detached
+        set_network_state(False, safir_instance=5) 
+        await app5.wait_for_node_state("Detached")
+        log("--- node5 is now detached")
+
+        # Do some changes on bothe nodes while they are detached
+        await app1.send('{"method": "unregisterHandler", "params": {"typeId": "DoseTest.GlobalService"}, "id": 7}')
+        await app1.send('{"method": "registerEntityHandler", "params": {"typeId": "DoseTest.GlobalEntity2"}, "id": 8}')
+        await app1.send('{"method": "registerServiceHandler", "params": {"typeId": "DoseTest.GlobalService", "handlerId": "updatedApp1"}, "id": 9}')
+        changedRegGlobal = [("Safir.Dob.NodeInfo:1", "Registered"), ("DoseTest.GlobalEntity:DEFAULT_HANDLER", "Registered"), ("DoseTest.GlobalEntity2:DEFAULT_HANDLER", "Registered"), ("DoseTest.GlobalService:updatedApp1", "Registered")]
+        changedEntGlobal = [("Safir.Dob.NodeInfo:1", "_")]
+        for i in range(1, 4001): # Unchanged entities
+            changedEntGlobal.append(("DoseTest.GlobalEntity:" + str(i), "version0"))
+        for i in range(4001, 6001): # Updated entities
+            await app1.send('{"method": "setEntity", "params": {"entity": {"_DouType": "DoseTest.GlobalEntity", "Info": "version1"}, "instanceId": ' + str(i) + '}, "id": ' + str(i + 9000) +'}')
+            changedEntGlobal.append(("DoseTest.GlobalEntity:" + str(i), "version1"))
+        for i in range(6001, 8001): # Deleted entities
+            await app1.send('{"method": "deleteEntity", "params": {"typeId": "DoseTest.GlobalEntity", "instanceId": ' + str(i) + '}, "id": ' + str(i + 11000) +'}')
+        for i in range(1, 2001): # New entities
+            await app1.send('{"method": "setEntity", "params": {"entity": {"_DouType": "DoseTest.GlobalEntity2", "Info": "version0"}, "instanceId": ' + str(i) + '}, "id": ' + str(i + 13000) +'}')
+            changedEntGlobal.append(("DoseTest.GlobalEntity2:" + str(i), "version0"))
+
+        await app5.send('{"method": "unregisterHandler", "params": {"typeId": "DoseTest.LimitedService"}, "id": 7}')
+        await app5.send('{"method": "registerEntityHandler", "params": {"typeId": "DoseTest.LimitedEntity2"}, "id": 8}')
+        await app5.send('{"method": "registerServiceHandler", "params": {"typeId": "DoseTest.LimitedService", "handlerId": "updatedApp5"}, "id": 9}')
+        changedRegLimited = [("Safir.Dob.NodeInfo:5", "Registered"), ("DoseTest.LimitedEntity:DEFAULT_HANDLER", "Registered"), ("DoseTest.LimitedEntity2:DEFAULT_HANDLER", "Registered"), ("DoseTest.LimitedService:updatedApp5", "Registered")]
+        changedEntLimited = [("Safir.Dob.NodeInfo:5", "_")]
+        for i in range(1, 1001): # Unchanged entities
+            changedEntLimited.append(("DoseTest.LimitedEntity:" + str(i), "version0"))
+        for i in range(1001, 1501): # Updated entities
+            await app5.send('{"method": "setEntity", "params": {"entity": {"_DouType": "DoseTest.LimitedEntity", "Info": "version1"}, "instanceId": ' + str(i) + '}, "id": ' + str(i + 9000) +'}')
+            changedEntLimited.append(("DoseTest.LimitedEntity:" + str(i), "version1"))
+        for i in range(1501, 2001): # Deleted entities
+            await app5.send('{"method": "deleteEntity", "params": {"typeId": "DoseTest.LimitedEntity", "instanceId": ' + str(i) + '}, "id": ' + str(i + 11000) +'}')
+        for i in range(1, 501): # New entities
+            await app5.send('{"method": "setEntity", "params": {"entity": {"_DouType": "DoseTest.LimitedEntity2", "Info": "version0"}, "instanceId": ' + str(i) + '}, "id": ' + str(i + 13000) +'}')
+            changedEntLimited.append(("DoseTest.LimitedEntity2:" + str(i), "version0"))
+
+        # let the system run for a while to complete PD
+        await asyncio.sleep(5)
+        await check_pool(app1, changedRegGlobal, changedEntGlobal)
+        await check_pool(app5, initialRegGlobal + changedRegLimited, initialEntGlobal + changedEntLimited)
+
+        # Enable network on lightnode and wait for it to be Attached
+        set_network_state(True, safir_instance=5) 
+        await app5.wait_for_node_state("Attached")
+        log("--- node5 is now attached again")
+
+        # let the system run for a while to complete PD
+        await asyncio.sleep(5)
+        await check_pool(app1, changedRegGlobal + changedRegLimited, changedEntGlobal + changedEntLimited)
+        await check_pool(app5, changedRegGlobal + changedRegLimited, changedEntGlobal + changedEntLimited)
+
+        await asyncio.gather(app1.stop(), app5.stop())
+
+# async def two_normal_two_light_detach_reattach_light(args):
+#     with test_case("two_normal_two_light_detach_reattach_light"),\
+#         launch_node(args, safir_instance=1, node_id=1) as node1,\
+#         launch_node(args, safir_instance=2, node_id=2) as node2,\
+#         launch_node(args, safir_instance=5, node_id=5) as node5,\
+#         launch_node(args, safir_instance=6, node_id=6) as node6:
+
+#         app1 = SafirApp(safir_instance=1, node_id=1)
+#         app2 = SafirApp(safir_instance=2, node_id=2)
+#         app5 = SafirApp(safir_instance=5, node_id=5)
+#         app6 = SafirApp(safir_instance=6, node_id=6)
+
+#         await asyncio.sleep(5)
+#         await asyncio.gather(app5.wait_for_node_state("Attached"), app6.wait_for_node_state("Attached"))
+#         log("--- node5 and node6 are now attached")
+
+#         set_network_state(False, safir_instance=5)
+#         set_network_state(False, safir_instance=6)
+#         await asyncio.sleep(5)
+#         await asyncio.gather(app5.wait_for_node_state("Detached"), app6.wait_for_node_state("Detached"))
+#         log("--- node5 and node6 are now detached")
+
+#         # Do some changes while both light nodes are detached
+
+#         # connect all nodes again
+#         set_network_state(True, safir_instance=5)
+#         set_network_state(True, safir_instance=6)
+#         await asyncio.sleep(5)
+#         await asyncio.gather(app5.wait_for_node_state("Attached"), app6.wait_for_node_state("Attached"))
+#         log("--- node5 and node6 are now attached again")
+
+#         # check that pools are in sync
+
+#         await asyncio.gather(app1.stop(), app2.stop(), app5.stop(), app6.stop())
 
 # ===========================================
 # main
 # ===========================================
 async def main(args):
-    await one_normal_one_light_detach_reattach_light(args)
+    for f in glob.glob("/home/joel/dev/log/*"): os.remove(f)
+    await one_normal_one_light_detach_reattach_light_changed_entities(args)
+    await one_normal_one_light_detach_reattach_light_changed_registrations(args)
+    await one_normal_one_light_detach_reattach_light_big_pool(args)
+    # await two_normal_two_light_detach_reattach_light(args)
 
 if __name__ == "__main__":
     asyncio.run(main(parse_arguments()))

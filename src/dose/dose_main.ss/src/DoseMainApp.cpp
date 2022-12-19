@@ -93,38 +93,30 @@ namespace Internal
         m_cmdReceiver.reset(new Control::DoseMainCmdReceiver( ioService,
 
                                                               // StartDoseMain
-                                                              m_strand.wrap([this](const std::string& nodeName,
-                                                                                   int64_t nodeId,
-                                                                                   int64_t nodeTypeId,
-                                                                                   const std::string& dataAddress)
+                                                              m_strand.wrap([this](const std::string& nodeName, int64_t nodeId, int64_t nodeTypeId, const std::string& dataAddress)
                                                                             {
-                                                                                Start(nodeName,
-                                                                                      nodeId,
-                                                                                      nodeTypeId,
-                                                                                      dataAddress);
+                                                                                lllog(1) << "DOSE_MAIN: Got Start command from control"<< std::endl;
+                                                                                Start(nodeName,nodeId, nodeTypeId, dataAddress);
                                                                             }),
 
                                                               // InjectNode
-                                                              m_strand.wrap([this](const std::string& nodeName,
-                                                                                   int64_t nodeId,
-                                                                                   int64_t nodeTypeId,
-                                                                                   const std::string& dataAddress)
+                                                              m_strand.wrap([this](const std::string& nodeName, int64_t nodeId, int64_t nodeTypeId, const std::string& dataAddress)
                                                                             {
-                                                                                InjectNode(nodeName,
-                                                                                           nodeId,
-                                                                                           nodeTypeId,
-                                                                                           dataAddress);
+                                                                                lllog(1) << "DOSE_MAIN: Got InjectNode command from control for node " << nodeId << std::endl;
+                                                                                InjectNode(nodeName, nodeId, nodeTypeId, dataAddress);
                                                                             }),
 
                                                               // ExcludeNode
                                                               m_strand.wrap([this](int64_t nodeId, int64_t nodeTypeId)
                                                                             {
+                                                                                lllog(1) << "DOSE_MAIN: Got ExcludeNode command from control for node " << nodeId << std::endl;
                                                                                 ExcludeNode(nodeId, nodeTypeId);
                                                                             }),
 
                                                               // StoppedNodeIndication
                                                               m_strand.wrap([this](int64_t nodeId)
                                                                             {
+                                                                                lllog(1) << "DOSE_MAIN: Got StoppedNodeIndication command from control for node " << nodeId << std::endl;
                                                                                 StoppedNodeIndication(nodeId);
                                                                             }),
 
@@ -163,8 +155,7 @@ namespace Internal
         m_signalSet.add(SIGTERM);
 #endif
 
-        m_signalSet.async_wait(m_strand.wrap([](const boost::system::error_code& error,
-                                                    const int /*signalNumber*/)
+        m_signalSet.async_wait(m_strand.wrap([](const boost::system::error_code& error, const int /*signalNumber*/)
                                             {
                                                 if (error)
                                                 {
@@ -240,33 +231,16 @@ namespace Internal
     }
 
 
-    void DoseMainApp::Start(const std::string& nodeName,
-                            int64_t nodeId,
-                            int64_t nodeTypeId,
-                            const std::string& dataAddress)
+    void DoseMainApp::Start(const std::string& nodeName, int64_t nodeId, int64_t nodeTypeId, const std::string& dataAddress)
     {
         m_nodeId = nodeId;
-
         m_memoryMonitor.reset(new MemoryMonitor(m_ioService));
-
-        m_distribution.reset(new Distribution(m_ioService,
-                                              nodeName,
-                                              nodeId,
-                                              nodeTypeId,
-                                              dataAddress));
-
+        m_distribution.reset(new Distribution(m_ioService, nodeName, nodeId, nodeTypeId, dataAddress));
         InitializeDoseInternalFromDoseMain(nodeId);
-
         m_lockMonitor.reset(new LockMonitor());
-
         m_messageHandler.reset(new MessageHandler(*m_distribution));
-
-        m_requestHandler.reset(new RequestHandler(m_strand.context(),
-                                                  *m_distribution));
-
-        m_pendingRegistrationHandler.reset(new PendingRegistrationHandler(m_ioService,
-                                                                          *m_distribution));
-
+        m_requestHandler.reset(new RequestHandler(m_strand.context(), *m_distribution));
+        m_pendingRegistrationHandler.reset(new PendingRegistrationHandler(m_ioService, *m_distribution));
         m_connectionHandler.reset(new ConnectionHandler(m_ioService,
                                                         *m_distribution,
                                                         [this](const ConnectionPtr& connection, bool disconnecting){OnAppEvent(connection, disconnecting);},
@@ -312,10 +286,7 @@ namespace Internal
         }
     }
 
-    void DoseMainApp::InjectNode(const std::string& nodeName,
-                                 int64_t nodeId,
-                                 int64_t nodeTypeId,
-                                 const std::string& dataAddress)
+    void DoseMainApp::InjectNode(const std::string& nodeName, int64_t nodeId, int64_t nodeTypeId, const std::string& dataAddress)
     {
         ENSURE (m_distribution != nullptr, << "InjectNode cmd received before StartDoseMain cmd!");
         if (m_distribution->GetCommunication().Id() == nodeId)
@@ -329,26 +300,18 @@ namespace Internal
                   " NodeTypeId=" << nodeTypeId <<
                   " DataAddress=" << dataAddress.c_str() << std::endl;
 
-        m_distribution->InjectNode(nodeName,
-                                   nodeId,
-                                   nodeTypeId,
-                                   dataAddress);
+        m_distribution->InjectNode(nodeName, nodeId, nodeTypeId, dataAddress);
     }
 
     void DoseMainApp::ExcludeNode(int64_t nodeId, int64_t nodeTypeId)
     {
-        lllog(1) << "DOSE_MAIN: ExcludeNode. "<<
-                    " NodeId=" <<  nodeId <<
-                    " NodeTypeId=" << nodeTypeId << std::endl;
-
+        lllog(1) << "DOSE_MAIN: ExcludeNode. "<< " NodeId=" <<  nodeId << " NodeTypeId=" << nodeTypeId << std::endl;
         m_distribution->ExcludeNode(nodeId, nodeTypeId);
     }
 
     void DoseMainApp::StoppedNodeIndication(int64_t nodeId)
     {
-        lllog(1) << "DOSE_MAIN: StoppedNodeIndication cmd received."<<
-                    " NodeId=" <<  nodeId << std::endl;
-
+        lllog(1) << "DOSE_MAIN: StoppedNodeIndication cmd received." << " NodeId=" <<  nodeId << std::endl;
         m_distribution->StoppedNodeIndication(nodeId);
     }
 
@@ -364,8 +327,7 @@ namespace Internal
 
     void DoseMainApp::HandleAppEventHelper(const ConnectionPtr & connection)
     {
-        lllout << "HandleAppEventHelper for connection " << connection->NameWithCounter()
-               << ", id = " << connection->Id() << std::endl;
+        lllout << "HandleAppEventHelper for connection " << connection->NameWithCounter() << ", id = " << connection->Id() << std::endl;
 
         //Handle queued requests
         m_requestHandler->HandleRequests(connection);

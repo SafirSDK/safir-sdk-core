@@ -250,6 +250,7 @@ void ControlApp::Start()
     // --- Join system callback ---
     [this, isLightNode](const int64_t incarnationId) -> bool
     {
+        lllog(1) << L"CTRL: Got JoinSystemCallback, incarnationId: " << incarnationId << std::endl;
         ENSURE(incarnationId != m_incarnationId, << "CTRL: Join system called with same incarnationId that we are already part of, " << incarnationId);
         ENSURE(isLightNode || m_nodePristine, << "CTRL: Join/Form system callback should not occur more than once for non light node");
 
@@ -300,6 +301,7 @@ void ControlApp::Start()
     // --- Form system callback ---
     [this, isLightNode](const int64_t incarnationId) -> bool
     {
+        lllog(1) << L"CTRL: Got FormSystemCallback, incarnationId: " << incarnationId << std::endl;
         ENSURE(incarnationId != m_incarnationId, << "CTRL: Form system called with same incarnationId that we are already part of, " << incarnationId);
         ENSURE(isLightNode || m_nodePristine, << "CTRL: Join/Form system callback should not occur more than once for non light node");
 
@@ -322,7 +324,7 @@ void ControlApp::Start()
         {
             // Lightnode in detached mode
             m_detachedFromIncarnationId = m_incarnationId; // save old incarnation so we can determine if next attach is AttachNewSystem or AttachSameSystem
-            m_stateHandler->SetDetached(true);            
+            m_stateHandler->SetDetached(true);
             m_doseMainCmdSender->NodeStateChanged(Control::NodeState::DetachedFromSystem);
             std::ostringstream os;
             os << "CTRL: Light node in detached mode is forming a system on its own with incarnation id " << incarnationId << std::endl;
