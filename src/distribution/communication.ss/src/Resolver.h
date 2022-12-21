@@ -236,7 +236,7 @@ namespace Com
         const bool m_verbose;
 
 
-        //Splig addrss into ip and port. Indata on form "addr:port"
+        //Split address into ip and port. Indata on form "addr:port"
         static bool SplitAddress(const std::string& address, std::string& ip, unsigned short& port)
         {
             size_t startPortSearch=address.find_last_of(']'); //if ip6, start search after address end

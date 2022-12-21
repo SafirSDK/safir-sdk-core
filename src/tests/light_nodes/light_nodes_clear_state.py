@@ -23,7 +23,7 @@
 # along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-import os, sys, argparse, socket, glob
+import os, sys, argparse, socket, glob, logging
 import asyncio, json, websockets
 from contextlib import contextmanager
 from testenv import TestEnv, TestEnvStopper, log
@@ -40,6 +40,7 @@ def test_case(name):
         yield
     except Exception as e:
         failed_tests.add(name)
+        logging.exception('Got exception')
         log(e)
         log("*** Test failed: " + name)
     finally:
@@ -55,10 +56,10 @@ def launch_node(args, safir_instance, node_id):
                     args.dose_main,
                     args.dope_main if safir_instance == 1 else None,
                     args.safir_show_config,
-                    start_syslog_server=True if safir_instance == 1 else False,
-                    ignore_control_cmd=True if safir_instance == 1 else False,
-                    wait_for_persistence=True,
-                    force_node_id=node_id)
+                    start_syslog_server = True if safir_instance == 1 else False,
+                    ignore_control_cmd = True if safir_instance == 1 else False,
+                    wait_for_persistence = safir_instance < 3,
+                    force_node_id = node_id)
         
         env.launchProcess("safir_websocket", args.safir_websocket)
         yield env
@@ -132,7 +133,7 @@ def equal_values(keys, *dictionaries):
 
     return True
 
-# Checklif dictionary contains exact specied keys
+# Check if dictionary contains exact specied keys
 def contains_exact(keys, dictionary):
     return sorted(list(dictionary.keys())) == sorted(keys)
 
@@ -264,14 +265,17 @@ class SafirApp:
         await self.sendQueue.put(msg)
 
     async def wait_for_node_state(self, state, timeout=60):
-        nodeInfo = "Safir.Dob.NodeInfo:" + str(self.node_id)
+        nodeInfoEntityId = "Safir.Dob.NodeInfo:" + str(self.node_id)
         t = 0
         while t < timeout:
             t = t + 3
             await asyncio.sleep(3)
-            if state in self.entities.get(nodeInfo):
+            nodeInfo = self.entities.get(nodeInfoEntityId)
+            if nodeInfo is not None and state in nodeInfo:
                 return
 
+        log("*** wait_for_node_state timed out, dump pool")
+        self.dump_pool()
         raise AssertionError("app" + str(self.node_id) +" did not get NodeInfo.State='" + state +"' within " + str(timeout) + " seconds.")
 
     def dump_pool(self):

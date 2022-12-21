@@ -74,15 +74,12 @@ namespace Internal
 
             logStatus("dose_main is waiting for persistence data!");
 
-            if (!m_distribution.IsLightNode())
-            {
-                // Dope will never run on a lightNode anyway, so only open dobConn if we are not a lightNode
-                m_connection.Open(L"dose_main", L"persist_handler", 0, nullptr, &m_dispatcher);
-                m_connection.RegisterServiceHandler
-                    (Dob::PersistentDataReady::ClassTypeId,
-                     Typesystem::HandlerId(),
-                     this);
-            }
+            // Open connection for Dope communication
+            m_connection.Open(L"dose_main", L"persist_handler", 0, nullptr, &m_dispatcher);
+            m_connection.RegisterServiceHandler
+                (Dob::PersistentDataReady::ClassTypeId,
+                 Typesystem::HandlerId(),
+                 this);
         });
 
         m_distribution.SubscribeNodeEvents([this]
@@ -91,6 +88,10 @@ namespace Internal
                                             int64_t                nodeTypeId,
                                            const std::string&     /*dataAddress*/)
         {
+            if (m_distribution.IsLightNode(nodeTypeId))
+            {
+                return; // lightnodes doesn't have persistent data
+            }
             m_strand.post([this, nodeId, nodeTypeId]
                           {
                               if (m_systemFormed || m_persistentDataReady)
@@ -105,6 +106,10 @@ namespace Internal
                                            (int64_t   nodeId,
                                             int64_t   nodeTypeId)
         {
+            if (m_distribution.IsLightNode(nodeTypeId))
+            {
+                return; // lightnodes doesn't have persistent data
+            }
             m_strand.post([this, nodeId, nodeTypeId]
                           {
                               if (this->m_persistentDataReady)
@@ -163,26 +168,7 @@ namespace Internal
 
     void PersistHandler::Stop()
     {
-        if (!m_distribution.IsLightNode())
-        {
-            m_strand.post([this]
-                          {
-                            m_connection.Close();
-                          });
-        }
-    }
-
-    void PersistHandler::Reset()
-    {
-        m_strand.post([this]
-        {
-            m_systemFormed = true;
-            m_persistentDataReady = false;
-            m_persistentDataAllowed = false;
-            m_nodes.clear();
-            m_unsentRequests.clear();
-            m_unsentResponses.clear();
-        });
+        m_strand.post([this]{m_connection.Close();});
     }
 
     void PersistHandler::SetPersistentDataReady()
@@ -215,14 +201,8 @@ namespace Internal
             //to post the call to Close, or else we might be
             //killing the connection that is dispatching...
 
-            if (!m_distribution.IsLightNode())
-            {
-                m_strand.post([this]
-                              {
-                                  // We don't need the connection now
-                                  m_connection.Close();
-                              });
-            }
+            // We don't need the connection now
+            m_strand.post([this]{m_connection.Close();});
         });
 
     }
@@ -295,6 +275,8 @@ namespace Internal
                                                      const int64_t  fromNodeType,
                                                      const char*    data)
     {
+        ENSURE (!m_distribution.IsLightNode(fromNodeType), << "PersistHandler: Received message from lightnode. Lightnodes should not run a PersistHandler!");
+
         const DistributionData msg =
                 DistributionData::ConstConstructor(new_data_tag, data);
 
@@ -437,13 +419,12 @@ namespace Internal
 
     std::pair<Safir::Utilities::Internal::SharedConstCharArray, size_t> PersistHandler::CreateResponse() const
     {
-        bool responseValue = m_distribution.IsLightNode() ? false : m_persistentDataReady; // If we are a lightNode, always respond HaveNoPersistence
         DistributionData response
                 (have_persistence_data_response_tag,
                  ConnectionId(m_communication.Id(),
                               0,    //use context 0 for this response
                               -1),  //dummy identifier since it is a dose_main only thing.
-                 responseValue);
+                 m_persistentDataReady);
 
         return std::make_pair(Safir::Utilities::Internal::SharedConstCharArray (response.GetReference(),
                                                 [](const char* data)
