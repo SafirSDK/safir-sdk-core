@@ -107,11 +107,11 @@ namespace
         lllog(1)<<m_logPrefix.c_str()<<L"    using multicast: "<<std::boolalpha<<myNodeType->UseMulticast()<<std::dec<<std::endl;
         lllog(1)<<m_logPrefix.c_str()<<L"-------------------------------------------------"<<std::endl;
 
-        auto enableDebug = getenv("SAFIR_COM_NETWORK_SIMULATION");
-        if (enableDebug != nullptr)
+        auto sessionId = getenv("SAFIR_COM_NETWORK_SIMULATION");
+        if (sessionId != nullptr)
         {
             lllog(1)<<m_logPrefix.c_str()<<L"Env SAFIR_COM_NETWORK_SIMULATION is set. Enable possibility to simulate an unavailable network."<<std::endl;
-            m_debugServer = std::make_unique<DebugCommandServer>(m_ioContext, safirInstance, nodeId, m_logPrefix);
+            m_debugServer = std::make_unique<DebugCommandServer>(m_ioContext, safirInstance, nodeId, sessionId, m_logPrefix);
         }
     }
 #ifdef _MSC_VER

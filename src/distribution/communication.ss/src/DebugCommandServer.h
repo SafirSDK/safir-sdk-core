@@ -41,6 +41,7 @@
 
 #include <boost/asio.hpp>
 #include <boost/asio/steady_timer.hpp>
+#include <boost/algorithm/string/predicate.hpp>
 
 namespace Safir
 {
@@ -53,12 +54,17 @@ namespace Com
     class DebugCommandServer
     {
     public:
-        DebugCommandServer(boost::asio::io_context& io, unsigned int safirInst, int64_t nodeId, const std::string& logPrefix)
+        DebugCommandServer(boost::asio::io_context& io, unsigned int safirInst, int64_t nodeId, const std::string& sessionId, const std::string& logPrefix)
             :m_socket(io)
             ,m_safirInst(std::to_string(safirInst))
             ,m_nodeId(std::to_string(nodeId))
+            ,m_sessionId(sessionId)
             ,m_logPrefix(logPrefix)
         {
+            if (m_sessionId == "True" || m_sessionId == "true")
+            {
+                m_sessionId = "";
+            }
             auto endpoint = Resolver::StringToEndpoint("239.6.6.6:16666");
 
             m_socket.open(endpoint.protocol());
@@ -85,6 +91,7 @@ namespace Com
         boost::asio::ip::udp::socket m_socket;
         std::string m_safirInst;
         std::string m_nodeId;
+        std::string m_sessionId;
         std::string m_logPrefix;
 
         void AsyncReceive()
@@ -118,11 +125,16 @@ namespace Com
 
         int ParseCommand(const std::string& cmd) const
         {
+            if (!m_sessionId.empty() && !boost::algorithm::ends_with(cmd, m_sessionId))
+            {
+                return -1; // not for me
+            }
+
             std::istringstream iss(cmd);
             std::vector<std::string> tokens;
             std::copy(std::istream_iterator<std::string>(iss),
                       std::istream_iterator<std::string>(),
-                      std::back_inserter(tokens));
+                      std::back_inserter(tokens));            
 
             if (tokens.size() < 2)
             {

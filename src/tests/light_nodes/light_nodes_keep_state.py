@@ -23,12 +23,13 @@
 # along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-import os, sys, argparse, socket, glob, logging
+import os, sys, argparse, socket, glob, logging, uuid
 import asyncio, json, websockets
 from contextlib import contextmanager
 from testenv import TestEnv, TestEnvStopper, log
 
 failed_tests = set()
+session_id = str(uuid.uuid4())
 # ===================================================================
 # Helpers
 # ===================================================================
@@ -49,7 +50,7 @@ def test_case(name):
 @contextmanager
 def launch_node(args, safir_instance, node_id):
     try:
-        os.environ["SAFIR_COM_NETWORK_SIMULATION"] = "True" # Enable network simulation
+        os.environ["SAFIR_COM_NETWORK_SIMULATION"] = session_id # Enable network simulation
         os.environ["SAFIR_INSTANCE"] = str(safir_instance)
         print("--- Launching node", str(node_id))
         env = TestEnv(args.safir_control,
@@ -69,7 +70,7 @@ def launch_node(args, safir_instance, node_id):
 
 # Simulate network up/down
 def set_network_state(state, safir_instance):
-    cmd = ("up " if state == True else "down ") + str(safir_instance)
+    cmd = ("up " if state == True else "down ") + str(safir_instance) + " " + session_id
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.sendto(bytes(cmd, "utf-8"), ("239.6.6.6", 16666))
 
