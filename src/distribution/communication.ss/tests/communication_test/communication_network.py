@@ -28,8 +28,8 @@ import socket
 
 if __name__ == "__main__":
     if len(sys.argv) < 3 or sys.argv[1] not in ("up", "down"):
-        print("usage: communication_network <up|down> <safir_instance|node_id> [session-id]")
-        print("       Note: The environment variable SAFIR_COM_NETWORK_SIMULATION must be defined for the command to have any effect.")
+        print("usage: communication_network <up|down> <session-id>")
+        print("       Note: The environment variable SAFIR_COM_NETWORK_SIMULATION=session-id must be defined for the command to have any effect.")
         sys.exit("Invalid command line!") 
 
     cmd = ' '.join(sys.argv[1:])

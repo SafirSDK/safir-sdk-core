@@ -29,7 +29,6 @@ from contextlib import contextmanager
 from testenv import TestEnv, TestEnvStopper, log
 
 failed_tests = set()
-session_id = str(uuid.uuid4())
 # ===================================================================
 # Helpers
 # ===================================================================
@@ -50,6 +49,7 @@ def test_case(name):
 @contextmanager
 def launch_node(args, safir_instance, node_id):
     try:
+        session_id = str(uuid.uuid4())
         os.environ["SAFIR_COM_NETWORK_SIMULATION"] = session_id # Enable network simulation
         os.environ["SAFIR_INSTANCE"] = str(safir_instance)
         print("--- Launching node", str(node_id))
@@ -61,7 +61,7 @@ def launch_node(args, safir_instance, node_id):
                     ignore_control_cmd = True if safir_instance == 1 else False,
                     wait_for_persistence = safir_instance < 3,
                     force_node_id = node_id)
-        
+        env.session_id = session_id
         env.launchProcess("safir_websocket", args.safir_websocket)
         yield env
     finally:
@@ -69,8 +69,8 @@ def launch_node(args, safir_instance, node_id):
         env.killprocs()
 
 # Simulate network up/down
-def set_network_state(state, safir_instance):
-    cmd = ("up " if state == True else "down ") + str(safir_instance) + " " + session_id
+def set_network_state(state, session_id):
+    cmd = ("up " if state == True else "down ") + session_id
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.sendto(bytes(cmd, "utf-8"), ("239.6.6.6", 16666))
 
@@ -326,7 +326,7 @@ async def one_normal_one_light_detach_reattach_light_changed_entities(args):
         await check_pool(app5, initialRegGlobal + initialRegLimited, initialEntGlobal + initialEntLimited)
 
         # Disable network on lightnode and wait for it to be Detached
-        set_network_state(False, safir_instance=5) 
+        set_network_state(False, node5.session_id) 
         await app5.wait_for_node_state("Detached")
         log("--- node5 is now detached")
 
@@ -347,7 +347,7 @@ async def one_normal_one_light_detach_reattach_light_changed_entities(args):
         await check_pool(app5, initialRegGlobal + initialRegLimited, initialEntGlobal + changedEntLimited)
 
         # Enable network on lightnode and wait for it to be Attached
-        set_network_state(True, safir_instance=5) 
+        set_network_state(True, node5.session_id) 
         await app5.wait_for_node_state("Attached")
         log("--- node5 is now attached again")
 
@@ -384,7 +384,7 @@ async def one_normal_one_light_detach_reattach_light_changed_registrations(args)
         await check_pool(app5, initialRegGlobal + initialRegLimited, initialEntGlobal + initialEntLimited)
 
         # Disable network on lightnode and wait for it to be Detached
-        set_network_state(False, safir_instance=5) 
+        set_network_state(False, node5.session_id) 
         await app5.wait_for_node_state("Detached")
         log("--- node5 is now detached")
 
@@ -405,7 +405,7 @@ async def one_normal_one_light_detach_reattach_light_changed_registrations(args)
         await check_pool(app5, initialRegGlobal + changedRegLimited, initialEntGlobal + initialEntLimited)
 
         # Enable network on lightnode and wait for it to be Attached
-        set_network_state(True, safir_instance=5) 
+        set_network_state(True, node5.session_id)
         await app5.wait_for_node_state("Attached")
         log("--- node5 is now attached again")
 
@@ -452,7 +452,7 @@ async def one_normal_one_light_detach_reattach_light_big_pool(args):
         await check_pool(app5, initialRegGlobal + initialRegLimited, initialEntGlobal + initialEntLimited)
 
         # Disable network on lightnode and wait for it to be Detached
-        set_network_state(False, safir_instance=5) 
+        set_network_state(False, node5.session_id)
         await app5.wait_for_node_state("Detached")
         log("--- node5 is now detached")
 
@@ -495,7 +495,7 @@ async def one_normal_one_light_detach_reattach_light_big_pool(args):
         await check_pool(app5, initialRegGlobal + changedRegLimited, initialEntGlobal + changedEntLimited)
 
         # Enable network on lightnode and wait for it to be Attached
-        set_network_state(True, safir_instance=5) 
+        set_network_state(True, node5.session_id)
         await app5.wait_for_node_state("Attached")
         log("--- node5 is now attached again")
 

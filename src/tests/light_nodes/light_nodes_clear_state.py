@@ -29,7 +29,6 @@ from contextlib import contextmanager
 from testenv import TestEnv, TestEnvStopper, log
 
 failed_tests = set()
-session_id = str(uuid.uuid4())
 # ===================================================================
 # Helpers
 # ===================================================================
@@ -50,6 +49,7 @@ def test_case(name):
 @contextmanager
 def launch_node(args, safir_instance, node_id):
     try:
+        session_id = str(uuid.uuid4())
         os.environ["SAFIR_COM_NETWORK_SIMULATION"] = session_id # Enable network simulation
         os.environ["SAFIR_INSTANCE"] = str(safir_instance)
         print("--- Launching node", str(node_id))
@@ -61,7 +61,7 @@ def launch_node(args, safir_instance, node_id):
                     ignore_control_cmd = True if safir_instance == 1 else False,
                     wait_for_persistence = safir_instance < 3,
                     force_node_id = node_id)
-        
+        env.session_id = session_id
         env.launchProcess("safir_websocket", args.safir_websocket)
         yield env
     finally:
@@ -69,8 +69,8 @@ def launch_node(args, safir_instance, node_id):
         env.killprocs()
 
 # Simulate network up/down
-def set_network_state(state, safir_instance):
-    cmd = ("up " if state == True else "down ") + str(safir_instance) + " " + session_id
+def set_network_state(state, session_id):
+    cmd = ("up " if state == True else "down ") + session_id
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.sendto(bytes(cmd, "utf-8"), ("239.6.6.6", 16666))
 
@@ -386,7 +386,7 @@ async def one_normal_one_light_detach_reattach_light(args):
         await check_pools_connected_nodes(app1, app3)
 
         # Disable network on lightnode and wait for it to be Detached
-        set_network_state(False, safir_instance=3) 
+        set_network_state(False, node3.session_id) 
         await app3.wait_for_node_state("Detached")
         log("--- node3 is now detached")
 
@@ -394,7 +394,7 @@ async def one_normal_one_light_detach_reattach_light(args):
         await check_pool_detached_node(app3)
 
         # Enable network on lightnode and wait for it to be Attached
-        set_network_state(True, safir_instance=3) 
+        set_network_state(True, node3.session_id) 
         await app3.wait_for_node_state("Attached")
         log("--- node3 is now attached again")
 
@@ -457,7 +457,7 @@ async def one_normal_two_light_detach_reattach_one_light(args):
         await check_pools_connected_nodes(app1, app3, app4)
 
         # Disable network on lightnode and wait for it to be Detached
-        set_network_state(False, safir_instance=3) 
+        set_network_state(False, node3.session_id)
         await app3.wait_for_node_state("Detached")
         log("--- node3 is now detached")
 
@@ -465,7 +465,7 @@ async def one_normal_two_light_detach_reattach_one_light(args):
         await check_pool_detached_node(app3)
 
         # Enable network on lightnode and wait for it to be Attached
-        set_network_state(True, safir_instance=3) 
+        set_network_state(True, node3.session_id)
         await app3.wait_for_node_state("Attached")
         log("--- node3 is now attached again")
         
@@ -525,8 +525,8 @@ async def two_normal_two_light_detach_reattach_both_light(args):
         await check_pools_connected_nodes(app1, app2, app3, app4)
 
         # Disable network on lightnodes and wait for them to be Detached
-        set_network_state(False, safir_instance=3) 
-        set_network_state(False, safir_instance=4) 
+        set_network_state(False, node3.session_id) 
+        set_network_state(False, node4.session_id) 
         await asyncio.gather(app3.wait_for_node_state("Detached"), app4.wait_for_node_state("Detached"))
         log("--- node 3 and node 4 are now detached")
 
@@ -535,8 +535,8 @@ async def two_normal_two_light_detach_reattach_both_light(args):
         await check_pool_detached_node(app4)
 
         # Enable network again and wait for nodes to become attached
-        set_network_state(True, safir_instance=3) 
-        set_network_state(True, safir_instance=4) 
+        set_network_state(True, node3.session_id)
+        set_network_state(True, node4.session_id)
         await asyncio.gather(app3.wait_for_node_state("Attached"), app4.wait_for_node_state("Attached"))
         log("--- node 3 and node 4 are now attached again")
 
@@ -564,8 +564,8 @@ async def two_normal_two_light_detach_reattach_both_light_big_pool(args):
         await check_pools_connected_nodes(app1, app2, app3, app4)
 
         # Disable network on lightnodes and wait for them to be Detached
-        set_network_state(False, safir_instance=3) 
-        set_network_state(False, safir_instance=4) 
+        set_network_state(False, node3.session_id)
+        set_network_state(False, node4.session_id)
         await asyncio.gather(app3.wait_for_node_state("Detached"), app4.wait_for_node_state("Detached"))
         log("--- node 3 and node 4 are now detached")
 
@@ -574,8 +574,8 @@ async def two_normal_two_light_detach_reattach_both_light_big_pool(args):
         await check_pool_detached_node(app4)
 
         # Enable network again and wait for nodes to become attached
-        set_network_state(True, safir_instance=3) 
-        set_network_state(True, safir_instance=4) 
+        set_network_state(True, node3.session_id)
+        set_network_state(True, node4.session_id)
         await asyncio.gather(app3.wait_for_node_state("Attached"), app4.wait_for_node_state("Attached"))
         log("--- node 3 and node 4 are now attached again")
 
@@ -665,8 +665,8 @@ async def two_normal_two_light_toggle_network_many_times_on_both_light(args):
         # Toggle network 10 times and end with disabled network
         for toggle in range(10):
             network_state = toggle % 2 == 0 # will end as disabled network
-            set_network_state(network_state, safir_instance=3)
-            set_network_state(network_state, safir_instance=4)
+            set_network_state(network_state, node3.session_id)
+            set_network_state(network_state, node4.session_id)
             await asyncio.sleep(2)
 
         # Give extra time to reach correct state
@@ -683,8 +683,8 @@ async def two_normal_two_light_toggle_network_many_times_on_both_light(args):
         # Toggle network 10 times and end with enabled network
         for toggle in range(10):
             network_state = toggle % 2 == 1 # will end as enabled network
-            set_network_state(network_state, safir_instance=3)
-            set_network_state(network_state, safir_instance=4)
+            set_network_state(network_state, node3.session_id)
+            set_network_state(network_state, node4.session_id)
             await asyncio.sleep(2)
 
         # Give extra time to reach correct state

@@ -41,7 +41,6 @@
 
 #include <boost/asio.hpp>
 #include <boost/asio/steady_timer.hpp>
-#include <boost/algorithm/string/predicate.hpp>
 
 namespace Safir
 {
@@ -54,17 +53,11 @@ namespace Com
     class DebugCommandServer
     {
     public:
-        DebugCommandServer(boost::asio::io_context& io, unsigned int safirInst, int64_t nodeId, const std::string& sessionId, const std::string& logPrefix)
+        DebugCommandServer(boost::asio::io_context& io, const std::string& sessionId, const std::string& logPrefix)
             :m_socket(io)
-            ,m_safirInst(std::to_string(safirInst))
-            ,m_nodeId(std::to_string(nodeId))
             ,m_sessionId(sessionId)
             ,m_logPrefix(logPrefix)
         {
-            if (m_sessionId == "True" || m_sessionId == "true")
-            {
-                m_sessionId = "";
-            }
             auto endpoint = Resolver::StringToEndpoint("239.6.6.6:16666");
 
             m_socket.open(endpoint.protocol());
@@ -107,15 +100,16 @@ namespace Com
                 std::string cmd(m_buf.data(), m_buf.data() + size);
                 auto network = ParseCommand(cmd);
 
-
                 if (network == 1)
                 {
-                    lllog(1)<<m_logPrefix.c_str()<<L"DebugCommand - Network is now enabled"<<std::endl;
+                    std::wcout<<m_logPrefix.c_str()<<L"DebugCommand - Network is now enabled"<<std::endl;
+                    lllog(1) << m_logPrefix.c_str() << L"DebugCommand - Network is now enabled" << std::endl;
                     Parameters::NetworkEnabled = true;
                 }
                 else if (network == 0)
                 {
-                    lllog(1)<<m_logPrefix.c_str()<<L"DebugCommand - Network is now disabled"<<std::endl;
+                    std::wcout<<m_logPrefix.c_str()<<L"DebugCommand - Network is now disabled"<<std::endl;
+                    lllog(1) << m_logPrefix.c_str() << L"DebugCommand - Network is now disabled" << std::endl;
                     Parameters::NetworkEnabled = false;
                 }
 
@@ -125,11 +119,6 @@ namespace Com
 
         int ParseCommand(const std::string& cmd) const
         {
-            if (!m_sessionId.empty() && !boost::algorithm::ends_with(cmd, m_sessionId))
-            {
-                return -1; // not for me
-            }
-
             std::istringstream iss(cmd);
             std::vector<std::string> tokens;
             std::copy(std::istream_iterator<std::string>(iss),
@@ -143,7 +132,7 @@ namespace Com
 
             for (const auto& t : tokens)
             {
-                if (t == m_safirInst || t == m_nodeId)
+                if (t == m_sessionId)
                 {
                     return tokens[0] == "up" ? 1 : (tokens[0] == "down" ? 0 : -1);
                 }

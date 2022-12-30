@@ -108,10 +108,10 @@ namespace
         lllog(1)<<m_logPrefix.c_str()<<L"-------------------------------------------------"<<std::endl;
 
         auto sessionId = getenv("SAFIR_COM_NETWORK_SIMULATION");
-        if (sessionId != nullptr)
+        if (sessionId != nullptr && strlen(sessionId) > 0)
         {
             lllog(1)<<m_logPrefix.c_str()<<L"Env SAFIR_COM_NETWORK_SIMULATION is set. Enable possibility to simulate an unavailable network."<<std::endl;
-            m_debugServer = std::make_unique<DebugCommandServer>(m_ioContext, safirInstance, nodeId, sessionId, m_logPrefix);
+            m_debugServer = std::make_unique<DebugCommandServer>(m_ioContext, sessionId, m_logPrefix);
         }
     }
 #ifdef _MSC_VER
