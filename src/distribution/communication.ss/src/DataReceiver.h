@@ -118,7 +118,6 @@ namespace Com
 
                     //to join mcGroup with specific interface, the address must be a IPv4. Bug report https://svn.boost.org/trac/boost/ticket/3247
                     m_multicastSocket->bind(boost::asio::ip::udp::endpoint(boost::asio::ip::address_v4::any(), m_multicastEndpoint.port())); //bind to all interfaces and the multicast port
-                    // m_multicastSocket->bind(boost::asio::ip::udp::endpoint(m_unicastEndpoint.address(), m_multicastEndpoint.port())); //bind to all interfaces and the multicast port
                     m_multicastSocket->set_option(boost::asio::ip::multicast::join_group(m_multicastEndpoint.address().to_v4(), m_unicastEndpoint.address().to_v4())); //join group on specific interface
                     m_multicastSocket->set_option(boost::asio::socket_base::receive_buffer_size(Parameters::SocketBufferSize));
                     AsyncReceive(m_bufferMulticast, m_multicastSocket.get());
@@ -327,8 +326,9 @@ namespace Com
                         m_multicastSocket->cancel(); // cancel any ongoing async_read
 
                         // rejoin mc group, by doing a leave followed by a join
-                        m_multicastSocket->set_option(boost::asio::ip::multicast::leave_group(m_multicastEndpoint.address().to_v4())); //leave group
-                        m_multicastSocket->set_option(boost::asio::ip::multicast::join_group(m_multicastEndpoint.address().to_v4(), m_unicastEndpoint.address().to_v4())); //join group on specific interface
+                        boost::system::error_code ec;
+                        m_multicastSocket->set_option(boost::asio::ip::multicast::leave_group(m_multicastEndpoint.address().to_v4()), ec); //leave group
+                        m_multicastSocket->set_option(boost::asio::ip::multicast::join_group(m_multicastEndpoint.address().to_v4(), m_unicastEndpoint.address().to_v4()), ec); //join group on specific interface
 
                         // start a new async_read
                         boost::asio::post(m_strand, [this]{AsyncReceive(m_bufferMulticast, m_multicastSocket.get());});

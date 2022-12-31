@@ -102,13 +102,11 @@ namespace Com
 
                 if (network == 1)
                 {
-                    std::wcout<<m_logPrefix.c_str()<<L"DebugCommand - Network is now enabled"<<std::endl;
                     lllog(1) << m_logPrefix.c_str() << L"DebugCommand - Network is now enabled" << std::endl;
                     Parameters::NetworkEnabled = true;
                 }
                 else if (network == 0)
                 {
-                    std::wcout<<m_logPrefix.c_str()<<L"DebugCommand - Network is now disabled"<<std::endl;
                     lllog(1) << m_logPrefix.c_str() << L"DebugCommand - Network is now disabled" << std::endl;
                     Parameters::NetworkEnabled = false;
                 }
