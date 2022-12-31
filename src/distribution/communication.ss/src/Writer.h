@@ -58,7 +58,7 @@ namespace Com
     template <class T>
     struct BasicSendPolicy
     {
-        void Send(const std::shared_ptr<T>& val,
+        bool Send(const std::shared_ptr<T>& val,
                   boost::asio::ip::udp::socket& socket,
                   const boost::asio::ip::udp::endpoint& to)
         {
@@ -77,11 +77,14 @@ namespace Com
                 {
                     SEND_SYSTEM_LOG(Informational, <<"Write<T> to " << to << " failed. Only "
                                     << sent << " bytes were sent, instead of " << sizeof(T) + sizeof(uint32_t));
+                    return false;
                 }
+                return true;
             }
             catch (const boost::system::system_error& sysErr)
             {
                 SEND_SYSTEM_LOG(Error, <<"Write to " << to << " failed with systemError: "<<sysErr.what());
+                return false;
             }
         }
     };
@@ -89,7 +92,7 @@ namespace Com
     template <>
     struct BasicSendPolicy<UserData>
     {
-        void Send(const UserDataPtr& val,
+        bool Send(const UserDataPtr& val,
                   boost::asio::ip::udp::socket& socket,
                   const boost::asio::ip::udp::endpoint& to)
         {
@@ -118,11 +121,14 @@ namespace Com
                 {
                     SEND_SYSTEM_LOG(Informational, <<"Write<UserData> to " << to << " failed. Only "
                                     << sent << " bytes were sent, instead of " << size);
+                    return false;
                 }
+                return true;
             }
             catch (const boost::system::system_error& sysErr)
             {
                 SEND_SYSTEM_LOG(Error, <<"Write to " << to << " failed with systemError: "<<sysErr.what());
+                return false;
             }
         }
     };
@@ -185,7 +191,7 @@ namespace Com
     template <class T>
     struct BasicSendPolicy : private UnreliableSender
     {
-        void Send(const std::shared_ptr<T>& val,
+        bool Send(const std::shared_ptr<T>& val,
                   boost::asio::ip::udp::socket& socket,
                   const boost::asio::ip::udp::endpoint& to)
         {
@@ -197,13 +203,14 @@ namespace Com
             bufs.push_back(boost::asio::buffer(static_cast<const void*>(val.get()), sizeof(T)));
             bufs.push_back(boost::asio::buffer(reinterpret_cast<const char*>(&crc32), sizeof(uint32_t)));
             UnreliableSender::Send(bufs, socket, to);
+            return true;
         }
     };
 
     template <>
     struct BasicSendPolicy<UserData> : private UnreliableSender
     {
-        void Send(const UserDataPtr& val,
+        bool Send(const UserDataPtr& val,
                   boost::asio::ip::udp::socket& socket,
                   const boost::asio::ip::udp::endpoint& to)
         {
@@ -223,6 +230,7 @@ namespace Com
             uint32_t crc32=crc.checksum();
             bufs.push_back(boost::asio::buffer(reinterpret_cast<const char*>(&crc32), sizeof(uint32_t)));
             UnreliableSender::Send(bufs, socket, to);
+            return true;
         }
     };
     //------------------------------------------------------------
@@ -240,44 +248,46 @@ namespace Com
         typedef std::shared_ptr<T> Ptr;
 
         Writer(boost::asio::io_context& ioContext, int protocol)
-            :m_socket(ioContext,  Resolver::Protocol(protocol))
+            :m_ioContext(ioContext)
+            ,m_protocol(protocol)
             ,m_multicastEndpoint()
-            ,m_multicastEnabled(false)
         {
-            m_socket.set_option(boost::asio::ip::udp::socket::reuse_address(true));
-            m_socket.set_option(boost::asio::socket_base::send_buffer_size(Parameters::SocketBufferSize));
+            InitSocket();
         }
 
         Writer(boost::asio::io_context& ioContext,
                int protocol,
                const std::string& localIf,
                const std::string& multicastAddress)
-            :m_socket(ioContext, Resolver::Protocol(protocol))
+            :m_ioContext(ioContext)
+            ,m_protocol(protocol)
+            ,m_localIf(localIf)
+            ,m_multicastAddress(multicastAddress)
             ,m_multicastEndpoint()
-            ,m_multicastEnabled(!multicastAddress.empty())
         {
-            m_socket.set_option(boost::asio::ip::udp::socket::reuse_address(true));
-            m_socket.set_option(boost::asio::socket_base::send_buffer_size(Parameters::SocketBufferSize));
-            if (m_multicastEnabled)
-            {
-                m_multicastEndpoint=Resolver::StringToEndpoint(multicastAddress);
-                m_socket.set_option(boost::asio::ip::multicast::outbound_interface(Resolver::StringToEndpoint(localIf).address().to_v4()));
-                m_socket.set_option(boost::asio::ip::multicast::enable_loopback(true));
-                m_socket.set_option(boost::asio::ip::multicast::join_group(m_multicastEndpoint.address()));
-            }
+            InitSocket();
         }
 
         //make noncopyable
         Writer(const Writer&) = delete;
         const Writer& operator=(const Writer&) = delete;
 
-        bool IsMulticastEnabled() const {return m_multicastEnabled;}
+        bool IsMulticastEnabled() const {return !m_multicastAddress.empty();}
 
         void SendTo(const Ptr& val, const boost::asio::ip::udp::endpoint& to)
         {
-            if (Parameters::NetworkEnabled)
+            if (!m_socket)
             {
-                SendPolicy::Send(val, m_socket, to);
+                InitSocket();
+            }
+            if (Parameters::NetworkEnabled && m_socket)
+            {
+                auto sendOk = SendPolicy::Send(val, *m_socket, to);
+                if (!sendOk)
+                {
+                    m_socket->close();
+                    m_socket.reset();
+                }
             }
         }
 
@@ -287,9 +297,33 @@ namespace Com
         }
 
     private:
-        boost::asio::ip::udp::socket m_socket;
+        boost::asio::io_context& m_ioContext;
+        const int m_protocol;
+        const std::string m_localIf;
+        const std::string m_multicastAddress;
+        std::unique_ptr<boost::asio::ip::udp::socket> m_socket;
         boost::asio::ip::udp::endpoint m_multicastEndpoint;
-        bool m_multicastEnabled;
+
+        void InitSocket()
+        {
+            if (!m_localIf.empty() && Resolver::ResolveLocalEndpoint(m_localIf).empty())
+            {
+                lllog(5) << L"COM: Writer could not resolve local interface: " << m_localIf.c_str() << std::endl;
+                return; // Local NIC not available
+            }
+
+            m_socket = std::make_unique<boost::asio::ip::udp::socket>(m_ioContext, Resolver::Protocol(m_protocol));
+            m_socket->set_option(boost::asio::ip::udp::socket::reuse_address(true));
+            m_socket->set_option(boost::asio::socket_base::send_buffer_size(Parameters::SocketBufferSize));
+
+            if (IsMulticastEnabled())
+            {
+                m_multicastEndpoint=Resolver::StringToEndpoint(m_multicastAddress);
+                m_socket->set_option(boost::asio::ip::multicast::outbound_interface(Resolver::StringToEndpoint(m_localIf).address().to_v4()));
+                m_socket->set_option(boost::asio::ip::multicast::enable_loopback(true));
+                m_socket->set_option(boost::asio::ip::multicast::join_group(m_multicastEndpoint.address()));
+            }
+        }
     };
 
 }

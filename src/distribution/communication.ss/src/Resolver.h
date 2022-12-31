@@ -102,11 +102,11 @@ namespace Com
                 throw std::logic_error(std::string("COM: Resolver.ResolveLocalEndpoint could not separate ip and port: "+expr));
             }
 
-            auto ip=GetIPAddressBestMatch(ipExpr,verbose);
+            auto ip=GetIPAddressBestMatch(ipExpr, verbose);
             if (ip.empty())
             {
-                // one more try, with verbose flag
-                ip=GetIPAddressBestMatch(ipExpr, true);
+                // one more try
+                ip=GetIPAddressBestMatch(ipExpr, verbose);
             }
             if (ip.empty())
             {

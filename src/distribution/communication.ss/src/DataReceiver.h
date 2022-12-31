@@ -71,6 +71,7 @@ namespace Com
                          const std::function<bool(void)>& isReceiverIsReady)
             :m_strand(receiveStrand)
             ,m_timer(m_strand.context(), boost::chrono::milliseconds(10))
+            ,m_checkMcTimer(m_strand.context())
             ,m_onRecv(onRecv)
             ,m_isReceiverReady(isReceiverIsReady)
             ,m_running(false)
@@ -117,9 +118,14 @@ namespace Com
 
                     //to join mcGroup with specific interface, the address must be a IPv4. Bug report https://svn.boost.org/trac/boost/ticket/3247
                     m_multicastSocket->bind(boost::asio::ip::udp::endpoint(boost::asio::ip::address_v4::any(), m_multicastEndpoint.port())); //bind to all interfaces and the multicast port
+                    // m_multicastSocket->bind(boost::asio::ip::udp::endpoint(m_unicastEndpoint.address(), m_multicastEndpoint.port())); //bind to all interfaces and the multicast port
                     m_multicastSocket->set_option(boost::asio::ip::multicast::join_group(m_multicastEndpoint.address().to_v4(), m_unicastEndpoint.address().to_v4())); //join group on specific interface
                     m_multicastSocket->set_option(boost::asio::socket_base::receive_buffer_size(Parameters::SocketBufferSize));
                     AsyncReceive(m_bufferMulticast, m_multicastSocket.get());
+
+                    m_lastMcRecv = boost::chrono::steady_clock::now();
+                    m_checkMcTimer.expires_after(boost::chrono::milliseconds(Parameters::SendPingThreshold * 2));
+                    m_checkMcTimer.async_wait(boost::asio::bind_executor(m_strand, [this](const boost::system::error_code&){CheckMulticast();}));
                 }
             });
         }
@@ -130,6 +136,7 @@ namespace Com
             {
                 m_running=false;
                 m_timer.cancel();
+                m_checkMcTimer.cancel();
                 ++m_runCount;
 
                 if (m_socket && m_socket->is_open())
@@ -152,6 +159,7 @@ namespace Com
 #endif
         boost::asio::io_context::strand& m_strand;
         boost::asio::steady_timer m_timer;
+        boost::asio::steady_timer m_checkMcTimer;
         std::function<bool(const char*, size_t, bool multicast)> m_onRecv;
         std::function<bool(void)> m_isReceiverReady;
         std::unique_ptr<boost::asio::ip::udp::socket> m_socket;
@@ -160,8 +168,9 @@ namespace Com
         boost::asio::ip::udp::endpoint m_multicastEndpoint;
         bool m_running;
         std::string m_logPrefix;
-        unsigned int m_runCount = 0;
 
+        unsigned int m_runCount = 0;
+        boost::chrono::time_point<boost::chrono::steady_clock> m_lastMcRecv;
         char m_bufferUnicast[Parameters::ReceiveBufferSize];
         char m_bufferMulticast[Parameters::ReceiveBufferSize];
 
@@ -176,7 +185,15 @@ namespace Com
                 if (error == boost::asio::error::operation_aborted)
                 {
                     // This happens when socket is closed by the Stop-method, and is a normal case.
-                    lllog(7)<<m_logPrefix.c_str()<<L"Socket has been closed. Read operation aborted."<<std::endl;
+                    if (m_running)
+                    {
+                        lllog(7)<<m_logPrefix.c_str()<<L"Socket read operation aborted."<<std::endl;
+                    }
+                    else
+                    {
+                        lllog(7)<<m_logPrefix.c_str()<<L"Socket has been closed. Read operation aborted."<<std::endl;
+                    }
+                    
                     return;
                 }
                 if (error)
@@ -224,6 +241,16 @@ namespace Com
             if (ValidCrc(buf, bytesRecv))
             {
                 const bool multicast = socket == m_multicastSocket.get();
+                if (multicast)
+                {
+                    lllog(9)<<m_logPrefix.c_str()<<L"received multicast"<<std::endl;
+                    m_lastMcRecv = boost::chrono::steady_clock::now();
+                }
+                else
+                {
+                    lllog(9)<<m_logPrefix.c_str()<<L"received unicast"<<std::endl;
+                }
+                    
                 //received message with correct checksum
                 receiverReady=m_onRecv(buf, bytesRecv-sizeof(uint32_t), multicast); //Remove the crc from size. Will return true if it is ready to handle a new message immediately
             }
@@ -277,6 +304,40 @@ namespace Com
                 lllog(7)<<m_logPrefix.c_str()<<L"Reader wakes up but must go back to sleep until application is ready"<<std::endl;
                 SetWakeUpTimer(buf, socket);
             }
+        }
+
+        void CheckMulticast()
+        {
+            if (!m_running)
+            {
+                return;
+            }
+
+            static const boost::chrono::milliseconds McRecvThreshold = boost::chrono::milliseconds(Parameters::SendPingThreshold + 1000);
+            auto timeSinceLastMc = boost::chrono::steady_clock::now() - m_lastMcRecv;
+            if (timeSinceLastMc > McRecvThreshold)
+            {
+                if (m_multicastSocket && m_multicastSocket->is_open())
+                {
+                    // Check if out network interface seems to be available. (Just add 1 as dummy port at the end of the ip-addr)
+                    if (!Resolver::ResolveLocalEndpoint(m_unicastEndpoint.address().to_string() + ":1") .empty())
+                    {
+                        lllog(7)<<m_logPrefix.c_str()<<L"We haven't received any multicast data for a while. Trying to rejoin multicastgroup"<<std::endl;
+                        
+                        m_multicastSocket->cancel(); // cancel any ongoing async_read
+
+                        // rejoin mc group, by doing a leave followed by a join
+                        m_multicastSocket->set_option(boost::asio::ip::multicast::leave_group(m_multicastEndpoint.address().to_v4())); //leave group
+                        m_multicastSocket->set_option(boost::asio::ip::multicast::join_group(m_multicastEndpoint.address().to_v4(), m_unicastEndpoint.address().to_v4())); //join group on specific interface
+
+                        // start a new async_read
+                        boost::asio::post(m_strand, [this]{AsyncReceive(m_bufferMulticast, m_multicastSocket.get());});
+                    }
+                }
+            }
+
+            m_checkMcTimer.expires_after(boost::chrono::milliseconds(Parameters::SendPingThreshold));
+            m_checkMcTimer.async_wait(boost::asio::bind_executor(m_strand, [this](const boost::system::error_code&){CheckMulticast();}));
         }
     };
 

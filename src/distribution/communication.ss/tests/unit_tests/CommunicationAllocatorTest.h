@@ -397,13 +397,14 @@ private:
 
     struct TestSendPolicy
     {
-        void Send(const std::shared_ptr<Com::Ack>& ack,
+        bool Send(const std::shared_ptr<Com::Ack>& ack,
                   boost::asio::ip::udp::socket& /*socket*/,
                   const boost::asio::ip::udp::endpoint& to)
         {
             //send ack
             std::cout<<"Send Ack to port "<<to.port()<<" with seq "<<ack->sequenceNumber<<std::endl;
             acked[ack->commonHeader.receiverId]=ack->sequenceNumber;
+            return true;
         }
     };
 

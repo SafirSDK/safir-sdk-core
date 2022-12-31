@@ -215,7 +215,7 @@ private:
 
     struct TestSendPolicy
     {
-        void Send(const Com::UserDataPtr val,
+        bool Send(const Com::UserDataPtr val,
                   boost::asio::ip::udp::socket& /*socket*/,
                   const boost::asio::ip::udp::endpoint& to)
         {
@@ -230,6 +230,7 @@ private:
                 else if (to.port()==10200)
                     discoversSentToSeed200[val->header.commonHeader.senderId]++;
             }
+            return true;
         }
     };
 
@@ -385,7 +386,7 @@ private:
 
     struct TestSendPolicy
     {
-        void Send(const Com::UserDataPtr val,
+        bool Send(const Com::UserDataPtr val,
                   boost::asio::ip::udp::socket& /*socket*/,
                   const boost::asio::ip::udp::endpoint& to)
         {
@@ -402,6 +403,7 @@ private:
             }
 
             discoverState[static_cast<int64_t>(to.port())].recvQueue.push(cm);
+            return true;
         }
     };
 
@@ -753,7 +755,7 @@ private:
 
     struct TestSendPolicy
     {
-        void Send(const Com::UserDataPtr val,
+        bool Send(const Com::UserDataPtr val,
                   boost::asio::ip::udp::socket& /*socket*/,
                   const boost::asio::ip::udp::endpoint& to)
         {
@@ -774,6 +776,7 @@ private:
             {
                 receiver->second.recvQueue.push(cm);
             }
+            return true;
         }
     };
     typedef Com::Writer<Com::UserData, TestSendPolicy> TestWriter;
@@ -1084,7 +1087,7 @@ private:
 
     struct TestSendPolicy
     {
-        void Send(const Com::UserDataPtr val,
+        bool Send(const Com::UserDataPtr val,
                   boost::asio::ip::udp::socket& /*socket*/,
                   const boost::asio::ip::udp::endpoint& to)
         {
@@ -1105,6 +1108,7 @@ private:
             {
                 receiver->second.recvQueue.push(cm);
             }
+            return true;
         }
     };
     typedef Com::Writer<Com::UserData, TestSendPolicy> TestWriter;

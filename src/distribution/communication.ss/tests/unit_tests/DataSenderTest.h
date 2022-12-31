@@ -340,7 +340,7 @@ private:
 
     struct TestSendPolicy
     {
-        void Send(const std::shared_ptr<Com::UserData>& val,
+        bool Send(const std::shared_ptr<Com::UserData>& val,
                   boost::asio::ip::udp::socket& /*socket*/,
                   const boost::asio::ip::udp::endpoint& /*to*/)
         {
@@ -348,7 +348,7 @@ private:
 
             if (Com::IsCommunicationDataType(val->header.commonHeader.dataType))
             {
-                return;
+                return true;
             }
 
             auto expectedAckNow = (val->header.sendMethod==Com::SingleReceiverSendMethod) ||
@@ -363,6 +363,7 @@ private:
             std::string s(val->fragment, val->header.fragmentContentSize);
             //std::wcout<<"Writer.Send to_port: "<<to.port()<<", seq: "<<val->header.sequenceNumber<<", data: '"<<s<<"'"<<std::endl;
             sent.push_back(val);
+            return true;
         }
     };
 
@@ -484,7 +485,7 @@ private:
 
     struct TestSendPolicy
     {
-        void Send(const std::shared_ptr<Com::UserData>& val,
+        bool Send(const std::shared_ptr<Com::UserData>& val,
                   boost::asio::ip::udp::socket& /*socket*/,
                   const boost::asio::ip::udp::endpoint& /*to*/)
         {
@@ -492,6 +493,7 @@ private:
             std::string s(val->fragment, val->fragment+val->header.fragmentContentSize);
             std::string ss(val->fragment, val->header.fragmentContentSize);
             sent.push(val);
+            return true;
         }
     };
 
@@ -805,7 +807,7 @@ private:
 
     struct TestSendPolicy
     {
-        void Send(const std::shared_ptr<Com::UserData>& val,
+        bool Send(const std::shared_ptr<Com::UserData>& val,
                   boost::asio::ip::udp::socket& /*socket*/,
                   const boost::asio::ip::udp::endpoint& /*to*/)
         {
@@ -813,7 +815,7 @@ private:
 
             if (Com::IsCommunicationDataType(val->header.commonHeader.dataType))
             {
-                return;
+                return true;
             }
 
             auto expectedAckNow = (val->header.sendMethod==Com::SingleReceiverSendMethod) ||
@@ -828,6 +830,7 @@ private:
             std::string s(val->fragment, val->header.fragmentContentSize);
             //std::wcout<<"Writer.Send to_port: "<<to.port()<<", seq: "<<val->header.sequenceNumber<<", data: '"<<s<<"'"<<std::endl;
             sent.push_back(val);
+            return true;
         }
     };
 
@@ -1092,14 +1095,14 @@ private:
 
     struct TestSendPolicy
     {
-        void Send(const std::shared_ptr<Com::UserData>& val,
+        bool Send(const std::shared_ptr<Com::UserData>& val,
                   boost::asio::ip::udp::socket& /*socket*/,
                   const boost::asio::ip::udp::endpoint& /*to*/)
         {
             boost::mutex::scoped_lock lock(mutex);
 
             if (Com::WelcomeDataType==val->header.commonHeader.dataType)
-                return;
+                return true;
 
             auto expectedAckNow = (val->header.sendMethod==Com::SingleReceiverSendMethod) ||
                     val->transmitCount>1 ||
@@ -1113,6 +1116,7 @@ private:
             std::string s(val->fragment, val->header.fragmentContentSize);
             //std::wcout<<"Writer.Send to_port: "<<to.port()<<", seq: "<<val->header.sequenceNumber<<", data: '"<<s<<"'"<<std::endl;
             sent.push_back(val);
+            return true;
         }
     };
 
@@ -1185,11 +1189,12 @@ private:
 
     struct TestSendPolicy
     {
-        void Send(const std::shared_ptr<std::string>& val,
+        bool Send(const std::shared_ptr<std::string>& val,
                   boost::asio::ip::udp::socket& /*socket*/,
                   const boost::asio::ip::udp::endpoint& /*to*/)
         {
             sent.push_back(*val);
+            return true;
         }
     };
 

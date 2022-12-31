@@ -155,7 +155,6 @@ namespace Internal
 
     void PoolHandler::OnToggleDetach(bool detach)
     {
-        std::wcout<< L"DoseMain.PoolHandler set detached to " << std::boolalpha << detach << std::endl;
         lllog(5)<< L"DoseMain.PoolHandler set detached to " << std::boolalpha << detach << std::endl;
         // reset flags
         m_poolDistributionComplete = detach; // If in detached mode then we are not expecting to get a PD from anyone else.

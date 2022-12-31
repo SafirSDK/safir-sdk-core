@@ -104,7 +104,7 @@ private:
 
     struct TestSendPolicy
     {
-        void Send(const std::shared_ptr<Com::Heartbeat>& /*val*/,
+        bool Send(const std::shared_ptr<Com::Heartbeat>& /*val*/,
                   boost::asio::ip::udp::socket& /*socket*/,
                   const boost::asio::ip::udp::endpoint& to)
         {
@@ -118,6 +118,7 @@ private:
             {
                 HeartbeatSenderTest::received.insert(std::make_pair(to.port(), 1));
             }
+            return true;
         }
     };
 
