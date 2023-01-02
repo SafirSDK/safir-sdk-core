@@ -110,7 +110,8 @@ namespace
         auto sessionId = getenv("SAFIR_COM_NETWORK_SIMULATION");
         if (sessionId != nullptr && strlen(sessionId) > 0)
         {
-            lllog(1)<<m_logPrefix.c_str()<<L"Env SAFIR_COM_NETWORK_SIMULATION is set. Enable possibility to simulate an unavailable network."<<std::endl;
+            lllog(1)<<m_logPrefix.c_str()<<L"Env SAFIR_COM_NETWORK_SIMULATION is set to '"
+                    << sessionId << "'. Enables the ability to simulate an unavailable network."<<std::endl;
             m_debugServer = std::make_unique<DebugCommandServer>(m_ioContext, sessionId, m_logPrefix);
         }
     }

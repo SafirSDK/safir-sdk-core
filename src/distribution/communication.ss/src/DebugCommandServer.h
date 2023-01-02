@@ -97,7 +97,9 @@ namespace Com
                     return;
                 }
 
-                std::string cmd(m_buf.data(), m_buf.data() + size);
+                const std::string cmd(m_buf.data(), m_buf.data() + size);
+                lllog(9) << m_logPrefix.c_str() << L"DebugCommand - Received command '"
+                         << cmd.c_str() << "'" << std::endl;
                 auto network = ParseCommand(cmd);
 
                 if (network == 1)
