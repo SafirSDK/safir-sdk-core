@@ -44,6 +44,7 @@
 #include <boost/asio.hpp>
 #include <boost/asio/steady_timer.hpp>
 #include <boost/process/child.hpp>
+#include <boost/process/async_pipe.hpp>
 
 #if defined _MSC_VER
 #  pragma warning (pop)
@@ -91,6 +92,8 @@ private:
 
     void HandleDoseMainExit(const int exitCode, const std::error_code& error);
 
+    void DoseMainOutputReadLoop();
+
     boost::asio::io_context&                    m_io;
     boost::asio::executor_work_guard<boost::asio::io_context::executor_type> m_work;
     bool                                        m_stopped;
@@ -117,6 +120,10 @@ private:
     std::unique_ptr<Control::DoseMainCmdSender>     m_doseMainCmdSender;
     std::unique_ptr<Control::SystemStateHandler>    m_stateHandler;
     std::unique_ptr<boost::process::child>          m_doseMain;
+
+    std::vector<char> m_doseMainOutputBuf;
+    std::string m_doseMainLineBuf;
+    boost::process::async_pipe m_doseMainOutputPipe;
 
     // 64 bit atomic needs to be aligned on 64 bit boundary even on 32 bit systems,
     // so we need to use alignment magic.

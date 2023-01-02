@@ -49,10 +49,9 @@
 
 #include <boost/regex.hpp>
 #include <boost/filesystem.hpp>
-#include <boost/process/environment.hpp>
-#include <boost/process/env.hpp>
-#include <boost/process/async.hpp>
+#include <boost/process.hpp>
 #include <boost/thread.hpp>
+#include <boost/algorithm/string.hpp>
 
 #if defined _MSC_VER
 #  pragma warning (pop)
@@ -114,6 +113,8 @@ ControlApp::ControlApp(boost::asio::io_context&         io,
     , m_incarnationBlackListHandler(m_conf.incarnationBlacklistFileName)
     , m_controlInfoReceiverReady(false)
     , m_doseMainRunning(false)
+    , m_doseMainOutputBuf(4096)
+    , m_doseMainOutputPipe(io)
     , m_incarnationIdStorage(new AlignedStorage())
     , m_incarnationId(reinterpret_cast<std::atomic<int64_t>&>(*m_incarnationIdStorage))
 {
@@ -273,7 +274,7 @@ void ControlApp::Start()
             {
                 m_doseMainCmdSender->NodeStateChanged(Control::NodeState::AttachedSameSystem);
                 std::ostringstream os;
-                os << "CTRL: Attached to the same system again as we have been detached from for a while. InncarnationId=" << incarnationId << std::endl;
+                os << "CTRL: Attached to the same system again as we have been detached from for a while. IncarnationId=" << incarnationId << std::endl;
                 os << "CTRL: This node has id " << m_nodeId;
                 LogStatus(os.str());
             }
@@ -281,7 +282,7 @@ void ControlApp::Start()
             {
                 m_doseMainCmdSender->NodeStateChanged(Control::NodeState::AttachedNewSystem);
                 std::ostringstream os;
-                os << "CTRL: Attached to a new system that we have not seen before. InncarnationId=" << incarnationId << std::endl;
+                os << "CTRL: Attached to a new system that we have not seen before. IncarnationId=" << incarnationId << std::endl;
                 os << "CTRL: This node has id " << m_nodeId;
                 LogStatus(os.str());
             }
@@ -428,14 +429,15 @@ void ControlApp::Start()
     std::error_code error;
 
     m_doseMain = std::make_unique<boost::process::child>
-            (m_doseMainPath,
-         #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
-             boost::process::windows::hide,
-         #endif
-             m_io,
-             error,
-             boost::process::on_exit=[this](int exitCode, const std::error_code& error)
-    {HandleDoseMainExit(exitCode,error);});
+        (m_doseMainPath,
+#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
+         boost::process::windows::hide,
+#endif
+         m_io,
+         error,
+         boost::process::on_exit=[this](int exitCode,const std::error_code& error){HandleDoseMainExit(exitCode,error);},
+         (boost::process::std_out & boost::process::std_err) > m_doseMainOutputPipe
+         );
 
     if (error)
     {
@@ -443,10 +445,54 @@ void ControlApp::Start()
                         << "CTRL: Error launching dose_main: " << error);
     }
 
+    DoseMainOutputReadLoop();
+
     m_doseMainCmdSender->Start();
     m_stopHandler->Start();
     m_controlInfoSender->Start();
 }
+
+void ControlApp::DoseMainOutputReadLoop()
+{
+    m_doseMainOutputPipe.async_read_some
+        (boost::asio::buffer(m_doseMainOutputBuf),
+         [this](const boost::system::error_code& error, std::size_t size)
+         {
+             if (error == boost::asio::error::eof)
+             {
+                 return;
+             }
+             else if (error)
+             {
+                 SEND_SYSTEM_LOG(Error,
+                                 << "CTRL: Error reading dose_main output: " << error);
+                 LogStatus(std::string("CTRL: Failed to read dose_main output: " + error.message()));
+                 return;
+             }
+
+             //Read the output line by line and print it like that, to ensure that output actually
+             //does not get mingled.
+             for (size_t i = 0; i < size; ++i)
+             {
+                 if (m_doseMainOutputBuf[i] == '\r')
+                 {
+                     continue;
+                 }
+                 if (m_doseMainOutputBuf[i] == '\n')
+                 {
+                     LogStatus("MAIN: " + m_doseMainLineBuf);
+                     m_doseMainLineBuf.clear();
+                 }
+                 else
+                 {
+                     m_doseMainLineBuf.push_back(m_doseMainOutputBuf[i]);
+                 }
+             }
+
+             DoseMainOutputReadLoop();
+         });
+}
+
 
 std::pair<Com::ResolvedAddress,Com::ResolvedAddress> ControlApp::ResolveAddresses()
 {
