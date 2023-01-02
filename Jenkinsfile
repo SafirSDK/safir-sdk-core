@@ -34,6 +34,7 @@ def clean_check_and_build(platform, arch) {
 
 def archive_and_analyze(platform, arch, buildType){
     def buildIdentifier = "${platform}-${arch}-${buildType}"
+
     if (betterIsUnix()) {
         sh label: "Moving artifacts to build-${buildIdentifier}.",
            script: """
@@ -41,8 +42,6 @@ def archive_and_analyze(platform, arch, buildType){
                    mv buildlog.html build-${buildIdentifier}
                    mv tmp/*.deb build-${buildIdentifier}
                    """
-
-        archiveArtifacts artifacts: "**/buildlog.html, build-${buildIdentifier}/*.deb", fingerprint: true
     }
     else {
         bat label: "Moving artifacts to build-${buildIdentifier}.",
@@ -51,9 +50,15 @@ def archive_and_analyze(platform, arch, buildType){
                     move buildlog.html build-${buildIdentifier}
                     move build\\packaging\\windows\\*.exe build-${buildIdentifier}
                     """
-
-        archiveArtifacts artifacts: "**/buildlog.html, build-${buildIdentifier}/*.exe", fingerprint: true
     }
+
+    // create a zip file that contains any output files left behind by tests. For this to work
+    // the directory containing the files must be named exactly 'test_output'
+    zip zipFile: "build-${buildIdentifier}/test-output.zip",
+        glob: "**/test_output/**"
+
+    archiveArtifacts artifacts: "**/buildlog.html, build-${buildIdentifier}/*.deb, build-${buildIdentifier}/*.exe, build-${buildIdentifier}/*.zip",
+                     fingerprint: true
 
     def cmake = scanForIssues (
         tool: cmake(pattern:"**/buildlog.html",
@@ -225,14 +230,12 @@ pipeline {
                         //clean, source_check and build the code
                         clean_check_and_build(BUILD_PLATFORM, BUILD_ARCH)
                     }}}
-                    stage('Archive and Analyze') { steps { script {
-                        //archive artifacts and check for warnings
-                        archive_and_analyze(BUILD_PLATFORM, BUILD_ARCH, BUILD_TYPE)
-                    }}}
-
                 }
                 post {
                     always {
+                        //archive artifacts and check for warnings
+                        archive_and_analyze(BUILD_PLATFORM, BUILD_ARCH, BUILD_TYPE)
+
                         junit keepLongStdio: true, skipPublishingChecks: true, testResults: '**/*.junit.xml'
                         cleanWs()
                     }
