@@ -50,6 +50,27 @@
 #  pragma warning (pop)
 #endif
 
+namespace
+{
+  template< typename ContainerT, typename PredicateT >
+  void erase_if( ContainerT& items, const PredicateT& predicate )
+  {
+    for( auto it = items.begin(); it != items.end(); )
+    {
+      if( predicate(*it) )
+      {
+          it = items.erase(it);
+      }
+      else
+      {
+          ++it;
+      }
+    }
+  }
+
+    const int RESURRECT_COUNT = 3;
+}
+
 namespace Safir
 {
 namespace Dob
@@ -357,11 +378,14 @@ namespace SP
     private:
         static std::set<int64_t> GetDeadNodes(const SystemStateMessage& state)
         {
+            lllog(9) << "GetDeadNodes1:" << std::endl;
             std::set<int64_t> dead;
             for (int i = 0; i < state.node_info_size(); ++i)
             {
                 if (state.node_info(i).is_dead())
                 {
+                    lllog(9) << " SystemStateMessage thinks " << state.node_info(i).id()
+                             << " (" << state.node_info(i).name().c_str() <<") is dead" << std::endl;
                     dead.insert(state.node_info(i).id());
                 }
             }
@@ -373,16 +397,21 @@ namespace SP
                                                                             const std::map<int64_t, NodeType>& nodeTypes,
                                                                             const int64_t ownId)
         {
+            lllog(9) << "GetDeadNodes2:" << std::endl;
             std::map<int64_t, std::pair<RawStatistics,int>> deadNodes;
             std::set<int64_t> resurrecting;
             for (int i = 0; i < statistics.Size(); ++i)
             {
                 if (statistics.IsDead(i))
                 {
+                    lllog(9) << " I think node " << statistics.Id(i)
+                             << " (" << statistics.Name(i).c_str() <<") is dead" << std::endl;
                     deadNodes.insert(std::make_pair(statistics.Id(i), std::make_pair(statistics,i)));
                 }
                 if (statistics.IsResurrecting(i))
                 {
+                    lllog(9) << " I think node " << statistics.Id(i)
+                             << " (" << statistics.Name(i).c_str() <<") is resurrecting" << std::endl;
                     resurrecting.insert(statistics.Id(i));
                 }
 
@@ -402,10 +431,14 @@ namespace SP
 
                         if (remote.IsDead(j))
                         {
+                            lllog(9) << " Node " << remote.Id() << " (" << remote.Name().c_str() <<") thinks node "
+                                     << remote.Id(j) << " (" << remote.Name(j).c_str() <<") is dead" << std::endl;
                             deadNodes.insert(std::make_pair(remote.Id(j), std::make_pair(remote,j)));
                         }
                         if (remote.IsResurrecting(j))
                         {
+                            lllog(9) << " Node " << remote.Id() << " (" << remote.Name().c_str() <<") thinks node "
+                                     << remote.Id(j) << " (" << remote.Name(j).c_str() <<") is resurrecting" << std::endl;
                             resurrecting.insert(remote.Id(j));
                         }
 
@@ -551,6 +584,11 @@ namespace SP
                               << " with id " << m_lastStatistics.Id(i)
                               << " is dead, so I'll exclude him."
                               << std::endl;
+                    if (m_resurrectingNodes.find(m_lastStatistics.Id(i)) != m_resurrectingNodes.end())
+                    {
+                        lllog(4) << "SP: No, actually, I won't. I am trying to resurrect that node."<< std::endl;
+                        continue;
+                    }
                     m_rawHandler.ExcludeNode(m_lastStatistics.Id(i));
                     changes = true;
                 }
@@ -577,7 +615,7 @@ namespace SP
                               << " with id " << m_lastStatistics.Id(i)
                               << std::endl;
                     m_rawHandler.ResurrectNode(m_lastStatistics.Id(i));
-                    m_resurrectingNodes.insert(m_lastStatistics.Id(i));
+                    m_resurrectingNodes.insert(std::make_pair(m_lastStatistics.Id(i), RESURRECT_COUNT));
 
                     changes = true;
                 }
@@ -684,18 +722,24 @@ namespace SP
             //Finish resurrecting any nodes in m_resurrectingNodes.
             //For us to get here all the resurrecting nodes must have sent a rawstatistics
             //(this is something Checkprereqs guarantees).
-            for (const auto id: m_resurrectingNodes)
+            for (auto& resurrectInfo: m_resurrectingNodes)
             {
                 for (auto& node: *m_stateMessage.mutable_node_info())
                 {
-                    if (node.id() == id)
+                    if (node.id() == resurrectInfo.first)
                     {
-                        lllog(4) << "SP: Finished resurrecting node " << node.id() << std::endl;;
-                        node.set_is_dead(false);
+                        lllog(4) << "SP: Finished resurrecting node " << node.id() << std::endl;
+                        if (resurrectInfo.second == RESURRECT_COUNT)
+                        {
+                            node.set_is_dead(false);
+                        }
+                        --resurrectInfo.second;
                     }
                 }
             }
-            m_resurrectingNodes.clear();
+
+            //remove elements that have been counted down to zero
+            erase_if(m_resurrectingNodes, [](const auto& elem){return elem.second <= 0;});
 
             lllog(9) << "SP: Looking at last state\n";
 
@@ -736,7 +780,8 @@ namespace SP
                     }
 
                     //check that it's not in dead nodes! (This is just a sanity check, really)
-                    if (lastDeadNodes.find(m_stateMessage.node_info(i).id()) != lastDeadNodes.end())
+                    if (lastDeadNodes.find(m_stateMessage.node_info(i).id()) != lastDeadNodes.end() &&
+                        m_resurrectingNodes.find(m_stateMessage.node_info(i).id()) != m_resurrectingNodes.end())
                     {
                         lllog(9) << std::flush;
                         throw std::logic_error("Live node was already defined as dead in last state!");
@@ -1039,7 +1084,7 @@ namespace SP
 
         SystemStateMessage m_stateMessage;
         std::atomic<bool> m_isDetached;
-        std::set<int64_t> m_resurrectingNodes;
+        std::map<int64_t,int> m_resurrectingNodes; //second is how many more raws need to be received before resurrect is complete
         const std::string m_name;
         const int64_t m_id;
         const int64_t m_nodeTypeId;

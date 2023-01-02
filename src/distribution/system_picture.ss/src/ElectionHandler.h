@@ -354,9 +354,6 @@ namespace SP
                     return;
                 }
 
-
-
-
                 lllog(4) << "SP: Starting election" << std::endl;
 
                 m_currentElectionId = LlufId_GenerateRandom64();
@@ -436,7 +433,7 @@ namespace SP
                     {
                         found = true;
 
-                        if (m_lastStatistics.IsDead(i))
+                        if (m_lastStatistics.IsDead(i) && !m_isLightNode)
                         {
                             lllog(5) << "SP: Got ElectionMessage from a node that is dead! Discarding!" << std::endl;
                             return;

@@ -910,7 +910,16 @@ namespace SP
             }
             else
             {
-                if (nodeIt != m_nodeTable.end())
+                if (nodeIt != m_nodeTable.end() && m_isLightNode && nodeIt->second.nodeInfo->is_dead())
+                {
+                    if (nodeTypeId != nodeIt->second.nodeInfo->node_type_id())
+                    {
+                        throw std::logic_error("A node changed type!!!");
+                    }
+                    //remove the "old" node and add it again below
+                    m_nodeTable.erase(nodeIt);
+                }
+                else if (nodeIt != m_nodeTable.end())
                 {
                     lllog(1) << "SP: Got a new node " << name.c_str() << " that I already had" << std::endl;
 
@@ -918,12 +927,7 @@ namespace SP
                     {
                         lllog(1) << "SP: And I am a lightnode and that node is not dead! Strange!" << std::endl;
                     }
-                    else if (m_isLightNode)
-                    {
-                        lllog(1) << "SP: And I am a lightnode that is not detached and that node should be ignored."
-                                 << std::endl;
-                        return;
-                    }
+
                     throw std::logic_error("Got a new node that I already had");
                 }
 
@@ -1079,9 +1083,9 @@ namespace SP
                     //and some lightnode scenarios). So we exclude the node.  However,
                     //during startup we can get a lot of retransmits while nodes are
                     //getting connected.
-                    if (node.nodeInfo->control_receive_count() > 20)
+                    if (node.nodeInfo->control_receive_count() > 50)
                     {
-                        if (transmitCount >= 20)
+                        if (transmitCount >= 30)
                         {
                             SEND_SYSTEM_LOG(Warning,
                                             << "Excessive retransmits (" << transmitCount << ") to node "
@@ -1089,7 +1093,9 @@ namespace SP
                                             << ") from which i have received "
                                             << node.nodeInfo->control_receive_count() << " packets, excluding it!");;
 
+                            node.nodeInfo->set_is_dead(true);
                             m_communication.ExcludeNode(id);
+                            PostRawChangedCallback(RawChanges::NODES_CHANGED, nullptr);
                         }
                     }
                     else
@@ -1109,7 +1115,9 @@ namespace SP
                                             << "Two minutes of retransmits (" << transmitCount << ") to node "
                                             << node.nodeInfo->name().c_str() << "(" <<  id << "), excluding it!");
 
+                            node.nodeInfo->set_is_dead(true);
                             m_communication.ExcludeNode(id);
+                            PostRawChangedCallback(RawChanges::NODES_CHANGED, nullptr);
                         }
                     }
                 }

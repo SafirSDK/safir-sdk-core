@@ -517,7 +517,7 @@ BOOST_AUTO_TEST_CASE( exclude_node_due_to_retransmit )
     comm.newNodeCb("asdf",13,10,"asdf","asdf", true);
     comm.newNodeCb("asdf",14,10,"asdf","asdf", false);
     comm.newNodeCb("asdf",15,10,"asdf","asdf", true);
-    for (int i = 0; i < 21; ++i)
+    for (int i = 0; i < 51; ++i)
     {
         comm.gotReceiveFromCb(11,false,false);
         comm.gotReceiveFromCb(12,false,false);
@@ -527,10 +527,10 @@ BOOST_AUTO_TEST_CASE( exclude_node_due_to_retransmit )
     }
     comm.retransmitToCb(11,1);
     comm.retransmitToCb(12,19);
-    comm.retransmitToCb(13,20);
+    comm.retransmitToCb(13,30);
     comm.retransmitToCb(14,100);
     comm.retransmitToCb(15,1);
-    comm.retransmitToCb(15,20);
+    comm.retransmitToCb(15,30);
     rh->Stop();
 
     std::set<int64_t> correctNodes;
@@ -540,7 +540,7 @@ BOOST_AUTO_TEST_CASE( exclude_node_due_to_retransmit )
 
     BOOST_CHECK_NO_THROW(ioService.run());
 
-    BOOST_CHECK(comm.excludedNodes == correctNodes);
+    BOOST_TEST(comm.excludedNodes == correctNodes, boost::test_tools::per_element());
 }
 
 
