@@ -167,11 +167,14 @@ async def check_pool(app, expected_registrations, expected_entities):
             await asyncio.sleep(10)
 
     log("*** ERROR: Incorrect pool on node " + str(app.node_id) + ", safir_instance: " + str(app.safir_instance))
+    app.dump_pool()
     print("  Expected registrations:")
     for t, v in expected_registrations: print("    " + t + " - " + str(v))
     print("  Expected entities:")
-    for t, v in expected_entities: print("    " + t + " - " + str(v))
-    app.dump_pool()
+    if len(expected_registrations) < 500:
+        for t, v in expected_entities: print("    " + t + " - " + str(v))
+    else:
+        print("Number of expected entities: " + str(len(expected_registrations)))
     raise AssertionError("Incorrect pool")    
 
 # ==============================================================================================

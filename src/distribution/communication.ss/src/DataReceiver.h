@@ -118,9 +118,18 @@ namespace Com
 
                     //to join mcGroup with specific interface, the address must be a IPv4. Bug report https://svn.boost.org/trac/boost/ticket/3247
                     m_multicastSocket->bind(boost::asio::ip::udp::endpoint(boost::asio::ip::address_v4::any(), m_multicastEndpoint.port())); //bind to all interfaces and the multicast port
-                    m_multicastSocket->set_option(boost::asio::ip::multicast::join_group(m_multicastEndpoint.address().to_v4(), m_unicastEndpoint.address().to_v4())); //join group on specific interface
-                    m_multicastSocket->set_option(boost::asio::socket_base::receive_buffer_size(Parameters::SocketBufferSize));
-                    AsyncReceive(m_bufferMulticast, m_multicastSocket.get());
+
+                    boost::system::error_code ec;
+                    m_multicastSocket->set_option(boost::asio::socket_base::receive_buffer_size(Parameters::SocketBufferSize), ec);
+                    m_multicastSocket->set_option(boost::asio::ip::multicast::join_group(m_multicastEndpoint.address().to_v4(), m_unicastEndpoint.address().to_v4()), ec); //join group on specific interface
+                    if (ec)
+                    {
+                        lllog(7)<<m_logPrefix.c_str()<<L"Failed to join multicast group. Will try again in a while."<<std::endl;
+                    }
+                    else
+                    {
+                        AsyncReceive(m_bufferMulticast, m_multicastSocket.get());
+                    }
 
                     m_lastMcRecv = boost::chrono::steady_clock::now();
                     m_checkMcTimer.expires_after(boost::chrono::milliseconds(Parameters::SendPingThreshold * 2));

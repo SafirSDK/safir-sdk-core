@@ -165,11 +165,11 @@ async def check_pool_detached_node(app):
 
     if not ok:
         log("*** ERROR: Incorrect pool on light node " + str(app.node_id) + ", safir_instance: " + str(app.safir_instance))
+        app.dump_pool()
         print("  Expected registrations:")
         for i in expected_reg: print("    " + i)
         print("  Expected entities:")
         for i in expected_ent: print("    " + i)
-        app.dump_pool()
 
     if not ok:
         raise AssertionError("Incorrect pool")    
@@ -222,11 +222,11 @@ async def check_pools_connected_nodes(*apps):
                 ok = False
                 if check == max_tries - 1:
                     log("*** ERROR: Incorrect pool on node " + str(app.node_id) + ", safir_instance: " + str(app.safir_instance))
+                    app.dump_pool()
                     print("  Expected registrations:")
                     for i in expected_reg: print("    " + i)
                     print("  Expected entities:")
                     for i in expected_ent: print("    " + i)
-                    app.dump_pool()
 
         if ok:
             break
