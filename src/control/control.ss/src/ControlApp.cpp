@@ -458,8 +458,10 @@ void ControlApp::DoseMainOutputReadLoop()
         (boost::asio::buffer(m_doseMainOutputBuf),
          [this](const boost::system::error_code& error, std::size_t size)
          {
-             if (error == boost::asio::error::eof)
+             if (error == boost::asio::error::eof || error == boost::asio::error::broken_pipe)
              {
+                 lllog(9) << "CTRL: Failed to read output from dose_main, maybe it is shutting down: "
+                          << error << std::endl;
                  return;
              }
              else if (error)
