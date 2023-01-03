@@ -118,7 +118,7 @@ QVariant NodeTableModel::data(const QModelIndex &index, int role) const
             break;
         case TYPE_COLUMN:
             return m_lightNodeTypeNames.find(nodeInfo->NodeType().GetVal()) != m_lightNodeTypeNames.end() ?
-                        QString::fromStdWString(nodeInfo->NodeType().GetVal()) + QString::fromUtf8("  \u24c1 ") :
+                        QString::fromStdWString(nodeInfo->NodeType().GetVal()) + QString::fromStdWString(L"  \u24c1 ") :
                         QString::fromStdWString(nodeInfo->NodeType().GetVal());
             break;
         case NODE_ID_COLUMN:

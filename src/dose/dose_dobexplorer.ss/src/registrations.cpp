@@ -135,9 +135,9 @@ void Registrations::UpdateGui()
         ui->tableWidget->setItem(row, 1, TableItem(r->handler));
         ui->tableWidget->setItem(row, 2, TableItem(r->connectionName));
         ui->tableWidget->setItem(row, 3, TableItem(QString::number(r->context), true));
-        ui->tableWidget->setItem(row, 4, TableItem(r->pending ? QString::fromUtf8("\u2713") : "", true)); // 2713 is the utf-8 code for 'Check Mark'
+        ui->tableWidget->setItem(row, 4, TableItem(r->pending ? QString::fromStdWString(L"\u2713") : "", true)); // 2713 is the utf-8 code for 'Check Mark'
         ui->tableWidget->setItem(row, 5, TableItem(scope, true));
-        ui->tableWidget->setItem(row, 6, TableItem(r->detached ? QString::fromUtf8("\u2713") : "", true));
+        ui->tableWidget->setItem(row, 6, TableItem(r->detached ? QString::fromStdWString(L"\u2713") : "", true));
         ++row;
     }
     ui->tableWidget->setSortingEnabled(true);
