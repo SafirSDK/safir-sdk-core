@@ -23,7 +23,7 @@
 # along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-import os, sys, argparse, socket, glob, logging, uuid
+import os, sys, argparse, socket, glob, logging, uuid, time
 import asyncio, json, websockets
 from contextlib import contextmanager
 from testenv import TestEnv, TestEnvStopper, log
@@ -158,12 +158,15 @@ async def check_pool(app, expected_registrations, expected_entities):
 
         return True
     
-    max_tries = 5
-    for check in range(max_tries):
+    pool_timestamp = app.last_pool_update
+    num_tries = 0
+    while pool_timestamp < app.last_pool_update or num_tries < 5:
+        num_tries = num_tries +1
+        pool_timestamp = app.last_pool_update
         if _check():
             return True
         else:
-            if check > 2: log("--- Extended wait for PD to finish, wait time " + str((check + 1)*10) + " sec")
+            if num_tries > 2: log("--- Extended wait for PD to finish, wait time " + str((num_tries + 1)*10) + " sec")
             await asyncio.sleep(10)
 
     log("*** ERROR: Incorrect pool on node " + str(app.node_id) + ", safir_instance: " + str(app.safir_instance))
@@ -191,6 +194,7 @@ class SafirApp:
         self.sendQueue = asyncio.Queue()
         self.entities = dict()
         self.registrations = dict()
+        self.last_pool_update = time.time()
         self.stopped = False
         self._setup_dob()
         self.task = asyncio.create_task(self._run())
@@ -257,15 +261,19 @@ class SafirApp:
                 msg = json.loads(message)
                 callback = method(msg)
                 if callback in ["onNewEntity", "onUpdatedEntity"] and not ignore_type(msg):
+                    self.last_pool_update = time.time()
                     entity_id = dou_type(msg) + ":" + str(instance_id(msg))
                     self.entities[entity_id] = json.dumps(entity(msg))
                 elif callback == "onDeletedEntity":
+                    self.last_pool_update = time.time()
                     entity_id = dou_type(msg) + ":" + str(instance_id(msg))
                     self.entities.pop(entity_id, None)
                 elif callback == "onRegistered" and not ignore_type(msg):
+                    self.last_pool_update = time.time()
                     handler = dou_type(msg) + ":" + str(handler_id(msg))
                     self.registrations[handler] = "Registered"
                 elif callback == "onUnregistered":
+                    self.last_pool_update = time.time()
                     handler = dou_type(msg) + ":" + str(handler_id(msg))
                     self.registrations.pop(handler, None)
                 elif "result" in msg and msg["result"] != "OK":
