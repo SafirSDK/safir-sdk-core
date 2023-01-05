@@ -174,7 +174,7 @@ async def check_pool(app, expected_registrations, expected_entities):
     print("  Expected registrations:")
     for t, v in expected_registrations: print("    " + t + " - " + str(v))
     print("  Expected entities:")
-    if len(expected_registrations) < 500:
+    if len(expected_entities) < 500:
         for t, v in expected_entities: print("    " + t + " - " + str(v))
     else:
         print("Number of expected entities: " + str(len(expected_registrations)))
