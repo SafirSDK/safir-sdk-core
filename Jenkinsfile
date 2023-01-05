@@ -35,21 +35,23 @@ def clean_check_and_build(platform, arch) {
 def archive_and_analyze(platform, arch, buildType){
     def buildIdentifier = "${platform}-${arch}-${buildType}"
 
-    if (betterIsUnix()) {
-        sh label: "Moving artifacts to build-${buildIdentifier}.",
-           script: """
-                   mkdir build-${buildIdentifier}
-                   mv buildlog.html build-${buildIdentifier}
-                   mv tmp/*.deb build-${buildIdentifier}
-                   """
-    }
-    else {
-        bat label: "Moving artifacts to build-${buildIdentifier}.",
-            script: """
-                    md build-${buildIdentifier}
-                    move buildlog.html build-${buildIdentifier}
-                    move build\\packaging\\windows\\*.exe build-${buildIdentifier}
-                    """
+    catchError {
+        if (betterIsUnix()) {
+            sh label: "Moving artifacts to build-${buildIdentifier}.",
+               script: """
+                       mkdir build-${buildIdentifier}
+                       mv buildlog.html build-${buildIdentifier}
+                       mv tmp/*.deb build-${buildIdentifier}
+                       """
+        }
+        else {
+            bat label: "Moving artifacts to build-${buildIdentifier}.",
+                script: """
+                        md build-${buildIdentifier}
+                        move buildlog.html build-${buildIdentifier}
+                        move build\\packaging\\windows\\*.exe build-${buildIdentifier}
+                        """
+        }
     }
 
     // create a zip file that contains any output files left behind by tests. For this to work
@@ -58,7 +60,7 @@ def archive_and_analyze(platform, arch, buildType){
         glob: "**/test_output/**"
 
     archiveArtifacts artifacts: "**/buildlog.html, build-${buildIdentifier}/*.deb, build-${buildIdentifier}/*.exe, build-${buildIdentifier}/*.zip",
-                     fingerprint: true
+                     fingerprint: true, onlyIfSuccessful: false
 
     def cmake = scanForIssues (
         tool: cmake(pattern:"**/buildlog.html",
