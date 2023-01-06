@@ -217,6 +217,10 @@ void RemoteClient::WsDispatch(const JsonRpcRequest& req)
         {
             WsSubscribeEntity(req);
         }
+        else if (req.Method()==Methods::UnsubscribeEntity)
+        {
+            WsUnsubscribeEntity(req);
+        }
         else if (req.Method()==Methods::RegisterEntityHandler)
         {
             WsRegisterEntityHandler(req);
