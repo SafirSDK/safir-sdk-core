@@ -63,7 +63,8 @@ namespace SP
         : private boost::noncopyable
     {
     public:
-        ElectionHandlerBasic(boost::asio::io_service::strand& strand,
+        ElectionHandlerBasic(const std::wstring& logPrefix,
+                             boost::asio::io_service::strand& strand,
                              CommunicationT& communication,
                              const int64_t id,
                              const int64_t nodeTypeId,
@@ -73,7 +74,8 @@ namespace SP
                              const std::function<void(const int64_t nodeId,
                                                       const int64_t electionId)>& electionCompleteCallback,
                              const std::function<void(const int64_t incarnationId)>& formSystemCallback)
-            : m_strand (strand)
+            : m_logPrefix(logPrefix)
+            , m_strand(strand)
             , m_stopped(false)
             , m_communication(communication)
             , m_receiverId(LlufId_Generate64(receiverId))
@@ -104,8 +106,8 @@ namespace SP
                                           [](size_t size){return new char[size];},
                                           [](const char* data){delete[] data;});
 
-            lllog(3) << "SP: AloneTimeout will be " << boost::chrono::duration_cast<boost::chrono::milliseconds>(m_aloneTimeout) << std::endl;
-            lllog(3) << "SP: ElectionTimeout will be " << boost::chrono::duration_cast<boost::chrono::milliseconds>(m_electionTimeout) << std::endl;
+            lllog(3) << m_logPrefix << "AloneTimeout will be " << boost::chrono::duration_cast<boost::chrono::milliseconds>(m_aloneTimeout) << std::endl;
+            lllog(3) << m_logPrefix << "ElectionTimeout will be " << boost::chrono::duration_cast<boost::chrono::milliseconds>(m_electionTimeout) << std::endl;
             m_electionInProgress = true;
             m_electionTimer.expires_from_now(m_aloneTimeout);
             m_electionTimer.async_wait(m_strand.wrap([this](const boost::system::error_code& error)
@@ -132,10 +134,10 @@ namespace SP
 
         void Stop()
         {
-            lllog(4) << "SP: ElectionHandler::Stop called." << std::endl;
+            lllog(4) << m_logPrefix << "ElectionHandler::Stop called." << std::endl;
             m_strand.dispatch([this]
                               {
-                                  lllog(4) << "SP: ElectionHandler executing Stop" << std::endl;
+                                  lllog(4) << m_logPrefix << "ElectionHandler executing Stop" << std::endl;
                                   m_pendingAlives.clear();
                                   m_pendingVictories.clear();
                                   m_pendingInquiries.clear();
@@ -161,14 +163,14 @@ namespace SP
                 {
                     if (m_id != statistics.Id(i) && m_nodeTypes.at(statistics.NodeTypeId(i)).isLightNode)
                     {
-                        throw std::logic_error("SP: It looks like I can see another light node!");
+                        throw std::logic_error("It looks like I can see another light node!");
                     }
                 }
             }
 
             m_strand.dispatch([this, statistics, completionSignaller]
                               {
-                                  lllog(5) << "SP: ElectionHandler got new RawStatistics" << std::endl;
+                                  lllog(5) << m_logPrefix << "ElectionHandler got new RawStatistics" << std::endl;
                                   m_lastStatistics = std::move(statistics);
                                   StartElection();
                               });
@@ -179,7 +181,7 @@ namespace SP
         {
             m_strand.dispatch([this]
                               {
-                                  lllog(5) << "SP: ElectionHandler is forcing an election" << std::endl;
+                                  lllog(5) << m_logPrefix << "ElectionHandler is forcing an election" << std::endl;
                                   StartElection();
                               });
         }
@@ -275,7 +277,7 @@ namespace SP
 
             if (m_stopped)
             {
-                lllog(4) << "SP: I am stopping, so will not start new election" << std::endl;
+                lllog(4) << m_logPrefix << "I am stopping, so will not start new election" << std::endl;
                 return;
             }
 
@@ -283,15 +285,15 @@ namespace SP
                 m_lastStatistics.Valid() &&
                 m_lastStatistics.IsEveryoneElseDead())
             {
-                lllog(4) << "SP: I am a light node, and everyone else is gone, so I shall get myself elected anyway." << std::endl;
+                lllog(4) << m_logPrefix << "I am a light node, and everyone else is gone, so I shall get myself elected anyway." << std::endl;
                 m_lastStatistics = RawStatistics();
             }
 
-            lllog(4) << "SP: Checking if I should start election" << std::endl;
+            lllog(4) << m_logPrefix << "Checking if I should start election" << std::endl;
 
             if (!m_lastStatistics.Valid())
             {
-                lllog(4) << "SP: Haven't heard from any other nodes, electing myself!" << std::endl;
+                lllog(4) << m_logPrefix << "Haven't heard from any other nodes, electing myself!" << std::endl;
                 m_elected = m_id;
                 m_currentElectionId = LlufId_GenerateRandom64();
                 m_electionCompleteCallback(m_elected, m_currentElectionId);
@@ -304,11 +306,11 @@ namespace SP
             }
             else if (m_isLightNode)
             {
-                lllog(4) << "SP: I am a light node, not starting any elections" << std::endl;
+                lllog(4) << m_logPrefix << "I am a light node, not starting any elections" << std::endl;
 
                 if (m_currentElectionId != m_lastStatistics.ElectionId())
                 {
-                    lllog(4) << "SP: FYI, I have a different election id than what others have. Not doing anything about that, though." << std::endl;
+                    lllog(4) << m_logPrefix << "FYI, I have a different election id than what others have. Not doing anything about that, though." << std::endl;
                 }
                 return;
             }
@@ -316,7 +318,7 @@ namespace SP
             {
                 for (int i = 0; i < m_lastStatistics.Size(); ++i)
                 {
-                    lllog(7) << "SP:   know of node " << m_lastStatistics.Id(i)
+                    lllog(7) << m_logPrefix << "  know of node " << m_lastStatistics.Id(i)
                              << (m_lastStatistics.IsDead(i) ? " which is dead" : "") << std::endl;
 
                     if (m_lastStatistics.Id(i) == m_elected && !m_lastStatistics.IsDead(i))
@@ -332,7 +334,7 @@ namespace SP
                             m_lastStatistics.HasRemoteStatistics(i) &&
                             m_lastStatistics.RemoteStatistics(i).ElectionId() == m_lastStatistics.ElectionId())
                         {
-                            lllog(4) << "SP: Found elected node with higher id than me, "
+                            lllog(4) << m_logPrefix << "Found elected node with higher id than me, "
                                      << "not starting election!" << std::endl;
                             return;
                         }
@@ -357,7 +359,7 @@ namespace SP
                     return;
                 }
 
-                lllog(4) << "SP: Starting election" << std::endl;
+                lllog(4) << m_logPrefix << "Starting election" << std::endl;
 
                 m_currentElectionId = LlufId_GenerateRandom64();
 
@@ -381,7 +383,7 @@ namespace SP
             {
                 m_electionInProgress = false;
 
-                lllog(4) << "SP: There can be only one! Will send VICTORY ("
+                lllog(4) << m_logPrefix << "There can be only one! Will send VICTORY ("
                     << m_currentElectionId << ") to everyone!" << std::endl;
 
                 m_elected = m_id;
@@ -421,7 +423,7 @@ namespace SP
         {
             ElectionMessage message;
             message.ParseFromArray(data.get(), static_cast<int>(size));
-            lllog(5) << "SP: Got ElectionMessage ("
+            lllog(5) << m_logPrefix << "Got ElectionMessage ("
                      << ToString(message.action())
                      << ", "
                      << message.election_id()
@@ -438,7 +440,7 @@ namespace SP
 
                         if (m_lastStatistics.IsDead(i) && !m_isLightNode)
                         {
-                            lllog(5) << "SP: Got ElectionMessage from a node that is dead! Discarding!" << std::endl;
+                            lllog(5) << m_logPrefix << "Got ElectionMessage from a node that is dead! Discarding!" << std::endl;
                             return;
                         }
 
@@ -467,7 +469,7 @@ namespace SP
                         //and start a new election
                         if (from < m_id && !m_isLightNode)
                         {
-                            lllog(5) << "SP: Got an inquiry from someone (" << from << ") smaller than us ("
+                            lllog(5) << m_logPrefix << "Got an inquiry from someone (" << from << ") smaller than us ("
                                      << m_id << "), sending alive and starting election."  << std::endl;
                             m_pendingAlives[from] = std::make_pair(nodeTypeId, message.election_id());
                             SendPendingElectionMessages();
@@ -483,7 +485,7 @@ namespace SP
                         if (from > m_id && !m_isLightNode &&
                             message.election_id() == m_currentElectionId)
                         {
-                            lllog(5) << "SP: Got alive from someone bigger than me ("
+                            lllog(5) << m_logPrefix << "Got alive from someone bigger than me ("
                                      << from << "), abandoning election." << std::endl;
                             m_electionInProgress = false;
                             m_electionTimer.cancel();
@@ -497,7 +499,7 @@ namespace SP
                     {
                         if (from > m_id || m_isLightNode)
                         {
-                            lllog(4) << "SP: New controller elected: " << from << std::endl;
+                            lllog(4) << m_logPrefix << "New controller elected: " << from << std::endl;
                             //graciously accept their victory
                             m_elected = from;
 
@@ -511,7 +513,7 @@ namespace SP
                         }
                         else //No! We're going to usurp him! restart election
                         {
-                            lllog(5) << "SP: Got victory from someone smaller than me ("
+                            lllog(5) << m_logPrefix << "Got victory from someone smaller than me ("
                                      << from << "), starting new election." << std::endl;
 
                             StartElection();
@@ -555,7 +557,7 @@ namespace SP
 
                     if (!sent)
                     {
-                        lllog(9) << "SP: ElectionHandler: Overflow when sending ALIVE to node "
+                        lllog(9) << m_logPrefix << "ElectionHandler: Overflow when sending ALIVE to node "
                                  << it->first << std::endl;
                         m_pendingAlives.insert(*it);
                     }
@@ -580,7 +582,7 @@ namespace SP
 
                     if (!sent)
                     {
-                        lllog(9) << "SP: ElectionHandler: Overflow when sending VICTORY to node type "
+                        lllog(9) << m_logPrefix << "ElectionHandler: Overflow when sending VICTORY to node type "
                                  << m_nodeTypes.find(*it)->second.name.c_str() << std::endl;
                         m_pendingVictories.insert(*it);
                     }
@@ -604,13 +606,13 @@ namespace SP
                     const bool sent = m_communication.Send(0, *it, std::move(data), size, m_receiverId, true);
                     if (!sent)
                     {
-                        lllog(7) << "SP: ElectionHandler: Overflow when sending INQUIRY to node type "
+                        lllog(7) << m_logPrefix << "ElectionHandler: Overflow when sending INQUIRY to node type "
                                  << m_nodeTypes.find(*it)->second.name.c_str() << std::endl;
                         m_pendingInquiries.insert(*it);
                     }
                     else
                     {
-                        lllog(9) << "SP: ElectionHandler: sent INQUIRY to node type "
+                        lllog(9) << m_logPrefix << "ElectionHandler: sent INQUIRY to node type "
                                  << m_nodeTypes.find(*it)->second.name.c_str() << std::endl;
                     }
                 }
@@ -640,7 +642,7 @@ namespace SP
 #endif
         }
 
-
+        const std::wstring m_logPrefix;
         boost::asio::io_service::strand& m_strand;
         bool m_stopped;
         CommunicationT& m_communication;

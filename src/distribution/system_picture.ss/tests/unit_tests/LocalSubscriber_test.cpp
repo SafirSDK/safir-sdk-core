@@ -88,7 +88,7 @@ BOOST_AUTO_TEST_CASE( send_one )
 {
     boost::asio::io_service ioService;
 
-    LocalSubscriber<::Subscriber, RawStatisticsSubscriber, RawStatisticsCreator> subscriber(ioService, "foo");
+    LocalSubscriber<::Subscriber, RawStatisticsSubscriber, RawStatisticsCreator> subscriber(L"", ioService, "foo");
 
     int dataReceived = 0;
     subscriber.Start([&](const RawStatistics& r)
@@ -126,7 +126,7 @@ BOOST_AUTO_TEST_CASE( two_subscribers )
 {
     boost::asio::io_service ioService;
 
-    LocalSubscriber<::Subscriber, RawStatisticsSubscriber, RawStatisticsCreator> subscriber(ioService, "foo");
+    LocalSubscriber<::Subscriber, RawStatisticsSubscriber, RawStatisticsCreator> subscriber(L"", ioService, "foo");
 
     int dataReceived = 0;
     subscriber.Start([&](const RawStatistics& r)
@@ -175,7 +175,7 @@ BOOST_AUTO_TEST_CASE( add_before_start )
 {
     boost::asio::io_service ioService;
 
-    LocalSubscriber<::Subscriber, RawStatisticsSubscriber, RawStatisticsCreator> subscriber(ioService, "foo");
+    LocalSubscriber<::Subscriber, RawStatisticsSubscriber, RawStatisticsCreator> subscriber(L"", ioService, "foo");
 
     int dataReceived = 0;
     subscriber.AddSubscriber([&](const RawStatistics& r)

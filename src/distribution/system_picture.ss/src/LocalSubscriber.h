@@ -56,9 +56,11 @@ namespace SP
     public:
         typedef std::function<void (const typename SubscriberInterfaceT::DataWrapper& data)> DataCallback;
 
-        LocalSubscriber(boost::asio::io_service& ioService,
+        LocalSubscriber(const std::wstring& logPrefix,
+                        boost::asio::io_service& ioService,
                         const char* const name)
-            : m_strand(ioService)
+            : m_logPrefix(logPrefix)
+            , m_strand(ioService)
             , m_name (name)
         {
 
@@ -77,14 +79,14 @@ namespace SP
         {
             m_strand.dispatch([this, dataCallback]
             {
-                lllog(9) << "SP: AddSubscriber" << std::endl;
+                lllog(9) << m_logPrefix << "AddSubscriber" << std::endl;
                 const bool needConnect = m_dataCallbacks.empty();
 
                 m_dataCallbacks.push_back(dataCallback);
 
                 if (needConnect)
                 {
-                    lllog(9) << "SP: AddSubscriber calling Connect" << std::endl;
+                    lllog(9) << m_logPrefix << "AddSubscriber calling Connect" << std::endl;
                     m_subscriber->Connect();
                 }
             });
@@ -103,7 +105,7 @@ namespace SP
         //called in strand
         void DataReceived(const char* const data, const size_t size)
         {
-            lllog(9) << "SP: LocalSubscriber " << m_name.c_str() << " received new data" << std::endl;
+            lllog(9) << m_logPrefix << "LocalSubscriber " << m_name.c_str() << " received new data" << std::endl;
 
             auto msg = Safir::make_unique<typename WrapperCreatorT::WrappedType>();
 
@@ -126,6 +128,7 @@ namespace SP
 
         //Order/sync is guaranteed by IpcSubscribers delivery order guarantee.
 
+        const std::wstring m_logPrefix;
         boost::asio::io_service::strand m_strand;
         const std::string m_name;
 

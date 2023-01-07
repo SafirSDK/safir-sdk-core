@@ -112,7 +112,7 @@ BOOST_AUTO_TEST_CASE( send_ten )
     nodeTypes.insert(std::make_pair(20, NodeType(20,"tupp",true,boost::chrono::seconds(1),22,retryTimeouts)));
 
     RawPublisherRemoteBasic<::Handler, ::Communication> publisher
-        (ioService,communication,nodeTypes,"foo",h,boost::chrono::milliseconds(10));
+        (L"", ioService,communication,nodeTypes,"foo",h,boost::chrono::milliseconds(10));
 
     h.stopCall = [&]{publisher.Stop();};
     ioService.run();
@@ -143,7 +143,7 @@ BOOST_AUTO_TEST_CASE( callbacks )
     nodeTypes.insert(std::make_pair(20, NodeType(20,"tupp",true,boost::chrono::seconds(1),22,retryTimeouts)));
 
     RawPublisherRemoteBasic<::Handler, ::Communication> publisher
-        (ioService,communication,nodeTypes,"foo",h,boost::chrono::hours(10));
+        (L"", ioService,communication,nodeTypes,"foo",h,boost::chrono::hours(10));
 
     h.stopCall = [&]{publisher.Stop();};
     std::shared_ptr<void> cs;

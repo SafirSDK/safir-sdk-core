@@ -41,13 +41,15 @@ namespace SP
     class RawPublisherRemoteBasic
     {
     public:
-        RawPublisherRemoteBasic(boost::asio::io_service& ioService,
+        RawPublisherRemoteBasic(const std::wstring& logPrefix,
+                                boost::asio::io_service& ioService,
                                 CommunicationT& communication,
                                 const std::map<int64_t, NodeType>& nodeTypes,
                                 const char* const senderId,
                                 RawHandlerT& rawHandler,
                                 const boost::chrono::steady_clock::duration& period)
-            : m_strand(ioService)
+            : m_logPrefix(logPrefix)
+            , m_strand(ioService)
             , m_timer(ioService)
             , m_stopped(false)
             , m_communication(communication)
@@ -126,7 +128,7 @@ namespace SP
                 return;
             }
 
-            lllog(8) << "SP: Publishing raw statistics to other nodes" << std::endl;
+            lllog(8) << m_logPrefix << "Publishing raw statistics to other nodes" << std::endl;
 
             //start by scheduling next timer to send to all nodes.
             //this will be cancelled if we need to do a resend due to overflow below.
@@ -145,7 +147,7 @@ namespace SP
                     const bool sent = m_communication.Send(0, *id, data, size, m_senderId, true);
                     if (!sent)
                     {
-                        lllog(7) << "SP: RawPublisherRemote: Overflow when sending to node type "
+                        lllog(7) << m_logPrefix << "RawPublisherRemote: Overflow when sending to node type "
                                  << m_nodeTypes.find(*id)->second.name.c_str() << std::endl;
                         overflowNodes.insert(*id);
                     }
@@ -158,6 +160,7 @@ namespace SP
             });
         }
 
+        const std::wstring m_logPrefix;
         boost::asio::io_service::strand m_strand;
         boost::asio::steady_timer m_timer;
         std::atomic<bool> m_stopped;

@@ -628,7 +628,8 @@ public:
 class ElectionHandlerStub
 {
 public:
-    ElectionHandlerStub(boost::asio::io_service::strand& /*strand*/,
+    ElectionHandlerStub(const std::wstring& /*logPrefix*/,
+                        boost::asio::io_service::strand& /*strand*/,
                         CommunicationStub& /*communication*/,
                         const int64_t id_,
                         const int64_t /*nodeTypeId_*/,
@@ -700,7 +701,8 @@ struct Fixture
 {
     Fixture()
         : strand(ioService)
-        , coordinator(strand,
+        , coordinator(L"",
+                      strand,
                       comm,
                       "myself",
                       1000,

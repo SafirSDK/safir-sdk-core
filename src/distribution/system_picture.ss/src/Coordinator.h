@@ -91,7 +91,8 @@ namespace SP
         : private boost::noncopyable
     {
     public:
-        CoordinatorBasic(boost::asio::io_service::strand& strand,
+        CoordinatorBasic(const std::wstring& logPrefix,
+                         boost::asio::io_service::strand& strand,
                          CommunicationT& communication,
                          const std::string& name,
                          const int64_t id,
@@ -102,7 +103,8 @@ namespace SP
                          const boost::chrono::steady_clock::duration& aloneTimeout,
                          const char* const receiverId,
                          RawHandlerT& rawHandler)
-            : m_strand (strand)
+            : m_logPrefix(logPrefix)
+            , m_strand (strand)
             , m_communication(communication)
             , m_lastStatisticsDirty(true)
             , m_name(name)
@@ -115,7 +117,8 @@ namespace SP
             , m_rawHandler(rawHandler)
             , m_failedStateUpdates(0)
         {
-            m_electionHandler.reset(new ElectionHandlerT(m_strand,
+            m_electionHandler.reset(new ElectionHandlerT(m_logPrefix,
+                                                         m_strand,
                                                          communication,
                                                          id,
                                                          nodeTypeId,
@@ -147,7 +150,7 @@ namespace SP
                                                                   const RawChanges flags,
                                                                   std::shared_ptr<void> completionSignaller)
             {
-                lllog(8) << "SP: Coordinator got new raw data (" << flags << ")" << std::endl;
+                lllog(8) << m_logPrefix << "Coordinator got new raw data (" << flags << ")" << std::endl;
 
                 m_lastStatistics = statistics;
                 m_lastStatisticsDirty = true;
@@ -199,37 +202,37 @@ namespace SP
         {
             m_strand.dispatch([this,fn,onlyOwnState]
             {
-                lllog(8) << "SP: Coordinator::PerformOnStateMessage:" << std::endl;
+                lllog(8) << m_logPrefix << "Coordinator::PerformOnStateMessage:" << std::endl;
                 if (onlyOwnState)
                 {
                     const bool okToSend = UpdateMyState();
 
                     if (!okToSend)
                     {
-                        lllog(8) << "SP:  - Not sending: System State not ok to send!" << std::endl;
+                        lllog(8) << m_logPrefix << " - Not sending: System State not ok to send!" << std::endl;
                         return;
                     }
                 }
 
                 if (m_stateMessage.elected_id() == 0)
                 {
-                    lllog(8) << "SP:  - Not sending: System State contains no elected node!" << std::endl;
+                    lllog(8) << m_logPrefix << " - Not sending: System State contains no elected node!" << std::endl;
                     return;
                 }
 
                 if (m_stateMessage.election_id() == 0)
                 {
-                    lllog(8) << "SP: - Not sending: System State contains no election id." << std::endl;
+                    lllog(8) << m_logPrefix << "- Not sending: System State contains no election id." << std::endl;
                     return;
                 }
 
                 if (m_stateMessage.node_info_size() == 0)
                 {
-                    lllog(8) << "SP:  - Not sending: System State contains no nodes!" << std::endl;
+                    lllog(8) << m_logPrefix << " - Not sending: System State contains no nodes!" << std::endl;
                     return;
                 }
 
-                lllog(8) << "SP:  - Ok to send!\n" << m_stateMessage << std::endl;
+                lllog(8) << m_logPrefix << " - Ok to send!\n" << m_stateMessage << std::endl;
                 const size_t size = m_stateMessage.ByteSizeLong();
                 auto data = std::unique_ptr<char[]>(new char[size]);
                 m_stateMessage.SerializeWithCachedSizesToArray
@@ -266,7 +269,7 @@ namespace SP
                 //value on non-lightnodes
                 const bool firstMessage = m_stateMessage.election_id() == 0;
 
-                lllog (7) << "SP: Got new SystemState from node " << from << std::endl;
+                lllog (7) << m_logPrefix << "Got new SystemState from node " << from << std::endl;
                 m_stateMessage.ParseFromArray(data.get(),static_cast<int>(size));
 
                 //do some sanity checks
@@ -299,7 +302,7 @@ namespace SP
                         const bool isDead = m_stateMessage.node_info(i).is_dead();
                         if (isDead && m_electionHandler->IsLightNode())
                         {
-                            lllog (4) << "SP: This state says that we are dead, hopefully "
+                            lllog (4) << m_logPrefix << "This state says that we are dead, hopefully "
                                       << "that is from before we were resurrected, so ignoring it"<< std::endl;
                             //This state may contain information about us before we were resurrected, so we ignore it.
                             //This is done by setting the state to an invalid mode.
@@ -330,7 +333,7 @@ namespace SP
                     return;
                 }
 
-                const auto deadNodes = GetDeadNodes(m_stateMessage);
+                const auto deadNodes = GetDeadNodes(m_logPrefix, m_stateMessage);
 
                 //Note: never do exclude on a node that is not one that we have
                 //received NewNode for, i.e. is in m_lastStatistics top level.
@@ -341,7 +344,7 @@ namespace SP
                     //is part of the system we want to exclude the node
                     if (!m_lastStatistics.IsDead(i) && deadInState)
                     {
-                        lllog (4) << "SP: Elected coordinator thinks that node "
+                        lllog (4) << m_logPrefix << "Elected coordinator thinks that node "
                                   << m_lastStatistics.Name(i).c_str()
                                   << " with id " << m_lastStatistics.Id(i)
                                   << " is dead, so I'll mark him as dead." << std::endl;
@@ -352,7 +355,7 @@ namespace SP
                     //we resurrect nodes that the coordinator thinks are alive
                     if (!deadInState && m_lastStatistics.IsDead(i) && m_lastStatistics.IsResurrecting(i))
                     {
-                        lllog (4) << "SP: Elected coordinator thinks that node "
+                        lllog (4) << m_logPrefix << "Elected coordinator thinks that node "
                                   << m_lastStatistics.Name(i).c_str()
                                   << " with id " << m_lastStatistics.Id(i)
                                   << " is alive, and I think it is resurrecting, so I'll resurrect it."
@@ -376,15 +379,16 @@ namespace SP
         }
 
     private:
-        static std::set<int64_t> GetDeadNodes(const SystemStateMessage& state)
+        static std::set<int64_t> GetDeadNodes(const std::wstring& logPrefix,
+                                              const SystemStateMessage& state)
         {
-            lllog(9) << "GetDeadNodes1:" << std::endl;
+            lllog(9) << logPrefix << "GetDeadNodes1:" << std::endl;
             std::set<int64_t> dead;
             for (int i = 0; i < state.node_info_size(); ++i)
             {
                 if (state.node_info(i).is_dead())
                 {
-                    lllog(9) << " SystemStateMessage thinks " << state.node_info(i).id()
+                    lllog(9) << logPrefix << " SystemStateMessage thinks " << state.node_info(i).id()
                              << " (" << state.node_info(i).name().c_str() <<") is dead" << std::endl;
                     dead.insert(state.node_info(i).id());
                 }
@@ -393,24 +397,25 @@ namespace SP
         }
 
         /** Get all node ids that any normal node thinks is dead, and noone thinks is resurrecting */
-        static std::map<int64_t, std::pair<RawStatistics,int>> GetDeadNodes(const RawStatistics& statistics,
+        static std::map<int64_t, std::pair<RawStatistics,int>> GetDeadNodes(const std::wstring& logPrefix,
+                                                                            const RawStatistics& statistics,
                                                                             const std::map<int64_t, NodeType>& nodeTypes,
                                                                             const int64_t ownId)
         {
-            lllog(9) << "GetDeadNodes2:" << std::endl;
+            lllog(9) << logPrefix << "GetDeadNodes2:" << std::endl;
             std::map<int64_t, std::pair<RawStatistics,int>> deadNodes;
             std::set<int64_t> resurrecting;
             for (int i = 0; i < statistics.Size(); ++i)
             {
                 if (statistics.IsDead(i))
                 {
-                    lllog(9) << " I think node " << statistics.Id(i)
+                    lllog(9) << logPrefix << " I think node " << statistics.Id(i)
                              << " (" << statistics.Name(i).c_str() <<") is dead" << std::endl;
                     deadNodes.insert(std::make_pair(statistics.Id(i), std::make_pair(statistics,i)));
                 }
                 if (statistics.IsResurrecting(i))
                 {
-                    lllog(9) << " I think node " << statistics.Id(i)
+                    lllog(9) << logPrefix << " I think node " << statistics.Id(i)
                              << " (" << statistics.Name(i).c_str() <<") is resurrecting" << std::endl;
                     resurrecting.insert(statistics.Id(i));
                 }
@@ -431,13 +436,13 @@ namespace SP
 
                         if (remote.IsDead(j))
                         {
-                            lllog(9) << " Node " << remote.Id() << " (" << remote.Name().c_str() <<") thinks node "
+                            lllog(9) << logPrefix << " Node " << remote.Id() << " (" << remote.Name().c_str() <<") thinks node "
                                      << remote.Id(j) << " (" << remote.Name(j).c_str() <<") is dead" << std::endl;
                             deadNodes.insert(std::make_pair(remote.Id(j), std::make_pair(remote,j)));
                         }
                         if (remote.IsResurrecting(j))
                         {
-                            lllog(9) << " Node " << remote.Id() << " (" << remote.Name().c_str() <<") thinks node "
+                            lllog(9) << logPrefix << " Node " << remote.Id() << " (" << remote.Name().c_str() <<") thinks node "
                                      << remote.Id(j) << " (" << remote.Name(j).c_str() <<") is resurrecting" << std::endl;
                             resurrecting.insert(remote.Id(j));
                         }
@@ -496,7 +501,7 @@ namespace SP
                     if (knownNodes.find(remote.Id(j)) == knownNodes.end())
                     {
                         //found a live node that we don't know about!
-                        lllog(7) << "SP: Found node " << remote.Id(j) << "(" << remote.Name(j).c_str()
+                        lllog(7) << m_logPrefix << "Found node " << remote.Id(j) << "(" << remote.Name(j).c_str()
                                  << ") that we don't know about but which node " << remote.Id()
                                  << "(" << remote.Name().c_str() << ") believes is alive. " << std::endl;
 
@@ -515,19 +520,19 @@ namespace SP
 
             if (!m_lastStatisticsDirty)
             {
-                lllog(9) << "SP: Last statistics is not dirty, no need to update." << std::endl;
+                lllog(9) << m_logPrefix << "Last statistics is not dirty, no need to update." << std::endl;
                 return true;
             }
 
             if (!m_lastStatistics.Valid())
             {
-                lllog(9) << "SP: No valid raw data yet, not updating my state" << std::endl;
+                lllog(9) << m_logPrefix << "No valid raw data yet, not updating my state" << std::endl;
                 return false;
             }
 
             if (m_lastStatistics.IncarnationId() == 0)
             {
-                lllog(9) << "SP: We don't have an incarnation id yet, not updating my state" << std::endl;
+                lllog(9) << m_logPrefix << "We don't have an incarnation id yet, not updating my state" << std::endl;
                 return false;
             }
 
@@ -542,7 +547,7 @@ namespace SP
 
                 if (!m_lastStatistics.HasRemoteStatistics(i))
                 {
-                    lllog(9) << "SP: No remote RAW data received from node "
+                    lllog(9) << m_logPrefix << "No remote RAW data received from node "
                              << m_lastStatistics.Id(i) << ", not updating my state" << std::endl;
                     return false;
                 }
@@ -550,7 +555,7 @@ namespace SP
                 const auto& remote = m_lastStatistics.RemoteStatistics(i);
                 if (remote.ElectionId() != m_ownElectionId)
                 {
-                    lllog(9) << "SP: Remote RAW data from node "
+                    lllog(9) << m_logPrefix << "Remote RAW data from node "
                              << m_lastStatistics.Id(i) << " has wrong election id ("
                              << remote.ElectionId() << "), not updating my state." << std::endl;
                     return false;
@@ -560,7 +565,7 @@ namespace SP
             //check that all nodes that are known by other nodes are also known by us.
             if (!SystemStable())
             {
-                lllog(9) << "SP: System is not stable, not updating my state." << std::endl;
+                lllog(9) << m_logPrefix << "System is not stable, not updating my state." << std::endl;
                 return false;
             }
 
@@ -580,13 +585,13 @@ namespace SP
                 if (!m_lastStatistics.IsDead(i) &&
                     deadNodes.find(m_lastStatistics.Id(i)) != deadNodes.end())
                 {
-                    lllog (4) << "SP: Someone thinks that node " << m_lastStatistics.Name(i).c_str()
+                    lllog (4) << m_logPrefix << "Someone thinks that node " << m_lastStatistics.Name(i).c_str()
                               << " with id " << m_lastStatistics.Id(i)
                               << " is dead, so I'll exclude him."
                               << std::endl;
                     if (m_resurrectingNodes.find(m_lastStatistics.Id(i)) != m_resurrectingNodes.end())
                     {
-                        lllog(4) << "SP: No, actually, I won't. I am trying to resurrect that node."<< std::endl;
+                        lllog(4) << m_logPrefix << "No, actually, I won't. I am trying to resurrect that node."<< std::endl;
                         continue;
                     }
                     m_rawHandler.ExcludeNode(m_lastStatistics.Id(i));
@@ -611,7 +616,7 @@ namespace SP
             {
                 if (m_lastStatistics.IsResurrecting(i))
                 {
-                    lllog (4) << "SP: Want to resurrect node " << m_lastStatistics.Name(i).c_str()
+                    lllog (4) << m_logPrefix << "Want to resurrect node " << m_lastStatistics.Name(i).c_str()
                               << " with id " << m_lastStatistics.Id(i)
                               << std::endl;
                     m_rawHandler.ResurrectNode(m_lastStatistics.Id(i));
@@ -631,11 +636,11 @@ namespace SP
             CheckStrand();
 
             //This function attempts to not flush the logger until the end of the function
-            lllog(9) << "SP: Entering UpdateMyState\n";
+            lllog(9) << m_logPrefix << "Entering UpdateMyState\n";
 
             if (!m_electionHandler->IsElected())
             {
-                lllog(9) << "SP: We're not elected, not updating my state." << std::endl;
+                lllog(9) << m_logPrefix << "We're not elected, not updating my state." << std::endl;
                 m_failedStateUpdates = 0;
                 return false;
             }
@@ -650,18 +655,18 @@ namespace SP
                 if (m_failedStateUpdates > 60)
                 {
                     m_failedStateUpdates = 0;
-                    lllog(1) << "SP: Have failed at 60 state updates, forcing reelection." << std::endl;
+                    lllog(1) << m_logPrefix << "Have failed at 60 state updates, forcing reelection." << std::endl;
                     m_electionHandler->ForceElection();
                 }
                 return false;
             }
 
-            lllog(9) << "SP: Passed all checks, looking for dead nodes that "
+            lllog(9) << m_logPrefix << "Passed all checks, looking for dead nodes that "
                      << "I need to exclude before updating my state\n";
 
             //get all nodes that any normal node thinks is dead in a table
             //(we will be removing nodes from this table as we handle them below)
-            auto deadNodes = GetDeadNodes(m_lastStatistics, m_nodeTypes, m_id);
+            auto deadNodes = GetDeadNodes(m_logPrefix, m_lastStatistics, m_nodeTypes, m_id);
 
             //Exclude nodes that we think are alive but someone else thinks are dead
             //(code in ExcludeNodes will cause RawHandler to post another RawChangedEvent,
@@ -671,8 +676,8 @@ namespace SP
 
             if (nodesWereExcluded)
             {
-                lllog(9) << "SP: At least one node was marked as dead, returning\n"
-                         << "SP: UpdateMyState will be called again very soon, "
+                lllog(9) << m_logPrefix << "At least one node was marked as dead, returning\n"
+                         << m_logPrefix << "UpdateMyState will be called again very soon, "
                          << "which will generate a new state" << std::endl;
                 return false;
             }
@@ -681,19 +686,19 @@ namespace SP
 
             if (nodesWereResurrected)
             {
-                lllog(9) << "SP: At least one node was resurrected, returning\n"
-                         << "SP: UpdateMyState will be called again, and once we have received a new "
+                lllog(9) << m_logPrefix << "At least one node was resurrected, returning\n"
+                         << m_logPrefix << "UpdateMyState will be called again, and once we have received a new "
                          << "remote statistics from the resurrected node we will be able to generate "
                          << "a new state" << std::endl;
                 return false;
             }
 
 
-            lllog(9) << "SP: Updating my state.\n";
+            lllog(9) << m_logPrefix << "Updating my state.\n";
             const bool logState = Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().LogLevel() >= 9;
             if (logState)
             {
-                lllog(9) << "SP: Last state:\n" << m_stateMessage << "\n";
+                lllog(9) << m_logPrefix << "Last state:\n" << m_stateMessage << "\n";
             }
 
             //Note: This code will ignore the case where we for some reason have a RAW from another node
@@ -707,7 +712,7 @@ namespace SP
             // if we're becoming detached we need to clear out all the nodes from state
             if (!IsDetached() && m_electionHandler->IsElectionDetached())
             {
-                lllog(6) << "SP: Becoming detached, clearing node info from state" <<std::endl;
+                lllog(6) << m_logPrefix << "Becoming detached, clearing node info from state" <<std::endl;
                 m_stateMessage.clear_node_info();
                 m_rawHandler.SetNodeIsDetached();
                 m_stateMessage.set_is_detached(true);
@@ -715,7 +720,7 @@ namespace SP
             }
             else if (IsDetached() && !m_electionHandler->IsElectionDetached())
             {
-                lllog(6) << "SP: Becoming attached" <<std::endl;
+                lllog(6) << m_logPrefix << "Becoming attached" <<std::endl;
                 m_stateMessage.set_is_detached(false);
             }
 
@@ -728,7 +733,7 @@ namespace SP
                 {
                     if (node.id() == resurrectInfo.first)
                     {
-                        lllog(4) << "SP: Finished resurrecting node " << node.id() << std::endl;
+                        lllog(4) << m_logPrefix << "Finished resurrecting node " << node.id() << std::endl;
                         if (resurrectInfo.second == RESURRECT_COUNT)
                         {
                             node.set_is_dead(false);
@@ -742,7 +747,7 @@ namespace SP
             //remove elements that have been counted down to zero
             erase_if(m_resurrectingNodes, [](const auto& elem){return elem.second <= 0;});
 
-            lllog(9) << "SP: Looking at last state\n";
+            lllog(9) << m_logPrefix << "Looking at last state\n";
 
             //get lists of dead and alive nodes in the last state, for future use.
             //(remember that the last state might not have been produced by us)
@@ -752,7 +757,7 @@ namespace SP
             {
                 if (m_stateMessage.node_info(i).is_dead())
                 {
-                    lllog(9) << "SP:   Dead node " << m_stateMessage.node_info(i).name().c_str()
+                    lllog(9) << m_logPrefix << "  Dead node " << m_stateMessage.node_info(i).name().c_str()
                              << " (" << m_stateMessage.node_info(i).id() << ")\n";
                     const bool res = lastDeadNodes.insert(m_stateMessage.node_info(i).id()).second;
                     if (!res)
@@ -770,7 +775,7 @@ namespace SP
                 }
                 else
                 {
-                    lllog(9) << "SP:   Live node " << m_stateMessage.node_info(i).name().c_str()
+                    lllog(9) << m_logPrefix << "  Live node " << m_stateMessage.node_info(i).name().c_str()
                              << " (" << m_stateMessage.node_info(i).id() << ")\n";
                     const bool res = lastLiveNodes.insert(std::make_pair(m_stateMessage.node_info(i).id(),
                                                                          m_stateMessage.mutable_node_info(i))).second;
@@ -799,7 +804,7 @@ namespace SP
             //check that we're in the last state (and alive), and insert us if we're not
             if (lastLiveNodes.find(m_id) == lastLiveNodes.end())
             {
-                lllog(9) << "SP: Adding own node to system state\n";
+                lllog(9) << m_logPrefix << "Adding own node to system state\n";
 
                 //add myself
                 auto node = m_stateMessage.add_node_info();
@@ -824,7 +829,7 @@ namespace SP
                         lln->second->set_is_dead(true);
                         deadNodes.erase(findIt);
                         died.insert(lln->first);
-                        lllog(9) << "SP: Node " << lln->first << " has died since last state\n";
+                        lllog(9) << m_logPrefix << "Node " << lln->first << " has died since last state\n";
                     }
                 }
 
@@ -845,7 +850,7 @@ namespace SP
             //lastDeadNodes, but that doesnt really matter, since we'll be using
             //deadNodes to add dead nodes to systemState at the end of this fcn.
 
-            lllog(9) << "SP: Looking for new nodes that can be added to the system state\n";
+            lllog(9) << m_logPrefix << "Looking for new nodes that can be added to the system state\n";
 
             //we need a list of new nodes that are fully connected, that we can add to
             //the system state
@@ -889,7 +894,7 @@ namespace SP
                 //(doesnt matter if they're dead, since that has already been handled)
                 if (lln.empty())
                 {
-                    lllog(9) << "SP:   Found a candidate " << m_lastStatistics.Name(i).c_str()
+                    lllog(9) << m_logPrefix << "  Found a candidate " << m_lastStatistics.Name(i).c_str()
                              << " (" << m_lastStatistics.Id(i) << ")\n";
 
                     newNodes.insert(m_lastStatistics.Id(i));
@@ -925,7 +930,7 @@ namespace SP
                 //remove them from newNodes
                 for (auto notSeen = seen.cbegin(); notSeen != seen.cend(); ++notSeen)
                 {
-                    lllog(9) << "SP:   Node " << m_lastStatistics.Id(i) << " cannot see node "
+                    lllog(9) << m_logPrefix << "  Node " << m_lastStatistics.Id(i) << " cannot see node "
                              << *notSeen << ", so we cannot add it to system state yet\n";
                     newNodes.erase(*notSeen);
                 }
@@ -962,7 +967,7 @@ namespace SP
                 //remove them from newNodes
                 for (auto notSeen = seen.cbegin(); notSeen != seen.cend(); ++notSeen)
                 {
-                    lllog(9) << "SP:   Node " << m_lastStatistics.Id(i) << " cannot see node "
+                    lllog(9) << m_logPrefix << "  Node " << m_lastStatistics.Id(i) << " cannot see node "
                              << *notSeen << ", so we cannot add it to system state yet\n";
                     newNodes.erase(*notSeen);
                 }
@@ -978,7 +983,7 @@ namespace SP
                     continue;
                 }
 
-                lllog(9) << "SP: Adding new node " << m_lastStatistics.Name(i).c_str()
+                lllog(9) << m_logPrefix << "Adding new node " << m_lastStatistics.Name(i).c_str()
                          << " (" << m_lastStatistics.Id(i) << ")\n";
 
                 auto node = m_stateMessage.add_node_info();
@@ -998,7 +1003,7 @@ namespace SP
                     const auto& remote = dn->second.first;
                     const int index = dn->second.second;
 
-                    lllog(9) << "SP: Adding dead node " << remote.Name(index).c_str()
+                    lllog(9) << m_logPrefix << "Adding dead node " << remote.Name(index).c_str()
                              << " (" << remote.Id(index) << ")\n";
 
                     auto node = m_stateMessage.add_node_info();
@@ -1025,7 +1030,7 @@ namespace SP
                 {
                     if (addedDeadNodes.find(m_lastStatistics.MoreDeadNodes(i)) == addedDeadNodes.end())
                     {
-                        lllog(9) << "SP: Adding dead node " << m_lastStatistics.MoreDeadNodes(i)
+                        lllog(9) << m_logPrefix << "Adding dead node " << m_lastStatistics.MoreDeadNodes(i)
                                  << " from more_dead_nodes\n";
                         auto node = m_stateMessage.add_node_info();
                         node->set_name("<unknown>");
@@ -1040,15 +1045,15 @@ namespace SP
             if (m_stateMessage.is_detached() && m_stateMessage.node_info_size() != 1)
             {
                 SEND_SYSTEM_LOG(Alert, << "Internal error: A detached SystemState message should only have one node in it.");
-                lllog(1) << "SP: A detached SystemState message should only have one node in it:\n"
+                lllog(1) << m_logPrefix << "A detached SystemState message should only have one node in it:\n"
                          << m_stateMessage << std::endl;
                 throw std::logic_error("A detached SystemState message should only have one node in it");
             }
 
-            lllog(9) << "SP: A new SystemState has been produced\n";
+            lllog(9) << m_logPrefix << "A new SystemState has been produced\n";
             if (logState)
             {
-                lllog(9) << "SP: New state:\n" << m_stateMessage << "\n";
+                lllog(9) << m_logPrefix << "New state:\n" << m_stateMessage << "\n";
             }
 
             if (m_stateChangedCallback != nullptr)
@@ -1072,7 +1077,7 @@ namespace SP
 #endif
         }
 
-
+        const std::wstring m_logPrefix;
         boost::asio::io_service::strand& m_strand;
         CommunicationT& m_communication;
 

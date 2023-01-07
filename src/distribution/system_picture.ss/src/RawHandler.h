@@ -101,7 +101,8 @@ namespace SP
         typedef std::unordered_map<int64_t, NodeInfo> NodeTable;
 
     public:
-        RawHandlerBasic(boost::asio::io_service::strand& strand,
+        RawHandlerBasic(const std::wstring& logPrefix,
+                        boost::asio::io_service::strand& strand,
                         CommunicationT& communication,
                         const std::string& name,
                         const int64_t id,
@@ -114,7 +115,8 @@ namespace SP
                                                   const bool incarnationIdChanged)>& validateJoinSystemCallback,
                         const std::function<bool (const int64_t incarnationId)>& validateFormSystemCallback)
         SAFIR_GCC_VISIBILITY_BUG_WORKAROUND
-            : m_strand(strand)
+            : m_logPrefix(logPrefix)
+            , m_strand(strand)
             , m_communication(communication)
             , m_id(id)
             , m_isLightNode(nodeTypes.at(nodeTypeId).isLightNode)
@@ -152,7 +154,7 @@ namespace SP
                                                            })));
                 m_checkDeadNodesTimer->Start();
 
-                m_communication.SetExcludeNodeTimeLimit(CalculateExcludeNodeTimeLimit(nodeTypes));
+                m_communication.SetExcludeNodeTimeLimit(CalculateExcludeNodeTimeLimit(m_logPrefix, nodeTypes));
             }
 
             //set up some info about ourselves in our message
@@ -265,7 +267,7 @@ namespace SP
         {
             m_strand.post([this,from,data,size]
             {
-                lllog(9) << "SP: NewRemoteStatistics for node " << from << std::endl;
+                lllog(9) << m_logPrefix << "NewRemoteStatistics for node " << from << std::endl;
                 auto findIt = m_nodeTable.find(from);
 
                 if (findIt == m_nodeTable.end())
@@ -276,7 +278,7 @@ namespace SP
 
                 if (node.nodeInfo->is_dead())
                 {
-                    lllog(8) << "SP: NewRemoteStatistics from dead node, ignoring." << std::endl;
+                    lllog(8) << m_logPrefix << "NewRemoteStatistics from dead node, ignoring." << std::endl;
                     return;
                 }
 
@@ -292,7 +294,7 @@ namespace SP
                     throw std::logic_error("Failed to parse remote data!");
                 }
 
-                lllog(9) << "SP: Processing remote node information" << std::endl;
+                lllog(9) << m_logPrefix << "Processing remote node information" << std::endl;
 
                 int changes = 0;
 
@@ -300,7 +302,7 @@ namespace SP
 
                 if (!m_allStatisticsMessage.has_incarnation_id())
                 {
-                    lllog(6) << "SP: This node does not have an incarnation id" << std::endl;
+                    lllog(6) << m_logPrefix << "This node does not have an incarnation id" << std::endl;
                     if (node.nodeInfo->remote_statistics().has_incarnation_id() &&
                         !remoteIsLightNode)
                     {
@@ -313,7 +315,7 @@ namespace SP
 
                         if (join)
                         {
-                            lllog(1) << "SP: Remote RAW contains incarnation id "
+                            lllog(1) << m_logPrefix << "Remote RAW contains incarnation id "
                                      << node.nodeInfo->remote_statistics().incarnation_id()
                                      << " and validation passed, let's use it!" << std::endl;
                             m_allStatisticsMessage.set_incarnation_id(node.nodeInfo->remote_statistics().incarnation_id());
@@ -322,7 +324,7 @@ namespace SP
                         }
                         else
                         {
-                            lllog(1) << "SP: Remote RAW contains incarnation id "
+                            lllog(1) << m_logPrefix << "Remote RAW contains incarnation id "
                                      << node.nodeInfo->remote_statistics().incarnation_id()
                                      << " but validation did not pass. Marking remote dead and excluding!" << std::endl;
 
@@ -335,7 +337,7 @@ namespace SP
                     }
                     else
                     {
-                        lllog(6) << "SP: Remote node does not have incarnation either, or is a lightnode, discarding remote data" << std::endl;
+                        lllog(6) << m_logPrefix << "Remote node does not have incarnation either, or is a lightnode, discarding remote data" << std::endl;
                         node.nodeInfo->clear_remote_statistics();
                     }
                 }
@@ -348,13 +350,13 @@ namespace SP
                         throw std::logic_error("No validateJoinSystemCallback set in RawHandler!");
                     }
 
-                    lllog(6) << "SP: Remote node has different incarnation from us, but we may be detached. So will try to join!" << std::endl;
+                    lllog(6) << m_logPrefix << "Remote node has different incarnation from us, but we may be detached. So will try to join!" << std::endl;
                     const bool join = m_validateJoinSystemCallback(node.nodeInfo->remote_statistics().incarnation_id(),
                                                                    true);
 
                     if (join)
                     {
-                        lllog(1) << "SP: Remote RAW contains incarnation id "
+                        lllog(1) << m_logPrefix << "Remote RAW contains incarnation id "
                                  << node.nodeInfo->remote_statistics().incarnation_id()
                                  << " and validation passed, let's use it!" << std::endl;
                         m_allStatisticsMessage.set_incarnation_id(node.nodeInfo->remote_statistics().incarnation_id());
@@ -363,7 +365,7 @@ namespace SP
                     }
                     else
                     {
-                        lllog(1) << "SP: Remote RAW contains incarnation id "
+                        lllog(1) << m_logPrefix << "Remote RAW contains incarnation id "
                                  << node.nodeInfo->remote_statistics().incarnation_id()
                                  << " but validation did not pass. Marking remote dead and excluding!" << std::endl;
 
@@ -379,7 +381,7 @@ namespace SP
                          node.nodeInfo->remote_statistics().has_incarnation_id() &&
                          node.nodeInfo->remote_statistics().incarnation_id() != m_allStatisticsMessage.incarnation_id())
                 {
-                    lllog(6) << "SP: Remote node has different incarnation from us, and we're not "
+                    lllog(6) << m_logPrefix << "Remote node has different incarnation from us, and we're not "
                              << "a detached lightnode, excluding node." << std::endl;
 
                     node.nodeInfo->set_is_dead(true);
@@ -393,12 +395,12 @@ namespace SP
                          node.nodeInfo->remote_statistics().has_incarnation_id() &&
                          node.nodeInfo->remote_statistics().incarnation_id() != m_allStatisticsMessage.incarnation_id())
                 {
-                    lllog(6) << "SP: Remote has different incarnation from us, but is a lightnode, discarding remote data." << std::endl;
+                    lllog(6) << m_logPrefix << "Remote has different incarnation from us, but is a lightnode, discarding remote data." << std::endl;
                     node.nodeInfo->clear_remote_statistics();
                 }
                 else if (!node.nodeInfo->remote_statistics().has_incarnation_id())
                 {
-                    lllog(6) << "SP: Remote node has no incarnation, discarding remote data." << std::endl;
+                    lllog(6) << m_logPrefix << "Remote node has no incarnation, discarding remote data." << std::endl;
                     node.nodeInfo->clear_remote_statistics();
                 }
 
@@ -412,7 +414,7 @@ namespace SP
                         {
                             if (AddToMoreDeadNodes(n->id()))
                             {
-                                lllog(8) << "SP: Added " << n->id() << " to more_dead_nodes since "
+                                lllog(8) << m_logPrefix << "Added " << n->id() << " to more_dead_nodes since "
                                          << from  << " thinks that it is dead" << std::endl;
 
                                 changes |= RawChanges::NODES_CHANGED;
@@ -420,13 +422,13 @@ namespace SP
                         }
                     }
 
-                    lllog(9) << "SP: Processing remote more_dead_nodes" << std::endl;
+                    lllog(9) << m_logPrefix << "Processing remote more_dead_nodes" << std::endl;
 
                     for (auto id = node.nodeInfo->remote_statistics().more_dead_nodes().begin(); id != node.nodeInfo->remote_statistics().more_dead_nodes().end(); ++id)
                     {
                         if (AddToMoreDeadNodes(*id))
                         {
-                            lllog(8) << "SP: Added " << *id << " to more_dead_nodes since "
+                            lllog(8) << m_logPrefix << "Added " << *id << " to more_dead_nodes since "
                                      << from  << " has it in more_dead_nodes" << std::endl;
 
                             changes |= RawChanges::NODES_CHANGED;
@@ -460,7 +462,7 @@ namespace SP
             else
             {
                 //bad id.
-                lllog(1) << "SP: Bad election id ("
+                lllog(1) << m_logPrefix << "Bad election id ("
                          << node.nodeInfo->remote_statistics().election_id()
                          << ") from node " << node.nodeInfo->name().c_str() << "("
                          << node.nodeInfo->id() << ")." << std::endl;
@@ -476,7 +478,7 @@ namespace SP
                     ++node.numBadElectionIds;
                     if (node.numBadElectionIds >= 3)
                     {
-                        lllog(1) << "SP: Have detected 3 bad election ids ("
+                        lllog(1) << m_logPrefix << "Have detected 3 bad election ids ("
                                  << node.nodeInfo->remote_statistics().election_id()
                                  << ") from node " << node.nodeInfo->name().c_str() << "("
                                  << node.nodeInfo->id() << ")! Forcing election." << std::endl;
@@ -499,7 +501,7 @@ namespace SP
 
             m_strand.dispatch([this,data]
             {
-                lllog(9) << "SP: NewDataChannelStatistics" << std::endl;
+                lllog(9) << m_logPrefix << "NewDataChannelStatistics" << std::endl;
 
                 int changes = 0;
                 for (int i = 0; i < data.Size(); ++i)
@@ -584,13 +586,13 @@ namespace SP
             {
                 throw std::logic_error("ExcludeNode on own node!");
             }
-            lllog(4) << "SP: ExcludeNode " << id << std::endl;
+            lllog(4) << m_logPrefix << "ExcludeNode " << id << std::endl;
             m_communication.ExcludeNode(id);
             m_strand.dispatch([this, id]
                               {
                                   if (m_isLightNode && !m_master)
                                   {
-                                      lllog(4) << "SP: ExcludeNode: Am a lightnode and in data connection, "
+                                      lllog(4) << m_logPrefix << "ExcludeNode: Am a lightnode and in data connection, "
                                                << "so removing node " << id << " from tables" << std::endl;
                                       m_nodeTable.erase(id);
                                       PostRawChangedCallback(RawChanges::NODES_CHANGED, nullptr);
@@ -630,7 +632,7 @@ namespace SP
 
             m_strand.dispatch([this, id]
                               {
-                                  lllog(4) << "SP: ResurrectNode: Resurrecting node " << id << std::endl;
+                                  lllog(4) << m_logPrefix << "ResurrectNode: Resurrecting node " << id << std::endl;
                                   auto findIt = m_nodeTable.find(id);
 
                                   if (findIt == m_nodeTable.end())
@@ -688,14 +690,14 @@ namespace SP
         {
             if (!m_isLightNode)
             {
-                throw std::logic_error("SP: SetNodeIsDetached was called on a non-light node!");
+                throw std::logic_error("SetNodeIsDetached was called on a non-light node!");
             }
 
             m_strand.dispatch([this]
                               {
                                   if (m_nodeTable.empty() && m_allStatisticsMessage.more_dead_nodes_size() == 0)
                                   {
-                                      lllog(4) << "SP: SetNodeIsDetached: Nothing to do." << std::endl;
+                                      lllog(4) << m_logPrefix << "SetNodeIsDetached: Nothing to do." << std::endl;
                                       return;
                                   }
 
@@ -703,11 +705,11 @@ namespace SP
                                   {
                                       if (!node.second.nodeInfo->is_dead())
                                       {
-                                          throw std::logic_error("SP: SetNodeIsDetached was called when"
+                                          throw std::logic_error("SetNodeIsDetached was called when"
                                                                  "there was a node that is alive!");
                                       }
                                   }
-                                  lllog(4) << "SP: SetNodeIsDetached: Clearing node tables" << std::endl;
+                                  lllog(4) << m_logPrefix << "SetNodeIsDetached: Clearing node tables" << std::endl;
                                   m_nodeTable.clear();
                                   m_allStatisticsMessage.clear_node_info();
                                   m_allStatisticsMessage.clear_more_dead_nodes();
@@ -751,7 +753,7 @@ namespace SP
         {
             m_strand.dispatch([this, electionId]
                               {
-                                  lllog(7) << "SP: Election Id " << electionId
+                                  lllog(7) << m_logPrefix << "Election Id " << electionId
                                            << " set in RawHandler." << std::endl;
 
                                   m_allStatisticsMessage.set_election_id(electionId);
@@ -762,12 +764,12 @@ namespace SP
 
         void FormSystem(const int64_t incarnationId)
         {
-            lllog(4) << "SP: FormSystem " << incarnationId << std::endl;
+            lllog(4) << m_logPrefix << "FormSystem " << incarnationId << std::endl;
             m_strand.post([this, incarnationId]
                           {
                               if (m_allStatisticsMessage.has_incarnation_id())
                               {
-                                  lllog(8) << "SP: Already have an incarnation_id "
+                                  lllog(8) << m_logPrefix << "Already have an incarnation_id "
                                            << m_allStatisticsMessage.incarnation_id() << std::endl;
                                   return;
                               }
@@ -781,12 +783,12 @@ namespace SP
 
                                   PostRawChangedCallback(RawChanges(RawChanges::METADATA_CHANGED), nullptr);
 
-                                  lllog(1) << "SP: Incarnation Id " << incarnationId
+                                  lllog(1) << m_logPrefix << "Incarnation Id " << incarnationId
                                            << " set in RawHandler." << std::endl;
                               }
                               else
                               {
-                                  lllog(8) << "SP: Not allowed to form new system" << std::endl;
+                                  lllog(8) << m_logPrefix << "Not allowed to form new system" << std::endl;
                               }
                           });
         }
@@ -818,7 +820,8 @@ namespace SP
             return result / 2;
         }
 
-        static int CalculateExcludeNodeTimeLimit(const std::map<int64_t,NodeType>& nodeTypes)
+        static int CalculateExcludeNodeTimeLimit(const std::wstring logPrefix,
+                                                 const std::map<int64_t,NodeType>& nodeTypes)
         {
             boost::chrono::steady_clock::duration result = boost::chrono::seconds(1);
 
@@ -831,7 +834,7 @@ namespace SP
             // twice the other nodes timeout.
             const int seconds = static_cast<int>
                 ((boost::chrono::duration_cast<boost::chrono::milliseconds>(result).count()*4)/1000);
-            lllog(1) << "SP: CalculateExcludeNodeTimeLimit " << seconds << " seconds" << std::endl;
+            lllog(1) << logPrefix << "CalculateExcludeNodeTimeLimit " << seconds << " seconds" << std::endl;
             return seconds;
         }
 
@@ -845,7 +848,7 @@ namespace SP
 
             if (id == m_id)
             {
-                lllog(4) << "SP: Not adding myself to MoreDeadNodes!" << std::endl;
+                lllog(4) << m_logPrefix << "Not adding myself to MoreDeadNodes!" << std::endl;
                 return false;
             }
 
@@ -872,7 +875,7 @@ namespace SP
                      const std::string& dataAddress,
                      const bool multicast)
         {
-            lllog(4) << "SP: New node '" << name.c_str() << "' with id "
+            lllog(4) << m_logPrefix << "New node '" << name.c_str() << "' with id "
                      << id << " was added. MC = " << std::boolalpha << multicast << std::endl;
 
             if (id == m_id)
@@ -900,7 +903,7 @@ namespace SP
                 }
 
                 nodeIt->second.nodeInfo->set_is_resurrecting(true);
-                lllog(4) << "SP: New node '" << name.c_str() << "' ("
+                lllog(4) << m_logPrefix << "New node '" << name.c_str() << "' ("
                          << id << ") is resurrecting" << std::endl;
 
                 nodeIt->second.lastUcReceiveTime = boost::chrono::steady_clock::now();
@@ -921,11 +924,11 @@ namespace SP
                 }
                 else if (nodeIt != m_nodeTable.end())
                 {
-                    lllog(1) << "SP: Got a new node " << name.c_str() << " that I already had" << std::endl;
+                    lllog(1) << m_logPrefix << "Got a new node " << name.c_str() << " that I already had" << std::endl;
 
                     if (m_isLightNode && !nodeIt->second.nodeInfo->is_dead())
                     {
-                        lllog(1) << "SP: And I am a lightnode and that node is not dead! Strange!" << std::endl;
+                        lllog(1) << m_logPrefix << "And I am a lightnode and that node is not dead! Strange!" << std::endl;
                     }
 
                     throw std::logic_error("Got a new node that I already had");
@@ -953,10 +956,10 @@ namespace SP
 
                 if (m_moreDeadNodes.find(id) != m_moreDeadNodes.end())
                 {
-                    lllog(1) << "SP: This node was found in moreDeadNodes, so marking it as dead" << std::endl;
+                    lllog(1) << m_logPrefix << "This node was found in moreDeadNodes, so marking it as dead" << std::endl;
                     if (!m_isLightNode)
                     {
-                        lllog(1) << "SP: ... and excluding it, since I am not a lightnode" << std::endl;
+                        lllog(1) << m_logPrefix << "... and excluding it, since I am not a lightnode" << std::endl;
                         m_communication.ExcludeNode(id);
                     }
                     newNode->set_is_dead(true);
@@ -970,18 +973,18 @@ namespace SP
                                        {
                                            if (!m_master)
                                            {
-                                               lllog(4) << "SP: Not calling IncludeNode for "
+                                               lllog(4) << m_logPrefix << "Not calling IncludeNode for "
                                                         << name.c_str() << "(" << id << ") since we're not the master" << std::endl;
                                            }
                                            else if (!newNode->is_dead())
                                            {
-                                               lllog(4) << "SP: Calling IncludeNode for "
+                                               lllog(4) << m_logPrefix << "Calling IncludeNode for "
                                                         << name.c_str() << "(" << id << ")" << std::endl;
                                                m_communication.IncludeNode(id);
                                            }
                                            else
                                            {
-                                               lllog(4) << "SP: Not calling IncludeNode for "
+                                               lllog(4) << m_logPrefix << "Not calling IncludeNode for "
                                                         << name.c_str() << "(" << id << ") since it has been marked as dead." << std::endl;
                                            }
                                        }));
@@ -992,7 +995,7 @@ namespace SP
         void GotReceive(const int64_t id, const bool multicast, const bool duplicate)
         {
             const auto now = boost::chrono::steady_clock::now();
-            lllog(9) << "SP: GotReceive (MC=" <<std::boolalpha << multicast
+            lllog(9) << m_logPrefix << "GotReceive (MC=" <<std::boolalpha << multicast
                      << ") from node with id " << id <<", time = " << now << std::endl;
 
             const auto findIt = m_nodeTable.find(id);
@@ -1007,7 +1010,7 @@ namespace SP
 
             if (node.nodeInfo->is_dead())
             {
-                lllog(8) << "SP: GotReceive from dead node, ignoring." << std::endl;
+                lllog(8) << m_logPrefix << "GotReceive from dead node, ignoring." << std::endl;
                 return;
             }
 
@@ -1048,13 +1051,13 @@ namespace SP
         //Must be called in strand!
         void Retransmit(int64_t id, size_t transmitCount)
         {
-            lllog(9) << "SP: Retransmit to node with id " << id << ", transmitCount = " << transmitCount << std::endl;
+            lllog(9) << m_logPrefix << "Retransmit to node with id " << id << ", transmitCount = " << transmitCount << std::endl;
 
             const auto findIt = m_nodeTable.find(id);
 
             if (m_isLightNode && findIt == m_nodeTable.end())
             {
-                lllog(9) << "SP: Retransmit to unknown node on lightnode, ignoring." <<  std::endl;
+                lllog(9) << m_logPrefix << "Retransmit to unknown node on lightnode, ignoring." <<  std::endl;
                 return;
             }
             else if (findIt == m_nodeTable.end())
@@ -1065,7 +1068,7 @@ namespace SP
 
             if (node.nodeInfo->is_dead())
             {
-                lllog(8) << "SP: Retransmit to dead node, ignoring." << std::endl;
+                lllog(8) << m_logPrefix << "Retransmit to dead node, ignoring." << std::endl;
                 return;
             }
 
@@ -1143,7 +1146,7 @@ namespace SP
                 //node has just been injected to this node, but the other node
                 //has not yet heard about us, so we really need to give the other
                 //node plenty of time here.
-                lllog(4) << "SP: Slave is extra tolerant towards new node " << nodeInfo.nodeInfo->name().c_str()
+                lllog(4) << m_logPrefix << "Slave is extra tolerant towards new node " << nodeInfo.nodeInfo->name().c_str()
                          << " with id " << id << " that has not started sending yet" << std::endl;
                 tolerance = 10;
             }
@@ -1152,7 +1155,7 @@ namespace SP
                 //We're more tolerant when nodes have just started, i.e. when we've received
                 //less than 10 packets from them
 
-                lllog(4) << "SP: Extra tolerant towards new node " << nodeInfo.nodeInfo->name().c_str()
+                lllog(4) << m_logPrefix << "Extra tolerant towards new node " << nodeInfo.nodeInfo->name().c_str()
                          << " with id " << id << std::endl;
 
                 tolerance = 2;
@@ -1194,7 +1197,7 @@ namespace SP
                 if (!node.nodeInfo->is_dead() &&
                     (lastAnyReceiveTime < anyThreshold || (node.multicast && node.lastMcReceiveTime < mcThreshold)))
                 {
-                    lllog(4) << "SP: Node " << node.nodeInfo->name().c_str()
+                    lllog(4) << m_logPrefix << "Node " << node.nodeInfo->name().c_str()
                              << " with id " << id
                              << " was marked as dead (" << std::boolalpha
                              << node.multicast << ", "
@@ -1212,7 +1215,7 @@ namespace SP
                 else if (node.nodeInfo->is_dead() &&
                          lastAnyReceiveTime < clearThreshold)
                 {
-                    lllog(4) << "SP: Node " << node.nodeInfo->name().c_str()
+                    lllog(4) << m_logPrefix << "Node " << node.nodeInfo->name().c_str()
                              << " with id " << id
                              << " has been dead for five minutes, clearing data." << std::endl;
 
@@ -1257,7 +1260,7 @@ namespace SP
 
                     if (AddToMoreDeadNodes(id))
                     {
-                        lllog(8) << "SP: Added " << id << " to more_dead_nodes since "
+                        lllog(8) << m_logPrefix << "Added " << id << " to more_dead_nodes since "
                                   "it has been dead for a long time." << std::endl;
                     }
                     //node was already dead, so no need to set somethingChanged
@@ -1287,7 +1290,7 @@ namespace SP
          */
         void PostRawChangedCallback(const RawChanges& flags, const std::function<void()>& completionHandler)
         {
-            lllog(7) << "SP: PostRawChangedCallback " << flags << std::endl;
+            lllog(7) << m_logPrefix << "PostRawChangedCallback " << flags << std::endl;
             const auto copy = RawStatisticsCreator::Create
                 (Safir::make_unique<RawStatisticsMessage>(m_allStatisticsMessage));
 
@@ -1309,7 +1312,7 @@ namespace SP
             }
         }
 
-
+        const std::wstring m_logPrefix;
         boost::asio::io_service::strand& m_strand;
         CommunicationT& m_communication;
 

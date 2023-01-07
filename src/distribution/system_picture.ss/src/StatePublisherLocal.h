@@ -45,11 +45,13 @@ namespace SP
     class StatePublisherLocalBasic
     {
     public:
-        StatePublisherLocalBasic(boost::asio::io_service& ioService,
+        StatePublisherLocalBasic(const std::wstring& logPrefix,
+                                 boost::asio::io_service& ioService,
                                  CoordinatorT& coordinator,
                                  const char* const name,
                                  const boost::chrono::steady_clock::duration& period)
-            : m_coordinator(coordinator)
+            : m_logPrefix(logPrefix)
+            , m_coordinator(coordinator)
             , m_publisher(ioService, name, NULL, NULL)
         {
             m_publishTimer.reset(new Safir::Utilities::Internal::AsioPeriodicTimer(ioService,
@@ -81,12 +83,13 @@ namespace SP
 
             m_coordinator.PerformOnStateMessage([this](std::unique_ptr<char[]> data, const size_t size)
                                                 {
-                                                    lllog(8) << "SP: Publishing system state over ipc" << std::endl;
+                                                    lllog(8) << m_logPrefix << "Publishing system state over ipc" << std::endl;
                                                     m_publisher.Send(std::move(data), static_cast<uint32_t>(size));
                                                 },
                                                 false); //ok to send anyones state
         }
 
+        const std::wstring m_logPrefix;
         CoordinatorT& m_coordinator;
         IpcPublisherT m_publisher;
         std::unique_ptr<Safir::Utilities::Internal::AsioPeriodicTimer> m_publishTimer;

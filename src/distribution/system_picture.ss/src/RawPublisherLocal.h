@@ -48,12 +48,14 @@ namespace SP
         /**
          * The all parameter controls whether remote raw data is sent or just our own data.
          */
-        RawPublisherLocalBasic(boost::asio::io_service& ioService,
+        RawPublisherLocalBasic(const std::wstring& logPrefix,
+                               boost::asio::io_service& ioService,
                                RawHandlerT& rawHandler,
                                const char* const name,
                                const boost::chrono::steady_clock::duration& period,
                                const bool all)
-            : m_rawHandler(rawHandler)
+            : m_logPrefix(logPrefix)
+            , m_rawHandler(rawHandler)
             , m_publisher(ioService,name,NULL,NULL)
             , m_all(all)
         {
@@ -84,7 +86,7 @@ namespace SP
                 throw std::logic_error("Unexpected error in RawPublisherLocal::Publish");
             }
 
-            lllog(8) << "SP: Publishing raw statistics over ipc" << std::endl;
+            lllog(8) << m_logPrefix << "Publishing raw statistics over ipc" << std::endl;
 
             const auto sender = [this](std::unique_ptr<char[]> data,
                                        const size_t size)
@@ -102,6 +104,7 @@ namespace SP
             }
         }
 
+        const std::wstring m_logPrefix;
         RawHandlerT& m_rawHandler;
         IpcPublisherT m_publisher;
         std::unique_ptr<Safir::Utilities::Internal::AsioPeriodicTimer> m_publishTimer;

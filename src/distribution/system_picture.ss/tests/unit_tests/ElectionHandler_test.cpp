@@ -276,7 +276,8 @@ struct Node
         , incarnationId(0)
         , removed(false)
     {
-        eh.reset(new ElectionHandlerBasic<Communication>(strand,
+        eh.reset(new ElectionHandlerBasic<Communication>(std::to_wstring(id) + L": ",
+                                                         strand,
                                                          comm,
                                                          id_,
                                                          nodeTypeId_,

@@ -60,6 +60,32 @@ namespace
     const char* const MASTER_REMOTE_RAW_NAME = "SP_RAW";
     const char* const MASTER_REMOTE_STATE_NAME = "SP_STATE";
     const char* const MASTER_REMOTE_ELECTION_NAME = "SP_ELECTION";
+
+    std::wstring MasterLogPrefix(const int64_t id)
+    {
+        std::wstring prefix = L"SPm";
+        if (id > 0 && id < 200)
+        {
+            prefix += L"[" + std::to_wstring(id) + L"]";
+        }
+        return prefix + L": ";
+    }
+
+    std::wstring SlaveLogPrefix(const int64_t id)
+    {
+        std::wstring prefix = L"SPs";
+        if (id > 0 && id < 200)
+        {
+            prefix += L"[" + std::to_wstring(id) + L"]";
+        }
+        return prefix + L": ";
+    }
+
+    std::wstring SubscriberLogPrefix()
+    {
+        return L"SPl: ";
+    }
+
 }
 
 namespace Safir
@@ -90,8 +116,10 @@ namespace SP
              const boost::chrono::steady_clock::duration& aloneTimeout,
              const std::function<bool (const int64_t incarnationId)>& validateJoinSystemCallback,
              const std::function<bool (const int64_t incarnationId)>& validateFormSystemCallback)
-            : m_strand(ioService)
-            , m_rawHandler(Safir::make_unique<RawHandler>(m_strand,
+            : m_logPrefix(MasterLogPrefix(id))
+            , m_strand(ioService)
+            , m_rawHandler(Safir::make_unique<RawHandler>(m_logPrefix,
+                                                          m_strand,
                                                           communication,
                                                           name,
                                                           id,
@@ -104,7 +132,7 @@ namespace SP
                                                                                              const bool incarnationIdChanged)
                                                           {
                                                               const auto detached = m_coordinator->IsDetached();
-                                                              lllog(6) << "SP: validateJoinSystemCallback incarnationIdChanged = "
+                                                              lllog(6) << m_logPrefix << "validateJoinSystemCallback incarnationIdChanged = "
                                                                        << std::boolalpha << incarnationIdChanged << ", detached = "
                                                                        << detached << std::endl;
                                                               if (detached && incarnationIdChanged)
@@ -121,15 +149,17 @@ namespace SP
                                                               }
                                                           },
                                                           validateFormSystemCallback))
-            , m_rawPublisherLocal(Safir::make_unique<RawPublisherLocal>(ioService,
+            , m_rawPublisherLocal(Safir::make_unique<RawPublisherLocal>(m_logPrefix,
+                                                                        ioService,
                                                                         *m_rawHandler,
                                                                         MASTER_LOCAL_RAW_NAME,
                                                                         boost::chrono::seconds(1),
                                                                         true))
             , m_rawSubscriberLocal(Safir::make_unique<LocalSubscriber<Safir::Utilities::Internal::IpcSubscriber,
                                                                       RawStatisticsSubscriber,
-                                                                      RawStatisticsCreator>>(ioService, SLAVE_LOCAL_RAW_NAME))
-            , m_rawPublisherRemote(Safir::make_unique<RawPublisherRemote>(ioService,
+                                                                      RawStatisticsCreator>>(m_logPrefix, ioService, SLAVE_LOCAL_RAW_NAME))
+            , m_rawPublisherRemote(Safir::make_unique<RawPublisherRemote>(m_logPrefix,
+                                                                          ioService,
                                                                           communication,
                                                                           nodeTypes,
                                                                           MASTER_REMOTE_RAW_NAME,
@@ -139,7 +169,8 @@ namespace SP
                                     (communication,
                                      MASTER_REMOTE_RAW_NAME,
                                      *m_rawHandler))
-            , m_coordinator(Safir::make_unique<Coordinator>(m_strand,
+            , m_coordinator(Safir::make_unique<Coordinator>(m_logPrefix,
+                                                            m_strand,
                                                             communication,
                                                             name,
                                                             id,
@@ -150,7 +181,8 @@ namespace SP
                                                             aloneTimeout,
                                                             MASTER_REMOTE_ELECTION_NAME,
                                                             *m_rawHandler))
-            , m_statePublisherLocal(Safir::make_unique<StatePublisherLocal>(ioService,
+            , m_statePublisherLocal(Safir::make_unique<StatePublisherLocal>(m_logPrefix,
+                                                                            ioService,
                                                                             *m_coordinator,
                                                                             MASTER_LOCAL_STATE_NAME,
                                                                             boost::chrono::seconds(1)))
@@ -192,8 +224,10 @@ namespace SP
                       const int64_t id,
                       const int64_t nodeTypeId,
                       const std::map<int64_t, NodeType>& nodeTypes)
-            : m_strand(ioService)
-            , m_rawHandler(Safir::make_unique<RawHandler>(m_strand,
+            : m_logPrefix(SlaveLogPrefix(id))
+            , m_strand(ioService)
+            , m_rawHandler(Safir::make_unique<RawHandler>(m_logPrefix,
+                                                          m_strand,
                                                           communication,
                                                           name,
                                                           id,
@@ -204,7 +238,8 @@ namespace SP
                                                           false,
                                                           nullptr,
                                                           nullptr))
-            , m_rawPublisherLocal(Safir::make_unique<RawPublisherLocal>(ioService,
+            , m_rawPublisherLocal(Safir::make_unique<RawPublisherLocal>(m_logPrefix,
+                                                                        ioService,
                                                                         *m_rawHandler,
                                                                         SLAVE_LOCAL_RAW_NAME,
                                                                         boost::chrono::seconds(1),
@@ -213,7 +248,8 @@ namespace SP
         {
             auto stateSubscriberLocal = Safir::make_unique<LocalSubscriber<Safir::Utilities::Internal::IpcSubscriber,
                                                                            SystemStateSubscriber,
-                                                                           SystemStateCreator>>(ioService,
+                                                                           SystemStateCreator>>(m_logPrefix,
+                                                                                                ioService,
                                                                                                 MASTER_LOCAL_STATE_NAME);
 
             stateSubscriberLocal->AddSubscriber([&](const SystemState& ss)
@@ -242,14 +278,17 @@ namespace SP
          */
         explicit Impl(subscriber_tag_t,
                       boost::asio::io_service& ioService)
-            : m_strand(ioService)
+            : m_logPrefix(SubscriberLogPrefix())
+            , m_strand(ioService)
             , m_rawSubscriberLocal(Safir::make_unique<LocalSubscriber<Safir::Utilities::Internal::IpcSubscriber,
                                                                       RawStatisticsSubscriber,
-                                                                      RawStatisticsCreator>>(ioService,
+                                                                      RawStatisticsCreator>>(m_logPrefix,
+                                                                                             ioService,
                                                                                              MASTER_LOCAL_RAW_NAME))
             , m_stateSubscriberLocal(Safir::make_unique<LocalSubscriber<Safir::Utilities::Internal::IpcSubscriber,
                                                                         SystemStateSubscriber,
-                                                                        SystemStateCreator>>(ioService,
+                                                                        SystemStateCreator>>(m_logPrefix,
+                                                                                             ioService,
                                                                                              MASTER_LOCAL_STATE_NAME))
             , m_stopped(false)
         {
@@ -365,6 +404,8 @@ namespace SP
 
 
     private:
+        const std::wstring m_logPrefix;
+
         boost::asio::io_service::strand m_strand;
         std::unique_ptr<RawHandler> m_rawHandler;
 

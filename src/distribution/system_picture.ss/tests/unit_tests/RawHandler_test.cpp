@@ -153,7 +153,7 @@ struct Fixture
         , formSystemDeniesBeforeOk(0)
         , formSystemCallsBeforeJoin(10000)
     {
-        rh.reset(new RawHandlerBasic<::Communication>(strand,comm,"plopp",10,ownNodeType,"asdfasdf","qwerty",
+        rh.reset(new RawHandlerBasic<::Communication>(L"", strand,comm,"plopp",10,ownNodeType,"asdfasdf","qwerty",
                                                       GetNodeTypes(), true,
                                                       [this](const int64_t id, const bool /*incarnationIdChanged*/)
                                                       {return ValidateJoinSystem(id);},
