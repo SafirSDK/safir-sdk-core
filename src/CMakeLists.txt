@@ -287,6 +287,9 @@ function (SET_SAFIR_TEST_PROPERTIES)
 
   if (NOT PROP_CONFIG_OVERRIDE)
     set(PROP_CONFIG_OVERRIDE "${safir-sdk-core_SOURCE_DIR}/src/tests/test_support/test_config")
+
+    #Create the directory that our default logging.ini will put its logs in.
+    make_directory(${CMAKE_CURRENT_BINARY_DIR}/test_output/${PROP_TEST}/)
   endif()
 
   set (pypath "$ENV{PYTHONPATH}${PATH_SEPARATOR}${safir-sdk-core_SOURCE_DIR}/src/tests/test_support/python")
@@ -317,6 +320,7 @@ function (SET_SAFIR_TEST_PROPERTIES)
     "CMAKE_CSHARP_OUTPUT_DIRECTORY=${CMAKE_CSHARP_OUTPUT_DIRECTORY}"
     "CMAKE_JAVA_OUTPUT_DIRECTORY=${CMAKE_JAVA_OUTPUT_DIRECTORY}"
     "SAFIR_GENERATED_LIB_OUTPUT_DIRECTORY=${SAFIR_GENERATED_LIB_OUTPUT_DIRECTORY}"
+    "SAFIR_TEST_NAME=${PROP_TEST}"
     "PYTHONPATH=${pypath}"
     "${PATH_ENVIRONMENT}"
     ${PROP_ENVIRONMENT})
