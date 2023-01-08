@@ -203,6 +203,11 @@ class Node():
     def __set_network_state(self, state):
         cmd = ("up " if state else "down ") + self.session_id
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        #Send three times to make it super likely that it will get there.
+        sock.sendto(bytes(cmd, "utf-8"), ("239.6.6.6", 16666))
+        time.sleep(0.01)
+        sock.sendto(bytes(cmd, "utf-8"), ("239.6.6.6", 16666))
+        time.sleep(0.01)
         sock.sendto(bytes(cmd, "utf-8"), ("239.6.6.6", 16666))
 
     @staticmethod
@@ -1668,21 +1673,15 @@ def test_four_normal_four_light_mixedcast(args):
                                                                       {"name": "node_008", "is_dead": false, "id": 8, "node_type_id": 12}]}'''
         form_system((node1, node2, node3, node4, node5, node6, node7, node8))
         node1.wait_for_states(state1, last_state_repeats=30)
-        node2.wait_for_states(state1)
-        node3.wait_for_states(state1)
-        node4.wait_for_states(state1)
-        node5.wait_for_states(state1)
-        node6.wait_for_states(state1)
-        node7.wait_for_states(state1)
-        node8.wait_for_states(state1)
-        node1.close_and_check()
-        node2.close_and_check()
-        node3.close_and_check()
-        node4.close_and_check()
-        node5.close_and_check()
-        node6.close_and_check()
-        node7.close_and_check()
-        node8.close_and_check()
+        node2.wait_for_states(state1, last_state_repeats=30)
+        node3.wait_for_states(state1, last_state_repeats=30)
+        node4.wait_for_states(state1, last_state_repeats=30)
+        node5.wait_for_states(state1, last_state_repeats=30)
+        node6.wait_for_states(state1, last_state_repeats=30)
+        node7.wait_for_states(state1, last_state_repeats=30)
+        node8.wait_for_states(state1, last_state_repeats=30)
+        #We don't use close_and_check here, since sometimes nodes pick up others being killed.
+        #The order of which is difficult to predict.
     return node1.returncode == 0 and node2.returncode == 0 and node3.returncode == 0 and node4.returncode == 0 \
         and node5.returncode == 0 and node6.returncode == 0 and node7.returncode == 0 and node8.returncode == 0
 
@@ -1763,7 +1762,6 @@ def test_two_normal_one_light_weird_seed(args):
             node3.close_and_check()
             node1.close_and_check()
             node2.ignore_returncode = True
-            node2.close_and_check()
             return node1.returncode == 0 and node3.returncode == 0
         elif inc3 == inc2:
             state1 = '''{"elected_id": 2, "is_detached": false, "nodes": [{"name": "<unknown>", "is_dead": true, "id": 1, "node_type_id": 0},
@@ -1777,7 +1775,6 @@ def test_two_normal_one_light_weird_seed(args):
             node3.close_and_check()
             node2.close_and_check()
             node1.ignore_returncode = True
-            node1.close_and_check()
             return node2.returncode == 0 and node3.returncode == 0
         else:
             raise Failure("unexpected incarnation")

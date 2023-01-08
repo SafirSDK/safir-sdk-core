@@ -48,10 +48,10 @@
 //We need thread safe variants for some of the tests that use multiple threads in the ioService.
 boost::mutex testMtx;
 #define SAFE_BOOST_CHECK(p) {boost::lock_guard<boost::mutex> lck123(testMtx); BOOST_CHECK(p);}
-#define SAFE_BOOST_FAIL(s) {boost::lock_guard<boost::mutex> lck123(testMtx); BOOST_FAIL(s);}
+#define SAFE_BOOST_FAIL(s) {boost::lock_guard<boost::mutex> lck123(testMtx); lllog(9) << s << std::endl; BOOST_FAIL(s);}
 #define SAFE_BOOST_CHECK_NE(L, R) {boost::lock_guard<boost::mutex> lck123(testMtx); BOOST_CHECK_NE(L, R);}
 #define SAFE_BOOST_CHECK_EQUAL(L, R) {boost::lock_guard<boost::mutex> lck123(testMtx); BOOST_CHECK_EQUAL(L, R);}
-#define SAFE_BOOST_TEST_MESSAGE(m) {boost::lock_guard<boost::mutex> lck123(testMtx); BOOST_TEST_MESSAGE(m);}
+#define SAFE_BOOST_TEST_MESSAGE(m) {boost::lock_guard<boost::mutex> lck123(testMtx); lllog(9) << m << std::endl; BOOST_TEST_MESSAGE(m);}
 
 class Communication;
 
@@ -190,12 +190,6 @@ public:
 };
 
 
-
-//static initialization
-//std::map<int64_t,Communication*> Communication::allComms;
-//bool Communication::overflows = false;
-
-
 bool Connector::SendTo(const int64_t nodeId,
                        const int64_t sender,
                        const Safir::Utilities::Internal::SharedConstCharArray& data,
@@ -211,14 +205,15 @@ bool Connector::SendTo(const int64_t nodeId,
 
     for (auto comm = m_allComms.cbegin(); comm != m_allComms.cend(); ++comm)
     {
-        if (comm->second == nullptr)
-        {
-            continue;
-        }
-
         //send to the intended node
         if (comm->first == nodeId)
         {
+            if (comm->second == nullptr)
+            {
+                SAFE_BOOST_TEST_MESSAGE(" - Not sending to node " << comm->first << " since it has been removed");
+                return true;
+            }
+
             SAFE_BOOST_TEST_MESSAGE(" - Sending to node " << comm->first);
             char* dataCopy = comm->second->allocator(size);
             memcpy(dataCopy,data.get(),size);
@@ -226,8 +221,8 @@ bool Connector::SendTo(const int64_t nodeId,
             return true;
         }
     }
-    
-    SAFE_BOOST_FAIL("Invalid node id " << nodeId);
+
+    SAFE_BOOST_FAIL("SendTo from node id " << sender << " to invalid node id " << nodeId);
     return true;
 }
 

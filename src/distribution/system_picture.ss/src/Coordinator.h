@@ -68,7 +68,7 @@ namespace
     }
   }
 
-    const int RESURRECT_COUNT = 3;
+    const int RESURRECT_COUNT = 20;
 }
 
 namespace Safir
@@ -733,6 +733,7 @@ namespace SP
                         {
                             node.set_is_dead(false);
                         }
+                        deadNodes.erase(node.id());
                         --resurrectInfo.second;
                     }
                 }

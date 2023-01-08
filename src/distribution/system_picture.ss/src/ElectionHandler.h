@@ -132,8 +132,10 @@ namespace SP
 
         void Stop()
         {
+            lllog(4) << "SP: ElectionHandler::Stop called." << std::endl;
             m_strand.dispatch([this]
                               {
+                                  lllog(4) << "SP: ElectionHandler executing Stop" << std::endl;
                                   m_pendingAlives.clear();
                                   m_pendingVictories.clear();
                                   m_pendingInquiries.clear();
@@ -273,6 +275,7 @@ namespace SP
 
             if (m_stopped)
             {
+                lllog(4) << "SP: I am stopping, so will not start new election" << std::endl;
                 return;
             }
 
@@ -464,7 +467,8 @@ namespace SP
                         //and start a new election
                         if (from < m_id && !m_isLightNode)
                         {
-                            lllog(5) << "SP: Got an inquiry from someone smaller than us, sending alive and starting election" << std::endl;
+                            lllog(5) << "SP: Got an inquiry from someone (" << from << ") smaller than us ("
+                                     << m_id << "), sending alive and starting election."  << std::endl;
                             m_pendingAlives[from] = std::make_pair(nodeTypeId, message.election_id());
                             SendPendingElectionMessages();
 
