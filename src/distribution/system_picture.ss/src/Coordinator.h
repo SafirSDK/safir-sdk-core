@@ -804,7 +804,7 @@ namespace SP
             //check that we're in the last state (and alive), and insert us if we're not
             if (lastLiveNodes.find(m_id) == lastLiveNodes.end())
             {
-                lllog(9) << m_logPrefix << "Adding own node to system state\n";
+                lllog(9) << m_logPrefix << "Adding own node '" << m_name.c_str() << "' (" << m_id <<") to system state\n";
 
                 //add myself
                 auto node = m_stateMessage.add_node_info();

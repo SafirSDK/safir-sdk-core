@@ -563,10 +563,10 @@ private:
         }
 
         //send the data to all node types.
-        m_communication->Send(0, 1, DATA, DATA_SIZE, 1000100222, true);
-        m_communication->Send(0, 2, DATA, DATA_SIZE, 1000100222, true);
-        m_communication->Send(0, 11, DATA, DATA_SIZE, 1000100222, true);
-        m_communication->Send(0, 12, DATA, DATA_SIZE, 1000100222, true);
+        m_communication->Send(0, 1, DATA, DATA_SIZE, 1000100222, false);
+        m_communication->Send(0, 2, DATA, DATA_SIZE, 1000100222, false);
+        m_communication->Send(0, 11, DATA, DATA_SIZE, 1000100222, false);
+        m_communication->Send(0, 12, DATA, DATA_SIZE, 1000100222, false);
         m_sendTimer.expires_from_now(boost::chrono::milliseconds(20));
         m_sendTimer.async_wait([this](const boost::system::error_code& error){Send(error);});
     }
@@ -677,7 +677,7 @@ int main(int argc, char * argv[])
             return 1;
         }
 
-        logerr << "Starting node " << options.name << " as node type " << options.nodeType << std::endl;
+        logerr << "Starting node '" << options.name << "' as node type " << options.nodeType << std::endl;
 
         boost::asio::io_service ioService;
         boost::asio::io_service::strand strand(ioService);
@@ -748,7 +748,7 @@ int main(int argc, char * argv[])
 
         main.reset(new Main(options, id));
 
-        logerr << "Starting Control and Main" << std::endl;
+        logerr << "Starting Control" << (options.onlyControl ? " (no Main)": " and Main") << std::endl;
 
         control->Start();
         if (!options.onlyControl)
