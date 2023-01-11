@@ -35,7 +35,9 @@ failed_tests = set()
 @contextmanager
 def test_case(name):
     global failed_tests
-    os.environ["LLL_LOGDIR"] = os.path.normpath(os.path.join(os.getcwd(), "test_output", "clear", name))
+    log_dir = os.path.normpath(os.path.join(os.getcwd(), "test_output", "keep", name))
+    for f in glob.glob(os.path.join(log_dir, "*")): os.remove(f)
+    os.environ["LLL_LOGDIR"] = log_dir
 
     try:
         log("=== Start: " + name + " ===")
@@ -711,16 +713,15 @@ async def main(args):
     await one_normal_two_light_restart_normal(args)                             # ok
     await two_normal_two_light_restart_one_normal(args)                         # ok
     await one_normal_one_light_restart_light(args)                              # ok
-    
     # await two_normal_two_light_detach_reattach_both_light(args)               # fails sometimes
     # await two_normal_two_light_detach_reattach_both_light_big_pool(args)      # fails sometimes
     # await two_normal_two_light_restart_both_normal(args)                      # fails sometimes
-    # await two_normal_two_light_toggle_network_many_times_on_both_light(args)  # fails sometimes
+    
+    # await two_normal_two_light_toggle_network_many_times_on_both_light(args)  # fails often
 
     #---- Some code for repeating a test and clearing local log folder after each run
     # for i in range(25):
-    #     for f in glob.glob("/home/joel/dev/log/*"): os.remove(f)
-    #     await two_normal_two_light_restart_both_normal(args)
+    #     await two_normal_two_light_toggle_network_many_times_on_both_light(args)
     #     if len(failed_tests) > 0: return
 
 if __name__ == "__main__":

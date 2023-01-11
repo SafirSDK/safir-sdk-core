@@ -653,7 +653,7 @@ namespace Com
             if (header->sequenceNumber<ch.welcome)
             {
                 //this message was sent before we got a welcome message, i.e not for us
-                lllog(5)<<m_logPrefix.c_str()<<L"Acked msg seq: "<<header->sequenceNumber<<" from: "<<header->commonHeader.senderId<<L", was sent before we got welcome. I will not ack."<<std::endl;
+                lllog(8)<<m_logPrefix.c_str()<<L"Acked msg seq: "<<header->sequenceNumber<<" from: "<<header->commonHeader.senderId<<L", was sent before we got welcome. I will not ack."<<std::endl;
                 m_gotRecvFrom(header->commonHeader.senderId, multicast, false);
                 return false; //dont send ack
             }
@@ -687,7 +687,9 @@ namespace Com
                 //message that we dont think we have got at all.
                 //All the code here just produce helpfull logs.
                 std::ostringstream os;
-                os<<m_logPrefix.c_str()<<"I must be dead, the others are moving forward without me!!! Node "<<m_myId<<" received message from node "<<header->commonHeader.senderId<<
+                os<<m_logPrefix.c_str()<<"I must be dead, the others are moving forward without me!!! " <<
+                    "Probably the other nodes have excluded me but I am not aware of it. " <<
+                    "I received message from node "<<header->commonHeader.senderId<<
                     " that is too far ahead which means that we have lost a message. "<<
                     SendMethodToString(header->sendMethod)<<", seq: "<<header->sequenceNumber<<"\n     RecvQueue - lastInSeq: "<<ch.lastInSequence<<
                     ", biggestSeq: "<<ch.biggestSequence<<", welcome: "<<ch.welcome<<

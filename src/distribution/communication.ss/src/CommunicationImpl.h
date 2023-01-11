@@ -111,6 +111,7 @@ namespace Com
 
     private:
         ::google::protobuf::LogSilencer m_disableProtobufLogs;
+        std::string m_logPrefix;
         std::atomic<bool> m_running;
         boost::asio::io_context& m_ioContext;
         boost::asio::io_context::strand m_receiveStrand;
@@ -127,8 +128,6 @@ namespace Com
         Discoverer m_discoverer;
         DeliveryHandler m_deliveryHandler;
         DataReceiver m_reader;
-
-        std::string m_logPrefix;
 
         std::unique_ptr<DebugCommandServer> m_debugServer;
 

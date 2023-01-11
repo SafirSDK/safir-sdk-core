@@ -39,13 +39,6 @@ namespace Internal
 namespace Com
 {
 
-// Initiate the extern global parameters in Parameters.h
-namespace Parameters
-{
-    std::atomic<bool> NetworkEnabled;
-    std::string LogPrefix;
-}
-
 namespace
 {
     std::set<int64_t> LightNodeTypes(const NodeTypeMap& nodeTypes)
@@ -76,6 +69,7 @@ namespace
                                          const NodeTypeMap& nodeTypes,
                                          int fragmentSize)
         :m_disableProtobufLogs()
+        ,m_logPrefix(Parameters::LogPrefix)
         ,m_running(false)
         ,m_ioContext(ioContext)
         ,m_receiveStrand(ioContext)
@@ -90,10 +84,7 @@ namespace
         ,m_reader(m_receiveStrand, m_me.unicastAddress, m_nodeTypes[nodeTypeId]->MulticastAddress(),
                   [this](const char* d, size_t s, const bool mc){return OnRecv(d,s,mc);},
                   [this](){return m_deliveryHandler.NumberOfUndeliveredMessages()<Parameters::MaxNumberOfUndelivered;})
-        ,m_logPrefix(isControlInstance ? "COMc["+std::to_string(nodeId)+"]: " : "COMd["+std::to_string(nodeId)+"]: ")
-    {
-        Parameters::NetworkEnabled = true;
-        Parameters::LogPrefix = m_logPrefix;
+    {        
         auto safirInstance = Safir::Utilities::Internal::Expansion::GetSafirInstance();
 
         if (nodeId==0)

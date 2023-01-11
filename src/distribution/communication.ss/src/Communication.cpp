@@ -45,6 +45,13 @@ namespace Internal
 {
 namespace Com
 {
+// Initiate the extern global parameters in Parameters.h
+namespace Parameters
+{
+    std::atomic<bool> NetworkEnabled;
+    std::string LogPrefix;
+}
+
 namespace
 {
     std::unique_ptr<CommunicationImpl> Init(bool isControlInstance,
@@ -57,6 +64,9 @@ namespace
                                             const std::vector<NodeTypeDefinition>& nodeTypes,
                                             int fragmentSize)
     {
+        Parameters::NetworkEnabled = true;
+        Parameters::LogPrefix = isControlInstance ? "COMc["+std::to_string(nodeId)+"]: " : "COMd["+std::to_string(nodeId)+"]: ";
+
         //find address of local interface to use
         Resolver resolver(ioContext);
 

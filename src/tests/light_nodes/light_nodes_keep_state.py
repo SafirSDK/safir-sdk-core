@@ -35,7 +35,9 @@ failed_tests = set()
 @contextmanager
 def test_case(name):
     global failed_tests
-    os.environ["LLL_LOGDIR"] = os.path.normpath(os.path.join(os.getcwd(), "test_output", "keep", name))
+    log_dir = os.path.normpath(os.path.join(os.getcwd(), "test_output", "keep", name))
+    for f in glob.glob(os.path.join(log_dir, "*")): os.remove(f)
+    os.environ["LLL_LOGDIR"] = log_dir
 
     try:
         log("=== Start: " + name + " ===")
@@ -539,7 +541,6 @@ async def one_normal_one_light_detach_reattach_light_big_pool(args):
 # main
 # ===========================================
 async def main(args):
-    # for f in glob.glob("/home/joel/dev/log/*"): os.remove(f)
     await one_normal_one_light_detach_reattach_light_changed_entities(args)
     await one_normal_one_light_detach_reattach_light_changed_registrations(args)
     await one_normal_one_light_detach_reattach_light_big_pool(args)
