@@ -161,7 +161,10 @@ async def check_pool_detached_node(app):
         print("  Expected registrations:")
         for i in expected_reg: print("    " + i)
         print("  Expected entities:")
-        for i in expected_ent: print("    " + i)
+        if len(expected_ent) < 500:
+            for i in expected_ent: print("    " + i)
+        else:
+            print("Number of expected entities: " + str(len(expected_ent)))
 
     if not ok:
         raise AssertionError("Incorrect pool")    
@@ -216,7 +219,10 @@ async def check_pools_connected_nodes(*apps):
                     print("  Expected registrations:")
                     for i in expected_reg: print("    " + i)
                     print("  Expected entities:")
-                    for i in expected_ent: print("    " + i)
+                    if len(expected_ent) < 500:
+                        for i in expected_ent: print("    " + i)
+                    else:
+                        print("Number of expected entities: " + str(len(expected_ent)))
 
         return apps_ok
 
@@ -713,15 +719,17 @@ async def main(args):
     await one_normal_two_light_restart_normal(args)                             # ok
     await two_normal_two_light_restart_one_normal(args)                         # ok
     await one_normal_one_light_restart_light(args)                              # ok
-    # await two_normal_two_light_detach_reattach_both_light(args)               # fails sometimes
+    await two_normal_two_light_detach_reattach_both_light(args)                 # ok
+
     # await two_normal_two_light_detach_reattach_both_light_big_pool(args)      # fails sometimes
     # await two_normal_two_light_restart_both_normal(args)                      # fails sometimes
     
-    # await two_normal_two_light_toggle_network_many_times_on_both_light(args)  # fails often
+    # await two_normal_two_light_toggle_network_many_times_on_both_light(args)  # fails sometimes
 
-    #---- Some code for repeating a test and clearing local log folder after each run
-    # for i in range(25):
-    #     await two_normal_two_light_toggle_network_many_times_on_both_light(args)
+    #---- Some code for repeating a test
+    # for i in range(5):
+    #     log("--- Round " + str(i+1))
+    #     await two_normal_two_light_detach_reattach_both_light_big_pool(args)
     #     if len(failed_tests) > 0: return
 
 if __name__ == "__main__":

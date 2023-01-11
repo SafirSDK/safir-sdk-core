@@ -162,7 +162,7 @@ async def check_pool(app, expected_registrations, expected_entities):
     if len(expected_entities) < 500:
         for t, v in expected_entities: print("    " + t + " - " + str(v))
     else:
-        print("Number of expected entities: " + str(len(expected_registrations)))
+        print("Number of expected entities: " + str(len(expected_entities)))
     raise AssertionError("Incorrect pool")    
 
 # ==============================================================================================
@@ -502,40 +502,40 @@ async def one_normal_one_light_detach_reattach_light_big_pool(args):
 
         await asyncio.gather(app1.stop(), app5.stop())
 
-# async def two_normal_two_light_detach_reattach_light(args):
-#     with test_case("two_normal_two_light_detach_reattach_light"),\
-#         launch_node(args, safir_instance=1, node_id=1) as node1,\
-#         launch_node(args, safir_instance=2, node_id=2) as node2,\
-#         launch_node(args, safir_instance=5, node_id=5) as node5,\
-#         launch_node(args, safir_instance=6, node_id=6) as node6:
+async def two_normal_two_light_detach_reattach_light(args):
+    with test_case("two_normal_two_light_detach_reattach_light"),\
+        launch_node(args, safir_instance=1, node_id=1) as node1,\
+        launch_node(args, safir_instance=2, node_id=2) as node2,\
+        launch_node(args, safir_instance=5, node_id=5) as node5,\
+        launch_node(args, safir_instance=6, node_id=6) as node6:
 
-#         app1 = SafirApp(safir_instance=1, node_id=1)
-#         app2 = SafirApp(safir_instance=2, node_id=2)
-#         app5 = SafirApp(safir_instance=5, node_id=5)
-#         app6 = SafirApp(safir_instance=6, node_id=6)
+        app1 = SafirApp(safir_instance=1, node_id=1)
+        app2 = SafirApp(safir_instance=2, node_id=2)
+        app5 = SafirApp(safir_instance=5, node_id=5)
+        app6 = SafirApp(safir_instance=6, node_id=6)
 
-#         await asyncio.sleep(5)
-#         await asyncio.gather(app5.wait_for_node_state("Attached"), app6.wait_for_node_state("Attached"))
-#         log("--- node5 and node6 are now attached")
+        await asyncio.sleep(5)
+        await asyncio.gather(app5.wait_for_node_state("Attached"), app6.wait_for_node_state("Attached"))
+        log("--- node5 and node6 are now attached")
 
-#         await set_network_state(False, safir_instance=5)
-#         await set_network_state(False, safir_instance=6)
-#         await asyncio.sleep(5)
-#         await asyncio.gather(app5.wait_for_node_state("Detached"), app6.wait_for_node_state("Detached"))
-#         log("--- node5 and node6 are now detached")
+        await set_network_state(False, node5.session_id)
+        await set_network_state(False, node6.session_id)
+        await asyncio.sleep(5)
+        await asyncio.gather(app5.wait_for_node_state("Detached"), app6.wait_for_node_state("Detached"))
+        log("--- node5 and node6 are now detached")
 
-#         # Do some changes while both light nodes are detached
+        # Do some changes while both light nodes are detached
 
-#         # connect all nodes again
-#         await set_network_state(True, safir_instance=5)
-#         await set_network_state(True, safir_instance=6)
-#         await asyncio.sleep(5)
-#         await asyncio.gather(app5.wait_for_node_state("Attached"), app6.wait_for_node_state("Attached"))
-#         log("--- node5 and node6 are now attached again")
+        # connect all nodes again
+        await set_network_state(True, node5.session_id)
+        await set_network_state(True, node6.session_id)
+        await asyncio.sleep(5)
+        await asyncio.gather(app5.wait_for_node_state("Attached"), app6.wait_for_node_state("Attached"))
+        log("--- node5 and node6 are now attached again")
 
-#         # check that pools are in sync
+        # check that pools are in sync
 
-#         await asyncio.gather(app1.stop(), app2.stop(), app5.stop(), app6.stop())
+        await asyncio.gather(app1.stop(), app2.stop(), app5.stop(), app6.stop())
 
 # ===========================================
 # main
@@ -544,7 +544,7 @@ async def main(args):
     await one_normal_one_light_detach_reattach_light_changed_entities(args)
     await one_normal_one_light_detach_reattach_light_changed_registrations(args)
     await one_normal_one_light_detach_reattach_light_big_pool(args)
-    # await two_normal_two_light_detach_reattach_light(args)
+    await two_normal_two_light_detach_reattach_light(args)
 
 if __name__ == "__main__":
     asyncio.run(main(parse_arguments()))
