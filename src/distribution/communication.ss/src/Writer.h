@@ -75,7 +75,7 @@ namespace Com
                 const size_t sent = socket.send_to(bufs, to);
                 if (sent != sizeof(T) + sizeof(uint32_t))
                 {
-                    SEND_SYSTEM_LOG(Informational, <<"Write<T> to " << to << " failed. Only "
+                    SEND_SYSTEM_LOG(Informational, <<Parameters::LogPrefix.c_str()<<"Write<T> to " << to << " failed. Only "
                                     << sent << " bytes were sent, instead of " << sizeof(T) + sizeof(uint32_t));
                     return false;
                 }
@@ -83,7 +83,7 @@ namespace Com
             }
             catch (const boost::system::system_error& sysErr)
             {
-                SEND_SYSTEM_LOG(Error, <<"Write to " << to << " failed with systemError: "<<sysErr.what());
+                SEND_SYSTEM_LOG(Error, <<Parameters::LogPrefix.c_str()<<"Write to " << to << " failed with systemError: "<<sysErr.what());
                 return false;
             }
         }
@@ -119,7 +119,7 @@ namespace Com
                 const size_t sent = socket.send_to(bufs, to);
                 if (sent != size)
                 {
-                    SEND_SYSTEM_LOG(Informational, <<"Write<UserData> to " << to << " failed. Only "
+                    SEND_SYSTEM_LOG(Informational, <<Parameters::LogPrefix.c_str()<<"Write<UserData> to " << to << " failed. Only "
                                     << sent << " bytes were sent, instead of " << size);
                     return false;
                 }
@@ -127,7 +127,7 @@ namespace Com
             }
             catch (const boost::system::system_error& sysErr)
             {
-                SEND_SYSTEM_LOG(Error, <<"Write to " << to << " failed with systemError: "<<sysErr.what());
+                SEND_SYSTEM_LOG(Error, <<Parameters::LogPrefix.c_str()<<"Write to " << to << " failed with systemError: "<<sysErr.what());
                 return false;
             }
         }

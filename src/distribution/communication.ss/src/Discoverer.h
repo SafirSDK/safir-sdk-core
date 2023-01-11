@@ -86,7 +86,7 @@ namespace Com
             ,m_onNewNode(onNewNode)
             ,m_timer(ioContext)
             ,m_random(1000, 3000)
-            ,m_logPrefix("COM["+std::to_string(me.nodeId)+"]: Discoverer - ")
+            ,m_logPrefix(Parameters::LogPrefix + "Discoverer - ")
         {
         }
 

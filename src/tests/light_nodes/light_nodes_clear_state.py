@@ -23,7 +23,7 @@
 # along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-import os, sys, argparse, socket, glob, logging, uuid
+import os, sys, argparse, socket, glob, logging, uuid, time
 import asyncio, json, websockets
 from contextlib import contextmanager
 from testenv import TestEnv, TestEnvStopper, log
@@ -35,6 +35,8 @@ failed_tests = set()
 @contextmanager
 def test_case(name):
     global failed_tests
+    os.environ["LLL_LOGDIR"] = os.path.normpath(os.path.join(os.getcwd(), "test_output", "clear", name))
+
     try:
         log("=== Start: " + name + " ===")
         yield
@@ -69,9 +71,13 @@ def launch_node(args, safir_instance, node_id):
         env.killprocs()
 
 # Simulate network up/down
-def set_network_state(state, session_id):
+async def set_network_state(state, session_id):
     cmd = ("up " if state == True else "down ") + session_id
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    sock.sendto(bytes(cmd, "utf-8"), ("239.6.6.6", 16666))
+    await asyncio.sleep(0.1)
+    sock.sendto(bytes(cmd, "utf-8"), ("239.6.6.6", 16666))
+    await asyncio.sleep(0.1)
     sock.sendto(bytes(cmd, "utf-8"), ("239.6.6.6", 16666))
 
 def parse_arguments():
@@ -120,28 +126,9 @@ def dict_to_sorted_list(d):
     l.sort()
     return l
 
-# check if all dict values are equal for specified keys
-def equal_values(keys, *dictionaries):
-    for key in keys:
-        items = set()
-        for d in dictionaries:
-            val = d.get(key)
-            if val == None:
-                return False
-            items.add(val)
-        if len(items) > 1:
-            return False
-
-    return True
-
 # Check if dictionary contains exact specied keys
 def contains_exact(keys, dictionary):
     return sorted(list(dictionary.keys())) == sorted(keys)
-
-def pools_equal(safir_app1, safir_app2):
-    ent = dict_to_sorted_list(safir_app1.entities) == dict_to_sorted_list(safir_app2.entities)
-    reg = dict_to_sorted_list(safir_app1.registrations) == dict_to_sorted_list(safir_app2.registrations)
-    return ent and reg
 
 async def check_pool_detached_node(app):
     ok = False
@@ -154,14 +141,17 @@ async def check_pool_detached_node(app):
         expected_ent.append(limited_type + str(instance))
     expected_ent.sort()
     
-    max_tries = 10
-    for check in range(max_tries):
+    pool_timestamp = app.last_pool_update
+    num_tries = 0
+    while pool_timestamp < app.last_pool_update or num_tries < 5:
+        num_tries = num_tries +1
+        pool_timestamp = app.last_pool_update
         if contains_exact(expected_reg, app.registrations) and contains_exact(expected_ent, app.entities):
             ok = True
             break
-        if check > 2:
-            log("--- Extended wait for PD to finish, wait time " + str((check + 1)*10) + " sec")
-        await asyncio.sleep(10)
+        else:
+            if num_tries > 2: log("--- Extended wait for PD to finish, wait time " + str((num_tries + 1)*10) + " sec")
+            await asyncio.sleep(10)
 
     if not ok:
         log("*** ERROR: Incorrect pool on light node " + str(app.node_id) + ", safir_instance: " + str(app.safir_instance))
@@ -198,11 +188,9 @@ async def check_pools_connected_nodes(*apps):
             for instance in range(1, app.number_of_entities + 1):
                 expected_limited_ent.append(limited_type + str(instance))
 
-    max_tries = 10
-    for check in range(max_tries):
-        ok = True
+    def check_apps(print_on_failure):
+        apps_ok = True
         for app in apps:
-            node_ok = True
             expected_reg = [*expected_global_reg]
             expected_ent = [*expected_global_ent]
             if app.safir_instance < 3: # normal node
@@ -219,8 +207,8 @@ async def check_pools_connected_nodes(*apps):
             expected_reg.sort()
             expected_ent.sort()
             if not (contains_exact(expected_reg, app.registrations) and contains_exact(expected_ent, app.entities)):
-                ok = False
-                if check == max_tries - 1:
+                apps_ok = False
+                if print_on_failure:
                     log("*** ERROR: Incorrect pool on node " + str(app.node_id) + ", safir_instance: " + str(app.safir_instance))
                     app.dump_pool()
                     print("  Expected registrations:")
@@ -228,12 +216,22 @@ async def check_pools_connected_nodes(*apps):
                     print("  Expected entities:")
                     for i in expected_ent: print("    " + i)
 
+        return apps_ok
+
+    pool_timestamp = app.last_pool_update
+    num_tries = 0
+    while pool_timestamp < app.last_pool_update or num_tries < 5:
+        num_tries = num_tries +1
+        pool_timestamp = app.last_pool_update
+        ok = check_apps(False)
         if ok:
             break
+        else:
+            if num_tries > 2: log("--- Extended wait for PD to finish, wait time " + str((num_tries + 1)*10) + " sec")
+            await asyncio.sleep(10)
 
-        if check > 2:
-            log("--- Extended wait for PD to finish, wait time " + str((check + 1)*10) + " sec")
-        await asyncio.sleep(10)
+    if not ok:
+        ok = check_apps(True) # One last try with print_on_failure
 
     if not ok:
         raise AssertionError("Incorrect pool")    
@@ -252,6 +250,7 @@ class SafirApp:
         self.sendQueue = asyncio.Queue()
         self.entities = dict()
         self.registrations = dict()
+        self.last_pool_update = time.time()
         self.stopped = False
         self.task = asyncio.create_task(self._run())
 
@@ -317,15 +316,19 @@ class SafirApp:
                 msg = json.loads(message)
                 callback = method(msg)
                 if callback in ["onNewEntity", "onUpdatedEntity"] and not ignore_type(msg):
+                    self.last_pool_update = time.time()
                     entity_id = dou_type(msg) + ":" + str(instance_id(msg))
                     self.entities[entity_id] = json.dumps(entity(msg))
                 elif callback == "onDeletedEntity":
+                    self.last_pool_update = time.time()
                     entity_id = dou_type(msg) + ":" + str(instance_id(msg))
                     self.entities.pop(entity_id, None)
                 elif callback == "onRegistered" and not ignore_type(msg):
+                    self.last_pool_update = time.time()
                     handler = dou_type(msg) + ":" + str(handler_id(msg))
                     self.registrations[handler] = "Registered"
                 elif callback == "onUnregistered":
+                    self.last_pool_update = time.time()
                     handler = dou_type(msg) + ":" + str(handler_id(msg))
                     self.registrations.pop(handler, None)
                 elif "result" in msg and msg["result"] != "OK":
@@ -386,7 +389,7 @@ async def one_normal_one_light_detach_reattach_light(args):
         await check_pools_connected_nodes(app1, app3)
 
         # Disable network on lightnode and wait for it to be Detached
-        set_network_state(False, node3.session_id) 
+        await set_network_state(False, node3.session_id) 
         await app3.wait_for_node_state("Detached")
         log("--- node3 is now detached")
 
@@ -394,7 +397,7 @@ async def one_normal_one_light_detach_reattach_light(args):
         await check_pool_detached_node(app3)
 
         # Enable network on lightnode and wait for it to be Attached
-        set_network_state(True, node3.session_id) 
+        await set_network_state(True, node3.session_id) 
         await app3.wait_for_node_state("Attached")
         log("--- node3 is now attached again")
 
@@ -457,7 +460,7 @@ async def one_normal_two_light_detach_reattach_one_light(args):
         await check_pools_connected_nodes(app1, app3, app4)
 
         # Disable network on lightnode and wait for it to be Detached
-        set_network_state(False, node3.session_id)
+        await set_network_state(False, node3.session_id)
         await app3.wait_for_node_state("Detached")
         log("--- node3 is now detached")
 
@@ -465,7 +468,7 @@ async def one_normal_two_light_detach_reattach_one_light(args):
         await check_pool_detached_node(app3)
 
         # Enable network on lightnode and wait for it to be Attached
-        set_network_state(True, node3.session_id)
+        await set_network_state(True, node3.session_id)
         await app3.wait_for_node_state("Attached")
         log("--- node3 is now attached again")
         
@@ -525,8 +528,8 @@ async def two_normal_two_light_detach_reattach_both_light(args):
         await check_pools_connected_nodes(app1, app2, app3, app4)
 
         # Disable network on lightnodes and wait for them to be Detached
-        set_network_state(False, node3.session_id) 
-        set_network_state(False, node4.session_id) 
+        await set_network_state(False, node3.session_id) 
+        await set_network_state(False, node4.session_id) 
         await asyncio.gather(app3.wait_for_node_state("Detached"), app4.wait_for_node_state("Detached"))
         log("--- node 3 and node 4 are now detached")
 
@@ -535,8 +538,8 @@ async def two_normal_two_light_detach_reattach_both_light(args):
         await check_pool_detached_node(app4)
 
         # Enable network again and wait for nodes to become attached
-        set_network_state(True, node3.session_id)
-        set_network_state(True, node4.session_id)
+        await set_network_state(True, node3.session_id)
+        await set_network_state(True, node4.session_id)
         await asyncio.gather(app3.wait_for_node_state("Attached"), app4.wait_for_node_state("Attached"))
         log("--- node 3 and node 4 are now attached again")
 
@@ -564,8 +567,8 @@ async def two_normal_two_light_detach_reattach_both_light_big_pool(args):
         await check_pools_connected_nodes(app1, app2, app3, app4)
 
         # Disable network on lightnodes and wait for them to be Detached
-        set_network_state(False, node3.session_id)
-        set_network_state(False, node4.session_id)
+        await set_network_state(False, node3.session_id)
+        await set_network_state(False, node4.session_id)
         await asyncio.gather(app3.wait_for_node_state("Detached"), app4.wait_for_node_state("Detached"))
         log("--- node 3 and node 4 are now detached")
 
@@ -574,8 +577,8 @@ async def two_normal_two_light_detach_reattach_both_light_big_pool(args):
         await check_pool_detached_node(app4)
 
         # Enable network again and wait for nodes to become attached
-        set_network_state(True, node3.session_id)
-        set_network_state(True, node4.session_id)
+        await set_network_state(True, node3.session_id)
+        await set_network_state(True, node4.session_id)
         await asyncio.gather(app3.wait_for_node_state("Attached"), app4.wait_for_node_state("Attached"))
         log("--- node 3 and node 4 are now attached again")
 
@@ -665,8 +668,8 @@ async def two_normal_two_light_toggle_network_many_times_on_both_light(args):
         # Toggle network 10 times and end with disabled network
         for toggle in range(10):
             network_state = toggle % 2 == 0 # will end as disabled network
-            set_network_state(network_state, node3.session_id)
-            set_network_state(network_state, node4.session_id)
+            await set_network_state(network_state, node3.session_id)
+            await set_network_state(network_state, node4.session_id)
             await asyncio.sleep(2)
 
         # Give extra time to reach correct state
@@ -683,8 +686,8 @@ async def two_normal_two_light_toggle_network_many_times_on_both_light(args):
         # Toggle network 10 times and end with enabled network
         for toggle in range(10):
             network_state = toggle % 2 == 1 # will end as enabled network
-            set_network_state(network_state, node3.session_id)
-            set_network_state(network_state, node4.session_id)
+            await set_network_state(network_state, node3.session_id)
+            await set_network_state(network_state, node4.session_id)
             await asyncio.sleep(2)
 
         # Give extra time to reach correct state

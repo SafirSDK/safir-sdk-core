@@ -78,7 +78,7 @@ namespace Com
             ,m_nodes()
             ,m_receivers()
             ,m_gotRecvFrom()
-            ,m_logPrefix("COM["+std::to_string(myNodeId)+"]: ")
+            ,m_logPrefix(Parameters::LogPrefix)
         {
             m_numberOfUndeliveredMessages=0;
 

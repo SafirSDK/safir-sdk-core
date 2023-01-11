@@ -31,12 +31,14 @@
 #include "CommunicationAllocatorTest.h"
 
 std::atomic<bool> Safir::Dob::Internal::Com::Parameters::NetworkEnabled;
+std::string Safir::Dob::Internal::Com::Parameters::LogPrefix;
 //**********************************
 // Main - run all tests
 //**********************************
 int main(int argc, char* argv[])
 {
     Safir::Dob::Internal::Com::Parameters::NetworkEnabled = true;
+    Safir::Dob::Internal::Com::Parameters::LogPrefix = "ComUnitTests";
     boost::chrono::steady_clock::now();
     try
     {

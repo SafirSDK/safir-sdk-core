@@ -63,8 +63,7 @@ namespace Com
     class DataReceiverType : private ReaderType
     {
     public:
-        DataReceiverType(int64_t nodeId,
-                         boost::asio::io_context::strand& receiveStrand,
+        DataReceiverType(boost::asio::io_context::strand& receiveStrand,
                          const std::string& unicastAddress,
                          const std::string& multicastAddress,
                          const std::function<bool(const char*, size_t, bool multicast)>& onRecv,
@@ -75,7 +74,7 @@ namespace Com
             ,m_onRecv(onRecv)
             ,m_isReceiverReady(isReceiverIsReady)
             ,m_running(false)
-            ,m_logPrefix("COM["+std::to_string(nodeId)+"]: DataReceiver - ")
+            ,m_logPrefix(Parameters::LogPrefix + "DataReceiver - ")
         {
             m_unicastEndpoint = Resolver::StringToEndpoint(unicastAddress);
             if (!multicastAddress.empty())

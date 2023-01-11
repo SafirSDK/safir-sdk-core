@@ -53,10 +53,9 @@ namespace Com
     class DebugCommandServer
     {
     public:
-        DebugCommandServer(boost::asio::io_context& io, const std::string& sessionId, const std::string& logPrefix)
+        DebugCommandServer(boost::asio::io_context& io, const std::string& sessionId)
             :m_socket(io)
             ,m_sessionId(sessionId)
-            ,m_logPrefix(logPrefix)
         {
             auto endpoint = Resolver::StringToEndpoint("239.6.6.6:16666");
 
@@ -85,7 +84,6 @@ namespace Com
         std::string m_safirInst;
         std::string m_nodeId;
         std::string m_sessionId;
-        std::string m_logPrefix;
 
         void AsyncReceive()
         {
@@ -98,18 +96,18 @@ namespace Com
                 }
 
                 const std::string cmd(m_buf.data(), m_buf.data() + size);
-                lllog(9) << m_logPrefix.c_str() << L"DebugCommand - Received command '"
+                lllog(9) << Parameters::LogPrefix.c_str() << L"DebugCommand - Received command '"
                          << cmd.c_str() << "'" << std::endl;
                 auto network = ParseCommand(cmd);
 
                 if (network == 1)
                 {
-                    lllog(1) << m_logPrefix.c_str() << L"DebugCommand - Network is now enabled" << std::endl;
+                    lllog(1) << Parameters::LogPrefix.c_str() << L"DebugCommand - Network is now enabled" << std::endl;
                     Parameters::NetworkEnabled = true;
                 }
                 else if (network == 0)
                 {
-                    lllog(1) << m_logPrefix.c_str() << L"DebugCommand - Network is now disabled" << std::endl;
+                    lllog(1) << Parameters::LogPrefix.c_str() << L"DebugCommand - Network is now disabled" << std::endl;
                     Parameters::NetworkEnabled = false;
                 }
 

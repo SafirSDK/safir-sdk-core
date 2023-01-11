@@ -40,7 +40,11 @@ namespace Com
 {
 
 // Initiate the extern global parameters in Parameters.h
-namespace Parameters {std::atomic<bool> NetworkEnabled;}
+namespace Parameters
+{
+    std::atomic<bool> NetworkEnabled;
+    std::string LogPrefix;
+}
 
 namespace
 {
@@ -83,12 +87,13 @@ namespace
         ,m_gotRecvFrom()
         ,m_discoverer(m_ioContext, m_me, fragmentSize, LightNodeTypes(nodeTypes), [this](const Node& n){OnNewNode(n);})
         ,m_deliveryHandler(ioContext, m_me.nodeId, m_protocol, m_nodeTypes[nodeTypeId]->SlidingWindowSize())
-        ,m_reader(nodeId, m_receiveStrand, m_me.unicastAddress, m_nodeTypes[nodeTypeId]->MulticastAddress(),
+        ,m_reader(m_receiveStrand, m_me.unicastAddress, m_nodeTypes[nodeTypeId]->MulticastAddress(),
                   [this](const char* d, size_t s, const bool mc){return OnRecv(d,s,mc);},
                   [this](){return m_deliveryHandler.NumberOfUndeliveredMessages()<Parameters::MaxNumberOfUndelivered;})
-        ,m_logPrefix("COM["+std::to_string(nodeId)+"]: ")
+        ,m_logPrefix(isControlInstance ? "COMc["+std::to_string(nodeId)+"]: " : "COMd["+std::to_string(nodeId)+"]: ")
     {
         Parameters::NetworkEnabled = true;
+        Parameters::LogPrefix = m_logPrefix;
         auto safirInstance = Safir::Utilities::Internal::Expansion::GetSafirInstance();
 
         if (nodeId==0)
@@ -112,7 +117,7 @@ namespace
         {
             lllog(1)<<m_logPrefix.c_str()<<L"Env SAFIR_COM_NETWORK_SIMULATION is set to '"
                     << sessionId << "'. Enables the ability to simulate an unavailable network."<<std::endl;
-            m_debugServer = std::make_unique<DebugCommandServer>(m_ioContext, sessionId, m_logPrefix);
+            m_debugServer = std::make_unique<DebugCommandServer>(m_ioContext, sessionId);
         }
     }
 #ifdef _MSC_VER

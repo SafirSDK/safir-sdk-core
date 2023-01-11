@@ -24,6 +24,7 @@
 #pragma once
 #include <cstddef>
 #include <atomic>
+#include <string>
 
 namespace Safir
 {
@@ -56,6 +57,8 @@ namespace Com
 
         //Simulate network up/down. Global variable that must be initiated one time at startup.
         extern std::atomic<bool> NetworkEnabled;
+
+        extern std::string LogPrefix;
     }
 }
 }

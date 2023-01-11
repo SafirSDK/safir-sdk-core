@@ -25,6 +25,7 @@
 
 #include <vector>
 #include <boost/circular_buffer.hpp>
+#include <iostream>
 
 namespace Safir
 {
