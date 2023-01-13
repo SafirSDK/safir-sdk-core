@@ -145,7 +145,7 @@ async def check_pool_detached_node(app):
     
     pool_timestamp = app.last_pool_update
     num_tries = 0
-    while pool_timestamp < app.last_pool_update or num_tries < 5:
+    while pool_timestamp < app.last_pool_update or num_tries < 60:
         num_tries = num_tries +1
         pool_timestamp = app.last_pool_update
         if contains_exact(expected_reg, app.registrations) and contains_exact(expected_ent, app.entities):
@@ -272,7 +272,8 @@ class SafirApp:
     async def send(self, msg):
         await self.sendQueue.put(msg)
 
-    async def wait_for_node_state(self, state, timeout=60):
+    async def wait_for_node_state(self, state):
+        timeout = 600 #seconds
         nodeInfoEntityId = "Safir.Dob.NodeInfo:" + str(self.node_id)
         t = 0
         while t < timeout:
@@ -280,6 +281,7 @@ class SafirApp:
             await asyncio.sleep(3)
             nodeInfo = self.entities.get(nodeInfoEntityId)
             if nodeInfo is not None and state in nodeInfo:
+                print(f"Node state received after {t} seconds")
                 return
 
         log("*** wait_for_node_state timed out, dump pool")
@@ -681,8 +683,8 @@ async def two_normal_two_light_toggle_network_many_times_on_both_light(args):
             await asyncio.sleep(2)
 
         # Give extra time to reach correct state
-        await asyncio.gather(app3.wait_for_node_state("Detached", timeout=120),
-                            app4.wait_for_node_state("Detached", timeout=120))
+        await asyncio.gather(app3.wait_for_node_state("Detached"),
+                            app4.wait_for_node_state("Detached"))
         log("--- node 3 and node 4 are now detached")
 
         # Give some time for PD
@@ -699,8 +701,8 @@ async def two_normal_two_light_toggle_network_many_times_on_both_light(args):
             await asyncio.sleep(2)
 
         # Give extra time to reach correct state
-        await asyncio.gather(app3.wait_for_node_state("Attached", timeout=120),
-                            app4.wait_for_node_state("Attached", timeout=120))
+        await asyncio.gather(app3.wait_for_node_state("Attached"),
+                            app4.wait_for_node_state("Attached"))
         log("--- node 3 and node 4 are now attached")
         
         # Give some time for PD

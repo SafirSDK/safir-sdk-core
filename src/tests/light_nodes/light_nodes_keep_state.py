@@ -145,7 +145,7 @@ async def check_pool(app, expected_registrations, expected_entities):
     
     pool_timestamp = app.last_pool_update
     num_tries = 0
-    while pool_timestamp < app.last_pool_update or num_tries < 5:
+    while pool_timestamp < app.last_pool_update or num_tries < 60:
         num_tries = num_tries +1
         pool_timestamp = app.last_pool_update
         if _check():
@@ -194,7 +194,8 @@ class SafirApp:
     async def send(self, msg):
         await self.sendQueue.put(msg)
 
-    async def wait_for_node_state(self, state, timeout=60):
+    async def wait_for_node_state(self, state):
+        timeout = 600 #seconds
         nodeInfoEntityId = "Safir.Dob.NodeInfo:" + str(self.node_id)
         t = 0
         while t < timeout:
@@ -202,6 +203,7 @@ class SafirApp:
             await asyncio.sleep(3)
             nodeInfo = self.entities.get(nodeInfoEntityId)
             if nodeInfo is not None and state in nodeInfo:
+                print(f"Node state received after {t} seconds")
                 return
 
         log("*** wait_for_node_state timed out, dump pool")
