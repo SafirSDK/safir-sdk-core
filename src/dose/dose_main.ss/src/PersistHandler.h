@@ -69,7 +69,7 @@ namespace Internal
         PersistHandler(boost::asio::io_service& ioService,
                        Distribution& distribution,
                        const std::function<void(const std::string& str)>& logStatus,
-                       const std::function<void()>& persistentDataReadyCb,
+                       const std::function<void(bool /*fromDope*/)>& persistentDataReadyCb,
                        const std::function<void()>& persistentDataAllowedCb);
 
         // Start should be called when a system has been formed.
@@ -77,7 +77,7 @@ namespace Internal
 
         void Stop();
 
-        void SetPersistentDataReady();
+        void SetPersistentDataReady(bool fromDope);
 
     private:
 
@@ -116,7 +116,7 @@ namespace Internal
         Utilities::AsioDispatcher               m_dispatcher;
         bool                                    m_persistentDataReady;
         bool                                    m_persistentDataAllowed;
-        std::vector<std::function<void()> >     m_persistentDataReadyCb;
+        std::vector<std::function<void(bool)> >     m_persistentDataReadyCb;
         std::vector<std::function<void()> >     m_persistentDataAllowedCb;
         const int64_t                           m_dataTypeIdentifier;
     };

@@ -112,10 +112,7 @@ BOOST_AUTO_TEST_CASE( PoolDistributionRequestSenderTest )
     pdr.RequestPoolDistribution(2, 1);
     pdr.RequestPoolDistribution(3, 1);
 
-    bool pdComplete=false;
-    pdr.Start([&]{pdComplete=true;});
-
-    pdr.m_strand.post([&]{BOOST_CHECK(pdr.IsAllNormalNodesCompleted() == false);});
+    pdr.Start();
 
     pdr.PoolDistributionFinished(1);
     pdr.PoolDistributionFinished(2);
@@ -126,53 +123,6 @@ BOOST_AUTO_TEST_CASE( PoolDistributionRequestSenderTest )
         BOOST_CHECK(com.requests.find(1)!=com.requests.end());
         BOOST_CHECK(com.requests.find(2)!=com.requests.end());
         BOOST_CHECK(com.requests.find(3)!=com.requests.end());
-        BOOST_CHECK(pdComplete);
-
-        BOOST_CHECK(pdr.IsAllNormalNodesCompleted() == true);
-    });
-
-    work.reset();
-    threads.join_all();
-}
-
-BOOST_AUTO_TEST_CASE( PoolDistributionRequestSenderTest_ClearNonLightNodesPoolDistributions )
-{
-    boost::asio::io_service io;
-    auto work=std::make_shared<boost::asio::io_service::work>(io);
-
-    boost::thread_group threads;
-    for (int i = 0; i < 2; ++i)
-    {
-        threads.create_thread([&]{io.run();});
-    }
-
-    Distribution distribution;
-    PoolDistributionRequestSender<Distribution> pdr(io, distribution);
-    auto& com = distribution.GetCommunication();
-
-    pdr.RequestPoolDistribution(1, 1);
-    pdr.RequestPoolDistribution(2, 9);
-    pdr.RequestPoolDistribution(3, 1);
-
-    bool pdComplete=false;
-    pdr.Start([&]{pdComplete=true;});
-
-    pdr.m_strand.post([&]{BOOST_CHECK(pdr.IsAllNormalNodesCompleted() == false);});
-
-    pdr.ClearNonLightNodesPoolDistributions();
-
-    pdr.m_strand.post([&]
-    {
-        BOOST_CHECK(com.requests.find(1)!=com.requests.end());
-        BOOST_CHECK(com.requests.find(2)!=com.requests.end());
-        BOOST_CHECK(com.requests.find(3)!=com.requests.end());
-        BOOST_CHECK(pdComplete);
-
-        BOOST_CHECK(pdr.m_requests.size() == 1);
-        BOOST_CHECK(pdr.m_requests[0].nodeId == 2);
-        BOOST_CHECK(pdr.m_requests[0].sent);
-
-        BOOST_CHECK(pdr.IsAllNormalNodesCompleted() == true);
     });
 
     work.reset();

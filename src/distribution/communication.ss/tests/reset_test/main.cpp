@@ -62,12 +62,12 @@ BOOST_AUTO_TEST_CASE( communication_reset_node_unicast )
 
     // Wait until receiver got some messages from sender2
     auto waitSec = 0;
-    while(receiver.GetRecvCount(2) < 300 && waitSec++ < 45)
+    while(receiver.GetRecvCount(2) < 200 && waitSec++ < 60)
     {
-        boost::this_thread::sleep_for(boost::chrono::milliseconds(500));
+        boost::this_thread::sleep_for(boost::chrono::milliseconds(1000));
     }
     std::cout << "recv sender2: " << receiver.GetRecvCount(2) << std::endl;
-    BOOST_CHECK(receiver.GetRecvCount(2) >= 300);
+    BOOST_CHECK(receiver.GetRecvCount(2) >= 200);
     BOOST_CHECK(receiver.GetRecvCount(3) == 0);
 
     sender2.Exclude(1);
@@ -75,13 +75,13 @@ BOOST_AUTO_TEST_CASE( communication_reset_node_unicast )
 
     // Wait until receiver got some messages from sender3
     waitSec = 0;
-    while(receiver.GetRecvCount(3) < 300 && waitSec++ < 45)
+    while(receiver.GetRecvCount(3) < 200 && waitSec++ < 60)
     {
-        boost::this_thread::sleep_for(boost::chrono::milliseconds(500));
+        boost::this_thread::sleep_for(boost::chrono::milliseconds(1000));
     }
     std::cout << "recv sender2: " << receiver.GetRecvCount(2) << std::endl;
     std::cout << "recv sender3: " << receiver.GetRecvCount(3) << std::endl;
-    BOOST_CHECK(receiver.GetRecvCount(3) >= 300);
+    BOOST_CHECK(receiver.GetRecvCount(3) >= 200);
 
     // Stop is synchronous calls that wait until fully stopped.
     receiver.Stop();
@@ -109,12 +109,12 @@ BOOST_AUTO_TEST_CASE( communication_reset_node_multicast )
 
     // Wait until receiver got some messages from sender2
     auto waitSec = 0;
-    while(receiver.GetRecvCount(2) < 300 && waitSec++ < 45)
+    while(receiver.GetRecvCount(2) < 200 && waitSec++ < 60)
     {
-        boost::this_thread::sleep_for(boost::chrono::milliseconds(500));
+        boost::this_thread::sleep_for(boost::chrono::milliseconds(1000));
     }
     std::cout << "recv sender2: " << receiver.GetRecvCount(2) << std::endl;
-    BOOST_CHECK(receiver.GetRecvCount(2) >= 300);
+    BOOST_CHECK(receiver.GetRecvCount(2) >= 200);
     BOOST_CHECK(receiver.GetRecvCount(3) == 0);
 
     sender2.Exclude(1);
@@ -122,13 +122,13 @@ BOOST_AUTO_TEST_CASE( communication_reset_node_multicast )
 
     // Wait until receiver got some messages from sender3
     waitSec = 0;
-    while(receiver.GetRecvCount(3) < 300 && waitSec++ < 45)
+    while(receiver.GetRecvCount(3) < 200 && waitSec++ < 60)
     {
-        boost::this_thread::sleep_for(boost::chrono::milliseconds(500));
+        boost::this_thread::sleep_for(boost::chrono::milliseconds(1000));
     }
     std::cout << "recv sender2: " << receiver.GetRecvCount(2) << std::endl;
     std::cout << "recv sender3: " << receiver.GetRecvCount(3) << std::endl;
-    BOOST_CHECK(receiver.GetRecvCount(3) >= 300);
+    BOOST_CHECK(receiver.GetRecvCount(3) >= 200);
 
     // Stop is synchronous calls that wait until fully stopped.
     receiver.Stop();

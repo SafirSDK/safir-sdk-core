@@ -80,13 +80,14 @@ namespace
             // When implementing smart-sync, we shall only RemoveDetachedConnections if sameSystem=false.
             if (m_keepStateWhileDetached)
             {
+                lllog(5)<< L"ConnectionHandler - Attach to system. Remove all kept detached states, if any." << std::endl;
                 Connections::Instance().RemoveDetachedConnections();
             }
-            m_poolHandler.OnToggleDetach(false);
+            m_poolHandler.SetDetached(false);
         },
         [this]()
         {
-            m_poolHandler.OnToggleDetach(true);
+            m_poolHandler.SetDetached(true);
         });
 
         for (auto nt = distribution.GetNodeTypeIds().cbegin(); nt != distribution.GetNodeTypeIds().cend(); ++nt)

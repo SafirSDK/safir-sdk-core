@@ -53,9 +53,6 @@ namespace Internal
         ,m_poolDistributionRequests(m_strand.context(), m_distribution)
         ,m_waitingStatesSanityTimer(m_strand.context())
         ,m_persistenceReady(false)
-        ,m_poolDistributionComplete(false)
-        ,m_pdCompleteSignaled(false)
-        ,m_numReceivedPdCompleteFromNormalNodes(0)
         ,m_detached(false)
         ,m_running(false)
     {
@@ -64,9 +61,9 @@ namespace Internal
             m_persistHandler.reset(new PersistHandler(m_strand.context(),
                                                       distribution,
                                                       logStatus,
-                                                      [this] // persistentDataReadyCb
+                                                      [this](bool fromDope) // persistentDataReadyCb
                                                       {
-                                                          OnPersistenceReady();
+                                                          OnPersistenceReady(fromDope);
                                                       },
                                                       [] // persistentDataAllowedCb
                                                       {
@@ -74,25 +71,14 @@ namespace Internal
                                                       }));
         }
 
-
         auto injectNode=[this](const std::string&, int64_t id, int64_t nt, const std::string&)
         {
             m_strand.dispatch([this, id, nt]
             {
                 if (m_nodes.insert(std::make_pair(id, nt)).second)
                 {
-                    if (m_distribution.IsLightNode() || m_distribution.IsLightNode(nt))
-                    {
-                        // If this node is a light node we always request PD
-                        // Always request pool from light nodes. They might have limited types created in detached mode.
-                        m_poolDistributionRequests.RequestPoolDistribution(id, nt);
-                    }
-                    else if (!m_poolDistributionComplete || !m_persistenceReady)
-                    {
-                        // Normal node injects other normal node. Request PD if we are still not up and running
-                        m_poolDistributionComplete=false;
-                        m_poolDistributionRequests.RequestPoolDistribution(id, nt);
-                    }
+                    lllog(5)<< L"DoseMain.PoolHandler InjectNode and send PD-request, nodeId=" << id << std::endl;
+                    m_poolDistributionRequests.RequestPoolDistribution(id, nt);
                 }
             });
         };
@@ -153,51 +139,6 @@ namespace Internal
         }
     }
 
-    void PoolHandler::OnToggleDetach(bool detach)
-    {
-        lllog(5)<< L"DoseMain.PoolHandler set detached to " << std::boolalpha << detach << std::endl;
-        // reset flags
-        m_poolDistributionComplete = detach; // If in detached mode then we are not expecting to get a PD from anyone else.
-        m_pdCompleteSignaled = detach;
-        m_numReceivedPdCompleteFromNormalNodes = 0;
-        m_detached = detach;
-
-        // When a lightNode attach to a System it can not keep EndStates since they
-        // will prevent pooldistribution of Entities that previously existed on this node.
-        EndStates::Instance().ClearAllEndstates();
-
-        // If the node is detached from the start, nodeInfoHandler is not created here.
-        if (m_nodeInfoHandler)
-        {
-            m_nodeInfoHandler->SetNodeState(m_detached ? Safir::Dob::NodeState::Detached : Safir::Dob::NodeState::Attaching); // Update detached flag in NodeInfo
-        }
-    }
-
-    void PoolHandler::OnPersistenceReady()
-    {
-        ENSURE(!m_distribution.IsLightNode(), <<"DoseMain.PoolHandler: Got OnPersistenceReady. Should not happen on a light node!")
-        m_strand.dispatch([this]
-        {
-            if (m_persistenceReady)
-            {
-                return; //already got this event
-            }
-
-            if (m_numReceivedPdCompleteFromNormalNodes == 0) // Got persistence from Dope
-            {
-                // Clear all PDs from non light nodes. We still need to get light nodes pools since they can have limited types created in detached mode.
-                m_poolDistributionRequests.ClearNonLightNodesPoolDistributions();
-            }
-            else // Normal node that got persistence from other node does not have anything to send.
-            {
-                // Tell poolDistributor that until we are started, we have no pool or persistence to provide.
-                m_poolDistributor.SetHaveNothing();
-            }
-            m_persistenceReady=true;
-            SignalPdComplete();
-        });
-    }
-
     void PoolHandler::Start()
     {
         m_strand.post([this]
@@ -206,13 +147,15 @@ namespace Internal
             {
                 return;
             }
+            lllog(5)<< L"DoseMain.PoolHandler Start" << std::endl;
             m_running = true;
 
             if (m_distribution.IsLightNode())
             {
                 // This will immediately allow connections and start the poolDistributor.
-                m_nodeInfoHandler.reset(new NodeInfoHandler(m_strand.context(), m_distribution, Safir::Dob::NodeState::Attaching));
+                m_nodeInfoHandler.reset(new NodeInfoHandler(m_strand.context(), m_distribution, Safir::Dob::NodeState::Detached));
                 m_poolDistributor.Start();
+                m_persistenceReady=true;
                 Connections::Instance().AllowConnect(-1);
                 Connections::Instance().AllowConnect(0);
             }
@@ -226,11 +169,7 @@ namespace Internal
             RunWaitingStatesSanityCheckTimer();
 
             //request pool distributions
-            m_poolDistributionRequests.Start(m_strand.wrap([this]
-            {
-                m_poolDistributionComplete=true;
-                SignalPdComplete();
-            }));
+            m_poolDistributionRequests.Start();
 
             //start distributing states to other nodes
             for (auto vt = m_stateDistributors.cbegin(); vt != m_stateDistributors.cend(); ++vt)
@@ -274,6 +213,53 @@ namespace Internal
             {
                 vt->second->Stop();
             }
+        });
+    }
+
+    void PoolHandler::SetDetached(bool detach)
+    {
+        m_strand.post([this, detach]
+        {
+            lllog(5)<< L"DoseMain.PoolHandler set detached to " << std::boolalpha << detach << std::endl;
+            m_detached = detach;
+
+            // When a lightNode attach to a System it can not keep EndStates since they
+            // will prevent pooldistribution of Entities that previously existed on this node.
+            EndStates::Instance().ClearAllEndstates();
+
+            // If the node is detached from the start, nodeInfoHandler is not created here.
+            if (m_nodeInfoHandler)
+            {
+                m_nodeInfoHandler->SetNodeState(m_detached ? Safir::Dob::NodeState::Detached : Safir::Dob::NodeState::Attached); // Update detached flag in NodeInfo
+            }
+        });
+    }
+
+    void PoolHandler::OnPersistenceReady(bool fromDope)
+    {
+        ENSURE(!m_distribution.IsLightNode(), <<"DoseMain.PoolHandler: Got OnPersistenceReady. Should not happen on a light node!")
+        m_strand.dispatch([this, fromDope]
+        {
+            if (m_persistenceReady)
+            {
+                return; //already got this event
+            }
+
+            m_persistenceReady=true;
+
+            if (fromDope)
+            {
+                lllog(5)<< L"DoseMain.PoolHandler Persistence data ready, got Persistence from Dope. Allow connections on all contexts." << std::endl;
+            }
+            else
+            {
+                lllog(5)<< L"DoseMain.PoolHandler Persistence data ready, got Persistence from other node via PD. Allow connections on all contexts." << std::endl;
+            }
+
+            Connections::Instance().AllowConnect(-1);
+            Connections::Instance().AllowConnect(0);
+            m_nodeInfoHandler.reset(new NodeInfoHandler(m_strand.context(), m_distribution, Safir::Dob::NodeState::Normal));
+            m_poolDistributor.Start();
         });
     }
 
@@ -330,20 +316,12 @@ namespace Internal
             case PdComplete:
                 {
                     lllog(5)<<"PoolHandler: got PdComplete from "<<fromNodeId<<std::endl;
-                    if (!m_distribution.IsLightNode() && !m_distribution.IsLightNode(fromNodeType))
+                    if (!m_distribution.IsLightNode() && !m_distribution.IsLightNode(fromNodeType) && !m_persistenceReady)
                     {
                         //persistence is ready as soon as we have received one pdComplete from a non-lightNode
-                        // This will trigger the chain OnPersistenDataReady->SignalPDComplete
-                        ++m_numReceivedPdCompleteFromNormalNodes;
-                        m_persistHandler->SetPersistentDataReady();
+                        // This will trigger the chain OnPersistenDataReady
+                        m_persistHandler->SetPersistentDataReady(false); // false indicates that we did not get Persistence from Dope
                     }
-                    m_poolDistributionRequests.PoolDistributionFinished(fromNodeId);
-                }
-                break;
-
-            case PdHaveNothing:
-                {
-                    lllog(5)<<"PoolHandler: got PdHaveNothing from "<<fromNodeId<<std::endl;
                     m_poolDistributionRequests.PoolDistributionFinished(fromNodeId);
                 }
                 break;
@@ -388,30 +366,6 @@ namespace Internal
 
             HandleEntityState(state, fromNodeType);
         });
-    }
-
-    void PoolHandler::SignalPdComplete()
-    {
-        if (m_pdCompleteSignaled)
-        {
-            return; // Already signaled
-        }
-
-        if (m_distribution.IsLightNode())
-        {
-            m_pdCompleteSignaled=true;
-            auto state = m_detached ? Safir::Dob::NodeState::Detached : Safir::Dob::NodeState::Attached;
-            m_nodeInfoHandler->SetNodeState(state);
-        }
-        else if (m_persistenceReady && m_poolDistributionComplete)
-        {
-            // Normal nodes must wait for persistence and PDComplete.
-            m_pdCompleteSignaled=true;
-            m_poolDistributor.Start();
-            Connections::Instance().AllowConnect(-1);
-            Connections::Instance().AllowConnect(0);
-            m_nodeInfoHandler.reset(new NodeInfoHandler(m_strand.context(), m_distribution, Safir::Dob::NodeState::Normal));
-        }
     }
 
     void PoolHandler::RunEndStatesTimer()

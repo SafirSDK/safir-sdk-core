@@ -48,8 +48,7 @@ namespace Internal
     enum PoolDistributionInfo
     {
         PdRequest = 1,      //Request a pool distribution from another node
-        PdComplete = 2,     //Answer to PdRequest: my pool distribution is completed including persistent data
-        PdHaveNothing = 3   //Answer to PdRequest: you can ignore me, my pool is empty and I have no persistence ready
+        PdComplete = 2     //Answer to PdRequest: my pool distribution is completed including persistent data
     };
     //---------------------------------------------------------
 
@@ -69,17 +68,11 @@ namespace Internal
         {
         }
 
-        void Start(const std::function<void()>& pdComplete)
+        void Start()
         {
-            m_strand.dispatch([this,pdComplete]
+            m_strand.dispatch([this]
             {
-                m_pdComplete=pdComplete;
                 m_running=true;
-                if (IsAllNormalNodesCompleted())
-                {
-                    m_pdComplete();
-                }
-
                 SendPoolDistributionRequests();
             });
 
@@ -104,29 +97,6 @@ namespace Internal
             });
         }
 
-        void ClearNonLightNodesPoolDistributions()
-        {
-            m_strand.dispatch([this]
-            {
-                for (auto it = std::cbegin(m_requests); it != std::cend(m_requests);)
-                {
-                    if (!m_distribution.IsLightNode(it->nodeType))
-                    {
-                        it = m_requests.erase(it);
-                    }
-                    else
-                    {
-                        ++it;
-                    }
-                }
-
-                if (IsAllNormalNodesCompleted())
-                {
-                    m_pdComplete();
-                }
-            });
-        }
-
         //fromNodeId=0 means all queued requests are finished
         void PoolDistributionFinished(int64_t fromNodeId)
         {
@@ -144,11 +114,6 @@ namespace Internal
                     {
                         m_requests.erase(it);
                     }
-                }
-
-                if (IsAllNormalNodesCompleted())
-                {
-                    m_pdComplete();
                 }
 
             });
@@ -176,7 +141,6 @@ namespace Internal
         boost::asio::io_service::strand m_strand;
         DistributionT& m_distribution;
 
-        std::function<void()> m_pdComplete; //signal pdComplete after all our pdRequests has reported pdComplete
         std::vector<PdReq> m_requests;
 
         void SendPoolDistributionRequests()
@@ -211,12 +175,6 @@ namespace Internal
                 //some requests could not be sent, retry
                 m_strand.post([this]{SendPoolDistributionRequests();}); //a bit aggressive, maybe we should set a timer instead
             }
-        }
-
-        bool IsAllNormalNodesCompleted() const
-        {
-            auto it = std::find_if(std::cbegin(m_requests), std::cend(m_requests), [this](const PdReq& r){return !m_distribution.IsLightNode(r.nodeType);});
-            return it == std::cend(m_requests);
         }
     };
 }

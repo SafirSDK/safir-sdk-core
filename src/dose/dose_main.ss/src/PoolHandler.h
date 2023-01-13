@@ -59,7 +59,7 @@ namespace Internal
         void HandleConnect(const ConnectionId& connId);
         void HandleDisconnect(const ConnectionId& connId);
 
-        void OnToggleDetach(bool detach);
+        void SetDetached(bool detach);
 
     private:
         typedef PoolDistribution<Distribution> PoolDistributionType;
@@ -82,9 +82,6 @@ namespace Internal
 
         std::function<void()> m_poolDistributionCompleteCallback;
         bool m_persistenceReady;
-        bool m_poolDistributionComplete;
-        bool m_pdCompleteSignaled;
-        int m_numReceivedPdCompleteFromNormalNodes;
 
         //The NodeInfoHandler can not be started until we have pd complete
         //so the PoolHandler has to own it.
@@ -92,7 +89,6 @@ namespace Internal
         bool m_detached;
         bool m_running;
 
-        void SignalPdComplete();
         void RunEndStatesTimer();
         void RunWaitingStatesSanityCheckTimer();
 
@@ -104,7 +100,7 @@ namespace Internal
         void HandleEntityState(const DistributionData& state, int64_t fromNodeType);
 
         //PersistenceHandler reports Persistet data ready
-        void OnPersistenceReady();
+        void OnPersistenceReady(bool fromDope);
 
         //other node is requesting a pd or report pdComplete
         void OnPoolDistributionInfo(int64_t fromNodeId, int64_t fromNodeType, const char* data, size_t size);

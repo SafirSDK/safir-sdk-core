@@ -47,7 +47,7 @@ namespace Internal
     PersistHandler::PersistHandler(boost::asio::io_service& ioService,
                                    Distribution& distribution,
                                    const std::function<void(const std::string& str)>& logStatus,
-                                   const std::function<void()>& persistentDataReadyCb,
+                                   const std::function<void(bool)>& persistentDataReadyCb,
                                    const std::function<void()>& persistentDataAllowedCb)
         : m_strand(ioService),
           m_logStatus(logStatus),
@@ -171,9 +171,9 @@ namespace Internal
         m_strand.post([this]{m_connection.Close();});
     }
 
-    void PersistHandler::SetPersistentDataReady()
+    void PersistHandler::SetPersistentDataReady(bool fromDope)
     {
-        m_strand.dispatch([this] ()
+        m_strand.dispatch([this, fromDope] ()
         {
             if (m_persistentDataReady)
             {
@@ -194,7 +194,7 @@ namespace Internal
 
             for (auto cb = m_persistentDataReadyCb.cbegin(); cb != m_persistentDataReadyCb.cend(); ++cb)
             {
-                (*cb)();
+                (*cb)(fromDope);
             }
 
             //We could be inside a Dob callback, so we need
@@ -241,7 +241,7 @@ namespace Internal
         // This service request indicates that persistent data is ready
         if (!m_persistentDataReady)
         {
-            SetPersistentDataReady();
+            SetPersistentDataReady(true);
         }
     }
 
@@ -261,7 +261,7 @@ namespace Internal
                                            true); // delivery guarantee
             if (ok)
             {
-                lllog(3) << "DOSE_MAIN: Sent HavePersistenceDataRequest to nodeId " << node->first << std::endl;
+                lllog(3) << "DOSE_MAIN.PersistHandler: Sent HavePersistenceDataRequest to nodeId " << node->first << std::endl;
             }
             else
             {
@@ -294,7 +294,7 @@ namespace Internal
                                            true); // delivery guarantee
              if (ok)
              {
-                 lllog(3) << "DOSE_MAIN: Sent HavePersistenceDataResponse=" << m_persistentDataReady
+                 lllog(3) << "DOSE_MAIN.PersistHandler: Sent HavePersistenceDataResponse=" << m_persistentDataReady
                           << " to nodeId " << fromNodeId << std::endl;
              }
              else
@@ -304,11 +304,11 @@ namespace Internal
         }
         else if (msg.GetType() == DistributionData::Action_HavePersistenceDataResponse)
         {
-            lllog(3) << "DOSE_MAIN: Got an Action_HavePersistenceDataResponse" << std::endl;
+            lllog(3) << "DOSE_MAIN.PersistHandler: Got an Action_HavePersistenceDataResponse" << std::endl;
 
             if (msg.GetIHavePersistenceData())
             {
-                lllog(3) << "DOSE_MAIN: Node " << msg.GetSenderId().m_node
+                lllog(3) << "DOSE_MAIN.PersistHandler: Node " << msg.GetSenderId().m_node
                          << " has persistence. Disallow initial set and let -1:s connect." << std::endl;
 
                 EntityTypes::Instance().DisallowInitialSet();
@@ -318,7 +318,7 @@ namespace Internal
             }
             else
             {
-                lllog(3) << "DOSE_MAIN: Node " << msg.GetSenderId().m_node
+                lllog(3) << "DOSE_MAIN.PersistHandler: Node " << msg.GetSenderId().m_node
                          << " doesnt have persistence." << std::endl;
 
                 m_nodes.erase(std::make_pair(fromNodeId, fromNodeType));
@@ -349,7 +349,7 @@ namespace Internal
                                                true); // delivery guarantee
                  if (ok)
                  {
-                    lllog(3) << "DOSE_MAIN: Sent HavePersistenceDataRequest to nodeId " << it->first << std::endl;
+                    lllog(3) << "DOSE_MAIN.PersistHandler: Sent HavePersistenceDataRequest to nodeId " << it->first << std::endl;
 
                     it = m_unsentRequests.erase(it);
                  }
@@ -375,7 +375,7 @@ namespace Internal
                                                true); // delivery guarantee
                  if (ok)
                  {
-                     lllog(3) << "DOSE_MAIN: Sent HavePersistenceDataResponse=" << m_persistentDataReady
+                     lllog(3) << "DOSE_MAIN.PersistHandler: Sent HavePersistenceDataResponse=" << m_persistentDataReady
                               << " to nodeId " << it->first << std::endl;
 
                     it = m_unsentResponses.erase(it);
@@ -392,7 +392,7 @@ namespace Internal
     {
         if (m_nodes.empty())
         {
-            lllog(3) << "DOSE_MAIN: Noone has persistence!"
+            lllog(3) << "DOSE_MAIN.PersistHandler: Noone has persistence!"
                         " Allow -1:s to connect (without disabling initialset)." << std::endl;
 
             // Everyone has responded saying that they have not seen persistence data

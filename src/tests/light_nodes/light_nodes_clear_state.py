@@ -35,7 +35,7 @@ failed_tests = set()
 @contextmanager
 def test_case(name):
     global failed_tests
-    log_dir = os.path.normpath(os.path.join(os.getcwd(), "test_output", "keep", name))
+    log_dir = os.path.normpath(os.path.join(os.getcwd(), "test_output", "clear", name))
     for f in glob.glob(os.path.join(log_dir, "*")): os.remove(f)
     os.environ["LLL_LOGDIR"] = log_dir
 

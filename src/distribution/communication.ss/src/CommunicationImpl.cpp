@@ -95,12 +95,12 @@ namespace
         lllog(1)<<m_logPrefix.c_str()<<L"-------------------------------------------------"<<std::endl;
         lllog(1)<<m_logPrefix.c_str()<<L"Communication initiated"<<std::endl;
         lllog(1)<<m_logPrefix.c_str()<<L"    Safir instance:  "<<safirInstance<<std::endl;
+        lllog(1)<<m_logPrefix.c_str()<<L"    node type:       "<<myNodeType->Name().c_str() << ", "<<nodeTypeId<<std::endl;
         lllog(1)<<m_logPrefix.c_str()<<L"    node id:         "<<m_me.nodeId<<std::endl;
         lllog(1)<<m_logPrefix.c_str()<<L"    name:            "<<m_me.name.c_str()<<std::endl;
         lllog(1)<<m_logPrefix.c_str()<<L"    data address:    "<<m_me.dataAddress.c_str()<<std::endl;
         lllog(1)<<m_logPrefix.c_str()<<L"    control address: "<<m_me.controlAddress.c_str()<<std::endl;
         lllog(1)<<m_logPrefix.c_str()<<L"    multicast:       "<<myNodeType->MulticastAddress().c_str()<<std::endl;
-        lllog(1)<<m_logPrefix.c_str()<<L"    using multicast: "<<std::boolalpha<<myNodeType->UseMulticast()<<std::dec<<std::endl;
         lllog(1)<<m_logPrefix.c_str()<<L"-------------------------------------------------"<<std::endl;
 
         auto sessionId = getenv("SAFIR_COM_NETWORK_SIMULATION");

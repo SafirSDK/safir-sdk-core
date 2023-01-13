@@ -89,7 +89,7 @@ namespace Internal
               m_liveNodes(),
               m_nodeTypeIds(CalculateNodeTypeIds(m_config)),
               m_lightNodeTypeIds(CalculateLightNodeTypeIds(m_config)),
-              m_detached(false),
+              m_nodeState(Normal),
               m_started(false)
         {
             m_isLightNode = IsLightNode(ownNodeTypeId);
@@ -219,17 +219,17 @@ namespace Internal
 
         bool IsDetached() const
         {
-            return m_detached;
+            return m_nodeState == Detached;
         }
 
         void SetAttached(bool sameSystem)
         {
-            if (!m_detached)
+            if (m_nodeState == Attached)
             {
                 return; // already attached
             }
 
-            m_detached = false;
+            m_nodeState = Attached;
 
             // Notify subscribers.
             for (const auto& cb : m_attachedCallbacks)
@@ -240,12 +240,12 @@ namespace Internal
 
         void SetDetached()
         {
-            if (m_detached)
+            if (m_nodeState == Detached)
             {
                 return; // already detached
             }
 
-            m_detached = true;
+            m_nodeState = Detached;
 
             // Notify subscribers.
             for (const auto& cb : m_detachedCallbacks)
@@ -352,7 +352,13 @@ namespace Internal
         // Set of all nodeTypeIds that are lightNodes.
         const std::set<int64_t> m_lightNodeTypeIds;
 
-        bool m_detached;
+        enum NodeState
+        {
+            Normal = 0,
+            Detached,
+            Attached
+        };
+        NodeState m_nodeState;
         bool m_started;
     };
 
