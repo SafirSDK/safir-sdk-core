@@ -81,14 +81,7 @@ private:
     std::shared_ptr<PingHandler> m_pingHandler;
     bool m_enableTypeSystem;
 
-    inline void SendToClient(const std::string& msg)
-    {
-        m_connection->send(msg);
-        if (m_pingHandler)
-        {
-            m_pingHandler->Update();
-        }
-    }
+    void SendToClient(const std::string& msg);
 
     //websocket events
     //-----------------

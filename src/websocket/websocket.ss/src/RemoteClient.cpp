@@ -86,6 +86,20 @@ std::string RemoteClient::ToString() const
     return m_connection->get_remote_endpoint();
 }
 
+void RemoteClient::SendToClient(const std::string& msg)
+{
+    auto err = m_connection->send(msg);
+    if (err)
+    {
+        lllog(5) << "WS: Exception in SendToClient: "<< err.message().c_str() <<std::endl;
+    }
+
+    if (m_pingHandler)
+    {
+        m_pingHandler->Update();
+    }
+}
+
 //------------------------------------------------------
 // Websocket events
 //------------------------------------------------------

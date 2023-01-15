@@ -85,10 +85,11 @@ namespace Internal
                 Connections::Instance().ForEachConnection([this](const Connection& connection)
                 {
                     //auto notDoseConnection=std::string(connection.NameWithoutCounter()).find(";dose_main;")==std::string::npos;
-                    auto localContext=Safir::Dob::NodeParameters::LocalContexts(connection.Id().m_contextId);
-                    auto connectionOnThisNode=connection.IsLocal();
+                    const auto localContext=Safir::Dob::NodeParameters::LocalContexts(connection.Id().m_contextId);
+                    const auto connectionOnThisNode=connection.IsLocal();
+                    const auto detachedConnection = connection.IsDetached();
 
-                    if (!localContext && connectionOnThisNode)
+                    if (!detachedConnection && !localContext && connectionOnThisNode)
                     {
                         m_connections.push(DistributionData(connect_message_tag,
                                                             connection.Id(),
@@ -288,6 +289,12 @@ namespace Internal
             // All nodes send ghost and injection data on PD!
             // Do not send updates
 
+            if (subscription->GetState()->IsDetached())
+            {
+                // never send detached states in PD
+                return true;
+            }
+
             bool success=true;
 
             //Real state
@@ -364,6 +371,12 @@ namespace Internal
         bool ProcessRegistrationState(const SubscriptionPtr& subscription)
         {
             bool success=true;
+
+            if (subscription->GetState()->IsDetached())
+            {
+                // never send detached states in PD
+                return true;
+            }
 
             if (subscription->GetLastRealState().IsNoState())
             {
