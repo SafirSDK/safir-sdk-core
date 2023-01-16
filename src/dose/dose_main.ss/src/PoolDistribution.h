@@ -384,11 +384,14 @@ namespace Internal
 
                 if (!state.IsNoState())
                 {
+                    const auto normalNode = !m_distribution.IsLightNode();
+                    const auto ownerOnThisNode = state.GetSenderId().m_node==m_distribution.GetCommunication().Id();
+                    const auto isUnregistration =!state.IsRegistered();
+
                     //States owned by someone on this node are to be sent to other nodes.
                     //Unregistration states are always sent, since ghosts may be in WaitingStates
-                    //waiting for the unreg.
-                    if (state.GetSenderId().m_node==m_distribution.GetCommunication().Id() ||
-                        !state.IsRegistered())
+                    //waiting for the unreg (only applies to normal nodes).
+                    if (ownerOnThisNode || (normalNode && isUnregistration))
                     {
                         if (!CanSend() || !m_distribution.GetCommunication().Send(m_nodeId, m_nodeType, ToPtr(state), state.Size(), RegistrationStateDataTypeId, true))
                         {

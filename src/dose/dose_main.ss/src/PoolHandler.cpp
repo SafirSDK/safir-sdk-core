@@ -346,6 +346,7 @@ namespace Internal
             ENSURE (state.GetType() == DistributionData::RegistrationState, <<
                     "PoolHandler::OnRegistrationState received DistributionData that is not a RegistrationState!");
 
+            lllog(7) << "PoolHandler - Received RegistrationState from nodeId=" << fromNodeId << state.Image() << std::endl;
             HandleRegistrationState(state, fromNodeType);
         });
     }
