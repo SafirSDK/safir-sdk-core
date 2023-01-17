@@ -11779,6 +11779,11 @@ BOOST_AUTO_TEST_CASE(DictionaryReflection)
     dict->EnumItemMember().at(TestEnum::MySecond)->MyInt() = 20;
     dict->EnumItemMember().at(TestEnum::MySecond)->MyString() = L"two";
 
+    dict->Int64StringMember().Insert(1, L"foo");
+    dict->Int64StringMember().Insert(20, L"bar");
+    dict->Int64StringMember().Insert(111, L"bart");
+    dict->Int64StringMember().at(111).SetNull();
+
     {
         DictionaryContainerBase& base = dict->Int64ItemMember();
         BOOST_CHECK_EQUAL(base.size(), 2U);
@@ -11813,4 +11818,24 @@ BOOST_AUTO_TEST_CASE(DictionaryReflection)
         BOOST_CHECK_EQUAL(container->GetPtr()->MyInt(), 20);
         BOOST_CHECK_EQUAL(container->GetPtr()->MyString(), L"two");
     }
+
+    {
+        DictionaryContainerBase& base = dict->Int64StringMember();
+        BOOST_CHECK_EQUAL(base.size(), 3U);
+        BOOST_CHECK_EQUAL(base.GetKeyAt<Int64>(0), 1);
+        BOOST_CHECK_EQUAL(base.GetKeyAt<Int64>(1), 20);
+        BOOST_CHECK_EQUAL(base.GetKeyAt<Int64>(2), 111);
+        auto* container = dynamic_cast<StringContainer*>(&base.GetValueContainerAt(0));
+        BOOST_CHECK_NE(container, nullptr);
+        BOOST_CHECK_EQUAL(container->IsNull(), false);
+        BOOST_CHECK_EQUAL(container->GetVal(), L"foo");
+        container = dynamic_cast<StringContainer*>(&base.GetValueContainerAt(1));
+        BOOST_CHECK_NE(container, nullptr);
+        BOOST_CHECK_EQUAL(container->IsNull(), false);
+        BOOST_CHECK_EQUAL(container->GetVal(), L"bar");
+        container = dynamic_cast<StringContainer*>(&base.GetValueContainerAt(2));
+        BOOST_CHECK_NE(container, nullptr);
+        BOOST_CHECK_EQUAL(container->IsNull(), true);
+    }
+
 }

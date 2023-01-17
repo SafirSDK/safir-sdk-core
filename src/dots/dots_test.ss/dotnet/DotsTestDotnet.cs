@@ -9638,6 +9638,7 @@ namespace Misc
             Test_BlobChangeFlags_member_dictionaries();
             Test_EnumerationSequenceReflection();
             Test_ObjectSequenceReflection();
+            Test_DictionaryReflection();
         }
 
         public void Test_EnumerationSequenceReflection()
@@ -9705,6 +9706,83 @@ namespace Misc
             Check(seq.TestClassMember[0].MyInt == 400);
             Check(seq.TestClassMember[1].MyInt == 30);
             Check(seq.TestClassMember[2].MyInt == 500);
+        }
+
+        public void Test_DictionaryReflection()
+        {
+            MemberDictionaries dict = new MemberDictionaries();
+            dict.Int64ItemMember.Add(1, new TestItem());
+            dict.Int64ItemMember[1].Obj.MyInt.Val = 10;
+            dict.Int64ItemMember[1].Obj.MyString.Val = "one";
+            dict.Int64ItemMember.Add(2, new TestItem());
+            dict.Int64ItemMember[2].Obj.MyInt.Val = 20;
+            dict.Int64ItemMember[2].Obj.MyString.Val = "two";
+
+            dict.EnumItemMember.Add(TestEnum.Enumeration.MyFirst, new TestItem());
+            dict.EnumItemMember[TestEnum.Enumeration.MyFirst].Obj.MyInt.Val = 10;
+            dict.EnumItemMember[TestEnum.Enumeration.MyFirst].Obj.MyString.Val = "one";
+            dict.EnumItemMember.Add(TestEnum.Enumeration.MySecond, new TestItem());
+            dict.EnumItemMember[TestEnum.Enumeration.MySecond].Obj.MyInt.Val = 20;
+            dict.EnumItemMember[TestEnum.Enumeration.MySecond].Obj.MyString.Val = "two";
+
+            dict.Int64StringMember.Add(1, "foo");
+            dict.Int64StringMember.Add(20, "bar");
+            dict.Int64StringMember.Add(111, "bart");
+            dict.Int64StringMember[111].SetNull();
+
+            {
+                DictionaryContainerBase b = dict.Int64ItemMember;
+                Check(b.Count == 2);
+                Check((long)b.GetKeyAt(0) == 1);
+                Check((long)b.GetKeyAt(1) == 2);
+                var container = (TestItemContainer)b.GetValueContainerAt(0);
+                Check(container != null);
+                Check(!container.IsNull());
+                Check(container.Obj.MyInt.Val == 10);
+                Check(container.Obj.MyString.Val == "one");
+                container = (TestItemContainer)b.GetValueContainerAt(1);
+                Check(container != null);
+                Check(!container.IsNull());
+                Check(container.Obj.MyInt.Val == 20);
+                Check(container.Obj.MyString.Val == "two");
+            }
+
+            {
+                DictionaryContainerBase b = dict.EnumItemMember;
+                Check(b.Count == 2);
+                Check((int)b.GetKeyAt(0) == 0);
+                Check((int)b.GetKeyAt(1) == 1);
+                var container = (TestItemContainer)(b.GetValueContainerAt(0));
+                Check(container != null);
+                Check(container.IsNull() == false);
+                Check(container.Obj.MyInt.Val == 10);
+                Check(container.Obj.MyString.Val == "one");
+                container = (TestItemContainer)(b.GetValueContainerAt(1));
+                Check(container != null);
+                Check(container.IsNull() == false);
+                Check(container.Obj.MyInt.Val == 20);
+                Check(container.Obj.MyString.Val == "two");
+            }
+
+            {
+                DictionaryContainerBase b = dict.Int64StringMember;
+                Check(b.Count == 3);
+                Check((long)b.GetKeyAt(0) == 1);
+                Check((long)b.GetKeyAt(1) == 20);
+                Check((long)b.GetKeyAt(2) == 111);
+                var container = (StringContainer)(b.GetValueContainerAt(0));
+                Check(container != null);
+                Check(container.IsNull() == false);
+                Check(container.Val == "foo");
+                container = (StringContainer)(b.GetValueContainerAt(1));
+                Check(container != null);
+                Check(container.IsNull() == false);
+                Check(container.Val == "bar");
+                container = (StringContainer)(b.GetValueContainerAt(2));
+                Check(container != null);
+                Check(container.IsNull() == true);
+            }
+
         }
     }
 

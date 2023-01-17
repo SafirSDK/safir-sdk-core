@@ -23,6 +23,7 @@
 ******************************************************************************/
 
 using System;
+using System.Linq;
 using System.Collections.Generic;
 
 namespace Safir.Dob.Typesystem
@@ -54,6 +55,36 @@ namespace Safir.Dob.Typesystem
             m_bIsChanged = changed;
         }
 
+        /// <summary>
+        /// Gets the count.
+        /// </summary>
+        /// <value>The count.</value>
+        public abstract int Count { get; }
+
+        /// <summary>
+        /// Get the key at a particular position in the dictionary.
+        /// <para/>
+        /// Note that the order of keys in the dictionary is not guaranteed.
+        /// This is not a particularly "cheap" way of accessing the contents of a
+        /// dictionary. Much better to use the iterators in the implementing class.
+        /// <para/>
+        /// For enumeration values, the returned value is an int ordinal.
+        /// </summary>
+        /// <param name="index"> an index between 0 and Count. </param>
+        /// <returns>The key at a position in the dictionary.</returns>
+        public abstract object GetKeyAt(int index);
+
+        /// <summary>
+        /// Get the container of the value at a particular position in the dictionary.
+        /// <para/>
+        /// Note that the order of keys in the dictionary is not guaranteed.
+        /// This is not a particularly "cheap" way of accessing the contents of a
+        /// dictionary. Much better to use normal iteration.
+        /// </summary>
+        /// <param name="index">An index between 0 and Count.</param>
+        /// <returns>The container at a position in the dictionary.</returns>
+        public abstract ContainerBase GetValueContainerAt(int index);
+        
         /// <summary>
         /// Function needed by Utilities::MergeChanges to be able to merge
         /// dictionaries. Will in turn call Utilities::MergeChanges recursively if it
@@ -250,7 +281,7 @@ namespace Safir.Dob.Typesystem
         /// Gets the count.
         /// </summary>
         /// <value>The count.</value>
-        public int Count {
+        public override int Count {
             get {
                 return m_values.Count;
             }
@@ -355,6 +386,40 @@ namespace Safir.Dob.Typesystem
 
         #endregion
 
+        /// <summary>
+        /// Get the key at a particular position in the dictionary.
+        /// <para/>
+        /// Note that the order of keys in the dictionary is not guaranteed. Any insertion
+        /// may reorder the contents.
+        /// <para/>
+        /// This is not a particularly "cheap" way of accessing the contents of a
+        /// dictionary. Much better to use the iterators in the implementing class.
+        /// <para/>
+        /// For enumeration values, the returned value is an int ordinal.
+        /// </summary>
+        /// <param name="index"> an index between 0 and Count. </param>
+        /// <returns>The key at a position in the dictionary.</returns>
+        public override object GetKeyAt(int index)
+        {
+            return m_values.ElementAt(index).Key;
+        }
+
+        /// <summary>
+        /// Get the container of the value at a particular position in the dictionary.
+        /// <para/>
+        /// Note that the order of keys in the dictionary is not guaranteed. Any insertion
+        /// may reorder the contents.
+        /// <para/>
+        /// This is not a particularly "cheap" way of accessing the contents of a
+        /// dictionary. Much better to use normal iteration.
+        /// </summary>
+        /// <param name="index">An index between 0 and Count.</param>
+        /// <returns>The container at a position in the dictionary.</returns>
+        public override ContainerBase GetValueContainerAt(int index)
+        {
+            return m_values.ElementAt(index).Value;
+        }
+        
         /// <summary>
         /// Copy.
         /// </summary>

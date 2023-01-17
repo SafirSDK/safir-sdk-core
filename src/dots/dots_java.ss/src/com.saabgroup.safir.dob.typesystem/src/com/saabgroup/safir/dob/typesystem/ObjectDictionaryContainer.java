@@ -56,5 +56,9 @@ public class ObjectDictionaryContainer<K, C extends ObjectContainerImpl<O>, O ex
         return m_values.put(key, container);
     }
 
+    public O getObj(K key) {
+        return m_values.get(key).getObj();
+    }
+
     private final Class<C> m_containerClass;
 }

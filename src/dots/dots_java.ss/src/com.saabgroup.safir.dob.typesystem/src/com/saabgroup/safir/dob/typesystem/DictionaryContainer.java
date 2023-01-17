@@ -1,7 +1,7 @@
 // -*- coding: utf-8 -*-
 /******************************************************************************
 *
-* Copyright Saab AB, 2015-2016 (http://safirsdkcore.com)
+* Copyright Saab AB, 2015-2016, 2022 (http://safirsdkcore.com)
 *
 * Created by: Lars Hagström / lars.hagstrom@consoden.se
 *
@@ -30,7 +30,7 @@ import java.util.Map;
 import java.util.Set;
 
 public class DictionaryContainer<K, V extends ContainerBase>
-extends ContainerBase
+extends DictionaryContainerBase
 implements java.util.Map<K, V> {
 
     public DictionaryContainer() {
@@ -222,6 +222,14 @@ implements java.util.Map<K, V> {
                 }
             }
         }
+    }
+
+    public java.lang.Object getKeyAt(int index) {
+        return m_values.keySet().toArray()[index];
+    }
+
+    public ContainerBase getValueContainerAt(int index) {
+        return (ContainerBase)m_values.values().toArray()[index];
     }
 
     protected java.util.TreeMap<K, V> m_values = new java.util.TreeMap<K, V>();

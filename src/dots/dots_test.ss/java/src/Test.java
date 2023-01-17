@@ -9515,6 +9515,7 @@ public class Test {
         {
             Test_EnumerationSequenceReflection();
             Test_ObjectSequenceReflection();
+            Test_DictionaryReflection();
         }
 
         private void Test_EnumerationSequenceReflection()
@@ -9588,6 +9589,87 @@ public class Test {
             check(seq.testClassMember().get(0).myInt().getVal() == 400);
             check(seq.testClassMember().get(1).myInt().getVal() == 30);
             check(seq.testClassMember().get(2).myInt().getVal() == 500);
+        }
+
+
+        @SuppressWarnings("unchecked")
+        private void Test_DictionaryReflection()
+        {
+            MemberDictionaries dict = new MemberDictionaries();
+
+            dict.int64ItemMember().putObj(1L, new TestItem());
+            dict.int64ItemMember().getObj(1L).myInt().setVal(10);
+            dict.int64ItemMember().getObj(1L).myString().setVal("one");
+            dict.int64ItemMember().putObj(2L, new TestItem());
+            dict.int64ItemMember().getObj(2L).myInt().setVal(20);
+            dict.int64ItemMember().getObj(2L).myString().setVal("two");
+
+            dict.enumItemMember().putObj(TestEnum.MY_FIRST, new TestItem());
+            dict.enumItemMember().getObj(TestEnum.MY_FIRST).myInt().setVal(10);
+            dict.enumItemMember().getObj(TestEnum.MY_FIRST).myString().setVal("one");
+            dict.enumItemMember().putObj(TestEnum.MY_SECOND, new TestItem());
+            dict.enumItemMember().getObj(TestEnum.MY_SECOND).myInt().setVal(20);
+            dict.enumItemMember().getObj(TestEnum.MY_SECOND).myString().setVal("two");
+
+            dict.int64StringMember().putVal(1L, "foo");
+            dict.int64StringMember().putVal(20L, "bar");
+            dict.int64StringMember().putVal(111L, "bart");
+            dict.int64StringMember().get(111L).setNull();
+
+            {
+                DictionaryContainerBase b = dict.int64ItemMember();
+
+                check(b.size() == 2);
+                check((long)b.getKeyAt(0) == 1);
+                check((long)b.getKeyAt(1) == 2);
+                var container = (ObjectContainerImpl<com.saabgroup.dotstest.TestItem>)b.getValueContainerAt(0);
+                check(container != null);
+                check(!container.isNull());
+                check(container.getObj().myInt().getVal() == 10);
+                check(container.getObj().myString().getVal() == "one");
+                container = (ObjectContainerImpl<com.saabgroup.dotstest.TestItem>)b.getValueContainerAt(1);
+                check(container != null);
+                check(!container.isNull());
+                check(container.getObj().myInt().getVal() == 20);
+                check(container.getObj().myString().getVal() == "two");
+            }
+
+            {
+                DictionaryContainerBase b = dict.enumItemMember();
+                check(b.size() == 2);
+                check(((Enum)b.getKeyAt(0)).ordinal() == 0);
+                check(((Enum)b.getKeyAt(1)).ordinal() == 1);
+                var container = (ObjectContainerImpl<com.saabgroup.dotstest.TestItem>)(b.getValueContainerAt(0));
+                check(container != null);
+                check(container.isNull() == false);
+                check(container.getObj().myInt().getVal() == 10);
+                check(container.getObj().myString().getVal() == "one");
+                container = (ObjectContainerImpl<com.saabgroup.dotstest.TestItem>)(b.getValueContainerAt(1));
+                check(container != null);
+                check(container.isNull() == false);
+                check(container.getObj().myInt().getVal() == 20);
+                check(container.getObj().myString().getVal() == "two");
+            }
+
+            {
+                DictionaryContainerBase b = dict.int64StringMember();
+                check(b.size() == 3);
+                check((long)b.getKeyAt(0) == 1);
+                check((long)b.getKeyAt(1) == 20);
+                check((long)b.getKeyAt(2) == 111);
+                var container = (StringContainer)(b.getValueContainerAt(0));
+                check(container != null);
+                check(container.isNull() == false);
+                check(container.getVal() == "foo");
+                container = (StringContainer)(b.getValueContainerAt(1));
+                check(container != null);
+                check(container.isNull() == false);
+                check(container.getVal() == "bar");
+                container = (StringContainer)(b.getValueContainerAt(2));
+                check(container != null);
+                check(container.isNull() == true);
+            }
+
         }
     }
 
