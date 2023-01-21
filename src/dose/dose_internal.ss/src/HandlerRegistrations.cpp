@@ -305,17 +305,18 @@ namespace Internal
     {
         DistributionData currentRegState = statePtr->GetRealState();
 
-        if (!NewRegStateIsAccepted(currentRegState, remoteRegistrationState))
+        if (!statePtr->IsDetached() && !NewRegStateIsAccepted(currentRegState, remoteRegistrationState))
         {
             return;
         }
 
         // We have an accepted registration state
 
+
         ConnectionPtr currentRegisterer;
         const Dob::Typesystem::HandlerId handlerId = remoteRegistrationState.GetHandlerId();
 
-        if (!currentRegState.IsNoState() && currentRegState.IsRegistered())
+        if (!statePtr->IsDetached() && !currentRegState.IsNoState() && currentRegState.IsRegistered())
         {
             // There is an existing registration that must be revoked.
 
@@ -335,6 +336,7 @@ namespace Internal
             connection->AddRegistration(m_typeId,
                                         handlerId,
                                         ConsumerId(NULL, static_cast<short>(0))); // Dummy consumer for registration state from external node
+
             statePtr->SetReleased(false);
         }
         else
@@ -371,6 +373,7 @@ namespace Internal
         }
 
         statePtr->SetRealState(remoteRegistrationState);
+        statePtr->SetDetached(false);
 
         if (currentRegisterer != NULL)
         {
@@ -847,6 +850,7 @@ namespace Internal
 
         if (newRegTime < currentRegTime)
         {
+            lllog(5) << "DoseMain: HandlerRegistrations - NewRegTime < CurrentRegTime, throw away!" << std::endl << newRegState.Image() << std::endl;
             return false;
         }
         else if (currentRegTime < newRegTime)
@@ -855,7 +859,13 @@ namespace Internal
         }
 
         // The registration time is the same, compare the state kind
-        return newRegState.GetRegistrationStateKind() > currentRegState.GetRegistrationStateKind();
+        if (newRegState.GetRegistrationStateKind() > currentRegState.GetRegistrationStateKind())
+        {
+            return true;
+        }
+
+        lllog(5) << "DoseMain: HandlerRegistrations - NewRegTime == CurrentRegTime but NewReg has lower RegistrationStateKind priority, throw away!" << std::endl << newRegState.Image() << std::endl;
+        return false;
     }
 
     bool HandlerRegistrations::CanAcquireContainerWriterLock(const boost::chrono::steady_clock::duration& lockTimeout) const

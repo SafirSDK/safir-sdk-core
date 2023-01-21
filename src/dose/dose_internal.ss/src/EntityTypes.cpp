@@ -28,6 +28,7 @@
 #include <Safir/Dob/Internal/ContextSharedTable.h>
 #include <Safir/Dob/Entity.h>
 #include <Safir/Dob/NodeParameters.h>
+#include <Safir/Utilities/Internal/LowLevelLogger.h>
 
 namespace Safir
 {
@@ -125,6 +126,7 @@ namespace Internal
         if (registrationState.IsRegistered() && connection == nullptr)
         {
             // Registration states without a connection should not be set
+            lllog(5) << "DoseMain: EntityTypes::RemoteSetRegistrationState - Registration state without connection, throw away!" << std::endl << registrationState.Image() << std::endl;
             return false;
         }
 

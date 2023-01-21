@@ -25,6 +25,7 @@
 #include <atomic>
 #include <boost/lexical_cast.hpp>
 #include <boost/asio.hpp>
+#include "Distribution.h"
 #include <Safir/Dob/Connection.h>
 #include <Safir/Dob/Internal/Connections.h>
 #include <Safir/Dob/Internal/ConnectionId.h>
@@ -43,6 +44,13 @@ namespace Internal
     static const int64_t RegistrationStateDataTypeId=6915466164769792349; //DoseMain.RegistrationState
     static const int64_t EntityStateDataTypeId=5802524208372516084; //DoseMain.EntityState
 
+    ///
+    /// This class is responsible for distributing states to other nodes of a certain
+    /// nodeType during normal execution.
+    //
+    /// PoolHandler keeps one instance of StateDistributor per nodeType.
+    /// PooDistribution is handled separately see PoolDistribution.h
+    ///
     template <class DistributionT>
     class StateDistributor
             :private Safir::Dob::Dispatcher
@@ -202,6 +210,12 @@ namespace Internal
 
         bool ProcessEntityState(const SubscriptionPtr& subscription)
         {
+            if (subscription->GetState()->IsDetached())
+            {
+                // Never send detached states
+                return true;
+            }
+
             bool complete = true;
 
             //Real state
@@ -267,6 +281,12 @@ namespace Internal
 
         bool ProcessRegistrationState(const SubscriptionPtr& subscription)
         {
+            if (subscription->GetState()->IsDetached())
+            {
+                // Never send detached states
+                return true;
+            }
+
             const DistributionData currentState = subscription->GetCurrentRealState();
             const DistributionData lastState = subscription->GetLastRealState();
 
@@ -300,6 +320,8 @@ namespace Internal
             {
                 m_checkPendingReg(currentState.GetTypeId());
                 subscription->SetLastRealState(currentState);
+
+                lllog(8) << "DoseMain.StateDistributor - RegistrationState sent to other nodes " << std::endl << currentState.Image() << std::endl;
             }
 
             return success;

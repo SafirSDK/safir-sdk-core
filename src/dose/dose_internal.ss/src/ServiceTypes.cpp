@@ -118,6 +118,7 @@ namespace Internal
         if (registrationState.IsRegistered() && connection == nullptr)
         {
             // Registration states without a connection should not be set
+            lllog(5) << "DoseMain: ServiceTypes::RemoteSetRegistrationState - Registration state without connection, throw away!" << std::endl << registrationState.Image() << std::endl;
             return false;
         }
 
