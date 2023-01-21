@@ -642,7 +642,8 @@ namespace SP
 
                                   if (!findIt->second.nodeInfo->is_dead())
                                   {
-                                      throw std::logic_error("ResurrectNode on not dead node!");
+                                      lllog(4) << m_logPrefix << "ResurrectNode on not dead node " << id << ", ignoring" << std::endl;
+                                      return;
                                   }
 
                                   if (!findIt->second.nodeInfo->is_resurrecting() && m_master)
