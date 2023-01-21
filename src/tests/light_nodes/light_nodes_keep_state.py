@@ -259,10 +259,12 @@ class SafirApp:
                     self.last_pool_update = time.time()
                     handler = dou_type(msg) + ":" + str(handler_id(msg))
                     self.registrations[handler] = "Registered"
+                    log("--- node_" + str(self.node_id) + " onRegistered: " + handler)
                 elif callback == "onUnregistered":
                     self.last_pool_update = time.time()
                     handler = dou_type(msg) + ":" + str(handler_id(msg))
                     self.registrations.pop(handler, None)
+                    log("--- node_" + str(self.node_id) + " onUnregistered: " + handler)
                 elif "result" in msg and msg["result"] != "OK":
                     result_id = msg["id"] if "id" in msg else "None"
                     log("--- node_" + str(self.node_id) + " received result " + msg["result"] + " with id=" + str(result_id))
