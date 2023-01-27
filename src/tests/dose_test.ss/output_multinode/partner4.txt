@@ -1455,7 +1455,6 @@ Caught FundamentalException in ExecuteAction: Safir.Dob.Typesystem.SoftwareViola
 Caught FundamentalException in ExecuteAction: Safir.Dob.Typesystem.SoftwareViolationException
 Caught FundamentalException in ExecuteAction: Safir.Dob.Typesystem.SoftwareViolationException
 Caught FundamentalException in ExecuteAction: Safir.Dob.Typesystem.SoftwareViolationException
-Caught FundamentalException in ExecuteAction: Safir.Dob.Typesystem.SoftwareViolationException
 ==========================================================================
 TESTCASE 2003
 Description: Register a local service on a lightnode (partner 4)
@@ -1582,6 +1581,20 @@ Consumer 0: OnMessage:
   ChannelId  = DEFAULT_CHANNEL
   Message    = <?xml version="1.0" encoding="utf-8"?><DoseTest.GlobalMessage><Info xml:space="preserve">Global Message</Info></DoseTest.GlobalMessage>
 
+
+==========================================================================
+TESTCASE 2009
+Description: Try to register a limited type on a lightnode (partner 4) using an injection handler. Which should work.
+Expectation: Registration should succeed..
+--------- Setup -----------
+--------- Test  -----------
+Consumer 0: OnRegistered:
+  Type      = DoseTest.LimitedEntity
+  HandlerId = RegisterEntityHandlerInjection-DoseTest.LimitedEntity
+
+Consumer 2: OnInitialInjectionsDone:
+  Type      = DoseTest.LimitedEntity
+  HandlerId = RegisterEntityHandlerInjection-DoseTest.LimitedEntity
 
 ==========================================================================
 TESTCASE 9999

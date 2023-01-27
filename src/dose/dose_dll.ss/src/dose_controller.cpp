@@ -520,6 +520,15 @@ namespace
             throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
         }
 
+        if (DistributionScopeReader::Instance().IsLimited(typeId) && !InjectionKindTable::Instance().IsNone(typeId))
+        {
+            std::wostringstream ostr;
+            ostr << "Limited types cannot have any kind of injection configured. typeId = " << Typesystem::Operations::GetName(typeId)
+                << " InjectionKind = "
+                << InjectionKind::ToString(InjectionKindTable::Instance().GetInjectionKind(typeId));
+            throw Safir::Dob::Typesystem::ConfigurationErrorException(ostr.str(),__WFILE__,__LINE__);
+        }
+
         if (overrideRegistration)
         {
             if (m_isLightNode)
@@ -530,20 +539,15 @@ namespace
                     ostr << "Not allowed to register global types on a light node. typeId = " << Typesystem::Operations::GetName(typeId) << ")";
                     throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
                 }
-                if (isInjectionHandler)
+                if (DistributionScopeReader::Instance().IsLocal(typeId) && !InjectionKindTable::Instance().IsNone(typeId))
                 {
                     std::wostringstream ostr;
-                    ostr << "Not allowed to register injection handlers on a light node. typeId = " << Typesystem::Operations::GetName(typeId) << ")";
-                    throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
+                    ostr << "Local types cannot have any kind of injection configured on a light node. typeId = " << Typesystem::Operations::GetName(typeId)
+                         << " InjectionKind = "
+                         << InjectionKind::ToString(InjectionKindTable::Instance().GetInjectionKind(typeId));
+                    throw Safir::Dob::Typesystem::ConfigurationErrorException(ostr.str(),__WFILE__,__LINE__);
                 }
             }
-            if (isInjectionHandler && DistributionScopeReader::Instance().IsLimited(typeId))
-            {
-                std::wostringstream ostr;
-                ostr << "Not allowed to register injection handlers for limited types. typeId = " << Typesystem::Operations::GetName(typeId) << ")";
-                throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
-            }
-
 
             EntityTypes::Instance().Register(m_connection,
                                              typeId,

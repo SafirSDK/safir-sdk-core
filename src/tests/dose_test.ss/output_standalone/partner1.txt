@@ -2311,6 +2311,12 @@ Expectation: Consumer 0 recieves a global message
 --------- Setup -----------
 --------- Test  -----------
 ==========================================================================
+TESTCASE 2009
+Description: Try to register a limited type on a lightnode (partner 4) using an injection handler. Which should work.
+Expectation: Registration should succeed..
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
 TESTCASE 9999
 Description: Empty Test case
 Expectation: Nothing

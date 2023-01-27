@@ -119,14 +119,6 @@
       <Handler>RegisterEntityHandlerInjection-DoseTest.InjectableEntity</Handler>
       <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
     </DoseTest.Action>
-    <DoseTest.Action>
-      <ActionKind>RegisterEntityHandlerInjection</ActionKind>
-      <Partner>4</Partner>
-      <Consumer>2</Consumer>
-      <TypeId>DoseTest.LimitedEntity</TypeId>
-      <Handler>RegisterEntityHandlerInjection-DoseTest.LimitedEntity</Handler>
-      <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
-    </DoseTest.Action>
 
     <DoseTest.Action>
       <ActionKind>RegisterServiceHandler</ActionKind>
