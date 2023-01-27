@@ -10925,6 +10925,41 @@ public class Test {
             }
         };
 
+        private void Test_ParserExceptions() {
+            String brokenXml = "<?xml version=\"1.0\" encoding=\"utf-8\"?><DotsTest.MemberSequences><Int32WRONGMember><Int32>10</Int32></Int32Member></DotsTest.MemberSequences>";
+            String brokenJson = "{\"_DouType\":\"DotsTest.MemberSequences\",\"Int32WRONGMember\":[10,20]}";
+
+            try {
+                Serialization.toObject(brokenXml);
+                Check(false);
+            }
+            catch (IllegalValueException exc) {
+                Check(exc.getMessage().contains("does not contain a member named"));
+            }
+
+            try {
+                Serialization.toObjectFromJson(brokenJson);
+                Check(false);
+            }
+            catch (IllegalValueException exc) {
+                Check(exc.getMessage().contains("does not contain a member named"));
+            }
+
+            try {
+                Serialization.toObject("");
+                Check(false);
+            }
+            catch (IllegalValueException exc) {
+            }
+
+            try {
+                Serialization.toObjectFromJson("");
+                Check(false);
+            }
+            catch (IllegalValueException exc) {
+            }
+        }
+
 
 
         public void Test_MergeChanges()
@@ -10959,6 +10994,7 @@ public class Test {
             new ObjectSequences_IntoNonEmpty_3();
             new ObjectSequences_IntoNonEmpty_4();
             new ObjectSequences_IntoNonEmpty_5();
+            Test_ParserExceptions();
         }
     }
 

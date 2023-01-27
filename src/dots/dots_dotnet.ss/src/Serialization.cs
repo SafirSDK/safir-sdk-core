@@ -116,7 +116,7 @@ namespace Safir.Dob.Typesystem
             Marshal.FreeHGlobal(sp);
             if (blob == System.IntPtr.Zero)
             {
-                throw new IllegalValueException("Something is wrong with the XML-formated object");
+                LibraryExceptions.Instance.Throw();
             }
             Object obj = ObjectFactory.Instance.CreateObject(blob);
 
@@ -208,7 +208,7 @@ namespace Safir.Dob.Typesystem
             Marshal.FreeHGlobal(sp);
             if (blob == System.IntPtr.Zero)
             {
-                throw new IllegalValueException("Something is wrong with the JSON-formated object");
+                LibraryExceptions.Instance.Throw();
             }
             Object obj = ObjectFactory.Instance.CreateObject(blob);
 

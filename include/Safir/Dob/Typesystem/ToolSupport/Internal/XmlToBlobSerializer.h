@@ -76,6 +76,11 @@ namespace Internal
 
         void operator()(boost::property_tree::ptree& xml, std::vector<char>& blob) const
         {
+            if (xml.empty())
+            {
+                throw ParseError("XmlToBinary serialization error", "Xml is empty", "", 1201);
+            }
+
             //*********************** One day this should be removed: Handle old deprecated XML format ***********************
             if (xml.front().first=="object")
             {

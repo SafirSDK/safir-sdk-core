@@ -10680,6 +10680,30 @@ namespace Misc
         };
 
 
+        private void Test_ParserExceptions() {
+            string brokenXml = "<?xml version=\"1.0\" encoding=\"utf-8\"?><DotsTest.MemberSequences><Int32WRONGMember><Int32>10</Int32></Int32Member></DotsTest.MemberSequences>";
+            string brokenJson = "{\"_DouType\":\"DotsTest.MemberSequences\",\"Int32WRONGMember\":[10,20]}";
+
+            try {
+                Serialization.ToObject(brokenXml);
+                Check(false);
+            }
+            catch (IllegalValueException exc) {
+                Check(exc.Message.Contains("does not contain a member named"));
+            }
+
+            try {
+                Serialization.ToObjectFromJson(brokenJson);
+                Check(false);
+            }
+            catch (IllegalValueException exc) {
+                Check(exc.Message.Contains("does not contain a member named"));
+            }
+
+            CheckThrow<IllegalValueException>(() => Serialization.ToObject(""));
+            CheckThrow<IllegalValueException>(() => Serialization.ToObjectFromJson(""));
+        }
+
 
         public void Test_MergeChanges()
         {
@@ -10713,6 +10737,7 @@ namespace Misc
             new ObjectSequences_IntoNonEmpty_3();
             new ObjectSequences_IntoNonEmpty_4();
             new ObjectSequences_IntoNonEmpty_5();
+            Test_ParserExceptions();
         }
 
     private static string Mapping(Safir.Dob.Typesystem.CollectionType ct)

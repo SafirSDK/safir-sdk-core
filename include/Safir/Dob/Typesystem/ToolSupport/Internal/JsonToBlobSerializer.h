@@ -76,11 +76,18 @@ namespace Internal
 
         void operator()(const char* json, std::vector<char>& blob) const
         {
-            boost::property_tree::ptree pt;
-            boost::iostreams::array_source src(json, strlen(json));
-            boost::iostreams::stream<boost::iostreams::array_source> stream(src);
-            boost::property_tree::json_parser::read_json(stream, pt);
-            this->operator ()(pt, blob);
+            try
+            {
+                boost::property_tree::ptree pt;
+                boost::iostreams::array_source src(json, strlen(json));
+                boost::iostreams::stream<boost::iostreams::array_source> stream(src);
+                boost::property_tree::json_parser::read_json(stream, pt);
+                this->operator ()(pt, blob);
+            }
+            catch (const boost::property_tree::json_parser_error& exc)
+            {
+                throw ParseError("JsonToBinary serialization error", std::string("Failed to parse json object: ") + exc.what(), "", 1201);
+            }
         }
 
         void operator()(const boost::property_tree::ptree& json, std::vector<char>& blob) const

@@ -42,7 +42,7 @@ public class Serialization {
         byte[] bin=toBinary(obj);
         return toXml(bin);
     }
-    
+
     /**
      * Convert a binary serialization to XML.
      *
@@ -54,7 +54,7 @@ public class Serialization {
         blob.put(binary);
         return toXml(blob);
     }
-    
+
     /**
      * Convert a blob to XML.
      *
@@ -81,7 +81,7 @@ public class Serialization {
      * It uses the ObjectFactory to accomplish this.
      *
      * @param xml The xml to convert.
-     * @return A boost::shared_ptr to the new object
+     * @return the new object
      * @exception IllegalValueException If the type represented by the serialization isn't found
      *                                   in the ObjectFactory.
      */
@@ -90,16 +90,16 @@ public class Serialization {
         java.nio.ByteBuffer deleter [] = new java.nio.ByteBuffer[1];
         Kernel.XmlToBlob(blob, deleter, xml);
         if (blob[0] == null) {
-            throw new IllegalValueException("Something is wrong with the XML-formated object");
+            LibraryExceptions.getInstance().throwFundamental();
         }
         com.saabgroup.safir.dob.typesystem.Object obj = ObjectFactory.getInstance().createObject(blob[0]);
         Kernel.InvokeDeleter(deleter[0],blob[0]);
         return obj;
     }
 
-    
 
-    
+
+
 
     /**
      * Serialize an object to JSON.
@@ -113,7 +113,7 @@ public class Serialization {
         byte[] bin=toBinary(obj);
         return toJson(bin);
     }
-    
+
     /**
      * Convert a binary serialization to JSON.
      *
@@ -152,7 +152,7 @@ public class Serialization {
      * It uses the ObjectFactory to accomplish this.
      *
      * @param json The json to convert.
-     * @return A boost::shared_ptr to the new object
+     * @return the new object
      * @exception IllegalValueException If the type represented by the serialization isn't found
      *                                   in the ObjectFactory.
      */
@@ -161,28 +161,22 @@ public class Serialization {
         java.nio.ByteBuffer deleter [] = new java.nio.ByteBuffer[1];
         Kernel.JsonToBlob(blob, deleter, json);
         if (blob[0] == null) {
-            throw new IllegalValueException("Something is wrong with the JSON-formated object");
+            LibraryExceptions.getInstance().throwFundamental();
         }
         com.saabgroup.safir.dob.typesystem.Object obj = ObjectFactory.getInstance().createObject(blob[0]);
         Kernel.InvokeDeleter(deleter[0],blob[0]);
         return obj;
     }
 
-    
-
     /**
      * Serialize an object to binary form.
-     *
-     * The serialization is put into a variable of type BinarySerialization, which
-     * is of type std::vector<char>. If you need to get hold of a "raw" C-pointer to the data
-     * use &binary[0]. See Effective STL Item 16 for more info.
      *
      * @param obj The object to serialize.
      * @return The object serialized to binary form.
      * @exception IllegalValueException - There is something wrong with the object.
      */
     public static byte[] toBinary(com.saabgroup.safir.dob.typesystem.Object obj){
-        
+
         long handle = Kernel.CreateBlobWriter(obj.getTypeId());
         obj.writeToBlob (handle);
         int size = Kernel.CalculateBlobSize (handle);

@@ -47,6 +47,8 @@ namespace ts = Safir::Dob::Typesystem::ToolSupport;
 
 namespace
 {
+    const DotsC_Int64 IllegalValueExceptionId = -3653935143986901894LL;
+
     void DeleteBytePointer(char* & ptr)
     {
         delete [] ptr;
@@ -742,17 +744,26 @@ void DotsC_XmlToBlob(char* & blobDest,
 {
     Init();
     deleter=DeleteBytePointer;
+    blobDest=NULL;
     std::vector<char> blob;
-    ts::XmlToBinary(RepositoryKeeper::GetRepository(), xmlSource, blob);
-    if (!blob.empty())
+    try
     {
-        blobDest=new char[blob.size()];
-        memcpy(blobDest, &blob[0], blob.size());
+        ts::XmlToBinary(RepositoryKeeper::GetRepository(), xmlSource, blob);
+        if (!blob.empty())
+        {
+            blobDest=new char[blob.size()];
+            memcpy(blobDest, &blob[0], blob.size());
+        }
+        else
+        {
+            DotsC_SetException(IllegalValueExceptionId, "Xml parsing failed unexpectedly");
+        }
     }
-    else
+    catch (const ts::ParseError& exc)
     {
-        blobDest=NULL;
+        DotsC_SetException(IllegalValueExceptionId, exc.what());
     }
+
 }
 
 void DotsC_BlobToJson(char * const jsonDest,
@@ -777,16 +788,25 @@ void DotsC_JsonToBlob(char * & blobDest,
 {
     Init();
     deleter=DeleteBytePointer;
+    blobDest=NULL;
     std::vector<char> blob;
-    ts::JsonToBinary(RepositoryKeeper::GetRepository(), jsonSource, blob);
-    if (!blob.empty())
+
+    try
     {
-        blobDest=new char[blob.size()];
-        memcpy(blobDest, &blob[0], blob.size());
+        ts::JsonToBinary(RepositoryKeeper::GetRepository(), jsonSource, blob);
+        if (!blob.empty())
+        {
+            blobDest=new char[blob.size()];
+            memcpy(blobDest, &blob[0], blob.size());
+        }
+        else
+        {
+            DotsC_SetException(IllegalValueExceptionId, "JSON parsing failed unexpectedly");
+        }
     }
-    else
+    catch (const ts::ParseError& exc)
     {
-        blobDest=NULL;
+        DotsC_SetException(IllegalValueExceptionId, exc.what());
     }
 }
 

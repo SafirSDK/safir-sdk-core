@@ -59,7 +59,7 @@ public class ObjectFactory {
      * appropriate callback to create the object.
      *
      * @param blob [in] - The blob to deserialize.
-     * @return A boost::shared_ptr to the object.
+     * @return The object.
      * @exception IllegalValueException If the type represented by the blob isn't found
      *                                   in the ObjectFactory.
     */
@@ -69,8 +69,8 @@ public class ObjectFactory {
             throw new SoftwareViolationException("blob ByteBuffer passed to createObject must be direct");
         }
 
-        long typeId = BlobOperations.getTypeId(blob);                        
-        
+        long typeId = BlobOperations.getTypeId(blob);
+
         try {
             long handle=Kernel.CreateBlobReader(blob);
             Class<?> theClass = getClass(typeId);
@@ -128,7 +128,7 @@ public class ObjectFactory {
         }
         catch (ClassNotFoundException e) {
             throw new ClassNotFoundException(e.toString()
-                                             + "\nLoaded jars are '" 
+                                             + "\nLoaded jars are '"
                                              + m_classLoader.getJarList() + "'");
         }
 
@@ -149,15 +149,15 @@ public class ObjectFactory {
                 }
                 catch (java.net.MalformedURLException e)
                 {
-                    throw new SoftwareViolationException("Failed to load jar file " 
-                                                         + file 
-                                                         + ". Got exception " 
+                    throw new SoftwareViolationException("Failed to load jar file "
+                                                         + file
+                                                         + ". Got exception "
                                                          + e.toString());
-            
+
                 }
             }
         }
-        
+
         public String getJarList() {
             java.lang.StringBuilder builder = new java.lang.StringBuilder();
             boolean first = false;

@@ -25,11 +25,11 @@
 #include <Safir/Dob/Typesystem/Operations.h>
 #include <Safir/Dob/Typesystem/Utilities.h>
 #include <Safir/Dob/Typesystem/Object.h>
+#include <Safir/Dob/Typesystem/LibraryExceptions.h>
 #include <Safir/Dob/Typesystem/ObjectFactory.h>
 #include <Safir/Dob/Typesystem/Internal/Kernel.h>
 #include <Safir/Dob/Typesystem/Internal/InternalOperations.h>
 #include <Safir/Dob/Typesystem/Exceptions.h>
-
 
 namespace Safir
 {
@@ -123,7 +123,6 @@ namespace Typesystem
     {
         char * blob;
         std::string xml8 = Utilities::ToUtf8(xml);
-
         std::vector<char> xml8v(xml8.size() +1);
         xml8v.assign(xml8.begin(),xml8.end());
         xml8v.push_back(0); //null termination
@@ -131,7 +130,7 @@ namespace Typesystem
         DotsC_XmlToBlob(blob, deleter, &xml8v[0]);
         if (blob == NULL)
         {
-            throw IllegalValueException(L"Something is wrong with the XML-formated object", __WFILE__,__LINE__);
+            LibraryExceptions::Instance().Throw();
         }
         ObjectPtr p = ObjectFactory::Instance().CreateObject(blob);
         deleter(blob);
@@ -151,7 +150,7 @@ namespace Typesystem
         DotsC_JsonToBlob(blob, deleter, &json8v[0]);
         if (blob == NULL)
         {
-            throw IllegalValueException(L"Something is wrong with the JSON-formated object", __WFILE__,__LINE__);
+            LibraryExceptions::Instance().Throw();
         }
         ObjectPtr p = ObjectFactory::Instance().CreateObject(blob);
         deleter(blob);

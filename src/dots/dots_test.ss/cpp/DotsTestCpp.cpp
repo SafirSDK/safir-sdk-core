@@ -23,6 +23,8 @@
 ******************************************************************************/
 
 #include <iostream>
+#include <boost/thread.hpp>
+#include <boost/algorithm/string.hpp>
 #include <Safir/Dob/Typesystem/Internal/Kernel.h>
 #include <Safir/Dob/Typesystem/ObjectFactory.h>
 #include <Safir/Dob/Typesystem/ToolSupport/Serialization.h>
@@ -11838,4 +11840,21 @@ BOOST_AUTO_TEST_CASE(DictionaryReflection)
         BOOST_CHECK_EQUAL(container->IsNull(), true);
     }
 
+}
+
+BOOST_AUTO_TEST_CASE(ParserExceptions)
+{
+    const std::wstring brokenXml = L"<?xml version=\"1.0\" encoding=\"utf-8\"?><DotsTest.MemberSequences><Int32WRONGMember><Int32>10</Int32></Int32Member></DotsTest.MemberSequences>";
+    const std::wstring brokenJson = L"{\"_DouType\":\"DotsTest.MemberSequences\",\"Int32WRONGMember\":[10,20]}";
+
+    BOOST_CHECK_EXCEPTION(ts::Serialization::ToObject(brokenXml),
+                          ts::IllegalValueException,
+                          [](const auto& exc) {return boost::algorithm::contains(exc.what(),"does not contain a member named");});
+    BOOST_CHECK_EXCEPTION(ts::Serialization::ToObjectFromJson(brokenJson),
+                          ts::IllegalValueException,
+                          [](const auto& exc) {return boost::algorithm::contains(exc.what(),"does not contain a member named");});
+    BOOST_CHECK_THROW(ts::Serialization::ToObject(L""),
+                      ts::IllegalValueException);
+    BOOST_CHECK_THROW(ts::Serialization::ToObjectFromJson(L""),
+                      ts::IllegalValueException);
 }
