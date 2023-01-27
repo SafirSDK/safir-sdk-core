@@ -97,14 +97,14 @@ class SafirSdkCoreConan(ConanFile):
             self.copy("*.exe", src="bin", dst="bin", root_package="ninja")
 
     def requirements(self):
-        self.requires("sentry-breakpad/0.5.0")
+        self.requires("sentry-breakpad/0.5.3")
         self.requires("websocketpp/0.8.2")
-        self.requires("rapidjson/cci.20211112")
-        protobuf_version = "3.21.4"
+        self.requires("rapidjson/cci.20220822")
+        protobuf_version = "3.21.9"
         if self.settings.os == "Windows":
-            self.requires("qt/5.15.5")
-            self.requires("ninja/1.11.0")
-            self.requires("boost/1.79.0")
+            self.requires("qt/5.15.8")
+            self.requires("ninja/1.11.1")
+            self.requires("boost/1.81.0")
 
             #Visual Studio 2015 does not work with later protobuf than this
             if self.settings.compiler.version == 14:
