@@ -12,7 +12,8 @@ if ((DEFINED ENV{SAFIR_SKIP_SLOW_TESTS}) AND ($ENV{SAFIR_SKIP_SLOW_TESTS}))
     dope_file_backend_test
     dope_none_backend_test
     restart_nodes
-    light_nodes_test
+    light_nodes_clear_state
+    light_nodes_keep_state
     StopHandler_test
     tracer_backdoor
     websocket_component_test
