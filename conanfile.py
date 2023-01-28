@@ -35,6 +35,7 @@ class SafirSdkCoreConan(ConanFile):
                        "boost:without_mpi": True,
                        "boost:without_json": True,
                        "boost:without_type_erasure": True,
+                       "boost:without_url": True,
                        "boost:bzip2": False,
                        "boost:zlib": False,
 
