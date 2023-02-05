@@ -87,12 +87,13 @@ namespace
 
     RequestHandler::RequestHandler(boost::asio::io_service& ioService,
                                    Distribution&            distribution)
-        : m_ioService(ioService),
-          m_strand(ioService),
-          m_distribution(distribution),
-          m_communication(distribution.GetCommunication()),
-          m_dataTypeIdentifier(LlufId_Generate64("RequestHandler")),
-          m_communicationVirtualConnectionId(LlufId_Generate64("CommunicationVirtualConnectionId"))
+        : m_ioService(ioService)
+        , m_strand(ioService)
+        , m_stopped(false)
+        , m_distribution(distribution)
+        , m_communication(distribution.GetCommunication())
+        , m_dataTypeIdentifier(LlufId_Generate64("RequestHandler"))
+        , m_communicationVirtualConnectionId(LlufId_Generate64("CommunicationVirtualConnectionId"))
     {
         m_responseHandler.reset(new ResponseHandler(m_strand,
                             distribution,
@@ -202,12 +203,16 @@ namespace
 
     void RequestHandler::Stop()
     {
-        m_strand.post([this]()
-                      {
-                          // Clear structures that hold timers
-                          m_outReqTimers.clear();
-                          m_pendingRequests.clear();
-                      });
+        //const bool was_stopped = m_stopped.exchange(true);
+        //if (!was_stopped)
+        {
+            m_strand.post([this]()
+            {
+                // Clear structures that hold timers
+                m_outReqTimers.clear();
+                m_pendingRequests.clear();
+            });
+        }
     }
 
     void RequestHandler::DispatchRequests(const ConnectionPtr& connection)
@@ -493,7 +498,7 @@ namespace
         {
             // This is the lambda that is executed when a request in the sender node has expired.
 
-            if (error == boost::asio::error::operation_aborted)
+            if (m_stopped || error == boost::asio::error::operation_aborted)
             {
                 return;
             }
@@ -836,7 +841,7 @@ namespace
         {
             // This is the lambda that is executed when a pending external request has expired
 
-            if (error == boost::asio::error::operation_aborted)
+            if (m_stopped || error == boost::asio::error::operation_aborted)
             {
                 // The timer has been canceled.
                 return;

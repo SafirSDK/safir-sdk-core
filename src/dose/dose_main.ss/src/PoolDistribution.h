@@ -24,6 +24,8 @@
 #pragma once
 #include <queue>
 #include <functional>
+#include <memory>
+#include <string>
 #include <boost/lexical_cast.hpp>
 #include <boost/asio.hpp>
 #include <boost/chrono.hpp>
@@ -47,10 +49,12 @@ namespace Internal
     ///
     /// Handles a single pool distribution to a specific node. This class is only to be used by
     /// PoolDistributor. To start a new pool distribution to a node, use PoolDistributor.AddPoolDistribution.
+    /// NOTE: All public methods in this class must be called from the strand passed in the ctor.
     ///
     template <class DistributionT>
     class PoolDistribution
-            :public Safir::Dob::EntitySubscriber
+            :public std::enable_shared_from_this< PoolDistribution<DistributionT> >
+            ,public Safir::Dob::EntitySubscriber
             ,public Safir::Dob::RegistrationSubscriber
             ,public Safir::Dob::Dispatcher
     {
@@ -67,22 +71,40 @@ namespace Internal
             ,m_timer(strand.context())
             ,m_distribution(distribution)
             ,m_completionHandler(completionHandler)
-            ,m_running(false)
         {
+        }
+
+        ~PoolDistribution()
+        {
+            if (m_dobConnection.IsOpen())
+            {
+                m_dobConnection.Close();
+            }
         }
 
         void Run() SAFIR_GCC_VISIBILITY_BUG_WORKAROUND
         {
-            m_strand.dispatch([this]
+            // Always called from m_strand
+            if (m_started || HasBeenCancelled())
             {
-                if (m_running)
+                lllog(5)<<"PoolHandler: Pooldistribution never started since it is already running or has been cancelled, nodeId="<<m_nodeId<<std::endl;
+                return;
+            }
+
+            m_started=true;
+
+            // post a new job for this pd
+            m_strand.post([self = this->shared_from_this()]
+            {
+                lllog(5)<<"PoolHandler: Start PoolDistribution to "<<self->m_nodeId<<std::endl;
+                if (self->HasBeenCancelled())
+                {
+                    // This PD has been cancelled
                     return;
+                }
 
-                lllog(5)<<"PoolHandler: Start PoolDistribution to "<<m_nodeId<<std::endl;
-
-                m_running=true;
                 //collect all connections on this node
-                Connections::Instance().ForEachConnection([this](const Connection& connection)
+                Connections::Instance().ForEachConnection([self](const Connection& connection)
                 {
                     //auto notDoseConnection=std::string(connection.NameWithoutCounter()).find(";dose_main;")==std::string::npos;
                     const auto localContext=Safir::Dob::NodeParameters::LocalContexts(connection.Id().m_contextId);
@@ -91,27 +113,34 @@ namespace Internal
 
                     if (!detachedConnection && !localContext && connectionOnThisNode)
                     {
-                        m_connections.push(DistributionData(connect_message_tag,
+                        self->m_connections.push(DistributionData(connect_message_tag,
                                                             connection.Id(),
                                                             connection.NameWithoutCounter(),
                                                             connection.Counter()));
                     }
                 });
 
-                SendConnections(); //will trigger the sequence SendConnections -> SendStates() -> SendPdComplete()
+                self->SendConnections(); //will trigger the sequence SendConnections -> SendStates() -> SendPdComplete()
             });
         }
 
-        void Cancel()
+        void Cancel(const std::function<void()>& cancelled = []{})
         {
-            m_strand.dispatch([this]
-            {
-                m_running=false;
-            });
+            lllog(1) << "PoolHandler: Cancel called for PoolDistribution to " << m_nodeId << std::endl;
+            m_onCancelled = cancelled;
+            m_cancelled = true;
         }
 
         int64_t NodeId() const {return m_nodeId;}
         int64_t NodeType() const {return m_nodeType;}
+        bool IsStarted() const {return m_started;}
+
+        std::wstring ToString() const
+        {
+            std::wostringstream os;
+            os << L"PD to node: " << m_nodeId << std::boolalpha << L", started: " << m_started << L", cancelled: " << m_cancelled;
+            return os.str();
+        }
 
     private:
         static const int64_t PoolDistributionInfoDataTypeId=-3446507522969672286; //DoseMain.PoolDistributionInfo
@@ -129,11 +158,24 @@ namespace Internal
         std::queue<DistributionData> m_connections;
         Safir::Dob::Connection m_dobConnection;
 
-        bool m_running;
+        bool m_started = false;
+        bool m_cancelled = false;
+        std::function<void()> m_onCancelled;
+
+        inline bool HasBeenCancelled()
+        {
+            if (m_cancelled)
+            {
+                lllog(5)<<L"PoolHandler: PoolDistribution to " << m_nodeId << L" has now been cancelled" <<std::endl;
+                m_onCancelled();
+                return true;
+            }
+            return false;
+        }
 
         void SendConnections()
         {
-            if (!m_running)
+            if (HasBeenCancelled())
             {
                 return;
             }
@@ -155,27 +197,30 @@ namespace Internal
 
             if (m_connections.empty())
             {
-                m_strand.post([this]
+                m_strand.post([self = this->shared_from_this()]
                 {
-                    SendStates(0);
+                    self->SendStates(0);
                 });
             }
             else
             {
-                SetTimer([this]{SendConnections();});
+                SetTimer([self = this->shared_from_this()]{self->SendConnections();});
             }
         }
 
         void SendStates(int context)
         {
-            if (!m_running)
+            if (HasBeenCancelled())
             {
                 return;
             }
 
             if (context>=Safir::Dob::NodeParameters::NumberOfContexts())
             {
-                m_strand.post([this]{SendPdComplete();});
+                m_strand.post([self = this->shared_from_this()]
+                {
+                    self->SendPdComplete();
+                });
                 return;
             }
 
@@ -184,7 +229,8 @@ namespace Internal
                 m_dobConnection.Close();
             }
 
-            m_dobConnection.Open(L"dose_pool_distribution", L"pool_distribution"+boost::lexical_cast<std::wstring>(m_distribution.GetNodeId()), context, NULL, this);
+            auto instancePart = L"pd_"+boost::lexical_cast<std::wstring>(m_distribution.GetNodeId()) + L"_" + boost::lexical_cast<std::wstring>(m_nodeId);
+            m_dobConnection.Open(L"dose_pool_distribution", instancePart, context, NULL, this);
 
             m_dobConnection.SubscribeRegistration(Entity::ClassTypeId,
                                                   Typesystem::HandlerId::ALL_HANDLERS,
@@ -219,7 +265,7 @@ namespace Internal
 
         void DispatchStates(const Safir::Dob::Internal::ConnectionPtr& conPtr, int context) SAFIR_GCC_VISIBILITY_BUG_WORKAROUND
         {
-            if (!m_running)
+            if (HasBeenCancelled())
             {
                 return;
             }
@@ -249,17 +295,17 @@ namespace Internal
 
             if (overflow)
             {
-                SetTimer([this,conPtr,context]{DispatchStates(conPtr, context);});
+                SetTimer([self = this->shared_from_this(), conPtr,context]{self->DispatchStates(conPtr, context);});
             }
             else //continue with next context
             {
-                m_strand.dispatch([this,context]{SendStates(context+1);});
+                m_strand.dispatch([self = this->shared_from_this(), context]{self->SendStates(context+1);});
             }
         }
 
         void SendPdComplete()
         {
-            if (!m_running)
+            if (HasBeenCancelled())
             {
                 return;
             }
@@ -276,13 +322,13 @@ namespace Internal
             }
             else
             {
-                SetTimer([this]{SendPdComplete();});
+                SetTimer([self = this->shared_from_this()]{self->SendPdComplete();});
             }
         }
 
         bool ProcessEntityState(const SubscriptionPtr& subscription)
         {
-            if (!m_running)
+            if (HasBeenCancelled())
             {
                 return true;
             }
@@ -315,14 +361,6 @@ namespace Internal
                         {
                             success=false;
                         }
-                        else
-                        {
-                            lllog(5)<<L"PoolHandler: Send state"<<currentState.Image()<<std::endl;
-                        }
-                    }
-                    else
-                    {
-                        lllog(5)<<L"PoolHandler: Dont send state"<<currentState.Image()<<std::endl;
                     }
                 }
                 else // sender and receiver are normal nodes
@@ -410,20 +448,26 @@ namespace Internal
 
         bool CanSend() const
         {
-            static const size_t threshold=m_distribution.GetCommunication().SendQueueCapacity(m_nodeType)/2;
+            // static const size_t threshold=m_distribution.GetCommunication().SendQueueCapacity(m_nodeType)/2;
+            static const size_t threshold=m_distribution.GetCommunication().SendQueueCapacity(m_nodeType);
             return m_distribution.GetCommunication().NumberOfQueuedMessages(m_nodeType)<threshold;
         }
 
         void SetTimer(const std::function<void()>& completionHandler)
         {
-            if (!m_running)
+            if (HasBeenCancelled())
+            {
                 return;
+            }
 
             m_timer.expires_from_now(boost::chrono::milliseconds(10));
-            m_timer.async_wait(m_strand.wrap([this,completionHandler](const boost::system::error_code&)
+            m_timer.async_wait(m_strand.wrap([self = this->shared_from_this(), completionHandler](const boost::system::error_code&)
             {
-                if (m_running)
-                    completionHandler();
+                if (self->HasBeenCancelled())
+                {
+                    return;
+                }
+                completionHandler();
             }));
         }
 

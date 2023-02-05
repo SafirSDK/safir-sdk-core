@@ -445,6 +445,8 @@ void ControlApp::Start()
                         << "CTRL: Error launching dose_main: " << error);
     }
 
+    lllog(1) << "Launched dose_main with pid " << m_doseMain->id() << std::endl;
+
     DoseMainOutputReadLoop();
 
     m_doseMainCmdSender->Start();
@@ -574,7 +576,7 @@ std::pair<Com::ResolvedAddress,Com::ResolvedAddress> ControlApp::ResolveAddresse
 void ControlApp::StopDoseMain()
 {
     // Set up a timer that will kill dose_main the hard way if it doesn't stop within a reasonable time.
-    m_terminationTimer.expires_after(boost::chrono::seconds(10));
+    m_terminationTimer.expires_after(boost::chrono::seconds(30));
 
     m_terminationTimer.async_wait([this]
                                   (const boost::system::error_code& error)

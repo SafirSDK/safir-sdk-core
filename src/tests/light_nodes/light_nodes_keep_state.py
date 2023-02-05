@@ -550,6 +550,12 @@ async def main(args):
     await one_normal_one_light_detach_reattach_light_big_pool(args)
     await two_normal_two_light_detach_reattach_light(args)
 
+    #---- Some code for repeating a test
+    # for i in range(5):
+    #     log("--- Round " + str(i+1))
+    #     await one_normal_one_light_detach_reattach_light_big_pool(args)
+    #     if len(failed_tests) > 0: return
+
 if __name__ == "__main__":
     asyncio.run(main(parse_arguments()))
     for failed in failed_tests:

@@ -66,9 +66,10 @@ namespace Internal
         PoolDistributionHandler(const PoolDistributionHandler&) = delete;
         const PoolDistributionHandler& operator=(const PoolDistributionHandler&) = delete;
 
-        //make sure that start is not called before persistent data is ready
+        // Make sure that start is not called before persistent data is ready
         void Start()
         {
+            lllog(5) << "PoolHandler: Start called on PooDistributionHandler" << std::endl;
             m_strand.dispatch([this]
             {
                 if (!m_running) //dont call start if its already started
@@ -79,48 +80,65 @@ namespace Internal
             });
         }
 
-        void Stop()
+        void Stop(const std::function<void()>& onPoolDistributionsCancelled)
         {
-            m_strand.post([this]
-            {
+            lllog(5) << "PoolHandler: Stop called on PooDistributionHandler" << std::endl;
+            m_strand.post([this, onPoolDistributionsCancelled]
+            {                
                 m_running=false;
-                if (!m_pendingPoolDistributions.empty())
+                if (!m_pendingPoolDistributions.empty() && m_pendingPoolDistributions.front()->IsStarted())
                 {
-                    m_pendingPoolDistributions.front()->Cancel();
+                    // The first pd in list is currently running.
+                    auto i = 0;
+                    for (auto& pendingPd : m_pendingPoolDistributions)
+                    {
+                        if (i++ == 0)
+                        {
+                            pendingPd->Cancel(onPoolDistributionsCancelled);
+                        }
+                        else
+                        {
+                            pendingPd->Cancel();
+                        }
+                    }
+                    m_pendingPoolDistributions.clear();
+                }
+                else
+                {
+                    for (auto& pendingPd : m_pendingPoolDistributions)
+                    {
+                        pendingPd->Cancel();
+                    }
+                    m_pendingPoolDistributions.clear();
+                    onPoolDistributionsCancelled();
                 }
             });
         }
 
-        //Called when a new pdRequest is received. Will result in a pd to the node with specified id.
+        // Called when a new pdRequest is received. Will result in a pd to the node with specified id.
+        // This method can be called before Start, but no PD will begin to run before Start is called.
         void AddPoolDistribution(int64_t nodeId, int64_t nodeTypeId) SAFIR_GCC_VISIBILITY_BUG_WORKAROUND
         {
-            m_strand.dispatch([this, nodeId, nodeTypeId]
+            lllog(5) << "PoolHandler: AddPoolDistribution to " << nodeId << std::endl;
+            m_strand.post([this, nodeId, nodeTypeId]
             {
-                auto pd=PoolDistributionHandler<DistributionT, PoolDistributionT>::PdPtr
-                    (new PoolDistributionT(nodeId,
-                                           nodeTypeId,
-                                           m_strand,
-                                           m_distribution,
-                                           [this](int64_t nodeId)
-                {
-                    if (!m_pendingPoolDistributions.empty() && m_pendingPoolDistributions.front()->NodeId()==nodeId)
-                    {
-                        //since this code is called from the m_pendingPoolDistributions.front object, we must
-                        //post before we can pop_front
-                        m_strand.post([this]
-                        {
-                            m_pendingPoolDistributions.pop_front();
-                            StartNextPoolDistribution();
-                        });
-                    }
-                }));
+                auto pd = std::make_shared<PoolDistributionT> (nodeId,
+                                                               nodeTypeId,
+                                                               m_strand,
+                                                               m_distribution,
+                                                               [this](int64_t nodeId)
+                                    {
+                                        lllog(5) << "PoolHandler: PD completionHandler nodeId=" << nodeId << std::endl;
+                                        if (!m_pendingPoolDistributions.empty() && m_pendingPoolDistributions.front()->NodeId()==nodeId)
+                                        {
+                                            m_pendingPoolDistributions.pop_front();
+                                            StartNextPoolDistribution();
+                                        }
+                                    });
 
                 m_pendingPoolDistributions.push_back(std::move(pd));
 
-                if (m_pendingPoolDistributions.size()==1) //if queue was empty we have to manually start the pd. If not the completion handler of the ongoing pd will start the next one.
-                {
-                    StartNextPoolDistribution();
-                }
+                StartNextPoolDistribution();
             });
         }
 
@@ -128,21 +146,17 @@ namespace Internal
         {
             m_strand.post([this, nodeId]
             {
-                if (m_pendingPoolDistributions.empty())
-                {
-                    return;
-                }
-
-                auto it=++m_pendingPoolDistributions.begin(); //start at second element since the first one is probably already running
-
-                for (; it!=m_pendingPoolDistributions.end(); ++it)
+                for (auto it = std::begin(m_pendingPoolDistributions); it != std::end(m_pendingPoolDistributions); ++it)
                 {
                     if ((*it)->NodeId()==nodeId)
                     {
+                        lllog(5) << "PoolHandler: RemovePoolDistribution to nodeId=" << nodeId << std::endl;
+                        (*it)->Cancel();
                         m_pendingPoolDistributions.erase(it);
                         break; //finished
                     }
                 }
+                StartNextPoolDistribution();
             });
         }
 
@@ -153,13 +167,16 @@ namespace Internal
         DistributionT& m_distribution;
         bool m_running;
 
-        typedef std::unique_ptr< PoolDistributionT > PdPtr;
+        typedef std::shared_ptr<PoolDistributionT> PdPtr;
         std::deque<PdPtr> m_pendingPoolDistributions;
+
 
         void StartNextPoolDistribution()
         {
+            // This is always called from m_strand
             if (m_running && !m_pendingPoolDistributions.empty())
             {
+                lllog(5) << "PoolHandler: StartNextPoolDistribution to " << m_pendingPoolDistributions.front()->NodeId() << std::endl;
                 m_pendingPoolDistributions.front()->Run();
             }
         }

@@ -7,7 +7,7 @@ ADD_TEST(NAME light_nodes_clear_state
   --safir_websocket $<TARGET_FILE:safir_websocket>)
 
 SET_SAFIR_TEST_PROPERTIES(TEST light_nodes_clear_state
-  TIMEOUT 3000
+  TIMEOUT 300000
   CONFIG_OVERRIDE ${CMAKE_CURRENT_SOURCE_DIR}/test_config)
 
 

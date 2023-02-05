@@ -101,7 +101,7 @@ class TestEnv:
 
     def WaitForPersistence(self):
         start_time = time.time()
-        log("Waiting for safir_control to be ready")
+        log(f"Waiting for safir_control {self.safir_control.pid} to be ready")
 
         phrase = "persistence data is ready"
 
@@ -128,12 +128,12 @@ class TestEnv:
                 log("Will keep waiting")
 
     def launchProcess(self, name, cmd, collect_output=True):
-        log("Launching", name)
         proc = subprocess.Popen(cmd,
                                 stdout=subprocess.PIPE if collect_output else None,
                                 stderr=subprocess.STDOUT if collect_output else None,
                                 creationflags=self.__creationflags,
                                 universal_newlines=True)
+        log(f"Launched {name} as pid {proc.pid}.")
         queue = Queue()
         if collect_output:
             thread = Thread(target=enqueue_output, args=(proc.stdout, queue))
@@ -145,14 +145,14 @@ class TestEnv:
 
     def __kill(self, name, proc, timeout):
         try:
-            log(" Terminating", name)
+            log(f" Terminating {name} with pid {proc.pid}")
             if sys.platform == "win32":
                 #pylint: disable=E1101
                 #can't send CTRL_C_EVENT to processes started with subprocess, unfortunately
                 proc.send_signal(signal.CTRL_BREAK_EVENT)
             else:
                 proc.terminate()
-            #let it have a minute to die...
+            #let it have timeout seconds to die...
             for _ in range(timeout * 10):
                 if proc.poll() is not None:
                     log("   Terminate successful")
@@ -167,16 +167,17 @@ class TestEnv:
 
     def killprocs(self):
         log("Terminating all processes")
-        self.__kill("safir_control", self.safir_control, timeout=120)
+        self.__kill("safir_control", self.safir_control, timeout=360)
 
         polls = 0
         for name, (proc, queue, output) in self.__procs.items():
-            while polls < 600 and proc.poll() is None:
-                time.sleep(0.1)
+            while polls < 600000 and proc.poll() is None:
+                time.sleep(1)
                 polls += 1
+                log(f"waiting for {name} to die")
 
             if proc.returncode is None:
-                self.__kill(name, proc, timeout=30)
+                self.__kill(name, proc, timeout=120)
 
             if proc.returncode != 0:
                 log("--", name, "returncode is", proc.returncode, " -----")

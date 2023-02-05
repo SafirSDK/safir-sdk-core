@@ -105,7 +105,7 @@ namespace Utilities
     void ProcessMonitorImpl::HandleEvent(const std::shared_ptr<Process>& process,
                                          const boost::system::error_code& error)
     {
-        if (error)
+        if (error || m_stopped)
         {
             return;
         }

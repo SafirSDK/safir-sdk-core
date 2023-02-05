@@ -153,6 +153,7 @@ public:
 
     int64_t NodeId() const {return m_nodeId;}
     int64_t NodeType() const {return m_nodeTypeId;}
+    std::wstring ToString() const {return L"";}
 
     int64_t m_nodeId;
     int64_t m_nodeTypeId;

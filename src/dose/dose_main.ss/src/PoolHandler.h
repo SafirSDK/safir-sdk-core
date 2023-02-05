@@ -52,7 +52,7 @@ namespace Internal
                     const std::function<void(const std::string& str)>& logStatus);
 
         void Start();
-        void Stop();
+        void Stop(const std::function<void()>& onPoolDistributionsCancelled);
 
         // The pool handler must be aware of connections/disconnections arriving from external nodes
         // in order to properly handle the "waiting states".

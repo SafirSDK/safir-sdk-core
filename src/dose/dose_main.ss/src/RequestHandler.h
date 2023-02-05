@@ -138,6 +138,8 @@ namespace Internal
 
         boost::asio::io_service&            m_ioService;
         boost::asio::io_service::strand     m_strand;
+        std::atomic<bool>                   m_stopped;
+
         Distribution&                       m_distribution;
         Com::Communication&                 m_communication;
         const int64_t                       m_dataTypeIdentifier;

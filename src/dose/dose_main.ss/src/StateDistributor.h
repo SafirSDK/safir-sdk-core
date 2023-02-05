@@ -85,13 +85,10 @@ namespace Internal
 
         void Stop()
         {
-            m_strand.dispatch([this]
+            for (auto context=0; context<Safir::Dob::NodeParameters::NumberOfContexts(); ++context)
             {
-                for (auto context=0; context<Safir::Dob::NodeParameters::NumberOfContexts(); ++context)
-                {
-                    m_connections[static_cast<size_t>(context)]->connection.Close();
-                }
-            });
+                m_connections[static_cast<size_t>(context)]->connection.Close();
+            }
         }
 
         void CheckForPending(Typesystem::TypeId typeId)

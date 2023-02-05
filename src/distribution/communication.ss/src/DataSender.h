@@ -127,7 +127,7 @@ namespace Com
         {
             boost::asio::post(m_strand, [this]
             {
-                lllog(9)<<m_logPrefix.c_str()<<"Start DataSender"<<std::endl;
+                lllog(5)<<m_logPrefix.c_str()<<"Start DataSender"<<std::endl;
                 m_lastSentMultiReceiverSeqNo = 0;
                 m_lastAckRequestMultiReceiver = 0;
 
@@ -152,7 +152,7 @@ namespace Com
         {
             boost::asio::post(m_strand, [this]
             {
-                lllog(9)<<m_logPrefix.c_str()<<"Stop DataSender"<<std::endl;
+                lllog(5)<<m_logPrefix.c_str()<<"Stop DataSender"<<std::endl;
                 m_running=false;
                 if (m_deliveryGuarantee==Acked)
                 {

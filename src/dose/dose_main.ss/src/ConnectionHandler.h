@@ -96,6 +96,8 @@ namespace Internal
         void HandleDisconnect(const ConnectionPtr& connection);
         void HandleConnectionOutEvent(const ConnectionPtr& connection, std::vector<ConnectionPtr>& deadConnections);
 
+        void StopConnectionThread();
+
         static inline std::pair<Safir::Utilities::Internal::SharedConstCharArray, size_t> ConnectDataPtr(const Safir::Dob::Internal::ConnectionId& id,
                                                                                         const char* nameWithoutCounter,
                                                                                         Typesystem::Int32 counter)

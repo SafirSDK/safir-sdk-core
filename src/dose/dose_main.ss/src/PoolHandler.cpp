@@ -179,41 +179,38 @@ namespace Internal
         });
     }
 
-    void PoolHandler::Stop()
+    void PoolHandler::Stop(const std::function<void()>& onPoolDistributionsCancelled)
     {
-        m_strand.post([this]
+        if (!m_running)
         {
-            if (!m_running)
-            {
-                return;
-            }
-            m_running = false;
+            return;
+        }
+        m_running = false;
 
-            if (m_nodeInfoHandler != nullptr)
-            {
-                m_nodeInfoHandler->Stop();
-            }
+        if (m_nodeInfoHandler != nullptr)
+        {
+            m_nodeInfoHandler->Stop();
+        }
 
-            m_endStatesTimer.cancel();
-            m_waitingStatesSanityTimer.cancel();
+        m_endStatesTimer.cancel();
+        m_waitingStatesSanityTimer.cancel();
 
-            if (m_persistHandler != nullptr)
-            {
-                m_persistHandler->Stop();
-            }
+        if (m_persistHandler != nullptr)
+        {
+            m_persistHandler->Stop();
+        }
 
-            //We are stopping so we dont care about receiving pool distributions anymore
-            m_poolDistributionRequests.Stop();
+        //We are stopping so we dont care about receiving pool distributions anymore
+        m_poolDistributionRequests.Stop();
 
-            //Stop ongoing pool distributions
-            m_poolDistributor.Stop();
+        //stop distributing states to others
+        for (auto vt = m_stateDistributors.cbegin(); vt != m_stateDistributors.cend(); ++vt)
+        {
+            vt->second->Stop();
+        }
 
-            //stop distributing states to others
-            for (auto vt = m_stateDistributors.cbegin(); vt != m_stateDistributors.cend(); ++vt)
-            {
-                vt->second->Stop();
-            }
-        });
+        //Stop ongoing pool distributions
+        m_poolDistributor.Stop(onPoolDistributionsCancelled);
     }
 
     void PoolHandler::SetDetached(bool detach)
@@ -281,8 +278,7 @@ namespace Internal
                 }
                 else
                 {
-                    ENSURE (false, <<
-                            "PoolHandler::HandleConnect Expected a registration state or entity state!");
+                    ENSURE (false, <<"PoolHandler::HandleConnect Expected a registration state or entity state!");
                 }
             });
         });
@@ -374,13 +370,14 @@ namespace Internal
         Safir::Dob::Internal::EndStates::Instance().HandleTimeout();
 
         m_endStatesTimer.expires_from_now(boost::chrono::seconds(60));
-        m_endStatesTimer.async_wait(m_strand.wrap([this](const boost::system::error_code& error)
+
+        m_endStatesTimer.async_wait([this](const boost::system::error_code& error)
         {
-            if (!error)
+            if (!error && m_running)
             {
                 RunEndStatesTimer();
             }
-        }));
+        });
     }
 
     void PoolHandler::RunWaitingStatesSanityCheckTimer()
@@ -389,13 +386,13 @@ namespace Internal
 
         /* We run this timer fairly infrequently, to reduce false warnings */
         m_waitingStatesSanityTimer.expires_from_now(boost::chrono::minutes(6));
-        m_waitingStatesSanityTimer.async_wait(m_strand.wrap([this](const boost::system::error_code& error)
+        m_waitingStatesSanityTimer.async_wait([this](const boost::system::error_code& error)
         {
-            if (!error)
+            if (!error && m_running)
             {
                 RunWaitingStatesSanityCheckTimer();
             }
-        }));
+        });
     }
 
     void PoolHandler::HandleStatesWaitingForRegistration(const DistributionData& registrationState)

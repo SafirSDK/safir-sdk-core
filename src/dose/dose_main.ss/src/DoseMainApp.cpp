@@ -199,7 +199,7 @@ namespace Internal
                 m_lockMonitor->Stop();
             }
 
-            if (m_lockMonitor != nullptr)
+            if (m_connectionHandler != nullptr)
             {
                 m_connectionHandler->Stop();
             }

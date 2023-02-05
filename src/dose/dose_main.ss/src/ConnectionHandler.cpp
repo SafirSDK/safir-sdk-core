@@ -159,19 +159,28 @@ namespace
     {
         m_strand.post([this]
         {
-            m_started = false;
-            m_poolHandler.Stop();
+            m_started = false;            
             m_processInfoHandler.Stop();
+            m_poolHandler.Stop([this]{StopConnectionThread();});
+        });
+    }
 
+    void ConnectionHandler::StopConnectionThread()
+    {
+        boost::asio::dispatch(m_strand, [this]
+        {
             if (m_connectionThread.get_id() != boost::thread::id())
             {
+                lllog(5) << "ConnectionHandler: Stopping connection thread" << std::endl;
                 //set the interrupt state so that when we generate the spurious signal
                 //the thread will be interrupted at the interruption_point.
                 m_connectionThread.interrupt();
                 Connections::Instance().GenerateSpuriousConnectOrOutSignal();
 
+                lllog(5) << "ConnectionHandler: Joining connection thread" << std::endl;
                 m_connectionThread.join();
                 m_connectionThread = boost::thread();
+                lllog(5) << "ConnectionHandler: Connection thread succesfully stopped." << std::endl;
             }
         });
     }

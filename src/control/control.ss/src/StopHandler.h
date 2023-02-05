@@ -315,17 +315,18 @@ namespace Control
             // Wait a short while and then send the notification again, just in case.
 
             m_stopTimer.expires_after(boost::chrono::milliseconds(300));
-            m_stopTimer.async_wait(Safir::Utilities::Internal::WrapInStrand(m_strand, [this](const boost::system::error_code& error)
-                                                 {
-                                                     if (error == boost::asio::error::operation_aborted)
-                                                     {
-                                                         return;
-                                                     }
-                                                     SendStopNotification();
 
-                                                     // The notification has been sent a second time, now we stop this node
-                                                     m_stopSafirNodeCb();
-                                                 }));
+            m_stopTimer.async_wait(boost::asio::bind_executor(m_strand, [this](const boost::system::error_code& error)
+            {
+                if (error == boost::asio::error::operation_aborted)
+                {
+                    return;
+                }
+                SendStopNotification();
+
+                // The notification has been sent a second time, now we stop this node
+                m_stopSafirNodeCb();
+            }));
         }
 
         void HandleLocalNodeStop(CommandAction cmdAction)
@@ -378,14 +379,15 @@ namespace Control
             }
 
             m_sendTimer.expires_after(boost::chrono::seconds(0));
-            m_sendTimer.async_wait(Safir::Utilities::Internal::WrapInStrand(m_strand, [this](const boost::system::error_code& error)
-                                                 {
-                                                     if (error == boost::asio::error::operation_aborted)
-                                                     {
-                                                         return;
-                                                     }
-                                                     SendAllOutstanding();
-                                                 }));
+
+            m_sendTimer.async_wait(boost::asio::bind_executor(m_strand, [this](const boost::system::error_code& error)
+            {
+                if (error == boost::asio::error::operation_aborted)
+                {
+                    return;
+                }
+                SendAllOutstanding();
+            }));
         }
 
         void StopExternalNode(Control::CommandAction cmdAction, int64_t cmdNodeId, int64_t toNodeId)
@@ -487,14 +489,15 @@ namespace Control
                 }
 
                 m_sendTimer.expires_after(boost::chrono::seconds(1));
-                m_sendTimer.async_wait(Safir::Utilities::Internal::WrapInStrand(m_strand, [this](const boost::system::error_code& error)
-                                                     {
-                                                         if (error == boost::asio::error::operation_aborted)
-                                                         {
-                                                             return;
-                                                         }
-                                                         SendAllOutstanding();
-                                                     }));
+
+                m_sendTimer.async_wait(boost::asio::bind_executor(m_strand, [this](const boost::system::error_code& error)
+                {
+                    if (error == boost::asio::error::operation_aborted)
+                    {
+                        return;
+                    }
+                    SendAllOutstanding();
+                }));
             }
             else if (m_localNodeStopInProgress)
             {

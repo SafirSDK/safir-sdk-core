@@ -136,3 +136,5 @@ conan_imports_manifest.txt
 conanbuildinfo.cmake
 
 test_output/
+
+.gdb_history
