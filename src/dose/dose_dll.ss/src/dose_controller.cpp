@@ -342,6 +342,8 @@ namespace
 
     void Controller::Disconnect()
     {
+        lllout << "Controller::Disconnect() " << m_connectionName.c_str() << std::endl;
+        lllout << "Controller::Disconnect() - m_isConnected: " << std::boolalpha << m_isConnected << std::endl;
         if (m_isConnected)
         {
             // The app must not get any callbacks after a disconnect
@@ -361,6 +363,7 @@ namespace
         {
             lllout << "Controller::Disconnect() - Disconnecting " << m_connectionName.c_str() << std::endl;
             Connections::Instance().Disconnect(m_connection);
+            lllout << "Controller::Disconnect() - Disconnected " << m_connectionName.c_str() << std::endl;
         }
         m_isConnected = false;
 
@@ -371,6 +374,7 @@ namespace
         m_messageQueueInOverflowState = false;
 
         //delete m_dispatcher's resources
+        lllout << "Controller::Disconnect() - Clear dispatcher " << m_connectionName.c_str() << std::endl;
         m_dispatcher.Clear();
 
         //shared queues are deleted by dose_main.
@@ -379,8 +383,10 @@ namespace
 
         // Drop any reference corresponding to a saved consumer (will be saved for
         // garbage collected languages only).
+        lllout << "Controller::Disconnect() - Drop consumer references " << m_connectionName.c_str() << std::endl;
         m_consumerReferences.DropAllReferences([this](const ConsumerId& consumer, const long refCounter)
                                                  {m_dispatcher.InvokeDropReferenceCb(consumer,refCounter);});
+        lllout << "Controller::Disconnect() - Done"<<std::endl;
     }
 
     const char*
@@ -1475,6 +1481,7 @@ namespace
     //---------------------------------------
     void Controller::Dispatch()
     {
+        lllog(9) << "Entering Dispatch" << std::endl;
         m_exitDispatch=false;
 
         if (!m_isConnected)
@@ -1553,6 +1560,7 @@ namespace
                 m_connection->SetStopOrderHandled();
             }
         }
+        lllog(9) << "Leaving Dispatch. m_exitDispatch = " << std::boolalpha << m_exitDispatch << std::endl;
     }
 
     void Controller::ExitDispatch()

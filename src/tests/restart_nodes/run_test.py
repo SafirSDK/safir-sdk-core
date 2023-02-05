@@ -99,11 +99,18 @@ def main():
                         return 1
 
                 for i in range(1, args.clients + 1):
+                    print(f"Terminating instance {i}")
                     env[i].killprocs()
+                    syslog_output = env[i].Syslog()
+                    if len(syslog_output) != 0:
+                        print("Unexpected syslog output:\n" + syslog_output)
+                        return 1
                     if not env[i].ReturnCodesOk():
                         print("Some process failed")
-                        return
+                        return 1
+            print("exiting normally")
         finally:
+            print ("cleaning up")
             for i, e in env.items():
                 e.killprocs()
 

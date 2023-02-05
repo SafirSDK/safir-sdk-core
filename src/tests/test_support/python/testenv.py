@@ -171,8 +171,8 @@ class TestEnv:
 
         polls = 0
         for name, (proc, queue, output) in self.__procs.items():
-            while polls < 600000 and proc.poll() is None:
-                time.sleep(1)
+            while polls < 240 and proc.poll() is None:
+                time.sleep(0.5) #2 minutes of polling in total
                 polls += 1
                 log(f"waiting for {name} to die")
 

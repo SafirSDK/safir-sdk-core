@@ -102,6 +102,7 @@ namespace Internal
                     // This PD has been cancelled
                     return;
                 }
+                lllog(5)<<"PoolHandler: Start PoolDistribution to "<<self->m_nodeId<<std::endl;
 
                 //collect all connections on this node
                 Connections::Instance().ForEachConnection([self](const Connection& connection)
@@ -166,7 +167,7 @@ namespace Internal
         {
             if (m_cancelled)
             {
-                lllog(5)<<L"PoolHandler: PoolDistribution to " << m_nodeId << L" has now been cancelled" <<std::endl;
+                lllog(5)<<L"PoolHandler: PoolDistribution to " << m_nodeId << L" has been cancelled" <<std::endl;
                 m_onCancelled();
                 return true;
             }
@@ -338,6 +339,7 @@ namespace Internal
             if (subscription->GetState()->IsDetached())
             {
                 // never send detached states in PD
+                lllog(5)<<L"PoolHandler: PoolDistribution - Dont send detached entity state."<<std::endl;
                 return true;
             }
 
@@ -413,6 +415,7 @@ namespace Internal
             if (subscription->GetState()->IsDetached())
             {
                 // never send detached states in PD
+                lllog(5)<<L"PoolHandler: PoolDistribution - Dont send detached registration state."<<std::endl;
                 return true;
             }
 

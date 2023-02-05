@@ -85,6 +85,10 @@ namespace Internal
 
         void Stop()
         {
+#if (!defined NDEBUG && !defined SAFIR_DISABLE_CHECK_STRAND)
+            ENSURE(m_strand.running_in_this_thread(),
+                   << "StateDistributor::Stop must be called from within the correct strand!");
+#endif
             for (auto context=0; context<Safir::Dob::NodeParameters::NumberOfContexts(); ++context)
             {
                 m_connections[static_cast<size_t>(context)]->connection.Close();

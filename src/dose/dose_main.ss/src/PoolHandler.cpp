@@ -181,6 +181,9 @@ namespace Internal
 
     void PoolHandler::Stop(const std::function<void()>& onPoolDistributionsCancelled)
     {
+#if (!defined NDEBUG && !defined SAFIR_DISABLE_CHECK_STRAND)
+        ENSURE(m_strand.running_in_this_thread(), << "PoolHandler::Stop must be called from within the correct strand!");
+#endif
         if (!m_running)
         {
             return;

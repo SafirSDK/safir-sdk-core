@@ -227,6 +227,7 @@ namespace Internal
             }
 
             m_work.reset();
+            lllog(1) << "DoseMainApp::Stop finished" << std::endl;
         }
     }
 
