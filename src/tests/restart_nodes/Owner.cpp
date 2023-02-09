@@ -23,6 +23,7 @@
 ******************************************************************************/
 #include <iostream>
 #include <Safir/Dob/Connection.h>
+#include <Safir/Dob/ErrorResponse.h>
 #include <Safir/Utilities/AsioDispatcher.h>
 #include <DoseTest/SynchronousPermanentEntity.h>
 #include <boost/lexical_cast.hpp>
@@ -33,10 +34,73 @@
   #pragma warning (disable : 4244 4267 4100)
 #endif
 
-#include <boost/thread.hpp>
+#include <boost/program_options.hpp>
+
 #if defined _MSC_VER
   #pragma warning (pop)
 #endif
+
+std::wostream& operator<<(std::wostream& out, const boost::program_options::options_description& opt)
+{
+    std::ostringstream ostr;
+    ostr << opt;
+    return out << ostr.str().c_str();
+}
+
+class ProgramOptions
+{
+public:
+    ProgramOptions(int argc, char* argv[])
+        : parseOk(false)
+    {
+        using namespace boost::program_options;
+        options_description options("Options");
+        options.add_options()
+            ("help,h", "show help message")
+            ("update-period",
+                 value<int>(&period)->default_value(10, ""),
+                 "Entity update period, in ms")
+            ("update",
+             "Update entities");
+
+        variables_map vm;
+
+        try
+        {
+            store(command_line_parser(argc, argv).
+                  options(options).run(), vm);
+            notify(vm);
+        }
+        catch (const std::exception& exc)
+        {
+            std::wcerr << "Error parsing command line: " << exc.what() << "\n" << std::endl;
+            ShowHelp(options);
+            return;
+        }
+
+        if (vm.count("help"))
+        {
+            ShowHelp(options);
+            return;
+        }
+
+        update = vm.count("update") != 0;
+
+        parseOk = true;
+    }
+    bool parseOk;
+    int period;
+    bool update;
+private:
+    static void ShowHelp(const boost::program_options::options_description& desc)
+    {
+        std::wcout << std::boolalpha
+                   << "Usage: control [OPTIONS]\n"
+                   << desc
+                   << std::endl;
+    }
+
+};
 
 
 class StopHandler :
@@ -51,13 +115,17 @@ private:
 
 };
 
+
+
 class EntityOwner
     : public Safir::Dob::EntityHandlerInjection
 {
 public:
-    explicit EntityOwner(boost::asio::io_service& ioService)
+    EntityOwner(boost::asio::io_service& ioService, const bool update, const int period)
         : m_timer(ioService)
-        , m_handler(Safir::Dob::Typesystem::InstanceId::GenerateRandom().GetRawValue())
+        , m_handler()
+        , m_update(update)
+        , m_period(period)
     {
         using namespace Safir::Dob;
         m_connection.Attach();
@@ -67,18 +135,21 @@ public:
                                                     InstanceIdPolicy::HandlerDecidesInstanceId,
                                                     this);
 
-        for (int i = 0; i < 20; ++i)
+        if (m_update)
         {
-            auto ent = DoseTest::SynchronousPermanentEntity::Create();
-            ent->Info() = L"test" + boost::lexical_cast<std::wstring>(Typesystem::InstanceId::GenerateRandom().GetRawValue());
-            m_instances.push_back(Typesystem::InstanceId::GenerateRandom());
-            m_connection.SetChanges(ent,
-                                    m_instances.back(),
-                                    m_handler);
-        }
+            for (int i = 0; i < 20; ++i)
+            {
+                auto ent = DoseTest::SynchronousPermanentEntity::Create();
+                ent->Info() = L"test" + boost::lexical_cast<std::wstring>(Typesystem::InstanceId::GenerateRandom().GetRawValue());
+                m_instances.push_back(Typesystem::InstanceId::GenerateRandom());
+                m_connection.SetChanges(ent,
+                                        m_instances.back(),
+                                        m_handler);
+            }
 
-        m_timer.expires_from_now(boost::posix_time::seconds(1));
-        m_timer.async_wait([this](const boost::system::error_code&){Update();});
+            m_timer.expires_from_now(boost::posix_time::seconds(1));
+            m_timer.async_wait([this](const boost::system::error_code&){Update();});
+        }
     }
 
 private:
@@ -94,7 +165,7 @@ private:
                                     m_handler);
         }
 
-        m_timer.expires_from_now(boost::posix_time::milliseconds(10));
+        m_timer.expires_from_now(boost::posix_time::milliseconds(m_period));
         m_timer.async_wait([this](const boost::system::error_code&){Update();});
     }
 
@@ -102,13 +173,16 @@ private:
         const Safir::Dob::Typesystem::HandlerId&) override {}
 
     void OnCreateRequest(const Safir::Dob::EntityRequestProxy /*entityRequestProxy*/,
-        Safir::Dob::ResponseSenderPtr        /*responseSender*/) override {}
+                         Safir::Dob::ResponseSenderPtr        responseSender) override
+    {responseSender->Send(m_errorResponse);}
 
     void OnUpdateRequest(const Safir::Dob::EntityRequestProxy /*entityRequestProxy*/,
-        Safir::Dob::ResponseSenderPtr        /*responseSender*/) override {}
+        Safir::Dob::ResponseSenderPtr        responseSender) override
+    {responseSender->Send(m_errorResponse);}
 
     void OnDeleteRequest(const Safir::Dob::EntityRequestProxy /*entityRequestProxy*/,
-        Safir::Dob::ResponseSenderPtr        /*responseSender*/) override {}
+        Safir::Dob::ResponseSenderPtr        responseSender) override
+    {responseSender->Send(m_errorResponse);}
 
     void OnInjectedNewEntity(const Safir::Dob::InjectedEntityProxy /*injectedEntityProxy*/) override
     {
@@ -125,20 +199,22 @@ private:
     std::vector<Safir::Dob::Typesystem::InstanceId> m_instances;
 
     const Safir::Dob::Typesystem::HandlerId m_handler;
+    const bool m_update;
+    const int m_period;
+    Safir::Dob::ErrorResponsePtr m_errorResponse = Safir::Dob::ErrorResponse::CreateErrorResponse(L"Blahonga",L"");
 };
 
-int main()
+int main(int argc, char * argv[])
 {
-#ifdef _WIN32
-    // On Windows we seem to have starvation issues, so we reduce priority then.
-    if(!SetPriorityClass(GetCurrentProcess(), BELOW_NORMAL_PRIORITY_CLASS))
+    const ProgramOptions options(argc, argv);
+    if (!options.parseOk)
     {
-        std::wcerr << "Failed to set priority on windows" << std::endl;
+        return 1;
     }
-#endif
+
     try
     {
-        const std::wstring nameCommonPart = L"C++";
+        const std::wstring nameCommonPart = L"Owner";
         const std::wstring nameInstancePart = Safir::Dob::Typesystem::InstanceId::GenerateRandom().ToString();
 
         boost::asio::io_service ioService;
@@ -154,7 +230,7 @@ int main()
                         0, // Context
                         &stopHandler,
                         &dispatcher);
-        EntityOwner owner(ioService);
+        EntityOwner owner(ioService, options.update, options.period);
         boost::asio::io_service::work keepRunning(ioService);
         ioService.run();
 

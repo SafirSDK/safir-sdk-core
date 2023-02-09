@@ -27,6 +27,7 @@ import subprocess, sys, time, signal
 import syslog_server
 from threading import Thread
 from queue import Queue, Empty
+import datetime
 
 
 def enqueue_output(out, queue):
@@ -39,9 +40,8 @@ def enqueue_output(out, queue):
 
 
 def log(*args, **kwargs):
-    print(*args, **kwargs)
+    print(datetime.datetime.now().isoformat(), ":", *args, **kwargs)
     sys.stdout.flush()
-
 
 class TestEnvStopper:
     def __init__(self, env):
