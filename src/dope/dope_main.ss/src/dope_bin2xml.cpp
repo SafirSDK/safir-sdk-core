@@ -45,6 +45,7 @@
 #include <Safir/Dob/Typesystem/Serialization.h>
 #include <Safir/Logging/Log.h>
 #include <boost/filesystem.hpp>
+#include <boost/filesystem/fstream.hpp>
 #include <boost/scoped_array.hpp>
 #include <iostream>
 #include <clocale>

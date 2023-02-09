@@ -24,6 +24,7 @@
 
 #include "TestCaseReader.h"
 #include <boost/filesystem.hpp>
+#include <boost/filesystem/fstream.hpp>
 #include <Safir/Dob/Typesystem/Serialization.h>
 #include <Safir/Dob/Typesystem/Utilities.h>
 #include <iostream>

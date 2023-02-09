@@ -9,7 +9,9 @@ if ($ENV{SAFIR_SKIP_SLOW_TESTS})
     LamportClocks
     dope_file_backend_test
     dope_none_backend_test
-    restart_nodes
+    restart_nodes_with_entity_updates_only
+    restart_nodes_with_entity_requests_only
+    restart_nodes_with_entity_requests_and_updates
     StopHandler_test
     tracer_backdoor
     websocket_component_test
