@@ -87,22 +87,18 @@ class MainWindow;
 }
 
 class MainWindow : public QMainWindow,
-        public Safir::Dob::StopHandler,
-        public Safir::Dob::Dispatcher,
-        public Safir::Dob::EntitySubscriber,
-        public Safir::Dob::Requestor
+                   public Safir::Dob::StopHandler,
+                   public Safir::Dob::Dispatcher,
+                   public Safir::Dob::EntitySubscriber,
+                   public Safir::Dob::Requestor
 {
     Q_OBJECT
-
-
-
 
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
     bool eventFilter(QObject* o, QEvent* e) override;
-
 
     //Dob stuff
     void OnDoDispatch() override;
@@ -112,29 +108,8 @@ public:
     void OnDeletedEntity(const Safir::Dob::EntityProxy entityProxy, const bool /*del*/) override;
     void OnResponse(const Safir::Dob::ResponseProxy responseProxy) override;
     void OnNotRequestOverflow() override;
-
 public slots:
     void customMenuRequested(QPoint pos);
-
-
-private:
-    Ui::MainWindow *ui;
-    Safir::Dob::Connection m_dobConnection;
-    QEvent::Type m_dispatchEvent;
-    DobConnector m_conThread;
-    NodeTableModel* m_nodeTableModel;
-    QLabel *m_dobConnectionLabel;
-
-    QMenu *m_NodeContextmenu;
-
-    void SetupContextMenu();
-    void HandleStatusEntity(const Safir::Control::StatusPtr status);
-    void SendRequestOnAllNodes(Safir::Control::Operation::Enumeration operation);
-    void SendRequestOnSpecificNode(Safir::Control::Operation::Enumeration operation, int64_t nodeId);
-    void SendRequest(Safir::Control::CommandPtr command);
-    bool DisplayConfirmationDialog(QString index, Safir::Control::Operation::Enumeration operation);
-    bool DisplayConfirmationDialog(Safir::Control::Operation::Enumeration operation);
-
 
 private slots:
     void OnConnected();
@@ -145,7 +120,29 @@ private slots:
     void on_pushButton_StopAll_clicked();
     void on_pushButton_RebootAll_clicked();
     void on_pushButton_ShutdownAll_clicked();
-    void nodeListSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected);
+    void UpdateStatus();
+
+private:
+    void SetupContextMenu();
+    void HandleStatusEntity(const Safir::Control::StatusPtr status);
+    void SendRequestOnAllNodes(Safir::Control::Operation::Enumeration operation);
+    void SendRequestOnSpecificNode(Safir::Control::Operation::Enumeration operation, int64_t nodeId);
+    void SendRequest(Safir::Control::CommandPtr command);
+    bool DisplayConfirmationDialog(QString index, Safir::Control::Operation::Enumeration operation);
+    bool DisplayConfirmationDialog(Safir::Control::Operation::Enumeration operation);
+
+    Ui::MainWindow *ui;
+    Safir::Dob::Connection m_dobConnection;
+    QEvent::Type m_dispatchEvent;
+    DobConnector m_conThread;
+    NodeTableModel* m_nodeTableModel;
+    QLabel *m_dobConnectionLabel;
+
+    QMenu *m_NodeContextmenu = nullptr;
+    bool m_statusRunning = false;
+    QString m_incarnationId = tr("UNKNOWN");
+    const bool m_rebootConfigured;
+    const bool m_shutdownConfigured;
 };
 
 

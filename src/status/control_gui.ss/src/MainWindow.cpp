@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2015 (http://safirsdkcore.com)
+* Copyright Saab AB, 2015, 2023 (http://safirsdkcore.com)
 *
 * Created by: Samuel Waxin / samuel.waxin@consoden.se
 *
@@ -41,7 +41,9 @@
 #endif
 
 
+#include <Safir/Utilities/Internal/Expansion.h>
 #include "Safir/Control/Operation.h"
+#include "Safir/Control/Parameters.h"
 #include "Safir/Dob/OverflowException.h"
 
 #ifdef _MSC_VER
@@ -50,21 +52,21 @@
 #pragma warning (disable: 4355) 
 #endif
 MainWindow::MainWindow(QWidget *parent)
-    :QMainWindow(parent)
-    ,ui(new Ui::MainWindow)
-    ,m_dispatchEvent(static_cast<QEvent::Type>(QEvent::User+666))
-    ,m_conThread(&m_dobConnection, this, this, 0)
+    : QMainWindow(parent)
+    , ui(new Ui::MainWindow)
+    , m_dispatchEvent(static_cast<QEvent::Type>(QEvent::User+666))
+    , m_conThread(&m_dobConnection, this, this, 0)
+    , m_rebootConfigured(!Safir::Control::Parameters::RebootCommand().empty())
+    , m_shutdownConfigured(!Safir::Control::Parameters::ShutdownCommand().empty())
 {
     installEventFilter(this);
     ui->setupUi(this);
 
-    ui->pushButton_RebootNode->setEnabled(false);
-    ui->pushButton_ShutdownNode->setEnabled(false);
-    ui->pushButton_StopNode->setEnabled(false);
-
-    m_dobConnectionLabel = new QLabel("Not connected");
+    m_dobConnectionLabel = new QLabel(this);
     statusBar()->setStyleSheet("QStatusBar::item { border: 0px solid black }; ");
     statusBar()->addPermanentWidget(m_dobConnectionLabel);
+
+    UpdateStatus();
 
     QObject::connect(&m_conThread, SIGNAL(ConnectedToDob()), this, SLOT(OnConnected()));
     m_conThread.start();
@@ -81,7 +83,6 @@ MainWindow::~MainWindow()
 void MainWindow::OnConnected()
 {
     m_dobConnection.Open(L"safir_control_gui", QTime::currentTime().toString("hh:mm:ss.zzz").toStdWString(), 0, this, this);
-    m_dobConnectionLabel->setText("Connected | System Incarnation Id: UNKNOWN");
 
     QSortFilterProxyModel *proxyModel = new QSortFilterProxyModel(this);
     m_nodeTableModel = new NodeTableModel(this);
@@ -94,17 +95,17 @@ void MainWindow::OnConnected()
     ui->nodeTableView->setColumnHidden(NODE_ID_COLUMN, false);
 
     connect(ui->nodeTableView->selectionModel(),
-            SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
+            &QItemSelectionModel::selectionChanged,
             this,
-            SLOT(nodeListSelectionChanged(const QItemSelection &, const QItemSelection &)));
-
+            &MainWindow::UpdateStatus);
 
     SetupContextMenu();
 
+    UpdateStatus();
 
-    m_dobConnection.SubscribeEntity(
-                 Safir::Dob::Typesystem::EntityId(Safir::Control::Status::ClassTypeId, Safir::Dob::Typesystem::InstanceId(0)), true, true, this );
-
+    m_dobConnection.SubscribeEntity(Safir::Dob::Typesystem::EntityId(Safir::Control::Status::ClassTypeId,
+                                                                     Safir::Dob::Typesystem::InstanceId(0)),
+                                    true, true, this );
 }
 
 void MainWindow::SetupContextMenu()
@@ -136,6 +137,8 @@ void MainWindow::SetupContextMenu()
     m_NodeContextmenu->addAction(reboot);
     m_NodeContextmenu->addAction(shutdown);
 
+    reboot->setEnabled(m_rebootConfigured);
+    shutdown->setEnabled(m_shutdownConfigured);
 }
 
 
@@ -197,9 +200,9 @@ void MainWindow::OnDeletedEntity(const Safir::Dob::EntityProxy entityProxy, cons
 {
     switch (entityProxy.GetTypeId()) {
     case Safir::Control::Status::ClassTypeId:
-    {
-        HandleStatusEntity(Safir::Control::Status::Create());
-    }
+        {
+            HandleStatusEntity(nullptr);
+        }
         break;
     default:
         break;
@@ -222,24 +225,28 @@ void MainWindow::OnNotRequestOverflow()
 {
 }
 
+
 //------------------------------------------------------------
 // Own DOB stuff
 //------------------------------------------------------------
 void MainWindow::HandleStatusEntity(const Safir::Control::StatusPtr status)
 {
-    if (status->SystemIncarnation().IsNull())
+
+    m_statusRunning = status != nullptr;;
+    UpdateStatus();
+
+    if (status != nullptr && !status->NodeId().IsNull())
     {
-        m_dobConnectionLabel->setText("Connected | System Incarnation Id: UNKNOWN");
+        m_nodeTableModel->setOwnNodeId(status->NodeId());
+    }
+    
+    if (status != nullptr && !status->SystemIncarnation().IsNull())
+    {
+        m_incarnationId = QString::number(status->SystemIncarnation().GetVal());
     }
     else
     {
-        QString message = QString("Connected | System Incarnation Id: %1").arg(status->SystemIncarnation().GetVal());
-        m_dobConnectionLabel->setText(message);
-    }
-
-    if (!status->NodeId().IsNull())
-    {
-        m_nodeTableModel->setOwnNodeId(status->NodeId());
+        m_incarnationId = tr("UNKNOWN");
     }
 }
 
@@ -386,13 +393,64 @@ void MainWindow::on_pushButton_ShutdownAll_clicked()
     }
 }
 
-void MainWindow::nodeListSelectionChanged(const QItemSelection & selected, const QItemSelection & /*deselected*/)
+void MainWindow::UpdateStatus()
 {
-    bool enabled = (selected.size() != 0);
+    QString status;
 
-    ui->pushButton_RebootNode->setEnabled(enabled);
-    ui->pushButton_ShutdownNode->setEnabled(enabled);
-    ui->pushButton_StopNode->setEnabled(enabled);
+    if (m_dobConnection.IsOpen() && m_statusRunning)
+    {
+        status += tr("Connected");
+    }
+    else if (m_dobConnection.IsOpen())
+    {
+        status += tr("safir_status not running");
+    }
+    else
+    {
+        status += tr("Not connected");
+    }
+
+    status += tr(" | System Incarnation Id: %1").arg(m_incarnationId);
+    status += tr(" | SAFIR_INSTANCE: %1").arg(Safir::Utilities::Internal::Expansion::GetSafirInstance());
+
+    m_dobConnectionLabel->setText(status);
+
+    bool somethingSelected = m_dobConnection.IsOpen() && ui->nodeTableView->selectionModel()->hasSelection();
+
+    ui->pushButton_RebootNode->setEnabled(somethingSelected && m_statusRunning && m_rebootConfigured);
+    ui->pushButton_ShutdownNode->setEnabled(somethingSelected && m_statusRunning && m_shutdownConfigured);
+    ui->pushButton_StopNode->setEnabled(somethingSelected && m_statusRunning);
+
+    ui->pushButton_RebootAll->setEnabled(m_statusRunning && m_rebootConfigured);
+    ui->pushButton_ShutdownAll->setEnabled(m_statusRunning && m_shutdownConfigured);
+    ui->pushButton_StopAll->setEnabled(m_statusRunning);
+
+    if (!m_rebootConfigured)
+    {
+        ui->pushButton_RebootAll->setToolTip(tr("Safir.Control.Parameters.RebootCommand is not set"));
+        ui->pushButton_RebootNode->setToolTip(tr("Safir.Control.Parameters.RebootCommand is not set"));
+    }
+
+    if (!m_shutdownConfigured)
+    {
+        ui->pushButton_ShutdownAll->setToolTip(tr("Safir.Control.Parameters.ShutdownCommand is not set"));
+        ui->pushButton_ShutdownNode->setToolTip(tr("Safir.Control.Parameters.ShutdownCommand is not set"));
+    }
+
+    if (!m_statusRunning)
+    {
+        ui->pushButton_StopNode->setToolTip(tr("safir_status is not running"));
+        ui->pushButton_RebootNode->setToolTip(tr("safir_status is not running"));
+        ui->pushButton_ShutdownNode->setToolTip(tr("safir_status is not running"));
+        ui->pushButton_StopAll->setToolTip(tr("safir_status is not running"));
+        ui->pushButton_RebootAll->setToolTip(tr("safir_status is not running"));
+        ui->pushButton_ShutdownAll->setToolTip(tr("safir_status is not running"));
+    }
+
+    if (m_NodeContextmenu != nullptr)
+    {
+        m_NodeContextmenu->setEnabled(m_statusRunning);
+    }
 }
 
 void MainWindow::on_actionExit_triggered()

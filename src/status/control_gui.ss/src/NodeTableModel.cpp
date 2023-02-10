@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2015 (http://safirsdkcore.com)
+* Copyright Saab AB, 2015, 2022-2023 (http://safirsdkcore.com)
 *
 * Created by: Samuel Waxin / samuel.waxin@consoden.se
 *
@@ -117,9 +117,10 @@ QVariant NodeTableModel::data(const QModelIndex &index, int role) const
             return QString::fromStdWString(nodeInfo->IpAddress().GetVal());
             break;
         case TYPE_COLUMN:
-            return m_lightNodeTypeNames.find(nodeInfo->NodeType().GetVal()) != m_lightNodeTypeNames.end() ?
-                        QString::fromStdWString(nodeInfo->NodeType().GetVal()) + QString::fromStdWString(L"  \u24c1 ") :
-                        QString::fromStdWString(nodeInfo->NodeType().GetVal());
+            {
+                const bool isLight = m_lightNodeTypeNames.find(nodeInfo->NodeType().GetVal()) != m_lightNodeTypeNames.end();
+                return QString::fromStdWString(nodeInfo->NodeType().GetVal()) + QString::fromStdWString(isLight ? L"  \u24c1 " : L"");
+            }
             break;
         case NODE_ID_COLUMN:
             return (qint64) m_nodeInfos.at(index.row()).GetInstanceId().GetRawValue();
@@ -152,6 +153,25 @@ QVariant NodeTableModel::data(const QModelIndex &index, int role) const
         }
 
         return QVariant();
+    }
+    if (role == Qt::ToolTipRole && index.column() == TYPE_COLUMN)
+    {
+        Safir::Dob::NodeInfoPtr nodeInfo;
+
+        try
+        {
+            nodeInfo = std::dynamic_pointer_cast<Safir::Dob::NodeInfo>(m_dobConnection.Read(m_nodeInfos.at(index.row())).GetEntity());
+        }
+        catch (const Safir::Dob::NotFoundException& /*ex*/)
+        {
+            return QVariant(); //do nothing, we end up here sometimes when the system is going down
+        }
+
+        const bool isLight = m_lightNodeTypeNames.find(nodeInfo->NodeType().GetVal()) != m_lightNodeTypeNames.end();
+        if (isLight)
+        {
+            return tr("Light Node");
+        }
     }
 
     return QVariant();
