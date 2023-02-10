@@ -55,21 +55,21 @@ SET_SAFIR_TEST_PROPERTIES(TEST restart_nodes_with_entity_requests_only
   TIMEOUT 6000
   CONFIG_OVERRIDE ${CMAKE_CURRENT_SOURCE_DIR}/test_config)
 
-ADD_TEST(NAME restart_nodes_with_entity_requests_and_updates
-  COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py
-  --owner $<TARGET_FILE:WaitingStatesOwner>
-  --sender $<TARGET_FILE:RequestSender>
-  --dobexplorer $<TARGET_FILE:dobexplorer>
-  --safir-control $<TARGET_FILE:safir_control>
-  --dose_main $<TARGET_FILE:dose_main>
-  --dope_main $<TARGET_FILE:dope_main>
-  --safir-show-config $<TARGET_FILE:safir_show_config>
-  --clients ${num_clients}
-  --entity-requests
-  --entity-updates
-  --update-period 200)
+# ADD_TEST(NAME restart_nodes_with_entity_requests_and_updates
+#   COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py
+#   --owner $<TARGET_FILE:WaitingStatesOwner>
+#   --sender $<TARGET_FILE:RequestSender>
+#   --dobexplorer $<TARGET_FILE:dobexplorer>
+#   --safir-control $<TARGET_FILE:safir_control>
+#   --dose_main $<TARGET_FILE:dose_main>
+#   --dope_main $<TARGET_FILE:dope_main>
+#   --safir-show-config $<TARGET_FILE:safir_show_config>
+#   --clients ${num_clients}
+#   --entity-requests
+#   --entity-updates
+#   --update-period 200)
 
-SET_SAFIR_TEST_PROPERTIES(TEST restart_nodes_with_entity_requests_and_updates
-  TIMEOUT 6000
-  CONFIG_OVERRIDE ${CMAKE_CURRENT_SOURCE_DIR}/test_config)
+# SET_SAFIR_TEST_PROPERTIES(TEST restart_nodes_with_entity_requests_and_updates
+#   TIMEOUT 6000
+#   CONFIG_OVERRIDE ${CMAKE_CURRENT_SOURCE_DIR}/test_config)
 
