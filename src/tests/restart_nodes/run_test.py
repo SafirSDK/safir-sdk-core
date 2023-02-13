@@ -50,14 +50,17 @@ def launch_node(args, instance):
                   wait_for_persistence=instance == 0)
 
     if instance == 0:
-        if args.entity_updates:
-            env.launchProcess("WaitingStatesOwner", (args.owner, "--update", "--update-period", str(args.update_period)))
-        else:
-            env.launchProcess("WaitingStatesOwner", args.owner)
         #env.launchProcess("Dobexplorer", args.dobexplorer)
-    else:
-        if args.entity_requests:
-            env.launchProcess("RequestSender", args.sender)
+        pass
+
+    for handler in range(args.handlers):
+        if instance == 0:
+            cmd = (args.owner, "--handler", str(handler))
+            if args.entity_updates:
+                cmd += ( "--update", "--update-period", str(args.update_period))
+            env.launchProcess(f"WaitingStatesOwner_{handler}", cmd)
+        elif args.entity_requests:
+            env.launchProcess(f"RequestSender_{handler}", (args.sender, "--handler",  str(handler)))
     return env
 
 
@@ -71,11 +74,12 @@ def parse_arguments():
     parser.add_argument("--dope_main", required=True)
     parser.add_argument("--safir-show-config", required=True)
     parser.add_argument("--clients", type=int, default=10)
+    parser.add_argument("--handlers", type=int, default=1, help="number of handlers used. Means more owners and more requestors are started")
     parser.add_argument("--update-period", type=int, default=10, help="Number of ms between updates of all entities")
     parser.add_argument('--entity-updates', action=argparse.BooleanOptionalAction,
                         help="Produce lots of entity updates on node 0")
     parser.add_argument('--entity-requests', action=argparse.BooleanOptionalAction,
-                        help="Produce lots of entity requests on all nodes except 0. These requests are always denied.")
+                        help="Produce lots of entity requests on all nodes except 0. Owner always deny requests, so this only tests request mechanism.")
     arguments = parser.parse_args()
 
     return arguments
@@ -112,9 +116,10 @@ def main():
                         return 1
 
                 if args.entity_requests:
-                    for i in range(1, args.clients + 1):
-                        log(f"Waiting for instance {i} to have completed sending requests")
-                        env[i].WaitForOutput("RequestSender", "Have sent 2000 requests and gotten responses to them")
+                    for num in range(args.handlers):
+                        for i in range(1, args.clients + 1):
+                            log(f"Waiting for instance {i} to have completed sending requests")
+                            env[i].WaitForOutput(f"RequestSender_{num}", "Have sent 1000 requests and gotten responses to them")
 
                 for i in range(1, args.clients + 1):
                     log(f"Terminating instance {i}")

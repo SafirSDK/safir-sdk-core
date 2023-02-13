@@ -29,6 +29,75 @@
 #include <DoseTest/SynchronousPermanentEntity.h>
 #include <boost/lexical_cast.hpp>
 
+//disable warnings in boost
+#if defined _MSC_VER
+  #pragma warning (push)
+  #pragma warning (disable : 4244 4267 4100)
+#endif
+
+#include <boost/program_options.hpp>
+
+#if defined _MSC_VER
+  #pragma warning (pop)
+#endif
+
+
+std::wostream& operator<<(std::wostream& out, const boost::program_options::options_description& opt)
+{
+    std::ostringstream ostr;
+    ostr << opt;
+    return out << ostr.str().c_str();
+}
+
+class ProgramOptions
+{
+public:
+    ProgramOptions(int argc, char* argv[])
+        : parseOk(false)
+    {
+        using namespace boost::program_options;
+        options_description options("Options");
+        options.add_options()
+            ("help,h", "show help message")
+            ("handler",
+                 value<std::int64_t>(&handler)->default_value(0, ""),
+             "Handler to send requests to");
+
+        variables_map vm;
+
+        try
+        {
+            store(command_line_parser(argc, argv).
+                  options(options).run(), vm);
+            notify(vm);
+        }
+        catch (const std::exception& exc)
+        {
+            std::wcerr << "Error parsing command line: " << exc.what() << "\n" << std::endl;
+            ShowHelp(options);
+            return;
+        }
+
+        if (vm.count("help"))
+        {
+            ShowHelp(options);
+            return;
+        }
+
+        parseOk = true;
+    }
+    bool parseOk;
+    std::int64_t handler;
+private:
+    static void ShowHelp(const boost::program_options::options_description& desc)
+    {
+        std::wcout << std::boolalpha
+                   << "Usage: control [OPTIONS]\n"
+                   << desc
+                   << std::endl;
+    }
+
+};
 
 class StopHandler :
     public Safir::Dob::StopHandler
@@ -46,7 +115,8 @@ class RequestSender
     : public Safir::Dob::Requestor
 {
 public:
-    RequestSender()
+    explicit RequestSender(const std::int64_t handler)
+        : m_handler(handler)
     {
         using namespace Safir::Dob;
         m_connection.Attach();
@@ -96,7 +166,7 @@ private:
         {
             try
             {
-                m_connection.CreateRequest(m_request, Safir::Dob::Typesystem::HandlerId(), this);
+                m_connection.CreateRequest(m_request, m_handler, this);
             }
             catch (const Safir::Dob::OverflowException&)
             {
@@ -106,13 +176,20 @@ private:
     }
 
     Safir::Dob::SecondaryConnection m_connection;
+    const Safir::Dob::Typesystem::HandlerId m_handler;
 
     DoseTest::SynchronousPermanentEntityPtr m_request = DoseTest::SynchronousPermanentEntity::Create();
     int m_numResponses = 0;
 };
 
-int main()
+int main(int argc, char * argv[])
 {
+    const ProgramOptions options(argc, argv);
+    if (!options.parseOk)
+    {
+        return 1;
+    }
+
     try
     {
         const std::wstring nameCommonPart = L"RequestSender";
@@ -131,7 +208,7 @@ int main()
                         0, // Context
                         &stopHandler,
                         &dispatcher);
-        RequestSender sender;
+        RequestSender sender(options.handler);
         boost::asio::io_service::work keepRunning(ioService);
         ioService.run();
 
