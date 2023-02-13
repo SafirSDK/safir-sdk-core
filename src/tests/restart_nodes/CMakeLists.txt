@@ -15,12 +15,13 @@ target_link_libraries(WaitingStatesOwner
 target_link_libraries(RequestSender
   PRIVATE
   dose_cpp
-  safir_generated-DoseTest-cpp)
+  safir_generated-DoseTest-cpp
+  Boost::program_options)
 
 if (MSVC)
   set(num_clients 10)
 else()
-  set(num_clients 20)
+  set(num_clients 10)
 endif()
 
 ADD_TEST(NAME restart_nodes_with_entity_updates_only
@@ -49,6 +50,7 @@ ADD_TEST(NAME restart_nodes_with_entity_requests_only
   --dope_main $<TARGET_FILE:dope_main>
   --safir-show-config $<TARGET_FILE:safir_show_config>
   --clients ${num_clients}
+  --handlers 2
   --entity-requests)
 
 SET_SAFIR_TEST_PROPERTIES(TEST restart_nodes_with_entity_requests_only
@@ -65,6 +67,7 @@ ADD_TEST(NAME restart_nodes_with_entity_requests_and_updates
   --dope_main $<TARGET_FILE:dope_main>
   --safir-show-config $<TARGET_FILE:safir_show_config>
   --clients ${num_clients}
+  --handlers 2
   --entity-requests
   --entity-updates
   --update-period 200)

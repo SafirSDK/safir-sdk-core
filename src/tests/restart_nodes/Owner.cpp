@@ -60,6 +60,9 @@ public:
             ("update-period",
                  value<int>(&period)->default_value(10, ""),
                  "Entity update period, in ms")
+            ("handler",
+                 value<std::int64_t>(&handler)->default_value(0, ""),
+                 "Handler to register")
             ("update",
              "Update entities");
 
@@ -91,6 +94,7 @@ public:
     bool parseOk;
     int period;
     bool update;
+    std::int64_t handler;
 private:
     static void ShowHelp(const boost::program_options::options_description& desc)
     {
@@ -121,10 +125,9 @@ class EntityOwner
     : public Safir::Dob::EntityHandlerInjection
 {
 public:
-    EntityOwner(boost::asio::io_service& ioService, const bool update, const int period)
-        : m_ioService(ioService)
-        , m_timer(ioService)
-        , m_handler()
+    EntityOwner(boost::asio::io_service& ioService, const bool update, const int period, const std::int64_t handler)
+        : m_timer(ioService)
+        , m_handler(handler)
         , m_update(update)
         , m_period(period)
     {
@@ -196,7 +199,6 @@ private:
     }
 
     Safir::Dob::SecondaryConnection m_connection;
-    boost::asio::io_service& m_ioService;
     boost::asio::deadline_timer m_timer;
     std::vector<Safir::Dob::Typesystem::InstanceId> m_instances;
 
@@ -232,7 +234,7 @@ int main(int argc, char * argv[])
                         0, // Context
                         &stopHandler,
                         &dispatcher);
-        EntityOwner owner(ioService, options.update, options.period);
+        EntityOwner owner(ioService, options.update, options.period, options.handler);
         boost::asio::io_service::work keepRunning(ioService);
         ioService.run();
 
