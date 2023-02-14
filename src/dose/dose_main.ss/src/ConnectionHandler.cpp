@@ -47,8 +47,7 @@ namespace
                                          const std::function<void(const ConnectionPtr& connection, bool disconnecting)>& onAppEvent,
                                          const std::function<void(int64_t)>& checkPendingReg,
                                          const std::function<void(const std::string& str)>& logStatus)
-        : m_started(false),
-          m_strand(ioService),
+        : m_strand(ioService),
           m_communication(distribution.GetCommunication()),
           m_onAppEvent(onAppEvent),
           m_poolHandler(m_strand, distribution, checkPendingReg, logStatus),
@@ -96,17 +95,24 @@ namespace
             m_sendQueues.insert(std::make_pair(*nt, SendQueue()));
             m_communication.SetQueueNotFullCallback([this](int64_t)
                                                     {
-                                                        m_strand.post([this]
-                                                                      {
-                                                                          HandleSendQueues();
-                                                                      });
+                                                        m_strand.post([this]{HandleSendQueues();});
                                                     }, *nt);
         }
 
         m_communication.SetDataReceiver([this](int64_t /*fromNodeId*/, int64_t /*fromNodeType*/, const char *data, size_t /*size*/)
         {
+            if (!m_running)
+            {
+                return;
+            }
+
             m_strand.post([this,data]
             {
+                if (!m_running)
+                {
+                    return;
+                }
+
                 const DistributionData state=DistributionData::ConstConstructor(new_data_tag, data);
                 DistributionData::DropReference(data);
                 if (state.GetType()==DistributionData::Action_Connect)
@@ -143,13 +149,13 @@ namespace
 
     void ConnectionHandler::Start()
     {
+        if (m_running.exchange(true))
+        {
+            return; // was already started
+        }
+
         m_strand.dispatch([this]
         {
-            if (m_started)
-            {
-                return;
-            }
-            m_started = true;
             m_connectionThread = boost::thread([this]() {ConnectionThread();});
             m_poolHandler.Start();
         });
@@ -157,9 +163,14 @@ namespace
 
     void ConnectionHandler::Stop()
     {
+        if (!m_running.exchange(false))
+        {
+            return; // was already stopped
+        }
+
         m_strand.post([this]
         {
-            m_started = false;            
+            lllog(5) << "ConnectionHandler: Stop" << std::endl;
             m_processInfoHandler.Stop();
             m_poolHandler.Stop([this]{StopConnectionThread();});
         });
@@ -187,6 +198,11 @@ namespace
 
     void ConnectionHandler::SendAll(const std::pair<Safir::Utilities::Internal::SharedConstCharArray, size_t>& data)
     {
+        if (!m_running)
+        {
+            return;
+        }
+
         for (auto vt = m_sendQueues.begin(); vt != m_sendQueues.end(); ++vt)
         {
             vt->second.push(data);
@@ -196,6 +212,11 @@ namespace
 
     void ConnectionHandler::HandleSendQueues()
     {
+        if (!m_running)
+        {
+            return;
+        }
+
         for (auto ntQ = m_sendQueues.begin(); ntQ != m_sendQueues.end(); ++ntQ)
         {
             while (!ntQ->second.empty())
@@ -256,8 +277,10 @@ namespace
 
     void ConnectionHandler::HandleEvents()
     {
-        lllog(9) << "ConnectionHandler::HandleEvents "<< std::endl;
-
+        if (!m_running)
+        {
+            return;
+        }
 
         m_handleEventsNotified=false;
 
@@ -315,6 +338,10 @@ namespace
 
     void ConnectionHandler::HandleDisconnect(const ConnectionPtr & connection)
     {
+        if (!m_running)
+        {
+            return;
+        }
         lllout << "ConnectionHandler::HandleDisconnect: Disconnected " << connection->NameWithCounter() << " id = " << connection->Id() << std::endl;
 
         //try to handle some outstanding stuff (this does not guarantee that all gets handled,
@@ -346,6 +373,10 @@ namespace
 
     void ConnectionHandler::HandleConnectionOutEvent(const ConnectionPtr & connection, std::vector<ConnectionPtr>& deadConnections)
     {
+        if (!m_running)
+        {
+            return;
+        }
         m_onAppEvent(connection, false);
 
         if (connection->IsDead())

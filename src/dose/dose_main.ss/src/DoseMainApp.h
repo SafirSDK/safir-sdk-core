@@ -120,8 +120,7 @@ namespace Internal
         std::unique_ptr<MemoryMonitor> m_memoryMonitor;
 
         //this class should be declared last, so that when the app
-        //is destroyed all connections will be marked as dead and stop
-        //orders sent before any more destruction is done.
+        //is destroyed all connections will be marked as dead.
         ConnectionKiller m_connectionKiller;
     };
 

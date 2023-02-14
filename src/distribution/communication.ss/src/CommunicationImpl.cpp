@@ -172,7 +172,12 @@ namespace
 
     void CommunicationImpl::Start()
     {
-        m_running = true;
+        if (m_running.exchange(true))
+        {
+            lllog(1)<<m_logPrefix.c_str()<<L"Start called when already started! "<<m_me.name.c_str()<<std::endl;
+            return; // already started
+        }
+
         lllog(1)<<m_logPrefix.c_str()<<L"Start "<<m_me.name.c_str()<<std::endl;
         boost::asio::post(m_receiveStrand, [this]{m_deliveryHandler.Start();});
         m_reader.Start();
@@ -190,7 +195,12 @@ namespace
 
     void CommunicationImpl::Stop()
     {
-        m_running = false;
+        if (!m_running.exchange(false))
+        {
+            lllog(1)<<m_logPrefix.c_str()<<L"Stop called when already stopped! "<<m_me.name.c_str()<<std::endl;
+            return; // already stopped
+        }
+
         lllog(1)<<m_logPrefix.c_str()<<L"Stop "<<m_me.name.c_str()<<std::endl;
         if (m_debugServer)
         {
@@ -325,6 +335,11 @@ namespace
                                  int64_t dataTypeIdentifier,
                                  bool deliveryGuarantee)
     {
+        if (!m_running)
+        {
+            return false;
+        }
+
         if (deliveryGuarantee)
         {
             return GetNodeType(nodeTypeId).GetAckedDataSender().AddToSendQueue(nodeId, data, size, dataTypeIdentifier);

@@ -34,8 +34,9 @@ namespace Internal
     class ConnectionKiller
         : private boost::noncopyable
     {
-    public:
+    public:        
         ~ConnectionKiller();
+        void SendStopOrders() const;
     };
 }
 }

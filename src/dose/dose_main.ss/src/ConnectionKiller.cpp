@@ -24,6 +24,7 @@
 #include "ConnectionKiller.h"
 
 #include <Safir/Dob/Internal/Connections.h>
+#include <Safir/Utilities/Internal/LowLevelLogger.h>
 
 namespace Safir
 {
@@ -38,6 +39,13 @@ namespace Internal
             if (connection->IsLocal() && connection->Pid() != Safir::Utilities::ProcessInfo::GetPid())
             {
                 connection->Died();
+            }
+        }
+
+        void StopOrder(const ConnectionPtr& connection)
+        {
+            if (connection->IsLocal() && connection->Pid() != Safir::Utilities::ProcessInfo::GetPid())
+            {
                 connection->SendStopOrder();
             }
         }
@@ -46,6 +54,11 @@ namespace Internal
     ConnectionKiller::~ConnectionKiller()
     {
         Connections::Instance().ForEachConnectionPtr(Kill);
+    }
+
+    void ConnectionKiller::SendStopOrders() const
+    {
+        Connections::Instance().ForEachConnectionPtr(StopOrder);
     }
 }
 }

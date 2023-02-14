@@ -203,8 +203,8 @@ namespace
 
     void RequestHandler::Stop()
     {
-        //const bool was_stopped = m_stopped.exchange(true);
-        //if (!was_stopped)
+        const bool was_stopped = m_stopped.exchange(true);
+        if (!was_stopped)
         {
             m_strand.post([this]()
             {
