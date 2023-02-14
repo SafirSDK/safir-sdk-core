@@ -134,3 +134,4 @@ graph_info.json
 conan_imports_manifest.txt
 conanbuildinfo.cmake
 include/boost-*
+test_output
