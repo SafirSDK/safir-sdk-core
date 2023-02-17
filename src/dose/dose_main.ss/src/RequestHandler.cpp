@@ -217,6 +217,7 @@ namespace
 
     void RequestHandler::DispatchRequests(const ConnectionPtr& connection)
     {
+        CheckStrand();
         ConnectionIdSet skipList;
         connection->GetRequestOutQueue().DispatchRequests([this, connection, &skipList]
                                                           (const DistributionData& request,
@@ -234,6 +235,7 @@ namespace
                                          const ConnectionPtr& sender,
                                          ConnectionIdSet& skipList)
     {
+        CheckStrand();
         const Dob::Typesystem::TypeId typeId = request.GetTypeId();
 
         lllog(8) << "DOSE_MAIN: DispatchRequest of type " << Typesystem::Operations::GetName(typeId)
@@ -488,6 +490,7 @@ namespace
                                           const DistributionData& request,
                                           boost::asio::steady_timer& timer)
     {
+        CheckStrand();
         auto senderId = sender->Id().m_id;
         auto reqId = request.GetRequestId();
         auto typeId = request.GetTypeId();
@@ -582,6 +585,7 @@ namespace
                                                                    const ConnectionPtr&    sender,
                                                                    const ConnectionConsumerPair& receiver)
     {
+        CheckStrand();
         if (!PostRequest(receiver, request))
         {
             m_blockingHandler.Request().AddWaitingConnection(receiver.connection->Id().m_id,
@@ -595,6 +599,7 @@ namespace
                                                                     const ConnectionPtr& sender,
                                                                     const ConnectionConsumerPair& receiver)
     {
+        CheckStrand();
         // If the receiver node is gone we just discard the response
         const auto nodeIt = m_liveNodes.find(receiver.connection->Id().m_node);
         if (nodeIt == m_liveNodes.end())
@@ -685,6 +690,7 @@ namespace
                                           const InternalRequestId&  reqId,
                                           const ConnectionPtr&      sender)
     {
+        CheckStrand();
         Typesystem::BinarySerialization bin;
         Typesystem::Serialization::ToBinary(resp,bin);
 
@@ -707,6 +713,7 @@ namespace
                                                      int64_t        /*fromNodeType*/,
                                                      const char*    data)
     {
+        CheckStrand();
         const DistributionData request =
                 DistributionData::ConstConstructor(new_data_tag, data);
 
@@ -727,7 +734,7 @@ namespace
 
     void RequestHandler::ReleaseAllBlocked(int64_t blockingConnection)
     {
-
+        CheckStrand();
         std::set<int64_t> waitingConnections;
         if (!m_blockingHandler.Request().GetWaitingConnections(blockingConnection, waitingConnections))
         {
@@ -756,6 +763,7 @@ namespace
 
     void RequestHandler::HandlePendingExternalRequest(int64_t blockingConnection)
     {
+        CheckStrand();
         lllog(7) << "DOSE_MAIN: HandlePendingExternalRequest for app " << blockingConnection << std::endl;
 
         auto it = m_pendingRequests.find(blockingConnection);
@@ -800,6 +808,7 @@ namespace
                                          const ConnectionPtr& deletedConn,
                                          const ConnectionPtr & fromConnection)
     {
+        CheckStrand();
         const ConnectionPtr regOwner = GetRegistrationOwner(request).connection;
 
         if (regOwner == nullptr || regOwner->Id() == deletedConn->Id())
@@ -828,6 +837,7 @@ namespace
 
     void RequestHandler::AddPendingRequest(const int64_t blockingConn, const DistributionData& request)
     {
+        CheckStrand();
         lllog(7) << "DOSE_MAIN: AddPendingRequest for app " << blockingConn <<std::endl;
 
         auto timer = Safir::make_unique<boost::asio::steady_timer>(m_ioService);
@@ -884,10 +894,12 @@ namespace
         m_blockingHandler.Request().AddWaitingConnection(blockingConn,
                                                          m_communicationVirtualConnectionId);
 
+        lllog(7) << "DOSE_MAIN: There are currently " << m_pendingRequests.size() << " pending requests" << std::endl;
     }
 
     void RequestHandler::RemovePendingRequest(const int64_t blockingConn, const InternalRequestId& requestId)
     {
+        CheckStrand();
         auto it = m_pendingRequests.find(blockingConn);
         if(it != m_pendingRequests.end())
         {
@@ -910,6 +922,7 @@ namespace
     bool RequestHandler::ReceiverHasOtherPendingRequest(const int64_t receiver,
                                                         const InternalRequestId& requestId) const
     {
+        CheckStrand();
         auto findIt = m_pendingRequests.find(receiver);
         if(findIt != m_pendingRequests.end())
         {
@@ -930,6 +943,7 @@ namespace
     boost::chrono::milliseconds
     RequestHandler::GetTimeout(const Safir::Dob::Typesystem::TypeId typeId) const
     {
+        CheckStrand();
         TimeoutTable::iterator findIt = m_timeoutTable.find(typeId);
         if (findIt != m_timeoutTable.end())
         {
@@ -971,6 +985,16 @@ namespace
         }
         m_timeoutTable.insert(std::make_pair(typeId,timeout));
         return boost::chrono::milliseconds(static_cast<int>(timeout * 1000));
+    }
+
+    void RequestHandler::CheckStrand() const
+    {
+#if (!defined NDEBUG && !defined SAFIR_DISABLE_CHECK_STRAND)
+        if (!m_strand.running_in_this_thread())
+        {
+            throw std::logic_error("Function must be called from the strand!");
+        }
+#endif
     }
 
 }

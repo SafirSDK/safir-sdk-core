@@ -129,7 +129,7 @@ namespace Internal
         void AddPendingRequest(const int64_t blockingConn, const DistributionData & request);
         void RemovePendingRequest(const int64_t blockingConn, const InternalRequestId& requestId);
         bool ReceiverHasOtherPendingRequest(const int64_t receiver, const InternalRequestId& requestId) const;
-
+        void CheckStrand() const;
         typedef std::pair<DistributionData, std::unique_ptr<boost::asio::steady_timer>> PendingRequest;
 
         typedef std::deque<PendingRequest> PendingRequestsQueue;

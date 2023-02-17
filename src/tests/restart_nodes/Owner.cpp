@@ -27,6 +27,7 @@
 #include <Safir/Utilities/AsioDispatcher.h>
 #include <DoseTest/SynchronousPermanentEntity.h>
 #include <boost/lexical_cast.hpp>
+#include <cstdlib>
 
 //disable warnings in boost
 #if defined _MSC_VER
@@ -35,6 +36,8 @@
 #endif
 
 #include <boost/program_options.hpp>
+#include <boost/thread.hpp>
+#include <boost/chrono.hpp>
 
 #if defined _MSC_VER
   #pragma warning (pop)
@@ -178,15 +181,24 @@ private:
 
     void OnCreateRequest(const Safir::Dob::EntityRequestProxy /*entityRequestProxy*/,
                          Safir::Dob::ResponseSenderPtr        responseSender) override
-    {responseSender->Send(m_errorResponse);}
+    {
+        boost::this_thread::sleep_for(boost::chrono::milliseconds(std::rand() % 10));
+        responseSender->Send(m_errorResponse);
+    }
 
     void OnUpdateRequest(const Safir::Dob::EntityRequestProxy /*entityRequestProxy*/,
         Safir::Dob::ResponseSenderPtr        responseSender) override
-    {responseSender->Send(m_errorResponse);}
+    {
+        boost::this_thread::sleep_for(boost::chrono::milliseconds(std::rand() % 10));
+        responseSender->Send(m_errorResponse);
+    }
 
     void OnDeleteRequest(const Safir::Dob::EntityRequestProxy /*entityRequestProxy*/,
         Safir::Dob::ResponseSenderPtr        responseSender) override
-    {responseSender->Send(m_errorResponse);}
+    {
+        boost::this_thread::sleep_for(boost::chrono::milliseconds(std::rand() % 10));
+        responseSender->Send(m_errorResponse);
+    }
 
     void OnInjectedNewEntity(const Safir::Dob::InjectedEntityProxy /*injectedEntityProxy*/) override
     {

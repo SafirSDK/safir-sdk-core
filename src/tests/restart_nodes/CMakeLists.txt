@@ -10,7 +10,8 @@ target_link_libraries(WaitingStatesOwner
   PRIVATE
   dose_cpp
   safir_generated-DoseTest-cpp
-  Boost::program_options)
+  Boost::program_options
+  Boost::thread)
 
 target_link_libraries(RequestSender
   PRIVATE
@@ -70,7 +71,7 @@ ADD_TEST(NAME restart_nodes_with_entity_requests_and_updates
   --handlers 2
   --entity-requests
   --entity-updates
-  --update-period 200)
+  --update-period 25)
 
 SET_SAFIR_TEST_PROPERTIES(TEST restart_nodes_with_entity_requests_and_updates
   TIMEOUT 6000
