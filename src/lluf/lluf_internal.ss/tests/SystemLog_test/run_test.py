@@ -81,7 +81,7 @@ if proc.returncode != 0:
 
 try:
     log_common_part = r"\D{3} [ |\d]\d \d{2}:\d{2}:\d{2} \S* " + system_log_test_pgm + r"\[\d*\]: "
-    for test in range(11):
+    for test in range(12):
         data, addr = sock.recvfrom(10 * 1024)  # buffer size is 10 k
         print("Received data:", data)
         if test == 0:
@@ -115,6 +115,9 @@ try:
             pri = r"<11>"
             text = r"This is another error log"
         elif test == 10:
+            pri = r"<15>"
+            text = r"This is a suuuuuuuuuuper duuuuuuuper long log line .*"
+        elif test == 11:
             pri = r"<9>"
             text = r"This is a log from a singleton destructor"
 
