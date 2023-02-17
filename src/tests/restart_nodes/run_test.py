@@ -76,9 +76,9 @@ def parse_arguments():
     parser.add_argument("--clients", type=int, default=10)
     parser.add_argument("--handlers", type=int, default=1, help="number of handlers used. Means more owners and more requestors are started")
     parser.add_argument("--update-period", type=int, default=10, help="Number of ms between updates of all entities")
-    parser.add_argument('--entity-updates', action=argparse.BooleanOptionalAction,
+    parser.add_argument('--entity-updates', action="store_true", default=False,
                         help="Produce lots of entity updates on node 0")
-    parser.add_argument('--entity-requests', action=argparse.BooleanOptionalAction,
+    parser.add_argument('--entity-requests', action="store_true", default=False,
                         help="Produce lots of entity requests on all nodes except 0. Owner always deny requests, so this only tests request mechanism.")
     arguments = parser.parse_args()
 
