@@ -636,6 +636,10 @@ namespace
         if (ReceiverHasOtherPendingRequest(receiver.connection->Id().m_id, request.GetRequestId()))
         {
             lllog(7) << "DOSE_MAIN: ReceiverHasOtherPendingRequest, so we'll add it to pending!" << std::endl;
+            receiver.connection->ForEachRequestInQueue([](const ConsumerId& consumer, RequestInQueue& queue)
+            {
+                lllog(7) << "DOSE_MAIN: Consumer " << consumer.consumer << " RequestInQueue size: " << queue.size() << std::endl;
+            });
 
             // To guarantee the request order, requests from external nodes can't
             // be posted to the receiver's requestInQ if there are other requests
@@ -896,12 +900,11 @@ namespace
 
         if (Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().LogLevel() >=7)
         {
-            size_t count = 0;
             for (const auto& it: m_pendingRequests)
             {
-                count += it.second.size();
+                lllog(7) << "DOSE_MAIN: There are currently " << it.second.size()
+                         << " pending requests for " << it.first << std::endl;
             }
-            lllog(7) << "DOSE_MAIN: There are currently " << count << " pending requests" << std::endl;
         }
     }
 

@@ -12,7 +12,7 @@ if ((DEFINED ENV{SAFIR_SKIP_SLOW_TESTS}) AND ($ENV{SAFIR_SKIP_SLOW_TESTS}))
     dope_file_backend_test
     dope_none_backend_test
     restart_nodes_with_entity_updates_only
-    restart_nodes_with_entity_requests_only
+    #restart_nodes_with_entity_requests_only
     restart_nodes_with_entity_requests_and_updates
     light_nodes_clear_state
     light_nodes_keep_state

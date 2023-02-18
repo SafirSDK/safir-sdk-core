@@ -54,9 +54,9 @@ ADD_TEST(NAME restart_nodes_with_entity_requests_only
   --handlers 2
   --entity-requests)
 
-# SET_SAFIR_TEST_PROPERTIES(TEST restart_nodes_with_entity_requests_only
-#   TIMEOUT 6000
-#   CONFIG_OVERRIDE ${CMAKE_CURRENT_SOURCE_DIR}/test_config)
+SET_SAFIR_TEST_PROPERTIES(TEST restart_nodes_with_entity_requests_only
+  TIMEOUT 6000
+  CONFIG_OVERRIDE ${CMAKE_CURRENT_SOURCE_DIR}/test_config)
 
 # ADD_TEST(NAME restart_nodes_with_entity_requests_and_updates
 #   COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py
