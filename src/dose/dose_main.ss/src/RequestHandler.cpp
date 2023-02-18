@@ -901,7 +901,7 @@ namespace
             {
                 count += it.second.size();
             }
-            lllog(7) << "DOSE_MAIN: There are currently " << m_pendingRequests.size() << " pending requests" << std::endl;
+            lllog(7) << "DOSE_MAIN: There are currently " << count << " pending requests" << std::endl;
         }
     }
 
