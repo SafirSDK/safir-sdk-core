@@ -894,7 +894,15 @@ namespace
         m_blockingHandler.Request().AddWaitingConnection(blockingConn,
                                                          m_communicationVirtualConnectionId);
 
-        lllog(7) << "DOSE_MAIN: There are currently " << m_pendingRequests.size() << " pending requests" << std::endl;
+        if (Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().LogLevel() >=7)
+        {
+            size_t count = 0;
+            for (const auto& it: m_pendingRequests)
+            {
+                count += it.second.size();
+            }
+            lllog(7) << "DOSE_MAIN: There are currently " << m_pendingRequests.size() << " pending requests" << std::endl;
+        }
     }
 
     void RequestHandler::RemovePendingRequest(const int64_t blockingConn, const InternalRequestId& requestId)
