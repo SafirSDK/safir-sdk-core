@@ -791,6 +791,7 @@ namespace
             {
                 if (DistributeRequest(request, receiver))
                 {
+                    lllog(7) << "DOSE_MAIN: Distributed one pending request to " << blockingConnection << std::endl;
                     it->second.pop_front();
                 }
                 else
@@ -927,6 +928,7 @@ namespace
             {
                 m_pendingRequests.erase(it);
             }
+            lllog(7) << "DOSE_MAIN: Removed pending request for " << blockingConn << " due to timeout" << std::endl;
         }
     }
 
