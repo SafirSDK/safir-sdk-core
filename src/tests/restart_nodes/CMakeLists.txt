@@ -51,7 +51,7 @@ ADD_TEST(NAME restart_nodes_with_entity_requests_only
   --dope_main $<TARGET_FILE:dope_main>
   --safir-show-config $<TARGET_FILE:safir_show_config>
   --clients ${num_clients}
-  --handlers 1
+  --handlers 2
   --entity-requests)
 
 SET_SAFIR_TEST_PROPERTIES(TEST restart_nodes_with_entity_requests_only
