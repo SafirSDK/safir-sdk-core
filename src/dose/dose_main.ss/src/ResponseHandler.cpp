@@ -98,28 +98,28 @@ namespace Internal
 
     void ResponseHandler::DistributeResponses(const ConnectionPtr& sender)
     {
+        CheckStrand();
         m_strand.dispatch([this, sender]
         {
             const auto senderId = sender->Id();
 
-            auto this_ = this; //fix for vs2010 issue with lambdas
-
             //loop over all the RequestInQueues in the connection
-            sender->ForEachRequestInQueue([this_, senderId](const ConsumerId& /*consumer*/, RequestInQueue& queue)
+            sender->ForEachRequestInQueue([this, senderId](const ConsumerId& /*consumer*/, RequestInQueue& queue)
             {
-                auto this__ = this_;
-                auto & senderId_ = senderId;
-
                 //loop over all responses in the connection
-                queue.DispatchResponses([this__, senderId_](const DistributionData& response, bool& dontRemove)
+                queue.DispatchResponses([this, senderId](const DistributionData& response, bool& dontRemove)
                 {
                     //Try to send the response
-                    const bool success = this__->SendResponseInternal(response);
+                    const bool success = SendResponseInternal(response);
                     dontRemove = !success;
 
                     if (!success)
                     {
-                        this__->m_waitingConnections.insert(senderId_);
+                        m_waitingConnections.insert(senderId);
+                    }
+                    else
+                    {
+                        lllog(7) << "DOSE_MAIN: Dispatched a response from connection " << senderId <<std::endl;
                     }
                 });
             });
@@ -130,6 +130,7 @@ namespace Internal
     //must be called in strand
     void ResponseHandler::SendLocalResponse(const DistributionData& response)
     {
+        CheckStrand();
         const ConnectionId toConnection=response.GetReceiverId();
 
         ENSURE (toConnection.m_node == m_distribution.GetNodeId(),
@@ -151,7 +152,8 @@ namespace Internal
     //must be called in strand
     bool ResponseHandler::SendResponseInternal(const DistributionData& response)
     {
-       lllout << "HandleResponse: " << Typesystem::Operations::GetName(response.GetTypeId()) << std::endl;
+        CheckStrand();
+        lllout << "HandleResponse: " << Typesystem::Operations::GetName(response.GetTypeId()) << std::endl;
 
        const ConnectionId fromConnection=response.GetSenderId();
        const ConnectionId toConnection=response.GetReceiverId();
@@ -187,6 +189,16 @@ namespace Internal
                                                      response.Size(),
                                                      m_dataTypeIdentifier,
                                                      true);
+    }
+
+    void ResponseHandler::CheckStrand() const
+    {
+#if (!defined NDEBUG && !defined SAFIR_DISABLE_CHECK_STRAND)
+        if (!m_strand.running_in_this_thread())
+        {
+            throw std::logic_error("Function must be called from the strand!");
+        }
+#endif
     }
 
 

@@ -636,9 +636,10 @@ namespace
         if (ReceiverHasOtherPendingRequest(receiver.connection->Id().m_id, request.GetRequestId()))
         {
             lllog(7) << "DOSE_MAIN: ReceiverHasOtherPendingRequest, so we'll add it to pending!" << std::endl;
-            receiver.connection->ForEachRequestInQueue([](const ConsumerId& consumer, RequestInQueue& queue)
+            receiver.connection->ForEachRequestInQueue([receiver](const ConsumerId& consumer, RequestInQueue& queue)
             {
-                lllog(7) << "DOSE_MAIN: Consumer " << consumer.consumer << " RequestInQueue size: " << queue.size() << std::endl;
+                lllog(7) << "DOSE_MAIN: " << receiver.connection->Id() << ","
+                         << consumer.consumer << " RequestInQueue size: " << queue.size() << std::endl;
             });
 
             // To guarantee the request order, requests from external nodes can't

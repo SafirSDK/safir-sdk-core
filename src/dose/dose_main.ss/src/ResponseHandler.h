@@ -74,6 +74,7 @@ namespace Internal
          * a service is not registered or a timeout occurs.
          */
         bool SendResponseInternal(const DistributionData& response);
+        void CheckStrand() const;
 
         boost::asio::io_service::strand& m_strand;
         Distribution& m_distribution;
