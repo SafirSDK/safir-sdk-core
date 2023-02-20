@@ -87,7 +87,7 @@ namespace Internal
                                            GetConnection(*conn,std::nothrow);
                                        if (to != NULL) //if receiver of the response is dead, theres nothing to do
                                        {
-                                           DistributeResponses(to);
+                                           DistributeResponses(to, true);
                                        }
                                    }
                                }),
@@ -96,32 +96,31 @@ namespace Internal
     }
 
 
-    void ResponseHandler::DistributeResponses(const ConnectionPtr& sender)
+    void ResponseHandler::DistributeResponses(const ConnectionPtr& sender, bool isRetry)
     {
         CheckStrand();
-        m_strand.dispatch([this, sender]
+        //loop over all the RequestInQueues in the connection
+        sender->ForEachRequestInQueue([this, sender, isRetry](const ConsumerId& /*consumer*/, RequestInQueue& queue)
         {
-            const auto senderId = sender->Id();
-
-            //loop over all the RequestInQueues in the connection
-            sender->ForEachRequestInQueue([this, senderId](const ConsumerId& /*consumer*/, RequestInQueue& queue)
+            //loop over all responses in the connection
+            queue.DispatchResponses([this, sender, isRetry](const DistributionData& response, bool& dontRemove)
             {
-                //loop over all responses in the connection
-                queue.DispatchResponses([this, senderId](const DistributionData& response, bool& dontRemove)
-                {
-                    //Try to send the response
-                    const bool success = SendResponseInternal(response);
-                    dontRemove = !success;
+                //Try to send the response
+                const bool success = SendResponseInternal(response);
+                dontRemove = !success;
 
-                    if (!success)
+                if (!success)
+                {
+                    m_waitingConnections.insert(sender->Id());
+                }
+                else
+                {
+                    lllog(7) << "DOSE_MAIN: Dispatched a response from connection " << sender->Id() <<std::endl;
+                    if (isRetry)
                     {
-                        m_waitingConnections.insert(senderId);
+                        sender->SignalOut();
                     }
-                    else
-                    {
-                        lllog(7) << "DOSE_MAIN: Dispatched a response from connection " << senderId <<std::endl;
-                    }
-                });
+                }
             });
         });
     }

@@ -55,7 +55,7 @@ namespace Internal
         /**
          * Distribute any responses the given connection has in its request in queues.
          */
-        void DistributeResponses(const ConnectionPtr& sender);
+        void DistributeResponses(const ConnectionPtr& sender, bool isRetry = false);
 
         /**
          * Send local response.
