@@ -99,10 +99,10 @@ namespace Internal
                 lllog(5)<<"PoolHandler: Start PoolDistribution to "<<self->m_nodeId<<std::endl;
                 if (self->HasBeenCancelled())
                 {
+                    lllog(5)<<"PoolHandler: PD was cancelled "<<self->m_nodeId<<std::endl;
                     // This PD has been cancelled
                     return;
                 }
-                lllog(5)<<"PoolHandler: Start PoolDistribution to "<<self->m_nodeId<<std::endl;
 
                 //collect all connections on this node
                 Connections::Instance().ForEachConnection([self](const Connection& connection)
