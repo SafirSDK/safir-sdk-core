@@ -84,6 +84,17 @@ namespace
 
     }
 
+    size_t GetRequestQueueSize(const DistributionData& request)
+    {
+        size_t size = 0;
+        const ConnectionConsumerPair receiver = GetRegistrationOwner(request);
+        receiver.connection->ForSpecificRequestInQueue(receiver.consumer, [&size](const ConsumerId& /*consumer*/, RequestInQueue& queue)
+        {
+            size = queue.size();
+        });
+        return size;
+    }
+
 }
 
     RequestHandler::RequestHandler(boost::asio::io_service& ioService,
@@ -93,16 +104,19 @@ namespace
           m_distribution(distribution),
           m_communication(distribution.GetCommunication()),
           m_dataTypeIdentifier(LlufId_Generate64("RequestHandler")),
-          m_communicationVirtualConnectionId(LlufId_Generate64("CommunicationVirtualConnectionId"))
+          m_communicationVirtualConnectionId(LlufId_Generate64("CommunicationVirtualConnectionId")) //  -5325874379630851183
     {
-        m_responseHandler.reset(new ResponseHandler(m_strand,
-                            distribution,
-                            [this]
-                            (const ConnectionId& connectionId,
-                             const InternalRequestId requestId)
-                            {
-                                m_outReqTimers.erase(std::make_pair(connectionId.m_id, requestId));
-                            }));
+        lllog(7) << L"DOSE_MAIN: RequestHandler constructor, CommunicationVirtualConnectionId=" << m_communicationVirtualConnectionId << std::endl;
+        m_responseHandler.reset(new ResponseHandler(m_strand, distribution,
+            [this](const ConnectionId& senderConnectionId)
+        {
+            lllog(7) << L"DOSE_MAIN: Response sent to external node. Try to handle pending requests." << std::endl;
+            ReleaseAllBlocked(senderConnectionId.m_id);
+        },
+            [this](const ConnectionId& toConnectionId, const InternalRequestId requestId)
+        {
+            m_outReqTimers.erase(std::make_pair(toConnectionId.m_id, requestId));
+        }));
 
         m_distribution.SubscribeNodeEvents(
                     // Executed when a 'node included' cb is received
@@ -675,7 +689,7 @@ namespace
 
     void RequestHandler::ReleaseAllBlocked(int64_t blockingConnection)
     {
-
+        lllog(7) << "DOSE_MAIN: ReleaseAllBlocked for app " << blockingConnection << std::endl;
         std::set<int64_t> waitingConnections;
         if (!m_blockingHandler.Request().GetWaitingConnections(blockingConnection, waitingConnections))
         {
@@ -688,6 +702,7 @@ namespace
         for (auto it = waitingConnections.begin(); it != waitingConnections.end(); ++it)
         {
             tmpConnectionId.m_id = *it;
+            lllog(7) << "DOSE_MAIN: Handle waiting connection " << tmpConnectionId.m_id << std::endl;
 
             if (tmpConnectionId.m_id == m_communicationVirtualConnectionId)
             {
@@ -704,14 +719,14 @@ namespace
 
     void RequestHandler::HandlePendingExternalRequest(int64_t blockingConnection)
     {
-        lllog(7) << "DOSE_MAIN: HandlePendingExternalRequest for app " << blockingConnection << std::endl;
-
         auto it = m_pendingRequests.find(blockingConnection);
 
         if (it == m_pendingRequests.end())
         {
             return;
         }
+
+        lllog(7) << "DOSE_MAIN: HandlePendingExternalRequest for app " << blockingConnection << ", numberOfPending=" << it->second.size() << std::endl;
 
         while (!it->second.empty())
         {
@@ -776,7 +791,14 @@ namespace
 
     void RequestHandler::AddPendingRequest(const int64_t blockingConn, const DistributionData& request)
     {
-        lllog(7) << "DOSE_MAIN: AddPendingRequest for app " << blockingConn <<std::endl;
+        // ---------- Debug code, remove ----------
+        auto qs = GetRequestQueueSize(request);
+        lllog(7) << "DOSE_MAIN: AddPendingRequest for app " << blockingConn << ", ReqInQSize=" << qs << std::endl;
+        if (qs < 10)
+        {
+            SEND_SYSTEM_LOG(Alert, << "AddPendingRequest when ReqInQ not full!");
+        }
+        // ---------- End Debug code ----------
 
         auto timer = Safir::make_unique<boost::asio::steady_timer>(m_ioService);
 

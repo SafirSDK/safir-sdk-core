@@ -36,11 +36,12 @@ namespace Internal
 {
     ResponseHandler::ResponseHandler(boost::asio::strand& strand,
                                      Distribution& distribution,
-                                     const std::function<void(const ConnectionId& connectionId,
-                                                              const InternalRequestId requestId)>& responsePostedCallback)
+                                     const std::function<void(const ConnectionId& connectionId)>& releaseBlocking,
+                                     const std::function<void(const ConnectionId& connectionId, const InternalRequestId requestId)>& responsePostedCallback)
         : m_strand(strand)
         , m_distribution(distribution)
         , m_dataTypeIdentifier(LlufId_Generate64("ResponseHandler"))
+        , m_releaseBlocking(releaseBlocking)
         , m_responsePostedCallback(responsePostedCallback)
     {
         //ioService is started after our constructor, so we do not need to be reentrant.
@@ -75,55 +76,45 @@ namespace Internal
                                                           DistributionData::NewData,
                                                           DistributionData::DropReference);
 
-        for (auto nodeTypeId = m_distribution.GetNodeTypeIds().cbegin(); nodeTypeId != m_distribution.GetNodeTypeIds().cend(); ++nodeTypeId)
+        m_distribution.GetCommunication().SetQueueNotFullCallback(m_strand.wrap([this](const int64_t /*nodeTypeId*/)
         {
-            m_distribution.GetCommunication().SetQueueNotFullCallback
-                (m_strand.wrap([this](const int64_t /*nodeTypeId*/)
-                               {
-                                   const auto pending = std::move(m_waitingConnections);
-                                   for (auto conn = pending.cbegin(); conn != pending.cend(); ++conn)
-                                   {
-                                       const ConnectionPtr to = Connections::Instance().
-                                           GetConnection(*conn,std::nothrow);
-                                       if (to != NULL) //if receiver of the response is dead, theres nothing to do
-                                       {
-                                           DistributeResponses(to);
-                                       }
-                                   }
-                               }),
-                 *nodeTypeId);
-        }
+            const auto pending = std::move(m_waitingConnections);
+            for (auto conn = pending.cbegin(); conn != pending.cend(); ++conn)
+            {
+                const ConnectionPtr to = Connections::Instance().
+                    GetConnection(*conn, std::nothrow);
+                if (to != NULL) //if receiver of the response is dead, theres nothing to do
+                {
+                    lllout << L"DOSE_MAIN: ResponseHandler.OnQueueNotFull from COM. Handle responses for connection " << (*conn) << std::endl;
+                    DistributeResponses(to);
+                }
+            }
+        }), 0);
     }
 
 
     void ResponseHandler::DistributeResponses(const ConnectionPtr& sender)
     {
-        m_strand.dispatch([this, sender]
+        const auto senderId = sender->Id();
+
+        //loop over all the RequestInQueues in the connection
+        sender->ForEachRequestInQueue([this, senderId](const ConsumerId& /*consumer*/, RequestInQueue& queue)
         {
-            const auto senderId = sender->Id();
-
-            auto this_ = this; //fix for vs2010 issue with lambdas
-
-            //loop over all the RequestInQueues in the connection
-            sender->ForEachRequestInQueue([this_, senderId](const ConsumerId& /*consumer*/, RequestInQueue& queue)
+            //loop over all responses in the connection
+            queue.DispatchResponses([this, senderId](const DistributionData& response, bool& dontRemove)
             {
-                auto this__ = this_;
-                auto & senderId_ = senderId;
+                //Try to send the response
+                const bool success = SendResponseInternal(response);
+                dontRemove = !success;
 
-                //loop over all responses in the connection
-                queue.DispatchResponses([this__, senderId_](const DistributionData& response, bool& dontRemove)
+                if (!success)
                 {
-                    //Try to send the response
-                    const bool success = this__->SendResponseInternal(response);
-                    dontRemove = !success;
-
-                    if (!success)
-                    {
-                        this__->m_waitingConnections.insert(senderId_);
-                    }
-                });
+                    m_waitingConnections.insert(senderId);
+                }
             });
         });
+
+        m_releaseBlocking(senderId);
     }
 
 
@@ -141,7 +132,7 @@ namespace Internal
         {
             to->GetRequestOutQueue().AttachResponse(response);
 
-            m_responsePostedCallback(response.GetReceiverId(),response.GetRequestId());
+            m_responsePostedCallback(response.GetReceiverId(), response.GetRequestId());
 
             to->SignalIn();
         }
@@ -168,18 +159,18 @@ namespace Internal
        //Response to another node
        lllout << "Sending the response to node " << toConnection.m_node << std::endl;
 
-       boost::shared_ptr<const char[]> responseP(response.GetReference(),
-                                                 [](const char* data)
-                                                 {
-                                                     DistributionData::DropReference(data);
-                                                 });
-
        //if the requestor node is gone we just discard the response
        const auto nodeType = m_liveNodes.find(toConnection.m_node);
        if (nodeType == m_liveNodes.end())
        {
            return true;
        }
+
+       boost::shared_ptr<const char[]> responseP(response.GetReference(),
+                                                 [](const char* data)
+                                                 {
+                                                     DistributionData::DropReference(data);
+                                                 });
 
        return m_distribution.GetCommunication().Send(toConnection.m_node,
                                                      nodeType->second,

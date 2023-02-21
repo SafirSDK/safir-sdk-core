@@ -49,6 +49,7 @@ namespace Internal
          */
         ResponseHandler(boost::asio::strand& strand,
                         Distribution& distribution,
+                        const std::function<void(const ConnectionId& connectionId)>& releaseBlocking,
                         const std::function<void(const ConnectionId& connectionId,
                                                  const InternalRequestId requestId)>& responsePostedCallback);
 
@@ -82,6 +83,7 @@ namespace Internal
 
         std::set<ConnectionId> m_waitingConnections;
 
+        const std::function<void(const ConnectionId& connectionId)> m_releaseBlocking;
         const std::function<void(const ConnectionId& connectionId,
                                  const InternalRequestId requestId)> m_responsePostedCallback;
     };
