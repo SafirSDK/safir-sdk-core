@@ -106,17 +106,10 @@ namespace
           m_dataTypeIdentifier(LlufId_Generate64("RequestHandler")),
           m_communicationVirtualConnectionId(LlufId_Generate64("CommunicationVirtualConnectionId")) //  -5325874379630851183
     {
-        lllog(7) << L"DOSE_MAIN: RequestHandler constructor, CommunicationVirtualConnectionId=" << m_communicationVirtualConnectionId << std::endl;
         m_responseHandler.reset(new ResponseHandler(m_strand, distribution,
-            [this](const ConnectionId& senderConnectionId)
-        {
-            lllog(7) << L"DOSE_MAIN: Response sent to external node. Try to handle pending requests." << std::endl;
-            ReleaseAllBlocked(senderConnectionId.m_id);
-        },
-            [this](const ConnectionId& toConnectionId, const InternalRequestId requestId)
-        {
-            m_outReqTimers.erase(std::make_pair(toConnectionId.m_id, requestId));
-        }));
+            [this](const ConnectionId& senderConnectionId){ReleaseAllBlocked(senderConnectionId.m_id);},
+            [this](const ConnectionId& toConnectionId, const InternalRequestId requestId){m_outReqTimers.erase(std::make_pair(toConnectionId.m_id, requestId));}
+        ));
 
         m_distribution.SubscribeNodeEvents(
                     // Executed when a 'node included' cb is received
@@ -791,15 +784,6 @@ namespace
 
     void RequestHandler::AddPendingRequest(const int64_t blockingConn, const DistributionData& request)
     {
-        // ---------- Debug code, remove ----------
-        auto qs = GetRequestQueueSize(request);
-        lllog(7) << "DOSE_MAIN: AddPendingRequest for app " << blockingConn << ", ReqInQSize=" << qs << std::endl;
-        if (qs < 10)
-        {
-            SEND_SYSTEM_LOG(Alert, << "AddPendingRequest when ReqInQ not full!");
-        }
-        // ---------- End Debug code ----------
-
         auto timer = Safir::make_unique<boost::asio::steady_timer>(m_ioService);
 
         auto reqId = request.GetRequestId();
@@ -840,6 +824,7 @@ namespace
             if (!reqFound)
             {
                 it->second.push_back(std::make_pair(request, std::move(timer)));
+                lllog(7) << "DOSE_MAIN: Added pending request for app " << blockingConn << ", numberOfPending=" << it->second.size() << std::endl;
             }
         }
         else
@@ -848,6 +833,7 @@ namespace
             PendingRequestsQueue requestQueue;
             requestQueue.push_back(std::make_pair(request, std::move(timer)));
             m_pendingRequests.insert(std::make_pair(blockingConn, std::move(requestQueue)));
+            lllog(7) << "DOSE_MAIN: Added pending request for app " << blockingConn << ", numberOfPending=1" << std::endl;
         }
 
         // Set that an external request is waiting for the receiver
