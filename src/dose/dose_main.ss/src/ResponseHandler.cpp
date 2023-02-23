@@ -65,11 +65,8 @@ namespace Internal
                                                                                 const char* data,
                                                                                 size_t /*size*/)
         {
-            const DistributionData msg =
-                DistributionData::ConstConstructor(new_data_tag, data);
-
+            const DistributionData msg = DistributionData::ConstConstructor(new_data_tag, data);
             DistributionData::DropReference(data);
-
             SendLocalResponse(msg);
         }),
                                                           m_dataTypeIdentifier,
