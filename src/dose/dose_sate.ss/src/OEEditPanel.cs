@@ -227,6 +227,8 @@ namespace Sate
         public void ExpandCollapse(int member)
         {
             dataMembers[member].ShowElements();
+            dataMembers[member].RePositioning();
+
             if (dataMembers[member].Width > Width)
             {
                 Width = dataMembers[member].Width + 50;

@@ -984,6 +984,23 @@ namespace Sate
             ValidateMember();
         }
 
+        public void RePositioning()
+        {
+            SuspendLayout();
+            Width = X_DEFAULT_WIDTH;
+            var location = new Point(X_TYPE_START, Y_START);
+            var numControls = fieldValueControl.Count;
+
+            var index = 0;
+            do
+            {
+                PositionControls(index, ref location);
+            } while (++index < numControls);
+
+            Height = location.Y;
+            ResumeLayout(false);
+        }
+
         protected virtual void PositionControls(int index, ref Point location)
         {
             if (fieldNameLabel.Count > index)

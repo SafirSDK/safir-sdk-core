@@ -89,6 +89,7 @@ namespace Sate
         private DobUnit _clHierarchyRootComplete;
         private DobUnit _clHierarchyRootFiltered;
 
+        private FilterControl filterControl = new FilterControl();
         private List<SateTreeNode> _nsHierarchyRootComplete = new List<SateTreeNode>();
         private List<SateTreeNode> _nsHierarchyRootFiltered = new List<SateTreeNode>();
 
@@ -218,7 +219,6 @@ namespace Sate
             _tabControl.SelectedIndex = 0;
 
             //Filter
-            var filterControl = new FilterControl();
             filterControl.FilterChanged += OnFilterChanged;
             filterControl.Dock = DockStyle.Top;
             _fillpanel.Controls.Add(filterControl);
@@ -1750,6 +1750,8 @@ namespace Sate
             {
                 root.Nodes.Add(new ObjectNode(entityId));
             }
+
+            OnFilterChanged(filterControl.FilterText);
         }
 
         public void DeleteObject(EntityId entityId)
@@ -1781,6 +1783,8 @@ namespace Sate
                     }
                 }
             }
+
+            OnFilterChanged(filterControl.FilterText);
         }
 
         //This application requests to be the owner, i.e pending registration
@@ -1806,6 +1810,8 @@ namespace Sate
             nnode.ImageIndex = _imageHandler.GetImageIndex(nnode.TypeId, nnode.ImageType);
             cnode.SelectedImageIndex = cnode.ImageIndex;
             nnode.SelectedImageIndex = nnode.ImageIndex;
+
+            OnFilterChanged(filterControl.FilterText);
         }
 
         //This application becomes the owner
@@ -1831,6 +1837,8 @@ namespace Sate
             nnode.ImageIndex = _imageHandler.GetImageIndex(nnode.TypeId, nnode.ImageType);
             cnode.SelectedImageIndex = cnode.ImageIndex;
             nnode.SelectedImageIndex = nnode.ImageIndex;
+
+            OnFilterChanged(filterControl.FilterText);
         }
 
         //Registration received via subscription, other application
@@ -1857,6 +1865,8 @@ namespace Sate
             nnode.ImageIndex = _imageHandler.GetImageIndex(nnode.TypeId, nnode.ImageType);
             cnode.SelectedImageIndex = cnode.ImageIndex;
             nnode.SelectedImageIndex = nnode.ImageIndex;
+
+            OnFilterChanged(filterControl.FilterText);
         }
 
         public void SetUnregistered(long typeId)
@@ -1880,6 +1890,8 @@ namespace Sate
             nnode.ImageIndex = _imageHandler.GetImageIndex(nnode.TypeId, nnode.ImageType);
             cnode.SelectedImageIndex = cnode.ImageIndex;
             nnode.SelectedImageIndex = nnode.ImageIndex;
+
+            OnFilterChanged(filterControl.FilterText);
         }
 
 
@@ -1908,6 +1920,8 @@ namespace Sate
             nnode.ImageIndex = _imageHandler.GetImageIndex(nnode.TypeId, nnode.ImageType);
             cnode.SelectedImageIndex = cnode.ImageIndex;
             nnode.SelectedImageIndex = nnode.ImageIndex;
+
+            OnFilterChanged(filterControl.FilterText);
         }
 
         private void SetSubscribed(EntityId entityId)
@@ -1941,6 +1955,8 @@ namespace Sate
             nnode.ImageIndex = _imageHandler.GetImageIndex(nnode.TypeId, nnode.ImageType);
             cnode.SelectedImageIndex = cnode.ImageIndex;
             nnode.SelectedImageIndex = nnode.ImageIndex;
+
+            OnFilterChanged(filterControl.FilterText);
         }
 
         public void LocateInInheritanceTree(long typeId, long? instanceId)

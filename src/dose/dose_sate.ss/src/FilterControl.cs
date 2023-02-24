@@ -22,6 +22,8 @@ namespace Sate
             this.filterText.TextChanged += onFilterChanged;
         }
 
+        public string FilterText { get { return this.filterText.Text; } }
+
         private void onFilterChanged(object sender, EventArgs e)
         {
             FilterChanged?.Invoke(filterText.Text);
