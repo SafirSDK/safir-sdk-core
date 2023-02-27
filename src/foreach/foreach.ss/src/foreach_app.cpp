@@ -44,12 +44,6 @@ namespace Utilities
 {
 namespace ForEach
 {
-
-    Safir::Dob::Typesystem::Int32 ComposeMinusOneContext(const Safir::Dob::Typesystem::Int32 context)
-    {
-        return (context + 1000000) * -1;
-    }
-
     ForEachApp::ForEachApp()
     {
         const Safir::Dob::Typesystem::Int32 numContexts = Safir::Dob::NodeParameters::NumberOfContexts();
@@ -75,7 +69,7 @@ namespace ForEach
                     m_context[context]->m_connection.Open
                         (connectionName,
                          boost::lexical_cast<std::wstring>(inst),
-                         ComposeMinusOneContext(context),
+                         context,
                          context == 0 ? this : NULL, //only context 0 connection has stop handler.
                          &m_context[context]->m_dispatcher);
                     break;
