@@ -446,6 +446,15 @@ void MainWindow::UpdateStatus()
         ui->pushButton_RebootAll->setToolTip(tr("safir_status is not running"));
         ui->pushButton_ShutdownAll->setToolTip(tr("safir_status is not running"));
     }
+    else
+    {
+        ui->pushButton_StopNode->setToolTip(tr(""));
+        ui->pushButton_RebootNode->setToolTip(tr(""));
+        ui->pushButton_ShutdownNode->setToolTip(tr(""));
+        ui->pushButton_StopAll->setToolTip(tr(""));
+        ui->pushButton_RebootAll->setToolTip(tr(""));
+        ui->pushButton_ShutdownAll->setToolTip(tr(""));
+    }
 
     if (m_NodeContextmenu != nullptr)
     {
