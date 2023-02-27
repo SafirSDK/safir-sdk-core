@@ -1,4 +1,16 @@
 -----------------------------------------------------------------------------------------------------------------------
+2023-02-27 version 6.3.13
+-----------------------------------------------------------------------------------------------------------------------
+
+This release fixes the following issue (see http://safirsdkcore.com for details):
+
+#416 Backport request flooding bugfix to 6.3.x
+#414 Backport Sate changes to 6.3.x
+
+The primary motivator for this release was the #416 bug, which is a backport of
+#415 Flooding a node with requests from multiple nodes causes some nodes to hang
+
+-----------------------------------------------------------------------------------------------------------------------
 2017-12-10 version 6.3.12
 -----------------------------------------------------------------------------------------------------------------------
 
