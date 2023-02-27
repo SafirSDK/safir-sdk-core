@@ -4,7 +4,7 @@
 Safir SDK Core User's Guide
 ==========================
 Lars Hagström, Anders Widén and Joel Ottosson
-2022-02-11
+2023-03-02
 
 :cpp: {basebackend@docbook:c++:cpp}
 :csharp: {basebackend@docbook:c:csharp}
@@ -3542,16 +3542,22 @@ In order to get system information, the GUI needs another program, +safir_status
 
 +safir_control_gui+ communicates with the local +safir_status+ program which means that both programs must execute on the same node. However, it is perfectly ok to start these programs on all (or a subset) of the nodes that constitue the system. The Node Control GUI on any node can be used to view the status of the complete system as well as to stop a specific node or all nodes.
 
-<<node_control_overview>> shows a system with 3 nodes. In this case all three Safir nodes run on the local computer using the loopback address.
+<<node_control_overview>> shows a system with 3 nodes. In this case all three Safir nodes run on the local computer using the loopback address. The node that is highlighted in green is the node that the gui is connected to (i.e. the local node). The circled-L symbol shows that the node is a light node. The State column shows whether a light node is detached or attached to the system.
+
+////
+TODO make light node a reference to a chapter on light nodes.
+////
 
 [[node_control_overview]]
 .Node Control screen shot
 ifdef::backend-docbook[]
-image::images/node_control.png["Node Control Screen shot", width="50%"]
+image::images/node_control.png["Node Control Screen shot", width="70%"]
 endif::backend-docbook[]
 ifndef::backend-docbook[]
 image::images/node_control.png["Node Control Screen shot", link="images/node_control.png"]
 endif::backend-docbook[]
+
+The Reboot and Shutdown buttons will only be enabled if the parameters +Safir.Control.Parameters.RebootCommand+ and +Safir.Control.Parameters.ShutdownCommand+ are set to something useful.
 
 === Command Line Tool
 +safir_control_cli+ is a simple command line tool that can be used to execute different stop orders. This tool doesn't require the +safir_status+ program to be started. Type +safir_control_cli --help+ for the available command line options.
@@ -4303,7 +4309,7 @@ Dobexplorer is a tool that is primarily meant for the developers of the Dob, but
 [[dobexplorer_memory]]
 .Dobexplorer showing a graph of memory usage.
 ifdef::backend-docbook[]
-image::images/dobexplorer_memory.png["Dobexplorer showing memory usage", width="50%"]
+image::images/dobexplorer_memory.png["Dobexplorer showing memory usage", width="60%"]
 endif::backend-docbook[]
 ifndef::backend-docbook[]
 image::images/dobexplorer_memory.png["Dobexplorer showing memory usage", link="images/dobexplorer_memory.png"]
@@ -4314,11 +4320,39 @@ endif::backend-docbook[]
 [[dobexplorer_nodes]]
 .Dobexplorer showing node statuses.
 ifdef::backend-docbook[]
-image::images/dobexplorer_nodes.png["Dobexplorer showing node statuses", width="50%"]
+image::images/dobexplorer_nodes.png["Dobexplorer showing node statuses", width="60%"]
 endif::backend-docbook[]
 ifndef::backend-docbook[]
 image::images/dobexplorer_nodes.png["Dobexplorer showing node statuses", link="images/dobexplorer_nodes.png"]
 endif::backend-docbook[]
+
+=== Entity Viewer
+
+The +safir_entity_viewer+ tool is provided as a way to quickly show many instances of one entity, in a table form.
+
+[[entity_viewer]]
+.Entity Viewer screen shot
+ifdef::backend-docbook[]
+image::images/entity_viewer.png["Entity Viewer Screen shot", width="60%"]
+endif::backend-docbook[]
+ifndef::backend-docbook[]
+image::images/entity_viewer.png["Entity Viewer Screen shot", link="images/entity_viewer.png"]
+endif::backend-docbook[]
+
+=== Tool Launcher
+
+The +safir_tool_launcher+ tool is useful for launching the different debug tools of Safir SDK Core. Especially useful when there are several nodes running on the same computer (see <<multiple-nodes-on-one-computer>>)), as it is possible to specify which SAFIR_INSTANCE the launched tool should connect to.
+
+[[tool_launcher]]
+.Tool Launcher screen shot
+ifdef::backend-docbook[]
+image::images/tool_launcher.png["Tool Launcher Screen shot", width="60%"]
+endif::backend-docbook[]
+ifndef::backend-docbook[]
+image::images/tool_launcher.png["Tool Launcher Screen shot", link="images/tool_launcher.png"]
+endif::backend-docbook[]
+
+
 
 === dots_configuration_check
 +dots_configuration_check+ is a command line tool that can be used to quickly validate
