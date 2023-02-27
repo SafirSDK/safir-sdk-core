@@ -63,20 +63,26 @@ namespace Sate
 
         protected List<Label> fieldNameLabel = new List<Label>();
         protected List<Control> fieldValueControl = new List<Control>();
+        protected List<CheckBox> isNullCheckBox = new List<CheckBox>();
 
         private bool ignoreEvent;
         protected List<bool> isNotChanged = new List<bool>();
-        protected List<CheckBox> isNullCheckBox = new List<CheckBox>();
+        
         protected bool isSequenceChanged;
         protected MemberType keyType;
         protected long keyTypeId;
         protected int member;
         protected string memberName = "";
+        protected int arraySize;
         protected ObjectEditPanel parentObjectEditPanel;
 
         protected Label typeLabel;
         protected LinkLabel typeLabelAddItem;
         protected string typeName = "";
+
+        private PaginationControl pagination;
+        private int startIndex = 0;
+        private int endIndex = 0;
 
         protected ObjectDataFieldControl()
         {
@@ -85,7 +91,13 @@ namespace Sate
         protected ObjectDataFieldControl(ObjectInfo objInfo, int member, string typeName, string memberName,
             CollectionType collectionType, int arraySize)
         {
-            Init(objInfo, member, typeName, memberName, collectionType, arraySize);
+            Tag = objInfo;
+            Init(member, typeName, memberName, collectionType, arraySize);
+        }
+        
+        protected ObjectInfo ObjInfo
+        {
+            get { return Tag as ObjectInfo; }
         }
 
         public ObjectEditPanel ParentObjectEditPanel
@@ -115,12 +127,15 @@ namespace Sate
         public abstract void SetFieldValues();
         protected abstract void InsertSequenceItem(int index);
 
-        protected void Init(ObjectInfo objInfo, int member, string typeName, string memberName,
+        protected void Init(int member, string typeName, string memberName,
             CollectionType collectionType, int arraySize)
         {
+            var objInfo = ObjInfo;
+            this.member = member;
             this.typeName = typeName;
             this.memberName = memberName;
             this.collectionType = collectionType;
+            this.arraySize = arraySize;
 
             Controls.Clear();
             fieldValueControl.Clear();
@@ -130,8 +145,6 @@ namespace Sate
             isNotChanged.Clear();
 
             ignoreEvent = true;
-            Tag = objInfo;
-            this.member = member;
             SuspendLayout();
 
             Name = "ObjectDataFieldControl";
@@ -144,54 +157,117 @@ namespace Sate
             {
                 case CollectionType.SingleValueCollectionType:
                 {
-                    InitSingleOrArray(objInfo, member, typeName, arraySize, ref location);
+                    InitSingleValue(typeName, ref location);                    
                 }
                     break;
 
                 case CollectionType.ArrayCollectionType:
                 {
-                    InitSingleOrArray(objInfo, member, typeName, arraySize, ref location);
+                    InitArray(typeName, arraySize, ref location);
                 }
                     break;
 
                 case CollectionType.DictionaryCollectionType:
                 {
-                    InitDictionary(objInfo, member, typeName, ref location);
+                    InitDictionary(member, typeName, ref location);
                 }
                     break;
 
                 case CollectionType.SequenceCollectionType:
                 {
-                    InitSequence(objInfo, member, typeName, ref location);
+                    InitSequence(member, typeName, ref location);
                 }
                     break;
-            }
-
-
-            Controls.AddRange(fieldNameLabel.ToArray());
-            Controls.AddRange(fieldValueControl.ToArray());
-            Controls.AddRange(isNullCheckBox.ToArray());
+            }            
 
             if (typeLabel != null)
                 Controls.Add(typeLabel);
             if (typeLabelAddItem != null)
                 Controls.Add(typeLabelAddItem);
 
-            Height = location.Y;
+            var numberOfValues = fieldValueControl.Count;
+            if (numberOfValues > PaginationControl.PageSizes[0] && pagination == null)
+            {                
+                pagination = new PaginationControl(numberOfValues);
+                pagination.PaginationChange += OnPaginationChange;
+                endIndex = pagination.PageSize;
+            }
+            if (pagination != null)
+            {
+                Controls.Add(pagination);
+            }
 
             SetFieldValues();
+            ShowElements();
+
             ignoreEvent = false;
             ResumeLayout(false);
         }
 
-        protected void InitDictionary(ObjectInfo objInfo, int member, string typeName, ref Point location)
+        private void OnPaginationChange(int page, int startIndex, int endIndex)
+        {
+            this.startIndex = startIndex;
+            this.endIndex = endIndex;
+            // ShowElements();
+            parentObjectEditPanel.ExpandCollapse(member);
+        }
+
+        public void ShowElements()
+        {
+            SuspendLayout();
+
+            var location = new Point(X_TYPE_START, Y_START);
+
+            // Remove visible controls
+            fieldNameLabel.ForEach(c => Controls.Remove(c));
+            fieldValueControl.ForEach(c => Controls.Remove(c));
+            isNullCheckBox.ForEach(c => Controls.Remove(c));
+
+            // Add controls that shall be visible
+            var showCount = endIndex - startIndex;
+
+            
+            Controls.AddRange(fieldValueControl.GetRange(startIndex, showCount).ToArray());
+            if (collectionType != CollectionType.SequenceCollectionType)
+            {
+                Controls.AddRange(isNullCheckBox.GetRange(startIndex, showCount).ToArray());
+            }
+            if (collectionType == CollectionType.DictionaryCollectionType)
+            {
+                if (showCount > 0)
+                    location.Y += Y_STEP * 4;
+                Controls.AddRange(fieldNameLabel.GetRange(startIndex, showCount).ToArray());
+            }
+            else
+            {
+                Controls.AddRange(fieldNameLabel.GetRange(startIndex, Math.Max(1, showCount)).ToArray());
+            }
+
+            for (var i = startIndex; i < Math.Max(1, endIndex); i++)
+            {
+                PositionControls(i, ref location);
+            }
+
+            if (pagination != null)
+            {
+                pagination.Location = new Point(0, location.Y);
+                location.Y += pagination.Height + Y_STEP;
+            }
+
+            Width = X_DEFAULT_WIDTH;
+            Height = Math.Max(location.Y, Y_DEFAULT_HEIGHT);
+
+            ResumeLayout(false);
+        }
+
+        protected void InitDictionary(int member, string typeName, ref Point location)
         {
             MemberType memberType;
             long complexType;
             int typeSize;
             CollectionType ct;
             int arrLength;
-            var memberName = Members.GetInfo(objInfo.Obj.GetTypeId(),
+            var memberName = Members.GetInfo(ObjInfo.Obj.GetTypeId(),
                 member,
                 out memberType,
                 out keyType,
@@ -211,7 +287,7 @@ namespace Sate
             typeLabelAddItem.Location = location;
             typeLabelAddItem.Font = font;
             typeLabelAddItem.LinkColor = ColorMap.ADD_LINK_DEFAULT;
-            typeLabelAddItem.Text = string.Format("Dict<{0}, {1}>", keyTypeName, typeName);
+            typeLabelAddItem.Text = $"Dict<{keyTypeName}, {typeName}>";
             location.X += typeLabelAddItem.Width + X_STEP;
             typeLabelAddItem.Click += AddDictionaryItem_Click;
             var tsi = new ToolStripMenuItem();
@@ -220,9 +296,13 @@ namespace Sate
             typeLabelAddItem.ContextMenuStrip = new ContextMenuStrip();
             typeLabelAddItem.ContextMenuStrip.Items.Add(tsi);
 
+            // special handling for dictionary
+            var fixedName = CreateNameLabel(memberName);
+            fixedName.Location = new Point(X_NAME_START, location.Y);
+            Controls.Add(fixedName);
+
             //set values
-            var tmp = (ObjectInfo) Tag;
-            var container = tmp.Obj.GetMember(member, 0);
+            var container = ObjInfo.Obj.GetMember(member, 0);
             var containerType = container.GetType();
             var keys = (IEnumerable) containerType.GetProperty("Keys").GetValue(container, null);
 
@@ -231,9 +311,7 @@ namespace Sate
             {
                 //key
                 var keyString = ObjectDataFieldDictionaryKey.KeyToString(keyType, k);
-                var nameLabel = index == 0
-                    ? CreateNameLabel(memberName + Environment.NewLine + string.Format("[{0}]", keyString))
-                    : CreateNameLabel(string.Format("[{0}]", keyString));
+                var nameLabel = CreateNameLabel($"[{keyString}]");
                 nameLabel.Tag = k;
                 fieldNameLabel.Add(nameLabel);
 
@@ -242,16 +320,10 @@ namespace Sate
                 changed.Add(false);
                 isNotChanged.Add(false);
                 isNullCheckBox.Add(CreateIsNullCheckbox());
-
-                PositionControls(index, ref location);
                 index++;
             }
 
-            if (index == 0)
-            {
-                fieldNameLabel.Add(CreateNameLabel(memberName));
-                PositionControls(0, ref location);
-            }
+            endIndex = index;
         }
 
         private void AddDictionaryItem_Click(object sender, EventArgs e)
@@ -265,49 +337,41 @@ namespace Sate
                 var maxKeyWidth = X_VALUE_START - X_NAME_START - 2 * X_STEP;
                 var keyStr = CutTextToFit(font, maxKeyWidth, addDlg.KeyString);
                 var setToolTip = keyStr != addDlg.KeyString;
-                
-                if (fieldValueControl.Count == 0)
+
+                var keyIndex = FindDictionaryKeyIndex(key);
+                if (keyIndex < 0)
                 {
-                    fieldNameLabel[0].Text += string.Format(Environment.NewLine + "[{0}]", keyStr);
-                    fieldNameLabel[0].Tag = key;
+                    var keyLabel = CreateNameLabel(string.Format("[{0}]", keyStr));
+                    keyLabel.Tag = key;
+                    fieldNameLabel.Add(keyLabel);
                     if (setToolTip)
-                        toolTip.SetToolTip(fieldNameLabel[0], addDlg.KeyString);
+                        toolTip.SetToolTip(keyLabel, addDlg.KeyString);
                 }
                 else
                 {
-                    var keyIndex = FindDictionaryKeyIndex(key);
-                    if (keyIndex < 0)
-                    {
-                        var keyLabel = CreateNameLabel(string.Format("[{0}]", keyStr));
-                        keyLabel.Tag = key;
-                        fieldNameLabel.Add(keyLabel);
-                        Controls.Add(keyLabel);
-                        if (setToolTip)
-                            toolTip.SetToolTip(keyLabel, addDlg.KeyString);
-                    }
-                    else
-                    {
-                        //duplicated key
-                        fieldValueControl[keyIndex].Focus();
-                        return;
-                    }
+                    //duplicated key
+                    fieldValueControl[keyIndex].Focus();
+                    return;
                 }
 
                 var control = CreateDictionaryItemValueControl();
-                Controls.Add(control);
                 fieldValueControl.Add(control);
                 changed.Add(true);
                 isNotChanged.Add(false);
                 var cb = CreateIsNullCheckbox();
                 cb.Checked = true;
-                Controls.Add(cb);
                 isNullCheckBox.Add(cb);
 
                 InsertDictionaryItem(key);
 
                 SetDictionaryChanged(true, fieldValueControl.Count - 1);
 
-                RePositioning();
+                endIndex = fieldValueControl.Count;
+                if (pagination != null)
+                {
+                    pagination.Update(fieldValueControl.Count, endIndex-1);
+                }
+
                 control.Focus();
                 parentObjectEditPanel.ExpandCollapse(member);
             }
@@ -324,7 +388,7 @@ namespace Sate
             return -1;
         }
 
-        protected void InitSequence(ObjectInfo objInfo, int member, string typeName, ref Point location)
+        protected void InitSequence(int member, string typeName, ref Point location)
         {
             //Type label and AddItem link
             typeLabelAddItem = new LinkLabel();
@@ -334,6 +398,7 @@ namespace Sate
             typeLabelAddItem.Location = location;
             typeLabelAddItem.Font = font;
             location.X = X_NAME_START;
+
             typeLabelAddItem.Click += AddSequenceItem_Click;
             var tsi = new ToolStripMenuItem();
             tsi.Text = "Is changed";
@@ -341,22 +406,19 @@ namespace Sate
             typeLabelAddItem.ContextMenuStrip = new ContextMenuStrip();
             typeLabelAddItem.ContextMenuStrip.Items.Add(tsi);
 
-            var tmp = (ObjectInfo) Tag;
-            var container = tmp.Obj.GetMember(member, 0);
+            var container = ObjInfo.Obj.GetMember(member, 0);
             var containerType = container.GetType();
-            var numberOfValues = (int) containerType.GetProperty("Count").GetValue(container, null);
+            endIndex = (int) containerType.GetProperty("Count").GetValue(container, null);
 
-            for (var i = 0; i < numberOfValues; i++)
+            for (var i = 0; i < endIndex; i++)
             {
                 fieldNameLabel.Add(CreateNameLabel(string.Format("{0}[{1}]", memberName, i)));
                 fieldValueControl.Add(CreateSequenceItemValueControl());
-                PositionControls(i, ref location);
             }
 
-            if (numberOfValues == 0)
+            if (endIndex == 0)
             {
                 fieldNameLabel.Add(CreateNameLabel(memberName));
-                PositionControls(0, ref location);
             }
         }
 
@@ -434,17 +496,23 @@ namespace Sate
             if (insertAt < 0)
             {
                 fieldValueControl.Add(control);
-                InsertSequenceItem(fieldValueControl.Count - 1);
+                insertAt = fieldValueControl.Count - 1;
             }
             else
             {
                 fieldValueControl.Insert(insertAt, control);
-                InsertSequenceItem(insertAt);
             }
+
+            InsertSequenceItem(insertAt);
 
             SetSequenceChanged(true);
 
-            RePositioning();
+            endIndex = fieldValueControl.Count;
+            
+            if (pagination != null)
+            {
+                pagination.Update(fieldValueControl.Count, insertAt);
+            }
 
             parentObjectEditPanel.ExpandCollapse(member);
             control.Focus(); //set input focus on the newly added control
@@ -492,15 +560,17 @@ namespace Sate
                     fieldNameLabel[0].Text = memberName;
                 }
 
-
-                var tmp = (ObjectInfo) Tag;
-                var container = tmp.Obj.GetMember(member, 0);
+                var container = ObjInfo.Obj.GetMember(member, 0);
                 var containerType = container.GetType();
                 containerType.GetMethod("Remove", new[] {key.GetType()}).Invoke(container, new[] {key});
 
                 SetDictionaryChanged(true, -1);
 
-                RePositioning();
+                endIndex = fieldValueControl.Count;
+                if (pagination != null)
+                {
+                    pagination.Update(fieldValueControl.Count, removeAt);
+                }
 
                 parentObjectEditPanel.ExpandCollapse(member);
             }
@@ -539,14 +609,17 @@ namespace Sate
                     fieldNameLabel[0].Text = memberName;
                 }
 
-                var tmp = (ObjectInfo) Tag;
-                var container = tmp.Obj.GetMember(member, 0);
+                var container = ObjInfo.Obj.GetMember(member, 0);
                 var containerType = container.GetType();
                 containerType.GetMethod("RemoveAt").Invoke(container, new object[] {removeAt});
 
                 SetSequenceChanged(true);
 
-                RePositioning();
+                endIndex = fieldValueControl.Count;
+                if (pagination != null)
+                {
+                    pagination.Update(fieldValueControl.Count, removeAt);
+                }
 
                 parentObjectEditPanel.ExpandCollapse(member);
             }
@@ -554,8 +627,7 @@ namespace Sate
 
         protected void SetDictionaryChanged(bool isChanged, int index)
         {
-            var tmp = (ObjectInfo) Tag;
-            var container = tmp.Obj.GetMember(member, 0);
+            var container = ObjInfo.Obj.GetMember(member, 0);
             container.SetChanged(isChanged);
 
             typeLabelAddItem.LinkColor = isChanged ? ColorMap.ADD_LINK_CHANGED : ColorMap.ADD_LINK_DEFAULT;
@@ -591,15 +663,33 @@ namespace Sate
                     fieldValueControl[i].BackColor = ColorMap.ERROR;
             }
 
-            var tmp = (ObjectInfo) Tag;
-            var cont = tmp.Obj.GetMember(member, 0);
+            var cont = ObjInfo.Obj.GetMember(member, 0);
             cont.SetChanged(isChanged);
 
             typeLabelAddItem.LinkColor = isChanged ? ColorMap.ADD_LINK_CHANGED : ColorMap.ADD_LINK_DEFAULT;
             ((ToolStripMenuItem) typeLabelAddItem.ContextMenuStrip.Items[0]).Checked = isChanged;
         }
 
-        protected void InitSingleOrArray(ObjectInfo objInfo, int member, string typeName, int numberOfValues,
+        protected void InitSingleValue(string typeName, ref Point location)
+        {
+            startIndex = 0;
+            endIndex = 1;
+            typeLabel = new Label();
+            typeLabel.Width = X_NAME_START - X_TYPE_START - 2 * X_STEP;
+            typeLabel.Text = typeName;
+            typeLabel.AutoSize = true;
+            typeLabel.Location = location;
+            typeLabel.Font = font;
+            location.X = X_NAME_START;
+
+            fieldNameLabel.Add(CreateNameLabel(memberName));
+            fieldValueControl.Add(CreateValueControl());
+            changed.Add(false);
+            isNotChanged.Add(false);
+            isNullCheckBox.Add(CreateIsNullCheckbox());
+        }
+
+        protected void InitArray(string typeName, int numberOfValues,
             ref Point location)
         {
             typeLabel = new Label();
@@ -612,12 +702,11 @@ namespace Sate
 
             for (var i = 0; i < numberOfValues; i++)
             {
+                fieldNameLabel.Add(CreateNameLabel(memberName + "[" + i + "]"));
                 fieldValueControl.Add(CreateValueControl());
                 changed.Add(false);
                 isNotChanged.Add(false);
-                fieldNameLabel.Add(CreateNameLabel(numberOfValues > 1 ? memberName + "[" + i + "]" : memberName));
                 isNullCheckBox.Add(CreateIsNullCheckbox());
-                PositionControls(i, ref location);
             }
         }
 
@@ -674,7 +763,7 @@ namespace Sate
             {
                 var cont = collectionType == CollectionType.DictionaryCollectionType
                     ? GetDictionaryValue(fieldNameLabel[index].Tag)
-                    : ((ObjectInfo) Tag).Obj.GetMember(member, index);
+                    : ObjInfo.Obj.GetMember(member, index);
 
                 // set isChanged flag to false if this should be done
                 if (isNotChanged[index])
@@ -963,17 +1052,15 @@ namespace Sate
 
         protected virtual void InsertDictionaryItem(object key)
         {
-            var tmp = (ObjectInfo) Tag;
-            var container = tmp.Obj.GetMember(member, 0);
+            var container = ObjInfo.Obj.GetMember(member, 0);
             var containerType = container.GetType();
-            var method = containerType.GetMethod("Add", new[] {key.GetType()});
+            var method = containerType.GetMethod("Add", new[] {containerType.GetGenericArguments()[0]});
             method.Invoke(container, new[] {key});
         }
 
         protected ContainerBase GetDictionaryValue(object key)
         {
-            var tmp = (ObjectInfo) Tag;
-            var container = tmp.Obj.GetMember(member, 0);
+            var container = ObjInfo.Obj.GetMember(member, 0);
             var containerType = container.GetType();
             var value = containerType.GetProperty("Item").GetValue(container, new[] {key});
             return value as ContainerBase;

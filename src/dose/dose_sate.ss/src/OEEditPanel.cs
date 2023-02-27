@@ -226,7 +226,9 @@ namespace Sate
 
         public void ExpandCollapse(int member)
         {
+            dataMembers[member].ShowElements();
             dataMembers[member].RePositioning();
+
             if (dataMembers[member].Width > Width)
             {
                 Width = dataMembers[member].Width + 50;
@@ -268,8 +270,12 @@ namespace Sate
 
 
         private void OnLocateInClassExplorer_Click(object sender, EventArgs e)
-        {
-            ExplorerPanel.Instance.LocateClass(((Object) Tag).GetTypeId());
+        {            
+            var objInfo = Tag as ObjectInfo;
+            var typeId = objInfo.Obj.GetTypeId();
+            var entityInfo = objInfo as EntityInfo;
+            var instanceId = entityInfo?.GetInstanceId().RawValue;
+            ExplorerPanel.Instance.LocateInInheritanceTree(typeId, instanceId);
         }
 
         private void OnResetAllChangeFlags_Click(object sender, EventArgs e)

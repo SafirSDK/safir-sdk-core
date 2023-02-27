@@ -12,8 +12,9 @@ namespace Sate
 
         public ObjectField(ObjectInfo objInfo, int member, long typeId, string name, CollectionType ct, int arraySize)
         {
+            Tag = objInfo;
             this.typeId = typeId;
-            Init(objInfo, member, Operations.GetName(typeId), name, ct, arraySize);
+            Init(member, Operations.GetName(typeId), name, ct, arraySize);
         }
 
         public void TypeChange(long newTypeId, ObjectEditPanel sender)
@@ -333,13 +334,12 @@ namespace Sate
             else if (collectionType == CollectionType.SequenceCollectionType)
             {
                 SetSequenceChanged(false);
-                var tmp = (ObjectInfo) Tag;
-                var container = tmp.Obj.GetMember(member, 0);
+                var container = ObjInfo.Obj.GetMember(member, 0);
                 var containerType = container.GetType();
 
                 if ((int) containerType.GetProperty("Count").GetValue(container, null) != fieldValueControl.Count)
                 {
-                    Init(tmp, member, typeName, memberName, collectionType, 1);
+                    Init(member, typeName, memberName, collectionType, 1);
                     parentObjectEditPanel.ExpandCollapse(member);
                     SetSequenceChanged(true);
                     return;
