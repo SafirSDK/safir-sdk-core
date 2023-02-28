@@ -95,14 +95,10 @@ namespace
         , m_dataTypeIdentifier(LlufId_Generate64("RequestHandler"))
         , m_communicationVirtualConnectionId(LlufId_Generate64("CommunicationVirtualConnectionId"))
     {
-        m_responseHandler.reset(new ResponseHandler(m_strand,
-                            distribution,
-                            [this]
-                            (const ConnectionId& connectionId,
-                             const InternalRequestId requestId)
-                            {
-                                m_outReqTimers.erase(std::make_pair(connectionId.m_id, requestId));
-                            }));
+        m_responseHandler.reset(new ResponseHandler(m_strand, distribution,
+                    [this](const ConnectionId& senderConnectionId){ReleaseAllBlocked(senderConnectionId.m_id);},
+                    [this](const ConnectionId& toConnectionId, const InternalRequestId requestId){m_outReqTimers.erase(std::make_pair(toConnectionId.m_id, requestId));}
+                ));
 
         m_distribution.SubscribeNodeEvents(
                     // Executed when a 'node included' cb is received
