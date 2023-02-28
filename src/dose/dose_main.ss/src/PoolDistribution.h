@@ -230,8 +230,8 @@ namespace Internal
                 m_dobConnection.Close();
             }
 
-            auto instancePart = L"pd_"+boost::lexical_cast<std::wstring>(m_distribution.GetNodeId()) + L"_" + boost::lexical_cast<std::wstring>(m_nodeId);
-            m_dobConnection.Open(L"dose_pool_distribution", instancePart, context, NULL, this);
+            auto instancePart = boost::lexical_cast<std::wstring>(m_distribution.GetNodeId()) + L"_" + boost::lexical_cast<std::wstring>(m_nodeId);
+            m_dobConnection.Open(L"PD", instancePart, context, NULL, this);
 
             m_dobConnection.SubscribeRegistration(Entity::ClassTypeId,
                                                   Typesystem::HandlerId::ALL_HANDLERS,

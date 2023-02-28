@@ -3132,15 +3132,27 @@ string indicates that nodes of this type can't be reached via multicast.
 | How many lost heartbeats before marking nodes of this type as dead.
 
 | SlidingWindowSize
-| Size of the sliding window when communicating with nodes of this type.
+| How many messages that can be sent on the network at the same time when communicating with other nodes. This value has a valid range between 1 and 20. Setting this value to 1 means that every message must be acknowledged from all receivers before continuing sending the next message. If this value is set to 20, it means that it is allowed to send at most 20 messages at the same time before waiting for acknowledgements from the receivers. On a stable network with decent speed it is recommended to use the maximum value (20).
+
+| AckRequestThreshold
+| The maximum number of sent messages that are still unacknowledged, before the sender will explicitly request acknowledgements from the receivers. The valid range for this value is between 1 and SlidingWindowSize. For small values on SlidingWindowSize it is recommended to set AckRequestThreshold=SlidingWindowSize. For SlidingWindowSize close to the maximum value (20), it is recommended to set this value to about half the SlidingWindowSize.
 
 | RetryTimeout
-| Time to wait for Ack before retrying transmission to nodes of this type.
+| Time to wait for acknowledgement before sending the same message again to nodes of this type. This parameter is a sequence of time values where the first value is used as time limit before the first retransmission is made, the second value is used as time limit before the second retransmission an so on. The last value in the sequence is used for any forthcoming retransmissions.
 
 | RequiredForStart
 | If true, a node of this type can start a system of its own. A node with a node
 type where this parameter is set to false will never start a system of its own, it
 just waits for a system to join.
+If IsLightNode is set true this value must be false or it can be omitted. I.e a light node can never be required for start.
+
+| IsLightNode
+| If true, nodes of this node type are light nodes. See lightnodes.
+
+| KeepStateWhileDetached
+| This parameter only has effect if IsLightNode is true.
+If this value is true, all Entities owned by connections on remote nodes are kept in read-only mode. Any requests will result in an error response.
+If this value is false, all Entities owned by connection on remote nodes are unregistered and deleted.
 
 |======================
 
