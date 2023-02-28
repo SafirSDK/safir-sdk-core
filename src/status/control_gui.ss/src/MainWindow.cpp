@@ -342,30 +342,33 @@ void MainWindow::customMenuRequested(QPoint pos)
 void MainWindow::on_pushButton_StopNode_clicked()
 {
     QModelIndexList selected = ui->nodeTableView->selectionModel()->selectedIndexes();
+    auto model = ui->nodeTableView->model();
 
-    if (DisplayConfirmationDialog(m_nodeTableModel->data(m_nodeTableModel->index(selected[0].row(), NAME_COLUMN)).toString(), Safir::Control::Operation::Stop))
+    if (DisplayConfirmationDialog(model->data(model->index(selected[0].row(), NAME_COLUMN)).toString(), Safir::Control::Operation::Stop))
     {
-        SendRequestOnSpecificNode(Safir::Control::Operation::Stop, m_nodeTableModel->data(m_nodeTableModel->index(selected[0].row(), NODE_ID_COLUMN)).toLongLong());
+        SendRequestOnSpecificNode(Safir::Control::Operation::Stop, model->data(model->index(selected[0].row(), NODE_ID_COLUMN)).toLongLong());
     }
 }
 
 void MainWindow::on_pushButton_RebootNode_clicked()
 {
     QModelIndexList selected = ui->nodeTableView->selectionModel()->selectedIndexes();
+    auto model = ui->nodeTableView->model();
 
-    if (DisplayConfirmationDialog(m_nodeTableModel->data(m_nodeTableModel->index(selected[0].row(), NAME_COLUMN)).toString(), Safir::Control::Operation::Reboot))
+    if (DisplayConfirmationDialog(model->data(model->index(selected[0].row(), NAME_COLUMN)).toString(), Safir::Control::Operation::Reboot))
     {
-        SendRequestOnSpecificNode(Safir::Control::Operation::Reboot, m_nodeTableModel->data(m_nodeTableModel->index(selected[0].row(), NODE_ID_COLUMN)).toLongLong());
+        SendRequestOnSpecificNode(Safir::Control::Operation::Reboot, model->data(model->index(selected[0].row(), NODE_ID_COLUMN)).toLongLong());
     }
 }
 
 void MainWindow::on_pushButton_ShutdownNode_clicked()
 {
     QModelIndexList selected = ui->nodeTableView->selectionModel()->selectedIndexes();
+    auto model = ui->nodeTableView->model();
 
-    if (DisplayConfirmationDialog(m_nodeTableModel->data(m_nodeTableModel->index(selected[0].row(), NAME_COLUMN)).toString(), Safir::Control::Operation::Shutdown))
+    if (DisplayConfirmationDialog(model->data(model->index(selected[0].row(), NAME_COLUMN)).toString(), Safir::Control::Operation::Shutdown))
     {
-        SendRequestOnSpecificNode(Safir::Control::Operation::Shutdown, m_nodeTableModel->data(m_nodeTableModel->index(selected[0].row(), NODE_ID_COLUMN)).toLongLong());
+        SendRequestOnSpecificNode(Safir::Control::Operation::Shutdown, model->data(model->index(selected[0].row(), NODE_ID_COLUMN)).toLongLong());
     }
 }
 
