@@ -110,13 +110,11 @@
             <Name>Server</Name>
             <HeartbeatInterval>1.0</HeartbeatInterval>
             <MaxLostHeartbeats>5</MaxLostHeartbeats>
-            <SlidingWindowsSize>2</SlidingWindowsSize>
-            <AckRequestThreshold>1</AckRequestThreshold>
+            <SlidingWindowsSize>20</SlidingWindowsSize>
+            <AckRequestThreshold>10</AckRequestThreshold>
             <RetryTimeout>
-                <Second64>0.02</Second64>
-                <Second64>0.08</Second64>
-                <Second64>0.30</Second64>
-                <Second64>0.50</Second64>
+                <Second64>1.0</Second64>
+                <Second64>2.0</Second64>
             </RetryTimeout>
             <RequiredForStart>True</RequiredForStart>
           </Safir.Dob.NodeType>
