@@ -3,6 +3,7 @@ Linux Build Instructions
 
 We provide pre-built packages for certain linux distributions:
    Ubuntu 20.04 amd64
+   Ubuntu 22.04 amd64
    Debian 11 Bullseye x86
    Debian 11 Bullseye amd64
 
@@ -29,10 +30,10 @@ To install all build dependencies "in one go" run the following from the command
 The last three packages - devscripts, debhelper and fakeroot - are used for debian
 package creation.
 
-Then you need to install conan, which is a C++ package manager we use for some third party
-dependencies:
+Then you need to install conan 1.x, which is a C++ package manager we use for some third party
+dependencies, and python websockets, which we use for some tests.
 
-  pip3 install conan
+  pip3 install "conan<2.0.0" websockets
 
 If you're building for another Debian-based distribution you may have to adjust some
 package names.

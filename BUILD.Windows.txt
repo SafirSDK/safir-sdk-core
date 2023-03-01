@@ -18,21 +18,26 @@ Java Platform (JDK) *
 NSIS (>=3.0) *
 Doxygen *
 Graphviz *
-Conan (>=1.44)
+Conan (<2.0.0)
 
 Items marked with an asterisk (*) are optional.
 
 The easiest way to install these prerequisites is using chocolatey (www.chocolatey.org):
 
    choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System'
-   choco install Temurin11 graphviz nsis doxygen.install ninja python3 conan
+   choco install Temurin11 graphviz nsis doxygen.install ninja python3
 
 Temurin11 is a packaged version OpenJDK 11.
 
-Conan
------
-Safir SDK Core uses conan (as installed above) for downloading some third party code.
+Conan and websockets
+--------------------
+Safir SDK Core uses conan for downloading some third party code.
 For details on what versions are downloaded, see conanfile.py.
+
+So you need to install conan 1.x, which is a C++ package manager we use for some third party
+dependencies, and python websockets, which we use for some tests.
+
+  pip3 install "conan<2.0.0" websockets
 
 Building Safir SDK Core Installer
 ---------------------------------
