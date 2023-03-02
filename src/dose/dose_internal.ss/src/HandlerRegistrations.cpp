@@ -30,6 +30,7 @@
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
 #include <Safir/Dob/Internal/DistributionScopeReader.h>
+#include <Safir/Utilities/Internal/SystemLog.h>
 #include <Safir/Dob/Entity.h>
 #include <Safir/Dob/Service.h>
 
@@ -192,6 +193,15 @@ namespace Internal
                     << "Not allowed for a connection to register a handler that is already registered by the same connection!!!");
             }
 
+            if (DistributionScopeReader::Instance().IsLimited(m_typeId))
+            {
+                std::wostringstream ostr;
+                ostr << "An overregistration of the limited type " << Typesystem::Operations::GetName(m_typeId)
+                     << " with handler " << handlerId << " was detected. "
+                     << "Overregistrations of limited types is not allowed.";
+                throw Typesystem::SoftwareViolationException(ostr.str(), __WFILE__, __LINE__);
+            }
+
             RevokeRegisterer(currentRegisterer, currentConsumer, handlerId, currentRegState.GetRegistrationTime());
         }
 
@@ -322,6 +332,14 @@ namespace Internal
 
             currentRegisterer = statePtr->GetConnection();
             ConsumerId currentConsumer = statePtr->GetConsumer();
+
+            if (DistributionScopeReader::Instance().IsLimited(m_typeId))
+            {
+                SEND_SYSTEM_LOG(Critical,
+                                << "An overregistration of the limited type " << Typesystem::Operations::GetName(m_typeId)
+                                << " with handler " << handlerId << " was detected. "
+                                << "Overregistrations of limited types is not allowed. Your system is now in an inconsistent state!");
+            }
 
             RevokeRegisterer(currentRegisterer,
                              currentConsumer,
