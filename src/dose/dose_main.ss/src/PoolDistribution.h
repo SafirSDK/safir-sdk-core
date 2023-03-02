@@ -181,7 +181,7 @@ namespace Internal
                 return;
             }
 
-            while (CanSend() && !m_connections.empty())
+            while (!m_connections.empty())
             {
                 const DistributionData& d=m_connections.front();
                 Safir::Utilities::Internal::SharedConstCharArray p(d.GetReference(), [=](const char* ptr){DistributionData::DropReference(ptr);});
@@ -359,7 +359,7 @@ namespace Internal
                         currentState.GetEntityStateKind() == DistributionData::Real &&
                             currentState.HasBlob())
                     {
-                        if (!CanSend() || !m_distribution.GetCommunication().Send(m_nodeId, m_nodeType, ToPtr(currentState), currentState.Size(), EntityStateDataTypeId, true))
+                        if (!m_distribution.GetCommunication().Send(m_nodeId, m_nodeType, ToPtr(currentState), currentState.Size(), EntityStateDataTypeId, true))
                         {
                             success=false;
                         }
@@ -374,7 +374,7 @@ namespace Internal
                         currentState.GetEntityStateKind() == DistributionData::Ghost ||
                         !currentState.HasBlob())
                     {
-                        if (!CanSend() || !m_distribution.GetCommunication().Send(m_nodeId, m_nodeType, ToPtr(currentState), currentState.Size(), EntityStateDataTypeId, true))
+                        if (!m_distribution.GetCommunication().Send(m_nodeId, m_nodeType, ToPtr(currentState), currentState.Size(), EntityStateDataTypeId, true))
                         {
                             success=false;
                         }
@@ -394,7 +394,7 @@ namespace Internal
 
                 if (!currentState.IsNoState())
                 {
-                    if (!CanSend() || !m_distribution.GetCommunication().Send(m_nodeId, m_nodeType, ToPtr(currentState), currentState.Size(), EntityStateDataTypeId, true))
+                    if (!m_distribution.GetCommunication().Send(m_nodeId, m_nodeType, ToPtr(currentState), currentState.Size(), EntityStateDataTypeId, true))
                     {
                         success=false;
                     }
@@ -434,7 +434,7 @@ namespace Internal
                     //waiting for the unreg (only applies to normal nodes).
                     if (ownerOnThisNode || (normalNode && isUnregistration))
                     {
-                        if (!CanSend() || !m_distribution.GetCommunication().Send(m_nodeId, m_nodeType, ToPtr(state), state.Size(), RegistrationStateDataTypeId, true))
+                        if (!m_distribution.GetCommunication().Send(m_nodeId, m_nodeType, ToPtr(state), state.Size(), RegistrationStateDataTypeId, true))
                         {
                             success=false;
                         }
@@ -447,13 +447,6 @@ namespace Internal
                 }
             }
             return success;
-        }
-
-        bool CanSend() const
-        {
-            // static const size_t threshold=m_distribution.GetCommunication().SendQueueCapacity(m_nodeType)/2;
-            static const size_t threshold=m_distribution.GetCommunication().SendQueueCapacity(m_nodeType);
-            return m_distribution.GetCommunication().NumberOfQueuedMessages(m_nodeType)<threshold;
         }
 
         void SetTimer(const std::function<void()>& completionHandler)
