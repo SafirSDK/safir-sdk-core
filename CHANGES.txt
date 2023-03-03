@@ -1,4 +1,39 @@
 -----------------------------------------------------------------------------------------------------------------------
+2023-03-03 version 7.1.0
+-----------------------------------------------------------------------------------------------------------------------
+
+This releases major new feature is the implementation of Light Nodes. Please read the
+User's Guide for more information about what they are.
+
+This release also fixes the following issue (see http://safirsdkcore.com for details):
+
+#415 Flooding a node with requests from multiple nodes causes some nodes to hang
+#417 Explain communication parameters better in users guide
+#418 safir_control_gui buttons work on the wrong thing if sort order is changed
+#408 Foreach uses negative contexts for unknown reason
+#378 Write an instruction for how customer projects can use CrashReporter
+#305 Add info on new tools to user's guide
+#411 Sate tree search is not updated on subscribe
+#413 Improve safir_control_gui
+#409 Dots xml deserialization throws incorrect exception
+#338 Improve reflection interface for Dictionaries
+#406 UnsubscribeEntity is not implemented in safir_websocket
+#294 Communication stops working if network interface disappears and comes back
+#398 Add registrations to dobexplorer
+#399 Compiler settings are not applied to user built safir_generated-libraries in C++
+#400 Sate crashes when trying to add a new key in a dictionary with an enumeration as key
+#376 Consider moving the EntityViewer from the SDK to Core
+#393 Create StartMenu shortcut to safir_tool_launcher (and EntityViewer)
+#394 Dobexplorer does not have close buttons on tabs
+#351 valueRefIndex on dictionaries unhandled
+#390 Dictionary parameters crash
+#395 Sate large objects
+#391 dots_v fails to create code for dictionary parameters with enum keys
+#392 Dobexplorer filter/search behaves unexpectedly when searching for things two levels down bug
+
+Also the versions of third party libraries included in the builds have been updated.
+
+-----------------------------------------------------------------------------------------------------------------------
 2022-07-15 version 7.0.1
 -----------------------------------------------------------------------------------------------------------------------
 This release fixes the following issue (see http://safirsdkcore.com for details):
