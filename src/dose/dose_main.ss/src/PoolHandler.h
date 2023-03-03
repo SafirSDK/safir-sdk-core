@@ -78,17 +78,12 @@ namespace Internal
         std::unordered_map<int64_t, int64_t> m_nodes; //map<nodeId, nodeType>
         std::unordered_map<int64_t, std::unique_ptr<StateDistributorType> > m_stateDistributors; //map<nodeType, StateDistributor>
 
-        std::function<void()> m_poolDistributionCompleteCallback;
         bool m_persistenceReady;
-        bool m_poolDistributionComplete;
-        bool m_pdCompleteSignaled;
-        int m_numReceivedPdComplete;
 
         //The NodeInfoHandler can not be started until we have pd complete
         //so the PoolHandler has to own it.
         std::unique_ptr<NodeInfoHandler> m_nodeInfoHandler;
-
-        void SignalPdComplete();
+        
         void RunEndStatesTimer();
         void RunWaitingStatesSanityCheckTimer();
 

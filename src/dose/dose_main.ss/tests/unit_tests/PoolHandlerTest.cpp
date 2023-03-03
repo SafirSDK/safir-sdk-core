@@ -101,7 +101,7 @@ BOOST_AUTO_TEST_CASE( PoolDistributionRequestSenderTest )
     pdr.RequestPoolDistribution(3, 1);
 
     bool pdComplete=false;
-    pdr.Start([&]{pdComplete=true;});
+    pdr.Start();
 
     pdr.PoolDistributionFinished(1);
     pdr.PoolDistributionFinished(2);

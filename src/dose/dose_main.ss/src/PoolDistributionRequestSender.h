@@ -48,7 +48,6 @@ namespace Internal
     {
         PdRequest = 1,      //Request a pool distribution from another node
         PdComplete = 2,     //Answer to PdRequest: my pool distribution is completed including persistent data
-        PdHaveNothing = 3   //Answer to PdRequest: you can ignore me, my pool is empty and I have no persistence ready
     };
     //---------------------------------------------------------
 
@@ -68,22 +67,13 @@ namespace Internal
         {
         }
 
-        void Start(const std::function<void()>& pdComplete)
+        void Start()
         {
-            m_strand.dispatch([=]
+            m_strand.dispatch([this]
             {
-                m_pdComplete=pdComplete;
-                m_running=true;
-                if (m_requests.empty())
-                {
-                    m_pdComplete();
-                }
-                else
-                {
-                    SendPoolDistributionRequests();
-                }
+                m_running = true;
+                SendPoolDistributionRequests();
             });
-
         }
 
         void Stop()
@@ -107,26 +97,21 @@ namespace Internal
         //fromNodeId=0 means all queued requests are finished
         void PoolDistributionFinished(int64_t fromNodeId)
         {
-            m_strand.dispatch([=]
+            m_strand.dispatch([this, fromNodeId]
             {
-                if (fromNodeId==0)
+                if (fromNodeId == 0)
                 {
                     m_requests.clear();
                 }
                 else
                 {
-                    auto& fromNodeId_ = fromNodeId;
-                    auto it=std::find_if(m_requests.begin(), m_requests.end(), [fromNodeId_](const PdReq& r){return r.nodeId==fromNodeId_;});
-                    if (it!=m_requests.end())
+                    auto it = std::find_if(m_requests.begin(), m_requests.end(), [fromNodeId](const PdReq& r) {return r.nodeId == fromNodeId; });
+                    if (it != m_requests.end())
                     {
                         m_requests.erase(it);
                     }
                 }
 
-                if (m_requests.empty())
-                {
-                    m_pdComplete();
-                }
             });
         }
 
@@ -151,12 +136,11 @@ namespace Internal
 
         boost::asio::io_service::strand m_strand;
         CommunicationT& m_communication;
-        std::function<void()> m_pdComplete; //signal pdComplete after all our pdRequests has reported pdComplete
         std::vector<PdReq> m_requests;
 
         void SendPoolDistributionRequests()
         {
-            if (!m_running)
+            if (!m_running || m_requests.empty())
             {
                 return;
             }

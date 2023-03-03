@@ -368,7 +368,7 @@ namespace Internal
 
         bool CanSend() const
         {
-            static const size_t threshold=m_distribution.GetCommunication().SendQueueCapacity(m_nodeType)/2;
+            static const size_t threshold = m_distribution.GetCommunication().SendQueueCapacity(m_nodeType);
             return m_distribution.GetCommunication().NumberOfQueuedMessages(m_nodeType)<threshold;
         }
 

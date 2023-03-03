@@ -58,7 +58,6 @@ namespace Internal
             :m_strand(io)
             ,m_distribution(distribution)
             ,m_running(false)
-            ,m_haveNothing(false)
         {
         }
 
@@ -69,7 +68,6 @@ namespace Internal
             {
                 if (!m_running) //dont call start if its already started
                 {
-                    m_haveNothing=false;
                     m_running=true;
                     StartNextPoolDistribution();
                 }
@@ -88,33 +86,11 @@ namespace Internal
             });
         }
 
-        void SetHaveNothing()
-        {
-            m_strand.dispatch([=]
-            {
-                if (m_running)
-                    return; //not allowed if we are started
-
-                m_haveNothing=true;
-                while (!m_pendingPoolDistributions.empty())
-                {
-                    SendHaveNothing(m_pendingPoolDistributions.front()->NodeId(), m_pendingPoolDistributions.front()->NodeType());
-                    m_pendingPoolDistributions.pop_front();
-                }
-            });
-        }
-
         //Called when a new pdRequest is received. Will result in a pd to the node with specified id.
         void AddPoolDistribution(int64_t nodeId, int64_t nodeTypeId) SAFIR_GCC_VISIBILITY_BUG_WORKAROUND
         {
             m_strand.dispatch([this, nodeId, nodeTypeId]
             {
-                if (m_haveNothing)
-                {
-                    SendHaveNothing(nodeId, nodeTypeId);
-                    return;
-                }
-
                 auto pd=PoolDistributionHandler<DistributionT, PoolDistributionT>::PdPtr(new PoolDistributionT(nodeId, nodeTypeId, m_strand, m_distribution, [=](int64_t nodeId)
                 {
                     if (!m_pendingPoolDistributions.empty() && m_pendingPoolDistributions.front()->NodeId()==nodeId)
@@ -164,13 +140,13 @@ namespace Internal
         boost::asio::io_service::strand m_strand;
         DistributionT& m_distribution;
         bool m_running;
-        bool m_haveNothing;
 
         typedef std::unique_ptr< PoolDistributionT > PdPtr;
         std::deque<PdPtr> m_pendingPoolDistributions;
 
         void StartNextPoolDistribution()
         {
+            // This is always called from m_strand
             if (m_running && !m_pendingPoolDistributions.empty())
             {
                 m_pendingPoolDistributions.front()->Run();

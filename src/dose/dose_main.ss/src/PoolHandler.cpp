@@ -53,9 +53,6 @@ namespace Internal
         ,m_poolDistributionRequests(m_strand.get_io_service(), m_distribution.GetCommunication())
         ,m_waitingStatesSanityTimer(m_strand.get_io_service())
         ,m_persistenceReady(false)
-        ,m_poolDistributionComplete(false)
-        ,m_pdCompleteSignaled(false)
-        ,m_numReceivedPdComplete(0)
     {
         m_persistHandler.reset(new PersistHandler(m_strand.get_io_service(),
                                                   distribution,
@@ -71,34 +68,27 @@ namespace Internal
 
         auto injectNode=[=](const std::string&, int64_t id, int64_t nt, const std::string&)
         {
-            auto this_ = this; //fix for vs 2010 issues with lambdas
-
-            m_strand.dispatch([=]
+            m_strand.dispatch([this, id, nt]
             {
-                if (this_->m_nodes.insert(std::make_pair(id, nt)).second)
+                if (m_nodes.insert(std::make_pair(id, nt)).second)
                 {
-                    if (!this_->m_poolDistributionComplete || !this_->m_persistenceReady)
-                    {
-                        this_->m_poolDistributionComplete=false;
-                        this_->m_poolDistributionRequests.RequestPoolDistribution(id, nt);
-                    }
+                    lllog(5) << L"DoseMain.PoolHandler InjectNode and send PD-request, nodeId=" << id << std::endl;
+                    m_poolDistributionRequests.RequestPoolDistribution(id, nt);
                 }
             });
         };
 
         auto excludeNode=[=](int64_t id, int64_t)
         {
-            auto this_ = this; //fix for vs 2010 issues with lambdas
-
-            m_strand.post([=]
+            m_strand.post([this, id]
             {
-                if (this_->m_nodes.erase(id)>0)
+                if (m_nodes.erase(id)>0)
                 {
-                    this_->m_poolDistributionRequests.PoolDistributionFinished(id);
-                    this_->m_poolDistributor.RemovePoolDistribution(id);
+                    m_poolDistributionRequests.PoolDistributionFinished(id);
+                    m_poolDistributor.RemovePoolDistribution(id);
                 }
 
-                this_->m_waitingStates.NodeDown(id);
+                m_waitingStates.NodeDown(id);
             });
         };
 
@@ -146,26 +136,22 @@ namespace Internal
 
     void PoolHandler::OnPersistenceReady()
     {
-        m_strand.dispatch([=]
+        m_strand.dispatch([this]
         {
             if (m_persistenceReady)
             {
                 return; //already got this event
             }
 
-            if (m_numReceivedPdComplete==0) //got persistence from Dope
-            {
-                //clear all, we dont care anymore for other nodes pools
-                m_poolDistributionRequests.PoolDistributionFinished(0);
-            }
-            else //got persistence from other node
-            {
-                //tell poolDistributor that until we are started, we have no pool or persistence to provide
-                m_poolDistributor.SetHaveNothing();
-            }
-            m_persistenceReady=true;
-            SignalPdComplete();
+            m_persistenceReady = true;
 
+            lllog(5) << L"DoseMain.PoolHandler Persistence data ready. Allow connections on all contexts." << std::endl;
+
+            Connections::Instance().AllowConnect(-1);
+            Connections::Instance().AllowConnect(0);
+
+            m_nodeInfoHandler.reset(new NodeInfoHandler(m_strand.get_io_service(), m_distribution));
+            m_poolDistributor.Start();
         });
     }
 
@@ -178,14 +164,8 @@ namespace Internal
             RunEndStatesTimer();
             RunWaitingStatesSanityCheckTimer();
 
-            auto this_ = this;
-
             //request pool distributions
-            m_poolDistributionRequests.Start(m_strand.wrap([this_]
-            {
-                this_->m_poolDistributionComplete=true;
-                this_->SignalPdComplete();
-            }));
+            m_poolDistributionRequests.Start();
 
             //start distributing states to other nodes
             for (auto vt = m_stateDistributors.cbegin(); vt != m_stateDistributors.cend(); ++vt)
@@ -277,16 +257,13 @@ namespace Internal
 
             case PdComplete:
                 {
+                    
                     lllog(5)<<"PoolHandler: got PdComplete from "<<fromNodeId<<std::endl;
-                    ++m_numReceivedPdComplete;
-                    m_persistHandler->SetPersistentDataReady(); //persistence is ready as soon as we have received one pdComplete
-                    m_poolDistributionRequests.PoolDistributionFinished(fromNodeId);
-                }
-                break;
-
-            case PdHaveNothing:
-                {
-                    lllog(5)<<"PoolHandler: got PdHaveNothing from "<<fromNodeId<<std::endl;
+                    if (!m_persistenceReady)
+                    {
+                        m_persistHandler->SetPersistentDataReady(); //persistence is ready as soon as we have received one pdComplete
+                    }
+                    
                     m_poolDistributionRequests.PoolDistributionFinished(fromNodeId);
                 }
                 break;
@@ -331,19 +308,6 @@ namespace Internal
 
             HandleEntityState(state, fromNodeType);
         });
-    }
-
-    void PoolHandler::SignalPdComplete()
-    {
-        if (m_persistenceReady && m_poolDistributionComplete && !m_pdCompleteSignaled)
-        {
-            lllog(1)<<"PD complete"<<std::endl;
-            m_pdCompleteSignaled=true;
-            m_poolDistributor.Start();
-            Connections::Instance().AllowConnect(-1);
-            Connections::Instance().AllowConnect(0);
-            m_nodeInfoHandler.reset(new NodeInfoHandler(m_strand.get_io_service(), m_distribution));
-        }
     }
 
     void PoolHandler::RunEndStatesTimer()
