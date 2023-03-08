@@ -78,12 +78,13 @@ def copy_tree(srcdir, dstdir):
             copy_file(srcfname, dstdir)
 
 class __WindowsStager(object):
-    def __init__(self, logger, stage):
+    def __init__(self, logger, stage, is32bit):
         self.logger = logger
 
-        self.LIB_DESTINATION = os.path.join(stage, "Development", "Program Files", "safir-sdk-core", "lib")
-        self.DLL_DESTINATION = os.path.join(stage, "Runtime", "Program Files", "safir-sdk-core", "bin")
-        self.HEADER_DESTINATION = os.path.join(stage, "Development", "Program Files", "safir-sdk-core", "include")
+        programFilesDir = "Program Files (x86)" if is32bit else "Program Files"
+        self.LIB_DESTINATION = os.path.join(stage, "Development", programFilesDir, "safir-sdk-core", "lib")
+        self.DLL_DESTINATION = os.path.join(stage, "Runtime", programFilesDir, "safir-sdk-core", "bin")
+        self.HEADER_DESTINATION = os.path.join(stage, "Development", programFilesDir, "safir-sdk-core", "include")
 
     def __copy_dll(self, name):
         for path in os.environ.get("PATH").split(os.pathsep):
@@ -200,13 +201,13 @@ class __WindowsStager(object):
             mkdir(platforms)
             copy_file(qwindows, platforms)
 
-def stage_dependencies(logger, stage):
+def stage_dependencies(logger, stage, is32bit):
     """
     Throws StagingError if something goes wrong.
     """
     logger.log("Copying Safir SDK Core binary dependencies to staging area", "header")
     if sys.platform == "win32":
-        stager = __WindowsStager(logger,stage)
+        stager = __WindowsStager(logger,stage,is32bit)
         stager.run()
 
     else:

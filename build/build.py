@@ -423,7 +423,7 @@ class BuilderBase(object):
     def __package(self):
         try:
             import stage_dependencies
-            stage_dependencies.stage_dependencies(logger, self.stagedir)
+            stage_dependencies.stage_dependencies(logger, self.stagedir, self.target_architecture == "x86")
         except stage_dependencies.StagingError as e:
             raise FatalError("Error while copying dependencies to staging area: " + str(e))
 

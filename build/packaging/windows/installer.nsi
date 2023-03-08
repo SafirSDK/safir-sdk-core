@@ -309,9 +309,11 @@ FunctionEnd
   !if ${ARCH} == "x86"
     InstallDir "$PROGRAMFILES32\Safir SDK Core"
     !define nameBitwidth "32bit"
+    !define programFilesDir "Program Files (x86)"
   !else if ${ARCH} == "x86-64"
     InstallDir "$PROGRAMFILES64\Safir SDK Core"
     !define nameBitwidth "64bit"
+    !define programFilesDir "Program Files"
   !else
     !error "ARCH needs to be defined on command line to be either x86 or x86-64"
   !endif
@@ -342,10 +344,10 @@ FunctionEnd
   !define StartMenuDir "$SMPROGRAMS\Safir SDK Core"
 
   ;Source directories created by build script
-  !define StageDirRuntime "..\..\..\stage\Runtime\Program Files\safir-sdk-core"
-  !define StageDirTools "..\..\..\stage\Tools\Program Files\safir-sdk-core"
-  !define StageDirDevelopment "..\..\..\stage\Development\Program Files\safir-sdk-core"
-  !define StageDirTest "..\..\..\stage\TestSuite\Program Files\safir-sdk-core"
+  !define StageDirRuntime "..\..\..\stage\Runtime\${programFilesDir}\safir-sdk-core"
+  !define StageDirTools "..\..\..\stage\Tools\${programFilesDir}\safir-sdk-core"
+  !define StageDirDevelopment "..\..\..\stage\Development\${programFilesDir}\safir-sdk-core"
+  !define StageDirTest "..\..\..\stage\TestSuite\${programFilesDir}\safir-sdk-core"
 
   ;Get installation folder from registry if available
   InstallDirRegKey HKLM "Software\Safir SDK Core" ""
