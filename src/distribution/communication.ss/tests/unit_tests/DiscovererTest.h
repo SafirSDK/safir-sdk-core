@@ -1162,6 +1162,178 @@ private:
 boost::mutex DiscoverExcludeNodes::mutex;
 std::map<int64_t, DiscoverExcludeNodes::Info> DiscoverExcludeNodes::discoverState;
 
+class DiscovererNodeInfoTest
+{
+public:
+    static void Run()
+    {
+        std::wcout<<"DiscovererNodeInfoTest started"<<std::endl;
+        boost::asio::ip::udp::endpoint ep;
+        boost::asio::io_context io;
+        auto work=boost::asio::make_work_guard(io);
+        boost::thread_group threads;
+        for (int i = 0; i < 9; ++i)
+        {
+            threads.create_thread([&]{io.run();});
+        }
+
+        // -----------------------------------------------------------------------------
+        // Normal to normal, has info about both normal and lightnodes. Send all nodes
+        // -----------------------------------------------------------------------------
+        {
+            sentNodeInfo.clear();
+            Discoverer disc(io, CreateNode(100, 1), 1500, std::set<int64_t>{2}, [&](const Com::Node&){});
+
+            // create 2 seeds
+            disc.m_seeds.emplace(123456, CreateNode(123456, 0));
+            disc.m_seeds.emplace(234567, CreateNode(234567, 0));
+
+            // create 10 normal and 10 light
+            for (int64_t nodeId = 1; nodeId <= 20; ++nodeId)
+            {
+                disc.m_nodes.emplace(nodeId, CreateNode(nodeId, 1 + nodeId % 2));
+            }
+
+            disc.SendNodeInfo(101, false, 100, ep);
+
+            CHECKCB(static_cast<size_t>(sentNodeInfo[0].node_info().number_of_packets()) == sentNodeInfo.size(), [&]{Dump();});
+
+
+            auto result = GetNodeIds();
+            std::vector<int64_t> expected {0,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14 ,15,16,17,18,19,20};
+            CHECKCB(result == expected, [&]{Dump();});
+        }
+
+        // -----------------------------------------------------------------------------
+        // Normal to lightnode, has only lightnodes. Send no other nodes
+        // -----------------------------------------------------------------------------
+        {
+            sentNodeInfo.clear();
+            Discoverer disc(io, CreateNode(100, 1), 1500, std::set<int64_t>{2}, [&](const Com::Node&){});
+
+            // create 20 lightnodes
+            for (int64_t nodeId = 1; nodeId <= 20; ++nodeId)
+            {
+                disc.m_nodes.emplace(nodeId, CreateNode(nodeId, 2));
+            }
+
+            disc.SendNodeInfo(101, true, 100, ep);
+
+            CHECKCB(static_cast<size_t>(sentNodeInfo[0].node_info().number_of_packets()) == sentNodeInfo.size(), [&]{Dump();});
+
+            auto result = GetNodeIds();
+            std::vector<int64_t> expected {};
+            CHECKCB(result == expected, [&]{Dump();});
+        }
+
+        // ---------------------------------------------------------------------------------
+        // Normal to lightnode, has info about both normal and lightnodes. Send only normal
+        // ---------------------------------------------------------------------------------
+        {
+            sentNodeInfo.clear();
+            Discoverer disc(io, CreateNode(100, 1), 1500, std::set<int64_t>{2}, [&](const Com::Node&){});
+
+            // create 2 seeds
+            disc.m_seeds.emplace(123456, CreateNode(123456, 0));
+            disc.m_seeds.emplace(234567, CreateNode(234567, 0));
+
+            // create 10 normal and 10 light
+            for (int64_t nodeId = 1; nodeId <= 20; ++nodeId)
+            {
+                // even nodeId is normal node, odd nodeId is lightnode
+                disc.m_nodes.emplace(nodeId, CreateNode(nodeId, 1 + nodeId % 2));
+            }
+
+            disc.SendNodeInfo(101, true, 100, ep);
+
+            CHECKCB(static_cast<size_t>(sentNodeInfo[0].node_info().number_of_packets()) == sentNodeInfo.size(), [&]{Dump();});
+
+
+            auto result = GetNodeIds();
+            std::vector<int64_t> expected {0,0,2,4,6,8,10,12,14,16,18,20};
+            CHECKCB(result == expected, [&]{Dump();});
+        }
+
+        // -----------------------------------------------------------------------------
+        // Lightnode to normal, has info about other normals. Send no other nodes
+        // -----------------------------------------------------------------------------
+        {
+            sentNodeInfo.clear();
+            Discoverer disc(io, CreateNode(100, 2), 1500, std::set<int64_t>{2}, [&](const Com::Node&){});
+
+            // create 2 seeds
+            disc.m_seeds.emplace(123456, CreateNode(123456, 0));
+            disc.m_seeds.emplace(234567, CreateNode(234567, 0));
+
+            // create 20 normal
+            for (int64_t nodeId = 1; nodeId <= 20; ++nodeId)
+            {
+                disc.m_nodes.emplace(nodeId, CreateNode(nodeId, 1));
+            }
+
+            disc.SendNodeInfo(101, false, 100, ep);
+
+            CHECKCB(static_cast<size_t>(sentNodeInfo[0].node_info().number_of_packets()) == sentNodeInfo.size(), [&]{Dump();});
+
+            auto result = GetNodeIds();
+            std::vector<int64_t> expected {};
+            CHECKCB(result == expected, [&]{Dump();});
+        }
+
+    }
+
+private:
+    static std::vector<Com::CommunicationMessage> sentNodeInfo;
+    struct TestSendPolicy
+    {
+        bool Send(const Com::UserDataPtr val,
+                  boost::asio::ip::udp::socket& /*socket*/,
+                  const boost::asio::ip::udp::endpoint&)
+        {
+            Com::CommunicationMessage cm;
+            cm.ParseFromArray(val->message.get(), static_cast<int>(val->header.totalContentSize));
+            sentNodeInfo.push_back(cm);
+            return true;
+        }
+    };
+    typedef Com::Writer<Com::UserData, TestSendPolicy> TestWriter;
+    typedef Com::DiscovererBasic<TestWriter> Discoverer;
+
+    static Com::Node CreateNode(int64_t nodeId, int64_t nodeType)
+    {
+        return Com::Node(std::string("discoverer_")+boost::lexical_cast<std::string>(nodeId), nodeId, nodeType, std::string("127.0.0.1:")+boost::lexical_cast<std::string>(nodeId), "", true);
+    }
+
+    static std::vector<int64_t> GetNodeIds()
+    {
+        std::vector<int64_t> ids;
+        for (const auto& cm : sentNodeInfo)
+        {
+            for (int i = 0; i < cm.node_info().nodes_size(); ++i)
+            {
+                ids.push_back(cm.node_info().nodes(i).node_id());
+            }
+        }
+
+        std::sort(std::begin(ids), std::end(ids));
+        return ids;
+    }
+
+    static void Dump()
+    {
+        std::wcout << L"Total num packets sent: " << sentNodeInfo.size() << std::endl;
+        for (const auto& p : sentNodeInfo)
+        {
+            std::wcout << L"packet_number=" << p.node_info().packet_number() << ", number_of_packets=" << p.node_info().number_of_packets() << std::endl;
+            for (int i = 0; i < p.node_info().nodes_size(); ++i)
+            {
+                std::wcout << L"node_id=" << p.node_info().nodes(i).node_id() << L", node_type_id=" << p.node_info().nodes(i).node_type_id() << std::endl;
+            }
+        }
+    }
+};
+std::vector<Com::CommunicationMessage> DiscovererNodeInfoTest::sentNodeInfo;
+
 struct DiscovererTest
 {
     static void Run()
@@ -1170,5 +1342,6 @@ struct DiscovererTest
         HandleDiscover::Run();
         DiscoverWithLightNodes::Run();
         DiscoverExcludeNodes::Run();
+        DiscovererNodeInfoTest::Run();
     }
 };

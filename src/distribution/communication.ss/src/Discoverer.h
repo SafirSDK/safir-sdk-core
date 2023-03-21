@@ -25,6 +25,7 @@
 
 #include <set>
 #include <functional>
+#include <algorithm>
 #include <boost/random.hpp>
 #include <boost/asio.hpp>
 #include <boost/optional.hpp>
@@ -378,14 +379,10 @@ namespace Com
 
         void SendNodeInfo(int64_t toId, bool receiverIsLightNode, int64_t fromId, const boost::asio::ip::udp::endpoint& toEndpoint)
         {
-            const int totalNumberOfNodes=static_cast<int>(m_seeds.size()+m_nodes.size());
-            const int numberOfPackets=totalNumberOfNodes/m_numberOfNodesPerNodeInfoMsg+(totalNumberOfNodes%m_numberOfNodesPerNodeInfoMsg>0 ? 1 : 0);
-
             //Compose a DiscoverMessage
             CommunicationMessage cm;
             cm.mutable_node_info()->set_sent_from_id(fromId);
-            cm.mutable_node_info()->set_sent_to_id(toId);
-            cm.mutable_node_info()->set_number_of_packets(numberOfPackets);
+            cm.mutable_node_info()->set_sent_to_id(toId);            
 
             //Add myself - if this node is a lightNode it will be the only information sent.
             CommunicationMessage_Node* me=cm.mutable_node_info()->mutable_sent_from_node();
@@ -395,49 +392,69 @@ namespace Com
             me->set_data_address(m_me.dataAddress);
             me->set_node_type_id(m_me.nodeTypeId);
 
+            // If this is a lightnode, only send the info about ourself.
+            if (m_thisNodeIsLightNode)
+            {
+                // we are a lightnode, we dont send any info about other nodes nor our seeds
+                cm.mutable_node_info()->set_number_of_packets(1);
+                cm.mutable_node_info()->set_packet_number(0);
+                SendMessageTo(cm, toEndpoint);
+                return;
+            }
+
+            // If we get here we are not a lightnode.
+
+            // Calculate the number of nodes to send as nodeInfo
+            const int numberOfNodesToSend = m_seeds.size() +(receiverIsLightNode ? std::count_if(std::begin(m_nodes), std::end(m_nodes),[this](auto n)
+            {
+                return !IsLightNode(n.second.nodeTypeId);
+            }) : m_nodes.size());
+
+            // Calculate the number of packages needed to send all nodes. We always have to send at least one package even if we dont have any other nodes to share.
+            const int numberOfPackets = std::max(1, numberOfNodesToSend / m_numberOfNodesPerNodeInfoMsg + (numberOfNodesToSend % m_numberOfNodesPerNodeInfoMsg > 0 ? 1 : 0));
+
+            cm.mutable_node_info()->set_number_of_packets(numberOfPackets);
+
             int packetNumber=0;
 
-            if (!m_thisNodeIsLightNode) // If this node is a light node we dont send any information about other nodes. Only include ourselves.
+            //Add seeds
+            for (auto seedIt=m_seeds.cbegin(); seedIt!=m_seeds.cend(); ++seedIt)
             {
-                //Add seeds
-                for (auto seedIt=m_seeds.cbegin(); seedIt!=m_seeds.cend(); ++seedIt)
+                CommunicationMessage_Node* ptr=cm.mutable_node_info()->mutable_nodes()->Add();
+                ptr->set_name(seedIt->second.name);
+                ptr->set_node_id(0);
+                ptr->set_control_address(seedIt->second.controlAddress);
+                if (cm.node_info().nodes().size()==m_numberOfNodesPerNodeInfoMsg)
                 {
-                    CommunicationMessage_Node* ptr=cm.mutable_node_info()->mutable_nodes()->Add();
-                    ptr->set_name(seedIt->second.name);
-                    ptr->set_node_id(0);
-                    ptr->set_control_address(seedIt->second.controlAddress);
-                    if (cm.node_info().nodes().size()==m_numberOfNodesPerNodeInfoMsg)
-                    {
-                        cm.mutable_node_info()->set_packet_number(packetNumber);
-                        SendMessageTo(cm, toEndpoint);
-                        cm.mutable_node_info()->mutable_nodes()->Clear(); //clear nodes and continue fill up the same message
-                        ++packetNumber;
-                    }
+                    cm.mutable_node_info()->set_packet_number(packetNumber);
+                    SendMessageTo(cm, toEndpoint);
+                    cm.mutable_node_info()->mutable_nodes()->Clear(); //clear nodes and continue fill up the same message
+                    ++packetNumber;
                 }
+            }
 
-                // Add all other nodes we have talked to and is not excluded. We dont send nodes that only have been reported, i.e we dont spread rumors
-                // If the receiver is a lightNode we exclude other lightNodes from the NodeInfo result.
-                for (auto nodeIt=m_nodes.cbegin(); nodeIt!=m_nodes.cend(); ++nodeIt)
+            // Add all other nodes we have talked to and is not excluded. We dont send nodes that only have been reported, i.e we dont spread rumors
+            // If the receiver is a lightNode we exclude other lightNodes from the NodeInfo result.
+            for (auto nodeIt=m_nodes.cbegin(); nodeIt!=m_nodes.cend(); ++nodeIt)
+            {
+                const Node& node=nodeIt->second;
+                if (receiverIsLightNode && IsLightNode(node.nodeTypeId))
                 {
-                    const Node& node=nodeIt->second;
-                    if (receiverIsLightNode && IsLightNode(node.nodeTypeId))
-                    {
-                        continue; // Dont send NodeInfo about lightNodes to a lightNode.
-                    }
-                    CommunicationMessage_Node* ptr=cm.mutable_node_info()->mutable_nodes()->Add();
-                    ptr->set_name(node.name);
-                    ptr->set_node_id(node.nodeId);
-                    ptr->set_node_type_id(node.nodeTypeId);
-                    ptr->set_control_address(node.controlAddress);
-                    ptr->set_data_address(node.dataAddress);
+                    continue; // Dont send NodeInfo about lightNodes to a lightNode.
+                }
+                CommunicationMessage_Node* ptr=cm.mutable_node_info()->mutable_nodes()->Add();
+                ptr->set_name(node.name);
+                ptr->set_node_id(node.nodeId);
+                ptr->set_node_type_id(node.nodeTypeId);
+                ptr->set_control_address(node.controlAddress);
+                ptr->set_data_address(node.dataAddress);
 
-                    if (cm.node_info().nodes().size()==m_numberOfNodesPerNodeInfoMsg)
-                    {
-                        cm.mutable_node_info()->set_packet_number(packetNumber);
-                        SendMessageTo(cm, toEndpoint);
-                        cm.mutable_node_info()->mutable_nodes()->Clear(); //clear nodes and continue fill up the same message
-                        ++packetNumber;
-                    }
+                if (cm.node_info().nodes().size()==m_numberOfNodesPerNodeInfoMsg)
+                {
+                    cm.mutable_node_info()->set_packet_number(packetNumber);
+                    SendMessageTo(cm, toEndpoint);
+                    cm.mutable_node_info()->mutable_nodes()->Clear(); //clear nodes and continue fill up the same message
+                    ++packetNumber;
                 }
             }
 

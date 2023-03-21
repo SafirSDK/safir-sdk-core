@@ -62,6 +62,7 @@
 #define CHECK(expr) {if (!(expr)) { std::wcout<<"Test failed! Line: "<<__LINE__<<", expr: "<< #expr <<std::endl; exit(1);}}
 #define CHECKMSG(expr, msg) {if (!(expr)) { std::wcout<<"Test failed! Line: "<<__LINE__<<", expr: "<< #expr <<", msg: "<<msg<<std::endl; exit(1);}}
 #define CHECKINF(expr, msg) {if (!(expr)) { std::wcout<<"Test failed! Line: "<<__LINE__<<", expr: "<< #expr <<", msg: " ## msg << std::endl; exit(1);}}
+#define CHECKCB(expr, cb) {if (!(expr)) { std::wcout<<"Test failed! Line: "<<__LINE__<<", expr: "<< #expr <<std::endl; cb(); exit(1);}}
 
 #define TRACELINE {std::wcout<<"line "<<__LINE__<<std::endl;}
 
