@@ -388,6 +388,12 @@ namespace Internal
                 }
                 break;
             }
+
+            auto  regCon = statePtr->GetConnection();
+            if (regCon)
+            {
+                RemoveRegistration(regCon, handlerId);
+            }
         }
 
         statePtr->SetRealState(remoteRegistrationState);
