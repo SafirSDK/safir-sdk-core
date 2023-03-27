@@ -1275,21 +1275,15 @@ For C++, which is not a garbage collected language, we use the smart pointer con
 In C# and Java there is no need for smart pointers, since both these languages have garbage collection.
 
 ===== Smart pointers in C++
-In C++ to guarantee that all dynamically allocated memory is deallocated, the Dob uses the +boost::shared_ptr+ implementation of smart pointers. You can find more information on how to use them here: http://www.boost.org/libs/smart_ptr/smart_ptr.htm.
 
-Since C++ is not garbage collected we do not want to use raw pointers. +shared_ptr+ is a smart pointer that automatically deletes the object pointed to when there are no references to it.
+In C++ to guarantee that all dynamically allocated memory is deallocated, the Dob uses
+the +std::shared_ptr+ implementation of smart pointers. Since C++ is not garbage
+collected we do not want to use raw pointers. +std::shared_ptr+ is a smart pointer that
+automatically deletes the object pointed to when there are no references to it.
 
-Here is part of the introduction from that page:
+Read more about them in your favourite C\+\+ Reference
 
-*********************************************
-Smart pointers are objects which store pointers to dynamically allocated (heap) objects. They behave much like built-in C++ pointers except that they automatically delete the object pointed to at the appropriate time. Smart pointers are particularly useful in the face of exceptions as they ensure proper destruction of dynamically allocated objects. They can also be used to keep track of dynamically allocated objects shared by multiple owners.
-
-Conceptually, smart pointers are seen as owning the object pointed to, and thus responsible for deletion of the object when it is no longer needed.
-*********************************************
-
-The boost::shared_ptr type is included in C\++ since 2007 (ISO/IEC TR 19768:2007 aka
-C++TR1) under the name std::shared_ptr. Safir SDK Core will continue to use the boost
-version so as not to break backward compatibility.
+Prior to version 7.0 Safir SDK Core used the Boost version of shared_ptr, +boost::shared_ptr+.
 
 See <<cpp_type_casting>> for more information on how to cast smart pointers in C++.
 
@@ -1319,22 +1313,29 @@ endif::backend-docbook[]
 
 [[cpp_type_casting]]
 ===== C++ type casting
-The Dob C++ interface uses +boost::shared_ptr+ (as described above) for passing around objects over the interfaces. For example this means that you get a +shared_ptr<Safir.Dob.Entity>+ (typedefed to +Safir.Dob.EntityPtr+ in the generated code) out of the +EntityProxy+ in +OnNewEntity+. If you're subscribing to +EntityParent+ you would want to somehow cast this +EntityPtr+ to an +EntityParentPtr+.
+The Dob C++ interface uses +std::shared_ptr+ (as described above) for passing around
+objects over the interfaces. For example this means that you get a
++std::shared_ptr<Safir.Dob.Entity>+ (typedefed to +Safir.Dob.EntityPtr+ in the generated
+code) out of the +EntityProxy+ in +OnNewEntity+. If you're subscribing to +EntityParent+
+you would want to somehow cast this +EntityPtr+ to an +EntityParentPtr+.
 
-If it was an ordinary pointer you would either use a +static_cast+ or a +dynamic_cast+ operation (if you're unfamiliar with them you should look them up in your C++ reference now), but since these are shared_ptrs you have to use +boost::static_pointer_cast+ or +boost::dynamic_pointer_cast+ to accomplish the same thing.
+If it was an ordinary pointer you would either use a +static_cast+ or a +dynamic_cast+
+operation (if you're unfamiliar with them you should look them up in your C++ reference
+now), but since these are shared_ptrs you have to use +std::static_pointer_cast+ or
++std::dynamic_pointer_cast+ to accomplish the same thing.
 
-*boost::static_pointer_cast*
+*std::static_pointer_cast*
 
-Use boost::static_pointer_cast when you know that the cast will succeed (i.e. you know what type the pointer really has). For example if you have an EntitySubscriber that has subscribed to EntityParent _only_ you can do:
+Use std::static_pointer_cast when you know that the cast will succeed (i.e. you know what type the pointer really has). For example if you have an EntitySubscriber that has subscribed to EntityParent _only_ you can do:
 
-.Using boost::static_pointer_cast
+.Using std::static_pointer_cast
 [source,{cpp}]
 ----------------------------
 void MyEntitySubscriber::OnUpdatedEntity
     (const Safir::Dob::EntityProxy entityProxy)
 {
     EntityParentPtr parent =
-        boost::static_pointer_cast<EntityParent>(entityProxy.GetEntity());
+        std::static_pointer_cast<EntityParent>(entityProxy.GetEntity());
     ... Your code for handling the entity ...
 ----------------------------
 
@@ -1342,11 +1343,11 @@ void MyEntitySubscriber::OnUpdatedEntity
 
 *Warning:* If you add a subscription to AnotherEntity this code will cast AnotherEntity-objects to EntityParentPtrs too, which will result in undefined behaviour.
 
-*boost::dynamic_pointer_cast*
+*std::dynamic_pointer_cast*
 
-Use boost::dynamic_pointer_cast when the pointer could be of several different types that you want to treat differently. For example if you have an EntitySubscriber that has subscribed to EntityChild _and_ AnotherEntity you can do:
+Use std::dynamic_pointer_cast when the pointer could be of several different types that you want to treat differently. For example if you have an EntitySubscriber that has subscribed to EntityChild _and_ AnotherEntity you can do:
 
-.Using boost::dynamic_pointer_cast
+.Using std::dynamic_pointer_cast
 [source,{cpp}]
 ----------------------------
 void MyEntitySubscriber::OnUpdatedEntity
@@ -1355,7 +1356,7 @@ void MyEntitySubscriber::OnUpdatedEntity
     EntityPtr entity = entityProxy.GetEntity();
 
     EntityChildPtr child =
-        boost::dynamic_pointer_cast<EntityChild>(entity);
+        std::dynamic_pointer_cast<EntityChild>(entity);
     if (child != NULL)
     {
         HandleChild(child);
@@ -1363,7 +1364,7 @@ void MyEntitySubscriber::OnUpdatedEntity
     }
 
     AnotherEntityPtr another =
-        boost::dynamic_pointer_cast<AnotherEntity>(entity);
+        std::dynamic_pointer_cast<AnotherEntity>(entity);
     if (another != NULL)
     {
         HandleAnother(another);
@@ -1373,7 +1374,7 @@ void MyEntitySubscriber::OnUpdatedEntity
 
 This would use a different routine to handle the different entities. Another example would be if you have subscribed to EntityParent _only_ but want to treat EntityChild2 differently:
 
-.Another boost::dynamic_pointer_cast example
+.Another std::dynamic_pointer_cast example
 [source,{cpp}]
 ----------------------------
 void MyEntitySubscriber::OnUpdatedEntity
@@ -1382,13 +1383,13 @@ void MyEntitySubscriber::OnUpdatedEntity
     EntityPtr entity = entityProxy.GetEntity();
 
     EntityChild2Ptr child2 =
-        boost::dynamic_pointer_cast<EntityChild2>(entity);
+        std::dynamic_pointer_cast<EntityChild2>(entity);
     if (child2 != NULL)
     {
         HandleChild2(child2);
         return;
     }
-    HandleParent(boost::static_pointer_cast<EntityParent>(entity));
+    HandleParent(std::static_pointer_cast<EntityParent>(entity));
 ----------------------------
 
 In this code HandleChild2 gets called for all objects of the EntityChild2 type (remember that it can be a subclass of EntityChild2 too) and all others will be handled by HandleParent.
@@ -1415,7 +1416,7 @@ void MyEntitySubscriber::OnUpdatedEntity
         return;
     }
 
-    HandleChildren(boost::static_pointer_cast<EntityParent>(entity));
+    HandleChildren(std::static_pointer_cast<EntityParent>(entity));
 ----------------------------
 
 Here the HandleParent routine would be called for EntityParent objects _only_ and all other objects would be handled by HandleChildren.
@@ -1440,7 +1441,7 @@ IsOfType(EntityChild2::ClassTypeId,
          EntityChild::ClassTypeId)   //False
 ----------------------------
 
-This operation should _only_ be used when you need to check relationships between TypeIds. If you have an object you should be using +boost::dynamic_pointer_cast+.
+This operation should _only_ be used when you need to check relationships between TypeIds. If you have an object you should be using +std::dynamic_pointer_cast+.
 
 ===== C# type casting
 Since C# is garbage collected the Dob can use normal C# pointers to objects. This means that the normal type casting operations can be used. C# also does not have an equivalent to static_cast, so there is really only the choice between different forms of the dynamic_cast-like operation to choose between. If you're unsure of how C# casting works you should look it up in your C# reference, since a complete explanation is outside the scope of this document. But here are some pointers:
@@ -1804,7 +1805,7 @@ void VehicleMessageSubscriber::OnMessage
                     (const Safir::Dob::MessageProxy messageProxy)
 {
     Capabilities::Vehicles::VehicleMsgPtr vehicle =
-        boost::static_pointer_cast
+        std::static_pointer_cast
         <Capabilities::Vehicles::VehicleMsg>(messageProxy.GetMessage());
 
     ... do something with vehicle ...
@@ -1938,7 +1939,7 @@ void VehicleServiceHandler::OnServiceRequest
      Safir::Dob::ResponseSenderPtr         responseSender)
 {
     Capabilities::Vehicles::BearingDistanceServicePtr bearingService =
-        boost::static_pointer_cast
+        std::static_pointer_cast
             <Capabilities::Vehicles::BearingDistanceService>
             (serviceRequestProxy.GetRequest());
 
@@ -2146,7 +2147,7 @@ void VehicleHandler::OnCreateRequest
       Safir::Dob::ResponseSenderPtr        responseSender);
 {
     Capabilities::Vehicles::VehiclePtr vehicle =
-        boost::static_pointer_cast<Capabilities::Vehicles::Vehicle>
+        std::static_pointer_cast<Capabilities::Vehicles::Vehicle>
             (entityRequestProxy.GetRequest());
 
     // Callsign and Vehicle ID is required for a create
@@ -2192,7 +2193,7 @@ void VehicleHandler::OnUpdateRequest
      Safir::Dob::ResponseSenderPtr        responseSender);
 {
     Capabilities::Vehicles::VehiclePtr vehicle =
-        boost::static_pointer_cast
+        std::static_pointer_cast
             <Capabilities::Vehicles::Vehicle>
             (entityRequestProxy.GetRequest());
 
@@ -2291,7 +2292,7 @@ void VehicleSubscriber::OnNewEntity
     (const Safir::Dob::EntityProxy entityProxy)
 {
     Capabilities::Vehicles::VehiclePtr vehicle =
-        boost::static_pointer_cast<Capabilities::Vehicles::Vehicle>
+        std::static_pointer_cast<Capabilities::Vehicles::Vehicle>
             (entityProxy.GetEntity());
 
     if (!vehicle->Callsign().IsNull())
@@ -2307,7 +2308,7 @@ void VehicleSubscriber::OnNewEntity
 }
 ----------------------------
 
-See <<type_casting>> for more information on what +boost::static_pointer_cast+ is.
+See <<type_casting>> for more information on what +std::static_pointer_cast+ is.
 
 .Handling the +OnUpdatedEntity+ callback
 [source,{cpp}]
@@ -2316,7 +2317,7 @@ void VehicleSubscriber::OnUpdatedEntity
     (const Safir::Dob::EntityProxy entityProxy)
 {
     Capabilities::Vehicles::VehiclePtr vehicle =
-        boost::static_pointer_cast
+        std::static_pointer_cast
             <Capabilities::Vehicles::Vehicle>
             (entityProxy.GetEntityWithChangeInfo());
 
@@ -2403,7 +2404,7 @@ for (Safir::Dob::EntityIterator it = m_connection.GetEntityIterator
 
 Dereferencing +it+ will give an entity proxy.
 
-Note that the default constructor for EntityIterator creates an "end" iterator, pointing "one past" the last instance. This is a pattern that was inspired by the +boost::filesystem+ directory iterators.
+Note that the default constructor for EntityIterator creates an "end" iterator, pointing "one past" the last instance. This is a pattern that was inspired by the +std::filesystem+ directory iterators.
 
 Iterating over all Vehicles (including subclasses) in C#:
 
@@ -2629,7 +2630,7 @@ void VehicleSubscriber::OnInjectedNewEntity
      (const Safir::Dob::InjectedEntityProxy injectedEntityProxy);
 {
     Capabilities::Vehicles::VehiclePtr vehicle =
-        boost::static_pointer_cast<Capabilities::Vehicles::Vehicle>
+        std::static_pointer_cast<Capabilities::Vehicles::Vehicle>
             (injectedEntityProxy.GetInjection());
 
     m_myLookupTable.Add(vehicle->Callsign(),
