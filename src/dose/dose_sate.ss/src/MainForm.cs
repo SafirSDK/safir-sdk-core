@@ -1973,7 +1973,7 @@ namespace Sate
 
         private void typeIdToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            new TypeIdCalculatorForm().ShowDialog();
+            new TypeIdCalculatorForm().Show();
         }
 
         private void runGarbageCollectorToolStripMenuItem_Click(object sender, EventArgs e)
