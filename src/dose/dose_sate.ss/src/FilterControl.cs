@@ -14,7 +14,7 @@ namespace Sate
     {
         public delegate void FilterHandler(string filter);
 
-        public event FilterHandler FilterChanged;
+        public event FilterHandler FilterChanged;        
 
         public FilterControl()
         {

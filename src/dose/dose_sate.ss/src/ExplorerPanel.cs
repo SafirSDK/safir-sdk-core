@@ -246,11 +246,15 @@ namespace Sate
             {
                 if (_clHierarchyRootFiltered != _clHierarchyRootComplete)
                 {
+                    var selctedFilteredNode = (DobUnit)GetSelectedNode();
+
                     _treeViewClassHierarchy.BeginUpdate();
                     _treeViewClassHierarchy.Nodes.Clear();
                     _clHierarchyRootFiltered = _clHierarchyRootComplete;
                     _treeViewClassHierarchy.Nodes.Add(_clHierarchyRootFiltered);
                     _treeViewClassHierarchy.EndUpdate();
+
+                    LocateInInheritanceTree(selctedFilteredNode.TypeId, selctedFilteredNode.EntityId?.InstanceId.RawValue);
                 }
 
                 return;
@@ -281,11 +285,15 @@ namespace Sate
             {
                 if (_nsHierarchyRootFiltered != _nsHierarchyRootComplete)
                 {
+                    var selctedFilteredNode = (DobUnit)GetSelectedNode();
+
                     _treeViewNsHierarchy.BeginUpdate();
                     _treeViewNsHierarchy.Nodes.Clear();
                     _nsHierarchyRootFiltered = _nsHierarchyRootComplete;
                     _treeViewNsHierarchy.Nodes.AddRange(_nsHierarchyRootFiltered.ToArray());
                     _treeViewNsHierarchy.EndUpdate();
+                    
+                    LocateInNamespaceTree(selctedFilteredNode.TypeId, selctedFilteredNode.EntityId?.InstanceId.RawValue);
                 }
 
                 return;
