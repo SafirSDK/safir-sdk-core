@@ -1,4 +1,14 @@
 -----------------------------------------------------------------------------------------------------------------------
+2023-04-02 version 7.1.1
+-----------------------------------------------------------------------------------------------------------------------
+This release fixes the following issues (see http://safirsdkcore.com for details):
+
+#426 Make Sate TypeIdCalculator non-modal
+#425 Sate preserve selection after cleared filter
+#422 Update users guide to reflect that we're now using std::shared_ptr
+#424 Communication discoverer calculates wrong number of NodeInfo packages
+
+-----------------------------------------------------------------------------------------------------------------------
 2023-03-03 version 7.1.0
 -----------------------------------------------------------------------------------------------------------------------
 
