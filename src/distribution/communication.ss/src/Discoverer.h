@@ -405,10 +405,12 @@ namespace Com
             // If we get here we are not a lightnode.
 
             // Calculate the number of nodes to send as nodeInfo
-            const int numberOfNodesToSend = m_seeds.size() +(receiverIsLightNode ? std::count_if(std::begin(m_nodes), std::end(m_nodes),[this](auto n)
-            {
-                return !IsLightNode(n.second.nodeTypeId);
-            }) : m_nodes.size());
+            const int numberOfNodesToSend = static_cast<int>(m_seeds.size() + (receiverIsLightNode ?
+                                                                               std::count_if(std::begin(m_nodes), std::end(m_nodes),[this](const auto& n)
+                                                                               {
+                                                                                   return !IsLightNode(n.second.nodeTypeId);
+                                                                               })
+                                                                               : m_nodes.size()));
 
             // Calculate the number of packages needed to send all nodes. We always have to send at least one package even if we dont have any other nodes to share.
             const int numberOfPackets = std::max(1, numberOfNodesToSend / m_numberOfNodesPerNodeInfoMsg + (numberOfNodesToSend % m_numberOfNodesPerNodeInfoMsg > 0 ? 1 : 0));
