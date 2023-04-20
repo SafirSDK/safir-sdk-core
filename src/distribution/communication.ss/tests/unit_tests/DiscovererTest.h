@@ -1181,6 +1181,7 @@ public:
         // Normal to normal, has info about both normal and lightnodes. Send all nodes
         // -----------------------------------------------------------------------------
         {
+            std::wcout<<"DiscovererNodeInfoTest: Normal to normal, has info about both normal and lightnodes. Send all nodes"<<std::endl;
             sentNodeInfo.clear();
             Discoverer disc(io, CreateNode(100, 1), 1500, std::set<int64_t>{2}, [&](const Com::Node&){});
 
@@ -1208,6 +1209,7 @@ public:
         // Normal to lightnode, has only lightnodes. Send no other nodes
         // -----------------------------------------------------------------------------
         {
+            std::wcout<<"DiscovererNodeInfoTest: Normal to lightnode, has only lightnodes. Send no other nodes"<<std::endl;
             sentNodeInfo.clear();
             Discoverer disc(io, CreateNode(100, 1), 1500, std::set<int64_t>{2}, [&](const Com::Node&){});
 
@@ -1230,6 +1232,7 @@ public:
         // Normal to lightnode, has info about both normal and lightnodes. Send only normal
         // ---------------------------------------------------------------------------------
         {
+            std::wcout<<"DiscovererNodeInfoTest: Normal to lightnode, has info about both normal and lightnodes. Send only normal"<<std::endl;
             sentNodeInfo.clear();
             Discoverer disc(io, CreateNode(100, 1), 1500, std::set<int64_t>{2}, [&](const Com::Node&){});
 
@@ -1258,6 +1261,7 @@ public:
         // Lightnode to normal, has info about other normals. Send no other nodes
         // -----------------------------------------------------------------------------
         {
+            std::wcout<<"DiscovererNodeInfoTest: Lightnode to normal, has info about other normals. Send no other nodes"<<std::endl;
             sentNodeInfo.clear();
             Discoverer disc(io, CreateNode(100, 2), 1500, std::set<int64_t>{2}, [&](const Com::Node&){});
 
@@ -1280,6 +1284,12 @@ public:
             CHECKCB(result == expected, [&]{Dump();});
         }
 
+        //-----------
+        // shutdown
+        //-----------
+        std::wcout<<"DiscovererNodeInfoTest shutdown"<<std::endl;
+        work.reset();
+        threads.join_all();
     }
 
 private:
