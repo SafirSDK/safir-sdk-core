@@ -23,7 +23,6 @@
 # along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import print_function
 import sys
 import os
 import re
@@ -33,18 +32,6 @@ import subprocess
 import xml.etree.ElementTree as ET
 import codecs
 import argparse
-
-## Fix for unicode cross compatibility
-if sys.version < '3':
-    print("WARNING: Python 2.x support is deprecated and will not be supported by Safir SDK Core 6.5")
-    import codecs
-
-    def u(x):
-        return codecs.unicode_escape_decode(x)[0]
-else:
-    def u(x):
-        return x
-
 
 class VException(Exception):
     pass
@@ -682,7 +669,7 @@ def underscore_formatter(name, style):
         #    - number preceeded by capital or small letter
         #    - small letter preceeded by a number
         #    - last capital letter in a sequence of capital letters, if followed by small letter or number
-        s1 = re.sub(u("([^\._:\u00A4])([A-Z][a-z]+)"), r'\1_\2', name)
+        s1 = re.sub("([^\._:\u00A4])([A-Z][a-z]+)", r'\1_\2', name)
         s2 = re.sub('([a-z])([A-Z])', r'\1_\2', s1)
         s3 = re.sub('([0-9])([A-Za-z])', r'\1_\2', s2)
         s4 = re.sub('([A-Za-z])([0-9])', r'\1_\2', s3)
@@ -851,7 +838,7 @@ def process_at_variable_lookup(gSession, var, dou, table_line, parent_table_line
     elif var == "DEPENDENCY":
         # Special case - the ADA dod file uses an uniterated MATCH(..):DEPENDENCY, which means match to all strings in the iterator
         if index < 0:
-            return dependency_formatter(gSession, u("\u00A4").join(dou.unique_dependencies))
+            return dependency_formatter(gSession, "\u00A4".join(dou.unique_dependencies))
         return dou.unique_dependencies[index]
     elif var == "DEPENDENCYBASE":
         return dou.dependency_base[index]
@@ -1245,12 +1232,12 @@ def process_at_str(gSession, at_string, dou, table_line, parent_table_line, stri
                 # there are any in the expression
                 rc1 = command[command.find("(") + 1:-1]
                 # first replace all escaped slashes with something else (¤)
-                rc1 = rc1.replace("\/", u("\u00A4"))
+                rc1 = rc1.replace("\/", "\u00A4")
                 # Then split on the non-espaced slash
                 ptn, repl = rc1.split("/", 1)
                 # now put the slashes back, unescaped
-                ptn = ptn.replace(u("\u00A4"), "/")
-                repl = repl.replace(u("\u00A4"), "/")
+                ptn = ptn.replace("\u00A4", "/")
+                repl = repl.replace("\u00A4", "/")
                 result = re.sub(ptn, repl, result, 1)
 
             elif command.startswith("REPLACE_ALL("):
@@ -1258,12 +1245,12 @@ def process_at_str(gSession, at_string, dou, table_line, parent_table_line, stri
                 # there are any in the expression
                 rc1 = command[command.find("(") + 1:-1]
                 # first replace all escaped slashes with something else
-                rc1 = rc1.replace("\/", u("\u00A4"))
+                rc1 = rc1.replace("\/", "\u00A4")
                 # Then split on the non-espaced slash
                 ptn, repl = rc1.split("/", 1)
                 # now put the slashes back, unescaped
-                ptn = ptn.replace(u("\u00A4"), "/")
-                repl = repl.replace(u("\u00A4"), "/")
+                ptn = ptn.replace("\u00A4", "/")
+                repl = repl.replace("\u00A4", "/")
                 result = re.sub(ptn, repl, result)
 
             else:

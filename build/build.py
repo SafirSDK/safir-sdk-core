@@ -24,7 +24,6 @@
 #
 ###############################################################################
 """Build script for safir-sdk-core. Check the help to get some hints on what it can do."""
-from __future__ import print_function
 import os
 import glob
 import sys
@@ -73,9 +72,6 @@ except:
     except:
         def linux_distribution():
             return ("unknown",)
-
-if sys.version < '3':
-    print("WARNING: Python 2.x support is deprecated and will not be supported by Safir SDK Core 6.5")
 
 #a few constants
 known_configs = set(["Release", "Debug", "MinSizeRel", "RelWithDebInfo"])
@@ -268,8 +264,6 @@ class Logger():
     @staticmethod
     def __print(data):
         try:
-            if sys.version_info[0] < 3:
-                data = data.encode("utf-8", errors="replace")
             sys.stdout.write(data)
             sys.stdout.write("\n")
             sys.stdout.flush()
