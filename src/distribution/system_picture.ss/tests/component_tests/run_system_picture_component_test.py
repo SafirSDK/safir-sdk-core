@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 ###############################################################################
 #
-# Copyright Saab AB, 2013-2014,2022 (http://safirsdkcore.com)
+# Copyright Saab AB, 2013-2014,2022-2023 (http://safirsdkcore.com)
 #
 # Created by: Lars Hagstrom (lars.hagstrom@consoden.se)
 #
@@ -1972,6 +1972,29 @@ def test_move_lightnode_to_other_system_fast(args):
                     node4.close_and_check()
                     node5.close_and_check()
         return node1.returncode == 0 and node2.returncode == 0 and node3.returncode == 0 and node4.returncode == 0 and node5.returncode == 0
+
+def test_one_normal_one_light_kill_on_reconnect(args):
+    with closing(Node(args,1,light_node = False, multicast = False)) as node1,\
+         closing(Node(args,2,light_node = True, multicast = False, seeds = 1)) as node2:
+        state1 = '''{"elected_id": 1, "is_detached": false, "nodes": [{"name": "node_001", "is_dead": false, "id": 1, "node_type_id": 1},
+                                                                      {"name": "node_002", "is_dead": false, "id": 2, "node_type_id": 11}]}'''
+        state2 = '''{"elected_id": 1, "is_detached": false, "nodes": [{"name": "node_001", "is_dead": false, "id": 1, "node_type_id": 1},
+                                                                      {"name": "node_002", "is_dead": true, "id": 2, "node_type_id": 11}]}'''
+        state3 = '''{"elected_id": 2, "is_detached": true, "nodes": [{"name": "node_002", "is_dead": false, "id": 2, "node_type_id": 11}]}'''
+        inc1 = form_system((node1, node2))
+        node1.wait_for_states(state1)
+        node2.wait_for_states(state1)
+        node1.disconnect()
+        node1.wait_for_states((state1,state2))
+        node2.wait_for_form(allowed_states=(state1,))
+        node2.wait_for_states((state1,state3))
+        node1.reconnect()
+        node1.wait_for_states((state1,state2,state1))
+        node2.close()
+        node1.wait_for_states((state1,state2,state1,state2))
+        node1.close_and_check()
+    return node1.returncode == 0 and node2.returncode == 0
+
 TEST_CASES = (
     "one_normal",
     "one_light",
@@ -2023,8 +2046,8 @@ TEST_CASES = (
     "move_lightnode_to_other_new_node_fast",
     "two_normal_one_light_weird_seed",
     "move_lightnode_to_other_system",
+    "one_normal_one_light_kill_on_reconnect",
     #"move_lightnode_to_other_system_fast",
-    #pull cable and let them fall apart and then reattach
 )
 
 

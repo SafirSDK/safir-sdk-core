@@ -635,6 +635,10 @@ namespace SP
         {
             CheckStrand();
 
+            //This function attempts to avoid excessive flushing of lll, so we
+            //have this thing here to always flush on exit from the function.
+            std::shared_ptr<void> flushOnExit(nullptr, [](auto){lllog(9) << std::flush;});
+
             //This function attempts to not flush the logger until the end of the function
             lllog(9) << m_logPrefix << "Entering UpdateMyState\n";
 
@@ -649,7 +653,6 @@ namespace SP
             //produce a system state.
             if (!CheckPrerequisites())
             {
-                lllog(9) << std::flush;
                 ++m_failedStateUpdates;
 
                 if (m_failedStateUpdates > 60)
@@ -762,14 +765,12 @@ namespace SP
                     const bool res = lastDeadNodes.insert(m_stateMessage.node_info(i).id()).second;
                     if (!res)
                     {
-                        lllog(9) << std::flush;
                         throw std::logic_error("Duplicate dead node in last state! Not good at all!");
                     }
 
                     //check that it's not in live nodes! (This is just a sanity check, really)
                     if (lastLiveNodes.find(m_stateMessage.node_info(i).id()) != lastLiveNodes.end())
                     {
-                        lllog(9) << std::flush;
                         throw std::logic_error("Dead node was already defined as alive in last state!");
                     }
                 }
@@ -781,7 +782,6 @@ namespace SP
                                                                          m_stateMessage.mutable_node_info(i))).second;
                     if (!res)
                     {
-                        lllog(9) << std::flush;
                         throw std::logic_error("Duplicate live node in last state! Not good at all!");
                     }
 
@@ -789,7 +789,6 @@ namespace SP
                     if (lastDeadNodes.find(m_stateMessage.node_info(i).id()) != lastDeadNodes.end() &&
                         m_resurrectingNodes.find(m_stateMessage.node_info(i).id()) != m_resurrectingNodes.end())
                     {
-                        lllog(9) << std::flush;
                         throw std::logic_error("Live node was already defined as dead in last state!");
                     }
                 }
@@ -797,7 +796,6 @@ namespace SP
 
             if (lastDeadNodes.find(m_id) != lastDeadNodes.end())
             {
-                lllog(9) << std::flush;
                 throw std::logic_error("We're dead in the last state! Not good at all!");
             }
 
@@ -1063,7 +1061,6 @@ namespace SP
 
             m_lastStatisticsDirty = false;
 
-            lllog(9) << std::flush;
             return true;
         }
 
