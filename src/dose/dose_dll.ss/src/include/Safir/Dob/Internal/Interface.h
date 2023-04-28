@@ -653,6 +653,11 @@ extern "C"
     DOSE_DLL_API void DoseC_GetNodeId(DotsC_Int64& nodeId,
                                       bool& success);
 
+
+    DOSE_DLL_API void DoseC_IsLightNode(const DotsC_Int32 ctrl,
+                                        bool& isLight,
+                                        bool& success);
+
     //-------------------------------
     // Debug and statistics
     //-------------------------------
@@ -667,4 +672,3 @@ extern "C"
 #ifdef __cplusplus
 }
 #endif
-

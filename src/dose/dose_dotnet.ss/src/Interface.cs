@@ -718,6 +718,12 @@ namespace Safir.Dob
         internal static extern void DoseC_GetNodeId(out System.Int64 nodeId,
                                                     out byte success);
 
+        //DoseC_IsLightNode
+        [DllImport(DOSE_DLL_NAME, CallingConvention = CallingConvention.Cdecl)]
+        internal static extern bool DoseC_IsLightNode(System.Int32 ctrl,
+                                                      out byte isLight,
+                                                      out byte success);
+
         //DoseC_SimulateOverflows
         [DllImport(DOSE_DLL_NAME, CallingConvention = CallingConvention.Cdecl)]
         internal static extern void DoseC_SimulateOverflows(System.Int32 ctrl,

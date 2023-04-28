@@ -285,6 +285,7 @@ namespace Internal
 
         ContextId GetContext() const;
 
+        bool IsLightNode() const;
         //-------------------------------
         // Debug
         //-------------------------------

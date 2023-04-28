@@ -464,6 +464,11 @@ final class Interface {
     static native void GetNodeId(long[] nodeId,
                                  boolean[] success);
 
+    //dose_java_jni Islightnode
+    static native void IsLightNode(int ctrl,
+                                   boolean[] isLight,
+                                   boolean[] success);
+
     //dose_java_jni GetSharedMemoryUsage
     static native void GetSharedMemoryUsage(long[] usage,
                                             boolean[] success);

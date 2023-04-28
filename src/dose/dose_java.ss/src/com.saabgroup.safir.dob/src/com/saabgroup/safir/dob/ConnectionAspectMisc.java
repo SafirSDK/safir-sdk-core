@@ -1,7 +1,7 @@
 // -*- coding: utf-8 -*-
 /******************************************************************************
 *
-* Copyright Saab AB, 2008-2013, 2022 (http://safirsdkcore.com)
+* Copyright Saab AB, 2008-2013, 2022-2023 (http://safirsdkcore.com)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -159,6 +159,26 @@ public class ConnectionAspectMisc
             com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
         }
         return nodeId[0];
+    }
+
+
+    /**
+     * Check whether the current node is a light node.
+     *
+     * This is slightly easier than looking through the parameters to work this out.
+     *
+     * @return true if the current node is a light node.
+     */
+    public boolean isLightNode()
+    {
+        boolean [] isLight = new boolean[1];
+        boolean [] success = new boolean [1];
+        Interface.IsLightNode(getControllerId(), isLight, success);
+        if (!success[0]) {
+            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
+            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+        }
+        return isLight[0];
     }
 
     //

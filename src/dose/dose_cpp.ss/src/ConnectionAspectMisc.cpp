@@ -110,6 +110,19 @@ namespace Dob
         return nodeId;
     }
 
+    bool ConnectionAspectMisc::IsLightNode() const
+    {
+        bool isLight;;
+        bool success;
+        DoseC_IsLightNode(GetControllerId(), isLight, success);
+
+        if (!success)
+        {
+            Typesystem::LibraryExceptions::Instance().Throw();
+        }
+        return isLight;
+    }
+
     Safir::Dob::Typesystem::Int32
     ConnectionAspectMisc::GetQueueCapacity(const Safir::Dob::ConnectionQueueId::Enumeration queue) const
     {

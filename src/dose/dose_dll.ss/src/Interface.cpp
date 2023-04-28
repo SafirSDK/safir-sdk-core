@@ -1395,6 +1395,20 @@ void DoseC_GetNodeId(DotsC_Int64& nodeId,
     CATCH_LIBRARY_EXCEPTIONS;
 }
 
+void DoseC_IsLightNode(const DotsC_Int32 ctrl,
+                       bool& isLight,
+                       bool& success)
+{
+    lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
+    success = false;
+    try
+    {
+        isLight = ControllerTable::Instance().GetController(ctrl)->IsLightNode();
+        success = true;
+    }
+    CATCH_LIBRARY_EXCEPTIONS;
+}
+
 
 void DoseC_SimulateOverflows(const DotsC_Int32 ctrl,
                              const bool inQueues,
@@ -1426,5 +1440,3 @@ void DoseC_GetSharedMemoryUsage(DotsC_Int64& usage,
     }
     CATCH_LIBRARY_EXCEPTIONS;
 }
-
-

@@ -1714,6 +1714,25 @@ void JNICALL Java_com_saabgroup_safir_dob_Interface_GetNodeId
 
 /*
  * Class:     com_saabgroup_safir_dob_Interface
+ * Method:    IsLightNode
+ * Signature: (I[Z[Z)V
+ */
+JNIEXPORT void JNICALL Java_com_saabgroup_safir_dob_Interface_IsLightNode
+  (JNIEnv * env,
+   jclass,
+   jint _ctrl,
+   jbooleanArray _isLight,
+   jbooleanArray _success)
+{
+    bool success;
+    bool isLight;
+    DoseC_IsLightNode(_ctrl,isLight,success);
+    SetJArray(env,_success,success);
+    SetJArray(env,_isLight,isLight);
+}
+
+/*
+ * Class:     com_saabgroup_safir_dob_Interface
  * Method:    GetSharedMemoryUsage
  * Signature: ([J[Z)V
  */

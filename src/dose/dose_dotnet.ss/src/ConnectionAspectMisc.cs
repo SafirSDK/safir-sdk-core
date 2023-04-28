@@ -161,6 +161,25 @@ namespace Safir.Dob
             }
             return nodeId;
         }
+
+        /// <summary>
+        /// Check whether the current node is a light node.
+        /// <para/>
+        /// This is slightly easier than looking through the parameters to work this out.
+        /// </summary>
+        /// <returns>true if the current node is a light node.</returns>
+        public bool IsLightNode()
+        {
+            byte isLight;
+            byte success;
+            Interface.DoseC_IsLightNode(ControllerId, out isLight, out success);
+            if (!Interface.BoolOf(success))
+            {
+                Typesystem.LibraryExceptions.Instance.Throw();
+            }
+            return Interface.BoolOf(isLight);
+        }
+
         #endregion
 
         #region Queue Status

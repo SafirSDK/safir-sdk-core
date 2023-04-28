@@ -75,6 +75,7 @@ namespace Dob
          */
         const std::wstring GetConnectionName() const;
 
+
         /**
          * Get the common part of the connection name.
          *
@@ -104,6 +105,15 @@ namespace Dob
          * @return NodeId of current node
          */
         Dob::Typesystem::Int64 GetNodeId() const;
+
+        /**
+         * Check whether the current node is a light node.
+         *
+         * This is slightly easier than looking through the parameters to work this out.
+         *
+         * @return true if the current node is a light node.
+         */
+        bool IsLightNode() const;
 
         /** @} */
 

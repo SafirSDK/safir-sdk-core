@@ -109,7 +109,7 @@ namespace
           m_exitDispatch(false),
           m_originalInjectionState(no_state_tag),
           m_consumerReferences(),
-          m_isLightNode(IsLightNode())
+          m_isLightNode(Safir::Dob::Internal::IsLightNode())
     {
     }
 
@@ -2898,6 +2898,11 @@ namespace
     ContextId Controller::GetContext() const
     {
         return m_contextId;
+    }
+
+    bool Controller::IsLightNode() const
+    {
+        return m_isLightNode;
     }
 
     void Controller::SimulateOverflows(const bool inQueues, const bool outQueues)
