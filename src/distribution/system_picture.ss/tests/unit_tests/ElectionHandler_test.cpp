@@ -356,7 +356,8 @@ struct Fixture
         : nextNodeId(10)
     {
         SAFE_BOOST_TEST_MESSAGE("Set up fixture");
-        const auto seed = static_cast<unsigned int>(time(nullptr));
+        //const auto seed = static_cast<unsigned int>(time(nullptr));
+        const auto seed = static_cast<unsigned int>(1681462503U);
         std::wcout << "Using random seed " << seed << std::endl;
         srand(seed);
         Connector::Instance().Reset();
@@ -821,23 +822,28 @@ BOOST_AUTO_TEST_CASE( remove_during_election_some_light )
     boost::thread_group threads;
     for (int i = 0; i < numThreads; ++i)
     {
-        threads.create_thread([this, &barrier]
+        threads.create_thread([this, &barrier, i]
         {
             ioService.run();
             SendNodesChanged(true);
+            lllog(1) << "Thread " << i << " waiting at first barrier" << std::endl;
             barrier.wait();
+            lllog(1) << "Thread " << i << " waiting at second barrier" << std::endl;
             barrier.wait();
             ioService.run();
         });
     }
 
+    lllog(1) << "Main thread waiting at first barrier" << std::endl;
     barrier.wait();
     AddNode();
     AddLightNode();
     SendNodesChanged(true);
     ioService.reset();
+    lllog(1) << "Main thread waiting at second barrier" << std::endl;
     barrier.wait();
 
+    //    lllog(1) << "Removing nodes" << std::endl;
     //will keep node 0 to 3
     for (int i = numNodes - 1 + 2; i > 3; --i)
     {
@@ -846,6 +852,7 @@ BOOST_AUTO_TEST_CASE( remove_during_election_some_light )
     }
 
     threads.join_all();
+    lllog(1) << "Checking results" << std::endl;
 
     SAFE_BOOST_CHECK(!nodes.at(0)->eh->IsElected());
     SAFE_BOOST_CHECK(!nodes.at(0)->eh->IsElectionDetached());

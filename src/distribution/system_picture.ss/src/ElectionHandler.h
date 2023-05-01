@@ -440,7 +440,17 @@ namespace SP
 
                         if (m_lastStatistics.IsDead(i) && !m_isLightNode)
                         {
-                            lllog(5) << m_logPrefix << "Got ElectionMessage from a node that is dead! Discarding!" << std::endl;
+#if 1 
+                            if (message.action() == VICTORY)
+                            {
+                                lllog(5) << m_logPrefix << "Got VICTORY from a node that is dead! Starting an election!" << std::endl;
+                                StartElection();
+                            }
+                            else
+#endif
+                            {
+                                lllog(5) << m_logPrefix << "Got ElectionMessage from a node that is dead! Discarding!" << std::endl;
+                            }
                             return;
                         }
 
