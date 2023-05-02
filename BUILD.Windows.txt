@@ -19,13 +19,19 @@ NSIS (>=3.0) *
 Doxygen *
 Graphviz *
 Conan (<2.0.0)
+Python Websockets
+DejaVu Fonts *
+Dia *
+Asciidoctor *
+gzip *
 
 Items marked with an asterisk (*) are optional.
 
 The easiest way to install these prerequisites is using chocolatey (www.chocolatey.org):
 
    choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System'
-   choco install Temurin11 graphviz nsis doxygen.install ninja python3
+   choco install Temurin11 graphviz nsis doxygen.install ninja python3 dejavufonts \
+                 asciidoctorj dia gzip
 
 Temurin11 is a packaged version OpenJDK 11.
 

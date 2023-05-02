@@ -16,16 +16,16 @@ The main goal of the Tracer class is for it to be as easy to use as possible, an
 2. Log to the tracer-instance (in this example the instance is called "debug"):
  - *C++*
 +
-[source,{cpp}]
+[source,c++]
 ----------------------------
 debug << "Testing logging " << myFloat << ", " << myInt << std::endl;
 ----------------------------
 
  - *C#*
 +
-[source,{csharp}]
+[source,csharp]
 ----------------------------
-debug.WriteLine("Testing logging {0}, {1}",myFloat,myInt);
+debug.WriteLine("Testing logging {0}, {1}", myFloat, myInt);
 ----------------------------
 
  - *Java*
@@ -49,21 +49,21 @@ The checking of whether a prefix is enabled happens in slightly different ways i
 
 - In C++ the check is made once for every "<<", but since the check is inlined it can be considered cheap. Floats and suchlike are not expanded into strings until after the check has "been successful", so it is ok to log most stuff using lines like 
 +
-[source,{cpp}]
+[source,c++]
 ----------------------------
 debug << "Testing logging " << myFloat << ", " << myInt << std::endl;
 ----------------------------
 
 - In C# the check is made for every +Write+ or +WriteLine+ call, which means that if you log using the form
 +
-[source,{csharp}]
+[source,csharp]
 ----------------------------
 debug.WriteLine("Hello " + 123.098);
 ----------------------------
 +
 the whole string expansion will be performed before the check is made. It is better to use the form
 +
-[source,{csharp}]
+[source,csharp]
 ----------------------------
 debug.WriteLine("Hello {0}", 123.098);
 ----------------------------
@@ -74,13 +74,13 @@ since the string expansion will not be performed until the check has passed.
 
 Sometimes you might have something that is expensive to calculate in your logs, for example something like 
 
-[source,{cpp}]
+[source,c++]
 ----------------------------
 debug << "Average: " << ExpensiveAverageCalculation() << std::endl;
 ----------------------------
 where the expensive function will be called every time the statement executed whether or not the prefix is enabled. In this situation it is better to check whether logging is enabled using +debug.IsEnabled()+ before doing the logging, like this:
 
-[source,{cpp}]
+[source,c++]
 ----------------------------
 if (debug.IsEnabled()) 
 {

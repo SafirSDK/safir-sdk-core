@@ -53,4 +53,4 @@ override_dh_strip:
 
 #dont compress examples
 override_dh_compress:
-	dh_compress -X.cpp -X.cs -X.h -X.java -X.resx -X.sql -X.ui -X.xhtml -X.py
+	dh_compress -X.cpp -X.cs -X.h -X.java -X.resx -X.sql -X.ui -X.html -X.py

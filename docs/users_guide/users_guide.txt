@@ -1,16 +1,21 @@
 // -*- coding: utf-8 -*-
 :encoding: UTF-8
+:source-highlighter: rouge
 
 Safir SDK Core User's Guide
 ==========================
 Lars Hagström, Anders Widén and Joel Ottosson
 2023-03-02
+:source-highlighter: rouge
+:doctype: book
+:toc:
+:toclevels: 4
+:sectnumlevels: 5
+:pdf-page-size: A4
+:appendix-caption: Appendix
+:sectnums:
 
-:cpp: {basebackend@docbook:c++:cpp}
-:csharp: {basebackend@docbook:c:csharp}
-:json: {basebackend@docbook:java:java}
-
-:numbered!:
+[preface]
 == Preface
 The purpose of this document is to provide a comprehensive guide to using the services in Safir SDK Core. The reader should have general knowledge about object-oriented programming. Some knowledge of distributed real-time systems programming is also desirable, but not essential.
 
@@ -32,7 +37,7 @@ To obtain the latest version, please visit http://safirsdkcore.com/[].
 
 [[licenses]]
 === Licences and Copying
-    Copyright (C) 2004 - 2015 Saab AB.
+    Copyright (C) 2004 - 2023 Saab AB.
     Permission is granted to copy, distribute and/or modify this document
     under the terms of the GNU Free Documentation License, Version 1.3
     or any later version published by the Free Software Foundation;
@@ -49,7 +54,6 @@ For more information on the GPL v3 license, see http://gplv3.fsf.org/[].
 Portions of the source code has other licenses and other copyright holders. These are
 listed in the file source package file build/packaging/debian/copyright.
 
-:numbered:
 == What is Safir SDK Core?
 
 Safir SDK Core is a middleware and platform for creation of distributed soft real-time
@@ -88,12 +92,12 @@ Component dependencies and the layered architecture of Safir SDK Core is illustr
 
 [[sdk_core_component_dependencies]]
 .Safir SDK Core component dependencies
-ifdef::backend-docbook[]
+ifdef::backend-docbook5[]
 image::images/block_diagram.eps["Component Dependencies", scaledwidth="50%"]
-endif::backend-docbook[]
-ifndef::backend-docbook[]
+endif::backend-docbook5[]
+ifndef::backend-docbook5[]
 image::images/block_diagram.png["Component Dependencies", link="images/block_diagram.png"]
-endif::backend-docbook[]
+endif::backend-docbook5[]
 
 Again, to be able to use Safir SDK Core you do not need to understand or like these acronyms, but knowing that they are there may make some things in the SDK easier to use.
 
@@ -642,7 +646,7 @@ routine, and those to be fetched from parameter definitions are defined. For exa
 Will result in generated code like:
 
 .Generated C++ create routine
-[source,{cpp}]
+[source,c++]
 -----------------------------------------------------
 /**
  * Create a position with dummy altitude.
@@ -902,7 +906,7 @@ Property mappings are inherited, so, for example, any class that inherits from S
 To use the property you need to have an object of a type that is mapped to it. For example you could have set up a subscription to Capabilities.Vehicles.Vehicle (which is mapped to the NamedObject property).
 
 .Using a property
-[source,{cpp}]
+[source,c++]
 ----------------------------
 void DisplayName(const Safir::Dob::Typesystem::ObjectPtr & obj)
 {
@@ -931,8 +935,9 @@ on CMake, visit http://www.cmake.org[]).
 
 [[cmake-simple]]
 .Simple CMakeLists.txt for building a safir_generated module out of two dou files
+[source,cmake]
 ----------------------------
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.16)
 
 find_package(SafirSDKCore REQUIRED)
 
@@ -990,6 +995,7 @@ and C++ header files somewhere where your code can find them.
 
 [[cmake-install]]
 .CMakeLists.txt commands for installing safir_generated files
+[source,cmake]
 ----------------------------
 #relative paths, relative to CMAKE_INSTALL_PREFIX
 install_safir_generated_library(
@@ -1029,12 +1035,12 @@ be used to build any CMakeLists.txt file. <<dobmake>> shows dobmake running unde
 
 [[dobmake]]
 .Dobmake screen shot
-ifdef::backend-docbook[]
+ifdef::backend-docbook5[]
 image::images/dobmake.png["Dobmake Screen shot", width="70%"]
-endif::backend-docbook[]
-ifndef::backend-docbook[]
+endif::backend-docbook5[]
+ifndef::backend-docbook5[]
 image::images/dobmake.png["Dobmake Screen shot", link="images/dobmake.png"]
-endif::backend-docbook[]
+endif::backend-docbook5[]
 
 To build a CMake project, enter the path to the CMakeLists.txt file in the _Dou
 directory_ field (or select the CMakeLists.txt file using the browse button).
@@ -1072,12 +1078,12 @@ So an A object (myA) could look like in <<example_object>>.
 
 [[example_object]]
 .Example object
-ifdef::backend-docbook[]
+ifdef::backend-docbook5[]
 image::images/example_object.eps["Example object", scaledwidth="25%"]
-endif::backend-docbook[]
-ifndef::backend-docbook[]
+endif::backend-docbook5[]
+ifndef::backend-docbook5[]
 image::images/example_object.png["Example object", link="images/example_object.png"]
-endif::backend-docbook[]
+endif::backend-docbook5[]
 
 
 ==== Syntax in the different languages
@@ -1097,7 +1103,7 @@ collector. See <<smart-pointers>> for some info on smart pointers).
 
 [[cpp-top-level]]
 .Operating on top-level members in C++
-[source,{cpp}]
+[source,c++]
 ----------------------------
 // Get MyFloat out of myA
 int val = myA->MyFloat();
@@ -1123,7 +1129,7 @@ myA->MyFloat().SetNull();
 
 [[cs-top-level]]
 .Operating on top-level members in C#
-[source,{csharp}]
+[source,csharp]
 ----------------------------
 // Get MyFloat out of myA
 int val = myA.MyFloat.Val;
@@ -1173,7 +1179,7 @@ Things get a bit more interesting when accessing nested members, see <<cpp-neste
 
 [[cpp-nested]]
 .Operating on nested members in C++
-[source,{cpp}]
+[source,c++]
 ----------------------------
 // Get MyInt
 int val = myA->MyB()->MyInt();
@@ -1203,7 +1209,7 @@ myA->MyB()->MyInt().SetNull();
 
 [[cs-nested]]
 .Operating on nested members in C#
-[source,{csharp}]
+[source,csharp]
 ----------------------------
 // Get MyInt
 int val = myA.MyB.Obj.MyInt.Val;
@@ -1304,12 +1310,12 @@ For the discussion in this section the object hierarchy in <<example_object_hier
 
 [[example_object_hierarchy]]
 .Example object hierarchy
-ifdef::backend-docbook[]
+ifdef::backend-docbook5[]
 image::images/object_hierarchy.eps["Example object hierarchy", scaledwidth="40%"]
-endif::backend-docbook[]
-ifndef::backend-docbook[]
+endif::backend-docbook5[]
+ifndef::backend-docbook5[]
 image::images/object_hierarchy.png["Example object hierarchy", link="images/object_hierarchy.png"]
-endif::backend-docbook[]
+endif::backend-docbook5[]
 
 [[cpp_type_casting]]
 ===== C++ type casting
@@ -1329,7 +1335,7 @@ now), but since these are shared_ptrs you have to use +std::static_pointer_cast+
 Use std::static_pointer_cast when you know that the cast will succeed (i.e. you know what type the pointer really has). For example if you have an EntitySubscriber that has subscribed to EntityParent _only_ you can do:
 
 .Using std::static_pointer_cast
-[source,{cpp}]
+[source,c++]
 ----------------------------
 void MyEntitySubscriber::OnUpdatedEntity
     (const Safir::Dob::EntityProxy entityProxy)
@@ -1348,7 +1354,7 @@ void MyEntitySubscriber::OnUpdatedEntity
 Use std::dynamic_pointer_cast when the pointer could be of several different types that you want to treat differently. For example if you have an EntitySubscriber that has subscribed to EntityChild _and_ AnotherEntity you can do:
 
 .Using std::dynamic_pointer_cast
-[source,{cpp}]
+[source,c++]
 ----------------------------
 void MyEntitySubscriber::OnUpdatedEntity
     (const Safir::Dob::EntityProxy entityProxy)
@@ -1375,7 +1381,7 @@ void MyEntitySubscriber::OnUpdatedEntity
 This would use a different routine to handle the different entities. Another example would be if you have subscribed to EntityParent _only_ but want to treat EntityChild2 differently:
 
 .Another std::dynamic_pointer_cast example
-[source,{cpp}]
+[source,c++]
 ----------------------------
 void MyEntitySubscriber::OnUpdatedEntity
         (const Safir::Dob::EntityProxy entityProxy)
@@ -1403,7 +1409,7 @@ In this code HandleChild2 gets called for all objects of the EntityChild2 type (
 You should *only* use direct TypeId comparison when you want to check that a type is of _one specific type but not a subtype._ For example if you have subscribed to EntityParent and you want to handle EntityParent differently from the subclasses you can do:
 
 .Direct TypeId comparison
-[source,{cpp}]
+[source,c++]
 ----------------------------
 void MyEntitySubscriber::OnUpdatedEntity
     (const Safir::Dob::EntityProxy entityProxy)
@@ -1427,7 +1433,7 @@ This construction should be used _very_ sparingly. It is probably not the behavi
 The Dob provides an operation Safir::Dob::Typesystem::Operations::IsOfType that can be used to check the relationship between TypeIds while taking inheritance into account.
 
 .IsOfType logic
-[source,{cpp}]
+[source,c++]
 ----------------------------
 IsOfType(EntityParent::ClassTypeId,
          EntityParent::ClassTypeId)  //True
@@ -1449,7 +1455,7 @@ Since C# is garbage collected the Dob can use normal C# pointers to objects. Thi
 If you know the type of the object (by only having subscribed to one type), go right ahead and cast it:
 
 .Type casting in C#
-[source,{csharp}]
+[source,csharp]
 ----------------------------
     AnotherEntity ent = (AnotherEntity)entity;
    ... do something ...
@@ -1460,7 +1466,7 @@ If for some reason the entity was not of the expected type an exception will be 
 If you need to find out the type there are two ways to do it. One good and one not so good. Either you can use the _is_ operation to check that the type is of the right kind and then cast it using c-style casts to get an object of the right type:
 
 .Using the +is+ operator
-[source,{csharp}]
+[source,csharp]
 ----------------------------
 if (entity is EntityChild) //not recommended way of checking type
 {
@@ -1471,7 +1477,7 @@ if (entity is EntityChild) //not recommended way of checking type
 The drawback of using this approach is that you in fact get two type checks, one in the is operation and one in the cast operation. C# provides another operation that means that you only get one type check:
 
 .Using the +as+ operator
-[source,{csharp}]
+[source,csharp]
 ----------------------------
 EntityChild child = entity as EntityChild;
 if (child != null)
@@ -1603,7 +1609,7 @@ All objects of types defined by dou files can be serialized to and from XML and 
 * JSON serialized objects must always have an attribute named "_douType" which specifies the type as it is stated in the dou file. For example +"_douType" : "Safir.Dob.NodeInfo"+. The rest of the attributes will be named exactly as they are in the corresponding dou file.
 
 .Example of object serialized to JSON
-[source,{json}]
+[source,json]
 ----------------------------
 {
     "_douType" : "Capabilities.TestObj",
@@ -1692,12 +1698,12 @@ The upshot is that all callbacks (except, of course, the +OnDoDispatch+ one) are
 
 [[dispatching_sequence_diagram]]
 .Dispatching sequence diagram
-ifdef::backend-docbook[]
+ifdef::backend-docbook5[]
 image::images/dispatching_sequence_diagram.png["Dispatching Sequence Diagram", width="50%"]
-endif::backend-docbook[]
-ifndef::backend-docbook[]
+endif::backend-docbook5[]
+ifndef::backend-docbook5[]
 image::images/dispatching_sequence_diagram.png["Dispatching Sequence Diagram", link="images/dispatching_sequence_diagram.png"]
-endif::backend-docbook[]
+endif::backend-docbook5[]
 
 If you're using C++ and Boost.Asio or ACE the SDK provides Dispatcher classes that do the thread switch and calls Dispatch, see <<dispatcher_classes>>.
 
@@ -1752,12 +1758,12 @@ Of course it is possible to pass proxies to other methods, as long as the proxy 
 
 [[messages_sequence_diagram]]
 .Sequence diagram for messages
-ifdef::backend-docbook[]
+ifdef::backend-docbook5[]
 image::images/messages_sequence_diagram.png["Messages Sequence Diagram", width="50%"]
-endif::backend-docbook[]
-ifndef::backend-docbook[]
+endif::backend-docbook5[]
+ifndef::backend-docbook5[]
 image::images/messages_sequence_diagram.png["Messages Sequence Diagram", link="images/messages_sequence_diagram.png"]
-endif::backend-docbook[]
+endif::backend-docbook5[]
 
 For messages there are two different roles involved. The Message Sender sends messages and the Message Subscriber receives messages. The subscriber needs to set up the subscription, and subsequently it will receive messages in its +OnMessage+ callback function whenever a Message Sender sends a message.
 
@@ -1776,7 +1782,7 @@ It is worth noting that the channel is all the addressing there is for messages,
 Two steps are necessary to receive messages. The first is to implement the Safir.Dob.MessageSubscriber interface:
 
 .Message subscriber class declaration
-[source,{cpp}]
+[source,c++]
 ----------------------------
 class VehicleMessageSubscriber : public Safir::Dob::MessageSubscriber
 {
@@ -1787,7 +1793,7 @@ public:
 The second step is to start the subscription by calling the +SubscribeMessage+ method on the Dob connection object. This method takes a TypeId (the message type to subscribe to), a ChannelId (the channel to listen to) and a pointer to a class that implements the MessageSubscriber interface.
 
 .Subscribing to a message
-[source,{cpp}]
+[source,c++]
 ----------------------------
 m_connection.SubscribeMessage
         (Capabilities::Vehicles::VehicleMsg::ClassTypeId,
@@ -1799,7 +1805,7 @@ This subscribes to VehicleMsg (and all messages that inherit from VehicleMsg) on
 If you do not want to include subclasses in your subscription, there is an overload to the +SubscribeMessage+ method that allows you to specify whether or not to include subclasses. Default behaviour of most applications should be to include subclasses.
 
 .Handling OnMessage callback
-[source,{cpp}]
+[source,c++]
 ----------------------------
 void VehicleMessageSubscriber::OnMessage
                     (const Safir::Dob::MessageProxy messageProxy)
@@ -1816,7 +1822,7 @@ See <<type_casting>> for more information on the casting in the example above.
 To cancel a subscription you call the +UnsubscribeMessage+ method on the Dob connection object. (It is not necessary to do this before closing a connection or before the application shuts down, the Dob will handle that automatically when the connection is destroyed/closed.)
 
 .Removing a message subscription (unsubscribing)
-[source,{cpp}]
+[source,c++]
 ----------------------------
 m_connection.UnsubscribeMessage
     (Capabilities::Vehicles::VehicleMsg::ClassTypeId,
@@ -1830,7 +1836,7 @@ A note on combinations of subscribe and unsubscribe: If you subscribe to ALL_CHA
 To send messages it is necessary to implement the Dob interface _MessageSender._ The MessageSender interface is used to manage overflow situations when sending messages.
 
 .Message sender class declaration
-[source,{cpp}]
+[source,c++]
 ----------------------------
 class VehicleMessageSender : public Safir::Dob::MessageSender
 {
@@ -1844,7 +1850,7 @@ Messages are sent with the +Send+ function in the Safir.Dob.Connection class. Th
 When an overflow occurs the +Send+ function will throw an exception (Safir.Dob.OverflowException). This means that the applications message out queue is full, and that the application should not try to send any more messages until told otherwise (and the message that was passed to the Send function was not sent). When the message out queue is no longer full the Dob will call the +OnNotMessageOverflow+ method in the MessageSender passed in the send call that failed, which means that it is now okay to start sending messages again.
 
 .Sending a message
-[source,{cpp}]
+[source,c++]
 ----------------------------
 Capabilities::Vehicles::VehicleMsgPtr msg =
                             Capabilities::Vehicles::VehicleMsg::Create();
@@ -1867,12 +1873,12 @@ catch (const Safir::Dob::OverflowException &)
 
 [[services_sequence_diagram]]
 .Sequence diagram for services
-ifdef::backend-docbook[]
+ifdef::backend-docbook5[]
 image::images/services_sequence_diagram.png["Services Sequence Diagram", width="50%"]
-endif::backend-docbook[]
-ifndef::backend-docbook[]
+endif::backend-docbook5[]
+ifndef::backend-docbook5[]
 image::images/services_sequence_diagram.png["Services Sequence Diagram", link="images/services_sequence_diagram.png"]
-endif::backend-docbook[]
+endif::backend-docbook5[]
 
 
 For services there are two different roles involved. The ServiceHandler is the component implementing the service and the Requestor is the component using the service. The Handler needs to register the service and then the Requestor can send requests to it.
@@ -1895,7 +1901,7 @@ Two things need to be done to register a service handler. The first is to implem
 _Overregistration_ occurs when another application registers the same handler for the same service. This will cause the current handler to loose the registration, which is known as an overregistration.
 
 .Service handler class declaration
-[source,{cpp}]
+[source,c++]
 ----------------------------
 class VehicleServiceHandler : public Safir::Dob::ServiceHandler
 {
@@ -1914,7 +1920,7 @@ public:
 The second thing that needs to be done is to call the RegisterServiceHandler method on the Dob connection object.
 
 .Registering a service handler
-[source,{cpp}]
+[source,c++]
 ----------------------------
 m_connection.RegisterServiceHandler
     (Safir::BearingDistanceService::ClassTypeId,
@@ -1932,7 +1938,7 @@ The +OnServiceRequest+ callback will now be called whenever the application rece
 Every service request must be responded to with an object that inherits from the Safir::Dob::Response class. The response is sent using the ResponseSender that is received in the +OnServiceRequest+ callback.
 
 .Handling the OnServiceRequest callback
-[source,{cpp}]
+[source,c++]
 ----------------------------
 void VehicleServiceHandler::OnServiceRequest
     (const Safir::Dob::ServiceRequestProxy serviceRequestProxy,
@@ -1967,7 +1973,7 @@ It is possible to keep the +responseSender+ "for later" if it is not possible to
 To stop handling a service you call the UnregisterHandler method. (It is not necessary to do this before closing a connection or before the application shuts down, the Dob will handle that automatically when the connection is destroyed/closed.)
 
 .Unregistering the handler
-[source,{cpp}]
+[source,c++]
 ----------------------------
 m_connection.UnregisterHandler(Safir::BearingDistanceService::ClassTypeId,
                                Safir::Dob::Typesystem::HandlerId()));
@@ -1984,7 +1990,7 @@ The parameter file +Safir.Dob.ResponseGeneralErrorCodes.dou+ contains some prede
 To send a service request you have to have a class that implements the Requestor consumer interface and create a request and send it using the +ServiceRequest+ method in the Dob connection object.
 
 .Request sender class declaration
-[source,{cpp}]
+[source,c++]
 ----------------------------
 class VehicleServiceRequestSender : public Safir::Dob::Requestor
 {
@@ -2000,7 +2006,7 @@ The +OnResponse+ callback will be called with the response to your request, and 
 Sending a request is done like this:
 
 .Sending a service request
-[source,{cpp}]
+[source,c++]
 ----------------------------
 Capabilities::Vehicles::VehicleServicePtr request =
     Capabilities::Vehicles::VehicleService::Create();
@@ -2034,12 +2040,12 @@ When handling entities there are three roles involved. _Entity Handler_ is an ap
 
 [[entities_sequence_diagram]]
 .Sequence diagram for entities
-ifdef::backend-docbook[]
+ifdef::backend-docbook5[]
 image::images/entities_sequence_diagram.png["Entities Sequence Diagram", width="50%"]
-endif::backend-docbook[]
-ifndef::backend-docbook[]
+endif::backend-docbook5[]
+ifndef::backend-docbook5[]
 image::images/entities_sequence_diagram.png["Entities Sequence Diagram", link="images/entities_sequence_diagram.png"]
-endif::backend-docbook[]
+endif::backend-docbook5[]
 
 This section will first describe "simple" entity handling, such as is shown in <<entities_sequence_diagram>>, and later go on to describe more advanced concepts, such as _persistence_ and _injections_.
 
@@ -2087,7 +2093,7 @@ The handler *must* then create that instance, or if it cannot it should send an 
 Again there is a consumer interface to implement, +EntityHandler+, which allows the application to receive Create, Update and Delete requests. The interface also allows the applications to be told of overregistrations, just as for ServiceHandler registrations.
 
 .Entity handler class declaration
-[source,{cpp}]
+[source,c++]
 ----------------------------
 class VehicleHandler :
     public Safir::Dob::EntityHandler
@@ -2117,7 +2123,7 @@ The +OnRevokedRegistration+ callback works exactly as for Services, as does the 
 Applications register an entity handler by calling the +RegisterEntityHandler+ method in the Dob connection object. This method takes an EntityHandler (like the one declared above), a HandlerId, an InstanceIdPolicy and an entity TypeId.
 
 .Registering an entity handler
-[source,{cpp}]
+[source,c++]
 ----------------------------
 m_connection.RegisterEntityHandler
     (Capabilities::Vehicles::Vehicle::ClassTypeId,
@@ -2130,7 +2136,7 @@ After the call to RegisterEntityHandler the application can immediately use the 
 To stop handling an entity you call the UnregisterHandler method. (It is not necessary to do this before closing a connection or before the application shuts down, the Dob will handle that automatically when the connection is destroyed/closed.)
 
 .Unregistering an entity handler
-[source,{cpp}]
+[source,c++]
 ----------------------------
 m_connection.UnregisterHandler(Capabilities::Vehicles::Vehicle::ClassTypeId,
                                Safir::Dob::Typesystem::HandlerId()));
@@ -2140,7 +2146,7 @@ m_connection.UnregisterHandler(Capabilities::Vehicles::Vehicle::ClassTypeId,
 The method OnCreateRequest is used by the Dob to notify the entity handler of a create request. The arguments to the method is an EntityRequestProxy which contains the request data and metadata, and a ResponseSender which must be used to send the mandatory response to the request.
 
 .Handling a create request
-[source,{cpp}]
+[source,c++]
 ----------------------------
 void VehicleHandler::OnCreateRequest
      (const Safir::Dob::EntityRequestProxy entityRequestProxy,
@@ -2186,7 +2192,7 @@ The method +OnUpdateRequest+ is used by the Dob to notify the entity handler of 
 Note that the Dob guarantees that the update request is on an existing entity. There is no need to check for the existence of the entity inside +OnUpdateRequest+.
 
 .Handling an update request
-[source,{cpp}]
+[source,c++]
 ----------------------------
 void VehicleHandler::OnUpdateRequest
     (const Safir::Dob::EntityRequestProxy entityRequestProxy,
@@ -2232,7 +2238,7 @@ The method +OnDeleteRequest+ is used by the Dob to notify the entity handler of 
 Note that the Dob guarantees that the delete request is on an existing entity. There is no need to check for the existence of the entity inside +OnDeletedRequest+.
 
 .Handling a delete request
-[source,{cpp}]
+[source,c++]
 ----------------------------
 void VehicleHandler::OnDeleteRequest
     (const Safir::Dob::EntityRequestProxy entityRequestProxy,
@@ -2256,7 +2262,7 @@ Once more there is a consumer interface to be implemented to subscribe to entiti
 
 
 .Entity subscriber class declaration
-[source,{cpp}]
+[source,c++]
 ----------------------------
 class VehicleSubscriber : public Safir::Dob::EntitySubscriber
 {
@@ -2276,7 +2282,7 @@ class VehicleSubscriber : public Safir::Dob::EntitySubscriber
 The subscription is started by a call to the +SubscribeEntity+ method on the Dob connection object.
 
 .Subscribing to an entity
-[source,{cpp}]
+[source,c++]
 ----------------------------
 m_connection.SubscribeEntity
     (Capabilities::Vehicles::Vehicle::ClassTypeId, this);
@@ -2286,7 +2292,7 @@ The subscription will be to all instances of that entity, including subclasses. 
 After the call to +SubscribeEntity+ the Dob will start calling the +OnNewEntity+ callback for all entities that already existed when the subscription was set up, and thereafter it will call the callbacks whenever an entity is created, updated or deleted.
 
 .Handling the +OnNewEntity+ callback
-[source,{cpp}]
+[source,c++]
 ----------------------------
 void VehicleSubscriber::OnNewEntity
     (const Safir::Dob::EntityProxy entityProxy)
@@ -2311,7 +2317,7 @@ void VehicleSubscriber::OnNewEntity
 See <<type_casting>> for more information on what +std::static_pointer_cast+ is.
 
 .Handling the +OnUpdatedEntity+ callback
-[source,{cpp}]
+[source,c++]
 ----------------------------
 void VehicleSubscriber::OnUpdatedEntity
     (const Safir::Dob::EntityProxy entityProxy)
@@ -2334,7 +2340,7 @@ void VehicleSubscriber::OnUpdatedEntity
 Note the use of +GetEntityWithChangeInfo()+ and the change flag on the callsign member to only look at it if it changes. See <<interpreting_change_flags>> for more information on how to interpret change flags. It is also possible to get hold of the _previous_ entity that was seen by a subscription. Use +entityProxy.GetPrevious()+ to get information about the previous subscription response.
 
 .Handling the +OnDeletedEntity+ callback
-[source,{cpp}]
+[source,c++]
 ----------------------------
 void VehicleSubscriber::OnDeletedEntity
     (const Safir::Dob::EntityProxy entityProxy,
@@ -2352,7 +2358,7 @@ Please ignore the +deprecated+ flag, it will be removed in a future version of S
 To stop subscribing to an entity the application calls the +Unsubscribe+ method in the Dob connection object. (It is not necessary to do this before closing a connection or before the application shuts down, the Dob will handle that automatically when the connection is destroyed/closed.)
 
 .Removing an entity subscription (unsubscribing)
-[source,{cpp}]
+[source,c++]
 ----------------------------
 m_connection.UnsubscribeEntity
     (Capabilities::Vehicles::Vehicle::ClassTypeId,
@@ -2372,7 +2378,7 @@ Do not keep the proxy (it is possible, and it will appear to work, but remember 
 If you're using C#, you _must_ dispose of the proxy before letting go of your reference to it. The proxy is an +IDisposable+ object, and C# best practice states that +IDisposable+ objects shall always be disposed explicitly. The easiest way to do this in an exception safe way is to use the +using+ construct:
 
 .Using the +using+ construction with EntityProxy
-[source,{csharp}]
+[source,csharp]
 ----------------------------
 using (Safir.Dob.EntityProxy ep = m_connection.Read(anEntityId))
 {
@@ -2392,7 +2398,7 @@ Before looking at how this is done, a *word of warning*: Iterating over lots of 
 Iterating over all Vehicles (including subclasses) in C++:
 
 .Iterating over entities in C++
-[source,{cpp}]
+[source,c++]
 ----------------------------
 for (Safir::Dob::EntityIterator it = m_connection.GetEntityIterator
          (Capabilities::Vehicles::Vehicle::ClassTypeId,true);
@@ -2409,7 +2415,7 @@ Note that the default constructor for EntityIterator creates an "end" iterator, 
 Iterating over all Vehicles (including subclasses) in C#:
 
 .Iterating over entities in C#
-[source,{cpp}]
+[source,c++]
 ----------------------------
 foreach (Safir.Dob.EntityProxy entityProxy in
          m_connection.GetEntityEnumerator
@@ -2429,7 +2435,7 @@ There are four methods in the Dob connection object that are used for sending re
 All the request methods return a unique RequestId to allow the Requestor to know which response was generated by which request in the +OnResponse+ callback.
 
 .Sending an update request.
-[source,{cpp}]
+[source,c++]
 ----------------------------
 Capabilities::Vehicles::VehiclePtr request =
     Capabilities::Vehicles::Vehicle::Create();
@@ -2444,7 +2450,7 @@ When the handler has processed the request it sends a response back telling the 
 If, for some reason, no response is sent from the owner then a time-out reply will be generated to ensure that the sender of the request always receives a response.
 
 .Handling the OnResponse callback
-[source,{cpp}]
+[source,c++]
 ----------------------------
 void VehicleSubscriber::OnResponse
     (const Safir::Dob::ResponseProxy responseProxy)
@@ -2464,7 +2470,7 @@ void VehicleSubscriber::OnResponse
 There are two variants of the +CreateRequest+ method in the Dob connection class:
 
 .The two variants of CreateRequest
-[source,{cpp}]
+[source,c++]
 ----------------------------
 Safir::Dob::RequestId CreateRequest
     (const Safir::Dob::EntityPtr&               request,
@@ -2507,7 +2513,7 @@ asynchronously throughout the lifetime of an entity instance.
 ===== SynchronousVolatile
 +SynchronousVolatile+ persistence is useful to make entities survive when an application restarts, but when the whole system does not. For example if an application crashes and is restarted automatically, or, in a system with redundant nodes, a node is shut down and the applications restarted on another node.
 
-When an entity handler is unregistered, without the entity instances being explicitly deleted, the instances owned by that handler are kept in shared memory (they stay in the system as _ghosts_). When an application later registers an _injection handler_ (see <<simple_persistence>>) with the same handler id, it will be handed all the ghosts of the previous handler (the ghosts will be _injected_), and will be given the choice of whether to revive them or not.
+When an entity handler is unregistered, without the entity instances being explicitly deleted, the instances owned by that handler are kept in shared memory (they stay in the system as _ghosts_). When an application later registers an _injection handler_ (see <<using_persistence>>) with the same handler id, it will be handed all the ghosts of the previous handler (the ghosts will be _injected_), and will be given the choice of whether to revive them or not.
 
 If the whole system (all nodes) is restarted at the same time the ghosts will be lost, hence the "volatile"-part of the name.
 
@@ -2567,7 +2573,7 @@ To use persistence (of the volatile or permanent kind) there is a different cons
 In C\++ all the four _Injection callbacks_ have an empty default implementation. This is not possible in C# or Java since their interfaces cannot have default implementations of any kind. This means that in C\++ you don't have to override these callbacks if you don't want to do anything inside of them. For this example we assume that there is something that we need to do in these callbacks (but since this is a C++ example we only need to override the two callbacks that are actually used for persistent entities).
 
 .Injection entity handler class declaration
-[source,{cpp}]
+[source,c++]
 ----------------------------
 class VehicleHandler :
     public Safir::Dob::EntityHandlerInjection
@@ -2602,7 +2608,7 @@ The first four overrides are of course the same as when registering an entity ha
 The handler is registered by calling +RegisterEntityHandlerInjection+, which has the same signature as +RegisterEntityHandler+ except that it takes an EntityHandlerInjection instead of an EntityHandler as its fourth argument.
 
 .Registering an injection entity handler
-[source,{cpp}]
+[source,c++]
 ----------------------------
 m_connection.RegisterEntityHandlerInjection
     (Capabilities::Vehicles::Vehicle::ClassTypeId,
@@ -2624,7 +2630,7 @@ Once all persisted instances have been accepted or rejected by the application t
 For our Vehicle example, let's assume that the vehicle handler application has to keep an internal instance lookup table (again, it shouldn't keep all the vehicle data internally, but it might be necessary to have lookup tables to quickly know which instance to +Read+, to get at the data). In this case we will want to add instances to the tables in +OnInjectedNewEntity+ and maybe update some status in +OnInitialInjectionsDone+.
 
 .Handling the OnInjectedNewEntity callback
-[source,{cpp}]
+[source,c++]
 ----------------------------
 void VehicleSubscriber::OnInjectedNewEntity
      (const Safir::Dob::InjectedEntityProxy injectedEntityProxy);
@@ -2642,7 +2648,7 @@ void VehicleSubscriber::OnInjectedNewEntity
 
 
 .Handling the OnInitialInjectionsDone callback
-[source,{cpp}]
+[source,c++]
 ----------------------------
 void VehicleSubscriber::OnInitialInjectionsDone
      (const Safir::Dob::Typesystem::TypeId typeId,
@@ -2661,12 +2667,12 @@ Now you need to create a dom file as described in <<using_persistence>>, and the
 
 [[persistence_sequence_diagram]]
 .Sequence diagram for persistent entity
-ifdef::backend-docbook[]
+ifdef::backend-docbook5[]
 image::images/persistence_sequence_diagram.png["Persistence Sequence Diagram", width="50%"]
-endif::backend-docbook[]
-ifndef::backend-docbook[]
+endif::backend-docbook5[]
+ifndef::backend-docbook5[]
 image::images/persistence_sequence_diagram.png["Persistence Sequence Diagram", link="images/persistence_sequence_diagram.png"]
-endif::backend-docbook[]
+endif::backend-docbook5[]
 
 [[handler_registration_subscription]]
 ==== Handler registration subscriptions
@@ -2676,7 +2682,7 @@ This is useful to be able to monitor the status of other applications in the sys
 The application needs a class that implements the +Safir::Dob::RegistrationSubscriber+ consumer interface.
 
 .Registration subscriber class declaration
-[source,{cpp}]
+[source,c++]
 ----------------------------
 class VehicleRegistrationSubscriber :
     public Safir::Dob::RegistrationSubscriber
@@ -2694,7 +2700,7 @@ class VehicleRegistrationSubscriber :
 Then start the subscription (remember that you can do this on a service handler too!):
 
 .Starting a registration subscription
-[source,{cpp}]
+[source,c++]
 ----------------------------
 m_connection.SubscribeRegistration
     (Capabilities::Vehicles::Vehicle::ClassTypeId,
@@ -2709,7 +2715,7 @@ Note the use of +ALL_HANDLERS+ above, that means that we're subscribing to the r
 When someone registers an entity handler or a service handler the Dob will notify the application of this through a call to the +OnRegistered+ method. (Note that the function has a TypeId and HandlerId as parameters and if the implementation of the interface is used for several different classes then these can be inspected to ascertain how to handle the information).
 
 .Handling the OnRegistered callback
-[source,{cpp}]
+[source,c++]
 ----------------------------
 void VehicleRegistrationSubscriber::OnRegistered
     (const Safir::Dob::Typesystem::TypeId      typeId,
@@ -2724,7 +2730,7 @@ For entity handler registration subscriptions the +OnRegistered+ callback is cal
 When a service or entity handler is unregistered the Dob will notify the application of this through a call to +OnUnregistered+. (A handler is unregistered when the owning application unregisters the handler or the application dies).
 
 .Handling the OnUnregistered callback
-[source,{cpp}]
+[source,c++]
 ----------------------------
 void VehicleRegistrationSubscriber::OnUnregistered
     (const Safir::Dob::Typesystem::TypeId      typeId,
@@ -2814,7 +2820,7 @@ From version 6.3 of Safir SDK Core, a JSON-RPC interface over WebSockets is prov
 Most of the common DOB features are available such as subscribing to entities and messages, sending messages, sending and handling requests, registering as a handler of entities, and some typesystem operations.
 If you are not familiair with JSON-RPC, It is strongly recomended to read the JSON-RPC 2.0 Specification. Its a simple protocol and the specification is short and easy to read, it won’t take more than about 10 minutes to read it.
 
-The API is explained in full detail in <<appendix_b>>, but basically the API consists of 3 types of messages:
+The API is explained in full detail in <<websocket_api_reference>>, but basically the API consists of 3 types of messages:
 
 * Requests - sent from client to server.
 * Responses - sent from server to client as a response to a request.
@@ -3533,7 +3539,7 @@ Safir Log provides an easy-to-use interface that allows an application to create
 It is also possible to configure Safir Log so that the logs are sent to a native, platform specific, logging mechanism. In practice, this could be of use on the Windows platform to send logs to the Windows Event Log and on Linux to send the logs directly to the +syslog(...)+ interface instead of using UDP messages.
 
 .Example, sending a log message using C++
-[source,{cpp}]
+[source,c++]
 ----------------------------
 #include <Safir/Logging/Log.h>
 
@@ -3663,12 +3669,12 @@ For an explanation of what full and light nodes are, see <<light-nodes>>.
 
 [[node_control_overview]]
 .Node Control screen shot
-ifdef::backend-docbook[]
+ifdef::backend-docbook5[]
 image::images/node_control.png["Node Control Screen shot", width="70%"]
-endif::backend-docbook[]
-ifndef::backend-docbook[]
+endif::backend-docbook5[]
+ifndef::backend-docbook5[]
 image::images/node_control.png["Node Control Screen shot", link="images/node_control.png"]
-endif::backend-docbook[]
+endif::backend-docbook5[]
 
 The Reboot and Shutdown buttons will only be enabled if the parameters +Safir.Control.Parameters.RebootCommand+ and +Safir.Control.Parameters.ShutdownCommand+ are set to something useful.
 
@@ -3906,7 +3912,7 @@ To use the crash reporter you need to initiate it in your application. The initi
 For example, in C++ you would do something like this:
 
 .Initializing crash reporting in C++ using RAII object
-[source,{cpp}]
+[source,c++]
 ----------------------------
 int main(int argc, char* argv[])
 {
@@ -3918,7 +3924,7 @@ int main(int argc, char* argv[])
 The +CrashReporterStarter+ class is an RAII class, which means that it is equivalent to doing the following:
 
 .Initializing and stopping crash reporter in C++ manually
-[source,{cpp}]
+[source,c++]
 ----------------------------
 int main(int argc, char* argv[])
 {
@@ -3936,7 +3942,7 @@ int main(int argc, char* argv[])
 ----------------------------
 
 .Initializing and stopping crash reporting in C#
-[source,{csharp}]
+[source,csharp]
 ----------------------------
 static void Main()
 {
@@ -3986,7 +3992,7 @@ The correct way of managing overflow is to use the designated functions telling 
 For example, if you get an overflow when sending a message (and that message should then be retried according to your application requirements/design) you can do something like this:
 
 .Handling OverflowException
-[source,{cpp}]
+[source,c++]
 ----------------------------
 try
 {
@@ -4001,7 +4007,7 @@ catch (const Safir::Dob::OverflowException &)
 And then handle resending like this:
 
 .Resending messages in OnNotMessageOverflow
-[source,{cpp}]
+[source,c++]
 ----------------------------
 void MyMessageSender::OnNotMessageOverflow()
 {
@@ -4087,12 +4093,12 @@ The first time the application instances start, one of the instances will be giv
 
 [[redundancy_sequence_diagram]]
 .Sequence diagram for redundant entity handlers
-ifdef::backend-docbook[]
+ifdef::backend-docbook5[]
 image::images/redundancy_sequence_diagram.png["Redundancy Sequence Diagram", width="50%"]
-endif::backend-docbook[]
-ifndef::backend-docbook[]
+endif::backend-docbook5[]
+ifndef::backend-docbook5[]
 image::images/redundancy_sequence_diagram.png["Redundancy Sequence Diagram", link="images/redundancy_sequence_diagram.png"]
-endif::backend-docbook[]
+endif::backend-docbook5[]
 
 Note that applications subscribing to the entities that are redundancy-handled _may_ see the entity instances as deleted for a short while, since in reality the handler was unregistered for a short while.
 
@@ -4103,12 +4109,12 @@ Applications that own the entities must make sure that no _orphans_ are left beh
 
 [[orphan_example]]
 .Entities that may cause orphans.
-ifdef::backend-docbook[]
+ifdef::backend-docbook5[]
 image::images/orphan_object.eps["Entities that may cause orphans", scaledwidth="40%"]
-endif::backend-docbook[]
-ifndef::backend-docbook[]
+endif::backend-docbook5[]
+ifndef::backend-docbook5[]
 image::images/orphan_object.png["Entities that may cause orphans", link="images/orphan_object.png"]
-endif::backend-docbook[]
+endif::backend-docbook5[]
 
 
 For applications that use the entities that contain associations you need to be aware that the Dob does not guarantee the order in which entities are delivered to subscribers, and that while you're handling a subscription an associated entity may be removed, before you've managed to Read it.
@@ -4159,12 +4165,12 @@ The +EntityHandlerInjection+ consumer interface has, as described in <<advanced_
 
 [[injection_sequence_diagram]]
 .Injection sequence diagram
-ifdef::backend-docbook[]
+ifdef::backend-docbook5[]
 image::images/injection_sequence_diagram.png["Injection Sequence Diagram", width="50%"]
-endif::backend-docbook[]
-ifndef::backend-docbook[]
+endif::backend-docbook5[]
+ifndef::backend-docbook5[]
 image::images/injection_sequence_diagram.png["Injection Sequence Diagram", link="images/injection_sequence_diagram.png"]
-endif::backend-docbook[]
+endif::backend-docbook5[]
 
 Note that it is not possible to tell the difference between the two kinds of calls to +OnInjectedNewEntity+, and in fact both new and old (i.e. persisted and injected) data can be mixed (i.e. timestamp merged) in a call to +OnInjectedNewEntity+.
 
@@ -4306,7 +4312,7 @@ The safety issue is very important when mixing real data sessions and Replay ses
 Safir applications are usually classified as either Business applications or Presentation
 applications (for simplicity we will refer to these as _Apps_ and _GUIs_ in the rest of
 this chapter). The first type handles all business logic while the latter takes care of
-all presentation of data in a GUI (see <<appendix_a>>). This section contains some
+all presentation of data in a GUI (see <<example_applications>>). This section contains some
 recommendations for how APPs and GUIs should use contexts to support Replay sessions.
 
 === Design principles
@@ -4410,12 +4416,12 @@ For example, you can set up a subscription to an entity, register entity handler
 
 [[sate_overview]]
 .Sate screen shot
-ifdef::backend-docbook[]
+ifdef::backend-docbook5[]
 image::images/sate_overview.png["Sate Screen shot", width="50%"]
-endif::backend-docbook[]
-ifndef::backend-docbook[]
+endif::backend-docbook5[]
+ifndef::backend-docbook5[]
 image::images/sate_overview.png["Sate Screen shot", link="images/sate_overview.png"]
-endif::backend-docbook[]
+endif::backend-docbook5[]
 
 The lower left part is an "inbox", containing the most recent entity updates and requests, service requests and messages received. The lower right hand part shows a history of what "has happened", e.g. showing if a request has been successfully sent, etc.
 
@@ -4427,23 +4433,23 @@ Dobexplorer is a tool that is primarily meant for the developers of the Dob, but
 
 [[dobexplorer_memory]]
 .Dobexplorer showing a graph of memory usage.
-ifdef::backend-docbook[]
+ifdef::backend-docbook5[]
 image::images/dobexplorer_memory.png["Dobexplorer showing memory usage", width="60%"]
-endif::backend-docbook[]
-ifndef::backend-docbook[]
+endif::backend-docbook5[]
+ifndef::backend-docbook5[]
 image::images/dobexplorer_memory.png["Dobexplorer showing memory usage", link="images/dobexplorer_memory.png"]
-endif::backend-docbook[]
+endif::backend-docbook5[]
 
 <<dobexplorer_nodes>> shows dobexplorer displaying a table of the node statuses of a multinode system.
 
 [[dobexplorer_nodes]]
 .Dobexplorer showing node statuses.
-ifdef::backend-docbook[]
+ifdef::backend-docbook5[]
 image::images/dobexplorer_nodes.png["Dobexplorer showing node statuses", width="60%"]
-endif::backend-docbook[]
-ifndef::backend-docbook[]
+endif::backend-docbook5[]
+ifndef::backend-docbook5[]
 image::images/dobexplorer_nodes.png["Dobexplorer showing node statuses", link="images/dobexplorer_nodes.png"]
-endif::backend-docbook[]
+endif::backend-docbook5[]
 
 === Entity Viewer
 
@@ -4451,12 +4457,12 @@ The +safir_entity_viewer+ tool is provided as a way to quickly show many instanc
 
 [[entity_viewer]]
 .Entity Viewer screen shot
-ifdef::backend-docbook[]
+ifdef::backend-docbook5[]
 image::images/entity_viewer.png["Entity Viewer Screen shot", width="60%"]
-endif::backend-docbook[]
-ifndef::backend-docbook[]
+endif::backend-docbook5[]
+ifndef::backend-docbook5[]
 image::images/entity_viewer.png["Entity Viewer Screen shot", link="images/entity_viewer.png"]
-endif::backend-docbook[]
+endif::backend-docbook5[]
 
 === Tool Launcher
 
@@ -4464,12 +4470,12 @@ The +safir_tool_launcher+ tool is useful for launching the different debug tools
 
 [[tool_launcher]]
 .Tool Launcher screen shot
-ifdef::backend-docbook[]
+ifdef::backend-docbook5[]
 image::images/tool_launcher.png["Tool Launcher Screen shot", width="60%"]
-endif::backend-docbook[]
-ifndef::backend-docbook[]
+endif::backend-docbook5[]
+ifndef::backend-docbook5[]
 image::images/tool_launcher.png["Tool Launcher Screen shot", link="images/tool_launcher.png"]
-endif::backend-docbook[]
+endif::backend-docbook5[]
 
 
 
@@ -4508,8 +4514,9 @@ include as much information as possible, e.g. version information and platform
 information. If you experience a crash in any part of Safir SDK Core, please include any
 crash dumps that were created.
 
-[[appendix_a]]
-== Appendix A: Example applications
+[[example_applications]]
+[appendix]
+== Example applications
 
 ////
 Example app text is located in a separate file, example_applications.txt
@@ -4517,8 +4524,9 @@ Example app text is located in a separate file, example_applications.txt
 
 include::example_applications.txt[]
 
-[[appendix_b]]
-== Appendix B: DOB WebSocket/JSON-RPC API reference
+[[websocket_api_reference]]
+[appendix]
+== DOB WebSocket/JSON-RPC API reference
 
 ////
 WebSocket/JSON-RPC Api reference is located in a separate file, websocket_api_reference.txt
@@ -4527,7 +4535,8 @@ WebSocket/JSON-RPC Api reference is located in a separate file, websocket_api_re
 include::websocket_api_reference.txt[]
 
 [[faq]]
-== Appendix C: FAQ
+[appendix]
+== FAQ
 Why do I get IllegalValueExceptions when sending message/request or setting an entity?::
   Most likely because you've got a string in your object that is longer than what is specified by the +maxLength+ field in your dou-file. For various reasons the string lengths are not checked until the object is "handed" to the Dob. This means that if you put a string which is 100 characters long into a message member that has +maxLength+ 10 you will not get the error until you call +Send+.
 +
@@ -4600,46 +4609,36 @@ What happened to Olib and the Safir.Databases namespace?::
 The Safir ODBC database interface was deprecated and then removed. Please use some other way
 of interacting with databases.
 
-== Appendix D: Building from source
+[appendix]
+== Building from source
 Since Safir SDK Core is released under an Open Source license (as described in <<licenses>>) you are able to download and build the source code from scratch. Instructions for building is included in the source distribution of Safir SDK Core obtained from http://safirsdkcore.com/[].
 
-[[glossary]]
+[glossary]
 == Glossary
 This glossary mostly contains Safir-related acronyms and terms. General computer terms are not included, like "UDP", "Multicast" and "ODBC". Wikipedia, for example, is a much better source for explanations of those terms than this glossary could ever be.
 
-
+[glossary]
 Dob::
     Distributed Objects. Consists of the components Dose and Dots.
-
 Dom::
     Distributed Objects Mapping. File type for mapping Dob classes to properties (in Xml).
-
 Dope::
     The Safir SDK Core component that provides the persistent storage of Dob entities.
-
 Dose::
     Safir component that provides the object distribution.
-
 Dots::
     Safir component that provides the type system.
-
 Dou::
     Distributed Objects Unit. File type for defining Dob classes (in Xml).
-
 HMI::
     Human-Machine Interface.
-
 Safir::
     Software Architecture For Information And Real-time systems.
-
 Safir SDK::
     The technical platform of Safir.
-
 Safir SDK Core::
     The core part of the Safir SDK.
-
 SDK::
     Software Development Kit.
-
 Swre::
     A Safir SDK Core component that provides Crash Reporting, Error/Event Logging and Trace logging functionality.

@@ -548,12 +548,11 @@ Section /o "Development" SecDevelopment
   CreateShortCut "${StartMenuDir}\Dobmake.lnk" \
                  "$INSTDIR\bin\dobmake.exe" "" "" "" SW_SHOWNORMAL "" "Build libraries from your dou files."
 
-  CreateShortCut "${StartMenuDir}\Documentation\Doxygen.lnk" \
-                 "$INSTDIR\docs\html\index.xhtml" "" "" "" SW_SHOWNORMAL "" "Doxygen API documentation."
+  CreateShortCut "${StartMenuDir}\Documentation\Safir SDK Core Doxygen API docs.lnk" \
+                 "$INSTDIR\docs\html\index.html" "" "" "" SW_SHOWNORMAL "" "Safir SDK Core Doxygen API documentation."
 
-  !insertmacro CreateInternetShortcut "${StartMenuDir}\Documentation\User's Guide" \
-                                      "http://www.safirsdkcore.com/docs" "" "0"
-
+  CreateShortCut "${StartMenuDir}\Documentation\Safir SDK Core User's Guide.lnk" \
+                   "$INSTDIR\docs\users_guide.html" "" "" "" SW_SHOWNORMAL "" "Safir SDK Core User's Guide."
 SectionEnd
 
 Section /o "Test suite" SecTest

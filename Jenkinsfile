@@ -125,18 +125,13 @@ def archive_and_analyze(platform, arch, buildType){
 
 
 def render_documentation() {
-    sh label:  "Run Asciidoc to generate users guide and requirements specification.",
+    sh label:  "Run Asciidoctor to generate users guide and requirements specification.",
        script: """
-               cd docs/users_guide
-               make -j2 all
-               cd ../requirements
-               make -j2 all
-               cd ../..
-               mkdir -p rendered_docs/images
-               cp docs/users_guide/users_guide.pdf rendered_docs/
-               cp docs/users_guide/users_guide.html rendered_docs/
-               cp docs/users_guide/images/*.png rendered_docs/images
-               cp docs/requirements/requirements_specification.pdf rendered_docs/
+               cd docs
+               cmake . -G Ninja
+               ninja
+               ninja install
+               mv rendered_docs ..
                """
     archiveArtifacts artifacts: 'rendered_docs/*, rendered_docs/images/*', fingerprint: true
 }
