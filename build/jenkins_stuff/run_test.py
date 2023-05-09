@@ -35,6 +35,7 @@ import tempfile
 import urllib.request
 import time
 import socket
+import datetime
 
 try:
     import apt
@@ -53,7 +54,7 @@ except:
 
 def log(*args, **kwargs):
     """logging function that flushes"""
-    print(*args, **kwargs)
+    print(datetime.datetime.now().isoformat(), ":", *args, **kwargs)
     sys.stdout.flush()
 
 def nice_call(*popenargs, timeout=None, **kwargs):
@@ -416,7 +417,7 @@ class JenkinsInterface:
                 time.sleep(1.0)
 
     def build(self, job, parameters = None):
-        command = ("build", job)
+        command = ("build", job, "-w")
         if parameters is not None:
             for key,value in parameters.items():
                 command += ("-p", f"{key}={value}")
@@ -444,7 +445,6 @@ class JenkinsInterface:
                  build = item.getLastBuild()
                  text = build.getLogText()
                  println ("text length " + text.length())
-                 //build.getLogText().writeLogTo(0, System.out)
                  println(build.getLog())
                  println ("end log")
                  """
@@ -471,7 +471,9 @@ class JenkinsController:
 
     def start_slave(self):
         log(" * Starting slave")
+        #wait for any previous run to complete
         self.interface.wait_for_job(self.job_name)
+
         # Get the build number and the job name for the slave to copy artifacts from
         # from Jenkins environment variables
         parameters = {"SOURCE_PROJECT" : os.environ.get("JOB_NAME"),
@@ -479,7 +481,7 @@ class JenkinsController:
                       "SLAVE_ROLE": self.slave_role}
         self.interface.build(self.job_name, parameters)
 
-    def stop_slave(self):
+    def __stop_slave(self):
         try:
             self.interface.wait_for_job(self.job_name, 60)
             self.interface.cancel_job(self.job_name)
@@ -488,7 +490,7 @@ class JenkinsController:
             log("Failed to stop slave!", exc)
 
     def close(self):
-        self.stop_slave()
+        self.__stop_slave()
 
 def run_test_suite(kind):
     log("Launching test suite")

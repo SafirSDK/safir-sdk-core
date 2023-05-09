@@ -299,7 +299,6 @@ pipeline {
                         //artifacts are left over from previous stage
                         run_test_suite(BUILD_PLATFORM, BUILD_ARCH, BUILD_TYPE, JOB_NAME, BUILD_NUMBER, "multinode-tests")
                     }}}
-                    /* TODO: Multicomputer tests are temporarily disabled due to Jenkins trouble
                     stage('Multicomputer Tests') {
                         when { allOf {
                             expression {Languages == "cpp-cpp-cpp-cpp-cpp"}
@@ -310,14 +309,16 @@ pipeline {
                                 expression {params.PLATFORM_FILTER == 'debian-bullseye'}
                             }
                         }}
-                        options {
-                            lock( 'multicomputer-test-slaves' )
-                        }
-                        steps { script {
-                            //artifacts are left over from previous stage
-                            run_test_suite(BUILD_PLATFORM, BUILD_ARCH, BUILD_TYPE, JOB_NAME, BUILD_NUMBER, "multicomputer-tests")
-                    }}}
-                    */
+                        steps {
+                            lock( 'multicomputer-test-slaves' ) {
+                                script {
+                                    echo "Took multicomputer-test-slaves lock: ${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE} ${BUILD_NUMBER} ${JOB_NAME}"
+                                    //artifacts are left over from previous stage
+                                    run_test_suite(BUILD_PLATFORM, BUILD_ARCH, BUILD_TYPE, JOB_NAME, BUILD_NUMBER, "multicomputer-tests")
+                                    echo "Releasing multicomputer-test-slaves lock: ${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}"
+                    }}}}
+
+
 
                 }
                 post {
@@ -328,7 +329,7 @@ pipeline {
 
             }
         }
-
+        
         stage('Build examples') {
             matrix {
                 when {

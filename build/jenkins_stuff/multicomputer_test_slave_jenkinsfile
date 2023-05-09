@@ -38,12 +38,14 @@ pipeline {
             }}
         }
     }
-    post {
-        always {
+    post { always { script {
+        if (getContext(hudson.FilePath)) {
             archiveArtifacts artifacts: "dose_test_output/*", fingerprint: true
 
-            //junit keepLongStdio: true, skipPublishingChecks: true, testResults: '**/*.junit.xml'
             cleanWs()
         }
-    }
+        else {
+            echo "No context found, cannot archive or clean"
+        }
+    }}}
 }
