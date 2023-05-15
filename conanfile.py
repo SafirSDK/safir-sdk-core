@@ -101,13 +101,8 @@ class SafirSdkCoreConan(ConanFile):
         self.requires("sentry-breakpad/0.5.3")
         self.requires("websocketpp/0.8.2")
         self.requires("rapidjson/cci.20220822")
-        protobuf_version = "3.21.9"
+        self.requires("protobuf/3.21.9")
         if self.settings.os == "Windows":
             self.requires("qt/5.15.8")
             self.requires("ninja/1.11.1")
             self.requires("boost/1.81.0")
-
-            #Visual Studio 2015 does not work with later protobuf than this
-            if self.settings.compiler.version == 14:
-                protobuf_version = "[<3.15]"
-        self.requires(f"protobuf/{protobuf_version}")
