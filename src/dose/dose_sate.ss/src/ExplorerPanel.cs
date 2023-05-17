@@ -235,9 +235,11 @@ namespace Sate
 
         private void OnFilterChanged(string filter)
         {
+            var selectedTab = _tabControl.SelectedIndex;
             var f = filter.Trim().ToLower();
             FilterClassHierarchyTree(f);
             FilterNamespaceHierarchyTree(f);
+            _tabControl.SelectedIndex = selectedTab;
         }
 
         private void FilterClassHierarchyTree(string filter)
@@ -246,7 +248,7 @@ namespace Sate
             {
                 if (_clHierarchyRootFiltered != _clHierarchyRootComplete)
                 {
-                    var selctedFilteredNode = (DobUnit)GetSelectedNode();
+                    var selectedFilteredNode = GetSelectedNode() as DobUnit;
 
                     _treeViewClassHierarchy.BeginUpdate();
                     _treeViewClassHierarchy.Nodes.Clear();
@@ -254,7 +256,10 @@ namespace Sate
                     _treeViewClassHierarchy.Nodes.Add(_clHierarchyRootFiltered);
                     _treeViewClassHierarchy.EndUpdate();
 
-                    LocateInInheritanceTree(selctedFilteredNode.TypeId, selctedFilteredNode.EntityId?.InstanceId.RawValue);
+                    if (selectedFilteredNode != null)
+                    {
+                        LocateInInheritanceTree(selectedFilteredNode.TypeId, selectedFilteredNode.EntityId?.InstanceId.RawValue);
+                    }
                 }
 
                 return;
@@ -285,7 +290,7 @@ namespace Sate
             {
                 if (_nsHierarchyRootFiltered != _nsHierarchyRootComplete)
                 {
-                    var selctedFilteredNode = (DobUnit)GetSelectedNode();
+                    var selectedFilteredNode = GetSelectedNode() as DobUnit;
 
                     _treeViewNsHierarchy.BeginUpdate();
                     _treeViewNsHierarchy.Nodes.Clear();
@@ -293,7 +298,10 @@ namespace Sate
                     _treeViewNsHierarchy.Nodes.AddRange(_nsHierarchyRootFiltered.ToArray());
                     _treeViewNsHierarchy.EndUpdate();
                     
-                    LocateInNamespaceTree(selctedFilteredNode.TypeId, selctedFilteredNode.EntityId?.InstanceId.RawValue);
+                    if (selectedFilteredNode != null)
+                    {
+                        LocateInNamespaceTree(selectedFilteredNode.TypeId, selectedFilteredNode.EntityId?.InstanceId.RawValue);
+                    }
                 }
 
                 return;
