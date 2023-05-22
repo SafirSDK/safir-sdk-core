@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 ###############################################################################
 #
-# Copyright Saab AB, 2011-2013 (http://safirsdkcore.com)
+# Copyright Saab AB, 2011-2013, 2023 (http://safirsdkcore.com)
 #
 # Created by: Lars Hagstrom (lars@foldspace.nu)
 #
@@ -24,18 +24,23 @@
 #
 ###############################################################################
 import subprocess, os, time, sys, random
+import argparse
+
+def parse_arguments():
+    parser = argparse.ArgumentParser(description='unit test script')
+    parser.add_argument("--test-exe", help="The test executable", required=True)
+    parser.add_argument("--sleeper-exe", help="The sleeper executable", required=True)
+    return parser.parse_args()
+
+args = parse_arguments()
 
 #start two sleepers
 #start the listener
 #wait for sleepers to exit
 #check output of listener
 
-exe_path = os.environ.get("CMAKE_RUNTIME_OUTPUT_DIRECTORY")
-if exe_path is None:
-    exe_path = "."
-
-ProcessMonitor_test = os.path.join(exe_path, "ProcessMonitor_test")
-Sleeper = os.path.join(exe_path, "ProcessMonitorSleeper")
+ProcessMonitor_test = args.test_exe
+Sleeper = args.sleeper_exe
 
 #start a bunch of sleepers
 sleepers = list()

@@ -47,10 +47,23 @@ TARGET_LINK_LIBRARIES (ProcessMonitor_test2 PRIVATE
 TARGET_LINK_LIBRARIES (ProcessMonitorSleeper PRIVATE
   Boost::thread)
 
-ADD_TEST(NAME ProcessMonitor_unittest COMMAND ProcessMonitor_test3 --catch_system_error=no)
-ADD_TEST(NAME ProcessMonitor_polling_unittest COMMAND ProcessMonitor_polling_test --catch_system_error=no)
-ADD_TEST(NAME ProcessMonitor_monitor COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py)
-ADD_TEST(NAME ProcessMonitor_stop COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test2.py)
+ADD_TEST(NAME ProcessMonitor_unittest
+  COMMAND ProcessMonitor_test3
+            --catch_system_error=no
+            -- --sleeper-exe $<TARGET_FILE:ProcessMonitorSleeper>)
+
+ADD_TEST(NAME ProcessMonitor_polling_unittest
+  COMMAND ProcessMonitor_polling_test
+           --catch_system_error=no
+           -- --sleeper-exe $<TARGET_FILE:ProcessMonitorSleeper>)
+
+ADD_TEST(NAME ProcessMonitor_monitor COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py
+                   --test-exe $<TARGET_FILE:ProcessMonitor_test>
+                   --sleeper-exe $<TARGET_FILE:ProcessMonitorSleeper>)
+
+ADD_TEST(NAME ProcessMonitor_stop COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test2.py
+                   --test-exe $<TARGET_FILE:ProcessMonitor_test2>
+                   --sleeper-exe $<TARGET_FILE:ProcessMonitorSleeper>)
 
 SET_SAFIR_TEST_PROPERTIES(TEST ProcessMonitor_unittest TIMEOUT 240)
 SET_SAFIR_TEST_PROPERTIES(TEST ProcessMonitor_polling_unittest TIMEOUT 240)

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 ###############################################################################
 #
-# Copyright Saab AB, 2012-2013 (http://safirsdkcore.com)
+# Copyright Saab AB, 2012-2013,2023 (http://safirsdkcore.com)
 #
 # Created by: Lars Hagstrom (lars.hagstrom@consoden.se)
 #
@@ -24,16 +24,18 @@
 #
 ###############################################################################
 import subprocess, os, time, sys, re
+import argparse
 
-exe_path = os.environ.get("CMAKE_RUNTIME_OUTPUT_DIRECTORY")
-if exe_path is None:
-    exe_path = "."
+def parse_arguments():
+    parser = argparse.ArgumentParser(description='unit test script')
+    parser.add_argument("--crasher-exe", help="The test executable", required=True)
+    return parser.parse_args()
 
-crasher_exe = os.path.join(exe_path, "crasher")
+args = parse_arguments()
 
 
 def run_crasher(reason):
-    crasher = subprocess.Popen((crasher_exe, reason), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    crasher = subprocess.Popen((args.crasher_exe, reason), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     result = crasher.communicate()[0].decode("ascii")
     print("Testing signal", reason)
     if result.find("callback") == -1:

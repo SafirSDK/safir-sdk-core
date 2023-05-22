@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 ###############################################################################
 #
-# Copyright Saab AB, 2013-2014 (http://safirsdkcore.com)
+# Copyright Saab AB, 2013-2014,2023 (http://safirsdkcore.com)
 #
 # Created by: Anders Widén (anders.widen@consoden.se)
 #
@@ -25,10 +25,15 @@
 ###############################################################################
 from inspect import currentframe
 import subprocess, os, time, sys, datetime
+import argparse
 
-exe_path = os.environ.get("CMAKE_RUNTIME_OUTPUT_DIRECTORY")
-if exe_path is None:
-    exe_path = "."
+def parse_arguments():
+    parser = argparse.ArgumentParser(description='unit test script')
+    parser.add_argument("--subscriber-exe", required=True)
+    parser.add_argument("--publisher-exe", required=True)
+    return parser.parse_args()
+
+args = parse_arguments()
 
 def log(*args, **kwargs):
     print(datetime.datetime.now().isoformat(), ":", *args, **kwargs)
@@ -97,14 +102,11 @@ def exit_process(proc):
     proc.communicate()
 
 
-IpcPublisher = os.path.join(exe_path, "IpcPublisher")
-IpcSubscriber = os.path.join(exe_path, "IpcSubscriber")
-
 #######
 log("Test that the publisher is notified of subscriber connect/disconnect")
 #######
 # Start a publisher that sends no messages
-publisher = subprocess.Popen((IpcPublisher, "--cmd-from-stdin"),
+publisher = subprocess.Popen((args.publisher_exe, "--cmd-from-stdin"),
                              stdin=subprocess.PIPE,
                              stdout=subprocess.PIPE,
                              stderr=subprocess.STDOUT)
@@ -112,11 +114,11 @@ send_cmd(publisher, "START\n")
 wait_for_output(publisher, "Publisher is started", exact_match=True)
 
 # Start two subscribers
-subscriber1 = subprocess.Popen((IpcSubscriber, "--cmd-from-stdin"),
+subscriber1 = subprocess.Popen((args.subscriber_exe, "--cmd-from-stdin"),
                                stdin=subprocess.PIPE,
                                stdout=subprocess.PIPE,
                                stderr=subprocess.STDOUT)
-subscriber2 = subprocess.Popen((IpcSubscriber, "--cmd-from-stdin"),
+subscriber2 = subprocess.Popen((args.subscriber_exe, "--cmd-from-stdin"),
                                stdin=subprocess.PIPE,
                                stdout=subprocess.PIPE,
                                stderr=subprocess.STDOUT)
@@ -161,14 +163,14 @@ terminate(subscriber2)
 log("Test that the publisher can be started before the subscribers")
 #######
 # Start a publisher that sends messages
-publisher = subprocess.Popen((IpcPublisher, "--message-delay", "10"), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+publisher = subprocess.Popen((args.publisher_exe, "--message-delay", "10"), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 wait_for_output(publisher, "Publisher is started")
 
 # Start two subscribers that receives 5 messages and then exit
-subscriber1 = subprocess.Popen((IpcSubscriber, "--number-of-messages", "5"),
+subscriber1 = subprocess.Popen((args.subscriber_exe, "--number-of-messages", "5"),
                                stdout=subprocess.PIPE,
                                stderr=subprocess.STDOUT)
-subscriber2 = subprocess.Popen((IpcSubscriber, "--number-of-messages", "5"),
+subscriber2 = subprocess.Popen((args.subscriber_exe, "--number-of-messages", "5"),
                                stdout=subprocess.PIPE,
                                stderr=subprocess.STDOUT)
 
@@ -186,17 +188,17 @@ terminate(publisher)
 #######
 log("Test that subscribers can be started before publisher")
 #######
-subscriber1 = subprocess.Popen((IpcSubscriber, "--number-of-messages", "5"),
+subscriber1 = subprocess.Popen((args.subscriber_exe, "--number-of-messages", "5"),
                                stdout=subprocess.PIPE,
                                stderr=subprocess.STDOUT)
 wait_for_output(subscriber1, "Trying to connect")
-subscriber2 = subprocess.Popen((IpcSubscriber, "--number-of-messages", "5"),
+subscriber2 = subprocess.Popen((args.subscriber_exe, "--number-of-messages", "5"),
                                stdout=subprocess.PIPE,
                                stderr=subprocess.STDOUT)
 wait_for_output(subscriber2, "Trying to connect")
 
 # Start Publisher and wait for the subscribers to receive the messages
-publisher = subprocess.Popen((IpcPublisher, "--message-delay", "10"), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+publisher = subprocess.Popen((args.publisher_exe, "--message-delay", "10"), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 
 wait_for_outputs(
     publisher,
@@ -217,7 +219,7 @@ terminate(publisher)
 log("Test that subscribers can connect/disconnect several times")
 #######
 # Connect/disconnect witout an existing publisher
-subscriber = subprocess.Popen((IpcSubscriber, "--cmd-from-stdin"),
+subscriber = subprocess.Popen((args.subscriber_exe, "--cmd-from-stdin"),
                               stdin=subprocess.PIPE,
                               stdout=subprocess.PIPE,
                               stderr=subprocess.STDOUT)
@@ -228,11 +230,11 @@ wait_for_output(subscriber, "Disconnected from publisher", exact_match=True)
 terminate(subscriber)
 
 # Launch a publisher and wait for it to start
-publisher = subprocess.Popen((IpcPublisher, "--message-delay", "10"), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+publisher = subprocess.Popen((args.publisher_exe, "--message-delay", "10"), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 wait_for_output(publisher, "Publisher is started")
 
 # Start a subscriber that run the loop (connect, receive 2 messages, disconnect) two times.
-subscriber = subprocess.Popen((IpcSubscriber, "--cmd-from-stdin"),
+subscriber = subprocess.Popen((args.subscriber_exe, "--cmd-from-stdin"),
                               stdin=subprocess.PIPE,
                               stdout=subprocess.PIPE,
                               stderr=subprocess.STDOUT)
@@ -256,10 +258,10 @@ terminate(subscriber)
 #######
 log("Test that a publisher can do several start/stop")
 #######
-subscriber1 = subprocess.Popen((IpcSubscriber), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+subscriber1 = subprocess.Popen((args.subscriber_exe), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 wait_for_output(subscriber1, "Trying to connect", exact_match=True)
 
-publisher = subprocess.Popen((IpcPublisher, "--cmd-from-stdin"),
+publisher = subprocess.Popen((args.publisher_exe, "--cmd-from-stdin"),
                              stdin=subprocess.PIPE,
                              stdout=subprocess.PIPE,
                              stderr=subprocess.STDOUT)
@@ -289,17 +291,17 @@ terminate(subscriber1)
 #######
 log("Test with large messages")
 #######
-subscriber1 = subprocess.Popen((IpcSubscriber, "--number-of-messages", "2", "-o"),
+subscriber1 = subprocess.Popen((args.subscriber_exe, "--number-of-messages", "2", "-o"),
                                stdout=subprocess.PIPE,
                                stderr=subprocess.STDOUT)
 wait_for_output(subscriber1, "Trying to connect")
-subscriber2 = subprocess.Popen((IpcSubscriber, "--number-of-messages", "2", "-o"),
+subscriber2 = subprocess.Popen((args.subscriber_exe, "--number-of-messages", "2", "-o"),
                                stdout=subprocess.PIPE,
                                stderr=subprocess.STDOUT)
 wait_for_output(subscriber2, "Trying to connect")
 
 # Start Publisher and send 100 Mb messages
-publisher = subprocess.Popen((IpcPublisher, "--message-delay", "1000", "--large-message-size", "100000000"),
+publisher = subprocess.Popen((args.publisher_exe, "--message-delay", "1000", "--large-message-size", "100000000"),
                              stdout=subprocess.PIPE,
                              stderr=subprocess.STDOUT)
 wait_for_output(publisher, "A Subscriber disconnected")
@@ -319,14 +321,14 @@ terminate(publisher)
 #######
 log("Test that publisher and subscriber can be stopped properly")
 #######
-publisher = subprocess.Popen((IpcPublisher, "--cmd-from-stdin"),
+publisher = subprocess.Popen((args.publisher_exe, "--cmd-from-stdin"),
                              stdin=subprocess.PIPE,
                              stdout=subprocess.PIPE,
                              stderr=subprocess.STDOUT)
 send_cmd(publisher, "START\n")
 wait_for_output(publisher, "Publisher is started", exact_match=True)
 
-subscriber = subprocess.Popen((IpcSubscriber, "--cmd-from-stdin"),
+subscriber = subprocess.Popen((args.subscriber_exe, "--cmd-from-stdin"),
                               stdin=subprocess.PIPE,
                               stdout=subprocess.PIPE,
                               stderr=subprocess.STDOUT)

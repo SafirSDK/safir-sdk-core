@@ -59,6 +59,7 @@ RelWithDebInfo/
 ipch/
 **/.vscode/
 **/.vs/
+*.VC.*
 
 
 #CTest / Unit test stuff
@@ -78,6 +79,7 @@ Testing
 *.exp
 *.resource.txt
 *.vcxproj
+*.csproj
 *.vcxproj.filters
 *.sln
 *.suo
@@ -136,7 +138,7 @@ conanbuildinfo.txt
 graph_info.json
 /Find*.cmake
 conan_imports_manifest.txt
-conanbuildinfo.cmake
+conanbuildinfo*.cmake
 
 test_output/
 

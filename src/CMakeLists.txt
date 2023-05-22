@@ -111,57 +111,49 @@ function (SAFIR_INSTALL)
 
   foreach (target ${INST_TARGETS})
     get_target_property(target_type ${target} TYPE)
-    #UTILITY means that it is a dotnet or java target, probably
-    if (target_type STREQUAL "UTILITY")
-      ################ Dotnet ####################
-      get_target_property(assembly_file ${target} ASSEMBLY_FILE)
-      if (assembly_file)
-        #by default assemblies get installed here
-        set(destination ${SAFIR_INSTALL_DESTINATION_CSHARP})
+    get_target_property(assembly_file ${target} ASSEMBLY_FILE)
+    get_target_property(jar_file ${target} JAR_FILE)
+    ################ Dotnet ####################
+    if (assembly_file)
+      #by default assemblies get installed here
+      set(destination ${SAFIR_INSTALL_DESTINATION_CSHARP})
 
-        #except exes on windows
-        get_property(ASSEMBLY_KIND TARGET ${target} PROPERTY TARGET_KIND)
-        if (WIN32 AND NOT ASSEMBLY_KIND STREQUAL "library")
-          set(destination ${SAFIR_INSTALL_DESTINATION_BIN})
+      #except exes on windows
+      get_property(ASSEMBLY_KIND TARGET ${target} PROPERTY TARGET_KIND)
+      if (WIN32 AND NOT ASSEMBLY_KIND STREQUAL "library")
+        set(destination ${SAFIR_INSTALL_DESTINATION_BIN})
+      endif()
+
+      INSTALL_CSHARP_ASSEMBLY(TARGET ${target}
+        DESTINATION ${destination}
+        COMPONENT ${INST_COMPONENT})
+
+      #and on unix systems we want a little shell script in bin to launch exes with
+      if (UNIX AND NOT ASSEMBLY_KIND STREQUAL "library")
+        #we need the assembly file name, so we get the full path first
+        get_property(assembly_file TARGET ${target} PROPERTY ASSEMBLY_FILE)
+        get_filename_component(assembly_file ${assembly_file} NAME) #and strip the path off
+        if (ASSEMBLY_KIND STREQUAL "winexe")
+          set(winforms_workaround "--verify-all")
         endif()
-
-        INSTALL_CSHARP_ASSEMBLY(TARGET ${target}
-          DESTINATION ${destination}
+        FILE(WRITE ${CMAKE_CURRENT_BINARY_DIR}/${target} "#!/bin/sh\nexec /usr/bin/mono ${winforms_workaround} $MONO_OPTIONS ${CMAKE_INSTALL_PREFIX}/${SAFIR_INSTALL_DESTINATION_CSHARP}/${assembly_file} $@")
+        #and install it to bin directory
+        install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/${target}
+          DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN}
           COMPONENT ${INST_COMPONENT})
-
-        #and on unix systems we want a little shell script in bin to launch exes with
-        if (UNIX AND NOT ASSEMBLY_KIND STREQUAL "library")
-          #we need the assembly file name, so we get the full path first
-          get_property(assembly_file TARGET ${target} PROPERTY ASSEMBLY_FILE)
-          get_filename_component(assembly_file ${assembly_file} NAME) #and strip the path off
-          if (ASSEMBLY_KIND STREQUAL "winexe")
-            set(winforms_workaround "--verify-all")
-          endif()
-          FILE(WRITE ${CMAKE_CURRENT_BINARY_DIR}/${target} "#!/bin/sh\nexec /usr/bin/mono ${winforms_workaround} $MONO_OPTIONS ${CMAKE_INSTALL_PREFIX}/${SAFIR_INSTALL_DESTINATION_CSHARP}/${assembly_file} $@")
-          #and install it to bin directory
-          install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/${target}
-            DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN}
-            COMPONENT ${INST_COMPONENT})
-        endif()
       endif()
 
+    elseif (jar_file)
       #################### Java ########################
-      get_target_property(jar_file ${target} JAR_FILE)
-      if (jar_file)
-        get_target_property(install_files ${target} INSTALL_FILES)
+      get_target_property(install_files ${target} INSTALL_FILES)
 
-        if (install_files)
-          INSTALL(FILES ${install_files}
-            DESTINATION ${SAFIR_INSTALL_DESTINATION_JAR}
-            COMPONENT ${INST_COMPONENT})
-        endif()
+      if (install_files)
+        INSTALL(FILES ${install_files}
+          DESTINATION ${SAFIR_INSTALL_DESTINATION_JAR}
+          COMPONENT ${INST_COMPONENT})
       endif()
 
-      if (NOT jar_file AND NOT assembly_file)
-        message(FATAL_ERROR "The target ${target} does not appear to be either a java or dotnet target, cannot use SAFIR_INSTALL.")
-      endif()
-    else() #Not a dotnet or java thing
-
+    else()
       ############### C/C++ ####################
       if ("${target_type}" STREQUAL "SHARED_LIBRARY")
         if (INST_DEVELOPMENT)
@@ -173,10 +165,8 @@ function (SAFIR_INSTALL)
           set(INST_export EXPORT SafirSDKCore)
         endif()
 
-        set(debug_suffix ${CMAKE_DEBUG_POSTFIX})
       else()
         unset(INST_export)
-        unset(debug_suffix)
       endif()
 
       #Runtime and Tools components need special treatment.
@@ -206,22 +196,12 @@ function (SAFIR_INSTALL)
       # Install pdb files on windows
       if(MSVC)
         if (INST_COMPONENT STREQUAL "TestSuite")
-          INSTALL(FILES $<TARGET_FILE_DIR:${target}>/${target}.pdb
+          INSTALL(FILES $<TARGET_PDB_FILE:${target}>
             DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN}
-            CONFIGURATIONS RelWithDebInfo
-            COMPONENT TestSuite)
-          INSTALL(FILES $<TARGET_FILE_DIR:${target}>/${target}${debug_suffix}.pdb
-            DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN}
-            CONFIGURATIONS Debug
             COMPONENT TestSuite)
         else()
-          INSTALL(FILES $<TARGET_FILE_DIR:${target}>/${target}.pdb
+          INSTALL(FILES $<TARGET_PDB_FILE:${target}>
             DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN}
-            CONFIGURATIONS RelWithDebInfo
-            COMPONENT Development)
-          INSTALL(FILES $<TARGET_FILE_DIR:${target}>/${target}${debug_suffix}.pdb
-            DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN}
-            CONFIGURATIONS Debug
             COMPONENT Development)
         endif()
       endif()
@@ -313,17 +293,28 @@ function (SET_SAFIR_TEST_PROPERTIES)
   set (pypath "$ENV{PYTHONPATH}${PATH_SEPARATOR}${safir-sdk-core_SOURCE_DIR}/src/tests/test_support/python")
   string(REGEX REPLACE "^${PATH_SEPARATOR}+" "" pypath ${pypath}) # remove any leading path separators
 
- if (MSVC)
-   set(PATH_ENVIRONMENT "PATH=$ENV{PATH};${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
-   STRING(REPLACE "\;" ";" PATH_ENVIRONMENT "${PATH_ENVIRONMENT}")
-   STRING(REPLACE ";" "\\;" PATH_ENVIRONMENT "${PATH_ENVIRONMENT}")
- else()
-   set(PATH_ENVIRONMENT "LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH}:${CMAKE_LIBRARY_OUTPUT_DIRECTORY}")
- endif()
+  if (MSVC)
+    if (CMAKE_CONFIGURATION_TYPES)
+      foreach(_config_type IN LISTS CMAKE_CONFIGURATION_TYPES)
+        set(_extra_path "${_extra_path}$<$<CONFIG:${_config_type}>:${CMAKE_RUNTIME_OUTPUT_DIRECTORY_${_config_type}}>")
+      endforeach()
+      set(PATH_ENVIRONMENT "PATH=$ENV{PATH};${_extra_path}")
+    else()
+      set(PATH_ENVIRONMENT "PATH=$ENV{PATH};${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
+    endif()
+    STRING(REPLACE "\;" ";" PATH_ENVIRONMENT "${PATH_ENVIRONMENT}")
+    STRING(REPLACE ";" "\\;" PATH_ENVIRONMENT "${PATH_ENVIRONMENT}")
+  else()
+    set(PATH_ENVIRONMENT "LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH}:${CMAKE_LIBRARY_OUTPUT_DIRECTORY}")
+  endif()
 
   # Set a variable that points to where put all the generated libraries for use by tests
   if (MSVC)
-    set(SAFIR_GENERATED_LIB_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+    if (CMAKE_CONFIGURATION_TYPES)
+      set(SAFIR_GENERATED_LIB_OUTPUT_DIRECTORY ${_extra_path})
+    else()
+      set(SAFIR_GENERATED_LIB_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+    endif()
   else()
     set(SAFIR_GENERATED_LIB_OUTPUT_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
   endif()
@@ -396,26 +387,36 @@ include(protobuf-generate)
 include(protobuf-module)
 
 #
+# Define a function that adds a subdirectory and also sets the name
+# as the IDE folder name
+#
+
+function (add_subdirectory_and_set_ide_folder NAME)
+  set(CMAKE_FOLDER ${NAME})
+  add_subdirectory(${NAME})
+endfunction()
+
+#
 # At last, we're ready to add our subdirectories.
 #
 
-add_subdirectory(patch_check)
-add_subdirectory(lluf)
-add_subdirectory(logging)
-add_subdirectory(distribution)
-add_subdirectory(dots)
-add_subdirectory(safir_dou)
-add_subdirectory(control)
-add_subdirectory(dose)
-add_subdirectory(status)
-add_subdirectory(douf)
-add_subdirectory(swre)
-add_subdirectory(foreach)
-add_subdirectory(dope)
-add_subdirectory(websocket)
-add_subdirectory(tests)
-add_subdirectory(util)
-add_subdirectory(config)
+add_subdirectory_and_set_ide_folder(patch_check)
+add_subdirectory_and_set_ide_folder(lluf)
+add_subdirectory_and_set_ide_folder(logging)
+add_subdirectory_and_set_ide_folder(distribution)
+add_subdirectory_and_set_ide_folder(dots)
+add_subdirectory_and_set_ide_folder(safir_dou)
+add_subdirectory_and_set_ide_folder(control)
+add_subdirectory_and_set_ide_folder(dose)
+add_subdirectory_and_set_ide_folder(status)
+add_subdirectory_and_set_ide_folder(douf)
+add_subdirectory_and_set_ide_folder(swre)
+add_subdirectory_and_set_ide_folder(foreach)
+add_subdirectory_and_set_ide_folder(dope)
+add_subdirectory_and_set_ide_folder(websocket)
+add_subdirectory_and_set_ide_folder(tests)
+add_subdirectory_and_set_ide_folder(util)
+add_subdirectory_and_set_ide_folder(config)
 
 
 #non-msvc systems need the cmake export file.

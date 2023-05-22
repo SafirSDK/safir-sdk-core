@@ -24,15 +24,16 @@
 #
 ###############################################################################
 import subprocess, os, time, sys, re
+import argparse
 
+def parse_arguments():
+    parser = argparse.ArgumentParser(description='unit test script')
+    parser.add_argument("--dumper-exe", help="The test executable", required=True)
+    return parser.parse_args()
 
-exe_path = os.environ.get("CMAKE_RUNTIME_OUTPUT_DIRECTORY")
-if exe_path is None:
-    exe_path = "."
+args = parse_arguments()
 
-dumper_exe = os.path.join(exe_path, "dumper")
-
-dumper = subprocess.Popen(dumper_exe, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+dumper = subprocess.Popen(args.dumper_exe, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 result = dumper.communicate()[0].decode("ascii")
 
 if result.find("callback") == -1:

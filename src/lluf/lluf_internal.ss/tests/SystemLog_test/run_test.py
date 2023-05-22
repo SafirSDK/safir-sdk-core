@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 ###############################################################################
 #
-# Copyright Saab AB, 2013 (http://safirsdkcore.com)
+# Copyright Saab AB, 2013,2023 (http://safirsdkcore.com)
 #
 # Created by: Anders Widén
 #
@@ -33,16 +33,14 @@ import socket
 import re
 import argparse
 
-parser = argparse.ArgumentParser()
-parser.add_argument("test_conf_dir", help="Test configuration directory")
-args = parser.parse_args()
+def parse_arguments():
+    parser = argparse.ArgumentParser(description='unit test script')
+    parser.add_argument("test_conf_dir", help="Test configuration directory")
+    parser.add_argument("--test-exe", help="The test executable", required=True)
+    parser.add_argument("--test-exe-name", help="The test executable name", required=True)
+    return parser.parse_args()
 
-exe_path = os.environ.get("CMAKE_RUNTIME_OUTPUT_DIRECTORY")
-if exe_path is None:
-    exe_path = "."
-
-system_log_test_pgm = "SystemLog_test"
-system_log_test_path = os.path.join(exe_path, system_log_test_pgm)
+args = parse_arguments()
 
 conf_file = os.path.join(args.test_conf_dir, "logging.ini")
 
@@ -71,7 +69,7 @@ sock.settimeout(2)
 sock.bind((syslog_server_address, int(syslog_server_port)))
 
 #Run the program that sends system logs
-proc = subprocess.Popen(system_log_test_path, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
+proc = subprocess.Popen(args.test_exe, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
 stdout, stderr = proc.communicate()
 
 if proc.returncode != 0:
@@ -79,57 +77,53 @@ if proc.returncode != 0:
     print(stdout)
     sys.exit(1)
 
-try:
-    log_common_part = r"\D{3} [ |\d]\d \d{2}:\d{2}:\d{2} \S* " + system_log_test_pgm + r"\[\d*\]: "
-    for test in range(12):
-        data, addr = sock.recvfrom(10 * 1024)  # buffer size is 10 k
-        print("Received data:", data)
-        if test == 0:
-            pri = r"<9>"
-            text = r"This is a log from a singleton constructor"
-        elif test == 1:
-            pri = r"<8>"
-            text = r"This is an emergency log"
-        elif test == 2:
-            pri = r"<9>"
-            text = r"This is an alert log"
-        elif test == 3:
-            pri = r"<10>"
-            text = r"This is a critical log with   newline and \t tab"
-        elif test == 4:
-            pri = r"<11>"
-            text = r"This is an error log"
-        elif test == 5:
-            pri = r"<12>"
-            text = r"This is a warning log with   newline and \t tab"
-        elif test == 6:
-            pri = r"<13>"
-            text = r"This is a notice log"
-        elif test == 7:
-            pri = r"<14>"
-            text = r"This is an informational log with   newline and \t tab"
-        elif test == 8:
-            pri = r"<15>"
-            text = r"This is a debug log"
-        elif test == 9:
-            pri = r"<11>"
-            text = r"This is another error log"
-        elif test == 10:
-            pri = r"<15>"
-            text = r"This is a suuuuuuuuuuper duuuuuuuper long log line .*"
-        elif test == 11:
-            pri = r"<9>"
-            text = r"This is a log from a singleton destructor"
 
-        p = re.compile(pri + log_common_part + inst_str + text)
-        data = data.decode("utf-8")
-        if p.match(data) == None:
-            print("Unexpected syslog message:", data)
-            sys.exit(1)
+log_common_part = r"\D{3} [ |\d]\d \d{2}:\d{2}:\d{2} \S* " + args.test_exe_name + r"\[\d*\]: "
+for test in range(12):
+    data, addr = sock.recvfrom(10 * 1024)  # buffer size is 10 k
+    print("Received data:", data)
+    if test == 0:
+        pri = r"<9>"
+        text = r"This is a log from a singleton constructor"
+    elif test == 1:
+        pri = r"<8>"
+        text = r"This is an emergency log"
+    elif test == 2:
+        pri = r"<9>"
+        text = r"This is an alert log"
+    elif test == 3:
+        pri = r"<10>"
+        text = r"This is a critical log with   newline and \t tab"
+    elif test == 4:
+        pri = r"<11>"
+        text = r"This is an error log"
+    elif test == 5:
+        pri = r"<12>"
+        text = r"This is a warning log with   newline and \t tab"
+    elif test == 6:
+        pri = r"<13>"
+        text = r"This is a notice log"
+    elif test == 7:
+        pri = r"<14>"
+        text = r"This is an informational log with   newline and \t tab"
+    elif test == 8:
+        pri = r"<15>"
+        text = r"This is a debug log"
+    elif test == 9:
+        pri = r"<11>"
+        text = r"This is another error log"
+    elif test == 10:
+        pri = r"<15>"
+        text = r"This is a suuuuuuuuuuper duuuuuuuper long log line .*"
+    elif test == 11:
+        pri = r"<9>"
+        text = r"This is a log from a singleton destructor"
 
-except:
-    print("Exception!")
-    sys.exit(1)
+    p = re.compile(pri + log_common_part + inst_str + text)
+    data = data.decode("utf-8")
+    if p.match(data) == None:
+        print("Unexpected syslog message:", data)
+        sys.exit(1)
 
 print("Success!")
 sys.exit(0)

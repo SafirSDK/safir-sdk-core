@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 ###############################################################################
 #
-# Copyright Saab AB, 2011-2013 (http://safirsdkcore.com)
+# Copyright Saab AB, 2011-2013, 2023 (http://safirsdkcore.com)
 #
 # Created by: Lars Hagstrom (lars@foldspace.nu)
 #
@@ -26,14 +26,18 @@
 import subprocess
 import os
 import sys
+import argparse
 
+def parse_arguments():
+    parser = argparse.ArgumentParser(description='unit test script')
+    parser.add_argument("--test-exe", help="The test executable", required=True)
+    parser.add_argument("--sleeper-exe", help="The sleeper executable", required=True)
+    return parser.parse_args()
 
-exe_path = os.environ.get("CMAKE_RUNTIME_OUTPUT_DIRECTORY")
-if exe_path is None:
-    exe_path = "."
+args = parse_arguments()
 
-ProcessMonitor_test2 = os.path.join(exe_path, "ProcessMonitor_test2")
-Sleeper = os.path.join(exe_path, "ProcessMonitorSleeper")
+ProcessMonitor_test2 = args.test_exe
+Sleeper = args.sleeper_exe
 
 #start a bunch of sleepers
 sleepers = list()

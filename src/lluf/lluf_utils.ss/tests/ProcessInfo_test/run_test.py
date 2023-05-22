@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 ###############################################################################
 #
-# Copyright Saab AB, 2014 (http://safirsdkcore.com)
+# Copyright Saab AB, 2014, 2023 (http://safirsdkcore.com)
 #
 # Created by: Anders Widén (anders.widen@consoden.se)
 #
@@ -24,18 +24,20 @@
 #
 ###############################################################################
 import subprocess, os, time, sys
+import argparse
 
-exe_path = os.environ.get("CMAKE_RUNTIME_OUTPUT_DIRECTORY")
-if exe_path is None:
-    exe_path = "."
+def parse_arguments():
+    parser = argparse.ArgumentParser(description='unit test script')
+    parser.add_argument("--test-exe", help="The test executable", required=True)
+    parser.add_argument("--sleeper-exe", help="The sleeper executable", required=True)
+    return parser.parse_args()
 
-ProcessInfo_test = os.path.join(exe_path, "ProcessInfo_test")
-Sleeper = os.path.join(exe_path, "ProcessInfoSleeper")
+args = parse_arguments()
 
 #start sleeper
-sleeper = subprocess.Popen((Sleeper, "120"))
+sleeper = subprocess.Popen((args.sleeper_exe, "120"))
 
-listener = subprocess.Popen((ProcessInfo_test, "ProcessInfoSleeper", str(sleeper.pid)),
+listener = subprocess.Popen((args.test_exe, "ProcessInfoSleeper", str(sleeper.pid)),
                             stdout=subprocess.PIPE,
                             stderr=subprocess.STDOUT,
                             universal_newlines=True)
@@ -43,7 +45,7 @@ result = listener.communicate()[0]
 sleeper.kill()
 
 if result != "":
-    print("ProcessInfo_test exited with non-empty output!")
+    print(args.test_exe, "exited with non-empty output!")
     print(result)
     sys.exit(1)
 

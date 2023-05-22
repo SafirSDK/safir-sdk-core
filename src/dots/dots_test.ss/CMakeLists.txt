@@ -19,7 +19,7 @@ if (CSHARP_FOUND)
     COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py
     --show-safir-config $<TARGET_FILE:safir_show_config>
     --language dotnet
-    --binary $<TARGET_PROPERTY:dots_test_dotnet,ASSEMBLY_FILE>
+    --binary $<TARGET_GENEX_EVAL:dots_test_dotnet,$<TARGET_PROPERTY:dots_test_dotnet,ASSEMBLY_FILE>>
     --output ${CMAKE_CURRENT_SOURCE_DIR}/output.txt
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/dotnet)
 

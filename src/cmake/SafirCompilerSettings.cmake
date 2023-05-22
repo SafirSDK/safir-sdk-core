@@ -30,6 +30,7 @@ if (MSVC)
    add_compile_definitions(_WINSOCK_DEPRECATED_NO_WARNINGS)
    add_compile_definitions(_UNICODE UNICODE)
    add_compile_definitions(_WIN32_WINNT=0x0600)
+   add_compile_definitions(WINVER=0x0600)
    add_compile_definitions(WIN32_LEAN_AND_MEAN)
 
    add_compile_options(/wd4503) #decorated name length exceeded
@@ -68,4 +69,7 @@ if (MSVC)
    #Also disable incremental linking to avoid warning.
    add_link_options($<$<CONFIG:RelWithDebInfo>:/OPT:REF>)
    add_link_options($<$<CONFIG:RelWithDebInfo>:/INCREMENTAL:NO>)
+
+   #disable spurious linker warnings for third party libraries.
+   add_link_options($<$<CONFIG:Debug>:/ignore:4099>)
 endif ()

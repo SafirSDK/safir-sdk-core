@@ -24,18 +24,21 @@
 #
 ###############################################################################
 import subprocess, os, time, sys, re
+import argparse
 
-exe_path = os.environ.get("CMAKE_RUNTIME_OUTPUT_DIRECTORY")
-if exe_path is None:
-    exe_path = "."
+def parse_arguments():
+    parser = argparse.ArgumentParser(description='unit test script')
+    parser.add_argument("--test-exe", help="The test executable", required=True)
+    return parser.parse_args()
 
-ss_test = os.path.join(exe_path, "ss_processes_and_threads_test")
+args = parse_arguments()
+
 procs = list()
 
 try:
     #Start a bunch of processes
     for i in range(25):
-        proc = subprocess.Popen(ss_test,
+        proc = subprocess.Popen(args.test_exe,
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.STDOUT,
                                 stdin=subprocess.PIPE,

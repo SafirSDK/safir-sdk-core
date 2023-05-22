@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2014 (http://safirsdkcore.com)
+* Copyright Saab AB, 2014,2023 (http://safirsdkcore.com)
 *
 * Created by: Lars Hagström / lars.hagstrom@consoden.se
 *
@@ -118,13 +118,12 @@ struct Fixture
 
     pid_t LaunchSleeper(const double duration)
     {
-        std::string path = ".";
-        auto env = getenv("CMAKE_RUNTIME_OUTPUT_DIRECTORY");
-        if (env != nullptr)
-        {
-            path = env;
-            std::wcout << path.c_str() << std::endl;
-        }
+        using namespace boost::unit_test;
+        BOOST_TEST_REQUIRE( framework::master_test_suite().argc == 3 );
+        BOOST_TEST_REQUIRE( framework::master_test_suite().argv[1] == "--sleeper-exe" );
+
+        const std::string sleeper = framework::master_test_suite().argv[2];
+
 #ifdef PROCMON_LINUX
         const pid_t pid = fork();
         switch (pid)
@@ -132,7 +131,7 @@ struct Fixture
         case -1:
             throw std::logic_error(std::string("fork failed: ") + strerror(errno));
         case 0:
-            execl((path + "/ProcessMonitorSleeper").c_str(),
+            execl(sleeper.c_str(),
                   "ProcessMonitorSleeper",
                   boost::lexical_cast<std::string>(duration).c_str(),
                   nullptr);
@@ -145,7 +144,7 @@ struct Fixture
         STARTUPINFOA info={sizeof(info)};
         PROCESS_INFORMATION processInfo;
         if (::CreateProcessA(NULL,
-                             (LPSTR)((path + "\\ProcessMonitorSleeper.exe " +
+                             (LPSTR)((sleeper + " " +
                                      boost::lexical_cast<std::string>(duration)).c_str()),
                              NULL,
                              NULL,

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 ###############################################################################
 #
-# Copyright Saab AB, 2012-2013 (http://safirsdkcore.com)
+# Copyright Saab AB, 2012-2013,2023 (http://safirsdkcore.com)
 #
 # Created by: Lars Hagstrom (lars.hagstrom@consoden.se)
 #
@@ -24,12 +24,14 @@
 #
 ###############################################################################
 import subprocess, os, time, sys, re, signal
+import argparse
 
-exe_path = os.environ.get("CMAKE_RUNTIME_OUTPUT_DIRECTORY")
-if exe_path is None:
-    exe_path = "."
+def parse_arguments():
+    parser = argparse.ArgumentParser(description='unit test script')
+    parser.add_argument("--sleeper-exe", help="The test executable", required=True)
+    return parser.parse_args()
 
-sleeper_exe = os.path.join(exe_path, "crash_reporter_sleeper")
+args = parse_arguments()
 
 print("stdout isatty:", sys.stdout.isatty())
 print("stderr isatty:", sys.stderr.isatty())
@@ -48,7 +50,7 @@ def test_signal_internal(reason, expectCallback, expectedReturncode):
     global errors
     print("Testing signal", str(reason) + ":")
     cf = subprocess.CREATE_NEW_PROCESS_GROUP if sys.platform == "win32" else 0
-    sleeper = subprocess.Popen(sleeper_exe, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, creationflags=cf)
+    sleeper = subprocess.Popen(args.sleeper_exe, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, creationflags=cf)
     line = sleeper.stdout.readline().decode("ascii")
     if not line.startswith("Started"):
         print("Strange starting line:", line)

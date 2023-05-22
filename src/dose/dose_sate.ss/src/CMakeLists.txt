@@ -1,4 +1,4 @@
-if (NOT CSHARP_FOUND)
+if (NOTCSHARP_FOUND)
   return()
 endif()
 
@@ -10,7 +10,13 @@ ADD_CSHARP_ASSEMBLY(sate WINEXE
   ICON sate_logo.ico
   SOURCES ${sources}
   RESOURCES PREFIX Sate. ${resx_files}
-  REFERENCES Safir.Dob safir_generated-Core-dotnet Safir.Dob.Typesystem System.Windows.Forms System.Drawing System.Data)
+  REFERENCES
+      Safir.Dob safir_generated-Core-dotnet
+      Safir.Dob.Typesystem
+      System.Windows.Forms
+      System.Drawing
+      System.Data
+      System.Xml
+      System.Xml.Serialization)
 
 SAFIR_INSTALL(TARGETS sate COMPONENT Tools)
-

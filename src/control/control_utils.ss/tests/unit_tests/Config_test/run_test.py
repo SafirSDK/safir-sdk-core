@@ -29,9 +29,16 @@ import shutil
 import re
 import argparse
 
+def parse_arguments():
+    parser = argparse.ArgumentParser(description='unit test script')
+    parser.add_argument("test_conf_dir", help="Test configuration directory")
+    parser.add_argument("--test-exe", help="The test executable", required=True)
+    return parser.parse_args()
+
+args = parse_arguments()
 
 def run_test(test_case):
-    proc = subprocess.Popen((test_path, test_case),
+    proc = subprocess.Popen((args.test_exe, test_case),
                             stdout=subprocess.PIPE,
                             stderr=subprocess.STDOUT,
                             universal_newlines=True)
@@ -42,17 +49,6 @@ def run_test(test_case):
         print(stdout)
         sys.exit(1)
 
-
-parser = argparse.ArgumentParser()
-parser.add_argument("test_conf_dir", help="Test configuration directory")
-args = parser.parse_args()
-
-exe_path = os.environ.get("CMAKE_RUNTIME_OUTPUT_DIRECTORY")
-if exe_path is None:
-    exe_path = "."
-
-test_pgm = "Config_test"
-test_path = os.path.join(exe_path, test_pgm)
 
 os.environ["SAFIR_TEST_CONFIG_OVERRIDE"] = args.test_conf_dir
 

@@ -491,7 +491,7 @@ namespace Safir.Dob.Typesystem
         }
 
 
-        private SortedDictionary<KeyT, ValT> m_values;
+        private System.Collections.Generic.SortedDictionary<KeyT, ValT> m_values;
     }
 
     /// <summary>
