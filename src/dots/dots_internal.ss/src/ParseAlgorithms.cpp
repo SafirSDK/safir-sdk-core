@@ -692,7 +692,7 @@ namespace ToolSupport
             {
                 //Enum type does not exist
                 std::ostringstream os;
-                os<<"The parameter type '"<<pd->typeName<<"' does not exist. Expected to be a basic type or enum type. Specified for parameter "<<pd->GetName();
+                os<<"The parameter type '"<<pd->typeName<<"' does not exist, maybe a dou-file is missing. Specified for parameter "<<pd->GetName();
                 throw ParseError("Invalid type", os.str(), state.currentPath, 47);
             }
 
@@ -707,6 +707,17 @@ namespace ToolSupport
                     os<<"The parameter "<<pd->GetName()<<" has an invalid value '"<<v.val.str<<"'. Expected to be an enum value of type "<<ed->GetName();
                     throw ParseError("Invalid enum value", os.str(), state.currentPath, 48);
                 }
+            }
+        }        
+        else if (pd->GetMemberType() == ObjectMemberType)
+        {
+            const ClassDescription* cd =state.repository->GetClass(pd->GetTypeId());
+            if (!cd)
+            {
+                //Class type does not exist
+                std::ostringstream os;
+                os << "The parameter type '" << pd->typeName << "' does not exist, maybe a dou-file is missing. Specified for parameter " << pd->GetName();
+                throw ParseError("Invalid type", os.str(), state.currentPath, 218);
             }
         }
     }
