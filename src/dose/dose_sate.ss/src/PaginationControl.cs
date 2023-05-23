@@ -18,8 +18,9 @@ namespace Sate
             InitializeComponent();
             itemsPerPage.Items.Clear();
             itemsPerPage.Items.AddRange(PageSizes.Select(s => s.ToString()).ToArray());
-            this.numberOfValues = numberOfValues;
+            //this.numberOfValues = numberOfValues;
             this.itemsPerPage.SelectedIndex = 0;
+            NumberOfValues = numberOfValues;
         }
 
         public int NumberOfValues

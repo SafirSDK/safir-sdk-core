@@ -186,6 +186,7 @@ namespace Sate
                 Controls.Add(typeLabelAddItem);
 
             var numberOfValues = fieldValueControl.Count;
+
             if (numberOfValues > PaginationControl.PageSizes[0] && pagination == null)
             {                
                 pagination = new PaginationControl(numberOfValues);
@@ -196,7 +197,7 @@ namespace Sate
             {
                 Controls.Add(pagination);
             }
-
+            
             SetFieldValues();
             ShowElements();
 
@@ -208,8 +209,8 @@ namespace Sate
         {
             this.startIndex = startIndex;
             this.endIndex = endIndex;
-            // ShowElements();
-            parentObjectEditPanel.ExpandCollapse(member);
+            ShowElements();
+            //parentObjectEditPanel.ExpandCollapse(member);
         }
 
         public void ShowElements()
@@ -692,6 +693,12 @@ namespace Sate
         protected void InitArray(string typeName, int numberOfValues,
             ref Point location)
         {
+            if (arraySize <= PaginationControl.PageSizes[0])
+            {
+                // No pagination will be needed, then set start and end index
+                startIndex = 0;
+                endIndex = arraySize;
+            }
             typeLabel = new Label();
             typeLabel.Width = X_NAME_START - X_TYPE_START - 2*X_STEP;
             typeLabel.Text = typeName;
