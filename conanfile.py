@@ -98,7 +98,7 @@ class SafirSdkCoreConan(ConanFile):
             self.copy("*.exe", src="bin", dst="bin", root_package="ninja")
 
     def requirements(self):
-        self.requires("sentry-breakpad/0.5.3")
+        self.requires("sentry-breakpad/0.6.2")
         self.requires("websocketpp/0.8.2")
         self.requires("rapidjson/cci.20220822")
         self.requires("protobuf/3.21.9")
