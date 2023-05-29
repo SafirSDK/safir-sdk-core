@@ -184,15 +184,6 @@ namespace Internal
         return *AnyPtrCast<Header>(GetData());
     }
 
-    DistributionData::RequestPDHeader &
-    DistributionData::GetRequestPDHeader()
-    {
-        ENSURE(m_data, << "Trying to GetHeader from a NULL DistributionData!");
-        ENSURE(GetType() == Action_RequestPoolDistribution,
-               << "GetRequestPDHeader called on DistributionData that was not a Action_RequestPoolDistribution (type = " << GetType() << ")");
-        return *AnyPtrCast<RequestPDHeader>(GetData());
-    }
-
     DistributionData::ConnectHeader &
     DistributionData::GetConnectHeader()
     {
@@ -603,19 +594,6 @@ namespace Internal
     }
 
 
-    DistributionData::DistributionData(request_pool_distribution_request_tag_t,
-                                       const ConnectionId& sender,
-                                       const ConnectionId& receiver)
-    {
-        Allocate(sizeof(RequestPDHeader));
-
-        Header & header = GetHeader();
-        header.m_type=Action_RequestPoolDistribution;
-        header.m_sender=sender;
-
-        RequestPDHeader & pdRequest = GetRequestPDHeader();
-        pdRequest.m_receiver = receiver;
-    }
 
 
     DistributionData::DistributionData(service_request_tag_t,
@@ -788,8 +766,6 @@ namespace Internal
         case Action_HavePersistenceDataResponse:
             return sizeof (HavePersistenceDataResponseMsg);
 
-        case Action_RequestPoolDistribution:
-            return sizeof (RequestPDHeader);
         default:
             ENSURE(false, << "DistributionData::Size: Invalid message kind: " << GetType());
             return 0;
@@ -1380,14 +1356,6 @@ namespace Internal
                 oStr << "Action_HavePersistenceDataResponse" << std::endl
                      << HeaderImage() << std::endl
                      << "\tIHavePersistenceData: " << std::boolalpha << GetIHavePersistenceData() << std::endl;
-            }
-            break;
-
-        case Action_RequestPoolDistribution:
-            {
-                oStr << "Action_RequestPoolDistribution" << std::endl
-                     << HeaderImage() << std::endl
-                     << "\tReceiverId: " << GetPDRequestReceiverId() << std::endl;
             }
             break;
 
