@@ -511,7 +511,11 @@ public:
                     throw std::logic_error("Received corrupt data!");
                 }
             }
-            m_expectDataFrom.erase(fromNodeId);
+            const int erased = m_expectDataFrom.erase(fromNodeId);
+            if (erased != 0)
+            {
+                logerr << "MAIN: First receive from " << fromNodeId << std::endl;;
+            }
         }),
                                          1000100222,
                                          [](size_t size){return new char[size];},

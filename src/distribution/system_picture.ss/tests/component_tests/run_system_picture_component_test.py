@@ -292,12 +292,14 @@ class Node():
         log(f"  Node {self.node_id} waiting for states on ctrl")
         Node.__wait_for_states_internal(self.node_id, self.ctrl_queue, self.ctrl_states, expected_states,
                                         last_state_repeats)
+        log(" - Got them")
 
     def wait_for_states_main(self, expected_states, last_state_repeats):
         if not self.args.only_control:
             log(f"  Node {self.node_id} waiting for states on main")
             Node.__wait_for_states_internal(self.node_id, self.main_queue, self.main_states, expected_states,
                                             last_state_repeats)
+            log(" - Got them")
 
     @staticmethod
     def __wait_for_states_internal(node_id, queue, states, expected_states, last_state_repeats):
@@ -680,6 +682,33 @@ def test_one_normal_one_light_disconnect_reconnect(args):
         node2.close_and_check()
     return node1.returncode == 0 and node2.returncode == 0
 
+def test_one_normal_one_light_disconnect_sleep_reconnect(args):
+    #This tests the more_dead_nodes thing in RawHandler
+    with closing(Node(args,1,light_node = False, multicast = False)) as node1,\
+         closing(Node(args,2,light_node = True, multicast = False, seeds = 1)) as node2:
+        state1 = '''{"elected_id": 1, "is_detached": false, "nodes": [{"name": "node_001", "is_dead": false, "id": 1, "node_type_id": 1},
+                                                                      {"name": "node_002", "is_dead": false, "id": 2, "node_type_id": 11}]}'''
+        state2 = '''{"elected_id": 1, "is_detached": false, "nodes": [{"name": "node_001", "is_dead": false, "id": 1, "node_type_id": 1},
+                                                                      {"name": "node_002", "is_dead": true, "id": 2, "node_type_id": 11}]}'''
+        state3 = '''{"elected_id": 2, "is_detached": true, "nodes": [{"name": "node_002", "is_dead": false, "id": 2, "node_type_id": 11}]}'''
+        inc1 = form_system((node1, node2))
+        node1.wait_for_states(state1)
+        node2.wait_for_states(state1)
+        node2.disconnect()
+        node1.wait_for_states((state1,state2))
+        inc2 = node2.wait_for_form(allowed_states=(state1,))
+        if inc1 == inc2:
+            raise Failure("unexpeced incarnation")
+        node2.wait_for_states((state1,state3))
+        log(f"Sleeping for 7 minutes before reconnecting node 2")
+        time.sleep(60*7) #seven minutes, to go longer than the 5 minute more_dead_nodes timeout
+        node2.reconnect()
+        node1.wait_for_states((state1,state2,state1))
+        node2.wait_for_join(inc1, allow_detached_states=True)
+        node2.wait_for_states((state1,state3, state1))
+        node1.close_and_check()
+        node2.close_and_check()
+    return node1.returncode == 0 and node2.returncode == 0
 
 def test_one_normal_one_light_multicast(args):
     with closing(Node(args,1,light_node = False, multicast = True)) as node1,\
@@ -2047,6 +2076,7 @@ TEST_CASES = (
     "two_normal_one_light_weird_seed",
     "move_lightnode_to_other_system",
     "one_normal_one_light_kill_on_reconnect",
+    "one_normal_one_light_disconnect_sleep_reconnect",
     #"move_lightnode_to_other_system_fast",
 )
 
