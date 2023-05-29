@@ -98,7 +98,6 @@ class SafirSdkCoreConan(ConanFile):
             self.copy("*.exe", src="bin", dst="bin", root_package="ninja")
 
     def requirements(self):
-        self.requires("sentry-breakpad/0.6.2")
         self.requires("websocketpp/0.8.2")
         self.requires("rapidjson/cci.20220822")
         self.requires("protobuf/3.21.9")
@@ -106,3 +105,10 @@ class SafirSdkCoreConan(ConanFile):
             self.requires("qt/5.15.8")
             self.requires("ninja/1.11.1")
             self.requires("boost/1.81.0")
+
+        #Visual Studio 2015 does not compile the latest sentry-breakpad (lacks c++17 support)
+        if self.settings.os == "Windows" and self.settings.compiler.version == 14:
+            self.requires("sentry-breakpad/0.5.3")
+        else:
+            self.requires("sentry-breakpad/0.6.2")
+
