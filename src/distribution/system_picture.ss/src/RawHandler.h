@@ -672,7 +672,22 @@ namespace SP
                                   findIt->second.nodeInfo->set_data_duplicate_count(0);
                                   findIt->second.nodeInfo->set_data_retransmit_count(0);
 
-                                  m_moreDeadNodes.erase(id);
+                                  const auto erased = m_moreDeadNodes.erase(id);
+                                  if(erased != 0)
+                                  {
+                                      lllog(4) << m_logPrefix << "Resurrecting node found in more_dead_nodes, removing it from there" << id << std::endl;
+
+                                      auto* protoField = m_allStatisticsMessage.mutable_more_dead_nodes();
+                                      auto findIt = std::find(protoField->begin(), protoField->end(), id);
+                                      if (findIt != protoField->end())
+                                      {
+                                          protoField->erase(findIt);
+                                      }
+                                      else
+                                      {
+                                          throw std::logic_error("Inconsistent contents of more_dead_nodes");
+                                      }
+                                  }
 
                                   findIt->second.lastUcReceiveTime = boost::chrono::steady_clock::now();
                                   findIt->second.lastMcReceiveTime = boost::chrono::steady_clock::now();
