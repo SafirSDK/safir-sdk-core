@@ -245,7 +245,11 @@ namespace Com
 
             bool receiverReady=true;
 
-            if (ValidCrc(buf, bytesRecv))
+            if (!Parameters::NetworkEnabled)
+            {
+                //ignore the packet
+            }
+            else if (ValidCrc(buf, bytesRecv))
             {
                 const bool multicast = socket == m_multicastSocket.get();
                 if (multicast)
