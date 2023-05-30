@@ -679,12 +679,6 @@ namespace Internal
             Typesystem::Int32 m_padding;
         };
 
-        struct RequestPDHeader
-        {
-            Header m_commonHeader;
-            ConnectionId m_receiver;
-        };
-
 #pragma pack (pop)
 
         //This method is meant to contain BOOST_STATIC_ASSERTs, and is not meant to be called
@@ -695,10 +689,6 @@ namespace Internal
         const Header & GetHeader() const  //just call non-const version
         {return const_cast<DistributionData *>(this)->GetHeader();}
         
-        RequestPDHeader& GetRequestPDHeader();
-        const RequestPDHeader & GetRequestPDHeader() const  //just call non-const version
-        {return const_cast<DistributionData *>(this)->GetRequestPDHeader();}
-
         ConnectHeader& GetConnectHeader();
         const ConnectHeader & GetConnectHeader() const  //just call non-const version
         {return const_cast<DistributionData *>(this)->GetConnectHeader();}

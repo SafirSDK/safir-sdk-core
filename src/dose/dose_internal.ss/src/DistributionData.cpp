@@ -102,9 +102,6 @@ namespace Internal
                             + 2 * 4
                             + sizeof(ConnectionId));
 
-        BOOST_STATIC_ASSERT(sizeof (RequestPDHeader) == sizeof(Header)
-                            + sizeof(ConnectionId));
-
         BOOST_STATIC_ASSERT(sizeof (HavePersistenceDataResponseMsg) == sizeof(Header)
                             + 4); //bool plus padding
 
