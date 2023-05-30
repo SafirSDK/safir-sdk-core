@@ -1314,7 +1314,7 @@ namespace ToolSupport
             {
                 std::ostringstream os;
                 os<<"Can't map object to property member '"<<propMem->GetName()<<"' of type "<<propMem->typeName;
-                throw ParseError("Type missmatch", os.str(), state.currentPath, 98);
+                throw ParseError("Type mismatch", os.str(), state.currentPath, 98);
             }
 
             ParameterDescriptionLocal* param=state.lastInsertedMemberMapping->paramRef;
@@ -1333,7 +1333,7 @@ namespace ToolSupport
                     std::ostringstream os;
                     os<<"PropertyMapping with object of incorrect type. The object specified for propertyMember '"<<pd->GetName()<<"."<<propMem->GetName()<<"' in class '"<<state.lastInsertedPropertyMapping->class_->GetName()
                      <<"' is not compatible with the expected type "<<propMem->typeName;
-                    throw ParseError("Type missmatch", os.str(), state.currentPath, 138);
+                    throw ParseError("Type mismatch", os.str(), state.currentPath, 138);
                 }
             }
             else
@@ -1378,7 +1378,7 @@ namespace ToolSupport
             {
                 std::ostringstream os;
                 os<<"Can't map object to property member '"<<propMem->GetName()<<"' of type "<<propMem->typeName;
-                throw ParseError("Type missmatch", os.str(), state.currentPath, 99);
+                throw ParseError("Type mismatch", os.str(), state.currentPath, 99);
             }
 
             ParameterDescriptionLocal* param=state.lastInsertedMemberMapping->paramRef;
@@ -1409,7 +1409,7 @@ namespace ToolSupport
                 std::ostringstream os;
                 os<<"PropertyMapping with object of incorrect type. The object specified for propertyMember '"<<pd->GetName()<<"."<<propMem->GetName()<<"' in class '"<<state.lastInsertedPropertyMapping->class_->GetName()
                  <<"' is not compatible with the expected type "<<propMem->typeName;
-                throw ParseError("Type missmatch", os.str(), state.currentPath, 113);
+                throw ParseError("Type mismatch", os.str(), state.currentPath, 113);
             }
         }
     };
@@ -1426,7 +1426,7 @@ namespace ToolSupport
             {
                 std::ostringstream os;
                 os<<"Can't map entityId to property member '"<<propMem->GetName()<<"'' of type "<<propMem->typeName;
-                throw ParseError("Type missmatch", os.str(), state.currentPath, 103);
+                throw ParseError("Type mismatch", os.str(), state.currentPath, 103);
             }
 
             ParameterDescriptionLocal* param=state.lastInsertedMemberMapping->paramRef;
@@ -1600,7 +1600,7 @@ namespace ToolSupport
                 std::ostringstream os;
                 os<<"PropertyMapping is mapping property member "<<propMem->GetName()<<" that has type "<<propMem->typeName
                     <<" to parameter '"<<param->GetName()<<"' that has type "<<param->typeName<<". The types are not compatible.";
-                throw ParseError("Type missmatch", os.str(), state.currentPath, 95);
+                throw ParseError("Type mismatch", os.str(), state.currentPath, 95);
             }
 
             state.lastInsertedMemberMapping->paramRef=param;
@@ -1646,7 +1646,7 @@ namespace ToolSupport
                 std::ostringstream os;
                 os<<"PropertyMapping is mapping property member "<<propMem->GetName()<<" that has type "<<propMem->typeName
                     <<" to parameter '"<<srcParam->GetName()<<"' that has type "<<srcParam->typeName<<". The types are not compatible.";
-                throw ParseError("Type missmatch", os.str(), state.currentPath, 201);
+                throw ParseError("Type mismatch", os.str(), state.currentPath, 201);
             }
 
             int paramIndex=-1;
@@ -1839,7 +1839,7 @@ namespace ToolSupport
                     std::ostringstream os;
                     os<<"PropertyMapping is mapping property member "<<propMem->GetName()<<" that has type "<<propMem->typeName
                         <<" to class member '"<<classMem->GetName()<<"' that has type "<<classMem->typeName<<". The types are not compatible.";
-                    throw ParseError("Type missmatch", os.str(), state.currentPath, 88);
+                    throw ParseError("Type mismatch", os.str(), state.currentPath, 88);
                 }
             }
         }

@@ -28,12 +28,14 @@
 #include "MainWindow.h"
 
 #ifdef _MSC_VER
-#pragma warning (push)
-#pragma warning (disable: 4127)
-#pragma warning (disable: 4244)
-#pragma warning (disable: 4251)
-#pragma warning (disable: 4800)
-#pragma warning (disable: 4018)
+#  pragma warning (push)
+#  pragma warning (disable: 4127)
+#  pragma warning (disable: 4244)
+#  pragma warning (disable: 4251)
+#  pragma warning (disable: 4800)
+#  pragma warning (disable: 4459)
+#  pragma warning (disable: 4018)
+#  include <boost/process/windows.hpp>
 #endif
 
 #include "ui_MainWindow.h"
@@ -41,10 +43,30 @@
 #include <QTimer>
 #include <QShortcut>
 #include <QScrollBar>
+#include <QDebug>
 
 #ifdef _MSC_VER
-#pragma warning (pop)
+#  pragma warning (pop)
 #endif
+
+namespace
+{
+    QString concatenateCommand(const std::string& program, const std::vector<std::string>& args)
+    {
+        QString result = QString::fromStdString(program);
+        for (const auto& arg: args)
+        {
+            result += " ";
+            result += QString::fromStdString(arg);
+        }
+        return result;
+    }
+}
+
+MainWindow::Process::~Process()
+{
+    AppendMetaText(textEdit, exitText, exitError);
+}
 
 
 MainWindow::MainWindow()
@@ -53,7 +75,9 @@ MainWindow::MainWindow()
     , m_work(std::make_unique<boost::asio::io_service::work>(m_ioService))
 {
     m_ui->setupUi(this);
+    setStyleSheet("QGroupBox { border-top: 1px solid lightgray; margin-top: 8px; } QGroupBox::title {subcontrol-origin: margin; subcontrol-position: top left; padding: 0 3px; }");
     m_ui->outputTabs->setVisible(false);
+    m_ui->lookupEdit->setPlaceholderText(tr("TypeId or Type name"));
     adjustSize();
     auto* shortcut = new QShortcut(QKeySequence::Cancel, this);
     connect(shortcut, &QShortcut::activated, this, &QMainWindow::close);
@@ -62,6 +86,15 @@ MainWindow::MainWindow()
     connect(m_ui->launchDobExplorerButton, &QPushButton::pressed, this, &MainWindow::OnLaunchDobExplorerPressed);
     connect(m_ui->launchEntityViewerButton, &QPushButton::pressed, this, &MainWindow::OnLaunchEntityViewerPressed);
     connect(m_ui->launchControlGuiButton, &QPushButton::pressed, this, &MainWindow::OnLaunchControlGuiPressed);
+    connect(m_ui->checkDouFilesButton, &QPushButton::pressed, this, &MainWindow::OnCheckDouFilesPressed);
+    connect(m_ui->checkGeneratedButton, &QPushButton::pressed, this, &MainWindow::OnCheckGeneratedPressed);
+    connect(m_ui->showTypesystemDetailsButton, &QPushButton::pressed, this, &MainWindow::OnShowTypesystemDetailsPressed);
+    connect(m_ui->lookupEdit, &QLineEdit::textChanged, this, [this]{
+                      m_ui->typeIdLookupButton->setEnabled(!m_ui->lookupEdit->text().isEmpty());
+                      m_ui->typeLookupButton->setEnabled(!m_ui->lookupEdit->text().isEmpty());
+                  });
+    connect(m_ui->typeIdLookupButton, &QPushButton::pressed, this, &MainWindow::OnTypeIdLookupPressed);
+    connect(m_ui->typeLookupButton, &QPushButton::pressed, this, &MainWindow::OnTypeLookupPressed);
     connect(m_ui->showOutputButton, &QAbstractButton::toggled, this, &MainWindow::OnShowOutputToggled);
 
     auto* timer = new QTimer(this);
@@ -79,7 +112,7 @@ MainWindow::~MainWindow()
 }
 
 
-void MainWindow::LaunchProgram(const std::string& program)
+void MainWindow::LaunchProgram(const std::string& program, const std::vector<std::string>& args)
 {
     std::error_code error;
 
@@ -95,29 +128,34 @@ void MainWindow::LaunchProgram(const std::string& program)
 
     process->proc = std::make_unique<boost::process::child>
         (boost::process::search_path(program),
+         boost::process::args(args),
          m_ioService,
          error,
          boost::process::on_exit=[this,process](int exitCode, const std::error_code& error){Exited(process, error, exitCode);},
          boost::process::std_out > process->outPipe,
          boost::process::std_err > process->errPipe,
+#ifdef _MSC_VER
+         boost::process::windows::create_no_window, //Avoid creating terminal window on Windows
+#endif
          environment
          );
 
-    process->textEdit = new QPlainTextEdit(this);
+    process->textEdit = new QTextEdit(this);
     process->textEdit->setReadOnly(true);
 
     const int index = m_ui->outputTabs->
         addTab(process->textEdit, QString::fromStdString(program) + " " + QString::number(process->proc->id()));
     m_ui->outputTabs->setCurrentIndex(index);
-    AppendText(process->textEdit,
-               tr("Output from '%1' with pid %2 and SAFIR_INSTANCE=%3:\n")
-                 .arg(QString::fromStdString(program))
-                 .arg(process->proc->id())
-                 .arg(m_ui->safirInstanceSpin->value()));
+    AppendMetaText(process->textEdit,
+                   tr("Output from '%1' with pid %2 and SAFIR_INSTANCE=%3:\n")
+                   .arg(concatenateCommand(program,args))
+                   .arg(process->proc->id())
+                   .arg(m_ui->safirInstanceSpin->value()),
+                   false);
 
     if (error)
     {
-        AppendText(process->textEdit, tr("Failed to launch process: %1\n").arg(QString::fromStdString(error.message())));
+        AppendMetaText(process->textEdit, tr("Failed to launch process: %1\n").arg(QString::fromStdString(error.message())), true);
     }
     else
     {
@@ -134,13 +172,18 @@ void MainWindow::PipeReadOutLoop(const std::shared_ptr<Process>& process)
         (boost::asio::buffer(process->outBuf),
          [this,process](const boost::system::error_code& error, std::size_t size)
          {
-             if (error == boost::asio::error::eof)
+             if (error == boost::asio::error::eof || error == boost::asio::error::broken_pipe)
              {
                  return;
              }
              else if (error)
              {
-                 AppendText(process->textEdit, tr("Failed to read process output: %1\n").arg(QString::fromStdString(error.message())));
+                 AppendMetaText(process->textEdit, tr("Failed to read process stdout: %1 (Error %2 %3:%4)\n").
+                                arg(QString::fromStdString(error.message())).
+                                arg(error.value()).
+                                arg(QString::fromStdString(error.category().name())).
+                                arg(QString::fromStdString(error.default_error_condition().message())),
+                                true);
                  return;
              }
 
@@ -156,17 +199,22 @@ void MainWindow::PipeReadErrLoop(const std::shared_ptr<Process>& process)
         (boost::asio::buffer(process->errBuf),
          [this,process](const boost::system::error_code& error, std::size_t size)
          {
-             if (error == boost::asio::error::eof)
+             if (error == boost::asio::error::eof || error == boost::asio::error::broken_pipe)
              {
                  return;
              }
              else if (error)
              {
-                 AppendText(process->textEdit, tr("Failed to read process error: %1\n").arg(QString::fromStdString(error.message())));
+                 AppendMetaText(process->textEdit, tr("Failed to read process stderr: %1 (Error %2 %3:%4)\n").
+                                arg(QString::fromStdString(error.message())).
+                                arg(error.value()).
+                                arg(QString::fromStdString(error.category().name())).
+                                arg(QString::fromStdString(error.default_error_condition().message())),
+                                true);
                  return;
              }
 
-             AppendText(process->textEdit,QString::fromUtf8(process->errBuf.data(), static_cast<int>(size)));
+             AppendMetaText(process->textEdit,QString::fromUtf8(process->errBuf.data(), static_cast<int>(size)), true);
 
              PipeReadErrLoop(process);
       });
@@ -178,11 +226,14 @@ void MainWindow::Exited(const std::shared_ptr<Process>& process,
 {
     if (error)
     {
-        AppendText(process->textEdit, tr("Error in waiting for process to exit: %1\n").arg(QString::fromStdString(error.message())));
-        return;
+        process->exitText = tr("Error in waiting for process to exit: %1\n").arg(QString::fromStdString(error.message()));
+        process->exitError = true;
     }
-
-    AppendText(process->textEdit, tr("Process exited with code %1").arg(exitCode));
+    else
+    {
+        process->exitText = tr("Process exited with code %1\n").arg(exitCode);
+        process->exitError = exitCode != 0;
+    }
 
     m_processes.erase(process);
 }
@@ -208,17 +259,72 @@ void MainWindow::OnLaunchControlGuiPressed()
     LaunchProgram("safir_control_gui");
 }
 
+void MainWindow::OnCheckDouFilesPressed()
+{
+    m_ui->showOutputButton->setChecked(true);
+    LaunchProgram("dots_configuration_check");
+}
+
+void MainWindow::OnCheckGeneratedPressed()
+{
+    m_ui->showOutputButton->setChecked(true);
+    LaunchProgram("dots_configuration_check", {"--compare-generated"});
+}
+
+void MainWindow::OnShowTypesystemDetailsPressed()
+{
+    m_ui->showOutputButton->setChecked(true);
+    LaunchProgram("dots_configuration_check",{"-d"});
+}
+
+void MainWindow::OnTypeIdLookupPressed()
+{
+    if (! m_ui->lookupEdit->text().isEmpty())
+    {
+        m_ui->showOutputButton->setChecked(true);
+        LaunchProgram("dots_configuration_check",{"--type-id", m_ui->lookupEdit->text().toStdString()});
+    }
+}
+
+void MainWindow::OnTypeLookupPressed()
+{
+    if (! m_ui->lookupEdit->text().isEmpty())
+    {
+        m_ui->showOutputButton->setChecked(true);
+        LaunchProgram("dots_configuration_check",{"--type", m_ui->lookupEdit->text().toStdString()});
+    }
+}
+
 void MainWindow::OnShowOutputToggled(const bool checked)
 {
     m_ui->outputTabs->setVisible(checked);
+    m_ui->buttonSeparator->setVisible(!checked);
     adjustSize();
 }
 
-void MainWindow::AppendText(QPlainTextEdit* textEdit, const QString& string)
+void MainWindow::AppendText(QTextEdit* textEdit, const QString& string)
 {
-    //append new text
-    textEdit->appendPlainText(string);
+    auto oldCursor = textEdit->textCursor();
+    textEdit->moveCursor (QTextCursor::End);
+    textEdit->setTextColor(Qt::black);
+    textEdit->insertPlainText(string);
+    textEdit->setTextCursor(oldCursor);
+}
 
-    //scroll to bottom
-    textEdit->verticalScrollBar()->setValue(textEdit->verticalScrollBar()->maximum());
+
+void MainWindow::AppendMetaText(QTextEdit* textEdit, const QString& string, const bool error)
+{
+    auto oldCursor = textEdit->textCursor();
+    textEdit->moveCursor (QTextCursor::End);
+    if (error)
+    {
+        textEdit->setTextColor(Qt::darkRed);
+    }
+    else
+    {
+        textEdit->setTextColor(Qt::darkGray);
+    }
+
+    textEdit->insertPlainText(string);
+    textEdit->setTextCursor(oldCursor);
 }

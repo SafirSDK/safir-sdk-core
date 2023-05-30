@@ -90,6 +90,7 @@ RelWithDebInfo/
 *_automoc.cpp
 moc_*.cpp
 moc_*.cpp_parameters
+qrc_*.cpp
 ui_*.h
 moc_*.cxx
 moc_*.cxx_parameters

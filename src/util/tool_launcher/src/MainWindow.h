@@ -28,22 +28,22 @@
 #include <set>
 
 #ifdef _MSC_VER
-#pragma warning (push)
-#pragma warning (disable: 4127)
-#pragma warning (disable: 4244)
-#pragma warning (disable: 4251)
-#pragma warning (disable: 4800)
-#pragma warning (disable: 4459)
-#pragma warning (disable: 4018)
+#  pragma warning (push)
+#  pragma warning (disable: 4127)
+#  pragma warning (disable: 4244)
+#  pragma warning (disable: 4251)
+#  pragma warning (disable: 4800)
+#  pragma warning (disable: 4459)
+#  pragma warning (disable: 4018)
 #endif
 
 #include <QMessageBox>
 #include <QMainWindow>
-#include <QPlainTextEdit>
+#include <QTextEdit>
 #include <boost/process.hpp>
 
 #ifdef _MSC_VER
-#pragma warning (pop)
+#  pragma warning (pop)
 #endif
 
 namespace Ui {
@@ -63,9 +63,15 @@ private slots:
     void OnLaunchDobExplorerPressed();
     void OnLaunchEntityViewerPressed();
     void OnLaunchControlGuiPressed();
-    void OnShowOutputToggled(const bool checked);
+    void OnCheckDouFilesPressed();
+    void OnCheckGeneratedPressed();
+    void OnShowTypesystemDetailsPressed();
+    void OnTypeIdLookupPressed();
+    void OnTypeLookupPressed();
+void OnShowOutputToggled(const bool checked);
 private:
-    static void AppendText(QPlainTextEdit* textEdit, const QString& string);
+    static void AppendText(QTextEdit* textEdit, const QString& string);
+    static void AppendMetaText(QTextEdit* textEdit, const QString& string, bool error);
     struct Process
     {
         Process(boost::asio::io_service& ioService)
@@ -73,18 +79,23 @@ private:
             , errBuf(4096)
             , outPipe(ioService)
             , errPipe(ioService)
+            , exitError(false)
         {
         }
+
+        ~Process();
 
         std::vector<char> outBuf;
         std::vector<char> errBuf;
         boost::process::async_pipe outPipe;
         boost::process::async_pipe errPipe;
         std::unique_ptr<boost::process::child> proc;
-        QPlainTextEdit* textEdit;
+        QTextEdit* textEdit;
+        QString exitText;
+        bool exitError;
     };
 
-    void LaunchProgram(const std::string&program);
+    void LaunchProgram(const std::string&program, const std::vector<std::string>& args = {});
 
     void PipeReadOutLoop(const std::shared_ptr<Process>& process);
     void PipeReadErrLoop(const std::shared_ptr<Process>& process);

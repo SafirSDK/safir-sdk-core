@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>479</width>
-    <height>406</height>
+    <width>449</width>
+    <height>540</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,86 +18,255 @@
     <normaloff>tool_launcher.png</normaloff>tool_launcher.png</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QVBoxLayout" name="verticalLayout_3" stretch="0,100,0,0">
+   <layout class="QVBoxLayout" name="verticalLayout_3" stretch="0,100,0,0,0">
     <item>
-     <layout class="QGridLayout" name="gridLayout" columnstretch="0,0,0,0,0">
-      <item row="0" column="0" alignment="Qt::AlignBottom">
-       <widget class="QLabel" name="label">
-        <property name="toolTip">
-         <string>Launch the tool using the specified value for SAFIR_INSTANCE</string>
-        </property>
-        <property name="text">
-         <string>Safir Instance:</string>
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <item>
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <item>
+         <widget class="QLabel" name="label">
+          <property name="toolTip">
+           <string>Launch the tool using the specified value for SAFIR_INSTANCE</string>
+          </property>
+          <property name="text">
+           <string>Safir Instance:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSpinBox" name="safirInstanceSpin">
+          <property name="maximum">
+           <number>999999999</number>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="verticalSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="showOutputButton">
+          <property name="text">
+           <string>Show output</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="Line" name="line">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
         </property>
        </widget>
       </item>
-      <item row="0" column="2">
-       <widget class="QPushButton" name="launchDobExplorerButton">
-        <property name="minimumSize">
-         <size>
-          <width>135</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>Launch DobExplorer...</string>
-        </property>
-       </widget>
+      <item>
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <item>
+         <widget class="QGroupBox" name="groupBox_2">
+          <property name="minimumSize">
+           <size>
+            <width>230</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="title">
+           <string>Launch tool</string>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_3">
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <item row="0" column="0">
+            <widget class="QPushButton" name="launchDobExplorerButton">
+             <property name="text">
+              <string>DobExplorer...</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QPushButton" name="launchEntityViewerButton">
+             <property name="text">
+              <string>EntityViewer...</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QPushButton" name="launchSateButton">
+             <property name="text">
+              <string>SATE...</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QPushButton" name="launchControlGuiButton">
+             <property name="text">
+              <string>ControlGui...</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="groupBox">
+          <property name="title">
+           <string>Typesystem information</string>
+          </property>
+          <property name="flat">
+           <bool>false</bool>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_2">
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <item row="0" column="0">
+            <widget class="QPushButton" name="checkDouFilesButton">
+             <property name="toolTip">
+              <string>Run dots_configuration_check</string>
+             </property>
+             <property name="text">
+              <string>Check dou files</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QPushButton" name="showTypesystemDetailsButton">
+             <property name="toolTip">
+              <string>Output a full information about the entire type system</string>
+             </property>
+             <property name="text">
+              <string>Show details</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QPushButton" name="checkGeneratedButton">
+             <property name="toolTip">
+              <string>Check that dou-files are correct and also find any mismatch between
+the dou-files and the types found in the generated libraries. This option
+will use the dou-files and generated libraries found by the current
+configuration.</string>
+             </property>
+             <property name="text">
+              <string>Check generated</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="groupBox_3">
+          <property name="title">
+           <string>Find Typesystem information</string>
+          </property>
+          <layout class="QGridLayout" name="gridLayout">
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <item row="0" column="0" colspan="3">
+            <widget class="QLineEdit" name="lookupEdit"/>
+           </item>
+           <item row="1" column="0">
+            <spacer name="horizontalSpacer_2">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item row="1" column="2">
+            <widget class="QToolButton" name="typeLookupButton">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="toolTip">
+              <string>Output info about a specific type</string>
+             </property>
+             <property name="text">
+              <string>Type</string>
+             </property>
+             <property name="icon">
+              <iconset resource="tool_launcher.qrc">
+               <normaloff>:/icons/magnifying_glass.png</normaloff>:/icons/magnifying_glass.png</iconset>
+             </property>
+             <property name="toolButtonStyle">
+              <enum>Qt::ToolButtonTextBesideIcon</enum>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QToolButton" name="typeIdLookupButton">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="toolTip">
+              <string>If argument is a string the typeId is calculated. 
+If argument is a numeric typeId or part of a typeId, 
+the matching type name(s) are looked up.</string>
+             </property>
+             <property name="text">
+              <string>TypeId</string>
+             </property>
+             <property name="icon">
+              <iconset resource="tool_launcher.qrc">
+               <normaloff>:/icons/magnifying_glass.png</normaloff>:/icons/magnifying_glass.png</iconset>
+             </property>
+             <property name="toolButtonStyle">
+              <enum>Qt::ToolButtonTextBesideIcon</enum>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
       </item>
-      <item row="0" column="4" rowspan="2">
+      <item>
        <spacer name="horizontalSpacer">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
         <property name="sizeHint" stdset="0">
          <size>
-          <width>0</width>
-          <height>0</height>
+          <width>40</width>
+          <height>1</height>
          </size>
         </property>
        </spacer>
-      </item>
-      <item row="1" column="0">
-       <widget class="QSpinBox" name="safirInstanceSpin">
-        <property name="maximum">
-         <number>999999999</number>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="2">
-       <widget class="QPushButton" name="launchSateButton">
-        <property name="text">
-         <string>Launch SATE...</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="3">
-       <widget class="QPushButton" name="launchControlGuiButton">
-        <property name="text">
-         <string>Launch ControlGui...</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="3">
-       <widget class="QPushButton" name="launchEntityViewerButton">
-        <property name="text">
-         <string>Launch EntityViewer...</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="3">
-       <widget class="QCheckBox" name="showOutputButton">
-        <property name="text">
-         <string>Show output</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1" rowspan="3">
-       <widget class="Line" name="line">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-       </widget>
       </item>
      </layout>
     </item>
@@ -114,6 +283,11 @@
         <width>300</width>
         <height>200</height>
        </size>
+      </property>
+      <property name="toolTip">
+       <string>Gray text is information from the launcher. Black text is
+program output and red text is error output (stderr) 
+from the program, or error output from the launcher.</string>
       </property>
       <property name="currentIndex">
        <number>-1</number>
@@ -134,6 +308,13 @@
      </spacer>
     </item>
     <item>
+     <widget class="Line" name="buttonSeparator">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+    </item>
+    <item>
      <widget class="QDialogButtonBox" name="buttonBox">
       <property name="standardButtons">
        <set>QDialogButtonBox::Close</set>
@@ -151,12 +332,9 @@
    </property>
   </action>
  </widget>
- <tabstops>
-  <tabstop>safirInstanceSpin</tabstop>
-  <tabstop>launchDobExplorerButton</tabstop>
-  <tabstop>launchSateButton</tabstop>
- </tabstops>
- <resources/>
+ <resources>
+  <include location="tool_launcher.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>buttonBox</sender>

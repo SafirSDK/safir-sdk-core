@@ -68,7 +68,7 @@ namespace ToolSupport
         size_t ix=filename.rfind(name);
         if (ix!=filename.length()-name.length()-4)
         {
-            throw ParseError("File name missmatch", std::string("The file name does not match the DOB unit name: ") + name + std::string(" - Filename and Dob unit name must match!"), filename, 9);
+            throw ParseError("File name mismatch", std::string("The file name does not match the DOB unit name: ") + name + std::string(" - Filename and Dob unit name must match!"), filename, 9);
         }
     }
 
@@ -1041,7 +1041,7 @@ namespace ToolSupport
                         std::ostringstream os;
                         os<<param->GetName()<<" index="<<paramIndex<<" in class "<<parIt->referee.referencingClass->GetName()<<" contains a value of type '"
                          <<typeName<<"' that is not a subtype of the declared type "<<param->typeName;
-                        throw ParseError("Type missmatch", os.str(), parIt->referee.referencingClass->FileName(), 105);
+                        throw ParseError("Type mismatch", os.str(), parIt->referee.referencingClass->FileName(), 105);
                     }
                 }
                 else
@@ -1083,7 +1083,7 @@ namespace ToolSupport
                     std::ostringstream os;
                     os<<param->GetName()<<" index="<<paramIndex<<" in class "<<parIt->referee.referencingClass->GetName()<<" contains a value of type '"
                      <<state.repository->GetClass(tid)->GetName()<<"' that is not a subtype of the declared type "<<param->typeName;
-                    throw ParseError("Type missmatch", os.str(), parIt->referee.referencingClass->FileName(), 106);
+                    throw ParseError("Type mismatch", os.str(), parIt->referee.referencingClass->FileName(), 106);
                 }
             }
         }
@@ -1236,7 +1236,7 @@ namespace ToolSupport
         {
             std::ostringstream ss;
             ss<<"The parameter referenced for arraySize '"<<ref.parameterName<<"' has type "<<referenced->typeName<<" and not the expected type Int32. Referenced from memeber '"<<md->GetName()<<"' in class "<<cd->GetName();
-            throw ParseError("Type missmatch in arraySizeRef", ss.str(), cd->FileName(), 52);
+            throw ParseError("Type mismatch in arraySizeRef", ss.str(), cd->FileName(), 52);
         }
 
         int size=referenced->GetInt32Value(parameterIndex);
@@ -1280,7 +1280,7 @@ namespace ToolSupport
         {
             std::ostringstream ss;
             ss<<"The parameter referenced for maxLength '"<<ref.parameterName<<"' has type "<<referenced->typeName<<" and not the expected type Int32. Referenced from memeber '"<<md->GetName()<<"' in class "<<cd->GetName();
-            throw ParseError("Type missmatch in maxLengthRef", ss.str(), cd->FileName(), 41);
+            throw ParseError("Type mismatch in maxLengthRef", ss.str(), cd->FileName(), 41);
         }
 
         int size=referenced->GetInt32Value(parameterIndex);
@@ -1341,7 +1341,7 @@ namespace ToolSupport
         {
             if (!BasicTypeOperations::IsOfType<TypeRepository>(state.repository.get(), pdef->GetMemberType(), pdef->GetTypeId(), md->GetMemberType(), md->GetTypeId()))
             {
-                //Type missmatch
+                //Type mismatch
                 std::ostringstream os;
                 os<<"The createRoutine '"<<cr->name<<"' in class '"<<cd->GetName()<<"' specifies a value of incorrect type for member '"<<md->name<<"'. Expected type "<<
                     md->typeName<<" but specified value has type "<<pdef->typeName;

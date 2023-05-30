@@ -137,7 +137,7 @@ namespace ToolSupport
                 {
                     std::stringstream ss;
                     ss<<"You cant have both '"<<A::ElementName()<<"' and '"<<B::ElementName()<<"' at location "<<Parent()->Path()<<". Choose one of them.";
-                    throw ParseError("Element Missmatch", ss.str(), state.currentPath, 12);
+                    throw ParseError("Element Mismatch", ss.str(), state.currentPath, 12);
                 }
                 return false;
             }

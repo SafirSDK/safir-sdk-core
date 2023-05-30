@@ -52,7 +52,7 @@ public:
                 ("details,d", "Output a full information about the entire type system")
                 ("type,t", boost::program_options::value<std::string>(), "Output info about a specific type")
                 ("path,p", boost::program_options::value< std::vector<std::string> >()->multitoken(), "Parse specified path(s) into a local memory type repository. If same type exists in more than one path, the latter wins.")
-                ("compare-generated", "Check that dou-files are correct and also find any missmatch between the dou-files and the types found in the generated libraries. This option will use the dou-files and generated libraries found by the current configuration. Can't be combined with any other flags.")
+                ("compare-generated", "Check that dou-files are correct and also find any mismatch between the dou-files and the types found in the generated libraries. This option will use the dou-files and generated libraries found by the current configuration. Can't be combined with any other flags.")
                 ("type-id",boost::program_options::value<std::string>(), "If argument is a string the typeId is calculated. If argument is a numeric typeId or part of a typeId, the matching type name(s) are looked up." );        
 
         boost::program_options::variables_map vm;
@@ -150,11 +150,20 @@ void TypeIdLookup(const std::string& typeIdString, const std::map<std::string, D
 class CheckConfigurationDotsKernel
 {
 public:
-    static void Run(const CmdLine& cmd)
+    static int Run(const CmdLine& cmd)
     {
         if (!cmd.typeName.empty())
         {
-            ShowType(DotsC_TypeIdFromName(cmd.typeName.c_str()));
+            const auto typeId = DotsC_TypeIdFromName(cmd.typeName.c_str());
+            if (DotsC_TypeExists(typeId))
+            {
+                ShowType(typeId);
+            }
+            else
+            {
+                std::cerr<<"No such type defined in the current set of dou files!" <<std::endl;
+                return 1;
+            }
         }
         else if (cmd.summary)
         {
@@ -176,6 +185,7 @@ public:
         {
             SimpleCheck();
         }
+        return 0;
     }
 
 private:
@@ -308,7 +318,7 @@ class CheckConfigurationLocal
 {
 public:
     typedef std::shared_ptr<const Safir::Dob::Typesystem::ToolSupport::TypeRepository> RepPtr;
-    static void Run(const CmdLine& cmd)
+    static int Run(const CmdLine& cmd)
     {
         RepPtr rep;
         try
@@ -352,6 +362,7 @@ public:
             std::cout<<"Checking configuration..."<<std::endl;
             std::cout<<"Success!"<<std::endl;
         }
+        return 0;
     }
 
 private:
@@ -406,22 +417,22 @@ int main(int argc, char* argv[])
     {
         if (cmd.paths.empty())
         {
-            CheckConfigurationDotsKernel::Run(cmd);
+            return CheckConfigurationDotsKernel::Run(cmd);
         }
         else
         {
-            CheckConfigurationLocal::Run(cmd);
+            return CheckConfigurationLocal::Run(cmd);
         }
     }
     catch (const std::exception & exc)
     {
         std::cout << "Failed with exception description: " << exc.what() << std::endl;
-        exit(1);
+        return 1;
     }
     catch (...)
     {
         std::cout << "Failed with ... exception." << std::endl;
-        exit(1);
+        return 1;
     }
 
     return 0;
