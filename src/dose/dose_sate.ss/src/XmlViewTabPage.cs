@@ -95,7 +95,7 @@ namespace Sate
             _richEdit = new XmlRichEdit();
             RichEdit.Dock = DockStyle.Fill;
             Controls.Add(RichEdit);
-            RichEdit.Text = Serialization.ToJson(objInfo.Obj);
+            RichEdit.Text = JsonHelper.FormatJson(Serialization.ToJson(objInfo.Obj));
         }
 
         public JsonTabPage(string jsonContent, string fileName)
@@ -105,7 +105,7 @@ namespace Sate
             _richEdit = new XmlRichEdit();
             RichEdit.Dock = DockStyle.Fill;
             Controls.Add(RichEdit);
-            RichEdit.Text = jsonContent;
+            RichEdit.Text = JsonHelper.FormatJson(jsonContent);
             RichEdit.ReadOnly = false;
         }
 
