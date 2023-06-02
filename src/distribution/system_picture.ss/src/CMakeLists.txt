@@ -15,7 +15,7 @@ add_library(system_picture SHARED ${sources} ${headers}
 PROTOBUF_GENERATE(TARGET system_picture OUT_VAR generated_files)
 
 if (MSVC)
-  SET_SOURCE_FILES_PROPERTIES(${generated_files} PROPERTIES COMPILE_FLAGS "/wd4127 /wd4244 /wd4267")
+  SET_SOURCE_FILES_PROPERTIES(${generated_files} PROPERTIES COMPILE_FLAGS "/wd4127 /wd4244 /wd4267 /wd4100")
 endif()
 
 #Make our INTERNAL headers available to other parts of Core.
