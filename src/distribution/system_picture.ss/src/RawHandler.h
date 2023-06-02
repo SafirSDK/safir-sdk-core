@@ -678,10 +678,10 @@ namespace SP
                                       lllog(4) << m_logPrefix << "Resurrecting node found in more_dead_nodes, removing it from there" << id << std::endl;
 
                                       auto* protoField = m_allStatisticsMessage.mutable_more_dead_nodes();
-                                      auto findIt = std::find(protoField->begin(), protoField->end(), id);
-                                      if (findIt != protoField->end())
+                                      auto idIt = std::find(protoField->begin(), protoField->end(), id);
+                                      if (idIt != protoField->end())
                                       {
-                                          protoField->erase(findIt);
+                                          protoField->erase(idIt);
                                       }
                                       else
                                       {
