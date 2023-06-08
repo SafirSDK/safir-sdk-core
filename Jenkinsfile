@@ -207,7 +207,7 @@ pipeline {
                     }
                     axis {
                         name 'BUILD_TYPE'
-                        values 'DebugOnly', 'RelWithDebInfo'
+                        values 'RelWithDebInfo', 'DebugOnly'
                     }
                 }
                 excludes {
@@ -269,7 +269,7 @@ pipeline {
                     }
                     axis {
                         name 'BUILD_TYPE'
-                        values 'DebugOnly', 'RelWithDebInfo'
+                        values 'RelWithDebInfo', 'DebugOnly'
                     }
                     axis {
                         name 'Languages'
@@ -352,7 +352,7 @@ pipeline {
                     }
                     axis {
                         name 'BUILD_TYPE'
-                        values 'DebugOnly', 'RelWithDebInfo'
+                        values 'RelWithDebInfo', 'DebugOnly'
                     }
                 }
                 excludes {
