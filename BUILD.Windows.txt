@@ -45,6 +45,17 @@ dependencies, and python websockets, which we use for some tests.
 
   pip3 install "conan<2.0.0" websockets
 
+Conan and Visual Studio Build Tools
+-----------------------------------
+If you are using Visual Studio Build Tools instead of the IDE to build Safir SDK Core you
+*may* have to add the following two lines to a file called global.conf in the .conan
+directory in you home directory (create the file if it does not exist):
+
+  tools.cmake.cmaketoolchain:generator=Ninja
+  tools.microsoft.msbuild:installation_path=C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools
+
+This is needed if you get errors about Conan not finding "Visual Studio 14", for example.
+
 Building Safir SDK Core Installer
 ---------------------------------
 Now you can build Safir SDK Core using the build script. Open a command prompt in the
