@@ -78,6 +78,8 @@ namespace Safir.Dob
         /// <param name="dispatcher">Object that implements the Dispatcher interface.</param>
         /// <exception cref="Safir.Dob.NotOpenException">The connection name is already used by someone else.
         ///                                              Try another!</exception>
+        /// <exception cref="Safir.Dob.LowMemoryException">Not enough shared memory available
+        ///                                                to complete this operation.</exception>
         public void Open(string connectionNameCommonPart,
                          string connectionNameInstancePart,
                          System.Int32 context,
@@ -148,6 +150,8 @@ namespace Safir.Dob
         /// Note that all connections that were set up using Attach will also be closed after
         /// a call to this method.
         /// </summary>
+        /// <exception cref="Safir.Dob.LowMemoryException">Not enough shared memory available
+        ///                                                to complete this operation.</exception>
         public void Close()
         {
             byte success;

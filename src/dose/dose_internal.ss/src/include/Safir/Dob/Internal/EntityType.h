@@ -359,7 +359,9 @@ namespace Internal
             HandlerRevoked,
             HandlerNotRegistered,
             InstanceOwnedByOtherHandler,
-            InstanceIsGhost
+            InstanceIsGhost,
+            CreatesDisallowedMemoryFull,
+            UpdatesAndDeletesDisallowedMemoryFull,
         };
 
         EntityAccessStatus VerifyEntityAccess(const StateSharedPtr&               statePtr,

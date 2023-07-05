@@ -32,6 +32,7 @@
 #include <Safir/Dob/Entity.h>
 #include <Safir/Dob/ConnectionQueueId.h>
 #include <Safir/Dob/CallbackId.h>
+#include <Safir/Dob/MemoryLevel.h>
 
 #include <string>
 
@@ -187,6 +188,19 @@ namespace Dob
          * @return The amount of shared memory used, in bytes.
          */
          Typesystem::Int64 GetSharedMemoryUsage() const;
+
+         /**
+         * Get the usage level of the shared memory.
+         *
+         * When the memory level gets to Low or below that there will be operations that are
+         * no longer allowed. See the User's Guide for more information.
+         *
+         * Calling this function does not require the underlying Connection to have been opened.
+         *
+         * @return The memory level.
+         */
+         Dob::MemoryLevel::Enumeration GetSharedMemoryLevel() const;
+
         /** @} */
 
     };

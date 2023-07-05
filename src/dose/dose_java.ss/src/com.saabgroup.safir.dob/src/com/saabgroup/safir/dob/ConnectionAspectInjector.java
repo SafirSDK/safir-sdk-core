@@ -51,6 +51,8 @@ public class ConnectionAspectInjector
      * @param instanceId Instance id.
      * @param timestamp Timestamp valid for the top members that are marked as changed.
      * @param handlerId Handler id.
+     *
+     * @throws LowMemoryException Not enough shared memory available to complete this operation.
      */
     public void injectChanges(Entity entity,
                               com.saabgroup.safir.dob.typesystem.InstanceId instanceId,
@@ -83,6 +85,8 @@ public class ConnectionAspectInjector
      * @param entityId Entity id of the instance to delete.
      * @param timestamp Timestamp Time of deletion.
      * @param handlerId Handler id.
+     *
+     * @throws LowMemoryException Not enough shared memory available to complete this operation.
      */
     public void injectDelete(com.saabgroup.safir.dob.typesystem.EntityId entityId,
                              long timestamp,
@@ -110,6 +114,8 @@ public class ConnectionAspectInjector
      * @param entity Entity to create.
      * @param instanceId Instance id.
      * @param handlerId The handler that should be handed the ghost.
+     *
+     * @throws LowMemoryException Not enough shared memory available to complete this operation.
      */
     public void initialSet(Entity entity,
                            com.saabgroup.safir.dob.typesystem.InstanceId instanceId,
@@ -160,6 +166,8 @@ public class ConnectionAspectInjector
      * @param timestampChangeInfo True => ChangeInfo is based on timestamps instead of contents
      *                                 False => ChangeInfo is based on object contents, as with normal subscribe.
      * @param entitySubscriber EntitySubscriber that will receive the entities.
+     *
+     * @throws LowMemoryException Not enough shared memory available to complete this operation.
      */
     public void subscribeEntity(long typeId,
                                 boolean includeUpdates,

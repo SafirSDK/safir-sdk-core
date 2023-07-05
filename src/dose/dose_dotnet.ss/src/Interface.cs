@@ -736,6 +736,11 @@ namespace Safir.Dob
         internal static extern void DoseC_GetSharedMemoryUsage(out System.Int64 usage,
                                                                out byte success);
 
+        //DoseC_GetSharedMemoryLevel
+        [DllImport(DOSE_DLL_NAME, CallingConvention = CallingConvention.Cdecl)]
+        internal static extern void DoseC_GetSharedMemoryLevel(out System.Int32 level,
+                                                               out byte success);
+
 
         #endregion
 

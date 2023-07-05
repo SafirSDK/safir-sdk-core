@@ -1440,3 +1440,16 @@ void DoseC_GetSharedMemoryUsage(DotsC_Int64& usage,
     }
     CATCH_LIBRARY_EXCEPTIONS;
 }
+
+void DoseC_GetSharedMemoryLevel(DotsC_EnumerationValue& level,
+                                bool& success)
+{
+    lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
+    success = false;
+    try
+    {
+        level = SharedMemoryObject::GetMemoryLevelFuzzy(); // Get the fuzzy number, to avoid rounding errors
+        success = true;
+    }
+    CATCH_LIBRARY_EXCEPTIONS;
+}

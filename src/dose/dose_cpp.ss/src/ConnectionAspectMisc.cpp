@@ -174,5 +174,18 @@ namespace Dob
         }
         return size;
     }
+
+    Dob::MemoryLevel::Enumeration ConnectionAspectMisc::GetSharedMemoryLevel() const
+    {
+        Dob::Typesystem::EnumerationValue level;
+        bool success;
+        DoseC_GetSharedMemoryLevel(level, success);
+        if (!success)
+        {
+            Typesystem::LibraryExceptions::Instance().Throw();
+        }
+        return static_cast<Dob::MemoryLevel::Enumeration>(level);
+    }
+
 }
 }

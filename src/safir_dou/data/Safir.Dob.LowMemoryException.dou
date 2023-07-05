@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<exception xmlns="urn:safir-dots-unit">
+    <summary>Thrown when an operation cannot be completed due to the current shared memory usage level.</summary>
+    <name>Safir.Dob.LowMemoryException</name>
+    <baseClass>Exception</baseClass>
+</exception>

@@ -669,6 +669,9 @@ extern "C"
     DOSE_DLL_API void DoseC_GetSharedMemoryUsage(DotsC_Int64& usage,
                                                  bool& success);
 
+    DOSE_DLL_API void DoseC_GetSharedMemoryLevel(DotsC_EnumerationValue& level,
+                                                 bool& success);
+
 #ifdef __cplusplus
 }
 #endif

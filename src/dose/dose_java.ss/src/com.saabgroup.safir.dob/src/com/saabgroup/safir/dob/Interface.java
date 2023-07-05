@@ -473,4 +473,8 @@ final class Interface {
     static native void GetSharedMemoryUsage(long[] usage,
                                             boolean[] success);
 
+    //dose_java_jni GetSharedMemoryLevel
+    static native void GetSharedMemoryLevel(int[] level,
+                                            boolean[] success);
+
 }

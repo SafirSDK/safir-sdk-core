@@ -48,11 +48,12 @@ const Safir::Dob::Typesystem::Int32 PERSISTENCE_CONTEXT = -1000000;
 //-------------------------------------------------------
 PersistenceHandler::PersistenceHandler(boost::asio::io_service& ioService,
                                        const bool ignorePersistenceProperties)
-    : m_writeTimer(ioService),
-      m_nextTimeout(boost::chrono::steady_clock::time_point::max()),
-      m_dispatcher(m_dobConnection, ioService),
-      m_debug(L"PersistenceHandler"),
-      m_started(false)
+    : m_ioService(ioService)
+    , m_writeTimer(ioService)
+    , m_nextTimeout(boost::chrono::steady_clock::time_point::max())
+    , m_dispatcher(m_dobConnection, ioService)
+    , m_debug(L"PersistenceHandler")
+    , m_started(false)
 {
     const Safir::Dob::Typesystem::TypeIdVector types =
         Safir::Dob::Typesystem::Operations::GetClassTree(Safir::Dob::Entity::ClassTypeId);

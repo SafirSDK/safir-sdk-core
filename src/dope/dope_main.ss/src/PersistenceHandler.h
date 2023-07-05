@@ -80,6 +80,7 @@ public:
 protected:
 
     const TypeIdSet & GetPersistentTypes() const {return m_persistentTypes;}
+    boost::asio::io_service& m_ioService;
     Safir::Dob::Connection m_dobConnection;
 
 

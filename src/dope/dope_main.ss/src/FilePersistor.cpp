@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2006-2013 (http://safirsdkcore.com)
+* Copyright Saab AB, 2006-2013, 2023 (http://safirsdkcore.com)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -26,6 +26,7 @@
 #include <Safir/Dob/PersistenceParameters.h>
 #include <Safir/Dob/Typesystem/Serialization.h>
 #include <Safir/Dob/Typesystem/ObjectFactory.h>
+#include <Safir/Dob/LowMemoryException.h>
 #include <Safir/Logging/Log.h>
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
@@ -432,6 +433,12 @@ FilePersistor::RestoreAll()
                                           + Safir::Dob::Typesystem::Utilities::ToWstring(path.string())
                                           + L", removing it.");
             RemoveFile(path);
+        }
+        catch (const Safir::Dob::LowMemoryException&)
+        {
+            Safir::Logging::SendSystemLog(Safir::Logging::Emergency,
+                                          L"Failed to inject persisted entities into system due to lack of shared memory. Exiting.");
+            m_ioService.stop();
         }
         catch (const boost::filesystem::filesystem_error & e)
         {

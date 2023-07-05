@@ -81,6 +81,7 @@ public final class Connection
      *
      * @throws NotOpenException The connection name is already used by someone else.
      *                                      Try another!
+     * @throws LowMemoryException Not enough shared memory available to complete this operation.
      */
     public void open(String connectionNameCommonPart,
                      String connectionNameInstancePart,
@@ -118,6 +119,8 @@ public final class Connection
      * Unsubscribe and Unregister before calling Close.
      * Note that all connections that were set up using Attach will also be closed after
      * a call to this method.
+     *
+     * @throws LowMemoryException Not enough shared memory available to complete this operation.
      */
     @Override
     public void close()

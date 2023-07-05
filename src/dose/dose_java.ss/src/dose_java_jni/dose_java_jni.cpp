@@ -1748,3 +1748,22 @@ JNIEXPORT void JNICALL Java_com_saabgroup_safir_dob_Interface_GetSharedMemoryUsa
     SetJArray(env,_success,success);
     SetJArray(env,_usage,usage);
 }
+
+
+/*
+ * Class:     com_saabgroup_safir_dob_Interface
+ * Method:    GetSharedMemoryLevel
+ * Signature: ([I[Z)V
+ */
+JNIEXPORT void JNICALL Java_com_saabgroup_safir_dob_Interface_GetSharedMemoryLevel
+  (JNIEnv * env,
+   jclass,
+   jintArray _level,
+   jbooleanArray _success)
+{
+    bool success;
+    DotsC_EnumerationValue level;
+    DoseC_GetSharedMemoryLevel(level,success);
+    SetJArray(env,_success,success);
+    SetJArray(env,_level,level);
+}

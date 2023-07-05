@@ -65,6 +65,7 @@ public class ResponseSender
      *
      * @param response The response to be sent.
      * @throws NotOpenException If the connection is not open.
+     * @throws LowMemoryException Not enough shared memory available to complete this operation.
      */
     public void send(Response response)
     {

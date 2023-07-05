@@ -72,7 +72,9 @@ namespace Dob
          * a programming error.
          *
          * @param response - The response to be sent.
+         *
          * @throws Safir::Dob::NotOpenException  - If the connection is not open.
+         * @throws Safir::Dob::LowMemoryException Not enough shared memory available to complete this operation.
          */
         virtual void Send(const Safir::Dob::ResponsePtr & response) = 0;
 

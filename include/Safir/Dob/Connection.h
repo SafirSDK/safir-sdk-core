@@ -84,6 +84,8 @@ namespace Dob
          *
          * @throws Safir::Dob::NotOpenException The connection name is already used by someone else.
          *                                      Try another!
+         *
+         * @throws Safir::Dob::LowMemoryException Not enough shared memory available to complete this operation.
          */
         void Open(const std::wstring& connectionNameCommonPart,
                   const std::wstring& connectionNameInstancePart,
@@ -99,6 +101,8 @@ namespace Dob
          * Unsubscribe and Unregister before calling Close.
          * Note that all connections that were set up using Attach will also be closed after
          * a call to this method.
+         *
+         * @throws Safir::Dob::LowMemoryException Not enough shared memory available to complete this operation.
          */
         void Close();
 

@@ -61,6 +61,8 @@ namespace Dob
          * @param [in] instanceId Instance id.
          * @param [in] timestamp Timestamp valid for the top members that are marked as changed.
          * @param [in] handlerId Handler id.
+         *
+         * @throws Safir::Dob::LowMemoryException Not enough shared memory available to complete this operation.
          */
         void InjectChanges(const Dob::EntityPtr&                entity,
                            const Dob::Typesystem::InstanceId&   instanceId,
@@ -76,6 +78,8 @@ namespace Dob
          * @param [in] entityId Entity id of the instance to delete.
          * @param [in] timestamp Timestamp Time of deletion.
          * @param [in] handlerId Handler id.
+         *
+         * @throws Safir::Dob::LowMemoryException Not enough shared memory available to complete this operation.
          */
         void InjectDelete(const Dob::Typesystem::EntityId&     entityId,
                           const Dob::Typesystem::Int64         timestamp,
@@ -88,6 +92,8 @@ namespace Dob
          * @param [in] entity Entity to create.
          * @param [in] instanceId Instance id.
          * @param [in] handlerId The handler id to which the state belongs.
+         *
+         * @throws Safir::Dob::LowMemoryException Not enough shared memory available to complete this operation.
          */
         void InitialSet(const Dob::EntityPtr&              entity,
                         const Dob::Typesystem::InstanceId& instanceId,
@@ -119,6 +125,8 @@ namespace Dob
          * @param [in] timestampChangeInfo True => ChangeInfo is based on timestamps instead of contents
          *                                 False => ChangeInfo is based on object contents, as with normal subscribe.
          * @param [in] entitySubscriber EntitySubscriber that will receive the entities.
+         *
+         * @throws Safir::Dob::LowMemoryException Not enough shared memory available to complete this operation.
          */
         void SubscribeEntity(const Dob::Typesystem::TypeId      typeId,
                              const bool                         includeUpdates,

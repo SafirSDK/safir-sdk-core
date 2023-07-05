@@ -58,6 +58,8 @@ namespace Safir.Dob
         /// a programming error.
         /// </summary>
         /// <param name="response">The response to be sent.</param>
+        /// <exception cref="Safir.Dob.LowMemoryException">Not enough shared memory available
+        ///                                                to complete this operation.</exception>
         public void Send(Dob.Response response)
         {
             if (!m_valid)

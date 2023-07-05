@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2007-2023, (http://safirsdkcore.com)
+* Copyright Saab AB, 2007-2013,2015,2023 (http://safirsdkcore.com)
 *
 * Created by: Anders Widén / stawi
 *
@@ -25,6 +25,7 @@
 #include <Safir/Dob/Internal/EntityType.h>
 #include <Safir/Dob/Internal/Connection.h>
 #include <Safir/Dob/AccessDeniedException.h>
+#include <Safir/Dob/LowMemoryException.h>
 #include <Safir/Dob/GhostExistsException.h>
 #include <Safir/Dob/NotFoundException.h>
 #include <Safir/Dob/Internal/InjectionKindTable.h>
@@ -834,7 +835,6 @@ namespace Internal
                      << ", connId = " << connection->Id()
                      << ", handlerId = " << handlerId << ")";
                 throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
-
             }
             break;
 
@@ -846,7 +846,6 @@ namespace Internal
                      << ", instanceId = " << instanceId
                      << ", handlerId = " << handlerId << ")";
                 throw Safir::Dob::AccessDeniedException(ostr.str(),__WFILE__,__LINE__);
-
             }
             break;
 
@@ -858,7 +857,30 @@ namespace Internal
                      << ", instanceId = " << instanceId
                      << ", handlerId = " << handlerId << ")";
                 throw Safir::Dob::GhostExistsException(ostr.str(),__WFILE__,__LINE__);
+            }
+            break;
 
+            case CreatesDisallowedMemoryFull:
+            {
+                std::wostringstream ostr;
+                ostr << "SetEntity to create new instance is not allowed due to lack of shared memory (typeId = "
+                     << Typesystem::Operations::GetName(m_typeId)
+                     << ", instanceId = " << instanceId
+                     << ", handlerId = " << handlerId << ")";
+                SEND_SYSTEM_LOG(Error, << ostr.str());
+                throw Safir::Dob::LowMemoryException(ostr.str(),__WFILE__,__LINE__);
+            }
+            break;
+
+            case UpdatesAndDeletesDisallowedMemoryFull:
+            {
+                std::wostringstream ostr;
+                ostr << "SetEntity to update an existing instance is not allowed due to lack of shared memory (typeId = "
+                     << Typesystem::Operations::GetName(m_typeId)
+                     << ", instanceId = " << instanceId
+                     << ", handlerId = " << handlerId << ")";
+                SEND_SYSTEM_LOG(Error, << ostr.str());
+                throw Safir::Dob::LowMemoryException(ostr.str(),__WFILE__,__LINE__);
             }
             break;
         }
@@ -926,6 +948,22 @@ namespace Internal
 
             }
             break;
+
+        case CreatesDisallowedMemoryFull:
+            //ok
+            break;
+
+        case UpdatesAndDeletesDisallowedMemoryFull:
+            {
+                std::wostringstream ostr;
+                ostr << "DeleteEntity is not allowed due to lack of shared memory (typeId = "
+                     << Typesystem::Operations::GetName(m_typeId)
+                     << ", instanceId = " << instanceId
+                     << ", handlerId = " << handlerId << ")";
+                SEND_SYSTEM_LOG(Error, << ostr.str());
+                throw Safir::Dob::LowMemoryException(ostr.str(),__WFILE__,__LINE__);
+            }
+            break;
         }
 
         DeleteEntityLocal(statePtr,
@@ -971,6 +1009,17 @@ namespace Internal
     {
         ENSURE(blob != NULL, << "Trying to do a SetInitalGhostEntity with a NULL blob! connId = " << connection->Id());
 
+        if (GetMemoryLevel() >= MemoryLevel::Low)
+        {
+            std::wostringstream ostr;
+            ostr << "InitialSet is not allowed due to lack of shared memory (typeId = "
+                 << Typesystem::Operations::GetName(m_typeId)
+                 << ", instanceId = " << instanceId
+                 << ", handlerId = " << handlerId << ")";
+            SEND_SYSTEM_LOG(Error, << ostr.str());
+            throw Safir::Dob::LowMemoryException(ostr.str(),__WFILE__,__LINE__);
+        }
+
         // Shouldn't check owner in this case
 
         DistributionData realState = statePtr->GetRealState();
@@ -1004,6 +1053,17 @@ namespace Internal
                                           const char* const                    blob,
                                           const Dob::Typesystem::Int64         timestamp)
     {
+        if (GetMemoryLevel() >= MemoryLevel::Low)
+        {
+            std::wostringstream ostr;
+            ostr << "InjectChanges is not allowed due to lack of shared memory (typeId = "
+                 << Typesystem::Operations::GetName(m_typeId)
+                 << ", instanceId = " << instanceId
+                 << ", handlerId = " << handlerId << ")";
+            SEND_SYSTEM_LOG(Error, << ostr.str());
+            throw Safir::Dob::LowMemoryException(ostr.str(),__WFILE__,__LINE__);
+        }
+
         DistributionData injectionState = statePtr->GetInjectionState();
 
         bool handlerIdOk = true;
@@ -1100,6 +1160,17 @@ namespace Internal
                                                  const Dob::Typesystem::InstanceId&   instanceId,
                                                  const Dob::Typesystem::Int64         timestamp)
     {
+        if (GetMemoryLevel() >= MemoryLevel::VeryLow)
+        {
+            std::wostringstream ostr;
+            ostr << "InjectDelete is not allowed due to lack of shared memory (typeId = "
+                 << Typesystem::Operations::GetName(m_typeId)
+                 << ", instanceId = " << instanceId
+                 << ", handlerId = " << handlerId << ")";
+            SEND_SYSTEM_LOG(Error, << ostr.str());
+            throw Safir::Dob::LowMemoryException(ostr.str(),__WFILE__,__LINE__);
+        }
+
         if (IsCreated(statePtr) || IsGhost(statePtr))
         {
             // In this case we can check that the injected handlerId corresponds to
@@ -1200,17 +1271,20 @@ namespace Internal
         {
             case AccessOk:
             case InstanceIsGhost:
-            break;
+                break;
 
             case HandlerRevoked:
             case HandlerNotRegistered:
             case InstanceOwnedByOtherHandler:
-            {
                 // The handler doesn't know that its handler registration just has been revoked,
                 // so just let the connection think that the accept succeeded.
                 return;
-            }
-            break;
+
+            case CreatesDisallowedMemoryFull:
+            case UpdatesAndDeletesDisallowedMemoryFull:
+                // New injections should have been stopped when memory is running low. So we
+                // accept any that made it through before passing the 10% limit.
+                break;
         }
 
         DistributionData realState = statePtr->GetRealState();
@@ -1329,6 +1403,12 @@ namespace Internal
 
             }
             break;
+
+            case CreatesDisallowedMemoryFull:
+            case UpdatesAndDeletesDisallowedMemoryFull:
+                // just accept it, since the injection that cause these will be throttled
+                // when memory is low
+                break;
         }
 
         SetEntityLocal(statePtr,
@@ -1392,7 +1472,13 @@ namespace Internal
             break;
 
             case InstanceIsGhost:
-            break;  // This is what we expect here
+                break;  // This is what we expect here
+
+            case CreatesDisallowedMemoryFull:
+            case UpdatesAndDeletesDisallowedMemoryFull:
+                // just accept it, since the injection that cause these will be throttled
+                // when memory is low
+                break;
         }
 
         DeleteEntityLocal(statePtr,
@@ -1482,7 +1568,7 @@ namespace Internal
             {
                 // The remote delete state belongs to a newer registration state.
                 if (localEntity.GetEntityStateKind() != DistributionData::Ghost)
-                {                    
+                {
                     result = RemoteSetNeedRegistration;
                     return;
                 }
@@ -1983,6 +2069,20 @@ namespace Internal
         else if (IsGhost(statePtr))
         {
             return InstanceIsGhost;
+        }
+
+        const auto memoryLevel = GetMemoryLevel();
+        if (memoryLevel >= MemoryLevel::Low &&
+            std::string(connection->NameWithoutCounter()).find(";NodeInfoHandler;") == std::string::npos)
+        {
+            if (!hasOwner && memoryLevel >= MemoryLevel::Low)
+            {
+                return CreatesDisallowedMemoryFull;
+            }
+            else if (memoryLevel >= MemoryLevel::VeryLow)
+            {
+                return UpdatesAndDeletesDisallowedMemoryFull;
+            }
         }
 
         return AccessOk;

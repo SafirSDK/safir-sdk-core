@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2008-2023 (http://safirsdkcore.com)
+* Copyright Saab AB, 2008-2013,2015,2023 (http://safirsdkcore.com)
 *
 * Created by: Joel Ottosson / stjoot
 *
@@ -64,6 +64,8 @@
 #include <Safir/Dob/ResponseGeneralErrorCodes.h>
 #include <Safir/Dob/Typesystem/Serialization.h>
 #include <Safir/Dob/Internal/DistributionScopeReader.h>
+#include <Safir/Utilities/Internal/SystemLog.h>
+#include <Safir/Dob/LowMemoryException.h>
 
 #include <assert.h>
 
@@ -84,21 +86,22 @@ namespace Dob
 {
 namespace Internal
 {
-namespace
-{
-    bool IsLightNode()
+    namespace
     {
-        for (auto i = 0; i < Safir::Dob::NodeParameters::NodeTypesArraySize(); ++i)
+        bool IsLightNode()
         {
-            const auto& nt = Safir::Dob::NodeParameters::NodeTypes(i);
-            if (!nt->Name().IsNull() && nt->Name().GetVal() == Safir::Dob::ThisNodeParameters::NodeType())
+            for (auto i = 0; i < Safir::Dob::NodeParameters::NodeTypesArraySize(); ++i)
             {
-                return !nt->IsLightNode().IsNull() && nt->IsLightNode().GetVal();
+                const auto& nt = Safir::Dob::NodeParameters::NodeTypes(i);
+                if (!nt->Name().IsNull() && nt->Name().GetVal() == Safir::Dob::ThisNodeParameters::NodeType())
+                {
+                    return !nt->IsLightNode().IsNull() && nt->IsLightNode().GetVal();
+                }
             }
+            return false;
         }
-        return false;
     }
-}
+    
     Controller::Controller()
         : m_isConnected(false),
           m_connection(NULL),
@@ -194,6 +197,15 @@ namespace
                  << NodeParameters::NumberOfContexts()-1 << ". (The number of contexts is " << NodeParameters::NumberOfContexts()
                  << "). Consider changing parameter Safir.Dob.NodeParameters.NumberOfContexts.";
             throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
+        }
+
+        if (SharedMemoryObject::GetMemoryLevel() >= MemoryLevel::Low)
+        {
+            std::wostringstream ostr;
+            ostr << "Opening connections is not allowed due to lack of shared memory ("
+                 << connectionNameCommonPart << ", " << connectionNameInstancePart << ")";
+            SEND_SYSTEM_LOG(Error, << ostr.str());
+            throw Safir::Dob::LowMemoryException(ostr.str(),__WFILE__,__LINE__);
         }
 
         // If it is a garbage collected language the consumer reference counters must be incremented.
@@ -343,6 +355,7 @@ namespace
     void Controller::Disconnect()
     {
         lllout << "Controller::Disconnect() " << m_connectionName.c_str() << std::endl;
+
         lllout << "Controller::Disconnect() - m_isConnected: " << std::boolalpha << m_isConnected << std::endl;
         if (m_isConnected)
         {
@@ -453,9 +466,18 @@ namespace
             throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
         }
 
+        if (SharedMemoryObject::GetMemoryLevel() >= MemoryLevel::Low)
+        {
+            std::wostringstream ostr;
+            ostr << "Register is not allowed due to lack of shared memory (typeId = "
+                 << Typesystem::Operations::GetName(typeId)
+                 << ", handlerId = " << handlerId << ")";
+            SEND_SYSTEM_LOG(Error, << ostr.str());
+            throw Safir::Dob::LowMemoryException(ostr.str(),__WFILE__,__LINE__);
+        }
+
         if (overrideRegistration)
         {
-
             if (m_isLightNode && DistributionScopeReader::Instance().IsGlobal(typeId))
             {
                 std::wostringstream ostr;
@@ -476,12 +498,14 @@ namespace
                 ostr << "Not allowed to do pending registrations on light nodes. typeId = " << Typesystem::Operations::GetName(typeId) << ")";
                 throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
             }
+
             if (DistributionScopeReader::Instance().IsLimited(typeId))
             {
                 std::wostringstream ostr;
                 ostr << "Not allowed to do pending registrations for limited types. typeId = " << Typesystem::Operations::GetName(typeId) << ")";
                 throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
             }
+
             m_connection->AddPendingRegistration(PendingRegistration(typeId, handlerId, consumer));
             m_connection->SignalOut();
         }
@@ -535,6 +559,16 @@ namespace
             throw Safir::Dob::Typesystem::ConfigurationErrorException(ostr.str(),__WFILE__,__LINE__);
         }
 
+        if (SharedMemoryObject::GetMemoryLevel() >= MemoryLevel::Low)
+        {
+            std::wostringstream ostr;
+            ostr << "Register is not allowed due to lack of shared memory (typeId = "
+                 << Typesystem::Operations::GetName(typeId)
+                 << ", handlerId = " << handlerId << ")";
+            SEND_SYSTEM_LOG(Error, << ostr.str());
+            throw Safir::Dob::LowMemoryException(ostr.str(),__WFILE__,__LINE__);
+        }
+
         if (overrideRegistration)
         {
             if (m_isLightNode)
@@ -545,6 +579,7 @@ namespace
                     ostr << "Not allowed to register global types on a light node. typeId = " << Typesystem::Operations::GetName(typeId) << ")";
                     throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
                 }
+
                 if (DistributionScopeReader::Instance().IsLocal(typeId) && !InjectionKindTable::Instance().IsNone(typeId))
                 {
                     std::wostringstream ostr;
@@ -571,6 +606,7 @@ namespace
                 ostr << "Not allowed to do pending registrations on light nodes. typeId = " << Typesystem::Operations::GetName(typeId) << ")";
                 throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
             }
+
             if (DistributionScopeReader::Instance().IsLimited(typeId))
             {
                 std::wostringstream ostr;
@@ -599,6 +635,16 @@ namespace
                  << Typesystem::Operations::GetName(typeId)
                  << " with handlerId " << handlerId << ")";
             throw Safir::Dob::NotOpenException(ostr.str(),__WFILE__,__LINE__);
+        }
+
+        if (SharedMemoryObject::GetMemoryLevel() >= MemoryLevel::VeryLow)
+        {
+            std::wostringstream ostr;
+            ostr << "Unregister is not allowed due to lack of shared memory (typeId = "
+                 << Typesystem::Operations::GetName(typeId)
+                 << ", handlerId = " << handlerId << ")";
+            SEND_SYSTEM_LOG(Error, << ostr.str());
+            throw Safir::Dob::LowMemoryException(ostr.str(),__WFILE__,__LINE__);
         }
 
         if (m_connection->RemovePendingRegistrations(typeId,handlerId))
@@ -661,6 +707,16 @@ namespace
             std::wostringstream ostr;
             ostr << "Type used in SubscribeMessage is not a Message type. typeId = " << Typesystem::Operations::GetName(typeId) << ")";
             throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
+        }
+
+        if (SharedMemoryObject::GetMemoryLevel() >= MemoryLevel::ExtremelyLow)
+        {
+            std::wostringstream ostr;
+            ostr << "Subscribe Message is not allowed due to lack of shared memory (typeId = "
+                 << Typesystem::Operations::GetName(typeId)
+                 << ", channelId = " << channelId << ")";
+            SEND_SYSTEM_LOG(Error, << ostr.str());
+            throw Safir::Dob::LowMemoryException(ostr.str(),__WFILE__,__LINE__);
         }
 
         MessageTypes::Instance().Subscribe(m_connection,
@@ -745,6 +801,15 @@ namespace
             throw Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
         }
 
+        if (SharedMemoryObject::GetMemoryLevel() >= MemoryLevel::Low)
+        {
+            std::wostringstream ostr;
+            ostr << "Subscribe is not allowed due to lack of shared memory (typeId = "
+                 << Typesystem::Operations::GetName(entityId.GetTypeId()) << ")";
+            SEND_SYSTEM_LOG(Error, << ostr.str());
+            throw Safir::Dob::LowMemoryException(ostr.str(),__WFILE__,__LINE__);
+        }
+
         // Set subscription type to EntitySubscription.
         // The subscription type makes it possible for dose to set up an internal injection subscription for the same connection/consumer
         // that doesn't interfere with the "normal" subscription.
@@ -785,6 +850,15 @@ namespace
             throw Safir::Dob::NotOpenException(ostr.str(),__WFILE__,__LINE__);
         }
 
+        if (SharedMemoryObject::GetMemoryLevel() >= MemoryLevel::ExtremelyLow)
+        {
+            std::wostringstream ostr;
+            ostr << "Unsubscribe is not allowed due to lack of shared memory (typeId = "
+                 << Typesystem::Operations::GetName(entityId.GetTypeId()) << ")";
+            SEND_SYSTEM_LOG(Error, << ostr.str());
+            throw Safir::Dob::LowMemoryException(ostr.str(),__WFILE__,__LINE__);
+        }
+
         // See comment for the SubscribeEntity method above.
         SubscriptionId subscriptionId(ConnectionConsumerPair(m_connection, consumer), EntitySubscription, 0);
 
@@ -818,6 +892,16 @@ namespace
                  << Typesystem::Operations::GetName(typeId)
                  << " with handlerId " << handlerId << ")";
             throw Safir::Dob::NotOpenException(ostr.str(),__WFILE__,__LINE__);
+        }
+
+        if (SharedMemoryObject::GetMemoryLevel() >= MemoryLevel::Low)
+        {
+            std::wostringstream ostr;
+            ostr << "SubscribeRegistration is not allowed due to lack of shared memory (typeId = "
+                 << Typesystem::Operations::GetName(typeId)
+                 << ", handlerId = " << handlerId << ")";
+            SEND_SYSTEM_LOG(Error, << ostr.str());
+            throw Safir::Dob::LowMemoryException(ostr.str(),__WFILE__,__LINE__);
         }
 
         if (Dob::Typesystem::Operations::IsOfType(typeId, Dob::Entity::ClassTypeId))
@@ -875,6 +959,16 @@ namespace
                  << Typesystem::Operations::GetName(typeId)
                  << " with handlerId " << handlerId << ")";
             throw Safir::Dob::NotOpenException(ostr.str(),__WFILE__,__LINE__);
+        }
+
+        if (SharedMemoryObject::GetMemoryLevel() >= MemoryLevel::ExtremelyLow)
+        {
+            std::wostringstream ostr;
+            ostr << "UnsubscribeRegistration is not allowed due to lack of shared memory (typeId = "
+                 << Typesystem::Operations::GetName(typeId)
+                 << ", handlerId = " << handlerId << ")";
+            SEND_SYSTEM_LOG(Error, << ostr.str());
+            throw Safir::Dob::LowMemoryException(ostr.str(),__WFILE__,__LINE__);
         }
 
         if (Dob::Typesystem::Operations::IsOfType(typeId, Dob::Entity::ClassTypeId))
@@ -1096,6 +1190,16 @@ namespace
             throw Safir::Dob::NotOpenException(ostr.str(),__WFILE__,__LINE__);
         }
 
+        if (SharedMemoryObject::GetMemoryLevel() >= MemoryLevel::VeryLow &&
+            std::string(m_connection->NameWithoutCounter()).find(";NodeInfoHandler;") == std::string::npos)
+        {
+            std::wostringstream ostr;
+            ostr << "SetChanges/ReadEntity is not allowed due to lack of shared memory (entityId = "
+                 << entityId << ")";
+            SEND_SYSTEM_LOG(Error, << ostr.str());
+            throw Safir::Dob::LowMemoryException(ostr.str(),__WFILE__,__LINE__);
+        }
+
         const DistributionData state = EntityTypes::Instance().ReadEntity(entityId, m_connection->Id().m_contextId);
         currentBlob = state.GetBlob();
         currentState = state.GetReference();
@@ -1229,6 +1333,16 @@ namespace
              throw Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
         }
 
+        if (SharedMemoryObject::GetMemoryLevel() >= MemoryLevel::ExtremelyLow)
+        {
+            std::wostringstream ostr;
+            ostr << "Send Message is not allowed due to lack of shared memory (typeId = "
+                 << Typesystem::Operations::GetName(typeId)
+                 << ", channelId = " << channel << ")";
+            SEND_SYSTEM_LOG(Error, << ostr.str());
+            throw Safir::Dob::LowMemoryException(ostr.str(),__WFILE__,__LINE__);
+        }
+
         const bool success = m_connection->GetMessageOutQueue().push(msg);
 
         if (success)
@@ -1269,6 +1383,16 @@ namespace
             throw Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
         }
 
+        if (SharedMemoryObject::GetMemoryLevel() >= MemoryLevel::ExtremelyLow)
+        {
+            std::wostringstream ostr;
+            ostr << "ServiceRequest is not allowed due to lack of shared memory (typeId = "
+                 << Typesystem::Operations::GetName(typeId)
+                 << ", handlerId = " << handlerId << ")";
+            SEND_SYSTEM_LOG(Error, << ostr.str());
+            throw Safir::Dob::LowMemoryException(ostr.str(),__WFILE__,__LINE__);
+        }
+
         const InternalRequestId reqIdCounter = m_requestIds.GetNextRequestId();
         requestId = reqIdCounter.GetCounter();
 
@@ -1305,6 +1429,16 @@ namespace
             ostr << "Object passed to CreateRequest is not an entity! (Type = "
                 << Typesystem::Operations::GetName(typeId) << " and handler = " << handlerId << ")";
             throw Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
+        }
+
+        if (SharedMemoryObject::GetMemoryLevel() >= MemoryLevel::ExtremelyLow)
+        {
+            std::wostringstream ostr;
+            ostr << "CreateRequest is not allowed due to lack of shared memory (typeId = "
+                 << Typesystem::Operations::GetName(typeId)
+                 << ", handlerId = " << handlerId << ")";
+            SEND_SYSTEM_LOG(Error, << ostr.str());
+            throw Safir::Dob::LowMemoryException(ostr.str(),__WFILE__,__LINE__);
         }
 
         ConnectionConsumerPair regOwner;
@@ -1380,6 +1514,15 @@ namespace
             throw Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
         }
 
+        if (SharedMemoryObject::GetMemoryLevel() >= MemoryLevel::ExtremelyLow)
+        {
+            std::wostringstream ostr;
+            ostr << "UpdateRequest is not allowed due to lack of shared memory (typeId = "
+                 << Typesystem::Operations::GetName(typeId)
+                 << ", instanceId = " << instanceId << ")";
+            SEND_SYSTEM_LOG(Error, << ostr.str());
+            throw Safir::Dob::LowMemoryException(ostr.str(),__WFILE__,__LINE__);
+        }
 
         const InternalRequestId reqIdCounter = m_requestIds.GetNextRequestId();
         requestId = reqIdCounter.GetCounter();
@@ -1413,6 +1556,15 @@ namespace
             throw Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
         }
 
+        if (SharedMemoryObject::GetMemoryLevel() >= MemoryLevel::ExtremelyLow)
+        {
+            std::wostringstream ostr;
+            ostr << "DeleteRequest is not allowed due to lack of shared memory (entityId = "
+                 << entityId << ")";
+            SEND_SYSTEM_LOG(Error, << ostr.str());
+            throw Safir::Dob::LowMemoryException(ostr.str(),__WFILE__,__LINE__);
+        }
+
         const InternalRequestId reqIdCounter = m_requestIds.GetNextRequestId();
         requestId = reqIdCounter.GetCounter();
 
@@ -1432,6 +1584,15 @@ namespace
                                   const ResponseId responseId)
     {
         const Dob::Typesystem::TypeId typeId = Dob::Typesystem::Internal::BlobOperations::GetTypeId(blob);
+        if (SharedMemoryObject::GetMemoryLevel() >= MemoryLevel::ExtremelyLow)
+        {
+            std::wostringstream ostr;
+            ostr << "Sending response is not allowed due to lack of shared memory (typeId = "
+                 << Typesystem::Operations::GetName(typeId) << ")";
+            SEND_SYSTEM_LOG(Error, << ostr.str());
+            throw Safir::Dob::LowMemoryException(ostr.str(),__WFILE__,__LINE__);
+        }
+
         if (!m_isConnected)
         {
             std::wostringstream ostr;
@@ -2829,6 +2990,15 @@ namespace
                                                        const bool includeSubclasses,
                                                        bool& end)
     {
+        if (SharedMemoryObject::GetMemoryLevel() >= MemoryLevel::VeryLow)
+        {
+            std::wostringstream ostr;
+            ostr << "Entity iteration is not allowed due to lack of shared memory (typeId = "
+                 << Typesystem::Operations::GetName(typeId) << ")";
+            SEND_SYSTEM_LOG(Error, << ostr.str());
+            throw Safir::Dob::LowMemoryException(ostr.str(),__WFILE__,__LINE__);
+        }
+
         ENSURE(m_entityIterators.size() < RAND_MAX, << "It seems that the application isn't releasing its Entity Iterators");
 
         //Generate a unique iterator id

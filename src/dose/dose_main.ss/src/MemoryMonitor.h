@@ -26,6 +26,7 @@
 #include <Safir/Utilities/Internal/AsioPeriodicTimer.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
+#include <Safir/Dob/NodeParameters.h>
 
 namespace Safir
 {
@@ -40,7 +41,7 @@ namespace Internal
     public:
         explicit MemoryMonitor(boost::asio::io_service& ioService):
             m_capacity(GetSharedMemory().get_size()),
-            m_warningPercent(20)
+            m_warningPercent(Safir::Dob::NodeParameters::SharedMemoryLevels(L"Warning"))
         {
 
             m_timer.reset(new Safir::Utilities::Internal::AsioPeriodicTimer(ioService,
@@ -73,8 +74,8 @@ namespace Internal
                     if (percentFree < m_warningPercent)
                     {
                         SEND_SYSTEM_LOG(Alert,
-                                        << "Less than " << m_warningPercent << "% of the Dob shared memory is available!"
-                                        << "This probably means that you're close to running out of memory!"
+                                        << "Only " << percentFree << "% of the Dob shared memory is available! "
+                                        << "This means that you're close to running out of memory! "
                                         << "Increase Safir.Dob.NodeParameters.SharedMemorySize.");
                     }
                 }

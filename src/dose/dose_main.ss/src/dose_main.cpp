@@ -25,6 +25,7 @@
 #include "DoseMainApp.h"
 #include <Safir/Utilities/Internal/SystemLog.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
+#include <Safir/Dob/LowMemoryException.h>
 #include <Safir/Utilities/CrashReporter.h>
 #include <boost/lexical_cast.hpp>
 #include <boost/asio.hpp>
@@ -113,8 +114,21 @@ int main()
         {
             try
             {
-                ioService.run();
-                return;
+                for(;;)
+                {
+                    try
+                    {
+                        ioService.run();
+                        return;
+                    }
+                    catch (const Safir::Dob::LowMemoryException& exc)
+                    {
+                        SEND_SYSTEM_LOG(Alert,
+                                        << "DOSE_MAIN: Unexpectedly caught LowMemoryException from io_service.run(): "
+                                        << "'" << exc.what() << "'. Will continue execution, "
+                                        << "but please report this exception to you nearest Dob developer!");
+                    }
+                }
             }
             catch (const std::exception & exc)
             {

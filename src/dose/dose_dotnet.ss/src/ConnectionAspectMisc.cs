@@ -257,7 +257,7 @@ namespace Safir.Dob
         #endregion
 
         #region Shared Memory statistics
-        
+
         /// <summary>
         /// Get the number of currently used bytes in the shared memory.
         /// <para/>
@@ -279,6 +279,27 @@ namespace Safir.Dob
             }
 
             return usage;
+        }
+
+        /// <summary>
+        /// Get the usage level of the shared memory.
+        /// <para/>
+        /// When the memory level gets to Low or below that there will be operations that are
+        /// no longer allowed. See the User's Guide for more information.
+        /// <para/>
+        /// Calling this function does not require the underlying Connection to have been opened.
+        /// </summary>
+        /// <returns>The memory level.</returns>
+        public Safir.Dob.MemoryLevel.Enumeration GetSharedMemoryLevel()
+        {
+            System.Int32 level;
+            byte success;
+            Interface.DoseC_GetSharedMemoryLevel(out level, out success);
+            if (!Interface.BoolOf(success))
+            {
+                Safir.Dob.Typesystem.LibraryExceptions.Instance.Throw();
+            }
+            return (Safir.Dob.MemoryLevel.Enumeration)level;
         }
 
         #endregion

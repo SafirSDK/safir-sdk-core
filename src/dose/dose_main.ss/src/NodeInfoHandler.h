@@ -24,10 +24,12 @@
 #pragma once
 
 #include <Safir/Dob/Connection.h>
+#include <Safir/Dob/MemoryLevel.h>
 #include <Safir/Utilities/AsioDispatcher.h>
 #include <Safir/Dob/NodeState.h>
 #include <boost/noncopyable.hpp>
 #include <boost/asio.hpp>
+#include <boost/asio/steady_timer.hpp>
 #include "Distribution.h"
 
 namespace Safir
@@ -54,6 +56,8 @@ namespace Internal
 
         void SetNodeState(Safir::Dob::NodeState::Enumeration state);
     private:
+        void RunUpdateMemoryLevelTimer();
+
         void OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId    typeId,
                                    const Safir::Dob::Typesystem::HandlerId& handlerId) override;
 
@@ -69,6 +73,8 @@ namespace Internal
         Safir::Dob::Connection m_connection;
         Utilities::AsioDispatcher m_dispatcher;
         const Distribution& m_distribution;
+        boost::asio::steady_timer m_timer;
+        Safir::Dob::MemoryLevel::Enumeration m_memoryLevel = Safir::Dob::MemoryLevel::Normal;
     };
 }
 }

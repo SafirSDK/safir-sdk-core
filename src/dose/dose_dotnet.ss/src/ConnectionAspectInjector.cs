@@ -50,6 +50,8 @@ namespace Safir.Dob
         /// <param name="instanceId">Instance id.</param>
         /// <param name="timestamp">Timestamp valid for the top members that are marked as changed.</param>
         /// <param name="handlerId">Handler id.</param>
+        /// <exception cref="Safir.Dob.LowMemoryException">Not enough shared memory available
+        ///                                                to complete this operation.</exception>
         public void InjectChanges(Entity entity,
                                   Typesystem.InstanceId instanceId,
                                   System.Int64 timestamp,
@@ -90,6 +92,8 @@ namespace Safir.Dob
         /// <param name="entityId">Entity id of the instance to delete.</param>
         /// <param name="timestamp">Timestamp Time of deletion.</param>
         /// <param name="handlerId">Handler id.</param>
+        /// <exception cref="Safir.Dob.LowMemoryException">Not enough shared memory available
+        ///                                                to complete this operation.</exception>
         public void InjectDelete(Typesystem.EntityId entityId,
                                  System.Int64 timestamp,
                                  Typesystem.HandlerId handlerId)
@@ -123,6 +127,8 @@ namespace Safir.Dob
         /// <param name="entity">Entity to create.</param>
         /// <param name="instanceId">Instance id of entity to inject.</param>
         /// <param name="handlerId">The handler id to inject to.</param>
+        /// <exception cref="Safir.Dob.LowMemoryException">Not enough shared memory available
+        ///                                                to complete this operation.</exception>
         public void InitialSet(Entity entity,
                                Typesystem.InstanceId instanceId,
                                Typesystem.HandlerId handlerId)
@@ -180,6 +186,8 @@ namespace Safir.Dob
         /// <param name="timestampChangeInfo">True => ChangeInfo is based on timestamps instead of contents
         ///                                   False => ChangeInfo is based on object contents, as with normal subscribe.</param>
         /// <param name="entitySubscriber">EntitySubscriber that will receive the entities.</param>
+        /// <exception cref="Safir.Dob.LowMemoryException">Not enough shared memory available
+        ///                                                to complete this operation.</exception>
         public void SubscribeEntity(System.Int64 typeId,
                                     bool includeUpdates,
                                     bool includeSubclasses,

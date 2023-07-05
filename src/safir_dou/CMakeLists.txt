@@ -54,6 +54,8 @@ ADD_SAFIR_GENERATED_LIBRARY(NAME Core
   data/Safir.Dob.InjectionProperty.dou
   data/Safir.Dob.InstanceIdPolicy.dou
   data/Safir.Dob.Item.dou
+  data/Safir.Dob.LowMemoryException.dou
+  data/Safir.Dob.MemoryLevel.dou
   data/Safir.Dob.Message.dou
   data/Safir.Dob.NodeInfo.dou
   data/Safir.Dob.NodeState.dou

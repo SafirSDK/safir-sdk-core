@@ -1,6 +1,6 @@
 /* ****************************************************************************
 *
-* Copyright Saab AB, 2007-2013 (http://safirsdkcore.com)
+* Copyright Saab AB, 2007-2013, 2023 (http://safirsdkcore.com)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -71,15 +71,17 @@ namespace Safir.Dob
         /// <param name="instanceIdPolicy">Specifies if the handler expects instance ids in create requests to be
         ///                                assigned by the requestor (normal case) or if the handler assigns them by itself.</param>
         /// <param name="entityHandler">Callback consumer object.</param>
+        /// <exception cref="Safir.Dob.LowMemoryException">Not enough shared memory available
+        ///                                                to complete this operation.</exception>
         public void RegisterEntityHandler(System.Int64 typeId,
                                           Typesystem.HandlerId handlerId,
-                                          InstanceIdPolicy.Enumeration instanceIdPolicy, 
+                                          InstanceIdPolicy.Enumeration instanceIdPolicy,
                                           EntityHandler entityHandler)
         {
             byte success;
 
             System.IntPtr handlerIdStr = Dob.Typesystem.Internal.InternalOperations.CStringOf(handlerId.RawString);
-            
+
             Interface.DoseC_RegisterEntityHandler(ControllerId,
                                                   typeId,
                                                   handlerId.RawValue,
@@ -126,6 +128,8 @@ namespace Safir.Dob
         /// <param name="instanceIdPolicy">Specifies if the handler expects instance ids in create requests to be
         ///                                assigned by the requestor (normal case) or if the handler assigns them by itself.</param>
         /// <param name="entityHandlerInjection">Callback consumer object.</param>
+        /// <exception cref="Safir.Dob.LowMemoryException">Not enough shared memory available
+        ///                                                to complete this operation.</exception>
         public void RegisterEntityHandlerInjection(System.Int64 typeId,
                                                    Typesystem.HandlerId handlerId,
                                                    InstanceIdPolicy.Enumeration instanceIdPolicy,
@@ -183,6 +187,8 @@ namespace Safir.Dob
         /// <param name="instanceIdPolicy">Specifies if the handler expects instance ids in create requests to be
         ///                                assigned by the requestor (normal case) or if the handler assigns them by itself.</param>
         /// <param name="entityHandlerPending">Callback consumer object.</param>
+        /// <exception cref="Safir.Dob.LowMemoryException">Not enough shared memory available
+        ///                                                to complete this operation.</exception>
         public void RegisterEntityHandlerPending(System.Int64 typeId,
                                                  Typesystem.HandlerId handlerId,
                                                  InstanceIdPolicy.Enumeration instanceIdPolicy,
@@ -225,6 +231,8 @@ namespace Safir.Dob
         /// <param name="typeId">Service type to register.</param>
         /// <param name="handlerId">Handler id.</param>
         /// <param name="serviceHandler">Callback consumer object.</param>
+        /// <exception cref="Safir.Dob.LowMemoryException">Not enough shared memory available
+        ///                                                to complete this operation.</exception>
         public void RegisterServiceHandler(System.Int64 typeId,
                                            Typesystem.HandlerId handlerId,
                                            ServiceHandler serviceHandler)
@@ -264,6 +272,8 @@ namespace Safir.Dob
         /// <param name="typeId">Service type to register.</param>
         /// <param name="handlerId">Handler id.</param>
         /// <param name="serviceHandlerPending">Callback consumer object.</param>
+        /// <exception cref="Safir.Dob.LowMemoryException">Not enough shared memory available
+        ///                                                to complete this operation.</exception>
         public void RegisterServiceHandlerPending(System.Int64 typeId,
                                                   Typesystem.HandlerId handlerId,
                                                   ServiceHandlerPending serviceHandlerPending)
@@ -309,6 +319,8 @@ namespace Safir.Dob
         /// </summary>
         /// <param name="typeId">Type id of the entity or service to unregister.</param>
         /// <param name="handlerId">Handler id.</param>
+        /// <exception cref="Safir.Dob.LowMemoryException">Not enough shared memory available
+        ///                                                to complete this operation.</exception>
         public void UnregisterHandler(System.Int64 typeId,
                                       Typesystem.HandlerId handlerId)
         {
@@ -347,6 +359,8 @@ namespace Safir.Dob
         /// <param name="typeId">Type id of the message to subscribe for.</param>
         /// <param name="channelId">Channel id.</param>
         /// <param name="messageSubscriber">MessageSubscriber that will receive the messages.</param>
+        /// <exception cref="Safir.Dob.LowMemoryException">Not enough shared memory available
+        ///                                                to complete this operation.</exception>
         public void SubscribeMessage(System.Int64 typeId,
                                      Typesystem.ChannelId channelId,
                                      MessageSubscriber messageSubscriber)
@@ -365,6 +379,8 @@ namespace Safir.Dob
         /// <param name="includeSubclasses">True => Subscription for this message type and all its subclasses.
         ///                                 False => No subclasses will be included.</param>
         /// <param name="messageSubscriber">MessageSubscriber that will receive the messages.</param>
+        /// <exception cref="Safir.Dob.LowMemoryException">Not enough shared memory available
+        ///                                                to complete this operation.</exception>
         public void SubscribeMessage(System.Int64 typeId,
                                      Typesystem.ChannelId channelId,
                                      bool includeSubclasses,
@@ -410,6 +426,8 @@ namespace Safir.Dob
         /// <param name="channelId">Channel id.</param>
         /// <param name="messageSubscriber">The MessageSubscriber consumer that was used when
         ///                                 the subscription was initiated.</param>
+        /// <exception cref="Safir.Dob.LowMemoryException">Not enough shared memory available
+        ///                                                to complete this operation.</exception>
         public void UnsubscribeMessage(System.Int64 typeId,
                                        Typesystem.ChannelId channelId,
                                        MessageSubscriber messageSubscriber)
@@ -429,6 +447,8 @@ namespace Safir.Dob
         ///                                 False => No subclasses will be included.</param>
         /// <param name="messageSubscriber">The MessageSubscriber consumer that was used when
         ///                                 the subscription was initiated.</param>
+        /// <exception cref="Safir.Dob.LowMemoryException">Not enough shared memory available
+        ///                                                to complete this operation.</exception>
         public void UnsubscribeMessage(System.Int64 typeId,
                                        Typesystem.ChannelId channelId,
                                        bool includeSubclasses,
@@ -473,6 +493,8 @@ namespace Safir.Dob
         /// </summary>
         /// <param name="typeId">Type id of the entity to subscribe for.</param>
         /// <param name="entitySubscriber">EntitySubscriber that will receive the entities.</param>
+        /// <exception cref="Safir.Dob.LowMemoryException">Not enough shared memory available
+        ///                                                to complete this operation.</exception>
         public void SubscribeEntity(System.Int64 typeId,
                                     EntitySubscriber entitySubscriber)
         {
@@ -497,6 +519,8 @@ namespace Safir.Dob
         /// <param name="restartSubscription">True=> OnNewEntity callbacks are generated even if the subscription already exists.
         ///                                   False=> OnNewEntity callbacks are generated only for instances that are not previously subscribed.</param>
         /// <param name="entitySubscriber">EntitySubscriber that will receive the entities.</param>
+        /// <exception cref="Safir.Dob.LowMemoryException">Not enough shared memory available
+        ///                                                to complete this operation.</exception>
         public void SubscribeEntity(System.Int64 typeId,
                                     bool includeUpdates,
                                     bool includeSubclasses,
@@ -541,6 +565,8 @@ namespace Safir.Dob
         /// <param name="restartSubscription">True=> An OnNewEntity callback will be generated even if the subscription already exists.
         ///                                 False=> An OnNewEntity callback is generated only if the instance is not previously subscribed.</param>
         /// <param name="entitySubscriber">EntitySubscriber that will receive the entities.</param>
+        /// <exception cref="Safir.Dob.LowMemoryException">Not enough shared memory available
+        ///                                                to complete this operation.</exception>
         public void SubscribeEntity(Typesystem.EntityId entityId,
                                     bool includeUpdates,
                                     bool restartSubscription,
@@ -582,6 +608,8 @@ namespace Safir.Dob
         /// <param name="typeId">Type id of the entity to unsubscribe for.</param>
         /// <param name="entitySubscriber">The EntitySubscriber consumer that was used when
         ///                                the subscription was initiated.</param>
+        /// <exception cref="Safir.Dob.LowMemoryException">Not enough shared memory available
+        ///                                                to complete this operation.</exception>
         public void UnsubscribeEntity(System.Int64 typeId,
                                       EntitySubscriber entitySubscriber)
         {
@@ -601,6 +629,8 @@ namespace Safir.Dob
         ///                                 False => Unsubscribe for just this type (no subclasses).</param>
         /// <param name="entitySubscriber">The EntitySubscriber consumer that was used when
         ///                                the subscription was initiated.</param>
+        /// <exception cref="Safir.Dob.LowMemoryException">Not enough shared memory available
+        ///                                                to complete this operation.</exception>
         public void UnsubscribeEntity(System.Int64 typeId,
                                       bool includeSubclasses,
                                       EntitySubscriber entitySubscriber)
@@ -637,6 +667,8 @@ namespace Safir.Dob
         /// <param name="entityId">Entity id of the entity instance.</param>
         /// <param name="entitySubscriber">The EntitySubscriber consumer that was used when
         ///                                the subscription was initiated.</param>
+        /// <exception cref="Safir.Dob.LowMemoryException">Not enough shared memory available
+        ///                                                to complete this operation.</exception>
         public void UnsubscribeEntity(Typesystem.EntityId entityId,
                                       EntitySubscriber entitySubscriber)
         {
@@ -688,6 +720,8 @@ namespace Safir.Dob
         /// <param name="restartSubscription">True=> OnRegistered callbacks are generated even if the subscription already exists.
         ///                                   False => OnRegistered callbacks are generated only for handlers that are not previously subscribed.</param>
         /// <param name="registrationSubscriber">RegistrationSubscriber that will receive the subscription response.</param>
+        /// <exception cref="Safir.Dob.LowMemoryException">Not enough shared memory available
+        ///                                                to complete this operation.</exception>
         public void SubscribeRegistration(System.Int64 typeId,
                                           Typesystem.HandlerId handlerId,
                                           bool includeSubclasses,
@@ -732,6 +766,8 @@ namespace Safir.Dob
         ///                                 False => No subclasses will be included.</param>
         /// <param name="registrationSubscriber">The registrationSubscriber consumer that was used when
         ///                                      the subscription was initiated.</param>
+        /// <exception cref="Safir.Dob.LowMemoryException">Not enough shared memory available
+        ///                                                to complete this operation.</exception>
         public void UnsubscribeRegistration(System.Int64 typeId,
                                             Typesystem.HandlerId handlerId,
                                             bool includeSubclasses,
@@ -776,6 +812,8 @@ namespace Safir.Dob
         /// <param name="channelId">Channel id.</param>
         /// <param name="messageSender">MessageSender for notification about overflow status.</param>
         /// <exception cref="Safir.Dob.OverflowException">There was an overflow when sending.</exception>
+        /// <exception cref="Safir.Dob.LowMemoryException">Not enough shared memory available
+        ///                                                to complete this operation.</exception>
         public void Send(Message message,
                          Typesystem.ChannelId channelId,
                          MessageSender messageSender)
@@ -835,6 +873,8 @@ namespace Safir.Dob
         /// <param name="requestor">Requestor for response and notification about overflow status.</param>
         /// <returns>Request id that can be used to match sent request with the response.</returns>
         /// <exception cref="Safir.Dob.OverflowException">There was an overflow when sending.</exception>
+        /// <exception cref="Safir.Dob.LowMemoryException">Not enough shared memory available
+        ///                                                to complete this operation.</exception>
         public System.Int32 CreateRequest(Entity entity,
                                           Typesystem.HandlerId handlerId,
                                           Requestor requestor)
@@ -902,6 +942,8 @@ namespace Safir.Dob
         /// <param name="requestor">Requestor for response and notification about overflow status.</param>
         /// <returns>Request id that can be used to match sent request with the response.</returns>
         /// <exception cref="Safir.Dob.OverflowException">There was an overflow when sending.</exception>
+        /// <exception cref="Safir.Dob.LowMemoryException">Not enough shared memory available
+        ///                                                to complete this operation.</exception>
         public System.Int32 CreateRequest(Entity entity,
                                           Typesystem.InstanceId instanceId,
                                           Typesystem.HandlerId handlerId,
@@ -924,7 +966,7 @@ namespace Safir.Dob
                  instanceId.RawValue,
                  instanceIdStr,
                  handlerId.RawValue,
-                 handlerIdStr, 
+                 handlerIdStr,
                  Interface.DOSE_LANGUAGE_DOTNET,
                  cons,
                  out requestId,
@@ -962,6 +1004,8 @@ namespace Safir.Dob
         /// <param name="requestor">Requestor for response and notification about overflow status.</param>
         /// <returns>Request id that can be used to match sent request with the response.</returns>
         /// <exception cref="Safir.Dob.OverflowException">There was an overflow when sending.</exception>
+        /// <exception cref="Safir.Dob.LowMemoryException">Not enough shared memory available
+        ///                                                to complete this operation.</exception>
         public System.Int32 UpdateRequest(Entity entity,
                                           Typesystem.InstanceId instanceId,
                                           Requestor requestor)
@@ -1014,6 +1058,8 @@ namespace Safir.Dob
         /// <param name="requestor">Requestor for response and notification about overflow status.</param>
         /// <returns>Request id that can be used to match sent request with the response.</returns>
         /// <exception cref="Safir.Dob.OverflowException">There was an overflow when sending.</exception>
+        /// <exception cref="Safir.Dob.LowMemoryException">Not enough shared memory available
+        ///                                                to complete this operation.</exception>
         public System.Int32 DeleteRequest(Typesystem.EntityId entityId,
                                           Requestor requestor)
         {
@@ -1061,6 +1107,8 @@ namespace Safir.Dob
         /// <param name="requestor">Requestor for service response and notification about overflow status.</param>
         /// <returns>Request id that can be used to match sent request with the response.</returns>
         /// <exception cref="Safir.Dob.OverflowException">There was an overflow when sending.</exception>
+        /// <exception cref="Safir.Dob.LowMemoryException">Not enough shared memory available
+        ///                                                to complete this operation.</exception>
         public System.Int32 ServiceRequest(Service service,
                                            Typesystem.HandlerId handlerId,
                                            Requestor requestor)
@@ -1115,6 +1163,8 @@ namespace Safir.Dob
         /// <param name="handlerId">Handler id.</param>
         /// <exception cref="Safir.Dob.AccessDeniedException">The instance is owned by another handler.</exception>
         /// <exception cref="Safir.Dob.GhostExistsException">There is a ghost instance that hasn't been injected.</exception>
+        /// <exception cref="Safir.Dob.LowMemoryException">Not enough shared memory available
+        ///                                                to complete this operation.</exception>
         public void SetChanges(Entity entity,
                                Typesystem.InstanceId instanceId,
                                Typesystem.HandlerId handlerId)
@@ -1159,6 +1209,8 @@ namespace Safir.Dob
         /// <param name="handlerId">Handler id.</param>
         /// <exception cref="Safir.Dob.AccessDeniedException">The instance is owned by another handler.</exception>
         /// <exception cref="Safir.Dob.GhostExistsException">There is a ghost instance that hasn't been injected.</exception>
+        /// <exception cref="Safir.Dob.LowMemoryException">Not enough shared memory available
+        ///                                                to complete this operation.</exception>
         public void SetAll(Entity entity,
                            Typesystem.InstanceId instanceId,
                            Typesystem.HandlerId handlerId)
@@ -1211,6 +1263,8 @@ namespace Safir.Dob
         /// <param name="handlerId">Handler id.</param>
         /// <exception cref="Safir.Dob.AccessDeniedException">The instance is owned by another handler.</exception>
         /// <exception cref="Safir.Dob.GhostExistsException">There is a ghost instance that hasn't been injected.</exception>
+        /// <exception cref="Safir.Dob.LowMemoryException">Not enough shared memory available
+        ///                                                to complete this operation.</exception>
         public void Delete(Typesystem.EntityId entityId,
                            Typesystem.HandlerId handlerId)
         {
@@ -1244,6 +1298,8 @@ namespace Safir.Dob
         /// </summary>
         /// <param name="typeId">Entity type.</param>
         /// <param name="handlerId">Handler id.</param>
+        /// <exception cref="Safir.Dob.LowMemoryException">Not enough shared memory available
+        ///                                                to complete this operation.</exception>
         public void DeleteAllInstances(System.Int64 typeId,
                                        Typesystem.HandlerId handlerId)
         {
@@ -1256,7 +1312,7 @@ namespace Safir.Dob
                                          typeId,
                                          0,
                                          instanceIdStr,
-                                         Interface.ByteOf(true),                        // true => all instances 
+                                         Interface.ByteOf(true),                        // true => all instances
                                          handlerId.RawValue,
                                          handlerIdStr,
                                          out success);
@@ -1269,7 +1325,7 @@ namespace Safir.Dob
                 Typesystem.LibraryExceptions.Instance.Throw();
             }
         }
-        
+
         #endregion
 
         #region Get iterators
@@ -1281,6 +1337,8 @@ namespace Safir.Dob
         /// <param name="includeSubclasses">True =>  Iterate over subclass instances
         ///                                 False => No subclasses will be included.</param>
         /// <returns>An enumerator for entities</returns>
+        /// <exception cref="Safir.Dob.LowMemoryException">Not enough shared memory available
+        ///                                                to complete this operation.</exception>
         public System.Collections.Generic.IEnumerable<EntityProxy>
         GetEntityEnumerator(System.Int64 typeId,
                             bool includeSubclasses)
@@ -1288,7 +1346,7 @@ namespace Safir.Dob
             Int32 iteratorId;
             byte success;
             byte end;
-            Interface.DoseC_EntityIteratorCreate(ControllerId, typeId, Interface.ByteOf(includeSubclasses), out iteratorId, 
+            Interface.DoseC_EntityIteratorCreate(ControllerId, typeId, Interface.ByteOf(includeSubclasses), out iteratorId,
                                                  out end, out success);
             if (!Interface.BoolOf(success))
             {
@@ -1323,7 +1381,7 @@ namespace Safir.Dob
                 Interface.DoseC_EntityIteratorDestroy(ControllerId, iteratorId);
             }
         }
-        
+
         #endregion
 
         #region Read operations
@@ -1336,6 +1394,8 @@ namespace Safir.Dob
         /// <param name="entityId">Entity id of the entity to read.</param>
         /// <returns>Entity read from the distributed object pool.</returns>
         /// <exception cref="Safir.Dob.NotFoundException">The specified instance of the entity does not exist.</exception>
+        /// <exception cref="Safir.Dob.LowMemoryException">Not enough shared memory available
+        ///                                                to complete this operation.</exception>
         public EntityProxy Read(Typesystem.EntityId entityId)
         {
             byte success;
@@ -1407,6 +1467,8 @@ namespace Safir.Dob
         ///                         to get all handlers).</param>
         /// <param name="includeSubclasses">Include subclasses when counting instances.</param>
         /// <returns>Number of instances</returns>
+        /// <exception cref="Safir.Dob.LowMemoryException">Not enough shared memory available
+        ///                                                to complete this operation.</exception>
         public System.Int64 GetNumberOfInstances(System.Int64 typeId,
                                                  Safir.Dob.Typesystem.HandlerId handlerId,
                                                  bool includeSubclasses)

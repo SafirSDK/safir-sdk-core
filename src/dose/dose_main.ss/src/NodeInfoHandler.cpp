@@ -24,6 +24,8 @@
 #include "NodeInfoHandler.h"
 #include <Safir/Dob/ErrorResponse.h>
 #include <Safir/Dob/NodeInfo.h>
+#include <Safir/Dob/ConnectionAspectMisc.h>
+#include <Safir/Dob/LowMemoryException.h>
 #include <Safir/Dob/ResponseGeneralErrorCodes.h>
 #include <Safir/Dob/ThisNodeParameters.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
@@ -38,8 +40,9 @@ namespace Internal
     NodeInfoHandler::NodeInfoHandler(boost::asio::io_service& ioService,
                                      const Distribution& distribution,
                                      Safir::Dob::NodeState::Enumeration initialState)
-        : m_dispatcher(m_connection, ioService),
-          m_distribution(distribution)
+        : m_dispatcher(m_connection, ioService)
+        , m_distribution(distribution)
+        , m_timer(m_dispatcher.Strand().context())
     {
         m_dispatcher.Strand().post([this, initialState]
         {
@@ -66,15 +69,19 @@ namespace Internal
             ni->IpAddress().SetVal(Safir::Dob::Typesystem::Utilities::ToWstring(ip));
             ni->NodeType().SetVal(ThisNodeParameters::NodeType());
             ni->State().SetVal(initialState);
+            ni->MemoryLevel().SetVal(m_memoryLevel);
 
             m_connection.SetAll(ni,
                                 Typesystem::InstanceId(m_distribution.GetNodeId()),
                                 Typesystem::HandlerId(m_distribution.GetNodeId()));
+
+            RunUpdateMemoryLevelTimer();
         });
     }
 
     void NodeInfoHandler::Stop()
     {
+        m_timer.cancel();
         m_dispatcher.Strand().dispatch([this]
         {
             m_connection.Close();
@@ -95,6 +102,40 @@ namespace Internal
                                         Typesystem::HandlerId(m_distribution.GetNodeId()));
             }
         });
+    }
+
+    //must run in strand
+    void NodeInfoHandler::RunUpdateMemoryLevelTimer()
+    {
+        const auto newMemoryLevel = Safir::Dob::ConnectionAspectMisc(m_connection).GetSharedMemoryLevel();
+
+        if (newMemoryLevel != m_memoryLevel)
+        {
+            Dob::NodeInfoPtr ni = Dob::NodeInfo::Create();
+            ni->MemoryLevel().SetVal(newMemoryLevel);
+
+            try
+            {
+                m_connection.SetChanges(ni,
+                                        Typesystem::InstanceId(m_distribution.GetNodeId()),
+                                        Typesystem::HandlerId(m_distribution.GetNodeId()));
+                m_memoryLevel = newMemoryLevel;
+            }
+            catch (const Safir::Dob::LowMemoryException&)
+            {
+            }
+        }
+
+        m_timer.expires_from_now(boost::chrono::seconds(10));
+        m_timer.async_wait(boost::asio::bind_executor(m_dispatcher.Strand(),
+                                                      [this](const boost::system::error_code& error)
+        {
+            if (error == boost::asio::error::operation_aborted)
+            {
+                return;
+            }
+            RunUpdateMemoryLevelTimer();
+        }));
     }
 
     void NodeInfoHandler::OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId    /*typeId*/,

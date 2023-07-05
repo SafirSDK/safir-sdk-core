@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<enumeration xmlns="urn:safir-dots-unit" xmlns:xsd="http://www.w3.org/2001/XMLSchema-instance">
+  <summary>The different memory levels that makes the Dob go into various degraded modes.</summary>
+  <name>Safir.Dob.MemoryLevel</name>
+  <values>
+    <value>Normal</value>
+    <value>Warning</value>
+    <value>Low</value>
+    <value>VeryLow</value>
+    <value>ExtremelyLow</value>
+  </values>
+</enumeration>

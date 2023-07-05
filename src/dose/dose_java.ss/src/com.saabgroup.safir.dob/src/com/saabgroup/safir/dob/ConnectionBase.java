@@ -73,6 +73,8 @@ public abstract class ConnectionBase
      * @param instanceIdPolicy Specifies if the handler expects instance ids in create requests to be
      *                              assigned by the requestor (normal case) or if the handler assigns them by itself.
      * @param entityHandler Callback consumer object.
+     *
+     * @throws LowMemoryException Not enough shared memory available to complete this operation.
      */
     public void registerEntityHandler(long typeId,
                                       com.saabgroup.safir.dob.typesystem.HandlerId handlerId,
@@ -119,6 +121,8 @@ public abstract class ConnectionBase
      * @param instanceIdPolicy Specifies if the handler expects instance ids in create requests to be
      *                              assigned by the requestor (normal case) or if the handler assigns them by itself.
      * @param entityInjectionHandler Callback consumer object.
+     *
+     * @throws LowMemoryException Not enough shared memory available to complete this operation.
      */
     public void registerEntityHandlerInjection(long typeId,
                                                com.saabgroup.safir.dob.typesystem.HandlerId handlerId,
@@ -171,6 +175,8 @@ public abstract class ConnectionBase
      * @param instanceIdPolicy Specifies if the handler expects instance ids in create requests to be
      *                              assigned by the requestor (normal case) or if the handler assigns them by itself.
      * @param entityHandlerPending Callback consumer object.
+     *
+     * @throws LowMemoryException Not enough shared memory available to complete this operation.
      */
     public void registerEntityHandlerPending(long typeId,
                                              com.saabgroup.safir.dob.typesystem.HandlerId handlerId,
@@ -208,6 +214,8 @@ public abstract class ConnectionBase
      * @param typeId  Service type to register.
      * @param handlerId Handler id.
      * @param serviceHandler Callback consumer object.
+     *
+     * @throws LowMemoryException Not enough shared memory available to complete this operation.
      */
     public void registerServiceHandler(long typeId,
                                        com.saabgroup.safir.dob.typesystem.HandlerId handlerId,
@@ -242,6 +250,8 @@ public abstract class ConnectionBase
      * @param typeId  Service type to register.
      * @param handlerId Handler id.
      * @param serviceHandlerPending Callback consumer object.
+     *
+     * @throws LowMemoryException Not enough shared memory available to complete this operation.
      */
     public void registerServiceHandlerPending(long typeId,
                                               com.saabgroup.safir.dob.typesystem.HandlerId handlerId,
@@ -282,6 +292,8 @@ public abstract class ConnectionBase
      *
      * @param typeId Type id of the entity or service to unregister.
      * @param handlerId Handler id.
+     *
+     * @throws LowMemoryException Not enough shared memory available to complete this operation.
      */
     public void unregisterHandler(long typeId,
                                   com.saabgroup.safir.dob.typesystem.HandlerId handlerId)
@@ -318,6 +330,8 @@ public abstract class ConnectionBase
      * @param typeId Type id of the message to subscribe for.
      * @param channelId Channel id.
      * @param messageSubscriber MessageSubscriber that will receive the messages.
+     *
+     * @throws LowMemoryException Not enough shared memory available to complete this operation.
      */
     public void subscribeMessage(long typeId,
                                  com.saabgroup.safir.dob.typesystem.ChannelId channelId,
@@ -337,6 +351,8 @@ public abstract class ConnectionBase
      * @param includeSubclasses True => Subscription for this message type and all its subclasses.
      *                               False => No subclasses will be included.
      * @param messageSubscriber MessageSubscriber that will receive the messages.
+     *
+     * @throws LowMemoryException Not enough shared memory available to complete this operation.
      */
     public void subscribeMessage(long typeId,
                                  com.saabgroup.safir.dob.typesystem.ChannelId channelId,
@@ -376,6 +392,8 @@ public abstract class ConnectionBase
      * @param channelId Channel id.
      * @param messageSubscriber The MessageSubscriber consumer that was used when
      *                               the subscription was initiated.
+     *
+     * @throws LowMemoryException Not enough shared memory available to complete this operation.
      */
     public void unsubscribeMessage(long typeId,
                                    com.saabgroup.safir.dob.typesystem.ChannelId channelId,
@@ -396,6 +414,8 @@ public abstract class ConnectionBase
      *                               False => No subclasses will be included.
      * @param messageSubscriber The MessageSubscriber consumer that was used when
      *                               the subscription was initiated.
+     *
+     * @throws LowMemoryException Not enough shared memory available to complete this operation.
      */
     public void unsubscribeMessage(long typeId,
                                    com.saabgroup.safir.dob.typesystem.ChannelId channelId,
@@ -435,6 +455,8 @@ public abstract class ConnectionBase
      *
      * @param typeId Type id of the entity to subscribe for.
      * @param entitySubscriber EntitySubscriber that will receive the entities.
+     *
+     * @throws LowMemoryException Not enough shared memory available to complete this operation.
      */
     public void subscribeEntity(long typeId,
                                 EntitySubscriber entitySubscriber)
@@ -460,6 +482,8 @@ public abstract class ConnectionBase
      * @param restartSubscription True=> OnNewEntity callbacks are generated even if the subscription already exists.
      *                                 False=> OnNewEntity callbacks are generated only for instances that are not previously subscribed.
      * @param entitySubscriber EntitySubscriber that will receive the entities.
+     *
+     * @throws LowMemoryException Not enough shared memory available to complete this operation.
      */
     public void subscribeEntity(long typeId,
                                 boolean includeUpdates,
@@ -497,6 +521,8 @@ public abstract class ConnectionBase
      * @param restartSubscription True=> An OnNewEntity callback will be generated even if the subscription already exists.
      *                                 False=> An OnNewEntity callback is generated only if the instance is not previously subscribed.
      * @param entitySubscriber EntitySubscriber that will receive the entities.
+     *
+     * @throws LowMemoryException Not enough shared memory available to complete this operation.
      */
     public void subscribeEntity(com.saabgroup.safir.dob.typesystem.EntityId entityId,
                                 boolean includeUpdates,
@@ -531,6 +557,8 @@ public abstract class ConnectionBase
      * @param typeId Type id of the entity to unsubscribe for.
      * @param entitySubscriber The EntitySubscriber consumer that was used when
      *                              the subscription was initiated.
+     *
+     * @throws LowMemoryException Not enough shared memory available to complete this operation.
      */
     public void unsubscribeEntity(long typeId,
                                   EntitySubscriber entitySubscriber)
@@ -551,6 +579,8 @@ public abstract class ConnectionBase
      *                               False => Unsubscribe for just this type (no subclasses).
      * @param entitySubscriber The EntitySubscriber consumer that was used when
      *                              the subscription was initiated.
+     *
+     * @throws LowMemoryException Not enough shared memory available to complete this operation.
      */
     public void unsubscribeEntity(long typeId,
                                   boolean includeSubclasses,
@@ -580,6 +610,8 @@ public abstract class ConnectionBase
      * @param entityId Entity id of the entity instance.
      * @param entitySubscriber The EntitySubscriber consumer that was used when
      *                              the subscription was initiated.
+     *
+     * @throws LowMemoryException Not enough shared memory available to complete this operation.
      */
     public void unsubscribeEntity(com.saabgroup.safir.dob.typesystem.EntityId entityId,
                                   EntitySubscriber entitySubscriber)
@@ -627,6 +659,8 @@ public abstract class ConnectionBase
      *                                 False=> OnRegistered callbacks are generated only for handlers that are not previously subscribed.
      * @param registrationSubscriber RegistrationSubscriber that will receive the subscription
      *                                    response.
+     *
+     * @throws LowMemoryException Not enough shared memory available to complete this operation.
      */
     public void subscribeRegistration(long typeId,
                                       com.saabgroup.safir.dob.typesystem.HandlerId handlerId,
@@ -663,6 +697,8 @@ public abstract class ConnectionBase
      *                               False => No subclasses will be included.
      * @param registrationSubscriber The registrationSubscriber consumer that was used when
      *                                    the subscription was initiated.
+     *
+     * @throws LowMemoryException Not enough shared memory available to complete this operation.
      */
     public void unsubscribeRegistration(long typeId,
                                         com.saabgroup.safir.dob.typesystem.HandlerId handlerId,
@@ -703,6 +739,7 @@ public abstract class ConnectionBase
          * @param messageSender MessageSender for notification about overflow status.
          *
          * @throws OverflowException There was an overflow when sending.
+     * @throws LowMemoryException Not enough shared memory available to complete this operation.
          */
     public void send(Message message,
                      com.saabgroup.safir.dob.typesystem.ChannelId channelId,
@@ -752,6 +789,7 @@ public abstract class ConnectionBase
      * @return Request id that can be used to match sent request with the response.
      *
      * @throws OverflowException There was an overflow when sending.
+     * @throws LowMemoryException Not enough shared memory available to complete this operation.
      */
     public int createRequest(Entity request,
                              com.saabgroup.safir.dob.typesystem.HandlerId handlerId,
@@ -807,6 +845,7 @@ public abstract class ConnectionBase
      * @return Request id that can be used to match sent request with the response.
      *
      * @throws OverflowException There was an overflow when sending.
+     * @throws LowMemoryException Not enough shared memory available to complete this operation.
      */
     public int createRequest(Entity request,
                              com.saabgroup.safir.dob.typesystem.InstanceId instanceId,
@@ -854,6 +893,7 @@ public abstract class ConnectionBase
      * @return Request id that can be used to match sent request with the response.
      *
      * @throws OverflowException There was an overflow when sending.
+     * @throws LowMemoryException Not enough shared memory available to complete this operation.
      */
     public int updateRequest(Entity request,
                              com.saabgroup.safir.dob.typesystem.InstanceId instanceId,
@@ -896,6 +936,7 @@ public abstract class ConnectionBase
      * @return Request id that can be used to match sent request with the response.
      *
      * @throws OverflowException There was an overflow when sending.
+     * @throws LowMemoryException Not enough shared memory available to complete this operation.
      */
     public int deleteRequest(com.saabgroup.safir.dob.typesystem.EntityId entityId,
                              Requestor requestor)
@@ -935,6 +976,7 @@ public abstract class ConnectionBase
      * @return Request id that can be used to match sent request with the response.
      *
      * @throws OverflowException There was an overflow when sending.
+     * @throws LowMemoryException Not enough shared memory available to complete this operation.
      */
     public int serviceRequest(Service request,
                               com.saabgroup.safir.dob.typesystem.HandlerId handlerId,
@@ -981,6 +1023,7 @@ public abstract class ConnectionBase
      *
      * @throws AccessDeniedException The instance is owned by another handler.
      * @throws GhostExistsException There is a ghost instance that hasn't been injected.
+     * @throws LowMemoryException Not enough shared memory available to complete this operation.
      */
     public void setChanges(Entity entity,
                            com.saabgroup.safir.dob.typesystem.InstanceId instanceId,
@@ -1031,6 +1074,7 @@ public abstract class ConnectionBase
      *
      * @throws AccessDeniedException The instance is owned by another handler.
      * @throws GhostExistsException There is a ghost instance that hasn't been injected.
+     * @throws LowMemoryException Not enough shared memory available to complete this operation.
      */
     public void setAll(Entity entity,
                        com.saabgroup.safir.dob.typesystem.InstanceId instanceId,
@@ -1077,6 +1121,7 @@ public abstract class ConnectionBase
      *
      * @throws AccessDeniedException The instance is owned by another handler.
      * @throws GhostExistsException There is a ghost instance that hasn't been injected.
+     * @throws LowMemoryException Not enough shared memory available to complete this operation.
      */
     public void delete(com.saabgroup.safir.dob.typesystem.EntityId entityId,
                        com.saabgroup.safir.dob.typesystem.HandlerId handlerId)
@@ -1103,6 +1148,8 @@ public abstract class ConnectionBase
      *
      * @param typeId Entity type.
      * @param handlerId Handler id.
+     *
+     * @throws LowMemoryException Not enough shared memory available to complete this operation.
      */
     public void deleteAllInstances(long typeId,
                                    com.saabgroup.safir.dob.typesystem.HandlerId handlerId)
@@ -1137,7 +1184,7 @@ public abstract class ConnectionBase
      *       after calling next().
      *
      * A correct way of using the iterator:
-     * 
+     *
      * <pre>
      * EntityIterator iterator = m_connection.getEntityIterator(typeId,true);
      * try {
@@ -1156,6 +1203,8 @@ public abstract class ConnectionBase
      * @param includeSubclasses True =>  Iterate over subclass instances
      *                          False => No subclasses will be included
      * @return An iterator for entities
+     *
+     * @throws LowMemoryException Not enough shared memory available to complete this operation.
      */
     public EntityIterator getEntityIterator(long typeId,
                                             boolean includeSubclasses) {
@@ -1176,7 +1225,8 @@ public abstract class ConnectionBase
      *
      * @return Entity read from the distributed object pool.
      *
-     * @throws com.saabgroup.safir.dob.NotFoundException The specified instance of the entity does not exist.
+     * @throws NotFoundException The specified instance of the entity does not exist.
+     * @throws LowMemoryException Not enough shared memory available to complete this operation.
      */
     public EntityProxy read(com.saabgroup.safir.dob.typesystem.EntityId entityId)
     {
@@ -1201,94 +1251,96 @@ public abstract class ConnectionBase
         return new EntityProxy(currentBlob[0].asReadOnlyBuffer(), currentState[0].asReadOnlyBuffer(), null, null, false, false);
     }
 
-        /**
-         * Check if an instance of an entity is created or not.
-         *
-         * This method will return true if the given entity instance is created.
-         *
-         * Note that the only time that you can really trust this information is if you're the one that
-         * has created the entity instance and no one is overregistering a handler with the same id as yours.
-         * Otherwise there is no guarantee that the instance still is created immediately after this call.
-         * The owner may be deleting it right after you asked, or your handler may have been revoked but
-         * you have not yet received a Revoke status.
-         * Use with care!
-         *
-         * @param entityId Entity instance to check existence of.
-         * @return True if the entity instance is created, otherwise false.
-         */
-        public boolean isCreated(com.saabgroup.safir.dob.typesystem.EntityId entityId)
-        {
-            boolean [] success = new boolean [1];
-            boolean [] isCreated = new boolean [1];
-
-            Interface.IsCreated(getControllerId(),
-                                entityId.getTypeId(),
-                                entityId.getInstanceId().getRawValue(),
-                                entityId.getInstanceId().getRawString(),
-                                isCreated,
-                                success);
-            if (!success[0]) {
-                com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
-            }
-            return isCreated[0];
-        }
-
-        /**
-         * This method is used to get the number of instances of an entity that exists.
-         *
-         * @param typeId The type of the class whose instances we're counting.
-         * @param handlerId Count only instances owned by this handler (use HandlerId::ALL_HANDLERS
-         *                        to get all handlers).
-         * @param includeSubclasses Include subclasses when counting instances.
-         * @return The number of instances.
-         */
-        public long getNumberOfInstances(long typeId,
-                                                 com.saabgroup.safir.dob.typesystem.HandlerId handlerId,
-                                                 boolean includeSubclasses)
-        {
-            boolean [] success = new boolean [1];
-            long [] numInstances = new long [1];
-
-            Interface.GetNumberOfInstances(getControllerId(),
-                                           typeId,
-                                           handlerId.getRawValue(),
-                                           handlerId.getRawString(),
-                                           includeSubclasses,
-                                           numInstances,
-                                           success);
-
-            if (!success[0]) {
-                com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
-            }
-            return numInstances[0];
-        }
-
-        /**
-         * This method is used to get the number of instances of an entity that exists.
-         *
-         * @param typeId The type of the class the handler is registered for.
-         * @param handlerId Get instanceIdPolicy for this handler.
-         * @return instanceIdPolicy Specifies if the handler expects instance ids in create requests to be
-         *                          assigned by the requestor or if the handler assigns them by itself.
-         * @throws com.saabgroup.safir.dob.NotFoundException The given handlerId has not registered the given class.
-         */
-    public InstanceIdPolicy GetInstanceIdPolicy(long typeId,
-            com.saabgroup.safir.dob.typesystem.HandlerId handlerId)
+    /**
+     * Check if an instance of an entity is created or not.
+     *
+     * This method will return true if the given entity instance is created.
+     *
+     * Note that the only time that you can really trust this information is if you're the one that
+     * has created the entity instance and no one is overregistering a handler with the same id as yours.
+     * Otherwise there is no guarantee that the instance still is created immediately after this call.
+     * The owner may be deleting it right after you asked, or your handler may have been revoked but
+     * you have not yet received a Revoke status.
+     * Use with care!
+     *
+     * @param entityId Entity instance to check existence of.
+     * @return True if the entity instance is created, otherwise false.
+     */
+    public boolean isCreated(com.saabgroup.safir.dob.typesystem.EntityId entityId)
     {
-            boolean [] success = new boolean [1];
-            int [] instanceIdPolicy = new int [1];
+        boolean [] success = new boolean [1];
+        boolean [] isCreated = new boolean [1];
 
-            Interface.GetInstanceIdPolicy(getControllerId(),
-                                          typeId,
-                                          handlerId.getRawValue(),
-                                          instanceIdPolicy,
-                                          success);
-
-            if (!success[0]) {
-                com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
-            }
-            return InstanceIdPolicy.class.getEnumConstants()[instanceIdPolicy[0]];
+        Interface.IsCreated(getControllerId(),
+                            entityId.getTypeId(),
+                            entityId.getInstanceId().getRawValue(),
+                            entityId.getInstanceId().getRawString(),
+                            isCreated,
+                            success);
+        if (!success[0]) {
+            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
         }
+        return isCreated[0];
+    }
+
+    /**
+     * This method is used to get the number of instances of an entity that exists.
+     *
+     * @param typeId The type of the class whose instances we're counting.
+     * @param handlerId Count only instances owned by this handler (use HandlerId::ALL_HANDLERS
+     *                        to get all handlers).
+     * @param includeSubclasses Include subclasses when counting instances.
+     * @return The number of instances.
+     *
+     * @throws LowMemoryException Not enough shared memory available to complete this operation.
+     */
+    public long getNumberOfInstances(long typeId,
+                                     com.saabgroup.safir.dob.typesystem.HandlerId handlerId,
+                                     boolean includeSubclasses)
+    {
+        boolean [] success = new boolean [1];
+        long [] numInstances = new long [1];
+
+        Interface.GetNumberOfInstances(getControllerId(),
+                                       typeId,
+                                       handlerId.getRawValue(),
+                                       handlerId.getRawString(),
+                                       includeSubclasses,
+                                       numInstances,
+                                       success);
+
+        if (!success[0]) {
+            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
+        }
+        return numInstances[0];
+    }
+
+    /**
+     * This method is used to get the number of instances of an entity that exists.
+     *
+     * @param typeId The type of the class the handler is registered for.
+     * @param handlerId Get instanceIdPolicy for this handler.
+     * @return instanceIdPolicy Specifies if the handler expects instance ids in create requests to be
+     *                          assigned by the requestor or if the handler assigns them by itself.
+     * @throws NotFoundException The given handlerId has not registered the given class.
+     */
+    public InstanceIdPolicy GetInstanceIdPolicy(long typeId,
+                                                com.saabgroup.safir.dob.typesystem.HandlerId handlerId)
+    {
+        boolean [] success = new boolean [1];
+        int [] instanceIdPolicy = new int [1];
+
+        Interface.GetInstanceIdPolicy(getControllerId(),
+                                      typeId,
+                                      handlerId.getRawValue(),
+                                      instanceIdPolicy,
+                                      success);
+
+        if (!success[0]) {
+            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
+        }
+        return InstanceIdPolicy.class.getEnumConstants()[instanceIdPolicy[0]];
+    }
 
     /**
      * Interrupt the ongoing Dispatch even if all data to the application have not been distpatched.

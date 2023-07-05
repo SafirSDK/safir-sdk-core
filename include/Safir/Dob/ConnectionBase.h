@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2007-2013 (http://safirsdkcore.com)
+* Copyright Saab AB, 2007-2013, 2023 (http://safirsdkcore.com)
 *
 * Created by: Anders Widén / stawi
 *
@@ -101,6 +101,8 @@ namespace Dob
          * @param [in] instanceIdPolicy Specifies if the handler expects instance ids in create requests to be
          *                              assigned by the requestor (normal case) or if the handler assigns them by itself.
          * @param [in] entityHandler Callback consumer object.
+         *
+         * @throws Safir::Dob::LowMemoryException Not enough shared memory available to complete this operation.
          */
         void RegisterEntityHandler(const Safir::Dob::Typesystem::TypeId     typeId,
                                    const Dob::Typesystem::HandlerId&        handlerId,
@@ -130,6 +132,8 @@ namespace Dob
          * @param [in] instanceIdPolicy Specifies if the handler expects instance ids in create requests to be
          *                              assigned by the requestor (normal case) or if the handler assigns them by itself.
          * @param [in] entityHandlerInjection Callback consumer object.
+         *
+         * @throws Safir::Dob::LowMemoryException Not enough shared memory available to complete this operation.
          */
         void RegisterEntityHandlerInjection(const Safir::Dob::Typesystem::TypeId      typeId,
                                             const Dob::Typesystem::HandlerId&         handlerId,
@@ -165,6 +169,8 @@ namespace Dob
          * @param [in] instanceIdPolicy Specifies if the handler expects instance ids in create requests to be
          *                              assigned by the requestor (normal case) or if the handler assigns them by itself.
          * @param [in] entityHandlerPending Callback consumer object.
+         *
+         * @throws Safir::Dob::LowMemoryException Not enough shared memory available to complete this operation.
          */
         void RegisterEntityHandlerPending(const Dob::Typesystem::TypeId             typeId,
                                           const Dob::Typesystem::HandlerId&         handlerId,
@@ -186,6 +192,8 @@ namespace Dob
          * @param [in] typeId  Service type to register.
          * @param [in] handlerId Handler id.
          * @param [in] serviceHandler Callback consumer object.
+         *
+         * @throws Safir::Dob::LowMemoryException Not enough shared memory available to complete this operation.
          */
         void RegisterServiceHandler(const Safir::Dob::Typesystem::TypeId      typeId,
                                     const Dob::Typesystem::HandlerId&         handlerId,
@@ -206,6 +214,8 @@ namespace Dob
          * @param [in] typeId  Service type to register.
          * @param [in] handlerId Handler id.
          * @param [in] serviceHandlerPending Callback consumer object.
+         *
+         * @throws Safir::Dob::LowMemoryException Not enough shared memory available to complete this operation.
          */
         void RegisterServiceHandlerPending(const Dob::Typesystem::TypeId             typeId,
                                            const Dob::Typesystem::HandlerId&         handlerId,
@@ -232,6 +242,8 @@ namespace Dob
          *
          * @param [in] typeId Type id of the entity or service to unregister.
          * @param [in] handlerId Handler id.
+         *
+         * @throws Safir::Dob::LowMemoryException Not enough shared memory available to complete this operation.
          */
         void UnregisterHandler(const Dob::Typesystem::TypeId        typeId,
                                const Dob::Typesystem::HandlerId&    handlerId) const;
@@ -256,6 +268,8 @@ namespace Dob
          * @param [in] typeId Type id of the message to subscribe for.
          * @param [in] channelId Channel id.
          * @param [in] messageSubscriber MessageSubscriber that will receive the messages.
+         *
+         * @throws Safir::Dob::LowMemoryException Not enough shared memory available to complete this operation.
          */
         void SubscribeMessage(const Dob::Typesystem::TypeId     typeId,
                               const Dob::Typesystem::ChannelId& channelId,
@@ -272,6 +286,8 @@ namespace Dob
          * @param [in] includeSubclasses True => Subscription for this message type and all its subclasses.
          *                               False => No subclasses will be included.
          * @param [in] messageSubscriber MessageSubscriber that will receive the messages.
+         *
+         * @throws Safir::Dob::LowMemoryException Not enough shared memory available to complete this operation.
          */
         void SubscribeMessage(const Dob::Typesystem::TypeId     typeId,
                               const Dob::Typesystem::ChannelId& channelId,
@@ -295,6 +311,8 @@ namespace Dob
          * @param [in] channelId Channel id.
          * @param [in] messageSubscriber The MessageSubscriber consumer that was used when
          *                               the subscription was initiated.
+         *
+         * @throws Safir::Dob::LowMemoryException Not enough shared memory available to complete this operation.
          */
         void UnsubscribeMessage(const Dob::Typesystem::TypeId     typeId,
                                 const Dob::Typesystem::ChannelId& channelId,
@@ -312,6 +330,8 @@ namespace Dob
          *                               False => No subclasses will be included.
          * @param [in] messageSubscriber The MessageSubscriber consumer that was used when
          *                               the subscription was initiated.
+         *
+         * @throws Safir::Dob::LowMemoryException Not enough shared memory available to complete this operation.
          */
         void UnsubscribeMessage(const Dob::Typesystem::TypeId     typeId,
                                 const Dob::Typesystem::ChannelId& channelId,
@@ -338,6 +358,8 @@ namespace Dob
          *
          * @param [in] typeId Type id of the entity to subscribe for.
          * @param [in] entitySubscriber EntitySubscriber that will receive the entities.
+         *
+         * @throws Safir::Dob::LowMemoryException Not enough shared memory available to complete this operation.
          */
         void SubscribeEntity(const Dob::Typesystem::TypeId      typeId,
                              Dob::EntitySubscriber* const       entitySubscriber) const;
@@ -356,6 +378,8 @@ namespace Dob
          * @param [in] restartSubscription True=> OnNewEntity callbacks are generated even if the subscription already exists.
          *                                 False=> OnNewEntity callbacks are generated only for instances that are not previously subscribed.
          * @param [in] entitySubscriber EntitySubscriber that will receive the entities.
+         *
+         * @throws Safir::Dob::LowMemoryException Not enough shared memory available to complete this operation.
          */
         void SubscribeEntity(const Dob::Typesystem::TypeId      typeId,
                              const bool                         includeUpdates,
@@ -375,6 +399,8 @@ namespace Dob
          * @param [in] restartSubscription True=> An OnNewEntity callback will be generated even if the subscription already exists.
          *                                 False=> An OnNewEntity callback is generated only if the instance is not previously subscribed.
          * @param [in] entitySubscriber EntitySubscriber that will receive the entities.
+         *
+         * @throws Safir::Dob::LowMemoryException Not enough shared memory available to complete this operation.
          */
         void SubscribeEntity(const Dob::Typesystem::EntityId&    entityId,
                              const bool                          includeUpdates,
@@ -391,6 +417,8 @@ namespace Dob
          * @param [in] typeId Type id of the entity to unsubscribe for.
          * @param [in] entitySubscriber The EntitySubscriber consumer that was used when
          *                              the subscription was initiated.
+         *
+         * @throws Safir::Dob::LowMemoryException Not enough shared memory available to complete this operation.
          */
         void UnsubscribeEntity(const Dob::Typesystem::TypeId        typeId,
                                Dob::EntitySubscriber* const         entitySubscriber) const;
@@ -406,6 +434,8 @@ namespace Dob
          *                               False => Unsubscribe for just this type (no subclasses).
          * @param [in] entitySubscriber The EntitySubscriber consumer that was used when
          *                              the subscription was initiated.
+         *
+         * @throws Safir::Dob::LowMemoryException Not enough shared memory available to complete this operation.
          */
         void UnsubscribeEntity(const Dob::Typesystem::TypeId        typeId,
                                const bool                           includeSubclasses,
@@ -419,6 +449,8 @@ namespace Dob
          * @param [in] entityId Entity id of the entity instance.
          * @param [in] entitySubscriber The EntitySubscriber consumer that was used when
          *                              the subscription was initiated.
+         *
+         * @throws Safir::Dob::LowMemoryException Not enough shared memory available to complete this operation.
          */
         void UnsubscribeEntity(const Dob::Typesystem::EntityId& entityId,
                                Dob::EntitySubscriber* const     entitySubscriber) const;
@@ -450,6 +482,8 @@ namespace Dob
          *                                 False=> OnRegistered callbacks are generated only for handlers that are not previously subscribed.
          * @param [in] registrationSubscriber RegistrationSubscriber that will receive the subscription
          *                                    response.
+         *
+         * @throws Safir::Dob::LowMemoryException Not enough shared memory available to complete this operation.
          */
         void SubscribeRegistration(const Dob::Typesystem::TypeId            typeId,
                                    const Dob::Typesystem::HandlerId&        handlerId,
@@ -471,6 +505,8 @@ namespace Dob
          *                               False => No subclasses will be included.
          * @param [in] registrationSubscriber The registrationSubscriber consumer that was used when
          *                                    the subscription was initiated.
+         *
+         * @throws Safir::Dob::LowMemoryException Not enough shared memory available to complete this operation.
          */
         void UnsubscribeRegistration(const Dob::Typesystem::TypeId      typeId,
                                      const Dob::Typesystem::HandlerId&  handlerId,
@@ -496,6 +532,7 @@ namespace Dob
          * @param [in] messageSender MessageSender for notification about overflow status.
          *
          * @throws Safir::Dob::OverflowException There was an overflow when sending.
+         * @throws Safir::Dob::LowMemoryException Not enough shared memory available to complete this operation.
          */
         void Send(const Dob::MessagePtr&            message,
                   const Dob::Typesystem::ChannelId& channelId,
@@ -530,6 +567,7 @@ namespace Dob
          * @return Request id that can be used to match sent request with the response.
          *
          * @throws Safir::Dob::OverflowException There was an overflow when sending.
+         * @throws Safir::Dob::LowMemoryException Not enough shared memory available to complete this operation.
          */
         Dob::RequestId CreateRequest(const Dob::EntityPtr&               request,
                                      const Dob::Typesystem::HandlerId&   handlerId,
@@ -561,6 +599,7 @@ namespace Dob
          * @return Request id that can be used to match sent request with the response.
          *
          * @throws Safir::Dob::OverflowException There was an overflow when sending.
+         * @throws Safir::Dob::LowMemoryException Not enough shared memory available to complete this operation.
          */
         Dob::RequestId CreateRequest(const Dob::EntityPtr&              request,
                                      const Dob::Typesystem::InstanceId& instanceId,
@@ -584,6 +623,7 @@ namespace Dob
          * @return Request id that can be used to match sent request with the response.
          *
          * @throws Safir::Dob::OverflowException There was an overflow when sending.
+         * @throws Safir::Dob::LowMemoryException Not enough shared memory available to complete this operation.
          */
         Dob::RequestId UpdateRequest(const Dob::EntityPtr&              request,
                                      const Dob::Typesystem::InstanceId& instanceId,
@@ -605,6 +645,7 @@ namespace Dob
          * @return Request id that can be used to match sent request with the response.
          *
          * @throws Safir::Dob::OverflowException There was an overflow when sending.
+         * @throws Safir::Dob::LowMemoryException Not enough shared memory available to complete this operation.
          */
         Dob::RequestId DeleteRequest(const Dob::Typesystem::EntityId& entityId,
                                      Dob::Requestor* const            requestor) const;
@@ -624,6 +665,7 @@ namespace Dob
          * @return Request id that can be used to match sent request with the response.
          *
          * @throws Safir::Dob::OverflowException There was an overflow when sending.
+         * @throws Safir::Dob::LowMemoryException Not enough shared memory available to complete this operation.
          */
         Dob::RequestId ServiceRequest(const Dob::ServicePtr&                  request,
                                       const Dob::Typesystem::HandlerId&       handlerId,
@@ -649,6 +691,7 @@ namespace Dob
          *
          * @throws Safir::Dob::AccessDeniedException The instance is owned by another handler.
          * @throws Safir::Dob::GhostExistsException There is a ghost instance that hasn't been injected.
+         * @throws Safir::Dob::LowMemoryException Not enough shared memory available to complete this operation.
          */
         void SetChanges(const Dob::EntityPtr&              entity,
                         const Dob::Typesystem::InstanceId& instanceId,
@@ -672,6 +715,7 @@ namespace Dob
          *
          * @throws Safir::Dob::AccessDeniedException The instance is owned by another handler.
          * @throws Safir::Dob::GhostExistsException There is a ghost instance that hasn't been injected.
+         * @throws Safir::Dob::LowMemoryException Not enough shared memory available to complete this operation.
          */
         void SetAll(const Dob::EntityPtr&              entity,
                     const Dob::Typesystem::InstanceId& instanceId,
@@ -687,6 +731,7 @@ namespace Dob
          *
          * @throws Safir::Dob::AccessDeniedException The instance is owned by another handler.
          * @throws Safir::Dob::GhostExistsException There is a ghost instance that hasn't been injected.
+         * @throws Safir::Dob::LowMemoryException Not enough shared memory available to complete this operation.
          */
         void Delete(const Dob::Typesystem::EntityId&    entityId,
                     const Dob::Typesystem::HandlerId&   handlerId) const;
@@ -698,6 +743,8 @@ namespace Dob
          *
          * @param [in] typeId Entity type.
          * @param [in] handlerId Handler id.
+         *
+         * @throws Safir::Dob::LowMemoryException Not enough shared memory available to complete this operation.
          */
         void DeleteAllInstances(const Dob::Typesystem::TypeId       typeId,
                                 const Dob::Typesystem::HandlerId&   handlerId) const;
@@ -725,6 +772,8 @@ namespace Dob
          * @param [in] typeId Entity type.
          * @param [in] includeSubclasses True =>  Iterate over subclass instances
          *                               False => No subclasses will be included.
+         *
+         * @throws Safir::Dob::LowMemoryException Not enough shared memory available to complete this operation.
          */
         Dob::EntityIterator GetEntityIterator(const Dob::Typesystem::TypeId  typeId,
                                               const bool                     includeSubclasses) const;
@@ -744,6 +793,8 @@ namespace Dob
          * @return Entity read from the distributed object pool.
          *
          * @throws Safir::Dob::NotFoundException The specified instance of the entity does not exist.
+         *
+         * @throws Safir::Dob::LowMemoryException Not enough shared memory available to complete this operation.
          */
         const Dob::EntityProxy Read(const Dob::Typesystem::EntityId & entityId) const;
 
@@ -771,6 +822,8 @@ namespace Dob
          * @param [in] handlerId Count only instances owned by this handler (use HandlerId::ALL_HANDLERS
          *                        to get all handlers).
          * @param [in] includeSubclasses Include subclasses when counting instances.
+         *
+         * @throws Safir::Dob::LowMemoryException Not enough shared memory available to complete this operation.
          */
         Dob::Typesystem::Int64 GetNumberOfInstances(const Dob::Typesystem::TypeId typeId,
                                                     const Dob::Typesystem::HandlerId& handlerId,

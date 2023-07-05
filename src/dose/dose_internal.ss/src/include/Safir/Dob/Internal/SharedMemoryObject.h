@@ -28,6 +28,7 @@
 #include <mutex>
 #include <memory>
 #include <Safir/Dob/Internal/InternalExportDefs.h>
+#include <Safir/Dob/MemoryLevel.h>
 #include <Safir/Utilities/StartupSynchronizer.h>
 
 #ifdef _MSC_VER
@@ -63,7 +64,6 @@ namespace Dob
 {
 namespace Internal
 {
-
     /**
      * Base class for all objects that reside in shared memory.
      *
@@ -87,6 +87,7 @@ namespace Internal
             static SharedMemoryHolder & Instance();
 
             boost::interprocess::managed_shared_memory & GetShmem() {return *m_shmem;}
+            MemoryLevel::Enumeration GetMemoryLevel(const bool fuzzy) const;
         private:
             SharedMemoryHolder();
             ~SharedMemoryHolder();
@@ -114,6 +115,11 @@ namespace Internal
             };
 
             Safir::Utilities::StartupSynchronizer m_startupSynchronizer;
+
+            const double m_warningPercentage;
+            const double m_lowPercentage;
+            const double m_veryLowPercentage;
+            const double m_extremelyLowPercentage;
         };
 
     public:
@@ -338,7 +344,14 @@ namespace Internal
         /**
          * Get hold of the shared memory.
          */
-        static boost::interprocess::managed_shared_memory & GetSharedMemory() {return SharedMemoryHolder::Instance().GetShmem();}
+        static boost::interprocess::managed_shared_memory & GetSharedMemory()
+        {return SharedMemoryHolder::Instance().GetShmem();}
+
+        static MemoryLevel::Enumeration GetMemoryLevel()
+        {return SharedMemoryHolder::Instance().GetMemoryLevel(false);}
+
+        static MemoryLevel::Enumeration GetMemoryLevelFuzzy()
+        {return SharedMemoryHolder::Instance().GetMemoryLevel(true);}
     private:
 
     };

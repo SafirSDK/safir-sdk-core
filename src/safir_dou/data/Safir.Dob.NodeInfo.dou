@@ -30,5 +30,12 @@
             <name>State</name>
             <type>Safir.Dob.NodeState</type>
         </member>
+        <member>
+            <summary>
+              Current shared memory usage level of the node.
+            </summary>
+            <name>MemoryLevel</name>
+            <type>Safir.Dob.MemoryLevel</type>
+        </member>
     </members>
 </class>

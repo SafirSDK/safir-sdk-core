@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2006-2015 (http://safirsdkcore.com)
+* Copyright Saab AB, 2006-2015, 2023 (http://safirsdkcore.com)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -27,6 +27,7 @@
 
 #include <Safir/Dob/Typesystem/Serialization.h>
 #include <Safir/Dob/Typesystem/ObjectFactory.h>
+#include <Safir/Dob/LowMemoryException.h>
 #include <Safir/Dob/PersistenceParameters.h>
 #include <Safir/Logging/Log.h>
 #include <Safir/Dob/ConnectionAspectInjector.h>
@@ -863,6 +864,12 @@ void OdbcPersistor::RestoreAll()
                     //remove the row from the db
                     Remove(entityId);
                     //since we did not remove the objectid from persistentObjects an empty row will be inserted below.
+                }
+                catch (const Safir::Dob::LowMemoryException&)
+                {
+                    Safir::Logging::SendSystemLog(Safir::Logging::Emergency,
+                                                  L"Failed to inject persisted entities into system due to lack of shared memory. Exiting.");
+                    m_ioService.stop();
                 }
             }
         }

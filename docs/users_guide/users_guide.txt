@@ -968,14 +968,12 @@ that you can do with this function than what has been described here.
 
 |C++ shared library
 |libsafir_generated-<name>-cpp.so
-|safir_generated-<name>-cpp.dll
-+
+|safir_generated-<name>-cpp.dll +
 safir_generated-<name>-cppd.dll
 
 |C++ link library
 |N/A
-|safir_generated-<name>-cpp.lib
-+
+|safir_generated-<name>-cpp.lib +
 safir_generated-<name>-cppd.lib
 
 |C# assembly
@@ -2742,6 +2740,7 @@ void VehicleRegistrationSubscriber::OnUnregistered
 
 If a registration goes down and up ``very quickly'', the subscriber is guaranteed to get first an OnUnregistered and then an OnRegistered callback. I.e. registration subscribers are guaranteed to be notified of the intermediate unregistrations, as opposed entity subscribers, who are not guaranteed to get told if an entity is deleted and then recreated immediately.
 
+[[aspects]]
 === Aspects
 Aspects are used to reduce the size of the Connection classes and header files, and to be able to classify peripheral or esoteric functionality as just that.
 
@@ -3529,6 +3528,126 @@ called +SharedMemorySize+ and can be found in Safir.Dob.NodeParameters.dou. Know
 value to set +SharedMemorySize+ to is trickier since the memory usage varies over time,
 but one approach is to run the system and monitor the memory usage, for example using
 _dobexplorer_, which is described in <<dobexplorer>>.
+
+=== Memory levels and graceful degradation
+
+To ensure optimal performance and avoid potential issues related to memory exhaustion,
+Safir SDK Core implements five different memory levels, namely: _Normal_, _Warning_,
+_Low_, _VeryLow_, and _ExtremelyLow_. These memory levels are parameterized in the
++Safir.Dob.NodeParameters.SharedMemoryLevels+ parameter.
+
+The memory levels in the Safir SDK Core's distribution mechanism are designed to enable
+graceful degradation in resource-constrained environments. When memory consumption
+gets to the Low level and beyond, the system will take precautionary measures to
+prevent critical failures by adapting its behavior and prioritizing essential operations.
+
+The five memory levels and their descriptions are as follows:
+
+_Normal_::
+Everything works as normal.
+
+_Warning_::
+Everything continues to work as normal, but system operators should be alerted to the
+fact that memory is running low. Warnings are logged to the syslog. Default threshold is 20%.
+
+_Low_::
+In the Low memory level, the system restricts operations that allocate new object
+instances. Default threshold is 10%.
+
+_VeryLow_::
+In the VeryLow memory level, the system restricts operations that modify existing object
+instances or potentially lock instances in memory. Default threshold is 5%.
+
+_ExtremelyLow_::
+This is the most severe memory level, indicating an extremely constrained environment. At
+this point, the system attempts to forbid all operations, even those that just cause
+temporary shared memory allocation. Default threshold is 3%.
+
+==== Forbidden operations at severe memory levels
+
+At the Warning, Low, and VeryLow memory levels, Safir SDK Core imposes restrictions on
+certain operations to prevent memory exhaustion and prioritize essential tasks. When one
+of these operations are performed when they are not allowed a
++Safir.Dob.LowMemoryException+ will be thrown. The table below outlines the operations
+that become forbidden at each of the memory levels:
+
+[[forbidden_operations]]
+.Operations that _become_ forbidden at each memory level
+[width="95%", cols="20%,15%,25%,25%,15%",options="header",frame="topbot"]
+|=========================================================================
+| Memory Level    | Connections   | Entities | Services | Messages
+
+| Normal, Warning | -             | -        | -        | -
+| Low
+| Open
+|Register +
+Register Pending +
+Create new instance +
+Inject +
+Subscribe
+|Register +
+Register Pending
+| -
+
+| VeryLow
+| -
+| Subscribe Registration +
+Unregister +
+Read +
+Update existing instance +
+Delete existing instance +
+Create iterator +
+GetNumberOfInstances +
+Inject Deletion
+| Subscribe Registration +
+Unregister
+| -
+
+| ExtremelyLow
+| -
+| CreateRequest +
+UpdateRequest +
+DeleteRequest +
+SendResponse +
+Unsubscribe Registration +
+Unsubscribe Entity
+| SendRequest +
+SendResponse +
+Unsubscribe Registration
+| Subscribe +
+Send
+|=========================================================================
+
+By implementing these memory levels and the graceful degradation strategy, Safir SDK
+Core's distribution mechanism attempts to ensure stability and reliability even in
+resource-constrained scenarios, giving operators a chance to reduce memory usage before
+actual fatal memory allocation failures occur,
+
+If your system is designed in a way that makes it likely that it will reach these memory
+levels it is recommended to have a component that monitors the memory levels and issues
+UI alerts to the operators when the warning level and beyond are reached,
+
+===== Some notes on why things are where they are in the table above
+
+GetNumberOfInstances at VeryLow?::
+GetNumberOfInstances uses entity iterators under the hood, so it gets forbidden along with the iterators.
+
+Entity iteration and Read at VeryLow?::
+These operations hold references to things in shared memory until the caller releases them.
+
+Unregister at VeryLow?::
+An unregistration can cause a whole bunch of entity instances to be deleted, which may cause the
+creation of a lot of ghost entities, which means shared memory allocations.
+
+==== API for getting current memory level
++Safir.Dob.ConnectionAspectMisc+ contains functions that are useful for monitoring the
+shared memory:
+
++GetSharedMemoryLevel+::
+Gives you the current shared memory level on the current node.
+
++GetSharedMemoryUsage+::
+Gives you the current shared memory usage in bytes on the current node.
 
 [[safir_logging]]
 == Safir Logging

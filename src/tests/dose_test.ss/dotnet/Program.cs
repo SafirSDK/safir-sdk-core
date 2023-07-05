@@ -51,10 +51,16 @@ namespace dose_test_dotnet
             System.Console.WriteLine("Performing extra checks");
             {
                 //Check shared memory usage. And expect more than 100 bytes used.
-                var usage = new Safir.Dob.ConnectionAspectMisc(new Safir.Dob.Connection()).GetSharedMemoryUsage();;
+                var usage = new Safir.Dob.ConnectionAspectMisc(new Safir.Dob.Connection()).GetSharedMemoryUsage();
                 if (usage < 100)
                 {
                     System.Console.WriteLine("GetSharedMemoryUsage returned unexpected value.");
+                    return 1;
+                }
+
+                if (new Safir.Dob.ConnectionAspectMisc(new Safir.Dob.Connection()).GetSharedMemoryLevel() != Safir.Dob.MemoryLevel.Enumeration.Normal)
+                {
+                    System.Console.WriteLine("GetSharedMemoryLevel returned unexpected value.");
                     return 1;
                 }
             }

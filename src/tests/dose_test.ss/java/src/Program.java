@@ -41,10 +41,17 @@ public class Program
             Logger.instance().println("Performing extra checks");
             {
                 //Check shared memory usage. And expect more than 100 bytes used.
-                long usage = new com.saabgroup.safir.dob.ConnectionAspectMisc(new com.saabgroup.safir.dob.Connection()).getSharedMemoryUsage();;
+                long usage = new com.saabgroup.safir.dob.ConnectionAspectMisc(new com.saabgroup.safir.dob.Connection()).getSharedMemoryUsage();
                 if (usage < 100)
                 {
                     Logger.instance().println("getSharedMemoryUsage returned unexpected value.");
+                    System.exit(1);
+                }
+
+                if (new com.saabgroup.safir.dob.ConnectionAspectMisc(new com.saabgroup.safir.dob.Connection()).getSharedMemoryLevel() !=
+                    com.saabgroup.safir.dob.MemoryLevel.NORMAL)
+                {
+                    Logger.instance().println("getSharedMemoryLevel returned unexpected value.");
                     System.exit(1);
                 }
             }

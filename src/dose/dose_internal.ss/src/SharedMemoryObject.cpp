@@ -61,8 +61,12 @@ namespace Internal
         return SingletonHelper::Instance();
     }
 
-    SharedMemoryObject::SharedMemoryHolder::SharedMemoryHolder():
-        m_startupSynchronizer("SAFIR_DOSE_INITIALIZATION")
+    SharedMemoryObject::SharedMemoryHolder::SharedMemoryHolder()
+        : m_startupSynchronizer("SAFIR_DOSE_INITIALIZATION")
+        , m_warningPercentage(Safir::Dob::NodeParameters::SharedMemoryLevels(L"Warning"))
+        , m_lowPercentage(Safir::Dob::NodeParameters::SharedMemoryLevels(L"Low"))
+        , m_veryLowPercentage(Safir::Dob::NodeParameters::SharedMemoryLevels(L"VeryLow"))
+        , m_extremelyLowPercentage(Safir::Dob::NodeParameters::SharedMemoryLevels(L"ExtremelyLow"))
     {
         m_startupSynchronizer.Start(this);
     }
@@ -96,6 +100,34 @@ namespace Internal
     {
         boost::interprocess::shared_memory_object::remove(SHARED_MEMORY_NAME);
     }
+
+    MemoryLevel::Enumeration SharedMemoryObject::SharedMemoryHolder::GetMemoryLevel(const bool fuzzy) const
+    {
+        const auto freeMemoryPercent = (100.0 * m_shmem->get_free_memory()) / m_shmem->get_size() - (fuzzy ? 1 : 0);
+
+        if (freeMemoryPercent <= m_extremelyLowPercentage)
+        {
+            return MemoryLevel::ExtremelyLow;
+        }
+        else if (freeMemoryPercent <= m_veryLowPercentage)
+        {
+            return MemoryLevel::VeryLow;
+        }
+        else if (freeMemoryPercent <= m_lowPercentage)
+        {
+            return MemoryLevel::Low;
+        }
+        else if (freeMemoryPercent <= m_warningPercentage)
+        {
+            return MemoryLevel::Warning;
+        }
+        else
+        {
+            return MemoryLevel::Normal;
+        }
+
+    }
+
 
     SharedMemoryObject::SharedMemoryHolder::~SharedMemoryHolder()
     {

@@ -19,6 +19,30 @@
     </parameter>
 
     <parameter>
+      <summary>Percentages of the SharedMemorySize to enter the different degradation levels. The names have to be exactly these.</summary>
+      <name>SharedMemoryLevels</name>
+      <type>Float64</type>
+      <dictionary keyType="String">
+        <entry>
+          <key>Warning</key>
+          <value>20</value>
+        </entry>
+        <entry>
+          <key>Low</key>
+          <value>10</value>
+        </entry>
+        <entry>
+          <key>VeryLow</key>
+          <value>5</value>
+        </entry>
+        <entry>
+          <key>ExtremelyLow</key>
+          <value>3</value>
+        </entry>
+      </dictionary>
+    </parameter>
+
+    <parameter>
       <summary>This controls how many connections the local Dob instance can handle.</summary>
       <name>MaxNumberOfConnections</name>
       <type>Int32</type>
