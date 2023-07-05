@@ -203,12 +203,12 @@ class WindowsInstaller():
         proc = subprocess.Popen((pathed, "/machine"),
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.STDOUT,
-                                universal_newlines=True)
+                                encoding="utf-8")
 
         output = proc.communicate()[0]
         binpath = os.path.join(self.installpath, "bin")
         if output.find(binpath) == -1:
-            raise SetupError("bin directory does not appear to have been added to PATH:\n" + output.decode("utf-8"))
+            raise SetupError("bin directory does not appear to have been added to PATH:\n" + output)
         if os.environ["PATH"].find(os.path.join("Safir SDK Core", "bin")) != -1:
             raise SetupError("bin directory seems to have been added to PATH before installation!:\n" +
                              os.environ["PATH"])
@@ -221,11 +221,11 @@ class WindowsInstaller():
         proc = subprocess.Popen(("safir_show_config", "--locations", "--typesystem", "--logging"),
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.STDOUT,
-                                universal_newlines=True)
+                                encoding="utf-8")
         output = proc.communicate()[0]
         if proc.returncode != 0:
             raise SetupError("Failed to run safir_show_config. returncode = " + str(proc.returncode) + "\nOutput:\n" +
-                             output.decode("utf-8"))
+                             output)
 
         if not self.development_installed:
             if os.path.isdir(os.path.join(self.installpath, "include", "Safir", "Dob")):
@@ -261,11 +261,11 @@ class DebianInstaller():
                 log(" ", pkg)
                 cmd.append(pkg)
 
-        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding="utf-8")
         output = proc.communicate()[0]
         if proc.returncode != 0:
             raise SetupError("Failed to run apt-get purge. returncode = " + str(proc.returncode) + "\nOutput:\n" +
-                             output.decode("utf-8"))
+                             output)
 
     def install(self, development, testsuite):
         runtime = glob.glob("safir-sdk-core_*.deb")
@@ -294,22 +294,23 @@ class DebianInstaller():
 
         proc = subprocess.Popen(["sudo", "dpkg", "--install"] + packages,
                                 stdout=subprocess.PIPE,
-                                stderr=subprocess.STDOUT)
+                                stderr=subprocess.STDOUT,
+                                encoding="utf-8")
         output = proc.communicate()[0]
         if proc.returncode != 0:
             raise SetupError("Failed to run dpkg --install. returncode = " + str(proc.returncode) + "\nOutput:\n" +
-                             output.decode("utf-8"))
+                             output)
 
     def check_installation(self):
         log("Running safir_show_config to test that exes can be run")
         proc = subprocess.Popen(("safir_show_config", "--locations", "--typesystem", "--logging"),
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.STDOUT,
-                                universal_newlines=True)
+                                encoding="utf-8")
         output = proc.communicate()[0]
         if proc.returncode != 0:
             raise SetupError("Failed to run safir_show_config. returncode = " + str(proc.returncode) + "\nOutput:\n" +
-                             output.decode("utf-8"))
+                             output)
 
 class JenkinsInterface:
     def __init__(self):
@@ -351,18 +352,17 @@ class JenkinsInterface:
         else:
             log(f"Running {name}")
 
-        if inp is not None:
-            inp = inp.encode("utf-8")
 
         proc = subprocess.Popen(args,
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.STDOUT,
+                                encoding = "utf-8",
                                 stdin=None if inp is None else subprocess.PIPE)
         res = proc.communicate(inp)
         if proc.returncode == 0:
-            return res[0].decode("utf-8")
+            return res[0]
         else:
-            log(res[0].decode("utf-8"))
+            log(res[0])
             raise Exception(f"Failed to run jenkins command '{' '.join(args)}'")
 
     def __run_groovy(self, name, script):

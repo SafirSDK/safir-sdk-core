@@ -188,9 +188,14 @@ pipeline {
         stage('Build') {
             matrix {
                 when {
-                    anyOf {
-                        expression { params.PLATFORM_FILTER == 'all' }
-                        expression { params.PLATFORM_FILTER == env.BUILD_PLATFORM }
+                    beforeAgent true
+                    allOf {
+                        //first expression makes us skip builds where agents are offline or missing
+                        expression { return nodesByLabel("${BUILD_PLATFORM}-${BUILD_ARCH}-build").size() > 0 }
+                        anyOf {
+                            expression { return params.PLATFORM_FILTER == 'all' }
+                            expression { return params.PLATFORM_FILTER == env.BUILD_PLATFORM }
+                        }
                     }
                 }
                 agent {
@@ -212,7 +217,7 @@ pipeline {
                 }
                 excludes {
                     exclude {
-                        axis { //ubuntu does no longer support 32 bit builds
+                        axis { //ubuntu no longer support 32 bit builds
                             name 'BUILD_PLATFORM'
                             values 'ubuntu-focal', 'ubuntu-jammy'
                         }
@@ -241,6 +246,10 @@ pipeline {
         }
 
         stage('Render documentation') {
+            when {
+                beforeAgent true
+                expression { return nodesByLabel("debian-bullseye-amd64-build").size() > 0 }
+            }
             agent { label 'debian-bullseye-amd64-build' }
             steps { script {
                 render_documentation()
@@ -250,9 +259,14 @@ pipeline {
         stage('Test suite') {
             matrix {
                 when {
-                    anyOf {
-                        expression { params.PLATFORM_FILTER == 'all' }
-                        expression { params.PLATFORM_FILTER == env.BUILD_PLATFORM }
+                    beforeAgent true
+                    allOf {
+                        //first expression makes us skip builds where agents are offline or missing
+                        expression { return nodesByLabel("${BUILD_PLATFORM}-${BUILD_ARCH}-test").size() > 0 }
+                        anyOf {
+                            expression { return params.PLATFORM_FILTER == 'all' }
+                            expression { return params.PLATFORM_FILTER == env.BUILD_PLATFORM }
+                        }
                     }
                 }
                 agent {
@@ -280,7 +294,7 @@ pipeline {
                 }
                 excludes {
                     exclude {
-                        axis { //ubuntu does no longer support 32 bit builds
+                        axis { //ubuntu no longer support 32 bit builds
                             name 'BUILD_PLATFORM'
                             values 'ubuntu-focal', 'ubuntu-jammy'
                         }
@@ -302,6 +316,7 @@ pipeline {
                     stage('Multicomputer Tests') {
                         when { allOf {
                             expression {Languages == "cpp-cpp-cpp-cpp-cpp"}
+                            expression { return nodesByLabel("debian-bullseye-x86-build").size() > 0 }
                             anyOf {
                                 //The multicomputer test slave uses the debian-bullseye-x86 release build,
                                 //so we can't run unless they are part of the build
@@ -333,9 +348,14 @@ pipeline {
         stage('Build examples') {
             matrix {
                 when {
-                    anyOf {
-                        expression { params.PLATFORM_FILTER == 'all' }
-                        expression { params.PLATFORM_FILTER == env.BUILD_PLATFORM }
+                    beforeAgent true
+                    allOf {
+                        //first expression makes us skip builds where agents are offline or missing
+                        expression { return nodesByLabel("${BUILD_PLATFORM}-${BUILD_ARCH}-build").size() > 0 }
+                        anyOf {
+                            expression { return params.PLATFORM_FILTER == 'all' }
+                            expression { return params.PLATFORM_FILTER == env.BUILD_PLATFORM }
+                        }
                     }
                 }
                 agent {
@@ -357,7 +377,7 @@ pipeline {
                 }
                 excludes {
                     exclude {
-                        axis { //ubuntu does no longer support 32 bit builds
+                        axis { //ubuntu no longer support 32 bit builds
                             name 'BUILD_PLATFORM'
                             values 'ubuntu-focal', 'ubuntu-jammy'
                         }
