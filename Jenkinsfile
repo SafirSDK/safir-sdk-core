@@ -161,6 +161,9 @@ def run_test_suite(platform, arch, buildType, sourceJob, sourceBuildNumber, test
 
     archiveArtifacts artifacts: '**/*.output.txt'
     junit keepLongStdio: true, skipPublishingChecks: true, testResults: '**/*.junit.xml'
+
+    //delete archived junit files, so they are not left behind for next test suite run
+    fileOperations([fileDeleteOperation(includes: "**/*.junit.xml")])
 }
 
 
