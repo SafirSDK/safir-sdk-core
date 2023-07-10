@@ -147,8 +147,8 @@ def clean_and_copy_artifacts(platform, arch, buildType, sourceJob, sourceBuildNu
                   selector: specific("${sourceBuildNumber}")
 }
 
-def run_test_suite(platform, arch, buildType, sourceJob, sourceBuildNumber, testType){
-    def buildIdentifier = "${platform}-${arch}-${buildType}"
+def run_test_suite(platform, arch, buildType, sourceJob, sourceBuildNumber, languages, testType){
+    def buildIdentifier = "${platform}-${arch}-${buildType}-${languages}"
     catchError {
         //languages are picked up from environment variable
         //and for the multicomputer tests the artifacts to copy are inferred from environment too,
@@ -289,7 +289,7 @@ pipeline {
                         values 'RelWithDebInfo', 'DebugOnly'
                     }
                     axis {
-                        name 'Languages'
+                        name 'LANGUAGES'
                         values 'dotnet-java-cpp-dotnet-java',
                                'java-cpp-dotnet-java-cpp',
                                'cpp-cpp-cpp-cpp-cpp'
@@ -310,15 +310,15 @@ pipeline {
                 stages {
                     stage('Standalone Tests') { steps { script {
                         clean_and_copy_artifacts(BUILD_PLATFORM, BUILD_ARCH, BUILD_TYPE, JOB_NAME, BUILD_NUMBER)
-                        run_test_suite(BUILD_PLATFORM, BUILD_ARCH, BUILD_TYPE, JOB_NAME, BUILD_NUMBER, "standalone-tests")
+                        run_test_suite(BUILD_PLATFORM, BUILD_ARCH, BUILD_TYPE, JOB_NAME, BUILD_NUMBER, LANGUAGES, "standalone-tests")
                     }}}
                     stage('Multinode Tests') { steps { script {
                         //artifacts are left over from previous stage
-                        run_test_suite(BUILD_PLATFORM, BUILD_ARCH, BUILD_TYPE, JOB_NAME, BUILD_NUMBER, "multinode-tests")
+                        run_test_suite(BUILD_PLATFORM, BUILD_ARCH, BUILD_TYPE, JOB_NAME, BUILD_NUMBER, LANGUAGES, "multinode-tests")
                     }}}
                     stage('Multicomputer Tests') {
                         when { allOf {
-                            expression {Languages == "cpp-cpp-cpp-cpp-cpp"}
+                            expression {LANGUAGES == "cpp-cpp-cpp-cpp-cpp"}
                             expression { return nodesByLabel("debian-bullseye-x86-build").size() > 0 }
                             anyOf {
                                 //The multicomputer test slave uses the debian-bullseye-x86 release build,
@@ -332,7 +332,7 @@ pipeline {
                                 script {
                                     echo "Took multicomputer-test-slaves lock: ${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE} ${BUILD_NUMBER} ${JOB_NAME}"
                                     //artifacts are left over from previous stage
-                                    run_test_suite(BUILD_PLATFORM, BUILD_ARCH, BUILD_TYPE, JOB_NAME, BUILD_NUMBER, "multicomputer-tests")
+                                    run_test_suite(BUILD_PLATFORM, BUILD_ARCH, BUILD_TYPE, JOB_NAME, BUILD_NUMBER, LANGUAGES, "multicomputer-tests")
                                     echo "Releasing multicomputer-test-slaves lock: ${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}"
                     }}}}
 

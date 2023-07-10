@@ -130,31 +130,31 @@ class Parameters:
                           dest="lang0",
                           default="cpp",
                           help="Which partner 0 to run."
-                          "If --jenkins is specified the Languages environment variable will override this.")
+                          "If --jenkins is specified the LANGUAGES environment variable will override this.")
         parser.add_argument("--lang1",
                           action="store",
                           dest="lang1",
                           default="cpp",
                           help="Which partner 1 to run."
-                          "If --jenkins is specified the Languages environment variable will override this.")
+                          "If --jenkins is specified the LANGUAGES environment variable will override this.")
         parser.add_argument("--lang2",
                           action="store",
                           dest="lang2",
                           default="cpp",
                           help="Which partner 2 to run."
-                          "If --jenkins is specified the Languages environment variable will override this.")
+                          "If --jenkins is specified the LANGUAGES environment variable will override this.")
         parser.add_argument("--lang3",
                           action="store",
                           dest="lang3",
                           default="cpp",
                           help="Which partner 3 to run."
-                          "If --jenkins is specified the Languages environment variable will override this.")
+                          "If --jenkins is specified the LANGUAGES environment variable will override this.")
         parser.add_argument("--lang4",
                           action="store",
                           dest="lang4",
                           default="cpp",
                           help="Which partner 4 to run."
-                          "If --jenkins is specified the Languages environment variable will override this.")
+                          "If --jenkins is specified the LANGUAGES environment variable will override this.")
         parser.add_argument("--single-testcase", action="store", help="Run only a single testcase.")
         parser.add_argument("--first-testcase", action="store", help="Sets the first testcase to be run.")
         parser.add_argument("--last-testcase", action="store", help="Sets the last testcase to be run.")
@@ -188,11 +188,11 @@ class Parameters:
 
         if options.jenkins:
             #Get env variables if they're set
-            langs = os.environ.get("Languages")
+            langs = os.environ.get("LANGUAGES")
             if langs is not None:
                 splitlangs = langs.split("-")
                 if len(splitlangs) != 5:
-                    raise Exception("Invalid format of Languages environment variable: " + langs)
+                    raise Exception("Invalid format of LANGUAGES environment variable: " + langs)
                 self.lang0 = splitlangs[0]
                 self.lang1 = splitlangs[1]
                 self.lang2 = splitlangs[2]
