@@ -525,7 +525,7 @@ namespace Dob
          * The application must be prepared to handle the situation that the outgoing send queue is full
          * (OverflowException is thrown). In this case the application is responsible for resending
          * the message. When the overflow situation is dissolved, the application is notified by the
-         * MessageSender::OnNotMessageOverflow callback, which should trig the resending.
+         * MessageSender::OnNotMessageOverflow callback, which should trigger the resending.
          *
          * @param [in] message Message to send.
          * @param [in] channelId Channel id.
@@ -558,7 +558,7 @@ namespace Dob
          * The application must be prepared to handle the situation that the outgoing send queue is full
          * (OverflowException is thrown). In this case the application is responsible for resending
          * of the create request. When the overflow situation is dissolved, the application is
-         * notified by the Requestor::OnNotRequestOverflow callback, which should trig the resending.
+         * notified by the Requestor::OnNotRequestOverflow callback, which should trigger the resending.
          *
          * @param [in] request Entity requested to be created.
          * @param [in] handlerId Handler id.
@@ -589,7 +589,7 @@ namespace Dob
          * The application must be prepared to handle the situation that the outgoing send queue is full
          * (OverflowException is thrown). In this case the application is responsible for resending
          * of the entity create request. When the overflow situation is dissolved, the application is
-         * notified by the Requestor::OnNotRequestOverflow callback, which should trig the resending.
+         * notified by the Requestor::OnNotRequestOverflow callback, which should trigger the resending.
          *
          * @param [in] request Entity requested to be created.
          * @param [in] instanceId Instance id.
@@ -614,7 +614,7 @@ namespace Dob
          * The application must be prepared to handle the situation that the outgoing send queue is full
          * (OverflowException is thrown). In this case the application is responsible for resending
          * of the entity update request. When the overflow situation is dissolved, the application is
-         * notified by the Requestor::OnNotRequestOverflow callback, which should trig the resending.
+         * notified by the Requestor::OnNotRequestOverflow callback, which should trigger the resending.
          *
          * @param [in] request Entity requested to be updated.
          * @param [in] instanceId Instance id.
@@ -637,7 +637,7 @@ namespace Dob
          * The application must be prepared to handle the situation that the outgoing send queue is full
          * (OverflowException is thrown). In this case the application is responsible for resending
          * of the entity delete request. When the overflow situation is dissolved, the application is
-         * notified by the Requestor::OnNotRequestOverflow callback, which should trig the resending.
+         * notified by the Requestor::OnNotRequestOverflow callback, which should trigger the resending.
          *
          * @param [in] entityId EntityId of the entity to be deleted.
          * @param [in] requestor Requestor for response and notification about overflow status.
@@ -656,7 +656,7 @@ namespace Dob
          * The application must be prepared to handle the situation that the outgoing send queue is full
          * (OverflowException is thrown). In this case the application is responsible for resending
          * of the service request. When the overflow situation is dissolved, the application is notified
-         * by the Requestor::OnNotRequestOverflow callback, which should trig the resending.
+         * by the Requestor::OnNotRequestOverflow callback, which should trigger the resending.
          *
          * @param [in] request The service request.
          * @param [in] handlerId Service handler id.

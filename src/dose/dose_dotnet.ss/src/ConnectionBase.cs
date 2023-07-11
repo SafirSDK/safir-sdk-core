@@ -806,7 +806,7 @@ namespace Safir.Dob
         /// The application must be prepared to handle the situation that the outgoing send queue is full
         /// (OverflowException is thrown). In this case the application is responsible for resending
         /// the message. When the overflow situation is dissolved, the application is notified by the
-        /// MessageSender::OnNotMessageOverflow callback, which should trig the resending.
+        /// MessageSender::OnNotMessageOverflow callback, which should trigger the resending.
         /// </summary>
         /// <param name="message">Message to send</param>
         /// <param name="channelId">Channel id.</param>
@@ -866,7 +866,7 @@ namespace Safir.Dob
         /// The application must be prepared to handle the situation that the outgoing send queue is full
         /// (OverflowException is thrown). In this case the application is responsible for resending
         /// of the create request. When the overflow situation is dissolved, the application is
-        /// notified by the Requestor::OnNotRequestOverflow callback, which should trig the resending.
+        /// notified by the Requestor::OnNotRequestOverflow callback, which should trigger the resending.
         /// </summary>
         /// <param name="entity">Entity requested to be created.</param>
         /// <param name="handlerId">Handler id.</param>
@@ -934,7 +934,7 @@ namespace Safir.Dob
         /// The application must be prepared to handle the situation that the outgoing send queue is full
         /// (OverflowException is thrown). In this case the application is responsible for resending
         /// of the entity create request. When the overflow situation is dissolved, the application is
-        /// notified by the Requestor::OnNotRequestOverflow callback, which should trig the resending.
+        /// notified by the Requestor::OnNotRequestOverflow callback, which should trigger the resending.
         /// </summary>
         /// <param name="entity">Entity requested to be created.</param>
         /// <param name="instanceId">Instance id.</param>
@@ -997,7 +997,7 @@ namespace Safir.Dob
         /// The application must be prepared to handle the situation that the outgoing send queue is full
         /// (OverflowException is thrown). In this case the application is responsible for resending
         /// of the entity update request. When the overflow situation is dissolved, the application is
-        /// notified by the Requestor::OnNotRequestOverflow callback, which should trig the resending.
+        /// notified by the Requestor::OnNotRequestOverflow callback, which should trigger the resending.
         /// </summary>
         /// <param name="entity">Entity requested to be updated.</param>
         /// <param name="instanceId">Instance id.</param>
@@ -1052,7 +1052,7 @@ namespace Safir.Dob
         /// The application must be prepared to handle the situation that the outgoing send queue is full
         /// (OverflowException is thrown). In this case the application is responsible for resending
         /// of the entity delete request. When the overflow situation is dissolved, the application is
-        /// notified by the Requestor::OnNotRequestOverflow callback, which should trig the resending.
+        /// notified by the Requestor::OnNotRequestOverflow callback, which should trigger the resending.
         /// </summary>
         /// <param name="entityId">EntityId of the entity to be deleted.</param>
         /// <param name="requestor">Requestor for response and notification about overflow status.</param>
@@ -1100,7 +1100,7 @@ namespace Safir.Dob
         /// The application must be prepared to handle the situation that the outgoing send queue is full
         /// (OverflowException is thrown). In this case the application is responsible for resending
         /// of the service request. When the overflow situation is dissolved, the application is notified
-        /// by the Requestor::OnNotRequestOverflow callback, which should trig the resending.
+        /// by the Requestor::OnNotRequestOverflow callback, which should trigger the resending.
         /// </summary>
         /// <param name="service">The service request.</param>
         /// <param name="handlerId">Service handler id.</param>

@@ -726,21 +726,21 @@ public abstract class ConnectionBase
     // Send messages
     //
 
-            /**
-         * Send a message on the specified channel.
-         *
-         * The application must be prepared to handle the situation that the outgoing send queue is full
-         * (OverflowException is thrown). In this case the application is responsible for resending
-         * the message. When the overflow situation is dissolved, the application is notified by the
-         * MessageSender::OnNotMessageOverflow callback, which should trig the resending.
-         *
-         * @param message Message to send.
-         * @param channelId Channel id.
-         * @param messageSender MessageSender for notification about overflow status.
-         *
-         * @throws OverflowException There was an overflow when sending.
+    /**
+     * Send a message on the specified channel.
+     *
+     * The application must be prepared to handle the situation that the outgoing send queue is full
+     * (OverflowException is thrown). In this case the application is responsible for resending
+     * the message. When the overflow situation is dissolved, the application is notified by the
+     * MessageSender::OnNotMessageOverflow callback, which should trigger the resending.
+     *
+     * @param message Message to send.
+     * @param channelId Channel id.
+     * @param messageSender MessageSender for notification about overflow status.
+     *
+     * @throws OverflowException There was an overflow when sending.
      * @throws LowMemoryException Not enough shared memory available to complete this operation.
-         */
+     */
     public void send(Message message,
                      com.saabgroup.safir.dob.typesystem.ChannelId channelId,
                      MessageSender messageSender)
@@ -780,7 +780,7 @@ public abstract class ConnectionBase
      * The application must be prepared to handle the situation that the outgoing send queue is full
      * (OverflowException is thrown). In this case the application is responsible for resending
      * of the create request. When the overflow situation is dissolved, the application is
-     * notified by the Requestor::OnNotRequestOverflow callback, which should trig the resending.
+     * notified by the Requestor::OnNotRequestOverflow callback, which should trigger the resending.
      *
      * @param request Entity requested to be created.
      * @param handlerId Handler id.
@@ -835,7 +835,7 @@ public abstract class ConnectionBase
      * The application must be prepared to handle the situation that the outgoing send queue is full
      * (OverflowException is thrown). In this case the application is responsible for resending
      * of the entity create request. When the overflow situation is dissolved, the application is
-     * notified by the Requestor::OnNotRequestOverflow callback, which should trig the resending.
+     * notified by the Requestor::OnNotRequestOverflow callback, which should trigger the resending.
      *
      * @param request Entity requested to be created.
      * @param instanceId Instance id.
@@ -884,7 +884,7 @@ public abstract class ConnectionBase
      * The application must be prepared to handle the situation that the outgoing send queue is full
      * (OverflowException is thrown). In this case the application is responsible for resending
      * of the entity update request. When the overflow situation is dissolved, the application is
-     * notified by the Requestor::OnNotRequestOverflow callback, which should trig the resending.
+     * notified by the Requestor::OnNotRequestOverflow callback, which should trigger the resending.
      *
      * @param request Entity requested to be updated.
      * @param instanceId Instance id.
@@ -928,7 +928,7 @@ public abstract class ConnectionBase
      * The application must be prepared to handle the situation that the outgoing send queue is full
      * (OverflowException is thrown). In this case the application is responsible for resending
      * of the entity delete request. When the overflow situation is dissolved, the application is
-     * notified by the Requestor::OnNotRequestOverflow callback, which should trig the resending.
+     * notified by the Requestor::OnNotRequestOverflow callback, which should trigger the resending.
      *
      * @param entityId EntityId of the entity to be deleted.
      * @param requestor Requestor for response and notification about overflow status.
@@ -967,7 +967,7 @@ public abstract class ConnectionBase
      * The application must be prepared to handle the situation that the outgoing send queue is full
      * (OverflowException is thrown). In this case the application is responsible for resending
      * of the service request. When the overflow situation is dissolved, the application is notified
-     * by the Requestor::OnNotRequestOverflow callback, which should trig the resending.
+     * by the Requestor::OnNotRequestOverflow callback, which should trigger the resending.
      *
      * @param request The service request.
      * @param handlerId Service handler id.
