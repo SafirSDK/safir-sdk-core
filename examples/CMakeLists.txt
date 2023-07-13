@@ -1,6 +1,6 @@
-PROJECT(safir_sdk_core_examples CXX)
-
 cmake_minimum_required(VERSION 3.16.0)
+
+PROJECT(safir_sdk_core_examples CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 
