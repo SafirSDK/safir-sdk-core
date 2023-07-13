@@ -97,8 +97,7 @@ public class SecondaryConnection extends ConnectionBase
                                    success);
         if (!success[0])
         {
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
         }
 
         m_ctrl=newCtrlId[0];
@@ -131,8 +130,7 @@ public class SecondaryConnection extends ConnectionBase
         Interface.IsConnected(m_ctrl, isConn, success);
 
         if (!success[0]) {
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
         }
         return isConn[0];
     }

@@ -98,8 +98,7 @@ public class ConnectionAspectPostpone
         boolean [] success = new boolean [1];
         Interface.Postpone(getControllerId(), redispatchCurrent, success);
         if (!success[0]) {
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
         }
     }
 
@@ -116,8 +115,7 @@ public class ConnectionAspectPostpone
         boolean [] success = new boolean [1];
         Interface.ResumePostponed(getControllerId(), success);
         if (!success[0]) {
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
         }
     }
 
@@ -140,8 +138,7 @@ public class ConnectionAspectPostpone
         boolean [] success = new boolean [1];
         Interface.IncompleteInjectionState(getControllerId(), success);
         if (!success[0]) {
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
         }
     }
 }

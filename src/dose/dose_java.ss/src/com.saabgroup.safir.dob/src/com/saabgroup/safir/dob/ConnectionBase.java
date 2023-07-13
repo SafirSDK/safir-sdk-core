@@ -1,7 +1,7 @@
 // -*- coding: utf-8 -*-
 /******************************************************************************
 *
-* Copyright Saab AB, 2007-2013 (http://safirsdkcore.com)
+* Copyright Saab AB, 2007-2013, 2023 (http://safirsdkcore.com)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -92,8 +92,7 @@ public abstract class ConnectionBase
                                         success);
 
         if (!success[0]) {
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
         }
     }
 
@@ -139,8 +138,7 @@ public abstract class ConnectionBase
                                         success);
 
         if (!success[0]) {
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
         }
     }
 
@@ -192,8 +190,7 @@ public abstract class ConnectionBase
                                         success);
 
         if (!success[0]) {
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
         }
     }
 
@@ -227,8 +224,7 @@ public abstract class ConnectionBase
                                          success);
 
         if (!success[0]) {
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
         }
     }
 
@@ -262,8 +258,7 @@ public abstract class ConnectionBase
                                          success);
 
         if (!success[0]) {
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
         }
     }
 
@@ -300,8 +295,7 @@ public abstract class ConnectionBase
                                     success);
 
         if (!success[0]) {
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
         }
     }
 
@@ -361,8 +355,7 @@ public abstract class ConnectionBase
 
 
         if (!success[0]) {
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
         }
     }
 
@@ -420,8 +413,7 @@ public abstract class ConnectionBase
                                      success);
 
         if (!success[0]) {
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
         }
     }
 
@@ -489,8 +481,7 @@ public abstract class ConnectionBase
                                   success);
 
         if (!success[0]) {
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
         }
     }
 
@@ -526,8 +517,7 @@ public abstract class ConnectionBase
                                   success);
 
         if (!success[0]) {
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
         }
     }
 
@@ -578,8 +568,7 @@ public abstract class ConnectionBase
                                     success);
 
         if (!success[0]) {
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
         }
     }
 
@@ -607,8 +596,7 @@ public abstract class ConnectionBase
                                     success);
 
         if (!success[0]) {
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
         }
     }
 
@@ -657,8 +645,7 @@ public abstract class ConnectionBase
                                         registrationSubscriber,
                                         success);
         if (!success[0]) {
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
         }
     }
 
@@ -693,8 +680,7 @@ public abstract class ConnectionBase
                                           success);
 
         if (!success[0]) {
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
         }
     }
 
@@ -721,7 +707,6 @@ public abstract class ConnectionBase
     public void send(Message message,
                      com.saabgroup.safir.dob.typesystem.ChannelId channelId,
                      MessageSender messageSender)
-        throws OverflowException
     {
         boolean [] success = new boolean [1];
 
@@ -736,15 +721,7 @@ public abstract class ConnectionBase
 
         if (!success[0])
         {
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
-
-            com.saabgroup.safir.dob.typesystem.Exception exc =
-                com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().getException();
-            if (exc instanceof com.saabgroup.safir.dob.OverflowException)
-            {
-                throw (com.saabgroup.safir.dob.OverflowException)exc;
-            }
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
         }
     }
 
@@ -778,7 +755,7 @@ public abstract class ConnectionBase
      */
     public int createRequest(Entity request,
                              com.saabgroup.safir.dob.typesystem.HandlerId handlerId,
-                             Requestor requestor) throws OverflowException
+                             Requestor requestor)
     {
         boolean [] success = new boolean [1];
         int [] requestId = new int[1];
@@ -798,15 +775,7 @@ public abstract class ConnectionBase
 
         if (!success[0])
         {
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
-
-            com.saabgroup.safir.dob.typesystem.Exception exc =
-                com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().getException();
-            if (exc instanceof com.saabgroup.safir.dob.OverflowException)
-            {
-                throw (com.saabgroup.safir.dob.OverflowException)exc;
-            }
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
         }
 
         return requestId[0];
@@ -842,7 +811,7 @@ public abstract class ConnectionBase
     public int createRequest(Entity request,
                              com.saabgroup.safir.dob.typesystem.InstanceId instanceId,
                              com.saabgroup.safir.dob.typesystem.HandlerId handlerId,
-                             Requestor requestor) throws OverflowException
+                             Requestor requestor)
     {
         boolean [] success = new boolean [1];
         int [] requestId = new int[1];
@@ -862,15 +831,7 @@ public abstract class ConnectionBase
 
         if (!success[0])
         {
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
-
-            com.saabgroup.safir.dob.typesystem.Exception exc =
-                com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().getException();
-            if (exc instanceof com.saabgroup.safir.dob.OverflowException)
-            {
-                throw (com.saabgroup.safir.dob.OverflowException)exc;
-            }
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
         }
 
         return requestId[0];
@@ -896,7 +857,7 @@ public abstract class ConnectionBase
      */
     public int updateRequest(Entity request,
                              com.saabgroup.safir.dob.typesystem.InstanceId instanceId,
-                             Requestor requestor) throws OverflowException
+                             Requestor requestor)
     {
         boolean [] success = new boolean [1];
         int [] requestId = new int [1];
@@ -913,15 +874,7 @@ public abstract class ConnectionBase
 
         if (!success[0])
         {
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
-
-            com.saabgroup.safir.dob.typesystem.Exception exc =
-                com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().getException();
-            if (exc instanceof com.saabgroup.safir.dob.OverflowException)
-            {
-                throw (com.saabgroup.safir.dob.OverflowException)exc;
-            }
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
         }
 
         return requestId[0];
@@ -945,7 +898,7 @@ public abstract class ConnectionBase
      * @throws OverflowException There was an overflow when sending.
      */
     public int deleteRequest(com.saabgroup.safir.dob.typesystem.EntityId entityId,
-                             Requestor requestor) throws OverflowException
+                             Requestor requestor)
     {
         boolean [] success = new boolean [1];
         int [] requestId = new int[1];
@@ -960,15 +913,7 @@ public abstract class ConnectionBase
 
         if (!success[0])
         {
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
-
-            com.saabgroup.safir.dob.typesystem.Exception exc =
-                com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().getException();
-            if (exc instanceof com.saabgroup.safir.dob.OverflowException)
-            {
-                throw (com.saabgroup.safir.dob.OverflowException)exc;
-            }
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
         }
 
 
@@ -993,7 +938,7 @@ public abstract class ConnectionBase
      */
     public int serviceRequest(Service request,
                               com.saabgroup.safir.dob.typesystem.HandlerId handlerId,
-                              Requestor requestor) throws OverflowException
+                              Requestor requestor)
     {
         boolean [] success = new boolean [1];
         int [] requestId = new int[1];
@@ -1011,15 +956,7 @@ public abstract class ConnectionBase
 
         if (!success[0])
         {
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
-
-            com.saabgroup.safir.dob.typesystem.Exception exc =
-                com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().getException();
-            if (exc instanceof com.saabgroup.safir.dob.OverflowException)
-            {
-                throw (com.saabgroup.safir.dob.OverflowException)exc;
-            }
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
         }
 
         return requestId[0];
@@ -1027,7 +964,7 @@ public abstract class ConnectionBase
 
 
 
-//
+    //
     // Entity Owners
     //
 
@@ -1052,30 +989,28 @@ public abstract class ConnectionBase
         com.saabgroup.safir.dob.typesystem.EntityId eid = new com.saabgroup.safir.dob.typesystem.EntityId(entity.getTypeId(), instanceId);
         if (isCreated(eid))
         {
+            EntityProxy entityProxy = read(eid);
             try {
-                EntityProxy entityProxy = read(eid);
-                try {
-                    Entity merged = entityProxy.getEntity();
-                    com.saabgroup.safir.dob.typesystem.Utilities.mergeChanges(merged, entity);
+                Entity merged = entityProxy.getEntity();
+                com.saabgroup.safir.dob.typesystem.Utilities.mergeChanges(merged, entity);
 
-                    set(merged,
-                        instanceId,
-                        handlerId,
-                        true);     // true => consider change flags
-                    return;
-                }
-                finally {
-                    entityProxy.dispose();
-                }
+                set(merged,
+                    instanceId,
+                    handlerId,
+                    true);     // true => consider change flags
+                return;
             }
-            catch (com.saabgroup.safir.dob.NotFoundException exc){
+            finally {
+                entityProxy.dispose();
             }
         }
-
-        set(entity,
-            instanceId,
-            handlerId,
-            false);     // false => don't consider change flags
+        else
+        {
+            set(entity,
+                instanceId,
+                handlerId,
+                false);     // false => don't consider change flags
+        }
     }
 
     /**
@@ -1128,8 +1063,7 @@ public abstract class ConnectionBase
                             success);
 
         if (!success[0]) {
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
         }
     }
 
@@ -1158,8 +1092,7 @@ public abstract class ConnectionBase
                                handlerId.getRawString(),
                                success);
         if (!success[0]) {
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
         }
     }
 
@@ -1186,8 +1119,7 @@ public abstract class ConnectionBase
                                success);
 
         if (!success[0]) {
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
         }
     }
 
@@ -1247,7 +1179,6 @@ public abstract class ConnectionBase
      * @throws com.saabgroup.safir.dob.NotFoundException The specified instance of the entity does not exist.
      */
     public EntityProxy read(com.saabgroup.safir.dob.typesystem.EntityId entityId)
-        throws com.saabgroup.safir.dob.NotFoundException
     {
         boolean [] success = new boolean [1];
 
@@ -1264,15 +1195,7 @@ public abstract class ConnectionBase
 
         if (!success[0])
         {
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
-
-            com.saabgroup.safir.dob.typesystem.Exception exc =
-                com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().getException();
-            if (exc instanceof com.saabgroup.safir.dob.NotFoundException)
-            {
-                throw (com.saabgroup.safir.dob.NotFoundException)exc;
-            }
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
         }
 
         return new EntityProxy(currentBlob[0].asReadOnlyBuffer(), currentState[0].asReadOnlyBuffer(), null, null, false, false);
@@ -1305,8 +1228,7 @@ public abstract class ConnectionBase
                                 isCreated,
                                 success);
             if (!success[0]) {
-                com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
-                com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+                com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
             }
             return isCreated[0];
         }
@@ -1336,8 +1258,7 @@ public abstract class ConnectionBase
                                            success);
 
             if (!success[0]) {
-                com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
-                com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+                com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
             }
             return numInstances[0];
         }
@@ -1364,8 +1285,7 @@ public abstract class ConnectionBase
                                           success);
 
             if (!success[0]) {
-                com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
-                com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+                com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
             }
             return InstanceIdPolicy.class.getEnumConstants()[instanceIdPolicy[0]];
         }
@@ -1380,8 +1300,7 @@ public abstract class ConnectionBase
         boolean [] success = new boolean [1];
         Interface.ExitDispatch(getControllerId(),success);
         if (!success[0]) {
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
         }
     }
 

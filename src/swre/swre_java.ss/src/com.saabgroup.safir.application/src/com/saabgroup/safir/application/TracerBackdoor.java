@@ -36,8 +36,7 @@ public final class TracerBackdoor
                                    success);
         if (!success[0])
         {
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
         }
     }
     

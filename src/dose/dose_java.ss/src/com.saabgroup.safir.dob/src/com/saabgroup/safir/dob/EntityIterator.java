@@ -53,8 +53,7 @@ public class EntityIterator
 
         if (!success[0])
         {
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
         }
     }
 
@@ -99,8 +98,7 @@ public class EntityIterator
                                             success);
         if (!success[0])
         {
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
         }
 
         if (m_state.current != null) {
@@ -133,8 +131,7 @@ public class EntityIterator
                                           success);
         if (!success[0])
         {
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
         }
     }
 

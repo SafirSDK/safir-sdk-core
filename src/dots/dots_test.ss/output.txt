@@ -1985,6 +1985,7 @@ DotsTest.TestEnum
 Testing: IsException
 =====================================================
 DotsTest.TestException
+DotsTest.TestException2
 
 
 

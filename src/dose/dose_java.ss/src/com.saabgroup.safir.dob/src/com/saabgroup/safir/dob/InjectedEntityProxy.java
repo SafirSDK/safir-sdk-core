@@ -46,8 +46,7 @@ public class InjectedEntityProxy {
             Interface.GetTypeId(m_injectionState, typeId, success);
 
             if (!success[0]) {
-                com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
-                com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+                com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
             }
 
             return typeId[0];
@@ -73,8 +72,7 @@ public class InjectedEntityProxy {
         Interface.GetInstanceId(m_injectionState, instanceId, success);
 
         if (!success[0]) {
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
         }
 
         return new com.saabgroup.safir.dob.typesystem.InstanceId(instanceId[0]);

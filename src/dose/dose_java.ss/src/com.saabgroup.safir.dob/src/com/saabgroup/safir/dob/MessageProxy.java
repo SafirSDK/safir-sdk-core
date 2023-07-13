@@ -67,8 +67,7 @@ public class MessageProxy {
         Interface.GetConnectionInfo(m_state, blob, blobDeleter, success);
 
         if (!success[0]) {
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
         }
 
         try
@@ -96,8 +95,7 @@ public class MessageProxy {
         Interface.GetChannelId(m_state, channelId, success);
 
         if (!success[0]) {
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
         }
 
         return new com.saabgroup.safir.dob.typesystem.ChannelId(channelId[0]);

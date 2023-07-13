@@ -47,8 +47,7 @@ public class EntityProxy {
             Interface.GetTypeId(m_state.currentState, typeId, success);
 
             if (!success[0]) {
-                com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
-                com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+                com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
             }
             return typeId[0];
         }
@@ -72,8 +71,7 @@ public class EntityProxy {
         boolean [] success = new boolean [1];
         Interface.GetInstanceId(m_state.currentState, instanceId, success);
         if (!success[0]) {
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
         }
 
         return new com.saabgroup.safir.dob.typesystem.InstanceId(instanceId[0]);
@@ -157,8 +155,7 @@ public class EntityProxy {
             if (!success[0]) {
                 m_state.currentBlobWithChangeInfo = null;
                 m_state.blobDeleter = null;
-                com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
-                com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+                com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
             }
 
             m_state.currentBlobWithChangeInfo = currentBlobWithChangeInfo[0];
@@ -183,8 +180,7 @@ public class EntityProxy {
         Interface.GetHandlerId(m_state.currentState, handlerId, success);
 
         if (!success[0]) {
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
         }
 
         return new com.saabgroup.safir.dob.typesystem.HandlerId(handlerId[0]);
@@ -204,8 +200,7 @@ public class EntityProxy {
         Interface.GetConnectionInfo(m_state.currentState, blob, blobDeleter, success);
 
         if (!success[0]) {
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
         }
 
         try
@@ -293,8 +288,7 @@ public class EntityProxy {
             if (!success[0]) {
                 m_state.currentBlobWithChangeInfo = null;
                 m_state.blobDeleter = null;
-                com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
-                com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+                com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
             }
 
             m_state.currentBlobWithChangeInfo = currentBlobWithChangeInfo[0];
@@ -372,8 +366,7 @@ public class EntityProxy {
         boolean [] success = new boolean [1];
         Interface.GetTopTimestamp(m_state.currentState, timestamp, success);
         if (!success[0]) {
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
         }
         return timestamp[0];
     }
@@ -394,8 +387,7 @@ public class EntityProxy {
         boolean [] success = new boolean [1];
         Interface.GetMemberTimestamp(m_state.currentState, member, timestamp, success);
         if (!success[0]) {
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
         }
 
         return timestamp [0];

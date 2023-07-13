@@ -90,7 +90,7 @@ public class Serialization {
         java.nio.ByteBuffer deleter [] = new java.nio.ByteBuffer[1];
         Kernel.XmlToBlob(blob, deleter, xml);
         if (blob[0] == null) {
-            LibraryExceptions.getInstance().throwFundamental();
+            LibraryExceptions.getInstance().Throw();
         }
         com.saabgroup.safir.dob.typesystem.Object obj = ObjectFactory.getInstance().createObject(blob[0]);
         Kernel.InvokeDeleter(deleter[0],blob[0]);
@@ -161,7 +161,7 @@ public class Serialization {
         java.nio.ByteBuffer deleter [] = new java.nio.ByteBuffer[1];
         Kernel.JsonToBlob(blob, deleter, json);
         if (blob[0] == null) {
-            LibraryExceptions.getInstance().throwFundamental();
+            LibraryExceptions.getInstance().Throw();
         }
         com.saabgroup.safir.dob.typesystem.Object obj = ObjectFactory.getInstance().createObject(blob[0]);
         Kernel.InvokeDeleter(deleter[0],blob[0]);

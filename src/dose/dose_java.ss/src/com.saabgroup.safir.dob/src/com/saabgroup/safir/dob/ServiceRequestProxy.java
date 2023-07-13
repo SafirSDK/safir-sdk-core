@@ -69,8 +69,7 @@ public class ServiceRequestProxy {
         Interface.GetConnectionInfo(m_state, blob, blobDeleter, success);
 
         if (!success[0]) {
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
         }
 
         try
@@ -98,8 +97,7 @@ public class ServiceRequestProxy {
         Interface.GetHandlerId(m_state, handlerId, success);
 
         if (!success[0]) {
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
         }
 
         return new com.saabgroup.safir.dob.typesystem.HandlerId(handlerId[0]);

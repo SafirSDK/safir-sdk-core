@@ -45,8 +45,7 @@ public class EntityRequestProxy {
             Interface.GetTypeId(m_state, typeId, success);
 
             if (!success[0]) {
-                com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
-                com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+                com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
             }
 
             return typeId[0];
@@ -75,8 +74,7 @@ public class EntityRequestProxy {
         Interface.GetInstanceId(m_state, instanceId, success);
 
         if (!success[0]) {
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
         }
 
         return new com.saabgroup.safir.dob.typesystem.InstanceId(instanceId[0]);
@@ -126,8 +124,7 @@ public class EntityRequestProxy {
         Interface.GetConnectionInfo(m_state, blob, blobDeleter, success);
 
         if (!success[0]) {
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
         }
 
         try
@@ -155,8 +152,7 @@ public class EntityRequestProxy {
         Interface.GetHandlerId(m_state, handlerId, success);
 
         if (!success[0]) {
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
         }
 
         return new com.saabgroup.safir.dob.typesystem.HandlerId(handlerId[0]);

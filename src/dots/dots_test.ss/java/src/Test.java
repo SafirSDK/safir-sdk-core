@@ -36,7 +36,7 @@ public class Test {
     /**
      * @param args
      */
-    public static void main(String[] args) throws java.lang.Exception {
+    public static void main(String[] args) {
         Locale.setDefault(new Locale("en", "US"));
 
         test_Has_Property();
@@ -8264,14 +8264,14 @@ public class Test {
 
         LibraryExceptions.getInstance().set(new TestException("For LibraryExceptions"));
         try {
-            LibraryExceptions.getInstance().throwFundamental();
+            LibraryExceptions.getInstance().Throw();
         } catch (TestException e) {
             System.out.println("Caught exception: " + Operations.getName(e.getTypeId()));
         }
 
         LibraryExceptions.getInstance().set(new java.lang.RuntimeException("For LibraryExceptions"));
         try {
-            LibraryExceptions.getInstance().throwFundamental();
+            LibraryExceptions.getInstance().Throw();
         } catch (java.lang.RuntimeException e) {
             System.out.println("Caught native exception");
         }
@@ -8849,15 +8849,23 @@ public class Test {
             {
                 LibraryExceptions.getInstance().set(new TestException("For LibraryExceptions"));
                 try {
-                    LibraryExceptions.getInstance().throwFundamental();
+                    LibraryExceptions.getInstance().Throw();
                     check(false);
                 } catch (TestException e) {
                     check(e.getTypeId() == TestException.ExceptionTypeId);
                 }
 
+                LibraryExceptions.getInstance().set(new TestException2("For LibraryExceptions"));
+                try {
+                    LibraryExceptions.getInstance().Throw();
+                    check(false);
+                } catch (TestException2 e) {
+                    check(e.getTypeId() == TestException2.ExceptionTypeId);
+                }
+
                 LibraryExceptions.getInstance().set(new java.lang.RuntimeException("For LibraryExceptions"));
                 try {
-                    LibraryExceptions.getInstance().throwFundamental();
+                    LibraryExceptions.getInstance().Throw();
                     check(false);
                 } catch (java.lang.RuntimeException e) {
                     check(true);

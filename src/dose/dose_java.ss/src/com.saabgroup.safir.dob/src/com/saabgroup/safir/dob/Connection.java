@@ -47,8 +47,7 @@ public final class Connection
         Interface.Constructor(ctrl, success);
         if (!success[0])
         {
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
         }
         m_state.ctrl = ctrl[0];
     }
@@ -106,8 +105,7 @@ public final class Connection
                           success);
         if (!success[0])
         {
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
         }
 
     }
@@ -139,8 +137,7 @@ public final class Connection
         Interface.IsConnected(m_state.ctrl, isConn, success);
 
         if (!success[0]) {
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
         }
         return isConn[0];
     }
@@ -157,8 +154,7 @@ public final class Connection
         boolean [] success = new boolean [1];
         Interface.Dispatch(m_state.ctrl, success);
         if (!success[0]) {
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
         }
     }
 
@@ -181,8 +177,7 @@ public final class Connection
             Interface.Disconnect(ctrl, success);
 
             if (!success[0]) {
-                com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
-                com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+                com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
             }
         }
         //-------------------

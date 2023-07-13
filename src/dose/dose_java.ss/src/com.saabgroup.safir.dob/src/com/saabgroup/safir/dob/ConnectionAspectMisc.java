@@ -53,8 +53,7 @@ public class ConnectionAspectMisc
         Interface.GetCurrentCallbackId(getControllerId(), callbackId, success);
 
         if (!success[0]) {
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
         }
 
         return CallbackId.values()[callbackId[0]];
@@ -80,8 +79,7 @@ public class ConnectionAspectMisc
         Interface.GetConnectionName(getControllerId(), name, success);
 
         if (!success[0]) {
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
         }
 
         return name[0];
@@ -100,8 +98,7 @@ public class ConnectionAspectMisc
         Interface.GetConnectionNameCommonPart(getControllerId(), name, success);
 
         if (!success[0]) {
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
         }
 
         return name[0];
@@ -119,8 +116,7 @@ public class ConnectionAspectMisc
         Interface.GetConnectionNameInstancePart(getControllerId(), name, success);
 
         if (!success[0]) {
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
         }
         return name[0];
     }
@@ -136,8 +132,7 @@ public class ConnectionAspectMisc
         boolean [] success = new boolean [1];
         Interface.GetContext(getControllerId(), context, success);
         if (!success[0]) {
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
         }
         return context[0];
     }
@@ -155,8 +150,7 @@ public class ConnectionAspectMisc
         boolean [] success = new boolean [1];
         Interface.GetNodeId(nodeId, success);
         if (!success[0]) {
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
         }
         return nodeId[0];
     }
@@ -175,8 +169,7 @@ public class ConnectionAspectMisc
         boolean [] success = new boolean [1];
         Interface.IsLightNode(getControllerId(), isLight, success);
         if (!success[0]) {
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
         }
         return isLight[0];
     }
@@ -200,8 +193,7 @@ public class ConnectionAspectMisc
         boolean [] success = new boolean [1];
         Interface.GetQueueCapacity(getControllerId(), queue.ordinal(), queueCapacity, success);
         if (!success[0]) {
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
         }
         return queueCapacity[0];
     }
@@ -223,8 +215,7 @@ public class ConnectionAspectMisc
         boolean [] success = new boolean [1];
         Interface.GetQueueSize(getControllerId(), queue.ordinal(), queueSize, success);
         if (!success[0]) {
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
         }
         return queueSize[0];
     }
@@ -256,8 +247,7 @@ public class ConnectionAspectMisc
                                     outQueues,
                                     success);
         if (!success[0]) {
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
         }
     }
 
@@ -282,8 +272,7 @@ public class ConnectionAspectMisc
         Interface.GetSharedMemoryUsage(usage,
                                        success);
         if (!success[0]) {
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
         }
         return usage[0];
     }

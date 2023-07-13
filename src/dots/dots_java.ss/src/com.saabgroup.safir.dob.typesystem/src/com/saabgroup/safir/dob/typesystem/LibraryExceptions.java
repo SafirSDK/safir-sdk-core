@@ -1,7 +1,7 @@
 // -*- coding: utf-8 -*-
 /******************************************************************************
 *
-* Copyright Saab AB, 2005-2013 (http://safirsdkcore.com)
+* Copyright Saab AB, 2005-2013, 2023 (http://safirsdkcore.com)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -30,11 +30,6 @@ package com.saabgroup.safir.dob.typesystem;
  */
 public class LibraryExceptions
 {
-    //private java.util.HashMap<Long,String> m_exceptionNameTable =
-    //    new java.util.HashMap<Long,String>();
-
-    private Exception m_cachedException;
-
     private LibraryExceptions()
     {
 
@@ -101,50 +96,16 @@ public class LibraryExceptions
     }
 
     /**
-     * Check the source code in dose_java for examples of how to use this.
-     * @return difficult to explain...
+     * Throw the current exception.
+     *
+     * Call this to throw the current exception. It is considered a programming
+     * error to call this function if no exception is set.
+     *
+     * This function is a bit badly named, a better name would have been rethrow(), but
+     * this matches the name in the other languages, even if it breaks the java
+     * naming conventions...
      */
-    public com.saabgroup.safir.dob.typesystem.Exception getException()
-    {
-        if (m_cachedException == null)
-        {
-            throw new SoftwareViolationException("getException: There was no cached exception! There is an error in the library that you just called!");
-        }
-        else
-        {
-            com.saabgroup.safir.dob.typesystem.Exception exc = m_cachedException;
-            m_cachedException = null;
-            return exc;
-        }
-    }
-
-    /**
-     * Check the source code in dose_java for examples of how to use this.
-     */
-    public void throwUnknown()
-    {
-        if (m_cachedException == null)
-        {
-            throw new SoftwareViolationException("throwUnknown: There was no cached exception! There is an error in the library that you just called!"
-                                                 + " Contact the developer of the library so that he/she can fix it");
-        }
-        else
-        {
-            com.saabgroup.safir.dob.typesystem.Exception exc = m_cachedException;
-            m_cachedException = null;
-            throw new SoftwareViolationException("The exception '"
-                                                 + exc.getClass().getName()
-                                                 + "' was not handled correctly in the library that you just called"
-                                                 + " Contact the developer of the library so that he/she can fix it.\n"
-                                                 + "Exception.toString: " + exc.toString());
-        }
-    }
-
-
-    /**
-     * Check the source code in dose_java for examples of how to use this.
-     */
-    public void throwFundamental()
+    public void Throw()
     {
         boolean [] wasSet = new boolean [1];
         long [] exceptionId = new long [1];
@@ -163,17 +124,11 @@ public class LibraryExceptions
                 if (typename != null)
                 { //found in table
 
-                    FundamentalException exc;
+                    java.lang.RuntimeException exc;
                     try
                     {
                         java.lang.Object obj = Class.forName(typename).getConstructor(String.class).newInstance(description[0]);
-                        if (obj instanceof Exception)
-                        {
-                            m_cachedException = (Exception)obj;
-                            return;
-                        }
-                        exc = (FundamentalException)obj;
-
+                        exc = (RuntimeException)obj;
                     }
                     catch (java.lang.Exception e)
                     {

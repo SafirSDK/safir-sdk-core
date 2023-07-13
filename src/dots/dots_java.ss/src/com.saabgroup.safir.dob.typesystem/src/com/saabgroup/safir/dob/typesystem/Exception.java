@@ -32,7 +32,7 @@ package com.saabgroup.safir.dob.typesystem;
  * by the calling function and are possible to recover from.
  */
 abstract public class Exception
-  extends java.lang.Exception
+  extends java.lang.RuntimeException
 {
     /**
      * Constructor with exception information.

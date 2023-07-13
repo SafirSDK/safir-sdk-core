@@ -155,8 +155,6 @@ class Consumer implements
 
 
     private long getTimestamp(com.saabgroup.dosetest.Action action)
-        throws com.saabgroup.safir.dob.NotFoundException,
-               com.saabgroup.safir.dob.OverflowException
     {
         com.saabgroup.safir.dob.typesystem.EntityId entityId = new com.saabgroup.safir.dob.typesystem.EntityId
             (com.saabgroup.dosetest.LastInjectionTimestamp.ClassTypeId,
