@@ -35,7 +35,7 @@ public class Serialization {
      *
      * @param obj - The object to serialize
      * @return The xml serialization
-     * @exception IllegalValueException - There is something wrong with the object.
+     * @throws IllegalValueException - There is something wrong with the object.
      */
     public static String toXml(com.saabgroup.safir.dob.typesystem.Object obj)
     {
@@ -82,7 +82,7 @@ public class Serialization {
      *
      * @param xml The xml to convert.
      * @return the new object
-     * @exception IllegalValueException If the type represented by the serialization isn't found
+     * @throws IllegalValueException If the type represented by the serialization isn't found
      *                                   in the ObjectFactory.
      */
     public static com.saabgroup.safir.dob.typesystem.Object toObject(String xml) {
@@ -106,7 +106,7 @@ public class Serialization {
      *
      * @param obj - The object to serialize
      * @return The json serialization
-     * @exception IllegalValueException - There is something wrong with the object.
+     * @throws IllegalValueException - There is something wrong with the object.
      */
     public static String toJson(com.saabgroup.safir.dob.typesystem.Object obj)
     {
@@ -153,7 +153,7 @@ public class Serialization {
      *
      * @param json The json to convert.
      * @return the new object
-     * @exception IllegalValueException If the type represented by the serialization isn't found
+     * @throws IllegalValueException If the type represented by the serialization isn't found
      *                                   in the ObjectFactory.
      */
     public static com.saabgroup.safir.dob.typesystem.Object toObjectFromJson(String json) {
@@ -173,7 +173,7 @@ public class Serialization {
      *
      * @param obj The object to serialize.
      * @return The object serialized to binary form.
-     * @exception IllegalValueException - There is something wrong with the object.
+     * @throws IllegalValueException - There is something wrong with the object.
      */
     public static byte[] toBinary(com.saabgroup.safir.dob.typesystem.Object obj){
 
@@ -198,7 +198,7 @@ public class Serialization {
      *
      * @param binary - The binary serialization to deserialize.
      * @return The deserialized object.
-     * @exception IllegalValueException If the type represented by the serialization isn't found
+     * @throws IllegalValueException If the type represented by the serialization isn't found
      *                                   in the ObjectFactory.
      */
         public static com.saabgroup.safir.dob.typesystem.Object toObject(byte[] binary) {

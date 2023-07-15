@@ -64,7 +64,7 @@ public class ResponseSender
      * a programming error.
      *
      * @param response The response to be sent.
-     * @exception NotOpenException If the connection is not open.
+     * @throws NotOpenException If the connection is not open.
      */
     public void send(Response response)
     {

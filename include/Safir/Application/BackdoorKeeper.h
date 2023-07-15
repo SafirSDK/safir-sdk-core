@@ -70,7 +70,7 @@ public:
      * The class supports restarting/pausing by calling stop and then start again.
      *
      * @param backdoor [in] - Class that implements the Backdoor interface.
-     * @exception Safir::Dob::NotOpenException 'Start' was called before connect to Dob.
+     * @throws Safir::Dob::NotOpenException 'Start' was called before connect to Dob.
      */
     void Start(Safir::Application::Backdoor& backdoor);
 

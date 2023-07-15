@@ -72,7 +72,7 @@ namespace Dob
          * a programming error.
          *
          * @param response - The response to be sent.
-         * @exception Safir::Dob::NotOpenException  - If the connection is not open.
+         * @throws Safir::Dob::NotOpenException  - If the connection is not open.
          */
         virtual void Send(const Safir::Dob::ResponsePtr & response) = 0;
 

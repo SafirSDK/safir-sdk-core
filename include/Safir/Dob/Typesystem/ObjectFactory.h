@@ -66,7 +66,7 @@ namespace Typesystem
          *
          * @param typeId [in] - The TypeId of the object to create.
          * @return A std::shared_ptr to the object.
-         * @exception IllegalValueException If the type couldn't be found in the ObjectFactory.
+         * @throws IllegalValueException If the type couldn't be found in the ObjectFactory.
         */
         ObjectPtr CreateObject(const TypeId typeId) const;
 
@@ -110,7 +110,7 @@ namespace Typesystem
          *
          * @param blob [in] - The blob to deserialize.
          * @return A std::shared_ptr to the object.
-         * @exception IllegalValueException If the type represented by the blob isn't found
+         * @throws IllegalValueException If the type represented by the blob isn't found
          *                                   in the ObjectFactory.
         */
         ObjectPtr CreateObject(char const * const blob) const;

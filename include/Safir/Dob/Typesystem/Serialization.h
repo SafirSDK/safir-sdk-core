@@ -53,7 +53,7 @@ namespace Typesystem
          *
          * @param [in] object - The object to serialize
          * @return The xml serialization
-         * @exception IllegalValueException - There is something wrong with the object.
+         * @throws IllegalValueException - There is something wrong with the object.
          */
         static const std::wstring ToXml(const Dob::Typesystem::ObjectConstPtr& object);
 
@@ -62,7 +62,7 @@ namespace Typesystem
          *
          * @param [in] object - The object to serialize
          * @return The json serialization
-         * @exception IllegalValueException - There is something wrong with the object.
+         * @throws IllegalValueException - There is something wrong with the object.
          */
         static const std::wstring ToJson(const Dob::Typesystem::ObjectConstPtr& object);
 
@@ -74,7 +74,7 @@ namespace Typesystem
          *
          * @param [in] xml - The xml to convert.
          * @return A std::shared_ptr to the new object
-         * @exception IllegalValueException If there is something wrong with the XML or if the type
+         * @throws IllegalValueException If there is something wrong with the XML or if the type
          *                                  represented by the serialization isn't found
          *                                  in the ObjectFactory.
          */
@@ -88,7 +88,7 @@ namespace Typesystem
          *
          * @param [in] json - The json to convert.
          * @return A std::shared_ptr to the new object
-         * @exception IllegalValueException If there is something wrong with the JSON or if the type
+         * @throws IllegalValueException If there is something wrong with the JSON or if the type
          *                                  represented by the serialization isn't found
          *                                  in the ObjectFactory.
          */
@@ -135,7 +135,7 @@ namespace Typesystem
          *
          * @param [in] object - The object to serialize
          * @param [out] binary - The destination of the serialization
-         * @exception IllegalValueException - There is something wrong with the object.
+         * @throws IllegalValueException - There is something wrong with the object.
          */
         static void ToBinary(const Dob::Typesystem::ObjectConstPtr& object, Dob::Typesystem::BinarySerialization& binary);
 
@@ -149,7 +149,7 @@ namespace Typesystem
          *
          * @param [in] binary - The binary serialization to deserialize.
          * @return A std::shared_ptr to the new object
-         * @exception IllegalValueException If the type represented by the serialization isn't found
+         * @throws IllegalValueException If the type represented by the serialization isn't found
          *                                   in the ObjectFactory.
          */
         static Dob::Typesystem::ObjectPtr ToObject(const Dob::Typesystem::BinarySerialization& binary);

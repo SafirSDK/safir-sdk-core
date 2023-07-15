@@ -76,7 +76,7 @@ namespace Internal
      *
      * @param [in] json - The json to convert.
      * @return A std::shared_ptr to the new object
-     * @exception IllegalValueException If there is something wrong with the JSON or if the type
+     * @throws IllegalValueException If there is something wrong with the JSON or if the type
      *                                  represented by the serialization isn't found
      *                                  in the ObjectFactory.
      */

@@ -60,7 +60,7 @@ public class ObjectFactory {
      *
      * @param blob [in] - The blob to deserialize.
      * @return The object.
-     * @exception IllegalValueException If the type represented by the blob isn't found
+     * @throws IllegalValueException If the type represented by the blob isn't found
      *                                   in the ObjectFactory.
     */
 
@@ -91,7 +91,7 @@ public class ObjectFactory {
      *
      * @param typeId The TypeId of the object to create.
      * @return The newly created object.
-     * @exception IllegalValueException If the type couldn't be found in the ObjectFactory.
+     * @throws IllegalValueException If the type couldn't be found in the ObjectFactory.
     */
     public com.saabgroup.safir.dob.typesystem.Object createObject(long typeId){
         try {
