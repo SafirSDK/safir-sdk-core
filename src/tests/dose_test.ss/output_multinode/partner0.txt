@@ -4715,7 +4715,7 @@ Description: Test of GetQueueCapacity
 Expectation: Queue capacity should be 10 for all queues
 --------- Setup -----------
 --------- Test  -----------
-Consumer 0: The capacity of MessageOutQueue is 10
+Consumer 0: The capacity of MessageOutQueue is 2
 Consumer 0: The capacity of MessageInQueue is 10
 Consumer 0: The capacity of RequestOutQueue is 10
 Consumer 0: The capacity of RequestInQueue is 10

@@ -20,7 +20,7 @@
                   </member>
                   <member>
                     <name>MessageOutQueueCapacity</name>
-                    <value>10</value>
+                    <value>2</value>
                   </member>
                   <member>
                     <name>RequestInQueueCapacity</name>
