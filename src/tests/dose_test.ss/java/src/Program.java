@@ -23,11 +23,14 @@
 *
 ******************************************************************************/
 
-//package DoseTestJava;
-
+/** Main entrypoint class */
 public class Program
 {
-    /** main program */
+    private Program() {}
+    /**
+     * main program
+     * @param args command line
+     */
     public static void main(String[] args)
     {
         System.out.println("Starting");

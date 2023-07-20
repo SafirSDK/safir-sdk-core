@@ -30,8 +30,10 @@ import java.util.Locale;
  * Test program that send system logs
  */
 public class Sender {
+    private Sender() {}
     /**
-     * @param args
+     * Main entrypoint
+     * @param args command line
      */
     public static void main(String[] args) {
 

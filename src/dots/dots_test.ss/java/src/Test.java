@@ -33,8 +33,10 @@ import java.util.Locale;
  * Main test class
  */
 public class Test {
+    private Test() {}
     /**
-     * @param args
+     * Main program
+     * @param args command line
      */
     public static void main(String[] args) {
         Locale.setDefault(new Locale("en", "US"));
@@ -10026,6 +10028,7 @@ public class Test {
 
     public static class MergeChangesTests
     {
+        private MergeChangesTests() {}
         private void Check(boolean expr, String desc)
         {
             ++tests;

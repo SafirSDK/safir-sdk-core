@@ -90,6 +90,10 @@ public abstract class EnumerationContainerBase<E extends Enum<E>>
         return m_Value;
     }
 
+    /**
+     * Get number of enum values.
+     * @return the number of values in the enum.
+     */
     protected abstract int getNumValues();
 
     /**

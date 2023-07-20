@@ -30,6 +30,7 @@ public abstract class EnumerationSequenceContainer<TEnum extends Enum<TEnum>>
 
     /**
      * Protected constructor has to take a Class as an argument for us to be able to use java reflection on it.
+     * @param clazz The class to operate on.
      */
     protected EnumerationSequenceContainer(Class<TEnum> clazz) {
         m_class = clazz;

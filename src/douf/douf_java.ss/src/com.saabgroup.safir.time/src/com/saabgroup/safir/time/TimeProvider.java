@@ -28,6 +28,8 @@ package com.saabgroup.safir.time;
  * This helper class contains methods to convert time between Date and double format.
  */
 public class TimeProvider {
+    private TimeProvider() {}
+
     /**
      * Get current UTC time
      * @return Current time in UTC (Seconds and fraction since jan 1 1970 00:00)

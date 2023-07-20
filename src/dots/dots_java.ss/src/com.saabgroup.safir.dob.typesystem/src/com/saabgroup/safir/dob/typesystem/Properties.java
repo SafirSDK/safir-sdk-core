@@ -34,6 +34,7 @@ import com.saabgroup.safir.dob.typesystem.Object;
  * functions in Members. (For array sizes, use the method in this class though...).
  */
 public class Properties {
+    private Properties() {}
 
     /**
      * Get the information of how a property member is mapped for a class.

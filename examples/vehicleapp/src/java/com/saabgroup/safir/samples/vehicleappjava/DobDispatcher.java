@@ -18,16 +18,16 @@ import com.saabgroup.safir.dob.StopHandler;
  *
  */
 public class DobDispatcher implements com.saabgroup.safir.dob.Dispatcher {
-    
+
     private Connection dobConnection;
     private IMainLoop mainLoop;
     private DoDispatch dispatcher = new DoDispatch();
     private long delay = 0;
     private volatile long lastDispatchTime = 0;
-    
+
     /**
      * Constructor
-     * 
+     *
      * @param dobConnection The Dob connection
      * @param mainLoop The main loop
      */
@@ -35,28 +35,28 @@ public class DobDispatcher implements com.saabgroup.safir.dob.Dispatcher {
         this.dobConnection = dobConnection;
         this.mainLoop = mainLoop;
     }
-    
+
     /**
      * Get Dob connection
-     * 
+     *
      * @return The Dob connection
      */
     public Connection getDobConnection() {
         return dobConnection;
     }
-    
+
     /**
      * Get main loop
-     * 
+     *
      * @return The main loop
      */
     public IMainLoop getMainLoop() {
         return mainLoop;
     }
-    
+
     /**
      * Get minimum time between each dispatch call
-     * 
+     *
      * @return the time between dispatch calls in milliseconds
      */
     public long getDelay() {
@@ -65,13 +65,13 @@ public class DobDispatcher implements com.saabgroup.safir.dob.Dispatcher {
 
     /**
      * Set a minimum time between each dispatch call
-     * 
+     *
      * @param delay The minimum time between each dispatch call in milliseconds
      */
     public void setDelay(long delay) {
         this.delay = delay;
     }
-    
+
     /**
      * Open a connection to the DOB.
      * <p>
@@ -80,13 +80,13 @@ public class DobDispatcher implements com.saabgroup.safir.dob.Dispatcher {
      * The intended primary usage is for recording/replay functionality. 0 is defined as the default
      * context.
      * </p>
-     * 
-     * @note connectionNameCommonPart together with connectionNameInstancePart must be unique in the node.
-     * 
+     *
+     * Note that connectionNameCommonPart together with connectionNameInstancePart must be unique in the node.
+     *
      * @throws com.saabgroup.safir.dob.NotOpenException The connection name is already used by someone else. Try another!
-     * 
+     *
      * @see Connection#open
-     * 
+     *
      * @param connectionNameCommonPart Name that identifies the program but not any particular program instance.
      * @param connectionNameInstancePart Name that identifies a particular program instance.
      * @param context Context
@@ -98,7 +98,7 @@ public class DobDispatcher implements com.saabgroup.safir.dob.Dispatcher {
             StopHandler stopHandler) {
         dobConnection.open(connectionNameCommonPart, connectionNameInstancePart, context, stopHandler, this);
     }
-    
+
     /**
      * Not to be called. Used by the framework.
      */

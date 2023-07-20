@@ -32,6 +32,13 @@ import java.util.Set;
 public class BinaryDictionaryContainer<K>
     extends DictionaryContainer<K,BinaryContainer>
 {
+    /**
+     * Set the value for a particular key.
+     *
+     * @param key The key to assign a value for
+     * @param value The value to assign.
+     * @return The container that was modified/created.
+     */
     public BinaryContainer putVal(K key, byte[] value) {
         m_isChanged=true;
         BinaryContainer container = new BinaryContainer();

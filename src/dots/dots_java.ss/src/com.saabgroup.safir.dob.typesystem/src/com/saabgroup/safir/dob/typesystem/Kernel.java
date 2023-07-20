@@ -32,7 +32,7 @@ import java.nio.ByteBuffer;
  * The dots Kernel class is the raw interface to the C-world.
  */
 public final class Kernel {
-
+    private Kernel() {}
     static {
         //load the jni dll
         System.loadLibrary("dots_java_jni");

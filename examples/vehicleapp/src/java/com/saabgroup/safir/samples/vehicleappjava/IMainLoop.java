@@ -45,7 +45,7 @@ public interface IMainLoop extends AutoCloseable{
     /**
      * Starts the main loop with callback method
      *
-     * @param callback The callback interface
+     * @param initMethod The callback interface
      */
     public void start(Callback initMethod);
 

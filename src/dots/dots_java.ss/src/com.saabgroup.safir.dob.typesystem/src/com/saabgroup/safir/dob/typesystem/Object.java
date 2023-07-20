@@ -89,13 +89,12 @@ public class Object
     {
     }
 
-   
+
 
     /**
      * Write the object to a blob.
      *
      * @param handle A handle to a blob writer
-     * @return beginningOfUnused after the object has been written to the blob.
      */
     public void writeToBlob(long handle)
     {
@@ -166,4 +165,3 @@ public class Object
         }
     }
 }
-

@@ -1,3 +1,4 @@
+// -*- coding: utf-8 -*-
 /******************************************************************************
 *
 * Copyright Saab AB, 2013 (http://safirsdkcore.com)
@@ -21,6 +22,9 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
+
+/** Main test class */
+
 public class Test {
     public static void main(String[] args) {
         java.util.GregorianCalendar cal = new java.util.GregorianCalendar(java.util.TimeZone.getTimeZone("UTC"));

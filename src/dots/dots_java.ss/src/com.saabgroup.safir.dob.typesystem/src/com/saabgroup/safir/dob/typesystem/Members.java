@@ -33,6 +33,7 @@ package com.saabgroup.safir.dob.typesystem;
  * get TypeIds of members etc.
  */
 public class Members {
+    private Members() {}
 
     /**
      * Get the number of members for a class or property.

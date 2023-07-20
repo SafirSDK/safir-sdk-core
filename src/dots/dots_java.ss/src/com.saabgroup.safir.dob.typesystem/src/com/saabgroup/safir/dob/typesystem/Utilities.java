@@ -30,6 +30,7 @@ package com.saabgroup.safir.dob.typesystem;
  * Utility functions for users of the DOB type system.
  */
 public class Utilities {
+    private Utilities() {}
 
     /**
      * Merge the changed members (recursively) from one object into another.

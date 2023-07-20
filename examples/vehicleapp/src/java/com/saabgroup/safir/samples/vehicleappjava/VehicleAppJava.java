@@ -74,7 +74,8 @@ public class VehicleAppJava implements StopHandler {
     }
 
     /**
-     * @param args
+     * main program
+     * @param args command line
      */
     public static void main(String[] args) {
         VehicleAppJava app = new VehicleAppJava();

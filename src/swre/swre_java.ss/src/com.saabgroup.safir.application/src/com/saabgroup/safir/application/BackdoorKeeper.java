@@ -56,7 +56,7 @@ public class BackdoorKeeper
      * The class supports restarting/pausing by calling stop and then start again.
      *
      * @param backdoor [in] - Class that implements the Backdoor interface.
-     * @throws Safir::Dob::NotOpenException 'Start' was called before connect to Dob.
+     * @throws com.saabgroup.safir.dob.NotOpenException 'Start' was called before connect to Dob.
      */
     public void start(Backdoor backdoor)
     {

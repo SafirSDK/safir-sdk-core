@@ -38,6 +38,7 @@ public class ConnectionAspectBase{
 
     /**
      * Get the id of the controller.
+     * @return the controller id.
      */
     protected int getControllerId() {
         return m_ctrl;

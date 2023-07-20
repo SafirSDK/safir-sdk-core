@@ -32,6 +32,7 @@ public interface EnumerationSequenceContainerBase {
 
     /**
      * Get the number of elements contained in the sequence.
+     * @return the number of elements.
      */
     public int size();
 
@@ -39,6 +40,7 @@ public interface EnumerationSequenceContainerBase {
     * Get the ordinal value of the value at the specified index.
     *
     * @param index Index of value to get
+    * @return The ordinal at the specified index.
     */
     int getOrdinal(int index);
 
@@ -74,14 +76,14 @@ public interface EnumerationSequenceContainerBase {
     /**
     * Is the container set to null. Null is the same as empty.
     *
-    * @True if the container is set to null.
+    * @return True if the container is set to null.
     */
     boolean isNull();
 
     /**
     * Is the change flag set on the container?
     *
-    * @returns True if the containers change flag is set.
+    * @return True if the containers change flag is set.
     */
     boolean isChanged();
 

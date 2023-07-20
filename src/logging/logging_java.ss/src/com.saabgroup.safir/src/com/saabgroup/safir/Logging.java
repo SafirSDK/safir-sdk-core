@@ -24,13 +24,14 @@
 ******************************************************************************/
 package com.saabgroup.safir;
 
-/** 
+/**
  * Class containing types and functions to be used for logging.
  */
 public final class Logging
 {
-    /** 
-     * Severity level according to RFC 3164. Please read the section on Safir Logging 
+    private Logging() {}
+    /**
+     * Severity level according to RFC 3164. Please read the section on Safir Logging
      * in the Safir SDK Core User's Guide for some recommendations on when to use the
      * various severity levels.
      **/
@@ -78,7 +79,7 @@ public final class Logging
 
     private static native void sendSystemLogInternal(int severity,
                                                      String message);
-    
+
     static
     {
         System.loadLibrary("logging_java_jni");

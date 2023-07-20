@@ -30,6 +30,8 @@ package com.saabgroup.safir.dob.typesystem;
  * Serialization and deserialization of objects, xml, json and base64.
  */
 public class Serialization {
+    private Serialization() {}
+
     /**
      * Serialize an object to XML.
      *

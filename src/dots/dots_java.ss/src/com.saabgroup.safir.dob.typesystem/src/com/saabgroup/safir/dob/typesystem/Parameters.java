@@ -34,6 +34,7 @@ package com.saabgroup.safir.dob.typesystem;
  * parameter names and indexes, TypeIds of parameters etc.
  */
 public class Parameters {
+    private Parameters() {}
 
     /**
      * Get the number of parameters defined in a class.
@@ -89,14 +90,14 @@ public class Parameters {
     public static String getName(long typeId, int parameter)
     {
         int[] memberType=new int[1];
-        String[] parameterName=new String[1];        
+        String[] parameterName=new String[1];
         long[] complexType=new long[1];
         int[] collectionType=new int[1];
         int[] numberOfValues=new int[1];
         Kernel.GetParameterInfo(typeId, parameter, memberType, parameterName, complexType, collectionType, numberOfValues);
-        
+
         return parameterName[0];
-    }    
+    }
 
     /**
      * Gets a string representation of the type of a parameter.
@@ -113,12 +114,12 @@ public class Parameters {
     public static String getTypeName(long typeId, int parameter)
     {
         int[] memberType=new int[1];
-        String[] parameterName=new String[1];        
+        String[] parameterName=new String[1];
         long[] complexType=new long[1];
         int[] collectionType=new int[1];
         int[] numberOfValues=new int[1];
         Kernel.GetParameterInfo(typeId, parameter, memberType, parameterName, complexType, collectionType, numberOfValues);
-        
+
         MemberType mt=MemberType.values()[memberType[0]];
         if (mt==MemberType.OBJECT_MEMBER_TYPE || mt==MemberType.ENUMERATION_MEMBER_TYPE)
         {
@@ -129,7 +130,7 @@ public class Parameters {
             return Kernel.MemberTypeName(memberType[0]);
         }
     }
-    
+
     /**
      * Get the type of a parameter.
      *
@@ -143,12 +144,12 @@ public class Parameters {
     public static MemberType getType(long typeId, int parameter)
     {
         int[] memberType=new int[1];
-        String[] parameterName=new String[1];        
+        String[] parameterName=new String[1];
         long[] complexType=new long[1];
         int[] collectionType=new int[1];
         int[] numberOfValues=new int[1];
         Kernel.GetParameterInfo(typeId, parameter, memberType, parameterName, complexType, collectionType, numberOfValues);
-        
+
         return MemberType.values()[memberType[0]];
     }
 
@@ -165,12 +166,12 @@ public class Parameters {
     public static int getArraySize(long typeId, int parameter)
     {
         int[] memberType=new int[1];
-        String[] parameterName=new String[1];        
+        String[] parameterName=new String[1];
         long[] complexType=new long[1];
         int[] collectionType=new int[1];
         int[] numberOfValues=new int[1];
         Kernel.GetParameterInfo(typeId, parameter, memberType, parameterName, complexType, collectionType, numberOfValues);
-        
+
         return numberOfValues[0];
     }
 
@@ -426,31 +427,31 @@ public class Parameters {
         val[0].get(result);
         return result;
     }
-    
+
     public static int dictionaryKeyToIndex(long typeId, int parameter, int key) {
         return Kernel.DictionaryInt32KeyToIndex(typeId, parameter, key);
     }
-    
+
     public static int dictionaryKeyToIndex(long typeId, int parameter, long key) {
         return Kernel.DictionaryInt64KeyToIndex(typeId, parameter, key);
     }
-    
+
     public static int dictionaryKeyToIndex(long typeId, int parameter, String key) {
         return Kernel.DictionaryStringKeyToIndex(typeId, parameter, key);
     }
-    
+
     public static int dictionaryKeyToIndex(long typeId, int parameter, EntityId key) {
         return Kernel.DictionaryEntityIdKeyToIndex(typeId, parameter, key.getTypeId(), key.getInstanceId().getRawValue());
     }
-    
+
     public static int dictionaryKeyToIndex(long typeId, int parameter, InstanceId key) {
         return Kernel.DictionaryInt64KeyToIndex(typeId, parameter, key.getRawValue());
     }
-    
+
     public static int dictionaryKeyToIndex(long typeId, int parameter, HandlerId key) {
         return Kernel.DictionaryInt64KeyToIndex(typeId, parameter, key.getRawValue());
     }
-    
+
     public static int dictionaryKeyToIndex(long typeId, int parameter, ChannelId key) {
         return Kernel.DictionaryInt64KeyToIndex(typeId, parameter, key.getRawValue());
     }

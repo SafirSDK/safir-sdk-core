@@ -25,28 +25,30 @@
 package com.saabgroup.safir.swreports;
 
 /**
-Provides methods for sending sofware reports.
-<p>
-There are five predefined report types: Fatal Error Report, Error Report, Resource Report,
-Program Info Report and Programming Error Report.
-<p>
-See the corresponding method for a description of the intended usage.
-<p>
-Some methods have both an error code and a text parameter (both of type string).
-The intended usage is that the error code parameter should be a short mnemonic string
-and the text parameter should be a more elaborated description. The mnemonic strings
-are preferably defined as Dob parameters.
-<p>
-From the location parameter string it should be easy to identify the exact code location
-where the report is generated.
-<p>
-All methods are thread safe.
-<p>
-@deprecated use com.saabgroup.safir.logging.SendSystemLog() instead.
-*/
+ * Provides methods for sending sofware reports.
+ * <p>
+ * There are five predefined report types: Fatal Error Report, Error Report, Resource Report,
+ * Program Info Report and Programming Error Report.
+ * </p>
+ * See the corresponding method for a description of the intended usage.
+ * <p>
+ * Some methods have both an error code and a text parameter (both of type string).
+ * The intended usage is that the error code parameter should be a short mnemonic string
+ * and the text parameter should be a more elaborated description. The mnemonic strings
+ * are preferably defined as Dob parameters.
+ * </p>
+ * From the location parameter string it should be easy to identify the exact code location
+ * where the report is generated.
+ * <p>
+ * All methods are thread safe.
+ * </p>
+ * @deprecated use com.saabgroup.safir.logging.SendSystemLog() instead.
+ */
 @Deprecated
 public class SwReport
 {
+    private SwReport() {}
+
     /**
      * Sends a Fatal Error report.
      *

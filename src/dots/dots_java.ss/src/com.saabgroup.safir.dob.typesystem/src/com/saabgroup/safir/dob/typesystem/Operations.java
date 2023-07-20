@@ -29,6 +29,7 @@ package com.saabgroup.safir.dob.typesystem;
  * Operations on DOB types.
  */
 public class Operations {
+    private Operations() {}
 
     /**
      * Get the number of type id's defined in the system.

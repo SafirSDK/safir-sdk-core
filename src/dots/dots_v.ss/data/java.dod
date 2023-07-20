@@ -142,6 +142,8 @@ package @_NAMESPACE_@;
 @@END_IF@@
 public class @_CLASS_@
 {
+    private @_CLASS_@() {}
+
     /**
      * Check if a certain object has a property mapping to this property.
      * @param obj Object to check
@@ -1074,7 +1076,7 @@ public class @_CLASS_@
 
     /**
      * Create @_CLASS_@ object from blob.
-     * @param blob the blob to deserialize.
+     * @param handle A handle to a blob reader.
      */
     public @_CLASS_@(long handle) {
         super(handle);
@@ -1170,7 +1172,7 @@ public class @_CLASS_@
     }
 
     /**
-     * @see com.saabgroup.safir.dob.typesystem.Object#writeToBlob(java.nio.ByteBuffer, int)
+     * @see com.saabgroup.safir.dob.typesystem.Object#writeToBlob(long)
      */
     @Override
     public void writeToBlob(long handle)
@@ -1461,6 +1463,12 @@ public class @_CLASS_@
      */
     static public class SequenceContainer
         extends com.saabgroup.safir.dob.typesystem.GenericObjectSequenceContainer<@_CLASS_@> {
+
+        /** Construct an empty sequence container */
+        public SequenceContainer()
+        {
+            super();
+        }
     }
 
 }
@@ -1510,8 +1518,9 @@ public enum @_CLASS_@
      * Convert the dou string value of an enum to an enum value.
      * @see #toDouString for an explanation of "dou enum strings".
      *
+     * @param str The dou string to convert to an enum.
      * @return The enum value corresponding to the string.
-     * @throws IllegalValueException There is no such type defined or it is not an enumeration.
+     * @throws com.saabgroup.safir.dob.typesystem.IllegalValueException There is no such type defined or it is not an enumeration.
      */
     static public @_CLASS_@ fromDouString(String str) {
         return @_CLASS_@.values()[com.saabgroup.safir.dob.typesystem.Operations.getEnumerationValue(EnumerationId,str)];
@@ -1614,10 +1623,25 @@ public enum @_CLASS_@
 
     /**
      * Dictionary container
+     *
+     * @param <K> key type
      */
     static public class DictionaryContainer<K>
         extends com.saabgroup.safir.dob.typesystem.DictionaryContainer<K,Container> {
 
+        /** Construct an empty dictionary container */
+        public DictionaryContainer()
+        {
+            super();
+        }
+
+        /**
+         * Set the value for a particular key.
+         *
+         * @param key The key to assign a value for
+         * @param value The value to assign.
+         * @return The container that was assigned to inside the dictionary.
+         */
         public Container putVal(K key, @_CLASS_@ value) {
             m_isChanged=true;
             Container container = new Container();

@@ -38,15 +38,16 @@ package com.saabgroup.safir.dob.typesystem;
  *       has worked okay. They will just return unexpected values if something went wrong.
  */
 public class BlobOperations {
+    private BlobOperations() {}
 
     public static final int KEY_MODE = 0;
     public static final int VALUE_MODE = 1;
 
-    /// <summary>
-    /// Writes to BLOB.
-    /// </summary>
-    /// <returns>The to BLOB.</returns>
-    /// <param name="obj">Object.</param>
+    /**
+     * Write to BLOB.
+     * @return A bytebuffer containing BLOB.
+     * @param obj Object.
+     */
     public static java.nio.ByteBuffer writeToBlob(com.saabgroup.safir.dob.typesystem.Object obj)
     {
         long handle = Kernel.CreateBlobWriter(obj.getTypeId());

@@ -27,6 +27,8 @@ package com.saabgroup.safir.application;
 
 public final class TracerBackdoor
 {
+    private TracerBackdoor() {}
+
     public static void start(com.saabgroup.safir.dob.ConnectionBase connection)
     {
         com.saabgroup.safir.dob.ConnectionAspectMisc misc = new com.saabgroup.safir.dob.ConnectionAspectMisc(connection);
@@ -39,7 +41,7 @@ public final class TracerBackdoor
             com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
         }
     }
-    
+
     public static void stop()
     {
         Library.StopTraceBackdoor();
