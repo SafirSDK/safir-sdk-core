@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2015 (http://safirsdkcore.com)
+* Copyright Saab AB, 2023 (http://safirsdkcore.com)
 *
 * Created by: Anders Widn / anders.widen@consoden.se
 *
@@ -253,7 +253,7 @@ namespace Internal
                 cb();
             }
 
-            // If we toggle to detached mode, first exclude all remote nodes.
+            // If we toggle to detached mode, exclude all remote nodes.
             auto nodesCopy = m_liveNodes;
             for (const auto& kv : nodesCopy)
             {

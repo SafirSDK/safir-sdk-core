@@ -112,9 +112,14 @@ namespace Internal
         GetType(typeId).UnregisterAll(connection, explicitUnregister);
     }
 
-    void EntityTypes::DetachAll(const ConnectionPtr& connection, const Dob::Typesystem::TypeId typeId)
+    void EntityTypes::SetDetachFlagAll(const ConnectionPtr& connection, const Dob::Typesystem::TypeId typeId, bool detached)
     {
-        GetType(typeId).DetachAll(connection);
+        GetType(typeId).SetDetachFlagAll(connection, detached);
+    }
+
+    void EntityTypes::PrepareSmartSync(SmartSyncState::Registration& reg) const
+    {
+        GetType(reg.typeId).PrepareSmartSync(reg);
     }
 
     bool EntityTypes::RemoteSetRegistrationState(const ConnectionPtr& connection,

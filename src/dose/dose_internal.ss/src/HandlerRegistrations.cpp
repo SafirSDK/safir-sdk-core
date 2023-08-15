@@ -237,11 +237,11 @@ namespace Internal
         // If the handler id happens to be on the revoked list for the new registerer (unlikely) it must be removed.
         registerer.connection->RemoveRevokedRegistration(m_typeId, handlerId);
 
-        registerer.connection->AddRegistration(m_typeId, handlerId, registerer.consumer);
+        registerer.connection->AddRegistration(m_typeId, handlerId, registerer.consumer, regTime.GetRawValue());
 
         if (isInjectionHandler)
         {
-            RegisterInjectionHandler(registerer.connection, handlerId, registerer.consumer);
+            RegisterInjectionHandler(registerer.connection, handlerId, registerer.consumer, regTime.GetRawValue());
         }
 
         registrationDone = true;
@@ -353,7 +353,8 @@ namespace Internal
             statePtr->SetConnection(connection);
             connection->AddRegistration(m_typeId,
                                         handlerId,
-                                        ConsumerId(NULL, static_cast<short>(0))); // Dummy consumer for registration state from external node
+                                        ConsumerId(NULL, static_cast<short>(0)), // Dummy consumer for registration state from external node
+                                        remoteRegistrationState.GetRegistrationTime().GetRawValue());
 
             statePtr->SetReleased(false);
         }
@@ -417,19 +418,19 @@ namespace Internal
              false);  // no need to include already released states
     }
 
-    void HandlerRegistrations::DetachAll(const ConnectionPtr& connection)
+    void HandlerRegistrations::SetDetachFlagAll(const ConnectionPtr& connection, bool detached)
     {
-        m_registrations.ForEachState([this, &connection](const auto, const StateSharedPtr& regState, bool&)
+        m_registrations.ForEachState([this, &connection, detached](const auto, const StateSharedPtr& regState, bool&)
         {
             if (regState->GetConnection()->Id() == connection->Id())
             {
-                regState->SetDetached(true);
+                regState->SetDetached(detached);
             }
 
             if (m_entityContainerPtr != NULL)
             {
                 auto handlerId = regState->GetRealState().GetHandlerId();
-                m_entityContainerPtr->ForEachState([connection, handlerId](const auto, const StateSharedPtr& entityState, bool&)
+                m_entityContainerPtr->ForEachState([connection, handlerId, detached](const auto, const StateSharedPtr& entityState, bool&)
                 {
                     // RevokeEntity(stateSharedPtr,connection,handlerId,currentRegisterTime,exitDispatch);
                     if (entityState->GetConnection() == NULL || connection->Id() != entityState->GetConnection()->Id())
@@ -445,7 +446,7 @@ namespace Internal
                         return;
                     }
 
-                    entityState->SetDetached(true);
+                    entityState->SetDetached(detached);
                 }, false);
 
             }
@@ -652,7 +653,7 @@ namespace Internal
         {
             RemoveRegistration(connection, handlerId);
             ENSURE(consumer != ConsumerId(), << "RevokeRegisterer called with a \"NULL\" consumer!");
-            connection->AddRevokedRegistration(m_typeId, handlerId, consumer);
+            connection->AddRevokedRegistration(m_typeId, handlerId, consumer, currentRegisterTime.GetRawValue());
         }
 
         if (m_entityContainerPtr != NULL)
@@ -806,7 +807,8 @@ namespace Internal
 
     void HandlerRegistrations::RegisterInjectionHandler(const ConnectionPtr&      connection,
                                                         const Dob::Typesystem::HandlerId&   handlerId,
-                                                        const ConsumerId&                   consumer)
+                                                        const ConsumerId&                   consumer,
+                                                        const uint32_t                       regTime)
     {
         if (!connection->IsLocal())
         {
@@ -832,7 +834,7 @@ namespace Internal
                                          SubscriptionOptionsPtr(NULL));    // options not used for injection subscription
 
         // Save the consumer, it is needed when unsubscribing for the injection subscriptions.
-        connection->AddInjectionHandler(m_typeId, handlerId, consumer);
+        connection->AddInjectionHandler(m_typeId, handlerId, consumer, regTime);
     }
 
     void HandlerRegistrations::RemoveRegistration(const ConnectionPtr& connection,

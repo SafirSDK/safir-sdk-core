@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2015 (http://safirsdkcore.com)
+* Copyright Saab AB, 2023 (http://safirsdkcore.com)
 *
 * Created by: Joel Ottosson / joel.ottosson@consoden.se
 *
@@ -64,7 +64,7 @@ namespace Internal
     private:
         typedef PoolDistribution<Distribution> PoolDistributionType;
         typedef PoolDistributionHandler<Distribution, PoolDistributionType> PoolDistributionHandlerType;
-        typedef PoolDistributionRequestSender<Distribution> PoolDistributionRequestSenderType;
+        typedef PoolDistributionRequestSender<Distribution, Connections> PoolDistributionRequestSenderType;
         typedef StateDistributor<Distribution> StateDistributorType;
 
         boost::asio::io_service::strand& m_strand;
@@ -86,7 +86,7 @@ namespace Internal
         //The NodeInfoHandler can not be started until we have pd complete
         //so the PoolHandler has to own it.
         std::unique_ptr<NodeInfoHandler> m_nodeInfoHandler;
-        bool m_detached;
+        Safir::Dob::NodeState::Enumeration m_nodeState;
         bool m_running;
 
         void RunEndStatesTimer();
@@ -104,6 +104,7 @@ namespace Internal
 
         //other node is requesting a pd or report pdComplete
         void OnPoolDistributionInfo(int64_t fromNodeId, int64_t fromNodeType, const char* data, size_t size);
+        void OnAllPoolsReceived();
 
         //received registration state from other node
         void OnRegistrationState(int64_t fromNodeId, int64_t fromNodeType, const char* data, size_t size);

@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2008-2013 (http://safirsdkcore.com)
+* Copyright Saab AB, 2008-2023 (http://safirsdkcore.com)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -24,6 +24,10 @@
 #ifndef __VERSIONNUMBER_H__
 #define __VERSIONNUMBER_H__
 
+#include <iostream>
+#include <cstdint>
+#include <limits>
+
 namespace Safir
 {
 namespace Dob
@@ -34,6 +38,7 @@ namespace Internal
     {
     public:
         VersionNumber():m_counter(0){}
+        VersionNumber(uint16_t initialValue):m_counter(initialValue){}
 
         VersionNumber& operator++(){++m_counter; return *this;}
 
@@ -71,6 +76,8 @@ namespace Internal
         {
             return ((other.m_counter - m_counter) % max()) > 1;
         }
+
+        std::uint16_t GetRawValue() const { return m_counter; }
 
     private:
         static inline std::uint16_t max() {return std::numeric_limits<std::uint16_t>::max();}

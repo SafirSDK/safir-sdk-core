@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2015 (http://safirsdkcore.com)
+* Copyright Saab AB, 2023 (http://safirsdkcore.com)
 *
 * Created by: Joel Ottosson / joel.ottosson@consoden.se
 *
@@ -26,6 +26,9 @@
 #include <functional>
 #include <Safir/Utilities/Internal/SharedCharArray.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
+#include <Safir/Dob/Internal/InternalDefs.h>
+#include <Safir/Dob/Internal/SmartSyncState.h>
+#include "PoolSyncInfo.pb.h"
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -45,26 +48,24 @@ namespace Dob
 namespace Internal
 {
     static const int64_t PoolDistributionInfoDataTypeId=-3446507522969672286; //DoseMain.PoolDistributionInfo
-    enum PoolDistributionInfo : std::int32_t
-    {
-        PdRequest = 1,      //Request a pool distribution from another node
-        PdComplete = 2     //Answer to PdRequest: my pool distribution is completed including persistent data
-    };
     //---------------------------------------------------------
 
     ///
     /// Responsible for sending poolDistributionRequests to all nodes at start-up.
     /// When all poolDistributions are received, this class calls the pdComplete callback.
     ///
-    template <class DistributionT>
+    template <class DistributionT, class ConnectionsT>
     class PoolDistributionRequestSender
     {
     public:
-        PoolDistributionRequestSender(boost::asio::io_service& io,
-                                  DistributionT& distribution)
+        typedef ConnectionsT Connections;
+
+        PoolDistributionRequestSender(boost::asio::io_service& io, DistributionT& distribution,
+                                      const std::function<void()>& allPoolsReceived)
             :m_running(false)
             ,m_strand(io)
             ,m_distribution(distribution)
+            ,m_allPoolsReceivedCb(allPoolsReceived)
         {
         }
 
@@ -92,7 +93,7 @@ namespace Internal
             m_strand.post([this, nodeId, nodeTypeId]
             {
                 lllog(5)<<"PoolHandler: Request pooldistribution from "<< nodeId <<std::endl;
-                m_requests.push_back(PoolDistributionRequestSender<DistributionT>::PdReq(nodeId, nodeTypeId, false));
+                m_requests.push_back(PoolDistributionRequestSender<DistributionT, ConnectionsT>::PdReq(nodeId, nodeTypeId, false));
                 SendPoolDistributionRequests();
             });
         }
@@ -114,6 +115,11 @@ namespace Internal
                     {
                         m_requests.erase(it);
                     }
+                }
+
+                if (m_requests.empty())
+                {
+                    m_allPoolsReceivedCb();
                 }
 
             });
@@ -140,6 +146,7 @@ namespace Internal
 
         boost::asio::io_service::strand m_strand;
         DistributionT& m_distribution;
+        std::function<void()> m_allPoolsReceivedCb;
 
         std::vector<PdReq> m_requests;
 
@@ -150,18 +157,58 @@ namespace Internal
                 return;
             }
 
-            auto req=Safir::Utilities::Internal::MakeSharedArray(sizeof(PoolDistributionInfo));
-            (*reinterpret_cast<PoolDistributionInfo*>(req.get()))= PdRequest;
-
             bool unsentRequests=false;
 
-            for (auto r = m_requests.begin(); r != m_requests.end(); ++r)
+            for (auto request = m_requests.begin(); request != m_requests.end(); ++request)
             {
-                if (!r->sent)
+                if (!request->sent)
                 {
-                    if (m_distribution.GetCommunication().Send(r->nodeId, r->nodeType, req, sizeof(PoolDistributionInfo), PoolDistributionInfoDataTypeId, true))
+                    lllog(5) << L"smart prepareRequest to " << request->nodeId << std::endl;
+                    SmartSyncState syncState;
+                    ConnectionsT::Instance().PrepareSmartSync(request->nodeId, syncState);
+                    lllog(5) << L"smart prepareRequest DONE to " << request->nodeId << std::endl;
+
+                    if (Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().LogLevel() >= 5)
                     {
-                        r->sent=true;
+                        std::wostringstream os;
+                        syncState.ToString(os);
+                        lllog(5) << L"Send PD request with smartSyncState: " << std::endl << os.str() << std::endl;
+                    }
+
+                    Pd::PoolSyncInfo poolSyncInfo;
+                    poolSyncInfo.set_messagetype(Pd::PoolSyncInfo_PdMsgType::PoolSyncInfo_PdMsgType_PdRequest);
+                    for (const auto& connection : syncState.connections)
+                    {
+                        auto c = poolSyncInfo.mutable_connections()->Add();
+                        c->set_connection_id(connection.connectionId);
+                        c->set_context(connection.context);
+                        c->set_counter(connection.counter);
+                        for (const auto& registration : connection.registrations)
+                        {
+                            auto r = c->mutable_registrations()->Add();
+                            r->set_type_id(registration.typeId);
+                            r->set_handler_id(registration.handlerId);
+                            r->set_registration_time(registration.registrationTime);
+
+                            for (const auto& entity : registration.entities)
+                            {
+                                auto e = r->mutable_entities()->Add();
+                                e->set_instance_id(entity.instanceId);
+                                e->set_version(entity.version);
+                                e->set_creation_time(entity.creationTime);
+                            }
+                        }
+                        c->set_name(connection.name);
+                    }
+
+                    const auto size = poolSyncInfo.ByteSizeLong();
+                    Safir::Utilities::Internal::SharedCharArray payload = Safir::Utilities::Internal::MakeSharedArray(size);
+                    google::protobuf::uint8* buf=reinterpret_cast<google::protobuf::uint8*>(const_cast<char*>(payload.get()));
+                    poolSyncInfo.SerializeWithCachedSizesToArray(buf);
+
+                    if (m_distribution.GetCommunication().Send(request->nodeId, request->nodeType, payload, size, PoolDistributionInfoDataTypeId, true))
+                    {
+                        request->sent=true;
                     }
                     else
                     {

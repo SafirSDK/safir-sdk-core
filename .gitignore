@@ -22,6 +22,7 @@ CTestTestfile.cmake
 CMakeLists.txt.user
 install_manifest*.txt
 CMakeFiles
+CMakeSettings.json
 *.rsp
 CMakeCache.txt
 Makefile
@@ -53,9 +54,11 @@ stage
 x64/
 Debug/
 Release/
+out/
 RelWithDebInfo/
 ipch/
 **/.vscode/
+**/.vs/
 
 
 #CTest / Unit test stuff

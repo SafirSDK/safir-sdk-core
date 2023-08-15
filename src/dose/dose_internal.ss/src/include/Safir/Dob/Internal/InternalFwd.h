@@ -42,7 +42,8 @@ namespace Internal
 
     class Connection;
     typedef SharedMemoryObject::SmartPointers<Connection>::shared_ptr ConnectionPtr;
-    typedef SharedMemoryObject::SmartPointers<const Connection>::shared_ptr ConnectionConstPtr;
+    typedef SharedMemoryObject::SmartPointers<Connection>::const_shared_ptr ConnectionConstPtr;
+    //typedef SharedMemoryObject::SmartPointers<const Connection>::shared_ptr ConnectionConstPtr;
     
     class Instance;
     typedef boost::interprocess::offset_ptr<Instance> InstancePtr;

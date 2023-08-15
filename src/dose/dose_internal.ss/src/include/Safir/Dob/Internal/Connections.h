@@ -33,6 +33,7 @@
 #include <boost/interprocess/sync/interprocess_mutex.hpp>
 #include <Safir/Dob/Internal/ConnectRequest.h>
 #include <Safir/Dob/Internal/LeveledLock.h>
+#include <Safir/Dob/Internal/LeveledLock.h>
 
 namespace Safir
 {
@@ -176,8 +177,9 @@ namespace Internal
 
         // Removes connection(s) from specified node.
         void RemoveConnectionFromNode(const int64_t nodeId);
-        void DetachConnectionsFromNode(const int64_t nodeId);
+        void SetDetachFlagForConnectionsFromNode(const int64_t nodeId, bool detached);
         void RemoveDetachedConnections();
+        void PrepareSmartSync(const int64_t fromNodeId, SmartSyncState& syncState) const;
 
 
         //A reader lock on the connection vector will be taken during the looping and the callback!

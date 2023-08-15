@@ -291,6 +291,14 @@ namespace Internal
             >
             shared_ptr;
 
+            typedef typename boost::interprocess::shared_ptr
+            <
+                const T,
+                my_allocator<T>,
+                my_deleter<T>
+            >
+            const_shared_ptr;
+
             typedef typename boost::interprocess::weak_ptr
             <
                 T,

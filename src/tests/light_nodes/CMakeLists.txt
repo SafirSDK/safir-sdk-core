@@ -22,3 +22,16 @@ ADD_TEST(NAME light_nodes_keep_state
 SET_SAFIR_TEST_PROPERTIES(TEST light_nodes_keep_state
   TIMEOUT 3000
   CONFIG_OVERRIDE ${CMAKE_CURRENT_SOURCE_DIR}/test_config)
+
+ADD_TEST(NAME light_nodes_smart_sync
+  COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/light_nodes_smart_sync.py
+  --safir-control $<TARGET_FILE:safir_control>
+  --dose_main $<TARGET_FILE:dose_main>
+  --dope_main $<TARGET_FILE:dope_main>
+  --safir-show-config $<TARGET_FILE:safir_show_config>
+  --dobexplorer $<TARGET_FILE:dobexplorer>
+  --safir_websocket $<TARGET_FILE:safir_websocket>)
+
+SET_SAFIR_TEST_PROPERTIES(TEST light_nodes_smart_sync
+  TIMEOUT 3000
+  CONFIG_OVERRIDE ${CMAKE_CURRENT_SOURCE_DIR}/test_config)

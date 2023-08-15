@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2015 (http://safirsdkcore.com)
+* Copyright Saab AB, 2023 (http://safirsdkcore.com)
 *
 * Created by: Joel Ottosson / joel.ottosson@consoden.se
 *
@@ -26,6 +26,7 @@
 #include <functional>
 #include <Safir/Utilities/Internal/VisibilityHelpers.h>
 #include <Safir/Utilities/Internal/SharedCharArray.h>
+#include <Safir/Dob/Internal/SmartSyncState.h>
 #include "PoolDistributionRequestSender.h"
 
 #ifdef _MSC_VER
@@ -117,13 +118,14 @@ namespace Internal
 
         // Called when a new pdRequest is received. Will result in a pd to the node with specified id.
         // This method can be called before Start, but no PD will begin to run before Start is called.
-        void AddPoolDistribution(int64_t nodeId, int64_t nodeTypeId) SAFIR_GCC_VISIBILITY_BUG_WORKAROUND
+        void AddPoolDistribution(int64_t nodeId, int64_t nodeTypeId, const std::shared_ptr<SmartSyncState>& syncState) SAFIR_GCC_VISIBILITY_BUG_WORKAROUND
         {
             lllog(5) << "PoolHandler: AddPoolDistribution to " << nodeId << std::endl;
-            m_strand.post([this, nodeId, nodeTypeId]
+            m_strand.post([this, nodeId, nodeTypeId, syncState]
             {
                 auto pd = std::make_shared<PoolDistributionT> (nodeId,
                                                                nodeTypeId,
+                                                               syncState,
                                                                m_strand,
                                                                m_distribution,
                                                                [this](int64_t nodeId)

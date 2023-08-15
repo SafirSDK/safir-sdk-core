@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2015 (http://safirsdkcore.com)
+* Copyright Saab AB, 2023 (http://safirsdkcore.com)
 *
 * Created by: Joel Ottosson / joel.ottosson@consoden.se
 *
@@ -40,6 +40,8 @@
 #include <Safir/Dob/NodeParameters.h>
 #include <Safir/Dob/Internal/DistributionScopeReader.h>
 
+#include "PoolSyncInfo.pb.h"
+
 namespace Safir
 {
 namespace Dob
@@ -61,11 +63,13 @@ namespace Internal
     public:
         PoolDistribution(int64_t nodeId,
                          int64_t nodeType,
+                         const std::shared_ptr<SmartSyncState>& syncState,
                          boost::asio::io_service::strand& strand,
                          DistributionT& distribution,
                          const std::function<void(int64_t)>& completionHandler)
             :m_nodeId(nodeId)
             ,m_nodeType(nodeType)
+            ,m_syncState(syncState)
             ,m_receiverIsLightNode(distribution.IsLightNode(nodeType))
             ,m_strand(strand)
             ,m_timer(strand.context())
@@ -84,6 +88,13 @@ namespace Internal
 
         void Run() SAFIR_GCC_VISIBILITY_BUG_WORKAROUND
         {
+            // Starts the PD to a node.
+            // Info will be sent in this order:
+            // 1. Disconnects, Unregistrations
+            // 2. New Connections
+            // 3. New registrationStates, updated and new EntityStates (uses a dob subscription, sends in the same order it is handled over from subscription)
+            // 4. Deleted EntityStates
+
             // Always called from m_strand
             if (m_started || HasBeenCancelled())
             {
@@ -97,6 +108,7 @@ namespace Internal
             m_strand.post([self = this->shared_from_this()]
             {
                 lllog(5)<<"PoolHandler: Start PoolDistribution to "<<self->m_nodeId<<std::endl;
+
                 if (self->HasBeenCancelled())
                 {
                     lllog(5)<<"PoolHandler: PD was cancelled "<<self->m_nodeId<<std::endl;
@@ -104,24 +116,78 @@ namespace Internal
                     return;
                 }
 
-                //collect all connections on this node
+                if (Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().LogLevel() >= 5)
+                {
+                    std::wostringstream os;
+                    self->m_syncState->ToString(os);
+                    lllog(5) << L"Start PD using smartSyncState: " << std::endl << os.str() << std::endl;
+                }
+
+                //If receiver is lightNode, we must send deleted connections and unregistrations
+                if (self->m_receiverIsLightNode)
+                {
+                    // get deleted connections
+                    for (const auto& con : self->m_syncState->connections)
+                    {
+                        ConnectionId connId(self->m_distribution.GetNodeId(), con.context, con.connectionId);
+                        auto conPtr = Connections::Instance().GetConnection(connId, std::nothrow);
+                        if (!conPtr || conPtr->Counter() != con.counter)
+                        {
+                            // connection does not exist anymore, or has new counter which means it has been disconnected and then reconnected.
+                            self->m_prioritizedStates.push(DistributionData(disconnect_message_tag, connId));
+                        }
+                        else
+                        {
+                            // the connection exists, check for any deleted registrations
+                            auto registrations = conPtr->GetRegisteredHandlers();
+                            for (const auto& reg : con.registrations)
+                            {
+                                bool exists = std::any_of(std::begin(registrations), std::end(registrations), [&reg](auto r) {
+                                    return r.typeId == reg.typeId && r.handlerId.GetRawValue() == reg.handlerId && r.regTime == reg.registrationTime;
+                                    });
+
+                                if (!exists)
+                                {
+                                    // registration state doesn't exist any more, add a unregister state to the send queue
+                                    self->m_prioritizedStates.push(
+                                        DistributionData(registration_state_tag,
+                                            connId,
+                                            reg.typeId,
+                                            Typesystem::HandlerId(reg.handlerId),
+                                            InstanceIdPolicy::HandlerDecidesInstanceId, // Dummy for an unreg state
+                                            DistributionData::Unregistered,
+                                            LamportTimestamp::MakeTimestamp(reg.registrationTime, connId.m_node))
+                                    );
+                                }
+                            }
+                        }
+                    }
+                }
+                
+
+                //collect all connections on this node that receiver does not already have
                 Connections::Instance().ForEachConnection([self](const Connection& connection)
                 {
-                    //auto notDoseConnection=std::string(connection.NameWithoutCounter()).find(";dose_main;")==std::string::npos;
                     const auto localContext=Safir::Dob::NodeParameters::LocalContexts(connection.Id().m_contextId);
                     const auto connectionOnThisNode=connection.IsLocal();
                     const auto detachedConnection = connection.IsDetached();
 
                     if (!detachedConnection && !localContext && connectionOnThisNode)
                     {
-                        self->m_connections.push(DistributionData(connect_message_tag,
-                                                            connection.Id(),
-                                                            connection.NameWithoutCounter(),
-                                                            connection.Counter()));
+                        bool exists = std::any_of(std::begin(self->m_syncState->connections), std::end(self->m_syncState->connections), [&connection](auto c){
+                            return connection.Id().m_id == c.connectionId && connection.Id().m_contextId == c.context && connection.Counter() == c.counter;
+                        });
+                        if (!exists)
+                        {
+                            self->m_prioritizedStates.push(DistributionData(connect_message_tag,
+                                                                connection.Id(),
+                                                                connection.NameWithoutCounter(),
+                                                                connection.Counter()));
+                        }
                     }
                 });
 
-                self->SendConnections(); //will trigger the sequence SendConnections -> SendStates() -> SendPdComplete()
+                self->SendConnectionsAndUnregistrations(); //will trigger the sequence SendConnectionsAndUnregistrations() -> SendStates() -> SendPdComplete()
             });
         }
 
@@ -151,12 +217,20 @@ namespace Internal
 
         const int64_t m_nodeId;
         const int64_t m_nodeType;
+        std::shared_ptr<SmartSyncState> m_syncState;
         const bool m_receiverIsLightNode;
         boost::asio::io_service::strand& m_strand;
         boost::asio::steady_timer m_timer;
         DistributionT& m_distribution;
         std::function<void(int64_t)> m_completionHandler;
-        std::queue<DistributionData> m_connections;
+        
+        // States that must be sent before normal reg/entity states
+        // Queue layout will be:
+        // +---------------------------------------------------------+
+        // | deleted connections | unregistrations | new connections |
+        // +---------------------------------------------------------+
+        std::queue<DistributionData> m_prioritizedStates; 
+        
         Safir::Dob::Connection m_dobConnection;
 
         bool m_started = false;
@@ -174,21 +248,21 @@ namespace Internal
             return false;
         }
 
-        void SendConnections()
+        void SendConnectionsAndUnregistrations()
         {
             if (HasBeenCancelled())
             {
                 return;
             }
 
-            while (!m_connections.empty())
+            while (!m_prioritizedStates.empty())
             {
-                const DistributionData& d=m_connections.front();
+                const DistributionData& d=m_prioritizedStates.front();
                 Safir::Utilities::Internal::SharedConstCharArray p(d.GetReference(), [=](const char* ptr){DistributionData::DropReference(ptr);});
 
                 if (m_distribution.GetCommunication().Send(m_nodeId, m_nodeType, p, d.Size(), ConnectionMessageDataTypeId, true))
                 {
-                    m_connections.pop();
+                    m_prioritizedStates.pop();
                 }
                 else
                 {
@@ -196,7 +270,7 @@ namespace Internal
                 }
             }
 
-            if (m_connections.empty())
+            if (m_prioritizedStates.empty())
             {
                 m_strand.post([self = this->shared_from_this()]
                 {
@@ -205,7 +279,7 @@ namespace Internal
             }
             else
             {
-                SetTimer([self = this->shared_from_this()]{self->SendConnections();});
+                SetTimer([self = this->shared_from_this()]{self->SendConnectionsAndUnregistrations();});
             }
         }
 
@@ -272,7 +346,7 @@ namespace Internal
             }
 
             bool overflow=false;
-            conPtr->GetDirtySubscriptionQueue().Dispatch([this, conPtr, &overflow](const SubscriptionPtr& subscription, bool& exitDispatch, bool& dontRemove)
+            conPtr->GetDirtySubscriptionQueue().Dispatch([this, conPtr, context, &overflow](const SubscriptionPtr& subscription, bool& exitDispatch, bool& dontRemove)
             {
                 dontRemove=false;
                 DistributionData realState = subscription->GetState()->GetRealState();
@@ -281,12 +355,12 @@ namespace Internal
                     if (realState.GetType()==DistributionData::RegistrationState)
                     {
                         // Registration state
-                        dontRemove=!subscription->DirtyFlag().Process([this, &subscription]{return ProcessRegistrationState(subscription);});
+                        dontRemove=!subscription->DirtyFlag().Process([this, context, &subscription]{return ProcessRegistrationState(context, subscription);});
                     }
                     else
                     {
                         // Entity state
-                        dontRemove=!subscription->DirtyFlag().Process([this, &subscription]{return ProcessEntityState(subscription);});
+                        dontRemove=!subscription->DirtyFlag().Process([this, context, &subscription]{return ProcessEntityState(context, subscription);});
                     }
                 }
                 //dontRemove is true if we got an overflow, and if we did we dont want to keep sending anything to communication.
@@ -300,8 +374,85 @@ namespace Internal
             }
             else //continue with next context
             {
-                m_strand.dispatch([self = this->shared_from_this(), context]{self->SendStates(context+1);});
+                m_strand.dispatch([self = this->shared_from_this(), context]{self->SendDeletedEntityStates(context);});
             }
+        }
+
+        SmartSyncState::Entity* GetNextEntityInContext(int32_t context)
+        {
+            for (auto& con : m_syncState->connections)
+            {
+                if (con.context == context)
+                {
+                    for (auto& reg : con.registrations)
+                    {
+                        if (!reg.entities.empty())
+                        {
+                            return &reg.entities.front();
+                        }
+                    }
+                }
+            }
+
+            return nullptr; // no entity found in context
+        }
+
+        void SendDeletedEntityStates(int context)
+        {
+            if (HasBeenCancelled())
+            {
+                return;
+            }
+
+            if (m_receiverIsLightNode)
+            {
+                while (true)
+                {
+                    // any entities left in m_syncState is states that were not found anymore and a deleteEntity must be sent.
+                    SmartSyncState::Entity* entity = GetNextEntityInContext(context);
+
+                    if (entity == nullptr)
+                    {
+                        break; // we are done with this context
+                    }
+
+                    // Send delete state
+                    // if send ok, remove entityIt
+                    // if overflow, set timer and keep entityIt
+                    // There is no existing real state, create a new real state 'deleted'
+                    const auto thisNodeId = m_distribution.GetNodeId();
+
+                    DistributionData deleteState(entity_state_tag,
+                        // Correct node number and context but no connection id for delete states
+                        ConnectionId(thisNodeId, context, -1),
+                        entity->registration->typeId,
+                        Safir::Dob::Typesystem::HandlerId(entity->registration->handlerId),
+                        LamportTimestamp::MakeTimestamp(entity->registration->registrationTime, thisNodeId), //regtime
+                        Safir::Dob::Typesystem::InstanceId(entity->instanceId),
+                        LamportTimestamp::MakeTimestamp(entity->creationTime, thisNodeId),      // creation time
+                        DistributionData::Real,
+                        true,                          // deleted by owner
+                        false,                         // false => source is not permanent store
+                        NULL);                         // no blob
+
+                    // To make the receiver accept the state, we have to increment the original version number
+                    deleteState.SetVersion(VersionNumber(static_cast<uint16_t>(entity->version)));
+                    deleteState.IncrementVersion();
+
+                    Safir::Utilities::Internal::SharedConstCharArray p(deleteState.GetReference(), [=](const char* ptr) {DistributionData::DropReference(ptr); });
+                    if (m_distribution.GetCommunication().Send(m_nodeId, m_nodeType, p, deleteState.Size(), EntityStateDataTypeId, true))
+                    {
+                        entity->registration->DeleteEntity(entity->instanceId);
+                    }
+                    else
+                    {
+                        SetTimer([self = this->shared_from_this(), context] {self->SendDeletedEntityStates(context); });
+                        return;
+                    }
+                }
+            }
+
+            m_strand.dispatch([self = this->shared_from_this(), context] {self->SendStates(context + 1); });
         }
 
         void SendPdComplete()
@@ -313,10 +464,14 @@ namespace Internal
 
             m_dobConnection.Close();
 
-            auto req=Safir::Utilities::Internal::MakeSharedArray(sizeof(PoolDistributionInfo));
-            (*reinterpret_cast<PoolDistributionInfo*>(req.get()))=PdComplete;
+            Pd::PoolSyncInfo poolSyncInfo;
+            poolSyncInfo.set_messagetype(Pd::PoolSyncInfo_PdMsgType::PoolSyncInfo_PdMsgType_PdComplete);
+            const auto size = poolSyncInfo.ByteSizeLong();
+            Safir::Utilities::Internal::SharedCharArray payload = Safir::Utilities::Internal::MakeSharedArray(size);
+            google::protobuf::uint8* buf=reinterpret_cast<google::protobuf::uint8*>(const_cast<char*>(payload.get()));
+            poolSyncInfo.SerializeWithCachedSizesToArray(buf);
 
-            if (m_distribution.GetCommunication().Send(m_nodeId, m_nodeType, req, sizeof(PoolDistributionInfo), PoolDistributionInfoDataTypeId, true))
+            if (m_distribution.GetCommunication().Send(m_nodeId, m_nodeType, payload, size, PoolDistributionInfoDataTypeId, true))
             {
                 lllog(5)<<"PoolHandler: Completed PoolDistribution to "<<m_nodeId<<std::endl;
                 m_completionHandler(m_nodeId);
@@ -327,7 +482,7 @@ namespace Internal
             }
         }
 
-        bool ProcessEntityState(const SubscriptionPtr& subscription)
+        bool ProcessEntityState(int context, const SubscriptionPtr& subscription)
         {
             if (HasBeenCancelled())
             {
@@ -335,6 +490,7 @@ namespace Internal
             }
             // All nodes send ghost and injection data on PD!
             // Do not send updates
+            lllog(5)<<L"PoolHandler: PoolDistribution.ProcessEntityState: " << subscription->GetCurrentRealState().Image() << std::endl;
 
             if (subscription->GetState()->IsDetached())
             {
@@ -350,7 +506,38 @@ namespace Internal
             {
                 const DistributionData currentState = subscription->GetCurrentRealState();
 
-                if (m_distribution.IsLightNode() || m_receiverIsLightNode) // dealing with light nodes
+                if (m_receiverIsLightNode) // receiver is light node
+                {
+                    //Send all states owned by someone on this node
+                    //It is a real state, not ghost or other junk
+                    //It is an existing state, not a deleted state
+                    if (currentState.GetSenderId().m_node == m_distribution.GetCommunication().Id() &&
+                        currentState.GetEntityStateKind() == DistributionData::Real &&
+                        currentState.HasBlob())
+                    {
+                        auto entity = m_syncState->GetEntity(context, currentState.GetHandlerId().GetRawValue(), currentState.GetTypeId(), currentState.GetInstanceId().GetRawValue());
+                        bool entityChanged = entity == nullptr ||
+                            entity->version != currentState.GetVersion().GetRawValue() ||
+                            entity->creationTime != currentState.GetCreationTime().GetRawValue();
+
+                        // Only send states that is new or changed.
+                        if (entityChanged)
+                        {
+                            if (!m_distribution.GetCommunication().Send(m_nodeId, m_nodeType, ToPtr(currentState), currentState.Size(), EntityStateDataTypeId, true))
+                            {
+                                success = false;
+                            }
+                        }
+
+                        // Remove states that has been handled. When all states are sent we will send delete states for any remining states in m_syncState->entities
+                        if (success && entity != nullptr)
+                        {
+                            entity->registration->DeleteEntity(entity->instanceId);
+                        }
+                    }
+
+                }
+                else if (m_distribution.IsLightNode()) // this node is light node
                 {
                     //Send all states owned by someone on this node
                     //It is a real state, not ghost or other junk
@@ -358,7 +545,7 @@ namespace Internal
                     if (currentState.GetSenderId().m_node==m_distribution.GetCommunication().Id() &&
                         currentState.GetEntityStateKind() == DistributionData::Real &&
                             currentState.HasBlob())
-                    {
+                    {                        
                         if (!m_distribution.GetCommunication().Send(m_nodeId, m_nodeType, ToPtr(currentState), currentState.Size(), EntityStateDataTypeId, true))
                         {
                             success=false;
@@ -408,7 +595,7 @@ namespace Internal
             return success;
         }
 
-        bool ProcessRegistrationState(const SubscriptionPtr& subscription)
+        bool ProcessRegistrationState(int context, const SubscriptionPtr& subscription)
         {
             bool success=true;
 
@@ -425,18 +612,35 @@ namespace Internal
 
                 if (!state.IsNoState())
                 {
+                    ENSURE(state.GetSenderId().m_contextId == context, << L"PoolDistribution.ProcessRegistrationState - Got subscription with wrong context");
                     const auto normalNode = !m_distribution.IsLightNode();
                     const auto ownerOnThisNode = state.GetSenderId().m_node==m_distribution.GetCommunication().Id();
                     const auto isUnregistration =!state.IsRegistered();
 
                     //States owned by someone on this node are to be sent to other nodes.
                     //Unregistration states are always sent, since ghosts may be in WaitingStates
-                    //waiting for the unreg (only applies to normal nodes).
-                    if (ownerOnThisNode || (normalNode && isUnregistration))
+                    //waiting for the unreg (only applies between two normal nodes).
+                    if (ownerOnThisNode || (normalNode && !m_receiverIsLightNode && isUnregistration))
                     {
-                        if (!m_distribution.GetCommunication().Send(m_nodeId, m_nodeType, ToPtr(state), state.Size(), RegistrationStateDataTypeId, true))
+                        const auto conPtr = Connections::Instance().GetConnection(state.GetSenderId(), std::nothrow);
+                        auto counter = conPtr != nullptr ? conPtr->Counter() : -1;
+                        bool receiverHasRegState = std::any_of(std::begin(m_syncState->connections), std::end(m_syncState->connections), [counter, &state](const auto& c)
                         {
-                            success=false;
+                            return c.context == state.GetSenderId().m_contextId &&
+                                    c.connectionId == state.GetSenderId().m_id &&
+                                    c.counter == counter &&
+                                    std::any_of(std::begin(c.registrations), std::end(c.registrations), [&state, counter](const auto& r)
+                                    {
+                                        return r.typeId == state.GetTypeId() && r.handlerId == state.GetHandlerId().GetRawValue() && r.registrationTime >= state.GetRegistrationTime().GetRawValue();
+                                    });
+                        });
+
+                        if (!receiverHasRegState)
+                        {
+                            if (!m_distribution.GetCommunication().Send(m_nodeId, m_nodeType, ToPtr(state), state.Size(), RegistrationStateDataTypeId, true))
+                            {
+                                success=false;
+                            }
                         }
                     }
                 }

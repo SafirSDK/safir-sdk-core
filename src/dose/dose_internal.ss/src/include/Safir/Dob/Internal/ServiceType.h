@@ -68,7 +68,7 @@ namespace Internal
         void UnregisterAll(const ConnectionPtr& connection,
                            const bool           explicitUnregister);
 
-        void DetachAll(const ConnectionPtr& connection);
+        void SetDetachFlagAll(const ConnectionPtr& connection, bool detached);
 
         /** New registration state from external node */
         void RemoteSetRegistrationState(const ConnectionPtr& connection,

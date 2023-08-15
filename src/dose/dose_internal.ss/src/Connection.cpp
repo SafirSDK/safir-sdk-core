@@ -133,31 +133,47 @@ namespace Internal
         m_requestInQueues->ForSpecific(consumer, queueFunc);
     }
 
+    void Connection::PrepareSmartSync(SmartSyncState& syncState) const
+    {
+        syncState.connections.push_back(SmartSyncState::Connection{Id().m_id, Id().m_contextId, Counter(), {}, std::string(NameWithCounter())});
+        auto& smCon = syncState.connections.back();
+        for (const auto& reg : m_registrations)
+        {
+            auto typeId = reg.first.first;
+            auto handlerId = reg.first.second.GetRawValue();
+            smCon.registrations.push_back(SmartSyncState::Registration{typeId, handlerId, reg.second.regTime, {}, &smCon});
+            if (Dob::Typesystem::Operations::IsOfType(typeId, Dob::Entity::ClassTypeId))
+            {
+                EntityTypes::Instance().PrepareSmartSync(smCon.registrations.back());
+            }
+        }
+    }
+
 
     bool Connection::IsLocal() const
     {
         return m_isLocal;
     }
 
-    void Connection::SetDetached()
+    void Connection::SetDetachFlag(bool detached)
     {
-        m_detached = 1;
+        m_detached = detached ? 1 : 0;
         for (const auto& reg : m_registrations)
         {
             const Typesystem::TypeId& typeId = reg.first.first;
             if (Dob::Typesystem::Operations::IsOfType(typeId, Dob::Entity::ClassTypeId))
             {
-                EntityTypes::Instance().DetachAll(shared_from_this(), typeId);
+                EntityTypes::Instance().SetDetachFlagAll(shared_from_this(), typeId, detached);
             }
             else if (Dob::Typesystem::Operations::IsOfType(typeId, Dob::Service::ClassTypeId))
             {
-                ServiceTypes::Instance().DetachAll(shared_from_this(), typeId);
+                ServiceTypes::Instance().SetDetachFlagAll(shared_from_this(), typeId, detached);
             }
         }
     }
 
     void Connection::Cleanup()
-    {
+    {        
         // Unregister all registered handlers
         //(making copy of the map allows Unregister to call back into connection without upsetting the iteration)
         const bool explicitUnregister = !NodeIsDown();
@@ -342,11 +358,12 @@ namespace Internal
 
     void Connection::AddInjectionHandler(const Typesystem::TypeId              typeId,
                                          const Dob::Typesystem::HandlerId&     handlerId,
-                                         const ConsumerId&                     consumer)
+                                         const ConsumerId&                     consumer,
+                                         const uint32_t                         regTime)
     {
         ScopedConnectionLock lck(m_lock);
 
-        m_injectionHandlers.insert(std::make_pair(std::make_pair(typeId, ShmHandlerId(handlerId)), consumer));
+        m_injectionHandlers.insert(std::make_pair(std::make_pair(typeId, ShmHandlerId(handlerId)), TypeHandlerData{consumer, regTime}));
     }
 
     void Connection::RemoveInjectionHandler(const Typesystem::TypeId              typeId,
@@ -364,7 +381,7 @@ namespace Internal
         //        ENSURE(it != m_injectionHandlers.end(), << "Didn't find given type/handler");
         if (it != m_injectionHandlers.end())
         {
-            return it->second;
+            return it->second.consumerId;
         }
         else
         {
@@ -380,11 +397,12 @@ namespace Internal
 
     void Connection::AddRegistration(const Typesystem::TypeId              typeId,
                                      const Dob::Typesystem::HandlerId&     handlerId,
-                                     const ConsumerId&                     consumer)
+                                     const ConsumerId&                     consumer,
+                                     const uint32_t                         regTime)
     {
         ScopedConnectionLock lck(m_lock);
 
-        m_registrations.insert(std::make_pair(std::make_pair(typeId, ShmHandlerId(handlerId)), consumer));
+        m_registrations.insert(std::make_pair(std::make_pair(typeId, ShmHandlerId(handlerId)), TypeHandlerData{consumer, regTime}));
     }
 
     void Connection::RemoveRegistration(const Typesystem::TypeId              typeId,
@@ -409,13 +427,14 @@ namespace Internal
 
     void Connection::AddRevokedRegistration(const Typesystem::TypeId              typeId,
                                             const Dob::Typesystem::HandlerId&     handlerId,
-                                            const ConsumerId&                     consumer)
+                                            const ConsumerId&                     consumer,
+                                            const uint32_t                         regTime)
     {
         if (!IsLocal()) return;
 
         ScopedConnectionLock lck(m_lock);
 
-        m_revokedRegistrations.insert(std::make_pair(std::make_pair(typeId, ShmHandlerId(handlerId)), consumer));
+        m_revokedRegistrations.insert(std::make_pair(std::make_pair(typeId, ShmHandlerId(handlerId)), TypeHandlerData{consumer, regTime}));
     }
 
     void Connection::RemoveRevokedRegistration(const Typesystem::TypeId              typeId,
@@ -492,7 +511,7 @@ namespace Internal
         }
     }
 
-    void Connection::Unregister(const std::pair<TypeHandlerKey, ConsumerId>& reg, const bool explicitUnregister)
+    void Connection::Unregister(const std::pair<TypeHandlerKey, TypeHandlerData>& reg, const bool explicitUnregister)
     {
         const Typesystem::TypeId& typeId = reg.first.first;
 
@@ -678,7 +697,8 @@ namespace Internal
             RegistrationInfo regInfo;
             regInfo.typeId = it->first.first;
             regInfo.handlerId = it->first.second.GetHandlerId();
-            regInfo.consumer = it->second;
+            regInfo.consumer = it->second.consumerId;
+            regInfo.regTime = it->second.regTime;
 
             regVec.push_back(regInfo);
         }

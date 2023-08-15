@@ -75,8 +75,8 @@ namespace Internal
                            const Dob::Typesystem::TypeId  typeId,
                            const bool                     explicitUnregister);
 
-        // Mark registrations as detached
-        void DetachAll(const ConnectionPtr& connection, const Dob::Typesystem::TypeId typeId);
+        // Set detach-flag for all registrations
+        void SetDetachFlagAll(const ConnectionPtr& connection, const Dob::Typesystem::TypeId typeId, bool detached);
 
         // New registration state from external node
         //

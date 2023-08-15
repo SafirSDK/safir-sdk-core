@@ -110,13 +110,13 @@ namespace Internal
         m_handlerRegistrations[context].UnregisterAll(connection, explicitUnregister);
     }
 
-    void ServiceType::DetachAll(const ConnectionPtr& connection)
+    void ServiceType::SetDetachFlagAll(const ConnectionPtr& connection, bool detached)
     {
         const ContextId context = connection->Id().m_contextId;
 
         ScopedTypeLock lck(m_typeLocks[context]);
 
-        m_handlerRegistrations[context].DetachAll(connection);
+        m_handlerRegistrations[context].SetDetachFlagAll(connection, detached);
     }
 
     void ServiceType::RemoteSetRegistrationState(const ConnectionPtr& connection,

@@ -1,0 +1,59 @@
+/******************************************************************************
+*
+* Copyright Saab AB, 2023 (http://safirsdkcore.com/)
+*
+* Created by: Joel Ottosson
+*
+*******************************************************************************
+*
+* This file is part of Safir SDK Core.
+*
+* Safir SDK Core is free software: you can redistribute it and/or modify
+* it under the terms of version 3 of the GNU General Public License as
+* published by the Free Software Foundation.
+*
+* Safir SDK Core is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
+*
+******************************************************************************/
+syntax = "proto2";
+option optimize_for = LITE_RUNTIME;
+
+package Safir.Dob.Internal.Pd;
+
+message PoolSyncInfo {
+
+    enum PdMsgType {
+        PdRequest = 0;
+        PdComplete = 1;
+    }
+
+    message Registration {
+        optional sfixed64 handler_id = 1;
+        optional sfixed64 type_id = 2;
+        optional uint32 registration_time = 3;
+        repeated Entity  entities = 4;
+    }
+    
+    message Connection {
+    	optional sfixed64 connection_id = 1;
+    	optional int32 context = 2;
+    	optional int32 counter = 3;
+        repeated Registration registrations = 4;
+        optional string name = 5;
+    }
+
+    message Entity {
+        optional sfixed64 instance_id = 1;
+        optional uint32 version = 2;
+        optional uint32 creation_time = 3;
+    }
+
+    optional PdMsgType messageType = 1;
+    repeated Connection connections = 2;
+}

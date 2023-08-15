@@ -69,6 +69,13 @@ namespace Internal
         bool operator != (const LamportTimestamp& other) const
         {return m_clock != other.m_clock || m_nodeId != other.m_nodeId;}
 
+        uint32_t GetRawValue() const { return m_clock; }
+
+        static LamportTimestamp MakeTimestamp(const uint32_t clock, const int64_t nodeId)
+        {
+            return LamportTimestamp(clock, nodeId);
+        }
+
     private:
         LamportTimestamp(const uint32_t clock, const int64_t nodeId)
             : m_clock(clock)

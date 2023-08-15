@@ -583,9 +583,9 @@ namespace Internal
         }
     }
 
-    void Connections::DetachConnectionsFromNode(const int64_t nodeId)
+    void Connections::SetDetachFlagForConnectionsFromNode(const int64_t nodeId, bool detached)
     {
-        std::vector<ConnectionPtr> detachConnections;
+        std::vector<ConnectionPtr> connectionsFromNode;
 
         // Remove from m_connections and store in removeConnections
         {
@@ -594,14 +594,14 @@ namespace Internal
             {
                 if (con.first.m_node == nodeId)
                 {
-                    detachConnections.push_back(con.second);
+                    connectionsFromNode.push_back(con.second);
                 }
             }
         }
 
-        for (auto& con : detachConnections)
+        for (auto& con : connectionsFromNode)
         {
-            con->SetDetached();
+            con->SetDetachFlag(detached);
         }
     }
 
@@ -628,9 +628,30 @@ namespace Internal
 
         for (auto& con : removeConnections)
         {
+            lllog(5) << L"Remove detached connection " << con->NameWithCounter() << L", id: " << con->Id() << std::endl;
             con->Cleanup();
         }
+    }
 
+    void Connections::PrepareSmartSync(const int64_t fromNodeId, SmartSyncState& syncState) const
+    {
+        // Get all connections on the specified node
+        std::vector<ConnectionPtr> connectionsOnNode;
+        {
+            boost::interprocess::scoped_lock<ConnectionsTableLock> lck(m_connectionTablesLock);
+            for (const auto& con : m_connections)
+            {
+                if (con.first.m_node == fromNodeId)
+                {
+                    connectionsOnNode.push_back(con.second);
+                }
+            }
+        }
+
+        for (const auto& con : connectionsOnNode)
+        {
+            con->PrepareSmartSync(syncState);
+        }
     }
 
     void Connections::ForEachConnection(const std::function<void(const Connection & connection)> & connectionFunc) const

@@ -11,7 +11,13 @@ set(sources
   PendingRegistrationHandler.cpp PersistHandler.cpp PoolHandler.cpp
   ProcessInfoHandler.cpp RequestHandler.cpp ResponseHandler.cpp WaitingStates.cpp)
 
-ADD_EXECUTABLE(dose_main ${sources} ${headers})
+ADD_EXECUTABLE(dose_main ${sources} ${headers} PoolSyncInfo.proto)
+
+PROTOBUF_GENERATE(TARGET dose_main OUT_VAR generated_files)
+
+if (MSVC)
+  SET_SOURCE_FILES_PROPERTIES(${generated_files} PROPERTIES COMPILE_FLAGS "/wd4127 /wd4244 /wd4267 /wd4100")
+endif()
 
 TARGET_LINK_LIBRARIES(dose_main PRIVATE
   dose_cpp
@@ -19,6 +25,7 @@ TARGET_LINK_LIBRARIES(dose_main PRIVATE
   communication
   system_picture
   control_utils
+  protobuf::protobuf
   lluf_internal
   lluf_utils
   lluf_crash_reporter

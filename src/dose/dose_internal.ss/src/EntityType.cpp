@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2007-2013,2015 (http://safirsdkcore.com)
+* Copyright Saab AB, 2007-2023, (http://safirsdkcore.com)
 *
 * Created by: Anders Widén / stawi
 *
@@ -144,11 +144,28 @@ namespace Internal
         CleanGhosts(Dob::Typesystem::HandlerId::ALL_HANDLERS, context);
     }
 
-    void EntityType::DetachAll(const ConnectionPtr& connection)
+    void EntityType::SetDetachFlagAll(const ConnectionPtr& connection, bool detached)
     {
         const ContextId context = connection->Id().m_contextId;
         ScopedTypeLock lck(m_typeLocks[context]);
-        m_handlerRegistrations[context].DetachAll(connection);
+        m_handlerRegistrations[context].SetDetachFlagAll(connection, detached);
+    }
+
+    void EntityType::PrepareSmartSync(SmartSyncState::Registration& reg) const
+    {
+        m_entityStates[reg.connection->context].ForEachState([&reg](auto, const StateSharedPtr& ptr, bool&)
+        {
+            auto d = ptr->GetRealState();
+            if (d.GetType() == DistributionData::EntityState && !d.IsNoState() && d.GetHandlerId().GetRawValue() == reg.handlerId)
+            {
+                SmartSyncState::Entity sst;
+                sst.instanceId = d.GetInstanceId().GetRawValue();
+                sst.version = d.GetVersion().GetRawValue();
+                sst.creationTime = d.GetCreationTime().GetRawValue();
+                sst.registration = &reg;
+                reg.entities.push_back(sst);
+            }
+        }, false);
     }
 
     void EntityType::RemoteSetRegistrationState(const ConnectionPtr& connection,
@@ -1575,8 +1592,8 @@ namespace Internal
             // There is an existing entity state
             if (remoteEntity.GetRegistrationTime() < localEntity.GetRegistrationTime())
             {
-                lllog(3) << "Skipping remote entity state since the existing local entity state "
-                            "(created, deleted or ghost) belongs to a newer registration" << std::endl;
+                lllog(3) << "RemoteSetRealEntityStateInternal: Skipping remote entity state since the existing local entity state "
+                            "(created, deleted or ghost) belongs to a newer registration. " << remoteEntity.Image() << std::endl;
                 result = RemoteSetDiscarded;
                 return;
             }
@@ -1603,7 +1620,7 @@ namespace Internal
                 // Compare entity creation time and version
                 if (!RemoteEntityStateIsAccepted(remoteEntity, localEntity))
                 {
-                    lllog(3) << "Discard remote entity state since the existing state is newer" << std::endl;
+                    lllog(3) << "RemoteSetRealEntityStateInternal: Discard remote entity state since the existing state is newer. " << remoteEntity.Image() << std::endl;
                     result = RemoteSetDiscarded;
                     return;
                 }

@@ -65,7 +65,7 @@ namespace
             {
                 if (distribution.IsDetached() && keepState)
                 {
-                    Connections::Instance().DetachConnectionsFromNode(nodeId);
+                    Connections::Instance().SetDetachFlagForConnectionsFromNode(nodeId, true);
                 }
                 else
                 {
@@ -74,12 +74,11 @@ namespace
             }
         );
 
-        distribution.SubscribeAttachedDetached([this](bool /*sameSystem*/)
+        distribution.SubscribeAttachedDetached([this](bool sameSystem)
         {
-            // When implementing smart-sync, we shall only RemoveDetachedConnections if sameSystem=false.
-            if (m_keepStateWhileDetached)
+            if (m_keepStateWhileDetached && !sameSystem)
             {
-                lllog(5)<< L"ConnectionHandler - Attach to system. Remove all kept detached states, if any." << std::endl;
+                lllog(5)<< L"ConnectionHandler - Attach to a new system. Remove all kept detached states, if any." << std::endl;
                 Connections::Instance().RemoveDetachedConnections();
             }
             m_poolHandler.SetDetached(false);

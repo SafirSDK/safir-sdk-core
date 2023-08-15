@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2015 (http://safirsdkcore.com)
+* Copyright Saab AB, 2023 (http://safirsdkcore.com)
 *
 * Created by: Joel Ottosson / joel.ottosson@consoden.se
 *
@@ -50,10 +50,10 @@ namespace Internal
         ,m_distribution(distribution)
         ,m_log(logStatus)
         ,m_poolDistributor(m_strand.context(), m_distribution)
-        ,m_poolDistributionRequests(m_strand.context(), m_distribution)
+        ,m_poolDistributionRequests(m_strand.context(), m_distribution, [this]{OnAllPoolsReceived();})
         ,m_waitingStatesSanityTimer(m_strand.context())
         ,m_persistenceReady(false)
-        ,m_detached(false)
+        ,m_nodeState(m_distribution.IsLightNode() ? Safir::Dob::NodeState::Detached : Safir::Dob::NodeState::Normal)
         ,m_running(false)
     {
         if (!m_distribution.IsLightNode())
@@ -96,7 +96,7 @@ namespace Internal
                 m_waitingStates.NodeDown(id);
             });
         };
-
+        
         //subscribe for included and excluded nodes
         distribution.SubscribeNodeEvents(injectNode, excludeNode);
 
@@ -221,7 +221,15 @@ namespace Internal
         m_strand.post([this, detach]
         {
             lllog(5)<< L"DoseMain.PoolHandler set detached to " << std::boolalpha << detach << std::endl;
-            m_detached = detach;
+
+            auto isCurrentlyDetached = m_nodeState == Safir::Dob::NodeState::Detached;
+            if (detach == isCurrentlyDetached)
+            {
+                // No change of state
+                return;
+            }
+
+            m_nodeState = detach ? Safir::Dob::NodeState::Detached : Safir::Dob::NodeState::Attaching;
 
             // When a lightNode attach to a System it can not keep EndStates since they
             // will prevent pooldistribution of Entities that previously existed on this node.
@@ -230,7 +238,7 @@ namespace Internal
             // If the node is detached from the start, nodeInfoHandler is not created here.
             if (m_nodeInfoHandler)
             {
-                m_nodeInfoHandler->SetNodeState(m_detached ? Safir::Dob::NodeState::Detached : Safir::Dob::NodeState::Attached); // Update detached flag in NodeInfo
+                m_nodeInfoHandler->SetNodeState(m_nodeState); // Update state flag in NodeInfo
             }
         });
     }
@@ -295,24 +303,48 @@ namespace Internal
         });
     }
 
-    void PoolHandler::OnPoolDistributionInfo(int64_t fromNodeId, int64_t fromNodeType, const char *data, size_t /*size*/)
+    void PoolHandler::OnPoolDistributionInfo(int64_t fromNodeId, int64_t fromNodeType, const char *data, size_t size)
     {
-        const PoolDistributionInfo pdInfo=*reinterpret_cast<const PoolDistributionInfo*>(data);
+        auto pdInfo = std::make_shared<Pd::PoolSyncInfo>();
+        bool parsedOk = pdInfo->ParseFromArray(static_cast<const void*>(data), size);
         delete[] data;
 
-        m_strand.dispatch([this, pdInfo, fromNodeType, fromNodeId]
+        if (!parsedOk)
         {
-            switch (pdInfo)
+            lllog(4) << L"PoolHandler: Received corrupt poolDistributionInfo data."<<std::endl;
+            return;
+        }
+
+        m_strand.dispatch([this, fromNodeType, fromNodeId, pdInfo]
+        {
+            switch (pdInfo->messagetype())
             {
-            case PdRequest:
+            case Pd::PoolSyncInfo_PdMsgType::PoolSyncInfo_PdMsgType_PdRequest:
                 {
                     lllog(5)<<"PoolHandler: got PdRequest from "<<fromNodeId<<std::endl;
+                    auto syncState = std::make_shared<SmartSyncState>();
+                    for (const auto& c : pdInfo->connections())
+                    {
+                        syncState->connections.push_back(SmartSyncState::Connection{c.connection_id(), c.context(), c.counter(), {}, c.name()});
+                        auto& smCon = syncState->connections.back();
+                        for (const auto& r : c.registrations())
+                        {
+                            smCon.registrations.push_back(SmartSyncState::Registration{r.type_id(), r.handler_id(), r.registration_time(), {}, &smCon});
+                            auto& smReg = smCon.registrations.back();
+
+                            for (const auto& e : r.entities())
+                            {
+                                smReg.entities.push_back(SmartSyncState::Entity{ e.instance_id(), e.version(), e.creation_time(), &smReg });
+                            }
+                        }
+                    }
+                     
                     //start new pool distribution to node
-                    m_poolDistributor.AddPoolDistribution(fromNodeId, fromNodeType);
+                    m_poolDistributor.AddPoolDistribution(fromNodeId, fromNodeType, syncState);
                 }
                 break;
 
-            case PdComplete:
+            case Pd::PoolSyncInfo_PdMsgType::PoolSyncInfo_PdMsgType_PdComplete:
                 {
                     lllog(5)<<"PoolHandler: got PdComplete from "<<fromNodeId<<std::endl;
                     if (!m_distribution.IsLightNode() && !m_distribution.IsLightNode(fromNodeType) && !m_persistenceReady)
@@ -321,6 +353,14 @@ namespace Internal
                         // This will trigger the chain OnPersistenDataReady
                         m_persistHandler->SetPersistentDataReady(false); // false indicates that we did not get Persistence from Dope
                     }
+
+                    // If this node is a light node, the smartSync has made sure the other node only sent the changes during PD.
+                    // Any unchanged states must now be updated to not be marked as detached anymore.
+                    if (m_distribution.IsLightNode())
+                    {
+                        Connections::Instance().SetDetachFlagForConnectionsFromNode(fromNodeId, false);
+                    }
+
                     m_poolDistributionRequests.PoolDistributionFinished(fromNodeId);
                 }
                 break;
@@ -329,6 +369,26 @@ namespace Internal
                 break;
             }
         });
+    }
+
+    void PoolHandler::OnAllPoolsReceived()
+    {
+        lllog(5) << L"PoolHandler - all pools received" << std::endl;
+
+        if (m_nodeState == Safir::Dob::NodeState::Attaching)
+        {
+            // Clear all detached states that are still left. If there still exists any detached states after all pools have been received, those states must
+            // belong to nodes that were part of the system before we became detached, but they left the system while we were detached and is not part of
+            // the system anymore.
+            Connections::Instance().RemoveDetachedConnections();
+
+            m_nodeState = Safir::Dob::NodeState::Attached;
+            if (m_nodeInfoHandler)
+            {
+                lllog(5) << L"PoolHandler - change NodeState from Attaching to Attached" << std::endl;
+                m_nodeInfoHandler->SetNodeState(Safir::Dob::NodeState::Attached);
+            }
+        }
     }
 
     void PoolHandler::OnRegistrationState(int64_t fromNodeId, int64_t fromNodeType, const char* data, size_t /*size*/)

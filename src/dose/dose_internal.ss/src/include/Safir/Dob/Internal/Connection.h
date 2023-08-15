@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2007-2013 (http://safirsdkcore.com)
+* Copyright Saab AB, 2007-2023 (http://safirsdkcore.com)
 *
 * Created by: Joel Ottosson / stjoot
 *
@@ -43,6 +43,7 @@
 #include <Safir/Dob/Internal/State.h>
 #include <Safir/Dob/Internal/ShmWrappers.h>
 #include <Safir/Dob/Internal/LeveledLock.h>
+#include <Safir/Dob/Internal/SmartSyncState.h>
 
 namespace Safir
 {
@@ -122,7 +123,8 @@ namespace Internal
         //---------- Registrations ----------
         void AddRegistration(const Typesystem::TypeId              typeId,
                              const Dob::Typesystem::HandlerId&     handlerId,
-                             const ConsumerId&                     consumer);
+                             const ConsumerId&                     consumer,
+                             const uint32_t                        regTime);
         void RemoveRegistration(const Typesystem::TypeId              typeId,
                                 const Dob::Typesystem::HandlerId&     handlerId);
 
@@ -152,7 +154,8 @@ namespace Internal
         // Injection handler consumers
         void AddInjectionHandler(const Typesystem::TypeId              typeId,
                                  const Dob::Typesystem::HandlerId&     handlerId,
-                                 const ConsumerId&                     consumer);
+                                 const ConsumerId&                     consumer,
+                                 const uint32_t                         regTime);
         const ConsumerId GetInjectionHandlerConsumer(const Typesystem::TypeId              typeId,
                                                      const Dob::Typesystem::HandlerId&     handlerId) const;
         // Get a copy of current injection handlers.
@@ -161,7 +164,8 @@ namespace Internal
         //---------- Revoked registrations ----------
         void AddRevokedRegistration(const Typesystem::TypeId              typeId,
                                     const Dob::Typesystem::HandlerId&     handlerId,
-                                    const ConsumerId&                     consumer);
+                                    const ConsumerId&                     consumer,
+                                    const uint32_t                         regTime);
         void RemoveRevokedRegistration(const Typesystem::TypeId              typeId,
                                        const Dob::Typesystem::HandlerId&     handlerId);
         // Get a copy of current revoked registrations.
@@ -219,11 +223,12 @@ namespace Internal
         bool NodeIsDown() const {return m_nodeDown != 0;}
 
         bool IsDetached() const {return m_detached != 0;}
-        void SetDetached();
+        void SetDetachFlag(bool detached);
 
         size_t QueueCapacity(const ConnectionQueueId::Enumeration queue) const
         {return m_queueCapacities[queue];}
 
+        void PrepareSmartSync(SmartSyncState& syncState) const;
     private:
 
         const ShmString m_nameWithoutCounter;
@@ -242,11 +247,15 @@ namespace Internal
         SignalPtr m_outSignal;
 
         typedef std::pair<Typesystem::TypeId, ShmHandlerId> TypeHandlerKey;
+        struct TypeHandlerData
+        {
+            ConsumerId consumerId;
+            uint32_t regTime; // raw value
+        };
 
-        typedef PairContainers<TypeHandlerKey, ConsumerId>::map RegistrationsMap;
+        typedef PairContainers<TypeHandlerKey, TypeHandlerData>::map RegistrationsMap;
 
         RegistrationsMap m_injectionHandlers;
-
         RegistrationsMap m_registrations;
         RegistrationsMap m_revokedRegistrations;
 
@@ -296,7 +305,7 @@ namespace Internal
 
         void Unsubscribe(const Typesystem::TypeId typeId);
 
-        void Unregister(const std::pair<TypeHandlerKey, ConsumerId>& reg, const bool explicitUnregister);
+        void Unregister(const std::pair<TypeHandlerKey, TypeHandlerData>& reg, const bool explicitUnregister);
 
         void RemoveInjectionHandler(const Typesystem::TypeId              typeId,
             const Dob::Typesystem::HandlerId&     handlerId);

@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2008-2013 (http://safirsdkcore.com)
+* Copyright Saab AB, 2008-2023 (http://safirsdkcore.com)
 *
 * Created by: Joel Ottosson / stjoot
 *

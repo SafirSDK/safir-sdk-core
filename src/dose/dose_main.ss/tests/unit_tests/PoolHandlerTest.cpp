@@ -26,6 +26,8 @@
 #include <atomic>
 #include "../../src/PoolDistributionRequestSender.h"
 #include "../../src/PoolDistributionHandler.h"
+#include "../../../dose_internal.ss/src/include/Safir/Dob/Internal/InternalDefs.h"
+#include "../../../dose_internal.ss/src/include/Safir/Dob/Internal/SmartSyncState.h"
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -93,6 +95,18 @@ private:
     Communication m_communication;
 };
 
+class Connections
+{
+public:
+    static Connections& Instance()
+    {
+        static Connections c;
+        return c;
+    }
+    void PrepareSmartSync(const int64_t, SmartSyncState&) const {}
+
+};
+
 BOOST_AUTO_TEST_CASE( PoolDistributionRequestSenderTest )
 {
     boost::asio::io_service io;
@@ -105,7 +119,7 @@ BOOST_AUTO_TEST_CASE( PoolDistributionRequestSenderTest )
     }
 
     Distribution distribution;
-    PoolDistributionRequestSender<Distribution> pdr(io, distribution);
+    PoolDistributionRequestSender<Distribution, Connections> pdr(io, distribution, []{});
     auto& com = distribution.GetCommunication();
 
     pdr.RequestPoolDistribution(1, 1);
@@ -131,23 +145,23 @@ BOOST_AUTO_TEST_CASE( PoolDistributionRequestSenderTest )
 
 //----------------------------------------------------------------------------
 
-class Pd
+class PoolDistTest
 {
 public:
-    Pd(int64_t nodeId, int64_t nodeType,
+    PoolDistTest(int64_t nodeId, int64_t nodeType, const std::shared_ptr<SmartSyncState>&,
        boost::asio::io_service::strand&,
        Distribution&,
        const std::function<void(int64_t)>& completionHandler)
         :m_nodeId(nodeId)
         ,m_nodeTypeId(nodeType)
     {
-        Pd::PoolDistributions[nodeId]=std::make_pair(false, completionHandler);
+        PoolDistTest::PoolDistributions[nodeId]=std::make_pair(false, completionHandler);
     }
 
     void Run()
     {
-        auto it=Pd::PoolDistributions.find(m_nodeId);
-        if (it!=Pd::PoolDistributions.end())
+        auto it=PoolDistTest::PoolDistributions.find(m_nodeId);
+        if (it!=PoolDistTest::PoolDistributions.end())
             it->second.first=true;
     }
 
@@ -161,7 +175,7 @@ public:
     // map <nodeId,  (started, completionHandler) >
     static std::map<int64_t, std::pair<bool, std::function<void(int64_t)> > > PoolDistributions;
 };
-std::map<int64_t, std::pair<bool, std::function<void(int64_t)> > > Pd::PoolDistributions;
+std::map<int64_t, std::pair<bool, std::function<void(int64_t)> > > PoolDistTest::PoolDistributions;
 
 BOOST_AUTO_TEST_CASE( PoolDistributionHandlerTest )
 {
@@ -169,7 +183,7 @@ BOOST_AUTO_TEST_CASE( PoolDistributionHandlerTest )
     {
         std::wcout<<L"--- outbound pool distributions ---"<<std::endl;
 
-        for (auto vt = Pd::PoolDistributions.cbegin(); vt != Pd::PoolDistributions.cend(); ++vt)
+        for (auto vt = PoolDistTest::PoolDistributions.cbegin(); vt != PoolDistTest::PoolDistributions.cend(); ++vt)
         {
             std::wcout<<L"Node "<<vt->first<<L" started: "<<std::boolalpha<<vt->second.first<<std::endl;
         }
@@ -178,7 +192,7 @@ BOOST_AUTO_TEST_CASE( PoolDistributionHandlerTest )
     auto complete=[](int64_t id)
     {
         std::wcout<<L"call completionHandler "<<id<<std::endl;
-        Pd::PoolDistributions[id].second(id);
+        PoolDistTest::PoolDistributions[id].second(id);
     };
 
     boost::asio::io_service io;
@@ -191,11 +205,11 @@ BOOST_AUTO_TEST_CASE( PoolDistributionHandlerTest )
     }
 
     Distribution distribution;
-    PoolDistributionHandler<Distribution, Pd> pdh(io, distribution);
+    PoolDistributionHandler<Distribution, PoolDistTest> pdh(io, distribution);
     pdh.Start();
 
-    pdh.AddPoolDistribution(1, 1);
-    pdh.AddPoolDistribution(2, 1);
+    pdh.AddPoolDistribution(1, 1, std::make_shared<SmartSyncState>());
+    pdh.AddPoolDistribution(2, 1, std::make_shared<SmartSyncState>());
 
     std::atomic<bool> hasRun;
     hasRun=false;
@@ -209,8 +223,8 @@ BOOST_AUTO_TEST_CASE( PoolDistributionHandlerTest )
     pdh.m_strand.post([&]
     {
         dump();
-        BOOST_CHECK(Pd::PoolDistributions[1].first==true);
-        BOOST_CHECK(Pd::PoolDistributions[2].first==false);
+        BOOST_CHECK(PoolDistTest::PoolDistributions[1].first==true);
+        BOOST_CHECK(PoolDistTest::PoolDistributions[2].first==false);
 
         BOOST_CHECK_EQUAL(pdh.m_pendingPoolDistributions.size(), 2u);
 
@@ -224,8 +238,8 @@ BOOST_AUTO_TEST_CASE( PoolDistributionHandlerTest )
     {
         BOOST_CHECK_EQUAL(pdh.m_pendingPoolDistributions.size(), 1u);
         dump();
-        BOOST_CHECK(Pd::PoolDistributions[1].first==true);
-        BOOST_CHECK(Pd::PoolDistributions[2].first==true);
+        BOOST_CHECK(PoolDistTest::PoolDistributions[1].first==true);
+        BOOST_CHECK(PoolDistTest::PoolDistributions[2].first==true);
 
         complete(2);
         hasRun=true;
@@ -236,7 +250,7 @@ BOOST_AUTO_TEST_CASE( PoolDistributionHandlerTest )
     pdh.m_strand.post([&]
     {
         BOOST_CHECK_EQUAL(pdh.m_pendingPoolDistributions.size(), 0u);
-        pdh.AddPoolDistribution(3, 1);
+        pdh.AddPoolDistribution(3, 1, std::make_shared<SmartSyncState>());
         hasRun=true;
     });
 
@@ -245,7 +259,7 @@ BOOST_AUTO_TEST_CASE( PoolDistributionHandlerTest )
     pdh.m_strand.post([&]
     {
         dump();
-        BOOST_CHECK(Pd::PoolDistributions[3].first==true);
+        BOOST_CHECK(PoolDistTest::PoolDistributions[3].first==true);
         BOOST_CHECK_EQUAL(pdh.m_pendingPoolDistributions.size(), 1u);
 
         complete(3);
@@ -258,9 +272,9 @@ BOOST_AUTO_TEST_CASE( PoolDistributionHandlerTest )
     {
         dump();
         BOOST_CHECK_EQUAL(pdh.m_pendingPoolDistributions.size(), 0u);
-        BOOST_CHECK(Pd::PoolDistributions[1].first==true);
-        BOOST_CHECK(Pd::PoolDistributions[2].first==true);
-        BOOST_CHECK(Pd::PoolDistributions[3].first==true);
+        BOOST_CHECK(PoolDistTest::PoolDistributions[1].first==true);
+        BOOST_CHECK(PoolDistTest::PoolDistributions[2].first==true);
+        BOOST_CHECK(PoolDistTest::PoolDistributions[3].first==true);
         hasRun=true;
     });
 

@@ -104,9 +104,9 @@ namespace Internal
         GetType(typeId).UnregisterAll(connection, explicitUnregister);
     }
 
-    void ServiceTypes::DetachAll(const ConnectionPtr& connection, const Dob::Typesystem::TypeId typeId)
+    void ServiceTypes::SetDetachFlagAll(const ConnectionPtr& connection, const Dob::Typesystem::TypeId typeId, bool detached)
     {
-        GetType(typeId).DetachAll(connection);
+        GetType(typeId).SetDetachFlagAll(connection, detached);
     }
 
     bool ServiceTypes::RemoteSetRegistrationState(const ConnectionPtr& connection,

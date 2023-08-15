@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2008-2013,2015 (http://safirsdkcore.com)
+* Copyright Saab AB, 2008-2023 (http://safirsdkcore.com)
 *
 * Created by: Joel Ottosson / stjoot
 *
@@ -215,7 +215,7 @@ namespace
             return;
         }
 
-        lllout << "Starting  with (" << connectionNameCommonPart << ", " << connectionNameInstancePart << ")" << std::endl;
+        lllout << "Starting with (" << connectionNameCommonPart << ", " << connectionNameInstancePart << ")" << std::endl;
 
         m_dispatcher.SetConnectionOwner(connectionOwner, onStopOrderCb);
 

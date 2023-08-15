@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2007-2013 (http://safirsdkcore.com)
+* Copyright Saab AB, 2007-2023 (http://safirsdkcore.com)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -28,6 +28,7 @@
 #include <Safir/Dob/Typesystem/Defs.h>
 #include <Safir/Dob/Typesystem/EntityId.h>
 #include <Safir/Dob/Typesystem/HandlerId.h>
+#include <Safir/Dob/Typesystem/Operations.h>
 #include <Safir/Dob/Defs.h>
 #include <Safir/Dob/Internal/WrapAroundCounter.h>
 #include <Safir/Dob/Internal/LamportClocks.h>
@@ -47,6 +48,7 @@ namespace Internal
         Typesystem::TypeId      typeId;
         Typesystem::HandlerId   handlerId;
         ConsumerId              consumer;
+        uint32_t                regTime;
     };
 
     typedef std::vector<RegistrationInfo> RegistrationVector;
@@ -81,6 +83,7 @@ namespace Internal
     enum StatePtrHandling {RestorePtr,
                            ReleasePtr,
                            KeepPtr};
+
 
     //---------------------
     // Lock levels used to check (in debug build code) that locks always

@@ -71,7 +71,7 @@ namespace Internal
         void UnregisterAll(const ConnectionPtr&     connection,
                            const bool               explicitUnregister);
 
-        void DetachAll(const ConnectionPtr& connection);
+        void SetDetachFlagAll(const ConnectionPtr& connection, bool detached);
 
         /** New registration state from external node */
         void RemoteSetRegistrationState(const ConnectionPtr& connection,
@@ -209,7 +209,8 @@ namespace Internal
 
         void RegisterInjectionHandler(const ConnectionPtr&                connection,
                                       const Dob::Typesystem::HandlerId&   handlerId,
-                                      const ConsumerId&                   consumer);
+                                      const ConsumerId&                   consumer,
+                                      const uint32_t                       regTime);
 
         void RemoveRegistration(const ConnectionPtr& connection,
                                 const Dob::Typesystem::HandlerId& handlerId);

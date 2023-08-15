@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2008-2013 (http://safirsdkcore.com)
+* Copyright Saab AB, 2008-2023 (http://safirsdkcore.com)
 *
 * Created by: Anders Widén / stawi
 *
@@ -35,6 +35,7 @@
 #include <Safir/Dob/InstanceIdPolicy.h>
 #include <Safir/Dob/Internal/LeveledLock.h>
 #include <Safir/Dob/Internal/ShmArray.h>
+#include <Safir/Dob/Internal/SmartSyncState.h>
 
 namespace Safir
 {
@@ -70,7 +71,7 @@ namespace Internal
         void UnregisterAll(const ConnectionPtr& connection,
                            const bool           explicitUnregister);
 
-        void DetachAll(const ConnectionPtr& connection);
+        void SetDetachFlagAll(const ConnectionPtr& connection, bool detached);
 
         /** New registration state from external node */
         void RemoteSetRegistrationState(const ConnectionPtr& connection,
@@ -233,6 +234,8 @@ namespace Internal
 
         bool CanAcquireContainerWriterLock(const ContextId contextId,
                                            const boost::chrono::steady_clock::duration& lockTimeout);
+
+        void PrepareSmartSync(SmartSyncState::Registration& reg) const;
 
     private:
         const Typesystem::TypeId            m_typeId;

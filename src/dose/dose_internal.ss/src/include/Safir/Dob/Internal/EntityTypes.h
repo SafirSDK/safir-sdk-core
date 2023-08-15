@@ -36,6 +36,8 @@
 #include <Safir/Dob/Internal/SubscriptionOptions.h>
 #include <Safir/Dob/Internal/InternalFwd.h>
 #include <Safir/Utilities/Internal/Atomic.h>
+#include <Safir/Dob/Internal/SmartSyncState.h>
+
 
 namespace Safir
 {
@@ -88,8 +90,8 @@ namespace Internal
                            const Dob::Typesystem::TypeId  typeId,
                            const bool                     explicitUnregister);
 
-        // Mark all entities and registrations detached
-        void DetachAll(const ConnectionPtr& connection, const Dob::Typesystem::TypeId typeId);
+        // Set detach-flag for all entities and registrations
+        void SetDetachFlagAll(const ConnectionPtr& connection, const Dob::Typesystem::TypeId typeId, bool detached);
 
         // New registration state from external node
         //
@@ -337,6 +339,8 @@ namespace Internal
         bool CanAcquireContainerWriterLock(const Typesystem::TypeId typeId,
                                            const ContextId contextId,
                                            const boost::chrono::steady_clock::duration& lockTimeout);
+
+        void PrepareSmartSync(SmartSyncState::Registration& reg) const;
 
         //Debug and statistics
         void DumpRegistrationSubscriptions() const;
