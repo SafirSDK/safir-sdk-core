@@ -39,11 +39,11 @@ message PoolSyncInfo {
         optional uint32 registration_time = 3;
         repeated Entity  entities = 4;
     }
-    
+
     message Connection {
-    	optional sfixed64 connection_id = 1;
-    	optional int32 context = 2;
-    	optional int32 counter = 3;
+        optional sfixed64 connection_id = 1;
+        optional int32 context = 2;
+        optional int32 counter = 3;
         repeated Registration registrations = 4;
         optional string name = 5;
     }
