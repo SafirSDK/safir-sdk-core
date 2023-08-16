@@ -3649,6 +3649,22 @@ Gives you the current shared memory level on the current node.
 +GetSharedMemoryUsage+::
 Gives you the current shared memory usage in bytes on the current node.
 
+==== Testing application memory handling
+
++safir_memory_allocator+ can be used to generate fake memory pressure on a node. For
+example the commands
+
+----
+safir_memory_allocator --allocate Low
+safir_memory_allocator --deallocate
+----
+
+will allocate shared memory until the system reaches the Low level, and deallocate all
+memory allocated by this tool, respectively.
+
+Run +safir_memory_allocator --help+ for more information.
+
+
 [[safir_logging]]
 == Safir Logging
 Safir SDK Core has a mechanism, Safir Log, designed to make it simpler for applications to generate and send log messages according to the widely adopted _Syslog_ protocol http://www.ietf.org/rfc/rfc3164.txt[RFC 3164].
