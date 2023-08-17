@@ -69,7 +69,13 @@ public class Parameters {
         int result = Kernel.GetParameterId(typeId, parameterName);
         if (result == -1)
         {
-            throw new IllegalValueException("There is no such type or parameter defined");
+            String typeName = Kernel.GetTypeName(typeId);
+            if (typeName != null)
+            {
+                throw new IllegalValueException("The class '" + typeName + "' does not have a parameter called '"  + parameterName + "'!");                
+            }
+            
+            throw new IllegalValueException("Trying to read parameter '"  + parameterName + "' from a class that does not exist. TypeId=" + typeId);
         }
         else
         {

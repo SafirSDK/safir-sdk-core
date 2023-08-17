@@ -61,10 +61,19 @@ namespace Parameters
         const ParameterIndex result = DotsC_GetParameterId(typeId, Utilities::ToUtf8(parameterName).c_str());
         if (result == -1)
         {
+            const char* typeName = DotsC_GetTypeName(typeId);
             std::wostringstream ostr;
-            ostr << "There is no such type or parameter defined: ("
-                 << typeId << ", " 
-                 << parameterName << ")";
+
+            if (typeName != nullptr)
+            {
+                ostr << "The class '"<< Safir::Dob::Typesystem::Utilities::ToWstring(typeName) <<
+                        "' does not have a parameter called '" << parameterName << "'!";
+            }
+            else
+            {
+                ostr << L"Trying to read parameter '" << parameterName << "' from a class that does not exist. TypeId=" << typeId;
+            }
+
             throw IllegalValueException(ostr.str(), __WFILE__, __LINE__);
         }
         else

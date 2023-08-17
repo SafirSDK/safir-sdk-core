@@ -69,7 +69,14 @@ namespace Safir.Dob.Typesystem
             Marshal.FreeHGlobal(sp);
             if (constId == -1)
             {
-                throw new IllegalValueException("There is no such type or parameter defined");
+                IntPtr typeNamePtr=Kernel.DotsC_GetTypeName (typeId);                
+                if (typeNamePtr != System.IntPtr.Zero)
+                {
+                    string typeName = InternalOperations.StringOf(typeNamePtr);
+                    throw new IllegalValueException($"The class '{typeName}' does not have a parameter called '{parameterName}'!");
+                }
+
+                throw new IllegalValueException($"Trying to read parameter '{parameterName}' from a class that does not exist. TypeId={typeId}");
             }
             else
             {
