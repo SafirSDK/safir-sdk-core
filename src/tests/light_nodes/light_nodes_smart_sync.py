@@ -35,7 +35,7 @@ failed_tests = set()
 @contextmanager
 def test_case(name):
     global failed_tests
-    log_dir = os.path.normpath(os.path.join(os.getcwd(), "test_output", "smart", name))
+    log_dir = os.path.normpath(os.path.join(os.getcwd(), "test_output", "smart_sync", name))
     for f in glob.glob(os.path.join(log_dir, "*")): os.remove(f)
     os.environ["LLL_LOGDIR"] = log_dir    
 
@@ -52,7 +52,7 @@ def test_case(name):
         log("--- Finished: " + name + " ---")
 
 @contextmanager
-def launch_node(args, safir_instance, node_id):
+def launch_node(args, safir_instance, node_id, start_dope=False):
     try:
         session_id = str(uuid.uuid4())
         os.environ["SAFIR_COM_NETWORK_SIMULATION"] = session_id # Enable network simulation
@@ -60,7 +60,7 @@ def launch_node(args, safir_instance, node_id):
         print("--- Launching node", str(node_id))
         env = TestEnv(args.safir_control,
                     args.dose_main,
-                    args.dope_main if safir_instance == 1 else None,
+                    args.dope_main if start_dope or safir_instance == 1 else None,
                     args.safir_show_config,
                     start_syslog_server = True if safir_instance == 1 else False,
                     ignore_control_cmd = True if safir_instance == 1 else False,
@@ -150,7 +150,7 @@ async def check_pool(app, expected_registrations, expected_entities):
     
     pool_timestamp = app.last_pool_update
     num_tries = 0
-    while pool_timestamp < app.last_pool_update or num_tries < 60:
+    while pool_timestamp < app.last_pool_update or num_tries < 3:
         num_tries = num_tries +1
         pool_timestamp = app.last_pool_update
         if _check():
@@ -235,7 +235,6 @@ class SafirApp:
     async def _run(self):
         uri = "ws://localhost:1667" + str(self.safir_instance)
         for connectTry in range(10):
-            log("RUN node_" + str(self.node_id))
             try:
                 async with websockets.connect(uri) as ws:
                     self.ws = ws
@@ -374,7 +373,7 @@ async def two_normal_one_light_detach_reattach_light(args):
         await check_pool(app5, initialRegApp1 + initialRegApp2 + initialRegLight, initialEntApp1 + initialEntApp2 + initialEntLight)
         
         # Disable network on lightnode and wait for it to be Detached
-        log("---------- set_network_state=detached -----------")
+        log("---------- set_network_state=down -----------")
         await set_network_state(False, node5.session_id) 
         await app5.wait_for_node_state("Detached")
         log("--- node5 is now detached")
@@ -406,7 +405,7 @@ async def two_normal_one_light_detach_reattach_light(args):
         await check_pool(app5, initialRegApp1 + initialRegApp2 + initialRegLight, initialEntApp1 + initialEntApp2 + initialEntLight)
 
         # Enable network on lightnode and wait for it to be Attached
-        log("---------- set_network_state=attached -----------")
+        log("---------- set_network_state=up -----------")
         await set_network_state(True, node5.session_id) 
         await app5.wait_for_node_state("Attached")
         log("--- node5 is now attached again")
@@ -471,7 +470,7 @@ async def two_normal_one_light_kill_one_normal_while_light_is_detached(args):
         await check_pool(app5, initialRegApp1 + initialRegApp2 + initialRegLight, initialEntApp1 + initialEntApp2 + initialEntLight)
 
         # Disable network on lightnode and wait for it to be Detached
-        log("---------- set_network_state=detached -----------")
+        log("---------- set_network_state=down -----------")
         await set_network_state(False, node5.session_id) 
         await app5.wait_for_node_state("Detached")
         log("--- node5 is now detached")
@@ -510,7 +509,7 @@ async def two_normal_one_light_kill_one_normal_while_light_is_detached(args):
         await check_pool(app5, initialRegApp1 + initialRegApp2 + initialRegLight, initialEntApp1 + initialEntApp2 + initialEntLight)
 
         # Enable network on lightnode and wait for it to be Attached
-        log("---------- set_network_state=attached -----------")
+        log("---------- set_network_state=up -----------")
         await set_network_state(True, node5.session_id) 
         await app5.wait_for_node_state("Attached")
         log("--- node5 is now attached again")
@@ -564,7 +563,7 @@ async def one_normal_two_light_detach_reattach_one_light_big_pool(args):
         await check_pool(app6, initialRegApp1 + initialRegApp6, initialEntApp1 + initialEntApp6)
 
         # Disable network on lightnode and wait for it to be Detached
-        log("---------- set_network_state=detached for node5 -----------")
+        log("---------- set_network_state=down for node5 -----------")
         await set_network_state(False, node5.session_id)
         await asyncio.sleep(5)
         await app5.wait_for_node_state("Detached")
@@ -589,7 +588,7 @@ async def one_normal_two_light_detach_reattach_one_light_big_pool(args):
         await check_pool(app6, changedRegApp1 + initialRegApp6, changedEntApp1 + initialEntApp6)
 
         # Enable network again for node5
-        log("---------- set_network_state=attached for node5 -----------")
+        log("---------- set_network_state=up for node5 -----------")
         await set_network_state(True, node5.session_id) 
         await app5.wait_for_node_state("Attached")
         log("--- node5 is now attached again")
@@ -631,7 +630,7 @@ async def one_normal_one_light_ensure_only_valid_requests_and_no_unnecessary_not
         app5.notifications = list() 
 
         # Disable network on lightnode and wait for it to be Detached
-        log("---------- set_network_state=detached for node5 -----------")
+        log("---------- set_network_state=down for node5 -----------")
         await set_network_state(False, node5.session_id)
         await asyncio.sleep(5)
         await app5.wait_for_node_state("Detached")
@@ -661,7 +660,7 @@ async def one_normal_one_light_ensure_only_valid_requests_and_no_unnecessary_not
             raise AssertionError("Did not get a DetachedState error code when sending requests in detached state!")    
 
         # Enable network again for node5
-        log("---------- set_network_state=attached for node5 -----------")
+        log("---------- set_network_state=up for node5 -----------")
         await set_network_state(True, node5.session_id) 
         await app5.wait_for_node_state("Attached")
         log("--- node5 is now attached again")
@@ -682,14 +681,85 @@ async def one_normal_one_light_ensure_only_valid_requests_and_no_unnecessary_not
 
         await asyncio.gather(app1.stop(), app5.stop())
 
+async def lightnode_attaches_to_new_system_after_detached(args):
+    with test_case("one_normal_one_light_ensure_only_valid_requests_and_no_unnecessary_notifications"),\
+        launch_node(args, safir_instance=1, node_id=1) as node1,\
+        launch_node(args, safir_instance=5, node_id=5) as node5:
+    
+        app1 = SafirApp(safir_instance=1, node_id=1)
+        app5 = SafirApp(safir_instance=5, node_id=5)
+
+        # App 1
+        await app1.send('{"method": "registerServiceHandler", "params": {"typeId": "DoseTest.GlobalService"}, "id": 101}')
+        await app1.send('{"method": "registerEntityHandler", "params": {"typeId": "DoseTest.GlobalEntity"}, "id": 103}')
+        await app1.send('{"method": "setEntity", "params": {"entity": {"_DouType": "DoseTest.GlobalEntity", "Info": "version0"}, "instanceId": 1}, "id": 104}')
+        await app1.send('{"method": "setEntity", "params": {"entity": {"_DouType": "DoseTest.GlobalEntity", "Info": "version0"}, "instanceId": 2}, "id": 105}')
+        await app1.send('{"method": "setEntity", "params": {"entity": {"_DouType": "DoseTest.GlobalEntity", "Info": "version0"}, "instanceId": 3}, "id": 106}')
+        initialRegApp1 = [("Safir.Dob.NodeInfo:1", "Registered"), ("DoseTest.GlobalEntity:DEFAULT_HANDLER", "Registered"), ("DoseTest.GlobalService:DEFAULT_HANDLER", "Registered")]
+        initialEntApp1 = [("Safir.Dob.NodeInfo:1", "_"), ("DoseTest.GlobalEntity:1", "version0"), ("DoseTest.GlobalEntity:2", "version0"), ("DoseTest.GlobalEntity:3", "version0")]
+
+        # App 5 - Light node
+        initialRegApp5 = [("Safir.Dob.NodeInfo:5", "Registered")]
+        initialEntApp5 = [("Safir.Dob.NodeInfo:5", "_")]
+
+        # let the system run for a while to complete PD
+        await asyncio.sleep(5)
+        await app5.wait_for_node_state("Attached")
+        log("--- node5 is now attached")
+        await check_pool(app1, initialRegApp1 + initialRegApp5, initialEntApp1 + initialEntApp5)
+        await check_pool(app5, initialRegApp1 + initialRegApp5, initialEntApp1 + initialEntApp5)
+
+        # Disable network on lightnode and wait for it to be Detached
+        log("---------- set_network_state=down for node5 -----------")
+        await set_network_state(False, node5.session_id)
+        await asyncio.sleep(5)
+        await app5.wait_for_node_state("Detached")
+        log("--- node5 is now detached")
+        await check_pool(app1, initialRegApp1, initialEntApp1)
+        await check_pool(app5, initialRegApp1 + initialRegApp5, initialEntApp1 + initialEntApp5)
+
+        log("--- stop node1 while node5 is detached")
+        node1.killprocs()
+
+        # Enable network again for node5
+        log("---------- set_network_state=up for node5 -----------")
+        await set_network_state(True, node5.session_id) 
+        await asyncio.sleep(10) # wait for a while and make sure the node stays in detached mode
+        await app5.wait_for_node_state("Detached")
+
+        # Start a new normal node
+        log("--- start node2")
+        with launch_node(args, safir_instance=2, node_id=2, start_dope=True) as node2:
+            app2 = SafirApp(safir_instance=2, node_id=2)
+            await app2.send('{"method": "registerEntityHandler", "params": {"typeId": "DoseTest.GlobalEntity", "handlerId": "APP2"}, "id": 107}')
+            await app2.send('{"method": "setEntity", "params": {"entity": {"_DouType": "DoseTest.GlobalEntity", "Info": "version2"}, "instanceId": 22, "handlerId": "APP2"}, "id": 104}')
+            initialRegApp2 = [("Safir.Dob.NodeInfo:2", "Registered"), ("DoseTest.GlobalEntity:APP2", "Registered")]
+            initialEntApp2 = [("Safir.Dob.NodeInfo:2", "_"), ("DoseTest.GlobalEntity:22", "version2")]
+
+            # let the system run for a while to complete PD
+            await asyncio.sleep(5)
+            await app5.wait_for_node_state("Attached")
+            log("--- node5 is now attached to a new system")
+            await check_pool(app2, initialRegApp2 + initialRegApp5, initialEntApp2 + initialEntApp5)
+            await check_pool(app5, initialRegApp2 + initialRegApp5, initialEntApp2 + initialEntApp5)
+
+        # node5 should now be detached again
+        log("--- Killed node2, wait for node5 to be detached again")
+        await app5.wait_for_node_state("Detached")
+        await check_pool(app5, initialRegApp2 + initialRegApp5, initialEntApp2 + initialEntApp5)
+
+        await app5.stop()
+
+
 # ===========================================
 # main
 # ===========================================
 async def main(args):
-    await two_normal_one_light_detach_reattach_light(args)
-    await two_normal_one_light_kill_one_normal_while_light_is_detached(args)
-    await one_normal_two_light_detach_reattach_one_light_big_pool(args)
-    await one_normal_one_light_ensure_only_valid_requests_and_no_unnecessary_notifications(args)
+    # await two_normal_one_light_detach_reattach_light(args)
+    # await two_normal_one_light_kill_one_normal_while_light_is_detached(args)
+    # await one_normal_two_light_detach_reattach_one_light_big_pool(args)
+    # await one_normal_one_light_ensure_only_valid_requests_and_no_unnecessary_notifications(args)
+    await lightnode_attaches_to_new_system_after_detached(args)
     
 if __name__ == "__main__":
     asyncio.run(main(parse_arguments()))

@@ -162,11 +162,9 @@ namespace Internal
             for (auto request = m_requests.begin(); request != m_requests.end(); ++request)
             {
                 if (!request->sent)
-                {
-                    lllog(5) << L"smart prepareRequest to " << request->nodeId << std::endl;
+                {                    
                     SmartSyncState syncState;
                     ConnectionsT::Instance().PrepareSmartSync(request->nodeId, syncState);
-                    lllog(5) << L"smart prepareRequest DONE to " << request->nodeId << std::endl;
 
                     if (Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().LogLevel() >= 5)
                     {

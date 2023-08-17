@@ -876,7 +876,9 @@ namespace Internal
 
         if (newRegTime < currentRegTime)
         {
-            lllog(5) << "DoseMain: HandlerRegistrations - NewRegTime < CurrentRegTime, throw away!" << std::endl << newRegState.Image() << std::endl;
+            lllog(5) << "DoseMain: HandlerRegistrations - NewRegTime < CurrentRegTime, throw away!" << std::endl;
+            lllog(5) << "DoseMain: HandlerRegistrations - CurentState" << currentRegState.Image() << std::endl;
+            lllog(5) << "DoseMain: HandlerRegistrations - NewState" << newRegState.Image() << std::endl;
             return false;
         }
         else if (currentRegTime < newRegTime)
@@ -890,7 +892,9 @@ namespace Internal
             return true;
         }
 
-        lllog(5) << "DoseMain: HandlerRegistrations - NewRegTime == CurrentRegTime but NewReg has lower RegistrationStateKind priority, throw away!" << std::endl << newRegState.Image() << std::endl;
+        lllog(5) << "DoseMain: HandlerRegistrations - NewRegTime == CurrentRegTime but NewReg has lower RegistrationStateKind priority, throw away!" << std::endl;
+        lllog(5) << "DoseMain: HandlerRegistrations - CurentState" << currentRegState.Image() << std::endl;
+        lllog(5) << "DoseMain: HandlerRegistrations - NewState" << newRegState.Image() << std::endl;
         return false;
     }
 
