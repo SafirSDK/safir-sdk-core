@@ -44,6 +44,7 @@ public:
     void OnDoDispatch() override;
     void OnStopOrder() override;
 
+    bool notify(QObject* object, QEvent* event) override;
 private:
     std::unique_ptr<Safir::Dob::Connection> m_connection;
     std::unique_ptr<EntityViewerMainWindow> m_mainWindow;

@@ -23,6 +23,8 @@
 ******************************************************************************/
 #include "EntityViewerApplication.h"
 
+#include <Safir/Dob/LowMemoryException.h>
+#include <QMessageBox>
 #include <iostream>
 #include <thread>
 #include <chrono>
@@ -36,17 +38,32 @@ EntityViewerApplication::EntityViewerApplication(int &argc, char **argv)
     m_mainWindow->show();
     std::thread([this]
     {
-        auto connection = std::make_unique<Safir::Dob::Connection>();
-        connection->Open(L"EntityViewerApplication",
-                         Safir::Dob::Typesystem::InstanceId::GenerateRandom().ToString(),
-                         0,
-                         this,
-                         this);
-        QMetaObject::invokeMethod(this, [this, connection = std::move(connection)] () mutable
-                                        {
-                                            m_connection.swap(connection);
-                                            m_mainWindow->SetConnection(*m_connection);
-                                        });
+        try
+        {
+            auto connection = std::make_unique<Safir::Dob::Connection>();
+            connection->Open(L"EntityViewerApplication",
+                             Safir::Dob::Typesystem::InstanceId::GenerateRandom().ToString(),
+                             0,
+                             this,
+                             this);
+            QMetaObject::invokeMethod(this, [this, connection = std::move(connection)] () mutable
+                                            {
+                                                m_connection.swap(connection);
+                                                m_mainWindow->SetConnection(*m_connection);
+                                            });
+        }
+        catch (const Safir::Dob::LowMemoryException& exc)
+        {
+            QMetaObject::invokeMethod(this, [this, exc]
+                                            {
+                                                QMessageBox::critical(nullptr,
+                                                                      tr("Low Memory"),
+                                                                      tr("Operation could not be performed because shared memory is low:\n\n%1").
+                                                                      arg(exc.what()));
+                                                exit(0);
+                                            });
+        }
+
     }).detach();
 }
 
@@ -68,4 +85,20 @@ void EntityViewerApplication::OnDoDispatch()
 void EntityViewerApplication::OnStopOrder()
 {
     QMetaObject::invokeMethod(this, []{quit();});
+}
+
+bool EntityViewerApplication::notify(QObject* object, QEvent* event)
+{
+    try
+    {
+        return QApplication::notify(object, event);
+    }
+    catch (const Safir::Dob::LowMemoryException& exc)
+    {
+        QMessageBox::critical(nullptr,
+                              tr("Low Memory"),
+                              tr("Operation could not be performed because shared memory is low:\n\n%1").
+                              arg(exc.what()));
+    }
+    return false;
 }
