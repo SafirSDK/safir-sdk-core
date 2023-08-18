@@ -191,10 +191,12 @@ int main(int argc, char * argv[])
         else if (options.allocate)
         {
             app.AllocateUntilLevel(options.allocationLevel);
+            app.ShowLevel();
         }
         else if (options.deallocate)
         {
             app.Deallocate();
+            app.ShowLevel();
         }
 
         return 0;

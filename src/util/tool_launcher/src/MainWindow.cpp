@@ -75,7 +75,8 @@ MainWindow::MainWindow()
     , m_work(std::make_unique<boost::asio::io_service::work>(m_ioService))
 {
     m_ui->setupUi(this);
-    setStyleSheet("QGroupBox { border-top: 1px solid lightgray; margin-top: 8px; } QGroupBox::title {subcontrol-origin: margin; subcontrol-position: top left; padding: 0 3px; }");
+    //Note that a stylesheet is set on the dialog in qt designer.
+
     m_ui->outputTabs->setVisible(false);
     m_ui->lookupEdit->setPlaceholderText(tr("TypeId or Type name"));
     adjustSize();
@@ -96,6 +97,8 @@ MainWindow::MainWindow()
     connect(m_ui->typeIdLookupButton, &QPushButton::pressed, this, &MainWindow::OnTypeIdLookupPressed);
     connect(m_ui->typeLookupButton, &QPushButton::pressed, this, &MainWindow::OnTypeLookupPressed);
     connect(m_ui->showOutputButton, &QAbstractButton::toggled, this, &MainWindow::OnShowOutputToggled);
+    connect(m_ui->allocateButton, &QPushButton::pressed, this, &MainWindow::OnAllocatePressed);
+    connect(m_ui->deallocateButton, &QPushButton::pressed, this, &MainWindow::OnDeallocatePressed);
 
     auto* timer = new QTimer(this);
     timer->setInterval(100);
@@ -301,6 +304,19 @@ void MainWindow::OnShowOutputToggled(const bool checked)
     m_ui->buttonSeparator->setVisible(!checked);
     adjustSize();
 }
+
+void MainWindow::OnAllocatePressed()
+{
+    m_ui->showOutputButton->setChecked(true);
+    LaunchProgram("safir_memory_allocator", {"--allocate", m_ui->allocationLevelCombo->currentText().toStdString()});
+}
+
+void MainWindow::OnDeallocatePressed()
+{
+    m_ui->showOutputButton->setChecked(true);
+    LaunchProgram("safir_memory_allocator", {"--deallocate"});
+}
+
 
 void MainWindow::AppendText(QTextEdit* textEdit, const QString& string)
 {

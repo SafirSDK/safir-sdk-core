@@ -68,6 +68,8 @@ private slots:
     void OnShowTypesystemDetailsPressed();
     void OnTypeIdLookupPressed();
     void OnTypeLookupPressed();
+    void OnAllocatePressed();
+    void OnDeallocatePressed();
 void OnShowOutputToggled(const bool checked);
 private:
     static void AppendText(QTextEdit* textEdit, const QString& string);
