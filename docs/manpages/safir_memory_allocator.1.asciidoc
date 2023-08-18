@@ -1,0 +1,34 @@
+SAFIR_CONTROL_GUI(1)
+====================
+:doctype: manpage
+
+
+NAME
+----
+safir_memory_allocator - Test tool for faking shared memory pressure.
+
+
+SYNOPSIS
+--------
+*safir_memory_allocator* ['OPTIONS']
+
+DESCRIPTION
+-----------
+Use this tool to generate fake memory pressure in the Dob shared memory. This can be used
+to test application behaviour under low memory conditions.
+
+OPTIONS
+-------
+Please check safir_show_config --help for information on options.
+
+
+RESOURCES
+---------
+Web site: <http://www.safirsdkcore.com/>
+
+
+COPYING
+-------
+Copyright \(C) 2023 Saab AB. Free use of this software is granted under
+the terms of the GNU General Public License Version 3 (GPL-3).
+
