@@ -35,7 +35,7 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Saab AB")]
 [assembly: AssemblyProduct("Safir SDK Core")]
-[assembly: AssemblyCopyright("Copyright Saab AB, 2006-2014")]
+[assembly: AssemblyCopyright("Copyright Saab AB, 2006-2014, 2022-2023")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

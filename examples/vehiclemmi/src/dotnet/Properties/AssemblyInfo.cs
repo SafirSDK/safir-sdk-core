@@ -33,7 +33,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Saab AB")]
 [assembly: AssemblyProduct("Safir SDK Core")]
-[assembly: AssemblyCopyright("Copyright Saab AB 2008-2014")]
+[assembly: AssemblyCopyright("Copyright Saab AB 2008-2015")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

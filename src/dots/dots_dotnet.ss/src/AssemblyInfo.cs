@@ -30,12 +30,12 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 //
-[assembly: AssemblyTitle("dots_dotnet.dll")]
+[assembly: AssemblyTitle("Safir.Dob.Typesystem.dll")]
 [assembly: AssemblyDescription("Typesystem interface for dotnet")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Saab AB")]
 [assembly: AssemblyProduct("Safir SDK Core")]
-[assembly: AssemblyCopyright("Copyright Saab AB 2006-2014")]
+[assembly: AssemblyCopyright("Copyright Saab AB 2006-2014, 2022-2023")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

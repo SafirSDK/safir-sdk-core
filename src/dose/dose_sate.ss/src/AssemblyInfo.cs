@@ -35,7 +35,7 @@ using System.Reflection;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Saab AB")]
 [assembly: AssemblyProduct("Safir SDK Core")]
-[assembly: AssemblyCopyright("Copyright Saab AB, 2006-2016")]
+[assembly: AssemblyCopyright("Copyright Saab AB, 2006-2016, 2022-2023")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
