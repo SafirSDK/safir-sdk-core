@@ -245,18 +245,27 @@ namespace Sate
 
         public void OnDispatchTimer(object myObject, EventArgs myEventArgs)
         {
-            var prevCount = dispatchCounter;
-            if (!Settings.Sate.NoDispatch && !IsDisposed)
+            try
             {
-                Dose.Dispatch();
-            }
+                var prevCount = dispatchCounter;
+                if (!Settings.Sate.NoDispatch && !IsDisposed)
+                {
+                    Dose.Dispatch();
+                }
 
-            dispatchTimer.Stop();
-            if (prevCount < dispatchCounter)
+                dispatchTimer.Stop();
+                if (prevCount < dispatchCounter)
+                {
+                    // If we get here, dispatchThread has made a callback while the timer was already running. In that case we restart timer.
+                    // If dispatchThread already started the timer again after the Stop above, then this call to Start has no effect.
+                    dispatchTimer.Start();
+                }
+            }
+            catch (LowMemoryException)
             {
-                // If we get here, dispatchThread has made a callback while the timer was already running. In that case we restart timer.
-                // If dispatchThread already started the timer again after the Stop above, then this call to Start has no effect.
-                dispatchTimer.Start();
+                MessageBox.Show("Operation failed due to low shared memory", "Low Memory",
+                                MessageBoxButtons.OK,
+                                MessageBoxIcon.Error);
             }
         }
 
@@ -1007,7 +1016,20 @@ namespace Sate
         [STAThread]
         private static void Main()
         {
+            System.Windows.Forms.Application.ThreadException += new ThreadExceptionEventHandler(Application_ThreadException);
+            System.Windows.Forms.Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
+            AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
             System.Windows.Forms.Application.Run(Instance);
+        }
+
+        static void Application_ThreadException(object sender, ThreadExceptionEventArgs e)
+        {
+            MessageBox.Show(e.Exception.Message, "Unhandled Thread Exception");
+        }
+
+        static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+        {
+            MessageBox.Show((e.ExceptionObject as Exception).Message, "Unhandled UI Exception");
         }
 
         //This is executed when the MainForm is first loaded
@@ -1059,6 +1081,12 @@ namespace Sate
                     // Instance already used, try another!
                     instance++;
                 }
+                catch (LowMemoryException)
+                {
+                    MessageBox.Show("Cannot connect to the Dob due to low shared memory", "Low Memory", MessageBoxButtons.OK,
+                                    MessageBoxIcon.Error);
+                    System.Windows.Forms.Application.Exit();
+                }
             }
 
             Dose.Close();
@@ -1093,6 +1121,12 @@ namespace Sate
                 {
                     // Instance already used, try another!
                     instance++;
+                }
+                catch (LowMemoryException)
+                {
+                    MessageBox.Show("Cannot connect to the Dob due to low shared memory", "Low Memory", MessageBoxButtons.OK,
+                                    MessageBoxIcon.Error);
+                    System.Windows.Forms.Application.Exit();
                 }
             }
 

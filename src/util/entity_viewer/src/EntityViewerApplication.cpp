@@ -58,7 +58,7 @@ EntityViewerApplication::EntityViewerApplication(int &argc, char **argv)
                                             {
                                                 QMessageBox::critical(nullptr,
                                                                       tr("Low Memory"),
-                                                                      tr("Operation could not be performed because shared memory is low:\n\n%1").
+                                                                      tr("Cannot connect to the Dob due to low shared memory:\n\n%1").
                                                                       arg(exc.what()));
                                                 exit(0);
                                             });
