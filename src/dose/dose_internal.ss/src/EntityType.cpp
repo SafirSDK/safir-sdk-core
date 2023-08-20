@@ -2073,7 +2073,7 @@ namespace Internal
 
         const auto memoryLevel = GetMemoryLevel();
         if (memoryLevel >= MemoryLevel::Low &&
-            std::string(connection->NameWithoutCounter()).find(";NodeInfoHandler;") == std::string::npos)
+            std::string(connection->NameWithoutCounter()).find(";NodeInfoHandler") == std::string::npos)
         {
             if (!hasOwner && memoryLevel >= MemoryLevel::Low)
             {

@@ -25,6 +25,7 @@
 #include "ProcessInfoHandler.h"
 
 #include <Safir/Dob/AccessDeniedException.h>
+#include <Safir/Dob/LowMemoryException.h>
 #include <Safir/Dob/ErrorListResponse.h>
 #include <Safir/Dob/ResponseErrorInfo.h>
 #include <Safir/Dob/ConnectionAspectMisc.h>
@@ -145,6 +146,13 @@ namespace Internal
                                 << "Unable to set ProcessInfo entity " << eid
                                 << ". Has anyone overregistered Safir::Dob::ProcessInfo?");
             }
+            catch (const Safir::Dob::LowMemoryException &)
+            {
+                SEND_SYSTEM_LOG(Error,
+                                << "Unable to set ProcessInfo entity " << eid
+                                << " due to low shared memory.");
+            }
+
         });
     }
 
@@ -172,6 +180,13 @@ namespace Internal
                             << "Unable to set ProcessInfo entity " << eid
                             << "Has someone overregistered Safir::Dob::ProcessInfo?");
         }
+        catch (const Safir::Dob::LowMemoryException &)
+        {
+            SEND_SYSTEM_LOG(Error,
+                            << "Unable to set ProcessInfo entity " << eid
+                            << " due to low shared memory.");
+        }
+
     }
 
 
@@ -226,8 +241,14 @@ namespace Internal
             catch (const Safir::Dob::AccessDeniedException &)
             {
                 SEND_SYSTEM_LOG(Error,
-                                << "Unable to set ProcessInfo entity " << eid
+                                << "Unable to remove ProcessInfo entity " << eid
                                 << "Has someone overregistered Safir::Dob::ProcessInfo?");
+            }
+            catch (const Safir::Dob::LowMemoryException &)
+            {
+                SEND_SYSTEM_LOG(Error,
+                                << "Unable to remove ProcessInfo entity " << eid
+                                << " due to low shared memory.");
             }
         });
     }
@@ -257,26 +278,35 @@ namespace Internal
     }
 
     void ProcessInfoHandler::OnDeleteRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy,
-                                             Safir::Dob::ResponseSenderPtr    responseSender)
+                                             Safir::Dob::ResponseSenderPtr        responseSender)
     {
-        if (m_connection.IsCreated(entityRequestProxy.GetEntityId()))
+        try
         {
-            ProcessInfoPtr procInfo = std::static_pointer_cast<ProcessInfo>
-                (m_connection.Read(entityRequestProxy.GetEntityId()).GetEntity());
-
-            for (auto name = procInfo->ConnectionNames().begin(); name != procInfo->ConnectionNames().end(); ++name)
+            if (m_connection.IsCreated(entityRequestProxy.GetEntityId()))
             {
-                const ConnectionId id(Connections::Instance().NodeId(),
-                    -1,  // dummy context (context is part of the connection name)
-                    (Connection::CalculateIdentifier
-                    (Typesystem::Utilities::ToUtf8(*name))));
-                ConnectionPtr connection = Connections::Instance().GetConnection(id);
+                ProcessInfoPtr procInfo = std::static_pointer_cast<ProcessInfo>
+                    (m_connection.Read(entityRequestProxy.GetEntityId()).GetEntity());
 
-                connection->SendStopOrder();
+                for (auto name = procInfo->ConnectionNames().begin(); name != procInfo->ConnectionNames().end(); ++name)
+                {
+                    const ConnectionId id(Connections::Instance().NodeId(),
+                                          -1,  // dummy context (context is part of the connection name)
+                                          (Connection::CalculateIdentifier
+                                           (Typesystem::Utilities::ToUtf8(*name))));
+                    ConnectionPtr connection = Connections::Instance().GetConnection(id);
+
+                    connection->SendStopOrder();
+                }
             }
-        }
 
-        responseSender->Send(Safir::Dob::SuccessResponse::Create());
+            responseSender->Send(Safir::Dob::SuccessResponse::Create());
+        }
+        catch (const Safir::Dob::LowMemoryException &)
+        {
+            SEND_SYSTEM_LOG(Error,
+                            << "Unable to handle delete request for " << entityRequestProxy.GetEntityId()
+                            << " due to low shared memory.");
+        }
     }
 
 }

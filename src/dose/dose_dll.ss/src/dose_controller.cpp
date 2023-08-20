@@ -1191,7 +1191,7 @@ namespace Internal
         }
 
         if (SharedMemoryObject::GetMemoryLevel() >= MemoryLevel::VeryLow &&
-            std::string(m_connection->NameWithoutCounter()).find(";NodeInfoHandler;") == std::string::npos)
+            std::string(m_connection->NameWithoutCounter()).find(";NodeInfoHandler") == std::string::npos)
         {
             std::wostringstream ostr;
             ostr << "SetChanges/ReadEntity is not allowed due to lack of shared memory (entityId = "
