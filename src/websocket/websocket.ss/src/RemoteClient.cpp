@@ -23,6 +23,7 @@
 ******************************************************************************/
 #include <Safir/Dob/Typesystem/Serialization.h>
 #include <Safir/Dob/Typesystem/ToolSupport/Serialization.h>
+#include <Safir/Dob/LowMemoryException.h>
 #include <Safir/Websocket/Parameters.h>
 #include "RemoteClient.h"
 #include "CommandValidator.h"
@@ -308,6 +309,11 @@ void RemoteClient::WsDispatch(const JsonRpcRequest& req)
     catch (const Safir::Dob::OverflowException& e)
     {
         RequestErrorException err(JsonRpcErrorCodes::SafirOverflow, e.what());
+        SendToClient(JsonRpcResponse::Error(req.Id(), err.Code(), err.Message(), err.Data()));
+    }
+    catch (const Safir::Dob::LowMemoryException& e)
+    {
+        RequestErrorException err(JsonRpcErrorCodes::SafirLowMemoryException, e.what());
         SendToClient(JsonRpcResponse::Error(req.Id(), err.Code(), err.Message(), err.Data()));
     }
     catch (const Safir::Dob::AccessDeniedException& e)

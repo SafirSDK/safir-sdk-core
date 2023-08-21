@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2016 (http://safirsdkcore.com)
+* Copyright Saab AB, 2016, 2023 (http://safirsdkcore.com)
 *
 * Created by: Joel Ottosson / joel.ottosson@consoden.se
 *
@@ -45,6 +45,7 @@ namespace JsonRpcErrorCodes
     static const int SafirSoftwareViolation     = 106;
     static const int SafirReadOnly              = 107;
     static const int SafirUnexpectedException   = 108;
+    static const int SafirLowMemoryException    = 109;
 
     static std::string CodeToString(int code)
     {
@@ -80,6 +81,8 @@ namespace JsonRpcErrorCodes
             return "Read only";
         case SafirUnexpectedException:
             return "Unexpected Safir exception";
+        case SafirLowMemoryException:
+            return "Low memory";
         default:
             return "Unexpected error";
         }
@@ -117,9 +120,8 @@ public:
     const std::string& Message() const {return m_message;}
     const std::string& Data() const {return m_data;}
 
-private:    
+private:
     int m_code;
     std::string m_message;
     std::string m_data;
 };
-

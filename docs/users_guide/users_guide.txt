@@ -2816,7 +2816,7 @@ When an application has several connections to the Dob, only one of them should 
 [[safir_websocket]]
 == Safir WebSocket/JSON-RPC interface
 From version 6.3 of Safir SDK Core, a JSON-RPC interface over WebSockets is provided as an alternative to the traditional language interfaces. The interface is an implementation of the JSON-RPC specification 2.0 (http://www.jsonrpc.org/specification) and uses WebSockets https://tools.ietf.org/html/rfc6455[(RFC 6455)] as carrier.
-Most of the common DOB features are available such as subscribing to entities and messages, sending messages, sending and handling requests, registering as a handler of entities, and some typesystem operations.
+Most of the common Dob features are available such as subscribing to entities and messages, sending messages, sending and handling requests, registering as a handler of entities, and some typesystem operations.
 If you are not familiair with JSON-RPC, It is strongly recomended to read the JSON-RPC 2.0 Specification. Its a simple protocol and the specification is short and easy to read, it won’t take more than about 10 minutes to read it.
 
 The API is explained in full detail in <<websocket_api_reference>>, but basically the API consists of 3 types of messages:
@@ -4661,7 +4661,7 @@ include::example_applications.txt[]
 
 [[websocket_api_reference]]
 [appendix]
-== DOB WebSocket/JSON-RPC API reference
+== Dob WebSocket/JSON-RPC API reference
 
 ////
 WebSocket/JSON-RPC Api reference is located in a separate file, websocket_api_reference.txt

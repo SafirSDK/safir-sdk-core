@@ -6,14 +6,14 @@ To use the API, connect a WebSocket to the Safir WebSocket server and send the J
 Remember that JSON is case sensitive.
 
 === Methods
-This section describes all methods exposed by the DOB JSON-RPC interface. Methods can be called by clients and
+This section describes all methods exposed by the Dob JSON-RPC interface. Methods can be called by clients and
 a response with the same id is guaranteed. The id can be either a string or a number. If no id is present the method
 will still be executed but the caller will not get any response.
 
 Some parameters have a specified default value. Such parameters can be omitted in a method call and will then adopt their default value.
 
 ==== Method: close
-Close connection to the DOB.
+Close connection to the Dob.
 
 Returns::
  * `value` - On success the string _OK_ is returned, otherwize an error is returned.
@@ -57,7 +57,7 @@ Example::
 ----------------------------
 
 ==== Method: deleteEntity
-Deletes an entity instance in the DOB.
+Deletes an entity instance in the Dob.
 
 Parameters::
  * `typeId` - Type of the entity to delete.
@@ -147,7 +147,7 @@ Example::
 ----------------------------
 
 ==== Method: isCreated
-Check if an entity instance exists in the DOB.
+Check if an entity instance exists in the Dob.
 
 Parameters::
  * `typeId` - Type of the entity.
@@ -162,10 +162,10 @@ Example::
 ----------------------------
 
 ==== Method: isOpen
-Check if there is an open connection to the DOB.
+Check if there is an open connection to the Dob.
 
 Returns::
- * `value` - If connected to the DOB _true_ is returned, otherwize _false_ is returned.
+ * `value` - If connected to the Dob _true_ is returned, otherwize _false_ is returned.
 
 Example::
 ----------------------------
@@ -174,7 +174,7 @@ Example::
 ----------------------------
 
 ==== Method: open
-Opens a connection to the DOB.
+Opens a connection to the Dob.
 
 Parameters::
  * `connectionName` - Name of the new connection.
@@ -204,7 +204,7 @@ Example::
 ----------------------------
 
 ==== Method: readEntity
-Read current version of an entity in the DOB.
+Read current version of an entity in the Dob.
 
 Parameters::
  * `typeId` - Type of the entity to read.
@@ -284,11 +284,11 @@ Example::
 ----------------------------
 
 ==== Method: setEntity
-Creates or updates an entity in the DOB. No merge is performed, the entity will look exactly like the one submitted in the
+Creates or updates an entity in the Dob. No merge is performed, the entity will look exactly like the one submitted in the
 entity parameter. Any members not present will be set to null. 
 
 Parameters::
- * `entity` - Entity to set in the DOB.
+ * `entity` - Entity to set in the Dob.
  * `instanceId` - Instance id of the entity to set.
  * `handlerId` - Id of the handler. _([small]*Default:* DEFAULT_HANDLER)_
 Returns::
@@ -301,14 +301,14 @@ Example::
 ----------------------------
 
 ==== Method: setEntityChanges
-Merge all members that are present in the entity parameter, with the current version of the entity in the DOB.
+Merge all members that are present in the entity parameter, with the current version of the entity in the Dob.
 Only the members that are present in the entity parameter are considered as part of the change. This means that if the 
 intention is to change a specific member to null, that member must explicitly be part of the entity parameter with the value null.
 Since JSON arrays don't have indices, it limits the possibility to set changes on individual array values.
 Hence, if an array is to be changed the entire array should be specified in the call.
 
 Parameters::
- * `entity` - Entity merge into the DOB.
+ * `entity` - Entity merge into the Dob.
  * `instanceId` - Instance id of the entity to change.
  * `handlerId` - Id of the handler. _([small]*Default:* DEFAULT_HANDLER)_
 Returns::
@@ -697,14 +697,15 @@ preserved. However if it is not possible to extract the id, the error will be se
 Besides the predefined error codes, Safir can send the following error codes
 
 Error codes::
- * `SafirNotOpen (100)` - When fail to open a DOB connection. 
+ * `SafirNotOpen (100)` - When fail to open a Dob connection. 
  * `SafirOverflow (101)` - Sending requests or messges to fast.
  * `SafirAccessDenied (102)` - Trying to modify an entity without ownership.
  * `SafirGhostExists (103)` - Trying to modify an entity when there is a ghost instance that hasn't been injected.
  * `SafirNotFound (104)` - Calling read or getInstanceIdPolicy on non-existing instance.
  * `SafirIllegalValue (105)` - A parameter was invalid.
  * `SafirSoftwareViolation (106)` - There is a programming error somewhere. For example trying register a global type on a light node.
- * `SafirReadOnly (107)` - Trying to set a read-only value.
+ * `SafirUnexpectedException (108)` - Unexpected exception occurred.
+ * `SafirLowMemoryException (109)` - Operation could not be completed because Dob shared memory is running low.
  
  Example::
 ----------------------------
