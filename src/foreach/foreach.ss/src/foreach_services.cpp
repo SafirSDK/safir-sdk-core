@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2007-2013 (http://safirsdkcore.com)
+* Copyright Saab AB, 2007-2013, 2023 (http://safirsdkcore.com)
 *
 * Created by: Stefan Lindström / stsyli
 *
@@ -25,27 +25,24 @@
 #include "foreach_app.h"
 #include "foreach_data.h"
 
-#include <Safir/Dob/Response.h>
-#include <Safir/Dob/SuccessResponse.h>
-#include <Safir/Dob/ResponseGeneralErrorCodes.h>
-
-#include <Safir/Utilities/ForEach/UpdateRequest.h>
-#include <Safir/Utilities/ForEach/DeleteRequest.h>
-#include <Safir/Utilities/ForEach/DeleteAllRequest.h>
-#include <Safir/Utilities/ForEach/ResponseType.h>
-
-#include <Safir/Utilities/ForEach/BriefResponse.h>
-#include <Safir/Utilities/ForEach/FullResponse.h>
-
+#include <Safir/Dob/LowMemoryException.h>
+#include <Safir/Dob/NotFoundException.h>
 #include <Safir/Dob/OverflowException.h>
 #include <Safir/Dob/RequestTimeoutProperty.h>
-#include <Safir/Dob/NotFoundException.h>
+#include <Safir/Dob/Response.h>
+#include <Safir/Dob/ResponseGeneralErrorCodes.h>
+#include <Safir/Dob/SuccessResponse.h>
+#include <Safir/Dob/Typesystem/Members.h>
+#include <Safir/Dob/Typesystem/ObjectFactory.h>
+#include <Safir/Dob/Typesystem/Operations.h>
 #include <Safir/Logging/Log.h>
 #include <Safir/Time/TimeProvider.h>
-#include <Safir/Dob/Typesystem/Operations.h>
-#include <Safir/Dob/Typesystem/ObjectFactory.h>
-
-#include <Safir/Dob/Typesystem/Members.h>
+#include <Safir/Utilities/ForEach/BriefResponse.h>
+#include <Safir/Utilities/ForEach/DeleteAllRequest.h>
+#include <Safir/Utilities/ForEach/DeleteRequest.h>
+#include <Safir/Utilities/ForEach/FullResponse.h>
+#include <Safir/Utilities/ForEach/ResponseType.h>
+#include <Safir/Utilities/ForEach/UpdateRequest.h>
 
 namespace Safir
 {
@@ -53,9 +50,10 @@ namespace Utilities
 {
 namespace ForEach
 {
-    Services::Services(boost::asio::io_service& ioService) :
-        m_ioService(ioService),
-        m_debug(L"Services")
+    Services::Services(boost::asio::io_service& ioService)
+        : m_ioService(ioService)
+        , m_debug(L"Services")
+        , m_backdoorKeeper(m_connection)
     {
         //m_debug.Enable(true);
         // Send something to the tracer to open the connection.
@@ -64,10 +62,8 @@ namespace ForEach
 
     Services::~Services()
     {
-#if NOT_YET
         // Stop backdoor keeper
         m_backdoorKeeper.Stop();
-#endif
     }
 
     void Services::Init(const std::wstring& connectionNameCommonPart,
@@ -75,25 +71,19 @@ namespace ForEach
     {
         m_debug << "**** Initializing Services ****"<<std::endl;
         m_connection.Attach(connectionNameCommonPart, connectionNameInstancePart);
-        Safir::Dob::ConnectionAspectMisc connnectionAspectMisc(m_connection);
-
         // Register service.
 
         // Register as service provider.
         m_connection.RegisterServiceHandler(Safir::Utilities::ForEach::UpdateRequest::ClassTypeId, Safir::Dob::Typesystem::HandlerId(), this);
         m_connection.RegisterServiceHandler(Safir::Utilities::ForEach::DeleteRequest::ClassTypeId, Safir::Dob::Typesystem::HandlerId(), this);
         m_connection.RegisterServiceHandler(Safir::Utilities::ForEach::DeleteAllRequest::ClassTypeId, Safir::Dob::Typesystem::HandlerId(), this);
-#if NOT_YET
+
         // Start backdoor keeper
         m_backdoorKeeper.Start(*this);
-#endif
+
         /* to test overflow */
         m_backdoorOverflow = false;
 
-        //m_connection.SetAlwaysOverflowFlag(m_backdoorOverflow);
-        connnectionAspectMisc.SimulateOverflows(m_backdoorOverflow, m_backdoorOverflow);
-
-        m_debug << "Force overflow is: " << m_backdoorOverflow << std::endl;
     }
 
     void Services::OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId    /*typeId*/,
@@ -103,7 +93,7 @@ namespace ForEach
     }
 
     void Services::OnServiceRequest(const Safir::Dob::ServiceRequestProxy serviceRequestProxy,
-                                    Safir::Dob::ResponseSenderPtr replySender)
+                                    Safir::Dob::ResponseSenderPtr responseSender)
     {
         m_debug << "**** Services::OnServiceRequest() ****" << std::endl;
 
@@ -145,11 +135,22 @@ namespace ForEach
             {
                 error -> Code().SetVal(Safir::Dob::ResponseGeneralErrorCodes::SafirNullMember());
                 error -> Member().SetVal(Safir::Utilities::ForEach::UpdateRequest::ResponseTypeMemberIndex());
-                replySender->Send(errorList);
-                errorMessageSent = true;
                 m_debug << "ResponseType is NULL - sending error response" << std::endl;
-                Safir::Logging::SendSystemLog(Safir::Logging::Error,
-                                              L"ResponseType in Delete request is NULL - sending error response");
+                try
+                {
+                    Safir::Logging::SendSystemLog(Safir::Logging::Error,
+                                                  L"ResponseType in Delete request is NULL - sending error response");
+                    responseSender->Send(errorList);
+                }
+                catch (const Safir::Dob::LowMemoryException &)
+                {
+                    m_debug << "Failed to send response due to low dob shared memory." << std::endl;
+                    Safir::Logging::SendSystemLog(Safir::Logging::Error,
+                                                  L"Failed to send response due to low shared memory. Skipping.");
+                    responseSender->Discard();
+                }
+
+                errorMessageSent = true;
             }
             else
             {
@@ -173,7 +174,7 @@ namespace ForEach
                         {
                             m_debug << "Inserting into map in for loop - " << requestSpecificData << std::endl;
                             /* insert into map */
-                            m_requestData[replySender] = requestSpecificData;
+                            m_requestData[responseSender] = requestSpecificData;
                         }
                         else
                         {
@@ -189,7 +190,7 @@ namespace ForEach
                                                       L"Delete reuest on 0 objects! Sending empty response.");
                         // save response type
                         requestSpecificData->ResponseType() = deleteService->ResponseType().GetVal();
-                        SendEmptyResponse(requestSpecificData, replySender);
+                        SendEmptyResponse(requestSpecificData, responseSender);
                         return;
                     }
                 }
@@ -198,7 +199,18 @@ namespace ForEach
                 {
                     m_debug << "ReponseType Immediate" << std::endl;
                     Safir::Dob::ResponsePtr response = Safir::Dob::SuccessResponse::Create();
-                    replySender -> Send(response);
+                    try
+                    {
+                        responseSender -> Send(response);
+                    }
+                    catch (const Safir::Dob::LowMemoryException &)
+                    {
+                        m_debug << "Failed to send response due to low dob shared memory." << std::endl;
+                        Safir::Logging::SendSystemLog(Safir::Logging::Error,
+                                                      L"Failed to send response due to low shared memory. Skipping.");
+                        responseSender->Discard();
+                    }
+
                     requestSpecificData->ResponseType() = Safir::Utilities::ForEach::ResponseType::Immediate;
                 }
                 else if (deleteService->ResponseType().GetVal() == Safir::Utilities::ForEach::ResponseType::Brief)
@@ -239,11 +251,22 @@ namespace ForEach
             {
                 error -> Code().SetVal(Safir::Dob::ResponseGeneralErrorCodes::SafirNullMember());
                 error -> Member().SetVal(Safir::Utilities::ForEach::DeleteAllRequest::ResponseTypeMemberIndex());
-                replySender->Send(errorList);
-                errorMessageSent = true;
                 m_debug << "ResponseType is NULL - sending error response" << std::endl;
-                Safir::Logging::SendSystemLog(Safir::Logging::Critical,
-                                              L"ResponseType in DeleteAll request is NULL - sending error response");
+                try
+                {
+                    Safir::Logging::SendSystemLog(Safir::Logging::Critical,
+                                                  L"ResponseType in DeleteAll request is NULL - sending error response");
+                    responseSender->Send(errorList);
+                }
+                catch (const Safir::Dob::LowMemoryException &)
+                {
+                    m_debug << "Failed to send response due to low dob shared memory." << std::endl;
+                    Safir::Logging::SendSystemLog(Safir::Logging::Error,
+                                                  L"Failed to send response due to low shared memory. Skipping.");
+                    responseSender->Discard();
+                }
+
+                errorMessageSent = true;
             }
             else if (deleteAllService->TypeId().IsNull())
             {
@@ -253,7 +276,7 @@ namespace ForEach
                                               L"No typeId specified in DeleteAll request. Sending empty response.");
                 // save response type
                 requestSpecificData->ResponseType() = deleteAllService->ResponseType().GetVal();
-                SendEmptyResponse(requestSpecificData, replySender);
+                SendEmptyResponse(requestSpecificData, responseSender);
                 return;
             }
             else
@@ -275,32 +298,41 @@ namespace ForEach
                 }
 
                 /* loop over all instances of typeId and store into requestSpecifcData */
-                // get iterator for this class
-                for (Safir::Dob::EntityIterator it = m_connection.GetEntityIterator(deleteAllService->TypeId().GetVal(), includeSubClasses);
-                     it != Safir::Dob::EntityIterator();
-                     ++it)
+                try
                 {
-                    // if handlerId is set and does not match, skip this instance
-                    if (handlerIdSet && it->GetOwner() != handlerId)
+                    // get iterator for this class
+                    for (Safir::Dob::EntityIterator it = m_connection.GetEntityIterator(deleteAllService->TypeId().GetVal(), includeSubClasses);
+                         it != Safir::Dob::EntityIterator();
+                         ++it)
                     {
-                        continue;
-                    }
+                        // if handlerId is set and does not match, skip this instance
+                        if (handlerIdSet && it->GetOwner() != handlerId)
+                        {
+                            continue;
+                        }
 
-                    requestSpecificData->NumberOfObjects()++;
-                    Safir::Dob::Typesystem::EntityId entityId = it->GetEntityId();
-                    m_debug << "Added entityId to transaction list: " << it->GetEntityId().ToString() << std::endl;
-                    Safir::Utilities::ForEach::TransactionTableEntry entry;
-                    entry.entityId = entityId;
-                    /* unknown requestId so far, indicates that no request has been done yet */
-                    entry.requestId = -1;
-                    requestSpecificData->Transactions().push_back(entry);
+                        requestSpecificData->NumberOfObjects()++;
+                        Safir::Dob::Typesystem::EntityId entityId = it->GetEntityId();
+                        m_debug << "Added entityId to transaction list: " << it->GetEntityId().ToString() << std::endl;
+                        Safir::Utilities::ForEach::TransactionTableEntry entry;
+                        entry.entityId = entityId;
+                        /* unknown requestId so far, indicates that no request has been done yet */
+                        entry.requestId = -1;
+                        requestSpecificData->Transactions().push_back(entry);
+                    }
+                }
+                catch (const Safir::Dob::LowMemoryException &)
+                {
+                    m_debug << "Failed to find instances to send request to due to low shared memory." << std::endl;
+                    Safir::Logging::SendSystemLog(Safir::Logging::Error,
+                                                  L"Failed to find instances to send request to due to low shared memory.");
                 }
 
                 if (!errorMessageSent)
                 {
                     m_debug << "Inserting into map in for loop - " << requestSpecificData << std::endl;
                     /* insert into map */
-                    m_requestData[replySender] = requestSpecificData;
+                    m_requestData[responseSender] = requestSpecificData;
                 }
                 else
                 {
@@ -315,7 +347,7 @@ namespace ForEach
                                                   L"DeleteAll request operating on 0 objects. Sending empty response.");
                     // save response type
                     requestSpecificData->ResponseType() = deleteAllService->ResponseType().GetVal();
-                    SendEmptyResponse(requestSpecificData, replySender);
+                    SendEmptyResponse(requestSpecificData, responseSender);
                     return;
                 }
 
@@ -323,7 +355,18 @@ namespace ForEach
                 {
                     m_debug << "ReponseType Immediate" << std::endl;
                     Safir::Dob::ResponsePtr response = Safir::Dob::SuccessResponse::Create();
-                    replySender -> Send(response);
+                    try
+                    {
+                        responseSender -> Send(response);
+                    }
+                    catch (const Safir::Dob::LowMemoryException &)
+                    {
+                        m_debug << "Failed to send response due to low dob shared memory." << std::endl;
+                        Safir::Logging::SendSystemLog(Safir::Logging::Error,
+                                                      L"Failed to send response due to low shared memory. Skipping.");
+                        responseSender->Discard();
+                    }
+
                     requestSpecificData->ResponseType() = Safir::Utilities::ForEach::ResponseType::Immediate;
                 }
                 else if (deleteAllService->ResponseType().GetVal() == Safir::Utilities::ForEach::ResponseType::Brief)
@@ -365,7 +408,18 @@ namespace ForEach
             {
                 error -> Code().SetVal(Safir::Dob::ResponseGeneralErrorCodes::SafirNullMember());
                 error -> Member().SetVal(Safir::Utilities::ForEach::UpdateRequest::ResponseTypeMemberIndex());
-                replySender->Send(errorList);
+                try
+                {
+                    responseSender->Send(errorList);
+                }
+                catch (const Safir::Dob::LowMemoryException &)
+                {
+                    m_debug << "Failed to send response due to low dob shared memory." << std::endl;
+                    Safir::Logging::SendSystemLog(Safir::Logging::Error,
+                                                  L"Failed to send response due to low shared memory. Skipping.");
+                    responseSender->Discard();
+                }
+
                 errorMessageSent = true;
                 m_debug << "ResponseType is NULL - sending error response" << std::endl;
             }
@@ -377,7 +431,18 @@ namespace ForEach
 
                 error -> Code().SetVal(Safir::Dob::ResponseGeneralErrorCodes::SafirNullMember());
                 error -> Member().SetVal(Safir::Utilities::ForEach::UpdateRequest::TemplateEntityRequestMemberIndex());
-                replySender->Send(errorList);
+                try
+                {
+                    responseSender->Send(errorList);
+                }
+                catch (const Safir::Dob::LowMemoryException &)
+                {
+                    m_debug << "Failed to send response due to low dob shared memory." << std::endl;
+                    Safir::Logging::SendSystemLog(Safir::Logging::Error,
+                                                  L"Failed to send response due to low shared memory. Skipping.");
+                    responseSender->Discard();
+                }
+
                 errorMessageSent = true;
             }
             else
@@ -403,7 +468,7 @@ namespace ForEach
                         {
                             m_debug << "Inserting into map in for loop - " << requestSpecificData << std::endl;
                             /* insert into map */
-                            m_requestData[replySender] = requestSpecificData;
+                            m_requestData[responseSender] = requestSpecificData;
                         }
                         else
                         {
@@ -416,7 +481,7 @@ namespace ForEach
                 {
                     Safir::Logging::SendSystemLog(Safir::Logging::Warning,
                                                   L"UpdateRequest Operating on 0 objects! Sending empty response.");
-                    SendEmptyResponse(requestSpecificData, replySender);
+                    SendEmptyResponse(requestSpecificData, responseSender);
                     return;
                 }
 
@@ -425,7 +490,18 @@ namespace ForEach
                     m_debug << "ReponseType Immediate" << std::endl;
                     Safir::Dob::ResponsePtr response = Safir::Dob::SuccessResponse::Create();
                     // Send response.
-                    replySender -> Send(response);
+                    try
+                    {
+                        responseSender -> Send(response);
+                    }
+                    catch (const Safir::Dob::LowMemoryException &)
+                    {
+                        m_debug << "Failed to send response due to low dob shared memory." << std::endl;
+                        Safir::Logging::SendSystemLog(Safir::Logging::Error,
+                                                      L"Failed to send response due to low shared memory. Skipping.");
+                        responseSender->Discard();
+                    }
+
                     requestSpecificData->ResponseType() = Safir::Utilities::ForEach::ResponseType::Immediate;
                 }
                 else if (updateService->ResponseType().GetVal() == Safir::Utilities::ForEach::ResponseType::Brief)
@@ -457,7 +533,7 @@ namespace ForEach
         {
             m_debug << "Inserting into map - " << requestSpecificData << std::endl;
             /* insert into map */
-            m_requestData[replySender] = requestSpecificData;
+            m_requestData[responseSender] = requestSpecificData;
         }
         else
         {
@@ -467,39 +543,49 @@ namespace ForEach
 
     // Function:    SendEmptyResponse
     // Parameters:  Safir::Utilities::ForEach::RequestSpecificDataPtr requestSpecificData,
-    //              Safir::Dob::ResponseSenderPtr replySender
+    //              Safir::Dob::ResponseSenderPtr responseSender
     // Returns:     -
-    // Comments:    Sends an empty response using replySender
+    // Comments:    Sends an empty response using responseSender
     //
     void Services::SendEmptyResponse(Safir::Utilities::ForEach::RequestSpecificDataPtr requestSpecificData,
-                                     Safir::Dob::ResponseSenderPtr replySender)
+                                     Safir::Dob::ResponseSenderPtr responseSender)
     {
-        if (requestSpecificData->ResponseType() == Safir::Utilities::ForEach::ResponseType::Immediate)
+        try
         {
-            m_debug << "ReponseType Immediate" << std::endl;
-            Safir::Dob::ResponsePtr response = Safir::Dob::SuccessResponse::Create();
-            replySender -> Send(response);
-            m_debug << "Sent success response back" << std::endl;
+            if (requestSpecificData->ResponseType() == Safir::Utilities::ForEach::ResponseType::Immediate)
+            {
+                m_debug << "ReponseType Immediate" << std::endl;
+                Safir::Dob::ResponsePtr response = Safir::Dob::SuccessResponse::Create();
+                responseSender -> Send(response);
+                m_debug << "Sent success response back" << std::endl;
+            }
+            else if (requestSpecificData->ResponseType() == Safir::Utilities::ForEach::ResponseType::Brief)
+            {
+                m_debug << "ReponseType Brief" << std::endl;
+                Safir::Utilities::ForEach::BriefResponsePtr response = Safir::Utilities::ForEach::BriefResponse::Create();
+                response->NumberOfErrorResponses().SetVal(0);
+                response->NumberOfResponses().SetVal(0);
+                response->NumberOfSuccessResponses().SetVal(0);
+                responseSender->Send(response);
+                m_debug << "Sent Brief response back" << std::endl;
+            }
+            else /* Full */
+            {
+                m_debug << "ReponseType Full" << std::endl;
+                Safir::Utilities::ForEach::FullResponsePtr response = Safir::Utilities::ForEach::FullResponse::Create();
+                response->NumberOfErrorResponses().SetVal(0);
+                response->NumberOfResponses().SetVal(0);
+                response->NumberOfSuccessResponses().SetVal(0);
+                responseSender->Send(response);
+                m_debug << "Sent Full response back" << std::endl;
+            }
         }
-        else if (requestSpecificData->ResponseType() == Safir::Utilities::ForEach::ResponseType::Brief)
+        catch (const Safir::Dob::LowMemoryException &)
         {
-            m_debug << "ReponseType Brief" << std::endl;
-            Safir::Utilities::ForEach::BriefResponsePtr response = Safir::Utilities::ForEach::BriefResponse::Create();
-            response->NumberOfErrorResponses().SetVal(0);
-            response->NumberOfResponses().SetVal(0);
-            response->NumberOfSuccessResponses().SetVal(0);
-            replySender->Send(response);
-            m_debug << "Sent Brief response back" << std::endl;
-        }
-        else /* Full */
-        {
-            m_debug << "ReponseType Full" << std::endl;
-            Safir::Utilities::ForEach::FullResponsePtr response = Safir::Utilities::ForEach::FullResponse::Create();
-            response->NumberOfErrorResponses().SetVal(0);
-            response->NumberOfResponses().SetVal(0);
-            response->NumberOfSuccessResponses().SetVal(0);
-            replySender->Send(response);
-            m_debug << "Sent Full response back" << std::endl;
+            m_debug << "Failed to send response due to low dob shared memory." << std::endl;
+            Safir::Logging::SendSystemLog(Safir::Logging::Error,
+                                          L"Failed to send response due to low shared memory. Skipping.");
+            responseSender->Discard();
         }
     }
 
@@ -603,6 +689,13 @@ namespace ForEach
                     m_debug << "We got overflow... Add requestSpecificData to sendQueue for later retry" << std::endl;
                     m_sendQueue.push_back(requestSpecificData);
                 }
+                catch (const Safir::Dob::LowMemoryException &)
+                {
+                    m_debug << "Failed to send request due to low dob shared memory." << std::endl;
+                    Safir::Logging::SendSystemLog(Safir::Logging::Error,
+                                                  L"Failed to send request due to low shared memory. Skipping.");
+
+                }
                 catch (const Safir::Dob::NotFoundException &e)
                 {
                     //It's allowed to update a non-existing object. This exception will not be thrown for that reason.
@@ -634,7 +727,7 @@ namespace ForEach
 
         for (RequestMap::iterator iter = m_requestData.begin(); iter != m_requestData.end(); ++iter)
         {
-            Safir::Dob::ResponseSenderPtr replySender = iter->first;
+            Safir::Dob::ResponseSenderPtr responseSender = iter->first;
             RequestSpecificDataPtr data = iter->second;
             bool foundRequest = false;
 
@@ -683,8 +776,18 @@ namespace ForEach
                     response->NumberOfErrorResponses().SetVal(data->NumberOfErrorResponses());
                     response->NumberOfResponses().SetVal(data->NumberOfResponses());
                     response->NumberOfSuccessResponses().SetVal(data->NumberOfSuccessResponses());
-                    replySender->Send(response);
-                    m_debug << "Sent Brief response back" << std::endl;
+                    try
+                    {
+                        m_debug << "Sending Brief response back" << std::endl;
+                        responseSender->Send(response);
+                    }
+                    catch (const Safir::Dob::LowMemoryException &)
+                    {
+                        m_debug << "Failed to send response due to low dob shared memory." << std::endl;
+                        Safir::Logging::SendSystemLog(Safir::Logging::Error,
+                                                      L"Failed to send response due to low shared memory. Skipping.");
+                        responseSender->Discard();
+                    }
                 }
                 else if (data->ResponseType() == Safir::Utilities::ForEach::ResponseType::Full)
                 {
@@ -707,9 +810,18 @@ namespace ForEach
                         response->Response()[i++].SetPtr(entry.responsePtr);
                     }
 
-                    replySender->Send(response);
-                    m_debug << "Sent Full response back" << std::endl;
-
+                    try
+                    {
+                        m_debug << "Sending Full response back" << std::endl;
+                        responseSender->Send(response);
+                    }
+                    catch (const Safir::Dob::LowMemoryException &)
+                    {
+                        m_debug << "Failed to send response due to low dob shared memory." << std::endl;
+                        Safir::Logging::SendSystemLog(Safir::Logging::Error,
+                                                      L"Failed to send response due to low shared memory. Skipping.");
+                        responseSender->Discard();
+                    }
                 }
                 else if (data->ResponseType() == Safir::Utilities::ForEach::ResponseType::Immediate)
                 {
@@ -725,7 +837,17 @@ namespace ForEach
                     errorList -> NumberOfErrors().SetVal(1);
                     errorList -> Error()[0].SetPtr(error);
                     error -> Code().SetVal(Safir::Dob::ResponseGeneralErrorCodes::SafirNullMember());
-                    replySender->Send(errorList);
+                    try
+                    {
+                        responseSender->Send(errorList);
+                    }
+                    catch (const Safir::Dob::LowMemoryException &)
+                    {
+                        m_debug << "Failed to send response due to low dob shared memory." << std::endl;
+                        Safir::Logging::SendSystemLog(Safir::Logging::Error,
+                                                      L"Failed to send response due to low shared memory. Skipping.");
+                        responseSender->Discard();
+                    }
 
                     m_debug << "ResponseType is NULL - sending error response. Shouldn't happen!" << std::endl;
                 }
@@ -767,7 +889,7 @@ namespace ForEach
 
         RequestMap::iterator iter;
         iter = m_requestData.begin();
-        Safir::Dob::ResponseSenderPtr replySender = iter->first;
+        Safir::Dob::ResponseSenderPtr responseSender = iter->first;
         RequestSpecificDataPtr data = iter->second;
 
         ScheduleNextRequest(data, true);
@@ -829,8 +951,10 @@ namespace ForEach
             }
 
         }
+        Safir::Dob::ConnectionAspectMisc connnectionAspectMisc(m_connection);
+        connnectionAspectMisc.SimulateOverflows(m_backdoorOverflow, m_backdoorOverflow);
+
         m_debug << "Force overflow is: " << m_backdoorOverflow << std::endl;
-        //                m_connection.SetAlwaysOverflowFlag(m_backdoorOverflow);
     }
 
     // Function:    GetHelpText

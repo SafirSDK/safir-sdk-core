@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2007-2013 (http://safirsdkcore.com)
+* Copyright Saab AB, 2007-2013, 2023 (http://safirsdkcore.com)
 *
 * Created by: Stefan Lindström / stsyli
 *
@@ -24,6 +24,9 @@
 
 #include "foreach_app.h"
 #include <Safir/Dob/NodeParameters.h>
+#include <Safir/Logging/Log.h>
+#include <Safir/Dob/NotOpenException.h>
+#include <Safir/Dob/LowMemoryException.h>
 
 #ifdef _MSC_VER
 #pragma warning(push)
@@ -35,8 +38,6 @@
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif
-
-#include <Safir/Dob/NotOpenException.h>
 
 namespace Safir
 {
@@ -78,6 +79,12 @@ namespace ForEach
                 {
                     ++inst;
                 }
+                catch (const Safir::Dob::LowMemoryException&)
+                {
+                    Safir::Logging::SendSystemLog(Safir::Logging::Critical,
+                                                  L"Failed to open Dob connection due to low shared memory. Exiting.");
+                    return 1;
+                }
             }
 
             if (context == 0)
@@ -88,10 +95,20 @@ namespace ForEach
             // Send something to the tracer to open the connection.
             m_context[context]->m_debug << "Starting ForEach in context " << context << std::endl;
 
-            // Call the init method on startup.
-            // Register as a service provider.
-            m_context[context]->m_service.Init(connectionName,
-                                               boost::lexical_cast<std::wstring>(inst));
+            try
+            {
+                // Call the init method on startup.
+                // Register as a service provider.
+                m_context[context]->m_service.Init(connectionName,
+                                                   boost::lexical_cast<std::wstring>(inst));
+            }
+            catch (const Safir::Dob::LowMemoryException&)
+            {
+                Safir::Logging::SendSystemLog(Safir::Logging::Critical,
+                                              L"Failed to register as a service provider due to low shared memory. Exiting.");
+                return 1;
+            }
+
         }
 
         boost::asio::io_service::work keepRunning(m_ioService);

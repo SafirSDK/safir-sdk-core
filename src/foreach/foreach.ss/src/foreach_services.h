@@ -63,13 +63,10 @@ namespace Safir
             * Defines a service. This class handles the registration
             * of the service and processes requests.
             */
-            class Services :
-                // Allows this class to register as a service provider.
-                public Safir::Dob::ServiceHandler,
-                public Safir::Dob::Requestor
-#if NOT_YET
-                public Safir::Application::Backdoor
-#endif
+            class Services
+                : public Safir::Dob::ServiceHandler
+                , public Safir::Dob::Requestor
+                , public Safir::Application::Backdoor
             {
             public:
 
@@ -94,16 +91,24 @@ namespace Safir
                 void OnServiceRequest(const Safir::Dob::ServiceRequestProxy serviceRequestProxy,
                                       Safir::Dob::ResponseSenderPtr   responseSender) override;
 
-
                 void OnResponse(const Safir::Dob::ResponseProxy responseProxy) override;
                 void OnNotRequestOverflow(void) override;
 
-                // Overrides Safir::Application::Backdoor, for more information see baseclass
-                void HandleCommand(const std::vector<std::wstring>& cmdTokens);
-                std::wstring GetHelpText();
+                void HandleCommand(const std::vector<std::wstring>& cmdTokens) override;
+                std::wstring GetHelpText() override;
 
             private:
                 void SendQueuedRequests();
+
+                void SendEmptyResponse(Safir::Utilities::ForEach::RequestSpecificDataPtr requestSpecificData,
+                                       Safir::Dob::ResponseSenderPtr responseSender);
+
+                // Send next request in queue for a specific service request
+                bool SendNextRequest(Safir::Utilities::ForEach::RequestSpecificDataPtr requestSpecificData);
+
+                // Schedule to send next request
+                void ScheduleNextRequest(Safir::Utilities::ForEach::RequestSpecificDataPtr requestSpecificData,
+                                         bool addToQueue);
 
                 boost::asio::io_service& m_ioService;
 
@@ -119,22 +124,11 @@ namespace Safir
                 // Send queue. Handles in which order outgoing request should be sent
                 RequestVector m_sendQueue;
 
-                // Sends an empty response
-                void SendEmptyResponse(Safir::Utilities::ForEach::RequestSpecificDataPtr requestSpecificData,
-                    Safir::Dob::ResponseSenderPtr replySender);
-
-                // Send next request in queue for a specific service request
-                bool SendNextRequest(Safir::Utilities::ForEach::RequestSpecificDataPtr requestSpecificData);
-
-                // Schedule to send next request
-                void ScheduleNextRequest(Safir::Utilities::ForEach::RequestSpecificDataPtr requestSpecificData, bool addToQueue);
-
                 // Overflow setting for the backdoor
                 bool m_backdoorOverflow;
-#if NOT_YET
+
                 // Backdoor keeper, to handle program interface commands
                 Safir::Application::BackdoorKeeper m_backdoorKeeper;
-#endif
             };
         }
     }
