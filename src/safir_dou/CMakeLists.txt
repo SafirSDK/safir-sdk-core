@@ -30,10 +30,6 @@ ADD_SAFIR_GENERATED_LIBRARY(NAME Core
   data/Safir.Control.Command.dou
   data/Safir.Control.Operation.dou
   data/Safir.Control.Status.dou
-  data/Safir.Databases.Odbc.IntegrityConstraintException.dou
-  data/Safir.Databases.Odbc.ReconnectException.dou
-  data/Safir.Databases.Odbc.RetryException.dou
-  data/Safir.Databases.Odbc.TimeoutException.dou
   data/Safir.Dob.AccessDeniedException.dou
   data/Safir.Dob.CallbackId.dou
   data/Safir.Dob.ConnectionInfo.dou
