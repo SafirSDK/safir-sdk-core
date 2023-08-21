@@ -150,7 +150,7 @@ namespace Internal
                         {
                             SetMember(md, memIx, 0, memIt->second, 0, writer);
                         }
-                        catch (boost::property_tree::ptree_error&)
+                        catch (const boost::property_tree::ptree_error&)
                         {
                             std::ostringstream os;
                             os<<"Failed to serialize member '"<<cd->GetName()<<"."<<md->GetName()<<"' from xml to binary. Type is incorrect.";
@@ -210,7 +210,7 @@ namespace Internal
                             {
                                 SetMember(md, memIx, arrayIndex, arrIt->second, 0, writer);
                             }
-                            catch (boost::property_tree::ptree_error&)
+                            catch (const boost::property_tree::ptree_error&)
                             {
                                 std::ostringstream os;
                                 os<<"Failed to serialize array member '"<<cd->GetName()<<"."<<md->GetName()<<"' with index="<<arrayIndex<<" from xml to binary. Type is incorrect.";
@@ -304,7 +304,7 @@ namespace Internal
                                     SetKeyWithNullValue(md, memIx, *keyTree, writer);
                                 }
                             }
-                            catch (boost::property_tree::ptree_error&)
+                            catch (const boost::property_tree::ptree_error&)
                             {
                                 std::ostringstream os;
                                 os<<"Failed to serialize dictionary member '"<<cd->GetName()<<"."<<md->GetName()<<"'. Key or value is incorrect. (Hint it's the "<<entryCount<<":th dictionary entry).";

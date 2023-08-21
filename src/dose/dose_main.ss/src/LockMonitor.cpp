@@ -146,7 +146,7 @@ namespace Internal
                 }
             }
         }
-        catch (boost::thread_interrupted&)
+        catch (const boost::thread_interrupted&)
         {
             // Thread was interrupted, which is expected behaviour. By catching this exception we make
             // sure that the whole program is not aborted, which could otherwise be the case on some platforms

@@ -182,7 +182,7 @@ void BackdoorKeeper::OnMessage(const Safir::Dob::MessageProxy messageProxy)
         // Let the subclass handle the command
         m_backdoor->HandleCommand(cmdTokens);
     }
-    catch (boost::bad_expression& /* e*/ )
+    catch (const boost::bad_expression& /* e*/ )
     {
         // An invalid regular expression was used, skip this command
         return;  // *** RETURN ***

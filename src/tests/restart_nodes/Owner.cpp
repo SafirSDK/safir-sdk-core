@@ -160,7 +160,7 @@ int main()
 
         connection.Close();
     }
-    catch(std::exception & e)
+    catch(const std::exception & e)
     {
         std::wcout << "Caught std::exception! Contents of exception is:" << std::endl
             << e.what()<<std::endl;

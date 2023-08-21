@@ -109,7 +109,7 @@ void StatisticsCollection::PrintThread()
             Reset();
         }
     }
-    catch (boost::thread_interrupted&)
+    catch (const boost::thread_interrupted&)
     {
 
     }

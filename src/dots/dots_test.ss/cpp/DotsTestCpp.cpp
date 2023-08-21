@@ -9668,7 +9668,7 @@ void ContainerTest()
     }
 
 #define CheckNullExc(expr) \
-    try{bool b = expr;b;Check(false);}catch(Safir::Dob::Typesystem::NullException &){Check(true);}
+    try{bool b = expr;b;Check(false);}catch(const Safir::Dob::Typesystem::NullException &){Check(true);}
 
     {
         MemberTypes t;

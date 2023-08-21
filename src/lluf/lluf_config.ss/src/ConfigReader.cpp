@@ -85,7 +85,7 @@ namespace
                 }
             }
         }
-        catch (boost::property_tree::ptree_bad_path&)
+        catch (const boost::property_tree::ptree_bad_path&)
         {
             throw std::logic_error("Failed to resolve dependencies of dou module " + moduleName);
         }
@@ -191,7 +191,7 @@ namespace Internal
                     {
                         directories.push_back(std::make_pair(it->first, it->second.get<std::string>("dou_directory")));
                     }
-                    catch (boost::property_tree::ptree_bad_path&)
+                    catch (const boost::property_tree::ptree_bad_path&)
                     {
                         throw std::logic_error("Error in typesystem.ini. "
                                                "A section with key 'safir_instance' must also have a key 'dou_directory'");

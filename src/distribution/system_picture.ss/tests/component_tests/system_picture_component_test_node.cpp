@@ -773,7 +773,7 @@ int main(int argc, char * argv[])
             main.reset();
         }
     }
-    catch(std::exception& e)
+    catch(const std::exception& e)
     {
         logerr << "Caught exception: " << e.what() << std::endl;
         return 1;

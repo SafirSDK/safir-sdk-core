@@ -220,7 +220,7 @@ int main(int argc, char* argv[])
         connection.Close();
         std::wcout << "End" << std::endl;
     }
-    catch(std::exception & e)
+    catch(const std::exception & e)
     {
         std::wcout << "Caught std::exception! Contents of exception is:" << std::endl
                    << e.what()<<std::endl;

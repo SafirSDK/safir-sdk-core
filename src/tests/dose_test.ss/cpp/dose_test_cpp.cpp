@@ -41,7 +41,7 @@ int main(int argc, char* argv[])
         Executor app(arguments);
         app.Run();
     }
-    catch(std::exception & e)
+    catch(const std::exception & e)
     {
         lout << "Caught std::exception! Contents of exception is:" << std::endl
                    << e.what()<<std::endl;
