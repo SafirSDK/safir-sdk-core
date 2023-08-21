@@ -22,9 +22,12 @@
 *
 ******************************************************************************/
 #include "StatusEntityHandler.h"
-#include <Safir/Dob/ErrorResponse.h>
+
 #include <Safir/Control/Status.h>
+#include <Safir/Dob/ErrorResponse.h>
+#include <Safir/Dob/LowMemoryException.h>
 #include <Safir/Dob/ResponseGeneralErrorCodes.h>
+#include <Safir/Logging/Log.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
 
 
@@ -45,9 +48,9 @@ namespace Control
         m_dobConnection.Attach();
 
         m_dobConnection.RegisterEntityHandler(Status::ClassTypeId,
-                                                       Safir::Dob::Typesystem::HandlerId(),
-                                                       Safir::Dob::InstanceIdPolicy::HandlerDecidesInstanceId,
-                                                       this);
+                                              Safir::Dob::Typesystem::HandlerId(),
+                                              Safir::Dob::InstanceIdPolicy::HandlerDecidesInstanceId,
+                                              this);
 
         m_controlInfoReceiver->Start();
     }
@@ -64,7 +67,16 @@ namespace Control
         status->NodeId().SetVal(nodeId);
         status->SystemIncarnation().SetVal(incarnationId);
 
-        m_dobConnection.SetAll(status, Safir::Dob::Typesystem::InstanceId(0), Safir::Dob::Typesystem::HandlerId());
+        try
+        {
+            m_dobConnection.SetAll(status, Safir::Dob::Typesystem::InstanceId(0), Safir::Dob::Typesystem::HandlerId());
+        }
+        catch (const Safir::Dob::LowMemoryException&)
+        {
+            Safir::Logging::SendSystemLog(Safir::Logging::Error,
+                                          L"Failed to update the status entity with the current values, due to low Dob shared memory..");
+        }
+
     }
 
     void StatusEntityHandler::OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId /*typeId*/,
@@ -79,25 +91,46 @@ namespace Control
     void StatusEntityHandler::OnCreateRequest(const Safir::Dob::EntityRequestProxy /*entityRequestProxy*/,
                                           Safir::Dob::ResponseSenderPtr responseSender)
     {
-        responseSender->Send(Safir::Dob::ErrorResponse::CreateErrorResponse
-                             (Safir::Dob::ResponseGeneralErrorCodes::SafirReqErr(),
-                              L"It is not possible to send create requests on Safir::Control::Status"));
+        try
+        {
+            responseSender->Send(Safir::Dob::ErrorResponse::CreateErrorResponse
+                                 (Safir::Dob::ResponseGeneralErrorCodes::SafirReqErr(),
+                                  L"It is not possible to send create requests on Safir::Control::Status"));
+        }
+        catch (const Safir::Dob::LowMemoryException&)
+        {
+            responseSender->Discard();
+        }
     }
 
     void StatusEntityHandler::OnUpdateRequest(const Safir::Dob::EntityRequestProxy /*entityRequestProxy*/,
                                           Safir::Dob::ResponseSenderPtr responseSender)
     {
-        responseSender->Send(Safir::Dob::ErrorResponse::CreateErrorResponse
-                             (Safir::Dob::ResponseGeneralErrorCodes::SafirReqErr(),
-                              L"It is not possible to send update requests on Safir::Control::Status"));
+        try
+        {
+            responseSender->Send(Safir::Dob::ErrorResponse::CreateErrorResponse
+                                 (Safir::Dob::ResponseGeneralErrorCodes::SafirReqErr(),
+                                  L"It is not possible to send update requests on Safir::Control::Status"));
+        }
+        catch (const Safir::Dob::LowMemoryException&)
+        {
+            responseSender->Discard();
+        }
     }
 
     void StatusEntityHandler::OnDeleteRequest(const Safir::Dob::EntityRequestProxy /*entityRequestProxy*/,
                                           Safir::Dob::ResponseSenderPtr responseSender)
     {
-        responseSender->Send(Safir::Dob::ErrorResponse::CreateErrorResponse
-                             (Safir::Dob::ResponseGeneralErrorCodes::SafirReqErr(),
-                              L"It is not possible to send delete requests on Safir::Control::Status"));
+        try
+        {
+            responseSender->Send(Safir::Dob::ErrorResponse::CreateErrorResponse
+                                 (Safir::Dob::ResponseGeneralErrorCodes::SafirReqErr(),
+                                  L"It is not possible to send delete requests on Safir::Control::Status"));
+        }
+        catch (const Safir::Dob::LowMemoryException&)
+        {
+            responseSender->Discard();
+        }
     }
 }
 }

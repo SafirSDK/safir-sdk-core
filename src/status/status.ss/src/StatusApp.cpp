@@ -35,11 +35,11 @@ StatusApp::StatusApp()
     , m_statusEntityHandler(m_ioService)
     , m_commandRequestHandler(m_ioService)
 {
-    m_connection.Open(L"safir_control_status",  // Note the name. We want this to be handled as a normal connection.
-                          L"main",
-                          0,
-                          this,
-                          &m_dispatcher);
+    m_connection.Open(L"safir_control_status",
+                      L"main",
+                      0,
+                      this,
+                      &m_dispatcher);
 
 
     m_statusEntityHandler.Start();

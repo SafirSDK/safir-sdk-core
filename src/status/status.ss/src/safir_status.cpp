@@ -23,9 +23,10 @@
 ******************************************************************************/
 
 #include "StatusApp.h"
-#include <Safir/Utilities/Internal/SystemLog.h>
-#include <Safir/Utilities/Internal/LowLevelLogger.h>
+#include <Safir/Dob/LowMemoryException.h>
 #include <Safir/Utilities/CrashReporter.h>
+#include <Safir/Utilities/Internal/LowLevelLogger.h>
+#include <Safir/Utilities/Internal/SystemLog.h>
 
 int main(int /*argc*/, char* [] /*argv*/)
 {
@@ -44,10 +45,17 @@ int main(int /*argc*/, char* [] /*argv*/)
 
         crGuard.reset();
     }
-    catch(std::exception & e)
+    catch(const Safir::Dob::LowMemoryException&)
+    {
+        SEND_SYSTEM_LOG(Critical,
+                        << "Failed to start safir_status due to low Dob shared memory.");
+
+        success.exchange(false);
+    }
+    catch(const std::exception & e)
     {
         SEND_SYSTEM_LOG(Alert,
-                        << "SCaught std::exception! Contents of exception is: "
+                        << "Caught std::exception! Contents of exception is: "
                         << "  '" << e.what() << "'.");
 
         success.exchange(false);

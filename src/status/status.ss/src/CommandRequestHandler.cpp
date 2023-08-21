@@ -23,8 +23,10 @@
 ******************************************************************************/
 #include "CommandRequestHandler.h"
 #include <Safir/Dob/ErrorResponse.h>
-#include <Safir/Dob/SuccessResponse.h>
+#include <Safir/Dob/LowMemoryException.h>
 #include <Safir/Dob/ResponseGeneralErrorCodes.h>
+#include <Safir/Dob/SuccessResponse.h>
+#include <Safir/Logging/Log.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
 
 namespace Safir
@@ -58,7 +60,7 @@ namespace Control
     }
 
     void CommandRequestHandler::OnServiceRequest(const Safir::Dob::ServiceRequestProxy serviceRequestProxy,
-                                   Safir::Dob::ResponseSenderPtr responseSender)
+                                                 Safir::Dob::ResponseSenderPtr responseSender)
     {
         Safir::Dob::ResponsePtr response;
 
@@ -88,11 +90,21 @@ namespace Control
         {
             //Send node command
             response = Safir::Dob::SuccessResponse::Create();
-            m_controlCommandSender->SendCmd(GetCommandActionFromOperation(command->Operation().GetVal())
-                                                                         ,command->NodeId().GetVal());
+            m_controlCommandSender->SendCmd(GetCommandActionFromOperation(command->Operation().GetVal()),
+                                                                         command->NodeId().GetVal());
         }
 
-        responseSender->Send(response);
+        try
+        {
+            responseSender->Send(response);
+        }
+        catch (const Safir::Dob::LowMemoryException&)
+        {
+            Safir::Logging::SendSystemLog(Safir::Logging::Error,
+                                          L"Failed to send response due to low shared memory. Skipping.");
+            responseSender->Discard();
+        }
+
     }
 
     void CommandRequestHandler::OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId /*typeId*/,
