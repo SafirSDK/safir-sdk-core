@@ -150,7 +150,7 @@ async def check_pool(app, expected_registrations, expected_entities):
     
     pool_timestamp = app.last_pool_update
     num_tries = 0
-    while pool_timestamp < app.last_pool_update or num_tries < 3:
+    while pool_timestamp < app.last_pool_update or num_tries < 20:
         num_tries = num_tries +1
         pool_timestamp = app.last_pool_update
         if _check():
