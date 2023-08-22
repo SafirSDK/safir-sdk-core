@@ -60,7 +60,7 @@ EntityViewerApplication::EntityViewerApplication(int &argc, char **argv)
                                                                       tr("Low Memory"),
                                                                       tr("Cannot connect to the Dob due to low shared memory:\n\n%1").
                                                                       arg(exc.what()));
-                                                exit(0);
+                                                exit(1);
                                             });
         }
 

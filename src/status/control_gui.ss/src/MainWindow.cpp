@@ -46,11 +46,6 @@
 #include "Safir/Control/Parameters.h"
 #include "Safir/Dob/OverflowException.h"
 
-#ifdef _MSC_VER
-#pragma warning (push)
-//fix for vs2010 which complains about the usage of this in the member initializer list
-#pragma warning (disable: 4355) 
-#endif
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -69,23 +64,33 @@ MainWindow::MainWindow(QWidget *parent)
     UpdateStatus();
 
     QObject::connect(&m_conThread, SIGNAL(ConnectedToDob()), this, SLOT(OnConnected()));
+    QObject::connect(&m_conThread, &DobConnector::LowMemoryException, this,
+                     [this]
+                     {
+                         QMessageBox::critical(nullptr,
+                                               tr("Low Memory"),
+                                               tr("Cannot connect to the Dob due to low shared memory."));
+                         exit(0);
+                     });
     m_conThread.start();
 }
-#ifdef _MSC_VER
-#pragma warning (pop)
-#endif
 
 MainWindow::~MainWindow()
 {
+    //If the connect is still pending we need to kill the program very forcefully, since there is no way
+    //to interrupt the Open call.
+    if (!m_dobConnection.IsOpen())
+    {
+        std::quick_exit(0);
+    }
+
     delete ui;
 }
 
 void MainWindow::OnConnected()
 {
-    m_dobConnection.Open(L"safir_control_gui", QTime::currentTime().toString("hh:mm:ss.zzz").toStdWString(), 0, this, this);
-
     QSortFilterProxyModel *proxyModel = new QSortFilterProxyModel(this);
-    m_nodeTableModel = new NodeTableModel(this);
+    m_nodeTableModel = new NodeTableModel(this, m_dobConnection);
 
     proxyModel->setSourceModel(m_nodeTableModel);
     ui->nodeTableView->setModel(proxyModel);
@@ -103,9 +108,18 @@ void MainWindow::OnConnected()
 
     UpdateStatus();
 
-    m_dobConnection.SubscribeEntity(Safir::Dob::Typesystem::EntityId(Safir::Control::Status::ClassTypeId,
-                                                                     Safir::Dob::Typesystem::InstanceId(0)),
-                                    true, true, this );
+    try
+    {
+        m_dobConnection.SubscribeEntity(Safir::Dob::Typesystem::EntityId(Safir::Control::Status::ClassTypeId,
+                                                                         Safir::Dob::Typesystem::InstanceId(0)),
+                                        true, true, this );
+    }
+    catch (const Safir::Dob::LowMemoryException&)
+    {
+        QMessageBox::critical(nullptr,
+                              tr("Low Memory"),
+                              tr("Cannot subscribe to status information due to low Dob shared memory."));
+    }
 }
 
 void MainWindow::SetupContextMenu()
@@ -233,13 +247,12 @@ void MainWindow::HandleStatusEntity(const Safir::Control::StatusPtr status)
 {
 
     m_statusRunning = status != nullptr;;
-    UpdateStatus();
 
     if (status != nullptr && !status->NodeId().IsNull())
     {
         m_nodeTableModel->setOwnNodeId(status->NodeId());
     }
-    
+
     if (status != nullptr && !status->SystemIncarnation().IsNull())
     {
         m_incarnationId = QString::number(status->SystemIncarnation().GetVal());
@@ -248,6 +261,7 @@ void MainWindow::HandleStatusEntity(const Safir::Control::StatusPtr status)
     {
         m_incarnationId = tr("UNKNOWN");
     }
+    UpdateStatus();
 }
 
 void MainWindow::SendRequestOnAllNodes(Safir::Control::Operation::Enumeration operation)

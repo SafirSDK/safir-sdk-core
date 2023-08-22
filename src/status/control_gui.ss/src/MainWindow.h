@@ -21,11 +21,11 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#pragma once
 
 
 #include <Safir/Dob/Connection.h>
+#include <Safir/Dob/LowMemoryException.h>
 #include "Safir/Control/Status.h"
 #include "Safir/Control/Command.h"
 
@@ -66,12 +66,21 @@ public:
 
 signals:
     void ConnectedToDob();
-
+    void LowMemoryException();
 protected:
     void run() override
     {
-        m_con->Open(L"safir_control_gui", QTime::currentTime().toString("hh:mm:ss.zzz").toStdWString(), 0, m_stop, m_disp);
-        m_con->Close();
+        try
+        {
+            m_con->Open(L"safir_control_gui",
+                        Safir::Dob::Typesystem::InstanceId::GenerateRandom().ToString(),
+                        0, m_stop, m_disp);
+        }
+        catch (const Safir::Dob::LowMemoryException& exc)
+        {
+            emit LowMemoryException();
+            return;
+        }
         emit ConnectedToDob();
     }
 
@@ -145,6 +154,3 @@ private:
     const bool m_shutdownConfigured;
 };
 
-
-
-#endif // MAINWINDOW_H

@@ -21,11 +21,10 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifndef NODETABLEMODEL_H
-#define NODETABLEMODEL_H
+#pragma once
 
 
-#include <Safir/Dob/SecondaryConnection.h>
+#include <Safir/Dob/Connection.h>
 #include <Safir/Dob/NodeInfo.h>
 #include <set>
 
@@ -54,7 +53,7 @@ class NodeTableModel : public QAbstractTableModel,
                       public Safir::Dob::EntitySubscriber
 {
 public:
-    NodeTableModel(QObject *parent = 0);
+    NodeTableModel(QObject *parent, Safir::Dob::Connection& connection);
 
     //Dob stuff
     virtual void OnNewEntity(const Safir::Dob::EntityProxy entityProxy) override;
@@ -75,10 +74,9 @@ public slots:
 
 private:
 
-    Safir::Dob::SecondaryConnection m_dobConnection;
+    Safir::Dob::Connection& m_dobConnection;
     std::vector<Safir::Dob::Typesystem::EntityId> m_nodeInfos;
     int64_t m_ownNodeId;
     std::set<std::wstring> m_lightNodeTypeNames;
 };
 
-#endif // NODETABLEMODEL_H

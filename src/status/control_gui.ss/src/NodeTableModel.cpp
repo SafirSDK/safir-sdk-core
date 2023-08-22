@@ -24,14 +24,24 @@
 
 #include "NodeTableModel.h"
 #include "Safir/Dob/NotFoundException.h"
+#include <Safir/Dob/LowMemoryException.h>
 #include <Safir/Dob/NodeParameters.h>
+#include <QMessageBox>
 
-NodeTableModel::NodeTableModel(QObject *parent)
+NodeTableModel::NodeTableModel(QObject *parent, Safir::Dob::Connection& connection)
     : QAbstractTableModel(parent)
+    , m_dobConnection(connection)
 {
-    m_dobConnection.Attach();
-
-    m_dobConnection.SubscribeEntity(Safir::Dob::NodeInfo::ClassTypeId, this );
+    try
+    {
+        m_dobConnection.SubscribeEntity(Safir::Dob::NodeInfo::ClassTypeId, this );
+    }
+    catch (const Safir::Dob::LowMemoryException&)
+    {
+        QMessageBox::critical(nullptr,
+                              tr("Low Memory"),
+                              tr("Cannot subscribe to node information due to low Dob shared memory."));
+    }
 
     for (auto i = 0; i < Safir::Dob::NodeParameters::NodeTypesArraySize(); ++i)
     {
@@ -95,18 +105,32 @@ QVariant NodeTableModel::data(const QModelIndex &index, int role) const
     if (!index.isValid())
         return QVariant();
 
+    //quickly leave if it is a role we don't want to handle
+    if (role != Qt::DisplayRole && role != Qt::BackgroundRole && role != Qt::ToolTipRole)
+    {
+        return QVariant();
+    }
+
+    Safir::Dob::NodeInfoPtr nodeInfo = nullptr;
+
+    try
+    {
+        nodeInfo = std::dynamic_pointer_cast<Safir::Dob::NodeInfo>(m_dobConnection.Read(m_nodeInfos.at(index.row())).GetEntity());
+    }
+    catch (const Safir::Dob::LowMemoryException&)
+    {
+        //handle nullptr below
+    }
+    catch (const Safir::Dob::NotFoundException& /*ex*/)
+    {
+        return QVariant(); //do nothing, we end up here sometimes when the system is going down
+    }
 
     if (role == Qt::DisplayRole)
     {
-        Safir::Dob::NodeInfoPtr nodeInfo;
-
-        try
+        if (nodeInfo == nullptr)
         {
-            nodeInfo = std::dynamic_pointer_cast<Safir::Dob::NodeInfo>(m_dobConnection.Read(m_nodeInfos.at(index.row())).GetEntity());
-        }
-        catch (const Safir::Dob::NotFoundException& /*ex*/)
-        {
-            return QVariant(); //do nothing, we end up here sometimes when the system is going down
+            return "...";
         }
 
         switch (index.column()) {
@@ -135,43 +159,25 @@ QVariant NodeTableModel::data(const QModelIndex &index, int role) const
     }
     else if (role == Qt::BackgroundRole)
     {
-        Safir::Dob::NodeInfoPtr nodeInfo;
-
-        try
-        {
-            nodeInfo = std::dynamic_pointer_cast<Safir::Dob::NodeInfo>(m_dobConnection.Read(m_nodeInfos.at(index.row())).GetEntity());
-        }
-        catch (const Safir::Dob::NotFoundException& /*ex*/)
-        {
-            return QVariant(); //do nothing, we end up here sometimes when the system is going down
-        }
-
         //give the local node a slight tint
-        if (m_nodeInfos.at(index.row()).GetInstanceId().GetRawValue() == m_ownNodeId)
+        if (nodeInfo != nullptr && m_nodeInfos.at(index.row()).GetInstanceId().GetRawValue() == m_ownNodeId)
         {
             return  QColor(164, 237, 166, 127);
         }
 
         return QVariant();
     }
-    if (role == Qt::ToolTipRole && index.column() == TYPE_COLUMN)
+    else if (nodeInfo != nullptr && role == Qt::ToolTipRole && index.column() == TYPE_COLUMN)
     {
-        Safir::Dob::NodeInfoPtr nodeInfo;
-
-        try
-        {
-            nodeInfo = std::dynamic_pointer_cast<Safir::Dob::NodeInfo>(m_dobConnection.Read(m_nodeInfos.at(index.row())).GetEntity());
-        }
-        catch (const Safir::Dob::NotFoundException& /*ex*/)
-        {
-            return QVariant(); //do nothing, we end up here sometimes when the system is going down
-        }
-
         const bool isLight = m_lightNodeTypeNames.find(nodeInfo->NodeType().GetVal()) != m_lightNodeTypeNames.end();
         if (isLight)
         {
             return tr("Light Node");
         }
+    }
+    else if (nodeInfo == nullptr && role == Qt::ToolTipRole)
+    {
+        return tr("Failed to read node information, due to low Dob shared memory");
     }
 
     return QVariant();
@@ -212,4 +218,3 @@ void NodeTableModel::OnDeletedEntity(const Safir::Dob::EntityProxy entityProxy, 
     }
 
 }
-
