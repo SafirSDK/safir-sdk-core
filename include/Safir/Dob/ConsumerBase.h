@@ -394,7 +394,7 @@ namespace Dob
          * @param [in] handlerId - Handler id in corresponding registration.
          */
          virtual void OnInitialInjectionsDone(const Safir::Dob::Typesystem::TypeId typeId,
-                                              const Dob::Typesystem::HandlerId& handlerId)
+                                              const Safir::Dob::Typesystem::HandlerId& handlerId)
          {
              //unused parameters
              (void)typeId;
