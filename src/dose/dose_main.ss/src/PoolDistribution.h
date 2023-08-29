@@ -595,7 +595,7 @@ namespace Internal
             return success;
         }
 
-        bool ProcessRegistrationState(int context, const SubscriptionPtr& subscription)
+        bool ProcessRegistrationState(int /*context*/, const SubscriptionPtr& subscription)
         {
             bool success=true;
 
@@ -612,7 +612,6 @@ namespace Internal
 
                 if (!state.IsNoState())
                 {
-                    ENSURE(state.GetSenderId().m_contextId == context, << L"PoolDistribution.ProcessRegistrationState - Got subscription with wrong context");
                     const auto normalNode = !m_distribution.IsLightNode();
                     const auto ownerOnThisNode = state.GetSenderId().m_node==m_distribution.GetCommunication().Id();
                     const auto isUnregistration =!state.IsRegistered();
