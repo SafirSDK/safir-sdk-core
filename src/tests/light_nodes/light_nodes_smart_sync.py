@@ -150,7 +150,7 @@ async def check_pool(app, expected_registrations, expected_entities):
     
     pool_timestamp = app.last_pool_update
     num_tries = 0
-    while pool_timestamp < app.last_pool_update or num_tries < 20:
+    while pool_timestamp < app.last_pool_update or num_tries < 60:
         num_tries = num_tries +1
         pool_timestamp = app.last_pool_update
         if _check():
@@ -682,7 +682,7 @@ async def one_normal_one_light_ensure_only_valid_requests_and_no_unnecessary_not
         await asyncio.gather(app1.stop(), app5.stop())
 
 async def lightnode_attaches_to_new_system_after_detached(args):
-    with test_case("one_normal_one_light_ensure_only_valid_requests_and_no_unnecessary_notifications"),\
+    with test_case("lightnode_attaches_to_new_system_after_detached"),\
         launch_node(args, safir_instance=1, node_id=1) as node1,\
         launch_node(args, safir_instance=5, node_id=5) as node5:
     
@@ -742,8 +742,11 @@ async def lightnode_attaches_to_new_system_after_detached(args):
             log("--- node5 is now attached to a new system")
             await check_pool(app2, initialRegApp2 + initialRegApp5, initialEntApp2 + initialEntApp5)
             await check_pool(app5, initialRegApp2 + initialRegApp5, initialEntApp2 + initialEntApp5)
+            # Turn off network, since we cannot control the order TestEnv will kill the processes. If safir_websocket is killed before dose_main node5 might get an unregistration before it is detached
+            await set_network_state(False, node5.session_id) 
 
         # node5 should now be detached again
+        await set_network_state(True, node5.session_id) # turn on networkl again. Actually I'm not sure if this will fix all timing issues. The correct way would be to force TestEnv to kill dose_main and safir_control before safir_websocket.
         log("--- Killed node2, wait for node5 to be detached again")
         await app5.wait_for_node_state("Detached")
         await check_pool(app5, initialRegApp2 + initialRegApp5, initialEntApp2 + initialEntApp5)
@@ -755,10 +758,10 @@ async def lightnode_attaches_to_new_system_after_detached(args):
 # main
 # ===========================================
 async def main(args):
-    # await two_normal_one_light_detach_reattach_light(args)
-    # await two_normal_one_light_kill_one_normal_while_light_is_detached(args)
-    # await one_normal_two_light_detach_reattach_one_light_big_pool(args)
-    # await one_normal_one_light_ensure_only_valid_requests_and_no_unnecessary_notifications(args)
+    await two_normal_one_light_detach_reattach_light(args)
+    await two_normal_one_light_kill_one_normal_while_light_is_detached(args)
+    await one_normal_two_light_detach_reattach_one_light_big_pool(args)
+    await one_normal_one_light_ensure_only_valid_requests_and_no_unnecessary_notifications(args)
     await lightnode_attaches_to_new_system_after_detached(args)
     
 if __name__ == "__main__":
