@@ -1,4 +1,44 @@
 -----------------------------------------------------------------------------------------------------------------------
+2023-09-01 version 7.2.0
+-----------------------------------------------------------------------------------------------------------------------
+The biggest points in this release are:
+* Smart sync for light nodes: This allows a light node that reattaches to a system to
+  only resynchronize changes, instead of discarding everything and synchronizing
+  everything. This also means that a detach/reattach is completely transparent to most
+  subscribers.
+* Better handling of low shared memory: When the system reaches defined thresholds
+  certain operations will become unavailable. For example creating new entity instances
+  will become impossible at 90% memory use. This allows a system to degrade gracefully
+  when memory pressure is high.
+
+This release also fixes the following issues (see http://safirsdkcore.com for details):
+
+#441 Implement smart sync for light nodes
+#453 Smart sync docs in users_guide
+#445 Improve low shared memory handling
+#446 Create tool for generating memory pressure
+#451 Add override specifiers to all relevant places in SUG
+#450 dose_test failure: ENSURE triggers during multinode and multicomputer tests
+#447 Remove obsolete Odbc exceptions
+#436 Give better error message when attempting to read parameter that does not exist
+#448 Make all Dob exceptions into unchecked exceptions in Java
+#435 Add a way to run dots_configuration_check from ToolLauncher
+#444 Safir_Tool_Launcher bigger buttons
+#443 SATE - Serialize to JSON pretty-print
+#433 Crash when reattaching and stopping clients at the same time
+#439 Protobuf conan recipe does not build with vs2015
+#437 dots_configuration_check --details crashes silently in customer system
+#440 Sate array members does not show any values
+#438 Sate crashes when deleting search text
+#427 Make the user's guide part of the installation, to make it accessible offline
+#430 SystemPicture unit test ElectionHandler_test_with_overflows sometimes fails
+#432 Add IsLightNode to ConnectionAspectMisc
+#431 Drop python2 support
+#428 Re-enable support for vs2017 and vs2019
+#454 Serialization of typeId and entityId crashes
+
+
+-----------------------------------------------------------------------------------------------------------------------
 2023-04-02 version 7.1.1
 -----------------------------------------------------------------------------------------------------------------------
 This release fixes the following issues (see http://safirsdkcore.com for details):
