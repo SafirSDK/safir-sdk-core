@@ -3109,6 +3109,10 @@ The properties of a Light node are:
 * A light node can be disconnected from one system and connected to another system,
   without having to be restarted.
 
+A light node that is disconnected from a system is known as a _detached_ light node, and
+when it is connected it is known as an _attached_ node. These statuses are reflected in
+the +Safir.Dob.NodeInfo+ entity.
+
 Light nodes never communicate directly with each other, so there is no need for them to
 be able to reach each other on the network. Light nodes do however need to be able to
 reach all full nodes.
@@ -3117,19 +3121,33 @@ A side effect of this is that light nodes may not be aware of each other at all.
 example, looking at the +Safir.Dob.NodeInfo+ entity on one light node will not show
 instances for all nodes, but only for the light node itself and all the full nodes.
 
-===== Light node disconnected behaviour
+===== Light node detach/attach behaviour
 
-There are two ways that a disconnected node can behave. Either it can wipe all
+There are two ways that a detached light node can behave. Either it can wipe all
 registrations and entities, and essentially become ``blank'', or it can keep all
 registrations and entities, but as read-only. This latter mode of course disallows
 all requests (except to handlers on the same node).
 
 The keep mode is useful for allowing a user on a disconnected light node to still look at
-the last received state of all entities, until a reconnection happens, and the entities
-are updated.
+the last received state of all entities.
 
 This behaviour is configured using the +KeepStateWhileDetached+ parameter, as described
 in <<node-type-parameters>>.
+
+When a detached node in keep mode reattaches to the same system that it was attached to
+previously it will update its state to the state of the system. So instances that no
+longer exist or handlers that no longer are registered will get removed, and new
+instances and registrations will be added. Subscribers on the light node will be updated
+accordingly.
+
+If a detached light node in keep mode attaches to another system (or the same system, but
+restarted) it will also get resynchronized, so that it reaches a correct state. But of
+course in this case all instances and registrations from the old system will get deleted
+first.
+
+Since a light node in non-keep mode will get cleared of all instances and registrations
+when it detaches, the resynchronization when attaching/reattaching is just a matter of
+sending the current system state to the light node.
 
 ==== Safir SDK Core networking
 
@@ -3376,8 +3394,8 @@ it, with the value "Local" as DistributionScope, using a dom file.
 Light nodes (as described in <<light-nodes>>) are only able to be given their extra
 flexibility by giving up the ability to own ``normal'' types. Instead they are given the
 ability to own _Limited types_, that have a number of limitations put upon them.  The
-limitations are there to ensure that a light node can reconnect to a system after it has
-been disconnected.
+limitations are there to ensure that a light node can reattach to a system after it has
+been detached.
 
 * A limited type can have no persistence, i.e. it has neither Volatile, Permanent or Injectable persistence.
 * Pending registrations of a limited type is not allowed.
