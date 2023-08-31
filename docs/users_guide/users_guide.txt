@@ -3055,7 +3055,7 @@ The supported special variables are listed in <<windows_special_variables>>. We 
 |CSIDL_PROGRAM_FILESX86 |FOLDERID_ProgramFilesX86
 |===========================
 
-Here are two more links that contain useful information about Windows paths, CSIDLs, and Windows Known Folders.: "http://blogs.msdn.com/b/cjacks/archive/2008/02/05/where-should-i-write-program-data-instead-of-program-files.aspx[Where Should I Write Program Data...?]" and "http://blogs.msdn.com/b/patricka/archive/2010/03/18/where-should-i-store-my-data-and-configuration-files-if-i-target-multiple-os-versions.aspx[Where Should I Store my Data and Config...?]".
+Here are two more links that contain useful information about Windows paths, CSIDLs, and Windows Known Folders.: "https://techcommunity.microsoft.com/t5/windows-blog-archive/where-should-i-write-program-data-instead-of-program-files/ba-p/228513[Where Should I Write Program Data...?]" and "http://patrickablog.azurewebsites.net/index.php/2010/03/18/where-should-i-store-my-data-and-configuration-files-if-i-target-multiple-os-versions/[Where Should I Store my Data and Config...?]".
 
 There is currently two special variables that are available on both Linux and Windows. They are described in <<common_special_variables>>, below.
 
