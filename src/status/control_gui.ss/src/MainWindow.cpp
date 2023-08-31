@@ -32,6 +32,7 @@
 #pragma warning (disable: 4244)
 #pragma warning (disable: 4251)
 #pragma warning (disable: 4800)
+#pragma warning (disable: 4702)
 #endif
 
 #include "ui_MainWindow.h"
