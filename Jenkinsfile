@@ -409,6 +409,9 @@ pipeline {
     options {
         buildDiscarder(logRotator(numToKeepStr: '30',
                                   artifactNumToKeepStr: '10'))
+        disableConcurrentBuilds()
+        disableResume()
+        timestamps()
     }
 
 }
