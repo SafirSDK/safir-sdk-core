@@ -127,6 +127,7 @@ def archive_and_analyze(platform, arch, buildType){
 def render_documentation() {
     sh label:  "Run Asciidoctor to generate users guide and requirements specification.",
        script: """
+               rm -rf rendered_docs
                cd docs
                cmake . -G Ninja
                ninja
