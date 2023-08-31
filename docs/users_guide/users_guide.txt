@@ -1785,7 +1785,7 @@ Two steps are necessary to receive messages. The first is to implement the Safir
 class VehicleMessageSubscriber : public Safir::Dob::MessageSubscriber
 {
 public:
-    virtual void OnMessage(const Safir::Dob::MessageProxy messageProxy);
+    void OnMessage(const Safir::Dob::MessageProxy messageProxy) override;
 };
 ----------------------------
 The second step is to start the subscription by calling the +SubscribeMessage+ method on the Dob connection object. This method takes a TypeId (the message type to subscribe to), a ChannelId (the channel to listen to) and a pointer to a class that implements the MessageSubscriber interface.
@@ -1839,8 +1839,7 @@ To send messages it is necessary to implement the Dob interface _MessageSender._
 class VehicleMessageSender : public Safir::Dob::MessageSender
 {
 public:
-    // Overrides MessageSender
-    virtual void OnNotMessageOverflow();
+    void OnNotMessageOverflow() override;
 };
 ----------------------------
 Messages are sent with the +Send+ function in the Safir.Dob.Connection class. This function takes the message as a parameter and a pointer to the MessageSender interface.
@@ -1904,15 +1903,13 @@ _Overregistration_ occurs when another application registers the same handler fo
 class VehicleServiceHandler : public Safir::Dob::ServiceHandler
 {
 public:
-
-    //Overrides ServiceHandler
-    virtual void OnServiceRequest
+    void OnServiceRequest
         (const Safir::Dob::ServiceRequestProxy serviceRequestProxy,
-         Safir::Dob::ResponseSenderPtr         responseSender);
+         Safir::Dob::ResponseSenderPtr         responseSender) override;
 
-    virtual void OnRevokedRegistration
+    void OnRevokedRegistration
         (const Safir::Dob::Typesystem::TypeId     typeId,
-         const Safir::Dob::Typesystem::HandlerId& handlerId);
+         const Safir::Dob::Typesystem::HandlerId& handlerId) override;
 };
 ----------------------------
 The second thing that needs to be done is to call the RegisterServiceHandler method on the Dob connection object.
@@ -1993,10 +1990,9 @@ To send a service request you have to have a class that implements the Requestor
 class VehicleServiceRequestSender : public Safir::Dob::Requestor
 {
 public:
-    // Overrides Requestor
-    virtual void OnResponse(const Safir::Dob::ResponseProxy responseProxy);
+    void OnResponse(const Safir::Dob::ResponseProxy responseProxy) override;
 
-    virtual void OnNotRequestOverflow();
+    void OnNotRequestOverflow() override;
 };
 ----------------------------
 The +OnResponse+ callback will be called with the response to your request, and the +OnNotRequestOverflow+ callback will be called when it is okay to start sending requests again after an overflow has occurred.
@@ -2097,22 +2093,21 @@ class VehicleHandler :
     public Safir::Dob::EntityHandler
 {
 public:
-    // Overrides EntityHandler
-    virtual void OnCreateRequest
+    void OnCreateRequest
          (const Safir::Dob::EntityRequestProxy entityRequestProxy,
-          Safir::Dob::ResponseSenderPtr        responseSender);
+          Safir::Dob::ResponseSenderPtr        responseSender) override;
 
-    virtual void OnUpdateRequest
+    void OnUpdateRequest
          (const Safir::Dob::EntityRequestProxy entityRequestProxy,
-          Safir::Dob::ResponseSenderPtr        responseSender);
+          Safir::Dob::ResponseSenderPtr        responseSender) override;
 
-    virtual void OnDeleteRequest
+    void OnDeleteRequest
          (const Safir::Dob::EntityRequestProxy entityRequestProxy,
-          Safir::Dob::ResponseSenderPtr        responseSender);
+          Safir::Dob::ResponseSenderPtr        responseSender) override;
 
-    virtual void OnRevokedRegistration
+    void OnRevokedRegistration
          (const Safir::Dob::Typesystem::TypeId     typeId,
-          const Safir::Dob::Typesystem::HandlerId& handlerId);
+          const Safir::Dob::Typesystem::HandlerId& handlerId) override;
 };
 ----------------------------
 
@@ -2264,16 +2259,15 @@ Once more there is a consumer interface to be implemented to subscribe to entiti
 ----------------------------
 class VehicleSubscriber : public Safir::Dob::EntitySubscriber
 {
-    // Override EntitySubscriber
-    virtual void OnNewEntity
-        (const Safir::Dob::EntityProxy entityProxy);
+    void OnNewEntity
+        (const Safir::Dob::EntityProxy entityProxy) override;
 
-    virtual void OnUpdatedEntity
-        (const Safir::Dob::EntityProxy entityProxy);
+    void OnUpdatedEntity
+        (const Safir::Dob::EntityProxy entityProxy) override;
 
-    virtual void OnDeletedEntity
+    void OnDeletedEntity
         (const Safir::Dob::EntityProxy entityProxy,
-         const bool /*deprecated*/);
+         const bool /*deprecated*/) override;
 };
 ----------------------------
 
@@ -2577,28 +2571,28 @@ class VehicleHandler :
     public Safir::Dob::EntityHandlerInjection
 {
 public:
-    virtual void OnCreateRequest
+    void OnCreateRequest
          (const Safir::Dob::EntityRequestProxy entityRequestProxy,
-          Safir::Dob::ResponseSenderPtr        responseSender);
+          Safir::Dob::ResponseSenderPtr        responseSender) override;
 
-    virtual void OnUpdateRequest
+    void OnUpdateRequest
          (const Safir::Dob::EntityRequestProxy entityRequestProxy,
-          Safir::Dob::ResponseSenderPtr        responseSender);
+          Safir::Dob::ResponseSenderPtr        responseSender) override;
 
-    virtual void OnDeleteRequest
+    void OnDeleteRequest
          (const Safir::Dob::EntityRequestProxy entityRequestProxy,
-          Safir::Dob::ResponseSenderPtr        responseSender);
+          Safir::Dob::ResponseSenderPtr        responseSender) override;
 
-    virtual void OnRevokedRegistration
+    void OnRevokedRegistration
          (const Safir::Dob::Typesystem::TypeId     typeId,
-          const Safir::Dob::Typesystem::HandlerId& handlerId);
+          const Safir::Dob::Typesystem::HandlerId& handlerId) override;
 
-    virtual void OnInjectedNewEntity
-         (const Safir::Dob::InjectedEntityProxy injectedEntityProxy);
+    void OnInjectedNewEntity
+         (const Safir::Dob::InjectedEntityProxy injectedEntityProxy) override;
 
-    virtual void OnInitialInjectionsDone
+    void OnInitialInjectionsDone
          (const Safir::Dob::Typesystem::TypeId     typeId,
-          const Safir::Dob::Typesystem::HandlerId& handlerId);
+          const Safir::Dob::Typesystem::HandlerId& handlerId) override;
 };
 ----------------------------
 The first four overrides are of course the same as when registering an entity handler without persistence or injection support (see <<registering_entity_handler>>). I won't mention them again in this section, as they work exactly the same.
@@ -2685,13 +2679,13 @@ The application needs a class that implements the +Safir::Dob::RegistrationSubsc
 class VehicleRegistrationSubscriber :
     public Safir::Dob::RegistrationSubscriber
 {
-    virtual void OnRegistered
+    void OnRegistered
         (const Safir::Dob::Typesystem::TypeId      typeId,
-         const Safir::Dob::Typesystem::HandlerId&  handlerId);
+         const Safir::Dob::Typesystem::HandlerId&  handlerId) override;
 
-    virtual void OnUnregistered
+    void OnUnregistered
          (const Safir::Dob::Typesystem::TypeId      typeId,
-          const Safir::Dob::Typesystem::HandlerId&  handlerId);
+          const Safir::Dob::Typesystem::HandlerId&  handlerId) override;
 }
 ----------------------------
 
