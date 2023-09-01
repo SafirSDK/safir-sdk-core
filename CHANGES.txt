@@ -2,14 +2,18 @@
 2023-09-01 version 7.2.0
 -----------------------------------------------------------------------------------------------------------------------
 The biggest points in this release are:
-* Smart sync for light nodes: This allows a light node that reattaches to a system to
-  only resynchronize changes, instead of discarding everything and synchronizing
-  everything. This also means that a detach/reattach is completely transparent to most
-  subscribers.
-* Better handling of low shared memory: When the system reaches defined thresholds
-  certain operations will become unavailable. For example creating new entity instances
-  will become impossible at 90% memory use. This allows a system to degrade gracefully
-  when memory pressure is high.
+ * Smart sync for light nodes: This allows a light node that reattaches to a system to
+   only resynchronize changes, instead of discarding everything and synchronizing
+   everything. This also means that a detach/reattach is completely transparent to most
+   subscribers.
+ * Better handling of low shared memory: When the system reaches defined thresholds
+   certain operations will become unavailable. For example creating new entity instances
+   will become impossible at 90% memory use. This allows a system to degrade gracefully
+   when memory pressure is high.
+ * XML and JSON serialization now accept serialization/deserialization of
+   TypeIds/EntityIds that are not actual types. Previously this was prohibited under
+   certain circumstances, but that led to problems of it not being possible to
+   serialize/deserialize objects that the rest of a system had already accepted as valid.
 
 This release also fixes the following issues (see http://safirsdkcore.com for details):
 
