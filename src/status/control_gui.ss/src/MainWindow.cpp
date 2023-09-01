@@ -66,7 +66,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     QObject::connect(&m_conThread, SIGNAL(ConnectedToDob()), this, SLOT(OnConnected()));
     QObject::connect(&m_conThread, &DobConnector::LowMemoryException, this,
-                     [this]
+                     []
                      {
                          QMessageBox::critical(nullptr,
                                                tr("Low Memory"),

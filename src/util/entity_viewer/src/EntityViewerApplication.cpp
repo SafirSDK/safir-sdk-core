@@ -54,7 +54,7 @@ EntityViewerApplication::EntityViewerApplication(int &argc, char **argv)
         }
         catch (const Safir::Dob::LowMemoryException& exc)
         {
-            QMetaObject::invokeMethod(this, [this, exc]
+            QMetaObject::invokeMethod(this, [exc]
                                             {
                                                 QMessageBox::critical(nullptr,
                                                                       tr("Low Memory"),
