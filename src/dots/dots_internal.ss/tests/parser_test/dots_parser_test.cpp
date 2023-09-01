@@ -11,7 +11,7 @@
 
 #include <iostream>
 #include <set>
-#include <boost/timer.hpp>
+#include <boost/timer/timer.hpp>
 #include <Safir/Dob/Typesystem/ToolSupport/TypeParser.h>
 #include <Safir/Dob/Typesystem/ToolSupport/Serialization.h>
 #include <boost/lexical_cast.hpp>
@@ -79,7 +79,7 @@ int main(int argc, char* argv[])
     }
 
     std::cout<<"========= Test suite started ========"<<std::endl;
-    boost::timer timer;
+    boost::timer::cpu_timer timer;
     try
     {
         RunTests(douDir, first, last);
@@ -90,7 +90,7 @@ int main(int argc, char* argv[])
         return 1; //Failed
     }
 
-    std::cout<<"- Time elapsed: "<<timer.elapsed()<<std::endl;
+    std::cout<<"- Time elapsed: "<<timer.format()<<std::endl;
     std::cout<<"====================================="<<std::endl;
     return 0;
 }
@@ -267,7 +267,7 @@ void PrintTestFailMessage(const std::string& result, const std::string& shortInf
 void ParseDir(const boost::filesystem::path& dir)
 {
     std::cout<<"Start parsing"<<std::endl;
-    boost::timer timer;
+    boost::timer::cpu_timer timer;
     try
     {
         std::shared_ptr<const Safir::Dob::Typesystem::ToolSupport::TypeRepository> rep=Safir::Dob::Typesystem::ToolSupport::ParseTypeDefinitions(dir);
@@ -289,7 +289,7 @@ void ParseDir(const boost::filesystem::path& dir)
     }
 
 
-    std::cout<<"Time elapsed: "<<timer.elapsed()<<std::endl;
+    std::cout<<"Time elapsed: "<<timer.format()<<std::endl;
 }
 
 #ifdef _MSC_VER
