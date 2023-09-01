@@ -106,8 +106,9 @@ class SafirSdkCoreConan(ConanFile):
             self.requires("ninja/1.11.1")
             self.requires("boost/1.83.0")
 
-        #Visual Studio 2015 does not compile the latest sentry-breakpad (lacks c++17 support)
+        #Visual Studio 2015 does not compile the latest sentry-breakpad (lacks c++17 support).
+        #0.5.3 appears to be the last one that doesn't need that. Even 0.5.4 wants it.
         if self.settings.os == "Windows" and self.settings.compiler.version == 14:
-            self.requires("sentry-breakpad/0.5.4")
+            self.requires("sentry-breakpad/0.5.3")
         else:
             self.requires("sentry-breakpad/0.6.5")
