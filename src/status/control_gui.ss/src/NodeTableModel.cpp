@@ -26,7 +26,6 @@
 #include "Safir/Dob/NotFoundException.h"
 #include <Safir/Dob/LowMemoryException.h>
 #include <Safir/Dob/NodeParameters.h>
-#include <QMessageBox>
 
 NodeTableModel::NodeTableModel(QObject *parent, Safir::Dob::Connection& connection)
     : QAbstractTableModel(parent)
