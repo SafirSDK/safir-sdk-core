@@ -82,7 +82,7 @@ BOOST_AUTO_TEST_CASE( send_one )
 
     const size_t size = 10;
     auto data = Safir::Utilities::Internal::SharedCharArray(new char[size]);
-    strcpy(data.get(), "123456789");
+    strncpy(data.get(), "123456789",size);
     char* dataCopy = allocator(size);
     memcpy(dataCopy,data.get(),size);
 

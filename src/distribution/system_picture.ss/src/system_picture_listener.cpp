@@ -98,8 +98,8 @@ public:
     }
     bool parseOk;
 
-    bool raw;
-    bool one;
+    bool raw = false;
+    bool one = false;
 private:
     static void ShowHelp(const boost::program_options::options_description& desc)
     {

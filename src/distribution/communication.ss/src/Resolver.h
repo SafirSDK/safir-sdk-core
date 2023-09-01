@@ -494,7 +494,8 @@ namespace Com
             try
             {
                 struct ifreq ifr;
-                strcpy(ifr.ifr_name, interfaceName.c_str());
+                strncpy(ifr.ifr_name, interfaceName.c_str(), IFNAMSIZ);
+                ifr.ifr_name[IFNAMSIZ - 1] = 0;
                 int fd=socket((protocol==6 ? AF_INET6 : AF_INET), SOCK_DGRAM, 0);
                 if (ioctl(fd, SIOCGIFADDR, &ifr)==-1)
                 {

@@ -43,8 +43,8 @@ namespace Internal
     //Since it is a POD type it does not inherit from SharedMemoryObject!
     struct ConnectionId
     {
-        ConnectionId(): m_node(-1), m_id(-1), m_contextId(-1) {}
-        ConnectionId(const int64_t node, const ContextId contextId, const Identifier id): m_node(node),  m_id(id), m_contextId(contextId) {}
+        ConnectionId(): m_node(-1), m_id(-1), m_contextId(-1) {} //NOLINT
+        ConnectionId(const int64_t node, const ContextId contextId, const Identifier id): m_node(node),  m_id(id), m_contextId(contextId) {} //NOLINT
 
 #pragma pack (push)
 #pragma pack (4)

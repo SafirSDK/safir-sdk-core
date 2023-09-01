@@ -62,7 +62,6 @@ public:
         {
             boost::mutex::scoped_lock lock(mutex);
             CHECK(received[11000]>last11000);
-            last11000=received[11000];
 
             CHECK(received.find(10001)==received.end());
             CHECK(received.find(10002)==received.end());
@@ -82,9 +81,7 @@ public:
         {
             boost::mutex::scoped_lock lock(mutex);
             CHECK(received[10003]>last10003);
-            last10003=received[10003];
             CHECK(received[10004]>last10004);
-            last10004=received[10004];
         }
         TRACELINE
 

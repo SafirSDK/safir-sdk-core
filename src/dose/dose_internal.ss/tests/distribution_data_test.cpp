@@ -35,7 +35,7 @@ class ShmStatistics:
     public SharedMemoryObject
 {
 public:
-    ShmStatistics():m_lastFree(0) {}
+    ShmStatistics():m_lastFree(0), m_delta(0) {}
 
     void DumpMemoryUsage()
     {
@@ -45,7 +45,7 @@ public:
         std::wcout << "Allocated delta = " << m_delta << std::endl;
         m_lastFree = free;
     }
-    
+
     Int64 lastDelta() const {return m_delta;}
 private:
     Int64 m_lastFree;
@@ -104,4 +104,3 @@ int main(int, char**)
     }
     return 0;
 }
-

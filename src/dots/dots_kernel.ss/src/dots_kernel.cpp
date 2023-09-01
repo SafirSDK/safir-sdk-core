@@ -140,7 +140,7 @@ namespace
     char* CopyStringToNew(const std::string& str)
     {
         char* dest = new char[str.size() + 1];
-        strcpy(dest,str.c_str());
+        strncpy(dest,str.c_str(), str.size() + 1);
         return dest;
     }
 

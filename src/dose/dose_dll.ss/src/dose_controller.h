@@ -403,6 +403,7 @@ namespace Internal
 
         DispatchThreadPtr  m_dispatchThread;
 
+        const bool m_isLightNode;
         bool m_exitDispatch;
 
         Postponer m_postponedTypes;
@@ -439,7 +440,6 @@ namespace Internal
         /*             // For test purposes */
         /*             void DumpDirtySub(std::vector<DirtySub>& ds); */
 
-        const bool m_isLightNode;        
     };
 
     typedef std::shared_ptr<Controller> ControllerPtr;

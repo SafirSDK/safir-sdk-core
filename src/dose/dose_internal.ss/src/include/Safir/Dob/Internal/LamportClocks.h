@@ -45,7 +45,7 @@ namespace Internal
     public:
         // A default initialized timestamp will always be older than one that is acquired with GetNewTimestamp,
         // since the first timestamp GetNewTimestamp will return will be 1.
-        LamportTimestamp(): m_clock(0), m_nodeId(0) {}
+    LamportTimestamp(): m_clock(0), m_nodeId(0) {} //NOLINT
 
         bool operator < (const LamportTimestamp& other) const
         {

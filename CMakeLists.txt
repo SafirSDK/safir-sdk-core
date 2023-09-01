@@ -50,6 +50,16 @@ conan_cmake_run(CONANFILE conanfile.py
                 ${CONAN_SETTINGS_WINDOWS}
                 BUILD missing)
 
+# Define RUN_CLANG_TIDY on the command line if you want to run clangs static analysis tool.
+# With these settings there are only a few warnings given. Other settings yield more...
+if (RUN_CLANG_TIDY)
+  set(CMAKE_CXX_CLANG_TIDY
+    clang-tidy;
+    -header-filter=.;
+    -checks=-*,clang-analyzer-*;
+  )
+endif()
+
 #Set up the Safir SDK Core version by parsing version.txt
 #IMPORTANT: THE version.txt FILE NEEDS TO BE UPDATED FOR EVERY RELEASE
 #Remember: any updates that change APIs should update MAJOR, since

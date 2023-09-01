@@ -47,7 +47,7 @@ public:
         std::wcout << "Perform" << std::endl;
         const size_t size = 10;
         auto data = std::unique_ptr<char[]>(new char[size]);
-        strcpy(data.get(),"123456789");
+        strncpy(data.get(),"123456789",size);
         gsize = size;
         fn(std::move(data), size);
 

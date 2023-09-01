@@ -101,7 +101,7 @@ namespace Internal
             return false;
         }
     }
-    
+
     Controller::Controller()
         : m_isConnected(false),
           m_connection(NULL),
@@ -109,10 +109,10 @@ namespace Internal
           m_messageQueueInOverflowState(false),
           m_ctrlId(0),
           m_contextId(0),
+          m_isLightNode(Safir::Dob::Internal::IsLightNode()),
           m_exitDispatch(false),
           m_originalInjectionState(no_state_tag),
-          m_consumerReferences(),
-          m_isLightNode(Safir::Dob::Internal::IsLightNode())
+          m_consumerReferences()
     {
     }
 
