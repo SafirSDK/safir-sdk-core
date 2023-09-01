@@ -28,17 +28,19 @@
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Dob/Internal/InternalDefs.h>
 #include <Safir/Dob/Internal/SmartSyncState.h>
-#include "PoolSyncInfo.pb.h"
 
 #ifdef _MSC_VER
-#pragma warning (push)
-#pragma warning (disable: 4267)
+#  pragma warning (push)
+#  pragma warning (disable: 4267)
+#  pragma warning (disable: 4127)
+#  pragma warning (disable: 4100)
 #endif
 
 #include <boost/asio.hpp>
+#include "PoolSyncInfo.pb.h"
 
 #ifdef _MSC_VER
-#pragma warning (pop)
+#  pragma warning (pop)
 #endif
 
 namespace Safir

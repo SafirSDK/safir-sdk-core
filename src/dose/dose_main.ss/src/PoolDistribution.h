@@ -40,7 +40,17 @@
 #include <Safir/Dob/NodeParameters.h>
 #include <Safir/Dob/Internal/DistributionScopeReader.h>
 
+#ifdef _MSC_VER
+#  pragma warning (push)
+#  pragma warning (disable: 4127)
+#  pragma warning (disable: 4100)
+#endif
+
 #include "PoolSyncInfo.pb.h"
+
+#ifdef _MSC_VER
+#  pragma warning (pop)
+#endif
 
 namespace Safir
 {
