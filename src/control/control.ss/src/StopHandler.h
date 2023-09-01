@@ -465,7 +465,8 @@ namespace Control
                     {
                         SEND_SYSTEM_LOG(Informational,
                                         << "Node " << nodeIt->first
-                                        << " doesn't receive or doesn't act on a stop order");
+                                        << " doesn't receive or doesn't act on a stop order. Have tried for"
+                                        << m_nodeTypeTable[nodeIt->second.nodeTypeId] << "ms");
 
                         nodeIt->second.stopInProgress = false;
                     }
