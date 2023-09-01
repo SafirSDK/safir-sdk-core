@@ -306,7 +306,7 @@ namespace Internal
     void PoolHandler::OnPoolDistributionInfo(int64_t fromNodeId, int64_t fromNodeType, const char *data, size_t size)
     {
         auto pdInfo = std::make_shared<Pd::PoolSyncInfo>();
-        bool parsedOk = pdInfo->ParseFromArray(static_cast<const void*>(data), size);
+        bool parsedOk = pdInfo->ParseFromArray(static_cast<const void*>(data), static_cast<int>(size));
         delete[] data;
 
         if (!parsedOk)
