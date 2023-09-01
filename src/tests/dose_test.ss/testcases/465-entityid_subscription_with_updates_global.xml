@@ -58,6 +58,10 @@
       </Object>
     </DoseTest.Action>
     <DoseTest.Action>
+      <ActionKind>Sleep</ActionKind>
+      <SleepDuration>1</SleepDuration>
+    </DoseTest.Action>
+    <DoseTest.Action>
       <ActionKind>Delete</ActionKind>
       <Partner>2</Partner>
       <Consumer>0</Consumer>
