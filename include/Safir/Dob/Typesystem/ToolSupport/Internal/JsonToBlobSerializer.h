@@ -252,8 +252,14 @@ namespace Internal
 
             case TypeIdMemberType:
                 {
-                    DotsC_TypeId tid=SerializationUtils::StringToTypeId(keyContent.data());
-                    SetMember(md, memIx, arrIx, memberContent, tid, writer);
+                    auto tid=SerializationUtils::StringToTypeId(m_repository, keyContent.data());
+                    if (!tid.first)
+                    {
+                        std::ostringstream os;
+                        os<<"TypeId member "<<md->GetName()<<" does not refer to an existing type. Specified type name: "<<memberContent.data();
+                        throw ParseError("JsonToBinary serialization error", os.str(), "", 174);
+                    }
+                    SetMember(md, memIx, arrIx, memberContent, tid.second, writer);
                 }
                 break;
 
@@ -266,8 +272,15 @@ namespace Internal
             case EntityIdMemberType:
                 {
                     const std::string inst = keyContent.get<std::string>("instanceId");
-                    std::pair<DotsC_EntityId, const char*> eid=SerializationUtils::StringToEntityId(keyContent.get<std::string>("name"), inst);
-                    SetMember(md, memIx, arrIx, memberContent, eid, writer);
+                    const std::string type = keyContent.get<std::string>("name");
+                    auto eid=SerializationUtils::StringToEntityId(m_repository, type, inst);
+                    if (!eid.first)
+                    {
+                        std::ostringstream os;
+                        os<<"EntityId member "<<md->GetName()<<" does not refer to an existing entity type. Specified type name: "<<memberContent.data();
+                        throw ParseError("JsonToBinary serialization error", os.str(), "", 174);
+                    }
+                    SetMember(md, memIx, arrIx, memberContent, eid.second, writer);
                 }
                 break;
 
@@ -359,8 +372,14 @@ namespace Internal
 
             case TypeIdMemberType:
                 {
-                    DotsC_TypeId tid=SerializationUtils::StringToTypeId(memberContent.data());
-                    writer.WriteValue(memIx, arrIx, tid, false, true);
+                    auto tid=SerializationUtils::StringToTypeId(m_repository, memberContent.data());
+                    if (!tid.first)
+                    {
+                        std::ostringstream os;
+                        os<<"TypeId member "<<md->GetName()<<" does not refer to an existing type. Specified type name: "<<memberContent.data();
+                        throw ParseError("JsonToBinary serialization error", os.str(), "", 174);
+                    }
+                    writer.WriteValue(memIx, arrIx, tid.second, false, true);
                 }
                 break;
 
@@ -389,12 +408,17 @@ namespace Internal
                         os<<"EntityId member '"<<md->GetName()<<"' is missing the instanceId-element that specifies the instance.";
                         throw ParseError("JsonToBinary serialization error", os.str(), "", 160);
                     }
-                    std::pair<DotsC_EntityId, const char*> entId;
-                    entId.first.typeId=SerializationUtils::StringToTypeId(*typeIdString);
-                    std::pair<DotsC_TypeId, const char*> instanceId=SerializationUtils::StringToHash(*instanceIdString);
-                    entId.first.instanceId=instanceId.first;
-                    entId.second=instanceId.second;
-                    writer.WriteValue(memIx, arrIx, entId, false, true);
+
+                    auto eid = SerializationUtils::StringToEntityId(m_repository, *typeIdString, *instanceIdString);
+
+                    if (!eid.first)
+                    {
+                        std::ostringstream os;
+                        os<<"EntityId member '"<<md->GetName()<<"' has an typeId that is not an sub-type of Safir.Dob.Entity. Specified type: " << (*typeIdString);
+                        throw ParseError("JsonToBinary serialization error", os.str(), "", 159);
+                    }
+
+                    writer.WriteValue(memIx, arrIx, eid.second, false, true);
                 }
                 break;
 

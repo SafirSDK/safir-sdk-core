@@ -113,7 +113,7 @@ namespace SerializationUtils
         return result;
     }
 
-    inline DotsC_TypeId StringToTypeId(const std::string& str)
+    inline DotsC_TypeId StringToTypeIdUnchecked(const std::string& str)
     {
         DotsC_TypeId tid=0;
         try
@@ -125,6 +125,28 @@ namespace SerializationUtils
             tid=LlufId_Generate64(str.c_str());
         }
         return tid;
+    }
+
+    template <class RepT>
+    std::pair<bool /*valid*/, DotsC_TypeId> StringToTypeId(const RepT* repository, const std::string& str)
+    {
+        bool valid = true;
+        DotsC_TypeId tid=0;
+        try
+        {
+            // numbers are always ok
+            tid=boost::lexical_cast<DotsC_TypeId>(str);
+        }
+        catch (const boost::bad_lexical_cast&)
+        {
+            // string value, check that type exists
+            tid=LlufId_Generate64(str.c_str());
+            if (!BasicTypeOperations::TypeIdToTypeName(repository, tid))
+            {
+                valid=false;
+            }
+        }
+        return std::make_pair(valid, tid);
     }
 
     inline std::pair<DotsC_Int64, const char*> StringToHash(const std::string& str)
@@ -142,14 +164,35 @@ namespace SerializationUtils
         return result;
     }
 
-    inline std::pair<DotsC_EntityId, const char*> StringToEntityId(const std::string& type, const std::string& inst)
+    template <class RepT>
+    std::pair<bool /*valid*/, std::pair<DotsC_EntityId, const char*>> StringToEntityId(const RepT* repository, const std::string& type, const std::string& inst)
     {
-        std::pair<DotsC_EntityId, const char*> entityId;
-        entityId.first.typeId=SerializationUtils::StringToTypeId(type);
+        DotsC_EntityId eid;
+
+        // check the typeId
+        bool valid = true;
+        try
+        {
+            // numbers that does not represent an existing type is always ok
+            eid.typeId=boost::lexical_cast<DotsC_TypeId>(type);
+            if (BasicTypeOperations::ValidTypeId(repository, eid.typeId))
+            {
+                // the typeId is an existing type, then it must be a subtype of Entity
+                valid = BasicTypeOperations::IsOfType(repository, ObjectMemberType, eid.typeId, ObjectMemberType, LlufId_Generate64("Safir.Dob.Entity"));
+            }
+        }
+        catch (const boost::bad_lexical_cast&)
+        {
+            // string values must represent an existing type that is a subtype to Entity
+            eid.typeId=LlufId_Generate64(type.c_str());
+            valid = BasicTypeOperations::IsOfType(repository, ObjectMemberType, eid.typeId, ObjectMemberType, LlufId_Generate64("Safir.Dob.Entity"));
+        }
+
+        // handle instanceId
         std::pair<DotsC_Int64, const char*> instanceId=SerializationUtils::StringToHash(inst);
-        entityId.first.instanceId=instanceId.first;
-        entityId.second=instanceId.second;
-        return entityId;
+        eid.instanceId = instanceId.first;
+
+        return std::make_pair(valid, std::make_pair(eid, instanceId.second));
     }
 
     inline bool StringToBoolean(const std::string& val)
@@ -246,16 +289,14 @@ namespace SerializationUtils
         case TypeIdMemberType:
             {
                 Trim(memberContent.data());
-                DotsC_TypeId tid=SerializationUtils::StringToTypeId(memberContent.data());
-
-                if (!BasicTypeOperations::TypeIdToTypeName(repository, tid))
+                auto tid = SerializationUtils::StringToTypeId(repository, memberContent.data());
+                if (!tid.first)
                 {
                     std::ostringstream os;
                     os<<"TypeId member "<<md->GetName()<<" does not refer to an existing type. Specified type name: "<<memberContent.data();
                     throw ParseError("Serialization error", os.str(), "", 174);
                 }
-
-                writer.WriteValue(memIx, arrIx, tid, false, true);
+                writer.WriteValue(memIx, arrIx, tid.second, false, true);
             }
             break;
 
@@ -271,8 +312,6 @@ namespace SerializationUtils
 
         case EntityIdMemberType:
             {
-                static const DotsC_TypeId EntityTypeId=LlufId_Generate64("Safir.Dob.Entity");
-
                 boost::optional<std::string> typeIdString=memberContent.get_optional<std::string>("name");
                 boost::optional<std::string> instanceIdString=memberContent.get_optional<std::string>("instanceId");
                 if (!typeIdString)
@@ -290,20 +329,20 @@ namespace SerializationUtils
 
                 Trim(*typeIdString);
                 Trim(*instanceIdString);
-                std::pair<DotsC_EntityId, const char*> entityId=StringToEntityId(*typeIdString, *instanceIdString);
 
-                if (!BasicTypeOperations::IsOfType(repository, ObjectMemberType, entityId.first.typeId, ObjectMemberType, EntityTypeId))
+                auto entityId = StringToEntityId(repository, *typeIdString, *instanceIdString);
+                if (!entityId.first)
                 {
                     std::ostringstream os;
                     os<<"EntityId member "<<md->GetName()<<" contains a typeId that does not refer to a subtype of Safir.Dob.Entity. Specified type name: "<<*typeIdString;
-                    if (!BasicTypeOperations::TypeIdToTypeName(repository, entityId.first.typeId))
+                    if (!BasicTypeOperations::TypeIdToTypeName(repository, entityId.second.first.typeId))
                     {
                         os<<". By the way, the type '"<<*typeIdString<<"'' does not exist at all!";
                     }
                     throw ParseError("Serialization error", os.str(), "", 173);
                 }
 
-                writer.WriteValue(memIx, arrIx, entityId, false, true);
+                writer.WriteValue(memIx, arrIx, entityId.second, false, true);
             }
             break;
 
@@ -485,8 +524,14 @@ namespace SerializationUtils
 
             case TypeIdMemberType:
             {
-                const auto typeId = StringToTypeId(parameterKey);
-                unifiedKey = TypeUtilities::ToUnifiedDictionaryKey(typeId);
+                const auto typeId = StringToTypeId(repository, parameterKey);
+                if (!typeId.first)
+                {
+                    std::ostringstream os;
+                    os<<"The specified key '" << parameterKey << "' for parameter " << parameterName << " can not be interpreted as a valid typeId. The parameter key was: " << parameterKey << ". Specified as valueRef in member " << md->GetName();
+                    throw ParseError("Serialization error", os.str(), "", 1200);
+                }
+                unifiedKey = TypeUtilities::ToUnifiedDictionaryKey(typeId.second);
             }
                 break;
 
@@ -500,8 +545,14 @@ namespace SerializationUtils
                     throw ParseError("Serialization error", os.str(), "", 1200);
                 }
 
-                const auto eid = StringToEntityId(tokens[0], tokens[1]);
-                unifiedKey = TypeUtilities::ToUnifiedDictionaryKey(eid.first);
+                const auto eid = StringToEntityId(repository, tokens[0], tokens[1]);
+                if (!eid.first)
+                {
+                    std::ostringstream os;
+                    os<<"The specified key '" << parameterKey << "' for parameter " << parameterName << " has type EntityId, but the typeId part is not a valid entityId '" << tokens[0] << "'. Specified as valueRef in member " << md->GetName();
+                    throw ParseError("Serialization error", os.str(), "", 1200);
+                }
+                unifiedKey = TypeUtilities::ToUnifiedDictionaryKey(eid.second.first);
             }
                 break;
 

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<BlobTest.MyEntity type="BlobTest.MyEntity">
+    <MyEntityIdVal>
+        <name>34</name>
+        <instanceId>1</instanceId>
+    </MyEntityIdVal>
+    <MyTypeIdVal>Hej</MyTypeIdVal>
+</BlobTest.MyEntity>

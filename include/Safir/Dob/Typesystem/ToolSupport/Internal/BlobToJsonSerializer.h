@@ -238,7 +238,15 @@ namespace Internal
         {
             os<<"{";
             WriteMemberName("name", os);
-            os<<SAFIR_JSON_QUOTE(TypeUtilities::GetTypeName(m_repository, val.first.typeId));
+            const char* name = TypeUtilities::GetTypeName(m_repository, val.first.typeId);
+            if (name != nullptr)
+            {
+                os << SAFIR_JSON_QUOTE(name);
+            }
+            else
+            {
+                os << SAFIR_JSON_QUOTE(val.first.typeId);
+            }
 
             os<<",";
             WriteMemberName("instanceId", os);
@@ -285,7 +293,16 @@ namespace Internal
                 break;
             case TypeIdMemberType:
                 {
-                    os<<SAFIR_JSON_QUOTE(TypeUtilities::GetTypeName(m_repository, reader.template ReadKey<DotsC_TypeId>(memberIndex, valueIndex)));
+                    DotsC_TypeId typeId = reader.template ReadKey<DotsC_TypeId>(memberIndex, valueIndex);
+                    const char* name = TypeUtilities::GetTypeName(m_repository, typeId);
+                    if (name != nullptr)
+                    {
+                        os << SAFIR_JSON_QUOTE(name);
+                    }
+                    else
+                    {
+                        os << SAFIR_JSON_QUOTE(typeId);
+                    }
                 }
                 break;
             case InstanceIdMemberType:
@@ -375,7 +392,16 @@ namespace Internal
                     reader.ReadValue(memberIndex, arrayIndex, val, isNull, isChanged);
                     if (!isNull)
                     {
-                        os<<SAFIR_JSON_QUOTE(TypeUtilities::GetTypeName(m_repository, val));
+                        const char* name = TypeUtilities::GetTypeName(m_repository, val);
+                        if (name != nullptr)
+                        {
+                            os << SAFIR_JSON_QUOTE(name);
+                        }
+                        else
+                        {
+                            os << SAFIR_JSON_QUOTE(val);
+                        }
+
                         return true;
                     }
                 }

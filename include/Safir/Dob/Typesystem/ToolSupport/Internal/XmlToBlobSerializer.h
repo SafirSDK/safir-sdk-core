@@ -346,8 +346,15 @@ namespace Internal
 
             case TypeIdMemberType:
                 {
-                    DotsC_TypeId tid=SerializationUtils::StringToTypeId(keyContent.data());
-                    SerializationUtils::SetKeyWithNullValue(memIx, tid, writer);
+                    auto tid=SerializationUtils::StringToTypeId(m_repository, keyContent.data());
+                    if (!tid.first)
+                    {
+                        std::ostringstream os;
+                        os<<"TypeId member "<<md->GetName()<<" does not refer to an existing type. Specified type name: "<<keyContent.data();
+                        throw ParseError("XmlToBinary serialization erro", os.str(), "", 174);
+                    }
+
+                    SerializationUtils::SetKeyWithNullValue(memIx, tid.second, writer);
                 }
                 break;
 
@@ -360,8 +367,14 @@ namespace Internal
             case EntityIdMemberType:
                 {
                     const std::string inst = keyContent.get<std::string>("instanceId");
-                    std::pair<DotsC_EntityId, const char*> eid=SerializationUtils::StringToEntityId(keyContent.get<std::string>("name"), inst);
-                    SerializationUtils::SetKeyWithNullValue(memIx, eid, writer);
+                    auto eid=SerializationUtils::StringToEntityId(m_repository, keyContent.get<std::string>("name"), inst);
+                    if (!eid.first)
+                    {
+                        std::ostringstream os;
+                        os<<"EntityId member "<<md->GetName()<<" does not refer to an existing valid entity type. Specified type name: "<<keyContent.data();
+                        throw ParseError("XmlToBinary serialization erro", os.str(), "", 174);
+                    }
+                    SerializationUtils::SetKeyWithNullValue(memIx, eid.second, writer);
                 }
                 break;
 
@@ -410,8 +423,14 @@ namespace Internal
 
             case TypeIdMemberType:
                 {
-                    DotsC_TypeId tid=SerializationUtils::StringToTypeId(keyContent.data());
-                    SetMember(md, memIx, arrIx, memberContent, tid, writer);
+                    auto tid=SerializationUtils::StringToTypeId(m_repository, keyContent.data());
+                    if (!tid.first)
+                    {
+                        std::ostringstream os;
+                        os<<"TypeId member "<<md->GetName()<<" does not refer to an existing type. Specified type name: "<<keyContent.data();
+                        throw ParseError("XmlToBinary serialization erro", os.str(), "", 174);
+                    }
+                    SetMember(md, memIx, arrIx, memberContent, tid.second, writer);
                 }
                 break;
 
@@ -424,8 +443,15 @@ namespace Internal
             case EntityIdMemberType:
                 {
                     const std::string inst = keyContent.get<std::string>("instanceId");
-                    std::pair<DotsC_EntityId, const char*> eid=SerializationUtils::StringToEntityId(keyContent.get<std::string>("name"), inst);
-                    SetMember(md, memIx, arrIx, memberContent, eid, writer);
+                    const std::string type = keyContent.get<std::string>("name");
+                    auto eid=SerializationUtils::StringToEntityId(m_repository, type, inst);
+                    if (!eid.first)
+                    {
+                        std::ostringstream os;
+                        os<<"EntityId member "<<md->GetName()<<" does not refer to an existing valid entity type. Specified type name: "<<keyContent.data();
+                        throw ParseError("XmlToBinary serialization erro", os.str(), "", 174);
+                    }
+                    SetMember(md, memIx, arrIx, memberContent, eid.second, writer);
                 }
                 break;
 

@@ -479,18 +479,21 @@ namespace ToolSupport
                     result.key.int64=LlufId_Generate64(val.substr(0, sep).c_str());
                     result.key.str=val.substr(sep+2);
 
-                    std::pair<DotsC_EntityId, const char*> entId=SerializationUtils::StringToEntityId(val.substr(0, sep), val.substr(sep+2));
-                    result.key.int64=entId.first.typeId;
-                    result.key.hash=entId.first.instanceId;
-                    if (entId.second)
-                        result.key.str=entId.second;
+                    // typeId
+                    result.key.int64=SerializationUtils::StringToTypeIdUnchecked(val.substr(0, sep));
+
+                    // instanceId
+                    auto instanceId = SerializationUtils::StringToHash(val.substr(sep+2));
+                    result.key.hash=instanceId.first; // instance number
+                    if (instanceId.second) // instance string
+                        result.key.str=instanceId.second;
                     else
                         result.key.str.clear();
                 }
                 break;
             case TypeIdMemberType:
                 {
-                    result.key.int64=SerializationUtils::StringToTypeId(val);
+                    result.key.int64=SerializationUtils::StringToTypeIdUnchecked(val);
                 }
                 break;
             case InstanceIdMemberType:

@@ -1820,7 +1820,7 @@ namespace Sate
             var of = new OpenFileDialog
             {
                 AddExtension = true,
-                Filter = "XML files (*.xml)|*.xml|All files (*.*)|*.*"
+                Filter = "XML files (*.xml)|*.xml|JSON files (*.json)|*.json|All files (*.*)|*.*"
             };
 
             if (of.ShowDialog() == DialogResult.OK)
@@ -1831,15 +1831,18 @@ namespace Sate
 
         private void OpenSerializedObject(string fileName)
         {
+            bool isXml = true;
             using (TextReader reader = new StreamReader(fileName))
             {
-                var xml = reader.ReadToEnd();
+                var content = reader.ReadToEnd().Trim();
                 reader.Close();
+
+                isXml = Path.GetExtension(fileName).ToLower() == ".xml" || content.StartsWith(@"<?xml version");
 
                 //First try to open as serialized object
                 try
                 {
-                    var o = Serialization.ToObject(xml);
+                    var o = isXml ? Serialization.ToObject(content) : Serialization.ToObjectFromJson(content);
                     if (o is Service)
                     {
                         var srvInfo = new ServiceHandlerInfo();
@@ -1880,7 +1883,15 @@ namespace Sate
                 //if not serialized object, open as plain xml
                 try
                 {
-                    AddTabPage(new XmlTabPage(xml, fileName));
+                    if (isXml)
+                    {
+                        AddTabPage(new XmlTabPage(content, fileName));
+                    }
+                    else
+                    {
+                        AddTabPage(new JsonTabPage(content, fileName));
+                    }
+                    
                     return;
                 }
                 catch
@@ -1888,7 +1899,7 @@ namespace Sate
                 }
 
                 MessageBox.Show("Failed to open file '" + fileName + "'.",
-                    "Invalid xml", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    "Invalid xml or json", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
