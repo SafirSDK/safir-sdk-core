@@ -638,7 +638,7 @@ namespace Internal
                             return c.context == state.GetSenderId().m_contextId &&
                                     c.connectionId == state.GetSenderId().m_id &&
                                     c.counter == counter &&
-                                    std::any_of(std::begin(c.registrations), std::end(c.registrations), [&state, counter](const auto& r)
+                                    std::any_of(std::begin(c.registrations), std::end(c.registrations), [&state](const auto& r)
                                     {
                                         return r.typeId == state.GetTypeId() && r.handlerId == state.GetHandlerId().GetRawValue() && r.registrationTime >= state.GetRegistrationTime().GetRawValue();
                                     });
