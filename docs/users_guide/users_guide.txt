@@ -5,7 +5,7 @@
 Safir SDK Core User's Guide
 ==========================
 Lars Hagström, Anders Widén and Joel Ottosson
-2023-03-02
+2023-09-04
 :source-highlighter: rouge
 :doctype: book
 :toc:
@@ -1029,7 +1029,7 @@ build tree under +src/dots/dots_dobmake.ss/tests/tree+.
 ==== Running Dobmake GUI
 
 Dobmake is really only a gui for building and installing a CMake project. In fact, it can
-be used to build any CMakeLists.txt file. <<dobmake>> shows dobmake running under Windows 7.
+be used to build any CMakeLists.txt file. <<dobmake>> shows dobmake running under Windows 10.
 
 [[dobmake]]
 .Dobmake screen shot
@@ -2853,7 +2853,7 @@ The system will look for these configuration files in several places, which allo
   2. _CSIDL_LOCAL_APPDATA_\safir-sdk-core\config\ - user configuration
 
 +
-On Windows 7 _CSIDL_COMMON_APPDATA_ is +C:\ProgramData+ and _CSIDL_LOCAL_APPDATA_ is +%USERPROFILE%\AppData\Local+ by default. See http://msdn.microsoft.com/en-us/library/windows/desktop/bb762494%28v=vs.85%29.aspx[MSDN documentation] for more information about CSIDLs.
+On Windows 10 _CSIDL_COMMON_APPDATA_ is +C:\ProgramData+ and _CSIDL_LOCAL_APPDATA_ is +%USERPROFILE%\AppData\Local+ by default. See http://msdn.microsoft.com/en-us/library/windows/desktop/bb762494%28v=vs.85%29.aspx[MSDN documentation] for more information about CSIDLs.
 
 The reason for checking for the system-wide configuration before checking for a user
 configuration is a security measure. It will ensure that an unpriviliged user cannot
