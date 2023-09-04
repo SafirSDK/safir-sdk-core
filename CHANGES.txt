@@ -1,5 +1,5 @@
 -----------------------------------------------------------------------------------------------------------------------
-2023-09-01 version 7.2.0
+2023-09-04 version 7.2.0
 -----------------------------------------------------------------------------------------------------------------------
 The biggest points in this release are:
  * Smart sync for light nodes: This allows a light node that reattaches to a system to
@@ -40,7 +40,7 @@ This release also fixes the following issues (see http://safirsdkcore.com for de
 #431 Drop python2 support
 #428 Re-enable support for vs2017 and vs2019
 #454 Serialization of typeId and entityId crashes
-
+#455 Make SATE able to open json serialized objects
 
 -----------------------------------------------------------------------------------------------------------------------
 2023-04-02 version 7.1.1
