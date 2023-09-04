@@ -52,7 +52,7 @@ namespace Internal
 
     struct Msg
     {
-        Msg(Safir::Utilities::Internal::SharedCharArray data_,  uint32_t size_ )
+        Msg(const Safir::Utilities::Internal::SharedCharArray& data_, const uint32_t size_ )
             : data(data_)
             , size(size_)
         {
@@ -73,7 +73,7 @@ namespace Internal
         Session(const std::string&                  name,
                 const StreamPtr&                    streamPtr,
                 boost::asio::io_context::strand&    strand,
-                std::function<void()>             sessionClosedCb)
+                std::function<void()>&              sessionClosedCb)
             : m_name(name),
               m_streamPtr(streamPtr),
               m_msgQueue(),
@@ -90,7 +90,7 @@ namespace Internal
             }
         }
 
-        void Send(Safir::Utilities::Internal::SharedCharArray msg, uint32_t msgSize)
+        void Send(const Safir::Utilities::Internal::SharedCharArray& msg, uint32_t msgSize)
         {
             bool writeInProgress = !m_msgQueue.empty();
             m_msgQueue.push_back(Msg(msg, msgSize));

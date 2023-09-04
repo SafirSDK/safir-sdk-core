@@ -742,7 +742,7 @@ namespace SP
          * This function is only expected to be called on the slave (i.e. the dose_main
          * exe).
          */
-        void RecentlyDeadNodes(std::vector<int64_t> nodeIds)
+        void RecentlyDeadNodes(const std::vector<int64_t>& nodeIds)
         {
             m_strand.dispatch([this, nodeIds]
                               {
@@ -837,7 +837,7 @@ namespace SP
             return result / 2;
         }
 
-        static int CalculateExcludeNodeTimeLimit(const std::wstring logPrefix,
+        static int CalculateExcludeNodeTimeLimit(const std::wstring& logPrefix,
                                                  const std::map<int64_t,NodeType>& nodeTypes)
         {
             boost::chrono::steady_clock::duration result = boost::chrono::seconds(1);

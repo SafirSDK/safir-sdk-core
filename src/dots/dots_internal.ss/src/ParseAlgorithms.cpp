@@ -63,7 +63,7 @@ namespace ToolSupport
         return true;
     }
 
-    void CheckNameAndFilenameConsistency(const std::string& filename, const std::string name)
+    void CheckNameAndFilenameConsistency(const std::string& filename, const std::string& name)
     {
         size_t ix=filename.rfind(name);
         if (ix!=filename.length()-name.length()-4)
@@ -1479,7 +1479,7 @@ namespace ToolSupport
              parIt!=state.repository->m_parameters.end(); ++parIt)
         {
             ParameterDescriptionLocal* pd=parIt->second;
-            state.currentPath=pd->qualifiedName.substr(0, pd->qualifiedName.rfind(".")+1)+"dou";
+            state.currentPath=pd->qualifiedName.substr(0, pd->qualifiedName.rfind('.')+1)+"dou";
             VerifyParameterKey(state, pd);
         }
 
@@ -1492,7 +1492,7 @@ namespace ToolSupport
              parIt!=state.repository->m_parameters.end(); ++parIt)
         {
             ParameterDescriptionLocal* pd=parIt->second;
-            state.currentPath=pd->qualifiedName.substr(0, pd->qualifiedName.rfind(".")+1)+"dou";
+            state.currentPath=pd->qualifiedName.substr(0, pd->qualifiedName.rfind('.')+1)+"dou";
             VerifyParameterValue(state, pd);
         }
     }

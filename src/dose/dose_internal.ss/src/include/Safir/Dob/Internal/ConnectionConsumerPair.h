@@ -42,7 +42,7 @@ namespace Internal
         ConnectionConsumerPair()
             : connection(NULL), consumer(NULL,0) {}
 
-        ConnectionConsumerPair(ConnectionPtr _connection, ConsumerId _consumer)
+        ConnectionConsumerPair(const ConnectionPtr& _connection, ConsumerId _consumer)
             : connection(_connection), consumer(_consumer) {}
 
         ConnectionPtr connection;

@@ -70,7 +70,7 @@ namespace
         using namespace boost::filesystem;
 
         Safir::Utilities::Internal::ConfigReader config;
-        const path dir(config.Locations().get<std::string>("lock_file_directory"));
+        path dir(config.Locations().get<std::string>("lock_file_directory"));
 
         if (!exists(dir))
         {
@@ -101,7 +101,7 @@ namespace
     const boost::filesystem::path GetLockFile(const std::string& name)
     {
         using namespace boost::filesystem;
-        const path filename = GetLockfileDirectory() / name;
+        path filename = GetLockfileDirectory() / name;
 
         if (exists(filename))
         {

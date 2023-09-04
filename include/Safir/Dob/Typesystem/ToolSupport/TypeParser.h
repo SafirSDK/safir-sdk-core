@@ -52,6 +52,7 @@ namespace ToolSupport
     static inline std::shared_ptr<const TypeRepository> ParseTypeDefinitions(const std::vector<boost::filesystem::path>& roots)
      {
          std::vector<std::string> sroots;
+         sroots.reserve(roots.size());
          for (const auto& root: roots)
          {
              sroots.push_back(boost::filesystem::canonical(root).string(std::codecvt_utf8_utf16<wchar_t>()));

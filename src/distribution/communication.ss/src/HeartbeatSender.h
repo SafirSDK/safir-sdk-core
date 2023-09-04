@@ -98,7 +98,7 @@ namespace Com
         }
 
         //Add a node and starts sending heartbeats
-        void AddNode(int64_t id, const std::string address)
+        void AddNode(const int64_t id, const std::string& address)
         {
             boost::asio::post(m_strand, [this, id, address]
             {

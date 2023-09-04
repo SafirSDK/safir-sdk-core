@@ -52,7 +52,7 @@ namespace ToolSupport
     // Helper functions
     //------------------------------------------
     bool ValidName(const std::string& name);
-    void CheckNameAndFilenameConsistency(const std::string& filename, const std::string name);
+    void CheckNameAndFilenameConsistency(const std::string& filename, const std::string& name);
     //Resolves references on the form <...><name>param</name>123<index></index></...>
     void GetReferencedParameter(boost::property_tree::ptree& pt, std::string& paramName, std::string& paramKey);
     int GetReferencedIndex(boost::property_tree::ptree& pt, ParseState& state);

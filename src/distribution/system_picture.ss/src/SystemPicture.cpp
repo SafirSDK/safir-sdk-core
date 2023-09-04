@@ -265,7 +265,7 @@ namespace SP
 
                     if(!deadNodes.empty())
                     {
-                        m_rawHandler->RecentlyDeadNodes(std::move(deadNodes));
+                        m_rawHandler->RecentlyDeadNodes(deadNodes);
                     }
                 });
 

@@ -87,7 +87,7 @@ namespace SP
 
                 for (auto it = m_nodeTypes.cbegin(); it != m_nodeTypes.cend(); ++it)
                 {
-                    const bool sent = m_communication.Send(0, it->second.id, std::move(data), size, m_senderId, true);
+                    const bool sent = m_communication.Send(0, it->second.id, data, size, m_senderId, true);
                     if (!sent)
                     {
                         lllog(8) << "StatePublisherRemote: Overflow when sending to node type "

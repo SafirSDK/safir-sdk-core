@@ -68,8 +68,8 @@ namespace Internal
 
         IpcPublisherImpl(boost::asio::io_context&       io,
                          const std::string&             name,
-                         const std::function<void()>    subscriberConnectedCb,
-                         const std::function<void()>    subscriberDisconnectedCb)
+                         const std::function<void()>&   subscriberConnectedCb,
+                         const std::function<void()>&   subscriberDisconnectedCb)
             : m_running(false),
               m_strand(io),
               m_acceptor(),
@@ -231,8 +231,8 @@ namespace Internal
          */
         IpcPublisher(boost::asio::io_context&       io,
                      const std::string&             name,
-                     const std::function<void()>    subscriberConnectedCb,
-                     const std::function<void()>    subscriberDisconnectedCb)
+                     const std::function<void()>&   subscriberConnectedCb,
+                     const std::function<void()>&   subscriberDisconnectedCb)
             : m_pimpl(std::make_shared<IpcPubImpl>(io,
                                                      name,
                                                      subscriberConnectedCb,

@@ -67,7 +67,10 @@ namespace ToolSupport
             const ElementParserBase* el=m_parent;
             while (el!=NULL)
             {
-                result="<" + el->Name() + ">" + result;
+                result="<";
+                result += el->Name();
+                result += ">";
+                result += result;
                 el=el->Parent();
             }
             return result;

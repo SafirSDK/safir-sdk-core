@@ -53,7 +53,7 @@ namespace Internal
         using namespace boost::filesystem;
 
         Safir::Utilities::Internal::ConfigReader config;
-        const path dir(config.Locations().get<std::string>("ipc_endpoints_directory"));
+        path dir(config.Locations().get<std::string>("ipc_endpoints_directory"));
 
         if (!exists(dir))
         {

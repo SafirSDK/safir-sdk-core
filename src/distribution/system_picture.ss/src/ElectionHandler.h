@@ -172,7 +172,7 @@ namespace SP
             m_strand.dispatch([this, statistics, completionSignaller]
                               {
                                   lllog(5) << m_logPrefix << "ElectionHandler got new RawStatistics" << std::endl;
-                                  m_lastStatistics = std::move(statistics);
+                                  m_lastStatistics = statistics;
                                   StartElection();
                               });
         }

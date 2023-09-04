@@ -55,7 +55,7 @@ namespace Typesystem
          * @param instanceId [in] - The instance of the entity that the EntityId is to refer to.
         */
         EntityId(const Dob::Typesystem::TypeId typeId,
-                 const Dob::Typesystem::InstanceId instanceId)
+                 const Dob::Typesystem::InstanceId& instanceId)
                  : m_typeId(typeId),m_instanceId(instanceId) {}
 
 

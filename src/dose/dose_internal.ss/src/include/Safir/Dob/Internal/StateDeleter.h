@@ -46,7 +46,7 @@ namespace Internal
     public:
         typedef SharedMemoryObject::my_deleter<State>::pointer pointer;
 
-        StateDeleter(ThisPtr                _this,
+        StateDeleter(const ThisPtr&         _this,
                      Dob::Typesystem::Int64 key) : m_this(_this), m_key(key) {}
 
         void operator()(const pointer& p);
