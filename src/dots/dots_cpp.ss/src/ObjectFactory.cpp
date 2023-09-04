@@ -45,7 +45,7 @@ namespace Typesystem
     {
         struct Unused{template<class T> Unused(const T&){}};  // To keep compilers happy about unused variable
 
-        void LoadGeneratedLibrary(const std::string& path, const std::string& name)
+        void LoadGeneratedLibrary(const std::string& path, std::string name)
         {
 #if defined (_MSC_VER) && !defined (NDEBUG)
             name += 'd';
