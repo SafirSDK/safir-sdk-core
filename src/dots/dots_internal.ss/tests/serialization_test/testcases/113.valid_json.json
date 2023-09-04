@@ -1,0 +1,49 @@
+{
+    "_DouType": "BlobTest.MyCollections",
+    "SeqTypeId": [
+        "123",
+        "Safir.Dob.Entity"
+    ],
+    "SeqEntityId": [
+        {
+            "name": "123",
+            "instanceId": "1"
+        },
+        {
+            "name": "Safir.Dob.Item",
+            "instanceId": "two"
+        }
+    ],
+    "DictTypeIdEnum": [
+        {
+            "key": "BlobTest.MyItem",
+            "value": "Black"
+        },
+        {
+            "key": "123",
+            "value": "Grey"
+        }
+    ],
+    "DictEntityIdObject": [
+        {
+            "key": {
+                "name": "BlobTest.MyItem",
+                "instanceId": "1"
+            },
+            "value": {
+                "_DouType": "BlobTest.MyItem",
+                "MyStrings": ["aaa", "bbb"]
+            }
+        },
+        {
+            "key": {
+                "name": "123",
+                "instanceId": "two"
+            },
+            "value": {
+                "_DouType": "BlobTest.MyItem",
+                "MyNumber": 666
+            }
+        }
+    ]
+}

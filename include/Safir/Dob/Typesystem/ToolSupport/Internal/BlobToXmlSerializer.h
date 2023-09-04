@@ -238,16 +238,20 @@ namespace Internal
             case EntityIdMemberType:
                 {
                     std::pair<DotsC_EntityId, const char*> eid=reader.template ReadKey< std::pair<DotsC_EntityId, const char*> >(memberIndex, valueIndex);
-                    os<<"<name>"<<TypeUtilities::GetTypeName(m_repository, eid.first.typeId)<<"</name>";
+                    os<< "<name>" << SerializationUtils::TypeIdToString(m_repository, eid.first.typeId) << "</name>";
                     if (eid.second)
+                    {
                         os<<"<instanceId>"<<eid.second<<"</instanceId>";
+                    }
                     else
+                    {
                         os<<"<instanceId>"<<eid.first.instanceId<<"</instanceId>";
+                    }
                 }
                 break;
             case TypeIdMemberType:
                 {
-                    os<<TypeUtilities::GetTypeName(m_repository, reader.template ReadKey<DotsC_TypeId>(memberIndex, valueIndex));
+                    os<<SerializationUtils::TypeIdToString(m_repository, reader.template ReadKey<DotsC_TypeId>(memberIndex, valueIndex));
                 }
                 break;
             case InstanceIdMemberType:
@@ -256,9 +260,13 @@ namespace Internal
                 {
                     std::pair<DotsC_Int64, const char*> hash=reader.template ReadKey< std::pair<DotsC_Int64, const char*> >(memberIndex, valueIndex);
                     if (hash.second)
+                    {
                         os<<hash.second;
+                    }
                     else
+                    {
                         os<<hash.first;
+                    }
                 }
                 break;
 
@@ -349,18 +357,7 @@ namespace Internal
                     if (!isNull)
                     {
                         WriteStartElement(elementName, arrayIndex, md->GetCollectionType()==ArrayCollectionType, os);
-
-                        const char* typeName=TypeUtilities::GetTypeName(m_repository, val);
-                        if (typeName)
-                        {
-                            os<<typeName;
-                        }
-                        else
-                        {
-                            os<<val;
-                        }
-
-                        os<<"</"<<elementName<<">";
+                        os << SerializationUtils::TypeIdToString(m_repository, val) << "</" << elementName << ">";
                     }
                 }
                 break;
@@ -395,16 +392,7 @@ namespace Internal
                     {
                         WriteStartElement(elementName, arrayIndex, md->GetCollectionType()==ArrayCollectionType, os);
 
-                        const char* typeName=TypeUtilities::GetTypeName(m_repository, val.first.typeId);
-                        if (typeName)
-                        {
-                            os<<"<name>"<<typeName<<"</name>";
-                        }
-                        else
-                        {
-                            os<<"<name>"<<val.first.typeId<<"</name>";
-                        }
-
+                        os<<"<name>"<<SerializationUtils::TypeIdToString(m_repository, val.first.typeId)<<"</name>";
                         if (val.second)
                         {
                             os<<"<instanceId>"<<val.second<<"</instanceId>";

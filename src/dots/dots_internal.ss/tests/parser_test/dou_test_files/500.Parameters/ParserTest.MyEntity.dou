@@ -18,5 +18,25 @@
             <type>String</type>
             <maxLength>50</maxLength>
         </member>
+        <member>
+            <name>TypeIdSeq</name>
+            <type>TypeId</type>
+            <sequence/>
+        </member>
+        <member>
+            <name>TypeIdDict</name>
+            <type>TypeId</type>
+            <dictionary keyType="TypeId" />
+        </member>
+        <member>
+            <name>EntityIdSeq</name>
+            <type>EntityId</type>
+            <sequence/>
+        </member>
+        <member>
+            <name>EntityIdDict</name>
+            <type>EntityId</type>
+            <dictionary keyType="EntityId" />
+        </member>
     </members>
 </class>

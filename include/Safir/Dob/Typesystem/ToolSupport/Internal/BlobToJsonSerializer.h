@@ -238,16 +238,7 @@ namespace Internal
         {
             os<<"{";
             WriteMemberName("name", os);
-            const char* name = TypeUtilities::GetTypeName(m_repository, val.first.typeId);
-            if (name != nullptr)
-            {
-                os << SAFIR_JSON_QUOTE(name);
-            }
-            else
-            {
-                os << SAFIR_JSON_QUOTE(val.first.typeId);
-            }
-
+            os << SAFIR_JSON_QUOTE(SerializationUtils::TypeIdToString(m_repository, val.first.typeId));
             os<<",";
             WriteMemberName("instanceId", os);
             if (val.second)
@@ -294,15 +285,7 @@ namespace Internal
             case TypeIdMemberType:
                 {
                     DotsC_TypeId typeId = reader.template ReadKey<DotsC_TypeId>(memberIndex, valueIndex);
-                    const char* name = TypeUtilities::GetTypeName(m_repository, typeId);
-                    if (name != nullptr)
-                    {
-                        os << SAFIR_JSON_QUOTE(name);
-                    }
-                    else
-                    {
-                        os << SAFIR_JSON_QUOTE(typeId);
-                    }
+                    os << SAFIR_JSON_QUOTE(SerializationUtils::TypeIdToString(m_repository, typeId));
                 }
                 break;
             case InstanceIdMemberType:
@@ -392,16 +375,7 @@ namespace Internal
                     reader.ReadValue(memberIndex, arrayIndex, val, isNull, isChanged);
                     if (!isNull)
                     {
-                        const char* name = TypeUtilities::GetTypeName(m_repository, val);
-                        if (name != nullptr)
-                        {
-                            os << SAFIR_JSON_QUOTE(name);
-                        }
-                        else
-                        {
-                            os << SAFIR_JSON_QUOTE(val);
-                        }
-
+                        os << SAFIR_JSON_QUOTE(SerializationUtils::TypeIdToString(m_repository, val));
                         return true;
                     }
                 }

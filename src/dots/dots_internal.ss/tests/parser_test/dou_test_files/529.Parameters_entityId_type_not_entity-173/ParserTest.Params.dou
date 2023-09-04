@@ -9,7 +9,7 @@
             <type>ParserTest.MyEntity</type>
             <ParserTest.MyEntity>
                 <Val>
-                    <name>ParserTest.AnyType</name>
+                    <name>NoType</name>
                     <instanceId>abc</instanceId>
                 </Val>
             </ParserTest.MyEntity>

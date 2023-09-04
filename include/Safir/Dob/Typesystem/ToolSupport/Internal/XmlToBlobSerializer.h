@@ -351,7 +351,7 @@ namespace Internal
                     {
                         std::ostringstream os;
                         os<<"TypeId member "<<md->GetName()<<" does not refer to an existing type. Specified type name: "<<keyContent.data();
-                        throw ParseError("XmlToBinary serialization erro", os.str(), "", 174);
+                        throw ParseError("XmlToBinary serialization error", os.str(), "", 174);
                     }
 
                     SerializationUtils::SetKeyWithNullValue(memIx, tid.second, writer);
@@ -367,12 +367,13 @@ namespace Internal
             case EntityIdMemberType:
                 {
                     const std::string inst = keyContent.get<std::string>("instanceId");
-                    auto eid=SerializationUtils::StringToEntityId(m_repository, keyContent.get<std::string>("name"), inst);
+                    const auto type = keyContent.get<std::string>("name");
+                    auto eid=SerializationUtils::StringToEntityId(m_repository, type, inst);
                     if (!eid.first)
                     {
                         std::ostringstream os;
-                        os<<"EntityId member "<<md->GetName()<<" does not refer to an existing valid entity type. Specified type name: "<<keyContent.data();
-                        throw ParseError("XmlToBinary serialization erro", os.str(), "", 174);
+                        os<<"EntityId member "<<md->GetName()<<" does not refer to an existing valid entity type. Specified type name: "<<type;
+                        throw ParseError("XmlToBinary serialization error", os.str(), "", 173);
                     }
                     SerializationUtils::SetKeyWithNullValue(memIx, eid.second, writer);
                 }
@@ -428,7 +429,7 @@ namespace Internal
                     {
                         std::ostringstream os;
                         os<<"TypeId member "<<md->GetName()<<" does not refer to an existing type. Specified type name: "<<keyContent.data();
-                        throw ParseError("XmlToBinary serialization erro", os.str(), "", 174);
+                        throw ParseError("XmlToBinary serialization error", os.str(), "", 174);
                     }
                     SetMember(md, memIx, arrIx, memberContent, tid.second, writer);
                 }
@@ -448,8 +449,8 @@ namespace Internal
                     if (!eid.first)
                     {
                         std::ostringstream os;
-                        os<<"EntityId member "<<md->GetName()<<" does not refer to an existing valid entity type. Specified type name: "<<keyContent.data();
-                        throw ParseError("XmlToBinary serialization erro", os.str(), "", 174);
+                        os<<"EntityId member "<<md->GetName()<<" does not refer to an existing valid entity type. Specified type name: "<<type;
+                        throw ParseError("XmlToBinary serialization error", os.str(), "", 173);
                     }
                     SetMember(md, memIx, arrIx, memberContent, eid.second, writer);
                 }

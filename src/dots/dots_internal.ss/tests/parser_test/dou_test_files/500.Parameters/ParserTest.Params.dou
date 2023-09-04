@@ -145,7 +145,56 @@
                 <ParserTest.MyEntity>
                     <StringVal>Kalle</StringVal>
                     <Int32Val>1</Int32Val>
-                </ParserTest.MyEntity>              
+                </ParserTest.MyEntity>
+
+                <ParserTest.MyEntity>
+                    <TypeIdSeq>
+                        <value>ParserTest.MyColorEnum</value>
+                        <value>123</value>
+                    </TypeIdSeq>
+                    <EntityIdSeq>
+                        <value>
+                            <name>ParserTest.MyParam1</name>
+                            <instanceId>1</instanceId>
+                        </value>
+                        <value>
+                            <name>123</name>
+                            <instanceId>two</instanceId>
+                        </value>
+                    </EntityIdSeq>
+                    <TypeIdDict>
+                        <entry>
+                            <key>ParserTest.MyParam1</key>
+                            <value>123</value>
+                        </entry>
+                        <entry>
+                            <key>123</key>
+                            <value>ParserTest.MyParam1</value>
+                        </entry>
+                    </TypeIdDict>
+                    <EntityIdDict>
+                        <entry>
+                            <key>
+                                <name>ParserTest.MyParam1</name>
+                                <instanceId>1</instanceId>
+                            </key>
+                            <value>
+                                <name>123</name>
+                                <instanceId>two</instanceId>
+                            </value>
+                        </entry>
+                        <entry>
+                            <key>
+                                <name>123</name>
+                                <instanceId>two</instanceId>
+                            </key>
+                            <value>
+                                <name>ParserTest.MyParam1</name>
+                                <instanceId>1</instanceId>
+                            </value>
+                        </entry>
+                    </EntityIdDict>
+                </ParserTest.MyEntity>
             </array>                              
         </parameter>
         

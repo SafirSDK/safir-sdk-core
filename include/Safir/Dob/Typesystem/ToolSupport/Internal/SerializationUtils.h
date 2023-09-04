@@ -149,6 +149,14 @@ namespace SerializationUtils
         return std::make_pair(valid, tid);
     }
 
+    template <class RepT>
+    std::string TypeIdToString(const RepT* repository, DotsC_TypeId typeId)
+    {
+        auto typeName = TypeUtilities::GetTypeName(repository, typeId);
+        return typeName != nullptr ? typeName : boost::lexical_cast<std::string>(typeId);
+    }
+
+
     inline std::pair<DotsC_Int64, const char*> StringToHash(const std::string& str)
     {
         std::pair<DotsC_Int64, const char*> result(0, static_cast<const char*>(NULL));
@@ -167,32 +175,12 @@ namespace SerializationUtils
     template <class RepT>
     std::pair<bool /*valid*/, std::pair<DotsC_EntityId, const char*>> StringToEntityId(const RepT* repository, const std::string& type, const std::string& inst)
     {
+        auto tid = StringToTypeId(repository, type);
+        auto instanceId = SerializationUtils::StringToHash(inst);
         DotsC_EntityId eid;
-
-        // check the typeId
-        bool valid = true;
-        try
-        {
-            // numbers that does not represent an existing type is always ok
-            eid.typeId=boost::lexical_cast<DotsC_TypeId>(type);
-            if (BasicTypeOperations::ValidTypeId(repository, eid.typeId))
-            {
-                // the typeId is an existing type, then it must be a subtype of Entity
-                valid = BasicTypeOperations::IsOfType(repository, ObjectMemberType, eid.typeId, ObjectMemberType, LlufId_Generate64("Safir.Dob.Entity"));
-            }
-        }
-        catch (const boost::bad_lexical_cast&)
-        {
-            // string values must represent an existing type that is a subtype to Entity
-            eid.typeId=LlufId_Generate64(type.c_str());
-            valid = BasicTypeOperations::IsOfType(repository, ObjectMemberType, eid.typeId, ObjectMemberType, LlufId_Generate64("Safir.Dob.Entity"));
-        }
-
-        // handle instanceId
-        std::pair<DotsC_Int64, const char*> instanceId=SerializationUtils::StringToHash(inst);
+        eid.typeId = tid.second;
         eid.instanceId = instanceId.first;
-
-        return std::make_pair(valid, std::make_pair(eid, instanceId.second));
+        return std::make_pair(tid.first, std::make_pair(eid, instanceId.second));
     }
 
     inline bool StringToBoolean(const std::string& val)

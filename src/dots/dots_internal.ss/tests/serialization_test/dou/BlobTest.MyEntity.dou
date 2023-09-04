@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<class xmlns="urn:safir-dots-unit"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <summary>Contains the definition of a distribution channel name.</summary>
     <name>BlobTest.MyEntity</name>
     <baseClass>BlobTest.MyEntityBase</baseClass>
@@ -47,22 +48,22 @@
         <member>
             <name>MyStringVal</name>
             <type>String</type>
-        <maxLength>10</maxLength>
+            <maxLength>10</maxLength>
         </member>
         <member>
             <name>MyBinaryVal</name>
             <type>Binary</type>
         </member>
-    <member>
+        <member>
             <name>MyEnumVal</name>
             <type>BlobTest.MyColorEnum</type>
         </member>
-    <member>
+        <member>
             <name>MyItemVal</name>
             <type>BlobTest.MyItem</type>
         </member>
 
-    <!--- Array members ---->
+        <!-- Array members -->
         <member>
             <name>MyBoolArray</name>
             <type>Boolean</type>

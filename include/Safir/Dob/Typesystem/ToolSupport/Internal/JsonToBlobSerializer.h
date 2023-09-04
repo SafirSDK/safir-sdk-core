@@ -256,7 +256,7 @@ namespace Internal
                     if (!tid.first)
                     {
                         std::ostringstream os;
-                        os<<"TypeId member "<<md->GetName()<<" does not refer to an existing type. Specified type name: "<<memberContent.data();
+                        os<<"TypeId member "<<md->GetName()<<" does not refer to an existing type. Specified type name: "<<keyContent.data();
                         throw ParseError("JsonToBinary serialization error", os.str(), "", 174);
                     }
                     SetMember(md, memIx, arrIx, memberContent, tid.second, writer);
@@ -277,7 +277,7 @@ namespace Internal
                     if (!eid.first)
                     {
                         std::ostringstream os;
-                        os<<"EntityId member "<<md->GetName()<<" does not refer to an existing entity type. Specified type name: "<<memberContent.data();
+                        os<<"EntityId member "<<md->GetName()<<" does not refer to an existing entity type. Specified type name: "<<type;
                         throw ParseError("JsonToBinary serialization error", os.str(), "", 174);
                     }
                     SetMember(md, memIx, arrIx, memberContent, eid.second, writer);

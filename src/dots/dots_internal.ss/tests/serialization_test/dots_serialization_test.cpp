@@ -42,7 +42,7 @@ bool TestInfoFromPath(const boost::filesystem::path& p, TestCase& test);
 void RunTests(const TypeRepository* repository, const boost::filesystem::path& testRoot, int firstTest, int lastTest);
 bool RunSingleTest(const TypeRepository* repository, const TestCase& test);
 bool RunTestFromXml(const TypeRepository* repository, const std::string& fileName);
-void RunTestFromJson(const TypeRepository* repository, const std::string& fileName);
+bool RunTestFromJson(const TypeRepository* repository, const std::string& fileName);
 void PrintTestFailMessage(const std::string& result, const std::string& shortInfo, const std::string& description, const std::string& file);
 
 void CheckBlobSize(const std::vector<char>& blob)
@@ -818,6 +818,11 @@ bool RunSingleTest(const TypeRepository* repository, const TestCase& test)
         {
             RunTestFromXml(repository, test.path.string());
         }
+        else if (test.path.extension()==".json")
+        {
+
+            RunTestFromJson(repository, test.path.string());
+        }
         else
         {
             throw std::logic_error("Dots Serializaton Test only handles xml files");
@@ -936,6 +941,78 @@ bool RunTestFromXml(const TypeRepository* repository, const std::string& fileNam
     }
 
     return true;
+}
+
+bool RunTestFromJson(const TypeRepository* repository, const std::string& fileName)
+{
+     //read file into xml
+     std::ostringstream json1;
+     {
+         std::ifstream is(fileName.c_str());
+         json1<<is.rdbuf();
+         is.close();
+     }
+     std::cout<<"---- RAW ---"<<std::endl<<json1.str()<<std::endl;
+     std::vector<char> bin1;
+     Safir::Dob::Typesystem::ToolSupport::JsonToBinary(repository, json1.str().c_str(), bin1);
+     CheckBlobSize(bin1);
+
+     std::ostringstream os1;
+     Safir::Dob::Typesystem::ToolSupport::BinaryToBase64(&bin1[0], bin1.size(), os1);
+
+     std::vector<char> bin2;
+     Safir::Dob::Typesystem::ToolSupport::Base64ToBinary(os1.str(), bin2);
+     CheckBlobSize(bin2);
+
+     if (bin1.size()!=bin2.size() || memcmp(&bin1[0], &bin2[0], bin1.size())!=0)
+     {
+         throw std::logic_error("Not binary equal after base64 conversion");
+     }
+
+     std::ostringstream json2;
+     BinaryToJson(repository, &bin2[0], json2);
+     std::cout<<"---- JSON2 ---"<<std::endl<<json2.str()<<std::endl;
+
+     std::vector<char> bin3;
+     Safir::Dob::Typesystem::ToolSupport::JsonToBinary(repository, json2.str().c_str(), bin3);
+     CheckBlobSize(bin3);
+
+     if (bin1.size()!=bin3.size() || memcmp(&bin1[0], &bin3[0], bin1.size())!=0)
+     {
+         throw std::logic_error("Not binary equal after xml conversion");
+     }
+
+
+
+     std::ostringstream xml1;
+     BinaryToXml(repository, &bin1[0], xml1);
+
+     std::cout<<"--- XML 1 ---"<<std::endl<<xml1.str()<<std::endl;
+
+     std::vector<char> bin4;
+     XmlToBinary(repository, xml1.str().c_str(), bin4);
+     CheckBlobSize(bin4);
+
+     if (bin1.size()!=bin4.size() || memcmp(&bin1[0], &bin4[0], bin1.size())!=0)
+     {
+         std::ostringstream dummyXml;
+         BinaryToXml(repository, &bin4[0], dummyXml);
+         std::cout<<"--- XML DUMMY ---"<<std::endl<<dummyXml.str()<<std::endl;
+
+         throw std::logic_error("Not binary equal after json conversion");
+     }
+
+     std::ostringstream xml2;
+     BinaryToXml(repository, &bin4[0], xml2);
+     std::cout<<"--- XML 2 ---"<<std::endl<<xml2.str()<<std::endl;
+
+     if (xml1.str()!=xml2.str())
+     {
+         throw std::logic_error("XML 1 differs from XML 2");
+     }
+
+    return true;
+
 }
 
 void PrintTestFailMessage(const std::string& result, const std::string& shortInfo, const std::string& description, const std::string& file)

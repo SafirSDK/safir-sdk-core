@@ -4,5 +4,13 @@
         <name>34</name>
         <instanceId>1</instanceId>
     </MyEntityIdVal>
+    <MyBaseEntityId>
+        <name>BlobTest.MyItem</name>
+        <instanceId>two</instanceId>
+    </MyBaseEntityId>
     <MyTypeIdVal>555</MyTypeIdVal>
+    <MyTypeIdArray>
+        <typeId>BlobTest.MyColorEnum</typeId>
+        <typeId>123</typeId>
+    </MyTypeIdArray>
 </BlobTest.MyEntity>
