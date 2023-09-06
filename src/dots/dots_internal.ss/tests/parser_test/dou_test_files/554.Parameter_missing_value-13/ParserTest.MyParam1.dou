@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class>
+    <name>ParserTest.MyParam1</name>
+    <baseClass>Object</baseClass>
+    <parameters>
+        <parameter>
+            <name>Par1</name>
+            <type>Int32</type>
+            <value>1</value>
+        </parameter>
+        <parameter>
+            <name>Par2</name>
+            <type>Int32</type>
+            <value>2</value>
+        </parameter>
+        <parameter>
+            <name>ParamWithNoValue</name>
+            <type>EntityId</type>
+        </parameter>
+    </parameters>
+</class>

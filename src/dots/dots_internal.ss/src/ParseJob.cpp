@@ -117,6 +117,7 @@ namespace ToolSupport
                         if (parser.Match(ptIt->first, state))
                         {
                             parser.Parse(ptIt->second, state);
+                            parser.Reset(state);
                         }
                     }
                     catch (const ParseError& err)

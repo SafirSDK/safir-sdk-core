@@ -182,6 +182,12 @@ namespace ToolSupport
             {
                 std::ostringstream ss;
                 ss<<"Expecting one of following elements: "<<ElementName();
+
+                // Check if this error happened in a Paramter. In that case try to give info about wich parameter is the problem.
+                if (Parent() && Parent()->Name() == Elements::Parameter::Name() && state.lastInsertedClass->ownParameters.back()->GetName())
+                {
+                    ss << ". Error in parameter '" << state.lastInsertedClass->ownParameters.back()->GetName() << "'.";
+                }
                 throw ParseError("Wrong number of occurrences", ss.str(), state.currentPath, 13);
             }
             m_parser.reset(); //m_parser set to 0, and is now ready to match any of A and B again.
