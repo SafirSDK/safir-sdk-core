@@ -22,6 +22,7 @@
 *
 ******************************************************************************/
 #include <iostream>
+#include <fstream>
 #include <Safir/Utilities/Internal/Expansion.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
@@ -185,7 +186,43 @@ namespace Internal
         //-------------------------------------------------
         //Copy localRepository into shared memory
         //-------------------------------------------------
-        RepositoryShm::CreateShmCopyOfRepository(*localRepository, DOTS_REPOSITORY_NAME, *m_sharedMemory);
+        SEND_SYSTEM_LOG(Debug, << "Loading shm from file");
+        char* dest = (char*)m_sharedMemory->get_address();
+        std::ifstream rf("/home/joel/dev/dots_shm.dat", std::ios::out | std::ios::binary);
+        if (!rf)
+        {
+            SEND_SYSTEM_LOG(Error, << "Failed to open file for shm");
+            throw "Failed to open file for shm";
+        }
+
+        rf.read(dest, m_sharedMemory->get_size());
+        if (!rf.good())
+        {
+            SEND_SYSTEM_LOG(Error, << "Failed to read file into shm");
+            throw "Failed to read file into shm";
+        }
+
+//        RepositoryShm::CreateShmCopyOfRepository(*localRepository, DOTS_REPOSITORY_NAME, *m_sharedMemory);
+
+//        // Save shared memory to file
+//        std::ofstream wf("/home/joel/dev/dots_shm.dat", std::ios::binary | std::ios::out);
+//        if (!wf)
+//        {
+//            SEND_SYSTEM_LOG(Error, << "Failed to create file for shm");
+//            throw "Failed to create file for shm";
+//        }
+
+//        SEND_SYSTEM_LOG(Debug, << "Write shm to file: " << m_sharedMemory->get_size());
+//        wf.write((char*)m_sharedMemory->get_address(), m_sharedMemory->get_size());
+//        wf.close();
+//       if(!wf.good())
+//       {
+//           SEND_SYSTEM_LOG(Error, << "Failed to write shm to file");
+//           throw "Failed to write shm to file";
+//       }
+
+        lllog(5) << "Dots type repository is ready in shared memory." << std::endl;
+
     }
 }
 }

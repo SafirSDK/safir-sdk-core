@@ -54,11 +54,12 @@ namespace Internal
         static boost::once_flag initFlag;
         static void Init()
         {
-            lllog(1) << "Loading DOTS shared memory" << std::endl;
+            lllog(1) << "Loading DOTS shared memory..." << std::endl;
             std::vector<boost::filesystem::path> paths;
             size_t sharedMemorySize;
             ReadTypesystemIni(sharedMemorySize, paths);
             RepositoryKeeper::Initialize(sharedMemorySize, paths);
+            lllog(1) << "... DOTS shared memory is ready!" << std::endl;
         }
 
         //Reads the typesystem.ini file.
