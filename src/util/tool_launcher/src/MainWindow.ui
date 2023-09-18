@@ -298,7 +298,7 @@ configuration.</string>
             </size>
            </property>
            <property name="currentText">
-            <string>VeryLow</string>
+            <string>Low</string>
            </property>
            <item>
             <property name="text">
