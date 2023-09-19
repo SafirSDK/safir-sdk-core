@@ -61,9 +61,6 @@ namespace Dob
          * When called the application owning the connection shall stop its execution.
          */
         virtual void OnStopOrder() = 0;
-
-    private:
-        StopHandler * ToStopHandler() override {return this;}
     };
 
     /**
@@ -86,9 +83,6 @@ namespace Dob
          * the connection.
          */
         virtual void OnDoDispatch() = 0;
-
-    private:
-        Dispatcher * ToDispatcher() override {return this;}
     };
 
     /**
@@ -113,9 +107,6 @@ namespace Dob
         : public virtual RevokedRegistrationBase,
           public virtual EntityRequestBase
     {
-
-    private:
-        EntityHandler * ToEntityHandler() override {return this;}
     };
 
     /**
@@ -153,9 +144,6 @@ namespace Dob
         : public virtual RevokedRegistrationBase,
           public virtual EntityInjectionBase
     {
-
-    private:
-        EntityHandlerInjection * ToEntityHandlerInjection() override {return this;}
     };
 
     /**
@@ -195,9 +183,6 @@ namespace Dob
         : public virtual CompletedRegistrationBase,
           public virtual EntityInjectionBase
     {
-
-    private:
-        EntityHandlerPending * ToEntityHandlerPending() override {return this;}
     };
 
     /**
@@ -216,9 +201,6 @@ namespace Dob
         : public virtual RevokedRegistrationBase,
           public virtual ServiceRequestBase
     {
-
-    private:
-        ServiceHandler * ToServiceHandler() override {return this;}
     };
 
     /**
@@ -240,9 +222,6 @@ namespace Dob
         : public virtual CompletedRegistrationBase,
           public virtual ServiceRequestBase
     {
-
-    private:
-        ServiceHandlerPending * ToServiceHandlerPending() override {return this;}
     };
 
     /**
@@ -267,9 +246,6 @@ namespace Dob
          * Called to indicate that it is meningful to make a retry after an overflow situation.
          */
         virtual void OnNotRequestOverflow() = 0;
-
-    private:
-        Requestor * ToRequestor() override {return this;}
     };
 
     /**
@@ -286,9 +262,6 @@ namespace Dob
          * Called to indicate that it is meningful to make a retry after an overflow situation.
          */
         virtual void OnNotMessageOverflow() = 0;
-
-    private:
-        MessageSender * ToMessageSender() override {return this;}
     };
 
     /**
@@ -318,9 +291,6 @@ namespace Dob
          */
         virtual void OnUnregistered(const Safir::Dob::Typesystem::TypeId      typeId,
                                     const Safir::Dob::Typesystem::HandlerId&  handlerId) = 0;
-
-    private:
-        RegistrationSubscriber * ToRegistrationSubscriber() override {return this;}
     };
 
     /**
@@ -339,9 +309,6 @@ namespace Dob
          * @param [in] messageProxy - Proxy object containing received message and meta information.
          */
         virtual void OnMessage(const Safir::Dob::MessageProxy messageProxy) = 0;
-
-    private:
-        MessageSubscriber * ToMessageSubscriber() override {return this;}
     };
 
     /**
@@ -382,9 +349,6 @@ namespace Dob
          */
         virtual void OnDeletedEntity(const Safir::Dob::EntityProxy entityProxy,
                                      const bool                    deprecated) = 0;
-
-    private:
-        EntitySubscriber * ToEntitySubscriber() override {return this;}
     };
 
 }

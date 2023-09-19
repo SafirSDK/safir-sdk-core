@@ -89,111 +89,12 @@ namespace Dob
         private:
             friend class Safir::Dob::Internal::Callbacks;
 
-            virtual RevokedRegistrationBase * ToRevokedRegistrationBase()
-            {throw Dob::Typesystem::SoftwareViolationException
-                    (L"Call to ConsumerBase::ToRevokedRegistrationBase is illegal. Method must be overridden!",
-                     __WFILE__,__LINE__);}
-            virtual CompletedRegistrationBase * ToCompletedRegistrationBase()
-            {throw Dob::Typesystem::SoftwareViolationException
-                    (L"Call to ConsumerBase::ToCompletedRegistrationBase is illegal. Method must be overridden!",
-                     __WFILE__,__LINE__);}
-            virtual EntityRequestBase * ToEntityRequestBase()
-            {throw Dob::Typesystem::SoftwareViolationException
-                    (L"Call to ConsumerBase::ToEntityRequestBase is illegal. Method must be overridden!",
-                     __WFILE__,__LINE__);}
-            virtual EntityInjectionBase * ToEntityInjectionBase()
-            {throw Dob::Typesystem::SoftwareViolationException
-                    (L"Call to ConsumerBase::ToEntityInjectionBase is illegal. Method must be overridden!",
-                     __WFILE__,__LINE__);}
-            virtual ServiceRequestBase * ToServiceRequestBase()
-            {throw Dob::Typesystem::SoftwareViolationException
-                    (L"Call to ConsumerBase::ToServiceRequestBase is illegal. Method must be overridden!",
-                     __WFILE__,__LINE__);}
-            virtual StopHandler * ToStopHandler()
-            {throw Dob::Typesystem::SoftwareViolationException
-                    (L"Call to ConsumerBase::ToStopHandler is illegal. Method must be overridden!",
-                     __WFILE__,__LINE__);}
-            virtual Dispatcher * ToDispatcher()
-            {throw Dob::Typesystem::SoftwareViolationException
-                    (L"Call to ConsumerBase::ToDispatcher is illegal. Method must be overridden!",
-                     __WFILE__,__LINE__);}
-            virtual EntityHandler * ToEntityHandler()
-            {throw Dob::Typesystem::SoftwareViolationException
-                    (L"Call to ConsumerBase::ToEntityHandler is illegal. Method must be overridden!",
-                     __WFILE__,__LINE__);}
-            virtual EntityHandlerInjection * ToEntityHandlerInjection()
-            {throw Dob::Typesystem::SoftwareViolationException
-                    (L"Call to ConsumerBase::ToEntityHandlerInjection is illegal. Method must be overridden!",
-                     __WFILE__,__LINE__);}
-            virtual EntityHandlerPending * ToEntityHandlerPending()
-            {throw Dob::Typesystem::SoftwareViolationException
-                    (L"Call to ConsumerBase::ToEntityHandlerPending is illegal. Method must be overridden!",
-                     __WFILE__,__LINE__);}
-            virtual ServiceHandler * ToServiceHandler()
-            {throw Dob::Typesystem::SoftwareViolationException
-                    (L"Call to ConsumerBase::ToServiceHandler is illegal. Method must be overridden!",
-                     __WFILE__,__LINE__);}
-            virtual ServiceHandlerPending * ToServiceHandlerPending()
-            {throw Dob::Typesystem::SoftwareViolationException
-                    (L"Call to ConsumerBase::ToServiceHandlerPending is illegal. Method must be overridden!",
-                     __WFILE__,__LINE__);}
-            virtual Requestor * ToRequestor()
-            {throw Dob::Typesystem::SoftwareViolationException
-                    (L"Call to ConsumerBase::ToRequestor is illegal. Method must be overridden!",
-                     __WFILE__,__LINE__);}
-            virtual MessageSender * ToMessageSender()
-            {throw Dob::Typesystem::SoftwareViolationException
-                    (L"Call to ConsumerBase::ToMessageSender is illegal. Method must be overridden!",
-                     __WFILE__,__LINE__);}
-            virtual RegistrationSubscriber * ToRegistrationSubscriber()
-            {throw Dob::Typesystem::SoftwareViolationException
-                    (L"Call to ConsumerBase::ToRegistrationSubscriber is illegal. Method must be overridden!",
-                     __WFILE__,__LINE__);}
-            virtual MessageSubscriber * ToMessageSubscriber()
-            {throw Dob::Typesystem::SoftwareViolationException
-                    (L"Call to ConsumerBase::ToMessageSubscriber is illegal. Method must be overridden!",
-                     __WFILE__,__LINE__);}
-            virtual EntitySubscriber * ToEntitySubscriber()
-            {throw Dob::Typesystem::SoftwareViolationException
-                    (L"Call to ConsumerBase::ToEntitySubscriber is illegal. Method must be overridden!",
-                     __WFILE__,__LINE__);}
-
-
-            //These functions take a void ptr and call the desired version of the above methods
-            static RevokedRegistrationBase * ToRevokedRegistrationBase(void * consumerBase)
-            {return static_cast<ConsumerBase*>(consumerBase)->ToRevokedRegistrationBase();}
-            static CompletedRegistrationBase * ToCompletedRegistrationBase(void * consumerBase)
-            {return static_cast<ConsumerBase*>(consumerBase)->ToCompletedRegistrationBase();}
-            static EntityRequestBase * ToEntityRequestBase(void * consumerBase)
-            {return static_cast<ConsumerBase*>(consumerBase)->ToEntityRequestBase();}
-            static EntityInjectionBase * ToEntityInjectionBase(void * consumerBase)
-            {return static_cast<ConsumerBase*>(consumerBase)->ToEntityInjectionBase();}
-            static ServiceRequestBase * ToServiceRequestBase(void * consumerBase)
-            {return static_cast<ConsumerBase*>(consumerBase)->ToServiceRequestBase();}
-            static StopHandler * ToStopHandler(void * consumerBase)
-            {return static_cast<ConsumerBase*>(consumerBase)->ToStopHandler();}
-            static Dispatcher * ToDispatcher(void * consumerBase)
-            {return static_cast<ConsumerBase*>(consumerBase)->ToDispatcher();}
-            static EntityHandler * ToEntityHandler(void * consumerBase)
-            {return static_cast<ConsumerBase*>(consumerBase)->ToEntityHandler();}
-            static EntityHandlerInjection * ToEntityHandlerInjection(void * consumerBase)
-            {return static_cast<ConsumerBase*>(consumerBase)->ToEntityHandlerInjection();}
-            static EntityHandlerPending * ToEntityHandlerPending(void * consumerBase)
-            {return static_cast<ConsumerBase*>(consumerBase)->ToEntityHandlerPending();}
-            static ServiceHandler * ToServiceHandler(void * consumerBase)
-            {return static_cast<ConsumerBase*>(consumerBase)->ToServiceHandler();}
-            static ServiceHandlerPending * ToServiceHandlerPending(void * consumerBase)
-            {return static_cast<ConsumerBase*>(consumerBase)->ToServiceHandlerPending();}
-            static Requestor * ToRequestor(void * consumerBase)
-            {return static_cast<ConsumerBase*>(consumerBase)->ToRequestor();}
-            static MessageSender * ToMessageSender(void * consumerBase)
-            {return static_cast<ConsumerBase*>(consumerBase)->ToMessageSender();}
-            static RegistrationSubscriber * ToRegistrationSubscriber(void * consumerBase)
-            {return static_cast<ConsumerBase*>(consumerBase)->ToRegistrationSubscriber();}
-            static MessageSubscriber * ToMessageSubscriber(void * consumerBase)
-            {return static_cast<ConsumerBase*>(consumerBase)->ToMessageSubscriber();}
-            static EntitySubscriber * ToEntitySubscriber(void * consumerBase)
-            {return static_cast<ConsumerBase*>(consumerBase)->ToEntitySubscriber();}
+            template <class T>
+            static T* ConsumerCast(void* consumerBase)
+            {
+                auto cb = static_cast<ConsumerBase*>(consumerBase);
+                return dynamic_cast<T*>(cb);
+            }
         };
     }
 
@@ -217,9 +118,6 @@ namespace Dob
          */
         virtual void OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId     typeId,
                                            const Safir::Dob::Typesystem::HandlerId& handlerId) = 0;
-
-    private:
-        RevokedRegistrationBase * ToRevokedRegistrationBase() override {return this;}
     };
 
     /**
@@ -238,9 +136,6 @@ namespace Dob
          */
         virtual void OnCompletedRegistration(const Safir::Dob::Typesystem::TypeId     typeId,
                                              const Safir::Dob::Typesystem::HandlerId& handlerId) = 0;
-
-    private:
-        CompletedRegistrationBase * ToCompletedRegistrationBase() override {return this;}
     };
 
     /**
@@ -306,9 +201,6 @@ namespace Dob
          */
         virtual void OnDeleteRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy,
                                      Safir::Dob::ResponseSenderPtr        responseSender) = 0;
-
-    private:
-        EntityRequestBase * ToEntityRequestBase() override {return this;}
     };
 
     /**
@@ -400,10 +292,6 @@ namespace Dob
              (void)typeId;
              (void)handlerId;
          }
-
-
-    private:
-         EntityInjectionBase * ToEntityInjectionBase() override {return this;}
     };
 
     /**
@@ -431,9 +319,6 @@ namespace Dob
          */
         virtual void OnServiceRequest(const Safir::Dob::ServiceRequestProxy serviceRequestProxy,
                                       Safir::Dob::ResponseSenderPtr         responseSender ) = 0;
-
-    private:
-        ServiceRequestBase * ToServiceRequestBase() override {return this;}
     };
 
 }

@@ -118,24 +118,23 @@ namespace Internal
             Consumer * c = &cons;
             void * v = static_cast<Internal::ConsumerBase*>(c);
 
-            CheckAddr(L"StopHandler",static_cast<StopHandler*>(c),ConsumerBase::ToStopHandler(v));
-            CheckAddr(L"Dispatcher",static_cast<Dispatcher*>(c),ConsumerBase::ToDispatcher(v));
-            CheckAddr(L"EntityHandler",static_cast<EntityHandler*>(c),ConsumerBase::ToEntityHandler(v));
-            CheckAddr(L"EntityHandlerInjection",static_cast<EntityHandlerInjection*>(c),ConsumerBase::ToEntityHandlerInjection(v));
-            CheckAddr(L"EntityHandlerPending",static_cast<EntityHandlerPending*>(c),ConsumerBase::ToEntityHandlerPending(v));
-            CheckAddr(L"ServiceHandler",static_cast<ServiceHandler*>(c),ConsumerBase::ToServiceHandler(v));
-            CheckAddr(L"ServiceHandlerPending",static_cast<ServiceHandlerPending*>(c),ConsumerBase::ToServiceHandlerPending(v));
-            CheckAddr(L"Requestor",static_cast<Requestor*>(c),ConsumerBase::ToRequestor(v));
-            CheckAddr(L"MessageSender",static_cast<MessageSender*>(c),ConsumerBase::ToMessageSender(v));
-            CheckAddr(L"RegistrationSubscriber",static_cast<RegistrationSubscriber*>(c),ConsumerBase::ToRegistrationSubscriber(v));
-            CheckAddr(L"MessageSubscriber",static_cast<MessageSubscriber*>(c),ConsumerBase::ToMessageSubscriber(v));
-            CheckAddr(L"EntitySubscriber",static_cast<EntitySubscriber*>(c),ConsumerBase::ToEntitySubscriber(v));
-
-            CheckAddr(L"RevokedRegistrationBase",static_cast<RevokedRegistrationBase*>(c),ConsumerBase::ToRevokedRegistrationBase(v));
-            CheckAddr(L"CompletedRegistrationBase",static_cast<CompletedRegistrationBase*>(c),ConsumerBase::ToCompletedRegistrationBase(v));
-            CheckAddr(L"EntityRequestBase",static_cast<EntityRequestBase*>(c),ConsumerBase::ToEntityRequestBase(v));
-            CheckAddr(L"EntityInjectionBase",static_cast<EntityInjectionBase*>(c),ConsumerBase::ToEntityInjectionBase(v));
-            CheckAddr(L"ServiceRequestBase",static_cast<ServiceRequestBase*>(c),ConsumerBase::ToServiceRequestBase(v));
+            CheckAddr(L"StopHandler",static_cast<StopHandler*>(c),ConsumerBase::ConsumerCast<StopHandler>(v));
+            CheckAddr(L"Dispatcher",static_cast<Dispatcher*>(c),ConsumerBase::ConsumerCast<Dispatcher>(v));
+            CheckAddr(L"EntityHandler",static_cast<EntityHandler*>(c),ConsumerBase::ConsumerCast<EntityHandler>(v));
+            CheckAddr(L"EntityHandlerInjection",static_cast<EntityHandlerInjection*>(c),ConsumerBase::ConsumerCast<EntityHandlerInjection>(v));
+            CheckAddr(L"EntityHandlerPending",static_cast<EntityHandlerPending*>(c),ConsumerBase::ConsumerCast<EntityHandlerPending>(v));
+            CheckAddr(L"ServiceHandler",static_cast<ServiceHandler*>(c),ConsumerBase::ConsumerCast<ServiceHandler>(v));
+            CheckAddr(L"ServiceHandlerPending",static_cast<ServiceHandlerPending*>(c),ConsumerBase::ConsumerCast<ServiceHandlerPending>(v));
+            CheckAddr(L"Requestor",static_cast<Requestor*>(c),ConsumerBase::ConsumerCast<Requestor>(v));
+            CheckAddr(L"MessageSender",static_cast<MessageSender*>(c),ConsumerBase::ConsumerCast<MessageSender>(v));
+            CheckAddr(L"RegistrationSubscriber",static_cast<RegistrationSubscriber*>(c),ConsumerBase::ConsumerCast<RegistrationSubscriber>(v));
+            CheckAddr(L"MessageSubscriber",static_cast<MessageSubscriber*>(c),ConsumerBase::ConsumerCast<MessageSubscriber>(v));
+            CheckAddr(L"EntitySubscriber",static_cast<EntitySubscriber*>(c),ConsumerBase::ConsumerCast<EntitySubscriber>(v));
+            CheckAddr(L"RevokedRegistrationBase",static_cast<RevokedRegistrationBase*>(c),ConsumerBase::ConsumerCast<RevokedRegistrationBase>(v));
+            CheckAddr(L"CompletedRegistrationBase",static_cast<CompletedRegistrationBase*>(c),ConsumerBase::ConsumerCast<CompletedRegistrationBase>(v));
+            CheckAddr(L"EntityRequestBase",static_cast<EntityRequestBase*>(c),ConsumerBase::ConsumerCast<EntityRequestBase>(v));
+            CheckAddr(L"EntityInjectionBase",static_cast<EntityInjectionBase*>(c),ConsumerBase::ConsumerCast<EntityInjectionBase>(v));
+            CheckAddr(L"ServiceRequestBase",static_cast<ServiceRequestBase*>(c),ConsumerBase::ConsumerCast<ServiceRequestBase>(v));
         }
 
     private:

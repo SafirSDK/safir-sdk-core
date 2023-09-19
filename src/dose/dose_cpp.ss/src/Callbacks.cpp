@@ -47,7 +47,7 @@ namespace Internal
         success = false;
         try
         {
-            ConsumerBase::ToDispatcher(consumer)->OnDoDispatch();
+            ConsumerBase::ConsumerCast<Safir::Dob::Dispatcher>(consumer)->OnDoDispatch();
             success = true;
         }
         CATCH_LIBRARY_EXCEPTIONS;
@@ -59,7 +59,7 @@ namespace Internal
         success = false;
         try
         {
-            ConsumerBase::ToStopHandler(consumer)->OnStopOrder();
+            ConsumerBase::ConsumerCast<Safir::Dob::StopHandler>(consumer)->OnStopOrder();
             success = true;
         }
         CATCH_LIBRARY_EXCEPTIONS;
@@ -78,7 +78,7 @@ namespace Internal
 
             EntityProxy entityProxy(new EntityProxyImpl(currentBlob,currentState,NULL,NULL,true,timestampDiff));
 
-            ConsumerBase::ToEntitySubscriber(consumer)->OnNewEntity(entityProxy);
+            ConsumerBase::ConsumerCast<Safir::Dob::EntitySubscriber>(consumer)->OnNewEntity(entityProxy);
 
             success = true;
         }
@@ -100,7 +100,7 @@ namespace Internal
 
             EntityProxy entityProxy(new EntityProxyImpl(currentBlob,currentState,previousBlob,previousState,true, timestampDiff));
 
-            ConsumerBase::ToEntitySubscriber(consumer)->OnUpdatedEntity(entityProxy);
+            ConsumerBase::ConsumerCast<Safir::Dob::EntitySubscriber>(consumer)->OnUpdatedEntity(entityProxy);
 
             success = true;
         }
@@ -122,7 +122,7 @@ namespace Internal
 
             EntityProxy entityProxy(new EntityProxyImpl(NULL,currentState,previousBlob,previousState,true, timestampDiff));
 
-            ConsumerBase::ToEntitySubscriber(consumer)->OnDeletedEntity(entityProxy, explicitlyDeleted);
+            ConsumerBase::ConsumerCast<Safir::Dob::EntitySubscriber>(consumer)->OnDeletedEntity(entityProxy, explicitlyDeleted);
 
             success = true;
         }
@@ -144,7 +144,7 @@ namespace Internal
             EntityRequestProxy entityRequestProxy(new EntityRequestProxyImpl(requestBlob,state));
             ResponseSenderPtr responseSender(new ResponseSenderImpl(ctrl,consumer,responseId));
 
-            ConsumerBase::ToEntityRequestBase(consumer)->OnCreateRequest(entityRequestProxy,
+            ConsumerBase::ConsumerCast<Safir::Dob::EntityRequestBase>(consumer)->OnCreateRequest(entityRequestProxy,
                                                                          responseSender);
 
             success = true;
@@ -167,7 +167,7 @@ namespace Internal
             EntityRequestProxy entityRequestProxy(new EntityRequestProxyImpl(requestBlob,state));
             ResponseSenderPtr responseSender(new ResponseSenderImpl(ctrl,consumer,responseId));
 
-            ConsumerBase::ToEntityRequestBase(consumer)->OnUpdateRequest(entityRequestProxy,
+            ConsumerBase::ConsumerCast<Safir::Dob::EntityRequestBase>(consumer)->OnUpdateRequest(entityRequestProxy,
                                                                          responseSender);
 
             success = true;
@@ -187,7 +187,7 @@ namespace Internal
             EntityRequestProxy entityRequestProxy(new EntityRequestProxyImpl(NULL,state));
             ResponseSenderPtr responseSender(new ResponseSenderImpl(ctrl,consumer,responseId));
 
-            ConsumerBase::ToEntityRequestBase(consumer)->OnDeleteRequest(entityRequestProxy,
+            ConsumerBase::ConsumerCast<Safir::Dob::EntityRequestBase>(consumer)->OnDeleteRequest(entityRequestProxy,
                                                                          responseSender);
 
             success = true;
@@ -210,7 +210,7 @@ namespace Internal
             ServiceRequestProxy serviceRequestProxy(new ServiceRequestProxyImpl(requestBlob,state));
             ResponseSenderPtr responseSender(new ResponseSenderImpl(ctrl,consumer,responseId));
 
-            ConsumerBase::ToServiceRequestBase(consumer)->OnServiceRequest(serviceRequestProxy,
+            ConsumerBase::ConsumerCast<Safir::Dob::ServiceRequestBase>(consumer)->OnServiceRequest(serviceRequestProxy,
                                                                        responseSender);
 
             success = true;
@@ -237,7 +237,7 @@ namespace Internal
                                                               requestBlob,
                                                               requestState));
 
-            ConsumerBase::ToRequestor(consumer)->OnResponse(responseProxy);
+            ConsumerBase::ConsumerCast<Safir::Dob::Requestor>(consumer)->OnResponse(responseProxy);
 
             success = true;
         }
@@ -256,7 +256,7 @@ namespace Internal
 
             MessageProxy messageProxy(new MessageProxyImpl(message, state));
 
-            ConsumerBase::ToMessageSubscriber(consumer)->OnMessage(messageProxy);
+            ConsumerBase::ConsumerCast<Safir::Dob::MessageSubscriber>(consumer)->OnMessage(messageProxy);
 
             success = true;
         }
@@ -272,7 +272,7 @@ namespace Internal
         success = false;
         try
         {
-            ConsumerBase::ToRegistrationSubscriber(consumer)->OnRegistered
+            ConsumerBase::ConsumerCast<Safir::Dob::RegistrationSubscriber>(consumer)->OnRegistered
                 (typeId,
                  Typesystem::HandlerId(handlerId,
                                        Typesystem::Utilities::ToWstring(handlerIdStr)));
@@ -292,7 +292,7 @@ namespace Internal
         success = false;
         try
         {
-            ConsumerBase::ToRegistrationSubscriber(consumer)->OnUnregistered
+            ConsumerBase::ConsumerCast<Safir::Dob::RegistrationSubscriber>(consumer)->OnUnregistered
                 (typeId,
                  Typesystem::HandlerId(handlerId,
                                        Typesystem::Utilities::ToWstring(handlerIdStr)));
@@ -313,7 +313,7 @@ namespace Internal
         success = false;
         try
         {
-            ConsumerBase::ToRevokedRegistrationBase(consumer)->OnRevokedRegistration
+            ConsumerBase::ConsumerCast<RevokedRegistrationBase>(consumer)->OnRevokedRegistration
                 (typeId,
                  Typesystem::HandlerId(handlerId,
                                        Typesystem::Utilities::ToWstring(handlerIdStr)));
@@ -332,7 +332,7 @@ namespace Internal
         success = false;
         try
         {
-            ConsumerBase::ToCompletedRegistrationBase(consumer)->
+            ConsumerBase::ConsumerCast<Safir::Dob::CompletedRegistrationBase>(consumer)->
                 OnCompletedRegistration(typeId,
                                         Typesystem::HandlerId(handlerId,
                                                               Typesystem::Utilities::ToWstring(handlerIdStr)));
@@ -354,7 +354,7 @@ namespace Internal
 
             InjectedEntityProxy injectedEntityProxy(new InjectedEntityProxyImpl(injectionBlob,injectionState,NULL,NULL));
 
-            ConsumerBase::ToEntityInjectionBase(consumer)->OnInjectedNewEntity(injectedEntityProxy);
+            ConsumerBase::ConsumerCast<Safir::Dob::EntityInjectionBase>(consumer)->OnInjectedNewEntity(injectedEntityProxy);
 
             success = true;
         }
@@ -376,7 +376,7 @@ namespace Internal
             InjectedEntityProxy injectedEntityProxy(new InjectedEntityProxyImpl
                 (injectionBlob,injectionState, currentBlob, currentState));
 
-            ConsumerBase::ToEntityInjectionBase(consumer)->OnInjectedUpdatedEntity(injectedEntityProxy);
+            ConsumerBase::ConsumerCast<Safir::Dob::EntityInjectionBase>(consumer)->OnInjectedUpdatedEntity(injectedEntityProxy);
 
             success = true;
         }
@@ -394,7 +394,7 @@ namespace Internal
         {
             InjectedEntityProxy injectedEntityProxy(new InjectedEntityProxyImpl(NULL,injectionState,currentBlob, currentState));
 
-            ConsumerBase::ToEntityInjectionBase(consumer)->OnInjectedDeletedEntity(injectedEntityProxy);
+            ConsumerBase::ConsumerCast<Safir::Dob::EntityInjectionBase>(consumer)->OnInjectedDeletedEntity(injectedEntityProxy);
 
             success = true;
         }
@@ -410,7 +410,7 @@ namespace Internal
         success = false;
         try
         {
-            ConsumerBase::ToEntityInjectionBase(consumer)->
+            ConsumerBase::ConsumerCast<Safir::Dob::EntityInjectionBase>(consumer)->
                 OnInitialInjectionsDone(typeId,
                                         Typesystem::HandlerId(handlerId,
                                                               Typesystem::Utilities::ToWstring(handlerIdStr)));
@@ -426,7 +426,7 @@ namespace Internal
         success = false;
         try
         {
-            ConsumerBase::ToRequestor(consumer)->OnNotRequestOverflow();
+            ConsumerBase::ConsumerCast<Safir::Dob::Requestor>(consumer)->OnNotRequestOverflow();
             success = true;
         }
         CATCH_LIBRARY_EXCEPTIONS;
@@ -438,7 +438,7 @@ namespace Internal
         success = false;
         try
         {
-            ConsumerBase::ToMessageSender(consumer)->OnNotMessageOverflow();
+            ConsumerBase::ConsumerCast<Safir::Dob::MessageSender>(consumer)->OnNotMessageOverflow();
             success = true;
         }
         CATCH_LIBRARY_EXCEPTIONS;
