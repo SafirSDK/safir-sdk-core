@@ -371,9 +371,13 @@ namespace ToolSupport
 #pragma warning(push)
 #pragma warning(disable:4127) //Get rid of warning that this if-expression is constant (comparing two constants)
 #endif
-                if (m_occurrences.MinOccurrences==m_occurrences.MaxOccurrences)
+                if (m_occurrences.MinOccurrences == m_occurrences.MaxOccurrences)
                 {
                     ss<<"Element '"<<Name()<<"' must occur exactly "<<m_occurrences.MinOccurrences<<" time(s) at location "<<Parent()->Path()<<". Number of occurrences="<<m_occurrences();
+                }
+                else if (m_occurrences.MaxOccurrences == INT_MAX)
+                {
+                    ss<<"Element '"<<Name()<<"' must occur at least "<<m_occurrences.MinOccurrences<<" times at location "<<Parent()->Path()<<". Number of occurrences="<<m_occurrences();
                 }
                 else
                 {

@@ -77,7 +77,7 @@ namespace ToolSupport
         typedef Element<Elements::Membersummary, OptionalOne> Membersummary;
         typedef Element<Elements::MemberName, One> MemberName;
         typedef Element<Elements::MemberType, One > MemberType;
-        typedef Element<Elements::Member, AtLeastOne, boost::mpl::vector<Membersummary, MemberName, MemberType, ELEMENT_CHOICE_4(ArraySize, ArraySizeRef, Dictionary, Sequence, OptionalOne), ELEMENT_CHOICE_2(MaxLength, MaxLengthRef, OptionalOne) > > Member;
+        typedef Element<Elements::Member, OptionalMany, boost::mpl::vector<Membersummary, MemberName, MemberType, ELEMENT_CHOICE_4(ArraySize, ArraySizeRef, Dictionary, Sequence, OptionalOne), ELEMENT_CHOICE_2(MaxLength, MaxLengthRef, OptionalOne) > > Member;
         typedef Element<Elements::ClassMembers, OptionalOne, boost::mpl::vector<Member> > Members;
 
         typedef Element<Elements::Parametersummary, OptionalOne> Parametersummary;
@@ -94,14 +94,13 @@ namespace ToolSupport
         typedef Element<Elements::ParameterObjectDeprecated, OptionalMany, boost::mpl::vector<IgnoreAny> > ParameterObjectDeprecatedCollection;
         typedef Element<Elements::Any, OptionalMany, boost::mpl::vector<IgnoreAny>, ParseAlgorithm<Elements::ParameterObject>, AnyMatcher > ParameterObjectCollection;
         typedef Element<Elements::ParameterArray, One, boost::mpl::vector<ParameterObjectCollection, ParameterValueRefCollection, ELEMENT_CHOICE_3(ParameterValueCollection, ParameterEntityIdCollection, ParameterObjectDeprecatedCollection, OptionalOne) > > ParameterArray;
-        typedef Element<Elements::ParameterArrayElement, AtLeastOne, boost::mpl::vector< ELEMENT_CHOICE_5(ParameterValue, ParameterValueRef, ParameterEntityId, ParameterObjectDeprecated, ParameterObject, OptionalOne), Ignore<Elements::ParameterArrayIndex> > > ParameterArrayElement;
+        typedef Element<Elements::ParameterArrayElement, OptionalMany, boost::mpl::vector< ELEMENT_CHOICE_5(ParameterValue, ParameterValueRef, ParameterEntityId, ParameterObjectDeprecated, ParameterObject, OptionalOne), Ignore<Elements::ParameterArrayIndex> > > ParameterArrayElement;
         typedef Element<Elements::ParameterArrayElements, One, boost::mpl::vector<ParameterArrayElement> > ParameterArrayElements;
         typedef Element<Elements::ParameterDictionaryKey, One, boost::mpl::vector< Ignore<Elements::ClassName>, Ignore<Elements::InstanceId> > > ParameterDictionaryKey;
         typedef Element<Elements::ParameterDictionaryEntry, OptionalMany, boost::mpl::vector<ELEMENT_CHOICE_5(ParameterValue, ParameterValueRef, ParameterEntityId, ParameterObjectDeprecated, ParameterObject, One), ParameterDictionaryKey> > ParameterDictionaryEntry;
         typedef Element<Elements::ParameterSequence, One> ParameterSequence;
-        //typedef Element<Elements::ParameterSequence, One, boost::mpl::vector<ParameterObjectCollection, ParameterValueRefCollection, ELEMENT_CHOICE_3(ParameterValueCollection, ParameterEntityIdCollection, ParameterObjectDeprecatedCollection, OptionalOne) > > ParameterSequence;
         typedef Element<Elements::ParameterDictionary, One, boost::mpl::vector<Ignore<Elements::XmlAttribute>, ParameterDictionaryEntry > > ParameterDictionary;
-        typedef Element<Elements::Parameter, AtLeastOne, boost::mpl::vector<ELEMENT_CHOICE_9(ParameterValue, ParameterEntityId, ParameterValueRef, ParameterArray, ParameterArrayElements, ParameterSequence, ParameterDictionary, ParameterObjectDeprecated, ParameterObject, One), Parametersummary, ParameterName, ParameterType > > Parameter;
+        typedef Element<Elements::Parameter, OptionalMany, boost::mpl::vector<ELEMENT_CHOICE_9(ParameterValue, ParameterEntityId, ParameterValueRef, ParameterArray, ParameterArrayElements, ParameterSequence, ParameterDictionary, ParameterObjectDeprecated, ParameterObject, One), Parametersummary, ParameterName, ParameterType > > Parameter;
         typedef Element<Elements::Parameters, OptionalOne, boost::mpl::vector<Parameter> > Parameters;
 
         typedef Element<Elements::CreateRoutinesummary, OptionalOne> CreateRoutinesummary;
@@ -111,10 +110,10 @@ namespace ToolSupport
         typedef Element<Elements::CreateRoutineValueEntityId, One, boost::mpl::vector< Ignore<Elements::ClassName>, Ignore<Elements::InstanceId> > > CreateRoutineValueEntityId;
         typedef Element<Elements::CreateRoutineValueObjectDeprecated, One, boost::mpl::vector<IgnoreAny> > CreateRoutineValueObjectDeprecated;
         typedef Element<Elements::Any, One, boost::mpl::vector<IgnoreAny>, ParseAlgorithm<Elements::CreateRoutineValueObject>, AnyMatcher > CreateRoutineValueObject;
-        typedef Element<Elements::CreateRoutineValue, AtLeastOne, boost::mpl::vector<ELEMENT_CHOICE_5(CreateRoutineValueParameter, CreateRoutineValueValue, CreateRoutineValueEntityId, CreateRoutineValueObjectDeprecated, CreateRoutineValueObject, One), CreateRoutineValueMember > > CreateRoutineValue;
+        typedef Element<Elements::CreateRoutineValue, OptionalMany, boost::mpl::vector<ELEMENT_CHOICE_5(CreateRoutineValueParameter, CreateRoutineValueValue, CreateRoutineValueEntityId, CreateRoutineValueObjectDeprecated, CreateRoutineValueObject, One), CreateRoutineValueMember > > CreateRoutineValue;
         typedef Element<Elements::CreateRoutineValues, OptionalOne, boost::mpl::vector<CreateRoutineValue> > CreateRoutineValues;
         typedef Element<Elements::CreateRoutineName, One> CreateRoutineName;
-        typedef Element<Elements::CreateRoutineMemberName, AtLeastOne > CreateRoutineMemberName;
+        typedef Element<Elements::CreateRoutineMemberName, OptionalMany > CreateRoutineMemberName;
         typedef Element<Elements::CreateRoutineParameterList, OptionalOne, boost::mpl::vector<CreateRoutineMemberName> > CreateRoutineParameters;
         typedef Element<Elements::CreateRoutine, AtLeastOne, boost::mpl::vector<CreateRoutinesummary, CreateRoutineName, CreateRoutineParameters, CreateRoutineValues> > CreateRoutine;
         typedef Element<Elements::CreateRoutines, OptionalOne, boost::mpl::vector<CreateRoutine> > CreateRoutines;
