@@ -1,4 +1,14 @@
 -----------------------------------------------------------------------------------------------------------------------
+2023-09-29 version 7.2.1
+-----------------------------------------------------------------------------------------------------------------------
+This release fixes the following issues (see http://safirsdkcore.com for details):
+
+#462 Improve dou-file parsing performance
+#458 Make "Low" the default in tool_launcher memory allocation selection
+#456 Missing parameter value is not detected
+#452 dots_configuration_check better error message
+
+-----------------------------------------------------------------------------------------------------------------------
 2023-09-04 version 7.2.0
 -----------------------------------------------------------------------------------------------------------------------
 The biggest points in this release are:
