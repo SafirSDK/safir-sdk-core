@@ -1,9 +1,16 @@
+safir-sdk-core (7.2.2-1) UNRELEASED; urgency=medium
+
+  [ Lars Hagström ]
+  * Update of source package.
+
+ -- Lars Hagström <lars@foldspace.nu>  Sun, 01 Oct 2023 15:00:00 +0100
+
 safir-sdk-core (7.2.1-1) UNRELEASED; urgency=medium
 
   [ Lars Hagström ]
   * Update of source package.
 
- -- Lars Hagström <lars@foldspace.nu>  Thu, 29 Sep 2023 10:00:00 +0100
+ -- Lars Hagström <lars@foldspace.nu>  Fri, 29 Sep 2023 10:00:00 +0100
 
 safir-sdk-core (7.2.0-1) UNRELEASED; urgency=medium
 
