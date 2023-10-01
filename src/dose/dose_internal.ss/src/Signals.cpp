@@ -42,7 +42,7 @@ namespace
 {
     const std::string GetSemaphoreName(const Safir::Dob::Internal::ConnectionId& connection)
     {
-        return std::string("SAFIR_CONNECTION_") + boost::lexical_cast<std::string>(connection.m_id);
+        return std::string("Global\\SAFIR_CONNECTION_") + boost::lexical_cast<std::string>(connection.m_id);
     }
 }
 
@@ -52,7 +52,7 @@ namespace Dob
 {
 namespace Internal
 {
-    const char * ConnectOrOutSignalName = "SAFIR_DOSE_CONN_OR_OUT";
+    const char * ConnectOrOutSignalName = "Global\\SAFIR_DOSE_CONN_OR_OUT";
 
 
     std::once_flag Signals::SingletonHelper::m_onceFlag;
