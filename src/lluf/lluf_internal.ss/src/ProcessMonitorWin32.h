@@ -27,6 +27,7 @@
 #include <functional>
 #include <map>
 #include <atomic>
+#include <utility> 
 
 #ifdef _MSC_VER
 #  pragma warning (push)
@@ -70,7 +71,7 @@ namespace Utilities
 
         struct Process; //forward decl
 
-        void HandleEvent(const std::shared_ptr<Process>& process, const boost::system::error_code& error);
+        void HandleEvent(const std::shared_ptr<Process>& process, const boost::system::error_code& error);        
 
         // Client callback
         std::function<void(const pid_t pid)> m_callback;
@@ -78,6 +79,14 @@ namespace Utilities
         boost::asio::io_context& m_io;
         std::atomic<bool> m_stopped;
         boost::asio::io_context::strand m_strand;
+
+        // In some cases async supervision is not possible due to application access level. In that
+        // case the fallback solution is polling.
+        const boost::chrono::steady_clock::duration m_pollPeriod;
+        void Poll(std::shared_ptr<Process> proc, const boost::system::error_code& error);
+
+        HANDLE GetProcessHandle(const pid_t pid) const;
+        bool ProcessExists(const pid_t pid) const;
 
         struct Process
         {
@@ -87,6 +96,8 @@ namespace Utilities
             {}
             boost::asio::windows::object_handle handle;
             const pid_t pid;
+            std::unique_ptr<boost::asio::steady_timer> pollTimer;
+
         };
         typedef std::map<pid_t, std::shared_ptr<Process> > ProcessTable;
 
