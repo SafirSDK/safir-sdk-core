@@ -115,12 +115,13 @@ namespace Safir
         HANDLE ProcessMonitorImpl::GetProcessHandle(const pid_t pid) const
         {
             // A quick an dirty way to be able to unit test the polling version.
-            #ifdef PROCMONTEST_NO_OPENPROCESS
+#ifdef PROCMONTEST_NO_OPENPROCESS
+            (void)pid; //unused
             lllog(9) << L"WARNING ProcessMonitorWin32 is running in test mode." << std::endl;
             return NULL;
-            #else
+#else
             return OpenProcess(PROCESS_ALL_ACCESS, FALSE, (DWORD)pid);
-            #endif
+#endif
 
         }
 
