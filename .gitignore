@@ -141,3 +141,4 @@ conanbuildinfo.cmake
 test_output/
 
 .gdb_history
+.qt/

@@ -40,7 +40,6 @@ class SafirSdkCoreConan(ConanFile):
                        "boost:zlib": False,
 
                        "qt:shared": False,
-                       "qt:commercial": False,
                        "qt:opengl": "no",
                        "qt:openssl": False,
                        "qt:with_vulkan": False,
@@ -102,9 +101,18 @@ class SafirSdkCoreConan(ConanFile):
         self.requires("rapidjson/cci.20220822")
         self.requires("protobuf/3.21.12")
         if self.settings.os == "Windows":
-            self.requires("qt/5.15.10")
             self.requires("ninja/1.11.1")
             self.requires("boost/1.83.0")
+
+            #Visual Studio 2015 and 2017 does not have support for c++17, which is required
+            #by qt6. So we go for qt5 instead there.
+            #The conan recipe for qt6 does not work for x86 currently, so we fall back to qt5
+            if self.settings.arch == "x86" or \
+               self.settings.compiler.version == 14 or \
+               self.settings.compiler.version == 15:
+                self.requires("qt/5.15.11")
+            else:
+                self.requires("qt/6.5.2")
 
         #Visual Studio 2015 does not compile the latest sentry-breakpad (lacks c++17 support).
         #0.5.3 appears to be the last one that doesn't need that. Even 0.5.4 wants it.

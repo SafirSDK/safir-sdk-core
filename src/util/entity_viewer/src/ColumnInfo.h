@@ -27,6 +27,7 @@
 
 #include <QSharedPointer>
 #include <QString>
+#include <QObject>
 
 class ColumnInfo;
 

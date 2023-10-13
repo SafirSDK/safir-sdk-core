@@ -4,13 +4,13 @@ set(sources ColumnInfo.cpp  EntityModel.cpp  EntityView.cpp  EntityViewerApplica
 
 set(widget_headers ColumnInfo.h  EntityModel.h  EntityViewerApplication.h  EntityView.h EntityViewerMainWindow.h)
 
-if (NOT TARGET Qt5::Widgets)
-  message(STATUS "Could not find Qt5, will not build safir_tool_launcher")
+if (NOT TARGET Qt::Widgets)
+  message(STATUS "Could not find Qt, will not build safir_tool_launcher")
   return()
 endif()
 
-QT5_WRAP_UI(ui_headers ${ui})
-QT5_WRAP_CPP(moc_sources ${widget_headers} ${QT5_WRAP_CPP_OPTIONS})
+QT_WRAP_UI(ui_headers ${ui})
+QT_WRAP_CPP(moc_sources ${widget_headers} ${QT_WRAP_CPP_OPTIONS})
 
 #This application does not use boost, yet
 ADD_DEFINITIONS(-DSAFIR_NO_BOOST)
@@ -21,7 +21,7 @@ TARGET_LINK_LIBRARIES(safir_entity_viewer PRIVATE
   douf_time_cpp
   dose_cpp
   lluf_config
-  Qt5::Widgets
+  Qt::Widgets
   Boost::date_time
 )
 

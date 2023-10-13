@@ -31,9 +31,14 @@
 //We take the boost.interprocess approach and define/import what we need from windows.h
 //instead of including it and letting it taint the world with its define and other
 //nastyness
-// So there are a bunch of definitions below.
+//So there are a bunch of definitions below, both just below and also in a Win32
+//namespace.
 
 #  include <boost/interprocess/permissions.hpp>
+
+   extern "C" {
+       struct _SECURITY_ATTRIBUTES;
+   }
 
 #elif defined(linux) || defined(__linux) || defined(__linux__)
 
@@ -94,7 +99,7 @@ namespace Internal
 
     namespace Win32
     {
-        extern "C" __declspec(dllimport) void * __stdcall CreateSemaphoreA(void*, long, long, const char *);
+        extern "C" __declspec(dllimport) void * __stdcall CreateSemaphoreA(::_SECURITY_ATTRIBUTES*, long, long, const char *);
         extern "C" __declspec(dllimport) int __stdcall ReleaseSemaphore(void *, long, long *);
         extern "C" __declspec(dllimport) unsigned long __stdcall WaitForSingleObject(void *, unsigned long);
         extern "C" __declspec(dllimport) int __stdcall CloseHandle(void*);
@@ -109,7 +114,7 @@ namespace Internal
         m_semaphoreHandle(NULL)
     {
         m_semaphoreHandle =
-                Win32::CreateSemaphoreA(UnrestrictedPermissions().get_permissions(),
+                Win32::CreateSemaphoreA(static_cast<::_SECURITY_ATTRIBUTES*>(UnrestrictedPermissions().get_permissions()),
                                         0,
                                         0x7fffffff,
                                         (name + Safir::Utilities::Internal::Expansion::GetSafirInstanceSuffix()).c_str());

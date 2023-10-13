@@ -92,7 +92,7 @@ def parse_arguments():
     parser.add_argument("--dose_main", required=True)
     parser.add_argument("--dope_main", required=True)
     parser.add_argument("--safir-show-config", required=True)
-    parser.add_argument("--dobexplorer", required=True)
+    parser.add_argument("--dobexplorer", required=False)
     parser.add_argument("--safir_websocket", required=True)
     arguments = parser.parse_args()
     return arguments

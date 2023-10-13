@@ -22,17 +22,17 @@ TARGET_LINK_LIBRARIES(dope_main PRIVATE
   logging_cpp
   Boost::filesystem
   Boost::thread
-  ${SAFIR_ODBC_LIBRARIES})
+  ODBC::ODBC)
 
 TARGET_LINK_LIBRARIES(dope_bin2xml PRIVATE
   safir_generated-Core-cpp
   Boost::filesystem
   Boost::program_options
-  ${SAFIR_ODBC_LIBRARIES})
+  ODBC::ODBC)
 
 TARGET_LINK_LIBRARIES(run_sql PRIVATE
   Boost::program_options
-  ${SAFIR_ODBC_LIBRARIES})
+  ODBC::ODBC)
 
 SAFIR_INSTALL(TARGETS dope_main dope_bin2xml)
 

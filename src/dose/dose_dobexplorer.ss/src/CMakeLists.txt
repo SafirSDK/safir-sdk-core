@@ -10,13 +10,13 @@ set(widget_headers About.h connectionstats.h dosemon.h entitystats.h
 
 set(headers internalfunctions.h common_header.h)
 
-if (NOT TARGET Qt5::Widgets)
-  message(STATUS "Could not find Qt5, will not build dobexplorer")
+if (NOT TARGET Qt::Widgets)
+  message(STATUS "Could not find Qt, will not build dobexplorer")
   return()
 endif()
 
-QT5_WRAP_UI(ui_headers ${ui})
-QT5_WRAP_CPP(moc_sources ${widget_headers} ${QT5_WRAP_CPP_OPTIONS})
+QT_WRAP_UI(ui_headers ${ui})
+QT_WRAP_CPP(moc_sources ${widget_headers} ${QT_WRAP_CPP_OPTIONS})
 
 ADD_EXECUTABLE(dobexplorer WIN32 ${sources} ${ui_headers} ${moc_sources} ${headers} ${widget_headers} dobexplorer.rc)
 
@@ -25,6 +25,6 @@ TARGET_LINK_LIBRARIES(dobexplorer PRIVATE
   system_picture
   lluf_internal
   lluf_crash_reporter
-  Qt5::Widgets)
+  Qt::Widgets)
 
 SAFIR_INSTALL(TARGETS dobexplorer COMPONENT Tools)

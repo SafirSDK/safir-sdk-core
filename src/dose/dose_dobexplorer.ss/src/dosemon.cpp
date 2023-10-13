@@ -436,7 +436,7 @@ void DoseMon::ApplyFilter(const QString& filter, QTreeWidgetItem* item)
     item->setHidden(false);
 
     // require at least 3 characters before filter is applied
-    if (filter.count() > 2)
+    if (filter.length() > 2)
     {
         auto filterHit = item->text(0).contains(filter, Qt::CaseInsensitive);
         if (filterHit)

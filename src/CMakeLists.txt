@@ -9,52 +9,68 @@ endif()
 #
 # Find an ODBC installation, of either iODBC or UnixODBC
 #
-if (UNIX)
-    FIND_PACKAGE(IODBC)
-    if (IODBC_FOUND)
-      INCLUDE_DIRECTORIES(${IODBC_INCLUDE_DIRS})
-      SET(SAFIR_ODBC_LIBRARIES ${IODBC_LIBRARIES})
-      ADD_DEFINITIONS(-DSAFIR_ODBC_IS_IODBC)
-    else()
-      message(STATUS "iODBC not found, trying UnixODBC")
-      FIND_PACKAGE(UnixODBC)
-      if (NOT UnixODBC_FOUND)
-        message(FATAL_ERROR "Failed to find either iODBC or UnixODBC!")
-      endif()
-      INCLUDE_DIRECTORIES(${UnixODBC_INCLUDE_DIRS})
-      SET(SAFIR_ODBC_LIBRARIES ${UnixODBC_LIBRARIES})
-      ADD_DEFINITIONS(-DSAFIR_ODBC_IS_UNIXODBC)
-    endif()
-elseif(MSVC)
-  SET(SAFIR_ODBC_LIBRARIES odbc32)
-endif()
+FIND_PACKAGE(ODBC)
 ###########
 
 
 #
-# Load Qt5
+# Load Qt6, (or Qt5 on Windows if Qt6 is not available)
 #
+
 # As moc files are generated in the binary dir, tell CMake
 # to always look for includes there:
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-find_package(Qt5 COMPONENTS Core Widgets)
+
+# Conan does not generate the versionless targets, so we
+# need to do that ourselves. First we disable them for when
+# do not run using conan.
+set(QT_NO_CREATE_VERSIONLESS_TARGETS True)
+
+find_package(Qt6 COMPONENTS Core Widgets)
 
 if (MSVC)
   # On Windows we build qt in Conan and link statically
-  target_link_libraries(Qt5::Widgets
-    INTERFACE
-    Qt5::QWindowsIntegrationPlugin
-    Qt5::QWindowsVistaStylePlugin
-    debug Qt5FontDatabaseSupportd
-    debug Qt5EventDispatcherSupportd
-    debug Qt5ThemeSupportd
-    debug Qt5WindowsUIAutomationSupportd
-    optimized Qt5FontDatabaseSupport
-    optimized Qt5EventDispatcherSupport
-    optimized Qt5ThemeSupport
-    optimized Qt5WindowsUIAutomationSupport)
+  #we also look for qt5 if qt6 was not available.
+  if (Qt6_FOUND)
+    target_link_libraries(Qt6::Widgets
+      INTERFACE
+      Qt6::QWindowsIntegrationPlugin
+      Qt6::QWindowsVistaStylePlugin
+      #These are windows libraries that qt needs to link against.
+      shcore
+      UxTheme
+      Setupapi
+      Dcomp
+      D3d9)
+  else()
+    find_package(Qt5 COMPONENTS Core Widgets)
+    if (Qt5_FOUND)
+      # On Windows we build qt in Conan and link statically
+      target_link_libraries(Qt5::Widgets
+        INTERFACE
+        Qt5::QWindowsIntegrationPlugin
+        Qt5::QWindowsVistaStylePlugin
+        debug Qt5FontDatabaseSupportd
+        debug Qt5EventDispatcherSupportd
+        debug Qt5ThemeSupportd
+        debug Qt5WindowsUIAutomationSupportd
+        optimized Qt5FontDatabaseSupport
+        optimized Qt5EventDispatcherSupport
+        optimized Qt5ThemeSupport
+        optimized Qt5WindowsUIAutomationSupport)
+    endif()
+  endif()
 
   add_definitions(-DSAFIR_LINK_QT_STATICALLY)
+endif()
+
+# And then we need to define the versionless targets
+if (Qt6_FOUND)
+   add_library (Qt::Core ALIAS Qt6::Core)
+   add_library (Qt::Widgets ALIAS Qt6::Widgets)
+elseif(Qt5_FOUND)
+   add_library (Qt::Core ALIAS Qt5::Core)
+   add_library (Qt::Widgets ALIAS Qt5::Widgets)
 endif()
 
 #

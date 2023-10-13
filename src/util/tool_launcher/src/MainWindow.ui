@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>606</width>
-    <height>471</height>
+    <width>794</width>
+    <height>629</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -29,17 +29,11 @@ QGroupBox::title {
 }</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QVBoxLayout" name="verticalLayout_3" stretch="0,100,0,0,0">
+   <layout class="QVBoxLayout" name="verticalLayout_3" stretch="1,100,0,0,0">
     <item>
-     <layout class="QGridLayout" name="gridLayout_5">
+     <layout class="QGridLayout" name="gridLayout_5" rowstretch="1,1" columnstretch="0,0,1,0,1">
       <item row="0" column="4">
        <widget class="QGroupBox" name="groupBox">
-        <property name="minimumSize">
-         <size>
-          <width>230</width>
-          <height>0</height>
-         </size>
-        </property>
         <property name="title">
          <string>Typesystem information</string>
         </property>
@@ -49,6 +43,9 @@ QGroupBox::title {
         <layout class="QGridLayout" name="gridLayout_2">
          <property name="leftMargin">
           <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>12</number>
          </property>
          <property name="rightMargin">
           <number>0</number>
@@ -125,6 +122,9 @@ configuration.</string>
         <layout class="QGridLayout" name="gridLayout">
          <property name="leftMargin">
           <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>12</number>
          </property>
          <property name="rightMargin">
           <number>0</number>
@@ -248,12 +248,6 @@ the matching type name(s) are looked up.</string>
       </item>
       <item row="1" column="2">
        <widget class="QGroupBox" name="groupBox_4">
-        <property name="minimumSize">
-         <size>
-          <width>230</width>
-          <height>0</height>
-         </size>
-        </property>
         <property name="title">
          <string>Shared memory testing</string>
         </property>
@@ -263,6 +257,9 @@ the matching type name(s) are looked up.</string>
         <layout class="QGridLayout" name="gridLayout_4">
          <property name="leftMargin">
           <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>12</number>
          </property>
          <property name="rightMargin">
           <number>0</number>
@@ -298,7 +295,7 @@ configuration.</string>
             </size>
            </property>
            <property name="currentText">
-            <string>Low</string>
+            <string>Warning</string>
            </property>
            <item>
             <property name="text">
@@ -343,18 +340,15 @@ configuration.</string>
       </item>
       <item row="0" column="2">
        <widget class="QGroupBox" name="groupBox_2">
-        <property name="minimumSize">
-         <size>
-          <width>230</width>
-          <height>0</height>
-         </size>
-        </property>
         <property name="title">
          <string>Launch tool</string>
         </property>
         <layout class="QGridLayout" name="gridLayout_3">
          <property name="leftMargin">
           <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>12</number>
          </property>
          <property name="rightMargin">
           <number>0</number>

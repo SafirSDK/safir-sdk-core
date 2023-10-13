@@ -5,17 +5,19 @@ if (NOT "$ENV{SAFIR_SKIP_QT}" STREQUAL "")
   return()
 endif()
 
-# find and setup Qt5 for this project
-find_package(Qt5Widgets QUIET)
-if (NOT Qt5Widgets_FOUND)
-  message(STATUS "Qt5 was not found, not building the VehicleMmiCppQt example.")
-  return()
+# find and setup Qt6 or Qt5 for this project
+find_package(Qt6 COMPONENTS Core Widgets)
+if (NOT Qt6_FOUND)
+  find_package(Qt5 COMPONENTS Core Widgets)
+  if (NOT Qt5_FOUND)
+    message(STATUS "Qt6 or Qt5 was not found, not building the VehicleMmiCppQt example.")
+    return()
+  endif()
 endif()
 
-QT5_WRAP_UI(ui_headers entitymw.ui messagedialog.ui servicedialog.ui categoryinfodialog.ui entitydialog.ui)
-QT5_ADD_RESOURCES(rcc_sources entitymw.qrc)
-QT5_WRAP_CPP(moc_sources categoryinfodialog.h entitydialog.h entitymw.h entitytablehandler.h messagedialog.h servicedialog.h)
-
+QT_WRAP_UI(ui_headers entitymw.ui messagedialog.ui servicedialog.ui categoryinfodialog.ui entitydialog.ui)
+QT_ADD_RESOURCES(rcc_sources entitymw.qrc)
+QT_WRAP_CPP(moc_sources categoryinfodialog.h entitydialog.h entitymw.h entitytablehandler.h messagedialog.h servicedialog.h)
 
 ADD_EXECUTABLE(VehicleMmiCppQt WIN32
   app.h app.cpp
@@ -35,7 +37,7 @@ ADD_EXECUTABLE(VehicleMmiCppQt WIN32
 TARGET_LINK_LIBRARIES(VehicleMmiCppQt
   safir_generated-Example-cpp
   ${SAFIR_SDK_CORE_LIBRARIES}
-  Qt5::Widgets)
+  Qt::Widgets)
 
 TARGET_INCLUDE_DIRECTORIES(VehicleMmiCppQt PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
