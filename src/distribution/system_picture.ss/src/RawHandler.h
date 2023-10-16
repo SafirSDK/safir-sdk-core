@@ -1064,7 +1064,9 @@ namespace SP
             }
             else
             {
-                //ignore spurious multicast data notifications
+                SEND_SYSTEM_LOG(Critical,
+                                << "Got multicast data from a non-multicast node!");
+                throw std::logic_error("Got multicast data from a non-multicast node!");
             }
         }
 
