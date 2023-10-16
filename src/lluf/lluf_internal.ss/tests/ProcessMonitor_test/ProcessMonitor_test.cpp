@@ -46,12 +46,12 @@ void callback(const pid_t pid);
 boost::asio::io_context gIo;
 Safir::Utilities::ProcessMonitor monitor(gIo, callback, boost::chrono::milliseconds(50));
 
-boost::mutex mtx;
+boost::mutex pidsLock;
 std::set<pid_t> pids;
 
 void callback(const pid_t pid)
 {
-    boost::lock_guard<boost::mutex> lck(mtx);
+    boost::lock_guard<boost::mutex> lck(pidsLock);
     std::wcout << "Process with pid " << pid << " exited." << std::endl;
     pids.erase(pid);
     if(pids.empty())
