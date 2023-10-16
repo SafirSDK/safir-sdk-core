@@ -1054,14 +1054,17 @@ namespace SP
                 }
             }
 
-            if (multicast)
+            if (multicast && node.multicast)
             {
-                assert(node.multicast);
                 node.lastMcReceiveTime = now;
+            }
+            else if (!multicast)
+            {
+                node.lastUcReceiveTime = now;
             }
             else
             {
-                node.lastUcReceiveTime = now;
+                //ignore spurious multicast data notifications
             }
         }
 
