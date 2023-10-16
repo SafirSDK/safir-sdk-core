@@ -26,7 +26,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 # do not run using conan.
 set(QT_NO_CREATE_VERSIONLESS_TARGETS True)
 
-find_package(Qt6 COMPONENTS Core Widgets)
+find_package(Qt6 COMPONENTS Core Widgets QUIET)
 
 if (MSVC)
   # On Windows we build qt in Conan and link statically
@@ -43,7 +43,7 @@ if (MSVC)
       Dcomp
       D3d9)
   else()
-    find_package(Qt5 COMPONENTS Core Widgets)
+    find_package(Qt5 COMPONENTS Core Widgets QUIET)
     if (Qt5_FOUND)
       # On Windows we build qt in Conan and link statically
       target_link_libraries(Qt5::Widgets
@@ -66,11 +66,13 @@ endif()
 
 # And then we need to define the versionless targets
 if (Qt6_FOUND)
-   add_library (Qt::Core ALIAS Qt6::Core)
-   add_library (Qt::Widgets ALIAS Qt6::Widgets)
+  add_library (Qt::Core ALIAS Qt6::Core)
+  add_library (Qt::Widgets ALIAS Qt6::Widgets)
 elseif(Qt5_FOUND)
-   add_library (Qt::Core ALIAS Qt5::Core)
-   add_library (Qt::Widgets ALIAS Qt5::Widgets)
+  add_library (Qt::Core ALIAS Qt5::Core)
+  add_library (Qt::Widgets ALIAS Qt5::Widgets)
+else()
+  message(WARNING "Appropriate version of Qt was not found. Will not build tools that depend on Qt.")
 endif()
 
 #
