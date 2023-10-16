@@ -257,7 +257,10 @@ class Node():
                 self.ctrl_states.append(data)
             else:
                 break
-        if "form" in data or "join" in data:
+        if data is None:
+            log(f"Node {self.node_id} expected a form or join statement, but got a None!", self.proc.returncode)
+            raise Failure("Got unexpected state")
+        elif "form" in data or "join" in data:
             return data
         else:
             log(f"Node {self.node_id} expected a form or join statement, but got \n{data}")
