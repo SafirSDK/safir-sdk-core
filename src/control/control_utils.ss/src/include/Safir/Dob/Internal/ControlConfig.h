@@ -353,7 +353,7 @@ namespace Control
 
             if (!nodeTypeValid)
             {
-                throw std::logic_error("Parameter error: " + thisNodeParam.name + " is not a valid node type!");
+                throw std::logic_error("Parameter error: Node " + thisNodeParam.name + " specifies a nodeType that does not exist, specified nodeType:  " + nodeType);
             }
 
             localInterfaceTimeout = boost::chrono::milliseconds(static_cast<int64_t>(Safir::Dob::NodeParameters::LocalInterfaceTimeout() * 1000));
