@@ -99,6 +99,7 @@ MainWindow::MainWindow()
     connect(m_ui->showOutputButton, &QAbstractButton::toggled, this, &MainWindow::OnShowOutputToggled);
     connect(m_ui->allocateButton, &QPushButton::pressed, this, &MainWindow::OnAllocatePressed);
     connect(m_ui->deallocateButton, &QPushButton::pressed, this, &MainWindow::OnDeallocatePressed);
+    connect(m_ui->outputTabs, &QTabWidget::tabCloseRequested, this, &MainWindow::OnCloseTab);
 
     auto* timer = new QTimer(this);
     timer->setInterval(100);
@@ -303,6 +304,11 @@ void MainWindow::OnShowOutputToggled(const bool checked)
     m_ui->outputTabs->setVisible(checked);
     m_ui->buttonSeparator->setVisible(!checked);
     adjustSize();
+}
+
+void MainWindow::OnCloseTab(const int index)
+{
+    m_ui->outputTabs->setTabVisible(index, false);
 }
 
 void MainWindow::OnAllocatePressed()

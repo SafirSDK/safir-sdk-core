@@ -442,6 +442,9 @@ from the program, or error output from the launcher.</string>
       <property name="currentIndex">
        <number>-1</number>
       </property>
+      <property name="tabsClosable">
+       <bool>true</bool>
+      </property>
      </widget>
     </item>
     <item>

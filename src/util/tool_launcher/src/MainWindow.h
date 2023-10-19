@@ -70,7 +70,8 @@ private slots:
     void OnTypeLookupPressed();
     void OnAllocatePressed();
     void OnDeallocatePressed();
-void OnShowOutputToggled(const bool checked);
+    void OnShowOutputToggled(const bool checked);
+    void OnCloseTab(const int index);
 private:
     static void AppendText(QTextEdit* textEdit, const QString& string);
     static void AppendMetaText(QTextEdit* textEdit, const QString& string, bool error);
