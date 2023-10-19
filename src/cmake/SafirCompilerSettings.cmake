@@ -44,7 +44,13 @@ if (MSVC)
 
    # increase warning level
    # Use the highest warning level for visual studio.
-   add_compile_options(/W4)
+   # This ought to work both for cases where CMP0092 is set or not.
+   IF(CMAKE_CXX_FLAGS MATCHES "/W[0-4]")
+     STRING(REGEX REPLACE "/W[0-4]" "/W4"
+       CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+   ELSE()
+     add_compile_options(/W4)
+   ENDIF()
 
    #generated libraries sometimes get very large, so we need to use bigobj compiler flag
    add_compile_options(/bigobj)
