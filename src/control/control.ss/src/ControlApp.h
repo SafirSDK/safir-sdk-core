@@ -70,6 +70,9 @@ public:
     ~ControlApp();
 
     void Stop() {StopThisNode();}
+
+    bool DoseMainExitedCleanly() const {return m_doseMainExitedCleanly;}
+
 private:
     void LogStatus(const std::string& str);
 
@@ -111,6 +114,7 @@ private:
     Control::IncarnationBlacklistHandler        m_incarnationBlackListHandler;
     bool                                        m_controlInfoReceiverReady;
     bool                                        m_doseMainRunning;
+    bool                                        m_doseMainExitedCleanly = true;
     bool                                        m_nodePristine = true; // True until first time being part of a system
 
     std::unique_ptr<Com::Communication>             m_communication;

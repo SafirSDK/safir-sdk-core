@@ -711,6 +711,7 @@ void ControlApp::HandleDoseMainExit(int exitCode, const std::error_code& error)
     {
         if (exitCode != 0)
         {
+            m_doseMainExitedCleanly = false;
             std::ostringstream ostr;
             ostr << "CTRL: dose_main has exited with status code "  << exitCode;
 
@@ -720,6 +721,7 @@ void ControlApp::HandleDoseMainExit(int exitCode, const std::error_code& error)
     }
     else if (WIFSIGNALED(nativeExitCode))
     {
+        m_doseMainExitedCleanly = false;
         std::ostringstream ostr;
         ostr << "CTRL: dose_main has exited due to signal "
              << strsignal(exitCode) << " ("  << exitCode << ")";
@@ -729,6 +731,7 @@ void ControlApp::HandleDoseMainExit(int exitCode, const std::error_code& error)
     }
     else
     {
+        m_doseMainExitedCleanly = false;
         std::stringstream ostr;
         ostr << "CTRL: dose_main has exited with unexpected status code ("
              << exitCode << ", " <<nativeExitCode << ")";
@@ -739,6 +742,7 @@ void ControlApp::HandleDoseMainExit(int exitCode, const std::error_code& error)
 #elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
     if (exitCode != 0)
     {
+        m_doseMainExitedCleanly = false;
         std::ostringstream ostr;
         ostr << "CTRL: dose_main has exited with status code "  << exitCode;
 

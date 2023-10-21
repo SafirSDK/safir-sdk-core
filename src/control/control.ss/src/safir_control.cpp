@@ -259,6 +259,10 @@ int main(int argc, char * argv[])
             io.run();
         }
 
+        if (!controlApp->DoseMainExitedCleanly())
+        {
+            success = false;
+        }
         controlApp.reset();
         crGuard.reset();
     }
