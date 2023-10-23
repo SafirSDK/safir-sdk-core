@@ -974,7 +974,7 @@ namespace @_NAMESPACEV_@
         Safir::Dob::Typesystem::Int32 index=Safir::Dob::Typesystem::Parameters::DictionaryKeyToIndex(ClassTypeId, g_@_LOWER:PARAMETER_@ParameterIndex, static_cast<Safir::Dob::Typesystem::Int32>(key));
         if (index<0)
         {
-            throw "something";
+            throw Safir::Dob::Typesystem::IllegalValueException(L"Enumeration key not found in dictionary @_PARAMETERDICTIONARYTYPE_@.", __WFILE__, __LINE__);
         }
         return static_cast<@_PARAMETERTYPE_@::Enumeration>(Safir::Dob::Typesystem::Parameters::GetEnumeration(ClassTypeId, g_@_LOWER:PARAMETER_@ParameterIndex, index));
     }
@@ -985,7 +985,7 @@ namespace @_NAMESPACEV_@
         Safir::Dob::Typesystem::Int32 index=Safir::Dob::Typesystem::Parameters::DictionaryKeyToIndex(ClassTypeId, g_@_LOWER:PARAMETER_@ParameterIndex, static_cast<Safir::Dob::Typesystem::Int32>(key));
         if (index<0)
         {
-            throw "something";
+            throw Safir::Dob::Typesystem::IllegalValueException(L"Key not found in dictionary.", __WFILE__, __LINE__);
         }
         return std::static_pointer_cast<@_PARAMETERTYPE_@>(Safir::Dob::Typesystem::Parameters::GetObject(ClassTypeId, g_@_LOWER:PARAMETER_@ParameterIndex, index));
     }
@@ -996,7 +996,7 @@ namespace @_NAMESPACEV_@
         Safir::Dob::Typesystem::Int32 index=Safir::Dob::Typesystem::Parameters::DictionaryKeyToIndex(ClassTypeId, g_@_LOWER:PARAMETER_@ParameterIndex, static_cast<Safir::Dob::Typesystem::Int32>(key));
         if (index<0)
         {
-            throw "something";
+            throw Safir::Dob::Typesystem::IllegalValueException(L"Key not found in dictionary.", __WFILE__, __LINE__);
         }
         return Safir::Dob::Typesystem::Parameters::Get@_UNIFORM_PARAMETERTYPE_@(ClassTypeId, g_@_LOWER:PARAMETER_@ParameterIndex, index);
     }
@@ -1009,7 +1009,7 @@ namespace @_NAMESPACEV_@
         Safir::Dob::Typesystem::Int32 index=Safir::Dob::Typesystem::Parameters::DictionaryKeyToIndex(ClassTypeId, g_@_LOWER:PARAMETER_@ParameterIndex, key);
         if (index<0)
         {
-            throw "something";
+            throw Safir::Dob::Typesystem::IllegalValueException(L"Key not found in dictionary.", __WFILE__, __LINE__);
         }
         return static_cast<@_PARAMETERTYPE_@::Enumeration>(Safir::Dob::Typesystem::Parameters::GetEnumeration(ClassTypeId, g_@_LOWER:PARAMETER_@ParameterIndex, index));
     }
@@ -1020,7 +1020,7 @@ namespace @_NAMESPACEV_@
         Safir::Dob::Typesystem::Int32 index=Safir::Dob::Typesystem::Parameters::DictionaryKeyToIndex(ClassTypeId, g_@_LOWER:PARAMETER_@ParameterIndex, key);
         if (index<0)
         {
-            throw "something";
+            throw Safir::Dob::Typesystem::IllegalValueException(L"Key not found in dictionary.", __WFILE__, __LINE__);
         }
         return std::static_pointer_cast<@_PARAMETERTYPE_@>(Safir::Dob::Typesystem::Parameters::GetObject(ClassTypeId, g_@_LOWER:PARAMETER_@ParameterIndex, index));
     }
@@ -1031,7 +1031,7 @@ namespace @_NAMESPACEV_@
         Safir::Dob::Typesystem::Int32 index=Safir::Dob::Typesystem::Parameters::DictionaryKeyToIndex(ClassTypeId, g_@_LOWER:PARAMETER_@ParameterIndex, key);
         if (index<0)
         {
-            throw "something";
+            throw Safir::Dob::Typesystem::IllegalValueException(L"Key not found in dictionary @_PARAMETERDICTIONARYTYPE_@.", __WFILE__, __LINE__);
         }
         return Safir::Dob::Typesystem::Parameters::Get@_UNIFORM_PARAMETERTYPE_@(ClassTypeId, g_@_LOWER:PARAMETER_@ParameterIndex, index);
     }
