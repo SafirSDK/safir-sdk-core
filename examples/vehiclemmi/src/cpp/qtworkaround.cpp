@@ -100,13 +100,15 @@ namespace VehicleMmiCppQt
 
     QString QtWorkaround::WCharArrayToQString(const wchar_t *pcString, int nSize)
     {
+        //This is an innefficient way to provide linux and windows compatibility.
+        //You should really use preprocessor magic instead than copying this.
         if (sizeof(wchar_t) == sizeof(QChar))
         {
-            return QString::fromUtf16((ushort *)pcString, nSize);
+            return QString::fromUtf16(reinterpret_cast<const char16_t *>(pcString), nSize);
         }
         else
         {
-            return QString::fromUcs4((uint *)pcString, nSize);
+            return QString::fromUcs4(reinterpret_cast<const char32_t *>(pcString), nSize);
         }
     }
 

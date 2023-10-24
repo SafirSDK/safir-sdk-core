@@ -97,7 +97,7 @@ namespace VehicleMmiCppQt
     void ServiceDialog::on_pushButtonApply_clicked()
     {
         // The dialog is open until operator selects Close button.
-        if(ui.lineEditCurrentSpeed->text() == NULL)
+        if(ui.lineEditCurrentSpeed->text().isEmpty())
         {
             ui.lineEditStatusBar->setText("Current speed must exist.");
             return;

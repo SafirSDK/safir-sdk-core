@@ -195,7 +195,7 @@ namespace VehicleMmiCppQt
         {
             isModified = true;*/
 
-            if(ui.lineEditSpeed->text() == NULL)
+            if(ui.lineEditSpeed->text().isEmpty())
             {
                 req->VehicleCategoryInfo()->MaxSpeed().SetNull();
             }
@@ -210,7 +210,7 @@ namespace VehicleMmiCppQt
         {
             isModified = true;*/
 
-            if(ui.lineEditAdditionalRemark->text() == NULL)
+            if(ui.lineEditAdditionalRemark->text().isEmpty())
             {
                 req->VehicleCategoryInfo()->Remark().SetNull();
             }

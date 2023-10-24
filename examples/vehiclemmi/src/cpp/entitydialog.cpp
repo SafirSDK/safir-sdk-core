@@ -33,8 +33,8 @@ namespace VehicleMmiCppQt
 
     EntityDialog::EntityDialog(QWidget *parent) :
         QDialog(parent, Qt::WindowTitleHint|Qt::WindowSystemMenuHint), // Remove help button
-        m_clickedOKButton(false), 
-        m_clickedApplyButton(false), 
+        m_clickedOKButton(false),
+        m_clickedApplyButton(false),
         m_isCreate(true)
     {
         ui.setupUi(this);
@@ -100,8 +100,8 @@ namespace VehicleMmiCppQt
         ClearAllControls();
         ui.lineEditIdentification->setEnabled(false); // Not allowed to update callsign.
         ui.comboBoxCategory->setFocus();
-      
-        m_vehicleObjectId = entityId;       
+
+        m_vehicleObjectId = entityId;
         m_isCreate = false;
 
         // Get data from Dob and fill dialog
@@ -127,7 +127,7 @@ namespace VehicleMmiCppQt
             qstrSpeed.setNum(speed);
             ui.lineEditSpeed->setText(qstrSpeed);
         }
-    
+
         if(!pVehicle->Position().IsNull() )
         {
             if(!pVehicle->Position()->Latitude().IsNull())
@@ -150,7 +150,7 @@ namespace VehicleMmiCppQt
         Show();
     }
 
-    
+
     void EntityDialog::OnResponse(const Safir::Dob::ResponseProxy responseProxy)
     {
         Safir::Dob::SuccessResponsePtr success = std::dynamic_pointer_cast<Safir::Dob::SuccessResponse>(responseProxy.GetResponse());
@@ -173,7 +173,7 @@ namespace VehicleMmiCppQt
 
     void EntityDialog::OnNotRequestOverflow()
     {
-        // No automatic resending is made. 
+        // No automatic resending is made.
        ui.lineEditStatusBar->setText("Overflow situation solved. Make request again!");
     }
 
@@ -195,14 +195,14 @@ namespace VehicleMmiCppQt
 
         ui.lineEditStatusBar->clear();
 
-        // Collect the values from the dialog controls and store them in the vehicle 
+        // Collect the values from the dialog controls and store them in the vehicle
         // entity and send a create or update request.
 
         Capabilities::Vehicles::VehiclePtr pVehicle = Capabilities::Vehicles::Vehicle::Create();
 
         if(ui.lineEditSpeed->isModified())
-        {           
-           if(ui.lineEditSpeed->text() == NULL)
+        {
+           if(ui.lineEditSpeed->text().isEmpty())
            {
                pVehicle->Speed().SetNull();
            }
@@ -213,8 +213,8 @@ namespace VehicleMmiCppQt
         }
 
         Safir::Geodesy::PositionPtr pPosition = Safir::Geodesy::Position::Create();
-       
-        if(ui.lineEditPositionLat->text() == NULL || ui.lineEditPositionLong->text() == NULL)
+
+        if(ui.lineEditPositionLat->text().isEmpty() || ui.lineEditPositionLong->text().isEmpty())
         {
             pVehicle->Position().SetNull();
         }
@@ -225,14 +225,14 @@ namespace VehicleMmiCppQt
             pPosition->Altitude().SetVal(Safir::Geodesy::Position::DummyAltitude());
             pVehicle->Position().SetPtr(pPosition);
         }
-        
+
         Capabilities::Vehicles::VehicleCategoryCode::Enumeration eVehicleCategory
             = Capabilities::Vehicles::VehicleCategoryCode::ToValue(QtWorkaround::QStringToStdWString(ui.comboBoxCategory->currentText()));
         pVehicle->VehicleCategory().SetVal(eVehicleCategory);
-        
+
         if(m_isCreate)
         {
-            if( ui.lineEditIdentification->text() == NULL)
+            if( ui.lineEditIdentification->text().isEmpty())
             {
                 ui.lineEditStatusBar->setText(QString("Identification must be given."));
                 return;
