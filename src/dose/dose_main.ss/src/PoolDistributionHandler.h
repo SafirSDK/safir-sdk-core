@@ -71,7 +71,7 @@ namespace Internal
         void Start()
         {
             lllog(5) << "PoolHandler: Start called on PooDistributionHandler" << std::endl;
-            m_strand.dispatch([this]
+            boost::asio::dispatch(m_strand, [this]
             {
                 if (!m_running) //dont call start if its already started
                 {
@@ -84,7 +84,7 @@ namespace Internal
         void Stop(const std::function<void()>& onPoolDistributionsCancelled)
         {
             lllog(5) << "PoolHandler: Stop called on PooDistributionHandler" << std::endl;
-            m_strand.post([this, onPoolDistributionsCancelled]
+            boost::asio::post(m_strand, [this, onPoolDistributionsCancelled]
             {                
                 m_running=false;
                 if (!m_pendingPoolDistributions.empty() && m_pendingPoolDistributions.front()->IsStarted())
@@ -121,7 +121,7 @@ namespace Internal
         void AddPoolDistribution(int64_t nodeId, int64_t nodeTypeId, const std::shared_ptr<SmartSyncState>& syncState) SAFIR_GCC_VISIBILITY_BUG_WORKAROUND
         {
             lllog(5) << "PoolHandler: AddPoolDistribution to " << nodeId << std::endl;
-            m_strand.post([this, nodeId, nodeTypeId, syncState]
+            boost::asio::post(m_strand, [this, nodeId, nodeTypeId, syncState]
             {
                 auto pd = std::make_shared<PoolDistributionT> (nodeId,
                                                                nodeTypeId,
@@ -146,7 +146,7 @@ namespace Internal
 
         void RemovePoolDistribution(int64_t nodeId)
         {
-            m_strand.post([this, nodeId]
+            boost::asio::post(m_strand, [this, nodeId]
             {
                 for (auto it = std::begin(m_pendingPoolDistributions); it != std::end(m_pendingPoolDistributions); ++it)
                 {

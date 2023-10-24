@@ -37,8 +37,10 @@
 #include <Safir/Dob/ConnectionAspectInjector.h>
 #include <Safir/Utilities/Internal/SharedCharArray.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
+#include <Safir/Utilities/Internal/SystemLog.h>
 #include <Safir/Dob/NodeParameters.h>
 #include <Safir/Dob/Internal/DistributionScopeReader.h>
+#include <Safir/Dob/LowMemoryException.h>
 
 #ifdef _MSC_VER
 #  pragma warning (push)
@@ -90,9 +92,17 @@ namespace Internal
 
         ~PoolDistribution()
         {
-            if (m_dobConnection.IsOpen())
+            try
             {
-                m_dobConnection.Close();
+                if (m_dobConnection.IsOpen())
+                {
+                    m_dobConnection.Close();
+                }
+            }
+            catch (const Safir::Dob::LowMemoryException& e)
+            {
+                lllog(5) << L"PoolHandler: Pooldistribution to " << m_nodeId << L" got LowMemoryException in destructor. " << e.GetMessage() << std::endl;
+                SEND_SYSTEM_LOG(Error, << L"PoolHandler: Pooldistribution to " << m_nodeId << L" got LowMemoryException in destructor. " << e.GetMessage());
             }
         }
 
@@ -115,7 +125,7 @@ namespace Internal
             m_started=true;
 
             // post a new job for this pd
-            m_strand.post([self = this->shared_from_this()]
+            boost::asio::post(m_strand, [self = this->shared_from_this()]
             {
                 lllog(5)<<"PoolHandler: Start PoolDistribution to "<<self->m_nodeId<<std::endl;
 
@@ -123,6 +133,14 @@ namespace Internal
                 {
                     lllog(5)<<"PoolHandler: PD was cancelled "<<self->m_nodeId<<std::endl;
                     // This PD has been cancelled
+                    return;
+                }
+
+                if (SharedMemoryObject::GetMemoryLevel() >= MemoryLevel::Low)
+                {
+                    lllog(5) << L"PoolHandler: Abort PoolDistribution to " << self->m_nodeId << L" since this node is low on shared memory." <<std::endl;
+                    SEND_SYSTEM_LOG(Error, << L"PoolHandler: Abort PoolDistribution to " << self->m_nodeId << L" since this node is low on shared memory.");
+                    self->SendPdAbort();
                     return;
                 }
 
@@ -282,7 +300,7 @@ namespace Internal
 
             if (m_prioritizedStates.empty())
             {
-                m_strand.post([self = this->shared_from_this()]
+                boost::asio::post(m_strand, [self = this->shared_from_this()]
                 {
                     self->SendStates(0);
                 });
@@ -302,49 +320,57 @@ namespace Internal
 
             if (context>=Safir::Dob::NodeParameters::NumberOfContexts())
             {
-                m_strand.post([self = this->shared_from_this()]
+                boost::asio::post(m_strand, [self = this->shared_from_this()]
                 {
                     self->SendPdComplete();
                 });
                 return;
             }
 
-            if (m_dobConnection.IsOpen())
+            try
             {
-                m_dobConnection.Close();
+                if (m_dobConnection.IsOpen())
+                {
+                    m_dobConnection.Close();
+                }
+
+                auto instancePart = boost::lexical_cast<std::wstring>(m_distribution.GetNodeId()) + L"_" + boost::lexical_cast<std::wstring>(m_nodeId);
+                m_dobConnection.Open(L"PD", instancePart, context, NULL, this);
+
+                m_dobConnection.SubscribeRegistration(Entity::ClassTypeId,
+                                                      Typesystem::HandlerId::ALL_HANDLERS,
+                                                      true, //includeSubclasses
+                                                      false, //restartSubscription
+                                                      this);
+
+
+                m_dobConnection.SubscribeRegistration(Service::ClassTypeId,
+                                                      Typesystem::HandlerId::ALL_HANDLERS,
+                                                      true, //includeSubclasses
+                                                      false, //restartSubscription
+                                                      this);
+
+                ConnectionAspectInjector(m_dobConnection).SubscribeEntity(Entity::ClassTypeId,
+                                                                          false, //includeUpdates,
+                                                                          true,  //includeSubclasses
+                                                                          false, //restartSubscription
+                                                                          false, //wantsGhostDelete
+                                                                          false, //wantsLastState
+                                                                          false, //doesntWantSourceIsPermanentStore
+                                                                          true,  //wantsAllStateChanges
+                                                                          false, //timestampChangeInfo
+                                                                          this);
+            }
+            catch (const Safir::Dob::LowMemoryException& e)
+            {
+                lllog(5) << L"PoolHandler: Pooldistribution to " << m_nodeId << L" failed. Caught LowMemoryException. " << e.GetMessage() << std::endl;
+                SEND_SYSTEM_LOG(Error, << L"PoolHandler: Pooldistribution to " << m_nodeId << L" failed. Caught LowMemoryException. " << e.GetMessage());
+                boost::asio::post(m_strand, [self = this->shared_from_this()]{self->SendPdAbort();});
+                return;
             }
 
-            auto instancePart = boost::lexical_cast<std::wstring>(m_distribution.GetNodeId()) + L"_" + boost::lexical_cast<std::wstring>(m_nodeId);
-            m_dobConnection.Open(L"PD", instancePart, context, NULL, this);
-
-            m_dobConnection.SubscribeRegistration(Entity::ClassTypeId,
-                                                  Typesystem::HandlerId::ALL_HANDLERS,
-                                                  true, //includeSubclasses
-                                                  false, //restartSubscription
-                                                  this);
-
-
-            m_dobConnection.SubscribeRegistration(Service::ClassTypeId,
-                                                  Typesystem::HandlerId::ALL_HANDLERS,
-                                                  true, //includeSubclasses
-                                                  false, //restartSubscription
-                                                  this);
-
-            ConnectionAspectInjector(m_dobConnection).SubscribeEntity(Entity::ClassTypeId,
-                                                                      false, //includeUpdates,
-                                                                      true,  //includeSubclasses
-                                                                      false, //restartSubscription
-                                                                      false, //wantsGhostDelete
-                                                                      false, //wantsLastState
-                                                                      false, //doesntWantSourceIsPermanentStore
-                                                                      true,  //wantsAllStateChanges
-                                                                      false, //timestampChangeInfo
-                                                                      this);
-
             auto connectionName=ConnectionAspectMisc(m_dobConnection).GetConnectionName();
-
             auto conPtr=Connections::Instance().GetConnectionByName(Typesystem::Utilities::ToUtf8(connectionName));
-
             DispatchStates(conPtr, context);
         }
 
@@ -384,7 +410,7 @@ namespace Internal
             }
             else //continue with next context
             {
-                m_strand.dispatch([self = this->shared_from_this(), context]{self->SendDeletedEntityStates(context);});
+                boost::asio::dispatch(m_strand, [self = this->shared_from_this(), context]{self->SendDeletedEntityStates(context);});
             }
         }
 
@@ -462,7 +488,7 @@ namespace Internal
                 }
             }
 
-            m_strand.dispatch([self = this->shared_from_this(), context] {self->SendStates(context + 1); });
+            boost::asio::dispatch(m_strand, [self = this->shared_from_this(), context] {self->SendStates(context + 1); });
         }
 
         void SendPdComplete()
@@ -472,7 +498,15 @@ namespace Internal
                 return;
             }
 
-            m_dobConnection.Close();
+            try
+            {
+                m_dobConnection.Close();
+            }
+            catch (const Safir::Dob::LowMemoryException& e)
+            {
+                lllog(5) << L"PoolHandler: Pooldistribution to " << m_nodeId << L" got LowMemoryException when closing dobConnection. The PD managed to finish before the error occurred. " << e.GetMessage() << std::endl;
+                SEND_SYSTEM_LOG(Error, << L"PoolHandler: Pooldistribution to " << m_nodeId << L" got LowMemoryException when closing dobConnection. The PD managed to finish before the error occurred. " << e.GetMessage());
+            }
 
             Pd::PoolSyncInfo poolSyncInfo;
             poolSyncInfo.set_messagetype(Pd::PoolSyncInfo_PdMsgType::PoolSyncInfo_PdMsgType_PdComplete);
@@ -489,6 +523,40 @@ namespace Internal
             else
             {
                 SetTimer([self = this->shared_from_this()]{self->SendPdComplete();});
+            }
+        }
+
+        void SendPdAbort()
+        {
+            if (HasBeenCancelled())
+            {
+                return;
+            }
+
+            try
+            {
+                // Try to close the connection
+                m_dobConnection.Close();
+            }
+            catch (const Safir::Dob::LowMemoryException&){}
+
+            Pd::PoolSyncInfo poolSyncInfo;
+            poolSyncInfo.set_messagetype(Pd::PoolSyncInfo_PdMsgType::PoolSyncInfo_PdMsgType_PdAbort);
+            const auto size = poolSyncInfo.ByteSizeLong();
+            Safir::Utilities::Internal::SharedCharArray payload = Safir::Utilities::Internal::MakeSharedArray(size);
+            google::protobuf::uint8* buf=reinterpret_cast<google::protobuf::uint8*>(const_cast<char*>(payload.get()));
+            poolSyncInfo.SerializeWithCachedSizesToArray(buf);
+
+            if (m_distribution.GetCommunication().Send(m_nodeId, m_nodeType, payload, size, PoolDistributionInfoDataTypeId, true))
+            {
+                lllog(5) << L"PoolHandler: PoolDistribution to " << m_nodeId
+                         << L" failed since this node is low on shared memory. PdAbort has been sent." <<std::endl;
+                //m_distribution.ForceExcludeNode(m_nodeId);
+                m_completionHandler(m_nodeId);
+            }
+            else
+            {
+                SetTimer([self = this->shared_from_this()]{self->SendPdAbort();});
             }
         }
 

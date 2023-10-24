@@ -31,6 +31,7 @@ message PoolSyncInfo {
     enum PdMsgType {
         PdRequest = 0;
         PdComplete = 1;
+        PdAbort = 2; // this is sent when a node get low memory and have to abort all pd
     }
 
     message Registration {

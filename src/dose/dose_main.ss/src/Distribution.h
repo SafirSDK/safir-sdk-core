@@ -73,7 +73,7 @@ namespace Internal
         : private boost::noncopyable
     {
     public:
-        DistributionBasic(boost::asio::io_service&  ioService,
+        DistributionBasic(boost::asio::io_context&  ioContext,
                           const std::string&        ownNodeName,
                           int64_t                   ownNodeId,
                           int64_t                   ownNodeTypeId,
@@ -129,7 +129,7 @@ namespace Internal
             }
 
             m_communication.reset(new CommunicationT(Com::dataModeTag,
-                                                     ioService,
+                                                     ioContext,
                                                      ownNodeName,
                                                      ownNodeId,
                                                      ownNodeTypeId,
@@ -138,7 +138,7 @@ namespace Internal
                                                      m_config.fragmentSize));
 
             m_sp.reset(new SystemPictureT(SP::slave_tag,
-                                          ioService,
+                                          ioContext,
                                           *m_communication,
                                           ownNodeName,
                                           ownNodeId,
@@ -207,13 +207,19 @@ namespace Internal
             }
         }
 
-        void StoppedNodeIndication(int64_t nodeId)
+        void ExcludeNode(int64_t nodeId)
         {
             // check that the node has not already been deleted
             auto it = m_liveNodes.find(nodeId);
             if (it != std::end(m_liveNodes))
             {
-                ExcludeNode(nodeId, it->second);
+                auto nodeTypeId = it->second;
+                m_liveNodes.erase(it);
+                m_sp->ExcludeNode(nodeId);
+                for (const auto& cb : m_excludeCallbacks)
+                {
+                    cb(nodeId, nodeTypeId);
+                }
             }
         }
 

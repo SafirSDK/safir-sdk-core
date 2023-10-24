@@ -73,7 +73,7 @@ namespace Internal
 
         void Start()
         {
-            m_strand.dispatch([this]
+            boost::asio::dispatch(m_strand, [this]
             {
                 m_running=true;
                 SendPoolDistributionRequests();
@@ -83,7 +83,7 @@ namespace Internal
 
         void Stop()
         {
-            m_strand.post([this] //use post to prevent that stop is executed before start
+            boost::asio::post(m_strand, [this] //use post to prevent that stop is executed before start
             {
                 m_running=false;
                 m_requests.clear();
@@ -92,7 +92,7 @@ namespace Internal
 
         void RequestPoolDistribution(int64_t nodeId, int64_t nodeTypeId)
         {
-            m_strand.post([this, nodeId, nodeTypeId]
+            boost::asio::post(m_strand, [this, nodeId, nodeTypeId]
             {
                 lllog(5)<<"PoolHandler: Request pooldistribution from "<< nodeId <<std::endl;
                 m_requests.push_back(PoolDistributionRequestSender<DistributionT, ConnectionsT>::PdReq(nodeId, nodeTypeId, false));
@@ -103,7 +103,7 @@ namespace Internal
         //fromNodeId=0 means all queued requests are finished
         void PoolDistributionFinished(int64_t fromNodeId)
         {
-            m_strand.dispatch([this,fromNodeId]
+            boost::asio::dispatch(m_strand, [this,fromNodeId]
             {
                 lllog(5)<<"PoolHandler: PoolDistributionFinished from "<< fromNodeId <<std::endl;
                 if (fromNodeId==0)
@@ -220,7 +220,7 @@ namespace Internal
             if (unsentRequests)
             {
                 //some requests could not be sent, retry
-                m_strand.post([this]{SendPoolDistributionRequests();}); //a bit aggressive, maybe we should set a timer instead
+                boost::asio::post(m_strand, [this]{SendPoolDistributionRequests();}); //a bit aggressive, maybe we should set a timer instead
             }
         }
     };

@@ -94,7 +94,7 @@ namespace
             m_sendQueues.insert(std::make_pair(*nt, SendQueue()));
             m_communication.SetQueueNotFullCallback([this](int64_t)
                                                     {
-                                                        m_strand.post([this]{HandleSendQueues();});
+                                                        boost::asio::post(m_strand, [this]{HandleSendQueues();});
                                                     }, *nt);
         }
 
@@ -105,7 +105,7 @@ namespace
                 return;
             }
 
-            m_strand.post([this,data]
+            boost::asio::post(m_strand, [this,data]
             {
                 if (!m_running)
                 {
@@ -153,7 +153,7 @@ namespace
             return; // was already started
         }
 
-        m_strand.dispatch([this]
+        boost::asio::dispatch(m_strand, [this]
         {
             m_connectionThread = boost::thread([this]() {ConnectionThread();});
             m_poolHandler.Start();
@@ -167,7 +167,7 @@ namespace
             return; // was already stopped
         }
 
-        m_strand.post([this]
+        boost::asio::post(m_strand, [this]
         {
             lllog(5) << "ConnectionHandler: Stop" << std::endl;
             m_processInfoHandler.Stop();
@@ -264,7 +264,7 @@ namespace
                 {
                     lllog(9) << "ConnectionThread - NOTIFY "<< std::endl;
                     m_handleEventsNotified=true;
-                    m_strand.post([this]{HandleEvents();});
+                    boost::asio::post(m_strand, [this]{HandleEvents();});
                 }
             }
         }

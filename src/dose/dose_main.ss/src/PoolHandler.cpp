@@ -73,7 +73,7 @@ namespace Internal
 
         auto injectNode=[this](const std::string&, int64_t id, int64_t nt, const std::string&)
         {
-            m_strand.dispatch([this, id, nt]
+            boost::asio::dispatch(m_strand, [this, id, nt]
             {
                 if (m_nodes.insert(std::make_pair(id, nt)).second)
                 {
@@ -85,7 +85,7 @@ namespace Internal
 
         auto excludeNode=[this](int64_t id, int64_t)
         {
-            m_strand.post([this, id]
+            boost::asio::post(m_strand, [this, id]
             {
                 if (m_nodes.erase(id)>0)
                 {
@@ -141,7 +141,7 @@ namespace Internal
 
     void PoolHandler::Start()
     {
-        m_strand.post([this]
+        boost::asio::post(m_strand, [this]
         {
             if (m_running)
             {
@@ -217,8 +217,8 @@ namespace Internal
     }
 
     void PoolHandler::SetDetached(bool detach)
-    {
-        m_strand.post([this, detach]
+    {        
+        boost::asio::post(m_strand, [this, detach]
         {
             lllog(5)<< L"DoseMain.PoolHandler set detached to " << std::boolalpha << detach << std::endl;
 
@@ -246,7 +246,7 @@ namespace Internal
     void PoolHandler::OnPersistenceReady(bool fromDope)
     {
         ENSURE(!m_distribution.IsLightNode(), <<"DoseMain.PoolHandler: Got OnPersistenceReady. Should not happen on a light node!")
-        m_strand.dispatch([this, fromDope]
+        boost::asio::dispatch(m_strand, [this, fromDope]
         {
             if (m_persistenceReady)
             {
@@ -273,7 +273,7 @@ namespace Internal
 
     void PoolHandler::HandleConnect(const ConnectionId& connId)
     {
-        m_strand.post([this, connId]
+        boost::asio::post(m_strand, [this, connId]
         {
             m_waitingStates.PerformStatesWaitingForConnection(connId,
                                                               [this](const DistributionData& state,
@@ -297,7 +297,7 @@ namespace Internal
 
     void PoolHandler::HandleDisconnect(const ConnectionId& connId)
     {
-        m_strand.post([this, connId]
+        boost::asio::post(m_strand, [this, connId]
         {
             m_waitingStates.Disconnect(connId);
         });
@@ -315,7 +315,7 @@ namespace Internal
             return;
         }
 
-        m_strand.dispatch([this, fromNodeType, fromNodeId, pdInfo]
+        boost::asio::dispatch(m_strand, [this, fromNodeType, fromNodeId, pdInfo]
         {
             switch (pdInfo->messagetype())
             {
@@ -365,6 +365,13 @@ namespace Internal
                 }
                 break;
 
+            case Pd::PoolSyncInfo_PdMsgType::PoolSyncInfo_PdMsgType_PdAbort:
+                {
+                    lllog(5) << L"PoolHandler: got PdAbort from " << fromNodeId << L". It probably means the counterpart node has low shared memory. We now stop the ongoing PD." << std::endl;
+                    m_poolDistributionRequests.PoolDistributionFinished(fromNodeId);
+                }
+                break;
+
             default:
                 break;
             }
@@ -393,7 +400,7 @@ namespace Internal
 
     void PoolHandler::OnRegistrationState(int64_t fromNodeId, int64_t fromNodeType, const char* data, size_t /*size*/)
     {
-        m_strand.post([this,data,fromNodeId,fromNodeType]
+        boost::asio::post(m_strand, [this,data,fromNodeId,fromNodeType]
         {
             const auto state=DistributionData::ConstConstructor(new_data_tag, data);
             DistributionData::DropReference(data);
@@ -412,7 +419,7 @@ namespace Internal
 
     void PoolHandler::OnEntityState(int64_t fromNodeId, int64_t fromNodeType, const char* data, size_t /*size*/)
     {
-        m_strand.post([this,data,fromNodeId,fromNodeType]
+        boost::asio::post(m_strand, [this,data,fromNodeId,fromNodeType]
         {
             const auto state=DistributionData::ConstConstructor(new_data_tag, data);
             DistributionData::DropReference(data);

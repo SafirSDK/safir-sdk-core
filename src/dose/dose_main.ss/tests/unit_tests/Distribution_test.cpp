@@ -104,14 +104,14 @@ struct Fixture
 {
 
     Fixture ()
-        : ioService()
-        , distribution(ioService,
+        : ioContext()
+        , distribution(ioContext,
                       "Pelle",
                       6565,
                       878787,
                       "127.0.0.1:5555") {}
 
-    boost::asio::io_service ioService;
+    boost::asio::io_context ioContext;
     Safir::Dob::Internal::DistributionBasic<Communication, SP, Config> distribution;
 };
 

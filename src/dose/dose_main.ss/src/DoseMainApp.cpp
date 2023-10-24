@@ -31,6 +31,7 @@
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
 #include <Safir/Utilities/CrashReporter.h>
+#include <Safir/Utilities/Internal/AsioStrandWrap.h>
 #include <iostream>
 
 namespace Safir
@@ -93,42 +94,42 @@ namespace Internal
         m_cmdReceiver.reset(new Control::DoseMainCmdReceiver( ioService,
 
                                                               // StartDoseMain
-                                                              m_strand.wrap([this](const std::string& nodeName, int64_t nodeId, int64_t nodeTypeId, const std::string& dataAddress)
+                                                              Safir::Utilities::Internal::WrapInStrand(m_strand, [this](const std::string& nodeName, int64_t nodeId, int64_t nodeTypeId, const std::string& dataAddress)
                                                                             {
                                                                                 lllog(1) << "DOSE_MAIN: Got Start command from control"<< std::endl;
                                                                                 Start(nodeName,nodeId, nodeTypeId, dataAddress);
                                                                             }),
 
                                                               // InjectNode
-                                                              m_strand.wrap([this](const std::string& nodeName, int64_t nodeId, int64_t nodeTypeId, const std::string& dataAddress)
+                                                              Safir::Utilities::Internal::WrapInStrand(m_strand, [this](const std::string& nodeName, int64_t nodeId, int64_t nodeTypeId, const std::string& dataAddress)
                                                                             {
                                                                                 lllog(1) << "DOSE_MAIN: Got InjectNode command from control for node " << nodeId << std::endl;
                                                                                 InjectNode(nodeName, nodeId, nodeTypeId, dataAddress);
                                                                             }),
 
                                                               // ExcludeNode
-                                                              m_strand.wrap([this](int64_t nodeId, int64_t nodeTypeId)
+                                                              Safir::Utilities::Internal::WrapInStrand(m_strand, [this](int64_t nodeId, int64_t nodeTypeId)
                                                                             {
                                                                                 lllog(1) << "DOSE_MAIN: Got ExcludeNode command from control for node " << nodeId << std::endl;
                                                                                 ExcludeNode(nodeId, nodeTypeId);
                                                                             }),
 
                                                               // StoppedNodeIndication
-                                                              m_strand.wrap([this](int64_t nodeId)
+                                                              Safir::Utilities::Internal::WrapInStrand(m_strand, [this](int64_t nodeId)
                                                                             {
                                                                                 lllog(1) << "DOSE_MAIN: Got StoppedNodeIndication command from control for node " << nodeId << std::endl;
                                                                                 StoppedNodeIndication(nodeId);
                                                                             }),
 
                                                               // StopDoseMain
-                                                              m_strand.wrap([this]()
+                                                              Safir::Utilities::Internal::WrapInStrand(m_strand, [this]()
                                                                             {
                                                                                 lllog(1) << "DOSE_MAIN: Got Stop command from control"<< std::endl;
                                                                                 Stop();
                                                                             }),
 
                                                               // NodeStateChanged
-                                                              m_strand.wrap([this](Safir::Dob::Internal::Control::NodeState nodeState)
+                                                              Safir::Utilities::Internal::WrapInStrand(m_strand, [this](Safir::Dob::Internal::Control::NodeState nodeState)
                                                                             {
                                                                                 lllog(1) << "DOSE_MAIN: Got NodeStateChanged command from control, state=" << Control::NodeStateToString(nodeState).c_str() << std::endl;
                                                                                 NodeStateChanged(nodeState);
@@ -143,7 +144,7 @@ namespace Internal
         //We install a ConsoleCtrlHandler to handle presses of the Close button
         //on the console window. This is a little different from handling signals
         //since there is no way to ignore it...
-        ConsoleCtrlHandlerFcn = m_strand.wrap([this]()
+        ConsoleCtrlHandlerFcn = Safir::Utilities::Internal::WrapInStrand(m_strand, [this]()
         {
             lllog(1) << "DOSE_MAIN: Got console Close button Stop"<< std::endl;
             Stop();
@@ -155,7 +156,7 @@ namespace Internal
         m_signalSet.add(SIGTERM);
 #endif
 
-        m_signalSet.async_wait(m_strand.wrap([](const boost::system::error_code& error, const int /*signalNumber*/)
+        m_signalSet.async_wait(Safir::Utilities::Internal::WrapInStrand(m_strand, [](const boost::system::error_code& error, const int /*signalNumber*/)
                                             {
                                                 if (error)
                                                 {
@@ -187,6 +188,25 @@ namespace Internal
         Stop();
     }
 
+    void DoseMainApp::Start(const std::string& nodeName, int64_t nodeId, int64_t nodeTypeId, const std::string& dataAddress)
+    {
+        m_nodeId = nodeId;
+        m_memoryMonitor.reset(new MemoryMonitor(m_ioService));
+        m_distribution.reset(new Distribution(m_ioService, nodeName, nodeId, nodeTypeId, dataAddress));
+        InitializeDoseInternalFromDoseMain(nodeId);
+        m_lockMonitor.reset(new LockMonitor());
+        m_messageHandler.reset(new MessageHandler(*m_distribution));
+        m_requestHandler.reset(new RequestHandler(m_strand.context(), *m_distribution));
+        m_pendingRegistrationHandler.reset(new PendingRegistrationHandler(m_ioService, *m_distribution));
+        m_connectionHandler.reset(new ConnectionHandler(m_ioService,
+                                                        *m_distribution,
+                                                        [this](const ConnectionPtr& connection, bool disconnecting){OnAppEvent(connection, disconnecting);},
+                                                        [this](int64_t tid){m_pendingRegistrationHandler->CheckForPending(tid);},
+                                                        [this](const std::string& str){LogStatus(str);}));
+
+        m_distribution->Start();
+    }
+
     void DoseMainApp::Stop()
     {
         const bool wasStopped = m_stopped.exchange(true);
@@ -209,7 +229,7 @@ namespace Internal
             if (m_connectionHandler != nullptr)
             {
                 m_connectionHandler->Stop();
-            }            
+            }
 
             if (m_requestHandler != nullptr)
             {
@@ -231,26 +251,6 @@ namespace Internal
             m_work.reset();
             lllog(1) << "DoseMainApp::Stop finished" << std::endl;
         }
-    }
-
-
-    void DoseMainApp::Start(const std::string& nodeName, int64_t nodeId, int64_t nodeTypeId, const std::string& dataAddress)
-    {
-        m_nodeId = nodeId;
-        m_memoryMonitor.reset(new MemoryMonitor(m_ioService));
-        m_distribution.reset(new Distribution(m_ioService, nodeName, nodeId, nodeTypeId, dataAddress));
-        InitializeDoseInternalFromDoseMain(nodeId);
-        m_lockMonitor.reset(new LockMonitor());
-        m_messageHandler.reset(new MessageHandler(*m_distribution));
-        m_requestHandler.reset(new RequestHandler(m_strand.context(), *m_distribution));
-        m_pendingRegistrationHandler.reset(new PendingRegistrationHandler(m_ioService, *m_distribution));
-        m_connectionHandler.reset(new ConnectionHandler(m_ioService,
-                                                        *m_distribution,
-                                                        [this](const ConnectionPtr& connection, bool disconnecting){OnAppEvent(connection, disconnecting);},
-                                                        [this](int64_t tid){m_pendingRegistrationHandler->CheckForPending(tid);},
-                                                        [this](const std::string& str){LogStatus(str);}));
-
-        m_distribution->Start();
     }
 
     void DoseMainApp::NodeStateChanged(Control::NodeState nodeState)
@@ -315,7 +315,7 @@ namespace Internal
     void DoseMainApp::StoppedNodeIndication(int64_t nodeId)
     {
         lllog(1) << "DOSE_MAIN: StoppedNodeIndication cmd received." << " NodeId=" <<  nodeId << std::endl;
-        m_distribution->StoppedNodeIndication(nodeId);
+        m_distribution->ExcludeNode(nodeId);
     }
 
     void DoseMainApp::OnAppEvent(const ConnectionPtr & connection, bool disconnecting)
@@ -345,7 +345,7 @@ namespace Internal
     void DoseMainApp::LogStatus(const std::string& str)
     {
         lllog(1) << str.c_str() << std::endl;
-        m_wcoutStrand.dispatch([str]{std::wcout << str.c_str() << std::endl;});
+        boost::asio::dispatch(m_wcoutStrand, [str]{std::wcout << str.c_str() << std::endl;});
     }
 }
 }
