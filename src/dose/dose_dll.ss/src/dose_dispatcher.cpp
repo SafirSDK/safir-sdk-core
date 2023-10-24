@@ -190,6 +190,7 @@ namespace Internal
                             success);
             if (!success)
             {
+                Typesystem::LibraryExceptions::Instance().AppendDescription(L"Exception while in Dob callback OnStopOrder");
                 Typesystem::LibraryExceptions::Instance().Throw();
             }
         }
@@ -724,6 +725,10 @@ namespace Internal
         m_callbacks[consumer.lang].m_onNotRequestOverflowCb(consumer.consumer, success);
         if (!success)
         {
+            std::wostringstream moreDesc;
+            moreDesc << "Exception while in Dob callback OnNotRequestOverflow. Consumer:" << consumer.consumer
+                << " Lang:" << consumer.lang << std::endl;
+            Typesystem::LibraryExceptions::Instance().AppendDescription(moreDesc.str());
             Typesystem::LibraryExceptions::Instance().Throw();
         }
     }
@@ -740,6 +745,10 @@ namespace Internal
         m_callbacks[consumer.lang].m_onNotMessageOverflowCb(consumer.consumer, success);
         if (!success)
         {
+            std::wostringstream moreDesc;
+            moreDesc << "Exception while in Dob callback OnNotMessageOverflow. Consumer:" << consumer.consumer
+                << " Lang:" << consumer.lang << std::endl;
+            Typesystem::LibraryExceptions::Instance().AppendDescription(moreDesc.str());
             Typesystem::LibraryExceptions::Instance().Throw();
         }
     }
