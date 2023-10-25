@@ -271,7 +271,11 @@ namespace Internal
 
                             if (entryIt->second.size()>2) //there shall at most 2 subelements, key and value. If no value, key->NULL
                             {
-                                throw "Wrong number of subelements";
+                                std::ostringstream os;
+                                os<<"Wrong number of subelements! Failed to serialize dictionary member '"<<cd->GetName()<<"."<<md->GetName()<<" from xml to binary." << std::endl;
+                                os<<"Each dictionary element must contain exactly 2 subelements, key and value. Number of subelements found: "
+                                 << entryIt->second.size() <<" (Hint it's the "<<entryCount<<":th dictionary entry).";
+                                throw ParseError("XmlToBinary serialization error", os.str(), "", 219);
                             }
                             boost::property_tree::ptree* keyTree=NULL;
                             boost::property_tree::ptree* valTree=NULL;
@@ -290,7 +294,10 @@ namespace Internal
 
                             if (keyTree==NULL)
                             {
-                                throw "No key element";
+                                std::ostringstream os;
+                                os<<"Key element is missing in a dictionary entry! Failed to serialize dictionary member '"<<cd->GetName()<<"."<<md->GetName()<<" from xml to binary. "
+                                    <<" (Hint it's the "<<entryCount<<":th dictionary entry).";
+                                throw ParseError("XmlToBinary serialization error", os.str(), "", 220);
                             }
 
                             try

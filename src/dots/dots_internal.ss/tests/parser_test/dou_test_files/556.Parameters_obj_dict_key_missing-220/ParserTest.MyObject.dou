@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class>
+    <name>ParserTest.MyObject</name>
+    <baseClass>Object</baseClass>
+    <members>
+        <member>
+            <name>MyDict</name>
+            <type>String</typer>
+            <dictionary keyType="String" />
+        </member>
+    </members>
+</class>

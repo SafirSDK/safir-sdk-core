@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class>
+    <name>ParserTest.MyParam</name>
+    <baseClass>Object</baseClass>
+    <parameters>
+        <parameter>
+            <name>ObjParam</name>
+            <type>ParserTest.MyObject</type>
+            <ParserTest.MyObject>
+                <MyDict>
+                    <entry>
+                        <key>person1</key>                        
+                        <value>Kalle</value>
+                    </entry>
+                    <entry>
+                        <key>person2</key>
+                        <value>Olle</value>
+                    </entry>
+                    <entry>
+                        <something>person3</something>
+                        <value>Pelle</value>
+                    </entry>
+                </MyDict>
+            </ParserTest.MyObject>
+        </parameter>
+    </parameters>
+</class>
