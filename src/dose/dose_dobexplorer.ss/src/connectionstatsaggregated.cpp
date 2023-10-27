@@ -72,7 +72,8 @@ void ConnectionStatsAggregated::Update()
 
     Safir::Dob::Internal::Connections::Instance().ForEachConnectionPtr([&connectionStatistics](const Safir::Dob::Internal::ConnectionPtr& con)
     {
-        auto& stat = connectionStatistics.emplace_back();
+        connectionStatistics.emplace_back();
+        auto& stat = connectionStatistics.back();
         stat.first = con->NameWithCounter();
         ConnectionStatisticsCollector::GetStatistics(con, stat.second);
     });
