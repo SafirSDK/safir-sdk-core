@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2008-2013 (http://safirsdkcore.com)
+* Copyright Saab AB, 2008-2023 (http://safirsdkcore.com)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -29,6 +29,7 @@
 #include "memgraph.h"
 #include "entitystats.h"
 #include "connectionstats.h"
+#include "connectionstatsaggregated.h"
 #include "SystemPicturePage.h"
 #include "numberofentities.h"
 #include "RawStatisticsPage.h"
@@ -174,6 +175,17 @@ void DoseMon::TreeItemActivated ( QTreeWidgetItem * item, int /*column*/ )
     else if (item->text(0) == "System Picture")
     {
         newTab = tabWidget->addTab(new SystemPicturePage(this),"System Picture");
+    }
+    else if (item->text(0) == "Connection Statistics")
+    {
+        if (m_doseInternalInitialized)
+        {
+            newTab = tabWidget->addTab(new ConnectionStatsAggregated(this), "Connection Statistics");
+        }
+        else
+        {
+            QMessageBox::information(this,"Not initialized","dose_internal not yet initialized, cannot open.");
+        }
     }
     else if (item->text(0) == "Registrations")
     {

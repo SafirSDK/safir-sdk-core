@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2008-2013 (http://safirsdkcore.com)
+* Copyright Saab AB, 2008-2023 (http://safirsdkcore.com)
 *
 * Created by: Anders Widén / stawi
 *
@@ -22,6 +22,7 @@
 *
 ******************************************************************************/
 #include "connectionstats.h"
+#include "ConnectionStatisticsCollector.h"
 #include <sstream>
 #include <math.h>
 
@@ -38,84 +39,6 @@
 #ifdef _MSC_VER
 #pragma warning (pop)
 #endif
-
-
-struct ReqQStat
-{
-    Safir::Dob::Typesystem::Int32 noPushedRequests;
-    Safir::Dob::Typesystem::Int32 noOverflows;
-    Safir::Dob::Typesystem::Int32 noDispatchedRequests;
-    Safir::Dob::Typesystem::Int32 noAttachedResponses;
-    Safir::Dob::Typesystem::Int32 noDispatchedResponses;
-    size_t capacity;
-    size_t size;
-
-    Safir::Dob::Internal::ConsumerId    consumerId; // valid only for in queues
-    Safir::Dob::Typesystem::Int32       noTimeouts; // valid only for out queues
-};
-
-struct MsgQStat
-{
-    Safir::Dob::Typesystem::Int32 noPushedMsg;
-    Safir::Dob::Typesystem::Int32 noOverflows;
-    size_t capacity;
-    size_t size;
-
-    Safir::Dob::Internal::ConsumerId    consumerId; // valid only for in queues
-};
-
-struct Stat
-{
-    ReqQStat                    reqOutQStat;
-    std::vector<ReqQStat>       reqInQStat;
-    MsgQStat                    msgOutQStat;
-    std::vector<MsgQStat>       msgInQStat;
-    bool detached;
-
-};
-namespace Safir
-{
-namespace Dob
-{
-namespace Internal
-{
-inline void StatisticsCollector(Safir::Dob::Internal::RequestOutQueue& requestOutQueue, void* ptr)
-{
-    ReqQStat* p = static_cast<ReqQStat*>(ptr);
-
-    p->noTimeouts = requestOutQueue.m_noTimeouts;
-    p->noPushedRequests = requestOutQueue.m_noPushedRequests;
-    p->noOverflows = requestOutQueue.m_noOverflows;
-    p->noDispatchedRequests = requestOutQueue.m_noDispatchedRequests;
-    p->noAttachedResponses = requestOutQueue.m_noAttachedResponses;
-    p->noDispatchedResponses = requestOutQueue.m_noDispatchedResponses;
-    p->size = requestOutQueue.size();
-    p->capacity = requestOutQueue.capacity();
-}
-
-inline void StatisticsCollector(Safir::Dob::Internal::MessageQueue& messageQueue, void* ptr)
-{
-    MsgQStat* p = static_cast<MsgQStat*>(ptr);
-
-    p->noPushedMsg = messageQueue.m_noPushed;
-    p->noOverflows = messageQueue.m_noOverflows;
-    p->size = messageQueue.size();
-    p->capacity = messageQueue.capacity();
-}
-
-inline void StatisticsCollector(Safir::Dob::Internal::RequestInQueue& requestInQueue, void* ptr)
-{
-    ReqQStat* p = static_cast<ReqQStat*>(ptr);
-
-    p->noPushedRequests = requestInQueue.m_noPushedRequests;
-    p->noOverflows = requestInQueue.m_noOverflows;
-    p->noDispatchedRequests = requestInQueue.m_noDispatchedRequests;
-    p->noAttachedResponses = requestInQueue.m_noAttachedResponses;
-    p->noDispatchedResponses = requestInQueue.m_noDispatchedResponses;
-    p->size = requestInQueue.size();
-    p->capacity = requestInQueue.capacity();
-}
-}}}
 
 ConnectionStats::ConnectionStats(QWidget* /*parent*/,  const QString& connectionName):
     m_timer(this),
@@ -198,12 +121,13 @@ void ConnectionStats::UpdateStatistics(const bool ignoreVisible)
     }
 
     bool connectionExists = false;
-    Stat stat;
+    ConnectionStatisticsCollector::Stat stat;
 
-    Safir::Dob::Internal::Connections::Instance().ForSpecificConnection
-        (m_connectionId,
-         [&stat,&connectionExists](const auto& connectionPtr)
-            {ProcessConnection(connectionPtr,stat,connectionExists);});
+    Safir::Dob::Internal::Connections::Instance().ForSpecificConnection(m_connectionId, [&stat,&connectionExists](const auto& connectionPtr)
+    {
+        connectionExists = true; // this handler only gets called if connection was found
+        ConnectionStatisticsCollector::GetStatistics(connectionPtr, stat);
+    });
 
     if (connectionExists)
     {
@@ -357,51 +281,3 @@ void ConnectionStats::UpdateStatistics(const bool ignoreVisible)
         missingConnectionLabel->show();
     }
 }
-
-void ConnectionStats::ProcessConnection(const Safir::Dob::Internal::ConnectionPtr& connection, Stat& stat, bool& exist)
-{
-    exist = true;
-
-    stat.detached = connection->IsDetached();
-
-    Safir::Dob::Internal::RequestOutQueue& reqOutQ = connection->GetRequestOutQueue();
-    StatisticsCollector(reqOutQ, &stat.reqOutQStat);
-
-    connection->ForEachRequestInQueue([&stat](const auto& consumer, auto& queue)
-                                      {ProcessReqInQ(consumer,queue,stat);});
-
-
-    Safir::Dob::Internal::MessageQueue& msgOutQ = connection->GetMessageOutQueue();
-    StatisticsCollector(msgOutQ, &stat.msgOutQStat);
-
-    connection->ForEachMessageInQueue([&stat](const auto& consumer, auto& queue)
-                                      {ProcessMsgInQ(consumer,queue,stat);});
-
-}
-
-void ConnectionStats::ProcessReqInQ(const Safir::Dob::Internal::ConsumerId& consumer,
-                                    Safir::Dob::Internal::RequestInQueue&   queue,
-                                    Stat&                                   stat)
-{
-    ReqQStat reqInQStat;
-
-    reqInQStat.consumerId = consumer;
-
-    StatisticsCollector(queue, &reqInQStat);
-
-    stat.reqInQStat.push_back(reqInQStat);
-}
-
-void ConnectionStats::ProcessMsgInQ(const Safir::Dob::Internal::ConsumerId& consumer,
-                                    Safir::Dob::Internal::MessageQueue&     queue,
-                                    Stat&                                   stat)
-{
-    MsgQStat msgInQStat;
-
-    msgInQStat.consumerId = consumer;
-
-    StatisticsCollector(queue, &msgInQStat);
-
-    stat.msgInQStat.push_back(msgInQStat);
-}
-

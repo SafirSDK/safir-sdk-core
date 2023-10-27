@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2008-2013 (http://safirsdkcore.com)
+* Copyright Saab AB, 2008-2023 (http://safirsdkcore.com)
 *
 * Created by: Anders Widén / stawi
 *
@@ -46,14 +46,6 @@ private:
 
     QTimer m_timer;
     Safir::Dob::Internal::ConnectionId m_connectionId;
-
-    static void ProcessConnection(const Safir::Dob::Internal::ConnectionPtr& connection, Stat& stat, bool& exist);
-    static void ProcessReqInQ(const Safir::Dob::Internal::ConsumerId& consumer,
-                              Safir::Dob::Internal::RequestInQueue&   queue,
-                              Stat&                                   stat);
-    static void ProcessMsgInQ(const Safir::Dob::Internal::ConsumerId& consumer,
-                              Safir::Dob::Internal::MessageQueue&     queue,
-                              Stat&                                   stat);
 };
 
 

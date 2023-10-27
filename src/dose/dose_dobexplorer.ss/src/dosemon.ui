@@ -76,6 +76,14 @@
          </item>
          <item>
           <property name="text">
+           <string>Connection Statistics</string>
+          </property>
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Show aggregated statistics for all local connections in one.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
            <string>Registrations</string>
           </property>
          </item>
