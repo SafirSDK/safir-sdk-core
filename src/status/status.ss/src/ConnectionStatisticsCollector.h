@@ -52,7 +52,6 @@ namespace ConnectionStatisticsCollector
 
     struct Stat
     {
-        std::string                 connectionName;
         ReqQStat                    reqOutQStat;
         std::vector<ReqQStat>       reqInQStat;
         MsgQStat                    msgOutQStat;

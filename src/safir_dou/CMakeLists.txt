@@ -30,6 +30,11 @@ ADD_SAFIR_GENERATED_LIBRARY(NAME Core
   data/Safir.Control.Command.dou
   data/Safir.Control.Operation.dou
   data/Safir.Control.Status.dou
+  data/Safir.Control.ConnectionStatisticsAllNodesResponse.dou
+  data/Safir.Control.ConnectionStatisticsItem.dou
+  data/Safir.Control.ConnectionStatisticsResponse.dou
+  data/Safir.Control.GetConnectionStatistics.dou
+  data/Safir.Control.GetConnectionStatisticsAllNodes.dou
   data/Safir.Dob.AccessDeniedException.dou
   data/Safir.Dob.CallbackId.dou
   data/Safir.Dob.ConnectionInfo.dou
@@ -97,6 +102,7 @@ ADD_SAFIR_GENERATED_LIBRARY(NAME Core
   data/Safir.Application.BackdoorCommand-Safir.Dob.ContextSharedProperty.dom
   data/Safir.Control.Command-Safir.Dob.DistributionScopeProperty.dom
   data/Safir.Control.Status-Safir.Dob.DistributionScopeProperty.dom
+  data/Safir.Control.GetConnectionStatistics-Safir.Dob.DistributionScopeProperty.dom
   data/Safir.Dob.NodeInfo-Safir.Dob.DistributionScopeProperty.dom
   data/Safir.Dob.PersistentDataReady-Safir.Dob.DistributionScopeProperty.dom
   data/Safir.Dob.ProcessInfo-Safir.Dob.DistributionScopeProperty.dom

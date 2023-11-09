@@ -31,7 +31,7 @@
 namespace
 {
     // Create read-only table item
-    QTableWidgetItem* TableItem(QString text, bool alignCenter = false)
+    QTableWidgetItem* TableItem(const QString& text, bool alignCenter = false)
     {
         auto item = new QTableWidgetItem(text);
         item->setFlags(item->flags() &  ~Qt::ItemIsEditable);

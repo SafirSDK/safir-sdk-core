@@ -27,6 +27,7 @@
 #include <Safir/Utilities/AsioDispatcher.h>
 #include "StatusEntityHandler.h"
 #include "CommandRequestHandler.h"
+#include "ConnectionStatisticsServiceHandler.h"
 
 #include <boost/asio.hpp>
 
@@ -52,10 +53,11 @@ private:
     boost::asio::io_service    m_ioService;
 
     boost::shared_ptr<boost::asio::io_service::work> m_work;
-    Safir::Utilities::AsioDispatcher        m_dispatcher;
-    Safir::Dob::Connection                  m_connection;
-    Safir::Control::StatusEntityHandler     m_statusEntityHandler;
-    Safir::Control::CommandRequestHandler   m_commandRequestHandler;
+    Safir::Utilities::AsioDispatcher m_dispatcher;
+    Safir::Dob::Connection m_connection;
+    StatusEntityHandler m_statusEntityHandler;
+    CommandRequestHandler m_commandRequestHandler;
+    ConnectionStatisticsServiceHandler m_connectionStatsHandler;
 
 };
 }

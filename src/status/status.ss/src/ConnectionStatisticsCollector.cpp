@@ -71,7 +71,6 @@ namespace ConnectionStatisticsCollector
 {
 void GetStatistics(const Safir::Dob::Internal::ConnectionPtr& connection, Stat& stat)
 {
-    stat.connectionName = connection->NameWithCounter();
     stat.detached = connection->IsDetached();
 
     Safir::Dob::Internal::RequestOutQueue& reqOutQ = connection->GetRequestOutQueue();

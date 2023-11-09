@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <summary>Response to a Safir.Control.GetConnectionStatistics service request.</summary>
+    <name>Safir.Control.ConnectionStatisticsResponse</name>
+    <baseClass>Safir.Dob.SuccessResponse</baseClass>
+    <members>
+        <member>
+            <summary>Id of the node that this response was sent from.</summary>
+            <name>NodeId</name>
+            <type>Int64</type>
+        </member>
+        <member>
+            <summary>Name of the node that this response was sent from.</summary>
+            <name>NodeName</name>
+            <type>String</type>
+        </member>
+        <member>
+            <summary>Statistics for all connections on a single node.</summary>
+            <name>ConnectionStatistics</name>
+            <type>Safir.Control.ConnectionStatisticsItem</type>
+            <sequence/>
+        </member>
+    </members>
+</class>

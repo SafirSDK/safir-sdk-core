@@ -1,14 +1,15 @@
 set(headers
-  StatusApp.h StatusEntityHandler.h CommandRequestHandler.h)
+  StatusApp.h StatusEntityHandler.h CommandRequestHandler.h ConnectionStatisticsServiceHandler.h ConnectionStatisticsCollector.h)
 
 set(sources
-  StatusApp.cpp safir_status.cpp StatusEntityHandler.cpp CommandRequestHandler.cpp)
+  StatusApp.cpp safir_status.cpp StatusEntityHandler.cpp CommandRequestHandler.cpp ConnectionStatisticsServiceHandler.cpp ConnectionStatisticsCollector.cpp)
 
 ADD_EXECUTABLE(safir_status ${sources} ${headers})
 
 TARGET_LINK_LIBRARIES(safir_status PRIVATE
   control_utils
   dose_cpp
+  dose_internal
   logging_cpp
   lluf_internal
   lluf_crash_reporter)

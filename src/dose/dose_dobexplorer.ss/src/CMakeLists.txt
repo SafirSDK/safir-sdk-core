@@ -55,6 +55,7 @@ QT_WRAP_CPP(moc_sources ${widget_headers} ${QT_WRAP_CPP_OPTIONS})
 ADD_EXECUTABLE(dobexplorer WIN32 ${sources} ${ui_headers} ${moc_sources} ${headers} ${widget_headers} dobexplorer.rc)
 
 TARGET_LINK_LIBRARIES(dobexplorer PRIVATE
+  dose_cpp
   dose_internal
   system_picture
   lluf_internal

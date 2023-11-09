@@ -34,6 +34,7 @@ StatusApp::StatusApp()
     , m_dispatcher(m_connection, m_ioService)
     , m_statusEntityHandler(m_ioService)
     , m_commandRequestHandler(m_ioService)
+    , m_connectionStatsHandler(m_ioService)
 {
     m_connection.Open(L"safir_control_status",
                       L"main",
@@ -44,12 +45,14 @@ StatusApp::StatusApp()
 
     m_statusEntityHandler.Start();
     m_commandRequestHandler.Start();
+    m_connectionStatsHandler.Start();
 }
 
 void StatusApp::OnStopOrder()
 {
     m_commandRequestHandler.Stop();
     m_statusEntityHandler.Stop();
+    m_connectionStatsHandler.Stop();
 
     m_work.reset();
 }
