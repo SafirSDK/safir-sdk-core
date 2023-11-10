@@ -179,6 +179,7 @@ namespace
     {
         boost::asio::dispatch(m_strand, [this]
         {
+            m_connectionThreadRunning = false;
             if (m_connectionThread.get_id() != boost::thread::id())
             {
                 lllog(5) << "ConnectionHandler: Stopping connection thread" << std::endl;
@@ -197,7 +198,7 @@ namespace
 
     void ConnectionHandler::SendAll(const std::pair<Safir::Utilities::Internal::SharedConstCharArray, size_t>& data)
     {
-        if (!m_running)
+        if (!m_connectionThreadRunning)
         {
             return;
         }
@@ -211,7 +212,7 @@ namespace
 
     void ConnectionHandler::HandleSendQueues()
     {
-        if (!m_running)
+        if (!m_connectionThreadRunning)
         {
             return;
         }
@@ -238,9 +239,10 @@ namespace
 
     void ConnectionHandler::ConnectionThread()
     {
+        m_connectionThreadRunning = true;
         try
         {
-            for (;;)
+            while (m_connectionThreadRunning)
             {
                 bool connect, connectionOut;
                 Connections::Instance().WaitForDoseMainSignal(connect, connectionOut);
@@ -274,9 +276,10 @@ namespace
         }
     }
 
+    // Calls to this method is only posted from the connectionThread
     void ConnectionHandler::HandleEvents()
     {
-        if (!m_running)
+        if (!m_connectionThreadRunning)
         {
             return;
         }
@@ -337,7 +340,7 @@ namespace
 
     void ConnectionHandler::HandleDisconnect(const ConnectionPtr & connection)
     {
-        if (!m_running)
+        if (!m_connectionThreadRunning)
         {
             return;
         }
@@ -372,7 +375,7 @@ namespace
 
     void ConnectionHandler::HandleConnectionOutEvent(const ConnectionPtr & connection, std::vector<ConnectionPtr>& deadConnections)
     {
-        if (!m_running)
+        if (!m_connectionThreadRunning)
         {
             return;
         }

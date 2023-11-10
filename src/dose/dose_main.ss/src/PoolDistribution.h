@@ -92,6 +92,10 @@ namespace Internal
 
         ~PoolDistribution()
         {
+            if (m_cancelled && !m_cancelledCalled)
+            {
+                lllog(5) << L"PoolHandler: Pooldistribution was cancelled but was destructed without calling the cancelHandler!" << std::endl;
+            }
             try
             {
                 if (m_dobConnection.IsOpen())
@@ -264,6 +268,7 @@ namespace Internal
         bool m_started = false;
         bool m_cancelled = false;
         std::function<void()> m_onCancelled;
+        bool m_cancelledCalled = false;
 
         inline bool HasBeenCancelled()
         {
@@ -271,6 +276,8 @@ namespace Internal
             {
                 lllog(5)<<L"PoolHandler: PoolDistribution to " << m_nodeId << L" has been cancelled" <<std::endl;
                 m_onCancelled();
+                m_cancelledCalled = true;
+                m_onCancelled = []{}; // prevent calling completion handler again in vain
                 return true;
             }
             return false;

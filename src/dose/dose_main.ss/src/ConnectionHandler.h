@@ -70,6 +70,7 @@ namespace Internal
 
     private:
         std::atomic<bool> m_running = false;
+        std::atomic<bool> m_connectionThreadRunning = false;
         boost::asio::io_service::strand m_strand;
         Com::Communication&             m_communication;
         std::function<void(const ConnectionPtr& connection, bool disconnecting)> m_onAppEvent;

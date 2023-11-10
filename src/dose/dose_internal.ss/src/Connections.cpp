@@ -152,8 +152,11 @@ namespace Internal
             m_connectSem.post();
         }
 
+        lllout << "Waiting on m_connectLock" << std::endl;
         //this means that only one process can attempt to connect at a time.
         ScopedConnectLock lck(m_connectLock);
+
+        lllout << "Got m_connectLock" << std::endl;
 
         const pid_t pid = Safir::Utilities::ProcessInfo::GetPid();
 
@@ -162,7 +165,10 @@ namespace Internal
         m_connectSignal = 1;
         Signals::Instance().SignalConnectOrOut();
         //wait for response
+
+        lllout << "Waiting for m_connectResponseEvent" << std::endl;
         m_connectResponseEvent.wait();
+        lllout << "Got m_connectResponseEvent" << std::endl;
 
         m_connectResponse.GetAndClear(connect_tag, result, connection);
 

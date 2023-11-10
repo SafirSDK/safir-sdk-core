@@ -85,7 +85,8 @@ namespace Internal
         {
             lllog(5) << "PoolHandler: Stop called on PooDistributionHandler" << std::endl;
             boost::asio::post(m_strand, [this, onPoolDistributionsCancelled]
-            {                
+            {
+                lllog(5) << "PoolHandler: PooDistributionHandler calls cancel on all ongoing and pending PDs" << std::endl;
                 m_running=false;
                 if (!m_pendingPoolDistributions.empty() && m_pendingPoolDistributions.front()->IsStarted())
                 {
@@ -111,6 +112,7 @@ namespace Internal
                         pendingPd->Cancel();
                     }
                     m_pendingPoolDistributions.clear();
+
                     onPoolDistributionsCancelled();
                 }
             });
